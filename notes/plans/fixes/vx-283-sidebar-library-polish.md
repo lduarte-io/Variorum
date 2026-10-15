@@ -2437,8 +2437,10 @@ and the chip are walk evidence); edge auto-scroll during a drag (the M shape, ou
 **LIVE STATUS (per piece)**
 - E0 — this section + the trace verified on this tip: DONE (this commit).
 - E1 — the pure drop rule (`SidebarLayout.OpenListDrop`: the gap under the pointer, the onMove destination with the
-  false-offer nil, the line's place, the end zone's height) + its pure pins + the stale List-drag comment corrected:
-  NOT-STARTED.
+  false-offer nil, the line's place, the end zone's height) + its pure pins (`OpenListDropRuleTests` ×14 in the new
+  `VariorumTests/OpenListDragTests.swift`) + the stale List-drag comments corrected (`WorkspaceNavigationTests`): DONE
+  (this commit) — a headless REPLICA (the real `SidebarLayout.swift` + `OpenNotes` compiled beside the pins' bodies,
+  scratchpad only): 1165 checks, 0 failed; with R-K's patch (below) 229 failed. The suite's run PENDING the window.
 - E2 — the delivery (one drop delegate on the list's rows + the end-zone band; the drag state; the insertion line as
   an overlay above the edge fade; the settle) + the chip (the Bookcase's grab canvas moved to `Core/Views/`, reused):
   NOT-STARTED.

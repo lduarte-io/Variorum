@@ -524,4 +524,113 @@ nonisolated enum SidebarLayout {
             following ? ask : .none
         }
     }
+
+    // MARK: - The Open list's drop (U2 — VX-288, the light version; the VX-283 run)
+    //
+    // Her words (2026-10-13): *"the dragging between open notes in there needs
+    // to be smoother - it should be as smooth as the editor drag with a nice
+    // little line showing as you hover and a nice fit / snap into place because
+    // right now it feels janky to use."* Her ruling on the shape: the light
+    // version first (the system drag kept).
+    //
+    // The traced bug under the jank (the U2 record): each row was its own drop
+    // target and every drop landed in the GAP BEFORE the row under the pointer
+    // (`toOffset: target`, the onMove convention's pre-move gap) whatever half of
+    // the row the pointer was on — so the row just below the dragged one was
+    // unreachable (a drop there changed nothing), every downward drop landed one
+    // row short, and the slot after the last row could not be reached at all.
+    // The rule is now pure, and the half of the row decides.
+
+    /// The Open list's drop, as pure decisions over the list's rows (each
+    /// `rowHeight` tall, the first at the content's top — the same row model the
+    /// section window reads).
+    nonisolated enum OpenListDrop {
+        /// Where a drag over the list is pointing.
+        enum Hover: Equatable, Sendable {
+            /// Over the rows — the pointer's y in the list's VIEWPORT (the scroll
+            /// view's visible top is 0). Held in the viewport, not the content, so
+            /// a scroll under a still pointer moves the gap it names (the line's
+            /// scroll axis).
+            case rows(viewportY: CGFloat)
+            /// Over the END ZONE under the last row: the slot after it.
+            case end
+        }
+
+        /// The insertion line's thickness — the book navigator's 2-pt line in
+        /// the ring token (`BookView`'s precedent).
+        static let lineThickness: CGFloat = 2
+
+        /// The end zone's tallest form — the book navigator's own 28-pt end
+        /// zone (`BookView`'s precedent; 13f W11a's lesson: 14 pt was "nothing").
+        static let endZoneMaxHeight: CGFloat = 28
+
+        /// **The gap a pointer at `y` (the rows' own space) names**, 0…rows:
+        /// on a row's LOWER half the gap after it, on its UPPER half the gap
+        /// before it (the midpoint counts as lower — the editor's block drag
+        /// settles its bar the same way); above the first row the first gap;
+        /// below the last row the end. nil before the rows are laid out.
+        static func gap(at y: CGFloat, rowHeight: CGFloat, rows: Int) -> Int? {
+            guard rowHeight > 0, rows > 0, y.isFinite else { return nil }
+            guard y > 0 else { return 0 }
+            let row = Int((y / rowHeight).rounded(.down))
+            guard row < rows else { return rows }
+            let within = y - CGFloat(row) * rowHeight
+            return within >= rowHeight / 2 ? row + 1 : row
+        }
+
+        /// The gap a hover names, read against the list's scroll offset NOW.
+        static func gap(for hover: Hover, offset: CGFloat, rowHeight: CGFloat, rows: Int) -> Int? {
+            switch hover {
+            case .rows(let viewportY): gap(at: viewportY + offset, rowHeight: rowHeight, rows: rows)
+            case .end: rows > 0 && rowHeight > 0 ? rows : nil
+            }
+        }
+
+        /// **Where the dragged row goes** — the onMove destination (a PRE-move
+        /// gap index, `OpenNotes.move`'s convention), which IS the gap. nil
+        /// where the drop would change nothing: the dragged row's own two gaps
+        /// (just before it and just after it), or an index off the list —
+        /// §12's false-offer rule: no line there, and no drop.
+        static func destination(gap: Int, dragged: Int, rows: Int) -> Int? {
+            guard rows > 0, (0..<rows).contains(dragged), (0...rows).contains(gap) else { return nil }
+            guard gap != dragged, gap != dragged + 1 else { return nil }
+            return gap
+        }
+
+        /// **The insertion line's top, in the list's VIEWPORT** — nil where no
+        /// line is drawn: nothing hovering, no drag of this list's in flight,
+        /// nothing laid out or read yet, or a gap where the drop would change
+        /// nothing. The line sits centred on the boundary the gap names, held
+        /// inside the rows at the two ends and inside the window (a boundary
+        /// half a row past a scrolled edge shows at that edge). Every input is
+        /// an argument — the pointer, the scroll window, the rows, the pitch,
+        /// the dragged row — so the line re-derives on each of them (the
+        /// overlay/sink delivery law: hover, scroll, list change).
+        static func lineTop(
+            hover: Hover?, dragged: Int?, rows: Int, rowHeight: CGFloat, window: ScrollWindow
+        ) -> CGFloat? {
+            guard let hover, let dragged, window.isMeasured,
+                  let gap = gap(for: hover, offset: window.offset, rowHeight: rowHeight, rows: rows),
+                  destination(gap: gap, dragged: dragged, rows: rows) != nil
+            else { return nil }
+            let inRows = min(max(CGFloat(gap) * rowHeight - lineThickness / 2, 0),
+                             max(CGFloat(rows) * rowHeight - lineThickness, 0))
+            return min(max(inRows - window.offset, 0), max(window.viewport - lineThickness, 0))
+        }
+
+        /// **The end zone's height** — the room the list leaves under its rows
+        /// above the column's bottom padding (the same two measurements as
+        /// `openListMaxHeight`), capped at `endZoneMaxHeight`, so the zone never
+        /// pushes the column past the sync footer. 0 when the rows fill the list
+        /// (it scrolls; the last row's lower half is then the end slot) or before
+        /// anything is measured.
+        static func endZoneHeight(
+            visibleHeight: CGFloat, listTop: CGFloat, bottomPadding: CGFloat, rows: Int,
+            rowHeight: CGFloat
+        ) -> CGFloat {
+            guard visibleHeight > 0, listTop > 0, rows > 0, rowHeight > 0 else { return 0 }
+            let room = visibleHeight - listTop - bottomPadding - CGFloat(rows) * rowHeight
+            return max(0, min(endZoneMaxHeight, room.rounded(.down)))
+        }
+    }
 }
