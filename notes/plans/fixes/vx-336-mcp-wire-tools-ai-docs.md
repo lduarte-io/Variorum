@@ -4206,7 +4206,7 @@ paging parameters is byte-unchanged, and so is the one not-shared shape.
 | 0 | read-in; this record | DONE (this commit) |
 | 1 | the pins on the OLD tree (Tests only) → RED, counts read from the run's own output | DONE (this commit) — see THE PINS below: 22 tests, 9 failed, 18 issues on `0b1be274`'s product |
 | 2 | the product: the answer budget (`MCPNoteStructure`, `MCPReadTools`'s shared encoder + the version echoes) + `read_note`'s description; builder B's budget pins re-pinned (each edit commented) → GREEN | DONE (this commit) — the four suites 24/24 green (read from the log; THE DESIGN AS BUILT and THE GREEN RUN below); one more of builder B's pins re-pinned (the clamp, a FINDING); the whole package's finals are piece 4's, PENDING |
-| 3 | the revert check (announced here and committed BEFORE it runs; restore verified) | IN-PROGRESS — ANNOUNCED (THE REVERT CHECK below, this commit); the arms run next on the committed tree, then `git checkout HEAD -- Sources` and the restore verified |
+| 3 | the revert check (announced here and committed BEFORE it runs; restore verified) | DONE (this commit) — announced in `39fb5320` before any arm ran; four arms on that tree, each undone by `git checkout HEAD -- Sources`; the restore verified (status clean, 25/25 green) — THE REVERT CHECK's results below |
 | 4 | headless finals (whole package) · the measured page sizes · FOR VX-234 · PROVISIONAL · the RE-PROBE for U8b · OWED | NOT-STARTED |
 
 ### THE DESIGN AS BUILT (piece 2 — the ruling applied to code; no fork: every choice below follows the ruling's letter)
@@ -4306,6 +4306,26 @@ runs `swift test --filter 'MCPPageAnswerBudgetServerTests|MCPPagedReadServerTest
   arithmetic alone is exact; the measurement is the bound's guarantee, not its mechanism.
 - **Arm (d) — the lens picks unweighed** (each pick's size taken as 0): EXPECTED P-U7c-5 RED (its pages over the budget).
 - **Restore:** `git checkout HEAD -- Sources`, `git status` clean, the four suites green again.
+
+**THE RESULTS (read from each arm's own log; 25 tests in 4 suites each):**
+- **Arm (a), builder B's product back** (the three files from `b3b66903`): **11 failed, 20 issues — exactly as
+  expected:** the eight new pins (P-U7c-1: 161 / 65,716 · 54 / 28,388 at 200, 100 / 42,967 at 100, the version 161 /
+  65,754 — 4 issues; P-U7c-2: 200 / 54,808; P-U7c-3: 4 / 35,026 — 2; P-U7c-4: 2 / 33,366 — 3; P-U7c-4b: 4 / 32,957;
+  P-U7c-5: ONE page, 60 / 161,088; P-U7c-6 — 2; **P-U7c-7: [2] / 32,071 — 2**) and the three re-pinned (P-256-2,
+  F-256-7, P-256-1b); the other 14 green, both GUARDS among them.
+- **Arm (b), the echoes set after the read:** **2 failed, 3 issues** — P-U7c-7 ([2] / 32,071, 2 issues) as expected,
+  AND P-U7c-1's version leg (page 2: 82 blocks / **32,091**, 1 issue) — the same mechanism caught twice (the sherlock
+  version happened to land a page within its echoes' width of the bound under this arm). Every other pin green.
+- **Arm (c), the final measurement removed:** **25/25 GREEN, as expected** — the piece-by-piece arithmetic alone is
+  exact on every pin; the measurement is the bound's guarantee, not its mechanism.
+- **Arm (d), the lens picks unweighed:** **1 failed, 12 issues** — P-U7c-5, but NOT as the announcement predicted
+  ("its pages over the budget"): the final measurement HELD the bound (every page ≤ 32,000 — 5 blocks / 29,599–29,888),
+  and the wrong arithmetic showed instead as **11 pages not full** (the fullness check: 5 blocks where 14 fit — each
+  shrink step re-filled commit text from an over-estimated room, so the page kept shrinking) plus **commit text never
+  omitted** (1). So the fullness half of the rule is what pins the arithmetic, and the measurement is what pins the
+  bound — the two halves work as designed.
+- **Restore:** `git checkout HEAD -- Sources` → `git status` clean, `git diff HEAD` empty; the four suites **25/25
+  green** (read from `u7c-restore.log`).
 
 ### THE PINS — RED ON THE OLD TREE (piece 1; read from the run's own output)
 
