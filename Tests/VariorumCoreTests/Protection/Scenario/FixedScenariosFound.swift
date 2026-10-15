@@ -257,4 +257,16 @@ struct GeneratorFoundScenarios {
         #expect(world.macA.slot?.record?.mode == .castle, "the follow never came")
         expectPromisesKept(world)
     }
+    /// Seed 1 (sequence 854): Use Standard (synced) crashed before its first
+    /// vault write; the account's passphrase then changed on another device —
+    /// the resume's first write finds the passphrase no longer opens the vault
+    /// and rolls back (the account moved before this device's first write).
+    @Test func aLeaveCrashedBeforeItsFirstWriteRollsBackWhenTheAccountMoved() async throws {
+        let world = try Self.start("a synced Castle account on two Macs and the phone", seed: 1000857)
+        await world.step(.crash(.useStandard("phone"), afterWrites: 7))
+        await world.done([.changePassphrase("macA"), .launch("phone")])
+        #expect(world.phone.library?.section.actInFlight == nil, "the leave stuck in flight")
+        await world.done([.settle])
+        expectPromisesKept(world)
+    }
 }

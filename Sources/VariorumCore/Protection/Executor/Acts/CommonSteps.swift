@@ -384,7 +384,11 @@ extension ActContext {
         if snapshot.format.previousCorpusKey != nil { throw ActRollback(refusal: .rotationInProgress) }
         let passphrase = try requirePassphrase()
         guard VaultModel.master(of: snapshot.format, passphrase: passphrase, words: nil) != nil else {
-            throw ExecutorRefusal.passphraseDoesNotOpen
+            // The account's passphrase changed elsewhere since the press —
+            // before this device's first vault write the act rolls back (it
+            // refused and stuck in flight — VX-305 U4, found by the scenario
+            // world); the follow picks up the change, then she presses again.
+            throw ActRollback(refusal: .accountMoved)
         }
         let current = try material(for: snapshot)
         let (format, fresh) = try VaultModel.rotationBegin(
