@@ -556,31 +556,11 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   228 in 51 green under `swift test -c release` (the four DEBUG-only mutation suites compiled out). The full core suite
   green in Debug (3128 / 385, 240 / 51, 40 / 6). Not done (the record's first line): the empty-slot landing → phase 5.
 - U4 — the scenario world, fixed scenarios, mutation pins, the generator: **IN-PROGRESS** (Opus implementer,
-  2026-10-14). RESUME MAP (a fresh session can finish from here): (a) the world and its fakes — DONE (`4de6b6c8`:
-  `Scenario/Fakes.swift`, `World.swift`); (b) today's stores from the old formats + the older build as an actor — DONE
-  (`OlderBuild.swift`; 17 starting states in `Generator.swift`'s `StartingState.all`); (c) the alphabet and the promises
-  — DONE (`Alphabet.swift`, `Promises.swift` — promises 1–13 + the vault's §3.9 invariant; the runner `SWorld.step`);
-  (f) the generator and `PROTECTION_SOAK=1` — DONE (`Generator.swift`; everyday 2 seeds × 8 sequences × ≤30 steps;
-  soak defaults 20 × 1,000 × ≤60, overridable by `PROTECTION_SOAK_SEEDS` / `PROTECTION_SOAK_SEQUENCES`; a failure
-  prints its shrunk minimal sequence); (d) the fixed scenarios — IN-PROGRESS: written so far (each also the red-on-old
-  pin of a bug the world found): `MigrationScenarios` (exposed/Standard-waiting through the migration; a vault that moved
-  while the library didn't; corner 45), `DeviceScenarios` (a replacement Mac's first open; the key file and memory item
-  both deleted), `AccountScenarios` (Replace All Keys on an account on the old shared key; the key doors on an
-  Always-ask device unlocked offline). NEXT: the rest of §6's list (name each test after its §6 sentence), then
-  (e) the mutation pins (`Scenario/MutationPins.swift`, DEBUG, each scenario guarding a known bug re-run with its guard
-  off — must fail), then (g) the runs and the record. Generator state at this commit: a mid-size batch
-  (`PROTECTION_SOAK=1 PROTECTION_SOAK_SEEDS=3 PROTECTION_SOAK_SEQUENCES=40`) was being driven to green finding by
-  finding — rerun it first; each failure is triaged as a checker bug (fix the checker) or a code bug (fixed-scenario
-  pin red-on-old, then the fix). BUGS FOUND AND FIXED SO FAR (each pinned): the move skipped the live library's own key
-  with no old shared key (`4de6b6c8`… `c8bddfe1`); corner 45's leave kept today's silent item (`be7ed598`, P-U4-2); a
-  replacement Mac without its memory item took over nothing (`be7ed598`, P-U4-3 — U1's VX-340 unit pin restated); the
-  migration took the vault's word over the library's own key, and copied a mismatched master words copy (`276677fa`,
-  P-U4-4); Replace All Keys refused inside its plan (`276677fa`); the key doors on an Always-ask device unlocked offline
-  (`<this series>`); the key file and memory both deleted (`57a3405a`). PROVISIONAL so far: P-U4-1 (a retirement's
-  delete that never reached iCloud, then a leave — the checker exempts exactly that corner; her call), P-U4-2, P-U4-3,
-  P-U4-4 — options for each go in the U4 record. Hand-forward noticed, not built: Land writes the landed library's key
-  file over the outgoing one's before the swap, so the outgoing library goes to `Previous Libraries/` with only its
-  custody and its pairs as roads (the world's `swapStaged(setAside:)` moves the slot's own key files beside it).
+  2026-10-14; the partial record is §8's "U4 RECORD — PARTIAL", resume from it). Done: (a) the world `4de6b6c8`;
+  (b) today's stores + the older build; (c) the alphabet + the promises; (f) the generator + `PROTECTION_SOAK=1` —
+  the mid-size batch green at `6020391b`. In progress: (d) the fixed scenarios (14 written, each the pin of a bug the
+  world found; the rest of §6's list NOT-STARTED — the record names which). Not started: (e) the mutation pins;
+  (g) the full runs (suites Debug + `-c release`, the full core suite, the soak both ways) and the final record.
 - The go/no-go record: **NOT-STARTED.**
 
 ---
@@ -1074,6 +1054,98 @@ landed.
 - **For her bundle:** P-U3-1 (a follow that waited out a leave asks its one secret again at the next press) and
   P-U3-6 (a copy act that crashes before its swap rolls back and is redone) are the two calls with faces she would
   meet; both PROVISIONAL, options in the U3 record, QUESTIONS at the closeout.
+
+### U4 RECORD — PARTIAL (Opus implementer, 2026-10-14; written at the context cliff so a fresh session can finish)
+
+**Not done, first (the remaining work, in order):** (1) the rest of §6's fixed scenarios — written so far are the 14
+listed below; every other sentence of §6's list is NOT YET a named test (name each test after its sentence, in
+`Tests/VariorumCoreTests/Protection/Scenario/FixedScenarios*.swift`, build each on `scenarioWorld`/`syncedWorld` +
+`world.done([...])` + `expectPromisesKept`); (2) the mutation pins — `Scenario/MutationPins.swift` (DEBUG only): for
+each fixed scenario guarding a known bug, re-run with its guard off via `SWorld.guards` (`scenarioWorld(guards:)`) and
+`#expect` it FAILS (a promise violation or its own assertion) — record each failing assertion in this record; (3) the
+runs: the scenario suites + the full protection set in Debug; `swift test -c release` over the protection set; the full
+core suite in Debug; the soak each way — `PROTECTION_SOAK=1 swift test --filter GeneratorTests` and the same with
+`-c release` (defaults 20 seeds × 1,000 sequences × ≤ 60 steps; ~6 ms a step in Debug ⇒ expect ~1.5 h Debug, less in
+Release — run in the foreground, poll the log) — record seed/sequence/step counts and WALL TIMES; (4) QUESTIONS entries
+wait for the closeout (CLAUDE.md's merge-moment rule; list P-U4-1…5 in §11).
+
+**What shipped so far** — `Tests/VariorumCoreTests/Protection/Scenario/`: `Fakes.swift` (device keychains with Touch
+ID/lid/state-hash semantics and Keychain Access's powers; iCloud Keychain per Apple account — no propagation until a
+sync, the per-device off switch, the same-name rule, deletes with no recovery; file systems; the server's vaults with
+CAS, the proof and the rotation fields; a seeded SplitMix64), `World.swift` (two Macs and a phone, two Apple accounts,
+two Variorum accounts; `DeviceLeaves` — every executor leaf over one device, dumb; the lobby walking every road;
+launch → unlock → settle → migrate → repairs; the user's secrets with their timelines; pending secrets adopted when
+the locks say so), `OlderBuild.swift` (today's stores from the old formats — format 1/2 key files, today's per-ID
+items, sync custody, the 13p escrow, the old shared key, today's vault; today's build as an actor: its leave, follow,
+Re-link, completion, backup), `Alphabet.swift` (every user, device, Apple-account, older-build and adversary act, one
+step each; a crash can ride any act), `Promises.swift` (the key-reach engine; promises 1–13 and §3.9's vault
+invariant; the stated exceptions taken out of the attacker's seeds), `Generator.swift` (the runner `SWorld.step`, 17
+starting states from the old formats, the seeded generator with shrinking, the everyday counts and the soak switch),
+`WorldSmokeTests.swift`, and the fixed scenarios so far.
+
+**Fixed scenarios written (§6's sentence → test):** today's Standard-waiting and exposed libraries through the
+migration → `MigrationScenarios.todaysStandardWaitingAndExposedLibrariesThroughTheMigration`; corner 45's ambiguous
+case → `MigrationScenarios.corner45sAmbiguousCase`; (§3.13 step 1) a vault that moved while the library didn't →
+`MigrationScenarios.aVaultThatMovedWhileTheLibraryDidntIsAnOrdinaryFollow`; signed out with keys → `MigrationScenarios.
+signedOutWithKeysThenTheVaultAnswers`; a replacement Mac's first open → `DeviceScenarios.aReplacementMacsFirstOpen`;
+the key file and memory item both deleted → `DeviceScenarios.theKeyFileAndTheMemoryItemBothDeleted`; (promise 6) a Mac
+replaced mid-act → `DeviceScenarios.aMacReplacedMidActLeavesNothingHalfDone`; (promise 6) a crash at every write of a
+settings change → `DeviceScenarios.aCrashAtEveryWriteOfASettingsChangeSettles`; Replace All Keys on an account still
+on the old shared key, its follow, a new device joining → `AccountScenarios.replaceAllKeysOnAnAccountStillOnTheOld
+SharedKey`; (promise 2) today's sync custody at entering Castle → `AccountScenarios.todaysSyncCustodyGoesWhenThe
+LibraryEntersCastle`; (promise 6) a device migrated after its account moved → `AccountScenarios.aDeviceMigratedAfter
+ItsAccountMovedFollowsFirst`; the key doors while a follow is owed → `AccountScenarios.theKeyDoorsRefuseWhileAFollow
+IsOwed`; the key doors on an Always-ask device unlocked offline → `AccountScenarios.theKeyDoorsOnAnAlwaysAskDevice
+UnlockedOffline`; plus the world's own `WorldSmokeTests` (3).
+
+**Bugs the world found in U1–U3's code, each pinned red-on-old by the scenario named, then fixed:** (1) the move
+skipped the live library's own key when no old shared key was readable — exposed/Standard-waiting stores never
+settled promise 3 (`SharedKeyAndRelink.swift`); (2) corner 45's leave kept today's silent item holding the outgoing
+Castle-era key (P13) (`CommonSteps.retireOldCustody`, P-U4-2); (3) a replacement Mac without its memory item took over
+nothing (P2) (`DeviceSection.thisMacsSection`, P-U4-3 — U1's VX-340 unit pin restated); (4) the migration took the
+vault's word over the library's own key — today's silent follow (P2/P13) — and (5) copied a mismatched master words
+copy (P9) (`Migration.swift`, P-U4-4); (6) Replace All Keys refused inside its plan (P6) (`ReplaceAllKeys.swift`);
+(7) the key doors on an Always-ask device unlocked offline stuck mid-plan (P6) (`KeyDoors.swift`); (8) both the key
+file and its mirror gone — nothing restored the live file (P6) (new repair `restoreKeyFileFromCopy`, the
+`needsLiveKeyFile` door check); (9) today's per-store sync custody survived Use Castle (P2) (`LegacyItemFact.Kind.
+syncCustody`, the Castle sweep); (10) a device migrated after its account moved — the doors didn't see the move (P6)
+(`doorSecrets`, the migration's remembered vault facts); (11) the key doors had no follow-owed check (P6);
+(12) confirming a mode later never ran what the migration deferred (P3) (`ConfirmModeProgram`); (13) a settings act's
+plan-less finish refused (P6) (`DeviceSettingsProgram`); (14) a staged file left by a predecessor's act (P6)
+(`settle`). Commits: `c8bddfe1`, `be7ed598`, `276677fa`, the key-doors commit, `57a3405a`, the sync-custody commit,
+the moved-account commit, the follow-owed commit, the confirm commit, the settings commit, the staged-file commit —
+`git log --oneline origin/vx-305-castle-core` lists each with its pin.
+
+**PROVISIONAL calls so far (options for QUESTIONS at the closeout):** P-U4-1 — a retirement's delete that never
+reached iCloud (made while iCloud Keychain was off, or queued and lost with a replaced/wiped keychain) followed by a
+leave: nothing in Standard deletes on sight (§3.3's guard), so promise 13 can't hold there; chosen (b) the checker
+exempts exactly that corner, pending her call; options (a) delete on sight in Standard too (conflicts with §3.3's
+"nothing destructive on a Standard record's word"), (c) the leave re-deletes this Mac's retired ids as its first step
+(covers the lost-queue case, not iCloud-off-through-the-leave). P-U4-2 — the leave retires today's silent item
+holding the outgoing Castle key (chosen); other: leave it as a stated residue of corner 45. P-U4-3 — a new identity
+with no predecessor, opening a library the record knows, takes over the live wrap's own key and every retired id and
+starts on Always ask (chosen, (a)); (b) take over nothing (U1's reading — the replacement Mac's Use Castle then strands
+nothing but leaves its predecessor's key alive, P2); (c) RECOMMENDED for her: split the marker into a hardware part
+and a login part so "same login, new hardware" (a replacement) is told from "same hardware, new login" (VX-340) —
+a model format change resting on GeneratedUID surviving Migration Assistant (phase 2's check). P-U4-4 — the migration
+records an unambiguous custody shape's mode over the vault's word and owes the follow (chosen); other: take the
+vault's word (the literal §3.13 step 2 — today's silent follow). P-U4-5 — after both homes are rolled back past Use
+Castle (the stated limit), `assess` offers Re-link's library arm (the retired own key is gone) and a press re-wraps
+the pre-Castle key under Apple, re-opening every copy from before Castle; §3.6's "never opens what was written before
+it" doesn't hold through that press. Chosen: recorded, checker treats the restored state as believed; options for
+her: (a) accept and restate the limit, (b) Re-link's library arm asks for the passphrase or words first when the key
+it re-wraps was ever Castle-adjacent (needs a signal nothing local has after the rollback), (c) offer Re-link's library
+arm only from Settings, never as an owed act.
+
+**Hand-forwards noticed, not built:** Land writes the landed library's key file over the outgoing one's before the
+swap, so the outgoing library goes to `Previous Libraries/` with only its custody and its pairs as roads (phase 5,
+VX-309); U3's `ExecutorWorld`/`EX`/`CrashHarness` were kept as the executor's unit scaffolding (the brief said
+"replace"; the scenario world's fakes are separate — PROVISIONAL, options: port U3's 114 tests onto the world, or keep
+both — chosen: keep both, the realistic crash coverage lives in the world's `crash(_:afterWrites:)` alphabet).
+
+**Machinery notes:** context ran past ~900k tokens in one session — the reason this record is partial. Counts so far:
+the protection suites were green at each fix's commit (the suites each fix touches, named in its commit); the mid-size
+generator batch green at `6020391b` (3 × 40 × ≤ 60, 5,387 steps, 33.6 s Debug).
 
 ## 9. The ladder (the Fable reviewer's report per round, committed unedited, then the dispositions)
 
