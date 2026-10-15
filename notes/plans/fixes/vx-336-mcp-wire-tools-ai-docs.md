@@ -7317,3 +7317,33 @@ renewal). The A1 ran first, before any test host.
 the load (its re-run recorded it). (2) The plan's attribution "VX-184's 5" reads, from this log, as `IndexTierMetricsTests`'
 4 plus that one `TakesFindBoardTests` known issue. (3) The products are kept for PHASE C's cleanup (D9 step 6:
 `vx336-close`, `vx336-close-red`, `vx336-close-ios`).
+
+## CLOSEOUT RECORD — PHASE C (the closeout implementer — opus-implementer, from 2026-10-15 ~10:45 MDT)
+
+**Not done (first line, kept current):** the ledgers, the STATUS flips, the handoff and the PR are NOT yet done (LIVE
+STATUS below). This session never merges the PR (the orchestrator asks the coordinator), cuts no release, does no
+`/Applications` refresh, edits no Linear ticket, runs no `xcodebuild`, claims no stage and touches no store. The
+merge sha, the release build and the post-merge cleanup (D9 steps 6–7) are the orchestrator's post-merge fill.
+
+**Read in full in this session (never delegated):** CLAUDE.md and its loaded canon; this record's header, Hard rules,
+LIVE STATUS, Stage traffic log, ORCHESTRATOR'S PROVISIONAL RULINGS, Tickets minted, the CLOSEOUT BRIEF (with the 0.9.7
+notes section), the CLOSEOUT RECORD — PHASE A whole (D1–D9, OWED), THE ORCHESTRATOR ON PHASE A, THE LADDER — ROUND 1
+and ROUND 2 with their dispositions, the CLOSEOUT RECORD — PHASE B whole (incl. "The merge slip" and its push rule),
+THE ORCHESTRATOR'S LINE-BY-LINE CHECK, the CLOSEOUT WINDOW RUN whole (THE RESULT LINE); the handoff draft; VX-246's
+handoff (for form); `notes/SessionResiliencyProtocol.md`'s implementer section.
+
+### LIVE STATUS — PHASE C's pieces (flipped in the same commit as each piece)
+
+| # | piece | state |
+|---|---|---|
+| 1 | freshen: `git fetch origin`; merge main if it moved; #227 and PL-56 re-checked | DONE — `origin/main` is still **`ebd16909`** (unmoved since PHASE B's merge `fc6bf20b`), so NO merge and no push of one (the merge slip's rule never arose); `git merge-base --is-ancestor origin/main HEAD` TRUE; the branch's `notes/QUESTIONS.md` and `notes/MobileSoul.md` are byte-equal to main's, the last number #226 and the last row PL-55, so **#227 and PL-56 are free** — no renumbering anywhere |
+| 2 | the kits removed in-branch (`git rm -r` of `vx-336-u7-kit` and `vx-336-u9-sweep`, 25 files), its own commit | NOT-STARTED |
+| 3 | D1 — QUESTIONS #227 | NOT-STARTED |
+| 4 | D2 — AppSpec §14's entry + VX-179 rolled to `notes/AppSpecDeltaArchive.md` | NOT-STARTED |
+| 5 | D3 — `notes/plans/run-finals-ledger.md`'s VX-336 section | NOT-STARTED |
+| 6 | D4 — the master plan: VX-336's in-flight row retired | NOT-STARTED |
+| 7 | D5 — MobileSoul PL-56 | NOT-STARTED |
+| 8 | the Stage traffic log's closeout-window entry | NOT-STARTED |
+| 9 | D8 — the STATUS lines (this record, the plan's banner, the top LIVE STATUS's CLOSEOUT row) | NOT-STARTED |
+| 10 | the handoff finished (D7's fills) | NOT-STARTED |
+| 11 | the PR opened (not merged): `git status` clean, `swift build` green, main an ancestor | NOT-STARTED |
