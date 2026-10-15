@@ -6466,7 +6466,7 @@ states (below).
 | 4 | the master plan draft: retire VX-336's in-flight row only (D4) | DONE (this commit) — D4 below |
 | 5 | the MOBILE PARITY draft (D5) | DONE (this commit) — D5 below (PL-56 unless taken) |
 | 6 | RULINGS RECONCILED (D6), remainders proposed in OWED | DONE (this commit) — D6 below: 24 rulings; REMAINDERS rows 11, 14, 15, 16 (+ row 12's optional evidence gap) → OWED T1–T5 |
-| 7 | the handoff draft `notes/handoffs/vx-336-handoff.md` (D7) | NOT-STARTED |
+| 7 | the handoff draft `notes/handoffs/vx-336-handoff.md` (D7) | DONE (this commit) — the file in the branch; D7 below lists its «…» fills |
 | 8 | the STATUS lines drafted closed (D8) | NOT-STARTED |
 | 9 | the kits' deletion and PHASE C's own steps written into the PHASE C draft (D9) | NOT-STARTED |
 
@@ -6772,3 +6772,14 @@ VX-143's and VX-168's. Recorded in OWED.)*
 | 22 | **Her overnight word**: merge tonight; the last merger writes notes, releases to the website and refreshes `/Applications`; a handoff for the morning | the notes section drafted (CLOSEOUT BRIEF item 9); the handoff drafted (D7) | PENDING — PHASE C's (the release and refresh only if this run merges last) |
 | 23 | **Her kickoff answer 2** ("as sized", each unit with its own red-first pins, Mac batch and real-client round, U5's shared) | every unit pinned red-first and proven in its window; U6/U7/U8 split into sub-units before spawn (said in the record); U9 added by ruling 1 | SHIPPED |
 | 24 | **The orchestrator's provisional rulings 1–2** (U9; VX-363) | both fixed red-first and proven in U9's window | SHIPPED (for her ratification, #227) |
+
+#### D7 — the handoff: `notes/handoffs/vx-336-handoff.md` (in the branch, a DRAFT)
+
+Her checklist first (the release and what to try · the re-seed through Help ▸ Restore Tutorial… · the live guide page
+with its PLACEHOLDER copy, DECISIONS #86 · the #227 bundle with the five most worth her eye · the two pre-launch calls
+VX-363 and VX-357 · VX-234's words · the filed tickets), then what to know (her overnight word and the calls made under
+it), what shipped, how it was checked, the consolidated VX-234 list, the tickets by priority, the other runs, what is
+left on disk, MOBILE PARITY, and the fresh-session pointer. **PHASE C fills every «…»:** the PR number and merge sha;
+the release (version, build, who cut it — this run or VX-283 — and where its notes are); round 2's result; the closeout
+window's counts; the refresh's A1 path and the replaced app, if this run refreshed; the tickets minted from OWED T1–T5;
+the bundle's number if renumbered; and it deletes the italic DRAFT line under the title.
