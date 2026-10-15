@@ -3051,8 +3051,8 @@ comment, a rename or a guard: no reachable behaviour changes, so no red-on-old i
 **LIVE STATUS (this leg, per piece)**
 - D0 — the dispositions above: DONE (`9fefb8bb`).
 - D1 — R1-3's comment (`SidebarLayout.revealOffset`'s doc + a pointer at `everyRowLandsClearOfTheFadesFromAnyWindow`):
-  DONE (this commit).
-- D2 — R1-4's comments: NOT-STARTED.
+  DONE (`b5823d77`; its commit names VX-286 alone where the earlier reveal commits named VX-285 + VX-286).
+- D2 — R1-4's comments (`OpenListDragState.began(_:)` and `OpenListDropDoor.perform`): DONE (this commit).
 - D3 — R1-5's rename + the record note: NOT-STARTED.
 - D4 — R1-6's guard + pins: NOT-STARTED.
 - D5 — headless `build-for-testing` into `DerivedData/vx283-u2` AND `DerivedData/vx283-u3b`: NOT-STARTED. The pins'

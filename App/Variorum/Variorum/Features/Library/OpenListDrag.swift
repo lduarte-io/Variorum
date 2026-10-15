@@ -65,6 +65,19 @@ final class OpenListDragState {
     @ObservationIgnored private var latest = SidebarLayout.ScrollWindow.unmeasured
 
     /// A drag began on `noteID`'s row (`draggable`'s payload runs then).
+    ///
+    /// **A known edge** (the U2 record; the VX-283 ladder's R1-4): only a drop
+    /// on THIS list's own targets clears `dragging` (`ended()`, in
+    /// `OpenListDropDoor.perform`). A drag released anywhere else leaves it
+    /// stale until this list's next drag begins here. Harmless on its own —
+    /// the hover clears on exit, and a drop is decided by the PAYLOAD's list
+    /// id — except that a row dragged in from ANOTHER window's list meanwhile
+    /// reads as a drag of this list's: the line draws, the drop is accepted,
+    /// and `land` then refuses the foreign payload, so nothing moves and the
+    /// image does not slide back. Deliberately not cleared from the drag
+    /// session's end (`onDragSessionUpdated`): its order against
+    /// `performDrop` is unverified, and the wrong order would break every
+    /// drop. No deterministic pin short of a fake drag session.
     func began(_ noteID: String) {
         dragging = noteID
         if hover != nil { hover = nil }
@@ -146,6 +159,14 @@ enum OpenListDropDoor {
     /// line she saw), the payload read, and `land` — on the payload's word,
     /// not the hover state's (a drop never depends on the drag having been
     /// seen to begin).
+    ///
+    /// **The same known edge, from this side** (`OpenListDragState.began`;
+    /// the VX-283 ladder's R1-4): the answer is given BEFORE the payload is
+    /// read, so a drop accepted here can still land nothing — a foreign
+    /// payload drawn a line by a stale `dragging`, a `loadTransferable` that
+    /// fails, or a `land` that re-validates against the rows as they stand
+    /// by then and finds no move. Each is accepted and silent: no slide-back,
+    /// no message. No deterministic pin short of a failing item provider.
     static func perform(
         _ providers: [NSItemProvider], state: OpenListDragState, rows: [String], rowHeight: CGFloat,
         workspace: WorkspaceModel
