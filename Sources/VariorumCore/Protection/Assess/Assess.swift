@@ -255,7 +255,13 @@ public enum AssessRules {
             // shrinks to match the mirror's word, nor the mirror to the file's.
             if let mirror = memory?.keyFileMirror, mirror.fingerprint == unlocked.currentFingerprint {
                 if let live = liveKeyFile(facts, unlocked) {
-                    if mirrorHoldsMore(mirror, than: live) {
+                    if live.fingerprint != mirror.fingerprint {
+                        // Another key's file in the live place with nothing in
+                        // flight: an act its own identity can't resume (a Mac
+                        // replaced mid-act) left it — the roll back's restore
+                        // (VX-305 U4, found by the scenario world).
+                        repairs.append(.restoreKeyFileFromMirror)
+                    } else if mirrorHoldsMore(mirror, than: live) {
                         repairs.append(.restoreKeyFileFromMirror)
                     } else if live != mirror {
                         stale = true

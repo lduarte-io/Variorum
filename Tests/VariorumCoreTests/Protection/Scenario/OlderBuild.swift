@@ -358,9 +358,18 @@ extension SWorld {
         guard device.build == .older, let slot = device.slot, let account = slot.rowsOwner, device.online,
               let shared = oldSharedKey(device), let material = todayMaterial(device), let vault = server.snapshot(account)
         else { throw WorldRefusal.noLibrary }
+        let castle = vault.format.masterWrappedByAppleHeld == nil
         let updated = try vault.format.settingAppleHeldCopy(
             masterKey: material.masterSymmetricKey, appleKey: shared.key, appleKeyID: shared.id)
         _ = try server.update(updated, accountID: account, expectedRevision: vault.revision, proofMaster: material.masterSymmetricKey)
+        // Today's Re-link reads no mode: on an account in Castle it puts the
+        // Castle-era master under the old shared key exactly as an older
+        // build's leave does — §8's exception, the same class (hand-forward:
+        // the exception's sentence names a leave or a follow, not a Re-link).
+        if castle {
+            truth.olderBuildLeaveKeys.insert(material.corpusKeyID)
+            truth.olderExposedMasters.insert(material.masterKey)
+        }
     }
 
     /// TODAY'S FOLLOW. It reads the vault's mode from the Apple wrap ALONE: a

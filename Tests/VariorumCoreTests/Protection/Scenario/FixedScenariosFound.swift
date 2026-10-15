@@ -138,4 +138,27 @@ struct GeneratorFoundScenarios {
         #expect(world.macB.slot?.record?.account == account, "a replayed library file took the account away")
         expectPromisesKept(world)
     }
+    /// Seed 16: This Mac Only into Standard crashed mid-act; its resume must
+    /// finish — the new key's Apple wrap is a local library's (decision 35
+    /// reads the vault for a SYNCED library's writes), so no vault read holds
+    /// it up.
+    @Test func aCrashedThisMacOnlyIntoStandardFinishes() async throws {
+        let world = try Self.start("a synced Castle account on two Macs and the phone", seed: 16000094)
+        await world.step(.crash(.thisMacOnly("macA", .standard), afterWrites: 12))
+        await world.done([.launch("macA")])
+        #expect(world.macA.library?.section.actInFlight == nil, "the leave stuck in flight")
+        expectPromisesKept(world)
+    }
+
+    /// Seed 16: a Mac replaced in the middle of Use Castle (its memory item
+    /// carried) — the new identity can't resume its predecessor's act, and
+    /// the new key's file left in the live place goes back to the mirror's.
+    @Test func aMacReplacedMidUseCastleGetsItsKeyFileBack() async throws {
+        let world = try Self.start("Standard-waiting", seed: 16000087)
+        await world.step(.createLibrary("macB", secrets: true))
+        await world.step(.crash(.useCastle("macB", .alwaysAsk, newWords: false), afterWrites: 7))
+        await world.done([.replaceMac("macB", carriesMemory: true), .settle])
+        #expect(world.liveKeyFile(world.macB)?.fingerprint == world.macB.slot?.fingerprint, "another key's file stayed live")
+        expectPromisesKept(world)
+    }
 }

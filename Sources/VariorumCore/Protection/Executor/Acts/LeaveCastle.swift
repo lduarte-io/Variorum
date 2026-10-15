@@ -87,6 +87,11 @@ extension ActContext {
     /// Decision 35: a synced library writes nothing Apple-reachable without a
     /// fresh vault read for its account this session.
     func requireAppleWriteAllowed() throws {
+        // A leave of the account writes its NEW key's Apple wrap for a library
+        // that is local from the swap on — nothing synced to read the vault
+        // for (and a resume, which reads no vault, must not stick on it —
+        // VX-305 U4, found by the scenario world).
+        if parameters.changesAccount == true, parameters.targetAccount == nil { return }
         guard executor.guards.freshVaultBeforeAppleWriteOn, let account = library.record?.account ?? accountID else { return }
         guard executor.readThisSession(account) else { throw ExecutorRefusal.needsFreshVault }
     }

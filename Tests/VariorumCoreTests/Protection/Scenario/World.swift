@@ -121,6 +121,11 @@ struct Truth {
     /// on a device whose switch was off: the stated exception (§3.1 rule 2)
     /// holds until iCloud Keychain carries a deletion.
     var deletedWhileOff: Set<KName> = []
+    /// The mode and account a device had just before a rollback of its files
+    /// (Time Machine, a replayed library file): the next open taking them back
+    /// from what the Mac remembers is the rollback's consequence, not a silent
+    /// change (P-U4-6).
+    var beforeRollback: [String: (mode: ProtectionMode?, account: String?)] = [:]
     /// Every copy retention pruned: who, under which Mac, for which library.
     var prunes: [(by: String, mac8: String, library: String, copy: CatalogCopy)] = []
     /// Every copy opened into a library: the record before and after.
@@ -486,6 +491,8 @@ final class SWorld {
             if let id = replica.item?.value.appleKey?.id { truth.lostAppleKeys.insert(id) }
         }
         for (name, replica) in device.keychain.synced where replica.dirty && replica.item == nil {
+            // Any lost delete: the cloud's copy comes back here (P-U4-1's class).
+            truth.deletedWhileOff.insert(name)
             if case .own(let id)? = ProtectionNames.parseAppleKeyAccount(name.account, scope: Self.scope) {
                 truth.deletesNotCarried.insert(id)
             } else if name == KName.oldShared(Self.scope), let id = appleAccounts[device.appleAccount ?? ""]?.cloud[name]?.item?.value.appleKey?.id {

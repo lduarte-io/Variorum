@@ -253,7 +253,7 @@ extension SWorld {
             })
         }()
         var items = Array(device.keychain.local.values)
-            + device.keychain.synced.filter { !tombstoned.contains($0.key) }.values.compactMap(\.item)
+            + device.keychain.synced.filter { !tombstoned.contains($0.key) && !truth.deletedWhileOff.contains($0.key) }.values.compactMap(\.item)
         if appleAccount, let id = device.appleAccount {
             // A delete made and queued on a device whose iCloud Keychain switch
             // is off holds everywhere once iCloud Keychain carries it (§3.1
@@ -640,6 +640,10 @@ extension SWorld {
             let changed = was.mode != now.mode || was.account != now.account
             guard changed else { continue }
             if deliberate(action, on: device.name) || crashedBefore.contains(device.name) { continue }
+            if let back = truth.beforeRollback[device.name], back.mode == now.mode, back.account == now.account {
+                truth.beforeRollback[device.name] = nil
+                continue
+            }
             violations.append(Violation(
                 promise: 4, device: device.name,
                 detail: "\(was.mode.map { "\($0)" } ?? "-")/\(was.account?.prefix(8) ?? "none") → \(now.mode.map { "\($0)" } ?? "-")/\(now.account?.prefix(8) ?? "none") at a step that isn't a deliberate act"))
