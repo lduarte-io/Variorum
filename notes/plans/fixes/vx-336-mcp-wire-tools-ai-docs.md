@@ -2842,7 +2842,7 @@ the end of this U7 section. Claims stay PENDING until read from a log.
 | 1b — VX-254: `MintedTake.text` + the encoder's `sha256` | DONE (this commit) — BUILDER A's RECORD |
 | 2 — VX-254: the flat answers (`add_take`, `add_takes`' `takes[]`, `edit_take`, `restore_commit`); `divide_block`/`merge_blocks` answer NO digest (F-254-2 (b), ruled) | DONE (this commit): P-254-2…10 red-on-old (9 failed, 50 issues) then 10/10 green |
 | 3 — VX-254: descriptions, pins red by absence, revert run, the U+0000 CHECK | DONE (this commit): descriptions `5852e474`; the U+0000 CHECK FOUND truncation (BUILDER A's RECORD); the whole MCP suite 293/61 green (1 known issue) + the touched core suites 171/42 green; THE REVERT RUN (announced `badcf3b7`): the eight product files back to `54cc62a5` → `MCPWriteDigestServerTests` 10 of 11 FAILED, 52 issues (the guard green); restored by `git checkout HEAD -- Sources` (status clean) → 15/15 green in both digest suites (1 known issue). No revert in flight. |
-| 4 — VX-261: `list_my_activity` (query, catalog listing rule, handler, Activity words, pins) | IN-PROGRESS — built (this commit): 11 pins red by absence (11 failed, 24 issues) then 11/11 green; PROVISIONAL P-VX261-6 built (BUILDER A's RECORD); the whole MCP target PENDING its final run; **A REVERT IS IN FLIGHT (announced in this commit), two arms, working tree only:** (a) `MCPReadTools.swift`, `MCPToolCatalog.swift`, `MCPGrantQueries.swift` back to `b0175aeb` and `MCPOwnActivity.swift` moved aside → `MCPOwnActivityServerTests`; (b) restored, then `MCPOwnActivity.hidesTarget` forced to `false` → the same suite. Then `git checkout HEAD -- Sources` and a green re-run. If this session dies mid-revert: `git checkout HEAD -- Sources` restores the product (and `git status` must show `MCPOwnActivity.swift` tracked and unmodified). Then the headless finals and `build-for-testing` (PENDING) |
+| 4 — VX-261: `list_my_activity` (query, catalog listing rule, handler, Activity words, pins) | DONE (`c22a57d2` + this commit): 11 pins red by absence (11 failed, 24 issues) then green; PROVISIONAL P-VX261-6 built; THE REVERT RUN (announced `fdd82382`): arm (a) the product back to `b0175aeb` → 11 of 11 failed, 24 issues; arm (b) `hidesTarget` forced false → exactly the two hidden-target pins failed (7 issues), nine green; restored (status clean) → 35/35 green (`MCPOwnActivityServerTests`, `MCPServerTests`, `MCPWriteServerTests`). No revert in flight. The Mac pin's run is THE WINDOW's (PENDING). NEXT the headless finals and `build-for-testing` (PENDING) |
 | 5 — VX-256: `read_note` paging + `ids_only` (pins, revert) | NOT-STARTED — D-256-* |
 | 6 — THE STAGE WINDOW plan (claim `vx336-u7`), headless + Mac build-for-testing, READY | NOT-STARTED — the draft below |
 
@@ -3665,6 +3665,14 @@ they compile on the old tree):
   old tree (the fallback says "used list my activity" — no underscore, no id), so the words got their own pin. It
   compiles in the `build-for-testing` below; its RED (old tree) and GREEN runs are THE WINDOW's (builder B's plan) —
   PENDING.
+- THE REVERT RUN (announced in `fdd82382` before it ran): arm (a) `MCPReadTools`, `MCPToolCatalog`, `MCPGrantQueries`
+  back to `b0175aeb` and `MCPOwnActivity.swift` moved aside → 11 of 11 failed, 24 issues; arm (b) the product restored,
+  `MCPOwnActivity.hidesTarget` forced to `false` → exactly `refusedRowsLoggingAResolvedTargetAnswerNoTarget` (6 issues)
+  and `duplicateNotesWingSideRefusalAnswersNoTarget` (1) failed, the other nine green — so the hidden-target rule is
+  pinned on its own. Restored with `git checkout HEAD -- Sources` (status clean) → 35/35 green.
+- The whole MCP target with VX-261 in: 304 tests / 62 suites — green but for `MCPHarnessTimeLimitTests`' never-answers
+  pin at 16.4 s and 20.3 s against its 15 s bound (load average 26): VX-353's recorded overrun, not U7's — the suite
+  alone is green (3/3, the pin 1.04 s).
 - Justified edits (the ritual, each commented in place): `MCPServerTests` (the read list; the book grant's exact tool
   set) and `MCPWriteServerTests` (the suggest grant's exact tool set; the suggest proof's every-door completeness
   subtracts this tool, which names no note, block or take).
