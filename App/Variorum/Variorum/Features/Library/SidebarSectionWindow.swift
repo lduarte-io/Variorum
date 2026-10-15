@@ -34,7 +34,9 @@
 //    and withdrawn, the orchestrator's ruling on Q9.) Her own scroll moves
 //    neither the viewport nor the content, so a list she has scrolled is
 //    never pulled back by a scroll; a row closing elsewhere is no reason
-//    either (P-U1b-7).
+//    either (P-U1b-7). (The re-walk's R6 showed that was not enough — any
+//    LATER viewport or content change still pulled her list back — so
+//    U1d's FOLLOW below gates every one of these re-asks.)
 //  · U1c (P-U1c-1 — the trace leg): the rail's implicit animation reaches a
 //    section's viewport frame by frame, its top held, and the re-ask used to
 //    fire only on a reading that stepped more than half a point — so the
@@ -45,6 +47,23 @@
 //    The settled check (`transitionSettle`) stays as the backstop of the
 //    DISCRETE requests only: the current row, the content height, the
 //    pitch, the mount.
+//  · U1d (her two rulings on the design memo, 2026-10-15):
+//    - FOLLOW, not every change (R6 — the re-walk saw the list pulled back
+//      to the current row seconds after her own scroll, with no input). A
+//      section FOLLOWS its current row from its first appearance and after
+//      every current-row change (an open, a ⇧⌘W/✕/Close All landing,
+//      back/forward); while it follows, every input above still re-asks.
+//      A HAND scroll — the scroll view's own phase, interacting or
+//      decelerating (`onScrollPhaseChange`; the reveal's unanimated
+//      `scrollTo` reports no phase, an animated scroll `.animating`) — ends
+//      following, and then NO reading, pitch change or settled check may
+//      reveal until her next act (`SidebarLayout.SectionFollow`, pure).
+//      Her words: *"once you scroll by hand it stays where you put it until
+//      your next one of those; resizing the window never pulls it back."*
+//    - THE FADE, RESHAPED (O-2/O-3): always the full half row deep where
+//      more lies beyond, its STRENGTH eased with the content beyond, and
+//      never fully solid at the very edge (`SidebarLayout.edgeFades`,
+//      `edgeFadeCap`).
 //
 
 import SwiftUI
@@ -54,6 +73,14 @@ import SwiftUI
 /// by its own DEBUG oracle in `SidebarView`, independent of this modifier, so
 /// a pin can measure a row's place with or without it.)
 typealias SidebarSectionWindowReport = (SidebarLayout.EdgeFades) -> Void
+
+/// U1d's DEBUG seam (nil in a shipping build): the section hands its owner a
+/// way to feed its follow state a scroll PHASE — exactly the road
+/// `onScrollPhaseChange` takes — so a mounted pin can play a hand scroll
+/// without posting a real scroll-wheel event (the test host never injects
+/// pointer events for this). `SidebarView` files it with the DEBUG oracle,
+/// keyed by the column's workspace.
+typealias SidebarSectionPhaseSeam = (@escaping (ScrollPhase) -> Void) -> Void
 
 extension SidebarLayout.ScrollWindow {
     /// A scroll view's reading: its visible rectangle in the content's space
@@ -76,6 +103,7 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
     /// The voice's room — the column's own background, which the fade paints.
     let room: Color
     var report: SidebarSectionWindowReport? = nil
+    var phaseSeam: SidebarSectionPhaseSeam? = nil
 
     @State private var fades = SidebarLayout.EdgeFades.none
     @State private var memory = SidebarSectionMemory()
@@ -93,6 +121,17 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
     /// directly, frame by frame, and schedules nothing.
     static var transitionSettle: Duration { .seconds(SidebarLayout.transitionSettle) }
 
+    /// **U1d — which scroll phases are HER hand** (her ruling on the memo,
+    /// R6): interacting (a trackpad gesture, a wheel burst, the scroller) and
+    /// decelerating (its momentum). Measured offscreen at U1d: a wheel burst
+    /// and a trackpad gesture each report `.interacting` before their first
+    /// offset change; the reveal's unanimated `scrollTo` reports no phase; an
+    /// animated programmatic scroll reports `.animating` — the app's, never
+    /// hers.
+    static func isHandScroll(_ phase: ScrollPhase) -> Bool {
+        phase == .interacting || phase == .decelerating
+    }
+
     private var depth: CGFloat { SidebarLayout.edgeFadeDepth(rowHeight: rowHeight) }
 
     #if DEBUG
@@ -104,7 +143,13 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
     func body(content: Content) -> some View {
         ScrollViewReader { proxy in
             content
-                .onAppear { memory.proxy = proxy }
+                .onAppear {
+                    memory.proxy = proxy
+                    // U1d's DEBUG seam: the same road as the phase callback below.
+                    let memory = memory
+                    let label = traceLabelOrEmpty
+                    phaseSeam? { phase in Self.observe(phase, memory: memory, label: label) }
+                }
                 .onScrollGeometryChange(for: SidebarLayout.ScrollWindow.self) {
                     SidebarLayout.ScrollWindow($0)
                 } action: { old, new in
@@ -115,10 +160,13 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
                     #if DEBUG
                     SidebarSectionTrace.note(traceLabel,
                         "reading \(SidebarSectionTrace.text(old)) -> \(SidebarSectionTrace.text(new))"
-                        + " rows=\(rows.count) rowsChanged=\(rowsChanged) pitch=\(rowHeight)")
+                        + " rows=\(rows.count) rowsChanged=\(rowsChanged) pitch=\(rowHeight)"
+                        + " following=\(memory.follow.following)")
                     #endif
                     if memory.mountRevealOwed, new.isMeasured {
                         memory.mountRevealOwed = false
+                        // The section's first appearance is an act (U1d).
+                        memory.follow.act()
                         requestReveal("mount")
                         return
                     }
@@ -127,20 +175,54 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
                     // signal) as a discrete request; the viewport (the rail arriving,
                     // a resize) on EVERY reading that changes it, revealed at once
                     // (P-U1c-1). An offset-only change — her scroll — never does.
-                    switch SidebarLayout.readingAsk(old: old, new: new, rowsChanged: rowsChanged) {
+                    // And only while the section FOLLOWS (U1d): after her hand
+                    // scroll, nothing moves the list until her next act.
+                    switch memory.follow.gate(
+                        SidebarLayout.readingAsk(old: old, new: new, rowsChanged: rowsChanged)) {
                     case .request: requestReveal("content")
                     case .revealNow: reveal("viewport")
                     case .none: break
                     }
                 }
-                .onChange(of: current) { requestReveal("current") }
+                // U1d: her hand on the scroll ends following (R6).
+                .onScrollPhaseChange { _, phase in
+                    Self.observe(phase, memory: memory, label: traceLabelOrEmpty)
+                }
+                // A current-row change is her ACT: follow again (U1d), then reveal.
+                .onChange(of: current) {
+                    memory.follow.act()
+                    requestReveal("current")
+                }
                 .onChange(of: rowHeight) {
                     refreshFades(memory.window)
-                    requestReveal("rowHeight")
+                    // The pitch moved the row — a discrete request, while following.
+                    if memory.follow.gate(.request) == .request { requestReveal("rowHeight") }
                 }
-                .onChange(of: settledCheck) { reveal("settled") }
+                .onChange(of: settledCheck) {
+                    // The backstop moves the list only while it still follows: a
+                    // hand scroll inside the settle window wins (U1d).
+                    if memory.follow.gate(.revealNow) == .revealNow { reveal("settled") }
+                }
                 .overlay { SidebarEdgeFade(fades: fades, room: room) }
         }
+    }
+
+    /// The trace's label in a DEBUG build; nothing in a shipping one.
+    private var traceLabelOrEmpty: String {
+        #if DEBUG
+        traceLabel
+        #else
+        ""
+        #endif
+    }
+
+    /// A scroll phase reaches the section's follow state — from
+    /// `onScrollPhaseChange`, or (DEBUG) from a pin through `phaseSeam`.
+    private static func observe(_ phase: ScrollPhase, memory: SidebarSectionMemory, label: String) {
+        memory.follow.phase(hers: isHandScroll(phase))
+        #if DEBUG
+        SidebarSectionTrace.note(label, "phase \(phase) following=\(memory.follow.following)")
+        #endif
     }
 
     private func refreshFades(_ window: SidebarLayout.ScrollWindow) {
@@ -222,21 +304,26 @@ final class SidebarSectionMemory {
     /// The section's `ScrollViewReader` proxy — the reveal's road (the
     /// orchestrator's ruling on Q9).
     var proxy: ScrollViewProxy?
+    /// U1d: whether the section follows its current row (her ruling, R6).
+    var follow = SidebarLayout.SectionFollow()
 }
 
-/// F-2's fade: the room, solid at the very edge, gone `depth` points in — on
-/// each edge that has content beyond it, as deep as that content (capped).
+/// F-2's fade, reshaped at U1d: on each edge that has content beyond it, the
+/// room at the edge's OPACITY (its eased strength under the cap — never fully
+/// solid) at the very edge, gone a half row in.
 private struct SidebarEdgeFade: View {
     let fades: SidebarLayout.EdgeFades
     let room: Color
 
     var body: some View {
         VStack(spacing: 0) {
-            LinearGradient(colors: [room, room.opacity(0)], startPoint: .top, endPoint: .bottom)
-                .frame(height: fades.top)
+            LinearGradient(colors: [room.opacity(fades.top.opacity), room.opacity(0)],
+                           startPoint: .top, endPoint: .bottom)
+                .frame(height: fades.top.depth)
             Spacer(minLength: 0)
-            LinearGradient(colors: [room.opacity(0), room], startPoint: .top, endPoint: .bottom)
-                .frame(height: fades.bottom)
+            LinearGradient(colors: [room.opacity(0), room.opacity(fades.bottom.opacity)],
+                           startPoint: .top, endPoint: .bottom)
+                .frame(height: fades.bottom.depth)
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)

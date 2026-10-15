@@ -307,9 +307,12 @@ nonisolated enum SidebarLayout {
     // scrolled section sliced its partial row through the letters right under
     // its header — a hard clip that read unfinished. Each edge now FADES over
     // about half a row, and only where content lies beyond it: the top only
-    // once scrolled down, the bottom only while more lies below. The depth
-    // grows with the content beyond the edge (capped at the half row), so the
-    // fade eases in as the list starts to move instead of popping in whole.
+    // once scrolled down, the bottom only while more lies below. **U1d, her
+    // ruling on the memo (*"The fade, reshaped"*):** the depth no longer grows
+    // with the content beyond (a few-point fade read as a slice — the re-walk's
+    // O-2); it is the full half row whenever more lies beyond, its STRENGTH
+    // eases in with the content beyond instead, and it is never fully solid at
+    // the very edge (`edgeFadeCap` — O-3's empty band).
     //
     // F-1 (the walker's O-1): the note she had just opened could sit with its
     // highlighted row cut at the list's bottom edge. The traced mechanism (the
@@ -337,16 +340,40 @@ nonisolated enum SidebarLayout {
         var isMeasured: Bool { viewport > 0 }
     }
 
-    /// How deep each edge of a scrolling section fades — 0 where nothing lies
-    /// beyond that edge.
-    nonisolated struct EdgeFades: Equatable, Sendable {
-        var top: CGFloat
-        var bottom: CGFloat
+    /// ONE edge's fade (U1d — her ruling on the memo, *"The fade, reshaped"*):
+    /// how deep it reaches into the window, and how STRONG it is. The overlay
+    /// paints the room from `opacity` at the very edge down to nothing `depth`
+    /// points in.
+    nonisolated struct EdgeFade: Equatable, Sendable {
+        /// 0 where nothing lies beyond the edge; otherwise the FULL half row —
+        /// never a few-point fade (the re-walk's O-2: a shallow fade read as a
+        /// slice through the letters).
+        var depth: CGFloat
+        /// 0…1 — eased with the content beyond the edge, so the fade arrives
+        /// gradually instead of popping in (it is the STRENGTH that eases now,
+        /// never the depth).
+        var strength: CGFloat
 
-        static let none = EdgeFades(top: 0, bottom: 0)
+        /// The opacity at the very edge: the strength under the cap, so the
+        /// fade is never fully solid and a hint of the partial row always shows
+        /// (the re-walk's O-3: a partial row under a solid outer half left an
+        /// empty band with no "there is more").
+        var opacity: CGFloat { strength * SidebarLayout.edgeFadeCap }
+
+        static let none = EdgeFade(depth: 0, strength: 0)
     }
 
-    /// F-2's full depth, in rows: *"about half a row"* (P-U1-6).
+    /// How each edge of a scrolling section fades — `.none` where nothing lies
+    /// beyond that edge.
+    nonisolated struct EdgeFades: Equatable, Sendable {
+        var top: EdgeFade
+        var bottom: EdgeFade
+
+        static let none = EdgeFades(top: .none, bottom: .none)
+    }
+
+    /// F-2's full depth, in rows: *"about half a row"* (P-U1-6) — and since
+    /// U1d, her words: *"always half a row deep when there's more beyond"*.
     static let edgeFadeRows: CGFloat = 0.5
 
     /// F-2's full depth at the drawn pitch.
@@ -354,21 +381,32 @@ nonisolated enum SidebarLayout {
         rowHeight * edgeFadeRows
     }
 
+    /// **The fade's cap** — the most it ever covers at the very edge (U1d, her
+    /// ruling: *"never fully solid so a hint of the next row always shows"*).
+    /// PROVISIONAL (P-U1d-3): chosen by eye from offscreen renders of the
+    /// shallow-overflow and partial-row states in both voices and both
+    /// appearances — the U1d record carries the comparison and the reason.
+    static let edgeFadeCap: CGFloat = 0.8
+
     /// Below half a point, an edge does not fade (a rounding hair of content
     /// beyond an edge is not "more").
     private static let fadeSlack: CGFloat = 0.5
 
-    /// **F-2 — which edges fade, and how deep:** the content beyond each edge,
-    /// capped at `depth`. A window that holds all its content fades nowhere;
-    /// an unmeasured one fades nowhere.
+    /// **F-2, reshaped at U1d — which edges fade, how deep and how strong.**
+    /// An edge with more than the slack beyond it fades the FULL `depth`
+    /// (half a row); its strength is the content beyond it over that same half
+    /// row, capped at 1 — so the fade eases in over the first half row of
+    /// scroll and stands at full strength from there (PROVISIONAL P-U1d-2: the
+    /// ease's distance). A window that holds all its content fades nowhere; an
+    /// unmeasured one fades nowhere.
     static func edgeFades(_ window: ScrollWindow, depth: CGFloat) -> EdgeFades {
         guard window.isMeasured, depth > 0 else { return .none }
         let above = max(0, window.offset)
         let below = max(0, window.content - (window.offset + window.viewport))
-        func settled(_ beyond: CGFloat) -> CGFloat {
-            beyond < fadeSlack ? 0 : min(depth, beyond)
+        func fade(_ beyond: CGFloat) -> EdgeFade {
+            beyond < fadeSlack ? .none : EdgeFade(depth: depth, strength: min(1, beyond / depth))
         }
-        return EdgeFades(top: settled(above), bottom: settled(below))
+        return EdgeFades(top: fade(above), bottom: fade(below))
     }
 
     /// **F-1 — the reveal, as an EXACT content offset** (the orchestrator's
@@ -389,8 +427,8 @@ nonisolated enum SidebarLayout {
         let top = CGFloat(row) * rowHeight
         let bottom = top + rowHeight
         let fades = edgeFades(window, depth: depth)
-        let above = top < window.offset + fades.top - fadeSlack
-        let below = bottom > window.offset + window.viewport - fades.bottom + fadeSlack
+        let above = top < window.offset + fades.top.depth - fadeSlack
+        let below = bottom > window.offset + window.viewport - fades.bottom.depth + fadeSlack
         guard above || below else { return nil }
         let wanted: CGFloat
         if above || window.viewport <= rowHeight {
@@ -440,5 +478,50 @@ nonisolated enum SidebarLayout {
         if abs(new.content - old.content) > 0.5, !rowsChanged { return .request }
         if new.viewport != old.viewport { return .revealNow }
         return .none
+    }
+
+    // MARK: - Follow, not every change (U1d — her ruling on the memo, R6)
+    //
+    // Her words (2026-10-15, the question tool): the list keeps the current
+    // note in view *"Only on your next act"* — after an open, ⇧⌘W, ✕, Close
+    // All or back/forward; *"once you scroll by hand it stays where you put it
+    // until your next one of those; resizing the window never pulls it back."*
+    //
+    // The traced defect (the re-walk's R6 — three pull-backs with no input):
+    // U1b/U1c's reveal had no idea of HER scroll beyond "an offset-only reading
+    // asks nothing" (`readingAsk`), so ANY later reading that moved the
+    // viewport or the content — a resize (P-U1b-2 re-revealed on purpose), or
+    // whatever moved them in the re-walk with no input (not identified, and it
+    // need not be: the class is every such reading) — and any pitch change
+    // re-asked, and the reveal snapped the list back to the current row. So the section
+    // now FOLLOWS explicitly: a discrete act starts following, a hand scroll
+    // stops it, and while it is stopped no reading, pitch change or settled
+    // check may reveal.
+
+    /// A scrolling section's follow state — a PURE model fed three kinds of
+    /// input: a discrete ACT (the current row changing; the section's first
+    /// appearance is its initial state), a scroll PHASE change (hers or not),
+    /// and every reveal ASK (a reading's, the pitch's, the settled check's).
+    nonisolated struct SectionFollow: Equatable, Sendable {
+        /// Following: the section keeps its current row in view. A section
+        /// FOLLOWS from its first appearance.
+        private(set) var following = true
+
+        /// A discrete act — the current row changed (an open, a landing, a
+        /// return): follow it again, whatever her hand did before.
+        mutating func act() { following = true }
+
+        /// The scroll view's phase changed. `hers` — a hand scroll (the phase
+        /// is interacting or decelerating): following ends until the next act.
+        /// Any other phase (idle, the app's own animated scroll) changes
+        /// nothing — her scroll's END does not resume following either.
+        mutating func phase(hers: Bool) {
+            if hers { following = false }
+        }
+
+        /// What an ask may do: itself while following; nothing while not.
+        func gate(_ ask: ReadingAsk) -> ReadingAsk {
+            following ? ask : .none
+        }
     }
 }

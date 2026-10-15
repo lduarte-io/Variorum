@@ -575,7 +575,7 @@ struct SidebarView: View {
                         StarTargeting.selection(for: $0.target) == selection
                     }?.target,
                     rowHeight: rowHeight, room: tokens.room,
-                    report: sectionReport(.starred)))
+                    report: sectionReport(.starred), phaseSeam: sectionPhaseSeam(.starred)))
                 .frame(maxHeight: SidebarLayout.scrollingSectionMaxHeight(rowHeight: rowHeight))
                 .fixedSize(
                     horizontal: false,
@@ -856,7 +856,7 @@ struct SidebarView: View {
                 .modifier(SidebarSectionWindow(
                     rows: shown, current: currentOpenRow,
                     rowHeight: rowHeight, room: tokens.room,
-                    report: sectionReport(.open)))
+                    report: sectionReport(.open), phaseSeam: sectionPhaseSeam(.open)))
                 .frame(maxHeight: maxHeight)
                 // VX-285: hug the rows while they FIT the room; past it,
                 // take the room and scroll in place (the `count <= 7`
@@ -938,6 +938,19 @@ struct SidebarView: View {
         let workspace = workspace
         let named: SidebarGeometry.ScrollingSection = section == .open ? .open : .starred
         return { fades in SidebarGeometry.recordSection(named, fades: fades, for: workspace) }
+        #else
+        return nil
+        #endif
+    }
+
+    /// U1d: the DEBUG seam through which a pin feeds a section a scroll phase
+    /// — a hand scroll without a real scroll-wheel event (nil in a shipping
+    /// build).
+    private func sectionPhaseSeam(_ section: SectionName) -> SidebarSectionPhaseSeam? {
+        #if DEBUG
+        let workspace = workspace
+        let named: SidebarGeometry.ScrollingSection = section == .open ? .open : .starred
+        return { feed in SidebarGeometry.recordSection(named, phaseFeed: feed, for: workspace) }
         #else
         return nil
         #endif
@@ -1189,11 +1202,24 @@ enum SidebarGeometry {
             .fades = fades
     }
 
+    /// U1d: each scrolling section's phase feed — the seam a pin uses to play
+    /// a hand scroll (`SidebarSectionPhaseSeam`), keyed by the column's
+    /// workspace like every oracle here.
+    static var sectionPhaseFeeds: [String: [ScrollingSection: (ScrollPhase) -> Void]] = [:]
+
+    static func recordSection(
+        _ section: ScrollingSection, phaseFeed: @escaping (ScrollPhase) -> Void,
+        for workspace: WorkspaceModel
+    ) {
+        sectionPhaseFeeds[bodyKey(for: workspace), default: [:]][section] = phaseFeed
+    }
+
     /// A pin clears ITS OWN column's rows and no other (the keying rule).
     static func forgetSections(for workspace: WorkspaceModel) {
         let key = bodyKey(for: workspace)
         sectionDraws[key] = nil
         columnScrollFrames[key] = nil
+        sectionPhaseFeeds[key] = nil
     }
     /// 18d batch 1: what the NOTE BOX drew — the whole box, and its header's
     /// words. The geometry oracle compares these two rectangles against the

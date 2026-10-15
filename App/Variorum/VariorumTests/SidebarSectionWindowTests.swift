@@ -29,6 +29,11 @@ import Testing
 import VariorumCore
 @testable import Variorum
 
+/// A whole fade at `depth`: the full half row at full strength (U1d).
+extension SidebarLayout.EdgeFade {
+    static func whole(_ depth: CGFloat) -> Self { Self(depth: depth, strength: 1) }
+}
+
 // MARK: - The pure rules
 
 @Suite("U1b — a scrolling section's window: the edge fades (F-2) and the reveal (F-1)")
@@ -49,24 +54,74 @@ struct SidebarSectionWindowRuleTests {
         #expect(SidebarLayout.edgeFadeDepth(rowHeight: 24) == 12)
     }
 
+    /// A whole fade: the full half row at full strength.
+    private var full: SidebarLayout.EdgeFade { SidebarLayout.EdgeFade(depth: depth, strength: 1) }
+
     /// The orchestrator's ruling, in its own words: the top fades only when
-    /// scrolled down, the bottom only when more lies below.
+    /// scrolled down, the bottom only when more lies below. (U1d: the values
+    /// are `EdgeFade`s now — depth AND strength — her ruling on the memo; the
+    /// pin's meaning is unchanged.)
     @Test func anEdgeFadesOnlyWhereContentLiesBeyondIt() {
-        #expect(SidebarLayout.edgeFades(window(at: 0), depth: depth) == Fades(top: 0, bottom: 15),
+        #expect(SidebarLayout.edgeFades(window(at: 0), depth: depth) == Fades(top: .none, bottom: full),
                 "at rest: nothing above, more below")
-        #expect(SidebarLayout.edgeFades(window(at: 200), depth: depth) == Fades(top: 15, bottom: 15),
+        #expect(SidebarLayout.edgeFades(window(at: 200), depth: depth) == Fades(top: full, bottom: full),
                 "mid-list: more both ways")
-        #expect(SidebarLayout.edgeFades(window(at: 350), depth: depth) == Fades(top: 15, bottom: 0),
+        #expect(SidebarLayout.edgeFades(window(at: 350), depth: depth) == Fades(top: full, bottom: .none),
                 "at the end: more above, nothing below")
     }
 
-    /// The depth is the content beyond the edge, capped at the half row — so
-    /// the fade eases in as the list starts to move instead of popping in.
-    @Test func theFadeEasesInWithTheContentBeyondTheEdge() {
-        #expect(SidebarLayout.edgeFades(window(at: 4), depth: depth) == Fades(top: 4, bottom: 15))
-        #expect(SidebarLayout.edgeFades(window(at: 342), depth: depth) == Fades(top: 15, bottom: 8))
-        #expect(SidebarLayout.edgeFades(window(at: 0.3), depth: depth) == Fades(top: 0, bottom: 15),
+    /// **U1d — her ruling on the memo, *"The fade, reshaped"*** (REWRITTEN from
+    /// U1b's `theFadeEasesInWithTheContentBeyondTheEdge`, whose DEPTH eased —
+    /// her words now: *"always half a row deep when there's more beyond, easing
+    /// in (its strength, not its depth) so it doesn't pop"*). Past the slack the
+    /// depth is the whole half row at once; the strength is the content beyond
+    /// over that half row, whole from a half row on (PROVISIONAL P-U1d-2).
+    /// RED ON OLD (R-J): U1b's rule answered depths of 4 and 8 here.
+    @Test func theFadeIsAlwaysHalfARowDeepAndItsStrengthEasesIn() {
+        let four = SidebarLayout.edgeFades(window(at: 4), depth: depth)
+        #expect(four.top.depth == 15, "4 pt above: the whole half row, never a 4-pt fade")
+        #expect(abs(four.top.strength - 4.0 / 15) < 0.0001, "…at a strength of 4/15: \(four.top.strength)")
+        #expect(four.bottom == full)
+        let eight = SidebarLayout.edgeFades(window(at: 342), depth: depth)
+        #expect(eight.top == full)
+        #expect(eight.bottom.depth == 15, "8 pt below: the whole half row")
+        #expect(abs(eight.bottom.strength - 8.0 / 15) < 0.0001, "…at 8/15: \(eight.bottom.strength)")
+        #expect(SidebarLayout.edgeFades(window(at: 15), depth: depth).top == full,
+                "a half row beyond: whole strength")
+        #expect(SidebarLayout.edgeFades(window(at: 0.3), depth: depth) == Fades(top: .none, bottom: full),
                 "a rounding hair beyond an edge is not more")
+        // It arrives faint (the first fade past the slack is a few percent — no
+        // pop), then eases monotonically, with no step, over the first row of scroll.
+        var last = SidebarLayout.edgeFades(window(at: 0.6), depth: depth).top.strength
+        #expect(last > 0 && last < 0.05, "the first fade past the slack: \(last)")
+        for tenth in 7...300 {
+            let strength = SidebarLayout.edgeFades(window(at: CGFloat(tenth) / 10), depth: depth).top.strength
+            #expect(strength >= last && strength - last < 0.01,
+                    "offset \(CGFloat(tenth) / 10): \(last) → \(strength)")
+            last = strength
+        }
+    }
+
+    /// **U1d — never fully solid** (her ruling: *"never fully solid so a hint of
+    /// the next row always shows"* — the re-walk's O-3, a partial row erased by
+    /// the solid outer half). The cap sits below 1 (PROVISIONAL P-U1d-3, chosen
+    /// by eye); no edge in any window paints the room at more than it; a whole
+    /// fade paints exactly it. And O-2's state — a few points beyond the edge —
+    /// is the full half row, faint (here at the compact pitch: 5 pt beyond).
+    /// RED ON OLD (R-J): U1b's fade was solid (1) at the edge, and 5 pt deep.
+    @Test func theFadeIsNeverFullySolid() {
+        #expect(SidebarLayout.edgeFadeCap < 1 && SidebarLayout.edgeFadeCap > 0.5,
+                "the cap: \(SidebarLayout.edgeFadeCap)")
+        #expect(full.opacity == SidebarLayout.edgeFadeCap)
+        for offset in stride(from: CGFloat(0), through: 350, by: 0.5) {
+            let fades = SidebarLayout.edgeFades(window(at: offset), depth: depth)
+            #expect(fades.top.opacity <= SidebarLayout.edgeFadeCap && fades.bottom.opacity <= SidebarLayout.edgeFadeCap)
+        }
+        let compact = SidebarLayout.edgeFadeDepth(rowHeight: 24)
+        let shallow = SidebarLayout.edgeFades(Window(offset: 31, viewport: 180, content: 216), depth: compact)
+        #expect(shallow.bottom.depth == 12, "5 pt beyond: the whole half row (12 at 24 pt), never 5")
+        #expect(abs(shallow.bottom.opacity - 5.0 / 12 * SidebarLayout.edgeFadeCap) < 0.0001,
+                "…and faint: \(shallow.bottom.opacity)")
     }
 
     @Test func aWindowThatHoldsEverythingFadesNowhere() {
@@ -160,9 +215,9 @@ struct SidebarSectionWindowRuleTests {
                     }
                     let fades = SidebarLayout.edgeFades(landed, depth: depth)
                     let top = CGFloat(row) * pitch
-                    #expect(top >= landed.offset + fades.top - 0.5,
+                    #expect(top >= landed.offset + fades.top.depth - 0.5,
                             "row \(row) from \(start) (window \(viewport)): top \(top) under the top fade")
-                    #expect(top + pitch <= landed.offset + viewport - fades.bottom + 0.5,
+                    #expect(top + pitch <= landed.offset + viewport - fades.bottom.depth + 0.5,
                             "row \(row) from \(start) (window \(viewport)): bottom under the bottom fade")
                     #expect(SidebarLayout.revealOffset(
                         row: row, rows: rows, rowHeight: pitch, window: landed, depth: depth) == nil,
@@ -228,7 +283,7 @@ struct SidebarSectionWindowRuleTests {
                 last = Window(offset: offset, viewport: reading.viewport, content: content)
             }
             let fades = SidebarLayout.edgeFades(last, depth: depth)
-            #expect(offset == content - to && fades.bottom == 0,
+            #expect(offset == content - to && fades.bottom == .none,
                     "at a \(cadence * 1000)-ms cadence the ninth row ends the beat at \(offset) of \(content - to)")
         }
     }
@@ -240,6 +295,113 @@ struct SidebarSectionWindowRuleTests {
             row: 20, rows: 20, rowHeight: rowHeight, window: window(at: 0), depth: depth) == nil)
         #expect(SidebarLayout.revealOffset(
             row: -1, rows: 20, rowHeight: rowHeight, window: window(at: 0), depth: depth) == nil)
+    }
+}
+
+// MARK: - Follow, not every change (U1d — her ruling on the memo, R6)
+
+/// **U1d — her ruling on the memo (R6):** *"Only on your next act … once you
+/// scroll by hand it stays where you put it until your next one of those;
+/// resizing the window never pulls it back."* The re-walk saw the Open list
+/// pulled back to the current row seconds after her own scroll, with no input:
+/// every viewport or content change re-asked the reveal, whoever had moved the
+/// list. The pure follow model decides; these pins play its inputs.
+@MainActor
+@Suite("U1d — a scrolling section follows on her acts, never after her own scroll")
+struct SidebarSectionFollowTests {
+    private typealias Window = SidebarLayout.ScrollWindow
+    private let pitch: CGFloat = 30
+    private var depth: CGFloat { SidebarLayout.edgeFadeDepth(rowHeight: pitch) }
+
+    /// Row 15 of 20 is the current row; `ask` lands it if the follow state lets
+    /// the ask through (the modifier's road: the gate, then the exact offset).
+    private func land(_ ask: SidebarLayout.ReadingAsk, _ follow: SidebarLayout.SectionFollow,
+                      _ window: inout Window) {
+        guard follow.gate(ask) != .none,
+              let target = SidebarLayout.revealOffset(
+                row: 15, rows: 20, rowHeight: pitch, window: window, depth: depth) else { return }
+        window.offset = target
+    }
+
+    @Test func aSectionFollowsFromItsFirstAppearance() {
+        let follow = SidebarLayout.SectionFollow()
+        #expect(follow.following)
+        #expect(follow.gate(.revealNow) == .revealNow)
+        #expect(follow.gate(.request) == .request)
+        #expect(follow.gate(.none) == .none)
+    }
+
+    /// Her hand ends following; its END (idle) does not resume it, the app's
+    /// own animated scroll does not either; only an act does.
+    @Test func aHandScrollEndsFollowingUntilHerNextAct() {
+        var follow = SidebarLayout.SectionFollow()
+        follow.phase(hers: true)
+        #expect(!follow.following)
+        #expect(follow.gate(.revealNow) == .none, "a viewport reading moves nothing")
+        #expect(follow.gate(.request) == .none, "nor the pitch, nor a content change")
+        follow.phase(hers: false)
+        #expect(!follow.following, "her scroll ending is not an act")
+        follow.act()
+        #expect(follow.following && follow.gate(.revealNow) == .revealNow, "her next act follows again")
+        follow.phase(hers: false)
+        #expect(follow.following, "a phase that is not hers never ends following")
+    }
+
+    /// Which phases are her hand — the modifier's mapping. U1d's offscreen
+    /// measurement: a wheel burst and a trackpad gesture report `.interacting`
+    /// before their first offset change; the reveal's unanimated `scrollTo`
+    /// reports nothing; an animated scroll reports `.animating`.
+    @Test func onlyInteractingAndDeceleratingAreHerHand() {
+        #expect(SidebarSectionWindow<String>.isHandScroll(.interacting))
+        #expect(SidebarSectionWindow<String>.isHandScroll(.decelerating))
+        #expect(!SidebarSectionWindow<String>.isHandScroll(.idle))
+        #expect(!SidebarSectionWindow<String>.isHandScroll(.animating), "the app's own scroll")
+        #expect(!SidebarSectionWindow<String>.isHandScroll(.tracking), "a touch that has not moved the list")
+    }
+
+    /// **The re-walk's R6, played through the model** (RED ON OLD — R-I, where
+    /// her hand never ends following, exactly U1c's behaviour). The current row
+    /// revealed; she scrolls the list to its top by hand; then every change that
+    /// re-asks a following section — a resize shorter and taller, the content
+    /// re-laid under the same row count, the pitch's discrete request, the
+    /// settled check — leaves her list where she put it. Her next act reveals.
+    @Test func herScrollStaysWhereSheLeftItThroughEveryLaterChange() {
+        var follow = SidebarLayout.SectionFollow()
+        var window = Window(offset: 0, viewport: 351, content: 600)
+        follow.act()
+        land(.request, follow, &window)
+        #expect(window.offset == 144, "the act revealed row 15 (450…480): 480 + 15 − 351")
+        follow.phase(hers: true)
+        window.offset = 0
+        follow.phase(hers: false)
+        for (label, next) in [("a resize shorter", Window(offset: 0, viewport: 291, content: 600)),
+                              ("the content re-laid under the same count", Window(offset: 0, viewport: 291, content: 606)),
+                              ("a resize taller", Window(offset: 0, viewport: 400, content: 606))] {
+            let ask = SidebarLayout.readingAsk(old: window, new: next, rowsChanged: false)
+            #expect(ask != .none, "\(label) is a change a following section re-asks on")
+            window = next
+            land(ask, follow, &window)
+            #expect(window.offset == 0, "\(label) leaves her list where she put it: \(window.offset)")
+        }
+        land(.request, follow, &window)
+        land(.revealNow, follow, &window)
+        #expect(window.offset == 0, "nor the pitch's request, nor the settled check")
+        follow.act()
+        land(.request, follow, &window)
+        #expect(window.offset == 95, "her next act reveals the row: 480 + 15 − 400")
+    }
+
+    /// While FOLLOWING, a resize still keeps the row in view (the memo, item 1:
+    /// *"While following, anything that moves the row … keeps it wholly in
+    /// view"* — P-U1c-1 unchanged).
+    @Test func whileFollowingAResizeKeepsTheRowInView() {
+        let follow = SidebarLayout.SectionFollow()
+        var window = Window(offset: 144, viewport: 351, content: 600)
+        let next = Window(offset: 144, viewport: 291, content: 600)
+        let ask = SidebarLayout.readingAsk(old: window, new: next, rowsChanged: false)
+        window = next
+        land(ask, follow, &window)
+        #expect(window.offset == 204, "the shorter list re-reveals row 15: 480 + 15 − 291")
     }
 }
 
@@ -413,11 +575,46 @@ private final class SectionRig {
         let fades = draw.fades ?? .none
         let top = CGFloat(row) * rowHeight
         let bottom = top + rowHeight
-        let clearTop = window.offset + fades.top
-        let clearBottom = window.offset + window.viewport - fades.bottom
+        let clearTop = window.offset + fades.top.depth
+        let clearBottom = window.offset + window.viewport - fades.bottom.depth
         if top >= clearTop - 0.5, bottom <= clearBottom + 0.5 { return nil }
         return "row \(row + 1) of \(shown.count) spans \(top)…\(bottom); the window shows \(window.offset)…"
-            + "\(window.offset + window.viewport) with fades \(fades.top)/\(fades.bottom)"
+            + "\(window.offset + window.viewport) with fades \(fades.top.depth)/\(fades.bottom.depth)"
+    }
+
+    /// U1d: a section's AppKit scroll view — the one whose window rectangle is
+    /// the section's drawn scroll frame (SwiftUI's global space is the content
+    /// view's, top-left; AppKit's window space is bottom-left).
+    func scrollView(_ draw: SidebarGeometry.SectionDraw?) -> NSScrollView? {
+        guard let frame = draw?.scroll else { return nil }
+        func all(_ view: NSView) -> [NSScrollView] {
+            var found: [NSScrollView] = []
+            if let scroll = view as? NSScrollView { found.append(scroll) }
+            for sub in view.subviews { found += all(sub) }
+            return found
+        }
+        let height = hosting.bounds.height
+        return all(hosting).first { scroll in
+            let box = scroll.convert(scroll.bounds, to: nil)
+            return abs((height - box.maxY) - frame.minY) < 1 && abs(box.height - frame.height) < 1
+        }
+    }
+
+    /// **U1d — a HAND scroll, played without a real scroll-wheel event** (the
+    /// test host never injects pointer events here): the section's phase seam
+    /// is fed `.interacting` — exactly `onScrollPhaseChange`'s road — the
+    /// section's clip view moves to `offset` (an offset-only change, which
+    /// reports no phase of its own — U1d's offscreen measurement), and the
+    /// phase returns to `.idle`, as her wheel's or trackpad's does.
+    func handScroll(_ section: SidebarGeometry.ScrollingSection, to offset: CGFloat) async throws {
+        let feed = try #require(SidebarGeometry.sectionPhaseFeeds[key]?[section], "the section's phase seam")
+        let scroll = try #require(scrollView(section == .open ? open : starred), "the section's scroll view")
+        feed(.interacting)
+        scroll.contentView.scroll(to: NSPoint(x: scroll.contentView.bounds.origin.x, y: offset))
+        scroll.reflectScrolledClipView(scroll.contentView)
+        pump(0.05)
+        feed(.idle)
+        await settle()
     }
 }
 
@@ -570,7 +767,10 @@ struct SidebarSectionWindowMountTests {
             _ = try #require(rig.open?.window)
             var depth = rig.depth(rig.open, rows: 20)
             #expect(depth >= 12, "half a row at either pitch: \(depth)")
-            #expect(rig.open?.fades == SidebarLayout.EdgeFades(top: 0, bottom: depth),
+            // (U1d: the fades are `EdgeFade`s — depth and strength, her ruling
+            //  on the memo; every edge here has a half row or more beyond it,
+            //  so each fade stands whole.)
+            #expect(rig.open?.fades == SidebarLayout.EdgeFades(top: .none, bottom: .whole(depth)),
                     "at the top: \(String(describing: rig.open?.fades))")
             // Row 15 (420…450) lies below the fold of the 351-pt list, so the
             // reveal scrolls it in and leaves rows above AND below. (U1b's
@@ -578,11 +778,11 @@ struct SidebarSectionWindowMountTests {
             // nothing scrolled — a pin fault, recorded.)
             await rig.go(.post(rig.notes[14]))
             depth = rig.depth(rig.open, rows: 20)
-            #expect(rig.open?.fades == SidebarLayout.EdgeFades(top: depth, bottom: depth),
+            #expect(rig.open?.fades == SidebarLayout.EdgeFades(top: .whole(depth), bottom: .whole(depth)),
                     "mid-list: \(String(describing: rig.open?.fades))")
             await rig.go(.post(rig.notes[19]))
             depth = rig.depth(rig.open, rows: 20)
-            #expect(rig.open?.fades == SidebarLayout.EdgeFades(top: depth, bottom: 0),
+            #expect(rig.open?.fades == SidebarLayout.EdgeFades(top: .whole(depth), bottom: .none),
                     "at the end: \(String(describing: rig.open?.fades))")
         }
     }
@@ -596,13 +796,14 @@ struct SidebarSectionWindowMountTests {
             let window = try #require(rig.starred?.window)
             var depth = rig.depth(rig.starred, rows: 9)
             #expect(depth >= 12, "half a row at either pitch: \(depth)")
-            #expect(rig.starred?.fades == SidebarLayout.EdgeFades(top: 0, bottom: depth),
+            // (U1d: `EdgeFade`s now — each edge here has a half row or more beyond.)
+            #expect(rig.starred?.fades == SidebarLayout.EdgeFades(top: .none, bottom: .whole(depth)),
                     "at rest: \(String(describing: rig.starred?.fades)) over \(window)")
             // Opening the ninth star's note brings the rail (and may flip the
             // column's pitch): the section reveals it and fades the top instead.
             await rig.go(.post(rig.notes[8]))
             depth = rig.depth(rig.starred, rows: 9)
-            #expect(rig.starred?.fades == SidebarLayout.EdgeFades(top: depth, bottom: 0),
+            #expect(rig.starred?.fades == SidebarLayout.EdgeFades(top: .whole(depth), bottom: .none),
                     "the ninth star revealed: \(String(describing: rig.starred?.fades)) over \(String(describing: rig.starred?.window))")
         }
         try await withRig(height: 900, openNotes: 3, starred: 5, startOn: nil) { rig in
@@ -648,6 +849,64 @@ struct SidebarSectionWindowMountTests {
                 #expect(sample.window?.offset == settled.offset,
                         "\(when): \(seen) — it settles at \(SidebarSectionTrace.text(settled))")
             }
+        }
+    }
+
+    /// **U1d — her ruling on the memo, R6 (RED ON OLD — R-I, her hand never
+    /// ending following: U1c's behaviour).** Her words: *"once you scroll by
+    /// hand it stays where you put it until your next one of those; resizing
+    /// the window never pulls it back."* The current row revealed; her hand
+    /// scrolls the list to its top (the phase seam + the clip view — no real
+    /// wheel event); the window shortens, then grows back — on U1c's code the
+    /// shortening re-revealed the row (P-U1b-2), pulling her list back. Her
+    /// next act — another note opened — follows again.
+    @Test func aHandScrollIsNeverPulledBackUntilHerNextAct() async throws {
+        try await withRig(height: 900, openNotes: 20, startOn: 9) { rig in
+            let current = rig.notes[15]
+            await rig.go(.post(current))
+            #expect(rig.openRowTrouble(current) == nil, "revealed: \(rig.openRowTrouble(current) ?? "")")
+            try await rig.handScroll(.open, to: 0)
+            let scrolled = try #require(rig.open?.window)
+            #expect(scrolled.offset < 0.5, "her scroll took the list to its top: \(scrolled)")
+            #expect(rig.openRowTrouble(current) != nil, "…with the current row out of view, where she put it")
+            rig.window.setContentSize(NSSize(width: 230, height: 840))
+            await rig.settle()
+            let shorter = try #require(rig.open?.window)
+            print("[U1d hand] \(scrolled) → \(shorter)")
+            #expect(shorter.viewport < scrolled.viewport - 30,
+                    "the list's viewport really shrank: \(scrolled) → \(shorter)")
+            #expect(shorter.offset < 0.5, "the resize left her list where she put it: \(shorter)")
+            rig.window.setContentSize(NSSize(width: 230, height: 900))
+            await rig.settle()
+            #expect((rig.open?.window?.offset ?? -1) < 0.5,
+                    "and so did growing back: \(String(describing: rig.open?.window))")
+            let next = rig.notes[16]
+            await rig.go(.post(next))
+            #expect(rig.openRowTrouble(next) == nil, "her next act follows: \(rig.openRowTrouble(next) ?? "")")
+        }
+    }
+
+    /// **U1d — the re-walk's O-2 state, as drawn (RED ON OLD — R-J, U1b's
+    /// eased-depth fade).** A few points left beyond the bottom edge drew a
+    /// few-point fade, solid at the edge, over the row's descenders — a slice.
+    /// Her ruling: *"always half a row deep when there's more beyond, easing in
+    /// (its strength, not its depth) … never fully solid"*. So the bottom edge
+    /// fades the whole half row, at a strength of what lies beyond over that
+    /// half row, under the cap.
+    @Test func aShallowOverflowFadesTheWholeHalfRowFaintly() async throws {
+        try await withRig(height: 900, openNotes: 20, startOn: 0) { rig in
+            let window = try #require(rig.open?.window)
+            try await rig.handScroll(.open, to: window.content - window.viewport - 5)
+            let draw = try #require(rig.open)
+            let shallow = try #require(draw.window)
+            let beyond = shallow.content - shallow.offset - shallow.viewport
+            let depth = rig.depth(draw, rows: 20)
+            #expect(beyond >= 3 && beyond <= 7, "a few points beyond the bottom edge: \(shallow)")
+            let fade = try #require(draw.fades?.bottom)
+            print("[U1d shallow] \(shallow) · \(fade)")
+            #expect(fade.depth == depth, "the whole half row (\(depth)), never a \(beyond)-pt fade: \(fade)")
+            #expect(abs(fade.strength - beyond / depth) < 0.01, "faint — \(beyond) of \(depth): \(fade)")
+            #expect(fade.opacity < 1, "never fully solid: \(fade.opacity)")
         }
     }
 
