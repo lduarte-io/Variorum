@@ -2841,7 +2841,7 @@ the end of this U7 section. Claims stay PENDING until read from a log.
 | 1a — VX-254: `MCPTextDigest` (its own commit — builder B calls it) + P-254-1 | DONE (this commit): red by absence (`cannot find 'MCPTextDigest' in scope`), then 4/4 green |
 | 1b — VX-254: `MintedTake.text` + the encoder's `sha256` | DONE (this commit) — BUILDER A's RECORD |
 | 2 — VX-254: the flat answers (`add_take`, `add_takes`' `takes[]`, `edit_take`, `restore_commit`); `divide_block`/`merge_blocks` answer NO digest (F-254-2 (b), ruled) | DONE (this commit): P-254-2…10 red-on-old (9 failed, 50 issues) then 10/10 green |
-| 3 — VX-254: descriptions, pins red by absence, revert run, the U+0000 CHECK | IN-PROGRESS — descriptions DONE (`5852e474`); the U+0000 CHECK DONE (FOUND: truncated — BUILDER A's RECORD); the whole MCP suite GREEN (293 tests / 61 suites, 1 known issue — the U+0000 pin) and the touched core suites GREEN (171 / 42), read from the logs; **A REVERT IS IN FLIGHT (announced in this commit):** the sweep's eight product files go back to `54cc62a5` in the working tree only (`MCPTextDigest` and every test kept), `MCPWriteDigestServerTests` runs, then `git checkout HEAD --` restores them and the suite re-runs. If this session dies mid-revert: `git checkout HEAD -- Sources` restores the product. |
+| 3 — VX-254: descriptions, pins red by absence, revert run, the U+0000 CHECK | DONE (this commit): descriptions `5852e474`; the U+0000 CHECK FOUND truncation (BUILDER A's RECORD); the whole MCP suite 293/61 green (1 known issue) + the touched core suites 171/42 green; THE REVERT RUN (announced `badcf3b7`): the eight product files back to `54cc62a5` → `MCPWriteDigestServerTests` 10 of 11 FAILED, 52 issues (the guard green); restored by `git checkout HEAD -- Sources` (status clean) → 15/15 green in both digest suites (1 known issue). No revert in flight. |
 | 4 — VX-261: `list_my_activity` (query, catalog listing rule, handler, Activity words, pins) | NOT-STARTED — D-261-* |
 | 5 — VX-256: `read_note` paging + `ids_only` (pins, revert) | NOT-STARTED — D-256-* |
 | 6 — THE STAGE WINDOW plan (claim `vx336-u7`), headless + Mac build-for-testing, READY | NOT-STARTED — the draft below |
@@ -3590,6 +3590,12 @@ the old tree).
   after the sweep.
 - Guards (green both sides, by design): `divideAndMergeAnswerNoDigest`; the book-form import's exact key set stays
   pinned in `MCPMintedAnswerServerTests` (`["book_id", "note_ids", "chapter_ids"]`), unedited.
+- THE REVERT RUN (announced in `badcf3b7` before it ran): the sweep's eight product files back to `54cc62a5` in the
+  working tree (`MCPTextDigest` and the tests kept) → 10 of 11 failed, 52 issues — the nine pins and the U+0000 pin's
+  "the answer digests the act's row" line; `divideAndMergeAnswerNoDigest` green. Restored with `git checkout HEAD --
+  Sources` (status clean) → `MCPWriteDigestServerTests` + `MCPTextDigestTests` 15/15 green, 1 known issue.
+- No existing pin needed an edit (G-254-2): the whole MCP target 293 tests / 61 suites green, the touched core suites
+  171 / 42 green.
 
 **THE U+0000 CHECK — FOUND: a take holding U+0000 is STORED TRUNCATED at its first NUL** (recorded, NOT fixed, no
 ticket minted — the orchestrator's ruling).
