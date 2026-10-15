@@ -6970,7 +6970,7 @@ and `MCPCompareLandingTests.swift` whole.
 | # | piece | state |
 |---|---|---|
 | 1 | merge `origin/main` (a merge commit); headless `swift build` | DONE — **`fc6bf20b`** merges `origin/main` `ebd16909` (notes, `.claude` and `CLAUDE.md` only: 7 files, no file touched by both sides, **no conflict**); `origin/main` is an ancestor of the branch (`git merge-base --is-ancestor`). **VX-306 (Castle phase 2) has NOT merged** (no such commit on main), so the dev store is not migrated and a product from this tree opens it. `swift build` complete on the merged tree. **A SLIP, repaired without rewriting anything** — the first merge `994d0083` was flattened by `pull --rebase` before its push (### The merge slip, below) |
-| 2 | R2-1's pin, alone (red on the pre-fix tree — RUN in the window) | NOT-STARTED |
+| 2 | R2-1's pin, alone (red on the pre-fix tree — RUN in the window) | DONE (`65ba0704`, the test file alone) — four state-transition tests appended to `MCPCompareLandingTests` (### R2-1 below). **The red product `vx336-close-red` is built from exactly this tree** (`build-for-testing` started from the uncommitted pin, then committed with no other source change: TEST BUILD SUCCEEDED, XCB-EXIT 0, 0 `error:`, 0 warnings in the touched file — `close/logs/build-mac-red.log`; the four test names found in its `VariorumTests` binary by `nm -j` + `swift-demangle`). **Expected red (PENDING — the window's run): 11 tests, 4 failed, 4 issues**, one at each new test's LAST `#expect`; the suite's other 7 green |
 | 3 | R2-1's fix (the three clears of `landingPostureFor`) | NOT-STARTED |
 | 4 | R2-2's clause in `MCPWireRefusalSweepTests.swift`'s comment | NOT-STARTED |
 | 5 | headless finals (MCP · core · workbook) | NOT-STARTED |
