@@ -6947,3 +6947,32 @@ No BLOCKER. No MAJOR. No round 3 is earned.
 - **R2-3 — AGREED, done by the orchestrator** (the handoff's VX-234 list gains the line, in this commit).
 - **R2-4 — AGREED as a NIT, no code change.** It goes on the handoff's VX-234 / description list: `read_note`'s
   description could say `books` rides every page.
+
+## CLOSEOUT RECORD — PHASE B (the closeout implementer — opus-implementer, from 2026-10-15 ~02:15 MDT)
+
+**Not done (first line, kept current):** THE CLOSEOUT WINDOW itself (claim `vx336-close`) is NOT run here. It runs only
+on the orchestrator's GO, under the coordinator's exact claim line. No `xcodebuild test`, no app launch, no store
+touched, no stage claimed, no Linear edit, no shared ledger on main touched (PHASE C's). R2-1's pin has NOT yet been seen
+red or green: both runs are the window's.
+
+**Read in full in this session (never delegated):** CLAUDE.md and its loaded canon; this record's header, Hard rules
+(never `claude mcp list`; the live-round machinery), LIVE STATUS, Stage traffic log, Cross-run coordination, the
+CLOSEOUT BRIEF, the CLOSEOUT RECORD — PHASE A whole (D1–D9, OWED), THE ORCHESTRATOR ON PHASE A, THE LADDER — ROUND 1 and
+ROUND 2 with their dispositions, the U6a UNIT RECORD's D-298-1…8 and its ONE OPEN DECISION, THE ORCHESTRATOR'S RULING ON
+U6a's ONE OPEN DECISION, U9's STAGE WINDOW and the U9 STAGE RUN whole; VX-246's CLOSEOUT WINDOW (plan and results, the
+merge-moment whole-target form); `notes/SessionResiliencyProtocol.md`'s implementer section and addenda. Code:
+`CompareBoardView.swift`'s `CompareViewModel` (`peerSlots.didSet`, `relatedOnly`, `landingPostureFor`, `adopt`,
+`consumePendingCompareLanding`, `land`, `teardown`, `setPeer`, `removePeerSlot`, the board's `onAppear`/`onDisappear`)
+and `MCPCompareLandingTests.swift` whole.
+
+### LIVE STATUS — PHASE B's pieces (flipped in the same commit as each piece)
+
+| # | piece | state |
+|---|---|---|
+| 1 | merge `origin/main` (a merge commit); headless `swift build` | DONE — `994d0083` merges `origin/main` `ebd16909` (notes, `.claude` and `CLAUDE.md` only: 7 files, no file touched by both sides, **no conflict**). **VX-306 (Castle phase 2) has NOT merged** (no such commit on main), so the dev store is not migrated and a product from this tree opens it. `swift build` complete on the merged tree |
+| 2 | R2-1's pin, alone (red on the pre-fix tree — RUN in the window) | NOT-STARTED |
+| 3 | R2-1's fix (the three clears of `landingPostureFor`) | NOT-STARTED |
+| 4 | R2-2's clause in `MCPWireRefusalSweepTests.swift`'s comment | NOT-STARTED |
+| 5 | headless finals (MCP · core · workbook) | NOT-STARTED |
+| 6 | the products: `vx336-close` (final), `vx336-close-red` (the pin-only tree), `vx336-close-ios` (final, phone); `vx336-u9` deleted | NOT-STARTED |
+| 7 | THE CLOSEOUT WINDOW plan (claim `vx336-close`); READY | NOT-STARTED |
