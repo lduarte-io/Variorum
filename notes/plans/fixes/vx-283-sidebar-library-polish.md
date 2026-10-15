@@ -2427,6 +2427,50 @@ the list follows again**; R7 regressions (the footer stop, the bar beside the �
 
 *(The walker writes one line per row here.)*
 
+### U2 — the drag (VX-288, the light version + the compact chip on the Open list's rows)
+
+**Implementer:** a fresh Opus 5.5 at xhigh (2026-10-15, overnight), worktree `~/dev/variorum-vx-283`, DerivedData
+`App/Variorum/DerivedData/vx283-u2`. **Not done by this session (first line):** any stage work (the Mac batch, the
+behavioural revert's run) until the orchestrator hands over a claim; the walk (a fresh walker's — the line, the settle
+and the chip are walk evidence); edge auto-scroll during a drag (the M shape, out of scope).
+
+**LIVE STATUS (per piece)**
+- E0 — this section + the trace verified on this tip: DONE (this commit).
+- E1 — the pure drop rule (`SidebarLayout.OpenListDrop`: the gap under the pointer, the onMove destination with the
+  false-offer nil, the line's place, the end zone's height) + its pure pins + the stale List-drag comment corrected:
+  NOT-STARTED.
+- E2 — the delivery (one drop delegate on the list's rows + the end-zone band; the drag state; the insertion line as
+  an overlay above the edge fade; the settle) + the chip (the Bookcase's grab canvas moved to `Core/Views/`, reused):
+  NOT-STARTED.
+- E3 — headless `build-for-testing` green; the behavioural revert prebuilt; READY FOR STAGE: NOT-STARTED.
+
+**THE TRACE (this tip, `9643aaf6`; paths under `App/Variorum/Variorum/`):** the Open row drags with the system drag
+and each row is its OWN drop target (`Features/Library/SidebarView.swift:1032-1041`): `.draggable(OpenNoteDragToken)`
+and `.dropDestination(for: OpenNoteDragToken.self) { tokens, _ in … moveOpenNotes(fromOffsets: [source], toOffset:
+target) }` where `target` is the index of the row UNDER the pointer — the drop location is ignored. In the onMove
+convention (`Workspace/WorkspaceNavigation.swift:361-382`, `destination` = a PRE-move gap index), `toOffset: target` is
+always the gap BEFORE that row. So, inputs → wrong state: [a, b, c, d], drag a onto b → `move([0], 1)` → the insertion
+shifts left by the one moved row before it → index 0 → **nothing changes** ("the row just below is unreachable");
+drag a onto d → `move([0], 3)` → [b, c, a, d] — **one row short** of where she aimed, for every downward drop; no
+target exists after d → **the last slot is unreachable** (no end zone). The move is applied UNANIMATED
+(`Workspace/WorkspaceModel.swift:505-508`), there is no hover feedback, and the drag image is the system's snapshot of
+the whole row. The pins (`VariorumTests/WorkspaceNavigationTests.swift:226-275`) check only `OpenNotes.move`'s
+arithmetic, and their comment still says "the drag route itself is AppKit's inside the List" — the List is long gone.
+
+**THE DESIGN (being built; PROVISIONALs listed as they land):**
+- The drop rule is PURE (`SidebarLayout.OpenListDrop`): a pointer's y over the rows names a GAP (0…rows) — the lower
+  half of a row is the gap AFTER it, the upper half the gap BEFORE it, below the last row the end; the onMove
+  destination IS that gap, and it is nil at the dragged row's own two gaps (the drop would change nothing — §12's
+  false-offer rule: no line, and the drop is refused so the image slides back).
+- ONE drop delegate on the list's scroll CONTENT (its location is the content's own space — the row arithmetic needs
+  no scroll offset), plus an END ZONE band under the rows; the system drag stays (`.draggable` with a preview).
+- The insertion line: 2 pt in the ring token, the book navigator's precedent, as an OVERLAY on the list (above the
+  edge fade), placed from the pointer's place in the VIEWPORT + the list's scroll offset + the rows + the pitch — so
+  it re-derives on every input axis (hover, scroll, list change) and never before a reading exists.
+- The settle: the move lands inside an animation on the column's one beat (`SidebarLayout.railTransition`).
+- The chip: the Bookcase's compact title chip at the grab point (R-LWP-3's `BookDragSource` canvas), moved to the
+  shared home and reused on the Open list's rows only.
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
