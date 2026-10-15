@@ -304,6 +304,11 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
 
 ## Rules binding this run
 
+- **VX-336's ladder cast, HER WORD (2026-10-14 ~19:55 MDT, in chat, verbatim):** *"you can use fable xhigh to review instead
+  of opus at max"*. Every ladder round is a FRESH `fable-reviewer` at effort xhigh (REVIEW_PROMPT verbatim,
+  PHASE=VX-336), replacing the kickoff's "Opus cold reviews at max" for rounds 2–3. Each round runs the cross-model flow:
+  Fable makes the final call on every finding, the Opus implementer applies the confirmed fixes red-on-old, and Fable
+  writes a fix only for `Sync/` lines (none here) or a FINDER-FIXES finding.
 - Cast per CLAUDE.md: Fable orchestrates by default (she redirects at kickoff); `opus-implementer` per unit,
   strictly sequential; the cold review is hers to name at kickoff. **Effort: her word during VX-184
   (2026-10-13, verbatim): *"Run everything at max effort - the implementer, reviewer, etc."*** Spawn every
