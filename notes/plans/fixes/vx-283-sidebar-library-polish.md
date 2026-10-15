@@ -2403,6 +2403,30 @@ green under both.
   `SidebarSectionWindowRuleTests.theFadeIsAlwaysHalfARowDeepAndItsStrengthEasesIn`, `.theFadeIsNeverFullySolid`,
   `SidebarSectionWindowMountTests.aShallowOverflowFadesTheWholeHalfRowFaintly`.
 
+#### U1d — THE STAGE WINDOW (run by the orchestrator, claim `vx283-u1d` 01:44:58–01:50:37, RELEASED)
+
+`u1d/window.sh` as written: **batch** `✔ Test run with 434 tests in 96 suites passed` (the two env-gated U1c harnesses
+skipped) · **mount × 5** `✔ … 11 tests in 1 suite passed` · **R-I** (her hand never ends following) `✘ 16 tests, 10
+issues` — exactly `aHandScrollEndsFollowingUntilHerNextAct`, `herScrollStaysWhereSheLeftItThroughEveryLaterChange`,
+`aHandScrollIsNeverPulledBackUntilHerNextAct` · **R-J** (U1b's fade) `✘ 26 tests, 11 issues` — exactly
+`theFadeIsAlwaysHalfARowDeepAndItsStrengthEasesIn`, `theFadeIsNeverFullySolid`,
+`aShallowOverflowFadesTheWholeHalfRowFaintly`. Revert trees deleted. Store restored + cmp-verified; the suites' 9 prefs
+keys deleted, diff clean (1602 = 1602); castle-W1 untouched. The orchestrator's eye on the cap sheets
+(`u1d/cap/`): 0.8 shows a faint ghost of a half-hidden row in all four rooms — P-U1d-3 accepted.
+
+#### U1d — THE RE-WALK PLAN (a fresh Opus at xhigh; her rule)
+
+U1b's re-walk rows R0–R8 (above), on `DerivedData/vx283-u1d`, screens to `notes/plans/vx283-screens/u1d/walk/`, with:
+R4 — the shallow-overflow state reproduced ("to the top, then one wheel line down") in all four rooms (the row fades
+over the whole half row, faintly — never a slice); R5 — the twenty rapid opens, and R5a's half-hidden partial row
+(a faint ghost, never an empty band); **R6 — a hand scroll with `walk-scroll`, then waits of 20 s, 60 s and 90 s with no
+input, the list staying where she left it; then a resize while scrolled away (stays); then her next act (an open) —
+the list follows again**; R7 regressions (the footer stop, the bar beside the ✕).
+
+#### U1d — RE-WALK RECORD
+
+*(The walker writes one line per row here.)*
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
