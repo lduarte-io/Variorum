@@ -403,6 +403,7 @@ trailer of any kind.
 
 *(The orchestrator appends each REQUEST / READY / GO / RELEASE here.)*
 
+- 2026-10-15 17:06 GO `vx283-u2b` (25 min; HID idle 528 s at the GO, her clearance standing); RELEASED 17:08:32 — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched".
 - 2026-10-15 16:43 GO `vx283-u3c` (25 min); RELEASED 16:54:31 — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched".
 - 2026-10-15 15:59 GO `vx283-walk` (15:58:41, 65 min); the walk 15:59–16:21; SEAM, continue pre-given; the U3c probe folded in 16:23–16:25; RELEASED 16:25:43 — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched".
 - 2026-10-15 15:32 GO `vx283-u2` (the coordinator; HID idle 3 h, her word "Now, I'm off the Pro"). 15:31:45 claimed (95 min). 15:50:46 RELEASED at the SEAM — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched"; the stage to `vx336-release` (0.9.7). REQUEST sent: `vx283-walk` (≈55 min) after it.
@@ -3769,6 +3770,36 @@ no `walk-cap`: it comes from the trace's own ROW lines and is verified by the ro
     log also shows the ORDER of `SESSION phase=ended(…)` against `ROWS performDrop` (the U2 record's unverified
     order).
   - Refused → `allowMove` doesn't open `.move` to a DropDelegate.
+
+#### U2b — THE TRACE RUN (the orchestrator, claim `vx283-u2b` 17:06:13 → RELEASED 17:08:32; `u2b/logs/trace.log`, `trace-counts.txt`, `trace-key.txt`, `u2b/caps/`)
+
+`window.sh` pre (GUARD OK, the author idle 540 s; App/ clean at `d60087ee`; store `store-before/20261015T230613Z`) →
+the steps run by hand (`launch trace`, then the launch capture looked at: no What's New sheet, 13 Open rows; a system
+notification banner sat at the top right, clear of the sidebar) → `aim` OK (row 2 `D4C23B6A` at 133,413) → drags
+A, B, C → quit → `launch "trace session allowmove"` → aim OK → drags D, E → quit → read → restore (identical before
+copy-back, `cmp`; no keys added; PREFS CLEAN; castle-W1 present). GUARD OK at every press, no interference. **No
+drag landed (all five lists byte-identical).**
+- **A (the shipped road): `payload=1 preview=1 began=1`, then ZERO delegate calls** (validate 0, entered 0, updated 0,
+  exited 0, perform 0). **G1 is REFUTED:** the payload is evaluated on the main thread at the drag's start
+  (`SOURCE payload evaluated … dragging(before)=nil`, `STATE began` at 17:06:47.39). The list knows its own drag; the
+  delegate is never asked.
+- **The hit chains say why: every view under the pointer reports `[reg 0]`.** That is
+  `PlatformGroupContainer ← DocumentView ← HostingClipView ← HostingScrollView ← PlatformContainer ← …`, at the rows
+  (100,527), (133,704) and at the preview's start. The instrument marks `+OURS` where a view registers our type, and
+  **no `+OURS` appears anywhere. No AppKit view in the Open list's hit chain is registered for ANY dragged type**, so
+  AppKit's tracking never offers the drag to SwiftUI's drop machinery there. The Bookcase's targets react to the same
+  road (the walk's control), so the failure is the Open list's registration, not the synthetic drag.
+- **D (session + allowMove): the same zero delegate calls.** The session's phases arrive (`initial` at 17:07:53.907,
+  then `active` every ~0.35 s; `loc` cycles 0…29 in the source's own coordinate space), and `ended with operation
+  cancel` comes at the release. **G2 is moot while the delegate is never called.** It stays a second gate to fix
+  with the first (the SDK's copy-only default).
+- **B, C, E — the SECOND drag of each launch never started:** `payload=0 preview=0 began=0`, and the mid-drag captures
+  show NO chip (`B-mid1-row3lower.png`, `E-mid1-row3lower.png` against `A-`/`D-mid1`, by the orchestrator's eye). So
+  load/copy (B, C) and load under allowMove (E) were NOT tested. **A second finding: after one cancelled drag, the
+  next press-and-move on a row does not begin a drag.** It is not yet known whether that is the product (a stale
+  `dragging` never cleared, since no delegate's `ended`/`exit` ran; the row's gesture gated) or the road (the walk's
+  seven variations each started a drag, but with other acts between them). It is owed to T3: the proposal must name
+  it, and the re-walk must drag twice in a row.
 
 ## Ladder
 
