@@ -2160,14 +2160,130 @@ Build to "U1 — HER RULINGS ON THE MEMO" and "U1 — THE DESIGN MEMO" above, on
 session (first line):** any stage work until the orchestrator hands over a claim; the re-walk (a fresh walker's).
 
 **LIVE STATUS (per piece)**
-- D0 — this section: DONE (this commit).
-- D1 — the pure follow model (`SidebarLayout.SectionFollow`: acts, phases, readings → may a reading reveal) + pure
-  pins: NOT-STARTED.
-- D2 — the fade reshaped (pure: full half-row depth past the slack, strength eased with the content beyond, the
-  outermost opacity capped below 1) + pure pins; the cap chosen by eye offscreen: NOT-STARTED.
-- D3 — the modifier wired to both (the phase from `onScrollPhaseChange`; a DEBUG hand-scroll seam) + the mounted
-  pins (a viewport change while not following moves nothing): NOT-STARTED.
-- D4 — headless evidence + the reverts prebuilt + READY FOR STAGE: NOT-STARTED.
+- D0 — this section: DONE (`931eaf5b`).
+- D1 — the pure follow model (`SidebarLayout.SectionFollow`) + pure pins: DONE (`74a7d787`) — the pure replica green
+  headless (below); the suite's run PENDING the stage window.
+- D2 — the fade reshaped (`SidebarLayout.EdgeFade`/`edgeFades`/`edgeFadeCap`) + pure pins; the cap chosen by eye
+  offscreen (0.8): DONE (`74a7d787`) — replica green headless; the run PENDING.
+- D3 — the modifier wired to both (`onScrollPhaseChange`; the DEBUG phase seam) + the mounted pins: DONE (`74a7d787`)
+  — headless `build-for-testing` green (`DerivedData/vx283-u1d`, no warning in a touched file); the runs PENDING.
+- D4 — the reverts R-I and R-J, each named here BEFORE it is applied, prebuilt into their own DerivedData and restored:
+  IN-PROGRESS — R-I next (the tree is clean at the commit after this record).
+
+**THE TRACE (R6 — U1c's tip, `App/Variorum/Variorum/…`).** Every road that moved a section by itself was gated by
+nothing but "an offset-only reading asks nothing": `Features/Library/SidebarSectionWindow.swift`'s geometry action
+asked `SidebarLayout.readingAsk` — ANY viewport change → `reveal` at once (P-U1c-1), a content change > 0.5 pt under an
+unchanged row count → `requestReveal` — and `onChange(of: rowHeight)` and the settled backstop asked again
+unconditionally. None of them knew whether HER hand had moved the list since the last act. So after a hand scroll,
+any later reading whose viewport or content changed snapped the list back to the current row — by design for a resize
+(P-U1b-2, "including a window resize after she scrolled away"), and by the same road for whatever perturbed the
+column with no input in the re-walk (three pull-backs; that perturbation is NOT identified — candidates such as the
+lazy stack re-estimating rows her scroll realized, or a footer row's height, are untraced guesses and were not
+pursued: the gate closes the whole class, whatever the source). The mechanism, as inputs → wrong state: [act: current
+row revealed] → [hand scroll: offset-only, asks nothing] → [any reading with a viewport/content change, or a pitch
+change, or a pending settled check] → `reveal()` → `proxy.scrollTo(current)` → her list pulled back.
+
+**THE PROBE (headless, a standalone process with a never-shown window — `notes/plans/vx283-screens/u1d/phase-probe.swift`,
+gitignored):** which inputs SwiftUI's `onScrollPhaseChange` reports on macOS 27 —
+- the reveal's unanimated `proxy.scrollTo` (a `disablesAnimations` transaction): NO phase change (idle throughout);
+- an animated `proxy.scrollTo`: `idle → animating → idle` (the app's, never hers);
+- a LEGACY line-unit wheel burst (no phase fields — WalkKit's `walk-scroll` shape, a mouse wheel): `idle →
+  interacting` BEFORE its first offset change, `→ idle` ≈100 ms after its last event; every new burst (≥100 ms apart)
+  reports again, including one issued 20 ms after an app reveal;
+- a phased trackpad gesture (began/changed/ended): `idle → interacting → idle` at the gesture's end;
+- a programmatic clip-view scroll and a frame-height change: no phase.
+So the scroll view's phase separates her hand from the app's own scrolls for both a wheel and a trackpad, and the
+walker's `walk-scroll` produces a real hand phase.
+
+**THE BUILD (`74a7d787`).**
+- `Core/Views/SidebarLayout.swift` (pure): **`SectionFollow`** — `following` (true from the first appearance);
+  `act()` (follow again); `phase(hers:)` (a hand phase ends following; any other phase — idle, the app's animated
+  scroll — changes nothing, so her scroll's END is not an act); `gate(_ ask:)` (the ask itself while following,
+  `.none` while not). **`EdgeFade`** (`depth` · `strength` · `opacity = strength × edgeFadeCap`) and `EdgeFades` of two;
+  **`edgeFades`** reshaped: past the 0.5-pt slack an edge fades the FULL `depth` (half a row), its strength
+  `min(1, beyond / depth)`; **`edgeFadeCap = 0.8`**. `revealOffset` reads the fades' depths (unchanged answers: the
+  reveal only ever differed where the old depth was shallow, and there the row was "below" either way — the replica's
+  idempotence sweep and the eased-shrink cadences agree).
+- `Features/Library/SidebarSectionWindow.swift`: `SidebarSectionMemory.follow`; the geometry action routes
+  `readingAsk` through `follow.gate`; `onScrollPhaseChange` → `observe` → `follow.phase(hers: isHandScroll(phase))`
+  (`isHandScroll`: interacting or decelerating); `onChange(of: current)` → `follow.act()` then the request; the mount's
+  first reading is an act; the pitch's request and the settled check pass `follow.gate` first. The overlay paints the
+  room from each edge's `opacity` down to nothing over its `depth`. The DEBUG phase seam (`SidebarSectionPhaseSeam`):
+  the section hands its owner a feeder that runs the SAME `observe` the phase callback runs; the trace notes phases
+  and `following`.
+- `Features/Library/SidebarView.swift`: both sections pass `phaseSeam: sectionPhaseSeam(…)`; the DEBUG oracle files
+  each feeder in `SidebarGeometry.sectionPhaseFeeds` keyed by the column's workspace (cleared by `forgetSections`).
+- What the walk must prove that no pin can: the seam calls `observe` directly, so `onScrollPhaseChange` being attached
+  to the section's scroll view is proven only by a real hand scroll (the re-walk's R6 with `walk-scroll`).
+
+**THE CAP, CHOSEN BY EYE (P-U1d-3).** An offscreen render (`notes/plans/vx283-screens/u1d/cap/`, gitignored — the
+probe source `fade-probe-main.swift`, the real `SidebarLayout.swift` compiled beside it; the four rooms' room / ink /
+muted / accent / wash from `VoiceTokens`; rows at 24 pt) of three states at caps 1.0 · 0.9 · 0.8 · 0.7 · 0.6:
+O-2's shallow overflow (5 pt beyond), O-3's partial row with its text in the fade's outer half (12 pt of it showing)
+and R2b's middle (partial rows at both edges). Looked at: `cmp-O3-partial-b.png`, `zoom-O3-partial-b.png`,
+`zoom-R2b-middle-t.png`, `cmp-R2b-middle-t.png`, `cmp-O2-shallow-b.png`. At 1.0 the partial row's letters fade to
+nothing toward the edge (all but gone in both dark rooms — O-3's empty band). At **0.8** a faint ghost of the row
+reads in all four rooms — her "a hint" — while the clipped edge of the letters still reads soft. At 0.7 and 0.6 the
+ghost grows and the clip line through the letters starts to read crisp again (the slice F-2 removed). 0.9 leaves a
+10% hint, near invisible on black. Built: 0.8. Options: (a) 0.8 [built]; (b) 0.7 (more hint, a crisper clip); (c) 0.9
+(less hint, invisible in dark). Note: a sliver of a partial row thinner than its row's top padding (≲ 6 pt) shows no
+ink under any cap — that is the clip, not the fade.
+
+**PROVISIONALs (U1d):**
+- **P-U1d-1 — re-selecting the note already shown is not an act.** The act is a CURRENT-ROW CHANGE; a door that
+  re-selects the very note the pane shows (⌘⇧N for its own ordinal, ⌘K to itself) changes nothing, so a list she
+  scrolled stays put. Options: (a) no act [built — no current change, no reveal]; (b) every navigation request is an
+  act, even to the same note (needs a request token from the shell — `ShellRouter`, not this lane).
+- **P-U1d-2 — the strength's ease: linear over the first half row beyond the edge** (`min(1, beyond / depth)`; a
+  half-point past the slack it is 3–4%, so nothing pops). Options: (a) linear over the half row [built]; (b) over a
+  whole row; (c) a smoothstep over the half row.
+- **P-U1d-3 — the cap, 0.8** (above).
+- **P-U1d-4 — each section follows on its own.** A hand scroll in the Open list ends the Open list's following only;
+  Starred, untouched, keeps following its current row (through a resize, say). Options: (a) per section [built — her
+  "it stays where you put it" names the list she scrolled]; (b) a hand scroll in either section stops both.
+- Ruled, not provisional: her scroll's END does not resume following (her words: "until your next one of those"); a
+  resize while FOLLOWING still keeps the row in view (the memo's item 1, P-U1c-1 unchanged).
+
+**PINS (`App/Variorum/VariorumTests/SidebarSectionWindowTests.swift`; all PENDING the stage window):**
+- NEW `SidebarSectionFollowTests` (pure ×5): `aSectionFollowsFromItsFirstAppearance`;
+  `aHandScrollEndsFollowingUntilHerNextAct` (RED under R-I); `onlyInteractingAndDeceleratingAreHerHand`;
+  **`herScrollStaysWhereSheLeftItThroughEveryLaterChange`** (R6 played through the model — a resize shorter, the
+  content re-laid under the same count, a resize taller, the pitch's request, the settled check: her offset 0 holds;
+  her next act reveals at 95 — RED under R-I: 204, 204, 95); `whileFollowingAResizeKeepsTheRowInView`.
+- `SidebarSectionWindowRuleTests`: `anEdgeFadesOnlyWhereContentLiesBeyondIt` ADJUSTED (the values are `EdgeFade`s —
+  her ruling; meaning unchanged); `theFadeEasesInWithTheContentBeyondTheEdge` **REWRITTEN by her ruling** as
+  `theFadeIsAlwaysHalfARowDeepAndItsStrengthEasesIn` (4 and 8 pt beyond: depth 15, strengths 4/15 and 8/15; the ease
+  monotone with no step — RED under R-J: depths 4 and 8, strength 1); NEW `theFadeIsNeverFullySolid` (the cap in
+  (0.5, 1); no edge above it anywhere; O-2's 5 pt beyond = depth 12 at 5/12 × cap — RED under R-J);
+  `everyRowLandsClearOfTheFadesFromAnyWindow` and `anEasedShrink…EveryCadence` ADJUSTED to read `.depth` / `.none`
+  (meaning unchanged).
+- `SidebarSectionWindowMountTests`: `theOpenListFadesOnlyTheEdgesWithMoreBeyond` and
+  `starredFadesWhereMoreLiesBeyondAndNowhereWhenItHoldsEverything` ADJUSTED to compare `EdgeFade`s (`.whole(depth)` —
+  every edge there has a half row or more beyond; meaning unchanged); `openRowTrouble` reads the fades' depths; NEW
+  **`aHandScrollIsNeverPulledBackUntilHerNextAct`** (20 notes at 900 pt, row 16 current and revealed; the phase seam
+  `.interacting` + the clip view to 0 + `.idle`; the window to 840 pt then back to 900: her offset 0 holds both times;
+  her next act — note 17 opened — lands it clear — **RED ON OLD under R-I**: the 840-pt shrink re-reveals); NEW
+  **`aShallowOverflowFadesTheWholeHalfRowFaintly`** (the list hand-scrolled to 5 pt short of its end: the bottom fade
+  is the whole half row at strength beyond/depth, opacity < 1 — **RED ON OLD under R-J**: a 5-pt fade). Rig helpers:
+  `SectionRig.scrollView(_:)`, `.handScroll(_:to:)`. The existing U1/U1b/U1c pins otherwise unchanged
+  (`aShorterListKeepsTheCurrentRowInView` reads "while following" now — nothing scrolled by hand there).
+
+**Headless evidence:** `build-for-testing` → TEST BUILD SUCCEEDED (`DerivedData/vx283-u1d`, the `74a7d787` code; no
+warning in a touched file). The PURE pins replicated line for line against the real `SidebarLayout.swift`
+(`notes/plans/vx283-screens/u1d/pure-replica-main.swift`, gitignored): **8715 checks, 0 failed**; with R-J's patch 5
+failed (exactly the reshape checks); with R-I's 6 failed (exactly the follow checks); the U1b/U1c-era rule checks
+green under both.
+
+**THE REVERTS (named before they are applied; each prebuilt into its own DerivedData and restored by `git checkout
+--` from the commit, `git diff` empty after):**
+- **R-I (R6 — follow):** `SidebarLayout.SectionFollow.phase(hers:)` loses its `if hers { following = false }` — her
+  hand never ends following, i.e. U1c's behaviour. Products: `DerivedData/vx283-u1d-ri`. Expected RED:
+  `SidebarSectionFollowTests.aHandScrollEndsFollowingUntilHerNextAct`, `.herScrollStaysWhereSheLeftItThroughEveryLaterChange`,
+  `SidebarSectionWindowMountTests.aHandScrollIsNeverPulledBackUntilHerNextAct`.
+- **R-J (O-2/O-3 — the fade):** `edgeFades` back to U1b's eased DEPTH at full strength (`EdgeFade(depth: min(depth,
+  beyond), strength: 1)`) and `edgeFadeCap = 1`. Products: `DerivedData/vx283-u1d-rj`. Expected RED:
+  `SidebarSectionWindowRuleTests.theFadeIsAlwaysHalfARowDeepAndItsStrengthEasesIn`, `.theFadeIsNeverFullySolid`,
+  `SidebarSectionWindowMountTests.aShallowOverflowFadesTheWholeHalfRowFaintly`.
 
 ## Ladder
 
