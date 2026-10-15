@@ -4518,9 +4518,15 @@ re-pinned pins (P-256-2, F-256-7, P-256-1b) — each edit commented in the file 
 
 ## U8a UNIT RECORD — the model-facing words: `MCPSession.instructions`, the tool descriptions, the stargazing brief's delta (VX-197; opus-implementer, from 2026-10-14 ~20:40 MDT)
 
-**NOT DONE (said first): no code, no pins and no brief edit yet.** This session read in, then PAUSED at the
-orchestrator's word (U7's window took its GO) before its first product or test commit. Nothing is in flight; `git status`
-is clean.
+**NOT DONE (said first, at the continuation's close):** the field guide's MCP chapter, the re-seed note, the Mac
+Tutorial*/MCP suites, the chapter walk and the real client reading the instructions are all U8b's (OWED FOR U8b
+below), and so is U7c's re-probe. No `xcodebuild`, no Mac build or suite, no launch, no stage claim, no store touched
+(headless `swift build` / `swift test` only; no app file changed). No MCPSpec, AppSpec, QUESTIONS or ticket edit
+(MCPSpec's "≤2,000" → "≤3,000" is the merge's, OWED). The four OBSERVATIONS below are recorded, not changed. No
+subagent was spawned.
+
+*(The first U8a session's line, kept: it read in, then PAUSED at the orchestrator's word, U7's window having taken its
+GO, before its first product or test commit.)*
 
 **THE CONTINUATION (a FRESH opus-implementer, from 2026-10-14 ~22:20 MDT, after THE ORCHESTRATOR ON U7c).** The paused
 session (harness ~398k) does not resume; this continuation builds pieces 1–6 from the plan below, adjusted only by U7c's
@@ -4563,7 +4569,7 @@ trimmed, no prefix), `MCPWriteTools+CommentDelete` (VX-260), `readableBooks` (VX
 | 3 | the descriptions → GREEN | DONE (this commit) — twelve descriptions (THE DESCRIPTIONS AS BUILT in piece 6's record); the piece-1 filter + `MCPProviderNeutralityTests` → **30 tests in 8 suites passed**, re-run after a source reflow, **30/8 passed** again (both from the logs); a temporary, uncommitted dump test proved the reflow byte-clean (no double space, no joined word) |
 | 4 | revert checks (announced, committed first) | DONE (this commit) — announced in `d9ca204d` before any arm ran; three arms, each EXACTLY as announced, each undone by `git checkout HEAD -- Sources`; the restore verified (status clean, `git diff HEAD` empty, 30/8 green) — THE REVERT CHECK's results below |
 | 5 | the stargazing brief's FURTHER delta, one send-ready message | DONE (this commit) — THE BRIEF'S DELTA in piece 6's record; the appendix checked against the catalog (64 tools, none missing, none extra) |
-| 6 | headless finals (the MCP target) + the instructions' final text whole + FOR VX-234 + OWED for U8b | NOT-STARTED |
+| 6 | headless finals (the MCP target) + the instructions' final text whole + FOR VX-234 + OWED for U8b | DONE (this commit) — the record parts in `9ed8452e`; THE HEADLESS FINALS: 340 tests in 66 suites, the one red VX-353's flake (15.34 s), green alone 3/1; 1 known issue (VX-357) |
 
 **For the orchestrator, said before any Sources line moves (no action taken):** U7's runner checks at its step 0 that
 `git diff --name-only cfda547a..HEAD -- Sources App Package.swift` is empty. U8a's pieces 2–3 commit to
@@ -4788,9 +4794,16 @@ book-form import answer none, P-VX254-1/2); **(3)** import_document's label clau
 line's, untrimmed inside the quotes, so it says "as its take: line says" rather than "trimmed"; **(4)** the brief's new
 page facts, each checked against the as-built code or MCPSpec (listed in THE BRIEF'S DELTA).
 
-### THE HEADLESS FINALS (piece 6 — PENDING until read from the log)
+### THE HEADLESS FINALS (piece 6 — the MCP target, at `9ed8452e`; read from the logs)
 
-`swift test --filter VariorumMCPTests` on the final tree: PENDING.
+- **Run 1, `swift test --filter VariorumMCPTests`:** "Test run with **340 tests in 66 suites** failed with 2 issues
+  (including 1 known issue)" — 339 passed. The one failure is **VX-353's load flake**:
+  `MCPHarnessTimeLimitTests/aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` at **15.34 s** against its
+  15 s bound (load average about 7 / 9 / 14 at the time). The known issue is VX-357's U+0000 pin
+  (`aTakeHoldingUPlus0000IsStoredTruncatedSoItsDigestOverclaims`), by design. 340 = U7c's 329 + this unit's 11 new tests.
+- **Run 2, the flake's suite alone, `swift test --filter MCPHarnessTimeLimitTests`:** "Test run with **3 tests in 1
+  suite passed**" — the never-answers-initialize pin green.
+- No Core, workbook or app file changed, so no other target is U8a's.
 
 ### OWED FOR U8b (every fact the guide chapter must match)
 
@@ -4830,6 +4843,14 @@ page facts, each checked against the as-built code or MCPSpec (listed in THE BRI
    the build ships publicly only after the page is live (R-VX184-4). If the chapter mentions the page, it says so
    plainly; the brief's "Learn more" quotes the chapter's title "AI & the MCP door" (OBSERVATION 4).
 10. **Provider neutrality (O-4):** any provider's name in the chapter stays inside `TutorialSeeder`'s ONE setup fence.
+
+### OWED (U8a → the orchestrator)
+
+1. **MCPSpec at the merge:** the docs line's "`MCPSession.instructions` (≤2,000 characters, …)" → "≤3,000" (R-VX184-3),
+   and the instructions' one link sentence with its gate (R-VX184-4).
+2. **The brief** goes to her at the closeout; the handoff leads with carrying it to her site agent, the gate first.
+3. **The four OBSERVATIONS** — any follow-up is the orchestrator's call; none is a truth fix.
+4. **No ticket minted, no PROVISIONAL.**
 
 
 ## U7 STAGE RUN — the whole window (a fresh stage runner, from 2026-10-14)
