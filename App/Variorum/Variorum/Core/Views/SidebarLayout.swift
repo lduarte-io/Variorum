@@ -450,6 +450,26 @@ nonisolated enum SidebarLayout {
     /// (none past the first row or the last, where nothing lies beyond to
     /// fade), clamped to what the window as read can scroll to. A second
     /// reveal from its own result moves nothing (pinned).
+    ///
+    /// **The bound on that fixed point** (the VX-283 ladder's R1-3): it holds
+    /// at every viewport of at least `rowHeight + 2 × depth − fadeSlack` (two
+    /// rows less half a point, the depth being the half row: 59.5 pt at 30,
+    /// 47.5 at 24), and at a window no taller than one row (the arm that
+    /// shows the row's top). Between the two a reveal can BOUNCE: the below
+    /// arm lands the row's top inside the top fade, so the next ask answers
+    /// the above arm's offset and the one after it the below arm's again —
+    /// pitch 30, viewport 45, a middle row: 150 ↔ 135 (the first and last
+    /// rows bounce under `rowHeight + depth − fadeSlack`). No SETTLED window
+    /// lies in that band: only a section whose content runs past its window
+    /// has a fade at all, and a section scrolls only at the Open list's
+    /// 3½-row floor (`openListFloorRows`) or more, or at Starred's 7½-row
+    /// window; a section that hugs its rows fades nowhere, so every row
+    /// answers nil. A frame stream can pass through the band (a one-row Open
+    /// list growing to two asks on every frame, if the growth animates), but
+    /// it ends on its settled reading, outside it. Hence the fixed-point
+    /// pin's smallest window, 105 pt. A future section that can SETTLE
+    /// scrolling under two rows must widen the `viewport <= rowHeight` arm
+    /// to this bound, with a red-on-old pin.
     static func revealOffset(
         row: Int, rows: Int, rowHeight: CGFloat, window: ScrollWindow, depth: CGFloat
     ) -> CGFloat? {

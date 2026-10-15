@@ -256,6 +256,9 @@ struct SidebarSectionWindowRuleTests {
 
     /// **Idempotent from every window:** every row lands wholly in view and
     /// clear of both fades, and a second reveal from the result moves nothing.
+    /// "Every window" a SCROLLING section can settle at — 3½ rows or more;
+    /// the band under two rows, where a reveal can bounce, is named at
+    /// `SidebarLayout.revealOffset` (the VX-283 ladder's R1-3).
     @Test func everyRowLandsClearOfTheFadesFromAnyWindow() throws {
         for (viewport, rows, pitch) in [(CGFloat(250), 20, CGFloat(30)), (CGFloat(105), 20, CGFloat(30)),
                                         (CGFloat(225), 9, CGFloat(30)), (CGFloat(180), 9, CGFloat(24))] {

@@ -3017,11 +3017,18 @@ comment, a rename or a guard: no reachable behaviour changes, so no red-on-old i
 - **R1-3 — AGREE.** Re-traced by hand: pitch 30, depth 15, viewport 45, row 5 of 10 from offset 0 → 150 (= top); at
   150 `above` holds (150 < 150 + 15 − 0.5) → 135; at 135 `below` holds → 150 again. The band, exactly: a row with a
   row on each side bounces whenever `rowHeight < viewport < rowHeight + 2 × depth − fadeSlack` (two rows less half a
-  point, the depth being the half row). Unreachable on every settled window (a list with such a row has ≥ 3 rows: it
-  hugs them, ≥ 72 pt compact, or scrolls at the Open list's 3½-row floor or Starred's 7½); the one road into the band
-  in a frame stream (a 2-row hug growing to 3 rows while the pitch decompresses) adds the row at the END (an open
-  appends) or as a star (which compresses), and any frame stream ends on its settled reading. Fix: the bound named
-  in a comment at `revealOffset` (+ one pointer line at the fixed-point pin) — no behaviour change.
+  point, the depth being the half row); **the first and last rows bounce too, under `rowHeight + depth − fadeSlack`**
+  (traced at viewport 35: the last row 265 ↔ 255, the first 10 ↔ 0 — so this row's first draft, "two-row lists and
+  the end rows are a fixed point at every viewport", was WRONG and was corrected before commit). Unreachable on
+  every SETTLED window: only a section whose content runs past its window has a fade, a section scrolls only at
+  the Open list's 3½-row floor or Starred's 7½, and a section hugging its rows fades nowhere (every row answers
+  nil). **Observation for the orchestrator (not fixed — outside the comment's scope):** a frame stream CAN cross
+  the band — a one-row Open list growing to two on an open (the new row appended, current, the content stepping
+  first) asks on every frame while following; traced by hand at viewports 35 → 47 in 3-pt frames (the clip view
+  assumed to clamp each frame's offset to the content's end) it answers 25, 15, 19, 15, then nil, so
+  IF that growth animates the row could wobble a few points for a few frames; the stream ends on its settled
+  reading (no fades, nil), so nothing is left standing. Fix: the bound named in a comment at `revealOffset` (+ one
+  pointer line at the fixed-point pin) — no behaviour change.
 - **R1-4 — AGREE.** Re-traced: `began(_:)` arms `dragging`; only a drop on THIS list's targets clears it (`ended()`
   in `perform`), so a release elsewhere leaves it; a foreign token then reads the stale row as "a drag of this
   list's" (`lineTop`'s `dragged`), the line draws, `perform` accepts, and `land` refuses on the payload's list id —
@@ -3042,8 +3049,9 @@ comment, a rename or a guard: no reachable behaviour changes, so no red-on-old i
   it (that pin is red without the clamp by construction — a guard's own contract, not a reachable bug).
 
 **LIVE STATUS (this leg, per piece)**
-- D0 — the dispositions above: DONE (this commit).
-- D1 — R1-3's comment: NOT-STARTED.
+- D0 — the dispositions above: DONE (`9fefb8bb`).
+- D1 — R1-3's comment (`SidebarLayout.revealOffset`'s doc + a pointer at `everyRowLandsClearOfTheFadesFromAnyWindow`):
+  DONE (this commit).
 - D2 — R1-4's comments: NOT-STARTED.
 - D3 — R1-5's rename + the record note: NOT-STARTED.
 - D4 — R1-6's guard + pins: NOT-STARTED.
