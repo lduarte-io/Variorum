@@ -366,7 +366,7 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **READY FOR STAGE** (≈12 min — Q11: the 93-suite batch on HEAD + R-G prebuilt, then the restore) — the orchestrator's ruling on Q9 built (`1b51bc56`: R-F's proxy road is HEAD, every trigger kept; the `ScrollPosition` road withdrawn). Then the re-walk. F-3 → VX-359 (U3 rider). |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **STOPPED — Q11 not green** (22:05–22:08): batch 413, 2 red — VX-245's lint and the Starred pin (0.5 pt short on HEAD — the same code R-F ran green: FLAKY); R-G red as expected but uninformative. A new trace is needed — a fresh successor's (leads in Q11). Every other U1b pin green. F-3 → VX-359 (U3 rider). |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 — the Library and the red lint | NOT-STARTED |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
@@ -955,14 +955,33 @@ lines — below); any stage work until the orchestrator hands over a claim.
   (content changed && !rowsChanged)` arm; `onChange(of: rowHeight)` keeps `refreshFades` but no longer asks), all else
   kept — patch `notes/plans/vx283-screens/u1b/reverts/R-G.patch` applied, built into `DerivedData/vx283-u1b-rg`
   (green), restored by `git checkout --`; **no revert is in the tree** (`git diff` empty).
-- Q11 — **READY FOR STAGE** (≈12 min): (0) prefs export + the dev store's three files copied (zero dev instances);
-  (1) the 93-suite batch on HEAD — `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath
-  DerivedData/vx283-u1 test-without-building` + one `-only-testing:VariorumTests/<Suite>` per line of
-  `notes/plans/vx283-screens/u1b/batch-suites.txt` (products at `1b51bc56`'s code = HEAD's) — expected: VX-245's lint
-  the only red; (2) **R-G** — `… -derivedDataPath DerivedData/vx283-u1b-rg test-without-building
-  -only-testing:VariorumTests/SidebarSectionWindowMountTests` — expected RED: the Starred pin; then delete
-  `DerivedData/vx283-u1b-rg` (keep `vx283-u1`); (3) the store restored (`cmp`), prefs import → delete added keys →
-  re-export → diff; release. Then READY FOR WALK.
+- Q11 — the window: DONE (claim `vx283-u1b4` 22:05:11 → released 22:08:15) — **NOT GREEN, STOPPED; nothing fixed.
+  The Starred pin is red on HEAD — the SAME code that ran green as R-F in the Q9 window: the pin is FLAKY (timing),
+  so neither road has been shown to fix it.**
+  - **The batch** (93 suites, products at `1b51bc56` = HEAD's code): **"✘ Test run with 413 tests in 93 suites failed
+    after 86.239 seconds with 2 issues."** 411 passed · 2 failed · no skipped lines. (1) VX-245's lint
+    (`ChromeLineLimitTests.swift:104`). (2) **`starredFadesWhereMoreLiesBeyondAndNowhereWhenItHoldsEverything`
+    (`:544`) RED:** "EdgeFades(top: 12.0, bottom: 0.5) over ScrollWindow(offset: 35.5, viewport: 180.0, content:
+    216.0)" — 0.5 pt short of 36 (the clear test's slack is 0.5, the fade's own floor 0.5, so 0.5 counts as a fade).
+    Every other U1b pin green (the return rested at 249.33 of 249; the shorter window exact).
+  - **R-G** (prebuilt — only the content-height and row-height re-asks dropped): "✘ Test run with 6 tests in 1 suite
+    failed after 10.400 seconds with 1 issue." — the Starred pin **RED** ("bottom: 1.0 over offset 35.0"), the other
+    five green. As expected — but HEAD is red too, so R-G proves nothing against it. `DerivedData/vx283-u1b-rg`
+    deleted; `vx283-u1` kept.
+  - **The Starred readings so far (offset of a max 36, after the flip):** Q2 code 35 · Q5/Q7 code 34 · the
+    ScrollPosition road 34.5 · the proxy road with every axis 36 (Q9's R-F, green) then **35.5** (this batch) · R-G
+    35. Non-integer resting offsets keep appearing on the Open list's return too (248.58 · 248.69 · 249.16 · 249.33 —
+    inside the slack). **Reading (untraced):** the row lands a fraction short or over by a timing-dependent amount
+    after the flip — something keeps moving the offset after the last reveal (an animated scroll or clip-view
+    adjustment riding the 0.22-s transition, or a reading that never reports the final frame). A NEW TRACE is needed
+    (the orchestrator's rule: a fresh successor takes it). Leads: instrument the Starred window's readings over time
+    after the flip (does a final reading arrive? does the offset drift after the settled ask?); the offscreen probe
+    (its flip lands exactly 36 every time — what differs: the real column's outer scroll, the fit test's two
+    measurements, the lazy re-estimate with 9 starred rows of which one is unrealized).
+  - **Restore:** the dev store's three files byte-identical before the copy-back, copied back from
+    `store-before/20261015T040520Z/`, `cmp`-verified; prefs: 9 keys ADDED (deleted; one `surfaceSize.outline.*` key
+    needed a second delete after the import), 2 CHANGED (the idle-sweep mark, the backup log) — import, re-export,
+    diff CLEAN (1602 = 1602); `castle-W1-20261013` untouched; zero dev instances throughout.
 
 **F-3 — THE DOUBLED SEPARATOR: OLDER THAN U1, NOT ADJACENT — RECORDED AND LEFT (the brief's rule).**
 - The View menu's note group is `EditorCommands`' `CommandGroup(before: .toolbar)` (`EditorCommands.swift:954`). It
