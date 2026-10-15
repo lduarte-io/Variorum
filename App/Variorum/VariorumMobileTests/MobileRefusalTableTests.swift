@@ -62,8 +62,14 @@ struct MobileRefusalTableTests {
     }
 
     /// GUARD: where the table has no words, each site keeps the fallback it had.
+    ///
+    /// *A justified edit (VX-362 — the VX-336 run record's U9):* this guard's
+    /// unworded sample was `containerNotFound`, which the wire's sweep words in
+    /// the shared table now (the next test). The guard keeps its meaning on a
+    /// case that stays unworded — `referenceNotFound`, which the sweep proved
+    /// no wire road reaches and no table words.
     @Test func eachSiteKeepsItsOwnFallbackWhereTheTableHasNoWords() {
-        let unworded = OperationError.containerNotFound(id: "c")
+        let unworded = OperationError.referenceNotFound(id: "f")
         #expect(MobileBlockMenuController.refusalMessage(unworded, act: "name the block")
                 == DeletionRefusal.fallback(unworded))
         #expect(MobileUndoDoor.refusal(unworded) == String(describing: unworded))
@@ -71,6 +77,22 @@ struct MobileRefusalTableTests {
         #expect(MobileStructuralController.refusalMessage(unworded, act: "divide the block")
                 == String(describing: unworded))
         #expect(MobileMembershipModel.refusal(unworded, bookName: nil) == "Refused: \(unworded)")
+    }
+
+    /// **VX-362 (VX-336 U9) — MOBILE PARITY: the sweep's new shared words reach
+    /// the phone.** The wire's sweep worded ten cases; those her doors can also
+    /// meet live in the SHARED table, so every phone site that falls through to
+    /// the table speaks them too. A note gone between a door's read and its
+    /// write is the one this suite's sites meet (it was the guard's unworded
+    /// sample above). *Red on the old tree:* each site's own fallback dump.
+    @Test func theSweepsNoteGoneSentenceReachesEveryFallThroughSite() {
+        let gone = OperationError.containerNotFound(id: "c")
+        let words = "That note isn't there any more — it may have just been deleted."
+        #expect(MobileBlockMenuController.refusalMessage(gone, act: "name the block") == words)
+        #expect(MobileUndoDoor.refusal(gone) == words)
+        #expect(MobileCommentsController.refusalMessage(gone) == words)
+        #expect(MobileStructuralController.refusalMessage(gone, act: "divide the block") == words)
+        #expect(MobileMembershipModel.refusal(gone, bookName: nil) == words)
     }
 
     /// GUARD: the seal keeps the phone's own door words ("Unlock Note") — the
