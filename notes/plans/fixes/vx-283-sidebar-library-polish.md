@@ -1362,6 +1362,20 @@ weigh, not to assume: the scrolling sections' frames taken OUT of the rail's imp
 arrives once; the settled reveal forced to read fresh geometry; another the trace shows). The architect rules before
 it is built. The instrumentation is DEBUG-only and is removed (or kept as an oracle) by the ruling.
 
+### U1c — the trace leg
+
+**Implementer:** a fresh Opus 5.5 at xhigh (2026-10-14, night), worktree `~/dev/variorum-vx-283`, DerivedData
+`App/Variorum/DerivedData/vx283-u1`. **Not done by this session (first line, per the brief):** NO FIX is built — the
+leg traces and PROPOSES; the architect rules before anything ships. Any stage work waits for the orchestrator's claim.
+
+**LIVE STATUS (per piece)**
+- T0 — this section: DONE (this commit).
+- T1 — the headless offscreen probe (a standalone process, never-shown window; the column's implicit animation on the
+  sections' frames and the 30 → 24 pitch flip, as the real column has them): IN-PROGRESS.
+- T2 — the DEBUG-only instrumentation in `SidebarSectionWindow` + a trace test in the mounted rig: NOT-STARTED.
+- T3 — the stage window (the trace test in the mounted rig): NOT-STARTED.
+- T4 — the proposal with the trace as its evidence, and the pin that would go red on HEAD: NOT-STARTED.
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
