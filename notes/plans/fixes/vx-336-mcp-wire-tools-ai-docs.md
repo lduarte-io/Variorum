@@ -6462,7 +6462,7 @@ states (below).
 |---|---|---|
 | 1 | `notes/MCPSpec.md` in-branch: the bound ≤3,000, the link, a contract line + pointer for every new surface; AppSpec §12 checked | DONE (this commit) — ### ITEM 1 below; AppSpec §12 UNCHANGED (argued there) |
 | 2 | the QUESTIONS bundle draft (D1) | DONE (this commit) — D1 below (#227 unless taken) |
-| 3 | the AppSpec §14 draft + the roll + the finals ledger text (D2, D3) | NOT-STARTED |
+| 3 | the AppSpec §14 draft + the roll + the finals ledger text (D2, D3) | DONE (this commit) — D2 (the entry, the VX-179 roll, the VX-283-first case) and D3 below |
 | 4 | the master plan draft: retire VX-336's in-flight row only (D4) | NOT-STARTED |
 | 5 | the MOBILE PARITY draft (D5) | NOT-STARTED |
 | 6 | RULINGS RECONCILED (D6), remainders proposed in OWED | NOT-STARTED |
@@ -6655,3 +6655,59 @@ checklist leads with this bundle."), one blank line, then:
 > *(Numbering: the next free number on main when written; a sibling run merging first may take it — the merging session
 > renumbers.)*
 > Status: open — your eye; the handoff's checklist leads with this bundle.
+
+#### D2 — AppSpec §14: the new entry leads; VX-246's becomes "Before it —"; the roll (her VX-341 rule)
+
+**D2a — the entry.** Anchor: in §14's one paragraph, replace the exact text `**Most recent canon deltas — VX-246 (a RUN,`
+with:
+
+> **Most recent canon deltas — VX-336 (a RUN, 2026-10-14/15 overnight, `notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md`
+> — MCP wire tools & AI docs: VX-246's U5–U8 moved here by its ruling 3 (ratified, #226), VX-330 and VX-342 joined at her
+> word; her kickoff answers (VX-246's cast, "as sized", rule provisionally and continue), her ladder-cast word (a fresh
+> Fable at xhigh every round), her stargazing word (the page published by this run) and her overnight mandate; the
+> orchestrator's provisional rulings 1–2 (U9 joins with VX-361 · VX-362 · VX-363), ruling 3 superseded by her word;
+> units U5a · U5b · U6a · U6b · U7 + U7c · U8a · U8b · U9, each proven by red-on-old pins and a Mac batch with a
+> real-client live round on the dev store, both voices where a face changed, across five stage windows):** MCPSpec gains
+> THE WIRE TOOLS AND THE AI'S DOCS — the AI label form, `save_lens` by `label` or `pin_chosen`, the minted answers with
+> `section_id` and every worn tag, `insert_blocks`, `duplicate_note`, Compare from the wire and `link_versions`' Open ›,
+> the `sha256` write digest, paged and `ids_only` `read_note` bounded by the answer, `list_my_activity`, `apply_tag`'s
+> `changed: false`, no raw refusal on the wire, the book import's readable-books name check — plus the instructions
+> bound ≤3,000 with the one public-guide link (R-VX184-3/4; the page live 2026-10-15), the collapsed chapter row's marks
+> and `duplicate_note` in the pre-act flush list; AppSpec §12 unchanged. The shared refusal table gains nine sentences
+> (both platforms); the undo-overwrite warning says "before" (Mac and phone). Zero `Sync/`, custody, schema and
+> editor-seam lines; marker 13 untouched; zero lockstep. The ratify bundle QUESTIONS #227; «PR #N» (merge commit
+> «sha»). Before it — **VX-246 (a RUN,
+
+(Everything after it is unchanged: VX-246's entry keeps its text and its bold head, now read as "Before it — ".)
+
+**D2b — the roll (the 2026-09-26 rule as amended by VX-341: keep the most recent ~five, always the most recent MCP
+effort).** With VX-336 added, §14 holds six (VX-336 · VX-246 · VX-282 · VX-281 · VX-184 · VX-179): the OLDEST, VX-179,
+rolls.
+- In §14, delete the exact text from ` Before it — **VX-179 (a TICKET run, architect shape, 2026-10-12/13 overnight,` through
+  `PR #154 (merge commit d6caafc1).**` (the entry's last words, bold close included), and replace the closing italic
+  `*(Entries before VX-179 live verbatim in` with `*(Entries before VX-184 live verbatim in`.
+- In `notes/AppSpecDeltaArchive.md`, append at the end a new section, the removed text verbatim:
+  > ## Rolled at the VX-336 closeout (2026-10-15)
+  >
+  > Before it — **VX-179 (a TICKET run, … PR #154 (merge commit d6caafc1).**
+- **If VX-283 merges first** and rolls VX-179 itself, §14 then holds VX-283 · VX-246 · VX-282 · VX-281 · VX-184 under
+  this entry: roll **VX-184** instead (the same two steps, its exact text; the closing italic then names VX-281). The
+  most recent MCP effort stays in §14 either way (VX-336 itself).
+
+#### D3 — `notes/plans/run-finals-ledger.md`, the new section (newest first)
+
+Anchor: insert after the file's intro paragraph (the one ending "…append the finals/ladder text here in the same
+commit.") and its blank line, ahead of `## VX-246`:
+
+> ## VX-336
+>
+> the ladder «CLOSED at round N» — Fable xhigh R1 0B/1M/2m/2n (R1-1, U9's window then pending, closed by its evidence;
+> R1-2, the canon owed, landed in-branch before the merge; R1-4/R1-5 nits, no change; no code fix) → «Fable xhigh R2 …»
+>
+> Finals: on the tree merged with main, headless VariorumMCPTests «N/M» · core «N/M» · workbook «40/6»; Mac: the
+> merge-moment WHOLE target «N tests / M suites — issues incl. known; reds named, each standing on main (VX-115; VX-167;
+> VX-245/VX-283's lint sites)»; the phone suites U9 ran «120/15». Per window: U5 31 suites 251 (244 passed, 7 gated
+> skips) · U6 125 suites 790 (786 passed, the 2 standing reds VX-115 and VX-167, 2 gated skips) with every red run exact
+> · U7 21 suites 176 (173 passed, 3 gated) · U8 66 suites 432 (429 passed, 3 gated) with the old seed's red exact · U9
+> 121 suites 771 (765 passed, 6 gated) with the Mac red (20 issues) and the phone red (5) exact and the phone green
+> 120/15; every real-client leg proven from the wire's bytes.
