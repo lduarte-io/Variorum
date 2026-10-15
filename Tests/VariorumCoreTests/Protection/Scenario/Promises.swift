@@ -511,6 +511,8 @@ extension SWorld {
         // A Standard device's files tampered with (outside the claims — rule
         // 3), until a deliberate act mints a key past them (P-U4-10).
         if truth.tamperedStandard[device.name]?.contains(record.currentFingerprint) == true { return [] }
+        // A synced pair landed held: no sync round until Resume Sync.
+        if truth.heldLanding[device.name] == record.libraryID { return [] }
         var violations: [Violation] = []
         if let mode = vault.mode.settled, mode != record.mode {
             violations.append(Violation(promise: 7, device: device.name, detail: "the library is \(record.mode), the account \(mode)"))

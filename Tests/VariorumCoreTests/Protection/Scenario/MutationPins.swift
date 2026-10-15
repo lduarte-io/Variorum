@@ -296,22 +296,11 @@ struct ScenarioMutationPins {
         }
     }
 
-    /// "the old key's fold, then retirement — no stranded copy": the
-    /// retirement runs the moves again, so another library's copy keeps a road
-    /// of this Mac's own when the old shared key goes.
-    @Test func theRetirementRerunsTheMoves() async throws {
-        try await mutationPin("another library's copy keeps a road of this Mac's own", off: { $0.retirementRerunsMoves = false }) { guards in
-            let world = try scenarioWorld(guards: guards) { w in
-                try w.today(on: w.macA, TodaySpec(mode: .castle, gate: .touchID, olderKeys: [.standard]))
-                w.ensureOldShared(SWorld.appleA)
-            }
-            await world.done([.launch("macA")])
-            try world.todayOtherLibrary(on: world.macA, mode: .standard, passphrase: false, words: false)
-            await world.done([.retireOldSharedKey("macA"), .settle])
-            let gifts = world.macA.container.files.keys.filter { $0.hasPrefix("Backups/") && $0.hasSuffix(SPath.liveKeyFile) }
-            return (world, !gifts.isEmpty)
-        }
-    }
+    // "the old key's fold, then retirement — no stranded copy" and its pin
+    // (retirementRerunsMoves) — SUPERSEDED by her ruling of 2026-10-14 (the
+    // legacy cut, the plan's §8): the fold shrinks to the current key, and an
+    // old copy stranding at the retirement is the ruled, honestly-said outcome.
+    // The guard and its model code stay as built (phase 2 removes them).
 
     /// "delete on sight, by recorded id only": a Mac in Castle never deletes
     /// another Mac's own Apple key it can see (that Mac's library is in
@@ -331,7 +320,9 @@ struct ScenarioMutationPins {
 
     /// "this library's own Castle-era copy restored after a leave: ours by
     /// the family tree, opening with the passphrase or words, taking the
-    /// Standard mode, with no raise".
+    /// Standard mode, with no raise" — on a NEW-system pair (the backup is
+    /// this build's, after the migration), as her ruling of 2026-10-14
+    /// re-points it.
     @Test func ownCastleEraCopyRestoredAfterALeave() async throws {
         try await mutationPin("its own Castle-era copy opens as its own", off: { $0.ownLineByFamilyTree = false }) { guards in
             let world = try scenarioWorld(guards: guards) { try $0.today(on: $0.macA, TodaySpec(mode: .castle, gate: .touchID)) }

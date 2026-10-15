@@ -27,8 +27,11 @@ struct CopyAndCrossingScenarios {
         }
     }
 
-    /// "W-1 / VX-263": every copy keeps opening across re-keys — entering
-    /// Castle takes everything, Replace All Keys grows the history.
+    /// "W-1 / VX-263", re-pointed by her ruling of 2026-10-14 (the legacy cut):
+    /// every NEW-system pair keeps opening with its day's secrets across
+    /// re-keys — entering Castle takes everything, Replace All Keys grows the
+    /// history (every pair here is made by this build, after the migration;
+    /// promise 5 walks each).
     @Test func w1VX263() async throws {
         let (world, _) = try syncedWorld(.standard, devices: ["macA"])
         await world.done([.launch("macA"), .backup("macA"), .useCastle("macA", .touchID, newWords: false), .backup("macA"),
@@ -158,19 +161,12 @@ struct CopyAndCrossingScenarios {
         expectPromisesKept(world)
     }
 
-    /// "a Castle copy from another Mac into a Standard library (it raises,
-    /// never lowers)" — and "a copy made before this change, of another
-    /// library, Standard with no passphrase: it lands in Standard, never
-    /// Castle".
-    @Test func copiesFromElsewhereNeverLower() async throws {
-        let world = try scenarioWorld { w in
-            try w.today(on: w.macA, TodaySpec(mode: .standard))
-            try w.todayOtherLibrary(on: w.macA, mode: .standard, passphrase: false, words: false)
-        }
-        await world.done([.launch("macA"), .openOlderLibrary("macA")])
-        #expect(world.macA.slot?.record?.mode == .standard)
-        expectPromisesKept(world)
-    }
+    // "a copy made before this change, of another library, Standard with no
+    // passphrase: it lands in Standard, never Castle" — SUPERSEDED by her ruling
+    // of 2026-10-14 (the legacy cut, the plan's §8): a pre-rebuild copy opening
+    // is no longer a guarantee. (The raise — "a Castle copy from another Mac
+    // into a Standard library" — is CornerScenarios.aCastleCopyFromAnotherMacRaises,
+    // on new-system pairs.)
 
     /// "today's Standard library with an old marker — an old build's crashed
     /// act, migrated after today's finish runner is gone: never happened, so

@@ -126,6 +126,9 @@ struct Truth {
     /// from what the Mac remembers is the rollback's consequence, not a silent
     /// change (P-U4-6).
     var beforeRollback: [String: (mode: ProtectionMode?, account: String?)] = [:]
+    /// A synced pair landed HELD on a device (library id): no sync round until
+    /// the one Resume Sync press — promise 7 waits for it.
+    var heldLanding: [String: String] = [:]
     /// Every copy retention pruned: who, under which Mac, for which library.
     var prunes: [(by: String, mac8: String, library: String, copy: CatalogCopy)] = []
     /// Every copy opened into a library: the record before and after.

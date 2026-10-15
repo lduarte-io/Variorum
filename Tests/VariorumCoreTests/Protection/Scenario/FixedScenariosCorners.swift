@@ -111,29 +111,10 @@ struct CornerScenarios {
         }
     }
 
-    /// "an older library of another library, Standard with no passphrase: it
-    /// still opens after retirement, on its own key; and one whose library
-    /// later entered Castle: its pre-Castle copies stop opening through the
-    /// Apple account".
-    @Test func anOlderLibraryOfAnotherLibrary() async throws {
-        let world = try scenarioWorld { w in
-            try w.today(on: w.macA, TodaySpec(mode: .standard))
-            try w.todayOtherLibrary(on: w.macA, mode: .standard, passphrase: false, words: false)
-        }
-        // Use Castle's last step retires the old shared key (Standard has no
-        // retirement door of its own).
-        await world.done([.launch("macA"), .settle, .backup("macA"), .useCastle("macA", .touchID, newWords: false), .settle])
-        #expect(world.oldSharedKey(world.macA) == nil, "the old shared key wasn't retired")
-        let own = try #require(world.macA.slot?.libraryID)
-        let assessment = world.assessed(world.macA)
-        for copy in world.catalog(world.macA).copies where copy.library == own && world.truth.copies[copy.id]?.mode == .standard {
-            #expect(!(assessment.opensWith[copy.id]?.routes.contains { $0.opener.isApple } ?? false),
-                    "a pre-Castle copy still opens through the Apple account: \(copy.id)")
-        }
-        await world.done([.openOlderLibrary("macA")])
-        #expect(world.macA.slot?.libraryID != own && world.macA.slot?.record?.mode == .standard)
-        expectPromisesKept(world)
-    }
+    // "an older library of another library, Standard with no passphrase …; and
+    // one whose library later entered Castle …" — SUPERSEDED by her ruling of
+    // 2026-10-14 (the legacy cut, the plan's §8): pre-rebuild copies of other
+    // libraries no longer open on the new system; both variants removed.
 
     /// "the window after the move: the Mac is lost right after moving off the
     /// old key; the fresh pair opens its copies elsewhere".

@@ -418,6 +418,7 @@ extension SWorld {
                 let typed = TypedSecrets(passphrase: own.passphrase ?? acct.passphrase, words: own.words ?? acct.words)
                 return try await executor.resumeSyncAfterLanding(&library, typed: typed)
             }
+            truth.heldLanding[name] = nil
             // A secret made new at the landing became the account's (the
             // account's forgot road, as the landing said): the truth follows
             // whatever now opens the vault.
@@ -930,6 +931,7 @@ extension SWorld {
             try await executor.land(&library, pair: pair, opener: opener, typed: finalTyped, gate: device.biometry.enrolled ? .touchID : .alwaysAsk)
         }
         guard let record = device.library?.record else { return }
+        if record.account != nil { truth.heldLanding[device.name] = record.libraryID }
         // The landed library's own secrets on this Mac (a synced pair's
         // account keeps its own until Resume Sync).
         setKnown(holder(device, account: nil, libraryID: record.libraryID), passphrase: landed.passphrase, words: landed.words)
