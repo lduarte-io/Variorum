@@ -1081,24 +1081,17 @@ landed.
   P-U3-6 (a copy act that crashes before its swap rolls back and is redone) are the two calls with faces she would
   meet; both PROVISIONAL, options in the U3 record, QUESTIONS at the closeout.
 
-### U4 RECORD — PARTIAL (Opus implementer, 2026-10-14; stopped at a clean seam at `e281b846` so a closer session finishes)
+### U4 RECORD — the scenario world (Opus implementers, 2026-10-14/15: the U4 session, stopped at a clean seam at `e281b846`; the closer session from `03d8e3e4`)
 
-**Not done, first (the remaining work, in order).** (1) **The soak's untriaged finding:** `PROTECTION_SOAK=1
-PROTECTION_SEED=2 PROTECTION_SOAK_SEEDS=1 PROTECTION_SOAK_SEQUENCES=1000 swift test --filter GeneratorTests` fails at
-seed 2 sequence 432 (world seed 2000438, start "a phone on an older build beside a synced Castle Mac"), minimal sequence
-`crash(useStandard("macA"), afterWrites: 21)`, `signOut("macA")`, `setGate("macA", .alwaysAsk)` → promise 6 "an act is
-still in flight (leaveCastle)" + "copies are still paused": a synced leave crashed mid-rotation, then signed out — its
-resume needs the account's vault and can't read it. Triage it as every finding before it was (trace → code bug: a
-red-on-old pin in `FixedScenariosFound.swift`, then the fix; checker bug: fix the world): the open question is whether a
-synced act stuck mid-rotation while signed out may stay in flight (promise 6 exempts only offline) or must roll back /
-wait visibly — likely a P-U4 call for her. (2) **The soak, seed by seed** on the final tree: seeds 1–20 × 1000 × ≤ 60
-(`PROTECTION_SEED=n PROTECTION_SOAK_SEEDS=1`, one foreground call each — ~6 min a seed in Debug, under the tool's
-10-minute cap; record each seed's sequences, steps and wall time, and sum them), fixing what it finds the same way; then
-the same in `-c release`. A fix after a seed passed means re-running the seeds before it on the final tree. (3) **The
-runs:** the protection set in Debug (the suite-name filter: every `@Suite` type under `Tests/VariorumCoreTests/
-Protection/`, 65 suites today) and under `swift test -c release` (the DEBUG-only mutation suites compile out — DEBUG-only
-symbols are under `#if DEBUG`); the full core suite in Debug. (4) **The final record** (replace this one), §7's flip,
-`SubagentHandback`. QUESTIONS entries wait for the closeout (the merge-moment rule): P-U4-1…11 below.
+**Not done, first.** (1) DEFERRED — RATIFIED to phase 5 / VX-309 by the orchestrator (it joins the empty-slot landing
+there): §3.7's "a copy of a library this Mac remembers (the one in the slot, or ANY IT KNOWS) is re-encrypted under that
+library's current key" has no act in phase 1 — the executor opens only the slot's own line, so a library this Mac itself
+set aside (a landing put it in Previous Libraries) reopens as a DIFFERENT library under a fresh key with an empty history,
+and its own line's earlier key and that key's silent item stay outside the next Use Castle's history (promise 2; the
+soak's seed 9, sequence 232, traced). The generator does not reopen a library this Mac remembers until that road exists
+(`07a6101d`). (2) QUESTIONS entries for P-U4-1…15 wait for the closeout (the merge-moment rule). (3) The canon deltas this
+unit implies (design §4.1 promise 6's vault-reach qualifier; §3.2/§3.6/§3.13 the marker's two parts and, if ratified,
+P-U4-14's login-part predecessor) land at the merge moment.
 
 **What shipped** — `Tests/VariorumCoreTests/Protection/Scenario/`: `Fakes.swift`, `World.swift`, `OlderBuild.swift`,
 `Alphabet.swift`, `Promises.swift`, `Generator.swift` (the world, its alphabet, the thirteen promises + §3.9's vault
@@ -1106,44 +1099,65 @@ invariant, 17 starting states from the old formats, the seeded generator with sh
 count overrides), `WorldSmokeTests.swift`, the fixed scenarios (`FixedScenarios.swift` — migration; `…Devices.swift`;
 `…Accounts.swift`; `…Copies.swift`; `…More.swift`; `…Corners.swift`; `…Found.swift` — the generator's findings at their
 minimal sequences) and `MutationPins.swift` (DEBUG). The world's design notes: realistic resumes (she types the secret
-her press took — the plan's descriptor tells which); a crash can ride any act; the world runs the assessment's repairs
-after every act (the app's refresh); the truth tracks each holder's secrets with their timelines.
+her press took — the plan's descriptor tells which, and since the closer the locks under it this Mac holds, the memory's
+mirror included); a crash can ride any act; the world runs the assessment's repairs after every act (the app's refresh)
+and re-settles a waiting act at the next vault reach (sign-in, back online, the settle); the truth tracks each holder's
+secrets with their timelines; the vault fake answers only a session signed into the account, online.
+
+**The closer's model changes (Sources, beyond the bug fixes below).** HER RULING 2 — THE MARKER SPLIT (`f87db7c6`):
+`HardwareMarker` is now two salted parts (`hardware`, `login`; HMAC-SHA256 under the record's salt, one domain each);
+`IdentityResolution.anotherLogin` — this hardware's part under another login's part (a section or the memory item) mints
+its own identity and ADOPTS NOTHING (VX-340, no choice yet); other hardware is a replacement. P-U4-3's no-predecessor
+takeover is new hardware's alone. Pins re-pointed: `DeviceFactsTests.aSecondMacOSLoginStartsItsOwnIdentity` (its old
+assertion WAS the takeover), `newHardwareWithNoMemoryItemTakesOverWhatNeedsNoPredecessor`,
+`ProtectionGuardTests.hardwareMarker`, the scenario pin `theHardwareMarker` (adopts nothing; still failing with the guard
+off), `HardwareMarkerTests` (two parts, salted, no unsalted hash), the scans (both parts as log needles; no marker part
+outside this Mac's facts). HER RULING 1 — THE STUCK LEAVE (`1cf72df9`): `readVault` reads only the session's account
+(`ExecutorRefusal.vaultOutOfReach`, `VaultRefusal.notSignedIn` for the leaf); a synced resume that can't reach its vault
+ROLLS BACK before its commit point and past it runs what needs no vault, then WAITS NAMED (`SettleOutcome.waiting(act,
+account:)`); `ProtectionPlan.pastCommitPoint` is the one line both the executor and promise 6 read; Re-link-first inside
+Replace All Keys stamps `accountWriteBegun`; a resume of an unswapped re-key pauses copies again. Promise 6 gains her
+vault-reach qualifier (a synced act past its commit point whose account's vault this device can't reach — signed out,
+another account, offline — stays NAMED and WAITING: the section names it, its plan is the one named, the library is
+open, copies paused while unswapped; it finishes at the next vault reach). HER 2026-10-15 WIDENING (`41c9d63f`): the
+older-build acts left the generator's alphabet (an older device only updates); the older-build fixed scenarios and the
+door-time-vault-check pin are marked "beyond scope, kept while green" — all stayed green.
 
 **§6's fixed scenarios → tests.** Every sentence is a named test (or a named mutation pin that runs it guarded first),
-in the files above — doc comments quote the sentence. Her 2026-10-14 ruling (the legacy cut, the block below):
-SUPERSEDED, removed and marked in place — "the old key's fold, then retirement — no stranded copy" and its pin
-(`retirementRerunsMoves`); "an older library of another library … (both variants)"; "a copy made before this change,
-of another library, … lands in Standard". RE-POINTED (already on new-system pairs, docs say so) — W-1/VX-263
-(`CopyAndCrossingScenarios.w1VX263`); "this library's own Castle-era copy restored after a leave"
-(`ScenarioMutationPins.ownCastleEraCopyRestoredAfterALeave`). Kept as §6 says with a QUESTION for the closer/orchestrator
-(class unclear under the cut): the mutation pin `giftsOnlyForThisMacsCopies` (the gift machinery drops at phase 2) and
-"the window after the move" (its fresh pair is the new build's) and "iCloud Keychain off … the retirement lists the
-library" (current stores) — all three kept. Not covered: the "synced store whose old rotation still stands on the
-server" is covered by `CornerScenarios.anOldRotationStillStandingOnTheServer` (today's rotation built with
-`VaultModel.rotationBegin` and today's marker); nothing else is uncovered.
+in the files above — doc comments quote the sentence. Her 2026-10-14 ruling (the legacy cut): SUPERSEDED, removed and
+marked in place — "the old key's fold, then retirement — no stranded copy" and its pin (`retirementRerunsMoves`); "an
+older library of another library … (both variants)"; "a copy made before this change, of another library, … lands in
+Standard". RE-POINTED (already on new-system pairs, docs say so) — W-1/VX-263 (`CopyAndCrossingScenarios.w1VX263`); "this
+library's own Castle-era copy restored after a leave" (`ScenarioMutationPins.ownCastleEraCopyRestoredAfterALeave`). KEPT
+(the orchestrator's adjudication): `giftsOnlyForThisMacsCopies`, "the window after the move", "iCloud Keychain off … the
+retirement lists the library". Her 2026-10-15 widening: BEYOND SCOPE, KEPT WHILE GREEN — `anOlderBuildCompletingALeavesRotation`,
+`anOlderBuildsRelinkAndTheLastStepRace`, the older-build half of `followersAnchorsOpenWithWhatOpenedThem`, the
+not-updated variant of `twoLibrariesOnOneAppleAccount`, the pin `anOlderBuildsRelinkLandsTheVaultOnTheOldKey`, and (an
+old backup — a pre-migration snapshot) `aRollbackPastUseCastleToTodaysFilesKeepsTheKeysBirth`. Nothing uncovered.
 
 **Mutation pins (21 after the cut; each green guarded, FAILING with its guard off — the failing assertion is the pin's
 sentence, `#expect(holds)` false or a promise violation):** planNamedBySection (a replayed genuine plan turns the export
 on) · twoHomes (a replayed memory item turns the export back on) · hardwareMarker (a second login adopts the first's
-section) · noRepairMakesTouchID + repairNeverMakesTouchIDItem (a Touch ID item made by a repair) · noRearmWithoutItem
-(the re-arm asked with no item) · rekeyAtEveryCrossing (a leave keeps the key) · anchorCarriedByEveryRekey (the anchor
-dropped) · familyTreeTwoHomes (later copies read foreign after a rollback) · exportOffAtCastle (the export stays on) ·
-everyOwnKeyRetiredAtCastle (Re-link's second own key survives Use Castle) · doorTimeVaultCheck (Use Castle passes a
-vault on the old key) · moveKeepsOldWrap (the old wrap dropped) · freshPairAfterMove (no fresh pair) ·
+section — strengthened by the closer: it must adopt NOTHING, no export, no keys) · noRepairMakesTouchID +
+repairNeverMakesTouchIDItem (a Touch ID item made by a repair) · noRearmWithoutItem (the re-arm asked with no item) ·
+rekeyAtEveryCrossing (a leave keeps the key) · anchorCarriedByEveryRekey (the anchor dropped) · familyTreeTwoHomes (later
+copies read foreign after a rollback) · exportOffAtCastle (the export stays on) · everyOwnKeyRetiredAtCastle (Re-link's
+second own key survives Use Castle) · doorTimeVaultCheck (Use Castle passes a vault on the old key — beyond scope since
+2026-10-15, kept while green) · moveKeepsOldWrap (the old wrap dropped) · freshPairAfterMove (no fresh pair) ·
 giftsOnlyForThisMacsCopies (a gift for another Mac's copies) · pruneOwnCopiesOnly (another Mac's copies pruned) ·
 followerAnchorTypedLock (the follower's anchor won't open with the typed secret) · castleKindCustodyThroughLeave (silent
 sync keys in a leave's window) · leaveIDGatesCompletion (the previous key cleared with no wrap for the id) ·
 deleteOnSightByIDOnly (another Mac's own key deleted) · ownLineByFamilyTree (the own Castle-era copy refused as
 foreign) · libraryFileLosesToMemory (a replayed library file lowers the mode — U4's own guard).
 
-**The code bugs the world found — 37, each pinned red-on-old by the named test (watched failing on the tree before its
-fix), then fixed; U1–U3's suites green after each.** Before the partial record (14): the move skipping the live
+**The code bugs the world found — 52, each pinned red-on-old by the named test (watched failing on the tree before its
+fix), then fixed; the protection set green after each.** Before the partial record (14): the move skipping the live
 library's own key; corner 45's leave keeping today's silent item (P-U4-2); a replacement Mac taking over nothing
 (P-U4-3); the migration taking the vault's word over the custody shape (P-U4-4) and copying a mismatched words copy;
 Replace All Keys refusing inside its plan; the key doors stuck offline on Always ask; key file + memory both deleted;
 today's sync custody surviving Use Castle; the doors blind to a moved account; the key doors without a follow-owed
-check; ConfirmMode skipping the deferred steps; the settings act's plan-less finish; a stray staged file. Since (23):
-This Mac Only into Castle (signed out) retiring the old shared key an account still stood on
+check; ConfirmMode skipping the deferred steps; the settings act's plan-less finish; a stray staged file. The partial's
+next 23: This Mac Only into Castle (signed out) retiring the old shared key an account still stood on
 (`thisMacOnlyCastleFromAStandardAccount`); a library file replayed alone in Castle lowering the mode
 (`aLibraryFileReplayedAloneInCastle` — new repair `rekeyOlderLibraryFile`, guard `libraryFileLosesToMemory`, P-U4-6);
 the finish-leaving door refused while the follow was owed (`aFollowerMeetingARotationInProgress`); a wiped keychain
@@ -1166,46 +1180,158 @@ Castle's retirement never run after a replacement (`aReplacementFinishesUseCastl
 `retireOwnAppleKeys`); a held synced landing writing an Apple wrap (`aSyncedStandardPairLandsHeldAndFinishes`); a
 rollback to today's files recorded Castle over an Apple wrap (`aRollbackPastUseCastleToTodaysFilesKeepsTheKeysBirth`,
 P-U4-4 refined again); a rotation's first write refusing instead of rolling back when the account moved
-(`aLeaveCrashedBeforeItsFirstWriteRollsBackWhenTheAccountMoved`). `git log --oneline 6020391b..e281b846` lists each
-commit with its mechanism and pin.
+(`aLeaveCrashedBeforeItsFirstWriteRollsBackWhenTheAccountMoved`). THE CLOSER'S 15 (all in `FixedScenariosFound.swift`,
+each commit naming its mechanism): (1) the stuck leave, her ruling 1 — a signed-out resume read and rotated the vault,
+stuck past a commit point, named by no outcome, with copies running — `aSyncedLeaveCrashedPastItsFirstWriteWaitsForTheVault`,
+`aSyncedLeaveCrashedBeforeItsFirstWriteRollsBackWhileSignedOut`, `copiesStayPausedWhileAnActWaitsAcrossARelaunch` (+
+`aWaitingLeaveIsFinishedByAnotherDeviceThenAtSignIn`) — `1cf72df9`; (2) a landing resumed at its swap carried the
+OUTGOING library's section into the landed one (`aLandingResumedAtItsSwapKeepsTheLandedSection`, `e7ce22d6`); (3) a Mac
+replaced mid Use Castle with no memory item lost the outgoing key file — the plan now carries it
+(`ActParameters.outgoingKeyFile`; `aMacReplacedMidUseCastleWithNoMemoryGetsItsKeyFileBack`, `81924cae`); (4) Re-link's
+arm unoffered for a local Standard library whose live file has no Apple wrap and whose Mac reads no own key
+(`aReplacedMacIsOfferedReLinkForALocalLibraryWithNoAppleWrap`, `3bff0ba5`); (5) a resumed New Words refreshed the master's
+words copy from a vault whose master isn't the file's (`newWordsResumedPastAnotherDevicesLeaveKeepsTheWordsCopyHonest`,
+`0c92fe01`); (6) Set Up Sync stuck on its lost account key — one minter, mint afresh
+(`aSetUpWhoseAccountKeyWasLostMintsAfresh`, `b503826a`); (7) a no-predecessor replacement dropped a STANDING old-shared
+record (P-U4-9 extended; `aReplacementKeepsTheOldSharedKeysStandingRecord`, `a7271412`); (8) the migration with no vault's
+word recorded Castle over an Apple wrap (P-U4-4 extended; `aStandardBornKeyStaysStandardWithNoVaultToAsk`, `e3ea2b78`);
+(9) a key door whose account moved before its vault write stuck — it rolls back as a rotation's first write does
+(`aKeyDoorWhoseAccountMovedBeforeItsVaultWriteRollsBack`, `be0c4231`); (10) a resumed follow recorded the vault as read
+NOW, hiding the follow still owed — acts record the keys they TOOK (`ActParameters.followedCorpusKeyID`;
+`aFollowResumedPastAnotherReplacementStillFollows`, `a897833f`); (11) a no-memory replacement never named its predecessor
+(P-U4-14; `aReplacementWithNoMemoryNamesItsPredecessorByTheLogin`, `d69e28f3`); (12) an offline retirement's door-time
+read threw and stuck the act (`anOfflineRetirementResumeTakesItsOwnKnowledge`, `1264931e`); (13) a resume whose live
+outgoing file lost the anchor its plan recorded (a Time Machine restore) writes it again first
+(`aLeaveResumedAfterARestoreTookItsAnchorWritesItAgain`, `8dd79259`); (14) another identity's replayed memory item took
+the account through the memory-wins repair — only THIS Mac's memory speaks
+(`anotherIdentitysMemoryItemNeverRestoresTheRecordsFacts`, `4fa3c682`); (15) a rolled-back landing restored the outgoing
+key file only from a wiped mirror — the plan's copy too (`aRolledBackLandingRestoresTheOutgoingKeyFileFromItsPlan`,
+`6128c8de`).
 
-**PROVISIONAL calls (options for QUESTIONS at the closeout):** P-U4-1 a retirement's delete that never reached iCloud,
+**The checker and world findings the closer fixed in the world (17 — no model change; each kept as a fixed scenario):**
+a crashed landing's made-new passphrase dropped from her truth (`aCrashedLandingsMadeNewPassphraseStaysHers`); a Time
+Machine restore past a Castle stretch is the stated limit (P-U4-12; `aTimeMachineRestorePastACastleStretchIsTheStatedLimit`);
+a held landing waits for Resume Sync before promise 3 (`aHeldLandingWaitsForResumeSyncBeforeStandardMeansStandard`), and
+is held from its press (`aCrashedHeldLandingIsHeldWhenItsResumeFinishes`); a sent Standard pair is the sender's own
+(promise 13; `aSentStandardPairIsTheSendersOwnAfterALeave`); a secretless library restored by Time Machine past Use Castle
+(P-U4-13; `aTimeMachineRestorePastUseCastleOfASecretlessLibrary`); her vault road while signed out
+(`aSignedOutDeviceStillHasTheVaultRoad`) and §3.5a's residue for a silently-joined device
+(`aSilentlyJoinedDeviceBehindANewMasterIsTheStatedResidue`); a copy's own library's secrets on a dated day and a held-here
+day (`anAsideLibrarysCopyNamesItsOwnLeaveDay`, `aRolledBackOverLandingsCopyNamesItsOwnWords`); the stated limit releases
+exactly what the restored state reached through Apple in its day — its key and its key file's history, never an anchor's
+(`bothHomesRolledBackOverAVX209VictimIsTheStatedLimit`); she types the passphrase her press took against the mirror's lock
+(`aKeyDoorResumedAfterATimeMachineRestoreFinishes`); a retirement that couldn't reach its key is a delete never carried
+(P-U4-1's class; `aRetirementThatCouldNotReachItsKeyIsADeleteNeverCarried`); a Standard tamper before a Castle stretch is
+theirs already in promise 13 too (`aStandardTamperBeforeACastleStretchIsTheirsAlready`); every Apple account of hers counts
+among her roads (`aFormerAppleAccountStillOpensItsCopies`); a lock clears the process's copy pause
+(`aReplacedMacDoesNotInheritTheCopyPause`); the pre-tamper open's resume is settled first
+(`aResumeBeforeATamperSettlesHerNewWordsFirst`). SUPERSEDED by her cut (an old backup): a pre-migration Time Machine
+snapshot restored over the migrated store (seed 3, sequence 724 — the generator snapshots only a migrated store,
+`e6077c2d`).
+
+**PROVISIONAL calls (options for QUESTIONS at the closeout).** P-U4-1 a retirement's delete that never reached iCloud,
 then a leave — (b) the checker exempts it, stated residue [chosen]; (a) delete on sight in Standard too; (c) the leave
-re-deletes retired ids first. P-U4-2 the leave retires today's silent item holding the outgoing Castle key [chosen]; or
-a stated corner-45 residue. P-U4-3 a new identity with no predecessor takes over the live wrap's own key and every
-retired id, starting on Always ask [chosen]; (b) take over nothing; (c) RECOMMENDED: split the marker into hardware and
-login parts. P-U4-4 (refined twice) the migration records the key's birth over the vault's word when the KEY FILE says
-it (an Apple wrap ⇒ Standard-born) or the file and custody agree on Castle, and owes the follow [chosen]; or take the
-vault's word (the literal step 2 — today's silent follow). P-U4-5 after both homes roll back past Use Castle, Re-link's
-library arm re-wraps the pre-Castle key under Apple — (a) accept and restate the limit [recorded]; (b) ask the
-passphrase or words first; (c) offer it only from Settings. P-U4-6 a library file older than what this Mac remembers
-(by key epoch, or the same key with a newer section) loses to the memory: re-keyed under the current key / its facts
-taken back [chosen]; (b) refuse it and offer the newest copy; (c) believe the file (today). A file whose key only the
-ANCHOR reaches (from before a leave) is NOT re-keyed (that would expose Castle-era content silently) — it stays as the
-replayed Castle record, out of the Standard device's claims (P-U4-10). P-U4-7 (folded into P-U4-4's refinements — no
-separate call). P-U4-8 a Time Machine rollback past a leave keeps the later Standard stretch's silent item (it holds
-only what was Apple-reachable by design) [chosen]; or a repair that deletes it once each such copy keeps another road.
-P-U4-9 a replacement Mac takes over the predecessor's old-shared-key record, or with no predecessor a retirement any
-section of this library's record lists, by id [chosen]; (b) the predecessor's only — no predecessor, the door and §3.1's
-first exception show again; (c) leave it. P-U4-10 a tamper on a Standard device (rule 3: that person holds the key) sits
-outside promises 3 and 7 until a key is minted past it; the lobby could offer the newest copy under the current key
-(hand-forward). P-U4-11 an unconfirmed synced library whose vault answers the other mode owes the ORDINARY FOLLOW (§3.13
-step 1) [chosen — U2's `aSyncedUnconfirmedModeWaitsForTheVault` restated]; or keep `confirmMode(isKeyChange: true)`
-and give it a door.
+re-deletes retired ids first. THE CLOSER: a second road into the class — a retirement recorded while this Mac is on
+another Apple ID, its delete unable to reach the key there, then back to that Apple ID and a leave (seed 6, sequence
+485) — read the same way under (b); option (c) would close both. P-U4-2 the leave retires today's silent item holding
+the outgoing Castle key [chosen]; or a stated corner-45 residue. P-U4-3 RESOLVED by her ruling 2 (2026-10-14/15, split
+the marker): another login on this hardware adopts nothing; the no-predecessor takeover (the live key file's wrap ids,
+every retired id, Always ask) is new hardware's alone. P-U4-4 (refined twice, EXTENDED by the closer) the migration
+records the key's birth when the KEY FILE says it (an Apple wrap ⇒ Standard-born) or the file and custody agree on
+Castle — over the vault's word, and (the closer, seed 9) with NO vault's word too, where today's rule reads a missing
+silent item as Castle [chosen]; or take the vault's/today's reading (the literal step 2). P-U4-5 after both homes roll
+back past Use Castle, Re-link's library arm re-wraps the pre-Castle key under Apple — ACCEPTED AND STATED by her
+(2026-10-14/15): §3.6's stated limit. P-U4-6 a library file older than what this Mac remembers loses to the memory
+[chosen]; (b) refuse it and offer the newest copy; (c) believe the file — and (the closer, seed 17) only THIS Mac's own
+memory speaks (another identity's replayed item never). A file only the ANCHOR reaches stays the replayed record
+(P-U4-10). P-U4-7 (folded into P-U4-4). P-U4-8 a Time Machine rollback past a leave keeps the later Standard stretch's
+silent item [chosen]; or a repair that deletes it once each such copy keeps another road. P-U4-9 a replacement Mac takes
+over the predecessor's old-shared-key record, or with no predecessor a retirement any section lists — and (the closer,
+seed 7) failing that a STANDING record any section lists, so the door and §3.1's first exception still show [chosen];
+(b) the predecessor's only; (c) leave it. P-U4-10 a tamper on a Standard device sits outside promises 3 and 7 until a key
+is minted past it — and (the closer, seed 6) outside promise 13 for the keys it took; the lobby could offer the newest
+copy (hand-forward). P-U4-11 ACCEPTED by the orchestrator: an unconfirmed synced library whose vault answers the other
+mode owes the ORDINARY FOLLOW (§3.13 step 1).
 
-**Hand-forwards noticed, not built:** Land writes the landed key file over the outgoing one's before the swap (the
-outgoing library aside keeps only its custody and pairs as roads — phase 5, VX-309); a crashed landing rolls back
-(the pair's key is never stored) — its face should say so and offer the press again; an act whose resume needs re-typed
-secrets stays in flight until she types them — phase 3/5's face (a cancel that rolls back, before the commit point);
-an older build's Re-link on a Castle account exposes the Castle-era master exactly as its leave does — §8's exception
-names only a leave or a follow (her wording call); U3's `ExecutorWorld`/`EX`/`CrashHarness` kept as the executor's unit
-scaffolding beside the scenario world (the brief said "replace"; PROVISIONAL — options: port U3's tests onto the world,
-or keep both [chosen]).
+THE CLOSER'S NEW CALLS: **P-U4-12 — a Time Machine restore of the container past a Castle stretch** (her act — the
+library file and its key file back together, the open believing them, P-U4-8): its own Apple key was retired at Use
+Castle, so Re-link's library arm re-wraps the restored Standard key and the restored state's copies open through Apple
+again — read as P-U4-5's accepted limit, releasing exactly what that state reached through Apple in its day (its key
+and its key file's history, never an anchor's). (a) accept as the stated limit [chosen]; (b) refuse Re-link's arm for a
+key this Mac's section records retired by a Castle entry, offering the newest copy instead; (c) re-key the restored file
+under the memory's current key (a road only the anchor gives — it would expose Castle-era content). **P-U4-13 — a
+secretless library (today's exposed shape) restored by Time Machine past its Use Castle:** the Castle key file whose
+history held the old key went with the restore, the old key's only road was the Apple key Use Castle retired, so the
+restored library and its copies open by no road on this Mac. (a) read as promise 5's exception ("a Standard copy made
+with no passphrase or words once its own Apple key and this Mac's are both gone"), narrowly — a device restored past a
+crossing [chosen]; (b) RECOMMENDED for phase 2's lobby: count this Mac's memory mirror of the key file as a road (§3.3's
+"rolled back by Time Machine, still opens" favours it — the mirror holds the Castle key's history); (c) a world whose
+Time Machine restores only the library file. **P-U4-14 — the login part names the predecessor:** with no memory item (a
+real replacement — Migration Assistant carries none), a record section on OTHER hardware under THIS login's part is this
+login's previous Mac: named the predecessor, its own keys taken over (seed 11: Use Castle crashed past its swap, the Mac
+replaced — the new identity never learned the predecessor's own keys, the pre-Castle copies stayed Apple-reachable).
+(a) the login part names it [chosen]; (b) the letter of §3.5 — only the memory item names a predecessor; the
+predecessor's own keys a stated residue; (c) take over every own key any section on other hardware lists. Phase 2's leaf
+check of GeneratedUID's lifecycle (P-U1-1) now also decides this one: whether Migration Assistant carries GeneratedUID.
+**P-U4-15 — the commit point of an act whose vault is out of reach:** `ProtectionPlan.pastCommitPoint` = the library
+swapped to the act's new key, OR an act that re-keys nothing (the plan-less rule's "committed"), OR the account's first
+vault write begun (stamped before the write: a rotation's `newCorpusKeyID`, Re-link-first's `accountWriteBegun`). (a) so —
+an act that re-keys nothing waits rather than rolls back [chosen]; (b) stamp every vault write and roll a re-key-nothing
+act back when none began. Not product, recorded: the plan carries the outgoing key file (`outgoingKeyFile`) and the
+followed corpus key id (`followedCorpusKeyID`) — non-secret, sealed with the plan.
 
-**Machinery notes.** Two sessions' worth of context (the first compacted at ~920k). Generator cost: ~8 ms a step in
-Debug (seed 1 × 1000: 44,873 steps, 357.8 s); a 20-seed soak is ~2 h in Debug, one seed per foreground call. The
-protection set in Debug: 376 tests in 65 suites green at `e281b846`. Release, the full core suite and the soak: not yet
-run (above).
+**Hand-forwards noticed, not built:** RATIFIED to phase 5 / VX-309 (the orchestrator's word): reopening this Mac's own
+set-aside library under its current key (§3.7's "any it knows" — the first line above). Phase 3/4: the waiting act's face
+("Finish leaving Castle — sign in to finish", from `SettleOutcome.waiting`) and the cancel-before-commit-point; the vault
+leaf refusing an unauthenticated session (`VaultRefusal.notSignedIn`). Phase 2/3: the app re-settles a waiting act at the
+next vault reach (sign-in, back online). Phase 2: the lobby's memory-mirror road (P-U4-13 (b)); the GeneratedUID
+carry-over check (P-U4-14). From the partial: Land writes the landed key file over the outgoing one's before the swap
+(phase 5, VX-309 — the closer's roll back now restores it from the plan); a crashed landing rolls back — its face should
+say so; an act whose resume needs re-typed secrets stays in flight until she types them — phase 3/5's face; the §8
+older-build-Re-link sentence — WAIVED by her (2026-10-14/15, "there will not be older build's relinking"); U3's
+`ExecutorWorld`/`EX`/`CrashHarness` KEPT beside the world (the orchestrator's adjudication).
+
+**THE SOAK — the go/no-go's item 1 (seeds 1–20 × 1,000 sequences × ≤ 60 steps, `PROTECTION_SOAK=1 PROTECTION_SEED=n PROTECTION_SOAK_SEEDS=1`, one seed per call, on the FINAL TREE `6128c8de` — code; every later commit is a record).** Steps are identical in both configurations (the generator is deterministic). Seconds are the test time; wall includes the build check (Release seed 1 includes the release build).
+
+| seed | sequences | steps | Debug s | Debug wall | Release s | Release wall |
+|---|---|---|---|---|---|---|
+| 1 | 1000 | 45136 | 352.7 | 359 | PENDING | PENDING |
+| 2 | 1000 | 44823 | 349.2 | 356 | PENDING | PENDING |
+| 3 | 1000 | 44708 | 338.8 | 344 | PENDING | PENDING |
+| 4 | 1000 | 45177 | 336.5 | 342 | PENDING | PENDING |
+| 5 | 1000 | 45005 | 340.8 | 347 | PENDING | PENDING |
+| 6 | 1000 | 45093 | 345.9 | 352 | PENDING | PENDING |
+| 7 | 1000 | 45014 | 348.8 | 355 | PENDING | PENDING |
+| 8 | 1000 | 44547 | 339.1 | 345 | PENDING | PENDING |
+| 9 | 1000 | 45031 | 343.8 | 350 | PENDING | PENDING |
+| 10 | 1000 | 45065 | 349.3 | 356 | PENDING | PENDING |
+| 11 | 1000 | 44813 | 346.1 | 352 | PENDING | PENDING |
+| 12 | 1000 | 45038 | 344.3 | 351 | PENDING | PENDING |
+| 13 | 1000 | 44956 | 363.7 | 373 | PENDING | PENDING |
+| 14 | 1000 | 45241 | 368.3 | 376 | PENDING | PENDING |
+| 15 | 1000 | 44985 | 381.0 | 389 | PENDING | PENDING |
+| 16 | 1000 | 44803 | 368.4 | 373 | PENDING | PENDING |
+| 17 | 1000 | 44240 | 345.1 | 352 | PENDING | PENDING |
+| 18 | 1000 | 44925 | 341.2 | 346 | PENDING | PENDING |
+| 19 | 1000 | 45039 | 407.9 | 414 | PENDING | PENDING |
+| 20 | 1000 | 45245 | 356.5 | 363 | PENDING | PENDING |
+| **total** | **20,000** | **898,884** | **7,067.4** | **7,195** | PENDING | PENDING |
+
+**THE RUNS (on the final tree):** the protection set in Debug — PENDING; under `swift test -c release` — PENDING;
+the full core suite in Debug — PENDING.
+
+**Commits:** the partial's (`git log --oneline 6020391b..e281b846`, then `efd45ff7`, `3a970ec1`) and the closer's
+(`git log --oneline 03d8e3e4..HEAD`): (h) the marker split `f87db7c6`; (i) the stuck leave `1cf72df9`; the 60-sequence
+sweep's world finding `76d60234`; her 2026-10-15 widening `41c9d63f`; then one commit per soak finding — `e7ce22d6`,
+`8c450e8c`, `db61482d`, `e3b3ebbb`, `81924cae`, `207c6297`, `e1ed8c6a`, `709ec222`, `9a42aa3c`, `e6077c2d`, `3b533d9c`,
+`3bff0ba5`, `9a735ad7`, `65c12631`, `0c92fe01`, `79dd9cc6`, `b503826a`, `b69e051f`, `e5ee9401`, `a7271412`, `8c333f4e`,
+`07a6101d`, `ce3a3d71`, `e3ea2b78`, `be0c4231`, `a897833f`, `d69e28f3`, `4615ceb5`, `1264931e`, `8dd79259`, `4fa3c682`,
+`6128c8de` — and the LIVE STATUS flips between them; every commit pushed as it landed.
+
+**Machinery notes.** The closer ran across usage-limit deaths; everything was on origin at each. Generator cost: ~7–8 ms
+a step in Debug, ~5 ms under `-c release`; a passing Debug seed runs ~340–410 s, a failing one longer (the shrink) —
+past the tool's 10-minute cap, so seeds ran as background processes with a foreground wait (one at a time, never two
+builds at once). One commit message (`8dd79259`) says 412 tests where the run said 411 — the record's counts are the runs'.
 
 ### HER RULING, 2026-10-14 (mid-U4, to the orchestrator) — THE LEGACY CUT
 
