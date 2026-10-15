@@ -170,7 +170,7 @@ guidance. Each unit's evidence is named before its spawn.
 | U6 — Compare from the wire (+ VX-330, VX-342) | **PROVEN 2026-10-14 17:52–18:35** (U6 STAGE RUN). The 125-suite batch: 790 tests, 786 passed, 2 gated skips, 2 standing reds (VX-115, VX-167; neither on U6's paths). Every red run exact: U6a's router clears (9 pairs), U6b Mac (15), the phone (4), the phone green 18/3. The live round passed in both voices: L0–L5 (`duplicate_note` with her ⌥⌘Z/⇧⌥⌘Z, the AI's edit on the copy, Compare aligned on lineage with related-only on, an unrelated pair with it off, `link_versions`' Open › opening Compare, not-frontmost moving nothing); VX-330's walk (all twelve of sherlock's collapsed chapter rows wear the shared icon, the waiting mark on one, pressed, Don't allow clearing it); VX-342's "before" seen. The store was restored cmp-SAME. Built: U6a `2836171c`…`48e250e0`, U6b `12efb039`…`a1a094dc` |
 | U7 — the agent's read-backs | **PROVEN 2026-10-14 20:44–21:12 EXCEPT THE CAP** (U7 STAGE RUN). Batch 176/173, 0 failed. L1 (15/15 digests equal from the wire), L2a (6 inline pages of 50 = block_count 300), L3 (ids_only at limit 100, 300/300 equal), L4 (a killed create, found by `list_my_activity`), L5 (a refused row title-less; reads only with `include_reads`) all PROVEN. **THE CAP FAILED:** a budget-ended page (32,000 characters of take text, about 65k answer) spills past Claude Code 2.1.300's inline limit, which sits between 43,062 (inline) and 50,984 characters (spilled); `ids_only` at limit 200 spills too. → **U7c**, the cap fix (THE ORCHESTRATOR ON U7's WINDOW) · **U7c BUILT** (`0b1be274`…`12df7a8c`): the page budget bounds the whole serialized answer at 32,000 characters (UTF-16 units); 8 pins red on old, 3 of builder B's re-pinned; revert check in 4 arms; MCP 329/66 · core 2,871/333 · workbook 40/6; the orchestrator re-ran the paging suites, 25 green. Its RE-PROBE rides U8b's window |
 | U8 — the AI's docs (LAST) | **PROVEN 2026-10-14 23:07–23:33** (U8 STAGE RUN). 66-suite batch 432/429, 0 failed; the red run exact on the old seed; Restore Tutorial minted a fresh guide (the old one in the Trash with 30 days); the chapter walked word for word in Study and Terminal; the instructions read from bytes at 2,969 with the link last; **U7c's RE-PROBE: all three pages INLINE** (71 blocks / 31,825 · the same · ids_only 115 / 31,751). The organization ask did the advice unprompted (a book with a tag rule + outflow, a summary note filed) but met two pre-existing wire truths → **U9** (VX-361, VX-362) |
-| U9 — two wire truths from U8's round | NOT-STARTED — VX-361 (create_note's `tag_ids` misses the outflow's tags) · VX-362 (an unworded refusal reaches the wire raw; `alreadyTagged` seen live). U9 BRIEF below |
+| U9 — wire truths from U8's round | DESIGNED, FORKS RULED (U9 UNIT RECORD piece 0 `cd11c83e`; THE ORCHESTRATOR'S RULINGS ON U9's FORKS). Members VX-361 · VX-362 · **VX-363** (joined: the import's book-name fence leak). A FRESH builder takes pieces 1–7 |
 | LADDER | NOT-STARTED — after U9 |
 | CLOSEOUT | NOT-STARTED |
 
@@ -270,6 +270,11 @@ guidance. Each unit's evidence is named before its spawn.
    and refusals this run reshaped (VX-252's answer; the wire every new tool speaks through). A fix is cheapest while
    that code is open (her rider rule), and the ladder then reviews it with the rest. Option: (b) ticket them for
    later and merge without them.
+2. **VX-363 joins U9 (2026-10-14 ~23:58):** U9's design traced a FENCE LEAK. `import_document`'s book form checks the
+   name against every live book, so a book the client can't read blocks the name and is named back (VX-259 missed this
+   road). It is the same class VX-246 fixed, on a road this run's tools speak through, and a fence breach is a launch
+   matter, so it is fixed in-run, red-first. Pre-launch is HER call on the ticket (High, flagged). Option: (b) ticket
+   it for later.
 
 ## Tickets minted from this run
 
@@ -278,6 +283,9 @@ guidance. Each unit's evidence is named before its spawn.
 | (VX-122) | U7 STAGE RUN noticed 1 | NOT minted: a comment on VX-122 (Parked, a live Library misses revivals). An open Library list didn't show two wire-made notes until re-entered; it may be the same class (outside inserts) | a comment; split off if VX-122's fix doesn't cover it |
 | VX-361 | U8 STAGE RUN, the organization leg (F1) | `create_note`'s answer says `tag_ids: []` when the book's outflow tags the note in the same act | a MEMBER (sub-issue), U9; Bug · Confirmed · MCP · Medium |
 | VX-362 | U8 STAGE RUN, the organization leg (F2) | An unworded refusal reaches the wire as a raw Swift case (`Refused: alreadyTagged(...)`) | a MEMBER (sub-issue), U9; Bug · Confirmed · MCP · Medium |
+| VX-363 | U9's design (OWED 1) | `import_document`'s book form checks the name against every book, naming one the client can't read (VX-259 missed this road) — a fence leak | a MEMBER (sub-issue), U9; Bug · Suspected (until pinned) · MCP · High; Pre-launch her call |
+| VX-364 | U9's design (OWED 2) | A book whose wing pointer dangles refuses any outflow with `tagNotFound` (`set_book_rule` and her Save) | Todo, 13n, Bug · Suspected · Books · Low; not this run's |
+| VX-365 | U9's design (OWED 4) | `add_note_to_book`'s answer doesn't say the outflow tagged the note (VX-361's class, kept out of scope) | Todo, 13n, Improvement · Suspected · MCP · Low |
 | VX-357 | U7 builder A's U+0000 check | Text containing U+0000 is stored truncated at the NUL (GRDB binds text with length -1); VX-254's digest overclaims for such a take | Todo, 13n, Bug · Confirmed · MCP · Medium; Pre-launch is her call; pinned as a known issue |
 | VX-358 | U7 builder A's OWED 3 | `edit_take` / `restore_commit` treat an NFC↔NFD re-spelling as no change, so the digest differs from what the client sent | Todo, 13n, Improvement · Suspected · MCP · Low |
 | VX-355 | U6 STAGE RUN (the runner's note 2) | The Pool has no bottom bar, so receipts (an AI's, her undo's) show nowhere while it's open | Todo, 13n, Improvement · Confirmed · Library & sidebar · Low |
@@ -5889,3 +5897,30 @@ is built headless at piece 6.
    it." For VX-234's eye; no ticket proposed.
 4. **`add_note_to_book`'s answer doesn't say the outflow tagged the note** (no false field; after F-2 a redundant
    `apply_tag` answers `changed: false`). **Proposed ticket (optional):** Improvement · Suspected · MCP · Low.
+
+### THE ORCHESTRATOR'S RULINGS ON U9's FORKS (2026-10-14 ~23:58 MDT — binding on pieces 1–7)
+
+The design D1–D3 and the SWEEP TABLE (108 cases: 10 to word, 1 closed by F-2, the rest worded or proven unreachable)
+are ACCEPTED as written, with these rulings.
+
+- **F-1 (a), PROVISIONAL P-VX361-1.** On `create_note` and a one-document `import_document`, `tag_ids` lists EVERY tag
+  the note wears when the act lands: header tags in header order, then outflow-only tags. A parallel `tags` array gives
+  their paths, the wire's tag vocabulary. The answer then tells the truth about the note, and the old meaning (the header's
+  tags) is a prefix of the new one, so no caller loses what it had. Option (b) is recorded: keep `tag_ids` as the header's
+  plus a new `outflow_tag_ids`.
+- **D1's collision fix is CONFIRMED.** `applyDocumentTags` skips a worn tag but still reports it. This closes the import's
+  `SQLite error 19` whatever shape was ruled. That error was a third face of VX-361's class, so it is pinned under VX-361.
+- **F-2, CONFIRMED (PROVISIONAL P-VX362-1).** `apply_tag` on a tag the note already wears answers success with
+  `changed: false`, with no undo entry and no receipt; a landed apply answers `changed: true`. Her seven doors already
+  treat `alreadyTagged` as done. `remove_tag` on an absent tag keeps its worded refusal, and `add_note_to_book` on a
+  member refuses in her doors' own words.
+- **F-3, CONFIRMED (the orchestrator's).** Words her doors can also meet go in the shared `OpsRefusalTable`; words only a
+  client can meet go in `MCPWireRefusalCopy`, the split its own doc comment states. The new shared words are
+  mobile-visible (MOBILE PARITY).
+- **VX-363 joins U9** (provisional ruling 2). `import_document`'s book form takes VX-259's readable-books check. The pin
+  is red-first: a book the client can't read neither blocks the name nor is named. Her own doors keep the full guard.
+- **The OWED tickets are minted:** VX-364 (the dangling-wing outflow, Low) and VX-365 (`add_note_to_book`'s answer, Low).
+  OWED 3, the two Mac-door phrasings speaking to clients, goes on FOR VX-234.
+- **Next:** a FRESH builder (the designer's harness count was ~447k) builds pieces 1–7 from the U9 UNIT RECORD's build
+  plan plus VX-363, and writes THE STAGE WINDOW (`vx336-u9`).
+
