@@ -235,8 +235,7 @@ extension MCPWriteTools {
             case .blockNotFound?, .blockNotInContainer?:
                 throw ArgumentFailure(message: Self.notThisNotesBlockWords(path))
             default:
-                let words = MCPWireRefusalCopy.words(refusal.underlying) ?? hooks.refusalWords(refusal.underlying)
-                    ?? String(describing: refusal.underlying)
+                let words = MCPWireRefusalCopy.spoken(refusal.underlying, appWords: hooks.refusalWords)
                 throw ArgumentFailure(message: "\(path): \(words)")
             }
         }

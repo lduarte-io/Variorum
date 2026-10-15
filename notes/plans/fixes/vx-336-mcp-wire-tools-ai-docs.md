@@ -5603,12 +5603,22 @@ read from BYTES (`measure.py`), the advice read from BYTES (`instructions.py`).
 
 ## U9 UNIT RECORD — two wire truths from U8's round: VX-361 · VX-362 (opus-implementer, from 2026-10-14 ~23:55 MDT)
 
-**What this unit has NOT done (said first; updated at every piece):** (1) **NO product code yet** — piece 0 is the
-design, and it STOPS for the orchestrator's ruling on FORK F-1 (VX-361's shape: the brief names a shape change a fork to
-propose); F-2 and F-3 are argued single-answer and offered for confirmation in the same stop. (2) No pins yet (they
-follow the ruling, red on the pre-fix tree). (3) No stage window, no Mac build. (4) The sweep found two things OUTSIDE
-this unit's surface (OWED 1–2: a fence leak in `import_document`'s book form, and a dangling-wing outflow refusal) —
-recorded and proposed as tickets, never "also done".
+**What this unit has NOT done (said first; updated at every piece):** (1) **No pins, no fixes yet** — the builder's
+piece 1 (the behaviour-neutral refactor) is the only code so far. (2) No Mac or phone product built, no stage window.
+(3) VX-364 (the dangling-wing outflow) and VX-365 (`add_note_to_book`'s answer) are tickets, NOT this unit's (the
+orchestrator's rulings). *(Piece 0's own line, kept: piece 0 was the design and stopped for the ruling on F-1.)*
+
+**THE BUILDER (pieces 1–7 + VX-363): a fresh `opus-implementer`, from 2026-10-15 ~00:05 MDT** (the designer stopped at
+~447k after piece 0). Read in its own context before any code: this record's header, Hard rules (never `claude mcp
+list`), ORCHESTRATOR'S PROVISIONAL RULINGS 1–2, the U9 BRIEF, this U9 UNIT RECORD whole and THE ORCHESTRATOR'S RULINGS ON
+U9's FORKS; VX-246's U1 record on VX-259 (the brief, the trace, the fix row, the self-assessment line);
+`notes/MCPSpec.md` whole; `notes/SessionResiliencyProtocol.md`'s implementer section; the code the build plan names
+(re-verified at `0f011e10`: `land` l.730, `itemized` l.238, `noteAnswer` l.812, the `apply_tag` arm l.475,
+`mintNoteEntry` l.538, `applyTagPath` l.621, `applyDocumentTags` l.305, `importBook` l.149/l.600, `requireBookNameFree`
+l.945, `addPostToReading` l.738 → `applyAutoTag` l.310, `OperationError.swift` whole, `OpsRefusalTable.swift` whole, the
+Mac half `macWords`, `MCPDoor`'s hook l.404, `readableBooks` l.774) and the sweep tool's output (68 reachable · 40
+unreachable · 0 thrown nowhere — the record's table re-derived from it: W 65 = 42 reachable + 23 graph-unreachable; C 2;
+U-hand 13; R/E 10; X 1; U-graph 17).
 
 **Read in full before any code (never delegated):** this record's header, Hard rules (incl. never `claude mcp list`),
 LIVE STATUS, ORCHESTRATOR'S PROVISIONAL RULINGS (ruling 1), the U9 BRIEF, the U8 STAGE RUN (its organization leg, step
@@ -5632,13 +5642,15 @@ and the minted answer (`MCPMintedAnswerServerTests`).
 
 | piece | what | status |
 |---|---|---|
-| 0 | the design: traces (probed), F-1 proposed, F-2/F-3 argued, THE SWEEP TABLE, the build plan | DONE (this commit) — **STOPPED for the orchestrator's ruling on F-1** (and confirmation of F-2/F-3) |
-| 1 | refactor, behaviour-neutral: the wire's ONE refusal chain named (`MCPWireRefusalCopy.spoken`), used by `land` and `itemized` | NOT-STARTED — after the ruling |
-| 2 | the pins, red on the old tree (headless VX-361 · VX-362 (a) · the wire-copy row; the Mac sweep pin) | NOT-STARTED |
+| 0 | the design: traces (probed), F-1 proposed, F-2/F-3 argued, THE SWEEP TABLE, the build plan | DONE (`cd11c83e`) — ruled (THE ORCHESTRATOR'S RULINGS ON U9's FORKS, `0f011e10`) |
+| 1 | refactor, behaviour-neutral: the wire's ONE refusal chain named (`MCPWireRefusalCopy.spoken`), used by `land` and `itemized` | DONE (this commit) — `MCPWriteSupport.swift` `MCPWireRefusalCopy.spoken(_:appWords:)` = `words(e) ?? appWords(e) ?? String(describing: e)`; `land` (`MCPWriteTools.swift` l.730) and `itemized` (`+Batches.swift` l.238) call it with `hooks.refusalWords` — the same three steps in the same order, nothing else touched. **Headless: `swift build` clean; `swift test --filter 'MCPBatchDoorsServerTests|MCPWriteServerTests|MCPCarriageServerTests|MCPWingMoveServerTests'` → "Test run with 37 tests in 4 suites passed"** (the suites holding `land`'s and `itemized`'s raw-`Refused:` pins, unmodified; `u9/logs/p1-refactor.log`). The whole MCP target runs at piece 6 |
+| 2 | the pins, red on the old tree (headless VX-361 · VX-362 (a) · the wire-copy row; the Mac sweep pin; the phone guard's re-point + its parity line) | NOT-STARTED |
+| 2b | **VX-363** — the pin, red on the old tree (`import_document`'s book form beside a hidden book's name) | NOT-STARTED |
 | 3 | VX-361 — the fix (as ruled) + the import collision | NOT-STARTED |
+| 3b | **VX-363** — the fix (`importBook` takes VX-259's `counting:`; the wire passes `readableBooks`) | NOT-STARTED |
 | 4 | VX-362 (a) — `apply_tag`'s no-op answer | NOT-STARTED |
 | 5 | VX-362 (b) — the sweep's words (shared table + wire copy) | NOT-STARTED |
-| 6 | revert check (announced first), headless finals, `build-for-testing` (Mac + phone), red product | NOT-STARTED |
+| 6 | revert check (announced first), headless finals, `build-for-testing` (Mac + phone), red products | NOT-STARTED |
 | 7 | THE STAGE WINDOW plan (`vx336-u9`) → READY | NOT-STARTED |
 
 ### The traces (written before code; each mechanism PROBED on the pre-fix tree `35f9cd70`)

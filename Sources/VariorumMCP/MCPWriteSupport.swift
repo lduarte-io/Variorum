@@ -184,6 +184,16 @@ struct MCPAnswerEncodingFailure: Error, CustomStringConvertible {
 /// table would fall back to (the J8 class). The op still decides; this only
 /// words it. Nil = the app's own table speaks (`MCPHostHooks.refusalWords`).
 enum MCPWireRefusalCopy {
+    /// **THE WIRE'S ONE REFUSAL CHAIN** (VX-362 — the VX-336 run record's U9,
+    /// piece 1; named once so the door and its sweep pin read the same road):
+    /// the wire's own words first, then the app's table (`appWords` — the
+    /// host's `MCPHostHooks.refusalWords`; the Mac's `OpsRefusalCopy`), then
+    /// the error's description. `MCPWriteTools.land` (every write act) and
+    /// `itemized` (a batch's item) speak through it.
+    static func spoken(_ error: Error, appWords: (Error) -> String?) -> String {
+        words(error) ?? appWords(error) ?? String(describing: error)
+    }
+
     static func words(_ error: Error) -> String? {
         guard let error = error as? OperationError else { return nil }
         switch error {

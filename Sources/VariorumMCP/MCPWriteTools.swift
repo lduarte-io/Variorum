@@ -727,7 +727,7 @@ struct MCPWriteTools: Sendable {
             return .failure(Refused(outcome: Outcome(text: failure.message, isError: true)))
         } catch {
             try log(clientName, job.tool, kind, id, title, allowed: false)
-            let words = MCPWireRefusalCopy.words(error) ?? hooks.refusalWords(error) ?? String(describing: error)
+            let words = MCPWireRefusalCopy.spoken(error, appWords: hooks.refusalWords)
             return .failure(Refused(outcome: Outcome(text: words, isError: true)))
         }
     }
