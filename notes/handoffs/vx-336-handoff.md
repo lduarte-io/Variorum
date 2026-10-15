@@ -10,9 +10,11 @@ website so I can try the new things out tomorrow morning."*
 
 ## Your checklist
 
-1. **Try the new release: 0.9.7 («build N» — filled after the release is cut).** It is on the website and in
-   `/Applications`, cut by this run (VX-283 hadn't reached its closeout, so this run merged last). What to try first,
-   with Claude Code connected to a library you've shared with it:
+1. **Try the new release once VX-283 has cut it: 0.9.7, one release covering this run and VX-283** (your call,
+   2026-10-15: *"as originally planned, we will wait for x283 to merge in and then x283 will release a single release
+   (0.9.7) covering both your work & their work. it should not bump the version again, since this one was not yet
+   released."*). This run merged first, so it cut nothing; VX-283's handoff names the build and the refresh. What to try
+   first, with Claude Code connected to a library you've shared with it:
    - Ask it to add a paragraph at the end of a note it can write in. Then ask it to add one in the middle: with Write
      new it can't, so it asks you for Edit, and the ask waits under Settings ▸ MCP ▸ Waiting.
    - Ask it to duplicate a note and rewrite the copy, then to show you the two side by side. Compare (⌘5) opens with the
@@ -56,9 +58,9 @@ website so I can try the new things out tomorrow morning."*
   no tags when its book had tagged it; one refusal arrived as a raw Swift dump), and it fixed VX-363 above. A third call
   (to ship without the guide link) was overtaken by your word to publish the page ourselves.
 - **Nothing to do for the AI clients you already use.** Every grant and setup stands. The tools simply grew.
-- **The release notes for 0.9.7 were written without your review**, as you said was fine for tonight. This run cut the
-  release. Its notes are this run's section, drafted in the record's CLOSEOUT BRIEF ("THE 0.9.7 NOTES — VX-336's
-  section"); the release puts them in the app's What's New as `ReleaseNotes-0.9.7.md`.
+- **The release notes for 0.9.7 were written without your review**, as you said was fine for tonight. This run's
+  section is already on `main` in `ReleaseNotes-0.9.7.md` (the bump commit `28ca7fd2`); VX-283 adds its own section to
+  the same file before it cuts the release.
 - **Ten small commits appear twice in `main`'s history.** While merging `main` into this branch, one git step replayed
   ten of `main`'s commits, all notes and process files (six board snapshots, two in-flight rows, the closeout-ritual
   rule and the ticket-labeling rule), onto the branch under new names, so after this merge `main` holds each of them
@@ -68,12 +70,16 @@ website so I can try the new things out tomorrow morning."*
 
 ## The release (0.9.7)
 
-- **Cut by this run,** after the merge, because VX-283 hadn't reached its closeout: the version bump,
-  `Tools/Release/release.sh`, the website, and the `/Applications` refresh under the stage coordinator's rule card.
-- **What it carries:** this run's work (below) on top of 0.9.6. Its notes are the record's "THE 0.9.7 NOTES" section,
-  one line per bullet.
-- **Its facts,** filled after the release: the build «N» · the refresh's A1 copy of your real store «path» · the
-  replaced app in your Trash «name».
+- **Cut by VX-283, not this run** (your call above): one 0.9.7 covering both runs, after VX-283 merges, with the
+  `/Applications` refresh. VX-283's handoff carries its facts (the build, the A1 copy, the replaced app).
+- **What happened here first:** this run started the release after its merge, under an overnight rule that the first
+  merger releases if the other run isn't near its closeout so you'd have a build by morning. By the afternoon merge that
+  reason was gone and your words named the second merger, so the release was stopped. Left behind: ONE commit on `main`,
+  `28ca7fd2`, which sets the version to 0.9.7 in both app configurations and adds `ReleaseNotes-0.9.7.md` with this run's
+  section. That version was never released: release.sh was stopped partway through its archive, and nothing reached the
+  download store, the update feed, the website or `/Applications` (still 0.9.5, build 7503). VX-283 adds its section to
+  the notes and does not bump the version again.
+- **What it carries:** this run's work (below) and VX-283's, on top of 0.9.6.
 
 ## What shipped
 
@@ -207,8 +213,6 @@ The three it filed and fixed (VX-361, VX-362, VX-363) are under "What shipped".
   `-20261015T051427Z` (U8), `-20261015T070459Z` (U9), `-20261015T082808Z` (the closeout), under
   `~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Application Support/Variorum-dev/Backups/safety-copies/`.
   `castle-W1-20261013` there is yours, untouched.
-- The refresh's A1 copy of your real store «path» and the replaced app in your Trash «name» (filled after the
-  refresh).
 - Nothing else: the run's test kits left the branch before the merge (they stay in its history), and its screenshots,
   logs and build folders are deleted after it.
 
