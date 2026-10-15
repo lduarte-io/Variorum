@@ -651,6 +651,96 @@ implementer can do both halves if context allows; else a continuation builds fro
 - **Lanes:** `App/Variorum/Shared/OpsRefusalTable.swift` is no other live run's file today. Before editing any registry
   file, `WorkspaceModel` or `ShellRouter`, STOP and report (vx-283 is live).
 
+### CLOSEOUT BRIEF — VX-336 (the orchestrator's, 2026-10-15 ~01:45; her overnight word binds: merge tonight, and the LAST merger releases)
+
+The CLAUDE.md closeout ritual, for this run's scope (U5a–U9, twelve members plus VX-361/362/363). The run is in three
+phases, each a fresh `opus-implementer` at xhigh unless context allows one to carry on.
+- **The shared ledgers** (`notes/QUESTIONS.md`, the master plan, AppSpec §14, `notes/MobileSoul.md`,
+  `notes/plans/run-finals-ledger.md`) are touched ONLY at the merge moment, on LATEST main merged in, in PHASE C.
+- **PHASE A** writes their DRAFTS into this record, so PHASE C only applies them.
+
+**PHASE A — in-branch canon + drafts (no stage):**
+1. **`notes/MCPSpec.md` — canon IN-BRANCH (R1-2).** The bound "≤2,000" becomes "≤3,000", and the one link sentence
+   (the page is LIVE). Add a contract line plus a pointer to this record for every new surface:
+   - `insert_blocks` (rung from the arguments, P-VX255-1/2; one undo; the 200 cap);
+   - `duplicate_note` (READ on the source + WRITE NEW on its wing; the fence's one sentence; `source_block_id`; one undo);
+   - `show_in_app`'s compare target (`note_id` + `peer_ids` 1–3, decisions first, the board decides related-only);
+   - `link_versions`' Open › opening Compare;
+   - `save_lens` by `label` / `pin_chosen` (the matcher, `unmatched_blocks`, the ambiguity refusal);
+   - the AI label form `<client>` / `<client> · <label>`;
+   - `create_note`'s / one-document `import_document`'s `blocks` records, `section_id`, and `tag_ids` + `tags` (every
+     worn tag);
+   - paged and `ids_only` `read_note` (the WHOLE ANSWER bound at ~32,000 UTF-16 units, a block never split, a larger
+     block alone, a once grant reads one page, pages not a snapshot);
+   - the `sha256` write digests (which tools; divide/merge, `save_version` and the book import answer none);
+   - `list_my_activity` (every approved client, the era cut, refused rows title-less, looked-up ids hidden);
+   - `apply_tag`'s `changed:false`;
+   - the refusal sweep (no wire answer shows a raw case);
+   - VX-363's import road;
+   - VX-330's collapsed chapter row wearing its note's marks;
+   - the guide's chapter (still seven lessons).
+
+   Read AppSpec §12's always-loaded MCP summary and say whether anything there changed (edit it only if a contract
+   line there is now false).
+2. **QUESTIONS draft** (the next free number at PHASE C): every PROVISIONAL with its options (P-VX253-1/2 + R1-4's
+   option, P-VX252-1, P-VX255-1…4, P-VX311-1…3, P-VX298-1…3, P-VX254-1/2, P-VX256-1 re-ruled with U7c's e1–e4,
+   P-VX256-2…4, P-VX261-1…6, P-VX197-U8b-1/2, P-VX361-1, P-VX362-1 incl. its once-grant note), plus the orchestrator's
+   rulings 1–3 (3 superseded by her word). Lead with what she'd most want to know.
+3. **AppSpec §14 draft:** the slim VX-336 entry leads (contract + provenance), and VX-246's entry becomes "Before it —".
+   Roll the oldest entry beyond ~five to `notes/AppSpecDeltaArchive.md` per VX-341, always keeping the most recent MCP
+   effort. Write the finals/ladder text for `run-finals-ledger.md`.
+4. **The master plan draft:** retire VX-336's in-flight row ONLY (VX-246's precedent).
+5. **MOBILE PARITY draft:** a `MobileSoul.md` row. VX-342's phone word lowercased, and the shared refusal table's nine new
+   sentences reach the phone's fall-through sites (no phone face changed). Also VM-20, the "saved/committed" gap,
+   ticketed.
+6. **RULINGS RECONCILED** (her 2026-10-13 rule): re-read each ruling this run built against what shipped, especially
+   "every", "all" and "everywhere" (VX-254's "EVERY tool", VX-268's parity under VX-330, R-VX184-1). Ticket any remainder
+   as OWED (the orchestrator mints).
+7. **The handoff draft** `notes/handoffs/vx-336-handoff.md`, her checklist at the top:
+   - the release she'll try (0.9.7, what's new, what to try first);
+   - the stargazing page (live; its copy PLACEHOLDER-marked for her words; her site repo's DECISIONS #86);
+   - the re-seed note (Help ▸ Restore Tutorial…);
+   - the QUESTIONS bundle to ratify;
+   - the pre-launch calls on VX-357 and VX-363;
+   - the filed tickets, grouped by priority;
+   - the FOR VX-234 words (consolidated);
+   - her overnight word and the rulings made under it.
+
+   Self-contained for a fresh session.
+8. **The plan's STATUS banner** (`notes/plans/mcp-pane-and-docs-kickoff.md`) and this record's STATUS line are DRAFTED
+   CLOSED, to flip at PHASE C.
+9. **THE 0.9.7 NOTES SECTION for this run** is below (the orchestrator's draft, one line per bullet, VX-343's trap).
+   Whoever cuts the release lifts it whole and merges it with vx-283's section.
+
+**PHASE B — the closeout window** (claim `vx336-close`; through the orchestrator):
+- merge `origin/main` into the branch;
+- headless finals (MCP · core · workbook);
+- `xcodebuild build-for-testing` of the merged tree;
+- the WHOLE Mac target (VX-246's merge-moment form; standing reds named: VX-115, VX-167, VX-245's sites), plus the
+  phone suites U9 ran (the shared table);
+- no A1 copy is needed unless a walk runs.
+
+**PHASE C — the merge-moment ledgers:** on latest main merged in, apply the drafts (QUESTIONS, AppSpec §14 and its roll,
+`run-finals-ledger.md`, the master plan row, MobileSoul), flip the STATUS lines and finalize the handoff. Then the PR
+`VX-336: MCP wire tools & AI docs` and the merge ask to the coordinator. Then, if we are the last merger: the release
+(0.9.7) and the `/Applications` refresh under the coordinator's rule card. Then the cleanup: delete the worktree, the
+branch (GitHub + local), ALL evidence (`notes/plans/vx336-screens/`, the kits `notes/plans/fixes/vx-336-u7-kit/` and
+`vx-336-u9-sweep/` committed in-branch, and DerivedData).
+
+#### THE 0.9.7 NOTES — VX-336's section (orchestrator's draft; her review waived tonight)
+
+**More your AI can do.** For anyone using Variorum's MCP door:
+- An AI can add paragraphs to a note: at the end with Write new, anywhere with Edit.
+- An AI can duplicate a note the way Duplicate as Version does, so Compare lines its rewrite up with your original row by row, and it can open Compare to show you two notes side by side when you ask.
+- An AI can save a lens by take label instead of naming every take, and its own takes are labeled with just its name, like "claude-code · english".
+- Writes answer with the ids of everything they made and a fingerprint of the words stored, so an AI can check its work without reading the whole note back.
+- Long notes are read in pages small enough for an AI to take in whole, and an AI can look up its own recent acts to see whether a call went through after a dropped connection.
+- Clearer answers: notes made in a book that tags its notes say so, tagging a note twice is simply fine, and every refusal an AI can meet is in plain words.
+- The field guide's chapter on AI is refreshed. To get it, choose Help ▸ Restore Tutorial… (your old guide goes to the Trash for 30 days).
+- An AI can no longer learn the name of a book it can't read by importing one with the same name.
+- In the book panel, a chapter that is one note wears that note's shared-with-AI mark.
+- The undo warning no longer shouts "BEFORE".
+
 ## UNIT RECORDS
 
 ## U5a UNIT RECORD — the label pair: VX-267 · VX-253 (opus-implementer, from 2026-10-14 ~13:35 MDT)
