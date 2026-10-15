@@ -126,6 +126,12 @@ struct Truth {
     /// from what the Mac remembers is the rollback's consequence, not a silent
     /// change (P-U4-6).
     var beforeRollback: [String: (mode: ProtectionMode?, account: String?)] = [:]
+    /// Devices whose whole container she restored by Time Machine past a
+    /// crossing — with it, the newer key files (and their history) went: a
+    /// copy that had no passphrase or words is then promise 5's stated
+    /// exception once its own Apple key is gone, retired by her Use Castle
+    /// included (PROVISIONAL P-U4-13).
+    var restoredPastCrossing: Set<String> = []
     /// A synced pair landed HELD on a device (library id): no sync round until
     /// the one Resume Sync press — promise 7 waits for it.
     var heldLanding: [String: String] = [:]

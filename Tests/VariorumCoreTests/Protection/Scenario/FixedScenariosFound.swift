@@ -495,4 +495,23 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 2 (sequence 726, the closer's soak) — PROVISIONAL P-U4-13: a
+    /// library with no passphrase or words (today's exposed shape), Use
+    /// Castle (which retires its own Apple key — its copies then open through
+    /// the Castle key's history), then her Time Machine restore of the whole
+    /// container to before it: the Castle key file and its history went with
+    /// the restore, and the restored copy's only road was the retired key —
+    /// promise 5's stated exception ("a Standard copy made with no passphrase
+    /// or words once its own Apple key and this Mac's are both gone"), read to
+    /// cover a key her own Use Castle retired once she restored past it.
+    @Test func aTimeMachineRestorePastUseCastleOfASecretlessLibrary() async throws {
+        let world = try Self.start("exposed", seed: 2000732)
+        for action in [Action.crash(.timeMachineSnapshot("macA"), afterWrites: 1),
+                       .useCastle("macA", .alwaysAsk, newWords: false),
+                       .crash(.timeMachineRollback("macA"), afterWrites: 14)] {
+            await world.step(action)
+        }
+        expectPromisesKept(world)
+    }
 }

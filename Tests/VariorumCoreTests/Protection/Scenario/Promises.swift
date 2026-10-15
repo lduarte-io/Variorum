@@ -633,7 +633,23 @@ extension SWorld {
                 }
             }
             let readable = Set(readableAppleKeys(device).keys).union([oldSharedKey(device)?.id].compactMap { $0 })
-            if !holders.isEmpty, holders.allSatisfy(secretless), ids.contains(where: truth.lostAppleKeys.contains),
+            // "Gone" includes a key her own Use Castle retired, once she
+            // restored the container past it by Time Machine (the newer key
+            // file whose history held this copy's key went with the restore —
+            // PROVISIONAL P-U4-13).
+            var retiredHere: Set<String> = []
+            if truth.restoredPastCrossing.contains(device.name) {
+                retiredHere = device.library?.section.retiredAppleKeyIDs ?? []
+                for item in device.keychain.local.values {
+                    if case .memory(let sealed) = item.value,
+                       let memory = try? ProtectionCoding.decoder().decode(DeviceMemory.self, from: sealed.payload) {
+                        retiredHere.formUnion(memory.deviceSection.retiredAppleKeyIDs)
+                    }
+                }
+            }
+            let lost = truth.lostAppleKeys
+            let gone = { (id: String) in lost.contains(id) || retiredHere.contains(id) }
+            if !holders.isEmpty, holders.allSatisfy(secretless), ids.contains(where: gone),
                !ids.contains(where: readable.contains) { continue }
             violations.append(Violation(promise: 5, device: device.name, detail: "the copy \(id) (\(f8(image.fingerprint))) opens by no road"))
         }

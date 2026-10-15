@@ -672,6 +672,7 @@ extension SWorld {
             // copies made after its moment are the later stretch's (PROVISIONAL
             // P-U4-12: the acceptance read to cover a Time Machine restore).
             if let restored = d.slot?.record, restored.currentFingerprint != was {
+                truth.restoredPastCrossing.insert(d.name)
                 // Its STANDARD-born keys only — Apple-reachable in their day; a
                 // Castle-born key never was, and stays promise 13's.
                 truth.keptByLeave[d.name]?.subtract(restored.familyTree.entries.filter { $0.kind == .standard }.map(\.fingerprint))
