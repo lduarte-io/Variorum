@@ -3001,6 +3001,20 @@ leg on the merged tip, in the U1c shape (trace, propose, the architect rules, th
 - The cast: one implementer at a time; the U2 walker (D1–D7) may run beside it, since a walker is not an implementer
   (precedent: U1d's walk beside U2's build).
 
+### U3c — the trace leg
+
+**Implementer:** a fresh Opus 5.5 at xhigh (2026-10-15), worktree `~/dev/variorum-vx-283`, DerivedData
+`App/Variorum/DerivedData/vx283-u3c`. **Not done by this session (the record's first line, per the brief):** no
+`xcodebuild test`, no app launch, no stage (the probe runs in the orchestrator's window); T3 (the proposal) waits for
+the probe's output and the orchestrator's resume; NO product fix and NO pin change — the only product lines are a
+DEBUG-only trace hook, off unless the probe turns it on.
+
+**LIVE STATUS (per piece)**
+- T1 — the headless trace: IN-PROGRESS.
+- T2 — the DEBUG-only probe (product hook + the env-gated mounted suite), `build-for-testing` into `vx283-u3c`, the
+  window script: NOT-STARTED.
+- T3 — the proposal: NOT-STARTED (after the run, at the orchestrator's resume).
+
 #### U2 + U3b — THE WALK PLAN (the folded `vx283-u2` claim's walk; a fresh Opus at xhigh; her rule)
 
 Products: U2's Debug app `DerivedData/vx283-u2` (the drag + P-U1e-1 + the R1 fixes) for D1–D7; U3b's
