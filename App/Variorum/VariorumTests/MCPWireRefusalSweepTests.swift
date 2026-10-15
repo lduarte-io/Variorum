@@ -169,9 +169,10 @@ struct MCPWireRefusalSweepTests {
         #expect(declared.count > 100, "the walk read the real enum (\(declared.count) cases)")
         let sampled = Self.samples.map(Self.name)
         #expect(sampled.count == Set(sampled).count, "a case sampled twice")
+        let unsampled = Set(declared).subtracting(sampled).sorted()
+        let undeclared = Set(sampled).subtracting(declared).sorted()
         #expect(Set(sampled) == Set(declared),
-                "unsampled: \(Set(declared).subtracting(sampled).sorted()) · "
-                    + "not declared: \(Set(sampled).subtracting(declared).sorted()) — sweep the new case first")
+                "unsampled: \(unsampled) · not declared: \(undeclared) — sweep the new case first")
     }
 
     @Test func theUnspokenCasesAreRealCasesWithTheirProofs() throws {
