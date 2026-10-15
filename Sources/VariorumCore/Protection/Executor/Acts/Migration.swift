@@ -240,6 +240,16 @@ extension ProtectionExecutor {
                 mode = shape
                 confirmed = true
             }
+        } else if inputs.legacyMode.keyFile?.hasAppleWrap == true, mode == .castle {
+            // …and with no vault's word at all (signed out, offline, a deleted
+            // account): today's rule reads a missing silent item as Castle, but
+            // a key whose FILE carries an Apple wrap was born Standard (a wrap
+            // is never added to a Castle key; custody can vanish — a replaced
+            // or wiped keychain). Recorded by its birth, confirmed as the
+            // reader's reading was — an answer of "Castle" is then the key
+            // change it is, never a confirm over an Apple wrap (VX-305 U4, the
+            // soak's seed 9; P-U4-4 extended).
+            mode = .standard
         }
         let at = now()
         let deviceID = inputs.carriedDeviceID ?? leaves.ids.mintID()

@@ -752,4 +752,20 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 9 (sequence 423, the closer's soak): a synced Standard store whose
+    /// account was deleted, its Mac replaced (a new keychain: no silent item)
+    /// before its first open on this build — today's rule reads the missing
+    /// item as Castle, no vault can say otherwise, and an answer of "Castle"
+    /// then confirmed Castle over a key file carrying an Apple wrap (promise
+    /// 2). P-U4-4's rule — the key FILE says a key's birth, an Apple wrap is a
+    /// Standard-born key's — now holds with no vault's word too.
+    @Test func aStandardBornKeyStaysStandardWithNoVaultToAsk() async throws {
+        let world = try Self.start("a deleted account", seed: 9000450)
+        for action in [Action.replaceMac("macA", carriesMemory: false), .answerCorner45("macA", .castle)] {
+            await world.step(action)
+        }
+        #expect(world.macA.slot?.record?.mode == .standard, "an Apple-wrapped key was recorded Castle")
+        expectPromisesKept(world)
+    }
 }
