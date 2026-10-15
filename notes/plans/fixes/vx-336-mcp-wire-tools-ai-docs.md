@@ -6644,8 +6644,9 @@ checklist leads with this bundle."), one blank line, then:
 >     page was missing; you said to publish the page ourselves (*"just go ahead and do the stargazing MCP link
 >     yourself"*), so the page went live first and the link stays.
 > - **For your eye, not provisional:** the page `https://stargazing.tech/variorum/mcp` is live with stand-in copy
->   marked PLACEHOLDER for your words (your site repo's DECISIONS #86 and PLAN.md's content-owed list) · the release
->   notes for 0.9.7 were written without your review, at your word for tonight · every word your app shows that this run
+>   marked PLACEHOLDER for your words (your site repo's DECISIONS #86 and PLAN.md's content-owed list) · the night's
+>   release notes (0.9.7) were written without your review, at your word for tonight («by this run or VX-283,
+>   whichever merged last») · every word your app shows that this run
 >   added or changed is on VX-234's list (the handoff gathers them) · two worded refusals speak Mac-door words to an AI
 >   ("…since you picked it", "…if it's sealed, unseal it.") — on VX-234's list too · an open Library didn't show two
 >   notes an AI made until re-entered (a comment on VX-122, not a new ticket). Cross-refs: VX-267 · VX-253 · VX-252 ·
