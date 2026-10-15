@@ -158,6 +158,19 @@ enum MCPToolCatalog {
         landed byte for byte.
         """
 
+    /// VX-197 (VX-336 U8a): THE LABEL RULE, said in one set of words by every
+    /// tool that writes a take's label. Her split (VX-197): the client's name
+    /// is worn only by takes a client adds at SUGGEST, inside her writing
+    /// (`add_take`, `add_takes`), in VX-267's form — `MCPWriteTools.aiLabel`,
+    /// whose separator the sentence reads, never retypes.
+    static let suggestedLabelRule = """
+        labeled with your client name, then "\(MCPWriteTools.labelSeparator)" and your label when you \
+        give one (e.g. "<your client name>\(MCPWriteTools.labelSeparator)english"; a blank label is none)
+        """
+
+    /// …and the split's other half, on every other tool that writes a label.
+    static let labelNotPrefixed = "your client name is added only by add_take and add_takes"
+
     static func declaration(named name: String) -> MCPToolDeclaration? {
         all.first { $0.name == name }
     }
@@ -378,7 +391,7 @@ enum MCPToolCatalog {
         name: "add_take", rung: .suggest, title: "Add a take",
         description: """
             Add a new take (an alternative text) to one block, at the END of its fan. The take is \
-            labeled with this client's name (plus your label, if given), is never chosen and \
+            \(suggestedLabelRule), so the author sees who suggested it; it is never chosen and \
             never locked — the author's text is never touched; they choose. Get block ids from \
             read_note with with_ids: true. Returns JSON with the new take_id and its sha256. \
             \(digestSentence)
@@ -420,9 +433,9 @@ enum MCPToolCatalog {
         name: "add_takes", rung: .suggest, title: "Add takes to many blocks",
         description: """
             Add many takes in one act: each item adds a new take (an alternative text) to one block \
-            of note_id, at the END of that block's fan, exactly as add_take does — labeled with this \
-            client's name (plus the item's label, if given), never chosen and never locked; an \
-            empty text adds a blank take. Every block must be a block of that note (read_note with \
+            of note_id, at the END of that block's fan, exactly as add_take does — \
+            \(suggestedLabelRule) — never chosen and never locked; an empty text adds a blank take. \
+            Every block must be a block of that note (read_note with \
             with_ids: true gives the ids). One call carries at most 200 takes. All or nothing: if \
             any item can't land, none does, and the refusal names the item. The whole batch is one \
             undo for the author. Returns JSON with the new take_ids, in the items' order, and takes: \
@@ -490,9 +503,11 @@ enum MCPToolCatalog {
         name: "delete_comment", rung: .suggest, title: "Delete your comment",
         description: """
             Delete a comment. With suggest you may delete only a comment you left (with add_comment \
-            or add_comments): one Variorum doesn't have on file as yours (the author's, another \
-            client's, or one left before Variorum kept that record) is refused. With edit on the \
-            note you may delete any comment. Nothing is destroyed: the comment joins the block's \
+            or add_comments) whose words no one has changed since you wrote them; any other is \
+            refused — the author's, another client's, one left before Variorum kept a record of its \
+            words, or one whose words were changed after you wrote them (by the author on any \
+            device, or by another client). With edit on the note you may delete any comment. \
+            Nothing is destroyed: the comment joins the block's \
             deleted comments, where the author can bring it back (so can restore_comment), and the \
             delete is one undo for them. Get comment ids from read_note with with_ids: true. \
             Returns JSON.
@@ -558,7 +573,8 @@ enum MCPToolCatalog {
             shared wing (wing_id; "" is Home — it lands bookless). Give EITHER text (plain prose: \
             each paragraph becomes a block) OR blocks (structured: each block's shown text exactly \
             — a blank line inside it stays inside the one block — with an optional name and its \
-            other takes, each with an optional label). entry_date (yyyy-MM-dd) sets the \
+            other takes, each with an optional label). Each label is stored as given (trimmed; a \
+            blank label is none) — \(labelNotPrefixed). entry_date (yyyy-MM-dd) sets the \
             note's date, e.g. for old journal entries. section_id (with book_id) files the note \
             under one of that book's chapters in the same call (list_notes or create_section \
             gives chapter ids). Returns JSON with the note_id, its block_ids, and blocks: per \
@@ -612,7 +628,8 @@ enum MCPToolCatalog {
         description: """
             Import text in the Variorum document format (what read_note returns): a header \
             {t:"title"} {#tag/path}, paragraphs as blocks, "--- Alternates for this block ---" \
-            sections as extra takes; with {v:2} first in the header, "--- next block ---" lines \
+            sections as extra takes, each labeled as its take: line says — \(labelNotPrefixed); \
+            with {v:2} first in the header, "--- next block ---" lines \
             separate the blocks and blank lines stay inside them. Either one `document` into a shared book (book_id) or wing \
             (wing_id), or a whole `book` {name, chapters: [{name, documents}], documents} into a \
             shared wing. One import is one undo for the author. Returns JSON with the new ids — \
@@ -723,10 +740,14 @@ enum MCPToolCatalog {
         description: """
             Replace one take's text. expected_text must be the take's text EXACTLY as you read it \
             (read_note with with_ids: true) — if the author changed it since, the edit is refused and \
-            nothing is written; read again. Variorum saves a commit named "before <your name>'s edit" \
-            and one named "after <your name>'s edit", so the author can always compare and come back, \
-            and the edit is one undo for the author. Returns JSON with the commit ids and sha256, \
-            the take's text as it now stands. \(digestSentence)
+            nothing is written; read again. Variorum first commits the words it replaces, named \
+            "before <your client name>'s edit" (unless they are already the take's latest commit, or \
+            the take is blank and was never committed — then the answer has no before_commit_id), and \
+            then the new text, named "after <your client name>'s edit", so the author can always \
+            compare and come back; these commits stay even if the edit is undone. Writing the text the \
+            take already has changes nothing (changed: false). The edit is one undo for the author. \
+            Returns JSON with the commit ids and sha256, the take's text as it now stands. \
+            \(digestSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -920,8 +941,9 @@ enum MCPToolCatalog {
             (any block, the last one included) and at: "start" before its first block (read_note \
             with with_ids: true gives the block ids). Each item is exactly one block, as in \
             create_note's blocks: its shown text exactly (a blank line inside stays inside the one \
-            block), an optional name, and its other takes, never chosen, each label kept as given \
-            (an empty text is a blank take). One call carries at most 200 blocks. The whole call is \
+            block), an optional name, and its other takes, never chosen (an empty text is a blank \
+            take). Each label is stored as given (trimmed; a blank label is none) — \
+            \(labelNotPrefixed). One call carries at most 200 blocks. The whole call is \
             one undo for the author. Returns JSON with the note_id, the new block_ids, and blocks: \
             per block its block_id, the shown_take_id, and every take in fan order (take_id, label \
             where it has one, and sha256), as create_note answers them. \(digestSentence)
@@ -982,7 +1004,8 @@ enum MCPToolCatalog {
             shares no history, so Compare shows it beside the original unaligned). The copy lands \
             in no book, in the note's own wing (that wing's Pool). Needs read on the note and \
             write new on its wing. A note shared with you only per ask can't be duplicated. The \
-            original is never changed. One undo for the author removes the copy. Returns JSON: \
+            original is never changed. In the copy every take keeps its label — \
+            \(labelNotPrefixed). One undo for the author removes the copy. Returns JSON: \
             the copy's note_id, its block_ids, and blocks — per block its block_id, the \
             source_block_id it was copied from, the shown_take_id, and every take in fan order \
             (take_id, label where it has one, and sha256 — equal to its source take's), as \
@@ -1146,7 +1169,8 @@ enum MCPToolCatalog {
         name: "set_take_label", rung: .edit, title: "Label a take",
         description: """
             Give one take a label — a short name the author sees on it, such as "english" — or \
-            clear it with null or a blank. A locked or archived take may be labeled. One undo for the \
+            clear it with null or a blank. The label is stored as given (trimmed) — \
+            \(labelNotPrefixed). A locked or archived take may be labeled. One undo for the \
             author. Returns JSON.
             """,
         inputSchema: .object([
@@ -1200,11 +1224,12 @@ enum MCPToolCatalog {
         description: """
             Bring a commit's text back into its take, as the author's own restore does (read_note \
             with with_commits: true lists each take's commits). Variorum first commits the words it \
-            replaces, named "before <your name>'s restore" (unless they are already the take's latest \
-            commit — then that commit holds them and the answer has no before_commit_id), and then the \
-            restored text, named "after <your name>'s restore", so the author can always compare and \
-            come back; these commits stay even if the restore is undone. A locked or archived take refuses, as does a sealed \
-            note; a take already reading that text changes nothing. One undo for the author puts the \
+            replaces, named "before <your client name>'s restore" (unless they are already the take's \
+            latest commit — then that commit holds them and the answer has no before_commit_id), and \
+            then the restored text, named "after <your client name>'s restore", so the author can \
+            always compare and come back; these commits stay even if the restore is undone. A locked \
+            or archived take refuses, as does a sealed note; a take already reading that text changes \
+            nothing. One undo for the author puts the \
             replaced words back. Returns JSON with the commit ids and sha256, the take's text as it \
             now stands. \(digestSentence)
             """,
@@ -1291,10 +1316,10 @@ enum MCPToolCatalog {
     static let renameBook = MCPToolDeclaration(
         name: "rename_book", rung: .edit, title: "Rename a book",
         description: """
-            Give a book a new name. A name another live book already wears (ignoring case) is \
-            refused, as the author's rename is; a finished or sealed book can still be renamed. \
-            Gatherings are the author's to rename. One undo for the author puts the old name back. \
-            Returns JSON.
+            Give a book a new name. A name already worn (ignoring case) by another live, unarchived \
+            book or gathering that you can read is refused; one you can't read never counts, so it \
+            can't block the name. A finished or sealed book can still be renamed. Gatherings are the \
+            author's to rename. One undo for the author puts the old name back. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",
@@ -1525,7 +1550,7 @@ enum MCPToolCatalog {
         description: """
             Commit one take: save its text as it stands now as a commit (a saved moment the author \
             can compare against and come back to), with your message. The commit is stored as \
-            "<your name>: <message>", so the author's history says who saved it. The take's text \
+            "<your client name>: <message>", so the author's history says who saved it. The take's text \
             does not change. A commit is kept for good: the author's undo does not remove it, as \
             it does not remove their own. Get take ids from read_note with with_ids: true. \
             Returns JSON with the commit_id.
