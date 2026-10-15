@@ -643,6 +643,12 @@ struct LibraryControlsGeometryTests {
                 for state in Self.states {
                     await state.act(rig)
                     let read = try rig.read()
+                    // The premise: the column really is this wide (a window
+                    // that refused the resize would test one width thirteen
+                    // times and prove nothing).
+                    if abs(read.root.width - (room + 48)) > 1 {
+                        unstable.append("\(room) \(state.name): the catalog is \(read.root.width) wide, not \(room + 48)")
+                    }
                     heights[state.name] = read.controls.height
                     if read.controls.height < 40 && read.field.width < read.prompt - 0.5 {
                         unstable.append("\(room) \(state.name): one line, the field \(read.field.width) of \(read.prompt)")
