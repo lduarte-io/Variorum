@@ -344,5 +344,17 @@ struct ScenarioMutationPins {
             return (world, result == .done && world.macA.slot?.record?.mode == .standard)
         }
     }
+    /// "a library file replayed alone … changes nothing" (promise 10): an
+    /// older library file in the slot loses to the memory.
+    @Test func aLibraryFileReplayedAloneLosesToTheMemory() async throws {
+        try await mutationPin("the replayed library file changes nothing", off: { $0.libraryFileLosesToMemory = false }) { guards in
+            let world = try scenarioWorld(guards: guards) { try $0.today(on: $0.macA, TodaySpec(mode: .standard)) }
+            await world.done([.launch("macA"), .useCastle("macA", .alwaysAsk, newWords: false), .settle])
+            let current = try #require(world.macA.slot?.fingerprint)
+            await world.step(.tamper("macA", .replayLibraryFile))
+            await world.step(.settle)
+            return (world, world.macA.slot?.record?.mode == .castle && world.macA.slot?.fingerprint == current)
+        }
+    }
 }
 #endif

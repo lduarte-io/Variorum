@@ -595,7 +595,10 @@ extension SWorld {
         case .cloneMac(_, let d): return d == name
         case .useCastle(let d, _, _), .useStandard(let d), .follow(let d, _), .finishLeave(let d, _), .turnOnSync(let d),
              .move(let d), .thisMacOnly(let d, _), .stopSyncingHere(let d, _), .deleteAccountHere(let d), .resumeSync(let d),
-             .answerCorner45(let d, _), .confirmMode(let d), .land(let d, _), .openOlderLibrary(let d), .replaceAllKeys(let d, _):
+             .answerCorner45(let d, _), .confirmMode(let d), .land(let d, _), .openOlderLibrary(let d), .replaceAllKeys(let d, _),
+             // A copy that raises runs Use Castle at its confirm (§3.7); a
+             // lowering or a copy's own key is the opens' check below.
+             .restoreBackup(let d, _):
             return d == name
         default:
             return false
@@ -687,6 +690,16 @@ extension SWorld {
                     for p in livePassphrases { var b = book; b.passphrases[.current] = p; candidates.append(b) }
                 case .words(.current):
                     for w in liveWords { var b = book; b.words[.current] = w; candidates.append(b) }
+                // A day the library changed hands (a join, a landing): the
+                // secrets of that day are the copy's holder's AND the slot's.
+                case .passphrase(.of(let date)):
+                    for p in [known(holder).at(date).passphrase, slotK.at(date).passphrase].compactMap({ $0 }) {
+                        var b = book; b.passphrases[.of(date)] = p; candidates.append(b)
+                    }
+                case .words(.of(let date)):
+                    for w in [known(holder).at(date).words, slotK.at(date).words].compactMap({ $0 }) {
+                        var b = book; b.words[.of(date)] = w; candidates.append(b)
+                    }
                 default: break
                 }
                 switch route.opener {

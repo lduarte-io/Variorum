@@ -773,6 +773,7 @@ extension SWorld {
             for secret in secrets { if let key = try? file.open(secret, floor: PF.floor), PF.fp(key) == fingerprint { return key } }
             let apple = readableAppleKeys(device)
             if let wrap = file.apple, let key = apple[wrap.keyID], let opened = try? file.open(apple: key) { return opened }
+            if let shared = oldSharedKey(device), let opened = try? file.open(sharedApple: shared) { return opened }
         case .legacy(let legacy)?:
             for secret in secrets {
                 switch secret {
@@ -824,7 +825,15 @@ extension SWorld {
         let verdict = OpenRule.verdict(OpenFacts(
             libraryID: image.libraryID, keyFingerprint: image.fingerprint, recordMode: image.record?.mode, keyFileFacts: facts,
             rowsAccount: image.rowsOwner, synced: image.record?.account != nil, target: target), guards: guards)
-        guard let opener = openerFor(device, fingerprint: image.fingerprint, pair: pair, day: copy.stamp) else {
+        // Every key file the catalog says serves the copy — its own pair, and
+        // this Mac's own key file for that library (the move's gift).
+        var serving = catalog.servingKeyFiles(of: copy).compactMap(\.document)
+        for route in assessed(device).opensWith[copy.id]?.routes ?? [] {
+            for step in route.steps {
+                if case .keyFileLock(let id, _) = step, let document = catalog.keyFile(id: id)?.document { serving.append(document) }
+            }
+        }
+        guard let opener = ([pair] + serving).lazy.compactMap({ self.openerFor(device, fingerprint: image.fingerprint, pair: $0, day: copy.stamp) }).first else {
             throw WorldRefusal.cannotOpen
         }
         switch verdict {
@@ -838,7 +847,14 @@ extension SWorld {
             guard let pair else { throw ExecutorRefusal.nothingToDo }
             try await landPair(device, LandingPair(copyID: copy.id, keyFile: pair, record: image.record), opener: opener,
                                typing: .passphraseWordsTyped, holderOfPair: holder(device, account: image.record?.account, libraryID: image.libraryID))
-        case .raisesToCastle, .plaintextExport:
+        case .raisesToCastle:
+            // Use Castle's own steps (both secrets typed, a fresh key), then
+            // the copy opens into the Castle library it raised (§3.7).
+            try await perform(.useCastle(device.name, device.library?.section.settings.gateStyle ?? .alwaysAsk, newWords: false))
+            let fresh = self.catalog(device)
+            guard let again = fresh.copies.first(where: { $0.id == copy.id }) else { throw ExecutorRefusal.nothingToDo }
+            try await openCopyByRule(device, copy: again, catalog: fresh)
+        case .plaintextExport:
             throw ExecutorRefusal.nothingToDo
         }
     }

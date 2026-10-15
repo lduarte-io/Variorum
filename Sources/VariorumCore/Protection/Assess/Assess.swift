@@ -753,10 +753,18 @@ public enum AssessRules {
                                   synced: true, words: leaves ? [.ruleFive] : []))
         }()
         // FINISH LEAVING CASTLE, started on another device.
+        // The press waits for the named key and mints a fresh account key
+        // only if that one never arrives (§3.9) — so it stands whether or not
+        // the named key is readable here (`unfinishedLeave.namedKeyReadableHere`
+        // tells the face which it is doing); a device that still owes the
+        // follow types its one secret at it. VX-305 U4, found by the scenario
+        // world: refusing it while the follow was owed left an account whose
+        // acting device was lost before its key reached iCloud mid-leave for
+        // ever — every other device owes that follow.
         doors[.finishLeavingCastle] = {
-            guard let unfinished = vault?.unfinishedLeave else { return .refused(.nothingToDo) }
-            if followOwed && !unfinished.namedKeyReadableHere { return .refused(.followOwed) }
-            return .open(DoorSpec(requires: .none, synced: true))
+            guard vault?.unfinishedLeave != nil else { return .refused(.nothingToDo) }
+            let typed = acts.contains { if case .follow(_, let typed, _) = $0 { return typed } else { return false } }
+            return .open(DoorSpec(requires: typed ? .oneSecret : .none, synced: true))
         }()
         return doors
     }
