@@ -124,6 +124,23 @@ retitled to Close All; VX-288 notes the chip; the run and its nine members In Pr
   #188(m)).
 - **VX-121:** the ticket's class statement — ANY toast over the Bookcase collides with the quick-entry band; the
   placement rule keeps toasts clear of it.
+- **THE RELEASE — her call (2026-10-15 15:58).** She said it to the coordinator directly, and it was relayed to us
+  verbatim by the coordinator and by vx-336: *"ok. as originally planned, we will wait for x283 to merge in and then
+  x283 will release a single release (0.9.7) covering both your work & their work. it should not bump the version
+  again, since this one was not yet released. you can give the stage to x283 so they can walk and finish up their
+  work"*. So:
+  - VX-283 cuts ONE **0.9.7** after its merge, covering VX-336 and VX-283, and ends the window with the /Applications
+    refresh.
+  - **No version bump.** Main's `28ca7fd2` already set MARKETING_VERSION 0.9.7, and vx-336's release stopped
+    mid-archive with nothing published.
+  - Our section goes into the existing `Features/WhatsNew/ReleaseNotes-0.9.7.md`, above its Feedback section, in
+    0.9.6's form (a bold lead line, then bullets, one line per bullet: the VX-343 trap). VX-336's lines stay as they
+    are. Her notes review is waived (her overnight word).
+  - The worked road is "THE RELEASE BRIEF" at the end of `notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md` (its
+    bump step doesn't apply). The notes commit is the one commit before `release.sh`, and the main freeze runs from it
+    until the stamp.
+  - Main is merged into this branch again before the merge ask.
+  - This supersedes the 0.9.8 plan in the overnight state.
 
 ## THE ARCHITECTURAL RULES — binding (the 13b constitution P-1…P-9, copied verbatim per `/architect-phase`)
 
