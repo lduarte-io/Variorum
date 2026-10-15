@@ -700,7 +700,56 @@ ordinary window. The products' tip: the U1 tree at `358f4e04` (the last code cha
 
 #### U1 — WALK RECORD
 
-*(The walker writes one line per row here.)*
+**Walker:** a fresh Opus 5.5 at xhigh (not U1's implementer), 2026-10-14 20:16–, on the orchestrator's claim
+`vx283-u1-walk`; the Debug app `App/Variorum/DerivedData/vx283-u1/…/Variorum.app` (built 20:13 from the U1 tree, not
+rebuilt), PID 93969, discriminated by path. Screens in the gitignored
+`notes/plans/vx283-screens/u1/walk/` (sidebar rows as 2× region captures of the sidebar rect, a `-window` capture
+beside each). Every image below was opened and looked at before its verdict.
+
+- **W0 — preconditions.** Both strict pgreps empty before launch; her app absent (the guard); the host
+  `AX: true SCREEN: true`. The store copy (`walk-store-before/`) and prefs export (`walk-prefs/before.plist`) were the
+  orchestrator's, not redone. Posture at launch: Standard, unlocked (no lock screen; the Bookcase came up), voice
+  **Study**, appearance **follow system** (`appearanceChoice = system`, the system light). No What's New sheet showed.
+  · HOLDS.
+- **W1 — launch and seed.** The window resized by AX to its tallest (1380 × 1010 at (60, 36) — the screen's visible
+  frame caps it there). The store already had 14 notes open; 12 more opened from the Library (the list sits at the
+  ruled 20-row auto-close cap, `OpenNotes.trackedCap` — so 20 rows, not 26, is the most it ever holds); 8 notes starred
+  through the Library rows' right-click ▸ Star (9 starred with quicknotes). One misclick opened "wings" in a note
+  window (closed by AX at once; that note was not starred). · done.
+- **W2 — the tall list (VX-285), Study light.** `W2-study-light.png` (+`-window`; a note open, "this note" shown, the
+  column compressed): the list runs from its header down to just above the sync footer, the last row ("owned,
+  finished, sealed", highlighted) whole, ~11 pt clear of the footer's hairline, the rows above scrolled under the
+  header. `W2-study-light-bookcase.png` (+`-window`; on the Bookcase): the same — 15 whole rows, the list stops
+  ~15 pt above the footer, nothing under it, no empty band. With 5 notes open, `W2-study-light-fewrows.png`
+  (+`-window`): the list hugs its 5 rows (no scroll; the room below is the column's own). · HOLDS.
+- **W3 — the scroll bar (VX-286).** `W3-study-light-open-scrolling.png` (+`-window`), captured mid-scroll with the
+  pointer on the ✕ column: the overlay bar draws at x 221–226.5 pt of the 236-pt sidebar, every ✕ ends by ~210 pt —
+  ~11 pt of clear margin, no ✕ touched (pixel-measured, zoomed). `W3-study-light-starred-scrolling.png`: Starred's bar
+  in the same margin, every ★ clear by ~13 pt. · HOLDS.
+- **W4 — Starred keeps its 7.** `W2-study-light.png` / `W2-study-light-bookcase.png` (rest) and
+  `W4-study-light-starred-end.png` (scrolled to its end): with 9 stars Starred shows 7 whole rows and the half row
+  ("what the door is" cut mid-text), scrolls in place to "What's true in every mode", the rest of the column unmoved.
+  · HOLDS.
+- **W5 — the short window.** `W5-study-light-640.png` (window 640 tall): the list shrinks to ~6½ rows and still
+  stops above the footer. `W5-study-light-480.png` (+`-window`, 480 tall): the column overflows; the outer scroll
+  clips at the footer's top edge (a row's text cut there, never drawn under the footer).
+  `W5-study-light-480-outer-scrolling.png` / `-outer-scrolled.png`: the outer column scrolled to its end — the list
+  holds its 3½-row floor (three whole rows + the half row), the outer bar in the margin clear of ✕ and ★, the footer
+  uncovered. · HOLDS.
+- **W6 — ⇧⌘W repeatedly (VX-287).** From "what always asks" (mid-list, `W6-study-light-0-start*`), ⇧⌘W via
+  `keys.sh`: `W6-…-1*` the row gone, the pane on "how much, where, how long" (the next); `-2*` "connecting a client";
+  `-3*` "what the door is". From the LAST row "owned, finished, sealed" (`-4-lastrow-open`): ⇧⌘W landed on the
+  PREVIOUS, "the bookcase" (`-5-from-last*`). 15 more presses closed backwards to one row, "o museu" (`-6-onerow*`,
+  shown in its remembered Read mode); the last press emptied the list and the pane landed on the **Library**, the Open
+  section gone (`-7-empty-library-window`). With the Library showing, View ▸ Close Note ⇧⌘W and Close All Notes are
+  GREY (`-8-view-menu-library`; AX `enabled false` for both), and a ⇧⌘W press changed nothing — the window stayed
+  (`-9-library-after-shiftcmdw-window`). · HOLDS.
+- **W7 — the ✕ (her ruling).** 5 notes open, the pane on row 2 "how to use it" (`W7-…-1-before-x-shown*`, pointer
+  parked on its ✕): the ✕ on that row → the row gone, the pane on "sharing from where you are", the next (`-2*`). The
+  ✕ on row 1 "seeing, answering, undoing" (another row) → that row gone, the pane stayed on "sharing" (`-3*`).
+  Right-click on the shown note's row (`-4-rightclick-shown-menu`: Open Beside · Open in New Window · Unstar · Close ·
+  Close All Notes) ▸ Close → the pane on "what always asks", the next (`-5*`). Right-click on the other row "how much"
+  (`-6-rightclick-other-menu`) ▸ Close → that row gone, the pane stayed (`-7*`). · HOLDS.
 
 ## Ladder
 
