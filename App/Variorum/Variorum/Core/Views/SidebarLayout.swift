@@ -353,9 +353,14 @@ nonisolated enum SidebarLayout {
         rowHeight * edgeFadeRows
     }
 
-    /// Below half a point, an edge does not fade (a rounding hair of content
-    /// beyond an edge is not "more").
-    private static let fadeSlack: CGFloat = 0.5
+    /// **The edge slack** (the orchestrator's ruling P-U1b-8, after U1b's
+    /// windows): an edge with less than this beyond it is AT that edge — it
+    /// does not fade, and a row within it of clear counts as clear (no reveal
+    /// fires for it). SwiftUI's scroll settles a sub-2-pt drift into the offset
+    /// after a transition, varying run to run; 3 pt sits inside the compact
+    /// 24-pt row's own vertical padding, so no glyph is ever under the
+    /// remainder. The pins read this same constant, never a literal.
+    static let edgeSlack: CGFloat = 3
 
     /// **F-2 — which edges fade, and how deep:** the content beyond each edge,
     /// capped at `depth`. A window that holds all its content fades nowhere;
@@ -365,16 +370,16 @@ nonisolated enum SidebarLayout {
         let above = max(0, window.offset)
         let below = max(0, window.content - (window.offset + window.viewport))
         func settled(_ beyond: CGFloat) -> CGFloat {
-            beyond < fadeSlack ? 0 : min(depth, beyond)
+            beyond < edgeSlack ? 0 : min(depth, beyond)
         }
         return EdgeFades(top: settled(above), bottom: settled(below))
     }
 
     /// **F-1 — the reveal, as an EXACT content offset** (the orchestrator's
-    /// ruling P-U1b-6, after U1b's re-run: the anchor-fraction road it
-    /// replaces resolved the row through the lazy stack's own idea of where it
-    /// sat, which goes stale while the pitch flips — the Starred pin rested
-    /// 2 pt short). Row `row` of `rows`, each `rowHeight` tall, the first at
+    /// ruling P-U1b-6, amended after Q9: the exact offset is computed here and
+    /// re-asked on every input that moves the row — the re-asks are what keep
+    /// the row in view; the section applies it through its scroll proxy).
+    /// Row `row` of `rows`, each `rowHeight` tall, the first at
     /// the content's top: nil when it already stands wholly in the window AND
     /// clear of both fades, or nothing is measured yet; otherwise the content
     /// offset that lands it one fade's depth inside the edge it was beyond
@@ -388,8 +393,8 @@ nonisolated enum SidebarLayout {
         let top = CGFloat(row) * rowHeight
         let bottom = top + rowHeight
         let fades = edgeFades(window, depth: depth)
-        let above = top < window.offset + fades.top - fadeSlack
-        let below = bottom > window.offset + window.viewport - fades.bottom + fadeSlack
+        let above = top < window.offset + fades.top - edgeSlack
+        let below = bottom > window.offset + window.viewport - fades.bottom + edgeSlack
         guard above || below else { return nil }
         let wanted: CGFloat
         if above || window.viewport <= rowHeight {
