@@ -3855,3 +3855,7 @@ lens's picks over the whole note, P1's letter broken (the VX-280 lesson again). 
 - **Arm (c), the cursor's container check removed** → **exactly the crossing pins failed, 3 issues:** P-256-4's
   another-note cursor, and P-256-10's version-cursor-on-the-note and note-cursor-on-the-version; the other 13 green.
 - **Restored** (`git checkout HEAD -- Sources Tests`, status clean) → the three suites **16/16 green**.
+- **One more pin after the revert run — `aStaleCursorNeverSpendsAOnceGrant`** (D-256-6's ordering: the cursor's
+  container is checked after the decision and BEFORE the once spend). RED on the old tree (the four files from
+  `b5d838e1`: the other note's paged read answers the Level 0 text — by absence); RED with the check moved AFTER the once
+  spend (the stale call spent the grant, so the next read refused — 1 issue); restored → the three suites **17/17 green**.

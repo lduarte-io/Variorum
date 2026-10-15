@@ -407,6 +407,30 @@ struct MCPPagedReadServerTests {
         }
     }
 
+    /// A STALE cursor never spends a once grant (D-256-6: the cursor's container is checked
+    /// after the decision and BEFORE the spend): another note's cursor answers stale, and the
+    /// once grant then still reads its note.
+    @Test func aStaleCursorNeverSpendsAOnceGrant() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let w = try longNote(h, count: 3, text: numbered)
+            let once = try h.operations.createPost(title: "once")
+            _ = try h.operations.newBlock(in: once.id, text: "read me once", registeringUndo: false)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.book, w.book.id))
+            _ = try h.operations.grantMCPAccess(try h.client("claude-code").id, spec(.note, once.id, .read, .once))
+
+            let other = try json(try await call(connection, ["note_id": .string(w.note.id), "limit": 1]))
+            let foreign = try #require(other["next_cursor"] as? String)
+            let stale = try await call(connection, ["note_id": .string(once.id), "cursor": .string(foreign)])
+            #expect(stale.isError == true && text(stale) == MCPReadTools.staleCursorMessage, "\(text(stale))")
+            let read = try await call(connection, ["note_id": .string(once.id)])
+            #expect(read.isError != true && text(read).contains("read me once"), "the once grant still reads: \(text(read))")
+            await h.hangUp(connection)
+        }
+    }
+
     // MARK: - P-256-8: a lens through every page
 
     /// `lens_id` reads every page through the lens — per block `via` and `shown_take_id`
