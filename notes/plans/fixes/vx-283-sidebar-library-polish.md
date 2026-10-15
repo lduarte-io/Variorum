@@ -368,7 +368,7 @@ trailer of any kind.
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **STOPPED — Q11 not green** (22:05–22:08): batch 413, 2 red — VX-245's lint and the Starred pin (0.5 pt short on HEAD — the same code R-F ran green: FLAKY); R-G red as expected but uninformative. A new trace is needed — a fresh successor's (leads in Q11). Every other U1b pin green. F-3 → VX-359 (U3 rider). |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
-| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | IN-PROGRESS (headless; Opus implementer, 2026-10-15) — the section "U3 — the Library and the red lint" carries the per-piece LIVE STATUS |
+| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **AWAITING THE ORCHESTRATOR'S RULING on VX-175's composition** (the U3 section's Q5 — the brief's line 2 overflows the 1240-pt room in Terminal; (C) + a one-identity flow Layout recommended). VX-245 · VX-359 · VX-121 · VX-20 built headless (build-for-testing green), their pins and reverts PENDING one stage window after VX-175 is built |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
 
@@ -1870,8 +1870,8 @@ the orchestrator rules on its composition (below — the brief's composition doe
   (label `before`) and once fixed (label `after`), the `BWALK|` log chunks reassembled into
   `notes/plans/vx283-screens/u3/rig/` — the geometry dump's "uniform horizontal runs" give the pinned band's rgb.
   All PENDING the stage window.
-- Q5 — VX-175 (the controls row): **STOPPED FOR A RULING — composition (below).** Nothing built.
-- Q6 — the stage window: NOT-STARTED.
+- Q5 — VX-175 (the controls row): **STOPPED FOR A RULING — composition (below).** Nothing built; the turn ended with the question (2026-10-15).
+- Q6 — the stage window: NOT-STARTED — one window after VX-175 is built (the suite list, the reverts R-T · R-V · R-D · VX-175's, the rig's dark pass, the lint).
 
 **Q5 — VX-175: THE COMPOSITION QUESTION (for the orchestrator's ruling; nothing built).** The brief's P-U3-2 puts the
 search field alone on line 1 and scope · mode · sort · when on line 2. Measured, line 2 alone does not fit the very
