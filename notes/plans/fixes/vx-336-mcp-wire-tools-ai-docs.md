@@ -337,6 +337,11 @@ guidance. Each unit's evidence is named before its spawn.
 | VX-363 | U9's design (OWED 1) | `import_document`'s book form checks the name against every book, naming one the client can't read (VX-259 missed this road) — a fence leak | a MEMBER (sub-issue), U9; Bug · Suspected (until pinned) · MCP · High; Pre-launch her call |
 | VX-364 | U9's design (OWED 2) | A book whose wing pointer dangles refuses any outflow with `tagNotFound` (`set_book_rule` and her Save) | Todo, 13n, Bug · Suspected · Books · Low; not this run's |
 | VX-365 | U9's design (OWED 4) | `add_note_to_book`'s answer doesn't say the outflow tagged the note (VX-361's class, kept out of scope) | Todo, 13n, Improvement · Suspected · MCP · Low |
+| VX-366 | the closeout's rulings reconciled (D6 row 11) | `divide_block`, `merge_blocks`, `save_version` and the book import answer no `sha256` (P-VX254-1/2's remainder if she reverses them) | Needs Lillian, 13n, Improvement · Confirmed · MCP · Low |
+| VX-367 | D6 row 14 | the guide's lesson 3 names the remaining edit acts one by one | Todo, 13n, Improvement · Confirmed · MCP · Wording · Low |
+| VX-368 | D6 row 15 | an MCP parity audit against R-VX184-1 (move span, tag rename, extract, copy-takes divide, word targets) | Todo, 13n, Improvement · Confirmed · MCP · Low; Pre-launch her call |
+| VX-369 | D6 row 16 | errors other than `OperationError` may still reach the wire as raw text | Todo, 13n, Improvement · Suspected · MCP · Low |
+| VX-370 | D6 row 12 | measure another MCP client's output cap against the 32,000 page bound | Todo, 13n, Exploration · MCP · Low |
 | VX-357 | U7 builder A's U+0000 check | Text containing U+0000 is stored truncated at the NUL (GRDB binds text with length -1); VX-254's digest overclaims for such a take | Todo, 13n, Bug · Confirmed · MCP · Medium; Pre-launch is her call; pinned as a known issue |
 | VX-358 | U7 builder A's OWED 3 | `edit_take` / `restore_commit` treat an NFC↔NFD re-spelling as no change, so the digest differs from what the client sent | Todo, 13n, Improvement · Suspected · MCP · Low |
 | VX-355 | U6 STAGE RUN (the runner's note 2) | The Pool has no bottom bar, so receipts (an AI's, her undo's) show nowhere while it's open | Todo, 13n, Improvement · Confirmed · Library & sidebar · Low |
@@ -735,7 +740,7 @@ branch (GitHub + local), ALL evidence (`notes/plans/vx336-screens/`, the kits `n
 - An AI can save a lens by take label instead of naming every take, and its own takes are labeled with just its name, like "claude-code · english".
 - Writes answer with the ids of everything they made and a fingerprint of the words stored, so an AI can check its work without reading the whole note back.
 - Long notes are read in pages small enough for an AI to take in whole, and an AI can look up its own recent acts to see whether a call went through after a dropped connection.
-- Clearer answers: notes made in a book that tags its notes say so, tagging a note twice is simply fine, and every refusal an AI can meet is in plain words.
+- Clearer answers: notes made in a book that tags its notes say so, tagging a note twice is simply fine, and every refusal the door knows of is in plain words.
 - The field guide's chapter on AI is refreshed. To get it, choose Help ▸ Restore Tutorial… (your old guide goes to the Trash for 30 days).
 - An AI can no longer learn the name of a book it can't read by importing one with the same name.
 - In the book panel, a chapter that is one note wears that note's shared-with-AI mark.
@@ -6857,3 +6862,16 @@ the bundle's number if renumbered; and it deletes the italic DRAFT line under th
    reads Linear itself.
 6. **No `swift build` was run:** PHASE A changed no source, test or package file (`git diff --name-only 93d707eb..HEAD`
    = `notes/` only); PHASE B's headless finals run on the merged tree.
+
+### THE ORCHESTRATOR ON PHASE A (2026-10-15 ~01:35 MDT)
+
+- **Verified:** the commits `93d707eb`…`d3f36598` are pushed and the tree is clean; MCPSpec gained the VX-336 block, the
+  ≤3,000 bound and the VX-330 row, with its numbers checked against the code; AppSpec §12 is unchanged (argued).
+- **D6's remainders are MINTED:** VX-366 (Needs Lillian), VX-367, VX-368, VX-369 and VX-370, all Low, none with an
+  assignee. PHASE C lists them in the handoff by priority, beside the run's other filed tickets.
+- **The orchestrator's two small fixes, in this commit:**
+  - MCPSpec's four "PROVISIONAL #226" read "#226, ratified 2026-10-14" (she ratified #226 whole);
+  - the 0.9.7 notes' "every refusal an AI can meet" reads "every refusal the door knows of" (true under VX-369).
+- **Left as-is:** MobileSoul's two PL-53 rows predate this run and go on the handoff's notes, not fixed here.
+- **Next:** ROUND 2, a fresh `fable-reviewer` at xhigh with REVIEW_PROMPT verbatim, over the evidence and the in-branch
+  canon. Then PHASE B.
