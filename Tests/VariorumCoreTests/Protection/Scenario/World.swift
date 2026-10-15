@@ -851,6 +851,10 @@ final class SWorld {
         device.library = nil
         device.sessionMemory.removeAll()
         device.touchIDPress = nil
+        // The copy pause is the process's too (the next open's settle pauses
+        // again while an act waits) — a replaced Mac's new process never
+        // inherited it (the closer's soak, seed 8 sequence 866).
+        device.paused = false
     }
 
     // MARK: - assess's facts for a device

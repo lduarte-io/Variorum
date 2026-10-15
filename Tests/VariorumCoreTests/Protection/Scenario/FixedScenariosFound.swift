@@ -721,4 +721,18 @@ extension GeneratorFoundScenarios {
         #expect(world.macA.library?.section.oldSharedKeyStillStanding == true, "the replacement forgot the old key still stands")
         expectPromisesKept(world)
     }
+
+    /// Seed 8 (sequence 866, the closer's soak) — a WORLD finding: a leave
+    /// waiting, named, for its vault (signed out), then the Mac replaced: the
+    /// new identity rightly drops its predecessor's plan, and the copy pause —
+    /// the old process's — must not ride into the new Mac's process.
+    @Test func aReplacedMacDoesNotInheritTheCopyPause() async throws {
+        let world = try Self.start("a synced Standard account, a device that joined without a secret", seed: 8000890)
+        for action in [Action.useCastle("macA", .alwaysAsk, newWords: true), .settle,
+                       .crash(.useStandard("phone"), afterWrites: 11), .signOut("phone"),
+                       .crash(.replaceMac("phone", carriesMemory: true), afterWrites: 23), .openOlderLibrary("phone")] {
+            await world.step(action)
+        }
+        expectPromisesKept(world)
+    }
 }
