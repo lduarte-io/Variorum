@@ -169,7 +169,7 @@ guidance. Each unit's evidence is named before its spawn.
 | U5b — the block-writing pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): the 31-suite Mac batch green (251 tests, 0 failed, 7 gated skips); V252-a (create_note's `blocks` = read_note's records; filed under its chapter), V255-a/b/c (the end at write new with her ⌥⌘Z/⇧⌥⌘Z; any anchor at write new hears the rung sentence and asks her; anywhere at edit), D8-a passed; D8-b's open tail is unreachable from the keyboard (THE ORCHESTRATOR ON U5's WINDOW). The store was restored cmp-SAME. Built `7a15376c`…`93edbc2e` (U5b UNIT RECORD, three sessions) |
 | U6 — Compare from the wire (+ VX-330, VX-342) | **PROVEN 2026-10-14 17:52–18:35** (U6 STAGE RUN). The 125-suite batch: 790 tests, 786 passed, 2 gated skips, 2 standing reds (VX-115, VX-167; neither on U6's paths). Every red run exact: U6a's router clears (9 pairs), U6b Mac (15), the phone (4), the phone green 18/3. The live round passed in both voices: L0–L5 (`duplicate_note` with her ⌥⌘Z/⇧⌥⌘Z, the AI's edit on the copy, Compare aligned on lineage with related-only on, an unrelated pair with it off, `link_versions`' Open › opening Compare, not-frontmost moving nothing); VX-330's walk (all twelve of sherlock's collapsed chapter rows wear the shared icon, the waiting mark on one, pressed, Don't allow clearing it); VX-342's "before" seen. The store was restored cmp-SAME. Built: U6a `2836171c`…`48e250e0`, U6b `12efb039`…`a1a094dc` |
 | U7 — the agent's read-backs | **BUILT, READY FOR STAGE.** Builder A (VX-254 + VX-261, `54cc62a5`…`ff43e84c`); builder B (VX-256, `3e9a6dcd`…`62f39e44`). Headless finals: MCP 321/65 (1 known issue, VX-357) · core 2,871/333 · workbook 40/6. The orchestrator re-ran the paging pins: 17 green. One product, `vx336-u7`. The window is THE STAGE WINDOW in BUILDER B's RECORD (claim `vx336-u7`, about 75 min of work, 95 asked; batch-only 20); its kit is `notes/plans/fixes/vx-336-u7-kit/` (committed scripts, no secrets; **deleted at the closeout with the run's evidence**). A FRESH runner takes it |
-| U8 — the AI's docs (LAST) | NOT-STARTED |
+| U8 — the AI's docs (LAST) | SPLIT U8a (instructions + descriptions + the stargazing delta) / U8b (the field guide chapter + U8's window). U8a SPAWNED under the PAUSE protocol while U7's window waits in the queue. VX-292 re-checked 2026-10-14 ~20:25: no worktree, no in-flight row, Linear "Needs Lillian" untouched since 15:06 — not running |
 | LADDER | NOT-STARTED |
 | CLOSEOUT | NOT-STARTED |
 
@@ -478,6 +478,24 @@ after a deliberately dropped call.
 **Out of scope:** U8 (the guide) beyond doc-truth.
 
 ### U8 BRIEF — the AI's docs, LAST (VX-197)
+
+**SPLIT before its spawn (the orchestrator, 2026-10-14 ~20:30; U5–U7's lesson):**
+- **U8a — the model-facing words:** item 2 (`MCPSession.instructions`, bound 3,000, the ONE link sentence) + the tool
+  descriptions' truth (`edit_take`'s deduped before-commit; every take-writing tool's label rule per VX-197's split and
+  VX-267; the new tools' descriptions read once for consistency) + item 3 (the stargazing brief's FURTHER delta, the file
+  left ONE send-ready message). Headless pins (`MCPSession`'s bound and truth pins; the provider-neutrality pins).
+- **U8b — the field guide's MCP chapter:** item 1 + item 4 (the re-seed note) + THE STAGE WINDOW (claim `vx336-u8`: the
+  Tutorial*/MCP Mac suites, the chapter walked in both voices on a fresh dev-store guide via the product door, a real
+  client reading the instructions and answering one organization ask by the advice).
+- **Carried into U8 from U7 (builder A's OWED 6, builder B's OWED 3):** "Tools appear only for what they have shared"
+  is UNTRUE once `list_my_activity` lists at zero reach; the instructions and the chapter name paging (`limit`/`cursor`,
+  `ids_only`), the `sha256` write digest, and `list_my_activity` (recovery after a dropped call). **Numbers that U7's
+  window may still move** (the 32,000-character page budget, the 200 `limit` max): U8a states them only through the tool
+  descriptions it does not own, or writes them as `PENDING-U7` and the orchestrator confirms them after U7's window —
+  never a number the window could falsify.
+- **The PAUSE protocol (U8a starts while U7's window waits in the queue):** at the orchestrator's message "PAUSE",
+  U8a reaches a clean seam (committed, pushed, `git status` clean), records it, and ENDS ITS TURN; it is resumed after
+  U7's RELEASE. It never runs `xcodebuild test`, launches the app, or touches a store.
 
 *(The plan's "U7: the AI's docs" section is this brief's base — read it in full; this adds the carried facts.)* It runs
 over the AS-BUILT state, after U5–U7 are proven. Re-check VX-292 is not running before spawning.
