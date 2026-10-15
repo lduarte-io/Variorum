@@ -6463,8 +6463,8 @@ states (below).
 | 1 | `notes/MCPSpec.md` in-branch: the bound ≤3,000, the link, a contract line + pointer for every new surface; AppSpec §12 checked | DONE (this commit) — ### ITEM 1 below; AppSpec §12 UNCHANGED (argued there) |
 | 2 | the QUESTIONS bundle draft (D1) | DONE (this commit) — D1 below (#227 unless taken) |
 | 3 | the AppSpec §14 draft + the roll + the finals ledger text (D2, D3) | DONE (this commit) — D2 (the entry, the VX-179 roll, the VX-283-first case) and D3 below |
-| 4 | the master plan draft: retire VX-336's in-flight row only (D4) | NOT-STARTED |
-| 5 | the MOBILE PARITY draft (D5) | NOT-STARTED |
+| 4 | the master plan draft: retire VX-336's in-flight row only (D4) | DONE (this commit) — D4 below |
+| 5 | the MOBILE PARITY draft (D5) | DONE (this commit) — D5 below (PL-56 unless taken) |
 | 6 | RULINGS RECONCILED (D6), remainders proposed in OWED | NOT-STARTED |
 | 7 | the handoff draft `notes/handoffs/vx-336-handoff.md` (D7) | NOT-STARTED |
 | 8 | the STATUS lines drafted closed (D8) | NOT-STARTED |
@@ -6711,3 +6711,36 @@ commit.") and its blank line, ahead of `## VX-246`:
 > · U7 21 suites 176 (173 passed, 3 gated) · U8 66 suites 432 (429 passed, 3 gated) with the old seed's red exact · U9
 > 121 suites 771 (765 passed, 6 gated) with the Mac red (20 issues) and the phone red (5) exact and the phone green
 > 120/15; every real-client leg proven from the wire's bytes.
+
+#### D4 — the master plan (`notes/DetailedPlanForPhases.md`): retire VX-336's in-flight row ONLY
+
+Delete the one table line beginning `| Run: MCP wire tools & AI docs | VX-336 · \`vx-336-mcp-wire-tools-ai-docs\` |`
+(on `ebd16909` it is the IN-FLIGHT table's third row, after VX-305's and VX-283's). Nothing else: no "Latest closeout"
+paragraph — CLAUDE.md keeps fixes and runs out of the master plan, and VX-184 (`b228e51c`), VX-281 (`3d42df78`) and
+VX-246 (its PHASE A finding 2, ruled (a)) each retired their row and wrote no paragraph. The run's story lives in this
+record, AppSpec §14's entry and the handoff.
+
+#### D5 — MOBILE PARITY: a `notes/MobileSoul.md` ledger row (PL-56 unless taken)
+
+Anchor: a new list item directly after the PL-55 row (the one beginning `- **PL-55 (VX-246, 2026-10-14 — MCP door
+fixes):**`; on `ebd16909` it appears twice, the second copy the whole row — insert after the second). *(For PHASE C's
+eye, not ours to fix: main's MobileSoul carries the PL-55 line twice, the first a truncated copy, and two rows named
+PL-53. Recorded in OWED.)*
+
+> - **PL-56 (VX-336, 2026-10-15 — MCP wire tools & AI docs):** the MCP door is Mac-only, so every wire tool this run built
+>   or reshaped (`insert_blocks`, `duplicate_note`, Compare from the wire, the `sha256` digests, paged `read_note`,
+>   `list_my_activity`, the AI label form, `save_lens` by label, the minted answers, `apply_tag`'s `changed: false`), the
+>   Compare landing and VX-330's Book Panel marks are Mac faces and wire, and the field guide's MCP chapter is Mac-only
+>   (the phone's pocket guide carries none). **Two phone-visible changes, both through shared code:** (1) **VX-342** —
+>   the phone's undo-overwrite warning (`MobileUndoDoor.discardingUndoDetail`) says "before" in lowercase, as the Mac's
+>   does (`MobileUndoWarningWordsTests`, red then green on a simulator in U6's window); (2) **VX-362** — the shared
+>   `OpsRefusalTable` gains nine refusal sentences, which reach the phone wherever a phone door falls through to
+>   `OpsRefusalCopy.words(for:roads: .phone)` (`MobileBlockMenuController`, `MobileUndoDoor`,
+>   `MobileCommentsController`, `MobileStructuralController`, `MobileMembershipModel` after its own arms, the editor's
+>   status line, the shelf's and the book details' archive doors): a raw "Refused: …" dump becomes a sentence, and no
+>   phone face changed (`MobileRefusalTableTests`' guard re-pointed to a still-unworded case, plus a parity test — red
+>   5 issues and green 120 tests / 15 suites on a simulator in U9's window). The shared-core changes ride to the phone
+>   behaviour-neutral: the minted-take records on `DocumentImport` and the copy machine, `duplicateAsVersion`'s body
+>   extracted once, `importBook`'s optional name reach (nil = the full guard, her doors), `applyDocumentTags` skipping
+>   a tag the note already wears (a file import's fresh note never does). **VM-20** carries the phone warning's "It is
+>   saved first" where the Mac says "committed" (the commit vocabulary, R-13s-31/32).
