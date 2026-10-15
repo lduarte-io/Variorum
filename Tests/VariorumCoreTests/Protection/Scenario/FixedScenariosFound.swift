@@ -675,4 +675,19 @@ extension GeneratorFoundScenarios {
         await world.done([.settle])
         expectPromisesKept(world)
     }
+
+    /// Seed 6 (sequence 916, the closer's soak) — a CHECKER finding: in
+    /// Standard a login-password holder plants an Apple wrap of the key (they
+    /// hold the key already — rule 3), a backup freezes it, then Use Castle and
+    /// a leave: the frozen pair still opens through the planted key, as it did
+    /// before Castle. Promise 13 now reads a key tampered with in Standard as
+    /// promise 2 already did — theirs before, never undone.
+    @Test func aStandardTamperBeforeACastleStretchIsTheirsAlready() async throws {
+        let world = try Self.start("signed out with keys (Standard, synced)", seed: 6000934)
+        for action in [Action.createLibrary("phone", secrets: true), .tamper("phone", .plantAppleWrap), .backup("phone"),
+                       .useCastle("phone", .alwaysAsk, newWords: false), .useStandard("phone")] {
+            await world.step(action)
+        }
+        expectPromisesKept(world)
+    }
 }

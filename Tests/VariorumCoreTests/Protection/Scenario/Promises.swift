@@ -439,6 +439,11 @@ extension SWorld {
               record.mode == .standard, let kept = truth.keptByLeave[device.name], !kept.isEmpty else { return [] }
         let attacker = reach(attackerSeeds(device, appleAccount: true, settled: settled), files: keyFilesOn(device))
         var exempt = truth.handedOffBeforeChange.union(truth.olderBuildLeaveKeys)
+        // A key a login-password holder already held in Standard (rule 3) and
+        // tampered with there: the later crossings protect what's written
+        // after, never undo what they took before (promise 2 reads it the same
+        // way — the closer's soak, seed 6 sequence 916).
+        exempt.formUnion(truth.tamperedStandard[device.name] ?? [])
         // A Standard pair another Mac sent here is THAT Mac's own copy, under
         // its own key and its own Apple key (rule 3, its library's) — no copy
         // this device made, and no key made in Castle (promise 2 reads "made on
