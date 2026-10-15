@@ -260,15 +260,10 @@ struct RootView: View {
                 // every transient outcome (refusals, undo reports, routed
                 // speech) renders HERE, mode- and surface-independent,
                 // with the one auto-dismiss policy.
-                .overlay(alignment: .bottom) {
-                    if let item = session.status.current {
-                        StatusToast(
-                            item: item,
-                            tokens: theme.tokens(for: scheme),
-                            onDismiss: { session.status.clear() })
-                            .padding(.bottom, 46)
-                    }
-                }
+                // VX-121: placed by RULE — its resting 46 pt, lifted above
+                // any band the panes mark as kept clear (the quick-entry
+                // bar's), never a per-toast offset.
+                .statusToastHost(session.status, tokens: theme.tokens(for: scheme))
         }
         .toolbar {
             // The sidebar's own door, leading — where the split view's

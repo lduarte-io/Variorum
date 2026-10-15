@@ -1822,7 +1822,32 @@ the orchestrator rules on its composition (below — the brief's composition doe
   (new) — reads the REAL View menu in the test host (the `AppMenuServicesTests` precedent: owner rebuild + validate,
   hidden items dropped, the menu printed), no doubled / leading / trailing separator, and it reached Close Split.
   RED ON OLD planned as **R-V** (the `Divider()` restored after Close Split) — PENDING the stage window, as is its green.
-- Q3 — VX-121 (toasts clear of the quick-entry band): NOT-STARTED.
+- Q3 — VX-121 (toasts clear of the quick-entry band): DONE (this commit) — headless build-for-testing green.
+  **The trace (this tip):** the shell's one host was `RootView`'s `paneRow.overlay(alignment: .bottom) {
+  StatusToast(…).padding(.bottom, 46) }` (`RootView.swift:262-272` before) — a fixed 46 pt above the pane row's foot.
+  The Bookcase's foot is the ⌘K hint bar (≈26 pt, `ShelfView.hintBar`) with the quick-entry band directly above it
+  (`ShelfView.swift:238`; the bar is `QuickEntryBar` — the dashed box, 12-pt inner and 10-pt outer air ≈ 64 pt), so
+  the band spans ≈26–90 pt above the foot and the card resting at 46 pt sits ON the box. The Library's identical bar
+  sits at ITS foot (`LibraryCatalogView.swift:225`, 0–64 pt) — covered the same way. **The fix — a rule the host
+  reads:** `StatusToastPlacement.bottomInset(hostHeight:keepClearTops:resting:)` (pure, `Registry/StatusToast.swift`)
+  = the resting 46 pt, or just above the highest kept-clear band (8-pt clearance), never lower than resting; a band
+  marks itself with `statusToastKeepClear()` (an anchor preference); the host is ONE modifier,
+  `statusToastHost(_:tokens:resting:)` (`overlayPreferenceValue` → a `StatusToastLayer` view that alone re-renders
+  as toasts come and go), which `RootView` now uses in place of the fixed overlay. `QuickEntryBar` marks its WHOLE
+  band (box, title chip, refusal line, air). Same horizontal centre as before (the overlay's own). The note-only
+  window's host (`NoteWindowView`, resting 24 pt) is untouched — it never draws a quick-entry band.
+  **PROVISIONAL P-U3-3 (mine):** the marker sits on the shared `QuickEntryBar`, so the LIBRARY's band is kept clear
+  too, not only the Bookcase's — the ticket's class ("any toast … collides with the quick-entry band") on the one
+  component that draws it. Options: (a) the band marks itself — both surfaces [built]; (b) the Bookcase's bar only
+  (the Library's toasts keep covering its box); (c) a per-surface host inset (rejected — the ruling's "never a
+  per-toast offset"). **Pins:** `StatusToastPlacementRuleTests` (pure ×5, guards) and `StatusToastPlacementShellTests`
+  (a mounted `RootView` in a 1240 × 800 window, a refusal up, the card read against every kept-clear band in one
+  `.global` space through `StatusToastOracle` — DEBUG, owner-keyed by the 18k C4 rule: the card on the Bookcase and
+  on the Library sits ABOVE its band (clearance kept, not floating) at the band's centre; on a note it rests at 46
+  pt). **RED ON OLD planned as R-T:** `RootView`'s host line restored to the old fixed overlay (`.overlay(alignment:
+  .bottom) { if let item = session.status.current { StatusToast(item: item, tokens: theme.tokens(for: scheme),
+  onDismiss: { session.status.clear() }).padding(.bottom, 46) } }`) — expected RED: the Bookcase and Library cells;
+  the note cell green. All PENDING the stage window.
 - Q4 — VX-20 (the dark pinned heading): NOT-STARTED.
 - Q5 — VX-175 (the controls row): **STOPPED FOR A RULING — composition (below).** Nothing built.
 - Q6 — the stage window: NOT-STARTED.
