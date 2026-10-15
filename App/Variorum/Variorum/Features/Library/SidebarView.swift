@@ -530,7 +530,10 @@ struct SidebarView: View {
     ///
     /// The CURRENT row is revealed when the selection lands on a starred
     /// target, so navigating to an eighth starred note never leaves its row
-    /// hidden — the strip's own newcomer-reveal reasoning.
+    /// hidden — the strip's own newcomer-reveal reasoning. **Since U1b (the
+    /// VX-283 run)** that reveal is the shared `SidebarSectionWindow`'s: clear
+    /// of the edge fades both sections now draw (F-2), and again whenever the
+    /// section's height changes (F-1's mechanism).
     @ViewBuilder
     private var starredGroup: some View {
         let items = stars.items
@@ -551,17 +554,31 @@ struct SidebarView: View {
                         .padding(.horizontal, Self.scrollingSectionMargin)
                     }
                     .scrollBounceBehavior(.basedOnSize)
+                    #if DEBUG
+                    // U1b's oracle: the section's window over its rows.
+                    .onScrollGeometryChange(for: SidebarLayout.ScrollWindow.self) {
+                        SidebarLayout.ScrollWindow($0)
+                    } action: { _, window in
+                        SidebarGeometry.recordSection(.starred, window: window, for: workspace)
+                    }
+                    #endif
+                    // U1b (F-2, P-U1-6; F-1's reveal): the section's window —
+                    // the edges fade where more lies beyond them, and the
+                    // CURRENT row is revealed clear of the fades on a
+                    // selection change and on a height change. It replaces
+                    // the minimal `scrollTo` on a selection change that stood
+                    // here (which would now leave a row under the fade).
+                    .modifier(SidebarSectionWindow(
+                        proxy: proxy, rows: items.map(\.target),
+                        current: items.first {
+                            StarTargeting.selection(for: $0.target) == selection
+                        }?.target,
+                        rowHeight: rowHeight, room: tokens.room,
+                        report: sectionReport(.starred)))
                     .frame(maxHeight: SidebarLayout.scrollingSectionMaxHeight(rowHeight: rowHeight))
                     .fixedSize(
                         horizontal: false,
                         vertical: items.count <= SidebarLayout.scrollingSectionWindow)
-                    .onChange(of: selection) { _, now in
-                        if let match = items.first(where: {
-                            StarTargeting.selection(for: $0.target) == now
-                        }) {
-                            proxy.scrollTo(match.target)
-                        }
-                    }
                     #if DEBUG
                     // Item 10's oracle: what the SECTION actually drew,
                     // keyed by the column's own workspace (the DEBUG-oracle
@@ -821,6 +838,24 @@ struct SidebarView: View {
                         .padding(.horizontal, Self.scrollingSectionMargin)
                     }
                     .scrollBounceBehavior(.basedOnSize)
+                    #if DEBUG
+                    // U1b's oracle: the list's window over its rows.
+                    .onScrollGeometryChange(for: SidebarLayout.ScrollWindow.self) {
+                        SidebarLayout.ScrollWindow($0)
+                    } action: { _, window in
+                        SidebarGeometry.recordSection(.open, window: window, for: workspace)
+                    }
+                    #endif
+                    // U1b (F-1 + F-2): the list's window — the CURRENT row
+                    // wholly in view, clear of the fades, after an open, a
+                    // ⌘⇧W/✕ landing, a return from a place, and EVERY
+                    // viewport-height change (the traced cut: the old reveal
+                    // ran once, against a viewport that settled a pass later);
+                    // the edges fade where more lies beyond them.
+                    .modifier(SidebarSectionWindow(
+                        proxy: proxy, rows: shown, current: currentOpenRow,
+                        rowHeight: rowHeight, room: tokens.room,
+                        report: sectionReport(.open)))
                     .frame(maxHeight: maxHeight)
                     // VX-285: hug the rows while they FIT the room; past it,
                     // take the room and scroll in place (the `count <= 7`
@@ -841,12 +876,12 @@ struct SidebarView: View {
                         SidebarGeometry.recordSection(.open, scroll: frame, for: workspace)
                     }
                     #endif
-                    // The newcomer reveal: the most-recently-opened note
-                    // scrolls into view the moment it joins — "a newly
-                    // opened note never lands hidden", made literal.
-                    .onChange(of: workspace.openNotes.recency.first) { _, newest in
-                        if let newest { proxy.scrollTo(newest) }
-                    }
+                    // (U1b: the newcomer reveal that stood here — one minimal
+                    //  `scrollTo` when `recency.first` changed — is the
+                    //  section window's current-row reveal above. Every open
+                    //  takes the pane's focus, so the newcomer IS the current
+                    //  row; and a return to the note already newest, which
+                    //  never changed `recency.first`, now reveals too.)
                 }
             }
             // (VX-286: the `.padding(.horizontal, groupPadding)` that stood
@@ -886,6 +921,30 @@ struct SidebarView: View {
     private var openWingsKey: String {
         workspace.openNotes.shown.joined(separator: ",") + "|" + session.wing.currentID
     }
+
+    /// U1b (F-1): the Open row of the note the pane shows — the highlighted
+    /// row, which the list keeps wholly in view. nil on a place, a book, a
+    /// scraps container, or a note shown without a row.
+    private var currentOpenRow: String? {
+        guard case .post(let noteID) = selection,
+              workspace.openNotes.shown.contains(noteID) else { return nil }
+        return noteID
+    }
+
+    /// U1b: the DEBUG oracle's tap for the fades a scrolling section drew (nil
+    /// in a shipping build).
+    private func sectionReport(_ section: SectionName) -> SidebarSectionWindowReport? {
+        #if DEBUG
+        let workspace = workspace
+        let named: SidebarGeometry.ScrollingSection = section == .open ? .open : .starred
+        return { fades in SidebarGeometry.recordSection(named, fades: fades, for: workspace) }
+        #else
+        return nil
+        #endif
+    }
+
+    /// The two scrolling sections, by name (the oracle's own enum is DEBUG-only).
+    private enum SectionName { case starred, open }
 
     private func openRow(_ noteID: String, ordinal: Int) -> some View {
         let destination = SidebarSelection.post(noteID)
@@ -1088,6 +1147,10 @@ enum SidebarGeometry {
         var scroll: CGRect?
         /// Its FIRST row's box (the wash's rectangle), in global coordinates.
         var firstRow: CGRect?
+        /// U1b: the section's window over its rows as its scroll view last
+        /// reported it (F-1's reveal reads it), and the fades it drew (F-2).
+        var window: SidebarLayout.ScrollWindow?
+        var fades: SidebarLayout.EdgeFades?
     }
 
     static var sectionDraws: [String: [ScrollingSection: SectionDraw]] = [:]
@@ -1106,6 +1169,24 @@ enum SidebarGeometry {
     ) {
         sectionDraws[bodyKey(for: workspace), default: [:]][section, default: SectionDraw()]
             .firstRow = firstRow
+    }
+
+    /// U1b: the section's window as its scroll view reads it — recorded by
+    /// its OWN oracle in the view, apart from `SidebarSectionWindow`, so a pin
+    /// measures where a row sits whether or not the window logic is there.
+    static func recordSection(
+        _ section: ScrollingSection, window: SidebarLayout.ScrollWindow, for workspace: WorkspaceModel
+    ) {
+        sectionDraws[bodyKey(for: workspace), default: [:]][section, default: SectionDraw()]
+            .window = window
+    }
+
+    /// U1b: the fades `SidebarSectionWindow` drew (F-2).
+    static func recordSection(
+        _ section: ScrollingSection, fades: SidebarLayout.EdgeFades, for workspace: WorkspaceModel
+    ) {
+        sectionDraws[bodyKey(for: workspace), default: [:]][section, default: SectionDraw()]
+            .fades = fades
     }
 
     /// A pin clears ITS OWN column's rows and no other (the keying rule).

@@ -153,3 +153,294 @@ struct SidebarSectionWindowRuleTests {
             row: -1, rows: 20, rowHeight: rowHeight, window: window(at: 0), depth: depth) == nil)
     }
 }
+
+// MARK: - The mounted pins: what the sections actually DO in a window
+
+/// The column, bound to the workspace exactly as `RootView.selectionBinding`
+/// binds it: the sidebar reads the FOCUSED pane's selection, and a pick goes
+/// through `WorkspaceModel.select` (the road `ShellRouter.adopt` ends on).
+@MainActor
+private struct SectionWindowHost: View {
+    let session: AppSession
+    let workspace: WorkspaceModel
+    let stars: StarsModel
+    let theme: ThemeStore
+    /// The stand-in for the sync footer — `RootView.statusRows`' slot.
+    let footerHeight: CGFloat
+
+    var body: some View {
+        SidebarView(
+            session: session, model: LibraryViewModel(session: session),
+            pool: PoolViewModel(session: session),
+            workspace: workspace, stars: stars,
+            selection: Binding(
+                get: { workspace.selections[workspace.focusedPane] },
+                set: { picked in if let picked { workspace.select(picked) } }),
+            noteBox: nil,
+            bottom: AnyView(Color.clear.frame(height: footerHeight)))
+            .frame(width: 230)
+            .environment(theme)
+    }
+}
+
+/// One mounted column and the doors a pin drives it through.
+@MainActor
+private final class SectionRig {
+    let session: AppSession
+    let workspace: WorkspaceModel
+    let window: NSWindow
+    let hosting: NSView
+    let key: String
+    private(set) var notes: [String]
+
+    init(session: AppSession, workspace: WorkspaceModel, window: NSWindow, hosting: NSView, notes: [String]) {
+        self.session = session
+        self.workspace = workspace
+        self.window = window
+        self.hosting = hosting
+        self.key = SidebarGeometry.bodyKey(for: workspace)
+        self.notes = notes
+    }
+
+    /// A synchronous turn of the run loop (`run(until:)` is barred from async
+    /// contexts — `OpenListLayoutMountTests`' own helper shape).
+    private func pump(_ seconds: TimeInterval = 0.02) {
+        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+    }
+
+    var open: SidebarGeometry.SectionDraw? { SidebarGeometry.sectionDraws[key]?[.open] }
+    var starred: SidebarGeometry.SectionDraw? { SidebarGeometry.sectionDraws[key]?[.starred] }
+
+    /// A navigation, through the one door every navigation funnels through.
+    func go(_ destination: SidebarSelection) async {
+        workspace.select(destination)
+        await settle()
+    }
+
+    func newNote(_ title: String) throws -> String {
+        let id = try session.operations.createPost(title: title).id
+        notes.append(id)
+        return id
+    }
+
+    /// Turns the run loop until the Open list's window has STOPPED MOVING —
+    /// and never before the rail's 0.22 s fade has run its course.
+    func settle(minimum: TimeInterval = 0.5, until ready: () -> Bool = { true }) async {
+        let start = Date()
+        var last: SidebarLayout.ScrollWindow?
+        var lastFrame: CGRect?
+        var still = 0
+        for _ in 0..<300 {
+            hosting.layoutSubtreeIfNeeded()
+            window.layoutIfNeeded()
+            window.displayIfNeeded()
+            pump()
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(10))
+            let now = open?.window
+            let frame = open?.scroll
+            if now != nil, now == last, frame == lastFrame { still += 1 } else { still = 0 }
+            last = now
+            lastFrame = frame
+            if still >= 5, Date().timeIntervalSince(start) >= minimum, ready() { return }
+        }
+    }
+
+    /// nil when `noteID`'s Open row stands wholly in the list's window and
+    /// clear of its fades (none recorded reads as none drawn); otherwise what
+    /// is wrong, for the expectation's message.
+    func openRowTrouble(_ noteID: String) -> String? {
+        guard let draw = open, let window = draw.window else { return "the list never reported its window" }
+        let shown = workspace.openNotes.shown
+        guard let row = shown.firstIndex(of: noteID) else { return "\(noteID) has no row" }
+        let rowHeight = window.content / CGFloat(max(shown.count, 1))
+        let fades = draw.fades ?? .none
+        let top = CGFloat(row) * rowHeight
+        let bottom = top + rowHeight
+        let clearTop = window.offset + fades.top
+        let clearBottom = window.offset + window.viewport - fades.bottom
+        if top >= clearTop - 0.5, bottom <= clearBottom + 0.5 { return nil }
+        return "row \(row + 1) of \(shown.count) spans \(top)…\(bottom); the window shows \(window.offset)…"
+            + "\(window.offset + window.viewport) with fades \(fades.top)/\(fades.bottom)"
+    }
+}
+
+@MainActor
+@Suite("U1b — the scrolling sections' windows, as drawn", .serialized)
+struct SidebarSectionWindowMountTests {
+    private static let footerHeight: CGFloat = 64
+
+    /// Mounts the column at `height` with `openNotes` open (visited in order)
+    /// and `starred` stars, the focused pane on `startOn` (an index into the
+    /// notes, or nil for the Library), settled.
+    private func withRig(
+        height: CGFloat, openNotes: Int, starred: Int = 0, startOn: Int?,
+        _ body: @MainActor (SectionRig) async throws -> Void
+    ) async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            // The LIVE generator: the oracle keys must not collide with a
+            // parallel suite's (the DEBUG-oracle keying rule).
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 1281))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let notes = try (1...max(openNotes, starred)).map {
+                try session.operations.createPost(title: "note \($0)").id
+            }
+            if starred > 0 {
+                // `StarredScrollTests`' reason: the geometry, not the cap.
+                let keys = notes.prefix(starred).map { StarTarget.post($0).key }
+                let json = String(decoding: try JSONEncoder().encode(Array(keys)), as: UTF8.self)
+                try await db.write { db in
+                    try db.execute(
+                        sql: """
+                            INSERT INTO setting (key, value) VALUES ('starred', ?)
+                            ON CONFLICT(key) DO UPDATE SET value = excluded.value
+                            """,
+                        arguments: [json])
+                }
+            }
+            let workspace = WorkspaceModel()
+            for note in notes.prefix(openNotes) { workspace.visit(.post(note)) }
+            workspace.select(startOn.map { .post(notes[$0]) } ?? .library)
+            let stars = StarsModel(session: session)
+            let observing = Task { await stars.start() }
+            defer { observing.cancel() }
+            let theme = ThemeStore(session: session)
+            SidebarGeometry.forgetSections(for: workspace)
+            defer { SidebarGeometry.forgetSections(for: workspace) }
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 230, height: height),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(rootView: SectionWindowHost(
+                session: session, workspace: workspace, stars: stars, theme: theme,
+                footerHeight: Self.footerHeight))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            let rig = SectionRig(
+                session: session, workspace: workspace, window: window, hosting: hosting, notes: notes)
+            await rig.settle {
+                starred == 0 || (stars.items.count == starred && rig.starred?.window != nil)
+            }
+            try await body(rig)
+        }
+    }
+
+    /// **F-1, the deterministic road (RED ON OLD).** On the last row's note,
+    /// go to the Library and come back. The Library's taller list (no rail)
+    /// takes the rows in; coming back, the rail returns and the list's
+    /// viewport shrinks under the row — and the old reveal never ran, because
+    /// the note was already the newest (`recency.first` unchanged). RED ON
+    /// OLD: the row sits far below the window.
+    @Test func returningToTheNoteYouWereInRevealsItsRow() async throws {
+        try await withRig(height: 900, openNotes: 20, startOn: 18) { rig in
+            let last = rig.notes[19]
+            await rig.go(.post(last))
+            #expect(rig.openRowTrouble(last) == nil, "on the note: \(rig.openRowTrouble(last) ?? "")")
+            await rig.go(.library)
+            await rig.go(.post(last))
+            print("[U1b return] \(String(describing: rig.open?.window)) · \(String(describing: rig.open?.fades))")
+            #expect(rig.openRowTrouble(last) == nil,
+                    "back on the note, its row is wholly in view: \(rig.openRowTrouble(last) ?? "")")
+        }
+    }
+
+    /// **F-1's mechanism — a viewport that changes height under the current
+    /// row re-reveals it (RED ON OLD, and RED with only that trigger
+    /// reverted).** The current row revealed near the bottom, then the window
+    /// shortens by 60 pt: the list's viewport shrinks from below, top-anchored,
+    /// and only a re-reveal brings the row back.
+    @Test func aShorterListKeepsTheCurrentRowInView() async throws {
+        try await withRig(height: 900, openNotes: 20, startOn: 9) { rig in
+            let current = rig.notes[15]
+            await rig.go(.post(current))
+            #expect(rig.openRowTrouble(current) == nil, "revealed: \(rig.openRowTrouble(current) ?? "")")
+            let before = rig.open?.window
+            rig.window.setContentSize(NSSize(width: 230, height: 840))
+            await rig.settle()
+            let after = rig.open?.window
+            print("[U1b shorter] \(String(describing: before)) → \(String(describing: after))")
+            #expect((after?.viewport ?? 0) < (before?.viewport ?? 0) - 30,
+                    "the list's viewport really shrank: \(String(describing: before)) → \(String(describing: after))")
+            #expect(rig.openRowTrouble(current) == nil,
+                    "after the window shortened: \(rig.openRowTrouble(current) ?? "")")
+        }
+    }
+
+    /// **F-1, the walker's road** (O-1: a NEW note opened from a place, the
+    /// rail arriving and the column's height settling after the reveal). The
+    /// old code raced here — usually whole, once in ~40 cut — so this pin is
+    /// exact-behaviour for the new code, not a red-on-old proof.
+    @Test func aNewNoteOpenedFromThePlacesLandsWhollyInView() async throws {
+        try await withRig(height: 900, openNotes: 19, startOn: 18) { rig in
+            await rig.go(.library)
+            let newcomer = try rig.newNote("note 20")
+            await rig.go(.post(newcomer))
+            #expect(rig.workspace.openNotes.shown.last == newcomer)
+            #expect(rig.openRowTrouble(newcomer) == nil,
+                    "the note she just opened: \(rig.openRowTrouble(newcomer) ?? "")")
+        }
+    }
+
+    /// **F-1 — a ⌘⇧W landing** (the door's road: the workspace closes the
+    /// row and names the landing; the shell selects it). The next row sat
+    /// under the bottom fade beneath the closed one; it lands clear of it.
+    @Test func aCloseNoteLandingRevealsTheNextRowClearOfTheFades() async throws {
+        try await withRig(height: 900, openNotes: 20, startOn: 9) { rig in
+            await rig.go(.post(rig.notes[14]))
+            let landing = try #require(rig.workspace.closeFocusedNote())
+            #expect(landing == .post(rig.notes[15]))
+            await rig.go(landing)
+            #expect(rig.openRowTrouble(rig.notes[15]) == nil,
+                    "the landing's row: \(rig.openRowTrouble(rig.notes[15]) ?? "")")
+        }
+    }
+
+    /// **F-2 — the Open list fades only the edges with more beyond them**
+    /// (P-U1-6; the oracle reads the fades the overlay draws). At the top
+    /// only the bottom fades, mid-list both, at the end only the top — each
+    /// half a row deep. RED ON OLD: no fade at all (none recorded).
+    @Test func theOpenListFadesOnlyTheEdgesWithMoreBeyond() async throws {
+        try await withRig(height: 900, openNotes: 20, startOn: 0) { rig in
+            let window = try #require(rig.open?.window)
+            let depth = SidebarLayout.edgeFadeDepth(rowHeight: window.content / 20)
+            #expect(rig.open?.fades == SidebarLayout.EdgeFades(top: 0, bottom: depth),
+                    "at the top: \(String(describing: rig.open?.fades))")
+            await rig.go(.post(rig.notes[9]))
+            #expect(rig.open?.fades == SidebarLayout.EdgeFades(top: depth, bottom: depth),
+                    "mid-list: \(String(describing: rig.open?.fades))")
+            await rig.go(.post(rig.notes[19]))
+            #expect(rig.open?.fades == SidebarLayout.EdgeFades(top: depth, bottom: 0),
+                    "at the end: \(String(describing: rig.open?.fades))")
+        }
+    }
+
+    /// **F-2 — Starred too:** past its ~7 it fades its bottom edge at rest
+    /// (its half row reads as "more", softly), and a starred note revealed at
+    /// the end fades the top instead; a Starred that holds every row fades
+    /// nowhere. RED ON OLD: no fade at all.
+    @Test func starredFadesWhereMoreLiesBeyondAndNowhereWhenItHoldsEverything() async throws {
+        try await withRig(height: 900, openNotes: 3, starred: 9, startOn: nil) { rig in
+            let window = try #require(rig.starred?.window)
+            let depth = SidebarLayout.edgeFadeDepth(rowHeight: window.content / 9)
+            #expect(rig.starred?.fades == SidebarLayout.EdgeFades(top: 0, bottom: depth),
+                    "at rest: \(String(describing: rig.starred?.fades)) over \(window)")
+            await rig.go(.post(rig.notes[8]))
+            #expect(rig.starred?.fades == SidebarLayout.EdgeFades(top: depth, bottom: 0),
+                    "the ninth star revealed: \(String(describing: rig.starred?.fades))")
+        }
+        try await withRig(height: 900, openNotes: 3, starred: 5, startOn: nil) { rig in
+            #expect(rig.starred?.fades == SidebarLayout.EdgeFades.none,
+                    "five stars, all shown: \(String(describing: rig.starred?.fades))")
+        }
+    }
+}

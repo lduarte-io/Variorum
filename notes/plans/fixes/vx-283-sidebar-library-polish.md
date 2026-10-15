@@ -862,8 +862,10 @@ lines — below); any stage work until the orchestrator hands over a claim.
 - Q1 — F-1 + F-2's pure brain (`SidebarLayout`: `ScrollWindow`, `edgeFades`, `revealAnchor`) + its pure pins
   (`SidebarSectionWindowRuleTests` ×9): DONE (this commit) — headless `build-for-testing` green; the run PENDING the
   stage window.
-- Q2 — the view: one shared scrolling-section window for Open AND Starred (the edge-fade mask, the reveal on a
-  current-row change and on a viewport-height change, the DEBUG oracle) + the mounted pins: NOT-STARTED.
+- Q2 — the view: one shared scrolling-section window for Open AND Starred (`SidebarSectionWindow` — the edge fade,
+  the reveal on a current-row change, on mount and on every viewport-height change; the DEBUG oracles) + the mounted
+  pins (`SidebarSectionWindowMountTests` ×6): DONE (this commit) — headless `build-for-testing` green; the runs and
+  the reverts PENDING the stage window. The full write-up (trace, build, pins, PROVISIONALs) lands with Q3.
 - Q3 — headless `build-for-testing` green, then READY FOR STAGE (the batch + the reverts): NOT-STARTED.
 
 **F-3 — THE DOUBLED SEPARATOR: OLDER THAN U1, NOT ADJACENT — RECORDED AND LEFT (the brief's rule).**
