@@ -6160,3 +6160,111 @@ are ACCEPTED as written, with these rulings.
 - **Next:** a FRESH builder (the designer's harness count was ~447k) builds pieces 1–7 from the U9 UNIT RECORD's build
   plan plus VX-363, and writes THE STAGE WINDOW (`vx336-u9`).
 
+## U9 STAGE RUN — the whole window (a fresh stage runner, from 2026-10-15)
+
+**What this run does NOT do (said first):** no product code is written or changed, before the claim or under it. A red
+that needs code is RECORDED as a FINDING and reported, never fixed here. No rebuild: the window runs `vx336-u9` and
+`vx336-u9-ios` (from `c2f77ce9`) and `vx336-u9-red` and `vx336-u9-ios-red` (from `ce4f2ed9`) exactly as the U9 builder
+made them. No canon, QUESTIONS or ticket edits. Never her real store, never `/Applications/Variorum.app`, never her
+USER-scope MCP registrations: the copied setup line is never run as copied; only its key is taken, into a scratch config
+in the runner's scratchpad (`u9w/keys/`), OUTSIDE the repo, deleted at cleanup. **Never `claude mcp list` (nor `claude mcp
+get`).** `castle-W1-20261013` left alone. ONE simulator, shut down before the SEAM. The plan is the U9 UNIT RECORD → THE
+STAGE WINDOW (claim `vx336-u9`, steps 0–8), run as written, with the kit `notes/plans/fixes/vx-336-u7-kit/` (incl.
+`answers.py` and `prompts/U9-tags.txt`).
+
+**Read in full before READY (never delegated):** this record's header, Hard rules (never `claude mcp list`; the
+live-round machinery), LIVE STATUS, Stage traffic log and Cross-run coordination; the U9 UNIT RECORD whole (incl. THE
+STAGE WINDOW, FOR VX-234, PROVISIONALs, MOBILE PARITY, SELF-ASSESSMENT, OWED) and THE ORCHESTRATOR'S RULINGS ON U9's
+FORKS; THE ORCHESTRATOR ON U5's, U6's and U7's WINDOW; the U8 STAGE RUN and the U6 STAGE RUN whole (and U8b's STAGE
+WINDOW, whose steps 0/2/3/8/12 the U9 plan names "U8's step N exactly", and U7's step 2 for the fingerprint one-liner);
+every kit file (`turn.sh`, `tee-shim.sh`, `answers.py`, `drop-relay.py`, `instructions.py`, `measure.py`,
+`verify-digests.py`, the seventeen prompts); `Tools/stage`; `Tools/WalkKit/` (README, `guard.sh`, `click.sh`,
+`keys.sh`); `Tools/ScaleFixture/` (`stage.sh`'s copy loop, `restore.sh`); `notes/SessionResiliencyProtocol.md` (the
+implementer rules and the addenda); the memory note walk-driving-lessons.
+
+**The build check (READY, 2026-10-15 ~00:50 MDT):**
+- **The products match their trees.** HEAD `44d28ad9`; the tree clean; `git diff --name-only c2f77ce9..HEAD -- Sources
+  App Package.swift` is **EMPTY**, and so is the plan's wider form with `Tests` (since `c2f77ce9` only this record,
+  `answers.py` and `prompts/U9-tags.txt` changed). No `.swift`, plist, pbxproj, xcstrings, entitlements, xcconfig or
+  `Package.swift` under `Sources`, `App/Variorum` or the root is newer than `vx336-u9`'s `Variorum.debug.dylib`
+  (00:35:10). **The reds' tree:** `git diff --name-only ce4f2ed9..c2f77ce9 -- Sources App Tests Package.swift` is
+  exactly the fix files (`OpsRefusalTable.swift`, `Operations+DocumentImport.swift`, `Operations+MCPWrites.swift`,
+  `MCPToolCatalog.swift`, `MCPWriteSupport.swift`, `MCPWriteTools.swift`) plus the headless core pin
+  `Tests/VariorumCoreTests/MCPBookNameReachTests.swift` — NO Mac or phone test file differs, so the red products carry
+  the same Mac sweep pin and phone parity test as the finals. `ce4f2ed9` committed 00:12:24; the red dylibs 00:14:20 (Mac)
+  / 00:16:00 (phone); the first fix commit `7ae1551a` 00:18:24.
+- **The products exist, read from their binaries:**
+  *[removed for publication]*
+    00:35:10, shim `variorum-mcp` 00:33:24, test binary 00:35:10, `Variorum_Variorum_macosx27.0-arm64.xctestrun`
+    00:35:11. The dylib: "it may have just been deleted" ×1 · "once it lands, a book's outflow included" ×1 · "nothing
+    was written and there is nothing to undo" ×1 · "That comment is already back." ×1 · "A chapter needs a name." ×1.
+  - `App/Variorum/DerivedData/vx336-u9-red` (2.5 GB) — signed the same, 0.9.6; dylib 00:14:20, shim 00:11:36, the
+    `.xctestrun` 00:14:21. The same five strings ×0 each — **the old wire and the old table** ("must be a real day written
+    yyyy-MM-dd" ×1 in both, the parse's sentence predates the fix).
+  - `App/Variorum/DerivedData/vx336-u9-ios` (2.4 GB) — `VariorumMobile.debug.dylib` 00:37:07: the note-gone sentence ×2
+    and "That comment is already back." ×2 (two slices); `VariorumMobile_VariorumMobile_iphonesimulator27.0-arm64-x86_64.xctestrun` 00:37:08.
+  - `App/Variorum/DerivedData/vx336-u9-ios-red` (2.4 GB) — dylib 00:16:00: both ×0; the same `.xctestrun` name (00:16:01;
+    it also lists the `VariorumCore` product, a build-graph difference only — the test target, host and plan are the same).
+- **The suites are real types** (`nm -j` + `swift-demangle --simplified`, matched as `<Suite>.` on a word edge — a name
+  that matches no type runs 0 tests silently): the plan's step-1a list parsed from this record = **121 names, 121
+  distinct**, identical in order to the builder's `u9/mac-batch-suites.txt`, **121 of 121 found in BOTH `vx336-u9` and
+  `vx336-u9-red`**, ≥ 52 symbols each (the least `BlockTOCStatusTests`); `MCPWireRefusalSweepTests`' three test names in
+  both (`theSamplesNameEveryCaseExactlyOnce` · `theUnspokenCasesAreRealCasesWithTheirProofs` ·
+  `everyCaseTheWireCanCarrySpeaksWordsNeverARawCase`). The phone list (step 1c) = **15 names, 15 of 15 found in BOTH
+  `vx336-u9-ios` and `vx336-u9-ios-red`** (≥ 117 symbols, the least `MobileBookPinTests`); `MobileRefusalTableTests`
+  carries **7 test names** in both, `theSweepsNoteGoneSentenceReachesEveryFallThroughSite` and the re-pointed
+  `eachSiteKeepsItsOwnFallbackWhereTheTableHasNoWords` among them — the plan's "7 tests".
+- **The kit:** `answers.py` dry-run on a COPY of U8's `U8-org` tee (in the runner's scratchpad, so U8's evidence folder
+  is untouched) reads step 5's answer from bytes as `isError=True  answer: Refused: alreadyTagged(tagID: "…", targetID:
+  "…")` — the control.
+
+**Host and tools:** `AX: true SCREEN: true` (a compiled non-prompting probe); `walk-cap`, `walk-scroll` and the probe
+compiled FRESH into `u9w/bin/`; `Tools/WalkKit/wl2` present in this worktree (arm64, 15:10, newer than `wl2.swift`); Claude
+Code **2.1.300**; `cliclick` at `/opt/homebrew/bin`. Free disk **51 GiB**. Load average 18–30 (another session's work).
+**`U7_SCRATCH` = `<the runner's scratchpad>/u9w`** — created FRESH at READY (absent before; the shared scratchpad holds the
+earlier windows' `u7w`, `u8w`, `proj/`, none reused).
+
+**Her user-scope MCP servers (names + a sha256 prefix of the sorted compact `mcpServers` JSON, never values):**
+`['linear-server', 'variorum']`, **`bc64543e2f4e8e58`** — SAME as U5–U8's windows.
+
+**The instances, the simulators and the stage at READY — NOT ours:** both strict guards (`pgrep -lx Variorum`, `pgrep -lf
+"MacOS/Variorum$"`) EMPTY, the loose form EMPTY, no `variorum-mcp`; **0 simulators booted**; the plan's device **iPhone
+*[removed for publication]*
+`oct13coordinator`** ("HOLD: coordinator queue", claimed 00:05:36 for 180 min) — not ours; the GO's relayed line is run
+exactly as relayed. The stage log since U8's release: `vx283-u1b-walk` 23:35:55–00:04:14. **Main:** `origin/main` is
+`ebd16909` (ahead of this branch by notes, `.claude` and `CLAUDE.md` only) — VX-306 has NOT merged, so no rebuild is owed.
+
+**The dev store (read-only listing at READY):** `variorum.sqlite`, `-wal`, `-shm` all stamped 15 Oct 00:03:06 (vx-283's
+window ended 00:04; earlier windows saw 14 Oct stamps), key files `variorum-keys-b831b428ce0d67b1.json` ·
+`variorum-keys-e86ed514dc8dab5a.json`; **the sha256 prefixes EQUAL U5–U8's A1 set** (sqlite `c17923414b2e` · wal
+`7f2fcf1ec90d` · shm `e4e2b900d45c` · keys `3af4704371ff` / `7e12a1b85890`) — the content is as U8 left it, only the
+stamps moved. `Backups/` 57 entries; `Backups/safety-copies/` holds only `castle-W1-20261013` (left alone). Prefs 1,602
+keys, `variorum.whatsNew.lastVersion` 0.9.6 (= the product's, so no What's New sheet is expected), `appearanceChoice`
+system — informational only: the restore target is step 2's export, taken after the batch.
+
+**Process choices (the earlier windows' lessons applied):** the Mac batch, the Mac red and the phone red + green FIRST,
+each detached to its log and POLLED in the foreground (a `grep -q` loop, never `tail -f | grep -m1`); the simulator shut
+and the three red/phone products deleted before the SEAM; prefs, `Backups/`, the fingerprint and the clipboard BEFORE the
+A1; the A1 by `stage.sh`'s copy loop ONLY (no fixture), with every guard (strict and loose) empty; every GUI act through
+`click.sh` / `keys.sh` (keys only by System Events), at least 2.6 s apart; region captures; `á` and `·` never typed;
+Settings driven by AX; the Debug app quit BY BUNDLE ID; prefs restored by import, then re-export, diff, delete every
+added key until 0 differ; keys redacted to their first 9 characters everywhere; every client turn through the kit's
+`turn.sh` (prompt on STDIN, `--strict-mcp-config`); the six answers read from BYTES (`answers.py`).
+
+### LIVE STATUS — the stage run's steps
+
+| step | what | status |
+|---|---|---|
+| R | read-in, the build check, the fingerprint, this section → READY | DONE (this commit) — READY reported; the stage is NOT claimed (the orchestrator relays the coordinator's GO and its exact line) |
+| 0 | guards; the claim from the GO's line; HEAD at the GO; the product check | NOT-STARTED |
+| 1a | the Mac batch (121 suites on `vx336-u9`, `test-without-building`, detached + polled) | NOT-STARTED — expected green; 5 gated capture skips; `MCPWireRefusalSweepTests` 3/3 (its FIRST run); `OpsRefusalTableIntegrityTests` green |
+| 1b | THE MAC RED RUN on `vx336-u9-red` (`MCPWireRefusalSweepTests` alone), then `rm -rf` the red | NOT-STARTED — expected EXACTLY 3 tests · 1 failed · 20 issues (the ten R/E cases × prefix, name) |
+| 1c | THE PHONE, one simulator: red on `vx336-u9-ios-red` (`MobileRefusalTableTests`), green ×15 suites on `vx336-u9-ios`; shut down; `rm -rf` both phone products | NOT-STARTED — red expected EXACTLY 7 tests · 1 failed · 5 issues; green, no restart |
+| SEAM | 1a–1c recorded, committed, pushed; the claim KEPT; turn ended "SEAM" (unless the GO pre-gives "continue") | NOT-STARTED |
+| 2 | prefs export, `Backups/` listing, the store listing, the fingerprint BEFORE, the clipboard saved | NOT-STARTED |
+| 3 | THE ONE A1 (`stage.sh`'s copy loop only; cmp + sha256) | NOT-STARTED |
+| 4 | launch `vx336-u9` (Study expected) | NOT-STARTED |
+| 5 | bind (the key only) + THE GRANT A wing · Home · Write new · Always | NOT-STARTED |
+| 6 | THE U9 TURN (`U9-tags`) + `answers.py` — the six verdicts from bytes | NOT-STARTED |
+| 7 | the faces: Study (Bookcase, book, the note's tag once, Activity) → Terminal (Activity, book) → back to Study | NOT-STARTED |
+| 8 | cleanup → quit by bundle id, key grep 0 + `keys/` deleted, clipboard restored, no `mcpServers` for the scratch project, fingerprint SAME, prefs 0 differ, `restore.sh` cmp-SAME + sha256 equal, `Backups/` unchanged, castle-W1 untouched, 0 sims; release; THE RESULT LINE | NOT-STARTED |
