@@ -859,7 +859,9 @@ lines — below); any stage work until the orchestrator hands over a claim.
 
 **LIVE STATUS (per piece)**
 - Q0 — this record + F-3's trace and disposition: DONE (this commit).
-- Q1 — F-1 + F-2's pure brain (`SidebarLayout`: the edge bands, the reveal decision) + its pure pins: NOT-STARTED.
+- Q1 — F-1 + F-2's pure brain (`SidebarLayout`: `ScrollWindow`, `edgeFades`, `revealAnchor`) + its pure pins
+  (`SidebarSectionWindowRuleTests` ×9): DONE (this commit) — headless `build-for-testing` green; the run PENDING the
+  stage window.
 - Q2 — the view: one shared scrolling-section window for Open AND Starred (the edge-fade mask, the reveal on a
   current-row change and on a viewport-height change, the DEBUG oracle) + the mounted pins: NOT-STARTED.
 - Q3 — headless `build-for-testing` green, then READY FOR STAGE (the batch + the reverts): NOT-STARTED.

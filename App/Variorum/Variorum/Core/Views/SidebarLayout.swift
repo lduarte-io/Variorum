@@ -274,4 +274,112 @@ nonisolated enum SidebarLayout {
         scrollingSectionRowsCounted(rows: starred)
             + areas + rail + openStripRowsCounted(openNotes: openNotes)
     }
+
+    // MARK: - A scrolling section's window (U1b — F-1 and F-2, the VX-283 run)
+    //
+    // The two scrolling sections (Starred, the Open list) answer two
+    // questions from ONE reading of their scroll view — where its visible
+    // window sits over its rows — and both answers are pure:
+    //
+    // F-2 (the orchestrator's eye on U1's walk, PROVISIONAL P-U1-6): a
+    // scrolled section sliced its partial row through the letters right under
+    // its header — a hard clip that read unfinished. Each edge now FADES over
+    // about half a row, and only where content lies beyond it: the top only
+    // once scrolled down, the bottom only while more lies below. The depth
+    // grows with the content beyond the edge (capped at the half row), so the
+    // fade eases in as the list starts to move instead of popping in whole.
+    //
+    // F-1 (the walker's O-1): the note she had just opened could sit with its
+    // highlighted row cut at the list's bottom edge. The traced mechanism (the
+    // U1b record): the reveal was ONE minimal `scrollTo` per newest note,
+    // issued against whatever viewport stood when it ran — and the Open
+    // list's viewport is a function of measurements that land a pass later
+    // (`openListMaxHeight`'s two, the rail arriving, the column's pitch
+    // flipping 30 ↔ 24 under a 0.22 s animation), while returning to the note
+    // she was already in never revealed at all (its recency did not change).
+    // So the reveal is a decision over the window as it NOW stands, asked on
+    // a current-row change AND on every viewport-height change — and since
+    // F-2 fades the edges, "in view" means clear of the fades too.
+
+    /// A scrolling section's visible window over its rows, in the scroll
+    /// content's space: the visible top, the visible height, the content's
+    /// height. Unmeasured (a zero viewport) until the scroll view reports.
+    nonisolated struct ScrollWindow: Equatable, Sendable {
+        var offset: CGFloat
+        var viewport: CGFloat
+        var content: CGFloat
+
+        static let unmeasured = ScrollWindow(offset: 0, viewport: 0, content: 0)
+        var isMeasured: Bool { viewport > 0 }
+    }
+
+    /// How deep each edge of a scrolling section fades — 0 where nothing lies
+    /// beyond that edge.
+    nonisolated struct EdgeFades: Equatable, Sendable {
+        var top: CGFloat
+        var bottom: CGFloat
+
+        static let none = EdgeFades(top: 0, bottom: 0)
+    }
+
+    /// F-2's full depth, in rows: *"about half a row"* (P-U1-6).
+    static let edgeFadeRows: CGFloat = 0.5
+
+    /// F-2's full depth at the drawn pitch.
+    static func edgeFadeDepth(rowHeight: CGFloat) -> CGFloat {
+        rowHeight * edgeFadeRows
+    }
+
+    /// Below half a point, an edge does not fade (a rounding hair of content
+    /// beyond an edge is not "more").
+    private static let fadeSlack: CGFloat = 0.5
+
+    /// **F-2 — which edges fade, and how deep:** the content beyond each edge,
+    /// capped at `depth`. A window that holds all its content fades nowhere;
+    /// an unmeasured one fades nowhere.
+    static func edgeFades(_ window: ScrollWindow, depth: CGFloat) -> EdgeFades {
+        guard window.isMeasured, depth > 0 else { return .none }
+        let above = max(0, window.offset)
+        let below = max(0, window.content - (window.offset + window.viewport))
+        func settled(_ beyond: CGFloat) -> CGFloat {
+            beyond < fadeSlack ? 0 : min(depth, beyond)
+        }
+        return EdgeFades(top: settled(above), bottom: settled(below))
+    }
+
+    /// **F-1 — the reveal.** Row `row` of `rows` (each `rowHeight` tall, the
+    /// first at the content's top): nil when it already stands wholly in the
+    /// window AND clear of both fades — or when nothing is measured yet;
+    /// otherwise the `UnitPoint.y` to hand `ScrollViewProxy.scrollTo(_:anchor:)`
+    /// so the row lands one fade's depth inside the edge it was beyond (none
+    /// past the first row or the last, where nothing lies beyond to fade).
+    ///
+    /// The anchor arithmetic: `scrollTo` aligns the point `y × rowHeight` down
+    /// the row with the point `y × viewport` down the window, so the row's top
+    /// lands `y × (viewport − rowHeight)` below the window's top. A row that
+    /// must sit `margin` below the top asks `margin / room`; one that must sit
+    /// `margin` above the bottom asks `(room − margin) / room`
+    /// (`room = viewport − rowHeight`).
+    static func revealAnchor(
+        row: Int, rows: Int, rowHeight: CGFloat, window: ScrollWindow, depth: CGFloat
+    ) -> CGFloat? {
+        guard window.isMeasured, rowHeight > 0, row >= 0, row < rows else { return nil }
+        let top = CGFloat(row) * rowHeight
+        let bottom = top + rowHeight
+        let fades = edgeFades(window, depth: depth)
+        let clearTop = window.offset + fades.top
+        let clearBottom = window.offset + window.viewport - fades.bottom
+        let above = top < clearTop - fadeSlack
+        let below = bottom > clearBottom + fadeSlack
+        guard above || below else { return nil }
+        let room = window.viewport - rowHeight
+        // A window shorter than one row can only show the row's top.
+        guard room > 0 else { return 0 }
+        if above {
+            let margin = min(depth, top)
+            return min(max(margin / room, 0), 1)
+        }
+        let margin = min(depth, CGFloat(rows - 1 - row) * rowHeight)
+        return min(max((room - margin) / room, 0), 1)
+    }
 }
