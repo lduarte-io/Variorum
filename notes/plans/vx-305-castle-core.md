@@ -584,8 +584,8 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   `d69e28f3`; the seed-9 model gap — reopening this Mac's own set-aside library — DEFERRED and RATIFIED to phase
   5/VX-309 by the orchestrator). Seeds 17 and 18 found two more code bugs (another identity's replayed memory
   taking the account; a rolled-back landing's key file restored only from a wiped mirror), each pinned and fixed. THE
-  FINAL TREE so far is `6128c8de`: seeds 18, 19, 20 green × 1000 on it; seeds 1–7 green again on it
-  (the final-tree pass). NEXT: seeds 8–17, then the 20 under `-c release` — PENDING; (k) the runs — PENDING; (l) the final record — PENDING.
+  FINAL TREE so far is `6128c8de`: seeds 18, 19, 20 green × 1000 on it; seeds 1–13 green again on it
+  (the final-tree pass). NEXT: seeds 14–17, then the 20 under `-c release` — PENDING; (k) the runs — PENDING; (l) the final record — PENDING.
 - The go/no-go record: **NOT-STARTED.**
 
 ---
