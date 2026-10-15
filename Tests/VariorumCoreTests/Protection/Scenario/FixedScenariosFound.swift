@@ -442,4 +442,18 @@ extension GeneratorFoundScenarios {
         #expect(world.liveKeyFile(world.phone)?.apple != nil, "Resume Sync didn't give the library its Apple road")
         expectPromisesKept(world)
     }
+
+    /// Seed 2 (sequence 342, the closer's soak) — a CHECKER finding: the same
+    /// held landing, crashed after its swap and finished by the relaunch — the
+    /// world marked a landing held only when its press returned, so promise 3
+    /// judged the resumed one. A synced pair is held from its press.
+    @Test func aCrashedHeldLandingIsHeldWhenItsResumeFinishes() async throws {
+        let world = try Self.start("a synced Castle account on two Macs and the phone", seed: 2000348)
+        for action in [Action.useStandard("macA"), .sendLibrary(from: "macA", to: "macB"),
+                       .crash(.land("macB", .wordsPassphraseMadeNew), afterWrites: 15), .settle] {
+            await world.step(action)
+        }
+        #expect(world.liveKeyFile(world.macB)?.apple == nil, "a held landing wrote an Apple wrap")
+        expectPromisesKept(world)
+    }
 }

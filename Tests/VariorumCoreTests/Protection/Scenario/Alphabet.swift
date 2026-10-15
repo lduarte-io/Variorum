@@ -948,6 +948,10 @@ extension SWorld {
             }
         }()
         try await act(device) { executor, library in
+            // A synced pair lands HELD from its press: a crashed landing its
+            // resume finishes is held all the same (the slot's library is the
+            // landed one only if it landed — keyed by its id).
+            if pair.record?.account != nil, let landedID { self.truth.heldLanding[device.name] = landedID }
             // Chosen at the press — inside the act, after the opening's own
             // adoption (made before it, a crashed landing's made-new secret was
             // dropped as a rolled-back act's and her truth lost it).
