@@ -171,6 +171,16 @@ extension ProtectionExecutor {
             secrets: ActSecrets(passphrase: current, words: try WordsKey.derive(newWords)), library: &library)
     }
 
+    /// The account's keys moved past what this library follows (assess's
+    /// `follow(.keysReplaced)` read): the corpus key id this Mac remembers
+    /// following, or — its memory's vault facts gone — the library's master
+    /// words copy against the vault's recovery wrap.
+    func libraryBehind(_ library: UnlockedLibrary, vault: VaultSnapshot) -> Bool {
+        if let known = library.memory?.vaultFacts?.corpusKeyID { return known != vault.corpusKeyID }
+        guard let live = library.keyFile, live.master != nil, let copy = live.masterWordsCopy else { return false }
+        return copy != vault.reading.recoveryWrap
+    }
+
     func keyDoorParameters(_ library: UnlockedLibrary) async throws -> ActParameters {
         guard let record = library.record else { throw ExecutorRefusal.migrationOwed }
         var parameters = ActParameters(synced: record.account != nil, accountID: record.account)
@@ -182,9 +192,7 @@ extension ProtectionExecutor {
             // here, the door refused inside its plan with stale keys, leaving
             // the act in flight — VX-305 U4, found by the scenario world).
             if let settled = vault.mode.settled, settled != record.mode { throw ExecutorRefusal.accountMoved }
-            if let known = library.memory?.vaultFacts?.corpusKeyID, known != vault.corpusKeyID {
-                throw ExecutorRefusal.accountMoved
-            }
+            if libraryBehind(library, vault: vault) { throw ExecutorRefusal.accountMoved }
         }
         return parameters
     }

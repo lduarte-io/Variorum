@@ -358,6 +358,18 @@ extension ProtectionExecutor {
     func resume(_ plan: ProtectionPlan, _ library: inout UnlockedLibrary, typed: TypedSecrets) async throws -> ActOutcome {
         let program = Self.program(for: plan.act)
         let secrets = try derive(typed, under: plan.parameters?.passphraseKDF, newPassphrase: plan.parameters?.passphraseIsNew == true)
+        // The passphrase typed at a resume must be the press's: every lock
+        // under the plan's descriptor that this Mac holds opens with it. One
+        // descriptor names one passphrase (the route finder's `.current` rests
+        // on it) — a different passphrase derived under it would make the
+        // lines lie (promise 9 — VX-305 U4, found by the scenario world).
+        if let derived = secrets.passphrase, let kdf = plan.parameters?.passphraseKDF {
+            let locks = [library.keyFile, library.memory?.keyFileMirror].compactMap { $0 }.filter { $0.passphrase?.kdf == kdf }
+            if !locks.isEmpty,
+               !locks.contains(where: { (try? $0.open(passphrase: .passphraseKey(derived), floor: configuration.floor)) != nil }) {
+                throw ExecutorRefusal.passphraseDoesNotOpen
+            }
+        }
         let ctx = ActContext(
             executor: self, library: library, plan: plan, secrets: secrets, typed: typed, toKey: nil,
             resuming: true)

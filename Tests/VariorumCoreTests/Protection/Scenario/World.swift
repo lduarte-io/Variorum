@@ -111,7 +111,7 @@ struct Truth {
     /// the key it was then under — rule 3: in Standard that person can rewrite
     /// anything, and no repair acts on a Standard record's word (§3.3), so
     /// promise 3's own-key wording waits for the next key change.
-    var tamperedStandard: [String: String] = [:]
+    var tamperedStandard: [String: Set<String>] = [:]
     /// Apple key ids whose deliberate delete never reached iCloud: made while
     /// the device's switch was off, or queued and lost with its keychain (a
     /// replaced, wiped or re-Apple-ID'd device) — §8's residue (PROVISIONAL
@@ -334,7 +334,21 @@ final class SWorld {
                 // secrets of that moment: they are the library's own now (a
                 // resumed leave included — afterAct's rule for any road).
                 let own = holder(device, account: nil, libraryID: slot.libraryID)
-                let k = known(was)
+                var k = known(was)
+                // The secrets typed at the leave's press — the account's then,
+                // which a change made elsewhere since may have moved past.
+                if let wrap = liveKeyFile(device)?.passphrase {
+                    let candidates = [k.passphrase].compactMap { $0 } + k.timeline.compactMap(\.passphrase).reversed()
+                    if let opens = candidates.first(where: { p in
+                        passphraseKey(p, wrap.kdf).map { Lock.unwrap(wrap.wrapped, under: $0.key) != nil } == true
+                    }) { k.passphrase = opens }
+                }
+                if let lock = liveKeyFile(device)?.words {
+                    let candidates = [k.words].compactMap { $0 } + k.timeline.compactMap(\.words).reversed()
+                    if let opens = candidates.first(where: { w in wordsKey(w).map { Lock.unwrap(lock, under: $0) != nil } == true }) {
+                        k.words = opens
+                    }
+                }
                 if truth.known[own] == nil || truth.known[own] != k {
                     setKnown(own, passphrase: k.passphrase, words: k.words)
                 }
@@ -555,8 +569,20 @@ final class SWorld {
         var typed = TypedSecrets(passphrase: known.passphrase, words: known.words)
         // An act in flight resumes with the secrets typed at its press (a plan
         // never holds one): she types again what she chose seconds before.
-        if device.container.files[SPath.plan] != nil, let chosen = device.pending.last {
-            typed = TypedSecrets(passphrase: chosen.passphrase ?? typed.passphrase, words: chosen.words ?? typed.words)
+        if device.container.files[SPath.plan] != nil {
+            if let chosen = device.pending.last {
+                typed = TypedSecrets(passphrase: chosen.passphrase ?? typed.passphrase, words: chosen.words ?? typed.words)
+            }
+            // She types the passphrase that opens her library (a change made
+            // elsewhere since the press is not yet hers here).
+            if let wrap = liveKeyFile(device)?.passphrase {
+                let candidates = [typed.passphrase].compactMap { $0 } + known.timeline.compactMap(\.passphrase).reversed()
+                if let opens = candidates.first(where: { p in
+                    passphraseKey(p, wrap.kdf).map { Lock.unwrap(wrap.wrapped, under: $0.key) != nil } == true
+                }) {
+                    typed = TypedSecrets(passphrase: opens, words: typed.words)
+                }
+            }
         }
         return typed
     }

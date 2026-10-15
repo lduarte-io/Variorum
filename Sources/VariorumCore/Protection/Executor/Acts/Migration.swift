@@ -223,9 +223,17 @@ extension ProtectionExecutor {
         // the follow (a key change) is owed — today's silent follow, which
         // would make a Castle-born key Standard with no key change, is gone
         // (§3.15). PROVISIONAL P-U4-4 (VX-305 U4, found by the scenario world).
+        // Unambiguous = the custody AND the key file agree (a silent item with
+        // an Apple wrap is Standard-born; no silent item and no Apple wrap, a
+        // passphrase lock, Castle-born). A lone shape is no evidence: a wiped
+        // keychain leaves a Standard key with no silent item (the scenario
+        // world's second finding here).
         if case .vault = verdict.source, inputs.legacyMode.rawKeyCustody != .unknown {
             let shape = LegacyModeReader.shapeReading(inputs.legacyMode.keyFile, inputs.legacyMode.rawKeyCustody)
-            if shape != mode {
+            let fileSays: ProtectionMode? = inputs.legacyMode.keyFile.flatMap {
+                $0.hasAppleWrap ? .standard : ($0.hasPassphraseWrap ? .castle : nil)
+            }
+            if shape != mode, fileSays == shape {
                 mode = shape
                 confirmed = true
             }

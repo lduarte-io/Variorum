@@ -195,6 +195,8 @@ extension SWorld {
     /// the library current whatever happens.
     func act(_ device: SDevice, _ body: (ProtectionExecutor, inout UnlockedLibrary) async throws -> ActOutcome?) async throws {
         let (executor, start) = try await opened(device)
+        // A resume the opening ran settles what its press chose.
+        adoptPending(device)
         var library = start
         let before = library.record
         defer {
@@ -214,7 +216,9 @@ extension SWorld {
     func afterAct(_ device: SDevice, before: ProtectionRecord?) {
         noteBirths(device)
         guard let record = device.library?.record else { return }
-        if before?.mode == .castle, record.mode == .standard {
+        // A leave of THIS library (a different library landing in the slot is
+        // no leave — its outgoing library goes aside whole).
+        if before?.mode == .castle, record.mode == .standard, before?.libraryID == record.libraryID {
             truth.leftCastleAt[device.name] = clock
             truth.keptByLeave[device.name, default: []].formUnion(before?.familyTree.fingerprints ?? [])
         }
@@ -935,7 +939,12 @@ extension SWorld {
         let leaf = DeviceLeaves(world: self, device: device)
         guard let slot = device.slot else { throw WorldRefusal.noLibrary }
         let memoryName = KName.memory(Self.scope, slot.libraryID)
-        if slot.record?.mode == .standard { truth.tamperedStandard[device.name] = slot.fingerprint }
+        // A tamper on a Standard device is outside the protection claims (rule
+        // 3: that person holds the key): its library's keys at that moment.
+        if slot.record?.mode == .standard {
+            let tree = Set((slot.record?.familyTree.fingerprints ?? []) + (device.library?.familyTree.fingerprints ?? []) + [slot.fingerprint])
+            truth.tamperedStandard[device.name, default: []].formUnion(tree)
+        }
         lock(device)
         switch tamper {
         case .plantAppleWrap:

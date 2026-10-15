@@ -366,11 +366,10 @@ extension SWorld {
         // stretch's key — born after the restored current key — keeps its
         // silent item; it holds only what was Apple-reachable by design
         // (PROVISIONAL P-U4-8).
-        let currentBorn = library.familyTree.entry(record.currentFingerprint)?.madeAt
+        // (A Standard key the restored record never knew is one born after it.)
         func laterStandard(_ fingerprint: String) -> Bool {
-            guard let entry = library.familyTree.entry(fingerprint), entry.kind == .standard,
-                  let born = entry.madeAt, let currentBorn else { return false }
-            return born > currentBorn && !record.familyTree.contains(fingerprint)
+            guard let entry = library.familyTree.entry(fingerprint), entry.kind == .standard else { return false }
+            return !record.familyTree.contains(fingerprint)
         }
         for name in device.keychain.local.keys where name.service == ProtectionNames.custodyService {
             if let item = device.keychain.local[name], !item.touchID, let key = item.value.libraryKey, tree.contains(PF.fp(key)),
@@ -409,7 +408,7 @@ extension SWorld {
                 continue
             }
             if senders.contains(where: { id.hasPrefix("container:\($0.key)/") && $0.value != device.name }) { continue }
-            if truth.rolledBackOver.contains(id) { continue }
+            if truth.rolledBackOver.contains(id) || laterStandard(image.fingerprint) { continue }
             if attacker[image.fingerprint] != nil, !exempt.contains(image.fingerprint), !truth.listedBySheet.contains(id) {
                 fail("a login-password holder opens the copy \(id) (\(f8(image.fingerprint)))")
             }
@@ -458,7 +457,7 @@ extension SWorld {
     func standardMeansStandard(_ device: SDevice) -> [Violation] {
         guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record,
               record.mode == .standard, record.modeConfirmed else { return [] }
-        if truth.tamperedStandard[device.name] == record.currentFingerprint { return [] }
+        if truth.tamperedStandard[device.name]?.contains(record.currentFingerprint) == true { return [] }
         // Decision 35: a synced library writes nothing Apple-reachable without
         // a fresh read of its account's vault — signed out, in another account
         // or offline, its own Apple key waits (Re-link's library arm too).
@@ -478,6 +477,9 @@ extension SWorld {
         guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record,
               let account = record.account, device.session.accountID == account, device.online,
               let vault = server.snapshot(account) else { return [] }
+        // A Standard device's files tampered with (outside the claims — rule
+        // 3), until a deliberate act mints a key past them (P-U4-10).
+        if truth.tamperedStandard[device.name]?.contains(record.currentFingerprint) == true { return [] }
         var violations: [Violation] = []
         if let mode = vault.mode.settled, mode != record.mode {
             violations.append(Violation(promise: 7, device: device.name, detail: "the library is \(record.mode), the account \(mode)"))
@@ -738,7 +740,12 @@ extension SWorld {
                 // A synced pair landed held keeps its own secrets (made new at
                 // the landing) until Resume Sync: the library's own holder too.
                 let livePassphrases = Array(Set(slotK.timeline.compactMap(\.passphrase) + [slotK.passphrase, own.passphrase].compactMap { $0 }))
+                // `.current` words also name a master words copy equal to the
+                // vault's recovery wrap AS THIS SESSION READ IT — the account's
+                // words of that read (a reading the account has since moved past).
+                let sessionAccount = device.session.accountID.map(known) ?? Known()
                 let liveWords = slotK.timeline.compactMap(\.words) + [slotK.words, own.words].compactMap { $0 }
+                    + sessionAccount.timeline.compactMap(\.words)
                 switch route.opener {
                 case .passphrase(.current):
                     for p in livePassphrases { var b = book; b.passphrases[.current] = p; candidates.append(b) }

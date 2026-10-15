@@ -116,9 +116,7 @@ extension ProtectionExecutor {
             try requireSignedIn(as: account)
             guard let vault = try await readVault(accountID: account) else { throw ExecutorRefusal.needsFreshVault }
             if vault.reading.rotationInProgress { throw ExecutorRefusal.rotationInProgress }
-            if let known = library.memory?.vaultFacts?.corpusKeyID, known != vault.corpusKeyID {
-                throw ExecutorRefusal.accountMoved
-            }
+            if libraryBehind(library, vault: vault) { throw ExecutorRefusal.accountMoved }
             // The account in another mode than the library: the follow comes
             // first (a door begun here would refuse inside its plan, leaving
             // the act in flight — VX-305 U4, found by the scenario world).

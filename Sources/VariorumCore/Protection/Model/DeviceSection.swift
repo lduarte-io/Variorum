@@ -368,6 +368,21 @@ public enum DeviceFacts {
                     origin: .adopted, retiredAt: record.retiredAt))
             }
         }
+        // The old shared key's state (§3.5 points 4–5): the predecessor's, as
+        // it stood — this is the same Mac; with no predecessor to name, a
+        // retirement any section of this library's record lists (by its id —
+        // delete on sight fires only on that id, on the Apple account whose
+        // device already deleted it). Otherwise a delete the replaced keychain
+        // never carried left the old key alive here, opening this library's
+        // pre-Castle copies, with neither the door nor §3.1's first exception
+        // showing. PROVISIONAL P-U4-9 (VX-305 U4, found by the scenario world).
+        if let shared = predecessor?.oldSharedKey {
+            section.oldSharedKey = shared
+        } else if predecessor == nil,
+                  let retired = allSections.compactMap(\.oldSharedKey).filter({ $0.retiredAt != nil })
+                    .min(by: { ($0.retiredAt ?? .distantFuture) < ($1.retiredAt ?? .distantFuture) }) {
+            section.oldSharedKey = retired
+        }
         return section
     }
 

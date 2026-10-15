@@ -216,6 +216,14 @@ extension ProtectionExecutor {
                   library.memory?.vaultFacts?.corpusKeyID == nil else { return .nothingThere }
             guard let held = try leaves.syncKeys.readSyncKeys(accountID: account, itemClass: .silent)
                     ?? leaves.syncKeys.sessionSyncKeys(accountID: account) else { return .nothingThere }
+            // Only what the LIBRARY follows: its key file's master lock opens
+            // with the held master (keys fetched fresh from the vault for the
+            // session can be newer than the library — then the follow is owed,
+            // read by assess from the master's words copy).
+            if let live = library.keyFile, live.master != nil,
+               (try? live.open(master: held.masterSymmetricKey)).map({ Self.fp($0) == library.fingerprint }) != true {
+                return .preconditionDoesNotVerify
+            }
             let vault = freshVaults[account]
             let facts = vault.map { $0.corpusKeyID == held.corpusKeyID } == true
                 ? VaultFacts(kdf: vault?.format.kdf, corpusKeyID: held.corpusKeyID, recoveryWrapDigest: vault?.format.recoveryWrapDigest)

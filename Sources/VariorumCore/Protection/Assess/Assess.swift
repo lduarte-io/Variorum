@@ -459,7 +459,13 @@ public enum AssessRules {
             case .castle where current == .standard:
                 acts.append(.follow(.intoCastle, typesOneSecret: true, holdsLibraryRekey: vault.rotationInProgress))
             default:
-                if let known, let corpus = reading.corpusKeyID, known != corpus {
+                // What this Mac remembers names no vault facts (its memory item
+                // went): the library's master words copy against the vault's
+                // recovery wrap tells whether its master is the account's.
+                let behind = known == nil && liveKeyFile(facts, unlocked).map { live in
+                    live.master != nil && live.masterWordsCopy != nil && live.masterWordsCopy != reading.recoveryWrap
+                } == true
+                if (known.map { known in reading.corpusKeyID.map { $0 != known } ?? false } ?? false) || behind {
                     // Keys replaced in the same mode: Castle types one secret;
                     // Standard reads the new master through the account's Apple
                     // key, or takes a secret when it can't be read here.
