@@ -5417,3 +5417,100 @@ bar (a tag-rule book) would test the model as much as the advice.
 6. **The stargazing brief:** no edit owed — the chapter's title is unchanged and the brief's "Learn more" paragraph is
    true of the as-built door (read in this session).
 7. **No ticket minted.** No observation outside the chapter.
+
+## U8 STAGE RUN — the whole window (a fresh stage runner, from 2026-10-14)
+
+**What this run does NOT do (said first):** no product code is written or changed, before the claim or under it. A red
+that needs code is RECORDED as a FINDING and reported, never fixed here, and so is a re-probe page that spills (the
+orchestrator rules the budget). No rebuild: the window runs `vx336-u8` (from `f887d8c7`) and `vx336-u8-red` (from
+`c7fa39c4`) exactly as U8b built them. No canon, QUESTIONS or ticket edits. Never her real store, never
+`/Applications/Variorum.app`, never her USER-scope MCP registrations: the copied setup line is never run as copied; only
+its key is taken, into a scratch config in the runner's scratchpad, OUTSIDE the repo, deleted at cleanup. **Never `claude
+mcp list` (nor `claude mcp get`).** `castle-W1-20261013` left alone. The plan is the U8b UNIT RECORD → THE STAGE WINDOW
+(claim `vx336-u8`, steps 0–12), run as written, with its kit `notes/plans/fixes/vx-336-u7-kit/` (U7c's three prompts and
+U8b's `prompts/U8-org.txt` + `instructions.py` included).
+
+**Read in full before READY (never delegated):** this record's header, Hard rules (never `claude mcp list`; the
+live-round machinery), LIVE STATUS, Stage traffic log and Cross-run coordination; the U8b UNIT RECORD whole (THE PINS,
+THE PRODUCTS, THE STAGE WINDOW, THE CHAPTER AS BUILT, FOR VX-234, PROVISIONALs, OWED); the U7c UNIT RECORD's THE
+RE-PROBE; THE ORCHESTRATOR ON U5's, U6's and U7's WINDOW; the U7 STAGE RUN whole (and builder B's STAGE WINDOW it ran;
+the U6 STAGE RUN for the A1 copy-loop form); every kit file (`turn.sh`, `tee-shim.sh`, `drop-relay.py`, `measure.py`,
+`instructions.py`, `verify-digests.py`, the sixteen prompts); `Tools/stage`; `Tools/WalkKit/` (README, `guard.sh`,
+`click.sh`, `keys.sh`); `Tools/ScaleFixture/` (`stage.sh`'s copy loop, `restore.sh`); `notes/SessionResiliencyProtocol.md`
+(the implementer rules and the addenda); the memory note walk-driving-lessons.
+
+**The build check (READY, 2026-10-14 ~23:00 MDT):**
+- **The products match their trees.** HEAD `a2fb6459`; the tree clean; `git diff --name-only f887d8c7..HEAD -- Sources
+  App Package.swift` is **EMPTY** (since `f887d8c7` only this record, `instructions.py` and `prompts/U8-org.txt` changed);
+  `git diff --name-only c7fa39c4..f887d8c7 -- Sources App Package.swift` is **exactly
+  `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift`** (the fix commit — so `vx336-u8-red` = the pins + the
+  OLD seed). No `.swift`, plist, pbxproj, xcstrings, entitlements, xcconfig or `Package.swift` under `Sources`,
+  `App/Variorum` or the root is newer than `vx336-u8`'s `Variorum.debug.dylib` (22:49:14).
+- **The products exist, read from their binaries:**
+  *[removed for publication]*
+    0.9.6; dylib 22:49:14, shim `variorum-mcp` 22:47:19, test binary 22:49:14, the
+    `Variorum_Variorum_macosx27.0-arm64.xctestrun` 22:49:15. The dylib: "click the copy icon" ×1 · "press Copy setup
+    command" ×0 · "Until then, the one thing an approved client can do" ×1 · "Your AI can help keep the library in
+    order" ×1 · `stargazing.tech/variorum/mcp` ×1 (U8a) · "about 32,000 characters" ×1 (U7c).
+  - `App/Variorum/DerivedData/vx336-u8-red` — signed the same; dylib 22:45:17 (BEFORE the seeder's 22:45:33 edit),
+    shim 22:38:42, the `.xctestrun` 22:45:17. The dylib: "press Copy setup command" ×1 · "click the copy icon" ×0 · the
+    two new lessons' sentences ×0 — **the OLD seed**; U8a's link ×1 and U7c's words ×1 (both predate `c7fa39c4`).
+  - Both test binaries carry the new pins ("Until then, the one thing an approved client can do" ×2 in each).
+- **The 66 suites are real type names in BOTH test bundles** (`nm -j` + `swift-demangle --simplified`, matched as
+  `<Suite>.` on a word edge — a name that matches no type runs 0 tests silently): the plan's step-1a list parsed from
+  this record = **66 names, 66 distinct, 66 of 66 found** in `vx336-u8` and in `vx336-u8-red`, ≥ 49 symbols each (the
+  least `TourEndCardAsideGateTests`); `TutorialMCPChapterTests` 1,771 symbols, and **its eight test names present in both**
+  (`theChapterIsSevenLessonsAndTheGuidesAppendix` · `lessonOne…` · `lessonTwoConnectingAClient` ·
+  `lessonThreeHowMuchWhereHowLong` · `lessonFourWhatAlwaysAsks` · `lessonFiveSharingFromWhereYouAre` ·
+  `lessonSixHowToUseIt` · `lessonSevenSeeingAnsweringUndoing`).
+
+**Host and tools:** `AX: true SCREEN: true` (a compiled non-prompting probe); `walk-cap` and `walk-scroll` compiled into
+the runner's scratchpad `u8w/bin/`; `Tools/WalkKit/wl2` present in this worktree (arm64, compiled 15:10, newer than
+`wl2.swift`); Claude Code **2.1.300**; `cliclick` at `/opt/homebrew/bin`. Free disk **52 GiB**. Load average ~12 (another
+session's batch). **`U7_SCRATCH` = `<the runner's scratchpad>/u8w`** — created FRESH by this runner at READY (the shared
+scratchpad holds the earlier windows' `u7w`, `proj/`, `clip-before.txt`; none is reused).
+
+**Her user-scope MCP servers (names + a sha256 prefix of the sorted compact `mcpServers` JSON, never values):**
+`['linear-server', 'variorum']`, **`bc64543e2f4e8e58`** — SAME as U5–U7's windows and U8b's plan.
+
+**The instances and the stage at READY — NOT ours:** both strict guards (`pgrep -lx Variorum`, `pgrep -lf
+"MacOS/Variorum$"`) EMPTY, the loose form EMPTY, no `variorum-mcp`; **0 simulators booted**. `Tools/stage status` →
+**STAGE HELD by `vx283-u1c2`** (VX-283 U1 fix close: 93 suites + mount ×5 + reverts, claimed 23:00:00 for 30 min) — not
+ours; the GO's relayed line is run exactly as relayed. **Main:** `origin/main` is `ebd16909` (ahead of this branch by
+notes, `.claude` and `CLAUDE.md` only) — VX-306 has NOT merged, so no rebuild is owed.
+
+**The dev store (read-only listing at READY):** `variorum.sqlite` (14 Oct 08:50), `-wal` 09:17, `-shm` 23:00 (vx-283's
+window starting); key files `variorum-keys-b831b428ce0d67b1.json` · `variorum-keys-e86ed514dc8dab5a.json`; `Backups/` 57
+entries; `Backups/safety-copies/` holds only `castle-W1-20261013` (left alone). Prefs 1,602 keys,
+`variorum.whatsNew.lastVersion` 0.9.6 (= the product's, so no What's New sheet is expected), `appearanceChoice` system —
+informational only: the restore target is step 2's export, taken after the batch.
+
+**Process choices (the earlier windows' lessons applied):** the batch and the red run FIRST, each detached to its log
+and POLLED in the foreground (a `grep -q` loop, never `tail -f | grep -m1`); the SEAM after them; prefs, `Backups/`, the
+fingerprint and the clipboard BEFORE the A1; the A1 by `stage.sh`'s copy loop ONLY (no fixture), with every guard (strict
+and loose) empty; every GUI act through `click.sh` / `keys.sh` (keys only by System Events), at least 2.6 s apart;
+region captures; `á` and `·` never typed; every lesson by ⌘K → its title → ⏎; the Debug app quit BY BUNDLE ID; prefs
+restored by import, then re-export, diff, delete every added key until 0 differ; keys redacted to their first 9
+characters everywhere; every client turn through the kit's `turn.sh` (prompt on STDIN, `--strict-mcp-config`); inline
+read from BYTES (`measure.py`), the advice read from BYTES (`instructions.py`).
+
+### LIVE STATUS — the stage run's steps
+
+| step | what | status |
+|---|---|---|
+| R | read-in, the build check, the fingerprint, this section → READY | DONE (this commit) — READY reported; the stage is NOT claimed (the orchestrator relays the coordinator's GO and its exact line) |
+| 0 | guards; the claim from the GO's line; HEAD at the GO; the product check | NOT-STARTED |
+| 1a | the Mac batch (66 suites on `vx336-u8`, `test-without-building`, detached + polled) — expected green, 3 gated capture skips, `TutorialMCPChapterTests` 8 green (its FIRST run) | NOT-STARTED |
+| 1b | THE RED RUN on `vx336-u8-red` (`TutorialMCPChapterTests` alone) — expected EXACTLY 8 tests · 6 failed · 30 issues (3 · 1 · 10 · 9 · 2 · 5) | NOT-STARTED |
+| SEAM | 1a/1b counts recorded, committed, pushed; the claim KEPT; turn ended "SEAM" | NOT-STARTED |
+| 2 | prefs export, `Backups/` listing, the store listing, the fingerprint BEFORE, the clipboard saved | NOT-STARTED |
+| 3 | THE ONE A1 (`stage.sh`'s copy loop only; cmp + sha256) | NOT-STARTED |
+| 4 | launch `vx336-u8` (Study expected) | NOT-STARTED |
+| 5 | sherlock present | NOT-STARTED |
+| 6 | the fresh guide through Help ▸ Restore Tutorial… (confirm, receipt, the old guide in the Trash) | NOT-STARTED |
+| 7 | the chapter walk, Study (C0 outline, C1–C7 + scrolls) against THE CHAPTER AS BUILT | NOT-STARTED |
+| 8 | connect (the key only), the bind turn, THE ADVICE from bytes (`instructions.py bind`), THE GRANT Home · Write new · Always | NOT-STARTED |
+| 9 | THE ORGANIZATION ASK (`U8-org`; `instructions.py` + `measure.py`), her face in Study | NOT-STARTED |
+| 10 | U7c's RE-PROBE (U7c-200 · U7c-100 · U7c-ids-200, each measured alone from bytes) | NOT-STARTED |
+| 11 | the Terminal pass (the chapter again + Activity) → back to Study | NOT-STARTED |
+| 12 | cleanup → quit by bundle id, key grep 0 + `keys/` deleted, clipboard restored, no `mcpServers` for the scratch project, fingerprint SAME, prefs 0 differ, `restore.sh` cmp-SAME + sha256 equal, `Backups/` unchanged, castle-W1 untouched, 0 sims; release; THE RESULT LINE | NOT-STARTED |
