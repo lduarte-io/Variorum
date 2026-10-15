@@ -1404,31 +1404,37 @@ leg traces and PROPOSES; the architect rules before anything ships. Any stage wo
   back to `abs(new.viewport − old.viewport) > 0.5` AND the modifier's `.revealNow` back to `requestReveal("viewport")`
   (HEAD's arm whole — why, in "T5 — P-U1c-1, AS BUILT"); R-H′ = the threshold only. `DerivedData/vx283-u1` rebuilt
   headless from HEAD (green, no new warning in a touched file).
-- T7 — the closing window: **READY FOR STAGE — ≈15–20 min, run in this order from `App/Variorum/` (the record flips
-  per step):**
-  0. *Preconditions.* `pgrep -lx Variorum`; `pgrep -lf "MacOS/Variorum$"` (discriminate by path; never touch a
-     `/Applications` instance). `defaults export io.lduarte.Variorum.debug
-     notes/plans/vx283-screens/u1c/prefs-before-t7.plist`. With ZERO dev instances, copy `variorum.sqlite{,-wal,-shm}`
-     from the dev container's `Variorum-dev/` into `notes/plans/vx283-screens/u1c/store-before/<UTC stamp>/`.
-  1. *The batch* — `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx283-u1
-     test-without-building` + one `-only-testing:VariorumTests/<Suite>` per line of
-     `notes/plans/vx283-screens/u1b/batch-suites.txt` (the 93 suites; unchanged — U1c's pins live inside two of them).
-     Expected: only VX-245's lint (`ChromeLineLimitTests`) red; skipped lines = the two env-gated U1c harnesses (and
-     any env-gated harness the batch already skipped).
-  2. *The mount suite ×5* — `… -derivedDataPath DerivedData/vx283-u1 test-without-building
-     -only-testing:VariorumTests/SidebarSectionWindowMountTests -test-iterations 5`. Expected: the seven ungated tests
-     green 5/5 (the Starred pin and the walker's-road pin included); the two harnesses skipped. Count the
-     `[Invalid Configuration]` lines against T3's (≈10 per Starred mount) — (c1) must not grow them.
-  3. *R-H* — `… -derivedDataPath DerivedData/vx283-u1c-rh test-without-building
-     -only-testing:VariorumTests/SidebarSectionWindowRuleTests -only-testing:VariorumTests/SidebarSectionWindowMountTests
-     -test-iterations 3`. Expected RED: `anEasedShrinkEndsWithTheRowExactlyAtTheEdgeAtEveryCadence` every iteration
-     (7 of 8 cadences); `theNinthStarIsClearTheMomentTheBeatEnds` in the iterations where the tail manifests (≈5 in 6
-     per T3); very likely the Starred pin and the walker's-road pin too (as on HEAD).
-  4. *R-H′* (observed) — the same with `DerivedData/vx283-u1c-rhp`. Expected: the pure pin RED; the mounted pin
-     recorded as observed (likely green — the commit-scheduled backstop lands the row ≈40–60 ms after the beat).
-  5. *Release.* The dev store copied back with zero dev instances and `cmp`-verified per file; prefs `defaults import`
-     → delete any key the suites added → re-export → diff against `prefs-before-t7.plist`; delete
-     `DerivedData/vx283-u1c-rh` and `-rhp`; `Tools/stage release`; the one-line release report.
+- T7 — the closing window: **DONE** (claim `vx283-u1c2` 23:00:00 → released 23:06:36, the coordinator's GO line;
+  products at `7513cec4` = `6c8b0d37`'s code; logs `notes/plans/vx283-screens/u1c/logs/t7-*.log`, gitignored):
+  1. **The batch** (93 suites, `test-without-building`): **"✘ Test run with 418 tests in 93 suites failed after 91.597
+     seconds with 2 issues."** Skipped: the two env-gated U1c harnesses only. (a) VX-245's lint
+     (`ChromeLineLimitTests.everyBareFixedSizeStatesItsLinePolicy`, `ChromeLineLimitTests.swift:104`) — expected, U3's.
+     (b) **UNEXPECTED — `OpenListCloseShellTests.theMenuActsLandThePaneThroughTheShell` (`OpenListCloseTests.swift:479`):
+     "Expectation failed: router.workspace.openNotes.ids == [a.id, b.id, c.id]" — observed `[…0000, …0002, …0001]`,
+     i.e. the order [a, c, b]** where [a, b, c] was expected. **Green 3/3 alone** in the same window
+     (`-only-testing:VariorumTests/OpenListCloseShellTests -test-iterations 3`: "✔ Test run with 1 test in 1 suite
+     passed"). A FLAKE in U1's own pin — ours to fix, in the leg after the walk (the orchestrator's word). First
+     suspicion, untraced: the shell's open-notes order seeded from persisted state (`openNotes.remembered.*`) shared
+     through the test host's REAL `UserDefaults` with another suite of the batch. P-U1c-1 touches no workspace code.
+  2. **The mount suite ×5:** **"✔ Test run with 9 tests in 1 suite passed after 59.561 seconds"** — the seven ungated
+     tests green in all five iterations (the Starred pin, the walker's-road pin and the new mounted pin among them);
+     the two harnesses skipped. SwiftUI's `[Invalid Configuration]` lines: 70 across the five iterations (T3: 196 over
+     three with the harnesses) — not grown.
+  3. **R-H** (HEAD's viewport arm whole), Rule + Mount suites ×3: **red as named** —
+     `anEasedShrinkEndsWithTheRowExactlyAtTheEdgeAtEveryCadence` RED 3/3 (7 issues each: 7 of 8 cadences),
+     `aReadingAsksOnlyWhatMovesTheRow` RED 3/3 (the 0.002-pt step), `theNinthStarIsClearTheMomentTheBeatEnds` RED, the
+     Starred pin RED 1 of 3; the walker's-road pin green. Final line "✘ Test run with 23 tests in 2 suites failed after
+     36.428 seconds with 18 issues" (the last repetition's count).
+  4. **R-H′** (the threshold only), ×3: the two pure pins RED 3/3; the mounted pins GREEN 3/3 — as predicted (the
+     commit-scheduled backstop lands the row ≈40–60 ms after the beat, before the mounted pin's window): the pure pin
+     is the deterministic red-on-old proof, the mounted pin the use-shaped one.
+  5. **Restore:** the dev store's three files byte-identical before the copy-back, copied back from
+     `store-before/`, `cmp`-verified each; prefs: 9 keys ADDED (`currentBlock.*` ×5, `surfaceSize.outline.*` ×4 —
+     deleted), 2 CHANGED (`variorum.backup.log`, `IdleCommitSweepMark.Variorum-dev`) — import, re-export, diff CLEAN
+     (1602 = 1602); `castle-W1-20261013` untouched; zero dev instances throughout; `DerivedData/vx283-u1c-rh` and
+     `-rhp` deleted, `vx283-u1` kept for the walker.
+- **U1c CLOSED for its acceptance (P-U1c-1 built, pinned red-on-old, the mount suite 5/5).** Open, owned: the
+  `OpenListCloseShellTests` batch flake (the leg after the walk); the walk itself (the walker's).
 
 **T1 — WHAT THE PROBE ESTABLISHED** (scratchpad `u1c-probe/`: `main.swift` compiled with the REAL
 `Core/Views/SidebarLayout.swift` and the instrumented REAL `Features/Library/SidebarSectionWindow.swift`, the app's own
