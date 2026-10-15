@@ -6436,3 +6436,36 @@ wrong-output mechanism.
 - **R1-5 — AGREED as a NIT, no change:** recorded; a wording note for a later description pass (VX-234's list).
 - **Round 2:** a FRESH `fable-reviewer` at xhigh (her cast word), REVIEW_PROMPT verbatim, after U9's window and the
   closeout's in-branch canon deltas, so it reads the evidence and the canon together. A new BLOCKER/MAJOR earns round 3.
+
+## CLOSEOUT RECORD — PHASE A (the closeout implementer — opus-implementer, from 2026-10-15 ~02:00 MDT)
+
+**Not done (first line, kept current):** PHASE B (the closeout window) and PHASE C (the merge-moment ledgers, the PR,
+the merge, the release, the refresh, the cleanup) are later sessions; ladder round 2 has not run; no shared ledger on
+main is touched (QUESTIONS, the master plan, AppSpec §14, MobileSoul, the finals ledger — their DRAFTS are below); no
+Linear edit, no ticket minted (proposals are in OWED); no product code, no test beyond a headless `swift build`, no
+`xcodebuild`, no stage, no store.
+
+**Read in full in this session (never delegated):** CLAUDE.md and its loaded canon (main's CLAUDE.md for the labeling
+rule and the closeout ritual, `ebd16909`); this record whole, section by section (the header, kickoff answers, Hard
+rules, LIVE STATUS, Stage traffic log, Cross-run coordination, her rulings, the ORCHESTRATOR'S PROVISIONAL RULINGS,
+Tickets minted, every UNIT BRIEF, every UNIT RECORD's design, PROVISIONALs, FOR VX-234, OWED and self-assessment, every
+ORCHESTRATOR ON … section, every STAGE RUN's result line, THE LADDER — ROUND 1, the CLOSEOUT BRIEF); `notes/MCPSpec.md`
+whole; `notes/plans/mcp-pane-and-docs-kickoff.md` whole; VX-246's CLOSEOUT RECORD and CLOSEOUT DRAFTS D1–D9 and its
+handoff; on main (`ebd16909`, read-only): QUESTIONS' tail, AppSpec §14, `notes/plans/run-finals-ledger.md`,
+`notes/AppSpecDeltaArchive.md`'s roll headings, MobileSoul's newest rows, the master plan's in-flight table;
+`notes/SessionResiliencyProtocol.md`'s implementer section. Code read to check every number and rule MCPSpec now
+states (below).
+
+### LIVE STATUS — PHASE A's items (flipped in the same commit as each item)
+
+| # | item | state |
+|---|---|---|
+| 1 | `notes/MCPSpec.md` in-branch: the bound ≤3,000, the link, a contract line + pointer for every new surface; AppSpec §12 checked | NOT-STARTED |
+| 2 | the QUESTIONS bundle draft (D1) | NOT-STARTED |
+| 3 | the AppSpec §14 draft + the roll + the finals ledger text (D2, D3) | NOT-STARTED |
+| 4 | the master plan draft: retire VX-336's in-flight row only (D4) | NOT-STARTED |
+| 5 | the MOBILE PARITY draft (D5) | NOT-STARTED |
+| 6 | RULINGS RECONCILED (D6), remainders proposed in OWED | NOT-STARTED |
+| 7 | the handoff draft `notes/handoffs/vx-336-handoff.md` (D7) | NOT-STARTED |
+| 8 | the STATUS lines drafted closed (D8) | NOT-STARTED |
+| 9 | the kits' deletion and PHASE C's own steps written into the PHASE C draft (D9) | NOT-STARTED |
