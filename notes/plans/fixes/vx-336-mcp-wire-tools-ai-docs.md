@@ -168,7 +168,7 @@ guidance. Each unit's evidence is named before its spawn.
 | U5a — the label pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): legs A–D all passed in a real Claude Code 2.1.300 round on the dev store — the new `claude-code · english` label on Takes cards in both voices, `save_lens` by label refusing the ambiguous block and its `take_ids` retry, the legacy form matched as its own, `pin_chosen` holding. Built at `590c0cb8` (U5a UNIT RECORD) |
 | U5b — the block-writing pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): the 31-suite Mac batch green (251 tests, 0 failed, 7 gated skips); V252-a (create_note's `blocks` = read_note's records; filed under its chapter), V255-a/b/c (the end at write new with her ⌥⌘Z/⇧⌥⌘Z; any anchor at write new hears the rung sentence and asks her; anywhere at edit), D8-a passed; D8-b's open tail is unreachable from the keyboard (THE ORCHESTRATOR ON U5's WINDOW). The store was restored cmp-SAME. Built `7a15376c`…`93edbc2e` (U5b UNIT RECORD, three sessions) |
 | U6 — Compare from the wire (+ VX-330, VX-342) | **PROVEN 2026-10-14 17:52–18:35** (U6 STAGE RUN). The 125-suite batch: 790 tests, 786 passed, 2 gated skips, 2 standing reds (VX-115, VX-167; neither on U6's paths). Every red run exact: U6a's router clears (9 pairs), U6b Mac (15), the phone (4), the phone green 18/3. The live round passed in both voices: L0–L5 (`duplicate_note` with her ⌥⌘Z/⇧⌥⌘Z, the AI's edit on the copy, Compare aligned on lineage with related-only on, an unrelated pair with it off, `link_versions`' Open › opening Compare, not-frontmost moving nothing); VX-330's walk (all twelve of sherlock's collapsed chapter rows wear the shared icon, the waiting mark on one, pressed, Don't allow clearing it); VX-342's "before" seen. The store was restored cmp-SAME. Built: U6a `2836171c`…`48e250e0`, U6b `12efb039`…`a1a094dc` |
-| U7 — the agent's read-backs | NOT-STARTED |
+| U7 — the agent's read-backs | DESIGNED, FORKS RULED (U7 UNIT RECORD piece 0 `01860640`; THE ORCHESTRATOR'S RULINGS ON U7's FORKS). Builder A (VX-254 + VX-261) next, then builder B (VX-256 + the window plan), then a runner |
 | U8 — the AI's docs (LAST) | NOT-STARTED |
 | LADDER | NOT-STARTED |
 | CLOSEOUT | NOT-STARTED |
@@ -3500,3 +3500,55 @@ Leaving refusals out would make a refused call indistinguishable from a dropped 
 5. **The cap fact** (UNVERIFIED here): the live round records the measured inline-versus-file threshold. If 32,000 trips
    it, P-VX256-1's number moves before the merge.
 6. **No ticket minted.** If F-261-6 is ruled (a), the idempotency token stays "not chosen, recorded only" (the brief).
+
+### THE ORCHESTRATOR'S RULINGS ON U7's FORKS (2026-10-14 ~19:15 MDT — binding on pieces 1–6)
+
+The design (D-254-*, D-256-*, D-261-*) is ACCEPTED as written, with these rulings. The PROVISIONALs go to QUESTIONS at the
+merge with the record's options.
+
+**VX-254:**
+- **F-254-1 (a), the orchestrator's.** The field is `sha256`: lowercase hex, plain SHA-256 of the stored UTF-8 bytes,
+  nothing normalized. One function, `MCPTextDigest`.
+- **F-254-2 (b), PROVISIONAL P-VX254-1 (re-worded: divide and merge answer NO digest).** The digest exists to prove the
+  client's OWN words landed byte for byte. A divide or merge sends no words; its halves come from the seam rule. (a) would
+  change the core structural result types every editor door shares (`DivideResult` and its kin) for a check the client can
+  already make with `ids_only` pages. Keep the structural core untouched. (a) is recorded for her.
+- **F-254-3 (a) and F-254-4 (a), PROVISIONAL P-VX254-2.** `save_version` and the book-form import answer no digests.
+- **F-254-5 (a), the orchestrator's (U5b's no-positional rule).** `add_takes` answers `takes: [{take_id, block_id,
+  label?, sha256}]` beside its unchanged `take_ids`.
+
+**VX-256:**
+- **F-256-1 (a), PROVISIONAL P-VX256-1.** Both halves: keyset paging and `ids_only` (with digests).
+- **F-256-2 (a).** `limit` (default 50, max 200) AND a 32,000-character take-text budget, never splitting a block.
+  PROVISIONAL with P-VX256-1's numbers. The live round MEASURES the real client's output cap. If 32,000 trips it, the
+  budget moves, and the change is recorded before the merge.
+- **F-256-3 (a), F-256-4 (a), F-256-5 (a), F-256-6 (a), F-256-7 (a), the orchestrator's** (P1, the ids-live doctrine,
+  byte-unchanged existing forms).
+- **P-VX256-2** (pages are not a snapshot), **P-VX256-3** (a once grant reads one page) and **P-VX256-4** (`commit_ids`
+  binds to the page) stand as proposed, for her eye.
+
+**VX-261:**
+- **F-261-1 (a).** The tool is `list_my_activity`.
+- **F-261-2 (a), PROVISIONAL P-VX261-2.** It is listed for every APPROVED client, with no grant needed. Recovery after a
+  dropped "until you disconnect" grant is the case the tool exists for. It reads only the caller's own log rows since its
+  approval, so it adds no reach to her library.
+- **F-261-3 (a), PROVISIONAL P-VX261-1.** "Own" means the client name, since its current approval.
+- **F-261-4 (a), PROVISIONAL P-VX261-3.** Refused rows are listed, never with a title.
+- **F-261-5 (a), the orchestrator's.** Reads are excluded unless `include_reads` is set.
+- **F-261-6 (a), PROVISIONAL P-VX261-4.** Rows are answered exactly as logged, and a creating act's row names its place
+  with the recovery road stated. (b) would change her pane's coalescing; (c) is a schema, outside the brief.
+- **P-VX261-5: (b), RULED by the orchestrator (the oracle rule's strict letter).** On `duplicate_note`'s wing-side
+  refusal row, `target_*` is OMITTED: the wing id is one the client never sent.
+
+**The split: CONFIRMED.**
+- **Builder A:** VX-254 + VX-261, landing `MCPTextDigest` first.
+- **Builder B:** VX-256 + THE STAGE WINDOW (`vx336-u7`).
+- If A runs long, VX-261 moves to B whole.
+
+**OWED 2 (U+0000), carried to builder A as a CHECK.** Pin a take containing U+0000 through the write and read roads. If
+GRDB truncates it, that is a separate door bug: record it, mint nothing yourself (the orchestrator tickets it), and do not
+fix it in U7.
+
+**OWED 3 goes to U8's brief:** "Tools appear only for what they have shared" becomes untrue once `list_my_activity` is
+listed at zero reach. The instructions also name paging, `sha256` and the new tool.
+
