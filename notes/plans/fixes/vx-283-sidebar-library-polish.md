@@ -1663,6 +1663,14 @@ stage used.
     the next `pendingSelection` inside the same update that adopted the previous one. Red when the request is lost
     (b never adopted, `pendingSelection` stuck). Unbuilt.
 
+#### U1c — the orchestrator's ruling on the batch flake (2026-10-14 ~23:20)
+
+Ruled **(c)**: the PRODUCT race is real (traced, latent) and outside this run's lane — **VX-360** filed (Bug, Confirmed,
+Medium, *v1 release readiness*, related VX-284/VX-287; fix shape and deterministic pin in the ticket). The test-side
+half is done by the orchestrator (`OpenListCloseTests.settleAdoption`: wait until the pane shows the target AND the
+shell has cleared its request, then a frame, before the next request) — the pin's subject is the landing ORDER, not the
+race. Evidence owed: the shell pin + the suites that ran around it in the batch, on a short window after the walk.
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
