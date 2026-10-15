@@ -1225,6 +1225,42 @@ scenario (the two-libraries-on-one-account second Mac, today's shapes through th
 act, the pre-change two-Macs hand-off, and the rest). U4 records each skipped scenario as "superseded by this
 ruling", never silently.
 
+### ORCHESTRATOR NOTE after U4-PARTIAL + HER SITTING (2026-10-14/15)
+
+**U4-partial verified:** the protection set re-run by the orchestrator at `efd45ff7` — `✔ Test run with 376 tests in
+65 suites passed` (the exact claimed count); the 37 found-bug commits each name their mechanism and watched-red pin
+(`git log 6020391b..e281b846`); the seam is honest (the remaining work named in order at the record's head).
+
+**HER ANSWERS (the question tool, 2026-10-14/15 — verbatim where she wrote words):**
+1. **The stuck leave (the soak's seed-2 finding) — STAYS IN FLIGHT, her pick of the recommendation:** a synced leave
+   crashed past the rotation's first write and then signed out WAITS — said visibly ("Finish leaving Castle — sign in
+   to finish"), the library opens, sync waits, copies stay paused (no new backups until it finishes, said plainly);
+   a crash BEFORE the first write still rolls back; another device of the account can finish. Promise 6 gains the
+   vault-reach qualifier for a synced act past its commit point; the visible face + the cancel-before-commit-point
+   are phase 3/4's (the hand-forward list). The closer builds the fixed scenario from the minimal sequence and the
+   promise qualifier.
+2. **P-U4-3 — SPLIT THE MARKER, her pick:** two salted hashes, a hardware part and a login part (same hardware +
+   different login = a second login, its own identity, adopts nothing — VX-340; different hardware = a replacement,
+   takes over). Her "the marker covers the login" ruling intact; each part alone, salted, names nothing. The closer
+   makes the model change (HardwareMarker/DeviceSection/resolveIdentity) with the existing pins re-pointed.
+3. **P-U4-5 — ACCEPT AND STATE IT, her pick:** the both-homes rollback edge (Re-link's arm re-wrapping the
+   pre-Castle key) is part of §3.6's stated limit; the exposure is pre-Castle content, login-reachable in its day
+   (rule 3). The §3.6/§8 restatement lands at the merge moment.
+4. **The §8 older-build-Re-link sentence — NOT ADDED, her words:** *"i'll tell everyone in beta testing to update &
+   we haven't released publically yet, so there will not be older build's relinking. not a concern."* Scoped
+   precisely: the SENTENCE is waived; the older-build ACTOR stays in the world (it still models her own devices'
+   update windows after the release switch — the phone on yesterday's build completing a rotation).
+
+**ORCHESTRATOR ADJUDICATIONS (the architect mandate, each against the ruling or the design's letter):**
+- The three unclear-class scenarios under the legacy cut are KEPT, as U4 built them: `giftsOnlyForThisMacsCopies`
+  guards built code until phase 2 removes the arm (the pin dies with it); "the window after the move" proves a
+  NEW-system pair (inside the ongoing guarantee); "iCloud Keychain off … the retirement lists the library" is a
+  CURRENT store's stranding risk, squarely kept by the ruling.
+- **P-U4-11 ACCEPTED:** an unconfirmed synced library whose vault answers the other mode owes the ORDINARY FOLLOW —
+  that is design §3.13 step 1's own sentence ("a vault that moved while the library didn't is an ordinary follow");
+  U2's unit pin had the wrong reading and its restatement is the fix, not a relaxation.
+- U3's executor scaffolding KEPT beside the scenario world (two harnesses, more coverage; the ladder may consolidate).
+
 ## 9. The ladder (the Fable reviewer's report per round, committed unedited, then the dispositions)
 
 *(empty)*
