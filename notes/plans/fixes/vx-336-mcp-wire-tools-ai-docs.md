@@ -6969,7 +6969,7 @@ and `MCPCompareLandingTests.swift` whole.
 
 | # | piece | state |
 |---|---|---|
-| 1 | merge `origin/main` (a merge commit); headless `swift build` | DONE — `994d0083` merges `origin/main` `ebd16909` (notes, `.claude` and `CLAUDE.md` only: 7 files, no file touched by both sides, **no conflict**). **VX-306 (Castle phase 2) has NOT merged** (no such commit on main), so the dev store is not migrated and a product from this tree opens it. `swift build` complete on the merged tree |
+| 1 | merge `origin/main` (a merge commit); headless `swift build` | DONE — **`fc6bf20b`** merges `origin/main` `ebd16909` (notes, `.claude` and `CLAUDE.md` only: 7 files, no file touched by both sides, **no conflict**); `origin/main` is an ancestor of the branch (`git merge-base --is-ancestor`). **VX-306 (Castle phase 2) has NOT merged** (no such commit on main), so the dev store is not migrated and a product from this tree opens it. `swift build` complete on the merged tree. **A SLIP, repaired without rewriting anything** — the first merge `994d0083` was flattened by `pull --rebase` before its push (### The merge slip, below) |
 | 2 | R2-1's pin, alone (red on the pre-fix tree — RUN in the window) | NOT-STARTED |
 | 3 | R2-1's fix (the three clears of `landingPostureFor`) | NOT-STARTED |
 | 4 | R2-2's clause in `MCPWireRefusalSweepTests.swift`'s comment | NOT-STARTED |
