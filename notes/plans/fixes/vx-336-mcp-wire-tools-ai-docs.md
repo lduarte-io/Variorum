@@ -6723,9 +6723,8 @@ record, AppSpec §14's entry and the handoff.
 #### D5 — MOBILE PARITY: a `notes/MobileSoul.md` ledger row (PL-56 unless taken)
 
 Anchor: a new list item directly after the PL-55 row (the one beginning `- **PL-55 (VX-246, 2026-10-14 — MCP door
-fixes):**`; on `ebd16909` it appears twice, the second copy the whole row — insert after the second). *(For PHASE C's
-eye, not ours to fix: main's MobileSoul carries the PL-55 line twice, the first a truncated copy, and two rows named
-PL-53. Recorded in OWED.)*
+fixes):**`, line 259 on `ebd16909`). *(For PHASE C's eye, not ours to fix: main's MobileSoul has two rows named PL-53 —
+VX-143's and VX-168's. Recorded in OWED.)*
 
 > - **PL-56 (VX-336, 2026-10-15 — MCP wire tools & AI docs):** the MCP door is Mac-only, so every wire tool this run built
 >   or reshaped (`insert_blocks`, `duplicate_note`, Compare from the wire, the `sha256` digests, paged `read_note`,
