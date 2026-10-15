@@ -435,6 +435,19 @@ extension SWorld {
               record.mode == .standard, let kept = truth.keptByLeave[device.name], !kept.isEmpty else { return [] }
         let attacker = reach(attackerSeeds(device, appleAccount: true, settled: settled), files: keyFilesOn(device))
         var exempt = truth.handedOffBeforeChange.union(truth.olderBuildLeaveKeys)
+        // A Standard pair another Mac sent here is THAT Mac's own copy, under
+        // its own key and its own Apple key (rule 3, its library's) — no copy
+        // this device made, and no key made in Castle (promise 2 reads "made on
+        // this Mac" the same way). Its key rides this library's family tree
+        // only so the landing's own line reads as its own (the closer's soak,
+        // seed 2 sequence 661).
+        for (folder, sender) in senders where sender != device.name {
+            for path in device.container.paths(under: folder + "/") {
+                if let image = device.container.files[path]?.library, image.record?.mode == .standard {
+                    exempt.insert(image.fingerprint)
+                }
+            }
+        }
         // §3.1 rule 2's second exception: the Standard-synced days' keys, until
         // that account replaces its keys or enters Castle.
         // (On a device that hasn't yet followed the account past them, its

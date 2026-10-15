@@ -477,4 +477,22 @@ extension GeneratorFoundScenarios {
         #expect(world.liveKeyFile(world.macB)?.fingerprint == world.macB.slot?.fingerprint, "another key's file stayed live")
         expectPromisesKept(world)
     }
+
+    /// Seed 2 (sequence 661, the closer's soak) — a CHECKER finding: a
+    /// Standard pair another Mac sent, landed here under a fresh key, then
+    /// Use Castle and a leave — the sender's key rides the landed library's
+    /// family tree (the landing's own-line seed), and its pair in the hand-off
+    /// folder opens through the sender's own Apple key: that Mac's own
+    /// Standard copy, never one this device made, never a key made in Castle.
+    /// Promise 13 now reads "copies made before the leave" as promise 2 reads
+    /// "made on this Mac".
+    @Test func aSentStandardPairIsTheSendersOwnAfterALeave() async throws {
+        let world = try Self.start("older libraries of other libraries, and backups only", seed: 2000667)
+        for action in [Action.createLibrary("phone", secrets: true), .sendLibrary(from: "macA", to: "phone"),
+                       .land("phone", .wordsPassphraseMadeNew), .useCastle("phone", .alwaysAsk, newWords: true),
+                       .answerCorner45("phone", .standard)] {
+            await world.step(action)
+        }
+        expectPromisesKept(world)
+    }
 }
