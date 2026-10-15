@@ -168,7 +168,7 @@ guidance. Each unit's evidence is named before its spawn.
 | U5a — the label pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): legs A–D all passed in a real Claude Code 2.1.300 round on the dev store — the new `claude-code · english` label on Takes cards in both voices, `save_lens` by label refusing the ambiguous block and its `take_ids` retry, the legacy form matched as its own, `pin_chosen` holding. Built at `590c0cb8` (U5a UNIT RECORD) |
 | U5b — the block-writing pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): the 31-suite Mac batch green (251 tests, 0 failed, 7 gated skips); V252-a (create_note's `blocks` = read_note's records; filed under its chapter), V255-a/b/c (the end at write new with her ⌥⌘Z/⇧⌥⌘Z; any anchor at write new hears the rung sentence and asks her; anywhere at edit), D8-a passed; D8-b's open tail is unreachable from the keyboard (THE ORCHESTRATOR ON U5's WINDOW). The store was restored cmp-SAME. Built `7a15376c`…`93edbc2e` (U5b UNIT RECORD, three sessions) |
 | U6 — Compare from the wire (+ VX-330, VX-342) | **PROVEN 2026-10-14 17:52–18:35** (U6 STAGE RUN). The 125-suite batch: 790 tests, 786 passed, 2 gated skips, 2 standing reds (VX-115, VX-167; neither on U6's paths). Every red run exact: U6a's router clears (9 pairs), U6b Mac (15), the phone (4), the phone green 18/3. The live round passed in both voices: L0–L5 (`duplicate_note` with her ⌥⌘Z/⇧⌥⌘Z, the AI's edit on the copy, Compare aligned on lineage with related-only on, an unrelated pair with it off, `link_versions`' Open › opening Compare, not-frontmost moving nothing); VX-330's walk (all twelve of sherlock's collapsed chapter rows wear the shared icon, the waiting mark on one, pressed, Don't allow clearing it); VX-342's "before" seen. The store was restored cmp-SAME. Built: U6a `2836171c`…`48e250e0`, U6b `12efb039`…`a1a094dc` |
-| U7 — the agent's read-backs | **PROVEN 2026-10-14 20:44–21:12 EXCEPT THE CAP** (U7 STAGE RUN). Batch 176/173, 0 failed. L1 (15/15 digests equal from the wire), L2a (6 inline pages of 50 = block_count 300), L3 (ids_only at limit 100, 300/300 equal), L4 (a killed create, found by `list_my_activity`), L5 (a refused row title-less; reads only with `include_reads`) all PROVEN. **THE CAP FAILED:** a budget-ended page (32,000 characters of take text, about 65k answer) spills past Claude Code 2.1.300's inline limit, which sits between 43,062 (inline) and 50,984 characters (spilled); `ids_only` at limit 200 spills too. → **U7c**, the cap fix (THE ORCHESTRATOR ON U7's WINDOW) |
+| U7 — the agent's read-backs | **PROVEN 2026-10-14 20:44–21:12 EXCEPT THE CAP** (U7 STAGE RUN). Batch 176/173, 0 failed. L1 (15/15 digests equal from the wire), L2a (6 inline pages of 50 = block_count 300), L3 (ids_only at limit 100, 300/300 equal), L4 (a killed create, found by `list_my_activity`), L5 (a refused row title-less; reads only with `include_reads`) all PROVEN. **THE CAP FAILED:** a budget-ended page (32,000 characters of take text, about 65k answer) spills past Claude Code 2.1.300's inline limit, which sits between 43,062 (inline) and 50,984 characters (spilled); `ids_only` at limit 200 spills too. → **U7c**, the cap fix (THE ORCHESTRATOR ON U7's WINDOW) · **U7c BUILT** (`0b1be274`…`12df7a8c`): the page budget bounds the whole serialized answer at 32,000 characters (UTF-16 units); 8 pins red on old, 3 of builder B's re-pinned; revert check in 4 arms; MCP 329/66 · core 2,871/333 · workbook 40/6; the orchestrator re-ran the paging suites, 25 green. Its RE-PROBE rides U8b's window |
 | U8 — the AI's docs (LAST) | SPLIT U8a (instructions + descriptions + the stargazing delta) / U8b (the field guide chapter + U8's window). U8a SPAWNED under the PAUSE protocol while U7's window waits in the queue. VX-292 re-checked 2026-10-14 ~20:25: no worktree, no in-flight row, Linear "Needs Lillian" untouched since 15:06 — not running |
 | LADDER | NOT-STARTED |
 | CLOSEOUT | NOT-STARTED |
@@ -4499,6 +4499,22 @@ re-pinned pins (P-256-2, F-256-7, P-256-1b) — each edit commented in the file 
    Test-only, Area MCP, Priority Low — "a paged read's asked commit larger than its page's room is reachable only where
    its block heads a page".
 7. **No Mac change** (no app file moved): no Mac build or suite owed by U7c; the stage was never needed.
+
+### THE ORCHESTRATOR ON U7c (2026-10-14 ~22:10 MDT)
+
+- **Verified:** the tree is clean at `12df7a8c`; the diff touches only `MCPNoteStructure`, `MCPReadTools` and
+  `MCPToolCatalog`; the orchestrator re-ran the four paging suites headless, 25 green.
+- **Its four open edges stand as built, PROVISIONAL under P-VX256-1 (re-ruled), each with its options in the U7c UNIT
+  RECORD for her bundle:**
+  - e1: page 1 keeps its first block when the carriage fills the budget;
+  - e2: UTF-16 counting;
+  - e3: commit text rides newest-first;
+  - e4: a requested commit too large for its page's room refuses.
+  No ticket for e4 unless she rules a follow-up.
+- **Its finding 4 is recorded, not a change:** no 200-block page fits 32,000 characters (≈150 blocks at the smallest
+  entry). `limit`'s 200 max stands as ruled; the answer bound governs.
+- **Next:** a FRESH U8a continuation (the paused session's harness count was ~398k), from the U8a UNIT RECORD's piece-0
+  plan, writing the paging words as the answer bound. Then U8b with the re-probe in its window.
 
 ## U8a UNIT RECORD — the model-facing words: `MCPSession.instructions`, the tool descriptions, the stargazing brief's delta (VX-197; opus-implementer, from 2026-10-14 ~20:40 MDT)
 
