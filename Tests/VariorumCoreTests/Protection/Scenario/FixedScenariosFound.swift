@@ -567,4 +567,24 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 4 (sequence 617, the closer's soak): Use Standard (synced), the
+    /// Apple ID signed out and back in before iCloud Keychain carried the
+    /// fresh own key (lost), Stop syncing here (a Standard leave: the new key
+    /// under this Mac's EXISTING own key — gone, so no Apple wrap), then the
+    /// Mac replaced with no memory item: the new identity knows no own key, so
+    /// the lost road went unoffered and the local Standard library kept no
+    /// Apple road (promise 3). Re-link's library arm is now offered for a
+    /// local Standard library whose live key file has no Apple wrap and whose
+    /// Mac reads no own key for it (§3.3: the road is lost — the arm heals).
+    @Test func aReplacedMacIsOfferedReLinkForALocalLibraryWithNoAppleWrap() async throws {
+        let world = try Self.start("a synced Castle account on two Macs and the phone", seed: 4000629)
+        for action in [Action.useStandard("macA"), .switchAppleID("macA", to: SWorld.appleA),
+                       .stopSyncingHere("macA", forgotPassphrase: false), .replaceMac("macA", carriesMemory: false)] {
+            await world.step(action)
+        }
+        await world.done([.settle])
+        #expect(world.liveKeyFile(world.macA)?.apple != nil, "the local Standard library has no Apple road")
+        expectPromisesKept(world)
+    }
 }

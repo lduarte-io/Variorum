@@ -537,12 +537,20 @@ public enum AssessRules {
             let isLive = file.id == unlocked.liveKeyFileID
             guard isLive ? mode.mode == .standard : (file.role == .ownKeyFile && file.mac.isMac(mac8)) else { continue }
             guard case .format3(let keyFile)? = file.document else { continue }
+            let readsOwn = unlocked.thisMac.appleKeys.contains {
+                $0.isOwnLibraryKey && $0.retiredAt == nil && facts.appleKeys.readable.contains($0.id)
+            }
             if let wrap = keyFile.apple {
                 if !facts.appleKeys.readable.contains(wrap.keyID) { subjects.append(file.id) }
-            } else if isLive, unlocked.thisMac.appleKeys.contains(where: { $0.isOwnLibraryKey && $0.retiredAt == nil }),
-                      !unlocked.thisMac.appleKeys.contains(where: {
-                          $0.isOwnLibraryKey && $0.retiredAt == nil && facts.appleKeys.readable.contains($0.id)
-                      }) {
+            } else if isLive, unlocked.thisMac.appleKeys.contains(where: { $0.isOwnLibraryKey && $0.retiredAt == nil }), !readsOwn {
+                subjects.append(file.id)
+            } else if isLive, unlocked.record?.account == nil, !readsOwn {
+                // A LOCAL Standard library whose live file carries no Apple wrap
+                // and whose Mac reads no own key for it — the road is lost even
+                // when this identity never listed the key that carried it (a Mac
+                // replaced with no memory item, after a leave found its own key
+                // gone — VX-305 U4, the soak's seed 4). Synced libraries keep
+                // decision 35's road (a held landing waits for Resume Sync).
                 subjects.append(file.id)
             }
         }
