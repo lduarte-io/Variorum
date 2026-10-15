@@ -399,7 +399,7 @@ screenshot walk (a fresh walker's, after the stage window); any stage work until
 - P5 — the stage window: **DONE (the second window, claim `vx283-u1` 20:02:37 → released 20:12:05).** The batch and
   the three reverts ran (results below); the store and prefs restored and verified. No revert in flight.
 - P7 — the walk's sampled contexts (`CapabilityRegistryTests.sampledContexts` gains the two close gates — the
-  justified-edit ritual every gate has followed): DONE (the commit carrying this line) — headless build-for-testing
+  justified-edit ritual every gate has followed): DONE (`9b1938c1d`) — headless build-for-testing
   green; **PENDING one stage run of `-only-testing:VariorumTests/CapabilityRegistryTests` (≈3 min — it can ride the
   walker's window).**
 
