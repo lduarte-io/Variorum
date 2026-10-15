@@ -27,6 +27,16 @@ bar") above all; the orchestrator LOOKS at every screenshot before the unit's re
 does not look right goes back to a fix leg and is re-walked. Screenshots live in `notes/plans/vx283-screens/uN/`
 (gitignored); their absolute paths go to her in the unit's report (never an Artifact — her standing rule).
 
+**HER OVERNIGHT MANDATE (2026-10-15 ~00:35, verbatim):** *"I am going to sleep, rule provisionally overnight in my
+absence and leave me a handoff in the morning. you or 336 can merge in last (whoever gets there gets there), whoever
+does should have a release build ready, write notes on what was updated (I don't have to review those notes, it's
+fine), and push a release to the website so I can try the new things out tomorrow morning."* So: overnight every
+non-author-only call is PROVISIONAL-and-continue (recorded, bundled for the handoff); the run continues through the
+ladder and the closeout; **whichever of VX-283 / VX-336 merges LAST** bumps the version, builds the release, writes
+the notes itself (her review waived for this release — the 0.9.3/0.9.5 one-off exception, her word) and publishes to
+stargazing.tech by the proven road (memory: Variorum release publishing). The handoff `notes/handoffs/vx-283-handoff.md`
+is waiting for her in the morning.
+
 The kickoff is the runway's VX-283 section (`notes/plans/vx-33-release-runway.md`, as trimmed on `main` at
 `5911d1db`), plus its §2 conflict map and §3 rules for every run. Each member's ticket body carries its own trace;
 the briefs below quote what binds.
