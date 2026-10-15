@@ -7198,3 +7198,87 @@ orchestrator ruled.
   the copies would need a force-push, which is author-only, and none is proposed.
 - **PHASE C's rule:** push a merge of main with a plain `git push` (or `git pull --rebase=merges`), never a plain
   `pull --rebase` over an unpushed merge.
+
+## CLOSEOUT WINDOW RUN (a fresh stage runner, from 2026-10-15)
+
+**Not done (first line, kept current):** the window itself is NOT run. Nothing is claimed; no `xcodebuild test`, no
+simulator boot, no store touched, no prefs written. READY only (2026-10-15 ~02:26 MDT); the window runs on the
+orchestrator's GO under the coordinator's exact claim line.
+
+**What this run does NOT do (said first):** no product or test code is written or changed, before the claim or under
+it. A red that needs code is RECORDED as a FINDING and reported, never fixed. No rebuild: the window runs
+`vx336-close`, `vx336-close-red` and `vx336-close-ios` exactly as PHASE B built them. No walk, no MCP client, no live
+round, no app launch beyond the test host. No canon, QUESTIONS, ticket or shared-ledger edits. Never her real store,
+never `/Applications/Variorum.app`, never her MCP registrations; **never `claude mcp list` (nor `claude mcp get`)** —
+the fingerprint is read only by the one-liner. `castle-W1-20261013` left alone. ONE simulator, shut down after the
+phone run. The plan is PHASE B's THE CLOSEOUT WINDOW (steps 0, 1, R, G, W, P, C), run as written with its scripts in
+`notes/plans/vx336-screens/close/` (gitignored; evidence lands there).
+
+**Read in full before READY (never delegated):** this record's header, Hard rules (never `claude mcp list`; the
+live-round machinery), LIVE STATUS, Stage traffic log and Cross-run coordination; the CLOSEOUT BRIEF; the CLOSEOUT
+RECORD — PHASE B whole (incl. THE CLOSEOUT WINDOW, R2-1's trace/pin/fix, SELF-ASSESSMENT, OWED); THE ORCHESTRATOR'S
+LINE-BY-LINE CHECK OF R2-1's FIX; the U9 STAGE RUN whole (the A1 copy loop, the prefs export and diff, the
+one-simulator leg); the four scripts (`a1.sh`, `run-mac.sh`, `run-phone.sh`, `prefs-diff.py`); `Tools/stage`;
+`Tools/WalkKit/guard.sh`; `Tools/ScaleFixture/stage.sh` (its copy loop) and `restore.sh`;
+`notes/SessionResiliencyProtocol.md`'s implementer rules and addenda.
+
+**The build check (READY, 2026-10-15 ~02:25 MDT; read-only):**
+- **The tree.** HEAD `1b1f7483`, clean, up to date with its upstream. `origin/main` = `ebd16909`, an ancestor of HEAD;
+  `HEAD..origin/main` is EMPTY, so **main has not moved** and **VX-306 has not merged**.
+- **`vx336-close` = `cf619bcc`.** `git diff --name-only cf619bcc..HEAD -- Sources App Package.swift` is **EMPTY**, and so
+  is the plan's wider form with `Tests`; since `cf619bcc` only this record changed. No `.swift`, plist, pbxproj, xcstrings,
+  entitlements, xcconfig, xcscheme, xctestplan or `Package.swift` under `Sources`, `App/Variorum`, `Tests` or the root is
+  *[removed for publication]*
+  shim 02:04:09; test binary 02:07:02; `Variorum_Variorum_macosx27.0-arm64.xctestrun` 02:07:04; 2.5 GB.
+- **`vx336-close-red` = `65ba0704`** (an ancestor of `cf619bcc`; `65ba0704..cf619bcc` differs in exactly
+  `CompareBoardView.swift` + `MCPWireRefusalSweepTests.swift`, the latter a comment). The red product's dylib 02:01:06,
+  BEFORE the fix commit `e919f576` (02:02:29); its `CompareBoardView.o` compiled 01:58:53, before the fix's edit to
+  `CompareBoardView.swift` (mtime 02:02:07), and is **2,947,064 bytes vs the final's 2,950,048** (compiled 02:03:45) —
+  different objects, the red one the pre-fix code. The pin file `MCPCompareLandingTests.swift` is identical at
+  `65ba0704` and HEAD (mtime 01:57:24). Signed the same, 0.9.6; 2.5 GB.
+- **`vx336-close-ios` = `cf619bcc`.** No source newer than its `VariorumMobile.debug.dylib` (02:09:55);
+  `VariorumMobile_VariorumMobile_iphonesimulator27.0-arm64-x86_64.xctestrun` 02:09; 2.4 GB. No phone source moved since
+  U9's `c2f77ce9` (`git diff --name-only c2f77ce9 HEAD -- App/Variorum/VariorumMobile App/Variorum/Shared
+  App/Variorum/VariorumMobileTests Sources` EMPTY).
+- **The four R2-1 tests are real in BOTH Mac bundles** (`nm -j` + `swift-demangle --simplified`, matched as
+  `MCPCompareLandingTests.<name>`): `aNamedPeerThatNeverProjectsLeavesNoArmedPostureToOverwriteHerToggle` 64 ·
+  `aTornDownBoardNeverAppliesItsLandingsPostureAfterwards` 26 · `herOwnToggleBeforeTheFirstProjectionEndsTheLandingsRound`
+  26 · `aNamedPeersColumnLeavingEndsTheLandingsRound` 34 — the same in `vx336-close` and `vx336-close-red` (PHASE B's
+  counts). The suite has **11 `@Test`s** in source; the four expected issue lines are each test's LAST `#expect`:
+  `:369` · `:390` · `:407` · `:431`. Both Mac xctestruns list ONE testable, `VariorumTests`.
+- **The 15 phone suites are real in `vx336-close-ios`'s `VariorumMobileTests`** — 15 of 15, the least
+  `MobileBookPinTests` (117 symbols); `run-phone.sh`'s list is U9's step-1c list exactly, in order.
+- The branch adds **no `.fixedSize()`** and **no `withKnownIssue`** under `App` since `074c0f94` (the plan's W
+  expectations rest on both).
+
+**The host at READY — NOT ours:** both strict guards (`pgrep -lx Variorum`, `pgrep -lf "MacOS/Variorum$"`) EMPTY; the
+loose form, `variorum-mcp` and her `/Applications` app EMPTY. **0 simulators booted**; the device **iPhone 17 Pro
+*[removed for publication]*
+`oct13coordinator`** ("HOLD: coordinator queue", claimed 02:16:49 for 180 min) — not ours; the stage log's last window
+`vx283-u1d-walk` 01:51:02–02:16:00. **Free disk 44 GiB** (PHASE B's 48). **Load average 46.8 / 25.1 / 26.0** (other
+sessions' work; W may stretch). No stray `default.profraw` in the worktree or `App/Variorum`.
+
+**Her user-scope MCP servers (names + a sha256 prefix of the sorted compact `mcpServers` JSON, never values):**
+`['linear-server', 'variorum']`, **`bc64543e2f4e8e58`** — SAME as U5–U9's windows and PHASE B's READY.
+
+**The dev store (read-only, at READY):** `variorum.sqlite` 00:03 · `-wal` 00:03 · `-shm` 01:01 · the two key files
+(Oct 13). sha256 prefixes **EQUAL U5–U9's A1 set and PHASE B's READY**: sqlite `c17923414b2e` · wal `7f2fcf1ec90d` ·
+shm `e4e2b900d45c` · keys `3af4704371ff` / `7e12a1b85890`. `Backups/` 57 entries; `safety-copies/` holds only
+`castle-W1-20261013`. Prefs 1,602 keys (informational; the restore target is step 1's export).
+
+**Minutes:** the plan's ~57 of work, a **75-minute claim** (0+1 ~3 · R+G ~4 · W ~37–40 · re-runs ~3 · P ~4 · C ~5).
+Today's load (~47) matches the finals' load, so W may run long; the plan's own road is `Tools/stage renew --who
+vx336-close --minutes 20` on OUR claim before it expires (asked of the orchestrator at READY).
+
+### LIVE STATUS — the closeout window's steps
+
+| step | what | status |
+|---|---|---|
+| RD | read-in, the build check, the host, this section → READY | DONE (this commit) — READY reported; the stage is NOT claimed |
+| 0 | the GO's exact line, run alone; `guard.sh --author`; both strict guards; 0 sims; HEAD and the tree check at the GO | NOT-STARTED |
+| 1 | A1 FIRST — `zsh close/a1.sh` (prefs export, `Backups/` and store listings, fingerprint BEFORE, the one copy cmp-verified, hashes) | NOT-STARTED |
+| R | R2-1 RED — `run-mac.sh red vx336-close-red MCPCompareLandingTests` (expected EXACTLY 11 tests · 4 failed · 4 issues at `:369` `:390` `:407` `:431`) | NOT-STARTED |
+| G | R2-1 GREEN — `run-mac.sh green vx336-close MCPCompareLandingTests` (expected 11/11) | NOT-STARTED |
+| W | the WHOLE Mac target — `run-mac.sh whole vx336-close` (counts READ; standing reds named; any other red re-run alone once) | NOT-STARTED |
+| P | the phone — `run-phone.sh` (expected 120 tests in 15 suites, 2 known issues, no restart); simulator shut; 0 booted | NOT-STARTED |
+| C | cleanup: no instance; prefs 0 differ; `restore.sh` cmp-SAME + sha256 equal; `Backups/` unchanged; fingerprint SAME; 0 sims; no profraw; release; THE RESULT LINE | NOT-STARTED |
