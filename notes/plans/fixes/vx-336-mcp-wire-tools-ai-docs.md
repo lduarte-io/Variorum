@@ -169,8 +169,9 @@ guidance. Each unit's evidence is named before its spawn.
 | U5b — the block-writing pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): the 31-suite Mac batch green (251 tests, 0 failed, 7 gated skips); V252-a (create_note's `blocks` = read_note's records; filed under its chapter), V255-a/b/c (the end at write new with her ⌥⌘Z/⇧⌥⌘Z; any anchor at write new hears the rung sentence and asks her; anywhere at edit), D8-a passed; D8-b's open tail is unreachable from the keyboard (THE ORCHESTRATOR ON U5's WINDOW). The store was restored cmp-SAME. Built `7a15376c`…`93edbc2e` (U5b UNIT RECORD, three sessions) |
 | U6 — Compare from the wire (+ VX-330, VX-342) | **PROVEN 2026-10-14 17:52–18:35** (U6 STAGE RUN). The 125-suite batch: 790 tests, 786 passed, 2 gated skips, 2 standing reds (VX-115, VX-167; neither on U6's paths). Every red run exact: U6a's router clears (9 pairs), U6b Mac (15), the phone (4), the phone green 18/3. The live round passed in both voices: L0–L5 (`duplicate_note` with her ⌥⌘Z/⇧⌥⌘Z, the AI's edit on the copy, Compare aligned on lineage with related-only on, an unrelated pair with it off, `link_versions`' Open › opening Compare, not-frontmost moving nothing); VX-330's walk (all twelve of sherlock's collapsed chapter rows wear the shared icon, the waiting mark on one, pressed, Don't allow clearing it); VX-342's "before" seen. The store was restored cmp-SAME. Built: U6a `2836171c`…`48e250e0`, U6b `12efb039`…`a1a094dc` |
 | U7 — the agent's read-backs | **PROVEN 2026-10-14 20:44–21:12 EXCEPT THE CAP** (U7 STAGE RUN). Batch 176/173, 0 failed. L1 (15/15 digests equal from the wire), L2a (6 inline pages of 50 = block_count 300), L3 (ids_only at limit 100, 300/300 equal), L4 (a killed create, found by `list_my_activity`), L5 (a refused row title-less; reads only with `include_reads`) all PROVEN. **THE CAP FAILED:** a budget-ended page (32,000 characters of take text, about 65k answer) spills past Claude Code 2.1.300's inline limit, which sits between 43,062 (inline) and 50,984 characters (spilled); `ids_only` at limit 200 spills too. → **U7c**, the cap fix (THE ORCHESTRATOR ON U7's WINDOW) · **U7c BUILT** (`0b1be274`…`12df7a8c`): the page budget bounds the whole serialized answer at 32,000 characters (UTF-16 units); 8 pins red on old, 3 of builder B's re-pinned; revert check in 4 arms; MCP 329/66 · core 2,871/333 · workbook 40/6; the orchestrator re-ran the paging suites, 25 green. Its RE-PROBE rides U8b's window |
-| U8 — the AI's docs (LAST) | **U8a DONE** (paused session `f420f52e` + continuation `758abded`…`593008d3`): the instructions at 2,969/3,000 (`instructionsBound` 3,000, the link last), twelve descriptions made true, the stargazing brief's further delta (64 tools, the gate on top); 13 pins red on old, a 3-arm revert check; MCP 340/66 (the VX-353 flake re-run alone 3/3). The orchestrator read the instructions whole and re-ran four pin suites, 22 green. **U8b next** (the chapter + U8's window incl. U7c's re-probe) |
-| LADDER | NOT-STARTED |
+| U8 — the AI's docs (LAST) | **PROVEN 2026-10-14 23:07–23:33** (U8 STAGE RUN). 66-suite batch 432/429, 0 failed; the red run exact on the old seed; Restore Tutorial minted a fresh guide (the old one in the Trash with 30 days); the chapter walked word for word in Study and Terminal; the instructions read from bytes at 2,969 with the link last; **U7c's RE-PROBE: all three pages INLINE** (71 blocks / 31,825 · the same · ids_only 115 / 31,751). The organization ask did the advice unprompted (a book with a tag rule + outflow, a summary note filed) but met two pre-existing wire truths → **U9** (VX-361, VX-362) |
+| U9 — two wire truths from U8's round | NOT-STARTED — VX-361 (create_note's `tag_ids` misses the outflow's tags) · VX-362 (an unworded refusal reaches the wire raw; `alreadyTagged` seen live). U9 BRIEF below |
+| LADDER | NOT-STARTED — after U9 |
 | CLOSEOUT | NOT-STARTED |
 
 **No revert is in flight unless a unit's record says so.**
@@ -178,6 +179,15 @@ guidance. Each unit's evidence is named before its spawn.
 ## Stage traffic log (the oct13coordinator protocol)
 
 - *(Newest first from here.)*
+- 2026-10-14 23:33:52: **RELEASE `vx336-u8`** (26 of 100 min). Result line to the coordinator: the re-probe INLINE ×3; batch
+  432/429, 0 failed; the red run exact; dev store cmp-SAME vs A1; prefs 0 differ; fingerprint same; clipboard
+  restored; Standard/unlocked; castle-W1 untouched. The A1 `scale-prestage-20261015T051427Z` is the coordinator's to
+  prune.
+- 23:07: **GO for `vx336-u8`** (`Tools/stage release --who coord-for-vx336 && Tools/stage claim --who vx336-u8 --reason
+  "VX-336 U8: 66-suite batch + red, SEAM, then A1 + guide MCP chapter walk (Study, Terminal) + real-client round +
+  read_note re-probes on the Debug dev store" --minutes 100`); the coordinator PRE-GAVE "continue" at the SEAM, so the
+  window ran whole. vx-283's walk followed.
+- ~23:00: REQUEST then READY for `vx336-u8` (queued behind `vx283-u1c`/`u1c2`).
 - 2026-10-14 21:12:37: **RELEASE `vx336-u7`** (28 of 95 min). Result line to the coordinator: batch 176/173, 0 failed; dev store
   cmp-SAME vs A1; prefs 0 differ; fingerprint same; Standard/unlocked; castle-W1 untouched. The ScaleFixture A1
   `scale-prestage-20261015T024700Z` is the coordinator's to prune. The cap finding is ours, and its re-probe rides U8's window.
@@ -255,13 +265,19 @@ guidance. Each unit's evidence is named before its spawn.
 
 ## ORCHESTRATOR'S PROVISIONAL RULINGS (her away-mode delegation, kickoff answer 4 — each for her ratification)
 
-*(none yet)*
+1. **U9 joins the run (2026-10-14 ~23:40):** two wire truths that U8's real-client organization round met, VX-361 and
+   VX-362, are fixed in THIS run before the ladder, as sub-issues. Both predate this run, but both sit on the answers
+   and refusals this run reshaped (VX-252's answer; the wire every new tool speaks through). A fix is cheapest while
+   that code is open (her rider rule), and the ladder then reviews it with the rest. Option: (b) ticket them for
+   later and merge without them.
 
 ## Tickets minted from this run
 
 | ticket | born | what | fate |
 |---|---|---|---|
 | (VX-122) | U7 STAGE RUN noticed 1 | NOT minted: a comment on VX-122 (Parked, a live Library misses revivals). An open Library list didn't show two wire-made notes until re-entered; it may be the same class (outside inserts) | a comment; split off if VX-122's fix doesn't cover it |
+| VX-361 | U8 STAGE RUN, the organization leg (F1) | `create_note`'s answer says `tag_ids: []` when the book's outflow tags the note in the same act | a MEMBER (sub-issue), U9; Bug · Confirmed · MCP · Medium |
+| VX-362 | U8 STAGE RUN, the organization leg (F2) | An unworded refusal reaches the wire as a raw Swift case (`Refused: alreadyTagged(...)`) | a MEMBER (sub-issue), U9; Bug · Confirmed · MCP · Medium |
 | VX-357 | U7 builder A's U+0000 check | Text containing U+0000 is stored truncated at the NUL (GRDB binds text with length -1); VX-254's digest overclaims for such a take | Todo, 13n, Bug · Confirmed · MCP · Medium; Pre-launch is her call; pinned as a known issue |
 | VX-358 | U7 builder A's OWED 3 | `edit_take` / `restore_commit` treat an NFC↔NFD re-spelling as no change, so the digest differs from what the client sent | Todo, 13n, Improvement · Suspected · MCP · Low |
 | VX-355 | U6 STAGE RUN (the runner's note 2) | The Pool has no bottom bar, so receipts (an AI's, her undo's) show nowhere while it's open | Todo, 13n, Improvement · Confirmed · Library & sidebar · Low |
@@ -540,6 +556,41 @@ over the AS-BUILT state, after U5–U7 are proven. Re-check VX-292 is not runnin
 stage); THE STAGE WINDOW plan (claim `vx336-u8`): the Tutorial*/MCP Mac suites; the chapter walked in BOTH voices with
 captures (a fresh dev-store field guide via the product door); a real client reading the instructions and answering one
 organization ask by the advice.
+
+### U9 BRIEF — two wire truths from U8's round (VX-361 · VX-362)
+
+Both were seen live in U8's real-client organization round (U8 STAGE RUN, F1/F2). The orchestrator's provisional ruling 1
+joined them to the run. **Design first, then STOP for the orchestrator's ruling on any fork, then build** (one fresh
+implementer can do both halves if context allows; else a continuation builds from the record).
+
+1. **VX-361: `create_note`'s `tag_ids` misses the outflow.**
+   - **The symptom:** a client filed a note into a book whose outflow tags notes made inside it. The note was tagged in
+     the same act (`applyAutoTag` on mint-inside, AppSpec §9), but the answer said `tag_ids: []`. The client then
+     called `apply_tag` and was refused.
+   - **The design:** trace where `tag_ids` comes from and what the outflow writes. Argue the shape: `tag_ids` = every
+     tag the note carries after the act, or the requested ones plus a separate `outflow_tag_ids`. Keep every existing
+     caller's meaning honest; a shape change is a fork to propose. Check `import_document` (one document, and the book
+     form) and `insert_blocks` / `duplicate_note` for the same class.
+2. **VX-362: no wire answer may show a raw Swift case.**
+   - **The symptom:** `apply_tag` on an already-applied tag answered `Refused: alreadyTagged(tagID: "…", targetID: "…")`,
+     the `OpsRefusalTable.message(for:roads:)` fallthrough (`App/Variorum/Shared/OpsRefusalTable.swift` ~l.383).
+   - **(a) The act:** her own doors treat an already-applied tag as done (`BlockTOCView`, `TutorialSeeder` catch
+     `alreadyTagged`). Propose the wire's posture: an idempotent answer (`changed: false`, no undo entry, no Activity
+     noise beyond the read-like line) or worded refusal. Same for `remove_tag` on an absent tag and any sibling
+     no-op.
+   - **(b) The class:** a SWEEP TABLE of every `OperationError` case a wire tool can reach (trace the wire's error
+     roads), each either WORDED (words in the shared table, in the house voice, each on the FOR VX-234 list) or PROVEN
+     unreachable from the wire. Plus a pin that walks every case the sweep marks reachable and asserts no answer
+     starts "Refused:" with a Swift case.
+   - **Mobile:** the table is shared with the phone, so new words are mobile-visible; record it for MOBILE PARITY. A
+     phone pin that changes needs a simulator run in the window.
+- **Pins:** red-first per member and by revert, the house rule.
+- **Evidence:** a short window (claim `vx336-u9`): the Mac suites reaching the table and the tag doors (and a phone suite
+  if one changed), plus a short real-client leg that repeats U8's organization case (make a book with a tag rule and
+  outflow, `create_note` into it, then see `tag_ids` carry the tag, and an `apply_tag` of it answered without a raw case).
+  Never `claude mcp list`.
+- **Lanes:** `App/Variorum/Shared/OpsRefusalTable.swift` is no other live run's file today. Before editing any registry
+  file, `WorkspaceModel` or `ShellRouter`, STOP and report (vx-283 is live).
 
 ## UNIT RECORDS
 
@@ -5531,3 +5582,14 @@ read from BYTES (`measure.py`), the advice read from BYTES (`instructions.py`).
 2. **The re-probe's one-block difference** from the harness's prediction (71 vs 72, 115 vs 116) — explained by the dev store's first-page header and per-record keys; not a red.
 3. **The Restore Tutorial receipt** lands only when the async seed finishes (≈ 5–19 s under load) and fades within ~15 s, so a runner's capture missed it; the act's result (the guide open, on Welcome) is the evidence here.
 4. **The model named the book with an em dash** ("Green Tea Brewing — blog research") — its own choice of name, outside the product's words.
+
+### THE ORCHESTRATOR ON U8's WINDOW (2026-10-14 ~23:40 MDT)
+
+- **Verified, not trusted:** the stage reads FREE; no instance; her fingerprint SAME (`bc64543e2f4e8e58`, re-read by the
+  orchestrator); the tree is clean at `092adc56`.
+- **U8 is PROVEN.** VX-197 closes at the merge.
+- **U7c's re-probe closes VX-256's last open evidence:** all three pages arrived INLINE. VX-256 is PROVEN whole.
+- **The receipt words** for Help ▸ Restore Tutorial… faded before the capture. Its two facts (a fresh guide on the
+  Bookcase, on Welcome) were SEEN and the old guide was in the Trash, so this is recorded, not owed.
+- **F1/F2 → VX-361/VX-362, U9** (provisional ruling 1), before the ladder.
+
