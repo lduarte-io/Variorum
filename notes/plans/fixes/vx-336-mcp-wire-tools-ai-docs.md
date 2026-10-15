@@ -2830,12 +2830,18 @@ is in OWED.
 
 ### LIVE STATUS — U7's pieces
 
+**BUILDER A** (opus-implementer, from 2026-10-14 ~19:30 MDT; HEAD at start `e9ac7005`): VX-254 (pieces 1a–3) then
+VX-261 (piece 4), under THE ORCHESTRATOR'S RULINGS ON U7's FORKS (F-254-2 (b): divide/merge answer NO digest; P-VX261-5
+(b): the F7 row omits `target_*`; the U+0000 CHECK). Builder A's own record is the section **BUILDER A's RECORD** at
+the end of this U7 section. Claims stay PENDING until read from a log.
+
 | piece | status |
 |---|---|
-| 0 — traces, design, forks (this section) | DONE (this commit) |
-| 1 — VX-254: `MCPTextDigest` + `MintedTake.text` + the encoder's `sha256` | NOT-STARTED — D-254-1/2 |
-| 2 — VX-254: the flat answers (`add_take`, `add_takes`, `edit_take`, `restore_commit`) + `divide_block`/`merge_blocks` per F-254-2 | NOT-STARTED — D-254-2/3 |
-| 3 — VX-254: descriptions, pins red by absence, revert run | NOT-STARTED — D-254-6 |
+| 0 — traces, design, forks (this section) | DONE (`01860640`) |
+| 1a — VX-254: `MCPTextDigest` (its own commit — builder B calls it) + P-254-1 | DONE (this commit): red by absence (`cannot find 'MCPTextDigest' in scope`), then 4/4 green |
+| 1b — VX-254: `MintedTake.text` + the encoder's `sha256` | NOT-STARTED — D-254-1/2 |
+| 2 — VX-254: the flat answers (`add_take`, `add_takes`' `takes[]`, `edit_take`, `restore_commit`); `divide_block`/`merge_blocks` answer NO digest (F-254-2 (b), ruled) | NOT-STARTED — D-254-2/3 |
+| 3 — VX-254: descriptions, pins red by absence, revert run, the U+0000 CHECK | NOT-STARTED — D-254-6 |
 | 4 — VX-261: `list_my_activity` (query, catalog listing rule, handler, Activity words, pins) | NOT-STARTED — D-261-* |
 | 5 — VX-256: `read_note` paging + `ids_only` (pins, revert) | NOT-STARTED — D-256-* |
 | 6 — THE STAGE WINDOW plan (claim `vx336-u7`), headless + Mac build-for-testing, READY | NOT-STARTED — the draft below |
