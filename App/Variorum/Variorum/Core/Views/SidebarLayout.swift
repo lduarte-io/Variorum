@@ -351,7 +351,8 @@ nonisolated enum SidebarLayout {
         var depth: CGFloat
         /// 0…1 — eased with the content beyond the edge, so the fade arrives
         /// gradually instead of popping in (it is the STRENGTH that eases now,
-        /// never the depth).
+        /// never the depth) — whole once the row's text padding lies beyond
+        /// (P-U1e-1).
         var strength: CGFloat
 
         /// The opacity at the very edge: the strength under the cap, so the
@@ -392,19 +393,48 @@ nonisolated enum SidebarLayout {
     /// beyond an edge is not "more").
     private static let fadeSlack: CGFloat = 0.5
 
+    /// **The sidebar row's text LINE, in points — MEASURED** (P-U1e-1, the
+    /// orchestrator's ruling on U1d's re-walk, the VX-283 run). Both voices'
+    /// row title is a 13-pt system font (Study: `.system(size: 13)`; Terminal:
+    /// the same size, monospaced), whose line box is 16 pt in either
+    /// (`NSLayoutManager.defaultLineHeight` 16.0; ascender 12.57, descender
+    /// 2.74, no leading — the same for both designs), centred in the row by
+    /// `rowChrome`. So a row's text padding — above the line and below it — is
+    /// `(rowHeight − 16) / 2`: 7 pt at the generous pitch, 4 at the compact.
+    /// Measured offscreen at P-U1e-1 (the U2 record): the first INK sits 7.25–
+    /// 7.5 pt above a 30-pt row's bottom (the descenders of "export: it's all
+    /// yours") and 4.25–4.5 above a 24-pt row's, 9.25–10.5 / 6.25–7.5 below
+    /// their tops (both voices, regular and semibold) — never inside the
+    /// padding.
+    static let rowTextLineHeight: CGFloat = 16
+
+    /// **How far beyond an edge the fade takes to reach full strength**
+    /// (P-U1e-1, PROVISIONAL): the row's own text padding at the drawn pitch —
+    /// so by the time an edge's clip can reach a row's ink, the fade over it
+    /// stands at full strength (its cap). It was the half row (U1d's P-U1d-2),
+    /// 12–15 pt — longer than the padding (4–7 pt), so between the two the clip
+    /// cut ink under a weak fade (the re-walk's R4 at 7–9 pt short:
+    /// "export: it's all yours" sliced through its descenders). Never below a
+    /// point (no division by a hair).
+    static func edgeFadeRampDistance(rowHeight: CGFloat) -> CGFloat {
+        max(1, (rowHeight - rowTextLineHeight) / 2)
+    }
+
     /// **F-2, reshaped at U1d — which edges fade, how deep and how strong.**
     /// An edge with more than the slack beyond it fades the FULL `depth`
-    /// (half a row); its strength is the content beyond it over that same half
-    /// row, capped at 1 — so the fade eases in over the first half row of
-    /// scroll and stands at full strength from there (PROVISIONAL P-U1d-2: the
-    /// ease's distance). A window that holds all its content fades nowhere; an
-    /// unmeasured one fades nowhere.
-    static func edgeFades(_ window: ScrollWindow, depth: CGFloat) -> EdgeFades {
+    /// (half a row); its strength is the content beyond it over the RAMP —
+    /// since P-U1e-1 the row's text padding (`edgeFadeRampDistance`), read
+    /// from the pitch the depth is half of unless a ramp is given — capped at
+    /// 1: the fade eases in over the first few points of scroll (never a pop)
+    /// and stands whole before the clip can reach ink. A window that holds all
+    /// its content fades nowhere; an unmeasured one fades nowhere.
+    static func edgeFades(_ window: ScrollWindow, depth: CGFloat, ramp: CGFloat? = nil) -> EdgeFades {
         guard window.isMeasured, depth > 0 else { return .none }
+        let reach = ramp ?? edgeFadeRampDistance(rowHeight: depth / edgeFadeRows)
         let above = max(0, window.offset)
         let below = max(0, window.content - (window.offset + window.viewport))
         func fade(_ beyond: CGFloat) -> EdgeFade {
-            beyond < fadeSlack ? .none : EdgeFade(depth: depth, strength: min(1, beyond / depth))
+            beyond < fadeSlack ? .none : EdgeFade(depth: depth, strength: min(1, beyond / max(reach, 1)))
         }
         return EdgeFades(top: fade(above), bottom: fade(below))
     }

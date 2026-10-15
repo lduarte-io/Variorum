@@ -77,28 +77,77 @@ struct SidebarSectionWindowRuleTests {
     /// depth is the whole half row at once; the strength is the content beyond
     /// over that half row, whole from a half row on (PROVISIONAL P-U1d-2).
     /// RED ON OLD (R-J): U1b's rule answered depths of 4 and 8 here.
+    ///
+    /// **P-U1e-1 changed this pin's NUMBERS in place** (the orchestrator's
+    /// ruling on U1d's re-walk — R4 sliced at 7–9 pt short): the strength now
+    /// reaches whole over the row's own TEXT PADDING (7 pt at this 30-pt pitch,
+    /// `edgeFadeRampDistance`), not over the half row; the depth and the
+    /// ease-in are unchanged, so is what the pin holds.
     @Test func theFadeIsAlwaysHalfARowDeepAndItsStrengthEasesIn() {
+        let ramp = SidebarLayout.edgeFadeRampDistance(rowHeight: rowHeight)
+        #expect(ramp == 7, "the 30-pt row's text padding")
         let four = SidebarLayout.edgeFades(window(at: 4), depth: depth)
         #expect(four.top.depth == 15, "4 pt above: the whole half row, never a 4-pt fade")
-        #expect(abs(four.top.strength - 4.0 / 15) < 0.0001, "…at a strength of 4/15: \(four.top.strength)")
+        #expect(abs(four.top.strength - 4.0 / 7) < 0.0001, "…at a strength of 4/7: \(four.top.strength)")
         #expect(four.bottom == full)
-        let eight = SidebarLayout.edgeFades(window(at: 342), depth: depth)
-        #expect(eight.top == full)
-        #expect(eight.bottom.depth == 15, "8 pt below: the whole half row")
-        #expect(abs(eight.bottom.strength - 8.0 / 15) < 0.0001, "…at 8/15: \(eight.bottom.strength)")
+        let three = SidebarLayout.edgeFades(window(at: 347), depth: depth)
+        #expect(three.top == full)
+        #expect(three.bottom.depth == 15, "3 pt below: the whole half row")
+        #expect(abs(three.bottom.strength - 3.0 / 7) < 0.0001, "…at 3/7: \(three.bottom.strength)")
+        #expect(SidebarLayout.edgeFades(window(at: 342), depth: depth).bottom == full,
+                "8 pt below — past the 7-pt padding: whole strength")
         #expect(SidebarLayout.edgeFades(window(at: 15), depth: depth).top == full,
                 "a half row beyond: whole strength")
         #expect(SidebarLayout.edgeFades(window(at: 0.3), depth: depth) == Fades(top: .none, bottom: full),
                 "a rounding hair beyond an edge is not more")
         // It arrives faint (the first fade past the slack is a few percent — no
-        // pop), then eases monotonically, with no step, over the first row of scroll.
+        // pop), then eases monotonically, with no step, over the first few
+        // points of scroll (the padding).
         var last = SidebarLayout.edgeFades(window(at: 0.6), depth: depth).top.strength
-        #expect(last > 0 && last < 0.05, "the first fade past the slack: \(last)")
+        #expect(last > 0 && last < 0.1, "the first fade past the slack: \(last)")
         for tenth in 7...300 {
             let strength = SidebarLayout.edgeFades(window(at: CGFloat(tenth) / 10), depth: depth).top.strength
-            #expect(strength >= last && strength - last < 0.01,
+            #expect(strength >= last && strength - last < 0.1 / ramp + 0.0001,
                     "offset \(CGFloat(tenth) / 10): \(last) → \(strength)")
             last = strength
+        }
+    }
+
+    /// **P-U1e-1 — the fade is WHOLE before the clip can reach ink** (the
+    /// orchestrator's ruling on U1d's re-walk, PROVISIONAL: R4 at 7–9 pt short
+    /// cut "export: it's all yours" through its descenders under a fade still
+    /// weak, because the strength ramped over the half row, 12–15 pt, while the
+    /// clip reaches ink inside the row's own padding). The ramp is the row's
+    /// text padding at the drawn pitch — the 13-pt line box (16 pt, both
+    /// voices) centred: 7 pt at 30, 4 at 24 — and at the MEASURED first ink
+    /// (offscreen, both voices, regular and semibold: 7.25 pt above a 30-pt
+    /// row's bottom and 9.25 below its top; 4.25 / 6.25 at 24) each edge's fade
+    /// stands at full strength. The walk's R4 states, at 30 pt: 5 pt short
+    /// eases (5/7), 7 · 9 · 12 whole. RED under R-N (the half-row ramp).
+    @Test func theFadeIsWholeBeforeTheClipReachesInk() {
+        #expect(SidebarLayout.rowTextLineHeight == 16, "the 13-pt row title's line box")
+        #expect(SidebarLayout.edgeFadeRampDistance(rowHeight: 30) == 7)
+        #expect(SidebarLayout.edgeFadeRampDistance(rowHeight: 24) == 4)
+        for (pitch, bottomInk, topInk) in [(CGFloat(30), CGFloat(7.25), CGFloat(9.25)), (24, 4.25, 6.25)] {
+            let depth = SidebarLayout.edgeFadeDepth(rowHeight: pitch)
+            let content = pitch * 20
+            #expect(SidebarLayout.edgeFadeRampDistance(rowHeight: pitch) <= min(bottomInk, topInk),
+                    "the ramp ends inside the padding at \(pitch) pt")
+            let bottom = SidebarLayout.edgeFades(
+                Window(offset: content - 200 - bottomInk, viewport: 200, content: content), depth: depth).bottom
+            #expect(bottom.depth == depth && bottom.strength == 1,
+                    "the clip at the first descender (\(bottomInk) pt short at \(pitch)): whole — \(bottom)")
+            let top = SidebarLayout.edgeFades(
+                Window(offset: topInk, viewport: 200, content: content), depth: depth).top
+            #expect(top.depth == depth && top.strength == 1,
+                    "the clip at the first ascender (\(topInk) pt above at \(pitch)): whole — \(top)")
+        }
+        let depth = SidebarLayout.edgeFadeDepth(rowHeight: 30)
+        for (short, strength) in [(CGFloat(5), CGFloat(5) / 7), (7, 1), (9, 1), (12, 1)] {
+            let fade = SidebarLayout.edgeFades(
+                Window(offset: 600 - 250 - short, viewport: 250, content: 600), depth: depth).bottom
+            #expect(fade.depth == 15 && abs(fade.strength - strength) < 0.0001,
+                    "R4 at \(short) pt short: \(fade)")
         }
     }
 
@@ -120,8 +169,15 @@ struct SidebarSectionWindowRuleTests {
         let compact = SidebarLayout.edgeFadeDepth(rowHeight: 24)
         let shallow = SidebarLayout.edgeFades(Window(offset: 31, viewport: 180, content: 216), depth: compact)
         #expect(shallow.bottom.depth == 12, "5 pt beyond: the whole half row (12 at 24 pt), never 5")
-        #expect(abs(shallow.bottom.opacity - 5.0 / 12 * SidebarLayout.edgeFadeCap) < 0.0001,
-                "…and faint: \(shallow.bottom.opacity)")
+        // P-U1e-1 (numbers changed in place): 5 pt is past the compact row's
+        // 4-pt text padding, so the fade is whole there — at its cap, never 1 —
+        // and 3 pt beyond is the faint state (3/4 of the cap).
+        #expect(abs(shallow.bottom.opacity - SidebarLayout.edgeFadeCap) < 0.0001,
+                "…whole, at the cap: \(shallow.bottom.opacity)")
+        let faint = SidebarLayout.edgeFades(Window(offset: 33, viewport: 180, content: 216), depth: compact)
+        #expect(faint.bottom.depth == 12)
+        #expect(abs(faint.bottom.opacity - 3.0 / 4 * SidebarLayout.edgeFadeCap) < 0.0001,
+                "3 pt beyond: faint — \(faint.bottom.opacity)")
     }
 
     @Test func aWindowThatHoldsEverythingFadesNowhere() {
@@ -905,7 +961,11 @@ struct SidebarSectionWindowMountTests {
             let fade = try #require(draw.fades?.bottom)
             print("[U1d shallow] \(shallow) · \(fade)")
             #expect(fade.depth == depth, "the whole half row (\(depth)), never a \(beyond)-pt fade: \(fade)")
-            #expect(abs(fade.strength - beyond / depth) < 0.01, "faint — \(beyond) of \(depth): \(fade)")
+            // P-U1e-1 (changed in place): the strength ramps over the row's
+            // text padding at this pitch, not over the half row.
+            let ramp = SidebarLayout.edgeFadeRampDistance(rowHeight: depth / SidebarLayout.edgeFadeRows)
+            #expect(abs(fade.strength - min(1, beyond / ramp)) < 0.01,
+                    "\(beyond) over the \(ramp)-pt padding: \(fade)")
             #expect(fade.opacity < 1, "never fully solid: \(fade.opacity)")
         }
     }
