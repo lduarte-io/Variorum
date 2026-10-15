@@ -82,12 +82,15 @@ extension Queries {
 
     /// The statement `effectiveLensSelection(_:lens:blocks:)` runs — internal so
     /// its plan is pinned (the given ids drive; `uq_lens_choice_live` serves).
+    /// `CROSS JOIN` keeps that order (SQLite never reorders one): left to
+    /// itself the planner put the lens's picks outermost — ∝ the lens, the
+    /// whole note's picks — which the plan pin caught.
     static let pageLensSelectionSQL = """
         SELECT lc.block_id AS block_id, lc.variant_id AS variant_id
         FROM json_each(?) j
-        JOIN lens_choice lc
+        CROSS JOIN lens_choice lc
           ON lc.lens_id = ? AND lc.block_id = j.value AND lc.deleted_at IS NULL
-        JOIN variant v
+        CROSS JOIN variant v
           ON v.id = lc.variant_id
          AND v.block_id = lc.block_id
          AND v.deleted_at IS NULL
