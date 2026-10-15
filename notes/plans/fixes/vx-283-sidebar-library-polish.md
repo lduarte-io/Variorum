@@ -1916,6 +1916,27 @@ window the ticket names in Terminal:
   OLD by behavioural revert (today's flat `HStack` at 631 pt reports its overflowing minimum); the break function's
   pure pins; the walk's captures at 1240 with the panel open and at a wide window, both voices.
 
+#### U1 — HER RULINGS ON THE MEMO (2026-10-15 ~00:30, the question tool) — U1d builds to them
+
+- **Auto-scroll:** asked *"After you scroll the Open list (or Starred) by hand, when should the list move by itself
+  again?"*, she chose **"Only on your next act"** — the list keeps the current note in view after an open, ⇧⌘W, ✕,
+  Close All or back/forward; once she scrolls by hand it stays where she put it until her next one of those;
+  resizing the window never pulls it back. (The memo's item 1 as written; P-U1b-2's resize clause superseded.)
+- **The edges:** asked *"How should a scrolled list's cut-off rows look at the top and bottom edges?"*, she chose
+  **"The fade, reshaped"** — always half a row deep when there's more beyond, easing in (its strength, not its depth)
+  so it doesn't pop, never fully solid so a hint of the next row always shows. (The memo's (A).)
+
+#### U3 — THE ORCHESTRATOR'S RULING ON VX-175's COMPOSITION (2026-10-15 ~00:30 — P-U3-2 amended)
+
+The implementer measured the brief's two-line split against the 1240-pt default with the info panel open (631 pt for
+the controls): line 2 (scope · mode · sort · when) needs ~665 pt in Terminal — still pushes the panel off. **RULED (C):**
+**search · scope** on line 1, **mode · sort · when** on line 2 (both ~400 pt, ~200 pt spare in both voices; the one-line
+order kept — the row wraps after scope; the split falls where the controls already group). **Mechanism RULED:** a small
+two-line `Layout` over ONE set of views, never `ViewThatFits` (which builds two search fields and swaps them on the
+re-flow the info panel's opening triggers — dropping her caret); one line exactly as today's HStack when it fits; the
+wrap decision a pure function (one line only if the field keeps at least its placeholder width); a red-on-old geometry
+pin.
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
