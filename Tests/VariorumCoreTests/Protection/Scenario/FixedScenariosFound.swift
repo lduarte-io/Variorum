@@ -514,4 +514,22 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 3 (sequence 211, the closer's soak) — a CHECKER finding: a device
+    /// that joined without a secret, its keychain wiped, signed out, migrated,
+    /// then switched Apple ID (the old shared key gone with it): its copies
+    /// still open through the master — the vault's, behind her secrets, once
+    /// she signs back in ("only the server brings its writing back", §3.5a).
+    /// Her roads now count her accounts' vaults wherever she is signed in.
+    @Test func aSignedOutDeviceStillHasTheVaultRoad() async throws {
+        let world = try Self.start("a synced Standard account, a device that joined without a secret", seed: 3000220)
+        for action in [Action.wipeKeychain("phone"), .signOut("phone"),
+                       .crash(.switchAppleID("phone", to: SWorld.appleB), afterWrites: 22), .launch("phone")] {
+            await world.step(action)
+        }
+        expectPromisesKept(world)
+        let account = try #require(world.phone.slot?.record?.account)
+        await world.done([.signIn("phone", account: account), .launch("phone")])
+        #expect(world.phone.isOpen, "signed back in, the library didn't open through the vault")
+    }
 }

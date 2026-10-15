@@ -315,8 +315,12 @@ extension SWorld {
         }
         seeds.passphrases = truth.allPassphrases
         seeds.words = truth.allWords
-        if device.online, let account = device.session.accountID, let vault = server.snapshot(account) {
-            seeds.vaults.append(vault.format)
+        // Her accounts' vaults: signing in (and coming online) is hers to do,
+        // so a device signed out, or offline, still has the vault road behind
+        // her secrets — "only the server brings its writing back" (§3.5a) is a
+        // road, not a stranding (the closer's soak, seed 3 sequence 211).
+        for account in server.accounts.keys.sorted() {
+            if let vault = server.snapshot(account) { seeds.vaults.append(vault.format) }
         }
         return seeds
     }
