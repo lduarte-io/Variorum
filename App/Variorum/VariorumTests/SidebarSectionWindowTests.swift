@@ -172,6 +172,67 @@ struct SidebarSectionWindowRuleTests {
         }
     }
 
+    /// **P-U1c-1 — a reading asks only what moves the row:** her scroll (the
+    /// offset alone) asks nothing; ANY viewport change — an animated frame's
+    /// smallest step included — reveals now; a content change under an
+    /// unchanged row count (the pitch flip) is a discrete request; a content
+    /// change from a row closing elsewhere asks nothing (P-U1b-7).
+    @Test func aReadingAsksOnlyWhatMovesTheRow() {
+        let rest = Window(offset: 34, viewport: 180.002, content: 216)
+        func ask(_ new: Window, rowsChanged: Bool = false) -> SidebarLayout.ReadingAsk {
+            SidebarLayout.readingAsk(old: rest, new: new, rowsChanged: rowsChanged)
+        }
+        #expect(ask(Window(offset: 12, viewport: 180.002, content: 216)) == .none, "her scroll: the offset alone")
+        #expect(ask(Window(offset: 34, viewport: 180, content: 216)) == .revealNow,
+                "the beat's last frame, a 0.002-pt step, still reveals")
+        #expect(ask(Window(offset: 34, viewport: 225, content: 216)) == .revealNow, "a resize")
+        #expect(ask(Window(offset: 34, viewport: 180.002, content: 270)) == .request, "the pitch flip's content change")
+        #expect(ask(Window(offset: 34, viewport: 180.002, content: 192), rowsChanged: true) == .none,
+                "a row closing elsewhere is no reason (P-U1b-7)")
+        #expect(ask(Window(offset: 34, viewport: 180.002, content: 216.3)) == .none, "a rounding hair of content")
+    }
+
+    /// **P-U1c-1's clock-free pin (RED ON OLD — R-H).** The rail's implicit
+    /// animation, as U1c traced it: the content re-laid at the new pitch in one
+    /// step (216 = 9 × 24), then the viewport easing 225 → 180 over the rail's
+    /// beat as per-frame readings with its TOP HELD, every reveal landing on the
+    /// 0.5-pt pixel grid AppKit scrolls to. At every frame cadence from 500 Hz
+    /// down to 60 Hz the ninth row must end the beat exactly at the edge. The old
+    /// trigger (a re-ask only when one reading's viewport stepped more than half
+    /// a point) ended it short at every cadence finer than 60 Hz — 34.5 of 36 at
+    /// the mounted rig's ≈5-ms cadence, U1c's measured number.
+    @Test func anEasedShrinkEndsWithTheRowExactlyAtTheEdgeAtEveryCadence() {
+        let pitch: CGFloat = 24
+        let rows = 9
+        let depth = SidebarLayout.edgeFadeDepth(rowHeight: pitch)
+        let content = CGFloat(rows) * pitch
+        let (from, to): (CGFloat, CGFloat) = (225, 180)
+        let beat = SidebarLayout.railTransition
+        func eased(_ t: TimeInterval) -> CGFloat {
+            let x = min(max(t / beat, 0), 1)
+            return CGFloat(3 * x * x - 2 * x * x * x)
+        }
+        func onPixelGrid(_ y: CGFloat) -> CGFloat { (y * 2).rounded() / 2 }
+        for cadence in [0.002, 0.003, 0.004, 0.005, 0.006, 0.00833, 0.010, 0.01667] {
+            var frames = Array(stride(from: cadence, to: beat, by: cadence))
+            frames.append(beat)
+            var offset: CGFloat = 0
+            var last = Window(offset: 0, viewport: from, content: content)
+            for t in frames {
+                let reading = Window(offset: offset, viewport: from + (to - from) * eased(t), content: content)
+                if SidebarLayout.readingAsk(old: last, new: reading, rowsChanged: false) != .none,
+                   let target = SidebarLayout.revealOffset(
+                    row: rows - 1, rows: rows, rowHeight: pitch, window: reading, depth: depth) {
+                    offset = onPixelGrid(target)
+                }
+                last = Window(offset: offset, viewport: reading.viewport, content: content)
+            }
+            let fades = SidebarLayout.edgeFades(last, depth: depth)
+            #expect(offset == content - to && fades.bottom == 0,
+                    "at a \(cadence * 1000)-ms cadence the ninth row ends the beat at \(offset) of \(content - to)")
+        }
+    }
+
     @Test func nothingIsRevealedBeforeTheWindowIsMeasuredOrForARowThatIsNotThere() {
         #expect(SidebarLayout.revealOffset(
             row: 15, rows: 20, rowHeight: rowHeight, window: .unmeasured, depth: depth) == nil)
@@ -289,7 +350,7 @@ private final class SectionRig {
 
     /// A synchronous turn of the run loop (`run(until:)` is barred from async
     /// contexts — `OpenListLayoutMountTests`' own helper shape).
-    private func pump(_ seconds: TimeInterval = 0.02) {
+    func pump(_ seconds: TimeInterval = 0.02) {
         RunLoop.main.run(until: Date().addingTimeInterval(seconds))
     }
 
@@ -550,28 +611,27 @@ struct SidebarSectionWindowMountTests {
         }
     }
 
-    /// **U1c — the PROPOSED pin (env-gated until the architect rules:
-    /// `TEST_RUNNER_VARIORUM_U1C_PIN=1`).** The trace's signature of the
-    /// defect: the ninth star's row is cut by the rail transition's TAIL — the
-    /// viewport's last sub-half-point steps never re-ask — and only the settled
-    /// backstop (0.30 s after the last request) lands it. So: sampled at a fine
-    /// cadence across the open, the section must stand where it SETTLES within
-    /// 100–150 ms of the moment its viewport reaches its settled height — well
-    /// inside the backstop's 300 ms, so the backstop cannot be what passes it —
-    /// and where it settles must be the content's end (the row clear). RED on
-    /// HEAD whenever the tail leaves the row cut; green on a fix that lands it
-    /// at the beat's end.
-    @Test(.enabled(if: ProcessInfo.processInfo.environment["VARIORUM_U1C_PIN"] != nil))
-    func theNinthStarIsClearTheMomentTheBeatEnds() async throws {
+    /// **U1c — P-U1c-1's mounted pin (RED ON OLD — R-H).** The trace's
+    /// signature of the defect: the ninth star's row was cut by the rail
+    /// transition's TAIL — the viewport's last sub-half-point steps never
+    /// re-asked — and only the settled backstop landed it, 0.30 s after the
+    /// last request. So: sampled at a fine cadence across the open, the section
+    /// must stand where it SETTLES within 100–150 ms of the moment its viewport
+    /// reaches its settled height — inside the old per-frame backstop's 300 ms,
+    /// so that backstop cannot be what passes it — and where it settles must be
+    /// the content's end (the row clear). On the old trigger it went red
+    /// whenever the tail left the row cut (2 of 3 runs in U1c's window — the
+    /// third a pixel-grid lucky landing); on P-U1c-1 the beat's last reading
+    /// lands it.
+    @Test func theNinthStarIsClearTheMomentTheBeatEnds() async throws {
         try await withRig(height: 900, openNotes: 3, starred: 9, startOn: nil) { rig in
-            let pump = U1cTrace()
             let start = ProcessInfo.processInfo.systemUptime
             rig.workspace.select(.post(rig.notes[8]))
             var samples: [(at: TimeInterval, window: SidebarLayout.ScrollWindow?)] = []
             while ProcessInfo.processInfo.systemUptime - start < 1.0 {
                 rig.hosting.layoutSubtreeIfNeeded()
                 rig.window.displayIfNeeded()
-                pump.pump(0.004)
+                rig.pump(0.004)
                 await Task.yield()
                 samples.append((ProcessInfo.processInfo.systemUptime - start, rig.starred?.window))
             }
@@ -591,7 +651,9 @@ struct SidebarSectionWindowMountTests {
         }
     }
 
-    /// **U1c — the trace leg's harness (env-gated; asserts nothing).** The
+    /// **U1c — the trace leg's harness (env-gated; asserts nothing; KEPT as an
+    /// oracle at P-U1c-1 — re-run it with one variable whenever the beat or the
+    /// trigger changes).** The
     /// Starred pin's own road — the ninth star's note opened from the Library,
     /// the rail arriving and the pitch flipping 30 → 24 under the column's
     /// implicit animation — with every reading, request, reveal and settled
@@ -637,7 +699,7 @@ struct SidebarSectionWindowMountTests {
                     rig.hosting.layoutSubtreeIfNeeded()
                     rig.window.layoutIfNeeded()
                     rig.window.displayIfNeeded()
-                    trace.pump(0.02)
+                    rig.pump(0.02)
                     await Task.yield()
                     try? await Task.sleep(for: .milliseconds(10))
                 } else {
@@ -674,12 +736,6 @@ private final class U1cTrace {
 
     func note(_ line: String) {
         lines.append(String(format: "%.4f", ProcessInfo.processInfo.systemUptime) + " [rig] " + line)
-    }
-
-    /// A synchronous turn of the run loop (`SectionRig`'s own helper shape —
-    /// `run(until:)` is barred from async contexts).
-    func pump(_ seconds: TimeInterval) {
-        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
     }
 
     func text(_ window: SidebarLayout.ScrollWindow?) -> String {

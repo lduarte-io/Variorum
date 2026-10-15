@@ -30,13 +30,21 @@
 //    on EVERY change of the viewport, the content height or the pitch, from
 //    the window as it then stands — an EXACT offset (`SidebarLayout.
 //    revealOffset`) landed through the reveal's `ScrollViewReader` proxy,
-//    unanimated. (U1b's windows: re-asking on EVERY input that moves the row
-//    — the content height and the pitch among them — is what fixed the
-//    after-the-flip shortfall; an absolute `ScrollPosition` road was tried
-//    and withdrawn, the orchestrator's ruling on Q9.)
-//    viewport nor the content, so a list she has scrolled is never pulled
-//    back by a scroll; a row closing elsewhere is no reason either (P-U1b-7).
-//    The derived settled ask (`transitionSettle`) stays as the backstop.
+//    unanimated. (U1b's windows: an absolute `ScrollPosition` road was tried
+//    and withdrawn, the orchestrator's ruling on Q9.) Her own scroll moves
+//    neither the viewport nor the content, so a list she has scrolled is
+//    never pulled back by a scroll; a row closing elsewhere is no reason
+//    either (P-U1b-7).
+//  · U1c (P-U1c-1 — the trace leg): the rail's implicit animation reaches a
+//    section's viewport frame by frame, its top held, and the re-ask used to
+//    fire only on a reading that stepped more than half a point — so the
+//    ease's slow tail cut the row by its sum (1–2 pt in the mounted rig)
+//    until the settled backstop landed it 0.30 s later. The viewport now
+//    re-asks on EVERY reading that changes it (`SidebarLayout.readingAsk`)
+//    and reveals directly — the beat's last reading lands the row exactly.
+//    The settled check (`transitionSettle`) stays as the backstop of the
+//    DISCRETE requests only: the current row, the content height, the
+//    pitch, the mount.
 //
 
 import SwiftUI
@@ -79,8 +87,10 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
     /// How long after a reveal request the section checks again — DERIVED from
     /// the column's one transition beat (`SidebarLayout.transitionSettle` =
     /// `railTransition` + its margin; the orchestrator's ruling on P-U1b-5:
-    /// never a free-standing number). Since P-U1b-6 it is the BACKSTOP: every
-    /// input that moves the row's place already re-asks.
+    /// never a free-standing number). Since P-U1b-6 it is the BACKSTOP, and
+    /// since P-U1c-1 only the DISCRETE requests schedule it (the current row,
+    /// the content height, the pitch, the mount) — a viewport reading reveals
+    /// directly, frame by frame, and schedules nothing.
     static var transitionSettle: Duration { .seconds(SidebarLayout.transitionSettle) }
 
     private var depth: CGFloat { SidebarLayout.edgeFadeDepth(rowHeight: rowHeight) }
@@ -110,14 +120,17 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
                     if memory.mountRevealOwed, new.isMeasured {
                         memory.mountRevealOwed = false
                         requestReveal("mount")
-                    } else if abs(new.viewport - old.viewport) > 0.5
-                        || (abs(new.content - old.content) > 0.5 && !rowsChanged) {
-                        // Every input that moves the row's place re-asks (P-U1b-6):
-                        // the viewport (the rail arriving, a resize) and the
-                        // content height (the pitch flip's own signal — rows re-laid
-                        // at the new pitch). An offset-only change — her scroll —
-                        // never does.
-                        requestReveal(abs(new.viewport - old.viewport) > 0.5 ? "viewport" : "content")
+                        return
+                    }
+                    // Every input that moves the row's place re-asks (P-U1b-6): the
+                    // content height under an unchanged count (the pitch flip's own
+                    // signal) as a discrete request; the viewport (the rail arriving,
+                    // a resize) on EVERY reading that changes it, revealed at once
+                    // (P-U1c-1). An offset-only change — her scroll — never does.
+                    switch SidebarLayout.readingAsk(old: old, new: new, rowsChanged: rowsChanged) {
+                    case .request: requestReveal("content")
+                    case .revealNow: reveal("viewport")
+                    case .none: break
                     }
                 }
                 .onChange(of: current) { requestReveal("current") }
@@ -136,8 +149,9 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
         report?(now)
     }
 
-    /// A reveal now, from the window as last read — and the same question
-    /// again once any transition the request rode in on has settled.
+    /// A DISCRETE request: a reveal now, from the window as last read — and
+    /// the same question again once any transition the request rode in on has
+    /// settled. (A viewport reading never comes here — P-U1c-1.)
     private func requestReveal(_ trigger: StaticString) {
         memory.episode &+= 1
         let episode = memory.episode

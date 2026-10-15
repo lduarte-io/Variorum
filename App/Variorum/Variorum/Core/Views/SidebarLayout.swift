@@ -320,9 +320,10 @@ nonisolated enum SidebarLayout {
     // flipping 30 ↔ 24 under the rail's transition), while returning to the note
     // she was already in never revealed at all (its recency did not change).
     // So the reveal is a decision over the window as it NOW stands — an exact
-    // content offset, applied absolutely, re-asked on every input axis
-    // (P-U1b-6) — and since F-2 fades the edges, "in view" means clear of the
-    // fades too.
+    // content offset, landed through the section's proxy, re-asked on every
+    // input axis (P-U1b-6; on EVERY viewport reading since P-U1c-1,
+    // `readingAsk`) — and since F-2 fades the edges, "in view" means clear of
+    // the fades too.
 
     /// A scrolling section's visible window over its rows, in the scroll
     /// content's space: the visible top, the visible height, the content's
@@ -400,5 +401,44 @@ nonisolated enum SidebarLayout {
         }
         let limit = max(0, window.content - window.viewport)
         return min(max(wanted, 0), limit)
+    }
+
+    // MARK: - What one reading asks of the reveal (U1c — P-U1c-1, the VX-283 run)
+    //
+    // The traced mechanism (U1c — the probe and the mounted rig agree): the
+    // rail's implicit animation delivers a section's viewport change as a
+    // stream of per-frame readings, its top held, and the content's change in
+    // ONE step at the commit. The trigger used to re-ask only when one
+    // reading's viewport stepped more than half a point from the PREVIOUS
+    // reading — so an ease's slow tail, every step below that, shrank the
+    // viewport under an offset nothing moved again, and the current row ended
+    // the beat cut by the tail's sum (1–2 pt in the mounted rig, 15 at a fine
+    // cadence), until the settled backstop landed it 0.30 s later.
+
+    /// What one reading of a scrolling section asks of its reveal.
+    nonisolated enum ReadingAsk: Equatable, Sendable {
+        /// Nothing that moves the current row: her own scroll (an offset-only
+        /// change), or a content change from a row closing elsewhere (P-U1b-7).
+        case none
+        /// The viewport moved — an animated resize's frame, a window resize —
+        /// so reveal NOW from this reading, however small the step (P-U1c-1).
+        /// A reading arrives on every frame and the last one at the settled
+        /// height, so this lands the row exactly when the motion ends; it
+        /// schedules no settled check (the orchestrator's sub-call 2).
+        case revealNow
+        /// The content height changed under an unchanged row count — the
+        /// pitch flip's own signal (P-U1b-6) — a DISCRETE request: reveal now
+        /// and once more after the column's transition (`transitionSettle`).
+        case request
+    }
+
+    /// **What a reading asks** (P-U1c-1): a content change under an unchanged
+    /// row count is a discrete request; otherwise ANY viewport change reveals
+    /// now; an offset-only change asks nothing. (The mount's first reading is
+    /// the section's own bookkeeping, a request before any of this.)
+    static func readingAsk(old: ScrollWindow, new: ScrollWindow, rowsChanged: Bool) -> ReadingAsk {
+        if abs(new.content - old.content) > 0.5, !rowsChanged { return .request }
+        if new.viewport != old.viewport { return .revealNow }
+        return .none
     }
 }
