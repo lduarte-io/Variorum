@@ -224,6 +224,9 @@ struct SidebarView: View {
     /// name (the indicator). Read once per (rows, current wing) — bounded by
     /// the Open list.
     @State private var openRowWings: [String: String] = [:]
+    /// VX-288: the Open list's drag — which row is dragged, where it points,
+    /// the list's window as the insertion line reads it (`OpenListDrag.swift`).
+    @State private var openListDrag = OpenListDragState()
     #if DEBUG
     /// **This column's own name in the DEBUG oracle** (18k UNIT C4 — the
     /// `MastheadStamp.oracleOwner` shape): it owns the rail's drawn height.
@@ -792,13 +795,26 @@ struct SidebarView: View {
     /// **The reorder payload** — its own transfer type, deliberately not a
     /// plain String: the sidebar's whole surface is a `.plainText` import
     /// drop target, and a dragged row's id must never be importable as a
-    /// note's text.
-    struct OpenNoteDragToken: Codable, Transferable {
+    /// note's text. **VX-288:** it also names the LIST its drag began in
+    /// (`OpenListDragState.listID`), so a drop acts only on that list
+    /// (PROVISIONAL P-U2-3) — `nonisolated` + `Sendable` like the Bookcase's
+    /// tokens, because the drop reads it off the main thread.
+    nonisolated struct OpenNoteDragToken: Codable, Transferable, Sendable {
         let noteID: String
+        let listID: String
+
+        static let contentType = UTType(exportedAs: "io.lduarte.variorum.open-note-row")
+
         static var transferRepresentation: some TransferRepresentation {
-            CodableRepresentation(
-                contentType: UTType(exportedAs: "io.lduarte.variorum.open-note-row"))
+            CodableRepresentation(contentType: contentType)
         }
+    }
+
+    /// **The Open row's drag image** (VX-288 + her VX-70 ruling, *"Only on the
+    /// Open list's rows"*): the row's title as the compact chip, at the
+    /// sidebar's own register — the Bookcase's chip (R-LWP-3), shared.
+    static func openRowChip(_ title: String, tokens: VoiceTokens) -> some View {
+        DragTitleChip(title: title, font: tokens.navigation.weight(.semibold), tokens: tokens)
     }
 
     /// 13f batch 3 (W3/A27) — the OPEN strip. **Act 10 item 9 rebuilt it:**
@@ -835,8 +851,22 @@ struct SidebarView: View {
                     // VX-286: the margin INSIDE the scroll, so the overlay
                     // scroll bar rides beside the ✕, never over it.
                     .padding(.horizontal, Self.scrollingSectionMargin)
+                    // VX-288: ONE drop target over the rows (their margins
+                    // too), on the CONTENT — a drop's location is the rows'
+                    // own space, and the half of the row under the pointer
+                    // decides (`SidebarLayout.OpenListDrop`). The rows' own
+                    // per-row targets are gone.
+                    .contentShape(Rectangle())
+                    .onDrop(of: OpenListDropDoor.types, delegate: OpenListRowsDrop(
+                        state: openListDrag, rows: shown, rowHeight: rowHeight, workspace: workspace))
                 }
                 .scrollBounceBehavior(.basedOnSize)
+                // VX-288: the line's scroll axis — the list's window as it stands.
+                .onScrollGeometryChange(for: SidebarLayout.ScrollWindow.self) {
+                    SidebarLayout.ScrollWindow($0)
+                } action: { _, window in
+                    openListDrag.read(window)
+                }
                 #if DEBUG
                 // U1b's oracle: the list's window over its rows.
                 .onScrollGeometryChange(for: SidebarLayout.ScrollWindow.self) {
@@ -857,6 +887,9 @@ struct SidebarView: View {
                     rows: shown, current: currentOpenRow,
                     rowHeight: rowHeight, room: tokens.room,
                     report: sectionReport(.open), phaseSeam: sectionPhaseSeam(.open)))
+                // VX-288: the insertion line — over the list, ABOVE the edge
+                // fade, lit only where a drop would act.
+                .overlay { openListLine(shown) }
                 .frame(maxHeight: maxHeight)
                 // VX-285: hug the rows while they FIT the room; past it,
                 // take the room and scroll in place (the `count <= 7`
@@ -883,7 +916,12 @@ struct SidebarView: View {
                 //  takes the pane's focus, so the newcomer IS the current
                 //  row; and a return to the note already newest, which
                 //  never changed `recency.first`, now reveals too.)
+                openListEndZone(shown)
             }
+            #if DEBUG
+            // VX-288's oracle: this column's drag state, for a pin's hover.
+            .onAppear { SidebarGeometry.recordOpenListDrag(openListDrag, for: workspace) }
+            #endif
             // (VX-286: the `.padding(.horizontal, groupPadding)` that stood
             //  here put the margin OUTSIDE the scroll view — it moved inside.)
             // 17y (f): which open notes live in another wing (the indicator).
@@ -916,6 +954,51 @@ struct SidebarView: View {
     /// you're in takes you.
     static let closeRowHelp =
         "Close this row — the note itself is untouched (closing the note you're in moves you on to the next)"
+
+    /// **VX-288 — the insertion line** over the Open list (`OpenListInsertionLine`):
+    /// the ring token, across the rows' width, where a drop would land.
+    private func openListLine(_ shown: [String]) -> some View {
+        #if DEBUG
+        let workspace = workspace
+        return OpenListInsertionLine(
+            state: openListDrag, rows: shown, rowHeight: rowHeight,
+            inset: Self.scrollingSectionMargin, color: tokens.ring,
+            report: { SidebarGeometry.recordOpenListLine($0, for: workspace) })
+        #else
+        return OpenListInsertionLine(
+            state: openListDrag, rows: shown, rowHeight: rowHeight,
+            inset: Self.scrollingSectionMargin, color: tokens.ring)
+        #endif
+    }
+
+    /// **VX-288 — the END ZONE** under the Open list's rows: a drop anywhere in
+    /// it lands the row in the last slot (the book navigator's 28-pt zone).
+    /// It takes only the room the list leaves above the sync footer
+    /// (`SidebarLayout.OpenListDrop.endZoneHeight`, from VX-285's own two
+    /// measurements), so it never pushes the column, and it is absent when
+    /// the rows fill the list (the last row's lower half is the end slot
+    /// then). Clear — nothing draws; the line shows at the list's end.
+    @ViewBuilder
+    private func openListEndZone(_ shown: [String]) -> some View {
+        let height = SidebarLayout.OpenListDrop.endZoneHeight(
+            visibleHeight: columnScrollHeight, listTop: openListTop,
+            bottomPadding: SidebarLayout.contentBottomPadding, rows: shown.count, rowHeight: rowHeight)
+        if height > 0 {
+            Color.clear
+                .frame(maxWidth: .infinity)
+                .frame(height: height)
+                .contentShape(Rectangle())
+                .onDrop(of: OpenListDropDoor.types, delegate: OpenListEndZoneDrop(
+                    state: openListDrag, rows: shown, rowHeight: rowHeight, workspace: workspace))
+                #if DEBUG
+                // VX-288's oracle: the end zone as laid out.
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                    SidebarGeometry.recordOpenListEndZone(frame, for: workspace)
+                }
+                .onDisappear { SidebarGeometry.recordOpenListEndZone(nil, for: workspace) }
+                #endif
+        }
+    }
 
     /// The indicator's read key: the rows shown and the wing she stands in.
     private var openWingsKey: String {
@@ -1029,16 +1112,17 @@ struct SidebarView: View {
         // right-click carries Star). Inside the strip's own scroll, so the
         // ring sits on the row's edge rather than outside it.
         .tourAnchor(.sidebarOpenRow(noteID), cornerRadius: 6, outset: 0)
-        .draggable(OpenNoteDragToken(noteID: noteID))
-        .dropDestination(for: OpenNoteDragToken.self) { tokens, _ in
-            guard let dragged = tokens.first?.noteID, dragged != noteID,
-                  let source = workspace.openNotes.shown.firstIndex(of: dragged),
-                  let target = workspace.openNotes.shown.firstIndex(of: noteID)
-            else { return false }
-            // Drop-before-target, in the onMove convention (pre-move index).
-            workspace.moveOpenNotes(fromOffsets: IndexSet(integer: source), toOffset: target)
-            return true
-        }
+        // VX-288: the system drag, its image the row's title as the compact
+        // chip AT THE GRAB POINT (her VX-70 ruling — the Open list's rows
+        // only); the payload (made when the drag begins) tells the list which
+        // row it is. The drop is the LIST's (`openGroup`) — no row is its own
+        // target any more (each landed before itself, the traced bug).
+        .modifier(ChipDragSource(payload: {
+            openListDrag.began(noteID)
+            return OpenNoteDragToken(noteID: noteID, listID: openListDrag.listID)
+        }) {
+            Self.openRowChip(workspace.label(for: destination), tokens: tokens)
+        })
         .contextMenu {
             if let onOpenBeside {
                 Button(WorkspaceNaming.openBesideVerb) { onOpenBeside(noteID) }
@@ -1214,12 +1298,36 @@ enum SidebarGeometry {
         sectionPhaseFeeds[bodyKey(for: workspace), default: [:]][section] = phaseFeed
     }
 
+    /// **VX-288 (the VX-283 run, U2) — the Open list's drag, as drawn**, keyed
+    /// by the column's workspace: the column's drag state (a pin plays a hover
+    /// through it — a real drag cannot be posted in the test host), the
+    /// insertion line as drawn (global; absent when none is), the end zone as
+    /// laid out (global; absent when there is none).
+    static var openListDrags: [String: OpenListDragState] = [:]
+    static var openListLines: [String: CGRect] = [:]
+    static var openListEndZones: [String: CGRect] = [:]
+
+    static func recordOpenListDrag(_ state: OpenListDragState, for workspace: WorkspaceModel) {
+        openListDrags[bodyKey(for: workspace)] = state
+    }
+
+    static func recordOpenListLine(_ frame: CGRect?, for workspace: WorkspaceModel) {
+        openListLines[bodyKey(for: workspace)] = frame
+    }
+
+    static func recordOpenListEndZone(_ frame: CGRect?, for workspace: WorkspaceModel) {
+        openListEndZones[bodyKey(for: workspace)] = frame
+    }
+
     /// A pin clears ITS OWN column's rows and no other (the keying rule).
     static func forgetSections(for workspace: WorkspaceModel) {
         let key = bodyKey(for: workspace)
         sectionDraws[key] = nil
         columnScrollFrames[key] = nil
         sectionPhaseFeeds[key] = nil
+        openListDrags[key] = nil
+        openListLines[key] = nil
+        openListEndZones[key] = nil
     }
     /// 18d batch 1: what the NOTE BOX drew — the whole box, and its header's
     /// words. The geometry oracle compares these two rectangles against the
