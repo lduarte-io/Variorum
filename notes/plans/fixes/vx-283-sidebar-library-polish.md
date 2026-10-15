@@ -366,7 +366,7 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **STOPPED — the re-run (21:40–21:43) is not green**: 410 tests, 2 red — VX-245's lint (U3's, on main) and the Starred fade pin, the revealed last starred row 2 pt short after a pitch flip (the F-1 residual, narrowed but not gone; hypothesis + options in "THE RE-RUN'S RESULTS"). Awaiting the orchestrator. Every other U1b pin green. F-3 → VX-359 (U3 rider). |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: Q8 IN-PROGRESS — the orchestrator's ruling P-U1b-6 (the reveal as an exact pure offset applied absolutely, re-asked on every input axis) after the re-run's red (the Starred reveal 2 pt short after a pitch flip). Then READY FOR STAGE (the 93-suite batch + R-F). F-3 → VX-359 (U3 rider). |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 — the Library and the red lint | NOT-STARTED |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
@@ -887,6 +887,17 @@ lines — below); any stage work until the orchestrator hands over a claim.
   still red** (2 pt short — "THE RE-RUN'S RESULTS" below). **STOPPED at the orchestrator's rule** ("if anything
   besides VX-245's lint is red, record it exactly and stop"): nothing fixed; NOT READY FOR WALK; awaiting the
   orchestrator. Store and prefs restored and verified.
+- Q8 — the orchestrator's ruling P-U1b-6 (`a5f0eea1`): IN-PROGRESS. **Plan:** (1) pure
+  `SidebarLayout.revealOffset(row:rows:rowHeight:window:depth:)` — the EXACT content offset (row top = row ×
+  rowHeight, the half-row clearance where more lies beyond, clamped to `[0, max(0, content − viewport)]` of the window
+  as read, nil when clear); `revealAnchor` RETIRES (its pins rewritten on the offset); (2) the modifier applies it
+  ABSOLUTELY — `.scrollPosition($position)` on the section's scroll view, `position.scrollTo(y:)` in a transaction
+  with animations disabled — the proxy no longer reveals (it did nothing else in either section); (3) re-asks on the
+  current row, the viewport, the CONTENT height, the row height, the mount's first reading, plus the derived settled
+  ask; never on an offset-only change; (4) pins: the exact offsets (above · below · the ends · a viewport shorter than
+  a row · the pitch flip's before/after windows) and idempotence; the mounted Starred pin; **R-F** (the application
+  reverted to the proxy's anchor road, prebuilt) expected RED on the Starred pin. The offscreen probe re-run WITH a
+  row-height flip before the window.
 
 **F-3 — THE DOUBLED SEPARATOR: OLDER THAN U1, NOT ADJACENT — RECORDED AND LEFT (the brief's rule).**
 - The View menu's note group is `EditorCommands`' `CommandGroup(before: .toolbar)` (`EditorCommands.swift:954`). It
