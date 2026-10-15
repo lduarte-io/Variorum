@@ -2137,6 +2137,22 @@ Build to "U1 — HER RULINGS ON THE MEMO" and "U1 — THE DESIGN MEMO" above, on
    re-walk of R2–R6's rows (the fades in all four rooms, the shallow-overflow state R4 reproduced, the twenty opens,
    the hand-scroll-then-wait for R6 with waits of 20 s+), by a fresh walker.
 
+### U1d — follow and the reshaped fade
+
+**Implementer:** a fresh Opus 5.5 at xhigh (2026-10-15, overnight), worktree `~/dev/variorum-vx-283`, DerivedData
+`App/Variorum/DerivedData/vx283-u1d`. Builds to "U1 — HER RULINGS ON THE MEMO" on U1c's code. **Not done by this
+session (first line):** any stage work until the orchestrator hands over a claim; the re-walk (a fresh walker's).
+
+**LIVE STATUS (per piece)**
+- D0 — this section: DONE (this commit).
+- D1 — the pure follow model (`SidebarLayout.SectionFollow`: acts, phases, readings → may a reading reveal) + pure
+  pins: NOT-STARTED.
+- D2 — the fade reshaped (pure: full half-row depth past the slack, strength eased with the content beyond, the
+  outermost opacity capped below 1) + pure pins; the cap chosen by eye offscreen: NOT-STARTED.
+- D3 — the modifier wired to both (the phase from `onScrollPhaseChange`; a DEBUG hand-scroll seam) + the mounted
+  pins (a viewport change while not following moves nothing): NOT-STARTED.
+- D4 — headless evidence + the reverts prebuilt + READY FOR STAGE: NOT-STARTED.
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
