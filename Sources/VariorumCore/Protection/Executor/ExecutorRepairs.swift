@@ -77,6 +77,7 @@ extension ProtectionExecutor {
         case .rekeyOlderLibraryFile: return "rekeyOlderLibraryFile"
         case .recordHeldSyncKeysFacts: return "recordHeldSyncKeysFacts"
         case .restoreRecordFactsFromMemory: return "restoreRecordFactsFromMemory"
+        case .retireOwnAppleKeys: return "retireOwnAppleKeys"
         case .recordAlwaysAskQuietly: return "recordAlwaysAskQuietly"
         case .makeTouchIDItem: return "makeTouchIDItem"
         case .deleteTouchIDItem: return "deleteTouchIDItem"
@@ -211,6 +212,18 @@ extension ProtectionExecutor {
 
         case .rekeyOlderLibraryFile(let to):
             return try rekeyOlderLibraryFile(to: to, &library)
+
+        case .retireOwnAppleKeys(let ids):
+            guard castleConfirmed(library) else { return .wrongMode }
+            let listed = Set(library.section.ownLibraryAppleKeyIDsToRetire)
+            let retiring = ids.filter { listed.contains($0) }
+            guard !retiring.isEmpty else { return .nothingThere }
+            var section = library.section.bumped()
+            for id in retiring { section = section.retiringAppleKey(id: id, purpose: .library, origin: .minted, at: leaves.clock.now()) }
+            try writeFacts(&library, section: section)
+            let readable = try leaves.apple.readableAppleKeyIDs()
+            for id in retiring where readable.contains(id) { try leaves.apple.deleteAppleKey(id: id) }
+            return nil
 
         case .restoreRecordFactsFromMemory:
             guard guards.libraryFileLosesToMemoryOn, var record = library.record, let memory = library.memory,

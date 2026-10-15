@@ -346,6 +346,14 @@ public enum AssessRules {
     ) {
         let current = unlocked.currentFingerprint
         let tree = Set(unlocked.familyTree.fingerprints).union([current])
+        // No Apple key of this Mac's own for the library left unretired in
+        // Castle — entering Castle retires every one (§3.5); an entry whose
+        // last steps no one ran (a Mac replaced past the commit point, its act
+        // its predecessor's) leaves them listed (VX-305 U4, the scenario world).
+        let unretired = unlocked.thisMac.ownLibraryAppleKeyIDsToRetire
+        if !unretired.isEmpty, unlocked.thisMac.actInFlight == nil {
+            repairs.append(.retireOwnAppleKeys(ids: unretired))
+        }
         // No silent item for any key the library has had.
         for item in facts.custody where item.itemClass == .silent && tree.contains(item.fingerprint) {
             if let precondition = goesOnlyIf(item.fingerprint, current: current, live: live) {

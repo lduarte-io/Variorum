@@ -211,4 +211,19 @@ struct GeneratorFoundScenarios {
         await world.done([.settle])
         expectPromisesKept(world)
     }
+    /// Seed 1 (sequence 662): Use Castle crashed past its commit point, then
+    /// the device was replaced (memory carried) — the new identity can't
+    /// resume its predecessor's act, so the entry's last step (retiring every
+    /// own Apple key) never ran; the Castle repairs retire them, and the
+    /// pre-Castle copies stop opening through the Apple account.
+    @Test func aReplacementFinishesUseCastlesRetirement() async throws {
+        let world = try Self.start("two Macs sharing an iCloud Drive", seed: 1000665)
+        for action in [Action.createLibrary("phone", secrets: true), .syncICloud("phone"), .backup("phone"),
+                       .crash(.useCastle("phone", .touchID, newWords: false), afterWrites: 20)] {
+            await world.step(action)
+        }
+        await world.done([.replaceMac("phone", carriesMemory: true), .settle])
+        #expect(world.phone.library?.section.ownLibraryAppleKeyIDsToRetire.isEmpty == true)
+        expectPromisesKept(world)
+    }
 }

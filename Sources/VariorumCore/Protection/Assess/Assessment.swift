@@ -223,6 +223,10 @@ public enum Repair: Hashable, Sendable {
     /// so — takes back the mode and account last confirmed here (§3.6,
     /// promise 10). PROVISIONAL P-U4-6. VX-305 U4.
     case restoreRecordFactsFromMemory
+    /// Castle: an Apple key this Mac's section lists as its own for the
+    /// library and not retired — retired (recorded), then deleted on sight.
+    /// VX-305 U4.
+    case retireOwnAppleKeys(ids: [String])
     /// §3.10: this device's choice says Touch ID and no item exists — Always
     /// ask is recorded quietly (a settings write; never an item).
     case recordAlwaysAskQuietly
