@@ -85,6 +85,12 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
 
     private var depth: CGFloat { SidebarLayout.edgeFadeDepth(rowHeight: rowHeight) }
 
+    #if DEBUG
+    /// U1c's trace label: which section this is (Starred's rows are star
+    /// targets, the Open list's note ids).
+    private var traceLabel: String { String(describing: RowID.self) }
+    #endif
+
     func body(content: Content) -> some View {
         ScrollViewReader { proxy in
             content
@@ -96,9 +102,14 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
                     refreshFades(new)
                     let rowsChanged = rows.count != memory.rowCountAtReading
                     memory.rowCountAtReading = rows.count
+                    #if DEBUG
+                    SidebarSectionTrace.note(traceLabel,
+                        "reading \(SidebarSectionTrace.text(old)) -> \(SidebarSectionTrace.text(new))"
+                        + " rows=\(rows.count) rowsChanged=\(rowsChanged) pitch=\(rowHeight)")
+                    #endif
                     if memory.mountRevealOwed, new.isMeasured {
                         memory.mountRevealOwed = false
-                        requestReveal()
+                        requestReveal("mount")
                     } else if abs(new.viewport - old.viewport) > 0.5
                         || (abs(new.content - old.content) > 0.5 && !rowsChanged) {
                         // Every input that moves the row's place re-asks (P-U1b-6):
@@ -106,15 +117,15 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
                         // content height (the pitch flip's own signal — rows re-laid
                         // at the new pitch). An offset-only change — her scroll —
                         // never does.
-                        requestReveal()
+                        requestReveal(abs(new.viewport - old.viewport) > 0.5 ? "viewport" : "content")
                     }
                 }
-                .onChange(of: current) { requestReveal() }
+                .onChange(of: current) { requestReveal("current") }
                 .onChange(of: rowHeight) {
                     refreshFades(memory.window)
-                    requestReveal()
+                    requestReveal("rowHeight")
                 }
-                .onChange(of: settledCheck) { reveal() }
+                .onChange(of: settledCheck) { reveal("settled") }
                 .overlay { SidebarEdgeFade(fades: fades, room: room) }
         }
     }
@@ -127,12 +138,19 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
 
     /// A reveal now, from the window as last read — and the same question
     /// again once any transition the request rode in on has settled.
-    private func requestReveal() {
+    private func requestReveal(_ trigger: StaticString) {
         memory.episode &+= 1
         let episode = memory.episode
-        reveal()
+        #if DEBUG
+        SidebarSectionTrace.note(traceLabel, "request \(trigger) episode=\(episode)")
+        #endif
+        reveal(trigger)
         Task { @MainActor in
             try? await Task.sleep(for: Self.transitionSettle)
+            #if DEBUG
+            SidebarSectionTrace.note(traceLabel, "settle-timer episode=\(episode) latest=\(memory.episode)"
+                + (memory.episode == episode ? " FIRES" : " superseded"))
+            #endif
             if memory.episode == episode { settledCheck &+= 1 }
         }
     }
@@ -140,18 +158,31 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
     /// The current row, scrolled clear of the fades when the window as last
     /// read says it is not: the exact offset (`revealOffset`), turned into the
     /// proxy's anchor and landed unanimated.
-    private func reveal() {
+    private func reveal(_ caller: StaticString) {
         let window = memory.window
         guard window.isMeasured, let current, let row = rows.firstIndex(of: current),
               let target = SidebarLayout.revealOffset(
                 row: row, rows: rows.count, rowHeight: rowHeight, window: window, depth: depth)
-        else { return }
+        else {
+            #if DEBUG
+            SidebarSectionTrace.note(traceLabel,
+                "reveal(\(caller)) NONE window=\(SidebarSectionTrace.text(window))"
+                + " row=\(current.flatMap { rows.firstIndex(of: $0) }.map(String.init) ?? "nil")"
+                + "/\(rows.count) pitch=\(rowHeight)")
+            #endif
+            return
+        }
         var unanimated = Transaction()
         unanimated.disablesAnimations = true
         // The proxy lands the row's top `y × (viewport − rowHeight)` below the
         // window's top, so the exact offset is the anchor `y` below.
         let room = window.viewport - rowHeight
         let anchor = room > 0 ? min(max((CGFloat(row) * rowHeight - target) / room, 0), 1) : 0
+        #if DEBUG
+        SidebarSectionTrace.note(traceLabel,
+            "reveal(\(caller)) window=\(SidebarSectionTrace.text(window)) row=\(row)/\(rows.count)"
+            + " pitch=\(rowHeight) target=\(target) anchor=\(anchor) proxy=\(memory.proxy != nil)")
+        #endif
         withTransaction(unanimated) {
             memory.proxy?.scrollTo(current, anchor: UnitPoint(x: 0.5, y: anchor))
         }
@@ -197,3 +228,27 @@ private struct SidebarEdgeFade: View {
         .accessibilityHidden(true)
     }
 }
+
+#if DEBUG
+/// **U1c — the trace leg's instrument** (DEBUG-only; the VX-283 run). Off
+/// unless a pin or the offscreen probe installs a `sink`: every geometry
+/// reading a scrolling section receives, every reveal request and its
+/// trigger, every reveal's inputs and what it hands the proxy, and every
+/// settled check — each stamped on the system uptime clock (the same clock
+/// as `CACurrentMediaTime`), so a trace lines up with AppKit's own
+/// notifications. The architect's ruling decides whether it stays as an
+/// oracle or goes.
+@MainActor
+enum SidebarSectionTrace {
+    static var sink: ((String) -> Void)?
+
+    static func note(_ label: String, _ line: @autoclosure () -> String) {
+        guard let sink else { return }
+        sink(String(format: "%.4f", ProcessInfo.processInfo.systemUptime) + " [\(label)] " + line())
+    }
+
+    nonisolated static func text(_ window: SidebarLayout.ScrollWindow) -> String {
+        String(format: "(off %.3f vp %.3f ct %.3f)", window.offset, window.viewport, window.content)
+    }
+}
+#endif

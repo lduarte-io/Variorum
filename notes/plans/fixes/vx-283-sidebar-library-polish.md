@@ -1371,8 +1371,47 @@ leg traces and PROPOSES; the architect rules before anything ships. Any stage wo
 **LIVE STATUS (per piece)**
 - T0 — this section: DONE (this commit).
 - T1 — the headless offscreen probe (a standalone process, never-shown window; the column's implicit animation on the
-  sections' frames and the 30 → 24 pitch flip, as the real column has them): IN-PROGRESS.
-- T2 — the DEBUG-only instrumentation in `SidebarSectionWindow` + a trace test in the mounted rig: NOT-STARTED.
+  sections' frames and the 30 → 24 pitch flip, as the real column has them): DONE — findings below ("T1 — WHAT THE
+  PROBE ESTABLISHED"); the mounted rig's confirmation is T3's.
+- T2 — the DEBUG-only instrumentation in `SidebarSectionWindow` (`SidebarSectionTrace`, a sink off by default: every
+  reading, request + trigger, reveal + inputs + the anchor handed the proxy, settled check) + the env-gated harness
+  `SidebarSectionWindowMountTests.traceTheNinthStarsOpen` (`TEST_RUNNER_VARIORUM_U1C_TRACE=1`; asserts nothing; the
+  Starred pin's road with the trace, the pin's oracle per `SectionRig.settle`-shaped iteration, AppKit's frame /
+  clip-bounds / document-frame notifications from Starred's scroll view, the moment the settle WOULD return, to 1.5 s):
+  DONE (this commit) — headless `build-for-testing` green (`DerivedData/vx283-u1`), no new warning in a touched file.
+  The only shipping-path change is two `StaticString` labels threaded through `requestReveal`/`reveal`.
+
+**T1 — WHAT THE PROBE ESTABLISHED** (scratchpad `u1c-probe/`: `main.swift` compiled with the REAL
+`Core/Views/SidebarLayout.swift` and the instrumented REAL `Features/Library/SidebarSectionWindow.swift`, the app's own
+Swift flags — Swift 6, default isolation MainActor, approachable concurrency, `-D DEBUG`; a column mirroring
+`SidebarView`: Starred's 9 rows, the 5 areas, the rail inserted with `.transition(.opacity)`, the Open list with VX-285's
+two measurements, the fit test's pitch, the column's implicit `.animation(.easeInOut(duration: railTransition), value:)`;
+900-pt window, 3 → 4 open rows; the flip is ONE plain mutation, as `workspace.select` is. Each section's scroll view is
+an AppKit `HostingScrollView`; the probe observes its frame, clip bounds and document frame by notification):
+1. **The content height jumps ONCE at the commit** (270 → 222 → 216 inside 5 ms — the rows re-laid at 24). **The
+   viewport moves FRAME BY FRAME through the beat** (225 → 224.936 → 224.855 … → 180.000 over ≈0.24 s; the
+   `HostingScrollView`'s frame steps on the 0.5-pt pixel grid beside it), **its top held** (the clip origin does not
+   move with it).
+2. **The three reveals at the commit (`content`, `current`, `rowHeight`) all answer NONE:** the window they read is
+   still 225 tall, so the ninth row (192…216) stands clear in it. Nothing has to scroll until the shrinking viewport
+   passes the row's bottom.
+3. **Re-asks fire only on readings whose viewport step since the PREVIOUS reading exceeds 0.5 pt** (the trigger's
+   `abs(new.viewport − old.viewport) > 0.5`). An ease-in-out's first and last frames step less than that; only the fast
+   middle re-asks. Each re-ask lands the row at the end of THAT frame's viewport (anchor 1.0, the offset rounded to the
+   0.5-pt pixel grid), and the next frames keep shrinking the viewport under the fixed offset. **After the last re-ask,
+   nothing moves the offset: the viewport's tail (all steps < 0.5 pt) shrinks under it, and the row ends cut by the
+   tail's sum** — 15 pt at a fine 2-ms forced-layout cadence (offset 21 of 36); at the rig's cadence (its settle loop's
+   forced layout every ≈30 ms) **31 · 34.5 · 35** of 36 in three runs — the mounted rig's own spread (34–36; and under
+   the 3-pt slack 31.5–32.5, because a bigger slack makes more of the middle's re-asks answer NONE, so the last
+   effective one comes earlier).
+4. **A reading DOES arrive at the end** (`vp 180.002 → 180.000`, then an unchanged reading), and **the settled
+   backstop reads that FRESH final window and lands the row EXACTLY** (target 36, anchor 1.0 → offset 36) — in every
+   probe run. It fires `transitionSettle` (0.30 s) after the LAST request, i.e. ≈0.45–0.5 s after the commit.
+5. **The rig's red is a RACE, reproduced:** a verbatim replica of `SectionRig.settle(minimum: 0.5)` (five unchanged
+   iterations AND half a second) returned at **0.517 s reading offset 34.5** in run 2 — and the backstop fired **0.2 ms
+   later** and landed 36; in runs 1 and 3 the backstop fired first (the settle returned at 0.735 s, reading 36). So the
+   pin reads before or after the backstop by chance: Q9's green (R-F) and Q11's red on the SAME code are this race.
+   In use there is no early reader: the row sits cut for ≈0.2–0.3 s after the beat, then snaps (unanimated) into place.
 - T3 — the stage window (the trace test in the mounted rig): NOT-STARTED.
 - T4 — the proposal with the trace as its evidence, and the pin that would go red on HEAD: NOT-STARTED.
 

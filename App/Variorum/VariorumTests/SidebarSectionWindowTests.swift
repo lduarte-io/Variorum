@@ -549,4 +549,132 @@ struct SidebarSectionWindowMountTests {
                     "five stars, all shown: \(String(describing: rig.starred?.fades))")
         }
     }
+
+    /// **U1c — the trace leg's harness (env-gated; asserts nothing).** The
+    /// Starred pin's own road — the ninth star's note opened from the Library,
+    /// the rail arriving and the pitch flipping 30 → 24 under the column's
+    /// implicit animation — with every reading, request, reveal and settled
+    /// check of `SidebarSectionWindow` (its DEBUG `SidebarSectionTrace`), the
+    /// pin's own oracle per iteration, and AppKit's frame / clip-bounds /
+    /// document-frame notifications from Starred's scroll view, all on one
+    /// clock. It marks where `SectionRig.settle` WOULD have returned, keeps
+    /// turning to 1.5 s, and prints every line prefixed `[U1c]`. Run with
+    /// `TEST_RUNNER_VARIORUM_U1C_TRACE=1`.
+    @Test(.enabled(if: ProcessInfo.processInfo.environment["VARIORUM_U1C_TRACE"] != nil))
+    func traceTheNinthStarsOpen() async throws {
+        try await withRig(height: 900, openNotes: 3, starred: 9, startOn: nil) { rig in
+            let trace = U1cTrace()
+            SidebarSectionTrace.sink = { trace.lines.append($0) }
+            defer { SidebarSectionTrace.sink = nil }
+            trace.attach(to: rig.hosting, starredHeight: rig.starred?.window?.viewport ?? 0)
+            defer { trace.detach() }
+            trace.note("REST oracle \(trace.text(rig.starred?.window)) fades \(String(describing: rig.starred?.fades))")
+            let start = ProcessInfo.processInfo.systemUptime
+            trace.note("===== FLIP: select the ninth star's note =====")
+            rig.workspace.select(.post(rig.notes[8]))
+            var last: SidebarLayout.ScrollWindow?
+            var lastStar: SidebarLayout.ScrollWindow?
+            var lastFrame: CGRect?
+            var still = 0
+            var wouldReturn = false
+            var iteration = 0
+            while ProcessInfo.processInfo.systemUptime - start < 1.5 {
+                iteration += 1
+                // `SectionRig.settle`'s own turn, verbatim in shape.
+                rig.hosting.layoutSubtreeIfNeeded()
+                rig.window.layoutIfNeeded()
+                rig.window.displayIfNeeded()
+                trace.pump(0.02)
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(10))
+                let now = rig.open?.window
+                let frame = rig.open?.scroll
+                let star = rig.starred?.window
+                if now != nil, now == last, frame == lastFrame, star == lastStar { still += 1 } else { still = 0 }
+                last = now
+                lastFrame = frame
+                lastStar = star
+                let elapsed = ProcessInfo.processInfo.systemUptime - start
+                trace.note(String(format: "iteration %d (+%.3f s) still=%d", iteration, elapsed, still)
+                    + " oracle \(trace.text(star)) fades \(String(describing: rig.starred?.fades))")
+                if !wouldReturn, still >= 5, elapsed >= 0.5 {
+                    wouldReturn = true
+                    trace.note("===== SectionRig.settle WOULD RETURN HERE: the pin reads \(trace.text(star)) =====")
+                }
+            }
+            trace.note("===== END: oracle \(trace.text(rig.starred?.window)) fades \(String(describing: rig.starred?.fades)) =====")
+            for line in trace.lines { print("[U1c] \(line)") }
+        }
+    }
+}
+
+/// U1c's harness instrument: the trace's lines, and AppKit's own account of
+/// Starred's scroll view (its frame, its clip view's bounds, its document's
+/// frame), by notification, on the trace's clock.
+@MainActor
+private final class U1cTrace {
+    var lines: [String] = []
+    private var tokens: [NSObjectProtocol] = []
+
+    func note(_ line: String) {
+        lines.append(String(format: "%.4f", ProcessInfo.processInfo.systemUptime) + " [rig] " + line)
+    }
+
+    /// A synchronous turn of the run loop (`SectionRig`'s own helper shape —
+    /// `run(until:)` is barred from async contexts).
+    func pump(_ seconds: TimeInterval) {
+        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+    }
+
+    func text(_ window: SidebarLayout.ScrollWindow?) -> String {
+        window.map(SidebarSectionTrace.text) ?? "nil"
+    }
+
+    private func scrollViews(in view: NSView) -> [NSScrollView] {
+        var found: [NSScrollView] = []
+        if let scroll = view as? NSScrollView { found.append(scroll) }
+        for sub in view.subviews { found += scrollViews(in: sub) }
+        return found
+    }
+
+    private func describe(_ scroll: NSScrollView) -> String {
+        String(format: "frame.h %.3f clip.y %.3f clip.h %.3f doc.h %.3f",
+               scroll.frame.height, scroll.contentView.bounds.origin.y,
+               scroll.contentView.bounds.height, scroll.documentView?.frame.height ?? -1)
+    }
+
+    /// Starred's scroll view: the inner scroll view as tall as Starred's window
+    /// (the outer column scroll is the tallest; the Open list's is elsewhere).
+    func attach(to root: NSView, starredHeight: CGFloat) {
+        let all = scrollViews(in: root)
+        note("AppKit scroll views: " + all.map { "\(type(of: $0)) h=\($0.frame.height)" }.joined(separator: ", "))
+        guard let starred = all.first(where: { abs($0.frame.height - starredHeight) < 1 }) else {
+            note("Starred's scroll view NOT FOUND (window \(starredHeight))")
+            return
+        }
+        starred.postsFrameChangedNotifications = true
+        starred.contentView.postsBoundsChangedNotifications = true
+        starred.documentView?.postsFrameChangedNotifications = true
+        let center = NotificationCenter.default
+        let watch: [(NSView?, Notification.Name, String)] = [
+            (starred, NSView.frameDidChangeNotification, "frame"),
+            (starred.contentView, NSView.boundsDidChangeNotification, "bounds"),
+            (starred.documentView, NSView.frameDidChangeNotification, "docFrame"),
+        ]
+        for (object, name, what) in watch {
+            guard let object else { continue }
+            tokens.append(center.addObserver(forName: name, object: object, queue: nil) { [weak self, weak starred] _ in
+                MainActor.assumeIsolated {
+                    guard let self, let starred else { return }
+                    self.lines.append(String(format: "%.4f", ProcessInfo.processInfo.systemUptime)
+                        + " [appkit] \(what) " + self.describe(starred))
+                }
+            })
+        }
+    }
+
+    func detach() {
+        for token in tokens { NotificationCenter.default.removeObserver(token) }
+        tokens = []
+    }
 }
