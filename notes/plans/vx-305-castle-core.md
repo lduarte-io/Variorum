@@ -557,10 +557,12 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   green in Debug (3128 / 385, 240 / 51, 40 / 6). Not done (the record's first line): the empty-slot landing → phase 5.
 - U4 — the scenario world, fixed scenarios, mutation pins, the generator: **IN-PROGRESS** (Opus implementer,
   2026-10-14; the partial record is §8's "U4 RECORD — PARTIAL", resume from it). Done: (a) the world `4de6b6c8`;
-  (b) today's stores + the older build; (c) the alphabet + the promises; (f) the generator + `PROTECTION_SOAK=1` —
-  the mid-size batch green at `6020391b`. In progress: (d) the fixed scenarios (14 written, each the pin of a bug the
-  world found; the rest of §6's list NOT-STARTED — the record names which). Not started: (e) the mutation pins;
-  (g) the full runs (suites Debug + `-c release`, the full core suite, the soak both ways) and the final record.
+  (b) today's stores + the older build; (c) the alphabet + the promises; (d) every sentence of §6's fixed-scenario
+  list a named test (FixedScenarios*.swift — through `12bd00f5`), plus the generator's findings pinned
+  (`FixedScenariosFound.swift`); (e) the mutation pins — 22, each failing with its guard off (`MutationPins.swift`);
+  (f) the generator + `PROTECTION_SOAK=1` — seeds 1–8 × 60 green at `0d9a44b4`. In progress: the wider batches
+  (seeds 9–20 × 60) before the soak. Not started: (g) the full runs (suites Debug + `-c release`, the full core suite,
+  the soak both ways) and the final record.
 - The go/no-go record: **NOT-STARTED.**
 
 ---
