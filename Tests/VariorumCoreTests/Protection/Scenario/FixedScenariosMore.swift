@@ -16,7 +16,8 @@ struct MoreScenarios {
     /// "replays: a plan, a memory item, and a library file alone, each
     /// changing nothing" — the file swap by a login-password holder among them.
     @Test func replaysAndTheFileSwap() async throws {
-        for tamper in [Tamper.replayPlan, .replayMemory, .replayKeyFile, .replayLibraryFile, .plantPlan, .editSealedSetting] {
+        for tamper in [Tamper.replayPlan, .replayMemory, .replayKeyFile, .replayLibraryFile, .plantPlan, .editSealedSetting,
+                       .plantAppleWrap, .dropWordsLock, .deleteKeyFile, .deleteTouchIDItem, .deleteMemoryItem] {
             let world = try scenarioWorld { try $0.today(on: $0.macA, TodaySpec(mode: .standard)) }
             await world.done([.launch("macA"), .useCastle("macA", .alwaysAsk, newWords: false), .setScheduledExport("macA", false)])
             await world.step(.tamper("macA", tamper))
@@ -97,17 +98,21 @@ struct MoreScenarios {
     /// the other adopts nothing — its own identity, <mac8> folder, retention
     /// and Apple keys", and Use Castle in one never retires the other's own key.
     @Test func twoMacOSLoginsOnOneMac() async throws {
-        let world = try scenarioWorld { w in
-            try w.today(on: w.macA, TodaySpec(mode: .standard))
-            try w.today(on: w.macB, TodaySpec(mode: .standard, passphrase: true, words: true))
-            w.macB.machine = MachineIdentity(hardware: w.macA.machine.hardware, login: w.rng.uuid().uppercased())
+        for differentAppleID in [false, true] {
+            let world = try scenarioWorld { w in
+                try w.today(on: w.macA, TodaySpec(mode: .standard))
+                try w.today(on: w.macB, TodaySpec(mode: .standard, passphrase: true, words: true))
+                w.macB.machine = MachineIdentity(hardware: w.macA.machine.hardware, login: w.rng.uuid().uppercased())
+                if differentAppleID { w.macB.appleAccount = SWorld.appleB }
+            }
+            await world.done([.launch("macA"), .settle, .sendLibrary(from: "macA", to: "macB"), .land("macB", .passphraseWordsTyped),
+                              .useCastle("macB", .touchID, newWords: false), .settle])
+            let aOwn = try #require(world.liveKeyFile(world.macA)?.apple?.keyID)
+            #expect(world.readableAppleKeys(world.macA)[aOwn] != nil, "Apple ID B \(differentAppleID): the other login's own key was retired")
+            #expect(world.macB.library?.section.deviceID != world.macA.library?.section.deviceID)
+            #expect(world.macB.library?.section.mac8 != world.macA.library?.section.mac8)
+            expectPromisesKept(world, "different Apple ID \(differentAppleID)")
         }
-        await world.done([.launch("macA"), .settle, .sendLibrary(from: "macA", to: "macB"), .land("macB", .passphraseWordsTyped),
-                          .useCastle("macB", .touchID, newWords: false), .settle])
-        let aOwn = try #require(world.liveKeyFile(world.macA)?.apple?.keyID)
-        #expect(world.readableAppleKeys(world.macA)[aOwn] != nil, "the other login's own key was retired")
-        #expect(world.macB.library?.section.deviceID != world.macA.library?.section.deviceID)
-        expectPromisesKept(world)
     }
 
     /// "a living Mac cloned onto new hardware … either entering Castle costs

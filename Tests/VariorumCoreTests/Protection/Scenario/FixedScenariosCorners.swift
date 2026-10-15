@@ -542,4 +542,33 @@ struct CornerScenarios {
         }
         expectPromisesKept(world)
     }
+    /// "an old build's crashed act, migrated …: and a synced store whose old
+    /// rotation still stands on the server, completed by the new engine with
+    /// no Apple copy" — today's Use Castle crashed after its vault write (the
+    /// rotation's first write: no Apple copy, the previous corpus key under
+    /// M′), its marker in the library; the new build opens it.
+    @Test func anOldRotationStillStandingOnTheServer() async throws {
+        let (world, account) = try syncedWorld(.standard, devices: ["macA", "phone"])
+        let vault = try #require(world.server.snapshot(account))
+        let material = try #require(world.todayMaterial(world.macA))
+        let k = world.known(account)
+        let pk = try #require(world.passphraseKey(k.passphrase ?? "", vault.format.kdf))
+        let wk = try WordsKey.derive(k.words ?? [])
+        let begun = try VaultModel.rotationBegin(
+            current: material, passphrase: pk, words: wk, apple: .none, device: "today's build",
+            ids: DeviceLeaves(world: world, device: world.macA))
+        _ = try world.server.update(begun.format, accountID: account, expectedRevision: vault.revision,
+                                    proofMaster: material.masterSymmetricKey)
+        guard case .library(var image)? = world.macA.container.files[SPath.slot] else { Issue.record("no slot"); return }
+        image.legacyMarker = LegacyRotationMarker(
+            step: .reencrypt, entersCastle: true, oldKeyFingerprint: image.fingerprint, newKeyFingerprint: nil,
+            newCorpusKeyID: begun.material.corpusKeyID, startedAt: "2026-09-01T00:00:00Z", follow: false)
+        world.macA.container.files[SPath.slot] = .library(image)
+        await world.done([.launch("macA"), .settle])
+        let after = try #require(world.server.snapshot(account))
+        #expect(after.format.previousCorpusKey == nil, "the old rotation wasn't completed")
+        #expect(after.format.masterWrappedByAppleHeld == nil, "the completion added an Apple copy")
+        #expect(world.macA.slot?.legacyMarker == nil)
+        expectPromisesKept(world)
+    }
 }
