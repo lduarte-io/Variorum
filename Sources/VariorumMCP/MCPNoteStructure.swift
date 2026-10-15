@@ -46,8 +46,8 @@ import VariorumCore
 /// ANSWER past `pageAnswerBudget` characters (U7c — the first page's carriage
 /// counted; `fitPage`), never splitting a block and always holding one, so a
 /// block larger than its page has left comes alone; every carriage ask reads
-/// for THAT page's blocks only
-/// (∝ the page, P1), the note-wide lists (`with_tray`, `with_versions`,
+/// for THAT page's blocks only (∝ the page, P1), the note-wide lists
+/// (`with_tray`, `with_versions`,
 /// `dangling_picks`) riding the first page, which also says `block_count`;
 /// `next_cursor` comes back only while blocks remain. Pages are NOT a snapshot
 /// (each its own transaction — D-256-7). `idsOnly` answers every take's
@@ -376,7 +376,7 @@ enum MCPNoteStructure {
     }
 
     /// **THE PAGE, FITTED TO ITS ANSWER** (VX-256 re-ruled at U7c — P-VX256-1,
-    /// PROVISIONAL; the run record's U7c UNIT RECORD, D-U7c-1…6). `answer` is
+    /// PROVISIONAL; the run record's U7c UNIT RECORD, D-U7c-1…7). `answer` is
     /// the page with every CANDIDATE block (`blocks`, each lens's `picks` for
     /// all of them) and its header — the first page's carriage and the
     /// caller's echoes included. The page keeps the first `k` blocks, `k` the
