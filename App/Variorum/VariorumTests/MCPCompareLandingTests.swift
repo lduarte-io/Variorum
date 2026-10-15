@@ -324,4 +324,113 @@ struct MCPCompareLandingTests {
             afterTeardown.teardown()
         }
     }
+
+    // MARK: - The landing POSTURE's round (THE LADDER — ROUND 2, R2-1; fixed in the closeout's PHASE B)
+
+    // `land(peers:)` arms the posture for the peers it named, and `adopt` applies it once, on the
+    // first projection holding EVERY named peer. A named peer that never projects (deleted before
+    // the board's first projection, its slot leaving) used to leave the posture armed with no
+    // expiry, so a projection long after the landing could flip her own "related blocks only".
+    // The round now ends at the first of: the board's teardown, a named peer's slot leaving, or
+    // any set of the toggle by hand. Each test below isolates one ending, and the first is the
+    // review's story whole.
+    // RED on the pre-fix tree BY ASSERTION (the window runs it on the pin-only product): each of
+    // the four fails at its LAST `#expect` with exactly ONE issue (4 tests failed, 4 issues; the
+    // suite's other 7 green). The posture lands there on the old tree and overwrites the toggle.
+
+    /// **The review's story.** The AI names the duplicate and a stranger. The stranger is deleted
+    /// before the board's first projection and its column leaves. She turns "related blocks only"
+    /// on herself. Later she restores the stranger and adds it back as a column. Her pick stands:
+    /// the first projection to hold both named notes again is no landing any more.
+    @Test func aNamedPeerThatNeverProjectsLeavesNoArmedPostureToOverwriteHerToggle() async throws {
+        try await withCompareWorld { session, db in
+            let world = try await makeWorld(session)
+            let model = CompareViewModel(session: session, anchorPostID: world.anchor)
+            model.land(peers: [world.twin, world.stranger])
+            #expect(!model.relatedOnly, "nothing named is hidden while the lineage is read")
+
+            // The stranger is deleted before the first projection; its column leaves.
+            try await session.runner.run { ops in try ops.deleteContainer(world.stranger) }
+            let strangerSlot = try #require(model.peerSlots.first { $0.postID == world.stranger })
+            model.removePeerSlot(strangerSlot.id)
+            try await adoptFresh(model, db, anchor: world.anchor, peers: model.peerSlots.compactMap(\.postID))
+            #expect(!model.relatedOnly, "a projection missing a named peer decides nothing")
+
+            model.relatedOnly.toggle()  // her own toggle, the chip's action
+            #expect(model.relatedOnly)
+
+            // Later: she restores the stranger and adds it back as a column herself.
+            try await session.runner.run { ops in try ops.restoreContainer(world.stranger) }
+            model.addPeerSlot()
+            let empty = try #require(model.peerSlots.first { $0.postID == nil })
+            model.setPeer(slotID: empty.id, postID: world.stranger)
+            #expect(model.peerSlots.map(\.postID) == [world.twin, world.stranger])
+            try await adoptFresh(model, db, anchor: world.anchor, peers: [world.twin, world.stranger])
+            #expect(model.relatedOnly,
+                    "her manual pick stands — the landing's mixed-set posture (off) never lands this late")
+            model.teardown()
+        }
+    }
+
+    /// **The board's teardown ends the round.** The AI names the duplicate, and the board goes
+    /// (her ⌘1 within milliseconds) before any projection arrives. When the same model is shown
+    /// again and a projection holding the duplicate arrives, it applies nothing: the filter
+    /// stays as the board left it.
+    @Test func aTornDownBoardNeverAppliesItsLandingsPostureAfterwards() async throws {
+        try await withCompareWorld { session, db in
+            let world = try await makeWorld(session)
+            let model = CompareViewModel(session: session, anchorPostID: world.anchor)
+            model.land(peers: [world.twin])
+            #expect(!model.relatedOnly)
+            model.teardown()
+
+            // The board is shown again (a host keeping the model across onDisappear) and its
+            // first projection holds the named duplicate.
+            try await adoptFresh(model, db, anchor: world.anchor, peers: [world.twin])
+            #expect(!model.relatedOnly,
+                    "the landing's round ended with its board — the duplicate's posture (on) never lands afterwards")
+            model.teardown()  // pairs the re-acquisition `adopt` made
+        }
+    }
+
+    /// **Her own toggle ends the round.** The AI names a stranger, and she turns "related blocks
+    /// only" on before the first projection is adopted (a projection deferred while a buffer
+    /// settles is adopted at the settle). That projection applies nothing.
+    @Test func herOwnToggleBeforeTheFirstProjectionEndsTheLandingsRound() async throws {
+        try await withCompareWorld { session, db in
+            let world = try await makeWorld(session)
+            let model = CompareViewModel(session: session, anchorPostID: world.anchor)
+            model.land(peers: [world.stranger])
+            model.relatedOnly.toggle()  // her own toggle
+            #expect(model.relatedOnly)
+            try await adoptFresh(model, db, anchor: world.anchor, peers: [world.stranger])
+            #expect(model.relatedOnly,
+                    "her manual pick stands — the stranger's posture (off) never overwrites it")
+            model.teardown()
+        }
+    }
+
+    /// **A named peer's column leaving ends the round.** The AI names the duplicate, and she
+    /// swaps that column to the stranger before the first projection. Later she adds the
+    /// duplicate back as a column. The projection holding it applies nothing: the filter
+    /// stays as she left it.
+    @Test func aNamedPeersColumnLeavingEndsTheLandingsRound() async throws {
+        try await withCompareWorld { session, db in
+            let world = try await makeWorld(session)
+            let model = CompareViewModel(session: session, anchorPostID: world.anchor)
+            model.land(peers: [world.twin])
+            let twinSlot = try #require(model.peerSlots.first)
+            model.setPeer(slotID: twinSlot.id, postID: world.stranger)
+            try await adoptFresh(model, db, anchor: world.anchor, peers: [world.stranger])
+            #expect(!model.relatedOnly, "a projection missing the named peer decides nothing")
+
+            model.addPeerSlot()
+            let empty = try #require(model.peerSlots.first { $0.postID == nil })
+            model.setPeer(slotID: empty.id, postID: world.twin)
+            try await adoptFresh(model, db, anchor: world.anchor, peers: [world.stranger, world.twin])
+            #expect(!model.relatedOnly,
+                    "her columns are her own now — the duplicate's posture (on) never lands this late")
+            model.teardown()
+        }
+    }
 }
