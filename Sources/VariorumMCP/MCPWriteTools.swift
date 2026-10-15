@@ -318,10 +318,15 @@ struct MCPWriteTools: Sendable {
         formatter.timeZone = TimeZone(identifier: "UTC")
         formatter.dateFormat = "yyyy-MM-dd"
         guard raw.count == 10, let day = formatter.date(from: raw), formatter.string(from: day) == raw else {
-            throw ArgumentFailure(message: "entry_date must be a real day written yyyy-MM-dd (e.g. 2019-03-04).")
+            throw ArgumentFailure(message: Self.entryDateWords)
         }
         return raw
     }
+
+    /// `entry_date`'s one sentence — the parse's, and (VX-362) the op's own
+    /// `invalidEntryDate` on the wire (`MCPWireRefusalCopy`): two validators,
+    /// one sentence.
+    static let entryDateWords = "entry_date must be a real day written yyyy-MM-dd (e.g. 2019-03-04)."
 
     private func place(_ args: [String: Value]) throws -> Place {
         let bookID = try optionalString(args, "book_id")
