@@ -809,6 +809,13 @@ struct MCPWriteTools: Sendable {
     /// VX-252's `blocks` — every block's shown take and every take it was born
     /// with (`MCPMintedBlocks`, the one shape). `section_id` echoes a chapter
     /// the note was filed under (`add_note_to_book`'s echo).
+    ///
+    /// VX-361 (the run record's U9, F-1 (a) — PROVISIONAL P-VX361-1):
+    /// `tag_ids` is EVERY tag the note wears when the act lands — the header's
+    /// in header order, then the ones a book's outflow applied, in outflow
+    /// order (composed inside the act's transaction) — and `tags` their paths,
+    /// parallel: the wire's tag word, as `apply_tag` and `set_book_rule` speak
+    /// it. The header's list stays the prefix, so no caller loses what it had.
     func noteAnswer(
         _ minted: Operations.DocumentImport, act: Operations.MCPWriteAct, clientName: String,
         sectionID: String? = nil
@@ -818,7 +825,7 @@ struct MCPWriteTools: Sendable {
         }
         var answer: [String: Any] = [
             "note_id": minted.post.id, "block_ids": minted.blockIDs, "tag_ids": minted.tagIDs,
-            "blocks": MCPMintedBlocks.records(minted.blocks),
+            "tags": minted.tagPaths, "blocks": MCPMintedBlocks.records(minted.blocks),
         ]
         if let sectionID { answer["section_id"] = sectionID }
         return (answer,

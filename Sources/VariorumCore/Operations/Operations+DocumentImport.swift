@@ -55,8 +55,16 @@ extension Operations {
         public let blockIDs: [String]
         /// The takes that rode Alternates sections (chosen takes not counted).
         public let alternateCount: Int
-        /// The tags applied, in header order (adopted or minted).
+        /// **Every tag the note wears when the act lands** (VX-361 — the
+        /// VX-336 run record's U9, F-1 (a), PROVISIONAL P-VX361-1): the
+        /// header's tags in header order (adopted or minted; one the note
+        /// already wore is listed, never applied twice), then — for a note
+        /// minted into a book (`mintNoteEntry`) — the tags the book's OUTFLOW
+        /// applied that the header didn't name, in outflow order. A file
+        /// import's note is bookless, so its list is exactly the header's.
         public let tagIDs: [String]
+        /// `tagIDs`' paths, parallel — the wire's tag word (VX-361).
+        public let tagPaths: [String]
         /// VX-252 (VX-336 U5b): every minted block with EVERY take it was born
         /// with, in document order — what the act minted, said back so a caller
         /// never reads the note again to learn an id the write itself made.
@@ -125,11 +133,11 @@ extension Operations {
             try requireLiveWing(db, wingId)
             let now = date.now
             let minted = try mintDocument(db, named, wingId: wingId, now: now)
-            let tagIDs = try applyDocumentTags(
+            let tags = try applyDocumentTags(
                 db, named.document.tagPaths, to: minted.post.id, wingId: wingId, now: now)
             return DocumentImport(
-                post: minted.post, blockIDs: minted.blockIDs,
-                alternateCount: minted.alternateCount, tagIDs: tagIDs, blocks: minted.blocks)
+                post: minted.post, blockIDs: minted.blockIDs, alternateCount: minted.alternateCount,
+                tagIDs: tags.map(\.id), tagPaths: tags.map(\.path), blocks: minted.blocks)
         }
         let postID = result.post.id
         registerMintedContainerEntry(label: Self.importUndoLabel, postID)
@@ -301,20 +309,32 @@ extension Operations {
     /// The header's tags onto the note: each path's segments (`TagPath` —
     /// slash noise collapses; a path naming nothing is passed over),
     /// adopted-else-minted in the wing, applied once through the one
-    /// application road (intake hears it).
+    /// application road (intake hears it). Returns the header's tags, in
+    /// header order.
+    ///
+    /// **VX-361 — a tag the note ALREADY wears is reported, never applied
+    /// again** (the outflow's own rule, `applyAutoTag`): the wire mints a note
+    /// INTO a book whose outflow tags it in the same act, before the header's
+    /// tags, so a header naming an outflow tag met `uq_post_tag_live` and the
+    /// whole import refused. The application exists and its intake already
+    /// ran; the note wears the tag, so the header's list names it. A file
+    /// import's note is fresh and untagged here — byte-unchanged for it.
     func applyDocumentTags(
         _ db: Database, _ paths: [String], to postID: String, wingId: String, now: Date
-    ) throws -> [String] {
+    ) throws -> [Tag] {
         var adoption = TagAdoption(wing: wingId)
-        var applied: [String] = []
+        var applied: [Tag] = []
         for raw in paths {
             let segments = TagPath.segments(raw)
             guard !segments.isEmpty,
                   let tag = try adoptPath(db, segments.joined(separator: "/"), &adoption),
-                  !applied.contains(tag.id)
+                  !applied.contains(where: { $0.id == tag.id })
             else { continue }
-            try insertPostTag(db, tagID: tag.id, postID: postID, now: now)
-            applied.append(tag.id)
+            if try liveApplication(
+                db, table: "post_tag", tagID: tag.id, targetColumn: "post_id", targetID: postID) == nil {
+                try insertPostTag(db, tagID: tag.id, postID: postID, now: now)
+            }
+            applied.append(tag)
         }
         return applied
     }

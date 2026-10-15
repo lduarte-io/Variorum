@@ -580,8 +580,10 @@ enum MCPToolCatalog {
             gives chapter ids). Returns JSON with the note_id, its block_ids, and blocks: per \
             block its block_id, the shown_take_id, and every take in fan order (take_id, label \
             where it has one, and sha256), the shown one included — no read_note needed to learn \
-            them. \(digestSentence) With text, Variorum splits the prose into blocks by its own \
-            setting; to verify byte for byte, send blocks.
+            them. Its tag_ids and tags (their paths) list every tag the note wears once it lands, \
+            a book's outflow included, so there is nothing to tag again. \(digestSentence) With \
+            text, Variorum splits the prose into blocks by its own setting; to verify byte for \
+            byte, send blocks.
             """,
         inputSchema: .object([
             "type": "object",
@@ -634,8 +636,10 @@ enum MCPToolCatalog {
             (wing_id), or a whole `book` {name, chapters: [{name, documents}], documents} into a \
             shared wing. One import is one undo for the author. Returns JSON with the new ids — \
             for one document also blocks, as create_note answers them (each block's shown_take_id \
-            and every take's take_id, label and sha256); for a book, its book_id, note_ids and \
-            chapter_ids (no sha256 — check a book's notes with read_note). \(digestSentence)
+            and every take's take_id, label and sha256), and tag_ids and tags (their paths): every \
+            tag the note wears, the header's first, then a book's outflow; for a book, its \
+            book_id, note_ids and chapter_ids (no sha256 — check a book's notes with read_note). \
+            \(digestSentence)
             """,
         inputSchema: .object([
             "type": "object",

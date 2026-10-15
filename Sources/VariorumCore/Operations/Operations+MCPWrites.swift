@@ -547,6 +547,7 @@ extension Operations {
             let named = try document(db)
             let wing: String
             var bookID: String?
+            var outflow: [String] = []
             switch destination() {
             case .book(let id):
                 let book = try liveReading(db, id)
@@ -560,6 +561,7 @@ extension Operations {
                 }
                 wing = try Queries.wingIsLive(db, id: book.wingId) ? book.wingId : ""
                 bookID = id
+                outflow = book.autoTagIDs
             case .wing(let id):
                 // A wing holds no chapters: a section here names none.
                 if let sectionID { throw OperationError.sectionNotFound(id: sectionID) }
@@ -580,15 +582,50 @@ extension Operations {
                     try membership.update(db)
                 }
             }
-            let tagIDs = try applyDocumentTags(
+            let header = try applyDocumentTags(
                 db, named.document.tagPaths, to: minted.post.id, wingId: wing, now: now)
+            let worn = try mintedNoteTags(db, postID: minted.post.id, header: header, outflow: outflow)
             return DocumentImport(
-                post: minted.post, blockIDs: minted.blockIDs,
-                alternateCount: minted.alternateCount, tagIDs: tagIDs, blocks: minted.blocks)
+                post: minted.post, blockIDs: minted.blockIDs, alternateCount: minted.alternateCount,
+                tagIDs: worn.map(\.id), tagPaths: worn.map(\.path), blocks: minted.blocks)
         }
         let postID = result.post.id
         registerMintedContainerEntry(label: undoLabel, postID)
         return result
+    }
+
+    /// **VX-361 — every tag the minted note wears when the act lands** (the
+    /// VX-336 run record's U9 D1 + F-1 (a), PROVISIONAL P-VX361-1): the
+    /// header's tags in header order — one the book's outflow also applied is
+    /// listed once, at its header place — then the rest in the destination
+    /// book's OUTFLOW order (`autoTagIDs`), and last (a belt: nothing else in
+    /// this act tags the note — intake SEATS, it never applies an outflow) any
+    /// other by path. Read inside the act's transaction from the note's own
+    /// live applications: ∝ what this act applied, never the corpus (P1), and
+    /// never a read after the commit (no race — U5b's D1).
+    private func mintedNoteTags(
+        _ db: Database, postID: String, header: [Tag], outflow: [String]
+    ) throws -> [(id: String, path: String)] {
+        var paths: [String: String] = [:]
+        for row in try Row.fetchAll(
+            db,
+            sql: """
+                SELECT t.id, t.path FROM post_tag pt
+                JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
+                WHERE pt.post_id = ? AND pt.deleted_at IS NULL
+                """,
+            arguments: [postID]) {
+            paths[row["id"]] = row["path"]
+        }
+        var worn: [(id: String, path: String)] = []
+        func list(_ id: String) {
+            guard let path = paths.removeValue(forKey: id) else { return }
+            worn.append((id, path))
+        }
+        header.forEach { list($0.id) }
+        outflow.forEach(list)
+        paths.sorted { ($0.value, $0.key) < ($1.value, $1.key) }.forEach { worn.append(($0.key, $0.value)) }
+        return worn
     }
 
     // MARK: - WRITE NEW: a whole book (the bulk door)
