@@ -168,7 +168,7 @@ guidance. Each unit's evidence is named before its spawn.
 | U5a — the label pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): legs A–D all passed in a real Claude Code 2.1.300 round on the dev store — the new `claude-code · english` label on Takes cards in both voices, `save_lens` by label refusing the ambiguous block and its `take_ids` retry, the legacy form matched as its own, `pin_chosen` holding. Built at `590c0cb8` (U5a UNIT RECORD) |
 | U5b — the block-writing pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): the 31-suite Mac batch green (251 tests, 0 failed, 7 gated skips); V252-a (create_note's `blocks` = read_note's records; filed under its chapter), V255-a/b/c (the end at write new with her ⌥⌘Z/⇧⌥⌘Z; any anchor at write new hears the rung sentence and asks her; anywhere at edit), D8-a passed; D8-b's open tail is unreachable from the keyboard (THE ORCHESTRATOR ON U5's WINDOW). The store was restored cmp-SAME. Built `7a15376c`…`93edbc2e` (U5b UNIT RECORD, three sessions) |
 | U6 — Compare from the wire (+ VX-330, VX-342) | **PROVEN 2026-10-14 17:52–18:35** (U6 STAGE RUN). The 125-suite batch: 790 tests, 786 passed, 2 gated skips, 2 standing reds (VX-115, VX-167; neither on U6's paths). Every red run exact: U6a's router clears (9 pairs), U6b Mac (15), the phone (4), the phone green 18/3. The live round passed in both voices: L0–L5 (`duplicate_note` with her ⌥⌘Z/⇧⌥⌘Z, the AI's edit on the copy, Compare aligned on lineage with related-only on, an unrelated pair with it off, `link_versions`' Open › opening Compare, not-frontmost moving nothing); VX-330's walk (all twelve of sherlock's collapsed chapter rows wear the shared icon, the waiting mark on one, pressed, Don't allow clearing it); VX-342's "before" seen. The store was restored cmp-SAME. Built: U6a `2836171c`…`48e250e0`, U6b `12efb039`…`a1a094dc` |
-| U7 — the agent's read-backs | Builder A DONE (`54cc62a5`…`ff43e84c`): VX-254 + VX-261 built, pinned, revert-checked. **Builder B DONE to READY** (`3e9a6dcd`…): VX-256 built, pinned (17 + 2 plan), revert-checked in three arms; headless finals MCP 321/65 (1 known issue) · core 2,871/333 · workbook 40/6; the Mac product `vx336-u7` built; THE STAGE WINDOW (`vx336-u7`, ask 95 min; fallback 20) written with its kit. **READY for the GO** |
+| U7 — the agent's read-backs | **BUILT, READY FOR STAGE.** Builder A (VX-254 + VX-261, `54cc62a5`…`ff43e84c`); builder B (VX-256, `3e9a6dcd`…`62f39e44`). Headless finals: MCP 321/65 (1 known issue, VX-357) · core 2,871/333 · workbook 40/6. The orchestrator re-ran the paging pins: 17 green. One product, `vx336-u7`. The window is THE STAGE WINDOW in BUILDER B's RECORD (claim `vx336-u7`, about 75 min of work, 95 asked; batch-only 20); its kit is `notes/plans/fixes/vx-336-u7-kit/` (committed scripts, no secrets; **deleted at the closeout with the run's evidence**). A FRESH runner takes it |
 | U8 — the AI's docs (LAST) | NOT-STARTED |
 | LADDER | NOT-STARTED |
 | CLOSEOUT | NOT-STARTED |
@@ -221,10 +221,21 @@ guidance. Each unit's evidence is named before its spawn.
   `Registry/ShellActions.swift`, and U6's Compare target may reach `WorkspaceModel`/`ShellRouter`. Before U6 edits any
   of those, the orchestrator messages vx-283; whoever merges second merges main in first. It also shares the
   navigate-away road (`.variorumNotesDeleted`), where this run adds no second road.
+  - **Told and answered (2026-10-14):** the orchestrator sent three notices (U6a's one `CommandRouter` property, its
+    three clears, U6b's one `ShellActions` word). vx-283's reply: *no real collision.* Its U1 adds ~4 lines to
+    `CommandRouter.swift` (a `focusedPaneShowsNote` context fact, in the context-facts area), `.closeNote` /
+    `.closeAllNotes` in `Capability.swift` / `CapabilityRegistry.swift`, and View-menu items in `EditorCommands.swift`.
+    It doesn't touch `ShellActions`, `ShellRouter` or the navigate-away road, and the VX-342 word is fine. Whoever merges
+    second merges main in first.
 - **VX-284**: not started.
 
 ## Her rulings during the run (verbatim; each also on its ticket)
 
+- **THE LADDER'S CAST (2026-10-14 ~19:55 MDT, in chat), verbatim:** *"you can use fable xhigh to review instead of opus
+  at max"*. Every ladder round is a FRESH `fable-reviewer` at effort xhigh (REVIEW_PROMPT verbatim, PHASE=VX-336),
+  replacing the kickoff's Opus rounds 2–3, under the cross-model flow each round: Fable's final call, the Opus implementer
+  applies the fixes red-on-old, the next fresh Fable round re-checks them, and the final round's fixes get the
+  orchestrator's line-by-line check. Also in the plan's Rules (`4915493b`).
 - **VX-330 JOINS (2026-10-14 ~13:45 MDT, in chat), verbatim:** *"I want you to add VX-330 to somewhere in the run - you
   can choose where it would slot in best. It's an issue where combined chapter / note headings don't show any AI symbol
   but that's how the example sherlock holmes looks and i think people might share that book with AI as an example so i
