@@ -3018,7 +3018,8 @@ DEBUG-only trace hook, off unless the probe turns it on.
   the env-gated suite `LibraryControlsU3cProbe` (asserts nothing); `build-for-testing` green on `vx283-u3c`
   (`notes/plans/vx283-screens/u3c/logs/bft3.log`, no warning in either file); the window script
   `notes/plans/vx283-screens/u3c/window.sh` (gitignored). **READY FOR STAGE — the window below.** Its output PENDING.
-- T3 — the proposal: NOT-STARTED (after the run, at the orchestrator's resume). Nothing built before the ruling.
+- T3 — the proposal: DONE (this commit, below) — the mechanism read off the probe's trace; the fix shape and the pin
+  PROPOSED. **Nothing built: awaiting the orchestrator's ruling.**
 
 **T1 — THE TRACE (this tip; the product code is U3b's `8dbae3d6` plus the DEBUG hook; paths under
 `App/Variorum/Variorum/` unless named).**
@@ -3111,6 +3112,111 @@ directory), in order:
 - `restore` — the store copied back + `cmp`; the prefs keys the suite ADDED deleted by name, `prefs-before`
   imported, re-exported, diffed (PREFS CLEAN or not); castle-W1 counted.
 Then the orchestrator resumes this session with the logs' paths for T3.
+
+**T3 — THE PROPOSAL (from `u3c/logs/probe-lines.txt`; the run: the orchestrator's window 16:23–16:25, every road,
+both voices, the sweep's read = the settled read, traced = untraced). Nothing built.**
+
+1. **WHAT MOVES — exactly one pair of children: the two SEGMENTED PICKERS' minimum answer.** Read off the size pass at
+   the room in each state (`size p=950` Terminal, `size p=860` Study), the children's own answers (`n` = narrowest, at a
+   zero proposal; `ideal` = `.unspecified`):
+
+   | | state 4 created · oldest | state 5 typed a word | state 7 empty again | state 8 sort pick |
+   |---|---|---|---|---|
+   | Terminal scope `[1]` n / ideal | **262** / 262 | **228.5** / 262 | **228.5** / 262 | **262** / 262 |
+   | Terminal mode `[2]` n / ideal | **224** / 224 | **180** / 224 | **180** / 224 | **224** / 224 |
+   | Study scope `[1]` n / ideal | **264** / 264 | **233** / 264 | **233** / 264 | **264** / 264 |
+   | Study mode `[2]` n / ideal | **230** / 230 | **189** / 230 | **189** / 230 | **230** / 230 |
+   | decision · height | false · 56 | true · 24 | true · 24 | false · 56 |
+
+   Every other input is constant across the four states: the PROPOSAL (the size pass is at the room in all of them);
+   the field `[0]` (n 0, widest 320, floor 211.5 / 175 — its ideal follows the text, 211.5 → 40.5, but nothing reads
+   it since P-U3-5); the sort slot `[3]` (counted at 181 / 134 in both branches); `when` `[4]` (53 / 48). The SAME
+   view in the SAME model state answers in two MODES: **rigid** (its minimum = its natural width = its ideal) or
+   **compressible** (its minimum = the NSSegmentedControl squeezed — AppKit's frame reads 227 / 220.5 against an
+   intrinsic of 254 in states 5–7, Terminal; 225 / 206.5 against 256 / 225 in Study). Its ideal and AppKit's
+   intrinsic / fitting widths (254 · 216 Terminal, 256 · 225 Study, distribution `fillEqually`) never change.
+
+   **Which DECISION input moves** (`LibraryControlsFlow.swift:208-219` → `fitsOneLine`, `:114-122`):
+   - the pickers' **TAKEN width** at the decision's shares (`:214`): Terminal at 950 offers scope 225.3 — it takes
+     262 rigid (field left 188.7 < 211.5 → two lines) or 228.5 compressible (field 222.2 ≥ 211.5 → one line); Study at
+     860 offers scope 204 / 212.7 — it takes 264 or 233, and mode 230 or 212.7;
+   - their **FLEXIBILITY**, hence the **ORDER** (`:210-213` → `:83-85`): Terminal's order holds ([4] when · [2] mode ·
+     [1] scope · [0] field — flex 6/18 rigid, 50/51.5 compressible); **Study's flips** — rigid, mode is flex 0 and goes
+     FIRST at a 1/5 share (164 → takes 230); compressible, flex 41 and it goes after `when` (212.7 → 212.7).
+   - NOT the proposal, NOT the field, NOT the slot, NOT `when`. P-U3-5 stabilized the field and the slot; the two
+     pickers were the decision's remaining live inputs, and they are two-valued.
+
+   **When it switches (the trace's evidence — every state's FIRST arrangement already carries the new mode, so the
+   switch happens in the ACT, before this layout runs; our placement only follows it — AppKit's frame 254 → 227 →
+   220.5 → 254 — it is not a feedback loop through the row):**
+   - **ON at the first act that lands a search** (state 5: the field's text changes, the answer lands, the catalog
+     swaps the list for the answer sheet and adds the band). **It outlives the search** because nothing the cleared
+     search does touches the pickers: the scope picker reads `model.scope`, `model.editedOn` and
+     `model.searchState.bookState` (`LibraryCatalogView.swift:644-660`), the mode picker `model.mode` (`:664-673`) —
+     all unchanged across states 4–8. States 6 and 7 (the question longer, then cleared: the band gone, the list back,
+     the DOOR re-inserted with the very label of state 4) leave the mode where it is. The pickers' answer is not a
+     function of their inputs: it is SwiftUI's own sizing mode for the AppKit-backed segmented control, held between
+     updates.
+   - **OFF at a sort pick** (state 8) — its one effect on the row is the sort door's LABEL changing (`LibrarySortMenu`
+     → `VoicedMenu`, an AppKit-backed `Menu`, `LibraryCatalogView.swift:709-721`; 181 → 174 pt). The door's
+     re-insertion at state 7 with an unchanged label does not reset it.
+   - **Why SwiftUI flips the control's mode on exactly those two events is not observable from our side** (AppKit's
+     numbers never move; the two answers are SwiftUI's — the rigid one is AppKit's intrinsic 254 + 8, the compressible
+     one its squeezed minimum 220.5 + 8). Not traced further, deliberately: the fix below removes the dependence, so
+     the result does not need it. (A side fact, every state: an ideal-size pass lays the row out at its one-line ideal,
+     `size p=nil` / `place b=1104` — a hosting-view measurement; it never reaches the visible frames.)
+
+2. **THE FIX SHAPE — inside P-U3-5 and the one-Layout ruling (C), never `ViewThatFits`: stabilize the last two live
+   inputs AT THEIR SOURCE.** Each segmented Picker gets `.fixedSize(horizontal: true, vertical: false)` before its
+   existing frame (`LibraryCatalogView.swift:649-650`: `.pickerStyle(.segmented)` · NEW `.fixedSize(horizontal: true,
+   vertical: false)` · `.frame(maxWidth: 280)`; the same at `:672-673` with `230`). A horizontally fixed picker answers
+   its IDEAL at every proposal — the probe shows that ideal constant in every state of both voices — so its minimum,
+   its taken width at any share and its flexibility become functions of the voice alone: the decision reads stable
+   widths only, as P-U3-5 ruled. Zero changes to `LibraryControlsFlow`, the rule, the field's floor or the slot's
+   widest; ONE set of views, one Layout. What it changes, said plainly:
+   - the band resolves to the RIGID answer — today's sort states', the answer the row gives at mount and after every
+     sort pick. Thresholds by the probe's in-app widths: **Terminal ≈977.5, Study ≈891** of row width (two lines below,
+     one at and above, whatever is typed, picked or searched). The 1240 default with a 210-pt sidebar (row 981): ONE
+     line closed in both voices (Terminal by ≈3.5 pt — stable, a function of width only); two lines with the panel
+     open (631). The dev store's ≈240-pt sidebar (row ≈951): Terminal closed is TWO lines — stably (P-U3-5 item 4's
+     "stable is the point");
+   - **the placement stops cramping the segmented controls**: after a search today the scope control is drawn at
+     220.5–227 pt against its natural 254 (Study's mode at 206.5 against 225); fixed, they always draw at their
+     natural width inside their 280 / 230 frames — as they already do in the rigid mode (AppKit frame 254 in a
+     262–280 slot), so a wide window is unchanged;
+   - the row's honest minimum rises by the pickers' squeeze (line 2: mode 224 + sort 181 + when 53 + spacing = 478 pt
+     Terminal, was 434 compressible) — far inside the 631-pt room at the default with the panel open;
+   - P-8: the swept lint is the BARE `.fixedSize()` (`ChromeLineLimitTests`); the two-argument form is out of its scope
+     by its own text, and a segmented control is not a label that can wrap — said at the line.
+   **Rejected:** (F2) hand the pickers' natural widths down as layout values (a `FloorKey` twin) — the decision would be
+   stable but the PLACEMENT would still squeeze the controls after a search, and Study's order flip would survive in
+   the live distribution; (F3) `.frame(minWidth: …)` numbers — magic, per voice; (F4) `ViewThatFits` — ruled out.
+   **The trace hook and the probe suite:** PROPOSED to stay as an oracle (DEBUG-only, silent unless set; the suite
+   env-gated, asserts nothing — the U1c `SidebarSectionTrace` precedent, P-U1c-1) — the architect's call; deleting
+   both is a clean two-file removal.
+
+3. **THE PIN — red-on-old, with its behavioural revert.**
+   - **NEW (mounted, the mechanism's own mark):** `LibraryControlsGeometryTests.aSearchNeverSqueezesTheSegmentedControlsOrFlipsTheRow`
+     (×2 voices). The panel closed, ONE room per voice inside today's band (Terminal 950, Study 860); the acts
+     created · oldest → typed a word → empty again → a sort pick (the probe's states 4, 5, 7, 8, through the sweep's
+     own `Rig`); after each: (a) the row's height equals the first state's, and (b) each NSSegmentedControl in the
+     mount (found as the probe finds them) draws at no less than its intrinsic width − 0.5 (never squeezed). Expected
+     on the fix: two lines throughout, scope 254 / 256 and mode 216 / 225 throughout.
+   - **The sweep** `withThePanelClosedEachWidthHasOneLineCount` (×2) — red on today's tip (the U3b window), expected
+     GREEN on the fix, unchanged.
+   - **Behavioural revert R-P (named before it is applied):** delete the two `.fixedSize(horizontal: true, vertical:
+     false)` lines in `LibraryCatalogView.swift` (nothing else). Products `DerivedData/vx283-u3c-rv` (an APFS clone,
+     then `build-for-testing`). **Expected RED, exactly:** the new pin ×2 (typed a word and empty again read 24 pt, the
+     scope control 227 / 220.5 of 254 — Study 225 of 256) and the sweep ×2 (the band). **GREEN on both sides:** every
+     pure rule pin, both stable-widths tests, U3's six mounted cells, `typingWithThePanelOpenNeverChangesTheLineCount`
+     and `withThePanelOpenTheDefaultWindowHasOneLineCount` (at 631 the row is two lines in either mode).
+   - **Optional, the architect's call:** a pure pin documenting the in-app widths — the rule over the probe's rigid
+     rows (Terminal scope 262…280, mode 224…230; Study 264…280, 230) gives one line at 981 and the thresholds 977.5 /
+     891 — a GUARD on the default window's margin; the existing pure pins keep their offscreen numbers (their
+     `atTheMeasuredWidths…` comment's "≈934 / ≈834" is stale and would be annotated in place).
+   - **Evidence after the build:** the new pin + the sweep green, R-P red as named, the batch over the changed file's
+     suites (`LibraryCatalogView`'s — U3b's 103-suite list), then D8's re-walk (both voices, panel open/closed, typing,
+     a list scroll, a sort pick, the 1240 default — and a look at the scope control after a search: never cramped).
 
 #### U2 + U3b — THE WALK PLAN (the folded `vx283-u2` claim's walk; a fresh Opus at xhigh; her rule)
 
