@@ -824,4 +824,20 @@ extension GeneratorFoundScenarios {
         if case .newIdentity(let predecessor) = world.macA.library?.resolution { #expect(predecessor != nil, "no predecessor named") }
         expectPromisesKept(world)
     }
+
+    /// Seed 13 (sequence 708, the closer's soak) — a CHECKER finding: a
+    /// landed library's pair (its words made new at the landing), then both
+    /// homes rolled back to the Mac's own library before it: the copy's "the
+    /// words this Mac held it under then" line is honest — the landed library's
+    /// own words — which the checker looked for only among the slot's library
+    /// and the account's. The copy's own library's secrets count here too.
+    @Test func aRolledBackOverLandingsCopyNamesItsOwnWords() async throws {
+        let world = try Self.start("a phone on an older build beside a synced Castle Mac", seed: 13000747)
+        for action in [Action.createLibrary("macB", secrets: false), .sendLibrary(from: "macA", to: "macB"),
+                       .land("macB", .passphraseWordsMadeNew), .crash(.backup("macB"), afterWrites: 15),
+                       .tamper("macB", .replayBothHomes)] {
+            await world.step(action, words: true)
+        }
+        expectPromisesKept(world)
+    }
 }

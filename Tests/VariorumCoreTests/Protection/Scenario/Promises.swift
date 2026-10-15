@@ -861,7 +861,7 @@ extension SWorld {
             // anchor written at its leave is locked with its own secrets of
             // that day (the closer's soak, seed 4 sequence 410).
             let copyOwn = known(self.holder(device, account: nil, libraryID: truthCopy.libraryID))
-            k.timeline += own.timeline + slotK.timeline
+            k.timeline += own.timeline + slotK.timeline + copyOwn.timeline
             // A frozen key file's own locks are what the Mac that froze it held
             // that library under — any holder of a copy of that library (two
             // copies of one key serve each other's lines).
