@@ -377,7 +377,7 @@ trailer of any kind.
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **U1d (her two memo rulings: follow only on her acts; the fade reshaped) — READY FOR STAGE** (≈15 min): the 96-suite batch, the mount suite ×5, R-I and R-J (prebuilt), the restore — the U1d section's LIVE STATUS. Then the re-walk of R2–R6. |
-| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
+| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | **IN-PROGRESS** — headless build (the U2 section's LIVE STATUS) |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **READY FOR STAGE — the closing window** (≈15 min; the U3 section's Q6): the first window's batch green but for two of my own pins (test defects, fixed headless — test files only); R-ALL prebuilt in `vx283-u3-revert` and the tree restored; `vx283-u3` holds the current products for the walker |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
