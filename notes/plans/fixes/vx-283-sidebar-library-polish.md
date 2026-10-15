@@ -724,7 +724,7 @@ beside each). Every image below was opened and looked at before its verdict.
   (+`-window`): the list hugs its 5 rows (no scroll; the room below is the column's own). · HOLDS.
 - **W3 — the scroll bar (VX-286).** `W3-study-light-open-scrolling.png` (+`-window`), captured mid-scroll with the
   pointer on the ✕ column: the overlay bar draws at x 221–226.5 pt of the 236-pt sidebar, every ✕ ends by ~210 pt —
-  ~11 pt of clear margin, no ✕ touched (pixel-measured, zoomed). `W3-study-light-starred-scrolling.png`: Starred's bar
+  ~12 pt of clear margin, no ✕ touched (pixel-measured, zoomed — see W10). `W3-study-light-starred-scrolling.png`: Starred's bar
   in the same margin, every ★ clear by ~13 pt. · HOLDS.
 - **W4 — Starred keeps its 7.** `W2-study-light.png` / `W2-study-light-bookcase.png` (rest) and
   `W4-study-light-starred-end.png` (scrolled to its end): with 9 stars Starred shows 7 whole rows and the half row
@@ -750,6 +750,59 @@ beside each). Every image below was opened and looked at before its verdict.
   Right-click on the shown note's row (`-4-rightclick-shown-menu`: Open Beside · Open in New Window · Unstar · Close ·
   Close All Notes) ▸ Close → the pane on "what always asks", the next (`-5*`). Right-click on the other row "how much"
   (`-6-rightclick-other-menu`) ▸ Close → that row gone, the pane stayed (`-7*`). · HOLDS.
+- **W8 — Close All Notes (VX-289).** 4 notes open; right-click on a row (`W8-study-light-1-rightclick-menu`, the menu
+  open: … Close · Close All Notes) ▸ Close All Notes → the list emptied, the Open section gone, the pane on the
+  Library (`-2-after-rightclick-closeall-window`). 3 notes reopened; View ▸ Close All Notes (AX menu press) → the same
+  (`-3-after-menu-closeall-window`). · HOLDS.
+- **W9 — the View menu and ⌘W.** `W9-study-light-1-view-menu-notes-open`: with notes open, View ▸ Close Note ⇧⌘W and
+  Close All Notes are ENABLED (AX `enabled true`), under Open Notes (⌘⇧1–9). File ▸ New Window opened a second
+  window (1240 × 840; `-2-new-window`, `-2-original-window`); ⌘W (via `keys.sh`) closed ONLY that window — AX then
+  listed one window, the original 1380 × 1010, the app still running (`-3-after-cmdw-window`). · HOLDS.
+- **W10 — the other voice and dark.** Voice flipped by AX in Settings ▸ General (Theme), appearance likewise
+  (Appearance ▸ Dark). With 18 notes re-opened: **Terminal light** — `W2-terminal-light.png` (note open) and
+  `W2-terminal-light-bookcase.png` (+`-window`s): the list runs to just above the footer and stops;
+  `W3-terminal-light-open-scrolling.png` / `-starred-scrolling.png`: the bar in the margin, every × and ★ clear.
+  **Terminal dark** — `W2-terminal-dark-bookcase.png` (+`-window`), `W3-terminal-dark-open-scrolling.png`,
+  `W3-terminal-dark-starred-scrolling.png`: the same, the bar a light grey on the black room. **Study dark** —
+  `W2-study-dark-bookcase.png` (+`-window`), `W2-study-dark-note.png` (+`-window`), `W3-study-dark-open-scrolling.png`,
+  `W3-study-dark-starred-scrolling.png`, and one ⇧⌘W in dark (`W6-study-dark-shiftcmdw*`: "membership, not
+  ownership" → "a book from the inside", the next). Starred shows 7 whole rows + the half row in every voice and
+  appearance (W4). Pixel-measured in all four W3 Open captures: the ✕ ink ends at 417–418 px, the bar spans 442–453 px
+  of the 472-px (2×) sidebar — a constant **12-pt** clear margin in both voices and both appearances. Margins, the
+  footer and the row edges are consistent across all four. · HOLDS.
+- **W11 — restore and release.** Appearance set back to Follow system in Settings (AX; `appearanceChoice = system`),
+  voice back to Study. Quit MY instance by identity (`tell application id "io.lduarte.Variorum.debug" to quit`); both
+  strict pgreps empty after. With zero dev instances, the three store files copied back from `walk-store-before/` and
+  `cmp`-verified byte-identical each. No new file in `Backups/` from this walk (`safety-copies/` last modified 18:36,
+  before the walk); `castle-W1-20261013` untouched (its files still Oct 13). Prefs: the walk ADDED 18 `currentBlock.*`
+  keys (deleted by hand) and CHANGED 9 (`currentBlock.*` ×3, `openNotes.remembered.ids`/`.recency`, both window frames,
+  the backup log, the idle-sweep mark); `defaults import` of `before.plist`, re-export (`walk-prefs/after-restore.plist`),
+  diff CLEAN (1602 = 1602 keys, none added, removed or changed). Posture Standard/unlocked throughout (no lock screen
+  ever). Claim `vx283-u1-walk` released 20:41:26. · HOLDS.
+
+**OBSERVATIONS (outside the verdicts — for the orchestrator's eye):**
+- **O-1 — once, the newly opened note's row was left half-hidden at the list's bottom edge.** On the 18th rapid open
+  (W10's re-seed: ⌥⌘[ back to the Library, click a row, ~4.5 s per open), the highlighted current row ("the seal") sat
+  cut at the bottom of the Open list — only its top ~10 pt showing, a row-sliver at the top too — and STAYED so after
+  settling (`OBS-study-light-current-row-cut.png`, re-captured seconds later, same). The very next open revealed its
+  row whole (`OBS-study-light-current-row-cut-2.png`), as did every other open, ⇧⌘W, ✕ and right-click landing in the
+  walk (~40). One in ~40, not reproduced. Untraced — a guess only: the reveal may run before the list's newly measured
+  height settles (the height now comes from two measurements). It does not look right when it happens.
+- **O-2 — the column's row height jumps as rows close.** At 1010 pt tall, with 5 rows open the whole sidebar is
+  compressed (24-pt rows) and with 4 it relaxes to 30-pt rows, so a single ✕ in W7 re-flowed every section (Starred,
+  the places, "this note"). The record says the fit test still counts the strip at seven by design; noting how it
+  reads in use.
+- **O-3 — the scroll offset is kept across states**, so the top row often sits half under the "Open" header and the
+  gap above the footer varies (~11–22 pt) with the offset; never an awkward band, never a row under the footer.
+- **O-4 — the 20-row cap** (ruled, `trackedCap`) means a 1010-pt window overflows only past ~15 rows (on a place) or
+  ~13 (a note open).
+- **O-5 — the View menu shows a doubled separator** between Close Split and Toggle Sidebar (two separators in a row in
+  AX; two hairlines in `W6-study-light-8-view-menu-library` / `W9-…-1-view-menu-notes-open`). Probably pre-existing,
+  not U1's — untraced.
+- **O-6 — the floor (P-U1-4):** 3½ rows at the 480-pt window reads clearly as "a list with more" (`W5-…-outer-scrolled`);
+  no reason seen to change it.
+- The ✕ shows on every row at rest, with no hover change; the ⇧⌘W/✕ landings also scroll Starred to the landed note
+  when starred (nice). The one-row and empty-list states look right (the section header goes with the last row).
 
 ## Ladder
 
