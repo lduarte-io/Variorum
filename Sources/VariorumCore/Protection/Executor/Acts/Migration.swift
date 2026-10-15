@@ -223,17 +223,20 @@ extension ProtectionExecutor {
         // the follow (a key change) is owed — today's silent follow, which
         // would make a Castle-born key Standard with no key change, is gone
         // (§3.15). PROVISIONAL P-U4-4 (VX-305 U4, found by the scenario world).
-        // Unambiguous = the custody AND the key file agree (a silent item with
-        // an Apple wrap is Standard-born; no silent item and no Apple wrap, a
-        // passphrase lock, Castle-born). A lone shape is no evidence: a wiped
-        // keychain leaves a Standard key with no silent item (the scenario
-        // world's second finding here).
+        // Unambiguous = the key FILE says it (an Apple wrap is a Standard-born
+        // key's — custody can vanish, a wrap is never added to a Castle key), or
+        // the file and the custody agree on Castle (no Apple wrap, a passphrase
+        // lock, no silent item). A silent item on a Castle-shaped file is
+        // corner 45's ambiguity: the vault's word. (The scenario world's
+        // findings: a wiped keychain, and a Time Machine rollback past Use
+        // Castle, each left the custody saying Castle about a Standard key.)
         if case .vault = verdict.source, inputs.legacyMode.rawKeyCustody != .unknown {
-            let shape = LegacyModeReader.shapeReading(inputs.legacyMode.keyFile, inputs.legacyMode.rawKeyCustody)
             let fileSays: ProtectionMode? = inputs.legacyMode.keyFile.flatMap {
                 $0.hasAppleWrap ? .standard : ($0.hasPassphraseWrap ? .castle : nil)
             }
-            if shape != mode, fileSays == shape {
+            let shape: ProtectionMode? = fileSays == .standard ? .standard
+                : (fileSays == .castle && inputs.legacyMode.rawKeyCustody == .gatedOrNone ? .castle : nil)
+            if let shape, shape != mode {
                 mode = shape
                 confirmed = true
             }

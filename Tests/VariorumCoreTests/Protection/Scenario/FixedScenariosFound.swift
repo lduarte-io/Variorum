@@ -243,4 +243,18 @@ struct GeneratorFoundScenarios {
                 "a held landing wrote an Apple wrap")
         expectPromisesKept(world)
     }
+    /// Seed 1 (sequence 852): a Time Machine snapshot of today's files, Use
+    /// Castle (synced), then the rollback — today's library comes back with
+    /// its Standard key (Apple-wrapped) while the account reads Castle and the
+    /// Castle sweep took today's silent item: the migration records the key's
+    /// Standard birth and owes the follow, never "Castle" over an Apple wrap.
+    @Test func aRollbackPastUseCastleToTodaysFilesKeepsTheKeysBirth() async throws {
+        let world = try Self.start("a device that joined without a secret", seed: 1000855)
+        await world.done([.timeMachineSnapshot("macA"), .useCastle("macA", .touchID, newWords: false), .timeMachineRollback("macA"),
+                          .launch("macA")])
+        #expect(world.macA.slot?.record?.mode == .standard, "an Apple-wrapped key recorded Castle")
+        await world.done([.settle])
+        #expect(world.macA.slot?.record?.mode == .castle, "the follow never came")
+        expectPromisesKept(world)
+    }
 }
