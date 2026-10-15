@@ -2889,4 +2889,6 @@ renumbers. #227 was free at the merge.)*
     (d) not taken) · P-VX252-1 (ids only) · P-VX361-1 (one `tag_ids` list).
   - **Batch 3 → all RATIFIED as built:** P-VX255-2 (`at: "start"`) · P-VX255-3 (blocks only) · P-VX255-4 (at most
     200 a call) · P-VX311-1 (no duplicating a per-ask note).
+  - **Batch 4 → all RATIFIED as built:** P-VX311-3 · P-VX298-1 (on only when every named note shares history) ·
+    P-VX298-2 (the first note may be archived) · P-VX298-3 (`note_id` + 1–3 `peer_ids`).
 Status: open — your eye; the handoff's checklist leads with this bundle.
