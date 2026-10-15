@@ -5631,8 +5631,8 @@ read from BYTES (`measure.py`), the advice read from BYTES (`instructions.py`).
 
 ## U9 UNIT RECORD — two wire truths from U8's round: VX-361 · VX-362 (opus-implementer, from 2026-10-14 ~23:55 MDT)
 
-**What this unit has NOT done (said first; updated at every piece):** (1) **The revert check and the final products are
-not done yet** — pieces 1–5 (the refactor, every pin, every member's fix) and the two red products are; the Mac and phone reds run only in the window. (2) No Mac or phone product built, no stage window.
+**What this unit has NOT done (said first; updated at every piece):** (1) **No Mac or phone test has RUN** — the Mac sweep pin,
+the Mac batch and the phone pins wait for THE STAGE WINDOW (built: two finals, two reds); pieces 1–7 are done; the Mac and phone reds run only in the window. (2) No stage window yet, no live round.
 (3) VX-364 (the dangling-wing outflow) and VX-365 (`add_note_to_book`'s answer) are tickets, NOT this unit's (the
 orchestrator's rulings). *(Piece 0's own line, kept: piece 0 was the design and stopped for the ruling on F-1.)*
 
@@ -5678,8 +5678,8 @@ and the minted answer (`MCPMintedAnswerServerTests`).
 | 3b | **VX-363** — the fix (`importBook` takes VX-259's `counting:`; the wire passes `readableBooks`) | DONE (this commit) — **core** `importBook(_:wingId:shelfId:namesCountedBy:)` (`Operations+DocumentImport.swift`; default nil) passes `counting: reach` to `requireBookNameFree`; the MCP overload `importBook(_:wingId:undoLabel:namesCountedBy:)` (`Operations+MCPWrites.swift`) passes it through both arms. **Wire** the `.importBook` arm passes `readableBooks(clientName)` — VX-259's one predicate (`decide(standing, reading: readPlace)`, the listing's rule, non-consuming, asked only of colliders); its doc names the third road. Her doors (`DocumentImporter.swift:156` — File ▸ Import… and the Bookcase drop) call the 3-argument form: nil, E13 whole. **NEW core contract pin** `MCPBookNameReachTests.theBookImportCountsOnlyWhatItIsToldTo` (a non-counting collider passed by and asked alone; nil refuses naming it) — a new parameter, red by its absence on the old tree (VX-259's own pattern). **GREEN (`u9/logs/p3b-vx363-green.log`):** `MCPBookNameReachServerTests` 4/4 (VX-363's server pin ✔), core `MCPBookNameReachTests` 2/2, `MCPWriteServerTests`, `DocumentImportOperationTests`, `MCPWriteActsTests` — "14 tests in 2 suites" + "35 tests in 3 suites" passed |
 | 4 | VX-362 (a) — `apply_tag`'s no-op answer | DONE (this commit) — `MCPWriteTools.swift`'s `.applyTag` arm catches `OperationError.alreadyTagged(let worn, _)` around `applyTagPath` (the op's contract untouched — `MCPWriteActsTests`' throw pin unmodified): `tag_id` = the worn tag, `changed: false`, receipt nil; a landed apply answers `changed: true` (additive). The op threw, so its transaction rolled back and no undo entry registered; `land` logs the act's landed Activity line and spends a once grant as any landed call (D2). `flushesHerEditorFirst` unchanged (false — no take). `apply_tag`'s description: "Returns JSON with the tag_id and changed — false when the note already wore the tag: nothing was written and there is nothing to undo." (FOR VX-234). **GREEN (`u9/logs/p4-vx362a-green.log`):** VX-362 (a)'s two pins ✔ + the `remove_tag` guard ✔; `MCPWriteServerTests`, `MCPRemoveTagServerTests`, `MCPWireNeutralityTests`, `MCPProviderNeutralityTests` green; the one red left is the wire-copy row (piece 5) — "28 tests in 5 suites … 1 issue" |
 | 5 | VX-362 (b) — the sweep's words (shared table + wire copy) | DONE (this commit) — **the wire copy** (`MCPWriteSupport.swift` `MCPWireRefusalCopy.words`): `.invalidEntryDate` → `MCPWriteTools.entryDateWords`, the parse's own sentence now named once (`MCPWriteTools.swift` — the parse's `ArgumentFailure` and the op's refusal speak the one constant). **The shared table** (`App/Variorum/Shared/OpsRefusalTable.swift`, a commented block before `default:`, each arm commented with its road): `alreadyInReading` · `readingAtCapacity` (her generic arm's two sentences, `ReadingsViewModel.message` — that arm KEPT as is, byte-identical, a one-line forward at its next touch: the plan's piece 5 names only the table) · `commentNotDeleted` · `invalidSectionName` · `containerNotFound` · `wrongReadingKind` (both directions — `.gathering` her bind door's, hoisted) · `tagNotFound` · `blockAlreadyPlaced` · `blockNotInContainer` (`blockNotPlaced`'s sentence). The words are FOR VX-234's list below, exactly as planned. **GREEN (`u9/logs/p5-vx362b-green.log`):** the wire-copy row ✔ — `MCPTagTruthServerTests` 8/8 now; `MCPWireNeutralityTests` (its source net reads `OpsRefusalTable.swift`), `MCPCarriageServerTests`, `MCPMintedAnswerServerTests` — "32 tests in 4 suites passed". The Mac sweep pin and the phone parity line compile and run only in Xcode: the products (piece 6), the runs (the window) |
-| 6 | revert check (announced first), headless finals, `build-for-testing` (Mac + phone), red products | IN-PROGRESS — **THE REVERT CHECK DONE — all four arms EXACT, restored and green (THE REVERT CHECK below).** **the red products are BUILT, from the committed pins tree `ce4f2ed9` (refactor + every pin, NO fix), before any fix line was written** (vx-282 U2's / U6b's precedent: no revert needed for them): Mac `App/Variorum/DerivedData/vx336-u9-red` — TEST BUILD SUCCEEDED, XCB-EXIT 0, zero `error:` (`u9/logs/build-mac-red-2.log`; the first attempt `build-mac-red.log` failed on a pin-authoring error in the sweep pin — a `String + String` comment — fixed in the pin at `ce4f2ed9`), its test bundle carries `MCPWireRefusalSweepTests`; phone `App/Variorum/DerivedData/vx336-u9-ios-red` (`generic/platform=iOS Simulator`) — TEST BUILD SUCCEEDED, XCB-EXIT 0 (`build-ios-red.log`), its bundle carries `theSweepsNoteGoneSentenceReachesEveryFallThroughSite`; `…iphonesimulator27.0-arm64-x86_64.xctestrun`. 54 GiB free after. Remaining: the revert check, the finals, the two final products |
-| 7 | THE STAGE WINDOW plan (`vx336-u9`) → READY | NOT-STARTED |
+| 6 | revert check (announced first), headless finals, `build-for-testing` (Mac + phone), red products | DONE (`c2f77ce9` + this commit) — **THE REVERT CHECK** all four arms EXACT and restored (its section below). **HEADLESS FINALS** (`u9/logs/p6-finals.log`, the whole package `swift test --skip-build` on `c2f77ce9`'s sources): **MCP 349 tests / 67 suites — 1 issue: `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` 24.6 s > its 15 s bound (VX-353's load flake — load averages 30–37 from another session's builds at the time), plus the 1 KNOWN issue (VX-357's U+0000 pin); RE-RUN ALONE (`p6-timelimit-alone.log`) → "3 tests in 1 suite passed"** · **core 2,872 / 333 passed** · **workbook 40 / 6 passed**. **THE PRODUCTS** (52 → 46 GiB free): Mac final `App/Variorum/DerivedData/vx336-u9` from `c2f77ce9` (`build-mac-final.log`) and phone final `vx336-u9-ios` (`build-ios-final.log`, `generic/platform=iOS Simulator`) — each TEST BUILD SUCCEEDED, XCB-EXIT 0, zero `error:`, no warning in a touched file; the Mac app `Variorum.debug.dylib` carries the note-gone sentence ×1, create_note's tag sentence ×1, apply_tag's ×1 (the red `vx336-u9-red`: ×0 each); the phone dylib the note-gone sentence ×2 (two slices; the red ×0). Signed `io.lduarte.Variorum.debug`; shim `Contents/MacOS/variorum-mcp`; `Variorum_Variorum_macosx27.0-arm64.xctestrun` / `VariorumMobile_VariorumMobile_iphonesimulator27.0-arm64-x86_64.xctestrun`. Every batch suite below is a real type in its bundle (`nm -j` + `swift-demangle`). The red products: built at piece 2 from `ce4f2ed9` (above) |
+| 7 | THE STAGE WINDOW plan (`vx336-u9`) → READY | DONE (this commit) — THE STAGE WINDOW below; the kit gains `prompts/U9-tags.txt` and `answers.py` (dry-run on U8's tee: it reads U8's `apply_tag` answer as `Refused: alreadyTagged(…)` from bytes — the control). **READY** |
 
 ### THE REVERT CHECK (piece 6 — ANNOUNCED here and committed BEFORE any arm runs; every count read from that arm's own log)
 
@@ -5929,7 +5929,162 @@ collision (closed by D1). Nothing else found.
    carry it → `apply_tag` → `changed: false`, no raw case → `add_note_to_book` again → "That note is already in this
    book."), cleanup to cmp-SAME / prefs 0 differ / fingerprint SAME → READY.
 
-### FOR VX-234 (PLANNED words — written AS BUILT at piece 5)
+### THE STAGE WINDOW — the plan (claim `vx336-u9`; runs ONLY on the orchestrator's GO, under the exact claim line it relays)
+
+**What this window does NOT do (said first):** no product code is written or changed under the claim — a red that
+needs code is RECORDED as a FINDING and reported; no rebuild (if `git diff --name-only c2f77ce9..HEAD -- Sources App
+Tests Package.swift` is not empty at the GO, or the coordinator says VX-306 has merged: STOP before any launch and
+report); never her real store, never `/Applications/Variorum.app`, never her user-scope MCP registrations (the copied
+setup line is never run — only its key is taken); **never `claude mcp list` (nor `claude mcp get`)**; `castle-W1-20261013`
+left alone; ONE simulator, shut down before the SEAM.
+
+**Minutes:** guards 1 · the Mac batch (121 suites) ~15 · the Mac red ~2 · the phone red + green ~8 (a simulator boot) ·
+SEAM · prefs/Backups/fingerprint/clipboard 2 · the A1 2 · launch 2 · bind + grant 5 · the U9 turn ~4 · the faces (Study,
+Terminal) ~8 · cleanup 8 → **~57 of work; ask a 75-minute claim.** **Batch-only fallback (~28 min, claim 35):** steps 0,
+1a, 1b, 1c, the SEAM and the release (nothing launched, so no A1); the live leg then stays OPEN.
+
+**Evidence:** `notes/plans/vx336-screens/u9/` (gitignored): `logs/`, `tee/`, `U9-tags.jsonl`, `U9-tags-answers.txt`,
+captures `live/s/` and `live/t/`. **The kit** `notes/plans/fixes/vx-336-u7-kit/` as U8 used it, plus `prompts/U9-tags.txt`
+and `answers.py <leg>` (every `tools/call` with its arguments, isError and the answer WHOLE, from the tee). **Before any
+turn:** `export U7_SCRATCH=<the runner's scratchpad>/u9w` (FRESH), `export U7_SHIM_PATH=$PWD/App/Variorum/DerivedData/vx336-u9/Build/Products/Debug/Variorum.app/Contents/MacOS/variorum-mcp`,
+`export U7_SCREENS=$PWD/notes/plans/vx336-screens/u9`; `K=notes/plans/fixes/vx-336-u7-kit`; `T=$K/turn.sh`; repo root.
+
+0. **Guards, every step** — U8's step 0 exactly (`Tools/WalkKit/guard.sh --author` before anything touches the GUI —
+   exit 3/4 STOP; the strict instance guards `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` empty before the
+   launch; the claim line EXACTLY as relayed; `Tools/stage status` never in an `&&` chain; ≥ 2.6 s between synthetic
+   events; region captures; HEAD at the GO recorded; the product check above).
+1. **1a — the Mac batch (~15 min) FIRST.** From `App/Variorum/`: `xcodebuild test-without-building -scheme Variorum
+   -destination 'platform=macOS' -derivedDataPath DerivedData/vx336-u9 -resultBundlePath
+   ../../notes/plans/vx336-screens/u9/u9-batch.xcresult` + one `-only-testing:VariorumTests/<Suite>` per suite below,
+   detached to `u9/logs/u9-batch.log` and POLLED in the foreground (a `grep -q` loop). **The 121 suites** — every
+   suite in every Mac test file naming the shared table, a refusal copy, one of the ten worded cases, `alreadyTagged`,
+   `importBook`/`DocumentImporter` or a document import's tags (the types this unit changed), ∪ every MCP Mac suite (the
+   wire's answers changed), ∪ the new `MCPWireRefusalSweepTests`: ArchivedBooksGroupTests · ArchivedMarkTests · AscentDoorTests · AscentRoutingTests · BindDoorTests · BlockHighlightTests · BlockHistoryPaletteDoorTests · BlockHistorySealTests · BlockSelectionRegistryTests · BlockSelectionRuleTests · BlockTOCStatusTests · BoardBlockSelectionTests · BookAnchorTests · BookArchiveDeclarationTests · BookArchiveDoorActTests · BookArrivalsTests · BookCarryTests · BookcaseStarredShelfBrainTests · BookcaseStarredShelfDropTests · BookChooserOrderTests · BookDropTests · BookPanelMCPMarksTests · BookSettingsArchiveRowTests · BookStructureModelTests · ComesBackReceiptTests · CommandRouterTests · CommentPanelFixLeg2Tests · CommentPanelGeometryRuleTests · CommentPanelWordsTests · CommentTextAreaMountedTests · CommitVocabularyTests · CompareCompositionTests · CompareViewModelTests · ContextBarTests · DifferentialApplyTests · DivergeDoorTests · DivideExtractGestureTests · DivideWCeremonyTests · DocumentImportDoorTests · DropAndRefusalCopyTests · EncryptionBookDoorTests · JournalBooksTests · LifecycleFacesTests · MakeBlockGestureTests · MCPAskAndReceiptTests · MCPAsksWaitCaptureTests · MCPAsksWaitTests · MCPCompareLandingTests · MCPDeliberateFacesTests · MCPDoorErgonomicsFacesTests · MCPEditFacesTests · MCPEditParityFacesTests · MCPGatheringIconTests · MCPGrantSheetCaptureTests · MCPGrantSheetTests · MCPGrantSheetU2CaptureTests · MCPHerEditorDoorTests · MCPLibraryParityFacesTests · MCPNavigationTests · MCPPaneTabsCaptureTests · MCPPaneTabsTests · MCPPaneTests · MCPRebindFaceTests · MCPSetupKeyFacesTests · MCPSetupMenuTests · MCPSetupTabKeyTests · MCPSharedIconClickTests · MCPSharedRowsRulesTests · MCPSharedRowsTests · MCPShareFacesCaptureTests · MCPShareFacesTests · MCPWingFacesTests · MCPWireRefusalSweepTests · MembershipChoiceTests · MergeGestureTests · MoveAndExecuteTests · MultiBookEditNoteRuleTests · MultiBookEditNoteTriggerTests · NoteTrayTests · OpsRefusalTableIntegrityTests · OutflowChooserTests · PagedAnchorReportTests · PaletteDerivationTests · RecoveryDoorsTests · RefusalTableConvergenceTests · ReviewRound1FixTests · ReviewRound2FixTests · ReviewRound3FixTests · RuleEditorMakeTagTests · SavepointCommitDoorTests · SavepointNameAskTests · SavepointNameCopyTests · SavepointNameFaceTests · SavepointRenameDoorTests · SavepointSealedDoorTests · SavepointTakesDoorTests · SealDoorTests · SealedBookMemberDoorTests · SearchPickerBrainTests · StaleWriteIntentTests · StarActingTests · StarDeclarationTests · StarTargetingTests · StatusCenterTests · StructuralRewriteDoorTests · TakeCardDoorTests · TakesDivideTests · TakesLandingTests · TakesWordCountTests · TrashConfirmEdgeTests · TrashPoolHonestyTests · TrashPurgeDoorsTests · TrashPurgeSharedLayerTests · TrashSurfaceTests · TutorialBooksLessonTests · TutorialBooksRitualTests · TutorialMCPChapterTests · VocabularySweepTests · WingBookMoveDoorTests · WingContentsArchivedWordsTests · WriteBlockSelectionTests. **Expected:** green; the five
+   gated capture harnesses skip (`MCPAsksWaitCaptureTests`, `MCPGrantSheetCaptureTests`, `MCPGrantSheetU2CaptureTests`,
+   `MCPPaneTabsCaptureTests`, `MCPShareFacesCaptureTests` — a different skip set is a finding); **`MCPWireRefusalSweepTests`
+   3 tests green — its FIRST run (PENDING until read here)**; `OpsRefusalTableIntegrityTests` green (the nine new
+   sentences name no platform door). Neither standing red (VX-115's `BookCollectingDoorsTests`, VX-167's
+   `DestructiveUndoWarningTests`) is in the set. A red: re-run that suite ALONE once; one that reproduces is a FINDING.
+   **1b — THE MAC RED RUN (~2 min), on `vx336-u9-red` (never launched):** `xcodebuild test-without-building -xctestrun
+   DerivedData/vx336-u9-red/Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun -destination 'platform=macOS'
+   -only-testing:VariorumTests/MCPWireRefusalSweepTests` → `u9/logs/u9-mac-red.log`. **Expected EXACTLY: 3 tests, 1
+   failed, 20 issues** — the walk, two per unworded case (the "Refused:" prefix; the case's name + "(") for exactly
+   `alreadyInReading · readingAtCapacity · commentNotDeleted · invalidSectionName · invalidEntryDate · containerNotFound ·
+   wrongReadingKind · tagNotFound · blockAlreadyPlaced · blockNotInContainer`; the sample-coverage and proof tests green.
+   Any other count — above all a W-class case red — is a FINDING (a mis-swept case), recorded and reported. Then
+   `rm -rf DerivedData/vx336-u9-red`.
+   *[removed for publication]*
+   the products are generic-simulator builds, deployment iOS 26), `-collect-test-diagnostics never`, detached and polled.
+   **red** on `DerivedData/vx336-u9-ios-red/Build/Products/VariorumMobile_VariorumMobile_iphonesimulator27.0-arm64-x86_64.xctestrun`
+   `-only-testing:VariorumMobileTests/MobileRefusalTableTests` → `u9/logs/u9-ios-red.log`: **Expected EXACTLY: 7 tests,
+   1 failed, 5 issues** (`theSweepsNoteGoneSentenceReachesEveryFallThroughSite`; the re-pointed guard green). **green** on
+   `vx336-u9-ios`'s xctestrun with `-only-testing:VariorumMobileTests/` × MobileRefusalTableTests · MobileTrashTests ·
+   MobileDeletionTests · MobileSeededBookRestoreTests · MobileBookDetailsTests · MobileBookNameGuardTests ·
+   MobileBookCreateTests · MobileBookPinTests · MobileArchivedTakesTests · MobileBlockHistoryTests ·
+   MobileDailyJournalArchiveTests · MobileCrossBlockEditTests · MobileCrossBlockEditBrainTests · MobileNavigationTests ·
+   MobileTakeLockTests → `u9/logs/u9-ios.log` — expected green, no "Restarting after unexpected exit". Then `xcrun
+   simctl shutdown` it, `simctl list devices booted` → none; `rm -rf DerivedData/vx336-u9-ios-red DerivedData/vx336-u9-ios`.
+   **→ THE SEAM:** record 1a–1c here, commit, push, KEEP the claim, report "SEAM" through the orchestrator; continue only on
+   its word.
+2. **Prefs, Backups, fingerprint, clipboard — BEFORE the A1 (~2 min):** U8's step 2 exactly (`prefs-pre.plist` and its
+   key count; `backups-pre.txt`; her user-scope servers by U7 step 2's `python3 -I` one-liner → expected `['linear-server',
+   'variorum']`, `bc64543e2f4e8e58`; the clipboard saved, never read).
+3. **THE ONE A1 (~2 min):** U8's step 3 exactly (`stage.sh`'s copy loop only; `scale-prestage-<UTC stamp>`; `cmp` each;
+   `a1-path.txt`; `store-hash-pre.txt`).
+4. **Launch (~2 min):** `open -n App/Variorum/DerivedData/vx336-u9/Build/Products/Debug/Variorum.app`; What's New → its
+   own button; a lock screen → `source ~/.variorum/dev-castle.env`, those values only (none expected); Study expected.
+5. **Bind and grant (~5 min):** Settings ▸ MCP ▸ Connect ▸ Claude Code ▸ the copy icon → ONLY the key into
+   `$U7_SCRATCH/keys/u7.key` (U8 step 8's one-liner; record its first 9 characters only; `pbcopy < /dev/null` at once);
+   `zsh $T bind mcp__variorum-dev__list_books < $K/prompts/bind.txt` → Activity's bind line with zero clicks (capture
+   `live/s/00-bind`); then Clients ▸ claude-code ▸ Change… ▸ **A wing · Home · Write new · Always** (capture `01-grant`).
+6. **THE U9 TURN (~4 min):** `zsh $T U9-tags "mcp__variorum-dev__create_book,mcp__variorum-dev__set_book_rule,mcp__variorum-dev__create_note,mcp__variorum-dev__apply_tag,mcp__variorum-dev__import_document,mcp__variorum-dev__add_note_to_book" < $K/prompts/U9-tags.txt`
+   then `python3 -I $K/answers.py U9-tags`. **PASS, read from the answers' bytes:** (1) `create_book` ok; (2)
+   `set_book_rule` ok, its `outflow` `["u9-green-tea"]`; (3) `create_note` ok with **`tag_ids` = ONE id and `tags` =
+   `["u9-green-tea"]`** (VX-361 — U8's `[]`); (4) `apply_tag` **NOT isError, `"changed":false`**, the same `tag_id`
+   (VX-362 (a) — U8's raw `alreadyTagged`); (5) `import_document` **NOT isError — the import landed whole** with `tag_ids`
+   = that one id ONCE and `tags` = `["u9-green-tea"]` (VX-361's collision — the trace's `SQLite error 19`); (6)
+   `add_note_to_book` isError with **exactly "That note is already in this book."** (VX-362 (b), the Mac table through the
+   door — the trace's raw `alreadyInReading`); **no answer anywhere starts "Refused:" or carries a Swift case.** A client
+   that skips or adds a step: recorded; ONE re-run of the same prompt into a fresh leg name (`U9-tags-2`).
+7. **The faces (~8 min), Study:** the Bookcase shows "u9 tea" (capture `live/s/02-bookcase`); open it → its two notes,
+   "u9 brewing" and "u9 second" (`03-book`); open "u9 second" → its tag shows ONCE (`04-note-tag`); Settings ▸ MCP ▸
+   Activity: the six acts' lines in words — the `apply_tag` line landed, the `add_note_to_book` line refused, no tool id
+   (`05-activity`). **Terminal:** Settings ▸ General ▸ Theme ▸ Terminal; Activity again (`live/t/05-activity`) and the
+   book (`live/t/03-book`); Theme back to **Study** (`live/s/06-back-study`).
+8. **Cleanup (~8 min)** — U8's step 12 exactly: quit BY BUNDLE ID; the key grep → 0 files, then `keys/` deleted; the
+   clipboard restored (`cmp` SAME); no `mcpServers` for `$U7_SCRATCH/proj` in `~/.claude.json` (read-only, never `claude
+   mcp get`/`list`); any saved-to-file tool result under the scratch project deleted; the fingerprint AFTER = BEFORE;
+   prefs imported, re-exported, every added key deleted → **0 added · 0 removed · 0 changed**; `Tools/ScaleFixture/restore.sh
+   "$(cat $U7_SCREENS/a1-path.txt)"` → "Restored (verified)", a second `cmp` SAME, the sha256 set equal; `Backups/`
+   unchanged; castle-W1 untouched; 0 simulators booted; the tree clean; `Tools/stage release --who vx336-u9`; **THE
+   RESULT LINE** for the coordinator (claim times; 1a's counts, 1b's and 1c's exact reds; the six answers' verdicts; the
+   faces in both voices; the posture; the A1 path, the coordinator's to prune).
+
+### FOR VX-234 (user-facing words, AS BUILT — U9)
+
+- **Her app's shared refusal table (both platforms; also what the MCP door speaks):** "That note is already in this
+  book." · "This book is at its note limit." · "That comment is already back." · "A chapter needs a name." · "That note
+  isn't there any more — it may have just been deleted." · "That isn't a book — a gathering shows the notes its rule
+  matches and holds none of its own." · "That's already a book — only a gathering binds into one." · "That tag isn't
+  there any more — nothing changed." · "That block is already in a note — nothing changed." · (`blockNotInContainer`
+  speaks `blockNotPlaced`'s existing sentence). The first two and the bind sentence are byte-identical to
+  `ReadingsViewModel.message`'s.
+- **Model-facing (tool descriptions):** `create_note` — "Its tag_ids and tags (their paths) list every tag the note wears
+  once it lands, a book's outflow included, so there is nothing to tag again." · `import_document` — "…and tag_ids and tags
+  (their paths): every tag the note wears, the header's first, then a book's outflow;" · `apply_tag` — "Returns JSON with
+  the tag_id and changed — false when the note already wore the tag: nothing was written and there is nothing to undo."
+  The wire's `invalidEntryDate` speaks the parse's existing sentence (no new words).
+- **OWED 3, for her eye:** two worded cases speak Mac-door words on the wire — `blockNotFound` → "…since you picked it"
+  (`BlockSelectionCopy.blockGone`) and `lockedReading` → "…if it's sealed, unseal it."
+
+### PROVISIONALs (as built — the orchestrator files them at the merge)
+
+- **P-VX361-1 — what `create_note`'s and a one-document `import_document`'s answer says about tags** (F-1, ruled (a)): (a)
+  AS BUILT — `tag_ids` = every tag the note wears when the act lands (the header's in header order, then the outflow's
+  others in outflow order) with `tags`, their paths, parallel; (a′) the same without `tags`; (b) `tag_ids` stays the
+  header's plus a new `outflow_tag_ids`.
+- **P-VX362-1 — `apply_tag` on a worn tag, and the sweep's new words** (F-2 + D3): (a) AS BUILT — success, `changed: false`,
+  no undo entry, no receipt, the landed Activity line, a once grant spent as by any landed call (D2's argued posture; the
+  ruling is silent on the once grant), `changed: true` on a landed apply; the ten words above; (b) her VX-234 pass rewords
+  any; (c) a worded refusal for `apply_tag` ("That note already wears the tag “…” — nothing changed." — rejected: it
+  refuses where her doors don't); (d) the wire speaks the one not-shared shape for the race-only "isn't there any more"
+  class (rejected: every such refusal follows a decision that allowed the target).
+
+### MOBILE PARITY (as built)
+
+The shared table's nine new arms speak on the phone wherever a phone door falls through to `OpsRefusalCopy.words(for:roads:
+.phone)` — `MobileBlockMenuController`, `MobileUndoDoor`, `MobileCommentsController`, `MobileStructuralController`,
+`MobileMembershipModel` (its own `alreadyInReading`/`readingAtCapacity`/`lockedReading` arms stay first), the editor's
+status line, the shelf's and the book details' archive doors: mobile-VISIBLE words, the same sentences, no new face.
+**A phone pin changed** (the design's "no phone pin changes" was wrong — found at piece 2): `MobileRefusalTableTests`'
+guard re-pointed from `containerNotFound` to `referenceNotFound`, + the parity test; so the window runs ONE simulator
+(1c). The closeout's line: "VX-362: nine refusal sentences in the shared table, mobile-visible; no phone face changed."
+
+### SELF-ASSESSMENT (the builder's, pre-stage)
+
+- **VX-361:** the answer is composed inside the act's transaction from the note's own live applications (∝ the act's
+  writes, P1), so it cannot omit a tag the note wears; the belt ("any other, by path") is unreachable today (intake
+  seats, it never applies an outflow) and is there so the field can never lie. The file doors' behaviour is unchanged
+  (their notes are fresh); their `applyDocumentTags` now does one indexed `post_tag` read per header tag (∝ the header).
+- **VX-363:** exactly VX-259's predicate, on the third road; her doors keep the full guard (pinned on both trees by the
+  server test's guard line). The import's answer names only the client's spelling.
+- **VX-362 (a):** the op's contract is untouched (`MCPWriteActsTests`' throw pin unmodified); the no-op still spends a once
+  grant (D2) — said in P-VX362-1 since the ruling is silent there.
+- **VX-362 (b):** the shared table's new arms reach every door of hers that fell through to "Refused: …" — strictly dumps
+  turned into sentences (the table's own contract). `ReadingsViewModel.message` keeps its two byte-identical sentences (a
+  second home, a one-line forward at its next touch — the plan's piece 5 named only the table). The `wrongReadingKind
+  (.book)` sentence is the wire's register; a Mac door that met it fell to the raw case before.
+- **Not verified here:** every Mac and phone test (the window); the real client (the window).
+
+### OWED (U9 builder → the orchestrator)
+
+1. THE STAGE WINDOW above (claim `vx336-u9`, ~75 min; batch-only 35).
+2. Disk: the window deletes `vx336-u9-red`, `vx336-u9-ios-red` and `vx336-u9-ios`; `vx336-u9` is the ladder's product.
+3. VX-353's flake met again at the finals (24.6 s under load 30–37; green alone) — a data point for its ticket.
+4. The design's MOBILE PARITY line corrected (a phone pin changed) — the window's 1c covers it.
+5. VX-364 and VX-365 stay their tickets (the rulings); OWED 3's two phrasings are on FOR VX-234.
+
+### FOR VX-234 (PLANNED words — superseded by the AS BUILT list above; kept as the design wrote it)
 
 Her app's table (both platforms): "That note is already in this book." (hoisted) · "This book is at its note limit."
 (hoisted) · "That comment is already back." · "A chapter needs a name." · "That note isn't there any more — it may have
@@ -5938,7 +6093,7 @@ just been deleted." · "That isn't a book — a gathering shows the notes its ru
 changed." · "That block is already in a note — nothing changed." · (`blockNotPlaced`'s sentence reused). Model-facing:
 `create_note`'s and `import_document`'s tag sentence (per F-1), `apply_tag`'s `changed` sentence.
 
-### PROVISIONALs (planned — the orchestrator files them at the merge)
+### PROVISIONALs (planned — superseded by the AS BUILT list above)
 
 - **P-VX362-1 — the new refusal words** (the table above): (a) as built; (b) her VX-234 pass rewords any; (c) the wire
   speaks the one not-shared shape for the race-only "isn't there any more" class instead (rejected here: the wire
@@ -5946,7 +6101,7 @@ changed." · "That block is already in a note — nothing changed." · (`blockNo
   that allowed the target).
 - **F-1's shape** if the orchestrator rules it PROVISIONAL (her away-mode answer): the options as listed above.
 
-### MOBILE PARITY (planned)
+### MOBILE PARITY (planned — corrected by the AS BUILT line above: a phone pin DID change)
 
 The shared table's new arms speak on the phone wherever a phone door falls to `OpsRefusalCopy.words(for:roads: .phone)`
 (e.g. `MobileMembership`'s default arm): mobile-VISIBLE words, the same sentences. No phone pin changes; the phone target
