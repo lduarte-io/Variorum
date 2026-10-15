@@ -2873,4 +2873,16 @@ handoff in the morning"*). Each was built as stated below, with a line to revers
   VX-366 (P-VX254-1/2's remainder, waiting on your answer here) · VX-367 · VX-368 · VX-369 · VX-370.
 *(Numbering: the next free number on main when written; a sibling run merging first may take it — the merging session
 renumbers. #227 was free at the merge.)*
+- **HER ANSWERS (2026-10-15 afternoon, the question tool, batch by batch):**
+  - **The two pre-launch calls:** VX-363 → Pre-launch (*"you can fix the label on that one for the record"*); VX-357 →
+    Pre-launch, a child of the sweep VX-348, fixed by STRIPPING U+0000 in the operations layer — the wire says so and
+    fingerprints the stored text, her doors stay quiet (*"yes, mark it pre-launch and write that on the ticket"*; the
+    shape is on VX-357).
+  - **P-VX311-2 → RATIFIED (a), the wing's Pool:** *"I think that the Wing's Pool is fine for now."* Her follow-on, filed
+    as **VX-371** (Needs Lillian, Low): *"it might be worth filing a ticket for if the AI duplicated a note, being able
+    to add it to a book it can add things to, but I don't want to do that now and I'd have to think through what that
+    access should look like."*
+  - **P-VX255-1 → RATIFIED (a)** (no anchor only). **P-VX362-1 → RATIFIED as built** (the sentences; a repeat
+    `apply_tag` answers done, nothing changed). **P-VX256-1 → RATIFIED (a)** (32,000 characters of answer; e1–e4 as
+    built).
 Status: open — your eye; the handoff's checklist leads with this bundle.
