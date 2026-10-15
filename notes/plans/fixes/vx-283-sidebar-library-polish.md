@@ -1176,6 +1176,33 @@ The coordinator's rules bind (a system popup you can't dismiss → stop and repo
 
 *(The walker writes one line per row here.)*
 
+#### U1b — THE ORCHESTRATOR'S RULING ON THE RE-RUN'S RED (2026-10-14 ~21:55 — P-U1b-6)
+
+The Starred pin rests 2 pt short after the row pitch flips 30 → 24 mid-transition. **The mechanism, read in the
+code:** `reveal()` computes an ANCHOR FRACTION from the window as last read (`revealAnchor`'s `room = viewport −
+rowHeight`) and applies it through `proxy.scrollTo(id, anchor:)`, which resolves the row through the lazy stack's
+own idea of where that row sits. Mid-transition both inputs are stale — the fraction was computed against the old
+viewport/pitch, the lazy position against rows not yet laid out at the new pitch — so the landing is wrong by
+whatever drifted. More asks on the same road only repeat the stale arithmetic. **Option (a) (keep asking with a
+limit) is NOT taken** — polling over a wrong mechanism.
+
+**RULED (b), with every input axis (the overlay/sink delivery law):**
+1. A pure `SidebarLayout.revealOffset(row:rows:rowHeight:window:depth:) -> CGFloat?` — the EXACT content offset that
+   puts the row wholly in view and clear of the fades (row top = `row × rowHeight`; the same half-row clearance rule
+   as today), clamped to `[0, max(0, content − viewport)]` of the window as read; nil when the row already stands
+   clear (idempotent — a second reveal from the result moves nothing). It replaces `revealAnchor`'s fraction;
+   `revealAnchor` and its pins retire or become thin wrappers — the implementer's call.
+2. Apply it ABSOLUTELY: the section's scroll view takes a `ScrollPosition` (`.scrollPosition($position)`;
+   `position.scrollTo(y:)`), unanimated — never the proxy's id lookup. (Check nothing else in the sidebar relies on
+   the proxy for that section; keep any other road intact.)
+3. Re-ask on EVERY input axis: the current row changing; the measured VIEWPORT changing; the measured CONTENT height
+   changing (this is the pitch flip's own signal — the rows re-laid at 24 pt arrive as a new content height); the
+   row height changing; the mount's first measured reading. The settled ask (P-U1b-5, the derived beat) stays as a
+   backstop. Her own scrolling is still never pulled back: no reveal fires from an offset-only change.
+4. Pins: the pure rule's exact offsets (above, below, the ends, a viewport shorter than a row, the pitch flip's
+   before/after windows), idempotence; the mounted Starred pin GREEN with the flip; R-F — revert the application to
+   the proxy's anchor road — red on the Starred pin.
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
