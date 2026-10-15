@@ -2016,6 +2016,59 @@ re-flow the info panel's opening triggers — dropping her caret); one line exac
 wrap decision a pure function (one line only if the field keeps at least its placeholder width); a red-on-old geometry
 pin.
 
+#### U3 — THE WALK PLAN (the orchestrator's; her walk rule — a fresh Opus at xhigh)
+
+Products: U3's Debug app, `App/Variorum/DerivedData/vx283-u3/Build/Products/Debug/Variorum.app`. Screens to
+`notes/plans/vx283-screens/u3/walk/`, `<row>-<voice>-<appearance>.png`; region captures at native resolution for the
+controls row, the toast and the heading, whole-window beside each. Store copy + prefs export done by the orchestrator
+before the walker starts (the walk protocol); restored + diffed by the walker at the end.
+
+- **W1 — VX-121, the toast above the quick entry.** On the Bookcase, raise a REFUSAL toast (any door that refuses —
+  e.g. a structural undo with nothing to undo, or an import of a non-Variorum file through File ▸ Import…): the toast
+  sits ABOVE the quick-entry box at the same centre, never on it. The same in the Library (its quick-entry bar). A note
+  pane's toast where it was (unchanged). Both voices.
+- **W2 — VX-175, the controls row.** The window at the app's 1240-pt default width. The Library with the info panel
+  CLOSED: the controls on one line, as before. Click a note row so the panel OPENS: the row wraps to two lines —
+  search · scope / mode · sort · when — the panel wholly inside the window, its Open button and text unclipped, the
+  search field never a sliver. Type a few letters into the search field, then open and close the panel: the caret and
+  the text survive the re-flow. At a wide window (≈1600 pt) with the panel open: one line, unchanged. Study and
+  Terminal.
+- **W3 — VX-20, the dark heading.** The Library's List in DARK with enough rows that the pinned "books"/"notes"
+  heading floats: no warm grey band; it reads as the room's own surface with its hairline, in Study and Terminal.
+  Light: unchanged from before (compare with one light capture).
+- **W4 — VX-359.** The View menu open: one separator after Close Split, not two.
+- **W5 — VX-245's surfaces where reachable:** the Library's bulk row (pick two or more notes) at 1240 pt; a search
+  picker (e.g. a Move/Add to Book picker); Takes' show ▾ face. Labels sit on one line, nothing blows the window wider.
+- **W6 — restore and release** (copy the store back + `cmp`; prefs: delete added keys, import, re-export, diff;
+  posture Standard, unlocked, castle-W1 untouched; release; END THE TURN AT ONCE with the release line).
+
+#### U3 — WALK RECORD
+
+*(The walker writes one line per row here.)*
+
+#### U1d — THE BRIEF (her two rulings, built; a FRESH implementer)
+
+Build to "U1 — HER RULINGS ON THE MEMO" and "U1 — THE DESIGN MEMO" above, on top of U1c's code
+(`SidebarSectionWindow`, `SidebarLayout.revealOffset`/`readingAsk`/`edgeFades`):
+1. **FOLLOW (R6).** A section FOLLOWS its current row after a discrete act — the current row changing (an open, a
+   landing: ⇧⌘W, ✕, Close All, back/forward) and the section's first appearance. While following, every input that
+   moves the row re-asks (P-U1c-1). **A hand scroll ends following** — detected from the scroll view's phase
+   (`onScrollPhaseChange`: `.interacting` / `.decelerating` are hers; the app's unanimated `scrollTo` is not) —
+   and nothing moves the list until the next discrete act. Write the follow state as a PURE model (inputs: a
+   discrete act, a phase change, a reading) so it pins without a mouse; the mounted pin drives a hand scroll if the
+   harness can (a real scroll-wheel event via the WalkKit-style injector is NOT allowed in tests — use the model
+   seam), and asserts a viewport change while not following moves nothing. Red-on-old: on U1c's code the same
+   sequence re-reveals.
+2. **THE FADE, RESHAPED (O-2/O-3).** Depth = the full half row whenever more than the 0.5-pt slack lies beyond (never
+   a few-point fade); STRENGTH eases in with the content beyond (e.g. full strength once a half row lies beyond —
+   the implementer's PROVISIONAL number, recorded) so it doesn't pop; and NEVER fully solid at the very edge (the
+   outermost opacity capped below 1 — PROVISIONAL value, chosen by eye in both voices and appearances and recorded —
+   so a hint of the partial row always shows; O-3's empty band can't happen). Pure-rule pins for depth, strength and
+   the cap; the overlay still draws from the room token, takes no clicks.
+3. Evidence: the batch over the changed files' suites + the mount suite × 5 + the reverts naming each rule; then a
+   re-walk of R2–R6's rows (the fades in all four rooms, the shallow-overflow state R4 reproduced, the twenty opens,
+   the hand-scroll-then-wait for R6 with waits of 20 s+), by a fresh walker.
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
