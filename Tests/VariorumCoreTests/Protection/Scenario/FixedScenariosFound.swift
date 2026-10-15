@@ -80,4 +80,47 @@ struct GeneratorFoundScenarios {
         await world.done([.launch("macB"), .settle])
         expectPromisesKept(world)
     }
+    /// Seed 10: the account enters Castle on another device; a device that
+    /// hasn't followed yet presses Re-link for the account — it must refuse
+    /// (follow first), never land an Apple copy over the Castle-era master.
+    @Test func aStaleDeviceNeverRelinksACastleAccount() async throws {
+        let world = try Self.start("a device that joined without a secret", seed: 10000048)
+        await world.step(.useCastle("phone", .touchID, newWords: false))
+        let relink = await world.step(.relinkAccount("macA"))
+        #expect(relink != .done, "a stale device re-linked an account in Castle")
+        await world.done([.settle])
+        expectPromisesKept(world)
+    }
+
+    /// Seed 10: a phone's forgotten-passphrase reset moved the account's
+    /// passphrase; a Mac's Use Castle (synced) then crashed twice — the
+    /// resume must take the passphrase that opens the vault, never the old one
+    /// under the vault's descriptor.
+    @Test func aSyncedResumeTakesThePassphraseThatOpensTheVault() async throws {
+        let world = try Self.start("a device that joined without a secret", seed: 10000043)
+        await world.step(.resetPassphrase("phone", .touchID))
+        await world.step(.crash(.useCastle("macA", .touchID, newWords: false), afterWrites: 10))
+        let account = try #require(world.macA.slot?.record?.account ?? world.macA.slot?.rowsOwner)
+        let old = try #require(world.known(account).timeline.first?.passphrase)
+        // She types her library's old passphrase at the resume.
+        _ = try? await world.launch(world.macA, typed: TypedSecrets(passphrase: old, words: world.known(account).words))
+        if let vault = world.server.snapshot(account), let wrap = world.liveKeyFile(world.macA)?.passphrase, wrap.kdf == vault.format.kdf,
+           let pk = world.passphraseKey(old, wrap.kdf) {
+            #expect(Lock.unwrap(wrap.wrapped, under: pk.key) == nil, "a lock under the vault's descriptor opens with a passphrase the vault refuses")
+        }
+        world.lock(world.macA)
+        await world.done([.launch("macA"), .settle])
+        expectPromisesKept(world)
+    }
+    /// Seed 11 (§3.13 step 1): a device opens on this build offline — its
+    /// mode recorded unconfirmed — while the account leaves Castle elsewhere;
+    /// once online, the vault's word is an ordinary follow (a key change by
+    /// the follow's road), never a confirm nothing offers.
+    @Test func aDeviceMigratedOfflineFollowsOnceOnline() async throws {
+        let world = try Self.start("a synced Castle account on two Macs and the phone", seed: 11000072)
+        for action in [Action.goOffline("macB"), .useStandard("phone"), .settle, .goOnline("macB")] { await world.step(action) }
+        await world.done([.settle])
+        #expect(world.macB.slot?.record?.mode == .standard, "the device migrated offline never followed")
+        expectPromisesKept(world)
+    }
 }

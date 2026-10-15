@@ -377,7 +377,13 @@ extension ProtectionExecutor {
         log("\(plan.act.rawValue): resumes #\(plan.sequence) at step \(plan.firstUnfinishedStep.map(String.init) ?? "end")")
         if plan.parameters?.synced == true, let account = ctx.accountID {
             // A synced act resumes from the vault as it stands now.
-            _ = try await readVault(accountID: account)
+            let vault = try await readVault(accountID: account)
+            // …and a passphrase derived under the vault's own descriptor must
+            // open the vault (the press's did — one descriptor, one passphrase).
+            if let vault, let derived = secrets.passphrase, derived.kdf == vault.format.kdf,
+               VaultModel.master(of: vault.format, passphrase: derived, words: nil) == nil {
+                throw ExecutorRefusal.passphraseDoesNotOpen
+            }
         }
         try reachNewKey(ctx, program)
         try await drive(program, ctx)

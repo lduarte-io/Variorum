@@ -176,6 +176,13 @@ extension ProtectionExecutor {
         guard let account = record.account else { throw ExecutorRefusal.notSynced }
         try requireSignedIn(as: account)
         guard let vault = try await readVault(accountID: account) else { throw ExecutorRefusal.needsFreshVault }
+        // The ACCOUNT must be in Standard and this library current with it: a
+        // device that hasn't followed the account into Castle would land an
+        // Apple copy over the Castle-era master — the account lowered from a
+        // stale device (§3.9's vault invariant — VX-305 U4, found by the
+        // scenario world). The follow comes first.
+        if vault.reading.rotationInProgress { throw ExecutorRefusal.rotationInProgress }
+        if vault.mode.settled != .standard || libraryBehind(library, vault: vault) { throw ExecutorRefusal.accountMoved }
         try vault.format.kdf.validateFloor(configuration.floor)
         let typed = try PassphraseKey.derive(passphrase, kdf: vault.format.kdf)
         guard VaultModel.master(of: vault.format, passphrase: typed, words: nil) != nil else {

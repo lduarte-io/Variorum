@@ -446,7 +446,17 @@ public enum AssessRules {
                     acts.append(.corner45Notice)
                 }
             } else if let settled = vault?.mode.settled {
-                acts.append(.confirmMode(settled, isKeyChange: settled != current))
+                if settled != current {
+                    // §3.13 step 1: "a vault that moved while the library
+                    // didn't is an ordinary follow" — a key change by the
+                    // follow's road, never a confirm with no door (VX-305 U4,
+                    // found by the scenario world: a library migrated offline
+                    // waited for ever on a confirm nothing offered).
+                    acts.append(.follow(settled == .castle ? .intoCastle : .intoStandard, typesOneSecret: true,
+                                        holdsLibraryRekey: vault?.rotationInProgress ?? false))
+                } else {
+                    acts.append(.confirmMode(settled, isKeyChange: false))
+                }
             }
         } else if let vault, let reading, !ownActInFlight {
             // The account moved elsewhere: the follow.

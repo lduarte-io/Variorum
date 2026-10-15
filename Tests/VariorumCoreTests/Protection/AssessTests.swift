@@ -261,7 +261,10 @@ struct AssessModeTests {
         #expect(!waiting.repairs.contains { if case .landAppleWrap = $0 { return true } else { return false } },
                 "indeterminate writes nothing Apple-reachable")
         world.vault = AWorld.vault(x, .castle)
-        #expect(try world.assessed().acts.contains(.confirmMode(.castle, isKeyChange: true)),
+        // Restated at VX-305 U4 (PROVISIONAL P-U4-11): the key change's road is
+        // the ordinary follow (§3.13 step 1) — a confirm with a key change had
+        // no door, and a library migrated offline waited on it for ever.
+        #expect(try world.assessed().acts.contains(.follow(.intoCastle, typesOneSecret: true, holdsLibraryRekey: false)),
                 "confirming a mode the current key wasn't born in is a key change, never a move")
     }
 

@@ -260,7 +260,7 @@ extension SWorld {
             // rule 2's stated exception) — the escrow's and the retirements'.
             let queued = Set(devices.filter { $0.appleAccount == id && !$0.iCloudOn }
                 .flatMap { $0.keychain.synced.filter { $0.value.dirty && $0.value.item == nil }.map(\.key) })
-            items += eventualCloud(id).filter { !queued.contains($0.key) }.values
+            items += eventualCloud(id).filter { !queued.contains($0.key) && !truth.deletedWhileOff.contains($0.key) }.values
         }
         let retired = section?.retiredAppleKeyIDs ?? []
         let oldSharedStanding = section?.oldSharedKeyStillStanding ?? false
@@ -409,6 +409,10 @@ extension SWorld {
             }
             if senders.contains(where: { id.hasPrefix("container:\($0.key)/") && $0.value != device.name }) { continue }
             if truth.rolledBackOver.contains(id) || laterStandard(image.fingerprint) { continue }
+            // A key a login-password holder already held in Standard (rule 3)
+            // and tampered with there: entering Castle protects what's written
+            // after (promise 8), never undoes what they took before.
+            if truth.tamperedStandard[device.name]?.contains(image.fingerprint) == true { continue }
             if attacker[image.fingerprint] != nil, !exempt.contains(image.fingerprint), !truth.listedBySheet.contains(id) {
                 fail("a login-password holder opens the copy \(id) (\(f8(image.fingerprint)))")
             }
@@ -426,11 +430,31 @@ extension SWorld {
         var exempt = truth.handedOffBeforeChange.union(truth.olderBuildLeaveKeys)
         // §3.1 rule 2's second exception: the Standard-synced days' keys, until
         // that account replaces its keys or enters Castle.
-        for (fingerprint, synced) in truth.standardSynced where server.snapshot(synced.account)?.corpusKeyID == synced.corpusKeyID {
-            exempt.insert(fingerprint)
+        // (On a device that hasn't yet followed the account past them, its
+        // held sync keys still name that corpus key — rule 2: "after that
+        // device follows".)
+        var held = Set<String>()
+        for item in device.keychain.local.values {
+            switch item.value {
+            case .syncKeys(let m), .legacySync(_, let m?): held.insert(m.corpusKeyID)
+            default: break
+            }
         }
+        for m in device.sessionMemory.values { held.insert(m.corpusKeyID) }
+        var exceptionHolds = false
+        for (fingerprint, synced) in truth.standardSynced
+        where server.snapshot(synced.account)?.corpusKeyID == synced.corpusKeyID || held.contains(synced.corpusKeyID) {
+            exempt.insert(fingerprint)
+            exceptionHolds = true
+        }
+        // While the exception holds, what the account's master reaches — a
+        // Standard-days key file's master lock and the history behind it — is
+        // the exception's; the attacker's other roads are judged alone.
+        var seeds = attackerSeeds(device, appleAccount: true, settled: settled)
+        if exceptionHolds { seeds.masters = []; seeds.vaults = [] }
+        let withoutAccount = exceptionHolds ? reach(seeds, files: keyFilesOn(device)) : attacker
         var violations: [Violation] = []
-        for fingerprint in kept.sorted() where attacker[fingerprint] != nil && !exempt.contains(fingerprint) {
+        for fingerprint in kept.sorted() where attacker[fingerprint] != nil && withoutAccount[fingerprint] != nil && !exempt.contains(fingerprint) {
             violations.append(Violation(promise: 13, device: device.name, detail: "the Apple account or the login password reaches \(f8(fingerprint)), a key from before the leave"))
         }
         return violations

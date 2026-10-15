@@ -195,8 +195,10 @@ extension SWorld {
     /// the library current whatever happens.
     func act(_ device: SDevice, _ body: (ProtectionExecutor, inout UnlockedLibrary) async throws -> ActOutcome?) async throws {
         let (executor, start) = try await opened(device)
-        // A resume the opening ran settles what its press chose.
+        // A resume the opening ran settles what its press chose; the state the
+        // opening reached (a migration's record) is truth before the act.
         adoptPending(device)
+        syncHolders()
         var library = start
         let before = library.record
         defer {

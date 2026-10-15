@@ -117,6 +117,10 @@ struct Truth {
     /// replaced, wiped or re-Apple-ID'd device) — §8's residue (PROVISIONAL
     /// P-U4-1: after a leave, nothing in Standard deletes them on sight).
     var deletesNotCarried: Set<String> = []
+    /// Synced items (any kind — the 13p escrow's raw key among them) deleted
+    /// on a device whose switch was off: the stated exception (§3.1 rule 2)
+    /// holds until iCloud Keychain carries a deletion.
+    var deletedWhileOff: Set<KName> = []
     /// Every copy retention pruned: who, under which Mac, for which library.
     var prunes: [(by: String, mac8: String, library: String, copy: CatalogCopy)] = []
     /// Every copy opened into a library: the record before and after.
@@ -464,9 +468,11 @@ final class SWorld {
         if device.iCloudOn, device.appleAccount != nil {
             device.keychain.synced[name] = DeviceKeychain.Replica(item: nil, version: nextSyncVersion(), dirty: true)
             if let id { truth.deletesNotCarried.remove(id) }
+            truth.deletedWhileOff.remove(name)
         } else {
             device.keychain.synced[name] = nil
             if let id { truth.deletesNotCarried.insert(id) }
+            truth.deletedWhileOff.insert(name)
         }
     }
 
@@ -573,15 +579,26 @@ final class SWorld {
             if let chosen = device.pending.last {
                 typed = TypedSecrets(passphrase: chosen.passphrase ?? typed.passphrase, words: chosen.words ?? typed.words)
             }
-            // She types the passphrase that opens her library (a change made
-            // elsewhere since the press is not yet hers here).
-            if let wrap = liveKeyFile(device)?.passphrase {
-                let candidates = [typed.passphrase].compactMap { $0 } + known.timeline.compactMap(\.passphrase).reversed()
-                if let opens = candidates.first(where: { p in
-                    passphraseKey(p, wrap.kdf).map { Lock.unwrap(wrap.wrapped, under: $0.key) != nil } == true
-                }) {
-                    typed = TypedSecrets(passphrase: opens, words: typed.words)
-                }
+            // She types the passphrase the press took: the one that opens what
+            // the plan's descriptor locks — the vault's, or her library's (a
+            // change made elsewhere since the press is not yet hers here).
+            let candidates = [typed.passphrase].compactMap { $0 } + known.timeline.compactMap(\.passphrase).reversed()
+            let planKDF: PassphraseKDF.Descriptor? = {
+                guard case .plan(let sealed)? = device.container.files[SPath.plan],
+                      let plan = try? ProtectionCoding.decoder().decode(ProtectionPlan.self, from: sealed.payload) else { return nil }
+                return plan.parameters?.passphraseKDF
+            }()
+            let vault = device.session.accountID.flatMap { server.snapshot($0) }
+            if let kdf = planKDF, let vault, vault.format.kdf == kdf,
+               let opens = candidates.first(where: { p in
+                   passphraseKey(p, kdf).map { (try? vault.format.unwrapMaster(withPassphraseKey: $0.key)) != nil } == true
+               }) {
+                typed = TypedSecrets(passphrase: opens, words: typed.words)
+            } else if let wrap = liveKeyFile(device)?.passphrase,
+                      let opens = candidates.first(where: { p in
+                          passphraseKey(p, wrap.kdf).map { Lock.unwrap(wrap.wrapped, under: $0.key) != nil } == true
+                      }) {
+                typed = TypedSecrets(passphrase: opens, words: typed.words)
             }
         }
         return typed
