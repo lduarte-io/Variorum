@@ -161,4 +161,26 @@ struct GeneratorFoundScenarios {
         #expect(world.liveKeyFile(world.macB)?.fingerprint == world.macB.slot?.fingerprint, "another key's file stayed live")
         expectPromisesKept(world)
     }
+    /// Seed 16: the same crashed leave, then the Mac signs back into its
+    /// Apple ID (its keychain's un-uploaded own key lost) — the resume mints
+    /// a fresh own key and finishes.
+    @Test func aCrashedLeaveWhoseOwnKeyWasLostFinishes() async throws {
+        let world = try Self.start("a synced Castle account on two Macs and the phone", seed: 16000094)
+        await world.step(.crash(.thisMacOnly("macA", .standard), afterWrites: 12))
+        await world.step(.switchAppleID("macA", to: SWorld.appleA))
+        await world.done([.launch("macA"), .settle])
+        #expect(world.macA.library?.section.actInFlight == nil, "the leave stuck on its lost Apple key")
+        expectPromisesKept(world)
+    }
+    /// Seed 19: a Mac whose own library is synced (signed out) lands a local
+    /// pair from another Mac — the landing's Apple write is the landed local
+    /// library's, never held up by the outgoing library's account; it
+    /// finishes whole.
+    @Test func aLocalPairLandsBesideASyncedLibrary() async throws {
+        let world = try Self.start("signed out with keys (Standard, synced)", seed: 19000060)
+        await world.done([.createLibrary("macB", secrets: true), .sendLibrary(from: "macB", to: "macA"),
+                          .land("macA", .passphraseWordsTyped)])
+        #expect(world.macA.library?.section.actInFlight == nil)
+        expectPromisesKept(world)
+    }
 }

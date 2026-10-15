@@ -92,6 +92,14 @@ extension ActContext {
         // for (and a resume, which reads no vault, must not stick on it —
         // VX-305 U4, found by the scenario world).
         if parameters.changesAccount == true, parameters.targetAccount == nil { return }
+        // A landing writes for the LANDED library: a local pair has no vault
+        // to read; a synced pair's is its own account's (never the outgoing
+        // library's — a refusal there stuck the landing mid-act).
+        if act == .land {
+            guard executor.guards.freshVaultBeforeAppleWriteOn, parameters.synced == true, let account = parameters.accountID else { return }
+            guard executor.readThisSession(account) else { throw ExecutorRefusal.needsFreshVault }
+            return
+        }
         guard executor.guards.freshVaultBeforeAppleWriteOn, let account = library.record?.account ?? accountID else { return }
         guard executor.readThisSession(account) else { throw ExecutorRefusal.needsFreshVault }
     }
@@ -130,10 +138,13 @@ extension ActContext {
     /// reuses), read here.
     func ownAppleKey() throws -> AppleKeyMaterial {
         try requireAppleWriteAllowed()
-        guard let id = parameters.ownAppleKeyID, let key = try leaves.apple.readAppleKey(id: id) else {
-            throw ExecutorRefusal.appleKeyUnreadable
-        }
-        return key
+        guard let id = parameters.ownAppleKeyID else { throw ExecutorRefusal.appleKeyUnreadable }
+        if let key = try leaves.apple.readAppleKey(id: id) { return key }
+        // The key this act minted is gone (its keychain replaced or reset
+        // before iCloud Keychain carried it): a fresh one, under a fresh id
+        // (one minter) — a resume never sticks on it (VX-305 U4, found by the
+        // scenario world).
+        return try mintAppleKey(purpose: .library)
     }
 }
 

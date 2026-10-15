@@ -274,7 +274,7 @@ extension ProtectionExecutor {
         // Apple key may land with neither.
         var secrets = ActSecrets()
         var parameters = ActParameters(
-            synced: pair.record?.account != nil, newKind: mode, copyID: pair.copyID)
+            synced: pair.record?.account != nil, accountID: pair.record?.account, newKind: mode, copyID: pair.copyID)
         if let text = typed.passphrase {
             if case .format3(let file) = pair.keyFile, let wrap = file.passphrase,
                let key = try? PassphraseKey.derive(text, kdf: wrap.kdf),
