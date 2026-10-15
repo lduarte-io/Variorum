@@ -4022,6 +4022,21 @@ content root.
      ROW (with a hover between the pair, per G4's answer), and D8 on `vx283-u3c`.
   If G1 does not land: restore, release, and build F2.
 
+### U2c — the build (F1, as P-U2b-1 rules)
+
+**Implementer:** a fresh Opus 5.5 at xhigh (2026-10-15, evening), worktree `~/dev/variorum-vx-283`, DerivedData
+`App/Variorum/DerivedData/vx283-u2c` (+ the revert trees `-rt`, `-ru`, `-rv`). **Not done by this session (first
+line):** no stage work of any kind — no `xcodebuild test`, no launch, no walk; the window's drag checks, the pins' runs,
+the reverts' runs and the batch are the orchestrator's window (`u2c/window.sh`). F2 and the second-drag micro-leg are
+NOT built (pre-ruled, held for the window's answers).
+
+**LIVE STATUS (per piece)**
+- C0 — this section opened; the SDK's session-form API confirmed (below): IN PROGRESS.
+- C1 — the pins, red-first (no product line): NOT STARTED.
+- C2 — F1, the fix: NOT STARTED.
+- C3 — the three revert trees named, built and restored: NOT STARTED.
+- C4 — `u2c/window.sh` + READY FOR STAGE: NOT STARTED.
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
