@@ -366,7 +366,7 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **READY FOR STAGE** (≈25 min — the 92-suite batch + R-D/R-E prebuilt; see "U1b — the fix leg") — F-1 + F-2 built and pinned headless (`c3140a92f`, `871d86982`), F-3 recorded and left (older than U1); then the re-walk (W2/W3/W4/W5 scrolled, 20 rapid opens, W9). U1's batch: 1326 tests, 1323 green · 1 skipped · 2 red (P7 fixed headless — its `CapabilityRegistryTests` run rides U1b's batch; `BookCollectingDoorsTests:101` red on main) |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: the window ran (21:24–21:29) — batch 408 tests, 3 red: the lint (U3's VX-245, on main), one U1b pin fault, one real F-1 residual (Starred's revealed last row 1 pt short after the pitch flip); R-D/R-E red where needed. Q5 (headless): the residual's fix + the pin fault, then a short re-run window, then the re-walk. F-3 → VX-359 (U3 rider). |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 — the Library and the red lint | NOT-STARTED |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
@@ -874,8 +874,14 @@ lines — below); any stage work until the orchestrator hands over a claim.
   patches: `notes/plans/vx283-screens/u1b/reverts/R-D.patch`, `R-E.patch` (gitignored). After a pin fix (`ab1880cb`,
   `62d5a4a1` — the fade pins read the depth at the CURRENT pitch, since opening a note can flip 30 ↔ 24) all three
   trees were REBUILT at `62d5a4a1`'s code, each green; **no revert is in the tree** (`git diff` empty).
-- Q4 — **READY FOR STAGE** — the window below (≈25 min): the batch, the two prebuilt reverts, the restore. The
-  screenshot re-walk is a fresh walker's, after it.
+- Q4 — the stage window: **DONE** (claim `vx283-u1b` 21:24:11 → released 21:29:47, the GO's line). Results below
+  ("THE WINDOW'S RESULTS"): the batch 408 tests, **3 red** — the lint (U3's VX-245, red on main), one PIN FAULT (the
+  Open fade pin's mid-list row needs no scroll) and one REAL RESIDUAL of F-1 (Starred's revealed last row 1 pt short
+  after the pitch flip); R-D and R-E red where the brief needs them. Store and prefs restored and verified; the two
+  revert trees deleted (the coordinator's ask).
+- Q5 — the residual's fix (headless, after the window, told to the orchestrator): IN-PROGRESS — the reveal stays
+  owed until a reading shows the row clear (bounded re-issues), and its scroll is issued without animation; the pin
+  fault fixed; then a short re-run window.
 
 **F-3 — THE DOUBLED SEPARATOR: OLDER THAN U1, NOT ADJACENT — RECORDED AND LEFT (the brief's rule).**
 - The View menu's note group is `EditorCommands`' `CommandGroup(before: .toolbar)` (`EditorCommands.swift:954`). It
@@ -1021,6 +1027,48 @@ lines — below); any stage work until the orchestrator hands over a claim.
    → delete any key the suites added → re-export → diff against `prefs-before.plist`; `Tools/stage release`; the
    one-line release report. (The known red `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` is VX-115's
    and not in this batch.)
+
+**THE WINDOW'S RESULTS (2026-10-14 21:24–21:29, products at `62d5a4a1`, HEAD's code; logs in the gitignored
+`notes/plans/vx283-screens/u1b/logs/`):**
+- **The batch** (92 suites, `test-without-building`): **"✘ Test run with 408 tests in 92 suites failed after 84.583
+  seconds with 3 issues."** 405 passed · 3 failed · **no skipped lines**. P7's `CapabilityRegistryTests` GREEN (its
+  pending run, closed).
+  1. `ChromeLineLimitTests.everyBareFixedSizeStatesItsLinePolicy` (`ChromeLineLimitTests.swift:104`) — the bare
+     `.fixedSize()` sites `Core/Views/SearchPicker.swift:503`, `Features/Takes/TakesShowFaces.swift:185`,
+     `Features/Library/LibraryBulkRow.swift:93/101/109`, … — **VX-245, U3's member, red on main**; no U1b file.
+  2. `SidebarSectionWindowMountTests.theOpenListFadesOnlyTheEdgesWithMoreBeyond` (`:431`) — "mid-list" read
+     `EdgeFades(top: 0, bottom: 15)`. **A PIN FAULT, not the code's:** the pin opened row 10 (index 9, 270…300), which
+     stands clear in the 351-pt list at offset 0 (the bottom fade covers 336…351), so nothing scrolls and nothing
+     lies above. The mid-list step must open a row below the fold (index 14, 420…450).
+  3. `SidebarSectionWindowMountTests.starredFadesWhereMoreLiesBeyondAndNowhereWhenItHoldsEverything` (`:455`) —
+     after opening the ninth star's note: window offset **35** of a max **36** (viewport 180, content 216), so the
+     last starred row (192…216) is **cut by 1 pt** and the bottom edge fades 1 pt. **A REAL RESIDUAL OF F-1.** The
+     open brought the rail and flipped the pitch 30 → 24 under the column's 0.22-s animation
+     (`SidebarView.swift:359`, `.animation(_, value: railPostID)`); the reveal's `scrollTo` was issued inside that
+     animated transition and landed against an intermediate layout; `reveal()` cleared `revealOwed` the moment it
+     ISSUED the scroll, and the re-check fires only on a viewport-HEIGHT change, so the settled reading (35 of 36)
+     was never asked again. The same signature, below the half-point slack, elsewhere: `returning…` passed resting at
+     offset 248.58 of 249; R-D's and R-E's walker road rested at 248.19 and 248.47. This is very likely the walker's
+     O-1 itself at a larger amplitude (a scroll landing mid-animation).
+- **R-D** (prebuilt: the pre-U1b reveals in both sections, U1b's oracles kept) — "✘ Test run with 6 tests in 1
+  suite failed after 10.256 seconds with 9 issues": **RED** `returningToTheNoteYouWereInRevealsItsRow` (row 20 of 20
+  at 570…600, the window 0…351 — hidden); **RED** `aShorterListKeepsTheCurrentRowInView` (row 16 at 450…480, the
+  window 129…420 — hidden); **RED** `aNewNoteOpenedFromThePlacesLandsWhollyInView` (the walker's road, observed: the
+  window 248.19…599.19 — cut 0.81 pt); **GREEN** `aCloseNoteLandingRevealsTheNextRowClearOfTheFades` (as predicted —
+  exact-behaviour only); **RED** both fade pins (no fade recorded — "at rest: nil", ×3 and ×3).
+- **R-E** (prebuilt: only the viewport-height re-reveal removed) — "✘ Test run with 6 tests in 1 suite failed after
+  10.233 seconds with 5 issues": **RED** `aShorterListKeepsTheCurrentRowInView` (the window 144…435 — the named
+  pin); **RED** `returning…` (observed: 0…351 — the current-row reveal answered from the Library's stale window, and
+  nothing re-revealed); **RED** the walker's road (248.47…599.47, the bottom fade 0.53); **RED** the Open fade pin (the
+  pin fault above); **RED** the Starred pin (offset 0 — no reveal at all without the height trigger); **GREEN** the
+  landing.
+- **Restore:** the dev store's three files byte-identical before the copy-back (the test host writes no store),
+  copied back from `store-before/20261015T032420Z/`, `cmp`-verified each. Prefs: the suites ADDED 9 keys (5
+  `currentBlock.*`, 4 `surfaceSize.outline.*` — deleted by hand, one needing a second delete) and CHANGED 2
+  (`IdleCommitSweepMark.Variorum-dev`, `variorum.backup.log`); `defaults import` of `prefs-before.plist`, re-export
+  (`prefs-after-restore.plist`), diff CLEAN (1602 = 1602). `Backups/safety-copies/` holds only `castle-W1-20261013`,
+  untouched; no new backup. Zero dev instances throughout; `DerivedData/vx283-u1b-rd` and `-re` deleted;
+  `vx283-u1` kept for the walker. Claim released 21:29:47.
 
 ## Ladder
 
