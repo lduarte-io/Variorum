@@ -4981,9 +4981,12 @@ entries; `Backups/safety-copies/` holds only `castle-W1-20261013` (left alone). 
 
 ## U8b UNIT RECORD — the field guide's MCP chapter + U8's stage window plan (VX-197; opus-implementer, from 2026-10-14 ~23:00 MDT)
 
-**NOT DONE (said first; rewritten at close):** no `xcodebuild test`, no launch, no stage claim, no store touched — the
-chapter's Mac pins, their red run, the both-voices walk, the real client and U7c's re-probe are THE STAGE WINDOW's
-(claim `vx336-u8`, below), run only on the orchestrator's GO. No canon, QUESTIONS or ticket edit. No subagent.
+**NOT DONE (said first, at READY):** the chapter's Mac pins have never RUN — their red run on `vx336-u8-red` and
+their green run in the batch, the both-voices walk on a fresh guide, the real client reading the advice and answering
+the organization ask, and U7c's re-probe are all THE STAGE WINDOW's (claim `vx336-u8`, below; PENDING). No
+`xcodebuild test`, no launch, no stage claim, no store touched; no `Sources/` line changed; no canon, QUESTIONS, ticket
+or stargazing-brief edit (the title is unchanged); no subagent. This session is past ~500k by the harness count: a
+FRESH stage runner takes the window.
 
 **Read in full in this session (never delegated):** this record's header, Hard rules (incl. never `claude mcp list`),
 LIVE STATUS, Stage traffic log, Her rulings; the U8 BRIEF (items 1 and 4, the SPLIT, the U7 carries); the U8a UNIT
@@ -5010,9 +5013,407 @@ Compare road, `MCPSharedRowsRulesTests` / `BookPanelMCPMarksTests` (the icon's h
 
 | piece | what | status |
 |---|---|---|
-| 0 | read-in; this record | DONE (this commit) |
-| 1 | the chapter's truth pins on the OLD seed (Tests only — `TutorialMCPChapterTests`), committed ahead of the chapter | DONE (this commit) — WRITTEN; they run only on the Mac, so their red run on the old seed rides the window (step 1b, on the red product of THIS commit); the list is THE PINS below (written at piece 5) |
+| 0 | read-in; this record | DONE (`9060e968`) |
+| 1 | the chapter's truth pins on the OLD seed (Tests only — `TutorialMCPChapterTests`), committed ahead of the chapter | DONE (`c29a2b8e`; compile fixes `60aa6ba4`, `c7fa39c4`) — WRITTEN; they run only on the Mac, so their red run on the old seed rides the window (step 1b, on the red product of THIS commit); the list is THE PINS below (written at piece 5) |
 | 2 | the red product `DerivedData/vx336-u8-red` (`build-for-testing` from piece 1's commit) | DONE — built from `c7fa39c4` (the pins + the OLD seed; two earlier builds failed on the pins themselves — `60aa6ba4` fixed the type-checker's limit, `c7fa39c4` a duplicate `stack` in lesson three): **TEST BUILD SUCCEEDED**, zero `error:`, no warning in the pin file (`u8/logs/build-red.log`); `Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun` present. Never launched; its one use is the window's red run |
-| 3 | the chapter (`TutorialSeeder`'s MCP lessons) | DONE (this commit) — lessons 1, 2, 3, 6 and 7 rewritten (4 and 5 byte-unchanged); a scratch containment check (the seven lessons' literals compiled with every `text.contains` expectation of the suite, constants substituted) passed every expectation on the new text and failed 37 on the old — the predicted red set, read before the Mac run that decides it |
-| 4 | the green product `DerivedData/vx336-u8`; the headless guards (`MCPProviderNeutralityTests`, the core/MCP targets untouched) | IN-PROGRESS — building from this commit |
-| 5 | THE STAGE WINDOW plan (claim `vx336-u8`), the chapter's text whole, FOR VX-234, PROVISIONALs, OWED (the re-seed note) → READY | NOT-STARTED |
+| 3 | the chapter (`TutorialSeeder`'s MCP lessons) | DONE (`f887d8c7`) — lessons 1, 2, 3, 6 and 7 rewritten (4 and 5 byte-unchanged); a scratch containment check (the seven lessons' literals compiled with every `text.contains` expectation of the suite, constants substituted) passed every expectation on the new text and failed 37 on the old — the predicted red set, read before the Mac run that decides it |
+| 4 | the green product `DerivedData/vx336-u8`; the headless guards (`MCPProviderNeutralityTests`, the core/MCP targets untouched) | DONE — THE PRODUCTS below: `vx336-u8` from `f887d8c7`, **TEST BUILD SUCCEEDED**, all 66 batch suites found in its bundle; `MCPProviderNeutralityTests` **2 tests in 1 suite passed** |
+| 5 | THE STAGE WINDOW plan (claim `vx336-u8`), the chapter's text whole, FOR VX-234, PROVISIONALs, OWED (the re-seed note) → READY | DONE (this commit) — READY for a fresh runner; the kit gains `prompts/U8-org.txt` and `instructions.py` (dry-run on U7's tee) |
+
+### THE PINS (piece 1) — `App/Variorum/VariorumTests/TutorialMCPChapterTests.swift`, written AHEAD of the chapter
+
+**Mac-only** (the seed is an app type), so the red run on the old seed rides the window (step 1b, on `vx336-u8-red`).
+**`@testable import VariorumMCP`** replaces `import VariorumMCP` in this one file, so a claim whose truth lives inside
+the wire is tied to the catalog itself (a tool's rung and description, `aiLabel`, `MCPSession.instructions`,
+`MCPBookFacts.matchesWaitWords`) — W-UX-14's `MCPToolFacts` tie made direct, zero `Sources/` change. The behaviour
+behind each tie is the headless suite the pin names. Every NEW sentence is pinned by its words (RED on the old seed);
+every CHANGED pinned sentence is a JUSTIFIED EDIT commented in place with what it said before:
+
+- **The chapter test** — JUSTIFIED EDIT: the gathering guard lets lesson 7 say "gathering" (VX-185's icon on
+  gatherings); NEW guard: no em dash outside a quoted surface (R-13s-22; `PrivateMarkCopy.rowWords` the one quoted
+  dash) — red on old lessons 1 and 6.
+- **Lesson 1** — JUSTIFIED EDIT: "Your grants stay on this Mac and never sync to your other devices." (the dash).
+- **Lesson 2** — JUSTIFIED EDIT: "press Copy setup command" now ABSENT, and the code block's copy icon named (truth:
+  `MCPSetupCodeBlock.copySymbol == "doc.on.doc"`, the pane declares `.mcpCopySetupCommand`); NEW: requests "at the top
+  of Settings ▸ MCP"; THE TOOLS LINE "Until then, the one thing an approved client can do is look back over its own
+  recent acts." (truth: the ONE `listedWhenApproved` tool is `list_my_activity`, read rung); "listed under Clients";
+  VX-258's tab rule — "A client names itself…", "A client's own setup is the one copied from its tab, and moving its
+  name takes no clicks.", "Any other new setup for a name you approved waits under Waiting…", "It sees no tools until
+  you choose Allow…; Don't allow turns it away." (truths: `rebindTitle`, the registry's Allow / Don't allow,
+  `rebindDetail`'s "allowing moves the name, with its grants", the tabs' `expectedName`s, and `decide` → `.awaitRebind`
+  for ANOTHER tab's key under an approved name); "One honest limit: the key sits…" + L1's "tells two tools apart"
+  (parity). **The F-1 parity clause and its pins are byte-unchanged.**
+- **Lesson 3** — NEW: Suggest "one at a time or many at once" (`add_takes`/`add_comments` suggest); the Write new card
+  (ten tools, write new; `insert_blocks`' "at the note's END — write new on the note is enough"; `link_versions`' "Name
+  at least one pair"); JUSTIFIED EDIT: the Edit card as built (twenty-five tools, edit; `insert_blocks` "anywhere else
+  needs edit"; `delete_comment` "any comment" at edit); JUSTIFIED EDIT: "commits the take just before and just after"
+  now ABSENT, the new sentence pinned and EXECUTED on the wire's act (`editTakeUnderInsurance`: no before-commit when
+  the latest commit holds the words; before + after otherwise, named `mcpEditCommitNames`; the undo restores the words
+  and the commits stay; `labelTakeForClient` commits nothing and stores "  english  " as "english"); NEW: the label rule
+  (`aiLabel(‹name›, "english") == "‹name› · english"`, the separator, no label = the name; `suggestedLabelRule` on
+  add_take/add_takes, `labelNotPrefixed` on the five others); NEW: the comment rule EXECUTED (`addComment` by a client
+  → `mcpCommentIsOwn` true; her `editBlockComment` → false); NEW: the three acts hers alone (the instructions name the
+  same three phrases — D-2; no tool name carries private/seal/own).
+- **Lesson 6** — JUSTIFIED EDIT: recipe 3's exception parenthesized (the dash); NEW: her four first, then organization,
+  a revision, a long job, in that order (`#require` on each opening); the organization recipe (the advice's own
+  "put plans, summaries and research into notes"; `create_book` wing-only; `matchesWaitWords`) EXECUTED on the wire's
+  acts (a note she tagged before the client's `setBookRule` stands at `arrival`; a note the client tags with
+  `applyTagPath` afterwards, and one she tags, stand at `member`); the revision recipe (Compare is ⌘5 by the mode
+  row's order; `duplicate_note` "read on the note and write new on its wing"; `show_in_app`'s "compare" target)
+  EXECUTED (`duplicateNoteForClient`: no live membership, the note's wing, one `derived_from` edge per block, the
+  original's text unchanged); the long-job recipe (no digit but sha256's — P-VX256-1 is provisional; `read_note`'s
+  pages; the eight digest-answering tools carry `digestSentence`, divide/merge carry none — "most"; `list_my_activity`
+  "after a dropped call").
+- **Lesson 7** — JUSTIFIED EDIT: "a book or a gathering"; NEW: the icon's rows (the Library, Pool, book panel, wing
+  switcher and Bookcase hosts each declare `.mcpShowSharing`; `BookPanelBrain.markedNote(.chapter(_, collapsed: e))`
+  is `e`'s note — VX-330), the ⌘L chord from the registry; NEW: own activity, quoting Activity's own line
+  (`activityLine(list_my_activity)` = "‹name› checked its recent activity"); NEW: Compare on `link_versions`' Open ›
+  and on a show ask (both descriptions tie).
+
+**Lesson 1's "way in" (the brief's item) — DISMISSED AS HOLLOW:** the 13n-c UX walk fixed it (W-UX-17; the seed's
+comment says so) and its pin (`"way in"` at most once) is green on both sides — the old seed holds zero. Nothing to fix.
+
+**Predicted red on the old seed** (a scratch containment check — the seven lessons' literals compiled with every
+`text.contains` of the suite, constants substituted — read in this session; the Mac run decides it): **8 tests, 6
+failed, 30 issues** — `theChapterIsSevenLessonsAndTheGuidesAppendix` 3 (lesson 7's gathering; the dash in lessons 1
+and 6) · `lessonOneTheDoorIsShutUntilYouOpenIt` 1 · `lessonTwoConnectingAClient` 10 · `lessonThreeHowMuchWhereHowLong`
+9 · `lessonSixHowToUseIt` 2 (recipe 3's parenthesis; then the `#require` on recipe 5's opening ends the test) ·
+`lessonSevenSeeingAnsweringUndoing` 5; `lessonFour…` and `lessonFive…` green. Every failure by its WORDS; every truth
+half that runs on the old seed (lessons 2, 3 and 7's ties and executed acts) green. The same check on the new seed:
+every expectation holds.
+
+**No revert was ever applied** (U6b's precedent): the pins were committed ahead of the chapter, so the red product is
+the committed pre-fix tree `c7fa39c4`; the fix commit `f887d8c7` touches only `TutorialSeeder.swift`, so reverting it
+on the final tree would rebuild exactly that product.
+
+### THE PRODUCTS (pieces 2 and 4 — `xcodebuild build-for-testing`, never launched here)
+
+- **`App/Variorum/DerivedData/vx336-u8`** — the final tree `f887d8c7` (every later commit is `notes/` only): **TEST
+  BUILD SUCCEEDED**, zero `error:`, no warning in the seeder or the pin file (`u8/logs/build-green.log`). Signed
+  *[removed for publication]*
+  22:49:14; the xctestrun `Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`. The dylib carries "click the
+  copy icon" ×1 and "press Copy setup command" ×0, U8a's link `stargazing.tech/variorum/mcp` ×1 and U7c's "about 32,000
+  characters" ×1; the tree contains `d807cca6` (U7c), so the re-probe runs on it. **All 66 batch suites are real type
+  names in its test bundle** (`nm -j` + `swift-demangle`, matched as `<Suite>.`).
+- **`App/Variorum/DerivedData/vx336-u8-red`** — `c7fa39c4` (the pins + the OLD seed): **TEST BUILD SUCCEEDED**
+  (`u8/logs/build-red.log`); its one use is step 1b's red run, never launched.
+- **Headless guard (the working tree at `f887d8c7`):** `swift test --filter MCPProviderNeutralityTests` → **2 tests in
+  1 suite passed** (no provider outside the seeder's ONE O-4 fence; the fence short and live). No `Sources/` line
+  changed, so no core or MCP target is this unit's.
+
+### THE STAGE WINDOW — the plan (claim `vx336-u8`; runs ONLY on the orchestrator's GO, under the exact claim line it relays)
+
+**What this window does NOT do (said first):** no product code is written or changed, before the claim or under it — a
+red that needs code is RECORDED as a FINDING and reported; no rebuild (if `git diff --name-only f887d8c7..HEAD -- Sources
+App Package.swift` is not empty at the GO, or the coordinator says VX-306 has merged and main must come in first: STOP
+before any launch and report — the rebuild is an implementer's); no canon, QUESTIONS or ticket edits; never her real
+store, never `/Applications/Variorum.app`, never her USER-scope MCP registrations (the copied setup line is never run as
+copied — only its key is taken, into the runner's scratchpad); **never `claude mcp list` (nor `claude mcp get`)**;
+`castle-W1-20261013` left alone.
+
+**Minutes:** guards 1 · the batch ~10 · the red run ~2 · SEAM · prefs, Backups, fingerprint, clipboard 2 · the A1 2 ·
+launch 2 · sherlock present 1 · the fresh guide through the product door 2 · the chapter walk in Study ~12 · connect,
+bind, the advice read, the grant 6 · the organization ask ~8 · U7c's re-probe ~8 · the Terminal pass (the chapter again
++ Activity) ~12 · cleanup 8 → **~76 of work; ask a 100-minute claim.** **Batch-only fallback (~15 min, claim 20):**
+steps 0, 1a, 1b, the SEAM and the release (nothing launched, so no A1 — U1b's precedent); the walk, the client and the
+re-probe then stay OPEN.
+
+**Evidence:** `notes/plans/vx336-screens/u8/` (gitignored): `logs/`, `<leg>.jsonl`, `tee/`, `<leg>-measure.txt`,
+`<leg>-instructions.txt`, captures `live/s/` (Study) and `live/t/` (Terminal). Keys redacted to their first 9
+characters in every record and capture name. **The kit:** `notes/plans/fixes/vx-336-u7-kit/` as U7 used it, plus
+U7c's three prompts and U8b's two additions — `prompts/U8-org.txt` (the organization ask) and `instructions.py <leg>`
+(from the tee: the advice the server sent at `initialize` — its length, first and last lines, the four U8a markers
+CARRIES/LACKS — then every `tools/call` in order with ok / REFUSED; dry-run on U7's tee at READY: U7's pre-U8a product
+read LACKS ×4, the control). **Before any turn:** `export U7_SCRATCH=<the runner's scratchpad>/u8w` (FRESH — never a
+directory an earlier window used), `export U7_SHIM_PATH=$PWD/App/Variorum/DerivedData/vx336-u8/Build/Products/Debug/Variorum.app/Contents/MacOS/variorum-mcp`,
+`export U7_SCREENS=$PWD/notes/plans/vx336-screens/u8`; `K=notes/plans/fixes/vx-336-u7-kit`; `T=$K/turn.sh`; from the
+repo root.
+
+0. **Guards, every step** — U7's step 0 exactly: `Tools/WalkKit/guard.sh --author` before anything touches the GUI
+   (exit 3 ⇒ her app is running: STOP, never quit or kill it; exit 4 ⇒ someone at the machine: STOP); the STRICT
+   instance guards `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` both empty before the launch; the claim line
+   EXACTLY as the GO relays it; `Tools/stage status` never inside an `&&` chain; `guard.sh <devpid> x y` before each
+   click (`Tools/WalkKit/wl2` compiled in this worktree); ≥ 2.6 s between synthetic events; region captures; every key
+   through `keys.sh` (System Events — it drops `á` and `·`; nothing here types either); HEAD at the GO recorded; the
+   product check above.
+1. **1a — the Mac batch (~10 min) FIRST, before the A1.** From `App/Variorum/`: `xcodebuild test-without-building
+   -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx336-u8 -resultBundlePath
+   ../../notes/plans/vx336-screens/u8/u8-batch.xcresult` + one `-only-testing:VariorumTests/<Suite>` per suite below,
+   detached to `u8/logs/u8-batch.log` and POLLED in the foreground (a `grep -q` loop, never `tail -f | grep -m1`).
+   **The 66 suites** — every suite type in every Mac test file naming `TutorialSeeder` (the type this unit changed) ∪
+   U7's 21 (U8a's descriptions and instructions have met no Mac batch yet) ∪ the four the chapter's ties lean on:
+   CalmAsksTests · CaptureUndoHistoryTests · CaptureUndoSyncTests · CaptureHostsUndoFilingTests ·
+   CaptureFocusReattachTests · CaptureTourFocusTests · EncryptionExplainedDrillTests · EncryptionBookDoorTests ·
+   LaunchFurnitureTests · NewModesTests · SampleLibraryWelcomeTests · ShellConfirmTests · SnippetOpenTargetTests ·
+   SnippetsLandingTests · SnippetTagDoorTests · TakeCardDoorTests · TourScriptTests · TourSpotlightTests ·
+   TourEngineTests · TourPoolTuckTests · TourEntryTests · TourEndCardTests · TourEndCardAsideGateTests ·
+   TutorialFurnitureFoldTests · TutorialBuildFlavorTests · TutorialBooksLessonTests · TutorialBooksRitualTests ·
+   TutorialCurrencyTests · TutorialMCPChapterCaptureTests · TutorialMCPChapterTests · TutorialBookShapeTests ·
+   TutorialDoorTests · TutorialWritingActsTests · TutorialTakesActsTests · TutorialStructureActsTests ·
+   TutorialLookingActsTests · TutorialLibraryActsTests · TutorialDeletionActsTests · TutorialWherePlacesActsTests ·
+   TutorialPrivacyChapterTests · TutorialFannedMatrixTests · VX209GuideWarningTests · VX204PrivacyLessonTests (VX-201's
+   guide changes, never overwritten — this unit touched neither) · MCPAskAndReceiptTests · MCPAsksWaitTests ·
+   MCPDeliberateFacesTests · MCPDoorErgonomicsFacesTests · MCPEditFacesTests · MCPEditParityFacesTests ·
+   MCPGrantSheetTests · MCPGrantSheetU2CaptureTests · MCPHerEditorDoorTests · MCPLibraryParityFacesTests ·
+   MCPPaneTabsCaptureTests · MCPPaneTabsTests · MCPPaneTests · MCPRebindFaceTests · MCPSetupKeyFacesTests ·
+   MCPSetupMenuTests · MCPShareFacesTests · MCPWingFacesTests · TakesBoardTests · BookPanelMCPMarksTests ·
+   MCPSharedRowsTests · MCPSharedRowsRulesTests · MCPCompareLandingTests. **Expected:** green; the three gated
+   capture harnesses skip (TutorialMCPChapterCaptureTests, MCPGrantSheetU2CaptureTests, MCPPaneTabsCaptureTests — a
+   different skip set is a finding); **`TutorialMCPChapterTests` 8 tests green — its FIRST run (PENDING until read
+   here)**. Neither standing red (VX-115's `BookCollectingDoorsTests`, VX-167's `DestructiveUndoWarningTests`) is in
+   the set. A red: re-run that suite ALONE once; a red that reproduces is a FINDING — recorded and reported; the live
+   round continues only if it is outside every type this run changed.
+   **1b — THE RED RUN (~2 min), on `vx336-u8-red` (never launched):** `xcodebuild test-without-building -xctestrun
+   DerivedData/vx336-u8-red/Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun -destination 'platform=macOS'
+   -only-testing:VariorumTests/TutorialMCPChapterTests` → `u8/logs/u8b-red.log`. **Expected EXACTLY: 8 tests, 6
+   failed, 30 issues** (THE PINS' predicted red, test by test: 3 · 1 · 10 · 9 · 2 · 5; lessons 4 and 5 green), every
+   failure an expectation on the chapter's WORDS (none on a tie or an executed act). Any other count is a finding,
+   recorded and reported. Then the red product may be deleted (`rm -rf DerivedData/vx336-u8-red`, the coordinator's
+   disk). **→ THE SEAM:** record 1a's and 1b's counts here, commit, push, KEEP the claim, report "SEAM" through the
+   orchestrator; continue only on its word ("continue" or "release for X").
+2. **Prefs, Backups, fingerprint, clipboard — BEFORE the A1 and the launch (~2 min):** `defaults export
+   io.lduarte.Variorum.debug $U7_SCREENS/prefs-pre.plist` (key count recorded); `ls -la …/Variorum-dev/Backups/ >
+   $U7_SCREENS/backups-pre.txt`; the dev store listed read-only; her user-scope servers — names + the sha256 prefix,
+   never values (U7 step 2's `python3 -I` one-liner) → `userscope-pre.txt` — **expected `['linear-server', 'variorum']`,
+   `bc64543e2f4e8e58`** (U5–U7's); the clipboard saved (`pbpaste > $U7_SCRATCH/clip-before.txt`, never read or
+   recorded).
+3. **THE ONE A1 (~2 min) — `stage.sh`'s copy loop ONLY, no fixture** (U5/U6's form): the store must be quiet (both
+   strict guards and the loose `pgrep -f 'Variorum.app/Contents/MacOS'` EMPTY — a headless build line of another
+   session: wait for it to end); `DEST=…/Variorum-dev/Backups/safety-copies/scale-prestage-$(date -u
+   +%Y%m%dT%H%M%SZ)` (the name `restore.sh` accepts); `cp -p` each of `variorum.sqlite`, `-wal`, `-shm` and every
+   `variorum-keys-*.json` into it, each `cmp`-verified; the path → `a1-path.txt`; the sha256 prefixes →
+   `store-hash-pre.txt`. castle-W1 untouched.
+4. **Launch (~2 min):** `open -n App/Variorum/DerivedData/vx336-u8/Build/Products/Debug/Variorum.app`; its pid by the
+   strict guard; a What's New sheet → its own button; a lock screen → `source ~/.variorum/dev-castle.env`, those values
+   only (none expected — the store is Standard/unlocked); Study expected (capture `live/s/00-launch`).
+5. **Sherlock present (~1 min):** the Bookcase shows "the adventures of sherlock holmes" (Home). Absent ⇒ Help ▸
+   Restore the Sample Library (its door; restored at cleanup). Capture `live/s/01-sherlock`.
+6. **THE FRESH GUIDE THROUGH THE PRODUCT DOOR (~2 min) — item 4's road, walked:** Help ▸ **Restore Tutorial…** → the
+   confirm "Restore the tutorial?" (its detail names the tag, the pool and the book) → **Replace** (capture the confirm
+   `02-confirm`) → the receipt "The tutorial is fresh — “the field guide” is on your Bookcase, on the “Welcome” shelf."
+   and the guide opens (capture `03-fresh`). Then the Library's Trash: the OLD guide's book and lessons are there,
+   deletable or put back like any (capture `04-trash` — the re-seed note's own claim, seen).
+7. **THE CHAPTER WALK, Study (~12 min):** the guide's Outline with the chapter "AI & the MCP door" and its seven
+   lessons in order (capture `C0-outline`). Then each lesson by ⌘K → its title → ⏎ (the reliable road — WalkKit's
+   13u3 note): "what the door is" · "connecting a client" · "how much, where, how long" · "what always asks" ·
+   "sharing from where you are" · "how to use it" · "seeing, answering, undoing" — each opens at its start (a first
+   open, R-18l-1); capture `live/s/C1`…`C7`; a lesson taller than the window (lessons 3 and 6 for sure): `walk-scroll`
+   down and capture `C3b`, `C6b` (and `c`, as needed) until its last paragraph shows. **Read against THE CHAPTER AS
+   BUILT below:** every paragraph present, in order, nothing clipped; the only em dash is lesson 4's quoted Private
+   row; "‹name› · english" (lesson 3) and "‹name› checked its recent activity" (lesson 7) render their marks.
+8. **Connect, bind, THE ADVICE READ, the grant (~6 min):** App menu ▸ MCP Settings… → the switch ON (expected already).
+   **Connect ▸ Claude Code ▸ the copy icon** → ONLY the key: `mkdir -p "$U7_SCRATCH/keys" && pbpaste | python3 -I -c
+   'import re,sys; m=re.search(r"vmk2_claude-code_[^\s\"'"'"';]+", sys.stdin.read()); print(m.group(0) if m else "")' >
+   "$U7_SCRATCH/keys/u7.key" && chmod 600 "$U7_SCRATCH/keys/u7.key"` (non-empty; record only its first 9 characters);
+   the clipboard emptied at once (`pbcopy < /dev/null`); never run the copied line. **The bind turn:** `zsh $T bind
+   mcp__variorum-dev__list_books < $K/prompts/bind.txt` → Activity "claude-code connected with a new setup, now bound to
+   its name" (or "…a newer setup, which replaced its earlier one") with zero clicks (capture `05-bind`); an unknown
+   name → Waiting ▸ Approve… (alone — zero reach). **THE ADVICE, from bytes:** `python3 -I $K/instructions.py bind` →
+   **expected: the advice ≈ 2,969 code points (U8a's Swift count; a different count is recorded, not a red unless a
+   marker LACKS), its last line exactly "The guide to this door: https://stargazing.tech/variorum/mcp", CARRIES ×4**
+   (the tools line, the organization sentence, the three acts, the link) — the real client received U8a's advice.
+   **THE GRANT:** Clients ▸ claude-code ▸ Change… ▸ **A wing · Home · Write new · Always** (capture the sheet
+   `06-grant` and the Shared-with-AI row `07-row`). It reads sherlock (Home) for step 10 and can do every
+   organizing act the advice names (create_book is wing-only).
+9. **THE ORGANIZATION ASK — a real client answering by the advice (~8 min):** `zsh $T U8-org
+   "mcp__variorum-dev__list_books,mcp__variorum-dev__list_notes,mcp__variorum-dev__read_note,mcp__variorum-dev__search,mcp__variorum-dev__create_note,mcp__variorum-dev__apply_tag,mcp__variorum-dev__create_book,mcp__variorum-dev__create_section,mcp__variorum-dev__add_note_to_book,mcp__variorum-dev__file_note_in_chapter,mcp__variorum-dev__set_book_rule,mcp__variorum-dev__list_my_activity"
+   < $K/prompts/U8-org.txt`, then `python3 -I $K/instructions.py U8-org` (the advice again + the acts in order) and
+   `python3 -I $K/measure.py U8-org` (every answer INLINE). The prompt asks for a tea-research summary kept "organized
+   and easy to find" and NAMES no book, chapter or tag — the advice must supply the shape. **PASS:** (a) the summary
+   lands as a NOTE (`create_note` ok), not only in the chat; (b) at least one organizing act the advice names — a tag
+   (`apply_tag`), a book (`create_book`), chapters (`create_section`, `add_note_to_book` / `file_note_in_chapter`), or
+   the strongest form, a book that collects by a tag rule (`set_book_rule`); (c) zero REFUSED calls; (d) the model's
+   closing lines say what it made. **Record exactly which acts, in order.** **Her face (Study):** the Bookcase (any new
+   book; a rule it wrote → the note at that book's Arrivals if it was tagged first, a member if tagged after — lesson
+   6's own recipe sentence, seen live), the Library row, Activity's lines (captures `08-org-bookcase`,
+   `09-org-library`, `10-org-activity`). A client that answers only in chat, or makes one untagged bookless note: a
+   FINDING for the orchestrator (the advice's force), never a product red.
+10. **U7c's RE-PROBE (~8 min) — THE RE-PROBE in the U7c UNIT RECORD, run as written** (one read per turn, each measured
+    alone from BYTES): `zsh $T U7c-200 "mcp__variorum-dev__list_books,mcp__variorum-dev__list_notes,mcp__variorum-dev__read_note"
+    < $K/prompts/U7c-200.txt` then `python3 -I $K/measure.py U7c-200`; the same for `U7c-100` and `U7c-ids-200`.
+    **Expected:** (1) limit 200 → 72 blocks, ≈ 31,950 characters, `next_cursor`, `block_count` 215, **INLINE**; (2) limit
+    100 → the same 72-block page, **INLINE**; (3) `ids_only` limit 200 → 116 blocks, ≈ 31,930 characters, **INLINE**;
+    every answer ≤ 32,000 in `measure.py`. Any NOT-INLINE is a FINDING (the budget's number), recorded, not fixed.
+11. **The Terminal pass (~12 min):** Settings ▸ General ▸ Theme ▸ **Terminal** (a pointer click on the segmented
+    control — U5's road; capture `t/00-theme`); **the chapter walk again** — `C0-outline`, `C1`…`C7` (+ `b`/`c` scrolls)
+    under `live/t/`, read as in step 7; Settings ▸ MCP ▸ Activity in Terminal (step 9's lines; capture
+    `t/10-activity`); Theme back to **Study** (capture `s/11-back-study`).
+12. **Cleanup (~8 min)** — U7's step 13 exactly, adapted: the Debug app quit BY BUNDLE ID (`osascript -e 'tell
+    application id "io.lduarte.Variorum.debug" to quit'`), both strict guards empty, no turn or shim of ours left;
+    **the key** (read whole from `keys/u7.key`) grepped over `$U7_SCREENS`, `~/.claude.json`, `~/.claude/projects/`,
+    `notes/` + `Tools/` and the scratchpad outside `keys/` → **0 files**; then `keys/` deleted (the key and every
+    `cfg-*.json`); the clipboard RESTORED (`pbcopy < $U7_SCRATCH/clip-before.txt`, `pbpaste | cmp` SAME, the copy
+    deleted); **no `-s local` registration was ever made** — read-only: `~/.claude.json` has no `projects` entry for
+    `$U7_SCRATCH/proj` with `mcpServers` (never `claude mcp get`/`list`); any saved-to-file tool result under the scratch
+    project's `~/.claude/projects/…-u8w-proj/` deleted; her user-scope fingerprint AFTER = BEFORE; prefs: `defaults
+    import io.lduarte.Variorum.debug $U7_SCREENS/prefs-pre.plist`, re-export, diff, `defaults delete` every key the
+    window ADDED (import merges), until **0 added · 0 removed · 0 changed**; `Tools/ScaleFixture/restore.sh "$(cat
+    $U7_SCREENS/a1-path.txt)"` → "Restored (verified)", a second `cmp` of every file SAME and the sha256 set equal to
+    `store-hash-pre.txt` (the fresh guide, the old guide's Trash rows, the organization note and book — every window
+    write — gone with it; Standard, unlocked, Study, claude-code's pre-window binding and grants back); `Backups/`
+    unchanged against `backups-pre.txt`; castle-W1 untouched; 0 simulators booted; the tree clean;
+    `Tools/stage release --who vx336-u8`; **THE RESULT LINE** for the coordinator: claim times; 1a's counts and 1b's
+    exact red; the walk in both voices (PROVEN or the paragraph that wasn't); the advice from bytes; the organization
+    acts; the re-probe's three verdicts; the posture (cmp SAME vs A1, prefs 0 differ, fingerprint SAME,
+    Standard/unlocked); the A1 path (the coordinator's to prune).
+
+### THE CHAPTER AS BUILT (piece 3 — "AI & the MCP door", seven lessons; rendered from the seed's own literals at `f887d8c7`; lessons 4 and 5 byte-unchanged)
+
+The title is unchanged, so the stargazing brief's "Learn more" line (it quotes "AI & the MCP door") needs no edit.
+
+**Lesson 1 — what the door is**
+
+> Variorum can let an AI work in your library, if you want it to. It works through MCP, the Model Context Protocol: a standard way for AI apps to use another app's tools. Variorum calls this connection the door, and it stays shut until you open it. It lives on the Mac; the phone has no door.
+
+> Open it in Settings ▸ MCP (⌥⌘, takes you there) with Enable the MCP server. It works only while Variorum is open, and nothing in your library can be read through it until you share something with a client. Your grants stay on this Mac and never sync to your other devices. What a client reads goes wherever that client sends its work: for most clients, the company that runs its model.
+
+> A client can only do what you could do yourself, through the same acts. What it writes arrives as takes, notes and commits you can see, and every act it takes comes back out with ⌥⌘Z for as long as this session is open, except a commit, which stays, as yours do. The chapter's last lesson, “seeing, answering, undoing”, shows how to watch it, answer it and undo it.
+
+**Lesson 2 — connecting a client**
+
+> To connect a client, open Settings ▸ MCP; under Connect a client, choose yours at the top of the setup block: Claude Code, Codex, or Any MCP client. Then click the copy icon in the block's upper right corner. For Claude Code or Codex it is one command: run it in a terminal, then start a new session of that app. For any other client it is a few lines of JSON to paste into that client's MCP settings. The pane also shows the path they all point at, because the door is a standard MCP server: one program inside the app.
+
+> The first time a client connects, it shows up at the top of Settings ▸ MCP as a connection request, and it can reach nothing yet. Approve… lets it in, still reaching nothing until you share something: its sheet offers a first grant, with nothing picked for you. Until then, the one thing an approved client can do is look back over its own recent acts. Deny turns it away. Every approved client is listed under Clients, with Change… to share more and Deny… to shut it out again, every grant it holds revoked.
+
+> A client names itself when it connects, and the setup you copy carries a key that ties that name to it. Running the client's own setup again moves the name to the new key; a setup copied for any MCP client waits for your OK before it takes a name you approved; and a tool still using an older key, or none, is turned away.
+
+> A client's own setup is the one copied from its tab, and moving its name takes no clicks. Any other new setup for a name you approved waits under Waiting, above the tabs in Settings ▸ MCP, as a new setup for that name. It sees no tools until you choose Allow, which moves the name and its grants to it; Don't allow turns it away.
+
+> One honest limit: the key sits in the client's own settings, where any program running as you can read it. It tells two tools apart, not programs running as you.
+
+**Lesson 3 — how much, where, how long**
+
+> Each grant says how much a client may do, in four steps, each including the ones before it. Read: it can read and search what you shared. Suggest: it can add new takes and comments beside your text, one at a time or many at once, and save a lens; it can't change a word you wrote.
+
+> Write new: it can also make new notes, books, chapters and tags, file notes into books and chapters, and give a book a rule that collects notes by tag. It can add blocks at the end of a note, duplicate a note to work on a copy, and link two notes as versions by naming which paragraphs match.
+
+> Edit: it can also do most of what you can do at the keyboard. In a note, it can change, choose, commit, archive or delete takes, restore a commit, make a lens the note, add blocks anywhere, divide, merge, move or delete blocks, and edit or delete any comment. Across the library, it can take a tag off a note, rename, archive or delete notes and books, finish or reopen a book, reorder a book's notes and chapters, and rename or delete a chapter. When it rewrites the words of a take, Variorum first commits the words it replaces, unless the take's latest commit already holds them, and then commits the new words, so you can always compare and come back. Both commits stay even if you undo the edit.
+
+> You can always see who suggested a take. A take a client adds beside yours wears its name, then a dot and its own label if it gave one, like ‹name› · english. Takes it writes into a new note or new blocks, and labels it sets on a take, carry only the label it gave. With Suggest it can delete a comment it left, but only while the words are still the ones it wrote; once anyone changes them, deleting that comment takes Edit, which can delete any comment.
+
+> Three things stay yours alone, whatever you grant: marking something Private, sealing a book, and making a book own its notes. A client knows what each one does and may suggest one when it would help, but only you can do it.
+
+> Each grant also says where: one note; one book, with its notes now and any added to it later; or a whole wing and everything in it, except what always asks: your daily Journal's entries and anything Private (the next lesson). And for how long: once, for a single act (one read of a note, or one change); until it disconnects, which ends when the client goes away (offered while it's connected); or always, until you revoke it.
+
+> A wing grant also lets a client read that wing's gatherings; a gathering is never shared on its own. And a client can move a note to another wing only with edit where the note is and write new in the wing it goes to: the note leaves its books there, its tags come along, and ⌥⌘Z brings it back.
+
+> The open book is the widest grant of all: one switch in Settings ▸ MCP that lets every approved client read everything, always, again except what always asks. It is off to begin with; leave it off unless that is what you mean.
+
+**Lesson 4 — what always asks**
+
+> Two things are never reached by a book grant, a wing grant or the open book: the entries in your daily Journal (the journal ⌘J and Today's Entry file into), and anything marked Private. A client can read one of them only through a grant on that one note, once or until it disconnects. Always is never offered for them.
+
+> To mark a note Private, open the note ▾ menu in the bar at the bottom of the note and choose Private — never shared with AI. A book has the same mark in its Book Settings, and it covers every note in the book. Other books with date-stamped entries share like any book; only the daily Journal asks. An entry made with ⌘J keeps asking even if you later file it in another book.
+
+> Snippets can't be reached through the door at all: no grant reaches them. And each wing is a separate library: a grant in one wing never reaches another (⌘L switches wings). Snippets is the one room every wing shares, and it stays closed to clients.
+
+> To a client, something it can't reach looks exactly like something that isn't there. No answer it gets tells it that a Private page or a journal entry exists.
+
+**Lesson 5 — sharing from where you are**
+
+> Once a client is approved, you can share from wherever you are. Right-click a note in the Library, or a book on the Bookcase or in the Library, and choose Share with AI…: the grant sheet opens with that place already picked. ⌘-click several notes in the Library and doors appear under the controls at the top of the list, Share 3 notes with AI… among them (the number is how many you picked): one grant for all of them. And a book's Book Settings says who reaches it, with Share… beside.
+
+> ⌥⌘A (Edit ▸ Share This Note with AI) shares the note you're in with the client you granted most recently, at that grant's step: until it disconnects if it's connected, otherwise once, never always. Its confirmation says what was shared, with Change… to adjust it and Revoke › to take it back. With no grant yet to follow, it opens the grant sheet on this note instead.
+
+> Every grant shows in Settings ▸ MCP, with Change… to raise or lower it and Revoke to take it back. Sharing several notes at once makes one row there, and one Revoke covers them all.
+
+**Lesson 6 — how to use it**
+
+> Say your notes for a design doc live in a book. Share that book at Suggest and ask your AI to go through it: it can leave implementation ideas or tradeoffs as new takes on each block, and they join the block's takes unchosen, so the page doesn't change until you choose one. Review them in Takes (⌘2); ⌥⌘O shows the client's last change, and ⌥⌘Z takes the latest back, named after the client.
+
+> Or make a book just for your AI, even an empty one, and grant it Write new on that book alone. It can read what's in that book and add new notes to it; if that is its only grant and the open book is off, nothing else in your library is readable to it.
+
+> For help across everything, grant a whole wing instead: it reaches every note, book and gathering in the wing except what always asks (your daily Journal's entries and anything marked Private, which a client reaches only through a grant on that one note). So mark Private whatever should stay off-limits first, then grant the wing.
+
+> And for a one-off, right-click a note in the Library, choose Share with AI… and grant Read, once: the client's first read of the note spends the grant, and nothing stands afterwards.
+
+> Your AI can help keep the library in order, too. Grant it Write new on a wing and ask it to put plans, summaries and research into notes rather than leave them in the chat. It can make a book for a project, give it chapters and file notes into them, tag notes, and make a book that collects every note wearing a tag. A rule it writes moves nothing by itself: notes that already match wait at the book's Arrivals for you to let in, and notes it tags afterwards join the way they would if you had tagged them.
+
+> For a revision, grant Edit on the note's wing and ask your AI to duplicate the note and rewrite the copy. The copy lands in that wing's Pool, in no book, and your original never changes. Because each block of the copy remembers the block it came from, Compare (⌘5) lines the two up row by row. Ask your AI to show you the two side by side and, while Variorum is the app in front, it opens Compare on them.
+
+> For a long job, like translating a whole book, ask your AI to check its work as it goes. It can read a long note a page at a time instead of all at once. Most writes that add or rewrite words answer with a fingerprint of exactly what was stored (a sha256), so it can confirm every word landed as it sent it. And if the connection drops partway through, it can look back over its own recent acts to see which ones landed before it carries on.
+
+**Lesson 7 — seeing, answering, undoing**
+
+> On the Bookcase, a small icon beside a book or a gathering means a client can reach it. The same icon shows on notes, books and gatherings in the Library, on notes in the Pool, on the notes listed in the panel that shows a note's book, and on wings in the switcher that ⌘L opens. In that panel, a chapter that shares a row with its only note wears the note's icon. Point at the icon to see who and how far; click it for the details, including why (through the Home wing grant, say), with Change… and Revoke. Inside a note, while the door is open, the same icon sits at the right end of the context bar above the page, or a lock when the note is Private.
+
+> Settings ▸ MCP lists every client, everything shared, and, under Activity, the calls clients made recently. A client can look back over its own recent acts as well, which is how it learns whether a call landed after a dropped connection; Activity then says “‹name› checked its recent activity”.
+
+> When a client wants more than you've shared, nothing pops up and nothing interrupts you. Its ask waits: a small mark appears beside the place it names (the note's row in the Library, the book on the Bookcase, the wing's name, the note's context bar) and under Waiting in Settings ▸ MCP, which ⌥⌘, opens. Press the mark to answer: Once, Until it disconnects or Always, whichever fit, or Don't allow. Don't allow, or Esc, lets the ask go; the client can ask again.
+
+> Whatever a client writes, a line at the bottom of the window says so, naming the client, with Open › to go and look (unless Confirmations after an act is off, in Settings ▸ General); when it links two notes as versions, Open › shows them side by side in Compare. ⌥⌘O (Show the AI’s Last Change, in the Edit menu) takes you there later, even after the line fades. ⌥⌘Z takes a client's act back, one act at a time, and the Edit menu names it after the client: Undo ‹name›'s take.
+
+> A client is told to move your window only when you ask it to show you something, and it can only while Variorum is the app in front; it never brings a window forward. Asked to show you a note beside another, it opens Compare with them side by side.
+
+### FOR VX-234 (user-facing words, AS BUILT — U8b)
+
+- **No pane, sheet, receipt or menu word changed.** Every word U8b wrote is the field guide's (above, whole).
+- **Changed or new, by lesson:** 1 — the dash sentence ("Your grants stay on this Mac and never sync…"); 2 — the
+  setup block and its copy icon, "at the top of Settings ▸ MCP", the tools line ("Until then, the one thing an
+  approved client can do is look back over its own recent acts."), "listed under Clients", the re-voiced key cards
+  (the parity clause kept byte for byte), the Waiting card, the one honest limit; 3 — the Suggest clause, the Write
+  new card, the Edit card and its commits sentence, the who-wrote-what card ("You can always see who suggested a
+  take…", the label shown as "‹name› · english"), the three-acts card; 6 — recipe 3's parenthesis, and the three new
+  recipes (organization, a revision, a long job — "fingerprint" is the guide's word for the sha256); 7 — the icon's
+  rows, own activity (quoting Activity's "‹name› checked its recent activity"), Compare on Open › and on a show ask.
+- **For her eye:** lesson 3 is now eight paragraphs (P-VX197-U8b-1); "fingerprint" for the digest; "the panel that
+  shows a note's book" for the Book Panel (the guide never names it — the books chapter says "the panel it opens").
+
+### PROVISIONALs (the orchestrator files them at the merge)
+
+- **P-VX197-U8b-1 — where the tools are taught: lesson 3 grows, the chapter stays seven lessons.** The brief's "taught
+  in its lesson" put every rung's acts in lesson 3, which went from four paragraphs to eight (Read + Suggest, Write
+  new, Edit, who wrote what, the three acts, then the three it had). Options: **(a) as built** — seven lessons, every
+  title, seat and pointer unchanged (lesson 1's "the chapter's last lesson", lesson 3's "the next lesson"); (b) split
+  lesson 3 into "how much" and "where and how long" (eight lessons; the plan, the pins' indices and MCPSpec's "seven
+  lessons" move); (c) a new lesson "what a client can do" between 3 and 4 (the same moves). Built (a): the least
+  structure moved, and the reference lesson reads as one list of steps.
+- **P-VX197-U8b-2 — the revision and long-job recipes.** Organization as recipes is the plan's ruling; teaching
+  `duplicate_note` + Compare and pages + digests + `list_my_activity` as two more RECIPES beside her four (rather than
+  as facts inside lesson 3 or 7) is this unit's choice. Options: **(a) as built** — recipes 6 and 7 in "how to use it",
+  lesson 3 naming the acts and lesson 7 the faces; (b) facts only, no recipes (lessons 3 and 7 carry everything);
+  (c) one combined "careful work" recipe. Built (a): each tool sits where a reader would reach for it — the steps say
+  what is allowed, the recipes say when to use it — and her four still lead, unchanged in order and words but for
+  recipe 3's dash.
+
+### MOBILE PARITY (for the closeout's line)
+
+Nothing mobile-visible: the phone has no door and its pocket guide (`MobileTutorialSeeder`) carries no MCP chapter.
+
+### SELF-ASSESSMENT (the implementer's)
+
+The chapter is built to the brief's item 1 point by point, each claim pinned by its words and, where the truth is
+reachable from the app, by the act itself (the commit dedupe, the label as given, the comment rule, the organization
+recipe's arrival-then-member, the duplicate's landing) or by the catalog the wire serves (rungs, descriptions,
+`aiLabel`, the advice). The old seed fails the new pins by words only (predicted 30 issues in 6 tests by a scratch
+containment check; the Mac run decides it). What I'd have a reviewer press on: **(1)** `@testable import VariorumMCP` in
+a Mac test — new in this target (VariorumCore's precedent exists; no name collision, checked; the build is green);
+**(2)** the tool lists in lesson 3's Write new and Edit cards are the catalog's AS OF NOW — a tool added later is not
+caught by these pins (the pins catch only a named tool changing rung); **(3)** "the one thing an approved client can do"
+assumes the open book is off — I read turning the open book on as sharing (lesson 3 calls it "the widest grant of
+all"); **(4)** "Most writes that add or rewrite words" — divide, merge, `save_version` and a book import answer no
+digest (P-VX254-1/2); **(5)** the commits sentence leaves out the blank-never-committed edge (`isDirty` false: no
+before-commit, nothing to keep) — said simply rather than exactly; **(6)** lesson 7's book-panel sentence describes the
+collapsed row by its shape ("a chapter that shares a row with its only note") — true only of the row-8 collapse, which
+is the only time they share a row; **(7)** the window's organization leg PASSES on any one advice shape — a stricter
+bar (a tag-rule book) would test the model as much as the advice.
+
+### OWED (U8b → the orchestrator)
+
+1. **THE STAGE WINDOW (claim `vx336-u8`, ~100 min; batch-only fallback 20)** — a FRESH stage runner takes it (this
+   session is past ~500k by the harness count). The products are on disk; the plan is above; nothing in it needs
+   code.
+2. **THE RE-SEED NOTE for her handoff (item 4), ready to paste:** *Your library keeps the field guide it already has.
+   To get the new MCP chapter, choose Help ▸ Restore Tutorial…: it asks first, then moves the old guide (the book
+   "the field guide", every note tagged exactly "tutorial", including any of yours with that tag, and the "tutorial
+   scraps" pool) to the Trash and puts a fresh guide on your Bookcase, on the Welcome shelf (its confirm also says what it arranges there). Anything you changed in
+   the old guide is in the Trash for 30 days if you want it back. The same command brings the guide back if you have
+   deleted it.* (The window's step 6 walks this road on the dev store.)
+3. **The two PROVISIONALs** above → QUESTIONS at the merge.
+4. **FOR VX-234** above → posted to VX-234 at the closeout.
+5. **MCPSpec at the merge:** its docs clause "the field guide's MCP chapter (seven lessons, her ruled 'how to use it'
+   recipes sixth)" stays true; the orchestrator may add that the chapter teaches the as-built door (VX-197) beside
+   U8a's "≤2,000" → "≤3,000".
+6. **The stargazing brief:** no edit owed — the chapter's title is unchanged and the brief's "Learn more" paragraph is
+   true of the as-built door (read in this session).
+7. **No ticket minted.** No observation outside the chapter.
