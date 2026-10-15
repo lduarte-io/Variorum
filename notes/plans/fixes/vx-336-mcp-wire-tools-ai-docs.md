@@ -250,6 +250,21 @@ guidance. Each unit's evidence is named before its spawn.
 
 ## Her rulings during the run (verbatim; each also on its ticket)
 
+- **HER OVERNIGHT WORD (2026-10-15 ~00:05 MDT, in chat), verbatim:** *"I am going to sleep, rule provisionally overnight in
+  my absence and leave me a handoff in the morning. you or 283 can merge last, whoever does should have a release build
+  ready, write notes on what was updated (I don't have to review those notes, it's fine), and push a release to the
+  website so I can try the new things out tomorrow morning."*
+  - The run continues through the night: U9, the ladder, the closeout and the merge, ruling provisionally where she would
+    rule. It never rules on the author-only irreversible list (her accounts or credentials, deleting her things, history
+    rewrites, a synced lockstep deploy).
+  - **Whoever merges LAST tonight (VX-336 or VX-283; the coordinator decides) cuts the release:**
+    - the release notes, written by that session; her review is waived for this release ("I don't have to review those
+      notes, it's fine"), the named exception to her standing notes rule;
+    - the MARKETING_VERSION bump;
+    - `Tools/Release/release.sh`;
+    - the site road to stargazing.tech;
+    - the `/Applications` refresh, so her Mac has it in the morning.
+  - A handoff for the morning.
 - **THE LADDER'S CAST (2026-10-14 ~19:55 MDT, in chat), verbatim:** *"you can use fable xhigh to review instead of opus
   at max"*. Every ladder round is a FRESH `fable-reviewer` at effort xhigh (REVIEW_PROMPT verbatim, PHASE=VX-336),
   replacing the kickoff's Opus rounds 2–3, under the cross-model flow each round: Fable's final call, the Opus implementer
@@ -275,6 +290,19 @@ guidance. Each unit's evidence is named before its spawn.
    road). It is the same class VX-246 fixed, on a road this run's tools speak through, and a fence breach is a launch
    matter, so it is fixed in-run, red-first. Pre-launch is HER call on the ticket (High, flagged). Option: (b) ticket
    it for later.
+3. **The stargazing gate vs tonight's release (2026-10-15 ~00:05).**
+   - **The conflict:** her overnight word asks for a public release to the website. Her standing gate R-VX184-4 says *a
+     build carrying the instructions' link to `https://stargazing.tech/variorum/mcp` must not ship before the page is
+     live*, and the page answered **404** at 00:05 (checked by the orchestrator).
+   - **Ruled:** the release ships, and `MCPSession.instructions` OMITS the one link sentence until the page is live.
+     - Nothing else changes: the instructions' other words, the guide, the descriptions.
+     - The sentence returns in a one-line change the moment her site agent publishes the page, under a ticket and the
+       handoff's lead item.
+     - The pins move with it: the link sentence stays pinned as a constant, gated OFF.
+   - **Why:** both of her words hold at once. The release she asked for ships, and the gate she ruled is not broken.
+   - **Option:** (b) ship with the link; until the page is live an AI reading it meets a dead link (a breach of
+     R-VX184-4). Hers to choose in the morning.
+
 
 ## Tickets minted from this run
 
