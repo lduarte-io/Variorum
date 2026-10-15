@@ -4204,10 +4204,61 @@ paging parameters is byte-unchanged, and so is the one not-shared shape.
 | piece | what | status |
 |---|---|---|
 | 0 | read-in; this record | DONE (this commit) |
-| 1 | the pins on the OLD tree (Tests only) → RED, counts read from the run's own output | NOT-STARTED |
+| 1 | the pins on the OLD tree (Tests only) → RED, counts read from the run's own output | DONE (this commit) — see THE PINS below: 22 tests, 9 failed, 18 issues on `0b1be274`'s product |
 | 2 | the product: the answer budget (`MCPNoteStructure`, `MCPReadTools`'s shared encoder + the version echoes) + `read_note`'s description; builder B's budget pins re-pinned (each edit commented) → GREEN | NOT-STARTED |
 | 3 | the revert check (announced here and committed BEFORE it runs; restore verified) | NOT-STARTED |
 | 4 | headless finals (whole package) · the measured page sizes · FOR VX-234 · PROVISIONAL · the RE-PROBE for U8b · OWED | NOT-STARTED |
+
+### THE PINS — RED ON THE OLD TREE (piece 1; read from the run's own output)
+
+**The new suite** `Tests/VariorumMCPTests/MCPPageAnswerBudgetServerTests.swift` (wire, the SDK's own client; it compiles on
+the old tree — only builder B's arguments and types are named, the budget is the file's literal 32,000; "characters" are
+measured as UTF-16 code units, see D-U7c-3):
+- **P-U7c-1 `aSherlockSizedNoteReadsInPagesWithinTheAnswerBudget`** — THE FIXTURE is sherlock's "The Red-Headed League"
+  exactly as the sample library seeds it (`App/Variorum/Shared/SampleLibrary/SherlockAdventures.txt` read from disk by
+  `#filePath`, the `SampleBookDrillTests` precedent; split on its `%%% ` lines and trimmed as `SampleLibrarySeeder.parse`
+  does; `importPost(segmentation: .paragraph)`, the seeder's own mode) → **215 blocks · 49,007 characters of take text**
+  (the live note's exact numbers); the unpaged with-ids answer 93,708. Read at `limit` 200, 100 and 50, and a saved
+  version at 200: every page with more than one block ≤ 32,000; every non-final page FULL (with the next block — its
+  lens picks and its commits' text back to `text_omitted` — the answer would pass 32,000; skipped at `limit`); the pages
+  tile the note (every block once, in order, entry for entry the unpaged with-ids blocks); `block_count` on page 1 only.
+- **P-U7c-2 `idsOnlyPagesStayWithinTheAnswerBudget`** — the same note `ids_only` at `limit: 200`: within the budget,
+  full, tiling entry for entry the unpaged `ids_only` read, digests never text.
+- **P-U7c-3 `aBlockLargerThanTheBudgetComesAloneNeverSplit`** — 17,000 double quotes are 17,000 characters of text but
+  ≈ 34,000 of answer (each travels escaped — the wire's own encoding counts): the block comes ALONE, whole, the others
+  around it [1, 1, 2]; under `ids_only` a block with a 40,000-character comment comes alone the same way.
+- **P-U7c-4 `theFirstPagesCarriageCountsTowardItsAnswer`** — a 28,000-character tray + a version + a lens (its
+  `dangling_picks`) on page 1: one 2,000-character block fits, a second would not; page 1 ≤ 32,000; the next page holds
+  several; tray/versions on page 1 only.
+- **P-U7c-4b `theFirstPageHoldsOneBlockWhenItsCarriageLeavesNoRoom`** — the one-block floor over the carriage (P-U7c-1
+  PROVISIONAL below): a 31,800-character tray, page 1 still carries its first block (over the budget), later pages within.
+- **P-U7c-5 `lensPicksLineageAndCommitsAllCountTowardThePage`** — 60 two-take blocks, eight lenses each picking every
+  block, three 900-character commits on every take, read `with_lenses` + `with_lineage` + `with_commits` at `limit: 200`:
+  every page within and full, tiling (commit text set aside), each lens's picks exactly the page's blocks, commit text
+  riding only in what each page has left (some ride, some omitted).
+- **P-U7c-6 `theDescriptionSaysTheAnswerBound`** — the ruled sentence present, "takes' text passes" gone, the commit
+  sentence kept.
+
+**Builder B's budget pins RE-PINNED (justified edits, each commented in the file):**
+- **P-256-2 `aPageEndsAtItsTextBudgetNeverSplittingABlock`** — its `tens` note (four blocks of 10,000 read [3, 1]) was
+  true under BOTH budgets, so it no longer told them apart: re-pinned to 10,600 a block, whose three blocks' TEXT (31,800)
+  fits the old budget while their ANSWER does not — [3, 1] before, **[2, 2]** now. Its `ids_only` line keeps [3] but its
+  meaning changed ("the limit governs" → "three digest entries fit the answer budget"); the doc comment says the answer.
+- **F-256-7 `theNoteWideCarriageRidesTheFirstPage`** — at a 31,000-character tray, page 1's one block now rides only by
+  the floor (the answer past the budget), no longer "room for one more block": re-pinned to **28,000**, where one block
+  fits the ANSWER budget and a second does not (the old text budget seated two), plus the page's answer ≤ 32,000.
+- **Unchanged and still green, their meaning the answer budget's:** P-256-9 `theCommitAsksRideThePage` (commit text in
+  what the page has left), P-256-1/4–8/10, the catalog pin, and the two GUARDS (P-256-5, G-256-1).
+
+**THE RED RUN** (`swift test --filter 'MCPPageAnswerBudgetServerTests|MCPPagedReadServerTests|MCPReadFormsUnchangedServerTests'`
+on `0b1be274`'s product + these tests): **22 tests in 3 suites, 9 failed, 18 issues.** Every new pin RED, each by its
+mechanism: P-U7c-1 (limit 200: pages 161 blocks / **65,712** · 54 / 28,388; limit 100: 100 / 42,967 · 100 / 43,049 ·
+15 / 8,450; limit 50: all within; the version at 200: 161 / 65,750 — 4 issues, the page sizes); P-U7c-2 (one 200-block
+page of **54,812** · 15 / 4,277); P-U7c-3 (the quotes shared ONE page, 4 blocks / 35,026 — 2 issues); P-U7c-4 (page 1
+seated 2 blocks, **33,366** — 3 issues); P-U7c-4b (page 1 seated all 4, 32,957); P-U7c-5 (34 blocks / **105,800** · 26 /
+87,984 — 2 issues); P-U7c-6 (2 issues, the words); the re-pinned P-256-2 ([3, 1]) and F-256-7 (2 blocks; 1 + 1
+issues). The other 13 GREEN (builder B's unchanged pins and both guards). The live round's 65,807 vs this run's 65,712:
+the same 161-block page; the ids and the book's name differ.
 
 ## U8a UNIT RECORD — the model-facing words: `MCPSession.instructions`, the tool descriptions, the stargazing brief's delta (VX-197; opus-implementer, from 2026-10-14 ~20:40 MDT)
 

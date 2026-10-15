@@ -21,6 +21,12 @@ import Testing
 // note is checked against a source cheaply. Every page is the with-ids object; the first
 // says `block_count`; `next_cursor` comes back only while blocks remain.
 //
+// U7c (P-VX256-1 re-ruled — THE ORCHESTRATOR ON U7's WINDOW): the page budget now bounds
+// the WHOLE SERIALIZED ANSWER, not the take text — a page ends at `limit` blocks or as soon
+// as the next block would carry the answer past 32,000 characters (a block larger than
+// what its page has left comes alone). The two pins whose meaning that changed are
+// re-pinned below, each edit commented; `MCPPageAnswerBudgetServerTests` pins the rule.
+//
 // Wire only (the SDK's own client over a real socket). Each pin compiles on the tree
 // before VX-256 — the new arguments are named by string, every expected digest is the
 // test's own CryptoKit — so the red pins run RED there by absence (the old tree ignores
@@ -180,19 +186,27 @@ struct MCPPagedReadServerTests {
         }
     }
 
-    // MARK: - P-256-2: the text budget
+    // MARK: - P-256-2: the page budget (re-pinned at U7c: the answer, not the take text)
 
-    /// A page also ends once its takes' text would pass 32,000 characters — the first
-    /// block always whole: blocks of 20,000 read one per page; a 40,000-character block is
-    /// a page alone, and the small blocks after it share the next; four of 10,000 read as
-    /// three, then one. Under `ids_only` no take text rides, so the limit governs.
+    /// A page also ends once the answer would pass 32,000 characters — the first block
+    /// always whole: blocks of 20,000 read one per page; a 40,000-character block is a page
+    /// alone, and the small blocks after it share the next; four of 10,600 read as two and
+    /// two. Under `ids_only` the answer budget bounds the page too; three digests fit it.
+    ///
+    /// U7c re-pin (P-VX256-1 re-ruled): `tens` was four blocks of 10,000 read as three, then
+    /// one — true under both budgets, so it no longer told them apart. At 10,600 a block,
+    /// three blocks' TEXT (31,800) fits the old take-text budget, while their ANSWER (≈ 210
+    /// characters more a block, plus the header) does not: [3, 1] before, [2, 2] now. The
+    /// `ids_only` line's meaning changed too (it said "the limit governs"): the answer budget
+    /// governs, and three small entries are well within it.
     @Test func aPageEndsAtItsTextBudgetNeverSplittingABlock() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         try await h.within {
             let twenties = try longNote(h, title: "twenties", count: 3) { String(repeating: "\($0)", count: 20_000) }
             let opener = try longNote(h, title: "opener", count: 3) { $0 == 0 ? String(repeating: "x", count: 40_000) : "short \($0)" }
-            let tens = try longNote(h, title: "tens", count: 4) { String(repeating: "\($0)", count: 10_000) }
+            // U7c re-pin: 10,000 → 10,600 (see the doc comment).
+            let tens = try longNote(h, title: "tens", count: 4) { String(repeating: "\($0)", count: 10_600) }
             let connection = try await h.connect(as: "claude-code")
             for book in [twenties.book, opener.book, tens.book] {
                 _ = try h.approve("claude-code", spec(.book, book.id))
@@ -207,9 +221,12 @@ struct MCPPagedReadServerTests {
             }
             #expect(shownText?.count == 40_000, "the block rides whole")
             let c = try await pages(connection, ["note_id": .string(tens.note.id), "limit": 10])
-            #expect(c.map { blocks($0).count } == [3, 1], "30,000 fits; 40,000 would not")
+            // U7c re-pin: [3, 1] → [2, 2] — 31,800 characters of text fit the old budget; the
+            // three blocks' answer does not.
+            #expect(c.map { blocks($0).count } == [2, 2], "two blocks' answer fits; three's would not")
             let ids = try await pages(connection, ["note_id": .string(twenties.note.id), "limit": 10, "ids_only": true])
-            #expect(ids.map { blocks($0).count } == [3], "ids_only carries no take text, so the limit governs")
+            // U7c: the expectation stands; its meaning is the answer budget's (it said the limit governs).
+            #expect(ids.map { blocks($0).count } == [3], "ids_only's three digest entries fit the answer budget")
             await h.hangUp(connection)
         }
     }
@@ -566,13 +583,20 @@ struct MCPPagedReadServerTests {
     // MARK: - F-256-7: the note-wide carriage rides the first page
 
     /// `with_tray` and `with_versions` (note-wide lists) ride the FIRST page only — and the
-    /// tray's text counts toward that page's budget (a 31,000-character deleted block
-    /// leaves room for one more block only).
+    /// tray counts toward that page's budget (a 28,000-character deleted block leaves room
+    /// for one more block only, the page within 32,000).
+    ///
+    /// U7c re-pin (P-VX256-1 re-ruled — the first page's carriage counts toward its ANSWER):
+    /// at 31,000 the tray plus its one block now answered PAST the budget, the page holding
+    /// that block only by the one-block floor — no longer "room for one more block". At
+    /// 28,000 the one block fits within the answer budget and a second does not, while the
+    /// old take-text budget seated two (28,000 + 2,000 + 2,000).
     @Test func theNoteWideCarriageRidesTheFirstPage() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         try await h.within {
-            let w = try longNote(h, count: 5) { $0 == 0 ? String(repeating: "g", count: 31_000) : String(repeating: "\($0)", count: 2_000) }
+            // U7c re-pin: the tray block 31,000 → 28,000 (see the doc comment).
+            let w = try longNote(h, count: 5) { $0 == 0 ? String(repeating: "g", count: 28_000) : String(repeating: "\($0)", count: 2_000) }
             try h.operations.deleteBlock(w.blockIDs[0])
             _ = try h.operations.saveNoteVersion(w.note.id)
             let connection = try await h.connect(as: "claude-code")
@@ -582,7 +606,12 @@ struct MCPPagedReadServerTests {
                 "note_id": .string(w.note.id), "with_tray": true, "with_versions": true, "limit": 10,
             ])
             try #require(paged.count >= 2, "more than one page")
-            #expect(blocks(paged[0]).count == 1, "31,000 of tray + 2,000 leaves no room for a second block")
+            #expect(blocks(paged[0]).count == 1, "28,000 of tray + 2,000 leaves no room for a second block")
+            // U7c: the page, carriage and all, answers within the budget.
+            let firstPage = try await call(connection, [
+                "note_id": .string(w.note.id), "with_tray": true, "with_versions": true, "limit": 10,
+            ])
+            #expect(text(firstPage).utf16.count <= 32_000, "the first page answers \(text(firstPage).utf16.count)")
             #expect(((paged[0]["tray"] as? [String: Any])?["blocks"] as? [[String: Any]])?.count == 1)
             #expect((paged[0]["versions"] as? [[String: Any]])?.count == 1)
             #expect(paged.dropFirst().allSatisfy { $0["tray"] == nil && $0["versions"] == nil },
