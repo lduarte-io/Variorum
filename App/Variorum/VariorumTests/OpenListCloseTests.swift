@@ -440,6 +440,20 @@ struct OpenListCloseShellTests {
         }
     }
 
+    /// A navigation request ADOPTED: the pane shows `target`, the shell has
+    /// cleared its request, and a frame has passed, so the test's NEXT request
+    /// lands in a later update. Two requests in one frame are refused by
+    /// SwiftUI's `onChange` on the shell's adoption road: that product race is
+    /// VX-360 (the flake this test showed in VX-283's 93-suite batch, traced in
+    /// the record's "U1c — the batch flake"). This test pins the landing ORDER,
+    /// not that race.
+    private func settleAdoption(_ router: ShellRouter, at target: SidebarSelection) async {
+        await settle { router.workspace.focusedSelection == target && router.pendingSelection == nil }
+        pump()
+        try? await Task.sleep(for: .milliseconds(34))
+        pump()
+    }
+
     /// The doors' acts (`EditorCommands.closeNote(in:)` and
     /// `.closeAllNotes(in:)` — the exact closures the View menu's items run)
     /// against a mounted shell: the landing goes through the shell's own
@@ -472,24 +486,24 @@ struct OpenListCloseShellTests {
 
             for note in [a, b, c] {
                 router.pendingSelection = .post(note.id)
-                await settle { router.workspace.focusedSelection == .post(note.id) }
+                await settleAdoption(router, at: .post(note.id))
             }
             router.pendingSelection = .post(b.id)
-            await settle { router.workspace.focusedSelection == .post(b.id) }
+            await settleAdoption(router, at: .post(b.id))
             #expect(router.workspace.openNotes.ids == [a.id, b.id, c.id])
             #expect(session.commandRouter.isEnabled(.closeNote), "a note in a full window")
             #expect(session.commandRouter.isEnabled(.closeAllNotes))
 
             // ⌘⇧W on b: its row leaves and the pane lands on the NEXT note, c.
             EditorCommands.closeNote(in: router)
-            await settle { router.workspace.focusedSelection == .post(c.id) }
+            await settleAdoption(router, at: .post(c.id))
             #expect(router.workspace.focusedSelection == .post(c.id), "landed on the next note")
             #expect(router.workspace.openNotes.ids == [a.id, c.id])
             #expect(router.pendingSelection == nil, "the shell adopted the landing")
 
             // Again, on the LAST row: the previous note, a.
             EditorCommands.closeNote(in: router)
-            await settle { router.workspace.focusedSelection == .post(a.id) }
+            await settleAdoption(router, at: .post(a.id))
             #expect(router.workspace.focusedSelection == .post(a.id))
             #expect(router.workspace.openNotes.ids == [a.id])
 
