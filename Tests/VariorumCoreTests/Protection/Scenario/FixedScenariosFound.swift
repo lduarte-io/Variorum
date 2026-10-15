@@ -690,4 +690,18 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 7 (sequence 191, the closer's soak) — a CHECKER finding: a Mac
+    /// with a Standard library and no passphrase or words, iCloud Keychain off,
+    /// its keychain wiped, then signed into another Apple ID: its copies still
+    /// open through the Apple account it left, which carried its own key
+    /// (§3.1 rule 2's last exception) — her roads now count every Apple account
+    /// of hers, not only the one this Mac is signed into now.
+    @Test func aFormerAppleAccountStillOpensItsCopies() async throws {
+        let world = try Self.start("Standard libraries with no passphrase and no words, on two Macs", seed: 7000212)
+        for action in [Action.settle, .iCloudOff("macB"), .wipeKeychain("macB"), .switchAppleID("macB", to: SWorld.appleB)] {
+            await world.step(action)
+        }
+        expectPromisesKept(world)
+    }
 }

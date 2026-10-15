@@ -306,9 +306,12 @@ extension SWorld {
         }
         for material in device.sessionMemory.values { seeds.masters.append(material.masterKey) }
         if let library = device.library { seeds.keys.append(library.key) }
-        // Her Apple account's keychain is hers — the switch off on this device
-        // only hides it until she turns it back on.
-        if let id = device.appleAccount {
+        // Her Apple accounts' keychains are hers — the switch off on this
+        // device only hides one until she turns it back on, and an Apple ID
+        // this Mac left still holds what it carried ("open through that former
+        // account", §3.1 rule 2's last exception): she can sign back into it
+        // (the closer's soak, seed 7 sequence 191).
+        for id in appleAccounts.keys.sorted() {
             for item in eventualCloud(id).values {
                 if case .apple(let keyID, let bytes) = item.value, seeds.apple[keyID] == nil { seeds.apple[keyID] = SymmetricKey(data: bytes) }
             }
