@@ -2891,4 +2891,7 @@ renumbers. #227 was free at the merge.)*
     200 a call) · P-VX311-1 (no duplicating a per-ask note).
   - **Batch 4 → all RATIFIED as built:** P-VX311-3 · P-VX298-1 (on only when every named note shares history) ·
     P-VX298-2 (the first note may be archived) · P-VX298-3 (`note_id` + 1–3 `peer_ids`).
+  - **Batch 5 → all RATIFIED as built:** P-VX254-1 and P-VX254-2 (no fingerprints from divide, merge, `save_version`,
+    the book import — so **VX-366 is closed as decided**, Canceled with the reason) · P-VX256-2/3/4 · P-VX261-1 (since
+    the client's last approval).
 Status: open — your eye; the handoff's checklist leads with this bundle.
