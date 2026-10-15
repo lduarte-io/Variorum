@@ -159,6 +159,12 @@ final class CompareViewModel {
             let departed = oldValue.compactMap(\.postID)
                 .filter { !picked.contains($0) && $0 != anchorPostID }
             if !departed.isEmpty { onNotesLeft(departed) }
+            // VX-298 (R2-1): a NAMED peer's column leaving ends the landing's
+            // round (`landingPostureFor`). `land` arms before it replaces the
+            // columns, and the peers that replacement drops are never named.
+            if let landed = landingPostureFor, departed.contains(where: { landed.contains($0) }) {
+                landingPostureFor = nil
+            }
         }
     }
 
@@ -201,6 +207,12 @@ final class CompareViewModel {
     /// live-ring release are 2E's, byte for byte.
     var relatedOnly = true {
         didSet {
+            // VX-298 (R2-1): any set of the toggle ends a landing's round
+            // (`landingPostureFor`), so a later projection never overwrites her
+            // pick. The model's own two writes are ordered so this never ends a
+            // round they mean to keep: `land` sets the toggle BEFORE it arms,
+            // `adopt` disarms BEFORE it sets.
+            landingPostureFor = nil
             guard relatedOnly != oldValue else { return }
             releaseLivePaneIfFilteredAway()
         }
@@ -208,7 +220,11 @@ final class CompareViewModel {
     /// VX-298 (D-298-5): the peers a wire LANDING named, until the first
     /// projection holding every one of them applies the landing posture
     /// (`CompareComposition.landingShowsRelatedOnly`) — once; nil afterwards,
-    /// so a later projection never flips her own toggle.
+    /// so a later projection never flips her own toggle. **The round also ends,
+    /// unapplied (R2-1, the ladder's round 2), at the first of: the board's
+    /// `teardown()`, a named peer's column leaving (`peerSlots`), or any set of
+    /// `relatedOnly` — so a named peer that never projects leaves nothing
+    /// armed to flip her toggle long after the landing.**
     @ObservationIgnored private var landingPostureFor: [String]?
     /// In-cell fan blooms — session-only, like the takes board's.
     private(set) var expandedBlocks: Set<String> = []
@@ -444,6 +460,8 @@ final class CompareViewModel {
 
     func teardown() {
         observation?.cancel()
+        // VX-298 (R2-1): the board going ends a landing's round, unapplied.
+        landingPostureFor = nil
         for (postID, token) in coordinatorTokens {
             coordinators[postID]?.stopObserving(token)
         }
