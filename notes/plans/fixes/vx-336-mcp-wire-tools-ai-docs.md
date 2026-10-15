@@ -6817,7 +6817,7 @@ the bundle's number if renumbered; and it deletes the italic DRAFT line under th
    finals ledger (D3, with PHASE B's counts and round 2's tally) · the master plan row (D4) · MobileSoul (D5) · the STATUS
    lines (D8).
 3. **Renumber if a sibling merged first:** if #227 or PL-56 is taken on main, use the next free and change it everywhere
-   it appears — D1's heading, D2's entry, D8's banner, the handoff (four places) and `notes/MCPSpec.md`'s one "QUESTIONS
+   it appears — D1's heading, D2's entry, D8's banner, the handoff (three places) and `notes/MCPSpec.md`'s one "QUESTIONS
    #227" (grep for it). D2b's VX-283-first case decides which entry rolls.
 4. **Finalize the handoff** (D7's fill list) and delete its DRAFT line.
 5. **The PR** `VX-336: MCP wire tools & AI docs` (merge commit, never squash), the merge ask to the coordinator, then —
@@ -6846,7 +6846,7 @@ the bundle's number if renumbered; and it deletes the italic DRAFT line under th
      database error such as the import's former "SQLite error 19"). Improvement · Suspected · MCP · Low.
    - **T5 (D6 row 12, optional) — measure another MCP client's tool-output cap against `read_note`'s 32,000-character
      page** (only Claude Code 2.1.300 was measured; Codex isn't installed). Exploration · MCP · Low.
-2. **MCPSpec's VX-246 block still reads "PROVISIONAL #226"** in five places, though #226 was ratified whole on
+2. **MCPSpec's VX-246 block still reads "PROVISIONAL #226"** in four places, though #226 was ratified whole on
    2026-10-14. Not changed here (another run's canon, not this brief's); the orchestrator's call whether PHASE C writes
    "ratified #226".
 3. **MobileSoul on main has two rows named PL-53** (VX-143's and VX-168's) — a numbering note, not this run's to fix.
