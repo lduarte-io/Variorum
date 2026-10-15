@@ -1314,6 +1314,28 @@ the proxy (the R-F patch becomes HEAD).
 row-height re-asks only, keep everything else — must turn the Starred pin RED; and the Q6 re-run (pre-P-U1b-6 code)
 already recorded it red. If R-G stays green, the fix is unexplained and the leg stops again.
 
+#### U1b — THE ORCHESTRATOR'S RULING ON Q11 (2026-10-14 ~22:15 — P-U1b-8, the friction doctrine applied)
+
+Q11: HEAD (the proxy road, the code R-F ran GREEN in Q9) rested the ninth star 0.5 pt short; across six runs the
+resting offset after the pitch flip read 34 · 34.5 · 35 · 35 · 35.5 · 36 of 36, and the Open list's return lands at
+248.58…249.33 of 249. **A sub-2-pt drift that SwiftUI's scroll settles into after the transition, varying run to run**
+— the pin flakes on it. Four fix legs have now chased the same sub-pixel number; that is the friction doctrine's
+signal that the RULE is mis-shaped, not that another patch is owed. **What the eye sees:** the visible defect the
+walker found (O-1) was a row cut by ~20 pt; the pins that catch THAT class — the return to your note, the shorter
+window, the walker's road — went red on the old reveals (R-D: "row 20 hidden", "row 16 hidden") and are green now.
+What remains is ≤ 2 pt, inside a row's own vertical padding at either pitch (the compact row is 24 pt, its text
+~16 pt tall): no glyph is ever under it.
+
+**RULED:** the rules' "half a point" (`SidebarLayout.fadeSlack`, private, 0.5) becomes ONE named, internal constant
+**`SidebarLayout.edgeSlack = 3`** with its reason at the line — *an edge with less than this beyond it is AT that edge:
+it does not fade, and a row within it of clear counts as clear (no reveal fires for it); 3 pt is inside the compact
+24-pt row's vertical padding, so no glyph is ever under the remainder*. Both `edgeFades` and `revealOffset` read it;
+the pins' tolerances read the SAME constant (never a literal 0.5). The untraced drift is recorded here as a known
+residual of SwiftUI's post-transition settling — not pursued (invisible; a trace would be a rabbit hole with no
+user value). **The orchestrator makes this change itself** (small, at adjudication); the stage window then runs the
+93-suite batch and the mount suite **five times** (`-test-iterations 5`) as the flake's stability evidence; the
+re-walk is the visual evidence.
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
