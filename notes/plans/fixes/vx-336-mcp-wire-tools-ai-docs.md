@@ -7201,9 +7201,9 @@ orchestrator ruled.
 
 ## CLOSEOUT WINDOW RUN (a fresh stage runner, from 2026-10-15)
 
-**Not done (first line, kept current):** the window itself is NOT run. Nothing is claimed; no `xcodebuild test`, no
-simulator boot, no store touched, no prefs written. READY only (2026-10-15 ~02:26 MDT); the window runs on the
-orchestrator's GO under the coordinator's exact claim line.
+**Not done (first line, kept current):** the window is IN PROGRESS under the claim `vx336-close` (02:27:58, 90 min).
+Steps 0, 1, R and G are DONE; W (the whole Mac target) is RUNNING; P and C (the phone, the restore and the release) are
+NOT done yet. Nothing has been fixed or changed in code.
 
 **What this run does NOT do (said first):** no product or test code is written or changed, before the claim or under
 it. A red that needs code is RECORDED as a FINDING and reported, never fixed. No rebuild: the window runs
@@ -7275,10 +7275,10 @@ vx336-close --minutes 20` on OUR claim before it expires (asked of the orchestra
 | step | what | status |
 |---|---|---|
 | RD | read-in, the build check, the host, this section → READY | DONE (this commit) — READY reported; the stage is NOT claimed |
-| 0 | the GO's exact line, run alone; `guard.sh --author`; both strict guards; 0 sims; HEAD and the tree check at the GO | NOT-STARTED |
-| 1 | A1 FIRST — `zsh close/a1.sh` (prefs export, `Backups/` and store listings, fingerprint BEFORE, the one copy cmp-verified, hashes) | NOT-STARTED |
-| R | R2-1 RED — `run-mac.sh red vx336-close-red MCPCompareLandingTests` (expected EXACTLY 11 tests · 4 failed · 4 issues at `:369` `:390` `:407` `:431`) | NOT-STARTED |
-| G | R2-1 GREEN — `run-mac.sh green vx336-close MCPCompareLandingTests` (expected 11/11) | NOT-STARTED |
-| W | the WHOLE Mac target — `run-mac.sh whole vx336-close` (counts READ; standing reds named; any other red re-run alone once) | NOT-STARTED |
+| 0 | the GO's exact line, run alone; `guard.sh --author`; both strict guards; 0 sims; HEAD and the tree check at the GO | DONE — the GO from the coordinator at 02:28 (its pre-checks: no instances by the strict forms, no sims, `origin/main` still `ebd16909`, dev `safety-copies` only castle-W1; **renew ONCE allowed**, a second needs its word; the load 114/59/40 from mediaanalysisd, Spotlight and vx-305's headless `swift test`). The exact line run alone: `Tools/stage release --who coord-for-vx336 && Tools/stage claim --who vx336-close --reason "VX-336 closeout: R2-1 pin red/green + WHOLE Mac target on merged tree + 15 phone suites (one sim), dev store A1 first" --minutes 90` → **STAGE RELEASED (was 'coord-for-vx336') · STAGE CLAIMED by 'vx336-close' for 90 min at 02:27:58 MDT** (expires 03:57:58). Then `guard.sh --author` OK (idle 843 s); both strict guards and the loose form EMPTY; 0 sims booted. **HEAD at the GO `d64686e2`**, `origin/main` `ebd16909`; `git diff --name-only cf619bcc..HEAD -- App Sources Tests Package.swift` EMPTY; the tree clean |
+| 1 | A1 FIRST — `zsh close/a1.sh` (prefs export, `Backups/` and store listings, fingerprint BEFORE, the one copy cmp-verified, hashes) | DONE (02:28:08, before any test host) — prefs exported **1,602 keys** (`prefs-pre.plist`, the restore target); `Backups/` **57 entries** (`backups-pre.txt`); the store listing (`store-listing-pre.txt`); her user-scope servers BEFORE **`['linear-server', 'variorum']` `bc64543e2f4e8e58`** (`userscope-pre.txt`). **"A1 prestage copy (verified)": `…/Variorum-dev/Backups/safety-copies/scale-prestage-20261015T082808Z`** (`a1-path.txt`), five files each `cmp`-verified; sha256 prefixes (`store-hash-pre.txt`) sqlite `c17923414b2e` · wal `7f2fcf1ec90d` · shm `e4e2b900d45c` · keys `3af4704371ff` / `7e12a1b85890` — **EQUAL to READY's** (and U5–U9's). `safety-copies/` = castle-W1 (untouched) + this A1 |
+| R | R2-1 RED — `run-mac.sh red vx336-close-red MCPCompareLandingTests` (expected EXACTLY 11 tests · 4 failed · 4 issues at `:369` `:390` `:407` `:431`) | DONE (02:28:13 → 02:28:50; `logs/red.log`, `red.xcresult`, XCODEBUILD EXIT 65) — **EXACT: "✘ Test run with 11 tests in 1 suite failed after 2.194 seconds with 4 issues"**; one issue in each R2-1 test at its LAST `#expect`: `aNamedPeerThatNeverProjectsLeavesNoArmedPostureToOverwriteHerToggle` **`:369`** (`Expectation failed: model.relatedOnly`) · `aTornDownBoardNeverAppliesItsLandingsPostureAfterwards` **`:390`** (`!model.relatedOnly`) · `herOwnToggleBeforeTheFirstProjectionEndsTheLandingsRound` **`:407`** (`model.relatedOnly`) · `aNamedPeersColumnLeavingEndsTheLandingsRound` **`:431`** (`!model.relatedOnly`), each "failed … with 1 issue". U6a's other **7 ✔**. No finding about the pin |
+| G | R2-1 GREEN — `run-mac.sh green vx336-close MCPCompareLandingTests` (expected 11/11) | DONE (02:28:59 → 02:29:21; `logs/green.log`, XCODEBUILD EXIT 0) — **"✔ Test run with 11 tests in 1 suite passed after 0.529 seconds" · `** TEST EXECUTE SUCCEEDED **`**: the four R2-1 tests and U6a's seven, 0 ✘. **R2-1's pin: red on the pre-fix tree, green on the final** |
+| W | the WHOLE Mac target — `run-mac.sh whole vx336-close` (counts READ; standing reds named; any other red re-run alone once) | IN-PROGRESS — `guard.sh --author` OK (idle 928 s), strict guards EMPTY; started detached **02:29:28** → `logs/whole.log`, `whole.xcresult`; being polled. Counts PENDING |
 | P | the phone — `run-phone.sh` (expected 120 tests in 15 suites, 2 known issues, no restart); simulator shut; 0 booted | NOT-STARTED |
 | C | cleanup: no instance; prefs 0 differ; `restore.sh` cmp-SAME + sha256 equal; `Backups/` unchanged; fingerprint SAME; 0 sims; no profraw; release; THE RESULT LINE | NOT-STARTED |
