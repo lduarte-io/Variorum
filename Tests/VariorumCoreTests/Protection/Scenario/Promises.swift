@@ -657,7 +657,12 @@ extension SWorld {
         for copy in catalog.copies {
             guard let opens = assessment.opensWith[copy.id], let truthCopy = truth.copies[copy.id] else { continue }
             let holder = truthCopy.holder
-            let k = known(holder), slotK = slotHolder(device).map(known) ?? Known()
+            let slotK = slotHolder(device).map(known) ?? Known()
+            // Every holder this device's library has had: its own (before or
+            // after an account), the account's, the copy's.
+            var k = known(holder)
+            let own = known(self.holder(device, account: nil, libraryID: library.record?.libraryID ?? ""))
+            k.timeline += own.timeline + slotK.timeline
             // An Apple key this Mac lists as its own and can't read names the
             // former account that still opens it (§3.1 rule 2's last
             // exception) — a road elsewhere, by its own words, never here.

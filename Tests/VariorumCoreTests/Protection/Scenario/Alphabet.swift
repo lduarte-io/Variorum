@@ -937,6 +937,12 @@ extension SWorld {
             device.container.files[SPath.liveKeyFile] = capture.liveKeyFile
             device.container.files[SPath.plan] = capture.plan
             device.keychain.local[name] = capture.memory
+            // The stated limit (§3.6): the restored state is believed — the keys
+            // it brings back are its own again, as that state says (PROVISIONAL
+            // P-U4-5: a Re-link press then re-wraps them under Apple — her call).
+            if let tree = capture.slot?.library?.record?.familyTree.fingerprints {
+                truth.keptByLeave[device.name]?.subtract(tree)
+            }
         case .deleteMemoryItem:
             device.keychain.local[memoryName] = nil
         case .deleteTouchIDItem:
