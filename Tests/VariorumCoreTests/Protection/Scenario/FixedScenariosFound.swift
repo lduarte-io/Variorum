@@ -375,3 +375,20 @@ struct GeneratorFoundScenarios {
         expectPromisesKept(world)
     }
 }
+
+extension GeneratorFoundScenarios {
+    /// Seed 5 (sequence 5, the closer's 60-sequence sweep) — a WORLD finding:
+    /// a synced pair landed with the passphrase made new, crashed after its
+    /// swap; the world recorded her choice before the act's own opening, which
+    /// dropped it as a rolled-back act's — her truth lost the passphrase the
+    /// landed key file is under, and the backup's "your passphrase" line read
+    /// as a lie (promise 9). The choice is now made inside the act.
+    @Test func aCrashedLandingsMadeNewPassphraseStaysHers() async throws {
+        let world = try Self.start("a deleted account", seed: 5000020)
+        for action in [Action.sendLibrary(from: "macA", to: "macB"), .createLibrary("macB", secrets: true),
+                       .crash(.land("macB", .wordsPassphraseMadeNew), afterWrites: 15), .backup("macB")] {
+            await world.step(action, words: true)
+        }
+        expectPromisesKept(world)
+    }
+}

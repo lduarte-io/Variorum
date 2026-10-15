@@ -930,9 +930,15 @@ extension SWorld {
             case .legacy(let legacy): return legacy.envelope.storeID
             }
         }()
-        if let landedID { choose(device, holder: holder(device, account: nil, libraryID: landedID), passphrase: landed.passphrase, words: landed.words) }
         try await act(device) { executor, library in
-            try await executor.land(&library, pair: pair, opener: opener, typed: finalTyped, gate: device.biometry.enrolled ? .touchID : .alwaysAsk)
+            // Chosen at the press — inside the act, after the opening's own
+            // adoption (made before it, a crashed landing's made-new secret was
+            // dropped as a rolled-back act's and her truth lost it).
+            if let landedID {
+                self.choose(device, holder: self.holder(device, account: nil, libraryID: landedID),
+                            passphrase: landed.passphrase, words: landed.words)
+            }
+            return try await executor.land(&library, pair: pair, opener: opener, typed: finalTyped, gate: device.biometry.enrolled ? .touchID : .alwaysAsk)
         }
         guard let record = device.library?.record else { return }
         if record.account != nil { truth.heldLanding[device.name] = record.libraryID }
