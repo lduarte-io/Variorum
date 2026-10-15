@@ -1932,7 +1932,18 @@ the orchestrator rules on its composition (below — the brief's composition doe
     `cmp`-verified; the suites ADDED 9 prefs keys (`currentBlock.*` ×5, `surfaceSize.outline.*` ×4) — deleted, imported,
     re-exported, diff clean; zero instances; `castle-W1` untouched.
 
-(The plan below as first written; the closing window's plan follows the fixes.)
+- **THE TWO FIXES (this commit, test files only — no product line):** RED 1 — the expected value typed `CGFloat`
+  (`let widerLine: CGFloat = max(…)`, a comment at the line). RED 2 — the note cell measures from the SHELL's own
+  frame in the same `.global` space as the card: the mount wraps `RootView` in the test's own `.onGeometryChange`
+  reader (the `BookcaseQuickEntryPlacementTests.RootFrame` precedent), and the cell asserts the card's foot rests 46 pt
+  above the shell's foot (the pane row — the toast's host — runs to the shell's foot: `ShellSplit`'s detail fills
+  the height, nothing below it). Not the host layer's own frame through a DEBUG probe, as first suggested: that probe
+  would sit in product code (`StatusToastLayer`), and the walker runs on the CURRENT products (the orchestrator's
+  test-files-only rule) — the shell's frame answers the same question from the test. The cell stays a GUARD green on
+  both sides (the old fixed overlay also rested 46 pt above the same foot). `vx283-u3` rebuilt headless
+  (build-for-testing succeeded, no warning in the two files). PENDING the closing window.
+
+(The plan below as first written; the closing window's plan follows.)
 
 **Q6 — THE STAGE WINDOW PLAN (≈25 min; run in this order; the record flips per step; all commands from
 `App/Variorum/`, DerivedData `vx283-u3`, zsh `pipestatus` checked, the "Test run with N tests" line AND its skipped

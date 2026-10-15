@@ -113,7 +113,11 @@ struct LibraryControlsFlowRuleTests {
         #expect(ideal.oneLine && ideal.size.width == 1097)
         let minimum = Rule.arrange(Self.row, lineOneCount: 2, width: 0, spacing: 10, lineSpacing: 8)
         #expect(!minimum.oneLine)
-        #expect(minimum.size.width == max(75 + 10 + 228, 180 + 10 + 174 + 10 + 53))
+        // Typed CGFloat on purpose: left to itself, `max` of integer literals
+        // is an `Int` inside `#expect`, and the macro's CGFloat-vs-Int
+        // comparison answers false on equal values (the first window's red).
+        let widerLine: CGFloat = max(75 + 10 + 228, 180 + 10 + 174 + 10 + 53)
+        #expect(minimum.size.width == widerLine)
     }
 
     /// Timeline hides sort and when: line 2 is the mode alone.

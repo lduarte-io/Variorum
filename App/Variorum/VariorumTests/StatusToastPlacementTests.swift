@@ -99,7 +99,21 @@ struct StatusToastPlacementShellTests {
     private struct Read {
         let toast: CGRect
         let bands: [CGRect]
+        /// The mounted shell's own frame, in the SAME `.global` space as the
+        /// card and the bands — the pane row (the toast's host) runs to its
+        /// foot (`ShellSplit`'s detail fills the height). The first window
+        /// measured the HOSTING VIEW's height instead (832 pt) while the shell's
+        /// foot read ≈52 pt lower in `.global` — a harness fact, recorded.
+        let shell: CGRect
         let hostHeight: CGFloat
+    }
+
+    /// The shell's frame, reported by the test's own wrapper (the
+    /// `BookcaseQuickEntryPlacementTests.RootFrame` precedent — no product
+    /// probe).
+    @MainActor
+    private final class ShellFrame {
+        var frame: CGRect?
     }
 
     /// The shell in a 1240 × 800 window, on `selection` (nil = the Bookcase,
@@ -126,7 +140,11 @@ struct StatusToastPlacementShellTests {
                 contentRect: NSRect(x: 60, y: 60, width: 1240, height: 800),
                 styleMask: [.titled, .resizable], backing: .buffered, defer: false)
             window.isReleasedWhenClosed = false
-            let hosting = NSHostingView(rootView: RootView(session: session, services: nil, router: router))
+            let shellFrame = ShellFrame()
+            let hosting = NSHostingView(rootView: RootView(session: session, services: nil, router: router)
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                    shellFrame.frame = $0
+                })
             window.contentView = hosting
             window.orderFrontRegardless()
             defer {
@@ -151,8 +169,9 @@ struct StatusToastPlacementShellTests {
             await frames()
             let toast = try #require(StatusToastOracle.frame, "the toast drew")
             let bands = StatusToastOracle.bands
-            print("[VX-121 toast placement] \(String(describing: target)) · toast \(toast) · bands \(bands) · host \(hosting.bounds.size)")
-            try body(Read(toast: toast, bands: bands, hostHeight: hosting.bounds.height))
+            let shell = try #require(shellFrame.frame, "the shell reported its frame")
+            print("[VX-121 toast placement] \(String(describing: target)) · toast \(toast) · bands \(bands) · shell \(shell) · host \(hosting.bounds.size)")
+            try body(Read(toast: toast, bands: bands, shell: shell, hostHeight: hosting.bounds.height))
         }
         #endif
     }
@@ -197,9 +216,9 @@ struct StatusToastPlacementShellTests {
             expectBand: false
         ) { read in
             #expect(read.bands.isEmpty, "a note's surface draws no quick-entry band (\(read.bands))")
-            #expect(abs((read.hostHeight - read.toast.maxY) - StatusToastPlacement.shellRestingInset) < 1.5, """
-                the toast rests 46 pt above the window's foot \
-                (card foot \(read.toast.maxY) of \(read.hostHeight))
+            #expect(abs((read.shell.maxY - read.toast.maxY) - StatusToastPlacement.shellRestingInset) < 1.5, """
+                the toast rests 46 pt above the shell's foot, in one space \
+                (card foot \(read.toast.maxY), shell foot \(read.shell.maxY); the host reads \(read.hostHeight) tall)
                 """)
         }
     }
