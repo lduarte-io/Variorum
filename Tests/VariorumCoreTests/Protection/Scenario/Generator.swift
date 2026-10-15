@@ -235,6 +235,16 @@ struct ScenarioGenerator {
         // Use Castle) — superseded by the ruling, never generated. The open
         // goes first; snapshots of the migrated store stay fully in scope.
         if case .timeMachineSnapshot = action, d.slot?.record == nil { action = .launch(name) }
+        // DEFERRED (the closer's soak, seed 9 sequence 232 — owner in the U4
+        // record): §3.7's "a copy of a library this Mac remembers (the one in
+        // the slot, or ANY IT KNOWS) is re-encrypted under that library's
+        // current key" has no act in phase 1 — the executor opens only the
+        // slot's own line, so an older library this Mac itself set aside lands
+        // as a DIFFERENT library (a fresh key, no history), and its own line's
+        // keys then stay outside the next Castle entry's history (promise 2).
+        // Until that road is built, the generator doesn't reopen a library
+        // this Mac remembers; reopening another library's set-aside copy stays.
+        if case .openOlderLibrary = action, world.newestOlderLibraryIsRemembered(d) { action = .launch(name) }
         if kind != 45, rng.chance(12) { return .crash(action, afterWrites: rng.int(1..<24)) }
         return action
     }

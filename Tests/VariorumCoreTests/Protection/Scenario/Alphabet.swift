@@ -835,6 +835,14 @@ extension SWorld {
         try await openCopyByRule(device, copy: copy, catalog: catalog)
     }
 
+    /// Whether the newest older library here is one this Mac remembers (its
+    /// memory item for that library) — §3.7's "any it knows" road, deferred.
+    func newestOlderLibraryIsRemembered(_ device: SDevice) -> Bool {
+        guard let copy = catalog(device).copies.filter({ $0.kind == .previousLibrary })
+            .max(by: { ($0.stamp ?? .distantPast) < ($1.stamp ?? .distantPast) }), let library = copy.library else { return false }
+        return library != device.slot?.libraryID && device.keychain.local[KName.memory(Self.scope, library)] != nil
+    }
+
     func openOlderLibrary(_ device: SDevice) async throws {
         _ = try await opened(device)
         let catalog = catalog(device)
