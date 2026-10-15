@@ -2896,7 +2896,7 @@ renumbers. #227 was free at the merge.)*
     the client's last approval).
   - **The rest → RATIFIED as built** (*"the rest of the questions are ratified"*): P-VX261-2…6 · P-VX197-U8b-1/2 ·
     orchestrator's rulings 1 and 2.
-  - **P-VX311-2's follow-on promoted, the same sitting:** VX-371 is now Medium, Pre-launch, a child of the sweep VX-348
+  - **P-VX311-2's follow-on promoted, the same sitting:** VX-371 is now Medium, Pre-launch, first a child of the sweep VX-348, then moved into VX-284 beside VX-372 at her word (*"ok yeah add that add 371 into 284"*)
     (*"it seems like a small change and I feel like it should be done. it seems weird to me that if an AI creates a
     note it can put it in a book with write new but it can't do that for a note it duplicated."*). The shape:
     `duplicate_note` gains an optional `book_id` (and `section_id`) like `create_note`, at Write new on that book. Her
