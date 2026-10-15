@@ -367,7 +367,7 @@ struct AssessTouchIDTests {
     @Test func aNewDeviceIdentityStartsOnAlwaysAsk() throws {
         var world = try AWorld(.castle)
         world.section = DeviceFacts.takingOver(
-            predecessor: world.section, allSections: [world.section], newDeviceID: PF.id(), marker: "new",
+            predecessor: world.section, allSections: [world.section], newDeviceID: PF.id(), marker: .stub("new"),
             keyFileOwnAppleKeyIDs: [])
         world.custody = []
         #expect(world.section.settings.gateStyle == .alwaysAsk)
@@ -564,7 +564,7 @@ struct AssessRepairTests {
         world.liveFile = world.liveFile.droppingApple()
         let accountKey = PF.id()
         world.section = DeviceSection(
-            deviceID: CF.macA, hardwareMarker: "marker", settings: DeviceSettings(gateStyle: nil),
+            deviceID: CF.macA, hardwareMarker: .stub("marker"), settings: DeviceSettings(gateStyle: nil),
             appleKeys: [AppleKeyRecord(id: accountKey, purpose: .account, accountID: PF.id(), origin: .followed)])
         world.recordSection = world.section
         world.appleKeys.readable = [accountKey]

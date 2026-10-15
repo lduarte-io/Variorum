@@ -70,7 +70,9 @@ struct ExecutorLogScanTests {
                 needles.append(("the record's salt", record.markerSalt))
                 let reach = fixture.executor().reach(key: fixture.key, keyFile: world.liveFormat3)
                 for section in record.verifiedSections(reach: reach) {
-                    needles.append(("a hardware marker", Data(section.hardwareMarker.utf8)))
+                    // Both salted parts (her 2026-10-14/15 split): neither alone is logged.
+                    needles.append(("a marker's hardware part", Data(section.hardwareMarker.hardware.utf8)))
+                    needles.append(("a marker's login part", Data(section.hardwareMarker.login.utf8)))
                 }
             }
             #expect(!world.logLines.isEmpty)

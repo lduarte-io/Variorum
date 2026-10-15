@@ -122,8 +122,9 @@ public struct OldSharedKeyRecord: Codable, Equatable, Sendable {
 public struct DeviceSection: Codable, Equatable, Sendable {
     /// The device identity (`<mac8>` is its first eight characters).
     public var deviceID: String
-    /// `HardwareMarker.compute` — never the identifiers themselves.
-    public var hardwareMarker: String
+    /// `HardwareMarker.compute` — its two salted parts, never the identifiers
+    /// themselves.
+    public var hardwareMarker: HardwareMarker
     /// Only grows: every change to the section bumps it (§3.6).
     public var version: Int
     public var actInFlight: ActInFlight?
@@ -135,7 +136,7 @@ public struct DeviceSection: Codable, Equatable, Sendable {
     public var oldSharedKey: OldSharedKeyRecord?
 
     public init(
-        deviceID: String, hardwareMarker: String, version: Int = 1,
+        deviceID: String, hardwareMarker: HardwareMarker, version: Int = 1,
         actInFlight: ActInFlight? = nil, lastActSequence: Int = 0,
         settings: DeviceSettings, appleKeys: [AppleKeyRecord] = [],
         oldSharedKey: OldSharedKeyRecord? = nil
@@ -250,11 +251,21 @@ public enum IdentityResolution: Equatable, Sendable {
     /// Mac's hardware and login — adopted, so its settings and retired ids
     /// stay its own (deleting the memory item changes nothing on its own).
     case foundByMarker(deviceID: String)
-    /// A new identity is minted: either nothing here is this Mac's, or what
-    /// this Mac remembers turned up from other hardware (Quick Start,
-    /// Migration Assistant, a restored backup) — then it names its
-    /// PREDECESSOR, whose Apple keys the new identity takes over (§3.5).
+    /// A new identity is minted for NEW HARDWARE (or a library nothing here
+    /// knows): what this Mac remembers turned up from other hardware (Quick
+    /// Start, Migration Assistant, a restored backup) — then it names its
+    /// PREDECESSOR, whose Apple keys the new identity takes over (§3.5); or no
+    /// memory item came along and no section of the record is this
+    /// hardware's — a replacement with no predecessor to name, taking over
+    /// what §3.5 needs no predecessor for (P-U4-3 as her split simplified it).
     case newIdentity(predecessorID: String?)
+    /// ANOTHER macOS LOGIN on this same hardware (VX-340; her ruling
+    /// 2026-10-14/15 split the marker so it can be told apart): a section of
+    /// the record, or the memory item, carries THIS hardware's part under a
+    /// different login's part. It mints its own identity and ADOPTS NOTHING —
+    /// no settings, no Apple key ids, no retired ids; it starts with no choice
+    /// yet, like any brand-new identity with no predecessor (P-U1-7).
+    case anotherLogin
 }
 
 public enum DeviceFacts {
@@ -300,23 +311,28 @@ public enum DeviceFacts {
     /// what this Mac remembers, verified (nil when absent or failing its
     /// seal); `sections` are the record's verified sections; `marker` is
     /// `HardwareMarker.compute` for this hardware and login under the
-    /// record's salt.
+    /// record's salt — its two parts (her ruling 2026-10-14/15).
     ///
-    /// 1. The memory's identity, when its marker is this Mac's → continuing.
-    /// 2. Else a record section whose marker is this Mac's → found by marker
-    ///    (PROVISIONAL ordering — the U1 record: a foreign memory item beside
-    ///    this Mac's own section yields to the section, which is the marker's
-    ///    own evidence of who this Mac is). Several → the highest version.
-    /// 3. Else, with a memory item from other hardware or another login → a
-    ///    new identity naming the memory's identity as its predecessor.
-    /// 4. Else → a new identity with no predecessor (a second macOS login on
-    ///    this Mac opening the first login's copy adopts nothing — VX-340).
+    /// 1. The memory's identity, when its marker is this Mac's (both parts) →
+    ///    continuing.
+    /// 2. Else a record section whose marker is this Mac's (both parts) →
+    ///    found by marker (PROVISIONAL P-U1-2 ordering: a foreign memory item
+    ///    beside this Mac's own section yields to the section, which is the
+    ///    marker's own evidence of who this Mac is). Several → the highest
+    ///    version.
+    /// 3. Else a memory item, or with none a record section, from THIS
+    ///    hardware under another login → another login on this Mac: its own
+    ///    identity, adopting nothing (VX-340).
+    /// 4. Else, with a memory item from other hardware → a new identity
+    ///    naming the memory's identity as its predecessor (a replacement).
+    /// 5. Else → a new identity with no predecessor (new hardware with no
+    ///    memory item, or a library nothing here knows).
     ///
     /// Guard off (DEBUG mutation pins only): the memory's identity is trusted
     /// wherever it turns up, and with no memory item the first section is
     /// adopted — the two bugs the marker exists to close.
     public static func resolveIdentity(
-        memory: DeviceMemory?, sections: [DeviceSection], marker: String,
+        memory: DeviceMemory?, sections: [DeviceSection], marker: HardwareMarker,
         guards: ProtectionGuards = .all
     ) -> IdentityResolution {
         guard guards.hardwareMarkerOn else {
@@ -330,7 +346,11 @@ public enum DeviceFacts {
         let mine = sections.filter { $0.hardwareMarker == marker }
             .max { ($0.version, $1.deviceID) < ($1.version, $0.deviceID) }
         if let mine { return .foundByMarker(deviceID: mine.deviceID) }
-        if let memory { return .newIdentity(predecessorID: memory.deviceID) }
+        if let memory {
+            return memory.hardwareMarker.sameHardware(as: marker)
+                ? .anotherLogin : .newIdentity(predecessorID: memory.deviceID)
+        }
+        if sections.contains(where: { $0.hardwareMarker.sameHardware(as: marker) }) { return .anotherLogin }
         return .newIdentity(predecessorID: nil)
     }
 
@@ -343,7 +363,7 @@ public enum DeviceFacts {
     /// their defaults (§3.10's "a device with no choice yet").
     public static func takingOver(
         predecessor: DeviceSection?, allSections: [DeviceSection], newDeviceID: String,
-        marker: String, keyFileOwnAppleKeyIDs: [String]
+        marker: HardwareMarker, keyFileOwnAppleKeyIDs: [String]
     ) -> DeviceSection {
         var section = DeviceSection(
             deviceID: newDeviceID, hardwareMarker: marker, settings: .newIdentity)
@@ -390,7 +410,7 @@ public enum DeviceFacts {
     /// takeover, composed. `mintDeviceID` is called only when a new identity
     /// is minted. Returns the section and how it was found.
     public static func thisMacsSection(
-        memory: DeviceMemory?, recordSections: [DeviceSection], marker: String,
+        memory: DeviceMemory?, recordSections: [DeviceSection], marker: HardwareMarker,
         keyFileOwnAppleKeyIDs: [String], mintDeviceID: () -> String,
         guards: ProtectionGuards = .all
     ) -> (section: DeviceSection, resolution: IdentityResolution) {
@@ -412,17 +432,25 @@ public enum DeviceFacts {
         case .foundByMarker(let id):
             guard let section = recordSection(id) else { return fresh() }
             return (section, resolution)
+        case .anotherLogin:
+            // Another macOS login on this hardware (VX-340): its own identity,
+            // adopting nothing — not the other login's settings, its own keys'
+            // list or its retired ids; no choice yet (P-U1-7).
+            return (DeviceSection(deviceID: mintDeviceID(), hardwareMarker: marker, settings: .noChoiceYet), .anotherLogin)
         case .newIdentity(let predecessorID):
             guard let predecessorID else {
-                // New hardware (or a new login) whose memory item didn't come
-                // along — Migration Assistant reportedly doesn't carry Local
-                // Items (the Apple facts §3.7) — opening a library the record
-                // already knows: no predecessor can be named, but §3.5's other
-                // two takeovers need none — the Apple key ids ITS LIVE KEY
-                // FILE's wraps name as its own, and every id any section lists
-                // as retired ("a retired key is dead everywhere"). It starts on
-                // Always ask (§3.10: no act, no press). PROVISIONAL P-U4-3
-                // (VX-305 U4, found by the scenario world).
+                // NEW HARDWARE whose memory item didn't come along — Migration
+                // Assistant reportedly doesn't carry Local Items (the Apple
+                // facts §3.7) — opening a library the record already knows
+                // (no section of it is this hardware's, so this is no second
+                // login — that is `.anotherLogin`): a replacement with no
+                // predecessor to name, but §3.5's other two takeovers need
+                // none — the Apple key ids ITS LIVE KEY FILE's wraps name as
+                // its own, and every id any section lists as retired ("a
+                // retired key is dead everywhere"). It starts on Always ask
+                // (§3.10: no act, no press). PROVISIONAL P-U4-3, as her
+                // 2026-10-14/15 split of the marker simplified it: the
+                // takeover is new hardware's alone.
                 guard !recordSections.isEmpty else { return fresh() }
                 return (takingOver(
                     predecessor: nil, allSections: recordSections, newDeviceID: mintDeviceID(), marker: marker,

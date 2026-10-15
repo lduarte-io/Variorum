@@ -245,7 +245,7 @@ public final class ProtectionExecutor {
             // A library from before this change: the migration builds this
             // Mac's section from its own facts.
             let section = memory?.deviceSection ?? DeviceSection(
-                deviceID: leaves.ids.mintID(), hardwareMarker: "", settings: .noChoiceYet)
+                deviceID: leaves.ids.mintID(), hardwareMarker: .unset, settings: .noChoiceYet)
             return UnlockedLibrary(
                 key: key, record: nil, section: section, resolution: .newIdentity(predecessorID: nil),
                 memory: memory, keyFile: liveFile, familyTree: memory?.familyTree ?? FamilyTree())

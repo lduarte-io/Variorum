@@ -75,17 +75,23 @@ struct ScenarioMutationPins {
 
     /// Two macOS logins on one Mac (VX-340): the second, with no memory item,
     /// never adopts the first login's section — its settings, its retired ids.
+    /// Her 2026-10-14/15 split of the marker: the section's HARDWARE part is
+    /// this Mac's, its LOGIN part another's — another login, adopting nothing.
     @Test func theHardwareMarker() async throws {
         try await mutationPin("a Mac with no memory item finds only its own section", off: { $0.hardwareMarker = false }) { guards in
             let world = try scenarioWorld(guards: guards) { try $0.today(on: $0.macA, TodaySpec(mode: .castle, gate: .touchID)) }
             await world.done([.launch("macA"), .setScheduledExport("macA", true)])
-            let first = try #require(world.macA.library?.section.deviceID)
+            let first = try #require(world.macA.library?.section)
             // The same container opened by another login on the same hardware.
             world.macA.machine = MachineIdentity(hardware: world.macA.machine.hardware, login: world.rng.uuid().uppercased())
             world.macA.keychain.local = world.macA.keychain.local.filter { $0.key.service != ProtectionNames.memoryService }
             world.lock(world.macA)
             await world.done([.launch("macA")])
-            return (world, world.macA.library?.section.deviceID != first)
+            let second = world.macA.library?.section
+            let adoptedNothing = second?.settings.scheduledExport == false
+                && second?.appleKeys.contains { record in first.appleKeys.contains { $0.id == record.id } } == false
+            return (world, second?.deviceID != first.deviceID && second?.hardwareMarker.sameHardware(as: first.hardwareMarker) == true
+                && adoptedNothing)
         }
     }
 

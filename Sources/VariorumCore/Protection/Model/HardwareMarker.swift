@@ -2,15 +2,25 @@ import CryptoKit
 import Foundation
 
 // VX-305 U1 — THE HARDWARE MARKER (design §3.2, §3.6, §3.13; VX-340 option (a),
-// confirmed by the author at the VX-305 kickoff): a hash of this Mac's
-// hardware identity AND this macOS login's stable identity, with a random salt
-// the protection record carries — never either identifier itself — so it
+// confirmed by the author at the VX-305 kickoff): this Mac's hardware identity
+// AND this macOS login's stable identity, each hashed with a random salt the
+// protection record carries — never either identifier itself — so it
 // recomputes on the same hardware and login, a second login on the same Mac
 // gets a different marker (and so its own device identity), and a marker that
 // leaks alone (say into a log) names no Mac.
 //
-// WHICH IDENTITIES (U1's call, PROVISIONAL — the record in the phase plan §8,
-// QUESTIONS): the hardware identity is the Mac's hardware UUID
+// TWO SALTED PARTS (her ruling 2026-10-14/15, the U4 sitting — P-U4-3 option
+// (c), "split the marker"): a HARDWARE part and a LOGIN part, each its own
+// salted hash, so identity resolution can tell the two ways a marker differs:
+//   - the same hardware, another login → a SECOND LOGIN on this Mac: its own
+//     identity, and it adopts nothing (VX-340);
+//   - other hardware → a REPLACEMENT (Quick Start, Migration Assistant, a
+//     restore onto another Mac): a new identity that takes over per §3.5.
+// Each part alone, salted, names nothing; her "the marker covers the login"
+// ruling stands — continuing on a section needs BOTH parts to match.
+//
+// WHICH IDENTITIES (U1's call, PROVISIONAL P-U1-1, confirmed by her
+// 2026-10-14): the hardware identity is the Mac's hardware UUID
 // (`IOPlatformUUID`); the login's stable identity is the account's
 // directory-services UUID (`GeneratedUID` — what OpenDirectory's
 // `kODAttributeTypeGUID` and Collaboration's `CBUserIdentity.uniqueIdentifier`
@@ -43,9 +53,23 @@ public struct MachineIdentity: Equatable, Sendable, CustomStringConvertible, Cus
     public var debugDescription: String { description }
 }
 
-public enum HardwareMarker {
-    /// FORMAT: the domain separator inside the hashed message.
-    public static let domain = "variorum.hardware-marker.v1"
+/// **The marker** — two salted parts, lowercase hex each. Equal markers are
+/// the same hardware AND the same login.
+public struct HardwareMarker: Codable, Equatable, Hashable, Sendable {
+    /// `HMAC-SHA256(key: salt, message: hardwareDomain ‖ len‖hardware)`.
+    public var hardware: String
+    /// `HMAC-SHA256(key: salt, message: loginDomain ‖ len‖login)`.
+    public var login: String
+
+    public init(hardware: String, login: String) {
+        self.hardware = hardware
+        self.login = login
+    }
+
+    /// FORMAT: the domain separators inside the hashed messages — one per
+    /// part, so neither part can ever equal the other's hash of the same text.
+    public static let hardwareDomain = "variorum.hardware-marker.v2.hardware"
+    public static let loginDomain = "variorum.hardware-marker.v2.login"
     /// The salt's length — 256 random bits per record.
     public static let saltBytes = 32
 
@@ -54,18 +78,32 @@ public enum HardwareMarker {
         SymmetricKey(size: .bits256).withUnsafeBytes { Data($0) }
     }
 
-    /// `HMAC-SHA256(key: salt, message: domain ‖ len‖hardware ‖ len‖login)`,
-    /// lowercase hex. Length-prefixed so no pair of identifiers can collide
-    /// with another by moving a boundary.
-    public static func compute(_ machine: MachineIdentity, salt: Data) -> String {
+    /// Both parts for `machine` under `salt`.
+    public static func compute(_ machine: MachineIdentity, salt: Data) -> HardwareMarker {
+        HardwareMarker(
+            hardware: part(hardwareDomain, machine.hardware, salt: salt),
+            login: part(loginDomain, machine.login, salt: salt))
+    }
+
+    /// `HMAC-SHA256(key: salt, message: domain ‖ len‖field)`, lowercase hex —
+    /// length-prefixed, so no field can collide with another by moving a
+    /// boundary into the domain.
+    static func part(_ domain: String, _ field: String, salt: Data) -> String {
         var message = Data(domain.utf8)
-        for field in [machine.hardware, machine.login] {
-            let bytes = Data(field.utf8)
-            var length = UInt32(bytes.count).bigEndian
-            message.append(Data(bytes: &length, count: 4))
-            message.append(bytes)
-        }
+        let bytes = Data(field.utf8)
+        var length = UInt32(bytes.count).bigEndian
+        message.append(Data(bytes: &length, count: 4))
+        message.append(bytes)
         let mac = HMAC<SHA256>.authenticationCode(for: message, using: SymmetricKey(data: salt))
         return mac.map { String(format: "%02x", $0) }.joined()
     }
+
+    /// A library with no record yet (the migration's subject) has no salt to
+    /// compute under: its placeholder section carries this until the
+    /// migration writes the real one — never stored.
+    public static let unset = HardwareMarker(hardware: "", login: "")
+
+    /// The same hardware, whatever the login — with a different login part,
+    /// a second login on this Mac (VX-340).
+    public func sameHardware(as other: HardwareMarker) -> Bool { hardware == other.hardware }
 }

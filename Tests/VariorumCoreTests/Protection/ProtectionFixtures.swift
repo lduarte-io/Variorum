@@ -71,3 +71,9 @@ enum SecretScan {
         return carries(haystack, utf8) || String(decoding: haystack, as: UTF8.self).contains(needle)
     }
 }
+
+extension HardwareMarker {
+    /// A stand-in marker for tests that need a section, not a Mac: both parts
+    /// the same text (two stubs of different text are different hardware).
+    static func stub(_ text: String) -> HardwareMarker { HardwareMarker(hardware: text, login: text) }
+}

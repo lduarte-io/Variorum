@@ -62,7 +62,7 @@ final class EX {
             world.icloud.keys[own.id] = own
         }
         var section = DeviceSection(
-            deviceID: deviceID, hardwareMarker: "", settings: DeviceSettings(gateStyle: self.gate, scheduledExport: scheduledExport))
+            deviceID: deviceID, hardwareMarker: .stub(""), settings: DeviceSettings(gateStyle: self.gate, scheduledExport: scheduledExport))
         if let own = ownApple { section = section.recordingAppleKey(AppleKeyRecord(id: own.id, purpose: .library, origin: .minted)) }
         var locks = NewKeyLocks(passphrase: p, words: w, apple: ownApple)
         if let other { self.account = other.account }

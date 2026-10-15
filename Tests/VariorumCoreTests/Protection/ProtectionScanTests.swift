@@ -84,6 +84,10 @@ struct ProtectionScanTests {
             ("hardware identity, lowercased", Data(PF.macA.hardware.lowercased().utf8)),
             ("login identity", Data(PF.macA.login.utf8)),
             ("login identity, lowercased", Data(PF.macA.login.lowercased().utf8)),
+            // Each part of the marker is SALTED (her 2026-10-14/15 split): no
+            // unsalted hash of either identifier is stored anywhere.
+            ("hardware identity, unsalted hash", Data(SHA256.hash(data: Data(PF.macA.hardware.utf8)))),
+            ("login identity, unsalted hash", Data(SHA256.hash(data: Data(PF.macA.login.utf8)))),
         ]
         for key in [s3] {
             for purpose in [SealPurpose.memory, .plan, .deviceSection] {
@@ -94,6 +98,13 @@ struct ProtectionScanTests {
         for (name, data) in stored {
             for (secretName, secret) in secrets {
                 #expect(!SecretScan.carries(data, secret), "\(name) carries \(secretName)")
+            }
+        }
+        // The marker's two parts live in this Mac's facts (the record's
+        // section and the memory's second home) and nowhere else.
+        for (name, data) in stored where name != "record" && name != "memory" {
+            for part in [section.hardwareMarker.hardware, section.hardwareMarker.login] {
+                #expect(!SecretScan.carries(data, text: part), "\(name) carries a marker part")
             }
         }
         // The marker's salt lives in the record and nowhere else.

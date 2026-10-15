@@ -93,7 +93,7 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
     }
 
     /// The marker THIS hardware and login compute under the record's salt.
-    public func marker(for machine: MachineIdentity) -> String {
+    public func marker(for machine: MachineIdentity) -> HardwareMarker {
         HardwareMarker.compute(machine, salt: markerSalt)
     }
 

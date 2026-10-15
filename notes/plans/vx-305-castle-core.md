@@ -565,6 +565,11 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   tree of its day), seed 1 × 1000 green at `f1cad906` (44,873 steps, 357.8 s Debug). The protection set Debug: 376
   tests in 65 suites green at `e281b846`. NOT DONE: the soak's seeds 2–20 × 1000 (seed 2 fails at sequence 432 — an
   untriaged finding, the record names it), then (g) the full runs and the final record.
+  **THE CLOSER SESSION (Opus implementer, 2026-10-14, from `03d8e3e4`):** (h) her ruling 2 — the marker SPLIT into
+  salted hardware + login parts, `.anotherLogin` adopting nothing, P-U4-3's takeover new hardware's alone — DONE
+  (this commit; the protection set Debug 377 tests in 65 suites green, the seed-2 probe aside). NEXT: (i) her ruling 1
+  — the stuck leave's fixed scenario + promise 6's vault-reach qualifier — PENDING; (j) the soak, both
+  configurations — PENDING; (k) the runs — PENDING; (l) the final record — PENDING.
 - The go/no-go record: **NOT-STARTED.**
 
 ---

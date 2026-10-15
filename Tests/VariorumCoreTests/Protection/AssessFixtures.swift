@@ -61,7 +61,7 @@ struct AWorld {
         custody = [CustodyItemFact(fingerprint: PF.fp(current), itemClass: mode == .castle ? .touchid : .silent)]
         appleKeys = AppleKeyFacts(readable: mode == .standard ? [own.id] : [])
         section = DeviceSection(
-            deviceID: CF.macA, hardwareMarker: "marker", settings: DeviceSettings(gateStyle: mode == .castle ? .touchID : nil),
+            deviceID: CF.macA, hardwareMarker: .stub("marker"), settings: DeviceSettings(gateStyle: mode == .castle ? .touchID : nil),
             appleKeys: mode == .standard ? [AppleKeyRecord(id: own.id, purpose: .library, origin: .minted)] : [])
         tree = FamilyTree(entries: ([current] + history).map { FamilyTree.Entry(fingerprint: PF.fp($0), kind: mode) })
         recordSection = section

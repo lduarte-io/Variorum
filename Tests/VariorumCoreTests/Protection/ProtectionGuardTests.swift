@@ -31,9 +31,9 @@ struct ProtectionGuardMutationTests {
     /// un-retire an id.
     @Test func twoHomes() {
         let id = PF.id(), retired = PF.id()
-        let current = DeviceSection(deviceID: id, hardwareMarker: "m", version: 8, settings: DeviceSettings(gateStyle: .alwaysAsk))
+        let current = DeviceSection(deviceID: id, hardwareMarker: .stub("m"), version: 8, settings: DeviceSettings(gateStyle: .alwaysAsk))
             .retiringAppleKey(id: retired, purpose: .library, origin: .minted, at: PF.day(1))
-        let replayed = DeviceSection(deviceID: id, hardwareMarker: "m", version: 2, settings: DeviceSettings(gateStyle: .touchID))
+        let replayed = DeviceSection(deviceID: id, hardwareMarker: .stub("m"), version: 2, settings: DeviceSettings(gateStyle: .touchID))
         let on = DeviceFacts.reconcile(record: current, memory: replayed)!
         #expect(on.settings.gateStyle == .alwaysAsk)
         #expect(on.retiredAppleKeyIDs == [retired])
@@ -57,7 +57,7 @@ struct ProtectionGuardMutationTests {
         let secondLogin = HardwareMarker.compute(PF.macASecondLogin, salt: salt)
         let newHardware = HardwareMarker.compute(PF.macB, salt: salt)
         #expect(DeviceFacts.resolveIdentity(memory: nil, sections: [first], marker: secondLogin)
-            == .newIdentity(predecessorID: nil))
+            == .anotherLogin, "the split marker: this hardware's part, another login's part")
         #expect(DeviceFacts.resolveIdentity(memory: memory, sections: [first], marker: newHardware)
             == .newIdentity(predecessorID: first.deviceID))
         var off = ProtectionGuards()

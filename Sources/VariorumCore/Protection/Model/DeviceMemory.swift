@@ -95,7 +95,7 @@ public struct DeviceMemory: Codable, Equatable, Sendable {
     /// readings, never two values that could disagree).
     public var deviceID: String { deviceSection.deviceID }
     /// The hardware marker (likewise).
-    public var hardwareMarker: String { deviceSection.hardwareMarker }
+    public var hardwareMarker: HardwareMarker { deviceSection.hardwareMarker }
 
     /// The Keychain item's account.
     public var itemAccount: String { ProtectionNames.memoryAccount(scope: scope, libraryID: libraryID) }

@@ -134,19 +134,32 @@ struct FamilyTreeTests {
     }
 }
 
-@Suite("VX-305 U1 — the hardware marker covers the hardware AND the login (VX-340)")
+@Suite("VX-305 U1 — the hardware marker covers the hardware AND the login (VX-340), in two salted parts")
 struct HardwareMarkerTests {
+    /// Her 2026-10-14/15 ruling: a hardware part and a login part, each its
+    /// own salted hash — a second login keeps the hardware part and changes
+    /// the login part; other hardware changes the hardware part.
     @Test func itRecomputesOnTheSameHardwareAndLoginOnly() {
         let salt = HardwareMarker.mintSalt()
         let marker = HardwareMarker.compute(PF.macA, salt: salt)
         #expect(marker == HardwareMarker.compute(PF.macA, salt: salt))
-        #expect(marker.count == 64)
-        #expect(marker != HardwareMarker.compute(PF.macASecondLogin, salt: salt), "a second login is another device")
-        #expect(marker != HardwareMarker.compute(PF.macB, salt: salt), "other hardware is another device")
-        #expect(marker != HardwareMarker.compute(PF.macA, salt: HardwareMarker.mintSalt()), "a marker names no Mac without its salt")
-        // Moving the boundary between the two fields changes the marker.
+        #expect(marker.hardware.count == 64 && marker.login.count == 64)
+        let secondLogin = HardwareMarker.compute(PF.macASecondLogin, salt: salt)
+        #expect(secondLogin != marker, "a second login is another device")
+        #expect(secondLogin.sameHardware(as: marker) && secondLogin.login != marker.login, "…on the same hardware")
+        let otherHardware = HardwareMarker.compute(PF.macB, salt: salt)
+        #expect(otherHardware != marker && !otherHardware.sameHardware(as: marker), "other hardware is another device")
+        let fresh = HardwareMarker.compute(PF.macA, salt: HardwareMarker.mintSalt())
+        #expect(fresh.hardware != marker.hardware && fresh.login != marker.login, "each part names no Mac without its salt")
+        // The two parts never collide: the same text in both fields hashes
+        // differently per part (one domain each).
+        let same = HardwareMarker.compute(MachineIdentity(hardware: PF.macA.login, login: PF.macA.login), salt: salt)
+        #expect(same.hardware != same.login)
+        #expect(same.login == marker.login, "the login part hashes the login alone")
+        // Moving characters between the fields changes both parts.
         let shifted = MachineIdentity(hardware: PF.macA.hardware + "x", login: String(PF.macA.login.dropFirst()))
-        #expect(HardwareMarker.compute(shifted, salt: salt) != marker)
+        let moved = HardwareMarker.compute(shifted, salt: salt)
+        #expect(moved.hardware != marker.hardware && moved.login != marker.login)
     }
 
     @Test func theMarkerCarriesNeitherIdentifier() throws {
@@ -154,9 +167,16 @@ struct HardwareMarkerTests {
             libraryID: PF.id(), mode: .castle, modeConfirmed: true, account: nil,
             currentFingerprint: "abababababababab", madeBy: PF.id(), at: PF.t0)
         let marker = record.marker(for: PF.macA)
+        let encoded = try ProtectionCoding.canonical(marker)
         for identifier in [PF.macA.hardware, PF.macA.login] {
-            #expect(!marker.contains(identifier.lowercased()))
-            #expect(!SecretScan.carries(Data(marker.utf8), text: identifier))
+            for part in [marker.hardware, marker.login] {
+                #expect(!part.contains(identifier.lowercased()))
+                #expect(!SecretScan.carries(Data(part.utf8), text: identifier))
+            }
+            #expect(!SecretScan.carries(encoded, text: identifier))
+            // Each part alone is salted: no unsalted hash of either identifier.
+            let unsalted = Data(SHA256.hash(data: Data(identifier.utf8)))
+            #expect(!SecretScan.carries(encoded, unsalted))
         }
         #expect(!"\(PF.macA)".contains(PF.macA.hardware), "the identity's description is redacted")
     }
@@ -164,7 +184,7 @@ struct HardwareMarkerTests {
 
 @Suite("VX-305 U1 — this Mac's facts in two sealed homes")
 struct DeviceFactsTests {
-    private func section(_ id: String, marker: String, version: Int, gate: GateStyle = .touchID) -> DeviceSection {
+    private func section(_ id: String, marker: HardwareMarker, version: Int, gate: GateStyle = .touchID) -> DeviceSection {
         DeviceSection(deviceID: id, hardwareMarker: marker, version: version, settings: DeviceSettings(gateStyle: gate))
     }
 
@@ -178,9 +198,9 @@ struct DeviceFactsTests {
     @Test func theNewerWinsAndTheRetiredIdsAreTheUnion() {
         let id = PF.id()
         let retiredOnlyInRecord = PF.id(), retiredOnlyInMemory = PF.id()
-        var record = section(id, marker: "m", version: 4, gate: .alwaysAsk)
+        var record = section(id, marker: .stub("m"), version: 4, gate: .alwaysAsk)
             .retiringAppleKey(id: retiredOnlyInRecord, purpose: .library, origin: .minted, at: PF.day(1))
-        var memory = section(id, marker: "m", version: 9, gate: .touchID)
+        var memory = section(id, marker: .stub("m"), version: 9, gate: .touchID)
             .retiringAppleKey(id: retiredOnlyInMemory, purpose: .library, origin: .minted, at: PF.day(2))
         record.version = 4
         memory.version = 9
@@ -201,9 +221,9 @@ struct DeviceFactsTests {
     @Test func aReplayOfEitherHomeAloneChangesNothing() {
         let id = PF.id()
         let retired = PF.id()
-        let current = section(id, marker: "m", version: 7, gate: .alwaysAsk)
+        let current = section(id, marker: .stub("m"), version: 7, gate: .alwaysAsk)
             .retiringAppleKey(id: retired, purpose: .library, origin: .minted, at: PF.day(3))
-        var stale = section(id, marker: "m", version: 3, gate: .touchID)
+        var stale = section(id, marker: .stub("m"), version: 3, gate: .touchID)
             .recordingAppleKey(AppleKeyRecord(id: retired, purpose: .library, origin: .minted))
         stale.version = 3
         // The library file replayed alone.
@@ -233,13 +253,13 @@ struct DeviceFactsTests {
 
     /// VX-340: a second macOS login on the same Mac never finds the first
     /// login's section — it starts its own identity: its own device id and
-    /// `<mac8>`, never the first login's settings or its own keys' list. (VX-305
-    /// U4, PROVISIONAL P-U4-3: a slot holding the first login's library files is
-    /// a CLONE — §8's residue — and, like a replacement Mac whose memory item
-    /// stayed behind, takes over only what §3.5 needs no predecessor for: the
-    /// Apple key its live key file's wrap names and every retired id, starting
-    /// on Always ask. A copy opened from the other login lands under a fresh
-    /// key and adopts nothing — the scenario world's VX-340 scenario.)
+    /// `<mac8>`, never the first login's settings, its own keys' list or its
+    /// retired ids. Her 2026-10-14/15 ruling SPLIT THE MARKER so this can be
+    /// told from new hardware: a section carrying THIS hardware's part under
+    /// another login's part — or such a memory item — is another login, and it
+    /// adopts nothing, starting with no choice yet (P-U1-7). (Re-pointed from
+    /// P-U4-3 option (a), which took over the live key file's wrap id and every
+    /// retired id here too.)
     @Test func aSecondMacOSLoginStartsItsOwnIdentity() {
         let salt = HardwareMarker.mintSalt()
         let firstOwn = PF.id(), retired = PF.id(), wrapped = PF.id()
@@ -247,22 +267,50 @@ struct DeviceFactsTests {
             .recordingAppleKey(AppleKeyRecord(id: firstOwn, purpose: .library, origin: .minted))
             .retiringAppleKey(id: retired, purpose: .library, origin: .minted, at: PF.day(1))
         let minted = PF.id()
+        let here = HardwareMarker.compute(PF.macASecondLogin, salt: salt)
         let found = DeviceFacts.thisMacsSection(
-            memory: nil, recordSections: [firstLogin],
-            marker: HardwareMarker.compute(PF.macASecondLogin, salt: salt),
+            memory: nil, recordSections: [firstLogin], marker: here,
+            keyFileOwnAppleKeyIDs: [wrapped], mintDeviceID: { minted })
+        #expect(found.resolution == .anotherLogin)
+        #expect(found.section.deviceID == minted)
+        #expect(found.section.hardwareMarker == here)
+        #expect(found.section.mac8 != firstLogin.mac8)
+        #expect(found.section.appleKeys.isEmpty, "another login adopts nothing — no own keys, no retired ids")
+        #expect(found.section.settings == .noChoiceYet)
+        // The first login's memory item turning up in the second login's
+        // keychain (same hardware, another login) adopts nothing either.
+        let viaMemory = DeviceFacts.thisMacsSection(
+            memory: memory(for: firstLogin), recordSections: [firstLogin], marker: here,
+            keyFileOwnAppleKeyIDs: [wrapped], mintDeviceID: { minted })
+        #expect(viaMemory.resolution == .anotherLogin && viaMemory.section.appleKeys.isEmpty)
+        // With no record sections at all (nothing knows the library yet), nothing is taken over.
+        let bare = DeviceFacts.thisMacsSection(
+            memory: nil, recordSections: [], marker: here, keyFileOwnAppleKeyIDs: [wrapped], mintDeviceID: { minted })
+        #expect(bare.section.appleKeys.isEmpty && bare.section.settings == .noChoiceYet)
+    }
+
+    /// New hardware whose memory item stayed behind (Migration Assistant
+    /// doesn't carry Local Items), opening a library the record knows — no
+    /// section is this hardware's, so it is a REPLACEMENT with no predecessor
+    /// to name: it takes over what §3.5 needs no predecessor for — the Apple
+    /// key its live key file's wrap names, and every retired id any section
+    /// lists — starting on Always ask (P-U4-3 as the split simplified it).
+    @Test func newHardwareWithNoMemoryItemTakesOverWhatNeedsNoPredecessor() {
+        let salt = HardwareMarker.mintSalt()
+        let otherOwn = PF.id(), retired = PF.id(), wrapped = PF.id()
+        let elsewhere = section(PF.id(), marker: HardwareMarker.compute(PF.macA, salt: salt), version: 4)
+            .recordingAppleKey(AppleKeyRecord(id: otherOwn, purpose: .library, origin: .minted))
+            .retiringAppleKey(id: retired, purpose: .library, origin: .minted, at: PF.day(1))
+        let minted = PF.id()
+        let found = DeviceFacts.thisMacsSection(
+            memory: nil, recordSections: [elsewhere], marker: HardwareMarker.compute(PF.macB, salt: salt),
             keyFileOwnAppleKeyIDs: [wrapped], mintDeviceID: { minted })
         #expect(found.resolution == .newIdentity(predecessorID: nil))
         #expect(found.section.deviceID == minted)
-        #expect(found.section.mac8 != firstLogin.mac8)
-        #expect(!found.section.appleKeys.contains { $0.id == firstOwn }, "never the first login's own keys' list")
+        #expect(!found.section.appleKeys.contains { $0.id == otherOwn }, "no predecessor is named: never another section's own list")
         #expect(Set(found.section.appleKeys.map(\.id)) == [wrapped, retired])
         #expect(found.section.retiredAppleKeyIDs == [retired])
         #expect(found.section.settings == .newIdentity)
-        // With no record sections at all (nothing knows the library yet), nothing is taken over.
-        let bare = DeviceFacts.thisMacsSection(
-            memory: nil, recordSections: [], marker: HardwareMarker.compute(PF.macASecondLogin, salt: salt),
-            keyFileOwnAppleKeyIDs: [wrapped], mintDeviceID: { minted })
-        #expect(bare.section.appleKeys.isEmpty && bare.section.settings == .noChoiceYet)
     }
 
     /// A memory item that turns up on new hardware: a new identity, taking
@@ -275,7 +323,7 @@ struct DeviceFactsTests {
             .recordingAppleKey(AppleKeyRecord(id: ownKept, purpose: .library, origin: .minted))
             .retiringAppleKey(id: ownRetired, purpose: .library, origin: .minted, at: PF.day(1))
             .recordingAppleKey(AppleKeyRecord(id: followed, purpose: .account, accountID: PF.id(), origin: .followed))
-        let elsewhere = section(PF.id(), marker: "someone-else", version: 2)
+        let elsewhere = section(PF.id(), marker: .stub("someone-else"), version: 2)
             .retiringAppleKey(id: retiredElsewhere, purpose: .account, accountID: PF.id(), origin: .followed, at: PF.day(2))
         let minted = PF.id()
         let found = DeviceFacts.thisMacsSection(
@@ -306,7 +354,7 @@ struct DeviceFactsTests {
     }
 
     @Test func actsAreSequencedAndVersionsOnlyGrow() {
-        let start = section(PF.id(), marker: "m", version: 1)
+        let start = section(PF.id(), marker: .stub("m"), version: 1)
         let (one, first) = start.beginningAct(.enterCastle, from: "a", to: "b", at: PF.t0)
         #expect(first == 1)
         #expect(one.actInFlight?.sequence == 1)
@@ -328,7 +376,7 @@ struct SealedHomesAndPlansTests {
     @Test func aCopysActsInFlightAreClearedWhenItIsOpened() throws {
         let sent = StoreKey.mint(), landed = StoreKey.mint()
         let library = PF.id()
-        let busy = DeviceSection(deviceID: PF.id(), hardwareMarker: "m", settings: .noChoiceYet)
+        let busy = DeviceSection(deviceID: PF.id(), hardwareMarker: .stub("m"), settings: .noChoiceYet)
             .beginningAct(.replaceAllKeys, from: "a", to: "b", at: PF.t0).section
         var record = try ProtectionRecord.minting(
             libraryID: library, mode: .castle, modeConfirmed: true, account: nil,
@@ -336,7 +384,7 @@ struct SealedHomesAndPlansTests {
             .storing(busy, sealedUnder: sent)
         // A planted section no reachable key verifies.
         let planted = try Sealed.sealing(
-            DeviceSection(deviceID: PF.id(), hardwareMarker: "x", settings: .noChoiceYet)
+            DeviceSection(deviceID: PF.id(), hardwareMarker: .stub("x"), settings: .noChoiceYet)
                 .beginningAct(.enterCastle, from: nil, to: nil, at: PF.t0).section,
             purpose: .deviceSection, libraryID: library, key: StoreKey.mint())
         record.deviceSections.append(planted)
@@ -348,8 +396,8 @@ struct SealedHomesAndPlansTests {
 
     @Test func storingReplacesThatDevicesSectionOnly() throws {
         let key = StoreKey.mint()
-        let a = DeviceSection(deviceID: PF.id(), hardwareMarker: "a", settings: .noChoiceYet)
-        let b = DeviceSection(deviceID: PF.id(), hardwareMarker: "b", settings: .noChoiceYet)
+        let a = DeviceSection(deviceID: PF.id(), hardwareMarker: .stub("a"), settings: .noChoiceYet)
+        let b = DeviceSection(deviceID: PF.id(), hardwareMarker: .stub("b"), settings: .noChoiceYet)
         var record = ProtectionRecord.minting(
             libraryID: PF.id(), mode: .castle, modeConfirmed: true, account: nil,
             currentFingerprint: PF.fp(key), madeBy: a.deviceID, at: PF.t0)
@@ -368,7 +416,7 @@ struct SealedHomesAndPlansTests {
         let memory = DeviceMemory(
             libraryID: library, scope: "Variorum", currentFingerprint: PF.fp(key), keyEpoch: 1,
             familyTree: FamilyTree(),
-            deviceSection: DeviceSection(deviceID: PF.id(), hardwareMarker: "m", settings: DeviceSettings(gateStyle: .alwaysAsk)))
+            deviceSection: DeviceSection(deviceID: PF.id(), hardwareMarker: .stub("m"), settings: DeviceSettings(gateStyle: .alwaysAsk)))
         let sealed = try memory.sealed(under: key)
         var edited = memory
         edited.deviceSection.settings.gateStyle = .touchID
@@ -383,7 +431,7 @@ struct SealedHomesAndPlansTests {
     @Test func aPlanResumesOnlyWhenTheSectionNamesIt() throws {
         let key = StoreKey.mint(), newer = StoreKey.mint()
         let library = PF.id()
-        let base = DeviceSection(deviceID: PF.id(), hardwareMarker: "m", settings: .noChoiceYet)
+        let base = DeviceSection(deviceID: PF.id(), hardwareMarker: .stub("m"), settings: .noChoiceYet)
         let (firstAct, s1) = base.beginningAct(.enterCastle, from: PF.fp(key), to: nil, at: PF.t0)
         let plan1 = ProtectionPlan(
             libraryID: library, deviceID: base.deviceID, sequence: s1, act: .enterCastle,
