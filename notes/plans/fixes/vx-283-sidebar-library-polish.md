@@ -1943,6 +1943,13 @@ the orchestrator rules on its composition (below — the brief's composition doe
   both sides (the old fixed overlay also rested 46 pt above the same foot). `vx283-u3` rebuilt headless
   (build-for-testing succeeded, no warning in the two files). PENDING the closing window.
 
+- **R-ALL PREBUILD — STARTING (named before it is applied):** from the committed tip `4f8d1097`, the four reverts
+  exactly as step 3 below names them (R-V `EditorCommands.swift`, R-T `RootView.swift`, R-D `LibraryListFace.swift`,
+  R-L `LibraryCatalogView.swift`) applied to the working tree; `DerivedData/vx283-u3-revert` cloned from `vx283-u3`
+  (APFS clone) and built there with `build-for-testing` — `vx283-u3` is never touched by the revert (the walker's
+  products). Restore: `git checkout --` the four files, then `git diff` empty. A successor reading this with a dirty
+  tree: the reverts are in flight — restore them before anything else.
+
 (The plan below as first written; the closing window's plan follows.)
 
 **Q6 — THE STAGE WINDOW PLAN (≈25 min; run in this order; the record flips per step; all commands from
