@@ -550,6 +550,47 @@ struct SidebarSectionWindowMountTests {
         }
     }
 
+    /// **U1c — the PROPOSED pin (env-gated until the architect rules:
+    /// `TEST_RUNNER_VARIORUM_U1C_PIN=1`).** The trace's signature of the
+    /// defect: the ninth star's row is cut by the rail transition's TAIL — the
+    /// viewport's last sub-half-point steps never re-ask — and only the settled
+    /// backstop (0.30 s after the last request) lands it. So: sampled at a fine
+    /// cadence across the open, the section must stand where it SETTLES within
+    /// 100–150 ms of the moment its viewport reaches its settled height — well
+    /// inside the backstop's 300 ms, so the backstop cannot be what passes it —
+    /// and where it settles must be the content's end (the row clear). RED on
+    /// HEAD whenever the tail leaves the row cut; green on a fix that lands it
+    /// at the beat's end.
+    @Test(.enabled(if: ProcessInfo.processInfo.environment["VARIORUM_U1C_PIN"] != nil))
+    func theNinthStarIsClearTheMomentTheBeatEnds() async throws {
+        try await withRig(height: 900, openNotes: 3, starred: 9, startOn: nil) { rig in
+            let pump = U1cTrace()
+            let start = ProcessInfo.processInfo.systemUptime
+            rig.workspace.select(.post(rig.notes[8]))
+            var samples: [(at: TimeInterval, window: SidebarLayout.ScrollWindow?)] = []
+            while ProcessInfo.processInfo.systemUptime - start < 1.0 {
+                rig.hosting.layoutSubtreeIfNeeded()
+                rig.window.displayIfNeeded()
+                pump.pump(0.004)
+                await Task.yield()
+                samples.append((ProcessInfo.processInfo.systemUptime - start, rig.starred?.window))
+            }
+            let settled = try #require(samples.last?.window, "the section reported its window")
+            #expect(settled.offset == settled.content - settled.viewport,
+                    "it settles with the ninth star at the content's end: \(SidebarSectionTrace.text(settled))")
+            let end = try #require(samples.first { $0.window?.viewport == settled.viewport }?.at,
+                                   "the viewport reached its settled height")
+            let soon = samples.filter { $0.at >= end + 0.10 && $0.at < end + 0.15 }
+            #expect(!soon.isEmpty, "samples 100–150 ms after the beat's end")
+            for sample in soon {
+                let when = String(format: "+%.3f s (the beat ended at +%.3f s)", sample.at, end)
+                let seen = sample.window.map(SidebarSectionTrace.text) ?? "nil"
+                #expect(sample.window?.offset == settled.offset,
+                        "\(when): \(seen) — it settles at \(SidebarSectionTrace.text(settled))")
+            }
+        }
+    }
+
     /// **U1c — the trace leg's harness (env-gated; asserts nothing).** The
     /// Starred pin's own road — the ninth star's note opened from the Library,
     /// the rail arriving and the pitch flipping 30 → 24 under the column's
@@ -562,6 +603,17 @@ struct SidebarSectionWindowMountTests {
     /// `TEST_RUNNER_VARIORUM_U1C_TRACE=1`.
     @Test(.enabled(if: ProcessInfo.processInfo.environment["VARIORUM_U1C_TRACE"] != nil))
     func traceTheNinthStarsOpen() async throws {
+        try await traceTheNinthStar(driven: true)
+    }
+
+    /// The same road with NO forced layout: the harness only sleeps, so the
+    /// beat's frames come from the display, as they do in use.
+    @Test(.enabled(if: ProcessInfo.processInfo.environment["VARIORUM_U1C_TRACE"] != nil))
+    func traceTheNinthStarsOpenUndriven() async throws {
+        try await traceTheNinthStar(driven: false)
+    }
+
+    private func traceTheNinthStar(driven: Bool) async throws {
         try await withRig(height: 900, openNotes: 3, starred: 9, startOn: nil) { rig in
             let trace = U1cTrace()
             SidebarSectionTrace.sink = { trace.lines.append($0) }
@@ -570,7 +622,7 @@ struct SidebarSectionWindowMountTests {
             defer { trace.detach() }
             trace.note("REST oracle \(trace.text(rig.starred?.window)) fades \(String(describing: rig.starred?.fades))")
             let start = ProcessInfo.processInfo.systemUptime
-            trace.note("===== FLIP: select the ninth star's note =====")
+            trace.note("===== FLIP (\(driven ? "driven: SectionRig.settle's forced layout" : "UNDRIVEN: frames from the display only")): select the ninth star's note =====")
             rig.workspace.select(.post(rig.notes[8]))
             var last: SidebarLayout.ScrollWindow?
             var lastStar: SidebarLayout.ScrollWindow?
@@ -580,13 +632,17 @@ struct SidebarSectionWindowMountTests {
             var iteration = 0
             while ProcessInfo.processInfo.systemUptime - start < 1.5 {
                 iteration += 1
-                // `SectionRig.settle`'s own turn, verbatim in shape.
-                rig.hosting.layoutSubtreeIfNeeded()
-                rig.window.layoutIfNeeded()
-                rig.window.displayIfNeeded()
-                trace.pump(0.02)
-                await Task.yield()
-                try? await Task.sleep(for: .milliseconds(10))
+                if driven {
+                    // `SectionRig.settle`'s own turn, verbatim in shape.
+                    rig.hosting.layoutSubtreeIfNeeded()
+                    rig.window.layoutIfNeeded()
+                    rig.window.displayIfNeeded()
+                    trace.pump(0.02)
+                    await Task.yield()
+                    try? await Task.sleep(for: .milliseconds(10))
+                } else {
+                    try? await Task.sleep(for: .milliseconds(30))
+                }
                 let now = rig.open?.window
                 let frame = rig.open?.scroll
                 let star = rig.starred?.window
