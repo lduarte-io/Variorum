@@ -532,4 +532,19 @@ extension GeneratorFoundScenarios {
         await world.done([.signIn("phone", account: account), .launch("phone")])
         #expect(world.phone.isOpen, "signed back in, the library didn't open through the vault")
     }
+
+    /// Seed 3 (sequence 211, the second shrink): the same device, while
+    /// another device enters Castle with new words — the account's master is
+    /// replaced, and this device's file never got the master's words copy
+    /// (it migrated signed out): §3.5a's stated residue, promise 5's last
+    /// exception — only the server brings its writing back.
+    @Test func aSilentlyJoinedDeviceBehindANewMasterIsTheStatedResidue() async throws {
+        let world = try Self.start("a synced Standard account, a device that joined without a secret", seed: 3000220)
+        for action in [Action.wipeKeychain("phone"), .signOut("phone"),
+                       .crash(.switchAppleID("phone", to: SWorld.appleB), afterWrites: 22),
+                       .useCastle("macA", .touchID, newWords: true), .launch("phone")] {
+            await world.step(action)
+        }
+        expectPromisesKept(world)
+    }
 }

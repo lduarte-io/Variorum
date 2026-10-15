@@ -655,6 +655,22 @@ extension SWorld {
             let gone = { (id: String) in lost.contains(id) || retiredHere.contains(id) }
             if !holders.isEmpty, holders.allSatisfy(secretless), ids.contains(where: gone),
                !ids.contains(where: readable.contains) { continue }
+            // §3.5a's residue (promise 5's last exception): a silently-joined
+            // device's file — its library key under a master and no passphrase
+            // or words lock, its Apple roads gone — whose master the account
+            // has since replaced, no words copy her words open beside it: "only
+            // the server brings its writing back, and its unsynced edits are
+            // lost" (the closer's soak, seed 3 sequence 211 — the device had
+            // migrated signed out, so no vault read ever gave it the copy).
+            let masterOnly = holders.allSatisfy { document in
+                switch document {
+                case .format3(let file): return file.passphrase == nil && file.words == nil && file.master != nil
+                case .legacy(let legacy):
+                    return legacy.envelope.passphrase == nil && legacy.envelope.recovery == nil && legacy.envelope.master != nil
+                }
+            }
+            if truth.silentlyJoined.contains(device.name), !holders.isEmpty, masterOnly, server.accounts[copy.holder] != nil,
+               !ids.contains(where: readable.contains) { continue }
             violations.append(Violation(promise: 5, device: device.name, detail: "the copy \(id) (\(f8(image.fingerprint))) opens by no road"))
         }
         return violations

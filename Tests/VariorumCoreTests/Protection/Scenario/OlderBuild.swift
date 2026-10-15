@@ -144,6 +144,7 @@ extension SWorld {
             }
         }
         let secrets = known(holder)
+        if spec.joinedWithoutSecret { truth.silentlyJoined.insert(device.name) }
         let material: DeviceKeyMaterial? = try spec.account.map { account in
             guard let master = todayMaster(account), let vault = server.snapshot(account) else { throw WorldRefusal.noLibrary }
             return try VaultModel.material(following: vault.format, master: master)

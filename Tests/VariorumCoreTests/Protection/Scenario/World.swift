@@ -132,6 +132,10 @@ struct Truth {
     /// exception once its own Apple key is gone, retired by her Use Castle
     /// included (PROVISIONAL P-U4-13).
     var restoredPastCrossing: Set<String> = []
+    /// Devices that joined their account without typing a secret (§3.5a):
+    /// their file locks the library key under the master — and the master's
+    /// words copy once a vault read gave them one.
+    var silentlyJoined: Set<String> = []
     /// A synced pair landed HELD on a device (library id): no sync round until
     /// the one Resume Sync press — promise 7 waits for it.
     var heldLanding: [String: String] = [:]
