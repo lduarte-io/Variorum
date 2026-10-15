@@ -179,6 +179,23 @@ guidance. Each unit's evidence is named before its spawn.
 ## Stage traffic log (the oct13coordinator protocol)
 
 - *(Newest first from here.)*
+- 2026-10-15 03:14:45: **RELEASE `vx336-close`** (~47 of 90 min; no renewal). Result line to the coordinator: R2-1's pin RED
+  exact on `vx336-close-red` (11 tests · 4 failed · 4 issues at `:369` `:390` `:407` `:431`) and GREEN 11/11 on `vx336-close`;
+  the whole Mac target on the merged final tree (`cf619bcc`) 4,714 tests / 777 suites, 4,680 passed, 27 gated skips, 13
+  known; four reds = VX-115 · VX-245/283's six sites · VX-167 (standing) + one load flake that passed alone
+  (`TakesFindBoardTests`' Esc boundary), no real red; the phone 120 tests / 15 suites passed (2 known by design); dev store
+  cmp-SAME vs the A1 (sha256 set equal); prefs 0 differ (1,602 keys); fingerprint same (`bc64543e2f4e8e58`); 0 sims;
+  `Backups/` unchanged (57); castle-W1 untouched; Standard/unlocked/Study as handed over. The A1
+  `scale-prestage-20261015T082808Z` is the coordinator's to prune. **After the release the runner hit the weekly API
+  limit** with its last record edits written but uncommitted; it resumed at ~10:38 MDT on the coordinator's word, adopted
+  the edits as written (every line from output read before the release) and committed them (`4c95a3aa`); nothing re-ran
+  on the stage.
+- 02:28: **GO for `vx336-close`** (`Tools/stage release --who coord-for-vx336 && Tools/stage claim --who vx336-close --reason
+  "VX-336 closeout: R2-1 pin red/green + WHOLE Mac target on merged tree + 15 phone suites (one sim), dev store A1 first"
+  --minutes 90`), run alone → claimed 02:27:58 (expiring 03:57:58). The coordinator's pre-checks: no instances by the
+  strict forms, no sims, `origin/main` still `ebd16909`, the dev `safety-copies` only castle-W1; ONE renewal allowed. No
+  SEAM (tests only, the A1 first).
+- ~02:25: READY for `vx336-close` (a fresh stage runner; the three products matched their trees, the host clear).
 - 2026-10-15 01:12:51: **RELEASE `vx336-u9`** (15 of 75 min); every leg passed; the restore line as U5–U8's; the A1
   `scale-prestage-20261015T070459Z` is the coordinator's to prune. 00:57: **GO** (`Tools/stage release --who coord-for-vx336 &&
   Tools/stage claim --who vx336-u9 --reason "VX-336 U9: 121-suite Mac batch + Mac red + one-sim phone red/green, SEAM, A1 +
@@ -7342,8 +7359,8 @@ handoff (for form); `notes/SessionResiliencyProtocol.md`'s implementer section.
 | 4 | D2 — AppSpec §14's entry + VX-179 rolled to `notes/AppSpecDeltaArchive.md` | DONE (this commit) — **exactly as drafted:** D2a's entry replaces the one anchor `**Most recent canon deltas — VX-246 (a RUN,` (the draft's quoted lines joined into §14's one paragraph), so VX-246's entry reads "Before it — "; D2b's main-first case (VX-283 has not merged): the VX-179 entry cut from ` Before it — **VX-179 (a TICKET run, …` through `PR #154 (merge commit d6caafc1).**`, the closing italic now `*(Entries before VX-184 live verbatim in`, and the cut text appended verbatim to the archive under `## Rolled at the VX-336 closeout (2026-10-15)`. §14 now holds five: VX-336 · VX-246 · VX-282 · VX-281 · VX-184 (the most recent MCP effort is VX-336 itself). «PR #N» and «sha» left for the post-merge fill |
 | 5 | D3 — `notes/plans/run-finals-ledger.md`'s VX-336 section | DONE (this commit) — inserted ahead of `## VX-246`, every «…» filled: the ladder CLOSED at round 2 with R2's tally (0B/0M/1m/3n, R2-1 fixed red-first and checked line by line); PHASE B's headless finals (MCP 349/67, 1 known VX-357 · core 2,872/333 · workbook 40/6); the closeout window's whole Mac target (4,714 / 777 — 20 issues incl. 13 known, 4,680 passed, 27 gated skips; three standing reds + one load flake that passed alone, no new red), R2-1's red/green, the phone 120/15. **Differences from the draft:** the paragraphs are written unwrapped, the ledger's own form; the whole target's known issues read 13 (VX-229's nine + `IndexTierMetricsTests`' four — the window run's own reading), and the draft's "reds named, each standing on main" gains the one load flake, said as such |
 | 6 | D4 — the master plan: VX-336's in-flight row retired | DONE (this commit) — exactly as drafted: the one table line deleted; VX-305's and VX-283's rows stand; no closeout paragraph |
-| 7 | D5 — MobileSoul PL-56 | NOT-STARTED |
-| 8 | the Stage traffic log's closeout-window entry | NOT-STARTED |
+| 7 | D5 — MobileSoul PL-56 | DONE (this commit) — the row inserted directly after PL-55's, its text exactly as drafted, written as one line (MobileSoul's own form). PL-56 was free. (Main's two PL-53 rows predate this run — the handoff's note, not fixed here) |
+| 8 | the Stage traffic log's closeout-window entry | DONE (this commit) — three lines at the log's head: READY ~02:25, the GO at 02:28 with its exact claim line (90 min; claimed 02:27:58), the RELEASE at 03:14:45 with the result line and the A1 path, and the runner's stop at the weekly API limit after the release and its resume at ~10:38 |
 | 9 | D8 — the STATUS lines (this record, the plan's banner, the top LIVE STATUS's CLOSEOUT row) | NOT-STARTED |
 | 10 | the handoff finished (D7's fills) | NOT-STARTED |
 | 11 | the PR opened (not merged): `git status` clean, `swift build` green, main an ancestor | NOT-STARTED |
