@@ -4558,8 +4558,8 @@ trimmed, no prefix), `MCPWriteTools+CommentDelete` (VX-260), `readableBooks` (VX
 |---|---|---|
 | 0 | read-in; this record | DONE (this commit) |
 | P | **PAUSED** at the orchestrator's word (U7's window has its GO), 2026-10-14 ~20:45 MDT: committed, pushed, `git status` clean; resumed after U7's RELEASE | DONE — the paused session ended; a FRESH continuation took over after U7c (this commit) |
-| 1 | the pins on the OLD tree (Tests/ only): the advice (bound 3,000; the tools line; every new claim; the link) + the descriptions' truth (edit_take's deduped before-commit; the label rule per take-writing tool; `<your client name>`; delete_comment's VX-260 clause; rename_book's VX-259 rule) → RED | IN-PROGRESS — the continuation writes them next |
-| 2 | the instructions (new text with the old bound → RED on the bound; then 3,000 → GREEN) | NOT-STARTED |
+| 1 | the pins on the OLD tree (Tests/ only): the advice (bound 3,000; the tools line; every new claim; the link) + the descriptions' truth (edit_take's deduped before-commit; the label rule per take-writing tool; `<your client name>`; delete_comment's VX-260 clause; rename_book's VX-259 rule) → RED | DONE (this commit) — THE PINS below: 28 tests in 7 suites, 13 failed, 36 issues on `758abded`'s product, every one by its words; every mechanics half green on the old tree |
+| 2 | the instructions (new text with the old bound → RED on the bound; then 3,000 → GREEN) | NOT-STARTED — the text is THE INSTRUCTIONS (DRAFT) below |
 | 3 | the descriptions → GREEN | NOT-STARTED |
 | 4 | revert checks (announced, committed first) | NOT-STARTED |
 | 5 | the stargazing brief's FURTHER delta, one send-ready message | NOT-STARTED |
@@ -4583,6 +4583,73 @@ its pieces to keep Sources last (record, Tests-only pins and the brief first), a
   name>`; a model may read "your name" as its own. To be made consistent.
 - The label rule is unstated on create_note, import_document, duplicate_note and set_take_label, and add_take/add_takes
   state it without its form (VX-197's split, VX-267's form).
+
+**The Sources order (the continuation's note):** U7's window RELEASED at 21:12:37 and U7c rebuilt the product, so the
+"keep Sources last" reason above is spent. The pieces still run in the plan's order (pins → instructions → descriptions).
+
+**The checked facts each fix states (read from code in this session):** edit_take's "before" commit is skipped by
+`isDirty` exactly when the take's latest commit holds the words it replaces OR the take is blank and never committed;
+the "after" commit is always written when the text changed (a blank `text` refuses at the parse, R-VX171-2); writing
+the text the take already has returns `changed: false` with no commit and no undo entry; the brackets survive the undo
+(P-13nb-U3-2). Labels: `aiLabel` = `client` or `client · label` (trimmed) on add_take/add_takes only; create_note and
+insert_blocks (`noteBlocks`) and set_take_label (`setTakeLabelRows`) store a label trimmed, a blank one as none, no
+prefix; import_document's label is its `take: "…"` line's (inside the quotes, untrimmed; `take: N` = none);
+duplicate_note copies each take's label (the fan-copy machine). VX-259: `requireBookNameFree` counts live, UNARCHIVED
+readings of either kind, any wing, and the wire passes `readableBooks` so only those this client can read count. VX-260:
+at suggest a comment is the client's own only while its words' digest matches; a record without the digest (before
+v1_29) or no record (before v1_27) is not its own.
+
+### THE PINS — RED ON THE OLD TREE (piece 1; read from the run's own output)
+
+**The red run:** `swift test --filter 'MCPAdviceServerTests|MCPEditServerTests/editTakesBeforeCommitIsDeduped|MCPServerTests/theDescriptionsNameTheClientOneWay|MCPTakeLabelFormServerTests|MCPCommentWordsServerTests|MCPBookNameReachServerTests|MCPWireNeutralityTests'`
+on `758abded`'s product + these tests → **"Test run with 28 tests in 7 suites failed … with 36 issues"; 13 tests failed,
+15 passed.** Every failure is the WORDS; every mechanics half of a mixed pin passed on the old tree.
+
+**The advice** (`MCPAdviceServerTests`):
+- **`theAdviceIsBoundedAsStated`** (JUSTIFIED EDIT: `instructionsBound == 3_000`, R-VX184-3) — RED, 1 issue (the bound).
+- **`everyToolTheAdviceNamesIsDeclared`** (JUSTIFIED EDIT: the names grow by `list_my_activity` and `duplicate_note`, and
+  ONE parameter, `ids_only`, must be a declared input of `read_note` — a parameter is not a tool) — RED, 1 issue.
+- **`theToolsLineSaysWhatIsListedOnApproval`** (new) — "Tools appear only for what they have shared" gone; the built
+  line present; the catalog fact: the ONE `listedWhenApproved` tool is `list_my_activity` — RED, 2 issues.
+- **`theAdviceNamesPagingDigestsAndRecoveryWithNoNumber`** (new) — paging (`limit`, `cursor`, `ids_only` — read_note's
+  own inputs), the write digests, the lost-answer road; plus a GUARD (green on both sides by design): no digit in the
+  advice outside the format's version token and the word `sha256` — RED, 3 issues (the three sentences).
+- **`theRungsSayTheirReachAsBuilt`** (new) — write new's "blocks added at a note's end" (insert_blocks lists from write
+  new) and edit's "most of what the author can do at the keyboard" (six edit tools checked edit's) — RED, 2 issues.
+- **`theAdviceEncouragesOrganization`** (new) — the three organization sentences; every tool they lean on declared —
+  RED, 3 issues.
+- **`theAdviceSaysTheThreeActsAreTheAuthorsAlone`** (new, R-VX184-2) — the sentence; no tool name carries
+  private/seal/own — RED, 1 issue.
+- **`theAdviceLinksTheGuideOnce`** (new, R-VX184-4) — the URL exactly once, no other `://`, the one sentence last — RED,
+  3 issues.
+- Unchanged and green on the old tree: the format markers, the guide facts, the ladder carries, the arrival, snippets,
+  until-you-disconnect; `MCPWireNeutralityTests` (4, green — they ride every later run).
+
+**The descriptions' truth:**
+- **`MCPEditServerTests/editTakesBeforeCommitIsDedupedAndTheDescriptionSaysSo`** (new) — runs (1) a take whose latest
+  commit holds its words: no `before_commit_id`, history `["after claude-code's edit", "her moment"]`; (2) a blank take
+  never committed: no `before_commit_id`; (3) the same text: `changed: false`, no commit, no undo entry; (4) undone: the
+  text back, the commits stay — all GREEN on the old tree; the words RED, 3 issues (the dedupe sentence, the no-change
+  sentence, the old "Variorum saves a commit named" still present).
+- **`MCPServerTests/theDescriptionsNameTheClientOneWay`** (new) — every `<…name>` placeholder in every tool as the SDK
+  sends it is `<your client name>`; edit_take / restore_commit quote `Operations.mcpEditCommitNames` /
+  `mcpRestoreCommitNames(client: "<your client name>")` and save_commit `mcpCommitMessage(client:message:)` exactly —
+  RED, 6 issues (three tools' placeholders + three quotes).
+- **`MCPTakeLabelFormServerTests/everyLabelWritingToolSaysWhichLabelRuleApplies`** (new) — per tool: add_take/add_takes
+  carry the suggest form with `aiLabel`'s example (tied to `aiLabel` and `labelSeparator`); create_note, insert_blocks,
+  set_take_label, import_document and duplicate_note carry their as-given clause + "your client name is added only by
+  add_take and add_takes"; the wire controls (import keeps the line's label, the duplicate keeps it, set_take_label
+  stores "  warmest  " as "warmest") GREEN on the old tree — the words RED, 7 issues (one per tool).
+- **`MCPCommentWordsServerTests/deleteCommentsDescriptionSaysChangedWordsNeedEdit`** (new) — RED, 2 issues.
+- **`MCPBookNameReachServerTests/renameBooksDescriptionSaysOnlyBooksYouCanReadCount`** (new) — RED, 2 issues.
+
+### THE INSTRUCTIONS (DRAFT — piece 2 writes exactly this; 2,9xx characters measured on the draft)
+
+Kept whole from today's text: the opening sentence, the connection-request sentence, the rung list's frame, the
+places/durations, the once grant, the until-you-disconnect sentence, search, gatherings + the wing move, live ids, the
+format, the fence + snippets + the one shape, the refusal posture, show_in_app, the undo. Changed or new: the tools line
+(U7's carry), write new's and edit's reach, paging + digests + recovery (no number), organization, the three acts, the
+link. The final text, as built, goes in piece 6's record whole.
 
 
 ## U7 STAGE RUN — the whole window (a fresh stage runner, from 2026-10-14)

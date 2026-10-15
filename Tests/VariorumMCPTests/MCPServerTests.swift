@@ -294,6 +294,35 @@ struct MCPServerTests {
         }
     }
 
+    /// **VX-197 (VX-336 U8a): the descriptions name the client ONE way.** A
+    /// stored name that carries the client's name was written "<your name>"
+    /// in edit_take, restore_commit and save_commit but "<your client name>"
+    /// in save_lens — and a model can read "your name" as its own. Every
+    /// placeholder for it, on every tool as the SDK sends it, is now
+    /// "<your client name>", and each stored form the descriptions quote is
+    /// the operation's own (the names the brackets and the commit are written
+    /// with, read from `Operations`, never retyped).
+    @Test func theDescriptionsNameTheClientOneWay() throws {
+        let client = "<your client name>"
+        for declaration in MCPToolCatalog.all {
+            let sent = String(decoding: try JSONEncoder().encode(declaration.tool), as: UTF8.self)
+                .replacingOccurrences(of: "\\/", with: "/")
+            let placeholders = Set(sent.matches(of: /<[^<>]*name>/).map { String($0.output) })
+            #expect(placeholders.isSubset(of: [client]), "\(declaration.name) names the client as \(placeholders)")
+        }
+        let edit = Operations.mcpEditCommitNames(client: client)
+        let restore = Operations.mcpRestoreCommitNames(client: client)
+        #expect(MCPToolCatalog.editTake.description.contains("\"\(edit.before)\"")
+                && MCPToolCatalog.editTake.description.contains("\"\(edit.after)\""),
+                "edit_take quotes its brackets as stored: \(MCPToolCatalog.editTake.description)")
+        #expect(MCPToolCatalog.restoreCommit.description.contains("\"\(restore.before)\"")
+                && MCPToolCatalog.restoreCommit.description.contains("\"\(restore.after)\""),
+                "restore_commit quotes its brackets as stored: \(MCPToolCatalog.restoreCommit.description)")
+        let stored = Operations.mcpCommitMessage(client: client, message: "<message>")
+        #expect(MCPToolCatalog.saveCommit.description.contains("\"\(stored)\""),
+                "save_commit quotes its message as stored: \(MCPToolCatalog.saveCommit.description)")
+    }
+
     // MARK: - A new client: a pending request, nothing readable
 
     @Test func aNewClientIsAPendingRequestThatSeesNoToolsAndReadsNothing() async throws {

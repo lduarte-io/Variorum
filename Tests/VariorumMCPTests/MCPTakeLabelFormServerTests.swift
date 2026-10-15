@@ -102,4 +102,82 @@ struct MCPTakeLabelFormServerTests {
             await h.hangUp(connection)
         }
     }
+
+    /// **VX-197 (VX-336 U8a): every tool that writes a take's label says which
+    /// rule applies.** Her split (VX-197): the client prefix is worn only by
+    /// takes a client adds at SUGGEST (`add_take`, `add_takes`), in VX-267's
+    /// form; every other tool that writes a label keeps it as given. The words
+    /// are pinned per tool — red on the old descriptions, where the rule was
+    /// unstated on create_note, import_document, duplicate_note and
+    /// set_take_label, and add_take/add_takes said it without its form — the
+    /// example is tied to `aiLabel`, and the as-given half runs on the wire as
+    /// a control (green on both sides by design).
+    @Test func everyLabelWritingToolSaysWhichLabelRuleApplies() async throws {
+        let suggestRule = """
+            labeled with your client name, then " · " and your label when you give one \
+            (e.g. "<your client name> · english"; a blank label is none)
+            """
+        let notPrefixed = "your client name is added only by add_take and add_takes"
+        let says: [String: String] = [
+            "add_take": suggestRule,
+            "add_takes": suggestRule,
+            "create_note": "Each label is stored as given (trimmed; a blank label is none) — " + notPrefixed,
+            "insert_blocks": "Each label is stored as given (trimmed; a blank label is none) — " + notPrefixed,
+            "set_take_label": "The label is stored as given (trimmed) — " + notPrefixed,
+            "import_document": "each labeled as its take: line says — " + notPrefixed,
+            "duplicate_note": "every take keeps its label — " + notPrefixed,
+        ]
+        for (tool, needle) in says.sorted(by: { $0.key < $1.key }) {
+            let words = try #require(MCPToolCatalog.declaration(named: tool)).description
+            #expect(words.contains(needle), "\(tool) says: \(needle)\n— it reads: \(words)")
+        }
+        // The example is aiLabel's own form, separator and all.
+        #expect(MCPWriteTools.aiLabel(client: "<your client name>", own: " english ")
+                == "<your client name>\(MCPWriteTools.labelSeparator)english")
+        #expect(suggestRule.contains("\"\(MCPWriteTools.labelSeparator)\""))
+
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let source = try h.operations.createPost(title: "to K")
+            let one = try h.operations.newBlock(in: source.id, text: "Dear K,", registeringUndo: false)
+            let alternate = try h.operations.newBlankVariant(one.block.id)
+            try h.operations.autosave(alternate.id, text: "Dearest K,", charDelta: 10)
+            try h.operations.setTakeLabel(alternate.id, label: "warmer")
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.edit, .wing, ""))
+            func labels(_ noteID: String) async throws -> [String] {
+                try await h.database.read { db in
+                    try String.fetchAll(db, sql: """
+                        SELECT v.label FROM variant v
+                        JOIN container_block cb ON cb.block_id = v.block_id AND cb.deleted_at IS NULL
+                        WHERE cb.container_id = ? AND v.label IS NOT NULL AND v.deleted_at IS NULL
+                        """, arguments: [noteID])
+                }
+            }
+
+            // import_document: the label its take: line gives, no prefix.
+            let document = try await h.database.read { try Queries.variorumDocumentText($0, postID: source.id) }
+            let imported = try await call(connection, "import_document", [
+                "document": .string(document), "wing_id": .string(""),
+            ])
+            #expect(imported.isError != true, "\(text(imported))")
+            let importedNote = try #require(try json(imported)["note_id"] as? String)
+            #expect(try await labels(importedNote) == ["warmer"], "import keeps the line's label")
+
+            // duplicate_note: every take keeps its label.
+            let duplicated = try await call(connection, "duplicate_note", ["note_id": .string(source.id)])
+            #expect(duplicated.isError != true, "\(text(duplicated))")
+            let copy = try #require(try json(duplicated)["note_id"] as? String)
+            #expect(try await labels(copy) == ["warmer"], "the copy's take keeps its label")
+
+            // set_take_label: as given, trimmed — no client name.
+            let relabeled = try await call(connection, "set_take_label", [
+                "take_id": .string(alternate.id), "label": .string("  warmest  "),
+            ])
+            #expect(relabeled.isError != true, "\(text(relabeled))")
+            #expect(try await label(h, alternate.id) == "warmest", "stored as given, trimmed, no prefix")
+            await h.hangUp(connection)
+        }
+    }
 }

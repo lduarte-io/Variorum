@@ -107,4 +107,19 @@ struct MCPBookNameReachServerTests {
             await h.hangUp(connection)
         }
     }
+
+    /// **VX-197 (VX-336 U8a): rename_book's description says VX-259.** Its
+    /// VX-184 words said a name another live book wears is refused "as the
+    /// author's rename is" — untrue since VX-259: the door counts only a live,
+    /// unarchived reading (book or gathering — `requireBookNameFree`) that
+    /// THIS client can read (`readableBooks`), while her own rename counts
+    /// every one. The two pins above run the mechanics; this one holds the
+    /// words to them (red on the old description).
+    @Test func renameBooksDescriptionSaysOnlyBooksYouCanReadCount() {
+        let words = MCPToolCatalog.renameBook.description
+        #expect(!words.contains("as the author's rename is"), "the old claim is gone: \(words)")
+        #expect(words.contains(
+            "A name already worn (ignoring case) by another live, unarchived book or gathering that you can "
+                + "read is refused; one you can't read never counts, so it can't block the name."), "\(words)")
+    }
 }
