@@ -6976,3 +6976,26 @@ and `MCPCompareLandingTests.swift` whole.
 | 5 | headless finals (MCP · core · workbook) | NOT-STARTED |
 | 6 | the products: `vx336-close` (final), `vx336-close-red` (the pin-only tree), `vx336-close-ios` (final, phone); `vx336-u9` deleted | NOT-STARTED |
 | 7 | THE CLOSEOUT WINDOW plan (claim `vx336-close`); READY | NOT-STARTED |
+
+### The merge slip (piece 1) — what happened, what it costs, what was done
+
+- **What happened.** The first merge commit `994d0083` (`origin/main` `ebd16909` into the branch, no conflict) was
+  still local when the protocol's `git pull --rebase` ran before its push, together with the record commit on top of it.
+  A plain rebase linearizes a merge it has to replay. It dropped `994d0083` and re-picked main's ten commits (the
+  VX-336 and VX-283 in-flight rows, six board snapshots, the closeout-ritual line, the labeling rule) onto the branch
+  under NEW hashes, `2b5c6d16` … `d37dc257`, then the record commit as `2317a67e`. The push that followed was a
+  fast-forward of those.
+- **What it did not do.** No pushed commit was rewritten and nothing was force-pushed: the branch's pushed tip
+  `0b160daa` is still in the history. The content is exactly the merge's: `git diff 994d0083 2317a67e` is the record
+  file alone, and `git diff origin/main HEAD` over main's seven files is empty.
+- **The repair (no rewrite).** `fc6bf20b` is a real merge commit of `origin/main` `ebd16909` on top, so main is an
+  ancestor again (the coordinator's merge-ask check). It adds no content: both sides already hold the same text. It was
+  pushed with a plain `git push` after checking that the upstream equalled HEAD, NOT through `pull --rebase` (which
+  would flatten it again). Later commits can use `pull --rebase` normally, since the merge is now upstream.
+- **What it costs.** When the PR merges, main's history carries these ten notes commits twice: the originals, and the
+  branch's copies with identical changes. The PR's merge is clean (identical hunks), and the "Files changed" view is
+  unaffected (main's seven files show no diff). Removing the copies would need a force-push, which is the author's call
+  and is not proposed here.
+- **For PHASE C (its D9 step 2 merges main again if it moved):** merge, then push the merge commit with a plain
+  `git push` after `git fetch` shows the upstream unmoved, or use `git pull --rebase=merges`. Never a plain
+  `pull --rebase` while a merge commit is unpushed.
