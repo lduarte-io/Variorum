@@ -2845,7 +2845,7 @@ the end of this U7 section. Claims stay PENDING until read from a log.
 | 2 — VX-254: the flat answers (`add_take`, `add_takes`' `takes[]`, `edit_take`, `restore_commit`); `divide_block`/`merge_blocks` answer NO digest (F-254-2 (b), ruled) | DONE (this commit): P-254-2…10 red-on-old (9 failed, 50 issues) then 10/10 green |
 | 3 — VX-254: descriptions, pins red by absence, revert run, the U+0000 CHECK | DONE (this commit): descriptions `5852e474`; the U+0000 CHECK FOUND truncation (BUILDER A's RECORD); the whole MCP suite 293/61 green (1 known issue) + the touched core suites 171/42 green; THE REVERT RUN (announced `badcf3b7`): the eight product files back to `54cc62a5` → `MCPWriteDigestServerTests` 10 of 11 FAILED, 52 issues (the guard green); restored by `git checkout HEAD -- Sources` (status clean) → 15/15 green in both digest suites (1 known issue). No revert in flight. |
 | 4 — VX-261: `list_my_activity` (query, catalog listing rule, handler, Activity words, pins) | DONE (`c22a57d2` + this commit): 11 pins red by absence (11 failed, 24 issues) then green; PROVISIONAL P-VX261-6 built; THE REVERT RUN (announced `fdd82382`): arm (a) the product back to `b0175aeb` → 11 of 11 failed, 24 issues; arm (b) `hidesTarget` forced false → exactly the two hidden-target pins failed (7 issues), nine green; restored (status clean) → 35/35 green (`MCPOwnActivityServerTests`, `MCPServerTests`, `MCPWriteServerTests`). No revert in flight. The Mac pin's run is THE WINDOW's (PENDING). The headless finals GREEN (core 2,871/333 · MCP 304/62, 1 known issue · workbook 40/6) and `build-for-testing` SUCCEEDED into `vx336-u7a` (BUILDER A's RECORD). **BUILDER A STOPPED at this seam; builder B (VX-256 + THE STAGE WINDOW) is next.** |
-| 5 — VX-256: `read_note` paging + `ids_only` (pins, revert) | IN-PROGRESS — **BUILDER B** (opus-implementer, from 2026-10-14 ~20:00 MDT; HEAD at start `b5d838e1`). The build plan is BUILDER B's RECORD (end of this U7 section). Next: the wire pins, red on `b5d838e1` |
+| 5 — VX-256: `read_note` paging + `ids_only` (pins, revert) | IN-PROGRESS — **BUILDER B** (opus-implementer, from 2026-10-14 ~20:00 MDT; HEAD at start `b5d838e1`). The build plan is BUILDER B's RECORD (end of this U7 section). **The wire pins landed (this commit), RED on `b5d838e1`'s sources:** 14 tests, 12 failed (22 issues), the two GUARDS green by design. Next: the product (parse, page, ids_only), then the plan pin |
 | 6 — THE STAGE WINDOW plan (claim `vx336-u7`), headless + Mac build-for-testing, READY | NOT-STARTED — builder B's, after piece 5 (the draft below) |
 
 ### The traces (read in this session; file:line at `5c48547f`)
@@ -3823,3 +3823,16 @@ section; `MCPReadTools`, `MCPNoteStructure`, `LensQueries`, `MCPToolCatalog`'s r
   `MCPPagedReadPlanTests.swift`, red by absence of the SQL): P-256-1…4 and 6–10 red; P-256-5 (the fence) and G-256-1
   (every form without the new asks byte-unchanged — a golden-byte pin) are GUARDS, green on both sides by design; a
   catalog pin for the three new inputs; P-256-11 the plan.
+
+**THE PINS — RED ON THE OLD TREE (read from the run's own output, `b5d838e1`'s sources + the new file):**
+`swift test --filter 'MCPPagedReadServerTests|MCPReadFormsUnchangedServerTests'` → **14 tests, 12 failed, 22 issues.**
+Every red is the new asks' absence:
+- nine tests fail parsing the answer as JSON: the old tree ignores `limit`/`cursor`/`ids_only` and their with-ids
+  implication, so it answers the Level 0 TEXT (P-256-1, the cursor/clamp test, P-256-2, P-256-3, P-256-4, P-256-6,
+  P-256-7, P-256-8, P-256-10);
+- two stop at a `#require` of the page count — one whole-note page (P-256-9's `with_commits`; F-256-7's tray test);
+- the catalog pin's 11 issues (no `limit`/`cursor`/`ids_only` input, none of the words).
+The two GUARDS are GREEN on the old tree, as designed: `theFenceAnswersOneShapeWithOrWithoutTheNewAsks` (P-256-5) and
+`MCPReadFormsUnchangedServerTests.everyFormWithoutTheNewAsksIsByteUnchanged` (G-256-1 — the with-ids, with-commits,
+with-lenses + with-tray and through-a-lens answers written out byte for byte, the Level 0 text, `export_note` given the
+new arguments, and the unpaged `commit_ids` words; the hand-written bytes matched the old tree on the first run).
