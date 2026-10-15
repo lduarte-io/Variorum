@@ -1,0 +1,2 @@
+In Variorum, call list_books and find the book "the adventures of sherlock holmes", then call list_notes with its book_id and find the note titled "The Red-Headed League". Call read_note on that note ONCE, with limit 50, and make no call after it.
+Reply with: whether the answer reached you as JSON you could read in full, or something else (say exactly what you received instead); its number of blocks; block_count; whether next_cursor is present; and the first five words of the first and of the last block's shown text.

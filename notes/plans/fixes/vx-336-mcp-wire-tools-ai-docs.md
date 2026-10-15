@@ -168,7 +168,7 @@ guidance. Each unit's evidence is named before its spawn.
 | U5a — the label pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): legs A–D all passed in a real Claude Code 2.1.300 round on the dev store — the new `claude-code · english` label on Takes cards in both voices, `save_lens` by label refusing the ambiguous block and its `take_ids` retry, the legacy form matched as its own, `pin_chosen` holding. Built at `590c0cb8` (U5a UNIT RECORD) |
 | U5b — the block-writing pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): the 31-suite Mac batch green (251 tests, 0 failed, 7 gated skips); V252-a (create_note's `blocks` = read_note's records; filed under its chapter), V255-a/b/c (the end at write new with her ⌥⌘Z/⇧⌥⌘Z; any anchor at write new hears the rung sentence and asks her; anywhere at edit), D8-a passed; D8-b's open tail is unreachable from the keyboard (THE ORCHESTRATOR ON U5's WINDOW). The store was restored cmp-SAME. Built `7a15376c`…`93edbc2e` (U5b UNIT RECORD, three sessions) |
 | U6 — Compare from the wire (+ VX-330, VX-342) | **PROVEN 2026-10-14 17:52–18:35** (U6 STAGE RUN). The 125-suite batch: 790 tests, 786 passed, 2 gated skips, 2 standing reds (VX-115, VX-167; neither on U6's paths). Every red run exact: U6a's router clears (9 pairs), U6b Mac (15), the phone (4), the phone green 18/3. The live round passed in both voices: L0–L5 (`duplicate_note` with her ⌥⌘Z/⇧⌥⌘Z, the AI's edit on the copy, Compare aligned on lineage with related-only on, an unrelated pair with it off, `link_versions`' Open › opening Compare, not-frontmost moving nothing); VX-330's walk (all twelve of sherlock's collapsed chapter rows wear the shared icon, the waiting mark on one, pressed, Don't allow clearing it); VX-342's "before" seen. The store was restored cmp-SAME. Built: U6a `2836171c`…`48e250e0`, U6b `12efb039`…`a1a094dc` |
-| U7 — the agent's read-backs | Builder A DONE (`54cc62a5`…`ff43e84c`): VX-254 + VX-261 built, pinned, revert-checked; MCP 304/62 (1 known issue: VX-357's U+0000 pin) · core 2,871/333 · workbook 40/6; the orchestrator re-ran the pins, 50 green. Builder B (VX-256 + the window plan) next |
+| U7 — the agent's read-backs | Builder A DONE (`54cc62a5`…`ff43e84c`): VX-254 + VX-261 built, pinned, revert-checked. **Builder B DONE to READY** (`3e9a6dcd`…): VX-256 built, pinned (17 + 2 plan), revert-checked in three arms; headless finals MCP 321/65 (1 known issue) · core 2,871/333 · workbook 40/6; the Mac product `vx336-u7` built; THE STAGE WINDOW (`vx336-u7`, ask 95 min; fallback 20) written with its kit. **READY for the GO** |
 | U8 — the AI's docs (LAST) | NOT-STARTED |
 | LADDER | NOT-STARTED |
 | CLOSEOUT | NOT-STARTED |
@@ -2846,7 +2846,7 @@ the end of this U7 section. Claims stay PENDING until read from a log.
 | 3 — VX-254: descriptions, pins red by absence, revert run, the U+0000 CHECK | DONE (this commit): descriptions `5852e474`; the U+0000 CHECK FOUND truncation (BUILDER A's RECORD); the whole MCP suite 293/61 green (1 known issue) + the touched core suites 171/42 green; THE REVERT RUN (announced `badcf3b7`): the eight product files back to `54cc62a5` → `MCPWriteDigestServerTests` 10 of 11 FAILED, 52 issues (the guard green); restored by `git checkout HEAD -- Sources` (status clean) → 15/15 green in both digest suites (1 known issue). No revert in flight. |
 | 4 — VX-261: `list_my_activity` (query, catalog listing rule, handler, Activity words, pins) | DONE (`c22a57d2` + this commit): 11 pins red by absence (11 failed, 24 issues) then green; PROVISIONAL P-VX261-6 built; THE REVERT RUN (announced `fdd82382`): arm (a) the product back to `b0175aeb` → 11 of 11 failed, 24 issues; arm (b) `hidesTarget` forced false → exactly the two hidden-target pins failed (7 issues), nine green; restored (status clean) → 35/35 green (`MCPOwnActivityServerTests`, `MCPServerTests`, `MCPWriteServerTests`). No revert in flight. The Mac pin's run is THE WINDOW's (PENDING). The headless finals GREEN (core 2,871/333 · MCP 304/62, 1 known issue · workbook 40/6) and `build-for-testing` SUCCEEDED into `vx336-u7a` (BUILDER A's RECORD). **BUILDER A STOPPED at this seam; builder B (VX-256 + THE STAGE WINDOW) is next.** |
 | 5 — VX-256: `read_note` paging + `ids_only` (pins, revert) | DONE — **BUILDER B** (opus-implementer, from 2026-10-14 ~20:00 MDT; HEAD at start `b5d838e1`). The build plan is BUILDER B's RECORD (end of this U7 section). **The wire pins** (`52b2e246`) RED on `b5d838e1`'s sources: 14 tests, 12 failed (22 issues), the two GUARDS green by design. **The product landed (this commit):** `MCPReadTools.readNote`'s parse and cursor check, `MCPNoteStructure`'s page (`pageSQL`, the budget walk, `NotePageCursor`, `ids_only`), `Queries.effectiveLensSelection(_:lens:blocks:)`, the catalog's words and inputs → the 14 pins GREEN (`cbdf0002`). **The plan pin** (`d2897dd8`) 2/2 green. **The whole MCP target GREEN:** 320 tests / 65 suites, 1 known issue (VX-357's U+0000 pin), no existing pin edited. **THE REVERT RUN — DONE** (announced `5df458b9`; three arms, each read from its own run's output, each restored by `git checkout HEAD -- Sources Tests`, status clean): see THE REVERT RUN in BUILDER B's RECORD. **No revert in flight.** Next: piece 6 |
-| 6 — THE STAGE WINDOW plan (claim `vx336-u7`), headless + Mac build-for-testing, READY | IN-PROGRESS — builder B: the headless finals, then `build-for-testing` into `vx336-u7`, then the plan (BUILDER B's RECORD) |
+| 6 — THE STAGE WINDOW plan (claim `vx336-u7`), headless + Mac build-for-testing, READY | **READY** — the headless finals green (`cfda547a`: MCP 321/65, 1 known issue · core 2,871/333 · workbook 40/6); `build-for-testing` of `cfda547a`'s sources into `vx336-u7` SUCCEEDED (`vx336-u7a` deleted — one product); the kit (`ba220af6`, tested headlessly) and its prompts; THE STAGE WINDOW written (BUILDER B's RECORD). The Mac batch, builder A's Mac pin and the live round are the window's — PENDING. **Builder B stopped here (READY), past ~400k context.** |
 
 ### The traces (read in this session; file:line at `5c48547f`)
 
@@ -3864,3 +3864,245 @@ lens's picks over the whole note, P1's letter broken (the VX-280 lesson again). 
 321 tests / 65 suites green, 1 known issue** (VX-357's U+0000 pin, by design; `MCPHarnessTimeLimitTests` green this
 run, no VX-353 overrun) · **VariorumCoreTests 2,871 / 333 green** · **StringsWorkbookTests 40 / 6 green**. No existing
 pin edited by VX-256 (G-254-2's ritual not needed).
+
+**THE MAC PRODUCT (builder B, piece 6):** `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath
+App/Variorum/DerivedData/vx336-u7 build-for-testing` of `cfda547a`'s sources (every later commit is notes-only) → **`** TEST
+BUILD SUCCEEDED **`, XCB-EXIT 0**, 194 warnings, none in a touched file (`u7/logs/mac-build-for-testing.log`); 65 GiB free
+*[removed for publication]*
+`Contents/MacOS/variorum-mcp`, `Contents/PlugIns/VariorumTests.xctest`, `Variorum_Variorum_macosx27.0-arm64.xctestrun`.
+The dylib carries both builders' words ("isn't a commit of a take on this page", "about 32,000 characters", "ids_only",
+"checked its recent activity", "list_my_activity"); all 21 batch suites are real types in the test bundle (`nm` +
+`swift demangle`, ≥ 132 symbols each), `listMyActivitySpeaksItsOwnWords` among them. **`vx336-u7a` DELETED — one product
+(2.5 GB) remains.** No `xcodebuild test`, no launch, no store touched.
+
+### THE STAGE WINDOW — the plan (claim `vx336-u7`; runs ONLY on the orchestrator's GO, under the exact claim line it relays)
+
+**What this window does NOT do (said first):** no product code is written or changed, before the claim or under it — a
+red that needs code is RECORDED as a FINDING and reported, never fixed here; no rebuild (if `git diff --name-only
+cfda547a..HEAD -- Sources App Package.swift` is not empty at the GO, or the coordinator says VX-306 has merged and main
+must come in first: STOP before any launch and report — the rebuild is an implementer's); no canon, QUESTIONS or ticket
+edits; never her real store, never `/Applications/Variorum.app`, never her USER-scope MCP registrations (the copied setup
+line is never run as copied — only its key is taken, into the runner's scratchpad); **never `claude mcp list` (nor `claude
+mcp get`)**; `castle-W1-20261013` left alone.
+
+**The kit** (committed `ba220af6` + the prompts in this commit; tested headlessly against a fake shim at READY):
+`notes/plans/fixes/vx-336-u7-kit/` — `turn.sh <leg> "<allowedTools>" [relay] < prompts/<leg>.txt` (ONE `claude -p
+--strict-mcp-config --mcp-config <scratch cfg> --output-format stream-json --verbose --allowedTools …` turn from the
+scratch project `$U7_SCRATCH/proj`, the prompt on STDIN; its config `$U7_SCRATCH/keys/cfg-<leg>.json` chmod 600, built
+from `$U7_SCRATCH/keys/u7.key`), `tee-shim.sh` (the config's command: the product's shim, the wire tee'd to
+`u7/tee/<leg>-in.jsonl` / `-out.jsonl`), `drop-relay.py` (L4a's command: holds `create_note`'s answer, writes
+`u7/tee/L4a.HELD`), `measure.py <leg>` (per wire call: the server's answer size, what the MODEL received, INLINE /
+NOT-INLINE with what arrived instead, the page's facts, the context growth ≈ tokens; writes `u7/<leg>-measure.txt`),
+`verify-digests.py` (the digests' byte truth from the wire, independent of the model). **Before any turn:** `export
+U7_SCRATCH=<the runner's scratchpad>`; `alias T=$PWD/notes/plans/fixes/vx-336-u7-kit/turn.sh` (or the full path);
+`K=notes/plans/fixes/vx-336-u7-kit`; `U=notes/plans/vx336-screens/u7` (from the repo root).
+
+**Minutes:** the batch ~6 · SEAM · prefs + fingerprint ~2 · the fixture + A1 ~3 · connect, bind, grant ~6 · L1 ~8 · L2a ~5
+· L2b ~10 · L3 ~8 · L4 ~8 · L5 ~5 · the Terminal pass ~5 · cleanup ~8 → **~75 of work; ask a 95-minute claim.**
+**Batch-only fallback (~15 min, claim 20):** steps 0, 1, the SEAM and the release (nothing launched, so no A1 — U1b's
+precedent); U7's live round then stays OPEN.
+
+**Evidence:** `notes/plans/vx336-screens/u7/` (gitignored): `logs/`, `<leg>.jsonl`, `tee/`, `<leg>-measure.txt`, captures
+`live/s/` (Study) and `live/t/` (Terminal). Keys redacted to their first 9 characters in every record and capture name.
+
+0. **Guards, every step** — exactly U5b's step 0: `Tools/WalkKit/guard.sh --author` before anything touches the GUI (exit 3
+   ⇒ her app is running: STOP, never quit or kill it; exit 4 ⇒ someone at the machine: STOP); the STRICT instance guards
+   `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` both empty before the launch; the claim line EXACTLY as the GO
+   relays it; `Tools/stage status` never inside an `&&` chain; `guard.sh <devpid> x y` before each click (`Tools/WalkKit/wl2`
+   compiled in this worktree first — the U5 lesson); ≥ 2.6 s between synthetic events; region captures; keys by System
+   Events (it drops `á` and `·` — use their option chords); HEAD at the GO recorded; the product check above.
+1. **The Mac batch (~6 min) — FIRST, before the A1** (the Hard rules' SEAM order). From `App/Variorum/`: `xcodebuild
+   test-without-building -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx336-u7
+   -resultBundlePath ../../notes/plans/vx336-screens/u7/u7-batch.xcresult` + one `-only-testing:VariorumTests/<Suite>` per
+   suite, detached to `u7/logs/u7-batch.log` and POLLED in the foreground (a `grep -q` loop). **The 21 suites** — builder
+   A's 19 (every Mac file reaching `MCPPaneCopy`, `MCPActivityFace`, `activityLine`, `MCPToolFacts`, `MintedTake`,
+   `MintedBlockTakes`, `mcpActivity`, `MCPActivityRow`, `DocumentImport`, `listTools`, `MCPServerHost`, `MCPReadTools`,
+   `MCPWriteTools`, `callTool`) plus builder B's grep (`MCPNoteStructure`, `NotePageCursor`, `effectiveLensSelection`,
+   `read_note`, `MCPReadTools`) which adds `MCPPaneTabsCaptureTests` (it names `read_note`) and `TakesBoardTests` (it calls
+   the lens query family VX-256 grew; the app and the phone call only the UNCHANGED two-argument form, the new overload
+   being additive behind `blocks:` — so no phone run): MCPAskAndReceiptTests · MCPAsksWaitTests ·
+   MCPDeliberateFacesTests · MCPDoorErgonomicsFacesTests · MCPEditFacesTests · MCPEditParityFacesTests ·
+   MCPGrantSheetTests · MCPGrantSheetU2CaptureTests · MCPHerEditorDoorTests · MCPLibraryParityFacesTests ·
+   MCPPaneTabsCaptureTests · MCPPaneTabsTests · MCPPaneTests · MCPRebindFaceTests · MCPSetupKeyFacesTests ·
+   MCPSetupMenuTests · MCPShareFacesTests · MCPWingFacesTests · TakesBoardTests · TutorialMCPChapterCaptureTests ·
+   TutorialMCPChapterTests. **Expected:** green; the three gated `*CaptureTests` skip; **builder A's Mac pin
+   `MCPWingFacesTests.listMyActivitySpeaksItsOwnWords` ✔ — its FIRST run (PENDING until read here; its red-on-old is by
+   construction — the old table's fallback said "used list my activity", builder A's record)** and
+   `activitySpeaksEveryActInWordsNeverAToolID` ✔ (it now walks `list_my_activity`). Known noise, not a red: «Issues
+   recorded without an associated test» ×4. A red: re-run that suite ALONE once; a red that reproduces is a FINDING —
+   recorded and reported; the live round continues only if it is outside every type this run changed. **→ THE SEAM:**
+   record the counts here, commit, push, KEEP the claim, report "SEAM" through the orchestrator; continue only on its word.
+2. **Prefs, Backups, fingerprint — BEFORE the fixture (~2 min; `stage.sh` launches the app the moment its copy is done,
+   and a launch writes prefs):** `defaults export io.lduarte.Variorum.debug $U/prefs-pre.plist` (key count recorded);
+   `ls -la …/Variorum-dev/Backups/ > $U/backups-pre.txt`; the dev store listed read-only; her user-scope servers — names +
+   the sha256 prefix, never values: `python3 -I -c 'import json,hashlib,os;
+   d=json.load(open(os.path.expanduser("~/.claude.json"))).get("mcpServers",{}); print(sorted(d),
+   hashlib.sha256(json.dumps(d,sort_keys=True,separators=(",",":")).encode()).hexdigest()[:16])' > $U/userscope-pre.txt`
+   — **READY's read (2026-10-14 ~20:20 MDT): `['linear-server', 'variorum'] bc64543e2f4e8e58`** (= U5's and U6's).
+3. **THE FIXTURE AND THE ONE A1 (~3 min):** from the repo root, `Tools/ScaleFixture/stage.sh notes=10,long=300
+   "$PWD/App/Variorum/DerivedData/vx336-u7"`. **How it meets the run's other A1 needs:**
+   - **It IS the window's only A1.** Its copy loop takes `variorum.sqlite`, `-wal`, `-shm` and every `variorum-keys-*.json`
+     into `…/Variorum-dev/Backups/safety-copies/scale-prestage-<UTC>/`, each `cmp`-verified, prints that dir, THEN launches
+     the Debug app with `VARIORUM_SCALE_FIXTURE`, which mints once (10 `#scale-fixture` notes + **"scale fixture · long
+     note"**, 300 blocks, in Home). U5 and U6 ran that copy loop ALONE (no fixture); here the loop and the launch come
+     together, so no separate A1 is taken — a second copy after the launch would hold the fixture.
+   - **Its place in the order:** after the batch (the A1 then holds the batch's test-host side effects — the Hard rules'
+     order, as at U5/U6) and after step 2 (the launch writes prefs).
+   - **Its guard is the LOOSE `pgrep -f 'Variorum.app/Contents/MacOS'`** (so is `restore.sh`'s): it STOPs (exit 3) on our
+     own batch's test host if it is still alive, on another session's headless xcodebuild line, or on her real app. A build
+     line: wait for it to end — never edit the script. Her app: STOP the window, never quit or kill it.
+   - **Record** the printed dir to `$U/a1-path.txt` and the sha256 prefixes of the copied files to
+     `$U/store-hash-pre.txt` (U5's form). `restore.sh` at cleanup removes the current `-wal`/`-shm`, copies the A1 set back
+     and `cmp`-verifies each file; it refuses any dir not `scale-prestage-*` under the dev store. castle-W1 untouched.
+   - **The mint:** poll `log show --last 3m --style compact --predicate 'eventMessage CONTAINS "ScaleFixture:"'` until
+     "minted 10 notes + a 300-block note" (≤ 2 min); fallback: a Library capture showing "scale fixture · long note".
+4. **Launch, connect, bind, grant (~6 min).** The app is already up (`stage.sh`'s `open -n`); its pid by the strict guard;
+   a What's New sheet → its own button; a lock screen → `source ~/.variorum/dev-castle.env`, those values only (none
+   expected — the store is Standard/unlocked). Study expected (capture `live/s/00-launch`). App menu ▸ MCP Settings… → the
+   switch ON (expected already). **Connect ▸ Claude Code ▸ the copy icon** → ONLY the key: `mkdir -p
+   "$U7_SCRATCH/keys" && pbpaste | python3 -I -c 'import re,sys; m=re.search(r"vmk2_claude-code_[^\s\"'"'"';]+",
+   sys.stdin.read()); print(m.group(0) if m else "")' > "$U7_SCRATCH/keys/u7.key" && chmod 600 "$U7_SCRATCH/keys/u7.key"`
+   (non-empty; record only its first 9 characters); never run the copied line. **The bind turn:** `T bind
+   mcp__variorum-dev__list_books < $K/prompts/bind.txt` → Activity "claude-code connected with a new setup, now bound to its
+   name" (or "…a newer setup, which replaced its earlier one") with zero clicks (capture); an unknown name → Waiting →
+   Approve… (alone — zero reach). **THE GRANT:** Clients ▸ claude-code ▸ Change… (no row to change: ⌥⌘A from the Bookcase)
+   ▸ **A wing · Home · Edit · Always** (capture the sheet, and the Shared-with-AI row "Home (wing) · claude-code · read,
+   suggest, write new and edit · always"). It reaches the fixture's notes and sherlock (both Home).
+5. **L1 — VX-254, a write proves its words (~8 min).** `T L1
+   "mcp__variorum-dev__create_note,mcp__variorum-dev__edit_take,mcp__variorum-dev__add_take,mcp__variorum-dev__duplicate_note,Bash(python3:*)"
+   < $K/prompts/L1.txt`. **Expected on the wire** (read from `tee/L1-out.jsonl`): `create_note` → `block_ids`, `blocks` (six
+   records, each take `{take_id, sha256}`), `note_id`, `tag_ids`; `edit_take` → `changed: true`, the two commit ids and
+   `sha256`; `add_take` → `sha256` **`e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`**; `duplicate_note` →
+   records with `source_block_id`, every copy's `sha256` its source's. **THE BYTE TRUTH (the product, independent of the
+   model):** `python3 -I $K/verify-digests.py L1` → **"no mismatch · 15 checked · 15 equal"** (6 + edit + blank + 7 copies).
+   **The client's road:** the model's table MATCH for every string whose bytes it sent faithfully (the tee shows the bytes
+   sent: a MISMATCH that coincides with a re-spelled string — an NFD é sent as NFC, say — is the digest catching the very
+   slip it exists for, a client fact, never a product red); the **control MISMATCHES**; the edit and the blank match; the
+   duplicate matches. **Her face:** Write of "vx336 u7 digests" (six blocks, block 1 edited, block 2 ⑂2) and the Library
+   rows (the note and its copy) — captures.
+6. **L2a — VX-256, the long note in pages (~5 min).** `T L2a "mcp__variorum-dev__list_notes,mcp__variorum-dev__read_note" <
+   $K/prompts/L2a.txt`, then `python3 -I $K/measure.py L2a`. **Expected:** 6 pages of 50 = 300 = `block_count` 300, 300
+   distinct ids; **every `read_note` INLINE** (each page ≈ 10–15k characters; the measure prints each). **Her face:**
+   Settings ▸ MCP ▸ Activity — the six page reads coalesce to ONE line, "claude-code read “scale fixture · long note” (6
+   times)" (the pane's coalescing, F4 — capture; FOR VX-234).
+7. **L2b — THE CAP: a budget-ended page (~10 min).** On sherlock's "The Red-Headed League" (49,221 characters over ~215
+   paragraph blocks, Home): three turns, ONE read each, so each answer is measured alone — `T L2b-200
+   "mcp__variorum-dev__list_books,mcp__variorum-dev__list_notes,mcp__variorum-dev__read_note" < $K/prompts/L2b-200.txt`,
+   then `L2b-50`, then `L2b-whole` (same tools); `measure.py` after each. **Expected:** `L2b-200`'s page ENDS BY THE
+   BUDGET — ≈ 140 blocks, take text ≤ 32,000 characters (the measure prints it), `next_cursor` present, `block_count` ≈ 215;
+   **THE MEASUREMENT the orchestrator asked for: does that ≈ 55–60k-character page arrive INLINE?** Recorded either way,
+   with the answer's size and the context growth. `L2b-50` ≈ 20k characters, INLINE expected. `L2b-whole` (the "before" —
+   the unpaged with-ids read her book met) ≈ 90k characters, NOT-INLINE expected; what arrived instead is recorded
+   verbatim (the saved-to-file notice). **If `L2b-200` is NOT-INLINE:** run the same turn at limit 150 and 100 (edit the
+   limit in a copy of the prompt under `$U7_SCRATCH`) and record the largest page that arrives inline — the data the
+   orchestrator moves P-VX256-1's numbers by.
+8. **L3 — VX-256, `ids_only` verifies (~8 min).** `T L3-100
+   "mcp__variorum-dev__list_notes,mcp__variorum-dev__read_note,Bash(python3:*)" < $K/prompts/L3-100.txt`, then
+   `measure.py L3-100` and **`python3 -I $K/verify-digests.py L3-100 --texts L2a` → "no mismatch · 300 checked · 300 equal"**
+   (every take's `sha256` against the text L2a read for that take). **Expected:** 3 pages of 100, 300 takes, 300 with
+   `sha256`, 0 with text, every page INLINE; the model's three spot checks MATCH. Then **the ids_only cap:** `T L3-200
+   "mcp__variorum-dev__list_notes,mcp__variorum-dev__read_note" < $K/prompts/L3-200.txt` + `measure.py L3-200` — a 200-block
+   ids-only page (≈ 50k characters of UUIDs and hex, the token-heaviest shape) — INLINE or NOT-INLINE, recorded.
+9. **L4 — VX-261, a dropped call (~8 min).** `rm -f $U/tee/L4a.HELD`; start Turn A DETACHED: `nohup zsh -c "$K/turn.sh L4a
+   mcp__variorum-dev__create_note relay < $K/prompts/L4a.txt" > $U/logs/L4a.turn.txt 2>&1 &`. Poll ≤ 90 s for
+   `$U/tee/L4a.HELD`; the moment it exists, `pkill -TERM -f "keys/cfg-L4a.json"` (only claude's command line holds that
+   path); within 10 s confirm `pgrep -lf "cfg-L4a.json"`, `pgrep -lf drop-relay.py` and `pgrep -lf
+   "vx336-u7/Build/Products/Debug/Variorum.app/Contents/MacOS/variorum-mcp"` all empty (kill any leftover of OURS by its
+   pid — never anything else). **Recorded:** `tee/L4a-out.jsonl` holds `create_note`'s answer (the note made, its
+   `note_id`); `measure.py L4a` says **NO-RESULT** for that call (the client never heard). HELD never in 90 s → kill the
+   turn, record L4 NOT RUN with its tee and stderr, continue. **Turn B, a FRESH session:** `T L4b
+   "mcp__variorum-dev__list_my_activity,mcp__variorum-dev__list_notes" < $K/prompts/L4b.txt`. **Expected:** the newest act
+   `{"at": …, "outcome": "allowed", "target_id": "", "target_kind": "wing", "title": "vx336 u7 dropped", "tool":
+   "create_note"}` above L1's acts (no reads — `include_reads` off); B finds the note by title and its id EQUALS the tee's
+   `note_id`. **Her face:** the Library row "vx336 u7 dropped" and Activity's line for it (captures).
+10. **L5 — VX-261, refused and own (~5 min).** `T L5 "mcp__variorum-dev__read_note,mcp__variorum-dev__list_my_activity" <
+    $K/prompts/L5.txt`. **Expected:** the read refused with the one not-shared sentence ("That note isn't shared with this
+    client…"); `list_my_activity(include_reads: true, limit: 30)` newest first: the refused read as `{"at", "outcome":
+    "refused", "target_id": "00000000-0000-4000-8000-000000000000", "target_kind": "note", "tool": "read_note"}` — **NO
+    title** — then L4b's, L4a's `create_note`, L3's and L2's reads, L1's acts; **never a `list_my_activity` row, never a
+    connection row**; the second call (no arguments) lists **no read rows**. **Her face, Study:** Settings ▸ MCP ▸ Activity
+    — "claude-code checked its recent activity" (with its "(N times)") — capture `live/s/`.
+11. **The Terminal pass (~5 min):** Settings ▸ General ▸ Theme ▸ **Terminal** (a pointer click on the segmented control —
+    U5's road) → Settings ▸ MCP ▸ Activity: the same lines in Terminal, "claude-code checked its recent activity" among
+    them (capture `live/t/`). Theme back to **Study** (capture).
+12. **L6 (Deny, then re-approval) is NOT in this window:** its evidence is builder A's headless P-261-6 (after Deny and
+    re-approval nothing from before lists); the re-approval road needs a fresh setup and her approval sheet's sequence —
+    minutes this window spends on the cap.
+13. **Cleanup (~8 min)** — U5b's step 13, adapted: the Debug app quit BY BUNDLE ID (`osascript -e 'tell application id
+    "io.lduarte.Variorum.debug" to quit'`), both strict guards empty, no turn, relay or shim of ours left; **the key**
+    (read whole from `keys/u7.key`) grepped over `$U`, `~/.claude.json`, `~/.claude/projects/` (the scratch project's
+    transcripts), `notes/` and the scratchpad outside `keys/` → **0 files**; then `keys/` deleted (the key and every
+    `cfg-*.json`) and the clipboard emptied (`pbcopy < /dev/null`); **no `-s local` registration was ever made** — read-only:
+    `python3 -I -c` that `~/.claude.json`'s `projects` entry for `$U7_SCRATCH/proj` has no `mcpServers` (never `claude mcp
+    get`/`list`); her user-scope fingerprint AFTER = BEFORE; prefs: `defaults import io.lduarte.Variorum.debug
+    $U/prefs-pre.plist`, re-export, diff, `defaults delete` every key the window ADDED (import merges), until **0 added · 0
+    removed · 0 changed**; `Tools/ScaleFixture/restore.sh "$(cat $U/a1-path.txt)"` → "Restored (verified)", a second `cmp`
+    of every file SAME and the sha256 set equal to `store-hash-pre.txt` (the fixture, L1's notes, the dropped note — every
+    window write — gone with it; Standard, unlocked, Study, claude-code's pre-window binding and grants back);
+    `Backups/` unchanged against `backups-pre.txt` (no new backup from the launch); castle-W1 untouched; a stray
+    `default.profraw` removed; the tree clean; `Tools/stage release --who vx336-u7`; **THE RESULT LINE** for the
+    coordinator: claim times; the batch's counts; each leg PROVEN or RED (a red with its answer and capture); **the cap
+    measurement** (each probe: page size, INLINE or not, what arrived instead); the posture (cmp SAME vs A1, prefs 0
+    differ, fingerprint SAME, Standard/unlocked); the A1 path (the coordinator's to prune).
+
+**For the orchestrator — the cap, predicted (not measured; the window measures):** the default page (50 blocks) is ≈
+10–20k characters — far inside any cap. A budget-ended page is ≈ 32k characters of prose plus ≈ 140 blocks of ids ≈
+55–60k characters ≈ 20–25k tokens (UUIDs tokenize poorly), near Claude Code's recalled 25,000-token default
+(`MAX_MCP_OUTPUT_TOKENS` is unset on the Pro, so the default holds). An `ids_only` page of 200 is ≈ 50k characters of
+UUIDs and hex, ≈ 25–30k tokens — the likelier spill. If either spills, the numbers to move are the budget AND the limit's
+maximum (ids dominate a big `ids_only` page, which the take-text budget never counts) — the orchestrator's call, before
+the merge.
+
+**PROVISIONALs (builder B's — the orchestrator files them at the merge):**
+- The ruled ones stand as ruled, for her eye: **P-VX256-1** (both halves; the page bound 50 default · 200 max · 32,000
+  characters — the window measures the cap), **P-VX256-2** (pages are not a snapshot), **P-VX256-3** (a once grant reads
+  one page — pinned, `aOnceGrantIsSpentByTheFirstPage`), **P-VX256-4** (`commit_ids` binds to the page, with the words
+  "commit_id X isn't a commit of a take on this page.").
+- Small built choices, said for the eye (none is a fork; each follows the design's letter):
+  - `limit` CLAMPS to 1–200 like `list_notes` and `list_my_activity`, never refuses.
+  - The first page's TRAY text counts toward its budget (D-256-2's "the budget then counts only commit or tray text");
+    lineage's released-original text and comments are not counted (the budget is a take-text budget; both are bounded by
+    the page's own blocks).
+  - A stale cursor on a readable note is logged as a REFUSED read row, like the `version_id` check (its title then never
+    reaches `list_my_activity`, whose refused rows are untitled).
+  - `ids_only` with `with_commits` keeps the commits' text (D-256-2: explicit asks keep their text) — so commit text still
+    rides within the page's budget.
+
+**FOR VX-234 (user-facing words, AS BUILT — builder B):**
+- **No pane word changed.** One FACE consequence for her review: a paged read logs one read row per page, and the pane's
+  coalescing (F4) shows them as ONE line — "‹client› read “‹note›” (6 times)" for a six-page read. The window captures it
+  (step 6).
+- **Tool description (model-facing; U8 polishes), appended to `read_note`'s:** "Big notes read in pages: pass limit
+  (blocks per page, 1–200), then each answer's next_cursor as cursor until none comes back (a cursor alone reads 50). A
+  page also ends once its takes' text passes about 32,000 characters — a block is never split — and commit text rides in
+  what is left of that; the first page says block_count. Pages imply with_ids; with_tray and with_versions ride the first
+  page, and each page's lenses pick only among its own blocks. Pages are read one at a time, not as a snapshot — if the
+  note may have changed, read it again. A note shared once is read in one call. ids_only: true gives each take without
+  its text, with its sha256 instead — page it to check a whole note against your source cheaply." + the shared digest
+  sentence (`MCPToolCatalog.digestSentence`, builder A's).
+- **Inputs:** `limit` "Blocks per page (default 50); asks for pages (implies with_ids)." · `cursor` "next_cursor from the
+  previous page (implies with_ids)." · `ids_only` "Each take's sha256 instead of its text (implies with_ids)."
+
+**SELF-ASSESSMENT (builder B's).** VX-256 is built as designed and ruled (F-256-1…7 (a), P-VX256-1's numbers); every red
+pin was red on the old tree by absence, and red again by revert in three arms that each failed exactly the pins naming
+their mechanism; the guards hold the fence's one shape and every existing form byte for byte (hand-written golden bytes,
+green on both trees). What I'd have a reviewer press on: (1) **the plan pin caught my first lens statement** — plain
+JOINs let SQLite put the lens's picks outermost (∝ the note's picks); `CROSS JOIN` fixed it — so any future page-scoped
+read should be plan-pinned the same way; (2) **the budget counts take text, not the answer** — a page's ids are bounded
+only by `limit` (≈ 280 characters a block), so the real cap question is the 200-block page, above all `ids_only` (the
+window measures both); (3) `block_count` and the first page's `dangling_picks` are ∝ the note (the design's named
+allowances, first page only); (4) the unpaged read now reads its tray before its blocks (to count it) — the answer is
+byte-identical (pinned), only the order of the reads moved; (5) the Mac batch, builder A's Mac pin and the whole live
+round are the window's — PENDING.
+
+**OWED (builder B → the orchestrator):**
+1. **The cap measurement** (the window's L2b and L3-200): if the budget-ended page or the 200-block `ids_only` page spills,
+   P-VX256-1's numbers move before the merge — the budget AND/OR the limit's maximum (see the prediction above the plan).
+   A rebuild then needs a fresh builder and a re-run of the touched pins.
+2. **MCPSpec at the merge:** a contract line for paged `read_note` (limit/cursor, the budget, `next_cursor`,
+   `block_count`, not a snapshot, the cursor resumes only its container, a once grant reads one page) and `ids_only`
+   (each take's `sha256` in place of its text).
+3. **U8's doc truth (carried, with builder A's OWED 6):** the instructions and the field guide's MCP chapter name paging
+   and `ids_only` ("check a whole note against your source cheaply") beside the digests and `list_my_activity`.
+4. **FOR VX-234:** the coalesced "read “X” (N times)" line for a paged read (above).
+5. **No ticket minted by builder B.** None proposed.

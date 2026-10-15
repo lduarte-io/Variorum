@@ -1,0 +1,1 @@
+In Variorum, call read_note with note_id "00000000-0000-4000-8000-000000000000" (it names nothing, so expect a refusal). Then call list_my_activity with include_reads true and limit 30, and then list_my_activity again with no arguments. Reply with all three answers verbatim.

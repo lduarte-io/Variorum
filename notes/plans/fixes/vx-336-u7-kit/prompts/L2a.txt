@@ -1,0 +1,2 @@
+In Variorum, call list_notes with wing_id "" and find the note titled "scale fixture · long note". Read it with read_note(note_id, limit: 50). While an answer has next_cursor, call read_note again with the same note_id, limit 50 and cursor set to that next_cursor. Stop when an answer has no next_cursor. Do not read the note any other way.
+Reply with: the number of pages, each page's block count, the total blocks, block_count from the first page, and how many distinct block_ids you saw.

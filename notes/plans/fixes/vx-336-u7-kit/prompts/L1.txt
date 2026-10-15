@@ -1,0 +1,9 @@
+You are checking that Variorum's MCP door proves its writes. Do exactly these steps, in order. Never retry or work around a refusal.
+1. Run this command with Bash, exactly as written. It writes src.json and prints six strings as JSON, each with its SHA-256 digest:
+python3 -I -c 'import json,hashlib; s=["“Curly” quotes — and an em dash","beliscou","café (NFD)","\U0001F98A an emoji","two\nlines","a trailing space "]; json.dump(s,open("src.json","w")); [print(json.dumps({"i":i,"text":t,"sha256":hashlib.sha256(t.encode()).hexdigest()})) for i,t in enumerate(s)]'
+2. Call create_note with wing_id "" and title "vx336 u7 digests", and blocks: one block per string, in order, each block's text exactly that string. Keep every escape as printed: ́ is a combining accent after the e, and \n is a real newline.
+3. For each block in create_note's answer, compare its take's sha256 with the digest python printed for that string: MATCH or MISMATCH.
+4. Control: run python3 -I -c 'import hashlib; print(hashlib.sha256("beliscáu".encode()).hexdigest())' and compare its output with the "beliscou" take's sha256: MATCH or MISMATCH.
+5. Call edit_take on block 1's take, with expected_text exactly block 1's string and text "Edited — with an em dash.". Then call add_take on block 2 with text "" (a blank take). Compare each answer's sha256 with python's digest of the text you sent.
+6. Call duplicate_note on the new note. For each block of its answer, compare every take's sha256 with the takes of its source block (source_block_id) as they now stand.
+Reply with: a table of the six strings (index, MATCH or MISMATCH), the control's result, the edit's and the blank take's results, the duplicate's result, and create_note's answer verbatim.

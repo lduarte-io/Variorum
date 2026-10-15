@@ -1,0 +1,2 @@
+In Variorum, call list_notes with wing_id "" and find the note titled "scale fixture · long note". Call read_note on it ONCE with ids_only true and limit 200, and make no call after it.
+Reply with: whether the answer reached you as JSON you could read in full, or something else (say exactly what you received instead); its number of blocks; and whether next_cursor is present.
