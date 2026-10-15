@@ -170,8 +170,8 @@ guidance. Each unit's evidence is named before its spawn.
 | U6 — Compare from the wire (+ VX-330, VX-342) | **PROVEN 2026-10-14 17:52–18:35** (U6 STAGE RUN). The 125-suite batch: 790 tests, 786 passed, 2 gated skips, 2 standing reds (VX-115, VX-167; neither on U6's paths). Every red run exact: U6a's router clears (9 pairs), U6b Mac (15), the phone (4), the phone green 18/3. The live round passed in both voices: L0–L5 (`duplicate_note` with her ⌥⌘Z/⇧⌥⌘Z, the AI's edit on the copy, Compare aligned on lineage with related-only on, an unrelated pair with it off, `link_versions`' Open › opening Compare, not-frontmost moving nothing); VX-330's walk (all twelve of sherlock's collapsed chapter rows wear the shared icon, the waiting mark on one, pressed, Don't allow clearing it); VX-342's "before" seen. The store was restored cmp-SAME. Built: U6a `2836171c`…`48e250e0`, U6b `12efb039`…`a1a094dc` |
 | U7 — the agent's read-backs | **PROVEN 2026-10-14 20:44–21:12 EXCEPT THE CAP** (U7 STAGE RUN). Batch 176/173, 0 failed. L1 (15/15 digests equal from the wire), L2a (6 inline pages of 50 = block_count 300), L3 (ids_only at limit 100, 300/300 equal), L4 (a killed create, found by `list_my_activity`), L5 (a refused row title-less; reads only with `include_reads`) all PROVEN. **THE CAP FAILED:** a budget-ended page (32,000 characters of take text, about 65k answer) spills past Claude Code 2.1.300's inline limit, which sits between 43,062 (inline) and 50,984 characters (spilled); `ids_only` at limit 200 spills too. → **U7c**, the cap fix (THE ORCHESTRATOR ON U7's WINDOW) · **U7c BUILT** (`0b1be274`…`12df7a8c`): the page budget bounds the whole serialized answer at 32,000 characters (UTF-16 units); 8 pins red on old, 3 of builder B's re-pinned; revert check in 4 arms; MCP 329/66 · core 2,871/333 · workbook 40/6; the orchestrator re-ran the paging suites, 25 green. Its RE-PROBE rides U8b's window |
 | U8 — the AI's docs (LAST) | **PROVEN 2026-10-14 23:07–23:33** (U8 STAGE RUN). 66-suite batch 432/429, 0 failed; the red run exact on the old seed; Restore Tutorial minted a fresh guide (the old one in the Trash with 30 days); the chapter walked word for word in Study and Terminal; the instructions read from bytes at 2,969 with the link last; **U7c's RE-PROBE: all three pages INLINE** (71 blocks / 31,825 · the same · ids_only 115 / 31,751). The organization ask did the advice unprompted (a book with a tag rule + outflow, a summary note filed) but met two pre-existing wire truths → **U9** (VX-361, VX-362) |
-| U9 — wire truths from U8's round | DESIGNED, FORKS RULED (U9 UNIT RECORD piece 0 `cd11c83e`; THE ORCHESTRATOR'S RULINGS ON U9's FORKS). Members VX-361 · VX-362 · **VX-363** (joined: the import's book-name fence leak). A FRESH builder takes pieces 1–7 |
-| LADDER | NOT-STARTED — after U9 |
+| U9 — wire truths from U8's round | **PROVEN 2026-10-15 00:57–01:12** (U9 STAGE RUN). 121-suite Mac batch 771/765, 0 failed; the Mac red exact (20 issues, the ten R/E cases); the phone red exact (5) and green 120/15 on one simulator; the real-client turn 6/6 from the bytes (VX-361: `tag_ids`/`tags` carry the outflow tag; VX-362: `apply_tag` → `changed:false`, the add refused in words; the import's collision gone; no `Refused:`/Swift case anywhere); the faces in both voices. Built `4ff629ad`…`e454a8ef` (U9 UNIT RECORD) |
+| LADDER | **ROUND 1 DONE** (Fable xhigh, 2026-10-15 ~01:30): 0 BLOCKER · 1 MAJOR (R1-1, U9's pending evidence — closed by U9's window) · 2 MINOR · 2 NIT; no code fix (THE LADDER — ROUND 1 below). ROUND 2 (a fresh Fable xhigh) runs after the closeout's in-branch canon |
 | CLOSEOUT | NOT-STARTED |
 
 **No revert is in flight unless a unit's record says so.**
@@ -179,6 +179,19 @@ guidance. Each unit's evidence is named before its spawn.
 ## Stage traffic log (the oct13coordinator protocol)
 
 - *(Newest first from here.)*
+- 2026-10-15 01:12:51: **RELEASE `vx336-u9`** (15 of 75 min); every leg passed; the restore line as U5–U8's; the A1
+  `scale-prestage-20261015T070459Z` is the coordinator's to prune. 00:57: **GO** (`Tools/stage release --who coord-for-vx336 &&
+  Tools/stage claim --who vx336-u9 --reason "VX-336 U9: 121-suite Mac batch + Mac red + one-sim phone red/green, SEAM, A1 +
+  real-client turn + faces both voices on the Debug dev store" --minutes 75`), SEAM "continue" pre-given.
+- 2026-10-15 ~00:55: **the stargazing page went LIVE** (the orchestrator, at her word): site commit `2896a7f` (pushed), `npm run
+  deploy`; `https://stargazing.tech/variorum/mcp` → 307 → `/variorum/mcp/` → 200 (the same trailing-slash redirect `/variorum`
+  uses). The coordinator was told before the deploy and at 200; its release-GO check is the URL answering 200 (cache-busted, -L).
+- **The coordinator's overnight rulings (2026-10-15 ~00:45):** (1) the release GO probes the page for 200 (met); (2) the last
+  merger's release window ends with the `/Applications` refresh under the full rule card (A1 of her real store + key files,
+  zero-instance checks that ABORT, stage beside, codesign, swap, verify; nothing launched, no real-store MCP calls, no re-seed;
+  install the build the website serves); (3) a MAIN FREEZE from the version-bump commit until release.sh has stamped; (4) the
+  stray `~/dev/variorum/default.profraw` is moved aside (never deleted) before release.sh's clean-tree preflight; (5) the
+  notes are written one bullet per line (VX-343's parser trap).
 - 2026-10-14 23:33:52: **RELEASE `vx336-u8`** (26 of 100 min). Result line to the coordinator: the re-probe INLINE ×3; batch
   432/429, 0 failed; the red run exact; dev store cmp-SAME vs A1; prefs 0 differ; fingerprint same; clipboard
   restored; Standard/unlocked; castle-W1 untouched. The A1 `scale-prestage-20261015T051427Z` is the coordinator's to
@@ -6279,3 +6292,57 @@ added key until 0 differ; keys redacted to their first 9 characters everywhere; 
 - **The A1 copy, the coordinator's to prune:** `…/Variorum-dev/Backups/safety-copies/scale-prestage-20261015T070459Z`.
 
 **Noticed, not fixed (no product change under the claim):** none that is a finding. (1) The dev store's three files carried 15 Oct 00:03 stamps at READY (vx-283's restore does not keep the A1's stamps) while their content equalled U5–U8's A1 set — informational. (2) The phone green's "2 known issues" are `MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`'s deliberate `withKnownIssue`. (3) The phone red product's `.xctestrun` also lists the `VariorumCore` product (a build-graph difference; the run was exact).
+
+## THE LADDER — ROUND 1 (the Fable cold review, effort xhigh — her cast word; REVIEW_PROMPT verbatim, PHASE=VX-336; read-only; recorded verbatim by the orchestrator, 2026-10-15 ~01:30 MDT)
+
+Diff reviewed: origin/main (074c0f94)…HEAD (aef3149f) — 101 files, +16,589/−331. Zero `Sync/`, custody/keychain,
+schema/Persistence or editor-seam files (verified by path grep). The reviewer ran the new/modified headless suites itself:
+114 tests/18 suites + 71/10 (MCP) + 10/3 (core), all green, 1 known issue (VX-357). No "Review foci" section exists.
+
+### Findings (as reported; severity-ranked)
+
+- **R1-1 [MAJOR]** · the record's U9 STAGE RUN (steps 0–8 NOT-STARTED at review time) · U9's acceptance evidence was
+  unexecuted — a merge gate, not a code bug. The 108-case sweep pin (`MCPWireRefusalSweepTests`) and the phone pins had
+  never run; the 121-suite Mac batch over the shared-table change and the real-client leg were NOT-STARTED. Fix: run the
+  planned `vx336-u9` window (at minimum its batch-only fallback) and record the exact counts BEFORE the PR merges. The
+  reviewer cross-checked the pin's source-walk itself (108 declared = 108 unique samples; 33 unspoken = 17+13+1+2; 75
+  walked) and the hook it replays (`MCPDoor.swift:404` → `OpsRefusalCopy.message(for:)`).
+- **R1-2 [MINOR]** · `notes/MCPSpec.md:9` ("≤2,000") vs `MCPSession.swift:166` (`instructionsBound = 3_000`) · canon is
+  false the moment the PR merges unless the owed deltas land in-branch first; none of the run's new contract surface is in
+  MCPSpec yet (insert_blocks, duplicate_note, paged/ids_only read_note, sha256, list_my_activity, apply_tag's
+  changed:false, the ten worded refusals, VX-363's import road, VX-361's every-tag answer). Fix: the closeout's canon-delta
+  step, before the merge commit.
+- **R1-3 [MINOR]** · the record's top LIVE STATUS (U9 row and LADDER row) · stale state lines on the file that declares
+  itself the live state. Fix: a two-line status refresh (orchestrator).
+- **R1-4 [NIT]** · `MCPWriteTools.swift:216–224` · `take_ids: []` still saves an EMPTY lens, while P-VX253-2 refuses a
+  label matching nothing to avoid "a junk lens a suggest client can't delete". Pre-existing, deliberately byte-unchanged;
+  offered for P-VX253-2's QUESTIONS bundle as a consistency option.
+- **R1-5 [NIT]** · `MCPNoteStructure.swift:864` (`"length": text.count`) vs the page budget's UTF-16 count · two meanings
+  of "characters" in one answer; pre-existing (G-256-1), wording-class only.
+
+**Clean bill (the reviewer's, mechanism-level):** U5b/U6a core ops (insertBlocks' guard-first transaction, seal, anchor
+in-transaction, touch+churn, one entry; duplicateNoteForClient wraps the one extracted body); the shared answer shape
+(no second read, I10 honored, `source_block_id` only when set); duplicate_note's two-sided reach and fence; insert_blocks'
+rung-from-arguments and both `flushesHerEditorFirst` answers; VX-256/U7c paging (keyset range seek, exact piece
+accounting belt-checked by a final measurement, cursor checked before any once spend, unpaged forms byte-unchanged);
+VX-254 digests (and the code matching the F-254-2 (b) RULING); VX-261 (a pure projection, era-cut, oracle-clean); U9 (the
+one refusal chain, the nine arms + invalidEntryDate, apply_tag's changed:false with no undo/receipt, the import's
+UNIQUE collision closed, VX-363's one predicate); show_in_app compare and the landing with the three router clears;
+VX-330/VX-342; U8's docs (instructions 2,969/3,000, truth pins, guide parity clause, the stargazing brief); process
+(pin-before-fix per member, revert checks, forks ruled before halves, lanes honored, no trailers, tickets labeled).
+
+**Summary:** 0 BLOCKER · 1 MAJOR (evidence: the pending U9 window) · 2 MINOR · 2 NIT. No code-level bug with a traceable
+wrong-output mechanism.
+
+### ROUND 1 — dispositions (the orchestrator; no finding needs a code change, so there is nothing for the implementer to apply)
+
+- **R1-1 — AGREED, closed by evidence:** the `vx336-u9` window was GO'd at 00:57 and ran whole (pre-given SEAM); its
+  counts are recorded in the U9 STAGE RUN. No code.
+- **R1-2 — AGREED:** the closeout applies every canon delta IN-BRANCH before the merge commit (MCPSpec's bound line
+  ≤3,000 and contract lines for every new surface). R2 re-checks them.
+- **R1-3 — AGREED, done by the orchestrator** (the top LIVE STATUS refreshed in the same commit as this record).
+- **R1-4 — AGREED as a NIT, no change:** filed with P-VX253-2's options in the QUESTIONS bundle (option: refuse an empty
+  `take_ids` too).
+- **R1-5 — AGREED as a NIT, no change:** recorded; a wording note for a later description pass (VX-234's list).
+- **Round 2:** a FRESH `fable-reviewer` at xhigh (her cast word), REVIEW_PROMPT verbatim, after U9's window and the
+  closeout's in-branch canon deltas, so it reads the evidence and the canon together. A new BLOCKER/MAJOR earns round 3.
