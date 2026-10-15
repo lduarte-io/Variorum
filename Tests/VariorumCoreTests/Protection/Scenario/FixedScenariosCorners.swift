@@ -92,7 +92,9 @@ struct CornerScenarios {
     /// "two libraries on one Apple account: a Mac entering Castle beside a
     /// second Mac's local-only Standard library with no passphrase — the
     /// second Mac updated, and not; retirement strands nothing outside
-    /// promise 5's exceptions".
+    /// promise 5's exceptions". The NOT-UPDATED variant (an old build beside
+    /// the switch) is BEYOND SCOPE, KEPT WHILE GREEN (her 2026-10-15 ruling —
+    /// the legacy cut widened: the switch updates every device first).
     @Test func twoLibrariesOnOneAppleAccount() async throws {
         for updated in [true, false] {
             let world = try scenarioWorld { w in
@@ -144,7 +146,8 @@ struct CornerScenarios {
     /// nothing moves it automatically, and Use Castle stops at its door while
     /// a vault it can read, or (signed out) the account the record names,
     /// names it; and the last-step race, which lands with the door and the
-    /// first exception showing".
+    /// first exception showing". BEYOND SCOPE, KEPT WHILE GREEN (her
+    /// 2026-10-15 ruling — no old build acts after the switch).
     @Test func anOlderBuildsRelinkAndTheLastStepRace() async throws {
         let (world, account) = try syncedWorld(.standard, devices: ["macA", "macB"])
         world.macB.build = .older
@@ -348,7 +351,9 @@ struct CornerScenarios {
 
     /// "an Always-ask follower relocked after the rotation, and a words-typed
     /// follower: each anchor opening with what opened that device; a follow
-    /// after an older build's leave: the master's road left out".
+    /// after an older build's leave: the master's road left out". The
+    /// older-build half is BEYOND SCOPE, KEPT WHILE GREEN (her 2026-10-15
+    /// ruling — no old build acts after the switch).
     @Test func followersAnchorsOpenWithWhatOpenedThem() async throws {
         let (world, account) = try syncedWorld(.castle, devices: ["macA", "macB", "phone"], gate: .alwaysAsk)
         await world.done([.launch("macA"), .launch("macB"), .launch("phone"), .useStandard("macA"),

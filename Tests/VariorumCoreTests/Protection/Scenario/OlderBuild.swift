@@ -9,6 +9,13 @@
 //  wrap alone, and completes any rotation it finds, carrying the vault's other
 //  fields — `apple_key_id` among them — through").
 //
+//  HER RULING 2026-10-15 (the legacy cut widened — "no old backups or builds
+//  have to be considered"): today's STORES stay fully in scope (they are the
+//  migration's inputs); today's BUILD as a live, concurrent actor is beyond
+//  scope — the switch updates every device first. The generator no longer
+//  drives the actor's acts; the fixed scenarios that do are kept while green,
+//  each marked "beyond scope".
+//
 //  The old formats are today's real ones: format 1/2 key files
 //  (`StoreKeyEnvelope`, named `variorum-keys[-<fp16>].json`), today's custody
 //  items by library ID (`<scope>-<libraryID>-bound` / `-biometric`), the per-

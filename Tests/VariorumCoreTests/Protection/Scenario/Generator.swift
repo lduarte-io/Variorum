@@ -209,13 +209,13 @@ struct ScenarioGenerator {
         let d = world.device(name)
         let other = rng.pick(names.filter { $0 != name })!
         if d.build == .older {
-            switch rng.int(0..<6) {
-            case 0: return .olderBuild(name, .follow, typing: rng.chance(50) ? .passphrase : .words)
-            case 1: return .olderBuild(name, .leaveCastle, typing: nil)
-            case 2: return .olderBuild(name, .relink, typing: nil)
-            case 3: return .updateToNewBuild(name)
-            default: return .olderBuild(name, .backup, typing: nil)
-            }
+            // HER RULING 2026-10-15 (the legacy cut widened — "no old backups
+            // or builds have to be considered"): an older build is no live,
+            // concurrent actor after the switch, which updates every device
+            // first. A device a starting state left on today's build only
+            // UPDATES; its today-shaped store is the migration's input (in
+            // scope, unchanged). The older-build acts left the alphabet.
+            return .updateToNewBuild(name)
         }
         if d.slot == nil { return rng.chance(70) ? .createLibrary(name, secrets: rng.chance(70)) : .settle }
         let account = world.server.accounts.keys.sorted().first ?? "00000000-0000-4000-8000-000000000000"

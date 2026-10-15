@@ -572,8 +572,12 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   commit point (`ProtectionPlan.pastCommitPoint`, one line for executor and checker; Re-link-first stamps its write)
   and past it WAITS, named (`SettleOutcome.waiting`), copies re-paused; the world re-settles at the next vault reach;
   promise 6's vault-reach qualifier; four fixed scenarios, three red-on-old — DONE (this commit; the protection set
-  Debug 381 tests in 65 suites green). NEXT: (j) the soak, both configurations — PENDING; (k) the runs — PENDING;
-  (l) the final record — PENDING.
+  Debug 381 tests in 65 suites green; `1cf72df9`). A world finding of a 60-sequence sweep (a crashed landing's
+  made-new passphrase lost from her truth) fixed in the world (`76d60234`). HER 2026-10-15 WIDENING applied: the
+  older-build acts left the generator's alphabet (an older device only updates), the older-build fixed scenarios and
+  the door-time pin marked "beyond scope, kept while green" (this commit; the protection set Debug 382 tests in 65
+  suites green). NEXT: (j) the soak, both configurations — PENDING; (k) the runs — PENDING; (l) the final record —
+  PENDING.
 - The go/no-go record: **NOT-STARTED.**
 
 ---

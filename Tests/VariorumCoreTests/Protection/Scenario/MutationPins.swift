@@ -182,7 +182,8 @@ struct ScenarioMutationPins {
 
     /// The door-time vault check: an older build's Re-link lands an account's
     /// vault on the old shared key; Use Castle stops at its door while that
-    /// vault names it.
+    /// vault names it. BEYOND SCOPE, KEPT WHILE GREEN (her 2026-10-15 ruling —
+    /// no old build acts after the switch; the guard stays as built).
     @Test func anOlderBuildsRelinkLandsTheVaultOnTheOldKey() async throws {
         try await mutationPin("Use Castle stops at its door", off: { $0.doorTimeVaultCheck = false }) { guards in
             let (world, account) = try syncedWorld(.standard, devices: ["macB"], guards: guards)

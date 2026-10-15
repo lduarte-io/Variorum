@@ -162,7 +162,8 @@ struct MoreScenarios {
 
     /// "an older build completing a leave's rotation: the vault still reads a
     /// leave in progress, followers keep holding, and a device that reads the
-    /// named key adds the wrap".
+    /// named key adds the wrap". BEYOND SCOPE, KEPT WHILE GREEN (her
+    /// 2026-10-15 ruling — no old build acts after the switch).
     @Test func anOlderBuildCompletingALeavesRotation() async throws {
         let (world, account) = try syncedWorld(.castle, devices: ["macA", "phone"])
         world.phone.build = .older
