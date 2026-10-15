@@ -2084,6 +2084,22 @@ re-flow the info panel's opening triggers — dropping her caret); one line exac
 wrap decision a pure function (one line only if the field keeps at least its placeholder width); a red-on-old geometry
 pin.
 
+#### U3 — THE CLOSING WINDOW (run by the orchestrator in the folded claim `vx283-u3-walk`, 01:13:58 → SEAM 01:22:25)
+
+Run from the U3 section's plan, verbatim commands (logs `notes/plans/vx283-screens/u3/logs-w2/`, gitignored):
+1. The fixed pins on `vx283-u3`: `✔ Test run with 19 tests in 4 suites passed` (LibraryControlsFlowRuleTests,
+   LibraryControlsGeometryTests, StatusToastPlacementRuleTests, StatusToastPlacementShellTests).
+2. The List-face rig's dark pass, fixed: `✔ Test run with 5 tests in 1 suite passed` → `u3/rig/after/` (the
+   orchestrator's eye on `after-terminal-manybooks.png`: the pinned "books"/"notes" headings sit on the room's own
+   surface with the hairline, no grey band; the controls row wraps cleanly at the rig's width).
+3. **R-ALL** on `vx283-u3-revert`: `✘ Test run with 10 tests in 4 suites failed … with 13 issues`, EXACTLY as named —
+   R-L: the panel-open controls cell red in both voices (root wider than the window, the panel past the edge, the
+   field under its prompt), closed/wide GREEN · R-D: both dark-face tests red ×2 voices, light GREEN · R-T: the
+   Bookcase and Library toast cells red, the note cell GREEN · R-V: the separator test red. The rig again on the revert
+   tree → `u3/rig/before/`. `vx283-u3-revert` DELETED.
+4. Restore: the three store files copied back and `cmp`-verified; prefs diff clean (1602 = 1602); castle-W1 untouched;
+   zero instances. SEAM pinged; the coordinator said continue (vx-336's closeout not READY); the walk followed.
+
 #### U3 — THE WALK PLAN (the orchestrator's; her walk rule — a fresh Opus at xhigh)
 
 Products: U3's Debug app, `App/Variorum/DerivedData/vx283-u3/Build/Products/Debug/Variorum.app`. Screens to
