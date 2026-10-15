@@ -229,6 +229,7 @@ private final class SectionRig {
         let start = Date()
         var last: SidebarLayout.ScrollWindow?
         var lastFrame: CGRect?
+        var lastStar: SidebarLayout.ScrollWindow?
         var still = 0
         for _ in 0..<300 {
             hosting.layoutSubtreeIfNeeded()
@@ -239,11 +240,20 @@ private final class SectionRig {
             try? await Task.sleep(for: .milliseconds(10))
             let now = open?.window
             let frame = open?.scroll
-            if now != nil, now == last, frame == lastFrame { still += 1 } else { still = 0 }
+            let star = starred?.window
+            if now != nil, now == last, frame == lastFrame, star == lastStar { still += 1 } else { still = 0 }
             last = now
             lastFrame = frame
+            lastStar = star
             if still >= 5, Date().timeIntervalSince(start) >= minimum, ready() { return }
         }
+    }
+
+    /// F-2's full depth at the pitch a section is drawing NOW (its window's
+    /// content over its rows — the column's pitch flips 30 ↔ 24 as rows come
+    /// and go, so a pin reads it after every step).
+    func depth(_ draw: SidebarGeometry.SectionDraw?, rows: Int) -> CGFloat {
+        SidebarLayout.edgeFadeDepth(rowHeight: (draw?.window?.content ?? 0) / CGFloat(max(rows, 1)))
     }
 
     /// nil when `noteID`'s Open row stands wholly in the list's window and
@@ -411,14 +421,17 @@ struct SidebarSectionWindowMountTests {
     /// half a row deep. RED ON OLD: no fade at all (none recorded).
     @Test func theOpenListFadesOnlyTheEdgesWithMoreBeyond() async throws {
         try await withRig(height: 900, openNotes: 20, startOn: 0) { rig in
-            let window = try #require(rig.open?.window)
-            let depth = SidebarLayout.edgeFadeDepth(rowHeight: window.content / 20)
+            _ = try #require(rig.open?.window)
+            var depth = rig.depth(rig.open, rows: 20)
+            #expect(depth >= 12, "half a row at either pitch: \(depth)")
             #expect(rig.open?.fades == SidebarLayout.EdgeFades(top: 0, bottom: depth),
                     "at the top: \(String(describing: rig.open?.fades))")
             await rig.go(.post(rig.notes[9]))
+            depth = rig.depth(rig.open, rows: 20)
             #expect(rig.open?.fades == SidebarLayout.EdgeFades(top: depth, bottom: depth),
                     "mid-list: \(String(describing: rig.open?.fades))")
             await rig.go(.post(rig.notes[19]))
+            depth = rig.depth(rig.open, rows: 20)
             #expect(rig.open?.fades == SidebarLayout.EdgeFades(top: depth, bottom: 0),
                     "at the end: \(String(describing: rig.open?.fades))")
         }
@@ -431,12 +444,17 @@ struct SidebarSectionWindowMountTests {
     @Test func starredFadesWhereMoreLiesBeyondAndNowhereWhenItHoldsEverything() async throws {
         try await withRig(height: 900, openNotes: 3, starred: 9, startOn: nil) { rig in
             let window = try #require(rig.starred?.window)
-            let depth = SidebarLayout.edgeFadeDepth(rowHeight: window.content / 9)
+            var depth = rig.depth(rig.starred, rows: 9)
+            #expect(depth >= 12, "half a row at either pitch: \(depth)")
             #expect(rig.starred?.fades == SidebarLayout.EdgeFades(top: 0, bottom: depth),
                     "at rest: \(String(describing: rig.starred?.fades)) over \(window)")
+            // Opening the ninth star's note brings the rail (and may flip the
+            // column's pitch): the section reveals it and fades the top instead.
             await rig.go(.post(rig.notes[8]))
+            depth = rig.depth(rig.starred, rows: 9)
             #expect(rig.starred?.fades == SidebarLayout.EdgeFades(top: depth, bottom: 0),
-                    "the ninth star revealed: \(String(describing: rig.starred?.fades))")
+                    "the ninth star revealed: \(String(describing: rig.starred?.fades)) over "
+                        + "\(String(describing: rig.starred?.window))")
         }
         try await withRig(height: 900, openNotes: 3, starred: 5, startOn: nil) { rig in
             #expect(rig.starred?.fades == SidebarLayout.EdgeFades.none,

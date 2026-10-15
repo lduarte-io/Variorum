@@ -868,8 +868,10 @@ lines — below); any stage work until the orchestrator hands over a claim.
   the reverts PENDING the stage window. The full write-up (trace, build, pins, PROVISIONALs) lands with Q3.
 - Q3 — headless evidence: DONE. `build-for-testing` green for HEAD (`DerivedData/vx283-u1`, the Q2 code) and for
   both reverts, PREBUILT so the window only runs tests: R-D's products in `DerivedData/vx283-u1b-rd`, R-E's in
-  `DerivedData/vx283-u1b-re` (each patch applied, built, restored by `git checkout --`, `git diff` empty — **no revert
-  is in the tree**). The patches: `notes/plans/vx283-screens/u1b/reverts/R-D.patch`, `R-E.patch` (gitignored).
+  `DerivedData/vx283-u1b-re` (each patch applied, built, restored by `git checkout --`, `git diff` empty). The
+  patches: `notes/plans/vx283-screens/u1b/reverts/R-D.patch`, `R-E.patch` (gitignored). **A pin fix (the fade pins
+  read the depth at the CURRENT pitch — opening a note can flip 30 ↔ 24) means all three trees are being REBUILT:
+  REVERT IN FLIGHT (headless) until this line says otherwise — check `git diff` first.**
 - Q4 — **READY FOR STAGE** — the window below (≈25 min): the batch, the two prebuilt reverts, the restore. The
   screenshot re-walk is a fresh walker's, after it.
 
