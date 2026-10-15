@@ -14,6 +14,19 @@ import Testing
 
 @Suite("VX-305 U4 fixed — devices: Touch ID, replacement and cloned Macs, two logins, replays")
 struct DeviceScenarios {
+    /// A Mac replaced in the middle of an act (its memory item left behind):
+    /// the new identity can't resume its predecessor's act — the plan is
+    /// ignored — and nothing of it stays: no staged file (promise 6).
+    @Test func aMacReplacedMidActLeavesNothingHalfDone() async throws {
+        let world = try scenarioWorld { w in try w.today(on: w.macA, TodaySpec(mode: .castle, gate: .touchID)) }
+        await world.done([.launch("macA"), .backup("macA")])
+        await world.step(.crash(.restoreBackup("macA", newest: 0), afterWrites: 6))
+        #expect(world.macA.staged != nil)
+        await world.done([.replaceMac("macA", carriesMemory: false), .launch("macA")])
+        #expect(world.macA.staged == nil, "the predecessor's staged file is left")
+        expectPromisesKept(world)
+    }
+
     /// A crash at every write of this Mac's settings acts (the gate style, the
     /// re-arm), then a relaunch: each finishes or rolls back (promise 6) —
     /// the plan-less finish needs nothing only the press had.

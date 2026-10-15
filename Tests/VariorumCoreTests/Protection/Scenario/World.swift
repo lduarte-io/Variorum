@@ -250,6 +250,8 @@ final class SWorld {
     var violations: [(Violation, Int)] = []
     /// Each action kind's outcomes (the generator's coverage).
     var stats: [String: [String: Int]] = [:]
+    /// The account each device's library was last seen bound to.
+    var lastBinding: [String: String?] = [:]
 
     /// Two Macs and a phone on Apple account 1 (the phone and Mac A share a
     /// login identity? never: each device its own hardware and login).
@@ -308,6 +310,23 @@ final class SWorld {
         if let passphrase, !truth.allPassphrases.contains(passphrase) { truth.allPassphrases.append(passphrase) }
         if let words, !truth.allWords.contains(words) { truth.allWords.append(words) }
         device.pending.append((holder, passphrase, words))
+    }
+
+    /// After every step: a library that left its account (by an act, or by a
+    /// crashed act's resume) keeps the account's secrets as its own.
+    func syncHolders() {
+        for device in devices {
+            guard let slot = device.slot, let record = slot.record else { continue }
+            let key = "\(device.name)|\(slot.libraryID)"
+            if case .some(.some(let was)) = lastBinding[key], record.account == nil {
+                let own = holder(device, account: nil, libraryID: slot.libraryID)
+                if truth.known[own]?.passphrase == nil && truth.known[own]?.words == nil {
+                    let k = known(was)
+                    setKnown(own, passphrase: k.passphrase, words: k.words)
+                }
+            }
+            lastBinding[key] = .some(record.account)
+        }
     }
 
     /// After a step: a pending secret whose lock now holds — the live key

@@ -462,7 +462,6 @@ extension SWorld {
     func nothingStranded() -> [Violation] {
         var violations: [Violation] = []
         var reachCache: [String: [String: StoreKey]] = [:]
-        var catalogCache: [String: Catalog] = [:]
         for (id, copy) in truth.copies.sorted(by: { $0.key < $1.key }) {
             let device = device(copy.madeOn)
             guard let (fs, path) = DeviceLeaves(world: self, device: device).resolve(id), let image = fs.files[path]?.library else {
@@ -474,11 +473,25 @@ extension SWorld {
             reachCache[device.name] = reached
             if reached[image.fingerprint] != nil { continue }
             // A Standard copy made with no passphrase or words, once its own
-            // Apple key and this Mac's are both gone (promise 5's exception).
-            let catalog = catalogCache[device.name] ?? self.catalog(device)
-            catalogCache[device.name] = catalog
-            let serving = catalog.copies.first { $0.id == id }.map { catalog.servingKeyFiles(of: $0) } ?? []
-            if !serving.isEmpty, serving.allSatisfy({ secretless($0.document) }) { continue }
+            // Apple key and this Mac's are both gone (promise 5's exception):
+            // every key file here holding its key is secretless, a key that
+            // wrapped it was LOST (an Apple-ID switch, a reset, a wiped
+            // keychain), and none that wraps it reads here now.
+            let holders = keyFilesOn(device).filter { document in
+                switch document {
+                case .format3(let file): return file.fingerprint == image.fingerprint
+                case .legacy(let legacy): return legacy.fingerprint == image.fingerprint
+                }
+            }
+            let ids = holders.flatMap { document -> [String] in
+                switch document {
+                case .format3(let file): return [file.apple?.keyID, file.sharedApple?.keyID].compactMap { $0 }
+                case .legacy(let legacy): return [legacy.envelope.apple == nil ? nil : legacy.envelope.appleKeyID].compactMap { $0 }
+                }
+            }
+            let readable = Set(readableAppleKeys(device).keys).union([oldSharedKey(device)?.id].compactMap { $0 })
+            if !holders.isEmpty, holders.allSatisfy(secretless), ids.contains(where: truth.lostAppleKeys.contains),
+               !ids.contains(where: readable.contains) { continue }
             violations.append(Violation(promise: 5, device: device.name, detail: "the copy \(id) (\(f8(image.fingerprint))) opens by no road"))
         }
         return violations
@@ -486,17 +499,11 @@ extension SWorld {
 
     /// A key file with no passphrase, words or master lock whose Apple keys
     /// are all gone (an Apple-ID switch, an iCloud Keychain reset).
-    func secretless(_ document: KeyFileDocument?) -> Bool {
+    func secretless(_ document: KeyFileDocument) -> Bool {
         switch document {
-        case .format3(let file)?:
-            guard file.passphrase == nil, file.words == nil, file.master == nil else { return false }
-            return [file.apple?.keyID, file.sharedApple?.keyID].compactMap { $0 }.allSatisfy(truth.lostAppleKeys.contains)
-        case .legacy(let legacy)?:
-            let envelope = legacy.envelope
-            guard envelope.passphrase == nil, envelope.recovery == nil, envelope.master == nil else { return false }
-            return envelope.appleKeyID.map(truth.lostAppleKeys.contains) ?? true
-        case nil:
-            return false
+        case .format3(let file): return file.passphrase == nil && file.words == nil && file.master == nil
+        case .legacy(let legacy):
+            return legacy.envelope.passphrase == nil && legacy.envelope.recovery == nil && legacy.envelope.master == nil
         }
     }
 

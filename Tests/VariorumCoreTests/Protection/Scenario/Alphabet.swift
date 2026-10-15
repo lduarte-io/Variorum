@@ -271,7 +271,7 @@ extension SWorld {
                     for subject in sheet.routes.wouldStopOpening + sheet.routes.appleKeyAlone {
                         if case .copy(let id) = subject { self.truth.listedBySheet.insert(id) }
                     }
-                    for other in self.devices where other.build == .older { self.truth.olderWhenRetired.insert(other.name) }
+                    for other in self.devices where other.build == .older || (other.slot != nil && other.slot?.record == nil) { self.truth.olderWhenRetired.insert(other.name) }
                 }
                 let words = (makeNewWords || k.words == nil) ? self.newWords() : k.words!
                 let passphrase = k.passphrase ?? self.newPassphrase()
@@ -317,7 +317,7 @@ extension SWorld {
         case .retireOldSharedKey(let name):
             let d = device(name)
             try await act(d) { executor, library in
-                for other in self.devices where other.build == .older { self.truth.olderWhenRetired.insert(other.name) }
+                for other in self.devices where other.build == .older || (other.slot != nil && other.slot?.record == nil) { self.truth.olderWhenRetired.insert(other.name) }
                 if let sheet = self.assessed(d).retirement {
                     for subject in sheet.routes.wouldStopOpening + sheet.routes.appleKeyAlone {
                         if case .copy(let id) = subject { self.truth.listedBySheet.insert(id) }

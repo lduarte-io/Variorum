@@ -293,6 +293,14 @@ extension ProtectionExecutor {
                 log("settle: a plan this Mac's section doesn't name — ignored")
                 try leaves.plans.deletePlan()
             }
+            // A staged file exists only between an act's stage and its swap; with
+            // nothing of this device in flight it is debris (an act no plan of
+            // this identity can resume — a Mac replaced mid-act) and goes
+            // (promise 6 — VX-305 U4, found by the scenario world).
+            if try leaves.library.stagedFingerprint() != nil {
+                try leaves.library.discardStaged()
+                log("settle: a staged file with nothing in flight — discarded")
+            }
             // An act that ended between its two homes' writes (the record's
             // landed, the memory's didn't): the memory follows the newer home.
             if library.record != nil, let memory = library.memory, memory.deviceSection.actInFlight != nil,

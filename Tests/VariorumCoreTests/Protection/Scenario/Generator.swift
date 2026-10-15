@@ -25,6 +25,10 @@ extension SWorld {
     /// in `violations`.
     @discardableResult
     func step(_ action: Action, words: Bool = false) async -> StepResult {
+        if case .tamper(let name, _) = action, device(name).build == .new, !device(name).isOpen {
+            // Its true posture before the tamper is what an open reads.
+            _ = try? await launch(device(name))
+        }
         let before = Dictionary(uniqueKeysWithValues: devices.map { ($0.name, posture($0)) })
         let crashedBefore = crashed
         var moveBefore: (SDevice, Set<String>)?
@@ -39,6 +43,7 @@ extension SWorld {
         switch result { case .done: tag = "done"; case .crashed: tag = "crashed"; case .refused: tag = "refused" }
         stats[kind, default: [:]][tag, default: 0] += 1
         if case .crash = action, result == .crashed, let name = action.device { crashed.insert(name) }
+        syncHolders()
         for device in devices { adoptPending(device) }
         var found: [Violation] = []
         if case .tamper(let name, let tamper) = action {
