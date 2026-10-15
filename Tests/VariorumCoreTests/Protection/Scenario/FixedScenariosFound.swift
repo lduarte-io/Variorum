@@ -735,4 +735,21 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 9 (sequence 312, the closer's soak) — a WORLD finding: Use Castle
+    /// with new words crashed at its begin; the open before a tamper resumed it
+    /// (the new words now lock the key file), then the tamper deleted the key
+    /// file and the memory before the world read her new words back from them —
+    /// her truth kept the old words, and the restored copy's honest "your
+    /// words" line read as a lie. The open's resume is settled before the
+    /// tamper now.
+    @Test func aResumeBeforeATamperSettlesHerNewWordsFirst() async throws {
+        let world = try Self.start("exposed", seed: 9000339)
+        for action in [Action.createLibrary("phone", secrets: true),
+                       .crash(.useCastle("phone", .touchID, newWords: true), afterWrites: 3),
+                       .tamper("phone", .deleteKeyFileAndMemory)] {
+            await world.step(action, words: true)
+        }
+        expectPromisesKept(world)
+    }
 }

@@ -26,8 +26,14 @@ extension SWorld {
     @discardableResult
     func step(_ action: Action, words: Bool = false) async -> StepResult {
         if case .tamper(let name, _) = action, device(name).build == .new, !device(name).isOpen {
-            // Its true posture before the tamper is what an open reads.
+            // Its true posture before the tamper is what an open reads — and a
+            // resume that open ran settles what its press chose BEFORE the
+            // tamper can take the lock it would be read back from (the closer's
+            // soak, seed 9 sequence 312: a deleted key file left her truth
+            // without the words her resumed Use Castle had made new).
             _ = try? await launch(device(name))
+            syncHolders()
+            adoptPending(device(name))
         }
         let before = Dictionary(uniqueKeysWithValues: devices.map { ($0.name, posture($0)) })
         // A device whose pressed act was still in flight before this step — a
