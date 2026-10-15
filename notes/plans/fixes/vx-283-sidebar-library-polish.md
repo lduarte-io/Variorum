@@ -366,7 +366,7 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: Q8 IN-PROGRESS — the orchestrator's ruling P-U1b-6 (the reveal as an exact pure offset applied absolutely, re-asked on every input axis) after the re-run's red (the Starred reveal 2 pt short after a pitch flip). Then READY FOR STAGE (the 93-suite batch + R-F). F-3 → VX-359 (U3 rider). |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **READY FOR STAGE** (≈15 min — Q9: the 93-suite batch + R-F prebuilt, then the restore) — the orchestrator's ruling P-U1b-6 built (`a347f992`: the reveal as an exact pure offset set through a `ScrollPosition`, re-asked on every input axis; the offscreen probe lands the flip exactly). Then the re-walk. F-3 → VX-359 (U3 rider). |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 — the Library and the red lint | NOT-STARTED |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
@@ -914,11 +914,19 @@ lines — below); any stage work until the orchestrator hands over a claim.
   row ("her own scrolling is never pulled back"). A pitch flip keeps the count, so it still re-asks (and the row-height
   axis re-asks anyway). Options: (a) content changes with an unchanged count [built]; (b) every content change (the
   ruling's literal list, with the ✕ pull-back); (c) content changes only while a settled ask is pending.
-  **R-F — REVERT IN FLIGHT (headless, no stage) until this line says otherwise; check `git diff` first:** the
-  application reverted to the proxy's anchor road (a `ScrollViewReader` inside the modifier, the anchor fraction
-  `(row × pitch − target) / (viewport − pitch)` through `proxy.scrollTo(id, anchor:)`, unanimated; no
-  `.scrollPosition`) — `git apply notes/plans/vx283-screens/u1b/reverts/R-F.patch` → `build-for-testing` into
-  `DerivedData/vx283-u1b-rf` → `git checkout -- …/SidebarSectionWindow.swift` → `git diff` empty.
+  **R-F — prebuilt, restored:** the application reverted to the proxy's anchor road (a `ScrollViewReader` inside the
+  modifier, the anchor fraction `(row × pitch − target) / (viewport − pitch)` through `proxy.scrollTo(id, anchor:)`,
+  unanimated; no `.scrollPosition`) — patch `notes/plans/vx283-screens/u1b/reverts/R-F.patch` applied, built into
+  `DerivedData/vx283-u1b-rf` (green), restored by `git checkout --`; **no revert is in the tree** (`git diff` empty).
+- Q9 — **READY FOR STAGE** (≈15 min): (0) prefs export + the dev store's three files copied (zero dev instances);
+  (1) the 93-suite batch, `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath
+  DerivedData/vx283-u1 test-without-building` + one `-only-testing:VariorumTests/<Suite>` per line of
+  `notes/plans/vx283-screens/u1b/batch-suites.txt` (products at `a347f992`'s code = HEAD's) — expected: VX-245's lint
+  the only red; (2) **R-F** — `… -derivedDataPath DerivedData/vx283-u1b-rf test-without-building
+  -only-testing:VariorumTests/SidebarSectionWindowMountTests` — expected RED:
+  `starredFadesWhereMoreLiesBeyondAndNowhereWhenItHoldsEverything` (the proxy road short after the flip); then DELETE
+  `DerivedData/vx283-u1b-rf` (keep `vx283-u1` for the walker); (3) the store restored (`cmp`), prefs import → delete
+  added keys → re-export → diff; release. Then READY FOR WALK.
 
 **F-3 — THE DOUBLED SEPARATOR: OLDER THAN U1, NOT ADJACENT — RECORDED AND LEFT (the brief's rule).**
 - The View menu's note group is `EditorCommands`' `CommandGroup(before: .toolbar)` (`EditorCommands.swift:954`). It
