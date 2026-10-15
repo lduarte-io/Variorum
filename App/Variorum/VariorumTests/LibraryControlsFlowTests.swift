@@ -46,6 +46,23 @@
 //  **R-S** (the layout's floor read back from the field's own ideal, the
 //  widest dropped, the relevance label's line policy removed).
 //
+//  **U3c — P-U3c-1, the orchestrator's ruling on the trace leg's T3** (the
+//  sweep stayed red in a band: Terminal 940–960, Study 840–880). THE
+//  MECHANISM, read off the probe's trace (`LibraryControlsU3cProbe` below):
+//  the two SEGMENTED PICKERS answer in two modes in one model state — RIGID
+//  (their minimum is their natural width: Terminal scope 262 / mode 224,
+//  Study 264 / 230) or COMPRESSIBLE (the AppKit control squeezed: 228.5 /
+//  180, Study 233 / 189); a landed search turns COMPRESSIBLE on, nothing the
+//  cleared search does turns it off, a sort pick turns it off — moving the
+//  width each picker takes at its share (and, in Study, the order the
+//  distribution serves them). THE RULED FIX: each picker is fixed
+//  horizontally before its frame, so it answers its ideal in every state.
+//  THE PINS ADDED: mounted, a search never squeezes the segmented controls
+//  and never flips the row (inside the old band, both voices); pure, the
+//  rule over the probe's in-app widths — the default window one line closed,
+//  the thresholds (a GUARD). RED ON OLD by behavioural revert **R-P** (the
+//  two `fixedSize` lines deleted): the new mounted pin and the sweep.
+//
 
 import AppKit
 import Dependencies
@@ -188,6 +205,13 @@ struct LibraryControlsFlowRuleTests {
     /// the in-app Terminal row measures ≈20 pt wider than this harness (U3's
     /// first window: the field 222 where these numbers give 242), so a wider
     /// sidebar can take Terminal's closed row to two lines; stable either way.
+    /// *(U3c — ANNOTATED, not rewritten: "≈934 / ≈834" are this OFFSCREEN
+    /// harness's thresholds. In the app the segmented pickers measure wider —
+    /// rigid at Terminal scope 262 / mode 224, Study 264 / 230, the U3c probe's
+    /// reading (P-U3c-1 fixes them there) — and the "≈20 pt wider" Terminal row
+    /// was the scope picker. The in-app thresholds, ≈977 (Terminal) and ≈891
+    /// (Study), are pinned by `atTheProbesInAppWidthsTheDefaultWindowIsOneLineClosed`
+    /// below; this pin keeps its own numbers.)*
     @Test func atTheMeasuredWidthsTheDefaultWindowHasOneAnswerPerPanelState() {
         for voice in [ThemeVoice.terminal, .study] {
             #expect(!Rule.fitsOneLine(Self.measured(voice), width: 631, spacing: 10), "\(voice): open — two lines")
@@ -197,6 +221,56 @@ struct LibraryControlsFlowRuleTests {
         #expect(Rule.fitsOneLine(Self.measured(.terminal), width: 936, spacing: 10))
         #expect(!Rule.fitsOneLine(Self.measured(.study), width: 830, spacing: 10))
         #expect(Rule.fitsOneLine(Self.measured(.study), width: 836, spacing: 10))
+    }
+
+    /// **The IN-APP rows** (U3c — the probe's reading, `u3c/logs/probe-lines.txt`):
+    /// the segmented pickers RIGID at their natural widths, as P-U3c-1 fixes
+    /// them (Terminal scope 262…280 · mode 224…230; Study 264…280 · mode 230),
+    /// the field 0…320 with its floor, the sort slot counted at its widest,
+    /// `when ▾`.
+    static func inApp(_ voice: ThemeVoice, sort: CGFloat? = nil) -> [Rule.Child] {
+        switch voice {
+        case .terminal:
+            [child(0, 320, floor: 211.5, height: 22), child(262, 280), child(224, 230),
+             child(sort ?? 174, sort ?? 174, widest: 181, height: 18), child(53, 53, height: 18)]
+        case .study:
+            [child(0, 320, floor: 175, height: 22), child(264, 280), child(230, 230),
+             child(sort ?? 127, sort ?? 127, widest: 134, height: 18), child(48, 48, height: 18)]
+        }
+    }
+
+    /// **GUARD (U3c, P-U3c-1) — the default window's answer at the in-app
+    /// widths.** With the pickers rigid, the rule's thresholds are ≈977 pt of
+    /// row (Terminal) and ≈891 (Study) — exactly 977.0 and 890.5 with the
+    /// floor's half-point slack — so the 1240-pt default with a 210-pt sidebar
+    /// (row 981) is ONE line closed in both voices (Terminal by ≈4 pt) and two
+    /// lines open (631); the old band's rooms (Terminal 950, Study 860) are
+    /// two lines; and the decision never flips back above its threshold. A
+    /// guard, not red-on-old: the rule is unchanged by the fix — it documents
+    /// the margin the default window keeps.
+    @Test func atTheProbesInAppWidthsTheDefaultWindowIsOneLineClosed() {
+        for voice in [ThemeVoice.terminal, .study] {
+            #expect(Rule.fitsOneLine(Self.inApp(voice), width: 981, spacing: 10), "\(voice): closed — one line")
+            #expect(!Rule.fitsOneLine(Self.inApp(voice), width: 631, spacing: 10), "\(voice): open — two lines")
+        }
+        #expect(!Rule.fitsOneLine(Self.inApp(.terminal), width: 950, spacing: 10), "the old band: two lines")
+        #expect(!Rule.fitsOneLine(Self.inApp(.study), width: 860, spacing: 10), "the old band: two lines")
+        #expect(!Rule.fitsOneLine(Self.inApp(.terminal), width: 976, spacing: 10))
+        #expect(Rule.fitsOneLine(Self.inApp(.terminal), width: 978, spacing: 10))
+        #expect(!Rule.fitsOneLine(Self.inApp(.study), width: 889, spacing: 10))
+        #expect(Rule.fitsOneLine(Self.inApp(.study), width: 892, spacing: 10))
+        for voice in [ThemeVoice.terminal, .study] {
+            var width: CGFloat = 300
+            var seenOneLine = false
+            var flips: [CGFloat] = []
+            while width <= 1400 {
+                let answer = Rule.fitsOneLine(Self.inApp(voice), width: width, spacing: 10)
+                if seenOneLine && !answer { flips.append(width) }
+                seenOneLine = seenOneLine || answer
+                width += 0.5
+            }
+            #expect(flips.isEmpty, "\(voice): back to two lines at \(flips.prefix(5))")
+        }
     }
 
     /// The default window with the panel open (631 pt for the row): search ·
@@ -748,6 +822,68 @@ struct LibraryControlsGeometryTests {
             #expect(Set(heights.values.map { ($0 * 2).rounded() / 2 }).count == 1,
                     "\(voice): the line count moved — \(heights.sorted { $0.key < $1.key })")
             #expect(faults.isEmpty, "\(voice): \(faults)")
+        }
+    }
+
+    // MARK: U3c — P-U3c-1, the segmented pickers
+
+    /// The mounted row's segmented controls (scope: four segments; mode:
+    /// three) — AppKit's own views, found as the U3c probe found them.
+    fileprivate static func segmentedControls(in view: NSView) -> [NSSegmentedControl] {
+        var found: [NSSegmentedControl] = []
+        func walk(_ view: NSView) {
+            if let control = view as? NSSegmentedControl { found.append(control) }
+            for sub in view.subviews { walk(sub) }
+        }
+        walk(view)
+        return found
+    }
+
+    /// **RED ON OLD (R-P) — U3c, P-U3c-1: a search never squeezes the
+    /// segmented controls, so it never flips the row.** The panel closed, ONE
+    /// room per voice inside the old band (Terminal 950, Study 860 — the U3c
+    /// probe's rooms); created · oldest, then a typed word, then the field
+    /// cleared, then a sort pick (the probe's states 4, 5, 7, 8, through the
+    /// sweep's own acts): the row's height never moves, and each segmented
+    /// control draws at no less than its own natural (intrinsic) width.
+    /// (Before: the landed search turned the pickers COMPRESSIBLE — the scope
+    /// control drawn at 227 / 220.5 of its 254, Terminal — the row went to one
+    /// line, and only the sort pick brought the two lines back.)
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func aSearchNeverSqueezesTheSegmentedControlsOrFlipsTheRow(voice: ThemeVoice) async throws {
+        let room: CGFloat = voice == .terminal ? 950 : 860
+        try await withCatalog(voice: voice, width: Self.defaultLibraryWidth, panelOpen: false) { rig in
+            await rig.resize(to: room + 48)
+            let acts: [(name: String, act: (Rig) async -> Void)] = [
+                ("created · oldest", { await $0.pick(.createdAt, .asc) }),
+                ("typed a word", { await $0.ask("pick") }),
+                ("empty again", { await $0.ask("") }),
+                ("a sort pick", { await $0.pick(.lastTouched) }),
+            ]
+            var first: (name: String, height: CGFloat)?
+            for step in acts {
+                await step.act(rig)
+                let read = try rig.read()
+                // The premise: the column really is this wide.
+                #expect(abs(read.root.width - (room + 48)) <= 1,
+                        "\(voice) \(step.name): the catalog is \(read.root.width) wide, not \(room + 48)")
+                let controls = Self.segmentedControls(in: rig.hosting)
+                let faces = controls.map {
+                    "\($0.label(forSegment: 0) ?? "?") \($0.frame.width) of \($0.intrinsicContentSize.width)"
+                }
+                print("[VX-175 U3c pin] \(voice) · room \(room) · \(step.name) · controls \(read.controls) · segmented \(faces)")
+                #expect(controls.count == 2, "\(voice) \(step.name): both segmented controls are mounted (\(faces))")
+                for control in controls {
+                    #expect(control.frame.width >= control.intrinsicContentSize.width - 0.5,
+                            "\(voice) \(step.name): a segmented control squeezed — \(control.label(forSegment: 0) ?? "?") drawn \(control.frame.width) of its \(control.intrinsicContentSize.width)")
+                }
+                if let first {
+                    #expect(abs(read.controls.height - first.height) < 0.5,
+                            "\(voice): \(step.name) changed the line count (\(first.name) \(first.height) → \(read.controls.height) pt)")
+                } else {
+                    first = (step.name, read.controls.height)
+                }
+            }
         }
     }
 }
