@@ -945,6 +945,17 @@ lines — below); any stage work until the orchestrator hands over a claim.
     diff CLEAN (1602 = 1602); `castle-W1-20261013` untouched; zero dev instances throughout.
 - **P-U1b-7 — ACCEPTED (a) by the orchestrator (2026-10-14, the Q9 GO):** a content-height change re-asks only when
   the row count did not change, so a ✕ on another row never pulls her scrolled list back.
+- Q10 — the orchestrator's ruling on Q9 (`8a77431d`, ruled (a)): **R-F's road is HEAD** — every trigger, the pure
+  `revealOffset`, the derived settled backstop and P-U1b-7 stay; the application goes through the proxy (a
+  `ScrollViewReader` inside `SidebarSectionWindow`, the exact offset turned into the proxy's anchor, unanimated); the
+  `ScrollPosition` state removed; the bookkeeping class hoisted to the top level (`SidebarSectionMemory`), which also
+  clears the build's isolated-conformance warning on the generic modifier (present since Q2). No pin changed (the
+  mounted pins never touched `ScrollPosition`). DONE (this commit) — `DerivedData/vx283-u1` rebuilt from it, green.
+- **R-G — NAMED BEFORE IT STARTS (prebuilt headless; REVERT IN FLIGHT until this line says otherwise — check `git
+  diff` first):** drop ONLY the content-height and row-height re-asks (the geometry action's `|| (content changed &&
+  !rowsChanged)` arm; `onChange(of: rowHeight)` keeps `refreshFades` but no longer asks), everything else kept —
+  `git apply notes/plans/vx283-screens/u1b/reverts/R-G.patch` → `build-for-testing` into `DerivedData/vx283-u1b-rg`
+  → `git checkout -- …/SidebarSectionWindow.swift` → `git diff` empty. Expected under R-G: the Starred pin RED.
 
 **F-3 — THE DOUBLED SEPARATOR: OLDER THAN U1, NOT ADJACENT — RECORDED AND LEFT (the brief's rule).**
 - The View menu's note group is `EditorCommands`' `CommandGroup(before: .toolbar)` (`EditorCommands.swift:954`). It

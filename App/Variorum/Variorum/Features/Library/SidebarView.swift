@@ -567,8 +567,8 @@ struct SidebarView: View {
                 // CURRENT row is revealed clear of the fades at an exact
                 // offset on every input that moves its place. It replaces the
                 // minimal `scrollTo` on a selection change that stood here
-                // (inside a `ScrollViewReader`, now gone — nothing else used
-                // the proxy).
+                // (its `ScrollViewReader` now lives inside the modifier —
+                // nothing else here used the proxy).
                 .modifier(SidebarSectionWindow(
                     rows: items.map(\.target),
                     current: items.first {
@@ -851,8 +851,8 @@ struct SidebarView: View {
                 // of the viewport, the content height or the pitch (the
                 // traced cut: the old reveal ran once, against a viewport
                 // that settled a pass later); the edges fade where more lies
-                // beyond them. (The `ScrollViewReader` that held the old
-                // reveal's proxy is gone — nothing else used it.)
+                // beyond them. (The `ScrollViewReader` lives inside the
+                // modifier now — nothing else here used the proxy.)
                 .modifier(SidebarSectionWindow(
                     rows: shown, current: currentOpenRow,
                     rowHeight: rowHeight, room: tokens.room,

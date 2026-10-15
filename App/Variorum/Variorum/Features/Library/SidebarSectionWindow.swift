@@ -29,9 +29,11 @@
 //    fades) on every current-row change, on the section's first reading, and
 //    on EVERY change of the viewport, the content height or the pitch, from
 //    the window as it then stands — an EXACT offset (`SidebarLayout.
-//    revealOffset`) set absolutely through a `ScrollPosition`, unanimated
-//    (P-U1b-6 — U1b's two stage windows found the anchor road resting 1, then
-//    2 pt short after a pitch flip). A scroll of hers changes neither the
+//    revealOffset`) landed through the reveal's `ScrollViewReader` proxy,
+//    unanimated. (U1b's windows: re-asking on EVERY input that moves the row
+//    — the content height and the pitch among them — is what fixed the
+//    after-the-flip shortfall; an absolute `ScrollPosition` road was tried
+//    and withdrawn, the orchestrator's ruling on Q9.)
 //    viewport nor the content, so a list she has scrolled is never pulled
 //    back by a scroll; a row closing elsewhere is no reason either (P-U1b-7).
 //    The derived settled ask (`transitionSettle`) stays as the backstop.
@@ -68,31 +70,11 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
     var report: SidebarSectionWindowReport? = nil
 
     @State private var fades = SidebarLayout.EdgeFades.none
-    @State private var memory = Memory()
-    /// **The section's scroll position — the reveal's ONE road** (P-U1b-6): an
-    /// exact content offset (`SidebarLayout.revealOffset`) set absolutely,
-    /// never the proxy's id lookup with an anchor fraction (which resolved the
-    /// row through the lazy stack's own, stale, estimate mid-flip).
-    @State private var position = ScrollPosition()
+    @State private var memory = SidebarSectionMemory()
     /// Bumped to ask for the settled check — through `onChange`, so the check
     /// runs with the section's FRESH rows, current row and pitch.
     @State private var settledCheck = 0
 
-    /// The window as last read, and the reveal's bookkeeping — held by
-    /// REFERENCE, so the scroll's every frame re-renders nothing (only a
-    /// change of the fades does).
-    @MainActor
-    final class Memory {
-        var window = SidebarLayout.ScrollWindow.unmeasured
-        /// The mount's reveal waits for the first MEASURED reading.
-        var mountRevealOwed = true
-        /// How many rows stood at the last reading (a content change from a
-        /// row closing elsewhere is not a reason to scroll — P-U1b-7).
-        var rowCountAtReading = 0
-        /// Each reveal request is an episode; a later one supersedes the
-        /// settled check an earlier one scheduled.
-        var episode = 0
-    }
 
     /// How long after a reveal request the section checks again — DERIVED from
     /// the column's one transition beat (`SidebarLayout.transitionSettle` =
@@ -104,35 +86,37 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
     private var depth: CGFloat { SidebarLayout.edgeFadeDepth(rowHeight: rowHeight) }
 
     func body(content: Content) -> some View {
-        content
-            .scrollPosition($position)
-            .onScrollGeometryChange(for: SidebarLayout.ScrollWindow.self) {
-                SidebarLayout.ScrollWindow($0)
-            } action: { old, new in
-                memory.window = new
-                refreshFades(new)
-                let rowsChanged = rows.count != memory.rowCountAtReading
-                memory.rowCountAtReading = rows.count
-                if memory.mountRevealOwed, new.isMeasured {
-                    memory.mountRevealOwed = false
-                    requestReveal()
-                } else if abs(new.viewport - old.viewport) > 0.5
-                    || (abs(new.content - old.content) > 0.5 && !rowsChanged) {
-                    // Every input that moves the row's place re-asks (P-U1b-6):
-                    // the viewport (the rail arriving, a resize) and the
-                    // content height (the pitch flip's own signal — rows re-laid
-                    // at the new pitch). An offset-only change — her scroll —
-                    // never does.
+        ScrollViewReader { proxy in
+            content
+                .onAppear { memory.proxy = proxy }
+                .onScrollGeometryChange(for: SidebarLayout.ScrollWindow.self) {
+                    SidebarLayout.ScrollWindow($0)
+                } action: { old, new in
+                    memory.window = new
+                    refreshFades(new)
+                    let rowsChanged = rows.count != memory.rowCountAtReading
+                    memory.rowCountAtReading = rows.count
+                    if memory.mountRevealOwed, new.isMeasured {
+                        memory.mountRevealOwed = false
+                        requestReveal()
+                    } else if abs(new.viewport - old.viewport) > 0.5
+                        || (abs(new.content - old.content) > 0.5 && !rowsChanged) {
+                        // Every input that moves the row's place re-asks (P-U1b-6):
+                        // the viewport (the rail arriving, a resize) and the
+                        // content height (the pitch flip's own signal — rows re-laid
+                        // at the new pitch). An offset-only change — her scroll —
+                        // never does.
+                        requestReveal()
+                    }
+                }
+                .onChange(of: current) { requestReveal() }
+                .onChange(of: rowHeight) {
+                    refreshFades(memory.window)
                     requestReveal()
                 }
-            }
-            .onChange(of: current) { requestReveal() }
-            .onChange(of: rowHeight) {
-                refreshFades(memory.window)
-                requestReveal()
-            }
-            .onChange(of: settledCheck) { reveal() }
-            .overlay { SidebarEdgeFade(fades: fades, room: room) }
+                .onChange(of: settledCheck) { reveal() }
+                .overlay { SidebarEdgeFade(fades: fades, room: room) }
+        }
     }
 
     private func refreshFades(_ window: SidebarLayout.ScrollWindow) {
@@ -154,7 +138,8 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
     }
 
     /// The current row, scrolled clear of the fades when the window as last
-    /// read says it is not: the exact offset, set absolutely and unanimated.
+    /// read says it is not: the exact offset (`revealOffset`), turned into the
+    /// proxy's anchor and landed unanimated.
     private func reveal() {
         let window = memory.window
         guard window.isMeasured, let current, let row = rows.firstIndex(of: current),
@@ -163,8 +148,35 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
         else { return }
         var unanimated = Transaction()
         unanimated.disablesAnimations = true
-        withTransaction(unanimated) { position.scrollTo(y: target) }
+        // The proxy lands the row's top `y × (viewport − rowHeight)` below the
+        // window's top, so the exact offset is the anchor `y` below.
+        let room = window.viewport - rowHeight
+        let anchor = room > 0 ? min(max((CGFloat(row) * rowHeight - target) / room, 0), 1) : 0
+        withTransaction(unanimated) {
+            memory.proxy?.scrollTo(current, anchor: UnitPoint(x: 0.5, y: anchor))
+        }
     }
+}
+
+/// A scrolling section's window as last read, and its reveal's bookkeeping —
+/// top-level (not nested in the generic modifier) so its isolation never
+/// leans on the row type's conformances. Held by
+/// REFERENCE, so the scroll's every frame re-renders nothing (only a
+/// change of the fades does).
+@MainActor
+final class SidebarSectionMemory {
+    var window = SidebarLayout.ScrollWindow.unmeasured
+    /// The mount's reveal waits for the first MEASURED reading.
+    var mountRevealOwed = true
+    /// How many rows stood at the last reading (a content change from a
+    /// row closing elsewhere is not a reason to scroll — P-U1b-7).
+    var rowCountAtReading = 0
+    /// Each reveal request is an episode; a later one supersedes the
+    /// settled check an earlier one scheduled.
+    var episode = 0
+    /// The section's `ScrollViewReader` proxy — the reveal's road (the
+    /// orchestrator's ruling on Q9).
+    var proxy: ScrollViewProxy?
 }
 
 /// F-2's fade: the room, solid at the very edge, gone `depth` points in — on
