@@ -9,7 +9,13 @@ reduce load on Fable and make sure there was enough for reviews"*).
 **Cast — her word at kickoff (2026-10-14, the question tool):** "xhigh builds, max reviews". So:
 `opus-implementer` at **xhigh**, ONE fresh session per unit, strictly sequential; the ladder's cold reviews are
 **`opus-reviewer` at max**, fresh per round, running `notes/REVIEW_PROMPT.md` verbatim (same-model: the
-orchestrator arbitrates against the spec). No editor seam, `Sync/`, custody or default's-meaning content is
+orchestrator arbitrates against the spec). **SUPERSEDED for the ladder by her word (2026-10-14, evening, verbatim): *"you can use fable xhigh to review
+instead of opus at max if you werent already going to."*** So the cold reviews are **`fable-reviewer` at xhigh**,
+fresh per round, `notes/REVIEW_PROMPT.md` verbatim — the CROSS-MODEL flow (CLAUDE.md "Two reviews"): Fable makes the
+final call on each finding after the Opus implementer's agree/dispute; the implementer applies the confirmed fixes
+(red-on-old each, the suite green); the next fresh reviewer re-checks them; a final round's fixes get the
+orchestrator's line-by-line check; Fable writes a fix itself only for a finding it marks FINDER-FIXES (no `Sync/`
+lines here). No editor seam, `Sync/`, custody or default's-meaning content is
 expected, so no Fable round is owed; if a unit's diff reaches one of those after all, the orchestrator says so
 to her before the ladder. No agent runs concurrently with another.
 
@@ -803,6 +809,46 @@ beside each). Every image below was opened and looked at before its verdict.
   no reason seen to change it.
 - The ✕ shows on every row at rest, with no hover change; the ⇧⌘W/✕ landings also scroll Starred to the landed note
   when starred (nice). The one-row and empty-list states look right (the section header goes with the last row).
+
+#### U1 — THE ORCHESTRATOR'S EYE (her walk rule's step 5, 2026-10-14 ~20:50)
+
+Opened every REGION capture of a changed area (17 of the 71 files; the rest are whole-window context duplicates of
+the same states): W2 Study light tall + few rows, W2 Terminal dark, W3 Open scrolling in all four voice ×
+appearance pairs, W3 Starred Terminal dark, W4, W5 at 480 and 640, W6 a landing, W7 a ✕ landing, W8's right-click
+menu, W9's View menu, both O-1 captures.
+
+**Looks right:** the list runs to just above the sync footer and stops (no row under it, no band); the scroll bar
+rides in the margin with every ✕ and ★ clear, in both voices and both appearances; Starred holds its ~7½; the 3½-row
+floor at 480 pt with the outer scroll carrying the rest; the menus read "Close Note ⇧⌘W" / "Close All Notes" and
+right-click "Close" / "Close All Notes"; the landings are right.
+
+**Does NOT look right yet (U1's fix leg, U1b):**
+- **F-1 (the walker's O-1) — the CURRENT row can sit cut at the list's bottom edge.** Once in ~40 opens (the 18th
+  rapid open from the Library) the newly opened note's highlighted row showed only its top ~10 pt and stayed so after
+  settling (`OBS-study-light-current-row-cut.png`; the clean repeat `-2`). The note she just opened must always be
+  wholly in view. Trace the reveal (scroll-to-row vs. the list's measured max height settling — the walker's guess,
+  untraced) and fix by mechanism; pin what can be pinned (a pure reveal decision, or the re-reveal on a height change);
+  the evidence is the re-walk's repeated rapid opens.
+- **F-2 — a scrolled section slices its partial row through the letters right under its header.** Open (W2 Study
+  light: "Standard and Castle:…" under "Open"; W5: "2026-10-12"; W6) and Starred (W4: "seeing, answering, undoing"
+  under "Starred"; W2 Terminal dark: the top starred row butting the header) — a hard clip that reads unfinished,
+  above all beside the taller Open list. Starred did it before U1 too; her rule is that it look right. **PROVISIONAL
+  (the orchestrator's ruling, P-U1-6):** both scrolling sections get a short EDGE FADE (about half a row) at whichever
+  edge has content beyond it — the top only when scrolled down, the bottom only when more lies below — drawn from the
+  voice's room token (the Bookcase strip's edge-fade idiom; an overlay/mask, never a per-row attribute; no literal
+  colour). A partial row then fades instead of being cut. Starred's ruled ~7½-row window and the half row's "there is
+  more" signal stay; rows never move. Her eye on the re-walk decides.
+- **F-3 (the walker's O-5) — the View menu shows a doubled separator after Close Split** (W9's capture). U1 edited
+  that menu; trace whether U1's Divider (or a hidden item beside it) doubles it, and remove the double. If it is
+  older than U1 and not adjacent to U1's lines, record it and leave it.
+- Not taken: O-2 (the whole column's pitch flips 30 ↔ 24 pt as the Open count crosses the fit test's threshold —
+  her VX-285 ask moved height, not compression; the record's `openListFitRows` rationale stands), O-3's resting
+  scroll offset (F-2 is its visible half), O-4 (the 20-row cap), O-6 (the floor reads well).
+
+**U1b — the fix leg's acceptance:** a FRESH implementer (U1's is past the context guideline), briefed by this section +
+U1's section; pins where the mechanism allows; the Mac batch over the changed files' suites on a claim; then a
+re-walk of W2/W3/W4/W5 in the scrolled states (Study + Terminal, light + dark) and twenty rapid opens for F-1, plus
+W9's menu — by a fresh Opus walker; U1 closes when those screenshots look right.
 
 ## Ladder
 
