@@ -22,20 +22,48 @@
 //  old `HStack` did (`LibraryControlsFlowRule.distribute` — the HStack's own
 //  least-flexible-first sharing), so a wide window is unchanged.
 //
+//  **The wrap decision reads STABLE widths only** (P-U3-5, the orchestrator's
+//  ruling on U3's walk, W2's F-1 and F-2). The first build asked the field for
+//  its ideal (`sizeThatFits(.unspecified)`), which a `.roundedBorder` field
+//  answers with its cell's size — the PROMPT's width while empty, the TYPED
+//  TEXT's once she types (measured offscreen: 211.5 → 40.5 pt in Terminal for
+//  "wing"). So typing with the panel open made "the field keeps its ideal"
+//  true of a 40-pt field: the row collapsed to one line, the field a sliver,
+//  and the relevance label (no line limit) wrapped onto three lines (F-1);
+//  and Terminal's closed row at 1240, a few points from the threshold, flipped
+//  with the field's state and the sort's words (F-2). Now the decision counts
+//  the field at its PROMPT (`LibraryControlsStableWidths.fieldFloor`, handed
+//  down as a layout value — never the field's own answer) and the sort slot
+//  at the WIDEST it can read (every sort × direction, and search's relevance
+//  form), so it is a function of the column's width alone: typing, a sort pick
+//  or a search never changes the line count.
+//
 
+import AppKit
 import SwiftUI
+import VariorumCore
 
 /// **The pure half** (VX-175): the HStack's distribution and the wrap
 /// decision, over abstract children — what the layout asks, the pins drive.
 nonisolated enum LibraryControlsFlowRule {
     /// One control as the row sees it: how flexible it is (its widest less
-    /// its narrowest), the width and height it takes when offered a width,
-    /// and its ideal width.
+    /// its narrowest), the width and height it takes when offered a width —
+    /// and, for the two controls whose own answers move with state, the
+    /// STABLE width the wrap decision counts instead (P-U3-5).
     struct Child {
         var flexibility: CGFloat
-        var ideal: CGFloat
         var width: (CGFloat) -> CGFloat
         var height: (CGFloat) -> CGFloat
+        /// **The field's floor** — its prompt's width in its own face, cell
+        /// chrome included: one line only while the field keeps at least
+        /// this. nil for every control but the field. Never the field's own
+        /// ideal, which follows the typed text (F-1).
+        var floor: CGFloat? = nil
+        /// **The widest this control can read** — the sort slot, whose words
+        /// change with the sort, the direction and the search: the decision
+        /// counts it at this width, rigid, so a pick never flips the row.
+        /// nil = the control's own width is already stable.
+        var widest: CGFloat? = nil
     }
 
     struct Arrangement: Equatable {
@@ -64,17 +92,33 @@ nonisolated enum LibraryControlsFlowRule {
         return widths
     }
 
+    /// A child as the DECISION counts it: a control with a `widest` is a rigid
+    /// control of exactly that width; every other child is itself.
+    static func counted(_ child: Child) -> Child {
+        guard let widest = child.widest else { return child }
+        return Child(flexibility: 0, width: { _ in widest }, height: child.height,
+                     floor: child.floor, widest: widest)
+    }
+
     /// **The wrap decision** (the ruling: one line only if the field keeps at
-    /// least its placeholder width): the line, placed as the HStack places
-    /// it, fits `width` AND leaves the field (child 0) at least its ideal —
-    /// the field's ideal is its own prompt's width, so "never a sliver" means
-    /// the field never truncates its own words while the row is one line.
-    static func fitsOneLine(
-        widths: [CGFloat], fieldIdeal: CGFloat, width: CGFloat, spacing: CGFloat
-    ) -> Bool {
-        guard let field = widths.first else { return true }
-        let total = widths.reduce(0, +) + spacing * CGFloat(widths.count - 1)
-        return total <= width + 0.5 && field >= fieldIdeal - 0.5
+    /// least its placeholder width — P-U3-5: read from STABLE widths only):
+    /// the line, with every changing label counted at its widest and placed
+    /// as the HStack places it, fits `width` AND leaves the field at least its
+    /// floor. Nothing here reads the typed text or the current sort's words,
+    /// so the answer is a function of `width` (and the voice's widths) alone.
+    ///
+    /// The placement then uses the LIVE widths (`arrange`), never wider than
+    /// what was counted — and a narrower fixed label only leaves the field
+    /// MORE room in the HStack's order, so a line judged to fit places the
+    /// field at no less than its floor (pinned).
+    static func fitsOneLine(_ children: [Child], width: CGFloat, spacing: CGFloat) -> Bool {
+        let counted = children.map(counted)
+        let widths = distribute(counted, in: width, spacing: spacing)
+        let total = widths.reduce(0, +) + spacing * CGFloat(max(0, widths.count - 1))
+        guard total <= width + 0.5 else { return false }
+        return zip(counted, widths).allSatisfy { child, taken in
+            child.floor.map { taken >= $0 - 0.5 } ?? true
+        }
     }
 
     /// The whole arrangement: one line when it fits, else the first
@@ -85,9 +129,9 @@ nonisolated enum LibraryControlsFlowRule {
         spacing: CGFloat, lineSpacing: CGFloat
     ) -> Arrangement {
         guard !children.isEmpty else { return Arrangement(oneLine: true, frames: [], size: .zero) }
-        let single = distribute(children, in: width, spacing: spacing)
         let oneLine = children.count <= lineOneCount
-            || fitsOneLine(widths: single, fieldIdeal: children[0].ideal, width: width, spacing: spacing)
+            || fitsOneLine(children, width: width, spacing: spacing)
+        let single = distribute(children, in: width, spacing: spacing)
         let lines: [Range<Int>] = oneLine
             ? [children.indices]
             : [0..<lineOneCount, lineOneCount..<children.count]
@@ -122,6 +166,17 @@ struct LibraryControlsFlow: Layout {
     /// Search · scope.
     var lineOneCount: Int = 2
 
+    /// The field's floor, handed down by the header (P-U3-5 — the field's
+    /// own ideal follows the typed text, so the layout never asks it).
+    struct FloorKey: LayoutValueKey {
+        static let defaultValue: CGFloat? = nil
+    }
+
+    /// The widest a changing label can read (the sort slot, both its forms).
+    struct WidestKey: LayoutValueKey {
+        static let defaultValue: CGFloat? = nil
+    }
+
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         arrangement(width: proposal.width ?? .infinity, subviews: subviews).size
     }
@@ -142,15 +197,109 @@ struct LibraryControlsFlow: Layout {
     private func arrangement(width: CGFloat, subviews: Subviews) -> LibraryControlsFlowRule.Arrangement {
         let children = subviews.map { subview in
             let narrowest = subview.sizeThatFits(ProposedViewSize(width: 0, height: nil)).width
-            let widest = subview.sizeThatFits(ProposedViewSize(width: .infinity, height: nil)).width
+            let widestWidth = subview.sizeThatFits(ProposedViewSize(width: .infinity, height: nil)).width
             return LibraryControlsFlowRule.Child(
-                flexibility: widest - narrowest,
-                ideal: subview.sizeThatFits(.unspecified).width,
+                flexibility: widestWidth - narrowest,
                 width: { subview.sizeThatFits(ProposedViewSize(width: $0, height: nil)).width },
-                height: { subview.sizeThatFits(ProposedViewSize(width: $0, height: nil)).height })
+                height: { subview.sizeThatFits(ProposedViewSize(width: $0, height: nil)).height },
+                floor: subview[FloorKey.self],
+                widest: subview[WidestKey.self])
         }
         return LibraryControlsFlowRule.arrange(
             children, lineOneCount: lineOneCount, width: width,
             spacing: spacing, lineSpacing: lineSpacing)
+    }
+}
+
+extension View {
+    /// The search field's floor for `LibraryControlsFlow`'s wrap decision.
+    func libraryControlsFloor(_ width: CGFloat) -> some View {
+        layoutValue(key: LibraryControlsFlow.FloorKey.self, value: width)
+    }
+
+    /// The widest a changing label in `LibraryControlsFlow` can read.
+    func libraryControlsWidest(_ width: CGFloat) -> some View {
+        layoutValue(key: LibraryControlsFlow.WidestKey.self, value: width)
+    }
+}
+
+// MARK: - The stable widths (P-U3-5)
+
+/// **What the wrap decision counts** (P-U3-5): the field at its PROMPT and the
+/// sort slot at its WIDEST, measured in the voice's own small face — numbers
+/// that move only when the voice does, never with what she types or picks.
+struct LibraryControlsStableWidths: Equatable {
+    /// **The field's floor:** the prompt, in the field's own font, through the
+    /// cell the field draws with — exactly the width at which the field shows
+    /// its whole prompt. (A `.roundedBorder` field's ideal IS its cell's size:
+    /// with the prompt while empty, with the text once typed — measured equal
+    /// offscreen; the empty case is pinned against the mounted field itself.)
+    var fieldFloor: CGFloat
+    /// **The sort slot at the widest it can read:** every sort × direction as
+    /// the `sort ▾` door draws it, and the search's relevance label.
+    var sortWidest: CGFloat
+
+    /// One form of a label: its words and the chrome drawn around them.
+    struct LabelForm: Hashable {
+        var text: String
+        var chrome: CGFloat
+    }
+
+    /// `VoicedMenu`'s horizontal chrome around its words (`Theme/
+    /// VoiceControls.swift`: `.padding(.horizontal, 5)` each side; the menu
+    /// itself adds none — measured offscreen, every form). Kept honest by the
+    /// pin that measures the real door at every form.
+    static let voicedMenuChrome: CGFloat = 10
+
+    /// Every form the sort slot can take, in the voice's words: the `sort ▾`
+    /// door's label for every offered sort × direction, then the search's
+    /// relevance label (no chrome — a plain label).
+    static func sortForms(_ tokens: VoiceTokens) -> [LabelForm] {
+        let doors = LibrarySortFace.offered.flatMap { sort in
+            [SortDirection.desc, .asc].map { direction in
+                LabelForm(text: tokens.chromeLabel(LibrarySortFace.doorLabel(sort, direction)) + " \u{25BE}",
+                          chrome: voicedMenuChrome)
+            }
+        }
+        return doors + [LabelForm(text: tokens.chromeLabel(LibrarySearchCopy.relevance), chrome: 0)]
+    }
+
+    /// The row's stable widths in this voice — `prompt` is the field's own
+    /// (`LibraryCatalogView.searchPrompt`, before the voice's casing), resolved
+    /// from the voice's `small` face (the field's font and the labels') in the
+    /// view's own font context; memoized per face, so a keystroke re-renders
+    /// without re-measuring.
+    static func row(tokens: VoiceTokens, prompt: String, in context: Font.Context) -> Self {
+        let font = tokens.small.resolve(in: context).ctFont as NSFont
+        return measure(prompt: tokens.chromeLabel(prompt), sortForms: sortForms(tokens), font: font)
+    }
+
+    private struct MemoKey: Hashable {
+        var font: String
+        var size: CGFloat
+        var prompt: String
+        var forms: [LabelForm]
+    }
+
+    private static var memo: [MemoKey: LibraryControlsStableWidths] = [:]
+
+    /// The measurement itself: the prompt through a rounded-bezel field cell
+    /// in `font`, each label form's words in `font` (rounded UP to a whole
+    /// point, as a SwiftUI `Text` sizes itself) plus its chrome.
+    static func measure(prompt: String, sortForms: [LabelForm], font: NSFont) -> Self {
+        let key = MemoKey(font: font.fontName, size: font.pointSize, prompt: prompt, forms: sortForms)
+        if let known = memo[key] { return known }
+        let cell = NSTextFieldCell(textCell: "")
+        cell.isEditable = true
+        cell.isBezeled = true
+        cell.bezelStyle = .roundedBezel
+        cell.font = font
+        cell.placeholderString = prompt
+        let widest = sortForms.map { form in
+            (form.text as NSString).size(withAttributes: [.font: font]).width.rounded(.up) + form.chrome
+        }.max() ?? 0
+        let measured = LibraryControlsStableWidths(fieldFloor: cell.cellSize.width, sortWidest: widest)
+        memo[key] = measured
+        return measured
     }
 }

@@ -131,6 +131,9 @@ struct LibraryCatalogView: View {
     // environment — fall back to the leading voice's tokens.
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
+    /// VX-175 (P-U3-5): the font context the controls row's stable widths
+    /// are measured in — the same one its field and labels resolve in.
+    @Environment(\.fontResolutionContext) private var fontContext
     /// 13n-c U3: the window's road to the MCP door (nil in harness mounts —
     /// no share door; VX-272 — none without an approved client).
     @Environment(\.mcpShareRoad) private var mcpShareRoad
@@ -166,6 +169,10 @@ struct LibraryCatalogView: View {
     /// read here (a `.global` read inside a macOS `ScrollView` answers in
     /// the scroll view's space — batch C's lesson).
     static let probeSpace = "library-catalog"
+
+    /// The search field's prompt — one home for the field and for the floor
+    /// the controls row's wrap decision counts it at (VX-175, P-U3-5).
+    static let searchPrompt = "Search books, notes, blocks…"
 
     /// Row 24 (the panel half): the panel's presence animates — the column
     /// slides and fades in and out with the row selection. The mutation
@@ -608,8 +615,14 @@ struct LibraryCatalogView: View {
             // the field would swap on the re-flow the panel's opening makes,
             // dropping her caret). The order below IS the flow's order: the
             // field first, scope second (`LibraryControlsFlow`).
+            // P-U3-5: the wrap reads STABLE widths only — the field at its
+            // PROMPT (never its typed text) and the sort slot at its WIDEST
+            // form (every sort × direction, and the relevance label), so
+            // typing, a sort pick or a search never changes the line count.
+            let stable = LibraryControlsStableWidths.row(
+                tokens: tokens, prompt: Self.searchPrompt, in: fontContext)
             LibraryControlsFlow(spacing: 10, lineSpacing: 8) {
-                TextField(tokens.chromeLabel("Search books, notes, blocks…"),
+                TextField(tokens.chromeLabel(Self.searchPrompt),
                           text: Binding(get: { model.query }, set: { value in
                               model.query = value
                               Task { await model.search() }
@@ -618,6 +631,7 @@ struct LibraryCatalogView: View {
                     .font(tokens.small)
                     .frame(maxWidth: 320)
                     .libraryGeometryProbe(.searchField)
+                    .libraryControlsFloor(stable.fieldFloor)
                 // 17y B-WALK W-2 (her ruling): picking All while in Cards
                 // moves the view to List — the model's door decides.
                 Picker("", selection: Binding(get: { model.scope }, set: { model.pickScope($0); Task { await model.search() } })) {
@@ -670,11 +684,20 @@ struct LibraryCatalogView: View {
                         // could not change that order — stands down for the
                         // mockup's own words, a label (P-2: a door that
                         // cannot act is not drawn).
+                        // P-U3-5 / P-8: one line, holding its words — the
+                        // label once wrapped onto three lines when the row
+                        // squeezed it (the walk's F-1); the sort door's own
+                        // `VoicedMenu` and `when ▾` already carry the same
+                        // policy at their homes.
                         Text(tokens.chromeLabel(LibrarySearchCopy.relevance))
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
+                            .lineLimit(1)
+                            .fixedSize()
                             .help(LibrarySearchCopy.relevanceHelp)
                             .offset(y: Self.segmentedLabelDrop)
+                            .libraryGeometryProbe(.sortSlot)
+                            .libraryControlsWidest(stable.sortWidest)
                     } else {
                         LibrarySortMenu(
                             tokens: tokens, sort: model.sort, direction: model.direction,
@@ -687,6 +710,8 @@ struct LibraryCatalogView: View {
                                 Task { await model.search() }
                             })
                         .offset(y: Self.segmentedLabelDrop)
+                        .libraryGeometryProbe(.sortSlot)
+                        .libraryControlsWidest(stable.sortWidest)
                     }
                     // 18h batch 2 (her row 11): *"search for any note edited
                     // on a particular day."* 13o U2 (her R-13o-13): the door
