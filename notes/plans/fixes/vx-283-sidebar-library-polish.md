@@ -395,7 +395,7 @@ trailer of any kind.
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **PROVEN — awaiting U2's walk for P-U1e-1** (the fade ramp rides U2): U1 built + walked; U1b/U1c fix legs; U1d (her memo rulings) window GREEN (434/96, R-I/R-J red as named, 01:44–01:50) and re-walk HOLD on R0–R3, R5–R8 (R6 her scroll never pulled back); R4's 7–9-pt slice → P-U1e-1 built in U2's leg, verified by U2's window + walk. |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **TEST PART GREEN** (claim `vx283-u2` 15:31–15:50): batch 722/144 with only VX-115 red; the mounts green ×5; R-K exactly 16 red; R-N exactly 4 red. **NEXT: the walk D1–D7** (a fresh Opus at xhigh) after vx-336's 0.9.7 window. |
-| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **W1/W3/W4/W5 PROVEN.** U3b's window (15:41–15:50): batch 511/103 with ONE real red — the closed-panel sweep still flips in a band (Terminal 940–960, Study 840–880: sort states two lines, typed/empty-again one); R-S six red as named (the closed cell red on both sides). **U3c — TRACE-FIRST leg** (a fresh implementer, the ruling below); D8 (W2's re-check) waits for it. |
+| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **W1/W3/W4/W5 PROVEN.** U3b's window (15:41–15:50): batch 511/103 with ONE real red — the closed-panel sweep still flips in a band (Terminal 940–960, Study 840–880: sort states two lines, typed/empty-again one); R-S six red as named (the closed cell red on both sides). **U3c — TRACE-FIRST leg: READY FOR STAGE — U3c probe, ≈10 min** (T1 traced, T2 built `944cfd46`, `u3c/window.sh` pre · probe · restore; T3 after the run); D8 (W2's re-check) waits for it. |
 | Ladder | `fable-reviewer` at xhigh (her word, superseding opus at max), fresh per round, cross-model | **ROUND 1 DONE** (tip 448f9450; findings in the Ladder section, `9ef6fba3`): 0 BLOCKER · 0 MAJOR · 2 MINOR (R1-1 this table — fixed here; R1-2 sequencing — the windows owed) · 4 NIT (R1-3…6 → the implementer). Round 2 re-reviews the fixes + the U2/U3b window results. |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
 
@@ -3010,10 +3010,101 @@ the probe's output and the orchestrator's resume; NO product fix and NO pin chan
 DEBUG-only trace hook, off unless the probe turns it on.
 
 **LIVE STATUS (per piece)**
-- T1 — the headless trace: IN-PROGRESS.
-- T2 — the DEBUG-only probe (product hook + the env-gated mounted suite), `build-for-testing` into `vx283-u3c`, the
-  window script: NOT-STARTED.
-- T3 — the proposal: NOT-STARTED (after the run, at the orchestrator's resume).
+- T1 — the headless trace: DONE (this commit, below). It PROVES the row's answer has a history (two identical view
+  states, two answers) and narrows the moving input to the live AppKit answers P-U3-5 left un-stabilized; the
+  arithmetic on the batch's own in-app widths points at the SCOPE picker. Which control, and why, is the probe's.
+- T2 — the probe: DONE (`944cfd46`) — `LibraryControlsFlowTrace` (DEBUG-only, silent unless a probe sets its sink) +
+  the env-gated suite `LibraryControlsU3cProbe` (asserts nothing); `build-for-testing` green on `vx283-u3c`
+  (`notes/plans/vx283-screens/u3c/logs/bft3.log`, no warning in either file); the window script
+  `notes/plans/vx283-screens/u3c/window.sh` (gitignored). **READY FOR STAGE — the window below.** Its output PENDING.
+- T3 — the proposal: NOT-STARTED (after the run, at the orchestrator's resume). Nothing built before the ruling.
+
+**T1 — THE TRACE (this tip; the product code is U3b's `8dbae3d6` plus the DEBUG hook; paths under
+`App/Variorum/Variorum/` unless named).**
+1. **What the seven states change.** `pick` sets the model's sort (and direction) and settles — it spawns NO search
+   (`VariorumTests/LibraryControlsFlowTests.swift:484-488`); the door reads `model.sort` / `model.direction` directly
+   (`Features/Library/LibraryCatalogView.swift:709-711`). `ask` sets `model.query`, AWAITS `model.search()`, then
+   settles (`:476-480`); `search()` → `read(…)` awaits the DB read and lands it before returning
+   (`Features/Library/LibraryCatalogModel.swift:609-613, 629-700` — `searchState.land`, `:665-667`). So when `ask`
+   returns, `isSearching` already answers the new question. **No read precedes a landing** (the ruling's harness
+   candidate, ruled out by reading).
+2. **`isSearching` does not persist after `ask("")`.** `LibrarySearchQuestion.read("")` returns nil
+   (`Features/Library/LibrarySearchModel.swift:73`); `land(question: nil)` sets `question = nil` (`:310`);
+   `isAnswering` is `question?.hasWords == true` (`:258`), which `isSearching` reads (`LibrarySearchRouting.swift:22`).
+   So "empty again" draws the DOOR branch (`LibraryCatalogView.swift:708-722`) with query "", sort `createdAt`,
+   direction `asc` — exactly the model inputs of "created · oldest". **PROVEN: two identical view states, two answers
+   (56 vs 24 pt) — the row's answer has a history.** The sweep shows it a second way: "empty again" at Terminal 940
+   read ONE line, then the WIDER room 960 + "edited · newest" read TWO. No function of width alone does that.
+3. **The read itself.** The row's height is an `onGeometryChange` record (`LibraryInfoPanel.swift:670-679` on
+   `LibraryCatalogView.swift:740`), written only when the frame CHANGES. A fresh 24 after a 56 is a real record; but
+   "empty again"'s 24 may be "no change since typed past the prompt" or a change not yet delivered after the 0.35-s
+   settle. The probe reads twice: as the sweep read, and after a settle that waits for the row to hold still.
+4. **The decision's inputs** (`Features/Library/LibraryControlsFlow.swift:208-219`). P-U3-5 stabilized two: the
+   field's floor (`FloorKey`, `LibraryCatalogView.swift:641`) and the sort slot (`WidestKey` on BOTH branches,
+   `:707`/`:721` → `counted`, `LibraryControlsFlow.swift:97-101`: rigid at its widest, flexibility 0 — identical in
+   either branch, so the slot's branch cannot move the decision). **Still LIVE:** (i) every child's FLEXIBILITY, its
+   own answer at ∞ minus its answer at 0 (`:210-213`), which sets the distribution ORDER (`:83-85`); (ii) every
+   non-counted child's width answer at a share (`:214`) — the field (a `.roundedBorder` `TextField`, an NSTextField,
+   in `.frame(maxWidth: 320)`, `LibraryCatalogView.swift:639`), scope and mode (segmented `Picker`s,
+   NSSegmentedControls, in `.frame(maxWidth: 280)` / `(maxWidth: 230)`, `:650`/`:673`), and `when ▾` (a fixed SwiftUI
+   label, `LibraryWhenDoor.swift:155-160` — stable); (iii) the proposal. Through a `maxWidth`-only frame a child's
+   width at share p is max(its own answer at min(p, cap), min(p, cap)): **below its natural width a control takes ITS
+   OWN answer** — an AppKit control's say. The layout keeps no cache (`cache: inout ()`); SwiftUI's own caching of
+   subview answers sits outside it.
+5. **The arithmetic on the batch's in-app widths** (`u3b/logs/batch-geometry.txt`). At the mount (catalog 1029,
+   closed: row 981) Terminal's field read 222 with the door at "edited · newest first ▾" (174, live — the door's
+   measure is pinned honest by `theSortSlotIsCountedAtItsWidestForm`) and `when ▾` 53: 981 − 40 − 174 − 53 − mode −
+   scope = 222 ⇒ mode + scope = 492 ⇒ **scope ≈ 262–270** (mode ≤ its 230 cap) where the offscreen harness measured
+   228.5 — this IS U3b's "the in-app Terminal row runs ≈20 pt wider". With scope ≈ 262–270 the decision's threshold
+   (sort counted 181, `when` 53, field floor 211.5, spacing 40) falls at ≈ 967–978: two lines at 960, one at 980 —
+   **exactly the sort states.** Study's sort states (two at 880, one at 900) need scope ∈ (≈264, ≈277] by the same
+   sum. So **the SORT states obey the decision**, with the scope control answering ≈262–277. **The TYPED states and
+   "empty again" do not:** one line at Terminal 940 / two at 920 needs scope ∈ (≈219, ≈232.5]; Study one at 840 / two
+   at 820 needs scope ∈ (≈224, ≈237] — the offscreen harness's own 228.5 / 233. Both voices fit ONE two-valued input:
+   **the scope picker's answer below its natural width — ≈262–277 in the sort states, ≈225–237 after a search.**
+   (The mode picker moving instead, or the ORDER flipping as the field's zero-proposal answer follows its text, fits
+   only with less natural numbers.) Arithmetic, not proof: the probe's decision steps print what each child took.
+6. **Where a two-valued answer could come from** (candidates, unproven — the probe's AppKit lines and per-pass child
+   answers tell them apart): (a) the NSSegmentedControl's reported size follows how it was last LAID OUT (its frame /
+   segment widths) — a feedback loop through the row's own placement: placed wide, it answers wide (two lines hold);
+   once squeezed, it answers squeezed (one line holds); (b) SwiftUI's cached subview answers outliving the branch
+   change or the text change; (c) a window resize (an AppKit layout pass) and a SwiftUI-driven update measuring the
+   control by different roads.
+7. **A second road to the decision, recorded (not the band's):** `placeSubviews` re-decides at `bounds.width`
+   (`LibraryControlsFlow.swift:198`), and a `VStack(alignment: .leading)` places the row at its REPORTED width, not
+   its proposal. In the band the one-line row reports its full proposal (the field absorbs the rest under its 320
+   cap) and the two-line row re-decides at ≈610 → two lines again, so it cannot make the band; the probe prints both
+   passes anyway.
+
+**T2 — THE PROBE (`944cfd46`).** `LibraryControlsFlowTrace` (`LibraryControlsFlow.swift`, `#if DEBUG`, a `sink` that is
+nil unless the probe sets it — the `SidebarSectionTrace` precedent): for every arrangement the layout computes, the
+pass (`size p=…` / `place b=… p=…`), the decision REPLAYED through the real `fitsOneLine` with each child's width
+answer recorded as asked (`[i] offered→taken` — the counted slot never asks), the answer next to `arrange`'s, the
+frames and size, and each child's narrowest / widest / flexibility / ideal (`.unspecified`) / floor / widest. The
+suite `LibraryControlsU3cProbe` (`VariorumTests/LibraryControlsFlowTests.swift`, after the sweep — it reuses the
+sweep's own mount and `Rig`; no existing pin's line touched; enabled only by `TEST_RUNNER_VARIORUM_U3C_PROBE=1`, so
+every batch skips it): ONE room per voice (Terminal 950, Study 860); the sweep's seven states verbatim, then the
+ruling's sort pick after "empty again", then (an addition) a relayout at the same width — resize +20 and back, no
+state change. Per state it prints `isSearching`, the slot's branch, the query, the sort, the read generations, the
+height AS THE SWEEP READ IT and again after a landed settle (≥2 more settles until no read is in flight and the row
+held still), AppKit's account of the two segmented controls (frame, intrinsic, fitting, distribution, segment widths,
+font) and the field (frame, intrinsic, cell, editing), and every distinct trace line since the act (×count) plus the
+last. Three roads × two voices: `fromBelow` (the sweep's approach — the room reached from 40 pt below, two lines in
+both voices on the sweep's log), `fromAbove` (straight from the mount's wide one-line row — does the starting line
+count persist?), `fromBelowUntraced` (the trace OFF — the layout byte-for-byte as in use: does tracing perturb?).
+
+**THE WINDOW — READY FOR STAGE (≈10 min; products `DerivedData/vx283-u3c` at `944cfd46`).** `window.sh` (from any
+directory), in order:
+- `pre` — the strict `pgrep`s, App/ clean, the products present, prefs exported, the store's three files into
+  `u3c/store-before/<UTC>/`.
+- `probe` (≈3–4 min) — `TEST_RUNNER_VARIORUM_U3C_PROBE=1 xcodebuild -scheme Variorum -destination 'platform=macOS'
+  -derivedDataPath DerivedData/vx283-u3c test-without-building -only-testing:VariorumTests/LibraryControlsU3cProbe`
+  (from `App/Variorum/`) → `u3c/logs/probe.log`; it prints the "Test run with N tests" line (expected 6 test cases in
+  1 suite, passing — the probe asserts nothing), then extracts `logs/probe-lines.txt` (every `[VX-175 U3c` line) and
+  `logs/probe-summary.txt` (one line per state: the facts and both heights).
+- `restore` — the store copied back + `cmp`; the prefs keys the suite ADDED deleted by name, `prefs-before`
+  imported, re-exported, diffed (PREFS CLEAN or not); castle-W1 counted.
+Then the orchestrator resumes this session with the logs' paths for T3.
 
 #### U2 + U3b — THE WALK PLAN (the folded `vx283-u2` claim's walk; a fresh Opus at xhigh; her rule)
 
