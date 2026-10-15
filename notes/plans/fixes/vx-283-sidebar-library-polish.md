@@ -394,7 +394,7 @@ trailer of any kind.
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **PROVEN — awaiting U2's walk for P-U1e-1** (the fade ramp rides U2): U1 built + walked; U1b/U1c fix legs; U1d (her memo rulings) window GREEN (434/96, R-I/R-J red as named, 01:44–01:50) and re-walk HOLD on R0–R3, R5–R8 (R6 her scroll never pulled back); R4's 7–9-pt slice → P-U1e-1 built in U2's leg, verified by U2's window + walk. |
-| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **TEST PART GREEN; THE WALK FAILED D1/D2: a real system drag never draws the line or lands** (a regression against main's per-row road; the pins cannot post a drag). D5 (P-U1e-1) HOLDS by eye; D6 holds. **→ U2b TRACE-FIRST leg** (after U3c; the floor: back to main's road). |
+| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **TEST PART GREEN; THE WALK FAILED D1/D2: a real system drag never draws the line or lands** (a regression against main's per-row road; the pins cannot post a drag). D5 (P-U1e-1) HOLDS by eye; D6 holds. **→ U2b TRACE-FIRST leg — IN FLIGHT** (a fresh implementer; T1 DONE: G1 the payload's drag-start state never set, G2 the source's copy-only mask — both near-certain, the run confirms; T2's instrument next; the floor: back to main's road). |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **W1/W3/W4/W5 PROVEN.** U3b's band traced (U3c: the segmented pickers answered two ways after a search) → **P-U3c-1 built and PROVEN** (window 16:43–16:54: pins 23/3 green; R-P exactly 4 red; U3b's 103-suite batch 513 green). **OWED: D8's re-walk** on `vx283-u3c` (folded with U2b's). |
 | Ladder | `fable-reviewer` at xhigh (her word, superseding opus at max), fresh per round, cross-model | **ROUND 1 DONE** (tip 448f9450; findings in the Ladder section, `9ef6fba3`): 0 BLOCKER · 0 MAJOR · 2 MINOR (R1-1 this table — fixed here; R1-2 sequencing — the windows owed) · 4 NIT (R1-3…6 → the implementer). Round 2 re-reviews the fixes + the U2/U3b window results. |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
@@ -3547,6 +3547,106 @@ disturbing the layout either (the untraced road agrees). The row's answer has a 
 decision reads, the input outlives the search, and a sort pick resets it. Which child's numbers move is in the trace
 lines (each subview's narrowest / widest / flexibility / ideal / floor / widest-key, the steps' order, the proposal),
 for the implementer's T3.
+
+### U2b — the trace leg
+
+**Implementer:** a fresh Opus 5.5 at xhigh (2026-10-15, afternoon), worktree `~/dev/variorum-vx-283`, DerivedData
+`App/Variorum/DerivedData/vx283-u2b`. **Not done by this session (first line):** no stage work of any kind (no
+`xcodebuild test`, no launch, no walk); no fix (T3 waits for the trace run and the ruling); placed after U3c's probe
+result rather than directly under the U2b ruling, so that block keeps its own heading.
+
+**LIVE STATUS (per piece)**
+- B0 — T1, the headless trace (below): DONE (this commit).
+- B1 — T2, the DEBUG-only instrument (`OpenListDragTrace`) + its probes: IN FLIGHT.
+- B2 — `DerivedData/vx283-u2b` built (`build-for-testing`) + `notes/plans/vx283-screens/u2b/window.sh`: PENDING.
+- B3 — READY FOR STAGE: PENDING.
+
+#### T1 — the code trace: every gate between AppKit's drag session and the line (paths under `App/Variorum/Variorum/`)
+
+The line draws only when `OpenListDragState.lineTop` is non-nil (`Features/Library/OpenListDrag.swift:131-135` →
+`Core/Views/SidebarLayout.swift:659-669`). Its guard needs FOUR inputs at once: a `hover` (written only by the two
+delegates' `dropEntered`/`dropUpdated`), a `dragged` row (`dragging`, written only by `began`), a measured `window`,
+and a gap that changes something. The same nil decides the proposal (`OpenListDrag.swift:155`: `.move` where a line
+is, `.forbidden` everywhere else), and `.forbidden` means AppKit never calls `performDrop`, so the image slides back.
+So "no line anywhere" plus "every release slides back" is ONE observation: `lineTop` stayed nil for the whole drag.
+The gates, in the order a drag meets them:
+
+1. **The drag source's payload — where `dragging` is set. CANDIDATE G1, the leading one.** `began(noteID)` runs
+   INSIDE the payload closure (`Features/Library/SidebarView.swift:1120-1122`), which reaches SwiftUI as
+   `.draggable(payload())`'s `@autoclosure` (`Core/Views/DragChipCanvas.swift:129`). The whole design assumes SwiftUI
+   evaluates that autoclosure when the drag BEGINS. **Nothing has ever proven it.**
+   - The claim's only source is the Bookcase's note (`Features/Shelf/ShelfViewModel.swift:106-112`: "evaluates when
+     the drag BEGINS (pinned: mounting a board evaluates none)"). Its pin proves only the negative: mounting
+     evaluates nothing. The positive was never walked: librarywalkpolish's ladder round 1 lists "the strip outlines
+     under a real drag" under NOT DONE (1), and 17y's W-4/W-5 rows say "NOT walked".
+   - Apple documents no timing for `draggable(_:)`'s payload. The one API whose page says its payload closure "is
+     called when a drag operation begins" is the newer `dragContainer(for:in:_:)` (macOS 26). This comes from the
+     leg's one Sonnet lookup (external facts, read-only), which found no report either way for `draggable`.
+   - **The walk's own AppKit log points the same way** (the walker's `log show` of PID 55680, 16:02:03, kept in the
+     orchestrator's scratchpad `u2w/drag-log.txt`). At drag start the drag pasteboard receives our type only as a
+     PROMISE: `PromiseDataUsingBlock … flavor: 'io.lduarte.variorum.open-note-row'`, beside SwiftUI's file-promise
+     flavors. Through the whole tracking loop that follows (`kCoreDragTrackingInWindow` every ~0.46 s) no
+     `data requested for type io.lduarte.variorum.open-note-row` appears. So the value is produced only when a
+     consumer loads it, and the only consumer is `perform`'s `loadTransferable`.
+   - **If the autoclosure is that lazy, every observation follows.** `dragging` is nil while the drag hovers →
+     `lineTop` → nil (`SidebarLayout.swift:662`, `guard let hover, let dragged`) → no line, and `.forbidden` → no
+     `performDrop` → the payload is never loaded → `began` never runs → `dragging` stays nil. That covers the rows
+     and the end zone alike (both read the same state), both voices, a resize, an overflowing list and a note view:
+     exactly the walk's D1/D2.
+   - **Why main landed:** main's road needed no drag-start state. A per-row `.dropDestination(for:)` accepts by TYPE
+     alone and loads the payload at the drop (main `591bb8e8`, `SidebarView.swift:844-853`).
+   - **A latent twin outside this lane, if G1 holds:** the Bookcase's W-5/NIT-3 outlines read `dragInFlight`, which
+     is set inside the same lazy autoclosure (`ShelfViewModel.swift:115-118`). A first drag would light no outline,
+     and every later drag would read the PREVIOUS drop's payload. The walk's control can't tell: "starred notes" was
+     dragged over its OWN shelf, where no outline is due, and the green ＋ is the system's copy badge, not the
+     outline. **A ticket at the closeout if the trace confirms G1.**
+2. **The source's allowed operations. CANDIDATE G2 — a second gate in series, latent behind G1.** The delegate
+   proposes `.move` (`OpenListDrag.swift:155`). On macOS, SwiftUI's Transferable drag source allows COPY only by
+   default. The SDK says so: macOS 27's `DragConfiguration.OperationsWithinApp.init(allowCopy: true, allowMove:
+   false, allowDelete: false)`, and Apple's `DragConfiguration` page: "By default, only copy is allowed. To support
+   drag-to-move … `allowMove: true`" (the lookup). AppKit intersects the destination's operation with the source's
+   mask, so `.move` against a copy-only source is NONE: no `performDrop`, and a slide-back. **This would refuse every
+   drop even once a line draws.** Main's road never met it: `.dropDestination` proposes copy (the walk's control
+   shows the green ＋).
+3. **(a) The payload's type vs what the delegate validates — not the cause, by reading.** The token's type
+   `io.lduarte.variorum.open-note-row` (`SidebarView.swift:806`, `UTType(exportedAs:)`, a `CodableRepresentation`
+   at `:808-810`) is declared in `App/Variorum/VariorumInfo.plist` `UTExportedTypeDeclarations` (conforms to
+   `public.data`; pinned by `DragTypeDeclarationTests`). The drag pasteboard carries that exact identifier (the log
+   above). Both delegates register and validate the same one type (`OpenListDrag.swift:144`, `:213-215`,
+   `:246-248`; `SidebarView.swift:860`, `:991`). Main used the same identifier and landed. The trace logs
+   `hasItemsConforming` and the drag pasteboard's types at `validateDrop` and `dropEntered`, so a mismatch would
+   show anyway.
+4. **(b) The "a drag of its own" gate — G1 is its first half; the identity half is not the cause.** `dragging` is the
+   gate (above). `listID` (`OpenListDrag.swift:56`, `@ObservationIgnored let … = UUID()`) lives on the instance
+   SwiftUI keeps in `@State openListDrag` (`SidebarView.swift:229`). A body re-evaluation builds and discards a fresh
+   `OpenListDragState()`, but the payload closure and both delegates read the KEPT instance. And `listID` is read
+   only at `land` (`OpenListDrag.swift:195`), which no hover depends on. `perform`'s refusal
+   (`OpenListDrag.swift:175-178`) needs `dragging != nil`, so with G1 it never even forms. The pins never saw any of
+   this: every door and mount pin calls `state.began(…)` itself (`VariorumTests/OpenListDragTests.swift:277`, `:293`,
+   `:315`, … `:662`), so the gate's real writer was never in a pin's road.
+5. **(c) The hit area — unlikely, by reading.** The rows' delegate sits on the LazyVStack inside the ScrollView
+   (`SidebarView.swift:851-861`, `.contentShape(Rectangle())` before `.onDrop`). Both overlays above it take no hits:
+   the edge fade (`Features/Library/SidebarSectionWindow.swift:206`, `:328` `.allowsHitTesting(false)`) and the line
+   (`OpenListDrag.swift:303`). The end zone is a separate target OUTSIDE the scroll view
+   (`SidebarView.swift:982-999`) and failed the same way in D2c, which argues for a gate both delegates share (G1/G2)
+   over a hit-test peculiar to the ScrollView. The column-level import drop (`SidebarView.swift:381`, `.fileURL` +
+   `.plainText`) was also there on main, around the per-row targets that landed. The trace logs the AppKit view
+   chain under the pointer, with each view's registered drag types, so a registration or hit gap would show.
+6. **(d) What changed from main's working road** (main `591bb8e8` → this tip):
+   - (i) the hover now DEPENDS on drag-start state that only the payload writes (G1); main had no such state;
+   - (ii) a DropDelegate proposing `.move`/`.forbidden` replaces `.dropDestination`'s implicit copy (G2);
+   - (iii) one `onDrop(of:delegate:)` on the content replaces per-row targets;
+   - (iv) the preview became the chip canvas (`ChipDragSource`; the Bookcase's own machinery, moved);
+   - (v) the token gained `listID` and went `nonisolated` + `Sendable` with a static `contentType`;
+   - (vi) U1b's `SidebarSectionWindow` wraps the scroll view (a `ScrollViewReader`, the fade overlay) and VX-286's
+     margin moved inside the scroll.
+   (i) and (ii) are each sufficient by themselves to refuse every drop. (iii)–(vi) stay unexplained only if the trace
+   shows no delegate call at all.
+
+**T1's verdict:** the reading makes **G1 near-certain as the reason no line ever draws, and G2 near-certain as the
+reason no drop would land even with a line.** Neither is "beyond doubt": G1 rests on SwiftUI's undocumented timing,
+inferred from AppKit's promise log, and G2 on an SDK default plus the intersection rule. So T2's run must CONFIRM both.
+It does so with probes that test the fix's two halves without building one (below).
 
 ## Ladder
 
