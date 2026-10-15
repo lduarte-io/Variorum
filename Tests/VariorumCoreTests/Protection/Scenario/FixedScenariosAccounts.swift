@@ -58,6 +58,22 @@ struct AccountScenarios {
         expectPromisesKept(world)
     }
 
+    /// The key doors on a device that owes a follow (the account moved after
+    /// it last followed) refuse at their door — pick up the new keys first —
+    /// with nothing begun and nothing left in flight.
+    @Test func theKeyDoorsRefuseWhileAFollowIsOwed() async throws {
+        let (world, _) = try syncedWorld(.castle, devices: ["macA", "macB"])
+        await world.done([.launch("macB"), .useStandard("macA"), .follow("macB", .passphrase), .settle,
+                          .useCastle("macA", .touchID, newWords: true)])
+        for door in [Action.changePassphrase("macB"), .regenerateWords("macB"), .resetPassphrase("macB", .plainConfirm)] {
+            let result = await world.step(door)
+            #expect(result != .done, "\(door) ran while a follow is owed")
+            #expect(world.macB.library?.section.actInFlight == nil, "\(door) left its act in flight")
+        }
+        await world.done([.follow("macB", .words), .settle])
+        expectPromisesKept(world)
+    }
+
     @Test func theKeyDoorsOnAnAlwaysAskDeviceUnlockedOffline() async throws {
         for door in [Action.changePassphrase("macA"), .regenerateWords("macA")] {
             let (world, _) = try syncedWorld(.castle, devices: ["macA"], gate: .alwaysAsk)

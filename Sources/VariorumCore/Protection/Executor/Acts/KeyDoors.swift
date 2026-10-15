@@ -176,7 +176,15 @@ extension ProtectionExecutor {
         var parameters = ActParameters(synced: record.account != nil, accountID: record.account)
         if let account = record.account {
             try requireSignedIn(as: account)
-            guard try await readVault(accountID: account) != nil else { throw ExecutorRefusal.needsFreshVault }
+            guard let vault = try await readVault(accountID: account) else { throw ExecutorRefusal.needsFreshVault }
+            // The account moved since this device last followed — its keys or
+            // its mode: pick up the new keys first (assess's `followOwed`; begun
+            // here, the door refused inside its plan with stale keys, leaving
+            // the act in flight — VX-305 U4, found by the scenario world).
+            if let settled = vault.mode.settled, settled != record.mode { throw ExecutorRefusal.accountMoved }
+            if let known = library.memory?.vaultFacts?.corpusKeyID, known != vault.corpusKeyID {
+                throw ExecutorRefusal.accountMoved
+            }
         }
         return parameters
     }

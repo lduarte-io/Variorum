@@ -409,13 +409,20 @@ extension SWorld {
             let d = device(name)
             try await act(d) { executor, library in
                 guard let account = library.record?.account else { throw ExecutorRefusal.notSynced }
-                let kind = self.owedFollow(d) ?? .keysReplaced
+                // She can press only an open door: the follow is offered when owed
+                // (its notice comes from a fresh read of the vault).
+                if d.session.accountID == account, d.online { _ = try? await executor.readVault(accountID: account) }
+                guard let kind = self.owedFollow(d), self.assessed(d).door(.followNow).isOpen else {
+                    throw ExecutorRefusal.nothingToDo
+                }
                 return try await executor.follow(&library, kind: kind, typed: self.typed(typing, account))
             }
         case .finishLeave(let name, let mint):
             let d = device(name)
             try await act(d) { executor, library in
                 guard let account = library.record?.account else { throw ExecutorRefusal.notSynced }
+                if d.session.accountID == account, d.online { _ = try? await executor.readVault(accountID: account) }
+                guard self.assessed(d).door(.finishLeavingCastle).isOpen else { throw ExecutorRefusal.nothingToDo }
                 let kind: FollowKind = library.record?.mode == .castle ? .intoStandard : .keysReplaced
                 return try await executor.follow(
                     &library, kind: kind, typed: self.typed(.passphrase, account), mintingIfTheNamedKeyNeverArrives: mint)
