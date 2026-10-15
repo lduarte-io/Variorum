@@ -872,4 +872,24 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 17 (sequence 586, the closer's soak): a Castle Mac replaced with
+    /// no memory item (the new identity named its predecessor by the login),
+    /// then sync set up there; a login-password holder then replays the OLD
+    /// Mac's memory item into the new keychain — another identity's facts —
+    /// and the "library file loses to the memory" repair compared that
+    /// identity's version with this Mac's section and took the account away
+    /// (promise 10). The memory's word on the record's facts counts only when
+    /// it is THIS Mac's identity's.
+    @Test func anotherIdentitysMemoryItemNeverRestoresTheRecordsFacts() async throws {
+        let world = try Self.start("13p escrow items", seed: 17000637)
+        for action in [Action.setScheduledExport("macA", true), .signIn("macA", account: "00000000-0000-4000-8000-000000000000"),
+                       .useCastle("macA", .touchID, newWords: true), .launch("macA"), .backup("macA"),
+                       .replaceMac("macA", carriesMemory: false), .turnOnSync("macA"), .follow("macA", .passphrase),
+                       .plaintextExport("macA"), .crash(.offerDelete("macA"), afterWrites: 12), .launch("macA"),
+                       .tamper("macA", .replayMemory)] {
+            await world.step(action)
+        }
+        expectPromisesKept(world)
+    }
 }

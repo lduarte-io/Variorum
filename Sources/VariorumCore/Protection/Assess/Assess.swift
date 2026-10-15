@@ -224,7 +224,12 @@ public enum AssessRules {
         // FIRST: a library file older than what this Mac remembers (a library
         // file replayed alone, §3.6) loses to the memory — before any repair
         // moves toward its stale record.
-        if guards.libraryFileLosesToMemoryOn, let memory = unlocked.memory, memory.keyEpoch > record.keyEpoch,
+        // (Only THIS Mac's memory speaks for it: an item another identity
+        // left — a replayed one from the Mac this one replaced — names
+        // another section, and its versions mean nothing here; VX-305 U4, the
+        // soak's seed 17.)
+        let ownMemory = unlocked.memory.flatMap { $0.deviceSection.deviceID == unlocked.thisMac.deviceID ? $0 : nil }
+        if guards.libraryFileLosesToMemoryOn, let memory = ownMemory, memory.keyEpoch > record.keyEpoch,
            memory.currentFingerprint != record.currentFingerprint,
            let live = liveKeyFile(facts, unlocked), live.fingerprint == memory.currentFingerprint,
            live.history.contains(where: { $0.fingerprint == unlocked.currentFingerprint }) {
@@ -234,7 +239,7 @@ public enum AssessRules {
         // that changed the library's facts without a re-key (joining an
         // account) — this Mac's section in the memory is newer than the file's,
         // and the facts last confirmed here differ from the file's.
-        if guards.libraryFileLosesToMemoryOn, let memory = unlocked.memory, memory.keyEpoch == record.keyEpoch,
+        if guards.libraryFileLosesToMemoryOn, let memory = ownMemory, memory.keyEpoch == record.keyEpoch,
            memory.currentFingerprint == record.currentFingerprint, let recordSection = unlocked.recordSection,
            memory.deviceSection.version > recordSection.version, let confirmed = memory.lastConfirmed,
            confirmed != ConfirmedFacts(mode: record.mode, account: record.account) || !record.modeConfirmed,
