@@ -394,7 +394,7 @@ trailer of any kind.
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **PROVEN — awaiting U2's walk for P-U1e-1** (the fade ramp rides U2): U1 built + walked; U1b/U1c fix legs; U1d (her memo rulings) window GREEN (434/96, R-I/R-J red as named, 01:44–01:50) and re-walk HOLD on R0–R3, R5–R8 (R6 her scroll never pulled back); R4's 7–9-pt slice → P-U1e-1 built in U2's leg, verified by U2's window + walk. |
-| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **TEST PART GREEN** (claim `vx283-u2` 15:31–15:50): batch 722/144 with only VX-115 red; the mounts green ×5; R-K exactly 16 red; R-N exactly 4 red. **NEXT: the walk D1–D7** (a fresh Opus at xhigh) after vx-336's 0.9.7 window. |
+| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **TEST PART GREEN; THE WALK FAILED D1/D2: a real system drag never draws the line or lands** (a regression against main's per-row road; the pins cannot post a drag). D5 (P-U1e-1) HOLDS by eye; D6 holds. **→ U2b TRACE-FIRST leg** (after U3c; the floor: back to main's road). |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **W1/W3/W4/W5 PROVEN.** U3b's window (15:41–15:50): batch 511/103 with ONE real red — the closed-panel sweep still flips in a band (Terminal 940–960, Study 840–880: sort states two lines, typed/empty-again one); R-S six red as named (the closed cell red on both sides). **U3c — TRACE-FIRST leg: READY FOR STAGE — U3c probe, ≈10 min** (T1 traced, T2 built `944cfd46`, `u3c/window.sh` pre · probe · restore; T3 after the run); D8 (W2's re-check) waits for it. |
 | Ladder | `fable-reviewer` at xhigh (her word, superseding opus at max), fresh per round, cross-model | **ROUND 1 DONE** (tip 448f9450; findings in the Ladder section, `9ef6fba3`): 0 BLOCKER · 0 MAJOR · 2 MINOR (R1-1 this table — fixed here; R1-2 sequencing — the windows owed) · 4 NIT (R1-3…6 → the implementer). Round 2 re-reviews the fixes + the U2/U3b window results. |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
@@ -403,6 +403,7 @@ trailer of any kind.
 
 *(The orchestrator appends each REQUEST / READY / GO / RELEASE here.)*
 
+- 2026-10-15 15:59 GO `vx283-walk` (15:58:41, 65 min); the walk 15:59–16:21; SEAM, continue pre-given; the U3c probe folded in 16:23–16:25; RELEASED 16:25:43 — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched".
 - 2026-10-15 15:32 GO `vx283-u2` (the coordinator; HID idle 3 h, her word "Now, I'm off the Pro"). 15:31:45 claimed (95 min). 15:50:46 RELEASED at the SEAM — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched"; the stage to `vx336-release` (0.9.7). REQUEST sent: `vx283-walk` (≈55 min) after it.
 
 ## Unit records
@@ -3267,6 +3268,81 @@ was not launched.
   synthetic moves; low confidence.
 - **O-6 — the bottom fade band carries a ±1 luminance dither,** visible only in a 3× zoom
   (`D5-O1-study-light-zoom-bottom.png`) and invisible at 1×.
+
+#### U2 — THE ORCHESTRATOR'S EYE ON THE WALK (2026-10-15 ~16:30; her walk rule's step 5)
+
+The walk's restore was verified by the orchestrator: the three files `cmp`-same, prefs 0 differ, castle-W1 present,
+no instance. Then, under the coordinator's pre-given "continue", the U3c probe ran in the same claim (below), and the
+claim was RELEASED at 16:25:43.
+- **The drag does NOT land. Confirmed by eye** on `D1-study-light-lower-wide.png` and `D2a-study-light-strip.png`:
+  - the chip ("o museu", "2026-10-08") rides at the cursor;
+  - no line draws anywhere in the rows;
+  - the release slides the chip back, and the list is unchanged.
+  The walker's control is `D4f-bookcase-chip-study-light.png`: the same `cliclick` road over a Bookcase target lights
+  its ＋, so a synthetic system drag reaches SwiftUI drop targets in this window. **This is a REGRESSION against main:**
+  main's per-row `.draggable` / `.dropDestination` landed, if janky (her "janky"); this build lands nothing. The
+  pins could not see it: no pin posts a real drag (the U2 section's "What only the WALK can prove"). → **U2b**,
+  below.
+- **D5 (P-U1e-1) HOLDS by eye** on `D5-7-study-light-zoom-bottom.png`: at 7 pt short, "export: it's all yours" is cut
+  at its descenders, but faded to a ghost (the walker measured ~17–21 % of the ink's contrast at the clip, against
+  U1d's ~60 %). It reads soft, not sliced. P-U1e-1 is accepted on the walk.
+- **O-2 (the 620-pt window, the current last row under the footer's edge) — seen** on
+  `D7-0-following-terminal-dark-zoom-bottom.png`: "› what the door is" sits under a soft bottom edge, its wash cut by
+  the footer hairline. There the list is at its floor (~85 pt, compact rows), so the sidebar's OUTER scroll carries
+  the rest (U1's W5). The follow reveals inside the list's own scroll only. So at a window short enough to need the
+  outer scroll, the outer scroll can leave the row partly hidden. This is U1's scope and a rare height, born of F-1
+  (the orchestrator's finding, not one of her rulings). **It is ticketed at the closeout** (Low, Library & sidebar)
+  unless U2b's leg finds it is cheap and inside its seam. O-3…O-6 are recorded as observations: O-3 is the marquee's
+  existing design; O-4 and O-5 are transitional; O-6 is invisible at 1×.
+- D4's file drop is inconclusive (the Finder drag never began) and is OWED in U2b's re-walk. D3 and D7's drop half
+  cannot be walked until a drop lands.
+
+#### U2b — THE ORCHESTRATOR'S RULING (2026-10-15 ~16:30 — a TRACE-FIRST leg on the drag that does not land)
+
+P-5 and the hallucination guard apply: no guessed fix. A fresh `opus-implementer` at xhigh runs it AFTER U3c's leg
+(one implementer at a time), in the U1c shape.
+- **T1 — the code trace (headless).** Why a real system drag over the Open list never draws the line or lands. Name
+  each candidate with file:line, and enumerate every gate between AppKit's drag session and `OpenListDrop`'s line:
+  - **(a) the payload's type vs what the drop delegate validates.** A custom `UTType`'s export and declaration;
+    `validateDrop` / `info.hasItemsConforming(to:)`; what the drag source actually registers (the chip's preview road
+    may build its own `NSItemProvider`).
+  - **(b) the "a drag of its own" gate.** Is the list's `dragging` state ever set by a real drag start? Is the list's
+    identity (`listID`) stable across the body re-evaluations a drag causes? `perform` refuses whenever
+    `dragging != nil` and `lineTop == nil`.
+  - **(c) the hit area.** Is the delegate attached where the pointer is, or does an overlay (the fade, the line's own
+    canvas, the scroll view) take the drop first?
+  - **(d) anything the U2 build changed from main's working per-row road.**
+  The control (the Bookcase's drop targets react to the same synthetic drag) bounds the search: the difference lies in
+  the Open list's own wiring.
+- **T2 — a DEBUG-only trace, then READY FOR STAGE.** Log every delegate call (validateDrop / dropEntered / dropUpdated
+  / dropExited / performDrop) with the info's types and the gate's inputs (`dragging`, `listID`, hover, gap, lineTop)
+  to a file or the unified log under a fixed subsystem. The test host cannot post a drag, so the window is a short
+  orchestrator-driven run in the Debug app: launch, one `cliclick` drag over the Open list, then read the trace.
+  Write the exact commands into a gitignored `notes/plans/vx283-screens/u2b/window.sh`, build into
+  `DerivedData/vx283-u2b`, commit, push, and END THE TURN.
+- **T3 — THE PROPOSAL:** the mechanism with file:line, the fix, and a pin for the mechanism's testable part,
+  red-on-old by a named revert (e.g., the registered type identifiers equal the validated ones; the list's identity
+  survives a re-evaluation). Nothing is built before the ruling. **Acceptance is the re-walk** (D1–D4, D7 with real
+  drags, both voices), since only a real drag proves the road.
+- **The floor, named now:** if no fix makes the system drag land, U2's drag returns to main's per-row road, which is
+  shipped behaviour that lands. That is a restore, not new behaviour. Its line, its chip and its settle become a
+  ticket. A drag that never lands does not ship in 0.9.7.
+
+#### U3c — THE PROBE'S RESULT (the orchestrator, in `vx283-walk`'s fold, 16:23–16:25; `u3c/logs/probe.log`, 824 trace lines)
+
+`window.sh` pre (App/ clean at `34304a6b`, store `store-before/20261015T222336Z`) → probe (exit 0, 3 tests / 1 suite,
+6 cases) → restore (identical before copy-back, `cmp`; no keys added; PREFS CLEAN; castle-W1 present).
+**The band reproduces on EVERY road, in both voices** (`fromBelow`, `fromAbove`, `fromBelowUntraced`; Terminal 950,
+Study 860):
+- states 1–4 (the four sort forms): 56 pt;
+- 5–6 (typed; `isSearching` true, the relevance label): 24;
+- **7, "empty again" (`isSearching` FALSE, the sort door, sort createdAt asc — the same model state as state 4): 24**;
+- **8, a sort pick after it: 56**; 9, a relayout: 56.
+The sweep's read equals the settled read in every state, so **the harness is not the cause**. The trace isn't
+disturbing the layout either (the untraced road agrees). The row's answer has a history. A search moves an input the
+decision reads, the input outlives the search, and a sort pick resets it. Which child's numbers move is in the trace
+lines (each subview's narrowest / widest / flexibility / ideal / floor / widest-key, the steps' order, the proposal),
+for the implementer's T3.
 
 ## Ladder
 
