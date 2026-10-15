@@ -395,7 +395,7 @@ trailer of any kind.
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **PROVEN — awaiting U2's walk for P-U1e-1** (the fade ramp rides U2): U1 built + walked; U1b/U1c fix legs; U1d (her memo rulings) window GREEN (434/96, R-I/R-J red as named, 01:44–01:50) and re-walk HOLD on R0–R3, R5–R8 (R6 her scroll never pulled back); R4's 7–9-pt slice → P-U1e-1 built in U2's leg, verified by U2's window + walk. |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **TEST PART GREEN; THE WALK FAILED D1/D2: a real system drag never draws the line or lands** (a regression against main's per-row road; the pins cannot post a drag). D5 (P-U1e-1) HOLDS by eye; D6 holds. **→ U2b TRACE-FIRST leg** (after U3c; the floor: back to main's road). |
-| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **W1/W3/W4/W5 PROVEN.** U3b's window (15:41–15:50): batch 511/103 with ONE real red — the closed-panel sweep still flips in a band (Terminal 940–960, Study 840–880: sort states two lines, typed/empty-again one); R-S six red as named (the closed cell red on both sides). **U3c: READY FOR STAGE — U3c fix window, ≈15 min** (P-U3c-1 built: pins `032ee08a` red-first, fix `378e2261`; trees `vx283-u3c` + `vx283-u3c-rv` (R-P); `u3c/window.sh` pre · pins · rp · batch · restore); D8 (W2's re-check) on `vx283-u3c` after it. |
+| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **W1/W3/W4/W5 PROVEN.** U3b's band traced (U3c: the segmented pickers answered two ways after a search) → **P-U3c-1 built and PROVEN** (window 16:43–16:54: pins 23/3 green; R-P exactly 4 red; U3b's 103-suite batch 513 green). **OWED: D8's re-walk** on `vx283-u3c` (folded with U2b's). |
 | Ladder | `fable-reviewer` at xhigh (her word, superseding opus at max), fresh per round, cross-model | **ROUND 1 DONE** (tip 448f9450; findings in the Ladder section, `9ef6fba3`): 0 BLOCKER · 0 MAJOR · 2 MINOR (R1-1 this table — fixed here; R1-2 sequencing — the windows owed) · 4 NIT (R1-3…6 → the implementer). Round 2 re-reviews the fixes + the U2/U3b window results. |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
 
@@ -403,6 +403,7 @@ trailer of any kind.
 
 *(The orchestrator appends each REQUEST / READY / GO / RELEASE here.)*
 
+- 2026-10-15 16:43 GO `vx283-u3c` (25 min); RELEASED 16:54:31 — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched".
 - 2026-10-15 15:59 GO `vx283-walk` (15:58:41, 65 min); the walk 15:59–16:21; SEAM, continue pre-given; the U3c probe folded in 16:23–16:25; RELEASED 16:25:43 — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched".
 - 2026-10-15 15:32 GO `vx283-u2` (the coordinator; HID idle 3 h, her word "Now, I'm off the Pro"). 15:31:45 claimed (95 min). 15:50:46 RELEASED at the SEAM — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched"; the stage to `vx336-release` (0.9.7). REQUEST sent: `vx283-walk` (≈55 min) after it.
 
@@ -3302,6 +3303,18 @@ two ways.
   103-suite batch on `vx283-u3c`; restore. Then **D8's re-walk** (a fresh Opus, both voices, panel open/closed, typing,
   a list scroll, a sort pick, the 1240 default, and the scope control after a search) folds with U2b's re-walk where
   the timing allows.
+
+#### U3c — THE FIX WINDOW (run by the orchestrator, claim `vx283-u3c` 16:43:26 → RELEASED 16:54:31)
+
+`u3c/window.sh`: pre (App/ clean at `48a02c3b`, both trees present, store `store-before/20261015T224326Z`, prefs
+exported) → **pins: 23 tests / 3 suites ALL GREEN** on `vx283-u3c` (the new
+`aSearchNeverSqueezesTheSegmentedControlsOrFlipsTheRow` ×2, the sweep `withThePanelClosedEachWidthHasOneLineCount` ×2
+UNCHANGED and now green, the pure guard `atTheProbesInAppWidthsTheDefaultWindowIsOneLineClosed`; `logs/pins.log`,
+`pins-geometry.txt`) → **R-P: exactly the four named RED** (the new pin ×2, the sweep ×2), the other 19 GREEN
+(`logs/rp.log`); tree deleted → **batch: U3b's 103 suites, 513 tests, ALL GREEN** (the opt-in harnesses skipped as
+before; `logs/batch.log`) → restore (identical before copy-back, `cmp`; nine added keys deleted; PREFS CLEAN;
+castle-W1 present). **U3c is PROVEN by tests and red-on-old;** VX-175's closing evidence is D8's re-walk on
+`vx283-u3c` (folded with U2b's re-walk).
 
 #### U2 + U3b — THE WALK PLAN (the folded `vx283-u2` claim's walk; a fresh Opus at xhigh; her rule)
 
