@@ -18,6 +18,12 @@ import Foundation
 /// The vault facts today's key file caches (pre-13x §3.6; moved here by the
 /// design): what the local passphrase copy was last reconciled against.
 public struct VaultFacts: Codable, Equatable, Sendable {
+    /// Recorded when this Mac's memory lost its vault facts and the library's
+    /// master lock opens with none of the account's keys this device holds:
+    /// the library follows no corpus key the account still names — a follow
+    /// is owed (VX-305 U4, the held-keys repair).
+    public static let unfollowedCorpusKeyID = "unfollowed"
+
     public var kdf: PassphraseKDF.Descriptor?
     public var corpusKeyID: String?
     /// `RecoveryWrapDigest.hex` of the vault's recovery wrap.

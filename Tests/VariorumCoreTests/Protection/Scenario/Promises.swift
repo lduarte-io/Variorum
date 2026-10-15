@@ -306,6 +306,13 @@ extension SWorld {
         }
         for material in device.sessionMemory.values { seeds.masters.append(material.masterKey) }
         if let library = device.library { seeds.keys.append(library.key) }
+        // Her Apple account's keychain is hers — the switch off on this device
+        // only hides it until she turns it back on.
+        if let id = device.appleAccount {
+            for item in eventualCloud(id).values {
+                if case .apple(let keyID, let bytes) = item.value, seeds.apple[keyID] == nil { seeds.apple[keyID] = SymmetricKey(data: bytes) }
+            }
+        }
         seeds.passphrases = truth.allPassphrases
         seeds.words = truth.allWords
         if device.online, let account = device.session.accountID, let vault = server.snapshot(account) {

@@ -238,7 +238,10 @@ extension ProtectionExecutor {
             // read by assess from the master's words copy).
             if let live = library.keyFile, live.master != nil,
                (try? live.open(master: held.masterSymmetricKey)).map({ Self.fp($0) == library.fingerprint }) != true {
-                return .preconditionDoesNotVerify
+                // The library is behind the keys this device holds: a follow
+                // is owed — recorded so assess reads it.
+                try writeMemory(&library) { $0.vaultFacts = VaultFacts(corpusKeyID: VaultFacts.unfollowedCorpusKeyID) }
+                return nil
             }
             let vault = freshVaults[account]
             let facts = vault.map { $0.corpusKeyID == held.corpusKeyID } == true

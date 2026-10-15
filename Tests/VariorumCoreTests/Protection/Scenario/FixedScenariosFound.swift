@@ -183,4 +183,32 @@ struct GeneratorFoundScenarios {
         #expect(world.macA.library?.section.actInFlight == nil)
         expectPromisesKept(world)
     }
+    /// Seed 19: Use Standard crashed after its rotation's first write (the
+    /// vault names the actor's fresh account key, not yet carried by iCloud
+    /// Keychain); the actor's keychain is then wiped — its resume can't wait
+    /// for a key that no longer exists anywhere, so it mints afresh and
+    /// completes the leave.
+    @Test func anActorWhoseNamedKeyWasLostFinishesItsLeave() async throws {
+        let world = try Self.start("a synced Castle account on two Macs and the phone", seed: 19000097)
+        await world.step(.crash(.useStandard("macA"), afterWrites: 15))
+        await world.done([.wipeKeychain("macA"), .launch("macA")])
+        #expect(world.macA.library?.section.actInFlight == nil, "the actor's leave waited for a key that no longer exists")
+        let account = try #require(world.macA.slot?.record?.account)
+        #expect(world.server.snapshot(account)?.format.masterWrappedByAppleHeld != nil)
+        expectPromisesKept(world)
+    }
+    /// Seed 20: a device that never followed the account out of Castle has
+    /// its keychain wiped (its memory's vault facts with it), picks up the
+    /// account's current keys for the session, and the account then returns
+    /// to Castle — its library's master is none the account names: the
+    /// follow is owed and the world converges.
+    @Test func aWipedDeviceBehindTheAccountStillFollows() async throws {
+        let world = try Self.start("a synced Castle account on two Macs and the phone", seed: 20000071)
+        for action in [Action.useStandard("macA"), .launch("macB"), .wipeKeychain("macB"), .turnOnSync("macB"),
+                       .useCastle("macA", .alwaysAsk, newWords: false)] {
+            await world.step(action)
+        }
+        await world.done([.settle])
+        expectPromisesKept(world)
+    }
 }

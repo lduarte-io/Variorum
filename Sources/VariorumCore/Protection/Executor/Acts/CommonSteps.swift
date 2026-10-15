@@ -425,7 +425,13 @@ extension ActContext {
         var named: AppleKeyMaterial?
         if isLeave, let id = snapshot.format.appleKeyID {
             named = try leaves.apple.readAppleKey(id: id)
-            if named == nil, parameters.mintsFreshAccountKey == true {
+            // The finisher stopped waiting — or this is the ACTOR's own resume
+            // and the key it minted itself is gone (its keychain wiped or
+            // replaced before iCloud Keychain carried it): nothing will ever
+            // bring it, so the minter mints afresh (VX-305 U4, found by the
+            // scenario world — the actor's leave waited for ever).
+            let ownMintLost = named == nil && parameters.accountAppleKeyID == id && act == .leaveCastle
+            if named == nil, parameters.mintsFreshAccountKey == true || ownMintLost {
                 // The finisher stopped waiting for the named key: a fresh
                 // account key, minted here, completes the leave instead.
                 named = try mintAppleKey(purpose: .account)
