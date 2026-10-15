@@ -75,6 +75,7 @@ extension ProtectionExecutor {
         case .restoreKeyFileFromMirror: return "restoreKeyFileFromMirror"
         case .restoreKeyFileFromCopy: return "restoreKeyFileFromCopy"
         case .rekeyOlderLibraryFile: return "rekeyOlderLibraryFile"
+        case .recordHeldSyncKeysFacts: return "recordHeldSyncKeysFacts"
         case .recordAlwaysAskQuietly: return "recordAlwaysAskQuietly"
         case .makeTouchIDItem: return "makeTouchIDItem"
         case .deleteTouchIDItem: return "deleteTouchIDItem"
@@ -209,6 +210,18 @@ extension ProtectionExecutor {
 
         case .rekeyOlderLibraryFile(let to):
             return try rekeyOlderLibraryFile(to: to, &library)
+
+        case .recordHeldSyncKeysFacts:
+            guard let account = library.record?.account, library.memory != nil,
+                  library.memory?.vaultFacts?.corpusKeyID == nil else { return .nothingThere }
+            guard let held = try leaves.syncKeys.readSyncKeys(accountID: account, itemClass: .silent)
+                    ?? leaves.syncKeys.sessionSyncKeys(accountID: account) else { return .nothingThere }
+            let vault = freshVaults[account]
+            let facts = vault.map { $0.corpusKeyID == held.corpusKeyID } == true
+                ? VaultFacts(kdf: vault?.format.kdf, corpusKeyID: held.corpusKeyID, recoveryWrapDigest: vault?.format.recoveryWrapDigest)
+                : VaultFacts(corpusKeyID: held.corpusKeyID)
+            try writeMemory(&library) { $0.vaultFacts = facts }
+            return nil
 
         case .recordAlwaysAskQuietly:
             guard library.section.settings.gateStyle == .touchID else { return .nothingThere }

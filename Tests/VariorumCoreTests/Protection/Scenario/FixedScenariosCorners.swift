@@ -571,4 +571,31 @@ struct CornerScenarios {
         #expect(world.macA.slot?.legacyMarker == nil)
         expectPromisesKept(world)
     }
+    /// Found by the generator (promise 7): a synced device whose keychain was
+    /// wiped (its memory item with it) opens Always ask, its sync keys picked
+    /// up for the session; the account then replaces its keys elsewhere — the
+    /// device must still see the follow owed and converge.
+    @Test func aWipedKeychainStillFollowsAKeyReplacement() async throws {
+        let (world, account) = try syncedWorld(.castle, devices: ["macA", "phone"])
+        await world.done([.launch("phone"), .launch("macA"), .wipeKeychain("macA"), .settle,
+                          .replaceAllKeys("phone", newWords: true), .settle])
+        let held = world.macA.sessionMemory[account]?.corpusKeyID
+        #expect(held == world.server.snapshot(account)?.corpusKeyID, "the wiped device never followed the replacement")
+        expectPromisesKept(world)
+    }
+    /// Found by the generator (promise 7): the account replaces its keys on
+    /// another device; this device, freshly relaunched, changes a setting
+    /// before it follows — the settings act must not record vault facts it
+    /// never followed, or the follow owed disappears for good.
+    @Test func aSettingsChangeNeverHidesAFollowOwed() async throws {
+        let world = SWorld(seed: 6000039)
+        try StartingState.all.first { "\($0)".contains("a device that joined without a secret") }!.build(world)
+        let account = try #require(world.macA.slot?.rowsOwner)
+        await world.done([.launch("macA"), .launch("phone"), .replaceAllKeys("phone", newWords: false),
+                          .signIn("macA", account: account), .setGate("macA", .alwaysAsk), .settle])
+        let leaf = DeviceLeaves(world: world, device: world.macA)
+        let held = ((try? leaf.readSyncKeys(accountID: account, itemClass: .silent)) ?? nil) ?? world.macA.sessionMemory[account]
+        #expect(held?.corpusKeyID == world.server.snapshot(account)?.corpusKeyID, "the follow owed was hidden")
+        expectPromisesKept(world)
+    }
 }

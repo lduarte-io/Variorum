@@ -218,6 +218,11 @@ extension SWorld {
     /// its devices have already done — every queued add and delete of a
     /// device whose switch is on applied (the newer version of a name wins).
     func eventualCloud(_ appleAccount: String) -> [KName: KItem] {
+        eventualEntries(appleAccount).compactMapValues(\.item)
+    }
+
+    /// The cloud once every switched-on device has uploaded — tombstones kept.
+    func eventualEntries(_ appleAccount: String) -> [KName: AppleAccountFake.Entry] {
         guard let account = appleAccounts[appleAccount] else { return [:] }
         var cloud = account.cloud
         for device in devices where device.appleAccount == appleAccount && device.iCloudOn {
@@ -225,7 +230,7 @@ extension SWorld {
                 cloud[name] = AppleAccountFake.Entry(item: replica.item, version: replica.version)
             }
         }
-        return cloud.compactMapValues(\.item)
+        return cloud
     }
 
     /// THE ATTACKER on `device`: a login-password holder there (every item's
@@ -235,8 +240,28 @@ extension SWorld {
     func attackerSeeds(_ device: SDevice, appleAccount: Bool, settled: Bool) -> Seeds {
         var seeds = Seeds()
         let section = device.library?.section
-        var items = Array(device.keychain.local.values) + device.keychain.synced.values.compactMap(\.item)
-        if appleAccount, let id = device.appleAccount { items += eventualCloud(id).values }
+        // A synced item another device deleted, its tombstone on its way here
+        // (iCloud Keychain's delay): it holds here once carried — the
+        // retired-key clause's timing (checked once the world settles).
+        let tombstoned: Set<KName> = {
+            guard !settled, let id = device.appleAccount, device.iCloudOn else { return [] }
+            let entries = eventualEntries(id)
+            return Set(device.keychain.synced.compactMap { name, replica in
+                guard replica.item != nil, !replica.dirty, let entry = entries[name], entry.item == nil,
+                      entry.version > replica.version else { return nil }
+                return name
+            })
+        }()
+        var items = Array(device.keychain.local.values)
+            + device.keychain.synced.filter { !tombstoned.contains($0.key) }.values.compactMap(\.item)
+        if appleAccount, let id = device.appleAccount {
+            // A delete made and queued on a device whose iCloud Keychain switch
+            // is off holds everywhere once iCloud Keychain carries it (§3.1
+            // rule 2's stated exception) — the escrow's and the retirements'.
+            let queued = Set(devices.filter { $0.appleAccount == id && !$0.iCloudOn }
+                .flatMap { $0.keychain.synced.filter { $0.value.dirty && $0.value.item == nil }.map(\.key) })
+            items += eventualCloud(id).filter { !queued.contains($0.key) }.values
+        }
         let retired = section?.retiredAppleKeyIDs ?? []
         let oldSharedStanding = section?.oldSharedKeyStillStanding ?? false
         for item in items where !item.touchID {
@@ -337,8 +362,19 @@ extension SWorld {
         var violations: [Violation] = []
         func fail(_ detail: String, _ promise: Int = 2) { violations.append(Violation(promise: promise, device: device.name, detail: detail)) }
         let tree = Set(library.familyTree.fingerprints).union([record.currentFingerprint])
+        // A Time Machine rollback past a leave (her act): the later Standard
+        // stretch's key — born after the restored current key — keeps its
+        // silent item; it holds only what was Apple-reachable by design
+        // (PROVISIONAL P-U4-8).
+        let currentBorn = library.familyTree.entry(record.currentFingerprint)?.madeAt
+        func laterStandard(_ fingerprint: String) -> Bool {
+            guard let entry = library.familyTree.entry(fingerprint), entry.kind == .standard,
+                  let born = entry.madeAt, let currentBorn else { return false }
+            return born > currentBorn && !record.familyTree.contains(fingerprint)
+        }
         for name in device.keychain.local.keys where name.service == ProtectionNames.custodyService {
-            if let item = device.keychain.local[name], !item.touchID, let key = item.value.libraryKey, tree.contains(PF.fp(key)) {
+            if let item = device.keychain.local[name], !item.touchID, let key = item.value.libraryKey, tree.contains(PF.fp(key)),
+               !laterStandard(PF.fp(key)) {
                 fail("a silent custody item holds \(f8(key))")
             }
         }
@@ -373,6 +409,7 @@ extension SWorld {
                 continue
             }
             if senders.contains(where: { id.hasPrefix("container:\($0.key)/") && $0.value != device.name }) { continue }
+            if truth.rolledBackOver.contains(id) { continue }
             if attacker[image.fingerprint] != nil, !exempt.contains(image.fingerprint), !truth.listedBySheet.contains(id) {
                 fail("a login-password holder opens the copy \(id) (\(f8(image.fingerprint)))")
             }
@@ -387,7 +424,12 @@ extension SWorld {
         guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record,
               record.mode == .standard, let kept = truth.keptByLeave[device.name], !kept.isEmpty else { return [] }
         let attacker = reach(attackerSeeds(device, appleAccount: true, settled: settled), files: keyFilesOn(device))
-        let exempt = truth.handedOffBeforeChange.union(truth.olderBuildLeaveKeys)
+        var exempt = truth.handedOffBeforeChange.union(truth.olderBuildLeaveKeys)
+        // §3.1 rule 2's second exception: the Standard-synced days' keys, until
+        // that account replaces its keys or enters Castle.
+        for (fingerprint, synced) in truth.standardSynced where server.snapshot(synced.account)?.corpusKeyID == synced.corpusKeyID {
+            exempt.insert(fingerprint)
+        }
         var violations: [Violation] = []
         for fingerprint in kept.sorted() where attacker[fingerprint] != nil && !exempt.contains(fingerprint) {
             violations.append(Violation(promise: 13, device: device.name, detail: "the Apple account or the login password reaches \(f8(fingerprint)), a key from before the leave"))
@@ -417,6 +459,10 @@ extension SWorld {
         guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record,
               record.mode == .standard, record.modeConfirmed else { return [] }
         if truth.tamperedStandard[device.name] == record.currentFingerprint { return [] }
+        // Decision 35: a synced library writes nothing Apple-reachable without
+        // a fresh read of its account's vault — signed out, in another account
+        // or offline, its own Apple key waits (Re-link's library arm too).
+        if let account = record.account, device.session.accountID != account || !device.online { return [] }
         guard let live = liveKeyFile(device), live.fingerprint == record.currentFingerprint, let wrap = live.apple else {
             return [Violation(promise: 3, device: device.name, detail: "no Apple wrap of the current key")]
         }
@@ -673,6 +719,12 @@ extension SWorld {
             var k = known(holder)
             let own = known(self.holder(device, account: nil, libraryID: library.record?.libraryID ?? ""))
             k.timeline += own.timeline + slotK.timeline
+            // A frozen key file's own locks are what the Mac that froze it held
+            // that library under — any holder of a copy of that library (two
+            // copies of one key serve each other's lines).
+            for other in Set(truth.copies.values.filter { $0.libraryID == truthCopy.libraryID }.map(\.holder)) where other != holder {
+                k.timeline += known(other).timeline
+            }
             // An Apple key this Mac lists as its own and can't read names the
             // former account that still opens it (§3.1 rule 2's last
             // exception) — a road elsewhere, by its own words, never here.
@@ -683,8 +735,10 @@ extension SWorld {
                 // lock" (the route finder's definition) — on a device whose
                 // local copy lags a change made elsewhere, that's the secret it
                 // still holds, beside the account's newest (the vault road).
-                let livePassphrases = Array(Set(slotK.timeline.compactMap(\.passphrase) + [slotK.passphrase].compactMap { $0 }))
-                let liveWords = slotK.timeline.compactMap(\.words) + [slotK.words].compactMap { $0 }
+                // A synced pair landed held keeps its own secrets (made new at
+                // the landing) until Resume Sync: the library's own holder too.
+                let livePassphrases = Array(Set(slotK.timeline.compactMap(\.passphrase) + [slotK.passphrase, own.passphrase].compactMap { $0 }))
+                let liveWords = slotK.timeline.compactMap(\.words) + [slotK.words, own.words].compactMap { $0 }
                 switch route.opener {
                 case .passphrase(.current):
                     for p in livePassphrases { var b = book; b.passphrases[.current] = p; candidates.append(b) }

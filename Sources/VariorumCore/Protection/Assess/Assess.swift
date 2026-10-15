@@ -268,6 +268,14 @@ public enum AssessRules {
             }
             if stale { repairs.append(.refreshMemory) }
             if unlocked.recordSection != unlocked.thisMac { repairs.append(.refreshRecordSection) }
+            // A synced library whose memory names no vault facts (the memory
+            // item gone — a wiped keychain): the keys this device holds are
+            // recorded, so a later replacement of the account's keys reads as
+            // a follow owed (VX-305 U4, found by the scenario world).
+            if let account = record.account, facts.session.accountID == account, facts.freshVault(for: account) != nil,
+               memory != nil, memory?.vaultFacts?.corpusKeyID == nil {
+                repairs.append(.recordHeldSyncKeysFacts)
+            }
         }
         guard let current = mode.mode else { return (repairs, faults) }
         let live = liveKeyFile(facts, unlocked)

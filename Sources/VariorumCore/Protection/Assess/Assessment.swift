@@ -211,6 +211,13 @@ public enum Repair: Hashable, Sendable {
     /// branch applied to the slot (§3.7: never lowers the mode, never keeps
     /// its own key). PROVISIONAL P-U4-6. VX-305 U4.
     case rekeyOlderLibraryFile(toFingerprint: String)
+    /// Always, synced: what this Mac remembers names no vault facts (its
+    /// memory item went — a wiped keychain) while this device holds the
+    /// account's sync keys silently or for the session — the held keys'
+    /// corpus key id is recorded (non-secret), so the account replacing its
+    /// keys later reads as a follow owed. A Touch ID item is never read for it
+    /// (no repair prompts). VX-305 U4.
+    case recordHeldSyncKeysFacts
     /// §3.10: this device's choice says Touch ID and no item exists — Always
     /// ask is recorded quietly (a settings write; never an item).
     case recordAlwaysAskQuietly

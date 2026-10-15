@@ -204,6 +204,10 @@ extension SWorld {
         device.lastOutcome = outcome
         device.library = library
         afterAct(device, before: before)
+        // The assessment refreshes after an act, and its repairs run then (a
+        // mode just confirmed — corner 45's answer, the vault's — gets its
+        // custody repairs at once, §3.13).
+        try await runRepairs(device)
     }
 
     /// The truth an act leaves: the keys born in Castle, a leave's moment.
@@ -347,6 +351,9 @@ extension SWorld {
                     let p = k.passphrase ?? self.newPassphrase(), w = k.words ?? self.newWords()
                     let typed = TypedSecrets(passphrase: p, words: w, wordsAreNew: k.words == nil)
                     self.choose(d, holder: own, passphrase: p, words: w)
+                    // The account's too: a set-up a crash interrupts finishes on
+                    // its resume, and the vault then opens with these.
+                    self.choose(d, holder: account, passphrase: p, words: w)
                     let outcome = try await executor.setUpSync(&library, typed: typed)
                     k.passphrase = p
                     k.words = w
@@ -903,6 +910,16 @@ extension SWorld {
             landed = (nil, nil)
         }
         let finalTyped = typed
+        // The landed library's secrets, chosen at the press: a landing a crash
+        // interrupts finishes on its resume, and its key file then opens with them.
+        let landedID: String? = {
+            if let id = pair.record?.libraryID { return id }
+            switch pair.keyFile {
+            case .format3(let file): return file.libraryID
+            case .legacy(let legacy): return legacy.envelope.storeID
+            }
+        }()
+        if let landedID { choose(device, holder: holder(device, account: nil, libraryID: landedID), passphrase: landed.passphrase, words: landed.words) }
         try await act(device) { executor, library in
             try await executor.land(&library, pair: pair, opener: opener, typed: finalTyped, gate: device.biometry.enrolled ? .touchID : .alwaysAsk)
         }
@@ -922,8 +939,11 @@ extension SWorld {
         lock(device)
         switch tamper {
         case .plantAppleWrap:
+            // A login-password holder reads every item's secret except a Touch
+            // ID item's (the Apple facts §3.10): only a silent item gives the key.
             guard var file = liveKeyFile(device), let key = (device.keychain.names(service: ProtectionNames.custodyService)
-                .compactMap { device.keychain.item($0)?.value.libraryKey }.first { PF.fp($0) == file.fingerprint }) else {
+                .compactMap { name in device.keychain.item(name).flatMap { $0.touchID ? nil : $0.value.libraryKey } }
+                .first { PF.fp($0) == file.fingerprint }) else {
                 throw WorldRefusal.cannotOpen
             }
             let planted = mintApple()
@@ -977,6 +997,17 @@ extension SWorld {
             // P-U4-5: a Re-link press then re-wraps them under Apple — her call).
             if let tree = capture.slot?.library?.record?.familyTree.fingerprints {
                 truth.keptByLeave[device.name]?.subtract(tree)
+            }
+            if let since = capture.slot?.library?.record?.changedAt {
+                for (id, copy) in truth.copies where copy.madeOn == device.name && copy.mode == .standard && copy.madeAt > since {
+                    truth.rolledBackOver.insert(id)
+                }
+                // Its Send Library pairs from the Standard stretch too.
+                for (folder, sender) in senders where sender == device.name {
+                    for path in device.container.paths(under: folder + "/") where path.hasSuffix(".sqlite") {
+                        if device.container.files[path]?.library?.record?.mode == .standard { truth.rolledBackOver.insert("container:\(path)") }
+                    }
+                }
             }
         case .deleteMemoryItem:
             device.keychain.local[memoryName] = nil

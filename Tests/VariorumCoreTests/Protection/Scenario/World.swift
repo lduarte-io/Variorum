@@ -85,6 +85,15 @@ struct Truth {
     /// Every key the library had when it last left Castle, per device — what
     /// promise 13 keeps from the Apple account and the login password.
     var keptByLeave: [String: Set<String>] = [:]
+    /// Standard copies made after the moment both homes were rolled back to
+    /// (the stated limit, P-U4-5): the restored Castle state doesn't reach back
+    /// over them.
+    var rolledBackOver: Set<String> = []
+    /// §3.1 rule 2's second exception: a library key that was current while
+    /// the library synced with an account in Standard — its copies open
+    /// through that account until the account replaces its keys or enters
+    /// Castle (the vault's corpus key id then changes).
+    var standardSynced: [String: (account: String, corpusKeyID: String)] = [:]
     /// Corpus key ids current while their vault read Castle (§3.9: no
     /// Castle-era corpus key ever sits under anything Apple-reachable).
     var castleCorpusKeyIDs: Set<String> = []
@@ -321,13 +330,20 @@ final class SWorld {
             guard let slot = device.slot, let record = slot.record else { continue }
             let key = "\(device.name)|\(slot.libraryID)"
             if case .some(.some(let was)) = lastBinding[key], record.account == nil {
+                // The leave's re-key locks the new key under the account's
+                // secrets of that moment: they are the library's own now (a
+                // resumed leave included — afterAct's rule for any road).
                 let own = holder(device, account: nil, libraryID: slot.libraryID)
-                if truth.known[own]?.passphrase == nil && truth.known[own]?.words == nil {
-                    let k = known(was)
+                let k = known(was)
+                if truth.known[own] == nil || truth.known[own] != k {
                     setKnown(own, passphrase: k.passphrase, words: k.words)
                 }
             }
             lastBinding[key] = .some(record.account)
+            if let account = record.account, record.mode == .standard, record.modeConfirmed,
+               let corpus = server.snapshot(account)?.corpusKeyID, truth.standardSynced[record.currentFingerprint] == nil {
+                truth.standardSynced[record.currentFingerprint] = (account, corpus)
+            }
         }
     }
 
@@ -536,7 +552,13 @@ final class SWorld {
     func typedFor(_ device: SDevice) -> TypedSecrets {
         guard let holder = slotHolder(device) else { return .none }
         let known = known(holder)
-        return TypedSecrets(passphrase: known.passphrase, words: known.words)
+        var typed = TypedSecrets(passphrase: known.passphrase, words: known.words)
+        // An act in flight resumes with the secrets typed at its press (a plan
+        // never holds one): she types again what she chose seconds before.
+        if device.container.files[SPath.plan] != nil, let chosen = device.pending.last {
+            typed = TypedSecrets(passphrase: chosen.passphrase ?? typed.passphrase, words: chosen.words ?? typed.words)
+        }
+        return typed
     }
 
     /// Every road this device has for the slot, walked as she would: the

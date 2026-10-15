@@ -176,7 +176,13 @@ extension ActContext {
     func rememberNewKey() throws {
         let hasTouchID = try leaves.custody.custodyItems()
             .contains(CustodyItemFact(fingerprint: library.fingerprint, itemClass: .touchid))
-        let vault = accountID.flatMap { executor.freshVaults[$0] }
+        // The vault's facts are what this device FOLLOWED — recorded only by an
+        // act that worked the account's keys itself (a rotation, a follow, a
+        // join, a synced key door). A settings act after a fresh read must not
+        // record keys it never picked up: that hid the follow owed when the
+        // account had replaced its keys elsewhere (promise 7 — VX-305 U4,
+        // found by the scenario world).
+        let vault = parameters.synced == true ? accountID.flatMap { executor.freshVaults[$0] } : nil
         let hash = hasTouchID ? leaves.biometry.biometryStateHash() : nil
         try executor.writeMemory(&library) { memory in
             if hasTouchID { memory.biometryStateHash = hash }
