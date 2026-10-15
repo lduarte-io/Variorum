@@ -673,9 +673,7 @@ extension SWorld {
             // P-U4-12: the acceptance read to cover a Time Machine restore).
             if let restored = d.slot?.record, restored.currentFingerprint != was {
                 truth.restoredPastCrossing.insert(d.name)
-                // Its STANDARD-born keys only — Apple-reachable in their day; a
-                // Castle-born key never was, and stays promise 13's.
-                truth.keptByLeave[d.name]?.subtract(restored.familyTree.entries.filter { $0.kind == .standard }.map(\.fingerprint))
+                truth.keptByLeave[d.name]?.subtract(reachableInItsDay(restored, keyFile: d.container.files[SPath.liveKeyFile]))
                 for (id, copy) in truth.copies where copy.madeOn == d.name && copy.mode == .standard && copy.madeAt > restored.changedAt {
                     truth.rolledBackOver.insert(id)
                 }
@@ -1040,10 +1038,8 @@ extension SWorld {
             // The stated limit (§3.6): the restored state is believed — the keys
             // it brings back are its own again, as that state says (PROVISIONAL
             // P-U4-5: a Re-link press then re-wraps them under Apple — her call).
-            if let tree = capture.slot?.library?.record?.familyTree {
-                // Its Standard-born keys only (a Castle-born key was never
-                // Apple-reachable, and stays promise 13's).
-                truth.keptByLeave[device.name]?.subtract(tree.entries.filter { $0.kind == .standard }.map(\.fingerprint))
+            if let restored = capture.slot?.library?.record {
+                truth.keptByLeave[device.name]?.subtract(reachableInItsDay(restored, keyFile: capture.liveKeyFile))
             }
             if let since = capture.slot?.library?.record?.changedAt {
                 for (id, copy) in truth.copies where copy.madeOn == device.name && copy.mode == .standard && copy.madeAt > since {
@@ -1068,6 +1064,21 @@ extension SWorld {
             device.container.files[SPath.liveKeyFile] = nil
             device.keychain.local[memoryName] = nil
         }
+    }
+
+    /// What a restored state reached through the Apple account IN ITS DAY —
+    /// the stated limit's acceptance (P-U4-5, her 2026-10-14/15 ruling: "the
+    /// exposure is pre-Castle content, login-reachable in its day"): a Standard
+    /// restored state's current key and every key its own key file's HISTORY
+    /// holds (a VX-209 victim's older Castle key among them); never what an
+    /// anchor holds (behind the passphrase or words, never Apple-reachable).
+    func reachableInItsDay(_ record: ProtectionRecord, keyFile: SFile?) -> Set<String> {
+        guard record.mode == .standard else { return [] }
+        var keys: Set<String> = [record.currentFingerprint]
+        if case .format3(let file)? = keyFile?.keyFile, file.fingerprint == record.currentFingerprint {
+            keys.formUnion(file.history.map(\.fingerprint))
+        }
+        return keys
     }
 
     /// A crafted pair planted in the iCloud Drive folder: a backup-named

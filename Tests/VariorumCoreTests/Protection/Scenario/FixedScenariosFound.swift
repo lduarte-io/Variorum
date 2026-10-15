@@ -587,4 +587,21 @@ extension GeneratorFoundScenarios {
         #expect(world.liveKeyFile(world.macA)?.apple != nil, "the local Standard library has no Apple road")
         expectPromisesKept(world)
     }
+
+    /// Seed 4 (sequence 666, the closer's soak) — a CHECKER finding: VX-209's
+    /// victim (an older Castle key in its Standard key's history), Use Castle,
+    /// Use Standard, then both homes rolled back (the stated limit) and
+    /// Re-link's arm re-wrapping the restored Standard key (P-U4-5, accepted):
+    /// the older Castle key its history holds was Apple-reachable IN THAT DAY
+    /// too. The stated limit now releases exactly what the restored state
+    /// reached through Apple in its day — its key and its key file's history —
+    /// never an anchor's keys.
+    @Test func bothHomesRolledBackOverAVX209VictimIsTheStatedLimit() async throws {
+        let world = try Self.start("VX-209's victim", seed: 4000678)
+        for action in [Action.crash(.useCastle("macA", .touchID, newWords: false), afterWrites: 18), .useStandard("macA"),
+                       .tamper("macA", .replayBothHomes), .settle] {
+            await world.step(action)
+        }
+        expectPromisesKept(world)
+    }
 }
