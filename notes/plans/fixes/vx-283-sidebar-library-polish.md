@@ -1813,7 +1813,15 @@ the orchestrator rules on its composition (below — the brief's composition doe
   record names; the two MCP sites already gone, VX-281); each now states `.lineLimit(1)` (all six are labels — no
   prose site among them); the replica reads 0 offenders. The lint itself (the red-to-green pin, red on the tip by
   its own batch 418) — PENDING the stage window.
-- Q2 — VX-359 (the View menu's trailing `Divider()`): NOT-STARTED.
+- Q2 — VX-359 (the View menu's trailing `Divider()`): DONE (this commit) — F-3's trace re-verified on this tip: the
+  note group `CommandGroup(before: .toolbar)` ended with `Divider()` after Close Split (`EditorCommands.swift:1023`,
+  `07d9f583`), and SwiftUI adds its own separator at the boundary to the next group (Toggle Sidebar's), so two drew
+  back to back. Deleted, with a comment at the line. **Class sweep:** every `CommandGroup`/`CommandMenu` in the file
+  read for a leading or trailing `Divider()` at its own level — none other (the Lock Library Now and Find dividers
+  sit INSIDE their groups, before an item). **Pin:** `ViewMenuSeparatorTests.theViewMenuHasNoDoubledOrDanglingSeparators`
+  (new) — reads the REAL View menu in the test host (the `AppMenuServicesTests` precedent: owner rebuild + validate,
+  hidden items dropped, the menu printed), no doubled / leading / trailing separator, and it reached Close Split.
+  RED ON OLD planned as **R-V** (the `Divider()` restored after Close Split) — PENDING the stage window, as is its green.
 - Q3 — VX-121 (toasts clear of the quick-entry band): NOT-STARTED.
 - Q4 — VX-20 (the dark pinned heading): NOT-STARTED.
 - Q5 — VX-175 (the controls row): **STOPPED FOR A RULING — composition (below).** Nothing built.

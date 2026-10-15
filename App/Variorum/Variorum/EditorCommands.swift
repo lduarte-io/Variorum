@@ -1020,7 +1020,9 @@ struct EditorCommands: Commands {
                 .disabled(!enabled(.openBeside))
             Button(verb(.closeSplit)) { router?.closeSplit() }
                 .disabled(!enabled(.closeSplit))
-            Divider()
+            // VX-359: no trailing `Divider()` — SwiftUI separates command
+            // groups itself, so one here drew a second hairline beside the
+            // group boundary's (`ViewMenuSeparatorTests`).
         }
         // ⌘/ — the shortcut helper + dictionary (Sitting 9, R73/R91).
         // 13b Stage 2 (R113): the tutorial's Help-menu doors — open the
