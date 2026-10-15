@@ -4668,13 +4668,168 @@ committed), runs THE FILTER — `swift test --filter 'MCPAdviceServerTests|MCPEd
 - **Restore:** `git checkout HEAD -- Sources` → `git status` clean, `git diff HEAD` empty; THE FILTER **30 tests in 8
   suites passed** (`u8a-restore.log`).
 
-### THE INSTRUCTIONS (DRAFT — piece 2 writes exactly this; 2,9xx characters measured on the draft)
+### THE INSTRUCTIONS AS BUILT (piece 2 — 2,969 of 3,000 characters, Swift `count`; exactly what `initialize` sends)
 
-Kept whole from today's text: the opening sentence, the connection-request sentence, the rung list's frame, the
-places/durations, the once grant, the until-you-disconnect sentence, search, gatherings + the wing move, live ids, the
-format, the fence + snippets + the one shape, the refusal posture, show_in_app, the undo. Changed or new: the tools line
-(U7's carry), write new's and edit's reach, paging + digests + recovery (no number), organization, the three acts, the
-link. The final text, as built, goes in piece 6's record whole.
+Kept whole from the old text: the opening sentence, the connection-request sentence, the rung list's frame, the
+places and durations, the once grant, the until-you-disconnect sentence, search, gatherings and the wing move, live ids,
+the format, the fence with snippets and the one shape, the refusal posture, show_in_app, the undo. Changed or new: the
+tools line (U7's carry), write new's and edit's reach, paging, digests and recovery (no number), organization, the three
+acts, the link. Provider-neutral and pronoun-free (both nets green). The text, whole, as read from the product:
+
+```text
+Variorum is a writing app; this server is the door to its library, on the author's Mac, open only while Variorum runs. A new client is a connection request until the author approves it in Variorum ▸ Settings ▸ MCP. Once approved, list_my_activity is always listed; other tools appear only for what the author has shared (re-announced when that changes).
+Grants have four rungs, each including those before it: read (read and search), suggest (add takes and comments beside their text, save lenses), write new (new notes, books, chapters, tags, versions; blocks added at a note's end), edit (most of what the author can do at the keyboard: edit, choose and commit takes; divide, merge, move, delete; rename, archive). Each names a note, a book or a wing, for once, until you disconnect, or always; they may also open the whole library to reading (the open book). A once grant is one act: a read grant's first read of a note's text, a higher grant's first write. Until you disconnect lasts while any connection under your client's name stays open, sessions opened later included; it ends when the last one closes or Variorum's server stops, and reconnecting does not restore it.
+search covers standing grants only; read a once grant's note by id.
+A wing grant also reads that wing's gatherings (list_books lists them, kind gathering); none is ever granted alone. move_note_to_wing needs edit on the note and write new on the wing it goes to.
+Ids are live: after any divide or merge, theirs or yours, read again.
+read_note speaks the Variorum document format; when its header starts with {v:2}, a "--- next block ---" line separates the blocks. Read a long note in pages (limit, then cursor); ids_only gives each take's sha256 instead of its text. Many writes answer each take's sha256, to prove your words landed.
+Help the author stay organized: put plans, summaries and research into notes, not just chat; file notes into books and chapters; tag them, and make books that collect by tag rules. Offer a rewrite as a new take beside theirs, not an edit of their words; leave review as comments. For a revision, copy the note with duplicate_note and edit the copy, so Compare lines the two up.
+Three acts are the author's alone: marking something Private, sealing a book (finished, its text frozen) and making a book own its notes. You can't do them, but suggest one when it would help.
+The daily Journal's entries and anything marked Private are shared one ask at a time; snippets are not reachable at all. Anything you can't reach answers exactly as if it did not exist.
+If a call is refused, don't retry around it: tell the author what you need (Variorum may already have asked them). If an answer is lost, list_my_activity shows whether the call landed.
+Never call show_in_app unless the author asks you to show them something.
+Every change you make is one undo for the author, named after you; commits stay.
+The guide to this door: https://stargazing.tech/variorum/mcp
+```
+
+### THE DESCRIPTIONS AS BUILT (piece 3 — twelve tools; every other description byte-unchanged)
+
+Two shared sentences join `digestSentence` in `MCPToolCatalog`: **`suggestedLabelRule`** (`labeled with your client name,
+then " · " and your label when you give one (e.g. "<your client name> · english"; a blank label is none)` — the
+separator read from `MCPWriteTools.labelSeparator`) and **`labelNotPrefixed`** (`your client name is added only by
+add_take and add_takes`).
+- **edit_take** — "Variorum saves a commit named "before <your name>'s edit" and one named "after <your name>'s edit", so
+  the author can always compare and come back, and the edit is one undo for the author." → "Variorum first commits the
+  words it replaces, named "before <your client name>'s edit" (unless they are already the take's latest commit, or the
+  take is blank and was never committed — then the answer has no before_commit_id), and then the new text, named "after
+  <your client name>'s edit", so the author can always compare and come back; these commits stay even if the edit is
+  undone. Writing the text the take already has changes nothing (changed: false). The edit is one undo for the author."
+- **restore_commit** — `<your name>` → `<your client name>` (twice); the words otherwise unchanged.
+- **save_commit** — `"<your name>: <message>"` → `"<your client name>: <message>"`.
+- **add_take** — "labeled with this client's name (plus your label, if given), is never chosen and never locked" → "The
+  take is ‹suggestedLabelRule›, so the author sees who suggested it; it is never chosen and never locked".
+- **add_takes** — "labeled with this client's name (plus the item's label, if given)" → "‹suggestedLabelRule›".
+- **create_note** — adds "Each label is stored as given (trimmed; a blank label is none) — ‹labelNotPrefixed›." after the
+  blocks' description.
+- **insert_blocks** — "never chosen, each label kept as given (an empty text is a blank take)" → "never chosen (an empty
+  text is a blank take). Each label is stored as given (trimmed; a blank label is none) — ‹labelNotPrefixed›."
+- **import_document** — "sections as extra takes;" → "sections as extra takes, each labeled as its take: line says —
+  ‹labelNotPrefixed›;".
+- **duplicate_note** — adds "In the copy every take keeps its label — ‹labelNotPrefixed›." after "The original is never
+  changed."
+- **set_take_label** — adds "The label is stored as given (trimmed) — ‹labelNotPrefixed›."
+- **delete_comment** — ": one Variorum doesn't have on file as yours (the author's, another client's, or one left before
+  Variorum kept that record) is refused." → " whose words no one has changed since you wrote them; any other is refused —
+  the author's, another client's, one left before Variorum kept a record of its words, or one whose words were changed
+  after you wrote them (by the author on any device, or by another client)."
+- **rename_book** — "A name another live book already wears (ignoring case) is refused, as the author's rename is; a
+  finished or sealed book can still be renamed." → "A name already worn (ignoring case) by another live, unarchived book
+  or gathering that you can read is refused; one you can't read never counts, so it can't block the name. A finished or
+  sealed book can still be renamed."
+- **read_note** — UNCHANGED here: U7c's answer-bound sentence stands as the one place the paging numbers live.
+
+### THE BRIEF'S DELTA (piece 5 — `notes/stargazing-mcp-guide-brief-2026-10-12.md`, one send-ready message)
+
+- **R-VX184-4's gate at the top:** the page goes live first; the release whose instructions end "The guide to this door:
+  https://stargazing.tech/variorum/mcp" publishes only after it.
+- **"When" rewritten:** the next MCP update is the first release that links the page; the things that arrive only with
+  it are named (paragraphs added to a note, duplicating for Compare, Compare from the AI, an AI's own activity, labels
+  without "suggested"). No release number is claimed.
+- **The 2026-10-13 change list kept**, and a **FURTHER list** appended (11 items) for an agent that built from the
+  2026-10-13 version: the gate; the setup's code block and the waiting new setup (VX-258); Read's own activity and
+  Compare (VX-261, VX-298); Suggest's label form (VX-267) and the changed-words comment rule (VX-260); Write new's
+  duplicate (VX-311) and end-of-note paragraphs (VX-255); Edit's paragraphs anywhere and the comment restore made honest
+  (VX-148: an AI can bring back only a deleted comment it already knows of); the book-name rule (VX-259); undo never
+  overwriting her later change (VX-276), her typing saved first and a deleted open note going to the Library (VX-275 ·
+  VX-323), the icon's Pool and Book Panel rows (VX-268, VX-330), Activity's self-checks; a short section for the AI
+  reading the page; the refreshed chapter and Restore Tutorial…; the final appendix.
+- **The page content updated in place** to match, so the message never contradicts itself.
+- **The appendix:** 64 tools, checked against the catalog dump (none missing, none extra); `list_my_activity` (no share
+  needed), `insert_blocks` (end at write new, anywhere at edit), `duplicate_note` (a wing share).
+- **The note for Lillian:** what VX-246 and VX-336 fold in; two things that may still move (U8b's chapter wording and
+  title — the brief quotes "AI & the MCP door" — and VX-234's pane renames); the gate is hers.
+
+### FOR VX-234 (user-facing words, AS BUILT — U8a)
+
+- **No pane, sheet or receipt word changed.** Everything U8a wrote is model-facing (the instructions, twelve tool
+  descriptions) or the public page's brief.
+- **The instructions' new lines** (above, whole): the tools line; write new's and edit's parentheses; the paging and
+  digest sentences; the lost-answer sentence; the organization paragraph; the three-acts paragraph; the link line "The
+  guide to this door: https://stargazing.tech/variorum/mcp".
+- **The twelve descriptions** (above), with the two shared sentences.
+- **The public page's brief** — hers to carry to the site agent; its words are the site agent's to voice.
+
+### PROVISIONALs
+
+None. Every sentence states a built mechanism or a ruling (R-VX184-2/3/4, P-VX261-2, P-VX255-1, VX-258/259/260,
+VX-267, VX-148); the word choices are on FOR VX-234.
+
+### OBSERVATIONS (read, NOT changed — outside the plan's five; for the orchestrator)
+
+1. **edit_take** doesn't say a blank `text` refuses (R-VX171-2); the refusal's own sentence tells a client. Not untrue.
+2. **create_book** says nothing about the name check, which VX-259 also narrowed. Not untrue.
+3. **The instructions sit at 2,969 of 3,000:** 31 characters of room. Any later line must trim one.
+4. **The brief quotes the chapter's title** "AI & the MCP door" in "Learn more inside the app": if U8b retitles the
+   chapter, that line changes with it.
+
+### SELF-ASSESSMENT (the implementer's)
+
+Built to the plan's pieces 1–6, with U7c's bound respected by stating NO paging number in the instructions (the page
+bound lives in `read_note`'s description, untouched). Every new claim in the instructions is pinned sentence by sentence
+and tied where possible to a catalog fact (the one listed-on-approval tool, read_note's inputs, insert_blocks' rung, six
+edit tools, the tools the organization advice leans on, no tool that sets Private/Seal/Own); a GUARD keeps every digit
+out of the advice except the version token and `sha256`. Every description fix is pinned with its words, and the mixed
+pins run the mechanics the words state (edit_take's four cases, the label rule's three as-given roads); all mechanics
+halves were green on the old tree, so each fix is a words fix, as the findings said. The revert arms each failed
+exactly their announced pins. What I'd have a reviewer press on: **(1)** the instructions' "most of what the author can
+do at the keyboard" (R-VX184-1 says broadly as capable; "most" leaves room for the three acts and any door not on the
+wire); **(2)** "Many writes answer each take's sha256" — deliberately not "every" (divide, merge, save_version and the
+book-form import answer none, P-VX254-1/2); **(3)** import_document's label clause — its labels are the `take: "…"`
+line's, untrimmed inside the quotes, so it says "as its take: line says" rather than "trimmed"; **(4)** the brief's new
+page facts, each checked against the as-built code or MCPSpec (listed in THE BRIEF'S DELTA).
+
+### THE HEADLESS FINALS (piece 6 — PENDING until read from the log)
+
+`swift test --filter VariorumMCPTests` on the final tree: PENDING.
+
+### OWED FOR U8b (every fact the guide chapter must match)
+
+1. **The label rule (VX-197's split, VX-267's form).** Takes a client adds at suggest (`add_take`, `add_takes`) wear
+   "‹client›" or "‹client› · ‹label›" — no "suggested"; takes from before VX-267 keep "‹client› · suggested · ‹label›",
+   and `save_lens` by label matches both forms (its own takes only). Every other tool that writes a label (create_note,
+   insert_blocks, set_take_label — trimmed; import_document — the take line's; duplicate_note — copied) adds no name.
+2. **The new tools, taught in their lessons:** `insert_blocks` (write new at a note's end; edit anywhere — after a
+   block or at the start; ≤ 200 blocks; one undo); `duplicate_note` (read on the note + write new on its WING; the copy
+   lands bookless in that wing's Pool; per-ask notes refuse; Compare lines the copy up row by row); `show_in_app`'s
+   Compare target (a note + one to three peers in the same wing, only when she asks, only while Variorum is in front;
+   "related blocks only" on when every peer shares history); `link_versions`' Open › opens Compare; `list_my_activity`.
+3. **Paging and the answer bound:** `read_note` pages with `limit` and `cursor` (a cursor alone reads 50; `limit` up to
+   200); a page also ends once the ANSWER reaches about 32,000 characters — a block is never split, a single larger
+   block comes alone, commit text rides in what is left, the first page carries `block_count`, the tray and versions;
+   `ids_only` gives each take's `sha256` instead of its text. P-VX256-1 (the bound) is PROVISIONAL in her bundle, so
+   the chapter is safest naming pages WITHOUT the numbers, as the instructions do.
+4. **`sha256`:** lowercase hex SHA-256 of the take's stored UTF-8 bytes, nothing normalized; answered by add_take,
+   add_takes, create_note (its blocks), import_document (one document; not a book), insert_blocks, duplicate_note,
+   edit_take, restore_commit — NOT divide/merge, save_version or a book import (P-VX254-1/2). VX-357 (U+0000) is a
+   known issue.
+5. **`list_my_activity`:** listed for every APPROVED client with no grant (P-VX261-2); its own rows only, every
+   session under its name since its current approval; a refused row never carries a title; reads join only with
+   `include_reads`; the log keeps the library's last 500 acts; Activity shows "‹client› checked its recent activity".
+6. **The changed tools line:** the instructions now say "Once approved, list_my_activity is always listed; other tools
+   appear only for what the author has shared." The chapter must not say an approved client with nothing shared sees
+   NO tools; a connection request, and a new setup waiting for her OK (VX-258), see none.
+7. **Private, Seal and Own** are hers alone (R-VX184-2): no MCP road writes `ai_private_at`, `sealed_at` or `owned`;
+   the AI knows them and may suggest one (the instructions' "Three acts are the author's alone…").
+8. **This unit's description truths the chapter touches:** lesson 3's edit step — the before/after commits bracket
+   take TEXT changes only, the "before" deduped (none when the take's latest commit already holds the words, or the
+   take was blank and never committed), a no-change write does nothing, the commits stay after an undo; a suggest
+   client deletes only its own comments whose words are unchanged (VX-260); book names are checked only against books
+   the client can read (VX-259); deleted comments are not readable on the wire — `restore_comment` works on an id the
+   client holds (VX-148).
+9. **The link and its gate:** the instructions end with "The guide to this door: https://stargazing.tech/variorum/mcp";
+   the build ships publicly only after the page is live (R-VX184-4). If the chapter mentions the page, it says so
+   plainly; the brief's "Learn more" quotes the chapter's title "AI & the MCP door" (OBSERVATION 4).
+10. **Provider neutrality (O-4):** any provider's name in the chapter stays inside `TutorialSeeder`'s ONE setup fence.
 
 
 ## U7 STAGE RUN — the whole window (a fresh stage runner, from 2026-10-14)
