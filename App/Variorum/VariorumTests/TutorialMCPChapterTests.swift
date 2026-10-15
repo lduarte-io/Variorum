@@ -666,8 +666,8 @@ struct TutorialMCPChapterTests {
             // VX-197 U8b — THE TRUTH of the commit sentence, on the wire's own
             // act (`editTakeUnderInsurance`; the headless twin is U8a's
             // `MCPEditServerTests.editTakesBeforeCommitIsDedupedAndTheDescriptionSaysSo`).
-            let stack = UndoStack()
-            let undoable = Operations(undoStack: stack)
+            let editStack = UndoStack()
+            let editOps = Operations(undoStack: editStack)
             let page = try note(ops, "first words")
             let take = try #require(try await db.read { db in
                 try String.fetchOne(
@@ -682,25 +682,25 @@ struct TutorialMCPChapterTests {
             let editLabel = Operations.MCPWriteAct.edit.undoLabel(client: "claude-code")
             _ = try ops.commit(take, message: "hers")
             // "unless the take's latest commit already holds them".
-            let kept = try undoable.editTakeUnderInsurance(
+            let kept = try editOps.editTakeUnderInsurance(
                 take, text: "second words", expectedText: "first words", client: "claude-code", undoLabel: editLabel)
             #expect(kept.before == nil && kept.after?.text == "second words", "no second copy of kept words")
             // "first commits the words it replaces … then commits the new words".
             try ops.autosave(take, text: "her third words", charDelta: 9)
-            let insured = try undoable.editTakeUnderInsurance(
+            let insured = try editOps.editTakeUnderInsurance(
                 take, text: "fourth words", expectedText: "her third words", client: "claude-code",
                 undoLabel: editLabel)
             #expect(insured.before?.text == "her third words" && insured.after?.text == "fourth words")
             #expect(insured.before?.message == bracket.before && insured.after?.message == bracket.after)
             // "Both commits stay even if you undo the edit."
             let before = try await commits()
-            #expect(try stack.undo(with: undoable) == editLabel)
+            #expect(try editStack.undo(with: editOps) == editLabel)
             #expect(try await db.read { try Variant.fetchOne($0, key: take) }?.workingText == "her third words")
             #expect(try await commits() == before, "the commits stay")
             // "the WORDS of a take": relabelling it commits nothing — and the
             // label is stored as given, with no client name ("labels it sets
             // on a take carry only the label it gave").
-            _ = try undoable.labelTakeForClient(
+            _ = try editOps.labelTakeForClient(
                 take, label: "  english  ", undoLabel: Operations.MCPWriteAct.takeLabel.undoLabel(client: "claude-code"))
             #expect(try await commits() == before, "a label is not the take's words")
             #expect(try await db.read { try Variant.fetchOne($0, key: take) }?.label == "english",
@@ -710,7 +710,7 @@ struct TutorialMCPChapterTests {
             // headless twin is `MCPCommentWordsServerTests`): a comment a
             // client left is its own while its words are; her edit makes it hers.
             let block = try #require(try await db.read { try Queries.renderPost($0, containerID: page).first })
-            let left = try undoable.addComment(
+            let left = try editOps.addComment(
                 toBlock: block.blockID, text: "a client's note on this", author: "claude-code",
                 undoLabel: Operations.MCPWriteAct.comment.undoLabel(client: "claude-code"))
             #expect(try await db.read { try Queries.mcpCommentIsOwn($0, commentID: left.id, client: "claude-code") })
