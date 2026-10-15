@@ -76,6 +76,7 @@ extension ProtectionExecutor {
         case .restoreKeyFileFromCopy: return "restoreKeyFileFromCopy"
         case .rekeyOlderLibraryFile: return "rekeyOlderLibraryFile"
         case .recordHeldSyncKeysFacts: return "recordHeldSyncKeysFacts"
+        case .restoreRecordFactsFromMemory: return "restoreRecordFactsFromMemory"
         case .recordAlwaysAskQuietly: return "recordAlwaysAskQuietly"
         case .makeTouchIDItem: return "makeTouchIDItem"
         case .deleteTouchIDItem: return "deleteTouchIDItem"
@@ -210,6 +211,21 @@ extension ProtectionExecutor {
 
         case .rekeyOlderLibraryFile(let to):
             return try rekeyOlderLibraryFile(to: to, &library)
+
+        case .restoreRecordFactsFromMemory:
+            guard guards.libraryFileLosesToMemoryOn, var record = library.record, let memory = library.memory,
+                  memory.currentFingerprint == record.currentFingerprint, memory.keyEpoch == record.keyEpoch,
+                  let confirmed = memory.lastConfirmed,
+                  library.familyTree.entry(record.currentFingerprint).map({ $0.kind == confirmed.mode }) ?? true
+            else { return .preconditionDoesNotVerify }
+            record.mode = confirmed.mode
+            record.account = confirmed.account
+            record.modeConfirmed = true
+            library.record = record
+            try writeFacts(&library, section: library.section)
+            leaves.diagnostics.report(.olderLibraryFileRekeyed(older8: String(record.currentFingerprint.prefix(8)), current8: String(record.currentFingerprint.prefix(8))))
+            log("the library file was older than this Mac remembers — its facts taken from the memory")
+            return nil
 
         case .recordHeldSyncKeysFacts:
             guard let account = library.record?.account, library.memory != nil,

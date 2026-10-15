@@ -218,6 +218,11 @@ public enum Repair: Hashable, Sendable {
     /// keys later reads as a follow owed. A Touch ID item is never read for it
     /// (no repair prompts). VX-305 U4.
     case recordHeldSyncKeysFacts
+    /// Always, first: a library file replayed from before an act that changed
+    /// its facts under the same key (a join) — the memory's newer section says
+    /// so — takes back the mode and account last confirmed here (§3.6,
+    /// promise 10). PROVISIONAL P-U4-6. VX-305 U4.
+    case restoreRecordFactsFromMemory
     /// §3.10: this device's choice says Touch ID and no item exists — Always
     /// ask is recorded quietly (a settings write; never an item).
     case recordAlwaysAskQuietly

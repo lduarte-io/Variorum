@@ -777,12 +777,16 @@ extension SWorld {
                     for w in liveWords { var b = book; b.words[.current] = w; candidates.append(b) }
                 // A day the library changed hands (a join, a landing): the
                 // secrets of that day are the copy's holder's AND the slot's.
+                // (…or an account's that day: an anchor written at a leave is
+                // locked with the account's secrets as typed then.)
                 case .passphrase(.of(let date)):
-                    for p in [known(holder).at(date).passphrase, slotK.at(date).passphrase].compactMap({ $0 }) {
+                    let accounts = server.accounts.keys.map { known($0).at(date).passphrase }
+                    for p in ([known(holder).at(date).passphrase, slotK.at(date).passphrase, own.at(date).passphrase] + accounts).compactMap({ $0 }) {
                         var b = book; b.passphrases[.of(date)] = p; candidates.append(b)
                     }
                 case .words(.of(let date)):
-                    for w in [known(holder).at(date).words, slotK.at(date).words].compactMap({ $0 }) {
+                    let accounts = server.accounts.keys.map { known($0).at(date).words }
+                    for w in ([known(holder).at(date).words, slotK.at(date).words, own.at(date).words] + accounts).compactMap({ $0 }) {
                         var b = book; b.words[.of(date)] = w; candidates.append(b)
                     }
                 default: break

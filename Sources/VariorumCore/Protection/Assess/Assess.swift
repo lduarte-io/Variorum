@@ -230,6 +230,17 @@ public enum AssessRules {
            live.history.contains(where: { $0.fingerprint == unlocked.currentFingerprint }) {
             return ([.rekeyOlderLibraryFile(toFingerprint: memory.currentFingerprint)], faults)
         }
+        // …and under the SAME key: a library file replayed from before an act
+        // that changed the library's facts without a re-key (joining an
+        // account) — this Mac's section in the memory is newer than the file's,
+        // and the facts last confirmed here differ from the file's.
+        if guards.libraryFileLosesToMemoryOn, let memory = unlocked.memory, memory.keyEpoch == record.keyEpoch,
+           memory.currentFingerprint == record.currentFingerprint, let recordSection = unlocked.recordSection,
+           memory.deviceSection.version > recordSection.version, let confirmed = memory.lastConfirmed,
+           confirmed != ConfirmedFacts(mode: record.mode, account: record.account) || !record.modeConfirmed,
+           unlocked.familyTree.entry(record.currentFingerprint).map({ $0.kind == confirmed.mode }) ?? true {
+            return ([.restoreRecordFactsFromMemory], faults)
+        }
         // ALWAYS: the two homes agree — nothing lost by construction (newer
         // wins, the retired ids and the tree are unions).
         do {

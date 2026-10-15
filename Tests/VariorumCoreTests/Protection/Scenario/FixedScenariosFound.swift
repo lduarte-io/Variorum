@@ -123,4 +123,19 @@ struct GeneratorFoundScenarios {
         #expect(world.macB.slot?.record?.mode == .standard, "the device migrated offline never followed")
         expectPromisesKept(world)
     }
+    /// Seed 12 (promise 10, P-U4-6): a Castle library sets up sync (the key
+    /// stays — joining is no crossing); its library file from before is
+    /// replayed alone — under the same key — and must not take the account
+    /// away: this Mac's newer section in the memory names the facts it
+    /// confirmed.
+    @Test func aLibraryFileReplayedFromBeforeAJoinChangesNothing() async throws {
+        let world = try Self.start("two Macs sharing an iCloud Drive", seed: 12000053)
+        await world.step(.signIn("macB", account: "00000000-0000-4000-8000-000000000000"))
+        await world.step(.crash(.turnOnSync("macB"), afterWrites: 23))
+        await world.done([.launch("macB")])
+        let account = try #require(world.macB.slot?.record?.account)
+        await world.step(.tamper("macB", .replayLibraryFile))
+        #expect(world.macB.slot?.record?.account == account, "a replayed library file took the account away")
+        expectPromisesKept(world)
+    }
 }
