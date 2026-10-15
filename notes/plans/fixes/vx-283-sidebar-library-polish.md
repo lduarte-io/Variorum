@@ -866,7 +866,11 @@ lines — below); any stage work until the orchestrator hands over a claim.
   the reveal on a current-row change, on mount and on every viewport-height change; the DEBUG oracles) + the mounted
   pins (`SidebarSectionWindowMountTests` ×6): DONE (this commit) — headless `build-for-testing` green; the runs and
   the reverts PENDING the stage window. The full write-up (trace, build, pins, PROVISIONALs) lands with Q3.
-- Q3 — headless `build-for-testing` green, then READY FOR STAGE (the batch + the reverts): NOT-STARTED.
+- Q3 — headless `build-for-testing` green (HEAD's products in `DerivedData/vx283-u1`), then the reverts' products
+  PREBUILT HEADLESS so the stage window only runs tests: **REVERT IN FLIGHT (headless, no stage) — R-D then R-E,
+  each `git apply notes/plans/vx283-screens/u1b/reverts/R-?.patch` → `build-for-testing` into
+  `DerivedData/vx283-u1b-rd` / `-re` → restored by `git checkout -- <file>` → `git diff` empty.** If this line still
+  reads IN FLIGHT, check `git diff` first. Then READY FOR STAGE.
 
 **F-3 — THE DOUBLED SEPARATOR: OLDER THAN U1, NOT ADJACENT — RECORDED AND LEFT (the brief's rule).**
 - The View menu's note group is `EditorCommands`' `CommandGroup(before: .toolbar)` (`EditorCommands.swift:954`). It
