@@ -1,0 +1,350 @@
+{
+ "reachable": {
+  "containerNotFound": [
+   "liveContainer",
+   "restoreContainerRows"
+  ],
+  "containerNotDeleted": [
+   "restoreContainerRows"
+  ],
+  "blockNotFound": [
+   "deleteBlockRows",
+   "liveBlock",
+   "restoreBlock",
+   "revertDeleteBlock"
+  ],
+  "variantNotFound": [
+   "archiveVariantRows",
+   "choosablePlacement",
+   "deleteVariantRows",
+   "divideWRows",
+   "enforce",
+   "fanPosition",
+   "liveVariant",
+   "mergeCeremony",
+   "resolve",
+   "restoreVariant",
+   "revertDeleteVariant",
+   "saveLens"
+  ],
+  "commitNotFound": [
+   "renameCommitRows",
+   "restoreCommitForClient",
+   "restoreCommitRows"
+  ],
+  "readingNotFound": [
+   "liveReading",
+   "restoreReadingRows"
+  ],
+  "readingNotDeleted": [
+   "restoreReadingRows"
+  ],
+  "tagNotFound": [
+   "adopt",
+   "applyTag",
+   "insertTag",
+   "liveTag",
+   "writeReadingOutflow"
+  ],
+  "wrongContainerKind": [
+   "livePost"
+  ],
+  "wrongReadingKind": [
+   "addPostToReading",
+   "finishReadingRows",
+   "insertSection",
+   "setBookFinishedForClient",
+   "writeReadingIntakeSeating",
+   "writeReadingOutflow"
+  ],
+  "invalidEntryDate": [
+   "setEntryDate",
+   "setNoteEntryDate",
+   "stampEntryDate"
+  ],
+  "lockedPost": [
+   "ensureUnlocked"
+  ],
+  "lockedVariant": [
+   "commit",
+   "deleteTakeForClient",
+   "deleteVariantRows",
+   "editableVariant",
+   "ensureEditable"
+  ],
+  "lockedReading": [
+   "addPostToReading",
+   "assignSectionRow",
+   "deleteSectionRow",
+   "insertSection",
+   "reapplyAddedMembership",
+   "reapplyMCPWingMove",
+   "refileMembership",
+   "relocateNote",
+   "removeMembershipRow",
+   "reorderMembershipRow",
+   "reorderSectionRow",
+   "reremoveMembership",
+   "restoreChapterPosition",
+   "restoreMembershipPosition",
+   "restoreSectionRow",
+   "revertAddedMembership",
+   "reviveCreatedSection",
+   "reviveRemovedMembership",
+   "tombstoneCreatedSection"
+  ],
+  "lastActiveVariant": [
+   "ensureNotLastActive"
+  ],
+  "variantIsChosen": [
+   "deleteVariantRows",
+   "revertAddedTake"
+  ],
+  "archivedVariant": [
+   "choosablePlacement",
+   "divideWRows",
+   "editableVariant",
+   "ensureEditable",
+   "mergeCeremony",
+   "resolve",
+   "saveLens"
+  ],
+  "variantNotDeleted": [
+   "putBackTake",
+   "restoreVariant"
+  ],
+  "blockCarriesUnshownText": [
+   "enforce"
+  ],
+  "blockAlreadyPlaced": [
+   "insertPlacement"
+  ],
+  "blockNotPlaced": [
+   "choosablePlacement",
+   "containerPosition",
+   "moveBlock",
+   "placedContext",
+   "reorder",
+   "restorePlacementLocation"
+  ],
+  "blockNotDeleted": [
+   "restoreBlock"
+  ],
+  "postNotInReading": [
+   "assignSectionRow",
+   "fileNoteInChapter",
+   "readingPosition",
+   "removeMembershipRow",
+   "reorderMembershipRow"
+  ],
+  "alreadyInReading": [
+   "addPostToReading"
+  ],
+  "readingAtCapacity": [
+   "addPostToReading"
+  ],
+  "gatheringRequiresRule": [
+   "writeReadingQuerySpec"
+  ],
+  "noteMemberedElsewhere": [
+   "consultOwnership"
+  ],
+  "noteOwnedElsewhere": [
+   "consultOwnership"
+  ],
+  "readingSealed": [
+   "reapplyMCPWingMove",
+   "relocateNote",
+   "reopenReadingRows",
+   "revertFinishedBook",
+   "setBookFinishedForClient"
+  ],
+  "readingAlreadyArchived": [
+   "archiveReadingRow"
+  ],
+  "readingNotArchived": [
+   "unarchiveReading"
+  ],
+  "dailyJournalCannotBeDeleted": [
+   "refuseDeletingTheDailyJournal",
+   "revertImportedBook"
+  ],
+  "invalidCut": [
+   "divideRows",
+   "divideWRows"
+  ],
+  "fannedBlock": [
+   "divideRows"
+  ],
+  "noMarkedVariants": [
+   "divideWRows"
+  ],
+  "divideSideWouldBeEmpty": [
+   "divideWRows"
+  ],
+  "blocksNotAdjacent": [
+   "merge",
+   "mergeCeremony"
+  ],
+  "mergedBlockWouldHaveNoTake": [
+   "mergeCeremony"
+  ],
+  "takePairedTwice": [
+   "mergeCeremony"
+  ],
+  "noRenderableVariant": [
+   "renderedVariant"
+  ],
+  "duplicateTagPath": [
+   "ensureNoLiveTagPath"
+  ],
+  "invalidTagName": [
+   "applyTagPath",
+   "insertTag",
+   "removeTagForClient",
+   "resolve",
+   "setBookRule"
+  ],
+  "alreadyTagged": [
+   "applyTag",
+   "applyTagPath"
+  ],
+  "tagNotApplied": [
+   "removePostTagApplication",
+   "removeTag",
+   "removeTagForClient"
+  ],
+  "cannotVersionLinkBlockToItself": [
+   "insertVersionOfEdge"
+  ],
+  "versionLinkExists": [
+   "insertVersionOfEdge",
+   "linkVersionsForClient"
+  ],
+  "postHasNoBlocks": [
+   "copyPost"
+  ],
+  "bufferChangedSinceGesture": [
+   "divideBlock",
+   "editTakeUnderInsurance",
+   "enforce",
+   "mergeBlocks"
+  ],
+  "lensNotFound": [
+   "deleteLensForClient",
+   "liveLens"
+  ],
+  "invalidLensName": [
+   "saveLens"
+  ],
+  "blockNotInContainer": [
+   "requireBlock",
+   "saveLens"
+  ],
+  "emptyImport": [
+   "importBook",
+   "insertBlocks"
+  ],
+  "commentNotFound": [
+   "liveComment",
+   "reviveCommentRow"
+  ],
+  "invalidCommentText": [
+   "insertBlockComment",
+   "rewriteComment"
+  ],
+  "commentNotDeleted": [
+   "reviveCommentRow"
+  ],
+  "sectionNotFound": [
+   "liveSection",
+   "restoreSectionRow",
+   "sectionPosition"
+  ],
+  "invalidSectionName": [
+   "importBook",
+   "insertSection",
+   "renameSectionRow"
+  ],
+  "sectionNotInReading": [
+   "addNoteToBook",
+   "assignSectionRow"
+  ],
+  "sectionNotDeleted": [
+   "restoreSectionRow"
+  ],
+  "shelfNotFound": [
+   "importBook",
+   "liveShelf"
+  ],
+  "wingNotFound": [
+   "requireLiveWing"
+  ],
+  "postAlreadyInWing": [
+   "moveNoteToWing"
+  ],
+  "crossWingMembership": [
+   "requireSameWing"
+  ],
+  "wingMoveChangedSince": [
+   "refuseIfWingMoveChangedSince"
+  ],
+  "duplicateBookName": [
+   "requireBookNameFree"
+  ],
+  "mcpInvalidClientName": [
+   "recordMCPContact"
+  ],
+  "mcpClientNotFound": [
+   "recordMCPContact"
+  ],
+  "mcpGrantNotFound": [
+   "consumeMCPOnceGrant"
+  ]
+ },
+ "unreachable": [
+  "referenceNotFound",
+  "dailyJournalTraitIsConstitutive",
+  "blockAlreadyArchived",
+  "blockNotArchived",
+  "arrivalNotFound",
+  "readingHasNoAutoTag",
+  "noteInSealedBook",
+  "readingNotSealed",
+  "ownedBookDuplicatesDeep",
+  "spanNotExtractable",
+  "blockNotInPool",
+  "emptyTakeCannotBecomeABlock",
+  "noConvertibleTakes",
+  "noOwnerIdentity",
+  "versionLinkNotFound",
+  "postsAlreadyVersionLinked",
+  "notVersionHistory",
+  "lensChoiceNotFound",
+  "canvasPositionNotFound",
+  "invalidPresentationKind",
+  "invalidExtent",
+  "invalidTint",
+  "invalidShelfName",
+  "invalidShelfGlyph",
+  "invalidWingName",
+  "duplicateWingName",
+  "wingNotEmpty",
+  "dailyJournalIsHomeOnly",
+  "readingAlreadyInWing",
+  "wingMoveIntoItself",
+  "placementAnchorNotOnShelf",
+  "starLimitReached",
+  "purgeTargetNotDeleted",
+  "unsupportedPurgeTarget",
+  "deliberateSavepointNeverPruned",
+  "smartFilterUnsatisfiable",
+  "mcpClientNotApproved",
+  "mcpGrantScopeNotFound",
+  "mcpGrantScopeFenced",
+  "mcpRebindRequestNotFound"
+ ],
+ "thrown_nowhere": [],
+ "roots_in_core": 136,
+ "functions_reached": 695
+}

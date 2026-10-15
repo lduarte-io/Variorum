@@ -5593,3 +5593,299 @@ read from BYTES (`measure.py`), the advice read from BYTES (`instructions.py`).
   Bookcase, on Welcome) were SEEN and the old guide was in the Trash, so this is recorded, not owed.
 - **F1/F2 → VX-361/VX-362, U9** (provisional ruling 1), before the ladder.
 
+## U9 UNIT RECORD — two wire truths from U8's round: VX-361 · VX-362 (opus-implementer, from 2026-10-14 ~23:55 MDT)
+
+**What this unit has NOT done (said first; updated at every piece):** (1) **NO product code yet** — piece 0 is the
+design, and it STOPS for the orchestrator's ruling on FORK F-1 (VX-361's shape: the brief names a shape change a fork to
+propose); F-2 and F-3 are argued single-answer and offered for confirmation in the same stop. (2) No pins yet (they
+follow the ruling, red on the pre-fix tree). (3) No stage window, no Mac build. (4) The sweep found two things OUTSIDE
+this unit's surface (OWED 1–2: a fence leak in `import_document`'s book form, and a dangling-wing outflow refusal) —
+recorded and proposed as tickets, never "also done".
+
+**Read in full before any code (never delegated):** this record's header, Hard rules (incl. never `claude mcp list`),
+LIVE STATUS, ORCHESTRATOR'S PROVISIONAL RULINGS (ruling 1), the U9 BRIEF, the U8 STAGE RUN (its organization leg, step
+9, F1/F2 and the result line), THE ORCHESTRATOR ON U8's WINDOW, U5b's D1 and its rulings; `notes/MCPSpec.md` whole;
+`notes/SessionResiliencyProtocol.md`'s implementer section; the code — `MCPWriteTools.swift` (the `create_note` /
+`import_document` / `apply_tag` arms, `noteAnswer`, `land`), `MCPWriteTools+RemoveTag.swift`, `+Batches.swift`
+(`itemized`), `+Carriage.swift` (`set_book_rule`), `+NoteEdits.swift` (`restore_comment`), `+LibraryEdits.swift`,
+`+WingMove.swift`, `MCPWriteSupport.swift` (`MCPWireRefusalCopy`, `MCPHostHooks.refusalWords`), `MCPReadTools.swift` /
+`MCPShowTool.swift` / `MCPSession.swift` (their error roads); core `Operations+Tag.swift`, `Operations+MCPWrites.swift`
+(`mintNoteEntry`, `applyTagPath`, `removeTagForClient`), `Operations+Intake.swift` (`insertPostTag`, `applyAutoTag`,
+`writeReadingOutflow`), `Operations+Reading.swift` (`addPostToReading`, `newPostInReading`), `Operations+DocumentImport.swift`
+(`DocumentImport`, `applyDocumentTags`, `importBook`), `OperationError.swift` whole; `App/Variorum/Shared/OpsRefusalTable.swift`
+whole and the Mac half `Registry/OpsRefusalCopy.swift` (`macWords`, `message(for:)`), `MCPDoor.swift`'s hook (l.404);
+her doors catching `alreadyTagged` (`BlockTOCView` l.634, `TutorialSeeder` l.1898, `LibraryCatalogTagActs` l.36,
+`PoolPostsView` l.183, `SnippetsSurface` l.438, `TypedTagPath` l.155, `Operations+Quicknote` l.90) and her
+`alreadyInReading` words (`ReadingsViewModel.message`, `MembershipChip`, `MembershipChoice`, `MobileMembership`);
+`OpsRefusalTableIntegrityTests`; the tests around `apply_tag` (`MCPWriteActsTests` l.247, `MCPWriteServerTests` l.513)
+and the minted answer (`MCPMintedAnswerServerTests`).
+
+### LIVE STATUS — U9's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | the design: traces (probed), F-1 proposed, F-2/F-3 argued, THE SWEEP TABLE, the build plan | DONE (this commit) — **STOPPED for the orchestrator's ruling on F-1** (and confirmation of F-2/F-3) |
+| 1 | refactor, behaviour-neutral: the wire's ONE refusal chain named (`MCPWireRefusalCopy.spoken`), used by `land` and `itemized` | NOT-STARTED — after the ruling |
+| 2 | the pins, red on the old tree (headless VX-361 · VX-362 (a) · the wire-copy row; the Mac sweep pin) | NOT-STARTED |
+| 3 | VX-361 — the fix (as ruled) + the import collision | NOT-STARTED |
+| 4 | VX-362 (a) — `apply_tag`'s no-op answer | NOT-STARTED |
+| 5 | VX-362 (b) — the sweep's words (shared table + wire copy) | NOT-STARTED |
+| 6 | revert check (announced first), headless finals, `build-for-testing` (Mac + phone), red product | NOT-STARTED |
+| 7 | THE STAGE WINDOW plan (`vx336-u9`) → READY | NOT-STARTED |
+
+### The traces (written before code; each mechanism PROBED on the pre-fix tree `35f9cd70`)
+
+The probe: a scratch `swift test` suite (never committed, deleted after) over the real wire (`ServerHarness`, the SDK
+client on a socket; the harness's `refusalWords` is `"Refused: \(error)"`, the app table's fallback shape): a book with
+outflow `[green-tea]`, a wing grant at write new. Its four answers, verbatim (ids are the harness's `.incrementing`):
+- `create_note {book_id, text}` → `…"note_id":"…0004","tag_ids":[]}` while `post_tag` holds `green-tea` for the note.
+- `apply_tag {note, "green-tea"}` → isError, `Refused: alreadyTagged(tagID: "…0000", targetID: "…0004")`.
+- `import_document {book_id, document "{t:\"second\"} {#green-tea}\n\nSteep 2 minutes."}` → isError,
+  `Refused: SQLite error 19: UNIQUE constraint failed: post_tag.tag_id, post_tag.post_id - while executing INSERT INTO "post_tag" …`
+  — **the whole import refused**, a third finding in VX-361's class (below).
+- `add_note_to_book` of the note again → isError, `Refused: alreadyInReading(postID: "…0004", readingID: "…0001")`.
+
+**VX-361 — `tag_ids` misses the outflow (and the outflow breaks a tagged import).** `noteAnswer`
+(`MCPWriteTools.swift:812`) answers `minted.tagIDs`; `mintNoteEntry` (`Operations+MCPWrites.swift:538`) builds it as
+`applyDocumentTags(db, named.document.tagPaths, …)`'s return — the DOCUMENT HEADER's tags only. For a book destination the
+hand-add runs first (`addPostToReading(db, …)` l.577, by design: "BEFORE the header's tags, so this book's own pair is
+decided"), and the hand-add's last line applies the book's OUTFLOW (`applyAutoTag`, `Operations+Reading.swift:781` →
+`Operations+Intake.swift:310` — each tag through `insertPostTag`, silent for a dangling tag, another wing's, or one
+already worn). So a note minted into a book with an outflow WEARS the outflow's tags while the answer lists only the
+header's: `create_note` (no header at all — `tagPaths: []`, l.445/494) always answers `[]`; one `import_document`
+answers its header only. **The collision:** `applyDocumentTags` (`Operations+DocumentImport.swift:305`) inserts every
+header tag with NO live-application check (it was written for a fresh, untagged note — `importDocument`, `importBook`'s
+seat), so a header tag the outflow already applied hits `uq_post_tag_live` → `DatabaseError` → the wire's chain
+(`land`, l.730: `MCPWireRefusalCopy.words ?? hooks.refusalWords ?? String(describing:)`) → the SQLite text, and the
+transaction rolls the whole import back. The other doors: `importDocument` (the file door) mints bookless — no outflow;
+`importBook` (the folder door and the wire's book form) mints a NEW book with no outflow — no collision, and its answer
+has no tag field; `insert_blocks` mints blocks into an existing note — no tags; `duplicate_note` carries the source's
+tags (17y B3 (c)) and answers no tag field — none of the three can say something false about tags. **Sibling (no false
+field, OWED 4):** `add_note_to_book` also wears the outflow onto the note (the same hand-add) and its answer names no
+tags — after F-2 a redundant `apply_tag` there answers `changed: false`, so the U8 failure cannot recur on that road.
+
+**VX-362 — the raw case.** `applyTagPath` (`Operations+MCPWrites.swift:621`) throws `alreadyTagged` for a tag the note
+already wears; the arm (`MCPWriteTools.swift:475`) does not catch it; `land`'s chain asks `MCPWireRefusalCopy.words`
+(no arm — nil), then the app hook (`MCPDoor.swift:404`: `OpsRefusalCopy.message(for:)` → the Mac half's `macWords` (no
+arm) → the shared `words(for:roads:)` (no arm) → `"Refused: \(error)"`, `OpsRefusalTable.swift:383`). **The error roads
+of the whole door** (traced for the sweep): (1) `MCPWriteTools.land` — every write act's thrown error past `Refused` /
+`ArgumentFailure`; (2) `MCPWriteTools.itemized` (the batches) — the same chain, prefixed by the item; (3) the outer
+catches — `MCPWriteTools.call`, `MCPReadTools.call`, `MCPShowTool.call` — `"Variorum couldn't complete X: \(error)"`
+for anything thrown OUTSIDE `land` (every `ops.` call sits inside a decision's closure, so only reads, logging and the
+transport reach them — never an `OperationError`); (4) the handshake (`MCPSession` l.214) — catches every admission
+error into its own sentence. Only `Operations` throws `OperationError` (no `Queries` function does).
+
+### The design (argued; the forks it leaves are proposed at the end)
+
+**D1 — VX-361's fix, every shape alike: the answer is built inside the act's transaction.** The note is minted in that
+transaction, so its live tags at commit are exactly this act's — read there, ∝ the outflow (a handful of ids), never a
+read after the commit (D1-of-U5b's no-race rule holds). `applyDocumentTags` gains the outflow's own rule — a header tag
+the note already wears is not inserted again (the application exists; its intake already ran) but IS reported (the note
+wears it). That closes the collision for every shape; `importDocument` and `importBook` mint untagged notes, so their
+behaviour is byte-unchanged. The shapes differ only in what the answer lists (F-1).
+
+**D2 — VX-362 (a): `apply_tag` on a tag the note already wears answers SUCCESS, `changed: false` (argued single-answer;
+offered for confirmation as F-2).** AF-11 F-1 rules the door "refuse exactly where her door refuses, never more", and
+R-13n-6 "exactly as her gestures do": every tag door of hers treats an already-applied tag as done — seven sites catch
+`alreadyTagged` and move on, `TypedTagPath`'s in her words *"Already wearing it — typing it again is a no-op, never an
+error"*. So: the arm catches `alreadyTagged(tagID:…)` and answers `{"note_id", "tag_id", "tag", "changed": false}` (the
+path read for the id the error names — the success arm's own read); the op threw, so its transaction rolled back (a
+segment it would have minted was not — the tag exists) and NO undo entry registered; the receipt is nil (a receipt may
+only claim what landed — the U3 no-op rule); the Activity line is the act's landed line, as every no-op act on the wire
+logs (`rename_book`, `choose_take`, `edit_take` with `changed: false`); a once grant is spent as by any landed call (AF-7
+as amended: "spent by its first write of any rung" — the no-op edits spend theirs in their guards). A landed apply
+gains `"changed": true` (additive; every existing caller and pin reads the same keys). The op keeps its contract
+(`MCPWriteActsTests` l.263 pins `applyTagPath` throwing — unmodified). `flushesHerEditorFirst` stays false (no take).
+**`remove_tag` on a tag the note doesn't wear keeps its worded refusal** (VX-184 U3, pinned in
+`MCPRemoveTagServerTests`): her un-tag can't meet that state (her chips list only worn tags), so no ruling of hers binds
+it; a path naming nothing (a typo) is indistinguishable from not-worn there and the sentence points at `read_note`'s
+header — while `apply_tag` cannot meet a typo at all (any path adopts or mints). **The siblings:** the wire's other
+no-ops either answer `changed: false` already (the renames, finish/reopen, choose, adopt, label, date, filing, block
+name, edits) or refuse in words (`archive_*`/`unarchive_*` "already … — nothing changed", `put_back` "already back",
+`link_versions` "already linked"); the two that refused RAW are swept below (`add_note_to_book`'s `alreadyInReading` —
+her doors REFUSE it, in words, so the wire refuses in those words; `restore_comment`'s `commentNotDeleted` —
+`put_back`'s "already back" twin).
+
+**D3 — VX-362 (b): where the words live (argued single-answer; F-3 for confirmation).** `MCPWireRefusalCopy`'s own
+contract (13n-b U4) splits the homes: it holds "the op refusals only the WIRE can meet … an address a client typed",
+and "the app's own table speaks" the rest (the hook). So a refusal her doors can also meet gets words in the SHARED table
+(`OpsRefusalTable.swift` — her voice, both platforms; mobile-visible, MOBILE PARITY below), and one only a client can
+type gets words in `MCPWireRefusalCopy` (it runs first). Words are reused from her own doors wherever a sentence already
+exists. The pin (piece 2) walks every `OperationError` case through the door's EXACT chain, named once (piece 1).
+
+**D4 — the fence, P1, undo, her editor.** No new answer or refusal can tell hidden from missing: every swept case is
+raised only AFTER the act's decision allowed its target (the snapshot or the in-transaction guard), so its words speak
+of a thing the client could reach; the not-shared shape stays first on every road. P1: the answer's tags ∝ the outflow;
+no new read elsewhere. Undo: no new entry anywhere (the no-op registers none; D1 changes no entry). `flushesHerEditorFirst`:
+no job changes family.
+
+### THE FORKS — F-1 proposed for the orchestrator's ruling; F-2, F-3 argued and offered for confirmation
+
+**F-1 (VX-361) — what `create_note`'s and one `import_document`'s answer says about tags.** *(Recommendation first.)*
+- **(a) RECOMMENDED — `tag_ids` = every tag the note wears when the act lands, plus `tags`, their paths, parallel.**
+  Order: the header's tags in header order (a header tag the outflow also applied is listed once, here), then the
+  outflow's tags the header didn't name, in outflow order. `tags` is the wire's tag vocabulary everywhere else —
+  `apply_tag`/`remove_tag` answer `tag` (a path), `read_note`'s header lists paths, the book facts' `outflow` (what
+  `set_book_rule` answers) lists paths — so a client that set an outflow by path sees the same words come back, with no
+  read. Why (a): `create_note` has NO tag input, so its `tag_ids` could only ever have meant "the note's tags", and it has
+  answered `[]` for every note an outflow tagged; for `import_document` the header's tags stay the prefix, in order, so
+  a caller pairing them with its header still reads right. The meaning widens from "the tags the header named" to "the
+  tags the note wears" — which is what the name says, what neither description ever narrowed (`create_note`'s never
+  mentions `tag_ids`; `import_document`'s says "the new ids"), and what the client needed to not tag again. Each
+  description gains one sentence (FOR VX-234's planned list).
+- **(a′) — (a) without `tags`** (ids only): the smallest change; a client maps ids to paths by reading.
+- **(b) — `tag_ids` unchanged (the header's) + a new `outflow_tag_ids`** (and paths): keeps the old meaning exactly; a
+  client must learn a second field, and `create_note`'s `tag_ids` stays `[]` forever — the field that misled U8's client.
+
+**F-2 (VX-362 (a)) — argued single-answer (D2); offered for confirmation:** `apply_tag` on a worn tag = success,
+`changed: false`, no entry, no receipt, the landed Activity line; `changed: true` on a landed apply; `remove_tag` on an
+absent tag keeps its worded refusal; `add_note_to_book` on a member refuses in her words. (The rejected option: a worded
+refusal for `apply_tag` — "That note already wears the tag “…” — nothing changed." — refuses where her doors don't.)
+
+**F-3 (VX-362 (b)) — argued single-answer (D3); offered for confirmation:** the shared table for refusals her doors can
+meet; `MCPWireRefusalCopy` for client-typed ones; her doors' existing sentences reused.
+
+### THE SWEEP TABLE (VX-362 (b)) — all 108 `OperationError` cases at `35f9cd70`
+
+**Method.** (i) **The worded set** — read from the three tables' switches: the shared `words(for:roads:)` (53), the Mac
+half `macWords` (8), `MCPWireRefusalCopy` (4) = **65**; plus tool-level catches that word a case on its only wire road.
+(ii) **The over-approximate call graph** (`notes/plans/fixes/vx-336-u9-sweep/callgraph.py`, output
+`callgraph-35f9cd70.json`; re-run: `python3 -I notes/plans/fixes/vx-336-u9-sweep/callgraph.py <repo>`, `--why <case>`
+prints a chain): every function body in `Sources/VariorumCore` parsed (comments and strings stripped), calls matched BY
+NAME (overloads merged, every closure body counted for its enclosing function — undo inverses included), rooted at
+EVERY call `Sources/VariorumMCP` makes (136 roots in core, 695 functions reached). Over-approximation makes its
+"unreachable" column a proof (modulo the parser) and its "reachable" column a candidate list. **40 unreachable, 68
+candidates.** (iii) **The candidates not already worded (26) traced by hand**, below.
+
+| class | n | cases | disposition |
+|---|---|---|---|
+| **W — worded already** (any reachable road speaks a sentence) | 65 | shared: archivedVariant · blockCarriesUnshownText · blockNotDeleted · blockNotPlaced · blocksNotAdjacent · bufferChangedSinceGesture · commitNotFound · crossWingMembership · dailyJournalCannotBeDeleted · dailyJournalIsHomeOnly · dailyJournalTraitIsConstitutive · duplicateBookName · duplicateWingName · emptyTakeCannotBecomeABlock · fannedBlock · gatheringRequiresRule · invalidCommentText · invalidCut · invalidExtent · invalidShelfGlyph · invalidShelfName · invalidTint · invalidWingName · lastActiveVariant · lockedPost · lockedVariant · noConvertibleTakes · noRenderableVariant · noteInSealedBook · noteMemberedElsewhere · noteOwnedElsewhere · ownedBookDuplicatesDeep · placementAnchorNotOnShelf · postAlreadyInWing · postHasNoBlocks · postsAlreadyVersionLinked · purgeTargetNotDeleted · readingAlreadyArchived · readingAlreadyInWing · readingNotArchived · readingNotDeleted · readingNotFound · readingNotSealed · readingSealed · shelfNotFound · unsupportedPurgeTarget · variantIsChosen · variantNotDeleted · variantNotFound · versionLinkNotFound · wingMoveIntoItself · wingNotEmpty · wingNotFound — Mac half: blockNotFound · deliberateSavepointNeverPruned · divideSideWouldBeEmpty · lockedReading · mergedBlockWouldHaveNoTake · starLimitReached · takePairedTwice · wingMoveChangedSince — wire copy: invalidTagName · postNotInReading · sectionNotFound · sectionNotInReading | none (two observations on their WORDS: OWED 3) |
+| **C — worded by the tool on its only wire road** | 2 | `tagNotApplied` (`remove_tag` → `notWornWords`; `removeTagForClient` is its one road) · `versionLinkExists` (`linkVersionsForClient` catches → `alreadyLinked`; `duplicate_note`'s edges join FRESH blocks) | none |
+| **U-graph — unreachable by the call graph, unworded** | 17 | arrivalNotFound · blockAlreadyArchived · blockNotArchived · blockNotInPool · canvasPositionNotFound · invalidPresentationKind · lensChoiceNotFound · mcpClientNotApproved · mcpGrantScopeFenced · mcpGrantScopeNotFound · mcpRebindRequestNotFound · noOwnerIdentity · notVersionHistory · readingHasNoAutoTag · referenceNotFound · smartFilterUnsatisfiable · spanNotExtractable | PROVEN unreachable (no function the wire reaches throws it) |
+| **U-hand — candidates proven unreachable by hand** | 13 | see the rows below | PROVEN unreachable |
+| **R/E — reachable, unworded → WORDED in this unit** | 10 | see the rows below | words (pieces 5) |
+| **X — reachable, closed by the act's posture** | 1 | `alreadyTagged` | F-2: `apply_tag` (its only wire road — `applyTagPath`; `applyTag(_:toPost:)` / `toBlock` are never wire-called) catches it; then U |
+
+**U-hand — the proofs (13):**
+- `duplicateTagPath` — `insertTag` is wire-reached only through `adoptPath`, which mints a segment only after reading
+  that no live tag holds that path in that wing, in the same transaction (`ensureNoLiveTagPath` re-reads the same rows).
+  `createTag`/`renameTag` are never wire-called.
+- `noMarkedVariants` — `divideW` is wire-called only by `divideBlock`, whose `KeepOnTopDivide.compose` always carries the
+  shown take's cut (`cuts = [displayedID: cut]` first).
+- `cannotVersionLinkBlockToItself` — `link_versions` refuses `sameNote` before the op and a block lives in one note (I2),
+  so a pair's blocks differ; `duplicate_note` links a source block to its FRESH copy.
+- `lensNotFound` — `delete_lens` / `adopt_lens` decide on `mcpContainerOf(lens:)` (live lenses only) in the snapshot AND
+  in the in-transaction guard that runs FIRST in the op's transaction (`deleteLensForClient` l.556, `adoptLensAsNote`
+  l.227); `read_note`'s `lens_id` answers the not-shared shape.
+- `invalidLensName` — `save_lens`'s `name` is `requiredText` (non-blank) at the parse; the op's check is the same trim.
+- `emptyImport` — `insert_blocks` refuses an empty `blocks` at the parse (1–200); `import_document`'s book form refuses
+  "The book holds no documents." at the parse; `importText`/paste are never wire-called.
+- `commentNotFound` — `edit_comment`/`delete_comment` decide on a LIVE comment's note, `restore_comment` on
+  `mcpCommentHome` (nil for no row), each in the snapshot and again in the guard first in the transaction.
+- `sectionNotDeleted` — no wire tool restores a chapter (`restoreSectionRow` runs only in her ⌥⌘Z of `delete_chapter`).
+- `containerNotDeleted` — `restoreContainerRows` runs only inside undo inverses (her ⌥⌘Z), never a wire act.
+- `wrongContainerKind` — `container.kind` is never written after its mint (no op updates it), and every container id an
+  op receives on a wire road was decided as a live POST (`mcpNoteFacts` requires `kind = 'post'`).
+- `mcpInvalidClientName` · `mcpClientNotFound` — `recordMCPContact` runs only at admission, whose `catch`
+  (`MCPSession.swift:214`) answers the handshake's own sentence — never a tool answer; the other throwers are her pane's.
+- `mcpGrantNotFound` — every consume runs in the same transaction as the decision that found the once grant live and
+  unspent (the guards, `read_note`); `land`'s after-the-act spend is `try?`.
+
+**R/E — reachable and unworded (10), each with its road (R = an ordinary call; E = a sync race between the act's
+decision and its transaction, or a sync-made store state), its home (D3) and its words (PLANNED — FOR VX-234):**
+
+| case | road | home | words (PLANNED) |
+|---|---|---|---|
+| `alreadyInReading` | R — `add_note_to_book` on a note already in the book (probed) | shared | **"That note is already in this book."** — her generic arm's sentence (`ReadingsViewModel.message`), hoisted |
+| `readingAtCapacity` | R — `create_note` / one `import_document` into a full book (`max_posts`), `add_note_to_book` | shared | **"This book is at its note limit."** — her generic arm's, hoisted |
+| `commentNotDeleted` | R — `restore_comment` on a live comment (its arm's own note: "a live one reaches her restore's own 'not deleted' refusal") | shared | **"That comment is already back."** — NEW, `put_back`'s "That block is already back." twin |
+| `invalidSectionName` | R — `import_document`'s book form with a blank chapter name (the parse accepts `""`) | shared | **"A chapter needs a name."** — NEW, the shelf's/wing's "A … needs a name." twin |
+| `invalidEntryDate` | E/belt — the wire parses `entry_date` with its own formatter, the op with `JournalDay.isValid`; a probe of 1,000+ shapes found no disagreement, but two validators are not one | wire copy | the wire's OWN parse sentence: "entry_date must be a real day written yyyy-MM-dd (e.g. 2019-03-04)." (no new words) |
+| `containerNotFound` | E — a write-new/suggest act with no in-transaction guard whose op reads the note by `livePost` (`apply_tag`, `save_lens`, `add_note_to_book`) while a sync apply tombstones the note between the decision and the act | shared | **"That note isn't there any more — it may have just been deleted."** — NEW, `variantNotFound`'s first clause, one row-kind up |
+| `wrongReadingKind` | E — `create_note` / one `import_document` into a book, or `add_note_to_book`, while a sync apply turns the book back into a gathering (another device's un-bind) | shared | `.book`: **"That isn't a book — a gathering shows the notes its rule matches and holds none of its own."** — NEW (the wire's `gatheringWords` register); `.gathering`: "That's already a book — only a gathering binds into one." — her bind door's, hoisted |
+| `tagNotFound` | E — `set_book_rule`'s outflow on a book whose wing pointer dangles (the adoption resolves in Home; `writeReadingOutflow` compares the stored id — OWED 2; her Save shares it) | shared | **"That tag isn't there any more — nothing changed."** — NEW, the shelf's/library's "isn't there any more — nothing changed." twin |
+| `blockAlreadyPlaced` | E — `put_back` on a deleted block a sync apply left with a live placement (`restoreBlock` → `insertPlacement`) | shared | **"That block is already in a note — nothing changed."** — NEW |
+| `blockNotInContainer` | E — `save_lens` whose picked block a sync apply moves out between the picks' read and the act (the batches already word it on their road) | shared | `blockNotPlaced`'s sentence, reused: "That block is no longer in this note — it may have moved while you worked. Nothing was changed here." |
+
+**Other error TYPES on the wire** (the class beyond `OperationError` — no raw Swift case may reach a client): the MCP
+refusal enums are each caught by their tool and worded (`MCPBookRuleRefusal` — `set_book_rule`; `MCPNoteEditRefusal`'s
+two — `edit_comment`, `delete_take`; `MCPLibraryRefusal` — `move_note_in_book`; `MCPVersionLinkRefusal`'s five —
+`link_versions`); `MCPBatchItemRefusal` — `itemized`; `VariorumDocument.Failure` — parsed into an `ArgumentFailure`;
+`MCPAnswerEncodingFailure` — a `CustomStringConvertible` sentence; `SearchComposer.Refusal.negativeOnlyText` — the v1
+parser (`SearchQueryParser`) never emits `.not` (U); a `DatabaseError` — the one reachable today is the import
+collision (closed by D1). Nothing else found.
+
+### THE BUILD PLAN after the ruling (pieces 1–7 — a fresh session can run these from this record)
+
+1. **Refactor (neutral, its own commit):** `MCPWireRefusalCopy.spoken(_ error: Error, appWords: (Error) -> String?) ->
+   String` = `words(error) ?? appWords(error) ?? String(describing: error)`; `land` (l.730) and `itemized` (l.238) call
+   it. Headless MCP target green, unchanged.
+2. **Pins (red on the old tree, committed before any fix):** headless `Tests/VariorumMCPTests/MCPTagTruthServerTests.swift`
+   — (VX-361) `create_note` into an outflow book answers the outflow's tag (per the ruled shape); one `import_document`
+   whose header names the outflow tag LANDS (old: the SQLite refusal) and lists it once; a header tag + a different
+   outflow tag both listed, header first; a bookless note's answer unchanged; (VX-362 (a)) `apply_tag` twice → the second
+   `changed: false`, the undo stack's top label and count unchanged, no receipt, the first `changed: true`;
+   `remove_tag` of an absent tag still refuses in its words (a guard); `MCPWireRefusalCopy.words(.invalidEntryDate)` is
+   the parse sentence (old: nil). Mac `App/Variorum/VariorumTests/MCPWireRefusalSweepTests.swift` — reads
+   `OperationError.swift` by `#filePath`, holds ONE sample per case (the case-name sets must be EQUAL — a new case fails
+   the pin until it is swept), the U list with each proof's one line; every case not in U runs the door's exact chain
+   (`MCPWireRefusalCopy.spoken(e) { OpsRefusalCopy.message(for: $0) }` — `MCPDoor`'s hook) and must not start
+   "Refused:", contain the case name followed by "(", or equal `String(describing:)`; plus `OpsRefusalTableIntegrityTests`
+   unmodified. **Predicted red on old:** the Mac pin's 10 R/E cases (+ any I mis-swept); the headless pins' VX-361 and
+   VX-362 (a) tests and the wire-copy row.
+3. **VX-361:** `applyDocumentTags` skips-but-reports a worn tag; `mintNoteEntry` composes the answer's tags inside the
+   transaction (D1, the ruled shape); `DocumentImport` carries what the shape needs; `noteAnswer` answers it; the two
+   descriptions gain their sentence.
+4. **VX-362 (a):** the `apply_tag` arm's catch and `changed`; `apply_tag`'s description gains "changed is false when
+   the note already wore the tag — nothing written, nothing to undo".
+5. **VX-362 (b):** the nine shared-table arms (`OpsRefusalTable.swift`, each commented with its road) and the wire-copy
+   arm.
+6. **Revert check** (ANNOUNCED in this record and committed first): each fix's lines reverted alone, its pins red,
+   restored, green. **Headless finals** (`swift build`; `swift test` per target: `VariorumMCPTests` (VX-353's flake
+   re-run alone), the core tag/intake/import/MCP-write suites). **Products** (disk checked): `xcodebuild
+   build-for-testing` → `App/Variorum/DerivedData/vx336-u9` (Mac) + the phone target (the shared table moved); a red
+   product `vx336-u9-red` from the pins commit for the Mac sweep pin.
+7. **THE STAGE WINDOW plan** (`vx336-u9`): the Mac suites reaching the table and the tag doors (named by grep), the red
+   run, the SEAM, the A1, the short real-client leg (a book with a tag rule + outflow → `create_note` → `tag_ids`/`tags`
+   carry it → `apply_tag` → `changed: false`, no raw case → `add_note_to_book` again → "That note is already in this
+   book."), cleanup to cmp-SAME / prefs 0 differ / fingerprint SAME → READY.
+
+### FOR VX-234 (PLANNED words — written AS BUILT at piece 5)
+
+Her app's table (both platforms): "That note is already in this book." (hoisted) · "This book is at its note limit."
+(hoisted) · "That comment is already back." · "A chapter needs a name." · "That note isn't there any more — it may have
+just been deleted." · "That isn't a book — a gathering shows the notes its rule matches and holds none of its own." ·
+"That's already a book — only a gathering binds into one." (hoisted) · "That tag isn't there any more — nothing
+changed." · "That block is already in a note — nothing changed." · (`blockNotPlaced`'s sentence reused). Model-facing:
+`create_note`'s and `import_document`'s tag sentence (per F-1), `apply_tag`'s `changed` sentence.
+
+### PROVISIONALs (planned — the orchestrator files them at the merge)
+
+- **P-VX362-1 — the new refusal words** (the table above): (a) as built; (b) her VX-234 pass rewords any; (c) the wire
+  speaks the one not-shared shape for the race-only "isn't there any more" class instead (rejected here: the wire
+  already speaks the shared table's not-found sentences for takes and books, and every such refusal follows a decision
+  that allowed the target).
+- **F-1's shape** if the orchestrator rules it PROVISIONAL (her away-mode answer): the options as listed above.
+
+### MOBILE PARITY (planned)
+
+The shared table's new arms speak on the phone wherever a phone door falls to `OpsRefusalCopy.words(for:roads: .phone)`
+(e.g. `MobileMembership`'s default arm): mobile-VISIBLE words, the same sentences. No phone pin changes; the phone target
+is built headless at piece 6.
+
+### OWED (U9 → the orchestrator)
+
+1. **A fence leak in `import_document`'s BOOK form (VX-259's class)** — `importBook` (`Operations+DocumentImport.swift`,
+   the E13 guard `requireBookNameFree(db, name)` with no reach) counts EVERY live book, so a book the client cannot read
+   blocks the name AND is named back ("A book named “…” already exists — …"). `create_book` and `rename_book` pass
+   `readableBooks(clientName)` since VX-259; the import's book form was missed. Traced, not pinned (outside U9's surface).
+   **Proposed ticket:** Bug · Suspected · MCP · High (a no-oracle breach); Pre-launch is her call.
+2. **A dangling-wing book refuses an outflow** — `set_book_rule` (and her own rule editor's Save, through
+   `writeReadingOutflow`) resolves tags in the EFFECTIVE wing (Home for a dangling pointer) but checks them against the
+   STORED wing id, so it refuses `tagNotFound`. Reachable only after a sync-made dangling wing. **Proposed ticket:** Bug ·
+   Suspected · Books · Low.
+3. **Two worded cases speak Mac-door words on the wire** (not raw, so outside VX-362's letter): `blockNotFound` → "…since
+   you picked it" (`BlockSelectionCopy.blockGone`, the ⌘-click vocabulary) and `lockedReading` → "…if it's sealed, unseal
+   it." For VX-234's eye; no ticket proposed.
+4. **`add_note_to_book`'s answer doesn't say the outflow tagged the note** (no false field; after F-2 a redundant
+   `apply_tag` answers `changed: false`). **Proposed ticket (optional):** Improvement · Suspected · MCP · Low.
