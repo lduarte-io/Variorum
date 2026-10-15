@@ -152,8 +152,16 @@ struct LandProgram: ActProgram {
             // The slot holds the landed library now: this executor serves it.
             guard let record = try ctx.leaves.library.readRecord(with: key) else { throw ExecutorRefusal.recordMissing }
             ctx.executor.configuration.libraryID = record.libraryID
+            // This Mac's section for the LANDED library: the press's, in hand —
+            // or, on a resume (the press's memory went with the crash), the one
+            // the swapped-in record carries naming this landing, where the
+            // press wrote it. Never the outgoing library's (it carried another
+            // identity's keys into the landed library — VX-305 U4, the soak's
+            // seed 1).
+            let landedSection = ctx.landingSection ?? record.verifiedSections(reach: { $0 == ActContext.fp(key) ? key : nil })
+                .first { $0.actInFlight?.act == .land && $0.actInFlight?.toFingerprint == ActContext.fp(key) }
             ctx.library = UnlockedLibrary(
-                key: key, record: record, section: ctx.landingSection ?? ctx.library.section,
+                key: key, record: record, section: landedSection ?? ctx.library.section,
                 resolution: .newIdentity(predecessorID: nil), memory: nil, keyFile: try ctx.executor.liveFormat3(),
                 familyTree: record.familyTree)
             // The plan stays the one the landed library's section names.

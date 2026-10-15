@@ -391,4 +391,24 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 1 (sequence 180, the closer's soak): a local Standard pair's
+    /// landing crashed between its record written into the staged file and
+    /// the swap; the relaunch's resume swapped, then carried the OUTGOING
+    /// library's device section into the landed library — this Mac's own
+    /// Apple key for it (minted at the landing, listed in the landed section)
+    /// read as nobody's, promise 3 broken. The resume takes this Mac's landed
+    /// section from the swapped-in record, where the press wrote it.
+    @Test func aLandingResumedAtItsSwapKeepsTheLandedSection() async throws {
+        let world = try Self.start("exposed", seed: 1000183)
+        for action in [Action.createLibrary("phone", secrets: true), .sendLibrary(from: "phone", to: "macA"),
+                       .crash(.land("macA", .wordsPassphraseMadeNew), afterWrites: 14)] {
+            await world.step(action)
+        }
+        await world.done([.settle])
+        let landed = try #require(world.liveKeyFile(world.macA)?.apple?.keyID)
+        #expect(world.macA.library?.section.appleKeys.contains { $0.id == landed && $0.isOwnLibraryKey } == true,
+                "the landed library's section doesn't list this Mac's own key for it")
+        expectPromisesKept(world)
+    }
 }
