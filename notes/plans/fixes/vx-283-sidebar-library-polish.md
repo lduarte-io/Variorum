@@ -2128,7 +2128,84 @@ before the walker starts (the walk protocol); restored + diffed by the walker at
 
 #### U3 — WALK RECORD
 
-*(The walker writes one line per row here.)*
+**Walker:** a fresh Opus 5.5 at xhigh (2026-10-15 01:23–01:45), claim `vx283-u3-walk` (held by the orchestrator).
+Products `DerivedData/vx283-u3` (product code `e6ed9b66`), launched by path (pid 63327, the only dev instance; her
+app absent throughout). Host: AX true, Screen Recording true. At launch: no lock screen (Standard, unlocked), no
+What's New sheet, voice **Study**, appearance **follow system** (= light). Window set to **1240 × 900** (read back
+from System Events: 1240 wide). The voice was flipped in Settings ▸ General ▸ Theme and the appearance in its
+Appearance row (both via AX), so no relaunch. W1's refusal: File ▸ Import… on an empty folder ("Couldn't import
+“empty-import” — it holds no .md, .txt or .variorum files." — a refusal, nothing minted). Screens (gitignored):
+`notes/plans/vx283-screens/u3/walk/`, a whole-window capture + a native-resolution region per state.
+
+- **W1 — the toast above the quick entry.** Bookcase, Library and a note (2026-10-11, Write), Study + Terminal,
+  light. · `W1-bookcase-{study,terminal}-light{,-region}.png`, `W1-library-{study,terminal}-light{,-region}.png`,
+  `W1-note-study-light{,-region}.png` · **HOLDS.** Bookcase: the card sits ≈18 pt clear of the dashed box, centred
+  on it (both voices; Terminal's card wraps to two lines and still clears). Library (panel closed, Study): above its
+  box at the box's centre, over the list's last row. Note: rests just above the bottom bar, where it always has.
+  (Library with the panel OPEN, Terminal: clear of the box too, but see O-3 on its centre.)
+- **W2 — the controls row at 1240.** · `W2-closed-study-light*`, `W2-open-study-light*`, `W2-typed-open-study-light*`,
+  `W2-typed2-open-study-light-region`, `W2-typed-closed-study-light*`, `W2-typed-reopen-study-light*`,
+  `W2-wide-open-study-light*`, `W2-open-bulk-terminal-light*`, `W2-closed-terminal-light*`,
+  `W2-closed-relayout-terminal-light-region`, `W2-typed-closed-terminal-light*`, `W2-typed-reopen-terminal-light-region`,
+  `W2-typed-open-terminal-light*`, `W2-closed-terminal-dark-region`, `W2-closed-focused-terminal-dark-region`,
+  `W3-terminal-dark.png` · **DOES NOT HOLD.** What holds: Study, panel closed, empty field → one line, the field
+  showing its whole prompt; panel opened by a row click → two neat lines (search · scope / mode · sort · when), the
+  panel wholly inside the window, Close/Open/its prose unclipped, the field ≈320 pt; closing the panel with text typed
+  → one line, the text, the caret and the focus ring kept; 1600-pt window, panel open → one line, unchanged. What
+  does not: **(F-1) typing in the field while the panel is open collapses the row to ONE line with the field a
+  sliver (≈57 pt, just the typed word) and the sort label wrapped onto three lines** — Study "relevance / · best /
+  first", Terminal mid-word "relevanc / e · best / first" (`W2-typed-open-study-light-region`,
+  `W2-typed2-open-study-light-region`, `W2-typed-open-terminal-light-region`). Reproduced on every keystroke, both
+  voices; a re-layout from a row click brings back the two lines (`W2-typed-reopen-*`). The text and caret survive
+  every re-flow. Likely mechanism (read, not traced): `LibraryControlsFlow.swift:148` reads the field's ideal as
+  `sizeThatFits(.unspecified)`, which for a TextField holding text is the TEXT's width, not the prompt's — so once
+  the typed text is shorter than the prompt, `fitsOneLine` passes and the field is distributed down to its text,
+  and the sort label (no line limit) is squeezed into wrapping. **(F-2) In Terminal at 1240 the closed-panel row is
+  not reliably one line:** empty field, panel closed → two lines (`W2-closed-terminal-light*`, kept through a
+  1250→1240 resize, `W2-closed-relayout-*`); later, in dark, the same state read one line (`W2-closed-*-terminal-dark-*`),
+  then two lines again after nothing but a scroll of the list (`W3-terminal-dark.png`). With text typed it is one
+  line (`W2-typed-closed-terminal-light*`). So in Terminal the default window sits on the wrap threshold and the row
+  — and the whole List under it — jumps a line with incidental state. Study read one line every time.
+- **W3 — the dark heading.** Library ▸ List scrolled so "notes" pins, dark, Terminal then Study; one light capture
+  (Study). · `W3-terminal-dark{,-region}.png`, `W3-study-dark{,-region}.png`, `W3-study-light{,-region}.png` ·
+  **HOLDS.** Sampled: Terminal dark — the pinned band #0D0F0D = the List's paper and the header above it, a #303230
+  hairline at its foot; Study dark — #1A1712 = the List's paper, hairline #39352F. No #2F2D29 grey band in either.
+  Light — the native material, near-white #FFFFFF with its soft #DBDBDB shadow line (the light branch is
+  `.material`, unchanged).
+- **W4 — the View menu.** Opened by AX in Study light. · `W4-viewmenu-study-light.png` · **HOLDS.** One separator
+  after Close Split (the AX item list reads "… Open Beside, Close Split, ⟨separator⟩, Toggle Sidebar …").
+- **W5 — VX-245's sites.** The Library's bulk row (2 notes selected by ⌘-click) at 1240, Study (panel open) and
+  Terminal (panel open and closed); the Add to Book picker (the "in no book" chip on 2026-10-11); Takes' show ▾ on
+  "a escola" (a note with a lens). · `W5-bulk-study-light{,-region}.png`, `W2-open-bulk-terminal-light*`,
+  `W2-closed-terminal-light.png`, `W5-picker-study-light.png`, `W5-takesshow-study-light{,-region}.png` · **HOLDS.**
+  "2 notes selected" + Tag · Untag · Share 2 notes with AI… · Delete 2 notes…, each label on one line, the row inside
+  the column; the show popover's inline lens pickers ("english readings — a escola ▾", "another lens ▾") each on one
+  line in a popover that fits them. **Not reached:** `SearchPicker.swift:503` (the arrangement buttons) draws only
+  in the MCP grant sheet, left alone by the coordinator's rule; the Add to Book picker (no arrangements) draws its
+  rows on one line.
+- **W6 — restore.** See below.
+
+**OBSERVATIONS (not verdicts):**
+- **O-1** Two-line row (panel open): line 2 starts ≈7 pt right of the field's left edge — the segmented mode
+  control draws its pill inset inside its frame (`W2-open-study-light-region`). Small, visible.
+- **O-2** With the panel open and a query typed, the answer band's echo reads "“w…g”" / "“w…gs”" for a 4–5 letter
+  query (Terminal, `W2-typed-*-terminal-*`). Not U3's code.
+- **O-3** With the info panel open, the Library toast centres on the whole pane row, not on the quick-entry box, so
+  it straddles the list/panel seam and covers some panel prose (`W1-library-terminal-light-region.png`). Clear of
+  the box, as ruled; horizontally the same centre as before U3.
+- **O-4** The Add to Book picker opens over the chip's own popover, which shows through at the picker's right edge,
+  and its left edge pokes into the sidebar (`W5-picker-study-light.png`). Not U3's code.
+- **O-5** Selection and the info panel persist across Bookcase ↔ Library navigation (the panel was still open
+  when I came back). Noted only because it changes which W2 state a return lands in.
+
+**RESTORE (W6):** my instance quit by bundle id; zero dev instances (`pgrep -lx Variorum`, `pgrep -lf
+"MacOS/Variorum$"` both empty). Store: `variorum.sqlite` unchanged, `-wal`/`-shm` changed by the walk → the three
+copied back from `notes/plans/vx283-screens/u3-walk/store-before/`, each `cmp`-identical. The launch's routine
+dev-store backup under `Backups/` was left as is (that folder is not ours to touch); `castle-W1-20261013` present,
+untouched; key files and `Previous Libraries/` untouched. Prefs: the walk ADDED one key
+(`postMode.B48D5133-…`) — deleted; `defaults import` of `prefs-before.plist`; re-export diffed against it: no added,
+removed or changed keys — CLEAN (`appearanceChoice` = system). The voice was returned to Study in-app and the store
+restore carries it regardless. Posture Standard, unlocked.
 
 #### U1d — THE BRIEF (her two rulings, built; a FRESH implementer)
 
