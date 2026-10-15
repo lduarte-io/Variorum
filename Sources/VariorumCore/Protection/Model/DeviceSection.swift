@@ -402,6 +402,14 @@ public enum DeviceFacts {
                   let retired = allSections.compactMap(\.oldSharedKey).filter({ $0.retiredAt != nil })
                     .min(by: { ($0.retiredAt ?? .distantFuture) < ($1.retiredAt ?? .distantFuture) }) {
             section.oldSharedKey = retired
+        } else if predecessor == nil, let standing = allSections.compactMap(\.oldSharedKey).first {
+            // …and with no retirement listed, a STANDING record any section
+            // lists: the key still wraps this library's pre-Castle copies, so
+            // the replacement shows the door and §3.1's first exception too —
+            // it fell away with no predecessor named, leaving those copies open
+            // through the Apple account unsaid (VX-305 U4, the soak's seed 7;
+            // P-U4-9 extended).
+            section.oldSharedKey = standing
         }
         return section
     }

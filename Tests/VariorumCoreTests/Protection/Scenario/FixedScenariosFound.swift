@@ -704,4 +704,21 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 7 (sequence 257, the closer's soak): This Mac Only into Castle on
+    /// an account still on the old shared key (the key stays — the account
+    /// stands on it; the door and §3.1's first exception show), then the Mac
+    /// replaced with no memory item: the new identity, no predecessor named,
+    /// took over only a RETIRED old-shared record (P-U4-9) — this standing one
+    /// fell away, and with it the door and the exception, while the pre-Castle
+    /// copies still opened through the Apple account (promise 2). The takeover
+    /// now adopts a standing record too (a retired one still wins).
+    @Test func aReplacementKeepsTheOldSharedKeysStandingRecord() async throws {
+        let world = try Self.start("a synced Standard account, a device that joined without a secret", seed: 7000278)
+        for action in [Action.thisMacOnly("macA", .castle), .replaceMac("macA", carriesMemory: false), .launch("macA")] {
+            await world.step(action)
+        }
+        #expect(world.macA.library?.section.oldSharedKeyStillStanding == true, "the replacement forgot the old key still stands")
+        expectPromisesKept(world)
+    }
 }
