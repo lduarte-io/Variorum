@@ -4180,9 +4180,10 @@ round are the window's — PENDING.
 
 ## U7c UNIT RECORD — the page budget bounds the whole answer (VX-256; opus-implementer, from 2026-10-14 ~21:20 MDT)
 
-**NOT DONE (said first):** nothing below is done until its LIVE STATUS line says so. No subagent is spawned. No
-`xcodebuild test`, no Mac build, no launch, no store touched (headless `swift build` / `swift test` only). The
-re-probe is NOT run here; it rides U8b's window (written below for that runner).
+**NOT DONE (said first, at close):** the RE-PROBE is NOT run — the real-client proof that the three probes now arrive
+inline rides U8b's window (written below). No `xcodebuild`, no Mac build or suite, no launch, no stage claim, no store
+touched (headless `swift build` / `swift test` only; no app file changed). No MCPSpec, QUESTIONS or ticket edit (the
+orchestrator's at the merge — OWED). No subagent was spawned.
 
 **Read in full in this session (never delegated):** this record's header and Hard rules; THE ORCHESTRATOR ON U7's
 WINDOW (the ruling); the U7 STAGE RUN (its cap table, steps 7–8, THE RESULT LINE); the U7 UNIT RECORD's D-256-1…10;
