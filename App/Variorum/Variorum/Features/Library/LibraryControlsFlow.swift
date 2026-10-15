@@ -178,12 +178,23 @@ struct LibraryControlsFlow: Layout {
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        arrangement(width: proposal.width ?? .infinity, subviews: subviews).size
+        #if DEBUG
+        if LibraryControlsFlowTrace.sink != nil {
+            LibraryControlsFlowTrace.pass = "size p=\(LibraryControlsFlowTrace.text(proposal.width))"
+        }
+        #endif
+        return arrangement(width: proposal.width ?? .infinity, subviews: subviews).size
     }
 
     func placeSubviews(
         in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
     ) {
+        #if DEBUG
+        if LibraryControlsFlowTrace.sink != nil {
+            LibraryControlsFlowTrace.pass =
+                "place b=\(LibraryControlsFlowTrace.text(bounds.width)) p=\(LibraryControlsFlowTrace.text(proposal.width))"
+        }
+        #endif
         let arranged = arrangement(width: bounds.width, subviews: subviews)
         for (index, subview) in subviews.enumerated() {
             let frame = arranged.frames[index]
@@ -205,11 +216,83 @@ struct LibraryControlsFlow: Layout {
                 floor: subview[FloorKey.self],
                 widest: subview[WidestKey.self])
         }
-        return LibraryControlsFlowRule.arrange(
+        let arranged = LibraryControlsFlowRule.arrange(
             children, lineOneCount: lineOneCount, width: width,
             spacing: spacing, lineSpacing: lineSpacing)
+        #if DEBUG
+        if LibraryControlsFlowTrace.sink != nil {
+            LibraryControlsFlowTrace.record(
+                width: width, subviews: subviews, children: children, arranged: arranged, spacing: spacing)
+        }
+        #endif
+        return arranged
     }
 }
+
+#if DEBUG
+/// **VX-283 U3c — the trace leg's probe (DEBUG only; silent unless a probe
+/// sets `sink`).** The closed-panel sweep found a band where the row's line
+/// count followed its HISTORY, not its width (the record's "U2 + U3b — THE
+/// STAGE WINDOW"). This reports, for every arrangement the layout computes,
+/// the pass (sizing or placing, with its proposal), every child's own
+/// answers (narrowest at a zero proposal, widest at an infinite one, the
+/// flexibility the distribution orders by, its ideal at an unspecified
+/// proposal, the floor and widest the header hands down), the DECISION's
+/// distribution step by step (each child's offered share and what it took —
+/// recorded by wrapping the children's own width answers around the real
+/// `fitsOneLine`, so no rule logic is copied here), its answer, and the
+/// arrangement's frames and size. The architect's ruling decides whether it
+/// stays as an oracle or goes (the `SidebarSectionTrace` precedent).
+/// `nonisolated(unsafe)`: the layout's entry points are nonisolated
+/// (`Layout`'s requirements), and SwiftUI runs them on the main thread —
+/// the probe that sets `sink` runs there too.
+nonisolated enum LibraryControlsFlowTrace {
+    nonisolated(unsafe) static var sink: ((String) -> Void)?
+    /// The pass the next arrangement belongs to (set by the layout's two
+    /// entry points just before they arrange).
+    nonisolated(unsafe) static var pass = ""
+
+    nonisolated static func text(_ value: CGFloat?) -> String {
+        guard let value else { return "nil" }
+        return value.isFinite ? String(format: "%.1f", value) : "inf"
+    }
+
+    static func record(
+        width: CGFloat, subviews: LayoutSubviews, children: [LibraryControlsFlowRule.Child],
+        arranged: LibraryControlsFlowRule.Arrangement, spacing: CGFloat
+    ) {
+        guard let sink else { return }
+        // The decision, replayed through the real rule with each child's
+        // width answer recorded as it is asked (a counted child — the sort
+        // slot — never asks; it is its widest, rigid).
+        var steps: [String] = []
+        let recorded = children.enumerated().map { index, child in
+            var copy = child
+            copy.width = { offered in
+                let taken = child.width(offered)
+                steps.append("[\(index)] \(text(offered))→\(text(taken))")
+                return taken
+            }
+            return copy
+        }
+        let decided = LibraryControlsFlowRule.fitsOneLine(recorded, width: width, spacing: spacing)
+        let readings = subviews.enumerated().map { index, subview in
+            let narrowest = subview.sizeThatFits(ProposedViewSize(width: 0, height: nil)).width
+            let widest = subview.sizeThatFits(ProposedViewSize(width: .infinity, height: nil)).width
+            let ideal = subview.sizeThatFits(.unspecified).width
+            return "[\(index)] n=\(text(narrowest)) w=\(text(widest)) flex=\(text(children[index].flexibility))"
+                + " ideal=\(text(ideal)) floor=\(text(subview[LibraryControlsFlow.FloorKey.self]))"
+                + " widest=\(text(subview[LibraryControlsFlow.WidestKey.self]))"
+        }
+        let frames = arranged.frames.map { "\(text($0.minX))+\(text($0.width))@\(text($0.minY))" }
+        sink("\(pass) w=\(text(width)) · decided=\(decided) arranged.oneLine=\(arranged.oneLine)"
+             + " size=\(text(arranged.size.width))x\(text(arranged.size.height))"
+             + " · decision steps \(steps.joined(separator: " "))"
+             + " · frames \(frames.joined(separator: " "))"
+             + " · children \(readings.joined(separator: " | "))")
+    }
+}
+#endif
 
 extension View {
     /// The search field's floor for `LibraryControlsFlow`'s wrap decision.

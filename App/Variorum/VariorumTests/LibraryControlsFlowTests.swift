@@ -751,3 +751,205 @@ struct LibraryControlsGeometryTests {
         }
     }
 }
+
+// MARK: - U3c — the trace leg's probe (env-gated; asserts nothing)
+
+/// **VX-283 U3c — the closed-panel band, probed** (the record's "U3c — THE
+/// ORCHESTRATOR'S RULING ON THE CLOSED-PANEL RED", T2). The sweep above
+/// (`withThePanelClosedEachWidthHasOneLineCount`) found a band — Terminal
+/// 940–960, Study 840–880 — where the four sort states read TWO lines and a
+/// typed word, a question past the prompt and EMPTY AGAIN read ONE; "empty
+/// again" is the same view state as "created · oldest" (the field empty, the
+/// door shown, the same sort), so the row's answer followed its history.
+///
+/// This replays the sweep's road at ONE room per voice inside the band
+/// (Terminal 950, Study 860) through the sweep's own mount and acts, and
+/// prints per state: the model's facts (`isSearching`, the slot's branch,
+/// the query, the sort, the read generations), the row's height as the
+/// SWEEP read it (right after the act's own settle) and again after a settle
+/// that waits for the search to land and the row to hold still; AppKit's own
+/// account of the two segmented controls and the field (frame, intrinsic and
+/// fitting widths, distribution, segment widths); and the layout's trace
+/// (`LibraryControlsFlowTrace`, DEBUG): every distinct arrangement computed
+/// since the act — its pass and proposal, the decision's steps (each child's
+/// offered share and what it took), its answer, the frames, and every
+/// child's narrowest / widest / flexibility / ideal / floor / widest.
+///
+/// Three roads, the same states: `fromBelow` (the sweep's approach — the room
+/// reached from a narrower, two-line room), `fromAbove` (the room reached
+/// straight from the mount's wide one-line room — does the starting line
+/// count persist?), and `fromBelowUntraced` (the sweep's approach with the
+/// trace OFF, so the layout runs byte-for-byte as in use — does tracing
+/// perturb the band?). The states: the sweep's seven, verbatim, then the
+/// ruling's sort pick after "empty again", then a relayout at the same width
+/// with no state change (an addition: a resize away and back — does a fresh
+/// proposal alone bring the two lines back?).
+///
+/// Run with `TEST_RUNNER_VARIORUM_U3C_PROBE=1`; every line is prefixed
+/// `[VX-175 U3c`. Asserts nothing: a trace leg's instrument.
+@MainActor
+@Suite("VX-175 U3c — the closed-panel band, probed (env-gated; asserts nothing)", .serialized,
+       .enabled(if: ProcessInfo.processInfo.environment["VARIORUM_U3C_PROBE"] != nil))
+struct LibraryControlsU3cProbe {
+    fileprivate typealias Rig = LibraryControlsGeometryTests.Rig
+
+    /// One room per voice inside the sweep's band (the row's width, as the
+    /// sweep names it: the catalog is this + the header's 2 × 24).
+    static func room(_ voice: ThemeVoice) -> CGFloat { voice == .terminal ? 950 : 860 }
+
+    /// The sweep's seven states VERBATIM (`LibraryControlsGeometryTests.states`
+    /// is private to its suite), then the ruling's sort pick after "empty
+    /// again", then the relayout at the same width.
+    fileprivate static func states(room: CGFloat) -> [(name: String, act: (Rig) async -> Void)] {
+        [
+            ("edited · newest", { await $0.pick(.lastTouched) }),
+            ("title · A–Z", { await $0.pick(.title) }),
+            ("created · newest", { await $0.pick(.createdAt) }),
+            ("created · oldest", { await $0.pick(.createdAt, .asc) }),
+            ("typed a word", { await $0.ask("pick") }),
+            ("typed past the prompt", { await $0.ask("note pick from listing note pick") }),
+            ("empty again", { await $0.ask("") }),
+            ("sort pick after empty again (edited · newest)", { await $0.pick(.lastTouched) }),
+            ("relayout at the same width (resize +20, back)", { rig in
+                await rig.resize(to: room + 48 + 20)
+                await rig.resize(to: room + 48)
+            }),
+        ]
+    }
+
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func fromBelow(voice: ThemeVoice) async throws {
+        try await probe(voice: voice, road: "fromBelow", traced: true)
+    }
+
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func fromAbove(voice: ThemeVoice) async throws {
+        try await probe(voice: voice, road: "fromAbove", traced: true)
+    }
+
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func fromBelowUntraced(voice: ThemeVoice) async throws {
+        try await probe(voice: voice, road: "fromBelowUntraced", traced: false)
+    }
+
+    /// The trace's lines since the last state (nonisolated: the layout's
+    /// trace sink is called from its nonisolated entry points, on the main
+    /// thread).
+    private nonisolated final class Buffer {
+        var lines: [String] = []
+    }
+
+    private func probe(voice: ThemeVoice, road: String, traced: Bool) async throws {
+        #if DEBUG
+        let room = Self.room(voice)
+        let tag = "[VX-175 U3c] \(voice) · \(road) · room \(room)"
+        try await LibraryControlsGeometryTests().withCatalog(
+            voice: voice, width: LibraryControlsGeometryTests.defaultLibraryWidth, panelOpen: false
+        ) { rig in
+            let buffer = Buffer()
+            if traced { LibraryControlsFlowTrace.sink = { buffer.lines.append($0) } }
+            defer { LibraryControlsFlowTrace.sink = nil }
+            try report(rig, tag: tag, step: "mount (row \(LibraryControlsGeometryTests.defaultLibraryWidth - 48))",
+                       sweepRead: nil, loops: 0, buffer: buffer)
+            if road != "fromAbove" {
+                // The sweep reached each room from the room 20 below, where
+                // every state read two lines; 40 below is two lines in both
+                // voices on the sweep's own log (Terminal 910 — between 900
+                // and 920; Study 820).
+                buffer.lines = []
+                await rig.resize(to: room - 40 + 48)
+                await rig.pick(.lastTouched)
+                let loops = await settleLanded(rig)
+                try report(rig, tag: tag, step: "pre-room \(room - 40) · edited · newest",
+                           sweepRead: nil, loops: loops, buffer: buffer)
+            }
+            buffer.lines = []
+            await rig.resize(to: room + 48)
+            let loops = await settleLanded(rig)
+            try report(rig, tag: tag, step: "resized to the room", sweepRead: nil, loops: loops, buffer: buffer)
+            for (index, state) in Self.states(room: room).enumerated() {
+                buffer.lines = []
+                await state.act(rig)
+                // What the sweep read: the act's own settle, then the read.
+                let sweepRead = LibraryPanelOracle.controlsFrame
+                let loops = await settleLanded(rig)
+                try report(rig, tag: tag, step: "state \(index + 1) \"\(state.name)\"",
+                           sweepRead: sweepRead, loops: loops, buffer: buffer)
+            }
+        }
+        #endif
+    }
+
+    /// **The settle that waits for the search to land:** at least two more
+    /// of the rig's own settles, until no read is in flight (the listed
+    /// answer is the newest question's) and the row's frame held still
+    /// across the last two — at most twelve.
+    private func settleLanded(_ rig: Rig) async -> Int {
+        var loops = 0
+        var last: CGRect?
+        while loops < 12 {
+            await rig.settle()
+            loops += 1
+            let now = LibraryPanelOracle.controlsFrame
+            if loops >= 2, now == last, rig.model.listedGeneration == rig.model.searchGeneration { break }
+            last = now
+        }
+        return loops
+    }
+
+    private func report(
+        _ rig: Rig, tag: String, step: String, sweepRead: CGRect?, loops: Int, buffer: Buffer
+    ) throws {
+        let model = rig.model
+        let read = try rig.read()
+        let slot = !model.showsCatalogControls ? "none (timeline)" : (model.isSearching ? "relevance label" : "sort door")
+        let sweep = sweepRead.map { "\(LibraryControlsFlowTrace.text($0.height)) pt" } ?? "—"
+        print("\(tag) · \(step) · isSearching \(model.isSearching) · slot \(slot) · query \"\(model.query)\""
+              + " · sort \(model.sort) \(model.direction) · generations \(model.searchGeneration)/\(model.listedGeneration)"
+              + " · height as the sweep read it \(sweep) · after \(loops) landed settles \(LibraryControlsFlowTrace.text(read.controls.height)) pt"
+              + " · controls \(read.controls) · field \(read.field) · slot \(String(describing: read.sortSlot))"
+              + " · root \(read.root.width) · prompt \(read.prompt)")
+        print("[VX-175 U3c ax] \(step) · \(Self.appKitFacts(rig.hosting))")
+        var counts: [String: Int] = [:]
+        var order: [String] = []
+        for line in buffer.lines {
+            if counts[line] == nil { order.append(line) }
+            counts[line, default: 0] += 1
+        }
+        print("[VX-175 U3c flow] \(step) · \(buffer.lines.count) arrangements, \(order.count) distinct")
+        for line in order { print("[VX-175 U3c flow]   ×\(counts[line] ?? 0) \(line)") }
+        if let lastLine = buffer.lines.last { print("[VX-175 U3c flow]   LAST \(lastLine)") }
+    }
+
+    /// AppKit's own account of the controls behind the row: the segmented
+    /// controls (scope: four segments; mode: three) and the search field.
+    private static func appKitFacts(_ hosting: NSView) -> String {
+        var segmented: [NSSegmentedControl] = []
+        var fields: [NSTextField] = []
+        func walk(_ view: NSView) {
+            if let control = view as? NSSegmentedControl { segmented.append(control) }
+            if let field = view as? NSTextField, field.isEditable { fields.append(field) }
+            for sub in view.subviews { walk(sub) }
+        }
+        walk(hosting)
+        func f(_ value: CGFloat) -> String { LibraryControlsFlowTrace.text(value) }
+        let distributions = ["fit", "fill", "fillEqually", "fillProportionally"]
+        let segs = segmented.map { control -> String in
+            let widths = (0..<control.segmentCount).map { f(control.width(forSegment: $0)) }
+            let labels = (0..<control.segmentCount).map { control.label(forSegment: $0) ?? "?" }
+            let distribution = control.segmentDistribution.rawValue
+            return "seg\(labels) frame \(f(control.frame.width)) intrinsic \(f(control.intrinsicContentSize.width))"
+                + " fitting \(f(control.fittingSize.width))"
+                + " dist \(distribution < distributions.count ? distributions[distribution] : "\(distribution)")"
+                + " widths \(widths) font \(control.font?.fontName ?? "nil") \(f(control.font?.pointSize ?? 0))"
+                + " size \(control.controlSize.rawValue)"
+        }
+        let texts = fields.map { field -> String in
+            "field \"\(field.placeholderString ?? "")\" text \(field.stringValue.count) chars frame \(f(field.frame.width))"
+                + " intrinsic \(f(field.intrinsicContentSize.width)) cell \(f(field.cell?.cellSize.width ?? -1))"
+                + " editing \(field.currentEditor() != nil)"
+        }
+        return (segs.isEmpty ? ["no NSSegmentedControl found"] : segs).joined(separator: " | ")
+            + " || " + (texts.isEmpty ? "no editable NSTextField found" : texts.joined(separator: " | "))
+    }
+}
