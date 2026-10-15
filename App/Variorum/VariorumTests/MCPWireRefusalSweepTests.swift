@@ -125,7 +125,9 @@ struct MCPWireRefusalSweepTests {
     /// (the SWEEP TABLE's U-graph, U-hand, X and C rows, verbatim in short).
     static let unspokenOnTheWire: [String: String] = [
         // U-graph (17): no function a wire tool reaches throws it (the sweep's
-        // call graph, `notes/plans/fixes/vx-336-u9-sweep/callgraph-35f9cd70.json`).
+        // call graph, `notes/plans/fixes/vx-336-u9-sweep/callgraph-35f9cd70.json`,
+        // kept in the VX-336 branch's history at `e454a8ef` and removed from main
+        // at the run's closeout).
         "arrivalNotFound": "graph: unreachable",
         "blockAlreadyArchived": "graph: unreachable",
         "blockNotArchived": "graph: unreachable",
