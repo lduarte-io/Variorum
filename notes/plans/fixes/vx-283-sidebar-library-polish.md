@@ -1615,6 +1615,54 @@ expected: only VX-245's lint red in the batch, the mount suite 5/5 green, R-H re
   existing `starredFadesWhereMoreLiesBeyondAndNowhereWhenItHoldsEverything` stops flaking: the landing (≈+0.25 s)
   precedes the rig's settle's ≥ 0.5-s return.
 
+#### U1c — the batch flake (`OpenListCloseShellTests.theMenuActsLandThePaneThroughTheShell`) — TRACED; STOPPED (a product-side race in the shell's adoption road, not test hygiene)
+
+**Not done (first line):** no pin and no fix. The mechanism lives in `RootView`'s `pendingSelection` adoption, the
+ShellRouter seam (VX-284's lane), so the leg stops and reports per the orchestrator's rule. Headless trace only, no
+stage used.
+- **The suspicion, tested and REJECTED:** under the test host the shell never restores or writes the remembered strip.
+  `RootView.swift:532-535` returns before `restoreRememberedOpenNotes`, so `remembersOpenNotes` stays false and
+  `rememberOpenNotesIfClaimed` writes nothing (`WorkspaceModel.swift:603-606`). No real-`UserDefaults` road reaches
+  this shell's order.
+- **Cross-suite broadcasts, checked and RULED OUT for this run:**
+  - The two global roads exist and are real hazards:
+    - `.variorumNotesDeleted` → `workspace.notesDeleted` closes rows (`RootView.swift:482-485`, `WorkspaceModel.swift:491-498`).
+    - `.variorumOpenPost` overwrites `pendingSelection` (`:459-462`).
+  - A test `RootView` gets its own private `WindowRegistry` (`RootView.swift:172`), so it claims EVERY global
+    navigation broadcast. `TwoWindowMountTests` posts `.variorumOpenPost` for an `.incrementing` id …0001
+    (`WindowsTests.swift:385-386`), and the `NoteDeletion` suites post …0000.
+  - But the batch log shows NO other test running during the flaky test's 5.551 s (`t7-batch.log`, lines 647–659:
+    suites ran one at a time), and neither broadcast can produce [a, c, b].
+- **The mechanism (by elimination, strongly corroborated):**
+  - `WorkspaceModel.select` appends the row itself (`WorkspaceModel.swift:199-203`, `OpenNotes.opened` appends once),
+    so the strip's order IS the order of `select` calls. [a, c, b] therefore means b's `select` never ran at its step.
+  - The road is `RootView.swift:441-445`: `.onChange(of: router.pendingSelection) { adopt(pending…);
+    router.pendingSelection = nil }`. The action writes the very value it observes.
+  - The test (`OpenListCloseTests.swift:473-478`) writes the next request the moment the previous adoption is visible,
+    which can fall in the SAME frame as that re-entrant update. SwiftUI then refuses the extra invocation.
+  - The red run's log carries exactly that warning, 65 ms in: `[Invalid Configuration] onChange(of:
+    Optional<SidebarSelection>) action tried to update multiple times per frame`.
+  - b's request is LOST, and `pendingSelection` stays `.post(b)` (nothing nils it), so b's settle times out after
+    300 × ≈15 ms ≈ 4.5 s — the run took 5.551 s against 0.55–1.6 s when green.
+  - The test then requests c: an `onChange` (b → c) adopts c, giving [a, c]. Then `= b` adopts b, giving [a, c, b].
+- **The correlation:** the red run has the warning once. Six green runs of the same test have zero (T7's alone ×3;
+  the batches of U1b's Q6, Q9 and Q11, U1b's first window, and U1b5's).
+- **Product reach:** a request lost this way also leaves `pendingSelection` STUCK on its destination, so a later door
+  asking for the SAME destination changes nothing SwiftUI can see. That stays true until some other destination is
+  asked for. The doors that write `pendingSelection`: ⌘⇧W / Close All's menu acts (VX-287/289, this run's), ⌘⇧1–9, the
+  creation acts (⌘N/⌘J/the tutorial), the palette, `.variorumOpenPost`. A human can hardly land two writes inside one
+  frame; code can (a door writing right after an adoption, a broadcast beside a door). Latent. No report from her.
+- **Options (for the orchestrator; none built):**
+  - (a) **Product fix in the adoption road** — VX-284's lane, or a ticket: requests carry a distinct token, or the
+    router hands requests to the shell's adoption directly rather than through an `onChange` that writes its own
+    observed value. The test then passes as written.
+  - (b) **Test-side only, in our lane:** the pin waits a display frame (or until the shell has seen `pendingSelection
+    == nil`) before issuing its next request. This hides the race rather than fixing it.
+  - (c) Both: (a) as a ticket, (b) now so the batch stops flaking.
+  - **The deterministic pin, either way:** a mounted `RootView` whose observer of `workspace.focusedSelection` writes
+    the next `pendingSelection` inside the same update that adopted the previous one. Red when the request is lost
+    (b never adopted, `pendingSelection` stuck). Unbuilt.
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
