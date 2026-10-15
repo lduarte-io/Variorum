@@ -148,6 +148,10 @@ guidance. Each unit's evidence is named before its spawn.
 - **Disk.** Build into `App/Variorum/DerivedData/vx336-<unit>` (gitignored); check free space before a Mac build.
 - **Context:** past ~500k, stop at the next clean seam (committed, green, the continuation written in the record) and
   report.
+- **Never run `claude mcp list` in a window** (U6's runner slip, 2026-10-14): its health check SPAWNS every user-scope
+  server, her `variorum` shim included. With her real app running, that would present her real setup key to her real
+  store. Use only the fingerprint one-liner (names + hash, never values) and `claude -p --strict-mcp-config` with the
+  scratch config.
 - **Labeling (CLAUDE.md since `ebd16909`, her triage sitting 2026-10-14):** every ticket this run files gets ONE kind,
   an Evidence label on Bug/Improvement/Debt, ONE Area, a Priority; Pre-launch only at her call; **never an assignee**.
   Riders: the open Low/Medium tickets in the run's Areas were offered to her mid-run (the MCP area, 2026-10-14 ~17:45),
@@ -163,7 +167,7 @@ guidance. Each unit's evidence is named before its spawn.
 |---|---|
 | U5a — the label pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): legs A–D all passed in a real Claude Code 2.1.300 round on the dev store — the new `claude-code · english` label on Takes cards in both voices, `save_lens` by label refusing the ambiguous block and its `take_ids` retry, the legacy form matched as its own, `pin_chosen` holding. Built at `590c0cb8` (U5a UNIT RECORD) |
 | U5b — the block-writing pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): the 31-suite Mac batch green (251 tests, 0 failed, 7 gated skips); V252-a (create_note's `blocks` = read_note's records; filed under its chapter), V255-a/b/c (the end at write new with her ⌥⌘Z/⇧⌥⌘Z; any anchor at write new hears the rung sentence and asks her; anywhere at edit), D8-a passed; D8-b's open tail is unreachable from the keyboard (THE ORCHESTRATOR ON U5's WINDOW). The store was restored cmp-SAME. Built `7a15376c`…`93edbc2e` (U5b UNIT RECORD, three sessions) |
-| U6 — Compare from the wire (+ VX-330, VX-342) | **BUILT, READY FOR STAGE** — U6a closed headless (`48e250e0`; MCP 278/59 · core 2,871/333 · workbook 40/6; revert checks identical); U6b built (`12efb039`…`a1a094dc`; VX-330 + VX-342, no package line). Products: `vx336-u6` (final, from `006e45f8`), `vx336-u6-red`, `vx336-u6b-red`, `vx336-u6b-ios`, `vx336-u6b-ios-red`. The window is in the U6b UNIT RECORD (claim `vx336-u6`, about 105 min of work, 130 asked; batch-only 35); a FRESH runner takes it |
+| U6 — Compare from the wire (+ VX-330, VX-342) | **PROVEN 2026-10-14 17:52–18:35** (U6 STAGE RUN). The 125-suite batch: 790 tests, 786 passed, 2 gated skips, 2 standing reds (VX-115, VX-167; neither on U6's paths). Every red run exact: U6a's router clears (9 pairs), U6b Mac (15), the phone (4), the phone green 18/3. The live round passed in both voices: L0–L5 (`duplicate_note` with her ⌥⌘Z/⇧⌥⌘Z, the AI's edit on the copy, Compare aligned on lineage with related-only on, an unrelated pair with it off, `link_versions`' Open › opening Compare, not-frontmost moving nothing); VX-330's walk (all twelve of sherlock's collapsed chapter rows wear the shared icon, the waiting mark on one, pressed, Don't allow clearing it); VX-342's "before" seen. The store was restored cmp-SAME. Built: U6a `2836171c`…`48e250e0`, U6b `12efb039`…`a1a094dc` |
 | U7 — the agent's read-backs | NOT-STARTED |
 | U8 — the AI's docs (LAST) | NOT-STARTED |
 | LADDER | NOT-STARTED |
@@ -174,6 +178,15 @@ guidance. Each unit's evidence is named before its spawn.
 ## Stage traffic log (the oct13coordinator protocol)
 
 - *(Newest first from here.)*
+- 2026-10-14 18:35:06: **RELEASE `vx336-u6`** (42 of 130 min). Result line to the coordinator: batch 790/786 (2
+  standing reds, 2 gated skips); the red runs exact; dev store cmp-SAME vs A1; prefs 0 differ (1,602 keys); fingerprint same; 0
+  sims booted; Standard/unlocked; castle-W1 untouched. The A1 copy `scale-prestage-20261015T000711Z` is the
+  coordinator's to prune. The `claude mcp list` slip was reported (nothing changed).
+- ~18:10: SEAM (the batch and reds done, the simulator shut, the red products deleted); "continue".
+- 17:52: **GO for `vx336-u6`** (`Tools/stage release --who coord-for-vx336 && Tools/stage claim --who vx336-u6 --reason
+  "VX-336 U6: 125-suite Mac batch + reds (one sim), SEAM, then real-client MCP live round + Compare/Book Panel walk on
+  the Debug dev store (A1 prestage)" --minutes 130`), run at 17:52:45.
+- ~17:50: REQUEST, then READY for `vx336-u6` (first in the queue; vx-283 waits on her ⇧⌘W ruling).
 - 2026-10-14 15:49:56: **RELEASE `vx336-u5`** (37 of 110 min). Result line to the coordinator: batch green (251 / 31, 0 failed); dev store
   cmp-SAME vs A1; prefs 0 differ (1,596 keys); user-scope fingerprint same (`bc64543e2f4e8e58`, no `-s local` ever
   made); posture Standard/unlocked; castle-W1 untouched. The A1 copy `scale-prestage-20261014T211517Z` is the
@@ -228,6 +241,8 @@ guidance. Each unit's evidence is named before its spawn.
 
 | ticket | born | what | fate |
 |---|---|---|---|
+| VX-355 | U6 STAGE RUN (the runner's note 2) | The Pool has no bottom bar, so receipts (an AI's, her undo's) show nowhere while it's open | Todo, 13n, Improvement · Confirmed · Library & sidebar · Low |
+| VX-356 | U6 STAGE RUN (the runner's note 4) | Book Panel in Study: the open note's collapsed chapter row shows no open-note marker (Terminal shows "›") | Todo, 13n, Improvement · Suspected · Books · Low |
 | VX-354 | U6b's sweep (OWED 2) | Book Panel: the header's book name and its gatherings names wear neither MCP glyph (outside VX-268's parity and VX-330) | Todo, 13n, Improvement · Confirmed · MCP · Low; Pre-launch is her call |
 | VM-20 | U6b (OWED 5) | The phone's undo warning says "It is saved first" where the Mac says "committed" — the commit vocabulary (R-13s-31/32) looks missed there | VM Backlog, Improvement · Confirmed · Wording · Low |
 | VX-353 | U6a's build (the implementer, 2026-10-14) | `MCPHarnessTimeLimitTests`' never-answers-initialize pin overruns its 15 s bound under heavy machine load (16.3–16.7 s at load 9–67; green alone) | Todo, 13n, Debt · Test-only · Low; not pre-launch; not this run's |
@@ -2771,4 +2786,33 @@ scratch project directory in the scratchpad, prompts on STDIN, each answer tee'd
 - **The A1 copy, the coordinator's to prune:** `…/Variorum-dev/Backups/safety-copies/scale-prestage-20261015T000711Z`.
 
 **Noticed, not fixed (no product change under the claim):** (1) **L4's receipt words** — "claude-code linked “u6a source” and “u6a stranger” as versions · ⌥⌘Z undoes" is 75 characters, so the bar speaks the designed fallback "made a change" (`MCPPaneCopy.budget` 72); a two-title link receipt reaches the budget even at short titles — for VX-234's eye; (2) **the Pool surface has no bottom bar**, so a receipt spoken there (her ⌥⌘Z/⇧⌥⌘Z of the duplicate) renders nowhere until she reaches a surface with the bar — the plan expected "Undid…" in the Pool; seen instead from the Bookcase; (3) **receipts fade in ~13–15 s**, before a runner's capture-read-click loop — both Open › presses went through ⌥⌘O, the plan's named same show; (4) in **Study the open story's collapsed Book Panel row wears no visible open-note marker** (Terminal shows "›") — not VX-330's (glyphs only), observed; (5) **VX-167's `redoNeverAsks` reds at SUITE scope too** (alone it passes) — a data point for VX-167; (6) machinery: a `while read` over a list without a trailing newline skips its last line (one prefs key needed a second delete); `claude mcp list`'s health check spawns every registered server's command, her user-scope shim included — use `claude mcp get <name>` alone in later windows.
+
+### THE ORCHESTRATOR ON U6's WINDOW (2026-10-14 ~18:45 MDT)
+
+- **Verified, not trusted:**
+  - the stage reads FREE;
+  - no Variorum instance, and 0 simulators booted;
+  - her user-scope fingerprint is SAME (`bc64543e2f4e8e58`), re-read by the orchestrator;
+  - the tree is clean at `0c6e7f50`.
+  - The orchestrator viewed four captures: sherlock's Book Panel in Study with every collapsed row's shared icon and the
+    waiting mark on "The Red-Headed League"; the same in Terminal; L2's Compare, with the source and its duplicate aligned
+    on lineage rails and the AI's edit in the copy; VX-342's warning reading "…as it was before the divide…".
+- **U6 is PROVEN.** VX-311, VX-298, VX-330 and VX-342 close at the merge.
+- **The two standing reds:**
+  - VX-115 is unchanged.
+  - VX-167 (`redoNeverAsks`, divide → edit → undo → redo) stayed red with its suite run alone, but passed as a single test. The
+    orchestrator read its body: it walks the divide ops, `UndoStack` and `structuralRedo`, none of which this branch
+    changes. The data point is now on VX-167.
+- **The runner's notes:**
+  1. `link_versions`' receipt line falls back to a count past the bar's 72-character budget (by design) → FOR VX-234.
+  2. The Pool shows no receipts → VX-355.
+  3. Receipts fade in ~13–15 s; the plan's ⌥⌘O road was used.
+  4. The Study open-note marker on the collapsed row → VX-356 (Suspected).
+  5. The `claude mcp list` slip: nothing changed, the fingerprint is SAME. It is now a Hard rule.
+  6. Another app's banner, which was not Variorum's.
+- **Disk:** `vx336-u6` and `vx336-u6b-ios` are deleted (U7 builds its own); the red products went at the coordinator's
+  ask.
+- **Next: U7** (VX-254 digests · VX-256 paged `read_note` · VX-261 the client's own recent acts), in U5b's and U6a's
+  shape: ONE design session for all three members (narrow reading; its forks ruled by the orchestrator), then fresh
+  builders, then a runner.
 
