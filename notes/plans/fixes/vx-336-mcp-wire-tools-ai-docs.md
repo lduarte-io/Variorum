@@ -5012,7 +5012,7 @@ Compare road, `MCPSharedRowsRulesTests` / `BookPanelMCPMarksTests` (the icon's h
 |---|---|---|
 | 0 | read-in; this record | DONE (this commit) |
 | 1 | the chapter's truth pins on the OLD seed (Tests only — `TutorialMCPChapterTests`), committed ahead of the chapter | DONE (this commit) — WRITTEN; they run only on the Mac, so their red run on the old seed rides the window (step 1b, on the red product of THIS commit); the list is THE PINS below (written at piece 5) |
-| 2 | the red product `DerivedData/vx336-u8-red` (`build-for-testing` from piece 1's commit) | IN-PROGRESS — building from this commit |
+| 2 | the red product `DerivedData/vx336-u8-red` (`build-for-testing` from piece 1's commit) | IN-PROGRESS — the first build of `c29a2b8e` FAILED on two `#expect`s whose six-part `+` concatenations the type-checker gave up on (`TutorialMCPChapterTests.swift:483`, `:1069`, "unable to type-check this expression in reasonable time"); this commit restates the three longest as multi-line literals and settles three sentences' final wording (the suggestion, the icon's rows, recipe 5) before the red product is built; rebuilding from this commit |
 | 3 | the chapter (`TutorialSeeder`'s MCP lessons) | NOT-STARTED |
 | 4 | the green product `DerivedData/vx336-u8`; the headless guards (`MCPProviderNeutralityTests`, the core/MCP targets untouched) | NOT-STARTED |
 | 5 | THE STAGE WINDOW plan (claim `vx336-u8`), the chapter's text whole, FOR VX-234, PROVISIONALs, OWED (the re-seed note) → READY | NOT-STARTED |

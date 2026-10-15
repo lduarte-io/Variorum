@@ -480,12 +480,14 @@ struct TutorialMCPChapterTests {
             // inside a note and across the library ("Edit: it can also change,
             // choose and commit takes, make a lens the note, and divide, merge,
             // move or delete blocks." before).
-            #expect(text.contains("Edit: it can also do most of what you can do at the keyboard. In a note, it can "
-                                  + "change, choose, commit, archive or delete takes, restore a commit, make a lens the "
-                                  + "note, add blocks anywhere, divide, merge, move or delete blocks, and edit or delete "
-                                  + "any comment. Across the library, it can take a tag off a note, rename, archive or "
-                                  + "delete notes and books, finish or reopen a book, reorder a book's notes and "
-                                  + "chapters, and rename or delete a chapter."))
+            let editStep = """
+                Edit: it can also do most of what you can do at the keyboard. In a note, it can change, choose, \
+                commit, archive or delete takes, restore a commit, make a lens the note, add blocks anywhere, \
+                divide, merge, move or delete blocks, and edit or delete any comment. Across the library, it can \
+                take a tag off a note, rename, archive or delete notes and books, finish or reopen a book, reorder \
+                a book's notes and chapters, and rename or delete a chapter.
+                """
+            #expect(text.contains(editStep))
             for name in ["edit_take", "choose_take", "save_commit", "archive_take", "delete_take", "restore_commit",
                          "adopt_lens", "divide_block", "merge_blocks", "move_block", "delete_block", "edit_comment",
                          "remove_tag", "rename_note", "archive_note", "delete_note", "rename_book", "archive_book",
@@ -515,7 +517,7 @@ struct TutorialMCPChapterTests {
             #expect(suggested == "\(placeholderName)\(MCPWriteTools.labelSeparator)english")
             #expect(MCPWriteTools.labelSeparator == " \u{00B7} ", "the dot the lesson names")
             #expect(MCPWriteTools.aiLabel(client: placeholderName, own: nil) == placeholderName, "no label: the name")
-            #expect(text.contains("You can always tell a suggestion apart. A take a client adds beside yours wears "
+            #expect(text.contains("You can always see who suggested a take. A take a client adds beside yours wears "
                                   + "its name, then a dot and its own label if it gave one, like \(suggested)."))
             #expect(text.contains("Takes it writes into a new note or new blocks, and labels it sets on a take, carry "
                                   + "only the label it gave."))
@@ -990,10 +992,12 @@ struct TutorialMCPChapterTests {
                     && revision.lowerBound < longJob.lowerBound, "her four first, then the three")
 
             // ——— Recipe 5: organization (the advice's own, D-2) ———
-            #expect(text.contains("Grant it \(writeNew) on a wing and ask it to put plans, summaries and research "
-                                  + "into notes instead of leaving them in the chat, to make a book for a project and "
-                                  + "give it chapters, to file notes into it, to tag them, and to make a book that "
-                                  + "collects every note wearing a tag."))
+            let organizeRecipe = """
+                Grant it \(writeNew) on a wing and ask it to put plans, summaries and research into notes rather \
+                than leave them in the chat. It can make a book for a project, give it chapters and file notes into \
+                them, tag notes, and make a book that collects every note wearing a tag.
+                """
+            #expect(text.contains(organizeRecipe))
             #expect(MCPSession.instructions.contains("put plans, summaries and research into notes"),
                     "the advice says the same (U8a)")
             #expect(MCPToolFacts.scopes(of: "create_book") == [.wing], "making a book takes a wing grant")
@@ -1029,11 +1033,15 @@ struct TutorialMCPChapterTests {
 
             // ——— Recipe 6: a revision (VX-311, VX-298) ———
             let compareKey = try #require(PostMode.allCases.firstIndex(of: .compare)) + 1
-            #expect(text.contains("For a revision, grant \(MCPPaneCopy.rungName(.edit)) on the note's wing and ask "
-                                  + "your AI to duplicate the note and rewrite the copy. The copy lands in that wing's "
-                                  + "Pool, in no book, and your original never changes. Because each block of the copy "
-                                  + "remembers the block it came from, \(PostMode.compare.rawValue) "
-                                  + "(\u{2318}\(compareKey)) lines the two up row by row."))
+            let editRung = MCPPaneCopy.rungName(.edit)
+            let compareName = PostMode.compare.rawValue
+            let revisionRecipe = """
+                For a revision, grant \(editRung) on the note's wing and ask your AI to duplicate the note and \
+                rewrite the copy. The copy lands in that wing's Pool, in no book, and your original never changes. \
+                Because each block of the copy remembers the block it came from, \(compareName) \
+                (\u{2318}\(compareKey)) lines the two up row by row.
+                """
+            #expect(text.contains(revisionRecipe))
             #expect(compareKey == 5)
             #expect(text.contains("Ask your AI to show you the two side by side and, while Variorum is the app in "
                                   + "front, it opens \(PostMode.compare.rawValue) on them."))
@@ -1066,12 +1074,14 @@ struct TutorialMCPChapterTests {
                     "your original never changes")
 
             // ——— Recipe 7: a long job (VX-256, VX-254, VX-261) — no numbers ———
-            #expect(text.contains("For a long job, like translating a whole book, ask your AI to check its work as "
-                                  + "it goes. It can read a long note a page at a time instead of all at once. Most "
-                                  + "writes that add or rewrite words answer with a fingerprint of exactly what was "
-                                  + "stored (a sha256), so it can confirm every word landed as it sent it. And if the "
-                                  + "connection drops partway through, it can look back over its own recent acts to "
-                                  + "see which ones landed before it carries on."))
+            let longJobRecipe = """
+                For a long job, like translating a whole book, ask your AI to check its work as it goes. It can \
+                read a long note a page at a time instead of all at once. Most writes that add or rewrite words \
+                answer with a fingerprint of exactly what was stored (a sha256), so it can confirm every word \
+                landed as it sent it. And if the connection drops partway through, it can look back over its own \
+                recent acts to see which ones landed before it carries on.
+                """
+            #expect(text.contains(longJobRecipe))
             let longJobText = String(text[longJob.lowerBound...]).replacingOccurrences(of: "sha256", with: "")
             #expect(longJobText.range(of: #"[0-9]"#, options: .regularExpression) == nil,
                     "P-VX256-1 is PROVISIONAL: no page number is promised (sha256's own digits aside)")
@@ -1108,10 +1118,12 @@ struct TutorialMCPChapterTests {
             // (`BookPanelMCPMarksTests`). RED ON OLD: "the guide still says
             // Bookcase only".
             let wingChord = try #require(CapabilityRegistry.capability(.switchWing).shortcutLabel)
-            #expect(text.contains("The same icon marks what a client reaches in the Library (notes, books and "
-                                  + "gatherings), notes in the Pool, the notes in the panel that shows a note's book "
-                                  + "(where a chapter and its one note share a row, that row wears it too), and wings "
-                                  + "in the switcher that \(wingChord) opens."))
+            let iconRows = """
+                The same icon shows on notes, books and gatherings in the Library, on notes in the Pool, on the \
+                notes listed in the panel that shows a note's book, and on wings in the switcher that \(wingChord) \
+                opens. In that panel, a chapter that shares a row with its only note wears the note's icon.
+                """
+            #expect(text.contains(iconRows))
             for (host, declared) in [("Library", LibraryCatalogView.surfaceCapabilities),
                                      ("Pool", PoolPostsView.surfaceCapabilities),
                                      ("the book panel", BookPanelView.surfaceCapabilities),
