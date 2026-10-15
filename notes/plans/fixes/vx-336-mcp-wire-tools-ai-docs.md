@@ -3859,3 +3859,8 @@ lens's picks over the whole note, P1's letter broken (the VX-280 lesson again). 
   container is checked after the decision and BEFORE the once spend). RED on the old tree (the four files from
   `b5d838e1`: the other note's paged read answers the Level 0 text — by absence); RED with the check moved AFTER the once
   spend (the stale call spent the grant, so the next read refused — 1 issue); restored → the three suites **17/17 green**.
+
+**THE HEADLESS FINALS (builder B, the whole package at `aee135bc`, read from the log):** `swift test` → **VariorumMCPTests
+321 tests / 65 suites green, 1 known issue** (VX-357's U+0000 pin, by design; `MCPHarnessTimeLimitTests` green this
+run, no VX-353 overrun) · **VariorumCoreTests 2,871 / 333 green** · **StringsWorkbookTests 40 / 6 green**. No existing
+pin edited by VX-256 (G-254-2's ritual not needed).
