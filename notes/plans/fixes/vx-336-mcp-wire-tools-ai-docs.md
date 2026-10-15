@@ -6950,10 +6950,12 @@ No BLOCKER. No MAJOR. No round 3 is earned.
 
 ## CLOSEOUT RECORD — PHASE B (the closeout implementer — opus-implementer, from 2026-10-15 ~02:15 MDT)
 
-**Not done (first line, kept current):** THE CLOSEOUT WINDOW itself (claim `vx336-close`) is NOT run here. It runs only
-on the orchestrator's GO, under the coordinator's exact claim line. No `xcodebuild test`, no app launch, no store
-touched, no stage claimed, no Linear edit, no shared ledger on main touched (PHASE C's). R2-1's pin has NOT yet been seen
-red or green: both runs are the window's.
+**Not done (first line, kept current):** THE CLOSEOUT WINDOW itself (claim `vx336-close`) is NOT run: it runs only on
+the orchestrator's GO, under the coordinator's exact claim line. So R2-1's pin has NOT been seen red or green, and the
+whole Mac target and the phone suites have not run on this tree. The orchestrator's line-by-line check of R2-1's fix
+(the final round's) is owed. No `xcodebuild test`, no app launch, no store touched, no stage claimed, no Linear edit,
+no shared ledger on main touched (PHASE C's). Pieces 1–7 are DONE; **READY**. One slip at piece 1 (the merge
+flattened by `pull --rebase`) was repaired without rewriting anything; see "The merge slip".
 
 **Read in full in this session (never delegated):** CLAUDE.md and its loaded canon; this record's header, Hard rules
 (never `claude mcp list`; the live-round machinery), LIVE STATUS, Stage traffic log, Cross-run coordination, the
@@ -7130,3 +7132,38 @@ W, `Tools/stage renew --who vx336-close --minutes 20` extends our own claim befo
 
 **The reason line for the claim:** `"VX-336 closeout: R2-1 pin red/green + WHOLE Mac target on merged tree + 15 phone
 suites (one sim), dev store A1 first"`.
+
+### SELF-ASSESSMENT (PHASE B's implementer)
+
+- **R2-1 is fixed exactly as the disposition shapes it.** It makes three clears and changes nothing else. The pin is
+  committed alone (`65ba0704`) ahead of the fix (`e919f576`), and the red product is built from the pin's own tree, so
+  the window's red run tests the code that existed. Each of cases 2–4 meets exactly one ending, so a later regression
+  that drops any single clear reds exactly one named test.
+- **The manual-set clear** sits in `relatedOnly.didSet` ahead of its guard. It relies on `land` writing the toggle
+  before arming and `adopt` disarming before writing, both already true and now stated in a comment at the clear. An
+  alternative, a dedicated `toggleRelatedOnly()` the chip calls, would have changed the view's call site (more than
+  the disposition named) and left a direct `relatedOnly =` write unprotected.
+- **The weakest point is evidence:** the pin's red/green, the whole Mac target and the phone run all wait on the
+  window. Every claim about them above is marked PENDING or "expected".
+- **The merge slip is mine** (### The merge slip). The repair rewrote nothing, but main's ten notes commits now ride
+  the PR twice.
+
+### OWED (PHASE B → the orchestrator)
+
+1. **The GO for THE CLOSEOUT WINDOW** (claim `vx336-close`, ~57 min of work, a 75-minute claim; the reason line is in
+   the plan). Its runner records the RESULTS under the plan, flips this section's LIVE STATUS (add a row 8, "the
+   window") and the top LIVE STATUS's CLOSEOUT row.
+2. **The orchestrator's line-by-line check of R2-1's fix** (`e919f576`, 18 lines, the final round's fix — THE LADDER
+   ROUND 2's disposition).
+3. **The merge slip** (piece 1): the PR will carry main's ten notes commits twice (originals + the branch's copies
+   `2b5c6d16`…`d37dc257`, identical changes). Harmless to the merge. Removing them needs a force-push, which is the
+   author's call, and is NOT proposed. **PHASE C's D9 step 2 must push any new merge of main with a plain `git push`
+   (after `git fetch` shows the upstream unmoved) or `git pull --rebase=merges`, never a plain `pull --rebase` while
+   the merge commit is unpushed.**
+4. **For PHASE C's drafts:**
+   - D3's finals line takes PHASE B's headless counts: MCP **349/67** (1 known, VX-357) · core **2,872/333** · workbook
+     **40/6**, plus the window's.
+   - D9 step 6's DerivedData list is now `vx336-close`, `vx336-close-red` and `vx336-close-ios`: `vx336-u9` is already
+     deleted.
+   - The R2-1 pin and fix go in the handoff's "how it was checked" line (round 2's one fix).
+5. **The top LIVE STATUS table** (the orchestrator's) still reads `| CLOSEOUT | NOT-STARTED |`. Not changed here.
