@@ -4522,6 +4522,22 @@ re-pinned pins (P-256-2, F-256-7, P-256-1b) — each edit commented in the file 
 orchestrator's word (U7's window took its GO) before its first product or test commit. Nothing is in flight; `git status`
 is clean.
 
+**THE CONTINUATION (a FRESH opus-implementer, from 2026-10-14 ~22:20 MDT, after THE ORCHESTRATOR ON U7c).** The paused
+session (harness ~398k) does not resume; this continuation builds pieces 1–6 from the plan below, adjusted only by U7c's
+final bound: wherever paging is described, the words describe the ANSWER bound — and the instructions carry NO paging
+number at all (the numbers live in `read_note`'s description, U7c's sentence, byte-unchanged here). **Read in full in
+this session (never delegated):** this record's header, Hard rules, LIVE STATUS, Her rulings; the U8 BRIEF (its SPLIT and
+the U7 carries); this U8a UNIT RECORD; THE ORCHESTRATOR ON U7's WINDOW; the U7c UNIT RECORD whole and THE ORCHESTRATOR ON
+U7c; THE ORCHESTRATOR'S RULINGS on U5b's, U6a's (and its ONE OPEN DECISION) and U7's FORKS; the kickoff plan's "U7: the
+AI's docs" and R-VX184-2/3/4; `notes/MCPSpec.md` whole; `notes/stargazing-mcp-guide-brief-2026-10-12.md` whole;
+`notes/SessionResiliencyProtocol.md`'s implementer section; code: `MCPSession.swift` whole, `MCPToolCatalog.swift` whole,
+`MCPAdviceServerTests`, `MCPWireNeutralityTests`, `MCPProviderNeutralityTests`, `MCPTakeLabelFormServerTests`, and for
+the truth checks `editTakeUnderInsurance` + `isDirty`, the edit_take answer (`MCPWriteTools+Edit`), `aiLabel`,
+`noteBlocks`, `setTakeLabelRows` (trimmed, blank = none, no prefix), `VariorumDocument`'s `take: "label"` lines,
+`MCPWriteTools+CommentDelete` (VX-260), `readableBooks` + `requireBookNameFree` (VX-259: live, UNARCHIVED readings of
+any kind, counted only while this client can read them), `mcpEditCommitNames` / `mcpRestoreCommitNames` /
+`mcpCommitMessage`.
+
 **Read in full in this session (never delegated):** this record's header, Hard rules, LIVE STATUS, Her rulings, the U8
 BRIEF (its SPLIT and the U7 carries), the U5a UNIT RECORD (traces, design, FOR VX-234, OWED), U5b's design D1–D10, its
 FORKS, PROVISIONALs, FOR VX-234, OWED and THE ORCHESTRATOR'S RULINGS ON U5b's FORKS, THE ORCHESTRATOR ON U5's WINDOW,
@@ -4541,8 +4557,8 @@ trimmed, no prefix), `MCPWriteTools+CommentDelete` (VX-260), `readableBooks` (VX
 | piece | what | status |
 |---|---|---|
 | 0 | read-in; this record | DONE (this commit) |
-| P | **PAUSED** at the orchestrator's word (U7's window has its GO), 2026-10-14 ~20:45 MDT: committed, pushed, `git status` clean; resumed after U7's RELEASE | PAUSED (this commit) |
-| 1 | the pins on the OLD tree (Tests/ only): the advice (bound 3,000; the tools line; every new claim; the link) + the descriptions' truth (edit_take's deduped before-commit; the label rule per take-writing tool; `<your client name>`; delete_comment's VX-260 clause; rename_book's VX-259 rule) → RED | NOT-STARTED |
+| P | **PAUSED** at the orchestrator's word (U7's window has its GO), 2026-10-14 ~20:45 MDT: committed, pushed, `git status` clean; resumed after U7's RELEASE | DONE — the paused session ended; a FRESH continuation took over after U7c (this commit) |
+| 1 | the pins on the OLD tree (Tests/ only): the advice (bound 3,000; the tools line; every new claim; the link) + the descriptions' truth (edit_take's deduped before-commit; the label rule per take-writing tool; `<your client name>`; delete_comment's VX-260 clause; rename_book's VX-259 rule) → RED | IN-PROGRESS — the continuation writes them next |
 | 2 | the instructions (new text with the old bound → RED on the bound; then 3,000 → GREEN) | NOT-STARTED |
 | 3 | the descriptions → GREEN | NOT-STARTED |
 | 4 | revert checks (announced, committed first) | NOT-STARTED |
