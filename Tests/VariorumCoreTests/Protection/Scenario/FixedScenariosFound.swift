@@ -411,4 +411,22 @@ extension GeneratorFoundScenarios {
                 "the landed library's section doesn't list this Mac's own key for it")
         expectPromisesKept(world)
     }
+
+    /// Seed 1 (sequence 358, the closer's soak) — a CHECKER finding: Use
+    /// Standard, a Time Machine snapshot, Use Castle, Use Standard again, then
+    /// the rollback to the snapshot — the first Standard stretch's library and
+    /// key file come back and the open believes them (P-U4-8, her restore);
+    /// its own Apple key was retired at Use Castle, so Re-link's library arm
+    /// re-wraps its key. That is the stated limit her 2026-10-14/15 ruling
+    /// accepted for P-U4-5 (pre-Castle content, Apple-reachable in its day);
+    /// the world now applies to a Time Machine restore the truth the two-home
+    /// replay already did (PROVISIONAL P-U4-12).
+    @Test func aTimeMachineRestorePastACastleStretchIsTheStatedLimit() async throws {
+        let world = try Self.start("Castle with Touch ID, the old shared key with pre-Castle copies", seed: 1000361)
+        for action in [Action.useStandard("macA"), .timeMachineSnapshot("macA"), .useCastle("macA", .touchID, newWords: false),
+                       .useStandard("macA"), .timeMachineRollback("macA"), .settle] {
+            await world.step(action, words: true)
+        }
+        expectPromisesKept(world)
+    }
 }

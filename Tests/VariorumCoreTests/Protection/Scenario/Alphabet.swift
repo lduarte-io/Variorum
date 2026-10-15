@@ -660,8 +660,25 @@ extension SWorld {
             guard let files = d.timeMachine.last else { throw WorldRefusal.noLibrary }
             lock(d)
             let plan = d.container.files[SPath.plan]
+            let was = d.slot?.record?.currentFingerprint
             d.container.files = files
             d.container.files[SPath.plan] = plan
+            // Her restore: the library file and its key file come back together
+            // and the open believes them (the memory follows the restored
+            // current key — P-U4-8's rollback, her act). Past a crossing, that
+            // is the stated limit's shape (§3.6, P-U4-5 — her 2026-10-14/15
+            // ruling: accepted and stated): the keys the restored state names
+            // are its own again — Re-link's arm may re-wrap them — and Standard
+            // copies made after its moment are the later stretch's (PROVISIONAL
+            // P-U4-12: the acceptance read to cover a Time Machine restore).
+            if let restored = d.slot?.record, restored.currentFingerprint != was {
+                // Its STANDARD-born keys only — Apple-reachable in their day; a
+                // Castle-born key never was, and stays promise 13's.
+                truth.keptByLeave[d.name]?.subtract(restored.familyTree.entries.filter { $0.kind == .standard }.map(\.fingerprint))
+                for (id, copy) in truth.copies where copy.madeOn == d.name && copy.mode == .standard && copy.madeAt > restored.changedAt {
+                    truth.rolledBackOver.insert(id)
+                }
+            }
         case .deleteContainerAndOpenOldCopy(let name):
             try deleteContainerAndOpenOldCopy(device(name))
         case .shareBackupFolder(let name, let account):
@@ -1018,8 +1035,10 @@ extension SWorld {
             // The stated limit (§3.6): the restored state is believed — the keys
             // it brings back are its own again, as that state says (PROVISIONAL
             // P-U4-5: a Re-link press then re-wraps them under Apple — her call).
-            if let tree = capture.slot?.library?.record?.familyTree.fingerprints {
-                truth.keptByLeave[device.name]?.subtract(tree)
+            if let tree = capture.slot?.library?.record?.familyTree {
+                // Its Standard-born keys only (a Castle-born key was never
+                // Apple-reachable, and stays promise 13's).
+                truth.keptByLeave[device.name]?.subtract(tree.entries.filter { $0.kind == .standard }.map(\.fingerprint))
             }
             if let since = capture.slot?.library?.record?.changedAt {
                 for (id, copy) in truth.copies where copy.madeOn == device.name && copy.mode == .standard && copy.madeAt > since {
