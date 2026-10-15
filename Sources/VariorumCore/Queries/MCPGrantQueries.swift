@@ -375,13 +375,41 @@ extension Queries {
         try Row.fetchAll(
             db,
             sql: "SELECT * FROM mcp_activity ORDER BY id DESC \(limit.map { "LIMIT \($0)" } ?? "")"
-        ).map { row in
-            MCPActivityRow(
-                id: row["id"], clientName: row["client_name"], act: row["act"],
-                targetKind: row["target_kind"], targetID: row["target_id"],
-                targetTitle: row["target_title"], allowed: (row["outcome"] as String) == "allowed",
-                at: row["at"])
-        }
+        ).map(mcpActivityRow(from:))
+    }
+
+    /// **ONE client's own rows — `list_my_activity`'s read** (VX-261, VX-336
+    /// U7 — the run record's D-261-3/6): the rows logged under `clientName`
+    /// at or after `since` (its current approval's `decided_at` — the era
+    /// cut, P-VX261-1), whose act is one of `acts` (the tools the answer
+    /// lists — never a connection row), newest first, keyset-paged on the
+    /// row id (`before` = the previous page's last id, exclusive). Rows as
+    /// LOGGED, joined to nothing (the oracle rule, D-261-4). Cost ∝ the log's
+    /// cap (≤ `mcpActivityCap` + 1 rows by construction), never the corpus —
+    /// no index needed.
+    public static func mcpOwnActivity(
+        _ db: Database, clientName: String, since: String, acts: [String], before: Int64?, limit: Int
+    ) throws -> [MCPActivityRow] {
+        let json = String(decoding: try JSONEncoder().encode(acts), as: UTF8.self)
+        return try Row.fetchAll(
+            db,
+            sql: """
+                SELECT * FROM mcp_activity
+                WHERE client_name = ? AND at >= ? AND act IN (SELECT value FROM json_each(?))
+                  AND (? IS NULL OR id < ?)
+                ORDER BY id DESC
+                LIMIT ?
+                """,
+            arguments: [clientName, since, json, before, before, limit]
+        ).map(mcpActivityRow(from:))
+    }
+
+    private static func mcpActivityRow(from row: Row) -> MCPActivityRow {
+        MCPActivityRow(
+            id: row["id"], clientName: row["client_name"], act: row["act"],
+            targetKind: row["target_kind"], targetID: row["target_id"],
+            targetTitle: row["target_title"], allowed: (row["outcome"] as String) == "allowed",
+            at: row["at"])
     }
 
     public static func mcpActivityCount(_ db: Database) throws -> Int {

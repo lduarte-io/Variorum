@@ -2842,7 +2842,7 @@ the end of this U7 section. Claims stay PENDING until read from a log.
 | 1b — VX-254: `MintedTake.text` + the encoder's `sha256` | DONE (this commit) — BUILDER A's RECORD |
 | 2 — VX-254: the flat answers (`add_take`, `add_takes`' `takes[]`, `edit_take`, `restore_commit`); `divide_block`/`merge_blocks` answer NO digest (F-254-2 (b), ruled) | DONE (this commit): P-254-2…10 red-on-old (9 failed, 50 issues) then 10/10 green |
 | 3 — VX-254: descriptions, pins red by absence, revert run, the U+0000 CHECK | DONE (this commit): descriptions `5852e474`; the U+0000 CHECK FOUND truncation (BUILDER A's RECORD); the whole MCP suite 293/61 green (1 known issue) + the touched core suites 171/42 green; THE REVERT RUN (announced `badcf3b7`): the eight product files back to `54cc62a5` → `MCPWriteDigestServerTests` 10 of 11 FAILED, 52 issues (the guard green); restored by `git checkout HEAD -- Sources` (status clean) → 15/15 green in both digest suites (1 known issue). No revert in flight. |
-| 4 — VX-261: `list_my_activity` (query, catalog listing rule, handler, Activity words, pins) | NOT-STARTED — D-261-* |
+| 4 — VX-261: `list_my_activity` (query, catalog listing rule, handler, Activity words, pins) | IN-PROGRESS — built (this commit): 11 pins red by absence (11 failed, 24 issues) then 11/11 green; PROVISIONAL P-VX261-6 built (BUILDER A's RECORD); the whole MCP target PENDING its final run; NEXT the revert run (PENDING), then the headless finals and `build-for-testing` (PENDING) |
 | 5 — VX-256: `read_note` paging + `ids_only` (pins, revert) | NOT-STARTED — D-256-* |
 | 6 — THE STAGE WINDOW plan (claim `vx336-u7`), headless + Mac build-for-testing, READY | NOT-STARTED — the draft below |
 
@@ -3621,3 +3621,50 @@ is Swift `String` equality, which is CANONICAL equivalence — so an `edit_take`
 spelling answers `changed: false` and writes nothing. The new `sha256` (the stored text's) then honestly differs from
 the client's digest of what it sent, which is exactly what the digest is for; the client cannot re-spell a take's
 normalization through `edit_take`. Proposed if she wants it: Improvement · Suspected · MCP · Low.
+
+**VX-261 — what landed (piece 4).**
+- `Queries.mcpOwnActivity` (core, `MCPGrantQueries.swift`): D-261-6's statement exactly — the name, `at >= since`, `act IN
+  json_each(acts)`, the keyset `id < before`, newest first, `LIMIT`; rows as LOGGED, joined to nothing.
+- `MCPToolDeclaration.listedWhenApproved` (`isListed` reads it right after the approved guard) and the declaration
+  `MCPToolCatalog.listMyActivity` (read rung, in `read`; inputs `limit` 1–200 default 50, `cursor`, `include_reads`).
+- The handler `MCPReadTools.listMyActivity`: the parse first (a cursor that isn't this tool's answers
+  `staleCursorMessage`), ONE read snapshot (a pending or denied client hears its standing's sentence — `list_books`'
+  guard; the era cut at the client's `decided_at`, failing closed if an approved row ever lacked one), one extra row read
+  so `next_cursor` comes back only while rows remain, then the activity line in its own write (`logAfter`, target-less).
+- The projection `MCPOwnActivity` (`Sources/VariorumMCP/MCPOwnActivity.swift`): the listed acts (every catalog tool but
+  itself, reads only with `include_reads`), the entry (`tool`, `outcome`, `at`, the target when present, `title` on
+  allowed rows only), the hidden-target rule, the cursor (`a\n<id>`).
+- Activity words (`MCPPaneCopy.swift`): allowed "‹client› checked its recent activity" (+ " (N times)"), refused
+  "‹client› was refused checking its recent activity".
+
+**VX-261 — FOUND while building: the design's "every other row's id is an argument the client sent" is not true** —
+two more row classes log a RESOLVED id, F7's class (traced in the code, at `5c48547f` lines unchanged):
+- the chapter acts (`rename_chapter`, `delete_chapter`, `move_chapter`) — `onChapter`
+  (`MCPWriteTools+LibraryEdits.swift:207–215`) resolves the section's BOOK (`Queries.mcpBookOf(section:)`, `""` when the
+  section names nothing) and `onBook` logs that id, refusals included;
+- `delete_take` on a block's LAST take — `MCPWriteTools+NoteEdits.swift:209–213` logs `("block", road.blockID)` whenever
+  the take's note exists, reachable or not; otherwise `("take", the sent id)`.
+As logged, both would tell a hidden chapter or take from a missing one in `list_my_activity` (the kind and id differ) —
+the Hard rules forbid that. **Built PROVISIONAL P-VX261-6 (below):** every REFUSED row of those four acts answers no
+`target_*` (hidden and missing then read byte-identical, pinned); their ALLOWED rows keep the target (the act's answer
+told the client that id — `book_id`, `block_id`). The log itself is untouched (her pane keeps its words).
+
+**VX-261 — the pins** (`Tests/VariorumMCPTests/MCPOwnActivityServerTests.swift`, 11 tests; the tool named by string so
+they compile on the old tree):
+- RED by absence on `b0175aeb` (VX-254 done, no tool): 11 of 11 failed, 24 issues, every one "Unknown tool:
+  list_my_activity." — read from the run's own output. Then 11/11 green.
+- P-261-1 (newest first, exactly as logged, the creating act naming its place) · P-261-2 (another client's rows) ·
+  P-261-3 (connection rows) · P-261-4 (a refused read on a hidden note = one on a missing id, no title, no leaked title)
+  · P-VX261-6 (the chapter acts and `delete_take`: refused rows target-less, hidden = missing) · P-261-11 (F7: the wing
+  side target-less, the note side keeps its sent id; the log keeps both) · P-261-5 (act-time title through a rename and a
+  delete) · P-261-6 (Deny and re-approval: nothing from before) · P-261-7 (zero grants: offered ONLY this tool and
+  answered; pending, denied and a waiting setup hear their sentences) · P-261-8 (reads only with `include_reads`; its
+  own rows never) · P-261-9 (pages of 2 tile 5 rows as 2·2·1; two foreign cursors stale).
+- The Mac pin: `MCPWingFacesTests.listMyActivitySpeaksItsOwnWords` (the three lines exactly). The design's
+  "`activitySpeaksEveryActInWordsNeverAToolID` walks the new tool, red by absence" is NOT true: that walk is green on the
+  old tree (the fallback says "used list my activity" — no underscore, no id), so the words got their own pin. It
+  compiles in the `build-for-testing` below; its RED (old tree) and GREEN runs are THE WINDOW's (builder B's plan) —
+  PENDING.
+- Justified edits (the ritual, each commented in place): `MCPServerTests` (the read list; the book grant's exact tool
+  set) and `MCPWriteServerTests` (the suggest grant's exact tool set; the suggest proof's every-door completeness
+  subtracts this tool, which names no note, block or take).

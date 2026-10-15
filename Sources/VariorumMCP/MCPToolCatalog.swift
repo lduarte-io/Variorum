@@ -37,12 +37,19 @@ struct MCPToolDeclaration: Sendable {
     /// comment, a tombstone, one undo), so its hint says so, honest as the
     /// edit rung's (P-13nb-U3-16). nil = the rung decides (edit ⇒ true).
     var destructive: Bool?
+    /// VX-261 (VX-336 U7 — F-261-2 (a), PROVISIONAL P-VX261-2): listed for
+    /// EVERY approved client, no grant needed — `list_my_activity` reads only
+    /// the caller's own log rows, so it always acts (P-2 holds: never a door
+    /// that can never act), and recovery after a dropped "until you
+    /// disconnect" grant is the case it exists for.
+    var listedWhenApproved: Bool = false
 
     /// Listed for this standing? Approved, and the open book (read) or a
     /// live grant at this rung of a scope kind the tool acts under —
     /// standing (non-once) when the tool never serves a once grant.
     func isListed(for standing: MCPGrantAuthority.Standing) -> Bool {
         guard standing.state == .approved else { return false }
+        if listedWhenApproved { return true }
         if standing.openBook, rung == .read { return true }
         let grants = needsStandingReach ? standing.searchGrants : standing.liveGrants
         return grants.contains { grant in grant.rung >= rung && scopes.contains(grant.scopeKind) }
@@ -84,7 +91,11 @@ public enum MCPToolFacts {
 }
 
 enum MCPToolCatalog {
-    static let read: [MCPToolDeclaration] = [listBooks, listNotes, readNote, search, exportNote]
+    static let read: [MCPToolDeclaration] = [
+        listBooks, listNotes, readNote, search, exportNote,
+        // VX-336 U7 — VX-261: the client's own recent acts (listed when approved).
+        listMyActivity,
+    ]
     static let suggest: [MCPToolDeclaration] = [
         addTake, addComment, saveLens,
         // VX-184 U3 — VX-173's batch doors (one note, one act, the cap stated).
@@ -314,6 +325,36 @@ enum MCPToolCatalog {
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
+
+    /// VX-261 (VX-336 U7 — D-261-1/2, F-261-1 (a)): a client reads its OWN
+    /// recent acts from the activity log (`MCPOwnActivity`), to learn whether
+    /// a call landed after a dropped connection or a lost context.
+    static let listMyActivity = MCPToolDeclaration(
+        name: "list_my_activity", rung: .read, title: "List my recent activity",
+        description: """
+            What this client did in Variorum, newest first, from its activity log: each act's \
+            tool, whether it was allowed or refused, when, and the id it named (for a note or book \
+            it made, the book or wing it was made in). An allowed act also says what its target was \
+            called at the time; a refused one never does, and names only an id you sent. Use it \
+            after a dropped call or a lost context to learn whether a call landed — for a made \
+            note, look for its title with list_notes (two rows with one title mean two notes). It \
+            lists every session under this client's name since the author last approved it, never \
+            another client's. Reads join with include_reads: true. The log keeps the library's \
+            last 500 acts across all clients. Paged — pass next_cursor back as cursor. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "include_reads": .object(["type": "boolean",
+                                          "description": "Also list reads (default false)."]),
+                "cursor": .object(["type": "string", "description": "next_cursor from the previous page."]),
+                "limit": .object(["type": "integer", "minimum": 1, "maximum": 200,
+                                  "description": "Page size (default 50)."]),
+            ]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope,
+        listedWhenApproved: true)
 
     // MARK: - The SUGGEST rung (U2 — "it cannot touch a word you wrote")
 

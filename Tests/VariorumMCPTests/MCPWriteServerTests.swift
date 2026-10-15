@@ -48,10 +48,12 @@ struct MCPWriteServerTests {
             let names = Set(try await connection.client.listTools().tools.map(\.name))
             // U4 (justified edit, the ritual): the read rung gains show_in_app.
             // VX-184 U3 (justified edit, the ritual): suggest gains VX-173's
-            // batch doors and VX-188's delete_comment.
+            // batch doors and VX-188's delete_comment. VX-336 U7 (justified
+            // edit, the ritual): VX-261's list_my_activity is listed for every
+            // approved client (P-VX261-2).
             #expect(names == ["list_books", "list_notes", "read_note", "search", "export_note", "show_in_app",
                               "add_take", "add_comment", "save_lens", "add_takes", "add_comments",
-                              "delete_comment"],
+                              "delete_comment", "list_my_activity"],
                     "a suggest grant lists read + suggest, never a write-new door (P-2)")
 
             let read = try json(try await call(connection, "read_note",
@@ -335,7 +337,10 @@ struct MCPWriteServerTests {
                     #expect(result.isError == true, "\(name) refuses under a suggest grant")
                 }
             }
-            #expect(Set(calls.map(\.0)) == Set(MCPToolCatalog.all.map(\.name)).subtracting(["list_books", "list_notes", "search"]),
+            // VX-336 U7 (justified edit, the ritual): VX-261's list_my_activity
+            // names no note, block or take — it reads the caller's own log rows.
+            #expect(Set(calls.map(\.0)) == Set(MCPToolCatalog.all.map(\.name))
+                .subtracting(["list_books", "list_notes", "search", "list_my_activity"]),
                     "every door that names a note, a block or a take was tried")
             #expect(try snapshot() == before,
                     "every take that existed, every chosen pointer and every default is byte-identical")

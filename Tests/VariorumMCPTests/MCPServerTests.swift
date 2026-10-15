@@ -241,7 +241,10 @@ struct MCPServerTests {
         #expect(MCPShowTool.handledToolNames.isDisjoint(with: MCPReadTools.handledToolNames.union(MCPWriteTools.handledToolNames)))
         #expect(MCPToolCatalog.navigation.map(\.name) == ["show_in_app"])
         #expect(MCPToolCatalog.navigation.allSatisfy { $0.rung == .read })
-        #expect(Set(MCPToolCatalog.read.map(\.name)) == ["list_books", "list_notes", "read_note", "search", "export_note"])
+        // VX-336 U7 (justified edit, the ritual): the read rung gains VX-261's
+        // list_my_activity (a read of the caller's own log rows).
+        #expect(Set(MCPToolCatalog.read.map(\.name))
+                == ["list_books", "list_notes", "read_note", "search", "export_note", "list_my_activity"])
         // VX-184 U3 (justified edit, the ritual): suggest gains VX-173's batch
         // doors, add_takes and add_comments, and VX-188's delete_comment.
         #expect(Set(MCPToolCatalog.suggest.map(\.name))
@@ -334,7 +337,10 @@ struct MCPServerTests {
 
             let names = Set(try await connection.client.listTools().tools.map(\.name))
             // U4 (justified edit, the ritual): the read rung gains show_in_app.
-            #expect(names == ["list_books", "list_notes", "read_note", "search", "export_note", "show_in_app"])
+            // VX-336 U7 (justified edit, the ritual): and VX-261's
+            // list_my_activity, listed for every approved client (P-VX261-2).
+            #expect(names == ["list_books", "list_notes", "read_note", "search", "export_note", "show_in_app",
+                              "list_my_activity"])
 
             let books = try json(try await connection.client.callTool(name: "list_books"))["books"] as? [[String: Any]]
             #expect(books?.map { $0["id"] as? String } == [shared.id], "only the shared book is listed")

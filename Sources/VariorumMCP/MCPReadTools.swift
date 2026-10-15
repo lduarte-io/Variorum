@@ -56,6 +56,7 @@ struct MCPReadTools: Sendable {
             case MCPToolCatalog.readNote.name: return try readNote(args, clientName: clientName, plain: false)
             case MCPToolCatalog.exportNote.name: return try readNote(args, clientName: clientName, plain: true)
             case MCPToolCatalog.search.name: return try search(args, clientName: clientName)
+            case MCPToolCatalog.listMyActivity.name: return try listMyActivity(args, clientName: clientName)
             default: return Outcome(text: "Unknown tool: \(name).", isError: true)
             }
         } catch let failure as ArgumentFailure {
@@ -65,7 +66,9 @@ struct MCPReadTools: Sendable {
         }
     }
 
-    static let handledToolNames: Set<String> = ["list_books", "list_notes", "read_note", "export_note", "search"]
+    static let handledToolNames: Set<String> = [
+        "list_books", "list_notes", "read_note", "export_note", "search", "list_my_activity",
+    ]
 
     // MARK: - read_note / export_note
 
@@ -581,6 +584,48 @@ struct MCPReadTools: Sendable {
             .filter { seen.insert($0.id).inserted }
             .prefix(limit)
             .map { $0 }
+    }
+
+    // MARK: - list_my_activity (VX-261)
+
+    /// **The client's own recent acts** (VX-336 U7 — D-261-1…7): an APPROVED
+    /// client's rows logged under its name since its current approval
+    /// (P-VX261-1 — `decided_at`; Deny is her "stop trusting this client" and
+    /// a re-approved name starts with no reach and no history), newest first,
+    /// each AS LOGGED (`MCPOwnActivity`). A pending or denied client hears its
+    /// standing's own sentence (`list_books`' guard). The parse first (the
+    /// cursor's decode, independent of any target), then ONE read snapshot,
+    /// then the activity line in its own short write (F3) — logged like every
+    /// read, target-less, and never listed in its own answer. Not a `Job`: it
+    /// reads the log only, nothing of her text, so no flush; no undo. Cost ∝
+    /// the page, over a table bounded by its cap.
+    private func listMyActivity(_ args: [String: Value], clientName: String) throws -> Outcome {
+        let limit = min(max(try optionalInt(args, "limit") ?? Self.defaultPageSize, 1), Self.maxPageSize)
+        let cursor = try optionalString(args, "cursor")
+        let before = cursor.flatMap(MCPOwnActivity.rowID(decoding:))
+        if cursor != nil, before == nil { throw ArgumentFailure(message: Self.staleCursorMessage) }
+        let includeReads = try optionalBool(args, "include_reads") ?? false
+        let outcome: Outcome = try database.read { db in
+            let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
+            guard standing.state == .approved else {
+                return refusal(MCPGrantAuthority.decide(standing, note: nil, rung: .read, consumes: false), .note)
+            }
+            // An approved client always carries its approval's stamp; without
+            // one there is no era to read from — fail closed (nothing listed).
+            guard let since = try Queries.mcpClient(db, name: clientName)?.decidedAt else {
+                return Outcome(text: try encode(["acts": [Any]()]), isError: false)
+            }
+            let rows = try Queries.mcpOwnActivity(
+                db, clientName: clientName, since: since, acts: MCPOwnActivity.listedActs(includeReads: includeReads),
+                before: before, limit: limit + 1)
+            let page = rows.prefix(limit)
+            var answer: [String: Any] = ["acts": page.map(MCPOwnActivity.entry)]
+            // Only while rows remain (the one extra row read says so).
+            if rows.count > limit, let last = page.last { answer["next_cursor"] = MCPOwnActivity.cursor(after: last.id) }
+            return Outcome(text: try encode(answer), isError: false)
+        }
+        try logAfter(clientName, MCPToolCatalog.listMyActivity.name, nil, nil, allowed: !outcome.isError)
+        return outcome
     }
 
     // MARK: - search

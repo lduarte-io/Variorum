@@ -425,6 +425,9 @@ nonisolated enum MCPPaneCopy {
         // TWO-SIDED act (UXR1-1) — the note at read, its wing at write new — so
         // the line says the side that refused as itself.
         case "duplicate_note": return kind == "wing" ? "duplicating a note in \(at)" : "duplicating \(at)"
+        // VX-336 U7 — VX-261: a client reading its OWN recent acts (target-less;
+        // PROVISIONAL words, her copy pass — VX-234).
+        case "list_my_activity": return "checking its recent activity"
         // VX-188 — a client deleting a comment (its own, at suggest).
         case "delete_comment": return "deleting a comment in \(at)"
         // VX-190 — un-tagging a note at edit.
@@ -543,6 +546,9 @@ nonisolated enum MCPPaneCopy {
         case "insert_blocks": return "added blocks to \(at)" + times
         // VX-336 U6a — VX-311: logged on the SOURCE note (the copy wears its title).
         case "duplicate_note": return "duplicated \(at)" + times
+        // VX-336 U7 — VX-261: the client read its own recent acts (PROVISIONAL
+        // words, her copy pass — VX-234).
+        case "list_my_activity": return "checked its recent activity" + times
         case "delete_comment": return n == 1 ? "deleted a comment in \(at)" : "deleted \(n) comments in \(at)"
         case "remove_tag": return "removed a tag from \(at)" + times
         case "link_versions": return "linked \(at) and another note as versions" + times
