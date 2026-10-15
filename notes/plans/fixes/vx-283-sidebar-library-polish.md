@@ -378,7 +378,7 @@ trailer of any kind.
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **U1d (her two memo rulings: follow only on her acts; the fade reshaped) — READY FOR STAGE** (≈15 min): the 96-suite batch, the mount suite ×5, R-I and R-J (prebuilt), the restore — the U1d section's LIVE STATUS. Then the re-walk of R2–R6. |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp, the orchestrator's added piece) | **READY FOR STAGE** (≈15 min): the 144-suite batch, the two mount suites ×3, R-K and R-N (prebuilt), the restore — the U2 section's E6. Then the walk. |
-| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **U3b (P-U3-5 — the controls row reads stable widths only; the walk's W2 F-1/F-2) — IN-PROGRESS** (headless; the U3b section's LIVE STATUS). U3's W1 W3 W4 W5 hold (the walk record). |
+| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **U3b (P-U3-5 — the controls row reads stable widths only; the walk's W2 F-1/F-2) — READY FOR STAGE** (≈15 min; ≈11 without the optional mount ×2): `u3b/window.sh` pre · batch (103 suites on `vx283-u3b`) · rv (R-S prebuilt in `vx283-u3b-rv`, the three VX-175 suites, six cells expected red) · [mount ×2] · restore — the U3b section's S5. Then the re-walk of W2. U3's W1 W3 W4 W5 hold (the walk record). |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
 
@@ -2785,7 +2785,37 @@ over a claim; the sidebar (not mine).
   (`3ab7ad9e`). Headless `build-for-testing` green on `vx283-u3b` (cloned from `vx283-u2`); no new warning in the three
   files (the two `probeSpace` Sendable warnings are the pre-existing pair U3 recorded).
 - S3 — the pins: DONE (`ed58c2ac`), compiled in the same build. All PENDING the stage window.
-- S4 — the revert tree **R-S** (named below, BEFORE it is applied), the window script, READY FOR STAGE: IN-PROGRESS.
+- S4 — the revert tree **R-S** (named below, before it was applied): DONE — applied from the committed tip `a4a68295`,
+  `DerivedData/vx283-u3b-rv` APFS-cloned from `vx283-u3b` and built (`build-for-testing` succeeded; the log shows
+  `LibraryControlsFlow.swift` and `LibraryCatalogView.swift` recompiled), RESTORED by `git checkout --` the two files,
+  `git diff --quiet` empty. **No revert in flight.** The window script `notes/plans/vx283-screens/u3b/window.sh`
+  (gitignored) written.
+- **S5 — READY FOR STAGE** (≈15 min; ≈11 without the optional step). `window.sh` from any directory, in order:
+  `pre` (instances, App/ clean, prefs export, the store's three files into `u3b/store-before/<UTC>/`) · `batch` (≈6
+  min — `test-without-building` on `vx283-u3b`, **103 suites** = every suite in the 45 test files naming a type of the
+  three changed sources (`LibraryControlsFlow*`, `LibraryControlsStableWidths`, `LibraryCatalogView` and its row types,
+  `LibraryInfoPanel`/`LibraryPanelOracle`/`LibraryProbeSlot`/`LibraryPanelLayout`/`LibraryPreview`), the catalog's
+  source-read pins, `ChromeLineLimitTests` (a `fixedSize` was added) and every `RootView(` mount — `u3b/suites.txt`,
+  `u3b/files.txt`; expected all green, the opt-in rig suites SKIPPED) · `rv` (≈3 min — R-S on `vx283-u3b-rv`, the three
+  VX-175 suites; expected RED exactly as R-S names; then `vx283-u3b-rv` deleted) · `mount` (OPTIONAL, ≈4 min — the
+  mounted suite ×2, a flake check) · `restore` (the store copied back + `cmp`; the prefs keys the suites ADDED deleted
+  by name, `prefs-before` imported, re-exported and diffed — it prints PREFS CLEAN or not; castle-W1 counted). The
+  geometry print lines land in `u3b/logs/{batch,rv}-geometry.txt` (the in-app widths the offscreen harness can only
+  estimate). Then **the re-walk of W2** (P-U3-5 item 5): both voices, panel open/closed, typing, a list scroll, the 1240
+  default — `vx283-u3b` holds the products.
+
+**PROVISIONAL (mine — options for the orchestrator's bundle; `notes/QUESTIONS.md` left to the merging session, the
+shared-ledger rule):**
+- **P-U3b-1 — the floor includes the field's bezel.** "The placeholder string measured in the field's own font" is
+  read as the width at which the FIELD shows its whole prompt: the cell's size (the prompt's 199.05 pt + the rounded
+  bezel's ≈12.5 = 211.5, Terminal) — the same number U3's pins read as "the prompt's width". Options: (a) the cell's
+  size [built]; (b) the bare text width (≈12.5 pt less — at the threshold the prompt's last characters clip under the
+  bezel).
+- **P-U3b-2 — Timeline is judged without sort and when** (unchanged from U3): a mode switch may re-flow the row
+  (List two lines, Timeline one, at some widths). Options: (a) judge the controls present [kept — the ruling's
+  stability set is typing, a sort pick and a search; a mode change is her act and changes the row's contents]; (b)
+  always count sort + when at their widest, so a mode change never re-flows either (Timeline then two lines wherever
+  List is, though one would fit).
 
 **S0 — THE TRACE (this tip; offscreen measures from a scratch `NSHostingController` probe in the voices' own `small`
 faces — the numbers in brackets).**
