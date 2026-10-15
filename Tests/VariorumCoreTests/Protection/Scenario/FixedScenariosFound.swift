@@ -429,4 +429,17 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 1 (sequence 596, the closer's soak) — a CHECKER finding: a synced
+    /// pair landed on a device signed into that same account lands HELD, with
+    /// no Apple wrap until Resume Sync (§3.7's restore hold); promise 3 now
+    /// waits for the press, as promise 7 already did — and after it, holds.
+    @Test func aHeldLandingWaitsForResumeSyncBeforeStandardMeansStandard() async throws {
+        let world = try Self.start("a synced Standard account, a device that joined without a secret", seed: 1000599)
+        await world.done([.sendLibrary(from: "macA", to: "phone"), .land("phone", .passphraseWordsMadeNew), .settle])
+        #expect(world.liveKeyFile(world.phone)?.apple == nil, "a held landing wrote an Apple wrap")
+        await world.done([.resumeSync("phone"), .settle])
+        #expect(world.liveKeyFile(world.phone)?.apple != nil, "Resume Sync didn't give the library its Apple road")
+        expectPromisesKept(world)
+    }
 }

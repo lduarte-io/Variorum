@@ -531,6 +531,10 @@ extension SWorld {
         // a fresh read of its account's vault — signed out, in another account
         // or offline, its own Apple key waits (Re-link's library arm too).
         if let account = record.account, device.session.accountID != account || !device.online { return [] }
+        // A synced pair landed HELD writes nothing Apple-reachable until the
+        // one Resume Sync press reads its account's vault (§3.7, the restore
+        // hold) — as promise 7 already waits for it.
+        if truth.heldLanding[device.name] == record.libraryID { return [] }
         guard let live = liveKeyFile(device), live.fingerprint == record.currentFingerprint, let wrap = live.apple else {
             return [Violation(promise: 3, device: device.name, detail: "no Apple wrap of the current key")]
         }
