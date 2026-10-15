@@ -376,10 +376,10 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **U1d (her two memo rulings: follow only on her acts; the fade reshaped) — READY FOR STAGE** (≈15 min): the 96-suite batch, the mount suite ×5, R-I and R-J (prebuilt), the restore — the U1d section's LIVE STATUS. Then the re-walk of R2–R6. |
-| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp, the orchestrator's added piece) | **READY FOR STAGE** (≈15 min): the 144-suite batch, the two mount suites ×3, R-K and R-N (prebuilt), the restore — the U2 section's E6. Then the walk. |
-| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **U3b (P-U3-5 — the controls row reads stable widths only; the walk's W2 F-1/F-2) — READY FOR STAGE** (≈15 min; ≈11 without the optional mount ×2): `u3b/window.sh` pre · batch (103 suites on `vx283-u3b`) · rv (R-S prebuilt in `vx283-u3b-rv`, the three VX-175 suites, six cells expected red) · [mount ×2] · restore — the U3b section's S5. Then the re-walk of W2. U3's W1 W3 W4 W5 hold (the walk record). |
-| Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **PROVEN — awaiting U2's walk for P-U1e-1** (the fade ramp rides U2): U1 built + walked; U1b/U1c fix legs; U1d (her memo rulings) window GREEN (434/96, R-I/R-J red as named, 01:44–01:50) and re-walk HOLD on R0–R3, R5–R8 (R6 her scroll never pulled back); R4's 7–9-pt slice → P-U1e-1 built in U2's leg, verified by U2's window + walk. |
+| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **BUILT, READY FOR STAGE — the folded claim `vx283-u2`** (test part: the 144-suite batch, two mount suites ×3, R-K/R-N; SEAM; one walk with U3's W2). PENDING: every pin's run, the reverts, the walk (the ladder ran ahead — R1-2). |
+| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **W1/W3/W4/W5 PROVEN** (closing window R-ALL red as named; walk HOLD). **U3b (P-U3-5) BUILT, READY FOR STAGE in the folded `vx283-u2` claim** (103-suite batch, R-S, then W2's re-walk). PENDING: U3b's run + W2. |
+| Ladder | `fable-reviewer` at xhigh (her word, superseding opus at max), fresh per round, cross-model | **ROUND 1 DONE** (tip 448f9450; findings in the Ladder section, `9ef6fba3`): 0 BLOCKER · 0 MAJOR · 2 MINOR (R1-1 this table — fixed here; R1-2 sequencing — the windows owed) · 4 NIT (R1-3…6 → the implementer). Round 2 re-reviews the fixes + the U2/U3b window results. |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
 
 ## Stage traffic log (oct13coordinator protocol)
