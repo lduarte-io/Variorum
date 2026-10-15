@@ -379,6 +379,9 @@ struct SidebarView: View {
         // (The Open strip's row reorder rides its OWN transfer type, so a
         // dragged row can never be mistaken for droppable text.)
         .onDrop(of: [.fileURL, .plainText], isTargeted: nil) { providers in
+            #if DEBUG
+            OpenListDragTrace.note("COLUMN import drop performed · types=\(providers.map(\.registeredTypeIdentifiers))")
+            #endif
             let model = importer ?? ImportModel(session: session)
             importer = model
             return model.handleDrop(providers, into: .library)
@@ -994,6 +997,7 @@ struct SidebarView: View {
                 // VX-288's oracle: the end zone as laid out.
                 .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
                     SidebarGeometry.recordOpenListEndZone(frame, for: workspace)
+                    OpenListDragTrace.note("ENDZONE laid out at global \(OpenListDragTrace.rect(frame))")
                 }
                 .onDisappear { SidebarGeometry.recordOpenListEndZone(nil, for: workspace) }
                 #endif
@@ -1099,6 +1103,8 @@ struct SidebarView: View {
             SidebarGeometry.recordOpenRowHeight(height, in: session.debugProbeScope)
         }
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { box in
+            // U2b: every row's frame, in screen points, for the trace window's aim.
+            OpenListDragTrace.row(ordinal: ordinal, noteID: noteID, global: box)
             if ordinal == 1 {
                 SidebarGeometry.recordFirstRowBox(
                     WorkspaceNaming.openSectionHeader, box, in: session.debugProbeScope)
@@ -1118,11 +1124,29 @@ struct SidebarView: View {
         // row it is. The drop is the LIST's (`openGroup`) — no row is its own
         // target any more (each landed before itself, the traced bug).
         .modifier(ChipDragSource(payload: {
+            #if DEBUG
+            // U2b's trace (`OpenListDragTrace`, off unless its marker exists):
+            // WHEN SwiftUI runs this payload — T1's G1.
+            OpenListDragTrace.note("SOURCE payload evaluated row=\(noteID.prefix(8)) main=\(Thread.isMainThread)"
+                + " dragging(before)=\(OpenListDragTrace.short(openListDrag.dragging))")
+            #endif
             openListDrag.began(noteID)
             return OpenNoteDragToken(noteID: noteID, listID: openListDrag.listID)
         }) {
             Self.openRowChip(workspace.label(for: destination), tokens: tokens)
+                #if DEBUG
+                .onAppear {
+                    OpenListDragTrace.note("SOURCE preview appeared row=\(noteID.prefix(8))")
+                    OpenListDragTrace.dumpHitChain("SOURCE preview")
+                }
+                #endif
         })
+        #if DEBUG
+        // U2b: the source probes (`session`, `allowmove`; read at launch —
+        // with neither flag the row is exactly as shipped) and the aim check.
+        .modifier(OpenListDragTraceSource(noteID: noteID))
+        .onHover { inside in if inside { OpenListDragTrace.hover(ordinal: ordinal, noteID: noteID) } }
+        #endif
         .contextMenu {
             if let onOpenBeside {
                 Button(WorkspaceNaming.openBesideVerb) { onOpenBeside(noteID) }
