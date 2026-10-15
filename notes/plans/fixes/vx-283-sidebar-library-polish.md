@@ -82,6 +82,12 @@ retitled to Close All; VX-288 notes the chip; the run and its nine members In Pr
   note-only and quick-note windows); if it collides, STOP and report — never rebind silently.
 - **VX-289:** *"close all now is good"* — Close All only, landing by VX-287's rule; closing stays VIEW-ONLY (the
   note itself is untouched — `SidebarView.swift:109-115`).
+- **⇧⌘W VS MACOS WINDOW TABS — her ruling at U1's stopped window (2026-10-14, the question tool):** the window's
+  step 1 measured that once two Variorum windows are merged into native window tabs, AppKit adds File ▸ Close
+  Window on ⇧⌘W and takes the key (View ▸ Close Note loses its equivalent there; one ordinary window is free —
+  `notes/plans/vx283-screens/u1/p0/`). Offered (a) keep ⇧⌘W and turn native window tabs off, (b) ⌃⌘W, (c) keep ⇧⌘W
+  and accept it, she chose **"Keep ⇧⌘W, live with it"**: in a tabbed window ⇧⌘W is macOS's Close Window; Variorum
+  changes nothing about window tabbing. Not a finding for the walk or the ladder.
 - **THE ✕ ON THE NOTE YOU'RE LOOKING AT — her ruling at U1's READY (2026-10-14, the question tool):** asked
   *"Clicking a row's ✕ (or right-click ▸ Close) on the note you're currently looking at: today the row disappears but
   the note stays on screen with no row. Should it behave like ⇧⌘W and move you to the next note?"*, she chose **"Yes,
