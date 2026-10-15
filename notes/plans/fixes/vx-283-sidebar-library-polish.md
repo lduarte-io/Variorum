@@ -1336,6 +1336,32 @@ user value). **The orchestrator makes this change itself** (small, at adjudicati
 93-suite batch and the mount suite **five times** (`-test-iterations 5`) as the flake's stability evidence; the
 re-walk is the visual evidence.
 
+#### U1b5 — THE WINDOW (run by the orchestrator, claim `vx283-u1b5` 22:12:27–22:16:19, RELEASED) and the TRACE LEG
+
+**Result under `be4e4c0f` (the 3-pt slack):** the 93-suite batch — `✘ Test run with 413 tests in 93 suites failed after
+87.910 seconds with 2 issues` (VX-245's lint; the Starred pin). The mount suite × 5 (`-test-iterations 5`): the Starred
+pin red 4 of 5, resting at offsets **31.5 · 32 · 32 · 32.5** of 36 (bottom fade 3.5–4.5) — WIDER than under the 0.5-pt
+rule (34–36). Dev store restored + cmp-verified, the suites' 9 added prefs keys deleted, the prefs diff clean (1602 =
+1602), castle-W1 untouched, zero instances. Logs: `notes/plans/vx283-screens/u1b5/logs/`.
+
+**Reading:** the shortfall GROWS with the slack — so it is not fixed-size settling noise; it is motion that keeps going
+after the re-asks stop (a bigger slack stops them sooner). **P-U1b-8 was a guess and is REVERTED (`13e36041`).** The
+orchestrator's best hypothesis, UNTRACED and offered to the trace only: the column's implicit `.animation(…railTransition,
+value: railPostID)` animates the scrolling sections' FRAME heights too; the viewport shrinks over the beat with the top
+held, each mid-animation reading re-asks only while the row is past the slack, and the last frames' small steps leave an
+error the re-asks never see — while the settled backstop may read a stale `memory.window` if no reading arrives at the
+end.
+
+**THE TRACE LEG (P-5's friction doctrine, the hallucination guard):** five legs have chased this number with fixes built
+ahead of a traced mechanism. No more fixes until the mechanism is traced. A FRESH implementer (trace-first) instruments
+the Starred section in the mounted rig across the ninth star's open — every geometry reading (time, offset, viewport,
+content), every reveal request and its trigger, the computed target, what `scrollTo` is called with, and every offset
+change after the last reveal — establishes WHEN the geometry reaches its final values, WHETHER a reading arrives after
+the transition, and WHAT moves the offset after the last reveal; then PROPOSES a fix with that evidence (candidates to
+weigh, not to assume: the scrolling sections' frames taken OUT of the rail's implicit animation so their geometry
+arrives once; the settled reveal forced to read fresh geometry; another the trace shows). The architect rules before
+it is built. The instrumentation is DEBUG-only and is removed (or kept as an oracle) by the ruling.
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
