@@ -3218,6 +3218,38 @@ both voices, the sweep's read = the settled read, traced = untraced). Nothing bu
      suites (`LibraryCatalogView`'s — U3b's 103-suite list), then D8's re-walk (both voices, panel open/closed, typing,
      a list scroll, a sort pick, the 1240 default — and a look at the scope control after a search: never cramped).
 
+#### U3c — THE ORCHESTRATOR'S RULING ON T3 (2026-10-15 ~16:50 — P-U3c-1)
+
+**Accepted as proposed.** The mechanism is traced to the input that moves. The two segmented pickers (scope, mode)
+answer either RIGID (minimum = ideal) or COMPRESSIBLE (the AppKit control squeezed below its natural width). The
+mode is the same model state either way: a landed search turns COMPRESSIBLE on, nothing the cleared search does turns
+it off, and a sort pick (the slot's label changing) turns it off. That moves the width each picker takes at its share,
+and in Study the serving order too. Every other input is constant in the trace. Why SwiftUI flips the mode on exactly
+those two events is not visible from our side. The fix does not depend on it: it removes the picker's freedom to answer
+two ways.
+- **P-U3c-1 (PROVISIONAL, the orchestrator's):** each segmented Picker in the Library's controls row takes
+  `.fixedSize(horizontal: true, vertical: false)` before its existing frame (`LibraryCatalogView.swift` scope and mode).
+  So its width is its ideal in every state, and P-U3-5's "the wrap reads stable widths only" extends to the pickers.
+  - **Consequences, accepted:** the band resolves to the rigid answer, the row's answer at mount and after every sort
+    pick (thresholds ≈977.5 Terminal / ≈891 Study). The 1240 default with a 210-pt sidebar is one line closed (Terminal
+    by ≈3.5 pt, stable) and two lines open. A wider sidebar can make Terminal's closed row two lines, and it stays two
+    (P-U3-5 allows it). After a search the segmented controls are no longer squeezed. Line 2's minimum rises to 478
+    pt, still inside the 631-pt open room.
+  - The lint is unaffected (it sweeps only the bare `.fixedSize()`).
+- **The pins, pin first (red-first commit, then the fix):**
+  - NEW `LibraryControlsGeometryTests.aSearchNeverSqueezesTheSegmentedControlsOrFlipsTheRow` (×2 voices, as proposed);
+  - the existing sweep `withThePanelClosedEachWidthHasOneLineCount` must go green UNCHANGED;
+  - **the optional pure guard pin: YES**, with the stale "≈934 / ≈834" comment annotated in place (not rewritten).
+- **R-P (the behavioural revert, named now):** delete the two `.fixedSize(horizontal: true, vertical: false)` lines,
+  nothing else. Products `DerivedData/vx283-u3c-rv`. Expected RED, exactly: the new pin ×2 and the sweep ×2. GREEN:
+  everything else named in T3 §3.
+- **The trace hook and the probe suite STAY as an oracle** (the U1c precedent): DEBUG-only, silent unless a probe sets
+  the sink, env-gated. The ladder may disagree.
+- **The window (READY FOR STAGE when built):** the new pin and the sweep on `vx283-u3c`; R-P on `vx283-u3c-rv`; U3b's
+  103-suite batch on `vx283-u3c`; restore. Then **D8's re-walk** (a fresh Opus, both voices, panel open/closed, typing,
+  a list scroll, a sort pick, the 1240 default, and the scope control after a search) folds with U2b's re-walk where
+  the timing allows.
+
 #### U2 + U3b — THE WALK PLAN (the folded `vx283-u2` claim's walk; a fresh Opus at xhigh; her rule)
 
 Products: U2's Debug app `DerivedData/vx283-u2` (the drag + P-U1e-1 + the R1 fixes) for D1–D7; U3b's
