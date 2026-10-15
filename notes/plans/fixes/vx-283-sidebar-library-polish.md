@@ -869,9 +869,9 @@ lines — below); any stage work until the orchestrator hands over a claim.
 - Q3 — headless evidence: DONE. `build-for-testing` green for HEAD (`DerivedData/vx283-u1`, the Q2 code) and for
   both reverts, PREBUILT so the window only runs tests: R-D's products in `DerivedData/vx283-u1b-rd`, R-E's in
   `DerivedData/vx283-u1b-re` (each patch applied, built, restored by `git checkout --`, `git diff` empty). The
-  patches: `notes/plans/vx283-screens/u1b/reverts/R-D.patch`, `R-E.patch` (gitignored). **A pin fix (the fade pins
-  read the depth at the CURRENT pitch — opening a note can flip 30 ↔ 24) means all three trees are being REBUILT:
-  REVERT IN FLIGHT (headless) until this line says otherwise — check `git diff` first.**
+  patches: `notes/plans/vx283-screens/u1b/reverts/R-D.patch`, `R-E.patch` (gitignored). After a pin fix (`ab1880cb`,
+  `62d5a4a1` — the fade pins read the depth at the CURRENT pitch, since opening a note can flip 30 ↔ 24) all three
+  trees were REBUILT at `62d5a4a1`'s code, each green; **no revert is in the tree** (`git diff` empty).
 - Q4 — **READY FOR STAGE** — the window below (≈25 min): the batch, the two prebuilt reverts, the restore. The
   screenshot re-walk is a fresh walker's, after it.
 
@@ -1005,8 +1005,8 @@ lines — below); any stage work until the orchestrator hands over a claim.
    TourEndCardTests TourEngineTests TourEntryTests TourPoolTuckTests TourScriptTests TourSpotlightTests
    TutorialCurrencyTests TwoWindowMountTests WindowRegistryTests WindowUnmountTests WingSwitcherTests
    WorkspaceCloseActTests WorkspaceModelTests WorkspaceNamingTests WriteTakesPanelTests.
-   `pipestatus` checked; the "Test run with N tests" line AND its skipped lines recorded. (The products are the Q2
-   code, identical to HEAD; `test` instead of `test-without-building` would only re-check them.)
+   `pipestatus` checked; the "Test run with N tests" line AND its skipped lines recorded. (The products are
+   `62d5a4a1`'s code — HEAD's code; `test` instead of `test-without-building` would only re-check them.)
 2. *R-D (prebuilt — the pre-U1b reveals in BOTH sections, U1b's oracles kept)* — `… -derivedDataPath
    DerivedData/vx283-u1b-rd test-without-building -only-testing:VariorumTests/SidebarSectionWindowMountTests`.
    Expected RED: `returningToTheNoteYouWereInRevealsItsRow`, `aShorterListKeepsTheCurrentRowInView`,
