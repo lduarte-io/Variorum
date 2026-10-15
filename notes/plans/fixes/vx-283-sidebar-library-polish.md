@@ -378,7 +378,7 @@ trailer of any kind.
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **STOPPED — Q11 not green** (22:05–22:08): batch 413, 2 red — VX-245's lint and the Starred pin (0.5 pt short on HEAD — the same code R-F ran green: FLAKY); R-G red as expected but uninformative. A new trace is needed — a fresh successor's (leads in Q11). Every other U1b pin green. F-3 → VX-359 (U3 rider). |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
-| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **AWAITING THE ORCHESTRATOR'S RULING on VX-175's composition** (the U3 section's Q5 — the brief's line 2 overflows the 1240-pt room in Terminal; (C) + a one-identity flow Layout recommended). VX-245 · VX-359 · VX-121 · VX-20 built headless (build-for-testing green), their pins and reverts PENDING one stage window after VX-175 is built |
+| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **READY FOR STAGE** (tip `e6ed9b66`) — all five members built headless (VX-175 to the ruling at 76ccfc45), build-for-testing green; the window (≈25 min): the 187-suite batch, the rig's dark pass, ONE combined revert R-ALL (R-V + R-T + R-D + R-L), restore — the U3 section's Q6 plan |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
 
@@ -1903,7 +1903,54 @@ the orchestrator rules on its composition (below — the brief's composition doe
   keeps its prompt's width — **RED ON OLD planned as R-L** (`LibraryControlsFlow(spacing: 10, lineSpacing: 8) {` →
   `HStack(spacing: 10) {` in `LibraryCatalogView.header`); guards: panel closed at 1029 → one line, the field whole;
   1229 pt (a 1440 window) → one line, the field 320 at the header's 24-pt inset. All PENDING the stage window.
-- Q6 — the stage window: NOT-STARTED — one window after VX-175 is built (the suite list, the reverts R-T · R-V · R-D · VX-175's, the rig's dark pass, the lint).
+- Q6 — the stage window: **READY FOR STAGE — the plan below (≈25 min), tip `e6ed9b66`; no revert in flight.**
+
+**Q6 — THE STAGE WINDOW PLAN (≈25 min; run in this order; the record flips per step; all commands from
+`App/Variorum/`, DerivedData `vx283-u3`, zsh `pipestatus` checked, the "Test run with N tests" line AND its skipped
+lines recorded):**
+0. *Preconditions (≈3 min).* `pgrep -lx Variorum`; `pgrep -lf "MacOS/Variorum$"` (discriminate by PATH; never touch a
+   `/Applications` instance). `defaults export io.lduarte.Variorum.debug notes/plans/vx283-screens/u3/prefs-before.plist`.
+   With ZERO dev instances, copy `variorum.sqlite{,-wal,-shm}` from the dev container's `Variorum-dev/` into
+   `notes/plans/vx283-screens/u3/store-before/<UTC stamp>/` (never the key files, `Backups/`, `Previous Libraries/`;
+   castle-W1 untouched). No app is launched in this window — the test host only.
+1. *The batch (≈9 min incl. the incremental build).* `xcodebuild -scheme Variorum -destination 'platform=macOS'
+   -derivedDataPath DerivedData/vx283-u3 test $(sed 's#^#-only-testing:VariorumTests/#'
+   ../../notes/plans/vx283-screens/u3/suites.txt)` — **187 suites** from the 96 test files matching
+   `SearchPicker|TakesShow(Copy|Door|Popover)|LibraryBulkRow|StatusToast|QuickEntry(Bar|Copy|Model|OpeningFocus)|LibraryList(Face|Header|Lead|Row|Separator)|LibraryBookOutline|LibraryInfoPanel|LibraryNotePreview|LibraryOutlineRowView|LibraryPanelLayout|LibraryPanelOracle|LibraryPreview|LibraryProbeSlot|LibraryControlsFlow|LibraryCatalogView|EditorCommands|RootView\(|ShelfView\(|ChromeLineLimit|ViewMenuSeparator|NSApp\.mainMenu`
+   (every type of every changed source file, the two shell roots, the menu readers; the list and the file list are
+   saved, gitignored, at `notes/plans/vx283-screens/u3/{suites,files}.txt`). It includes `ChromeLineLimitTests` (the
+   VX-245 lint — red on the tip by batch 418, so green here is its red→green), `ViewMenuSeparatorTests`,
+   `StatusToastPlacementRuleTests`, `StatusToastPlacementShellTests`, `LibraryListHeaderDarkFaceTests`,
+   `LibraryControlsFlowRuleTests`, `LibraryControlsGeometryTests`, `LibraryBulkRowGeometryTests`. The opt-in rig suite
+   rides as SKIPPED (expected).
+2. *The rig's dark pass, fixed (≈3 min).* `TEST_RUNNER_VARIORUM_LIBRARY_LIST_FACE=1
+   TEST_RUNNER_VARIORUM_LIBRARY_LIST_FACE_APPEARANCE=dark TEST_RUNNER_VARIORUM_LIBRARY_LIST_FACE_LABEL=after xcodebuild
+   … test -only-testing:VariorumTests/LibraryListFaceRigTests > <log>`; then `python3 -I
+   ../../notes/plans/vx283-screens/u3/tools/bwalk_extract.py <log> ../../notes/plans/vx283-screens/u3/rig/after`;
+   record the `after-<voice>-geometry.txt` "uniform horizontal runs" row of the pinned header band (expected: the
+   voice's dark `surface`, not #2F2D29).
+3. *The red-on-old reverts — ONE combined revert build, **R-ALL = R-V + R-T + R-D + R-L** (each pin's subject is its
+   own file and the expected reds are disjoint; named here before it starts) (≈8 min):*
+   - **R-V** `EditorCommands.swift`: the three `// VX-359: …` comment lines after Close Split's `.disabled(…)` →
+     `Divider()`.
+   - **R-T** `RootView.swift`: `.statusToastHost(session.status, tokens: theme.tokens(for: scheme))` → `.overlay(alignment:
+     .bottom) { if let item = session.status.current { StatusToast(item: item, tokens: theme.tokens(for: scheme),
+     onDismiss: { session.status.clear() }).padding(.bottom, 46) } }`.
+   - **R-D** `LibraryListFace.swift`: `pinnedFace`'s body `dark ? .voice(fill: tokens.surface, hairline: tokens.line) :
+     .material` → `.material`.
+   - **R-L** `LibraryCatalogView.swift`: `LibraryControlsFlow(spacing: 10, lineSpacing: 8) {` → `HStack(spacing: 10) {`.
+   Run `-only-testing:` `ViewMenuSeparatorTests`, `StatusToastPlacementShellTests`, `LibraryListHeaderDarkFaceTests`,
+   `LibraryControlsGeometryTests`. **Expected RED:** ViewMenuSeparator's one test (two separators in a row after Close
+   Split); the Bookcase + Library toast cells (the note cell green); the dark face cells ×2 voices ×2 tests (light ×2
+   green); the controls panel-open cell ×2 voices (panel closed / wide green). Then the rig's dark pass again with
+   `…_LABEL=before` → `rig/before` (expected: the band's grey, or the snapshot's own reading of the material —
+   recorded as read). **Restore:** `git checkout -- App/Variorum/Variorum/EditorCommands.swift
+   App/Variorum/Variorum/RootView.swift App/Variorum/Variorum/Features/Library/LibraryListFace.swift
+   App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift`, then `git diff --quiet` (empty).
+4. *Release (≈2 min).* Dev store copied back with zero dev instances and `cmp`-verified per file; prefs `defaults
+   import` → re-export → diff against `prefs-before.plist` (delete by hand every key the suites ADDED); `Tools/stage
+   release`; the one-line release report ("dev store restored + verified, prefs diff clean, posture Standard/unlocked,
+   castle-W1 untouched") and the turn ends at once.
 
 **Q5 — VX-175: THE COMPOSITION QUESTION (for the orchestrator's ruling; nothing built).** The brief's P-U3-2 puts the
 search field alone on line 1 and scope · mode · sort · when on line 2. Measured, line 2 alone does not fit the very
