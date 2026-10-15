@@ -892,4 +892,22 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 18 (sequence 370, the closer's soak): a landing crashed right
+    /// after writing the landed key file into the live place (before its
+    /// swap); the keychain was then wiped (the memory's mirror of the outgoing
+    /// file with it). The relaunch rolls the landing back — the pair's key is
+    /// never stored — but restored the live key file only from the mirror:
+    /// the landed library's file stayed live beside the Mac's own library, and
+    /// Re-link's arm, offered, could do nothing (promise 3). A roll back now
+    /// restores the outgoing file from the plan too (it carries it).
+    @Test func aRolledBackLandingRestoresTheOutgoingKeyFileFromItsPlan() async throws {
+        let world = try Self.start("a phone on an older build beside a synced Castle Mac", seed: 18000424)
+        for action in [Action.createLibrary("macB", secrets: true), .backup("macB"), .sendLibrary(from: "macA", to: "macB"),
+                       .crash(.land("macB", .wordsPassphraseMadeNew), afterWrites: 9), .wipeKeychain("macB"), .settle] {
+            await world.step(action)
+        }
+        #expect(world.liveKeyFile(world.macB)?.fingerprint == world.macB.slot?.fingerprint, "another key's file stayed live")
+        expectPromisesKept(world)
+    }
 }

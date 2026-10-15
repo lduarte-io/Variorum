@@ -266,7 +266,7 @@ extension ProtectionExecutor {
                 try await program.run(step, ctx)
             } catch let stop as ActRollback {
                 try dropUnlandedAccountKey(ctx)
-                try rollBack(&ctx.library, act: ctx.act)
+                try rollBack(&ctx.library, act: ctx.act, outgoingKeyFile: ctx.plan.parameters?.outgoingKeyFile)
                 throw ActRolledBack(act: ctx.act, refusal: stop.refusal)
             }
             if ctx.plan.firstUnfinishedStep == index { ctx.plan.steps[index].done = true }
@@ -450,7 +450,7 @@ extension ProtectionExecutor {
                 // it runs what needs no vault and WAITS, named, for the rest.
                 guard plan.pastCommitPoint(libraryFingerprint: ctx.library.fingerprint) else {
                     try dropUnlandedAccountKey(ctx)
-                    try rollBack(&ctx.library, act: plan.act)
+                    try rollBack(&ctx.library, act: plan.act, outgoingKeyFile: plan.parameters?.outgoingKeyFile)
                     throw ActRolledBack(act: plan.act, refusal: .vaultOutOfReach(account: account))
                 }
                 waitsFor = account
@@ -543,13 +543,17 @@ extension ProtectionExecutor {
     /// library never had), an own Apple key the act minted that wraps
     /// nothing retired (a Castle library — every other own key was retired at
     /// its entry), the act cleared in both homes, the plan deleted.
-    func rollBack(_ library: inout UnlockedLibrary, act: ProtectionAct) throws {
+    /// `outgoingKeyFile`: the copy the act's plan carried — the restore's
+    /// source when the memory's mirror is gone (a wiped keychain — VX-305 U4,
+    /// the soak's seed 18).
+    func rollBack(_ library: inout UnlockedLibrary, act: ProtectionAct, outgoingKeyFile: KeyFile? = nil) throws {
         guard let inFlight = library.section.actInFlight else { return }
         try leaves.library.discardStaged()
         let live = try liveFormat3()
-        if let live, live.fingerprint != library.fingerprint,
-           let mirror = library.memory?.keyFileMirror, mirror.fingerprint == library.fingerprint {
-            try writeLiveKeyFile(mirror, &library)
+        let restore = [library.memory?.keyFileMirror, outgoingKeyFile].compactMap { $0 }
+            .first { $0.fingerprint == library.fingerprint }
+        if let live, live.fingerprint != library.fingerprint, let restore {
+            try writeLiveKeyFile(restore, &library)
         } else {
             library.keyFile = live
         }
