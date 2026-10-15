@@ -38,6 +38,19 @@ import VariorumCore
 ///   carries `commitTextBudget` characters of them; a commit past that says
 ///   `text_omitted: true` and is fetched by id (`commit_ids`, ≤20 per call,
 ///   always with text) — a bounded answer with complete reach (AF-10 (d)).
+///
+/// **VX-256 (VX-336 U7 — D-256-1…9, F-256-1…7 (a)) pages it:** with `page` the
+/// read is ONE keyset page of the note's placements in its own order
+/// (`(position, placement id)` on `idx_cblock_order` — `pageSQL`), ending at
+/// the FIRST of `page.limit` blocks or `pageTextBudget` characters of take text
+/// (the first page also counting its tray's), never splitting a block and
+/// always holding one; every carriage ask reads for THAT page's blocks only
+/// (∝ the page, P1), the note-wide lists (`with_tray`, `with_versions`,
+/// `dangling_picks`) riding the first page, which also says `block_count`;
+/// `next_cursor` comes back only while blocks remain. Pages are NOT a snapshot
+/// (each its own transaction — D-256-7). `idsOnly` answers every take's
+/// `sha256` (`MCPTextDigest`) in place of its text. With neither, every form is
+/// byte-for-byte as it was (G-256-1).
 enum MCPNoteStructure {
     /// What the caller asked for beyond the blocks.
     struct Options: Sendable {
@@ -68,7 +81,50 @@ enum MCPNoteStructure {
         /// take, and each block says which: `via: "lens" | "chosen"`. The
         /// caller has already checked the lens is a live lens of THIS note.
         var lensID: String?
+        /// VX-256: every take answers its `sha256` (`MCPTextDigest` — the
+        /// digest of its text exactly as stored) in place of its `text`;
+        /// comments, commits, the tray and lineage keep their text.
+        var idsOnly = false
+        /// VX-256: read ONE page of the note (nil: the whole note, as ever).
+        var page: Page?
     }
+
+    /// **One page's ask** (VX-256): at most `limit` blocks, resuming after
+    /// `after` (nil: the first page).
+    struct Page: Sendable {
+        var limit: Int
+        var after: NotePageCursor?
+    }
+
+    /// The take text one PAGE carries before it ends (VX-256 — F-256-2 (a),
+    /// PROVISIONAL P-VX256-1, measured against the real client's cap at the
+    /// live round): counted over the page's takes' text (none under `idsOnly`)
+    /// and the first page's tray; a page always holds at least one whole
+    /// block. Commit text rides within what is left (`text_omitted` past it).
+    static let pageTextBudget = 32_000
+
+    /// **ONE PAGE of the note's placements** (VX-256 — D-256-5): the keyset
+    /// `(position, placement id) > (cursor)` written as a RANGE on `position`
+    /// so `idx_cblock_order(container_id, position)` seeks the cursor instead
+    /// of walking the note to it — the first page passes `''`, which sorts
+    /// before every fractional key. ∝ the page (P1; the plan is pinned).
+    static let pageSQL = """
+        SELECT cb.id AS placement_id, cb.position, cb.block_id, cb.chosen_variant_id,
+               b.default_variant_id, b.name
+        FROM container_block cb JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
+        WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+          AND cb.position >= ? AND (cb.position > ? OR cb.id > ?)
+        ORDER BY cb.position, cb.id
+        LIMIT ?
+        """
+
+    /// The first page's `block_count`: the note's live blocks now — one count
+    /// over its placements' index range (the Hard rules' named allowance, "∝
+    /// the note's blocks", first page only — F-256-5 (a)).
+    static let blockCountSQL = """
+        SELECT COUNT(*) FROM container_block cb JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
+        WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+        """
 
     /// The most deleted blocks, deleted takes, versions and lenses one answer
     /// carries (each list says `truncated` past it) — ∝ the note, bounded.
@@ -91,17 +147,34 @@ enum MCPNoteStructure {
         versionOf liveNoteID: String? = nil
     ) throws -> [String: Any] {
         let title = try Queries.mcpScopeTitle(db, kind: .note, id: noteID, calendar: calendar) ?? ""
-        let placements = try Row.fetchAll(
-            db,
-            sql: """
-                SELECT cb.block_id, cb.chosen_variant_id, b.default_variant_id, b.name
-                FROM container_block cb JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
-                WHERE cb.container_id = ? AND cb.deleted_at IS NULL
-                ORDER BY cb.position, cb.id
-                """,
-            arguments: [noteID])
-        let blockIDs: [String] = placements.map { $0["block_id"] }
-        let json = String(decoding: try JSONEncoder().encode(blockIDs), as: UTF8.self)
+        // VX-256: a page is the first page when it resumes after nothing; the
+        // unpaged read is its own "first page" (every note-wide list rides).
+        let page = options.page
+        let firstPage = page?.after == nil
+        var placements: [Row]
+        /// Blocks remain past this page (a page only): the extra row read, or
+        /// the budget ending the page early.
+        var remains = false
+        if let page {
+            let after = page.after
+            let fetched = try Row.fetchAll(
+                db, sql: pageSQL,
+                arguments: [noteID, after?.position ?? "", after?.position ?? "", after?.placementID ?? "",
+                            page.limit + 1])
+            remains = fetched.count > page.limit
+            placements = Array(fetched.prefix(page.limit))
+        } else {
+            placements = try Row.fetchAll(
+                db,
+                sql: """
+                    SELECT cb.block_id, cb.chosen_variant_id, b.default_variant_id, b.name
+                    FROM container_block cb JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
+                    WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+                    ORDER BY cb.position, cb.id
+                    """,
+                arguments: [noteID])
+        }
+        var blockIDs: [String] = placements.map { $0["block_id"] }
         var takes: [String: [Row]] = [:]
         for row in try Row.fetchAll(
             db,
@@ -112,9 +185,37 @@ enum MCPNoteStructure {
                 WHERE v.deleted_at IS NULL AND (v.status = 'active' OR ?)
                 ORDER BY v.fan_position, v.id
                 """,
-            arguments: [json, options.includeArchived]) {
+            arguments: [String(decoding: try JSONEncoder().encode(blockIDs), as: UTF8.self), options.includeArchived]) {
             takes[row["block_id"], default: []].append(row)
         }
+        // The note's tray rides the FIRST page (VX-256 — F-256-7 (a)); read
+        // here so a page counts its text toward the budget.
+        let trayAnswer = options.withTray && firstPage ? try tray(db, noteID: noteID, now: options.now) : nil
+        var commitBudget = commitTextBudget
+        if page != nil {
+            // VX-256 — THE BUDGET WALK (F-256-2 (a)): a block joins while the
+            // page's take text (its fan as emitted; none under ids_only) plus
+            // the first page's tray stays within the budget — the first block
+            // always, whole. Commit text then rides within what is left.
+            var used = trayAnswer.map(Self.textLength(ofTray:)) ?? 0
+            var kept = 0
+            for placement in placements {
+                let fan = takes[placement["block_id"] as String] ?? []
+                let chars = options.idsOnly ? 0 : fan.reduce(0) { $0 + ($1["working_text"] as String).count }
+                if kept > 0, used + chars > pageTextBudget { break }
+                used += chars
+                kept += 1
+            }
+            if kept < placements.count {
+                remains = true
+                placements.removeLast(placements.count - kept)
+                blockIDs = placements.map { $0["block_id"] }
+                let onPage = Set(blockIDs)
+                takes = takes.filter { onPage.contains($0.key) }
+            }
+            commitBudget = max(0, pageTextBudget - used)
+        }
+        let json = String(decoding: try JSONEncoder().encode(blockIDs), as: UTF8.self)
         let lineage = options.withLineage
             ? try Self.lineage(db, noteID: noteID, blockIDs: blockIDs, standing: standing, versionOf: liveNoteID)
             : nil
@@ -137,13 +238,20 @@ enum MCPNoteStructure {
             comments[row["block_id"], default: []].append(["comment_id": row["id"] as String, "text": row["text"] as String])
         }
         let commitLists = options.withCommits || !options.commitIDs.isEmpty
-            ? try commits(db, takeIDs: takes.values.flatMap { $0.map { $0["id"] as String } }, options: options)
+            ? try commits(
+                db, takeIDs: takes.values.flatMap { $0.map { $0["id"] as String } }, options: options,
+                budget: commitBudget, onPage: page != nil)
             : nil
         // VX-172: the lens's EFFECTIVE picks — the very read her Lenses board
         // makes (`Queries.takesProjection.lensSelections`): a pick whose take
         // was archived or deleted since is dropped, so the block falls
         // through to its shown take, exactly as her lens column does.
-        let lensPicks = try options.lensID.map { try Queries.effectiveLensSelection(db, lens: $0) }
+        // VX-256: a page reads the lens's picks for ITS blocks only (D-256-4).
+        let lensPicks = try options.lensID.map { lensID in
+            page == nil
+                ? try Queries.effectiveLensSelection(db, lens: lensID)
+                : try Queries.effectiveLensSelection(db, lens: lensID, blocks: blockIDs)
+        }
         var blocks: [[String: Any]] = []
         for placement in placements {
             let blockID: String = placement["block_id"]
@@ -161,7 +269,9 @@ enum MCPNoteStructure {
             for take in fan {
                 let id: String = take["id"]
                 let text: String = take["working_text"]
-                var entry: [String: Any] = ["take_id": id, "chosen": id == shown, "text": text]
+                var entry: [String: Any] = ["take_id": id, "chosen": id == shown]
+                // VX-256: ids_only answers the take's digest in place of its words.
+                if options.idsOnly { entry["sha256"] = MCPTextDigest.sha256(text) } else { entry["text"] = text }
                 if let label: String = take["label"] { entry["label"] = label }
                 if (take["status"] as String) == "archived" { entry["archived"] = true }
                 if let commitLists { entry["commits"] = commitLists[id] ?? [] }
@@ -210,20 +320,40 @@ enum MCPNoteStructure {
         if let standing, liveNoteID == nil {
             answer["books"] = try books(db, noteID: noteID, standing: standing)
         }
-        if options.withTray { answer["tray"] = try tray(db, noteID: noteID, now: options.now) }
+        if let trayAnswer { answer["tray"] = trayAnswer }
         if options.withLenses {
-            let lenses = try lenses(db, noteID: noteID, blockOrder: blockIDs)
+            // VX-256 (F-256-7 (a)): the list on every page, each lens's picks
+            // for the page's blocks, dangling_picks on the first page only.
+            let lenses = try lenses(
+                db, noteID: noteID, blockOrder: blockIDs, pageBlocks: page == nil ? nil : blockIDs,
+                danglingPicks: firstPage)
             answer["lenses"] = lenses.entries
             // Ladder round 1, F-5: the cap says so (the tray's shape) —
             // never a silent drop.
             if lenses.truncated { answer["lenses_truncated"] = true }
         }
-        if options.withVersions {
+        if options.withVersions, firstPage {
             let versions = try versions(db, noteID: noteID)
             answer["versions"] = versions.entries
             if versions.truncated { answer["versions_truncated"] = true }
         }
+        if page != nil {
+            if firstPage {
+                answer["block_count"] = try Int.fetchOne(db, sql: blockCountSQL, arguments: [noteID]) ?? 0
+            }
+            if remains, let last = placements.last {
+                answer["next_cursor"] = NotePageCursor(
+                    containerID: noteID, position: last["position"], placementID: last["placement_id"]).encoded
+            }
+        }
         return answer
+    }
+
+    /// The characters of text a tray answer carries (its blocks' and takes').
+    private static func textLength(ofTray tray: [String: Any]) -> Int {
+        ["blocks", "takes"].reduce(0) { total, key in
+            total + (tray[key] as? [[String: Any]] ?? []).reduce(0) { $0 + (($1["text"] as? String)?.count ?? 0) }
+        }
     }
 
     // MARK: - 13n-b U4: the carriage (AF-11 F-4)
@@ -258,20 +388,25 @@ enum MCPNoteStructure {
     /// in `dangling_picks`), in the note's block order.
     /// Capped at `carriageCap` with a truncated flag (ladder round 1, F-5 —
     /// the tray's own shape; a silent drop said nothing).
+    /// VX-256: `pageBlocks` reads each lens's picks for those blocks only (a
+    /// page's — ∝ the page), and `danglingPicks: false` leaves the note-wide
+    /// count to the first page.
     static func lenses(
-        _ db: Database, noteID: String, blockOrder: [String]
+        _ db: Database, noteID: String, blockOrder: [String], pageBlocks: [String]? = nil,
+        danglingPicks: Bool = true
     ) throws -> (entries: [[String: Any]], truncated: Bool) {
         let rank = Dictionary(blockOrder.enumerated().map { ($1, $0) }, uniquingKeysWith: { first, _ in first })
         let all = try Queries.lenses(db, post: noteID)
         let entries = try all.prefix(carriageCap).map { lens -> [String: Any] in
-            let picks = try Queries.effectiveLensSelection(db, lens: lens.id)
+            let selection = try pageBlocks.map { try Queries.effectiveLensSelection(db, lens: lens.id, blocks: $0) }
+                ?? Queries.effectiveLensSelection(db, lens: lens.id)
+            let picks = selection
                 .filter { rank[$0.key] != nil }
                 .sorted { (rank[$0.key] ?? 0, $0.key) < (rank[$1.key] ?? 0, $1.key) }
                 .map { ["block_id": $0.key, "take_id": $0.value] }
-            return [
-                "lens_id": lens.id, "name": lens.name, "picks": picks,
-                "dangling_picks": try Queries.danglingLensPicks(db, lens: lens.id).count,
-            ]
+            var entry: [String: Any] = ["lens_id": lens.id, "name": lens.name, "picks": picks]
+            if danglingPicks { entry["dangling_picks"] = try Queries.danglingLensPicks(db, lens: lens.id).count }
+            return entry
         }
         return (entries, all.count > carriageCap)
     }
@@ -490,9 +625,11 @@ enum MCPNoteStructure {
 
     /// Each take's commits, newest first, with texts riding newest-first
     /// across the note until the budget is spent; `commitIDs` always ride
-    /// with text and must be commits of these takes.
+    /// with text and must be commits of these takes. VX-256: a PAGE passes
+    /// what its budget has left and `onPage` (the takes are the page's, so a
+    /// stranger "isn't a commit of a take on this page" — P-VX256-4).
     static func commits(
-        _ db: Database, takeIDs: [String], options: Options
+        _ db: Database, takeIDs: [String], options: Options, budget: Int = commitTextBudget, onPage: Bool = false
     ) throws -> [String: [[String: Any]]] {
         let json = String(decoding: try JSONEncoder().encode(takeIDs), as: UTF8.self)
         let rows = try Row.fetchAll(
@@ -505,10 +642,12 @@ enum MCPNoteStructure {
             arguments: [json])
         let known = Set(rows.map { $0["id"] as String })
         if let stranger = options.commitIDs.first(where: { !known.contains($0) }) {
-            throw MCPReadTools.ArgumentFailure(message: "commit_id \(stranger) isn't a commit of this note.")
+            throw MCPReadTools.ArgumentFailure(message: onPage
+                ? "commit_id \(stranger) isn't a commit of a take on this page."
+                : "commit_id \(stranger) isn't a commit of this note.")
         }
         let asked = Set(options.commitIDs)
-        var budget = commitTextBudget
+        var budget = budget
         var lists: [String: [[String: Any]]] = [:]
         for row in rows {
             let id: String = row["id"]
@@ -530,5 +669,42 @@ enum MCPNoteStructure {
             lists[row["variant_id"], default: []].append(entry)
         }
         return lists
+    }
+}
+
+/// **A paged `read_note`'s resume point** (VX-256 — D-256-3): the last page
+/// block's placement `(position, id)`, the read's own order, and the container
+/// it pages (the note, or the saved version) — opaque to the client, base64 of
+/// `n\n<container id>\n<position>\n<placement id>`. It resumes ONLY that
+/// container: anything else answers `MCPReadTools.staleCursorMessage`, so a
+/// `list_notes` or `list_my_activity` cursor (another shape) never decodes as
+/// one. Keyed on a position, never a live row, so deleting the cursor's own
+/// block never breaks the resume.
+struct NotePageCursor: Equatable, Sendable {
+    let containerID: String
+    let position: String
+    let placementID: String
+
+    var encoded: String {
+        Data("n\n\(containerID)\n\(position)\n\(placementID)".utf8).base64EncodedString()
+    }
+
+    init(containerID: String, position: String, placementID: String) {
+        self.containerID = containerID
+        self.position = position
+        self.placementID = placementID
+    }
+
+    init?(encoded: String) {
+        guard let data = Data(base64Encoded: encoded), let text = String(data: data, encoding: .utf8) else {
+            return nil
+        }
+        let parts = text.split(separator: "\n", maxSplits: 3, omittingEmptySubsequences: false).map(String.init)
+        guard parts.count == 4, parts[0] == "n", !parts[1].isEmpty, !parts[2].isEmpty, !parts[3].isEmpty,
+              !parts[3].contains("\n")
+        else { return nil }
+        containerID = parts[1]
+        position = parts[2]
+        placementID = parts[3]
     }
 }

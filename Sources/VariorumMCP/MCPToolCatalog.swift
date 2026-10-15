@@ -246,7 +246,15 @@ enum MCPToolCatalog {
             lens_id reads the note through one of its lenses, in either form: each block shows the \
             take the lens shows there, else its chosen take; with with_ids each block's \
             shown_take_id is that take and via says which ("lens" or "chosen"), and chosen still \
-            marks the note's own chosen take.
+            marks the note's own chosen take. Big notes read in pages: pass limit (blocks per page, \
+            1–200), then each answer's next_cursor as cursor until none comes back (a cursor alone \
+            reads 50). A page also ends once its takes' text passes about 32,000 characters — a \
+            block is never split — and commit text rides in what is left of that; the first page \
+            says block_count. Pages imply with_ids; with_tray and with_versions ride the first page, \
+            and each page's lenses pick only among its own blocks. Pages are read one at a time, \
+            not as a snapshot — if the note may have changed, read it again. A note shared once is \
+            read in one call. ids_only: true gives each take without its text, with its sha256 \
+            instead — page it to check a whole note against your source cheaply. \(digestSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -272,6 +280,13 @@ enum MCPToolCatalog {
                                        "description": "Read this saved version of the note instead."]),
                 "lens_id": .object(["type": "string",
                                     "description": "Read the note through this lens of it (with_lenses lists them)."]),
+                // VX-256 (VX-336 U7): pages, and the digests in place of the words.
+                "limit": .object(["type": "integer", "minimum": 1, "maximum": 200,
+                                  "description": "Blocks per page (default 50); asks for pages (implies with_ids)."]),
+                "cursor": .object(["type": "string",
+                                   "description": "next_cursor from the previous page (implies with_ids)."]),
+                "ids_only": .object(["type": "boolean",
+                                     "description": "Each take's sha256 instead of its text (implies with_ids)."]),
             ]),
             "required": .array(["note_id"]),
             "additionalProperties": false,

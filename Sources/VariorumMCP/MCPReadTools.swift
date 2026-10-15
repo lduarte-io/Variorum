@@ -107,12 +107,26 @@ struct MCPReadTools: Sendable {
             if versionID != nil, lensID != nil {
                 throw ArgumentFailure(message: "Pass version_id or lens_id, not both: a saved version has no lenses.")
             }
+            // VX-256 (VX-336 U7 — D-256-2/6): PAGES and ids_only, parsed
+            // before any target is read (independent of it, so no oracle):
+            // `limit` clamps 1…200 like `list_notes`; a `cursor` this read
+            // would not have minted is stale; either asks for pages (a cursor
+            // alone reads 50), and pages and ids_only each imply with_ids.
+            let limit = try optionalInt(args, "limit")
+            let cursor = try optionalString(args, "cursor")
+            let after = cursor.flatMap(NotePageCursor.init(encoded:))
+            if cursor != nil, after == nil { throw ArgumentFailure(message: Self.staleCursorMessage) }
+            options.idsOnly = try optionalBool(args, "ids_only") ?? false
+            if limit != nil || cursor != nil {
+                options.page = MCPNoteStructure.Page(
+                    limit: min(max(limit ?? Self.defaultPageSize, 1), Self.maxPageSize), after: after)
+            }
         }
         let carriage = options.includeArchived || options.withTray || options.withLineage
             || options.withLenses || options.withVersions
         let withIDs = plain ? false
             : (try optionalBool(args, "with_ids") ?? false) || options.withCommits || !options.commitIDs.isEmpty
-                || carriage
+                || carriage || options.page != nil || options.idsOnly
         let act = plain ? MCPToolCatalog.exportNote.name : MCPToolCatalog.readNote.name
         return try database.write { db in
             let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
@@ -150,6 +164,15 @@ struct MCPReadTools: Sendable {
                     MCPGrantAuthority.decide(standing, note: nil, rung: .read, consumes: true), .note,
                     standing: standing, ask: nil)
             }
+            // VX-256 (D-256-6, step 3): a cursor resumes ONLY the container it
+            // paged — the note, or the saved version read — checked only after
+            // the note is allowed (an unreachable note answered the one refusal
+            // above, cursor or not) and BEFORE the once spend, so a stale cursor
+            // never spends the grant. Logged refused, as the version check is.
+            if let after = options.page?.after, after.containerID != (versionID ?? noteID) {
+                try log(db, clientName, act, "note", noteID, title, allowed: false)
+                return Outcome(text: Self.staleCursorMessage, isError: true)
+            }
             if consumesOnce, let grantID { try operations.consumeMCPOnceGrant(db, grantID) }
             let text: String
             if plain {
@@ -168,7 +191,7 @@ struct MCPReadTools: Sendable {
                         options: MCPNoteStructure.Options(
                             withCommits: options.withCommits, commitIDs: options.commitIDs,
                             includeArchived: options.includeArchived, withLineage: options.withLineage,
-                            now: options.now),
+                            now: options.now, idsOnly: options.idsOnly, page: options.page),
                         versionOf: noteID)
                     shaped["version_id"] = versionID
                     shaped["version_of"] = noteID
