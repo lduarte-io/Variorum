@@ -104,6 +104,7 @@ review those notes, it's fine), and push a release to the website so I can try t
   headless finals».
 
 ## Your wording pass (VX-234): every word this run added or changed
+- Two small wire-doc notes from the review (no behaviour): `read_note`'s commit `length` counts Swift characters while its page budget counts UTF-16 units (the same word, two meanings); and on a paged read the note's `books` list rides every page while the other note-wide lists ride the first page only. A later description pass can say both.
 
 In your app (the Mac unless said):
 - **Take labels** on Takes cards, the take panel and Lenses: "‹client› · ‹label›", or "‹client›" alone (was

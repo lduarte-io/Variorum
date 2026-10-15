@@ -171,7 +171,7 @@ guidance. Each unit's evidence is named before its spawn.
 | U7 — the agent's read-backs | **PROVEN 2026-10-14 20:44–21:12 EXCEPT THE CAP** (U7 STAGE RUN). Batch 176/173, 0 failed. L1 (15/15 digests equal from the wire), L2a (6 inline pages of 50 = block_count 300), L3 (ids_only at limit 100, 300/300 equal), L4 (a killed create, found by `list_my_activity`), L5 (a refused row title-less; reads only with `include_reads`) all PROVEN. **THE CAP FAILED:** a budget-ended page (32,000 characters of take text, about 65k answer) spills past Claude Code 2.1.300's inline limit, which sits between 43,062 (inline) and 50,984 characters (spilled); `ids_only` at limit 200 spills too. → **U7c**, the cap fix (THE ORCHESTRATOR ON U7's WINDOW) · **U7c BUILT** (`0b1be274`…`12df7a8c`): the page budget bounds the whole serialized answer at 32,000 characters (UTF-16 units); 8 pins red on old, 3 of builder B's re-pinned; revert check in 4 arms; MCP 329/66 · core 2,871/333 · workbook 40/6; the orchestrator re-ran the paging suites, 25 green. Its RE-PROBE rides U8b's window |
 | U8 — the AI's docs (LAST) | **PROVEN 2026-10-14 23:07–23:33** (U8 STAGE RUN). 66-suite batch 432/429, 0 failed; the red run exact on the old seed; Restore Tutorial minted a fresh guide (the old one in the Trash with 30 days); the chapter walked word for word in Study and Terminal; the instructions read from bytes at 2,969 with the link last; **U7c's RE-PROBE: all three pages INLINE** (71 blocks / 31,825 · the same · ids_only 115 / 31,751). The organization ask did the advice unprompted (a book with a tag rule + outflow, a summary note filed) but met two pre-existing wire truths → **U9** (VX-361, VX-362) |
 | U9 — wire truths from U8's round | **PROVEN 2026-10-15 00:57–01:12** (U9 STAGE RUN). 121-suite Mac batch 771/765, 0 failed; the Mac red exact (20 issues, the ten R/E cases); the phone red exact (5) and green 120/15 on one simulator; the real-client turn 6/6 from the bytes (VX-361: `tag_ids`/`tags` carry the outflow tag; VX-362: `apply_tag` → `changed:false`, the add refused in words; the import's collision gone; no `Refused:`/Swift case anywhere); the faces in both voices. Built `4ff629ad`…`e454a8ef` (U9 UNIT RECORD) |
-| LADDER | **ROUND 1 DONE** (Fable xhigh, 2026-10-15 ~01:30): 0 BLOCKER · 1 MAJOR (R1-1, U9's pending evidence — closed by U9's window) · 2 MINOR · 2 NIT; no code fix (THE LADDER — ROUND 1 below). ROUND 2 (a fresh Fable xhigh) runs after the closeout's in-branch canon |
+| LADDER | **CLOSED AT ROUND 2 (2026-10-15 ~02:00).** R1 (Fable xhigh): 0B · 1M (evidence, closed by U9's window) · 2m · 2n, no code fix. R2 (a fresh Fable xhigh): 0B · 0M · 1m · 3n, so no round 3 is earned. R2-1's fix (the Compare landing posture) goes to PHASE B's implementer with a pin; as the final round's fix it gets the orchestrator's line-by-line check |
 | CLOSEOUT | NOT-STARTED |
 
 **No revert is in flight unless a unit's record says so.**
@@ -6875,3 +6875,75 @@ the bundle's number if renumbered; and it deletes the italic DRAFT line under th
 - **Left as-is:** MobileSoul's two PL-53 rows predate this run and go on the handoff's notes, not fixed here.
 - **Next:** ROUND 2, a fresh `fable-reviewer` at xhigh with REVIEW_PROMPT verbatim, over the evidence and the in-branch
   canon. Then PHASE B.
+
+## THE LADDER — ROUND 2 (a fresh `fable-reviewer` at xhigh, REVIEW_PROMPT verbatim, PHASE=VX-336; read-only; recorded verbatim by the orchestrator, 2026-10-15 ~02:00 MDT)
+
+Diff reviewed: origin/main (074c0f94)…HEAD (0fdec607b), 103 files, +17,381/−333. Since round 1 only `notes/` moved, so
+this round re-verified round 1's dispositions and made a fresh mechanism-level pass. Zero `Sync/`, custody, Persistence or
+editor-seam files; marker 13 untouched. The reviewer ran VariorumMCPTests (349/67, green except the recorded knowns
+VX-353 and VX-357) and VariorumCoreTests MCP* (272/39, green). For the Mac and phone suites it verified U9's recorded
+evidence instead.
+
+### Findings (as reported)
+
+- **R2-1 [MINOR]** · `CompareBoardView.swift` (`CompareViewModel.landingPostureFor` + `adopt`/`land`) · a wire landing's
+  armed posture has no expiry, so it can flip her own toggle long after the landing. **Mechanism:**
+  - `land(peers:)` sets `landingPostureFor = named`, and `adopt` applies it only once EVERY named peer appears in a
+    projection.
+  - If a named peer never enters a projection (deleted between the wire's decision and the board's first projection,
+    its slot then leaving by the navigate-away road), the posture stays armed indefinitely.
+  - She then toggles "related blocks only" by hand. If she later re-adds that restored note as a peer, the first
+    projection holding all named peers silently overwrites her manual pick.
+
+  **Fix shape:** clear `landingPostureFor` in `teardown()`, when a named peer's slot leaves, or on any manual
+  `relatedOnly` set. **Pin:** a `CompareViewModel` state-transition test.
+- **R2-2 [NIT]** · `MCPWireRefusalSweepTests.swift:127–128` · the 17 "graph: unreachable" proofs cite
+  `notes/plans/fixes/vx-336-u9-sweep/callgraph-35f9cd70.json`, which PHASE C deletes before the merge. **Fix:** one clause in
+  the test comment (kept in branch history at `e454a8ef`; removed from main at the closeout).
+- **R2-3 [NIT]** · the handoff's VX-234 list vs R1-5's disposition · the "two meanings of characters" note was routed to
+  VX-234's list, but the handoff's consolidated list doesn't carry it. **Fix:** one line.
+- **R2-4 [NIT]** · `MCPNoteStructure.swift` (`read`, the `books` carriage) · on a paged read `books` rides EVERY page,
+  while `block_count`, tray, versions and `dangling_picks` ride page 1 only. Weighed by the budget and ∝ the note's books,
+  so no P1 breach; consistency/doc only.
+
+No BLOCKER. No MAJOR. No round 3 is earned.
+
+**Round 1's dispositions, re-checked:**
+- R1-1 is closed by evidence.
+- R1-2 has landed in-branch; MCPSpec's VX-336 block was checked number by number against the code.
+- R1-3 is done.
+- R1-4 is filed as option (d) under P-VX253-2.
+- R1-5 is recorded; R2-3 is its one loose thread.
+
+**Clean bill (the reviewer's, mechanism-level), each item verified in its session:**
+- The 108-case sweep, counted independently, with two hand proofs spot-verified.
+- U7c's page budget: the keyset seek, the exact piece arithmetic, the final measurement, the container-pinned cursor
+  checked before any once spend.
+- `save_lens` by rule.
+- `insert_blocks`.
+- `duplicate_note`: the one body, the two-sided reach, the fence before the wing, the deduped once union.
+- VX-252 and VX-361.
+- VX-362(a).
+- VX-363: the readable-books predicate on all three roads.
+- VX-254 and VX-256: one digest home, exactly the spec's eight tools plus `ids_only`.
+- VX-261: oracle-clean.
+- VX-298, including the three router clears.
+- VX-330 and VX-342.
+- U8's docs: every instruction claim pinned against catalog facts, ≤3,000.
+- The shared `OpsRefusalTable`.
+- Canon and closeout: MCPSpec states only what the code does, the D1–D9 anchors match main, D6 is honest.
+- Process: 181 commits, members named, zero trailers; pin-before-fix per member; lanes honored; P1 on every new
+  read and answer.
+
+### ROUND 2 — dispositions (the orchestrator; the final round, so the fixes get the orchestrator's line-by-line check)
+
+- **R2-1 — AGREED, FIXED in PHASE B with its pin.**
+  - The fix clears `landingPostureFor` on `teardown()`, on the departure of any named peer's slot, and on any manual
+    `relatedOnly` set.
+  - The pin: a `CompareViewModel` state-transition test covering a named peer that never projects, her manual toggle,
+    and the re-add. It must be red on the pre-fix tree, with a red product built from the pin-only commit and run in
+    the closeout window.
+- **R2-2 — AGREED, done in PHASE B** (one comment clause).
+- **R2-3 — AGREED, done by the orchestrator** (the handoff's VX-234 list gains the line, in this commit).
+- **R2-4 — AGREED as a NIT, no code change.** It goes on the handoff's VX-234 / description list: `read_note`'s
+  description could say `books` rides every page.
