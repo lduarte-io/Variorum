@@ -4561,7 +4561,7 @@ trimmed, no prefix), `MCPWriteTools+CommentDelete` (VX-260), `readableBooks` (VX
 | 1 | the pins on the OLD tree (Tests/ only): the advice (bound 3,000; the tools line; every new claim; the link) + the descriptions' truth (edit_take's deduped before-commit; the label rule per take-writing tool; `<your client name>`; delete_comment's VX-260 clause; rename_book's VX-259 rule) → RED | DONE (this commit) — THE PINS below: 28 tests in 7 suites, 13 failed, 36 issues on `758abded`'s product, every one by its words; every mechanics half green on the old tree |
 | 2 | the instructions (new text with the old bound → RED on the bound; then 3,000 → GREEN) | DONE (this commit) — the new text under the OLD bound: `MCPAdviceServerTests\|MCPWireNeutralityTests\|MCPProviderNeutralityTests\|MCPDiscoverProbeServerTests` 25 tests in 4 suites, **failed with 3 issues** — exactly the bound (`theAdviceIsBoundedAsStated` 2: the literal and "the advice is 2969 characters"; `theAdviceNamesTheAuthorNeverAPronoun` 1: inside its bound); then `instructionsBound = 3_000` → **25 tests in 4 suites passed** (both read from the logs). **2,969 of 3,000 characters** (Swift `count`) |
 | 3 | the descriptions → GREEN | DONE (this commit) — twelve descriptions (THE DESCRIPTIONS AS BUILT in piece 6's record); the piece-1 filter + `MCPProviderNeutralityTests` → **30 tests in 8 suites passed**, re-run after a source reflow, **30/8 passed** again (both from the logs); a temporary, uncommitted dump test proved the reflow byte-clean (no double space, no joined word) |
-| 4 | revert checks (announced, committed first) | NOT-STARTED |
+| 4 | revert checks (announced, committed first) | IN-PROGRESS — ANNOUNCED in THE REVERT CHECK below (this commit); no arm has run |
 | 5 | the stargazing brief's FURTHER delta, one send-ready message | NOT-STARTED |
 | 6 | headless finals (the MCP target) + the instructions' final text whole + FOR VX-234 + OWED for U8b | NOT-STARTED |
 
@@ -4642,6 +4642,21 @@ on `758abded`'s product + these tests → **"Test run with 28 tests in 7 suites 
   stores "  warmest  " as "warmest") GREEN on the old tree — the words RED, 7 issues (one per tool).
 - **`MCPCommentWordsServerTests/deleteCommentsDescriptionSaysChangedWordsNeedEdit`** (new) — RED, 2 issues.
 - **`MCPBookNameReachServerTests/renameBooksDescriptionSaysOnlyBooksYouCanReadCount`** (new) — RED, 2 issues.
+
+### THE REVERT CHECK (piece 4 — ANNOUNCED here and committed BEFORE any arm runs; every count read from that arm's own log)
+
+The tree under test is `97b04d4a`'s. Each arm changes `Sources/VariorumMCP/` in the WORKING TREE only (never
+committed), runs THE FILTER — `swift test --filter 'MCPAdviceServerTests|MCPEditServerTests/editTakesBeforeCommitIsDeduped|MCPServerTests/theDescriptionsNameTheClientOneWay|MCPTakeLabelFormServerTests|MCPCommentWordsServerTests|MCPBookNameReachServerTests|MCPWireNeutralityTests|MCPProviderNeutralityTests'`
+(30 tests in 8 suites) — and is undone by `git checkout HEAD -- Sources` before the next:
+- **Arm (a) — the whole product back:** `MCPSession.swift` and `MCPToolCatalog.swift` from `758abded` (the pre-U8a
+  product). EXPECTED: exactly the piece-1 red — 13 tests failed, 36 issues; the other 17 green.
+- **Arm (b) — the instructions alone back:** `MCPSession.swift` from `758abded`, the new catalog kept. EXPECTED: the eight
+  advice pins red (bound 1, names 1, tools line 2, paging 3, rungs 2, organization 3, three acts 1, link 3 — 16 issues),
+  the five description pins green.
+- **Arm (c) — the descriptions alone back:** `MCPToolCatalog.swift` from `758abded`, the new instructions kept.
+  EXPECTED: the five description pins red (edit_take 3, the client placeholder 6, the label rule 7, delete_comment 2,
+  rename_book 2 — 20 issues); every advice pin green (each tool and input it names exists in the old catalog too).
+- **Restore:** `git checkout HEAD -- Sources`, `git status` clean, THE FILTER 30/8 green again.
 
 ### THE INSTRUCTIONS (DRAFT — piece 2 writes exactly this; 2,9xx characters measured on the draft)
 
