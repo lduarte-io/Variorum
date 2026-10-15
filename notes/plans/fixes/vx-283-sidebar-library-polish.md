@@ -3784,7 +3784,7 @@ drag landed (all five lists byte-identical).**
   exited 0, perform 0). **G1 is REFUTED:** the payload is evaluated on the main thread at the drag's start
   (`SOURCE payload evaluated … dragging(before)=nil`, `STATE began` at 17:06:47.39). The list knows its own drag; the
   delegate is never asked.
-- **The hit chains say why: every view under the pointer reports `[reg 0]`.** That is
+- **The hit chains (CORRECTED by T3 and the ruling below — `[reg 0]` reads zero even under working targets, so it is NOT the mechanism): every view under the pointer reports `[reg 0]`.** That is
   `PlatformGroupContainer ← DocumentView ← HostingClipView ← HostingScrollView ← PlatformContainer ← …`, at the rows
   (100,527), (133,704) and at the preview's start. The instrument marks `+OURS` where a view registers our type, and
   **no `+OURS` appears anywhere. No AppKit view in the Open list's hit chain is registered for ANY dragged type**, so
@@ -3975,6 +3975,52 @@ whether the second-drag failure is the product). It is a short PROBE build:
 workaround held in reserve, and make its first stage window the confirmation (G1–G5 on the product build). It costs
 less if F1 works, and the same as the probe road if it does not. I recommend the PROBE road: two unknowns, both on
 an API this app has never used, and the ruling asked to confirm before building.
+
+#### U2b — THE ORCHESTRATOR'S RULING ON T3 (2026-10-15 ~17:35 — P-U2b-1; the build is leg U2c, a FRESH implementer)
+
+**The correction is accepted.** The trace run's `[reg 0]` reads zero up to the root hosting view, under targets that DO
+work (the Bookcase), so on macOS 27 SwiftUI's drop registration is not visible through `registeredDraggedTypes`. The
+record's "no view is registered" (the trace run's section) is therefore NOT the mechanism; that line stands corrected
+here. What the run proves stands: the source works, and the delegate is never consulted (zero `validateDrop`). The
+discriminating fact is the pattern T3 found: every working drop inside scroll content in this app is a per-row
+Transferable `.dropDestination`, and ours is the only legacy `onDrop(of:delegate:)` inside scroll content, on a
+content root.
+- **P-U2b-1 (PROVISIONAL, the orchestrator's): build F1 DIRECTLY, with no probe build.** The product's first window
+  OPENS with the drag checks, before any batch, so a failed F1 costs a short window, the same as the probe would, and
+  no throwaway DEBUG roads are built. F1 per T3 §3:
+  - each Open row's Transferable `dropDestination(for: OpenNoteDragToken.self, isEnabled:action:)`;
+  - `onDropSessionUpdated` mapping the row-local location to content (`index × rowHeight + location.y`) into the
+    unchanged pure half-row rule and the line overlay;
+  - `dropConfiguration` answering `.move` where the line is drawn, `.forbidden` elsewhere;
+  - the source's `DragConfiguration(allowMove: true)` (G2);
+  - the end zone the same kind of drop;
+  - the session's end clears `dragging`;
+  - the legacy delegates removed.
+  The chip stays on the Open rows only; the light version, as ruled.
+- **F2 is PRE-RULED as the next build if F1's drag check does not land:** the book navigator's road exactly (per-row
+  `isTargeted:`, the line at the hovered row's top, the drop before that row, the end zone for the last slot). No
+  new ruling is needed. **The floor stays main's per-row road.**
+- **The second drag:** the inner-identity fix is NOT built now. F1 clears `dragging` at the session's end. The window's
+  G3/G4/G5 decide road vs product: G3 fails but G4 starts = the road (the re-walk hovers between drags); G3/G4 fail but
+  G5 starts = product, time-bound; all three fail = product. If it is the product, the inner `.id(dragGeneration)`
+  fix (T3 §2) is PRE-RULED as a micro-leg, its pin the same window's G-steps.
+- **The pins (pin first, red-first commit):** P-T3-1 (source read; revert R-T), P-T3-2 (pure: the row-local location
+  maps to the right gap for every row and both halves; revert R-U), P-T3-3 (state: the session's end clears `dragging`;
+  revert R-V). The in-place edits are annotated: `theRowDragsItsChipAndTheListIsTheOneDrop` inverts its "no row is its
+  own drop target" assertion, and the two `NSItemProvider` door pins move to the token-taking door. G2's operation
+  mask has no headless pin; the walk proves it. Every other pure and mount pin of U2 must stay green UNCHANGED (the
+  half-row rule is untouched).
+- **The T2 instrument stays** (DEBUG-only, marker-gated, as the U3c oracle), with `read` using `/usr/bin/log` (T3's
+  script fix), so the product window can read a trace. The ladder may ask for it to go.
+- **THE WINDOW (one claim, folded; `u2c/window.sh`):**
+  1. **the drag checks first** — G1–G5 per T3 §5 on the product build, traced;
+  2. if G1 lands: the U2 pins and the three new ones on `vx283-u2c`, then R-T / R-U / R-V on their prebuilt trees,
+     then the 144-suite batch (`u2/batch-suites.txt` plus any suite file the leg adds);
+  3. restore;
+  4. SEAM;
+  5. the RE-WALK (a fresh Opus at xhigh): U2's D1–D4 and D7 with real drags, both voices, every drag done TWICE IN A
+     ROW (with a hover between the pair, per G4's answer), and D8 on `vx283-u3c`.
+  If G1 does not land: restore, release, and build F2.
 
 ## Ladder
 
