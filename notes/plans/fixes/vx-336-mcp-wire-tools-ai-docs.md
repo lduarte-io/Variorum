@@ -168,7 +168,7 @@ guidance. Each unit's evidence is named before its spawn.
 | U5a — the label pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): legs A–D all passed in a real Claude Code 2.1.300 round on the dev store — the new `claude-code · english` label on Takes cards in both voices, `save_lens` by label refusing the ambiguous block and its `take_ids` retry, the legacy form matched as its own, `pin_chosen` holding. Built at `590c0cb8` (U5a UNIT RECORD) |
 | U5b — the block-writing pair | **PROVEN 2026-10-14 15:13–15:50** (U5 STAGE RUN): the 31-suite Mac batch green (251 tests, 0 failed, 7 gated skips); V252-a (create_note's `blocks` = read_note's records; filed under its chapter), V255-a/b/c (the end at write new with her ⌥⌘Z/⇧⌥⌘Z; any anchor at write new hears the rung sentence and asks her; anywhere at edit), D8-a passed; D8-b's open tail is unreachable from the keyboard (THE ORCHESTRATOR ON U5's WINDOW). The store was restored cmp-SAME. Built `7a15376c`…`93edbc2e` (U5b UNIT RECORD, three sessions) |
 | U6 — Compare from the wire (+ VX-330, VX-342) | **PROVEN 2026-10-14 17:52–18:35** (U6 STAGE RUN). The 125-suite batch: 790 tests, 786 passed, 2 gated skips, 2 standing reds (VX-115, VX-167; neither on U6's paths). Every red run exact: U6a's router clears (9 pairs), U6b Mac (15), the phone (4), the phone green 18/3. The live round passed in both voices: L0–L5 (`duplicate_note` with her ⌥⌘Z/⇧⌥⌘Z, the AI's edit on the copy, Compare aligned on lineage with related-only on, an unrelated pair with it off, `link_versions`' Open › opening Compare, not-frontmost moving nothing); VX-330's walk (all twelve of sherlock's collapsed chapter rows wear the shared icon, the waiting mark on one, pressed, Don't allow clearing it); VX-342's "before" seen. The store was restored cmp-SAME. Built: U6a `2836171c`…`48e250e0`, U6b `12efb039`…`a1a094dc` |
-| U7 — the agent's read-backs | **BUILT, READY FOR STAGE.** Builder A (VX-254 + VX-261, `54cc62a5`…`ff43e84c`); builder B (VX-256, `3e9a6dcd`…`62f39e44`). Headless finals: MCP 321/65 (1 known issue, VX-357) · core 2,871/333 · workbook 40/6. The orchestrator re-ran the paging pins: 17 green. One product, `vx336-u7`. The window is THE STAGE WINDOW in BUILDER B's RECORD (claim `vx336-u7`, about 75 min of work, 95 asked; batch-only 20); its kit is `notes/plans/fixes/vx-336-u7-kit/` (committed scripts, no secrets; **deleted at the closeout with the run's evidence**). A FRESH runner takes it |
+| U7 — the agent's read-backs | **PROVEN 2026-10-14 20:44–21:12 EXCEPT THE CAP** (U7 STAGE RUN). Batch 176/173, 0 failed. L1 (15/15 digests equal from the wire), L2a (6 inline pages of 50 = block_count 300), L3 (ids_only at limit 100, 300/300 equal), L4 (a killed create, found by `list_my_activity`), L5 (a refused row title-less; reads only with `include_reads`) all PROVEN. **THE CAP FAILED:** a budget-ended page (32,000 characters of take text, about 65k answer) spills past Claude Code 2.1.300's inline limit, which sits between 43,062 (inline) and 50,984 characters (spilled); `ids_only` at limit 200 spills too. → **U7c**, the cap fix (THE ORCHESTRATOR ON U7's WINDOW) |
 | U8 — the AI's docs (LAST) | SPLIT U8a (instructions + descriptions + the stargazing delta) / U8b (the field guide chapter + U8's window). U8a SPAWNED under the PAUSE protocol while U7's window waits in the queue. VX-292 re-checked 2026-10-14 ~20:25: no worktree, no in-flight row, Linear "Needs Lillian" untouched since 15:06 — not running |
 | LADDER | NOT-STARTED |
 | CLOSEOUT | NOT-STARTED |
@@ -178,6 +178,15 @@ guidance. Each unit's evidence is named before its spawn.
 ## Stage traffic log (the oct13coordinator protocol)
 
 - *(Newest first from here.)*
+- 2026-10-14 21:12:37: **RELEASE `vx336-u7`** (28 of 95 min). Result line to the coordinator: batch 176/173, 0 failed; dev store
+  cmp-SAME vs A1; prefs 0 differ; fingerprint same; Standard/unlocked; castle-W1 untouched. The ScaleFixture A1
+  `scale-prestage-20261015T024700Z` is the coordinator's to prune. The cap finding is ours, and its re-probe rides U8's window.
+- ~20:47: SEAM (the batch green); "continue" (vx-283's re-test not READY).
+- 20:43: **GO for `vx336-u7`** (`Tools/stage release --who coord-for-vx336 && Tools/stage claim --who vx336-u7 --reason
+  "VX-336 U7: 21-suite Mac batch, SEAM, then ScaleFixture A1 + real-client MCP live round on the Debug dev store"
+  --minutes 95`), run at 20:44:51, after U8a PAUSED clean at `f420f52e`.
+- ~20:30: REQUEST then READY for `vx336-u7` (queued behind `vx283-u1-walk`, which released at 20:41 with the store
+  verified).
 - 2026-10-14 18:35:06: **RELEASE `vx336-u6`** (42 of 130 min). Result line to the coordinator: batch 790/786 (2
   standing reds, 2 gated skips); the red runs exact; dev store cmp-SAME vs A1; prefs 0 differ (1,602 keys); fingerprint same; 0
   sims booted; Standard/unlocked; castle-W1 untouched. The A1 copy `scale-prestage-20261015T000711Z` is the
@@ -252,6 +261,7 @@ guidance. Each unit's evidence is named before its spawn.
 
 | ticket | born | what | fate |
 |---|---|---|---|
+| (VX-122) | U7 STAGE RUN noticed 1 | NOT minted: a comment on VX-122 (Parked, a live Library misses revivals). An open Library list didn't show two wire-made notes until re-entered; it may be the same class (outside inserts) | a comment; split off if VX-122's fix doesn't cover it |
 | VX-357 | U7 builder A's U+0000 check | Text containing U+0000 is stored truncated at the NUL (GRDB binds text with length -1); VX-254's digest overclaims for such a take | Todo, 13n, Bug · Confirmed · MCP · Medium; Pre-launch is her call; pinned as a known issue |
 | VX-358 | U7 builder A's OWED 3 | `edit_take` / `restore_commit` treat an NFC↔NFD re-spelling as no change, so the digest differs from what the client sent | Todo, 13n, Improvement · Suspected · MCP · Low |
 | VX-355 | U6 STAGE RUN (the runner's note 2) | The Pool has no bottom bar, so receipts (an AI's, her undo's) show nowhere while it's open | Todo, 13n, Improvement · Confirmed · Library & sidebar · Low |
@@ -4136,6 +4146,37 @@ round are the window's — PENDING.
 4. **FOR VX-234:** the coalesced "read “X” (N times)" line for a paged read (above).
 5. **No ticket minted by builder B.** None proposed.
 
+
+### THE ORCHESTRATOR ON U7's WINDOW (2026-10-14 ~21:20 MDT)
+
+- **Verified, not trusted:** the stage reads FREE; no Variorum instance; her fingerprint SAME (`bc64543e2f4e8e58`, re-read by
+  the orchestrator); the tree is clean at `fcae0574`. The runner measured the cap from bytes (the server's answer from the
+  tee against the tool result the model received, from stream-json), never from the client's wording.
+- **Proven:** VX-254 (L1) and VX-261 (L4, L5) are PROVEN; they close at the merge. VX-256 is PROVEN on paging and
+  `ids_only` (L2a, L3) EXCEPT its page bound.
+- **THE CAP, RULED (P-VX256-1 re-ruled, PROVISIONAL):** the page budget moves from the TAKE TEXT to the WHOLE ANSWER. A
+  page ends at `limit` blocks, or as soon as adding the next block would carry the SERIALIZED ANSWER past **32,000
+  characters**. A block is never split: a single block larger than the budget is returned alone, and the description
+  says so.
+  - **Why the answer:** the ids and records add about 210 characters a block, so the answer runs about 2× its text, and
+    `ids_only` pages carry no text at all, so a text budget can't bound them.
+  - **Why 32,000:** the measured inline limit sits between 43,062 and 50,984 characters for prose. `ids_only`'s denser
+    tokens (about 1.5 characters a token, against prose's about 2.06) put 32,000 characters near 21k tokens, under Claude
+    Code's 25,000-token default with margin, for both forms.
+  - **What stays:** `limit`'s default 50 and max 200 stand; the answer budget is what bounds a page now.
+  - **The description says it:** "a page also ends once the answer reaches about 32,000 characters".
+- **Who builds it: U7c**, a FRESH, narrow builder:
+  - the budget's meaning changed in `MCPNoteStructure`/`MCPReadTools`;
+  - the budget pins re-pinned red-first: on the current tree, a 200-block page of sherlock-sized prose answers over
+    32,000 characters, which is red;
+  - a revert check;
+  - `read_note`'s description;
+  - headless finals;
+  - no Mac change, unless a pin finds one.
+- **The re-probe rides U8b's window:** the same three probes on "The Red-Headed League" (limit 200 and limit 100 with
+  text; `ids_only` at limit 200) must all arrive INLINE, read from bytes.
+- **U8a resumes after U7c**, so its descriptions and instructions match the final bound; a FRESH U8a continuation takes it
+  (its harness count was ~398k at the pause).
 
 ## U8a UNIT RECORD — the model-facing words: `MCPSession.instructions`, the tool descriptions, the stargazing brief's delta (VX-197; opus-implementer, from 2026-10-14 ~20:40 MDT)
 
