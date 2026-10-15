@@ -544,58 +544,57 @@ struct SidebarView: View {
                     // VX-286: the group's side margin moved off the group (see
                     // `scrollingSectionMargin`), so the header carries its own.
                     .padding(.horizontal, Self.groupPadding)
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 0) {
-                            ForEach(items, id: \.target) { item in
-                                starredRow(item, first: item.target == items.first?.target)
-                                    .id(item.target)
-                            }
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        ForEach(items, id: \.target) { item in
+                            starredRow(item, first: item.target == items.first?.target)
+                                .id(item.target)
                         }
-                        .padding(.horizontal, Self.scrollingSectionMargin)
                     }
-                    .scrollBounceBehavior(.basedOnSize)
-                    #if DEBUG
-                    // U1b's oracle: the section's window over its rows.
-                    .onScrollGeometryChange(for: SidebarLayout.ScrollWindow.self) {
-                        SidebarLayout.ScrollWindow($0)
-                    } action: { _, window in
-                        SidebarGeometry.recordSection(.starred, window: window, for: workspace)
-                    }
-                    #endif
-                    // U1b (F-2, P-U1-6; F-1's reveal): the section's window —
-                    // the edges fade where more lies beyond them, and the
-                    // CURRENT row is revealed clear of the fades on a
-                    // selection change and on a height change. It replaces
-                    // the minimal `scrollTo` on a selection change that stood
-                    // here (which would now leave a row under the fade).
-                    .modifier(SidebarSectionWindow(
-                        proxy: proxy, rows: items.map(\.target),
-                        current: items.first {
-                            StarTargeting.selection(for: $0.target) == selection
-                        }?.target,
-                        rowHeight: rowHeight, room: tokens.room,
-                        report: sectionReport(.starred)))
-                    .frame(maxHeight: SidebarLayout.scrollingSectionMaxHeight(rowHeight: rowHeight))
-                    .fixedSize(
-                        horizontal: false,
-                        vertical: items.count <= SidebarLayout.scrollingSectionWindow)
-                    #if DEBUG
-                    // Item 10's oracle: what the SECTION actually drew,
-                    // keyed by the column's own workspace (the DEBUG-oracle
-                    // keying rule — suites run in parallel, and a singleton
-                    // here would let another suite's column answer the pin).
-                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
-                        SidebarGeometry.starredSectionHeights[
-                            SidebarGeometry.bodyKey(for: workspace)] = height
-                    }
-                    // VX-286's oracle: the section's scroll view as drawn —
-                    // where its overlay scroll bar rides.
-                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
-                        SidebarGeometry.recordSection(.starred, scroll: frame, for: workspace)
-                    }
-                    #endif
+                    .padding(.horizontal, Self.scrollingSectionMargin)
                 }
+                .scrollBounceBehavior(.basedOnSize)
+                #if DEBUG
+                // U1b's oracle: the section's window over its rows.
+                .onScrollGeometryChange(for: SidebarLayout.ScrollWindow.self) {
+                    SidebarLayout.ScrollWindow($0)
+                } action: { _, window in
+                    SidebarGeometry.recordSection(.starred, window: window, for: workspace)
+                }
+                #endif
+                // U1b (F-2, P-U1-6; F-1's reveal, P-U1b-6): the section's
+                // window — the edges fade where more lies beyond them, and the
+                // CURRENT row is revealed clear of the fades at an exact
+                // offset on every input that moves its place. It replaces the
+                // minimal `scrollTo` on a selection change that stood here
+                // (inside a `ScrollViewReader`, now gone — nothing else used
+                // the proxy).
+                .modifier(SidebarSectionWindow(
+                    rows: items.map(\.target),
+                    current: items.first {
+                        StarTargeting.selection(for: $0.target) == selection
+                    }?.target,
+                    rowHeight: rowHeight, room: tokens.room,
+                    report: sectionReport(.starred)))
+                .frame(maxHeight: SidebarLayout.scrollingSectionMaxHeight(rowHeight: rowHeight))
+                .fixedSize(
+                    horizontal: false,
+                    vertical: items.count <= SidebarLayout.scrollingSectionWindow)
+                #if DEBUG
+                // Item 10's oracle: what the SECTION actually drew,
+                // keyed by the column's own workspace (the DEBUG-oracle
+                // keying rule — suites run in parallel, and a singleton
+                // here would let another suite's column answer the pin).
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                    SidebarGeometry.starredSectionHeights[
+                        SidebarGeometry.bodyKey(for: workspace)] = height
+                }
+                // VX-286's oracle: the section's scroll view as drawn —
+                // where its overlay scroll bar rides.
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                    SidebarGeometry.recordSection(.starred, scroll: frame, for: workspace)
+                }
+                #endif
             }
             // (VX-286: the `.padding(.horizontal, groupPadding)` that stood
             //  here put the margin OUTSIDE the scroll view — it moved inside.)
@@ -826,64 +825,64 @@ struct SidebarView: View {
                 header(WorkspaceNaming.openSectionHeader)
                     // VX-286: the header carries the group's margin itself now.
                     .padding(.horizontal, Self.groupPadding)
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 0) {
-                            ForEach(shown, id: \.self) { noteID in
-                                openRow(noteID, ordinal: (shown.firstIndex(of: noteID) ?? 99) + 1)
-                                    .id(noteID)
-                            }
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        ForEach(shown, id: \.self) { noteID in
+                            openRow(noteID, ordinal: (shown.firstIndex(of: noteID) ?? 99) + 1)
+                                .id(noteID)
                         }
-                        // VX-286: the margin INSIDE the scroll, so the overlay
-                        // scroll bar rides beside the ✕, never over it.
-                        .padding(.horizontal, Self.scrollingSectionMargin)
                     }
-                    .scrollBounceBehavior(.basedOnSize)
-                    #if DEBUG
-                    // U1b's oracle: the list's window over its rows.
-                    .onScrollGeometryChange(for: SidebarLayout.ScrollWindow.self) {
-                        SidebarLayout.ScrollWindow($0)
-                    } action: { _, window in
-                        SidebarGeometry.recordSection(.open, window: window, for: workspace)
-                    }
-                    #endif
-                    // U1b (F-1 + F-2): the list's window — the CURRENT row
-                    // wholly in view, clear of the fades, after an open, a
-                    // ⌘⇧W/✕ landing, a return from a place, and EVERY
-                    // viewport-height change (the traced cut: the old reveal
-                    // ran once, against a viewport that settled a pass later);
-                    // the edges fade where more lies beyond them.
-                    .modifier(SidebarSectionWindow(
-                        proxy: proxy, rows: shown, current: currentOpenRow,
-                        rowHeight: rowHeight, room: tokens.room,
-                        report: sectionReport(.open)))
-                    .frame(maxHeight: maxHeight)
-                    // VX-285: hug the rows while they FIT the room; past it,
-                    // take the room and scroll in place (the `count <= 7`
-                    // switch asked only about the old window).
-                    .fixedSize(
-                        horizontal: false,
-                        vertical: SidebarLayout.openListRowsFit(
-                            rows: shown.count, rowHeight: rowHeight, maxHeight: maxHeight))
-                    // VX-285's second measurement: where the list STARTS in
-                    // the column's content. Nothing above it depends on the
-                    // list's own height, so this can never feed back.
-                    .onGeometryChange(for: CGFloat.self) {
-                        $0.frame(in: .named(Self.columnContentSpace)).minY
-                    } action: { openListTop = $0 }
-                    #if DEBUG
-                    // VX-285/286's oracle: the list's scroll view as drawn.
-                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
-                        SidebarGeometry.recordSection(.open, scroll: frame, for: workspace)
-                    }
-                    #endif
-                    // (U1b: the newcomer reveal that stood here — one minimal
-                    //  `scrollTo` when `recency.first` changed — is the
-                    //  section window's current-row reveal above. Every open
-                    //  takes the pane's focus, so the newcomer IS the current
-                    //  row; and a return to the note already newest, which
-                    //  never changed `recency.first`, now reveals too.)
+                    // VX-286: the margin INSIDE the scroll, so the overlay
+                    // scroll bar rides beside the ✕, never over it.
+                    .padding(.horizontal, Self.scrollingSectionMargin)
                 }
+                .scrollBounceBehavior(.basedOnSize)
+                #if DEBUG
+                // U1b's oracle: the list's window over its rows.
+                .onScrollGeometryChange(for: SidebarLayout.ScrollWindow.self) {
+                    SidebarLayout.ScrollWindow($0)
+                } action: { _, window in
+                    SidebarGeometry.recordSection(.open, window: window, for: workspace)
+                }
+                #endif
+                // U1b (F-1 + F-2): the list's window — the CURRENT row
+                // wholly in view, clear of the fades, after an open, a
+                // ⌘⇧W/✕ landing, a return from a place, and every change
+                // of the viewport, the content height or the pitch (the
+                // traced cut: the old reveal ran once, against a viewport
+                // that settled a pass later); the edges fade where more lies
+                // beyond them. (The `ScrollViewReader` that held the old
+                // reveal's proxy is gone — nothing else used it.)
+                .modifier(SidebarSectionWindow(
+                    rows: shown, current: currentOpenRow,
+                    rowHeight: rowHeight, room: tokens.room,
+                    report: sectionReport(.open)))
+                .frame(maxHeight: maxHeight)
+                // VX-285: hug the rows while they FIT the room; past it,
+                // take the room and scroll in place (the `count <= 7`
+                // switch asked only about the old window).
+                .fixedSize(
+                    horizontal: false,
+                    vertical: SidebarLayout.openListRowsFit(
+                        rows: shown.count, rowHeight: rowHeight, maxHeight: maxHeight))
+                // VX-285's second measurement: where the list STARTS in
+                // the column's content. Nothing above it depends on the
+                // list's own height, so this can never feed back.
+                .onGeometryChange(for: CGFloat.self) {
+                    $0.frame(in: .named(Self.columnContentSpace)).minY
+                } action: { openListTop = $0 }
+                #if DEBUG
+                // VX-285/286's oracle: the list's scroll view as drawn.
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                    SidebarGeometry.recordSection(.open, scroll: frame, for: workspace)
+                }
+                #endif
+                // (U1b: the newcomer reveal that stood here — one minimal
+                //  `scrollTo` when `recency.first` changed — is the
+                //  section window's current-row reveal above. Every open
+                //  takes the pane's focus, so the newcomer IS the current
+                //  row; and a return to the note already newest, which
+                //  never changed `recency.first`, now reveals too.)
             }
             // (VX-286: the `.padding(.horizontal, groupPadding)` that stood
             //  here put the margin OUTSIDE the scroll view — it moved inside.)

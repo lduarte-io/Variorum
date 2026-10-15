@@ -44,16 +44,6 @@ struct SidebarSectionWindowRuleTests {
         Window(offset: offset, viewport: viewport, content: content)
     }
 
-    /// What `ScrollViewProxy.scrollTo(_:anchor:)` does with the anchor: the
-    /// row's top lands `y × (viewport − rowHeight)` below the window's top,
-    /// clamped to the content (a scroll view never scrolls past its ends).
-    private func landing(row: Int, anchor: CGFloat, in start: Window) -> Window {
-        let top = CGFloat(row) * rowHeight
-        let wanted = top - anchor * (start.viewport - rowHeight)
-        let limit = max(0, start.content - start.viewport)
-        return Window(offset: min(max(wanted, 0), limit), viewport: start.viewport, content: start.content)
-    }
-
     @Test func theFadeIsAboutHalfARow() {
         #expect(SidebarLayout.edgeFadeDepth(rowHeight: 30) == 15)
         #expect(SidebarLayout.edgeFadeDepth(rowHeight: 24) == 12)
@@ -87,69 +77,107 @@ struct SidebarSectionWindowRuleTests {
 
     @Test func aRowClearOfTheFadesIsLeftWhereItIs() {
         // Window 100…350 fades 100…115 and 335…350; row 5 is 150…180.
-        #expect(SidebarLayout.revealAnchor(
+        #expect(SidebarLayout.revealOffset(
             row: 5, rows: 20, rowHeight: rowHeight, window: window(at: 100), depth: depth) == nil)
         // The first row at rest, the last at the end — nothing beyond either to fade.
-        #expect(SidebarLayout.revealAnchor(
+        #expect(SidebarLayout.revealOffset(
             row: 0, rows: 20, rowHeight: rowHeight, window: window(at: 0), depth: depth) == nil)
-        #expect(SidebarLayout.revealAnchor(
+        #expect(SidebarLayout.revealOffset(
             row: 19, rows: 20, rowHeight: rowHeight, window: window(at: 350), depth: depth) == nil)
     }
 
     /// **F-2 meets F-1:** a row wholly inside the viewport but under the
-    /// bottom fade is NOT in view — the minimal `scrollTo` the old reveal used
-    /// would leave it there, half washed out. It is revealed one fade's depth
-    /// above the bottom edge.
-    @Test func aRowUnderTheBottomFadeIsRevealedClearOfIt() throws {
-        // Row 7 is 210…240; the bottom fade covers 235…250.
-        let start = window(at: 0)
-        let anchor = try #require(SidebarLayout.revealAnchor(
-            row: 7, rows: 20, rowHeight: rowHeight, window: start, depth: depth))
-        #expect(abs(anchor - (220 - 15) / 220) < 0.0001)
-        let landed = landing(row: 7, anchor: anchor, in: start)
-        #expect(abs(landed.offset - 5) < 0.001, "the row's bottom lands 15 pt above the window's: offset \(landed.offset)")
+    /// bottom fade is NOT in view — it lands one fade's depth above the bottom
+    /// edge, at an EXACT offset (P-U1b-6).
+    @Test func aRowUnderTheBottomFadeLandsAtTheExactOffsetClearOfIt() {
+        // Row 7 is 210…240; the bottom fade covers 235…250. 240 + 15 − 250 = 5.
+        #expect(SidebarLayout.revealOffset(
+            row: 7, rows: 20, rowHeight: rowHeight, window: window(at: 0), depth: depth) == 5)
     }
 
-    @Test func theLastRowLandsOnTheBottomEdgeAndTheFirstOnTheTop() {
-        #expect(SidebarLayout.revealAnchor(
-            row: 19, rows: 20, rowHeight: rowHeight, window: window(at: 0), depth: depth) == 1)
-        #expect(SidebarLayout.revealAnchor(
-            row: 0, rows: 20, rowHeight: rowHeight, window: window(at: 300), depth: depth) == 0)
+    @Test func aRowAboveLandsOneFadeBelowTheTop() {
+        // Window 200…450; row 5 (150…180) lies above: 150 − 15 = 135.
+        #expect(SidebarLayout.revealOffset(
+            row: 5, rows: 20, rowHeight: rowHeight, window: window(at: 200), depth: depth) == 135)
     }
 
-    /// **The reveal is a fixed point:** from any window, every row lands
-    /// wholly in view and clear of both fades, and asking again asks nothing.
+    @Test func theEndsLandOnTheEdgesAndTheOffsetStaysInsideTheContent() {
+        #expect(SidebarLayout.revealOffset(
+            row: 19, rows: 20, rowHeight: rowHeight, window: window(at: 0), depth: depth) == 350,
+                "the last row: the content's end, 600 − 250")
+        #expect(SidebarLayout.revealOffset(
+            row: 0, rows: 20, rowHeight: rowHeight, window: window(at: 300), depth: depth) == 0,
+                "the first row: the content's top")
+        #expect(SidebarLayout.revealOffset(
+            row: 18, rows: 20, rowHeight: rowHeight, window: window(at: 0), depth: depth) == 335,
+                "the row before last keeps its half row of air: 570 + 15 − 250")
+    }
+
+    @Test func aWindowShorterThanARowShowsTheRowsTop() {
+        let narrow = Window(offset: 0, viewport: 20, content: 600)
+        #expect(SidebarLayout.revealOffset(
+            row: 10, rows: 20, rowHeight: rowHeight, window: narrow, depth: depth) == 300)
+    }
+
+    /// **The pitch flip's two windows** (the re-run's red: Starred's ninth row
+    /// after the column went 30 → 24). Each window answers its OWN exact
+    /// offset — the 30-pt window 45, the 24-pt window 36 (its content's end) —
+    /// so a reveal asked again on the new window's reading lands exactly,
+    /// where an answer carried over from the old one would not.
+    @Test func thePitchFlipsBeforeAndAfterWindowsEachAnswerExactly() {
+        let before = Window(offset: 0, viewport: 225, content: 270)  // 9 rows at 30, 7.5 shown
+        let after = Window(offset: 0, viewport: 180, content: 216)   // the same 9 at 24
+        #expect(SidebarLayout.revealOffset(
+            row: 8, rows: 9, rowHeight: 30, window: before,
+            depth: SidebarLayout.edgeFadeDepth(rowHeight: 30)) == 45)
+        let landed = SidebarLayout.revealOffset(
+            row: 8, rows: 9, rowHeight: 24, window: after,
+            depth: SidebarLayout.edgeFadeDepth(rowHeight: 24))
+        #expect(landed == 36)
+        #expect(SidebarLayout.revealOffset(
+            row: 8, rows: 9, rowHeight: 24, window: Window(offset: 34, viewport: 180, content: 216),
+            depth: SidebarLayout.edgeFadeDepth(rowHeight: 24)) == 36,
+                "the re-run's resting place (34) is not clear, and the exact answer is the end")
+        #expect(SidebarLayout.revealOffset(
+            row: 8, rows: 9, rowHeight: 24, window: Window(offset: 36, viewport: 180, content: 216),
+            depth: SidebarLayout.edgeFadeDepth(rowHeight: 24)) == nil, "…and from there nothing moves")
+    }
+
+    /// **Idempotent from every window:** every row lands wholly in view and
+    /// clear of both fades, and a second reveal from the result moves nothing.
     @Test func everyRowLandsClearOfTheFadesFromAnyWindow() throws {
-        for (viewport, rows) in [(CGFloat(250), 20), (CGFloat(105), 20), (CGFloat(225), 9)] {
-            let content = CGFloat(rows) * rowHeight
+        for (viewport, rows, pitch) in [(CGFloat(250), 20, CGFloat(30)), (CGFloat(105), 20, CGFloat(30)),
+                                        (CGFloat(225), 9, CGFloat(30)), (CGFloat(180), 9, CGFloat(24))] {
+            let content = CGFloat(rows) * pitch
+            let depth = SidebarLayout.edgeFadeDepth(rowHeight: pitch)
             for start in stride(from: CGFloat(0), through: max(0, content - viewport), by: 7) {
-                let from = window(at: start, viewport: viewport, content: content)
+                let from = Window(offset: start, viewport: viewport, content: content)
                 for row in 0..<rows {
                     var landed = from
-                    if let anchor = SidebarLayout.revealAnchor(
-                        row: row, rows: rows, rowHeight: rowHeight, window: from, depth: depth) {
-                        landed = landing(row: row, anchor: anchor, in: from)
+                    if let target = SidebarLayout.revealOffset(
+                        row: row, rows: rows, rowHeight: pitch, window: from, depth: depth) {
+                        landed.offset = target
                     }
                     let fades = SidebarLayout.edgeFades(landed, depth: depth)
-                    let top = CGFloat(row) * rowHeight
+                    let top = CGFloat(row) * pitch
                     #expect(top >= landed.offset + fades.top - 0.5,
                             "row \(row) from \(start) (window \(viewport)): top \(top) under the top fade")
-                    #expect(top + rowHeight <= landed.offset + viewport - fades.bottom + 0.5,
+                    #expect(top + pitch <= landed.offset + viewport - fades.bottom + 0.5,
                             "row \(row) from \(start) (window \(viewport)): bottom under the bottom fade")
-                    #expect(SidebarLayout.revealAnchor(
-                        row: row, rows: rows, rowHeight: rowHeight, window: landed, depth: depth) == nil,
-                            "row \(row) from \(start): a second ask moves nothing")
+                    #expect(SidebarLayout.revealOffset(
+                        row: row, rows: rows, rowHeight: pitch, window: landed, depth: depth) == nil,
+                            "row \(row) from \(start): a second reveal moves nothing")
                 }
             }
         }
     }
 
     @Test func nothingIsRevealedBeforeTheWindowIsMeasuredOrForARowThatIsNotThere() {
-        #expect(SidebarLayout.revealAnchor(
+        #expect(SidebarLayout.revealOffset(
             row: 15, rows: 20, rowHeight: rowHeight, window: .unmeasured, depth: depth) == nil)
-        #expect(SidebarLayout.revealAnchor(
+        #expect(SidebarLayout.revealOffset(
             row: 20, rows: 20, rowHeight: rowHeight, window: window(at: 0), depth: depth) == nil)
-        #expect(SidebarLayout.revealAnchor(
+        #expect(SidebarLayout.revealOffset(
             row: -1, rows: 20, rowHeight: rowHeight, window: window(at: 0), depth: depth) == nil)
     }
 }

@@ -27,13 +27,14 @@
 //    returning to the note she was already in never revealed at all (its
 //    recency did not change). Now the CURRENT row is revealed (clear of the
 //    fades) on every current-row change, on the section's first reading, and
-//    on EVERY viewport-height change, from the window as it then stands
-//    (`SidebarLayout.revealAnchor`). A scroll of hers changes no viewport, so
-//    a list she has scrolled is never pulled back by a scroll. Each reveal
-//    is asked twice — at once, and again once the transition it rode in on
-//    has settled (`transitionSettle`) — and scrolls unanimated: U1b's stage
-//    window found a scroll issued inside the rail's animated transition
-//    resting 1 pt short, with nothing asking again.
+//    on EVERY change of the viewport, the content height or the pitch, from
+//    the window as it then stands — an EXACT offset (`SidebarLayout.
+//    revealOffset`) set absolutely through a `ScrollPosition`, unanimated
+//    (P-U1b-6 — U1b's two stage windows found the anchor road resting 1, then
+//    2 pt short after a pitch flip). A scroll of hers changes neither the
+//    viewport nor the content, so a list she has scrolled is never pulled
+//    back by a scroll; a row closing elsewhere is no reason either (P-U1b-7).
+//    The derived settled ask (`transitionSettle`) stays as the backstop.
 //
 
 import SwiftUI
@@ -55,9 +56,8 @@ extension SidebarLayout.ScrollWindow {
     }
 }
 
-/// Applied to a scrolling section's `ScrollView`, inside its `ScrollViewReader`.
+/// Applied to a scrolling section's `ScrollView`.
 struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
-    let proxy: ScrollViewProxy
     /// The section's rows, in drawn order, each `rowHeight` tall.
     let rows: [RowID]
     /// The row of what the pane shows, if it is one of these.
@@ -69,8 +69,13 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
 
     @State private var fades = SidebarLayout.EdgeFades.none
     @State private var memory = Memory()
-    /// Bumped to ask for the after-the-transition check — through `onChange`,
-    /// so the check runs with the section's FRESH rows, current row and pitch.
+    /// **The section's scroll position — the reveal's ONE road** (P-U1b-6): an
+    /// exact content offset (`SidebarLayout.revealOffset`) set absolutely,
+    /// never the proxy's id lookup with an anchor fraction (which resolved the
+    /// row through the lazy stack's own, stale, estimate mid-flip).
+    @State private var position = ScrollPosition()
+    /// Bumped to ask for the settled check — through `onChange`, so the check
+    /// runs with the section's FRESH rows, current row and pitch.
     @State private var settledCheck = 0
 
     /// The window as last read, and the reveal's bookkeeping — held by
@@ -81,44 +86,52 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
         var window = SidebarLayout.ScrollWindow.unmeasured
         /// The mount's reveal waits for the first MEASURED reading.
         var mountRevealOwed = true
+        /// How many rows stood at the last reading (a content change from a
+        /// row closing elsewhere is not a reason to scroll — P-U1b-7).
+        var rowCountAtReading = 0
         /// Each reveal request is an episode; a later one supersedes the
-        /// after-the-transition check an earlier one scheduled.
+        /// settled check an earlier one scheduled.
         var episode = 0
     }
 
     /// How long after a reveal request the section checks again — DERIVED from
     /// the column's one transition beat (`SidebarLayout.transitionSettle` =
     /// `railTransition` + its margin; the orchestrator's ruling on P-U1b-5:
-    /// never a free-standing number). U1b's stage window found why: a scroll
-    /// issued while the column's layout is still animating is resolved against
-    /// the scroll view's PRESENTATION frame, not the one it settles into, and
-    /// no reading arrives once the animation ends — so the row could rest short
-    /// (1 pt in the window's Starred pin; once in ~40, much more, the walker's
-    /// O-1).
+    /// never a free-standing number). Since P-U1b-6 it is the BACKSTOP: every
+    /// input that moves the row's place already re-asks.
     static var transitionSettle: Duration { .seconds(SidebarLayout.transitionSettle) }
 
     private var depth: CGFloat { SidebarLayout.edgeFadeDepth(rowHeight: rowHeight) }
 
     func body(content: Content) -> some View {
         content
+            .scrollPosition($position)
             .onScrollGeometryChange(for: SidebarLayout.ScrollWindow.self) {
                 SidebarLayout.ScrollWindow($0)
             } action: { old, new in
                 memory.window = new
                 refreshFades(new)
+                let rowsChanged = rows.count != memory.rowCountAtReading
+                memory.rowCountAtReading = rows.count
                 if memory.mountRevealOwed, new.isMeasured {
                     memory.mountRevealOwed = false
                     requestReveal()
-                } else if abs(new.viewport - old.viewport) > 0.5 {
-                    // F-1's mechanism: a viewport that changed height under a
-                    // revealed row (the rail arriving, the pitch flipping, the
-                    // window resizing) reveals it from the window as it now is.
+                } else if abs(new.viewport - old.viewport) > 0.5
+                    || (abs(new.content - old.content) > 0.5 && !rowsChanged) {
+                    // Every input that moves the row's place re-asks (P-U1b-6):
+                    // the viewport (the rail arriving, a resize) and the
+                    // content height (the pitch flip's own signal — rows re-laid
+                    // at the new pitch). An offset-only change — her scroll —
+                    // never does.
                     requestReveal()
                 }
             }
             .onChange(of: current) { requestReveal() }
+            .onChange(of: rowHeight) {
+                refreshFades(memory.window)
+                requestReveal()
+            }
             .onChange(of: settledCheck) { reveal() }
-            .onChange(of: rowHeight) { refreshFades(memory.window) }
             .overlay { SidebarEdgeFade(fades: fades, room: room) }
     }
 
@@ -141,19 +154,16 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
     }
 
     /// The current row, scrolled clear of the fades when the window as last
-    /// read says it is not — unanimated, so the scroll lands on the layout it
-    /// was computed against rather than riding the request's transition.
+    /// read says it is not: the exact offset, set absolutely and unanimated.
     private func reveal() {
         let window = memory.window
         guard window.isMeasured, let current, let row = rows.firstIndex(of: current),
-              let anchor = SidebarLayout.revealAnchor(
+              let target = SidebarLayout.revealOffset(
                 row: row, rows: rows.count, rowHeight: rowHeight, window: window, depth: depth)
         else { return }
         var unanimated = Transaction()
         unanimated.disablesAnimations = true
-        withTransaction(unanimated) {
-            proxy.scrollTo(current, anchor: UnitPoint(x: 0.5, y: anchor))
-        }
+        withTransaction(unanimated) { position.scrollTo(y: target) }
     }
 }
 

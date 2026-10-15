@@ -319,9 +319,10 @@ nonisolated enum SidebarLayout {
     // (`openListMaxHeight`'s two, the rail arriving, the column's pitch
     // flipping 30 ↔ 24 under the rail's transition), while returning to the note
     // she was already in never revealed at all (its recency did not change).
-    // So the reveal is a decision over the window as it NOW stands, asked on
-    // a current-row change AND on every viewport-height change — and since
-    // F-2 fades the edges, "in view" means clear of the fades too.
+    // So the reveal is a decision over the window as it NOW stands — an exact
+    // content offset, applied absolutely, re-asked on every input axis
+    // (P-U1b-6) — and since F-2 fades the edges, "in view" means clear of the
+    // fades too.
 
     /// A scrolling section's visible window over its rows, in the scroll
     /// content's space: the visible top, the visible height, the content's
@@ -369,39 +370,35 @@ nonisolated enum SidebarLayout {
         return EdgeFades(top: settled(above), bottom: settled(below))
     }
 
-    /// **F-1 — the reveal.** Row `row` of `rows` (each `rowHeight` tall, the
-    /// first at the content's top): nil when it already stands wholly in the
-    /// window AND clear of both fades — or when nothing is measured yet;
-    /// otherwise the `UnitPoint.y` to hand `ScrollViewProxy.scrollTo(_:anchor:)`
-    /// so the row lands one fade's depth inside the edge it was beyond (none
-    /// past the first row or the last, where nothing lies beyond to fade).
-    ///
-    /// The anchor arithmetic: `scrollTo` aligns the point `y × rowHeight` down
-    /// the row with the point `y × viewport` down the window, so the row's top
-    /// lands `y × (viewport − rowHeight)` below the window's top. A row that
-    /// must sit `margin` below the top asks `margin / room`; one that must sit
-    /// `margin` above the bottom asks `(room − margin) / room`
-    /// (`room = viewport − rowHeight`).
-    static func revealAnchor(
+    /// **F-1 — the reveal, as an EXACT content offset** (the orchestrator's
+    /// ruling P-U1b-6, after U1b's re-run: the anchor-fraction road it
+    /// replaces resolved the row through the lazy stack's own idea of where it
+    /// sat, which goes stale while the pitch flips — the Starred pin rested
+    /// 2 pt short). Row `row` of `rows`, each `rowHeight` tall, the first at
+    /// the content's top: nil when it already stands wholly in the window AND
+    /// clear of both fades, or nothing is measured yet; otherwise the content
+    /// offset that lands it one fade's depth inside the edge it was beyond
+    /// (none past the first row or the last, where nothing lies beyond to
+    /// fade), clamped to what the window as read can scroll to. A second
+    /// reveal from its own result moves nothing (pinned).
+    static func revealOffset(
         row: Int, rows: Int, rowHeight: CGFloat, window: ScrollWindow, depth: CGFloat
     ) -> CGFloat? {
         guard window.isMeasured, rowHeight > 0, row >= 0, row < rows else { return nil }
         let top = CGFloat(row) * rowHeight
         let bottom = top + rowHeight
         let fades = edgeFades(window, depth: depth)
-        let clearTop = window.offset + fades.top
-        let clearBottom = window.offset + window.viewport - fades.bottom
-        let above = top < clearTop - fadeSlack
-        let below = bottom > clearBottom + fadeSlack
+        let above = top < window.offset + fades.top - fadeSlack
+        let below = bottom > window.offset + window.viewport - fades.bottom + fadeSlack
         guard above || below else { return nil }
-        let room = window.viewport - rowHeight
-        // A window shorter than one row can only show the row's top.
-        guard room > 0 else { return 0 }
-        if above {
-            let margin = min(depth, top)
-            return min(max(margin / room, 0), 1)
+        let wanted: CGFloat
+        if above || window.viewport <= rowHeight {
+            // A window shorter than one row can only show the row's top.
+            wanted = top - (window.viewport <= rowHeight ? 0 : min(depth, top))
+        } else {
+            wanted = bottom + min(depth, CGFloat(rows - 1 - row) * rowHeight) - window.viewport
         }
-        let margin = min(depth, CGFloat(rows - 1 - row) * rowHeight)
-        return min(max((room - margin) / room, 0), 1)
+        let limit = max(0, window.content - window.viewport)
+        return min(max(wanted, 0), limit)
     }
 }

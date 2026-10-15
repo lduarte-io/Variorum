@@ -898,6 +898,23 @@ lines — below); any stage work until the orchestrator hands over a claim.
   a row · the pitch flip's before/after windows) and idempotence; the mounted Starred pin; **R-F** (the application
   reverted to the proxy's anchor road, prebuilt) expected RED on the Starred pin. The offscreen probe re-run WITH a
   row-height flip before the window.
+  **Built (this commit):** `SidebarLayout.revealOffset` (pure, exact, clamped, idempotent); `revealAnchor` RETIRED;
+  `SidebarSectionWindow` applies the offset through `.scrollPosition($position)` + `position.scrollTo(y:)` in an
+  unanimated transaction; both sections' `ScrollViewReader`s are gone (the proxy did nothing else); re-asks on the
+  current row, the viewport, the content height, the row height, the mount's first reading, plus the derived settled
+  ask. Pure pins rewritten on the offset (×10 + the beat ×2): exact above (135) · below (5) · the ends (350, 0, the
+  row before last 335) · a window shorter than a row (the row's top, 300) · the pitch flip's two windows (45 at 30 pt,
+  36 at 24 pt; the re-run's resting 34 → 36; 36 → nil) · idempotence from every window (four window/pitch shapes).
+  Headless `build-for-testing` green. **The offscreen probe WITH the flip** (current + 30 → 24 in one animated update,
+  the rail's own beat): the ninth star lands at 36…216 — exactly the end, clear — from rest and from mid-list, and
+  24 → 30 lands clear too.
+  **PROVISIONAL P-U1b-7 — a content change from a row closing elsewhere does not re-ask.** The ruling lists the
+  content height as an axis (the pitch flip's signal); built, it re-asks on a content change only when the row COUNT
+  did not change — a ✕ on another row while she has scrolled away would otherwise pull the list back to the current
+  row ("her own scrolling is never pulled back"). A pitch flip keeps the count, so it still re-asks (and the row-height
+  axis re-asks anyway). Options: (a) content changes with an unchanged count [built]; (b) every content change (the
+  ruling's literal list, with the ✕ pull-back); (c) content changes only while a settled ask is pending.
+  NEXT: R-F's prebuilt tree, then READY FOR STAGE.
 
 **F-3 — THE DOUBLED SEPARATOR: OLDER THAN U1, NOT ADJACENT — RECORDED AND LEFT (the brief's rule).**
 - The View menu's note group is `EditorCommands`' `CommandGroup(before: .toolbar)` (`EditorCommands.swift:954`). It
