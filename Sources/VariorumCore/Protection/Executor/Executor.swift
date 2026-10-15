@@ -155,6 +155,12 @@ public enum ExecutorRefusal: Error, Equatable, Sendable {
     case signedOutUseThisMacOnly
     /// Decision 35 / a synced act: the vault must be read fresh this session.
     case needsFreshVault
+    /// The account's vault can't be reached this session — signed out, signed
+    /// into another account, or offline: nothing was read or written. A synced
+    /// act past its commit point WAITS for it, named (her ruling 2026-10-14/15:
+    /// "Finish leaving Castle — sign in to finish"); before it, the act rolls
+    /// back.
+    case vaultOutOfReach(account: String)
     /// Decision 32: one rotation at a time.
     case rotationInProgress
     /// The account's keys moved elsewhere since the door — follow first.
@@ -205,8 +211,16 @@ public final class ProtectionExecutor {
     // MARK: - The vault, read fresh
 
     /// Read the account's vault now — the one road to a "fresh vault read".
+    /// Only the account this session is signed into: the vault is the
+    /// account's (row-level security), so a device signed out, or signed into
+    /// another account, never asks — a resume that met that wrote the vault
+    /// while signed out (VX-305 U4, the soak's seed 2 — her ruling
+    /// 2026-10-14/15).
     @discardableResult
     public func readVault(accountID: String) async throws -> VaultSnapshot? {
+        guard configuration.session.accountID == accountID else {
+            throw ExecutorRefusal.vaultOutOfReach(account: accountID)
+        }
         let snapshot = try await leaves.vault.fetchVault(accountID: accountID)
         if let snapshot { freshVaults[accountID] = snapshot } else { freshVaults[accountID] = nil }
         vaultsReadThisSession.insert(accountID)

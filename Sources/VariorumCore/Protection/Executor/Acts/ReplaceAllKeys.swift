@@ -88,6 +88,15 @@ extension ActContext {
         let held = try material(for: snapshot)
         let format = try snapshot.format.settingAppleHeldCopy(
             masterKey: held.masterSymmetricKey, appleKey: key.key, appleKeyID: key.id)
+        // Stamped BEFORE the write (a re-key act's commit point — `pastCommitPoint`):
+        // a resume that can't reach the vault never rolls back over a write that
+        // may have landed (it would delete the key the vault now names).
+        if parameters.accountWriteBegun != true {
+            var stamped = parameters
+            stamped.accountWriteBegun = true
+            plan.parameters = stamped
+            try leaves.plans.writePlan(try plan.sealed(under: library.key))
+        }
         let written = try await leaves.vault.updateVault(
             format, accountID: snapshot.accountID, expectedRevision: snapshot.revision,
             proofMaster: held.masterSymmetricKey, device: deviceName)

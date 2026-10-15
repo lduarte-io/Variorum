@@ -567,9 +567,13 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   untriaged finding, the record names it), then (g) the full runs and the final record.
   **THE CLOSER SESSION (Opus implementer, 2026-10-14, from `03d8e3e4`):** (h) her ruling 2 — the marker SPLIT into
   salted hardware + login parts, `.anotherLogin` adopting nothing, P-U4-3's takeover new hardware's alone — DONE
-  (this commit; the protection set Debug 377 tests in 65 suites green, the seed-2 probe aside). NEXT: (i) her ruling 1
-  — the stuck leave's fixed scenario + promise 6's vault-reach qualifier — PENDING; (j) the soak, both
-  configurations — PENDING; (k) the runs — PENDING; (l) the final record — PENDING.
+  (`f87db7c6`; the protection set Debug 377 tests in 65 suites green). (i) her ruling 1 — the stuck leave: the
+  executor reads a vault only for the session's account; a synced resume that can't reach it ROLLS BACK before its
+  commit point (`ProtectionPlan.pastCommitPoint`, one line for executor and checker; Re-link-first stamps its write)
+  and past it WAITS, named (`SettleOutcome.waiting`), copies re-paused; the world re-settles at the next vault reach;
+  promise 6's vault-reach qualifier; four fixed scenarios, three red-on-old — DONE (this commit; the protection set
+  Debug 381 tests in 65 suites green). NEXT: (j) the soak, both configurations — PENDING; (k) the runs — PENDING;
+  (l) the final record — PENDING.
 - The go/no-go record: **NOT-STARTED.**
 
 ---

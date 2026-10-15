@@ -467,21 +467,59 @@ extension SWorld {
         return violations
     }
 
-    /// PROMISE 6 — crash-safe: with nothing running, no act is half-done.
+    /// PROMISE 6 — crash-safe: with nothing running, no act is half-done —
+    /// the act finished or rolled back, the library open, no copy carrying a
+    /// half-finished act. THE VAULT-REACH QUALIFIER (her ruling 2026-10-14/15,
+    /// the soak's seed 2): a SYNCED act PAST ITS COMMIT POINT whose account's
+    /// vault this device can't reach — signed out, signed into another
+    /// account, or offline — stays in flight NAMED and WAITING: this Mac's
+    /// section names it, its plan on disk is the one the section names, the
+    /// library is open, and copies stay paused while the re-key is unswapped;
+    /// it finishes at the next vault reach. That is no third state. Anything
+    /// else in flight is (a crash before the commit point rolls back).
     func crashSafe(_ device: SDevice) -> [Violation] {
         guard device.isOpen, let library = device.library else { return [] }
         var violations: [Violation] = []
-        if library.section.actInFlight != nil, device.online {
-            violations.append(Violation(promise: 6, device: device.name, detail: "an act is still in flight (\(library.section.actInFlight!.act))"))
+        func fail(_ detail: String) { violations.append(Violation(promise: 6, device: device.name, detail: detail)) }
+        var waiting = false
+        if let inFlight = library.section.actInFlight {
+            if let why = notNamedAndWaiting(device, library, inFlight) {
+                fail("an act is still in flight (\(inFlight.act)) — \(why)")
+            } else {
+                waiting = true
+                if let to = inFlight.toFingerprint, library.fingerprint != to, !device.paused {
+                    fail("copies run while \(inFlight.act) waits, its re-key unswapped")
+                }
+            }
         }
         if library.section.actInFlight == nil, device.container.files[SPath.plan] != nil {
-            violations.append(Violation(promise: 6, device: device.name, detail: "a plan is left on disk with nothing in flight"))
+            fail("a plan is left on disk with nothing in flight")
         }
         if library.section.actInFlight == nil, device.staged != nil {
-            violations.append(Violation(promise: 6, device: device.name, detail: "a staged file is left"))
+            fail("a staged file is left")
         }
-        if device.paused { violations.append(Violation(promise: 6, device: device.name, detail: "copies are still paused")) }
+        if device.paused, !waiting { fail("copies are still paused") }
         return violations
+    }
+
+    /// Why an act in flight is NOT named and waiting (nil when it is): the
+    /// plan on disk the one this Mac's section names; a synced act; its
+    /// account's vault out of this device's reach now; past its commit point
+    /// (`ProtectionPlan.pastCommitPoint` — the executor's own line).
+    func notNamedAndWaiting(_ device: SDevice, _ library: UnlockedLibrary, _ inFlight: ActInFlight) -> String? {
+        guard case .plan(let sealed)? = device.container.files[SPath.plan],
+              let plan = try? ProtectionCoding.decoder().decode(ProtectionPlan.self, from: sealed.payload) else {
+            return "no plan on disk"
+        }
+        guard plan.isNamed(by: library.section) else { return "the plan on disk isn't the one this Mac's section names" }
+        guard plan.parameters?.synced == true, let account = plan.parameters?.accountID ?? library.record?.account else {
+            return "not a synced act"
+        }
+        guard !device.online || device.session.accountID != account else { return "its account's vault is in reach" }
+        guard plan.pastCommitPoint(libraryFingerprint: library.fingerprint) else {
+            return "before its commit point (it rolls back)"
+        }
+        return nil
     }
 
     /// PROMISE 3 (settled) — Standard means Standard.

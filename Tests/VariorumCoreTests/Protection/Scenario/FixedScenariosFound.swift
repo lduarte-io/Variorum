@@ -269,4 +269,109 @@ struct GeneratorFoundScenarios {
         await world.done([.settle])
         expectPromisesKept(world)
     }
+
+    /// Seed 2 (sequence 432) — HER RULING 2026-10-14/15: a synced leave
+    /// crashed PAST its rotation's first write (here past the completing write
+    /// too: the account reads Standard, the library still under its Castle
+    /// key), then signed out. It STAYS IN FLIGHT, named and waiting: the
+    /// library opens, sync waits, copies stay paused (a backup refused), a door
+    /// refuses with the act named — and it finishes at the next vault reach,
+    /// signing in here. (Promise 6's vault-reach qualifier; the face, "Finish
+    /// leaving Castle — sign in to finish", is phase 3/4's.)
+    @Test func aSyncedLeaveCrashedPastItsFirstWriteWaitsForTheVault() async throws {
+        let world = try Self.start("a phone on an older build beside a synced Castle Mac", seed: 2000438)
+        let account = try #require(world.macA.slot?.rowsOwner)
+        await world.step(.crash(.useStandard("macA"), afterWrites: 21))
+        await world.step(.signOut("macA"))
+        let gate = await world.step(.setGate("macA", .alwaysAsk))
+        #expect(gate == .refused(String(describing: ExecutorRefusal.actInFlight(.leaveCastle))))
+        #expect(world.macA.isOpen, "the library didn't open")
+        #expect(world.macA.lastSettle == .waiting(.leaveCastle, account: account), "the leave isn't named and waiting")
+        #expect(world.macA.library?.section.actInFlight?.act == .leaveCastle)
+        let backup = await world.step(.backup("macA"))
+        #expect(backup != .done && world.macA.paused, "copies ran while the leave waited")
+        expectPromisesKept(world, "while it waits")
+        await world.done([.signIn("macA", account: account)])
+        #expect(world.macA.library?.section.actInFlight == nil, "the leave didn't finish at the vault reach")
+        #expect(world.macA.slot?.record?.mode == .standard && !world.macA.paused)
+        await world.done([.settle])
+        expectPromisesKept(world)
+    }
+
+    /// Her ruling, "or another device": the leave crashed just past its
+    /// rotation's first write (the vault names the leave's key, no wrap yet),
+    /// the actor signed out; another device of the account finishes the leave
+    /// (it reads the named key) while the actor waits, named — and the actor,
+    /// signing in, finishes its own library's re-key.
+    @Test func aWaitingLeaveIsFinishedByAnotherDeviceThenAtSignIn() async throws {
+        let (clean, _) = try syncedWorld(.castle, devices: ["macA", "macB"])
+        await clean.done([.launch("macA")])
+        let begin = clean.stepLog.count
+        await clean.done([.useStandard("macA")])
+        let writes = clean.stepLog[begin...].filter { $0.contains("✎") }
+        let firstVault = try #require(writes.firstIndex { $0.contains("✎ vault") })
+        let (world, account) = try syncedWorld(.castle, devices: ["macA", "macB"])
+        await world.done([.launch("macA"), .launch("macB")])
+        await world.step(.crash(.useStandard("macA"), afterWrites: firstVault + 1))
+        #expect(world.server.snapshot(account)?.format.appleKeyID != nil
+                && world.server.snapshot(account)?.format.masterWrappedByAppleHeld == nil, "the vault doesn't read a leave in progress")
+        await world.done([.signOut("macA"), .launch("macA")])
+        #expect(world.macA.lastSettle == .waiting(.leaveCastle, account: account))
+        await world.done([.settle])
+        #expect(world.server.snapshot(account)?.format.masterWrappedByAppleHeld != nil, "another device didn't finish the leave")
+        #expect(world.macA.library?.section.actInFlight?.act == .leaveCastle, "the actor's own re-key isn't still waiting")
+        await world.done([.signIn("macA", account: account), .settle])
+        #expect(world.macA.library?.section.actInFlight == nil && world.macA.slot?.record?.mode == .standard)
+        expectPromisesKept(world)
+    }
+
+    /// Her ruling's other half: a synced leave crashed BEFORE its rotation's
+    /// first write (the account key minted, its stamp not yet in the plan),
+    /// then signed out — at the open it ROLLS BACK: still Castle under its
+    /// key, the vault untouched, nothing waiting. (Red on the tree before: the
+    /// resume read and rotated the vault while signed out, then stuck at the
+    /// Apple write, in flight past a commit point it should never have
+    /// crossed.)
+    @Test func aSyncedLeaveCrashedBeforeItsFirstWriteRollsBackWhileSignedOut() async throws {
+        let clean = try Self.start("a phone on an older build beside a synced Castle Mac", seed: 2000438)
+        await clean.done([.launch("macA")])
+        let begin = clean.stepLog.count
+        await clean.done([.useStandard("macA")])
+        let writes = clean.stepLog[begin...].filter { $0.contains("✎") }
+        let firstVault = try #require(writes.firstIndex { $0.contains("✎ vault") })
+        #expect(firstVault >= 2 && writes[firstVault - 1].contains("✎ plan"), "the stamp's plan write precedes the first vault write")
+        let world = try Self.start("a phone on an older build beside a synced Castle Mac", seed: 2000438)
+        let account = try #require(world.macA.slot?.rowsOwner)
+        await world.done([.launch("macA")])
+        let before = try #require(world.server.snapshot(account))
+        let key = world.macA.slot?.fingerprint
+        await world.step(.crash(.useStandard("macA"), afterWrites: firstVault - 1))
+        await world.done([.signOut("macA"), .launch("macA")])
+        #expect(world.macA.lastSettle == .rolledBack(.leaveCastle), "the leave didn't roll back")
+        #expect(world.macA.library?.section.actInFlight == nil && !world.macA.paused)
+        #expect(world.macA.slot?.record?.mode == .castle && world.macA.slot?.fingerprint == key)
+        #expect(world.server.snapshot(account)?.revision == before.revision, "the vault was written while signed out")
+        await world.done([.signIn("macA", account: account), .settle])
+        expectPromisesKept(world)
+    }
+
+    /// Her ruling: while the act waits, copies STAY PAUSED — also when the
+    /// crash fell after the prepare's pause was recorded done, so the resume
+    /// starts past it (the pause is the process's and the crash took it). Red
+    /// on the tree before: the waiting leave left copies running, and a
+    /// backup pair of the Castle-era library was taken mid-act.
+    @Test func copiesStayPausedWhileAnActWaitsAcrossARelaunch() async throws {
+        let world = try Self.start("a phone on an older build beside a synced Castle Mac", seed: 2000438)
+        let account = try #require(world.macA.slot?.rowsOwner)
+        await world.step(.crash(.useStandard("macA"), afterWrites: 22))
+        await world.done([.signOut("macA"), .launch("macA")])
+        #expect(world.macA.lastSettle == .waiting(.leaveCastle, account: account))
+        #expect(world.macA.paused, "copies run while the leave waits")
+        let backup = await world.step(.backup("macA"))
+        #expect(backup != .done, "a backup was taken while the leave waited")
+        expectPromisesKept(world, "while it waits")
+        await world.done([.signIn("macA", account: account), .settle])
+        #expect(world.macA.library?.section.actInFlight == nil && !world.macA.paused)
+        expectPromisesKept(world)
+    }
 }

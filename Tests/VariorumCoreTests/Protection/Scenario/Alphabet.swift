@@ -343,6 +343,7 @@ extension SWorld {
             d.session = .signedIn(accountID: account, email: nil)
             d.executor?.configuration.session = d.session
             if let executor = d.executor, d.online { _ = try? await executor.readVault(accountID: account) }
+            await resumeAtVaultReach(d)
         case .signOut(let name):
             let d = device(name)
             d.session = .signedOut
@@ -645,7 +646,10 @@ extension SWorld {
             }
             syncICloud(clone)
         case .goOffline(let name): device(name).online = false
-        case .goOnline(let name): device(name).online = true
+        case .goOnline(let name):
+            let d = device(name)
+            d.online = true
+            await resumeAtVaultReach(d)
         case .timeMachineSnapshot(let name):
             let d = device(name)
             var files = d.container.snapshot()
@@ -1095,6 +1099,7 @@ extension SWorld {
                 if let account = device.library?.record?.account, device.session.accountID == account, device.online {
                     _ = try? await device.executor?.readVault(accountID: account)
                 }
+                await resumeAtVaultReach(device)
                 try? await runRepairs(device)
                 let assessment = assessed(device)
                 for act in assessment.acts {

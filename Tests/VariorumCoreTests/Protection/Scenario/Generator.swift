@@ -30,7 +30,11 @@ extension SWorld {
             _ = try? await launch(device(name))
         }
         let before = Dictionary(uniqueKeysWithValues: devices.map { ($0.name, posture($0)) })
-        let crashedBefore = crashed
+        // A device whose pressed act was still in flight before this step — a
+        // crash's, or one named and waiting for its account's vault (her
+        // ruling 2026-10-14/15) — may settle at this step: that is the
+        // deliberate act finishing, never a silent change (promise 4).
+        let crashedBefore = crashed.union(devices.filter { $0.library?.section.actInFlight != nil }.map(\.name))
         var moveBefore: (SDevice, Set<String>)?
         if case .moveOffSharedKey(let name) = action {
             let d = device(name)

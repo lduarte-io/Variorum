@@ -177,6 +177,9 @@ final class SDevice {
     var captures: [DeviceCapture] = []
     /// The last act's outcome (a Done's words).
     var lastOutcome: ActOutcome?
+    /// What the last open's settle (or a re-settle at a vault reach) did with
+    /// an act in flight — `.waiting` is the act named and waiting.
+    var lastSettle: SettleOutcome?
     /// Hand-off folders Send Library brought here, oldest first.
     var incoming: [String] = []
     /// New secrets she chose at an act that hasn't finished (a crash): which
@@ -731,13 +734,18 @@ final class SWorld {
         device.executor = executor
         var library = try executor.unlock(with: key, alsoInHand: also)
         device.library = library
+        device.lastSettle = nil
         do {
-            _ = try await executor.settle(&library, typed: typed)
+            device.lastSettle = try await executor.settle(&library, typed: typed)
+            if case .waiting(let act, let account)? = device.lastSettle {
+                stepLog.append("  \(device.name): \(act.rawValue) waits for \(account.prefix(8))'s vault — named, copies paused")
+            }
         } catch let crash as SimulatedCrash {
             throw crash
         } catch {
             // The lobby opens the library all the same; the act stays owed
-            // (promise 6 then says whether it may: only offline).
+            // (promise 6 then says whether it may: a synced act past its
+            // commit point, its account's vault out of reach — named, waiting).
             stepLog.append("  \(device.name): the act in flight couldn't settle now (\(error))")
         }
         device.library = library
@@ -766,6 +774,32 @@ final class SWorld {
         }
         try await runRepairs(device)
         return device.library!
+    }
+
+    /// THE NEXT VAULT REACH (her ruling 2026-10-14/15): an open library
+    /// whose act waits for its account's vault resumes the moment the vault is
+    /// reachable — signing in here, coming back online — as the app re-settles
+    /// (phase 2/3's wiring; the executor's `settle` is the one road).
+    func resumeAtVaultReach(_ device: SDevice) async {
+        guard device.build == .new, let executor = device.executor, var library = device.library,
+              library.section.actInFlight != nil, device.online else { return }
+        // Only an act waiting for THIS session's account (the plan names it).
+        if case .plan(let sealed)? = device.container.files[SPath.plan],
+           let plan = try? ProtectionCoding.decoder().decode(ProtectionPlan.self, from: sealed.payload),
+           let account = plan.parameters?.accountID ?? library.record?.account, plan.parameters?.synced == true,
+           device.session.accountID != account {
+            return
+        }
+        stepLog.append("  \(device.name): the vault is in reach — the act in flight resumes")
+        do {
+            device.lastSettle = try await executor.settle(&library, typed: typedFor(device))
+        } catch {
+            stepLog.append("  \(device.name): the act in flight couldn't settle now (\(error))")
+        }
+        device.library = library
+        adoptPending(device)
+        syncHolders()
+        try? await runRepairs(device)
     }
 
     /// `assess`'s repairs, run by the executor.
@@ -1023,13 +1057,20 @@ final class DeviceLeaves: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeysL
 
     // MARK: The vault
 
-    func fetchVault(accountID: String) async throws -> VaultSnapshot? {
+    /// The server answers only a session signed into the account (row-level
+    /// security), and only online.
+    func reach(_ accountID: String) throws {
         guard device.online else { throw VaultRefusal.unreachable }
+        guard device.session.accountID == accountID else { throw VaultRefusal.notSignedIn }
+    }
+
+    func fetchVault(accountID: String) async throws -> VaultSnapshot? {
+        try reach(accountID)
         return world.server.snapshot(accountID)
     }
 
     func createVault(_ format: KeyVaultFormat, accountID: String, device name: String) async throws -> VaultSnapshot {
-        guard device.online else { throw VaultRefusal.unreachable }
+        try reach(accountID)
         var named = format
         named.updatedByDevice = name
         let snapshot = try world.server.create(named, accountID: accountID)
@@ -1040,7 +1081,7 @@ final class DeviceLeaves: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeysL
     func updateVault(
         _ format: KeyVaultFormat, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey, device name: String
     ) async throws -> VaultSnapshot {
-        guard device.online else { throw VaultRefusal.unreachable }
+        try reach(accountID)
         var named = format
         named.updatedByDevice = name
         let snapshot = try world.server.update(named, accountID: accountID, expectedRevision: expectedRevision, proofMaster: proofMaster)
@@ -1049,7 +1090,7 @@ final class DeviceLeaves: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeysL
     }
 
     func reencryptBelowRotationSeq(accountID: String, material: DeviceKeyMaterial) async throws -> Int {
-        guard device.online else { throw VaultRefusal.unreachable }
+        try reach(accountID)
         let count = try world.server.reencrypt(accountID: accountID, material: material)
         try wrote("reencrypt")
         return count

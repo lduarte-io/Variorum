@@ -63,6 +63,9 @@ public enum VaultRefusal: Error, Equatable, Sendable {
     case vaultExists
     /// The network: nothing was read or written.
     case unreachable
+    /// The session isn't signed into this account (row-level security):
+    /// nothing was read or written.
+    case notSignedIn
 }
 
 /// How a rotation's first write treats the Apple-held copy (§3.5, §3.9).

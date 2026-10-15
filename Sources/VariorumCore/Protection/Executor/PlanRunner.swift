@@ -57,6 +57,22 @@ public enum SettleOutcome: Equatable, Sendable {
     case finishedFromRecord(ActOutcome)
     /// No usable plan, before the commit point: the act rolled back.
     case rolledBack(ProtectionAct)
+    /// THE ACT NAMED AND WAITING (her ruling 2026-10-14/15, the soak's seed
+    /// 2): a synced act past its commit point whose account's vault can't be
+    /// reached this session — signed out, signed into another account, or
+    /// offline. It stays in flight, named by this Mac's section and its plan;
+    /// the library is open, sync waits, copies stay paused; it finishes at the
+    /// next vault reach (signing in here — or another device of the account
+    /// finishes the rotation). Before the commit point the act rolled back
+    /// instead. The face ("Finish leaving Castle — sign in to finish") is
+    /// phase 3/4's.
+    case waiting(ProtectionAct, account: String)
+}
+
+/// A resume stopped for a vault it can't reach, past its commit point.
+struct ActWaiting: Error {
+    var act: ProtectionAct
+    var account: String
 }
 
 /// A step's way of saying the act must roll back now (before its commit
@@ -328,6 +344,9 @@ extension ProtectionExecutor {
                 return .resumed(try await resume(resumable, &library, typed: typed))
             } catch let rolledBack as ActRolledBack {
                 return .rolledBack(rolledBack.act)
+            } catch let waiting as ActWaiting {
+                log("settle: \(waiting.act.rawValue) waits for its account's vault — named, copies paused")
+                return .waiting(waiting.act, account: waiting.account)
             }
         }
         // No plan to trust. Past the commit point (the library opens under
@@ -355,8 +374,24 @@ extension ProtectionExecutor {
         return .finishedFromRecord(ctx.outcome)
     }
 
+    /// The vault this session can't reach — signed out, signed into another
+    /// account, offline.
+    static func vaultOutOfReach(_ error: Error) -> Bool {
+        switch error {
+        case ExecutorRefusal.vaultOutOfReach, ExecutorRefusal.needsFreshVault: return true
+        case VaultRefusal.unreachable, VaultRefusal.notSignedIn: return true
+        default: return false
+        }
+    }
+
     func resume(_ plan: ProtectionPlan, _ library: inout UnlockedLibrary, typed: TypedSecrets) async throws -> ActOutcome {
         let program = Self.program(for: plan.act)
+        // Copies pause from the prepare to the swap (§3.9) — and a resume of a
+        // re-key not yet swapped pauses them again: the pause is this process's
+        // and a crash took it, so a resume that started past the prepare ran
+        // with copies on, and one that then waited left them on (her ruling:
+        // while it waits, copies stay paused — VX-305 U4).
+        if let to = plan.toFingerprint, library.fingerprint != to { leaves.backups.pauseCopies() }
         let secrets = try derive(typed, under: plan.parameters?.passphraseKDF, newPassphrase: plan.parameters?.passphraseIsNew == true)
         // The passphrase typed at a resume must be the press's: every lock
         // under the plan's descriptor that this Mac holds opens with it. One
@@ -375,18 +410,36 @@ extension ProtectionExecutor {
             resuming: true)
         defer { library = ctx.library }
         log("\(plan.act.rawValue): resumes #\(plan.sequence) at step \(plan.firstUnfinishedStep.map(String.init) ?? "end")")
+        var waitsFor: String?
         if plan.parameters?.synced == true, let account = ctx.accountID {
             // A synced act resumes from the vault as it stands now.
-            let vault = try await readVault(accountID: account)
-            // …and a passphrase derived under the vault's own descriptor must
-            // open the vault (the press's did — one descriptor, one passphrase).
-            if let vault, let derived = secrets.passphrase, derived.kdf == vault.format.kdf,
-               VaultModel.master(of: vault.format, passphrase: derived, words: nil) == nil {
-                throw ExecutorRefusal.passphraseDoesNotOpen
+            do {
+                let vault = try await readVault(accountID: account)
+                // …and a passphrase derived under the vault's own descriptor must
+                // open the vault (the press's did — one descriptor, one passphrase).
+                if let vault, let derived = secrets.passphrase, derived.kdf == vault.format.kdf,
+                   VaultModel.master(of: vault.format, passphrase: derived, words: nil) == nil {
+                    throw ExecutorRefusal.passphraseDoesNotOpen
+                }
+            } catch where Self.vaultOutOfReach(error) {
+                // Her ruling 2026-10-14/15: before the commit point — the
+                // rotation's first write never begun, the library not swapped —
+                // the act ROLLS BACK (nothing account-side happened); past it,
+                // it runs what needs no vault and WAITS, named, for the rest.
+                guard plan.pastCommitPoint(libraryFingerprint: ctx.library.fingerprint) else {
+                    try dropUnlandedAccountKey(ctx)
+                    try rollBack(&ctx.library, act: plan.act)
+                    throw ActRolledBack(act: plan.act, refusal: .vaultOutOfReach(account: account))
+                }
+                waitsFor = account
             }
         }
-        try reachNewKey(ctx, program)
-        try await drive(program, ctx)
+        do {
+            try reachNewKey(ctx, program)
+            try await drive(program, ctx)
+        } catch where waitsFor != nil && Self.vaultOutOfReach(error) {
+            throw ActWaiting(act: plan.act, account: waitsFor!)
+        }
         return ctx.outcome
     }
 

@@ -95,6 +95,11 @@ public struct ActParameters: Codable, Equatable, Sendable {
     /// Resume Sync after a landing: the secret made new there — "passphrase"
     /// or "words" — becomes the account's (§3.7).
     public var adoptsMadeNewSecret: String?
+    /// A vault write of a re-key act that carries no corpus key stamp (Re-link
+    /// first, inside Replace All Keys) — stamped in the plan BEFORE the write,
+    /// like `newCorpusKeyID`, so a resume that can't reach the vault knows the
+    /// write may have landed and never rolls back over it.
+    public var accountWriteBegun: Bool?
 
     public init(
         gate: GateStyle? = nil, synced: Bool? = nil, accountID: String? = nil, doorRevision: Int? = nil,
@@ -169,6 +174,20 @@ public struct ProtectionPlan: Codable, Equatable, Sendable {
 
     /// The first step not yet done — where a resume starts; nil when all are.
     public var firstUnfinishedStep: Int? { steps.firstIndex { !$0.done } }
+
+    /// **Past the act's commit point** (§3.6, VX-235's class): the library
+    /// already under the act's new key; an act that re-keys nothing (the
+    /// plan-less rule's "committed" — its remaining steps finish); or the
+    /// account's first vault write begun — its stamp written into the plan
+    /// before the write (her ruling 2026-10-14/15: a synced act crashed past
+    /// the rotation's first write WAITS for the vault, named; one crashed
+    /// before it still rolls back). One function, so the executor's choice and
+    /// the scenario world's promise 6 read the same line.
+    public func pastCommitPoint(libraryFingerprint: String) -> Bool {
+        guard let to = toFingerprint else { return true }
+        if libraryFingerprint == to { return true }
+        return parameters?.newCorpusKeyID != nil || parameters?.accountWriteBegun == true
+    }
 
     /// Does `section` (this Mac's, at open) name this plan? The device, the
     /// sequence number, the act and its keys must all agree.
