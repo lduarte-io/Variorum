@@ -234,6 +234,11 @@ struct LibraryControlsStableWidths: Equatable {
     /// its whole prompt. (A `.roundedBorder` field's ideal IS its cell's size:
     /// with the prompt while empty, with the text once typed — measured equal
     /// offscreen; the empty case is pinned against the mounted field itself.)
+    /// CLAMPED at the field's own cap (`LibraryCatalogView.searchFieldMaxWidth`
+    /// — the VX-283 ladder's R1-6, a guard): a prompt measuring past what the
+    /// field can ever be given would leave `fitsOneLine` false at every width,
+    /// pinning the row at two lines forever. Both voices' prompts measure far
+    /// inside the cap today (211.5 / 175 of 320), so the clamp never engages.
     var fieldFloor: CGFloat
     /// **The sort slot at the widest it can read:** every sort × direction as
     /// the `sort ▾` door draws it, and the search's relevance label.
@@ -265,13 +270,17 @@ struct LibraryControlsStableWidths: Equatable {
     }
 
     /// The row's stable widths in this voice — `prompt` is the field's own
-    /// (`LibraryCatalogView.searchPrompt`, before the voice's casing), resolved
-    /// from the voice's `small` face (the field's font and the labels') in the
-    /// view's own font context; memoized per face, so a keystroke re-renders
-    /// without re-measuring.
-    static func row(tokens: VoiceTokens, prompt: String, in context: Font.Context) -> Self {
+    /// (`LibraryCatalogView.searchPrompt`, before the voice's casing) and
+    /// `fieldMaxWidth` the field's own cap (`LibraryCatalogView.
+    /// searchFieldMaxWidth`), resolved from the voice's `small` face (the
+    /// field's font and the labels') in the view's own font context;
+    /// memoized per face, so a keystroke re-renders without re-measuring.
+    static func row(
+        tokens: VoiceTokens, prompt: String, fieldMaxWidth: CGFloat, in context: Font.Context
+    ) -> Self {
         let font = tokens.small.resolve(in: context).ctFont as NSFont
-        return measure(prompt: tokens.chromeLabel(prompt), sortForms: sortForms(tokens), font: font)
+        return measure(prompt: tokens.chromeLabel(prompt), sortForms: sortForms(tokens), font: font,
+                       fieldMaxWidth: fieldMaxWidth)
     }
 
     private struct MemoKey: Hashable {
@@ -279,15 +288,20 @@ struct LibraryControlsStableWidths: Equatable {
         var size: CGFloat
         var prompt: String
         var forms: [LabelForm]
+        var fieldMaxWidth: CGFloat
     }
 
     private static var memo: [MemoKey: LibraryControlsStableWidths] = [:]
 
     /// The measurement itself: the prompt through a rounded-bezel field cell
-    /// in `font`, each label form's words in `font` (rounded UP to a whole
-    /// point, as a SwiftUI `Text` sizes itself) plus its chrome.
-    static func measure(prompt: String, sortForms: [LabelForm], font: NSFont) -> Self {
-        let key = MemoKey(font: font.fontName, size: font.pointSize, prompt: prompt, forms: sortForms)
+    /// in `font`, clamped at `fieldMaxWidth` (R1-6), each label form's words
+    /// in `font` (rounded UP to a whole point, as a SwiftUI `Text` sizes
+    /// itself) plus its chrome.
+    static func measure(
+        prompt: String, sortForms: [LabelForm], font: NSFont, fieldMaxWidth: CGFloat
+    ) -> Self {
+        let key = MemoKey(font: font.fontName, size: font.pointSize, prompt: prompt, forms: sortForms,
+                          fieldMaxWidth: fieldMaxWidth)
         if let known = memo[key] { return known }
         let cell = NSTextFieldCell(textCell: "")
         cell.isEditable = true
@@ -298,7 +312,8 @@ struct LibraryControlsStableWidths: Equatable {
         let widest = sortForms.map { form in
             (form.text as NSString).size(withAttributes: [.font: font]).width.rounded(.up) + form.chrome
         }.max() ?? 0
-        let measured = LibraryControlsStableWidths(fieldFloor: cell.cellSize.width, sortWidest: widest)
+        let measured = LibraryControlsStableWidths(
+            fieldFloor: min(cell.cellSize.width, fieldMaxWidth), sortWidest: widest)
         memo[key] = measured
         return measured
     }

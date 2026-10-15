@@ -264,13 +264,19 @@ struct LibraryControlsStableWidthsTests {
         TextField(tokens.chromeLabel(LibraryCatalogView.searchPrompt), text: .constant(text))
             .textFieldStyle(.roundedBorder)
             .font(tokens.small)
-            .frame(maxWidth: 320)
+            .frame(maxWidth: LibraryCatalogView.searchFieldMaxWidth)
     }
 
     private static func stable(_ tokens: VoiceTokens) -> LibraryControlsStableWidths {
         LibraryControlsStableWidths.row(
             tokens: tokens, prompt: LibraryCatalogView.searchPrompt,
+            fieldMaxWidth: LibraryCatalogView.searchFieldMaxWidth,
             in: EnvironmentValues().fontResolutionContext)
+    }
+
+    /// The voice's `small` face, resolved as the header resolves it.
+    private static func smallFont(_ tokens: VoiceTokens) -> NSFont {
+        tokens.small.resolve(in: EnvironmentValues().fontResolutionContext).ctFont as NSFont
     }
 
     /// The floor IS the empty field's own ideal (the width at which it shows
@@ -310,6 +316,53 @@ struct LibraryControlsStableWidthsTests {
         #expect(over.isEmpty, "\(voice): forms wider than the counted \(widest): \(over)")
         let top = measured.values.max() ?? 0
         #expect(abs(top - widest) < 1, "\(voice): the widest form \(top) vs the counted \(widest) — \(measured)")
+    }
+
+    /// **The floor never asks more than the field's cap** (the VX-283
+    /// ladder's R1-6 — a GUARD: no reachable red-on-old exists, since the
+    /// prompt is one constant and both voices' `small` faces are fixed). Each
+    /// voice's floor is within the cap, AND the prompt measured UNCLAMPED is
+    /// already inside it — so the clamp does not engage today and the floor
+    /// is still the width at which the field shows its whole prompt.
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func theFloorIsWithinTheFieldsCap(voice: ThemeVoice) {
+        let tokens = VoiceTokens.resolve(voice: voice, dark: false)
+        let cap = LibraryCatalogView.searchFieldMaxWidth
+        let floor = Self.stable(tokens).fieldFloor
+        let whole = LibraryControlsStableWidths.measure(
+            prompt: tokens.chromeLabel(LibraryCatalogView.searchPrompt), sortForms: [],
+            font: Self.smallFont(tokens), fieldMaxWidth: .infinity).fieldFloor
+        #expect(floor <= cap, "\(voice): the floor \(floor) within the field's cap \(cap)")
+        #expect(whole <= cap, "\(voice): the whole prompt \(whole) fits the cap — the clamp is not engaged")
+        #expect(abs(floor - whole) < 0.01, "\(voice): the floor \(floor) is the whole prompt \(whole)")
+    }
+
+    /// **A prompt measuring past the cap is clamped to it, so the row can
+    /// still be one line** (R1-6's guard, by construction: red with the
+    /// clamp removed from `measure`). The premise, stated: unclamped, such a
+    /// floor exceeds anything the capped field can take, so the decision is
+    /// false at EVERY width — the row pinned at two lines forever.
+    @Test func aPromptPastTheCapIsClampedSoTheRowCanStillBeOneLine() {
+        let tokens = VoiceTokens.resolve(voice: .terminal, dark: false)
+        let cap = LibraryCatalogView.searchFieldMaxWidth
+        let long = Array(repeating: tokens.chromeLabel(LibraryCatalogView.searchPrompt), count: 3)
+            .joined(separator: " ")
+        let unclamped = LibraryControlsStableWidths.measure(
+            prompt: long, sortForms: [], font: Self.smallFont(tokens), fieldMaxWidth: .infinity).fieldFloor
+        let clamped = LibraryControlsStableWidths.measure(
+            prompt: long, sortForms: [], font: Self.smallFont(tokens), fieldMaxWidth: cap).fieldFloor
+        #expect(unclamped > cap, "premise: the long prompt measures past the cap (\(unclamped))")
+        #expect(clamped == cap, "the floor clamped at the cap (\(clamped))")
+        func row(floor: CGFloat) -> [LibraryControlsFlowRule.Child] {
+            var children = LibraryControlsFlowRuleTests.measured(.terminal)
+            children[0] = LibraryControlsFlowRuleTests.child(0, cap, floor: floor, height: 22)
+            return children
+        }
+        let widths = stride(from: CGFloat(300), through: 3000, by: 10)
+        #expect(widths.allSatisfy { !LibraryControlsFlowRule.fitsOneLine(row(floor: unclamped), width: $0, spacing: 10) },
+                "premise: unclamped, two lines at every width")
+        #expect(LibraryControlsFlowRule.fitsOneLine(row(floor: clamped), width: 1400, spacing: 10),
+                "clamped, a wide room is one line")
     }
 }
 
@@ -354,7 +407,7 @@ struct LibraryControlsGeometryTests {
         let field = TextField(tokens.chromeLabel(LibraryCatalogView.searchPrompt), text: .constant(""))
             .textFieldStyle(.roundedBorder)
             .font(tokens.small)
-            .frame(maxWidth: 320)
+            .frame(maxWidth: LibraryCatalogView.searchFieldMaxWidth)
         return NSHostingController(rootView: field.fixedSize())
             .sizeThatFits(in: CGSize(width: 10_000, height: 10_000)).width
     }
@@ -558,7 +611,8 @@ struct LibraryControlsGeometryTests {
             - ShellSplit<EmptyView, EmptyView>.dividerWidth
         try await mounted(voice: voice, width: width, panelOpen: false) { read in
             #expect(read.controls.height < 40, "\(voice): one line (\(read.controls.height) pt tall)")
-            #expect(abs(read.field.width - 320) < 0.5, "\(voice): the field at its 320 (\(read.field.width))")
+            #expect(abs(read.field.width - LibraryCatalogView.searchFieldMaxWidth) < 0.5,
+                    "\(voice): the field at its 320 (\(read.field.width))")
             #expect(abs(read.field.minX - 24) < 0.5, "\(voice): at the header's inset (\(read.field.minX))")
         }
     }
@@ -579,6 +633,7 @@ struct LibraryControlsGeometryTests {
             let field = try #require(rig.searchField(), "\(voice): the search field is mounted")
             let stable = LibraryControlsStableWidths.row(
                 tokens: rig.tokens, prompt: LibraryCatalogView.searchPrompt,
+                fieldMaxWidth: LibraryCatalogView.searchFieldMaxWidth,
                 in: EnvironmentValues().fontResolutionContext)
             let own = try #require(field.cell?.cellSize.width)
             #expect(abs(stable.fieldFloor - own) < 0.5,

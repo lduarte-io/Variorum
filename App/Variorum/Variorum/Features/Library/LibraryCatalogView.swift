@@ -174,6 +174,12 @@ struct LibraryCatalogView: View {
     /// the controls row's wrap decision counts it at (VX-175, P-U3-5).
     static let searchPrompt = "Search books, notes, blocks…"
 
+    /// The search field's widest — its frame's cap, and the most the wrap
+    /// decision's floor for it may ask (the VX-283 ladder's R1-6): a floor
+    /// past what the field can ever be given would hold the row at two
+    /// lines at every width. One number for both, so they cannot drift.
+    static let searchFieldMaxWidth: CGFloat = 320
+
     /// Row 24 (the panel half): the panel's presence animates — the column
     /// slides and fades in and out with the row selection. The mutation
     /// sites wrap the model's change in this animation explicitly: an
@@ -620,7 +626,8 @@ struct LibraryCatalogView: View {
             // form (every sort × direction, and the relevance label), so
             // typing, a sort pick or a search never changes the line count.
             let stable = LibraryControlsStableWidths.row(
-                tokens: tokens, prompt: Self.searchPrompt, in: fontContext)
+                tokens: tokens, prompt: Self.searchPrompt,
+                fieldMaxWidth: Self.searchFieldMaxWidth, in: fontContext)
             LibraryControlsFlow(spacing: 10, lineSpacing: 8) {
                 TextField(tokens.chromeLabel(Self.searchPrompt),
                           text: Binding(get: { model.query }, set: { value in
@@ -629,7 +636,7 @@ struct LibraryCatalogView: View {
                           }))
                     .textFieldStyle(.roundedBorder)
                     .font(tokens.small)
-                    .frame(maxWidth: 320)
+                    .frame(maxWidth: Self.searchFieldMaxWidth)
                     .libraryGeometryProbe(.searchField)
                     .libraryControlsFloor(stable.fieldFloor)
                 // 17y B-WALK W-2 (her ruling): picking All while in Cards

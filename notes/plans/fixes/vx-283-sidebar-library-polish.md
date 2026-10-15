@@ -3054,7 +3054,16 @@ comment, a rename or a guard: no reachable behaviour changes, so no red-on-old i
   DONE (`b5823d77`; its commit names VX-286 alone where the earlier reveal commits named VX-285 + VX-286).
 - D2 — R1-4's comments (`OpenListDragState.began(_:)` and `OpenListDropDoor.perform`): DONE (`4f8b0dff`).
 - D3 — R1-5's rename (`SidebarLayoutTests`, `ShellChromeTests.swift`) + the record notes at the two earlier
-  citations: DONE (this commit).
-- D4 — R1-6's guard + pins: NOT-STARTED.
+  citations: DONE (`eda748a4`).
+- D4 — R1-6's guard + pins: DONE (this commit). `LibraryCatalogView.searchFieldMaxWidth` (320, the one name) — the
+  field's `.frame(maxWidth:)` and `LibraryControlsStableWidths.row(…, fieldMaxWidth:, …)` → `measure(…, fieldMaxWidth:)`,
+  `fieldFloor = min(cell width, fieldMaxWidth)` (the memo keyed on it too). The test file's three replicas of the
+  field / its cap (`LibraryControlsStableWidthsTests.field`, `LibraryControlsGeometryTests.promptWidth`, the wide-window
+  guard's 320) read the name. NEW pins in `LibraryControlsStableWidthsTests` (U3b's window list carries the suite):
+  `theFloorIsWithinTheFieldsCap` (×2 voices — floor ≤ cap, the UNCLAMPED prompt already ≤ cap, floor = the whole
+  prompt: the clamp does not engage today) and `aPromptPastTheCapIsClampedSoTheRowCanStillBeOneLine` (a 3× prompt:
+  unclamped > cap and `fitsOneLine` false at every width 300…3000 — the premise; clamped = cap and one line at 1400).
+  `build-for-testing` into `DerivedData/vx283-u3b`: **TEST BUILD SUCCEEDED** (every touched file recompiled; the one
+  warning in a touched file is the pre-existing `probeSpace` Sendable line). Runs PENDING U3b's window.
 - D5 — headless `build-for-testing` into `DerivedData/vx283-u2` AND `DerivedData/vx283-u3b`: NOT-STARTED. The pins'
   runs PENDING U2's / U3b's windows.
