@@ -2207,6 +2207,29 @@ untouched; key files and `Previous Libraries/` untouched. Prefs: the walk ADDED 
 removed or changed keys — CLEAN (`appearanceChoice` = system). The voice was returned to Study in-app and the store
 restore carries it regardless. Posture Standard, unlocked.
 
+#### U3b — THE ORCHESTRATOR'S RULING ON THE WALK'S W2 (2026-10-15 ~01:55 — P-U3-5, a FRESH implementer)
+
+The walk (record above) holds W1/W3/W4/W5; **W2 (VX-175) does not**: **F-1** — typing with the panel open collapses the
+row to one line, the field a ~57-pt sliver, the sort label wrapping onto three lines (Terminal breaks a word); **F-2** —
+Terminal at 1240 with the panel closed flips between one and two lines on incidental state (a list scroll, an empty
+vs typed field), its default sitting on the threshold. The walker's read, untraced: `LibraryControlsFlow.swift:148`
+takes the field's ideal from `sizeThatFits(.unspecified)` — for a field holding text that is the TEXT's width, not
+the prompt's — and the sort label carries no line limit.
+
+**RULED — the wrap decision reads STABLE widths only:**
+1. The field's floor is its PROMPT's width (the placeholder string measured in the field's own font), handed to the
+   layout explicitly (a `LayoutValueKey` on the field, or a parameter) — never the typed text's width.
+2. The one-line test counts the sort label at the WIDEST it can read (every sort field × direction × the search's
+   relevance form, measured in the voice's font) — so a sort or search change never flips the row. `when ▾` likewise
+   if its label varies.
+3. The sort (and when) labels get `.lineLimit(1)` (P-8) — never a wrapped label.
+4. Result to pin: the decision is a pure function of the column width + the voice's stable widths; at 1240 the row
+   is ONE stable answer per voice and panel state (Terminal panel-closed may be two lines — stable is the point);
+   typing never changes the line count. Red-on-old: today's `ideal` road re-flows on typed text (a mounted pin typing
+   into the field with the panel open — the walker's F-1).
+5. Evidence: the pins + the batch over the changed files' suites + a re-walk of W2 (both voices, panel open/closed,
+   typing, a list scroll, the 1240 default).
+
 #### U1d — THE BRIEF (her two rulings, built; a FRESH implementer)
 
 Build to "U1 — HER RULINGS ON THE MEMO" and "U1 — THE DESIGN MEMO" above, on top of U1c's code
