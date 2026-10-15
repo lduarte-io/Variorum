@@ -377,7 +377,7 @@ trailer of any kind.
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **U1d (her two memo rulings: follow only on her acts; the fade reshaped) — READY FOR STAGE** (≈15 min): the 96-suite batch, the mount suite ×5, R-I and R-J (prebuilt), the restore — the U1d section's LIVE STATUS. Then the re-walk of R2–R6. |
-| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | **IN-PROGRESS** — headless build (the U2 section's LIVE STATUS) |
+| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp, the orchestrator's added piece) | **READY FOR STAGE** (≈15 min): the 144-suite batch, the two mount suites ×3, R-K and R-N (prebuilt), the restore — the U2 section's E6. Then the walk. |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **READY FOR STAGE — the closing window** (≈15 min; the U3 section's Q6): the first window's batch green but for two of my own pins (test defects, fixed headless — test files only); R-ALL prebuilt in `vx283-u3-revert` and the tree restored; `vx283-u3` holds the current products for the walker |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
@@ -2548,8 +2548,32 @@ and the chip are walk evidence); edge auto-scroll during a drag (the M shape, ou
 - E4 — **P-U1e-1, the orchestrator's added piece (VX-286):** the fade's strength ramps over the row's text padding —
   DONE (`6bc31673`, its own commit; the section below the reverts); R-N named below BEFORE it is applied (this
   commit) — **R-N is NOT yet in the tree.**
-- E5 — the three trees on the tip (`vx283-u2` HEAD, `-rk`, `-rn`), restored and `git diff` empty; READY FOR STAGE:
-  NOT-STARTED.
+- E5 — the three trees on the tip `b24c209e` (the code of `6bc31673`): `DerivedData/vx283-u2` (HEAD), `-rk` (R-K
+  re-applied on the tip), `-rn` (R-N) — each TEST BUILD SUCCEEDED, each revert restored by `git checkout --`, **no
+  revert is in the tree** (`git diff` empty); patches `u2/reverts/R-K.patch`, `R-N.patch` (gitignored): DONE.
+- E6 — **READY FOR STAGE (≈15 min)** — the script `notes/plans/vx283-screens/u2/window.sh` (gitignored), from
+  `App/Variorum/`, in order: (0) `pre` — strict pgreps, "tree clean", the Debug prefs exported, the dev store's three
+  files copied to `u2/store-before/<UTC>/` with zero dev instances; (1) `batch` — `test-without-building` on
+  `DerivedData/vx283-u2` with one `-only-testing:VariorumTests/<Suite>` per line of `u2/batch-suites.txt` (**144
+  suites**: every top-level suite of the 63 test files referencing `SidebarLayout|SidebarView|SidebarGeometry|
+  SidebarSectionWindow|RootView(|ShelfView|BookDragSource|BookDragChip|OpenListDrag|OpenNoteDragToken|DragChip|
+  DragTitleChip|OpenListDrop`, + `NoLiteralColourTests`, `ChromeLineLimitTests`, `CapabilityRegistryTests`,
+  `DragTypeDeclarationTests`, `WorkspaceNavigationTests`' suites; U1d's 96 all among them) — expected all green but
+  the known `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` (VX-115, red on main, untouched here),
+  the env-gated harnesses skipped (record the "Test run with N tests" line AND the skipped lines); (2) `mount` —
+  `OpenListDragMountTests` + `SidebarSectionWindowMountTests` `-test-iterations 3`, expected 3/3 green; (3) `rk` —
+  R-K's products, `OpenListDropRuleTests` + `OpenListDropDoorTests` + `OpenListDragMountTests`, expected RED exactly
+  the 16 named under R-K; (4) `rn` — R-N's products, `SidebarSectionWindowRuleTests` + `SidebarSectionWindowMountTests`,
+  expected RED exactly the 4 named under R-N; (5) `restore` — the store copied back + `cmp`, prefs diffed (added keys
+  deleted by hand, `defaults import`, re-export, diff clean), castle-W1 untouched; then delete `DerivedData/vx283-u2-rk`
+  and `-rn` (keep `vx283-u2` for the walker); release.
+- **What only the WALK can prove** (a drag cannot be posted in the test host): a real drag (`cliclick dd/dm/du`)
+  shows the 2-pt ring line where the drop will land and the title CHIP under the cursor (no offset); a drop on the row
+  just below, a long downward drop, the end zone and an upward drop land where the line said, with the SETTLE; no line
+  (and a slide-back) over the dragged row's own place; a file dropped on the list still imports (the column's own
+  drop); the ✕, click, right-click and ⌘⇧n still work on the rows; the Bookcase's book drag still shows its chip at
+  the cursor (the shared move) — both voices; and for P-U1e-1, R4 at 5 · 7 · 9 · 12 pt short in two rooms and O-1's
+  state (the orchestrator's message).
 
 **THE TRACE (this tip, `9643aaf6`; paths under `App/Variorum/Variorum/`):** the Open row drags with the system drag
 and each row is its OWN drop target (`Features/Library/SidebarView.swift:1032-1041`): `.draggable(OpenNoteDragToken)`
