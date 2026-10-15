@@ -1393,17 +1393,42 @@ leg traces and PROPOSES; the architect rules before anything ships. Any stage wo
   **CONFIRMS the probe on all four of the ruling's conditions** ("T3 — THE MOUNTED RIG'S FACTS" below).
 - T4 — the proposal: RULED by the orchestrator (2026-10-14 ~22:40, conditional on T3 — met): **(c1), recorded as
   P-U1c-1** ("U1c — THE ORCHESTRATOR'S RULING" below).
-- T5 — P-U1c-1 built: DONE (`6c8b0d37` code + pins; this commit the record — Q5 corrected, the oracles' disposition)
+- T5 — P-U1c-1 built: DONE (`6c8b0d37` code + pins; `4e8a5f08` the record — Q5 corrected, the oracles' disposition)
   — headless `build-for-testing` green, no new warning in a touched file; the pure pin's arithmetic checked headless
   against the real `SidebarLayout.swift` (all 8 cadences land 36; the R-H patch ends short at 7 of 8); the probe on the
   ruled modifier: the mounted pin's logic GREEN 3/3, the rig-settle replica reads 36 3/3, 4 backstop timers a beat
   (the discrete requests) where there were 23–36. Write-up below ("T5 — P-U1c-1, AS BUILT"). The mounted runs are T7's.
-- T6 — R-H + R-H′ prebuilt: IN-PROGRESS — **a revert is applied to the tree while this line says so**: each patch
-  (`notes/plans/vx283-screens/u1c/reverts/R-H.patch`, `R-Hp.patch`, gitignored) is applied, built into
-  `DerivedData/vx283-u1c-rh` / `-rhp`, and restored by `git checkout --` from `4e8a5f08`, verified by an empty
-  `git diff`. R-H = `readingAsk`'s viewport arm back to `abs(new.viewport − old.viewport) > 0.5` AND the modifier's
-  `.revealNow` back to `requestReveal("viewport")`; R-H′ = the threshold only.
-- T7 — the closing window (the 93-suite batch + the mount suite ×5 + R-H + the store and prefs restore): NOT-STARTED.
+- T6 — R-H + R-H′ prebuilt: DONE — each patch (`notes/plans/vx283-screens/u1c/reverts/R-H.patch`, `R-Hp.patch`,
+  gitignored) applied, built into `DerivedData/vx283-u1c-rh` / `-rhp` (both TEST BUILD SUCCEEDED), restored by
+  `git checkout --` from `4e8a5f08`; **no revert is in the tree** (`git diff` empty). R-H = `readingAsk`'s viewport arm
+  back to `abs(new.viewport − old.viewport) > 0.5` AND the modifier's `.revealNow` back to `requestReveal("viewport")`
+  (HEAD's arm whole — why, in "T5 — P-U1c-1, AS BUILT"); R-H′ = the threshold only. `DerivedData/vx283-u1` rebuilt
+  headless from HEAD (green, no new warning in a touched file).
+- T7 — the closing window: **READY FOR STAGE — ≈15–20 min, run in this order from `App/Variorum/` (the record flips
+  per step):**
+  0. *Preconditions.* `pgrep -lx Variorum`; `pgrep -lf "MacOS/Variorum$"` (discriminate by path; never touch a
+     `/Applications` instance). `defaults export io.lduarte.Variorum.debug
+     notes/plans/vx283-screens/u1c/prefs-before-t7.plist`. With ZERO dev instances, copy `variorum.sqlite{,-wal,-shm}`
+     from the dev container's `Variorum-dev/` into `notes/plans/vx283-screens/u1c/store-before/<UTC stamp>/`.
+  1. *The batch* — `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx283-u1
+     test-without-building` + one `-only-testing:VariorumTests/<Suite>` per line of
+     `notes/plans/vx283-screens/u1b/batch-suites.txt` (the 93 suites; unchanged — U1c's pins live inside two of them).
+     Expected: only VX-245's lint (`ChromeLineLimitTests`) red; skipped lines = the two env-gated U1c harnesses (and
+     any env-gated harness the batch already skipped).
+  2. *The mount suite ×5* — `… -derivedDataPath DerivedData/vx283-u1 test-without-building
+     -only-testing:VariorumTests/SidebarSectionWindowMountTests -test-iterations 5`. Expected: the seven ungated tests
+     green 5/5 (the Starred pin and the walker's-road pin included); the two harnesses skipped. Count the
+     `[Invalid Configuration]` lines against T3's (≈10 per Starred mount) — (c1) must not grow them.
+  3. *R-H* — `… -derivedDataPath DerivedData/vx283-u1c-rh test-without-building
+     -only-testing:VariorumTests/SidebarSectionWindowRuleTests -only-testing:VariorumTests/SidebarSectionWindowMountTests
+     -test-iterations 3`. Expected RED: `anEasedShrinkEndsWithTheRowExactlyAtTheEdgeAtEveryCadence` every iteration
+     (7 of 8 cadences); `theNinthStarIsClearTheMomentTheBeatEnds` in the iterations where the tail manifests (≈5 in 6
+     per T3); very likely the Starred pin and the walker's-road pin too (as on HEAD).
+  4. *R-H′* (observed) — the same with `DerivedData/vx283-u1c-rhp`. Expected: the pure pin RED; the mounted pin
+     recorded as observed (likely green — the commit-scheduled backstop lands the row ≈40–60 ms after the beat).
+  5. *Release.* The dev store copied back with zero dev instances and `cmp`-verified per file; prefs `defaults import`
+     → delete any key the suites added → re-export → diff against `prefs-before-t7.plist`; delete
+     `DerivedData/vx283-u1c-rh` and `-rhp`; `Tools/stage release`; the one-line release report.
 
 **T1 — WHAT THE PROBE ESTABLISHED** (scratchpad `u1c-probe/`: `main.swift` compiled with the REAL
 `Core/Views/SidebarLayout.swift` and the instrumented REAL `Features/Library/SidebarSectionWindow.swift`, the app's own
