@@ -215,7 +215,7 @@ every input axis — hover, scroll, list change — never computed before layout
   the measured height above the list − bottom padding, floored at a few rows (short windows fall back to the
   outer scroll); the `count <= 7` sizing switch becomes "the rows fit". Starred keeps its ~7 (the shared constant
   splits). The two pins that change BY HER ASK are edited in place with an annotation naming VX-285:
-  `ShellChromeTests.theOpenStripWindowIsHerSevenAndAHalf`, `StarredScrollTests.theWindowIsOneConstantForBothScrollingSections`.
+  `ShellChromeTests.theOpenStripWindowIsHerSevenAndAHalf` *(renamed at R1-5 → `SidebarLayoutTests.theOpenListsTallestFormIsTheRoomDownToTheFooter`, the same file)*, `StarredScrollTests.theWindowIsOneConstantForBothScrollingSections`.
 - VX-287: one Close Note act (registry entry + a menu item + ⇧⌘W) that removes the row AND moves the focused pane
   to the next note in the Open list (fallbacks as ruled above). ⇧⌘W collision check FIRST, recorded.
 - VX-289: Close All (registry entry; the Open list's right-click + a menu twin), landing by VX-287's rule.
@@ -527,7 +527,7 @@ at `openListFloorRows` (3½); `openListRowsFit` replaces the `count <= 7` switch
 `openStripMaxHeight` are gone; the fit test still counts the strip at seven (`openListFitRows` — VX-285 changes how
 far the list grows, never when the column compresses). Two measurements feed it (`columnScrollHeight` on the outer
 scroll, `openListTop` on the list) — nothing above the list depends on its height, so no feedback loop. **The two
-pins changed BY HER ASK, edited in place with a VX-285 annotation:** `ShellChromeTests.theOpenStripWindowIsHerSevenAndAHalf`,
+pins changed BY HER ASK, edited in place with a VX-285 annotation:** `ShellChromeTests.theOpenStripWindowIsHerSevenAndAHalf` *(renamed at R1-5 → `SidebarLayoutTests.theOpenListsTallestFormIsTheRoomDownToTheFooter`, the same file)*,
 `StarredScrollTests.theWindowIsOneConstantForBothScrollingSections`. **New pins:** `OpenListHeightTests` (pure ×4)
 and `OpenListLayoutMountTests.inATallColumnTheListRunsDownToTheFooterAndStops` (RED ON OLD expected: 225 pt and
 empty column below) + `…inAShortColumnTheListTakesItsFloorAndTheColumnScrolls` (RED ON OLD expected: 7½ rows, not
@@ -3052,8 +3052,9 @@ comment, a rename or a guard: no reachable behaviour changes, so no red-on-old i
 - D0 — the dispositions above: DONE (`9fefb8bb`).
 - D1 — R1-3's comment (`SidebarLayout.revealOffset`'s doc + a pointer at `everyRowLandsClearOfTheFadesFromAnyWindow`):
   DONE (`b5823d77`; its commit names VX-286 alone where the earlier reveal commits named VX-285 + VX-286).
-- D2 — R1-4's comments (`OpenListDragState.began(_:)` and `OpenListDropDoor.perform`): DONE (this commit).
-- D3 — R1-5's rename + the record note: NOT-STARTED.
+- D2 — R1-4's comments (`OpenListDragState.began(_:)` and `OpenListDropDoor.perform`): DONE (`4f8b0dff`).
+- D3 — R1-5's rename (`SidebarLayoutTests`, `ShellChromeTests.swift`) + the record notes at the two earlier
+  citations: DONE (this commit).
 - D4 — R1-6's guard + pins: NOT-STARTED.
 - D5 — headless `build-for-testing` into `DerivedData/vx283-u2` AND `DerivedData/vx283-u3b`: NOT-STARTED. The pins'
   runs PENDING U2's / U3b's windows.

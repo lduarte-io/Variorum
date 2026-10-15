@@ -112,8 +112,10 @@ struct SidebarLayoutTests {
     /// What it holds now: the list's tallest form is the room down to the
     /// footer, floored; and the column's FIT TEST still counts the strip at
     /// seven, unchanged (VX-285 moves how far the list grows, never when the
-    /// column compresses).
-    @Test func theOpenStripWindowIsHerSevenAndAHalf() {
+    /// column compresses). RENAMED at the VX-283 ladder's R1-5 — it was
+    /// `theOpenStripWindowIsHerSevenAndAHalf`, a name still claiming the cap
+    /// its body now asserts the list grows past.
+    @Test func theOpenListsTallestFormIsTheRoomDownToTheFooter() {
         // The room under the list: visible 800, list top at 400, 12 of air.
         #expect(SidebarLayout.openListMaxHeight(
             visibleHeight: 800, listTop: 400, bottomPadding: 12, rowHeight: 30) == 388)
