@@ -113,9 +113,14 @@ extension MCPWriteTools {
             let links: [[String: Any]] = zip(pairs, edges).map { pair, edge in
                 ["block_a": pair.blockA, "block_b": pair.blockB, "edge_id": edge.id]
             }
+            // VX-298 (her answer (5), D-298-6): the receipt's Open › opens the
+            // two in Compare, A first, B beside it — her press delivers it
+            // (`MCPDoor.openShow`, no etiquette gate: she is at the app), and
+            // ⌥⌘O's last change follows. The board decides the posture from its
+            // own projection (F-8 (a)), so this answer stays ∝ its pairs.
             return (["note_a": noteA, "note_b": noteB, "links": links],
                     MCPWriteReceipt(clientName: clientName, act: .versionLink, targetID: noteA, targetTitle: titleA,
-                                    detail: titleB, show: .note(noteID: noteA, blockID: nil, select: nil)))
+                                    detail: titleB, show: .compare(noteID: noteA, peerIDs: [noteB])))
         }
     }
 

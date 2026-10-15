@@ -64,6 +64,39 @@ extension Queries {
             uniqueKeysWithValues: rows.map { ($0["block_id"], $0["variant_id"]) })
     }
 
+    /// **`effectiveLensSelection` for NAMED blocks only** (VX-256, VX-336 U7 —
+    /// D-256-4: a paged `read_note` reads a lens's picks for the page's blocks,
+    /// never the lens whole). The same rule exactly — a pick whose variant is
+    /// live, active and on the picked block — with each given block seeking its
+    /// one live pick through `uq_lens_choice_live(lens_id, block_id)`, so the
+    /// cost is ∝ the blocks named (P1), never the lens's picks.
+    public static func effectiveLensSelection(
+        _ db: Database, lens lensID: String, blocks blockIDs: [String]
+    ) throws -> [String: String] {
+        guard !blockIDs.isEmpty else { return [:] }
+        let json = String(decoding: try JSONEncoder().encode(blockIDs), as: UTF8.self)
+        let rows = try Row.fetchAll(db, sql: pageLensSelectionSQL, arguments: [json, lensID])
+        return Dictionary(
+            rows.map { ($0["block_id"], $0["variant_id"]) }, uniquingKeysWith: { first, _ in first })
+    }
+
+    /// The statement `effectiveLensSelection(_:lens:blocks:)` runs — internal so
+    /// its plan is pinned (the given ids drive; `uq_lens_choice_live` serves).
+    /// `CROSS JOIN` keeps that order (SQLite never reorders one): left to
+    /// itself the planner put the lens's picks outermost — ∝ the lens, the
+    /// whole note's picks — which the plan pin caught.
+    static let pageLensSelectionSQL = """
+        SELECT lc.block_id AS block_id, lc.variant_id AS variant_id
+        FROM json_each(?) j
+        CROSS JOIN lens_choice lc
+          ON lc.lens_id = ? AND lc.block_id = j.value AND lc.deleted_at IS NULL
+        CROSS JOIN variant v
+          ON v.id = lc.variant_id
+         AND v.block_id = lc.block_id
+         AND v.deleted_at IS NULL
+         AND v.status = 'active'
+        """
+
     /// **A pick that no longer resolves** (13j J5 — her mobile-gate ruling:
     /// when a saved lens's pick dangles the Mac must *"say loudly if that take
     /// was archived and this is a fallback WITH a button for quick restore"*).

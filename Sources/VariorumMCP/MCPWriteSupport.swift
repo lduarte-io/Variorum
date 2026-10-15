@@ -184,6 +184,16 @@ struct MCPAnswerEncodingFailure: Error, CustomStringConvertible {
 /// table would fall back to (the J8 class). The op still decides; this only
 /// words it. Nil = the app's own table speaks (`MCPHostHooks.refusalWords`).
 enum MCPWireRefusalCopy {
+    /// **THE WIRE'S ONE REFUSAL CHAIN** (VX-362 — the VX-336 run record's U9,
+    /// piece 1; named once so the door and its sweep pin read the same road):
+    /// the wire's own words first, then the app's table (`appWords` — the
+    /// host's `MCPHostHooks.refusalWords`; the Mac's `OpsRefusalCopy`), then
+    /// the error's description. `MCPWriteTools.land` (every write act) and
+    /// `itemized` (a batch's item) speak through it.
+    static func spoken(_ error: Error, appWords: (Error) -> String?) -> String {
+        words(error) ?? appWords(error) ?? String(describing: error)
+    }
+
     static func words(_ error: Error) -> String? {
         guard let error = error as? OperationError else { return nil }
         switch error {
@@ -193,6 +203,13 @@ enum MCPWireRefusalCopy {
             return "section_id isn't a chapter of this book (list_notes or create_section gives chapter ids)."
         case .invalidTagName(let name):
             return "\u{201C}\(name)\u{201D} isn't a tag path — a path is names joined by /, e.g. \"percy/pt-en\"."
+        // VX-362 (the run record's U9 SWEEP TABLE, the E/belt row): the wire
+        // parses `entry_date` with its own formatter and the op checks it with
+        // `JournalDay.isValid` — two validators are not one, so should the op
+        // ever refuse a day the parse passed, the client hears the parse's own
+        // sentence. Only a client types this field.
+        case .invalidEntryDate:
+            return MCPWriteTools.entryDateWords
         default:
             return nil
         }

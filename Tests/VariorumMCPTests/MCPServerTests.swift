@@ -241,7 +241,10 @@ struct MCPServerTests {
         #expect(MCPShowTool.handledToolNames.isDisjoint(with: MCPReadTools.handledToolNames.union(MCPWriteTools.handledToolNames)))
         #expect(MCPToolCatalog.navigation.map(\.name) == ["show_in_app"])
         #expect(MCPToolCatalog.navigation.allSatisfy { $0.rung == .read })
-        #expect(Set(MCPToolCatalog.read.map(\.name)) == ["list_books", "list_notes", "read_note", "search", "export_note"])
+        // VX-336 U7 (justified edit, the ritual): the read rung gains VX-261's
+        // list_my_activity (a read of the caller's own log rows).
+        #expect(Set(MCPToolCatalog.read.map(\.name))
+                == ["list_books", "list_notes", "read_note", "search", "export_note", "list_my_activity"])
         // VX-184 U3 (justified edit, the ritual): suggest gains VX-173's batch
         // doors, add_takes and add_comments, and VX-188's delete_comment.
         #expect(Set(MCPToolCatalog.suggest.map(\.name))
@@ -251,9 +254,15 @@ struct MCPServerTests {
         // edit (put_back, set_entry_date).
         // VX-184 U3 (justified edit, the ritual): write new gains VX-187's
         // link_versions.
+        // VX-336 U5b (justified edit, the ritual): write new gains VX-255's
+        // insert_blocks (the call's rung read from its arguments — an anchor
+        // or the start is edit).
+        // VX-336 U6a (justified edit, the ritual): write new gains VX-311's
+        // duplicate_note (read on the note, write new on its wing).
         #expect(Set(MCPToolCatalog.writeNew.map(\.name))
                 == ["create_note", "import_document", "apply_tag", "create_book", "add_note_to_book", "create_section",
-                    "save_version", "file_note_in_chapter", "set_book_rule", "link_versions"])
+                    "save_version", "file_note_in_chapter", "set_book_rule", "link_versions", "insert_blocks",
+                    "duplicate_note"])
         // 13n-c U6 (justified edit, the ritual): edit gains the per-item
         // note move across wings (VX-160). VX-168 U2 (justified
         // edit, the ritual): and the deliberate acts — VX-169's save_commit,
@@ -283,6 +292,35 @@ struct MCPServerTests {
         for declaration in MCPToolCatalog.all {
             #expect(declaration.inputSchema.objectValue?["type"] == "object")
         }
+    }
+
+    /// **VX-197 (VX-336 U8a): the descriptions name the client ONE way.** A
+    /// stored name that carries the client's name was written "<your name>"
+    /// in edit_take, restore_commit and save_commit but "<your client name>"
+    /// in save_lens — and a model can read "your name" as its own. Every
+    /// placeholder for it, on every tool as the SDK sends it, is now
+    /// "<your client name>", and each stored form the descriptions quote is
+    /// the operation's own (the names the brackets and the commit are written
+    /// with, read from `Operations`, never retyped).
+    @Test func theDescriptionsNameTheClientOneWay() throws {
+        let client = "<your client name>"
+        for declaration in MCPToolCatalog.all {
+            let sent = String(decoding: try JSONEncoder().encode(declaration.tool), as: UTF8.self)
+                .replacingOccurrences(of: "\\/", with: "/")
+            let placeholders = Set(sent.matches(of: /<[^<>]*name>/).map { String($0.output) })
+            #expect(placeholders.isSubset(of: [client]), "\(declaration.name) names the client as \(placeholders)")
+        }
+        let edit = Operations.mcpEditCommitNames(client: client)
+        let restore = Operations.mcpRestoreCommitNames(client: client)
+        #expect(MCPToolCatalog.editTake.description.contains("\"\(edit.before)\"")
+                && MCPToolCatalog.editTake.description.contains("\"\(edit.after)\""),
+                "edit_take quotes its brackets as stored: \(MCPToolCatalog.editTake.description)")
+        #expect(MCPToolCatalog.restoreCommit.description.contains("\"\(restore.before)\"")
+                && MCPToolCatalog.restoreCommit.description.contains("\"\(restore.after)\""),
+                "restore_commit quotes its brackets as stored: \(MCPToolCatalog.restoreCommit.description)")
+        let stored = Operations.mcpCommitMessage(client: client, message: "<message>")
+        #expect(MCPToolCatalog.saveCommit.description.contains("\"\(stored)\""),
+                "save_commit quotes its message as stored: \(MCPToolCatalog.saveCommit.description)")
     }
 
     // MARK: - A new client: a pending request, nothing readable
@@ -328,7 +366,10 @@ struct MCPServerTests {
 
             let names = Set(try await connection.client.listTools().tools.map(\.name))
             // U4 (justified edit, the ritual): the read rung gains show_in_app.
-            #expect(names == ["list_books", "list_notes", "read_note", "search", "export_note", "show_in_app"])
+            // VX-336 U7 (justified edit, the ritual): and VX-261's
+            // list_my_activity, listed for every approved client (P-VX261-2).
+            #expect(names == ["list_books", "list_notes", "read_note", "search", "export_note", "show_in_app",
+                              "list_my_activity"])
 
             let books = try json(try await connection.client.callTool(name: "list_books"))["books"] as? [[String: Any]]
             #expect(books?.map { $0["id"] as? String } == [shared.id], "only the shared book is listed")

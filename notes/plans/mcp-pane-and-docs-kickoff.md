@@ -1,5 +1,14 @@
 # VX-246 — Run: MCP pane, docs & door fixes — kickoff + plan
 
+**STATUS (VX-336): CLOSED 2026-10-15 — merged as «PR #N» (merge commit «sha»); every unit this file planned
+(U5–U8, with VX-330 and VX-342) shipped, and U9 (VX-361 · VX-362 · VX-363) joined; the record
+`notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md` (its CLOSEOUT RECORD), the handoff
+`notes/handoffs/vx-336-handoff.md`, the ratify bundle QUESTIONS #227. Nothing in this plan remains open.** Kicked off
+2026-10-14 at her kickoff (`/architect-phase vx-336`, the Pro). Her kickoff answers (the
+cast, the five-unit sizing U5a → U5b → U6 → U7 → U8, VX-292 not running, rule-provisionally-and-continue) and the
+re-aimed unit briefs live in the run record `notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md` — read it first. This
+file stays the plan: the rulings below bind as written.
+
 **STATUS: VX-246 CLOSED 2026-10-14 — it merged its FIX units (U1 + U1b, U2, U3, U4 + U4b + U4c: the door's security
 and correctness, the undo class, her editor vs the wire, the faces after big writes) through PR #162 "VX-246: MCP
 door fixes (security, undo, editor vs wire, faces)"; its record is `notes/plans/fixes/vx-246-mcp-door-fixes-ai-docs.md`.
@@ -287,9 +296,23 @@ Each tool's own description is truthful, so nothing the docs say is false; they 
     doors keep the full guard.
   - **VX-260 (Pre-launch):** her edit makes an AI's comment hers; a suggest delete then needs edit
     and hears her R-VX188-2 sentence.
+- **VX-330 JOINS VX-336 (her word, 2026-10-14, mid-run, verbatim):** *"I want you to add VX-330 to somewhere in the run
+  - you can choose where it would slot in best. It's an issue where combined chapter / note headings don't show any AI
+  symbol but that's how the example sherlock holmes looks and i think people might share that book with AI as an
+  example so i want it fixed pre launch."* The Book Panel's collapsed one-note chapter row (the chapter heading and its
+  one note shown as one row, as every chapter of the seeded sherlock reads) wears neither `MCPAskGlyph` nor
+  `MCPSharedIcon`; both go on that row, the same as the panel's note rows, through the one `MCPRowReach` hold (P1:
+  reach read for the rows drawn). **Promoted to Pre-launch.** **Slotted (the orchestrator, at her delegation): U6**, the
+  run's first unit with app-side code and a both-voices walk with a real client connected — the setting its proof needs —
+  and it lands before U8, so the guide's shared-icon sentence describes the panel as fixed.
 
 ## Rules binding this run
 
+- **VX-336's ladder cast, HER WORD (2026-10-14 ~19:55 MDT, in chat, verbatim):** *"you can use fable xhigh to review instead
+  of opus at max"*. Every ladder round is a FRESH `fable-reviewer` at effort xhigh (REVIEW_PROMPT verbatim,
+  PHASE=VX-336), replacing the kickoff's "Opus cold reviews at max" for rounds 2–3. Each round runs the cross-model flow:
+  Fable makes the final call on every finding, the Opus implementer applies the confirmed fixes red-on-old, and Fable
+  writes a fix only for `Sync/` lines (none here) or a FINDER-FIXES finding.
 - Cast per CLAUDE.md: Fable orchestrates by default (she redirects at kickoff); `opus-implementer` per unit,
   strictly sequential; the cold review is hers to name at kickoff. **Effort: her word during VX-184
   (2026-10-13, verbatim): *"Run everything at max effort - the implementer, reviewer, etc."*** Spawn every

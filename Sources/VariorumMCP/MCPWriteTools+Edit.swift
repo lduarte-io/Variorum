@@ -164,8 +164,12 @@ extension MCPWriteTools {
                     takeID, text: text, expectedText: expected, client: clientName,
                     undoLabel: label(.edit),
                     guardedBy: guardEdit(clientName) { db in [try Queries.mcpContainerOf(take: takeID, db)] })
+                // VX-254 (D-254-2): the digest of the take's text as it now
+                // stands — the new text, or (`changed: false`, nothing
+                // written) the text it already held.
                 var answer: [String: Any] = [
                     "take_id": takeID, "block_id": edit.take.blockId, "note_id": noteID, "changed": edit.changed,
+                    "sha256": MCPTextDigest.sha256(edit.take.workingText),
                 ]
                 if let before = edit.before { answer["before_commit_id"] = before.id }
                 if let after = edit.after { answer["after_commit_id"] = after.id }

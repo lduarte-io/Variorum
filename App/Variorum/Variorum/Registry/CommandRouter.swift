@@ -127,6 +127,9 @@ final class CommandRouter {
         if let landing = pendingLensLanding, landing.postID != postID {
             pendingLensLanding = nil
         }
+        if let landing = pendingCompareLanding, landing.postID != postID {
+            pendingCompareLanding = nil
+        }
         return token
     }
 
@@ -149,6 +152,7 @@ final class CommandRouter {
         pendingWriteIntent = nil
         pendingTakesLanding = nil
         pendingLensLanding = nil
+        pendingCompareLanding = nil
         pendingTrayRequest = nil
         focusedBlockIdentity = nil
         focusedOffset = nil
@@ -463,6 +467,9 @@ final class CommandRouter {
         if pendingLensLanding != nil, mode != .lenses {
             pendingLensLanding = nil
         }
+        if pendingCompareLanding != nil, mode != .compare {
+            pendingCompareLanding = nil
+        }
     }
 
     /// What a stale targeted mode request says (round-1 MAJOR, half a: the
@@ -736,6 +743,9 @@ final class CommandRouter {
     /// 13n-b U4: a landing on the Lenses board (show this saved lens) —
     /// observed, so a board already mounted consumes it too.
     var pendingLensLanding: LensLanding?
+    /// VX-298 (VX-336 U6a): a landing on the Compare board (these notes beside
+    /// the anchor) — observed, like the lens landing.
+    var pendingCompareLanding: CompareLanding?
 
     // MARK: - Composition wiring (set once by the session)
 

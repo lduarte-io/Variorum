@@ -56,6 +56,7 @@ struct MCPReadTools: Sendable {
             case MCPToolCatalog.readNote.name: return try readNote(args, clientName: clientName, plain: false)
             case MCPToolCatalog.exportNote.name: return try readNote(args, clientName: clientName, plain: true)
             case MCPToolCatalog.search.name: return try search(args, clientName: clientName)
+            case MCPToolCatalog.listMyActivity.name: return try listMyActivity(args, clientName: clientName)
             default: return Outcome(text: "Unknown tool: \(name).", isError: true)
             }
         } catch let failure as ArgumentFailure {
@@ -65,7 +66,9 @@ struct MCPReadTools: Sendable {
         }
     }
 
-    static let handledToolNames: Set<String> = ["list_books", "list_notes", "read_note", "export_note", "search"]
+    static let handledToolNames: Set<String> = [
+        "list_books", "list_notes", "read_note", "export_note", "search", "list_my_activity",
+    ]
 
     // MARK: - read_note / export_note
 
@@ -104,12 +107,26 @@ struct MCPReadTools: Sendable {
             if versionID != nil, lensID != nil {
                 throw ArgumentFailure(message: "Pass version_id or lens_id, not both: a saved version has no lenses.")
             }
+            // VX-256 (VX-336 U7 — D-256-2/6): PAGES and ids_only, parsed
+            // before any target is read (independent of it, so no oracle):
+            // `limit` clamps 1…200 like `list_notes`; a `cursor` this read
+            // would not have minted is stale; either asks for pages (a cursor
+            // alone reads 50), and pages and ids_only each imply with_ids.
+            let limit = try optionalInt(args, "limit")
+            let cursor = try optionalString(args, "cursor")
+            let after = cursor.flatMap(NotePageCursor.init(encoded:))
+            if cursor != nil, after == nil { throw ArgumentFailure(message: Self.staleCursorMessage) }
+            options.idsOnly = try optionalBool(args, "ids_only") ?? false
+            if limit != nil || cursor != nil {
+                options.page = MCPNoteStructure.Page(
+                    limit: min(max(limit ?? Self.defaultPageSize, 1), Self.maxPageSize), after: after)
+            }
         }
         let carriage = options.includeArchived || options.withTray || options.withLineage
             || options.withLenses || options.withVersions
         let withIDs = plain ? false
             : (try optionalBool(args, "with_ids") ?? false) || options.withCommits || !options.commitIDs.isEmpty
-                || carriage
+                || carriage || options.page != nil || options.idsOnly
         let act = plain ? MCPToolCatalog.exportNote.name : MCPToolCatalog.readNote.name
         return try database.write { db in
             let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
@@ -147,6 +164,15 @@ struct MCPReadTools: Sendable {
                     MCPGrantAuthority.decide(standing, note: nil, rung: .read, consumes: true), .note,
                     standing: standing, ask: nil)
             }
+            // VX-256 (D-256-6, step 3): a cursor resumes ONLY the container it
+            // paged — the note, or the saved version read — checked only after
+            // the note is allowed (an unreachable note answered the one refusal
+            // above, cursor or not) and BEFORE the once spend, so a stale cursor
+            // never spends the grant. Logged refused, as the version check is.
+            if let after = options.page?.after, after.containerID != (versionID ?? noteID) {
+                try log(db, clientName, act, "note", noteID, title, allowed: false)
+                return Outcome(text: Self.staleCursorMessage, isError: true)
+            }
             if consumesOnce, let grantID { try operations.consumeMCPOnceGrant(db, grantID) }
             let text: String
             if plain {
@@ -159,20 +185,20 @@ struct MCPReadTools: Sendable {
                     // call — address honestly instead of wearing the
                     // beyond-grant stub; the `books` answer stays suppressed
                     // (a moment is membered nowhere, and the key is the live
-                    // read's).
-                    var shaped = try MCPNoteStructure.read(
+                    // read's). U7c: the version's echoes ride INTO the read, so
+                    // a page's answer budget weighs them as the wire sends them.
+                    var echo = ["version_id": versionID, "version_of": noteID, "note_id": noteID]
+                    if let savedAt = try String.fetchOne(
+                        db, sql: "SELECT created_at FROM container WHERE id = ?", arguments: [versionID]) {
+                        echo["saved_at"] = savedAt
+                    }
+                    text = try encode(try MCPNoteStructure.read(
                         db, noteID: versionID, calendar: calendar, standing: standing,
                         options: MCPNoteStructure.Options(
                             withCommits: options.withCommits, commitIDs: options.commitIDs,
                             includeArchived: options.includeArchived, withLineage: options.withLineage,
-                            now: options.now),
-                        versionOf: noteID)
-                    shaped["version_id"] = versionID
-                    shaped["version_of"] = noteID
-                    shaped["note_id"] = noteID
-                    shaped["saved_at"] = try String.fetchOne(
-                        db, sql: "SELECT created_at FROM container WHERE id = ?", arguments: [versionID])
-                    text = try encode(shaped)
+                            now: options.now, idsOnly: options.idsOnly, page: options.page),
+                        versionOf: noteID, echo: echo))
                 } else {
                     text = try Queries.variorumDocumentText(db, postID: versionID)
                 }
@@ -583,6 +609,48 @@ struct MCPReadTools: Sendable {
             .map { $0 }
     }
 
+    // MARK: - list_my_activity (VX-261)
+
+    /// **The client's own recent acts** (VX-336 U7 — D-261-1…7): an APPROVED
+    /// client's rows logged under its name since its current approval
+    /// (P-VX261-1 — `decided_at`; Deny is her "stop trusting this client" and
+    /// a re-approved name starts with no reach and no history), newest first,
+    /// each AS LOGGED (`MCPOwnActivity`). A pending or denied client hears its
+    /// standing's own sentence (`list_books`' guard). The parse first (the
+    /// cursor's decode, independent of any target), then ONE read snapshot,
+    /// then the activity line in its own short write (F3) — logged like every
+    /// read, target-less, and never listed in its own answer. Not a `Job`: it
+    /// reads the log only, nothing of her text, so no flush; no undo. Cost ∝
+    /// the page, over a table bounded by its cap.
+    private func listMyActivity(_ args: [String: Value], clientName: String) throws -> Outcome {
+        let limit = min(max(try optionalInt(args, "limit") ?? Self.defaultPageSize, 1), Self.maxPageSize)
+        let cursor = try optionalString(args, "cursor")
+        let before = cursor.flatMap(MCPOwnActivity.rowID(decoding:))
+        if cursor != nil, before == nil { throw ArgumentFailure(message: Self.staleCursorMessage) }
+        let includeReads = try optionalBool(args, "include_reads") ?? false
+        let outcome: Outcome = try database.read { db in
+            let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
+            guard standing.state == .approved else {
+                return refusal(MCPGrantAuthority.decide(standing, note: nil, rung: .read, consumes: false), .note)
+            }
+            // An approved client always carries its approval's stamp; without
+            // one there is no era to read from — fail closed (nothing listed).
+            guard let since = try Queries.mcpClient(db, name: clientName)?.decidedAt else {
+                return Outcome(text: try encode(["acts": [Any]()]), isError: false)
+            }
+            let rows = try Queries.mcpOwnActivity(
+                db, clientName: clientName, since: since, acts: MCPOwnActivity.listedActs(includeReads: includeReads),
+                before: before, limit: limit + 1)
+            let page = rows.prefix(limit)
+            var answer: [String: Any] = ["acts": page.map(MCPOwnActivity.entry)]
+            // Only while rows remain (the one extra row read says so).
+            if rows.count > limit, let last = page.last { answer["next_cursor"] = MCPOwnActivity.cursor(after: last.id) }
+            return Outcome(text: try encode(answer), isError: false)
+        }
+        try logAfter(clientName, MCPToolCatalog.listMyActivity.name, nil, nil, allowed: !outcome.isError)
+        return outcome
+    }
+
     // MARK: - search
 
     private func search(_ args: [String: Value], clientName: String) throws -> Outcome {
@@ -785,12 +853,9 @@ struct MCPReadTools: Sendable {
     private func encode(_ object: [String: Any]) throws -> String {
         // U4: an answer holding a non-JSON value (a `Date`, say) would raise
         // an Objective-C exception and take the APP down — refuse it as an
-        // error instead.
-        guard JSONSerialization.isValidJSONObject(object) else {
-            throw MCPAnswerEncodingFailure()
-        }
-        return String(decoding: try JSONSerialization.data(
-            withJSONObject: object, options: [.sortedKeys, .withoutEscapingSlashes]), as: UTF8.self)
+        // error instead. U7c: the ONE encoding, shared with the page budget
+        // that measures it (`MCPNoteStructure.answerText`).
+        try MCPNoteStructure.answerText(object)
     }
 
     // MARK: - Arguments

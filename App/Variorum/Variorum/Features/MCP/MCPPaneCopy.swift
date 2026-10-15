@@ -418,6 +418,16 @@ nonisolated enum MCPPaneCopy {
         // VX-184 U3 — VX-173's batch doors (PROVISIONAL words, her copy pass).
         case "add_takes": return "adding takes to \(at)"
         case "add_comments": return "leaving comments in \(at)"
+        // VX-336 U5b — VX-255's blocks added to a note (PROVISIONAL words,
+        // her copy pass — the takes batch's family).
+        case "insert_blocks": return "adding blocks to \(at)"
+        // VX-336 U6a — VX-311's duplicate (PROVISIONAL words, her copy pass): a
+        // TWO-SIDED act (UXR1-1) — the note at read, its wing at write new — so
+        // the line says the side that refused as itself.
+        case "duplicate_note": return kind == "wing" ? "duplicating a note in \(at)" : "duplicating \(at)"
+        // VX-336 U7 — VX-261: a client reading its OWN recent acts (target-less;
+        // PROVISIONAL words, her copy pass — VX-234).
+        case "list_my_activity": return "checking its recent activity"
         // VX-188 — a client deleting a comment (its own, at suggest).
         case "delete_comment": return "deleting a comment in \(at)"
         // VX-190 — un-tagging a note at edit.
@@ -531,6 +541,14 @@ nonisolated enum MCPPaneCopy {
         // coarse — its row carries no item count; the receipt counts them).
         case "add_takes": return "added takes to \(at)" + times
         case "add_comments": return "left comments in \(at)" + times
+        // VX-336 U5b — VX-255: one log row per CALL, the batches' rule (the
+        // receipt counts the blocks).
+        case "insert_blocks": return "added blocks to \(at)" + times
+        // VX-336 U6a — VX-311: logged on the SOURCE note (the copy wears its title).
+        case "duplicate_note": return "duplicated \(at)" + times
+        // VX-336 U7 — VX-261: the client read its own recent acts (PROVISIONAL
+        // words, her copy pass — VX-234).
+        case "list_my_activity": return "checked its recent activity" + times
         case "delete_comment": return n == 1 ? "deleted a comment in \(at)" : "deleted \(n) comments in \(at)"
         case "remove_tag": return "removed a tag from \(at)" + times
         case "link_versions": return "linked \(at) and another note as versions" + times
@@ -1355,6 +1373,14 @@ nonisolated enum MCPReceiptCopy {
         case .comments:
             let total = receipts.reduce(0) { $0 + $1.count }
             return total == 1 ? "left a comment" : "left \(total) comments"
+        // VX-336 U5b — VX-255's blocks added to a note, counted and summed as
+        // the takes batch's are (PROVISIONAL words).
+        case .blocks:
+            let total = receipts.reduce(0) { $0 + $1.count }
+            return total == 1 ? "added a block" : "added \(total) blocks"
+        // VX-336 U6a — VX-311's duplicate: the run is keyed on the COPY, so it
+        // names the note the copy is of (PROVISIONAL words).
+        case .duplicate: return n == 1 ? "duplicated \(quoted(receipts[0].targetTitle))" : "made \(n) duplicates"
         // VX-188 — the client's own comment, deleted (PROVISIONAL words).
         case .commentDelete: return n == 1 ? "deleted a comment" : "deleted \(n) comments"
         // VX-190 — her un-tag, the client's (PROVISIONAL words).

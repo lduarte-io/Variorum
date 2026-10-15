@@ -371,6 +371,53 @@ nonisolated enum OpsRefusalCopy {
             return "That book is already archived — nothing changed."
         case .readingNotArchived:
             return "That book isn't archived any more — nothing changed."
+        // **VX-362 — THE WIRE'S SWEEP** (the VX-336 run record's U9 SWEEP
+        // TABLE, its R/E rows; D3: a refusal her doors can also meet is worded
+        // HERE, both platforms' words — the MCP door speaks this table through
+        // `MCPHostHooks.refusalWords`). Each reached the wire as the raw case.
+        // Platform-neutral: none names a door. (PROVISIONAL P-VX362-1.)
+        //
+        // `add_note_to_book` on a member — her generic arm's sentence
+        // (`ReadingsViewModel.message`), the same words here; that arm stays
+        // a one-line forward at its next touch.
+        case .alreadyInReading:
+            return "That note is already in this book."
+        // A note into a book at its `max_posts` — the same arm's sentence.
+        case .readingAtCapacity:
+            return "This book is at its note limit."
+        // `restore_comment` on a live comment — `put_back`'s "That block is
+        // already back." twin.
+        case .commentNotDeleted:
+            return "That comment is already back."
+        // A blank chapter name (`import_document`'s book form) — the shelf's
+        // and the wing's "A … needs a name." twin.
+        case .invalidSectionName:
+            return "A chapter needs a name."
+        // A note gone between a door's read and its write (a sync apply, a
+        // delete in another window) — `variantNotFound`'s first clause, one
+        // row-kind up.
+        case .containerNotFound:
+            return "That note isn't there any more — it may have just been deleted."
+        // A book that became a gathering under a door (another device's
+        // un-bind) — and the bind door's own direction, hoisted.
+        case .wrongReadingKind(_, let expected):
+            return expected == .gathering
+                ? "That's already a book — only a gathering binds into one."
+                : "That isn't a book — a gathering shows the notes its rule matches and holds none of its own."
+        // An outflow tag the book's wing doesn't hold (the dangling-wing road
+        // `set_book_rule` and her rule editor's Save share — VX-364) — the
+        // shelf's and the library's "isn't there any more — nothing changed."
+        // twin.
+        case .tagNotFound:
+            return "That tag isn't there any more — nothing changed."
+        // A deleted block put back while a sync apply left it placed.
+        case .blockAlreadyPlaced:
+            return "That block is already in a note — nothing changed."
+        // A picked block moved out between a door's read and its act —
+        // `blockNotPlaced`'s sentence, the same reading.
+        case .blockNotInContainer:
+            return "That block is no longer in this note — it may have "
+                + "moved while you worked. Nothing was changed here."
         default:
             return nil
         }

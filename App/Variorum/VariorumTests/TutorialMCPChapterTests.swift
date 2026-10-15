@@ -17,13 +17,25 @@
 //  The wire's half of the same facts is `MCPAdviceServerTests` (headless) and
 //  U1's `MCPFenceRekeyServerTests` (the one answer, byte for byte).
 //
+//  VX-197 (RUN VX-336, U8b — the record `notes/plans/fixes/vx-336-mcp-wire-
+//  tools-ai-docs.md`, U8b UNIT RECORD): the chapter's truth pass over the
+//  as-built door — every tool VX-184, VX-246 and VX-336 added, taught in its
+//  lesson; organization as recipes; Private, Seal and Own as hers alone; the
+//  label rule; the shared icon's rows; lesson 2 re-voiced for VX-258's tab
+//  rule; 13s's voice (R-13s-22: no em dash outside a quoted surface). Written
+//  AHEAD of the chapter (red on the old seed). Where a claim's truth lives
+//  inside the wire (a tool's rung, a description, `aiLabel`, the
+//  instructions), the pin reads the catalog itself — `@testable import
+//  VariorumMCP`, the W-UX-14 tie made direct — and the behaviour behind it is
+//  the headless suite each pin names.
+//
 
 import Dependencies
 import Foundation
 import GRDB
 import Testing
 import VariorumCore
-import VariorumMCP
+@testable import VariorumMCP
 @testable import Variorum
 
 // MARK: - The world
@@ -110,6 +122,14 @@ private func reachers(_ db: AppDatabase, _ noteID: String) async throws -> [Stri
 
 private let lessons = TutorialSeeder.mcpLessons
 
+/// A tool's declaration, by name — the catalog the wire serves (VX-197 U8b).
+private func tool(_ name: String) throws -> MCPToolDeclaration {
+    try #require(MCPToolCatalog.declaration(named: name), "\(name) is a declared tool")
+}
+
+/// The client placeholder the chapter quotes (lesson 7's "Undo ‹name›'s take").
+private let placeholderName = "\u{2039}name\u{203A}"
+
 // MARK: - The chapter
 
 @MainActor
@@ -150,14 +170,24 @@ struct TutorialMCPChapterTests {
                 // gatherings are taught in lesson 3, and named again only in
                 // her "how to use it" wing recipe (JOB 4 — the second justified
                 // edit; its truth is pinned in that lesson's test).
+                // VX-197 U8b (A JUSTIFIED EDIT, the ritual — VX-184 U2's carry
+                // and VX-268/VX-185's icon): lesson 7's icon sentence says "a
+                // book or a gathering", and its truth is pinned there.
                 #expect(text.localizedCaseInsensitiveContains("gathering")
-                            == (title == lessons[2] || title == lessons[5]),
-                        "\(title): gatherings under a wing grant are lesson 3's (VX-273) and the wing recipe's")
+                            == [lessons[2], lessons[5], lessons[6]].contains(title),
+                        "\(title): gatherings are lesson 3's (VX-273), the wing recipe's and the icon's (VX-185)")
                 #expect(!text.localizedCaseInsensitiveContains("filled"),
                         "\(title): the pending mark is taught by its role, never its shape")
                 #expect(!text.localizedCaseInsensitiveContains("savepoint"))
                 #expect(text.range(of: #"\b(?!MCP\b|JSON\b)[A-Z]{3,}\b"#, options: .regularExpression) == nil,
                         "\(title): no shouted word")
+                // VX-197 U8b — 13s's voice (R-13s-22, her words: "reduce AIisms
+                // in your writing like emoji's and em dashes"): no em dash in
+                // the chapter's own prose; a surface's own words, quoted, keep
+                // theirs (the Private row, lesson 4 — the 13s overview's
+                // quoted-UI rule). RED ON OLD: lessons 1 and 6.
+                #expect(!text.replacingOccurrences(of: PrivateMarkCopy.rowWords, with: "").contains("\u{2014}"),
+                        "\(title): no em dash outside a quoted surface")
             }
         }
     }
@@ -212,7 +242,9 @@ struct TutorialMCPChapterTests {
             // export_note hand text over the wire, and a client sends its work
             // to its model's provider), so the lesson must never say that what
             // you share stays here — and says plainly where it goes.
-            #expect(text.contains("Your grants stay on this Mac \u{2014} they never sync to your other devices"))
+            // VX-197 U8b (A JUSTIFIED EDIT, the ritual — R-13s-22's em dash):
+            // "Your grants stay on this Mac — they never sync…" before.
+            #expect(text.contains("Your grants stay on this Mac and never sync to your other devices."))
             #expect(!text.localizedCaseInsensitiveContains("share stays"),
                     "what you share leaves with the client — only the grants stay")
             #expect(!text.localizedCaseInsensitiveContains("shared stays"))
@@ -253,7 +285,17 @@ struct TutorialMCPChapterTests {
             #expect(text.contains("Claude Code, Codex, or Any MCP client"))
             #expect(MCPSetupClient.allCases.map(\.label) == ["Claude Code", "Codex", "Any MCP client"],
                     "the menu the lesson names, in its order")
-            #expect(text.contains("press \(CapabilityRegistry.capability(.mcpCopySetupCommand).verb)"))
+            // VX-197 U8b (A JUSTIFIED EDIT, the ritual — VX-205, built at
+            // VX-281): "Then press Copy setup command" taught a button the pane
+            // no longer has. The act's face is the code block's copy icon, in
+            // its upper right, with the act's verb as its help (one act, one
+            // door). RED ON OLD: the old seed says "press Copy setup command".
+            let copyVerb = CapabilityRegistry.capability(.mcpCopySetupCommand).verb
+            #expect(!text.contains("press \(copyVerb)"), "no button by that name is on the pane")
+            #expect(text.contains("choose yours at the top of the setup block: Claude Code, Codex, or Any MCP client. "
+                                  + "Then click the copy icon in the block's upper right corner."))
+            #expect(MCPSetupCodeBlock.copySymbol == "doc.on.doc", "the standard copy glyph")
+            #expect(MCPPane.surfaceCapabilities.contains(.mcpCopySetupCommand), "…the one copy act's door")
             #expect(text.contains("a few lines of JSON"))
             #expect(MCPSetupClient.anyClient.text(shimPath: "/x", isDebugBuild: false).contains("\"mcpServers\""))
             // VX-168 (A JUSTIFIED EDIT, the ritual): Claude Code's one line
@@ -303,6 +345,35 @@ struct TutorialMCPChapterTests {
             #expect(MCPPaneCopy.clientBoundary.contains("Running the client's own setup again moves the name to the new key"))
             #expect(MCPPaneCopy.clientBoundary.contains("a setup copied for any MCP client waits for your OK"))
             #expect(MCPPaneCopy.clientBoundary.contains("any of them can read the key"))
+            // VX-197 U8b — LESSON 2 RE-VOICED (VX-258's tab rule, her ruling:
+            // "tie keys to their tab … the re-bind waits for my ok"). The
+            // parity clause above stays byte-shared with L1; the lesson adds
+            // what the clause leaves out — which setup is a client's OWN, that
+            // it needs no clicks, and where any other waits, seeing nothing
+            // until she allows it. RED ON OLD: none of it is said.
+            #expect(text.contains("A client names itself when it connects, and the setup you copy carries a key "
+                                  + "that ties that name to it."))
+            #expect(text.contains("A client's own setup is the one copied from its tab, and moving its name "
+                                  + "takes no clicks."))
+            #expect(text.contains("Any other new setup for a name you approved waits under "
+                                  + "\(MCPPaneCopy.waitingSection), above the tabs in Settings \u{25B8} MCP, as a new "
+                                  + "setup for that name."))
+            #expect(MCPPaneCopy.rebindTitle("x") == "New setup for x", "Waiting's row, by its own words")
+            let allow = CapabilityRegistry.capability(.mcpAllowRebind).verb
+            let decline = CapabilityRegistry.capability(.mcpDeclineRebind).verb
+            #expect(text.contains("It sees no tools until you choose \(allow), which moves the name and its grants "
+                                  + "to it; \(decline) turns it away."))
+            #expect(MCPPaneCopy.rebindDetail(name: "x", version: nil, firstSeen: "today")
+                        .contains("allowing moves the name, with its grants, to this setup"), "the row says the same")
+            #expect(text.contains("One honest limit: the key sits in the client's own settings, where any program "
+                                  + "running as you can read it. It tells two tools apart, not programs running as you."))
+            #expect(MCPPaneCopy.clientBoundary.contains("tells two tools apart, not programs running as you"),
+                    "L1 says the same")
+            // THE TRUTH: "its own setup" is a tab's (a tab names its client;
+            // Any MCP client names nobody), and any OTHER fresh key under an
+            // approved name — another tab's included — waits.
+            #expect(MCPSetupClient.claudeCode.expectedName != nil && MCPSetupClient.codex.expectedName != nil)
+            #expect(MCPSetupClient.anyClient.expectedName == nil)
             let bound = MCPSetupKeyRule.Client(id: "c", boundHash: MCPSetupKeyRule.hash("vmk1_first"))
             let second = MCPSetupKeyRule.hash("vmk1_second")
             // VX-258 (A JUSTIFIED EDIT, the ritual — her ruling: a key re-binds
@@ -315,6 +386,11 @@ struct TutorialMCPChapterTests {
                     == .rebind, "running the setup again moves the name to the new key")
             #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second, standing: .unclaimed)
                     == .awaitRebind, "an Any-client copy under an approved name waits for her OK (VX-258)")
+            // VX-197 U8b: "Any other new setup for a name you approved waits" —
+            // another tab's copy too, not only an Any-client one.
+            #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second,
+                                           copiedFor: MCPSetupClient.codex.expectedName, standing: .unclaimed)
+                    == .awaitRebind, "another tab's setup under an approved name waits too")
             #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second, standing: .replaced)
                     == .refuse(.replaced), "a tool still using an older key is turned away")
             #expect(MCPSetupKeyRule.decide(name: "claude-code", client: bound, presentedHash: second, standing: .unknown)
@@ -339,6 +415,18 @@ struct TutorialMCPChapterTests {
             #expect(text.contains("with nothing picked for you"))
             #expect(MCPGrantSheet.start(approving: true, mostRecentBookID: "b1").place == .nothing,
                     "the approval sheet picks nothing (the sheet's own start)")
+            // VX-197 U8b — THE TOOLS LINE (U7's carry, builder A's OWED 6):
+            // an approved client with nothing shared is not toolless — it can
+            // always read its own recent acts (P-VX261-2). A connection
+            // request and a waiting setup see none (VX-258; the decide arms
+            // above). RED ON OLD: never said.
+            #expect(text.contains("it shows up at the top of Settings \u{25B8} MCP as a connection request"))
+            #expect(text.contains("Until then, the one thing an approved client can do is look back over its own "
+                                  + "recent acts."))
+            #expect(MCPToolCatalog.all.filter(\.listedWhenApproved).map(\.name) == ["list_my_activity"],
+                    "the ONE tool listed for every approved client")
+            #expect(try tool("list_my_activity").rung == .read)
+            #expect(text.contains("Every approved client is listed under \(MCPPaneCopy.clientsSection), with"))
             try ops.setMCPSwitch(.openBook, on: false)
             _ = try ops.approveMCPClient(pending.id, granting: nil)
             #expect(try await reachers(db, page).isEmpty, "approved alone, it reaches nothing")
@@ -359,17 +447,106 @@ struct TutorialMCPChapterTests {
             #expect(text.contains("each including the ones before it"))
             #expect(text.contains("it can't change a word you wrote"))
             #expect(MCPPaneCopy.rungDetail(.suggest).contains("cannot touch a word you wrote"))
-            #expect(text.contains("commits the take just before and just after"))
             let bracket = Operations.mcpEditCommitNames(client: "claude-code")
             #expect(bracket.before.hasPrefix("before") && bracket.after.hasPrefix("after"))
+
+            // VX-197 U8b — THE STEPS' REACH AS BUILT (VX-184 U3–U5, VX-246,
+            // VX-336 U5–U6). Every act a sentence names is a tool at that rung
+            // in the catalog the wire serves. RED ON OLD: the old Suggest and
+            // Write new sentences named none of the new acts, and the old Edit
+            // sentence (A JUSTIFIED EDIT below) stopped at blocks.
+            #expect(text.contains("Suggest: it can add new takes and comments beside your text, one at a time or "
+                                  + "many at once, and save a lens"))
+            for name in ["add_take", "add_takes", "add_comment", "add_comments", "save_lens"] {
+                #expect(MCPToolFacts.rung(of: name) == .suggest, "\(name) is a suggest-rung act")
+            }
+            #expect(text.contains("Write new: it can also make new notes, books, chapters and tags, file notes into "
+                                  + "books and chapters, and give a book a rule that collects notes by tag. It can add "
+                                  + "blocks at the end of a note, duplicate a note to work on a copy, and link two notes "
+                                  + "as versions by naming which paragraphs match."))
+            for name in ["create_note", "create_book", "create_section", "apply_tag", "add_note_to_book",
+                         "file_note_in_chapter", "set_book_rule", "insert_blocks", "duplicate_note", "link_versions"] {
+                #expect(MCPToolFacts.rung(of: name) == .writeNew, "\(name) is a write-new act")
+            }
+            #expect(try tool("insert_blocks").description.contains("they go at the note's END — write new on the note "
+                                                                     + "is enough"), "write new adds at the end only")
+            #expect(try tool("link_versions").description.contains("Name at least one pair"),
+                    "the client names which paragraphs match (R-VX187-1)")
             // VX-168 U2: Edit's step names the deliberate acts — choosing and
             // committing a take, making a lens the note. THE TRUTH: every act
             // the sentence names is an edit-rung tool in the catalog.
-            #expect(text.contains("Edit: it can also change, choose and commit takes, make a lens the note, "
-                                  + "and divide, merge, move or delete blocks."))
-            for tool in ["edit_take", "choose_take", "save_commit", "adopt_lens",
-                         "divide_block", "merge_blocks", "move_block", "delete_block"] {
-                #expect(MCPToolFacts.rung(of: tool) == .edit, "\(tool) is an edit-rung act")
+            // VX-197 U8b (A JUSTIFIED EDIT, the ritual — R-VX184-1, "as capable
+            // as her at the keyboard"): the Edit step says its reach as built,
+            // inside a note and across the library ("Edit: it can also change,
+            // choose and commit takes, make a lens the note, and divide, merge,
+            // move or delete blocks." before).
+            let editStep = """
+                Edit: it can also do most of what you can do at the keyboard. In a note, it can change, choose, \
+                commit, archive or delete takes, restore a commit, make a lens the note, add blocks anywhere, \
+                divide, merge, move or delete blocks, and edit or delete any comment. Across the library, it can \
+                take a tag off a note, rename, archive or delete notes and books, finish or reopen a book, reorder \
+                a book's notes and chapters, and rename or delete a chapter.
+                """
+            #expect(text.contains(editStep))
+            for name in ["edit_take", "choose_take", "save_commit", "archive_take", "delete_take", "restore_commit",
+                         "adopt_lens", "divide_block", "merge_blocks", "move_block", "delete_block", "edit_comment",
+                         "remove_tag", "rename_note", "archive_note", "delete_note", "rename_book", "archive_book",
+                         "delete_book", "finish_book", "reopen_book", "move_note_in_book", "move_chapter",
+                         "rename_chapter", "delete_chapter"] {
+                #expect(MCPToolFacts.rung(of: name) == .edit, "\(name) is an edit-rung act")
+            }
+            #expect(try tool("insert_blocks").description.contains("Placing them anywhere else needs edit"),
+                    "blocks anywhere: insert_blocks at edit (VX-255, her ruling)")
+            #expect(try tool("delete_comment").description.contains("With edit on the note you may delete any comment"),
+                    "any comment at edit (R-VX188-1)")
+
+            // VX-197 U8b (A JUSTIFIED EDIT, the ritual — U4's OWED, U8a's
+            // description truth): "When it changes a take, Variorum commits
+            // the take just before and just after" was true only of a take's
+            // WORDS, and the first commit is skipped when the take's latest
+            // commit already holds them. THE TRUTH below runs the act.
+            #expect(!text.contains("commits the take just before and just after"))
+            #expect(text.contains("When it rewrites the words of a take, Variorum first commits the words it "
+                                  + "replaces, unless the take's latest commit already holds them, and then commits the "
+                                  + "new words, so you can always compare and come back. Both commits stay even if you "
+                                  + "undo the edit."))
+
+            // VX-197 U8b — WHO WROTE WHAT: the label rule (her VX-197 split,
+            // VX-267's form) and the comment rule (VX-260). RED ON OLD.
+            let suggested = MCPWriteTools.aiLabel(client: placeholderName, own: "english")
+            #expect(suggested == "\(placeholderName)\(MCPWriteTools.labelSeparator)english")
+            #expect(MCPWriteTools.labelSeparator == " \u{00B7} ", "the dot the lesson names")
+            #expect(MCPWriteTools.aiLabel(client: placeholderName, own: nil) == placeholderName, "no label: the name")
+            #expect(text.contains("You can always see who suggested a take. A take a client adds beside yours wears "
+                                  + "its name, then a dot and its own label if it gave one, like \(suggested)."))
+            #expect(text.contains("Takes it writes into a new note or new blocks, and labels it sets on a take, carry "
+                                  + "only the label it gave."))
+            for name in ["add_take", "add_takes"] {
+                #expect(try tool(name).description.contains(MCPToolCatalog.suggestedLabelRule), "\(name) names itself")
+            }
+            for name in ["create_note", "insert_blocks", "import_document", "duplicate_note", "set_take_label"] {
+                #expect(try tool(name).description.contains(MCPToolCatalog.labelNotPrefixed),
+                        "\(name) stores the label as given")
+            }
+            #expect(text.contains("With Suggest it can delete a comment it left, but only while the words are still "
+                                  + "the ones it wrote; once anyone changes them, deleting that comment takes Edit, "
+                                  + "which can delete any comment."))
+            #expect(MCPToolFacts.rung(of: "delete_comment") == .suggest)
+
+            // VX-197 U8b — R-VX184-2: "three acts stay hers alone: Private,
+            // Seal, Own … though the AI should know about them so it can tell
+            // a user that they might want that." The chapter and the advice
+            // say the same three; no tool can do any of them. RED ON OLD.
+            #expect(text.contains("Three things stay yours alone, whatever you grant: marking something Private, "
+                                  + "sealing a book, and making a book own its notes. A client knows what each one does "
+                                  + "and may suggest one when it would help, but only you can do it."))
+            for act in ["marking something Private", "sealing a book", "making a book own its notes"] {
+                #expect(MCPSession.instructions.contains(act), "the advice names \u{201C}\(act)\u{201D} too (D-2)")
+            }
+            for name in MCPToolFacts.toolNames {
+                let words = Set(name.split(separator: "_").map(String.init))
+                #expect(words.isDisjoint(with: ["private", "seal", "sealed", "own", "owned", "owning"]),
+                        "\(name): no tool marks Private, seals or owns")
             }
             // Where, and how long — the durations by their own words.
             #expect(text.contains("one note; one book, with its notes now and any added to it later; or a whole wing"))
@@ -485,6 +662,61 @@ struct TutorialMCPChapterTests {
             #expect(!(try await reachers(db, loose)).contains("local-llama"))
             try ops.setMCPSwitch(.openBook, on: true)
             #expect(try await reachers(db, loose).contains("local-llama"))
+
+            // VX-197 U8b — THE TRUTH of the commit sentence, on the wire's own
+            // act (`editTakeUnderInsurance`; the headless twin is U8a's
+            // `MCPEditServerTests.editTakesBeforeCommitIsDedupedAndTheDescriptionSaysSo`).
+            let editStack = UndoStack()
+            let editOps = Operations(undoStack: editStack)
+            let page = try note(ops, "first words")
+            let take = try #require(try await db.read { db in
+                try String.fetchOne(
+                    db, sql: "SELECT chosen_variant_id FROM container_block WHERE container_id = ?", arguments: [page])
+            })
+            func commits() async throws -> [String] {
+                try await db.read { db in
+                    try String.fetchAll(db, sql: "SELECT text FROM commit_point WHERE variant_id = ? "
+                                        + "ORDER BY created_at, id", arguments: [take])
+                }
+            }
+            let editLabel = Operations.MCPWriteAct.edit.undoLabel(client: "claude-code")
+            _ = try ops.commit(take, message: "hers")
+            // "unless the take's latest commit already holds them".
+            let kept = try editOps.editTakeUnderInsurance(
+                take, text: "second words", expectedText: "first words", client: "claude-code", undoLabel: editLabel)
+            #expect(kept.before == nil && kept.after?.text == "second words", "no second copy of kept words")
+            // "first commits the words it replaces … then commits the new words".
+            try ops.autosave(take, text: "her third words", charDelta: 9)
+            let insured = try editOps.editTakeUnderInsurance(
+                take, text: "fourth words", expectedText: "her third words", client: "claude-code",
+                undoLabel: editLabel)
+            #expect(insured.before?.text == "her third words" && insured.after?.text == "fourth words")
+            #expect(insured.before?.message == bracket.before && insured.after?.message == bracket.after)
+            // "Both commits stay even if you undo the edit."
+            let before = try await commits()
+            #expect(try editStack.undo(with: editOps) == editLabel)
+            #expect(try await db.read { try Variant.fetchOne($0, key: take) }?.workingText == "her third words")
+            #expect(try await commits() == before, "the commits stay")
+            // "the WORDS of a take": relabelling it commits nothing — and the
+            // label is stored as given, with no client name ("labels it sets
+            // on a take carry only the label it gave").
+            _ = try editOps.labelTakeForClient(
+                take, label: "  english  ", undoLabel: Operations.MCPWriteAct.takeLabel.undoLabel(client: "claude-code"))
+            #expect(try await commits() == before, "a label is not the take's words")
+            #expect(try await db.read { try Variant.fetchOne($0, key: take) }?.label == "english",
+                    "trimmed, as given — no client name")
+
+            // VX-197 U8b — THE TRUTH of the comment rule (VX-260; the
+            // headless twin is `MCPCommentWordsServerTests`): a comment a
+            // client left is its own while its words are; her edit makes it hers.
+            let block = try #require(try await db.read { try Queries.renderPost($0, containerID: page).first })
+            let left = try editOps.addComment(
+                toBlock: block.blockID, text: "a client's note on this", author: "claude-code",
+                undoLabel: Operations.MCPWriteAct.comment.undoLabel(client: "claude-code"))
+            #expect(try await db.read { try Queries.mcpCommentIsOwn($0, commentID: left.id, client: "claude-code") })
+            try ops.editBlockComment(left.id, text: "her words now")
+            #expect(try await !db.read { try Queries.mcpCommentIsOwn($0, commentID: left.id, client: "claude-code") },
+                    "once anyone changes the words, deleting it takes Edit")
         }
     }
 
@@ -703,8 +935,11 @@ struct TutorialMCPChapterTests {
             #expect(text.contains("For help across everything, grant a whole wing instead: it reaches every note, "
                                   + "book and gathering in the wing except what always asks"))
             #expect(lessons[3] == "what always asks", "the words name lesson 4")
-            #expect(text.contains("your daily Journal's entries and anything marked Private, which a client "
-                                  + "reaches only through a grant on that one note."))
+            // VX-197 U8b (A JUSTIFIED EDIT, the ritual — R-13s-22's em dash):
+            // the exception is parenthesized now ("…always asks — your daily
+            // Journal's … one note." before), so the sentence closes ")".
+            #expect(text.contains("except what always asks (your daily Journal's entries and anything marked "
+                                  + "Private, which a client reaches only through a grant on that one note)."))
             #expect(text.contains("So mark Private whatever should stay off-limits first, then grant the wing."))
             // THE TRUTH, in the recipe's order: mark first, then the wing.
             let offLimits = try note(ops, "not for any AI")
@@ -745,6 +980,122 @@ struct TutorialMCPChapterTests {
             #expect(try await !reachers(db, oneOff).contains("claude-code"), "nothing stands afterwards")
             #expect(try await db.read { try Queries.mcpGrant($0, id: onceID) }?.ruleGrant.isLive == false,
                     "spent, it reaches nothing more")
+
+            // ——— VX-197 U8b — the recipes beside her four (RED ON OLD) ———
+            // Her four lead, unchanged and in her order (above); organization,
+            // a revision and a long job follow, in that order.
+            let organized = try #require(text.range(of: "Your AI can help keep the library in order, too."))
+            let revision = try #require(text.range(of: "For a revision,"))
+            let longJob = try #require(text.range(of: "For a long job,"))
+            let oneOffRecipe = try #require(text.range(of: "And for a one-off,"))
+            #expect(oneOffRecipe.lowerBound < organized.lowerBound && organized.lowerBound < revision.lowerBound
+                    && revision.lowerBound < longJob.lowerBound, "her four first, then the three")
+
+            // ——— Recipe 5: organization (the advice's own, D-2) ———
+            let organizeRecipe = """
+                Grant it \(writeNew) on a wing and ask it to put plans, summaries and research into notes rather \
+                than leave them in the chat. It can make a book for a project, give it chapters and file notes into \
+                them, tag notes, and make a book that collects every note wearing a tag.
+                """
+            #expect(text.contains(organizeRecipe))
+            #expect(MCPSession.instructions.contains("put plans, summaries and research into notes"),
+                    "the advice says the same (U8a)")
+            #expect(MCPToolFacts.scopes(of: "create_book") == [.wing], "making a book takes a wing grant")
+            #expect(text.contains("A rule it writes moves nothing by itself: notes that already match wait at the "
+                                  + "book's \(ArrivalsCopy.word) for you to let in, and notes it tags afterwards join "
+                                  + "the way they would if you had tagged them."))
+            #expect(MCPBookFacts.matchesWaitWords.contains("undecided matches wait at Arrivals for the author to let in"),
+                    "the wire tells the client the same (P-13nb-U4-16)")
+            // THE TRUTH, on the wire's own acts: a note she tagged before the
+            // rule WAITS at Arrivals; a note the client tags after it JOINS.
+            let teaBook = try ops.createReading(name: "tea", kind: .book)
+            let tagLabel = Operations.MCPWriteAct.tag.undoLabel(client: "claude-code")
+            let hers = try note(ops, "green tea, brewed cooler")
+            let teaTag = try ops.createTag(name: "tea")
+            try ops.applyTag(teaTag.id, toPost: hers)
+            _ = try ops.setBookRule(
+                teaBook.id, Operations.MCPBookRuleWrite(rule: .some(RuleTerm.tag("tea"))),
+                undoLabel: Operations.MCPWriteAct.bookRule.undoLabel(client: "claude-code"))
+            func standing(_ postID: String) async throws -> String? {
+                try await db.read { db in
+                    try String.fetchOne(
+                        db, sql: "SELECT status FROM reading_post WHERE reading_id = ? AND post_id = ? "
+                            + "AND deleted_at IS NULL", arguments: [teaBook.id, postID])
+                }
+            }
+            #expect(try await standing(hers) == "arrival", "a match from before the rule waits for her")
+            let theirs = try note(ops, "oolong, three steeps")
+            _ = try ops.applyTagPath("tea", toPost: theirs, undoLabel: tagLabel)
+            #expect(try await standing(theirs) == "member", "a note tagged afterwards joins")
+            let alsoHers = try note(ops, "her own tea note")
+            try ops.applyTag(teaTag.id, toPost: alsoHers)
+            #expect(try await standing(alsoHers) == "member", "…as hers would")
+
+            // ——— Recipe 6: a revision (VX-311, VX-298) ———
+            let compareKey = try #require(PostMode.allCases.firstIndex(of: .compare)) + 1
+            let editRung = MCPPaneCopy.rungName(.edit)
+            let compareName = PostMode.compare.rawValue
+            let revisionRecipe = """
+                For a revision, grant \(editRung) on the note's wing and ask your AI to duplicate the note and \
+                rewrite the copy. The copy lands in that wing's Pool, in no book, and your original never changes. \
+                Because each block of the copy remembers the block it came from, \(compareName) \
+                (\u{2318}\(compareKey)) lines the two up row by row.
+                """
+            #expect(text.contains(revisionRecipe))
+            #expect(compareKey == 5)
+            #expect(text.contains("Ask your AI to show you the two side by side and, while Variorum is the app in "
+                                  + "front, it opens \(PostMode.compare.rawValue) on them."))
+            #expect(try tool("duplicate_note").description.contains("Needs read on the note and write new on its wing"))
+            #expect(try tool("show_in_app").description.contains("or \"compare\" (note_id + peer_ids"),
+                    "the show road has a Compare target (VX-298)")
+            // THE TRUTH, on the wire's own act: the copy is bookless, in the
+            // note's wing, every block linked to its source, the source unchanged.
+            let draftBook = try ops.createReading(name: "drafts", kind: .book)
+            let draft = try note(ops, "The first paragraph.", in: draftBook.id)
+            _ = try ops.newBlock(in: draft, text: "The second paragraph.", at: .end, registeringUndo: false)
+            let read = try await db.read { try Queries.renderedText($0, containerID: draft) }
+            let copy = try undoable.duplicateNoteForClient(
+                draft, undoLabel: Operations.MCPWriteAct.duplicate.undoLabel(client: "claude-code"))
+            #expect(try await db.read { db in
+                try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM reading_post WHERE post_id = ? AND deleted_at IS NULL",
+                                 arguments: [copy.post.id])
+            } == 0, "the copy lands in no book")
+            #expect(try await db.read { try Queries.effectiveWing($0, ofPost: copy.post.id) }
+                    == (try await db.read { try Queries.effectiveWing($0, ofPost: draft) }), "…in the note's wing")
+            #expect(copy.blockCopies.count == 2)
+            for pair in copy.blockCopies {
+                #expect(try await db.read { db in
+                    try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM edge WHERE source_block_id = ? AND "
+                                     + "target_block_id = ? AND type = 'derived_from' AND deleted_at IS NULL",
+                                     arguments: [pair.copy, pair.source])
+                } == 1, "each block of the copy remembers the block it came from")
+            }
+            #expect(try await db.read { try Queries.renderedText($0, containerID: draft) } == read,
+                    "your original never changes")
+
+            // ——— Recipe 7: a long job (VX-256, VX-254, VX-261) — no numbers ———
+            let longJobRecipe = """
+                For a long job, like translating a whole book, ask your AI to check its work as it goes. It can \
+                read a long note a page at a time instead of all at once. Most writes that add or rewrite words \
+                answer with a fingerprint of exactly what was stored (a sha256), so it can confirm every word \
+                landed as it sent it. And if the connection drops partway through, it can look back over its own \
+                recent acts to see which ones landed before it carries on.
+                """
+            #expect(text.contains(longJobRecipe))
+            let longJobText = String(text[longJob.lowerBound...]).replacingOccurrences(of: "sha256", with: "")
+            #expect(longJobText.range(of: #"[0-9]"#, options: .regularExpression) == nil,
+                    "P-VX256-1 is PROVISIONAL: no page number is promised (sha256's own digits aside)")
+            #expect(try tool("read_note").description.contains("Big notes read in pages"))
+            // "Most": these answer a digest, and divide and merge do not.
+            for name in ["add_take", "add_takes", "create_note", "import_document", "insert_blocks",
+                         "duplicate_note", "edit_take", "restore_commit"] {
+                #expect(try tool(name).description.contains(MCPToolCatalog.digestSentence), "\(name) answers sha256")
+            }
+            for name in ["divide_block", "merge_blocks"] {
+                #expect(try !tool(name).description.contains("sha256"), "\(name) answers none — so \u{201C}most\u{201D}")
+            }
+            #expect(try tool("list_my_activity").description.contains("Use it after a dropped call or a lost context "
+                                                                       + "to learn whether a call landed"))
         }
     }
 
@@ -755,7 +1106,38 @@ struct TutorialMCPChapterTests {
     @Test func lessonSevenSeeingAnsweringUndoing() async throws {
         try await withGuideWorld { session, db, guideID in
             let text = try await prose(db, guideID, lessons[6])
-            #expect(text.contains("a small icon beside a book means a client can reach it"))
+            // VX-197 U8b (A JUSTIFIED EDIT, the ritual — VX-184 U2's carry,
+            // VX-185): a gathering wears the icon on the Bookcase too ("a small
+            // icon beside a book means…" before).
+            #expect(text.contains("On the Bookcase, a small icon beside a book or a gathering means a client can "
+                                  + "reach it."))
+            // VX-197 U8b — THE ICON'S ROWS AS BUILT (VX-268 at VX-281; VX-330
+            // at VX-336 U6b; the ⌘L sheet): every host renders the one icon
+            // and declares its acts (`MCPSharedRowsRulesTests`' hosts), and a
+            // book panel chapter that IS its one note wears that note's icon
+            // (`BookPanelMCPMarksTests`). RED ON OLD: "the guide still says
+            // Bookcase only".
+            let wingChord = try #require(CapabilityRegistry.capability(.switchWing).shortcutLabel)
+            let iconRows = """
+                The same icon shows on notes, books and gatherings in the Library, on notes in the Pool, on the \
+                notes listed in the panel that shows a note's book, and on wings in the switcher that \(wingChord) \
+                opens. In that panel, a chapter that shares a row with its only note wears the note's icon.
+                """
+            #expect(text.contains(iconRows))
+            for (host, declared) in [("Library", LibraryCatalogView.surfaceCapabilities),
+                                     ("Pool", PoolPostsView.surfaceCapabilities),
+                                     ("the book panel", BookPanelView.surfaceCapabilities),
+                                     ("the wing switcher", WingSwitcherSheet.surfaceCapabilities),
+                                     ("Bookcase", ShelfView.surfaceCapabilities)] {
+                #expect(declared.contains(.mcpShowSharing), "\(host) renders the shared icon")
+            }
+            let stamp = Date(timeIntervalSince1970: 1_782_864_000)
+            let chapter = ReadingSection(id: "s", readingId: "b", name: "The Red-Headed League", position: "a",
+                                         createdAt: stamp, updatedAt: stamp)
+            let story = Queries.ReadingEntry(postID: "p", title: "The Red-Headed League", entryDate: nil,
+                                             sectionPath: nil)
+            #expect(BookPanelBrain.markedNote(.chapter(chapter, collapsed: story)) == "p",
+                    "a chapter sharing a row with its one note wears that note's icon")
             #expect(text.contains("(through the Home wing grant, say)"))
             #expect(text.contains("with \(MCPShareCopy.change) and \(MCPShareCopy.revoke)"))
             #expect(text.contains("the right end of the context bar above the page, or a lock when the note is Private"))
@@ -769,6 +1151,15 @@ struct TutorialMCPChapterTests {
             // says the same — never "every call".
             #expect(MCPPaneCopy.noActivity.contains("the calls clients made recently"), "the pane says the same")
             #expect(!MCPPaneCopy.noActivity.contains("every call"))
+            // VX-197 U8b — VX-261: a client reads its OWN recent acts, and
+            // Activity says so in the pane's own words (P-VX261-2). RED ON OLD.
+            let checked = MCPPaneCopy.activityLine(MCPActivityFace.Line(
+                id: 1, clientName: placeholderName, act: "list_my_activity", targetKind: nil, targetID: nil,
+                targetTitle: nil, allowed: true, count: 1, at: "2026-10-14T00:00:00.000Z"))
+            #expect(checked == "\(placeholderName) checked its recent activity")
+            #expect(text.contains("A client can look back over its own recent acts as well, which is how it learns "
+                                  + "whether a call landed after a dropped connection; Activity then says "
+                                  + "\u{201C}\(checked)\u{201D}."))
             // Answering — the ask's own buttons and Waiting's own name.
             #expect(text.contains("nothing pops up and nothing interrupts you"))
             #expect(text.contains("a small mark appears beside the place it names"))
@@ -794,6 +1185,16 @@ struct TutorialMCPChapterTests {
             #expect(text.contains("the Edit menu names it after the client: \(placeholder)."))
             #expect(!text.localizedCaseInsensitiveContains("claude"))
             #expect(text.contains("only while Variorum is the app in front; it never brings a window forward"))
+            // VX-197 U8b — Compare from the wire (VX-298) and link_versions'
+            // receipt (VX-187 at VX-336 U6a): both land in Compare. The landing
+            // itself is U6a's `MCPCompareLandingTests` (the Mac batch). RED ON OLD.
+            #expect(text.contains("when it links two notes as versions, \(MCPReceiptCopy.openDoor) shows them side by "
+                                  + "side in \(PostMode.compare.rawValue)."))
+            #expect(try tool("link_versions").description.contains("opens the two side by side in Compare"))
+            #expect(text.contains("Asked to show you a note beside another, it opens \(PostMode.compare.rawValue) "
+                                  + "with them side by side."))
+            #expect(try tool("show_in_app").description.contains("Variorum's Compare with note_id first and each peer "
+                                                                  + "beside it"))
 
             // THE TRUTH — the icon and its why: a book reached through the Home
             // wing grant says so, through the popover's own words.

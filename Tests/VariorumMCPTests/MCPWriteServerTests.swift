@@ -48,10 +48,12 @@ struct MCPWriteServerTests {
             let names = Set(try await connection.client.listTools().tools.map(\.name))
             // U4 (justified edit, the ritual): the read rung gains show_in_app.
             // VX-184 U3 (justified edit, the ritual): suggest gains VX-173's
-            // batch doors and VX-188's delete_comment.
+            // batch doors and VX-188's delete_comment. VX-336 U7 (justified
+            // edit, the ritual): VX-261's list_my_activity is listed for every
+            // approved client (P-VX261-2).
             #expect(names == ["list_books", "list_notes", "read_note", "search", "export_note", "show_in_app",
                               "add_take", "add_comment", "save_lens", "add_takes", "add_comments",
-                              "delete_comment"],
+                              "delete_comment", "list_my_activity"],
                     "a suggest grant lists read + suggest, never a write-new door (P-2)")
 
             let read = try json(try await call(connection, "read_note",
@@ -79,8 +81,11 @@ struct MCPWriteServerTests {
             let labels = try await h.database.read { db in
                 try String.fetchAll(db, sql: "SELECT label FROM variant WHERE label IS NOT NULL ORDER BY label")
             }
-            #expect(labels == ["claude-code · suggested · english", "claude-code · suggested · english"],
-                    "P-13n-3: the fan always says who")
+            // VX-267 (JUSTIFIED EDIT, the ritual — VX-336 U5a, her ruling: "isn't
+            // it obvious it's suggested if it's claude?"): an AI take's label is
+            // `<client> · <label>` now — "suggested" dropped; the who stays.
+            #expect(labels == ["claude-code · english", "claude-code · english"],
+                    "P-13n-3 as VX-267 re-voiced it: the fan always says who")
             #expect(h.undoStack.depth == 3 && h.undoStack.topLabel == "claude-code's lens")
             #expect(h.receipts.value.map(\.act) == [.take, .take, .lens])
 
@@ -310,6 +315,17 @@ struct MCPWriteServerTests {
             calls.append(("delete_note", ["note_id": .string(note.id)]))
             calls.append(("archive_note", ["note_id": .string(note.id)]))
             calls.append(("unarchive_note", ["note_id": .string(otherNote.id)]))
+            // VX-336 U5b (justified edit, the ritual — the proof's completeness
+            // grows with the catalog): VX-255's insert_blocks, at her note's end
+            // (write new) and after her block (edit), each refusing at the rung.
+            calls.append(("insert_blocks", ["note_id": .string(note.id),
+                                            "blocks": .array([.object(["text": .string("x")])])]))
+            calls.append(("insert_blocks", ["note_id": .string(note.id), "after_block_id": .string(one.block.id),
+                                            "blocks": .array([.object(["text": .string("x")])])]))
+            // VX-336 U6a (justified edit, the ritual — the proof's completeness
+            // grows with the catalog): VX-311's duplicate_note, aimed at her
+            // note, refusing at the rung (a copy is a write new in the wing).
+            calls.append(("duplicate_note", ["note_id": .string(note.id)]))
             // …and the read rung's navigation tool (it moves a window, never a row).
             calls.append(("show_in_app", ["note_id": .string(note.id), "block_id": .string(one.block.id)]))
             // And the read rung, for completeness (reads write no take).
@@ -321,7 +337,10 @@ struct MCPWriteServerTests {
                     #expect(result.isError == true, "\(name) refuses under a suggest grant")
                 }
             }
-            #expect(Set(calls.map(\.0)) == Set(MCPToolCatalog.all.map(\.name)).subtracting(["list_books", "list_notes", "search"]),
+            // VX-336 U7 (justified edit, the ritual): VX-261's list_my_activity
+            // names no note, block or take — it reads the caller's own log rows.
+            #expect(Set(calls.map(\.0)) == Set(MCPToolCatalog.all.map(\.name))
+                .subtracting(["list_books", "list_notes", "search", "list_my_activity"]),
                     "every door that names a note, a block or a take was tried")
             #expect(try snapshot() == before,
                     "every take that existed, every chosen pointer and every default is byte-identical")
