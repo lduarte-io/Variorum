@@ -7414,7 +7414,7 @@ Debug app. No real-store MCP calls. No field-guide re-seed. Synchronous foregrou
    dmg <the feed DMG>` PASS (a transient per-POP 404 right after upload: wait and re-verify, NEVER re-upload) → copy the
    feed's `appcast.xml` to `public/variorum/appcast.xml` → bump `src/data/variorum.json` (`version` 0.9.7, `dmg`
    `https://dl.stargazing.tech/variorum/Variorum-0.9.7.dmg`) → `npm run build && npm run deploy` →
-   `Tools/Release/verify-published.sh appcast` PASS → commit (appcast + variorum.json) and push in the site repo. THAT repo's
+   `Tools/Release/verify-published.sh appcast <the feed appcast.xml>` PASS → commit (appcast + variorum.json) and push in the site repo. THAT repo's
    commits DO carry the attribution trailer lines (its own convention). Confirm `https://stargazing.tech/variorum/mcp`
    still answers 200 (cache-busted, `-L`).
 5. **The `/Applications` refresh (the coordinator's rule card, ruling (2)):** zero instances. (a) A1 safety copy of her
