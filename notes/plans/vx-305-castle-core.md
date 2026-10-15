@@ -1149,6 +1149,46 @@ both — chosen: keep both, the realistic crash coverage lives in the world's `c
 the protection suites were green at each fix's commit (the suites each fix touches, named in its commit); the mid-size
 generator batch green at `6020391b` (3 × 40 × ≤ 60, 5,387 steps, 33.6 s Debug).
 
+### HER RULING, 2026-10-14 (mid-U4, to the orchestrator) — THE LEGACY CUT
+
+**Her words, verbatim:** *"I don't want to strang my current store in the pro, air, phone, etc. but I don't need to
+save any backups … we don't need to keep every store shape today's builds ever left. they don't need to keep opening
+forever. as long as everyone's current store stays fine to open, we really don't need anything else (I can do a
+plaintext export if you're really concerned about the current one breaking). But we might be able to simplify phase 2
+because we do NOT need to keep supporting anything that's ever happened."* Clarified the same hour: *"once we have
+changed the system design the new backups made after this is all released should keep working on an ongoing basis.
+I'm just saying any current backup support is unnecessary - it's literally me and like 3 beta testers and i doubt any
+of them have ever made backups."* Question-tool picks: **old copies drop** (the new system's own pairs keep the full
+guarantee); **Previous Libraries / set-aside stores / other libraries' old copies take the same cut.**
+
+**What STANDS:** every CURRENT store migrates (all of §6's starting shapes are current-store shapes — exposed,
+Standard-waiting, corner 45, escrow, stuck markers, the two-Macs-one-library hand-off where both stores are live);
+the NEW system's own backup pairs keep the full opens-with-its-day's-secrets guarantee (the anchor, the history, the
+family tree — the VX-263 rulings, unchanged going forward); the A1 safety copy + the old-build road back through the
+transition (§3.13 step 9); the old shared key's retirement checks for CURRENT stores and vaults elsewhere; the
+catalog/retention/offer still LIST and DELETE old copies as files (VX-265's delete choice survives) — they just
+don't open.
+
+**What DROPS:** pre-rebuild copies opening on the new system, Previous Libraries and set-aside stores from before
+the switch, other libraries' old copies — and therefore: the migration's fold beyond the current key; §3.5 point 2's
+gift machinery (per-library key files + own Apple keys for OTHER libraries' old copies); the legacy readers'
+keep-forever role (they become migration-only); the "copy with no record" open road; the retirement sheet's old-copy
+listings. An old copy meets an HONEST REFUSAL naming its roads: an old build, or a plaintext export.
+
+**Where it lands:** the design's §1/§3 amendments at this phase's MERGE MOMENT (the closeout's canon-delta step);
+phase 2's plan (vx-306) is WRITTEN TO THE CUT; the now-dead model arms U1–U3 built (the fold-beyond-current, the
+gifts) are removed with their tests at phase 2's first act — phase 1 closes with the model as built and green.
+
+**U4 scenario deltas (the §6 list, re-read under the ruling):** SUPERSEDED — the old key's fold-then-retirement
+"no stranded copy" scenario and its mutation pin (the fold shrinks to the current key; old copies stranding is now
+the ruled, honestly-said outcome); the older-library-of-another-library opening scenarios (both variants); "a copy
+made before this change, of another library, lands in Standard"; any scenario whose point is a pre-rebuild copy
+OPENING. RE-POINTED — W-1/VX-263's fixed scenario proves the guarantee on a NEW-system pair; "this library's own
+Castle-era copy restored after a leave" is built with a new-system pair. KEPT UNCHANGED — every current-store
+scenario (the two-libraries-on-one-account second Mac, today's shapes through the migration, the old build's crashed
+act, the pre-change two-Macs hand-off, and the rest). U4 records each skipped scenario as "superseded by this
+ruling", never silently.
+
 ## 9. The ladder (the Fable reviewer's report per round, committed unedited, then the dispositions)
 
 *(empty)*
