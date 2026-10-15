@@ -1385,14 +1385,14 @@ leg traces and PROPOSES; the architect rules before anything ships. Any stage wo
   `TEST_RUNNER_VARIORUM_U1C_PIN=1` until the ruling); `build-for-testing` green again, products in
   `DerivedData/vx283-u1`.
 - T1b — the candidates measured in the probe (scratchpad copies only; nothing in the repo): DONE — below ("T1b").
-- T3 — the stage window: **READY FOR STAGE — from `App/Variorum/`: `TEST_RUNNER_VARIORUM_U1C_TRACE=1
-  TEST_RUNNER_VARIORUM_U1C_PIN=1 xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath
-  DerivedData/vx283-u1 test-without-building -only-testing:VariorumTests/SidebarSectionWindowMountTests
-  -test-iterations 3` (the six pins + the two harnesses + the proposed pin, ×3), ≈8 min with the store/prefs copy
-  and restore.** Expected: the proposed pin RED on HEAD; the Starred pin red or green by the race; the traces
-  printed (`[U1c]`).
-- T4 — the proposal with the trace as its evidence, and the pin: DRAFTED below ("T4 — THE PROPOSAL"), PENDING T3's
-  mounted confirmation.
+- T3 — the stage window: **DONE** (claim `vx283-u1c` 22:40:31 → released 22:42:12, the coordinator's GO line) — it
+  **CONFIRMS the probe on all four of the ruling's conditions** ("T3 — THE MOUNTED RIG'S FACTS" below).
+- T4 — the proposal: RULED by the orchestrator (2026-10-14 ~22:40, conditional on T3 — met): **(c1), recorded as
+  P-U1c-1** ("U1c — THE ORCHESTRATOR'S RULING" below).
+- T5 — P-U1c-1 built (the trigger, the backstop's scheduling, the pure pin, the ungated mounted pin, Q5's correction,
+  the oracles' disposition): IN-PROGRESS.
+- T6 — R-H prebuilt (the trigger back to the 0.5-pt step rule) + headless rebuilds: NOT-STARTED.
+- T7 — the closing window (the 93-suite batch + the mount suite ×5 + R-H + the store and prefs restore): NOT-STARTED.
 
 **T1 — WHAT THE PROBE ESTABLISHED** (scratchpad `u1c-probe/`: `main.swift` compiled with the REAL
 `Core/Views/SidebarLayout.swift` and the instrumented REAL `Features/Library/SidebarSectionWindow.swift`, the app's own
@@ -1451,6 +1451,66 @@ where the groups below Starred actually ARE, frame by frame):
 - **The proposed pin's logic, run in the probe** (forced layout + 4-ms turns for 1 s; the row must stand where it
   settles 100–150 ms after the viewport reaches its settled height): **HEAD RED 4/4** (offsets 22–28.5 standing there);
   **(c1) GREEN 4/4**.
+
+**T3 — THE MOUNTED RIG'S FACTS** (2026-10-14 22:40–22:42, products at `57d7911d`'s code; `TEST_RUNNER_VARIORUM_U1C_TRACE=1
+TEST_RUNNER_VARIORUM_U1C_PIN=1 xcodebuild … test-without-building -only-testing:VariorumTests/SidebarSectionWindowMountTests
+-test-iterations 3`; log `notes/plans/vx283-screens/u1c/logs/t3-mount-x3.log`, gitignored): **"✘ Test run with 9 tests
+in 1 suite failed after 48.513 seconds with 13 issues"** — no skipped tests (the env gates opened). Per repetition:
+`returning…` ✔✔✔ (resting 248.98 · 249.07 · 249.09 of 249), `aShorterList…` ✔✔✔, `aCloseNoteLanding…` ✔✔✔,
+`theOpenListFades…` ✔✔✔; **`aNewNoteOpenedFromThePlaces…` ✔✘✘** (the Open list's window ends at 599.41 / 599.34 of 600 —
+bottom fade 0.59 / 0.66: the same tail on the Open list, which earlier windows saw inside the slack); **the Starred pin
+✘✘✘** (offsets 34 · 35 · …); **the proposed pin ✘✔✘** (rep 1: offset 34.5 standing from +0.361 to +0.404 s, the beat
+ended at +0.261 s, the window settles at 36); both harnesses ✔ ×3 (they assert nothing). Six traces (three driven by
+`SectionRig.settle`'s forced layout, three UNDRIVEN — frames from the display only):
+
+| run | viewport changes in the beat (≤ 0.5 pt) | AppKit frame cadence | last effective re-ask | offset when the beat ends (vp 180.000) | settle would return | backstop fires → lands |
+|---|---|---|---|---|---|---|
+| 1 driven | 38 (6) | 6.1 ms | +0.260 s at vp 180.238 → target 35.76 | **36** (cut 0 — the lucky case) | +0.508 s | +0.567 s → NONE |
+| 2 driven | 48 (14) | 5.0 ms | +0.234 s at vp 181.483 → 34.52 | **34.5** (cut 1.5) | +0.512 s | +0.546 s → 36 |
+| 3 driven | 47 (18) | 5.2 ms | +0.224 s at vp 182.843 → 33.16 | **35** (cut 1.0) | +0.527 s | +0.550 s → 36 |
+| 4 undriven | 53 (14) | 4.4 ms | +0.235 s at vp 181.168 → 34.83 | **35** (cut 1.0) | +0.529 s | +0.546 s → 36 |
+| 5 undriven | 49 (15) | 5.0 ms | +0.234 s at vp 182.049 → 33.95 | **34** (cut 2.0) | +0.506 s | +0.550 s → 36 |
+| 6 undriven | 49 (15) | 5.0 ms | +0.243 s at vp 181.131 → 34.87 | **35** (cut 1.0) | +0.505 s | +0.552 s → 36 |
+
+- **(1) per-frame viewport readings through the beat — CONFIRMED:** 38–53 viewport changes per beat, every AppKit frame
+  (4.4–6.1 ms) reported, driven or not; the content jumps once at the commit (270 → 222 → 216, as in the probe — the 222
+  is eight rows re-laid at 24 beside the ninth, unrealized row still estimated at 30); the three commit-time reveals
+  answer NONE against the still-225-tall window.
+- **(2) a final reading at the end — CONFIRMED:** every run reads `vp 180.000` as the beat's last frame, and the settled
+  backstop reads that fresh window (`off 34.5 vp 180 → target 36`) and lands exactly. **Q5's claim that "once the
+  animation ends no reading arrives" is REFUTED for this road** (corrected at Q5 below).
+- **(3) the proposed pin red on HEAD — CONFIRMED:** red 2 of 3 in its own runs; red exactly when the tail manifests —
+  5 of the 6 traces ended the beat 1–2 pt short. The one exact landing (run 1) is the predicted lucky case: a ≥ 0.5-pt
+  final step whose re-ask computed at vp ≤ 180.25, so the pixel grid rounded its target (35.76) up to 36.
+- **(4) the race — CONFIRMED, and lopsided in the mounted rig:** `SectionRig.settle` would return at +0.505–0.529 s and
+  the backstop fires at +0.546–0.567 s (the last request + ≈0.31 s) — AFTER the settle in all six runs; the Starred pin
+  therefore reads the pre-backstop offset every time (red 3/3 here; Q9's lone green is run 1's lucky landing or a
+  slower settle).
+- **Undriven = in use:** the display-only runs (4–6) show the same tail (cut 1–2 pt for ≈0.28 s, then a 1–2-pt snap),
+  so what she sees is a small, brief cut and a hop; the rig's forced layout changes nothing material.
+- **Observed, not this leg's:** SwiftUI logs `[Invalid Configuration] <OnScrollGeometryChange Modifier> tried to update
+  multiple times per frame` (28) and `Geometry action is cycling between duplicate values` (168) — ≈10 per Starred
+  mount, 26–42 on the walker's-road test. **Pre-existing:** every earlier window's log carries them, R-D's (the pre-U1b
+  reveals) included (34). Untraced; the closing window checks that (c1) does not grow the count.
+- **Restore:** the dev store's three files byte-identical before the copy-back (the test host writes no store), copied
+  back from `store-before/` and `cmp`-verified each; prefs: none added, 2 CHANGED (`variorum.backup.log`,
+  `IdleCommitSweepMark.Variorum-dev`) — `defaults import`, re-export, diff CLEAN (1602 = 1602); `castle-W1-20261013`
+  untouched; zero dev instances throughout.
+
+#### U1c — THE ORCHESTRATOR'S RULING (2026-10-14 ~22:40 — P-U1c-1, conditional on T3; the condition met)
+
+*Verbatim in substance from the orchestrator's GO message:* if T3 confirms the probe (per-frame viewport readings
+through the beat, a final reading at the end, the proposed pin red on HEAD, and the race), build **(c1)**, recorded as
+**P-U1c-1**: the viewport re-ask fires on ANY change of viewport (`new.viewport != old.viewport`). **Sub-call 1 — the
+backstop: KEEP it, scheduled only by the DISCRETE triggers** (the current row, the content height with P-U1b-7, the row
+height, the mount's first reading). **Sub-call 2 — the per-frame viewport re-ask calls `reveal()` DIRECTLY** (no
+backstop Task per frame). Ungate `theNinthStarIsClearTheMomentTheBeatEnds`. Add the clock-free pure pin (the trigger as
+a `SidebarLayout` decision run through a simulated eased shrink on the 0.5-pt grid; red on the old 0.5-pt step rule,
+green on any change). Correct the record's Q5 claim. The trace sink and the two harnesses: kept DEBUG/env-gated as
+oracles if cheap and tidy, else removed — the implementer's call, recorded. Then rebuild headless, prebuild **R-H** (the
+trigger back to `abs(…) > 0.5`; expected red: the ungated pin and the pure pin), commit and push per piece, and end at
+READY FOR STAGE for the closing window (the 93-suite batch + the mount suite `-test-iterations 5` + R-H + the restore;
+expected: only VX-245's lint red in the batch, the mount suite 5/5 green, R-H red as named).
 
 **T4 — THE PROPOSAL (DRAFT — PENDING T3's mounted confirmation; nothing built):**
 - **The traced mechanism, in one breath:** the rail's implicit animation delivers Starred's 45-pt viewport shrink as a
