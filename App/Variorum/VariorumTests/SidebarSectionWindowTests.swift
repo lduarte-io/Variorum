@@ -453,8 +453,7 @@ struct SidebarSectionWindowMountTests {
             await rig.go(.post(rig.notes[8]))
             depth = rig.depth(rig.starred, rows: 9)
             #expect(rig.starred?.fades == SidebarLayout.EdgeFades(top: depth, bottom: 0),
-                    "the ninth star revealed: \(String(describing: rig.starred?.fades)) over "
-                        + "\(String(describing: rig.starred?.window))")
+                    "the ninth star revealed: \(String(describing: rig.starred?.fades)) over \(String(describing: rig.starred?.window))")
         }
         try await withRig(height: 900, openNotes: 3, starred: 5, startOn: nil) { rig in
             #expect(rig.starred?.fades == SidebarLayout.EdgeFades.none,
