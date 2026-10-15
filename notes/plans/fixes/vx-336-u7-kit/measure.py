@@ -10,7 +10,7 @@
 # cost (it includes the previous assistant message's own output). Writes <leg>-measure.txt too.
 import json, os, sys
 
-U = "<home>/dev/variorum-vx-336/notes/plans/vx336-screens/u7"
+U = os.environ.get("U7_SCREENS", "<home>/dev/variorum-vx-336/notes/plans/vx336-screens/u7")  # U7c: overridable
 leg = sys.argv[1]
 
 def lines(path):

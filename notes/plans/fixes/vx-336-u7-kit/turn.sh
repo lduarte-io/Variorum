@@ -9,9 +9,9 @@
 set -u
 S="${U7_SCRATCH:?set U7_SCRATCH to the runner's scratchpad}"
 R="<home>/dev/variorum-vx-336"
-U="$R/notes/plans/vx336-screens/u7"
+U="${U7_SCREENS:-$R/notes/plans/vx336-screens/u7}"   # U7c: overridable for a later window (U8b)
 LEG="$1"; TOOLS="$2"; MODE="${3:-tee}"
-SHIM="$R/App/Variorum/DerivedData/vx336-u7/Build/Products/Debug/Variorum.app/Contents/MacOS/variorum-mcp"
+SHIM="${U7_SHIM_PATH:-$R/App/Variorum/DerivedData/vx336-u7/Build/Products/Debug/Variorum.app/Contents/MacOS/variorum-mcp}"   # U7c: overridable
 KIT="$R/notes/plans/fixes/vx-336-u7-kit"
 CFG="$S/keys/cfg-$LEG.json"
 mkdir -p "$U/tee" "$U/logs" "$S/proj"

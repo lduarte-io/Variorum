@@ -4207,7 +4207,7 @@ paging parameters is byte-unchanged, and so is the one not-shared shape.
 | 1 | the pins on the OLD tree (Tests only) → RED, counts read from the run's own output | DONE (this commit) — see THE PINS below: 22 tests, 9 failed, 18 issues on `0b1be274`'s product |
 | 2 | the product: the answer budget (`MCPNoteStructure`, `MCPReadTools`'s shared encoder + the version echoes) + `read_note`'s description; builder B's budget pins re-pinned (each edit commented) → GREEN | DONE (this commit) — the four suites 24/24 green (read from the log; THE DESIGN AS BUILT and THE GREEN RUN below); one more of builder B's pins re-pinned (the clamp, a FINDING); the whole package's finals are piece 4's, PENDING |
 | 3 | the revert check (announced here and committed BEFORE it runs; restore verified) | DONE (this commit) — announced in `39fb5320` before any arm ran; four arms on that tree, each undone by `git checkout HEAD -- Sources`; the restore verified (status clean, 25/25 green) — THE REVERT CHECK's results below |
-| 4 | headless finals (whole package) · the measured page sizes · FOR VX-234 · PROVISIONAL · the RE-PROBE for U8b · OWED | NOT-STARTED |
+| 4 | headless finals (whole package) · the measured page sizes · FOR VX-234 · PROVISIONAL · the RE-PROBE for U8b · OWED | IN-PROGRESS — the record parts written (this commit: PROVISIONALs, FOR VX-234, THE RE-PROBE + the kit's three prompts and two env overrides, SELF-ASSESSMENT, OWED); the whole-package finals PENDING (`swift test`, next) |
 
 ### THE DESIGN AS BUILT (piece 2 — the ruling applied to code; no fork: every choice below follows the ruling's letter)
 
@@ -4377,6 +4377,117 @@ seated 2 blocks, **33,366** — 3 issues); P-U7c-4b (page 1 seated all 4, 32,957
 87,984 — 2 issues); P-U7c-6 (2 issues, the words); the re-pinned P-256-2 ([3, 1]) and F-256-7 (2 blocks; 1 + 1
 issues). The other 13 GREEN (builder B's unchanged pins and both guards). The live round's 65,807 vs this run's 65,712:
 the same 161-block page; the ids and the book's name differ.
+
+### PROVISIONALs (the orchestrator files them at the merge)
+
+- **P-VX256-1, RE-RULED (the orchestrator's ruling at U7's window, PROVISIONAL for her eye) — the page bound is the
+  SERIALIZED ANSWER.** Options: **(a) AS BUILT — 32,000 characters of answer**, the ruled number (between the measured
+  inline 43,062 and spilled 50,984 for prose, with margin for `ids_only`'s denser tokens: the 116-block `ids_only` page
+  is 31,928 characters ≈ 21k tokens at U7's ≈ 1.5 a token); (b) a higher answer budget nearer the measured threshold
+  (e.g. 40,000) — fewer pages, `ids_only` near the 25,000-token default; (c) a per-form budget (prose vs `ids_only`) —
+  two numbers to explain where one suffices. The edges this unit decided under (a), each the ruling's letter or the most
+  spec-defensible reading, for her eye:
+  - **(e1) the floor over the carriage:** page 1 always carries its first block, even when its note-wide carriage alone
+    leaves no room (P-U7c-4b: 32,443). Options: (i) AS BUILT (D-256-2's "a page always holds at least one whole block");
+    (ii) a block-less first page carrying only the carriage and a `next_cursor` (a new shape: a page of zero blocks);
+    (iii) move the note-wide lists to a page of their own always (a change to F-256-7's ruling — not this unit's).
+  - **(e2) the unit:** UTF-16 code units (D-U7c-3). Options: (i) AS BUILT (what the measuring client counts; never fewer
+    than any other reading of "characters"); (ii) Unicode scalars (Python's count — up to 2× looser on emoji-heavy text);
+    (iii) UTF-8 bytes (stricter still, but not "characters").
+  - **(e3) commit text in what is left — a newest-first PREFIX:** the first unasked text that does not fit ends them
+    (D-U7c-5). Options: (i) AS BUILT (the unpaged walk's own rule, minus its empty-text quirk); (ii) first-fit — keep
+    scanning older, smaller texts that still fit (more text per page, a non-prefix the client must reason about).
+  - **(e4) an asked commit counts with its block.** `commit_ids` texts are part of the answer, so a text larger than
+    what its page leaves after the blocks before its own pushes that block off the page, and the ask refuses with
+    P-VX256-4's words ("…isn't a commit of a take on this page."); such a commit rides only where its block heads a
+    page. Options: (i) AS BUILT (the ruling's letter: every multi-block page ≤ 32,000); (ii) the asked commits' blocks
+    are always kept and their texts ride on top of the page decided by metadata ("the same cursor gives the same page",
+    the answer then past the budget by what was asked); (iii) as (i), with a refusal that names the cursor to ask from
+    (new words — U8/VX-234's). Practically rare: a commit that large belongs to a take that was once that long.
+- **A FINDING, not a fork (no product change — `limit` 200 stands as ruled):** no 200-block page fits 32,000 (the
+  smallest block entry ≈ 207 characters), so `limit` above ≈ 150 never ends a page (D-U7c FINDING above).
+
+### FOR VX-234 (user-facing words, AS BUILT — U7c)
+
+- **No pane word changed.** The paged read's Activity line ("‹client› read “‹note›” (N times)") is unchanged; a page
+  now holds fewer blocks, so a long note's N is larger (sherlock at `limit: 200`: 3 pages, was 2).
+- **`read_note`'s description (model-facing; U8 polishes)** — ONE sentence changed, everything else byte-identical:
+  "A page also ends once its takes' text passes about 32,000 characters — a block is never split — and commit text rides
+  in what is left of that; the first page says block_count." → **"A page also ends once the answer reaches about 32,000
+  characters (a block is never split; a single larger block comes alone), and commit text rides in what is left of
+  that; the first page says block_count."**
+- The inputs' words (`limit`, `cursor`, `ids_only`) unchanged.
+
+### THE RE-PROBE — for U8b's window (NOT run here; the runner runs it under U8b's claim, on U8b's product)
+
+**What it proves:** the three probes U7's window failed now arrive INLINE in Claude Code — read from BYTES, never the
+client's wording. **The note:** sherlock ▸ "The Red-Headed League" in the dev store (block_count 215, 49,007 characters
+of take text — this unit's fixture is the same text, same segmentation). **Reach:** the window's grant must read the
+sherlock book (U7's Home · Edit · Always serves; a read grant on the book suffices).
+
+**The kit** (`notes/plans/fixes/vx-336-u7-kit/`, U7c added two env overrides with the old defaults and three prompts):
+- `U7_SCRATCH` = a FRESH scratch directory outside the repo (its `keys/u7.key` = ONLY the key from the Claude Code
+  tab's copy, the clipboard emptied at once; never the copied line, never `-s local`, never her user scope).
+- `U7_SHIM_PATH` = U8b's product's shim, e.g. `$R/App/Variorum/DerivedData/vx336-u8/Build/Products/Debug/Variorum.app/Contents/MacOS/variorum-mcp`
+  (the default is U7's product — rebuild or override; the product must carry U7c, i.e. contain `d807cca6`).
+- `U7_SCREENS` = the window's gitignored evidence folder, e.g. `$R/notes/plans/vx336-screens/u8` (default `…/u7`).
+- **Never `claude mcp list` (nor `get`)** — `turn.sh` runs `claude -p --strict-mcp-config --mcp-config <scratch cfg>
+  --output-format stream-json --verbose --allowedTools <tools>` with the PROMPT ON STDIN, the shim tee'd both ways.
+
+**The three turns** (ONE read each, so each answer is measured alone; `K=notes/plans/fixes/vx-336-u7-kit`, from the repo
+root, the three env vars exported):
+1. `zsh $K/turn.sh U7c-200 "mcp__variorum-dev__list_books,mcp__variorum-dev__list_notes,mcp__variorum-dev__read_note" < $K/prompts/U7c-200.txt`, then `python3 -I $K/measure.py U7c-200`
+2. `zsh $K/turn.sh U7c-100 "mcp__variorum-dev__list_books,mcp__variorum-dev__list_notes,mcp__variorum-dev__read_note" < $K/prompts/U7c-100.txt`, then `python3 -I $K/measure.py U7c-100`
+3. `zsh $K/turn.sh U7c-ids-200 "mcp__variorum-dev__list_books,mcp__variorum-dev__list_notes,mcp__variorum-dev__read_note" < $K/prompts/U7c-ids-200.txt`, then `python3 -I $K/measure.py U7c-ids-200`
+
+**How inline is read from bytes (`measure.py`, as U7's window did):** it pairs each `mcp__variorum-dev__read_note`
+tool_use in `<screens>/<leg>.jsonl` (stream-json: what the MODEL received as its tool_result) with the `tools/call`
+the tee recorded (`tee/<leg>-in.jsonl`) and the server's answer by JSON-RPC id (`tee/<leg>-out.jsonl`), and prints the
+server's answer size, the size of what the model received, and **INLINE iff the model's tool_result text equals the
+server's answer text** (else NOT-INLINE with the first 300 characters of what arrived — U7's spill was "Error: result
+(N characters across 1 line) exceeds maximum allowed tokens. Output has been saved to …"). For a read_note page it also
+prints blocks, block_count, next_cursor and the page's take-text characters.
+
+**Expected (from this unit's headless measurement of the same text):** (1) `limit: 200` → **72 blocks, ≈ 31,950
+characters, next_cursor, block_count 215, INLINE**; (2) `limit: 100` → the same 72-block page (the answer bound ends it
+before the limit), INLINE; (3) `ids_only`, `limit: 200` → **116 blocks, ≈ 31,930 characters, INLINE**. Every answer's
+size must read ≤ 32,000 in `measure.py` (Python counts code points, never more than the product's UTF-16 count). Any
+NOT-INLINE is a FINDING for the orchestrator (the budget's number), recorded and not fixed in the window. The dev store
+ids differ from the harness's, so the sizes may differ by a few characters; the block counts should match.
+
+### SELF-ASSESSMENT (the implementer's)
+
+The ruling is built to its letter: a page ends at `limit` or as soon as the next block would carry the serialized
+answer past 32,000; the measure is the wire's own encoder (one function now); the first page's carriage and a version's
+echoes are inside the measured answer; a larger block comes alone; `ids_only` is bounded the same; every unpaged form
+and the fence are byte-unchanged (the two guards green unedited). Every new pin was red on builder B's product by its
+own mechanism and green after; the revert arms each failed exactly the pins naming their mechanism (arm (b) caught the
+echoes twice; arm (d) showed the fullness check — not the bound — is what pins the arithmetic, and the final measurement
+holds the bound even when the arithmetic is wrong). What I'd have a reviewer press on: **(1)** the piece-sum's exactness
+claim (a sorted compact JSON object is its pieces joined by commas) — arm (c) and the fullness check are its evidence;
+**(2)** the asked-commit edge (e4) — the letter's consequence, recorded with options; **(3)** the floor over the carriage
+(e1); **(4)** cost: each page serializes every candidate's entry once, the base once, the finished answer once (≈ 3× the
+answer, ∝ the page; the take-text walk now only bounds which candidates' carriage is read); **(5)** P-U7c-1 reads the
+bundled sherlock text from `App/Variorum/Shared/SampleLibrary/` by `#filePath` (the `SampleBookDrillTests` precedent)
+and `#require`s it sherlock-sized, so a moved resource fails loudly, never silently passes; **(6)** builder B's three
+re-pinned pins (P-256-2, F-256-7, P-256-1b) — each edit commented in the file with why its meaning changed.
+
+### OWED (U7c → the orchestrator)
+
+1. **The re-probe** (above) rides U8b's window, on a product containing `d807cca6`.
+2. **MCPSpec at the merge** (builder B's OWED 2, amended): the paged `read_note` contract line says the ANSWER bound —
+   "a page ends at `limit` blocks or once the answer reaches about 32,000 characters (a block is never split; a single
+   larger block comes alone); the first page's note-wide carriage counts toward it; `ids_only` pages are bounded the
+   same" — not the take text.
+3. **U8a's continuation:** its instructions / field-guide truth must say the answer bound wherever they mention paging
+   (none of U8a's words is written yet; the description's sentence above is the model-facing truth).
+4. **The FINDING:** `limit` above ≈ 150 never ends a page under the answer bound (no product change; ruled). For her
+   eye at the ratification, beside P-VX256-1.
+5. **The PROVISIONAL** P-VX256-1 re-ruled + its edges (e1)–(e4) → QUESTIONS at the merge.
+6. **No ticket minted.** One proposal, only if the orchestrator rules (e4) worth a follow-up: an Improvement, Evidence
+   Test-only, Area MCP, Priority Low — "a paged read's asked commit larger than its page's room is reachable only where
+   its block heads a page".
+7. **No Mac change** (no app file moved): no Mac build or suite owed by U7c; the stage was never needed.
 
 ## U8a UNIT RECORD — the model-facing words: `MCPSession.instructions`, the tool descriptions, the stargazing brief's delta (VX-197; opus-implementer, from 2026-10-14 ~20:40 MDT)
 
