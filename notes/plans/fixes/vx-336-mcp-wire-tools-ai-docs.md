@@ -250,6 +250,16 @@ guidance. Each unit's evidence is named before its spawn.
 
 ## Her rulings during the run (verbatim; each also on its ticket)
 
+- **THE STARGAZING PAGE IS OURS TO PUBLISH (2026-10-15 ~00:15 MDT, in chat), verbatim:** *"honestly - just go ahead and do the
+  stargazing MCP link yourself. the stargazing agent doesn't have to do that part, you can do that part rather than the
+  brief"*.
+  - This run builds and DEPLOYS the page `https://stargazing.tech/variorum/mcp` itself, in the site repo
+    (`~/dev/stargazing.tech/stargazing-tech`), from the brief's content (`notes/stargazing-mcp-guide-brief-2026-10-12.md`).
+  - The site repo's own CLAUDE.md binds there: its subagent policy, the matte style, `COMPLETED.md` and `DECISIONS.md`
+    kept current, and its hard rule that published prose is hers. The page therefore carries the site's PLACEHOLDER marker
+    noting it was drafted at her word, and is listed in PLAN.md's content-owed section.
+  - The page goes live BEFORE any build carrying the instructions' link ships, so R-VX184-4 is met by the page existing.
+  - **Ruling 3's gating is SUPERSEDED:** the link sentence stays in `MCPSession.instructions`.
 - **HER OVERNIGHT WORD (2026-10-15 ~00:05 MDT, in chat), verbatim:** *"I am going to sleep, rule provisionally overnight in
   my absence and leave me a handoff in the morning. you or 283 can merge last, whoever does should have a release build
   ready, write notes on what was updated (I don't have to review those notes, it's fine), and push a release to the
@@ -290,7 +300,7 @@ guidance. Each unit's evidence is named before its spawn.
    road). It is the same class VX-246 fixed, on a road this run's tools speak through, and a fence breach is a launch
    matter, so it is fixed in-run, red-first. Pre-launch is HER call on the ticket (High, flagged). Option: (b) ticket
    it for later.
-3. **The stargazing gate vs tonight's release (2026-10-15 ~00:05).**
+3. ~~**The stargazing gate vs tonight's release (2026-10-15 ~00:05).**~~ **SUPERSEDED ~00:15 by her word** (Her rulings during the run: the stargazing page is ours to publish). The page goes live before the release, and the link stays. Kept for the record:
    - **The conflict:** her overnight word asks for a public release to the website. Her standing gate R-VX184-4 says *a
      build carrying the instructions' link to `https://stargazing.tech/variorum/mcp` must not ship before the page is
      live*, and the page answered **404** at 00:05 (checked by the orchestrator).
