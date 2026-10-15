@@ -3142,7 +3142,131 @@ orchestrator before; restored + diffed by the walker after.
 
 #### U2 + U3b — WALK RECORD
 
-*(The walker writes one line per row here.)*
+**Walker:** a fresh Opus 5.5 at xhigh (no implementer of any VX-283 leg), 2026-10-15 15:59 → 16:21, on the
+orchestrator's claim `vx283-walk` (not claimed, stolen or released by the walker). Product: the tip-built
+`App/Variorum/DerivedData/vx283-u2/…/Debug/Variorum.app` (not rebuilt), launched with `open -n`, **PID 55680**,
+told apart by its path; her app absent throughout; the host `AX: true SCREEN: true`. Posture at launch: Standard,
+unlocked (the Bookcase came up), voice Study, appearance follow system (light); **no What's New sheet showed**. The
+window was 1380 × 900 at (60, 36) for D1–D6, 1380 × 700 for one D1 variation, and 1380 × 620 for D7. **The sidebar
+rect is 60,36,236,H** (H = the window height), captured as 2× region captures. Screens are in the gitignored
+`notes/plans/vx283-screens/u2/walk/`; every image cited was opened and looked at. D5's verdicts are also
+pixel-measured (luminance per scanline at the clip). **D8 is DEFERRED to U3c's re-walk.** The `vx283-u3b` product
+was not launched.
+
+- **D1 — the line and the chip · the chip HOLDS; the line DOES NOT HOLD (no line is ever drawn).**
+  - The chip: the row's title chip sits centred on the grab point, at the cursor with no offset, in both voices:
+    `D1-study-light-upper-wide.png`, `D1-study-light-lower-wide.png`, `D1-noteview-study-light-mid-zoom.png`,
+    `D1-terminal-dark-mid-zoom.png`.
+  - The line: across every mid-drag capture there is no 2-pt ring line between the rows, in the upper half, the
+    lower half or the end zone, in Study light or Terminal dark. A pixel scan of the rows' band found no line pixels.
+  - Seven honest variations, all the same:
+    - 12 steps at 120 ms;
+    - a 700-ms press-hold, then 250-ms steps;
+    - after a window resize;
+    - with the list overflowing and hand-scrolled (the 700-pt window);
+    - out of the list into the content and back in;
+    - in a note view;
+    - in Terminal dark.
+  - AppKit's log shows `kCoreDragTrackingInWindow` all through the drag, so the drag session is live.
+  - **CONTROL:** in the same session, the same `cliclick dd/dm/du` road dragging the Bookcase book "starred notes"
+    over the Welcome shelf chip lights that target's green ＋ badge (`D4f-bookcase-chip-study-light.png`). So synthetic
+    drags do reach SwiftUI drop targets in this window. The Open list's targets never draw a line.
+  - Whether its delegate is never reached, or answers `.forbidden`, cannot be told from outside. The code fact the
+    orchestrator may want: `perform` refuses when `dragging != nil` and `lineTop == nil`, so whatever keeps the line
+    from drawing also refuses the drop.
+- **D2 — the four drop cases · DOES NOT HOLD (no drop lands).** In each case the before and after are
+  byte-identical, and in the `after-t0` / `-t03` frames the chip slides back to its origin (the system's refused
+  drop). The settle is therefore unobservable.
+  - (a) Row 2 onto row 3's lower half: `D2a-study-light-strip.png` (before · mid · t0 · t0.3 s · after).
+  - (b) Row 1 down onto row 8's upper half; (c) row 2 into the end zone; (d) row 10 up onto row 4's upper half:
+    `D2bcd-D3-study-light-strip.png`, plus each `D2{b,c,d}-study-light-{before,mid,after-t0,after-t03,after}.png`.
+- **D3 — a no-op drop (row 3 onto its own gap) · HOLDS, VACUOUSLY.** No line shows and nothing moves
+  (`D3-study-light-*.png`). But no line shows anywhere, so this row cannot discriminate.
+- **D4 — nothing regressed on the rows · HOLDS for click · ✕ · right-click · ⇧⌘W · the Bookcase chip; the FILE DROP
+  is NOT PROVEN.**
+  - Click opens: "a escola" opened in Write, its row washed (`D4a-click-opens-study-light-window.png`).
+  - ✕ closes a non-current row, and the current row is kept (`D4b-x-strip-study-light.png`).
+  - Right-click menu: Open Beside · Open in New Window · Star · Close · Close All Notes
+    (`D4c-rightclick-menu-study-light.png`).
+  - ⇧⌘W closes the current note and lands on the next row (`D4d-shiftcmdw-strip-study-light.png`).
+  - The Bookcase book drag shows its title chip at the cursor (`D4f-bookcase-chip-study-light.png`).
+  - The file drop: a cliclick drag of a probe `.md` from a Finder window onto the Open list showed no file image at
+    the cursor (`D4e-filedrop-mid-terminal-dark.png`), nothing landed (`D4e-filedrop-after-terminal-dark-window.png`),
+    and ⌘K finds no "walk import probe" (`D4e-filedrop-palette-check.png`). The Finder-side drag most likely never
+    began, so this is inconclusive either way. The Finder window was closed and the probe file lives only in the
+    scratchpad.
+- **D5 — P-U1e-1, the fade ramp · HOLDS in Study light and Terminal dark.**
+  - Setup: "export: it's all yours" (descenders p and y; here also the current row with its wash) was appended by ⌘K
+    as the last row. The note view's list overflows at 30-pt rows. Each state is a hand scroll to the end, then ONE
+    pixel-unit wheel event N px up (`pxscroll`).
+  - Unfaded ink contrast at the glyph tops: Study 0.83 (ink 38 on the pill's 230); Terminal 216 on 31.
+  - **5 pt short:** the descenders are whole and end ~2.5 pt above the clip, eased (0.37 at their foot).
+  - **7 · 9 · 12 pt short:** the clip cuts the descenders (7, 9) or the letters' feet (12). But the ink AT the clip
+    scanline keeps only 0.16–0.17 contrast in Study (≈ 20 % of unfaded, the 0.8 cap), and 37–47 on 7–8 in Terminal
+    (≈ 17–21 %). It reads as a faint ghost, against U1d's ~60 % at 7 pt.
+  - Files: `D5-{5,7,9,12}-{study-light,terminal-dark}.png` (+`-zoom-bottom`, `-zoom-top`) and
+    `D5-12-study-light-window-window.png`.
+  - **O-1's state** (the list at its top, ≈4 pt of the next row's padding beyond the edge): the last whole row's
+    glyph foot lightens over its bottom ~4 pt (Study 134 → 156, contrast 0.46 → 0.37; Terminal 142 → 114). It is a
+    faint hint, clear in the zooms and subtle at 1× (`D5-O1-{study-light,terminal-dark}-zoom-bottom.png`). The ~10 pt
+    of empty room to the clip below it remains.
+- **D6 — the one-row → two-row growth · HOLDS (no wobble; ends exact).**
+  - Method: Close All Notes, one note opened, then a second by ⌘K, captured as a 40-frame burst at ~60 ms
+    (`D6burst/b00…b39.png`; `D6-burst-terminal-dark-strip.png`; the key frames stacked in
+    `D6-burst-terminal-dark-frames.png`).
+  - Row 1 sits at the same y in every frame.
+  - The new row arrives over ~2 frames:
+    - b23: a sliver of its wash under the list's growing edge, its letter tops sliced
+      (`D6-b23-terminal-dark-zoom.png`);
+    - b24: whole, its foot faded;
+    - b25: settled.
+  - b25 = b26 = b39 byte-identical.
+- **D7 — following and the drag (P-U2-1) · "nothing pulls back" HOLDS; "the list does not jump after a drop" is NOT
+  WALKABLE (no drop lands).**
+  - Following, with row 6 of 8 current (620-pt window, Terminal dark), a drag of row 8 to above row 6: the list
+    stayed put, but the drop was refused like D2's, so the shifted current row of P-U2-1 never arose
+    (`D7-2-following-drag-terminal-dark-strip.png`).
+  - Then a hand scroll to the top (`walk-scroll`), a drag attempt, and a 20-s wait with no input: byte-identical to
+    the scrolled capture (`D7-3-scrolled-away-…`, `D7-4-scrolled-drag-…-{mid,after}`, `D7-5-scrolled-t20-…`; the
+    strip `D7-scrolled-strip-terminal-dark.png`).
+- **D8 — DEFERRED** to the re-walk after U3c (the orchestrator's ruling; not launched).
+- **D9 — restore · DONE.**
+  - My instance was quit by identity, and both strict pgreps were empty after.
+  - The store, with zero dev instances: `variorum.sqlite` was already identical. `-wal` and `-shm` had changed; all
+    three were copied back from `u2/walk/store-before/` and each `cmp` is byte-identical. No new file in `Backups/`
+    (newest 15:32, before the walk).
+  - `castle-W1-20261013` is untouched (its files dated Oct 13).
+  - Prefs: the walk ADDED 9 `currentBlock.*` keys (each deleted by hand) and CHANGED 7 (`openNotes.remembered.ids` /
+    `.recency`, both window frames, `appearanceChoice`, the backup log, the idle-sweep mark). After `defaults import`
+    of `prefs-before.plist` and a re-export (`u2/walk/prefs-after-restore.plist`), the diff is CLEAN: 1602 = 1602,
+    none added, removed or changed. `appearanceChoice` reads `system`; the voice (a store setting) returned with the
+    store.
+  - Posture Standard/unlocked throughout. The claim was left to the orchestrator.
+
+**OBSERVATIONS (outside the verdicts, for the orchestrator's eye):**
+- **O-1 — the Open list takes no drop under a real system drag (the D1/D2 finding, restated as the one thing to
+  read first).** The drag starts (the chip shows, AppKit tracks it in the window), but the line never draws and
+  every release slides back. The pins drive `land` / `perform` and the state directly, short of AppKit (the record's
+  own "a drag cannot be posted in the test host"). This walk is the only evidence on the delivery road, and it says
+  the delivery does not happen under cliclick, while a sibling SwiftUI drop target does. A hand drag by the author
+  would settle whether it is cliclick-specific.
+- **O-2 — at a 620-pt window, while following, the current row settles under the bottom fade.** "what the door is"
+  (8 of 8, compact 24-pt rows) has its text eased over its lower half (216 → 156) and its wash cut by the footer
+  hairline. Stable on a re-capture after 2 s, byte-identical (`D7-0-following-terminal-dark.png` + `-zoom-bottom`).
+  U1's "the current row wholly in view, clear of the fades" is not met at this height (U1's scope, not U2's; the
+  list has ~85 pt there).
+- **O-3 — the hover marquee widens the wash to the column's edge.** Hovering a truncated current row scrolls its
+  title (`MarqueeText`) and hides ⌘⇧6 and its ✕. The wash then runs to the sidebar's edge with no right margin, the
+  title cut at its left ("› ı, where, how long"): `D7-1-current-mid-terminal-dark-zoom.png`, against the rest state
+  `D7-1-current-mid-rest-terminal-dark-zoom.png`. This is probably pre-existing and by design; it is noted because
+  the cut-left title reads as a glitch in a still.
+- **O-4 — D6's transitional slice:** one ~60-ms frame (b23) shows the arriving row's letter tops clipped by the
+  list's growing edge. In motion it reads as a slide-in.
+- **O-5 — the end of one long fast drag (D2c) drew the chip ~18 pt above the cursor** (`D2bcd-D3-study-light-strip.png`,
+  the 5th panel); every other mid frame has it at the cursor. This is likely the drag image lagging the last
+  synthetic moves; low confidence.
+- **O-6 — the bottom fade band carries a ±1 luminance dither,** visible only in a 3× zoom
+  (`D5-O1-study-light-zoom-bottom.png`) and invisible at 1×.
 
 ## Ladder
 
