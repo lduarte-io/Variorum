@@ -576,8 +576,12 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   made-new passphrase lost from her truth) fixed in the world (`76d60234`). HER 2026-10-15 WIDENING applied: the
   older-build acts left the generator's alphabet (an older device only updates), the older-build fixed scenarios and
   the door-time pin marked "beyond scope, kept while green" (this commit; the protection set Debug 382 tests in 65
-  suites green). NEXT: (j) the soak, both configurations — PENDING; (k) the runs — PENDING; (l) the final record —
-  PENDING.
+  suites green; `41c9d63f`). (j) THE SOAK — IN PROGRESS, seed by seed, Debug: findings so far triaged and committed
+  one by one (code bugs with red-on-old pins: the landing resumed at its swap `e7ce22d6`, a Mac replaced mid-act with
+  no memory `81924cae`, Re-link unoffered after a replacement `3bff0ba5`; checker findings fixed in the world;
+  P-U4-12/13 recorded; the pre-migration snapshot class superseded by her cut). Seeds 3 and 4 green × 1000 on their
+  trees; seeds 1–2 to re-run on the final tree. NEXT: seeds 5–20, then 1–2 again, then Release — PENDING; (k) the
+  runs — PENDING; (l) the final record — PENDING.
 - The go/no-go record: **NOT-STARTED.**
 
 ---
