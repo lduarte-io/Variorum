@@ -1,6 +1,10 @@
 # VX-246 — Run: MCP pane, docs & door fixes — kickoff + plan
 
-**STATUS (VX-336): STARTED 2026-10-14 at her kickoff (`/architect-phase vx-336`, the Pro).** Her kickoff answers (the
+**STATUS (VX-336): CLOSED 2026-10-15 — merged as «PR #N» (merge commit «sha»); every unit this file planned
+(U5–U8, with VX-330 and VX-342) shipped, and U9 (VX-361 · VX-362 · VX-363) joined; the record
+`notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md` (its CLOSEOUT RECORD), the handoff
+`notes/handoffs/vx-336-handoff.md`, the ratify bundle QUESTIONS #227. Nothing in this plan remains open.** Kicked off
+2026-10-14 at her kickoff (`/architect-phase vx-336`, the Pro). Her kickoff answers (the
 cast, the five-unit sizing U5a → U5b → U6 → U7 → U8, VX-292 not running, rule-provisionally-and-continue) and the
 re-aimed unit briefs live in the run record `notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md` — read it first. This
 file stays the plan: the rulings below bind as written.
