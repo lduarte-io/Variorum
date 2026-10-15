@@ -19,6 +19,21 @@
 //  move arithmetic (`OpenNotes.move`) is unchanged and keeps its own pins
 //  (`WorkspaceNavigationTests`).
 //
+//  **U2c (the orchestrator's P-U2b-1 — the drag that never landed under a real
+//  system drag).** U2's one legacy `onDrop(of:delegate:)` on the scroll
+//  content's root was never consulted (U2b's trace: zero `validateDrop`); every
+//  live drop inside scroll content in this app is a per-row Transferable
+//  `dropDestination`. So each Open row is its own drop again, in the macOS 26
+//  SESSION form, and the row-local location maps into the same pure half-row
+//  rule; the source allows a move; the drag session's end clears the drag.
+//  Three pins, each red-on-old by its own named revert: P-T3-1 (the wiring,
+//  read — R-T), P-T3-2 (the row-local location → the gap, for every row and
+//  both halves — R-U), P-T3-3 (the session's end clears the drag — R-V). The
+//  door pins that built an `NSItemProvider` take the decoded tokens now
+//  (edited in place); every other pin above and below is unchanged. Delivery
+//  itself — that AppKit offers the drag to the rows — has no headless pin: only
+//  a real drag (the window's G1–G5, then the re-walk) proves it.
+//
 
 import AppKit
 import Dependencies
@@ -141,6 +156,29 @@ struct OpenListDropRuleTests {
                             #expect(movedTo == targetAt - 1,
                                     "\(dragged) on \(target)'s upper half (\(count) rows): \(after)")
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    /// **P-T3-2 (U2c — P-U2b-1; RED ON OLD, revert R-U).** Each row is its own
+    /// drop, and its session reports the pointer in the ROW's space (the SDK:
+    /// "the location of the drag in the coordinate space of the drop view"):
+    /// the row's index × the pitch + that location is the rows' own space,
+    /// which the unchanged half-row rule reads — so every row, at either half,
+    /// names the gap beside ITSELF (never row 0's, the dropped index term).
+    @Test func aRowsOwnLocationNamesTheGapForEveryRowAndBothHalves() {
+        for pitch: CGFloat in [30, 24] {
+            for count in 1...8 {
+                for row in 0..<count {
+                    for fraction in [0.0, 0.05, 0.3, 0.49, 0.5, 0.7, 0.95] {
+                        let y = CGFloat(fraction) * pitch
+                        let content = Drop.contentY(row: row, yInRow: y, rowHeight: pitch)
+                        #expect(content == CGFloat(row) * pitch + y,
+                                "row \(row)'s y \(y) is \(CGFloat(row) * pitch + y) in the rows' space at \(pitch)")
+                        #expect(Drop.gap(at: content, rowHeight: pitch, rows: count) == (fraction >= 0.5 ? row + 1 : row),
+                                "row \(row) of \(count), \(fraction) down it, at \(pitch): the gap beside it")
                     }
                 }
             }
@@ -373,10 +411,16 @@ struct OpenListDropDoorTests {
         #expect(state.lineTop(rows: ids, rowHeight: 30) == 118)
     }
 
-    /// The release reads the PAYLOAD and lands it (the whole road a real drop
-    /// takes after AppKit, short of the pointer): the gap the line named, the
-    /// token loaded from its item provider, the move.
-    @Test func aReleaseReadsThePayloadAndLandsIt() async throws {
+    /// The release lands the PAYLOAD (the whole road a real drop takes after
+    /// SwiftUI, short of the pointer): the gap the line named, the token, the
+    /// move.
+    ///
+    /// **U2c (P-U2b-1) — edited in place by the ruling:** the door takes the
+    /// DECODED tokens now — the row's Transferable drop decodes them before
+    /// its action runs — so there is no item provider and no asynchronous load
+    /// to wait for (the old body registered the token on an `NSItemProvider`
+    /// and polled for the move).
+    @Test func aReleaseReadsThePayloadAndLandsIt() {
         let ids = ["a", "b", "c", "d"]
         let workspace = workspace(ids)
         let state = OpenListDragState()
@@ -384,18 +428,18 @@ struct OpenListDropDoorTests {
         state.began("a")
         state.hoverRows(contentY: 105)  // d's lower half: the end
         let token = SidebarView.OpenNoteDragToken(noteID: "a", listID: state.listID)
-        let provider = NSItemProvider()
-        provider.register(token)
-        #expect(OpenListDropDoor.perform([provider], state: state, rows: ids, rowHeight: 30, workspace: workspace))
+        #expect(OpenListDropDoor.perform([token], state: state, rows: ids, rowHeight: 30, workspace: workspace,
+                                         animation: nil))
         #expect(state.dragging == nil && state.hover == nil, "the drop ends the drag")
-        for _ in 0..<200 where workspace.openNotes.ids == ids {
-            try await Task.sleep(for: .milliseconds(10))
-        }
         #expect(workspace.openNotes.ids == ["b", "c", "d", "a"])
     }
 
     /// A release with no payload, or where the line offered nothing, refuses
     /// (the image slides back) — and either way the drag is over.
+    ///
+    /// **U2c (P-U2b-1) — edited in place by the ruling:** the decoded tokens
+    /// replace the item providers (`[own]` for the provider carrying it, `[]`
+    /// for none).
     @Test func aReleaseThatOffersNothingRefuses() {
         let ids = ["a", "b", "c", "d"]
         let workspace = workspace(ids)
@@ -404,14 +448,111 @@ struct OpenListDropDoorTests {
         state.began("b")
         state.hoverRows(contentY: 40)  // its own upper half
         let own = SidebarView.OpenNoteDragToken(noteID: "b", listID: state.listID)
-        let provider = NSItemProvider()
-        provider.register(own)
-        #expect(!OpenListDropDoor.perform([provider], state: state, rows: ids, rowHeight: 30, workspace: workspace))
+        #expect(!OpenListDropDoor.perform([own], state: state, rows: ids, rowHeight: 30, workspace: workspace,
+                                          animation: nil))
         #expect(state.dragging == nil)
         state.began("a")
         state.hoverRows(contentY: 80)
-        #expect(!OpenListDropDoor.perform([], state: state, rows: ids, rowHeight: 30, workspace: workspace))
+        #expect(!OpenListDropDoor.perform([], state: state, rows: ids, rowHeight: 30, workspace: workspace,
+                                          animation: nil))
         #expect(workspace.openNotes.ids == ids)
+    }
+
+    // MARK: - U2c (P-U2b-1): each row is its own drop; the drag session's end
+
+    /// **P-T3-2, through the state (U2c; RED ON OLD, revert R-U).** A row's
+    /// session reports the pointer in the row's own space; the state maps it
+    /// into the rows' space (index × pitch + y) and holds it in the viewport —
+    /// so in a list scrolled 45 pt, the pointer 20 pt down row 4 (the fifth)
+    /// names the gap after it, the line draws on that boundary, the drop
+    /// offers a move and the release lands the dragged row there.
+    @Test func aRowsOwnLocationDrawsTheLineAndLandsThere() {
+        let ids = (0..<10).map { "n\($0)" }
+        let workspace = workspace(ids)
+        let state = OpenListDragState()
+        state.read(SidebarLayout.ScrollWindow(offset: 45, viewport: 120, content: 300))
+        state.began("n0")
+        state.hoverRow(4, yInRow: 20, rowHeight: 30)  // the rows' space 140: n4's lower half
+        #expect(state.gap(rows: 10, rowHeight: 30) == 5, "the gap after n4")
+        #expect(state.lineTop(rows: ids, rowHeight: 30) == 104, "the n4/n5 boundary at 150, 105 on screen, from 104")
+        #expect(OpenListDropDoor.proposal(state, rows: ids, rowHeight: 30).operation == .move)
+        let token = SidebarView.OpenNoteDragToken(noteID: "n0", listID: state.listID)
+        #expect(OpenListDropDoor.perform([token], state: state, rows: ids, rowHeight: 30, workspace: workspace,
+                                         animation: nil))
+        #expect(workspace.openNotes.ids == ["n1", "n2", "n3", "n4", "n0", "n5", "n6", "n7", "n8", "n9"])
+    }
+
+    /// Moving from one row to the next never blanks the hover, whichever of
+    /// the two sessions' updates arrives first: a row's late EXIT clears only
+    /// a hover it wrote itself (each row is its own drop now — the end zone's
+    /// precedent, `movingBetweenTheRowsAndTheEndZoneKeepsTheLine`). A guard of
+    /// U2c's per-row road (not red-on-old: the road is new).
+    @Test func movingBetweenRowsNeverBlanksTheHover() {
+        let state = OpenListDragState()
+        state.read(reading())
+        state.began("a")
+        state.hoverRow(2, yInRow: 20, rowHeight: 30)
+        state.hoverRow(3, yInRow: 5, rowHeight: 30)   // the next row entered before…
+        state.leftRow(2)                               // …the last one's exit arrived
+        #expect(state.hover != nil, "row 3's hover stands")
+        state.leftRow(3)
+        #expect(state.hover == nil, "the drag left the rows")
+        state.hoverRow(1, yInRow: 20, rowHeight: 30)
+        state.leftRow(1)                               // the other order: exit first…
+        state.hoverRow(2, yInRow: 5, rowHeight: 30)    // …then the next row's entry
+        #expect(state.hover != nil)
+        state.hoverEnd()
+        state.leftRow(2)                               // a row's late exit leaves the end zone's hover
+        #expect(state.hover == .end)
+    }
+
+    /// **P-T3-3 (U2c — P-U2b-1; RED ON OLD, revert R-V).** The drag SESSION's
+    /// end clears the list's drag — a release anywhere (a cancel off the list,
+    /// a drop elsewhere, a landed drop) — while a session still in flight keeps
+    /// it. U2's known edge, now pinned: before, only a drop on this list's own
+    /// targets cleared `dragging`, so a row dragged in from ANOTHER window's
+    /// list after a cancel read as this list's drag and drew a line.
+    @Test func theDragSessionsEndClearsTheDrag() {
+        let ids = ["a", "b", "c", "d"]
+        let state = OpenListDragState()
+        state.read(reading())
+        state.began("a")
+        state.hoverRows(contentY: 50)
+        #expect(state.lineTop(rows: ids, rowHeight: 30) == 59, "a's drag over b's lower half")
+        state.dragSessionUpdated(.active)
+        #expect(state.dragging == "a", "a session in flight keeps its drag")
+        state.dragSessionUpdated(.ended(.cancel))
+        #expect(state.dragging == nil && state.hover == nil, "the session ended: the drag is over")
+        // A foreign drag (another window's list) hovering after the cancel:
+        // no line, nothing offered.
+        state.hoverRows(contentY: 80)
+        #expect(state.lineTop(rows: ids, rowHeight: 30) == nil)
+        #expect(OpenListDropDoor.proposal(state, rows: ids, rowHeight: 30).operation == .forbidden)
+        state.leftRows()
+        // A landed drop's session end clears it too.
+        state.began("b")
+        state.dragSessionUpdated(.ended(.move))
+        #expect(state.dragging == nil)
+    }
+
+    /// The source's session end and the drop's action may arrive in either
+    /// order (U2's record left it unverified — the reason the old road never
+    /// used the session); the drop lands either way, because the action names
+    /// its gap from its OWN location and `land` decides on the payload. A guard
+    /// (green on both sides of R-V by design).
+    @Test func aSessionEndBeforeTheDropsActionStillLands() {
+        let ids = ["a", "b", "c", "d"]
+        let workspace = workspace(ids)
+        let state = OpenListDragState()
+        state.read(reading())
+        state.began("a")
+        state.hoverRows(contentY: 50)                 // the line after b
+        state.dragSessionUpdated(.ended(.move))       // the source's end FIRST
+        state.hoverRows(contentY: 50)                 // the action: its own location…
+        let token = SidebarView.OpenNoteDragToken(noteID: "a", listID: state.listID)
+        #expect(OpenListDropDoor.perform([token], state: state, rows: ids, rowHeight: 30, workspace: workspace,
+                                         animation: nil))  // …then the door
+        #expect(workspace.openNotes.ids == ["b", "a", "c", "d"])
     }
 }
 
@@ -449,9 +590,18 @@ struct OpenListDragFaceTests {
 
     /// The wiring, read from the source (a drag cannot be posted in the test
     /// host): the Open row drags through the shared chip source with its title
-    /// chip and is NOT its own drop target any more; the list's content is the
-    /// one drop, the end zone sits under it, the line lies over it.
-    @Test func theRowDragsItsChipAndTheListIsTheOneDrop() throws {
+    /// chip, and is its own drop; the end zone sits under the rows, the line
+    /// lies over the list.
+    ///
+    /// **U2c (P-U2b-1) — edited in place by the ruling** (was
+    /// `theRowDragsItsChipAndTheListIsTheOneDrop`): its "no row is its own drop
+    /// target" assertion INVERTS — the rows are the targets again, and the
+    /// location inside a row now decides the half (U2's traced bug was the row
+    /// under the pointer deciding alone, never the per-row target itself); the
+    /// assertion that the list's content carried ONE delegate is withdrawn
+    /// (that delegate was never consulted — U2b's trace). P-T3-1 below reads
+    /// the session form in full.
+    @Test func theRowDragsItsChipAndIsItsOwnDrop() throws {
         let source = try String(
             contentsOf: Self.appRoot.appending(path: "Variorum/Features/Library/SidebarView.swift"),
             encoding: .utf8)
@@ -459,8 +609,8 @@ struct OpenListDragFaceTests {
         let row = String(source[start.upperBound...].prefix(9_000))
         #expect(row.contains("ChipDragSource(") && row.contains("Self.openRowChip("),
                 "the row's drag image is its title chip at the grab point")
-        #expect(!row.contains("dropDestination("), "no row is its own drop target (each landed before itself)")
-        #expect(source.contains("delegate: OpenListRowsDrop("), "the list's rows are one drop target")
+        #expect(row.contains(".modifier(OpenListRowDrop("),
+                "each row is its own drop again — the location inside it decides the half (P-U2b-1)")
         #expect(source.contains("openListEndZone(shown)"), "the end zone sits under the rows")
         #expect(source.contains(".overlay { openListLine(shown) }"), "the line lies over the list")
         let shelf = try String(
@@ -469,6 +619,54 @@ struct OpenListDragFaceTests {
         #expect(shelf.contains("ChipDragSource(") && shelf.contains("DragChipCanvas("),
                 "the Bookcase reads the same shared chip machinery (one home)")
         #expect(!shelf.contains("struct GrabCanvas"), "no second copy of the canvas")
+    }
+
+    /// A function's (or a type's) body, read from the source: from `header`
+    /// to the first line closing at `indent`.
+    private static func body(of header: String, in source: String, indent: String = "    ") throws -> String {
+        let start = try #require(source.range(of: header), "\(header) is in the source")
+        let rest = source[start.upperBound...]
+        let end = rest.range(of: "\n\(indent)}\n")?.lowerBound ?? rest.endIndex
+        return String(rest[..<end])
+    }
+
+    /// **P-T3-1 (U2c — P-U2b-1; RED ON OLD, revert R-T).** The Open list's drop
+    /// is the road proven to land inside scroll content in this app — a
+    /// Transferable `dropDestination` on each ROW (and on the end zone), in
+    /// the macOS 26 SESSION form, with its session's location feeding the line
+    /// and its configuration answering the operation — and NO legacy
+    /// `onDrop(of:delegate:)` remains on the list (U2's one, on the scroll
+    /// content's root, was never consulted: zero `validateDrop` under a real
+    /// drag). The row's source allows a MOVE (copy-only is the macOS default,
+    /// and AppKit intersects the destination's `.move` with it — G2), and its
+    /// drag session's end reaches the list's state.
+    @Test func eachRowIsATransferableDropAndItsSourceAllowsTheMove() throws {
+        let sidebar = try String(
+            contentsOf: Self.appRoot.appending(path: "Variorum/Features/Library/SidebarView.swift"),
+            encoding: .utf8)
+        let drag = try String(
+            contentsOf: Self.appRoot.appending(path: "Variorum/Features/Library/OpenListDrag.swift"),
+            encoding: .utf8)
+        let row = try Self.body(of: "private func openRow(", in: sidebar)
+        #expect(row.contains(".modifier(OpenListRowDrop("), "each Open row is its own drop")
+        #expect(row.contains(".dragConfiguration(DragConfiguration(allowMove: true))"),
+                "the row's source allows a move")
+        #expect(row.contains(".onDragSessionUpdated {") && row.contains("openListDrag.dragSessionUpdated("),
+                "the source's drag session reaches the list's state (its end clears the drag)")
+        let group = try Self.body(of: "private var openGroup: some View {", in: sidebar)
+        let endZone = try Self.body(of: "private func openListEndZone(", in: sidebar)
+        #expect(!group.contains("onDrop(of:") && !endZone.contains("onDrop(of:"),
+                "no legacy drop on the Open list")
+        #expect(endZone.contains(".modifier(OpenListEndZoneDrop("), "the end zone is the same kind of drop")
+        for name in ["struct OpenListRowDrop: ViewModifier {", "struct OpenListEndZoneDrop: ViewModifier {"] {
+            let modifier = try Self.body(of: name, in: drag, indent: "")
+            #expect(modifier.contains(".dropDestination(for: SidebarView.OpenNoteDragToken.self, isEnabled:"),
+                    "\(name) — the Transferable drop, session form")
+            #expect(modifier.contains(".onDropSessionUpdated {"), "\(name) — its session feeds the hover")
+            #expect(modifier.contains(".dropConfiguration {") && modifier.contains("OpenListDropDoor.configuration("),
+                    "\(name) — its configuration answers the door's operation")
+        }
+        #expect(!drag.contains(": DropDelegate"), "no legacy drop delegate remains")
     }
 }
 
