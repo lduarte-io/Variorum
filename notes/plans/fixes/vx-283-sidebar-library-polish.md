@@ -3065,5 +3065,11 @@ comment, a rename or a guard: no reachable behaviour changes, so no red-on-old i
   unclamped > cap and `fitsOneLine` false at every width 300…3000 — the premise; clamped = cap and one line at 1400).
   `build-for-testing` into `DerivedData/vx283-u3b`: **TEST BUILD SUCCEEDED** (every touched file recompiled; the one
   warning in a touched file is the pre-existing `probeSpace` Sendable line). Runs PENDING U3b's window.
-- D5 — headless `build-for-testing` into `DerivedData/vx283-u2` AND `DerivedData/vx283-u3b`: NOT-STARTED. The pins'
-  runs PENDING U2's / U3b's windows.
+- D5 — headless `build-for-testing` on the tip `8dbae3d6`: `DerivedData/vx283-u3b` **TEST BUILD SUCCEEDED** (log
+  `u3b/bft-r1.log`) and `DerivedData/vx283-u2` **TEST BUILD SUCCEEDED** (log `u2/logs/bft-r1.log`) — DONE. **No suite-list
+  change:** no suite was added or renamed (R1-5 renames a TEST inside `SidebarLayoutTests`, on both lists; R1-6's pins
+  join `LibraryControlsStableWidthsTests`, on U3b's list). **The revert trees were NOT rebuilt** (`vx283-u2-rk`,
+  `-rn`, `vx283-u3b-rv` stand on their earlier tips, without this leg's four commits): their named RED/GREEN lists are
+  unaffected — R1-3/R1-4 are comments, the renamed test is in none of the reverted runs' suites, and R1-6's two pins
+  are absent from `-rv` (on a rebuilt `-rv` they would be GREEN: neither reads R-S's two edits). The pins' runs
+  PENDING U2's / U3b's windows; this leg is otherwise CLOSED.
