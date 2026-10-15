@@ -466,7 +466,11 @@ struct MCPWriteTools: Sendable {
             }
         case .importBook(let book, let wingID):
             return try inWing(wingID, job: job, clientName: clientName) {
-                let result = try ops.importBook(book, wingId: wingID, undoLabel: label(.importBook))
+                // VX-363: the book's name is checked only against the books
+                // this client can READ (VX-259's rule, on the third road that
+                // names a book) — a hidden one neither blocks it nor is named.
+                let result = try ops.importBook(
+                    book, wingId: wingID, undoLabel: label(.importBook), namesCountedBy: readableBooks(clientName))
                 return (["book_id": result.reading.id, "note_ids": result.postIDs, "chapter_ids": result.sectionIDs],
                         MCPWriteReceipt(clientName: clientName, act: .importBook, targetID: result.reading.id,
                                         targetTitle: result.reading.name, count: result.postIDs.count,
@@ -766,7 +770,8 @@ struct MCPWriteTools: Sendable {
     /// that it's ok if that happens"): a reading counts only while THIS client
     /// can READ it now — the one rule `list_books` reads (a book at read under
     /// its grants or the open book, never a fenced one; a gathering under its
-    /// wing's reach) — so `rename_book` and `create_book` never refuse with,
+    /// wing's reach) — so `rename_book`, `create_book` and (VX-363)
+    /// `import_document`'s book form never refuse with,
     /// or because of, a book the client cannot reach (F-7: anything it can't
     /// reach answers as if it did not exist). Non-consuming: a name check
     /// never spends a once grant. Asked inside the act's transaction, only of

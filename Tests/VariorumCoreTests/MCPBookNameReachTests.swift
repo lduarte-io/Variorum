@@ -38,4 +38,26 @@ struct MCPBookNameReachTests {
             #expect(try db.read { try Reading.fetchOne($0, key: made.id)?.name } == "SECRET", "nothing written")
         }
     }
+
+    /// **VX-363 (the VX-336 run record's U9):** the folder import names a book
+    /// too, so it takes the same `namesCountedBy` — the MCP book import passes
+    /// it through; nil (her File ▸ Import… and the Bookcase drop) counts every
+    /// reading. A new parameter: red by its absence on the old tree.
+    @Test func theBookImportCountsOnlyWhatItIsToldTo() throws {
+        try withOperations { ops, _ in
+            let hidden = try ops.createReading(name: "Secret", kind: .book)
+            let asked = LockIsolated<[String]>([])
+            let none: Operations.BookNameReach = { _, id in asked.withValue { $0.append(id) }; return false }
+            let one = VariorumDocument.NamedDocument(
+                fallbackTitle: "", document: try VariorumDocument.parse("{t:\"one\"}\n\nOne."))
+            func book(_ name: String) -> VariorumDocument.Book { .init(name: name, chapters: [], unfiled: [one]) }
+
+            let landed = try ops.importBook(book("SECRET"), wingId: "", undoLabel: "x", namesCountedBy: none)
+            #expect(landed.reading.name == "SECRET", "a duplicate the client can't see is fine")
+            #expect(asked.value == [hidden.id], "asked of the collider alone")
+            #expect(throws: OperationError.duplicateBookName(name: "Secret")) {
+                try ops.importBook(book("secret"), wingId: "")
+            }
+        }
+    }
 }

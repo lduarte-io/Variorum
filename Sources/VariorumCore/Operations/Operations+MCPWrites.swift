@@ -633,13 +633,16 @@ extension Operations {
     /// `importBook`'s act (a new unshelved book in `wingId`, chapters and
     /// seated notes, the E13 name guard) with its ONE entry relabeled for the
     /// client — the bulk door that undoes in a single press (R-13n-6).
+    /// VX-363: `namesCountedBy` — the readings the name guard counts (the wire
+    /// passes the ones the client can READ, VX-259's rule); nil counts every
+    /// reading.
     @discardableResult
     public func importBook(
-        _ book: VariorumDocument.Book, wingId: String, undoLabel: String
+        _ book: VariorumDocument.Book, wingId: String, undoLabel: String, namesCountedBy reach: BookNameReach? = nil
     ) throws -> BookImport {
-        guard let undoStack else { return try importBook(book, wingId: wingId, shelfId: nil) }
+        guard let undoStack else { return try importBook(book, wingId: wingId, shelfId: nil, namesCountedBy: reach) }
         return try undoStack.withCompound(label: undoLabel, operations: self) {
-            try importBook(book, wingId: wingId, shelfId: nil)
+            try importBook(book, wingId: wingId, shelfId: nil, namesCountedBy: reach)
         }
     }
 

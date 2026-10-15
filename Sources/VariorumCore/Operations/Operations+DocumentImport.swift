@@ -153,9 +153,17 @@ extension Operations {
     /// book lands UNSHELVED (§19). Validated exactly as `createReading`
     /// validates it — live, and in this book's wing — and never placed (it
     /// appends at the end of the shelf's order).
+    ///
+    /// `namesCountedBy` (VX-363 — VX-259's class on the third road that names
+    /// a book; the VX-336 run record's U9): the readings the E13 guard COUNTS.
+    /// The MCP door passes the ones its client can read, so a book it cannot
+    /// reach neither blocks the name nor is named back; nil counts every
+    /// reading — her own import doors (File ▸ Import…, the Bookcase drop) keep
+    /// the full guard.
     @discardableResult
     public func importBook(
-        _ book: VariorumDocument.Book, wingId: String = "", shelfId: String? = nil
+        _ book: VariorumDocument.Book, wingId: String = "", shelfId: String? = nil,
+        namesCountedBy reach: BookNameReach? = nil
     ) throws -> BookImport {
         let result: BookImport = try database.write { db in
             try requireLiveWing(db, wingId)
@@ -169,8 +177,9 @@ extension Operations {
             let trimmedName = book.name.trimmingCharacters(in: .whitespacesAndNewlines)
             let name = trimmedName.isEmpty ? DisplayTitle.placeholder : trimmedName
             // E13 — the door guard, inside the act's own transaction: the
-            // import names a book, so it refuses a name a live book wears.
-            try requireBookNameFree(db, name)
+            // import names a book, so it refuses a name a live book wears
+            // (VX-363: of the books `reach` counts — every one at her doors).
+            try requireBookNameFree(db, name, counting: reach)
             let now = date.now
             let reading = Reading(
                 id: newID(), ownerId: currentOwnerID(), name: name, kind: .book,
