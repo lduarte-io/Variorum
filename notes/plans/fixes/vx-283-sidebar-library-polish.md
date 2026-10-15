@@ -1273,7 +1273,106 @@ The coordinator's rules bind (a system popup you can't dismiss → stop and repo
 
 #### U1b — RE-WALK RECORD
 
-*(The walker writes one line per row here.)*
+**Walker:** a fresh Opus 5.5 at xhigh (not an implementer of U1/U1b/U1c), 2026-10-14 23:38 → 2026-10-15 00:05, on the
+orchestrator's claim `vx283-u1b-walk`; the Debug app `App/Variorum/DerivedData/vx283-u1/…/Variorum.app` (built 23:16
+from the branch, not rebuilt), PID 95179, discriminated by path. Screens in the gitignored
+`notes/plans/vx283-screens/u1b/walk/` (sidebar rows as 2× region captures of the sidebar rect, `-window` captures
+beside them, `-zoom-*` 2× nearest-neighbour crops of the edges). Every image cited was opened and looked at.
+
+- **R0 — preconditions.** Both strict pgreps empty before launch; her app absent (the guard); the host `AX: true
+  SCREEN: true`. Store copy + prefs export were the orchestrator's (`u1b-walk/store-before/`, `prefs-before.plist`),
+  not redone. Posture at launch: Standard, unlocked (the Bookcase came up, no lock screen), voice **Study**,
+  appearance **follow system** (light). No What's New sheet showed. Window AX-sized to its tallest, 1380 × 1010 at
+  (60, 36). · HOLDS.
+- **R1 — seed.** The store had 14 notes open and 1 star; 8 more starred through Library ▸ right-click ▸ Star (9
+  starred); the twenty opens of R5(a) filled the Open list to its 20-row cap. · done.
+- **R2 — the edge fade, Open list (Study light, tallest window).** (a) top — `R2a-study-light.png`
+  (+`-window`, `-zoom-top`, `-zoom-bottom`): "o museu" whole under the header, no top fade; "the seal" at the bottom
+  fades into the room, legible as a ghost. (b) middle — `R2b-study-light.png` (+`-zoom-top`, `-zoom-bottom`): the
+  current row "wings" fades under the header (the pill and letters soften upward), "sharing from where you are"
+  fades at the bottom; no hard slice either edge. (c) bottom — `R2c-study-light.png` (+`-zoom-top`, `-zoom-bottom`):
+  "owned, finished, sealed" fades at the top, the last row whole, no bottom fade. The ✕ inside the fade band:
+  `R2-xfade-study-light-1-hover.png` (pointer on the faded "the seal" row's ✕ — its tooltip "Close (…)" shows) →
+  click → `-2-after.png` (the row gone, "export" slid into the band, the pane unmoved). The fade matches the room,
+  no band or seam, in every capture. · HOLDS — **but see O-2** (a shallow overflow under ~12 pt reads as a slice).
+- **R3 — Starred (Study light, 9 stars).** `R3-top-study-light.png`: at its top, quicknotes + 6 whole rows, the
+  half row "what the door is" faded (still reads "there is more"), no top fade. `R3-end-study-light.png`: at its end,
+  "seeing, answering, undoing" faded at the top, "Standard and Castle: what…" whole, no bottom fade. · HOLDS.
+- **R4 — the voices and dark.** Voice and appearance flipped in Settings (window moved clear of the sidebar).
+  **Terminal light** — `R4-R3top-terminal-light.png` / `R4-R3end-terminal-light.png` (Starred top/end: right),
+  `R4-R2a-terminal-light.png` / `R4-R2c-terminal-light.png` and `R6-terminal-light-t03.png` (Open top: "o museu"
+  whole, "export…" faded at the bottom) — the fade matches the warm room. **Terminal dark** —
+  `R4-R3top-terminal-dark.png`, `R4-R3end-terminal-dark.png`, `R4-R2a-terminal-dark.png`, `R4-R2c-terminal-dark.png`:
+  fades into the black room, no grey band, no seam. **Study dark** — `R4-R3top-study-dark.png` (Starred top right),
+  `R4-R3end-study-dark.png`, `R4-R2a-study-dark.png` (Open top right), `R4-R2c-study-dark.png` (Open end right). The
+  colour match holds in all four rooms. **But** the Open list's "middle" gesture (to the top, then one wheel line
+  down) lands REPRODUCIBLY at ~5 pt short of the end in both Study rooms (`R4-R2b-study-dark.png`,
+  `R4-repro-study-dark-t05/-t15/-t45.png` — stable for 4.5 s — `-zoom-top`, `-zoom-bottom`;
+  `R4-repro-study-light.png` the same in light): the current row "what always asks" is **sliced through its
+  descenders** at the bottom edge ("alwavs") under a ~5-pt partial fade, and the top row "wings" reads crisp in dark
+  (a barely visible fade in light) with four rows above it. The Terminal "middle" captures
+  (`R4-R2b-terminal-light.png`, `R4-R2b-terminal-dark.png`) landed at the end instead, so no Terminal middle state
+  was captured. · **DOES NOT HOLD** for the shallow-overflow state (O-2); HOLDS for the colour match in every room.
+- **R5 — the current row always wholly in view.** (a) TWENTY rapid opens from the Library (⌥⌘[ back, click a
+  title, capture at 2.6 s; ~5 s per open; 17 new rows appended at the bottom, 3 opens of rows already in the list —
+  "Standard and Castle…", "what the door is", "wings" — revealed under the header mid-list): `R5a-01-study-light.png`
+  … `R5a-20-study-light.png` (+`-window` each; `R5a-19-study-light-zoom-top/-bottom.png`). **20 of 20 show the
+  current row wholly in view**, never cut, never under a fade; the row above a mid-list reveal is the faded partial.
+  (b) The Library and back: `R5b-study-light-0-opened` (the last row "connecting a client" opened) → `-1-scrolled-away`
+  (Open list scrolled to its top by hand) → `-4-library` → ⌥⌘[ `-5-back-from-library`: the row revealed whole at the
+  bottom; also note→note ⌥⌘[ / ⌥⌘] (`-2-library` landed on the previous note "wings", revealed; `-3-back`, revealed).
+  (c) ⇧⌘W on the last row → `R5c-study-light-1-shiftcmdw` (landed on "how much, where, how long", whole); the ✕ on
+  that current row → `R5c-study-light-2-x-landing` (landed on "what always asks", whole). (d) Window to 640 then 480
+  tall with "what always asks" current: `R5d-study-light-640.png` / `-480.png` (the column overflows; the outer scroll
+  at its top, Starred revealing the same note whole), `R5d-study-light-480-outer-scrolled.png` (+`-window`; the outer
+  column scrolled down: the Open list at its 3½-row floor, the current row whole at its bottom, the partial row
+  faded at its top), `R5d-study-light-640b.png` (back to 640: the same, whole). · HOLDS.
+- **R6 — her own scrolling is never pulled back.** Scrolled wholly away (the current row off-view):
+  `R6-study-light-bottom-t2/-t5/-t10/-t20.png` stayed 20 s; `R6-study-light-mid-t0…t20.png` stayed 20 s; a Terminal
+  light 85-s timed series (`r6series/p-*.png`) stayed. **But three times the list WAS pulled back to the current row
+  with no input:** (1) Study light — `R2b-study-light.png` ("wings" under the top fade) → 6 s later
+  `R6-study-light-after-wait.png` (the list moved ~16 pt so "wings" sat whole with the half-row clearance — the
+  reveal's exact landing; a whole-sidebar diff shows only the Open list changed); (2) Terminal light — scrolled to
+  the top: `R6-terminal-light-t03/-t1/-t3.png` at the top, then `-t6/-t12.png` back at the end with the current last
+  row whole; (3) Terminal light, a timed series (`r6series/s-*.png`, scroll at 23:56:50): at the top until ~17 s, back
+  at the end by ~19 s. Also the first Terminal-light R4 pass's Open captures (`R4-R2a/-R2b/-R2c-terminal-light.png`,
+  each 2–3 s after a scroll to the top or middle) all show the end state. Intermittent — the trigger not found
+  (three tries in a row did not reproduce it). · **DOES NOT HOLD.**
+- **R7 — nothing regressed (Study light).** `R7-study-light-tall.png` (+`-window`): the tall list stops just above
+  the sync footer, the last row whole, no row under the footer, no empty band. `R7-study-light-scrolling.png`
+  (captured mid-scroll): the overlay bar at x ≈ 440–453 px of the 480-px sidebar, every ✕ ending by ~420 px — clear
+  in the margin. · HOLDS.
+- **R8 — restore and release.** Quit MY instance by identity (`tell application id … to quit`); both strict pgreps
+  empty after. With zero dev instances the three store files were copied back from `u1b-walk/store-before/` and
+  `cmp`-verified byte-identical each (the `.sqlite` was already identical; `-wal` and `-shm` had changed). No new
+  file in `Backups/` (its mtime Oct 14 09:17); `castle-W1-20261013` untouched (its files Oct 13). Prefs: the walk
+  ADDED 27 keys (`currentBlock.*` ×23, `surfaceSize.outline.*` ×4 — each deleted by hand) and CHANGED 7
+  (`openNotes.remembered.ids`/`.recency`, both window frames, `appearanceChoice`, the backup log, the idle-sweep
+  mark); `defaults import` of `prefs-before.plist`, re-export (`u1b-walk/prefs-after-restore.plist`), diff CLEAN
+  (1602 = 1602, none added, removed or changed). The voice is a store setting, restored with the store copy;
+  appearance restored by the import (`system`). Posture Standard/unlocked throughout. · HOLDS.
+
+**OBSERVATIONS (outside the verdicts — for the orchestrator's eye):**
+- **O-1 — the pull-back (R6).** The only visible pattern: the list snaps to the reveal's exact landing (row whole,
+  half-row clearance), some seconds after her scroll, with nothing touched. Untraced guess only: something
+  periodic or deferred perturbs the column's viewport, and P-U1c-1's "ANY viewport change re-reveals" turns it into
+  a pull-back. The first R4 Terminal pass (straight after the voice flip) did it on every scroll.
+- **O-2 — a shallow overflow slices.** The fade's depth follows the overflow (the pins' `EdgeFades(bottom: 1.5)`
+  shape), so when only a few points lie beyond an edge the fade is a few points deep and a row there reads
+  **sliced**, not faded — the very look F-2 set out to remove (`R4-repro-study-dark-zoom-bottom.png`: the current
+  row's descenders cut, ~5-pt fade). In the same state the top edge, with four rows above, shows no visible fade in
+  dark (`-zoom-top`). Reproduced in Study dark and Study light by "to the top, then one wheel line".
+- **O-3 — a fully faded partial row leaves a blank band.** When a partial row's text lies entirely in the outer half
+  of the bottom fade, nothing of it shows: `R5a-19-study-light-zoom-bottom.png` — ~23 pt of empty room between the
+  last whole row and the footer hairline with more rows below (pixel-measured: no ink between the row and the
+  hairline). The list reads as ending there; no "there is more" signal at that edge.
+- **O-4 — the top partial row's letters show their lower half, faintly** (`R2b-study-light-zoom-top`,
+  `R2c-study-light-zoom-top`): sliced by the clip but faded to a ghost — reads soft, not unfinished, in all four rooms.
+- **O-5 — ⌥⌘[ from a note goes to the previous NOTE in history**, not the Library (`R5b-study-light-2-library` is
+  "wings") — the history's normal behaviour, noted only because R5(b)'s "the Library and back" needed a sidebar click.
+- **O-6 — a plain click on a Library row's tag chip does not open the note** (my first twenty-open pass clicked at
+  x = 450 pt, on the chips, and opened nothing; the pass was discarded and re-run on the titles). Not a finding.
+- The ✕ shows on every row at rest; a hover over the ✕ inside a fade band shows its tooltip.
 
 #### U1b — THE ORCHESTRATOR'S RULING ON THE RE-RUN'S RED (2026-10-14 ~21:55 — P-U1b-6)
 
