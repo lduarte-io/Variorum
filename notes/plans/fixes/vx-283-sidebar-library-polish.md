@@ -1108,6 +1108,45 @@ lines — below); any stage work until the orchestrator hands over a claim.
 - **The pin fault:** `theOpenListFadesOnlyTheEdgesWithMoreBeyond`'s mid-list step now opens row 15 (index 14,
   420…450), below the 351-pt list's fold.
 
+#### U1b — THE RE-WALK PLAN (the orchestrator's; her walk rule — a fresh Opus at xhigh)
+
+Products: `App/Variorum/DerivedData/vx283-u1/Build/Products/Debug/Variorum.app` (U1b's tree, rebuilt at `dffcde59`).
+Screens to `notes/plans/vx283-screens/u1b/walk/`, named `<row>-<voice>-<appearance>.png`, sidebar rows as REGION
+captures at native resolution (as U1's walk did), a whole-window capture beside each. Store copy + prefs export
+FIRST (the walk protocol), restored + diffed LAST.
+
+- **R0 — preconditions** (strict pgreps empty; AX + Screen Recording trusted; prefs exported; the three store files
+  copied with zero dev instances; posture noted).
+- **R1 — seed:** open ~18 notes (the Open list overflows at the tallest window), star 9+.
+- **R2 — F-2, the edge fade, Open list.** Tallest window. (a) Scrolled to the TOP: no fade at the top edge, a fade
+  at the bottom edge (more below). (b) Scrolled to the MIDDLE: both edges fade; the partial rows fade into the room,
+  no letters sliced under the "Open" header. (c) Scrolled to the BOTTOM: the top fades, the bottom does not. Capture
+  each; zoom crops of each edge so the fade (or its absence) is legible. Hover a row inside the fade band: its ✕ is
+  still reachable (the fade takes no clicks).
+- **R3 — F-2, Starred.** With 9+ stars: at its top, only the bottom fades (the half row softened, still reading
+  "there is more"); scrolled to its end, only the top fades. Capture both.
+- **R4 — the voices and dark.** R2(b) and R3's captures in Terminal light, Study dark, Terminal dark: the fade
+  matches each room exactly (no grey band, no seam, no visible gradient box against the column).
+- **R5 — F-1, the current row always wholly in view.** (a) TWENTY rapid opens from the Library (the walker's O-1
+  road — open, capture the sidebar, next): every time the current row is fully visible, never cut by the edge or
+  under the fade. (b) The Library and BACK to the note you were in (the deterministic road): the row is revealed.
+  (c) ⇧⌘W and a ✕ landing deep in the list: the landed row is fully in view. (d) Resize the window shorter while a
+  note deep in the list is current: the row stays in view. Capture each; any cut row is DOES NOT HOLD.
+- **R6 — her own scrolling is never pulled back.** Scroll the Open list away from the current row by hand and wait
+  a few seconds: it stays where she put it.
+- **R7 — nothing regressed:** W2's tall list still stops just above the footer; the scroll bar still in the margin
+  beside the ✕ (one capture each in Study light).
+- **R8 — restore and release** (copy the store back + `cmp`; prefs import / delete added keys / re-export / diff;
+  posture Standard, unlocked, castle-W1 untouched; `Tools/stage release --who vx283-u1b-walk`).
+
+Each row's line: what was done · the file(s) · HOLDS / DOES NOT HOLD (+ what's wrong). Then OBSERVATIONS.
+
+The coordinator's rules bind (a system popup you can't dismiss → stop and report its words; What's New dismissed; never `claude mcp list` or any MCP client). ⇧⌘W in a window merged into macOS tabs is macOS's Close Window by her ruling — walk in an ordinary window.
+
+#### U1b — RE-WALK RECORD
+
+*(The walker writes one line per row here.)*
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
