@@ -1261,6 +1261,22 @@ limit) is NOT taken** — polling over a wrong mechanism.
    before/after windows), idempotence; the mounted Starred pin GREEN with the flip; R-F — revert the application to
    the proxy's anchor road — red on the Starred pin.
 
+#### U1b — THE ORCHESTRATOR'S RULING ON Q9 (2026-10-14 ~22:00 — P-U1b-6 AMENDED)
+
+Q9 inverted my prediction: on HEAD's absolute `ScrollPosition` road the Starred pin still rests 1.5 pt short, while
+R-F — every P-U1b-6 trigger KEPT, only the application put back on the proxy's anchor road — went **6/6 green, the
+Starred pin included**. So the half of my ruling that carried the fix is the EVERY-INPUT-AXIS re-ask (content height,
+row height, viewport, current row, mount), and the half I named as the mechanism (the proxy road's stale arithmetic)
+was **wrong as the cause**: a direct `proxy.scrollTo` re-issued on each fresh reading converges, while a
+`ScrollPosition` set again to the value it already holds is most likely a no-op to SwiftUI (the implementer's
+reading, untraced — recorded, not pursued). **Item 2 of P-U1b-6 (apply absolutely through `ScrollPosition`) is
+WITHDRAWN.** RULED (a): keep every trigger, the pure `revealOffset`, the settled backstop and P-U1b-7; apply through
+the proxy (the R-F patch becomes HEAD).
+
+**The proof the triggers are the fix (the hallucination guard):** a new revert **R-G** — drop the content-height and
+row-height re-asks only, keep everything else — must turn the Starred pin RED; and the Q6 re-run (pre-P-U1b-6 code)
+already recorded it red. If R-G stays green, the fix is unexplained and the leg stops again.
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
