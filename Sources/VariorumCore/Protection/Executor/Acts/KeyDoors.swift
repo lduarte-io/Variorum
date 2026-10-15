@@ -27,17 +27,35 @@ struct KeyDoorProgram: ActProgram {
         switch step {
         case "vault":
             let snapshot = try await ctx.freshRead()
-            let held = try ctx.material(for: snapshot)
             var format = snapshot.format
+            // Landed already (this act's own write): nothing to do.
+            switch act {
+            case .changePassphrase, .resetPassphrase:
+                if format.kdf == (try ctx.requirePassphrase()).kdf { return }
+            default:
+                guard let words = ctx.secrets.words else { throw ExecutorRefusal.secretsRequired(act) }
+                if VaultModel.master(of: format, passphrase: nil, words: words) != nil { return }
+            }
+            // Not landed, and no master in reach — the press's secret no longer
+            // opens the vault (the account moved elsewhere since the press: a
+            // passphrase changed on another device) and no held keys follow
+            // it: before this, the act's first vault write, it ROLLS BACK, as a
+            // rotation's first write does; the follow picks the change up and
+            // she presses again (VX-305 U4, the soak's seed 10 — it stuck in
+            // flight with its vault in reach).
+            let held: DeviceKeyMaterial
+            do {
+                held = try ctx.material(for: snapshot)
+            } catch ExecutorRefusal.secretsRequired {
+                throw ActRollback(refusal: .accountMoved)
+            }
             switch act {
             case .changePassphrase, .resetPassphrase:
                 let passphrase = try ctx.requirePassphrase()
-                if format.kdf == passphrase.kdf { return }  // landed already
                 format = try format.rewrappingPassphrase(
                     masterKey: held.masterSymmetricKey, passphraseKey: passphrase.key, kdf: passphrase.kdf)
             default:
                 guard let words = ctx.secrets.words else { throw ExecutorRefusal.secretsRequired(act) }
-                if VaultModel.master(of: format, passphrase: nil, words: words) != nil { return }
                 format = try format.replacingRecoveryWrap(masterKey: held.masterSymmetricKey, recoveryKey: words.key)
             }
             format.updatedByDevice = ctx.deviceName

@@ -768,4 +768,23 @@ extension GeneratorFoundScenarios {
         #expect(world.macA.slot?.record?.mode == .standard, "an Apple-wrapped key was recorded Castle")
         expectPromisesKept(world)
     }
+
+    /// Seed 10 (sequence 516, the closer's soak): New Words (synced) crashed
+    /// right after its begin, before its vault write; the account's passphrase
+    /// then changed on another device. The resume could reach no master — the
+    /// press's passphrase no longer opens the vault, the new words never landed
+    /// there — and stuck in flight with its vault in reach (promise 6). Before
+    /// its vault write the key door now ROLLS BACK as a rotation's first write
+    /// does (the account moved: the follow picks the change up, she presses
+    /// again).
+    @Test func aKeyDoorWhoseAccountMovedBeforeItsVaultWriteRollsBack() async throws {
+        let world = try Self.start("a phone on an older build beside a synced Castle Mac", seed: 10000546)
+        for action in [Action.crash(.regenerateWords("macA"), afterWrites: 3), .updateToNewBuild("phone"), .changePassphrase("phone")] {
+            await world.step(action)
+        }
+        await world.step(.launch("macA"))
+        #expect(world.macA.library?.section.actInFlight == nil, "New Words stuck in flight")
+        await world.done([.settle])
+        expectPromisesKept(world)
+    }
 }
