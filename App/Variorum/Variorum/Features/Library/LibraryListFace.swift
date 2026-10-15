@@ -86,17 +86,49 @@ struct LibraryListSeparator: View {
 }
 
 /// A section header of the List's face — pinned (floating) over the rows on
-/// the header material, as the table's group rows floated.
+/// the header material, as the table's group rows floated (in LIGHT; in dark,
+/// on the voice's own colours — VX-20, below).
 struct LibraryListHeader: View {
     /// The words, already voiced (`tokens.chromeLabel`).
     let title: String
     @State private var pinned = false
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
 
     /// The system's shadow ink (appearance-adaptive — never a literal).
     private static var shade: Color { Color(nsColor: .shadowColor) }
 
+    /// **What the PINNED header draws on** (VX-20 — her #188(m) ruling, "the
+    /// bands match"; the record `notes/plans/librarywalkpolish-ladder-round1.md`
+    /// § THE ONE FINDING). The header material reads #FFFEFF in light — the
+    /// native table's own floating header, the batch-1 parity, true there —
+    /// but in DARK it drew a warm grey band (#2F2D29) across the black room
+    /// in both voices, where the old List's heading sits almost on the room.
+    /// So in dark the header draws from the VOICE: the paper the List itself
+    /// draws on (`surface` — under a palette it carries the palette's paper,
+    /// so the header can never be a band of another colour) and the voice's
+    /// hairline at its foot. Light keeps the material, unchanged.
+    enum PinnedFace: Equatable {
+        /// Light: the table's floating-header material, its soft shade and
+        /// hairline shadow (the measured face).
+        case material
+        /// Dark: the voice's own paper, and its hairline.
+        case voice(fill: Color, hairline: Color)
+    }
+
+    static func pinnedFace(tokens: VoiceTokens, dark: Bool) -> PinnedFace {
+        dark ? .voice(fill: tokens.surface, hairline: tokens.line) : .material
+    }
+
+    private var face: PinnedFace {
+        Self.pinnedFace(
+            tokens: themeStore?.tokens(for: scheme) ?? .fallback(for: scheme),
+            dark: scheme == .dark)
+    }
+
     var body: some View {
-        Text(title)
+        let face = face
+        return Text(title)
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(.secondary)
             .lineLimit(1)
@@ -106,32 +138,46 @@ struct LibraryListHeader: View {
                 maxHeight: LibraryListFace.headerHeight, alignment: .leading)
             .background {
                 if pinned {
-                    // The floating group row's face (measured): the header
-                    // material, a soft shade over its last 4 pt, and a
-                    // full-width hairline shadow under it.
-                    ZStack(alignment: .bottom) {
-                        LibraryListHeaderMaterial()
-                        LinearGradient(
-                            colors: [Self.shade.opacity(0), Self.shade.opacity(0.025)],
-                            startPoint: .top, endPoint: .bottom)
-                            .frame(height: 4)
+                    switch face {
+                    case .material:
+                        // The floating group row's face (measured): the header
+                        // material, a soft shade over its last 4 pt, and a
+                        // full-width hairline shadow under it.
+                        ZStack(alignment: .bottom) {
+                            LibraryListHeaderMaterial()
+                            LinearGradient(
+                                colors: [Self.shade.opacity(0), Self.shade.opacity(0.025)],
+                                startPoint: .top, endPoint: .bottom)
+                                .frame(height: 4)
+                        }
+                    case .voice(let fill, _):
+                        fill
                     }
                 }
             }
             .overlay(alignment: .bottom) { LibraryListSeparator() }
             .overlay(alignment: .bottom) {
                 if pinned {
-                    VStack(spacing: 0) {
-                        // The floating separator reads darker (measured 209–223
-                        // against a resting 230) …
-                        Self.shade.opacity(0.07)
+                    switch face {
+                    case .material:
+                        VStack(spacing: 0) {
+                            // The floating separator reads darker (measured 209–223
+                            // against a resting 230) …
+                            Self.shade.opacity(0.07)
+                                .frame(height: 1)
+                                .padding(.horizontal, LibraryListFace.separatorInset)
+                            // … over a full-width hairline shadow beneath it.
+                            Self.shade.opacity(0.09).frame(height: 1)
+                        }
+                        .offset(y: 1)
+                        .allowsHitTesting(false)
+                    case .voice(_, let hairline):
+                        // The voice's hairline across the header's foot, over
+                        // the resting separator (one line, edge to edge).
+                        hairline
                             .frame(height: 1)
-                            .padding(.horizontal, LibraryListFace.separatorInset)
-                        // … over a full-width hairline shadow beneath it.
-                        Self.shade.opacity(0.09).frame(height: 1)
+                            .allowsHitTesting(false)
                     }
-                    .offset(y: 1)
-                    .allowsHitTesting(false)
                 }
             }
             .onGeometryChange(for: Bool.self) { $0.frame(in: .scrollView).minY <= 0.5 } action: {

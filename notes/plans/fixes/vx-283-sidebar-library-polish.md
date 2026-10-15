@@ -1848,7 +1848,28 @@ the orchestrator rules on its composition (below — the brief's composition doe
   .bottom) { if let item = session.status.current { StatusToast(item: item, tokens: theme.tokens(for: scheme),
   onDismiss: { session.status.clear() }).padding(.bottom, 46) } }`) — expected RED: the Bookcase and Library cells;
   the note cell green. All PENDING the stage window.
-- Q4 — VX-20 (the dark pinned heading): NOT-STARTED.
+- Q4 — VX-20 (the dark pinned heading): DONE (this commit) — headless build-for-testing green. **The trace:**
+  `LibraryListHeader` (`Features/Library/LibraryListFace.swift:90-142` before) drew its PINNED background from
+  `LibraryListHeaderMaterial` — an `NSVisualEffectView(.headerView, .withinWindow)` — in every appearance: the light
+  parity (#FFFEFF beside the native header's, batch 1), a warm grey band (#2F2D29) in dark (the ladder record's
+  § THE ONE FINDING). **The fix (her #188(m), the orchestrator's reading — option 2):** the colour source is ONE pure
+  decision, `LibraryListHeader.pinnedFace(tokens:dark:)` — DARK → `.voice(fill: tokens.surface, hairline:
+  tokens.line)`: the paper the List itself draws on (the catalog's `.background(tokens.surface)`) with the voice's
+  hairline edge to edge at the header's foot, replacing the material, its shade and its shadow lines; LIGHT →
+  `.material`, byte-for-byte the old face. The header reads the theme store + colour scheme from the environment
+  (the call sites unchanged). No literal colour. **PROVISIONAL P-U3-4 (mine) — which voice colour is "the room":**
+  `surface`, the colour the List draws on, because under a palette the dark paper carries the palette's hue (18g)
+  while `room` stays black — so `room` would draw a BLACK band over a hued list, the defect again in another colour.
+  Options: (a) `surface` [built]; (b) `room` (black in dark, as the ruling's words literally name it — identical to
+  (a) only without a palette); (c) `card` (the old native heading's slightly-lighter look, #191B19 over #0D0E0D —
+  a faint band kept on purpose). **Pin:** `LibraryListHeaderDarkFaceTests` (dark × both voices → the voice's paper +
+  hairline; dark under the lavender palette → that palette's paper; light × both voices → the material, guards).
+  **RED ON OLD planned as R-D:** `pinnedFace` answering `.material` in every appearance (the old face) — expected RED:
+  the two dark cells ×2 voices; light green. **The rig's dark pass** (evidence, the brief's tool): `theFace` +
+  `theFaceUnderManyBooks` under `TEST_RUNNER_VARIORUM_LIBRARY_LIST_FACE=1` + `…_APPEARANCE=dark`, once under R-D
+  (label `before`) and once fixed (label `after`), the `BWALK|` log chunks reassembled into
+  `notes/plans/vx283-screens/u3/rig/` — the geometry dump's "uniform horizontal runs" give the pinned band's rgb.
+  All PENDING the stage window.
 - Q5 — VX-175 (the controls row): **STOPPED FOR A RULING — composition (below).** Nothing built.
 - Q6 — the stage window: NOT-STARTED.
 
