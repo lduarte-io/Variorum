@@ -248,6 +248,20 @@ extension ProtectionExecutor {
             .compactMap({ $0.file.envelope.apple != nil ? $0.file.envelope.appleKeyID : nil }).first {
             section.oldSharedKey = OldSharedKeyRecord(id: named)
         }
+        // The account's Apple key, as this device last knew its vault (the
+        // vault read now, else the key today's file was reconciled under — one
+        // Apple-held copy per account, today): recorded as followed, so a
+        // later act signed out knows the account still stands on it (§3.5
+        // point 4's door; P-U2-4). VX-305 U4, found by the scenario world.
+        if let account = inputs.account {
+            let read = freshVaults[account].flatMap { $0.format.masterWrappedByAppleHeld != nil ? $0.format.appleKeyID : nil }
+            let today = try leaves.keyFiles.legacyKeyFilesBesideLibrary()
+                .first { $0.file.fingerprint == library.fingerprint }
+                .flatMap { $0.file.envelope.master != nil && $0.file.envelope.apple != nil ? $0.file.envelope.appleKeyID : nil }
+            if let id = read ?? today {
+                section = section.recordingAppleKey(AppleKeyRecord(id: id, purpose: .account, accountID: account, origin: .followed))
+            }
+        }
         library.record = record
         library.section = section
         library.familyTree = record.familyTree

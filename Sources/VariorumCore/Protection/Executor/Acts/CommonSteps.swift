@@ -509,6 +509,24 @@ extension ActContext {
             log("the old shared key stays — a vault it can read names it")
             return
         }
+        // Signed out (or in another account), the vault can't be read — this
+        // device's own knowledge stands in (P-U2-4, at the act): an account it
+        // last knew on the old key, other than one THIS act rotates into
+        // Castle, keeps the key (This Mac Only leaving a Standard account on
+        // the old key must never cost its other devices their Apple road —
+        // VX-305 U4, found by the scenario world).
+        if executor.guards.doorTimeVaultCheckOn, let shared = recorded?.id ?? readable?.id {
+            let rotated = act == .enterCastle && parameters.synced == true ? accountID : nil
+            if let stays = library.section.appleKeys.first(where: {
+                $0.purpose == .account && $0.id == shared && $0.retiredAt == nil && $0.accountID != nil && $0.accountID != rotated
+                    && $0.accountID != executor.configuration.session.accountID
+            })?.accountID {
+                leaves.diagnostics.report(.oldSharedKeyStayed(account: stays))
+                outcome.notices.append(.oldSharedKeyStayed(account: stays))
+                log("the old shared key stays — an account this device knew still stands on it")
+                return
+            }
+        }
         let id: String
         if executor.guards.oldSharedKeyDeletedByRecordedIDOn {
             // The id this device's section lists — or, never listed, the item
