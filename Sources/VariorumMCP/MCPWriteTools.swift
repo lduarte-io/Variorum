@@ -478,14 +478,32 @@ struct MCPWriteTools: Sendable {
             }
         case .applyTag(let noteID, let path):
             return try onNote(noteID, rung: .writeNew, job: job, clientName: clientName) { title in
-                let application = try ops.applyTagPath(path, toPost: noteID, undoLabel: label(.tag))
+                // VX-362 (a) (the run record's U9, F-2 — PROVISIONAL P-VX362-1):
+                // a tag the note ALREADY wears is done, as at every tag door of
+                // hers (seven catch `alreadyTagged` and move on — `TypedTagPath`:
+                // "typing it again is a no-op, never an error"). The op threw, so
+                // its transaction rolled back and it registered no undo entry;
+                // the answer says `changed: false` and there is no receipt (a
+                // receipt may only claim what landed). The Activity line is the
+                // act's landed one, as every no-op on the wire logs.
+                let tagID: String
+                let changed: Bool
+                do {
+                    tagID = try ops.applyTagPath(path, toPost: noteID, undoLabel: label(.tag)).tagId
+                    changed = true
+                } catch OperationError.alreadyTagged(let worn, _) {
+                    tagID = worn
+                    changed = false
+                }
                 let tagPath = try database.read { db in
-                    try String.fetchOne(db, sql: "SELECT path FROM tag WHERE id = ?", arguments: [application.tagId])
+                    try String.fetchOne(db, sql: "SELECT path FROM tag WHERE id = ?", arguments: [tagID])
                 } ?? path
-                return (["tag_id": application.tagId, "tag": tagPath, "note_id": noteID],
-                        MCPWriteReceipt(clientName: clientName, act: .tag, targetID: noteID,
-                                        targetTitle: title, detail: tagPath,
-                                        show: .note(noteID: noteID, blockID: nil, select: nil)))
+                return (["tag_id": tagID, "tag": tagPath, "note_id": noteID, "changed": changed],
+                        changed
+                            ? MCPWriteReceipt(clientName: clientName, act: .tag, targetID: noteID,
+                                              targetTitle: title, detail: tagPath,
+                                              show: .note(noteID: noteID, blockID: nil, select: nil))
+                            : nil)
             }
         case .createBook(let name, let wingID):
             return try inWing(wingID, job: job, clientName: clientName) {

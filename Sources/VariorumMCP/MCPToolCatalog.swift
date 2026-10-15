@@ -672,7 +672,8 @@ enum MCPToolCatalog {
         description: """
             Apply a tag to a note by its path (e.g. "percy/pt-en"); a missing tag is created in the \
             note's wing. Books that collect by that tag hear it, as when the author tags. Returns \
-            JSON with the tag_id.
+            JSON with the tag_id and changed — false when the note already wore the tag: nothing \
+            was written and there is nothing to undo.
             """,
         inputSchema: .object([
             "type": "object",
