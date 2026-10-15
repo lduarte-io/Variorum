@@ -1,7 +1,7 @@
 # VX-336 handoff — what an AI can do in your library now: add paragraphs, duplicate for Compare, check its own work, and its guide (2026-10-15)
 
-**Run:** VX-336 "Run: MCP wire tools & AI docs" · PR #166, merged to `main` as a merge commit («sha» — the merge
-commit's hash, filled after the merge) · the record `notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md` (your rulings,
+**Run:** VX-336 "Run: MCP wire tools & AI docs" · PR #166, merged to `main` as a merge commit (4f47720d)
+· the record `notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md` (your rulings,
 the orchestrator's provisional rulings, every unit record, the stage windows, the review) · built 2026-10-14/15 on the
 Pro under your kickoff answers and your overnight word: *"I am going to sleep, rule provisionally overnight in my
 absence and leave me a handoff in the morning. you or 283 can merge last, whoever does should have a release build

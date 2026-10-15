@@ -2744,7 +2744,7 @@ Status: open — your eye; the handoff's checklist leads with this bundle.
 
 ## VX-336 — Run: MCP wire tools & AI docs (2026-10-15)
 
-#227 — **THE VX-336 RATIFY BUNDLE (merged 2026-10-15, «PR #N», merge commit «sha»; the binding record is
+#227 — **THE VX-336 RATIFY BUNDLE (merged 2026-10-15, PR #166, merge commit 4f47720d; the binding record is
 `notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md` — her rulings during the run, the ORCHESTRATOR'S PROVISIONAL
 RULINGS, each UNIT RECORD's PROVISIONALs with their options and the orchestrator's rulings on its forks, THE LADDER;
 your handoff `notes/handoffs/vx-336-handoff.md`).** Built through the evening and the night under your away-mode answer

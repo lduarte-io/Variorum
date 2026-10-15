@@ -1,6 +1,6 @@
 # VX-246 — Run: MCP pane, docs & door fixes — kickoff + plan
 
-**STATUS (VX-336): CLOSED 2026-10-15 — merged as «PR #N» (merge commit «sha»); every unit this file planned
+**STATUS (VX-336): CLOSED 2026-10-15 — merged as PR #166 (merge commit 4f47720d); every unit this file planned
 (U5–U8, with VX-330 and VX-342) shipped, and U9 (VX-361 · VX-362 · VX-363) joined; the record
 `notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md` (its CLOSEOUT RECORD), the handoff
 `notes/handoffs/vx-336-handoff.md`, the ratify bundle QUESTIONS #227. Nothing in this plan remains open.** Kicked off
