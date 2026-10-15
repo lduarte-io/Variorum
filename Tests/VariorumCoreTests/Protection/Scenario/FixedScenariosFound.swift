@@ -787,4 +787,21 @@ extension GeneratorFoundScenarios {
         await world.done([.settle])
         expectPromisesKept(world)
     }
+
+    /// Seed 11 (sequence 526, the closer's soak): a follow of a key
+    /// replacement crashed past its swap; the account then replaced its keys
+    /// AGAIN elsewhere; the relaunch's resume finished the follow and recorded
+    /// the vault's facts AS READ NOW — the second replacement's — though the
+    /// keys it picked up were the first's: the follow still owed went unseen,
+    /// and the device never caught up (promise 7). An act records the keys it
+    /// TOOK (stamped in its plan); a vault that moved past them leaves the
+    /// follow owed.
+    @Test func aFollowResumedPastAnotherReplacementStillFollows() async throws {
+        let world = try Self.start("a synced Castle account on two Macs and the phone", seed: 11000559)
+        for action in [Action.setGate("macA", .touchID), .replaceAllKeys("macB", newWords: false),
+                       .crash(.follow("macA", .words), afterWrites: 16), .replaceAllKeys("macB", newWords: true), .settle] {
+            await world.step(action)
+        }
+        expectPromisesKept(world)
+    }
 }

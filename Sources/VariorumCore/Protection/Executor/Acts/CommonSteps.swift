@@ -183,13 +183,22 @@ extension ActContext {
         // account had replaced its keys elsewhere (promise 7 — VX-305 U4,
         // found by the scenario world).
         let vault = parameters.synced == true ? accountID.flatMap { executor.freshVaults[$0] } : nil
+        // …and only the keys it TOOK: a vault read since that moved past them
+        // (the account replaced its keys again before a resume finished this
+        // act) leaves the follow owed — its corpus key recorded alone (VX-305
+        // U4, the soak's seed 11).
+        let took = parameters.followedCorpusKeyID ?? parameters.newCorpusKeyID
         let hash = hasTouchID ? leaves.biometry.biometryStateHash() : nil
         try executor.writeMemory(&library) { memory in
             if hasTouchID { memory.biometryStateHash = hash }
             if let vault {
-                memory.vaultFacts = VaultFacts(
-                    kdf: vault.format.kdf, corpusKeyID: vault.corpusKeyID,
-                    recoveryWrapDigest: vault.format.recoveryWrapDigest)
+                if let took, took != vault.corpusKeyID {
+                    memory.vaultFacts = VaultFacts(corpusKeyID: took)
+                } else {
+                    memory.vaultFacts = VaultFacts(
+                        kdf: vault.format.kdf, corpusKeyID: vault.corpusKeyID,
+                        recoveryWrapDigest: vault.format.recoveryWrapDigest)
+                }
             }
         }
     }

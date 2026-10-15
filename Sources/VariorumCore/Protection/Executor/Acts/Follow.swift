@@ -151,6 +151,17 @@ extension ActContext {
         guard let master else { throw ExecutorRefusal.secretsRequired(act) }
         let following = try VaultModel.material(following: snapshot.format, master: master)
         try holdSyncKeys(following, castleWay: reachesCastleEra(snapshot))
+        try stampFollowed(following.corpusKeyID)
+    }
+
+    /// The corpus key this act took, stamped in its plan (see
+    /// `ActParameters.followedCorpusKeyID`).
+    func stampFollowed(_ corpusKeyID: String) throws {
+        guard parameters.followedCorpusKeyID != corpusKeyID else { return }
+        var next = parameters
+        next.followedCorpusKeyID = corpusKeyID
+        plan.parameters = next
+        try leaves.plans.writePlan(try plan.sealed(under: library.key))
     }
 
     /// Do the keys of this vault reach a Castle-era key? In Castle; through a

@@ -30,6 +30,7 @@ struct ExactWritesTests {
         #expect(phone.world.writeLog(naming: [PF.fp(k0): "K0", PF.fp(library.key): "K1", phone.ownApple!.id: "OWN"]) == [
             "record K0", "memory K0", "plan",                        // the act named (its gate chosen at this press)
             "sync+ touchid", "sync- silent", "plan",                 // the new master, the Castle way; one item per account
+            "plan",                                                  // the corpus key it took, stamped (VX-305 U4)
             "plan",                                                  // no rotation left to help
             "custody+ touchid K1", "plan", "keyfile K1", "plan", "stage K1", "plan", "staged-record K1", "plan",
             "swap K1", "plan", "memory K1", "plan",

@@ -106,6 +106,11 @@ public struct ActParameters: Codable, Equatable, Sendable {
     /// (Migration Assistant never carries it) has only this to give the
     /// current key its own file back (VX-305 U4, the soak's seed 2).
     public var outgoingKeyFile: KeyFile?
+    /// The corpus key a follow (or a join) PICKED UP — stamped when it took
+    /// the keys, so the facts it records are the ones it followed, never a
+    /// vault that moved on before its resume finished (VX-305 U4, the soak's
+    /// seed 11).
+    public var followedCorpusKeyID: String?
 
     public init(
         gate: GateStyle? = nil, synced: Bool? = nil, accountID: String? = nil, doorRevision: Int? = nil,
