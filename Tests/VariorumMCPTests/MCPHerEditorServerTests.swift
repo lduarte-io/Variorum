@@ -498,4 +498,28 @@ struct MCPHerEditorServerTests {
             #expect(w.editor.pending.value.isEmpty)
         }
     }
+
+    // MARK: - COPY: duplicate_note (VX-311, VX-336 U6a — APPENDED; nothing above modified)
+
+    /// A duplicate COPIES her takes, as a version does — her own Duplicate as
+    /// Version flushes first (`AppSession.runCopying`, 13e E10), so the wire's
+    /// does too, in its own turn before the act's (the run record's D-311-6).
+    /// **RED on old:** `Unknown tool: duplicate_note.` — no flush, no copy.
+    @Test func aWireDuplicateAsksForHerFlushAndCopiesHerLatestText() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let w = try World(h)
+            let note = try h.operations.createPost(title: "ch 1")
+            let block = try h.operations.newBlock(in: note.id, text: "Her line.", registeringUndo: false)
+            w.editor.type(block.variant.id, "Her line. Her last words.")
+
+            let duplicated = await w.call("duplicate_note", ["note_id": .string(note.id)])
+            #expect(duplicated.isError != true, "\(duplicated.text)")
+            #expect(w.log.value == ["flush:duplicate_note", "act"], "her flush, THEN the act's own turn")
+            let copyID = try #require(try w.json(duplicated)["note_id"] as? String)
+            #expect(try await w.rendered(copyID) == "Her line. Her last words.", "the copy carries her latest words")
+            #expect(try await w.rendered(note.id) == "Her line. Her last words.")
+        }
+    }
 }

@@ -30,7 +30,7 @@ units) are scope, not durations.
 | **VX-246** MCP door fixes & AI docs | the door's security, correctness, wire asks, then the AI's docs last | 21 | Opus / **Fable** | now |
 | **VX-281** MCP settings pane & shared icon | the pane in tabs, the code block, the Library's shared icon | 4 | Opus / Opus | now |
 | **VX-282** Editor & notes fixes | backspace, the italics flicker, take panel, capture box, comments family | 9 | Opus / **Fable** (editor seam) | now |
-| **VX-283** Sidebar & Library polish | the Open list, navigate-away, Library polish, exports, the test reds | 16 | Opus / Opus | now |
+| **VX-283** Sidebar & Library polish | the Open list, Library polish, the red lint (trimmed at her 2026-10-14 triage) | 9 | Opus / Opus | in progress |
 | **VX-284** Books, gatherings & tags | her VX-214 follow-ups, tag undo, the book view's doors and Index slice, VX-216 last | 15 | Opus / Opus | now |
 
 Plus **her own track** (§4) and **the release itself** (§5).
@@ -70,16 +70,16 @@ The dependencies, all of them:
 8. **Closeouts serialize** (CLAUDE.md): first ready merges first, and the next rebases onto it.
 
 **Shared files to watch** (the conflict map — any two runs here rebase carefully):
-- **The navigate-away road** (`.variorumNotesDeleted` → `WorkspaceModel.notesDeleted`): VX-283 (VX-123 routes
-  sync applies and `deleteReadingWithNotes` through it; the new Close Note act moves the pane on) and
-  VX-246 (VX-275 sends her editor away before a wire delete). Whichever lands second builds on the first's
-  road, never a second road.
+- **The navigate-away road** (`.variorumNotesDeleted` → `WorkspaceModel.notesDeleted`): VX-283 (the new Close
+  Note act moves the pane on; VX-123 left the run at her 2026-10-14 triage) and VX-246 (VX-275 sends her
+  editor away before a wire delete — merged). Whoever builds on it second uses the first's road, never a
+  second road.
 - **Landing at a block:** VX-284 (VX-303 and VX-304 send book doors through `ShellRouter.adopt(landing:)` →
   `jump`) and VX-283 (Close Note's landing on the next note). Both use the existing roads; neither invents
   a new landing authority.
-- **Faces refreshing after writes:** VX-283's VX-122 (one revival signal for the Library) and VX-246's
-  VX-231 (stale Bookcase counts after an MCP write) may share a cause. VX-246 checks VX-283's signal before
-  inventing its own.
+- **Faces refreshing after writes:** VX-122 (a live Library missing revivals) and VX-231 (stale Bookcase
+  counts after an MCP write) may share a cause. VX-122 left VX-283 at her 2026-10-14 triage (Parked, after
+  launch), so no revival signal is coming from that run; whoever fixes VX-231 owns the signal.
 - **`TutorialSeeder`:** VX-246 (docs), VX-292 (hers), VX-266 (Castle's words).
 - **Settings:** VX-281 (the MCP pane), VX-284 (VX-240's "Opening your library…" face in the Settings
   scene's `.opening` arm), VX-266 (the Protection / Data Safety ceremonies), VX-234 (her wording).
@@ -192,27 +192,29 @@ Read `notes/TEXTKIT2_NOTES.md`. **Mobile-visible:** VX-296's shared face reaches
 (say so in the MOBILE PARITY line); VX-290 is Mac-only (the phone has no carve).
 
 ### VX-283 — Run: Sidebar & Library polish
+**TRIMMED at her kickoff triage (2026-10-14; the record is `notes/plans/fixes/vx-283-sidebar-library-polish.md`
+on the run's branch).** Parked until after launch, her words on each ticket: VX-123 and VX-122 (*"I don't want
+to contort VX-123 to be fixed incorrectly when it's really a sync issue … those are niche nits"*), VX-19, VX-125,
+VX-126, VX-167, VX-70 (the chip ships only on the Open list's rows, inside VX-288). VX-289's multi-select half
+→ VX-344 (Parked).
+
 **Members:**
 - The Open list (her 2026-10-13 asks): VX-285 (height) · VX-286 (scroll bar over ✕) · VX-287 (Close Note)
-  · VX-288 (the drag) · VX-289 (multi-select, Close All).
-- Navigation: VX-70 (the compact drag chip at the remaining rows, incl. the Open list's) · VX-123
-  (navigate-away gaps).
-- Library: VX-122 (revivals) · VX-19 (Timeline) · VX-20 (dark heading band) · VX-121 (toasts vs quick entry)
-  · VX-175 (the controls row at the 1240-pt default window; pre-launch at her word).
-- Exports: VX-125 · VX-126.
-- The reds: VX-245 (its six non-MCP sites) · VX-167 (two tests red only in wide parallel runs).
+  · VX-288 (the drag, with the compact chip on its rows) · VX-289 (Close All).
+- Library: VX-20 (dark heading band) · VX-121 (toasts vs quick entry) · VX-175 (the controls row at the
+  1240-pt default window; pre-launch at her word).
+- The red lint: VX-245 (its six non-MCP sites).
 
 **Units:**
 1. **The Open list's layout and closing:** VX-285, VX-286, VX-287, VX-289. **Her ruling on VX-287:** Close
    Note = **⇧⌘W** (⌘W keeps closing the window), landing on **the next note in the list** — *"that way you
    can close them all quickly."* Verify ⇧⌘W is free first.
-2. **The drag:** VX-288 — **the light version first** (her ruling) — + VX-70.
-3. **Navigate-away and Library revivals:** VX-123, VX-122 — one signal each, on the existing roads.
-4. **Library polish:** VX-19, VX-20, VX-121, VX-175.
-5. **The exports:** VX-125, VX-126 — the format's one home stays `Domain/VariorumDocument`.
-6. **The reds:** VX-245, VX-167.
+2. **The drag:** VX-288 — **the light version first** (her ruling) — with the chip on the Open list's rows.
+3. **Library polish and the red lint:** VX-20, VX-121, VX-175, VX-245.
 
-**Cast:** Opus / Opus. **Pins that change by her ask:** `ShellChromeTests.theOpenStripWindowIsHerSevenAndAHalf`
+**Cast:** Opus orchestrates; Opus builds at xhigh and cold-reviews at max (her word). **After each unit a fresh
+Opus at xhigh walks the changed areas with screenshots** — the Open list especially (her word: *"it should look
+right after it's done"*). **Pins that change by her ask:** `ShellChromeTests.theOpenStripWindowIsHerSevenAndAHalf`
 and the shared-constant pin in `StarredScrollTests` (Starred keeps its 7, her words).
 
 ### VX-284 — Run: Books, gatherings & tags

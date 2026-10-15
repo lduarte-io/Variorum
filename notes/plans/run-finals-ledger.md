@@ -2,6 +2,12 @@
 
 **What this is (her ruling 2026-10-14, VX-341):** AppSpec §14 keeps the most recent ~five efforts' entries slimmed to contract and provenance; the finals and ladder tallies stripped from each entry live HERE verbatim, newest first. A rolled entry's full original text also remains in `notes/AppSpecDeltaArchive.md` (VX-246's finals live only here until its roll). Future closeouts write the slim entry in §14 and append the finals/ladder text here in the same commit.
 
+## VX-336
+
+the ladder CLOSED at round 2 — Fable xhigh R1 0B/1M/2m/2n (R1-1, U9's window then pending, closed by its evidence; R1-2, the canon owed, landed in-branch before the merge; R1-4/R1-5 nits, no change; no code fix) → Fable xhigh R2 0B/0M/1m/3n (R2-1, a wire Compare landing's armed posture outliving a named peer that never projected, fixed red-first in PHASE B and checked line by line; R2-2 one comment clause; R2-3 one handoff line; R2-4 a nit, no change); no round 3 earned
+
+Finals: on the tree merged with main, headless VariorumMCPTests 349/67 (1 known, VX-357) · core 2,872/333 · workbook 40/6; Mac: the merge-moment WHOLE target 4,714 tests / 777 suites — 20 issues incl. 13 known (VX-229's nine + `IndexTierMetricsTests`' four), 4,680 passed, 27 gated skips; four reds, three standing on main (VX-115; VX-245/VX-283's six non-MCP lint sites; VX-167's redoNeverAsks) and one load flake that passed alone (`TakesFindBoardTests`' Esc boundary, 7/7 with its 1 known issue re-run alone), no new red; R2-1's pin red exact on the pin-only product (11 tests · 4 failed · 4 issues) and green 11/11 on the final; the phone suites U9 ran 120/15 (2 known by design). Per window: U5 31 suites 251 (244 passed, 7 gated skips) · U6 125 suites 790 (786 passed, the 2 standing reds VX-115 and VX-167, 2 gated skips) with every red run exact · U7 21 suites 176 (173 passed, 3 gated) · U8 66 suites 432 (429 passed, 3 gated) with the old seed's red exact · U9 121 suites 771 (765 passed, 6 gated) with the Mac red (20 issues) and the phone red (5) exact and the phone green 120/15; every real-client leg proven from the wire's bytes.
+
 ## VX-246
 
 the ladder CLOSED at round 2 — Fable R1 0B/0M/1m/3n (F-1, the field guide's lesson-2 truth stopgap, among them) → Opus max R2 0B/0M/2m/5n (R2-2 deferred to VM-16), the final fixes checked line by line

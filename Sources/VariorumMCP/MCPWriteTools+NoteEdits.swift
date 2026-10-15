@@ -290,9 +290,12 @@ extension MCPWriteTools {
                 let result = try ops.restoreCommitForClient(
                     commitID, client: clientName, undoLabel: label(.commitRestore),
                     guardedBy: guardEdit(clientName) { db in [try Queries.mcpContainerOf(commit: commitID, db)] })
+                // VX-254 (D-254-2): the digest of the take's text as it now
+                // stands — the commit's text, once restored.
                 var answer: [String: Any] = [
                     "commit_id": commitID, "take_id": result.take.id, "block_id": result.take.blockId,
                     "note_id": noteID, "changed": result.changed,
+                    "sha256": MCPTextDigest.sha256(result.take.workingText),
                 ]
                 if let before = result.before { answer["before_commit_id"] = before.id }
                 if let after = result.after { answer["after_commit_id"] = after.id }

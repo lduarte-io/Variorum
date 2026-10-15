@@ -151,7 +151,19 @@ extension MCPWriteTools {
                         labeled, inNote: noteID, undoLabel: label(.takes),
                         guardedBy: guardNotes(clientName, rung: .suggest) { _ in [noteID] })
                 }
-                return (["note_id": noteID, "take_ids": takes.map(\.id)],
+                // VX-254 (D-254-2, F-254-5 (a) — the no-positional rule): a
+                // take OBJECT per item, in the items' order — its id, its
+                // block, its label AS STORED (the `aiLabel` form) and the
+                // digest of the text it stored — beside `take_ids`, unchanged
+                // (F-6's compatibility ruling).
+                let objects: [[String: Any]] = takes.map { take in
+                    var object: [String: Any] = [
+                        "take_id": take.id, "block_id": take.blockId, "sha256": MCPTextDigest.sha256(take.workingText),
+                    ]
+                    if let label = take.label { object["label"] = label }
+                    return object
+                }
+                return (["note_id": noteID, "take_ids": takes.map(\.id), "takes": objects],
                         MCPWriteReceipt(clientName: clientName, act: .takes, targetID: noteID, targetTitle: title,
                                         count: takes.count,
                                         show: .takes(noteID: noteID, blockID: items[0].blockID)))
@@ -223,8 +235,7 @@ extension MCPWriteTools {
             case .blockNotFound?, .blockNotInContainer?:
                 throw ArgumentFailure(message: Self.notThisNotesBlockWords(path))
             default:
-                let words = MCPWireRefusalCopy.words(refusal.underlying) ?? hooks.refusalWords(refusal.underlying)
-                    ?? String(describing: refusal.underlying)
+                let words = MCPWireRefusalCopy.spoken(refusal.underlying, appWords: hooks.refusalWords)
                 throw ArgumentFailure(message: "\(path): \(words)")
             }
         }

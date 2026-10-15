@@ -81,7 +81,9 @@ struct MCPBlankTakeDoorsServerTests {
             let takeID = try #require(try json(blank)["take_id"] as? String)
             #expect(try await fan(h, w.blockID) == [
                 ["Her scaffold line.", nil, "chosen"],
-                ["", "claude-code \u{00B7} suggested", nil],
+                // VX-267 (JUSTIFIED EDIT, the ritual — VX-336 U5a): no label
+                // given, so the client's name alone ("suggested" dropped).
+                ["", "claude-code", nil],
             ], "at the fan's end, labeled, never chosen — her text untouched")
             #expect(try await h.database.read { try Queries.renderedText($0, containerID: w.note.id) }
                     == "Her scaffold line.")

@@ -36,7 +36,10 @@ struct MCPAdviceServerTests {
     @Test func theAdviceIsBoundedAsStated() {
         // 13n-c: her ruled bound (P-13nc-U5-5 — 1,500 → 2,000, "a bit of
         // wiggle room for future updates"); the pin keeps its form.
-        #expect(MCPSession.instructionsBound == 2_000)
+        // VX-197 (VX-336 U8a — A JUSTIFIED EDIT, the ritual): R-VX184-3, her
+        // ruling carried from VX-184's pre-run sitting — 2,000 → 3,000, the
+        // bound and its pin moved together.
+        #expect(MCPSession.instructionsBound == 3_000)
         #expect(advice.count <= MCPSession.instructionsBound,
                 "the advice is \(advice.count) characters — a client may carry it in every turn")
         #expect(advice.count > 600, "…and long enough to say what the door is")
@@ -48,10 +51,21 @@ struct MCPAdviceServerTests {
         let names = advice.matches(of: /\b[a-z]+(?:_[a-z]+)+\b/).map { String($0.output) }
         // 13n-c U6 (A JUSTIFIED EDIT, the ritual): the gatherings clause names
         // list_books and the move names move_note_to_wing.
-        #expect(Set(names) == ["read_note", "show_in_app", "list_books", "move_note_to_wing"],
-                "the tools it names: \(names)")
-        for name in names + ["search"] {
+        // VX-197 (VX-336 U8a — A JUSTIFIED EDIT, the ritual): the U7 carries
+        // name the recovery tool (list_my_activity), the organization advice
+        // names the copy road (duplicate_note) — and the paging clause names
+        // ONE parameter, read_note's ids_only, which must be a declared input
+        // of read_note (a parameter is not a tool).
+        let parameters: Set<String> = ["ids_only"]
+        #expect(Set(names) == Set(["read_note", "show_in_app", "list_books", "move_note_to_wing",
+                                   "list_my_activity", "duplicate_note"]).union(parameters),
+                "the tools and parameters it names: \(names)")
+        for name in Set(names).subtracting(parameters).union(["search"]) {
             #expect(MCPToolCatalog.declaration(named: name) != nil, "\(name) is a declared tool")
+        }
+        let readNoteInputs = MCPToolCatalog.readNote.inputSchema.objectValue?["properties"]?.objectValue ?? [:]
+        for parameter in parameters {
+            #expect(readNoteInputs[parameter] != nil, "\(parameter) is a declared input of read_note")
         }
         #expect(advice.contains("\nsearch covers standing grants only"))
     }
@@ -101,6 +115,99 @@ struct MCPAdviceServerTests {
         #expect(!advice.contains("Every refusal says why"))
         #expect(advice.contains("search covers standing grants only; read a once grant's note by id."))
         #expect(MCPToolCatalog.search.needsStandingReach, "the catalog's fact the sentence states")
+    }
+
+    // MARK: - VX-197 (VX-336 U8a): the advice at 3,000 — the U7 carries, the
+    // edit rung's reach, the organization advice, the three acts that stay the
+    // author's (R-VX184-2), and ONE link (R-VX184-4)
+
+    /// U7's carry (builder A's OWED 6): "Tools appear only for what they have
+    /// shared" is UNTRUE once list_my_activity lists at zero reach
+    /// (P-VX261-2). The line says the built rule, tied to the catalog: the
+    /// ONE tool listed on approval alone is list_my_activity.
+    @Test func theToolsLineSaysWhatIsListedOnApproval() {
+        #expect(!advice.contains("Tools appear only for what they have shared"))
+        #expect(advice.contains(
+            "Once approved, list_my_activity is always listed; other tools appear only for what the author "
+                + "has shared (re-announced when that changes)."))
+        #expect(MCPToolCatalog.all.filter(\.listedWhenApproved).map(\.name) == ["list_my_activity"],
+                "the catalog's fact the sentence states")
+    }
+
+    /// The paging and digest roads (U7's carries, builder B's OWED 3), said
+    /// WITHOUT a number: the page bound and the limit's numbers live in
+    /// read_note's description (U7c's sentence), so nothing a window measures
+    /// can falsify the advice. And the recovery road after a lost answer.
+    @Test func theAdviceNamesPagingDigestsAndRecoveryWithNoNumber() {
+        #expect(advice.contains(
+            "Read a long note in pages (limit, then cursor); ids_only gives each take's sha256 instead of its text."))
+        #expect(advice.contains("Many writes answer each take's sha256, to prove your words landed."))
+        #expect(advice.contains("If an answer is lost, list_my_activity shows whether the call landed."))
+        let inputs = MCPToolCatalog.readNote.inputSchema.objectValue?["properties"]?.objectValue ?? [:]
+        #expect(["limit", "cursor", "ids_only"].allSatisfy { inputs[$0] != nil }, "read_note's own inputs")
+        // A GUARD (green on both sides by design): no number at all beyond the
+        // format's version token and the digest's name — a page bound, a limit
+        // or a cap belongs to the descriptions.
+        let numberless = advice
+            .replacingOccurrences(of: VariorumDocument.versionToken, with: "")
+            .replacingOccurrences(of: "sha256", with: "")
+        #expect(numberless.firstMatch(of: /[0-9]/) == nil, "the advice states no number a window could move")
+    }
+
+    /// The edit rung's reach as built (R-VX184-1: as capable as the author at
+    /// the keyboard, the three acts that stay hers aside) and write new's
+    /// insert_blocks at a note's end (P-VX255-1) — the catalog's facts.
+    @Test func theRungsSayTheirReachAsBuilt() {
+        #expect(advice.contains(
+            "write new (new notes, books, chapters, tags, versions; blocks added at a note's end)"))
+        #expect(advice.contains(
+            "edit (most of what the author can do at the keyboard: edit, choose and commit takes; "
+                + "divide, merge, move, delete; rename, archive)"))
+        #expect(MCPToolCatalog.insertBlocks.rung == .writeNew, "insert_blocks lists from write new")
+        for tool in ["rename_note", "rename_book", "archive_note", "archive_book", "choose_take", "save_commit"] {
+            #expect(MCPToolCatalog.declaration(named: tool)?.rung == .edit, "\(tool) is edit's")
+        }
+    }
+
+    /// The organization advice (the plan's "U7: the AI's docs" item 2, her
+    /// recipes' spirit): notes over chat, books and chapters, tags and books
+    /// that collect by tag rules, takes over edits, comments for review, and
+    /// duplicate_note for a revision Compare lines up (VX-311 · VX-298).
+    @Test func theAdviceEncouragesOrganization() {
+        #expect(advice.contains(
+            "Help the author stay organized: put plans, summaries and research into notes, not just chat; "
+                + "file notes into books and chapters; tag them, and make books that collect by tag rules."))
+        #expect(advice.contains(
+            "Offer a rewrite as a new take beside theirs, not an edit of their words; leave review as comments."))
+        #expect(advice.contains(
+            "For a revision, copy the note with duplicate_note and edit the copy, so Compare lines the two up."))
+        for tool in ["create_note", "create_book", "create_section", "add_note_to_book", "apply_tag",
+                     "set_book_rule", "add_take", "add_comment", "duplicate_note"] {
+            #expect(MCPToolCatalog.declaration(named: tool) != nil, "\(tool) is a declared tool")
+        }
+    }
+
+    /// R-VX184-2: Private, Seal and Own stay the author's alone — "though the
+    /// AI should know about them so it can tell a user that they might want
+    /// that." No tool sets them (the catalog's fact).
+    @Test func theAdviceSaysTheThreeActsAreTheAuthorsAlone() {
+        #expect(advice.contains(
+            "Three acts are the author's alone: marking something Private, sealing a book (finished, its text "
+                + "frozen) and making a book own its notes. You can't do them, but suggest one when it would help."))
+        let words = Set(MCPToolCatalog.all.flatMap { $0.name.split(separator: "_").map(String.init) })
+        #expect(words.isDisjoint(with: ["private", "seal", "unseal", "own", "owned", "disown"]),
+                "no tool marks Private, seals or owns")
+    }
+
+    /// R-VX184-4: ONE sentence links the public guide at its FIXED URL — the
+    /// advice's last line, the only link it carries. (The launch gate travels
+    /// with it: a build carrying this line ships publicly only after the page
+    /// is live.)
+    @Test func theAdviceLinksTheGuideOnce() {
+        let url = "https://stargazing.tech/variorum/mcp"
+        #expect(advice.components(separatedBy: url).count == 2, "the URL, exactly once")
+        #expect(advice.components(separatedBy: "://").count == 2, "and no other link")
+        #expect(advice.hasSuffix("\nThe guide to this door: \(url)"), "its one sentence, last")
     }
 
     // MARK: - It arrives

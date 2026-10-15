@@ -55,8 +55,63 @@ extension Operations {
         public let blockIDs: [String]
         /// The takes that rode Alternates sections (chosen takes not counted).
         public let alternateCount: Int
-        /// The tags applied, in header order (adopted or minted).
+        /// **Every tag the note wears when the act lands** (VX-361 — the
+        /// VX-336 run record's U9, F-1 (a), PROVISIONAL P-VX361-1): the
+        /// header's tags in header order (adopted or minted; one the note
+        /// already wore is listed, never applied twice), then — for a note
+        /// minted into a book (`mintNoteEntry`) — the tags the book's OUTFLOW
+        /// applied that the header didn't name, in outflow order. A file
+        /// import's note is bookless, so its list is exactly the header's.
         public let tagIDs: [String]
+        /// `tagIDs`' paths, parallel — the wire's tag word (VX-361).
+        public let tagPaths: [String]
+        /// VX-252 (VX-336 U5b): every minted block with EVERY take it was born
+        /// with, in document order — what the act minted, said back so a caller
+        /// never reads the note again to learn an id the write itself made.
+        public let blocks: [MintedBlockTakes]
+    }
+
+    /// **One minted block, as the act minted it** (VX-252 — the run record's
+    /// U5b D1, the shared answer shape's core half): its id, the take it SHOWS
+    /// (at mint the in-place text — chosen AND default), and every take in fan
+    /// order, the shown one included. Built from the rows the mint returned,
+    /// never a second read (no race, ∝ the write).
+    public struct MintedBlockTakes: Equatable, Sendable {
+        public let blockID: String
+        public let shownTakeID: String
+        public let takes: [MintedTake]
+        /// VX-311 (VX-336 U6a — the run record's D-311-4, F-4 (a)): the block
+        /// this one was COPIED from, so a client that read the source with ids
+        /// edits "the copy of block X" without positional guessing. nil for
+        /// every mint (`create_note`, `import_document`, `insert_blocks` —
+        /// their answers byte-unchanged); set only by the copy machine
+        /// (`copyPlacements`).
+        public let sourceBlockID: String?
+
+        init(_ minted: MintedFanBlock, shownIndex: Int = 0) {
+            self.init(
+                blockID: minted.block.id, shownTakeID: minted.variants[shownIndex].id,
+                takes: minted.variants.map { MintedTake(id: $0.id, label: $0.label, text: $0.workingText) },
+                sourceBlockID: nil)
+        }
+
+        init(blockID: String, shownTakeID: String, takes: [MintedTake], sourceBlockID: String?) {
+            self.blockID = blockID
+            self.shownTakeID = shownTakeID
+            self.takes = takes
+            self.sourceBlockID = sourceBlockID
+        }
+    }
+
+    /// One minted take: its id, its stored label (nil = unlabeled), and —
+    /// VX-254 (VX-336 U7, D-254-2) — the text the mint STORED, the minted
+    /// row's own `working_text` (never a second read). It never rides a wire
+    /// answer: the door hashes it (`MCPTextDigest`), so a client proves its
+    /// words landed byte for byte.
+    public struct MintedTake: Equatable, Sendable {
+        public let id: String
+        public let label: String?
+        public let text: String
     }
 
     /// What one folder import minted.
@@ -78,11 +133,11 @@ extension Operations {
             try requireLiveWing(db, wingId)
             let now = date.now
             let minted = try mintDocument(db, named, wingId: wingId, now: now)
-            let tagIDs = try applyDocumentTags(
+            let tags = try applyDocumentTags(
                 db, named.document.tagPaths, to: minted.post.id, wingId: wingId, now: now)
             return DocumentImport(
-                post: minted.post, blockIDs: minted.blockIDs,
-                alternateCount: minted.alternateCount, tagIDs: tagIDs)
+                post: minted.post, blockIDs: minted.blockIDs, alternateCount: minted.alternateCount,
+                tagIDs: tags.map(\.id), tagPaths: tags.map(\.path), blocks: minted.blocks)
         }
         let postID = result.post.id
         registerMintedContainerEntry(label: Self.importUndoLabel, postID)
@@ -98,9 +153,17 @@ extension Operations {
     /// book lands UNSHELVED (§19). Validated exactly as `createReading`
     /// validates it — live, and in this book's wing — and never placed (it
     /// appends at the end of the shelf's order).
+    ///
+    /// `namesCountedBy` (VX-363 — VX-259's class on the third road that names
+    /// a book; the VX-336 run record's U9): the readings the E13 guard COUNTS.
+    /// The MCP door passes the ones its client can read, so a book it cannot
+    /// reach neither blocks the name nor is named back; nil counts every
+    /// reading — her own import doors (File ▸ Import…, the Bookcase drop) keep
+    /// the full guard.
     @discardableResult
     public func importBook(
-        _ book: VariorumDocument.Book, wingId: String = "", shelfId: String? = nil
+        _ book: VariorumDocument.Book, wingId: String = "", shelfId: String? = nil,
+        namesCountedBy reach: BookNameReach? = nil
     ) throws -> BookImport {
         let result: BookImport = try database.write { db in
             try requireLiveWing(db, wingId)
@@ -114,8 +177,9 @@ extension Operations {
             let trimmedName = book.name.trimmingCharacters(in: .whitespacesAndNewlines)
             let name = trimmedName.isEmpty ? DisplayTitle.placeholder : trimmedName
             // E13 — the door guard, inside the act's own transaction: the
-            // import names a book, so it refuses a name a live book wears.
-            try requireBookNameFree(db, name)
+            // import names a book, so it refuses a name a live book wears
+            // (VX-363: of the books `reach` counts — every one at her doors).
+            try requireBookNameFree(db, name, counting: reach)
             let now = date.now
             let reading = Reading(
                 id: newID(), ownerId: currentOwnerID(), name: name, kind: .book,
@@ -197,6 +261,8 @@ extension Operations {
         let post: Container
         let blockIDs: [String]
         let alternateCount: Int
+        /// VX-252: each block with every take it was born with.
+        let blocks: [MintedBlockTakes]
     }
 
     /// The note and its blocks, inside the caller's transaction. A document
@@ -220,6 +286,7 @@ extension Operations {
         var post = try insertPost(db, title: title, profile: nil, entryDate: nil, wingId: wingId)
 
         var blockIDs: [String] = []
+        var blocks: [MintedBlockTakes] = []
         var alternateCount = 0
         var renderedLength = 0
         var position: String?
@@ -235,6 +302,7 @@ extension Operations {
                 defaultIndex: 0, chosenIndex: 0,
                 labels: [nil] + takes.map(\.label), now: now)
             blockIDs.append(minted.block.id)
+            blocks.append(MintedBlockTakes(minted))
             alternateCount += takes.count
             renderedLength += block.text.count
         }
@@ -244,26 +312,38 @@ extension Operations {
         post.baselineLength = renderedLength
         post.updatedAt = now
         try post.update(db)
-        return MintedDocument(post: post, blockIDs: blockIDs, alternateCount: alternateCount)
+        return MintedDocument(post: post, blockIDs: blockIDs, alternateCount: alternateCount, blocks: blocks)
     }
 
     /// The header's tags onto the note: each path's segments (`TagPath` —
     /// slash noise collapses; a path naming nothing is passed over),
     /// adopted-else-minted in the wing, applied once through the one
-    /// application road (intake hears it).
+    /// application road (intake hears it). Returns the header's tags, in
+    /// header order.
+    ///
+    /// **VX-361 — a tag the note ALREADY wears is reported, never applied
+    /// again** (the outflow's own rule, `applyAutoTag`): the wire mints a note
+    /// INTO a book whose outflow tags it in the same act, before the header's
+    /// tags, so a header naming an outflow tag met `uq_post_tag_live` and the
+    /// whole import refused. The application exists and its intake already
+    /// ran; the note wears the tag, so the header's list names it. A file
+    /// import's note is fresh and untagged here — byte-unchanged for it.
     func applyDocumentTags(
         _ db: Database, _ paths: [String], to postID: String, wingId: String, now: Date
-    ) throws -> [String] {
+    ) throws -> [Tag] {
         var adoption = TagAdoption(wing: wingId)
-        var applied: [String] = []
+        var applied: [Tag] = []
         for raw in paths {
             let segments = TagPath.segments(raw)
             guard !segments.isEmpty,
                   let tag = try adoptPath(db, segments.joined(separator: "/"), &adoption),
-                  !applied.contains(tag.id)
+                  !applied.contains(where: { $0.id == tag.id })
             else { continue }
-            try insertPostTag(db, tagID: tag.id, postID: postID, now: now)
-            applied.append(tag.id)
+            if try liveApplication(
+                db, table: "post_tag", tagID: tag.id, targetColumn: "post_id", targetID: postID) == nil {
+                try insertPostTag(db, tagID: tag.id, postID: postID, now: now)
+            }
+            applied.append(tag)
         }
         return applied
     }

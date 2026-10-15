@@ -2487,6 +2487,17 @@ enum TutorialSeeder {
         // gatherings, and the per-item move across wings — each pinned. Her
         // ruled "how to use it" (the sitting's third round) seats sixth: four
         // worked recipes, every sentence executed in its pin.
+        //
+        // VX-197 (RUN VX-336, U8b) — THE TRUTH PASS over the as-built door
+        // (the record: `notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md`,
+        // U8b UNIT RECORD). Every tool VX-184, VX-246 and VX-336 added is
+        // taught in its lesson (lesson 3's steps, lesson 6's recipes, lesson
+        // 7's faces); lesson 2 re-voiced for VX-258's tab rule, its L1 parity
+        // clause kept byte-shared with `MCPPaneCopy.clientBoundary`; organization
+        // as recipes beside her four; Private, Seal and Own hers alone
+        // (R-VX184-2); 13s's voice (R-13s-22: no em dash outside a quoted
+        // surface). No page or limit number is promised (P-VX256-1 is
+        // PROVISIONAL). Seven lessons, their titles and seats unchanged.
 
         _ = try lesson(door, mcpLessons[0], [
             // 13n-c UX walk W-UX-17: "way in" said once, not twice.
@@ -2496,11 +2507,12 @@ enum TutorialSeeder {
             + "door, and it stays shut until you open it. It lives on the "
             + "Mac; the phone has no door.",
 
+            // VX-197 U8b: the dash re-voiced (R-13s-22).
             "Open it in Settings \u{25B8} MCP (\u{2325}\u{2318}, takes you there) "
             + "with Enable the MCP server. It works only while Variorum is open, and "
             + "nothing in your library can be read through it until you share "
-            + "something with a client. Your grants stay on this Mac \u{2014} they "
-            + "never sync to your other devices. What a client reads goes wherever "
+            + "something with a client. Your grants stay on this Mac and never sync "
+            + "to your other devices. What a client reads goes wherever "
             + "that client sends its work: for most clients, the company that runs "
             + "its model.",
 
@@ -2522,61 +2534,120 @@ enum TutorialSeeder {
             // labels (the provider setup — her exclusion; the H pattern keeps it
             // plain text, never interpolated).
             // W-UX-17: the lesson's opening names its subject (Read shows no
-            // lesson titles).
+            // lesson titles). VX-197 U8b (VX-205, built at VX-281): the copy
+            // act is the code block's copy icon now, not a button.
             "To connect a client, open Settings \u{25B8} MCP; under Connect a "
-            + "client, choose yours: Claude Code, Codex, or Any MCP client. Then press Copy setup command. For "
-            + "Claude Code or Codex it is one command: run it in a terminal, then "
-            + "start a new session of that app. For any other client it is a few "
-            + "lines of JSON to paste into that client's MCP settings. The pane also "
-            + "shows the path they all point at, because the door is a standard MCP "
-            + "server: one program inside the app.",
+            + "client, choose yours at the top of the setup block: Claude Code, "
+            + "Codex, or Any MCP client. Then click the copy icon in the block's "
+            + "upper right corner. For Claude Code or Codex it is one command: run "
+            + "it in a terminal, then start a new session of that app. For any other "
+            + "client it is a few lines of JSON to paste into that client's MCP "
+            + "settings. The pane also shows the path they all point at, because "
+            + "the door is a standard MCP server: one program inside the app.",
             // O-4 SETUP COPY END
 
-            "The first time a client connects, it shows up in Settings \u{25B8} MCP "
-            + "as a connection request, and it can reach nothing yet. "
+            // VX-197 U8b: where a request shows (above the tabs, VX-281), the
+            // tools line (an approved client can always read its own recent
+            // acts — P-VX261-2), and where approved clients are listed.
+            "The first time a client connects, it shows up at the top of Settings "
+            + "\u{25B8} MCP as a connection request, and it can reach nothing yet. "
             + "Approve\u{2026} lets it in, still reaching nothing until you share "
             + "something: its sheet offers a first grant, with nothing picked for "
-            + "you. Deny turns it away. Every approved client is listed there, with "
+            + "you. Until then, the one thing an approved client can do is look "
+            + "back over its own recent acts. Deny turns it away. Every approved "
             // 13n-c UX walk W-UX-4: the client row's verb is Deny… now, and it
             // says what it takes before it does.
-            + "Change\u{2026} to share more and Deny\u{2026} to shut it out "
-            + "again, every grant it holds revoked.",
+            + "client is listed under Clients, with Change\u{2026} to share more and "
+            + "Deny\u{2026} to shut it out again, every grant it holds revoked.",
 
             // VX-168: the sentence the setup key falsified ("Variorum can't
             // check that name"), made true of the build — and no truer: K2's
             // recorded non-defeat said with it. VX-198 (R-VX184-5): "so a
             // second tool using the same name is turned away" was falsified in
-            // its turn — the newest copied setup now takes the name — so the
-            // clause says the rule as built (a minimal truth fix; U7's quality
-            // pass re-voices the chapter). VX-258 (VX-246 ladder round 1,
-            // F-1): "Running the setup again moves the name to the new key"
-            // was falsified in its turn — only a client's OWN setup (a key
-            // copied for its name) re-binds with zero clicks; an "Any MCP
-            // client" copy under a name she approved waits for her OK. The
-            // sentence now says the pane's L1 clause verbatim (another minimal
-            // truth fix; U8 re-voices the chapter).
-            "One honest limit: a client names itself when it connects. The "
-            + "setup you copy carries a key that ties that name to it. Running "
-            + "the client's own setup again moves the name to the new key; a "
-            + "setup copied for any MCP client waits for your OK before it "
-            + "takes a name you approved; and a tool still using an older key, "
-            + "or none, is turned away. But the key sits in the client's own "
-            + "settings, where any program running as you can read it.",
+            // its turn. VX-258 (VX-246 ladder round 1, F-1): the clause says
+            // the pane's L1 clause verbatim — THE PARITY CLAUSE, byte-shared
+            // with `MCPPaneCopy.clientBoundary` (pinned). VX-197 U8b re-voices
+            // the lesson around it: the clause stands whole, and the next card
+            // says which setup is a client's own and where any other waits.
+            "A client names itself when it connects, and the setup you copy "
+            + "carries a key that ties that name to it. Running the client's own "
+            + "setup again moves the name to the new key; a setup copied for any "
+            + "MCP client waits for your OK before it takes a name you approved; "
+            + "and a tool still using an older key, or none, is turned away.",
+
+            // VX-197 U8b — VX-258's tab rule (her ruling: "tie keys to their tab
+            // … the re-bind waits for my ok"): a tab's copy carries its client's
+            // name and re-binds with zero clicks; any other fresh key under an
+            // approved name waits in Waiting, admitted with no tools, until her
+            // Allow (the name and its grants move) or her Don't allow.
+            "A client's own setup is the one copied from its tab, and moving its "
+            + "name takes no clicks. Any other new setup for a name you approved "
+            + "waits under Waiting, above the tabs in Settings \u{25B8} MCP, as a "
+            + "new setup for that name. It sees no tools until you choose Allow, "
+            + "which moves the name and its grants to it; Don't allow turns it "
+            + "away.",
+
+            // K2's recorded non-defeat, said as L1 says it.
+            "One honest limit: the key sits in the client's own settings, where "
+            + "any program running as you can read it. It tells two tools apart, "
+            + "not programs running as you.",
         ])
 
         _ = try lesson(door, mcpLessons[2], [
+            // VX-197 U8b: the four steps' reach AS BUILT (VX-184 U3–U5,
+            // VX-246, VX-336 U5–U6), one card per step past Read; every act a
+            // card names is a tool at that rung (pinned against the catalog).
             "Each grant says how much a client may do, in four steps, each "
             + "including the ones before it. Read: it can read and search what you "
             + "shared. Suggest: it can add new takes and comments beside your text, "
-            + "and save a lens; it can't change a word you wrote. Write new: it can "
-            // VX-168 U2: Edit's step names what the deliberate acts added —
-            // choosing a take, committing one (VX-169), making a lens the note
-            // (VX-174, R-MERGE-1) — each pinned to the catalog's rung.
-            + "also make new notes, books, chapters and tags. Edit: it can also "
-            + "change, choose and commit takes, make a lens the note, and divide, "
-            + "merge, move or delete blocks. When it "
-            + "changes a take, Variorum commits the take just before and just "
-            + "after, so you can always compare and come back.",
+            + "one at a time or many at once, and save a lens; it can't change a "
+            + "word you wrote.",
+
+            "Write new: it can also make new notes, books, chapters and tags, file "
+            + "notes into books and chapters, and give a book a rule that collects "
+            + "notes by tag. It can add blocks at the end of a note, duplicate a "
+            + "note to work on a copy, and link two notes as versions by naming "
+            + "which paragraphs match.",
+
+            // VX-168 U2: Edit's step named the deliberate acts — choosing a
+            // take, committing one (VX-169), making a lens the note (VX-174,
+            // R-MERGE-1). VX-197 U8b: its reach as built (R-VX184-1 — "as
+            // capable as her at the keyboard"), inside a note and across the
+            // library; and the commits sentence true of take WORDS only, the
+            // first commit skipped when the latest already holds them (U4's
+            // OWED; `editTakeUnderInsurance`'s dedupe).
+            "Edit: it can also do most of what you can do at the keyboard. In a "
+            + "note, it can change, choose, commit, archive or delete takes, restore "
+            + "a commit, make a lens the note, add blocks anywhere, divide, merge, "
+            + "move or delete blocks, and edit or delete any comment. Across the "
+            + "library, it can take a tag off a note, rename, archive or delete "
+            + "notes and books, finish or reopen a book, reorder a book's notes and "
+            + "chapters, and rename or delete a chapter. When it rewrites the words "
+            + "of a take, Variorum first commits the words it replaces, unless the "
+            + "take's latest commit already holds them, and then commits the new "
+            + "words, so you can always compare and come back. Both commits stay "
+            + "even if you undo the edit.",
+
+            // VX-197 U8b — who wrote what: her label split (VX-197, the client's
+            // name only on a SUGGESTED take, in VX-267's form) and the comment
+            // rule (VX-260 — own only while its words are unchanged).
+            "You can always see who suggested a take. A take a client adds beside "
+            + "yours wears its name, then a dot and its own label if it gave one, "
+            + "like \u{2039}name\u{203A} \u{00B7} english. Takes it writes into a "
+            + "new note or new blocks, and labels it sets on a take, carry only the "
+            + "label it gave. With Suggest it can delete a comment it left, but "
+            + "only while the words are still the ones it wrote; once anyone "
+            + "changes them, deleting that comment takes Edit, which can delete any "
+            + "comment.",
+
+            // VX-197 U8b — R-VX184-2, her words: "three acts stay hers alone:
+            // Private, Seal, Own … though the AI should know about them so it
+            // can tell a user that they might want that." The advice says the
+            // same three (`MCPSession.instructions`, pinned).
+            "Three things stay yours alone, whatever you grant: marking something "
+            + "Private, sealing a book, and making a book own its notes. A client "
+            + "knows what each one does and may suggest one when it would help, "
+            + "but only you can do it.",
 
             "Each grant also says where: one note; one book, with its notes now and "
             + "any added to it later; or a whole wing and everything in it, except "
@@ -2661,6 +2732,10 @@ enum TutorialSeeder {
         // pointer — "The chapter's last lesson, “seeing, answering,
         // undoing”, shows how to watch it…" (W-UX-17's words) — stays true
         // (PROVISIONAL P-13nc-U6-9 — the title and the seat).
+        // VX-197 U8b: her four lead, unchanged but for recipe 3's dash
+        // (R-13s-22); three recipes follow them — organization (the plan's
+        // "encouraged explicitly", the advice's own), a revision (VX-311 +
+        // VX-298) and a long job (VX-256 · VX-254 · VX-261, no numbers).
         _ = try lesson(door, mcpLessons[5], [
             "Say your notes for a design doc live in a book. Share that book at "
             + "Suggest and ask your AI to go through it: it can leave implementation "
@@ -2677,25 +2752,63 @@ enum TutorialSeeder {
 
             "For help across everything, grant a whole wing instead: it reaches "
             + "every note, book and gathering in the wing except what always asks "
-            + "\u{2014} your daily Journal's entries and anything marked Private, "
-            + "which a client reaches only through a grant on that one note. So "
-            + "mark Private whatever should stay off-limits first, then grant the "
-            + "wing.",
+            + "(your daily Journal's entries and anything marked Private, which a "
+            + "client reaches only through a grant on that one note). So mark "
+            + "Private whatever should stay off-limits first, then grant the wing.",
 
             "And for a one-off, right-click a note in the Library, choose Share "
             + "with AI\u{2026} and grant Read, once: the client's first read of the "
             + "note spends the grant, and nothing stands afterwards.",
+
+            "Your AI can help keep the library in order, too. Grant it Write new on "
+            + "a wing and ask it to put plans, summaries and research into notes "
+            + "rather than leave them in the chat. It can make a book for a project, "
+            + "give it chapters and file notes into them, tag notes, and make a book "
+            + "that collects every note wearing a tag. A rule it writes moves "
+            + "nothing by itself: notes that already match wait at the book's "
+            + "Arrivals for you to let in, and notes it tags afterwards join the way "
+            + "they would if you had tagged them.",
+
+            "For a revision, grant Edit on the note's wing and ask your AI to "
+            + "duplicate the note and rewrite the copy. The copy lands in that "
+            + "wing's Pool, in no book, and your original never changes. Because "
+            + "each block of the copy remembers the block it came from, Compare "
+            + "(\u{2318}5) lines the two up row by row. Ask your AI to show you the "
+            + "two side by side and, while Variorum is the app in front, it opens "
+            + "Compare on them.",
+
+            "For a long job, like translating a whole book, ask your AI to check "
+            + "its work as it goes. It can read a long note a page at a time "
+            + "instead of all at once. Most writes that add or rewrite words answer "
+            + "with a fingerprint of exactly what was stored (a sha256), so it can "
+            + "confirm every word landed as it sent it. And if the connection drops "
+            + "partway through, it can look back over its own recent acts to see "
+            + "which ones landed before it carries on.",
         ])
 
         _ = try lesson(door, mcpLessons[6], [
-            "On the Bookcase, a small icon beside a book means a client can reach "
-            + "it. Point at the icon to see who and how far; click it for the "
-            + "details, including why (through the Home wing grant, say), with "
-            + "Change\u{2026} and Revoke. Inside a note, while the door is open, "
-            + "the same icon sits at the right end of the context bar above the "
-            + "page, or a lock when the note is Private. Settings \u{25B8} MCP lists "
-            + "every client, everything shared, and, under Activity, the calls "
-            + "clients made recently.",
+            // VX-197 U8b: "a book or a gathering" (VX-184 U2's carry, VX-185)
+            // and the icon's rows as built — the Library (VX-268, VX-281), the
+            // Pool, the book panel with its one-note chapter rows (VX-330), the
+            // ⌘L sheet's wings.
+            "On the Bookcase, a small icon beside a book or a gathering means a "
+            + "client can reach it. The same icon shows on notes, books and "
+            + "gatherings in the Library, on notes in the Pool, on the notes listed "
+            + "in the panel that shows a note's book, and on wings in the switcher "
+            + "that \u{2318}L opens. In that panel, a chapter that shares a row with "
+            + "its only note wears the note's icon. Point at the icon to see who and how "
+            + "far; click it for the details, including why (through the Home wing "
+            + "grant, say), with Change\u{2026} and Revoke. Inside a note, while "
+            + "the door is open, the same icon sits at the right end of the context "
+            + "bar above the page, or a lock when the note is Private.",
+
+            // VX-197 U8b — VX-261: a client's own recent acts, and the line
+            // Activity says for them (P-VX261-2).
+            "Settings \u{25B8} MCP lists every client, everything shared, and, "
+            + "under Activity, the calls clients made recently. A client can look "
+            + "back over its own recent acts as well, which is how it learns "
+            + "whether a call landed after a dropped connection; Activity then says "
+            + "\u{201C}\u{2039}name\u{203A} checked its recent activity\u{201D}.",
 
             "When a client wants more than you've shared, nothing pops up and "
             + "nothing interrupts you. Its ask waits: a small mark appears beside "
@@ -2706,17 +2819,23 @@ enum TutorialSeeder {
             + "or Don't allow. Don't allow, or Esc, lets the ask go; the client can "
             + "ask again.",
 
+            // VX-197 U8b — link_versions' receipt opens Compare (VX-187 at
+            // VX-336 U6a).
             "Whatever a client writes, a line at the bottom of the window says so, "
             + "naming the client, with Open \u{203A} to go and look (unless "
-            + "Confirmations after an act is off, in Settings \u{25B8} General). "
+            + "Confirmations after an act is off, in Settings \u{25B8} General); "
+            + "when it links two notes as versions, Open \u{203A} shows them side "
+            + "by side in Compare. "
             + "\u{2325}\u{2318}O (Show the AI\u{2019}s Last Change, in the Edit "
             + "menu) takes you there later, even after the line fades. "
             + "\u{2325}\u{2318}Z takes a client's act back, one act at a time, and "
             + "the Edit menu names it after the client: Undo \u{2039}name\u{203A}'s take.",
 
+            // VX-197 U8b — Compare from the wire (VX-298).
             "A client is told to move your window only when you ask it to show you "
             + "something, and it can only while Variorum is the app in front; it "
-            + "never brings a window forward.",
+            + "never brings a window forward. Asked to show you a note beside "
+            + "another, it opens Compare with them side by side.",
         ])
 
         return book.id

@@ -107,4 +107,71 @@ struct MCPBookNameReachServerTests {
             await h.hangUp(connection)
         }
     }
+
+    /// **VX-197 (VX-336 U8a): rename_book's description says VX-259.** Its
+    /// VX-184 words said a name another live book wears is refused "as the
+    /// author's rename is" — untrue since VX-259: the door counts only a live,
+    /// unarchived reading (book or gathering — `requireBookNameFree`) that
+    /// THIS client can read (`readableBooks`), while her own rename counts
+    /// every one. The two pins above run the mechanics; this one holds the
+    /// words to them (red on the old description).
+    @Test func renameBooksDescriptionSaysOnlyBooksYouCanReadCount() {
+        let words = MCPToolCatalog.renameBook.description
+        #expect(!words.contains("as the author's rename is"), "the old claim is gone: \(words)")
+        #expect(words.contains(
+            "A name already worn (ignoring case) by another live, unarchived book or gathering that you can "
+                + "read is refused; one you can't read never counts, so it can't block the name."), "\(words)")
+    }
+
+    /// **VX-363 (VX-336 U9 — the third road VX-259 missed; provisional ruling 2):**
+    /// `import_document`'s BOOK form names a book too (the folder import's E13
+    /// guard, `importBook` → `requireBookNameFree`), and it counted EVERY live
+    /// book — a Private one, another wing's — refusing with the hidden book's
+    /// stored name: the same oracle (F-7). The door now counts only the books
+    /// the client can read; her own import doors keep the full guard.
+    /// *Red on the old tree:* both imports refused, echoing "secret" / "ledger".
+    @Test func importingABookBesideAHiddenBooksNameLandsAndNamesNothing() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let secret = try h.operations.createReading(name: "secret", kind: .book)
+            try h.operations.setBookPrivate(secret.id, true)
+            let work = try h.operations.createWing(name: "work")
+            _ = try h.operations.createReading(name: "ledger", kind: .book, wingId: work.id)
+            _ = try h.operations.createReading(name: "letters", kind: .book)
+            func book(_ name: String) -> Value {
+                .object(["name": .string(name), "documents": .array([.string("{t:\"one\"}\n\nOne.")])])
+            }
+            // Her own door counts every book (E13 whole) — a guard, both trees.
+            let one = VariorumDocument.NamedDocument(
+                fallbackTitle: "", document: try VariorumDocument.parse("{t:\"one\"}\n\nOne."))
+            #expect(throws: OperationError.duplicateBookName(name: "secret")) {
+                try h.operations.importBook(
+                    VariorumDocument.Book(name: "Secret", chapters: [], unfiled: [one]), wingId: "")
+            }
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.writeNew, .wing, ""))
+
+            for (asked, hiddenName) in [("SECRET", "secret"), ("Ledger", "ledger")] {
+                let imported = try await connection.client.callTool(name: "import_document", arguments: [
+                    "wing_id": .string(""), "book": book(asked),
+                ])
+                #expect(imported.isError != true, "\(hiddenName) is not the client's to see: \(text(imported))")
+                #expect(!text(imported).contains(hiddenName) && !text(imported).contains("uplicate"),
+                        "\(text(imported))")
+                if imported.isError != true {
+                    let bookID = try #require(try json(imported)["book_id"] as? String)
+                    #expect(try name(h, bookID) == asked, "the client's own spelling, a duplicate as ruled")
+                }
+            }
+            #expect(try name(h, secret.id) == "secret", "the hidden book untouched")
+
+            // The control: a book of the wing it writes into — one it can read.
+            let readable = try await connection.client.callTool(name: "import_document", arguments: [
+                "wing_id": .string(""), "book": book("LETTERS"),
+            ])
+            #expect(readable.isError == true && text(readable).contains("letters"), "\(text(readable))")
+            await h.hangUp(connection)
+        }
+    }
 }

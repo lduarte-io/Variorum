@@ -256,6 +256,8 @@ struct BookPanelView: View {
                     .font(tokens.small.weight(.semibold))
                     .foregroundStyle(tokens.accent)
                     .lineLimit(1)
+                // VX-330: a collapsed row IS its note's row — the note's marks.
+                noteMarks(for: line)
             }
             .frame(maxWidth: .infinity, minHeight: BookNavigatorLayout.chapterRowHeight,
                    alignment: .leading)
@@ -291,13 +293,7 @@ struct BookPanelView: View {
                     .foregroundStyle(isThis ? tokens.ink : tokens.muted)
                     .lineLimit(1)
                     .truncationMode(.tail)
-                // VX-268: the ONE shared icon (nothing when nobody reaches
-                // it), then a waiting ask — the Bookcase's order. Each its
-                // own button: the row's open never fires for them.
-                MCPSharedIcon(reaches: model.reach[entry.postID] ?? [], tokens: tokens)
-                // 13n-c U4: an ask waiting on this note (its own button — the
-                // row's open never fires for it, U3's nested-icon proof).
-                MCPAskGlyph(.note(entry.postID), tokens: tokens)
+                noteMarks(for: line)
             }
             .padding(.leading, indented ? 10 : 0)
             .frame(maxWidth: .infinity, minHeight: BookNavigatorLayout.noteRowHeight,
@@ -312,6 +308,22 @@ struct BookPanelView: View {
         .draggable(BookPanelDragToken(.note(entry.postID)))
         .panelDropSite(line.id, target: $dropTarget, tokens: tokens) { drag in
             Task { await model.drop(drag, onto: .note(entry.postID), in: book) }
+        }
+    }
+
+    /// **The two MCP marks a row that stands for a note wears** (the note
+    /// `BookPanelBrain.markedNote` names — the ONE decision): VX-268's ONE
+    /// shared icon (nothing when nobody reaches it), then 13n-c U4's waiting
+    /// ask — the Bookcase's order. Each is its own button, so the row's open
+    /// never fires for them (U3's nested-icon proof, VX-281 R1-5's click
+    /// pins). **VX-330:** the collapsed one-note chapter row is its note's row,
+    /// so it wears this same pair from the same reads — the note's reach is
+    /// already one of `entryIDs` (the hold is unchanged; nothing new is read).
+    @ViewBuilder
+    private func noteMarks(for line: BookPanelBrain.Line) -> some View {
+        if let noteID = BookPanelBrain.markedNote(line) {
+            MCPSharedIcon(reaches: model.reach[noteID] ?? [], tokens: tokens)
+            MCPAskGlyph(.note(noteID), tokens: tokens)
         }
     }
 
