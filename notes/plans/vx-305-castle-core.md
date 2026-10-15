@@ -582,9 +582,10 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   P-U4-12/13 recorded; the pre-migration snapshot class superseded by her cut). Through seed 15 every finding is
   triaged and committed (code bugs pinned red-on-old; checker/world findings fixed in the world; P-U4-14 at
   `d69e28f3`; the seed-9 model gap — reopening this Mac's own set-aside library — DEFERRED and RATIFIED to phase
-  5/VX-309 by the orchestrator). The tree `8dd79259` is the soak's current tree: seeds 15 and 16 green × 1000 on it.
-  NEXT: seeds 17–20, then seeds 1–14 again on the final tree, then the 20 under `-c release` — PENDING; (k) the runs
-  — PENDING; (l) the final record — PENDING.
+  5/VX-309 by the orchestrator). Seeds 17 and 18 found two more code bugs (another identity's replayed memory
+  taking the account; a rolled-back landing's key file restored only from a wiped mirror), each pinned and fixed. THE
+  FINAL TREE so far is `6128c8de`: seeds 18, 19, 20 green × 1000 on it. NEXT: seeds 1–17 again on it, then the 20 under
+  `-c release` — PENDING; (k) the runs — PENDING; (l) the final record — PENDING.
 - The go/no-go record: **NOT-STARTED.**
 
 ---
