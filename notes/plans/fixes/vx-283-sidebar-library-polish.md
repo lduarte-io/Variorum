@@ -2906,3 +2906,104 @@ harness — recorded as such; the binding-road cells carry the red.)
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
+
+### Round 1 — the cold review (fable-reviewer at xhigh, 2026-10-15, on tip `448f9450`; `notes/REVIEW_PROMPT.md` verbatim, the whole run's diff `origin/main...HEAD`)
+
+**No BLOCKER, no MAJOR.** Every traced mechanism in the diff checks out against the record, CLAUDE.md and the
+canon; the arithmetic of the load-bearing pure functions (`openListMaxHeight`, `revealOffset`, `edgeFades` + the
+P-U1e-1 ramp, `readingAsk`, `SectionFollow`, `OpenListDrop.gap/destination/lineTop/endZoneHeight`,
+`StatusToastPlacement.bottomInset`, `LibraryControlsFlowRule`) was re-derived by hand in this review and matches
+the pins. No "Review foci" section exists for this run (checked), so none were owed. Findings, severity-ranked
+(`[severity] · where · what · evidence · fix`):
+
+- **[MINOR] R1-1 · this record, the top LIVE STATUS table (lines ~375–384) · stale at the tip, contradicting the
+  record's own sections — a successor hazard, not a code defect.** Evidence: the U1 row still reads "U1d … READY
+  FOR STAGE" while the U1d section records the stage window DONE (claim `vx283-u1d` 01:44:58–01:50:37) and the
+  re-walk DONE (ruled at "THE ORCHESTRATOR'S EYE AND RULING ON THE RE-WALK"); the Ladder row still reads
+  "`opus-reviewer` at max" though the kickoff block records her supersession to `fable-reviewer` at xhigh; the
+  orchestrator handoff sends a successor to "LIVE STATUS first". Fix: refresh the table (U1 closed but for
+  P-U1e-1's visual re-check riding U2's walk; U2/U3b READY FOR STAGE; Ladder round 1 done). Doc-class — no pin.
+- **[MINOR] R1-2 · this record, §U2 E6 + §U3b S5 · the ladder ran AHEAD of U2's and U3b's stage windows — this
+  review must not be mistaken for their evidence.** Evidence: every U2 pin (`OpenListDropRuleTests` /
+  `DoorTests` / `FaceTests` / `MountTests`), R-K, R-N, and U3b's three mounted cells + R-S have never executed
+  under xcodebuild on any tip; the only runs are scratchpad replicas (1165 / 8734 checks), gitignored and gone;
+  P-U1e-1's visual acceptance (R4 at 5·7·9·12 pt) is owed to U2's walk. The record is honest (PENDING / READY FOR
+  STAGE throughout). Fix: none in code — run the two windows and walks exactly as E6/S5 name them before closing
+  the units, and read their results against the named expectations (round 2's first job if one runs).
+- **[NIT] R1-3 · `Core/Views/SidebarLayout.swift` `revealOffset` (≈ :453–472) · not a fixed point for viewports
+  strictly between one row and ~two rows.** Traced: pitch 30, depth 15, viewport 45, a mid-list row — the
+  below-branch lands `offset = bottom + 15 − 45 = top`; at that window `above` is true (`top < offset + 15 −
+  0.5`), so the next ask answers `top − 15`, and the one after that `top` again: alternating asks bounce the
+  offset 15 pt. UNREACHABLE today (the Open list floors at 3½ rows = 84 pt compact; Starred's window is 7½ rows;
+  the fixed-point pin's smallest window is 105 pt), so no red exists on any reachable road — a higher severity
+  would be hollow. Fix (optional): widen the `viewport <= rowHeight` arm to `viewport < rowHeight + 2 × depth`,
+  or name the bound in a comment beside `everyRowLandsClearOfTheFadesFromAnyWindow`.
+- **[NIT] R1-4 · `Features/Library/OpenListDrag.swift` `OpenListDropDoor.perform` (≈ :149–163) + `OpenListDragState`
+  · the record's "known edge" (a drag released outside leaves `dragging` stale; a foreign token then draws a line
+  and the accepted drop lands nothing) lives ONLY in this record — the code carries no note of it**, and the same
+  silent-accept shape covers a failed `loadTransferable`. The disposition (avoiding `onDragSessionUpdated`'s
+  unverified ordering) is reasonable; no deterministic pin short of injecting a failing provider. Fix: land the
+  known-edge note as a comment at `began(_:)`/`perform` so the next touch sees it.
+- **[NIT] R1-5 · `VariorumTests/ShellChromeTests.swift` `theOpenStripWindowIsHerSevenAndAHalf` (≈ :114) · the
+  pin's NAME now contradicts its claim** — it asserts the list grows PAST the old 7½-row cap; only the annotation
+  explains. Fix: rename at the next touch (e.g. `theOpenListsTallestFormIsTheRoomDownToTheFooter`).
+- **[NIT] R1-6 · `Features/Library/LibraryControlsFlow.swift` `LibraryControlsStableWidths.measure` (≈ :289–304)
+  vs the field's `.frame(maxWidth: 320)` in `LibraryCatalogView.header` · the floor and the cap are independent
+  numbers:** a future prompt/voice whose cell measures > 320 would make `fitsOneLine` false at EVERY width (the
+  field can never reach its floor — it answers at most 320), silently pinning the row at two lines forever.
+  Current prompts measure 175 / 211.5 — far inside. Fix (optional): clamp the floor at the field's own max, named
+  once, or a stable-widths pin asserting `fieldFloor` < the cap.
+
+**CLEAN BILL (checked and found solid):**
+- **Scope fence:** zero `Sources/VariorumCore`, `Sync/`, custody, Keychain, schema or editor-seam lines in the
+  diff (verified from the diff stat, not the record); shared ledgers (master plan, TICKETS, QUESTIONS, AppSpec)
+  untouched per the worktree rule; no forbidden commit trailers; `Part of VX-283` on the commits.
+- **VX-285/286 (U1):** `openListMaxHeight`'s two-measurement shape (no feedback loop — nothing above the list
+  reads its height), the 3½-row floor, `openListFitRows` deliberately 7; the margin moved INSIDE both scroll
+  views with headers carrying their own; the two her-ask pin edits annotated in place; R-A/R-B/R-C ran red
+  exactly as named in U1's window.
+- **VX-287/289:** `neighbour(ofClosing:skipping:)` pure and correct (next → previous → nil, pass-over, the
+  rowless note past-the-end); `closeRow`/`closeAllNotes` view-only (`closingNeverTouchesTheStore` pins store AND
+  outbox); the landing rides the EXISTING `pendingSelection`/`adopt` road — no ShellRouter edit, RULE ONE held;
+  the departure fires savepoint-on-leave (pinned, `departed == ["b"]`); both registry acts declared once with
+  honest gates, doors rendered from the registry, the walk fixtures extended by the justified-edit ritual; ⌘W
+  untouched; the ⌘/ helper and row help updated truthfully.
+- **The ✕ ruling:** one static act for both doors + a source-read pin that no door closes bare; R-C red as named.
+- **F-1/F-2's final shape (U1b→U1d + P-U1e-1):** `revealOffset` exact and idempotent on every reachable window
+  (hand-checked: landing clearances, the last/first-row zero-clearance cases, the clamp); `readingAsk`'s
+  per-frame viewport arm with P-U1b-7's count guard; `SectionFollow` gating EVERY reveal road (reading, pitch,
+  settled check) with per-section state; the fade reshaped — full half-row depth, strength over the measured text
+  padding (ramp 7/4 pt — full before the clip reaches ink at 7.25/4.25 pt), cap 0.8, room token only (P-8);
+  the eased-shrink pin's smoothstep/pixel-grid model matches the trace; the episode-superseded backstop is sound;
+  held-by-reference memory keeps her scroll from re-rendering anything. The five-leg ladder's discipline
+  (trace-first, reverts prebuilt and named, the friction doctrine invoked) is exemplary.
+- **VX-288 (U2):** the pure drop rule's onMove arithmetic verified by hand ([a,b,c,d] drags: after-b = `move([0],2)`
+  → [b,a,c,d]; the end zone = gap 4; own-gap nils); the false-offer rule at the line AND the proposal
+  (`.forbidden` slides back); a foreign-list drop refused by the payload's listID with `land` re-validating
+  against FRESH rows after the async load; the end zone bounded by VX-285's own measurements (never past the
+  footer); the drag state re-renders only the line; P-U2-1's follow interaction reasoned and stated; the chip
+  machinery's move to `Core/Views` is a verbatim parity move (forwarding names, `BookcaseDragFaceTests`
+  untouched) landing exactly on CLAUDE.md's second-consumer rule, with the one out-of-lane file (`ShelfView`)
+  declared to the orchestrator in the record.
+- **VX-121:** the placement is a pure rule read by ONE host; bands self-mark via anchor preference (both
+  quick-entry surfaces by construction — P-U3-3); never lower than resting; pins compare card and band in one
+  `.global` space, and the note cell's first-window harness fact was traced and fixed test-side only. R-T ran red
+  as named in U3's closing window.
+- **VX-20:** `pinnedFace` is one pure decision — dark = the voice's `surface` + hairline (palette-aware, P-U3-4's
+  reasoning sound), light byte-for-byte the material; R-D red ×4 as named; the rig's dark pass sampled the room's
+  own paper (#0D0F0D / #1A1712), the #2F2D29 band gone.
+- **VX-175 (U3 + U3b):** the one-identity `Layout` (never `ViewThatFits` — the caret survives, walked); the wrap
+  decision reads STABLE widths only (the prompt through the field's own cell, the sort slot at its widest form,
+  the relevance label one-lined per P-8), memoized per face; the minimum reported is the wider line, never the
+  sum; Timeline's exemption stated (P-U3b-2). R-L ran red as named in U3's closing window; U3b's own
+  cells await their window (R1-2).
+- **VX-245:** all six sites now state `.lineLimit(1)` (labels all); the lint's red→green recorded in U3's window.
+  **VX-359:** the trailing `Divider()` deleted with a class sweep; the pin reads the REAL menu with hidden items
+  dropped; R-V red as named.
+- **P1/P-8 discipline:** every new per-frame computation is bounded by the 20-row cap / the star cap or memoized;
+  no corpus-proportional cost anywhere; no word-level tracking; no text copied across entities; no literal colour
+  in any new chrome (room/ring/surface/line/star tokens throughout); DEBUG oracles owner-keyed and cleared per
+  column (`forgetSections`), nothing oracle-shaped in Release paths.
+- **Dispositions already owed elsewhere, correctly not re-flagged here:** the `BookCollectingDoorsTests` red on
+  main (VX-115), the shell adoption race (VX-360, filed with the fix shape and the deterministic pin), VX-344
+  (parked selection half), and the walkers' O-observations the orchestrator ruled on in-run.
