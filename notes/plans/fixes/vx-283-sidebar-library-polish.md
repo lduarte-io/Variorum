@@ -2689,6 +2689,25 @@ commit, `git diff` empty after):**
   `theEndZoneLandsTheLastSlot`, `aDropOnItsOwnPlaceOffersNothingAndMovesNothing`, `aDropActsOnlyOnTheListItsDragBeganIn`,
   `aReleaseThatOffersNothingRefuses`, `aDropSettlesInPlaceAndNeverMovesTheList`, `theEndZoneTakesTheRoom…`.
 
+#### U1d — THE ORCHESTRATOR'S EYE AND RULING ON THE RE-WALK (2026-10-15 ~02:25 — P-U1e-1)
+
+The re-walk holds R0–R3, R5, R6 (her scroll never pulled back — byte-identical through 90 s, a resize, and following
+again on her next act), R7, R8. **R4 holds at 5 pt short and DOES NOT HOLD at 7–9 pt short**: the orchestrator's eye on
+`u1d/walk/R4shallow7-study-light-zoom-bottom.png` — "export: it's all yours" cut through its descenders under a fade
+still weak (the walker measured ~60 % contrast at the cut at 7 pt). `R5a-19-study-light-zoom-bottom.png` — the
+half-hidden row now a faint ghost — reads right. **The mechanism (the walker's O-2, matching the formula as built):**
+the strength ramps over a half row (12–15 pt) while the clip reaches ink at ~6 pt (inside the row's own padding), so
+between ~6 and ~12 pt beyond, the clip cuts ink under a weak fade.
+
+**RULED (P-U1e-1, PROVISIONAL):** the fade's STRENGTH reaches full over the row's own top text padding (a named
+constant measured from the row's text inset at each pitch — ≈ 6 pt; the implementer records the measured value),
+not over the half row — so by the time the clip can touch ink, the fade is at full strength (its 0.8 cap). The depth
+stays the half row; the ease-in stays (a ramp over a few points of scroll, never a pop). This also gives O-1's
+near-empty band (≈4 pt of a row's padding beyond the edge) a visible fade over the last whole row's foot — the
+"there is more" hint. Rides U2's leg as a separate piece (U2's implementer already works in `SidebarLayout.swift`):
+pure pins for the ramp, R-K (revert to the half-row ramp) red on them; U2's walk re-checks R4 at 5/7/9/12 pt short in
+two rooms and O-1's state.
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
