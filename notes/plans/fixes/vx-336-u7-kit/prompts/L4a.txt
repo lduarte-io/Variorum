@@ -1,1 +1,0 @@
-In Variorum, call create_note with wing_id "", title "vx336 u7 dropped" and text "This answer never arrives." Then reply DONE.

@@ -1,8 +1,0 @@
-In Variorum, do exactly these six steps with the Variorum tools, in this order, one call each. Don't ask me questions and don't add any other step.
-1. create_book named "u9 tea" in Home (wing_id "").
-2. set_book_rule on that book with rule {"tag": "u9-green-tea"} and outflow ["u9-green-tea"].
-3. create_note into that book (its book_id) with title "u9 brewing" and text "Water at 80 degrees."
-4. apply_tag "u9-green-tea" to the note from step 3.
-5. import_document into that book (its book_id) with a document of exactly three lines: first the line {t:"u9 second"} {#u9-green-tea} then an empty line, then the line Steep 2 minutes.
-6. add_note_to_book: the note from step 3 into that same book again.
-When you're done, reply with each step's answer exactly as Variorum returned it, one line per step, including any refusal's words.

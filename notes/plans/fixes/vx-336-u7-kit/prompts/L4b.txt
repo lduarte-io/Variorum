@@ -1,1 +1,0 @@
-A session of yours that was using Variorum was cut off a few minutes ago, and you don't know what it did. Call list_my_activity with no arguments, and say what landed: each act's tool, outcome, target and title. If a note was made, find its id with list_notes (wing_id "") by its title and give the id.

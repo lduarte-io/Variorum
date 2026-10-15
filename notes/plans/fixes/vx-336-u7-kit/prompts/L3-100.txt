@@ -1,4 +1,0 @@
-In Variorum, call list_notes with wing_id "" and find the note titled "scale fixture · long note".
-1. Read it with read_note(note_id, ids_only: true, limit: 100). While an answer has next_cursor, call read_note again with the same note_id, ids_only true, limit 100 and that cursor. Stop when no next_cursor comes back. Report the pages, the blocks per page, the total takes, how many takes carry sha256, and how many carry text.
-2. Then call read_note(note_id, limit: 26) once. Take the shown text of blocks 1, 2 and 26 from it, and for each run python3 -I -c 'import hashlib,sys; print(hashlib.sha256(sys.argv[1].encode()).hexdigest())' with the text as the one argument. Compare each digest with that block's take sha256 from step 1: MATCH or MISMATCH.
-Reply with the counts and the three results.

@@ -1,1 +1,0 @@
-In Variorum, call list_books once and reply with the number of books it lists. Make no other call.
