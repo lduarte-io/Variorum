@@ -83,7 +83,8 @@ extension Operations {
         init(_ minted: MintedFanBlock, shownIndex: Int = 0) {
             self.init(
                 blockID: minted.block.id, shownTakeID: minted.variants[shownIndex].id,
-                takes: minted.variants.map { MintedTake(id: $0.id, label: $0.label) }, sourceBlockID: nil)
+                takes: minted.variants.map { MintedTake(id: $0.id, label: $0.label, text: $0.workingText) },
+                sourceBlockID: nil)
         }
 
         init(blockID: String, shownTakeID: String, takes: [MintedTake], sourceBlockID: String?) {
@@ -94,10 +95,15 @@ extension Operations {
         }
     }
 
-    /// One minted take: its id and its stored label (nil = unlabeled).
+    /// One minted take: its id, its stored label (nil = unlabeled), and —
+    /// VX-254 (VX-336 U7, D-254-2) — the text the mint STORED, the minted
+    /// row's own `working_text` (never a second read). It never rides a wire
+    /// answer: the door hashes it (`MCPTextDigest`), so a client proves its
+    /// words landed byte for byte.
     public struct MintedTake: Equatable, Sendable {
         public let id: String
         public let label: String?
+        public let text: String
     }
 
     /// What one folder import minted.

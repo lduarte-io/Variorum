@@ -137,6 +137,16 @@ enum MCPToolCatalog {
     static let navigation: [MCPToolDeclaration] = [showInApp]
     static let all: [MCPToolDeclaration] = read + navigation + suggest + writeNew + edit
 
+    /// VX-254 (VX-336 U7 — D-254-1, the FOR VX-234 list): THE DIGEST
+    /// SENTENCE, said once and shared by every tool that answers a take's
+    /// `sha256` (`MCPTextDigest`) — so every description states the algorithm
+    /// and the byte rule in the same words.
+    static let digestSentence = """
+        Each sha256 is the SHA-256 of that take's text exactly as stored, as UTF-8 bytes, in \
+        lowercase hex — nothing normalized or trimmed — so a digest of your own text proves it \
+        landed byte for byte.
+        """
+
     static func declaration(named name: String) -> MCPToolDeclaration? {
         all.first { $0.name == name }
     }
@@ -313,7 +323,8 @@ enum MCPToolCatalog {
             Add a new take (an alternative text) to one block, at the END of its fan. The take is \
             labeled with this client's name (plus your label, if given), is never chosen and \
             never locked — the author's text is never touched; they choose. Get block ids from \
-            read_note with with_ids: true. Returns JSON with the new take_id.
+            read_note with with_ids: true. Returns JSON with the new take_id and its sha256. \
+            \(digestSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -357,7 +368,8 @@ enum MCPToolCatalog {
             empty text adds a blank take. Every block must be a block of that note (read_note with \
             with_ids: true gives the ids). One call carries at most 200 takes. All or nothing: if \
             any item can't land, none does, and the refusal names the item. The whole batch is one \
-            undo for the author. Returns JSON with the new take_ids, in the items' order.
+            undo for the author. Returns JSON with the new take_ids, in the items' order, and takes: \
+            per item its take_id, block_id, label as stored, and sha256. \(digestSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -493,8 +505,10 @@ enum MCPToolCatalog {
             note's date, e.g. for old journal entries. section_id (with book_id) files the note \
             under one of that book's chapters in the same call (list_notes or create_section \
             gives chapter ids). Returns JSON with the note_id, its block_ids, and blocks: per \
-            block its block_id, the shown_take_id, and every take in fan order (take_id, and \
-            label where it has one), the shown one included — no read_note needed to learn them.
+            block its block_id, the shown_take_id, and every take in fan order (take_id, label \
+            where it has one, and sha256), the shown one included — no read_note needed to learn \
+            them. \(digestSentence) With text, Variorum splits the prose into blocks by its own \
+            setting; to verify byte for byte, send blocks.
             """,
         inputSchema: .object([
             "type": "object",
@@ -546,7 +560,8 @@ enum MCPToolCatalog {
             (wing_id), or a whole `book` {name, chapters: [{name, documents}], documents} into a \
             shared wing. One import is one undo for the author. Returns JSON with the new ids — \
             for one document also blocks, as create_note answers them (each block's shown_take_id \
-            and every take's take_id and label); for a book, its book_id, note_ids and chapter_ids.
+            and every take's take_id, label and sha256); for a book, its book_id, note_ids and \
+            chapter_ids (no sha256 — check a book's notes with read_note). \(digestSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -653,7 +668,8 @@ enum MCPToolCatalog {
             (read_note with with_ids: true) — if the author changed it since, the edit is refused and \
             nothing is written; read again. Variorum saves a commit named "before <your name>'s edit" \
             and one named "after <your name>'s edit", so the author can always compare and come back, \
-            and the edit is one undo for the author. Returns JSON with the commit ids.
+            and the edit is one undo for the author. Returns JSON with the commit ids and sha256, \
+            the take's text as it now stands. \(digestSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -850,8 +866,8 @@ enum MCPToolCatalog {
             block), an optional name, and its other takes, never chosen, each label kept as given \
             (an empty text is a blank take). One call carries at most 200 blocks. The whole call is \
             one undo for the author. Returns JSON with the note_id, the new block_ids, and blocks: \
-            per block its block_id, the shown_take_id, and every take in fan order (take_id, and \
-            label where it has one), as create_note answers them.
+            per block its block_id, the shown_take_id, and every take in fan order (take_id, label \
+            where it has one, and sha256), as create_note answers them. \(digestSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -912,8 +928,8 @@ enum MCPToolCatalog {
             original is never changed. One undo for the author removes the copy. Returns JSON: \
             the copy's note_id, its block_ids, and blocks — per block its block_id, the \
             source_block_id it was copied from, the shown_take_id, and every take in fan order \
-            (take_id, and label where it has one), as create_note answers them — and where it \
-            landed.
+            (take_id, label where it has one, and sha256 — equal to its source take's), as \
+            create_note answers them — and where it landed. \(digestSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -1132,7 +1148,8 @@ enum MCPToolCatalog {
             restored text, named "after <your name>'s restore", so the author can always compare and \
             come back; these commits stay even if the restore is undone. A locked or archived take refuses, as does a sealed \
             note; a take already reading that text changes nothing. One undo for the author puts the \
-            replaced words back. Returns JSON with the commit ids.
+            replaced words back. Returns JSON with the commit ids and sha256, the take's text as it \
+            now stands. \(digestSentence)
             """,
         inputSchema: .object([
             "type": "object",

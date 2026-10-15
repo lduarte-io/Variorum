@@ -2839,9 +2839,9 @@ the end of this U7 section. Claims stay PENDING until read from a log.
 |---|---|
 | 0 — traces, design, forks (this section) | DONE (`01860640`) |
 | 1a — VX-254: `MCPTextDigest` (its own commit — builder B calls it) + P-254-1 | DONE (this commit): red by absence (`cannot find 'MCPTextDigest' in scope`), then 4/4 green |
-| 1b — VX-254: `MintedTake.text` + the encoder's `sha256` | NOT-STARTED — D-254-1/2 |
-| 2 — VX-254: the flat answers (`add_take`, `add_takes`' `takes[]`, `edit_take`, `restore_commit`); `divide_block`/`merge_blocks` answer NO digest (F-254-2 (b), ruled) | NOT-STARTED — D-254-2/3 |
-| 3 — VX-254: descriptions, pins red by absence, revert run, the U+0000 CHECK | NOT-STARTED — D-254-6 |
+| 1b — VX-254: `MintedTake.text` + the encoder's `sha256` | DONE (this commit) — BUILDER A's RECORD |
+| 2 — VX-254: the flat answers (`add_take`, `add_takes`' `takes[]`, `edit_take`, `restore_commit`); `divide_block`/`merge_blocks` answer NO digest (F-254-2 (b), ruled) | DONE (this commit): P-254-2…10 red-on-old (9 failed, 50 issues) then 10/10 green |
+| 3 — VX-254: descriptions, pins red by absence, revert run, the U+0000 CHECK | IN-PROGRESS — descriptions DONE (this commit); the U+0000 CHECK DONE (FOUND: truncated — BUILDER A's RECORD); NEXT the whole MCP suite (PENDING), then the revert run (PENDING) |
 | 4 — VX-261: `list_my_activity` (query, catalog listing rule, handler, Activity words, pins) | NOT-STARTED — D-261-* |
 | 5 — VX-256: `read_note` paging + `ids_only` (pins, revert) | NOT-STARTED — D-256-* |
 | 6 — THE STAGE WINDOW plan (claim `vx336-u7`), headless + Mac build-for-testing, READY | NOT-STARTED — the draft below |
@@ -3558,3 +3558,60 @@ fix it in U7.
 **OWED 3 goes to U8's brief:** "Tools appear only for what they have shared" becomes untrue once `list_my_activity` is
 listed at zero reach. The instructions also name paging, `sha256` and the new tool.
 
+
+### BUILDER A's RECORD (VX-254 + VX-261; opus-implementer, from 2026-10-14 ~19:30 MDT)
+
+**NOT DONE by builder A (said first):** VX-256 (builder B's), THE STAGE WINDOW (builder B's), any Mac test run (the
+window's), any stage. Everything below is headless (`swift build` / `swift test`) plus, at the end, one Mac
+`build-for-testing`.
+
+**VX-254 — what landed (pieces 1a–3).**
+- `MCPTextDigest.sha256` (`Sources/VariorumMCP/MCPTextDigest.swift`): CryptoKit over `Data(text.utf8)`, lowercase hex.
+  The wire's only digest; builder B's `ids_only` calls it.
+- `Operations.MintedTake` gains `text` (the minted row's own `working_text`) at its two constructions
+  (`Operations+DocumentImport.swift`'s `MintedBlockTakes.init(_:)` — create_note, import_document, insert_blocks — and
+  `Operations+Versions.swift`'s copy machine — duplicate_note). `MCPMintedBlocks.records` emits `sha256` on EVERY take
+  object.
+- Flat answers: `add_take` · `edit_take` (the take as it now stands; on `changed: false` the text it already held) ·
+  `restore_commit` gain `sha256`; `add_takes` gains `takes: [{take_id, block_id, label?, sha256}]` beside its unchanged
+  `take_ids` (F-254-5 (a)).
+- NOT answered, as ruled: `divide_block` / `merge_blocks` (F-254-2 (b) — the structural core's result types untouched),
+  `save_version` and the book-form import (F-254-3/4 (a)). Pinned as guards.
+- Descriptions: ONE shared sentence, `MCPToolCatalog.digestSentence`, on all eight answering tools; `create_note` adds
+  the segmentation sentence; `import_document`'s book form says it carries no sha256.
+
+**VX-254 — the pins** (`Tests/VariorumMCPTests/MCPTextDigestTests.swift`, `MCPWriteDigestServerTests.swift`; expected
+digests computed by the TEST's own CryptoKit over the UTF-8 bytes, never by `MCPTextDigest`, so the wire pins compile on
+the old tree).
+- P-254-1 (`MCPTextDigestTests`, 4 tests): red by ABSENCE on `e9ac7005` (`cannot find 'MCPTextDigest' in scope`), then
+  green. Vectors from `printf … | shasum -a 256`.
+- P-254-2…10 (9 tests): RED on the tree with `MCPTextDigest` but no sweep (`54cc62a5` + the pins): 9 failed, 50
+  issues, every one a missing `sha256`/`takes` (the guard green) — read from the run's own output. Then 10/10 green
+  after the sweep.
+- Guards (green both sides, by design): `divideAndMergeAnswerNoDigest`; the book-form import's exact key set stays
+  pinned in `MCPMintedAnswerServerTests` (`["book_id", "note_ids", "chapter_ids"]`), unedited.
+
+**THE U+0000 CHECK — FOUND: a take holding U+0000 is STORED TRUNCATED at its first NUL** (recorded, NOT fixed, no
+ticket minted — the orchestrator's ruling).
+- Read from the run: `add_take` with "before\0after" (12 bytes) → the store holds 6 bytes ("before"); `read_note`
+  returns "before"; the answer's sha256 = the digest of the 12 bytes SENT.
+- The mechanism (traced): GRDB binds TEXT with length −1 — `sqlite3_bind_text(sqliteStatement, index, self, -1,
+  SQLITE_TRANSIENT)` (`.build/checkouts/GRDB.swift/GRDB/Core/Support/StandardLibrary/StandardLibrary.swift:625`) — so
+  SQLite takes the C string only up to the NUL as the row is WRITTEN (the read side, `String(cString:)` at `:595`, would
+  truncate too). It is the whole store's text road, not only the wire's: every take-writing door, the wire's and hers
+  (a paste carrying U+0000), stores the prefix while answering success.
+- What it means for VX-254: the digest is computed from the act's in-memory row (D-254-1's no-second-read rule), so for
+  a NUL-bearing take it digests what was SENT while the store holds the prefix — the one case where `sha256` overclaims
+  "exactly as stored". Nothing else in the sweep is affected.
+- Pinned as found: `aTakeHoldingUPlus0000IsStoredTruncatedSoItsDigestOverclaims` asserts the truncation and wraps the
+  digest agreement in `withKnownIssue` — green while the bug stands, RED the day the door keeps (or refuses) the bytes,
+  so its fixer flips it.
+- For the orchestrator's ticket (proposed fields, CLAUDE.md's labeling rule): **Bug · Confirmed · MCP (or the store's
+  Area — the bind is store-wide) · Medium**; not Pre-launch unless she says. The fix's two roads (the fixer's, not
+  U7's): refuse U+0000 at every text door, or bind TEXT by explicit byte length — the latter is a GRDB-wide change.
+
+**One more fact noticed (not a bug in U7's scope; for the orchestrator's eye):** `edit_take`'s "nothing to write" test
+is Swift `String` equality, which is CANONICAL equivalence — so an `edit_take` replacing an NFC take with its NFD
+spelling answers `changed: false` and writes nothing. The new `sha256` (the stored text's) then honestly differs from
+the client's digest of what it sent, which is exactly what the digest is for; the client cannot re-spell a take's
+normalization through `edit_take`. Proposed if she wants it: Improvement · Suspected · MCP · Low.

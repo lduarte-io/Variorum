@@ -835,7 +835,8 @@ extension Operations {
                 ?? activeCopies.first?.id ?? defaultCopyID
             outcome.minted.append(MintedBlockTakes(
                 blockID: blockCopy.id, shownTakeID: shownCopyID,
-                takes: activeCopies.map { MintedTake(id: $0.id, label: $0.label) }, sourceBlockID: block.id))
+                takes: activeCopies.map { MintedTake(id: $0.id, label: $0.label, text: $0.workingText) },
+                sourceBlockID: block.id))
             if let shownText = (chosenCopyID.flatMap { id in copiedVariants.first { $0.id == id } }
                                 ?? copiedVariants.first(where: { $0.id == defaultCopyID }))?
                 .workingText, !shownText.isEmpty {

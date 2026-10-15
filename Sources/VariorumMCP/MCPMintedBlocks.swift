@@ -9,7 +9,8 @@ import VariorumCore
 /// note order:
 ///
 /// ```json
-/// {"block_id": "…", "shown_take_id": "…", "takes": [{"take_id": "…"}, {"take_id": "…", "label": "english"}]}
+/// {"block_id": "…", "shown_take_id": "…",
+///  "takes": [{"take_id": "…", "sha256": "…"}, {"take_id": "…", "label": "english", "sha256": "…"}]}
 /// ```
 ///
 /// read_note's own words (`block_id`, `shown_take_id`, `take_id`, `label` —
@@ -23,6 +24,13 @@ import VariorumCore
 /// the block it was copied from (`source_block_id` — `duplicate_note`'s), so a
 /// client edits "the copy of block X" without guessing by position. Emitted
 /// only when set, so every mint's answer is byte-unchanged.
+///
+/// VX-254 (VX-336 U7 — D-254-2, the run record's U7 UNIT RECORD): every take
+/// object carries `sha256` — `MCPTextDigest` of the text the act STORED for
+/// that take (the minted row's own `working_text`, carried on
+/// `Operations.MintedTake.text`, never a second read; ∝ the write) — so a
+/// client digests its own source and proves the write without reading the
+/// text back. The text itself never rides the answer.
 enum MCPMintedBlocks {
     static func records(_ blocks: [Operations.MintedBlockTakes]) -> [[String: Any]] {
         blocks.map { block in
@@ -30,7 +38,7 @@ enum MCPMintedBlocks {
                 "block_id": block.blockID,
                 "shown_take_id": block.shownTakeID,
                 "takes": block.takes.map { take -> [String: Any] in
-                    var record: [String: Any] = ["take_id": take.id]
+                    var record: [String: Any] = ["take_id": take.id, "sha256": MCPTextDigest.sha256(take.text)]
                     if let label = take.label { record["label"] = label }
                     return record
                 },

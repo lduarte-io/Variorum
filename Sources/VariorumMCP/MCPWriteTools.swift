@@ -404,7 +404,9 @@ struct MCPWriteTools: Sendable {
                 let take = try ops.addTake(
                     toBlock: blockID, text: text, label: Self.aiLabel(client: clientName, own: takeLabel),
                     undoLabel: label(.take))
-                return (["take_id": take.id, "block_id": blockID, "note_id": note],
+                // VX-254 (D-254-2): the digest of the text the act stored.
+                return (["take_id": take.id, "block_id": blockID, "note_id": note,
+                         "sha256": MCPTextDigest.sha256(take.workingText)],
                         MCPWriteReceipt(clientName: clientName, act: .take, targetID: note, targetTitle: title,
                                         show: .takes(noteID: note, blockID: blockID)))
             }
