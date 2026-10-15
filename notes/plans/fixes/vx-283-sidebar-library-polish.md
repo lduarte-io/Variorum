@@ -2903,6 +2903,39 @@ Restore: `git checkout --` the two files, then `git diff --quiet`. **Expected RE
 mounted cells. (If the field-editor cell stays green on old, the keystroke road does not move the field's cell in the
 harness — recorded as such; the binding-road cells carry the red.)
 
+#### U2 + U3b — THE WALK PLAN (the folded `vx283-u2` claim's walk; a fresh Opus at xhigh; her rule)
+
+Products: U2's Debug app `DerivedData/vx283-u2` (the drag + P-U1e-1 + the R1 fixes) for D1–D7; U3b's
+`DerivedData/vx283-u3b` (relaunch) for D8. Screens to `notes/plans/vx283-screens/u2/walk/`. Store copy + prefs by the
+orchestrator before; restored + diffed by the walker after.
+
+- **D1 — the line and the chip.** Open ~10 notes. Start a drag on an Open row (`cliclick dd:` then `dm:` in small
+  steps): capture mid-drag over the upper half of a row and over the lower half — a 2-pt ring-colour line between
+  rows exactly where the drop would land, never at the dragged row's own gap; the drag image is the title chip AT the
+  cursor (no offset). Both voices.
+- **D2 — the four drop cases**, each before/after captured: a drop on the row JUST BELOW (lower half — it moves one
+  down; this was the dead drop); a long DOWNWARD drop (lands exactly where the line showed — no longer one short); the
+  END ZONE below the last row (reaches the last slot); an UPWARD drop. Each lands with a short settle (no jump).
+- **D3 — a no-op drop** (on its own gap): no line shows; nothing moves.
+- **D4 — nothing regressed on the rows:** click opens, ✕ closes (her ✕ rule), right-click menu, ⇧⌘W; a FILE dropped
+  on the list still imports (as before U2); the Bookcase's own book drag chip unchanged (one capture).
+- **D5 — P-U1e-1 (the fade ramp):** the shallow-overflow state at ~5, 7, 9 and 12 pt short in Study light and Terminal
+  dark — never a slice through letters at any of them (the row fades); O-1's state (≈4 pt of a row's padding beyond):
+  the last whole row's foot shows a fade hint.
+- **D6 — the one-row → two-row growth** (the R1 implementer's observation): with ONE note open and the list following,
+  open a second note — watch for a brief wobble of the rows (capture a short burst); it should end exact.
+- **D7 — following and the drag (P-U2-1):** while following, drag a row from below the current row to above it — the
+  list does not jump; then a hand scroll away, a drag, a wait — nothing pulls back.
+- **D8 — U3's W2 re-check on U3b's build** (relaunch on `vx283-u3b`): the 1240-pt default, Study and Terminal — panel
+  closed (one stable answer per voice; Terminal may be two lines, but it must not flip on a list scroll or on
+  typing); panel open: two lines; TYPE into the search field with the panel open — the row keeps its two lines, the
+  field never a sliver, the sort label one line; switch sort (edited → created → title) — no flip.
+- **D9 — restore and release.**
+
+#### U2 + U3b — WALK RECORD
+
+*(The walker writes one line per row here.)*
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
