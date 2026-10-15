@@ -1770,6 +1770,36 @@ half is done by the orchestrator (`OpenListCloseTests.settleAdoption`: wait unti
 shell has cleared its request, then a frame, before the next request) — the pin's subject is the landing ORDER, not the
 race. Evidence owed: the shell pin + the suites that ran around it in the batch, on a short window after the walk.
 
+#### U1 — THE DESIGN MEMO (P-5, the friction doctrine; 2026-10-15 ~00:15, after the re-walk)
+
+**Why a memo:** the sidebar's scrolling sections have had six fix legs since U1's walk (F-1's reveal, F-2's fade, the
+settle beat, the withdrawn absolute road, the reverted slack, the every-reading re-ask). The re-walk (record above)
+holds on every row but two: **R6 — her own scroll is pulled back** (three times, seconds after a hand scroll, no input)
+and **R4/O-2/O-3 — the fade's SHAPE** (a shallow fade over a few points reads as a slice through the letters; a partial
+row hidden under the fade's solid outer half leaves an empty band above the footer with no "there is more"). The
+orchestrator's eye on `R2b-study-light.png` (the middle state — reads right), `R4-repro-study-dark-zoom-bottom.png`
+(the slice) and `R5a-19-study-light-zoom-bottom.png` (the empty band) agrees. Repeated patches mean the feature's
+behaviour was never written whole — so here it is.
+
+**THE BEHAVIOUR, WHOLE (proposed):**
+1. **When the list moves by itself — FOLLOW, not every change.** The list FOLLOWS the current note after a discrete
+   act — a note opened, a landing (⇧⌘W, ✕, Close All, back/forward), the section's first appearance. While following,
+   anything that moves the row (the rail's beat, the pitch flip, a resize, content changing) keeps it wholly in view
+   (P-U1c-1's every-reading re-ask). **The moment she scrolls by hand, following stops**, and nothing moves the list
+   again until her next discrete act. Detected from the scroll view's own phase (a hand scroll is `.interacting` /
+   `.decelerating`; the app's reveals are not). This supersedes P-U1b-2's "including a window resize after she
+   scrolled away" — the root of R6. Her principle wins: never pulled back.
+2. **The edges — her taste call (three shapes):**
+   - **(A) The fade, reshaped:** the full half-row depth whenever more than a hair lies beyond (never a shallow
+     few-point fade — O-2), its STRENGTH easing in over the first few points of scroll instead of its depth (so it
+     still doesn't pop), and never fully solid at the very edge (a hint of the partial row always shows — O-3).
+   - **(B) Whole rows, no fade:** scrolling snaps to row boundaries, so no row is ever cut under a header; the
+     bottom keeps a half row as the "there is more" signal (Starred's own 7½ idiom).
+   - **(C) The plain clip, as before U1:** no fade (Starred has looked this way since 13u2; F-2 was the
+     orchestrator's critique, not hers). Lowest risk.
+
+Asked of her at this memo; the build follows her answers (U1d). U3 runs meanwhile (independent surfaces).
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
