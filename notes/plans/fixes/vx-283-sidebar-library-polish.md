@@ -3007,3 +3007,45 @@ the pins. No "Review foci" section exists for this run (checked), so none were o
 - **Dispositions already owed elsewhere, correctly not re-flagged here:** the `BookCollectingDoorsTests` red on
   main (VX-115), the shell adoption race (VX-360, filed with the fix shape and the deterministic pin), VX-344
   (parked selection half), and the walkers' O-observations the orchestrator ruled on in-run.
+
+### Ladder round 1 — the implementer's dispositions (Opus 5.5 at xhigh, a fresh session, 2026-10-15)
+
+**Not done by this session (first line):** R1-1 and R1-2 (the orchestrator's); any stage work — no `xcodebuild test`,
+no app launch (the pins below compile in both window trees and run in U2's / U3b's windows). Every fix here is a
+comment, a rename or a guard: no reachable behaviour changes, so no red-on-old is owed (R1-6 says why in its row).
+
+- **R1-3 — AGREE.** Re-traced by hand: pitch 30, depth 15, viewport 45, row 5 of 10 from offset 0 → 150 (= top); at
+  150 `above` holds (150 < 150 + 15 − 0.5) → 135; at 135 `below` holds → 150 again. The band, exactly: a row with a
+  row on each side bounces whenever `rowHeight < viewport < rowHeight + 2 × depth − fadeSlack` (two rows less half a
+  point, the depth being the half row). Unreachable on every settled window (a list with such a row has ≥ 3 rows: it
+  hugs them, ≥ 72 pt compact, or scrolls at the Open list's 3½-row floor or Starred's 7½); the one road into the band
+  in a frame stream (a 2-row hug growing to 3 rows while the pitch decompresses) adds the row at the END (an open
+  appends) or as a star (which compresses), and any frame stream ends on its settled reading. Fix: the bound named
+  in a comment at `revealOffset` (+ one pointer line at the fixed-point pin) — no behaviour change.
+- **R1-4 — AGREE.** Re-traced: `began(_:)` arms `dragging`; only a drop on THIS list's targets clears it (`ended()`
+  in `perform`), so a release elsewhere leaves it; a foreign token then reads the stale row as "a drag of this
+  list's" (`lineTop`'s `dragged`), the line draws, `perform` accepts, and `land` refuses on the payload's list id —
+  accepted, nothing lands, no slide-back. The same silent accept covers a failed `loadTransferable` and a `land`
+  that re-validates against fresh rows to nothing. Fix: the known edge as comments at `began(_:)` and `perform`.
+- **R1-5 — AGREE.** The pin's name says "seven and a half"; its body asserts the room down to the footer and growth
+  PAST the old 7½-row cap. Note: the test lives in `SidebarLayoutTests` (in `ShellChromeTests.swift`), not the
+  `ShellChromeTests` suite the record's citations name; the suite-level `-only-testing` lists already carry
+  `SidebarLayoutTests` in both windows, so no list change. Fix: renamed to
+  `theOpenListsTallestFormIsTheRoomDownToTheFooter` (the reviewer's name); the earlier citations stay as history,
+  with a "renamed at R1-5" note.
+- **R1-6 — AGREE (as a GUARD).** Re-traced: the floor (`fieldFloor`, the prompt through the field's cell) and the cap
+  (`.frame(maxWidth: 320)`) were independent numbers; a floor over the cap makes `fitsOneLine` false at every width.
+  No red-on-old is possible on a reachable road: the prompt is one constant and both voices' `small` faces are fixed
+  11.5-pt faces (no text-size setting) — measured 211.5 / 175, far inside 320. Fix: the cap named once
+  (`LibraryCatalogView.searchFieldMaxWidth`), read by the field's frame AND handed to the stable widths, whose floor
+  is clamped at it; pins that each voice's floor is ≤ the cap and that a prompt measuring past the cap is clamped to
+  it (that pin is red without the clamp by construction — a guard's own contract, not a reachable bug).
+
+**LIVE STATUS (this leg, per piece)**
+- D0 — the dispositions above: DONE (this commit).
+- D1 — R1-3's comment: NOT-STARTED.
+- D2 — R1-4's comments: NOT-STARTED.
+- D3 — R1-5's rename + the record note: NOT-STARTED.
+- D4 — R1-6's guard + pins: NOT-STARTED.
+- D5 — headless `build-for-testing` into `DerivedData/vx283-u2` AND `DerivedData/vx283-u3b`: NOT-STARTED. The pins'
+  runs PENDING U2's / U3b's windows.
