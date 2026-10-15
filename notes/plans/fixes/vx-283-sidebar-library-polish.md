@@ -1176,7 +1176,11 @@ lines — below); any stage work until the orchestrator hands over a claim.
   store or prefs — now with the column's own animation): when a current-row change and a viewport change ride ONE
   animated transaction (`withAnimation(.easeInOut(duration: 0.22))`, the rail's), a `scrollTo` issued during the
   transition is resolved against the scroll view's PRESENTATION frame — the pre-animation height — and once the
-  animation ends no reading arrives (SwiftUI's model already holds the target height). Q2's modifier, the
+  animation ends no reading arrives (SwiftUI's model already holds the target height). **[CORRECTED at U1c, P-U1c-1:
+  the second half is REFUTED for this road — the U1c probe AND the mounted rig read EVERY frame of the beat, the last
+  at the settled height (`vp 180.002 → 180.000`), and the settled backstop reads that fresh window and lands exactly
+  ("T3 — THE MOUNTED RIG'S FACTS" (2)). The residual was the trigger's per-reading 0.5-pt step threshold skipping the
+  ease's tail, not a missing reading.]** Q2's modifier, the
   owed-until-a-clear-reading variant tried first, and the old reveal ALL rested wrong: e.g. the last row revealed at
   offset 249 (= 600 − the OLD 351) while the viewport settled at 251 — the row hidden. That is the window's 1-pt
   Starred residual and, at a larger amplitude, very likely the walker's O-1 (a 15-pt cut).
@@ -1389,8 +1393,11 @@ leg traces and PROPOSES; the architect rules before anything ships. Any stage wo
   **CONFIRMS the probe on all four of the ruling's conditions** ("T3 — THE MOUNTED RIG'S FACTS" below).
 - T4 — the proposal: RULED by the orchestrator (2026-10-14 ~22:40, conditional on T3 — met): **(c1), recorded as
   P-U1c-1** ("U1c — THE ORCHESTRATOR'S RULING" below).
-- T5 — P-U1c-1 built (the trigger, the backstop's scheduling, the pure pin, the ungated mounted pin, Q5's correction,
-  the oracles' disposition): IN-PROGRESS.
+- T5 — P-U1c-1 built: DONE (`6c8b0d37` code + pins; this commit the record — Q5 corrected, the oracles' disposition)
+  — headless `build-for-testing` green, no new warning in a touched file; the pure pin's arithmetic checked headless
+  against the real `SidebarLayout.swift` (all 8 cadences land 36; the R-H patch ends short at 7 of 8); the probe on the
+  ruled modifier: the mounted pin's logic GREEN 3/3, the rig-settle replica reads 36 3/3, 4 backstop timers a beat
+  (the discrete requests) where there were 23–36. Write-up below ("T5 — P-U1c-1, AS BUILT"). The mounted runs are T7's.
 - T6 — R-H prebuilt (the trigger back to the 0.5-pt step rule) + headless rebuilds: NOT-STARTED.
 - T7 — the closing window (the 93-suite batch + the mount suite ×5 + R-H + the store and prefs restore): NOT-STARTED.
 
@@ -1511,6 +1518,38 @@ oracles if cheap and tidy, else removed — the implementer's call, recorded. Th
 trigger back to `abs(…) > 0.5`; expected red: the ungated pin and the pure pin), commit and push per piece, and end at
 READY FOR STAGE for the closing window (the 93-suite batch + the mount suite `-test-iterations 5` + R-H + the restore;
 expected: only VX-245's lint red in the batch, the mount suite 5/5 green, R-H red as named).
+
+**T5 — P-U1c-1, AS BUILT** (`6c8b0d37`):
+- `Core/Views/SidebarLayout.swift`: **`ReadingAsk`** (`none` · `revealNow` · `request`) and the pure
+  **`readingAsk(old:new:rowsChanged:)`** — a content change > 0.5 pt under an unchanged row count is a DISCRETE
+  `request` (the pitch flip; P-U1b-7's guard kept); otherwise ANY viewport change is `revealNow`; an offset-only change
+  (her scroll) is `none`. The F-1 comment's stale "applied absolutely" (withdrawn at Q10) now says "landed through the
+  section's proxy".
+- `Features/Library/SidebarSectionWindow.swift`: the geometry action asks `readingAsk` — `request` → `requestReveal`
+  (reveal now + the settled backstop), `revealNow` → `reveal` DIRECTLY (sub-call 2: no backstop Task per frame); the
+  mount's first reading stays a request before it. The backstop is scheduled only by the DISCRETE requests (sub-call
+  1): the current row, the content height, the row height, the mount. The header comment says so (and loses a broken
+  half-sentence a previous edit left behind).
+- **The oracles — KEPT (the implementer's call, per the ruling):** the DEBUG `SidebarSectionTrace` sink (off unless a
+  pin or a probe installs it; its notes are autoclosures, so an off sink builds no string; compiled out of Release) and
+  the two env-gated harnesses (`traceTheNinthStarsOpen` / `…Undriven`, `TEST_RUNNER_VARIORUM_U1C_TRACE=1`) — they are
+  what settled this after five legs, they cost nothing in a batch (gated off), and the next change to the beat or the
+  trigger can re-run them with one variable. The shipping path keeps only the two `StaticString` labels.
+- **Pins:** `SidebarSectionWindowRuleTests.aReadingAsksOnlyWhatMovesTheRow` (the decision's cases) and
+  **`…anEasedShrinkEndsWithTheRowExactlyAtTheEdgeAtEveryCadence`** — CLOCK-FREE: the content re-laid in one step (216),
+  the viewport easing 225 → 180 over `railTransition` (smoothstep) with its top held, every reveal on the 0.5-pt grid,
+  at cadences 2 · 3 · 4 · 5 · 6 · 8.33 · 10 · 16.67 ms; on P-U1c-1 the ninth row ends at 36 at all eight; on the old
+  rule (R-H) it ends at 27 · 32.5 · 34.5 · 34.5 · 35.5 · 35.5 · 35.5 · 36 — red at seven (checked headless against the
+  real `SidebarLayout.swift`, the R-H line patched in a scratch copy). **`SidebarSectionWindowMountTests.
+  theNinthStarIsClearTheMomentTheBeatEnds` UNGATED** (now on `rig.pump`, `SectionRig`'s own turn, made file-visible).
+- **R-H's shape, and a deviation stated:** the ruling names R-H as "the trigger back to `abs(…) > 0.5`; expected red:
+  the ungated pin and the pure pin". Under sub-call 2 a threshold-ONLY revert would leave the backstop scheduled by the
+  commit-time discrete requests alone — it then fires at the commit + 0.30 s, ≈40–60 ms after the beat ends, and lands
+  the row BEFORE the mounted pin's 100–150-ms window, so the mounted pin would read green for a reason that is not the
+  fix. **So R-H restores HEAD's viewport arm WHOLE** — the 0.5-pt step threshold in `readingAsk` AND the viewport arm
+  scheduling its backstop (`requestReveal`) — the trigger exactly as it stood; both pins red. The threshold-only
+  variant is prebuilt beside it as **R-H′** (expected: the pure pin red, the mounted pin observed — likely green, by the
+  mechanism just stated), so the window shows which pin is the deterministic one.
 
 **T4 — THE PROPOSAL (DRAFT — PENDING T3's mounted confirmation; nothing built):**
 - **The traced mechanism, in one breath:** the rail's implicit animation delivers Starred's 45-pt viewport shrink as a
