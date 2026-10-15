@@ -2887,4 +2887,6 @@ renumbers. #227 was free at the merge.)*
     built).
   - **Batch 2 → all RATIFIED as built:** P-VX253-1 (keep `take_ids`) · P-VX253-2 (refuse; the empty-`take_ids` note
     (d) not taken) · P-VX252-1 (ids only) · P-VX361-1 (one `tag_ids` list).
+  - **Batch 3 → all RATIFIED as built:** P-VX255-2 (`at: "start"`) · P-VX255-3 (blocks only) · P-VX255-4 (at most
+    200 a call) · P-VX311-1 (no duplicating a per-ask note).
 Status: open — your eye; the handoff's checklist leads with this bundle.
