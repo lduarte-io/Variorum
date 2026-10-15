@@ -4978,3 +4978,41 @@ entries; `Backups/safety-copies/` holds only `castle-W1-20261013` (left alone). 
   it or updates the brief in the same unit).
 - **Next: U8b** (a fresh `opus-implementer`): the field guide's MCP chapter, built against U8a's OWED FOR U8b, plus THE STAGE
   WINDOW (`vx336-u8`), which carries U7c's RE-PROBE.
+
+## U8b UNIT RECORD — the field guide's MCP chapter + U8's stage window plan (VX-197; opus-implementer, from 2026-10-14 ~23:00 MDT)
+
+**NOT DONE (said first; rewritten at close):** no `xcodebuild test`, no launch, no stage claim, no store touched — the
+chapter's Mac pins, their red run, the both-voices walk, the real client and U7c's re-probe are THE STAGE WINDOW's
+(claim `vx336-u8`, below), run only on the orchestrator's GO. No canon, QUESTIONS or ticket edit. No subagent.
+
+**Read in full in this session (never delegated):** this record's header, Hard rules (incl. never `claude mcp list`),
+LIVE STATUS, Stage traffic log, Her rulings; the U8 BRIEF (items 1 and 4, the SPLIT, the U7 carries); the U8a UNIT
+RECORD whole (THE INSTRUCTIONS AS BUILT, THE DESCRIPTIONS AS BUILT, OWED FOR U8b); THE ORCHESTRATOR ON U8a; the U7c
+UNIT RECORD's THE RE-PROBE and THE ORCHESTRATOR ON U7c; the U7 STAGE RUN whole and builder B's STAGE WINDOW (the
+worked form); the U6 window's A1 and sherlock steps; `notes/plans/mcp-pane-and-docs-kickoff.md` ("U7: the AI's docs",
+HER ADDITIONS incl. the label split and R-VX184-2); `notes/MCPSpec.md` whole; AppSpec §12's FIRST OPEN and COMMIT
+VOCABULARY lines; R-13s-22 (no em dashes, no emoji; quoted-UI dashes legal); the memory note no-shouty-caps-in-copy;
+`notes/SessionResiliencyProtocol.md`'s implementer section and addenda. Code: `TutorialSeeder.swift` (the MCP chapter
+whole, the plan, the restore door's discovery and seed, its neighbours' voice — books chapter, privacy chapter);
+`TutorialMCPChapterTests.swift` and `TutorialMCPChapterCaptureTests.swift` whole; the guide-wide sweeps in
+`TutorialCurrencyTests` (no Canvas, the practice word, the indent pair, the star row) and `TutorialBooksChapterTests`
+(no hidden Bookcase door); `MCPProviderNeutralityTests` (the O-4 fence: one in the seeder); `MCPPaneCopy` (the
+setup's words, `clientBoundary` — VX-246's F-1 parity — `keyLine`, the rebind row, the activity line), `MCPSetupMenu`
+(the code block and its copy icon), `MCPPane` (tabs, Waiting and requests above them, Connect's section title),
+the registry's MCP verbs, `MCPToolCatalog` (every description the chapter leans on), `MCPWriteTools.aiLabel`,
+`MCPWriteTools+CommentDelete` / `Operations+MCPCommentAuthors` (VX-260), `editTakeUnderInsurance` /
+`labelTakeForClient`, `setBookRule` + `MCPBookFacts.matchesWaitWords`, `duplicateNoteForClient`, `MCPNavigator`'s
+Compare road, `MCPSharedRowsRulesTests` / `BookPanelMCPMarksTests` (the icon's hosts, VX-330's `markedNote`),
+`ShellActions.restoreTutorial` and its confirm. VX-204's and VX-209's guide changes live in `ProtectionCopy`
+(the privacy chapter) — this unit never touches that file or chapter.
+
+### LIVE STATUS — U8b's pieces (flipped in the same commit as each piece)
+
+| piece | what | status |
+|---|---|---|
+| 0 | read-in; this record | DONE (this commit) |
+| 1 | the chapter's truth pins on the OLD seed (Tests only — `TutorialMCPChapterTests`), committed ahead of the chapter | NOT-STARTED |
+| 2 | the red product `DerivedData/vx336-u8-red` (`build-for-testing` from piece 1's commit) | NOT-STARTED |
+| 3 | the chapter (`TutorialSeeder`'s MCP lessons) | NOT-STARTED |
+| 4 | the green product `DerivedData/vx336-u8`; the headless guards (`MCPProviderNeutralityTests`, the core/MCP targets untouched) | NOT-STARTED |
+| 5 | THE STAGE WINDOW plan (claim `vx336-u8`), the chapter's text whole, FOR VX-234, PROVISIONALs, OWED (the re-seed note) → READY | NOT-STARTED |
