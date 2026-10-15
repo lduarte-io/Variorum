@@ -154,6 +154,63 @@ struct SidebarSectionWindowRuleTests {
     }
 }
 
+// MARK: - The column's one transition beat (the orchestrator's ruling on P-U1b-5)
+
+/// The scrolling sections ask their reveal a second time once the rail's
+/// animated transition has settled (U1b's stage window: a reveal resolved
+/// mid-transition rested short). The ruling: that wait is DERIVED from the
+/// rail's own duration, named once — never a free-standing number that drifts
+/// silently the day the motion changes.
+@MainActor
+@Suite("U1b — the column's one transition beat (P-U1b-5, ruled)")
+struct SidebarTransitionBeatTests {
+    private static var appRoot: URL {
+        URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // VariorumTests
+            .deletingLastPathComponent()  // App/Variorum
+    }
+
+    /// Code lines only — a comment may name the beat's history.
+    private func code(_ relative: String) throws -> [String] {
+        try String(contentsOf: Self.appRoot.appendingPathComponent(relative), encoding: .utf8)
+            .split(separator: "\n", omittingEmptySubsequences: false)
+            .map(String.init)
+            .filter {
+                let line = $0.trimmingCharacters(in: .whitespaces)
+                return !line.hasPrefix("//") && !line.hasPrefix("*")
+            }
+    }
+
+    @Test func theSecondRevealWaitsStrictlyPastTheRailsTransition() {
+        #expect(SidebarLayout.transitionSettleMargin > 0)
+        #expect(SidebarLayout.transitionSettle > SidebarLayout.railTransition)
+        #expect(SidebarLayout.transitionSettle
+                == SidebarLayout.railTransition + SidebarLayout.transitionSettleMargin)
+        #expect(SidebarSectionWindow<String>.transitionSettle == .seconds(SidebarLayout.transitionSettle),
+                "the section's wait is the derived settle, not a number of its own")
+    }
+
+    /// **A source read:** every animation in the sidebar column runs on the one
+    /// beat — the rail's and the note box's arrival and departure — and no
+    /// literal duration remains; the sections' wait reads the derived settle.
+    @Test func theSidebarsRailAnimationsReadTheOneBeat() throws {
+        let sidebar = try code("Variorum/Features/Library/SidebarView.swift")
+        let animations = sidebar.filter { $0.contains(".animation(") }
+        #expect(animations.contains { $0.contains("value: railPostID") }, "the rail's motion")
+        #expect(animations.contains { $0.contains("value: noteBox == nil") }, "the note box's motion")
+        for line in animations {
+            #expect(line.contains("SidebarLayout.railTransition"),
+                    "a sidebar animation off the shared beat: \(line)")
+        }
+        #expect(!sidebar.contains { $0.contains("duration: 0") || $0.contains("duration: 1") },
+                "no literal duration in the column")
+        let window = try code("Variorum/Features/Library/SidebarSectionWindow.swift")
+        #expect(window.contains { $0.contains(".seconds(SidebarLayout.transitionSettle)") })
+        #expect(!window.contains { $0.contains(".milliseconds(") || $0.contains("duration: 0") },
+                "no free-standing wait in the section window")
+    }
+}
+
 // MARK: - The mounted pins: what the sections actually DO in a window
 
 /// The column, bound to the workspace exactly as `RootView.selectionBinding`

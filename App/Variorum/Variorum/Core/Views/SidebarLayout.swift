@@ -275,6 +275,28 @@ nonisolated enum SidebarLayout {
             + areas + rail + openStripRowsCounted(openNotes: openNotes)
     }
 
+    // MARK: - The column's one transition beat (U1b — the orchestrator's ruling on P-U1b-5)
+
+    /// **The rail's transition, in seconds — named ONCE.** The "this note"
+    /// rail and the note box arrive and leave on it (row 24's sidebar half:
+    /// *"nothing on the left ever snaps"* — `SidebarView`'s two `.animation`
+    /// modifiers read it), and the scrolling sections' second reveal waits
+    /// past it (`transitionSettle`). It was a literal 0.22 at both modifiers;
+    /// a settle hard-coded beside them would drift silently the day the
+    /// motion's duration changed (`SidebarTransitionBeatTests` pins both
+    /// halves).
+    static let railTransition: TimeInterval = 0.22
+
+    /// The margin a section waits past `railTransition` before it asks its
+    /// reveal again: the transition's LAST frame must have landed (a frame or
+    /// more at any refresh rate) and its reading been delivered.
+    static let transitionSettleMargin: TimeInterval = 0.08
+
+    /// **When a scrolling section asks its reveal again** — strictly after the
+    /// rail's transition (U1b's stage window: a reveal resolved mid-transition
+    /// rested short; P-U1b-5, ruled (a)).
+    static var transitionSettle: TimeInterval { railTransition + transitionSettleMargin }
+
     // MARK: - A scrolling section's window (U1b — F-1 and F-2, the VX-283 run)
     //
     // The two scrolling sections (Starred, the Open list) answer two
@@ -295,7 +317,7 @@ nonisolated enum SidebarLayout {
     // issued against whatever viewport stood when it ran — and the Open
     // list's viewport is a function of measurements that land a pass later
     // (`openListMaxHeight`'s two, the rail arriving, the column's pitch
-    // flipping 30 ↔ 24 under a 0.22 s animation), while returning to the note
+    // flipping 30 ↔ 24 under the rail's transition), while returning to the note
     // she was already in never revealed at all (its recency did not change).
     // So the reveal is a decision over the window as it NOW stands, asked on
     // a current-row change AND on every viewport-height change — and since

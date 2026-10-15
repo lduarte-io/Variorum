@@ -316,8 +316,9 @@ struct SidebarView: View {
                         // rail's height — so the Open strip below never moves
                         // between a note and a book (her U-10's "measured to
                         // take up the same amount of room"). It fades in and
-                        // out on the same 0.22 s as the rail (row 24's
-                        // sidebar half: nothing on the left ever snaps).
+                        // out on the rail's own beat, `SidebarLayout.
+                        // railTransition` (row 24's sidebar half: nothing on
+                        // the left ever snaps).
                         noteBoxGroup(noteBox)
                             .transition(.opacity)
                     }
@@ -356,9 +357,9 @@ struct SidebarView: View {
         #endif
         // Row 24 (the sidebar half): the rail fades in and out with the
         // note — the groups below it slide, nothing snaps.
-        .animation(.easeInOut(duration: 0.22), value: railPostID)
+        .animation(.easeInOut(duration: SidebarLayout.railTransition), value: railPostID)
         // …and on the box's arrival and departure, for the same reason.
-        .animation(.easeInOut(duration: 0.22), value: noteBox == nil)
+        .animation(.easeInOut(duration: SidebarLayout.railTransition), value: noteBox == nil)
         // The strip's names, HELD for exactly what is on screen (17o batch
         // d, ledger row 18 — her *"renaming a note won't rename it on the
         // sidebar until you click on something else"*). The key still names

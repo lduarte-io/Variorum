@@ -366,7 +366,7 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **READY FOR STAGE** (≈12 min — the 92-suite batch re-run; Q6). The first window (21:24–21:29): batch 408 tests, 3 red — U3's VX-245 lint, a U1b pin fault, a real F-1 residual (a reveal resolved mid-animation, 1 pt short); R-D/R-E red where needed. Q5 fixed the residual and the pin headless. Then the re-walk. F-3 → VX-359 (U3 rider). |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | FIX LEG U1b: **READY FOR STAGE** (≈12 min — the 93-suite batch re-run; Q6). The first window (21:24–21:29): batch 408 tests, 3 red — U3's VX-245 lint, a U1b pin fault, a real F-1 residual (a reveal resolved mid-animation, 1 pt short); R-D/R-E red where needed. Q5 fixed the residual and the pin; Q7 built the ruling on P-U1b-5 (the settle derived from the rail's one beat, pinned). Then the re-walk. F-3 → VX-359 (U3 rider). |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version | NOT-STARTED |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 — the Library and the red lint | NOT-STARTED |
 | Ladder | `opus-reviewer` at max, fresh per round | NOT-STARTED |
@@ -881,9 +881,12 @@ lines — below); any stage work until the orchestrator hands over a claim.
   revert trees deleted (the coordinator's ask).
 - Q5 — the residual's fix + the pin fault (headless, AFTER the window — the orchestrator told in the report): DONE
   (this commit) — headless `build-for-testing` green; the re-run PENDING a short window (Q6).
-- Q6 — **READY FOR STAGE** (≈12 min): the same 92-suite batch, `test-without-building` on `DerivedData/vx283-u1`
-  (now this commit's code); no revert (the residual's red-on-old IS the window above: the Starred pin red at
-  `62d5a4a1`); the same restore. Then READY FOR WALK.
+- Q7 — the orchestrator's ruling on P-U1b-5 (the settle derived from the rail's ONE transition constant, pinned):
+  DONE (this commit) — headless `build-for-testing` green; its pins run in Q6.
+- Q6 — **READY FOR STAGE** (≈12 min): the batch — now **93 suites** (the 92 + `SidebarTransitionBeatTests`),
+  `test-without-building` on `DerivedData/vx283-u1` (this commit's code); no revert (the residual's red-on-old IS the
+  first window: the Starred pin red at `62d5a4a1`); the same restore. Expected: VX-245's lint the only red. Then READY
+  FOR WALK.
 
 **F-3 — THE DOUBLED SEPARATOR: OLDER THAN U1, NOT ADJACENT — RECORDED AND LEFT (the brief's rule).**
 - The View menu's note group is `EditorCommands`' `CommandGroup(before: .toolbar)` (`EditorCommands.swift:954`). It
@@ -1010,7 +1013,8 @@ lines — below); any stage work until the orchestrator hands over a claim.
    PaneHeldModeTests PaneLayoutTests PaneMountTests PaneMountWindowTests PaneSplitDoorTests PaneSplitModelTests
    PaneUnmountTests PostDetailModeMemoryTests PostDetailRoutingTests QuickEntryLaunchFocusTests ShellChromeTests
    ShellLandingDoorTests ShellLandingMountTests ShellLandingRuleTests SidebarLayoutTests
-   SidebarSectionWindowMountTests SidebarSectionWindowRuleTests SidebarSmokeTests StarActingTests
+   SidebarSectionWindowMountTests SidebarSectionWindowRuleTests SidebarSmokeTests SidebarTransitionBeatTests
+   (added at Q7 — the 93rd) StarActingTests
    StarDeclarationTests StarTargetingTests StarredScrollLayoutTests StarredScrollMountTests TourEndCardAsideGateTests
    TourEndCardTests TourEngineTests TourEntryTests TourPoolTuckTests TourScriptTests TourSpotlightTests
    TutorialCurrencyTests TwoWindowMountTests WindowRegistryTests WindowUnmountTests WingSwitcherTests
@@ -1087,11 +1091,20 @@ lines — below); any stage work until the orchestrator hands over a claim.
   current row and pitch; a later request supersedes an earlier one's second ask (an episode counter). Both scrolls are
   issued UNANIMATED (a transaction with animations disabled), so a scroll lands on the layout it was computed against.
   The probe, re-run: every step clear, the three animated ones included (349…600, 349…540, 354…585).
-- **PROVISIONAL P-U1b-5 — the settle delay.** 300 ms after the request, past the column's 0.22-s animation; in an
-  animated arrival the row may sit short for that moment, then settles in. Options: (a) an immediate ask + one ask
-  after 300 ms [built]; (b) only the delayed ask (no early scroll; the list holds still through the slide); (c) tie the
-  second ask to the animation's completion (SwiftUI exposes completion only to the animation's own author — the
-  column, a wider change).
+- **P-U1b-5 — the settle delay: RULED (a) by the orchestrator (2026-10-14), with the coupling.** An immediate ask +
+  one ask after the column settles; in an animated arrival the row may sit short for that moment, then settles in.
+  The ruling's condition: the wait is never a free-standing number — a hard-coded settle beside the rail's literal
+  0.22 would drift silently the day the motion changed. **Built (Q7):** `SidebarLayout.railTransition` (0.22 s) names
+  the column's ONE transition beat — both of `SidebarView`'s `.animation` modifiers (`value: railPostID`, `value:
+  noteBox == nil`) read it, and the note box's comment names it instead of the number; `transitionSettleMargin`
+  (0.08 s: the transition's last frame landed and its reading delivered) is named with its reason;
+  `SidebarLayout.transitionSettle` = beat + margin (0.30 s, unchanged in effect); `SidebarSectionWindow.
+  transitionSettle` is `.seconds(SidebarLayout.transitionSettle)`. **Pins** (`SidebarTransitionBeatTests`): the settle
+  strictly later than the beat (and exactly beat + margin, the section's wait equal to it); a source read that every
+  `.animation(` in `SidebarView.swift` reads `SidebarLayout.railTransition` with no literal duration left, and that the
+  section window's wait reads the derived settle with no `.milliseconds(` of its own. Not coupled, deliberately: the
+  Library info panel's `LibraryCatalogView.panelAnimation` (also 0.22 s) — another surface's motion (row 24's PANEL
+  half, U3's file), not the sidebar's beat.
 - **The pin fault:** `theOpenListFadesOnlyTheEdgesWithMoreBeyond`'s mid-list step now opens row 15 (index 14,
   420…450), below the 351-pt list's fold.
 

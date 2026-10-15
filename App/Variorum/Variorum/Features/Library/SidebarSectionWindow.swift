@@ -23,7 +23,7 @@
 //    NEWEST note, issued against whatever viewport stood when it ran — while
 //    the Open list's viewport is a function of measurements that land a pass
 //    later (`SidebarLayout.openListMaxHeight`'s two; the rail arriving; the
-//    column's pitch flipping 30 ↔ 24 under the 0.22 s animation) — and
+//    column's pitch flipping 30 ↔ 24 under the rail's transition) — and
 //    returning to the note she was already in never revealed at all (its
 //    recency did not change). Now the CURRENT row is revealed (clear of the
 //    fades) on every current-row change, on the section's first reading, and
@@ -86,14 +86,16 @@ struct SidebarSectionWindow<RowID: Hashable>: ViewModifier {
         var episode = 0
     }
 
-    /// How long after a reveal request the section checks again — past the
-    /// column's 0.22 s rail animation (`SidebarView`'s `.animation(_, value:
-    /// railPostID)`). U1b's stage window found why: a scroll issued while the
-    /// column's layout is still animating is resolved against the scroll
-    /// view's PRESENTATION frame, not the one it settles into, and no reading
-    /// arrives once the animation ends — so the row could rest short (1 pt in
-    /// the window's Starred pin; once in ~40, much more, the walker's O-1).
-    static var transitionSettle: Duration { .milliseconds(300) }
+    /// How long after a reveal request the section checks again — DERIVED from
+    /// the column's one transition beat (`SidebarLayout.transitionSettle` =
+    /// `railTransition` + its margin; the orchestrator's ruling on P-U1b-5:
+    /// never a free-standing number). U1b's stage window found why: a scroll
+    /// issued while the column's layout is still animating is resolved against
+    /// the scroll view's PRESENTATION frame, not the one it settles into, and
+    /// no reading arrives once the animation ends — so the row could rest short
+    /// (1 pt in the window's Starred pin; once in ~40, much more, the walker's
+    /// O-1).
+    static var transitionSettle: Duration { .seconds(SidebarLayout.transitionSettle) }
 
     private var depth: CGFloat { SidebarLayout.edgeFadeDepth(rowHeight: rowHeight) }
 
