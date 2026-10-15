@@ -395,7 +395,7 @@ trailer of any kind.
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **PROVEN — awaiting U2's walk for P-U1e-1** (the fade ramp rides U2): U1 built + walked; U1b/U1c fix legs; U1d (her memo rulings) window GREEN (434/96, R-I/R-J red as named, 01:44–01:50) and re-walk HOLD on R0–R3, R5–R8 (R6 her scroll never pulled back); R4's 7–9-pt slice → P-U1e-1 built in U2's leg, verified by U2's window + walk. |
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **TEST PART GREEN; THE WALK FAILED D1/D2: a real system drag never draws the line or lands** (a regression against main's per-row road; the pins cannot post a drag). D5 (P-U1e-1) HOLDS by eye; D6 holds. **→ U2b TRACE-FIRST leg** (after U3c; the floor: back to main's road). |
-| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **W1/W3/W4/W5 PROVEN.** U3b's window (15:41–15:50): batch 511/103 with ONE real red — the closed-panel sweep still flips in a band (Terminal 940–960, Study 840–880: sort states two lines, typed/empty-again one); R-S six red as named (the closed cell red on both sides). **U3c — TRACE-FIRST leg: READY FOR STAGE — U3c probe, ≈10 min** (T1 traced, T2 built `944cfd46`, `u3c/window.sh` pre · probe · restore; T3 after the run); D8 (W2's re-check) waits for it. |
+| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **W1/W3/W4/W5 PROVEN.** U3b's window (15:41–15:50): batch 511/103 with ONE real red — the closed-panel sweep still flips in a band (Terminal 940–960, Study 840–880: sort states two lines, typed/empty-again one); R-S six red as named (the closed cell red on both sides). **U3c: READY FOR STAGE — U3c fix window, ≈15 min** (P-U3c-1 built: pins `032ee08a` red-first, fix `378e2261`; trees `vx283-u3c` + `vx283-u3c-rv` (R-P); `u3c/window.sh` pre · pins · rp · batch · restore); D8 (W2's re-check) on `vx283-u3c` after it. |
 | Ladder | `fable-reviewer` at xhigh (her word, superseding opus at max), fresh per round, cross-model | **ROUND 1 DONE** (tip 448f9450; findings in the Ladder section, `9ef6fba3`): 0 BLOCKER · 0 MAJOR · 2 MINOR (R1-1 this table — fixed here; R1-2 sequencing — the windows owed) · 4 NIT (R1-3…6 → the implementer). Round 2 re-reviews the fixes + the U2/U3b window results. |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
 
@@ -3023,10 +3023,56 @@ DEBUG-only trace hook, off unless the probe turns it on.
   GUARD `atTheProbesInAppWidthsTheDefaultWindowIsOneLineClosed`, the stale "≈934 / ≈834" comment annotated in place.
 - B2 — the fix: DONE (`378e2261`) — the two `.fixedSize(horizontal: true, vertical: false)` lines; `build-for-testing`
   green on `vx283-u3c`.
-- B3 — **R-P IN FLIGHT** (a successor reading this with a dirty tree: restore FIRST — `git checkout --
-  App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift`, then `git diff --quiet`): the two
-  `.fixedSize(horizontal: true, vertical: false)` lines deleted from the committed tip `378e2261`, nothing else;
-  `DerivedData/vx283-u3c-rv` APFS-cloned from `vx283-u3c` and built.
+- B3 — R-P prebuilt: DONE — the two `.fixedSize(horizontal: true, vertical: false)` lines deleted from the committed
+  tip `378e2261` (the diff: exactly those two `-` lines), `DerivedData/vx283-u3c-rv` APFS-cloned from `vx283-u3c` and
+  built (`build-for-testing` succeeded, `LibraryCatalogView.swift` recompiled — `u3c/logs/bft-rv.log`), RESTORED by
+  `git checkout --`, `git diff --quiet` empty. **No revert in flight.** `vx283-u3c` holds the fix (`bft-fix.log`; the
+  only warning in the file is the pre-existing `probeSpace` one).
+- B4 — the window script: DONE — `notes/plans/vx283-screens/u3c/window.sh` (gitignored) gains `pins` · `rp` · `batch`;
+  `pre` (now checks both trees) and `restore` kept; `probe` kept, not part of this window. **READY FOR STAGE — the fix
+  window below.** Its results PENDING.
+
+**THE BUILD (P-U3c-1, as ruled at `ae582c53`).**
+- **The pins, red-first (`032ee08a`, no product line):**
+  - NEW `LibraryControlsGeometryTests.aSearchNeverSqueezesTheSegmentedControlsOrFlipsTheRow` (×2 voices): the panel
+    closed, Terminal 950 / Study 860, the catalog resized to the room; created · oldest → "pick" → "" → a sort pick
+    (edited · newest), through the sweep's own `Rig`; after each, the premise (the catalog is the room + 48 wide), both
+    NSSegmentedControls mounted, each drawn at no less than its intrinsic width − 0.5, and the row's height equal to
+    the first step's. It prints `[VX-175 U3c pin]` per step. Red on the pre-fix tree by the probe's own trace (states
+    4/5/7/8: the scope control at 227 / 220.5 of 254 and the row at 24 after the search).
+  - NEW pure GUARD `LibraryControlsFlowRuleTests.atTheProbesInAppWidthsTheDefaultWindowIsOneLineClosed` over
+    `inApp(_:)` — the probe's in-app rigid rows (Terminal scope 262…280 · mode 224…230 · slot 174 counted 181 · when 53
+    · floor 211.5; Study 264…280 · 230 · 127 counted 134 · 48 · 175): 981 one line and 631 two in both voices; the old
+    band's rooms (950 / 860) two lines; Terminal 976 ✗ / 978 ✓, Study 889 ✗ / 892 ✓ (the rule's exact thresholds
+    977.0 / 890.5 — the ruling's ≈977.5 / ≈891 less the floor's half-point slack; a Python replica of `distribute` +
+    `fitsOneLine` computed them); no flip back over 300…1400. A GUARD (the rule does not change).
+  - The stale "≈934 / ≈834" doc comment on `atTheMeasuredWidthsTheDefaultWindowHasOneAnswerPerPanelState` ANNOTATED in
+    place (an italic U3c note after it: the offscreen numbers, the in-app ones, the "≈20 pt wider" was the scope
+    picker); the pin's numbers unchanged. The file header gains a U3c paragraph.
+- **The fix (`378e2261`):** `LibraryCatalogView.swift` — `.fixedSize(horizontal: true, vertical: false)` after
+  `.pickerStyle(.segmented)` and before `.frame(maxWidth: 280)` on scope (`:659`) and before `.frame(maxWidth: 230)` on
+  mode (`:685`), each with its reason at the line. Nothing else in the product. The trace hook and the probe stay.
+
+**THE FIX WINDOW — READY FOR STAGE (≈15 min; products `vx283-u3c` = `378e2261` + `vx283-u3c-rv` = R-P).** `window.sh`
+from any directory, in order:
+1. `pre` (≈1 min) — the strict `pgrep`s; App/ clean; both trees present; prefs exported; the store's three files into
+   `u3c/store-before/<UTC>/`.
+2. `pins` (≈3 min) — `LibraryControlsFlowRuleTests` + `LibraryControlsStableWidthsTests` + `LibraryControlsGeometryTests`
+   on `vx283-u3c` → `logs/pins.log`. **Expected: ALL GREEN** — "Test run with 21 tests in 3 suites passed" (U3b's R-S
+   run printed 19 for these suites; +2 new functions); the sweep and the new pin green in both voices (`logs/pins-geometry.txt`:
+   the new pin's four steps one height each — two lines at 950 / 860 — and the segmented controls at 254 / 216 Terminal,
+   256 / 225 Study).
+3. `rp` (≈3 min) — the same three suites on `vx283-u3c-rv` → `logs/rp.log`; then `vx283-u3c-rv` deleted. **Expected
+   RED, exactly:** `aSearchNeverSqueezesTheSegmentedControlsOrFlipsTheRow` ×2 (the row 56 → 24 after "pick"; the scope
+   control squeezed) and `withThePanelClosedEachWidthHasOneLineCount` ×2 (the band, as at U3b's window). **GREEN:** every
+   pure pin incl. the new guard, the stable-widths tests, U3's six cells, `typingWithThePanelOpenNeverChangesTheLineCount`
+   and `withThePanelOpenTheDefaultWindowHasOneLineCount`.
+4. `batch` (≈6 min) — U3b's 103-suite list (`u3b/suites.txt`) on `vx283-u3c` → `logs/batch.log`. **Expected: ALL
+   GREEN** (U3b's run: 511 tests with the sweep the only red; now ≈513, the opt-in rig/harness suites SKIPPED as before).
+5. `restore` (≈1 min) — the store copied back + `cmp`; the added prefs keys deleted, import, re-export, diff (PREFS
+   CLEAN); castle-W1 counted.
+Then D8's re-walk on `vx283-u3c` (the ruling's list: both voices, panel open/closed, typing, a list scroll, a sort pick,
+the 1240 default, and the scope control after a search — never cramped).
 
 **T1 — THE TRACE (this tip; the product code is U3b's `8dbae3d6` plus the DEBUG hook; paths under
 `App/Variorum/Variorum/` unless named).**
