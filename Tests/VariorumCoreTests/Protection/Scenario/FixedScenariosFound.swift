@@ -804,4 +804,24 @@ extension GeneratorFoundScenarios {
         }
         expectPromisesKept(world)
     }
+
+    /// Seed 11 (sequence 919, the closer's soak): Use Castle crashed past its
+    /// swap, then the Mac replaced with no memory item (Migration Assistant
+    /// carries none): the new identity, no predecessor named, never learned
+    /// its predecessor's own Apple key — Use Castle's last steps (retire every
+    /// own key) were the predecessor's act's, and the pre-Castle copies stayed
+    /// open through the Apple account (promise 2). With her split marker a
+    /// section on OTHER hardware under THIS login's part is this login's
+    /// previous Mac: it names the predecessor (PROVISIONAL P-U4-14), whose own
+    /// keys the replacement takes over and the Castle repairs retire.
+    @Test func aReplacementWithNoMemoryNamesItsPredecessorByTheLogin() async throws {
+        let world = try Self.start("older libraries of other libraries, and backups only", seed: 11000952)
+        for action in [Action.settle, .crash(.useCastle("macA", .touchID, newWords: false), afterWrites: 14),
+                       .replaceMac("macA", carriesMemory: false)] {
+            await world.step(action)
+        }
+        await world.done([.launch("macA")])
+        if case .newIdentity(let predecessor) = world.macA.library?.resolution { #expect(predecessor != nil, "no predecessor named") }
+        expectPromisesKept(world)
+    }
 }

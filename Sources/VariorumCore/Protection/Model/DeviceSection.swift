@@ -325,7 +325,11 @@ public enum DeviceFacts {
     ///    identity, adopting nothing (VX-340).
     /// 4. Else, with a memory item from other hardware → a new identity
     ///    naming the memory's identity as its predecessor (a replacement).
-    /// 5. Else → a new identity with no predecessor (new hardware with no
+    /// 5. Else, a record section on other hardware under THIS login's part →
+    ///    a new identity naming that section's identity as its predecessor
+    ///    (PROVISIONAL P-U4-14: the login part, carried with the user record,
+    ///    names the previous Mac when no memory item came along).
+    /// 6. Else → a new identity with no predecessor (new hardware with no
     ///    memory item, or a library nothing here knows).
     ///
     /// Guard off (DEBUG mutation pins only): the memory's identity is trusted
@@ -351,6 +355,17 @@ public enum DeviceFacts {
                 ? .anotherLogin : .newIdentity(predecessorID: memory.deviceID)
         }
         if sections.contains(where: { $0.hardwareMarker.sameHardware(as: marker) }) { return .anotherLogin }
+        // No memory item came along (Migration Assistant never carries one):
+        // a section on OTHER hardware under THIS login's part is this login's
+        // previous Mac — the predecessor, named by her split marker's login
+        // part (PROVISIONAL P-U4-14; the closer's soak, seed 11: a Mac
+        // replaced mid-Use-Castle never learned its predecessor's own Apple
+        // keys, and the pre-Castle copies stayed open through the Apple
+        // account). Several → the highest version.
+        if let predecessor = sections.filter({ $0.hardwareMarker.login == marker.login })
+            .max(by: { ($0.version, $1.deviceID) < ($1.version, $0.deviceID) }) {
+            return .newIdentity(predecessorID: predecessor.deviceID)
+        }
         return .newIdentity(predecessorID: nil)
     }
 

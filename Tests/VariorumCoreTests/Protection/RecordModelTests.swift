@@ -291,10 +291,11 @@ struct DeviceFactsTests {
 
     /// New hardware whose memory item stayed behind (Migration Assistant
     /// doesn't carry Local Items), opening a library the record knows — no
-    /// section is this hardware's, so it is a REPLACEMENT with no predecessor
-    /// to name: it takes over what §3.5 needs no predecessor for — the Apple
-    /// key its live key file's wrap names, and every retired id any section
-    /// lists — starting on Always ask (P-U4-3 as the split simplified it).
+    /// section is this hardware's, and none carries this login's part, so it
+    /// is a REPLACEMENT with no predecessor to name: it takes over what §3.5
+    /// needs no predecessor for — the Apple key its live key file's wrap
+    /// names, and every retired id any section lists — starting on Always ask
+    /// (P-U4-3 as the split simplified it).
     @Test func newHardwareWithNoMemoryItemTakesOverWhatNeedsNoPredecessor() {
         let salt = HardwareMarker.mintSalt()
         let otherOwn = PF.id(), retired = PF.id(), wrapped = PF.id()
@@ -302,13 +303,35 @@ struct DeviceFactsTests {
             .recordingAppleKey(AppleKeyRecord(id: otherOwn, purpose: .library, origin: .minted))
             .retiringAppleKey(id: retired, purpose: .library, origin: .minted, at: PF.day(1))
         let minted = PF.id()
+        let newLogin = MachineIdentity(hardware: PF.macB.hardware, login: "55555555-EEEE-4EEE-8EEE-EEEEEEEEEEEE")
         let found = DeviceFacts.thisMacsSection(
-            memory: nil, recordSections: [elsewhere], marker: HardwareMarker.compute(PF.macB, salt: salt),
+            memory: nil, recordSections: [elsewhere], marker: HardwareMarker.compute(newLogin, salt: salt),
             keyFileOwnAppleKeyIDs: [wrapped], mintDeviceID: { minted })
         #expect(found.resolution == .newIdentity(predecessorID: nil))
         #expect(found.section.deviceID == minted)
         #expect(!found.section.appleKeys.contains { $0.id == otherOwn }, "no predecessor is named: never another section's own list")
         #expect(Set(found.section.appleKeys.map(\.id)) == [wrapped, retired])
+        #expect(found.section.retiredAppleKeyIDs == [retired])
+        #expect(found.section.settings == .newIdentity)
+    }
+
+    /// PROVISIONAL P-U4-14 (the closer's soak, seed 11): new hardware with
+    /// no memory item, under THIS login's part (the user record carried over
+    /// by Migration Assistant) — the section on other hardware under the same
+    /// login part is its previous Mac: named the predecessor, its own keys
+    /// taken over. (A second login on the same hardware still adopts nothing.)
+    @Test func newHardwareUnderThisLoginNamesItsPredecessor() {
+        let salt = HardwareMarker.mintSalt()
+        let own = PF.id(), retired = PF.id()
+        let previous = section(PF.id(), marker: HardwareMarker.compute(PF.macA, salt: salt), version: 4)
+            .recordingAppleKey(AppleKeyRecord(id: own, purpose: .library, origin: .minted))
+            .retiringAppleKey(id: retired, purpose: .library, origin: .minted, at: PF.day(1))
+        let minted = PF.id()
+        let found = DeviceFacts.thisMacsSection(
+            memory: nil, recordSections: [previous], marker: HardwareMarker.compute(PF.macB, salt: salt),
+            keyFileOwnAppleKeyIDs: [], mintDeviceID: { minted })
+        #expect(found.resolution == .newIdentity(predecessorID: previous.deviceID))
+        #expect(Set(found.section.ownLibraryAppleKeyIDsToRetire) == [own])
         #expect(found.section.retiredAppleKeyIDs == [retired])
         #expect(found.section.settings == .newIdentity)
     }
