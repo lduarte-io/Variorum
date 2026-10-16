@@ -480,11 +480,19 @@ extension SWorld {
         // this device made, and no key made in Castle (promise 2 reads "made on
         // this Mac" the same way). Its key rides this library's family tree
         // only so the landing's own line reads as its own (the closer's soak,
-        // seed 2 sequence 661).
+        // seed 2 sequence 661). …and so does every key that pair's own key
+        // file reaches by its own locks — its history (the sender's earlier
+        // keys, taken within Standard): the landed tree carries those too, and
+        // the pair (never written here, keeping its own locks — §3.7) opens
+        // them through the sender's own Apple key. The sender's Standard copy
+        // in its day, exactly what a restored Standard state reached
+        // (`reachableInItsDay` — never an anchor's); still no copy this device
+        // made and no key made in Castle (VX-305 ladder round 1, NEW-2).
         for (folder, sender) in senders where sender != device.name {
             for path in device.container.paths(under: folder + "/") {
-                if let image = device.container.files[path]?.library, image.record?.mode == .standard {
+                if let image = device.container.files[path]?.library, let record = image.record, record.mode == .standard {
                     exempt.insert(image.fingerprint)
+                    exempt.formUnion(reachableInItsDay(record, keyFile: device.container.files["\(folder)/\(SPath.liveKeyFile)"]))
                 }
             }
         }
