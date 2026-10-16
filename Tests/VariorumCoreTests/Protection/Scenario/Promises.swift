@@ -39,8 +39,6 @@ struct Seeds {
     var passphrases: [String] = []
     var words: [[String]] = []
     var vaults: [KeyVaultFormat] = []
-    /// Masters the reach must not use (an older build's exposure, §8).
-    var excludedMasters: Set<Data> = []
 }
 
 extension SWorld {
@@ -58,7 +56,7 @@ extension SWorld {
     func reach(_ seeds: Seeds, files: [KeyFileDocument]) -> [String: StoreKey] {
         var keys: [String: StoreKey] = [:]
         for key in seeds.keys { keys[PF.fp(key)] = key }
-        var masters = seeds.masters.filter { !seeds.excludedMasters.contains($0) }
+        var masters = seeds.masters
         let wordsKeys = seeds.words.compactMap { wordsKey($0) }
         func pass(_ wrap: StoreKeyEnvelope.PassphraseWrap?) -> [SymmetricKey] {
             guard let wrap else { return [] }
@@ -66,7 +64,7 @@ extension SWorld {
         }
         func addMaster(_ master: SymmetricKey) {
             let bytes = PF.bytes(master)
-            if !seeds.excludedMasters.contains(bytes), !masters.contains(bytes) { masters.append(bytes) }
+            if !masters.contains(bytes) { masters.append(bytes) }
         }
         var anchorsDone: Set<Data> = []
         var changed = true
@@ -287,7 +285,6 @@ extension SWorld {
            let vault = server.snapshot(account) {
             seeds.vaults.append(vault.format)
         }
-        seeds.excludedMasters = truth.olderExposedMasters
         return seeds
     }
 
@@ -334,7 +331,7 @@ extension SWorld {
     /// settled — 2's retired-key clause, 3 and 7 are checked too.
     func checkPromises(settled: Bool) -> [Violation] {
         var violations: [Violation] = []
-        for device in devices where device.build == .new {
+        for device in devices {
             violations += known(device)
             violations += castleMeansCastle(device, settled: settled)
             violations += castleStaysCastles(device, settled: settled)
@@ -438,8 +435,7 @@ extension SWorld {
         // Nothing a login-password holder can read opens the library or any
         // copy of it made here (the stated exceptions taken out of the seeds).
         let attacker = reach(attackerSeeds(device, appleAccount: false, settled: settled), files: keyFilesOn(device))
-        let exempt = truth.handedOffBeforeChange.union(truth.olderBuildLeaveKeys)
-        if attacker[record.currentFingerprint] != nil, !exempt.contains(record.currentFingerprint) {
+        if attacker[record.currentFingerprint] != nil {
             fail("a login-password holder reaches the current key \(f8(record.currentFingerprint))", 8)
         }
         for (id, image) in imagesOn(device) where image.libraryID == record.libraryID && id != "container:\(SPath.slot)" {
@@ -455,7 +451,7 @@ extension SWorld {
             // and tampered with there: entering Castle protects what's written
             // after (promise 8), never undoes what they took before.
             if truth.tamperedStandard[device.name]?.contains(image.fingerprint) == true { continue }
-            if attacker[image.fingerprint] != nil, !exempt.contains(image.fingerprint), !truth.listedBySheet.contains(id) {
+            if attacker[image.fingerprint] != nil, !truth.listedBySheet.contains(id) {
                 fail("a login-password holder opens the copy \(id) (\(f8(image.fingerprint)))")
             }
         }
@@ -469,7 +465,7 @@ extension SWorld {
         guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record,
               record.mode == .standard, let kept = truth.keptByLeave[device.name], !kept.isEmpty else { return [] }
         let attacker = reach(attackerSeeds(device, appleAccount: true, settled: settled), files: keyFilesOn(device))
-        var exempt = truth.handedOffBeforeChange.union(truth.olderBuildLeaveKeys)
+        var exempt = Set<String>()
         // A key a login-password holder already held in Standard (rule 3) and
         // tampered with there: the later crossings protect what's written
         // after, never undo what they took before (promise 2 reads it the same
@@ -589,10 +585,6 @@ extension SWorld {
         // a fresh read of its account's vault — signed out, in another account
         // or offline, its own Apple key waits (Re-link's library arm too).
         if let account = record.account, device.session.accountID != account || !device.online { return [] }
-        // A synced pair landed HELD writes nothing Apple-reachable until the
-        // one Resume Sync press reads its account's vault (§3.7, the restore
-        // hold) — as promise 7 already waits for it.
-        if truth.heldLanding[device.name] == record.libraryID { return [] }
         guard let live = liveKeyFile(device), live.fingerprint == record.currentFingerprint, let wrap = live.apple else {
             return [Violation(promise: 3, device: device.name, detail: "no Apple wrap of the current key")]
         }
@@ -611,8 +603,6 @@ extension SWorld {
         // A Standard device's files tampered with (outside the claims — rule
         // 3), until a deliberate act mints a key past them (P-U4-10).
         if truth.tamperedStandard[device.name]?.contains(record.currentFingerprint) == true { return [] }
-        // A synced pair landed held: no sync round until Resume Sync.
-        if truth.heldLanding[device.name] == record.libraryID { return [] }
         var violations: [Violation] = []
         if let mode = vault.mode.settled, mode != record.mode {
             violations.append(Violation(promise: 7, device: device.name, detail: "the library is \(record.mode), the account \(mode)"))
@@ -632,12 +622,10 @@ extension SWorld {
     func vaultInvariant() -> [Violation] {
         var violations: [Violation] = []
         for (id, account) in server.accounts.sorted(by: { $0.key < $1.key }) where account.format.masterWrappedByAppleHeld != nil {
-            if let previous = account.format.previousCorpusKey, truth.castleCorpusKeyIDs.contains(previous.keyID),
-               !truth.olderBuildLeaveKeys.contains(previous.keyID) {
+            if let previous = account.format.previousCorpusKey, truth.castleCorpusKeyIDs.contains(previous.keyID) {
                 violations.append(Violation(promise: 2, device: "vault \(id.prefix(8))", detail: "an Apple wrap beside a Castle-era previous corpus key"))
             }
-            if let corpus = account.format.classKey(for: .corpus)?.keyID, truth.castleCorpusKeyIDs.contains(corpus),
-               !truth.olderBuildLeaveKeys.contains(corpus) {
+            if let corpus = account.format.classKey(for: .corpus)?.keyID, truth.castleCorpusKeyIDs.contains(corpus) {
                 violations.append(Violation(promise: 2, device: "vault \(id.prefix(8))", detail: "an Apple wrap over a Castle-era master"))
             }
         }
@@ -656,7 +644,6 @@ extension SWorld {
                 continue  // deleted (by her, by retention, by a wiped container)
             }
             if truth.listedBySheet.contains(id) { continue }
-            if copy.byOlderBuild, truth.olderWhenRetired.contains(device.name) { continue }
             let reached = reachCache[device.name] ?? reach(herSeeds(device), files: keyFilesOn(device))
             reachCache[device.name] = reached
             if reached[image.fingerprint] != nil { continue }
@@ -695,22 +682,6 @@ extension SWorld {
             let lost = truth.lostAppleKeys
             let gone = { (id: String) in lost.contains(id) || retiredHere.contains(id) }
             if !holders.isEmpty, holders.allSatisfy(secretless), ids.contains(where: gone),
-               !ids.contains(where: readable.contains) { continue }
-            // §3.5a's residue (promise 5's last exception): a silently-joined
-            // device's file — its library key under a master and no passphrase
-            // or words lock, its Apple roads gone — whose master the account
-            // has since replaced, no words copy her words open beside it: "only
-            // the server brings its writing back, and its unsynced edits are
-            // lost" (the closer's soak, seed 3 sequence 211 — the device had
-            // migrated signed out, so no vault read ever gave it the copy).
-            let masterOnly = holders.allSatisfy { document in
-                switch document {
-                case .format3(let file): return file.passphrase == nil && file.words == nil && file.master != nil
-                case .legacy(let legacy):
-                    return legacy.envelope.passphrase == nil && legacy.envelope.recovery == nil && legacy.envelope.master != nil
-                }
-            }
-            if truth.silentlyJoined.contains(device.name), !holders.isEmpty, masterOnly, server.accounts[copy.holder] != nil,
                !ids.contains(where: readable.contains) { continue }
             violations.append(Violation(promise: 5, device: device.name, detail: "the copy \(id) (\(f8(image.fingerprint))) opens by no road"))
         }
@@ -774,7 +745,7 @@ extension SWorld {
     /// its own key.
     func noSilentChange(_ action: Action, before: [String: Posture], crashedBefore: Set<String>) -> [Violation] {
         var violations: [Violation] = []
-        for device in devices where device.build == .new {
+        for device in devices {
             guard let was = before[device.name] else { continue }
             let now = posture(device)
             guard was.libraryID == now.libraryID, was.mode != nil, now.mode != nil else { continue }
@@ -811,12 +782,8 @@ extension SWorld {
         case .timeMachineRollback(let d), .deleteContainerAndOpenOldCopy(let d), .tamper(let d, _), .tamperSequence(let d, _):
             return d == name
         case .cloneMac(_, let d): return d == name
-        case .useCastle(let d, _, _), .useStandard(let d), .follow(let d, _), .finishLeave(let d, _), .turnOnSync(let d),
-             .move(let d), .thisMacOnly(let d, _), .stopSyncingHere(let d, _), .deleteAccountHere(let d), .resumeSync(let d),
-             .answerCorner45(let d, _), .confirmMode(let d), .land(let d, _), .openOlderLibrary(let d), .replaceAllKeys(let d, _),
-             // A copy that raises runs Use Castle at its confirm (§3.7); a
-             // lowering or a copy's own key is the opens' check below.
-             .restoreBackup(let d, _):
+        case .useCastle(let d, _, _), .useStandard(let d), .follow(let d, _), .turnOnSync(let d),
+             .move(let d), .thisMacOnly(let d, _), .stopSyncingHere(let d, _), .deleteAccountHere(let d), .replaceAllKeys(let d, _):
             return d == name
         default:
             return false
@@ -858,13 +825,6 @@ extension SWorld {
         return violations
     }
 
-    /// PROMISE 12 — moving adds: the copies she could open before the move
-    /// she can open after.
-    func openableCopies(_ device: SDevice) -> Set<String> {
-        let reached = reach(herSeeds(device), files: keyFilesOn(device))
-        return Set(imagesOn(device).filter { reached[$0.image.fingerprint] != nil }.map(\.id))
-    }
-
     /// PROMISE 9 — honest words: every road an *Opens with* line names opens
     /// the copy (walked with the real secret of the day it names).
     func honestWords(_ device: SDevice) -> [Violation] {
@@ -883,7 +843,7 @@ extension SWorld {
         // The master as the vault was READ this session (the line was computed
         // from that reading — the account moving on since is promise 7's).
         let vaultAccount = device.session.accountID ?? library.record?.account
-        var masters: [SymmetricKey?] = [vaultAccount.flatMap { todayMaster($0) }]
+        var masters: [SymmetricKey?] = [vaultAccount.flatMap { accountMaster($0) }]
         if let account = vaultAccount, let read = device.executor?.freshVaults[account] {
             for p in known(account).timeline.compactMap(\.passphrase) {
                 if let pk = passphraseKey(p, read.format.kdf), let m = try? read.format.unwrapMaster(withPassphraseKey: pk.key) {

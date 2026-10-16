@@ -1,9 +1,9 @@
 //
 //  Alphabet.swift
 //  VariorumCoreTests — VX-305 U4: THE ACTION ALPHABET (design §4.1): every
-//  user act, every device and Apple-account event, an older build on any
-//  device, and the adversary's acts — all with the login password — each ONE
-//  step. A crash can ride any act (`crash(_:afterWrites:)`). The world applies
+//  user act, every device and Apple-account event, and the adversary's acts —
+//  all with the login password — each ONE step (VX-378 U1 cut the older build,
+//  rule 26, and the acts whose doors died with the design they served). A crash can ride any act (`crash(_:afterWrites:)`). The world applies
 //  a step, then the promises are checked (`Promises.swift`).
 //
 
@@ -18,16 +18,6 @@ enum Typing: String, Equatable, CaseIterable {
     case words
     /// The passphrase she had before a change elsewhere (VX-113).
     case oldPassphrase
-}
-
-/// How a different library's pair lands (§3.7): one secret unlocks it, the
-/// other typed or made new — or none for a Standard pair through an Apple key
-/// readable here.
-enum LandTyping: String, Equatable, CaseIterable {
-    case passphraseWordsTyped
-    case passphraseWordsMadeNew
-    case wordsPassphraseMadeNew
-    case nothing
 }
 
 enum ResetVia: String, Equatable, CaseIterable {
@@ -59,25 +49,15 @@ enum Tamper: String, Equatable, CaseIterable {
     case deleteKeyFileAndMemory
 }
 
-enum OlderAct: String, Equatable, CaseIterable {
-    case leaveCastle
-    case follow
-    case relink
-    case backup
-}
-
 indirect enum Action: Equatable {
     // The user's acts.
     case launch(String)
     case lock(String)
-    case createLibrary(String, secrets: Bool)
+    /// Twelve words always (rule 2); a passphrase when `passphrase`.
+    case createLibrary(String, passphrase: Bool)
     case useCastle(String, GateStyle, newWords: Bool)
     case useStandard(String)
     case replaceAllKeys(String, newWords: Bool)
-    case relinkAccount(String)
-    case relinkLibraryArm(String)
-    case retireOldSharedKey(String)
-    case moveOffSharedKey(String)
     case signIn(String, account: String)
     case signOut(String)
     /// Turn on sync as the signed-in account — set up (no vault) or join.
@@ -86,27 +66,19 @@ indirect enum Action: Equatable {
     case thisMacOnly(String, ProtectionMode?)
     case stopSyncingHere(String, forgotPassphrase: Bool)
     case deleteAccountHere(String)
-    case resumeSync(String)
     case follow(String, Typing)
-    case finishLeave(String, mint: Bool)
     case changePassphrase(String)
     case resetPassphrase(String, ResetVia)
     case regenerateWords(String)
     /// The backup service: a pair under the current key, then retention.
     case backup(String)
-    /// Open the n-th newest copy of the library in the slot.
-    case restoreBackup(String, newest: Int)
-    case openOlderLibrary(String)
     case sendLibrary(from: String, to: String)
-    case land(String, LandTyping)
     case plaintextExport(String)
     case offerDelete(String)
     case setGate(String, GateStyle)
     case answerRearm(String, yes: Bool)
     case setIdleLock(String, minutes: Int?)
     case setScheduledExport(String, Bool)
-    case answerCorner45(String, ProtectionMode)
-    case confirmMode(String)
     // The device and the Apple account.
     case addFinger(String)
     case removeFinger(String)
@@ -133,8 +105,6 @@ indirect enum Action: Equatable {
     case shareBackupFolder(String, account: String)
     /// A crash after the n-th write of an act.
     case crash(Action, afterWrites: Int)
-    case olderBuild(String, OlderAct, typing: Typing?)
-    case updateToNewBuild(String)
     // The adversary.
     case tamper(String, Tamper)
     /// Two or three tampers in ONE closed window (VX-305 ladder round 1, the
@@ -190,7 +160,6 @@ extension SWorld {
 
     /// Open the app on `device` if it isn't (a user act needs it open).
     func opened(_ device: SDevice) async throws -> (ProtectionExecutor, UnlockedLibrary) {
-        guard device.build == .new else { throw WorldRefusal.olderBuild }
         if !device.isOpen { try await launch(device) }
         guard let executor = device.executor, let library = device.library else { throw WorldRefusal.notOpen }
         capture(device)
@@ -268,10 +237,10 @@ extension SWorld {
             capture(d)
         case .lock(let name):
             lock(device(name))
-        case .createLibrary(let name, let secrets):
+        case .createLibrary(let name, let passphrase):
             let d = device(name)
-            guard d.build == .new, d.slot == nil else { throw WorldRefusal.noLibrary }
-            let p = secrets ? newPassphrase() : nil, w = secrets ? newWords() : nil
+            guard d.slot == nil else { throw WorldRefusal.noLibrary }
+            let p = passphrase ? newPassphrase() : nil, w = newWords()
             let executor = newExecutor(d, libraryID: "")
             let library = try executor.createLibrary(passphrase: p, words: w)
             d.executor = executor
@@ -287,7 +256,6 @@ extension SWorld {
                     for subject in sheet.routes.wouldStopOpening + sheet.routes.appleKeyAlone {
                         if case .copy(let id) = subject { self.truth.listedBySheet.insert(id) }
                     }
-                    for other in self.devices where other.build == .older || (other.slot != nil && other.slot?.record == nil) { self.truth.olderWhenRetired.insert(other.name) }
                 }
                 let words = (makeNewWords || k.words == nil) ? self.newWords() : k.words!
                 let passphrase = k.passphrase ?? self.newPassphrase()
@@ -314,36 +282,6 @@ extension SWorld {
                 if makeNewWords { self.setKnown(holder, passphrase: k.passphrase, words: words) }
                 return outcome
             }
-        case .relinkAccount(let name):
-            let d = device(name)
-            try await act(d) { executor, library in
-                try await executor.relinkAccount(&library, passphrase: self.known(self.slotHolder(d)!).passphrase ?? "")
-            }
-        case .relinkLibraryArm(let name):
-            let d = device(name)
-            try await act(d) { executor, library in
-                let subjects = self.assessed(d).acts.compactMap { act -> [String]? in
-                    if case .relinkLibraryArm(let ids) = act { return ids }
-                    return nil
-                }.flatMap { $0 }
-                let catalog = self.catalog(d)
-                let others = subjects.compactMap { catalog.keyFile(id: $0)?.library }.filter { $0 != library.record?.libraryID }
-                return try await executor.relinkLibraryArm(&library, otherLibraries: others)
-            }
-        case .retireOldSharedKey(let name):
-            let d = device(name)
-            try await act(d) { executor, library in
-                for other in self.devices where other.build == .older || (other.slot != nil && other.slot?.record == nil) { self.truth.olderWhenRetired.insert(other.name) }
-                if let sheet = self.assessed(d).retirement {
-                    for subject in sheet.routes.wouldStopOpening + sheet.routes.appleKeyAlone {
-                        if case .copy(let id) = subject { self.truth.listedBySheet.insert(id) }
-                    }
-                }
-                return try await executor.retireOldSharedKey(&library, moves: self.moveSubjects(d))
-            }
-        case .moveOffSharedKey(let name):
-            let d = device(name)
-            try await act(d) { executor, library in try await executor.moveOffSharedKey(&library, subjects: self.moveSubjects(d)) }
         case .signIn(let name, let account):
             let d = device(name)
             d.session = .signedIn(accountID: account, email: nil)
@@ -415,30 +353,6 @@ extension SWorld {
                 if let account { self.server.delete(accountID: account) }
                 return outcome
             }
-        case .resumeSync(let name):
-            let d = device(name)
-            try await act(d) { executor, library in
-                guard let account = library.record?.account else { throw ExecutorRefusal.notSynced }
-                let own = self.known(self.holder(d, account: nil, libraryID: library.record!.libraryID))
-                let acct = self.known(account)
-                // The secret the vault opens, and the one made new at the landing.
-                let typed = TypedSecrets(passphrase: own.passphrase ?? acct.passphrase, words: own.words ?? acct.words)
-                return try await executor.resumeSyncAfterLanding(&library, typed: typed)
-            }
-            truth.heldLanding[name] = nil
-            // A secret made new at the landing became the account's (the
-            // account's forgot road, as the landing said): the truth follows
-            // whatever now opens the vault.
-            if let account = d.library?.record?.account, let vault = server.snapshot(account) {
-                let own = known(holder(d, account: nil, libraryID: d.library!.record!.libraryID)), acct = known(account)
-                let p = [own.passphrase, acct.passphrase].compactMap { $0 }.first { p in
-                    passphraseKey(p, vault.format.kdf).map { (try? vault.format.unwrapMaster(withPassphraseKey: $0.key)) != nil } == true
-                }
-                let w = [own.words, acct.words].compactMap { $0 }.first { w in
-                    wordsKey(w).map { (try? vault.format.unwrapMaster(withRecoveryKey: $0)) != nil } == true
-                }
-                if p != acct.passphrase || w != acct.words { setKnown(account, passphrase: p ?? acct.passphrase, words: w ?? acct.words) }
-            }
         case .follow(let name, let typing):
             let d = device(name)
             try await act(d) { executor, library in
@@ -450,16 +364,6 @@ extension SWorld {
                     throw ExecutorRefusal.nothingToDo
                 }
                 return try await executor.follow(&library, kind: kind, typed: self.typed(typing, account))
-            }
-        case .finishLeave(let name, let mint):
-            let d = device(name)
-            try await act(d) { executor, library in
-                guard let account = library.record?.account else { throw ExecutorRefusal.notSynced }
-                if d.session.accountID == account, d.online { _ = try? await executor.readVault(accountID: account) }
-                guard self.assessed(d).door(.finishLeavingCastle).isOpen else { throw ExecutorRefusal.nothingToDo }
-                let kind: FollowKind = library.record?.mode == .castle ? .intoStandard : .keysReplaced
-                return try await executor.follow(
-                    &library, kind: kind, typed: self.typed(.passphrase, account), mintingIfTheNamedKeyNeverArrives: mint)
             }
         case .changePassphrase(let name):
             let d = device(name)
@@ -502,10 +406,6 @@ extension SWorld {
             }
         case .backup(let name):
             try await backupService(device(name))
-        case .restoreBackup(let name, let n):
-            try await restoreBackup(device(name), newest: n)
-        case .openOlderLibrary(let name):
-            try await openOlderLibrary(device(name))
         case .sendLibrary(let from, let to):
             let sender = device(from), receiver = device(to)
             let folder = "\(CatalogNames.handOffPrefix)\(CatalogNames.stampString(clock).prefix(10))"
@@ -521,8 +421,6 @@ extension SWorld {
                 truth.sentStandardPairReach[to, default: []].formUnion(
                     reachableInItsDay(record, keyFile: sender.container.files["\(folder)/\(SPath.liveKeyFile)"]))
             }
-        case .land(let name, let typing):
-            try await land(device(name), typing)
         case .plaintextExport(let name):
             let d = device(name)
             try await act(d) { executor, library in
@@ -560,20 +458,6 @@ extension SWorld {
                 settings.scheduledExport = on
                 return try await executor.changeSettings(&library, to: settings)
             }
-        case .answerCorner45(let name, let mode):
-            let d = device(name)
-            d.corner45Answer = mode
-            try await act(d) { executor, library in
-                if mode == .castle { return try await executor.confirmMode(&library, as: .castle) }
-                return try await executor.useStandard(&library, typed: self.typedFor(d))
-            }
-        case .confirmMode(let name):
-            let d = device(name)
-            try await act(d) { executor, library in
-                guard let mode = library.record?.mode else { throw ExecutorRefusal.recordMissing }
-                return try await executor.confirmMode(&library, as: mode)
-            }
-
         // MARK: The device and the Apple account
         case .addFinger(let name):
             let d = device(name)
@@ -650,7 +534,6 @@ extension SWorld {
             clone.keychain.local = source.keychain.local.filter { $0.key.service == ProtectionNames.memoryService }
             clone.appleAccount = source.appleAccount
             clone.session = source.session
-            clone.build = source.build
             clone.biometry = BiometryFake(generation: source.biometry.generation + 50)
             // The same libraries, so the same secrets: a local library's
             // holder is per device in the world's bookkeeping.
@@ -698,27 +581,10 @@ extension SWorld {
         case .crash(let inner, let n):
             guard let name = inner.device else { throw WorldRefusal.notOpen }
             let d = device(name)
-            if !d.isOpen, d.build == .new { try await launch(d) }
+            if !d.isOpen { try await launch(d) }
             d.crashAfterWrites = n
             defer { d.crashAfterWrites = nil }
             try await perform(inner)
-        case .olderBuild(let name, let act, let typing):
-            let d = device(name)
-            guard d.build == .older else { throw WorldRefusal.olderBuild }
-            switch act {
-            case .leaveCastle: try await olderLeaveCastle(d)
-            case .follow:
-                let account = d.slot?.rowsOwner ?? ""
-                let k = known(account)
-                let secret: ProtectionSecret? = typing == .words ? k.words.map { .words($0) } : k.passphrase.map { .passphrase($0) }
-                try await olderFollow(d, typing: secret)
-            case .relink: try olderRelink(d)
-            case .backup: try olderBackup(d)
-            }
-        case .updateToNewBuild(let name):
-            let d = device(name)
-            lock(d)
-            d.build = .new
         // MARK: The adversary
         case .tamper(let name, let tamper):
             try tamperWith(device(name), tamper)
@@ -800,208 +666,6 @@ extension SWorld {
             }
             truth.copies[id] = nil
         }
-    }
-
-    /// The key a copy is under, by the roads this device has (her finger, her
-    /// custody, the live history and anchor, the copy's own pair with the
-    /// secrets of its day and today's).
-    func openerFor(_ device: SDevice, fingerprint: String, pair: KeyFileDocument?, day: Date?) -> StoreKey? {
-        var keys: [StoreKey] = []
-        if let library = device.library {
-            keys.append(library.key)
-            if let live = library.keyFile, live.fingerprint == library.fingerprint {
-                keys += ((try? live.historyKeys(currentKey: library.key)) ?? []).map(\.key)
-            }
-        }
-        for name in device.keychain.names(service: ProtectionNames.custodyService) {
-            if let item = device.keychain.item(name), let key = pressRead(device, item)?.libraryKey { keys.append(key) }
-        }
-        if let hit = keys.first(where: { PF.fp($0) == fingerprint }) { return hit }
-        var secrets: [ProtectionSecret] = []
-        if let holder = slotHolder(device) {
-            let k = known(holder)
-            let then = day.map { k.at($0) }
-            for p in [k.passphrase, then?.passphrase].compactMap({ $0 }) { secrets.append(.passphrase(p)) }
-            for w in [k.words, then?.words].compactMap({ $0 }) { secrets.append(.words(w)) }
-        }
-        if let live = liveKeyFile(device), let anchor = live.anchor {
-            for secret in secrets {
-                if let contents = try? anchor.open(secret, floor: PF.floor), let hit = contents.keys.first(where: { $0.fingerprint == fingerprint }) {
-                    return hit.key
-                }
-            }
-        }
-        switch pair {
-        case .format3(let file)?:
-            for secret in secrets { if let key = try? file.open(secret, floor: PF.floor), PF.fp(key) == fingerprint { return key } }
-            let apple = readableAppleKeys(device)
-            if let wrap = file.apple, let key = apple[wrap.keyID], let opened = try? file.open(apple: key) { return opened }
-            if let shared = oldSharedKey(device), let opened = try? file.open(sharedApple: shared) { return opened }
-        case .legacy(let legacy)?:
-            for secret in secrets {
-                switch secret {
-                case .passphrase(let p): if let key = try? legacy.open(passphrase: p, floor: PF.floor) { return key }
-                case .words(let w): if let key = try? legacy.open(words: w) { return key }
-                default: break
-                }
-            }
-            if let shared = oldSharedKey(device), let key = try? legacy.open(sharedApple: shared) { return key }
-        case nil:
-            break
-        }
-        return nil
-    }
-
-    /// Open the n-th newest copy of the slot's library (Data Safety's
-    /// restore): the open rule's verdict, then the act.
-    func restoreBackup(_ device: SDevice, newest n: Int) async throws {
-        let (_, library) = try await opened(device)
-        let catalog = catalog(device)
-        let own = catalog.copies.filter { $0.library == library.record?.libraryID && $0.kind != .previousLibrary }
-            .sorted { ($0.stamp ?? .distantPast) > ($1.stamp ?? .distantPast) }
-        guard !own.isEmpty else { throw ExecutorRefusal.nothingToDo }
-        let copy = own[min(n, own.count - 1)]
-        try await openCopyByRule(device, copy: copy, catalog: catalog)
-    }
-
-    /// Whether the newest older library here is one this Mac remembers (its
-    /// memory item for that library) — §3.7's "any it knows" road, deferred.
-    func newestOlderLibraryIsRemembered(_ device: SDevice) -> Bool {
-        guard let copy = catalog(device).copies.filter({ $0.kind == .previousLibrary })
-            .max(by: { ($0.stamp ?? .distantPast) < ($1.stamp ?? .distantPast) }), let library = copy.library else { return false }
-        return library != device.slot?.libraryID && device.keychain.local[KName.memory(Self.scope, library)] != nil
-    }
-
-    func openOlderLibrary(_ device: SDevice) async throws {
-        _ = try await opened(device)
-        let catalog = catalog(device)
-        guard let copy = catalog.copies.filter({ $0.kind == .previousLibrary })
-            .max(by: { ($0.stamp ?? .distantPast) < ($1.stamp ?? .distantPast) }) else { throw ExecutorRefusal.nothingToDo }
-        try await openCopyByRule(device, copy: copy, catalog: catalog)
-    }
-
-    func openCopyByRule(_ device: SDevice, copy: CatalogCopy, catalog: Catalog) async throws {
-        guard let library = device.library, let record = library.record,
-              let (fs, path) = DeviceLeaves(world: self, device: device).resolve(copy.id),
-              let image = fs.files[path]?.library else { throw ExecutorRefusal.nothingToDo }
-        let pair = catalog.servingKeyFiles(of: copy).first?.document
-        let target = OpenTarget(
-            libraryID: record.libraryID, mode: record.mode, account: record.account, familyTree: library.familyTree,
-            liveHistoryFingerprints: [library.fingerprint] + (library.keyFile?.history.map(\.fingerprint) ?? []))
-        var facts: LegacyKeyFileFacts?
-        if case .legacy(let legacy)? = pair { facts = LegacyKeyFileFacts(legacy.envelope) }
-        if case .format3(let file)? = pair {
-            facts = LegacyKeyFileFacts(hasAppleWrap: file.apple != nil || file.sharedApple != nil, hasPassphraseWrap: file.passphrase != nil)
-        }
-        let verdict = OpenRule.verdict(OpenFacts(
-            libraryID: image.libraryID, keyFingerprint: image.fingerprint, recordMode: image.record?.mode, keyFileFacts: facts,
-            rowsAccount: image.rowsOwner, synced: image.record?.account != nil, target: target), guards: guards)
-        // Every key file the catalog says serves the copy — its own pair, and
-        // this Mac's own key file for that library (the move's gift).
-        var serving = catalog.servingKeyFiles(of: copy).compactMap(\.document)
-        for route in assessed(device).opensWith[copy.id]?.routes ?? [] {
-            for step in route.steps {
-                if case .keyFileLock(let id, _) = step, let document = catalog.keyFile(id: id)?.document { serving.append(document) }
-            }
-        }
-        guard let opener = ([pair] + serving).lazy.compactMap({ self.openerFor(device, fingerprint: image.fingerprint, pair: $0, day: copy.stamp) }).first else {
-            throw WorldRefusal.cannotOpen
-        }
-        switch verdict {
-        case .ownLine:
-            let before = record
-            try await act(device) { executor, library in
-                try await executor.openCopy(&library, copyID: copy.id, opener: opener, copyRecord: image.record)
-            }
-            truth.opens.append((device: device.name, before: before, after: device.library?.record))
-        case .differentLibrary:
-            guard let pair else { throw ExecutorRefusal.nothingToDo }
-            try await landPair(device, LandingPair(copyID: copy.id, keyFile: pair, record: image.record), opener: opener,
-                               typing: .passphraseWordsTyped, holderOfPair: holder(device, account: image.record?.account, libraryID: image.libraryID))
-        case .raisesToCastle:
-            // Use Castle's own steps (both secrets typed, a fresh key), then
-            // the copy opens into the Castle library it raised (§3.7).
-            try await perform(.useCastle(device.name, device.library?.section.settings.gateStyle ?? .alwaysAsk, newWords: false))
-            let fresh = self.catalog(device)
-            guard let again = fresh.copies.first(where: { $0.id == copy.id }) else { throw ExecutorRefusal.nothingToDo }
-            try await openCopyByRule(device, copy: again, catalog: fresh)
-        case .plaintextExport:
-            throw ExecutorRefusal.nothingToDo
-        }
-    }
-
-    /// Land the newest pair Send Library brought to `device`.
-    func land(_ device: SDevice, _ typing: LandTyping) async throws {
-        guard let folder = device.incoming.last,
-              case .library(let image)? = device.container.files["\(folder)/\(SPath.slot)"],
-              let document = device.container.files["\(folder)/\(SPath.liveKeyFile)"]?.keyFile
-        else { throw ExecutorRefusal.nothingToDo }
-        _ = try await opened(device)
-        let senderHolder = senderHolders[folder] ?? holder(device, account: image.record?.account, libraryID: image.libraryID)
-        let k = known(senderHolder)
-        var opener: StoreKey?
-        guard case .format3(let file) = document else { throw ExecutorRefusal.nothingToDo }
-        switch typing {
-        case .passphraseWordsTyped, .passphraseWordsMadeNew:
-            opener = try? file.open(.passphrase(k.passphrase ?? ""), floor: PF.floor)
-        case .wordsPassphraseMadeNew:
-            opener = k.words.flatMap { try? file.open(.words($0), floor: PF.floor) }
-        case .nothing:
-            if let wrap = file.apple, let key = readableAppleKeys(device)[wrap.keyID] { opener = try? file.open(apple: key) }
-        }
-        guard let opener else { throw WorldRefusal.cannotOpen }
-        try await landPair(device, LandingPair(copyID: "container:\(folder)/\(SPath.slot)", keyFile: document, record: image.record),
-                           opener: opener, typing: typing, holderOfPair: senderHolder)
-        device.incoming.removeAll { $0 == folder }
-    }
-
-    func landPair(_ device: SDevice, _ pair: LandingPair, opener: StoreKey, typing: LandTyping, holderOfPair: String) async throws {
-        let k = known(holderOfPair)
-        var typed: TypedSecrets
-        var landed = (passphrase: k.passphrase, words: k.words)
-        switch typing {
-        case .passphraseWordsTyped: typed = TypedSecrets(passphrase: k.passphrase, words: k.words)
-        case .passphraseWordsMadeNew:
-            let w = newWords()
-            typed = TypedSecrets(passphrase: k.passphrase, words: w, wordsAreNew: true)
-            landed.words = w
-        case .wordsPassphraseMadeNew:
-            let p = newPassphrase()
-            typed = TypedSecrets(words: k.words, newPassphrase: p)
-            landed.passphrase = p
-        case .nothing:
-            typed = .none
-            landed = (nil, nil)
-        }
-        let finalTyped = typed
-        // The landed library's secrets, chosen at the press: a landing a crash
-        // interrupts finishes on its resume, and its key file then opens with them.
-        let landedID: String? = {
-            if let id = pair.record?.libraryID { return id }
-            switch pair.keyFile {
-            case .format3(let file): return file.libraryID
-            case .legacy(let legacy): return legacy.envelope.storeID
-            }
-        }()
-        try await act(device) { executor, library in
-            // A synced pair lands HELD from its press: a crashed landing its
-            // resume finishes is held all the same (the slot's library is the
-            // landed one only if it landed — keyed by its id).
-            if pair.record?.account != nil, let landedID { self.truth.heldLanding[device.name] = landedID }
-            // Chosen at the press — inside the act, after the opening's own
-            // adoption (made before it, a crashed landing's made-new secret was
-            // dropped as a rolled-back act's and her truth lost it).
-            if let landedID {
-                self.choose(device, holder: self.holder(device, account: nil, libraryID: landedID),
-                            passphrase: landed.passphrase, words: landed.words)
-            }
-            return try await executor.land(&library, pair: pair, opener: opener, typed: finalTyped, gate: device.biometry.enrolled ? .touchID : .alwaysAsk)
-        }
-        guard let record = device.library?.record else { return }
-        if record.account != nil { truth.heldLanding[device.name] = record.libraryID }
-        // The landed library's own secrets on this Mac (a synced pair's
-        // account keeps its own until Resume Sync).
-        setKnown(holder(device, account: nil, libraryID: record.libraryID), passphrase: landed.passphrase, words: landed.words)
     }
 
     // MARK: - The adversary
@@ -1165,13 +829,12 @@ extension SWorld {
     // MARK: - The world settles
 
     /// Propagation done, followers followed (§4.1): iCloud Keychain carries
-    /// everything; every new-build device signed in opens, follows what it's
-    /// owed (typing its passphrase), finishes a leave it may finish, presses
-    /// Re-link's library arm where it's offered; repeated until nothing moves.
+    /// everything; every device signed in opens and follows what it's owed
+    /// (typing its passphrase); repeated until nothing moves.
     func settleWorld() async {
         for _ in 0..<4 {
             propagateAll()
-            for device in devices where device.build == .new && device.slot != nil {
+            for device in devices where device.slot != nil {
                 if !device.isOpen { _ = try? await launch(device) }
                 guard device.isOpen else { continue }
                 if let account = device.library?.record?.account, device.session.accountID == account, device.online {
@@ -1181,20 +844,7 @@ extension SWorld {
                 try? await runRepairs(device)
                 let assessment = assessed(device)
                 for act in assessment.acts {
-                    switch act {
-                    case .confirmMode(_, isKeyChange: false):
-                        // The vault answered: phase 2's lobby confirms with no question.
-                        _ = await apply(.confirmMode(device.name))
-                    case .follow:
-                        _ = await apply(.follow(device.name, .passphrase))
-                    case .relinkLibraryArm:
-                        _ = await apply(.relinkLibraryArm(device.name))
-                    default:
-                        break
-                    }
-                }
-                if assessment.door(.finishLeavingCastle).isOpen {
-                    _ = await apply(.finishLeave(device.name, mint: false))
+                    if case .follow = act { _ = await apply(.follow(device.name, .passphrase)) }
                 }
             }
         }

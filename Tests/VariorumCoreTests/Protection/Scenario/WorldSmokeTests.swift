@@ -1,8 +1,9 @@
 //
 //  WorldSmokeTests.swift
-//  VariorumCoreTests — VX-305 U4: the world's own checks — that a store
-//  today's build left migrates on the new build, that an act runs on it, and
-//  that the fakes keep their measured semantics (Touch ID items die on an
+//  VariorumCoreTests — VX-305 U4: the world's own checks — that a library made
+//  by the app's own door opens and an act runs on it (VX-378 U1: today's store
+//  through the migration left with rule 26), and that the fakes keep their
+//  measured semantics (Touch ID items die on an
 //  enrollment change and survive a closed lid; iCloud Keychain's delay, the
 //  off switch, the same-name rule, deletes with no recovery).
 //
@@ -13,19 +14,17 @@ import Testing
 
 @testable import VariorumCore
 
-@Suite("VX-305 U4 — the world: today's stores migrate, and the fakes keep their measured semantics")
+@Suite("VX-305 U4 — the world: a library made here opens and acts, and the fakes keep their measured semantics")
 struct WorldSmokeTests {
-    @Test func todaysStandardStoreMigratesThenEntersCastle() async throws {
+    @Test func aLibraryMadeHereOpensThenEntersCastle() async throws {
         let world = SWorld(seed: 7)
-        let lib = try world.today(on: world.macA, TodaySpec(mode: .standard))
+        try await world.fresh(on: world.macA)
         let opened = try await world.launch(world.macA)
-        #expect(opened.record?.mode == .standard && opened.record?.modeConfirmed == true)
-        #expect(world.liveKeyFile(world.macA)?.sharedApple != nil)
+        #expect(opened.record?.mode == .standard)
         let result = await world.apply(.useCastle("macA", .touchID, newWords: false))
         #expect(result == .done, "\(world.stepLog.suffix(8).joined(separator: "\n"))")
         let record = try #require(world.macA.slot?.record)
-        #expect(record.mode == .castle && record.currentFingerprint != PF.fp(lib.key))
-        #expect(world.oldSharedKey(world.macA) == nil)
+        #expect(record.mode == .castle && record.currentFingerprint != opened.fingerprint)
         await world.apply(.settle)
         #expect(world.macA.library?.section.actInFlight == nil)
     }

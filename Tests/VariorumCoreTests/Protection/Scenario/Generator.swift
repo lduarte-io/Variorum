@@ -7,11 +7,12 @@
 //  go/no-go run").
 //
 //  The runner applies a step and checks the promises after it: every step's
-//  (1, 2, 4, 5, 6, 8, 11, 13 and the vault's §3.9 invariant), the settle's
-//  (2's retired-key clause, 3, 7), the tampering steps' (10 — the device is
-//  relaunched as part of the step, the next open being when a planted or
-//  replayed thing would act), the move's (12), and — every few steps and at
-//  every settle — the words (9).
+//  (1, 2, 4, 5, 6, 8, 11 and — until U1's anchor piece — 13 and the vault's
+//  §3.9 invariant), the settle's (2's retired-key clause, 3, 7), the tampering
+//  steps' (10 — the device is relaunched as part of the step, the next open
+//  being when a planted or replayed thing would act), and — every few steps and
+//  at every settle — the words (9). (Promise 12 left with the move off the old
+//  shared key — VX-378 U1, rule 26.)
 //
 
 import CryptoKit
@@ -34,7 +35,7 @@ extension SWorld {
             default: return nil
             }
         }()
-        if let name = tampered?.name, device(name).build == .new, !device(name).isOpen {
+        if let name = tampered?.name, !device(name).isOpen {
             // Its true posture before the tamper is what an open reads — and a
             // resume that open ran settles what its press chose BEFORE the
             // tamper can take the lock it would be read back from (the closer's
@@ -50,12 +51,6 @@ extension SWorld {
         // ruling 2026-10-14/15) — may settle at this step: that is the
         // deliberate act finishing, never a silent change (promise 4).
         let crashedBefore = crashed.union(devices.filter { $0.library?.section.actInFlight != nil }.map(\.name))
-        var moveBefore: (SDevice, Set<String>)?
-        if case .moveOffSharedKey(let name) = action {
-            let d = device(name)
-            if !d.isOpen { _ = try? await launch(d) }
-            moveBefore = (d, openableCopies(d))
-        }
         var inner = action
         if case .crash(let wrapped, _) = action { inner = wrapped }
         switch inner {
@@ -79,14 +74,12 @@ extension SWorld {
         if let (name, tampers) = tampered {
             // The next open is when a planted or replayed thing would act.
             let d = device(name)
-            if d.build == .new {
-                do {
-                    try await launch(d)
-                    reopened = name
-                } catch { stepLog.append("  (the tampered library didn't open: \(error))") }
-                crashed.remove(name)
-                found += sealed(d, before: before[name]!, tampers: tampers)
-            }
+            do {
+                try await launch(d)
+                reopened = name
+            } catch { stepLog.append("  (the tampered library didn't open: \(error))") }
+            crashed.remove(name)
+            found += sealed(d, before: before[name]!, tampers: tampers)
         }
         if case .launch(let name) = action, result == .done { crashed.remove(name) }
         for device in devices { adoptPending(device) }
@@ -101,13 +94,8 @@ extension SWorld {
         // entry's one legitimate consumer. VX-305 ladder round 2, NIT 3 (the
         // final call §4).
         if let name = reopened { truth.beforeRollback[name] = nil }
-        if let (d, openable) = moveBefore {
-            for id in openable.subtracting(openableCopies(d)).sorted() {
-                found.append(Violation(promise: 12, device: d.name, detail: "the move stranded \(id)"))
-            }
-        }
         if words || action == .settle {
-            for device in devices where device.build == .new { found += honestWords(device) }
+            for device in devices { found += honestWords(device) }
         }
         if !found.isEmpty {
             stepLog.append(contentsOf: found.map { "  ✗ \($0)" })
@@ -125,96 +113,6 @@ extension SWorld {
     }
 
     var log: String { stepLog.joined(separator: "\n") }
-}
-
-// MARK: - The starting states (the phase plan §6's list, from the old formats)
-
-/// A starting state: a name and how the world is built.
-struct StartingState: CustomStringConvertible, Sendable {
-    var name: String
-    var build: @Sendable (SWorld) throws -> Void
-    var description: String { name }
-
-    /// Every shape today's builds leave (the plan's §6 list).
-    static let all: [StartingState] = [
-        StartingState(name: "exposed") { w in
-            try w.today(on: w.macA, TodaySpec(mode: .standard, passphrase: false, words: false, appleLanded: false))
-        },
-        StartingState(name: "Standard-waiting") { w in
-            try w.today(on: w.macA, TodaySpec(mode: .standard, appleLanded: false))
-        },
-        StartingState(name: "VX-202's victim (Castle, the raw key in the silent item)") { w in
-            try w.today(on: w.macA, TodaySpec(mode: .castle, gate: .alwaysAsk, silentInCastle: true))
-        },
-        StartingState(name: "VX-209's victim (a Castle library dropped to Standard by a copy)") { w in
-            try w.today(on: w.macA, TodaySpec(mode: .standard, olderKeys: [.castle]))
-        },
-        StartingState(name: "Castle with no Touch ID") { w in
-            try w.today(on: w.macA, TodaySpec(mode: .castle, gate: .alwaysAsk))
-        },
-        StartingState(name: "Castle with Touch ID, the old shared key with pre-Castle copies") { w in
-            try w.today(on: w.macA, TodaySpec(mode: .castle, gate: .touchID, olderKeys: [.standard]))
-            w.ensureOldShared(SWorld.appleA)
-        },
-        StartingState(name: "signed out with keys (Standard, synced)") { w in
-            let account = w.rng.uuid()
-            try w.todayAccount(account, mode: .standard)
-            try w.today(on: w.macA, TodaySpec(mode: .standard, account: account))
-            w.macA.session = .signedOut
-        },
-        StartingState(name: "a deleted account") { w in
-            let account = w.rng.uuid()
-            try w.todayAccount(account, mode: .standard)
-            try w.today(on: w.macA, TodaySpec(mode: .standard, account: account))
-            w.server.delete(accountID: account)
-        },
-        StartingState(name: "a stuck VX-235 marker") { w in
-            try w.today(on: w.macA, TodaySpec(mode: .standard, marker: LegacyRotationMarker(
-                step: .rekeyLibrary, entersCastle: true, oldKeyFingerprint: nil, newKeyFingerprint: nil,
-                newCorpusKeyID: nil, startedAt: "2026-09-01T00:00:00Z", follow: nil)))
-        },
-        StartingState(name: "older libraries of other libraries, and backups only") { w in
-            try w.today(on: w.macA, TodaySpec(mode: .standard))
-            try w.todayOtherLibrary(on: w.macA, mode: .standard, passphrase: false, words: false)
-            try w.todayOtherLibrary(on: w.macA, mode: .castle, passphrase: true, words: true)
-            try w.todayOtherLibrary(on: w.macA, mode: .standard, passphrase: true, words: false, asOlderLibrary: false)
-        },
-        StartingState(name: "a synced Castle account on two Macs and the phone") { w in
-            let account = w.rng.uuid()
-            try w.todayAccount(account, mode: .castle)
-            for d in w.devices { try w.today(on: d, TodaySpec(mode: .castle, gate: d.isPhone ? .touchID : .alwaysAsk, account: account)) }
-        },
-        StartingState(name: "a synced Standard account, a device that joined without a secret") { w in
-            let account = w.rng.uuid()
-            try w.todayAccount(account, mode: .standard)
-            try w.today(on: w.macA, TodaySpec(mode: .standard, account: account))
-            try w.today(on: w.phone, TodaySpec(mode: .standard, account: account, joinedWithoutSecret: true))
-        },
-        StartingState(name: "13p escrow items") { w in
-            try w.today(on: w.macA, TodaySpec(mode: .castle, gate: .touchID, escrow: true))
-        },
-        StartingState(name: "one library on two Macs from a hand-off before this change") { w in
-            let lib = try w.today(on: w.macA, TodaySpec(mode: .standard))
-            try w.today(on: w.macB, TodaySpec(mode: .standard, sameAs: lib))
-        },
-        StartingState(name: "two Macs sharing an iCloud Drive backup folder") { w in
-            try w.today(on: w.macA, TodaySpec(mode: .standard))
-            try w.today(on: w.macB, TodaySpec(mode: .castle, gate: .touchID))
-            w.macA.farFolderAccount = SWorld.appleA
-            w.macB.farFolderAccount = SWorld.appleA
-        },
-        StartingState(name: "Standard libraries with no passphrase and no words, on two Macs") { w in
-            try w.today(on: w.macA, TodaySpec(mode: .standard, passphrase: false, words: false))
-            try w.today(on: w.macB, TodaySpec(mode: .standard, passphrase: false, words: false))
-        },
-        StartingState(name: "a phone on an older build beside a synced Castle Mac") { w in
-            let account = w.rng.uuid()
-            try w.todayAccount(account, mode: .castle)
-            try w.today(on: w.macA, TodaySpec(mode: .castle, gate: .touchID, account: account))
-            try w.today(on: w.phone, TodaySpec(mode: .castle, gate: .touchID, account: account))
-            w.phone.build = .older
-        },
-    ]
 }
 
 // MARK: - The generator
@@ -237,53 +135,22 @@ struct ScenarioGenerator {
         let name = rng.pick(names)!
         let d = world.device(name)
         let other = rng.pick(names.filter { $0 != name })!
-        if d.build == .older {
-            // HER RULING 2026-10-15 (the legacy cut widened — "no old backups
-            // or builds have to be considered"): an older build is no live,
-            // concurrent actor after the switch, which updates every device
-            // first. A device a starting state left on today's build only
-            // UPDATES; its today-shaped store is the migration's input (in
-            // scope, unchanged). The older-build acts left the alphabet.
-            return .updateToNewBuild(name)
-        }
-        if d.slot == nil { return rng.chance(70) ? .createLibrary(name, secrets: rng.chance(70)) : .settle }
+        if d.slot == nil { return rng.chance(70) ? .createLibrary(name, passphrase: rng.chance(70)) : .settle }
         let account = world.server.accounts.keys.sorted().first ?? "00000000-0000-4000-8000-000000000000"
-        // (VX-305 ladder round 1: kind 46, the tamper GROUP, weight 1 — every
-        // seed's stream shifted with it, so the U4 soak table's step counts
-        // are of the tree before it.)
-        let weights = [6, 3, 5, 5, 3, 4, 2, 3, 2, 2, 2, 2, 1, 3, 2, 2, 6, 3, 1, 2, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 2, 1, 2,
-                       3, 1, 1, 1, 1, 1, 1, 2, 1, 3, 1]
-        var roll = rng.int(0..<weights.reduce(0, +))
+        let kinds = Self.kinds
+        var roll = rng.int(0..<kinds.reduce(0) { $0 + $1.weight })
         var kind = 0
-        while roll >= weights[kind] { roll -= weights[kind]; kind += 1 }
-        var action = make(kind, name, other, account)
-        // HER RULING (the legacy cut, 2026-10-14, widened 2026-10-15 — "no old
-        // backups or builds have to be considered"): a Time Machine snapshot
-        // of a store that has not yet migrated (no record) is a backup from
-        // BEFORE the switch — an old backup. Restored over the migrated store,
-        // it brings back today's shape for a second migration that knows
-        // nothing of the first one's keys (the closer's soak, seed 3 sequence
-        // 724: the first migration's own Apple key never retired at a later
-        // Use Castle) — superseded by the ruling, never generated. The open
-        // goes first; snapshots of the migrated store stay fully in scope.
-        if case .timeMachineSnapshot = action, d.slot?.record == nil { action = .launch(name) }
-        // DEFERRED (the closer's soak, seed 9 sequence 232 — owner in the U4
-        // record): §3.7's "a copy of a library this Mac remembers (the one in
-        // the slot, or ANY IT KNOWS) is re-encrypted under that library's
-        // current key" has no act in phase 1 — the executor opens only the
-        // slot's own line, so an older library this Mac itself set aside lands
-        // as a DIFFERENT library (a fresh key, no history), and its own line's
-        // keys then stay outside the next Castle entry's history (promise 2).
-        // Until that road is built, the generator doesn't reopen a library
-        // this Mac remembers; reopening another library's set-aside copy stays.
-        if case .openOlderLibrary = action, world.newestOlderLibraryIsRemembered(d) { action = .launch(name) }
-        // Never `.crash`-wrapped: the settle (45), and the tamper group (46) —
+        while roll >= kinds[kind].weight { roll -= kinds[kind].weight; kind += 1 }
+        let action = make(kinds[kind].name, name, other, account)
+        // Never `.crash`-wrapped: the settle, and the tamper group —
         // its edits are the adversary's file and item writes, not an act's,
         // so a crash "after n writes" of it means nothing; and the seed-9
         // pre-settle (kept, the final call §1(c)) settles a crashed act before
         // any group, so a group never lands inside a crash window here (the
         // fixed scenarios in LadderRound1Pins.swift hold that road).
-        if kind != 45, kind != 46, rng.chance(12) { return .crash(action, afterWrites: rng.int(1..<24)) }
+        if kinds[kind].name != "settle", kinds[kind].name != "tamperSequence", rng.chance(12) {
+            return .crash(action, afterWrites: rng.int(1..<24))
+        }
         return action
     }
 
@@ -326,54 +193,61 @@ struct ScenarioGenerator {
         return group.contains(.replayLibraryFile) && group.contains { otherHomes.contains($0) }
     }
 
-    mutating func make(_ kind: Int, _ name: String, _ other: String, _ account: String) -> Action {
+    /// THE ALPHABET, by name and weight. VX-378 U1 cut the acts whose doors
+    /// died with the design they served — Re-link (rule 8), the old shared
+    /// key's retirement and move (rule 26), the finish of a stuck leave (rule
+    /// 12), corner 45's answer and the mode confirm (rule 26), the open copy's
+    /// own line, the landing and the older library's open (rule 17), the older
+    /// build (rule 26). The stream shifted with it; U4 rewrites the alphabet.
+    static let kinds: [(name: String, weight: Int)] = [
+        ("launch", 6), ("lock", 3), ("useCastle", 5), ("useStandard", 5), ("replaceAllKeys", 3), ("follow", 4),
+        ("turnOnSync", 3), ("signIn", 2), ("signOut", 2), ("thisMacOnly", 2), ("stopSyncingHere", 2), ("move", 1),
+        ("changePassphrase", 3), ("resetPassphrase", 2), ("regenerateWords", 2), ("backup", 6), ("sendLibrary", 2),
+        ("plaintextExport", 2), ("offerDelete", 1), ("setGate", 2), ("answerRearm", 1), ("setIdleLock", 1),
+        ("setScheduledExport", 2), ("finger", 2), ("lid", 2), ("macOSUpdate", 1), ("iCloudSwitch", 2), ("syncICloud", 3),
+        ("wipeKeychain", 1), ("switchAppleID", 1), ("replaceMac", 1), ("online", 1), ("timeMachineSnapshot", 1),
+        ("timeMachineRollback", 1), ("tamper", 2), ("plantPair", 1), ("settle", 3), ("tamperSequence", 1),
+    ]
+
+    mutating func make(_ kind: String, _ name: String, _ other: String, _ account: String) -> Action {
         switch kind {
-        case 0: return .launch(name)
-        case 1: return .lock(name)
-        case 2: return .useCastle(name, rng.chance(60) ? .touchID : .alwaysAsk, newWords: rng.chance(20))
-        case 3: return .useStandard(name)
-        case 4: return .replaceAllKeys(name, newWords: rng.chance(30))
-        case 5: return .follow(name, rng.chance(60) ? .passphrase : (rng.chance(80) ? .words : .oldPassphrase))
-        case 6: return .finishLeave(name, mint: rng.chance(30))
-        case 7: return .turnOnSync(name)
-        case 8: return .signIn(name, account: account)
-        case 9: return .signOut(name)
-        case 10: return .thisMacOnly(name, rng.pick([nil, ProtectionMode.castle, .standard])!)
-        case 11: return .stopSyncingHere(name, forgotPassphrase: rng.chance(30))
-        case 12: return .move(name)
-        case 13: return .changePassphrase(name)
-        case 14: return .resetPassphrase(name, rng.pick(ResetVia.allCases)!)
-        case 15: return .regenerateWords(name)
-        case 16: return .backup(name)
-        case 17: return .restoreBackup(name, newest: rng.int(0..<4))
-        case 18: return .openOlderLibrary(name)
-        case 19: return .sendLibrary(from: name, to: other)
-        case 20: return .land(name, rng.pick(LandTyping.allCases)!)
-        case 21: return .plaintextExport(name)
-        case 22: return .offerDelete(name)
-        case 23: return .setGate(name, rng.chance(50) ? .touchID : .alwaysAsk)
-        case 24: return .answerRearm(name, yes: rng.chance(50))
-        case 25: return .setIdleLock(name, minutes: rng.pick([nil, 5, 10, 30])!)
-        case 26: return .setScheduledExport(name, rng.chance(50))
-        case 27: return .answerCorner45(name, rng.chance(50) ? .castle : .standard)
-        case 28: return .relinkLibraryArm(name)
-        case 29: return .relinkAccount(name)
-        case 30: return .retireOldSharedKey(name)
-        case 31: return .moveOffSharedKey(name)
-        case 32: return rng.chance(50) ? .addFinger(name) : .removeFinger(name)
-        case 33: return rng.chance(50) ? .closeLid(name) : .openLid(name)
-        case 34: return .macOSUpdate(name)
-        case 35: return rng.chance(50) ? .iCloudOff(name) : .iCloudOn(name)
-        case 36: return .syncICloud(name)
-        case 37: return .wipeKeychain(name)
-        case 38: return .switchAppleID(name, to: rng.chance(50) ? SWorld.appleB : SWorld.appleA)
-        case 39: return .replaceMac(name, carriesMemory: rng.chance(50))
-        case 40: return rng.chance(50) ? .goOffline(name) : .goOnline(name)
-        case 41: return .timeMachineSnapshot(name)
-        case 42: return .timeMachineRollback(name)
-        case 43: return .tamper(name, rng.pick(Tamper.allCases)!)
-        case 44: return .plantPair(name)
-        case 46: return .tamperSequence(name, tamperGroup())
+        case "launch": return .launch(name)
+        case "lock": return .lock(name)
+        case "useCastle": return .useCastle(name, rng.chance(60) ? .touchID : .alwaysAsk, newWords: rng.chance(20))
+        case "useStandard": return .useStandard(name)
+        case "replaceAllKeys": return .replaceAllKeys(name, newWords: rng.chance(30))
+        case "follow": return .follow(name, rng.chance(60) ? .passphrase : (rng.chance(80) ? .words : .oldPassphrase))
+        case "turnOnSync": return .turnOnSync(name)
+        case "signIn": return .signIn(name, account: account)
+        case "signOut": return .signOut(name)
+        case "thisMacOnly": return .thisMacOnly(name, rng.pick([nil, ProtectionMode.castle, .standard])!)
+        case "stopSyncingHere": return .stopSyncingHere(name, forgotPassphrase: rng.chance(30))
+        case "move": return .move(name)
+        case "changePassphrase": return .changePassphrase(name)
+        case "resetPassphrase": return .resetPassphrase(name, rng.pick(ResetVia.allCases)!)
+        case "regenerateWords": return .regenerateWords(name)
+        case "backup": return .backup(name)
+        case "sendLibrary": return .sendLibrary(from: name, to: other)
+        case "plaintextExport": return .plaintextExport(name)
+        case "offerDelete": return .offerDelete(name)
+        case "setGate": return .setGate(name, rng.chance(50) ? .touchID : .alwaysAsk)
+        case "answerRearm": return .answerRearm(name, yes: rng.chance(50))
+        case "setIdleLock": return .setIdleLock(name, minutes: rng.pick([nil, 5, 10, 30])!)
+        case "setScheduledExport": return .setScheduledExport(name, rng.chance(50))
+        case "finger": return rng.chance(50) ? .addFinger(name) : .removeFinger(name)
+        case "lid": return rng.chance(50) ? .closeLid(name) : .openLid(name)
+        case "macOSUpdate": return .macOSUpdate(name)
+        case "iCloudSwitch": return rng.chance(50) ? .iCloudOff(name) : .iCloudOn(name)
+        case "syncICloud": return .syncICloud(name)
+        case "wipeKeychain": return .wipeKeychain(name)
+        case "switchAppleID": return .switchAppleID(name, to: rng.chance(50) ? SWorld.appleB : SWorld.appleA)
+        case "replaceMac": return .replaceMac(name, carriesMemory: rng.chance(50))
+        case "online": return rng.chance(50) ? .goOffline(name) : .goOnline(name)
+        case "timeMachineSnapshot": return .timeMachineSnapshot(name)
+        case "timeMachineRollback": return .timeMachineRollback(name)
+        case "tamper": return .tamper(name, rng.pick(Tamper.allCases)!)
+        case "plantPair": return .plantPair(name)
+        case "tamperSequence": return .tamperSequence(name, tamperGroup())
         default: return .settle
         }
     }
@@ -383,7 +257,7 @@ struct ScenarioGenerator {
     mutating func sequence(seed: UInt64, maxSteps: Int) async throws -> (Generated, SWorld) {
         let start = rng.int(0..<StartingState.all.count)
         let world = SWorld(seed: seed)
-        try StartingState.all[start].build(world)
+        try await StartingState.all[start].build(world)
         var actions: [Action] = []
         let length = rng.int(max(1, maxSteps / 2)..<(maxSteps + 1))
         for index in 0..<length {
@@ -398,7 +272,7 @@ struct ScenarioGenerator {
     /// Replay a concrete sequence on a fresh world.
     static func replay(_ generated: Generated, actions: [Action]) async throws -> SWorld {
         let world = SWorld(seed: generated.seed)
-        try StartingState.all[generated.start].build(world)
+        try await StartingState.all[generated.start].build(world)
         for (index, action) in actions.enumerated() { await world.step(action, words: index % 10 == 9 || index == actions.count - 1) }
         return world
     }

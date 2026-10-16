@@ -2,8 +2,8 @@
 //  World.swift
 //  VariorumCoreTests — VX-305 U4: THE SCENARIO WORLD (design §4.1, the phase
 //  plan §6): two Macs and a phone, two Apple accounts and two Variorum
-//  accounts, the fakes with real semantics (`Fakes.swift`), an older build as
-//  an actor (`OlderBuild.swift`), real key files and wraps with test-speed KDF
+//  accounts, the fakes with real semantics (`Fakes.swift`), real key files and
+//  wraps with test-speed KDF
 //  parameters (`.relaxedForTests` floors), and stand-in library files keyed by
 //  their key's fingerprint and carrying their record.
 //
@@ -24,12 +24,6 @@ import CryptoKit
 import Foundation
 
 @testable import VariorumCore
-
-enum Build: String, Equatable {
-    case new
-    /// Today's build (pre-VX-305): it reads and mints only the old shared key.
-    case older
-}
 
 /// What she knows about one library or account's secrets — current, and every
 /// change with its time.
@@ -54,7 +48,6 @@ struct CopyTruth: Equatable {
     var madeOn: String
     /// The library's mode when it was made (Castle-era copies are promise 13's).
     var mode: ProtectionMode?
-    var byOlderBuild = false
     /// Whose secrets it was made under — an account, or the library's own.
     var holder: String
 }
@@ -72,12 +65,6 @@ struct Truth {
     /// Copies a retirement sheet listed before she confirmed it (promise 5's
     /// stated exception), by path.
     var listedBySheet: Set<String> = []
-    /// Library keys two Macs share because of a hand-off made before this
-    /// change (§3.1 rule 2's third exception).
-    var handedOffBeforeChange: Set<String> = []
-    /// Keys an older build's leave or follow put under the old shared key with
-    /// no change of keys (promise 13's one exception).
-    var olderBuildLeaveKeys: Set<String> = []
     /// Keys made in Castle — by the record's family tree at their birth.
     var castleBorn: Set<String> = []
     /// The time each library left Castle, per device (promise 13).
@@ -109,12 +96,6 @@ struct Truth {
     /// wiped keychain (promise 5's "its own Apple key and this Mac's are both
     /// gone").
     var lostAppleKeys: Set<String> = []
-    /// Devices on an older build when the old shared key was retired (promise
-    /// 5's exception).
-    var olderWhenRetired: Set<String> = []
-    /// Masters an older build's leave put under the old shared key (§8's
-    /// residue — this build never adds to it).
-    var olderExposedMasters: Set<Data> = []
     /// Devices whose STANDARD key file a login-password holder rewrote, with
     /// the key it was then under — rule 3: in Standard that person can rewrite
     /// anything, and no repair acts on a Standard record's word (§3.3), so
@@ -140,13 +121,6 @@ struct Truth {
     /// exception once its own Apple key is gone, retired by her Use Castle
     /// included (PROVISIONAL P-U4-13).
     var restoredPastCrossing: Set<String> = []
-    /// Devices that joined their account without typing a secret (§3.5a):
-    /// their file locks the library key under the master — and the master's
-    /// words copy once a vault read gave them one.
-    var silentlyJoined: Set<String> = []
-    /// A synced pair landed HELD on a device (library id): no sync round until
-    /// the one Resume Sync press — promise 7 waits for it.
-    var heldLanding: [String: String] = [:]
     /// Every copy retention pruned: who, under which Mac, for which library.
     var prunes: [(by: String, mac8: String, library: String, copy: CatalogCopy)] = []
     /// Every copy opened into a library: the record before and after.
@@ -157,7 +131,6 @@ final class SDevice {
     let name: String
     let isPhone: Bool
     var machine: MachineIdentity
-    var build: Build = .new
     /// The Apple ID it is signed into.
     var appleAccount: String?
     /// iCloud Keychain's switch — the app can't see it (corner 46).
@@ -183,13 +156,6 @@ final class SDevice {
     var executor: ProtectionExecutor?
     var library: UnlockedLibrary?
     var touchIDPress: TouchIDPress?
-    var corner45Answer: ProtectionMode?
-    /// Today's per-device settings (UserDefaults — §3.15 retires them there).
-    var legacySettings = DeviceSettings(gateStyle: .touchID)
-    /// Today's 13p-era stored at-open mode.
-    var legacyAtOpenMode: LegacyAtOpenMode?
-    /// Today's device identity for the slot's library (the sync custody item's).
-    var olderDeviceID: String?
     /// What an adversary with the login password captured earlier — replayed
     /// one at a time, or both homes together (§4.1).
     var captures: [DeviceCapture] = []
@@ -261,7 +227,6 @@ enum WorldRefusal: Error, Equatable {
     case noLibrary
     case cannotOpen
     case notOpen
-    case olderBuild
 }
 
 final class SWorld {
@@ -758,12 +723,10 @@ final class SWorld {
     // MARK: - Launch: the lobby, unlock, settle, the migration, the repairs
 
     /// The app opens on `device`: the lobby walks its roads, the executor
-    /// unlocks with every key reached, settles any act in flight, migrates a
-    /// library with no record, reads the vault fresh, and runs the repairs
-    /// `assess` owes.
+    /// unlocks with every key reached, settles any act in flight, reads the
+    /// vault fresh, and runs the repairs `assess` owes.
     @discardableResult
     func launch(_ device: SDevice, typed: TypedSecrets? = nil) async throws -> UnlockedLibrary {
-        guard device.build == .new else { throw WorldRefusal.olderBuild }
         if device.isOpen, let library = device.library { return library }
         guard let slot = device.slot else { throw WorldRefusal.noLibrary }
         let typed = typed ?? typedFor(device)
@@ -788,15 +751,6 @@ final class SWorld {
             stepLog.append("  \(device.name): the act in flight couldn't settle now (\(error))")
         }
         device.library = library
-        if library.record == nil {
-            let inputs = migrationInputs(device, library: library)
-            if let account = inputs.account, device.session.accountID == account, device.online {
-                _ = try? await executor.readVault(accountID: account)
-            }
-            _ = try await executor.migrate(&library, inputs: inputs, typed: typed)
-            device.library = library
-            noteBirths(device)
-        }
         if let account = library.record?.account, device.session.accountID == account, device.online {
             _ = try? await executor.readVault(accountID: account)
             // The lobby's Always-ask duty (pre-13x §3.3, phase 2's): with no
@@ -820,7 +774,7 @@ final class SWorld {
     /// reachable — signing in here, coming back online — as the app re-settles
     /// (phase 2/3's wiring; the executor's `settle` is the one road).
     func resumeAtVaultReach(_ device: SDevice) async {
-        guard device.build == .new, let executor = device.executor, var library = device.library,
+        guard let executor = device.executor, var library = device.library,
               library.section.actInFlight != nil, device.online else { return }
         // Only an act waiting for THIS session's account (the plan names it).
         if case .plan(let sealed)? = device.container.files[SPath.plan],
@@ -878,15 +832,13 @@ final class SWorld {
         if let library = device.library {
             let reach = device.executor?.reach(key: library.key, keyFile: library.keyFile) ?? PF.reach([library.key])
             let recordSection = library.record?.verifiedSections(reach: reach).first { $0.deviceID == library.section.deviceID }
-            var legacyInputs: LegacyModeInputs?
-            if library.record == nil { legacyInputs = migrationInputs(device, library: library).legacyMode }
             unlocked = UnlockedFacts(
-                record: library.record, legacyModeInputs: legacyInputs, familyTree: library.familyTree,
+                record: library.record, familyTree: library.familyTree,
                 thisMac: library.section, identity: library.resolution, memory: library.memory,
                 currentFingerprint: library.fingerprint,
                 liveKeyFileID: device.container.files[SPath.liveKeyFile] == nil ? nil
                     : Catalog.id(place: .container, folders: [], name: SPath.liveKeyFile),
-                corner45Answer: device.corner45Answer, recordSection: recordSection)
+                recordSection: recordSection)
         }
         let sessionAccount = device.session.accountID
         let vault = sessionAccount.flatMap { device.executor?.freshVaults[$0]?.reading }
@@ -899,48 +851,6 @@ final class SWorld {
     }
 
     func assessed(_ device: SDevice) -> Assessment { assess(facts(device), guards: guards) }
-
-    // MARK: - The migration's inputs, gathered from today's facts (phase 2's leaves)
-
-    func migrationInputs(_ device: SDevice, library: UnlockedLibrary) -> MigrationInputs {
-        let libraryID = device.slot?.libraryID ?? library.record?.libraryID ?? ""
-        let current = library.fingerprint
-        let beside = legacyBeside(device)
-        let currentFile = beside.first { $0.file.fingerprint == current }?.file
-        let facts = currentFile.map { LegacyKeyFileFacts($0.envelope) }
-        let bound = device.keychain.local[KName.legacyBound(Self.scope, libraryID)]?.value.libraryKey
-        let custody: LegacyRawKeyCustody = bound.map { PF.fp($0) == current } == true ? .silent : .gatedOrNone
-        let syncItem = device.keychain.local[KName.legacySync(Self.scope, libraryID, gated: false)]
-            ?? device.keychain.local[KName.legacySync(Self.scope, libraryID, gated: true)]
-        var carried: String?
-        if case .legacySync(let id, _)? = syncItem?.value { carried = id }
-        let account = currentFile?.envelope.master != nil ? device.slot?.rowsOwner : nil
-        let enrolled = syncItem != nil || account != nil
-        var vaultApple: Bool?
-        if let account, device.session.accountID == account, device.online, let vault = server.snapshot(account) {
-            vaultApple = vault.format.masterWrappedByAppleHeld != nil
-        }
-        let catalog = catalog(device)
-        let fingerprints = catalog.keyFiles.filter { $0.library == libraryID }.flatMap(\.heldFingerprints)
-        // The move's subjects: other libraries' newest copies attributed to
-        // this Mac, Standard-shaped.
-        var newest: [String: CatalogCopy] = [:]
-        for copy in catalog.copies {
-            guard let other = copy.library, other != libraryID, copy.mac.isMac(String((carried ?? "").prefix(8))) else { continue }
-            if let held = newest[other], (held.stamp ?? .distantPast) >= (copy.stamp ?? .distantPast) { continue }
-            newest[other] = copy
-        }
-        let subjects = newest.values.compactMap { copy -> String? in
-            guard let file = catalog.servingKeyFiles(of: copy).first else { return nil }
-            return AssessRules.standardShaped(file) ? file.id : nil
-        }.sorted()
-        return MigrationInputs(
-            legacyMode: LegacyModeInputs(
-                legacyMode: device.legacyAtOpenMode, vaultHasAppleHeldCopy: vaultApple, keyFile: facts,
-                rawKeyCustody: custody, enrolled: enrolled),
-            account: account, carriedDeviceID: carried ?? device.olderDeviceID, settings: device.legacySettings,
-            catalogFingerprints: Array(Set(fingerprints)).sorted(), moveSubjects: subjects)
-    }
 
     /// The family tree's births on `device`'s library, as ground truth.
     func noteBirths(_ device: SDevice) {
@@ -1377,9 +1287,9 @@ extension SWorld {
     /// A backup pair on `device`: the snapshot and its frozen key file, in this
     /// Mac's `Backups/<library8>/<mac8>/` — in the container, and in its far
     /// folder when it has one. The world remembers each copy's birth.
-    func writePair(_ device: SDevice, image: LibraryImage, keyFile: KeyFileDocument, deviceID: String, olderBuild: Bool = false) {
+    func writePair(_ device: SDevice, image: LibraryImage, keyFile: KeyFileDocument, deviceID: String) {
         let at = tick()
-        let folder = olderBuild ? CatalogNames.backupsFolderName : SPath.ownFolder(image.libraryID, deviceID)
+        let folder = SPath.ownFolder(image.libraryID, deviceID)
         let name = SPath.snapshot(at, image.fingerprint)
         var places: [(String, FolderFS)] = [("container", device.container)]
         if let far = farFolder(of: device) { places.append(("farFolder", far)) }
@@ -1388,7 +1298,7 @@ extension SWorld {
             fs.files["\(folder)/\(SPath.pair(of: name))"] = .keyFile(keyFile)
             truth.copies["\(place):\(folder)/\(name)"] = CopyTruth(
                 libraryID: image.libraryID, fingerprint: image.fingerprint, madeAt: at, madeOn: device.name,
-                mode: image.record?.mode, byOlderBuild: olderBuild,
+                mode: image.record?.mode,
                 holder: holder(device, account: image.record?.account ?? (image.record == nil ? image.rowsOwner : nil), libraryID: image.libraryID))
         }
     }
