@@ -5,10 +5,10 @@ import Foundation
 // of this library — its `Backups/<library8>/<mac8>/` pairs: 14 in the
 // container, 14 daily plus 4 weekly in the far folder. Everything else in a
 // shared folder is someone else's and is never pruned here: another Mac's
-// copies, another library's, a copy whose key file doesn't read, today's
-// legacy flat files (listed, and only she deletes them), older libraries
-// (kept as today), `Previous Libraries/` (kept), and the adoption's safety
-// copy (it lasts until its open finishes — the open's own plan removes it).
+// copies, another library's, a copy whose key file doesn't read,
+// `Previous Libraries/` (kept), and the adoption's safety copy (it lasts until
+// its open finishes — the open's own plan removes it). (Today's flat files and
+// their never-prune arm left with rule 26 — VX-378 U1.)
 //
 // The far folder's 14 + 4 rule is today's `BackupRetention.keep`
 // (App/Variorum/Shared/BackupRetention.swift — her 13l ruling), restated
@@ -42,9 +42,6 @@ public enum Retention {
         public var prune: [String]
         /// This Mac's copies of this library the policy keeps.
         public var keep: [String]
-        /// Today's legacy flat copies — listed for her, never pruned
-        /// automatically.
-        public var legacyFlat: [String]
     }
 
     /// **The plan for one library on one Mac.**
@@ -71,9 +68,7 @@ public enum Retention {
                 // Guard off (DEBUG mutation pins only): today's VX-302 shape —
                 // every snapshot in the folder counted and pruned by its stamp,
                 // whoever's it is.
-                candidates = catalog.copies.filter {
-                    $0.place == place && ($0.kind == .backup || $0.kind == .legacyFlatBackup)
-                }
+                candidates = catalog.copies.filter { $0.place == place && $0.kind == .backup }
             }
             let dated = candidates.compactMap { copy in copy.stamp.map { (id: copy.id, date: $0) } }
             let kept: Set<String>
@@ -88,8 +83,7 @@ public enum Retention {
             keep += candidates.map(\.id).filter { kept.contains($0) || !datedIDs.contains($0) }
             prune += dated.map(\.id).filter { !kept.contains($0) }
         }
-        let legacyFlat = catalog.copies.filter { $0.kind == .legacyFlatBackup }.map(\.id)
-        return Outcome(prune: prune.sorted(), keep: keep.sorted(), legacyFlat: legacyFlat.sorted())
+        return Outcome(prune: prune.sorted(), keep: keep.sorted())
     }
 
     // MARK: - Today's 14 + 4 rule (BackupRetention.keep, restated)

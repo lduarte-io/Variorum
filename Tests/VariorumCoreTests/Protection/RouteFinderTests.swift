@@ -40,11 +40,11 @@ func need<T>(_ value: T?, _ what: @autoclosure () -> String) throws -> T {
 func walk(_ route: Route, in catalog: Catalog, book: SecretBook) throws -> StoreKey {
     var key: StoreKey?
     var opened: AnchorContents?
-    func file(_ id: String) throws -> KeyFileDocument {
+    func file(_ id: String) throws -> KeyFile {
         try need(catalog.keyFile(id: id)?.document, "no key file \(id)")
     }
     func anchor(_ ref: AnchorRef) throws -> CastleAnchor {
-        guard case .format3(let keyFile) = try file(ref.keyFile) else { throw WalkError.stuck("legacy anchor") }
+        let keyFile = try file(ref.keyFile)
         return try need(ref.kept.map { keyFile.keptAnchors[$0] } ?? keyFile.anchor, "no anchor")
     }
     func secret() throws -> ProtectionSecret {
@@ -63,8 +63,8 @@ func walk(_ route: Route, in catalog: Catalog, book: SecretBook) throws -> Store
         case .custody(let fingerprint, _):
             key = try need(book.custody[fingerprint], "no custody item")
         case .keyFileLock(let id, let road):
-            switch try file(id) {
-            case .format3(let keyFile):
+            do {
+                let keyFile = try file(id)
                 switch road {
                 case .passphrase: key = try keyFile.open(try secret(), floor: PF.floor)
                 case .words: key = try keyFile.open(words: try words())
@@ -75,18 +75,9 @@ func walk(_ route: Route, in catalog: Catalog, book: SecretBook) throws -> Store
                     key = try keyFile.open(apple: try need(book.apple[id], "no apple key"))
                 case .sharedApple: key = try keyFile.open(sharedApple: try need(book.oldShared, "no shared key"))
                 }
-            case .legacy(let legacy):
-                switch road {
-                case .passphrase:
-                    guard case .passphrase(let typed) = try secret() else { throw WalkError.stuck("legacy passphrase") }
-                    key = try legacy.open(passphrase: typed, floor: PF.floor)
-                case .words: key = try legacy.open(words: try words())
-                case .sharedApple: key = try legacy.open(sharedApple: try need(book.oldShared, "no shared key"))
-                default: throw WalkError.stuck("legacy \(road)")
-                }
             }
         case .history(let id, let fingerprint):
-            guard case .format3(let keyFile) = try file(id) else { throw WalkError.stuck("legacy history") }
+            let keyFile = try file(id)
             key = try need(try keyFile.historyKey(fingerprint, currentKey: try need(key, "no key")), "not in history")
         case .anchorLock(let ref, _):
             opened = try anchor(ref).open(try secret(), floor: PF.floor)
@@ -330,87 +321,6 @@ struct RouteFinderRoadTests {
         expectEveryRoadOpens(opens, PF.fp(castleKey), catalog, book)
     }
 
-    /// Custody, Touch ID, the history, an Apple key readable here, one this
-    /// Mac lists but can't read, the old shared key: every road combination
-    /// names its opener — and each one walks.
-    @Test func everyRoadCombinationIsNamedAndWalks() throws {
-        let world = try KeyWorld()
-        let old = StoreKey.mint(), current = StoreKey.mint(), gated = StoreKey.mint()
-        let own = AppleKeyMaterial.mint(), lost = AppleKeyMaterial.mint(), shared = AppleKeyMaterial.mint()
-        // An older Standard key under the old shared key, then a re-key within
-        // the mode taking it into the history.
-        var oldFile = try KeyFile.building(libraryID: world.library, key: old, epoch: 1,
-                                           locks: NewKeyLocks(passphrase: world.p, apple: lost))
-        oldFile.sharedApple = AppleWrap(keyID: shared.id, wrapped: try AES.KeyWrap.wrap(SymmetricKey(data: old.data), using: shared.key))
-        let currentFile = try oldFile.rekeyed(.withinMode, from: old, to: current,
-                                              locks: NewKeyLocks(passphrase: world.p, words: world.w, apple: own), at: CF.stamp(2)).keyFile
-        let catalog = Catalog.build([
-            CatalogEntry(place: .container, name: ProtectionNames.keyFilename, bytes: try currentFile.encoded()),
-            CatalogEntry(place: .container, folders: ["Backups"], name: CF.snapshotName(CF.stamp(1), old)),
-            CatalogEntry(place: .container, folders: ["Backups"], name: CF.pairName(CF.stamp(1), old), bytes: try oldFile.encoded()),
-        ])
-        let finder = RouteFinder(RouteFacts(
-            catalog: catalog,
-            custody: [CustodyItemFact(fingerprint: PF.fp(current), itemClass: .silent),
-                      CustodyItemFact(fingerprint: PF.fp(gated), itemClass: .touchid)],
-            readableAppleKeyIDs: [own.id], oldSharedAppleKeyID: shared.id,
-            ownAppleKeyIDsNotReadableHere: [lost.id]))
-        let opens = finder.opensWith(fingerprint: PF.fp(old))
-        #expect(opens.line == [.thisMac, .passphrase(.current), .words(.current), .appleAccount, .oldSharedAppleKey,
-                               .appleKeyNotReadableHere])
-        // Each road's steps are the locks it names.
-        #expect(opens.route(for: .oldSharedAppleKey)?.steps.count == 1)
-        #expect(opens.route(for: .thisMac)?.steps.count == 2, "the silent item, then the history")
-        var book = SecretBook()
-        book.passphrases = [.current: world.passphrase]
-        book.words = [.current: world.words]
-        book.custody = [PF.fp(current): current, PF.fp(gated): gated]
-        book.apple = [own.id: own, lost.id: lost]
-        book.oldShared = shared
-        expectEveryRoadOpens(opens, PF.fp(old), catalog, book)
-        #expect(finder.opensWith(fingerprint: PF.fp(gated)).line == [.touchID])
-        // The old shared key taken away: everything else still stands.
-        let without = finder.withoutOldSharedKey().opensWith(fingerprint: PF.fp(old))
-        #expect(!without.openers.contains(.oldSharedAppleKey) && without.openers.count == opens.openers.count - 1)
-    }
-
-    /// A copy whose key the catalog can't pin (several of today's key files
-    /// beside an aside copy, no dates listed): the line names only what opens
-    /// EVERY candidate. With dates listed, today's newest-modified rule pins it.
-    @Test func aCopyWhoseKeyCantBePinnedNamesOnlyWhatOpensEveryCandidate() throws {
-        let world = try KeyWorld()
-        let a = StoreKey.mint(), b = StoreKey.mint()
-        var envelopeA = StoreKeyEnvelope(storeID: world.library)
-        try envelopeA.setRecoveryWrap(key: a, words: world.words)
-        try envelopeA.setPassphraseWrap(key: a, passphrase: world.passphrase, kdf: PF.fastKDF())
-        var envelopeB = StoreKeyEnvelope(storeID: world.library)
-        try envelopeB.setRecoveryWrap(key: b, words: world.words)
-        let folders = ["Previous Libraries", CF.stampText(CF.stamp(9))]
-        func entries(dated: Bool) throws -> [CatalogEntry] {
-            [
-                CatalogEntry(place: .container, folders: folders, name: "variorum.sqlite"),
-                CatalogEntry(place: .container, folders: folders, name: StoreKeyEnvelope.filename(forFingerprint: PF.fp(a)),
-                             bytes: try JSONEncoder().encode(envelopeA), modifiedAt: dated ? CF.stamp(8) : nil),
-                CatalogEntry(place: .container, folders: folders, name: StoreKeyEnvelope.filename(forFingerprint: PF.fp(b)),
-                             bytes: try JSONEncoder().encode(envelopeB), modifiedAt: dated ? CF.stamp(7) : nil),
-            ]
-        }
-        let catalog = Catalog.build(try entries(dated: false))
-        let copy = try #require(catalog.copies.first)
-        #expect(copy.fingerprint == nil && Set(copy.candidateFingerprints) == [PF.fp(a), PF.fp(b)])
-        let opens = RouteFinder(RouteFacts(catalog: catalog)).opensWith(copy: copy)
-        // The words (held here on the folder's day) open both; the passphrase
-        // opens only a — so it is not named.
-        #expect(opens.line == [.words(.heldHere(until: CF.stamp(9)))])
-        var book = SecretBook()
-        book.words = [.heldHere(until: CF.stamp(9)): world.words]
-        expectEveryRoadOpens(opens, PF.fp(a), catalog, book, orAnyOf: [PF.fp(b)])
-        #expect(Set(opens.routes.map(\.steps.last)).count == 2, "a witness road to each candidate")
-        // Dated: today's newest-modified rule pins the copy to a.
-        let dated = Catalog.build(try entries(dated: true))
-        #expect(dated.copies.first?.fingerprint == PF.fp(a))
-    }
-
     /// A kept anchor sealed inside a later anchor still needs the secrets of
     /// ITS day: the outer anchor's locks are never named for the keys only the
     /// inner one holds — until a file that carries the inner anchor in the
@@ -484,70 +394,5 @@ struct AnchorSentenceTests {
             CatalogEntry(place: .container, name: ProtectionNames.keyFilename, bytes: try world.castleFile(key).encoded()),
         ])
         #expect(RouteFinder(RouteFacts(catalog: catalog)).anchorSentence(for: .replacesWords) == nil)
-    }
-}
-
-@Suite("VX-305 U2 — the retirement's list: everything that belongs on it, and nothing else")
-struct RetirementRoutesTests {
-    @Test func theRetirementsListIsExact() throws {
-        let world = try KeyWorld()
-        let shared = AppleKeyMaterial.mint(), own = AppleKeyMaterial.mint(), otherOwn = AppleKeyMaterial.mint()
-        func sharedWrap(_ key: StoreKey) throws -> AppleWrap {
-            AppleWrap(keyID: shared.id, wrapped: try AES.KeyWrap.wrap(SymmetricKey(data: key.data), using: shared.key))
-        }
-        let live = StoreKey.mint(), onlyShared = StoreKey.mint(), otherLibrary = StoreKey.mint()
-        let castleCopy = StoreKey.mint(), unattributed = StoreKey.mint(), otherMacKey = StoreKey.mint()
-        // The live Standard library: its own key, the old shared wrap riding
-        // beside it, a passphrase and the words.
-        var liveFile = try KeyFile.building(libraryID: CF.lib1, key: live, epoch: 1,
-                                            locks: NewKeyLocks(passphrase: world.p, words: world.w, apple: own))
-        liveFile.sharedApple = try sharedWrap(live)
-        // A copy of this library whose only road is the old shared key (today's format 2).
-        var legacy = StoreKeyEnvelope(storeID: CF.lib1, keyFingerprint: PF.fp(onlyShared))
-        try legacy.setAppleWrappedCopy(key: onlyShared, under: shared.key, appleKeyID: shared.id)
-        // Another library on this Mac: this Mac's own key file for it, Standard, no secrets.
-        var otherFile = try KeyFile.building(libraryID: CF.lib2, key: otherLibrary, epoch: 1, locks: NewKeyLocks(apple: own))
-        otherFile.sharedApple = try sharedWrap(otherLibrary)
-        // A Castle copy (passphrase and words): never on the list.
-        let castleFile = try world.castleFile(castleCopy)
-        // An unattributed far copy of another library: Standard, no secrets.
-        let unattributedFile = try KeyFile.building(libraryID: CF.lib2, key: unattributed, epoch: 1, locks: NewKeyLocks(apple: own))
-        // Another Mac's pair holding this library's live key in its history.
-        let otherMacFile = try liveFile.rekeyed(.withinMode, from: live, to: otherMacKey,
-                                                locks: NewKeyLocks(passphrase: world.p, apple: otherOwn), at: CF.stamp(2)).keyFile
-        let mine = CF.macFolder(CF.lib1, CF.macA), mineOther = CF.macFolder(CF.lib2, CF.macA)
-        let theirs = CF.macFolder(CF.lib1, CF.macB)
-        let d = CF.stamp(1)
-        let catalog = Catalog.build([
-            CatalogEntry(place: .container, name: ProtectionNames.keyFilename, bytes: try liveFile.encoded()),
-            CatalogEntry(place: .container, folders: ["Backups"], name: CF.snapshotName(d, onlyShared)),
-            CatalogEntry(place: .container, folders: ["Backups"], name: CF.pairName(d, onlyShared), bytes: try JSONEncoder().encode(legacy)),
-            CatalogEntry(place: .container, folders: mineOther, name: ProtectionNames.keyFilename, bytes: try otherFile.encoded()),
-            CatalogEntry(place: .container, folders: mineOther, name: CF.snapshotName(d, otherLibrary)),
-            CatalogEntry(place: .container, folders: mineOther, name: CF.pairName(d, otherLibrary), bytes: try otherFile.encoded()),
-            CatalogEntry(place: .container, folders: mine, name: CF.snapshotName(d, castleCopy)),
-            CatalogEntry(place: .container, folders: mine, name: CF.pairName(d, castleCopy), bytes: try castleFile.encoded()),
-            CatalogEntry(place: .farFolder, folders: ["Backups"], name: CF.snapshotName(d, unattributed)),
-            CatalogEntry(place: .farFolder, folders: ["Backups"], name: CF.pairName(d, unattributed), bytes: try unattributedFile.encoded()),
-            CatalogEntry(place: .farFolder, folders: theirs, name: CF.snapshotName(CF.stamp(2), otherMacKey)),
-            CatalogEntry(place: .farFolder, folders: theirs, name: CF.pairName(CF.stamp(2), otherMacKey), bytes: try otherMacFile.encoded()),
-        ])
-        let finder = RouteFinder(RouteFacts(
-            catalog: catalog, custody: [CustodyItemFact(fingerprint: PF.fp(live), itemClass: .silent)],
-            readableAppleKeyIDs: [own.id], oldSharedAppleKeyID: shared.id))
-        let routes = finder.retirementRoutes(thisMac: CF.macA, libraryFingerprints: [PF.fp(live), PF.fp(onlyShared)])
-        func copyID(_ key: StoreKey) -> RetirementSubject {
-            .copy(catalog.copies.first { $0.fingerprint == PF.fp(key) }!.id)
-        }
-        let liveSubject = RetirementSubject.library(keyFile: catalog.liveKeyFile!.id)
-        let otherLibrarySubject = RetirementSubject.library(
-            keyFile: catalog.keyFiles.first { $0.role == .ownKeyFile }!.id)
-        #expect(Set(routes.wouldStopOpening) == [copyID(onlyShared)])
-        #expect(Set(routes.appleKeyAlone) == [otherLibrarySubject, copyID(otherLibrary), copyID(unattributed)])
-        #expect(Set(routes.stillNeedsIt) == [liveSubject, otherLibrarySubject, copyID(onlyShared), copyID(otherLibrary)])
-        #expect(routes.otherMacsKeyFiles == catalog.keyFiles.filter { $0.mac == .mac8(ProtectionNames.mac8(CF.macB)) }.map(\.id))
-        // The Castle copy and the live library (it keeps its secrets) are on none of it.
-        #expect(!routes.appleKeyAlone.contains(copyID(castleCopy)) && !routes.wouldStopOpening.contains(copyID(castleCopy)))
-        #expect(!routes.appleKeyAlone.contains(liveSubject))
     }
 }

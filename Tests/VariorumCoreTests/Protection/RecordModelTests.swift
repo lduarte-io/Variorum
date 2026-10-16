@@ -27,7 +27,7 @@ struct ProtectionValueRoundTripTests {
             AppleKeyRecord(id: PF.id(), purpose: .account, accountID: PF.id(), origin: .followed, retiredAt: PF.day(1)))
         section = section.beginningAct(.enterCastle, from: PF.fp(key), to: nil, at: PF.day(2)).section
         let record = try ProtectionRecord.minting(
-            libraryID: library, mode: .standard, modeConfirmed: true, account: PF.id(),
+            libraryID: library, mode: .standard, account: PF.id(),
             currentFingerprint: PF.fp(key), madeBy: device, at: PF.t0)
             .storing(section, sealedUnder: key)
         let memory = DeviceMemory(
@@ -65,7 +65,7 @@ struct FamilyTreeTests {
     @Test func everyMintedKeyIsRecordedWithItsKindAndItsMac() {
         let macA = PF.id(), macB = PF.id()
         var record = ProtectionRecord.minting(
-            libraryID: PF.id(), mode: .standard, modeConfirmed: true, account: nil,
+            libraryID: PF.id(), mode: .standard, account: nil,
             currentFingerprint: "aaaaaaaaaaaaaaaa", madeBy: macA, at: PF.t0)
         record = record.recordingRekey(to: "bbbbbbbbbbbbbbbb", kind: .castle, by: macA, at: PF.day(1))
         // A landing on another Mac is recorded the same way, by that Mac.
@@ -90,7 +90,7 @@ struct FamilyTreeTests {
     @Test func theTwoHomesUnion_aRolledBackLibraryStillKnowsItsLaterKeys() {
         let mac = PF.id()
         let early = ProtectionRecord.minting(
-            libraryID: PF.id(), mode: .standard, modeConfirmed: true, account: nil,
+            libraryID: PF.id(), mode: .standard, account: nil,
             currentFingerprint: "1111111111111111", madeBy: mac, at: PF.t0)
         let later = early.recordingRekey(to: "2222222222222222", kind: .castle, by: mac, at: PF.day(1))
         // The library file is rolled back to `early`; the memory kept `later`'s tree.
@@ -164,7 +164,7 @@ struct HardwareMarkerTests {
 
     @Test func theMarkerCarriesNeitherIdentifier() throws {
         let record = ProtectionRecord.minting(
-            libraryID: PF.id(), mode: .castle, modeConfirmed: true, account: nil,
+            libraryID: PF.id(), mode: .castle, account: nil,
             currentFingerprint: "abababababababab", madeBy: PF.id(), at: PF.t0)
         let marker = record.marker(for: PF.macA)
         let encoded = try ProtectionCoding.canonical(marker)
@@ -401,7 +401,7 @@ struct SealedHomesAndPlansTests {
         let a = DeviceSection(deviceID: PF.id(), hardwareMarker: .stub("a"), settings: .noChoiceYet)
         let b = DeviceSection(deviceID: PF.id(), hardwareMarker: .stub("b"), settings: .noChoiceYet)
         var record = ProtectionRecord.minting(
-            libraryID: PF.id(), mode: .castle, modeConfirmed: true, account: nil,
+            libraryID: PF.id(), mode: .castle, account: nil,
             currentFingerprint: PF.fp(key), madeBy: a.deviceID, at: PF.t0)
         record = try record.storing(a, sealedUnder: key).storing(b, sealedUnder: key)
         record = try record.storing(a.withSettings(.newIdentity), sealedUnder: key)

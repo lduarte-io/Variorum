@@ -53,7 +53,7 @@ extension SWorld {
     // MARK: - The engine
 
     /// Every library key the seeds reach through `files` (fingerprint → key).
-    func reach(_ seeds: Seeds, files: [KeyFileDocument]) -> [String: StoreKey] {
+    func reach(_ seeds: Seeds, files: [KeyFile]) -> [String: StoreKey] {
         var keys: [String: StoreKey] = [:]
         for key in seeds.keys { keys[PF.fp(key)] = key }
         var masters = seeds.masters
@@ -86,9 +86,8 @@ extension SWorld {
                 if masters.count != before { changed = true }
             }
             var anchors: [CastleAnchor] = []
-            for document in files {
-                switch document {
-                case .format3(let file):
+            for file in files {
+                do {
                     func open(_ blob: Data?, _ key: SymmetricKey) {
                         guard let blob, let opened = Lock.unwrapStoreKey(blob, under: key), PF.fp(opened) == file.fingerprint else { return }
                         add(opened)
@@ -114,19 +113,6 @@ extension SWorld {
                         }
                     }
                     anchors += [file.anchor].compactMap { $0 } + file.keptAnchors
-                case .legacy(let legacy):
-                    let envelope = legacy.envelope
-                    func open(_ blob: Data?, _ key: SymmetricKey) {
-                        guard let blob, let opened = Lock.unwrapStoreKey(blob, under: key) else { return }
-                        if let fingerprint = legacy.fingerprint, PF.fp(opened) != fingerprint { return }
-                        add(opened)
-                    }
-                    if let blob = envelope.apple {
-                        if let id = envelope.appleKeyID, let apple = seeds.apple[id] { open(blob, apple) }
-                    }
-                    for master in masters { open(envelope.master, SymmetricKey(data: master)) }
-                    for key in pass(envelope.passphrase) { open(envelope.passphrase?.wrapped, key) }
-                    for wk in wordsKeys { open(envelope.recovery, wk) }
                 }
             }
             // The anchors: by their own locks, by a follower's outgoing key or
@@ -183,8 +169,8 @@ extension SWorld {
 
     /// Every key file on a device: its container, its far folder, its Time
     /// Machine snapshots.
-    func keyFilesOn(_ device: SDevice, excluding exclude: (String, KeyFileDocument) -> Bool = { _, _ in false }) -> [KeyFileDocument] {
-        var documents: [KeyFileDocument] = []
+    func keyFilesOn(_ device: SDevice, excluding exclude: (String, KeyFile) -> Bool = { _, _ in false }) -> [KeyFile] {
+        var documents: [KeyFile] = []
         var sources: [(String, FolderFS?)] = [("container", device.container)]
         if let far = farFolder(of: device) { sources.append(("farFolder", far)) }
         for (place, fs) in sources {
@@ -265,7 +251,7 @@ extension SWorld {
         for item in items where !item.touchID {
             switch item.value {
             case .key(let key): seeds.keys.append(key)
-            case .syncKeys(let material), .legacySync(_, let material?): seeds.masters.append(material.masterKey)
+            case .syncKeys(let material): seeds.masters.append(material.masterKey)
             case .apple(let id, let bytes):
                 // A deliberate delete that never reached iCloud (P-U4-1).
                 if truth.deletesNotCarried.contains(id) { continue }
@@ -296,7 +282,7 @@ extension SWorld {
             guard let value = pressRead(device, item) else { continue }
             switch value {
             case .key(let key): seeds.keys.append(key)
-            case .syncKeys(let material), .legacySync(_, let material?): seeds.masters.append(material.masterKey)
+            case .syncKeys(let material): seeds.masters.append(material.masterKey)
             case .apple(let id, let bytes): seeds.apple[id] = SymmetricKey(data: bytes)
             default: break
             }
@@ -381,10 +367,8 @@ extension SWorld {
                 }
             }
             let copyExists = catalog(device).keyFiles.contains { file in
-                if case .format3(let keyFile)? = file.document {
-                    return keyFile.fingerprint == record.currentFingerprint && keyFile.libraryID == record.libraryID
-                }
-                return false
+                guard let keyFile = file.document else { return false }
+                return keyFile.fingerprint == record.currentFingerprint && keyFile.libraryID == record.libraryID
             }
             if !owed, copyExists {
                 return [Violation(promise: 1, device: device.name,
@@ -397,7 +381,7 @@ extension SWorld {
     /// PROMISES 2 and 8 — Castle means Castle; the posture law.
     func castleMeansCastle(_ device: SDevice, settled: Bool) -> [Violation] {
         guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record,
-              record.mode == .castle, record.modeConfirmed else { return [] }
+              record.mode == .castle else { return [] }
         var violations: [Violation] = []
         func fail(_ detail: String, _ promise: Int = 2) { violations.append(Violation(promise: promise, device: device.name, detail: detail)) }
         let tree = Set(library.familyTree.fingerprints).union([record.currentFingerprint])
@@ -497,7 +481,7 @@ extension SWorld {
         var held = Set<String>()
         for item in device.keychain.local.values {
             switch item.value {
-            case .syncKeys(let m), .legacySync(_, let m?): held.insert(m.corpusKeyID)
+            case .syncKeys(let m): held.insert(m.corpusKeyID)
             default: break
             }
         }
@@ -579,7 +563,7 @@ extension SWorld {
     /// PROMISE 3 (settled) — Standard means Standard.
     func standardMeansStandard(_ device: SDevice) -> [Violation] {
         guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record,
-              record.mode == .standard, record.modeConfirmed else { return [] }
+              record.mode == .standard else { return [] }
         if truth.tamperedStandard[device.name]?.contains(record.currentFingerprint) == true { return [] }
         // Decision 35: a synced library writes nothing Apple-reachable without
         // a fresh read of its account's vault — signed out, in another account
@@ -652,18 +636,8 @@ extension SWorld {
             // every key file here holding its key is secretless, a key that
             // wrapped it was LOST (an Apple-ID switch, a reset, a wiped
             // keychain), and none that wraps it reads here now.
-            let holders = keyFilesOn(device).filter { document in
-                switch document {
-                case .format3(let file): return file.fingerprint == image.fingerprint
-                case .legacy(let legacy): return legacy.fingerprint == image.fingerprint
-                }
-            }
-            let ids = holders.flatMap { document -> [String] in
-                switch document {
-                case .format3(let file): return [file.apple?.keyID, file.sharedApple?.keyID].compactMap { $0 }
-                case .legacy(let legacy): return [legacy.envelope.apple == nil ? nil : legacy.envelope.appleKeyID].compactMap { $0 }
-                }
-            }
+            let holders = keyFilesOn(device).filter { $0.fingerprint == image.fingerprint }
+            let ids = holders.flatMap { [$0.apple?.keyID, $0.sharedApple?.keyID].compactMap { $0 } }
             let readable = Set(readableAppleKeys(device).keys).union([oldSharedKey(device)?.id].compactMap { $0 })
             // "Gone" includes a key her own Use Castle retired, once she
             // restored the container past it by Time Machine (the newer key
@@ -690,13 +664,7 @@ extension SWorld {
 
     /// A key file with no passphrase, words or master lock whose Apple keys
     /// are all gone (an Apple-ID switch, an iCloud Keychain reset).
-    func secretless(_ document: KeyFileDocument) -> Bool {
-        switch document {
-        case .format3(let file): return file.passphrase == nil && file.words == nil && file.master == nil
-        case .legacy(let legacy):
-            return legacy.envelope.passphrase == nil && legacy.envelope.recovery == nil && legacy.envelope.master == nil
-        }
-    }
+    func secretless(_ file: KeyFile) -> Bool { file.passphrase == nil && file.words == nil && file.master == nil }
 
     /// PROMISE 11 — own copies only: retention prunes only this Mac's copies
     /// of this library.
@@ -717,7 +685,6 @@ extension SWorld {
     struct Posture: Equatable {
         var libraryID: String?
         var mode: ProtectionMode?
-        var confirmed: Bool?
         var account: String?
         var fingerprint: String?
         var gate: GateStyle?
@@ -735,7 +702,7 @@ extension SWorld {
             if parsed.class == .silent { silent.insert(parsed.fingerprint) } else { touch.insert(parsed.fingerprint) }
         }
         return Posture(
-            libraryID: device.slot?.libraryID, mode: record?.mode, confirmed: record?.modeConfirmed, account: record?.account,
+            libraryID: device.slot?.libraryID, mode: record?.mode, account: record?.account,
             fingerprint: record?.currentFingerprint, gate: section?.settings.gateStyle,
             scheduledExport: section?.settings.scheduledExport, silentItems: silent, touchIDItems: touch)
     }
@@ -804,7 +771,7 @@ extension SWorld {
     /// limit's shape (`ScenarioGenerator.rollsBackBothHomes`) — except a group
     /// that holds `.replayBothHomes` itself (a fixed scenario's).
     func sealed(_ device: SDevice, before was: Posture, tampers: [Tamper]) -> [Violation] {
-        guard was.mode == .castle, was.confirmed == true else { return [] }
+        guard was.mode == .castle else { return [] }
         let now = posture(device)
         var violations: [Violation] = []
         let label = tampers.map { "\($0)" }.joined(separator: " + ")
@@ -836,9 +803,6 @@ extension SWorld {
         var custody: [String: StoreKey] = [:]
         for name in device.keychain.names(service: ProtectionNames.custodyService) {
             if let item = device.keychain.item(name), let key = item.value.libraryKey { custody[PF.fp(key)] = key }
-        }
-        for name in device.keychain.names(service: LegacyItems.storeKeyService) {
-            if let item = device.keychain.item(name), !item.touchID, let key = item.value.libraryKey { custody[PF.fp(key)] = key }
         }
         // The master as the vault was READ this session (the line was computed
         // from that reading — the account moving on since is promise 7's).

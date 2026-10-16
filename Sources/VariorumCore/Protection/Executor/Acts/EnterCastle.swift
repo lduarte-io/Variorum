@@ -76,9 +76,8 @@ extension ProtectionExecutor {
     public func useCastle(
         _ library: inout UnlockedLibrary, typed: TypedSecrets, gate: GateStyle, moves: [String] = []
     ) async throws -> ActOutcome {
-        guard let record = library.record else { throw ExecutorRefusal.migrationOwed }
-        if record.mode == .castle && record.modeConfirmed { throw ExecutorRefusal.wrongMode(.castle) }
-        guard record.modeConfirmed else { throw ExecutorRefusal.modeNotConfirmed }
+        guard let record = library.record else { throw ExecutorRefusal.recordMissing }
+        if record.mode == .castle { throw ExecutorRefusal.wrongMode(.castle) }
         var parameters = ActParameters(
             gate: gate, synced: record.account != nil, accountID: record.account, newKind: .castle,
             outgoingAppleKeyID: library.keyFile?.apple?.keyID)

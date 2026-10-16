@@ -235,7 +235,7 @@ extension ProtectionExecutor {
         _ library: inout UnlockedLibrary, kind: FollowKind, typed: TypedSecrets, gate: GateStyle? = nil,
         mintingIfTheNamedKeyNeverArrives: Bool = false
     ) async throws -> ActOutcome {
-        guard let record = library.record else { throw ExecutorRefusal.migrationOwed }
+        guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         guard let account = record.account else { throw ExecutorRefusal.notSynced }
         try requireSignedIn(as: account)
         guard let vault = try await readVault(accountID: account) else { throw ExecutorRefusal.needsFreshVault }

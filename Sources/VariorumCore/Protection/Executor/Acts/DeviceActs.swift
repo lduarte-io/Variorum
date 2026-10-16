@@ -5,8 +5,7 @@ import Foundation
 // could weaken protection (the gate style, the idle lock, the scheduled
 // export — sealed in this Mac's facts, written into both homes); the Touch ID
 // re-arm (only after a press failed on an item that exists — her confirmed
-// call); confirming the mode (a flag only when the current key was born in
-// it — otherwise a key change, the crossing's road); and creating a library.
+// call); and creating a library. (Confirming the mode left with rule 26.)
 
 struct DeviceSettingsProgram: ActProgram {
     let act = ProtectionAct.deviceSettings
@@ -66,36 +65,6 @@ struct TouchIDRearmProgram: ActProgram {
     }
 }
 
-struct ConfirmModeProgram: ActProgram {
-    let act = ProtectionAct.confirmMode
-    /// Confirming runs what the migration deferred while the mode was
-    /// unconfirmed (§3.13 steps 4 and 7): the per-key custody items, and — a
-    /// Standard library — this Mac's own Apple key with its fresh pair (VX-305
-    /// U4, found by the scenario world: confirming only flipped the flag, and
-    /// nothing ever minted that key).
-    func steps(_ parameters: ActParameters, guards: ProtectionGuards) -> [String] { ["confirm", "custodyItems", "moves"] }
-    func finishingSteps(_ library: UnlockedLibrary) -> [String] { ["confirm", "custodyItems", "moves"] }
-
-    func run(_ step: String, _ ctx: ActContext) async throws {
-        switch step {
-        case "confirm":
-            guard var record = ctx.library.record else { throw ExecutorRefusal.recordMissing }
-            guard !record.modeConfirmed else { return }
-            record.modeConfirmed = true
-            try ctx.leaves.library.writeRecord(record, with: ctx.library.key)
-            ctx.library.record = record
-            try ctx.rememberNewKey()
-        case "custodyItems": try ctx.addPerKeyCustodyItems()
-        case "moves":
-            // Decision 35: a synced library's own Apple key only on a fresh read.
-            if let record = ctx.library.record, record.mode == .standard, let account = record.account,
-               !ctx.executor.readThisSession(account) { return }
-            try await ctx.executor.moveOffSharedKey(ctx, freshPair: true)
-        default: throw ExecutorRefusal.nothingToDo
-        }
-    }
-}
-
 /// Creating a library runs with no plan (an empty slot has nothing to
 /// protect or resume); no section ever names this act.
 struct CreateLibraryProgram: ActProgram {
@@ -130,21 +99,6 @@ extension ProtectionExecutor {
             library: &library)
     }
 
-    /// **Confirm the recorded mode** — when the vault answered, or corner 45's
-    /// notice was. A mode the current key wasn't born in is a key change, never
-    /// a move: refused here — Use Standard (or the follow) is its road.
-    public func confirmMode(_ library: inout UnlockedLibrary, as mode: ProtectionMode) async throws -> ActOutcome {
-        guard let record = library.record else { throw ExecutorRefusal.migrationOwed }
-        guard !record.modeConfirmed else { throw ExecutorRefusal.nothingToDo }
-        let born = library.familyTree.entry(library.fingerprint)?.kind ?? record.mode
-        guard mode == born, mode == record.mode else { throw ExecutorRefusal.wrongMode(record.mode) }
-        if let account = record.account, configuration.session.accountID == account {
-            _ = try await readVault(accountID: account)
-        }
-        return try await perform(
-            ConfirmModeProgram(), parameters: ActParameters(targetMode: mode), secrets: ActSecrets(), library: &library)
-    }
-
     /// **Create a library** in an empty slot — in Standard (the default): its
     /// key, its silent item, this Mac's own Apple key, its key file (the
     /// passphrase and words when given), its record and this Mac's section, what
@@ -158,7 +112,7 @@ extension ProtectionExecutor {
         let at = now()
         configuration.libraryID = libraryID
         var record = ProtectionRecord.minting(
-            libraryID: libraryID, mode: .standard, modeConfirmed: true, account: nil,
+            libraryID: libraryID, mode: .standard, account: nil,
             currentFingerprint: Self.fp(key), madeBy: deviceID, at: at)
         let apple = leaves.ids.mintAppleKey()
         let section = DeviceSection(

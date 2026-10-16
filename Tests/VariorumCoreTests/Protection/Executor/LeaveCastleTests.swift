@@ -22,7 +22,7 @@ enum UseStandardStates {
             let current = fixture.world.live!.fingerprint
             let anchorOpens = (try? anchor.open(.passphrase(fixture.passphrase), floor: PF.floor).outgoing.key) == k0
                 && (try? anchor.open(.words(fixture.words), floor: PF.floor).outgoing.key) == k0
-            return record.mode == .standard && record.modeConfirmed && current != PF.fp(k0)
+            return record.mode == .standard && current != PF.fp(k0)
                 && live.history.isEmpty && anchorOpens
                 && fixture.world.icloud.keys[apple.keyID] != nil
                 && library.section.appleKeys.contains { $0.id == apple.keyID && $0.isOwnLibraryKey && $0.retiredAt == nil }

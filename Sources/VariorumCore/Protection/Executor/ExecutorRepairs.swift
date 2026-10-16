@@ -65,8 +65,6 @@ extension ProtectionExecutor {
     static func name(of repair: Repair) -> String {
         switch repair {
         case .deleteSilentItem: return "deleteSilentItem"
-        case .deleteLegacyItem: return "deleteLegacyItem"
-        case .deleteLegacyKeyFile: return "deleteLegacyKeyFile"
         case .deleteRetiredAppleKey: return "deleteRetiredAppleKey"
         case .deleteRetiredOldSharedKey: return "deleteRetiredOldSharedKey"
         case .landAppleWrap: return "landAppleWrap"
@@ -102,13 +100,9 @@ extension ProtectionExecutor {
         }
     }
 
-    /// The Castle repairs act only on a CONFIRMED Castle record (an
-    /// unconfirmed mode runs no custody repair; a Standard record's word
-    /// drives nothing destructive).
-    func castleConfirmed(_ library: UnlockedLibrary) -> Bool {
-        guard let record = library.record else { return false }
-        return record.mode == .castle && record.modeConfirmed
-    }
+    /// The Castle repairs act only on a Castle record (a Standard record's
+    /// word drives nothing destructive).
+    func castleConfirmed(_ library: UnlockedLibrary) -> Bool { library.record?.mode == .castle }
 
     /// Run one repair; nil = done.
     func run(_ repair: Repair, _ library: inout UnlockedLibrary) throws -> RepairSkip? {
@@ -119,30 +113,6 @@ extension ProtectionExecutor {
             guard try leaves.custody.custodyItems().contains(CustodyItemFact(fingerprint: fingerprint, itemClass: .silent))
             else { return .nothingThere }
             try leaves.custody.deleteCustody(fingerprint: fingerprint, itemClass: .silent)
-            return nil
-
-        case .deleteLegacyItem(let kind, let fingerprint, let precondition):
-            guard castleConfirmed(library) else { return .wrongMode }
-            guard verifies(precondition, library) else { return .preconditionDoesNotVerify }
-            // The item must still hold that key (read without a prompt).
-            if case .gated = kind { return .preconditionDoesNotVerify }
-            guard let held = try leaves.legacyItems.readLegacyItem(kind) else { return .nothingThere }
-            guard !guards.repairPreconditionsVerifiedOn || Self.fp(held) == fingerprint else {
-                return .preconditionDoesNotVerify
-            }
-            try leaves.legacyItems.deleteLegacyItem(kind)
-            return nil
-
-        case .deleteLegacyKeyFile(let id, let precondition):
-            guard castleConfirmed(library) else { return .wrongMode }
-            guard verifies(precondition, library) else { return .preconditionDoesNotVerify }
-            if guards.repairPreconditionsVerifiedOn, case .historyHolds(let fingerprint) = precondition {
-                // The file the repair names must hold the key the history holds.
-                guard try leaves.keyFiles.legacyKeyFilesBesideLibrary()
-                    .contains(where: { $0.id == id && $0.file.fingerprint == fingerprint })
-                else { return .preconditionDoesNotVerify }
-            }
-            try leaves.keyFiles.deleteLegacyKeyFile(id: id)
             return nil
 
         case .deleteRetiredAppleKey(let id):
@@ -163,7 +133,7 @@ extension ProtectionExecutor {
             return try leaves.apple.deleteOldSharedAppleKey(id: id) ? nil : .nothingThere
 
         case .landAppleWrap(let id):
-            guard let record = library.record, record.mode == .standard, record.modeConfirmed else { return .wrongMode }
+            guard let record = library.record, record.mode == .standard else { return .wrongMode }
             // Decision 35: nothing Apple-reachable without a fresh vault read.
             if guards.freshVaultBeforeAppleWriteOn, let account = record.account {
                 guard let vault = freshVault(for: account), vault.mode.settled == .standard else { return .needsFreshVault }
@@ -215,8 +185,8 @@ extension ProtectionExecutor {
             // locks of its day; re-locking under current secrets is P-R1-1's
             // door.
             let present = try leaves.keyFiles.readLiveKeyFile()
-            if case .format3(let live)? = present, live.fingerprint == library.fingerprint { return .nothingThere }
-            guard case .format3(var copy)? = try leaves.keyFiles.readKeyFile(catalogID: id),
+            if let live = present, live.fingerprint == library.fingerprint { return .nothingThere }
+            guard var copy = try leaves.keyFiles.readKeyFile(catalogID: id),
                   copy.fingerprint == library.fingerprint, copy.libraryID == library.record?.libraryID
             else { return .preconditionDoesNotVerify }
             // Another key's file goes ASIDE first — never deleted (it may carry
@@ -254,7 +224,6 @@ extension ProtectionExecutor {
             else { return .preconditionDoesNotVerify }
             record.mode = confirmed.mode
             record.account = confirmed.account
-            record.modeConfirmed = true
             library.record = record
             try writeFacts(&library, section: library.section)
             leaves.diagnostics.report(.olderLibraryFileRekeyed(older8: String(record.currentFingerprint.prefix(8)), current8: String(record.currentFingerprint.prefix(8))))
@@ -373,10 +342,7 @@ extension ProtectionExecutor {
         // confirmation are what this Mac last confirmed for that mode.
         next.mode = library.familyTree.entry(to)?.kind ?? memory.lastConfirmed?.mode ?? record.mode
         if let confirmed = memory.lastConfirmed, confirmed.mode == next.mode {
-            next.modeConfirmed = true
             next.account = confirmed.account
-        } else {
-            next.modeConfirmed = false
         }
         next.currentFingerprint = to
         next.keyEpoch = memory.keyEpoch

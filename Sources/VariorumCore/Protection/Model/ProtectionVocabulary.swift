@@ -27,8 +27,6 @@ public enum ProtectionAct: String, Codable, Sendable, CaseIterable {
     /// Make this my library's stub (rule 17) — U2 rebuilds it as MakeMine.
     case land
     case sendLibrary = "send_library"
-    case migration
-    case confirmMode = "confirm_mode"
     case moveOffSharedKey = "move_off_shared_key"
     case retireSharedKey = "retire_shared_key"
     case relinkApple = "relink_apple"

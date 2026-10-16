@@ -1,15 +1,14 @@
 import Foundation
 
 // VX-305 U2 — THE CATALOG (design §3.7, VX-302): one place that knows every
-// place copies live —
-//   - the container's backups (`Backups/<library8>/<mac8>/`, and today's
-//     legacy flat `Backups/` files, lock-time copies among them: a lock-time
-//     copy and a backup share today's name),
-//   - the far folder (`<picked>/Variorum/Backups/…`, and its folder key files),
+// place copies live — and, since VX-378 U1, only the folders THIS design writes
+// (rule 19; rule 26 took today's flat files and folder key files):
+//   - the container's backups (`Backups/<library8>/<mac8>/`),
+//   - the far folder (`<picked>/Variorum/Backups/<library8>/<mac8>/`),
 //   - `Previous Libraries/<stamp>/`,
 //   - the adoption safety copies (`Backups/safety-copies/variorum-adopt-
 //     safety-<stamp>/`),
-//   - the `.stale-*` key files (and today's other key files) beside the slot —
+//   - the `.stale-*` key files beside the slot —
 // with ONE name parser (`CatalogNames`) and an attribution of every copy to
 // its LIBRARY (from the pair's key file) and its MAC (from the subfolder).
 // The restore list, Open Library, the Castle offer, retention and the route
@@ -56,10 +55,9 @@ public struct CatalogEntry: Equatable, Sendable {
 public enum MacAttribution: Equatable, Hashable, Sendable {
     /// From its `Backups/<library8>/<mac8>/` subfolder.
     case mac8(String)
-    /// In this Mac's own container but outside a Mac subfolder — today's
-    /// legacy flat copies, `Previous Libraries/`, the safety copies, the
-    /// slot's own key files: this Mac's by their place (the container is
-    /// per Mac and per login).
+    /// In this Mac's own container but outside a Mac subfolder —
+    /// `Previous Libraries/`, the safety copies, the slot's own key files:
+    /// this Mac's by their place (the container is per Mac and per login).
     case thisMacsContainer
     /// In the far folder outside a Mac subfolder — any Mac sharing the
     /// folder could have written it (VX-302's shared iCloud Drive folder).
@@ -77,11 +75,8 @@ public enum MacAttribution: Equatable, Hashable, Sendable {
 }
 
 public enum CopyKind: String, Codable, Sendable, CaseIterable {
-    /// A snapshot pair in `Backups/<library8>/<mac8>/` (this build's).
+    /// A snapshot pair in `Backups/<library8>/<mac8>/`.
     case backup
-    /// A snapshot in a `Backups/` root — today's flat files, lock-time copies
-    /// among them. Listed, never pruned automatically (§3.7).
-    case legacyFlatBackup
     /// `Previous Libraries/<stamp>/` — a library an adoption set aside.
     case previousLibrary
     /// `Backups/safety-copies/variorum-adopt-safety-<stamp>/`.
@@ -91,16 +86,10 @@ public enum CopyKind: String, Codable, Sendable, CaseIterable {
 public enum KeyFileRole: String, Codable, Sendable, CaseIterable {
     /// `variorum-library-keys.json` beside the slot — the live key file.
     case live
-    /// A format-1/2 key file beside the slot (today's live file, or one left
-    /// from an older key).
-    case besideLibrary
-    /// A `.stale-*` key file beside the slot (today's set-aside shape).
+    /// A `.stale-*` key file beside the slot (the set-aside shape).
     case setAside
     /// A snapshot's own key file (`<snapshot>.keys.json`).
     case snapshotPair
-    /// A fingerprint-named or legacy key file in a `Backups/` root or the far
-    /// folder's root (today's folder key files).
-    case folderKeyFile
     /// `variorum-library-keys.json` in `Backups/<library8>/<mac8>/` — this
     /// Mac's own key file for that library (§3.5 point 2).
     case ownKeyFile
@@ -114,11 +103,12 @@ public struct CatalogKeyFile: Equatable, Sendable, Identifiable {
     public var folders: [String]
     public var name: String
     public var role: KeyFileRole
-    /// The decoded file; nil when it could not be read or decoded.
-    public var document: KeyFileDocument?
+    /// The decoded file; nil when it could not be read or decoded (a format
+    /// other than 3 included — rule 26).
+    public var document: KeyFile?
     public var mac: MacAttribution
 
-    /// The library it belongs to (its `libraryID` / today's `storeID`).
+    /// The library it belongs to (its `libraryID`).
     public var library: String? { document?.libraryID }
     /// Its current key's fingerprint.
     public var fingerprint: String? { document?.fingerprint }
@@ -149,7 +139,7 @@ public struct CatalogCopy: Equatable, Sendable, Identifiable {
     /// pair's (or its folder's only) key file's current key.
     public var fingerprint: String?
     /// When it can't (several key files beside an aside copy), every key it
-    /// could be under — the route finder names only what opens them all.
+    /// could be under.
     public var candidateFingerprints: [String]
     /// The library it belongs to, from the serving key files (nil when none
     /// reads, or they name different libraries).
@@ -205,14 +195,13 @@ public struct Catalog: Equatable, Sendable {
     /// Where an entry sits, from its parsed folders.
     enum Location: Equatable {
         case besideLibrary
-        case farRoot
-        case backupsRoot
         case macFolder(library8: String, mac8: String)
         case adoptionSafety(stamp: Date)
         case previousLibrary(stamp: Date)
         /// A home of copies that holds none of the app's own files directly
-        /// (`Backups/<library8>/` itself, `Backups/safety-copies/` itself —
-        /// where the A1 rail keeps its copies): every file there is foreign.
+        /// (`Variorum/` and `Backups/` themselves, `Backups/<library8>/`,
+        /// `Backups/safety-copies/` — where the A1 rail keeps its copies):
+        /// every file there is foreign (rule 26 took today's flat files).
         case copyHome
         /// Hers, not a copy's place (`md-exports/`, a hand-off folder).
         case notACopyPlace
@@ -228,12 +217,10 @@ public struct Catalog: Equatable, Sendable {
         }
         switch parent {
         case nil: return .besideLibrary
-        case .variorum?: return .farRoot
-        case .backups?: return .backupsRoot
         case .macFolder(let mac8)?: return library8.map { .macFolder(library8: $0, mac8: mac8) }
         case .adoptionSafetyCopy(let stamp)?: return .adoptionSafety(stamp: stamp)
         case .previousLibrary(let stamp)?: return .previousLibrary(stamp: stamp)
-        case .libraryFolder?, .safetyCopies?, .previousLibraries?:
+        case .variorum?, .backups?, .libraryFolder?, .safetyCopies?, .previousLibraries?:
             return .copyHome
         case .markdownExports?, .handOff?:
             return .notACopyPlace
@@ -268,17 +255,16 @@ public struct Catalog: Equatable, Sendable {
             guard name.isKeyFile, let role = keyFileRole(name, location) else { continue }
             keyFiles.append(CatalogKeyFile(
                 id: entry.id, place: entry.place, folders: entry.folders, name: entry.name, role: role,
-                document: entry.bytes.flatMap { try? KeyFileDocument.decode($0) },
+                document: entry.bytes.flatMap { try? KeyFile.decode($0) },
                 mac: mac(entry.place, location), frozenAt: frozenAt(name, location), modifiedAt: entry.modifiedAt))
         }
         var copies: [CatalogCopy] = []
         for (entry, location, name) in placed {
             switch (name, location) {
-            case (.snapshot(let stamp, let fp8), .backupsRoot), (.snapshot(let stamp, let fp8), .macFolder):
-                let kind: CopyKind = location == .backupsRoot ? .legacyFlatBackup : .backup
+            case (.snapshot(let stamp, let fp8), .macFolder):
                 copies.append(copy(
-                    entry, kind: kind, stamp: stamp, fp8: fp8, location: location,
-                    serving: snapshotServing(entry, fp8: fp8, location: location, keyFiles: keyFiles)))
+                    entry, kind: .backup, stamp: stamp, fp8: fp8, location: location,
+                    serving: snapshotServing(entry, fp8: fp8, keyFiles: keyFiles)))
             case (.library, .previousLibrary(let stamp)), (.library, .adoptionSafety(let stamp)):
                 let kind: CopyKind
                 if case .previousLibrary = location { kind = .previousLibrary } else { kind = .adoptionSafetyCopy }
@@ -295,13 +281,11 @@ public struct Catalog: Equatable, Sendable {
     private static func keyFileRole(_ name: CatalogNames.FileName, _ location: Location) -> KeyFileRole? {
         switch (location, name) {
         case (.besideLibrary, .keyFile): return .live
-        case (.besideLibrary, .fingerprintKeyFile), (.besideLibrary, .legacyKeyFile): return .besideLibrary
         case (.besideLibrary, .setAsideKeyFile): return .setAside
         case (_, .snapshotKeyFile): return .snapshotPair
         case (.macFolder, .keyFile): return .ownKeyFile
         case (.previousLibrary, _), (.adoptionSafety, _): return .asideCopy
-        case (.backupsRoot, _), (.farRoot, _), (.macFolder, _): return .folderKeyFile
-        case (.besideLibrary, _), (.notACopyPlace, _), (.copyHome, _): return nil
+        case (.besideLibrary, _), (.macFolder, _), (.notACopyPlace, _), (.copyHome, _): return nil
         }
     }
 
@@ -326,26 +310,16 @@ public struct Catalog: Equatable, Sendable {
         }
     }
 
-    /// An aside folder's key files, best first: format 3 (the one key file a
-    /// library has under this build), then today's fingerprint-named files,
-    /// then the legacy name.
+    /// An aside folder's key files, best first: the format-3 live name first.
     private static func servingOrder(_ file: CatalogKeyFile) -> String {
-        switch CatalogNames.parseFile(file.name) {
-        case .keyFile?: return "0" + file.name
-        case .fingerprintKeyFile?: return "1" + file.name
-        default: return "2" + file.name
-        }
+        CatalogNames.parseFile(file.name) == .keyFile ? "0" + file.name : "1" + file.name
     }
 
-    /// TODAY'S PAIR RULES (`LibraryClassifier.classifyOpaque`, restated) for a
-    /// snapshot: (1) its own pair, when it agrees with the name's fp8;
-    /// (2) a backup-named snapshot with an fp8: the folder's (and, in the far
-    /// folder, the root's) fingerprint-named file of that fp8 — this build
-    /// adds the Mac folder's own format-3 key file; (3) a stamp-only name:
-    /// every key file its folder (and the far root) holds — the route finder
-    /// names only what opens them all.
+    /// The pair rules for a snapshot: (1) its own pair, when it agrees with
+    /// the name's fp8; (2) otherwise the Mac folder's own key files holding a
+    /// key of that fp8 (a stamp-only name: every one the folder holds).
     private static func snapshotServing(
-        _ entry: CatalogEntry, fp8: String?, location: Location, keyFiles: [CatalogKeyFile]
+        _ entry: CatalogEntry, fp8: String?, keyFiles: [CatalogKeyFile]
     ) -> [CatalogKeyFile] {
         let pairName = String(entry.name.dropLast(".sqlite".count)) + ".keys.json"
         let pair = keyFiles.first { $0.place == entry.place && $0.folders == entry.folders && $0.name == pairName }
@@ -356,19 +330,12 @@ public struct Catalog: Equatable, Sendable {
         } else if let pair, pair.document != nil {
             return [pair]
         }
-        var folderFiles = keyFiles.filter {
+        let folderFiles = keyFiles.filter {
             $0.place == entry.place && $0.folders == entry.folders && $0.role != .snapshotPair
-        }
-        if entry.place == .farFolder, location == .backupsRoot {
-            folderFiles += keyFiles.filter { $0.place == .farFolder && $0.folders.isEmpty }
         }
         guard let fp8 else { return folderFiles.sorted { servingOrder($0) < servingOrder($1) } }
         return folderFiles.filter { file in
             file.heldFingerprints.contains { StoreKeyEnvelope.shortFingerprint($0) == fp8 }
-                || (CatalogNames.parseFile(file.name).flatMap { name -> String? in
-                    if case .fingerprintKeyFile(let fingerprint) = name { return fingerprint }
-                    return nil
-                }.map { $0.hasPrefix(fp8) } ?? false)
         }.sorted { servingOrder($0) < servingOrder($1) }
     }
 
@@ -386,11 +353,6 @@ public struct Catalog: Equatable, Sendable {
                 ?? readable.lazy.flatMap(\.heldFingerprints).first { StoreKeyEnvelope.shortFingerprint($0) == fp8 }
         } else if readable.count == 1 || (readable.first.map { CatalogNames.parseFile($0.name) == .keyFile } ?? false) {
             fingerprint = readable.first?.fingerprint
-        } else if readable.count > 1, readable.allSatisfy({ $0.modifiedAt != nil }) {
-            // Today's `StoreKeyEnvelope.locate` rule for several of today's
-            // files beside one store: the most recently modified opens it (a
-            // state only a re-key produces — the move and the copy keep dates).
-            fingerprint = readable.max { ($0.modifiedAt!, $0.name) < ($1.modifiedAt!, $1.name) }?.fingerprint
         }
         let candidates = fingerprint.map { [$0] } ?? Array(Set(readable.compactMap(\.fingerprint))).sorted()
         let libraries = Set(readable.compactMap(\.library))

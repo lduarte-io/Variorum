@@ -136,63 +136,6 @@ struct ExecutorGuardMutationTests {
         }
     }
 
-    /// A Standard library still carrying the old shared key's wrap, and
-    /// another library's copy whose only road is that key.
-    func beforeTheMove() throws -> (EX, AppleKeyMaterial, String, StoreKey) {
-        let fixture = try EX(.standard)
-        let shared = AppleKeyMaterial.mint()
-        fixture.world.icloud.oldShared = shared
-        var live = try #require(fixture.world.liveFormat3).droppingApple()
-        live.sharedApple = AppleWrap(keyID: shared.id, wrapped: try AES.KeyWrap.wrap(SymmetricKey(data: fixture.key.data), using: shared.key))
-        fixture.world.liveKeyFile = .format3(live)
-        fixture.world.memories = [:]
-        let otherKey = StoreKey.mint(), otherID = "dddd4444-0000-4000-8000-000000000004"
-        var envelope = StoreKeyEnvelope(storeID: otherID, keyFingerprint: PF.fp(otherKey))
-        try envelope.setAppleWrappedCopy(key: otherKey, under: shared.key, appleKeyID: shared.id)
-        fixture.world.catalogKeyFiles["far:other"] = .legacy(LegacyKeyFile(envelope: envelope))
-        return (fixture, shared, otherID, otherKey)
-    }
-
-    @Test func theMoveDropsTheOldWrapWithTheGuardOff() async throws {
-        for guarded in [true, false] {
-            let (fixture, _, otherID, _) = try beforeTheMove()
-            let executor = fixture.executor(guards: guarded ? .all : Self.off { $0.moveKeepsOldWrap = false })
-            var library = try fixture.unlocked(executor)
-            _ = try await executor.moveOffSharedKey(&library, subjects: ["far:other"])
-            #expect((fixture.world.liveFormat3?.sharedApple != nil) == guarded)
-            #expect((fixture.world.ownKeyFiles[otherID]?.sharedApple != nil) == guarded)
-        }
-    }
-
-    @Test func theMoveTakesNoFreshPairWithTheGuardOff() async throws {
-        for guarded in [true, false] {
-            let (fixture, _, _, _) = try beforeTheMove()
-            let executor = fixture.executor(guards: guarded ? .all : Self.off { $0.freshPairAfterMove = false })
-            var library = try fixture.unlocked(executor)
-            _ = try await executor.moveOffSharedKey(&library, subjects: ["far:other"])
-            #expect(fixture.world.backups.isEmpty == !guarded)
-        }
-    }
-
-    @Test func theRetirementStrandsAnotherLibrarysCopyWithoutTheMovesWithTheGuardOff() async throws {
-        for guarded in [true, false] {
-            let fixture = try EX(.castle)
-            let shared = AppleKeyMaterial.mint()
-            fixture.world.icloud.oldShared = shared
-            let otherKey = StoreKey.mint(), otherID = "eeee5555-0000-4000-8000-000000000005"
-            var envelope = StoreKeyEnvelope(storeID: otherID, keyFingerprint: PF.fp(otherKey))
-            try envelope.setAppleWrappedCopy(key: otherKey, under: shared.key, appleKeyID: shared.id)
-            fixture.world.catalogKeyFiles["far:other"] = .legacy(LegacyKeyFile(envelope: envelope))
-            let executor = fixture.executor(guards: guarded ? .all : Self.off { $0.retirementRerunsMoves = false })
-            var library = try fixture.unlocked(executor)
-            _ = try await executor.retireOldSharedKey(&library, moves: ["far:other"])
-            #expect(fixture.world.icloud.oldShared == nil)
-            // With the move, the other library's copy keeps a road of this Mac's own.
-            let gift = fixture.world.ownKeyFiles[otherID]
-            #expect((gift.flatMap { try? $0.open(apple: fixture.world.icloud.keys[$0.apple!.keyID]!) } == otherKey) == guarded)
-        }
-    }
-
     @Test func onlyTheLiveFilesOwnKeyIsRetiredAtCastleWithTheGuardOff() async throws {
         for guarded in [true, false] {
             let fixture = try EX(.standard)
@@ -249,7 +192,7 @@ struct ExecutorGuardMutationTests {
     @Test func anAppleWrapLandsWithoutAFreshVaultReadWithTheGuardOff() throws {
         for guarded in [true, false] {
             let fixture = try EX(.standard, synced: true)
-            fixture.world.liveKeyFile = .format3(try #require(fixture.world.liveFormat3).droppingApple())
+            fixture.world.liveKeyFile = (try #require(fixture.world.liveFormat3).droppingApple())
             let executor = fixture.executor(guards: guarded ? .all : Self.off { $0.freshVaultBeforeAppleWrite = false })
             var library = try fixture.unlocked(executor)
             try executor.runRepairs([.landAppleWrap(appleKeyID: fixture.ownApple!.id)], on: &library)

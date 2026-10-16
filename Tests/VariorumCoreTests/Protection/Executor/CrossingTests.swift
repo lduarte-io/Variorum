@@ -19,7 +19,7 @@ enum UseCastleStates {
         { fixture, library in
             guard let record = fixture.liveRecord, let live = fixture.world.liveFormat3 else { return false }
             let current = fixture.world.live!.fingerprint
-            return record.mode == .castle && record.modeConfirmed && current != PF.fp(k0)
+            return record.mode == .castle && current != PF.fp(k0)
                 && live.apple == nil && live.history.contains { $0.fingerprint == PF.fp(k0) }
                 && !fixture.world.custody.keys.contains { $0.itemClass == .silent }
                 && ownApple.map { fixture.world.icloud.keys[$0] == nil && library.section.retiredAppleKeyIDs.contains($0) } ?? true

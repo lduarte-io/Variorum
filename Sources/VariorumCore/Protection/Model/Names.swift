@@ -11,8 +11,8 @@ import Foundation
 // `Variorum` would read `Variorum-dev-…` items as its own. Each parser
 // requires the exact prefix `<scope>-` AND a well-formed tail (sixteen hex
 // for a fingerprint, a canonical UUID for an id), which a neighbouring
-// scope's tail never is. Today's names (the legacy readers') live in
-// `LegacyReaders.swift`, never here.
+// scope's tail never is. (Today's names left with the legacy readers — rule
+// 26, VX-378 U1.)
 
 public enum ProtectionNames {
     // MARK: - Custody items — one per library key, of the key's kind for life

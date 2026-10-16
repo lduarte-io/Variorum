@@ -1,10 +1,11 @@
 //
 //  CatalogTests.swift
 //  VariorumCoreTests — VX-305 U2: the catalog's ONE name parser covers every
-//  name today's builds write (the union of today's three parsers, and agrees
-//  with each of them on its own names), refuses every name no build writes,
-//  and attributes each copy to its library (from the pair's key file) and its
-//  Mac (from the subfolder).
+//  name this design writes (and agrees with today's parsers on the snapshot
+//  and stamp-folder names it shares with them), refuses every name no build
+//  writes, and attributes each copy to its library (from the pair's key file)
+//  and its Mac (from the subfolder). (Today's key-file names, flat files and
+//  folder key files left with rule 26 — VX-378 U1.)
 //
 
 import CryptoKit
@@ -44,15 +45,6 @@ enum CF {
         return try file.encoded()
     }
 
-    /// A format-2 key file (today's), with or without the old shared Apple wrap.
-    static func format2(library: String, key: StoreKey, appleWrapped: Bool = false) throws -> Data {
-        var envelope = StoreKeyEnvelope(storeID: library, keyFingerprint: PF.fp(key))
-        if appleWrapped {
-            try envelope.setAppleWrappedCopy(key: key, under: SymmetricKey(size: .bits256), appleKeyID: PF.id())
-        }
-        return try JSONEncoder().encode(envelope)
-    }
-
     static let lib1 = "aaaa1111-0000-4000-8000-000000000001"
     static let lib2 = "bbbb2222-0000-4000-8000-000000000002"
     static let macA = "cccc3333-0000-4000-8000-00000000000a"
@@ -78,9 +70,9 @@ struct CatalogNameTests {
         // The pair writer (`StoreBackup.pairedKeyFile` = `LibraryClassifier.pairedKeyFile`).
         let pair = LibraryClassifier.pairedKeyFile(for: URL(fileURLWithPath: "/x/" + CF.snapshotName(when, key)))
         #expect(CatalogNames.parseFile(pair.lastPathComponent) == .snapshotKeyFile(stamp: when, fingerprint8: CF.fp8(key)))
-        // The key-file names (`StoreKeyEnvelope.filename(forFingerprint:)`, the legacy name).
-        #expect(CatalogNames.parseFile(StoreKeyEnvelope.filename(forFingerprint: fp)) == .fingerprintKeyFile(fingerprint: fp))
-        #expect(CatalogNames.parseFile(StoreKeyEnvelope.legacyFilename) == .legacyKeyFile)
+        // Today's key-file names are not read (rule 26).
+        #expect(CatalogNames.parseFile(StoreKeyEnvelope.filename(forFingerprint: fp)) == nil)
+        #expect(CatalogNames.parseFile(StoreKeyEnvelope.legacyFilename) == nil)
         // The set-aside writers (`StoreIdentity.setAside`, the launch gate's): the
         // same expression, restated here.
         for base in [StoreKeyEnvelope.filename(forFingerprint: fp), StoreKeyEnvelope.legacyFilename] {
@@ -163,16 +155,6 @@ struct CatalogNameTests {
             let safety = CatalogNames.parseFolder("variorum-adopt-safety-" + folder, under: .safetyCopies)
             #expect((safety != nil) == (LibraryAdoption.adoptionStamp(folder) != nil), "\(folder): the safety twin")
         }
-        // And the key-file names (`StoreKeyEnvelope.fingerprint(fromFilename:)`).
-        for name in ["variorum-keys-0123456789abcdef.json", "variorum-keys-0123456789ABCDEF.json",
-                     "variorum-keys-0123456789abcde.json", "variorum-keys-0123456789abcdefg.json",
-                     "variorum-keys-.json", "variorum-keys.json"] {
-            let mine: String? = {
-                if case .fingerprintKeyFile(let fp)? = CatalogNames.parseFile(name) { return fp }
-                return nil
-            }()
-            #expect(mine == StoreKeyEnvelope.fingerprint(fromFilename: name), "\(name)")
-        }
     }
 
     @Test func aNameNoBuildWritesIsNotTheApps() {
@@ -189,9 +171,10 @@ struct CatalogNameTests {
 
 @Suite("VX-305 U2 — the catalog: every place copies live, each copy attributed to its library and its Mac")
 struct CatalogAttributionTests {
-    /// A shared far folder holding two Macs' and two libraries' copies, a
-    /// legacy flat copy, the container's own copies, an aside folder, a
-    /// safety copy, set-aside files and foreign files.
+    /// A shared far folder holding two Macs' and two libraries' copies, the
+    /// container's own copies, an aside folder, a safety copy, a set-aside
+    /// file and foreign files (today's flat files and folder key files among
+    /// them — rule 26).
     static func world() throws -> (catalog: Catalog, keys: [String: StoreKey]) {
         let k1a = StoreKey.mint(), k1b = StoreKey.mint(), k2 = StoreKey.mint(), old = StoreKey.mint()
         let flat = StoreKey.mint(), aside = StoreKey.mint(), live = StoreKey.mint()
@@ -207,34 +190,26 @@ struct CatalogAttributionTests {
         // This Mac's own key file for lib2 (§3.5 point 2).
         entries.append(CatalogEntry(place: .farFolder, folders: CF.macFolder(CF.lib2, CF.macA),
                                     name: ProtectionNames.keyFilename, bytes: try CF.format3(library: CF.lib2, key: k2)))
-        // A legacy flat far copy whose key file sits one level up (today's folder file).
+        // Today's flat copies and folder key files: foreign now (rule 26).
         entries.append(CatalogEntry(place: .farFolder, folders: ["Backups"], name: CF.snapshotName(d1, flat)))
-        entries.append(CatalogEntry(place: .farFolder, name: StoreKeyEnvelope.filename(forFingerprint: PF.fp(flat)),
-                                    bytes: try CF.format2(library: CF.lib1, key: flat)))
-        // The container: a legacy flat stamp-only copy served by the legacy file.
+        entries.append(CatalogEntry(place: .farFolder, name: StoreKeyEnvelope.filename(forFingerprint: PF.fp(flat))))
         entries.append(CatalogEntry(place: .container, folders: ["Backups"], name: CF.snapshotName(d1, nil)))
-        entries.append(CatalogEntry(place: .container, folders: ["Backups"], name: StoreKeyEnvelope.legacyFilename,
-                                    bytes: try CF.format2(library: CF.lib1, key: old)))
-        // An aside folder (format 3 beside today's file) and a safety copy.
+        entries.append(CatalogEntry(place: .container, folders: ["Backups"], name: StoreKeyEnvelope.legacyFilename))
+        // An aside folder and a safety copy.
         let asideFolders = ["Previous Libraries", CF.stampText(d2)]
         entries.append(CatalogEntry(place: .container, folders: asideFolders, name: "variorum.sqlite"))
         entries.append(CatalogEntry(place: .container, folders: asideFolders, name: ProtectionNames.keyFilename,
                                     bytes: try CF.format3(library: CF.lib2, key: aside)))
-        entries.append(CatalogEntry(place: .container, folders: asideFolders,
-                                    name: StoreKeyEnvelope.filename(forFingerprint: PF.fp(old)),
-                                    bytes: try CF.format2(library: CF.lib1, key: old)))
         let safety = ["Backups", "safety-copies", "variorum-adopt-safety-" + CF.stampText(d2)]
         entries.append(CatalogEntry(place: .container, folders: safety, name: "variorum.sqlite"))
-        entries.append(CatalogEntry(place: .container, folders: safety, name: StoreKeyEnvelope.legacyFilename,
-                                    bytes: try CF.format2(library: CF.lib1, key: old)))
-        // Beside the slot: the live file, today's file, a set-aside file, the slot itself.
+        entries.append(CatalogEntry(place: .container, folders: safety, name: ProtectionNames.keyFilename,
+                                    bytes: try CF.format3(library: CF.lib1, key: old)))
+        // Beside the slot: the live file, a set-aside file, the slot itself.
         entries.append(CatalogEntry(place: .container, name: "variorum.sqlite"))
         entries.append(CatalogEntry(place: .container, name: ProtectionNames.keyFilename,
                                     bytes: try CF.format3(library: CF.lib1, key: live, epoch: 2, history: [old])))
-        entries.append(CatalogEntry(place: .container, name: StoreKeyEnvelope.filename(forFingerprint: PF.fp(old)),
-                                    bytes: try CF.format2(library: CF.lib1, key: old)))
         entries.append(CatalogEntry(place: .container, name: "variorum-keys.stale-1791000000.json",
-                                    bytes: try CF.format2(library: CF.lib1, key: old)))
+                                    bytes: try CF.format3(library: CF.lib1, key: old)))
         // Foreign: the A1 rail's copies, a drill file, a stray folder.
         entries.append(CatalogEntry(place: .container, folders: ["Backups", "safety-copies"],
                                     name: "variorum-backup-a1-2026-10-05-101010.sqlite"))
@@ -253,33 +228,27 @@ struct CatalogAttributionTests {
         #expect(copy("k1b")?.library == CF.lib1 && copy("k1b")?.mac == .mac8(ProtectionNames.mac8(CF.macB)))
         #expect(copy("k2")?.library == CF.lib2 && copy("k2")?.mac == .mac8(ProtectionNames.mac8(CF.macA)))
         #expect(copy("k1a")?.kind == .backup)
-        // A legacy flat far copy: its library from today's folder file, its Mac unattributed.
-        #expect(copy("flat")?.kind == .legacyFlatBackup)
-        #expect(copy("flat")?.library == CF.lib1 && copy("flat")?.mac == .unattributed)
-        // The container's stamp-only flat copy: this Mac's by place, served by the legacy file.
-        let stampOnly = catalog.copies.first { $0.place == .container && $0.kind == .legacyFlatBackup }
-        #expect(stampOnly?.mac == .thisMacsContainer && stampOnly?.library == CF.lib1)
-        #expect(stampOnly?.fingerprint == PF.fp(keys["old"]!))
-        // The aside folder: its format-3 file first — the key it is under.
+        // Today's flat copies are no copies of this design's (rule 26).
+        #expect(copy("flat") == nil)
+        #expect(!catalog.copies.contains { $0.folders == ["Backups"] })
+        // The aside folder: its format-3 file — the key it is under.
         let aside = catalog.copies.first { $0.kind == .previousLibrary }
-        #expect(aside?.fingerprint == PF.fp(keys["aside"]!) && aside?.library == nil,
-                "two key files naming different libraries leave the library unattributed")
+        #expect(aside?.fingerprint == PF.fp(keys["aside"]!) && aside?.library == CF.lib2)
         #expect(catalog.copies.contains { $0.kind == .adoptionSafetyCopy && $0.library == CF.lib1 })
         // The slot itself is never a copy.
         #expect(!catalog.copies.contains { $0.place == .container && $0.folders.isEmpty })
-        #expect(catalog.copies.count == 7)
+        #expect(catalog.copies.count == 5)
     }
 
     @Test func everyKeyFileHasItsRole() throws {
         let (catalog, _) = try Self.world()
         func roles(_ role: KeyFileRole) -> Int { catalog.keyFiles.filter { $0.role == role }.count }
         #expect(roles(.live) == 1)
-        #expect(roles(.besideLibrary) == 1)
         #expect(roles(.setAside) == 1)
         #expect(roles(.snapshotPair) == 3)
         #expect(roles(.ownKeyFile) == 1)
-        #expect(roles(.folderKeyFile) == 2)
-        #expect(roles(.asideCopy) == 3)
+        #expect(roles(.asideCopy) == 2)
+        #expect(catalog.keyFiles.count == 8)
         #expect(catalog.liveKeyFile?.heldFingerprints.count == 2, "the live file leads to its history too")
     }
 
@@ -288,27 +257,26 @@ struct CatalogAttributionTests {
         let names = catalog.foreign.map(\.name)
         #expect(names.contains("variorum-backup-a1-2026-10-05-101010.sqlite"))
         #expect(names.contains("variorum-backup-seed-drill-1.sqlite"))
+        #expect(names.contains(StoreKeyEnvelope.legacyFilename), "today's key files are foreign now (rule 26)")
         #expect(catalog.foreign.contains { $0.folders == ["Backups", "zzzz"] })
         #expect(!names.contains("note.md"), "an export is hers, not foreign to a copy's place")
         #expect(!catalog.copies.contains { $0.name.hasPrefix("variorum-backup-a1-") || $0.name.contains("seed-drill") })
         #expect(!catalog.copies.contains { $0.folders == ["Backups", "zzzz"] })
     }
 
-    /// Today's pair rules: a pair that disagrees with the name's fp8 is not
-    /// offered; the folder's fingerprint file of that fp8 serves instead.
+    /// The pair rule: a pair that disagrees with the name's fp8 is not
+    /// offered as if it opened the copy.
     @Test func aMismatchedPairIsNeverOfferedAsIfItOpened() throws {
         let key = StoreKey.mint(), other = StoreKey.mint()
         let when = CF.stamp(4)
+        let folders = CF.macFolder(CF.lib1, CF.macA)
         let catalog = Catalog.build([
-            CatalogEntry(place: .container, folders: ["Backups"], name: CF.snapshotName(when, key)),
-            CatalogEntry(place: .container, folders: ["Backups"], name: CF.pairName(when, key),
-                         bytes: try CF.format2(library: CF.lib1, key: other)),
-            CatalogEntry(place: .container, folders: ["Backups"], name: StoreKeyEnvelope.filename(forFingerprint: PF.fp(key)),
-                         bytes: try CF.format2(library: CF.lib1, key: key)),
+            CatalogEntry(place: .container, folders: folders, name: CF.snapshotName(when, key)),
+            CatalogEntry(place: .container, folders: folders, name: CF.pairName(when, key),
+                         bytes: try CF.format3(library: CF.lib1, key: other)),
         ])
         let copy = try #require(catalog.copies.first)
-        #expect(copy.servingKeyFiles == [Catalog.id(place: .container, folders: ["Backups"],
-                                                    name: StoreKeyEnvelope.filename(forFingerprint: PF.fp(key)))])
-        #expect(copy.fingerprint == PF.fp(key))
+        #expect(copy.servingKeyFiles.isEmpty)
+        #expect(copy.fingerprint == nil)
     }
 }

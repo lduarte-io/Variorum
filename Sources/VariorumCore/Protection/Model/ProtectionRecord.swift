@@ -1,8 +1,8 @@
 import Foundation
 
 // VX-305 U1 — THE PROTECTION RECORD, as a value (design §3.2). The library's
-// own facts — library ID; the mode (the current key's kind) and whether it's
-// confirmed; the account (none or one id); the key epoch; the current key's
+// own facts — library ID; the mode (the current key's kind); the account (none
+// or one id); the key epoch; the current key's
 // fingerprint; when it changed; the family tree; the salt every device's
 // hardware marker is computed under — and ONE SEALED DEVICE SECTION PER
 // DEVICE. Its SQLite table (`protection_record`, local-only, the plaintext
@@ -16,12 +16,9 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
 
     public var format: Int
     public var libraryID: String
-    /// The current key's kind.
+    /// The current key's kind. (Always known: the record's "unconfirmed
+    /// mode" — the migration's and corner 45's — left with rule 26.)
     public var mode: ProtectionMode
-    /// false: recorded by the migration from today's rules without the
-    /// vault's word, or corner 45's ambiguous case — no custody repair runs in
-    /// either direction until it is confirmed (§3.3, §3.13).
-    public var modeConfirmed: Bool
     /// The Variorum account the library is bound to — none, or one id
     /// (§3.8). Signing in or out never changes it.
     public var account: String?
@@ -38,14 +35,13 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
 
     public init(
         format: Int = ProtectionRecord.currentFormat, libraryID: String, mode: ProtectionMode,
-        modeConfirmed: Bool, account: String?, keyEpoch: Int, currentFingerprint: String,
+        account: String?, keyEpoch: Int, currentFingerprint: String,
         changedAt: Date, familyTree: FamilyTree, markerSalt: Data,
         deviceSections: [Sealed<DeviceSection>] = []
     ) {
         self.format = format
         self.libraryID = libraryID
         self.mode = mode
-        self.modeConfirmed = modeConfirmed
         self.account = account
         self.keyEpoch = keyEpoch
         self.currentFingerprint = currentFingerprint
@@ -56,10 +52,9 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
     }
 
     /// A new record for a library whose current key is `currentKey`, born
-    /// `mode` on `madeBy` (the creation, a landing, or the migration — whose
-    /// tree seeding is its own, `FamilyTree.seeding`).
+    /// `mode` on `madeBy` (the creation).
     public static func minting(
-        libraryID: String, mode: ProtectionMode, modeConfirmed: Bool, account: String?,
+        libraryID: String, mode: ProtectionMode, account: String?,
         currentFingerprint: String, keyEpoch: Int = 1, madeBy: String?, at: Date,
         markerSalt: Data = HardwareMarker.mintSalt()
     ) -> ProtectionRecord {
@@ -67,15 +62,15 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
             FamilyTree().recordingBirth(fingerprint: currentFingerprint, kind: mode, madeBy: $0, madeAt: at)
         } ?? FamilyTree(entries: [FamilyTree.Entry(fingerprint: currentFingerprint, kind: mode)])
         return ProtectionRecord(
-            libraryID: libraryID, mode: mode, modeConfirmed: modeConfirmed, account: account,
+            libraryID: libraryID, mode: mode, account: account,
             keyEpoch: keyEpoch, currentFingerprint: currentFingerprint, changedAt: at,
             familyTree: tree, markerSalt: markerSalt)
     }
 
     /// **A re-key or a landing** (§3.4): the new key is recorded in the family
     /// tree with its kind for life and the Mac that made it, the old key
-    /// retired, the epoch advanced; the mode is the new key's kind, confirmed
-    /// (a key changes only at a deliberate act — §3.12).
+    /// retired, the epoch advanced; the mode is the new key's kind (a key
+    /// changes only at a deliberate act — §3.12).
     public func recordingRekey(
         to newFingerprint: String, kind: ProtectionMode, by deviceID: String, at: Date
     ) -> ProtectionRecord {
@@ -86,7 +81,6 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
         next.currentFingerprint = newFingerprint
         next.keyEpoch += 1
         next.mode = kind
-        next.modeConfirmed = true
         next.changedAt = at
         return next
     }

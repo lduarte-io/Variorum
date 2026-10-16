@@ -47,13 +47,11 @@ struct RetentionTests {
         // A copy in A's lib1 folder whose pair doesn't read — never attributable.
         entries.append(CatalogEntry(place: .farFolder, folders: CF.macFolder(CF.lib1, CF.macA),
                                     name: CF.snapshotName(CF.stamp(-30), StoreKey.mint())))
-        // Today's legacy flat files.
+        // Today's flat files (foreign since rule 26 — never copies, never pruned).
         let flatKey = StoreKey.mint()
         for day in forty {
             entries.append(CatalogEntry(place: .farFolder, folders: ["Backups"], name: CF.snapshotName(CF.stamp(day), flatKey)))
         }
-        entries.append(CatalogEntry(place: .farFolder, name: StoreKeyEnvelope.filename(forFingerprint: PF.fp(flatKey)),
-                                    bytes: try CF.format2(library: CF.lib1, key: flatKey)))
         // The container: A's lib1 copies, and a predecessor's (B's) lib1 folder.
         entries += try RF.copies(.container, library: CF.lib1, mac: CF.macA, days: (0..<20).map(Double.init))
         entries += try RF.copies(.container, library: CF.lib1, mac: CF.macB, days: (0..<5).map(Double.init))
@@ -67,12 +65,10 @@ struct RetentionTests {
         #expect(!outcome.prune.isEmpty)
         #expect(Set(outcome.prune).isSubset(of: mine), "only this Mac's copies of this library")
         #expect(Set(outcome.prune).union(outcome.keep) == mine)
-        // Another Mac's, another library's, the unattributable one, the legacy flat ones: untouched.
+        // Another Mac's, another library's, the unattributable one: untouched.
         for copy in catalog.copies where !mine.contains(copy.id) {
             #expect(!outcome.prune.contains(copy.id), "\(copy.id) is not this Mac's copy of this library")
         }
-        #expect(Set(outcome.legacyFlat) == RF.ids(catalog) { $0.kind == .legacyFlatBackup })
-        #expect(outcome.legacyFlat.count == 40)
     }
 
     @Test func theContainerKeepsItsNewestFourteen() throws {

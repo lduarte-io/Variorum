@@ -76,9 +76,6 @@ public struct ProtectionGuards: Equatable, Sendable {
     /// file of this Mac's own only to libraries whose copies the catalog
     /// attributes to this Mac. Off: to every library in the catalog.
     public var giftsOnlyForThisMacsCopies = true
-    /// AN UNCONFIRMED MODE RUNS NO CUSTODY REPAIR (§3.3, §3.13). Off: the
-    /// recorded-but-unconfirmed mode's repairs run.
-    public var unconfirmedModeNoCustodyRepair = true
     /// NOTHING DESTRUCTIVE ON A STANDARD RECORD's WORD ALONE (§3.3, §3.6).
     /// Off: Standard's record drives deletes.
     public var standardRecordNoDestructiveRepair = true
@@ -266,13 +263,6 @@ public struct ProtectionGuards: Equatable, Sendable {
         #endif
     }
 
-    public var unconfirmedModeNoCustodyRepairOn: Bool {
-        #if DEBUG
-        return unconfirmedModeNoCustodyRepair
-        #else
-        return true
-        #endif
-    }
 
     public var standardRecordNoDestructiveRepairOn: Bool {
         #if DEBUG

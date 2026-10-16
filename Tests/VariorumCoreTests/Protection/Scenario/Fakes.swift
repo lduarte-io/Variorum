@@ -64,34 +64,15 @@ struct KName: Hashable, Comparable, CustomStringConvertible {
         KName(service: ProtectionNames.appleKeyService, account: ProtectionNames.oldSharedAppleKeyAccount(scope: scope))
     }
 
-    static func legacyBound(_ scope: String, _ libraryID: String) -> KName {
-        KName(service: LegacyItems.storeKeyService, account: LegacyItems.boundAccount(scope: scope, libraryID: libraryID))
-    }
-
-    static func legacyGated(_ scope: String, _ libraryID: String) -> KName {
-        KName(service: LegacyItems.storeKeyService, account: LegacyItems.gatedAccount(scope: scope, libraryID: libraryID))
-    }
-
-    static func escrow(_ libraryID: String) -> KName {
-        KName(service: LegacyItems.escrowService, account: LegacyItems.escrowAccount(libraryID: libraryID))
-    }
-
-    static func legacySync(_ scope: String, _ libraryID: String, gated: Bool) -> KName {
-        KName(service: LegacyItems.syncCustodyService,
-              account: gated ? LegacyItems.syncGatedAccount(scope: scope, libraryID: libraryID)
-                  : LegacyItems.syncBoundAccount(scope: scope, libraryID: libraryID))
-    }
 }
 
 /// What an item holds — typed, so a scan of the world can tell a secret from
 /// a non-secret value.
 enum KValue: Equatable {
-    /// A raw library key (custody, today's per-library-ID items, a 13p escrow).
+    /// A raw library key (custody).
     case key(StoreKey)
     /// The account's sync keys (M, C, J).
     case syncKeys(DeviceKeyMaterial)
-    /// Today's per-store sync custody (`SyncCustodyRecord` — `{deviceID, material}`).
-    case legacySync(deviceID: String?, material: DeviceKeyMaterial?)
     /// What this Mac remembers (non-secret, sealed).
     case memory(Sealed<DeviceMemory>)
     /// An Apple key `{id, key}` — the new per-id items and the old shared one.
@@ -108,11 +89,8 @@ enum KValue: Equatable {
     }
 
     var material: DeviceKeyMaterial? {
-        switch self {
-        case .syncKeys(let material): return material
-        case .legacySync(_, let material): return material
-        default: return nil
-        }
+        if case .syncKeys(let material) = self { return material }
+        return nil
     }
 }
 
@@ -215,15 +193,13 @@ struct LibraryImage: Equatable {
     var record: ProtectionRecord?
     /// The writing's generation (a counter standing in for the rows).
     var writing: Int
-    /// Today's in-file `RotationMarker` (`sync_state.rekey_in_progress`).
-    var legacyMarker: LegacyRotationMarker?
     /// The account its synced rows were stamped by.
     var rowsOwner: String?
 }
 
 enum SFile: Equatable {
     case library(LibraryImage)
-    case keyFile(KeyFileDocument)
+    case keyFile(KeyFile)
     case plan(Sealed<ProtectionPlan>)
     /// "A library lived here".
     case marker
@@ -235,21 +211,12 @@ enum SFile: Equatable {
         return nil
     }
 
-    var keyFile: KeyFileDocument? {
+    var keyFile: KeyFile? {
         if case .keyFile(let document) = self { return document }
         return nil
     }
 
-    func encodedKeyFile() -> Data? {
-        switch keyFile {
-        case .format3(let file)?: return try? file.encoded()
-        case .legacy(let legacy)?:
-            let encoder = JSONEncoder()
-            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-            return try? encoder.encode(legacy.envelope)
-        case nil: return nil
-        }
-    }
+    func encodedKeyFile() -> Data? { try? keyFile?.encoded() }
 }
 
 /// A folder tree: the container's slot folder, or a far (iCloud Drive) folder

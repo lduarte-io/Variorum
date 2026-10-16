@@ -142,12 +142,9 @@ extension ActContext {
 
 extension ProtectionExecutor {
     /// **Use Standard.** Both secrets typed; the words never made new.
-    /// Corner 45's Castle-not-yet-confirmed library takes this road as the
-    /// key change it now is.
     public func useStandard(_ library: inout UnlockedLibrary, typed: TypedSecrets) async throws -> ActOutcome {
-        guard let record = library.record else { throw ExecutorRefusal.migrationOwed }
+        guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         guard record.mode == .castle else { throw ExecutorRefusal.wrongMode(.standard) }
-        guard record.modeConfirmed || record.account == nil else { throw ExecutorRefusal.modeNotConfirmed }
         guard !typed.wordsAreNew else { throw ExecutorRefusal.wordsMustBeTyped }
         var parameters = ActParameters(synced: record.account != nil, accountID: record.account, newKind: .standard)
         let secrets = try await doorSecrets(library, typed: typed, wordsMayBeNew: false, parameters: &parameters)

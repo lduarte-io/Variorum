@@ -33,16 +33,6 @@ public protocol CustodyLeaf: AnyObject {
     func deleteCustody(fingerprint: String, itemClass: ProtectionNames.CustodyClass) throws
 }
 
-/// Today's items, by the legacy readers' names (`LegacyItems`) — read by the
-/// migration's fold, deleted by the Castle repairs once the history holds
-/// their key (§3.3, §3.13).
-public protocol LegacyItemsLeaf: AnyObject {
-    func legacyItems() throws -> [LegacyItemFact]
-    /// The raw key a legacy item holds (a gated item's read is a press).
-    func readLegacyItem(_ kind: LegacyItemFact.Kind) throws -> StoreKey?
-    func deleteLegacyItem(_ kind: LegacyItemFact.Kind) throws
-}
-
 /// The sync keys — M, C, J for the bound account — held by what they can
 /// reach (§3.2): a Touch ID item or session memory while they reach a
 /// Castle-era key, a silent item otherwise. One item per account.
@@ -104,7 +94,7 @@ public protocol LibraryFileLeaf: AnyObject {
     /// Does `key` open the live library file? (Every road verifies itself.)
     func libraryOpens(with key: StoreKey) throws -> Bool
     /// The record inside the live file (nil: a library from before this
-    /// change — the migration's subject).
+    /// design — rule 26: it is not handled, and never unlocks).
     func readRecord(with key: StoreKey) throws -> ProtectionRecord?
     func writeRecord(_ record: ProtectionRecord, with key: StoreKey) throws
     /// Export-and-swap's first half: the live library re-encrypted into a
@@ -125,24 +115,18 @@ public protocol LibraryFileLeaf: AnyObject {
     func createLibrary(with key: StoreKey, record: ProtectionRecord) throws
     /// A plaintext export carrying its library ID (§3.7).
     func exportPlaintext(with key: StoreKey, to destination: String) throws
-    /// Today's in-file `RotationMarker` (`sync_state.rekey_in_progress`).
-    func readLegacyRotationMarker(with key: StoreKey) throws -> LegacyRotationMarker?
-    func clearLegacyRotationMarker(with key: StoreKey) throws
 }
 
-/// Key files: THE live one beside the library, this Mac's own key files for
-/// other libraries (`Backups/<library8>/<mac8>/`), and today's format-1/2
-/// files beside the library (by their catalog ids).
+/// Key files: THE live one beside the library, and this Mac's own key files
+/// for other libraries (`Backups/<library8>/<mac8>/`). Format 3 only (rule 26).
 public protocol KeyFileStoreLeaf: AnyObject {
-    func readLiveKeyFile() throws -> KeyFileDocument?
+    func readLiveKeyFile() throws -> KeyFile?
     func writeLiveKeyFile(_ file: KeyFile) throws
     func readOwnKeyFile(libraryID: String, deviceID: String) throws -> KeyFile?
     func writeOwnKeyFile(_ file: KeyFile, deviceID: String) throws
-    func legacyKeyFilesBesideLibrary() throws -> [(id: String, file: LegacyKeyFile)]
-    func deleteLegacyKeyFile(id: String) throws
     /// Any key file the catalog lists, by its catalog id (a copy's serving
     /// file — the move reads another library's key through it).
-    func readKeyFile(catalogID: String) throws -> KeyFileDocument?
+    func readKeyFile(catalogID: String) throws -> KeyFile?
     /// Move whatever sits in the live place aside, to `name` beside the
     /// library — never deleting it, never overwriting: false (nothing moved)
     /// when `name` is taken; true when moved, or when the live place is empty
@@ -241,7 +225,6 @@ public enum ProtectionDiagnostic: Equatable, Sendable {
 /// All the leaves, together.
 public struct ExecutorLeaves {
     public var custody: any CustodyLeaf
-    public var legacyItems: any LegacyItemsLeaf
     public var syncKeys: any SyncKeysLeaf
     public var apple: any AppleKeysLeaf
     public var vault: any VaultLeaf
@@ -256,14 +239,13 @@ public struct ExecutorLeaves {
     public var diagnostics: any DiagnosticsLeaf
 
     public init(
-        custody: any CustodyLeaf, legacyItems: any LegacyItemsLeaf, syncKeys: any SyncKeysLeaf,
+        custody: any CustodyLeaf, syncKeys: any SyncKeysLeaf,
         apple: any AppleKeysLeaf, vault: any VaultLeaf, library: any LibraryFileLeaf,
         keyFiles: any KeyFileStoreLeaf, memory: any MemoryStoreLeaf, plans: any PlanStoreLeaf,
         backups: any BackupsLeaf, clock: any ClockLeaf, ids: any IDsLeaf, biometry: any BiometryLeaf,
         diagnostics: any DiagnosticsLeaf
     ) {
         self.custody = custody
-        self.legacyItems = legacyItems
         self.syncKeys = syncKeys
         self.apple = apple
         self.vault = vault

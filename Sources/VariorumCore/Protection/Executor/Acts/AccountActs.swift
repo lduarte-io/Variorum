@@ -198,7 +198,6 @@ extension ActContext {
         guard var record = library.record else { throw ExecutorRefusal.recordMissing }
         guard record.account != account else { return }
         record.account = account
-        record.modeConfirmed = true
         try leaves.library.writeRecord(record, with: library.key)
         library.record = record
         try rememberNewKey()
@@ -244,9 +243,8 @@ extension ProtectionExecutor {
     /// **Set up sync** — the first device of an account (no vault yet): the
     /// account takes the library's mode.
     public func setUpSync(_ library: inout UnlockedLibrary, typed: TypedSecrets) async throws -> ActOutcome {
-        guard let record = library.record else { throw ExecutorRefusal.migrationOwed }
+        guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         guard record.account == nil else { throw ExecutorRefusal.nothingToDo }
-        guard record.modeConfirmed else { throw ExecutorRefusal.modeNotConfirmed }
         guard let account = configuration.session.accountID else { throw ExecutorRefusal.noAccountSignedIn }
         if try await readVault(accountID: account) != nil { throw ExecutorRefusal.nothingToDo }
         var parameters = ActParameters(
@@ -259,7 +257,7 @@ extension ProtectionExecutor {
     /// **Enroll — join the signed-in account's vault**, by §3.8's joining
     /// rules. The account's passphrase and words, typed.
     public func enroll(_ library: inout UnlockedLibrary, typed: TypedSecrets, gate: GateStyle? = nil) async throws -> ActOutcome {
-        guard let record = library.record else { throw ExecutorRefusal.migrationOwed }
+        guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         guard record.account == nil else { throw ExecutorRefusal.nothingToDo }
         guard let account = configuration.session.accountID else { throw ExecutorRefusal.noAccountSignedIn }
         return try await join(.enroll, account: account, leaving: nil, library: &library, typed: typed, gate: gate)
@@ -268,7 +266,7 @@ extension ProtectionExecutor {
     /// **Move it to the signed-in account** — leave the record's account (a
     /// re-key), join this one.
     public func move(_ library: inout UnlockedLibrary, typed: TypedSecrets, gate: GateStyle? = nil) async throws -> ActOutcome {
-        guard let record = library.record else { throw ExecutorRefusal.migrationOwed }
+        guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         guard let old = record.account else { throw ExecutorRefusal.notSynced }
         guard let account = configuration.session.accountID, account != old else { throw ExecutorRefusal.nothingToDo }
         return try await join(.move, account: account, leaving: old, library: &library, typed: typed, gate: gate)
@@ -278,8 +276,7 @@ extension ProtectionExecutor {
         _ act: ProtectionAct, account: String, leaving old: String?, library: inout UnlockedLibrary, typed: TypedSecrets,
         gate: GateStyle?
     ) async throws -> ActOutcome {
-        guard let record = library.record else { throw ExecutorRefusal.migrationOwed }
-        guard record.modeConfirmed else { throw ExecutorRefusal.modeNotConfirmed }
+        guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         guard let vault = try await readVault(accountID: account) else { throw ExecutorRefusal.needsFreshVault }
         if vault.reading.rotationInProgress { throw ExecutorRefusal.rotationInProgress }
         let accountMode = vault.mode.settled ?? .castle
@@ -319,9 +316,8 @@ extension ProtectionExecutor {
         gate: GateStyle? = nil
     ) async throws -> ActOutcome {
         guard [.thisMacOnly, .stopSyncingHere, .deleteAccountHere].contains(act) else { throw ExecutorRefusal.nothingToDo }
-        guard let record = library.record else { throw ExecutorRefusal.migrationOwed }
+        guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         guard let old = record.account else { throw ExecutorRefusal.notSynced }
-        guard record.modeConfirmed else { throw ExecutorRefusal.modeNotConfirmed }
         if case .signedIn(let id, _) = configuration.session, id != old { throw ExecutorRefusal.otherAccountSignedIn }
         let to = act == .thisMacOnly ? (mode ?? record.mode) : record.mode
         var parameters = ActParameters(

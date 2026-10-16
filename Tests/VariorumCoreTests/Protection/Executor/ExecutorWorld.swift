@@ -23,7 +23,6 @@ struct SimulatedCrash: Error {}
 enum WorldWrite: Equatable, CustomStringConvertible {
     case custody(String, ProtectionNames.CustodyClass)
     case custodyDelete(String, ProtectionNames.CustodyClass)
-    case legacyDelete(String)
     case syncKeys(ProtectionNames.CustodyClass)
     case syncKeysDelete(ProtectionNames.CustodyClass)
     case appleAdd(String)
@@ -40,7 +39,6 @@ enum WorldWrite: Equatable, CustomStringConvertible {
     case keyFile(String)
     case keyFileAside(String)
     case ownKeyFile(String)
-    case legacyKeyFileDelete(String)
     case memory(String)
     case plan
     case planDelete
@@ -48,13 +46,11 @@ enum WorldWrite: Equatable, CustomStringConvertible {
     case sendPair(String)
     case copiesDelete
     case plaintextExport
-    case legacyMarkerClear
 
     var description: String {
         switch self {
         case .custody(let fp, let c): return "custody+ \(c.rawValue) \(fp)"
         case .custodyDelete(let fp, let c): return "custody- \(c.rawValue) \(fp)"
-        case .legacyDelete(let kind): return "legacy- \(kind)"
         case .syncKeys(let c): return "sync+ \(c.rawValue)"
         case .syncKeysDelete(let c): return "sync- \(c.rawValue)"
         case .appleAdd(let id): return "apple+ \(id)"
@@ -71,7 +67,6 @@ enum WorldWrite: Equatable, CustomStringConvertible {
         case .keyFile(let fp): return "keyfile \(fp)"
         case .keyFileAside(let name): return "keyfile-aside \(name)"
         case .ownKeyFile(let library): return "own-keyfile \(library)"
-        case .legacyKeyFileDelete(let id): return "legacy-keyfile- \(id)"
         case .memory(let fp): return "memory \(fp)"
         case .plan: return "plan"
         case .planDelete: return "plan-"
@@ -79,7 +74,6 @@ enum WorldWrite: Equatable, CustomStringConvertible {
         case .sendPair(let fp): return "send \(fp)"
         case .copiesDelete: return "copies-"
         case .plaintextExport: return "export"
-        case .legacyMarkerClear: return "marker-"
         }
     }
 }
@@ -170,7 +164,7 @@ final class ExecutorVault {
     }
 }
 
-final class ExecutorWorld: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, LibraryFileLeaf,
+final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, LibraryFileLeaf,
     KeyFileStoreLeaf, MemoryStoreLeaf, PlanStoreLeaf, BackupsLeaf, ClockLeaf, IDsLeaf, BiometryLeaf, DiagnosticsLeaf
 {
     struct LibraryFile {
@@ -178,7 +172,6 @@ final class ExecutorWorld: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeys
         var record: ProtectionRecord?
         /// The writing — a counter standing in for the rows.
         var generation: Int
-        var marker: LegacyRotationMarker?
     }
 
     struct Backup {
@@ -190,7 +183,6 @@ final class ExecutorWorld: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeys
 
     // The keychain.
     var custody: [CustodyItemFact: StoreKey] = [:]
-    var legacy: [LegacyItemFact.Kind: StoreKey] = [:]
     var syncItems: [SyncKeysItemFact: DeviceKeyMaterial] = [:]
     var session: [String: DeviceKeyMaterial] = [:]
     let icloud: ICloudKeychain
@@ -201,12 +193,11 @@ final class ExecutorWorld: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeys
     var staged: LibraryFile?
     var aside: [LibraryFile] = []
     var copies: [String: LibraryFile] = [:]
-    var liveKeyFile: KeyFileDocument?
+    var liveKeyFile: KeyFile?
     var ownKeyFiles: [String: KeyFile] = [:]
-    var legacyBeside: [String: LegacyKeyFile] = [:]
-    var catalogKeyFiles: [String: KeyFileDocument] = [:]
+    var catalogKeyFiles: [String: KeyFile] = [:]
     /// Key files moved out of the live place, by their set-aside names.
-    var setAsideKeyFiles: [String: KeyFileDocument] = [:]
+    var setAsideKeyFiles: [String: KeyFile] = [:]
     var memories: [String: Sealed<DeviceMemory>] = [:]
     var plan: Sealed<ProtectionPlan>?
     var paused = false
@@ -267,22 +258,6 @@ final class ExecutorWorld: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeys
     func deleteCustody(fingerprint: String, itemClass: ProtectionNames.CustodyClass) throws {
         custody[CustodyItemFact(fingerprint: fingerprint, itemClass: itemClass)] = nil
         try wrote(.custodyDelete(f8(fingerprint), itemClass))
-    }
-
-    // MARK: - Legacy items
-
-    func legacyItems() throws -> [LegacyItemFact] {
-        legacy.map { kind, key in
-            if case .gated = kind { return LegacyItemFact(kind: kind, fingerprint: nil) }
-            return LegacyItemFact(kind: kind, fingerprint: PF.fp(key))
-        }
-    }
-
-    func readLegacyItem(_ kind: LegacyItemFact.Kind) throws -> StoreKey? { legacy[kind] }
-
-    func deleteLegacyItem(_ kind: LegacyItemFact.Kind) throws {
-        legacy[kind] = nil
-        try wrote(.legacyDelete("\(kind)"))
     }
 
     // MARK: - Sync keys
@@ -380,13 +355,13 @@ final class ExecutorWorld: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeys
 
     func stageReencryption(from key: StoreKey, to newKey: StoreKey) throws {
         guard let live, live.fingerprint == PF.fp(key) else { throw ExecutorRefusal.keyDoesNotOpenLibrary }
-        staged = LibraryFile(fingerprint: PF.fp(newKey), record: live.record, generation: live.generation, marker: live.marker)
+        staged = LibraryFile(fingerprint: PF.fp(newKey), record: live.record, generation: live.generation)
         try wrote(.stage(f8(newKey)))
     }
 
     func stageCopy(copyID: String, opener: StoreKey, to newKey: StoreKey) throws {
         guard let copy = copies[copyID], copy.fingerprint == PF.fp(opener) else { throw ExecutorRefusal.keyDoesNotOpenLibrary }
-        staged = LibraryFile(fingerprint: PF.fp(newKey), record: copy.record, generation: copy.generation, marker: copy.marker)
+        staged = LibraryFile(fingerprint: PF.fp(newKey), record: copy.record, generation: copy.generation)
         try wrote(.stage(f8(newKey)))
     }
 
@@ -424,28 +399,15 @@ final class ExecutorWorld: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeys
         try wrote(.plaintextExport)
     }
 
-    func readLegacyRotationMarker(with key: StoreKey) throws -> LegacyRotationMarker? {
-        guard try libraryOpens(with: key) else { throw ExecutorRefusal.keyDoesNotOpenLibrary }
-        return live?.marker
-    }
-
-    func clearLegacyRotationMarker(with key: StoreKey) throws {
-        guard try libraryOpens(with: key) else { throw ExecutorRefusal.keyDoesNotOpenLibrary }
-        live?.marker = nil
-        try wrote(.legacyMarkerClear)
-    }
-
     // MARK: - Key files
 
-    func readLiveKeyFile() throws -> KeyFileDocument? { liveKeyFile }
+    func readLiveKeyFile() throws -> KeyFile? { liveKeyFile }
 
-    var liveFormat3: KeyFile? {
-        if case .format3(let file)? = liveKeyFile { return file }
-        return nil
-    }
+    /// The live key file (format 3 — the only one there is since rule 26).
+    var liveFormat3: KeyFile? { liveKeyFile }
 
     func writeLiveKeyFile(_ file: KeyFile) throws {
-        liveKeyFile = .format3(file)
+        liveKeyFile = file
         try wrote(.keyFile(f8(file.fingerprint)))
     }
 
@@ -456,16 +418,7 @@ final class ExecutorWorld: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeys
         try wrote(.ownKeyFile(String(file.libraryID.prefix(8))))
     }
 
-    func legacyKeyFilesBesideLibrary() throws -> [(id: String, file: LegacyKeyFile)] {
-        legacyBeside.sorted { $0.key < $1.key }.map { (id: $0.key, file: $0.value) }
-    }
-
-    func deleteLegacyKeyFile(id: String) throws {
-        legacyBeside[id] = nil
-        try wrote(.legacyKeyFileDelete(id))
-    }
-
-    func readKeyFile(catalogID: String) throws -> KeyFileDocument? { catalogKeyFiles[catalogID] }
+    func readKeyFile(catalogID: String) throws -> KeyFile? { catalogKeyFiles[catalogID] }
 
     /// The move, never a delete, and an existing name refused — but this U3
     /// harness keeps set-aside files OUT of its catalog view: it has none
@@ -573,7 +526,7 @@ final class ExecutorWorld: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeys
 
     var leaves: ExecutorLeaves {
         ExecutorLeaves(
-            custody: self, legacyItems: self, syncKeys: self, apple: self, vault: self, library: self, keyFiles: self,
+            custody: self, syncKeys: self, apple: self, vault: self, library: self, keyFiles: self,
             memory: self, plans: self, backups: self, clock: self, ids: self, biometry: self, diagnostics: self)
     }
 

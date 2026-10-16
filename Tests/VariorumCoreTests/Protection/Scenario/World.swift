@@ -212,10 +212,6 @@ enum SPath {
         ProtectionNames.backupsSubpath(libraryID: libraryID, deviceID: deviceID)
     }
 
-    static func legacyKeyFile(_ fingerprint: String?) -> String {
-        fingerprint.map { StoreKeyEnvelope.filename(forFingerprint: $0) } ?? StoreKeyEnvelope.legacyFilename
-    }
-
     static func snapshot(_ stamp: Date, _ fingerprint: String) -> String {
         "variorum-backup-\(CatalogNames.stampString(stamp))-\(StoreKeyEnvelope.shortFingerprint(fingerprint)).sqlite"
     }
@@ -352,7 +348,7 @@ final class SWorld {
                 }
             }
             lastBinding[key] = .some(record.account)
-            if let account = record.account, record.mode == .standard, record.modeConfirmed,
+            if let account = record.account, record.mode == .standard,
                let corpus = server.snapshot(account)?.corpusKeyID, truth.standardSynced[record.currentFingerprint] == nil {
                 truth.standardSynced[record.currentFingerprint] = (account, corpus)
             }
@@ -495,7 +491,7 @@ final class SWorld {
     func leaves(_ device: SDevice) -> ExecutorLeaves {
         let leaf = DeviceLeaves(world: self, device: device)
         return ExecutorLeaves(
-            custody: leaf, legacyItems: leaf, syncKeys: leaf, apple: leaf, vault: leaf, library: leaf, keyFiles: leaf,
+            custody: leaf, syncKeys: leaf, apple: leaf, vault: leaf, library: leaf, keyFiles: leaf,
             memory: leaf, plans: leaf, backups: leaf, clock: leaf, ids: leaf, biometry: leaf, diagnostics: leaf)
     }
 
@@ -517,17 +513,7 @@ final class SWorld {
         return Catalog.build(entries)
     }
 
-    func liveKeyFile(_ device: SDevice) -> KeyFile? {
-        if case .format3(let file)? = device.container.files[SPath.liveKeyFile]?.keyFile { return file }
-        return nil
-    }
-
-    func legacyBeside(_ device: SDevice) -> [(path: String, file: LegacyKeyFile)] {
-        device.container.files.keys.sorted().compactMap { path in
-            guard !path.contains("/"), case .legacy(let legacy)? = device.container.files[path]?.keyFile else { return nil }
-            return (path, legacy)
-        }
-    }
+    func liveKeyFile(_ device: SDevice) -> KeyFile? { device.container.files[SPath.liveKeyFile]?.keyFile }
 
     func readableAppleKeys(_ device: SDevice) -> [String: AppleKeyMaterial] {
         var keys: [String: AppleKeyMaterial] = [:]
@@ -649,11 +635,6 @@ final class SWorld {
                 device.touchIDPress = .failedOnExistingItem
             }
         }
-        // Today's items.
-        for name in device.keychain.names(service: LegacyItems.storeKeyService) {
-            guard let item = device.keychain.item(name) else { continue }
-            add(pressRead(device, item)?.libraryKey)
-        }
         // Every key file this device holds beside the slot, and the catalog's.
         let catalog = catalog(device)
         let files = catalog.keyFiles.compactMap(\.document)
@@ -673,19 +654,11 @@ final class SWorld {
                 masters.append(master)
             }
         }
-        for document in files {
-            switch document {
-            case .format3(let file):
-                if let wrap = file.apple, let key = apple[wrap.keyID] { add(try? file.open(apple: key)) }
-                if let shared, file.sharedApple?.keyID == shared.id { add(try? file.open(sharedApple: shared)) }
-                for secret in secrets { add(try? file.open(secret, floor: PF.floor)) }
-                for master in masters { add(try? file.open(master: master)) }
-            case .legacy(let legacy):
-                if let shared { add(try? legacy.open(sharedApple: shared)) }
-                if let passphrase = typed.passphrase { add(try? legacy.open(passphrase: passphrase, floor: PF.floor)) }
-                if let words = typed.words { add(try? legacy.open(words: words)) }
-                for master in masters { add(try? legacy.open(master: master)) }
-            }
+        for file in files {
+            if let wrap = file.apple, let key = apple[wrap.keyID] { add(try? file.open(apple: key)) }
+            if let shared, file.sharedApple?.keyID == shared.id { add(try? file.open(sharedApple: shared)) }
+            for secret in secrets { add(try? file.open(secret, floor: PF.floor)) }
+            for master in masters { add(try? file.open(master: master)) }
         }
         // Expansion: every file's history under a key in hand; every anchor by
         // the typed secrets or by its outgoing key.
@@ -693,8 +666,7 @@ final class SWorld {
         while index < candidates.count {
             let key = candidates[index]
             index += 1
-            for document in files {
-                guard case .format3(let file) = document else { continue }
+            for file in files {
                 if file.fingerprint == PF.fp(key) {
                     for older in (try? file.historyKeys(currentKey: key)) ?? [] { add(older.key) }
                 }
@@ -703,8 +675,7 @@ final class SWorld {
                 }
             }
         }
-        for document in files {
-            guard case .format3(let file) = document else { continue }
+        for file in files {
             for anchor in [file.anchor].compactMap({ $0 }) + file.keptAnchors {
                 for secret in secrets {
                     if let contents = try? anchor.open(secret, floor: PF.floor) {
@@ -825,15 +796,14 @@ final class SWorld {
         let catalog = catalog(device)
         let leaf = DeviceLeaves(world: self, device: device)
         let custody = (try? leaf.custodyItems()) ?? []
-        let legacy = (try? leaf.legacyItems()) ?? []
         let syncKeys = (try? leaf.syncKeyItems()) ?? []
         let apple = AppleKeyFacts(readable: Set(readableAppleKeys(device).keys), oldSharedID: oldSharedKey(device)?.id)
         var unlocked: UnlockedFacts?
-        if let library = device.library {
+        if let library = device.library, let record = library.record {
             let reach = device.executor?.reach(key: library.key, keyFile: library.keyFile) ?? PF.reach([library.key])
-            let recordSection = library.record?.verifiedSections(reach: reach).first { $0.deviceID == library.section.deviceID }
+            let recordSection = record.verifiedSections(reach: reach).first { $0.deviceID == library.section.deviceID }
             unlocked = UnlockedFacts(
-                record: library.record, familyTree: library.familyTree,
+                record: record, familyTree: library.familyTree,
                 thisMac: library.section, identity: library.resolution, memory: library.memory,
                 currentFingerprint: library.fingerprint,
                 liveKeyFileID: device.container.files[SPath.liveKeyFile] == nil ? nil
@@ -845,7 +815,7 @@ final class SWorld {
         return ProtectionFacts(
             scope: Self.scope, storeFile: device.slot == nil ? .absent : .present,
             containerMarker: device.container.files[SPath.marker] != nil, unlocked: unlocked,
-            slotFingerprintHint: liveKeyFile(device)?.fingerprint, custody: custody, legacyItems: legacy,
+            slotFingerprintHint: liveKeyFile(device)?.fingerprint, custody: custody,
             syncKeys: syncKeys, appleKeys: apple, biometry: device.biometry.facts, touchIDPress: device.touchIDPress,
             session: device.session, vault: vault, catalog: catalog, now: clock)
     }
@@ -858,13 +828,13 @@ final class SWorld {
         for entry in record.familyTree.entries where entry.kind == .castle && entry.madeBy != nil {
             truth.castleBorn.insert(entry.fingerprint)
         }
-        if record.mode == .castle, record.modeConfirmed { truth.castleBorn.insert(record.currentFingerprint) }
+        if record.mode == .castle { truth.castleBorn.insert(record.currentFingerprint) }
     }
 }
 
 // MARK: - The leaves: one device's view of the world
 
-final class DeviceLeaves: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, LibraryFileLeaf,
+final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, LibraryFileLeaf,
     KeyFileStoreLeaf, MemoryStoreLeaf, PlanStoreLeaf, BackupsLeaf, ClockLeaf, IDsLeaf, BiometryLeaf, DiagnosticsLeaf
 {
     unowned let world: SWorld
@@ -910,48 +880,6 @@ final class DeviceLeaves: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeysL
     func deleteCustody(fingerprint: String, itemClass: ProtectionNames.CustodyClass) throws {
         device.keychain.local[KName.custody(scope, fingerprint, itemClass)] = nil
         try wrote("custody- \(itemClass.rawValue) \(f8(fingerprint))")
-    }
-
-    // MARK: Today's items
-
-    func legacyItems() throws -> [LegacyItemFact] {
-        var facts: [LegacyItemFact] = []
-        for name in device.keychain.names(service: LegacyItems.storeKeyService) {
-            guard name.account.hasPrefix(scope), let item = device.keychain.item(name) else { continue }
-            if item.touchID {
-                facts.append(LegacyItemFact(kind: .gated(account: name.account), fingerprint: nil))
-            } else {
-                facts.append(LegacyItemFact(kind: .silent(account: name.account), fingerprint: item.value.libraryKey.map(PF.fp)))
-            }
-        }
-        for name in device.keychain.names(service: LegacyItems.syncCustodyService) where name.account.hasPrefix(scope) {
-            facts.append(LegacyItemFact(kind: .syncCustody(account: name.account), fingerprint: nil))
-        }
-        for name in device.keychain.names(service: LegacyItems.escrowService) {
-            guard let key = device.keychain.item(name)?.value.libraryKey else { continue }
-            facts.append(LegacyItemFact(kind: .escrow(libraryID: name.account), fingerprint: PF.fp(key)))
-        }
-        return facts
-    }
-
-    func legacyName(_ kind: LegacyItemFact.Kind) -> KName {
-        switch kind {
-        case .silent(let account), .gated(let account): return KName(service: LegacyItems.storeKeyService, account: account)
-        case .escrow(let libraryID): return KName.escrow(libraryID)
-        case .syncCustody(let account): return KName(service: LegacyItems.syncCustodyService, account: account)
-        }
-    }
-
-    func readLegacyItem(_ kind: LegacyItemFact.Kind) throws -> StoreKey? {
-        if case .syncCustody = kind { return nil }
-        guard let item = device.keychain.item(legacyName(kind)) else { return nil }
-        return world.pressRead(device, item)?.libraryKey
-    }
-
-    func deleteLegacyItem(_ kind: LegacyItemFact.Kind) throws {
-        let name = legacyName(kind)
-        if case .escrow = kind { world.deleteSynced(device, name) } else { device.keychain.local[name] = nil }
-        try wrote("legacy- \(name.account)")
     }
 
     // MARK: Sync keys
@@ -1149,53 +1077,29 @@ final class DeviceLeaves: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeysL
         try wrote("export")
     }
 
-    func readLegacyRotationMarker(with key: StoreKey) throws -> LegacyRotationMarker? {
-        guard try libraryOpens(with: key) else { throw ExecutorRefusal.keyDoesNotOpenLibrary }
-        return slot?.legacyMarker
-    }
-
-    func clearLegacyRotationMarker(with key: StoreKey) throws {
-        guard try libraryOpens(with: key) else { throw ExecutorRefusal.keyDoesNotOpenLibrary }
-        slot?.legacyMarker = nil
-        try wrote("marker-")
-    }
-
     // MARK: Key files
 
-    func readLiveKeyFile() throws -> KeyFileDocument? { device.container.files[SPath.liveKeyFile]?.keyFile }
+    func readLiveKeyFile() throws -> KeyFile? { device.container.files[SPath.liveKeyFile]?.keyFile }
 
     func writeLiveKeyFile(_ file: KeyFile) throws {
-        device.container.files[SPath.liveKeyFile] = .keyFile(.format3(file))
+        device.container.files[SPath.liveKeyFile] = .keyFile(file)
         try wrote("keyfile \(f8(file.fingerprint))")
     }
 
     func readOwnKeyFile(libraryID: String, deviceID: String) throws -> KeyFile? {
-        if case .format3(let file)? = device.container.files["\(SPath.ownFolder(libraryID, deviceID))/\(SPath.liveKeyFile)"]?.keyFile {
-            return file
-        }
-        return nil
+        device.container.files["\(SPath.ownFolder(libraryID, deviceID))/\(SPath.liveKeyFile)"]?.keyFile
     }
 
     func writeOwnKeyFile(_ file: KeyFile, deviceID: String) throws {
         let folder = SPath.ownFolder(file.libraryID, deviceID)
-        device.container.files["\(folder)/\(SPath.liveKeyFile)"] = .keyFile(.format3(file))
+        device.container.files["\(folder)/\(SPath.liveKeyFile)"] = .keyFile(file)
         if let far = world.farFolder(of: device), !far.paths(under: folder + "/").isEmpty {
-            far.files["\(folder)/\(SPath.liveKeyFile)"] = .keyFile(.format3(file))
+            far.files["\(folder)/\(SPath.liveKeyFile)"] = .keyFile(file)
         }
         try wrote("own-keyfile \(file.libraryID.prefix(8))")
     }
 
-    func legacyKeyFilesBesideLibrary() throws -> [(id: String, file: LegacyKeyFile)] {
-        world.legacyBeside(device).map { (Catalog.id(place: .container, folders: [], name: $0.path), $0.file) }
-    }
-
-    func deleteLegacyKeyFile(id: String) throws {
-        guard let (fs, path) = resolve(id) else { return }
-        fs.files[path] = nil
-        try wrote("legacy-keyfile- \(path)")
-    }
-
-    func readKeyFile(catalogID: String) throws -> KeyFileDocument? {
+    func readKeyFile(catalogID: String) throws -> KeyFile? {
         guard let (fs, path) = resolve(catalogID) else { return nil }
         return fs.files[path]?.keyFile
     }
@@ -1247,7 +1151,7 @@ final class DeviceLeaves: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeysL
         guard let slot, slot.fingerprint == PF.fp(key), keyFile.fingerprint == PF.fp(key) else {
             throw ExecutorRefusal.keyDoesNotOpenLibrary
         }
-        world.writePair(device, image: slot, keyFile: .format3(keyFile), deviceID: deviceID)
+        world.writePair(device, image: slot, keyFile: keyFile, deviceID: deviceID)
         try wrote("backup \(f8(key))")
     }
 
@@ -1255,7 +1159,7 @@ final class DeviceLeaves: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeysL
         guard !device.paused else { throw ExecutorRefusal.nothingToDo }
         guard let slot, slot.fingerprint == PF.fp(key) else { throw ExecutorRefusal.keyDoesNotOpenLibrary }
         device.container.files["\(destination)/\(SPath.slot)"] = .library(slot)
-        device.container.files["\(destination)/\(SPath.liveKeyFile)"] = .keyFile(.format3(keyFile))
+        device.container.files["\(destination)/\(SPath.liveKeyFile)"] = .keyFile(keyFile)
         try wrote("send \(f8(key))")
     }
 
@@ -1287,7 +1191,7 @@ extension SWorld {
     /// A backup pair on `device`: the snapshot and its frozen key file, in this
     /// Mac's `Backups/<library8>/<mac8>/` — in the container, and in its far
     /// folder when it has one. The world remembers each copy's birth.
-    func writePair(_ device: SDevice, image: LibraryImage, keyFile: KeyFileDocument, deviceID: String) {
+    func writePair(_ device: SDevice, image: LibraryImage, keyFile: KeyFile, deviceID: String) {
         let at = tick()
         let folder = SPath.ownFolder(image.libraryID, deviceID)
         let name = SPath.snapshot(at, image.fingerprint)

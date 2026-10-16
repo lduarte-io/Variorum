@@ -8,8 +8,7 @@ import Foundation
 //
 // The rules it encodes, each a small function below (table-tested one by one
 // in AssessTests):
-//   - §3.3, guards included: before unlock nothing decides; an unconfirmed
-//     mode runs no custody repair in either direction; no repair makes a
+//   - §3.3, guards included: before unlock nothing decides; no repair makes a
 //     Touch ID item or changes a key's kind; in Standard nothing destructive
 //     runs on the record's word alone; a synced library writes nothing
 //     Apple-reachable without a fresh vault read for its account (decision 35);
@@ -72,31 +71,19 @@ public enum AssessRules {
         }
     }
 
-    // MARK: - The mode (§3.3, §3.13 step 2)
+    // MARK: - The mode (§3.3)
 
     public static func mode(_ facts: ProtectionFacts) -> ModeVerdict {
         guard let unlocked = facts.unlocked else {
-            return ModeVerdict(mode: facts.rememberedModeHint, confirmed: false, source: .hintOnly, corner45: false)
+            return ModeVerdict(mode: facts.rememberedModeHint, source: .hintOnly)
         }
-        if let record = unlocked.record {
-            // Unconfirmed with no account is only ever corner 45's case — the
-            // legacy reader records nothing else unconfirmed locally.
-            return ModeVerdict(
-                mode: record.mode, confirmed: record.modeConfirmed, source: .record,
-                corner45: !record.modeConfirmed && record.account == nil)
-        }
-        // A library with no record yet: today's rule, read once (§3.15).
-        let verdict = LegacyModeReader.read(unlocked.legacyModeInputs ?? LegacyModeInputs(keyFile: nil, enrolled: false))
-        let recorded = verdict.migrationRecord
-        return ModeVerdict(
-            mode: recorded.mode, confirmed: recorded.confirmed, source: .legacyReader(verdict),
-            corner45: verdict.isCorner45Ambiguous)
+        return ModeVerdict(mode: unlocked.record.mode, source: .record)
     }
 
     // MARK: - The account (§3.8's four situations)
 
     public static func account(_ facts: ProtectionFacts) -> AccountVerdict {
-        let account = facts.unlocked?.record?.account
+        let account = facts.unlocked?.record.account
         guard let account else {
             return AccountVerdict(situation: .localOnly, account: nil, confirmed: false)
         }
@@ -182,12 +169,7 @@ public enum AssessRules {
         let vault = facts.vault.flatMap { $0.accountID == session ? $0 : nil }
         return RouteFinder(RouteFacts(
             catalog: facts.catalog, liveKeyFileID: facts.unlocked?.liveKeyFileID ?? facts.catalog.liveKeyFile?.id,
-            custody: facts.custody + facts.legacyItems.compactMap { item in
-                if case .silent = item.kind, let fingerprint = item.fingerprint {
-                    return CustodyItemFact(fingerprint: fingerprint, itemClass: .silent)
-                }
-                return nil
-            },
+            custody: facts.custody,
             readableAppleKeyIDs: facts.appleKeys.readable, oldSharedAppleKeyID: facts.appleKeys.oldSharedID,
             ownAppleKeyIDsNotReadableHere: notReadable, vaultRecoveryWrap: vault?.recoveryWrap,
             signedInToVault: vault != nil))
@@ -213,9 +195,8 @@ public enum AssessRules {
     // MARK: - Repairs (§3.3, guards included)
 
     static func liveKeyFile(_ facts: ProtectionFacts, _ unlocked: UnlockedFacts) -> KeyFile? {
-        guard let id = unlocked.liveKeyFileID, case .format3(let file)? = facts.catalog.keyFile(id: id)?.document
-        else { return nil }
-        return file
+        guard let id = unlocked.liveKeyFileID else { return nil }
+        return facts.catalog.keyFile(id: id)?.document
     }
 
     /// P-U4-6 (ratified (a), "Memory wins"; §3.6 "a library file replayed
@@ -246,9 +227,7 @@ public enum AssessRules {
     ) -> (repairs: [Repair], faults: [Fault]) {
         var repairs: [Repair] = []
         var faults: [Fault] = []
-        // A library with no record yet: the migration is owed, and it does its
-        // own steps — no repair runs before it (§3.13).
-        guard let record = unlocked.record else { return (repairs, faults) }
+        let record = unlocked.record
         // FIRST: a library file older than what this Mac remembers (a library
         // file replayed alone, §3.6) loses to the memory — before any repair
         // moves toward its stale record.
@@ -274,7 +253,7 @@ public enum AssessRules {
         if guards.libraryFileLosesToMemoryOn, let memory = ownMemory, memory.keyEpoch == record.keyEpoch,
            memory.currentFingerprint == record.currentFingerprint, let recordSection = unlocked.recordSection,
            memory.deviceSection.version > recordSection.version, let confirmed = memory.lastConfirmed,
-           confirmed != ConfirmedFacts(mode: record.mode, account: record.account) || !record.modeConfirmed,
+           confirmed != ConfirmedFacts(mode: record.mode, account: record.account),
            unlocked.familyTree.entry(record.currentFingerprint).map({ $0.kind == confirmed.mode }) ?? true {
             return ([.restoreRecordFactsFromMemory], faults)
         }
@@ -287,7 +266,7 @@ public enum AssessRules {
                 || memory?.keyEpoch != record.keyEpoch
                 || memory?.familyTree != unlocked.familyTree
                 || memory?.deviceSection != unlocked.thisMac
-                || (record.modeConfirmed && memory?.lastConfirmed != ConfirmedFacts(mode: record.mode, account: record.account))
+                || memory?.lastConfirmed != ConfirmedFacts(mode: record.mode, account: record.account)
             // The key file and its mirror, for the current key: the file never
             // shrinks to match the mirror's word, nor the mirror to the file's.
             if let mirror = memory?.keyFileMirror, mirror.fingerprint == unlocked.currentFingerprint {
@@ -327,10 +306,8 @@ public enum AssessRules {
                memory?.keyFileMirror.map({ $0.fingerprint != unlocked.currentFingerprint }) ?? true,
                let copy = facts.catalog.keyFiles
                 .filter({ file in
-                    if case .format3(let keyFile)? = file.document {
-                        return keyFile.fingerprint == unlocked.currentFingerprint && keyFile.libraryID == record.libraryID
-                    }
-                    return false
+                    guard let keyFile = file.document else { return false }
+                    return keyFile.fingerprint == unlocked.currentFingerprint && keyFile.libraryID == record.libraryID
                 })
                 .max(by: { ($0.frozenAt ?? .distantPast, $0.id) < ($1.frozenAt ?? .distantPast, $1.id) }) {
                 repairs.append(.restoreKeyFileFromCopy(keyFileID: copy.id))
@@ -366,9 +343,6 @@ public enum AssessRules {
             repairs.append(guards.noRepairMakesTouchIDOn
                 ? .recordAlwaysAskQuietly : .makeTouchIDItem(fingerprint: unlocked.currentFingerprint))
         }
-        // An unconfirmed (or ambiguous) mode runs no custody repair in either
-        // direction: the library keeps today's custody shape (§3.13).
-        if !mode.confirmed && guards.unconfirmedModeNoCustodyRepairOn { return (repairs, faults) }
         switch current {
         case .castle:
             castleRepairs(facts, unlocked, live: live, account: account, vault: vault, guards: guards,
@@ -424,28 +398,6 @@ public enum AssessRules {
             } else {
                 faults.append(.silentItemIsOnlyRoad(fingerprint: item.fingerprint))
             }
-        }
-        // …including the per-library-ID silent items the migration kept, and
-        // no 13p escrow item holding any of its keys — once the history holds it.
-        for item in facts.legacyItems {
-            guard let fingerprint = item.fingerprint, tree.contains(fingerprint) else { continue }
-            switch item.kind {
-            case .silent, .escrow:
-                if let precondition = goesOnlyIf(fingerprint, current: current, live: live) {
-                    repairs.append(.deleteLegacyItem(item.kind, fingerprint: fingerprint, precondition: precondition))
-                } else if case .silent = item.kind {
-                    faults.append(.silentItemIsOnlyRoad(fingerprint: fingerprint))
-                }
-            case .gated, .syncCustody:
-                continue
-            }
-        }
-        // No format-1/2 key file beside the library once the history verifiably
-        // holds its key (a key the fold couldn't reach keeps its file).
-        for file in facts.catalog.keyFiles where file.role == .besideLibrary || file.role == .setAside {
-            guard case .legacy? = file.document, let fingerprint = file.fingerprint,
-                  let precondition = goesOnlyIf(fingerprint, current: current, live: live) else { continue }
-            repairs.append(.deleteLegacyKeyFile(keyFileID: file.id, precondition: precondition))
         }
         // A Castle key never has an Apple wrap: a planted file — a fault the
         // re-key answers.
@@ -519,34 +471,11 @@ public enum AssessRules {
     ) -> [OwedAct] {
         var acts: [OwedAct] = []
         guard let current = mode.mode else { return acts }
-        guard unlocked.record != nil else { return [.migrate] }
         let reading = facts.freshVault(for: account.account)
         // This device's own act in flight is its plan's to finish — never read
         // as the account moving elsewhere.
         let ownActInFlight = unlocked.thisMac.actInFlight != nil
-        if !mode.confirmed {
-            if mode.corner45 {
-                // Corner 45: the one-time notice; her answer confirms — a key
-                // change when it isn't the current key's kind.
-                if let answer = unlocked.corner45Answer {
-                    acts.append(.confirmMode(answer, isKeyChange: answer != current))
-                } else {
-                    acts.append(.corner45Notice)
-                }
-            } else if let settled = vault?.mode.settled {
-                if settled != current {
-                    // §3.13 step 1: "a vault that moved while the library
-                    // didn't is an ordinary follow" — a key change by the
-                    // follow's road, never a confirm with no door (VX-305 U4,
-                    // found by the scenario world: a library migrated offline
-                    // waited for ever on a confirm nothing offered).
-                    acts.append(.follow(settled == .castle ? .intoCastle : .intoStandard, typesOneSecret: true,
-                                        holdsLibraryRekey: vault?.rotationInProgress ?? false))
-                } else {
-                    acts.append(.confirmMode(settled, isKeyChange: false))
-                }
-            }
-        } else if let vault, let reading, !ownActInFlight {
+        if let vault, let reading, !ownActInFlight {
             // The account moved elsewhere: the follow.
             let known = unlocked.memory?.vaultFacts?.corpusKeyID
             switch vault.mode {
@@ -578,7 +507,7 @@ public enum AssessRules {
         }
         let lost = relinkSubjects(facts, unlocked, mode: mode)
         if !lost.isEmpty { acts.append(.relinkLibraryArm(keyFileIDs: lost)) }
-        if mode.confirmed, current == .castle, unlocked.thisMac.oldSharedKeyStillStanding,
+        if current == .castle, unlocked.thisMac.oldSharedKeyStillStanding,
            unlocked.memory?.nudgeDismissals[retireOldSharedKeyNudge] == nil {
             acts.append(.retireOldSharedKeyAsk)
         }
@@ -593,13 +522,12 @@ public enum AssessRules {
     /// the live one, and this Mac's own key files for other libraries — whose
     /// own Apple key can't be read here.
     static func relinkSubjects(_ facts: ProtectionFacts, _ unlocked: UnlockedFacts, mode: ModeVerdict) -> [String] {
-        guard mode.confirmed else { return [] }
         let mac8 = unlocked.thisMac.mac8
         var subjects: [String] = []
         for file in facts.catalog.keyFiles {
             let isLive = file.id == unlocked.liveKeyFileID
             guard isLive ? mode.mode == .standard : (file.role == .ownKeyFile && file.mac.isMac(mac8)) else { continue }
-            guard case .format3(let keyFile)? = file.document else { continue }
+            guard let keyFile = file.document else { continue }
             // The live place's file counts only when it is the current key's
             // (another key's file there is its own fault — VX-305 ladder round 1).
             if isLive, keyFile.fingerprint != unlocked.currentFingerprint { continue }
@@ -610,7 +538,7 @@ public enum AssessRules {
                 if !facts.appleKeys.readable.contains(wrap.keyID) { subjects.append(file.id) }
             } else if isLive, unlocked.thisMac.appleKeys.contains(where: { $0.isOwnLibraryKey && $0.retiredAt == nil }), !readsOwn {
                 subjects.append(file.id)
-            } else if isLive, unlocked.record?.account == nil, !readsOwn {
+            } else if isLive, unlocked.record.account == nil, !readsOwn {
                 // A LOCAL Standard library whose live file carries no Apple wrap
                 // and whose Mac reads no own key for it — the road is lost even
                 // when this identity never listed the key that carried it (a Mac
@@ -631,13 +559,7 @@ public enum AssessRules {
     static func oldSharedKeyStands(_ facts: ProtectionFacts) -> Bool {
         if facts.unlocked?.thisMac.oldSharedKeyStillStanding == true { return true }
         if facts.appleKeys.oldSharedID != nil { return true }
-        return facts.catalog.keyFiles.contains { file in
-            switch file.document {
-            case .format3(let keyFile)?: return keyFile.sharedApple != nil
-            case .legacy(let legacy)?: return legacy.envelope.apple != nil
-            case nil: return false
-            }
-        }
+        return facts.catalog.keyFiles.contains { $0.document?.sharedApple != nil }
     }
 
     /// The old shared key's id: the readable item's, else the one this
@@ -688,7 +610,7 @@ public enum AssessRules {
     ) -> MovePlan {
         guard let unlocked = facts.unlocked else { return MovePlan(otherLibraries: [], liveLibrary: false) }
         let mac8 = unlocked.thisMac.mac8
-        let liveLibrary = unlocked.record?.libraryID
+        let liveLibrary = unlocked.record.libraryID
         var newest: [String: CatalogCopy] = [:]
         for copy in facts.catalog.copies {
             guard let library = copy.library, library != liveLibrary, copy.stamp != nil else { continue }
@@ -700,9 +622,9 @@ public enum AssessRules {
         let others = newest.filter { library, copy in
             !gifted.contains(library) && facts.catalog.servingKeyFiles(of: copy).first.map(standardShaped) == true
         }.keys.sorted()
-        // The live library — local or synced, once its mode is confirmed
-        // Standard (decision 35) — gains this Mac's own Apple key.
-        let live = mode.mode == .standard && mode.confirmed
+        // The live library — local or synced, in Standard (decision 35) —
+        // gains this Mac's own Apple key.
+        let live = mode.mode == .standard
             && (account.account == nil || facts.freshVault(for: account.account) != nil)
             && liveKeyFile(facts, unlocked)?.apple == nil
         return MovePlan(otherLibraries: others, liveLibrary: live)
@@ -710,11 +632,8 @@ public enum AssessRules {
 
     /// A key file whose current key is a Standard key (an Apple wrap).
     static func standardShaped(_ file: CatalogKeyFile) -> Bool {
-        switch file.document {
-        case .format3(let keyFile)?: return keyFile.apple != nil || keyFile.sharedApple != nil
-        case .legacy(let legacy)?: return legacy.envelope.apple != nil
-        case nil: return false
-        }
+        guard let keyFile = file.document else { return false }
+        return keyFile.apple != nil || keyFile.sharedApple != nil
     }
 
     // MARK: - Doors
@@ -726,10 +645,6 @@ public enum AssessRules {
         var doors: [Door: DoorState] = [:]
         guard let unlocked = facts.unlocked, let current = mode.mode else {
             for door in Door.allCases { doors[door] = .refused(.locked) }
-            return doors
-        }
-        guard unlocked.record != nil else {
-            for door in Door.allCases { doors[door] = .refused(.migrationOwed) }
             return doors
         }
         let section = unlocked.thisMac
@@ -768,20 +683,17 @@ public enum AssessRules {
         // USE CASTLE.
         doors[.useCastle] = {
             if let refusal = gate(syncedAct: true) { return .refused(refusal) }
-            if current == .castle && mode.confirmed { return .refused(.wrongMode(.castle)) }
-            if !mode.confirmed { return .refused(.modeNotConfirmed) }
+            if current == .castle { return .refused(.wrongMode(.castle)) }
             if signedOut { return .refused(.signedOutUseThisMacOnly) }
             let checks = retirementChecks(facts, finder: finder, account: account,
                                           actAccount: inSync ? account.account : nil, guards: guards)
             if let stop = checks?.doorStops.first { return .refused(.vaultOnOldSharedKey(account: stop)) }
             return .open(useCastleSpec(facts, unlocked, finder: finder, checks: checks, synced: inSync, guards: guards))
         }()
-        // USE STANDARD (corner 45's Castle-not-yet-confirmed included: "Use
-        // Standard offered as the key change it now is").
+        // USE STANDARD.
         doors[.useStandard] = {
             if let refusal = gate(syncedAct: true) { return .refused(refusal) }
             if current == .standard { return .refused(.wrongMode(.standard)) }
-            if !mode.confirmed && !mode.corner45 { return .refused(.modeNotConfirmed) }
             if signedOut { return .refused(.signedOutUseThisMacOnly) }
             return .open(DoorSpec(requires: .passphraseAndWords(wordsMayBeNew: false), rekeys: true, synced: inSync,
                                   words: [.ruleFive]))
@@ -789,7 +701,6 @@ public enum AssessRules {
         // REPLACE ALL KEYS — an enrolled library's security act.
         doors[.replaceAllKeys] = {
             if let refusal = gate(syncedAct: true) { return .refused(refusal) }
-            if !mode.confirmed { return .refused(.modeNotConfirmed) }
             guard inSync else { return .refused(signedOut ? .signedOutUseThisMacOnly : .notSynced) }
             let onOldKey = reading.map { $0.hasAppleWrap && $0.appleKeyID != nil && $0.appleKeyID == oldSharedID(facts) } ?? false
             return .open(DoorSpec(requires: .passphraseAndWords(wordsMayBeNew: true), rekeys: true, synced: true,
@@ -814,7 +725,6 @@ public enum AssessRules {
         doors[.relinkAccount] = {
             if let refusal = gate(syncedAct: true) { return .refused(refusal) }
             guard current == .standard else { return .refused(.wrongMode(current)) }
-            guard mode.confirmed else { return .refused(.modeNotConfirmed) }
             guard inSync, let reading else { return .refused(inSync ? .needsFreshVault : .notSynced) }
             let unreadable = reading.appleKeyID.map { !facts.appleKeys.readable.contains($0) } ?? true
             let onOldKey = reading.appleKeyID != nil && reading.appleKeyID == oldSharedID(facts)
@@ -830,7 +740,7 @@ public enum AssessRules {
         // RETIRE THE OLD APPLE KEY — a library already in Castle before this change.
         doors[.retireOldSharedKey] = {
             if let refusal = gate(syncedAct: false) { return .refused(refusal) }
-            guard current == .castle, mode.confirmed, section.oldSharedKeyStillStanding else {
+            guard current == .castle, section.oldSharedKeyStillStanding else {
                 return .refused(.nothingToDo)
             }
             let checks = retirementChecks(facts, finder: finder, account: account, actAccount: nil, guards: guards)
@@ -842,7 +752,6 @@ public enum AssessRules {
         doors[.turnOnSync] = {
             guard case .localOnly = account.situation else { return .refused(.nothingToDo) }
             guard signedIn else { return .refused(.noAccountSignedIn) }
-            if !mode.confirmed { return .refused(.modeNotConfirmed) }
             let join = joinPlan(library: current, vault: facts.vault.flatMap { $0.accountID == facts.session.accountID ? $0 : nil })
             return .open(joinSpec(join, facts, unlocked, finder: finder, guards: guards))
         }()

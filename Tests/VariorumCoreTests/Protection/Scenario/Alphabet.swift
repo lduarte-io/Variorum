@@ -652,7 +652,7 @@ extension SWorld {
         guard !device.paused, let live = liveKeyFile(device), live.fingerprint == library.fingerprint, let slot = device.slot else {
             throw ExecutorRefusal.noLiveKeyFile
         }
-        writePair(device, image: slot, keyFile: .format3(live), deviceID: library.section.deviceID)
+        writePair(device, image: slot, keyFile: live, deviceID: library.section.deviceID)
         let outcome = Retention.plan(
             catalog: catalog(device), libraryID: slot.libraryID, thisMac: library.section.deviceID, guards: guards)
         let catalog = catalog(device)
@@ -693,11 +693,11 @@ extension SWorld {
             let planted = mintApple()
             addSynced(device, KName.apple(Self.scope, planted.id), KItem(value: .apple(id: planted.id, bytes: PF.bytes(planted.key))))
             file.apple = AppleWrap(keyID: planted.id, wrapped: try AES.KeyWrap.wrap(SymmetricKey(data: key.data), using: planted.key))
-            device.container.files[SPath.liveKeyFile] = .keyFile(.format3(file))
+            device.container.files[SPath.liveKeyFile] = .keyFile(file)
         case .dropWordsLock:
             guard var file = liveKeyFile(device) else { throw WorldRefusal.noLibrary }
             file.words = nil
-            device.container.files[SPath.liveKeyFile] = .keyFile(.format3(file))
+            device.container.files[SPath.liveKeyFile] = .keyFile(file)
         case .plantPlan:
             let plan = ProtectionPlan(
                 libraryID: slot.libraryID, deviceID: rng.uuid(), sequence: 1, act: .deviceSettings,
@@ -776,7 +776,7 @@ extension SWorld {
     func reachableInItsDay(_ record: ProtectionRecord, keyFile: SFile?) -> Set<String> {
         guard record.mode == .standard else { return [] }
         var keys: Set<String> = [record.currentFingerprint]
-        if case .format3(let file)? = keyFile?.keyFile, file.fingerprint == record.currentFingerprint {
+        if let file = keyFile?.keyFile, file.fingerprint == record.currentFingerprint {
             keys.formUnion(file.history.map(\.fingerprint))
         }
         return keys
@@ -797,14 +797,14 @@ extension SWorld {
         let name = SPath.snapshot(tick(), PF.fp(key))
         let folder = "\(CatalogNames.backupsFolderName)/\(ProtectionNames.library8(slot.libraryID))/ffffffff"
         far.files["\(folder)/\(name)"] = .library(LibraryImage(libraryID: slot.libraryID, fingerprint: PF.fp(key), record: nil, writing: 99))
-        far.files["\(folder)/\(SPath.pair(of: name))"] = .keyFile(.format3(file))
+        far.files["\(folder)/\(SPath.pair(of: name))"] = .keyFile(file)
     }
 
     /// The container deleted; an old copy (the newest in the far folder or a
     /// Time Machine snapshot) opened into the slot as it was.
     func deleteContainerAndOpenOldCopy(_ device: SDevice) throws {
         lock(device)
-        var source: (image: LibraryImage, keyFile: KeyFileDocument)?
+        var source: (image: LibraryImage, keyFile: KeyFile)?
         if let far = farFolder(of: device) {
             for path in far.files.keys.sorted().reversed() where path.hasSuffix(".sqlite") {
                 if let image = far.files[path]?.library, let document = far.files[SPath.pair(of: path)]?.keyFile {
@@ -820,10 +820,7 @@ extension SWorld {
         guard let source else { throw WorldRefusal.noLibrary }
         device.container = FolderFS()
         device.container.files[SPath.slot] = .library(source.image)
-        switch source.keyFile {
-        case .format3: device.container.files[SPath.liveKeyFile] = .keyFile(source.keyFile)
-        case .legacy(let legacy): device.container.files[SPath.legacyKeyFile(legacy.fingerprint)] = .keyFile(source.keyFile)
-        }
+        device.container.files[SPath.liveKeyFile] = .keyFile(source.keyFile)
     }
 
     // MARK: - The world settles

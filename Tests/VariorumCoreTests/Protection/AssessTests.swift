@@ -204,76 +204,14 @@ struct AssessVaultTests {
     }
 }
 
-@Suite("VX-305 U2 — assess: the mode, confirmed or not; corner 45; before unlock nothing decides")
+@Suite("VX-305 U2 — assess: before unlock nothing decides (the mode's confirmed-or-not and corner 45 left with rule 26)")
 struct AssessModeTests {
-    /// Corner 45's ambiguous case (P-U1-6's exact shape: local-only, a
-    /// passphrase, no Apple wrap, the raw key in the silent item) as the
-    /// migration records it: Castle, not yet confirmed, no account.
-    static func corner45() throws -> AWorld {
-        var world = try AWorld(.castle)
-        world.confirmed = false
-        world.custody = [CustodyItemFact(fingerprint: PF.fp(world.key), itemClass: .silent)]
-        world.section.settings = .noChoiceYet
-        world.recordSection = world.section
-        return world
-    }
-
-    /// A library with no record yet: the legacy reader's mode, the migration
-    /// owed, nothing else runs.
-    @Test func aLibraryWithNoRecordOwesTheMigrationAndNothingElse() throws {
-        var world = try AWorld(.castle)
-        world.noRecord = true
-        world.legacyInputs = LegacyModeInputs(
-            keyFile: LegacyKeyFileFacts(hasAppleWrap: false, hasPassphraseWrap: true), rawKeyCustody: .silent, enrolled: false)
-        world.custody = [CustodyItemFact(fingerprint: PF.fp(world.key), itemClass: .silent)]
-        let assessed = try world.assessed()
-        #expect(assessed.mode.mode == .castle && !assessed.mode.confirmed && assessed.mode.corner45)
-        #expect(assessed.acts == [.migrate])
-        #expect(assessed.repairs.isEmpty)
-        #expect(assessed.doors.values.allSatisfy { $0 == .refused(.migrationOwed) })
-    }
-
-    @Test func cornerFortyFiveRecordsCastleNotYetConfirmedAndRepairsNothing() throws {
-        let assessed = try Self.corner45().assessed()
-        #expect(assessed.mode.mode == .castle && !assessed.mode.confirmed && assessed.mode.corner45)
-        #expect(assessed.acts.contains(.corner45Notice))
-        #expect(!assessed.repairs.contains { if case .deleteSilentItem = $0 { return true } else { return false } },
-                "no custody repair until the notice is answered")
-        #expect(assessed.door(.useStandard).spec?.rekeys == true, "Use Standard offered as the key change it now is")
-        #expect(assessed.door(.useCastle).refusal == .modeNotConfirmed)
-    }
-
-    @Test func answeringCornerFortyFiveStandardIsAKeyChange() throws {
-        var world = try Self.corner45()
-        world.corner45Answer = .standard
-        #expect(try world.assessed().acts.contains(.confirmMode(.standard, isKeyChange: true)))
-        world.corner45Answer = .castle
-        #expect(try world.assessed().acts.contains(.confirmMode(.castle, isKeyChange: false)))
-    }
-
-    @Test func aSyncedUnconfirmedModeWaitsForTheVault() throws {
-        let x = PF.id()
-        var world = try AWorld(.standard, account: x)
-        world.confirmed = false
-        world.session = .signedIn(accountID: x, email: nil)
-        let waiting = try world.assessed()
-        #expect(!waiting.acts.contains { if case .confirmMode = $0 { return true } else { return false } })
-        #expect(!waiting.repairs.contains { if case .landAppleWrap = $0 { return true } else { return false } },
-                "indeterminate writes nothing Apple-reachable")
-        world.vault = AWorld.vault(x, .castle)
-        // Restated at VX-305 U4 (PROVISIONAL P-U4-11): the key change's road is
-        // the ordinary follow (§3.13 step 1) — a confirm with a key change had
-        // no door, and a library migrated offline waited on it for ever.
-        #expect(try world.assessed().acts.contains(.follow(.intoCastle, typesOneSecret: true, holdsLibraryRekey: false)),
-                "confirming a mode the current key wasn't born in is a key change, never a move")
-    }
-
     @Test func beforeUnlockNothingDecides() throws {
         var world = try AWorld(.castle)
         world.unlocked = false
         let assessed = try world.assessed()
         #expect(assessed.launch == .lobby)
-        #expect(assessed.mode == ModeVerdict(mode: .castle, confirmed: false, source: .hintOnly, corner45: false))
+        #expect(assessed.mode == ModeVerdict(mode: .castle, source: .hintOnly))
         #expect(assessed.repairs.isEmpty && assessed.acts.isEmpty && assessed.faults.isEmpty)
         #expect(assessed.doors.values.allSatisfy { $0 == .refused(.locked) })
         // The roads: the Touch ID item, the typed secrets.
@@ -395,34 +333,6 @@ struct AssessRepairTests {
         #expect(!assessed.repairs.contains { if case .deleteSilentItem(let fp, _) = $0 { return fp == PF.fp(lost) } else { return false } })
     }
 
-    @Test func inCastleTodaysItemsAndKeyFilesGoOnceTheHistoryHoldsTheirKey() throws {
-        let older = StoreKey.mint(), unreached = StoreKey.mint()
-        var world = try AWorld(.castle, history: [older])
-        world.tree = world.tree.seeding([PF.fp(unreached)])
-        let bound = LegacyItemFact.Kind.silent(account: LegacyItems.boundAccount(scope: AWorld.scope, libraryID: world.world.library))
-        let escrow = LegacyItemFact.Kind.escrow(libraryID: world.world.library)
-        let gated = LegacyItemFact.Kind.gated(account: LegacyItems.gatedAccount(scope: AWorld.scope, libraryID: world.world.library))
-        world.legacyItems = [LegacyItemFact(kind: bound, fingerprint: PF.fp(older)),
-                             LegacyItemFact(kind: escrow, fingerprint: PF.fp(older)),
-                             LegacyItemFact(kind: gated, fingerprint: nil)]
-        world.extraEntries = [
-            CatalogEntry(place: .container, name: StoreKeyEnvelope.filename(forFingerprint: PF.fp(older)),
-                         bytes: try CF.format2(library: world.world.library, key: older)),
-            CatalogEntry(place: .container, name: StoreKeyEnvelope.filename(forFingerprint: PF.fp(unreached)),
-                         bytes: try CF.format2(library: world.world.library, key: unreached)),
-        ]
-        let assessed = try world.assessed()
-        let precondition = RepairPrecondition.historyHolds(fingerprint: PF.fp(older))
-        #expect(assessed.repairs.contains(.deleteLegacyItem(bound, fingerprint: PF.fp(older), precondition: precondition)))
-        #expect(assessed.repairs.contains(.deleteLegacyItem(escrow, fingerprint: PF.fp(older), precondition: precondition)))
-        #expect(!assessed.repairs.contains { if case .deleteLegacyItem(.gated, _, _) = $0 { return true } else { return false } })
-        let olderFile = Catalog.id(place: .container, folders: [], name: StoreKeyEnvelope.filename(forFingerprint: PF.fp(older)))
-        let unreachedFile = Catalog.id(place: .container, folders: [], name: StoreKeyEnvelope.filename(forFingerprint: PF.fp(unreached)))
-        #expect(assessed.repairs.contains(.deleteLegacyKeyFile(keyFileID: olderFile, precondition: precondition)))
-        #expect(!assessed.repairs.contains { if case .deleteLegacyKeyFile(unreachedFile, _) = $0 { return true } else { return false } },
-                "a key the fold couldn't reach keeps its file: it's that copy's only road")
-    }
-
     @Test func anAppleWrapOnACastleKeyIsAFaultTheReKeyAnswers() throws {
         var world = try AWorld(.castle)
         world.liveFile = try world.liveFile.settingApple(AppleKeyMaterial.mint(), for: world.key)
@@ -502,13 +412,12 @@ struct AssessRepairTests {
             second.custody.append(CustodyItemFact(fingerprint: PF.fp(second.key), itemClass: mode == .castle ? .silent : .touchid))
             shapes.append(second)
         }
-        shapes.append(try AssessModeTests.corner45())
         for world in shapes {
             for repair in try world.assessed().repairs {
                 switch repair {
                 case .makeTouchIDItem, .deleteTouchIDItem:
                     Issue.record("\(repair) — a guard's bug shape with every guard on")
-                case .deleteSilentItem, .deleteLegacyItem, .deleteLegacyKeyFile, .deleteRetiredAppleKey,
+                case .deleteSilentItem, .deleteRetiredAppleKey,
                      .deleteRetiredOldSharedKey, .landAppleWrap, .refreshMemory, .refreshRecordSection,
                      .restoreKeyFileFromMirror, .restoreKeyFileFromCopy, .recordAlwaysAskQuietly, .rekeyOlderLibraryFile, .recordHeldSyncKeysFacts, .restoreRecordFactsFromMemory, .retireOwnAppleKeys:
                     continue

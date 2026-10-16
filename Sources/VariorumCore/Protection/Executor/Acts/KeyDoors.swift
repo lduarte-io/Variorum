@@ -134,7 +134,7 @@ extension ProtectionExecutor {
     public func resetPassphrase(
         _ library: inout UnlockedLibrary, authorization: ResetAuthorization, new: String
     ) async throws -> ActOutcome {
-        guard let record = library.record else { throw ExecutorRefusal.migrationOwed }
+        guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         switch (record.mode, authorization) {
         case (.castle, .touchID):
             guard try leaves.custody.custodyItems().contains(CustodyItemFact(fingerprint: library.fingerprint, itemClass: .touchid))
@@ -206,7 +206,7 @@ extension ProtectionExecutor {
     }
 
     func keyDoorParameters(_ library: UnlockedLibrary) async throws -> ActParameters {
-        guard let record = library.record else { throw ExecutorRefusal.migrationOwed }
+        guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         var parameters = ActParameters(synced: record.account != nil, accountID: record.account)
         if let account = record.account {
             try requireSignedIn(as: account)

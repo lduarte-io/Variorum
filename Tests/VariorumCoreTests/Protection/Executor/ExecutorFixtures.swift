@@ -95,13 +95,13 @@ final class EX {
             }
         }
         var record = ProtectionRecord.minting(
-            libraryID: libraryID, mode: mode, modeConfirmed: true, account: self.account,
+            libraryID: libraryID, mode: mode, account: self.account,
             currentFingerprint: PF.fp(key), madeBy: deviceID, at: PF.t0)
         section.hardwareMarker = record.marker(for: PF.macA)
         record = try record.storing(section, sealedUnder: key)
         let file = try KeyFile.building(libraryID: libraryID, key: key, epoch: 1, locks: locks)
         world.live = ExecutorWorld.LibraryFile(fingerprint: PF.fp(key), record: record, generation: 1)
-        world.liveKeyFile = .format3(file)
+        world.liveKeyFile = file
         switch (mode, self.gate) {
         case (.standard, _): world.custody[CustodyItemFact(fingerprint: PF.fp(key), itemClass: .silent)] = key
         case (.castle, .touchID): world.custody[CustodyItemFact(fingerprint: PF.fp(key), itemClass: .touchid)] = key

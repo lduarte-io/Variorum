@@ -17,14 +17,12 @@ struct AWorld {
     let world: KeyWorld
     var key: StoreKey
     var mode: ProtectionMode
-    var confirmed = true
     var account: String?
     var session: SessionFact = .signedOut
     var vault: VaultReading?
     var liveFile: KeyFile
     var extraEntries: [CatalogEntry] = []
     var custody: [CustodyItemFact]
-    var legacyItems: [LegacyItemFact] = []
     var syncKeys: [SyncKeysItemFact] = []
     var appleKeys: AppleKeyFacts
     var biometry = BiometryFacts.ready
@@ -34,9 +32,6 @@ struct AWorld {
     var memoryAbsent = false
     var recordSection: DeviceSection?
     var tree: FamilyTree
-    var corner45Answer: ProtectionMode?
-    var legacyInputs: LegacyModeInputs?
-    var noRecord = false
     var unlocked = true
     var libraryAccountEmail: String?
     let own = AppleKeyMaterial.mint()
@@ -69,7 +64,7 @@ struct AWorld {
 
     var record: ProtectionRecord {
         var record = ProtectionRecord.minting(
-            libraryID: world.library, mode: mode, modeConfirmed: confirmed, account: account,
+            libraryID: world.library, mode: mode, account: account,
             currentFingerprint: PF.fp(key), madeBy: CF.macA, at: PF.t0)
         record.familyTree = tree
         return record
@@ -79,7 +74,7 @@ struct AWorld {
     var agreeingMemory: DeviceMemory {
         DeviceMemory(
             libraryID: world.library, scope: Self.scope, currentFingerprint: PF.fp(key), keyEpoch: record.keyEpoch,
-            lastConfirmed: confirmed ? ConfirmedFacts(mode: mode, account: account) : nil,
+            lastConfirmed: ConfirmedFacts(mode: mode, account: account),
             familyTree: tree, deviceSection: section)
     }
 
@@ -89,14 +84,13 @@ struct AWorld {
 
     func facts() throws -> ProtectionFacts {
         let unlockedFacts = unlocked ? UnlockedFacts(
-            record: noRecord ? nil : record, legacyModeInputs: legacyInputs, familyTree: tree, thisMac: section,
+            record: record, familyTree: tree, thisMac: section,
             identity: .continuing(deviceID: section.deviceID), memory: memoryAbsent ? nil : (memory ?? agreeingMemory),
-            currentFingerprint: PF.fp(key), liveKeyFileID: Self.liveKeyFileID, corner45Answer: corner45Answer,
-            recordSection: recordSection) : nil
+            currentFingerprint: PF.fp(key), liveKeyFileID: Self.liveKeyFileID, recordSection: recordSection) : nil
         return ProtectionFacts(
             scope: Self.scope, unlocked: unlockedFacts, slotFingerprintHint: PF.fp(key),
             rememberedModeHint: unlocked ? nil : mode, libraryAccountEmail: libraryAccountEmail,
-            custody: custody, legacyItems: legacyItems, syncKeys: syncKeys, appleKeys: appleKeys, biometry: biometry,
+            custody: custody, syncKeys: syncKeys, appleKeys: appleKeys, biometry: biometry,
             touchIDPress: press, session: session, vault: vault, catalog: Catalog.build(try entries()), now: Self.now)
     }
 

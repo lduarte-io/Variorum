@@ -1,42 +1,26 @@
 import Foundation
 
 // VX-305 U2 — THE CATALOG'S ONE NAME PARSER (design §3.7: "It has one name
-// parser and attributes each copy to its library … and its Mac"). Every file
-// and folder name today's builds have written in the places copies live, and
-// the names this build adds, parsed in ONE place — so the restore list, Open
-// Library, the Castle offer and retention can never disagree about what a
-// name is.
-//
-// THE UNION OF TODAY'S THREE PARSERS (the plan's §4: "read the three existing
-// parsers and keep their union"):
-//   1. the BACKUP-NAME parser — `StoreBackup.date(fromBackupURL:)`
-//      (App/Variorum/Shared/StoreBackup.swift), restated in core as
-//      `BackupRestoreCandidates.backupDate`: `variorum-backup-<stamp>` or
-//      `variorum-backup-<stamp>-<fp8>`, `.sqlite`, the stamp reading back
-//      exactly as the writer formats it (UTC `yyyy-MM-dd-HHmmss`), the tail
-//      empty or `-` + eight LOWERCASE hex — and ONLY those (18k C7: a foreign
-//      name that merely starts with a stamp, the A1 rail's `variorum-backup-
-//      a1-…`, is not the app's and is never a candidate or pruned);
-//   2. the PAIR rules — `LibraryClassifier` (Persistence/LibraryClassifier
-//      .swift) and `StoreKeyEnvelope`'s names: the snapshot's own pair
-//      `<snapshot>.keys.json` (pre-13x row 42), the fingerprint-named key
-//      file `variorum-keys-<fp16>.json` (sixteen hex, `isHexDigit` as today),
-//      the legacy `variorum-keys.json`, and the set-aside `.stale-<epoch>
-//      .json` shape both set-aside writers spell (`StoreIdentity.setAside`,
-//      `StoreLaunchGate.live.setAsideEnvelope`);
-//   3. the STAMP-FOLDER qualifier — `LibraryAdoption.adoptionStamp` and
-//      `LibraryAsideCopies.qualify`: `Previous Libraries/<stamp>/` and
-//      `Backups/safety-copies/variorum-adopt-safety-<stamp>/`, the stamp
-//      reading back exactly.
-// The classifier's looser `isBackupNamed` (any `variorum-backup-` prefix) is
-// a routing hint for a file the user PICKED, never an acceptance of the name
-// as the app's — the strict stamp rule above decides here (18k C7).
-//
-// Beside them, the names today's builds write in the same places (the slot's
-// `variorum.sqlite` and its sidecars, `RESTORE.md`, `md-exports/`, the
-// hand-off folder `Variorum Library — <day>`) and this build's own
-// (`variorum-library-keys.json`, `variorum-plan.json`, `Backups/<library8>/
-// <mac8>/`). Pure: names in, values out — nothing here reads a disk.
+// parser and attributes each copy to its library … and its Mac"). The names
+// THIS design writes in the places copies live — and, since VX-378 U1 (rule 19:
+// "the catalog reads only the folders this design writes"; rule 26: nothing
+// from before this design is read), only those:
+//   - the slot's `variorum.sqlite` and its sidecars, `variorum-library-keys.json`
+//     (format 3), `variorum-plan.json`, `RESTORE.md`;
+//   - a snapshot pair in `Backups/<library8>/<mac8>/`: `variorum-backup-
+//     <stamp>[-<fp8>].sqlite` and its own `.keys.json`, the stamp reading back
+//     exactly as the writer formats it (UTC `yyyy-MM-dd-HHmmss`), the tail empty
+//     or `-` + eight LOWERCASE hex (18k C7: a foreign name that merely starts
+//     with a stamp, the A1 rail's `variorum-backup-a1-…`, is not the app's);
+//   - `Previous Libraries/<stamp>/` and `Backups/safety-copies/variorum-adopt-
+//     safety-<stamp>/`, the stamp reading back exactly;
+//   - the set-aside `.stale-<epoch>.json` shape the repair layer writes beside
+//     the slot (until VX-378 U1's repair piece);
+//   - beside them, the folders that are hers (`md-exports/`, the hand-off folder
+//     `Variorum Library — <day>`).
+// Today's fingerprint-named and fixed-name key files, the flat `Backups/` files
+// and the folder key files left with the legacy readers (VX-378 U1). Pure:
+// names in, values out — nothing here reads a disk.
 
 public enum CatalogNames {
     // MARK: - The stamp (`yyyy-MM-dd-HHmmss`, UTC — every stamp today's builds write)
@@ -76,8 +60,6 @@ public enum CatalogNames {
 
     public static let backupPrefix = "variorum-backup-"
     public static let libraryFilename = "variorum.sqlite"
-    public static let legacyKeyFilename = "variorum-keys.json"
-    public static let fingerprintKeyFilePrefix = "variorum-keys-"
     public static let restoreRecipeFilename = "RESTORE.md"
 
     public enum FileName: Equatable, Sendable {
@@ -87,12 +69,8 @@ public enum CatalogNames {
         /// `variorum-backup-<stamp>[-<fp8>].keys.json` — the snapshot's own
         /// key file, written with it and never rewritten.
         case snapshotKeyFile(stamp: Date, fingerprint8: String?)
-        /// `variorum-library-keys.json` — format 3 (this build's).
+        /// `variorum-library-keys.json` — format 3.
         case keyFile
-        /// `variorum-keys-<fp16>.json` — format 2's name.
-        case fingerprintKeyFile(fingerprint: String)
-        /// `variorum-keys.json` — format 1's fixed name.
-        case legacyKeyFile
         /// A key file moved aside: `variorum-keys[-<fp16>].stale-<epoch>.json`.
         case setAsideKeyFile(fingerprint: String?, setAsideAt: Date)
         /// `variorum.sqlite` — the slot's name; the store inside an aside or
@@ -108,7 +86,7 @@ public enum CatalogNames {
         /// A key file of any format (the names the route finder reads).
         public var isKeyFile: Bool {
             switch self {
-            case .snapshotKeyFile, .keyFile, .fingerprintKeyFile, .legacyKeyFile, .setAsideKeyFile: return true
+            case .snapshotKeyFile, .keyFile, .setAsideKeyFile: return true
             default: return false
             }
         }
@@ -125,7 +103,6 @@ public enum CatalogNames {
         switch name {
         case libraryFilename: return .library
         case ProtectionNames.keyFilename: return .keyFile
-        case legacyKeyFilename: return .legacyKeyFile
         case ProtectionNames.planFilename: return .plan
         case restoreRecipeFilename: return .restoreRecipe
         default: break
@@ -141,9 +118,7 @@ public enum CatalogNames {
             }
             return nil
         }
-        if name.hasPrefix(fingerprintKeyFilePrefix) || name.hasPrefix("variorum-keys.") {
-            return keyFileName(name)
-        }
+        if name.hasPrefix("variorum-keys") { return setAsideName(name) }
         return nil
     }
 
@@ -161,12 +136,8 @@ public enum CatalogNames {
         return (stamp, String(tail.dropFirst()))
     }
 
-    /// `variorum-keys-<fp16>.json`, `variorum-keys.json` (above) and the
-    /// set-aside shape `<either name minus .json>.stale-<epoch>.json`.
-    private static func keyFileName(_ name: String) -> FileName? {
-        if let fingerprint = StoreKeyEnvelope.fingerprint(fromFilename: name) {
-            return .fingerprintKeyFile(fingerprint: fingerprint)
-        }
+    /// The set-aside shape `variorum-keys[-<fp16>].stale-<epoch>.json`.
+    private static func setAsideName(_ name: String) -> FileName? {
         // The set-aside shape: `url.deletingPathExtension()
         // .appendingPathExtension("stale-<Int(epoch)>.json")`.
         guard name.hasSuffix(".json"), let marker = name.range(of: ".stale-", options: .backwards) else { return nil }

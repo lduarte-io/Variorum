@@ -53,8 +53,6 @@ public struct ActParameters: Codable, Equatable, Sendable {
     public var targetAccount: String?
     /// Whether `targetAccount` is to be set (a leave clears it).
     public var changesAccount: Bool?
-    /// A mode the act confirms or moves to.
-    public var targetMode: ProtectionMode?
     /// The account Apple key a leave minted (its id is the vault's mark).
     public var accountAppleKeyID: String?
     /// This Mac's own Apple key the act minted for the library.
@@ -113,7 +111,7 @@ public struct ActParameters: Codable, Equatable, Sendable {
         gate: GateStyle? = nil, synced: Bool? = nil, accountID: String? = nil, doorRevision: Int? = nil,
         passphraseKDF: PassphraseKDF.Descriptor? = nil, passphraseIsNew: Bool? = nil, wordsAreNew: Bool? = nil,
         typedSecret: String? = nil, follow: String? = nil, newKind: ProtectionMode? = nil,
-        targetAccount: String? = nil, changesAccount: Bool? = nil, targetMode: ProtectionMode? = nil,
+        targetAccount: String? = nil, changesAccount: Bool? = nil,
         accountAppleKeyID: String? = nil, ownAppleKeyID: String? = nil, copyID: String? = nil,
         copyIDs: [String]? = nil, destination: String? = nil, keyFileIDs: [String]? = nil,
         settings: DeviceSettings? = nil, oldCorpusKeyID: String? = nil, newCorpusKeyID: String? = nil,
@@ -131,7 +129,6 @@ public struct ActParameters: Codable, Equatable, Sendable {
         self.newKind = newKind
         self.targetAccount = targetAccount
         self.changesAccount = changesAccount
-        self.targetMode = targetMode
         self.accountAppleKeyID = accountAppleKeyID
         self.ownAppleKeyID = ownAppleKeyID
         self.copyID = copyID

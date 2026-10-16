@@ -106,8 +106,8 @@ protocol ActProgram {
 extension ActProgram {
     var needsLiveKeyFile: Bool {
         switch act {
-        case .deviceSettings, .touchIDRearm, .confirmMode, .offerDelete, .plaintextExport, .land,
-             .createLibrary, .migration, .moveOffSharedKey, .retireSharedKey, .relinkApple:
+        case .deviceSettings, .touchIDRearm, .offerDelete, .plaintextExport, .land,
+             .createLibrary, .moveOffSharedKey, .retireSharedKey, .relinkApple:
             return false
         default:
             return true
@@ -198,8 +198,6 @@ extension ProtectionExecutor {
         case .follow: return FollowProgram()
         case .land: return LandProgram()
         case .sendLibrary: return SendLibraryProgram()
-        case .migration: return MigrationProgram()
-        case .confirmMode: return ConfirmModeProgram()
         case .moveOffSharedKey: return MoveOffSharedKeyProgram()
         case .retireSharedKey: return RetireSharedKeyProgram()
         case .relinkApple: return RelinkAppleProgram()
@@ -222,7 +220,7 @@ extension ProtectionExecutor {
         _ program: any ActProgram, parameters: ActParameters, secrets: ActSecrets, typed: TypedSecrets? = nil,
         toKey: StoreKey? = nil, library: inout UnlockedLibrary
     ) async throws -> ActOutcome {
-        guard library.record != nil else { throw ExecutorRefusal.migrationOwed }
+        guard library.record != nil else { throw ExecutorRefusal.recordMissing }
         if let inFlight = library.section.actInFlight { throw ExecutorRefusal.actInFlight(inFlight.act) }
         if program.needsLiveKeyFile, library.keyFile?.fingerprint != library.fingerprint { throw ExecutorRefusal.noLiveKeyFile }
         let at = now()

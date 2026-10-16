@@ -133,8 +133,7 @@ extension ProtectionExecutor {
     /// **Replace All Keys** — synced, both secrets typed (the words typed or
     /// made new).
     public func replaceAllKeys(_ library: inout UnlockedLibrary, typed: TypedSecrets) async throws -> ActOutcome {
-        guard let record = library.record else { throw ExecutorRefusal.migrationOwed }
-        guard record.modeConfirmed else { throw ExecutorRefusal.modeNotConfirmed }
+        guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         guard let account = record.account else { throw ExecutorRefusal.notSynced }
         var parameters = ActParameters(
             gate: library.section.settings.gateStyle, synced: true, accountID: account, newKind: record.mode,

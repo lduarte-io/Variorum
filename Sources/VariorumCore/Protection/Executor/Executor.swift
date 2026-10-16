@@ -61,7 +61,7 @@ public struct ExecutorConfiguration: Sendable {
 public struct UnlockedLibrary {
     /// The key the library opened under.
     public var key: StoreKey
-    /// nil: a library from before this change — the migration's subject.
+    /// The record (a library with no record never unlocks — rule 26).
     public var record: ProtectionRecord?
     /// This Mac's section at open (the two homes reconciled).
     public var section: DeviceSection
@@ -132,8 +132,6 @@ public struct ActSecrets: Sendable {
 /// Every refusal the executor names (the doors' sentences are phase 4's).
 public enum ExecutorRefusal: Error, Equatable, Sendable {
     case keyDoesNotOpenLibrary
-    /// A library with no record yet: the migration runs first.
-    case migrationOwed
     /// An act is already in flight on this device — resume it first.
     case actInFlight(ProtectionAct)
     /// A resume needs the secrets typed again (a plan never holds one).
@@ -147,7 +145,6 @@ public enum ExecutorRefusal: Error, Equatable, Sendable {
     /// VX-113: the passphrase typed was changed elsewhere — the change named.
     case passphraseChangedElsewhere(device: String?, day: Date?)
     case wrongMode(ProtectionMode)
-    case modeNotConfirmed
     case notSynced
     case noAccountSignedIn
     case otherAccountSignedIn
@@ -246,19 +243,11 @@ public final class ProtectionExecutor {
         guard try leaves.library.libraryOpens(with: key) else { throw ExecutorRefusal.keyDoesNotOpenLibrary }
         let liveFile = try liveFormat3()
         let reach = reach(key: key, keyFile: liveFile, extra: alsoInHand)
-        let record = try leaves.library.readRecord(with: key)
-        let slotLibrary = record?.libraryID ?? libraryID
-        let memory = try leaves.memory.readMemory(libraryID: slotLibrary)
-            .flatMap { DeviceMemory.opening($0, libraryID: slotLibrary, reach: reach) }
-        guard let record else {
-            // A library from before this change: the migration builds this
-            // Mac's section from its own facts.
-            let section = memory?.deviceSection ?? DeviceSection(
-                deviceID: leaves.ids.mintID(), hardwareMarker: .unset, settings: .noChoiceYet)
-            return UnlockedLibrary(
-                key: key, record: nil, section: section, resolution: .newIdentity(predecessorID: nil),
-                memory: memory, keyFile: liveFile, familyTree: memory?.familyTree ?? FamilyTree())
-        }
+        // A library with no record is from before this design: rule 26 — not
+        // migrated, not handled; it does not unlock.
+        guard let record = try leaves.library.readRecord(with: key) else { throw ExecutorRefusal.recordMissing }
+        let memory = try leaves.memory.readMemory(libraryID: record.libraryID)
+            .flatMap { DeviceMemory.opening($0, libraryID: record.libraryID, reach: reach) }
         // The executor serves the slot's library (a landing changes it).
         configuration.libraryID = record.libraryID
         let sections = record.verifiedSections(reach: reach)
@@ -285,10 +274,7 @@ public final class ProtectionExecutor {
         return unlocked
     }
 
-    func liveFormat3() throws -> KeyFile? {
-        if case .format3(let file)? = try leaves.keyFiles.readLiveKeyFile() { return file }
-        return nil
-    }
+    func liveFormat3() throws -> KeyFile? { try leaves.keyFiles.readLiveKeyFile() }
 
     /// The keys a seal may be verified with: the key in hand, an older one
     /// through the live key file's history, and a key a SILENT custody item
@@ -322,7 +308,7 @@ public final class ProtectionExecutor {
         return DeviceMemory(
             libraryID: record.libraryID, scope: configuration.scope, currentFingerprint: record.currentFingerprint,
             keyEpoch: record.keyEpoch,
-            lastConfirmed: record.modeConfirmed ? ConfirmedFacts(mode: record.mode, account: record.account) : old?.lastConfirmed,
+            lastConfirmed: ConfirmedFacts(mode: record.mode, account: record.account),
             biometryStateHash: old?.biometryStateHash, vaultFacts: old?.vaultFacts,
             nudgeDismissals: old?.nudgeDismissals ?? [:], keyFileMirror: mirror,
             familyTree: library.familyTree.union(record.familyTree), deviceSection: library.section)

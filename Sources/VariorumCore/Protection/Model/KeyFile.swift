@@ -50,7 +50,7 @@ public enum KeyFileError: Error, Equatable, Sendable {
     case appleWrapOnACastleKey
     /// A re-key to the key already current.
     case newKeyIsTheCurrentKey
-    /// A file whose format is not 3 where format 3 is required.
+    /// A file whose format is not 3 (rule 26: an older format is not read).
     case notFormat3(Int)
     /// A file written by a newer build — refused, never guessed.
     case newerFormat(Int)
@@ -347,6 +347,25 @@ public struct KeyFile: Codable, Equatable, Sendable {
     }
 
     // MARK: - The file
+
+    /// A key file from its bytes — format 3 only (rule 26: a file of an older
+    /// format is not read, and says nothing); a newer format refuses, never
+    /// guessed; bytes that are not a key file throw `unreadable`.
+    public static func decode(_ data: Data) throws -> KeyFile {
+        struct Probe: Decodable { var formatVersion: Int }
+        guard let probe = try? JSONDecoder().decode(Probe.self, from: data) else {
+            throw StoreKeyEnvelopeError.unreadable("not a key file")
+        }
+        guard probe.formatVersion == currentFormatVersion else {
+            throw probe.formatVersion > currentFormatVersion
+                ? KeyFileError.newerFormat(probe.formatVersion) : KeyFileError.notFormat3(probe.formatVersion)
+        }
+        do {
+            return try ProtectionCoding.decoder().decode(KeyFile.self, from: data)
+        } catch {
+            throw StoreKeyEnvelopeError.unreadable(String(describing: error))
+        }
+    }
 
     public func encoded() throws -> Data {
         let encoder = ProtectionCoding.canonicalEncoder()

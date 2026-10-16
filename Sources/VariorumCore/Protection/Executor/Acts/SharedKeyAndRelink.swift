@@ -106,21 +106,11 @@ extension ProtectionExecutor {
             var gift: KeyFile
             let key: StoreKey
             let sharedWrap: AppleWrap?
-            switch document {
-            case .legacy(let legacy):
-                guard let opened = try? legacy.open(sharedApple: shared) else { continue }
-                key = opened
-                gift = KeyFile(libraryID: libraryID, key: key, epoch: 1)
-                gift.passphrase = legacy.envelope.passphrase
-                gift.words = legacy.envelope.recovery
-                sharedWrap = legacy.envelope.apple.map { AppleWrap(keyID: legacy.envelope.appleKeyID ?? shared.id, wrapped: $0) }
-            case .format3(let file):
-                guard let opened = try? file.open(sharedApple: shared) else { continue }
-                key = opened
-                gift = file
-                gift.apple = nil
-                sharedWrap = file.sharedApple
-            }
+            guard let opened = try? document.open(sharedApple: shared) else { continue }
+            key = opened
+            gift = document
+            gift.apple = nil
+            sharedWrap = document.sharedApple
             try ctx.requireAppleWriteAllowed()
             let own = leaves.ids.mintAppleKey()
             try leaves.apple.addAppleKey(own)
@@ -130,7 +120,7 @@ extension ProtectionExecutor {
             moved = true
         }
         // The live library — confirmed Standard (decision 35 for a synced one).
-        if let record = ctx.library.record, record.mode == .standard, record.modeConfirmed,
+        if let record = ctx.library.record, record.mode == .standard,
            let live = ctx.library.keyFile, live.fingerprint == ctx.library.fingerprint, live.apple == nil {
             let own = try ctx.mintAppleKey(purpose: .library)
             var file = try live.settingApple(own, for: ctx.library.key)
@@ -158,7 +148,7 @@ extension ProtectionExecutor {
     /// **Retire the old Apple key…** — a library already in Castle before
     /// this change (its own door, Settings ▸ Protection).
     public func retireOldSharedKey(_ library: inout UnlockedLibrary, moves subjects: [String] = []) async throws -> ActOutcome {
-        guard let record = library.record, record.mode == .castle, record.modeConfirmed else {
+        guard let record = library.record, record.mode == .castle else {
             throw ExecutorRefusal.wrongMode(library.record?.mode ?? .standard)
         }
         return try await perform(
@@ -170,7 +160,7 @@ extension ProtectionExecutor {
     /// at the press, the vault's Apple copy landed under it (CAS). Its consent
     /// says the key reaches other devices only through iCloud Keychain.
     public func relinkAccount(_ library: inout UnlockedLibrary, passphrase: String) async throws -> ActOutcome {
-        guard let record = library.record, record.mode == .standard, record.modeConfirmed else {
+        guard let record = library.record, record.mode == .standard else {
             throw ExecutorRefusal.wrongMode(library.record?.mode ?? .castle)
         }
         guard let account = record.account else { throw ExecutorRefusal.notSynced }

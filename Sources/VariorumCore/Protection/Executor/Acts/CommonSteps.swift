@@ -205,9 +205,8 @@ extension ActContext {
 
     /// The outgoing key's custody items go — only after the swap. Entering
     /// Castle sweeps too (§3.9): every silent item for a key the library has
-    /// had, the per-library-ID items the migration kept, the 13p escrow items
-    /// and the format-1/2 key files beside the library — each only once the
-    /// history VERIFIABLY holds its key (opened with the current key).
+    /// had — each only once the history VERIFIABLY holds its key (opened with
+    /// the current key). (Today's items and key files left with rule 26.)
     func retireOldCustody(sweepForCastle: Bool) throws {
         let current = library.fingerprint
         guard current != plan.fromFingerprint else { return }
@@ -227,42 +226,6 @@ extension ActContext {
             // with no silent item).
             if item.itemClass == .silent, sweepForCastle, !historyHolds(item.fingerprint) { continue }
             try leaves.custody.deleteCustody(fingerprint: item.fingerprint, itemClass: item.itemClass)
-        }
-        // A LEAVE: the outgoing Castle key's custody goes with its key — today's
-        // per-library-ID SILENT item holding it too (corner 45's ambiguous case,
-        // recorded Castle not yet confirmed, keeps today's custody until it is;
-        // answering Standard is this key change, and from it on nothing a
-        // login-password holder reads may open a copy from before the leave —
-        // promise 13). Only once the anchor, written first, holds that key.
-        // PROVISIONAL P-U4-2 (VX-305 U4, found by the scenario world).
-        if !sweepForCastle, let from = plan.fromFingerprint, library.record?.mode == .standard,
-           library.familyTree.entry(from)?.kind == .castle,
-           live?.anchor?.directFingerprints.contains(from) == true {
-            for item in try leaves.legacyItems.legacyItems() {
-                guard case .silent = item.kind, item.fingerprint == from else { continue }
-                try leaves.legacyItems.deleteLegacyItem(item.kind)
-            }
-        }
-        guard sweepForCastle else { return }
-        for item in try leaves.legacyItems.legacyItems() {
-            // Today's per-store sync custody holds the account's sync keys of
-            // today's road — the Standard-era master opens every pre-Castle key
-            // file's master wrap. It goes with the crossing (the act has filed
-            // the account's keys its own way). VX-305 U4, found by the world.
-            if case .syncCustody = item.kind {
-                try leaves.legacyItems.deleteLegacyItem(item.kind)
-                continue
-            }
-            guard let fingerprint = item.fingerprint, tree.contains(fingerprint) || fingerprint == plan.fromFingerprint,
-                  historyHolds(fingerprint) else { continue }
-            switch item.kind {
-            case .silent, .escrow: try leaves.legacyItems.deleteLegacyItem(item.kind)
-            case .gated, .syncCustody: continue
-            }
-        }
-        for (id, file) in try leaves.keyFiles.legacyKeyFilesBesideLibrary() {
-            guard let fingerprint = file.fingerprint, historyHolds(fingerprint) else { continue }
-            try leaves.keyFiles.deleteLegacyKeyFile(id: id)
         }
     }
 

@@ -298,22 +298,10 @@ public struct RouteFinder: Sendable {
             edges[from, default: []].append(Edge(from: from, step: step, to: to))
         }
         let live = facts.liveKeyFileID.flatMap { facts.catalog.keyFile(id: $0) }
-        let livePassphraseKDF: PassphraseKDF.Descriptor? = {
-            switch live?.document {
-            case .format3(let file)?: return file.passphrase?.kdf
-            case .legacy(let file)?: return file.envelope.passphrase?.kdf
-            case nil: return nil
-            }
-        }()
-        let liveWordsLock: (fingerprint: String, blob: Data)? = {
-            switch live?.document {
-            case .format3(let file)?: return file.words.map { (file.fingerprint, $0) }
-            case .legacy(let file)?:
-                guard let fingerprint = file.fingerprint else { return nil }
-                return file.envelope.recovery.map { (fingerprint, $0) }
-            case nil: return nil
-            }
-        }()
+        let livePassphraseKDF: PassphraseKDF.Descriptor? = live?.document?.passphrase?.kdf
+        let liveWordsLock: (fingerprint: String, blob: Data)? = live?.document.flatMap { file in
+            file.words.map { (file.fingerprint, $0) }
+        }
 
         // The secret a frozen key file's lock was made under: what this Mac
         // held its library under on the file's day — the account's that day
@@ -355,7 +343,7 @@ public struct RouteFinder: Sendable {
         for file in facts.catalog.keyFiles {
             let isLive = file.id == live?.id
             switch file.document {
-            case .format3(let keyFile)?:
+            case let keyFile?:
                 let current = Node.key(keyFile.fingerprint)
                 func lock(_ opener: Opener?, _ road: KeyFileRoad) {
                     guard let opener else { return }
@@ -413,23 +401,6 @@ public struct RouteFinder: Sendable {
                     for held in anchor.directFingerprints {
                         edge(node, .anchorHolds(ref, fingerprint: held), .key(held))
                     }
-                }
-            case .legacy(let legacy)?:
-                guard let fingerprint = legacy.fingerprint else { continue }
-                let current = Node.key(fingerprint)
-                let envelope = legacy.envelope
-                if let wrap = envelope.passphrase {
-                    sources.append(Source(
-                        opener: .passphrase(passphraseDay(wrap.kdf, frozenAt: file.frozenAt, isLive: isLive)),
-                        step: .keyFileLock(keyFile: file.id, road: .passphrase), to: current))
-                }
-                if let blob = envelope.recovery {
-                    sources.append(Source(
-                        opener: .words(wordsDay(fingerprint: fingerprint, blob: blob, frozenAt: file.frozenAt, isLive: isLive)),
-                        step: .keyFileLock(keyFile: file.id, road: .words), to: current))
-                }
-                if envelope.apple != nil, let opener = sharedOpener(envelope.appleKeyID) {
-                    sources.append(Source(opener: opener, step: .keyFileLock(keyFile: file.id, road: .sharedApple), to: current))
                 }
             case nil:
                 continue
@@ -500,7 +471,7 @@ public struct AnchorSentence: Equatable, Sendable {
 extension RouteFinder {
     /// This device's anchor (the live key file's), when there is one.
     public var liveAnchor: (ref: AnchorRef, anchor: CastleAnchor)? {
-        guard let live = facts.liveKeyFileID, case .format3(let file)? = facts.catalog.keyFile(id: live)?.document,
+        guard let live = facts.liveKeyFileID, let file = facts.catalog.keyFile(id: live)?.document,
               let anchor = file.anchor else { return nil }
         return (AnchorRef(keyFile: live, kept: nil), anchor)
     }
@@ -607,14 +578,8 @@ extension RouteFinder {
     /// CURRENT key — an Apple wrap (this Mac's own, or the old shared key's)?
     func standardShaped(_ fingerprint: String) -> Bool {
         facts.catalog.keyFiles.contains { file in
-            switch file.document {
-            case .format3(let keyFile)?:
-                return keyFile.fingerprint == fingerprint && (keyFile.apple != nil || keyFile.sharedApple != nil)
-            case .legacy(let legacy)?:
-                return legacy.fingerprint == fingerprint && legacy.envelope.apple != nil
-            case nil:
-                return false
-            }
+            guard let keyFile = file.document else { return false }
+            return keyFile.fingerprint == fingerprint && (keyFile.apple != nil || keyFile.sharedApple != nil)
         }
     }
 }

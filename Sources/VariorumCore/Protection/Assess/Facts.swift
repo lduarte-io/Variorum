@@ -118,33 +118,6 @@ public struct SyncKeysItemFact: Hashable, Sendable {
     }
 }
 
-/// Today's items, as the legacy readers name them (`LegacyItems`) — found by
-/// name, the silent ones' keys fingerprinted by a non-prompting read.
-public struct LegacyItemFact: Hashable, Sendable {
-    public enum Kind: Hashable, Sendable {
-        /// `<scope>-<libraryID>-bound`, `<scope>-bound`, `<scope>` — silent.
-        case silent(account: String)
-        /// `<scope>-<libraryID>-biometric` / `<scope>-biometric` — its key
-        /// can't be fingerprinted without a prompt.
-        case gated(account: String)
-        /// The 13p escrow item (a raw key in iCloud Keychain, by library ID).
-        case escrow(libraryID: String)
-        /// Today's per-store sync custody (`<scope>-<libraryID>-sync`, and its
-        /// `-sync-biometric` twin) — the account's sync keys of today's road,
-        /// the master among them. Entering Castle removes it (VX-305 U4).
-        case syncCustody(account: String)
-    }
-
-    public var kind: Kind
-    /// The key it holds, when a non-prompting read could tell.
-    public var fingerprint: String?
-
-    public init(kind: Kind, fingerprint: String?) {
-        self.kind = kind
-        self.fingerprint = fingerprint
-    }
-}
-
 /// Why Touch ID is unusable FOR NOW — a momentary reading that never changes
 /// anything (§3.10).
 public enum TransientUnavailability: String, Equatable, Sendable, CaseIterable {
@@ -187,11 +160,9 @@ public enum TouchIDPress: Equatable, Sendable {
 
 /// The facts that exist only after unlock — verified by the key in hand.
 public struct UnlockedFacts: Sendable {
-    /// The record, verified; nil for a library with no record yet (the
-    /// migration's subject) — its mode is the legacy reader's.
-    public var record: ProtectionRecord?
-    /// The legacy reader's inputs, for a library with no record.
-    public var legacyModeInputs: LegacyModeInputs?
+    /// The record, verified. (A library with no record is from before this
+    /// design and is not handled — rule 26; it never unlocks.)
+    public var record: ProtectionRecord
     /// The family tree at open (`FamilyTree.atOpen`: the two homes unioned).
     public var familyTree: FamilyTree
     /// This Mac's section at open (`DeviceFacts.thisMacsSection`).
@@ -204,27 +175,22 @@ public struct UnlockedFacts: Sendable {
     public var currentFingerprint: String
     /// The live key file's id in the catalog.
     public var liveKeyFileID: String?
-    /// Corner 45's notice, when she has answered it on this device.
-    public var corner45Answer: ProtectionMode?
     /// This device's section as the RECORD holds it, verified (nil: none yet)
     /// — so the assessment can tell when the record's home is behind.
     public var recordSection: DeviceSection?
 
     public init(
-        record: ProtectionRecord?, legacyModeInputs: LegacyModeInputs? = nil, familyTree: FamilyTree,
+        record: ProtectionRecord, familyTree: FamilyTree,
         thisMac: DeviceSection, identity: IdentityResolution, memory: DeviceMemory? = nil,
-        currentFingerprint: String, liveKeyFileID: String? = nil, corner45Answer: ProtectionMode? = nil,
-        recordSection: DeviceSection? = nil
+        currentFingerprint: String, liveKeyFileID: String? = nil, recordSection: DeviceSection? = nil
     ) {
         self.record = record
-        self.legacyModeInputs = legacyModeInputs
         self.familyTree = familyTree
         self.thisMac = thisMac
         self.identity = identity
         self.memory = memory
         self.currentFingerprint = currentFingerprint
         self.liveKeyFileID = liveKeyFileID
-        self.corner45Answer = corner45Answer
         self.recordSection = recordSection
     }
 }
@@ -249,7 +215,6 @@ public struct ProtectionFacts: Sendable {
     public var libraryAccountEmail: String?
     /// This scope's custody items, enumerated.
     public var custody: [CustodyItemFact]
-    public var legacyItems: [LegacyItemFact]
     public var syncKeys: [SyncKeysItemFact]
     public var appleKeys: AppleKeyFacts
     public var biometry: BiometryFacts
@@ -264,7 +229,7 @@ public struct ProtectionFacts: Sendable {
         scope: String, storeFile: StoreFileFact = .present, containerMarker: Bool = true,
         unlocked: UnlockedFacts? = nil, slotFingerprintHint: String? = nil, rememberedModeHint: ProtectionMode? = nil,
         libraryAccountEmail: String? = nil, custody: [CustodyItemFact] = [],
-        legacyItems: [LegacyItemFact] = [], syncKeys: [SyncKeysItemFact] = [], appleKeys: AppleKeyFacts = AppleKeyFacts(),
+        syncKeys: [SyncKeysItemFact] = [], appleKeys: AppleKeyFacts = AppleKeyFacts(),
         biometry: BiometryFacts = .ready, touchIDPress: TouchIDPress? = nil, session: SessionFact = .signedOut,
         vault: VaultReading? = nil, catalog: Catalog = Catalog(), now: Date
     ) {
@@ -276,7 +241,6 @@ public struct ProtectionFacts: Sendable {
         self.rememberedModeHint = rememberedModeHint
         self.libraryAccountEmail = libraryAccountEmail
         self.custody = custody
-        self.legacyItems = legacyItems
         self.syncKeys = syncKeys
         self.appleKeys = appleKeys
         self.biometry = biometry

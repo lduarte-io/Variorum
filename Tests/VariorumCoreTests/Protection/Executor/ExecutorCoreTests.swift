@@ -212,7 +212,7 @@ struct ExecutorRepairTests {
         let fixture = try EX(.standard, synced: true)
         // The live key file lost its Apple wrap; this Mac's own key is readable.
         let live = try #require(fixture.world.liveFormat3)
-        fixture.world.liveKeyFile = .format3(live.droppingApple())
+        fixture.world.liveKeyFile = (live.droppingApple())
         let executor = fixture.executor()
         var library = try fixture.unlocked(executor)
         let unread = try executor.runRepairs([.landAppleWrap(appleKeyID: fixture.ownApple!.id)], on: &library)
@@ -233,7 +233,7 @@ struct ExecutorRepairTests {
         // The move on a synced Standard library: no fresh vault read, no own
         // Apple key minted, no wrap landed — refused before any write.
         let fixture = try EX(.standard, synced: true)
-        fixture.world.liveKeyFile = .format3(try #require(fixture.world.liveFormat3).droppingApple())
+        fixture.world.liveKeyFile = (try #require(fixture.world.liveFormat3).droppingApple())
         fixture.world.icloud.oldShared = AppleKeyMaterial.mint()
         fixture.world.server.reachable = false
         let executor = fixture.executor()
@@ -254,7 +254,7 @@ struct ExecutorRepairTests {
         let live = try #require(fixture.world.liveFormat3)
         var shrunk = live.droppingApple()
         shrunk.words = nil
-        fixture.world.liveKeyFile = .format3(shrunk)
+        fixture.world.liveKeyFile = (shrunk)
         let executor = fixture.executor()
         var library = try fixture.unlocked(executor)
         try executor.runRepairs([.restoreKeyFileFromMirror], on: &library)
@@ -263,20 +263,4 @@ struct ExecutorRepairTests {
         #expect(restored.apple == nil)
     }
 
-    @Test func aLegacyItemGoesOnlyWhileItStillHoldsTheKeyTheHistoryHolds() async throws {
-        let (fixture, k0, _) = try await castleWithStrays()
-        let other = StoreKey.mint()
-        let bound = LegacyItemFact.Kind.silent(account: "Variorum-test-\(fixture.libraryID)-bound")
-        let escrow = LegacyItemFact.Kind.escrow(libraryID: fixture.libraryID)
-        fixture.world.legacy[bound] = k0
-        fixture.world.legacy[escrow] = other  // it holds another key now
-        let executor = fixture.executor()
-        var library = try fixture.unlocked(executor)
-        let report = try executor.runRepairs([
-            .deleteLegacyItem(bound, fingerprint: PF.fp(k0), precondition: .historyHolds(fingerprint: PF.fp(k0))),
-            .deleteLegacyItem(escrow, fingerprint: PF.fp(k0), precondition: .historyHolds(fingerprint: PF.fp(k0))),
-        ], on: &library)
-        #expect(report.done.count == 1)
-        #expect(fixture.world.legacy[bound] == nil && fixture.world.legacy[escrow] != nil)
-    }
 }

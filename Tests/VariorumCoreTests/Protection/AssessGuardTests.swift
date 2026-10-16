@@ -21,7 +21,7 @@ struct AssessGuardsOnTests {
         #expect(guards.doorTimeVaultCheckOn)
         #expect(guards.deleteOnSightByIDOnlyOn && guards.everyOwnKeyRetiredAtCastleOn && guards.leaveIDGatesCompletionOn)
         #expect(guards.castleKindCustodyThroughLeaveOn && guards.giftsOnlyForThisMacsCopiesOn)
-        #expect(guards.unconfirmedModeNoCustodyRepairOn && guards.standardRecordNoDestructiveRepairOn)
+        #expect(guards.standardRecordNoDestructiveRepairOn)
         #expect(guards.freshVaultBeforeAppleWriteOn && guards.rekeyAtEveryCrossingOn)
     }
 }
@@ -137,20 +137,6 @@ struct AssessGuardMutationTests {
         off.giftsOnlyForThisMacsCopies = false
         #expect(try world.assessed(guards: off).movePlan.otherLibraries == [theirs],
                 "red with the guard off: a gift for another Mac's copies")
-    }
-
-    /// AN UNCONFIRMED MODE RUNS NO CUSTODY REPAIR: VX-202's victims (Castle
-    /// recorded, not confirmed) would have their only silent road removed
-    /// before the notice is answered.
-    @Test func unconfirmedModeNoCustodyRepair() throws {
-        let world = try AssessModeTests.corner45()
-        func deletesSilent(_ assessed: Assessment) -> Bool {
-            assessed.repairs.contains { if case .deleteSilentItem = $0 { return true } else { return false } }
-        }
-        #expect(!deletesSilent(try world.assessed()))
-        var off = ProtectionGuards()
-        off.unconfirmedModeNoCustodyRepair = false
-        #expect(deletesSilent(try world.assessed(guards: off)), "red with the guard off: custody moved unconfirmed")
     }
 
     /// NOTHING DESTRUCTIVE ON A STANDARD RECORD's WORD ALONE: a swapped-in

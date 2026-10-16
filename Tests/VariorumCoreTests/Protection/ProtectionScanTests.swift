@@ -43,7 +43,7 @@ struct ProtectionScanTests {
 
         // The record, this Mac's facts in both homes, a plan.
         var record = ProtectionRecord.minting(
-            libraryID: library, mode: .castle, modeConfirmed: true, account: PF.id(),
+            libraryID: library, mode: .castle, account: PF.id(),
             currentFingerprint: PF.fp(c0), madeBy: device, at: PF.t0)
         record = record.recordingRekey(to: PF.fp(c1), kind: .castle, by: device, at: PF.day(1))
             .recordingRekey(to: PF.fp(s2), kind: .standard, by: device, at: PF.day(2))

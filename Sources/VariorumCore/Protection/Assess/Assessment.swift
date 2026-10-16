@@ -20,7 +20,8 @@ public enum LaunchVerdict: Equatable, Sendable {
     case open
 }
 
-/// The mode — the current key's kind — confirmed or not (§3.3, §3.13).
+/// The mode — the current key's kind (§3.3). (Its "confirmed or not" and
+/// corner 45 left with rule 26: the record's mode is always known.)
 public struct ModeVerdict: Equatable, Sendable {
     public enum Source: Equatable, Sendable {
         /// Before unlock: what this Mac remembers — a display hint that decides
@@ -28,16 +29,11 @@ public struct ModeVerdict: Equatable, Sendable {
         case hintOnly
         /// The record.
         case record
-        /// A library with no record: today's rule, read once (§3.15).
-        case legacyReader(LegacyModeVerdict)
     }
 
     /// nil before unlock when nothing is remembered.
     public var mode: ProtectionMode?
-    public var confirmed: Bool
     public var source: Source
-    /// Corner 45's ambiguous case (§3.13 step 2).
-    public var corner45: Bool
 }
 
 /// §3.8's four situations.
@@ -171,12 +167,6 @@ public enum RepairPrecondition: Hashable, Sendable {
 public enum Repair: Hashable, Sendable {
     /// Castle: no silent item for any key the library has had.
     case deleteSilentItem(fingerprint: String, precondition: RepairPrecondition)
-    /// Castle: today's per-library-ID items the migration kept, once the
-    /// history holds their key.
-    case deleteLegacyItem(LegacyItemFact.Kind, fingerprint: String, precondition: RepairPrecondition)
-    /// Castle: a format-1/2 key file beside the library, once the history
-    /// verifiably holds its key (a key the fold couldn't reach keeps its file).
-    case deleteLegacyKeyFile(keyFileID: String, precondition: RepairPrecondition)
     /// Castle: an Apple key this Mac's section lists as retired — delete on
     /// sight, by its id only.
     case deleteRetiredAppleKey(id: String)
@@ -272,20 +262,10 @@ public enum FollowKind: Equatable, Sendable {
 
 /// An act owed — a press, a notice, or an act the executor runs on a plan.
 public enum OwedAct: Equatable, Sendable {
-    /// A library with no record yet: the migration (§3.13), once, as a plan —
-    /// its mode is the legacy reader's until then, and nothing else runs.
-    case migrate
     /// The account's mode or keys changed elsewhere: the follow. Every follow
     /// into or out of Castle types one secret; it holds its library re-key
     /// while a rotation is in progress.
     case follow(FollowKind, typesOneSecret: Bool, holdsLibraryRekey: Bool)
-    /// The mode recorded but not confirmed — the vault answered, or corner
-    /// 45's notice was. Confirming a mode the current key wasn't born in is a
-    /// key change (Use Standard's road), never a move.
-    case confirmMode(ProtectionMode, isKeyChange: Bool)
-    /// Corner 45's one-time notice (floor sentence, *Export a plain copy
-    /// first*, Use Standard offered as the key change).
-    case corner45Notice
     /// A Castle key with an Apple wrap — re-keyed.
     case rekeyForFault
     /// Re-link's library arm: a fresh own Apple key for every Standard key
@@ -358,11 +338,7 @@ public enum JoinPlan: Equatable, Sendable {
 
 public enum DoorRefusal: Equatable, Sendable {
     case locked
-    /// A library with no record yet: the migration runs first.
-    case migrationOwed
     case wrongMode(ProtectionMode)
-    /// The mode isn't confirmed — corner 45's notice, or the vault, answers it.
-    case modeNotConfirmed
     /// Another account is signed in: the one screen (Move or Sign out).
     case otherAccountSignedIn
     /// Signed out: the one plain road (`thisMacOnly`) stands in its place.
