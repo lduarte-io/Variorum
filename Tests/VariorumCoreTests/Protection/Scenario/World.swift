@@ -85,6 +85,14 @@ struct Truth {
     /// Every key the library had when it last left Castle, per device — what
     /// promise 13 keeps from the Apple account and the login password.
     var keptByLeave: [String: Set<String>] = [:]
+    /// Per RECEIVING device: what each Standard pair another Mac sent it
+    /// reaches by its own locks — its key and its key file's history
+    /// (`reachableInItsDay`) — recorded at the send. THAT Mac's own copy by
+    /// what it is, wherever its files then sit here (its hand-off folder, a
+    /// Time Machine snapshot of it): promise 13's exemption (VX-305 ladder
+    /// round 1, NEW-2 — a folder overwritten by this device's own send the
+    /// same day, the pair surviving only in a snapshot).
+    var sentStandardPairReach: [String: Set<String>] = [:]
     /// Standard copies made after the moment both homes were rolled back to
     /// (the stated limit, P-U4-5): the restored Castle state doesn't reach back
     /// over them.

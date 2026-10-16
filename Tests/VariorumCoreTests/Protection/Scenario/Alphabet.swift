@@ -514,6 +514,13 @@ extension SWorld {
             senders[folder] = from
             for path in sender.container.paths(under: folder + "/") { receiver.container.files[path] = sender.container.files[path] }
             receiver.incoming.append(folder)
+            // The pair's own reach, as the sender's Standard copy in its day
+            // (promise 13 reads it by identity — a later same-day send can
+            // overwrite the folder here, a snapshot can keep the pair).
+            if let record = sender.container.files["\(folder)/\(SPath.slot)"]?.library?.record {
+                truth.sentStandardPairReach[to, default: []].formUnion(
+                    reachableInItsDay(record, keyFile: sender.container.files["\(folder)/\(SPath.liveKeyFile)"]))
+            }
         case .land(let name, let typing):
             try await land(device(name), typing)
         case .plaintextExport(let name):

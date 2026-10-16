@@ -19,7 +19,12 @@ The brief: the round-1 fixes record's §"Found by the generator, outside the rou
   landed library's file); the pin `LadderRound1NewFindsPins.aLoneOlderFileOfALibrarySetAsideByALandingLosesToItsMemory`
   (both forms) RED before, GREEN after, RED with the fix stashed whole AND with either link alone stashed — **DONE**
   (this commit). The protection set after: `✔ Test run with 431 tests in 70 suites passed after 13.178 seconds.`
-- The runs at the end (the protection set in Debug, `swift build -c release`) — PENDING.
+- **NEW-2's second road** (the slice re-run on `69336aa21` met sequence 222 again by a 17-step road — the same class, the
+  sender's pair in a Time Machine snapshot after a same-day send overwrote its folder): traced; the world exemption now
+  reads the sent pair by identity; the pin `aSentPairsSnapshotIsTheSendersOwnToo` RED before, GREEN after, RED with the
+  fix stashed — **DONE** (this commit). The protection set after: `✔ Test run with 432 tests in 70 suites passed after
+  12.768 seconds.`
+- The runs at the end (the generator slice again, the protection set in Debug, `swift build -c release`) — PENDING.
 
 ## NEW-2 — promise 13 with no tamper: a CHECKER bug
 
@@ -86,6 +91,49 @@ leave is reached at all; and the sent pair's history key IS reached and kept —
 - **The revert check:** `Promises.swift` stashed — `✘ Test run with 1 test in 1 suite failed after 0.082 seconds with 1
   issue.`; restored — `✔ Test run with 1 test in 1 suite passed after 0.082 seconds.`
 - The protection set after: `✔ Test run with 430 tests in 70 suites passed after 14.178 seconds.`
+
+### NEW-2's second road — the same class, found by re-running the round-1 slice on the first fix
+
+The slice (seeds 1–3 × 250, soak shape, on `69336aa21` — both first fixes in) passed sequence 54 (NEW-1) and met
+sequence 222 again, now shrunk to **17 steps**: `createLibrary(macB)` · `follow(phone, .oldPassphrase)` (refused) ·
+`useCastle(macA, alwaysAsk, newWords)` · `crash(setScheduledExport(phone, false), 19)` · `useCastle(phone, …)` (refused
+`accountMoved`) · `resetPassphrase(phone, .plainConfirm)` (refused) · `signIn(macB)` · `answerCorner45(macA, .standard)` ·
+`launch(macB)` · `follow(phone, .words)` · `finishLeave(phone)` (refused) · `sendLibrary(phone → macB)` ·
+`land(macB, .wordsPassphraseMadeNew)` · **`timeMachineSnapshot(macB)`** · **`sendLibrary(macB → macA)`** ·
+`useCastle(macB)` · `useStandard(macB)` → `promise 13 on macB: … reaches 08a7bed3` and `… reaches b03b0684, a key from
+before the leave`.
+
+**Traced (a probe listing every key file on macB, container and snapshots, with a leave-one-out reach):** the phone's
+pair (`08a7bed3`, its own Apple key `1fd80b51`, history `b03b0684`) lands on macB as before; a Time Machine snapshot
+takes macB's container — the hand-off folder with it; then macB's OWN Send Library to macA, the same day, writes its pair
+into the SAME-NAMED folder (the world names a hand-off folder `Variorum Library — <day>`), overwriting the phone's pair in
+the container and the world's `senders[folder]` entry (now `macB`). The phone's pair lives on only in the snapshot
+(`tm0`), which `keyFilesOn` reads; it opens through the phone's own Apple key to `08a7bed3` and `b03b0684`. Leave-one-out:
+without `tm:Variorum Library — 2026-01-14/variorum-library-keys.json` the reach loses exactly `{08a7bed3, b03b0684}`;
+nothing made in Castle (`35ec40e9`) and no copy macB made before the leave is reached. **The same class — the sender's own
+Standard pair — the exemption reading it by its folder in the container, through a map the same-day send overwrote.**
+
+**The fix (the world):** the exemption reads the pair by IDENTITY: at each `sendLibrary` the world records, for the
+receiver, what the sent Standard pair reaches by its own locks — `reachableInItsDay(record, keyFile:)`, its key and its
+key file's history (`Truth.sentStandardPairReach`); promise 13 exempts that set, wherever the pair's files then sit (the
+folder scan it replaces read the container only, through the overwritable map). A Standard key's history holds only
+keys of that device's own Standard stretch (§3.4), so the set can never hold a key the receiver made in Castle.
+**Noted, not changed:** the world's day-named hand-off folder lets a device's own send overwrite a pair it received the
+same day — a fake's simplification (the real destination is hers to pick, phase 5), recorded for round 2.
+
+**The pin — `LadderRound1NewFindsPins.aSentPairsSnapshotIsTheSendersOwnToo`** (the 17 steps; the same trace assertions —
+nothing Castle-made reached, no pre-leave copy of macB's reached, without every hand-off folder's files in the container
+AND the snapshots nothing kept is reached, and a kept key IS reached through them — then `expectPromisesKept`).
+- **RED on the first fix's tree** (`69336aa21` + the pin): `✘ Test aSentPairsSnapshotIsTheSendersOwnToo() recorded an
+  issue at LadderRound1NewFindsPins.swift:126:27: Expectation failed: found.isEmpty` — `promise 13 on macB: the Apple
+  account or the login password reaches 08a7bed3, a key from before the leave` · `… reaches b03b0684, …` (the trace
+  assertions green).
+- **GREEN after:** `✔ Test run with 3 tests in 1 suite passed after 0.117 seconds.`; with the closer's precedent
+  (`aSentStandardPairIsTheSendersOwnAfterALeave`): `✔ Test run with 4 tests in 2 suites passed after 0.119 seconds.`
+- **The revert check:** the three world files' change stashed — `✘ Test run with 3 tests in 1 suite failed after 0.120
+  seconds with 1 issue.` (the same two violations); restored — `✔ Test run with 3 tests in 1 suite passed after 0.117
+  seconds.`
+- The protection set after: `✔ Test run with 432 tests in 70 suites passed after 12.768 seconds.`
 
 ## NEW-1 — promise 3 after a replayed pre-landing capture: a MODEL bug
 

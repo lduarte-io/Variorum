@@ -487,15 +487,12 @@ extension SWorld {
         // them through the sender's own Apple key. The sender's Standard copy
         // in its day, exactly what a restored Standard state reached
         // (`reachableInItsDay` — never an anchor's); still no copy this device
-        // made and no key made in Castle (VX-305 ladder round 1, NEW-2).
-        for (folder, sender) in senders where sender != device.name {
-            for path in device.container.paths(under: folder + "/") {
-                if let image = device.container.files[path]?.library, let record = image.record, record.mode == .standard {
-                    exempt.insert(image.fingerprint)
-                    exempt.formUnion(reachableInItsDay(record, keyFile: device.container.files["\(folder)/\(SPath.liveKeyFile)"]))
-                }
-            }
-        }
+        // made and no key made in Castle (VX-305 ladder round 1, NEW-2). Read
+        // by the pair's IDENTITY, recorded at the send — never by its folder:
+        // this device's own Send Library the same day can overwrite the
+        // folder (and the folder → sender map), while a Time Machine snapshot
+        // still holds the sender's pair (NEW-2's second road).
+        exempt.formUnion(truth.sentStandardPairReach[device.name] ?? [])
         // §3.1 rule 2's second exception: the Standard-synced days' keys, until
         // that account replaces its keys or enters Castle.
         // (On a device that hasn't yet followed the account past them, its

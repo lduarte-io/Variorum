@@ -74,6 +74,58 @@ struct LadderRound1NewFindsPins {
         expectPromisesKept(world)
     }
 
+    /// NEW-2's SECOND ROAD — the same class, found by the round-1 slice re-run on
+    /// the first fix (seed 1, sequence 222 again, shrunk to 17 steps). The
+    /// phone's Standard pair lands on macB; a Time Machine snapshot of macB
+    /// takes the hand-off folder with it; then macB's OWN Send Library to macA
+    /// the same day writes its pair into the same-named folder (the world names
+    /// a hand-off folder by its day) — overwriting the phone's pair in the
+    /// container AND the world's folder → sender map. The phone's pair now
+    /// lives only in the snapshot, still opening through the phone's own Apple
+    /// key to its key AND its history; the exemption, read from the container's
+    /// folder by the map, saw neither. The sender's own copy is that by WHAT IT
+    /// IS, not where its files sit: the world now records each sent Standard
+    /// pair's reach at the send. Before the fix (on the first fix's tree):
+    /// `promise 13 on macB: … reaches 08a7bed3, a key from before the leave` and
+    /// `… reaches b03b0684, …`.
+    @Test func aSentPairsSnapshotIsTheSendersOwnToo() async throws {
+        let world = try GeneratorFoundScenarios.start("a device that joined without a secret", seed: 1_000_225)
+        let account = try #require(world.server.accounts.keys.sorted().first)
+        #expect(account.hasPrefix("8d2d5914"), "the seed no longer builds the found world")
+        for action in [Action.createLibrary("macB", secrets: true), .follow("phone", .oldPassphrase),
+                       .useCastle("macA", .alwaysAsk, newWords: true), .crash(.setScheduledExport("phone", false), afterWrites: 19),
+                       .useCastle("phone", .touchID, newWords: true), .resetPassphrase("phone", .plainConfirm),
+                       .signIn("macB", account: account), .answerCorner45("macA", .standard), .launch("macB"),
+                       .follow("phone", .words), .finishLeave("phone", mint: false), .sendLibrary(from: "phone", to: "macB"),
+                       .land("macB", .wordsPassphraseMadeNew), .timeMachineSnapshot("macB"), .sendLibrary(from: "macB", to: "macA"),
+                       .useCastle("macB", .alwaysAsk, newWords: true), .useStandard("macB")] {
+            await world.step(action)
+        }
+        let macB = world.macB
+        #expect(macB.slot?.record?.mode == .standard, "macB didn't leave Castle")
+        let kept = try #require(world.truth.keptByLeave["macB"])
+        let leftAt = try #require(world.truth.leftCastleAt["macB"])
+        let attacker = world.reach(world.attackerSeeds(macB, appleAccount: true, settled: false), files: world.keyFilesOn(macB))
+        let castleMade = world.truth.castleBorn.intersection(kept)
+        #expect(!castleMade.isEmpty, "the leave kept no Castle key — the scenario lost its point")
+        for fingerprint in castleMade.sorted() {
+            #expect(attacker[fingerprint] == nil, "a key made in Castle (\(fingerprint.prefix(8))) is reachable")
+        }
+        for (id, copy) in world.truth.copies where copy.madeOn == "macB" && copy.madeAt < leftAt {
+            #expect(attacker[copy.fingerprint] == nil, "macB's copy \(id) from before the leave is reachable")
+        }
+        // The road: the phone's pair, now only in the snapshot (the container's
+        // same-named folder holds macB's own pair) — without any hand-off
+        // folder's files, nothing kept by the leave is reached.
+        let handOff = CatalogNames.handOffPrefix
+        let withoutPairs = world.reach(
+            world.attackerSeeds(macB, appleAccount: true, settled: false),
+            files: world.keyFilesOn(macB, excluding: { id, _ in id.hasPrefix("container:\(handOff)") || id.hasPrefix("tm:\(handOff)") }))
+        #expect(kept.allSatisfy { withoutPairs[$0] == nil }, "a key kept by the leave is reached by another road")
+        #expect(kept.contains { attacker[$0] != nil }, "the snapshot's pair no longer reaches a kept key — the pin lost its road")
+        expectPromisesKept(world)
+    }
+
     /// NEW-1 — a MODEL finding (seed 1, sequence 54 of the round-1 slice; world
     /// seed 1000057). macB's own library Y (99708862) enters Castle (a crash
     /// past its swap, finished at the next open); then the phone's Castle pair
