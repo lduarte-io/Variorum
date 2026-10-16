@@ -313,7 +313,25 @@ record committed with PENDING numbers first.
 
 ## 8. Records (each unit appends: what shipped / what died with its rule, counts both configurations, PROVISIONALs, commits, notes)
 
-*(empty)*
+### THE KICKOFF SITTING — 2026-10-16 (her answers to the three kickoff calls, verbatim where quoted)
+
+- **Cast:** the standing default stands (Fable orchestrates and cold-reviews via `fable-reviewer`, Opus implements at
+  xhigh, one unit per session), with her rider on the reviewer: *"make sure that if the fable cold review stalls because
+  it tripped some overactive safeguard, you keep a watch for that and run an opus review if that happens."* ⇒ the
+  orchestrator watches every Fable round for a safeguard stall (a stop with no findings file, a refusal framed on the
+  custody narration) and, on one, runs that round as a fresh `opus-reviewer` at max effort with the same verbatim
+  prompt; the record says which model read each round.
+- **Ladder cap:** *"Up to five while MAJORs are found"* — VX-305's raised cap carries into the corrector (CLAUDE.md's
+  three is the floor; rounds four and five run only while a MAJOR is still being found).
+- **Mode:** *"Through to the gate"* — U1→U4, the ladder, the discovery run and the gate soak run without a sitting;
+  anything hers (ratifications, a fixture diff, a taste call) is ruled PROVISIONALLY and bundled for the next sitting;
+  a serious design issue (§1's stop rule) still stops the phase and reports.
+- **Riders:** none offered — every open Castle-area Low/Medium ticket is a face or old-road item; none fits a headless
+  `Protection/`-only phase. The project's old-road bug tickets (VX-107/108/109/209/228/235 …) are re-pointed at the
+  rebuild's faces at closeout, as VX-305's closeout owed.
+- **Consistency check at kickoff (the predecessor's last owed duty):** U2's and §5's rule numbers were still the
+  26-rule draft's; re-pointed to the 27-rule contract (`43e5ff0e4`). §3's table, the crossings table and U4 were
+  already current. The in-flight row on `main` gained this plan (`aecb509d0`).
 
 ## 9. The ladder
 
