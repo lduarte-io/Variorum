@@ -1567,7 +1567,23 @@ our current decisions."*
    the corrector plan, its kickoff prompt) — *"go ahead and write all four now, rules first"*; the rules in natural
    language, not trimmed to a page for its own sake. The consistency rule she named, now a rule: *"the only thing that has
    to stay castle only after leaving castle is a backup you made while in castle."*
-14. **THE LIFECYCLE PAGE FIRST.** *"I agree with building the lifecycle as a test and a page, before more triage. that's
+14. **HER RULINGS ON THE DESIGN COLD READ (2026-10-16 — `notes/plans/vx-378-design-cold-read.md`, the orchestrator's
+   adjudication brought to her first):** **F2 — one pair of secrets per account, RULED:** *"yes on one pair of secrets
+   per account, not per library … I think it's safe to just remove those words & replace them with the sync account's 12
+   words. users should know the previous 12 words won't work to open their backups / should be informed of the 12 word
+   replacement at sync sign in. we should NOT contort ourselves to preserve previous 12 word options."* (The orchestrator's
+   refinement: the FIRST device to turn on sync hands its pair up; only a joiner replaces; the join re-wraps the same key,
+   so older backups open with their old words AND the account's secrets.) **F3 — the account keeps its earlier row keys,
+   RULED, "required":** *"someone in a normal user flow … should never make a subset of their words unreadable to them"*;
+   carry-the-keys over re-keying, on the orchestrator's recommendation (a short list in the vault, rule 4's twin; no bulk
+   re-encryption, no crash window). **F4 — no ask while a quiet road still works, RULED:** *"agree."* **F5 — reading
+   (ii), RULED to settle there:** a copy is a copy; two doors (Look inside / Make this my library) and one tiny check; the
+   family tree dies (S1). **F14 — entering and leaving both type the passphrase, RULED:** *"yes."* **F9 — leaving an
+   account changes none of your keys; signing back in is a join:** accepted as one sentence after her question. **F10 —
+   DROPPED:** *"we do NOT need to be concerned with pre designed stores. we just don't."* **C5 — VX-307 owns the vault's
+   server change (the SyncSpec §12 lockstep).** The wording and plan tightenings (F1, F6, F7, F8, F11, F12, F13, S2, S3,
+   S4, C2, C3, C4, C6) apply as the orchestrator proposed.
+15. **THE LIFECYCLE PAGE FIRST.** *"I agree with building the lifecycle as a test and a page, before more triage. that's
    obviously the right thing to do & handling that should be first and foremost."* Written as the TARGET spec (every stage ×
    every user choice × every way in, plain words), ruled on by her, then proven by a test as the cuts land. Local HTML,
    never an Artifact.
