@@ -1502,7 +1502,32 @@ our current decisions."*
 7. **Earlier the same day:** T-8 (bringing a plaintext export in) → phase 5, her word; seeds 11 and 12 (an updated phone)
    deprioritized to last — *"the only person with a phone variorum build at all is me … i'm not that concerned about
    them"*; the Apple-ID change is *"actually a real issue"*.
-8. **THE LIFECYCLE PAGE FIRST.** *"I agree with building the lifecycle as a test and a page, before more triage. that's
+9. **(later the same sitting) THE GUEST DOORS — RULED IN:** *"I think that open a guest library path is a good
+   addition."* Two doors: **Look inside** (read-only, with the copy's day's secrets, writes nothing — no key file, no
+   keychain item, no record change; closing forgets) and **Make this my library** (one confirmed door; the copy takes the
+   live place and is re-keyed into the mode the user is in NOW — "you never leave Castle by opening something").
+   **THE ON-DEVICE ROAD IN STANDARD — RULED IN:** *"we're doing it"* (Castle's Touch ID item used in Standard too, gated by
+   Touch ID or the login password; a convenience, never a reason to skip the words). **THE WARNING SCHEDULE — accepted** as
+   proposed (words at creation, "write these down now"; the tutorial's last card asks for a passphrase; if none: the third
+   launch, then weekly twice, then "don't show again"; always before the first backup and at the first launch after the
+   quiet road failed). **THE FIELD GUIDE'S START HERE CHAPTER carries it** — *"if users only read a single chapter, they
+   NEED TO KNOW that their work is encrypted and to write down the 12 words, to record a passphrase, and that the apple
+   account road is for convenience (+ it'll work forever for most people)."* **THE CORRECTOR PHASE — agreed, on the same
+   branch**, its plan file and kickoff prompt written by the orchestrator once the sitting settles; her closing word:
+   *"this phase wasn't wasted, the challenges and complexity in it revealed where our design needed to be simplified
+   better than a planning session could've foreseen."*
+10. **ORCHESTRATOR FINDINGS at her ask (the SyncSpec check, 2026-10-16):** words-as-root WITHDRAWN — 14b makes the
+   twelve words the ACCOUNT's recovery wrap of a random master (R-5/R-8), so deriving each library's key from them would
+   turn "new words" into a lockstep re-encryption across devices and create two kinds of twelve words (local vs account);
+   her alternative adopted and strengthened: the key file is as essential as the library, kept redundant automatically
+   (beside the library, in every backup, this Mac's sealed copy, the vault when synced). The Apple-ID fact (the research
+   file §6c): kept items stay frozen on-device if "keep a copy" was chosen, absent otherwise, re-upload unknown — the
+   model's conservative assumption stands. Two further candidate cuts proposed for her: (A) no Apple lock in the account
+   vault — join-without-a-secret dies with ruling 1, so no master rotation at any crossing (Castle entry becomes each
+   device deleting its own quiet roads at its follow); (B) a landed copy is a NEW library with a fresh ID — collapses the
+   marker takeover, the whose-Apple-key rules (C-4) and replacement-Mac inheritance; two Macs share a library through sync,
+   not files.
+11. **THE LIFECYCLE PAGE FIRST.** *"I agree with building the lifecycle as a test and a page, before more triage. that's
    obviously the right thing to do & handling that should be first and foremost."* Written as the TARGET spec (every stage ×
    every user choice × every way in, plain words), ruled on by her, then proven by a test as the cuts land. Local HTML,
    never an Artifact.
