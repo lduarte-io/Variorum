@@ -628,6 +628,16 @@ nonisolated enum SidebarLayout {
             return within >= rowHeight / 2 ? row + 1 : row
         }
 
+        /// **A row's own location in the rows' space** (U2c, P-U2b-1): each
+        /// Open row is its own drop, and its drop session reports the pointer
+        /// in THAT row's space (the SDK: "the location of the drag in the
+        /// coordinate space of the drop view"); the row's index × the pitch
+        /// places it in the rows' space that `gap(at:)` reads — the rows abut
+        /// (spacing 0, each exactly `rowHeight` tall, the first at the top).
+        static func contentY(row: Int, yInRow: CGFloat, rowHeight: CGFloat) -> CGFloat {
+            CGFloat(row) * rowHeight + yInRow
+        }
+
         /// The gap a hover names, read against the list's scroll offset NOW.
         static func gap(for hover: Hover, offset: CGFloat, rowHeight: CGFloat, rows: Int) -> Int? {
             switch hover {

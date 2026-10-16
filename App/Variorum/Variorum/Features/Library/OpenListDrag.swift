@@ -16,11 +16,23 @@
 //  drop landed one row short, the last slot could not be reached, the move did
 //  not animate and nothing showed where a drop would land. Now:
 //
-//  · ONE drop target over the list's rows (`OpenListRowsDrop`, on the scroll
-//    CONTENT, so a drop's location is the rows' own space and the half of the
-//    row under the pointer decides — `SidebarLayout.OpenListDrop`, pure), plus
-//    an END ZONE under the rows when the column has room for one
-//    (`OpenListEndZoneDrop`).
+//  · EACH ROW IS ITS OWN DROP (`OpenListRowDrop`), a Transferable
+//    `dropDestination` in the macOS 26 SESSION form, plus an END ZONE under
+//    the rows when the column has room for one (`OpenListEndZoneDrop`, the
+//    same kind of drop). A row's session reports the pointer in the ROW's own
+//    space; its index × the pitch places it in the rows' space, where the half
+//    of the row under the pointer decides (`SidebarLayout.OpenListDrop`, pure).
+//    **U2c (the orchestrator's P-U2b-1):** U2 first built ONE legacy
+//    `onDrop(of:delegate:)` on the scroll content's root, and under a real
+//    system drag AppKit never offered it the drag (U2b's trace: zero
+//    `validateDrop`, the source working); every live drop inside scroll content
+//    in this app is a per-row Transferable `dropDestination`, so the rows are
+//    the targets again — with the location, not the row alone, deciding.
+//  · THE OPERATION: the drop's configuration answers MOVE where the line is
+//    drawn and FORBIDDEN elsewhere (the image slides back), and the row's
+//    SOURCE allows a move (`DragConfiguration(allowMove: true)` — macOS's
+//    Transferable source is copy-only by default, and AppKit intersects the
+//    destination's operation with the source's).
 //  · THE LINE — 2 pt in the ring token, the book navigator's precedent — drawn
 //    as an OVERLAY over the list (above the edge fade, taking no hits), placed
 //    from the pointer's place in the VIEWPORT, the list's scroll window, the
@@ -32,6 +44,8 @@
 //  · THE SETTLE — the move lands inside an animation on the column's one beat.
 //  · A drop acts only on the list its drag began in (the token carries the
 //    list's id — P-U2-3).
+//  · The drag SESSION's end — wherever the release fell — clears the list's
+//    drag (U2's known edge, closed at U2c).
 //
 //  What a drop does to the scrolling section's FOLLOW state (U1d): nothing
 //  (P-U2-1). A drop is neither one of her acts (it changes no current row) nor
@@ -45,10 +59,10 @@ import UniformTypeIdentifiers
 
 /// **One Open list's drag, as it stands** — which row a drag of THIS list's
 /// began on, where it points over the list, and the list's scroll window as the
-/// line reads it. Held by the column (`SidebarView`); the line and the two drop
-/// targets read and write it. Observed, so the LINE re-renders on a change —
-/// and only the line: the window is copied in only while a drag hovers, so an
-/// ordinary scroll re-renders nothing.
+/// line reads it. Held by the column (`SidebarView`); the line and the drops
+/// read and write it. Observed, so the LINE re-renders on a change — and only
+/// the line: the window is copied in only while a drag hovers, so an ordinary
+/// scroll re-renders nothing.
 @MainActor
 @Observable
 final class OpenListDragState {
@@ -63,26 +77,24 @@ final class OpenListDragState {
     private(set) var window = SidebarLayout.ScrollWindow.unmeasured
     /// The list's window as last read, whatever is in flight.
     @ObservationIgnored private var latest = SidebarLayout.ScrollWindow.unmeasured
+    /// The row whose drop session wrote the hover (U2c — each row is its own
+    /// drop, so one row's late EXIT must never clear the next row's hover).
+    @ObservationIgnored private var rowSource: Int?
 
-    /// A drag began on `noteID`'s row (`draggable`'s payload runs then).
+    /// A drag began on `noteID`'s row (`draggable`'s payload runs then — U2b's
+    /// trace proved it: on the main thread, at the drag's start).
     ///
-    /// **A known edge** (the U2 record; the VX-283 ladder's R1-4): only a drop
-    /// on THIS list's own targets clears `dragging` (`ended()`, in
-    /// `OpenListDropDoor.perform`). A drag released anywhere else leaves it
-    /// stale until this list's next drag begins here. Harmless on its own —
-    /// the hover clears on exit, and a drop is decided by the PAYLOAD's list
-    /// id — except that a row dragged in from ANOTHER window's list meanwhile
-    /// reads as a drag of this list's: the line draws, the drop is accepted,
-    /// and `land` then refuses the foreign payload, so nothing moves and the
-    /// image does not slide back. Deliberately not cleared from the drag
-    /// session's end (`onDragSessionUpdated`): its order against
-    /// `performDrop` is unverified, and the wrong order would break every
-    /// drop. No deterministic pin short of a fake drag session.
+    /// Cleared by the drag SESSION's end wherever the release fell
+    /// (`dragSessionUpdated`), and by a drop on this list (`ended()`, in
+    /// `OpenListDropDoor.perform`) — the two may arrive in either order, and
+    /// neither decides the drop (U2c; before it, a release elsewhere left this
+    /// stale — the VX-283 ladder's R1-4).
     func began(_ noteID: String) {
         #if DEBUG
         OpenListDragTrace.note("STATE began row=\(noteID.prefix(8)) (dragging was \(OpenListDragTrace.short(dragging)))")
         #endif
         dragging = noteID
+        rowSource = nil
         if hover != nil { hover = nil }
     }
 
@@ -101,14 +113,31 @@ final class OpenListDragState {
         if hover != now { hover = now }
     }
 
+    /// **U2c (P-U2b-1):** the drag points over row `index`, `yInRow` down it
+    /// (its drop session's location, in the row's own space) — mapped into the
+    /// rows' space by the pure rule.
+    func hoverRow(_ index: Int, yInRow: CGFloat, rowHeight: CGFloat) {
+        hoverRows(contentY: SidebarLayout.OpenListDrop.contentY(row: index, yInRow: yInRow, rowHeight: rowHeight))
+        rowSource = index
+    }
+
+    /// The drag left row `index` — the hover clears only if that row wrote it
+    /// (the next row's entry may arrive before this exit).
+    func leftRow(_ index: Int) {
+        guard rowSource == index else { return }
+        leftRows()
+    }
+
     /// The drag points over the end zone.
     func hoverEnd() {
         if window != latest { window = latest }
+        rowSource = nil
         if hover != .end { hover = .end }
     }
 
     /// The drag left the rows (a move into the end zone keeps the zone's).
     func leftRows() {
+        rowSource = nil
         if case .rows = hover { hover = nil }
     }
 
@@ -117,11 +146,23 @@ final class OpenListDragState {
         if hover == .end { hover = nil }
     }
 
-    /// The drag is over — dropped here.
+    /// **U2c (P-U2b-1):** the row's drag SESSION moved on (the source's
+    /// `onDragSessionUpdated`) — its END, wherever the release fell, ends the
+    /// drag; a session still in flight changes nothing.
+    func dragSessionUpdated(_ phase: DragSession.Phase) {
+        guard case .ended = phase else { return }
+        #if DEBUG
+        OpenListDragTrace.note("STATE the drag session ended (\(phase))")
+        #endif
+        ended()
+    }
+
+    /// The drag is over — dropped here, or its session ended.
     func ended() {
         #if DEBUG
         OpenListDragTrace.note("STATE ended (dragging was \(OpenListDragTrace.short(dragging)))")
         #endif
+        rowSource = nil
         if dragging != nil { dragging = nil }
         if hover != nil { hover = nil }
     }
@@ -141,14 +182,10 @@ final class OpenListDragState {
     }
 }
 
-/// **The drop's door** — what the two targets share, and the one act a pin
-/// drives (a `DropInfo` cannot be made outside SwiftUI).
+/// **The drop's door** — what the drops share, and the acts a pin drives (a
+/// `DropSession` cannot be made outside SwiftUI).
 @MainActor
 enum OpenListDropDoor {
-    /// The payload type both targets accept — the row's own transfer type, so
-    /// nothing else (text, files: the column's import drop) ever lights them.
-    static var types: [UTType] { [SidebarView.OpenNoteDragToken.contentType] }
-
     /// **The settle** — the move lands on the column's one beat
     /// (`SidebarLayout.railTransition`), with a snap: her *"a nice fit / snap
     /// into place"*. PROVISIONAL P-U2-4.
@@ -160,48 +197,48 @@ enum OpenListDropDoor {
     static func proposal(_ state: OpenListDragState, rows: [String], rowHeight: CGFloat) -> DropProposal {
         let lit = state.lineTop(rows: rows, rowHeight: rowHeight) != nil
         #if DEBUG
-        // U2b's probe (`OpenListDragTrace`, marker flag `copy` — never set
-        // outside the trace window): offer COPY where a line is drawn, to
-        // test G2 (the source's copy-only mask) against G1's fix.
+        // The instrument's diagnostic (`OpenListDragTrace`, marker flag `copy`
+        // — never set outside a trace window): offer COPY where a line is
+        // drawn, to tell a refused move (the source's mask) from a drop that
+        // never arrives.
         if lit, OpenListDragTrace.has("copy") { return DropProposal(operation: .copy) }
         #endif
         return DropProposal(operation: lit ? .move : .forbidden)
     }
 
-    /// The release: the gap the drag names at the moment of the drop (the
-    /// line she saw), the payload read, and `land` — on the payload's word,
-    /// not the hover state's (a drop never depends on the drag having been
-    /// seen to begin).
+    /// **U2c (P-U2b-1): the drop's configuration** — the session form's answer,
+    /// the same one decision as `proposal`.
+    static func configuration(_ state: OpenListDragState, rows: [String], rowHeight: CGFloat) -> DropConfiguration {
+        DropConfiguration(operation: proposal(state, rows: rows, rowHeight: rowHeight).operation)
+    }
+
+    /// The release: the gap the drag names at the moment of the drop (the line
+    /// she saw — the action refreshes the hover from its own location first),
+    /// and `land` — on the payload's word, not the hover state's (a drop never
+    /// depends on the drag having been seen to begin, nor on the order of the
+    /// source session's end against the drop).
     ///
-    /// **The same known edge, from this side** (`OpenListDragState.began`;
-    /// the VX-283 ladder's R1-4): the answer is given BEFORE the payload is
-    /// read, so a drop accepted here can still land nothing — a foreign
-    /// payload drawn a line by a stale `dragging`, a `loadTransferable` that
-    /// fails, or a `land` that re-validates against the rows as they stand
-    /// by then and finds no move. Each is accepted and silent: no slide-back,
-    /// no message. No deterministic pin short of a failing item provider.
+    /// **U2c (P-U2b-1):** the tokens arrive DECODED (the Transferable drop
+    /// decodes them before its action runs) — no item provider, no
+    /// asynchronous load. The configuration has already refused where no line
+    /// was drawn, so an accepted drop that lands nothing needs the rows to
+    /// change under it between the last update and the release (`land`
+    /// re-validates against the rows as they stand). Returns whether anything
+    /// moved.
+    @discardableResult
     static func perform(
-        _ providers: [NSItemProvider], state: OpenListDragState, rows: [String], rowHeight: CGFloat,
-        workspace: WorkspaceModel
+        _ tokens: [SidebarView.OpenNoteDragToken], state: OpenListDragState, rows: [String], rowHeight: CGFloat,
+        workspace: WorkspaceModel, animation: Animation? = settle
     ) -> Bool {
         let gap = state.gap(rows: rows.count, rowHeight: rowHeight)
         let knownNothing = state.dragging != nil && state.lineTop(rows: rows, rowHeight: rowHeight) == nil
-        let listID = state.listID
         #if DEBUG
         OpenListDragTrace.note("DOOR perform gap=\(gap.map(String.init) ?? "nil") knownNothing=\(knownNothing)"
-            + " providers=\(providers.count) types=\(providers.map(\.registeredTypeIdentifiers))")
+            + " tokens=\(tokens.map { "\($0.noteID.prefix(8))@\($0.listID.prefix(8))" })")
         #endif
         state.ended()
-        guard let gap, !knownNothing, let provider = providers.first else { return false }
-        _ = provider.loadTransferable(type: SidebarView.OpenNoteDragToken.self) { result in
-            #if DEBUG
-            let outcome = OpenListDragTrace.outcome(result)
-            Task { @MainActor in OpenListDragTrace.note("DOOR perform loadTransferable → \(outcome)") }
-            #endif
-            guard case .success(let token) = result else { return }
-            Task { @MainActor in land(token, atGap: gap, listID: listID, in: workspace) }
-        }
-        return true
+        guard let gap, !knownNothing, let token = tokens.first else { return false }
+        return land(token, atGap: gap, listID: state.listID, in: workspace, animation: animation)
     }
 
     /// **The landing**: the dragged row moves to the gap — when the drag began
@@ -232,127 +269,99 @@ enum OpenListDropDoor {
     }
 }
 
-/// The drop target over the list's ROWS — on the scroll content, so its
-/// location is the rows' own space (row arithmetic needs no scroll offset).
-struct OpenListRowsDrop: DropDelegate {
+/// **An Open row's drop** (U2c, P-U2b-1) — the Transferable road, in the
+/// macOS 26 SESSION form: the session's location (the ROW's own space) feeds
+/// the hover through the row's index, the configuration answers the door's
+/// operation, and the action lands the decoded token at the gap the line named.
+struct OpenListRowDrop: ViewModifier {
     let state: OpenListDragState
+    /// The row's index in the list (`rows`).
+    let index: Int
     let rows: [String]
     let rowHeight: CGFloat
     let workspace: WorkspaceModel
 
-    func validateDrop(info: DropInfo) -> Bool {
-        let valid = info.hasItemsConforming(to: OpenListDropDoor.types)
-        #if DEBUG
-        OpenListDragTrace.note("ROWS validateDrop → \(valid) · \(OpenListDragTrace.describe(info))"
-            + " · \(OpenListDragTrace.gate(state, rows: rows, rowHeight: rowHeight))")
-        #endif
-        return valid
+    func body(content: Content) -> some View {
+        content
+            .dropDestination(for: SidebarView.OpenNoteDragToken.self, isEnabled: true) { tokens, session in
+                state.hoverRow(index, yInRow: session.location.y, rowHeight: rowHeight)
+                #if DEBUG
+                OpenListDragTrace.action(site, session, tokens: tokens,
+                                         gate: OpenListDragTrace.gate(state, rows: rows, rowHeight: rowHeight))
+                #endif
+                OpenListDropDoor.perform(tokens, state: state, rows: rows, rowHeight: rowHeight, workspace: workspace)
+            }
+            .onDropSessionUpdated { session in
+                switch session.phase {
+                case .entering, .active: state.hoverRow(index, yInRow: session.location.y, rowHeight: rowHeight)
+                default: state.leftRow(index)  // exiting, ended, the transfer done
+                }
+                #if DEBUG
+                OpenListDragTrace.dropSession(site, session, state: state, rows: rows, rowHeight: rowHeight)
+                #endif
+            }
+            .dropConfiguration { session in
+                // The order of a tick's update and configuration is the
+                // framework's: the hover is refreshed here too (idempotent).
+                if session.phase == .entering || session.phase == .active {
+                    state.hoverRow(index, yInRow: session.location.y, rowHeight: rowHeight)
+                }
+                let configuration = OpenListDropDoor.configuration(state, rows: rows, rowHeight: rowHeight)
+                #if DEBUG
+                OpenListDragTrace.configured(site, configuration.operation, session,
+                                             state: state, rows: rows, rowHeight: rowHeight)
+                #endif
+                return configuration
+            }
     }
 
-    func dropEntered(info: DropInfo) {
-        state.hoverRows(contentY: info.location.y)
-        #if DEBUG
-        OpenListDragTrace.note("ROWS dropEntered · \(OpenListDragTrace.describe(info))"
-            + " · \(OpenListDragTrace.gate(state, rows: rows, rowHeight: rowHeight))")
-        OpenListDragTrace.probeLoadIfAsked(info, site: "ROWS")
-        #endif
-    }
-
-    func dropUpdated(info: DropInfo) -> DropProposal? {
-        state.hoverRows(contentY: info.location.y)
-        let proposal = OpenListDropDoor.proposal(state, rows: rows, rowHeight: rowHeight)
-        #if DEBUG
-        OpenListDragTrace.updated("ROWS", proposal: proposal, info: info,
-                                  gate: OpenListDragTrace.gate(state, rows: rows, rowHeight: rowHeight))
-        #endif
-        return proposal
-    }
-
-    func dropExited(info: DropInfo) {
-        state.leftRows()
-        #if DEBUG
-        OpenListDragTrace.note("ROWS dropExited · \(OpenListDragTrace.gate(state, rows: rows, rowHeight: rowHeight))")
-        #endif
-    }
-
-    func performDrop(info: DropInfo) -> Bool {
-        state.hoverRows(contentY: info.location.y)
-        #if DEBUG
-        OpenListDragTrace.note("ROWS performDrop · \(OpenListDragTrace.describe(info))"
-            + " · \(OpenListDragTrace.gate(state, rows: rows, rowHeight: rowHeight))")
-        #endif
-        let accepted = OpenListDropDoor.perform(
-            info.itemProviders(for: OpenListDropDoor.types), state: state, rows: rows,
-            rowHeight: rowHeight, workspace: workspace)
-        #if DEBUG
-        OpenListDragTrace.note("ROWS performDrop → \(accepted)")
-        #endif
-        return accepted
-    }
+    #if DEBUG
+    private var site: String { "ROW n=\(index + 1)" }
+    #endif
 }
 
-/// The END ZONE's drop target — anywhere in it names the slot after the last
-/// row.
-struct OpenListEndZoneDrop: DropDelegate {
+/// **The END ZONE's drop** (U2c, P-U2b-1) — the same Transferable session
+/// form; anywhere in it names the slot after the last row.
+struct OpenListEndZoneDrop: ViewModifier {
     let state: OpenListDragState
     let rows: [String]
     let rowHeight: CGFloat
     let workspace: WorkspaceModel
 
-    func validateDrop(info: DropInfo) -> Bool {
-        let valid = info.hasItemsConforming(to: OpenListDropDoor.types)
-        #if DEBUG
-        OpenListDragTrace.note("END validateDrop → \(valid) · \(OpenListDragTrace.describe(info))"
-            + " · \(OpenListDragTrace.gate(state, rows: rows, rowHeight: rowHeight))")
-        #endif
-        return valid
-    }
-
-    func dropEntered(info: DropInfo) {
-        state.hoverEnd()
-        #if DEBUG
-        OpenListDragTrace.note("END dropEntered · \(OpenListDragTrace.describe(info))"
-            + " · \(OpenListDragTrace.gate(state, rows: rows, rowHeight: rowHeight))")
-        OpenListDragTrace.probeLoadIfAsked(info, site: "END")
-        #endif
-    }
-
-    func dropUpdated(info: DropInfo) -> DropProposal? {
-        state.hoverEnd()
-        let proposal = OpenListDropDoor.proposal(state, rows: rows, rowHeight: rowHeight)
-        #if DEBUG
-        OpenListDragTrace.updated("END", proposal: proposal, info: info,
-                                  gate: OpenListDragTrace.gate(state, rows: rows, rowHeight: rowHeight))
-        #endif
-        return proposal
-    }
-
-    func dropExited(info: DropInfo) {
-        state.leftEnd()
-        #if DEBUG
-        OpenListDragTrace.note("END dropExited · \(OpenListDragTrace.gate(state, rows: rows, rowHeight: rowHeight))")
-        #endif
-    }
-
-    func performDrop(info: DropInfo) -> Bool {
-        state.hoverEnd()
-        #if DEBUG
-        OpenListDragTrace.note("END performDrop · \(OpenListDragTrace.describe(info))"
-            + " · \(OpenListDragTrace.gate(state, rows: rows, rowHeight: rowHeight))")
-        #endif
-        let accepted = OpenListDropDoor.perform(
-            info.itemProviders(for: OpenListDropDoor.types), state: state, rows: rows,
-            rowHeight: rowHeight, workspace: workspace)
-        #if DEBUG
-        OpenListDragTrace.note("END performDrop → \(accepted)")
-        #endif
-        return accepted
+    func body(content: Content) -> some View {
+        content
+            .dropDestination(for: SidebarView.OpenNoteDragToken.self, isEnabled: true) { tokens, session in
+                state.hoverEnd()
+                #if DEBUG
+                OpenListDragTrace.action("END", session, tokens: tokens,
+                                         gate: OpenListDragTrace.gate(state, rows: rows, rowHeight: rowHeight))
+                #endif
+                OpenListDropDoor.perform(tokens, state: state, rows: rows, rowHeight: rowHeight, workspace: workspace)
+            }
+            .onDropSessionUpdated { session in
+                switch session.phase {
+                case .entering, .active: state.hoverEnd()
+                default: state.leftEnd()  // exiting, ended, the transfer done
+                }
+                #if DEBUG
+                OpenListDragTrace.dropSession("END", session, state: state, rows: rows, rowHeight: rowHeight)
+                #endif
+            }
+            .dropConfiguration { session in
+                if session.phase == .entering || session.phase == .active { state.hoverEnd() }
+                let configuration = OpenListDropDoor.configuration(state, rows: rows, rowHeight: rowHeight)
+                #if DEBUG
+                OpenListDragTrace.configured("END", configuration.operation, session,
+                                             state: state, rows: rows, rowHeight: rowHeight)
+                #endif
+                return configuration
+            }
     }
 }
 
 /// **The insertion line** — an overlay over the list's scroll view, drawn
 /// above the edge fade (the fade must never dim the line), across the rows'
-/// width, taking no hits (the drop underneath stays the rows').
+/// width, taking no hits (the drops underneath stay the rows').
 struct OpenListInsertionLine: View {
     let state: OpenListDragState
     let rows: [String]
@@ -397,25 +406,30 @@ struct OpenListInsertionLine: View {
 import AppKit
 import os
 
-/// **U2b — the trace leg's instrument** (DEBUG only; the VX-283 run, VX-288 —
-/// the drag that never lands). OFF unless the marker file
-/// `<container>/Library/Caches/vx283-u2b-drag.on` exists; the trace window's
-/// `pre` writes it and its `restore` removes it, so no test run and no other
-/// launch ever writes a line. Every line goes to BOTH
-/// `<container>/Library/Caches/vx283-u2b-drag.log` and the unified log
+/// **The Open list drag's instrument** (DEBUG only; the VX-283 run, VX-288 —
+/// built at U2b's trace leg, KEPT and re-hooked into the session road at U2c by
+/// the orchestrator's P-U2b-1, as the window's oracle). OFF unless the marker
+/// file `<container>/Library/Caches/vx283-u2b-drag.on` exists; a trace
+/// window's `pre` clears it, its launch writes it and its `restore` removes it,
+/// so no test run and no other launch ever writes a line. Every line goes to
+/// BOTH `<container>/Library/Caches/vx283-u2b-drag.log` and the unified log
 /// (subsystem `io.lduarte.variorum.vx283-u2b`, category `openListDrag`, level
 /// notice), so it interleaves with AppKit's own `DragAndDrop` lines.
 ///
-/// The marker's words are FLAGS, read on every call (the window changes them
-/// between drags): `trace` observes only. Three PROBES test the fix's halves
-/// without building one (T1's G1 and G2; none is product behaviour, none
-/// ships): `load` — a delegate's `dropEntered` loads the payload at once, so
-/// the source's payload closure (and `began`) runs WHILE the drag hovers;
-/// `copy` — the proposal offers `.copy` where it would offer `.move`; and two
-/// SOURCE flags read once at LAUNCH (a modifier is attached at body time):
-/// `session` logs `onDragSessionUpdated`'s phases on each Open row, and
-/// `allowmove` attaches `DragConfiguration(allowMove: true)` to them. The
-/// architect's ruling decides whether any of it stays.
+/// What it logs at U2c: each row's and the end zone's drop SESSION updates
+/// (phase, location, the rows'-space y, the gap, the line — one line per
+/// change of what they decide, the repeats folded), the CONFIGURATION each
+/// answered (folded the same way), the ACTION (its location and tokens), the
+/// door's perform and land / land REFUSED, the line drawn / gone, the source's
+/// payload, preview and drag-SESSION phases (with location), the state's
+/// began / ended, the end zone laid out, the column's import drop, every Open
+/// row's frame in SCREEN points (the window's aim) and the hover per row.
+///
+/// The marker's words are FLAGS, read on every call: `trace` observes only;
+/// `copy` (a diagnostic, never product) makes the configuration offer COPY
+/// where it would offer MOVE. U2b's other probes (`load`, `session`,
+/// `allowmove`) retired with the delegates: the session hooks and `allowMove`
+/// are the product now.
 @MainActor
 enum OpenListDragTrace {
     static let logName = "vx283-u2b-drag.log"
@@ -438,10 +452,6 @@ enum OpenListDragTrace {
         else { return nil }
         return Set(text.split(whereSeparator: \.isWhitespace).map(String.init)).union(["trace"])
     }
-
-    /// The flags as the process LAUNCHED — the source-side probes attach a
-    /// modifier at body time, so they read once and hold for the process.
-    static let launchFlags: Set<String> = flags ?? []
 
     static func has(_ flag: String) -> Bool { flags?.contains(flag) == true }
 
@@ -472,6 +482,8 @@ enum OpenListDragTrace {
         "(\(number(rect.minX)),\(number(rect.minY)) \(number(rect.width))x\(number(rect.height)))"
     }
 
+    static func point(_ point: CGPoint) -> String { "(\(number(point.x)),\(number(point.y)))" }
+
     private static func hoverText(_ hover: SidebarLayout.OpenListDrop.Hover?) -> String {
         switch hover {
         case nil: "nil"
@@ -480,7 +492,7 @@ enum OpenListDragTrace {
         }
     }
 
-    /// The gate's inputs — everything `lineTop` and the proposal read.
+    /// The gate's inputs — everything `lineTop` and the configuration read.
     static func gate(_ state: OpenListDragState, rows: [String], rowHeight: CGFloat) -> String {
         let dragged = state.dragging.flatMap { rows.firstIndex(of: $0) }
         let gap = state.gap(rows: rows.count, rowHeight: rowHeight)
@@ -493,55 +505,62 @@ enum OpenListDragTrace {
             + " lineTop=\(top.map(number) ?? "nil") rows=\(rows.count) pitch=\(number(rowHeight))"
     }
 
-    /// What the drop info carries — types only, never data (reading the data
-    /// would resolve the payload's promise and change the road under trace).
-    static func describe(_ info: DropInfo) -> String {
-        let types = NSPasteboard(name: .drag).types?.map(\.rawValue) ?? []
-        return "loc=(\(number(info.location.x)),\(number(info.location.y)))"
-            + " conforms=\(info.hasItemsConforming(to: OpenListDropDoor.types)) dragPboard=\(types)"
+    /// What a site's decision turns on — a fold key (the pointer's own place
+    /// moves every tick; what it DECIDES changes rarely).
+    private static func decision(_ state: OpenListDragState, rows: [String], rowHeight: CGFloat) -> String {
+        let gap = state.gap(rows: rows.count, rowHeight: rowHeight)
+        let top = state.lineTop(rows: rows, rowHeight: rowHeight)
+        return "dragging=\(short(state.dragging)) gap=\(gap.map(String.init) ?? "nil") line=\(top.map(number) ?? "nil")"
     }
 
-    nonisolated static func outcome(_ result: Result<SidebarView.OpenNoteDragToken, any Error>) -> String {
-        switch result {
-        case .success(let token): "success row=\(token.noteID.prefix(8)) list=\(token.listID.prefix(8))"
-        case .failure(let error): "FAILURE \(error)"
-        }
-    }
-
-    private static var lastUpdated: [String: String] = [:]
+    private static var lastKey: [String: String] = [:]
     private static var repeats: [String: Int] = [:]
 
-    /// `dropUpdated` fires on every tracking tick — one line per CHANGE of
-    /// what it answers, with the number of identical ticks folded into it.
-    static func updated(_ site: String, proposal: DropProposal, info: DropInfo, gate: String) {
-        let line = "\(site) dropUpdated → \(proposal.operation) · \(gate)"
-        if lastUpdated[site] == line {
+    /// One line per CHANGE of what a site decides, with the number of identical
+    /// ticks between folded into it.
+    private static func folded(_ site: String, key: String, _ line: () -> String) {
+        guard flags != nil else { return }
+        if lastKey[site] == key {
             repeats[site, default: 0] += 1
             return
         }
         let folded = repeats[site] ?? 0
-        lastUpdated[site] = line
+        lastKey[site] = key
         repeats[site] = 0
-        note(line + " · loc=(\(number(info.location.x)),\(number(info.location.y)))"
-            + (folded > 0 ? " · (previous answer repeated \(folded)×)" : ""))
+        note(line() + (folded > 0 ? " · (previous answer repeated \(folded)×)" : ""))
     }
 
-    // MARK: The probes
-
-    /// `load`: read the payload while the drag hovers (G1's fix, tested).
-    static func probeLoadIfAsked(_ info: DropInfo, site: String) {
-        guard has("load") else { return }
-        let providers = info.itemProviders(for: OpenListDropDoor.types)
-        note("PROBE load at \(site) dropEntered: providers=\(providers.count)"
-            + " types=\(providers.map(\.registeredTypeIdentifiers))")
-        guard let provider = providers.first else { return }
-        _ = provider.loadTransferable(type: SidebarView.OpenNoteDragToken.self) { result in
-            let outcome = outcome(result)
-            Task { @MainActor in note("PROBE load → \(outcome)") }
+    /// A drop SESSION update at a row or the end zone (after the state took it).
+    static func dropSession(
+        _ site: String, _ session: DropSession, state: OpenListDragState, rows: [String], rowHeight: CGFloat
+    ) {
+        let key = "\(session.phase) " + decision(state, rows: rows, rowHeight: rowHeight)
+        folded("\(site) session", key: key) {
+            "\(site) DROP-SESSION phase=\(session.phase) loc=\(point(session.location))"
+                + " suggested=\(session.suggestedOperations.rawValue) items=\(session.itemsCount)"
+                + " · \(gate(state, rows: rows, rowHeight: rowHeight))"
         }
     }
 
-    /// `session`: what the drag session says on the row it began on.
+    /// The configuration a site answered.
+    static func configured(
+        _ site: String, _ operation: DropOperation, _ session: DropSession, state: OpenListDragState,
+        rows: [String], rowHeight: CGFloat
+    ) {
+        let key = "\(operation) " + decision(state, rows: rows, rowHeight: rowHeight)
+        folded("\(site) config", key: key) {
+            "\(site) CONFIG → \(operation) phase=\(session.phase) loc=\(point(session.location))"
+                + " · \(gate(state, rows: rows, rowHeight: rowHeight))"
+        }
+    }
+
+    /// A drop's ACTION ran (the tokens decoded), before the door.
+    static func action(_ site: String, _ session: DropSession, tokens: [SidebarView.OpenNoteDragToken], gate: String) {
+        note("\(site) ACTION phase=\(session.phase) loc=\(point(session.location))"
+            + " tokens=\(tokens.map { "\($0.noteID.prefix(8))@\($0.listID.prefix(8))" }) · \(gate)")
+    }
+
+    /// The SOURCE's drag session, on the row it began on.
     static func session(_ session: DragSession, noteID: String) {
         note("SESSION row=\(noteID.prefix(8)) phase=\(session.phase)"
             + " loc=(\(number(session.location.x)),\(number(session.location.y)))")
@@ -551,6 +570,9 @@ enum OpenListDragTrace {
 
     /// The view chain AppKit hit-tests under the pointer, each view's
     /// registered drag types counted and marked where ours is among them.
+    /// (U2b's reading of it was corrected by the ruling on T3: on macOS 27
+    /// SwiftUI's drop registration does not show through
+    /// `registeredDraggedTypes` — it reads 0 under working targets too.)
     static func dumpHitChain(_ why: String) {
         guard flags != nil else { return }
         let mouse = NSEvent.mouseLocation
@@ -626,29 +648,6 @@ enum OpenListDragTrace {
         guard flags != nil else { return }
         note("HOVER n=\(ordinal) id=\(noteID.prefix(8))")
         dumpHitChain("HOVER n=\(ordinal)")
-    }
-}
-
-/// U2b's SOURCE probes on an Open row (`session`, `allowmove` — read at
-/// launch; with neither, the row is exactly as shipped).
-struct OpenListDragTraceSource: ViewModifier {
-    let noteID: String
-
-    @ViewBuilder
-    func body(content: Content) -> some View {
-        let flags = OpenListDragTrace.launchFlags
-        let noteID = noteID
-        if flags.contains("session"), flags.contains("allowmove") {
-            content
-                .onDragSessionUpdated { OpenListDragTrace.session($0, noteID: noteID) }
-                .dragConfiguration(DragConfiguration(allowMove: true))
-        } else if flags.contains("session") {
-            content.onDragSessionUpdated { OpenListDragTrace.session($0, noteID: noteID) }
-        } else if flags.contains("allowmove") {
-            content.dragConfiguration(DragConfiguration(allowMove: true))
-        } else {
-            content
-        }
     }
 }
 #endif

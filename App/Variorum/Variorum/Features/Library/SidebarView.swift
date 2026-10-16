@@ -854,14 +854,9 @@ struct SidebarView: View {
                     // VX-286: the margin INSIDE the scroll, so the overlay
                     // scroll bar rides beside the ✕, never over it.
                     .padding(.horizontal, Self.scrollingSectionMargin)
-                    // VX-288: ONE drop target over the rows (their margins
-                    // too), on the CONTENT — a drop's location is the rows'
-                    // own space, and the half of the row under the pointer
-                    // decides (`SidebarLayout.OpenListDrop`). The rows' own
-                    // per-row targets are gone.
-                    .contentShape(Rectangle())
-                    .onDrop(of: OpenListDropDoor.types, delegate: OpenListRowsDrop(
-                        state: openListDrag, rows: shown, rowHeight: rowHeight, workspace: workspace))
+                    // (VX-288, U2c: the one legacy drop that stood on this
+                    //  content was never offered a real drag — each ROW is
+                    //  its own drop now, `openRow`'s `OpenListRowDrop`.)
                 }
                 .scrollBounceBehavior(.basedOnSize)
                 // VX-288: the line's scroll axis — the list's window as it stands.
@@ -991,7 +986,7 @@ struct SidebarView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: height)
                 .contentShape(Rectangle())
-                .onDrop(of: OpenListDropDoor.types, delegate: OpenListEndZoneDrop(
+                .modifier(OpenListEndZoneDrop(
                     state: openListDrag, rows: shown, rowHeight: rowHeight, workspace: workspace))
                 #if DEBUG
                 // VX-288's oracle: the end zone as laid out.
@@ -1121,8 +1116,7 @@ struct SidebarView: View {
         // VX-288: the system drag, its image the row's title as the compact
         // chip AT THE GRAB POINT (her VX-70 ruling — the Open list's rows
         // only); the payload (made when the drag begins) tells the list which
-        // row it is. The drop is the LIST's (`openGroup`) — no row is its own
-        // target any more (each landed before itself, the traced bug).
+        // row it is.
         .modifier(ChipDragSource(payload: {
             #if DEBUG
             // U2b's trace (`OpenListDragTrace`, off unless its marker exists):
@@ -1141,10 +1135,22 @@ struct SidebarView: View {
                 }
                 #endif
         })
+        // U2c (P-U2b-1): the source allows a MOVE (copy-only is the macOS
+        // default), and its session's END clears the list's drag wherever the
+        // release fell; the row is its own drop — the half of it under the
+        // pointer decides (`OpenListRowDrop`, the Transferable session form).
+        .dragConfiguration(DragConfiguration(allowMove: true))
+        .onDragSessionUpdated { session in
+            #if DEBUG
+            OpenListDragTrace.session(session, noteID: noteID)
+            #endif
+            openListDrag.dragSessionUpdated(session.phase)
+        }
+        .modifier(OpenListRowDrop(
+            state: openListDrag, index: ordinal - 1, rows: workspace.openNotes.shown,
+            rowHeight: rowHeight, workspace: workspace))
         #if DEBUG
-        // U2b: the source probes (`session`, `allowmove`; read at launch —
-        // with neither flag the row is exactly as shipped) and the aim check.
-        .modifier(OpenListDragTraceSource(noteID: noteID))
+        // U2b: the trace window's aim check.
         .onHover { inside in if inside { OpenListDragTrace.hover(ordinal: ordinal, noteID: noteID) } }
         #endif
         .contextMenu {
