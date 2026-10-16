@@ -18,7 +18,7 @@ struct ExecutorGuardsOnTests {
     @Test func everyU3GuardIsOn() {
         let guards = ProtectionGuards.all
         #expect(guards.planNamedBySectionOn && guards.repairPreconditionsVerifiedOn && guards.repairNeverMakesTouchIDItemOn)
-        #expect(guards.prepareBeforeCommitOn && guards.exportOffAtCastleOn && guards.followerAnchorTypedLockOn)
+        #expect(guards.prepareBeforeCommitOn && guards.exportOffAtCastleOn)
     }
 }
 
@@ -104,23 +104,6 @@ struct ExecutorGuardMutationTests {
         }
     }
 
-    @Test func aFollowersAnchorMissesTheSecretTypedAtItsFollowWithTheGuardOff() async throws {
-        for guarded in [true, false] {
-            let mac = try EX(.castle, synced: true)
-            let phone = try EX(.castle, synced: true, joining: mac)
-            // The passphrase changed during Castle on the Mac, which then leaves.
-            let me = mac.executor()
-            var ml = try mac.unlocked(me)
-            _ = try await me.changePassphrase(&ml, current: mac.passphrase, new: "changed on the Mac")
-            _ = try await me.useStandard(&ml, typed: TypedSecrets(passphrase: "changed on the Mac", words: mac.words))
-            let executor = phone.executor(guards: guarded ? .all : Self.off { $0.followerAnchorTypedLock = false })
-            var library = try phone.unlocked(executor)
-            _ = try await executor.follow(&library, kind: .intoStandard, typed: TypedSecrets(passphrase: "changed on the Mac"))
-            let anchor = try #require(phone.world.liveFormat3?.anchor)
-            #expect(anchor.opens(with: .passphrase("changed on the Mac"), floor: PF.floor) == guarded)
-        }
-    }
-
     @Test func onlyTheLiveFilesOwnKeyIsRetiredAtCastleWithTheGuardOff() async throws {
         for guarded in [true, false] {
             let fixture = try EX(.standard)
@@ -133,46 +116,6 @@ struct ExecutorGuardMutationTests {
             library.section = library.section.recordingAppleKey(AppleKeyRecord(id: minted.id, purpose: .library, origin: .minted))
             _ = try await executor.useCastle(&library, typed: fixture.typed, gate: .touchID)
             #expect(library.section.retiredAppleKeyIDs.contains(minted.id) == guarded)
-        }
-    }
-
-    @Test func aFollowerClearsAPreviousKeyWhileTheLeavesIDStandsWithTheGuardOff() async throws {
-        for guarded in [true, false] {
-            let mac = try EX(.castle, synced: true)
-            let phone = try EX(.castle, synced: true, joining: mac)
-            let clean = try EX(.castle, synced: true)
-            let ce = clean.executor()
-            var cl = try clean.unlocked(ce)
-            _ = try await ce.useStandard(&cl, typed: clean.typed)
-            mac.world.crashAfterWrites = try #require(clean.world.writes.firstIndex { $0.description.hasPrefix("vault") }) + 1
-            let me = mac.executor()
-            var ml = try mac.unlocked(me)
-            await #expect(throws: SimulatedCrash.self) { _ = try await me.useStandard(&ml, typed: mac.typed) }
-            let named = try #require(phone.world.server.snapshot(phone.account!)?.format.appleKeyID)
-            phone.world.icloud.keys[named] = nil
-            let executor = phone.executor(guards: guarded ? .all : Self.off { $0.leaveIDGatesCompletion = false })
-            var library = try phone.unlocked(executor)
-            _ = try? await executor.follow(&library, kind: .intoStandard, typed: TypedSecrets(passphrase: phone.passphrase))
-            let vault = try #require(phone.world.server.snapshot(phone.account!))
-            #expect((vault.format.previousCorpusKey != nil) == guarded)
-        }
-    }
-
-    @Test func theSyncKeysGoSilentInALeavesWindowWithTheGuardOff() async throws {
-        for guarded in [true, false] {
-            let guards = guarded ? ProtectionGuards.all : Self.off { $0.castleKindCustodyThroughLeave = false }
-            let clean = try EX(.castle, synced: true)
-            let ce = clean.executor(guards: guards)
-            var cl = try clean.unlocked(ce)
-            _ = try await ce.useStandard(&cl, typed: clean.typed)
-            // Crash right after the keys were filed for the window (before the walk).
-            let window = try #require(clean.world.writes.firstIndex(of: .reencrypt))
-            let fixture = try EX(.castle, synced: true)
-            fixture.world.crashAfterWrites = window
-            let executor = fixture.executor(guards: guards)
-            var library = try fixture.unlocked(executor)
-            await #expect(throws: SimulatedCrash.self) { _ = try await executor.useStandard(&library, typed: fixture.typed) }
-            #expect(fixture.world.syncItems.keys.contains { $0.itemClass == .silent } == !guarded)
         }
     }
 

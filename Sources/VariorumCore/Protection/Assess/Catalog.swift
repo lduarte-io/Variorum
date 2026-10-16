@@ -109,8 +109,7 @@ public struct CatalogKeyFile: Equatable, Sendable, Identifiable {
     public var library: String? { document?.libraryID }
     /// Its current key's fingerprint.
     public var fingerprint: String? { document?.fingerprint }
-    /// Every fingerprint it leads to without a secret — current, history,
-    /// anchors.
+    /// Every fingerprint it leads to without a secret — current and history.
     public var heldFingerprints: [String] { document?.heldFingerprints ?? [] }
     /// The day the file was frozen, when its place says (a snapshot pair's
     /// stamp; a set-aside file's epoch; an aside folder's stamp).
@@ -177,8 +176,8 @@ public struct Catalog: Equatable, Sendable {
     /// The live key file beside the slot, if one is listed.
     public var liveKeyFile: CatalogKeyFile? { keyFiles.first { $0.role == .live } }
 
-    /// Every key file that leads to `fingerprint` (current, history or
-    /// anchor) — "any key file the catalog knows that holds K" (§3.7).
+    /// Every key file that leads to `fingerprint` (current or history) —
+    /// "any key file the catalog knows that holds K" (§3.7).
     public func keyFiles(holding fingerprint: String) -> [CatalogKeyFile] {
         keyFiles.filter { $0.heldFingerprints.contains(fingerprint) }
     }

@@ -26,15 +26,23 @@ struct CopyAndCrossingScenarios {
     }
 
     /// "leaving Castle, local and synced, with followers typing the passphrase
-    /// and typing the words: the anchor written first; every copy from before
-    /// the leave opening with the passphrase or the words and through nothing
-    /// Apple-reachable" — and "a crash at every step … past the rotation's
-    /// first write, a resume, never a roll-back".
+    /// and typing the words: every copy from before the leave opening with the
+    /// current passphrase or words through the history (rule 4, rule 12)" —
+    /// and "a crash at every step … past the rotation's first write, a
+    /// resume, never a roll-back". (The anchor and promise 13's pre-leave
+    /// reading left with VX-378 U1.)
     @Test func leavingCastleLocalAndSynced() async throws {
         let (world, _) = try await syncedWorld(.castle, devices: ["macA", "macB", "phone"])
-        await world.done([.launch("macA"), .launch("macB"), .launch("phone"), .backup("macA"), .backup("macB"),
-                          .useStandard("macA"), .follow("macB", .passphrase), .follow("phone", .words), .settle])
-        for device in world.devices { #expect(device.slot?.record?.mode == .standard, "\(device.name) didn't follow") }
+        await world.done([.launch("macA"), .launch("macB"), .launch("phone"), .backup("macA"), .backup("macB")])
+        let castleKeys = Dictionary(uniqueKeysWithValues: world.devices.map { ($0.name, $0.slot?.fingerprint) })
+        await world.done([.useStandard("macA"), .follow("macB", .passphrase), .follow("phone", .words), .settle])
+        for device in world.devices {
+            #expect(device.slot?.record?.mode == .standard, "\(device.name) didn't follow")
+            // Rule 4: the current key's history carries the Castle key.
+            let castleKey = try #require(castleKeys[device.name] ?? nil)
+            #expect(world.liveKeyFile(device)?.heldFingerprints.contains(castleKey) == true,
+                    "\(device.name)'s history dropped its Castle key")
+        }
         expectPromisesKept(world)
         for n in [3, 6, 9, 12, 15, 20] {
             let (crashing, _) = try await syncedWorld(.castle, devices: ["macA"], gate: n % 2 == 0 ? .touchID : .alwaysAsk)
@@ -45,14 +53,18 @@ struct CopyAndCrossingScenarios {
         }
     }
 
-    /// "Castle → Standard → Castle: the anchor folds back, and every older
-    /// copy opens with nothing more typed".
+    /// "Castle → Standard → Castle: every older key rides the history, and
+    /// every older copy opens with nothing more typed".
     @Test func castleStandardCastle() async throws {
         let world = try await scenarioWorld { try await $0.fresh(on: $0.macA, mode: .castle, gate: .touchID) }
-        await world.done([.launch("macA"), .backup("macA"), .useStandard("macA"), .backup("macA"),
-                          .useCastle("macA", .touchID, newWords: false), .settle])
+        await world.done([.launch("macA"), .backup("macA")])
+        let castleKey = try #require(world.macA.slot?.fingerprint)
+        await world.done([.useStandard("macA"), .backup("macA")])
+        let standardKey = try #require(world.macA.slot?.fingerprint)
+        await world.done([.useCastle("macA", .touchID, newWords: false), .settle])
         let live = try #require(world.liveKeyFile(world.macA))
-        #expect(live.anchor == nil && live.keptAnchors.isEmpty, "the anchor didn't fold back")
+        #expect(live.heldFingerprints.contains(castleKey) && live.heldFingerprints.contains(standardKey),
+                "the history dropped a key")
         expectPromisesKept(world)
     }
 
@@ -62,8 +74,8 @@ struct CopyAndCrossingScenarios {
         let (world, _) = try await syncedWorld(.castle, devices: ["macA", "macB"])
         await world.done([.launch("macA"), .launch("macB"), .backup("macA"), .useStandard("macA"), .follow("macB", .passphrase),
                           .changePassphrase("macA"), .regenerateWords("macB"), .resetPassphrase("macA", .plainConfirm), .settle])
-        let done = world.macA.lastOutcome?.done ?? []
-        #expect(done.contains { if case .anchor = $0 { return true } else { return false } }, "the reset didn't say its sentence")
+        // Rule 6: the doors re-lock; the Done says nothing about an anchor.
+        #expect(world.macA.lastOutcome?.done == [])
         expectPromisesKept(world)
     }
 

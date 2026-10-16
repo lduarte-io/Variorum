@@ -19,8 +19,6 @@ struct ProtectionGuardsTests {
         #expect(guards.twoHomesOn)
         #expect(guards.hardwareMarkerOn)
         #expect(guards.familyTreeTwoHomesOn)
-        #expect(guards.anchorCarriedByEveryRekeyOn)
-        #expect(guards.anchorWrittenFirstOn)
     }
 }
 
@@ -81,40 +79,5 @@ struct ProtectionGuardMutationTests {
                 "red with the guard off: the later copy reads as foreign")
     }
 
-    /// THE ANCHOR CARRIED BY EVERY RE-KEY: a Replace All Keys in Standard
-    /// would strand every copy from before the leave.
-    @Test func anchorCarriedByEveryRekey() throws {
-        let world = try KeyWorld()
-        let c = StoreKey.mint(), s1 = StoreKey.mint(), s2 = StoreKey.mint()
-        let anchor = try CastleAnchor.sealing(
-            outgoingKeyFile: try world.castleFile(c), outgoingKey: c,
-            locks: .pressingDevice(passphrase: world.p, words: world.w), madeAt: PF.day(1), madeBy: nil)
-        let standard = try world.castleFile(c).writingAnchor(anchor).rekeyed(
-            .leavingCastle, from: c, to: s1, locks: NewKeyLocks(words: world.w), at: PF.day(1)).keyFile
-        #expect(try standard.rekeyed(.withinMode, from: s1, to: s2, locks: NewKeyLocks(), at: PF.day(2))
-            .keyFile.anchor == anchor)
-        var off = ProtectionGuards()
-        off.anchorCarriedByEveryRekey = false
-        let broken = try standard.rekeyed(.withinMode, from: s1, to: s2, locks: NewKeyLocks(), at: PF.day(2), guards: off)
-        #expect(broken.keyFile.anchor == nil, "red with the guard off: the anchor was dropped")
-        #expect(!broken.keyFile.heldFingerprints.contains(PF.fp(c)), "red with the guard off: the Castle-era key is unreachable")
-    }
-
-    /// THE ANCHOR WRITTEN FIRST: a leave would build its new key file with no
-    /// anchor at all — every copy from before the leave stranded.
-    @Test func anchorWrittenFirst() throws {
-        let world = try KeyWorld()
-        let c = StoreKey.mint(), s = StoreKey.mint()
-        let castle = try world.castleFile(c)
-        #expect(throws: KeyFileError.anchorNotWrittenFirst) {
-            _ = try castle.rekeyed(.leavingCastle, from: c, to: s, locks: NewKeyLocks(words: world.w), at: PF.day(1))
-        }
-        var off = ProtectionGuards()
-        off.anchorWrittenFirst = false
-        let broken = try castle.rekeyed(.leavingCastle, from: c, to: s, locks: NewKeyLocks(words: world.w),
-                                        at: PF.day(1), guards: off)
-        #expect(broken.keyFile.anchor == nil && broken.keyFile.history.isEmpty,
-                "red with the guard off: nothing from before the leave is reachable")
-    }
 }
 #endif

@@ -1,11 +1,12 @@
 //
 //  LeaveCastleTests.swift
 //  VariorumCoreTests — VX-305 U3: Use Standard — leaving Castle is a key
-//  change (design §3.9): the anchor written first, the rotation's first write
-//  naming the account's fresh key with no wrap (the account's commit point),
-//  the completing write only by a device that reads the named key, the sync
-//  keys the Castle way through the window, a fresh own Apple key, an empty
-//  history — the exact writes, a crash after every write, the refusals.
+//  change (rule 12): the rotation's first write with the new master's Apple
+//  wrap under the account's fresh key (the account's commit point), the
+//  completing write by anyone, the sync keys silent (the account's mode), a
+//  fresh own Apple key, the history carrying every Castle key (rule 4) — the
+//  exact writes, a crash after every write, the refusals. (The anchor and the
+//  stuck leave left with VX-378 U1.)
 //
 
 import CryptoKit
@@ -17,13 +18,17 @@ import Testing
 enum UseStandardStates {
     static func finished(_ k0: StoreKey) -> WorldState {
         { fixture, library in
-            guard let record = fixture.liveRecord, let live = fixture.world.liveFormat3, let apple = live.apple,
-                  let anchor = live.anchor else { return false }
+            guard let record = fixture.liveRecord, let live = fixture.world.liveFormat3, let apple = live.apple
+            else { return false }
             let current = fixture.world.live!.fingerprint
-            let anchorOpens = (try? anchor.open(.passphrase(fixture.passphrase), floor: PF.floor).outgoing.key) == k0
-                && (try? anchor.open(.words(fixture.words), floor: PF.floor).outgoing.key) == k0
+            // Rule 4: the current passphrase and words open the Castle key
+            // through the history.
+            let historyOpens = [ProtectionSecret.passphrase(fixture.passphrase), .words(fixture.words)].allSatisfy { secret in
+                guard let key = try? live.open(secret, floor: PF.floor) else { return false }
+                return (try? live.historyKey(PF.fp(k0), currentKey: key)) == k0
+            }
             return record.mode == .standard && current != PF.fp(k0)
-                && live.history.isEmpty && anchorOpens
+                && historyOpens
                 && fixture.world.icloud.keys[apple.keyID] != nil
                 && library.section.appleKeys.contains { $0.id == apple.keyID && $0.isOwnLibraryKey && $0.retiredAt == nil }
                 && fixture.world.custody.keys.map(\.itemClass) == [.silent]
@@ -41,7 +46,7 @@ enum UseStandardStates {
     }
 }
 
-@Suite("VX-305 U3 — Use Standard: the anchor first, the exact writes, a crash after every write")
+@Suite("VX-305 U3 — Use Standard: the history carried, the exact writes, a crash after every write")
 struct UseStandardTests {
     @Test func useStandardLocalWritesExactlyThisInOrder() async throws {
         let fixture = try EX(.castle)
@@ -54,10 +59,9 @@ struct UseStandardTests {
         #expect(outcome.done == [.ruleFive])
         #expect(fixture.world.writeLog(naming: [PF.fp(k0): "K0", PF.fp(k1): "K1"]) == [
             "record K0", "memory K0", "plan",
-            "keyfile K0", "plan",                                          // THE ANCHOR FIRST, into the outgoing file
             "custody+ silent K1", "plan",                                  // the new key's silent item
             "plan", "apple+ \(own.prefix(8))", "record K0", "memory K0", "plan",  // this Mac's own FRESH Apple key
-            "keyfile K1", "plan",                                          // empty history, the anchor carried
+            "keyfile K1", "plan",                                          // its history carrying K0 (rule 4)
             "stage K1", "plan", "staged-record K1", "plan", "swap K1", "plan",
             "memory K1", "plan",
             "custody- touchid K0", "plan",                                 // the Castle key's Touch ID item goes with it
@@ -66,11 +70,9 @@ struct UseStandardTests {
         ])
         expectSettled(fixture, library)
         #expect(UseStandardStates.finished(k0)(fixture, library))
-        // The anchor keeps the secrets of its day: Touch ID, the Apple key and
-        // the new key reach nothing from before the leave.
+        // Rule 12: the new Standard key carries every Castle key.
         let live = try #require(fixture.world.liveFormat3)
-        #expect(try live.historyKeys(currentKey: k1).isEmpty)
-        #expect(live.anchor?.locks.outgoingKey == nil)
+        #expect(try live.historyKeys(currentKey: k1).map(\.key) == [k0])
     }
 
     @Test func aCrashAfterEveryWriteFinishesOnResume() async throws {
@@ -101,7 +103,7 @@ struct UseStandardTests {
             dropPlan: true)
     }
 
-    @Test func syncedUseStandardMarksTheLeaveThenCompletesIt() async throws {
+    @Test func syncedUseStandardWritesTheAppleWrapAtItsFirstWrite() async throws {
         let fixture = try EX(.castle, synced: true)
         let k0 = fixture.key
         let executor = fixture.executor()
@@ -112,11 +114,10 @@ struct UseStandardTests {
         let own = try #require(fixture.world.liveFormat3?.apple?.keyID)
         #expect(fixture.world.writeLog(naming: [PF.fp(k0): "K0", PF.fp(k1): "K1"]) == [
             "record K0", "memory K0", "plan",
-            "keyfile K0", "plan",                                              // the anchor first
             "plan", "apple+ \(account.prefix(8))", "record K0", "memory K0", "plan",  // the account's FRESH key
-            "plan", "vault rotating apple-id-no-wrap", "sync+ touchid", "plan",      // the mark of a leave; Castle-kind keys
+            "plan", "vault rotating apple-wrap", "sync+ silent", "sync- touchid", "plan",  // the wrap at the FIRST write; silent keys
             "reencrypt", "plan",
-            "vault apple-wrap", "sync+ silent", "sync- touchid", "plan",     // ONE write completes it; the keys go silent
+            "vault apple-wrap", "sync+ silent", "plan",                      // the completing write, by anyone
             "custody+ silent K1", "plan",
             "plan", "apple+ \(own.prefix(8))", "record K0", "memory K0", "plan",
             "keyfile K1", "plan", "stage K1", "plan", "staged-record K1", "plan", "swap K1", "plan",
@@ -141,11 +142,11 @@ struct UseStandardTests {
             neverHappened: { UseStandardStates.neverHappened(k0)($0, $1) })
     }
 
-    @Test func pastTheVaultsFirstWriteWithThePlanGoneTheDeviceFinishesTheLeaveAsAnyFollower() async throws {
+    @Test func pastTheVaultsFirstWriteWithThePlanGoneTheDeviceFollowsOutAsAnyFollower() async throws {
         // The account's commit point passed; the plan is lost: the library
-        // half rolls back, the vault reads a leave in progress, and the
-        // finish (a follow into Standard — this device reads the named key,
-        // it minted it) completes it. Never a third state.
+        // half rolls back, the vault reads Standard already (the wrap went in
+        // at the first write — rule 12), and the follow into Standard
+        // completes the rotation. Never a stuck state.
         let fixture = try EX(.castle, synced: true)
         let k0 = fixture.key
         let clean = try EX(.castle, synced: true)
@@ -160,7 +161,7 @@ struct UseStandardTests {
         let (settled, rolledBack, _) = try await fixture.relaunchAndSettle(dropPlan: true)
         #expect(settled == .rolledBack(.leaveCastle))
         #expect(UseStandardStates.neverHappened(k0)(fixture, rolledBack))
-        #expect(fixture.world.server.snapshot(fixture.account!)!.reading.mode == .leavingCastle(
+        #expect(fixture.world.server.snapshot(fixture.account!)!.reading.mode == .standard(
             appleKeyID: fixture.world.server.snapshot(fixture.account!)!.format.appleKeyID!))
         let finisher = fixture.executor()
         var again = try finisher.unlock(with: fixture.key)

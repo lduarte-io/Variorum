@@ -1,10 +1,9 @@
 //
 //  DoorAndDeviceActTests.swift
 //  VariorumCoreTests — VX-305 U3: the key doors (re-wrap the current key
-//  only; a fresh descriptor for a new passphrase; the anchor sentence in the
-//  Done), this Mac's settings and the Touch ID re-arm, confirming the mode,
-//  creating a library, Re-link's two arms, the old shared key's move and
-//  retirement (by recorded id; the last-step race), and the migration.
+//  only; a fresh descriptor for a new passphrase), this Mac's settings and the
+//  Touch ID re-arm, creating a library. (The anchor sentences, confirming the
+//  mode, Re-link, the old shared key and the migration left with VX-378 U1.)
 //
 
 import CryptoKit
@@ -13,7 +12,7 @@ import Testing
 
 @testable import VariorumCore
 
-/// A library that left Castle (an anchor in its key file).
+/// A library that left Castle (its history carrying the Castle key).
 func leftCastle(synced: Bool = false) async throws -> (EX, UnlockedLibrary, ProtectionExecutor) {
     let fixture = try EX(.castle, synced: synced)
     let executor = fixture.executor()
@@ -24,30 +23,34 @@ func leftCastle(synced: Bool = false) async throws -> (EX, UnlockedLibrary, Prot
     return (fixture, library, executor)
 }
 
-@Suite("VX-305 U3 — the key doors re-wrap the current key only, and say the anchor's sentence")
+@Suite("VX-305 U3 — the key doors re-wrap the current key only (rule 6)")
 struct ExecutorKeyDoorTests {
-    @Test func changePassphraseReWrapsTheCurrentKeyAndTheAnchorKeepsItsDay() async throws {
+    /// Rule 6: the key stays, the history stays, and the NEW passphrase opens
+    /// the Castle key from before the leave through it (rule 4) — the Done
+    /// says nothing more (the anchor sentences left with VX-378 U1).
+    @Test func changePassphraseReWrapsTheCurrentKeyAndTheNewOneOpensTheHistory() async throws {
         var (fixture, library, executor) = try await leftCastle()
         let before = try #require(fixture.world.liveFormat3)
         let outcome = try await executor.changePassphrase(&library, current: fixture.passphrase, new: "another one")
         let after = try #require(fixture.world.liveFormat3)
-        #expect(after.fingerprint == before.fingerprint && after.anchor == before.anchor && after.history == before.history)
+        #expect(after.fingerprint == before.fingerprint && after.history == before.history)
         #expect(after.passphrase?.kdf != before.passphrase?.kdf)
-        #expect(try after.open(passphrase: .passphrase("another one"), floor: PF.floor) == library.key)
-        guard case .anchor(let sentence)? = outcome.done.first else { Issue.record("no anchor sentence"); return }
-        #expect(sentence.door == .changePassphrase && sentence.replacedSecretOpensIt == true)
-        // The anchor still opens with the leave day's passphrase.
-        #expect(after.anchor?.opens(with: .passphrase(fixture.passphrase), floor: PF.floor) == true)
+        let opened = try after.open(passphrase: .passphrase("another one"), floor: PF.floor)
+        #expect(opened == library.key)
+        #expect(try after.historyKeys(currentKey: opened).count == 1)
+        #expect(outcome.done.isEmpty)
         _ = executor
         expectSettled(fixture, library)
     }
 
-    @Test func theResetRoadNeverPointsAtTheForgottenPassphrase() async throws {
+    @Test func theResetRoadReLocksTheCurrentKey() async throws {
         var (fixture, library, executor) = try await leftCastle()
+        let before = try #require(fixture.world.liveFormat3)
         let outcome = try await executor.resetPassphrase(&library, authorization: .plainConfirm, new: "fresh")
-        guard case .anchor(let sentence)? = outcome.done.first else { Issue.record("no anchor sentence"); return }
-        #expect(sentence.door == .resetForgottenPassphrase)
-        #expect(!sentence.stillOpensWith.contains { if case .passphrase = $0 { return true } else { return false } })
+        let after = try #require(fixture.world.liveFormat3)
+        #expect(after.fingerprint == before.fingerprint && after.history == before.history)
+        #expect(try after.open(passphrase: .passphrase("fresh"), floor: PF.floor) == library.key)
+        #expect(outcome.done.isEmpty)
         _ = (fixture, executor)
     }
 

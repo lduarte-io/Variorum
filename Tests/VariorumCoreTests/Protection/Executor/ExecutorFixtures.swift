@@ -134,7 +134,7 @@ final class EX {
     // MARK: - The relaunch
 
     /// The lobby's roads, as a person would walk them: every custody item,
-    /// then the live key file with what she types, its history, its anchor.
+    /// then the live key file with what she types, and its history.
     func openByRoads(_ typed: TypedSecrets) -> StoreKey? {
         func opens(_ candidate: StoreKey) -> Bool { (try? world.libraryOpens(with: candidate)) == true }
         for item in (try? world.custodyItems()) ?? [] {
@@ -150,9 +150,6 @@ final class EX {
             if let current = try? live.open(secret, floor: PF.floor) {
                 if opens(current) { return current }
                 for older in (try? live.historyKeys(currentKey: current)) ?? [] where opens(older.key) { return older.key }
-            }
-            if let anchor = live.anchor, let contents = try? anchor.open(secret, floor: PF.floor) {
-                for held in contents.keys where opens(held.key) { return held.key }
             }
         }
         return nil

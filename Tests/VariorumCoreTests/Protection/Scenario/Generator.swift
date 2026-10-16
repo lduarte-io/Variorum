@@ -7,12 +7,12 @@
 //  go/no-go run").
 //
 //  The runner applies a step and checks the promises after it: every step's
-//  (1, 2, 4, 5, 6, 8, 11 and — until U1's anchor piece — 13 and the vault's
-//  §3.9 invariant), the settle's (2's retired-key clause, 3, 7), the tampering
+//  (1, 2, 4, 5, 6, 8, 11), the settle's (2's retired-key clause, 3, 7), the tampering
 //  steps' (10 — the device is relaunched as part of the step, the next open
 //  being when a planted or replayed thing would act), and — every few steps and
 //  at every settle — the words (9). (Promise 12 left with the move off the old
-//  shared key — VX-378 U1, rule 26.)
+//  shared key — VX-378 U1, rule 26; promise 13's pre-leave reading and the
+//  vault's Castle-era-key invariant left with the anchor — rules 12, 13, 15.)
 //
 
 import CryptoKit

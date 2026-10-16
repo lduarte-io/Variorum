@@ -7,11 +7,9 @@ import Foundation
 // rotation — Standard keeping the account's Apple copy under the SAME account
 // key (read, never minted — decision 30), Castle with none; then this
 // library's re-key WITHIN its mode: the new key's history takes the old key and
-// its history, the anchor carried unchanged. In Standard the new key goes under
-// this Mac's EXISTING own Apple key — Replace All Keys isn't a crossing, so
-// nothing is minted for the library. An account still on the old shared key
-// is re-linked first (§3.5 point 7): a fresh account key, so the new master
-// goes under the account's own key.
+// its history (rule 4). In Standard the new key goes under this Mac's EXISTING
+// own Apple key — Replace All Keys isn't a crossing, so nothing is minted for
+// the library.
 
 struct ReplaceAllKeysProgram: ActProgram {
     let act = ProtectionAct.replaceAllKeys
@@ -45,13 +43,11 @@ struct ReplaceAllKeysProgram: ActProgram {
         case "custodyItem": try ctx.newCustodyItem(kind: kind)
         case "keyFile":
             let apple = kind == .standard ? ctx.existingOwnAppleKey() : nil
-            try ctx.newKeyFile(.withinMode, locks: try ctx.newLocks(passphrase: true, words: true, master: true, apple: apple))
+            try ctx.newKeyFile(rekeyTo: kind, locks: try ctx.newLocks(passphrase: true, words: true, master: true, apple: apple))
         case "stage": try ctx.stage()
         case "recordIntoStaged": try ctx.recordIntoStaged(kind: kind)
         case "swap": try ctx.swap { try ctx.stage(); try ctx.recordIntoStaged(kind: kind) }
-        case "memory":
-            try ctx.rememberNewKey()
-            ctx.saySentence(.replacesWords)
+        case "memory": try ctx.rememberNewKey()
         case "retireOldCustody": try ctx.retireOldCustody(sweepForCastle: false)
         case "backup": try ctx.freshBackup()
         default: throw ExecutorRefusal.nothingToDo
@@ -70,26 +66,9 @@ extension ActContext {
         else { return nil }
         return try? leaves.apple.readAppleKey(id: id)
     }
-
-    /// Every door that replaces a secret while an anchor exists says what
-    /// still opens the copies from before the leave — one sentence, from the
-    /// route finder, for this device's anchor (§3.9).
-    func saySentence(_ door: SecretReplacingDoor) {
-        if let sentence = executor.anchorSentence(door, keyFile: library.keyFile) {
-            outcome.done.append(.anchor(sentence))
-        }
-    }
 }
 
 extension ProtectionExecutor {
-    /// The anchor sentence for `door`, from the route finder over this
-    /// device's live key file (nil when it carries no anchor).
-    func anchorSentence(_ door: SecretReplacingDoor, keyFile: KeyFile?) -> AnchorSentence? {
-        guard let keyFile, keyFile.anchor != nil, let bytes = try? keyFile.encoded() else { return nil }
-        let catalog = Catalog.build([CatalogEntry(place: .container, name: ProtectionNames.keyFilename, bytes: bytes)])
-        return RouteFinder(RouteFacts(catalog: catalog)).anchorSentence(for: door)
-    }
-
     /// **Replace All Keys** — synced, both secrets typed (the words typed or
     /// made new).
     public func replaceAllKeys(_ library: inout UnlockedLibrary, typed: TypedSecrets) async throws -> ActOutcome {

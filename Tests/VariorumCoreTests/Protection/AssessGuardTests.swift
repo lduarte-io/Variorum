@@ -18,8 +18,7 @@ struct AssessGuardsOnTests {
     @Test func everyU2GuardIsOnByDefault() {
         let guards = ProtectionGuards.all
         #expect(guards.pruneOwnCopiesOnlyOn && guards.noRepairMakesTouchIDOn && guards.noRearmWithoutItemOn)
-        #expect(guards.deleteOnSightByIDOnlyOn && guards.everyOwnKeyRetiredAtCastleOn && guards.leaveIDGatesCompletionOn)
-        #expect(guards.castleKindCustodyThroughLeaveOn)
+        #expect(guards.deleteOnSightByIDOnlyOn && guards.everyOwnKeyRetiredAtCastleOn)
         #expect(guards.standardRecordNoDestructiveRepairOn)
         #expect(guards.freshVaultBeforeAppleWriteOn && guards.rekeyAtEveryCrossingOn)
     }
@@ -79,29 +78,6 @@ struct AssessGuardMutationTests {
         off.everyOwnKeyRetiredAtCastle = false
         #expect(try world.assessed(guards: off).door(.useCastle).spec?.retiresOwnAppleKeys == [world.own.id],
                 "red with the guard off: only the live file's key retired")
-    }
-
-    /// THE LEAVE'S ID GATES ITS COMPLETION: a device that can't read the named
-    /// key would close the window with no Apple copy — the account reading
-    /// Castle in between.
-    @Test func leaveIDGatesCompletion() throws {
-        let world = try AssessVaultTests.synced(.castle, vault: .leavingCastle(appleKeyID: PF.id())).0
-        #expect(try world.assessed().vault?.mayCompleteLeave == false)
-        var off = ProtectionGuards()
-        off.leaveIDGatesCompletion = false
-        #expect(try world.assessed(guards: off).vault?.mayCompleteLeave == true,
-                "red with the guard off: any device completes the leave")
-    }
-
-    /// CASTLE-KIND CUSTODY THROUGH A LEAVE's ROTATION: the new keys reach a
-    /// Castle-era corpus key through the previous one until it leaves the vault.
-    @Test func castleKindCustodyThroughLeave() throws {
-        let world = try AssessVaultTests.synced(.castle, vault: .leavingCastle(appleKeyID: PF.id()), previous: "c0").0
-        #expect(try world.assessed().vault?.syncKeysCustody == .castleWay)
-        var off = ProtectionGuards()
-        off.castleKindCustodyThroughLeave = false
-        #expect(try world.assessed(guards: off).vault?.syncKeysCustody == .silent,
-                "red with the guard off: a Castle-era key within the login password's reach")
     }
 
     /// NOTHING DESTRUCTIVE ON A STANDARD RECORD's WORD ALONE: a swapped-in

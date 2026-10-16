@@ -1,36 +1,34 @@
 import CryptoKit
 import Foundation
 
-// VX-305 U3 — USE STANDARD: LEAVING CASTLE IS A KEY CHANGE (design §3.9; her
-// round-2 ruling "a fresh key at every crossing"; §3.4's "leaving Castle —
-// nothing"). The door: the passphrase and the twelve words, typed — the words
-// never made new here, so the paper she has keeps opening what stays behind —
+// VX-305 U3 — USE STANDARD: LEAVING CASTLE IS A KEY CHANGE (rule 12,
+// `notes/CastleRules.md`: "leaving hands everything out"). The door: the
+// passphrase and the twelve words, typed — the words never made new here —
 // and rule 5's sentence.
-//   1. THE ANCHOR FIRST: the outgoing Castle key and its whole history sealed
-//      under the typed passphrase and words, written into the CURRENT key
-//      file before any other step, and carried into the new one.
-//   2. Synced, the rotation: the account's FRESH Apple key minted at this
-//      press (in iCloud Keychain before the write), then the first write
-//      naming its id in `apple_key_id` with NO wrap — the mark of a leave, and
-//      the account's commit point (past it a crash resumes, never rolls back).
-//      The new sync keys and the previous corpus key stay in Castle-kind
-//      custody while the previous key stands. The walk. One write completes
-//      the leave — the account's Apple wrap under the named key, the window
-//      closed — made only by a device that reads that key (this one: it
-//      minted it). Then the sync keys go to a silent item.
-//   3. The new library key: its silent item; this Mac's own FRESH Apple key;
-//      the new key file (the Apple wrap, P, W, the new master when synced; an
-//      empty history; the anchor carried); the record into the staged file;
-//      the swap.
-//   4. What this Mac remembers; the Castle key's Touch ID item goes with its
+//   1. Synced, the rotation: the account's FRESH Apple key minted at this
+//      press (in iCloud Keychain before the write), then the first write with
+//      the new master's Apple wrap under it — the vault reads Standard from
+//      that write on (the account's commit point: past it a crash resumes,
+//      never rolls back); the walk; the completing write clears the previous
+//      corpus key, by anyone holding the new master. The sync keys go to a
+//      silent item (the account's mode is Standard).
+//   2. The new library key, re-keyed exactly as Replace All Keys does: its
+//      silent item; this Mac's own FRESH Apple key; the new key file (the
+//      Apple wrap, P, W, the new master when synced) whose history carries
+//      the Castle key and every key before it (rule 4); the record into the
+//      staged file; the swap.
+//   3. What this Mac remembers; the Castle key's Touch ID item goes with its
 //      key; a fresh backup.
+// (The anchor written first, the leave's empty history, the id-with-no-wrap
+// mark and the stuck leave's wait left with VX-378 U1 — rules 4, 12, 13. U2
+// makes the leave's account side the mode flag's flip, rule 15.)
 
 struct LeaveCastleProgram: ActProgram {
     let act = ProtectionAct.leaveCastle
     static let afterCommit = ["memory", "retireOldCustody", "backup"]
 
     func steps(_ parameters: ActParameters, guards: ProtectionGuards) -> [String] {
-        var steps = ["anchor"]
+        var steps: [String] = []
         if parameters.synced == true {
             steps += ["mintAccountAppleKey", "rotationWrite", "walk", "rotationComplete"]
         }
@@ -42,22 +40,19 @@ struct LeaveCastleProgram: ActProgram {
 
     func run(_ step: String, _ ctx: ActContext) async throws {
         switch step {
-        case "anchor":
-            guard let words = ctx.secrets.words else { throw ExecutorRefusal.secretsRequired(ctx.act) }
-            try ctx.writeAnchor(.pressingDevice(passphrase: try ctx.requirePassphrase(), words: words))
         case "mintAccountAppleKey":
             _ = try ctx.mintAppleKey(purpose: .account)
         case "rotationWrite":
-            guard let id = ctx.parameters.accountAppleKeyID else { throw ExecutorRefusal.appleKeyUnreadable }
-            try await ctx.rotationWrite(
-                apple: .leaveNaming(id: id), castleWay: ctx.executor.guards.castleKindCustodyThroughLeaveOn)
+            // The new master under the account's fresh key at the FIRST write
+            // (read back — or, lost before the write, minted afresh).
+            try await ctx.rotationWrite(apple: .keptUnder(ctx.mintAppleKey(purpose: .account)), castleWay: false)
         case "walk": try await ctx.walk()
         case "rotationComplete": try await ctx.completeRotation(castleWayAfter: false)
         case "mintOwnAppleKey": _ = try ctx.mintAppleKey(purpose: .library)
         case "custodyItem": try ctx.newCustodyItem(kind: .standard)
         case "keyFile":
             try ctx.newKeyFile(
-                .leavingCastle,
+                rekeyTo: .standard,
                 locks: try ctx.newLocks(
                     passphrase: true, words: true, master: ctx.parameters.synced == true, apple: try ctx.ownAppleKey()))
         case "stage": try ctx.stage()

@@ -31,13 +31,6 @@ public struct ProtectionGuards: Equatable, Sendable {
     /// memory's mirror are unioned at open. Off: the record's tree alone (a
     /// rolled-back library file makes its own later copies look foreign).
     public var familyTreeTwoHomes = true
-    /// THE ANCHOR CARRIED BY EVERY RE-KEY (§3.4): a re-key within a mode
-    /// carries the Castle anchor unchanged. Off: it is dropped.
-    public var anchorCarriedByEveryRekey = true
-    /// THE ANCHOR WRITTEN FIRST (§3.4, §3.9): leaving Castle refuses unless
-    /// the anchor is already written into the outgoing key file. Off: the leave
-    /// builds its new key file with no anchor in the outgoing one.
-    public var anchorWrittenFirst = true
 
     // U2 — the guards in `assess`, the route finder and retention.
     /// RETENTION PER LIBRARY PER MAC (§3.7, VX-302): only this Mac's copies
@@ -60,14 +53,6 @@ public struct ProtectionGuards: Equatable, Sendable {
     /// Mac's section lists as its own for the library. Off: only the one the
     /// live key file's Apple wrap names.
     public var everyOwnKeyRetiredAtCastle = true
-    /// THE LEAVE'S ID GATES ITS COMPLETION (§3.9): a vault whose rotation
-    /// names an Apple key id with no wrap is completed only by a device that
-    /// reads that key. Off: any device completes it.
-    public var leaveIDGatesCompletion = true
-    /// CASTLE-KIND CUSTODY THROUGH A LEAVE'S ROTATION (§3.2, §3.9): the sync
-    /// keys stay the Castle way while the previous corpus key stands. Off:
-    /// they go silent as soon as the vault reads a leave.
-    public var castleKindCustodyThroughLeave = true
     /// NOTHING DESTRUCTIVE ON A STANDARD RECORD's WORD ALONE (§3.3, §3.6).
     /// Off: Standard's record drives deletes.
     public var standardRecordNoDestructiveRepair = true
@@ -80,8 +65,7 @@ public struct ProtectionGuards: Equatable, Sendable {
     public var rekeyAtEveryCrossing = true
 
     // U3 — the guards in the executor (it also reads U2's
-    // `everyOwnKeyRetiredAtCastle`, `leaveIDGatesCompletion`,
-    // `castleKindCustodyThroughLeave`, `freshVaultBeforeAppleWrite`,
+    // `everyOwnKeyRetiredAtCastle`, `freshVaultBeforeAppleWrite`,
     // `rekeyAtEveryCrossing`, `standardRecordNoDestructiveRepair` and
     // `deleteOnSightByIDOnly` where it acts on the same rule).
     /// A PLAN RESUMES ONLY WHEN THIS MAC'S SECTION NAMES IT (§3.6, VX-313):
@@ -103,10 +87,6 @@ public struct ProtectionGuards: Equatable, Sendable {
     /// follow — turns this device's scheduled Markdown export off. Off: it
     /// stays on.
     public var exportOffAtCastle = true
-    /// A FOLLOWER'S ANCHOR LOCKED UNDER THE SECRET TYPED AT ITS FOLLOW
-    /// (§3.4, her 2026-10-14 confirm). Off: only the outgoing key and its
-    /// copied locks.
-    public var followerAnchorTypedLock = true
 
     // U4 — the guards the scenario world's bugs added.
     /// A LIBRARY FILE REPLAYED ALONE LOSES TO THE MEMORY (§3.6, promise 10 —
@@ -150,22 +130,6 @@ public struct ProtectionGuards: Equatable, Sendable {
         #endif
     }
 
-    public var anchorCarriedByEveryRekeyOn: Bool {
-        #if DEBUG
-        return anchorCarriedByEveryRekey
-        #else
-        return true
-        #endif
-    }
-
-    public var anchorWrittenFirstOn: Bool {
-        #if DEBUG
-        return anchorWrittenFirst
-        #else
-        return true
-        #endif
-    }
-
     public var pruneOwnCopiesOnlyOn: Bool {
         #if DEBUG
         return pruneOwnCopiesOnly
@@ -190,9 +154,6 @@ public struct ProtectionGuards: Equatable, Sendable {
         #endif
     }
 
-
-
-
     public var deleteOnSightByIDOnlyOn: Bool {
         #if DEBUG
         return deleteOnSightByIDOnly
@@ -208,24 +169,6 @@ public struct ProtectionGuards: Equatable, Sendable {
         return true
         #endif
     }
-
-    public var leaveIDGatesCompletionOn: Bool {
-        #if DEBUG
-        return leaveIDGatesCompletion
-        #else
-        return true
-        #endif
-    }
-
-    public var castleKindCustodyThroughLeaveOn: Bool {
-        #if DEBUG
-        return castleKindCustodyThroughLeave
-        #else
-        return true
-        #endif
-    }
-
-
 
     public var standardRecordNoDestructiveRepairOn: Bool {
         #if DEBUG
@@ -290,17 +233,5 @@ public struct ProtectionGuards: Equatable, Sendable {
         return true
         #endif
     }
-
-    public var followerAnchorTypedLockOn: Bool {
-        #if DEBUG
-        return followerAnchorTypedLock
-        #else
-        return true
-        #endif
-    }
-
-
-
-
 
 }

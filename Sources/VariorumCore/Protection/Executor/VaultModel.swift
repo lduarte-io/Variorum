@@ -6,15 +6,13 @@ import Foundation
 // (design §3.12): the master under the passphrase (with its descriptor), the
 // words and — Standard — the account's Apple key, naming `apple_key_id`; the
 // class keys under the master; the key proof; one rotation at a time, with
-// the previous corpus key under the new master and the rotation seq. What is
-// NEW is only this build's READING of one existing field (§3.9): a
-// Castle → Standard rotation names the account's fresh Apple key's id in
-// `apple_key_id` at its first write with NO wrap — the vault then reads
-//   - a wrap present — Standard;
-//   - an id with no wrap — leaving Castle, in progress;
-//   - neither — Castle;
-// and only a device that reads the named key makes the one completing write
-// that adds the wrap. The payloads are built here from the real
+// the previous corpus key under the new master and the rotation seq. The
+// vault reads Standard with an Apple wrap and Castle without one; a leave's
+// rotation writes the wrap under the account's fresh Apple key at its FIRST
+// write, like Standard's Replace All Keys (rule 12: no stuck leave — the
+// id-with-no-wrap mark and the named-key completion left with VX-378 U1; U2
+// replaces the rotation with the one-row write and the mode flag, rule 15).
+// The payloads are built here from the real
 // `KeyVaultFormat` (Crypto/, not Sync/), so the model is the true format; the
 // transport, the walk and the server's guards are the `VaultLeaf`'s.
 
@@ -72,11 +70,9 @@ public enum VaultRefusal: Error, Equatable, Sendable {
 public enum RotationAppleCopy: Sendable {
     /// Use Castle, a Castle Replace All Keys: no Apple copy, no id.
     case none
-    /// Standard's Replace All Keys (decision 30): M′ under the SAME account key.
+    /// Standard's Replace All Keys (decision 30): M′ under the SAME account
+    /// key; Use Standard (a leave): M′ under the account's FRESH key.
     case keptUnder(AppleKeyMaterial)
-    /// Use Standard (a leave): the account's FRESH key's id named, NO wrap —
-    /// the mark that this rotation is a leave.
-    case leaveNaming(id: String)
 }
 
 public enum VaultModel {
@@ -121,8 +117,6 @@ public enum VaultModel {
             break
         case .keptUnder(let key):
             format = try format.settingAppleHeldCopy(masterKey: master, appleKey: key.key, appleKeyID: key.id)
-        case .leaveNaming(let id):
-            format.appleKeyID = id
         }
         format.updatedByDevice = device
         let material = DeviceKeyMaterial(
@@ -132,18 +126,10 @@ public enum VaultModel {
         return (format, material)
     }
 
-    /// **The completing write**: the previous corpus key cleared — and, for a
-    /// leave (an id with no wrap), the account's Apple wrap of the new master
-    /// under the NAMED key, in the same write. Just the wrap when an older
-    /// build already cleared the previous key (§3.9). `namedKey` must be the
-    /// key the vault names (the caller's guard).
-    public static func completing(
-        _ format: KeyVaultFormat, master: SymmetricKey, namedKey: AppleKeyMaterial?, device: String
-    ) throws -> KeyVaultFormat {
+    /// **The completing write**: the previous corpus key cleared (any device
+    /// holding the new master may make it).
+    public static func completing(_ format: KeyVaultFormat, device: String) -> KeyVaultFormat {
         var next = format.clearingPreviousCorpusKey()
-        if let namedKey {
-            next = try next.settingAppleHeldCopy(masterKey: master, appleKey: namedKey.key, appleKeyID: namedKey.id)
-        }
         next.updatedByDevice = device
         return next
     }

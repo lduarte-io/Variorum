@@ -60,37 +60,18 @@ public struct AccountVerdict: Equatable, Sendable {
     public var confirmed: Bool
 }
 
-/// How the sync keys are held — by what they can reach (§3.2, §3.9).
+/// How the sync keys are held — by the account's mode (rule 15's custody).
 public enum SyncKeysCustody: Equatable, Sendable {
-    /// Touch ID, or session memory under Always ask: they reach a Castle-era
-    /// key (in Castle; through a leave's rotation until the previous corpus
-    /// key leaves the vault).
+    /// Castle: Touch ID, or session memory under Always ask.
     case castleWay
-    /// A silent item: they reach nothing Castle-era.
+    /// Standard: a silent item.
     case silent
-}
-
-/// A leave whose acting device was lost (§3.9): another device finishes it
-/// at a press — "Finish leaving Castle, started on [device] on [day]".
-public struct UnfinishedLeave: Equatable, Sendable {
-    public var device: String?
-    public var day: Date?
-    /// The account Apple key the leave named; the press waits for it, and
-    /// mints a fresh one only if it never arrives.
-    public var namedAppleKeyID: String
-    /// This device reads it already.
-    public var namedKeyReadableHere: Bool
 }
 
 /// The vault, read (§3.9).
 public struct VaultVerdict: Equatable, Sendable {
     public var mode: VaultMode
     public var rotationInProgress: Bool
-    /// A leave in progress whose completing write (the account's Apple wrap)
-    /// this device may make: it reads the named key. A rotation with no id
-    /// (Use Castle's, a Castle Replace All Keys) any device completes, and no
-    /// finisher ever adds an Apple copy to it.
-    public var mayCompleteLeave: Bool
     /// A rotation with no id — completed by anyone, never with an Apple copy.
     public var completesWithoutAppleCopy: Bool
     /// How this device holds the account's sync keys now.
@@ -99,8 +80,6 @@ public struct VaultVerdict: Equatable, Sendable {
     /// progress follows the keys but holds its library's re-key until the
     /// vault reads Standard or Castle.
     public var followHoldsLibraryRekey: Bool
-    /// A leave a lost device started — the finish door's facts.
-    public var unfinishedLeave: UnfinishedLeave?
 }
 
 // MARK: - Touch ID (§3.10, VX-310)
@@ -143,7 +122,7 @@ public struct LobbyRoads: Equatable, Sendable {
     /// The custody items enumerated, whatever fingerprint they name.
     public var custodyItems: [CustodyItemFact]
     /// What the passphrase or the words open, by the route finder (the key
-    /// file beside the slot, the history, the anchor, the catalog's files).
+    /// file beside the slot, the history, the catalog's files).
     public var typed: OpensWith
     /// The vault road behind the typed secrets (signed in).
     public var vaultRoad: Bool
@@ -181,7 +160,7 @@ public enum Repair: Hashable, Sendable {
     case refreshRecordSection
     /// Always: the live key file is missing, or lost a road the sealed mirror
     /// in what this Mac remembers still holds (a passphrase, words or master
-    /// lock, a history entry, the anchor) — it is written back from the
+    /// lock, a history entry) — it is written back from the
     /// mirror. Never an Apple wrap: those leave legitimately (a retirement, a
     /// re-key) and are never re-added by a repair.
     case restoreKeyFileFromMirror
@@ -286,7 +265,6 @@ public enum Door: String, Hashable, Sendable, CaseIterable {
     case moveToSignedInAccount
     case signOut
     case followNow
-    case finishLeavingCastle
 }
 
 /// What a door asks for.
@@ -317,8 +295,7 @@ public enum JoinPlan: Equatable, Sendable {
     /// sentence at the consent.
     case leavesCastle
     /// The library's own mode: the master's wrap added, the key stays, the
-    /// passphrase copy re-wrapped under the account's (corner 27); an anchor
-    /// untouched.
+    /// passphrase copy re-wrapped under the account's (corner 27).
     case sameMode
     /// No vault yet: the first device gives the account its shape.
     case setsUpInLibrarysMode
@@ -350,8 +327,6 @@ public enum Words: Equatable, Sendable {
     /// The floor: lose all three and it is gone.
     case floorSentence
     case exportAPlainCopyFirst
-    /// One sentence per door that replaces a secret while an anchor exists.
-    case anchor(AnchorSentence)
     /// Use Castle's door: copies under a key this Mac can't delete.
     case copiesUnderAKeyThisMacCantDelete([String])
     /// The scheduled Markdown export turns off, with one notice.

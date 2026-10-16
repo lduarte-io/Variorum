@@ -154,8 +154,8 @@ extension ProtectionExecutor {
             // Never an Apple wrap re-added: those leave legitimately.
             // Another key's file in the live place is overwritten in place
             // deliberately — a crashed act's never-used new-key file or a
-            // replayed genuine one, whose keys the mirror's history or anchor
-            // already holds; the copy repair's set-aside is the belt (VX-305
+            // replayed genuine one, whose keys the mirror's history already
+            // holds; the copy repair's set-aside is the belt (VX-305
             // ladder round 2, NIT 2).
             let live = try liveFormat3()
             var restored = mirror
@@ -180,9 +180,8 @@ extension ProtectionExecutor {
             guard var copy = try leaves.keyFiles.readKeyFile(catalogID: id),
                   copy.fingerprint == library.fingerprint, copy.libraryID == library.record?.libraryID
             else { return .preconditionDoesNotVerify }
-            // Another key's file goes ASIDE first — never deleted (it may carry
-            // a crashed act's anchor, or be an adversary's artifact worth
-            // keeping visible); a crash right after leaves the live place empty
+            // Another key's file goes ASIDE first — never deleted (it may be an
+            // adversary's artifact worth keeping visible); a crash right after leaves the live place empty
             // and this repair owed again.
             if let present, try !setAsideLiveKeyFile(fingerprint: present.fingerprint) { return .preconditionDoesNotVerify }
             // Never an Apple wrap re-added: those leave legitimately.

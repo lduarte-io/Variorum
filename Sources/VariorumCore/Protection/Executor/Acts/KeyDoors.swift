@@ -6,13 +6,11 @@ import Foundation
 // passphrase reset — in Castle through Touch ID on an enrolled device or the
 // twelve words (today's road, kept — her ruling), in Standard a plain confirm
 // (this Mac holds the key). They RE-WRAP THE CURRENT KEY and re-lock nothing
-// else: the history needs no secret, and the anchor keeps the secrets of its
-// day (§3.4). A NEW passphrase always takes a fresh KDF descriptor (U2's
-// hand-forward: the route finder's `.current` rests on it). Synced, the vault
-// is re-wrapped too (one CAS write under the proof — a convenience act, never
-// a rotation). Every one of them, while an anchor exists, says in its Done
-// what still opens the copies from before the leave — the reset road never
-// pointing at the passphrase she said she forgot.
+// else (rule 6): the history needs no secret — the current key opens it. A
+// NEW passphrase always takes a fresh KDF descriptor (U2's hand-forward: the
+// route finder's `.current` rests on it). Synced, the vault is re-wrapped too
+// (one CAS write under the proof — a convenience act, never a rotation). (The
+// anchor sentences these doors said left with VX-378 U1 — rule 6.)
 
 struct KeyDoorProgram: ActProgram {
     let act: ProtectionAct
@@ -66,13 +64,6 @@ struct KeyDoorProgram: ActProgram {
         case "keyFile":
             guard var file = ctx.library.keyFile, file.fingerprint == ctx.library.fingerprint else {
                 throw ExecutorRefusal.noLiveKeyFile
-            }
-            // The sentence reads the file as the door found it — "the passphrase
-            // you're replacing" is provable only against the lock it replaces.
-            switch act {
-            case .changePassphrase: ctx.saySentence(.changePassphrase)
-            case .resetPassphrase: ctx.saySentence(.resetForgottenPassphrase)
-            default: ctx.saySentence(.replacesWords)
             }
             switch act {
             case .changePassphrase, .resetPassphrase:
@@ -215,7 +206,7 @@ extension ProtectionExecutor {
             // its mode: pick up the new keys first (assess's `followOwed`; begun
             // here, the door refused inside its plan with stale keys, leaving
             // the act in flight — VX-305 U4, found by the scenario world).
-            if let settled = vault.mode.settled, settled != record.mode { throw ExecutorRefusal.accountMoved }
+            if vault.mode.settled != record.mode { throw ExecutorRefusal.accountMoved }
             if libraryBehind(library, vault: vault) { throw ExecutorRefusal.accountMoved }
         }
         return parameters

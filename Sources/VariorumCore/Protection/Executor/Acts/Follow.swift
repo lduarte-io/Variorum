@@ -4,29 +4,25 @@ import Foundation
 // VX-305 U3 — THE FOLLOW (design §3.9: into Castle, into Standard, keys
 // replaced). On a plan carrying every fact a resume needs; EVERY follow into
 // or out of Castle types ONE secret, once — the passphrase or the words,
-// through the vault — and no such follow waits on an Apple key.
-//   - A follower that sees a rotation in progress — a previous corpus key
-//     standing, or an id with no wrap (a leave not yet complete) — follows the
-//     keys (held by what they reach: Castle-kind while the previous key
-//     stands), walks and re-encrypts, completes a rotation with no id (anyone
-//     may, never with an Apple copy) or a leave whose named key it reads — but
-//     never clears the previous key while an id stands with no wrap — and
-//     HOLDS its own library's re-key until the vault reads Standard or Castle.
-//   - Into Standard: the ANCHOR FIRST — under the secret typed at the follow,
-//     and under the outgoing Castle key with that key's own locks from this
-//     device's key file copied beside it (the master's road left out when the
-//     vault's master is still the Castle-era one); then a new Standard key
-//     (its silent item, this Mac's own FRESH Apple key) with an empty history;
-//     the Castle key's Touch ID item goes with its key; rule 5's sentence.
+// through the vault — and no follow waits on an Apple key.
+//   - A follower that sees a rotation in progress (a previous corpus key
+//     standing) follows the keys (held the account's way — rule 15's
+//     custody), walks and re-encrypts, completes the rotation (anyone may),
+//     and HOLDS its own library's re-key while the vault still reads a
+//     rotation in progress.
+//   - Into Standard: a new Standard key (its silent item, this Mac's own
+//     FRESH Apple key) whose history carries the Castle key and every key
+//     before it (rule 4); the Castle key's Touch ID item goes with its key;
+//     rule 5's sentence.
 //   - Into Castle: a new Castle key (a Touch ID item made at this press where
 //     this device's gate style says so, or none), its history taking every
-//     older key (the anchor folded with the typed secret); every own Apple key
-//     deleted and recorded retired, the account's recorded retired; the
-//     scheduled export off, with one notice.
+//     older key; every own Apple key deleted and recorded retired, the
+//     account's recorded retired; the scheduled export off, with one notice.
 //   - Keys replaced, same mode: the history grows.
 // A follower's new key file is locked under the secret it typed and under the
 // new master, with that master's words copy beside it — plus, in Standard,
-// this Mac's own Apple key.
+// this Mac's own Apple key. (The follower's anchor, its typed lock and the
+// finish of a stuck leave left with VX-378 U1 — rules 4, 12.)
 
 struct FollowProgram: ActProgram {
     let act = ProtectionAct.follow
@@ -58,7 +54,7 @@ struct FollowProgram: ActProgram {
         let kind = Self.kind(parameters)
         switch kind {
         case .intoStandard:
-            return ["anchor", "pickUpKeys", "helpRotation"] + LibraryRekey.steps(guards, mintsOwnAppleKey: true)
+            return ["pickUpKeys", "helpRotation"] + LibraryRekey.steps(guards, mintsOwnAppleKey: true)
                 + Self.afterCommit(kind)
         case .intoCastle, .keysReplaced:
             return ["pickUpKeys", "helpRotation"] + LibraryRekey.steps(guards) + Self.afterCommit(kind)
@@ -84,11 +80,6 @@ struct FollowProgram: ActProgram {
         let kind = Self.kind(ctx.parameters)
         let newKind = try ctx.parameters.newKind ?? ctx.requireRecord().mode
         switch step {
-        case "anchor":
-            guard let live = ctx.library.keyFile else { throw ExecutorRefusal.noLiveKeyFile }
-            try ctx.writeAnchor(.follower(
-                typed: try ctx.typedLock(), outgoingKeyFile: live,
-                includeMasterRoad: ctx.parameters.includeMasterRoad ?? true))
         case "pickUpKeys": try await ctx.pickUpKeys()
         case "helpRotation": try await ctx.helpRotation()
         case "mintOwnAppleKey": _ = try ctx.mintAppleKey(purpose: .library)
@@ -103,13 +94,7 @@ struct FollowProgram: ActProgram {
             }
             let locks = try ctx.newLocks(
                 passphrase: !typedIsWords && ctx.secrets.passphrase != nil, words: typedIsWords, master: true, apple: apple)
-            let crossing: KeyFileCrossing
-            switch kind {
-            case .intoStandard: crossing = .leavingCastle
-            case .intoCastle: crossing = .enteringCastle(openers: ctx.anchorOpeners())
-            case .keysReplaced: crossing = .withinMode
-            }
-            try ctx.newKeyFile(crossing, locks: locks)
+            try ctx.newKeyFile(rekeyTo: newKind, locks: locks)
         case "stage": try ctx.stage()
         case "recordIntoStaged": try ctx.recordIntoStaged(kind: newKind)
         case "swap": try ctx.swap { try ctx.stage(); try ctx.recordIntoStaged(kind: newKind) }
@@ -127,18 +112,9 @@ struct FollowProgram: ActProgram {
 }
 
 extension ActContext {
-    /// The one secret typed at this follow, as the lock it makes.
-    func typedLock() throws -> TypedLock {
-        if parameters.typedSecret == "words" {
-            guard let words = secrets.words else { throw ExecutorRefusal.secretsRequired(act) }
-            return .words(words)
-        }
-        return .passphrase(try requirePassphrase())
-    }
-
     /// The new master from the vault by the typed secret (nothing unwrapped
     /// on the server), the class keys and — while a rotation stands — the
-    /// previous corpus key; held by what they reach.
+    /// previous corpus key; held the account's way.
     func pickUpKeys() async throws {
         let snapshot = try await freshRead()
         var master = VaultModel.master(of: snapshot.format, passphrase: secrets.passphrase, words: secrets.words)
@@ -150,7 +126,7 @@ extension ActContext {
         }
         guard let master else { throw ExecutorRefusal.secretsRequired(act) }
         let following = try VaultModel.material(following: snapshot.format, master: master)
-        try holdSyncKeys(following, castleWay: reachesCastleEra(snapshot))
+        try holdSyncKeys(following, castleWay: snapshot.mode == .castle)
         try stampFollowed(following.corpusKeyID)
     }
 
@@ -164,19 +140,8 @@ extension ActContext {
         try leaves.plans.writePlan(try plan.sealed(under: library.key))
     }
 
-    /// Do the keys of this vault reach a Castle-era key? In Castle; through a
-    /// leave's rotation until the previous corpus key leaves the vault (§3.2).
-    func reachesCastleEra(_ snapshot: VaultSnapshot) -> Bool {
-        switch snapshot.mode {
-        case .castle: return true
-        case .leavingCastle: return executor.guards.castleKindCustodyThroughLeaveOn
-        case .standard: return false
-        }
-    }
-
-    /// A follower in a rotation's window: walk; complete what it may; then
-    /// hold the library's re-key while the vault still reads a rotation in
-    /// progress.
+    /// A follower in a rotation's window: walk; complete it; then hold the
+    /// library's re-key while the vault still reads a rotation in progress.
     func helpRotation() async throws {
         var snapshot = try await freshRead()
         if snapshot.format.previousCorpusKey != nil, snapshot.rowsBelowRotationSeq > 0 {
@@ -184,16 +149,8 @@ extension ActContext {
                 accountID: snapshot.accountID, material: try material(for: snapshot))
             snapshot = try await freshRead()
         }
-        let isLeave = snapshot.format.appleKeyID != nil && snapshot.format.masterWrappedByAppleHeld == nil
-        let mayComplete: Bool
-        if isLeave {
-            let readable = try snapshot.format.appleKeyID.map { try leaves.apple.readAppleKey(id: $0) != nil } ?? false
-            mayComplete = readable || parameters.mintsFreshAccountKey == true || !executor.guards.leaveIDGatesCompletionOn
-        } else {
-            mayComplete = snapshot.format.previousCorpusKey != nil
-        }
-        if mayComplete {
-            try await completeRotation(castleWayAfter: !isLeave && snapshot.format.masterWrappedByAppleHeld == nil)
+        if snapshot.format.previousCorpusKey != nil {
+            try await completeRotation(castleWayAfter: snapshot.mode == .castle)
             snapshot = try await freshRead()
         }
         if snapshot.reading.rotationInProgress {
@@ -203,7 +160,7 @@ extension ActContext {
             skipRemaining()
             return
         }
-        try holdSyncKeys(try material(for: snapshot), castleWay: reachesCastleEra(snapshot))
+        try holdSyncKeys(try material(for: snapshot), castleWay: snapshot.mode == .castle)
     }
 
     /// A device that follows into Castle records the account's key as
@@ -228,12 +185,8 @@ extension ProtectionExecutor {
     /// `gate`: into Castle, this device's gate style — none chosen yet: Touch
     /// ID where a finger is enrolled, the item made at this press, else Always
     /// ask (§3.10).
-    /// `mintingIfTheNamedKeyNeverArrives`: FINISH LEAVING CASTLE, started on
-    /// another device (§3.9) — the press that stopped waiting for the key the
-    /// vault names mints a fresh account key to complete the leave.
     public func follow(
-        _ library: inout UnlockedLibrary, kind: FollowKind, typed: TypedSecrets, gate: GateStyle? = nil,
-        mintingIfTheNamedKeyNeverArrives: Bool = false
+        _ library: inout UnlockedLibrary, kind: FollowKind, typed: TypedSecrets, gate: GateStyle? = nil
     ) async throws -> ActOutcome {
         guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         guard let account = record.account else { throw ExecutorRefusal.notSynced }
@@ -268,15 +221,6 @@ extension ProtectionExecutor {
             follow: FollowProgram.name(kind),
             newKind: kind == .intoCastle ? .castle : kind == .intoStandard ? .standard : record.mode,
             ownAppleKeyID: kind == .keysReplaced ? library.keyFile?.apple?.keyID : nil)
-        if mintingIfTheNamedKeyNeverArrives { parameters.mintsFreshAccountKey = true }
-        if kind == .intoStandard {
-            // The master's road is left out of the anchor when the vault's
-            // master is still the Castle-era one this device's file holds (an
-            // older build left without changing it).
-            let master = VaultModel.master(of: vault.format, passphrase: secrets.passphrase, words: secrets.words)
-            let unchanged = master.flatMap { try? library.keyFile?.open(master: $0) } != nil
-            parameters.includeMasterRoad = !unchanged
-        }
         if kind == .intoCastle {
             let chosen = gate ?? library.section.settings.gateStyle
                 ?? (leaves.biometry.biometry().enrolled ? .touchID : .alwaysAsk)

@@ -110,7 +110,6 @@ final class ExecutorVault {
         var parts: [String] = []
         if format.previousCorpusKey != nil { parts.append("rotating") }
         if format.masterWrappedByAppleHeld != nil { parts.append("apple-wrap") }
-        else if format.appleKeyID != nil { parts.append("apple-id-no-wrap") }
         return parts.isEmpty ? "castle" : parts.joined(separator: " ")
     }
 

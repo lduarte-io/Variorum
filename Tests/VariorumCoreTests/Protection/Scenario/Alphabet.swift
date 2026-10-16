@@ -154,7 +154,6 @@ extension SWorld {
         }
         if case .refused(let why) = result { stepLog.append("  refused: \(why)") }
         if case .crashed = result { stepLog.append("  crashed") }
-        noteVaults()
         return result
     }
 
@@ -189,16 +188,12 @@ extension SWorld {
         try await runRepairs(device)
     }
 
-    /// The truth an act leaves: the keys born in Castle, a leave's moment.
+    /// The truth an act leaves: the keys born in Castle; a leave of the
+    /// account's secrets. (A leave of Castle's moment — promise 13's — left
+    /// with VX-378 U1, rule 13.)
     func afterAct(_ device: SDevice, before: ProtectionRecord?) {
         noteBirths(device)
         guard let record = device.library?.record else { return }
-        // A leave of THIS library (a different library landing in the slot is
-        // no leave — its outgoing library goes aside whole).
-        if before?.mode == .castle, record.mode == .standard, before?.libraryID == record.libraryID {
-            truth.leftCastleAt[device.name] = clock
-            truth.keptByLeave[device.name, default: []].formUnion(before?.familyTree.fingerprints ?? [])
-        }
         if before?.libraryID == record.libraryID, let account = before?.account, record.account == nil {
             // A leave: the library's own secrets start from the account's.
             let own = holder(device, account: nil, libraryID: record.libraryID)
@@ -217,13 +212,6 @@ extension SWorld {
             memory: memoryName.flatMap { device.keychain.local[$0] }, memoryName: memoryName,
             plan: device.container.files[SPath.plan]))
         if device.captures.count > 8 { device.captures.removeFirst() }
-    }
-
-    /// The vaults' Castle-era corpus keys (§3.9), as ground truth.
-    func noteVaults() {
-        for (_, account) in server.accounts where account.format.masterWrappedByAppleHeld == nil && account.format.appleKeyID == nil {
-            if let id = account.format.classKey(for: .corpus)?.keyID { truth.castleCorpusKeyIDs.insert(id) }
-        }
     }
 
     // MARK: - The acts
@@ -408,13 +396,6 @@ extension SWorld {
             senders[folder] = from
             for path in sender.container.paths(under: folder + "/") { receiver.container.files[path] = sender.container.files[path] }
             receiver.incoming.append(folder)
-            // The pair's own reach, as the sender's Standard copy in its day
-            // (promise 13 reads it by identity — a later same-day send can
-            // overwrite the folder here, a snapshot can keep the pair).
-            if let record = sender.container.files["\(folder)/\(SPath.slot)"]?.library?.record {
-                truth.sentStandardPairReach[to, default: []].formUnion(
-                    reachableInItsDay(record, keyFile: sender.container.files["\(folder)/\(SPath.liveKeyFile)"]))
-            }
         case .plaintextExport(let name):
             let d = device(name)
             try await act(d) { executor, library in
@@ -560,7 +541,6 @@ extension SWorld {
             // P-U4-12: the acceptance read to cover a Time Machine restore).
             if let restored = d.slot?.record, restored.currentFingerprint != was {
                 truth.restoredPastCrossing.insert(d.name)
-                truth.keptByLeave[d.name]?.subtract(reachableInItsDay(restored, keyFile: d.container.files[SPath.liveKeyFile]))
                 for (id, copy) in truth.copies where copy.madeOn == d.name && copy.mode == .standard && copy.madeAt > restored.changedAt {
                     truth.rolledBackOver.insert(id)
                 }
@@ -716,12 +696,6 @@ extension SWorld {
             device.container.files[SPath.liveKeyFile] = capture.liveKeyFile
             device.container.files[SPath.plan] = capture.plan
             device.keychain.local[name] = capture.memory
-            // The stated limit (§3.6): the restored state is believed — the keys
-            // it brings back are its own again, as that state says (PROVISIONAL
-            // P-U4-5: a Re-link press then re-wraps them under Apple — her call).
-            if let restored = capture.slot?.library?.record {
-                truth.keptByLeave[device.name]?.subtract(reachableInItsDay(restored, keyFile: capture.liveKeyFile))
-            }
             if let since = capture.slot?.library?.record?.changedAt {
                 for (id, copy) in truth.copies where copy.madeOn == device.name && copy.mode == .standard && copy.madeAt > since {
                     truth.rolledBackOver.insert(id)
@@ -745,21 +719,6 @@ extension SWorld {
             device.container.files[SPath.liveKeyFile] = nil
             device.keychain.local[memoryName] = nil
         }
-    }
-
-    /// What a restored state reached through the Apple account IN ITS DAY —
-    /// the stated limit's acceptance (P-U4-5, her 2026-10-14/15 ruling: "the
-    /// exposure is pre-Castle content, login-reachable in its day"): a Standard
-    /// restored state's current key and every key its own key file's HISTORY
-    /// holds (a VX-209 victim's older Castle key among them); never what an
-    /// anchor holds (behind the passphrase or words, never Apple-reachable).
-    func reachableInItsDay(_ record: ProtectionRecord, keyFile: SFile?) -> Set<String> {
-        guard record.mode == .standard else { return [] }
-        var keys: Set<String> = [record.currentFingerprint]
-        if let file = keyFile?.keyFile, file.fingerprint == record.currentFingerprint {
-            keys.formUnion(file.history.map(\.fingerprint))
-        }
-        return keys
     }
 
     /// A crafted pair planted in the iCloud Drive folder: a backup-named

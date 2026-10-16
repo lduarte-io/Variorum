@@ -103,9 +103,6 @@ struct AWorld {
         case .standard(let id):
             return VaultReading(accountID: account, hasAppleWrap: true, appleKeyID: id, previousCorpusKeyID: previous,
                                 corpusKeyID: corpus, updatedByDevice: device, updatedAt: day)
-        case .leavingCastle(let id):
-            return VaultReading(accountID: account, hasAppleWrap: false, appleKeyID: id, previousCorpusKeyID: previous,
-                                corpusKeyID: corpus, updatedByDevice: device, updatedAt: day)
         case .castle:
             return VaultReading(accountID: account, hasAppleWrap: false, previousCorpusKeyID: previous,
                                 corpusKeyID: corpus, updatedByDevice: device, updatedAt: day)

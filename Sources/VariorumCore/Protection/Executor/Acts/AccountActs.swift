@@ -11,7 +11,7 @@ import Foundation
 //     these acts do.
 //   - LEAVING AN ACCOUNT (This Mac Only, Stop syncing here, deleting it from
 //     this Mac, Move) RE-KEYS, in either mode: the new key's history takes the
-//     old one, the anchor rides along unchanged; in Castle both secrets, in
+//     old one; in Castle both secrets, in
 //     Standard the passphrase typed or set new and the words typed or made
 //     new; in Standard the new key under this Mac's EXISTING own Apple key
 //     (minting nothing); the account's Apple key left alone; this Mac stops
@@ -21,10 +21,10 @@ import Foundation
 //     Standard's crossing applied to this Mac only (§3.8's one plain road).
 //   - JOINING: in the library's own mode the master's wrap is added and the
 //     key stays (the passphrase copy re-wrapped under the account's, corner
-//     27; an anchor untouched); joining a Castle account from Standard is
-//     entering Castle (the re-key, own Apple keys retired, the old shared
-//     key's checks); joining a Standard account from Castle is leaving Castle
-//     (the anchor, a fresh own key, rule 5).
+//     27); joining a Castle account from Standard is entering Castle (the
+//     re-key, own Apple keys retired); joining a Standard account from Castle
+//     is leaving Castle (the re-key carrying the history, a fresh own key,
+//     rule 5).
 //   - SET UP SYNC (the first device): the account takes the library's mode;
 //     Standard mints the account's fresh Apple key for the vault, and this
 //     device's own for its key file if it has none.
@@ -43,7 +43,7 @@ struct AccountMoveProgram: ActProgram {
     func steps(_ parameters: ActParameters, guards: ProtectionGuards) -> [String] {
         let (from, to) = Self.crossing(parameters)
         let leaving = from == .castle && to == .standard, entering = from == .standard && to == .castle
-        var steps: [String] = leaving && Self.rekeys(parameters) ? ["anchor"] : []
+        var steps: [String] = []
         if parameters.targetAccount != nil { steps.append("pickUpJoinKeys") }
         if Self.rekeys(parameters) {
             steps += LibraryRekey.steps(guards, mintsOwnAppleKey: leaving)
@@ -70,9 +70,6 @@ struct AccountMoveProgram: ActProgram {
         let leaving = from == .castle && to == .standard, entering = from == .standard && to == .castle
         let joining = ctx.parameters.targetAccount != nil
         switch step {
-        case "anchor":
-            guard let words = ctx.secrets.words else { throw ExecutorRefusal.secretsRequired(ctx.act) }
-            try ctx.writeAnchor(.pressingDevice(passphrase: try ctx.requirePassphrase(), words: words))
         case "pickUpJoinKeys":
             try await ctx.pickUpKeys()
             // A Standard account's Apple key, as this device follows it.
@@ -87,15 +84,13 @@ struct AccountMoveProgram: ActProgram {
         case "keyFile":
             var apple: AppleKeyMaterial?
             if leaving { apple = try ctx.ownAppleKey() } else if to == .standard { apple = ctx.existingOwnAppleKey() }
-            let crossing: KeyFileCrossing = leaving ? .leavingCastle : entering ? .enteringCastle(openers: ctx.anchorOpeners()) : .withinMode
-            try ctx.newKeyFile(crossing, locks: try ctx.newLocks(passphrase: true, words: true, master: joining, apple: apple))
+            try ctx.newKeyFile(rekeyTo: to, locks: try ctx.newLocks(passphrase: true, words: true, master: joining, apple: apple))
         case "stage": try ctx.stage()
         case "recordIntoStaged": try ctx.recordIntoStaged(kind: to)
         case "swap": try ctx.swap { try ctx.stage(); try ctx.recordIntoStaged(kind: to) }
         case "memory":
             try ctx.rememberNewKey()
             if leaving { ctx.outcome.done.append(.ruleFive) }
-            if ctx.parameters.forgetsAccount != nil { ctx.saySentence(.replacesWords) }
         case "retireOldCustody": try ctx.retireOldCustody(sweepForCastle: entering)
         case "exportOff": try ctx.turnExportOff()
         case "retireOwnAppleKeys": try ctx.retireOwnAppleKeys()
@@ -128,7 +123,6 @@ struct SetUpSyncProgram: ActProgram {
         case "joinKeyFile": try ctx.joinKeyFile()
         case "bindAccount":
             try ctx.bindAccount(ctx.parameters.targetAccount)
-            if ctx.parameters.wordsAreNew == true { ctx.saySentence(.replacesWords) }
         case "bindIfVaultIsOurs": try await ctx.bindIfVaultIsOurs()
         case "backup": try ctx.freshBackup()
         default: throw ExecutorRefusal.nothingToDo
@@ -174,7 +168,7 @@ extension ActContext {
 
     /// Joining in the library's own mode: the master's wrap (with its words
     /// copy) added to the live key file and the key kept; the passphrase copy
-    /// re-wrapped under the account's (corner 27 — the anchor untouched);
+    /// re-wrapped under the account's (corner 27);
     /// words made new replace the words lock; Standard, this device's own
     /// Apple key for its key file if it has none.
     func joinKeyFile() throws {
@@ -278,7 +272,7 @@ extension ProtectionExecutor {
         guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         guard let vault = try await readVault(accountID: account) else { throw ExecutorRefusal.needsFreshVault }
         if vault.reading.rotationInProgress { throw ExecutorRefusal.rotationInProgress }
-        let accountMode = vault.mode.settled ?? .castle
+        let accountMode = vault.mode.settled
         let join = AssessRules.joinPlan(library: record.mode, vault: vault.reading)
         let rekeys = join != .sameMode || old != nil
         var parameters = ActParameters(

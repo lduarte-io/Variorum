@@ -81,9 +81,8 @@ struct AccountJoinTests {
         let outcome = try await executor.enroll(&library, typed: TypedSecrets(passphrase: mac.passphrase, words: mac.words))
         #expect(outcome.done.contains(.ruleFive))
         #expect(laptop.liveRecord?.mode == .standard && laptop.liveRecord?.account == mac.account)
-        let anchor = try #require(laptop.world.liveFormat3?.anchor)
-        #expect(anchor.outgoingFingerprint == PF.fp(k0))
-        #expect(try laptop.world.liveFormat3?.historyKeys(currentKey: library.key).isEmpty == true)
+        // Rule 4: the history carries the Castle key (the anchor left with VX-378 U1).
+        #expect(try laptop.world.liveFormat3?.historyKey(PF.fp(k0), currentKey: library.key) == k0)
         expectSettled(laptop, library)
     }
 

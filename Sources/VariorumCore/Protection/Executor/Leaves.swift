@@ -194,9 +194,6 @@ public enum ProtectionDiagnostic: Equatable, Sendable {
     /// A plan on disk this Mac's section doesn't name, or one failing its
     /// seal — ignored (§3.6).
     case planIgnored(PlanIgnoredReason)
-    /// An anchor the entry into Castle couldn't open — kept beside the
-    /// history (§3.4): its day and the outgoing key's fingerprint.
-    case anchorKeptUnopened(madeAt: Date, outgoing8: String)
     /// An act rolled back before its commit point, or finished from the
     /// record after it, with no plan to resume (§3.6).
     case actRolledBack(ProtectionAct)

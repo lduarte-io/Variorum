@@ -19,7 +19,7 @@ import Foundation
 //     the replayed plan): one the section doesn't name, or failing its seal,
 //     is ignored and reported. A missing or unmatched plan never blocks:
 //     before the commit point (the swap) the act ROLLS BACK — the old custody
-//     item, the history or the anchor still open the library — and after it
+//     item or the history still opens the library — and after it
 //     the act's fixed remaining steps FINISH FROM THE RECORD. A synced
 //     rotation resumes from the server's own state (the device follows its own
 //     landed rotation as any follower would).
@@ -164,8 +164,6 @@ public enum ExecutorRefusal: Error, Equatable, Sendable {
     case accountMoved
     /// No Apple key readable where one is needed (never minted to make up).
     case appleKeyUnreadable
-    /// A leave's completing write waits for the named key (§3.9).
-    case waitingForNamedAppleKey
     case noLiveKeyFile
     case recordMissing
     case nothingToDo

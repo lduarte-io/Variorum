@@ -6,9 +6,8 @@ import Foundation
 // the confirm, Data Safety and the field guide all read it). The roads:
 //   - the copy's own key file;
 //   - the live key file's history;
-//   - the live key file's anchor, with the passphrase or the words of its day;
-//   - any key file the catalog knows that holds K — as its current key, in its
-//     history, or in its anchor (a kept anchor beside its history included);
+//   - any key file the catalog knows that holds K — as its current key or in
+//     its history;
 //   - a custody item for K;
 //   - an Apple wrap whose key is readable here (this Mac's own, another of the
 //     account's);
@@ -26,12 +25,11 @@ import Foundation
 //     words lock byte-identical to the live file's (RFC 3394 is
 //     deterministic: the same key under the same words), a master words copy
 //     byte-identical to the vault's current recovery wrap (§3.5a);
-//   - `.of(day)` — the one TYPED at an act that day and verified there: an
-//     anchor's own locks ("the passphrase or words you had on 12 October");
 //   - `.heldHere(until:)` — what this Mac held its library under then: a
-//     frozen key file's own locks, and a follower anchor's COPIED locks —
-//     which may be older than that day's secret (a passphrase changed
-//     elsewhere and never typed there — §8's residue).
+//     frozen key file's own locks — which may be older than that day's secret
+//     (a passphrase changed elsewhere and never typed there — §8's residue).
+// (The anchor's roads and its `.of(day)` secrets left with VX-378 U1 — rule 4;
+// U1's piece J reduces this finder to rule 4's one sentence.)
 // Pure: facts in, routes out. Each named opener carries a WITNESS route — the
 // exact locks to walk — so a test (and U4's promise 9) can open the copy by
 // it with the real secret.
@@ -39,19 +37,15 @@ import Foundation
 /// When a secret was the one a lock was made under.
 public enum SecretDay: Hashable, Sendable {
     case current
-    case of(Date)
     case heldHere(until: Date?)
 
     /// Which of two days a line should name: the current secret first, then
-    /// the most recent day, then a copied lock's.
+    /// the most recent day.
     static func prefers(_ a: SecretDay, over b: SecretDay) -> Bool {
         switch (a, b) {
         case (.current, .current): return false
         case (.current, _): return true
         case (_, .current): return false
-        case (.of(let x), .of(let y)): return x > y
-        case (.of, .heldHere): return true
-        case (.heldHere, .of): return false
         case (.heldHere(let x), .heldHere(let y)): return (x ?? .distantPast) > (y ?? .distantPast)
         }
     }
@@ -106,18 +100,6 @@ public enum Opener: Hashable, Sendable {
     }
 }
 
-/// A named anchor: the key file it rides in, and which one (nil = the file's
-/// anchor; n = its n-th kept anchor).
-public struct AnchorRef: Hashable, Sendable {
-    public var keyFile: String
-    public var kept: Int?
-}
-
-public enum AnchorLockRoad: String, Hashable, Sendable {
-    case passphrase
-    case words
-}
-
 /// One lock walked on a road.
 public enum RouteStep: Hashable, Sendable {
     /// A custody item holds the key raw.
@@ -126,14 +108,6 @@ public enum RouteStep: Hashable, Sendable {
     case keyFileLock(keyFile: String, road: KeyFileRoad)
     /// A key file's current key opens an older key in its history.
     case history(keyFile: String, fingerprint: String)
-    /// An anchor opens by its own lock (a secret of its day).
-    case anchorLock(AnchorRef, AnchorLockRoad)
-    /// A follower's anchor opens with its outgoing Castle key.
-    case anchorOutgoingKey(AnchorRef)
-    /// The outgoing key opens by a lock copied beside it (a follower's).
-    case copiedLock(AnchorRef, KeyFileRoad)
-    /// An opened anchor yields a key it holds directly.
-    case anchorHolds(AnchorRef, fingerprint: String)
 }
 
 /// A road: the opener, and the locks from it to the key.
@@ -238,7 +212,6 @@ public struct RouteFinder: Sendable {
 
     enum Node: Hashable, Sendable {
         case key(String)
-        case anchor(AnchorRef)
     }
 
     public init(_ facts: RouteFacts) {
@@ -291,8 +264,7 @@ public struct RouteFinder: Sendable {
         // The secret a frozen key file's lock was made under: what this Mac
         // held its library under on the file's day — the account's that day
         // only if this Mac was up to date (a passphrase changed elsewhere and
-        // never typed here is §8's residue), so never `.of(day)`, which an
-        // anchor's own locks earn by being typed and verified at the act.
+        // never typed here is §8's residue).
         func passphraseDay(_ kdf: PassphraseKDF.Descriptor, frozenAt: Date?, isLive: Bool) -> SecretDay {
             if isLive || kdf == livePassphraseKDF { return .current }
             return .heldHere(until: frozenAt)
@@ -346,41 +318,6 @@ public struct RouteFinder: Sendable {
                 for entry in keyFile.history {
                     edge(current, .history(keyFile: file.id, fingerprint: entry.fingerprint), .key(entry.fingerprint))
                 }
-                let anchors: [(AnchorRef, CastleAnchor)] = [keyFile.anchor.map { (AnchorRef(keyFile: file.id, kept: nil), $0) }]
-                    .compactMap { $0 }
-                    + keyFile.keptAnchors.enumerated().map { (AnchorRef(keyFile: file.id, kept: $0.offset), $0.element) }
-                for (ref, anchor) in anchors {
-                    let node = Node.anchor(ref)
-                    let locks = anchor.locks
-                    if let wrap = locks.passphrase {
-                        let day: SecretDay = wrap.kdf == livePassphraseKDF ? .current : .of(anchor.madeAt)
-                        sources.append(Source(opener: .passphrase(day), step: .anchorLock(ref, .passphrase), to: node))
-                    }
-                    if locks.words != nil {
-                        sources.append(Source(opener: .words(.of(anchor.madeAt)), step: .anchorLock(ref, .words), to: node))
-                    }
-                    let outgoing = Node.key(anchor.outgoingFingerprint)
-                    if locks.outgoingKey != nil {
-                        edge(outgoing, .anchorOutgoingKey(ref), node)
-                        let copied = locks.copiedLocks
-                        if let wrap = copied?.passphrase {
-                            let day: SecretDay = wrap.kdf == livePassphraseKDF ? .current : .heldHere(until: anchor.madeAt)
-                            sources.append(Source(opener: .passphrase(day), step: .copiedLock(ref, .passphrase), to: outgoing))
-                        }
-                        if copied?.words != nil {
-                            sources.append(Source(
-                                opener: .words(.heldHere(until: anchor.madeAt)), step: .copiedLock(ref, .words), to: outgoing))
-                        }
-                        if copied?.master != nil, let copy = copied?.masterWordsCopy {
-                            let day: SecretDay = facts.vaultRecoveryWrap == copy ? .current : .heldHere(until: anchor.madeAt)
-                            sources.append(Source(
-                                opener: .words(day), step: .copiedLock(ref, .masterThroughWords), to: outgoing))
-                        }
-                    }
-                    for held in anchor.directFingerprints {
-                        edge(node, .anchorHolds(ref, fingerprint: held), .key(held))
-                    }
-                }
             case nil:
                 continue
             }
@@ -408,79 +345,5 @@ public struct RouteFinder: Sendable {
             }
         }
         return best
-    }
-}
-
-// MARK: - The sentences a door that replaces a secret says (§3.9)
-
-/// The doors that replace a secret while an anchor exists (§3.9).
-public enum SecretReplacingDoor: String, Sendable, CaseIterable {
-    /// New words, Replace All Keys, a leave from an account, sync setup's
-    /// choice to make new words — every door that replaces the words.
-    case replacesWords
-    case changePassphrase
-    /// Standard's reset road for a forgotten passphrase.
-    case resetForgottenPassphrase
-    /// Use Castle that can't fold the anchor in (the secrets changed since
-    /// the leave): the anchor stays beside the history, unchanged.
-    case useCastleCannotFold
-}
-
-/// **One sentence, from the route finder, for this device's anchor and its
-/// day** (§3.9): what still opens the copies from before the leave. Typed —
-/// phase 4 renders the words.
-public struct AnchorSentence: Equatable, Sendable {
-    public var door: SecretReplacingDoor
-    /// The day of the leave.
-    public var day: Date
-    /// What still opens those copies: never the passphrase she said she
-    /// forgot (the reset road), never a road the anchor doesn't have (a
-    /// words-only follower's names the words) — §3.9's closing sentence.
-    public var stillOpensWith: [Opener]
-    /// Whether the secret this door replaces provably opens the anchor (true:
-    /// the passphrase being changed is the anchor's — its lock is under the
-    /// live file's descriptor). Nil where that can't be told keylessly: the
-    /// words (RFC 3394 locks under different keys never compare), and the
-    /// doors that name no replaced secret. Where it isn't true, the sentence
-    /// names the day's secret ("the words you had on 12 October") rather than
-    /// "the one you're replacing" — always true (hand-forward to phase 4).
-    public var replacedSecretOpensIt: Bool?
-}
-
-extension RouteFinder {
-    /// This device's anchor (the live key file's), when there is one.
-    public var liveAnchor: (ref: AnchorRef, anchor: CastleAnchor)? {
-        guard let live = facts.liveKeyFileID, let file = facts.catalog.keyFile(id: live)?.document,
-              let anchor = file.anchor else { return nil }
-        return (AnchorRef(keyFile: live, kept: nil), anchor)
-    }
-
-    /// What opens this device's anchor itself (its own locks, and a
-    /// follower's outgoing key by its copied locks or any other road to it).
-    public func opensAnchor(_ ref: AnchorRef) -> OpensWith {
-        let routes = (reach[.anchor(ref)] ?? [:]).map { Route(opener: $0.key, steps: $0.value) }
-            .sorted { ($0.opener.rank, $0.steps.count) < ($1.opener.rank, $1.steps.count) }
-        return OpensWith(routes: routes)
-    }
-
-    /// The sentence `door` says while this device's anchor exists; nil when
-    /// there is no anchor.
-    public func anchorSentence(for door: SecretReplacingDoor) -> AnchorSentence? {
-        guard let (ref, anchor) = liveAnchor else { return nil }
-        // The anchor's own roads — custody never opens an anchor, and the
-        // Apple account never does by construction.
-        var line = opensAnchor(ref).line.filter(\.isSecret)
-        var replaced: Bool?
-        switch door {
-        case .replacesWords, .useCastleCannotFold:
-            replaced = nil
-        case .changePassphrase:
-            replaced = line.contains(.passphrase(.current)) ? true : nil
-        case .resetForgottenPassphrase:
-            // It never points at the passphrase she said she forgot.
-            line = line.filter { if case .passphrase = $0 { return false } else { return true } }
-            replaced = nil
-        }
-        return AnchorSentence(door: door, day: anchor.madeAt, stillOpensWith: line, replacedSecretOpensIt: replaced)
     }
 }

@@ -12,7 +12,7 @@ import Foundation
 // marker (both inside the device section's second home below); the biometry
 // state hash when its Touch ID item was made (a hint, never a verdict —
 // §3.10); the vault facts today's key file caches; nudge dismissals; a mirror
-// of the key file's wraps, history and anchor; the family tree's mirror; and
+// of the key file's wraps and history; the family tree's mirror; and
 // THE SECOND HOME OF THIS MAC'S DEVICE SECTION (the same fields and version).
 
 /// The vault facts today's key file caches (pre-13x §3.6; moved here by the
@@ -63,7 +63,7 @@ public struct DeviceMemory: Codable, Equatable, Sendable {
     public var vaultFacts: VaultFacts?
     /// Nudge name → dismissed at.
     public var nudgeDismissals: [String: Date]
-    /// The key file's mirror — its wraps, history and anchor (§3.2).
+    /// The key file's mirror — its wraps and history (§3.2).
     public var keyFileMirror: KeyFile?
     /// The family tree's mirror — unioned with the record's at open.
     public var familyTree: FamilyTree

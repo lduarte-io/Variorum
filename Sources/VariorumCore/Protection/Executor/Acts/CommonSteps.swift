@@ -4,15 +4,14 @@ import Foundation
 // VX-305 U3 — THE STEPS THE ACTS SHARE. Every step is idempotent (a crash
 // between a step's write and the plan marking it done re-runs it), and the
 // library re-key runs in PREPARE-THEN-COMMIT order (§3.4, VX-235's class):
-//   the new key's custody item → the new key file (the history it takes, the
-//   anchor carried; leaving Castle, the anchor written FIRST into the outgoing
-//   file) → the library re-encrypted into a staged file → the record written
-//   into the staged file → THE SWAP (the commit point) → what this Mac
-//   remembers → the outgoing key's custody items go.
+//   the new key's custody item → the new key file (its history the outgoing
+//   key and every key before it — rule 4, every crossing alike) → the library
+//   re-encrypted into a staged file → the record written into the staged file
+//   → THE SWAP (the commit point) → what this Mac remembers → the outgoing
+//   key's custody items go.
 // Copies pause from the prepare to the swap. Whatever state a crash leaves, a
 // road opens the file: the old custody item (it goes only after the swap),
-// the new key, the new key through the history — or, leaving Castle, the
-// anchor with the secrets of the leave.
+// the new key, the new key through the history.
 
 /// The library re-key's steps, in prepare-then-commit order (guard off —
 /// DEBUG mutation pins only — the swap runs first and the key file after it).
@@ -35,8 +34,7 @@ extension ActContext {
     var accountID: String? { parameters.accountID ?? library.record?.account }
 
     /// The act's OUTGOING key — the library's key at its begin: in hand
-    /// before the swap; after it, through the new file's history (none after a
-    /// leave — the anchor holds it).
+    /// before the swap; after it, through the new file's history.
     var fromKey: StoreKey? {
         if let heldFromKey { return heldFromKey }
         if library.fingerprint == plan.fromFingerprint { return library.key }
@@ -95,10 +93,10 @@ extension ActContext {
         }
     }
 
-    /// The new key file — the history it takes and the anchor it carries per
-    /// the crossing (§3.4); `crossing` nil builds a file with no past (a
+    /// The new key file — a re-key to a key of `kind`, its history carrying
+    /// every earlier key (rule 4); `kind` nil builds a file with no past (a
     /// landing, a creation).
-    func newKeyFile(_ crossing: KeyFileCrossing?, locks: NewKeyLocks) throws {
+    func newKeyFile(rekeyTo kind: ProtectionMode?, locks: NewKeyLocks) throws {
         let key = try requireToKey()
         if !(try libraryOpens(key)) { leaves.backups.pauseCopies() }
         if let live = library.keyFile, live.fingerprint == Self.fp(key) { return }
@@ -106,19 +104,13 @@ extension ActContext {
             throw ExecutorRefusal.noLiveKeyFile
         }
         let file: KeyFile
-        if let crossing {
-            let rekeyed = try outgoing.rekeyed(
-                crossing, from: from, to: key, locks: locks, at: now, guards: executor.guards, floor: floor)
-            file = rekeyed.keyFile
-            for kept in rekeyed.unopenedAnchors {
-                leaves.diagnostics.report(.anchorKeptUnopened(madeAt: kept.madeAt, outgoing8: Self.fp8(kept.outgoingFingerprint)))
-                outcome.notices.append(.anchorKeptUnopened(day: kept.madeAt))
-            }
+        if let kind {
+            file = try outgoing.rekeyed(from: from, to: key, kind: kind, locks: locks, at: now)
         } else {
             file = try KeyFile.building(libraryID: outgoing.libraryID, key: key, epoch: outgoing.epoch + 1, locks: locks)
         }
         try executor.writeLiveKeyFile(file, &library)
-        log("the new key file written (\(Self.fp8(file.fingerprint)), history \(file.history.count), anchor \(file.anchor != nil))")
+        log("the new key file written (\(Self.fp8(file.fingerprint)), history \(file.history.count))")
     }
 
     /// The library re-encrypted into the staged file under the new key.
@@ -221,9 +213,7 @@ extension ActContext {
             let sweep = sweepForCastle && item.itemClass == .silent && tree.contains(item.fingerprint)
             guard outgoing || sweep else { continue }
             // The outgoing key's Touch ID item goes with its key; a silent
-            // item goes only once the history holds its key (in a leave the
-            // anchor holds it — and a leave's outgoing key is a Castle key,
-            // with no silent item).
+            // item goes only once the history holds its key.
             if item.itemClass == .silent, sweepForCastle, !historyHolds(item.fingerprint) { continue }
             try leaves.custody.deleteCustody(fingerprint: item.fingerprint, itemClass: item.itemClass)
         }
@@ -282,10 +272,11 @@ extension ActContext {
         return material
     }
 
-    /// **Sync keys held by what they can reach** (§3.2): the Castle way — a
-    /// Touch ID item where this press chose Touch ID and a finger is enrolled,
-    /// else session memory — while they reach a Castle-era key; a silent item
-    /// otherwise. One item per account: the other class goes.
+    /// **Sync keys held the account's way** (rule 15's custody — by the
+    /// account's mode, never by what they reach): the Castle way — a Touch ID
+    /// item where this press chose Touch ID and a finger is enrolled, else
+    /// session memory; a silent item in Standard. One item per account: the
+    /// other class goes.
     func holdSyncKeys(_ held: DeviceKeyMaterial, castleWay: Bool) throws {
         guard let account = accountID else { return }
         let items = try leaves.syncKeys.syncKeyItems()
@@ -346,7 +337,9 @@ extension ActContext {
     /// the plan BEFORE the write, so a resume tells its own landed write (pick
     /// the new keys up from the vault) from another device's rotation (the
     /// account moved: this act rolls back and the device follows).
-    func rotationWrite(apple: RotationAppleCopy, castleWay: Bool) async throws {
+    /// `apple` is read only when this act's write is still to be made (a
+    /// resume past a landed write never mints an account key).
+    func rotationWrite(apple: @autoclosure () throws -> RotationAppleCopy, castleWay: Bool) async throws {
         let snapshot = try await freshRead()
         if let stamped = parameters.newCorpusKeyID, snapshot.corpusKeyID == stamped {
             try holdSyncKeys(try material(for: snapshot), castleWay: castleWay)
@@ -364,7 +357,7 @@ extension ActContext {
         }
         let current = try material(for: snapshot)
         let (format, fresh) = try VaultModel.rotationBegin(
-            current: current, passphrase: passphrase, words: secrets.words, apple: apple, device: deviceName,
+            current: current, passphrase: passphrase, words: secrets.words, apple: try apple(), device: deviceName,
             ids: leaves.ids)
         var stamped = parameters
         stamped.newCorpusKeyID = fresh.corpusKeyID
@@ -388,40 +381,17 @@ extension ActContext {
         _ = try await leaves.vault.reencryptBelowRotationSeq(accountID: snapshot.accountID, material: held)
     }
 
-    /// **The completing write.** A leave's (an id with no wrap) adds the
-    /// account's Apple wrap under the NAMED key and clears the previous corpus
-    /// key in one write — made only by a device that reads that key (just the
-    /// wrap when an older build already cleared the key). A rotation with no
-    /// id completes with no Apple copy, by anyone. Then the sync keys are held
-    /// by what they reach now.
+    /// **The completing write**: the previous corpus key cleared, by any
+    /// device holding the new master. Then the sync keys are held by the
+    /// account's mode. (A leave's completion under a NAMED Apple key — the
+    /// stuck leave — left with VX-378 U1, rule 12.)
     func completeRotation(castleWayAfter: Bool) async throws {
         let snapshot = try await freshRead()
         let held = try material(for: snapshot)
-        let isLeave = snapshot.format.appleKeyID != nil && snapshot.format.masterWrappedByAppleHeld == nil
-        var named: AppleKeyMaterial?
-        if isLeave, let id = snapshot.format.appleKeyID {
-            named = try leaves.apple.readAppleKey(id: id)
-            // The finisher stopped waiting — or this is the ACTOR's own resume
-            // and the key it minted itself is gone (its keychain wiped or
-            // replaced before iCloud Keychain carried it): nothing will ever
-            // bring it, so the minter mints afresh (VX-305 U4, found by the
-            // scenario world — the actor's leave waited for ever).
-            let ownMintLost = named == nil && parameters.accountAppleKeyID == id && act == .leaveCastle
-            if named == nil, parameters.mintsFreshAccountKey == true || ownMintLost {
-                // The finisher stopped waiting for the named key: a fresh
-                // account key, minted here, completes the leave instead.
-                named = try mintAppleKey(purpose: .account)
-            }
-            if named == nil {
-                guard !executor.guards.leaveIDGatesCompletionOn else { throw ExecutorRefusal.waitingForNamedAppleKey }
-            }
-        }
-        if snapshot.format.previousCorpusKey != nil || (isLeave && named != nil) {
-            let format = try VaultModel.completing(
-                snapshot.format, master: held.masterSymmetricKey, namedKey: named, device: deviceName)
+        if snapshot.format.previousCorpusKey != nil {
             let written = try await leaves.vault.updateVault(
-                format, accountID: snapshot.accountID, expectedRevision: snapshot.revision,
-                proofMaster: held.masterSymmetricKey, device: deviceName)
+                VaultModel.completing(snapshot.format, device: deviceName), accountID: snapshot.accountID,
+                expectedRevision: snapshot.revision, proofMaster: held.masterSymmetricKey, device: deviceName)
             executor.noteFresh(written)
         }
         var settled = held
@@ -440,34 +410,6 @@ extension ActContext {
         try updateSection {
             $0.retiringAppleKey(id: id, purpose: .account, accountID: accountID, origin: .minted, at: now)
         }
-    }
-
-    // MARK: - The anchor (§3.4) — written FIRST, into the outgoing file
-
-    /// Seal the outgoing Castle key, its whole history and any earlier anchor
-    /// into the anchor and write it into the CURRENT key file before any other
-    /// step of a leave. Idempotent: an anchor of this very key is already
-    /// written (a resume never seals a second one — it keeps its day).
-    func writeAnchor(_ inputs: AnchorLockInputs) throws {
-        guard let from = fromKey, let live = library.keyFile, live.fingerprint == Self.fp(from) else {
-            throw ExecutorRefusal.noLiveKeyFile
-        }
-        if let anchor = live.anchor, anchor.outgoingFingerprint == live.fingerprint, anchor.outgoingEpoch == live.epoch {
-            return
-        }
-        var anchor = try CastleAnchor.sealing(
-            outgoingKeyFile: live, outgoingKey: from, locks: inputs, madeAt: now, madeBy: deviceID,
-            anchorKey: leaves.ids.mintSymmetricKey())
-        #if DEBUG
-        if case .follower = inputs, !executor.guards.followerAnchorTypedLockOn {
-            // Guard off (DEBUG mutation pins only): the follower's anchor
-            // without the lock under the secret typed at its follow.
-            anchor.locks.passphrase = nil
-            anchor.locks.words = nil
-        }
-        #endif
-        try executor.writeLiveKeyFile(try live.writingAnchor(anchor), &library)
-        log("the anchor written first (\(Self.fp8(anchor.outgoingFingerprint)))")
     }
 }
 

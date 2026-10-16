@@ -11,11 +11,10 @@ import Foundation
 //     descriptor), the twelve words, the account's master (when bound), and —
 //     a Standard key only — this Mac's own Apple key for the library, naming
 //     its id (the old shared key's wrap left with rule 26);
-//   - THE HISTORY: the older keys the current key takes, each wrapped
-//     directly under it, with fingerprint, epoch and retirement date;
-//   - THE CASTLE ANCHOR, after a leave (`CastleAnchor.swift`), and any
-//     anchor an entry into Castle could not open, kept beside the history,
-//     unchanged;
+//   - THE HISTORY: every earlier key the library has had, each wrapped
+//     directly under the current key, with fingerprint, epoch and retirement
+//     date — carried forward by every key change, no exceptions (rule 4; the
+//     Castle anchor left with VX-378 U1);
 //   - the master's twelve-words copy, when the file has a master wrap (§3.5a).
 // Every byte is non-secret: holding the file grants nothing without a secret.
 // The crossings that build a new file from an old one are
@@ -36,16 +35,8 @@ public enum KeyFileError: Error, Equatable, Sendable {
     /// A history entry did not open under the current key, or opened to
     /// another key than it names.
     case historyEntryDoesNotOpen(String)
-    /// Leaving Castle needs the anchor written into the outgoing file FIRST.
-    case anchorNotWrittenFirst
-    /// The anchor offered was not sealed from this file's current key.
-    case anchorIsNotThisKeysAnchor
-    /// No lock on the anchor opens with what was offered.
-    case anchorDoesNotOpen
-    /// The anchor's bundle failed to decrypt or decode (tampered).
-    case anchorBundleUnreadable
-    /// A Castle key never has an Apple wrap (§3.3) — entering Castle refuses
-    /// an Apple lock for the new key.
+    /// A Castle key never has an Apple wrap (rule 9) — a re-key to a Castle
+    /// key refuses an Apple lock.
     case appleWrapOnACastleKey
     /// A re-key to the key already current.
     case newKeyIsTheCurrentKey
@@ -126,19 +117,12 @@ public struct KeyFile: Codable, Equatable, Sendable {
     /// This Mac's own Apple key for the library (a Standard key only).
     public var apple: AppleWrap?
     public var history: [HistoryEntry]
-    /// The Castle anchor (one at a time; only after a leave).
-    public var anchor: CastleAnchor?
-    /// Anchors an entry into Castle could not open with the secrets typed at
-    /// its door, kept beside the history UNCHANGED (§3.4); a later leave seals
-    /// them inside its new anchor.
-    public var keptAnchors: [CastleAnchor]
 
     public init(
         formatVersion: Int = KeyFile.currentFormatVersion, libraryID: String, fingerprint: String,
         epoch: Int, passphrase: StoreKeyEnvelope.PassphraseWrap? = nil, words: Data? = nil,
         master: Data? = nil, masterWordsCopy: Data? = nil, apple: AppleWrap? = nil,
-        history: [HistoryEntry] = [], anchor: CastleAnchor? = nil,
-        keptAnchors: [CastleAnchor] = []
+        history: [HistoryEntry] = []
     ) {
         self.formatVersion = formatVersion
         self.libraryID = libraryID
@@ -150,8 +134,6 @@ public struct KeyFile: Codable, Equatable, Sendable {
         self.masterWordsCopy = masterWordsCopy
         self.apple = apple
         self.history = history
-        self.anchor = anchor
-        self.keptAnchors = keptAnchors
     }
 
     /// A wraps-less file for `key` (the builders add the wraps).
@@ -165,8 +147,8 @@ public struct KeyFile: Codable, Equatable, Sendable {
         guard StoreKeyEnvelope.fingerprint(of: key) == fingerprint else { throw KeyFileError.keyIsNotThisFilesKey }
     }
 
-    /// The passphrase wrap, set or replaced — the anchor and the history are
-    /// untouched (the anchor keeps the secrets of its day; §3.4, §3.9).
+    /// The passphrase wrap, set or replaced — the history is untouched (rule 6:
+    /// re-locking the current key, never a new key).
     public func settingPassphrase(_ passphrase: PassphraseKey, for key: StoreKey) throws -> KeyFile {
         try requireOwnKey(key)
         var next = self
@@ -313,15 +295,11 @@ public struct KeyFile: Codable, Equatable, Sendable {
     }
 
     /// Every fingerprint this file can lead to, without any secret: its
-    /// current key, its history, and what its anchor and kept anchors hold —
-    /// what the catalog and the route finder read (§3.7).
+    /// current key and its history — what the catalog and the route finder
+    /// read (§3.7).
     public var heldFingerprints: [String] {
-        var all = [fingerprint] + history.map(\.fingerprint)
-        for anchor in [anchor].compactMap({ $0 }) + keptAnchors {
-            all += anchor.heldFingerprints
-        }
         var seen = Set<String>()
-        return all.filter { seen.insert($0).inserted }
+        return ([fingerprint] + history.map(\.fingerprint)).filter { seen.insert($0).inserted }
     }
 
     // MARK: - The file

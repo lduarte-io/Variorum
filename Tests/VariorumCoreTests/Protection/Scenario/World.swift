@@ -64,19 +64,6 @@ struct Truth {
     var copies: [String: CopyTruth] = [:]
     /// Keys made in Castle — by the record's family tree at their birth.
     var castleBorn: Set<String> = []
-    /// The time each library left Castle, per device (promise 13).
-    var leftCastleAt: [String: Date] = [:]
-    /// Every key the library had when it last left Castle, per device — what
-    /// promise 13 keeps from the Apple account and the login password.
-    var keptByLeave: [String: Set<String>] = [:]
-    /// Per RECEIVING device: what each Standard pair another Mac sent it
-    /// reaches by its own locks — its key and its key file's history
-    /// (`reachableInItsDay`) — recorded at the send. THAT Mac's own copy by
-    /// what it is, wherever its files then sit here (its hand-off folder, a
-    /// Time Machine snapshot of it): promise 13's exemption (VX-305 ladder
-    /// round 1, NEW-2 — a folder overwritten by this device's own send the
-    /// same day, the pair surviving only in a snapshot).
-    var sentStandardPairReach: [String: Set<String>] = [:]
     /// Standard copies made after the moment both homes were rolled back to
     /// (the stated limit, P-U4-5): the restored Castle state doesn't reach back
     /// over them.
@@ -86,9 +73,6 @@ struct Truth {
     /// through that account until the account replaces its keys or enters
     /// Castle (the vault's corpus key id then changes).
     var standardSynced: [String: (account: String, corpusKeyID: String)] = [:]
-    /// Corpus key ids current while their vault read Castle (§3.9: no
-    /// Castle-era corpus key ever sits under anything Apple-reachable).
-    var castleCorpusKeyIDs: Set<String> = []
     /// Apple key ids lost to an Apple-ID switch, an iCloud Keychain reset or a
     /// wiped keychain (promise 5's "its own Apple key and this Mac's are both
     /// gone").
@@ -605,7 +589,7 @@ final class SWorld {
     /// custody items enumerated (a Touch ID item through a press), today's
     /// items, the Apple wraps whose key reads here, the typed secrets on every
     /// key file the device holds, the vault road behind them — each candidate
-    /// expanded through the history and the anchor. Returns the key that
+    /// expanded through the history. Returns the key that
     /// opens the slot, and every other key reached on the way.
     func walkLobby(_ device: SDevice, typed: TypedSecrets) async -> (key: StoreKey, also: [StoreKey])? {
         guard let slot = device.slot else { return nil }
@@ -650,8 +634,7 @@ final class SWorld {
             for secret in secrets { add(try? file.open(secret, floor: PF.floor)) }
             for master in masters { add(try? file.open(master: master)) }
         }
-        // Expansion: every file's history under a key in hand; every anchor by
-        // the typed secrets or by its outgoing key.
+        // Expansion: every file's history under a key in hand.
         var index = 0
         while index < candidates.count {
             let key = candidates[index]
@@ -659,21 +642,6 @@ final class SWorld {
             for file in files {
                 if file.fingerprint == PF.fp(key) {
                     for older in (try? file.historyKeys(currentKey: key)) ?? [] { add(older.key) }
-                }
-                for anchor in [file.anchor].compactMap({ $0 }) + file.keptAnchors {
-                    if let contents = try? anchor.open(outgoingKey: key) { for held in contents.keys { add(held.key) } }
-                }
-            }
-        }
-        for file in files {
-            for anchor in [file.anchor].compactMap({ $0 }) + file.keptAnchors {
-                for secret in secrets {
-                    if let contents = try? anchor.open(secret, floor: PF.floor) {
-                        for held in contents.keys { add(held.key) }
-                        for kept in contents.keptAnchors {
-                            if let inner = try? kept.open(secret, floor: PF.floor) { for held in inner.keys { add(held.key) } }
-                        }
-                    }
                 }
             }
         }

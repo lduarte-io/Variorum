@@ -20,26 +20,21 @@ struct ProtectionScanTests {
         let device = PF.id()
         let c0 = StoreKey.mint(), c1 = StoreKey.mint(), s2 = StoreKey.mint(), s3 = StoreKey.mint()
         let apple = AppleKeyMaterial.mint()
-        let anchorKey = SymmetricKey(size: .bits256)
 
-        // A synced Castle library, a re-key, a leave (anchor first, its key
-        // known to the test), a re-key in Standard under this Mac's Apple key.
+        // A synced Castle library, a re-key, a leave (the history carrying the
+        // Castle keys), a re-key in Standard under this Mac's Apple key.
         let castle0 = try world.castleFile(c0)
-        let castle1 = try castle0.rekeyed(.withinMode, from: c0, to: c1, locks: world.castleLocks(), at: PF.day(1)).keyFile
-        let anchor = try CastleAnchor.sealing(
-            outgoingKeyFile: castle1, outgoingKey: c1,
-            locks: .follower(typed: .passphrase(world.p), outgoingKeyFile: castle1, includeMasterRoad: true),
-            madeAt: PF.day(2), madeBy: device, anchorKey: anchorKey)
-        let standard2 = try castle1.writingAnchor(anchor).rekeyed(
-            .leavingCastle, from: c1, to: s2,
+        let castle1 = try castle0.rekeyed(from: c0, to: c1, kind: .castle, locks: world.castleLocks(), at: PF.day(1))
+        let standard2 = try castle1.rekeyed(
+            from: c1, to: s2, kind: .standard,
             locks: NewKeyLocks(passphrase: world.p, words: world.w, master: world.master,
                                masterWordsCopy: try world.masterWordsCopy, apple: apple),
-            at: PF.day(2)).keyFile
+            at: PF.day(2))
         let standard3 = try standard2.rekeyed(
-            .withinMode, from: s2, to: s3,
+            from: s2, to: s3, kind: .standard,
             locks: NewKeyLocks(passphrase: world.p, words: world.w, master: world.master,
                                masterWordsCopy: try world.masterWordsCopy, apple: apple),
-            at: PF.day(3)).keyFile
+            at: PF.day(3))
 
         // The record, this Mac's facts in both homes, a plan.
         var record = ProtectionRecord.minting(
@@ -75,7 +70,6 @@ struct ProtectionScanTests {
         var secrets: [(String, Data)] = [
             ("c0", c0.data), ("c1", c1.data), ("s2", s2.data), ("s3", s3.data),
             ("master", PF.bytes(world.master)), ("apple key", PF.bytes(apple.key)),
-            ("anchor key", PF.bytes(anchorKey)),
             ("passphrase key", PF.bytes(world.p.key)), ("words key", PF.bytes(world.w.key)),
             ("passphrase", Data(world.passphrase.utf8)),
             ("the words", Data(world.words.joined(separator: " ").utf8)),

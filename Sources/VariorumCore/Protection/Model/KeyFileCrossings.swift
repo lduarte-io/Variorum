@@ -1,27 +1,15 @@
 import CryptoKit
 import Foundation
 
-// VX-305 U1 — RE-KEYING (design §3.4; her rulings of 2026-10-13, §1: "a fresh
-// key whenever the library crosses a line", "history flows into Castle, never
-// out"). What the NEW key's history takes:
-//   - ENTERING CASTLE — everything: the old key, its history, and the anchor
-//     (with any earlier anchor kept inside it), opened with the secrets typed
-//     at the door (both) or at the follow (one). An anchor those secrets can't
-//     open is KEPT beside the history, unchanged — it never fails the entry,
-//     keeps opening with the secrets of its day, and a later leave seals it
-//     inside the new anchor.
-//   - WITHIN A MODE (Replace All Keys, a follow that keeps the mode, leaving an
-//     account): the old key and its history, with the anchor (and any kept
-//     anchors) carried unchanged.
-//   - LEAVING CASTLE — nothing: the new key starts with an empty history, and
-//     everything from before the leave is in the anchor, WRITTEN FIRST into
-//     the outgoing file (`writingAnchor`) and carried into the new one.
-//   - A DIFFERENT LIBRARY LANDING — nothing (`building`): the sent pair keeps
-//     its own locks.
-// The history wraps each key it takes directly under the new key; the old key
-// (in hand during any re-key) opens the old history. A key opens older keys,
-// never newer ones. These are pure values: the executor (U3) writes them, in
-// prepare-then-commit order.
+// VX-305 U1 — RE-KEYING (rule 4, `notes/CastleRules.md`: "every key change
+// carries that list forward — no exceptions"). A new key's history takes the
+// outgoing key and every key the outgoing file's history holds — entering
+// Castle, leaving it, Replace All Keys, a follow, alike; each wrapped directly
+// under the new key, so the current key (and so the current passphrase or
+// words) opens every earlier key, and a key opens older keys, never newer
+// ones. (The Castle anchor, the leave's empty history and the entry's anchor
+// fold left with VX-378 U1 — rules 4, 12, 13.) These are pure values: the
+// executor (U3) writes them, in prepare-then-commit order.
 
 /// What the new key is locked under in its new file.
 public struct NewKeyLocks: Sendable {
@@ -46,22 +34,6 @@ public struct NewKeyLocks: Sendable {
     }
 }
 
-public enum KeyFileCrossing: Sendable {
-    case withinMode
-    /// `openers`: the secrets typed at the door or the follow — tried on the
-    /// anchor and on every kept anchor.
-    case enteringCastle(openers: [ProtectionSecret])
-    case leavingCastle
-}
-
-public struct RekeyOutcome: Sendable, Equatable {
-    public var keyFile: KeyFile
-    /// Anchors the entry into Castle could not open — kept beside the history,
-    /// listed in Diagnostics; the door says which secrets, of which day, still
-    /// open the copies they hold (§3.4, §3.9).
-    public var unopenedAnchors: [CastleAnchor]
-}
-
 extension KeyFile {
     /// A NEW file for a key with no past — a library's creation, or a
     /// different library's landing (§3.7: "a fresh key with no history").
@@ -71,66 +43,22 @@ extension KeyFile {
         try KeyFile(libraryID: libraryID, key: key, epoch: epoch).locking(key, with: locks)
     }
 
-    /// The anchor FIRST (§3.4, §3.9): written into the outgoing (current) key
-    /// file before any other step of a leave. It must be this key's anchor.
-    public func writingAnchor(_ anchor: CastleAnchor) throws -> KeyFile {
-        guard anchor.outgoingFingerprint == fingerprint, anchor.outgoingEpoch == epoch else {
-            throw KeyFileError.anchorIsNotThisKeysAnchor
-        }
-        var next = self
-        next.anchor = anchor
-        return next
-    }
-
-    /// **The crossing**: a new file for `newKey`, built from this one (whose
-    /// current key is `currentKey`).
+    /// **The re-key**: a new file for `newKey` (of `kind`), built from this
+    /// one (whose current key is `currentKey`) — its history the outgoing key
+    /// and every key this history holds (rule 4). A Castle key never takes an
+    /// Apple lock (rule 9).
     public func rekeyed(
-        _ crossing: KeyFileCrossing, from currentKey: StoreKey, to newKey: StoreKey,
-        locks: NewKeyLocks, at: Date, guards: ProtectionGuards = .all,
-        floor: PassphraseKDF.Floor = PassphraseKDF.floor
-    ) throws -> RekeyOutcome {
+        from currentKey: StoreKey, to newKey: StoreKey, kind: ProtectionMode, locks: NewKeyLocks, at: Date
+    ) throws -> KeyFile {
         guard StoreKeyEnvelope.fingerprint(of: currentKey) == fingerprint else {
             throw KeyFileError.keyIsNotThisFilesKey
         }
         guard newKey != currentKey else { throw KeyFileError.newKeyIsTheCurrentKey }
+        guard kind == .standard || locks.apple == nil else { throw KeyFileError.appleWrapOnACastleKey }
         var next = KeyFile(libraryID: libraryID, key: newKey, epoch: epoch + 1)
         let outgoing = OpenedKey(fingerprint: fingerprint, epoch: epoch, retiredAt: at, key: currentKey)
-        var unopened: [CastleAnchor] = []
-        switch crossing {
-        case .withinMode:
-            next.history = try Self.wrapping([outgoing] + historyKeys(currentKey: currentKey), under: newKey)
-            if guards.anchorCarriedByEveryRekeyOn {
-                next.anchor = anchor
-                next.keptAnchors = keptAnchors
-            }
-        case .enteringCastle(let openers):
-            guard locks.apple == nil else { throw KeyFileError.appleWrapOnACastleKey }
-            var taken = [outgoing] + (try historyKeys(currentKey: currentKey))
-            var queue = [anchor].compactMap { $0 } + keptAnchors
-            while !queue.isEmpty {
-                let candidate = queue.removeFirst()
-                if let contents = openers.lazy.compactMap({ try? candidate.open($0, floor: floor) }).first {
-                    taken += contents.keys.map {
-                        var key = $0
-                        key.retiredAt = key.retiredAt ?? candidate.madeAt
-                        return key
-                    }
-                    queue += contents.keptAnchors
-                } else {
-                    unopened.append(candidate)
-                }
-            }
-            next.history = try Self.wrapping(taken, under: newKey)
-            next.keptAnchors = unopened
-        case .leavingCastle:
-            if guards.anchorWrittenFirstOn {
-                guard let anchor, anchor.outgoingFingerprint == fingerprint else {
-                    throw KeyFileError.anchorNotWrittenFirst
-                }
-            }
-            next.anchor = anchor
-        }
-        return RekeyOutcome(keyFile: try next.locking(newKey, with: locks), unopenedAnchors: unopened)
+        next.history = try Self.wrapping([outgoing] + historyKeys(currentKey: currentKey), under: newKey)
+        return try next.locking(newKey, with: locks)
     }
 
     /// Lock this file's current key under `locks`.

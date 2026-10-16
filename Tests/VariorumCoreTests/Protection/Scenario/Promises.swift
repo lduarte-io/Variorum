@@ -6,9 +6,10 @@
 //
 //  The checks rest on one engine, `KeyReach`: from SEEDS (keys, Apple keys,
 //  masters, secrets, the vault's wrapped copies a session can fetch) it closes
-//  over every key file a device holds — every lock, every history, every
-//  anchor and kept anchor — to the library keys reached. Two readers:
-//    - THE ATTACKER (promises 2, 8, 13): a login-password holder on the device
+//  over every key file a device holds — every lock, every history — to the
+//  library keys reached. (Promise 13's pre-leave reading and the anchor left
+//  with VX-378 U1 — rules 12, 13.) Two readers:
+//    - THE ATTACKER (promises 2, 8): a login-password holder on the device
 //      (every keychain item but a Touch ID item's secret, every file, the
 //      session's vault) and the Apple account (its iCloud Keychain) — with the
 //      STATED EXCEPTIONS taken out of the seeds, exactly as §3.1 rule 2 names
@@ -66,7 +67,6 @@ extension SWorld {
             let bytes = PF.bytes(master)
             if !masters.contains(bytes) { masters.append(bytes) }
         }
-        var anchorsDone: Set<Data> = []
         var changed = true
         while changed {
             changed = false
@@ -85,7 +85,6 @@ extension SWorld {
                 for wk in wordsKeys { if let master = try? vault.unwrapMaster(withRecoveryKey: wk) { addMaster(master) } }
                 if masters.count != before { changed = true }
             }
-            var anchors: [CastleAnchor] = []
             for file in files {
                 do {
                     func open(_ blob: Data?, _ key: SymmetricKey) {
@@ -111,54 +110,7 @@ extension SWorld {
                                PF.fp(older) == entry.fingerprint { add(older) }
                         }
                     }
-                    anchors += [file.anchor].compactMap { $0 } + file.keptAnchors
                 }
-            }
-            // The anchors: by their own locks, by a follower's outgoing key or
-            // copied locks; their kept anchors in turn.
-            var queue = anchors
-            while !queue.isEmpty {
-                let anchor = queue.removeFirst()
-                guard !anchorsDone.contains(anchor.bundle) else { continue }
-                var contents: AnchorContents?
-                if let outgoing = keys[anchor.outgoingFingerprint] { contents = try? anchor.open(outgoingKey: outgoing) }
-                if contents == nil, let wrap = anchor.locks.passphrase {
-                    for p in seeds.passphrases {
-                        if let pk = passphraseKey(p, wrap.kdf), let opened = try? anchor.open(.passphraseKey(pk), floor: PF.floor) {
-                            contents = opened
-                            break
-                        }
-                    }
-                }
-                if contents == nil, anchor.locks.words != nil {
-                    for words in seeds.words { if let opened = try? anchor.open(.words(words), floor: PF.floor) { contents = opened; break } }
-                }
-                if contents == nil, anchor.locks.outgoingKey != nil, let copied = anchor.locks.copiedLocks {
-                    var outgoing: StoreKey?
-                    if let wrap = copied.passphrase {
-                        for key in pass(wrap) { if let o = Lock.unwrapStoreKey(wrap.wrapped, under: key) { outgoing = o } }
-                    }
-                    if outgoing == nil, let blob = copied.words { for wk in wordsKeys { outgoing = outgoing ?? Lock.unwrapStoreKey(blob, under: wk) } }
-                    if outgoing == nil, let blob = copied.master {
-                        for master in masters { outgoing = outgoing ?? Lock.unwrapStoreKey(blob, under: SymmetricKey(data: master)) }
-                        if outgoing == nil, let copy = copied.masterWordsCopy {
-                            for wk in wordsKeys {
-                                if let master = Lock.unwrap(copy, under: wk) {
-                                    outgoing = outgoing ?? Lock.unwrapStoreKey(blob, under: SymmetricKey(data: master))
-                                }
-                            }
-                        }
-                    }
-                    if let outgoing, PF.fp(outgoing) == anchor.outgoingFingerprint {
-                        add(outgoing)
-                        contents = try? anchor.open(outgoingKey: outgoing)
-                    }
-                }
-                guard let contents else { continue }
-                anchorsDone.insert(anchor.bundle)
-                changed = true
-                for held in contents.keys { add(held.key) }
-                queue += contents.keptAnchors
             }
         }
         return keys
@@ -314,14 +266,12 @@ extension SWorld {
         for device in devices {
             violations += known(device)
             violations += castleMeansCastle(device, settled: settled)
-            violations += castleStaysCastles(device, settled: settled)
             violations += crashSafe(device)
             if settled {
                 violations += standardMeansStandard(device)
                 violations += converges(device)
             }
         }
-        violations += vaultInvariant()
         violations += nothingStranded()
         violations += ownCopiesOnly()
         return violations
@@ -436,69 +386,6 @@ extension SWorld {
         return violations
     }
 
-    /// PROMISE 13 — what Castle wrote stays Castle's, in its copies: after a
-    /// leave, nothing the Apple account or a login-password holder can reach
-    /// opens a copy made before the leave, or any key made in Castle.
-    func castleStaysCastles(_ device: SDevice, settled: Bool) -> [Violation] {
-        guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record,
-              record.mode == .standard, let kept = truth.keptByLeave[device.name], !kept.isEmpty else { return [] }
-        let attacker = reach(attackerSeeds(device, appleAccount: true, settled: settled), files: keyFilesOn(device))
-        var exempt = Set<String>()
-        // A key a login-password holder already held in Standard (rule 3) and
-        // tampered with there: the later crossings protect what's written
-        // after, never undo what they took before (promise 2 reads it the same
-        // way — the closer's soak, seed 6 sequence 916).
-        exempt.formUnion(truth.tamperedStandard[device.name] ?? [])
-        // A Standard pair another Mac sent here is THAT Mac's own copy, under
-        // its own key and its own Apple key (rule 3, its library's) — no copy
-        // this device made, and no key made in Castle (promise 2 reads "made on
-        // this Mac" the same way). Its key rides this library's family tree
-        // only so the landing's own line reads as its own (the closer's soak,
-        // seed 2 sequence 661). …and so does every key that pair's own key
-        // file reaches by its own locks — its history (the sender's earlier
-        // keys, taken within Standard): the landed tree carries those too, and
-        // the pair (never written here, keeping its own locks — §3.7) opens
-        // them through the sender's own Apple key. The sender's Standard copy
-        // in its day, exactly what a restored Standard state reached
-        // (`reachableInItsDay` — never an anchor's); still no copy this device
-        // made and no key made in Castle (VX-305 ladder round 1, NEW-2). Read
-        // by the pair's IDENTITY, recorded at the send — never by its folder:
-        // this device's own Send Library the same day can overwrite the
-        // folder (and the folder → sender map), while a Time Machine snapshot
-        // still holds the sender's pair (NEW-2's second road).
-        exempt.formUnion(truth.sentStandardPairReach[device.name] ?? [])
-        // §3.1 rule 2's second exception: the Standard-synced days' keys, until
-        // that account replaces its keys or enters Castle.
-        // (On a device that hasn't yet followed the account past them, its
-        // held sync keys still name that corpus key — rule 2: "after that
-        // device follows".)
-        var held = Set<String>()
-        for item in device.keychain.local.values {
-            switch item.value {
-            case .syncKeys(let m): held.insert(m.corpusKeyID)
-            default: break
-            }
-        }
-        for m in device.sessionMemory.values { held.insert(m.corpusKeyID) }
-        var exceptionHolds = false
-        for (fingerprint, synced) in truth.standardSynced
-        where server.snapshot(synced.account)?.corpusKeyID == synced.corpusKeyID || held.contains(synced.corpusKeyID) {
-            exempt.insert(fingerprint)
-            exceptionHolds = true
-        }
-        // While the exception holds, what the account's master reaches — a
-        // Standard-days key file's master lock and the history behind it — is
-        // the exception's; the attacker's other roads are judged alone.
-        var seeds = attackerSeeds(device, appleAccount: true, settled: settled)
-        if exceptionHolds { seeds.masters = []; seeds.vaults = [] }
-        let withoutAccount = exceptionHolds ? reach(seeds, files: keyFilesOn(device)) : attacker
-        var violations: [Violation] = []
-        for fingerprint in kept.sorted() where attacker[fingerprint] != nil && withoutAccount[fingerprint] != nil && !exempt.contains(fingerprint) {
-            violations.append(Violation(promise: 13, device: device.name, detail: "the Apple account or the login password reaches \(f8(fingerprint)), a key from before the leave"))
-        }
-        return violations
-    }
-
     /// PROMISE 6 — crash-safe: with nothing running, no act is half-done —
     /// the act finished or rolled back, the library open, no copy carrying a
     /// half-finished act. THE VAULT-REACH QUALIFIER (her ruling 2026-10-14/15,
@@ -582,7 +469,8 @@ extension SWorld {
         // 3), until a deliberate act mints a key past them (P-U4-10).
         if truth.tamperedStandard[device.name]?.contains(record.currentFingerprint) == true { return [] }
         var violations: [Violation] = []
-        if let mode = vault.mode.settled, mode != record.mode {
+        let mode = vault.mode.settled
+        if mode != record.mode {
             violations.append(Violation(promise: 7, device: device.name, detail: "the library is \(record.mode), the account \(mode)"))
         }
         let leaf = DeviceLeaves(world: self, device: device)
@@ -590,22 +478,6 @@ extension SWorld {
             ?? device.sessionMemory[account]
         if let held, held.corpusKeyID != vault.corpusKeyID {
             violations.append(Violation(promise: 7, device: device.name, detail: "its sync keys are not the account's"))
-        }
-        return violations
-    }
-
-    /// §3.9 — no Castle-era corpus key ever sits under anything Apple-
-    /// reachable: an Apple wrap never beside a Castle-era previous corpus key,
-    /// and never over a Castle-era master (an older build's leave excepted).
-    func vaultInvariant() -> [Violation] {
-        var violations: [Violation] = []
-        for (id, account) in server.accounts.sorted(by: { $0.key < $1.key }) where account.format.masterWrappedByAppleHeld != nil {
-            if let previous = account.format.previousCorpusKey, truth.castleCorpusKeyIDs.contains(previous.keyID) {
-                violations.append(Violation(promise: 2, device: "vault \(id.prefix(8))", detail: "an Apple wrap beside a Castle-era previous corpus key"))
-            }
-            if let corpus = account.format.classKey(for: .corpus)?.keyID, truth.castleCorpusKeyIDs.contains(corpus) {
-                violations.append(Violation(promise: 2, device: "vault \(id.prefix(8))", detail: "an Apple wrap over a Castle-era master"))
-            }
         }
         return violations
     }
@@ -818,9 +690,8 @@ extension SWorld {
             var k = known(holder)
             let own = known(self.holder(device, account: nil, libraryID: library.record?.libraryID ?? ""))
             // The copy's OWN library's secrets on this device — the slot may
-            // hold another library now (a landing set this one aside), and an
-            // anchor written at its leave is locked with its own secrets of
-            // that day (the closer's soak, seed 4 sequence 410).
+            // hold another library now (a landing set this one aside) (the
+            // closer's soak, seed 4 sequence 410).
             let copyOwn = known(self.holder(device, account: nil, libraryID: truthCopy.libraryID))
             k.timeline += own.timeline + slotK.timeline + copyOwn.timeline
             // A frozen key file's own locks are what the Mac that froze it held
@@ -853,35 +724,17 @@ extension SWorld {
                     for p in livePassphrases { var b = book; b.passphrases[.current] = p; candidates.append(b) }
                 case .words(.current):
                     for w in liveWords { var b = book; b.words[.current] = w; candidates.append(b) }
-                // A day the library changed hands (a join, a landing): the
-                // secrets of that day are the copy's holder's AND the slot's.
-                // (…or an account's that day: an anchor written at a leave is
-                // locked with the account's secrets as typed then.)
-                case .passphrase(.of(let date)):
-                    let accounts = server.accounts.keys.map { known($0).at(date).passphrase }
-                    for p in ([known(holder).at(date).passphrase, slotK.at(date).passphrase, own.at(date).passphrase,
-                               copyOwn.at(date).passphrase] + accounts).compactMap({ $0 }) {
-                        var b = book; b.passphrases[.of(date)] = p; candidates.append(b)
-                    }
-                case .words(.of(let date)):
-                    let accounts = server.accounts.keys.map { known($0).at(date).words }
-                    for w in ([known(holder).at(date).words, slotK.at(date).words, own.at(date).words,
-                               copyOwn.at(date).words] + accounts).compactMap({ $0 }) {
-                        var b = book; b.words[.of(date)] = w; candidates.append(b)
-                    }
                 default: break
                 }
                 switch route.opener {
                 case .passphrase(let day):
                     switch day {
                     case .current: book.passphrases[day] = slotK.passphrase
-                    case .of(let date): book.passphrases[day] = known(holder).at(date).passphrase ?? slotK.at(date).passphrase
                     case .heldHere: for p in k.timeline.compactMap(\.passphrase) + slotK.timeline.compactMap(\.passphrase) { var b = book; b.passphrases[day] = p; candidates.append(b) }
                     }
                 case .words(let day):
                     switch day {
                     case .current: book.words[day] = slotK.words
-                    case .of(let date): book.words[day] = known(holder).at(date).words ?? slotK.at(date).words
                     case .heldHere: for w in k.timeline.compactMap(\.words) + slotK.timeline.compactMap(\.words) { var b = book; b.words[day] = w; candidates.append(b) }
                     }
                 default: break

@@ -39,7 +39,7 @@ public struct ActParameters: Codable, Equatable, Sendable {
     /// takes it, never a re-fetch.
     public var doorRevision: Int?
     /// The descriptor the typed passphrase is derived under: the door's
-    /// (reused by a re-key and the anchor), or a NEW passphrase's fresh one.
+    /// (reused by a re-key), or a NEW passphrase's fresh one.
     public var passphraseKDF: PassphraseKDF.Descriptor?
     public var passphraseIsNew: Bool?
     public var wordsAreNew: Bool?
@@ -53,7 +53,8 @@ public struct ActParameters: Codable, Equatable, Sendable {
     public var targetAccount: String?
     /// Whether `targetAccount` is to be set (a leave clears it).
     public var changesAccount: Bool?
-    /// The account Apple key a leave minted (its id is the vault's mark).
+    /// The account Apple key a leave minted (the new master's Apple wrap goes
+    /// under it).
     public var accountAppleKeyID: String?
     /// This Mac's own Apple key the act minted for the library.
     public var ownAppleKeyID: String?
@@ -72,13 +73,6 @@ public struct ActParameters: Codable, Equatable, Sendable {
     public var outgoingAppleKeyID: String?
     /// The account's Apple key a rotation into Castle retires once it completes.
     public var retiringAccountAppleKeyID: String?
-    /// A follower's anchor carries the master's road (false when the vault's
-    /// master is still the Castle-era one — §3.4).
-    public var includeMasterRoad: Bool?
-    /// Finishing a leave a lost device started (§3.9): the press stopped
-    /// waiting for the named key — a fresh account key is minted (the vault's
-    /// CAS keeps one).
-    public var mintsFreshAccountKey: Bool?
     /// The library's key kind before the act (the account family's crossing).
     public var fromKind: ProtectionMode?
     /// Whether the act re-keys the library (every leave does — §3.8).

@@ -28,19 +28,18 @@ public enum SessionFact: Equatable, Sendable {
     }
 }
 
-/// **The vault's mode in three states** (§3.9): an Apple wrap — Standard; an
-/// Apple key id with no wrap — leaving Castle, in progress; neither — Castle.
+/// **The vault's mode** — an Apple wrap: Standard; none: Castle. (The third
+/// state — an id with no wrap, a leave in progress — left with VX-378 U1: no
+/// leave writes it, rule 12; U2 replaces the reading with the row's mode flag.)
 public enum VaultMode: Equatable, Sendable {
     case standard(appleKeyID: String?)
-    case leavingCastle(appleKeyID: String)
     case castle
 
-    /// The settled mode it reads as; nil while a leave is in progress.
-    public var settled: ProtectionMode? {
+    /// The mode it reads as.
+    public var settled: ProtectionMode {
         switch self {
         case .standard: return .standard
         case .castle: return .castle
-        case .leavingCastle: return nil
         }
     }
 }
@@ -78,20 +77,13 @@ public struct VaultReading: Equatable, Sendable {
         self.updatedAt = updatedAt
     }
 
-    /// §3.9's three states — read by every device of this build.
+    /// The vault's mode — read by every device of this build.
     public var mode: VaultMode {
-        if hasAppleWrap { return .standard(appleKeyID: appleKeyID) }
-        if let appleKeyID { return .leavingCastle(appleKeyID: appleKeyID) }
-        return .castle
+        hasAppleWrap ? .standard(appleKeyID: appleKeyID) : .castle
     }
 
-    /// A rotation is in progress: a previous corpus key standing, or a leave
-    /// whose completing write hasn't landed.
-    public var rotationInProgress: Bool {
-        if previousCorpusKeyID != nil { return true }
-        if case .leavingCastle = mode { return true }
-        return false
-    }
+    /// A rotation is in progress: a previous corpus key standing.
+    public var rotationInProgress: Bool { previousCorpusKeyID != nil }
 }
 
 /// The Apple keys this device can see in this scope's family (§3.5).

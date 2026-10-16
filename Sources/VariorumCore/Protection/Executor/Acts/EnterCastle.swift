@@ -7,12 +7,10 @@ import Foundation
 // protocol with VX-109's fix (its first write takes the door's revision). Then
 // the new key in prepare-then-commit order — its custody item (a Touch ID item
 // made at THIS press, or none under Always ask), the new key file (P, W, plus
-// the new master when synced; the history taking every older key, the anchor
-// folded back in — an anchor the typed secrets can't open kept beside it,
-// unchanged; no Apple wrap), the record into the staged file, the swap. Then
-// what this Mac remembers; the old custody item, every silent item, the
-// per-library-ID items, the 13p escrow items and the format-1/2 key files —
-// each only once the history verifiably holds its key; the scheduled export
+// the new master when synced; the history taking every older key — rule 4;
+// no Apple wrap), the record into the staged file, the swap. Then what this
+// Mac remembers; the old custody item and every silent item — each only once
+// the history verifiably holds its key; the scheduled export
 // off, with one notice; a fresh backup; every Apple key of this Mac's own for
 // the library deleted and recorded retired (synced: the account's was, when
 // the rotation completed). (The old shared key's retirement left with rule 26.)
@@ -40,7 +38,7 @@ struct EnterCastleProgram: ActProgram {
         case "custodyItem": try ctx.newCustodyItem(kind: .castle)
         case "keyFile":
             try ctx.newKeyFile(
-                .enteringCastle(openers: ctx.anchorOpeners()),
+                rekeyTo: .castle,
                 locks: try ctx.newLocks(passphrase: true, words: true, master: ctx.parameters.synced == true))
         case "stage": try ctx.stage()
         case "recordIntoStaged": try ctx.recordIntoStaged(kind: .castle)
@@ -52,18 +50,6 @@ struct EnterCastleProgram: ActProgram {
         case "retireOwnAppleKeys": try ctx.retireOwnAppleKeys()
         default: throw ExecutorRefusal.nothingToDo
         }
-    }
-}
-
-extension ActContext {
-    /// The secrets typed at this door or follow, as openers for an anchor of
-    /// an earlier day (its own descriptor) — §3.4's fold.
-    func anchorOpeners() -> [ProtectionSecret] {
-        var openers: [ProtectionSecret] = []
-        if let typedPassphrase { openers.append(.passphrase(typedPassphrase)) }
-        if let passphrase = secrets.passphrase { openers.append(.passphraseKey(passphrase)) }
-        if let typedWords { openers.append(.words(typedWords)) }
-        return openers
     }
 }
 
@@ -104,7 +90,7 @@ extension ProtectionExecutor {
             // The account in another mode than the library: the follow comes
             // first (a door begun here would refuse inside its plan, leaving
             // the act in flight — VX-305 U4, found by the scenario world).
-            if let settled = vault.mode.settled, settled != library.record?.mode { throw ExecutorRefusal.accountMoved }
+            if vault.mode.settled != library.record?.mode { throw ExecutorRefusal.accountMoved }
             guard let text = typed.passphrase else { throw ExecutorRefusal.secretMissing }
             try vault.format.kdf.validateFloor(configuration.floor)
             let passphrase = try PassphraseKey.derive(text, kdf: vault.format.kdf)
