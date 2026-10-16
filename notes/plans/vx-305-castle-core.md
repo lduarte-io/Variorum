@@ -1590,6 +1590,18 @@ line-by-line check against each finding, since no later round reads them.
   misfire on a legitimate mid-act crash). The reviewer's own runs: the 19 new pins green, a 461-test/76-suite
   protection superset green in Debug, a seed-1 × 120 soak slice green with tamper groups live.
 
+**The implementer's agree/dispute — committed unedited as `notes/plans/vx-305-ladder-round-2-answer.md`:** all five
+AGREED, zero disputes. The MINOR's pin `LadderRound2AbsentArmPin.aLibraryFileReplayedWithItsKeyFileDeletedLosesToItsMemory`
+(untracked until the fixes) GREEN on HEAD, RED with 5 issues at `59d5d9289`'s three source files, and RED with the same
+5 when ONLY the absent arm flips — specific to the arm. Two corrections sent to the reviewer: the `.deleteKeyFile`
+hazard is not promise 1's "no verified memory item" but her P-U4-13 (b) phase-2 class (the memory's mirror is not a
+lobby road yet), so it recommends KEEPING `rollsBackBothHomes` with the comment rewritten; and it found a checker
+blindness — an older CASTLE-born file overwriting a verified newer memory moves nothing promise 10 watches (it reads
+mode, account, custody and gate style, never key or epoch), so only the pin's own assertions catch it. Fix shapes
+proposed: doc comments for NITs 1 and 2 (adopting the set-aside at the other restores would shift crash-point numbering
+in the final round); clear `beforeRollback` at the end of a tamper step whose relaunch opened the library (NIT 3, a
+wider cause than stated); NIT 4 recorded with a phase-2 lobby hand-forward. Sent to the reviewer for the final call.
+
 ## 10. The go/no-go and the key map's model half (filled at close)
 
 *(empty)*
