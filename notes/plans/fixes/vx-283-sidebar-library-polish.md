@@ -141,6 +141,11 @@ retitled to Close All; VX-288 notes the chip; the run and its nine members In Pr
     until the stamp.
   - Main is merged into this branch again before the merge ask.
   - This supersedes the 0.9.8 plan in the overnight state.
+- **HER SECOND OVERNIGHT MANDATE (2026-10-16 ~06:44, verbatim, to the orchestrator):** *"I'll be sleeping finish
+  everything and send the fresh install to the website overnight."* So VX-283 finishes in her absence, ruling
+  provisionally where the run needs it: U2c → its window → the re-walk → ladder round 2 → closeout → merge. It then
+  publishes the ONE 0.9.7 (VX-336 + VX-283) to the website per her 15:58 call, and ends the release window with the
+  /Applications refresh under the coordinator's rule card. Her notes review stays waived.
 
 ## THE ARCHITECTURAL RULES — binding (the 13b constitution P-1…P-9, copied verbatim per `/architect-phase`)
 
