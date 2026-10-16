@@ -73,4 +73,53 @@ struct LadderRound1NewFindsPins {
         #expect(sentHistory.contains { attacker[$0] != nil && kept.contains($0) }, "the sent pair's history no longer rides the tree — the pin lost its road")
         expectPromisesKept(world)
     }
+
+    /// NEW-1 — a MODEL finding (seed 1, sequence 54 of the round-1 slice; world
+    /// seed 1000057). macB's own library Y (99708862) enters Castle (a crash
+    /// past its swap, finished at the next open); then the phone's Castle pair
+    /// lands — a DIFFERENT library X in the slot, Y set aside to Previous
+    /// Libraries with its key file, and Y's memory item still naming the
+    /// landing (the landing is named in both libraries — Copies.swift); then a
+    /// login-password holder writes back the slot file they captured BEFORE Y
+    /// entered Castle — Y's Standard-era file, alone. §3.6 / P-U4-6 (ratified
+    /// (a), "Memory wins"): a lone older library file loses to this Mac's own
+    /// memory. Before the fix it WON: the open's settle rolled back the landing
+    /// act Y's memory still named, against the replayed file, and wrote that
+    /// file's facts (Standard, the pre-Castle key) over the newer memory —
+    /// and the memory-wins arm could not have verified anyway, because the
+    /// memory's key file was not in the live place (X's was). Y read Standard
+    /// under a key the adversary held in its Standard day, with no key file:
+    /// `promise 3 on macB: no Apple wrap of the current key`. Now the file
+    /// loses FIRST — through the memory's own sealed mirror of its key file —
+    /// and Y is back in its Castle state, X's file set aside, never deleted.
+    /// Both forms: the base tree's single tamper, the fixed tree's group.
+    @Test(arguments: [false, true])
+    func aLoneOlderFileOfALibrarySetAsideByALandingLosesToItsMemory(group: Bool) async throws {
+        let world = try GeneratorFoundScenarios.start("a phone on an older build beside a synced Castle Mac", seed: 1_000_057)
+        for action in [Action.createLibrary("macB", secrets: true), .updateToNewBuild("phone"),
+                       .sendLibrary(from: "phone", to: "macB"),
+                       .crash(.useCastle("macB", .alwaysAsk, newWords: false), afterWrites: 17)] {
+            await world.step(action)
+        }
+        let y = try #require(world.macB.slot)
+        let yCastle = try #require(y.record)
+        #expect(yCastle.mode == .castle, "Y didn't enter Castle")
+        await world.step(.land("macB", .wordsPassphraseMadeNew))
+        let x = try #require(world.macB.slot)
+        #expect(x.libraryID != y.libraryID, "the landing didn't put a different library in the slot")
+        let tamper: Action = group ? .tamperSequence("macB", [.replayPlan, .plantPlan, .replayLibraryFile])
+                                   : .tamper("macB", .replayLibraryFile)
+        await world.step(tamper)
+        await world.step(.settle)
+        let context = group ? "the group" : "the single tamper"
+        let slot = try #require(world.macB.slot)
+        #expect(slot.libraryID == y.libraryID, "\(context): the replayed file isn't Y's — the pin lost its road")
+        #expect(slot.record?.mode == .castle, "\(context): the replayed file lowered Y's mode")
+        #expect(slot.fingerprint == yCastle.currentFingerprint, "\(context): the slot isn't under Y's remembered key")
+        #expect(world.liveKeyFile(world.macB)?.fingerprint == yCastle.currentFingerprint, "\(context): Y's key file isn't live")
+        #expect(world.liveKeyFile(world.macB)?.apple == nil, "\(context): an Apple wrap on a Castle key")
+        #expect(world.catalog(world.macB).keyFiles.contains { $0.role == .setAside && $0.fingerprint == x.fingerprint },
+                "\(context): X's key file wasn't set aside")
+        expectPromisesKept(world, context)
+    }
 }

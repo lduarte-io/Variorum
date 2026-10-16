@@ -217,6 +217,28 @@ public enum AssessRules {
         return file
     }
 
+    /// P-U4-6 (ratified (a), "Memory wins"; §3.6 "a library file replayed
+    /// alone loses to the memory"): the key file that PROVES a library file
+    /// older than this Mac's own memory loses to it — the memory's current
+    /// key's file whose history holds the file's key. The live one; or, when
+    /// the file came back ALONE — the live place holds no key file of THIS
+    /// library (absent, or another library's, as a landing that set this one
+    /// aside leaves it) — the memory's own sealed mirror of that file (VX-305
+    /// ladder round 1, NEW-1). A whole-pair restore — the file's own key file
+    /// live beside it, her Time Machine restore (P-U4-12) — never qualifies;
+    /// nor does a file only the ANCHOR reaches (P-U4-6's residue: a leave's
+    /// new key takes no history). One reading, shared by assess's arm, the
+    /// executor's re-key and the settle that runs it first.
+    static func olderLibraryFileProof(
+        memoryFingerprint: String, mirror: KeyFile?, live: KeyFile?, fileFingerprint: String, libraryID: String
+    ) -> KeyFile? {
+        func holds(_ file: KeyFile) -> Bool { file.history.contains { $0.fingerprint == fileFingerprint } }
+        if let live, live.fingerprint == memoryFingerprint { return holds(live) ? live : nil }
+        guard live.map({ $0.libraryID != libraryID }) ?? true, let mirror, mirror.fingerprint == memoryFingerprint,
+              mirror.libraryID == libraryID, holds(mirror) else { return nil }
+        return mirror
+    }
+
     public static func repairs(
         _ facts: ProtectionFacts, _ unlocked: UnlockedFacts, mode: ModeVerdict, account: AccountVerdict,
         vault: VaultVerdict?, guards: ProtectionGuards
@@ -234,10 +256,14 @@ public enum AssessRules {
         // another section, and its versions mean nothing here; VX-305 U4, the
         // soak's seed 17.)
         let ownMemory = unlocked.memory.flatMap { $0.deviceSection.deviceID == unlocked.thisMac.deviceID ? $0 : nil }
+        // (The proof: the live file of the memory's key, or — the file back
+        // alone, the live place holding no file of this library — the
+        // memory's own sealed mirror; `olderLibraryFileProof`.)
         if guards.libraryFileLosesToMemoryOn, let memory = ownMemory, memory.keyEpoch > record.keyEpoch,
            memory.currentFingerprint != record.currentFingerprint,
-           let live = liveKeyFile(facts, unlocked), live.fingerprint == memory.currentFingerprint,
-           live.history.contains(where: { $0.fingerprint == unlocked.currentFingerprint }) {
+           olderLibraryFileProof(
+               memoryFingerprint: memory.currentFingerprint, mirror: memory.keyFileMirror, live: liveKeyFile(facts, unlocked),
+               fileFingerprint: unlocked.currentFingerprint, libraryID: record.libraryID) != nil {
             return ([.rekeyOlderLibraryFile(toFingerprint: memory.currentFingerprint)], faults)
         }
         // …and under the SAME key: a library file replayed from before an act

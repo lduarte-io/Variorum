@@ -295,6 +295,23 @@ extension ProtectionExecutor {
     /// is ignored, reported and deleted. `typed`: the secrets a resume may
     /// need (a plan never holds one).
     public func settle(_ library: inout UnlockedLibrary, typed: TypedSecrets = .none) async throws -> SettleOutcome {
+        // FIRST, before the settle acts on anything against the file's record:
+        // a library file older than this Mac's own memory loses to it (§3.6,
+        // P-U4-6 ratified (a) — assess's first arm, run here when this Mac's
+        // newer section names an act, since rolling that act back or finishing
+        // it against the stale record writes the stale facts over the memory).
+        // The road that found it: a landing names its act in the OUTGOING
+        // library's memory too, and that library's older file, captured before
+        // and written back into the slot alone, rolled the long-done landing
+        // back against itself — Castle remembered, Standard believed (VX-305
+        // ladder round 1, NEW-1). With nothing in flight assess owes the same
+        // re-key as a repair.
+        if guards.libraryFileLosesToMemoryOn, library.section.actInFlight != nil, let record = library.record,
+           let memory = library.memory, memory.deviceSection.deviceID == library.section.deviceID,
+           memory.keyEpoch > record.keyEpoch, memory.currentFingerprint != record.currentFingerprint,
+           try rekeyOlderLibraryFile(to: memory.currentFingerprint, &library) == nil {
+            log("settle: the library file was older than this Mac remembers — it lost to the memory first")
+        }
         let sealed = try leaves.plans.readPlan()
         let reach = reach(key: library.key, keyFile: library.keyFile)
         func verified() -> ProtectionPlan? {

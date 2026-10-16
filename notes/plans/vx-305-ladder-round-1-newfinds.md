@@ -13,8 +13,12 @@ The brief: the round-1 fixes record's §"Found by the generator, outside the rou
   `LadderRound1NewFindsPins.aSentPairsHistoryIsTheSendersOwnAfterALeave` RED on the tree before the fix, GREEN after,
   RED again with the fix stashed — **DONE** (this commit). The protection set after: `✔ Test run with 430 tests in 70
   suites passed after 14.178 seconds.`
-- **NEW-1 (promise 3, a replayed pre-landing capture):** traced (below); classified **a MODEL bug** (P-U4-6's
-  memory-wins arm too narrow); pin + fix — PENDING.
+- **NEW-1 (promise 3, a replayed pre-landing capture):** traced; classified **a MODEL bug** — P-U4-6's "memory wins"
+  failed twice over (the settle's roll back of a landing act the outgoing library's memory still named wrote the older
+  file's facts over the memory FIRST; and the memory-wins arm could verify only through the live place, which held the
+  landed library's file); the pin `LadderRound1NewFindsPins.aLoneOlderFileOfALibrarySetAsideByALandingLosesToItsMemory`
+  (both forms) RED before, GREEN after, RED with the fix stashed whole AND with either link alone stashed — **DONE**
+  (this commit). The protection set after: `✔ Test run with 431 tests in 70 suites passed after 13.178 seconds.`
 - The runs at the end (the protection set in Debug, `swift build -c release`) — PENDING.
 
 ## NEW-2 — promise 13 with no tamper: a CHECKER bug
@@ -83,6 +87,105 @@ leave is reached at all; and the sent pair's history key IS reached and kept —
   issue.`; restored — `✔ Test run with 1 test in 1 suite passed after 0.082 seconds.`
 - The protection set after: `✔ Test run with 430 tests in 70 suites passed after 14.178 seconds.`
 
-## NEW-1 — the trace
+## NEW-1 — promise 3 after a replayed pre-landing capture: a MODEL bug
 
-*(PENDING — written with its pin.)*
+**The sequence** (start "a phone on an older build beside a synced Castle Mac", world seed 1000057): base tree —
+`createLibrary(macB, secrets)` · `updateToNewBuild(phone)` · `sendLibrary(phone → macB)` ·
+`crash(useCastle(macB, alwaysAsk), afterWrites: 17)` · `land(macB, .wordsPassphraseMadeNew)` ·
+`tamper(macB, .replayLibraryFile)` · `settle`; the fixed tree's minimal swaps the single tamper for
+`tamperSequence(macB, [replayPlan, plantPlan, replayLibraryFile])` → `promise 3 on macB: no Apple wrap of the current
+key`.
+
+**The traced mechanism** (a probe printing, per step, the slot, the record, the live key file, BOTH memory items with
+their epoch, mode, mirror and in-flight act, and the executor's log lines):
+1. `createLibrary(macB)`: library **Y** (`99708862`), Standard, key `89b4e0e9`, macB's own Apple key `d0097361`.
+2. `crash(useCastle(macB))` after write 17 — past the swap: Y is under `c8d07e93` (Castle), the memory names it at
+   epoch 2. **Captures:** the world's `opened()` captured the slot at the press — Y's Standard-era file
+   (`89b4e0e9`, epoch 1, record Standard) — the adversary's copy from Y's Standard day.
+3. `land(macB)`: the open first finishes Use Castle (`retired 1 own Apple key(s)` — `d0097361`); then the phone's
+   Castle pair lands as a DIFFERENT library **X** (`091f29c6`) under a fresh key `8e37d193`, held. Y goes to Previous
+   Libraries WITH its key file (`c8d07e93`, history `[89b4e0e9]`); X's key file takes the live place. **The landing is
+   named in both libraries** (Copies.swift: "the outgoing one's section (a crash before the swap rolls it back there)"),
+   so Y's memory item (v6, `c8d07e93#2`, Castle confirmed) still names `land #2` (`c8d07e93 → 8e37d193`) in flight —
+   nothing ends it there once the slot serves X.
+4. `tamper(macB, .replayLibraryFile)`: the oldest capture — Y's `89b4e0e9` Standard file — is written into the slot over
+   X (X's file is gone: the adversary's destruction, availability only). `tamperWith` records no `tamperedStandard`: the
+   device it tampered was Castle (X).
+5. The relaunch: the lobby opens Y's old file through Previous Libraries' `c8d07e93` key file (the typed passphrase,
+   then its history); `unlock` takes Y's memory (sealed under `c8d07e93`, in hand) — newer than the file's section — so
+   this Mac's section names `land #2`. **THE FIRST WRONG WRITE — the settle:** no plan (the landing's was deleted at its
+   end) → plan-less → "before its commit point" (the library isn't under `8e37d193`) → `rollBack`: ends the act and
+   `writeFacts` — the record AND the memory written from the REPLAYED record. Log: `land: rolled back #2 — the library
+   stays under 89b4e0e9`; Y's memory item is now v7, `89b4e0e9#1`, Standard confirmed — **the older file won over this
+   Mac's own memory**, exactly what §3.6 ("a library file replayed alone loses to the memory") and P-U4-6 (ratified (a),
+   "Memory wins") rule out. **THE SECOND LINK — the repair arm:** even with no act named, assess's memory-wins arm
+   verified only through the LIVE key file (`live.fingerprint == memory.currentFingerprint`), and the live place held
+   X's file — so it could not fire, and the ALWAYS block's `refreshMemory` would have written the same stale facts.
+6. The state left: Y in the slot, Standard confirmed, under `89b4e0e9` — a key a login-password holder held in Y's
+   Standard day — with no key file of its own (none was ever frozen; P-R1-1's copy-less class, so promise 1's clause
+   stays exempt) and its own Apple key retired at Use Castle (so Re-link's arm has no Standard key file to re-lock —
+   the finder's second reading does not hold: nothing CAN re-link it). Promise 3 is the symptom; the substance is a
+   remembered Castle library lowered to Standard by one replayed file (promise 10's claim — which the checker skips
+   because the slot's library ID changed).
+
+**Classification: a MODEL bug, under her ratified rule (P-U4-6 (a)); not P-U4-10's ceiling.** The finder's first
+reading (the checker should record `tamperedStandard` for a Standard file swapped INTO a Castle slot) would have exempted
+the symptom and hidden the lowering: P-U4-10's stated limit covers a tamper on a STANDARD device (and, by P-U4-6's own
+text, "a file only the ANCHOR reaches") — here the device was Castle, and Y's memory's key reaches the file's key through
+its HISTORY (the mirror and the set-aside key file both carry it). The second reading (the swapped-in library's Apple
+road never re-linked) is not the mechanism: there is no Standard key file of `89b4e0e9` anywhere for the arm to re-lock,
+and Y shouldn't read Standard at all. No product behaviour invented: the outcome is the ratified one; the two changes
+are its mechanics.
+
+**The fix — the older file loses FIRST, verified through the memory's own sealed mirror** (three edits, one rule):
+- `AssessRules.olderLibraryFileProof` (Assess.swift, new, pure): the key file that proves the file loses — the live
+  file of the memory's key (today's road), or, when the file came back ALONE (the live place holds no key file of THIS
+  library: absent, or another library's, as a landing leaves it), the memory's own sealed mirror of its key file —
+  whichever holds the file's key in its history. A whole-pair restore (the file's own key file live beside it — her
+  Time Machine restore, P-U4-12) never qualifies; neither does the anchor-only residue (a leave's new key has no
+  history). Assess's first arm now owes `rekeyOlderLibraryFile` on this proof.
+- `rekeyOlderLibraryFile` (ExecutorRepairs.swift): takes the same proof (and now also checks the memory is THIS Mac's —
+  assess's own-memory rule, seed 17, said in the executor too); on the mirror's road it sets whatever is live ASIDE
+  (`setAsideLiveKeyFile`, never deleted — the round-1 rule for another key's file), writes the mirror back Apple wraps
+  stripped (`restoreKeyFileFromMirror`'s rule), then re-keys as before; everything verified before the first write. A
+  crash after the set-aside leaves the live place empty (the same proof again); after the mirror's write, the live file
+  is the memory's (today's proof).
+- `settle` (PlanRunner.swift): FIRST — when this Mac's section names an act, its own memory is newer by epoch and names
+  another key — the re-key runs before the settle reads its plan or rolls anything back, so a roll back or finish acts
+  against the memory's library, never the stale record. With nothing in flight the repair arm owes it as before.
+
+**After the fix** (the probe's log at the relaunch): `the live place held 8e37d193's file, not the current key's — set
+aside` · `the memory's own key file restored from its mirror — the library file came back alone` · `the library file was
+older than this Mac remembers — re-encrypted under c8d07e93, the memory's facts kept` · `settle: … it lost to the memory
+first` · `land: rolled back #2 — the library stays under c8d07e93` (the stale landing act now ends against Y's own key,
+harmlessly). Y: `c8d07e93`, Castle confirmed, its own key file live, no Apple wrap; X's key file catalogued `.setAside`;
+Y's memory v7 at `c8d07e93#2`. Every promise kept through the settle.
+
+**The pin — `LadderRound1NewFindsPins.aLoneOlderFileOfALibrarySetAsideByALandingLosesToItsMemory(group:)`** (both
+forms: `false` = the base tree's single tamper, `true` = the fixed tree's group; asserts Y back in the slot under its
+remembered Castle key, its own key file live with no Apple wrap, X's file set aside, every promise kept).
+- **RED on the tree before the fix** (`59d5d9289` + the pin): both cases — `Expectation failed: slot.record?.mode ==
+  .castle`, `… slot.fingerprint == yCastle.currentFingerprint`, `… world.liveKeyFile(world.macB)?.fingerprint ==
+  yCastle.currentFingerprint`, `… keyFiles.contains { $0.role == .setAside && $0.fingerprint == x.fingerprint }`,
+  `Expectation failed: found.isEmpty` → `promise 3 on macB: no Apple wrap of the current key` — `✘ Test run with 2
+  tests in 1 suite failed after 0.094 seconds with 10 issues.`
+- **GREEN after:** `✔ Test aLoneOlderFileOfALibrarySetAsideByALandingLosesToItsMemory(group:) with 2 test cases passed`
+  — `✔ Test run with 2 tests in 1 suite passed after 0.093 seconds.`
+- **The revert check, whole and by link** (each a fresh build): all three files stashed — `✘ … 2 tests in 1 suite
+  failed … with 10 issues` (`promise 3 on macB: no Apple wrap of the current key`); the settle-first link alone stashed
+  — the same `✘ … with 10 issues`; the mirror proof alone stashed (Assess + ExecutorRepairs, the settle-first kept) —
+  the same `✘ … with 10 issues`; restored — `✔ Test run with 2 tests in 1 suite passed after 0.093 seconds.` **Each
+  link is necessary; together they fix it.**
+- The protection set after: `✔ Test run with 431 tests in 70 suites passed after 13.178 seconds.` (the
+  `libraryFileLosesToMemory` mutation pin — guarded green, unguarded failing — among them; both new paths sit behind
+  the same guard.)
+
+**Noted, not built (for round 2):** (1) promise 10's checker skips a step that changes the slot's LIBRARY, so a
+remembered library lowered by a swap is caught only through promise 3's symptom — a check reading the swapped-in
+library's own memory would see it directly; (2) the landing still leaves its act named in the outgoing library's
+memory — harmless after this fix (any older file of that library re-keys first, and the act then ends against its own
+key), but ending it there at the swap would be the cleaner bookkeeping; (3) the generator's group rule
+(`rollsBackBothHomes`) treats a library file replayed with its key file deleted or replayed as the stated limit's shape
+— with the mirror proof, the deleted-key-file case is no longer one (the memory now wins it), so that exclusion could
+narrow; (4) the stale act's roll back deletes custody items of its to-key not in the slot library's tree (X's, if X had
+one) — pre-existing (the Time Machine road to before a landing meets it too), unchanged here.

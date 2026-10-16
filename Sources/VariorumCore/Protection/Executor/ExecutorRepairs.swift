@@ -320,19 +320,45 @@ extension ProtectionExecutor {
 
     /// The library file is older than what this Mac remembers (§3.6, promise
     /// 10): verified with the keys in hand — the memory (sealed, verified at
-    /// unlock) names `to` at a newer epoch, the live key file is `to`'s, and
+    /// unlock) names `to` at a newer epoch, the proof below is `to`'s file, and
     /// its history opens with `to` to exactly the key the file is under — the
     /// file is re-encrypted under `to` and its record takes the memory's facts.
     /// Idempotent: a crash before the swap leaves the older file (the staged
     /// one is discarded at the next open and this runs again); after it, the
-    /// file is current and nothing is owed. PROVISIONAL P-U4-6. VX-305 U4.
+    /// file is current and nothing is owed. P-U4-6 (ratified (a)). VX-305 U4.
+    ///
+    /// The proof (`AssessRules.olderLibraryFileProof`) is the live file of the
+    /// memory's key — or, the file having come back ALONE (the live place
+    /// holding no key file of this library: absent, or another library's, as a
+    /// landing that set this library aside leaves it), the memory's own sealed
+    /// mirror of that file: whatever sits in the live place then goes ASIDE
+    /// (never deleted, never overwritten) and the mirror comes back, Apple
+    /// wraps stripped (never re-added by a restore), before the re-key —
+    /// everything verified first. A crash after the set-aside leaves the live
+    /// place empty (the same proof again); after the mirror's write, the live
+    /// file is the memory's (the first proof). VX-305 ladder round 1, NEW-1.
     func rekeyOlderLibraryFile(to: String, _ library: inout UnlockedLibrary) throws -> RepairSkip? {
         guard let record = library.record, let memory = library.memory, memory.currentFingerprint == to,
-              memory.keyEpoch > record.keyEpoch, let live = library.keyFile, live.fingerprint == to,
+              memory.deviceSection.deviceID == library.section.deviceID,
+              memory.keyEpoch > record.keyEpoch,
+              let proof = AssessRules.olderLibraryFileProof(
+                  memoryFingerprint: to, mirror: memory.keyFileMirror, live: library.keyFile,
+                  fileFingerprint: library.fingerprint, libraryID: record.libraryID),
               let newKey = ([library.key] + library.keysInHand).first(where: { Self.fp($0) == to }),
-              let older = try? live.historyKey(library.fingerprint, currentKey: newKey),
+              let older = try? proof.historyKey(library.fingerprint, currentKey: newKey),
               Self.fp(older) == library.fingerprint
         else { return .preconditionDoesNotVerify }
+        var live = proof
+        if library.keyFile?.fingerprint != to {
+            // The mirror's road: another library's file (or nothing) in the
+            // live place — set aside first, then the memory's file back.
+            let present = try leaves.keyFiles.readLiveKeyFile()
+            if let present, try !setAsideLiveKeyFile(fingerprint: present.fingerprint) { return .preconditionDoesNotVerify }
+            live.apple = nil
+            live.sharedApple = nil
+            try writeLiveKeyFile(live, &library)
+            log("the memory's own key file restored from its mirror — the library file came back alone")
+        }
         if try leaves.library.stagedFingerprint() != to {
             try leaves.library.stageReencryption(from: library.key, to: newKey)
         }
