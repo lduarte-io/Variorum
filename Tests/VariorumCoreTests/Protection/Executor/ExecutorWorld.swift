@@ -38,6 +38,7 @@ enum WorldWrite: Equatable, CustomStringConvertible {
     case swap(String)
     case discardStaged
     case keyFile(String)
+    case keyFileAside(String)
     case ownKeyFile(String)
     case legacyKeyFileDelete(String)
     case memory(String)
@@ -68,6 +69,7 @@ enum WorldWrite: Equatable, CustomStringConvertible {
         case .swap(let fp): return "swap \(fp)"
         case .discardStaged: return "discard-staged"
         case .keyFile(let fp): return "keyfile \(fp)"
+        case .keyFileAside(let name): return "keyfile-aside \(name)"
         case .ownKeyFile(let library): return "own-keyfile \(library)"
         case .legacyKeyFileDelete(let id): return "legacy-keyfile- \(id)"
         case .memory(let fp): return "memory \(fp)"
@@ -203,6 +205,8 @@ final class ExecutorWorld: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeys
     var ownKeyFiles: [String: KeyFile] = [:]
     var legacyBeside: [String: LegacyKeyFile] = [:]
     var catalogKeyFiles: [String: KeyFileDocument] = [:]
+    /// Key files moved out of the live place, by their set-aside names.
+    var setAsideKeyFiles: [String: KeyFileDocument] = [:]
     var memories: [String: Sealed<DeviceMemory>] = [:]
     var plan: Sealed<ProtectionPlan>?
     var paused = false
@@ -462,6 +466,15 @@ final class ExecutorWorld: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeys
     }
 
     func readKeyFile(catalogID: String) throws -> KeyFileDocument? { catalogKeyFiles[catalogID] }
+
+    func setAsideLiveKeyFile(as name: String) throws -> Bool {
+        guard let file = liveKeyFile else { return true }
+        guard setAsideKeyFiles[name] == nil else { return false }
+        setAsideKeyFiles[name] = file
+        liveKeyFile = nil
+        try wrote(.keyFileAside(name))
+        return true
+    }
 
     // MARK: - Memory, plans
 

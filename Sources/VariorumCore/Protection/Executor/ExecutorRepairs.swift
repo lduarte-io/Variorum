@@ -199,10 +199,26 @@ extension ProtectionExecutor {
             return nil
 
         case .restoreKeyFileFromCopy(let id):
-            guard try liveFormat3() == nil else { return .nothingThere }
+            // The live place holds NO file of the current key: absent (both
+            // deleted), or ANOTHER key's (a roll back with no plan to trust
+            // and the memory item gone — VX-305 ladder round 1, the MAJOR:
+            // §3.3's "Always: the record, what this Mac remembers and the key
+            // file agree"). The LIVE KEY FILE is repaired from this Mac's own
+            // catalogued frozen pair — never a library copy offered, opened or
+            // restored, never the library file, no unlock-screen face: not her
+            // dropped newest-copy offer (P-U4-10). A restored file keeps the
+            // locks of its day; re-locking under current secrets is P-R1-1's
+            // door.
+            let present = try leaves.keyFiles.readLiveKeyFile()
+            if case .format3(let live)? = present, live.fingerprint == library.fingerprint { return .nothingThere }
             guard case .format3(var copy)? = try leaves.keyFiles.readKeyFile(catalogID: id),
                   copy.fingerprint == library.fingerprint, copy.libraryID == library.record?.libraryID
             else { return .preconditionDoesNotVerify }
+            // Another key's file goes ASIDE first — never deleted (it may carry
+            // a crashed act's anchor, or be an adversary's artifact worth
+            // keeping visible); a crash right after leaves the live place empty
+            // and this repair owed again.
+            if let present, try !setAsideLiveKeyFile(fingerprint: present.fingerprint) { return .preconditionDoesNotVerify }
             // Never an Apple wrap re-added: those leave legitimately.
             copy.apple = nil
             copy.sharedApple = nil
@@ -286,6 +302,22 @@ extension ProtectionExecutor {
 }
 
 extension ProtectionExecutor {
+    /// Whatever sits in the live place goes ASIDE under today's set-aside
+    /// shape, named by its key's fingerprint and this moment's epoch (the
+    /// next free epoch if one is taken) — never deleted, never overwriting.
+    /// False only when no free name was found. VX-305 ladder round 1.
+    func setAsideLiveKeyFile(fingerprint: String?) throws -> Bool {
+        let epoch = Int(now().timeIntervalSince1970)
+        for offset in 0..<60 {
+            let name = ProtectionNames.setAsideKeyFilename(fingerprint: fingerprint, epoch: epoch + offset)
+            if try leaves.keyFiles.setAsideLiveKeyFile(as: name) {
+                log("the live place held \(Self.fp8(fingerprint))'s file, not the current key's — set aside")
+                return true
+            }
+        }
+        return false
+    }
+
     /// The library file is older than what this Mac remembers (§3.6, promise
     /// 10): verified with the keys in hand — the memory (sealed, verified at
     /// unlock) names `to` at a newer epoch, the live key file is `to`'s, and

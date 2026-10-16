@@ -143,6 +143,11 @@ public protocol KeyFileStoreLeaf: AnyObject {
     /// Any key file the catalog lists, by its catalog id (a copy's serving
     /// file — the move reads another library's key through it).
     func readKeyFile(catalogID: String) throws -> KeyFileDocument?
+    /// Move whatever sits in the live place aside, to `name` beside the
+    /// library — never deleting it, never overwriting: false (nothing moved)
+    /// when `name` is taken; true when moved, or when the live place is empty
+    /// (VX-305 ladder round 1).
+    func setAsideLiveKeyFile(as name: String) throws -> Bool
 }
 
 /// What this Mac remembers — one sealed non-secret item per library ID.

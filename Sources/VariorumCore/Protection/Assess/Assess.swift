@@ -275,14 +275,29 @@ public enum AssessRules {
                     repairs.append(.restoreKeyFileFromMirror)
                 }
             }
-            // Both gone — the live file and its mirror (a login-password holder
-            // deleted the two): the newest catalogued copy of the current
-            // key's file comes back (the lobby opened through such a file).
-            if liveKeyFile(facts, unlocked) == nil,
+            // No file of the current key in the live place — both gone (a
+            // login-password holder deleted the live file and its mirror), OR
+            // ANOTHER key's file there with no mirror of the current key's (a
+            // roll back with no plan to trust and the memory item gone: VX-305
+            // ladder round 1, the MAJOR — §3.3's "Always: the record, what this
+            // Mac remembers and the key file agree") — with nothing in flight:
+            // the newest catalogued frozen copy of the current key's own file,
+            // same library, comes back (the executor sets another key's file
+            // ASIDE first, never deleting it). This repairs the LIVE KEY FILE
+            // from this Mac's own catalogued frozen pair: it never offers, opens
+            // or restores a library copy, never touches the library file and
+            // adds no unlock-screen face — it is not her dropped newest-copy
+            // offer (P-U4-10, "lets drop the healthy copy deal"). A restored
+            // file keeps the locks of its day; re-locking under current secrets
+            // is P-R1-1's door. With no such copy the state stays — P-R1-1.
+            if unlocked.thisMac.actInFlight == nil,
+               liveKeyFile(facts, unlocked)?.fingerprint != unlocked.currentFingerprint,
                memory?.keyFileMirror.map({ $0.fingerprint != unlocked.currentFingerprint }) ?? true,
                let copy = facts.catalog.keyFiles
                 .filter({ file in
-                    if case .format3(let keyFile)? = file.document { return keyFile.fingerprint == unlocked.currentFingerprint }
+                    if case .format3(let keyFile)? = file.document {
+                        return keyFile.fingerprint == unlocked.currentFingerprint && keyFile.libraryID == record.libraryID
+                    }
                     return false
                 })
                 .max(by: { ($0.frozenAt ?? .distantPast, $0.id) < ($1.frozenAt ?? .distantPast, $1.id) }) {
