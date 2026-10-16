@@ -113,17 +113,25 @@ public struct TouchIDAssessment: Equatable, Sendable {
 
 // MARK: - Roads (before unlock)
 
+/// A typed road the live key file has.
+public enum TypedRoad: String, Hashable, Sendable {
+    case passphrase
+    case words
+}
+
 /// The lobby's roads (§3.3): what this device has for the library. Every
 /// road verifies itself; nothing here decides.
 public struct LobbyRoads: Equatable, Sendable {
-    /// Roads that need no person (a silent item; an Apple wrap whose key is
-    /// readable here) — tried at once.
-    public var automatic: [Route]
+    /// Roads that need no person, tried at once: every silent item (whatever
+    /// fingerprint it names) …
+    public var silentItems: [CustodyItemFact]
+    /// … and the live key file's Apple wrap, when its key is readable here.
+    public var appleKeyID: String?
     /// The custody items enumerated, whatever fingerprint they name.
     public var custodyItems: [CustodyItemFact]
-    /// What the passphrase or the words open, by the route finder (the key
-    /// file beside the slot, the history, the catalog's files).
-    public var typed: OpensWith
+    /// The current passphrase or words — the live key file's typed locks
+    /// (rule 4's one sentence: they open the current key and its history).
+    public var typed: Set<TypedRoad>
     /// The vault road behind the typed secrets (signed in).
     public var vaultRoad: Bool
 }
@@ -371,6 +379,6 @@ public struct Assessment: Equatable, Sendable {
     public var faults: [Fault]
     public var acts: [OwedAct]
     public var doors: [Door: DoorState]
-    /// One *Opens with* line per catalogued copy (the route finder's).
+    /// Rule 4's one sentence per catalogued copy.
     public var opensWith: [String: OpensWith]
 }

@@ -43,12 +43,12 @@ public func assess(_ facts: ProtectionFacts, guards: ProtectionGuards = .all) ->
         acts = AssessRules.acts(facts, unlocked, mode: mode, account: account, vault: vault, faults: faults,
                                 touchID: touchID)
     }
-    let doors = AssessRules.doors(facts, mode: mode, account: account, vault: vault, acts: acts, finder: finder,
+    let doors = AssessRules.doors(facts, mode: mode, account: account, vault: vault, acts: acts,
                                   faults: faults, guards: guards)
     var opensWith: [String: OpensWith] = [:]
     for copy in facts.catalog.copies { opensWith[copy.id] = finder.opensWith(copy: copy) }
     return Assessment(
-        launch: launch, mode: mode, account: account, vault: vault, lobby: AssessRules.lobby(facts, finder: finder),
+        launch: launch, mode: mode, account: account, vault: vault, lobby: AssessRules.lobby(facts),
         touchID: touchID, repairs: repairs, faults: faults, acts: acts, doors: doors, opensWith: opensWith)
 }
 
@@ -136,34 +136,26 @@ public enum AssessRules {
     // MARK: - The route finder over this device's facts
 
     public static func routeFinder(_ facts: ProtectionFacts) -> RouteFinder {
-        let section = facts.unlocked?.thisMac
-        let notReadable = Set(section?.appleKeys.filter { $0.isOwnLibraryKey && $0.retiredAt == nil }.map(\.id) ?? [])
-            .subtracting(facts.appleKeys.readable)
-        let session = facts.session.accountID
-        let vault = facts.vault.flatMap { $0.accountID == session ? $0 : nil }
-        return RouteFinder(RouteFacts(
+        RouteFinder(RouteFacts(
             catalog: facts.catalog, liveKeyFileID: facts.unlocked?.liveKeyFileID ?? facts.catalog.liveKeyFile?.id,
-            custody: facts.custody,
-            readableAppleKeyIDs: facts.appleKeys.readable,
-            ownAppleKeyIDsNotReadableHere: notReadable, vaultRecoveryWrap: vault?.recoveryWrap,
-            signedInToVault: vault != nil))
+            custody: facts.custody, readableAppleKeyIDs: facts.appleKeys.readable))
     }
 
     // MARK: - The lobby (before unlock: roads only)
 
-    public static func lobby(_ facts: ProtectionFacts, finder: RouteFinder) -> LobbyRoads {
-        let fingerprint = facts.unlocked?.currentFingerprint ?? facts.slotFingerprintHint
-        let opens = fingerprint.map { finder.opensWith(fingerprint: $0) } ?? OpensWith(routes: [])
+    public static func lobby(_ facts: ProtectionFacts) -> LobbyRoads {
+        let live = (facts.unlocked?.liveKeyFileID ?? facts.catalog.liveKeyFile?.id)
+            .flatMap { facts.catalog.keyFile(id: $0)?.document }
+        var typed = Set<TypedRoad>()
+        if live?.passphrase != nil { typed.insert(.passphrase) }
+        if live?.words != nil || live?.masterWordsCopy != nil { typed.insert(.words) }
         // Roads needing no person: every silent item (whatever fingerprint it
-        // names — each verifies itself) and an Apple wrap readable here.
-        var automatic = opens.routes.filter { $0.opener == .appleAccount }
-        for item in facts.custody where item.itemClass == .silent {
-            automatic.append(Route(opener: .thisMac, steps: [.custody(fingerprint: item.fingerprint, itemClass: .silent)]))
-        }
+        // names — each verifies itself) and the live file's Apple wrap when its
+        // key is readable here.
+        let apple = live?.apple.flatMap { facts.appleKeys.readable.contains($0.keyID) ? $0.keyID : nil }
         return LobbyRoads(
-            automatic: automatic, custodyItems: facts.custody,
-            typed: OpensWith(routes: opens.routes.filter { $0.opener.isSecret && $0.opener != .accountOnline }),
-            vaultRoad: facts.session.accountID != nil)
+            silentItems: facts.custody.filter { $0.itemClass == .silent }, appleKeyID: apple,
+            custodyItems: facts.custody, typed: typed, vaultRoad: facts.session.accountID != nil)
     }
 
     // MARK: - Repairs (§3.3, guards included)
@@ -388,7 +380,7 @@ public enum AssessRules {
 
     public static func doors(
         _ facts: ProtectionFacts, mode: ModeVerdict, account: AccountVerdict, vault: VaultVerdict?,
-        acts: [OwedAct], finder: RouteFinder, faults: [Fault], guards: ProtectionGuards
+        acts: [OwedAct], faults: [Fault], guards: ProtectionGuards
     ) -> [Door: DoorState] {
         var doors: [Door: DoorState] = [:]
         guard let unlocked = facts.unlocked, let current = mode.mode else {
@@ -426,7 +418,7 @@ public enum AssessRules {
             if let refusal = gate(syncedAct: true) { return .refused(refusal) }
             if current == .castle { return .refused(.wrongMode(.castle)) }
             if signedOut { return .refused(.signedOutUseThisMacOnly) }
-            return .open(useCastleSpec(facts, unlocked, finder: finder, synced: inSync, guards: guards))
+            return .open(useCastleSpec(facts, unlocked, synced: inSync, guards: guards))
         }()
         // USE STANDARD.
         doors[.useStandard] = {
@@ -460,7 +452,7 @@ public enum AssessRules {
             guard case .localOnly = account.situation else { return .refused(.nothingToDo) }
             guard signedIn else { return .refused(.noAccountSignedIn) }
             let join = joinPlan(library: current, vault: facts.vault.flatMap { $0.accountID == facts.session.accountID ? $0 : nil })
-            return .open(joinSpec(join, facts, unlocked, finder: finder, guards: guards))
+            return .open(joinSpec(join, facts, unlocked, guards: guards))
         }()
         // THE LEAVES — none changes a key or a secret (rule 16), so none asks
         // for one (PROVISIONAL P-VX378-U1-2).
@@ -477,7 +469,7 @@ public enum AssessRules {
         doors[.moveToSignedInAccount] = {
             guard otherAccount else { return .refused(.nothingToDo) }
             let join = joinPlan(library: current, vault: facts.vault.flatMap { $0.accountID == facts.session.accountID ? $0 : nil })
-            var spec = joinSpec(join, facts, unlocked, finder: finder, guards: guards)
+            var spec = joinSpec(join, facts, unlocked, guards: guards)
             if sameEmail { spec.words.append(.sameEmailDifferentAccount) }
             return .open(spec)
         }()
@@ -503,13 +495,20 @@ public enum AssessRules {
     }
 
     static func useCastleSpec(
-        _ facts: ProtectionFacts, _ unlocked: UnlockedFacts, finder: RouteFinder, synced: Bool, guards: ProtectionGuards
+        _ facts: ProtectionFacts, _ unlocked: UnlockedFacts, synced: Bool, guards: ProtectionGuards
     ) -> DoorSpec {
         var words: [Words] = [.floorSentence, .exportAPlainCopyFirst]
-        // Copies under a key this Mac can't delete — one left in an Apple
-        // account it no longer uses — named, with what that means.
-        let undeletable = facts.catalog.copies.filter {
-            finder.opensWith(copy: $0).openers.contains(.appleKeyNotReadableHere)
+        // Copies under a key this Mac can't delete — an Apple key it lists as
+        // its own and can't read here (one left in an Apple account it no
+        // longer uses) wrapping the copy's key in its own key file — named,
+        // with what that means.
+        let notReadable = Set(unlocked.thisMac.appleKeys.filter { $0.isOwnLibraryKey && $0.retiredAt == nil }.map(\.id))
+            .subtracting(facts.appleKeys.readable)
+        let undeletable = facts.catalog.copies.filter { copy in
+            facts.catalog.servingKeyFiles(of: copy).contains { file in
+                guard let document = file.document, let wrap = document.apple else { return false }
+                return document.fingerprint == (copy.fingerprint ?? document.fingerprint) && notReadable.contains(wrap.keyID)
+            }
         }.map(\.id)
         if !undeletable.isEmpty { words.append(.copiesUnderAKeyThisMacCantDelete(undeletable)) }
         if unlocked.thisMac.settings.scheduledExport { words.append(.scheduledExportTurnsOff) }
@@ -529,12 +528,12 @@ public enum AssessRules {
     }
 
     static func joinSpec(
-        _ join: JoinPlan, _ facts: ProtectionFacts, _ unlocked: UnlockedFacts, finder: RouteFinder,
+        _ join: JoinPlan, _ facts: ProtectionFacts, _ unlocked: UnlockedFacts,
         guards: ProtectionGuards
     ) -> DoorSpec {
         switch join {
         case .entersCastle:
-            var spec = useCastleSpec(facts, unlocked, finder: finder, synced: true, guards: guards)
+            var spec = useCastleSpec(facts, unlocked, synced: true, guards: guards)
             spec.join = join
             return spec
         case .leavesCastle:

@@ -7,12 +7,12 @@ import Foundation
 //   - the far folder (`<picked>/Variorum/Backups/<library8>/<mac8>/`),
 //   - `Previous Libraries/<stamp>/`,
 //   - the adoption safety copies (`Backups/safety-copies/variorum-adopt-
-//     safety-<stamp>/`),
-//   - the `.stale-*` key files beside the slot —
+//     safety-<stamp>/`) —
 // with ONE name parser (`CatalogNames`) and an attribution of every copy to
 // its LIBRARY (from the pair's key file) and its MAC (from the subfolder).
-// The restore list, Open Library, the Castle offer, retention and the route
-// finder all read it.
+// The restore list, Open Library, the Castle offer, retention and rule 4's one
+// sentence (`RouteFinder`) all read it. (The `.stale-*` set-aside files left
+// with VX-378 U1 — rules 19, 21.)
 //
 // Pure: the leaf lists the two roots and reads every key file's bytes; this
 // builds the catalog from that listing and touches nothing. Key-file bytes

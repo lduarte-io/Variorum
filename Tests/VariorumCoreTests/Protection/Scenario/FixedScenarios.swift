@@ -34,7 +34,7 @@ extension SWorld {
     /// Run steps, expecting each to be done (not refused, not crashed).
     func done(_ actions: [Action], sourceLocation: SourceLocation = #_sourceLocation) async {
         for action in actions {
-            let result = await step(action, words: true)
+            let result = await step(action)
             #expect(result == .done, "\(action) → \(result)\n\(log)", sourceLocation: sourceLocation)
         }
     }

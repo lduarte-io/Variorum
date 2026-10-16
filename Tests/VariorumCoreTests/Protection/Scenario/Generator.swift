@@ -7,12 +7,13 @@
 //  go/no-go run").
 //
 //  The runner applies a step and checks the promises after it: every step's
-//  (1, 2, 4, 5, 6, 8, 11), the settle's (2's retired-key clause, 3, 7), the tampering
-//  steps' (10 — the device is relaunched as part of the step, the next open
-//  being when a planted or replayed thing would act), and — every few steps and
-//  at every settle — the words (9). (Promise 12 left with the move off the old
-//  shared key — VX-378 U1, rule 26; promise 13's pre-leave reading and the
-//  vault's Castle-era-key invariant left with the anchor — rules 12, 13, 15.)
+//  (1, 2, 4, 5, 6, 8, 11), the settle's (2's retired-key clause, 3, 7) and the
+//  tampering steps' (10 — the device is relaunched as part of the step, the
+//  next open being when a planted or replayed thing would act). (Promise 12
+//  left with the move off the old shared key — VX-378 U1, rule 26; promise 13's
+//  pre-leave reading and the vault's Castle-era-key invariant left with the
+//  anchor — rules 12, 13, 15; promise 9, the honest words, left with the route
+//  finder — rule 4.)
 //
 
 import CryptoKit
@@ -25,7 +26,7 @@ extension SWorld {
     /// Apply one step and check the promises after it. Violations accumulate
     /// in `violations`.
     @discardableResult
-    func step(_ action: Action, words: Bool = false) async -> StepResult {
+    func step(_ action: Action) async -> StepResult {
         // A single tamper and a group (`.tamperSequence`) are bracketed alike:
         // ONE pre-launch settle before, ONE relaunch and promise-10 check after.
         let tampered: (name: String, tampers: [Tamper])? = {
@@ -90,9 +91,6 @@ extension SWorld {
         // entry's one legitimate consumer. VX-305 ladder round 2, NIT 3 (the
         // final call §4).
         if let name = reopened { truth.beforeRollback[name] = nil }
-        if words || action == .settle {
-            for device in devices { found += honestWords(device) }
-        }
         if !found.isEmpty {
             stepLog.append(contentsOf: found.map { "  ✗ \($0)" })
             violations.append(contentsOf: found.map { ($0, stepLog.count) })
@@ -103,8 +101,8 @@ extension SWorld {
 
     /// Run a sequence; returns every violation, each with the step it surfaced at.
     @discardableResult
-    func run(_ actions: [Action], words: Bool = true) async -> [Violation] {
-        for action in actions { await step(action, words: words) }
+    func run(_ actions: [Action]) async -> [Violation] {
+        for action in actions { await step(action) }
         return violations.map(\.0)
     }
 
@@ -238,7 +236,7 @@ struct ScenarioGenerator {
         for index in 0..<length {
             let action = index == length - 1 ? Action.settle : next(world)
             actions.append(action)
-            await world.step(action, words: index % 10 == 9)
+            await world.step(action)
             if !world.violations.isEmpty { break }
         }
         return (Generated(seed: seed, start: start, actions: actions), world)
@@ -248,7 +246,7 @@ struct ScenarioGenerator {
     static func replay(_ generated: Generated, actions: [Action]) async throws -> SWorld {
         let world = SWorld(seed: generated.seed)
         try await StartingState.all[generated.start].build(world)
-        for (index, action) in actions.enumerated() { await world.step(action, words: index % 10 == 9 || index == actions.count - 1) }
+        for action in actions { await world.step(action) }
         return world
     }
 

@@ -212,7 +212,7 @@ struct AssessModeTests {
         #expect(assessed.doors.values.allSatisfy { $0 == .refused(.locked) })
         // The roads: the Touch ID item, the typed secrets.
         #expect(assessed.touchID.button)
-        #expect(assessed.lobby.typed.openers == [.passphrase(.current), .words(.current)])
+        #expect(assessed.lobby.typed == [.passphrase, .words])
     }
 
     @Test func aMissingLibraryIsMissingInBothModesAndAFreshStartIsNot() throws {
@@ -234,8 +234,8 @@ struct AssessModeTests {
         world.custody.append(CustodyItemFact(fingerprint: stray, itemClass: .silent))
         let lobby = try world.assessed().lobby
         // Every silent item, whatever fingerprint it names; the Apple wrap readable here.
-        #expect(lobby.automatic.contains { $0.steps == [.custody(fingerprint: stray, itemClass: .silent)] })
-        #expect(lobby.automatic.contains { $0.opener == .appleAccount })
+        #expect(lobby.silentItems.contains(CustodyItemFact(fingerprint: stray, itemClass: .silent)))
+        #expect(lobby.appleKeyID == world.own.id)
         #expect(!lobby.vaultRoad)
     }
 }

@@ -215,3 +215,33 @@ struct CutPinsRule16Tests {
         #expect(library.key == k0, "the move changed the library's key")
     }
 }
+
+@Suite("VX-378 U1 — rule 4: a quiet road opens only a key it holds directly (red on the pre-cut tree)")
+struct CutPinsRule4QuietRoadTests {
+    /// RULE 4: "Only typed secrets reach through the list; a quiet road opens
+    /// only a key it directly holds." After a leave, this Mac's silent item and
+    /// its Apple key hold the NEW key only: the Castle copy's sentence names no
+    /// quiet road (the old route graph walked them through the history).
+    @Test func aCastleCopyAfterALeaveNamesNoQuietRoad() throws {
+        let world = try KeyWorld()
+        let castleKey = StoreKey.mint(), standardKey = StoreKey.mint(), apple = AppleKeyMaterial.mint()
+        let castleFile = try world.castleFile(castleKey)
+        let standardFile = try castleFile.rekeyed(
+            from: castleKey, to: standardKey, kind: .standard,
+            locks: NewKeyLocks(passphrase: world.p, words: world.w, apple: apple), at: CF.stamp(2))
+        let folders = CF.macFolder(world.library, CF.macA)
+        let catalog = Catalog.build([
+            CatalogEntry(place: .container, name: ProtectionNames.keyFilename, bytes: try standardFile.encoded()),
+            CatalogEntry(place: .container, folders: folders, name: CF.snapshotName(CF.stamp(1), castleKey)),
+            CatalogEntry(place: .container, folders: folders, name: CF.pairName(CF.stamp(1), castleKey),
+                         bytes: try castleFile.encoded()),
+        ])
+        let finder = RouteFinder(RouteFacts(
+            catalog: catalog, custody: [CustodyItemFact(fingerprint: PF.fp(standardKey), itemClass: .silent)],
+            readableAppleKeyIDs: [apple.id]))
+        let copy = try #require(catalog.copies.first { $0.fingerprint == PF.fp(castleKey) })
+        let sentence = "\(finder.opensWith(copy: copy))"
+        #expect(!sentence.contains("thisMac") && !sentence.contains("appleAccount"),
+                "a quiet road reached through the history: \(sentence)")
+    }
+}
