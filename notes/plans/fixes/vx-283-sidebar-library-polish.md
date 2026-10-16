@@ -4243,6 +4243,36 @@ header and here:
   prefs keys deleted, `defaults import`, re-export: "PREFS CLEAN"; "castle-W1 present: 1". KEEP `DerivedData/vx283-u2c`
   for the re-walk.
 
+#### U2c — THE WINDOW (the orchestrator, claim `vx283-u2c` 07:04:37 →; `u2c/logs/trace.log`, `trace-counts`, `u2c/caps/`)
+
+`window.sh` pre (GUARD OK, the author idle ~13.9 h — she is asleep; App/ clean at `ab535ab2`; four products; store
+`store-before/20261016T130437Z`) → `launch trace` (PID 28528; the launch capture looked at: no What's New sheet, 13
+Open rows) → `aim` OK (row 2 `D4C23B6A` at 133,413) → **G1: DID NOT LAND.**
+- **G1's counts:** `payload=1 preview=1 began=1 src.session=21 src.ended=1` · **`dsess=0`** · `cfg.*=0` · `action=0` ·
+  `perform=0` · `land=0` · `line=0`. The source's session runs (initial → active ×21 → ended with cancel), but **no
+  per-row drop session update ever arrives**. F1's session-form `dropDestination` is never consulted, exactly as the
+  legacy delegate wasn't. Per the ruling, F1 is refuted under this road.
+- **G3–G5 run anyway** (they test the SOURCE only; within the claim's stated scope):
+  - G3a (row 4, ~30 s after G1) STARTED;
+  - **G3b (row 4 again ~2 s after its cancel) did NOT start** (no payload, no session);
+  - G4a (row 4 again, after a hover off the list and back) started a session (22 updates; the payload not re-evaluated);
+  - G4b started;
+  - **G5a (row 4 again, after a 10-s wait) did NOT start**;
+  - G5b started.
+  So a press on the same row right after a cancelled drag starts every OTHER time, whatever the wait. Road or product
+  is still undecided (no drop has landed on this road yet, so "after an accepted drop", G2, is untested).
+- restore (07:1x): the store identical before copy-back, `cmp`; no keys added; PREFS CLEAN; castle-W1 present; no
+  instance. The pins, R-T/R-U/R-V and the batch did NOT run (pointless on a road that does not land).
+- **THE DISCRIMINATOR OWED BEFORE F2 (the orchestrator's call):** F1, the legacy delegate AND F2 are all SwiftUI drops
+  on rows inside the sidebar's Open list. F2's and main's per-row `.dropDestination(…isTargeted:)` belong to the API
+  family the Bookcase strip uses, and the strip works under this road (the walk's control). But the Open list sits in
+  the SIDEBAR, and no drop on this road has ever landed there. So before building F2: **main's own Debug build
+  (`a7c0a25f`, headless into `DerivedData/vx283-main`), the same `cliclick` drag on its Open list.**
+  - Main's drag lands → this branch broke the drop (the container, the source's chip road, or the API); F2 plus a
+    bisect of the branch's sidebar changes.
+  - Main's drag does not land → synthetic drags cannot reach sidebar drops, and the walk road is invalid for this
+    question. Then the evidence has to come another way, and this is said plainly in the morning handoff.
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
