@@ -4338,9 +4338,23 @@ the hand check that proves delivery is hers (the morning checklist's first item,
 - F1 — the pins, red-first, no product line: DONE (`99565d41`).
 - F2 — the fix (F2 on main's per-row API; the instrument stripped): DONE (`63b8c191`); `build-for-testing` → TEST BUILD
   SUCCEEDED on `DerivedData/vx283-u2d`, no warning in a touched file; the headless replica green (below).
-- F3 — the trees: the fix + one per named revert. The five reverts are NAMED below (this commit), before any is
-  applied; each will be applied, built into its own tree and restored by `git checkout --` with `git diff` empty. The
-  superseded `vx283-u2c*` trees get deleted once these build: NEXT.
+- F3 — the trees: DONE.
+  - The five reverts were named below (`5be9360c`) before any was applied.
+  - Each was then applied to the tip `5be9360c` (whose code is `63b8c191`'s), its patch kept in `u2d/reverts/R-{W,X,Y,Z,Q}.patch`
+    (gitignored), and the replica run on it.
+  - Each was built with `build-for-testing` → TEST BUILD SUCCEEDED ×5: `DerivedData/vx283-u2d-rw`, `-rx`, `-ry`, `-rz`,
+    `-rq` (logs `u2d/logs/bft-r{w,x,y,z,q}.log`).
+  - Each was restored by `git checkout -- <file>`, with `git diff` empty after. **No revert is in the tree**, and the
+    replica on the restored tree is green again (26 / 0).
+  - All six products are present (the app and the `.xctestrun`). The superseded `vx283-u2c`, `-rt`, `-ru`, `-rv`
+    trees are deleted. `vx283-u3c` is kept for D8.
+  - **The replica per revert agrees with the hand-traced lists to the test** (its scope is the Rule + Door suites and
+    the two face source reads, never the mounted pins):
+    - R-W: red exactly (a);
+    - R-X: red exactly the 18 named Rule + Door tests (the 19th, the mounted line pin, is the window's);
+    - R-Y: red exactly the two named Door tests (the third, mounted, is the window's);
+    - R-Z: red exactly `theDragSessionsEndClearsTheDrag`;
+    - R-Q: red exactly the pure end-zone pin (the mounted one is the window's).
 - F4 — `notes/plans/vx283-screens/u2d/window.sh` (gitignored) + READY FOR STAGE.
 
 **The SDK, confirmed before a line was written** (Xcode 27.0 27A266a, `MacOSX.sdk`, SwiftUI's
