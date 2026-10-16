@@ -399,7 +399,7 @@ trailer of any kind.
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **PROVEN — awaiting U2's walk for P-U1e-1** (the fade ramp rides U2): U1 built + walked; U1b/U1c fix legs; U1d (her memo rulings) window GREEN (434/96, R-I/R-J red as named, 01:44–01:50) and re-walk HOLD on R0–R3, R5–R8 (R6 her scroll never pulled back); R4's 7–9-pt slice → P-U1e-1 built in U2's leg, verified by U2's window + walk. |
-| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **TEST PART GREEN; THE WALK FAILED D1/D2: a real system drag never draws the line or lands** (a regression against main's per-row road; the pins cannot post a drag). D5 (P-U1e-1) HOLDS by eye; D6 holds. **→ U2b: T3 PROPOSED, AWAITING THE RULING** (the trace run 17:06–17:08: G1 refuted, the source works; the rows' legacy `onDrop` delegate is never consulted, and the second drag of the same row never starts. T3 `53d66c65`: fix F1 (a per-row Transferable `dropDestination` in the session form + `onDropSessionUpdated` + `.move` with the source's `allowMove`), fallback F2 (the book navigator's road), the floor main's; a probe window `u2c` (G1–G5, H1–H3) recommended before building). |
+| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **READY FOR STAGE — U2c window (drag checks → pins/reverts/batch), ≈30 min, then the re-walk.** U2's walk failed D1/D2 (a real system drag never drew the line or landed — the legacy content-root delegate was never consulted, U2b's trace); D5 (P-U1e-1) and D6 HOLD by eye. U2c built F1 as P-U2b-1 rules (`e93e4246`, pins `51253c7c`): each row a Transferable `dropDestination` in the session form, the end zone the same, `.move` with the source's `allowMove`, the session's end clears the drag; trees `vx283-u2c` + `-rt`/`-ru`/`-rv` prebuilt, no revert in the tree; `u2c/window.sh` pre · drag (G1–G5, stops after G1 if it does not land) · pins · rt · ru · rv · batch · restore. F2 and the second-drag micro-leg held for the window's answers. |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **W1/W3/W4/W5 PROVEN.** U3b's band traced (U3c: the segmented pickers answered two ways after a search) → **P-U3c-1 built and PROVEN** (window 16:43–16:54: pins 23/3 green; R-P exactly 4 red; U3b's 103-suite batch 513 green). **OWED: D8's re-walk** on `vx283-u3c` (folded with U2b's). |
 | Ladder | `fable-reviewer` at xhigh (her word, superseding opus at max), fresh per round, cross-model | **ROUND 1 DONE** (tip 448f9450; findings in the Ladder section, `9ef6fba3`): 0 BLOCKER · 0 MAJOR · 2 MINOR (R1-1 this table — fixed here; R1-2 sequencing — the windows owed) · 4 NIT (R1-3…6 → the implementer). Round 2 re-reviews the fixes + the U2/U3b window results. |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
@@ -4040,8 +4040,13 @@ NOT built (pre-ruled, held for the window's answers).
 - C1 — the pins, red-first, no product line: DONE (`51253c7c`).
 - C2 — F1, the fix: DONE (`e93e4246`); `build-for-testing` → TEST BUILD SUCCEEDED on `DerivedData/vx283-u2c`, no
   warning in a touched file; the headless replica green (below).
-- C3 — the three revert trees: R-T / R-U / R-V NAMED below, BEFORE any is applied; build + restore IN PROGRESS.
-- C4 — `u2c/window.sh` + READY FOR STAGE: NOT STARTED.
+- C3 — the three revert trees, each named below BEFORE it was applied (`9b7a63bc`), applied to the tip `9b7a63bc`
+  (whose code is `e93e4246`'s), built (`build-for-testing` → TEST BUILD SUCCEEDED ×3: `DerivedData/vx283-u2c-rt`,
+  `-ru`, `-rv`; logs `u2c/logs/bft-r{t,u,v}.log`; patches `u2c/reverts/R-{T,U,V}.patch`, gitignored), each restored by
+  `git checkout -- <file>` with `git diff` empty after: DONE. **No revert is in the tree.**
+- C4 — `notes/plans/vx283-screens/u2c/window.sh` (gitignored; `zsh -n` clean; its count logic dry-run on a synthetic
+  trace) + **READY FOR STAGE — U2c window (drag checks → pins/reverts/batch), ≈30 min, then the re-walk**: DONE (this
+  commit). The window below.
 
 **The SDK, confirmed before a session-form call was written** (Xcode 27, `MacOSX.sdk`, SwiftUI's
 `arm64e-apple-macos.swiftinterface` and its `.swiftdoc`). Every API exists as T3 assumed; nothing was built around a
@@ -4183,6 +4188,60 @@ its own DerivedData, then restored by `git checkout -- <file>`, `git diff` empty
   loses its one `ended()` call (the guard and the DEBUG line stay). Products `DerivedData/vx283-u2c-rv`. Expected on
   `OpenListDropDoorTests` (12 tests): **RED exactly** `theDragSessionsEndClearsTheDrag`; the other 11 GREEN (incl.
   `aSessionEndBeforeTheDropsActionStillLands`, green on both sides by design).
+
+**THE WINDOW — `notes/plans/vx283-screens/u2c/window.sh`** (u2b's proven helpers: `ourpid` by the exact binary path,
+`guard.sh --author` then `guard.sh <pid> x y` before every press, the aim from the instrument's own `ROW n=… screen=…`
+lines verified by the row's `HOVER` line, `/usr/bin/log`). Run `pre` → `drag` → `pins` → `rt` → `ru` → `rv` → `batch`
+→ `restore`, then SEAM, then the re-walk (P-U2b-1's step 5). Each step's EXPECTED result is written in the script's
+header and here:
+- **pre** — the strict pgreps print nothing; `GUARD OK`; "App/ clean at <tip>"; all four products present
+  (`vx283-u2c`, `-rt`, `-ru`, `-rv`); the Debug prefs exported; the store's three files copied to
+  `u2c/store-before/<UTC>/`; the marker and the trace cleared.
+- **drag** — `launch "trace"` (a launch capture; a What's New sheet would stop `aim` — dismiss it with its own button)
+  → `aim` (AIM OK) → G1 … G5, each with before / mid / after region captures in `u2c/caps/`, the ids of rows 1–6 before
+  and after, a pixel bbox of the change, and a VERDICT line (two witnesses: the latest `ROW` line of the expected row,
+  and the drag's own `DOOR land row=<pressed>` line) → `read`.
+  - **G1** — row 2 pressed → row 3's lower quarter, hold 0.8 s → row 5's upper quarter, hold → release there.
+    EXPECT: `ROW n=3 DROP-SESSION phase=entering|active loc=(x,≈22)` and `ROW n=5 … loc=(x,≈7)` (the location in the
+    ROW's space, 0…pitch), `CONFIG → move` at both holds, `LINE drawn`, `ROW n=5 ACTION`, `DOOR perform gap=4`, `DOOR
+    land … from=1 to=4`, the source's `SESSION … phase=ended(move)` → **"VERDICT G1 LANDED"** (the pressed note at row
+    4). **If G1 does not land, the script STOPS after G1** (the ruling: restore, release, build F2). The counts say
+    why: `dsess=0` → the session form is not offered the drag either → F2 as pre-ruled; `dsess>0`, `cfg.move>0`,
+    `line>0` but `action=0` → the drop arrives and the MOVE is refused → the OPTIONAL `window.sh g1copy` (one drag like
+    G1 with the `copy` flag; if it lands, the source's mask refuses `.move` despite `allowMove` — F2 proposes `.copy`);
+    a location outside 0…pitch or the wrong gap → the session's location is not the row's space (report it).
+  - **G2** — after that ACCEPTED drop, the row now at row 2 pressed AT ONCE (a warp, no move) → row 3's lower quarter →
+    release. EXPECT the drag starts (`payload`, `preview`, `SESSION initial`) and **"G2 LANDED"** (at row 3).
+  - **G3** — row 4 → row 5's upper quarter → back to row 4's lower quarter (both its own gap; the detour only makes
+    sure a drag BEGINS) → release: EXPECT `CONFIG → forbidden`, no ACTION, a slide-back, "G3a unchanged — as
+    expected"; then row 4 AT ONCE → row 2's upper quarter → **"G3b LANDED"** (at row 2), or the drag never starts
+    (`payload=0 preview=0` in G3b).
+  - **G4** — as G3, but between the two drags the pointer leaves the list (into the content) and comes back onto row 4
+    (a hover cycle, as a hand makes); G4b → row 5's lower quarter: **"G4b LANDED"** (at row 5).
+  - **G5** — as G3, with a 10-s wait between the drags; G5b → row 2's lower quarter: **"G5b LANDED"** (at row 3).
+  - **"AT ONCE" is the soonest the guard allows** (a deviation from T3 §5's letter, recorded): every `cliclick` act
+    resets HIDIdleTime and the guard wants ≥ 2 s idle (WalkKit's SELF-TRIP rule), so the second press waits for HID
+    idle ≥ 2 s (`waitidle`, ≤ 6 s; a human keeps resetting it and the guard then stops the window — never retried) —
+    ≈2 s after the release, against U2b's failing B at 5 s and G5's 10 s.
+  - **Reading G3–G5 (the ruling):** G3b fails but G4b starts = the ROAD (the re-walk hovers between drags); G3b and G4b
+    fail but G5b starts = the PRODUCT, time-bound; all three fail = the PRODUCT → the pre-ruled micro-leg (the inner
+    `.id(dragGeneration)`), these G-steps its pin; all three land = neither.
+  - **read** — `u2c/logs/trace.log`; `trace-counts.txt` per drag (from its begin to the next — the source's session end
+    lands ~1–2 s after a release): `payload preview began src.session src.ended dsess cfg.move cfg.forbidden cfg.copy
+    action perform land refused line st.ended column`; `trace-key.txt`; `unified-<pid>.log`.
+- **pins** — on `vx283-u2c`: `OpenListDropRuleTests` (15) · `OpenListDropDoorTests` (12) · `OpenListDragFaceTests` (3)
+  · `OpenListDragMountTests` (3) · `SidebarSectionWindowRuleTests` + `SidebarSectionWindowMountTests` (27): EXPECT
+  **"Test run with 60 tests in 6 suites" passed**, no skips.
+- **rt / ru / rv** — each on its own tree, exactly the RED and GREEN lists under THE REVERTS above (R-T 2 red of 3; R-U
+  2 red of 27; R-V 1 red of 12); each step deletes its tree after.
+- **batch** — `u2/batch-suites.txt` (144 suites; no line added — no suite was added or renamed) on `vx283-u2c`: EXPECT
+  all green but `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` (VX-115, red on main, untouched); ≈728
+  tests (722 at the last U2 batch + U2c's six; more if a listed suite grew since); the skips the opt-in harnesses only
+  (9 last time) — record the "Test run with N tests" line AND the skipped lines.
+- **restore** — quit by PID (a missed synthetic mouse-up keeps AppKit's drag loop open: the script names the `sample`
+  check and the second `du`); the trace copied, the marker + trace removed; the store copied back + `cmp` ×3; the added
+  prefs keys deleted, `defaults import`, re-export: "PREFS CLEAN"; "castle-W1 present: 1". KEEP `DerivedData/vx283-u2c`
+  for the re-walk.
 
 ## Ladder
 
