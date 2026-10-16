@@ -568,8 +568,10 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
 - The ladder (§9; up to five rounds while MAJORs are found, her word): round 1 **DONE** (1 MAJOR · 1 MINOR · 4 NIT,
   all six fixed and verified, Debug 429/69 · Release 368/64); the triage of the two pre-existing generator finds
   **DONE** (NEW-2 a checker bug, NEW-1 a model bug under P-U4-6 (a); verified Debug 432/70 · Release 371/65); round 2
-  **IN FLIGHT**.
-- The go/no-go record: **NOT-STARTED.**
+  **DONE** (0 MAJOR · 1 MINOR · 4 NIT, all applied, checked line by line, Debug 434/71 · Release 372/66). **THE
+  LADDER IS CLOSED** — code tree `63cf038f1`.
+- The go/no-go record: **IN FLIGHT** — the fresh soak (seeds 1–20 × 1,000 × ≤ 60, one seed per call, Debug then
+  Release) on `63cf038f1`; the key map's model half by a fresh implementer, read-only on code while the soak runs.
 
 ---
 
@@ -1619,6 +1621,37 @@ epoch backward") with its exemptions named — the stated limit, the anchor-only
 lobby passes every key it reads in `alsoInHand` (or the re-key reads through the same `reach`); observation 1's
 promise-10 slot-library reading; observation 5's availability-only line; the optional set-aside adoption at the two
 other restores. The call ends with the orchestrator's eight-point line-by-line checklist — this is the final round.
+
+**The fixes — applied by the implementer (`notes/plans/vx-305-ladder-round-2-fixes.md`; commits `4d8234068` ·
+`e927333f9` · `601cd9251` · `ecf437996` · `43e48d8b1` · `63cf038f1` · `cf6e930ae`, each pushed), checked LINE BY LINE
+by the orchestrator against the final call's eight points (no later round reads them):**
+1. `LadderRound2Pins.swift` in the tree, its header's UNTRACKED line now the provenance line naming the four round-2
+   records; green in the committed tree. ✔
+2. The mutation twin `ScenarioMutationPins.aLibraryFileReplayedWithItsKeyFileDeletedLosesToTheMemory` — one test,
+   `mutationPin(off: libraryFileLosesToMemory = false)`, inside `MutationPins.swift`'s `#if DEBUG`, its own check the
+   slot under the remembered key at the memory's epoch (the implementer showed the unguarded leg depends on the
+   switch: a no-op switch failed the twin, restored green). ✔
+3. `tamperGroup`'s doc comment carries all three §1(c) clauses (the memory-home reason; P-U4-12 / `replayKeyFile`;
+   P-U4-13 (b) / `deleteKeyFile` with "NARROW this exclusion when that road lands"); the hunk is `///` lines only —
+   `rollsBackBothHomes`'s CODE unchanged. ✔
+4. One doc comment on `ExecutorWorld.setAsideLiveKeyFile` (no catalog view in the U3 harness; the scenario world
+   models that half); comment lines only. ✔
+5. One sentence each at PlanRunner's no-identity restore and `restoreKeyFileFromMirror` (the in-place overwrite
+   deliberate, the copy repair's set-aside the belt); a filter of every changed `Sources/` line minus comments
+   returns NOTHING — no behavior change, no new counted write. ✔
+6. `SWorld.step` records `reopened` only when the tamper step's relaunch succeeded and clears
+   `truth.beforeRollback[name]` at the step's END — after that step's own `checkPromises` and `noSilentChange` have
+   read it; kept when the relaunch didn't open. Test world only; the implementer's slice (seeds 1–3 × 250) reproduced
+   the triage's 33,684 steps exactly — the stream unshifted. ✔
+7. Re-run by the orchestrator, both configurations, EXACT: Debug `✔ Test run with 434 tests in 71 suites passed`;
+   `-c release` `✔ Test run with 372 tests in 66 suites passed` (re-run, not ridden — two `Sources/` files changed
+   by comments). ✔
+8. The closeout's hand-forward list is in this section above (the final-call entry), worded as ruled. ✔
+
+**THE LADDER IS CLOSED (2026-10-16): two rounds** — round 1's MAJOR fixed and re-checked by round 2; round 2 found no
+BLOCKER or MAJOR, so under her rule no third round is earned. Every finding of both rounds carries its written
+disposition above; the triage's two pre-existing finds are fixed and re-checked. Code tree for the go/no-go:
+`63cf038f1` (every later commit is a record).
 
 ## 10. The go/no-go and the key map's model half (filled at close)
 
