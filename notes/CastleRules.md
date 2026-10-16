@@ -104,7 +104,9 @@ and never leaves a hole you chose to close.**
     You never leave Castle by opening something.
 18. **Two devices share a library through sync, never through files.** An AirDropped library is a copy; it becomes its
     own library on arrival and may diverge, unless both devices sign into the same account. A restored copy that joins
-    the account merges by its rows, exactly as any device does.
+    the account merges by its rows, exactly as any device does. Someone else's copy you make yours joins *your* account
+    as a copy and nothing ever leaves theirs: the server keeps every account's rows apart, and only an account's own
+    sign-in and sync key reach its rows.
 19. **Copies of other libraries are listed and can be deleted.** They are read only through Look inside.
 
 ## Safety
