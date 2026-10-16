@@ -398,16 +398,17 @@ trailer of any kind.
 
 | Unit | Members | State |
 |---|---|---|
-| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **PROVEN — awaiting U2's walk for P-U1e-1** (the fade ramp rides U2): U1 built + walked; U1b/U1c fix legs; U1d (her memo rulings) window GREEN (434/96, R-I/R-J red as named, 01:44–01:50) and re-walk HOLD on R0–R3, R5–R8 (R6 her scroll never pulled back); R4's 7–9-pt slice → P-U1e-1 built in U2's leg, verified by U2's window + walk. |
-| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **READY FOR STAGE — U2d window (pins/reverts/batch), then the re-walk.** U2d built F2 on main's own per-row API (P-U2d-1): pins `99565d41`, fix `63b8c191`, five revert trees named and built (R-W/R-X/R-Y/R-Z/R-Q), `u2d/window.sh` with every step's expected result; PROVISIONAL P-U2d-2 (the end zone takes the bottom padding — never absent). Synthetic drags cannot reach sidebar drops (the main-build control), so delivery is her hand check, first in her morning checklist. D5 (P-U1e-1) and D6 HOLD. |
-| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **W1/W3/W4/W5 PROVEN.** U3b's band traced (U3c: the segmented pickers answered two ways after a search) → **P-U3c-1 built and PROVEN** (window 16:43–16:54: pins 23/3 green; R-P exactly 4 red; U3b's 103-suite batch 513 green). **OWED: D8's re-walk** on `vx283-u3c` (folded with U2b's). |
-| Ladder | `fable-reviewer` at xhigh (her word, superseding opus at max), fresh per round, cross-model | **ROUND 1 DONE** (tip 448f9450; findings in the Ladder section, `9ef6fba3`): 0 BLOCKER · 0 MAJOR · 2 MINOR (R1-1 this table — fixed here; R1-2 sequencing — the windows owed) · 4 NIT (R1-3…6 → the implementer). Round 2 re-reviews the fixes + the U2/U3b window results. |
-| Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
+| U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **PROVEN, CLOSED.** U1 + U1b/c/d built and walked; P-U1e-1's ramp accepted on U2's walk (D5) and re-held on the re-walk (D5'). VX-373 (O-2, the 620-pt window) ticketed. |
+| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **PROVEN on pins and parity, CLOSED; the landing is her hand check (VX-376).** U2d (F2 on main's per-row API, P-U2d-1): window 08:04–08:42, pins 60/7, every revert exactly as named (R-W in the worktree), batch 725/144 with only VX-115; the re-walk holds D1'/D4/D5'/D7'. Synthetic drags cannot reach sidebar drops (the main-build control; VX-375). |
+| U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **PROVEN, CLOSED.** W1/W3/W4/W5 (U3); VX-175 via U3b + U3c (P-U3c-1): window 16:43–16:54 green, R-P exactly 4 red; D8 HOLDS on the re-walk in both voices. VX-374 (R2-3/R2-4) ticketed. |
+| Ladder | `fable-reviewer` at xhigh (her word), fresh per round, cross-model | **CLOSED at two rounds.** Round 1 (tip 448f9450): 0B/0M/2m/4n, all dispositioned. Round 2 (tip 5147b7e5): 0B/0M/2m/2n — R2-1/R2-2 the orchestrator's (done / sequenced), R2-3/R2-4 → VX-374. |
+| Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, release | **IN PROGRESS** (2026-10-16 ~08:45): main into the branch, the release-notes section, canon, the merged-tip Mac run, the PR and merge ask, then the ONE 0.9.7 + the /Applications refresh (her second overnight mandate). |
 
 ## Stage traffic log (oct13coordinator protocol)
 
 *(The orchestrator appends each REQUEST / READY / GO / RELEASE here.)*
 
+- 2026-10-16 08:04 GO `vx283-u2d` (90 min, folded); the test part 08:04–08:13; SEAM, the coordinator's "continue"; the re-walk 08:14–08:41; RELEASED 08:42:58 (pgrep empty first) — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched".
 - 2026-10-16 07:04 GO `vx283-u2c` (90 min, folded); G1 failed → the main-build control folded in at the coordinator's yes (07:09–07:12); RELEASED 07:12:31 with the control's own instance still up (the slip — quit at ~07:13, the store re-verified, prefs clean; told).
 - 2026-10-15 17:06 GO `vx283-u2b` (25 min; HID idle 528 s at the GO, her clearance standing); RELEASED 17:08:32 — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched".
 - 2026-10-15 16:43 GO `vx283-u3c` (25 min); RELEASED 16:54:31 — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched".
@@ -4745,6 +4746,29 @@ pixel-measured.
 - **O-5 — a click on a Library row's TITLE opens the note** (an attempt to open the panel on "how to use it" opened it in
   Write), while a click on the row's empty part selects it and opens the info panel. Noted for later walkers: click the
   row's empty area.
+
+#### U2d + U3c — THE ORCHESTRATOR'S EYE ON THE RE-WALK (2026-10-16 ~08:45; her walk rule's step 5)
+
+The restore was verified by the orchestrator: pgrep empty, all five files `cmp`-same, prefs 0 differ, castle-W1
+present. The claim was RELEASED at 08:42:58.
+- **D1' HOLDS by eye** on `D1p-study-light-strip.png`: the chip ("o museu") rides at the cursor with no offset, the row's
+  own place stays drawn, and the slide-back leaves the list unchanged.
+- **D8 HOLDS by eye** on `D8-closed-search-sort-terminal-dark-strip.png`: Terminal at the dev store's sidebar (~231 pt)
+  is TWO lines in every state (a sort pick, `wings` searched with the relevance label, cleared, another sort). The
+  field is never a sliver and the scope/mode controls are at full width after the search. P-U3-5 + P-U3c-1 are held in
+  use. VX-175 CLOSES.
+- D4, D5' (the footer edge pixel-identical to U1d's: P-U2d-2's padding hand-off is invisible) and D7' hold per the
+  record. **U2 CLOSES on its source side and its rows; the landing is her hand check (VX-376, High, Needs Lillian),
+  first in her handoff.**
+- The walker's observations, for her eye:
+  - O-1: typing into an EMPTY search field with the panel open closes the panel on the first letter, because the
+    selected note leaves the results. This is the existing selection-follows-results design, not this run's.
+  - O-2: one keyboard sort pick closed the panel once and could not be reproduced (three retries kept it open).
+  - O-3: Study's one-line row moves the gap between scope and mode by ~8 pt as the sort label's width changes. The
+    controls never change width; the gap is the flow's free space.
+  - O-4: the drag chip is faintly see-through, the system drag image's own alpha.
+  - O-5: a walking note (a Library row's empty area opens the panel).
+  None is a regression of this run's members. O-2 is recorded, and a ticket follows if she sees it.
 
 ## Ladder
 
