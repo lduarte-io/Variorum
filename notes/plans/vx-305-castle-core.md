@@ -1565,6 +1565,31 @@ orchestrator:**
 *(launched 2026-10-16 after the triage's verification — her word at the model switch: "you can do another Fable
 ladder after the opus implementer")*
 
+**Tally: 0 BLOCKER · 0 MAJOR · 1 MINOR · 4 NIT (one SPECULATIVE)** (committed unedited, `ca6456e9d`). **No new
+BLOCKER/MAJOR, so under her cap rule round 2 is the ladder's FINAL round:** its fixes go through the cross-model flow
+(implementer agree/dispute → this reviewer's final call → the implementer applies) and then get the orchestrator's
+line-by-line check against each finding, since no later round reads them.
+- **The MINOR:** NEW-1's mirror-proof arm for an ABSENT live place (a library file replayed with the key file deleted)
+  works — the reviewer probed it, memory wins, red-on-old at the round base — but has no committed pin, and the
+  generator can never reach it (`rollsBackBothHomes` excludes the pair); the exclusion's comment calls it "the stated
+  limit's shape", which is wrong (§3.6's limit is the library file AND the memory item). Fix: commit the probe as a
+  fixed scenario; rewrite the comment to the two honest reasons (P-U4-12's whole-pair shape for `.replayKeyFile`; a
+  promise-1 false-positive hazard on an Always-ask device for `.deleteKeyFile`), adjudicating the promise-1 reading
+  first if the exclusion narrows. A lesser half: no mutation-pin twin for the new roads with the guard off.
+- **The NITs:** the U3 harness's `setAsideKeyFiles` is a write-only sink; the mirror and plan-runner restores still
+  overwrite a stray file in place (adopt the set-aside helper or record the asymmetry); `beforeRollback` over-records
+  for a group whose replay skipped; SPECULATIVE — promise 1's new clause counts a repair "owed" even if the executor
+  would forever skip it (no counterexample traced; record and watch the go/no-go soak for a
+  `preconditionDoesNotVerify` loop on `rekeyOlderLibraryFile`).
+- **The triage's five observations adjudicated:** item 3 escalated into the MINOR; items 1, 2, 4 and 5 acceptable as
+  recorded, with 1 (promise 10's breadth) and 5 (a stale act's roll back deleting another library's quiet-road item —
+  availability-only, her P-U4-1 frame) for the closeout's hand-forward list.
+- **The clean bill** covers every re-check the round-1 final call named (both gates agree; the set-aside
+  non-destructive and catalogued; promise 1's clause proven non-blind; the seed-9 pre-settle preserved; the MINOR's
+  guard conservative; NEW-2's exemption structurally unable to hide a Castle-born key; NEW-1's settle-first unable to
+  misfire on a legitimate mid-act crash). The reviewer's own runs: the 19 new pins green, a 461-test/76-suite
+  protection superset green in Debug, a seed-1 × 120 soak slice green with tamper groups live.
+
 ## 10. The go/no-go and the key map's model half (filled at close)
 
 *(empty)*
