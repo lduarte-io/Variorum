@@ -302,7 +302,10 @@ record committed with PENDING numbers first.
 
 ## 7. LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
 
-- U1 — the cut: **NEXT.**
+- U1 — the cut: **IN-PROGRESS** (Opus implementer, 2026-10-16) — the piece order and what is done live in §8's U1
+  RECORD (its "Pieces" list is the resume map: DONE (hash) / IN-PROGRESS / NOT-STARTED). Baseline before U1: the
+  protection set Debug `✔ 434 tests in 71 suites`, `-c release` `✔ 372 in 66` (VX-305 §9 item 7, tree `63cf038f1`);
+  `Sources/VariorumCore/Protection/` 11,928 lines, `Tests/VariorumCoreTests/Protection/` 15,460 lines.
 - U2 — the additions: not started.
 - U3 — the lifecycle proof: not started.
 - U4 — the world and the soak: not started.
@@ -332,6 +335,40 @@ record committed with PENDING numbers first.
 - **Consistency check at kickoff (the predecessor's last owed duty):** U2's and §5's rule numbers were still the
   26-rule draft's; re-pointed to the 27-rule contract (`43e5ff0e4`). §3's table, the crossings table and U4 were
   already current. The in-flight row on `main` gained this plan (`aecb509d0`).
+
+### U1 RECORD — THE CUT (Opus implementer, 2026-10-16; IN-PROGRESS — every count PENDING until its run lands)
+
+**Not done in U1, first (each stated with its reason; the orchestrator may redirect):**
+- *(filled at the close)*
+
+**Pieces (the resume map — a fresh session can finish U1 from this list and `git log`):**
+- A — the record skeleton and LIVE STATUS: this commit.
+- B — the world and the generator cut to the new-system shapes (tests only): NOT-STARTED.
+- C — rule 26: the migration, the legacy readers, corner 45, the unconfirmed mode, today's items and key files: NOT-STARTED.
+- D — rules 26 · 19 · 8: the old shared key, the gift machinery, Re-link: NOT-STARTED.
+- E — rules 4 · 6 · 12 · 13: the anchor and the stuck leave (pin: every key change carries the history): NOT-STARTED.
+- F — rules 20 · 21: the repair layer (memory wins, set-aside, the restores from copies): NOT-STARTED.
+- G — rules 21 · 23: the family tree, the hardware marker, identity resolution, the memory shrink: NOT-STARTED.
+- H — rule 16: leaving an account changes no keys (pin): NOT-STARTED.
+- I — rule 17: OpenCopy and the open rule deleted; Land a stub for U2's MakeMine: NOT-STARTED.
+- J — rule 4: the route finder to its one sentence: NOT-STARTED.
+- K — the guards, the promises' reductions, the counts and this record closed: NOT-STARTED.
+
+**THE RECORD TABLE** (one row per deleted thing: what · rule · the tests that went with it) — filled per piece.
+
+| What died | Rule | Tests that went with it |
+|---|---|---|
+
+**Stubs left for U2, and why:** *(per piece)*
+
+**Source line counts:** before 11,928 (`Sources/VariorumCore/Protection/`) · after PENDING. Tests: before 15,460 · after
+PENDING.
+
+**The runs (exit lines, both configurations):** PENDING.
+
+**PROVISIONAL calls:** *(none yet)*
+
+**Commits:** *(per piece)*
 
 ## 9. The ladder
 
