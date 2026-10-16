@@ -2979,4 +2979,10 @@ to reverse it.
 Cross-refs: VX-285 · VX-286 · VX-287 · VX-288 · VX-289 · VX-121 · VX-175 · VX-20 · VX-245 · VX-359 · VX-344 ·
 VX-360 · VX-373 · VX-374 · VX-375 · VX-376.
 *(Numbering: the next free number on main when written; #228 was free at the merge.)*
-Status: open — your eye; the handoff's checklist leads with the drag.
+- **HER ANSWERS (2026-10-16 afternoon, the question tool):**
+  - **RATIFIED as built:** **P-U3c-1** (*"Keep natural width"*) · **P-U3-4** (*"Surface, the paper"*) · **P-U1-4**
+    (*"3½ rows"*) · **P-U2d-2** (*"Always present"*).
+  - **Everything else in #228 stays PROVISIONAL**, in her words: *"the rest are fine to leave provisional - i'm just
+    going to have to see it and play around with it"*. That includes P-U2d-1, the drag's shape, which waits on her hand
+    check (VX-376).
+Status: partly ratified (four calls); the rest provisional pending her use of 0.9.7; the drag's shape waits on VX-376.
