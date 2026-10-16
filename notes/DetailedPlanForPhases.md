@@ -12,7 +12,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
-| Castle rebuild, phase 1 — the headless core | VX-305 · `vx-305-castle-core` | `~/dev/variorum-vx-305` · the Pro | In progress (architect shape; plan `notes/plans/vx-305-castle-core.md`). Holds the ONE Sync/-or-custody slot. Surfaces: NEW `Sources/VariorumCore/Protection/` + `Tests/VariorumCoreTests/Protection/` only — no `App/`, no `Sync/`, no migrations; headless, no stage. |
+| Castle rebuild, phase 1 — the headless core, and its corrector **Castle, simplified** | VX-305 + **VX-378** · `vx-305-castle-core` (one branch, one PR at VX-378's GO closes both) | `~/dev/variorum-vx-305` · the Pro | In progress (architect shape; VX-305's gate came back NO-GO 2026-10-16 and her simplification sitting ruled the corrector — the contract `notes/CastleRules.md`, the plan `notes/plans/vx-378-castle-simplified.md`, VX-305's record `notes/plans/vx-305-castle-core.md`; kicked off 2026-10-16). Holds the ONE Sync/-or-custody slot. Surfaces: `Sources/VariorumCore/Protection/` + `Tests/VariorumCoreTests/Protection/` only — no `App/`, no `Sync/`, no `Server/`, no migrations; headless, no stage. |
 
 ### Latest closeout
 
