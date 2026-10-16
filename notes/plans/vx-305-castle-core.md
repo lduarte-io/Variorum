@@ -1747,6 +1747,15 @@ committed — by `ScenarioGenerator.replay` from its start state and world seed;
   patched in the scratch worktree only to record every failing sequence and continue) is sizing the whole set before
   the triage batches are cut.
 
+**The CENSUS (the same 20 × 1,000 under `-c release`, the generator patched in the scratch worktree only to record
+every failing sequence and continue — never committed): 17 failing sequences in 20,000 (900,199 steps, 4,351 s).** The
+first-stop table above saw 13; the census adds four (seeds 1, 6, 7 and 18 each hold two). By promise: 9 ×5 · 6 ×3 ·
+5 ×3 · 10 ×2 · 8, 4, 2, 13 ×1 each. Five need no tamper. **By starting state: 12 of the 17 begin from a shape her
+2026-10-16 ruling 4 removes** — "a phone on an older build" ×4, "a deleted account" ×3, "13p escrow items" ×2, "older
+libraries of other libraries, and backups only" ×2, "a hand-off before this change" ×1; the remaining five begin from
+current-system shapes (two-Mac secretless Standard, signed-out-with-keys, exposed, Castle with no Touch ID). The problem
+is bounded, and most of it sits in ground the sitting has already cut.
+
 **The key map's model half — written** (`notes/plans/vx-305-key-map-model-half.md`, a fresh Opus implementer, commits
 `68a21c8c1` · `e8ec5f433` · `d5aafa926` · `07074efd5`; against `63cf038f1`, test names read, not run): **47 rows — 31
 PROVEN · 2 PARTLY (R-4: the lobby's memory-mirror road, her P-U4-13 (b), and P-R1-1's copy-less refusal; T-5: the
