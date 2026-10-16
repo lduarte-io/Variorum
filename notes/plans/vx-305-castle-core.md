@@ -1602,6 +1602,24 @@ proposed: doc comments for NITs 1 and 2 (adopting the set-aside at the other res
 in the final round); clear `beforeRollback` at the end of a tamper step whose relaunch opened the library (NIT 3, a
 wider cause than stated); NIT 4 recorded with a phase-2 lobby hand-forward. Sent to the reviewer for the final call.
 
+**The reviewer's FINAL CALL — committed unedited as `notes/plans/vx-305-ladder-round-2-final-call.md` (`d53991b00`):**
+all five CONFIRMED; FINDER-FIXES none — the implementer applies. (1) The MINOR: the pin commits as built (header
+reworded), the mutation twin commits this round (deterministic, no stream shift), and `rollsBackBothHomes` is KEPT
+with its comment rewritten to the three honest clauses the call words out (the memory-home reason; P-U4-12's whole-pair
+shape for `replayKeyFile`; P-U4-13 (b)'s phase-2 class for `deleteKeyFile`, narrowing when that road lands) — both of
+the implementer's corrections re-verified and adopted. (2) NIT 1: a doc comment. (3) NIT 2: a doc comment at each
+restore site (the set-aside is a counted write and would shift crash points in the final round). (4) NIT 3: the
+implementer's WIDER fix — clear `beforeRollback[name]` at the end of a tamper step whose relaunch opened the library,
+keep it otherwise; validated by the go/no-go soak (a red that traces only to a formerly-masked stale entry comes back
+as a checker question at the gate). (5) NIT 4: traced closed, record only. The §8 correction accepted: observation 5's
+hand-forward states availability-only on its own trace, without the P-U4-1 citation. **THE CLOSEOUT'S HAND-FORWARD
+LIST gains** (as ruled): narrow `rollsBackBothHomes` by `deleteKeyFile` when the memory-mirror road lands (vx-306,
+P-U4-13 (b)); a key/epoch-regression promise reading ("in Castle, no tamper ALONE moves the record's current key or
+epoch backward") with its exemptions named — the stated limit, the anchor-only residue, P-U4-13 (b)'s class; phase 2's
+lobby passes every key it reads in `alsoInHand` (or the re-key reads through the same `reach`); observation 1's
+promise-10 slot-library reading; observation 5's availability-only line; the optional set-aside adoption at the two
+other restores. The call ends with the orchestrator's eight-point line-by-line checklist — this is the final round.
+
 ## 10. The go/no-go and the key map's model half (filled at close)
 
 *(empty)*
