@@ -31,7 +31,7 @@ units) are scope, not durations.
 | **VX-281** MCP settings pane & shared icon | the pane in tabs, the code block, the Library's shared icon | 4 | Opus / Opus | now |
 | **VX-282** Editor & notes fixes | backspace, the italics flicker, take panel, capture box, comments family | 9 | Opus / **Fable** (editor seam) | now |
 | **VX-283** Sidebar & Library polish | the Open list, Library polish, the red lint (trimmed at her 2026-10-14 triage) | 9 | Opus / Opus | in progress |
-| **VX-284** Books, gatherings & tags | her VX-214 follow-ups, tag undo, the book view's doors and Index slice, VX-216 last | 15 | Opus / Opus | now |
+| **VX-284** Books, gatherings & tags | her VX-214 follow-ups, tag undo, the book view's doors and Index slice, VX-216 last | 17 | Opus / Opus | now |
 
 Plus **her own track** (§4) and **the release itself** (§5).
 
@@ -220,7 +220,14 @@ and the shared-constant pin in `StarredScrollTests` (Starred keeps its 7, her wo
 ### VX-284 — Run: Books, gatherings & tags
 **Members:**
 - Gatherings and tags: VX-250 (her copy, NOT terms; closes VX-240) · VX-240 · VX-241 · VX-249 (collecting
-  sets the star; pre-launch at her word) · VX-247 (tag-delete undo) · VX-111 (the shared-note notice).
+  sets the star; pre-launch at her word) · VX-247 (tag-delete undo) · VX-111 (the shared-note notice) ·
+  **VX-372** (joined 2026-10-15 at her word, pre-launch: a direct duplicate door in the registry, Duplicate with tags /
+  without tags, and a duplicate with tags joins the books those tags collect; it reaches the AI's `duplicate_note`
+  through the shared body) · **VX-371** (joined 2026-10-15 at her word, pre-launch, moved from the sweep VX-348: the AI's
+  `duplicate_note` can file its copy into a book at Write new, as `create_note` can). VX-371 and VX-372 change the
+  same duplicate code: design them together, prove both in one real-client round (MCPSpec read in full — this run now
+  touches the MCP door), and keep them in the same part if the run is split. Their unit placement and any split are
+  hers at the kickoff.
 - The honest disabled button: VX-194.
 - The book view: **VX-303** (every open door lands in Write at her block — a bug against the deep-link rule,
   her words) · **VX-304** (an "open in Write" door in the left note box in every book mode — her ask: the title's

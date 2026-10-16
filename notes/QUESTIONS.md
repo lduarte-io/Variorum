@@ -2873,4 +2873,33 @@ handoff in the morning"*). Each was built as stated below, with a line to revers
   VX-366 (P-VX254-1/2's remainder, waiting on your answer here) · VX-367 · VX-368 · VX-369 · VX-370.
 *(Numbering: the next free number on main when written; a sibling run merging first may take it — the merging session
 renumbers. #227 was free at the merge.)*
-Status: open — your eye; the handoff's checklist leads with this bundle.
+- **HER ANSWERS (2026-10-15 afternoon, the question tool, batch by batch):**
+  - **The two pre-launch calls:** VX-363 → Pre-launch (*"you can fix the label on that one for the record"*); VX-357 →
+    Pre-launch, a child of the sweep VX-348, fixed by STRIPPING U+0000 in the operations layer — the wire says so and
+    fingerprints the stored text, her doors stay quiet (*"yes, mark it pre-launch and write that on the ticket"*; the
+    shape is on VX-357).
+  - **P-VX311-2 → RATIFIED (a), the wing's Pool:** *"I think that the Wing's Pool is fine for now."* Her follow-on, filed
+    as **VX-371** (Needs Lillian, Low): *"it might be worth filing a ticket for if the AI duplicated a note, being able
+    to add it to a book it can add things to, but I don't want to do that now and I'd have to think through what that
+    access should look like."*
+  - **P-VX255-1 → RATIFIED (a)** (no anchor only). **P-VX362-1 → RATIFIED as built** (the sentences; a repeat
+    `apply_tag` answers done, nothing changed). **P-VX256-1 → RATIFIED (a)** (32,000 characters of answer; e1–e4 as
+    built).
+  - **Batch 2 → all RATIFIED as built:** P-VX253-1 (keep `take_ids`) · P-VX253-2 (refuse; the empty-`take_ids` note
+    (d) not taken) · P-VX252-1 (ids only) · P-VX361-1 (one `tag_ids` list).
+  - **Batch 3 → all RATIFIED as built:** P-VX255-2 (`at: "start"`) · P-VX255-3 (blocks only) · P-VX255-4 (at most
+    200 a call) · P-VX311-1 (no duplicating a per-ask note).
+  - **Batch 4 → all RATIFIED as built:** P-VX311-3 · P-VX298-1 (on only when every named note shares history) ·
+    P-VX298-2 (the first note may be archived) · P-VX298-3 (`note_id` + 1–3 `peer_ids`).
+  - **Batch 5 → all RATIFIED as built:** P-VX254-1 and P-VX254-2 (no fingerprints from divide, merge, `save_version`,
+    the book import — so **VX-366 is closed as decided**, Canceled with the reason) · P-VX256-2/3/4 · P-VX261-1 (since
+    the client's last approval).
+  - **The rest → RATIFIED as built** (*"the rest of the questions are ratified"*): P-VX261-2…6 · P-VX197-U8b-1/2 ·
+    orchestrator's rulings 1 and 2.
+  - **P-VX311-2's follow-on promoted, the same sitting:** VX-371 is now Medium, Pre-launch, first a child of the sweep VX-348, then moved into VX-284 beside VX-372 at her word (*"ok yeah add that add 371 into 284"*)
+    (*"it seems like a small change and I feel like it should be done. it seems weird to me that if an AI creates a
+    note it can put it in a book with write new but it can't do that for a note it duplicated."*). The shape:
+    `duplicate_note` gains an optional `book_id` (and `section_id`) like `create_note`, at Write new on that book. Her
+    question about tags is answered on the ticket: a duplicate wears the original's tags as copied rows, so no
+    tag-collecting book seats it or rings for it (P-17y-B3-c1); gatherings show it at once.
+Status: RATIFIED 2026-10-15 — every item above answered; P-VX311-2 to be extended by VX-371 (pre-launch).
