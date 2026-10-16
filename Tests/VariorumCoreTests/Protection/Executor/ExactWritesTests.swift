@@ -47,13 +47,15 @@ struct ExactWritesTests {
         let k0 = fixture.key
         let executor = fixture.executor()
         var library = try fixture.unlocked(executor)
-        _ = try await executor.leaveAccount(.stopSyncingHere, &library, typed: fixture.typed)
-        #expect(fixture.world.writeLog(naming: [PF.fp(k0): "K0", PF.fp(library.key): "K1"]) == [
+        _ = try await executor.leaveAccount(.stopSyncingHere, &library)
+        #expect(library.key == k0)
+        // Rule 16: the record stops naming the account, this Mac forgets its
+        // sync keys — no key, lock or secret changes.
+        #expect(fixture.world.writeLog(naming: [PF.fp(k0): "K0"]) == [
             "record K0", "memory K0", "plan",
-            "custody+ touchid K1", "plan", "keyfile K1", "plan", "stage K1", "plan", "staged-record K1", "plan",
-            "swap K1", "plan", "memory K1", "plan", "custody- touchid K0", "plan",
-            "sync- touchid", "plan",                                 // this Mac stops using the account — after the swap
-            "backup K1", "plan", "record K1", "memory K1", "plan-",
+            "record K0", "memory K0", "plan",                        // the record names no account
+            "sync- touchid", "plan",                                 // this Mac stops using the account
+            "backup K0", "plan", "record K0", "memory K0", "plan-",
         ])
     }
 

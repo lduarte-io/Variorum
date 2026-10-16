@@ -10,15 +10,12 @@ import Foundation
 //   - THE RECORD NAMES THE ACCOUNT; signing in or out never changes it — only
 //     these acts do.
 //   - LEAVING AN ACCOUNT (This Mac Only, Stop syncing here, deleting it from
-//     this Mac, Move) RE-KEYS, in either mode: the new key's history takes the
-//     old one; in Castle both secrets, in
-//     Standard the passphrase typed or set new and the words typed or made
-//     new; in Standard the new key under this Mac's EXISTING own Apple key
-//     (minting nothing); the account's Apple key left alone; this Mac stops
-//     using the old account (its sync keys forgotten — after the swap, the
-//     record's binding being what governs).
-//   - Signed out, This Mac Only carries a mode — Use Castle's or Use
-//     Standard's crossing applied to this Mac only (§3.8's one plain road).
+//     this Mac) CHANGES NONE OF THE LIBRARY'S KEYS OR SECRETS (rule 16): the
+//     record stops naming the account and this Mac forgets that account's
+//     sync keys — nothing else; the account's Apple key left alone. Move is
+//     that leave plus a join. (The leave's re-key and This Mac Only's mode
+//     crossing left with VX-378 U1 — rule 16; a crossing is Use Castle's or
+//     Use Standard's own act once the library is local.)
 //   - JOINING: in the library's own mode the master's wrap is added and the
 //     key stays (the passphrase copy re-wrapped under the account's, corner
 //     27); joining a Castle account from Standard is entering Castle (the
@@ -49,8 +46,12 @@ struct AccountMoveProgram: ActProgram {
             steps += LibraryRekey.steps(guards, mintsOwnAppleKey: leaving)
             steps += ["memory", "retireOldCustody"]
             if entering { steps += ["exportOff", "retireOwnAppleKeys"] }
-        } else {
+        } else if parameters.targetAccount != nil {
             steps += ["joinKeyFile", "bindAccount", "memory"]
+        } else {
+            // A leave (rule 16): the record stops naming the account — no key,
+            // no lock, no secret changes.
+            steps += ["bindAccount"]
         }
         if parameters.forgetsAccount != nil { steps.append("forgetOldSyncKeys") }
         return steps + ["backup"]
@@ -256,8 +257,8 @@ extension ProtectionExecutor {
         return try await join(.enroll, account: account, leaving: nil, library: &library, typed: typed, gate: gate)
     }
 
-    /// **Move it to the signed-in account** — leave the record's account (a
-    /// re-key), join this one.
+    /// **Move it to the signed-in account** — leave the record's account (no
+    /// key change — rule 16), join this one.
     public func move(_ library: inout UnlockedLibrary, typed: TypedSecrets, gate: GateStyle? = nil) async throws -> ActOutcome {
         guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         guard let old = record.account else { throw ExecutorRefusal.notSynced }
@@ -274,7 +275,9 @@ extension ProtectionExecutor {
         if vault.reading.rotationInProgress { throw ExecutorRefusal.rotationInProgress }
         let accountMode = vault.mode.settled
         let join = AssessRules.joinPlan(library: record.mode, vault: vault.reading)
-        let rekeys = join != .sameMode || old != nil
+        // A key change only where the join crosses modes (rule 16: the leave
+        // half changes nothing).
+        let rekeys = join != .sameMode
         var parameters = ActParameters(
             gate: gate ?? library.section.settings.gateStyle ?? (leaves.biometry.biometry().enrolled ? .touchID : .alwaysAsk),
             synced: true, accountID: account, newKind: accountMode, targetAccount: account, changesAccount: true,
@@ -301,43 +304,28 @@ extension ProtectionExecutor {
     }
 
     /// **The leaves** — This Mac Only, Stop syncing here, delete the account
-    /// from this Mac: every leave re-keys, in either mode. `mode`: This Mac
-    /// Only's one plain road while signed out may carry Use Castle's or Use
-    /// Standard's crossing for this Mac only.
-    public func leaveAccount(
-        _ act: ProtectionAct, _ library: inout UnlockedLibrary, typed: TypedSecrets, mode: ProtectionMode? = nil,
-        gate: GateStyle? = nil
-    ) async throws -> ActOutcome {
+    /// from this Mac (rule 16): the record stops naming the account and this
+    /// Mac forgets its sync keys; no key, lock or secret changes, so nothing is
+    /// typed (PROVISIONAL P-VX378-U1-2 — the face may still confirm).
+    public func leaveAccount(_ act: ProtectionAct, _ library: inout UnlockedLibrary) async throws -> ActOutcome {
         guard [.thisMacOnly, .stopSyncingHere, .deleteAccountHere].contains(act) else { throw ExecutorRefusal.nothingToDo }
         guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         guard let old = record.account else { throw ExecutorRefusal.notSynced }
         if case .signedIn(let id, _) = configuration.session, id != old { throw ExecutorRefusal.otherAccountSignedIn }
-        let to = act == .thisMacOnly ? (mode ?? record.mode) : record.mode
-        var parameters = ActParameters(
-            gate: gate ?? library.section.settings.gateStyle ?? (leaves.biometry.biometry().enrolled ? .touchID : .alwaysAsk),
-            newKind: to, targetAccount: nil, changesAccount: true, outgoingAppleKeyID: library.keyFile?.apple?.keyID)
+        var parameters = ActParameters(newKind: record.mode, targetAccount: nil, changesAccount: true)
         parameters.fromKind = record.mode
-        parameters.rekeys = guards.rekeyAtEveryCrossingOn || record.mode == .castle || to != record.mode
         parameters.forgetsAccount = old
-        // In Castle both secrets (the words typed or made new); in Standard
-        // the passphrase typed or set new, the words typed or made new.
-        let secrets = try localSecrets(
-            library, typed: typed, wordsMayBeNew: true, parameters: &parameters, passphraseMayBeNew: record.mode == .standard)
-        return try await perform(
-            AccountMoveProgram(act: act), parameters: parameters, secrets: secrets, typed: typed,
-            toKey: parameters.rekeys == true ? leaves.ids.mintLibraryKey() : nil, library: &library)
+        return try await perform(AccountMoveProgram(act: act), parameters: parameters, secrets: ActSecrets(), library: &library)
     }
 
     /// Secrets checked against the live key file (no vault in the act): the
-    /// passphrase typed — or, where `passphraseMayBeNew` (Standard's forgot
-    /// road: this Mac holds the key) or there is none, set new; the words
-    /// typed, or made new where allowed.
+    /// passphrase typed — or, where there is none, set new; the words typed,
+    /// or made new where allowed.
     func localSecrets(
-        _ library: UnlockedLibrary, typed: TypedSecrets, wordsMayBeNew: Bool, parameters: inout ActParameters,
-        passphraseMayBeNew: Bool = false
+        _ library: UnlockedLibrary, typed: TypedSecrets, wordsMayBeNew: Bool, parameters: inout ActParameters
     ) throws -> ActSecrets {
         var secrets = ActSecrets()
-        if let fresh = typed.newPassphrase, passphraseMayBeNew || library.keyFile?.passphrase == nil {
+        if let fresh = typed.newPassphrase, library.keyFile?.passphrase == nil {
             secrets.passphrase = try freshPassphrase(fresh)
             parameters.passphraseIsNew = true
         } else if library.keyFile?.passphrase != nil {

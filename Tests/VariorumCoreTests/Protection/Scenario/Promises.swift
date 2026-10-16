@@ -593,7 +593,7 @@ extension SWorld {
         case .timeMachineRollback(let d), .deleteContainerAndOpenOldCopy(let d), .tamper(let d, _), .tamperSequence(let d, _):
             return d == name
         case .useCastle(let d, _, _), .useStandard(let d), .follow(let d, _), .turnOnSync(let d),
-             .move(let d), .thisMacOnly(let d, _), .stopSyncingHere(let d, _), .deleteAccountHere(let d), .replaceAllKeys(let d, _):
+             .move(let d), .thisMacOnly(let d), .stopSyncingHere(let d), .deleteAccountHere(let d), .replaceAllKeys(let d, _):
             return d == name
         default:
             return false

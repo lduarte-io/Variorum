@@ -86,38 +86,27 @@ struct CopyAndCrossingScenarios {
         let (world, _) = try await syncedWorld(.standard, devices: ["macA"])
         // Signed out: the account it left keeps its vault on the old shared key
         // (§3.5 point 4 would stop Use Castle at its door while she reads it).
-        await world.done([.launch("macA"), .backup("macA"), .stopSyncingHere("macA", forgotPassphrase: true), .backup("macA"),
+        await world.done([.launch("macA"), .backup("macA"), .stopSyncingHere("macA"), .backup("macA"),
                           .signOut("macA"), .useCastle("macA", .touchID, newWords: false), .settle])
         let section = try #require(world.macA.library?.section)
         #expect(section.ownLibraryAppleKeyIDsToRetire.isEmpty)
         expectPromisesKept(world)
     }
 
-    /// "a library leaving its account by each of the four acts, in Castle and
-    /// in Standard … it re-keys, and nothing written after opens through the
-    /// account".
+    /// "a library leaving its account by each of the acts, in Castle and in
+    /// Standard": it stops syncing and changes none of its keys or secrets
+    /// (rule 16 — the leave's re-key left with VX-378 U1).
     @Test func aLibraryLeavingItsAccountByEachAct() async throws {
         for mode in ProtectionMode.allCases {
-            for leave in [Action.thisMacOnly("macA", nil), .stopSyncingHere("macA", forgotPassphrase: mode == .standard),
-                          .deleteAccountHere("macA")] {
+            for leave in [Action.thisMacOnly("macA"), .stopSyncingHere("macA"), .deleteAccountHere("macA")] {
                 let (world, _) = try await syncedWorld(mode, devices: ["macA"])
                 await world.done([.launch("macA")])
                 let before = try #require(world.macA.slot?.fingerprint)
                 await world.done([leave, .settle])
-                #expect(world.macA.slot?.fingerprint != before && world.macA.slot?.record?.account == nil, "\(mode) \(leave)")
+                #expect(world.macA.slot?.fingerprint == before && world.macA.slot?.record?.account == nil, "\(mode) \(leave)")
                 expectPromisesKept(world, "\(mode) \(leave)")
             }
         }
     }
 
-    /// "This-Mac-Only Castle from an account in Standard: the account's key
-    /// untouched".
-    @Test func thisMacOnlyCastleFromAStandardAccount() async throws {
-        let (world, account) = try await syncedWorld(.standard, devices: ["macA", "phone"])
-        await world.done([.launch("macA"), .launch("phone"), .signOut("macA"), .thisMacOnly("macA", .castle), .settle])
-        let vault = try #require(world.server.snapshot(account))
-        #expect(world.macA.slot?.record?.mode == .castle && vault.mode.settled == .standard)
-        #expect(vault.format.appleKeyID.map { world.readableAppleKeys(world.phone)[$0] != nil } == true)
-        expectPromisesKept(world)
-    }
 }

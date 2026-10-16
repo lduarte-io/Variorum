@@ -69,8 +69,8 @@ indirect enum Action: Equatable {
     /// Turn on sync as the signed-in account — set up (no vault) or join.
     case turnOnSync(String)
     case move(String)
-    case thisMacOnly(String, ProtectionMode?)
-    case stopSyncingHere(String, forgotPassphrase: Bool)
+    case thisMacOnly(String)
+    case stopSyncingHere(String)
     case deleteAccountHere(String)
     case follow(String, Typing)
     case changePassphrase(String)
@@ -309,34 +309,15 @@ extension SWorld {
                 let k = self.known(account)
                 return try await executor.move(&library, typed: TypedSecrets(passphrase: k.passphrase, words: k.words))
             }
-        case .thisMacOnly(let name, let mode):
-            let d = device(name)
-            try await act(d) { executor, library in
-                try await executor.leaveAccount(.thisMacOnly, &library, typed: self.typedFor(d), mode: mode)
-            }
-        case .stopSyncingHere(let name, let forgot):
-            let d = device(name)
-            try await act(d) { executor, library in
-                var typed = self.typedFor(d)
-                var fresh: String?
-                if forgot, library.record?.mode == .standard {
-                    fresh = self.newPassphrase()
-                    typed = TypedSecrets(words: typed.words, newPassphrase: fresh)
-                    self.choose(d, holder: self.holder(d, account: nil, libraryID: library.record!.libraryID), passphrase: fresh, words: nil)
-                }
-                let account = library.record?.account
-                let outcome = try await executor.leaveAccount(.stopSyncingHere, &library, typed: typed)
-                if let fresh, let account {
-                    let own = self.holder(d, account: nil, libraryID: library.record!.libraryID)
-                    self.setKnown(own, passphrase: fresh, words: self.known(account).words)
-                }
-                return outcome
-            }
+        case .thisMacOnly(let name):
+            try await act(device(name)) { executor, library in try await executor.leaveAccount(.thisMacOnly, &library) }
+        case .stopSyncingHere(let name):
+            try await act(device(name)) { executor, library in try await executor.leaveAccount(.stopSyncingHere, &library) }
         case .deleteAccountHere(let name):
             let d = device(name)
             try await act(d) { executor, library in
                 let account = library.record?.account
-                let outcome = try await executor.leaveAccount(.deleteAccountHere, &library, typed: self.typedFor(d))
+                let outcome = try await executor.leaveAccount(.deleteAccountHere, &library)
                 if let account { self.server.delete(accountID: account) }
                 return outcome
             }

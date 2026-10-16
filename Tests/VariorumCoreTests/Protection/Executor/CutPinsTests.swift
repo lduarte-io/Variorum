@@ -178,3 +178,40 @@ struct CutPinsRule23Tests {
         #expect(world.macA.library?.section.deviceID == id, "the device ID was recomputed from the hardware")
     }
 }
+
+@Suite("VX-378 U1 — rule 16: leaving an account changes no keys (red on the pre-cut tree)")
+struct CutPinsRule16Tests {
+    /// RULE 16: "Leaving an account changes none of your library's keys or
+    /// secrets — it stops syncing." Every leave, in both modes: the account
+    /// unbound, the key and the key file's secret locks as they were.
+    @Test func everyLeaveKeepsTheLibrarysKeyAndItsSecrets() async throws {
+        for mode in ProtectionMode.allCases {
+            for act in [ProtectionAct.thisMacOnly, .stopSyncingHere, .deleteAccountHere] {
+                let fixture = try EX(mode, synced: true)
+                let k0 = fixture.key
+                let before = try #require(fixture.world.liveFormat3)
+                let executor = fixture.executor()
+                var library = try fixture.unlocked(executor)
+                _ = try await executor.leaveAccount(act, &library)
+                #expect(fixture.liveRecord?.account == nil, "\(mode) \(act): still bound")
+                #expect(library.key == k0 && fixture.world.live?.fingerprint == PF.fp(k0), "\(mode) \(act): the key changed")
+                let after = try #require(fixture.world.liveFormat3)
+                #expect(after.passphrase == before.passphrase && after.words == before.words,
+                        "\(mode) \(act): a secret's lock changed")
+            }
+        }
+    }
+
+    /// RULE 16 + RULE 7: Move is leaving one account (no key change) and
+    /// joining another in the same mode (a re-lock, never a new key).
+    @Test func movingToAnAccountInTheSameModeKeepsTheKey() async throws {
+        let x = try EX(.standard, synced: true)
+        let y = try EX(.standard, synced: true, world: ExecutorWorld(icloud: x.world.icloud, server: x.world.server))
+        let k0 = x.key
+        let executor = x.executor(session: y.session)
+        var library = try x.unlocked(executor)
+        _ = try await executor.move(&library, typed: TypedSecrets(passphrase: y.passphrase, words: y.words))
+        #expect(x.liveRecord?.account == y.account)
+        #expect(library.key == k0, "the move changed the library's key")
+    }
+}

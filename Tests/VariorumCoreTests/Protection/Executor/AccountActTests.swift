@@ -97,55 +97,27 @@ struct AccountJoinTests {
         var l2 = try local.unlocked(e2)
         await #expect(throws: ExecutorRefusal.noAccountSignedIn) { _ = try await e2.setUpSync(&l2, typed: local.typed) }
         await #expect(throws: ExecutorRefusal.notSynced) {
-            _ = try await e2.leaveAccount(.stopSyncingHere, &l2, typed: local.typed)
+            _ = try await e2.leaveAccount(.stopSyncingHere, &l2)
         }
     }
 }
 
-@Suite("VX-305 U3 — every leave re-keys, in both modes; Move")
+@Suite("VX-305 U3 — no leave changes a key (rule 16); Move")
 struct LeaveAccountTests {
-    @Test func aCastleLeaveReKeysWithBothSecretsAndNothingAfterOpensThroughTheAccount() async throws {
+    /// Rule 16: the record stops naming the account and this Mac forgets its
+    /// sync keys; the key, its file and the account stay as they were.
+    @Test func aCastleLeaveUnbindsAndForgetsTheAccountsKeysAndChangesNothingElse() async throws {
         let fixture = try EX(.castle, synced: true)
         let k0 = fixture.key, account = fixture.account!
         let vaultBefore = fixture.world.server.snapshot(account)
+        let fileBefore = fixture.world.liveFormat3
         let executor = fixture.executor()
         var library = try fixture.unlocked(executor)
-        _ = try await executor.leaveAccount(.stopSyncingHere, &library, typed: fixture.typed)
+        _ = try await executor.leaveAccount(.stopSyncingHere, &library)
         #expect(fixture.liveRecord?.account == nil && fixture.liveRecord?.mode == .castle)
-        let live = try #require(fixture.world.liveFormat3)
-        #expect(library.key != k0 && live.master == nil)                        // nothing written after opens through it
-        #expect(try live.historyKey(PF.fp(k0), currentKey: library.key) == k0)  // her copies keep opening for her
+        #expect(library.key == k0 && fixture.world.liveFormat3 == fileBefore)
         #expect(fixture.world.server.snapshot(account) == vaultBefore)          // the account untouched
         #expect(fixture.world.syncItems.isEmpty && fixture.world.session[account] == nil)
-        expectSettled(fixture, library)
-    }
-
-    @Test func aStandardLeaveWithAForgottenPassphraseSetNewMintsNothing() async throws {
-        let fixture = try EX(.standard, synced: true)
-        let own = fixture.ownApple!.id, accountKey = fixture.accountApple!.id
-        let executor = fixture.executor()
-        var library = try fixture.unlocked(executor)
-        _ = try await executor.leaveAccount(
-            .thisMacOnly, &library,
-            typed: TypedSecrets(words: fixture.words, newPassphrase: "a fresh one"))
-        let live = try #require(fixture.world.liveFormat3)
-        #expect(live.apple?.keyID == own)                      // under this Mac's EXISTING own key
-        #expect(fixture.world.icloud.keys[accountKey] != nil)  // the account's key left alone
-        #expect(fixture.world.writes.allSatisfy { if case .appleAdd = $0 { return false } else { return true } })
-        #expect(try live.open(passphrase: .passphrase("a fresh one"), floor: PF.floor) == library.key)
-        #expect(live.passphrase?.kdf != fixture.p.kdf)          // a new passphrase: a fresh descriptor
-        expectSettled(fixture, library)
-    }
-
-    @Test func thisMacOnlyCastleFromAnAccountInStandardLeavesTheAccountsKeyUntouched() async throws {
-        let fixture = try EX(.standard, synced: true)
-        let accountKey = fixture.accountApple!.id, own = fixture.ownApple!.id
-        let executor = fixture.executor(session: .signedOut)
-        var library = try fixture.unlocked(executor)
-        _ = try await executor.leaveAccount(.thisMacOnly, &library, typed: fixture.typed, mode: .castle, gate: .touchID)
-        #expect(fixture.liveRecord?.mode == .castle && fixture.liveRecord?.account == nil)
-        #expect(fixture.world.icloud.keys[accountKey] != nil && fixture.world.icloud.keys[own] == nil)
-        #expect(fixture.world.server.snapshot(fixture.account!)!.mode == .standard(appleKeyID: accountKey))
         expectSettled(fixture, library)
     }
 
@@ -156,10 +128,9 @@ struct LeaveAccountTests {
         let executor = x.executor(session: y.session)
         var library = try x.unlocked(executor)
         _ = try await executor.move(&library, typed: TypedSecrets(passphrase: y.passphrase, words: y.words))
-        #expect(x.liveRecord?.account == y.account && library.key != k0)
+        #expect(x.liveRecord?.account == y.account && library.key == k0)
         #expect(!x.world.syncItems.keys.contains { $0.accountID == x.account })
         #expect(x.world.syncItems.keys.contains { $0.accountID == y.account && $0.itemClass == .silent })
-        #expect(try x.world.liveFormat3?.historyKey(PF.fp(k0), currentKey: library.key) == k0)
         expectSettled(x, library)
     }
 
@@ -167,10 +138,10 @@ struct LeaveAccountTests {
         var k0: StoreKey!
         try await CrashHarness.everywhere(
             { let f = try EX(.castle, synced: true, gate: .alwaysAsk); k0 = f.key; return f },
-            act: { fixture, executor, library in
-                _ = try await executor.leaveAccount(.stopSyncingHere, &library, typed: fixture.typed)
+            act: { _, executor, library in
+                _ = try await executor.leaveAccount(.stopSyncingHere, &library)
             },
-            finished: { fixture, _ in fixture.liveRecord?.account == nil && fixture.world.live!.fingerprint != PF.fp(k0) },
+            finished: { fixture, _ in fixture.liveRecord?.account == nil && fixture.world.live!.fingerprint == PF.fp(k0) },
             neverHappened: { fixture, _ in fixture.liveRecord?.account != nil && fixture.world.live!.fingerprint == PF.fp(k0) })
     }
 
@@ -178,11 +149,11 @@ struct LeaveAccountTests {
         var k0: StoreKey!
         try await CrashHarness.everywhere(
             { let f = try EX(.standard, synced: true); k0 = f.key; return f },
-            act: { fixture, executor, library in
-                _ = try await executor.leaveAccount(.stopSyncingHere, &library, typed: fixture.typed)
+            act: { _, executor, library in
+                _ = try await executor.leaveAccount(.stopSyncingHere, &library)
             },
             finished: { fixture, _ in
-                fixture.liveRecord?.account == nil && fixture.world.live!.fingerprint != PF.fp(k0) && fixture.world.syncItems.isEmpty
+                fixture.liveRecord?.account == nil && fixture.world.live!.fingerprint == PF.fp(k0) && fixture.world.syncItems.isEmpty
             },
             neverHappened: { fixture, _ in fixture.liveRecord?.account != nil && fixture.world.live!.fingerprint == PF.fp(k0) },
             dropPlan: true)

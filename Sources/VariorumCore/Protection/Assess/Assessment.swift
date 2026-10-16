@@ -253,9 +253,6 @@ public enum SecretRequirement: Equatable, Sendable {
     /// Decision 33: both typed — the words typed or made new where
     /// `wordsMayBeNew` (Use Standard: typed, never made new).
     case passphraseAndWords(wordsMayBeNew: Bool)
-    /// Standard's leave: the passphrase typed or set new (the forgot road),
-    /// the words typed or made new.
-    case passphraseOrSetNewAndWordsOrMadeNew
     /// One secret (a follow; a landing).
     case oneSecret
     /// The current passphrase (verified against the vault's copy where an

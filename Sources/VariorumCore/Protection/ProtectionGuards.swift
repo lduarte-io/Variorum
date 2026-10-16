@@ -10,7 +10,8 @@ import Foundation
 // U2 holds the guards in `assess`, the route finder and retention; U3 adds the
 // executor's (one value, one place to look). (U1's model guards — the two
 // homes, the hardware marker, the family tree's two homes, the anchor's two —
-// and U4's `libraryFileLosesToMemory` left with VX-378 U1, rules 4, 21, 23.)
+// and U4's `libraryFileLosesToMemory` left with VX-378 U1, rules 4, 21, 23;
+// U2's `rekeyAtEveryCrossing` left with rule 16.)
 
 public struct ProtectionGuards: Equatable, Sendable {
     /// Every guard on — the only value production code ever passes.
@@ -46,14 +47,10 @@ public struct ProtectionGuards: Equatable, Sendable {
     /// DECISION 35: a synced library writes nothing Apple-reachable without a
     /// fresh vault read for its account. Off: it writes on the record's word.
     public var freshVaultBeforeAppleWrite = true
-    /// THE RE-KEY AT EVERY CROSSING (§3.4, §3.8): into or out of Castle, out
-    /// of an account in either mode, a different library landing. Off:
-    /// leaving an account and a landing keep the key (today's behaviour).
-    public var rekeyAtEveryCrossing = true
 
     // U3 — the guards in the executor (it also reads U2's
     // `everyOwnKeyRetiredAtCastle`, `freshVaultBeforeAppleWrite`,
-    // `rekeyAtEveryCrossing`, `standardRecordNoDestructiveRepair` and
+    // `standardRecordNoDestructiveRepair` and
     // `deleteOnSightByIDOnly` where it acts on the same rule).
     /// A PLAN RESUMES ONLY WHEN THIS MAC'S SECTION NAMES IT (§3.6, VX-313):
     /// a plan the section doesn't name — planted, or replayed from an earlier
@@ -128,14 +125,6 @@ public struct ProtectionGuards: Equatable, Sendable {
     public var freshVaultBeforeAppleWriteOn: Bool {
         #if DEBUG
         return freshVaultBeforeAppleWrite
-        #else
-        return true
-        #endif
-    }
-
-    public var rekeyAtEveryCrossingOn: Bool {
-        #if DEBUG
-        return rekeyAtEveryCrossing
         #else
         return true
         #endif

@@ -46,7 +46,7 @@ struct ExecutorLogScanTests {
         let c = try EX(.castle, synced: true, gate: .alwaysAsk)
         let ce = c.executor()
         var cl = try c.unlocked(ce)
-        _ = try await ce.leaveAccount(.stopSyncingHere, &cl, typed: c.typed)
+        _ = try await ce.leaveAccount(.stopSyncingHere, &cl)
         try ce.runRepairs([.refreshMemory, .makeTouchIDItem(fingerprint: PF.fp(cl.key))], on: &cl)
         fixtures.append(c)
 

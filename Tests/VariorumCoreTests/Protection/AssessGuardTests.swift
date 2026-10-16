@@ -20,7 +20,7 @@ struct AssessGuardsOnTests {
         #expect(guards.pruneOwnCopiesOnlyOn && guards.noRepairMakesTouchIDOn && guards.noRearmWithoutItemOn)
         #expect(guards.deleteOnSightByIDOnlyOn && guards.everyOwnKeyRetiredAtCastleOn)
         #expect(guards.standardRecordNoDestructiveRepairOn)
-        #expect(guards.freshVaultBeforeAppleWriteOn && guards.rekeyAtEveryCrossingOn)
+        #expect(guards.freshVaultBeforeAppleWriteOn)
     }
 }
 
@@ -105,19 +105,5 @@ struct AssessGuardMutationTests {
                 "red with the guard off: Apple-reachable with no fresh vault")
     }
 
-    /// THE RE-KEY AT EVERY CROSSING: leaving an account in Standard would keep
-    /// the key — the account you left keeping what you write after. (The
-    /// landing's half left with rule 17 — VX-378 U1.)
-    @Test func rekeyAtEveryCrossing() throws {
-        let x = PF.id()
-        var world = try AWorld(.standard, account: x)
-        world.session = .signedIn(accountID: x, email: nil)
-        world.vault = AWorld.vault(x, .standard(appleKeyID: PF.id()))
-        #expect(try world.assessed().door(.thisMacOnly).spec?.rekeys == true)
-        var off = ProtectionGuards()
-        off.rekeyAtEveryCrossing = false
-        #expect(try world.assessed(guards: off).door(.thisMacOnly).spec?.rekeys == false,
-                "red with the guard off: a Standard leave keeps the key")
-    }
 }
 #endif

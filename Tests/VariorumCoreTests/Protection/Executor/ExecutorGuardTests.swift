@@ -130,17 +130,6 @@ struct ExecutorGuardMutationTests {
         }
     }
 
-    @Test func aStandardLeaveKeepsItsKeyWithTheGuardOff() async throws {
-        for guarded in [true, false] {
-            let fixture = try EX(.standard, synced: true)
-            let k0 = fixture.key
-            let executor = fixture.executor(guards: guarded ? .all : Self.off { $0.rekeyAtEveryCrossing = false })
-            var library = try fixture.unlocked(executor)
-            _ = try await executor.leaveAccount(.stopSyncingHere, &library, typed: fixture.typed)
-            #expect((library.key != k0) == guarded)
-        }
-    }
-
     @Test func aTouchIDItemIsDeletedOnAStandardRecordsWordWithTheGuardOff() throws {
         for guarded in [true, false] {
             let fixture = try EX(.standard)

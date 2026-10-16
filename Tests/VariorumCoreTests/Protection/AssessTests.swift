@@ -70,8 +70,9 @@ struct AssessAccountTests {
         #expect(same.door(.moveToSignedInAccount).spec?.words.contains(.sameEmailDifferentAccount) == true)
     }
 
-    /// Every leave re-keys, in both modes (her round-2 ruling).
-    @Test func everyLeaveReKeysInBothModes() throws {
+    /// No leave re-keys, in either mode (rule 16 — superseding her round-2
+    /// ruling's "every leave re-keys").
+    @Test func noLeaveReKeysOrAsksASecretInEitherMode() throws {
         for mode in ProtectionMode.allCases {
             let x = PF.id()
             var world = try AWorld(mode, account: x)
@@ -80,9 +81,10 @@ struct AssessAccountTests {
             let assessed = try world.assessed()
             for door in [Door.thisMacOnly, .stopSyncingHere, .deleteAccountHere] {
                 let spec = try #require(assessed.door(door).spec, "\(mode) \(door)")
-                #expect(spec.rekeys, "\(mode) \(door) re-keys")
-                #expect(spec.requires == (mode == .castle
-                    ? .passphraseAndWords(wordsMayBeNew: true) : .passphraseOrSetNewAndWordsOrMadeNew))
+                // Rule 16: no leave changes a key or a secret, so none asks
+                // for one (PROVISIONAL P-VX378-U1-2).
+                #expect(!spec.rekeys, "\(mode) \(door) re-keys")
+                #expect(spec.requires == SecretRequirement.none)
             }
         }
     }

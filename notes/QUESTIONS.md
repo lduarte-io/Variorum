@@ -2755,3 +2755,12 @@ an open does when the memory item is missing or fails its seal. Options:
 - (c) adopt the record's section when it holds exactly one (rejected: a guess, against rule 21).
 Record: `notes/plans/vx-378-castle-simplified.md` §8, the U1 RECORD (piece G). Status: open — U2 decides (b) or keeps
 (a); her eye at the phase's close.
+
+**P-VX378-U1-2 — Does leaving an account ask for a secret?** Rule 16: leaving changes none of the library's keys or
+secrets — it stops syncing. The leave used to re-key, and asked for both secrets to lock the new key. With nothing
+re-keyed or re-locked, the rules don't say whether the door still asks. Options:
+- **(a) BUILT, PROVISIONAL —** nothing is typed: `leaveAccount(_:_:)` takes no secrets and the three leave doors
+  require `.none` (the face may still confirm the act in words).
+- (b) the passphrase typed as consent, verified against the key file (deleting the account from this Mac is the
+  heaviest of the three).
+Record: the plan's §8 U1 RECORD (piece H). Status: open — her eye at the phase's close (the faces are phase 3/4's).

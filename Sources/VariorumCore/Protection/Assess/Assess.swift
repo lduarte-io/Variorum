@@ -20,8 +20,8 @@ import Foundation
 //     its retirement and the move's gifts left with rules 26 and 19);
 //   - §3.9: the vault's mode; a follower's hold; sync keys held the
 //     account's way (rule 15's custody; the stuck leave left with VX-378 U1);
-//   - §3.8: the four account situations; every leave re-keying in both modes;
-//     the joining rules;
+//   - §3.8: the four account situations; no leave re-keys (rule 16); the
+//     joining rules;
 //   - §3.10: the Touch ID road, VX-310's lobby rule as data.
 // (A copy is a copy — rule 17: the open rule left with VX-378 U1; Look inside
 // and Make this my library are U2's.)
@@ -420,10 +420,6 @@ public enum AssessRules {
             }
             return nil
         }
-        // The leave requirements, by mode (§3.8).
-        let leaveRequires: SecretRequirement = current == .castle
-            ? .passphraseAndWords(wordsMayBeNew: true) : .passphraseOrSetNewAndWordsOrMadeNew
-        let leaveRekeys = guards.rekeyAtEveryCrossingOn || current == .castle
 
         // USE CASTLE.
         doors[.useCastle] = {
@@ -466,22 +462,22 @@ public enum AssessRules {
             let join = joinPlan(library: current, vault: facts.vault.flatMap { $0.accountID == facts.session.accountID ? $0 : nil })
             return .open(joinSpec(join, facts, unlocked, finder: finder, guards: guards))
         }()
-        // THE LEAVES — every one re-keys, in both modes (§3.8).
+        // THE LEAVES — none changes a key or a secret (rule 16), so none asks
+        // for one (PROVISIONAL P-VX378-U1-2).
         for door in [Door.thisMacOnly, .stopSyncingHere, .deleteAccountHere] {
             doors[door] = {
                 if otherAccount { return .refused(.otherAccountSignedIn) }
                 if followOwed, door != .deleteAccountHere { return .refused(.followOwed) }
                 guard inSync || signedOut else { return .refused(.notSynced) }
                 if door == .deleteAccountHere, !inSync { return .refused(.noAccountSignedIn) }
-                return .open(DoorSpec(requires: leaveRequires, rekeys: leaveRekeys))
+                return .open(DoorSpec(requires: .none))
             }()
         }
-        // MOVE it to the signed-in account — leave X (a re-key), join Y.
+        // MOVE it to the signed-in account — leave X (no key change), join Y.
         doors[.moveToSignedInAccount] = {
             guard otherAccount else { return .refused(.nothingToDo) }
             let join = joinPlan(library: current, vault: facts.vault.flatMap { $0.accountID == facts.session.accountID ? $0 : nil })
             var spec = joinSpec(join, facts, unlocked, finder: finder, guards: guards)
-            spec.rekeys = spec.rekeys || leaveRekeys
             if sameEmail { spec.words.append(.sameEmailDifferentAccount) }
             return .open(spec)
         }()
