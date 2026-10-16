@@ -256,6 +256,12 @@ public enum Fault: Hashable, Sendable {
     /// Standard: the live key file's own Apple key can't be read here — the
     /// Apple road is lost; Re-link's library arm is offered (no repair mints).
     case appleRoadLost(keyFileID: String)
+    /// The live place holds ANOTHER key's file (nothing in flight): the
+    /// record, what this Mac remembers and the key file don't agree (§3.3's
+    /// "Always"). The current key's own file comes back by
+    /// `restoreKeyFileFromCopy` (or the mirror) when one exists; with none it
+    /// stays — PROVISIONAL P-R1-1 (VX-305 ladder round 1).
+    case liveKeyFileIsAnotherKeys(keyFileID: String)
 }
 
 public enum FollowKind: Equatable, Sendable {

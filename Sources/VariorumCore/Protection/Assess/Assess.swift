@@ -299,8 +299,19 @@ public enum AssessRules {
                 repairs.append(.recordHeldSyncKeysFacts)
             }
         }
+        // The mode's repairs and faults read the live file only when it is the
+        // CURRENT key's: another key's file in the live place (a roll back
+        // with nothing to restore from — VX-305 ladder round 1) is no "Castle
+        // key with an Apple wrap" and owes no Standard wrap — it is its own
+        // fault. Mid-act the live file is the act's new key's by design (no
+        // fault). The raw file stays for the arms above that need it whatever
+        // its key (`rekeyOlderLibraryFile`, the restores).
+        let rawLive = liveKeyFile(facts, unlocked)
+        let live = rawLive.flatMap { $0.fingerprint == unlocked.currentFingerprint ? $0 : nil }
+        if rawLive != nil, live == nil, unlocked.thisMac.actInFlight == nil, let id = unlocked.liveKeyFileID {
+            faults.append(.liveKeyFileIsAnotherKeys(keyFileID: id))
+        }
         guard let current = mode.mode else { return (repairs, faults) }
-        let live = liveKeyFile(facts, unlocked)
         // §3.10: a choice of Touch ID with no item behind it records Always
         // ask quietly — NEVER a repair that makes an item (only a press does).
         if current == .castle, unlocked.thisMac.settings.gateStyle == .touchID,
@@ -542,6 +553,9 @@ public enum AssessRules {
             let isLive = file.id == unlocked.liveKeyFileID
             guard isLive ? mode.mode == .standard : (file.role == .ownKeyFile && file.mac.isMac(mac8)) else { continue }
             guard case .format3(let keyFile)? = file.document else { continue }
+            // The live place's file counts only when it is the current key's
+            // (another key's file there is its own fault — VX-305 ladder round 1).
+            if isLive, keyFile.fingerprint != unlocked.currentFingerprint { continue }
             let readsOwn = unlocked.thisMac.appleKeys.contains {
                 $0.isOwnLibraryKey && $0.retiredAt == nil && facts.appleKeys.readable.contains($0.id)
             }
