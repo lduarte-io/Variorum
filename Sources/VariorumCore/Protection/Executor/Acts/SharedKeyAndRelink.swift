@@ -66,7 +66,7 @@ extension ActContext {
         }
         // Other libraries' own key files: their key reached through the old
         // shared key's wrap while it exists (else it needs that library's
-        // secret — reported, not guessed; PROVISIONAL P-U3-7).
+        // secret — reported, not guessed; PROVISIONAL P-U3-5).
         let shared = try leaves.apple.readOldSharedAppleKey()
         for libraryID in parameters.keyFileIDs ?? [] {
             guard let own = try leaves.keyFiles.readOwnKeyFile(libraryID: libraryID, deviceID: deviceID),

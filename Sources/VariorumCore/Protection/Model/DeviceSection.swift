@@ -378,7 +378,7 @@ public enum DeviceFacts {
     /// their defaults (§3.10's "a device with no choice yet").
     public static func takingOver(
         predecessor: DeviceSection?, allSections: [DeviceSection], newDeviceID: String,
-        marker: HardwareMarker, keyFileOwnAppleKeyIDs: [String]
+        marker: HardwareMarker, keyFileOwnAppleKeyIDs: [String], keyFileSharedAppleKeyID: String? = nil
     ) -> DeviceSection {
         var section = DeviceSection(
             deviceID: newDeviceID, hardwareMarker: marker, settings: .newIdentity)
@@ -417,14 +417,22 @@ public enum DeviceFacts {
                   let retired = allSections.compactMap(\.oldSharedKey).filter({ $0.retiredAt != nil })
                     .min(by: { ($0.retiredAt ?? .distantFuture) < ($1.retiredAt ?? .distantFuture) }) {
             section.oldSharedKey = retired
-        } else if predecessor == nil, let standing = allSections.compactMap(\.oldSharedKey).first {
+        } else if predecessor == nil, case let standing = allSections.compactMap(\.oldSharedKey), !standing.isEmpty {
             // …and with no retirement listed, a STANDING record any section
             // lists: the key still wraps this library's pre-Castle copies, so
             // the replacement shows the door and §3.1's first exception too —
             // it fell away with no predecessor named, leaving those copies open
             // through the Apple account unsaid (VX-305 U4, the soak's seed 7;
-            // P-U4-9 extended).
-            section.oldSharedKey = standing
+            // P-U4-9 extended). The pick (VX-305 ladder round 1, NIT 5): the
+            // record whose id the live key file's shared wrap names — the old
+            // shared key that actually wraps THIS library's key; else the
+            // smallest id, never the record's storage order. (The retirement
+            // deletes by the recorded id first, so a record of another Apple
+            // account's key would miss this Mac's; where none matches that
+            // stays P-U4-1's known-leftover class, her P-U4-9 "any standing
+            // record" wording.)
+            section.oldSharedKey = standing.first { $0.id == keyFileSharedAppleKeyID }
+                ?? standing.min { $0.id < $1.id }
         }
         return section
     }
@@ -434,7 +442,7 @@ public enum DeviceFacts {
     /// is minted. Returns the section and how it was found.
     public static func thisMacsSection(
         memory: DeviceMemory?, recordSections: [DeviceSection], marker: HardwareMarker,
-        keyFileOwnAppleKeyIDs: [String], mintDeviceID: () -> String,
+        keyFileOwnAppleKeyIDs: [String], keyFileSharedAppleKeyID: String? = nil, mintDeviceID: () -> String,
         guards: ProtectionGuards = .all
     ) -> (section: DeviceSection, resolution: IdentityResolution) {
         let resolution = resolveIdentity(
@@ -477,13 +485,15 @@ public enum DeviceFacts {
                 guard !recordSections.isEmpty else { return fresh() }
                 return (takingOver(
                     predecessor: nil, allSections: recordSections, newDeviceID: mintDeviceID(), marker: marker,
-                    keyFileOwnAppleKeyIDs: keyFileOwnAppleKeyIDs), resolution)
+                    keyFileOwnAppleKeyIDs: keyFileOwnAppleKeyIDs, keyFileSharedAppleKeyID: keyFileSharedAppleKeyID),
+                        resolution)
             }
             let predecessor = reconcile(
                 record: recordSection(predecessorID), memory: memory?.deviceSection, guards: guards)
             return (takingOver(
                 predecessor: predecessor, allSections: recordSections, newDeviceID: mintDeviceID(),
-                marker: marker, keyFileOwnAppleKeyIDs: keyFileOwnAppleKeyIDs), resolution)
+                marker: marker, keyFileOwnAppleKeyIDs: keyFileOwnAppleKeyIDs, keyFileSharedAppleKeyID: keyFileSharedAppleKeyID),
+                    resolution)
         }
     }
 }

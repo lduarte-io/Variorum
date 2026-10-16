@@ -16,10 +16,10 @@ none). The pins the implementer's answer ran red are `Tests/VariorumCoreTests/Pr
   orchestrator/reviewer (§"Found by the generator, outside the round" below):** NEW-1 (promise 3, a different
   library's file swapped into the slot) and **NEW-2 (promise 13, no tamper at all — a landing, Use Castle, Use
   Standard)**. Both reproduce on the round's base `e4ee1f083`. They keep a generator slice from running fully green.
-- **5 · NIT** — `takingOver`'s standing old-shared pick: PENDING.
-- **6 · NIT** — the lobby's Touch ID line before unlock: PENDING.
-- **3 · NIT** — DeviceActs' dead "memory" arm: PENDING.
-- **4 · NIT** — the P-U3-7 → P-U3-5 comment: PENDING.
+- **5 · NIT** — `takingOver`'s standing old-shared pick: **DONE** (this commit).
+- **6 · NIT** — the lobby's Touch ID line before unlock: **DONE** (this commit).
+- **3 · NIT** — DeviceActs' dead "memory" arm: **DONE** (this commit).
+- **4 · NIT** — the P-U3-7 → P-U3-5 comment: **DONE** (this commit).
 - The runs (the protection set in Debug, `swift build -c release`, a generator slice with tamper composition):
   PENDING.
 
@@ -196,3 +196,48 @@ is one of the six findings, so neither is fixed here (a second unit).
   the login password reaches b03b0684, a key from before the leave`. Byte-identical violation on the base tree.
   **A security-promise class with no adversary in it — it needs triage before the go/no-go soak** (promise 13: after
   a leave, nothing Apple- or login-reachable opens a key from before it). Not traced further here.
+
+## 5 · NIT — `takingOver`'s standing old-shared pick
+
+**The fix (the final call §5, shaped to stay pure).** A new parameter `keyFileSharedAppleKeyID: String?` (default nil)
+threads through `DeviceFacts.thisMacsSection` and `DeviceFacts.takingOver`; `ProtectionExecutor.unlock` passes the
+`sharedApple?.keyID` of the key file it already hands the takeover (`ownFile` — the live file, or the plan's carried
+outgoing file). The no-predecessor STANDING arm picks the record whose id that shared wrap names — the old shared key
+that actually wraps THIS library's key — else the smallest id (deterministic, never the record's storage order). The
+retired-record arm above it is untouched. The residue where no record matches stays P-U4-1's ratified known-leftover
+class under her P-U4-9 "any standing record" wording — recorded, not chased.
+
+**The pin, red → green.** `TakingOverStandingOldSharedTests` (3 tests). Red-on-old shown with the parameter threaded
+but the OLD `.first` pick kept (the only way a new parameter's pin can run on the old logic):
+`theRecordWhoseIDWrapsThisLibraryWins` — `Expectation failed: taken.oldSharedKey?.id == "z-this-library"` →
+`adopted Optional("a-another-apple-id")`; `noMatchTakesTheSmallestID` — `adopted Optional("z-second")` and `the pick
+depends on the record's storage order`; `aRetirementStillWins` green on both (the retired arm's own pin). Green after.
+
+## 6 · NIT — the lobby's Touch ID line before unlock
+
+**The fix (the final call §6 — VX-310's letter).** In `Assess.touchID`, when no fingerprint names the current key
+(before unlock with the key file AND the memory item gone — no hint), `itemExists` falls back to "any `.touchid`
+custody item in this scope": the button shows, a press verifies itself (a wrong key's item fails honestly into the
+passphrase road), and the quiet line saying it isn't set up disappears. Not new product behaviour: her pick read to
+its words ("the button whenever a Touch ID item exists"). No existing Touch ID pin's sentence changed — the state is
+reachable only with both hint sources gone (every existing Touch ID test green, unchanged).
+
+**The pin, red → green.** `TouchIDLobbyWithNoHintTests` (2 tests). Red before the fix:
+`aTouchIDItemWithNoHintShowsTheButton` — `Expectation failed: touchID.button` → `no button with a Touch ID item
+present`; `Expectation failed: touchID.quietLine == nil` → `the quiet line said
+Optional(VariorumCore.TouchIDQuietLine.notSetUpForThisLibrary)`; `noItemNoButton` green on both (no item, no button,
+the line stays). Green after.
+
+**The protection set after NITs 5 and 6 (and 3, 4):** `✔ Test run with 429 tests in 69 suites passed after 13.289
+seconds.`
+
+## 3 · NIT — DeviceActs' dead "memory" arm
+
+**The fix.** The unreachable `case "memory"` in `DeviceSettingsProgram.run`'s switch is removed; the early return
+stays, its comment now saying it serves BOTH the ordinary flow and the plan-less finish. No pin (dead code) — the
+protection set green after.
+
+## 4 · NIT — the P-U3-7 → P-U3-5 comment
+
+**The fix.** `SharedKeyAndRelink.swift`'s library-arm comment now cites **P-U3-5** (the skip-and-report call, the U3
+record); P-U3-7 is the no-repair-while-in-flight call. No pin.

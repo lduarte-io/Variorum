@@ -281,6 +281,7 @@ public final class ProtectionExecutor {
         let (section, resolution) = DeviceFacts.thisMacsSection(
             memory: memory, recordSections: sections, marker: record.marker(for: configuration.machine),
             keyFileOwnAppleKeyIDs: [ownFile?.apple?.keyID].compactMap { $0 },
+            keyFileSharedAppleKeyID: ownFile?.sharedApple?.keyID,
             mintDeviceID: { self.leaves.ids.mintID() }, guards: guards)
         var unlocked = UnlockedLibrary(
             key: key, record: record, section: section, resolution: resolution, memory: memory, keyFile: liveFile,

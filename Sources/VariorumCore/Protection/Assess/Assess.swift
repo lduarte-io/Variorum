@@ -147,9 +147,14 @@ public enum AssessRules {
 
     public static func touchID(_ facts: ProtectionFacts, guards: ProtectionGuards) -> TouchIDAssessment {
         let fingerprint = facts.unlocked?.currentFingerprint ?? facts.slotFingerprintHint
+        // With no fingerprint to name the current key (before unlock, the key
+        // file AND the memory item both gone — no hint), ANY Touch ID item in
+        // this scope counts: VX-310's letter, "the button whenever a Touch ID
+        // item exists" — a press verifies itself, a wrong key's item failing
+        // honestly into the passphrase road (VX-305 ladder round 1, NIT 6).
         let itemExists = fingerprint.map {
             facts.custody.contains(CustodyItemFact(fingerprint: $0, itemClass: .touchid))
-        } ?? false
+        } ?? facts.custody.contains { $0.itemClass == .touchid }
         let usableHere = facts.biometry.hardware && facts.biometry.enrolled
         let button = itemExists && usableHere
         var quietLine: TouchIDQuietLine?

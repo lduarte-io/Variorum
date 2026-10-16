@@ -63,3 +63,77 @@ struct LiveKeyFileIsTheCurrentKeysTests {
         #expect(!assessed.faults.contains(.liveKeyFileIsAnotherKeys(keyFileID: AWorld.liveKeyFileID)))
     }
 }
+
+@Suite("VX-305 ladder round 1 — NIT 5: a replacement's STANDING old-shared record is the one that wraps this library's key")
+struct TakingOverStandingOldSharedTests {
+    static func section(_ id: String, standing sharedID: String?, retiredAt: Date? = nil) -> DeviceSection {
+        DeviceSection(
+            deviceID: id, hardwareMarker: .stub("marker-\(id)"), settings: DeviceSettings(gateStyle: .touchID),
+            oldSharedKey: sharedID.map { OldSharedKeyRecord(id: $0, retiredAt: retiredAt) })
+    }
+
+    /// Two sections listing DIFFERENT standing ids (two Macs on different
+    /// Apple IDs); the live key file's shared wrap names the one the storage
+    /// order puts SECOND — and the one the smallest-id tie-break wouldn't pick.
+    @Test func theRecordWhoseIDWrapsThisLibraryWins() {
+        let sections = [Self.section("d-1111", standing: "a-another-apple-id"), Self.section("d-2222", standing: "z-this-library")]
+        let taken = DeviceFacts.takingOver(
+            predecessor: nil, allSections: sections, newDeviceID: "d-new", marker: .stub("marker-new"),
+            keyFileOwnAppleKeyIDs: [], keyFileSharedAppleKeyID: "z-this-library")
+        #expect(taken.oldSharedKey?.id == "z-this-library", "adopted \(String(describing: taken.oldSharedKey?.id))")
+    }
+
+    /// No record matches (no shared wrap): a deterministic pick — the smallest
+    /// id — not the record's storage order.
+    @Test func noMatchTakesTheSmallestID() {
+        let sections = [Self.section("d-1111", standing: "z-second"), Self.section("d-2222", standing: "a-first")]
+        let taken = DeviceFacts.takingOver(
+            predecessor: nil, allSections: sections, newDeviceID: "d-new", marker: .stub("marker-new"),
+            keyFileOwnAppleKeyIDs: [], keyFileSharedAppleKeyID: nil)
+        #expect(taken.oldSharedKey?.id == "a-first", "adopted \(String(describing: taken.oldSharedKey?.id))")
+        let reversed = DeviceFacts.takingOver(
+            predecessor: nil, allSections: sections.reversed(), newDeviceID: "d-new", marker: .stub("marker-new"),
+            keyFileOwnAppleKeyIDs: [], keyFileSharedAppleKeyID: nil)
+        #expect(reversed.oldSharedKey == taken.oldSharedKey, "the pick depends on the record's storage order")
+    }
+
+    /// The retired-record arm above stays untouched: a retirement any section
+    /// lists still wins over a standing record, matching or not.
+    @Test func aRetirementStillWins() {
+        let sections = [Self.section("d-1111", standing: "z-this-library"),
+                        Self.section("d-2222", standing: "a-retired", retiredAt: CF.stamp(3))]
+        let taken = DeviceFacts.takingOver(
+            predecessor: nil, allSections: sections, newDeviceID: "d-new", marker: .stub("marker-new"),
+            keyFileOwnAppleKeyIDs: [], keyFileSharedAppleKeyID: "z-this-library")
+        #expect(taken.oldSharedKey == OldSharedKeyRecord(id: "a-retired", retiredAt: CF.stamp(3)))
+    }
+}
+
+@Suite("VX-305 ladder round 1 — NIT 6: before unlock, with no fingerprint hint, a Touch ID item still shows the button")
+struct TouchIDLobbyWithNoHintTests {
+    /// The key file AND the memory item both gone (a listed tamper): no hint
+    /// names the current key before unlock, yet a Touch ID item exists and
+    /// opens — the button shows (VX-310's letter: "the button whenever a
+    /// Touch ID item exists"), and no quiet line says it isn't set up.
+    @Test func aTouchIDItemWithNoHintShowsTheButton() throws {
+        var world = try AWorld(.castle)
+        world.unlocked = false
+        var facts = try world.facts()
+        facts.slotFingerprintHint = nil
+        let touchID = assess(facts, guards: .all).touchID
+        #expect(touchID.button, "no button with a Touch ID item present")
+        #expect(touchID.quietLine == nil, "the quiet line said \(String(describing: touchID.quietLine))")
+    }
+
+    /// …and with no Touch ID item at all, still no button (the line stays).
+    @Test func noItemNoButton() throws {
+        var world = try AWorld(.castle)
+        world.unlocked = false
+        world.custody = []
+        var facts = try world.facts()
+        facts.slotFingerprintHint = nil
+        let touchID = assess(facts, guards: .all).touchID
+        #expect(!touchID.button)
+        #expect(touchID.quietLine == .notSetUpForThisLibrary)
+    }
+}

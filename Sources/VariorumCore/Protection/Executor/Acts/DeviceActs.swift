@@ -14,9 +14,10 @@ struct DeviceSettingsProgram: ActProgram {
     func finishingSteps(_ library: UnlockedLibrary) -> [String] { ["memory"] }
 
     func run(_ step: String, _ ctx: ActContext) async throws {
-        // The plan-less finish (a crash before the plan landed) runs only
-        // "memory", which needs nothing the press chose (it refused for want
-        // of the settings, leaving the act in flight — VX-305 U4).
+        // "memory" — for BOTH the ordinary flow and the plan-less finish (a
+        // crash before the plan landed runs only "memory", which needs nothing
+        // the press chose: it refused for want of the settings, leaving the
+        // act in flight — VX-305 U4). The switch below has no "memory" case.
         if step == "memory" { return try ctx.rememberNewKey() }
         guard let wanted = ctx.parameters.settings else { throw ExecutorRefusal.nothingToDo }
         let fingerprint = ctx.library.fingerprint
@@ -34,8 +35,6 @@ struct DeviceSettingsProgram: ActProgram {
             }
         case "settings":
             if ctx.library.section.settings != wanted { try ctx.updateSection { $0.withSettings(wanted) } }
-        case "memory":
-            try ctx.rememberNewKey()
         default: throw ExecutorRefusal.nothingToDo
         }
     }
