@@ -4618,6 +4618,27 @@ and here:
 - **Her hand check** stays first in her morning checklist: drag an Open row down one, down several, to the end (the end
   zone, in a list that scrolls too) and up. The one-commit fallback is main's road exactly.
 
+#### U2d — THE WINDOW'S TEST PART (the orchestrator, claim `vx283-u2d` 08:04:32 →; `u2d/logs/`)
+
+`window.sh` pre (GUARD OK; App/ clean at `1e3fad6b`; six products; all FIVE store files copied, `store-before/
+20261016T140432Z`) → **pins: 60 tests / 7 suites ALL GREEN** (the 2 skips are U1c's opt-in traces, pre-existing) → the
+reverts:
+- **R-X: exactly the 19 named RED, the 8 named GREEN** (27 / 3 suites);
+- **R-Y: exactly 3 red of 16**;
+- **R-Z: exactly 1 red of 13**;
+- **R-Q: exactly 2 red of 14**;
+- **R-W: GREEN on its prebuilt tree, a METHOD artifact, not a hollow pin.** Pin (a) is a source read (`#filePath`,
+  `OpenListDragTests.swift:588`), so it reads the WORKTREE at run time, and the worktree was clean. So R-W was applied to
+  the worktree itself (`u2d/reverts/R-W.patch`, one line), `OpenListDragFaceTests` was run on `vx283-u2d`: **exactly 1
+  red of 3** (`eachRowIsATargetedDropOnMainsRoadAndNoSessionFormRemains`, `OpenListDragTests.swift:698`), then
+  `git checkout -- App`, `git diff` empty (`logs/rw-worktree.log`). Lesson for every later source-read pin: its red-on-old
+  runs with the revert IN the worktree, never from a prebuilt tree.
+Every revert tree was deleted after its step.
+
+**Batch: 725 tests / 144 suites, the ONE red VX-115's `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads`**
+(red on main, untouched). Restore: pgrep empty first; all five files `cmp`-identical to the copy; nine added keys
+deleted; PREFS CLEAN; castle-W1 present. **U2d is PROVEN by its pins and reverts.** The landing itself is unwalkable
+(the main-build control); the re-walk covers the source side, the rows, the footer edge and D8.
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
