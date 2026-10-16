@@ -1465,9 +1465,29 @@ switch arm, a doc-comment misnumber, an order-dependent `.first` pick, a lobby T
 deterministic soak slice reproduced; `LegacyModeReader` hand-diffed against the live `Posture.derive` (matches); the
 mutation-pin harness and the promise checker's key-reach engine inspected and found genuinely biting.
 
-**Dispositions:** pending the cross-model flow — the findings to a fresh Opus implementer VERBATIM (the report file),
-its agree/dispute back to the round-1 reviewer for the final call, the implementer then applies the confirmed fixes
-(red-on-old pin per finding, the suite green), and round 2's fresh reviewer re-checks them.
+**The implementer's agree/dispute — committed unedited as `notes/plans/vx-305-ladder-round-1-answer.md`:** all six
+AGREED, zero disputes; the MAJOR's pin RED in all four cases on today's tree; reachability widened honestly (a planted
+plan works; no crash needed with an earlier key's file replayed while closed; always TWO tampers, never one); a second
+soak-blindness reason found (the generator relaunches between steps, so it can never compose two tampers or land one
+inside a crash window); three scope notes on the fix and one framing note, all sent to the reviewer.
+
+**The reviewer's FINAL CALL — committed unedited as `notes/plans/vx-305-ladder-round-1-final-call.md`:** all six
+findings CONFIRMED; FINDER-FIXES none — the implementer applies everything. Dispositions ruled: (1) the MAJOR's fix
+widens the `restoreKeyFileFromCopy` gate in BOTH places (Assess + ExecutorRepairs) with the precondition written out,
+sets the stray file ASIDE as `.stale-<epoch>` (never deleted), and the WORLD gains both halves — promise 1's
+live-key-file-agreement clause keyed on "no repair owed" plus a compound-tamper generator action (one closed window,
+the seed-9 pre-settle preserved) so the class is soak-visible; (2) the COPY-LESS case is NOT gating — PROVISIONAL
+**P-R1-1** hand-forward (recommended: a phase-2/4 rebuild-under-typed-secrets door, the key doors' sibling), bundled
+for the author; (3) the STALE-COPY caution adopted — the fix's pin includes a key door between the copy and the
+tampers and asserts the inherited `passphraseDoesNotOpen` honestly; pre-existing, rides P-R1-1, one recording sentence
+owed; (4) the framing correction ACCEPTED (§3.3's always-agree contract, not §3.6), severity stays MAJOR; (5) the
+`.first` NIT fixed this round via a pure `keyFileSharedAppleKeyID` parameter threaded from unlock (matching-id first,
+smallest-id tie-break, red-on-old unit pin; the no-match residue stays her P-U4-1/P-U4-9 hygiene class); (6) the
+P-U4-10 adjacency worded into the record — the repair restores the LIVE KEY FILE from this Mac's own frozen pair,
+never a library copy, never an unlock-screen offer; her dropped newest-copy ruling untouched. The file ends with
+round 2's re-check list. **Fixes: the implementer, next — red-on-old per finding, the pin file flipping to
+fixed-scenario assertions and joining the tree, the suite green both configs, the fixes record
+`notes/plans/vx-305-ladder-round-1-fixes.md`.**
 
 ## 10. The go/no-go and the key map's model half (filled at close)
 
