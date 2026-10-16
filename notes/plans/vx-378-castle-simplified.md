@@ -62,6 +62,13 @@ this plan file beside its own and keeps the one Sync/-or-custody slot.
 > biometric ACL — §3's rule-8 row; the key file's master wrap and its twelve-words copy are load-bearing — §3's rule-1
 > row. Zero-writes for Look inside is asserted in U2 (executor harness) AND U4 (the world).
 >
+> **If building reveals a serious issue with the design — a rule that cannot be built as written, two rules that
+> conflict in code, a core aim (`CastleRules.md`'s one sentence, the one-posture frame, Castle's promise) that the model
+> cannot meet — STOP that unit at a clean seam.** Record the issue in §8 with the trace (which rule, which code, which
+> sequence), commit, and report it. The orchestrator brings it to the author before anything moves. Never patch the
+> design silently, never add a handler to make a rule hold, never mark a rule PROVISIONAL to get past it — the rules are
+> hers, and a rule that needs machinery to stay true is exactly what she wants to hear about.
+>
 > **Pin before fix, red-on-old,** for every behaviour change that isn't a pure deletion. A deletion's proof is the
 > protection set green with the dead pins removed and a one-line record of what died and under which rule.
 >
@@ -103,6 +110,11 @@ all of:
    fixture-first): the page's facts are extracted into one machine-readable fixture BEFORE the test is written, the test
    is red-on-old by construction, and a fact that must change is a fixture diff, each hers to accept. Prose may differ;
    facts may not without her word.
+
+**A serious design issue stops the phase, not the rule (her word, 2026-10-16):** if any unit, the ladder or the gate
+shows a rule that cannot be built as written, two rules in conflict, or a core aim the model cannot meet, the
+orchestrator records it (§8, with the trace) and brings it to her before anything is changed or worked around. The rules
+document is amended only by her ruling; the plan then follows.
 
 **Cast:** the standing default — Fable orchestrates and cold-reviews (`fable-reviewer`), Opus implements at xhigh, one
 unit per session; she confirms or redirects at kickoff. No `Sync/` line is written; the phase holds the one
@@ -250,6 +262,14 @@ that survives. Then the discovery run (seeds 21–40) and the gate soak. **Evide
   banner (done on the branch, 2026-10-16); AppSpec §12's LIBRARY PORTABILITY line and §14's delta entry; the master
   plan's row and closeout paragraph; QUESTIONS gets the surviving PROVISIONALs (VX-305's quiet ones re-read against the
   rules — most die with their machinery) and this phase's.
+- **The words the app says — a standing acceptance item from here on (her ask, 2026-10-16; ticket VX-379):** the field
+  guide (the Start Here chapter FIRST — your work is encrypted, write down your twelve words, set a passphrase, the Apple
+  road is a convenience that works forever for most people — then the Castle and backups chapters), Settings ▸ Data
+  Safety and the protection panes, and the tutorial's last card are rewritten against `CastleRules.md`. **Every later
+  phase that builds a Castle face carries in its acceptance: "the guide and settings copy agree with the rules as
+  built"** — a face that contradicts the rules, or a guide sentence the build made false, is a regression by definition
+  (P-6's tutorial-as-spec, applied to the words). This headless phase ships no copy; it hands the item forward with the
+  rules as the text to write from.
 - **Later phases, re-planned to the rules:** VX-306 (the lobby / open road — the ask-and-re-make path's face, Touch ID
   re-arm, the refusal faces of rules 20/26; the P-U4-13 keychain-mirror road is now rule 1's redundancy, not a rescue);
   VX-307 (crossings' faces — the leave screen's "keep your Castle secrets" sentence, the follow's one ask); the warning
