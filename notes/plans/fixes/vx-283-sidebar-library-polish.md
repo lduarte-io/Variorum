@@ -399,7 +399,7 @@ trailer of any kind.
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **PROVEN — awaiting U2's walk for P-U1e-1** (the fade ramp rides U2): U1 built + walked; U1b/U1c fix legs; U1d (her memo rulings) window GREEN (434/96, R-I/R-J red as named, 01:44–01:50) and re-walk HOLD on R0–R3, R5–R8 (R6 her scroll never pulled back); R4's 7–9-pt slice → P-U1e-1 built in U2's leg, verified by U2's window + walk. |
-| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **The drag's road settled:** synthetic drags cannot reach sidebar drops, on main too (the main-build control, 07:09–07:12), so the walk's "does not land" was the road. U2c's F1 (session form) is unverifiable and dropped. **→ U2d builds F2 on main's own per-row API** (P-U2d-1); her hand check goes first in her morning checklist. D5 (P-U1e-1) and D6 HOLD. |
+| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **READY FOR STAGE — U2d window (pins/reverts/batch), then the re-walk.** U2d built F2 on main's own per-row API (P-U2d-1): pins `99565d41`, fix `63b8c191`, five revert trees named and built (R-W/R-X/R-Y/R-Z/R-Q), `u2d/window.sh` with every step's expected result; PROVISIONAL P-U2d-2 (the end zone takes the bottom padding — never absent). Synthetic drags cannot reach sidebar drops (the main-build control), so delivery is her hand check, first in her morning checklist. D5 (P-U1e-1) and D6 HOLD. |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **W1/W3/W4/W5 PROVEN.** U3b's band traced (U3c: the segmented pickers answered two ways after a search) → **P-U3c-1 built and PROVEN** (window 16:43–16:54: pins 23/3 green; R-P exactly 4 red; U3b's 103-suite batch 513 green). **OWED: D8's re-walk** on `vx283-u3c` (folded with U2b's). |
 | Ladder | `fable-reviewer` at xhigh (her word, superseding opus at max), fresh per round, cross-model | **ROUND 1 DONE** (tip 448f9450; findings in the Ladder section, `9ef6fba3`): 0 BLOCKER · 0 MAJOR · 2 MINOR (R1-1 this table — fixed here; R1-2 sequencing — the windows owed) · 4 NIT (R1-3…6 → the implementer). Round 2 re-reviews the fixes + the U2/U3b window results. |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
@@ -4355,7 +4355,7 @@ the hand check that proves delivery is hers (the morning checklist's first item,
     - R-Y: red exactly the two named Door tests (the third, mounted, is the window's);
     - R-Z: red exactly `theDragSessionsEndClearsTheDrag`;
     - R-Q: red exactly the pure end-zone pin (the mounted one is the window's).
-- F4 — `notes/plans/vx283-screens/u2d/window.sh` (gitignored) + READY FOR STAGE.
+- F4 — `notes/plans/vx283-screens/u2d/window.sh` (gitignored; `zsh -n` clean; its five-file list dry-run read-only against the dev store's folder) + **READY FOR STAGE — U2d window (pins/reverts/batch), then the re-walk**: DONE (this commit). The window below.
 
 **The SDK, confirmed before a line was written** (Xcode 27.0 27A266a, `MacOSX.sdk`, SwiftUI's
 `arm64e-apple-macos.swiftinterface`):
@@ -4567,6 +4567,55 @@ patches are kept, gitignored, in `u2d/reverts/`. The expected lists below are tr
   - **RED exactly 2:** `theEndZoneIsTheRoomUnderTheRowsCappedAndTheBottomPadding`,
     `theEndZoneIsAlwaysUnderTheRowsAndNeverPastTheFooter` (28 ≠ 40 with room; with twenty rows a 0-pt zone ≠ 12);
   - the other 12 GREEN.
+
+**THE WINDOW — `notes/plans/vx283-screens/u2d/window.sh`** (gitignored; every path absolute, run from anywhere). It is
+U2c's shape with no drag steps, because no synthetic road reaches a sidebar drop. Run `pre` → `pins` → `rw` → `rx` → `ry`
+→ `rz` → `rq` → `batch` → `restore`, then SEAM, then the re-walk. Each step's EXPECTED result is in the script's header
+and here:
+- **pre**
+  - The strict pgreps (`pgrep -lx Variorum`, `pgrep -lf "MacOS/Variorum$"`) print NOTHING. The step STOPS if either finds
+    an instance, so the store is never copied under a live one.
+  - "GUARD OK (author: …)" (`guard.sh --author`).
+  - "App/ clean at <tip> — no revert in flight".
+  - All six products present: `vx283-u2d`, `-rw`, `-rx`, `-ry`, `-rz`, `-rq`, each with its app and `.xctestrun`.
+  - "prefs exported" (`u2d/prefs-before.plist`).
+  - **"5 files copied"** to `u2d/store-before/<UTC>/`: `variorum.sqlite`, `-wal`, `-shm`, and the two
+    `variorum-keys-*.json` (the main-control's five).
+- **pins** — on `vx283-u2d`: `OpenListDropRuleTests` (11) · `OpenListDropDoorTests` (13) · `OpenListDragFaceTests` (3) ·
+  `OpenListDragMountTests` (3) · `SidebarSectionWindowRuleTests` (16) + `SidebarSectionWindowMountTests` (11) ·
+  `OpenListLayoutMountTests` (3; P-U2d-2 claims the column's layout unchanged). EXPECT exit 0 and **"Test run with 60
+  tests in 7 suites passed"**, no skips, no ✘.
+- **rw / rx / ry / rz / rq** — each on its own tree, exactly the RED and GREEN lists under THE REVERTS above:
+  - R-W: 1 red of 3;
+  - R-X: 19 red of 27;
+  - R-Y: 3 red of 16;
+  - R-Z: 1 red of 13;
+  - R-Q: 2 red of 14.
+
+  Each step deletes its tree after it runs.
+- **batch** — `u2/batch-suites.txt` (144 suites; no line added, since no suite was added or renamed) on `vx283-u2d`.
+  EXPECT all green, except `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` (VX-115, red on main,
+  untouched here) if it is still red there. ≈725 tests: 722 at the last U2 batch, less U2's 27 drag pins, plus U2d's
+  30; more if a listed suite grew since (the merge from main, U3c). The skips are the opt-in harnesses only (9 last
+  time). Record the "Test run with N tests" line AND the skipped lines.
+- **restore**
+  - FIRST it waits until `pgrep -lf "MacOS/Variorum$"` is EMPTY (≤ 90 s; the test host is the dev-store app and quits
+    after each run). If an instance remains it ABORTS and touches nothing ("ABORT: …"); never kill.
+  - It then `cmp`s the five files against the copy, one line each ("identical" / "DIFFERS").
+  - It copies the three db files back and `cmp`s them ("restored + verified" ×3).
+  - The key files are never written. A key file that differs prints "WARNING … — report it, never copied".
+  - The added prefs keys are deleted, `defaults import`, re-export: **"PREFS CLEAN"**.
+  - "castle-W1 present: 1".
+  - KEEP `DerivedData/vx283-u2d` for the re-walk.
+- **The re-walk** (P-U2d-1's evidence standard): everything a synthetic road CAN see.
+  - The chip at the cursor.
+  - The rows' click / ✕ / right-click / ⇧⌘W unchanged.
+  - The file drop on the list still importing (U2's D4, owed).
+  - The end zone's 12 pt under a scrolling list leaving the layout unchanged (a capture of the list's foot above the
+    footer against U2's walk).
+  - D8 on `vx283-u3c`.
+- **Her hand check** stays first in her morning checklist: drag an Open row down one, down several, to the end (the end
+  zone, in a list that scrolls too) and up. The one-commit fallback is main's road exactly.
 
 ## Ladder
 
