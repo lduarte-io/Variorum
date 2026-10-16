@@ -75,11 +75,15 @@ extension SWorld {
         syncHolders()
         for device in devices { adoptPending(device) }
         var found: [Violation] = []
+        var reopened: String?
         if let (name, tampers) = tampered {
             // The next open is when a planted or replayed thing would act.
             let d = device(name)
             if d.build == .new {
-                do { try await launch(d) } catch { stepLog.append("  (the tampered library didn't open: \(error))") }
+                do {
+                    try await launch(d)
+                    reopened = name
+                } catch { stepLog.append("  (the tampered library didn't open: \(error))") }
                 crashed.remove(name)
                 found += sealed(d, before: before[name]!, tampers: tampers)
             }
@@ -89,6 +93,14 @@ extension SWorld {
         if action == .settle { crashed.removeAll() }
         found += checkPromises(settled: action == .settle)
         found += noSilentChange(action, before: before, crashedBefore: crashedBefore)
+        // A tamper step whose relaunch OPENED the library has had its replay's
+        // effect land and be judged here, inside this deliberate step (promise
+        // 10 above; promise 4 counts the step deliberate), so its
+        // `beforeRollback` entry is spent — skipped, lost to the memory or won
+        // alike. Kept when the relaunch didn't open: the later open is that
+        // entry's one legitimate consumer. VX-305 ladder round 2, NIT 3 (the
+        // final call §4).
+        if let name = reopened { truth.beforeRollback[name] = nil }
         if let (d, openable) = moveBefore {
             for id in openable.subtracting(openableCopies(d)).sorted() {
                 found.append(Violation(promise: 12, device: d.name, detail: "the move stranded \(id)"))
