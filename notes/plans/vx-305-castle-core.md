@@ -1422,6 +1422,14 @@ For this phase's ladder: up to FIVE rounds while BLOCKERs/MAJORs are still being
 (a fresh reviewer per round, `notes/REVIEW_PROMPT.md` verbatim with zero framing, findings and dispositions
 repo-first, the cross-model flow, the final round's fixes checked line-by-line by the orchestrator).
 
+### HER RATIFICATIONS, 2026-10-15 (the provisional sitting at the U4 close — question-tool batches; this block grows as the sitting runs)
+
+- **P-U3-1 RATIFIED (a):** a follow that waited out a leave asks its one secret again at the next press — as built.
+- **P-U3-6 RATIFIED (a):** a copy act that crashes before its swap rolls back whole and is simply redone — as built.
+- *(P-U4-13 and P-U4-14 were re-posed in plain language at her word — "this question was too unclear to me" — answers below as they land.)*
+- **P-U4-13 RULED — the phase-2 rescue road (option b).** Her words: *"isn't this all not even being released until phase 5? I don't see the issue with building this in phase 2 instead of phase 1."* Phase 1 keeps the honest refusal as the recorded state; phase 2's lobby builds the keychain-saved-copy road, and the vx-306 plan carries it as a named deliverable. (Her clarifying question answered at the sitting: yes — the key file carries the library's earlier keys inside it, sealed under the current secret; entering Castle moves the old key from Apple's reach into hers alone, which is exactly the VX-263 forward guarantee.)
+- **P-U4-14 RATIFIED (a), with her severity frame recorded.** Her words: *"I think it's fine to do the same login = my previous mac, but for what it's worth, if your previous mac dies and can therefore still open the pre castle backups, why is that even that bad? the dead mac had apple keys that open pre castle copies - that doesn't seem like a huge issue to me. we're only *really* guaranteeing castle copies, right? what's the reason that we delete the apple key in general? it's just safer, right?"* — recorded as the SEVERITY FRAME for this class: retiring a dead Mac's keys is hygiene that shortens how long pre-Castle reachability lingers, not a promise the system makes; the hard guarantee is Castle-made content. The scoping stands as built (same login part = the predecessor), and phase 2's GeneratedUID check decides whether the mechanism holds on real hardware.
+
 ## 9. The ladder (the Fable reviewer's report per round, committed unedited, then the dispositions — her 2026-10-15 ruling: up to five rounds while MAJORs are still found)
 
 *(empty)*
