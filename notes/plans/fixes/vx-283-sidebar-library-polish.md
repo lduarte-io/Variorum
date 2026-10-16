@@ -4770,6 +4770,29 @@ present. The claim was RELEASED at 08:42:58.
   - O-5: a walking note (a Library row's empty area opens the panel).
   None is a regression of this run's members. O-2 is recorded, and a ticket follows if she sees it.
 
+## THE RELEASE BRIEF — the ONE 0.9.7 (VX-336 + VX-283) and the `/Applications` refresh (the orchestrator, 2026-10-16)
+
+**Authority:** her call (2026-10-15 15:58) — *"x283 will release a single release (0.9.7) covering both your work &
+their work. it should not bump the version again, since this one was not yet released"* — and her second overnight word
+(2026-10-16 ~06:44), *"I'll be sleeping finish everything and send the fresh install to the website overnight."* The
+notes review stays waived (her overnight word). **The worked road is VX-336's "THE RELEASE BRIEF"**
+(`notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md`, at its end). Its STOPPED note explains the unpublished bump
+`28ca7fd2`. **Differences here:**
+- **No bump step.** MARKETING_VERSION is already 0.9.7 in both app configurations (`28ca7fd2`, never released). The
+  notes file is complete on main after this run's merge: VX-336's section, then VX-283's (`cf7736e3`), then Feedback.
+- **THE MAIN FREEZE runs from VX-283's merge commit until release.sh stamps** (the build number = main's commit count).
+  Nothing lands on main in between without the coordinator's word first.
+- **Who runs it:** ONE fresh release runner (`opus-implementer`, xhigh), spawned AFTER the coordinator's release GO and
+  AFTER the orchestrator has run the GO's exact claim line. The runner reports to the orchestrator and never messages the
+  coordinator. **It follows VX-336's steps 1 and 3–6 exactly** (preflight with `default.profraw` moved aside to `/tmp`,
+  never deleted; `Tools/Release/release.sh --version 0.9.7` at zero instances; the site DMG FIRST then the appcast, with
+  both `verify-published.sh` PASS lines (the appcast check takes the local appcast path); the site repo's commit carries
+  its own attribution trailer; the mcp page re-probed for 200; then the `/Applications` refresh under the full rule card
+  — the A1 of her REAL store + key files cmp-verified first, zero-instance checks that ABORT, the exact build the website
+  serves staged beside, codesign + spctl, swap, verify again, nothing launched, no real-store MCP calls, no re-seed). The
+  A1's name in step 5 reads `vx283-refresh-<UTC stamp>`.
+- Installed before: 0.9.5 (7503).
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
