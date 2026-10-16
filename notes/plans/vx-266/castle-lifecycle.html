@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Castle lifecycle</title>
+<style>
+  :root { --bg:#faf8f3; --ink:#1d1b17; --muted:#6b665c; --rule:#d9d3c6; --card:#ffffff; --std:#e8f0fb; --cas:#f3e8fb; --warn:#fbeede; --ok:#e7f3e8; --acc:#4a5a8a; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#000; --ink:#ece8df; --muted:#9a948a; --rule:#2a2823; --card:#121110; --std:#141c2a; --cas:#1e1428; --warn:#2a1e12; --ok:#12241a; --acc:#9fb0e6; } }
+  :root[data-theme="dark"] { --bg:#000; --ink:#ece8df; --muted:#9a948a; --rule:#2a2823; --card:#121110; --std:#141c2a; --cas:#1e1428; --warn:#2a1e12; --ok:#12241a; --acc:#9fb0e6; }
+  body { margin:0; padding:24px 16px 64px; background:var(--bg); color:var(--ink); font:16px/1.5 -apple-system, "SF Pro Text", Helvetica, Arial, sans-serif; max-width:980px; margin-inline:auto; }
+  h1 { font-size:28px; margin:0 0 4px; } h2 { font-size:20px; margin:40px 0 8px; border-bottom:1px solid var(--rule); padding-bottom:4px; }
+  p.lead { color:var(--muted); margin:0 0 20px; }
+  .stage { background:var(--card); border:1px solid var(--rule); border-radius:10px; padding:14px 16px; margin:14px 0; }
+  .stage.std { border-left:6px solid #7a94c9; } .stage.cas { border-left:6px solid #a77ac9; } .stage.any { border-left:6px solid #a09888; }
+  .stage h3 { margin:0 0 6px; font-size:17px; } .stage h3 small { color:var(--muted); font-weight:normal; margin-left:8px; }
+  dl { display:grid; grid-template-columns: 11em 1fr; gap:4px 12px; margin:8px 0 0; } dt { color:var(--muted); } dd { margin:0; }
+  @media (max-width:600px) { dl { grid-template-columns:1fr; } dt { margin-top:6px; } }
+  .roads span { display:inline-block; padding:1px 8px; border-radius:999px; font-size:14px; margin:2px 4px 2px 0; border:1px solid var(--rule); }
+  .roads .s { background:var(--ok); } .roads .q { background:var(--std); } .roads .x { background:var(--warn); text-decoration:line-through; color:var(--muted); }
+  .note { font-size:14px; color:var(--muted); margin-top:6px; }
+  table { border-collapse:collapse; width:100%; margin:8px 0; font-size:15px; } th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--rule); vertical-align:top; } th { color:var(--muted); font-weight:600; }
+  .legend span { display:inline-block; margin-right:14px; font-size:14px; }
+  .key { font-weight:600; color:var(--acc); }
+  footer { margin-top:48px; color:var(--muted); font-size:14px; }
+</style>
+</head>
+<body>
+<h1>Castle lifecycle</h1>
+<p class="lead">One person, one library, the ordinary road — what is written at each stage, and every way the library and its backups can be opened, depending on the choices you make. The contract behind every line is <code>notes/CastleRules.md</code>; the rule numbers in brackets point at it. This page is the <em>target</em>: the corrector phase proves each stage with a test, then regenerates this page from the run so it can never drift.</p>
+
+<div class="legend">
+  <span class="roads"><span class="s">secret you know</span> passphrase or twelve words</span>
+  <span class="roads"><span class="q">quiet road</span> opens without typing</span>
+  <span class="roads"><span class="x">gone</span> a road that no longer opens anything</span>
+</div>
+
+<h2>The three kinds of road</h2>
+<table>
+  <tr><th>Road</th><th>What it is</th><th>Standard</th><th>Castle</th></tr>
+  <tr><td class="key">Twelve words</td><td>Made with the library, shown once, written down by you [2]</td><td>always</td><td>always</td></tr>
+  <tr><td class="key">Passphrase</td><td>Asked at the tutorial's end; reminded until set [3]</td><td>when you set one</td><td>required to enter</td></tr>
+  <tr><td class="key">Apple road</td><td>Your iCloud Keychain, through your Apple account — a convenience the app doesn't answer for [7, 24]</td><td>yes</td><td><b>never</b> [8]</td></tr>
+  <tr><td class="key">On-device road</td><td>Touch ID or your login password on this Mac</td><td>yes (login password or Touch ID)</td><td>Touch ID only, if you choose it; "Always ask" = none</td></tr>
+  <tr><td class="key">Sync</td><td>For a synced library, the account's shared keys — wrapped by passphrase and words only [13]</td><td>yes</td><td>yes</td></tr>
+</table>
+
+<h2>The stages</h2>
+
+<div class="stage std"><h3>1 · You create a library <small>Standard</small></h3>
+<dl>
+<dt>What happens</dt><dd>A random key is made. The key file is written beside the library, with the key locked under your <b>twelve words</b> and under this Mac's quiet roads. The words are shown once: "write these down now". A sealed copy of the key file goes into this Mac's keychain. A plain random device ID is written [1, 2, 22].</dd>
+<dt>Opens the library</dt><dd class="roads"><span class="s">twelve words</span><span class="q">Apple road</span><span class="q">on-device road</span></dd>
+<dt>Backups so far</dt><dd>none</dd>
+</dl><p class="note">If you skip writing the words down, the app reminds you — at the third launch, weekly twice, then with "don't show again", and always before your first backup [3].</p></div>
+
+<div class="stage std"><h3>2 · The tutorial ends: you set a passphrase <small>Standard</small></h3>
+<dl>
+<dt>What happens</dt><dd>The key file gains a passphrase lock. Nothing else changes [3, 6].</dd>
+<dt>Opens the library</dt><dd class="roads"><span class="s">passphrase</span><span class="s">twelve words</span><span class="q">Apple road</span><span class="q">on-device road</span></dd>
+</dl><p class="note">Either secret can reset the other. If you never set a passphrase, every later stage simply has one fewer road; nothing below depends on it except entering Castle.</p></div>
+
+<div class="stage std"><h3>3 · Your first backup <small>Standard</small></h3>
+<dl>
+<dt>What happens</dt><dd>The backup is the library plus the key file of this day [5]. If you still have no passphrase, the reminder shows right before the backup is made.</dd>
+<dt>Opens backup A</dt><dd class="roads"><span class="s">passphrase</span><span class="s">twelve words</span><span class="q">Apple road (on this Mac, while the account is the same)</span></dd>
+</dl></div>
+
+<div class="stage std"><h3>4 · You change your passphrase, or make new words <small>Standard</small></h3>
+<dl>
+<dt>What happens</dt><dd>The current key is re-locked under the new secret. Backup A's own key file still wants the <em>old</em> secret — but your <b>current</b> secrets reach it too, because the key file keeps the library's earlier keys [4, 6].</dd>
+<dt>Opens backup A</dt><dd class="roads"><span class="s">today's passphrase or words</span><span class="s">that day's passphrase or words</span><span class="q">Apple road</span></dd>
+</dl></div>
+
+<div class="stage std"><h3>5 · You change your Apple ID, or iCloud Keychain is reset <small>Standard — "the real issue"</small></h3>
+<dl>
+<dt>What happens</dt><dd>The Apple road may stop working. The app can't see this coming and doesn't try to. At the next open it asks for your passphrase or words, then quietly makes a fresh Apple road under the new account [7]. The on-device road never depended on iCloud and keeps working.</dd>
+<dt>Opens the library</dt><dd class="roads"><span class="s">passphrase</span><span class="s">twelve words</span><span class="q">on-device road</span><span class="x">old Apple road</span><span class="q">new Apple road, after the open</span></dd>
+<dt>Backups so far</dt><dd>Open with their day's secrets or today's [4, 5]. Their old Apple lock is dead, and that is fine.</dd>
+</dl><p class="note">This is why there is no secretless library: the one state where an Apple ID change could strand you no longer exists [2, 24].</p></div>
+
+<div class="stage cas"><h3>6 · Use Castle <small>Castle — Touch ID or Always ask</small></h3>
+<dl>
+<dt>What happens</dt><dd>A new Castle key is made; every earlier key moves into its history, under the new key [4, 10]. The Apple keychain entry is <b>deleted</b>. If you chose Touch ID, this Mac keeps the key behind your fingerprint; under Always ask, no copy stays on the device. The scheduled plain-text export is turned off, with one notice. Synced: the account's sync key rotates in one write; every other device must type a secret once to follow [9, 14]. Castle needs a passphrase to enter.</dd>
+<dt>Opens the library</dt><dd class="roads"><span class="s">passphrase</span><span class="s">twelve words</span><span class="q">Touch ID (if chosen)</span><span class="x">Apple road</span><span class="x">login password</span></dd>
+<dt>Opens backup A (Standard era)</dt><dd class="roads"><span class="s">today's passphrase or words (through the history)</span><span class="s">its day's secrets</span><span class="x">its Apple lock</span></dd>
+</dl><p class="note">Standard-era backups are not stranded by entering Castle. Your Castle secrets reach them through the history [4].</p></div>
+
+<div class="stage cas"><h3>7 · In Castle: new words, or a backup <small>Castle</small></h3>
+<dl>
+<dt>What happens</dt><dd>New words re-lock the current key; the history still carries everything, so older backups still open with today's secrets [4, 6]. A backup made now — <b>backup B</b> — carries this day's Castle key file: no Apple lock, no login-password lock.</dd>
+<dt>Opens backup B</dt><dd class="roads"><span class="s">Castle passphrase or words of its day</span><span class="s">today's, through the history</span><span class="q">Touch ID on this Mac (if chosen)</span></dd>
+</dl></div>
+
+<div class="stage std"><h3>8 · Use Standard (you leave Castle) <small>Standard again</small></h3>
+<dl>
+<dt>What happens</dt><dd>A <b>fresh</b> Standard key with an <b>empty</b> history and a fresh Apple road [11]. Your text, the server's rows and the sync key are Standard from now on — leaving is your choice about your writing. This Mac's Touch ID item and its sealed key-file copy now hold the new key. Other devices follow out quietly, with a notice.</dd>
+<dt>Opens the library</dt><dd class="roads"><span class="s">passphrase</span><span class="s">twelve words</span><span class="q">Apple road</span><span class="q">on-device road</span></dd>
+<dt>Opens backup B (Castle era)</dt><dd class="roads"><span class="s">the Castle passphrase or words of its day</span><span class="x">today's secrets</span><span class="x">Apple road</span><span class="x">Touch ID</span></dd>
+<dt>Opens backup A (before Castle)</dt><dd class="roads"><span class="s">its day's secrets</span><span class="s">the Castle secrets (its key is in the Castle key file's history)</span><span class="x">today's Standard secrets</span></dd>
+</dl><p class="note"><b>The only thing that stays Castle-only after leaving is a backup you made while in Castle</b> [12]. The leave screen says: keep your Castle passphrase and words — your Castle backups will always need them.</p></div>
+
+<div class="stage any"><h3>9 · You open a Castle-era backup after leaving <small>Look inside, or Make this my library</small></h3>
+<dl>
+<dt>Look inside</dt><dd>Type backup B's Castle passphrase or words. It opens read-only. Nothing is written — no key file, no keychain item, no change to your library. Close it and the app forgets it [15].</dd>
+<dt>Make this my library</dt><dd>One confirmed door. Backup B becomes a <b>new library</b> with a fresh key in the posture you are in now (Standard, here), and your current library steps aside whole into Previous Libraries [16]. Backup B itself is untouched and still Castle-only.</dd>
+</dl></div>
+
+<div class="stage any"><h3>10 · Someone AirDrops you their library <small>any posture</small></h3>
+<dl>
+<dt>Look inside</dt><dd>Opens with <em>their</em> secrets, read-only, writes nothing [15].</dd>
+<dt>Make this my library</dt><dd>It becomes a new library of yours, with a fresh identity and a fresh key in your posture; you never leave Castle by opening something [16, 17]. From here the two copies diverge — sharing a library across devices is what sync is for.</dd>
+</dl></div>
+
+<div class="stage any"><h3>11 · You move to a new Mac with Migration Assistant <small>any posture</small></h3>
+<dl>
+<dt>What happens</dt><dd>The library, its key file and this Mac's keychain items move with you. Nothing is "taken over" and nothing is fingerprinted — the device ID is a plain random value that moves like any other setting [22]. Castle: Touch ID is re-armed on the new hardware at the first open, with your passphrase.</dd>
+</dl></div>
+
+<div class="stage any"><h3>12 · You turn on sync, or join from a new device <small>any posture</small></h3>
+<dl>
+<dt>What happens</dt><dd>The account's shared keys are wrapped by your passphrase and your twelve words — never by Apple [13]. A new device types one of them once. For anyone who never wrote their words down, this is the reminder, while they still have access.</dd>
+<dt>Castle, account-wide</dt><dd>When one device enters Castle, each other device types a secret once at its next sync to follow; until then it reads only what it already has, through its own quiet road [9].</dd>
+</dl></div>
+
+<div class="stage any"><h3>13 · A crash in the middle of any of this <small>any posture</small></h3>
+<dl>
+<dt>What happens</dt><dd>Every act that changes keys is planned. The next open finds either the old state or the new one, finishes or rolls back from what is on disk, and says which [19]. A key is deleted only after its replacement has been verified [21].</dd>
+</dl></div>
+
+<div class="stage any"><h3>14 · Something is wrong on disk <small>any posture</small></h3>
+<dl>
+<dt>What happens</dt><dd>If the library file and what this Mac remembers about it disagree — a swapped-in or replayed file — the app refuses to open, says what it found, and points at your backups [20]. It never repairs by guessing. Your own deliberate restore of a backup (library and key file together) is not a disagreement.</dd>
+<dt>Lost the key file?</dt><dd>The app kept copies: beside the library, inside every backup, sealed in this Mac's keychain [1]. Synced libraries recover from the account with the twelve words [26].</dd>
+</dl></div>
+
+<h2>What we don't promise</h2>
+<ul>
+  <li>That Apple's roads keep working across Apple ID changes, sign-outs or keychain resets. We promise you never need them [24].</li>
+  <li>Migration of stores from before this design. Export or sign in to sync, then start fresh [25].</li>
+  <li>That a device which hasn't followed into Castle can't read its own local copy. It can, through its own quiet road, until it follows [9].</li>
+  <li>Recovery of a library whose every key-file copy and every backup are gone [26].</li>
+</ul>
+
+<footer>Target page written 2026-10-16 from the VX-305 simplification sitting; to be regenerated from the corrector phase's lifecycle test. Local file — not published anywhere.</footer>
+</body>
+</html>
