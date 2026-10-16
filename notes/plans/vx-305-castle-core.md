@@ -1485,9 +1485,36 @@ owed; (4) the framing correction ACCEPTED (§3.3's always-agree contract, not §
 smallest-id tie-break, red-on-old unit pin; the no-match residue stays her P-U4-1/P-U4-9 hygiene class); (6) the
 P-U4-10 adjacency worded into the record — the repair restores the LIVE KEY FILE from this Mac's own frozen pair,
 never a library copy, never an unlock-screen offer; her dropped newest-copy ruling untouched. The file ends with
-round 2's re-check list. **Fixes: the implementer, next — red-on-old per finding, the pin file flipping to
-fixed-scenario assertions and joining the tree, the suite green both configs, the fixes record
-`notes/plans/vx-305-ladder-round-1-fixes.md`.**
+round 2's re-check list.
+
+**The fixes — applied by the implementer, verified by the orchestrator (`notes/plans/vx-305-ladder-round-1-fixes.md`;
+commits `1dfbb85f8` · `95fbf9349` · `3ac5e5a95` · `5c36da3d8` · `74c638dab`, each pushed):** all six landed with
+red-on-old pins, revert-verified (5/6 red with the gate files reverted; the copy-less probe green on both trees BY
+DESIGN — it records P-R1-1's refusal). The MAJOR's set: both gates widened on one written precondition; the stray file
+set ASIDE as `.stale-<epoch>` (a name the catalog's parser already reads as `.setAside`); promise 1's live-key-file
+clause (keyed on "no repair owed", P-R1-1's copy-less case exempt); the `.tamperSequence` generator action — the wedge
+PROVEN soak-visible (found at seed 1, sequence 96 through a tamper group) and ALSO reachable by ONE tamper
+(`replayLibraryFile` after a leave: a leave's new key takes no history, so `libraryFileLosesToMemory` cannot verify —
+the round-1 "two tampers" annotation understated; both roads committed as fixed scenarios). The orchestrator re-ran
+both configs EXACT: Debug `✔ 429 tests in 69 suites`, Release `✔ 368 in 64`; the scope diff clean. NOTED FOR ROUND 2:
+the set-aside is scoped to the copy repair only (the mirror and plan-runner restores still overwrite a stray file —
+the final call's own scoping); the optional `.crash(...)` tamper-group wrap not built (the kept pre-settle means a
+group never lands inside a crash window; that road stays covered by the fixed scenarios). THE NEW GENERATOR WEIGHT
+SHIFTS EVERY SEED'S STREAM: the U4 soak table stands as its own run's record; the go/no-go soak runs FRESH on the
+final tree.
+
+**Two PRE-EXISTING finds by the new generator reach (both reproduce on the round base `e4ee1f083` — not caused by the
+fixes; triage before the go/no-go soak; minimal sequences in the fixes record):**
+- **NEW-1 — promise 3:** a replayed pre-Send-Library capture swaps a different, Standard library into a Castle slot;
+  either checker bookkeeping under P-U4-10's ratified limit, or the swapped-in library's Apple road is never re-linked.
+  Unadjudicated.
+- **NEW-2 — promise 13, WITH NO TAMPER:** a 10-step legitimate sequence (a secretless join → corner 45 answered →
+  a follow → Send Library → the landing with words-passphrase-made-new → Use Castle → Use Standard) ends with the
+  Apple account or the login password reaching a PRE-LEAVE key — a security-promise problem with no adversary in it.
+  Priority of the triage.
+
+**Triage: a fresh implementer (trace → classify → pin red-first → fix or PROVISIONAL), then round 2 re-checks the
+round-1 fixes and the triage together.**
 
 ## 10. The go/no-go and the key map's model half (filled at close)
 
