@@ -1455,6 +1455,58 @@ repo-first, the cross-model flow, the final round's fixes checked line-by-line b
 - Next: ladder round 1 — a fresh `fable-reviewer`, `notes/REVIEW_PROMPT.md` verbatim, zero framing; the report lands in §9 unedited; up to five rounds while MAJORs are found (her cap ruling above).
 - **P-U4-14 RATIFIED (a), with her severity frame recorded.** Her words: *"I think it's fine to do the same login = my previous mac, but for what it's worth, if your previous mac dies and can therefore still open the pre castle backups, why is that even that bad? the dead mac had apple keys that open pre castle copies - that doesn't seem like a huge issue to me. we're only *really* guaranteeing castle copies, right? what's the reason that we delete the apple key in general? it's just safer, right?"* — recorded as the SEVERITY FRAME for this class: retiring a dead Mac's keys is hygiene that shortens how long pre-Castle reachability lingers, not a promise the system makes; the hard guarantee is Castle-made content. The scoping stands as built (same login part = the predecessor), and phase 2's GeneratedUID check decides whether the mechanism holds on real hardware.
 
+### HER RULINGS, 2026-10-16 — THE SIMPLIFICATION SITTING (opened after the go/no-go's NO-GO and the mid-phase audit; her words verbatim; this block grows as the sitting runs)
+
+**Her frame, verbatim:** *"we need to prioritize the safety of what is in castle and we need to prioritize people not losing
+their standard libraries without understanding why … and we need to prioritize this being understandable."* — *"what I
+should've done differently from the start is made it clear that standard is a convenience + security posture, not a
+guarantee that our app will always handle things outside of its control (apple). reframing it as a matter of convenience,
+not a fully justified and blessed way to use the app, would fix a lot of problems."* — *"we do NOT NEED to stick to any of
+our current decisions."*
+
+1. **SECRETLESS STANDARD IS NO LONGER AN ACCEPTED STATE.** *"let's change secretless standard being an accepted state."*
+   Every library gets twelve words at creation (*"I REALLY like making 12 words for them so that there's never a secretless
+   standard"*; *"the popup then isn't even just asking people to make a passphrase, it's telling them straight away to
+   write their 12 words down right now"*). The first open stays calm; **the tutorial ends by asking for a passphrase**; a
+   library without one gets a returning warning — *"your account is only secured through iCloud keychain right now, please
+   add passphrase + 12 words to ensure continued access"* — dismissable permanently after three dismissals; the schedule is
+   open to proposals. **An on-device key road joins Standard too** — *"add a touchid gated key to secretless standard, just
+   as an extra road"*; *"an on device key that opens with the user's computer password OR touchid on a device that opens
+   through iCloud — a bit of cheap coverage for the people who refuse to write their 12 words down or make a passphrase."*
+2. **CASTLE IS CASTLE — THE LEAVE CARRIES NOTHING OUT.** *"castle is castle, castle backups are castle backups, we don't
+   help anyone in standard with their castle era items, castle is secure, that IS the line. if anything, it would actively
+   be *bad* if moving something to standard could let you access castle era backups."* *"I WANT users to need their castle
+   era passphrase to open their castle era backups."* *"we don't need stuck leave."* → the anchor, the stuck leave and its
+   wait, the promise-6 vault-reach qualifier, and the VX-263 "leave-day secrets open pre-leave copies" rule are SUPERSEDED.
+   **Kept and required:** someone in Castle must be able to open a Standard library (their own old backup, someone else's)
+   **without being put back into Standard**. Her open question: whether a distinct "open a guest library" path would remove
+   confusion or add complexity.
+3. **NO AUTOMATIC REPAIR OF SWAPPED-IN FILES; GOOD CRASH SAFETY STAYS.** *"we do not need automatic repair of things like
+   swapping an old library file in"*; *"agreed that we do need actually good crash safety."* Open to a "phase 1 corrector"
+   phase: *"this has been a lot of confusion but the work isn't wasted if we land in a good place."*
+4. **NO MIGRATION OF OLD STORES.** *"migrating every old user doesn't need to be done and *shouldn't* be considered an
+   issue. I can tell everyone to full on delete the app and do a plain export of their work (or sign in to free sync)
+   before this change. i myself don't care about my prior backups, if I'm signed into sync and my work is on the server
+   everything should be fine."* → the migration road, the seventeen starting shapes, the legacy readers' and the old shared
+   key's machinery drop with the testers told to export or sign in.
+5. **THE TWELVE WORDS AS THE ROOT OF THE KEY — UNDER CONSIDERATION, not ruled.** *"I'm not convinced on changing how we
+   do the key to base it off the 12 words — we can easily state that the key file is as essential as your library … maybe
+   it's still a change worth doing, I just want you to spend more time thinking about this proposal because it is
+   significant."* *"making the 12 words the root and the passphrase a convenience does sound appealing and like it might
+   make things better, but I want you to think about it more thoroughly ahead of time."*
+6. **She agrees with the orchestrator's five sentences:** Castle is one promise (no quiet road through Apple, ever; Touch ID
+   optional; leaving starts a fresh key with a fresh Apple convenience; Castle backups keep needing Castle secrets);
+   backups open with the secrets of their day and the within-mode history stays; crash safety stays, adversary repair goes
+   (detect, refuse, tell, point at backups); one migration road (now: none — ruling 4); the account-change warning
+   dissolves into secrets-from-birth.
+7. **Earlier the same day:** T-8 (bringing a plaintext export in) → phase 5, her word; seeds 11 and 12 (an updated phone)
+   deprioritized to last — *"the only person with a phone variorum build at all is me … i'm not that concerned about
+   them"*; the Apple-ID change is *"actually a real issue"*.
+8. **THE LIFECYCLE PAGE FIRST.** *"I agree with building the lifecycle as a test and a page, before more triage. that's
+   obviously the right thing to do & handling that should be first and foremost."* Written as the TARGET spec (every stage ×
+   every user choice × every way in, plain words), ruled on by her, then proven by a test as the cuts land. Local HTML,
+   never an Artifact.
+
 ## 9. The ladder (the Fable reviewer's report per round, committed unedited, then the dispositions — her 2026-10-15 ruling: up to five rounds while MAJORs are still found)
 
 ### Round 1 — 2026-10-16, fresh `fable-reviewer`, zero framing; the report committed UNEDITED as `notes/plans/vx-305-ladder-round-1.md`
