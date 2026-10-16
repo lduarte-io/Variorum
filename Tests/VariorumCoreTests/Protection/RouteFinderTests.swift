@@ -21,7 +21,6 @@ struct SecretBook {
     var words: [SecretDay: [String]] = [:]
     var custody: [String: StoreKey] = [:]
     var apple: [String: AppleKeyMaterial] = [:]
-    var oldShared: AppleKeyMaterial?
     var vaultMaster: SymmetricKey?
 
     func passphrase(_ day: SecretDay) throws -> String { try #require(passphrases[day], "no passphrase for \(day)") }
@@ -73,7 +72,6 @@ func walk(_ route: Route, in catalog: Catalog, book: SecretBook) throws -> Store
                 case .apple:
                     let id = try need(keyFile.apple?.keyID, "no apple wrap")
                     key = try keyFile.open(apple: try need(book.apple[id], "no apple key"))
-                case .sharedApple: key = try keyFile.open(sharedApple: try need(book.oldShared, "no shared key"))
                 }
             }
         case .history(let id, let fingerprint):

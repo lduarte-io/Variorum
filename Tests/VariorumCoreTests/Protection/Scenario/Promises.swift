@@ -93,7 +93,6 @@ extension SWorld {
                         add(opened)
                     }
                     if let wrap = file.apple, let apple = seeds.apple[wrap.keyID] { open(wrap.wrapped, apple) }
-                    if let wrap = file.sharedApple, let apple = seeds.apple[wrap.keyID] { open(wrap.wrapped, apple) }
                     for master in masters { open(file.master, SymmetricKey(data: master)) }
                     if let copy = file.masterWordsCopy {
                         for wk in wordsKeys {
@@ -247,7 +246,6 @@ extension SWorld {
             items += eventualCloud(id).filter { !queued.contains($0.key) && !truth.deletedWhileOff.contains($0.key) }.values
         }
         let retired = section?.retiredAppleKeyIDs ?? []
-        let oldSharedStanding = section?.oldSharedKeyStillStanding ?? false
         for item in items where !item.touchID {
             switch item.value {
             case .key(let key): seeds.keys.append(key)
@@ -255,14 +253,10 @@ extension SWorld {
             case .apple(let id, let bytes):
                 // A deliberate delete that never reached iCloud (P-U4-1).
                 if truth.deletesNotCarried.contains(id) { continue }
-                // §3.1 rule 2's first exception: the old shared key, until
-                // this device's section records it retired.
-                if oldSharedStanding, id == section?.oldSharedKey?.id { continue }
                 // A retirement holds everywhere once iCloud Keychain carries
                 // it (the retired-key clause — once the world settles; and
                 // while this Mac's switch is off, the stated exception).
                 if retired.contains(id), !settled || !device.iCloudOn { continue }
-                if let shared = section?.oldSharedKey, shared.retiredAt != nil, shared.id == id, !settled || !device.iCloudOn { continue }
                 seeds.apple[id] = SymmetricKey(data: bytes)
             default: break
             }
@@ -407,7 +401,7 @@ extension SWorld {
                 fail("a silent sync-keys item holds the account's Castle-era keys")
             }
         }
-        if let live = liveKeyFile(device), live.fingerprint == record.currentFingerprint, live.apple != nil || live.sharedApple != nil {
+        if let live = liveKeyFile(device), live.fingerprint == record.currentFingerprint, live.apple != nil {
             fail("an Apple wrap of the current key")
         }
         if settled {
@@ -435,7 +429,7 @@ extension SWorld {
             // and tampered with there: entering Castle protects what's written
             // after (promise 8), never undoes what they took before.
             if truth.tamperedStandard[device.name]?.contains(image.fingerprint) == true { continue }
-            if attacker[image.fingerprint] != nil, !truth.listedBySheet.contains(id) {
+            if attacker[image.fingerprint] != nil {
                 fail("a login-password holder opens the copy \(id) (\(f8(image.fingerprint)))")
             }
         }
@@ -627,7 +621,6 @@ extension SWorld {
             guard let (fs, path) = DeviceLeaves(world: self, device: device).resolve(id), let image = fs.files[path]?.library else {
                 continue  // deleted (by her, by retention, by a wiped container)
             }
-            if truth.listedBySheet.contains(id) { continue }
             let reached = reachCache[device.name] ?? reach(herSeeds(device), files: keyFilesOn(device))
             reachCache[device.name] = reached
             if reached[image.fingerprint] != nil { continue }
@@ -637,8 +630,8 @@ extension SWorld {
             // wrapped it was LOST (an Apple-ID switch, a reset, a wiped
             // keychain), and none that wraps it reads here now.
             let holders = keyFilesOn(device).filter { $0.fingerprint == image.fingerprint }
-            let ids = holders.flatMap { [$0.apple?.keyID, $0.sharedApple?.keyID].compactMap { $0 } }
-            let readable = Set(readableAppleKeys(device).keys).union([oldSharedKey(device)?.id].compactMap { $0 })
+            let ids = holders.compactMap { $0.apple?.keyID }
+            let readable = Set(readableAppleKeys(device).keys)
             // "Gone" includes a key her own Use Castle retired, once she
             // restored the container past it by Time Machine (the newer key
             // file whose history held this copy's key went with the restore —
@@ -840,7 +833,7 @@ extension SWorld {
             // former account that still opens it (§3.1 rule 2's last
             // exception) — a road elsewhere, by its own words, never here.
             for route in opens.routes where route.opener != .appleKeyNotReadableHere {
-                var book = SecretBook(custody: custody, apple: apple, oldShared: oldSharedKey(device), vaultMaster: masters.first ?? nil)
+                var book = SecretBook(custody: custody, apple: apple, vaultMaster: masters.first ?? nil)
                 var candidates: [SecretBook] = []
                 // `.current` is "the secret that opens the live key file's own
                 // lock" (the route finder's definition) — on a device whose

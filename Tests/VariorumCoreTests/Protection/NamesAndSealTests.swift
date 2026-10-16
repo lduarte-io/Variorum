@@ -23,7 +23,6 @@ struct ProtectionNamesTests {
                 .hasPrefix("\(scope)-"))
             #expect(ProtectionNames.memoryAccount(scope: scope, libraryID: Self.uuid).hasPrefix("\(scope)-"))
             #expect(ProtectionNames.appleKeyAccount(scope: scope, id: Self.uuid).hasPrefix("\(scope)-"))
-            #expect(ProtectionNames.oldSharedAppleKeyAccount(scope: scope) == "\(scope)-apple-key")
         }
         #expect(ProtectionNames.custodyAccount(scope: "Variorum", fingerprint: Self.fp, class: .touchid)
             == "Variorum-0123456789abcdef-touchid")
@@ -40,8 +39,9 @@ struct ProtectionNamesTests {
         #expect(ProtectionNames.parseMemoryAccount(
             ProtectionNames.memoryAccount(scope: "Variorum", libraryID: Self.uuid), scope: "Variorum") == Self.uuid)
         #expect(ProtectionNames.parseAppleKeyAccount(
-            ProtectionNames.appleKeyAccount(scope: "Variorum", id: Self.uuid), scope: "Variorum") == .own(id: Self.uuid))
-        #expect(ProtectionNames.parseAppleKeyAccount("Variorum-apple-key", scope: "Variorum") == .oldShared)
+            ProtectionNames.appleKeyAccount(scope: "Variorum", id: Self.uuid), scope: "Variorum") == Self.uuid)
+        #expect(ProtectionNames.parseAppleKeyAccount("Variorum-apple-key", scope: "Variorum") == nil,
+                "today's old shared name is not this design's (rule 26)")
     }
 
     /// The fence: under the scope `Variorum`, nothing of `Variorum-dev`'s

@@ -20,9 +20,8 @@ import Foundation
 //     its own locks.
 // The history wraps each key it takes directly under the new key; the old key
 // (in hand during any re-key) opens the old history. A key opens older keys,
-// never newer ones. The old shared key's wrap never rides into a new file (a
-// re-key drops it — §3.5 point 2). These are pure values: the executor (U3)
-// writes them, in prepare-then-commit order.
+// never newer ones. These are pure values: the executor (U3) writes them, in
+// prepare-then-commit order.
 
 /// What the new key is locked under in its new file.
 public struct NewKeyLocks: Sendable {

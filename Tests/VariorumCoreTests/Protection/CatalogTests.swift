@@ -187,7 +187,7 @@ struct CatalogAttributionTests {
             entries.append(CatalogEntry(place: .farFolder, folders: folders, name: CF.pairName(day, key),
                                         bytes: try CF.format3(library: library, key: key)))
         }
-        // This Mac's own key file for lib2 (§3.5 point 2).
+        // A key file directly in a Mac folder (the move's old gift): not this design's (rule 19).
         entries.append(CatalogEntry(place: .farFolder, folders: CF.macFolder(CF.lib2, CF.macA),
                                     name: ProtectionNames.keyFilename, bytes: try CF.format3(library: CF.lib2, key: k2)))
         // Today's flat copies and folder key files: foreign now (rule 26).
@@ -246,9 +246,8 @@ struct CatalogAttributionTests {
         #expect(roles(.live) == 1)
         #expect(roles(.setAside) == 1)
         #expect(roles(.snapshotPair) == 3)
-        #expect(roles(.ownKeyFile) == 1)
         #expect(roles(.asideCopy) == 2)
-        #expect(catalog.keyFiles.count == 8)
+        #expect(catalog.keyFiles.count == 7, "the Mac folder's own key file (the move's gift) is not this design's — rule 19")
         #expect(catalog.liveKeyFile?.heldFingerprints.count == 2, "the live file leads to its history too")
     }
 

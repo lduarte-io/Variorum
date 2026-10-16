@@ -170,9 +170,6 @@ public enum Repair: Hashable, Sendable {
     /// Castle: an Apple key this Mac's section lists as retired — delete on
     /// sight, by its id only.
     case deleteRetiredAppleKey(id: String)
-    /// Castle: the old-name item, when this device's section recorded its
-    /// retirement and it reappeared under the same id.
-    case deleteRetiredOldSharedKey(id: String)
     /// Standard: the live key file's Apple wrap, under this Mac's own Apple
     /// key for the library (never minted by a repair).
     case landAppleWrap(appleKeyID: String)
@@ -244,7 +241,8 @@ public enum Fault: Hashable, Sendable {
     /// a Castle-era key (PROVISIONAL P-U2-2: reported; the acts re-file them).
     case silentSyncKeysWhileCastleWay(account: String)
     /// Standard: the live key file's own Apple key can't be read here — the
-    /// Apple road is lost; Re-link's library arm is offered (no repair mints).
+    /// Apple road is lost (no repair mints; rule 8's quiet re-make is U2's —
+    /// Re-link left with VX-378 U1).
     case appleRoadLost(keyFileID: String)
     /// The live place holds ANOTHER key's file (nothing in flight): the
     /// record, what this Mac remembers and the key file don't agree (§3.3's
@@ -268,13 +266,6 @@ public enum OwedAct: Equatable, Sendable {
     case follow(FollowKind, typesOneSecret: Bool, holdsLibraryRekey: Bool)
     /// A Castle key with an Apple wrap — re-keyed.
     case rekeyForFault
-    /// Re-link's library arm: a fresh own Apple key for every Standard key
-    /// file whose own key can't be read here (the live one and other
-    /// libraries').
-    case relinkLibraryArm(keyFileIDs: [String])
-    /// A library already in Castle before this change: one calm ask — the old
-    /// shared key's retirement.
-    case retireOldSharedKeyAsk
     /// The re-arm question, after the passphrase opened.
     case touchIDRearmQuestion
 }
@@ -288,9 +279,6 @@ public enum Door: String, Hashable, Sendable, CaseIterable {
     case changePassphrase
     case newWords
     case resetForgottenPassphrase
-    case relinkAccount
-    case relinkLibraryArm
-    case retireOldSharedKey
     case turnOnSync
     case thisMacOnly
     case stopSyncingHere
@@ -349,13 +337,8 @@ public enum DoorRefusal: Equatable, Sendable {
     case rotationInProgress(device: String?, day: Date?)
     /// The account's keys changed elsewhere: pick them up first.
     case followOwed
-    /// §3.5 point 4: a vault on the old shared key stops Use Castle — named,
-    /// with the way through (that account's own Castle or Re-link).
-    case vaultOnOldSharedKey(account: String)
     case notSynced
     case noAccountSignedIn
-    /// Re-link reads, never mints: no Apple key readable here.
-    case appleKeyUnreadable
     /// Nothing to do: the door has no subject.
     case nothingToDo
 }
@@ -371,13 +354,8 @@ public enum Words: Equatable, Sendable {
     case anchor(AnchorSentence)
     /// Use Castle's door: copies under a key this Mac can't delete.
     case copiesUnderAKeyThisMacCantDelete([String])
-    /// The old shared key's sheet.
-    case retirementSheet(RetirementChecks)
     /// The scheduled Markdown export turns off, with one notice.
     case scheduledExportTurnsOff
-    /// Re-link's consent: the new key reaches other devices only through
-    /// iCloud Keychain, which Variorum can't see.
-    case relinkConsent
     /// The account screen: the same email with a different account.
     case sameEmailDifferentAccount
 }
@@ -389,28 +367,20 @@ public struct DoorSpec: Equatable, Sendable {
     /// Every own Apple key this Mac's section lists for the library, retired
     /// after the switch commits (entering Castle).
     public var retiresOwnAppleKeys: [String]
-    /// The old shared key retired as the act's last step.
-    public var retiresOldSharedKey: Bool
     /// The act runs on the account (a rotation) — synced.
     public var synced: Bool
     public var join: JoinPlan?
-    /// Replace All Keys on an account still on the old shared key re-links
-    /// it first (§3.5 point 7).
-    public var relinksAccountFirst: Bool
     public var words: [Words]
 
     public init(
         requires: SecretRequirement, rekeys: Bool = false, retiresOwnAppleKeys: [String] = [],
-        retiresOldSharedKey: Bool = false, synced: Bool = false, join: JoinPlan? = nil,
-        relinksAccountFirst: Bool = false, words: [Words] = []
+        synced: Bool = false, join: JoinPlan? = nil, words: [Words] = []
     ) {
         self.requires = requires
         self.rekeys = rekeys
         self.retiresOwnAppleKeys = retiresOwnAppleKeys
-        self.retiresOldSharedKey = retiresOldSharedKey
         self.synced = synced
         self.join = join
-        self.relinksAccountFirst = relinksAccountFirst
         self.words = words
     }
 }
@@ -435,31 +405,6 @@ public enum DoorState: Equatable, Sendable {
     }
 }
 
-// MARK: - The old shared key (§3.5 point 2 and 4)
-
-/// The move's subjects (§3.5 point 2): keys of this Mac's own beside the old
-/// one, never instead of it.
-public struct MovePlan: Equatable, Sendable {
-    /// Other libraries this Mac holds copies of whose newest copy is in
-    /// Standard — each gets this Mac's own key file in `Backups/<library8>/
-    /// <mac8>/` under an Apple key of its own. Never for copies the catalog
-    /// can't attribute to this Mac.
-    public var otherLibraries: [String]
-    /// The live library gains this Mac's own Apple key (confirmed Standard —
-    /// decision 35).
-    public var liveLibrary: Bool
-}
-
-/// The checks at Use Castle's door, before the sheet (§3.5 point 4).
-public struct RetirementChecks: Equatable, Sendable {
-    public var routes: RetirementRoutes
-    /// Every account it can't check ("your account x@… can't be checked
-    /// while you're signed out").
-    public var uncheckedAccounts: [String]
-    /// The vaults that stop the act at its door.
-    public var doorStops: [String]
-}
-
 // MARK: - The assessment
 
 public struct Assessment: Equatable, Sendable {
@@ -473,9 +418,6 @@ public struct Assessment: Equatable, Sendable {
     public var faults: [Fault]
     public var acts: [OwedAct]
     public var doors: [Door: DoorState]
-    public var movePlan: MovePlan
-    /// The old shared key's checks, while this store still has it.
-    public var retirement: RetirementChecks?
     /// One *Opens with* line per catalogued copy (the route finder's).
     public var opensWith: [String: OpensWith]
 }

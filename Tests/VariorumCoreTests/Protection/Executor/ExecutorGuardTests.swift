@@ -19,8 +19,6 @@ struct ExecutorGuardsOnTests {
         let guards = ProtectionGuards.all
         #expect(guards.planNamedBySectionOn && guards.repairPreconditionsVerifiedOn && guards.repairNeverMakesTouchIDItemOn)
         #expect(guards.prepareBeforeCommitOn && guards.exportOffAtCastleOn && guards.followerAnchorTypedLockOn)
-        #expect(guards.oldSharedKeyDeletedByRecordedIDOn && guards.moveKeepsOldWrapOn)
-        #expect(guards.retirementRerunsMovesOn && guards.freshPairAfterMoveOn)
     }
 }
 
@@ -123,19 +121,6 @@ struct ExecutorGuardMutationTests {
         }
     }
 
-    @Test func aNewerOldNameItemIsDeletedWithTheGuardOff() async throws {
-        for guarded in [true, false] {
-            let fixture = try EX(.castle)
-            let recorded = AppleKeyMaterial.mint(), newer = AppleKeyMaterial.mint()
-            fixture.world.icloud.oldShared = newer
-            let executor = fixture.executor(guards: guarded ? .all : Self.off { $0.oldSharedKeyDeletedByRecordedID = false })
-            var library = try fixture.unlocked(executor)
-            try executor.writeFacts(&library, section: { var s = library.section.bumped(); s.oldSharedKey = OldSharedKeyRecord(id: recorded.id); return s }())
-            _ = try await executor.retireOldSharedKey(&library)
-            #expect((fixture.world.icloud.oldShared != nil) == guarded)
-        }
-    }
-
     @Test func onlyTheLiveFilesOwnKeyIsRetiredAtCastleWithTheGuardOff() async throws {
         for guarded in [true, false] {
             let fixture = try EX(.standard)
@@ -143,9 +128,11 @@ struct ExecutorGuardMutationTests {
             fixture.world.icloud.keys[lost] = nil
             let executor = fixture.executor(guards: guarded ? .all : Self.off { $0.everyOwnKeyRetiredAtCastle = false })
             var library = try fixture.unlocked(executor)
-            _ = try await executor.relinkLibraryArm(&library)
+            let minted = AppleKeyMaterial.mint()
+            fixture.world.icloud.keys[minted.id] = minted
+            library.section = library.section.recordingAppleKey(AppleKeyRecord(id: minted.id, purpose: .library, origin: .minted))
             _ = try await executor.useCastle(&library, typed: fixture.typed, gate: .touchID)
-            #expect(library.section.retiredAppleKeyIDs.contains(lost) == guarded)
+            #expect(library.section.retiredAppleKeyIDs.contains(minted.id) == guarded)
         }
     }
 
@@ -208,44 +195,6 @@ struct ExecutorGuardMutationTests {
             var library = try fixture.unlocked(executor)
             _ = try await executor.leaveAccount(.stopSyncingHere, &library, typed: fixture.typed)
             #expect((library.key != k0) == guarded)
-        }
-    }
-
-    @Test func theLastStepRaceDeletesTheOldKeyAVaultStillNamesWithTheGuardOff() async throws {
-        for guarded in [true, false] {
-            let fixture = try EX(.castle, synced: true)
-            let shared = AppleKeyMaterial.mint()
-            fixture.world.icloud.oldShared = shared
-            var account = fixture.world.server.accounts[fixture.account!]!
-            account.format = try account.format.settingAppleHeldCopy(
-                masterKey: fixture.material!.masterSymmetricKey, appleKey: shared.key, appleKeyID: shared.id)
-            fixture.world.server.accounts[fixture.account!] = account
-            let executor = fixture.executor(guards: guarded ? .all : Self.off { $0.doorTimeVaultCheck = false })
-            var library = try fixture.unlocked(executor)
-            _ = try await executor.retireOldSharedKey(&library)
-            #expect((fixture.world.icloud.oldShared != nil) == guarded)
-        }
-    }
-
-    @Test func useCastlesDoorOpensOnAVaultStillOnTheOldKeyWithTheGuardOff() async throws {
-        for guarded in [true, false] {
-            // A local library on this Mac, signed in to another account whose
-            // vault an older build re-linked onto the old shared key.
-            let other = try EX(.standard, synced: true)
-            let shared = other.accountApple!
-            other.world.icloud.oldShared = shared
-            let fixture = try EX(.standard, world: ExecutorWorld(icloud: other.world.icloud, server: other.world.server))
-            let executor = fixture.executor(
-                guards: guarded ? .all : Self.off { $0.doorTimeVaultCheck = false }, session: other.session)
-            var library = try fixture.unlocked(executor)
-            if guarded {
-                await #expect(throws: ExecutorRefusal.vaultOnOldSharedKey(account: other.account!)) {
-                    _ = try await executor.useCastle(&library, typed: fixture.typed, gate: .touchID)
-                }
-            } else {
-                _ = try await executor.useCastle(&library, typed: fixture.typed, gate: .touchID)
-                #expect(fixture.liveRecord?.mode == .castle)
-            }
         }
     }
 

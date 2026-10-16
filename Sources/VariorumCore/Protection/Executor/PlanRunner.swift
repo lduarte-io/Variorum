@@ -33,9 +33,6 @@ public struct ActOutcome: Equatable, Sendable {
 public enum ActNotice: Equatable, Sendable {
     /// Entering Castle turned this device's scheduled Markdown export off.
     case scheduledExportTurnedOff
-    /// The old shared key stayed at Use Castle's last step — the door and
-    /// §3.1's first exception show (the last-step race).
-    case oldSharedKeyStayed(account: String)
     /// An anchor the entry couldn't open, kept beside the history: the
     /// secrets of its day still open the copies it holds.
     case anchorKeptUnopened(day: Date)
@@ -107,7 +104,7 @@ extension ActProgram {
     var needsLiveKeyFile: Bool {
         switch act {
         case .deviceSettings, .touchIDRearm, .offerDelete, .plaintextExport, .land,
-             .createLibrary, .moveOffSharedKey, .retireSharedKey, .relinkApple:
+             .createLibrary:
             return false
         default:
             return true
@@ -198,9 +195,6 @@ extension ProtectionExecutor {
         case .follow: return FollowProgram()
         case .land: return LandProgram()
         case .sendLibrary: return SendLibraryProgram()
-        case .moveOffSharedKey: return MoveOffSharedKeyProgram()
-        case .retireSharedKey: return RetireSharedKeyProgram()
-        case .relinkApple: return RelinkAppleProgram()
         case .createLibrary: return CreateLibraryProgram()
         case .setUpSync: return SetUpSyncProgram()
         case .enroll, .move, .thisMacOnly, .stopSyncingHere, .deleteAccountHere: return AccountMoveProgram(act: act)

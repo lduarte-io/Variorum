@@ -60,7 +60,6 @@ struct UseCastleTests {
             "record K1", "memory K1", "plan",                       // the scheduled export off
             "backup K1", "plan",                                    // a fresh pair
             "apple- \(own.prefix(8))", "record K1", "memory K1", "plan",  // this Mac's own Apple key retired
-            "plan",                                                 // no old shared key here
             "record K1", "memory K1", "plan-",                      // the act ends
         ])
         #expect(fixture.world.copyEvents == ["pause", "resume"])
@@ -114,7 +113,7 @@ struct UseCastleTests {
             "vault castle", "sync+ touchid", "apple- \(accountKey.prefix(8))", "record K0", "memory K0", "plan",
             "custody+ touchid K1", "plan", "keyfile K1", "plan", "stage K1", "plan", "staged-record K1", "plan",
             "swap K1", "plan", "memory K1", "plan", "custody- silent K0", "plan",
-            "plan", "backup K1", "plan", "apple- \(own.prefix(8))", "record K1", "memory K1", "plan", "plan",
+            "plan", "backup K1", "plan", "apple- \(own.prefix(8))", "record K1", "memory K1", "plan",
             "record K1", "memory K1", "plan-",
         ])
         let vault = try #require(fixture.world.server.snapshot(fixture.account!))

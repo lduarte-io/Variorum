@@ -51,10 +51,6 @@ public struct ProtectionGuards: Equatable, Sendable {
     /// follows only a press that failed on an item that exists. Off: a Touch
     /// ID choice with no item asks it.
     public var noRearmWithoutItem = true
-    /// THE DOOR-TIME VAULT CHECK (§3.5 point 4): a vault this device can
-    /// read, or the record's account while signed out, still on the old
-    /// shared key stops Use Castle at its door. Off: the door opens.
-    public var doorTimeVaultCheck = true
     /// DELETE ON SIGHT BY RECORDED ID ONLY (§3.5): in Castle, only an Apple
     /// key this Mac's section lists as retired is deleted. Off: every Apple
     /// key this Mac can see and doesn't use is deleted (another Mac's own
@@ -72,10 +68,6 @@ public struct ProtectionGuards: Equatable, Sendable {
     /// keys stay the Castle way while the previous corpus key stands. Off:
     /// they go silent as soon as the vault reads a leave.
     public var castleKindCustodyThroughLeave = true
-    /// GIFTS ONLY FOR THIS MAC'S COPIES (§3.5 point 2): the move gives a key
-    /// file of this Mac's own only to libraries whose copies the catalog
-    /// attributes to this Mac. Off: to every library in the catalog.
-    public var giftsOnlyForThisMacsCopies = true
     /// NOTHING DESTRUCTIVE ON A STANDARD RECORD's WORD ALONE (§3.3, §3.6).
     /// Off: Standard's record drives deletes.
     public var standardRecordNoDestructiveRepair = true
@@ -90,9 +82,8 @@ public struct ProtectionGuards: Equatable, Sendable {
     // U3 — the guards in the executor (it also reads U2's
     // `everyOwnKeyRetiredAtCastle`, `leaveIDGatesCompletion`,
     // `castleKindCustodyThroughLeave`, `freshVaultBeforeAppleWrite`,
-    // `rekeyAtEveryCrossing`, `doorTimeVaultCheck`,
-    // `standardRecordNoDestructiveRepair` and `deleteOnSightByIDOnly` where
-    // it acts on the same rule).
+    // `rekeyAtEveryCrossing`, `standardRecordNoDestructiveRepair` and
+    // `deleteOnSightByIDOnly` where it acts on the same rule).
     /// A PLAN RESUMES ONLY WHEN THIS MAC'S SECTION NAMES IT (§3.6, VX-313):
     /// a plan the section doesn't name — planted, or replayed from an earlier
     /// act — is ignored. Off: any plan that verifies resumes.
@@ -116,20 +107,6 @@ public struct ProtectionGuards: Equatable, Sendable {
     /// (§3.4, her 2026-10-14 confirm). Off: only the outgoing key and its
     /// copied locks.
     public var followerAnchorTypedLock = true
-    /// THE OLD-NAME ITEM DELETED ONLY BY ITS RECORDED ID (§3.5 point 5):
-    /// a new old-name item an older build minted later is left alone. Off:
-    /// whatever id the item carries now.
-    public var oldSharedKeyDeletedByRecordedID = true
-    /// THE MOVE KEEPS THE OLD WRAP (§3.5 point 2): a key of this Mac's own
-    /// beside the old shared key's wrap, never instead of it. Off: the old
-    /// wrap is dropped.
-    public var moveKeepsOldWrap = true
-    /// THE RETIREMENT RE-RUNS THE MOVES (§3.5 point 4) before the old key
-    /// goes. Off: it goes with no move first.
-    public var retirementRerunsMoves = true
-    /// THE FRESH PAIR AFTER THE MOVE (§3.5 point 2): the move ends with a
-    /// fresh backup pair of the live library. Off: none.
-    public var freshPairAfterMove = true
 
     // U4 — the guards the scenario world's bugs added.
     /// A LIBRARY FILE REPLAYED ALONE LOSES TO THE MEMORY (§3.6, promise 10 —
@@ -215,13 +192,6 @@ public struct ProtectionGuards: Equatable, Sendable {
 
 
 
-    public var doorTimeVaultCheckOn: Bool {
-        #if DEBUG
-        return doorTimeVaultCheck
-        #else
-        return true
-        #endif
-    }
 
     public var deleteOnSightByIDOnlyOn: Bool {
         #if DEBUG
@@ -255,13 +225,6 @@ public struct ProtectionGuards: Equatable, Sendable {
         #endif
     }
 
-    public var giftsOnlyForThisMacsCopiesOn: Bool {
-        #if DEBUG
-        return giftsOnlyForThisMacsCopies
-        #else
-        return true
-        #endif
-    }
 
 
     public var standardRecordNoDestructiveRepairOn: Bool {
@@ -336,36 +299,8 @@ public struct ProtectionGuards: Equatable, Sendable {
         #endif
     }
 
-    public var oldSharedKeyDeletedByRecordedIDOn: Bool {
-        #if DEBUG
-        return oldSharedKeyDeletedByRecordedID
-        #else
-        return true
-        #endif
-    }
 
 
-    public var moveKeepsOldWrapOn: Bool {
-        #if DEBUG
-        return moveKeepsOldWrap
-        #else
-        return true
-        #endif
-    }
 
-    public var retirementRerunsMovesOn: Bool {
-        #if DEBUG
-        return retirementRerunsMoves
-        #else
-        return true
-        #endif
-    }
 
-    public var freshPairAfterMoveOn: Bool {
-        #if DEBUG
-        return freshPairAfterMove
-        #else
-        return true
-        #endif
-    }
 }

@@ -251,17 +251,11 @@ extension SWorld {
             try await act(d) { executor, library in
                 let holder = self.holder(d, account: library.record?.account, libraryID: library.record!.libraryID)
                 var k = self.known(holder)
-                let assessment = self.assessed(d)
-                if let sheet = assessment.retirement {
-                    for subject in sheet.routes.wouldStopOpening + sheet.routes.appleKeyAlone {
-                        if case .copy(let id) = subject { self.truth.listedBySheet.insert(id) }
-                    }
-                }
                 let words = (makeNewWords || k.words == nil) ? self.newWords() : k.words!
                 let passphrase = k.passphrase ?? self.newPassphrase()
                 let typed = TypedSecrets(passphrase: passphrase, words: words, wordsAreNew: words != k.words)
                 self.choose(d, holder: holder, passphrase: passphrase, words: words)
-                let outcome = try await executor.useCastle(&library, typed: typed, gate: gate, moves: self.moveSubjects(d))
+                let outcome = try await executor.useCastle(&library, typed: typed, gate: gate)
                 k.passphrase = passphrase
                 k.words = words
                 if k != self.known(holder) { self.setKnown(holder, passphrase: passphrase, words: words) }
@@ -490,7 +484,6 @@ extension SWorld {
             let d = device(name)
             loseQueuedDeletes(d)
             truth.lostAppleKeys.formUnion(readableAppleKeys(d).keys)
-            if let shared = oldSharedKey(d) { truth.lostAppleKeys.insert(shared.id) }
             d.keychain.synced.removeAll()
             d.appleAccount = to
             syncICloud(d)
@@ -499,12 +492,10 @@ extension SWorld {
             guard let id = d.appleAccount, let account = appleAccounts[id] else { throw WorldRefusal.notOpen }
             for other in devices where other.appleAccount == id {
                 truth.lostAppleKeys.formUnion(readableAppleKeys(other).keys)
-                if let shared = oldSharedKey(other) { truth.lostAppleKeys.insert(shared.id) }
                 other.keychain.synced.removeAll()
             }
             truth.lostAppleKeys.formUnion(account.cloud.keys.compactMap {
-                if case .own(let key)? = ProtectionNames.parseAppleKeyAccount($0.account, scope: Self.scope) { return key }
-                return nil
+                ProtectionNames.parseAppleKeyAccount($0.account, scope: Self.scope)
             })
             account.cloud.removeAll()
         case .wipeKeychain(let name):
@@ -629,17 +620,6 @@ extension SWorld {
             if case .follow(let kind, _, _) = act { return kind }
         }
         return nil
-    }
-
-    /// The move's subjects — the serving key files (catalog ids) of the other
-    /// libraries `assess`'s MovePlan names.
-    func moveSubjects(_ device: SDevice) -> [String] {
-        let assessment = assessed(device)
-        let catalog = catalog(device)
-        return assessment.movePlan.otherLibraries.compactMap { library in
-            catalog.copies(ofLibrary: library).max { ($0.stamp ?? .distantPast) < ($1.stamp ?? .distantPast) }
-                .flatMap { catalog.servingKeyFiles(of: $0).first?.id }
-        }
     }
 
     // MARK: - Copies

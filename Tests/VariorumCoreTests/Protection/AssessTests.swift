@@ -353,30 +353,17 @@ struct AssessRepairTests {
                 "another Mac's copy of this library may be in Standard under a key of its own")
     }
 
-    @Test func theOldSharedKeyIsDeletedOnSightOnlyUnderTheIdThisSectionRetired() throws {
-        var world = try AWorld(.castle)
-        let shared = PF.id()
-        world.section.oldSharedKey = OldSharedKeyRecord(id: shared, retiredAt: PF.t0)
-        world.recordSection = world.section
-        world.appleKeys.oldSharedID = shared
-        #expect(try world.assessed().repairs.contains(.deleteRetiredOldSharedKey(id: shared)))
-        // An older build minted a new old-name item later: a new id, left alone.
-        world.appleKeys.oldSharedID = PF.id()
-        #expect(!(try world.assessed().repairs.contains { if case .deleteRetiredOldSharedKey = $0 { return true } else { return false } }))
-    }
-
     @Test func inStandardTheWrapLandsUnderThisMacsOwnKeyAndNoRepairMintsOne() throws {
         var world = try AWorld(.standard)
         world.liveFile = world.liveFile.droppingApple()
         #expect(try world.assessed().repairs.contains(.landAppleWrap(appleKeyID: world.own.id)))
         // The own key can't be read here (iCloud Keychain reset, another Apple
-        // ID): the Apple road is lost — Re-link's library arm, never a mint.
+        // ID): the Apple road is lost — reported, never a mint (Re-link left
+        // with VX-378 U1; rule 8's quiet re-make is U2's).
         world.appleKeys.readable = []
         let lost = try world.assessed()
         #expect(!lost.repairs.contains { if case .landAppleWrap = $0 { return true } else { return false } })
         #expect(lost.faults.contains(.appleRoadLost(keyFileID: AWorld.liveKeyFileID)))
-        #expect(lost.acts.contains(.relinkLibraryArm(keyFileIDs: [AWorld.liveKeyFileID])))
-        #expect(lost.door(.relinkLibraryArm).isOpen)
     }
 
     @Test func decision35ASyncedLibraryWritesNothingAppleReachableWithoutAFreshVault() throws {
@@ -417,8 +404,7 @@ struct AssessRepairTests {
                 switch repair {
                 case .makeTouchIDItem, .deleteTouchIDItem:
                     Issue.record("\(repair) — a guard's bug shape with every guard on")
-                case .deleteSilentItem, .deleteRetiredAppleKey,
-                     .deleteRetiredOldSharedKey, .landAppleWrap, .refreshMemory, .refreshRecordSection,
+                case .deleteSilentItem, .deleteRetiredAppleKey, .landAppleWrap, .refreshMemory, .refreshRecordSection,
                      .restoreKeyFileFromMirror, .restoreKeyFileFromCopy, .recordAlwaysAskQuietly, .rekeyOlderLibraryFile, .recordHeldSyncKeysFacts, .restoreRecordFactsFromMemory, .retireOwnAppleKeys:
                     continue
                 }
@@ -479,7 +465,6 @@ struct AssessRepairTests {
         world.appleKeys.readable = [accountKey]
         let assessed = try world.assessed()
         #expect(!assessed.repairs.contains { if case .landAppleWrap = $0 { return true } else { return false } })
-        #expect(assessed.movePlan.liveLibrary, "the move (an act) gives it a key of its own")
     }
 
     @Test func aSilentSyncKeysItemWhileTheyReachACastleEraKeyIsReported() throws {
@@ -531,16 +516,6 @@ struct AssessDoorTests {
         #expect(try AWorld(.castle).assessed().door(.useCastle).refusal == .wrongMode(.castle))
     }
 
-    @Test func replaceAllKeysOnAnAccountStillOnTheOldSharedKeyReLinksFirst() throws {
-        let x = PF.id(), shared = PF.id()
-        var world = try AWorld(.standard, account: x)
-        world.session = .signedIn(accountID: x, email: nil)
-        world.vault = AWorld.vault(x, .standard(appleKeyID: shared))
-        world.appleKeys.oldSharedID = shared
-        #expect(try world.assessed().door(.replaceAllKeys).spec?.relinksAccountFirst == true)
-        #expect(try AWorld(.standard).assessed().door(.replaceAllKeys).refusal == .notSynced)
-    }
-
     @Test func theKeyDoorsSayTheirAnchorSentenceWhileAnAnchorExists() throws {
         let leave = try LeaveWorld()
         var world = try AWorld(.standard)
@@ -567,69 +542,5 @@ struct AssessDoorTests {
         #expect(assessed.vault?.unfinishedLeave == UnfinishedLeave(
             device: "Lillian's Air", day: CF.stamp(9), namedAppleKeyID: named, namedKeyReadableHere: true))
         #expect(assessed.door(.finishLeavingCastle).isOpen)
-    }
-}
-
-@Suite("VX-305 U2 — assess: the old shared key's checks at the door, and the move's subjects (§3.5)")
-struct AssessOldSharedKeyTests {
-    /// A vault it can read, or the library's former account, still on the old
-    /// key — other than the act's own account — stops Use Castle at its door.
-    @Test func aVaultOnTheOldKeyStopsUseCastleUnlessItIsTheActsOwn() throws {
-        let x = PF.id(), shared = PF.id()
-        var world = try AWorld(.standard, account: x)
-        world.session = .signedIn(accountID: x, email: nil)
-        world.vault = AWorld.vault(x, .standard(appleKeyID: shared))
-        world.appleKeys.oldSharedID = shared
-        #expect(try world.assessed().door(.useCastle).isOpen, "the account this very act moves into Castle")
-        // This-Mac-Only Castle: the account stays — and on the old key, it stops.
-        world.section.oldSharedKey = OldSharedKeyRecord(id: shared)
-        world.section = world.section.recordingAppleKey(AppleKeyRecord(id: shared, purpose: .account, accountID: x, origin: .followed))
-        world.recordSection = world.section
-        world.session = .signedOut
-        world.vault = nil
-        let checks = try #require(try world.assessed().retirement)
-        #expect(checks.doorStops == [x] && checks.uncheckedAccounts == [x])
-    }
-
-    @Test func aLibraryAlreadyInCastleGetsOneAskAndADoor() throws {
-        var world = try AWorld(.castle)
-        world.section.oldSharedKey = OldSharedKeyRecord(id: PF.id())
-        world.recordSection = world.section
-        let assessed = try world.assessed()
-        #expect(assessed.acts.contains(.retireOldSharedKeyAsk))
-        #expect(assessed.door(.retireOldSharedKey).spec?.retiresOldSharedKey == true)
-        var dismissed = world.agreeingMemory
-        dismissed.nudgeDismissals[AssessRules.retireOldSharedKeyNudge] = PF.t0
-        world.memory = dismissed
-        let later = try world.assessed()
-        #expect(!later.acts.contains(.retireOldSharedKeyAsk) && later.door(.retireOldSharedKey).isOpen,
-                "asked once; the door stays in Settings")
-    }
-
-    /// The move gives keys of this Mac's own beside the old one — to other
-    /// libraries whose newest copy here is Standard, never for copies the
-    /// catalog can't attribute to this Mac.
-    @Test func theMovesGiftsAreOnlyForThisMacsCopies() throws {
-        var world = try AWorld(.standard)
-        world.liveFile = world.liveFile.droppingApple()
-        let shared = AppleKeyMaterial.mint()
-        func pair(_ library: String, mac: String, place: CatalogPlace, day: Double, standard: Bool) throws -> [CatalogEntry] {
-            let key = StoreKey.mint()
-            var file = try KeyFile.building(libraryID: library, key: key, epoch: 1, locks: NewKeyLocks(passphrase: world.world.p))
-            if standard {
-                file.sharedApple = AppleWrap(keyID: shared.id, wrapped: try AES.KeyWrap.wrap(SymmetricKey(data: key.data), using: shared.key))
-            }
-            let folders = CF.macFolder(library, mac)
-            return [CatalogEntry(place: place, folders: folders, name: CF.snapshotName(CF.stamp(day), key)),
-                    CatalogEntry(place: place, folders: folders, name: CF.pairName(CF.stamp(day), key), bytes: try file.encoded())]
-        }
-        let mine = PF.id(), castleNow = PF.id(), theirs = PF.id()
-        world.extraEntries = try pair(mine, mac: CF.macA, place: .container, day: 1, standard: true)
-            + pair(castleNow, mac: CF.macA, place: .farFolder, day: 1, standard: true)
-            + pair(castleNow, mac: CF.macA, place: .farFolder, day: 2, standard: false)
-            + pair(theirs, mac: CF.macB, place: .farFolder, day: 1, standard: true)
-        let plan = try world.assessed().movePlan
-        #expect(plan.otherLibraries == [mine], "newest Castle: no gift; another Mac's: no gift")
-        #expect(plan.liveLibrary, "the live Standard library gains this Mac's own key")
     }
 }

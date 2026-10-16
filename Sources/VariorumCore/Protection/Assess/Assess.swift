@@ -12,13 +12,12 @@ import Foundation
 //     Touch ID item or changes a key's kind; in Standard nothing destructive
 //     runs on the record's word alone; a synced library writes nothing
 //     Apple-reachable without a fresh vault read for its account (decision 35);
-//     a lost Apple road offers Re-link's library arm (no repair mints);
+//     a lost Apple road is reported (no repair mints — rule 8's re-make is
+//     U2's; Re-link left with VX-378 U1);
 //   - §3.5: one Apple key per library per Mac and one per account; entering
 //     Castle retires every own key this Mac's section lists; copies under a key
-//     this Mac can't delete are named at Use Castle's door; the old shared key —
-//     what still needs it, what its retirement would strand, what would then
-//     hang on an Apple key alone, and the door-time vault check; the move's
-//     subjects (gifts only for this Mac's copies);
+//     this Mac can't delete are named at Use Castle's door (the old shared key,
+//     its retirement and the move's gifts left with rules 26 and 19);
 //   - §3.9: the vault's three states; a follower's hold; only a device that
 //     reads the leave's named key completes it; sync keys held by what they
 //     reach;
@@ -45,19 +44,13 @@ public func assess(_ facts: ProtectionFacts, guards: ProtectionGuards = .all) ->
         acts = AssessRules.acts(facts, unlocked, mode: mode, account: account, vault: vault, faults: faults,
                                 touchID: touchID)
     }
-    var actAccount: String?
-    if case .inSync(let synced) = account.situation { actAccount = synced }
-    let retirement = AssessRules.retirementChecks(
-        facts, finder: finder, account: account, actAccount: actAccount, guards: guards)
     let doors = AssessRules.doors(facts, mode: mode, account: account, vault: vault, acts: acts, finder: finder,
                                   faults: faults, guards: guards)
     var opensWith: [String: OpensWith] = [:]
     for copy in facts.catalog.copies { opensWith[copy.id] = finder.opensWith(copy: copy) }
     return Assessment(
         launch: launch, mode: mode, account: account, vault: vault, lobby: AssessRules.lobby(facts, finder: finder),
-        touchID: touchID, repairs: repairs, faults: faults, acts: acts, doors: doors,
-        movePlan: AssessRules.movePlan(facts, mode: mode, account: account, guards: guards),
-        retirement: retirement, opensWith: opensWith)
+        touchID: touchID, repairs: repairs, faults: faults, acts: acts, doors: doors, opensWith: opensWith)
 }
 
 public enum AssessRules {
@@ -170,7 +163,7 @@ public enum AssessRules {
         return RouteFinder(RouteFacts(
             catalog: facts.catalog, liveKeyFileID: facts.unlocked?.liveKeyFileID ?? facts.catalog.liveKeyFile?.id,
             custody: facts.custody,
-            readableAppleKeyIDs: facts.appleKeys.readable, oldSharedAppleKeyID: facts.appleKeys.oldSharedID,
+            readableAppleKeyIDs: facts.appleKeys.readable,
             ownAppleKeyIDsNotReadableHere: notReadable, vaultRecoveryWrap: vault?.recoveryWrap,
             signedInToVault: vault != nil))
     }
@@ -182,7 +175,7 @@ public enum AssessRules {
         let opens = fingerprint.map { finder.opensWith(fingerprint: $0) } ?? OpensWith(routes: [])
         // Roads needing no person: every silent item (whatever fingerprint it
         // names — each verifies itself) and an Apple wrap readable here.
-        var automatic = opens.routes.filter { [.appleAccount, .oldSharedAppleKey].contains($0.opener) }
+        var automatic = opens.routes.filter { $0.opener == .appleAccount }
         for item in facts.custody where item.itemClass == .silent {
             automatic.append(Route(opener: .thisMac, steps: [.custody(fingerprint: item.fingerprint, itemClass: .silent)]))
         }
@@ -401,7 +394,7 @@ public enum AssessRules {
         }
         // A Castle key never has an Apple wrap: a planted file — a fault the
         // re-key answers.
-        if let live, live.apple != nil || live.sharedApple != nil, let id = unlocked.liveKeyFileID {
+        if let live, live.apple != nil, let id = unlocked.liveKeyFileID {
             faults.append(.appleWrapOnCastleKey(keyFileID: id))
         }
         // Delete on sight, BY RECORDED ID ONLY — never for belonging to "this
@@ -416,9 +409,6 @@ public enum AssessRules {
             for id in facts.appleKeys.readable.sorted() where id != live?.apple?.keyID {
                 repairs.append(.deleteRetiredAppleKey(id: id))
             }
-        }
-        if let shared = unlocked.thisMac.oldSharedKey, shared.retiredAt != nil, facts.appleKeys.oldSharedID == shared.id {
-            repairs.append(.deleteRetiredOldSharedKey(id: shared.id))
         }
         // The library's sync keys reach Castle-era keys: a silent item for them
         // is reported (PROVISIONAL P-U2-2 — the acts re-file sync keys).
@@ -505,135 +495,8 @@ public enum AssessRules {
         if faults.contains(where: { if case .appleWrapOnCastleKey = $0 { return true } else { return false } }) {
             acts.append(.rekeyForFault)
         }
-        let lost = relinkSubjects(facts, unlocked, mode: mode)
-        if !lost.isEmpty { acts.append(.relinkLibraryArm(keyFileIDs: lost)) }
-        if current == .castle, unlocked.thisMac.oldSharedKeyStillStanding,
-           unlocked.memory?.nudgeDismissals[retireOldSharedKeyNudge] == nil {
-            acts.append(.retireOldSharedKeyAsk)
-        }
         if touchID.rearmQuestion { acts.append(.touchIDRearmQuestion) }
         return acts
-    }
-
-    /// The nudge name the old shared key's one calm ask is dismissed under.
-    public static let retireOldSharedKeyNudge = "retire-old-shared-key"
-
-    /// Re-link's library arm (§3.9): every Standard key file this Mac holds —
-    /// the live one, and this Mac's own key files for other libraries — whose
-    /// own Apple key can't be read here.
-    static func relinkSubjects(_ facts: ProtectionFacts, _ unlocked: UnlockedFacts, mode: ModeVerdict) -> [String] {
-        let mac8 = unlocked.thisMac.mac8
-        var subjects: [String] = []
-        for file in facts.catalog.keyFiles {
-            let isLive = file.id == unlocked.liveKeyFileID
-            guard isLive ? mode.mode == .standard : (file.role == .ownKeyFile && file.mac.isMac(mac8)) else { continue }
-            guard let keyFile = file.document else { continue }
-            // The live place's file counts only when it is the current key's
-            // (another key's file there is its own fault — VX-305 ladder round 1).
-            if isLive, keyFile.fingerprint != unlocked.currentFingerprint { continue }
-            let readsOwn = unlocked.thisMac.appleKeys.contains {
-                $0.isOwnLibraryKey && $0.retiredAt == nil && facts.appleKeys.readable.contains($0.id)
-            }
-            if let wrap = keyFile.apple {
-                if !facts.appleKeys.readable.contains(wrap.keyID) { subjects.append(file.id) }
-            } else if isLive, unlocked.thisMac.appleKeys.contains(where: { $0.isOwnLibraryKey && $0.retiredAt == nil }), !readsOwn {
-                subjects.append(file.id)
-            } else if isLive, unlocked.record.account == nil, !readsOwn {
-                // A LOCAL Standard library whose live file carries no Apple wrap
-                // and whose Mac reads no own key for it — the road is lost even
-                // when this identity never listed the key that carried it (a Mac
-                // replaced with no memory item, after a leave found its own key
-                // gone — VX-305 U4, the soak's seed 4). Synced libraries keep
-                // decision 35's road (a held landing waits for Resume Sync).
-                subjects.append(file.id)
-            }
-        }
-        return subjects
-    }
-
-    // MARK: - The old shared key (§3.5 points 2 and 4)
-
-    /// Does this store still have the old shared key — this device's section
-    /// lists it standing, the old-name item is readable here, or a catalogued
-    /// key file carries its wrap?
-    static func oldSharedKeyStands(_ facts: ProtectionFacts) -> Bool {
-        if facts.unlocked?.thisMac.oldSharedKeyStillStanding == true { return true }
-        if facts.appleKeys.oldSharedID != nil { return true }
-        return facts.catalog.keyFiles.contains { $0.document?.sharedApple != nil }
-    }
-
-    /// The old shared key's id: the readable item's, else the one this
-    /// device's section recorded.
-    static func oldSharedID(_ facts: ProtectionFacts) -> String? {
-        facts.appleKeys.oldSharedID ?? facts.unlocked?.thisMac.oldSharedKey?.id
-    }
-
-    /// **The checks at the door** (§3.5 point 4). `actAccount`: the account
-    /// the act itself moves into Castle (its vault never stops it).
-    public static func retirementChecks(
-        _ facts: ProtectionFacts, finder: RouteFinder, account: AccountVerdict, actAccount: String?,
-        guards: ProtectionGuards
-    ) -> RetirementChecks? {
-        guard let unlocked = facts.unlocked, oldSharedKeyStands(facts) else { return nil }
-        let held = Set(unlocked.familyTree.fingerprints).union([unlocked.currentFingerprint])
-            .union(liveKeyFile(facts, unlocked)?.heldFingerprints ?? [])
-        let routes = finder.retirementRoutes(thisMac: unlocked.thisMac.deviceID, libraryFingerprints: held)
-        // Accounts named by the record or this device's section whose vault
-        // isn't read this session — "can't be checked".
-        let readable = facts.vault.flatMap { $0.accountID == facts.session.accountID ? $0.accountID : nil }
-        var named = Set(unlocked.thisMac.appleKeys.compactMap { $0.purpose == .account ? $0.accountID : nil })
-        if let record = account.account { named.insert(record) }
-        let unchecked = named.filter { $0 != readable }.sorted()
-        // The vaults that stop the act at its door.
-        var stops: [String] = []
-        if guards.doorTimeVaultCheckOn, let shared = oldSharedID(facts) {
-            if let vault = facts.vault, vault.accountID == readable, vault.hasAppleWrap, vault.appleKeyID == shared,
-               vault.accountID != actAccount {
-                stops.append(vault.accountID)
-            }
-            // While signed out (or in another account): the library's account,
-            // as this device last knew its vault.
-            if let record = account.account, record != readable, record != actAccount,
-               unlocked.thisMac.appleKeys.contains(where: {
-                   $0.purpose == .account && $0.accountID == record && $0.id == shared && $0.retiredAt == nil
-               }) {
-                stops.append(record)
-            }
-        }
-        return RetirementChecks(routes: routes, uncheckedAccounts: unchecked, doorStops: stops)
-    }
-
-    /// **The move's subjects** (§3.5 point 2): keys of this Mac's own beside
-    /// the old one. Gifts only for this Mac's copies.
-    public static func movePlan(
-        _ facts: ProtectionFacts, mode: ModeVerdict, account: AccountVerdict, guards: ProtectionGuards
-    ) -> MovePlan {
-        guard let unlocked = facts.unlocked else { return MovePlan(otherLibraries: [], liveLibrary: false) }
-        let mac8 = unlocked.thisMac.mac8
-        let liveLibrary = unlocked.record.libraryID
-        var newest: [String: CatalogCopy] = [:]
-        for copy in facts.catalog.copies {
-            guard let library = copy.library, library != liveLibrary, copy.stamp != nil else { continue }
-            if guards.giftsOnlyForThisMacsCopiesOn, !copy.mac.isMac(mac8) { continue }
-            if let held = newest[library], (held.stamp ?? .distantPast) >= (copy.stamp ?? .distantPast) { continue }
-            newest[library] = copy
-        }
-        let gifted = Set(facts.catalog.keyFiles.filter { $0.role == .ownKeyFile && $0.mac.isMac(mac8) }.compactMap(\.library))
-        let others = newest.filter { library, copy in
-            !gifted.contains(library) && facts.catalog.servingKeyFiles(of: copy).first.map(standardShaped) == true
-        }.keys.sorted()
-        // The live library — local or synced, in Standard (decision 35) —
-        // gains this Mac's own Apple key.
-        let live = mode.mode == .standard
-            && (account.account == nil || facts.freshVault(for: account.account) != nil)
-            && liveKeyFile(facts, unlocked)?.apple == nil
-        return MovePlan(otherLibraries: others, liveLibrary: live)
-    }
-
-    /// A key file whose current key is a Standard key (an Apple wrap).
-    static func standardShaped(_ file: CatalogKeyFile) -> Bool {
-        guard let keyFile = file.document else { return false }
-        return keyFile.apple != nil || keyFile.sharedApple != nil
     }
 
     // MARK: - Doors
@@ -685,10 +548,7 @@ public enum AssessRules {
             if let refusal = gate(syncedAct: true) { return .refused(refusal) }
             if current == .castle { return .refused(.wrongMode(.castle)) }
             if signedOut { return .refused(.signedOutUseThisMacOnly) }
-            let checks = retirementChecks(facts, finder: finder, account: account,
-                                          actAccount: inSync ? account.account : nil, guards: guards)
-            if let stop = checks?.doorStops.first { return .refused(.vaultOnOldSharedKey(account: stop)) }
-            return .open(useCastleSpec(facts, unlocked, finder: finder, checks: checks, synced: inSync, guards: guards))
+            return .open(useCastleSpec(facts, unlocked, finder: finder, synced: inSync, guards: guards))
         }()
         // USE STANDARD.
         doors[.useStandard] = {
@@ -702,9 +562,8 @@ public enum AssessRules {
         doors[.replaceAllKeys] = {
             if let refusal = gate(syncedAct: true) { return .refused(refusal) }
             guard inSync else { return .refused(signedOut ? .signedOutUseThisMacOnly : .notSynced) }
-            let onOldKey = reading.map { $0.hasAppleWrap && $0.appleKeyID != nil && $0.appleKeyID == oldSharedID(facts) } ?? false
             return .open(DoorSpec(requires: .passphraseAndWords(wordsMayBeNew: true), rekeys: true, synced: true,
-                                  relinksAccountFirst: onOldKey, words: anchorWords(.replacesWords)))
+                                  words: anchorWords(.replacesWords)))
         }()
         // THE KEY DOORS — re-wrap the current key only; each says its anchor
         // sentence while an anchor exists.
@@ -720,34 +579,6 @@ public enum AssessRules {
                 return .open(DoorSpec(requires: requires, synced: inSync, words: anchorWords(secretDoor)))
             }()
         }
-        // RE-LINK the account (Standard; a fresh account key minted at the
-        // press, never the old shared key).
-        doors[.relinkAccount] = {
-            if let refusal = gate(syncedAct: true) { return .refused(refusal) }
-            guard current == .standard else { return .refused(.wrongMode(current)) }
-            guard inSync, let reading else { return .refused(inSync ? .needsFreshVault : .notSynced) }
-            let unreadable = reading.appleKeyID.map { !facts.appleKeys.readable.contains($0) } ?? true
-            let onOldKey = reading.appleKeyID != nil && reading.appleKeyID == oldSharedID(facts)
-            guard unreadable || onOldKey else { return .refused(.nothingToDo) }
-            return .open(DoorSpec(requires: .currentPassphrase, synced: true, words: [.relinkConsent]))
-        }()
-        // RE-LINK's library arm.
-        doors[.relinkLibraryArm] = {
-            if otherAccount { return .refused(.otherAccountSignedIn) }
-            let subjects = relinkSubjects(facts, unlocked, mode: mode)
-            return subjects.isEmpty ? .refused(.nothingToDo) : .open(DoorSpec(requires: .none))
-        }()
-        // RETIRE THE OLD APPLE KEY — a library already in Castle before this change.
-        doors[.retireOldSharedKey] = {
-            if let refusal = gate(syncedAct: false) { return .refused(refusal) }
-            guard current == .castle, section.oldSharedKeyStillStanding else {
-                return .refused(.nothingToDo)
-            }
-            let checks = retirementChecks(facts, finder: finder, account: account, actAccount: nil, guards: guards)
-            if let stop = checks?.doorStops.first { return .refused(.vaultOnOldSharedKey(account: stop)) }
-            return .open(DoorSpec(requires: .none, retiresOldSharedKey: true,
-                                  words: checks.map { [.retirementSheet($0)] } ?? []))
-        }()
         // TURN ON SYNC — a local library; the joining rules.
         doors[.turnOnSync] = {
             guard case .localOnly = account.situation else { return .refused(.nothingToDo) }
@@ -810,8 +641,7 @@ public enum AssessRules {
     }
 
     static func useCastleSpec(
-        _ facts: ProtectionFacts, _ unlocked: UnlockedFacts, finder: RouteFinder, checks: RetirementChecks?,
-        synced: Bool, guards: ProtectionGuards
+        _ facts: ProtectionFacts, _ unlocked: UnlockedFacts, finder: RouteFinder, synced: Bool, guards: ProtectionGuards
     ) -> DoorSpec {
         var words: [Words] = [.floorSentence, .exportAPlainCopyFirst]
         // Copies under a key this Mac can't delete — one left in an Apple
@@ -820,14 +650,12 @@ public enum AssessRules {
             finder.opensWith(copy: $0).openers.contains(.appleKeyNotReadableHere)
         }.map(\.id)
         if !undeletable.isEmpty { words.append(.copiesUnderAKeyThisMacCantDelete(undeletable)) }
-        if let checks { words.append(.retirementSheet(checks)) }
         if unlocked.thisMac.settings.scheduledExport { words.append(.scheduledExportTurnsOff) }
         // An anchor those secrets can't open is kept, and the door says so.
         if let sentence = finder.anchorSentence(for: .useCastleCannotFold) { words.append(.anchor(sentence)) }
         return DoorSpec(
             requires: .passphraseAndWords(wordsMayBeNew: true), rekeys: true,
-            retiresOwnAppleKeys: ownKeysToRetire(facts, unlocked, guards: guards),
-            retiresOldSharedKey: checks != nil, synced: synced, words: words)
+            retiresOwnAppleKeys: ownKeysToRetire(facts, unlocked, guards: guards), synced: synced, words: words)
     }
 
     /// §3.8's joining rules: the account's mode against the library's.
@@ -848,10 +676,7 @@ public enum AssessRules {
     ) -> DoorSpec {
         switch join {
         case .entersCastle:
-            var spec = useCastleSpec(facts, unlocked, finder: finder,
-                                     checks: retirementChecks(facts, finder: finder, account: account(facts),
-                                                              actAccount: facts.session.accountID, guards: guards),
-                                     synced: true, guards: guards)
+            var spec = useCastleSpec(facts, unlocked, finder: finder, synced: true, guards: guards)
             spec.join = join
             return spec
         case .leavesCastle:

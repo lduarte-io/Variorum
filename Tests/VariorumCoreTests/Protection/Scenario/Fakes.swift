@@ -60,9 +60,6 @@ struct KName: Hashable, Comparable, CustomStringConvertible {
         KName(service: ProtectionNames.appleKeyService, account: ProtectionNames.appleKeyAccount(scope: scope, id: id))
     }
 
-    static func oldShared(_ scope: String) -> KName {
-        KName(service: ProtectionNames.appleKeyService, account: ProtectionNames.oldSharedAppleKeyAccount(scope: scope))
-    }
 
 }
 

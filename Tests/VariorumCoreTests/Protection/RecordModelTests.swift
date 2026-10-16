@@ -20,8 +20,7 @@ struct ProtectionValueRoundTripTests {
         let device = PF.id()
         var section = DeviceSection(
             deviceID: device, hardwareMarker: HardwareMarker.compute(PF.macA, salt: HardwareMarker.mintSalt()),
-            settings: DeviceSettings(gateStyle: .touchID, idleLockMinutes: 30, scheduledExport: true),
-            oldSharedKey: OldSharedKeyRecord(id: PF.id()))
+            settings: DeviceSettings(gateStyle: .touchID, idleLockMinutes: 30, scheduledExport: true))
         section = section.recordingAppleKey(AppleKeyRecord(id: PF.id(), purpose: .library, origin: .minted))
         section = section.recordingAppleKey(
             AppleKeyRecord(id: PF.id(), purpose: .account, accountID: PF.id(), origin: .followed, retiredAt: PF.day(1)))

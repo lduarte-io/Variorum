@@ -61,8 +61,6 @@ public struct ActParameters: Codable, Equatable, Sendable {
     public var copyID: String?
     public var copyIDs: [String]?
     public var destination: String?
-    /// Key files an act works through (Re-link's library arm).
-    public var keyFileIDs: [String]?
     /// Device settings an act writes.
     public var settings: DeviceSettings?
     /// The account's corpus key id when the act began, and the new one a
@@ -74,9 +72,6 @@ public struct ActParameters: Codable, Equatable, Sendable {
     public var outgoingAppleKeyID: String?
     /// The account's Apple key a rotation into Castle retires once it completes.
     public var retiringAccountAppleKeyID: String?
-    /// Replace All Keys on an account still on the old shared key re-links
-    /// it first (§3.5 point 7).
-    public var relinksFirst: Bool?
     /// A follower's anchor carries the master's road (false when the vault's
     /// master is still the Castle-era one — §3.4).
     public var includeMasterRoad: Bool?
@@ -90,11 +85,6 @@ public struct ActParameters: Codable, Equatable, Sendable {
     public var rekeys: Bool?
     /// The account this Mac stops using (its sync keys forgotten).
     public var forgetsAccount: String?
-    /// A vault write of a re-key act that carries no corpus key stamp (Re-link
-    /// first, inside Replace All Keys) — stamped in the plan BEFORE the write,
-    /// like `newCorpusKeyID`, so a resume that can't reach the vault knows the
-    /// write may have landed and never rolls back over it.
-    public var accountWriteBegun: Bool?
     /// A re-key's OUTGOING key file, as the act found it live — the same copy
     /// what this Mac remembers mirrors (sealed with the plan; a key file holds
     /// no secret). A Mac replaced mid-act whose memory item didn't come along
@@ -113,7 +103,7 @@ public struct ActParameters: Codable, Equatable, Sendable {
         typedSecret: String? = nil, follow: String? = nil, newKind: ProtectionMode? = nil,
         targetAccount: String? = nil, changesAccount: Bool? = nil,
         accountAppleKeyID: String? = nil, ownAppleKeyID: String? = nil, copyID: String? = nil,
-        copyIDs: [String]? = nil, destination: String? = nil, keyFileIDs: [String]? = nil,
+        copyIDs: [String]? = nil, destination: String? = nil,
         settings: DeviceSettings? = nil, oldCorpusKeyID: String? = nil, newCorpusKeyID: String? = nil,
         outgoingAppleKeyID: String? = nil, retiringAccountAppleKeyID: String? = nil
     ) {
@@ -134,7 +124,6 @@ public struct ActParameters: Codable, Equatable, Sendable {
         self.copyID = copyID
         self.copyIDs = copyIDs
         self.destination = destination
-        self.keyFileIDs = keyFileIDs
         self.settings = settings
         self.oldCorpusKeyID = oldCorpusKeyID
         self.newCorpusKeyID = newCorpusKeyID
@@ -191,7 +180,7 @@ public struct ProtectionPlan: Codable, Equatable, Sendable {
     public func pastCommitPoint(libraryFingerprint: String) -> Bool {
         guard let to = toFingerprint else { return true }
         if libraryFingerprint == to { return true }
-        return parameters?.newCorpusKeyID != nil || parameters?.accountWriteBegun == true
+        return parameters?.newCorpusKeyID != nil
     }
 
     /// Does `section` (this Mac's, at open) name this plan? The device, the

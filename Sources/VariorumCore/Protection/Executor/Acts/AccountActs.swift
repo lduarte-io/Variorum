@@ -48,7 +48,7 @@ struct AccountMoveProgram: ActProgram {
         if Self.rekeys(parameters) {
             steps += LibraryRekey.steps(guards, mintsOwnAppleKey: leaving)
             steps += ["memory", "retireOldCustody"]
-            if entering { steps += ["exportOff", "retireOwnAppleKeys", "retireOldSharedKey"] }
+            if entering { steps += ["exportOff", "retireOwnAppleKeys"] }
         } else {
             steps += ["joinKeyFile", "bindAccount", "memory"]
         }
@@ -99,7 +99,6 @@ struct AccountMoveProgram: ActProgram {
         case "retireOldCustody": try ctx.retireOldCustody(sweepForCastle: entering)
         case "exportOff": try ctx.turnExportOff()
         case "retireOwnAppleKeys": try ctx.retireOwnAppleKeys()
-        case "retireOldSharedKey": try await ctx.retireOldSharedKey()
         case "joinKeyFile": try ctx.joinKeyFile()
         case "bindAccount": try ctx.bindAccount(ctx.parameters.targetAccount)
         case "forgetOldSyncKeys": try ctx.forgetSyncKeys(of: ctx.parameters.forgetsAccount)

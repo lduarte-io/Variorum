@@ -433,10 +433,9 @@ extension ActContext {
 
     /// Use Castle on a synced library: the account's former Apple key goes
     /// once its rotation completes — deleted and recorded as retired by the
-    /// acting device (§3.5). The old shared key is the retirement's own.
+    /// acting device (§3.5).
     func retireAccountAppleKey() throws {
         guard let id = parameters.retiringAccountAppleKeyID else { return }
-        if let shared = try leaves.apple.readOldSharedAppleKey(), shared.id == id { return }
         try leaves.apple.deleteAppleKey(id: id)
         try updateSection {
             $0.retiringAppleKey(id: id, purpose: .account, accountID: accountID, origin: .minted, at: now)
@@ -469,79 +468,6 @@ extension ActContext {
         #endif
         try executor.writeLiveKeyFile(try live.writingAnchor(anchor), &library)
         log("the anchor written first (\(Self.fp8(anchor.outgoingFingerprint)))")
-    }
-
-    // MARK: - The old shared key (§3.5 points 2, 4, 5)
-
-    /// **Retiring the old shared key** — Use Castle's last step, or its own
-    /// door: the moves run again (keys of this Mac's own beside it), the
-    /// vault read fresh again — a vault it can read that names it now keeps
-    /// the key (the last-step race: the act lands with the door and §3.1's
-    /// first exception showing) — then the old-name item deleted ONLY by the
-    /// id this device's section lists, and recorded retired on THIS device's
-    /// section only.
-    func retireOldSharedKey() async throws {
-        let readable = try leaves.apple.readOldSharedAppleKey()
-        let recorded = library.section.oldSharedKey
-        if recorded?.retiredAt != nil { return }
-        guard readable != nil || recorded != nil else { return }
-        if executor.guards.retirementRerunsMovesOn {
-            try await executor.moveOffSharedKey(self, freshPair: true)
-        }
-        // The session's vault, read now — or, offline, not read at all: the
-        // signed-out case's twin, this device's own knowledge standing in for
-        // it too (VX-305 U4, the soak's seed 15 — a throw here stuck the
-        // retirement in flight).
-        var sessionVaultRead = false
-        if executor.guards.doorTimeVaultCheckOn, let account = executor.configuration.session.accountID {
-            let vault: VaultSnapshot??
-            do { vault = .some(try await executor.readVault(accountID: account)) } catch where ProtectionExecutor.vaultOutOfReach(error) { vault = nil }
-            if let vault {
-                sessionVaultRead = true
-                if let vault, vault.format.masterWrappedByAppleHeld != nil,
-                   let id = vault.format.appleKeyID, id == (recorded?.id ?? readable?.id) {
-                    leaves.diagnostics.report(.oldSharedKeyStayed(account: account))
-                    outcome.notices.append(.oldSharedKeyStayed(account: account))
-                    log("the old shared key stays — a vault it can read names it")
-                    return
-                }
-            }
-        }
-        // Signed out (or in another account), the vault can't be read — this
-        // device's own knowledge stands in (P-U2-4, at the act): an account it
-        // last knew on the old key, other than one THIS act rotates into
-        // Castle, keeps the key (This Mac Only leaving a Standard account on
-        // the old key must never cost its other devices their Apple road —
-        // VX-305 U4, found by the scenario world).
-        if executor.guards.doorTimeVaultCheckOn, let shared = recorded?.id ?? readable?.id {
-            let rotated = act == .enterCastle && parameters.synced == true ? accountID : nil
-            if let stays = library.section.appleKeys.first(where: {
-                $0.purpose == .account && $0.id == shared && $0.retiredAt == nil && $0.accountID != nil && $0.accountID != rotated
-                    && ($0.accountID != executor.configuration.session.accountID || !sessionVaultRead)
-            })?.accountID {
-                leaves.diagnostics.report(.oldSharedKeyStayed(account: stays))
-                outcome.notices.append(.oldSharedKeyStayed(account: stays))
-                log("the old shared key stays — an account this device knew still stands on it")
-                return
-            }
-        }
-        let id: String
-        if executor.guards.oldSharedKeyDeletedByRecordedIDOn {
-            // The id this device's section lists — or, never listed, the item
-            // as it stands at this act, listed now.
-            guard let listed = recorded?.id ?? readable?.id else { return }
-            id = listed
-        } else {
-            guard let current = readable?.id else { return }
-            id = current
-        }
-        _ = try leaves.apple.deleteOldSharedAppleKey(id: id)
-        try updateSection { section in
-            var next = section.bumped()
-            next.oldSharedKey = OldSharedKeyRecord(id: id, retiredAt: now)
-            return next
-        }
-        log("the old shared Apple key retired")
     }
 }
 

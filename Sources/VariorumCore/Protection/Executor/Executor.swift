@@ -162,8 +162,6 @@ public enum ExecutorRefusal: Error, Equatable, Sendable {
     case rotationInProgress
     /// The account's keys moved elsewhere since the door — follow first.
     case accountMoved
-    /// §3.5 point 4: a vault on the old shared key stops Use Castle.
-    case vaultOnOldSharedKey(account: String)
     /// No Apple key readable where one is needed (never minted to make up).
     case appleKeyUnreadable
     /// A leave's completing write waits for the named key (§3.9).
@@ -265,7 +263,6 @@ public final class ProtectionExecutor {
         let (section, resolution) = DeviceFacts.thisMacsSection(
             memory: memory, recordSections: sections, marker: record.marker(for: configuration.machine),
             keyFileOwnAppleKeyIDs: [ownFile?.apple?.keyID].compactMap { $0 },
-            keyFileSharedAppleKeyID: ownFile?.sharedApple?.keyID,
             mintDeviceID: { self.leaves.ids.mintID() }, guards: guards)
         var unlocked = UnlockedLibrary(
             key: key, record: record, section: section, resolution: resolution, memory: memory, keyFile: liveFile,

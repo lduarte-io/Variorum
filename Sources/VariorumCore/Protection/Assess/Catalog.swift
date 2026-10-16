@@ -90,9 +90,6 @@ public enum KeyFileRole: String, Codable, Sendable, CaseIterable {
     case setAside
     /// A snapshot's own key file (`<snapshot>.keys.json`).
     case snapshotPair
-    /// `variorum-library-keys.json` in `Backups/<library8>/<mac8>/` — this
-    /// Mac's own key file for that library (§3.5 point 2).
-    case ownKeyFile
     /// A key file inside a `Previous Libraries` or safety-copy folder.
     case asideCopy
 }
@@ -283,7 +280,6 @@ public struct Catalog: Equatable, Sendable {
         case (.besideLibrary, .keyFile): return .live
         case (.besideLibrary, .setAsideKeyFile): return .setAside
         case (_, .snapshotKeyFile): return .snapshotPair
-        case (.macFolder, .keyFile): return .ownKeyFile
         case (.previousLibrary, _), (.adoptionSafety, _): return .asideCopy
         case (.besideLibrary, _), (.macFolder, _), (.notACopyPlace, _), (.copyHome, _): return nil
         }

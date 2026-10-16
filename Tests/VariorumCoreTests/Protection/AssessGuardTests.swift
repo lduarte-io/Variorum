@@ -18,9 +18,8 @@ struct AssessGuardsOnTests {
     @Test func everyU2GuardIsOnByDefault() {
         let guards = ProtectionGuards.all
         #expect(guards.pruneOwnCopiesOnlyOn && guards.noRepairMakesTouchIDOn && guards.noRearmWithoutItemOn)
-        #expect(guards.doorTimeVaultCheckOn)
         #expect(guards.deleteOnSightByIDOnlyOn && guards.everyOwnKeyRetiredAtCastleOn && guards.leaveIDGatesCompletionOn)
-        #expect(guards.castleKindCustodyThroughLeaveOn && guards.giftsOnlyForThisMacsCopiesOn)
+        #expect(guards.castleKindCustodyThroughLeaveOn)
         #expect(guards.standardRecordNoDestructiveRepairOn)
         #expect(guards.freshVaultBeforeAppleWriteOn && guards.rekeyAtEveryCrossingOn)
     }
@@ -51,22 +50,6 @@ struct AssessGuardMutationTests {
         off.noRearmWithoutItem = false
         #expect(try world.assessed(guards: off).acts.contains(.touchIDRearmQuestion),
                 "red with the guard off: the re-arm question with no item behind it")
-    }
-
-    /// THE DOOR-TIME VAULT CHECK: a vault still on the old shared key would
-    /// lose its Apple copy's key to the retirement — its other devices their
-    /// silent setup.
-    @Test func doorTimeVaultCheck() throws {
-        let y = PF.id(), shared = PF.id()
-        var world = try AWorld(.standard)
-        world.session = .signedIn(accountID: y, email: nil)
-        world.vault = AWorld.vault(y, .standard(appleKeyID: shared))
-        world.appleKeys.oldSharedID = shared
-        #expect(try world.assessed().door(.useCastle).refusal == .vaultOnOldSharedKey(account: y))
-        var off = ProtectionGuards()
-        off.doorTimeVaultCheck = false
-        #expect(try world.assessed(guards: off).door(.useCastle).isOpen,
-                "red with the guard off: Use Castle opens over a vault on the old key")
     }
 
     /// DELETE ON SIGHT BY RECORDED ID ONLY: another Mac's own key for this
@@ -119,24 +102,6 @@ struct AssessGuardMutationTests {
         off.castleKindCustodyThroughLeave = false
         #expect(try world.assessed(guards: off).vault?.syncKeysCustody == .silent,
                 "red with the guard off: a Castle-era key within the login password's reach")
-    }
-
-    /// GIFTS ONLY FOR THIS MAC'S COPIES: another Mac's library in a shared
-    /// folder would get a key file of this Mac's own.
-    @Test func giftsOnlyForThisMacsCopies() throws {
-        var world = try AWorld(.standard)
-        let theirs = PF.id(), key = StoreKey.mint()
-        let file = try KeyFile.building(libraryID: theirs, key: key, epoch: 1, locks: NewKeyLocks(apple: AppleKeyMaterial.mint()))
-        let folders = CF.macFolder(theirs, CF.macB)
-        world.extraEntries = [
-            CatalogEntry(place: .farFolder, folders: folders, name: CF.snapshotName(CF.stamp(1), key)),
-            CatalogEntry(place: .farFolder, folders: folders, name: CF.pairName(CF.stamp(1), key), bytes: try file.encoded()),
-        ]
-        #expect(try world.assessed().movePlan.otherLibraries.isEmpty)
-        var off = ProtectionGuards()
-        off.giftsOnlyForThisMacsCopies = false
-        #expect(try world.assessed(guards: off).movePlan.otherLibraries == [theirs],
-                "red with the guard off: a gift for another Mac's copies")
     }
 
     /// NOTHING DESTRUCTIVE ON A STANDARD RECORD's WORD ALONE: a swapped-in

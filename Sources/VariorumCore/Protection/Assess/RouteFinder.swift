@@ -11,10 +11,8 @@ import Foundation
 //     history, or in its anchor (a kept anchor beside its history included);
 //   - a custody item for K;
 //   - an Apple wrap whose key is readable here (this Mac's own, another of the
-//     account's, or — while it exists — the old shared key);
+//     account's);
 //   - the current master's wrap (synced), proven current.
-// And the same finder with the old shared key taken away — how the
-// retirement's checks list what would stop opening (§3.5 point 4).
 //
 // Every road verifies itself (a key that doesn't open the file opens
 // nothing); this finder only NAMES roads, keylessly, from non-secret facts —
@@ -72,8 +70,6 @@ public enum Opener: Hashable, Sendable {
     case accountOnline
     /// An Apple key readable here — the Apple account.
     case appleAccount
-    /// The old shared Apple key, while it exists (§3.5 point 1).
-    case oldSharedAppleKey
     /// An Apple key this Mac lists as its own and can't read — one left in
     /// an Apple account this Mac no longer uses (§3.1 rule 2's last stated
     /// exception), or one iCloud Keychain hasn't carried here; Variorum can't
@@ -91,7 +87,7 @@ public enum Opener: Hashable, Sendable {
     /// Does this road run through an Apple account?
     public var isApple: Bool {
         switch self {
-        case .appleAccount, .oldSharedAppleKey, .appleKeyNotReadableHere: return true
+        case .appleAccount, .appleKeyNotReadableHere: return true
         default: return false
         }
     }
@@ -105,8 +101,7 @@ public enum Opener: Hashable, Sendable {
         case .words: return 3
         case .accountOnline: return 4
         case .appleAccount: return 5
-        case .oldSharedAppleKey: return 6
-        case .appleKeyNotReadableHere: return 7
+        case .appleKeyNotReadableHere: return 6
         }
     }
 }
@@ -210,8 +205,6 @@ public struct RouteFacts: Sendable {
     /// Apple key ids readable here (this Mac's own, the account's, another
     /// Mac's carried by iCloud Keychain).
     public var readableAppleKeyIDs: Set<String>
-    /// The old shared Apple key's id, when it is readable here.
-    public var oldSharedAppleKeyID: String?
     /// Ids this Mac's device section lists as its own and not retired, that
     /// it can't read.
     public var ownAppleKeyIDsNotReadableHere: Set<String>
@@ -224,7 +217,7 @@ public struct RouteFacts: Sendable {
 
     public init(
         catalog: Catalog, liveKeyFileID: String? = nil, custody: [CustodyItemFact] = [],
-        readableAppleKeyIDs: Set<String> = [], oldSharedAppleKeyID: String? = nil,
+        readableAppleKeyIDs: Set<String> = [],
         ownAppleKeyIDsNotReadableHere: Set<String> = [], vaultRecoveryWrap: Data? = nil,
         signedInToVault: Bool = false
     ) {
@@ -232,7 +225,6 @@ public struct RouteFacts: Sendable {
         self.liveKeyFileID = liveKeyFileID ?? catalog.liveKeyFile?.id
         self.custody = custody
         self.readableAppleKeyIDs = readableAppleKeyIDs
-        self.oldSharedAppleKeyID = oldSharedAppleKeyID
         self.ownAppleKeyIDsNotReadableHere = ownAppleKeyIDsNotReadableHere
         self.vaultRecoveryWrap = vaultRecoveryWrap
         self.signedInToVault = signedInToVault
@@ -252,13 +244,6 @@ public struct RouteFinder: Sendable {
     public init(_ facts: RouteFacts) {
         self.facts = facts
         self.reach = Self.solve(facts)
-    }
-
-    /// The same finder with the old shared key taken away (§3.5 point 4).
-    public func withoutOldSharedKey() -> RouteFinder {
-        var next = facts
-        next.oldSharedAppleKeyID = nil
-        return RouteFinder(next)
     }
 
     /// What opens key `fingerprint`.
@@ -326,11 +311,6 @@ public struct RouteFinder: Sendable {
             if facts.ownAppleKeyIDsNotReadableHere.contains(id) { return .appleKeyNotReadableHere }
             return nil
         }
-        func sharedOpener(_ id: String?) -> Opener? {
-            guard let shared = facts.oldSharedAppleKeyID else { return nil }
-            if let id, id != shared { return nil }
-            return .oldSharedAppleKey
-        }
 
         // Custody items.
         for item in facts.custody {
@@ -363,7 +343,6 @@ public struct RouteFinder: Sendable {
                     }
                 }
                 if let apple = keyFile.apple { lock(appleOpener(apple.keyID), .apple) }
-                if let shared = keyFile.sharedApple { lock(sharedOpener(shared.keyID), .sharedApple) }
                 for entry in keyFile.history {
                     edge(current, .history(keyFile: file.id, fingerprint: entry.fingerprint), .key(entry.fingerprint))
                 }
@@ -503,83 +482,5 @@ extension RouteFinder {
             replaced = nil
         }
         return AnchorSentence(door: door, day: anchor.madeAt, stillOpensWith: line, replacedSecretOpensIt: replaced)
-    }
-}
-
-// MARK: - The old shared key's checks (§3.5 point 4) — the route-based half
-
-/// What a check names: a copy, or a library through its key file (the live
-/// one, or this Mac's own key file for another library).
-public enum RetirementSubject: Hashable, Sendable {
-    case copy(String)
-    case library(keyFile: String)
-}
-
-public struct RetirementRoutes: Equatable, Sendable {
-    /// What still opens through the old shared key (the moves' subject).
-    public var stillNeedsIt: [RetirementSubject]
-    /// What would stop opening with the old key taken away.
-    public var wouldStopOpening: [RetirementSubject]
-    /// Every Standard library or copy here with no passphrase or words: its
-    /// only road off this Mac would be an Apple key this Mac can't confirm
-    /// reached iCloud.
-    public var appleKeyAlone: [RetirementSubject]
-    /// Every key file another Mac wrote that holds one of this library's keys
-    /// (a library sent there before this change — §3.1 rule 2's third
-    /// exception).
-    public var otherMacsKeyFiles: [String]
-}
-
-extension RouteFinder {
-    /// **The route-based half of the retirement's checks.** `thisMac` is this
-    /// Mac's device identity; `libraryFingerprints` every key this library has
-    /// had (its family tree at open, with the live file's held keys).
-    public func retirementRoutes(thisMac deviceID: String, libraryFingerprints: Set<String>) -> RetirementRoutes {
-        let without = withoutOldSharedKey()
-        let mac8 = ProtectionNames.mac8(deviceID)
-        var subjects: [(RetirementSubject, [String], OpensWith, OpensWith, here: Bool)] = []
-        for copy in facts.catalog.copies {
-            // "Here": this Mac's by its subfolder or its place — and a far
-            // folder's unattributed legacy copy, which the catalog can't say is
-            // another Mac's (PROVISIONAL P-U2-3: the sheet lists it).
-            let fingerprints = copy.fingerprint.map { [$0] } ?? copy.candidateFingerprints
-            subjects.append((.copy(copy.id), fingerprints, opensWith(copy: copy), without.opensWith(copy: copy),
-                             copy.mac.isMac(mac8) || copy.mac == .unattributed))
-        }
-        for file in facts.catalog.keyFiles
-        where file.id == facts.liveKeyFileID || (file.role == .ownKeyFile && file.mac.isMac(mac8)) {
-            guard let fingerprint = file.fingerprint else { continue }
-            subjects.append((.library(keyFile: file.id), [fingerprint], opensWith(fingerprint: fingerprint),
-                             without.opensWith(fingerprint: fingerprint), true))
-        }
-        var still: [RetirementSubject] = [], stop: [RetirementSubject] = [], alone: [RetirementSubject] = []
-        for (subject, fingerprints, now, after, here) in subjects {
-            if now.openers.contains(.oldSharedAppleKey) { still.append(subject) }
-            if now.opens && !after.opens { stop.append(subject); continue }
-            // A Standard key (an Apple wrap on a file whose current key it is,
-            // or this Mac's silent item) with no passphrase or words reaching
-            // it: off this Mac, only an Apple key would open it.
-            let standard = fingerprints.contains { standardShaped($0) } || now.openers.contains(.thisMac)
-            if here, standard, !after.openers.contains(where: \.isSecret), !after.openers.contains(.touchID) {
-                alone.append(subject)
-            }
-        }
-        let others = facts.catalog.keyFiles.filter {
-            if case .mac8(let other) = $0.mac, other != mac8.lowercased() {
-                return !libraryFingerprints.isDisjoint(with: $0.heldFingerprints)
-            }
-            return false
-        }.map(\.id)
-        return RetirementRoutes(
-            stillNeedsIt: still, wouldStopOpening: stop, appleKeyAlone: alone, otherMacsKeyFiles: others.sorted())
-    }
-
-    /// Is `fingerprint` a Standard key by the files that hold it as their
-    /// CURRENT key — an Apple wrap (this Mac's own, or the old shared key's)?
-    func standardShaped(_ fingerprint: String) -> Bool {
-        facts.catalog.keyFiles.contains { file in
-            guard let keyFile = file.document else { return false }
-            return keyFile.fingerprint == fingerprint && (keyFile.apple != nil || keyFile.sharedApple != nil)
-        }
     }
 }

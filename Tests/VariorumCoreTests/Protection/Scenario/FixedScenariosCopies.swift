@@ -105,7 +105,7 @@ struct CopyAndCrossingScenarios {
         await world.done([.launch("macA"), .launch("phone"), .signOut("macA"), .thisMacOnly("macA", .castle), .settle])
         let vault = try #require(world.server.snapshot(account))
         #expect(world.macA.slot?.record?.mode == .castle && vault.mode.settled == .standard)
-        #expect(vault.format.appleKeyID.map { world.readableAppleKeys(world.phone)[$0] != nil || world.oldSharedKey(world.phone)?.id == $0 } == true)
+        #expect(vault.format.appleKeyID.map { world.readableAppleKeys(world.phone)[$0] != nil } == true)
         expectPromisesKept(world)
     }
 }

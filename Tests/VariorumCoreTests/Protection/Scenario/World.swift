@@ -62,9 +62,6 @@ struct Truth {
     var allWords: [[String]] = []
     /// Every copy written, by its path ("<place>:<path>").
     var copies: [String: CopyTruth] = [:]
-    /// Copies a retirement sheet listed before she confirmed it (promise 5's
-    /// stated exception), by path.
-    var listedBySheet: Set<String> = []
     /// Keys made in Castle — by the record's family tree at their birth.
     var castleBorn: Set<String> = []
     /// The time each library left Castle, per device (promise 13).
@@ -478,9 +475,7 @@ final class SWorld {
         for (name, replica) in device.keychain.synced where replica.dirty && replica.item == nil {
             // Any lost delete: the cloud's copy comes back here (P-U4-1's class).
             truth.deletedWhileOff.insert(name)
-            if case .own(let id)? = ProtectionNames.parseAppleKeyAccount(name.account, scope: Self.scope) {
-                truth.deletesNotCarried.insert(id)
-            } else if name == KName.oldShared(Self.scope), let id = appleAccounts[device.appleAccount ?? ""]?.cloud[name]?.item?.value.appleKey?.id {
+            if let id = ProtectionNames.parseAppleKeyAccount(name.account, scope: Self.scope) {
                 truth.deletesNotCarried.insert(id)
             }
         }
@@ -518,15 +513,11 @@ final class SWorld {
     func readableAppleKeys(_ device: SDevice) -> [String: AppleKeyMaterial] {
         var keys: [String: AppleKeyMaterial] = [:]
         for (name, replica) in device.keychain.synced where name.service == ProtectionNames.appleKeyService {
-            guard let item = replica.item, case .own(let id)? = ProtectionNames.parseAppleKeyAccount(name.account, scope: Self.scope),
+            guard let item = replica.item, let id = ProtectionNames.parseAppleKeyAccount(name.account, scope: Self.scope),
                   let key = item.value.appleKey else { continue }
             keys[id] = key
         }
         return keys
-    }
-
-    func oldSharedKey(_ device: SDevice) -> AppleKeyMaterial? {
-        device.keychain.synced[KName.oldShared(Self.scope)]?.item?.value.appleKey
     }
 
     /// A Touch ID read is a press: usable biometry and the enrollment the item
@@ -638,7 +629,7 @@ final class SWorld {
         // Every key file this device holds beside the slot, and the catalog's.
         let catalog = catalog(device)
         let files = catalog.keyFiles.compactMap(\.document)
-        let apple = readableAppleKeys(device), shared = oldSharedKey(device)
+        let apple = readableAppleKeys(device)
         var secrets: [ProtectionSecret] = []
         if let passphrase = typed.passphrase { secrets.append(.passphrase(passphrase)) }
         if let newPassphrase = typed.newPassphrase { secrets.append(.passphrase(newPassphrase)) }
@@ -656,7 +647,6 @@ final class SWorld {
         }
         for file in files {
             if let wrap = file.apple, let key = apple[wrap.keyID] { add(try? file.open(apple: key)) }
-            if let shared, file.sharedApple?.keyID == shared.id { add(try? file.open(sharedApple: shared)) }
             for secret in secrets { add(try? file.open(secret, floor: PF.floor)) }
             for master in masters { add(try? file.open(master: master)) }
         }
@@ -797,7 +787,7 @@ final class SWorld {
         let leaf = DeviceLeaves(world: self, device: device)
         let custody = (try? leaf.custodyItems()) ?? []
         let syncKeys = (try? leaf.syncKeyItems()) ?? []
-        let apple = AppleKeyFacts(readable: Set(readableAppleKeys(device).keys), oldSharedID: oldSharedKey(device)?.id)
+        let apple = AppleKeyFacts(readable: Set(readableAppleKeys(device).keys))
         var unlocked: UnlockedFacts?
         if let library = device.library, let record = library.record {
             let reach = device.executor?.reach(key: library.key, keyFile: library.keyFile) ?? PF.reach([library.key])
@@ -932,20 +922,6 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
         }
         world.deleteSynced(device, KName.apple(scope, id))
         try wrote("apple- \(id.prefix(8))")
-    }
-
-    func readOldSharedAppleKey() throws -> AppleKeyMaterial? { world.oldSharedKey(device) }
-
-    func deleteOldSharedAppleKey(id: String) throws -> Bool {
-        guard let shared = world.oldSharedKey(device), shared.id == id else {
-            // Likewise (P-U4-1's class): the retirement recorded, its delete
-            // never reaching the key where it lives.
-            world.truth.deletesNotCarried.insert(id)
-            return false
-        }
-        world.deleteSynced(device, KName.oldShared(scope))
-        try wrote("shared- \(id.prefix(8))")
-        return true
     }
 
     // MARK: The vault
@@ -1084,19 +1060,6 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
     func writeLiveKeyFile(_ file: KeyFile) throws {
         device.container.files[SPath.liveKeyFile] = .keyFile(file)
         try wrote("keyfile \(f8(file.fingerprint))")
-    }
-
-    func readOwnKeyFile(libraryID: String, deviceID: String) throws -> KeyFile? {
-        device.container.files["\(SPath.ownFolder(libraryID, deviceID))/\(SPath.liveKeyFile)"]?.keyFile
-    }
-
-    func writeOwnKeyFile(_ file: KeyFile, deviceID: String) throws {
-        let folder = SPath.ownFolder(file.libraryID, deviceID)
-        device.container.files["\(folder)/\(SPath.liveKeyFile)"] = .keyFile(file)
-        if let far = world.farFolder(of: device), !far.paths(under: folder + "/").isEmpty {
-            far.files["\(folder)/\(SPath.liveKeyFile)"] = .keyFile(file)
-        }
-        try wrote("own-keyfile \(file.libraryID.prefix(8))")
     }
 
     func readKeyFile(catalogID: String) throws -> KeyFile? {

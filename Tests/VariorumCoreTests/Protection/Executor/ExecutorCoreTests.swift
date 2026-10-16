@@ -230,16 +230,7 @@ struct ExecutorRepairTests {
     }
 
     @Test func decision35_AnActWritesNothingAppleReachableOffline() async throws {
-        // The move on a synced Standard library: no fresh vault read, no own
-        // Apple key minted, no wrap landed — refused before any write.
-        let fixture = try EX(.standard, synced: true)
-        fixture.world.liveKeyFile = (try #require(fixture.world.liveFormat3).droppingApple())
-        fixture.world.icloud.oldShared = AppleKeyMaterial.mint()
-        fixture.world.server.reachable = false
-        let executor = fixture.executor()
-        var library = try fixture.unlocked(executor)
-        await #expect(throws: VaultRefusal.unreachable) { _ = try await executor.moveOffSharedKey(&library, subjects: []) }
-        #expect(fixture.world.writes.isEmpty)
+        // (The move off the old shared key's half left with rule 26.)
         // Use Standard on a synced Castle library offline: refused at its door.
         let castle = try EX(.castle, synced: true)
         castle.world.server.reachable = false

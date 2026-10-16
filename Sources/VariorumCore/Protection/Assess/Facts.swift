@@ -98,12 +98,9 @@ public struct VaultReading: Equatable, Sendable {
 public struct AppleKeyFacts: Equatable, Sendable {
     /// Ids of the `<scope>-apple-key-<id>` items present and readable here.
     public var readable: Set<String>
-    /// The old-name `<scope>-apple-key` item's id, when it is readable here.
-    public var oldSharedID: String?
 
-    public init(readable: Set<String> = [], oldSharedID: String? = nil) {
+    public init(readable: Set<String> = []) {
         self.readable = readable
-        self.oldSharedID = oldSharedID
     }
 }
 

@@ -15,11 +15,11 @@ import Foundation
 // each only once the history verifiably holds its key; the scheduled export
 // off, with one notice; a fresh backup; every Apple key of this Mac's own for
 // the library deleted and recorded retired (synced: the account's was, when
-// the rotation completed); last, the old shared key retired.
+// the rotation completed). (The old shared key's retirement left with rule 26.)
 
 struct EnterCastleProgram: ActProgram {
     let act = ProtectionAct.enterCastle
-    static let afterCommit = ["memory", "retireOldCustody", "exportOff", "backup", "retireOwnAppleKeys", "retireOldSharedKey"]
+    static let afterCommit = ["memory", "retireOldCustody", "exportOff", "backup", "retireOwnAppleKeys"]
 
     func steps(_ parameters: ActParameters, guards: ProtectionGuards) -> [String] {
         var steps: [String] = []
@@ -50,7 +50,6 @@ struct EnterCastleProgram: ActProgram {
         case "exportOff": try ctx.turnExportOff()
         case "backup": try ctx.freshBackup()
         case "retireOwnAppleKeys": try ctx.retireOwnAppleKeys()
-        case "retireOldSharedKey": try await ctx.retireOldSharedKey()
         default: throw ExecutorRefusal.nothingToDo
         }
     }
@@ -70,27 +69,13 @@ extension ActContext {
 
 extension ProtectionExecutor {
     /// **Use Castle** — `gate`: Touch ID (an item made at this press, where a
-    /// finger is enrolled) or Always ask; `moves`: the serving key files of the
-    /// other libraries the old shared key's retirement re-runs the move for
-    /// (assess's MovePlan — keys of this Mac's own before the old one goes).
-    public func useCastle(
-        _ library: inout UnlockedLibrary, typed: TypedSecrets, gate: GateStyle, moves: [String] = []
-    ) async throws -> ActOutcome {
+    /// finger is enrolled) or Always ask.
+    public func useCastle(_ library: inout UnlockedLibrary, typed: TypedSecrets, gate: GateStyle) async throws -> ActOutcome {
         guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         if record.mode == .castle { throw ExecutorRefusal.wrongMode(.castle) }
         var parameters = ActParameters(
             gate: gate, synced: record.account != nil, accountID: record.account, newKind: .castle,
             outgoingAppleKeyID: library.keyFile?.apple?.keyID)
-        parameters.keyFileIDs = moves.isEmpty ? nil : moves
-        // §3.5 point 4, read at the act as at the door: a vault this device can
-        // read — other than the account this very act moves into Castle — that
-        // still names the old shared key stops Use Castle here.
-        if guards.doorTimeVaultCheckOn, let session = configuration.session.accountID, session != record.account,
-           let shared = try library.section.oldSharedKey?.id ?? leaves.apple.readOldSharedAppleKey()?.id,
-           let vault = try await readVault(accountID: session),
-           vault.format.masterWrappedByAppleHeld != nil, vault.format.appleKeyID == shared {
-            throw ExecutorRefusal.vaultOnOldSharedKey(account: session)
-        }
         let secrets = try await doorSecrets(library, typed: typed, wordsMayBeNew: true, parameters: &parameters)
         if let account = record.account, let vault = freshVaults[account] {
             parameters.retiringAccountAppleKeyID = vault.format.masterWrappedByAppleHeld != nil ? vault.format.appleKeyID : nil

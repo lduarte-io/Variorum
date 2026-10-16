@@ -90,9 +90,7 @@ public enum ProtectionNames {
     // MARK: - Apple keys — named by their own id (design §3.5)
 
     /// The Apple-key family's service — today's (`AppleKeyKeychain.service`,
-    /// App/Variorum/Shared/AppleKeyCustody.swift), kept: the old shared key
-    /// and the new per-id keys are one family under one service, told apart by
-    /// account.
+    /// App/Variorum/Shared/AppleKeyCustody.swift), kept.
     public static let appleKeyService = "io.lduarte.Variorum.apple-key"
 
     /// `<scope>-apple-key-<id>` — one per library per Mac, one per account.
@@ -100,26 +98,13 @@ public enum ProtectionNames {
         "\(scope)-apple-key-\(id)"
     }
 
-    /// The OLD SHARED key's name — today's `<scope>-apple-key`. This build
-    /// never writes under it (§3.5 point 1); it reads it only to move things
-    /// off it, and deletes it only by its retirement.
-    public static func oldSharedAppleKeyAccount(scope: String) -> String {
-        "\(scope)-apple-key"
-    }
-
-    /// What an Apple-key account names under `scope`.
-    public enum AppleKeyName: Equatable, Sendable {
-        case own(id: String)
-        case oldShared
-    }
-
-    public static func parseAppleKeyAccount(_ account: String, scope: String) -> AppleKeyName? {
-        if account == oldSharedAppleKeyAccount(scope: scope) { return .oldShared }
+    /// The id an Apple-key account names under `scope` (nil for anything
+    /// else — today's old shared name `<scope>-apple-key` among them, rule 26).
+    public static func parseAppleKeyAccount(_ account: String, scope: String) -> String? {
         let prefix = "\(scope)-apple-key-"
         guard account.hasPrefix(prefix) else { return nil }
         let id = String(account.dropFirst(prefix.count))
-        guard isUUID(id) else { return nil }
-        return .own(id: id)
+        return isUUID(id) ? id : nil
     }
 
     // MARK: - Files

@@ -10,8 +10,7 @@ import Foundation
 //   - the current key's WRAPS: under the passphrase (with its KDF
 //     descriptor), the twelve words, the account's master (when bound), and —
 //     a Standard key only — this Mac's own Apple key for the library, naming
-//     its id; on stores from before this change the OLD SHARED key's wrap
-//     rides beside it until that key is retired (a re-key drops it);
+//     its id (the old shared key's wrap left with rule 26);
 //   - THE HISTORY: the older keys the current key takes, each wrapped
 //     directly under it, with fingerprint, epoch and retirement date;
 //   - THE CASTLE ANCHOR, after a leave (`CastleAnchor.swift`), and any
@@ -66,7 +65,6 @@ public enum KeyFileRoad: String, Codable, Sendable, CaseIterable {
     /// The master's twelve-words copy → the master → the master wrap.
     case masterThroughWords = "master_through_words"
     case apple
-    case sharedApple = "shared_apple"
 }
 
 /// An Apple wrap: the current key under an Apple key, naming its id.
@@ -127,9 +125,6 @@ public struct KeyFile: Codable, Equatable, Sendable {
     public var masterWordsCopy: Data?
     /// This Mac's own Apple key for the library (a Standard key only).
     public var apple: AppleWrap?
-    /// The OLD SHARED key's wrap, riding beside `apple` on stores from before
-    /// this change until that key is retired. This build never writes one.
-    public var sharedApple: AppleWrap?
     public var history: [HistoryEntry]
     /// The Castle anchor (one at a time; only after a leave).
     public var anchor: CastleAnchor?
@@ -142,7 +137,7 @@ public struct KeyFile: Codable, Equatable, Sendable {
         formatVersion: Int = KeyFile.currentFormatVersion, libraryID: String, fingerprint: String,
         epoch: Int, passphrase: StoreKeyEnvelope.PassphraseWrap? = nil, words: Data? = nil,
         master: Data? = nil, masterWordsCopy: Data? = nil, apple: AppleWrap? = nil,
-        sharedApple: AppleWrap? = nil, history: [HistoryEntry] = [], anchor: CastleAnchor? = nil,
+        history: [HistoryEntry] = [], anchor: CastleAnchor? = nil,
         keptAnchors: [CastleAnchor] = []
     ) {
         self.formatVersion = formatVersion
@@ -154,7 +149,6 @@ public struct KeyFile: Codable, Equatable, Sendable {
         self.master = master
         self.masterWordsCopy = masterWordsCopy
         self.apple = apple
-        self.sharedApple = sharedApple
         self.history = history
         self.anchor = anchor
         self.keptAnchors = keptAnchors
@@ -219,13 +213,6 @@ public struct KeyFile: Codable, Equatable, Sendable {
     public func droppingApple() -> KeyFile {
         var next = self
         next.apple = nil
-        return next
-    }
-
-    /// The old shared key's retirement drops its wrap.
-    public func droppingSharedApple() -> KeyFile {
-        var next = self
-        next.sharedApple = nil
         return next
     }
 
@@ -294,14 +281,6 @@ public struct KeyFile: Codable, Equatable, Sendable {
         return try verified(Lock.unwrapStoreKey(wrap.wrapped, under: apple.key), .apple)
     }
 
-    public func open(sharedApple: AppleKeyMaterial) throws -> StoreKey {
-        guard let wrap = self.sharedApple else { throw KeyFileError.noSuchWrap(.sharedApple) }
-        guard wrap.keyID == sharedApple.id else {
-            throw KeyFileError.appleKeyMismatch(expected: wrap.keyID, offered: sharedApple.id)
-        }
-        return try verified(Lock.unwrapStoreKey(wrap.wrapped, under: sharedApple.key), .sharedApple)
-    }
-
     /// The roads this file carries (no secret needed to tell).
     public var roads: Set<KeyFileRoad> {
         var roads: Set<KeyFileRoad> = []
@@ -310,7 +289,6 @@ public struct KeyFile: Codable, Equatable, Sendable {
         if master != nil { roads.insert(.master) }
         if master != nil, masterWordsCopy != nil { roads.insert(.masterThroughWords) }
         if apple != nil { roads.insert(.apple) }
-        if sharedApple != nil { roads.insert(.sharedApple) }
         return roads
     }
 

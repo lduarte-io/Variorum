@@ -4,8 +4,8 @@ import Foundation
 // §3.6). Its device identity and hardware marker; the act in flight; the
 // settings that could weaken protection (the gate style, the idle lock, the
 // scheduled Markdown export); the Apple key ids this Mac minted or followed
-// for the library and its account, and whether each is retired; the old
-// shared key's state; and a version that only grows.
+// for the library and its account, and whether each is retired; and a
+// version that only grows. (The old shared key's state left with rule 26.)
 //
 // It has TWO SEALED HOMES — its section of the protection record (inside the
 // encrypted library) and what this Mac remembers — and `DeviceFacts` below is
@@ -104,21 +104,6 @@ public struct AppleKeyRecord: Codable, Equatable, Sendable {
     public var isOwnLibraryKey: Bool { purpose == .library && origin != .followed }
 }
 
-/// The OLD SHARED Apple key's state on this device (§3.5 point 4–5): present
-/// when this device's section lists it among the keys that ever wrapped this
-/// library's keys; its recorded id (the `{id, key}` item's id, so a delete
-/// fires only on that id); and its retirement, recorded on the retiring act's
-/// own device section only.
-public struct OldSharedKeyRecord: Codable, Equatable, Sendable {
-    public var id: String
-    public var retiredAt: Date?
-
-    public init(id: String, retiredAt: Date? = nil) {
-        self.id = id
-        self.retiredAt = retiredAt
-    }
-}
-
 public struct DeviceSection: Codable, Equatable, Sendable {
     /// The device identity (`<mac8>` is its first eight characters).
     public var deviceID: String
@@ -133,13 +118,11 @@ public struct DeviceSection: Codable, Equatable, Sendable {
     public var lastActSequence: Int
     public var settings: DeviceSettings
     public var appleKeys: [AppleKeyRecord]
-    public var oldSharedKey: OldSharedKeyRecord?
 
     public init(
         deviceID: String, hardwareMarker: HardwareMarker, version: Int = 1,
         actInFlight: ActInFlight? = nil, lastActSequence: Int = 0,
-        settings: DeviceSettings, appleKeys: [AppleKeyRecord] = [],
-        oldSharedKey: OldSharedKeyRecord? = nil
+        settings: DeviceSettings, appleKeys: [AppleKeyRecord] = []
     ) {
         self.deviceID = deviceID
         self.hardwareMarker = hardwareMarker
@@ -148,7 +131,6 @@ public struct DeviceSection: Codable, Equatable, Sendable {
         self.lastActSequence = lastActSequence
         self.settings = settings
         self.appleKeys = appleKeys
-        self.oldSharedKey = oldSharedKey
     }
 
     public var mac8: String { ProtectionNames.mac8(deviceID) }
@@ -164,12 +146,6 @@ public struct DeviceSection: Codable, Equatable, Sendable {
     /// Every retired id — delete on sight, by id only (§3.5).
     public var retiredAppleKeyIDs: Set<String> {
         Set(appleKeys.filter { $0.retiredAt != nil }.map(\.id))
-    }
-
-    /// §3.5 point 4: the old shared key's door and §3.1's first exception show
-    /// only while this device's section lists the key and not as retired.
-    public var oldSharedKeyStillStanding: Bool {
-        oldSharedKey != nil && oldSharedKey?.retiredAt == nil
     }
 
     // MARK: - Changing (every change bumps the version)
@@ -285,18 +261,6 @@ public enum DeviceFacts {
                 merged.appleKeys.append(retired)
             }
         }
-        if let lost = loser.oldSharedKey, let lostRetired = lost.retiredAt {
-            if var shared = merged.oldSharedKey {
-                // The same old-name item only: a different id is an item an
-                // older build minted later — never this one's retirement.
-                if shared.id == lost.id {
-                    shared.retiredAt = [shared.retiredAt, lostRetired].compactMap { $0 }.min()
-                    merged.oldSharedKey = shared
-                }
-            } else {
-                merged.oldSharedKey = lost
-            }
-        }
         return merged
     }
 
@@ -371,7 +335,7 @@ public enum DeviceFacts {
     /// their defaults (§3.10's "a device with no choice yet").
     public static func takingOver(
         predecessor: DeviceSection?, allSections: [DeviceSection], newDeviceID: String,
-        marker: HardwareMarker, keyFileOwnAppleKeyIDs: [String], keyFileSharedAppleKeyID: String? = nil
+        marker: HardwareMarker, keyFileOwnAppleKeyIDs: [String]
     ) -> DeviceSection {
         var section = DeviceSection(
             deviceID: newDeviceID, hardwareMarker: marker, settings: .newIdentity)
@@ -396,37 +360,6 @@ public enum DeviceFacts {
                     origin: .adopted, retiredAt: record.retiredAt))
             }
         }
-        // The old shared key's state (§3.5 points 4–5): the predecessor's, as
-        // it stood — this is the same Mac; with no predecessor to name, a
-        // retirement any section of this library's record lists (by its id —
-        // delete on sight fires only on that id, on the Apple account whose
-        // device already deleted it). Otherwise a delete the replaced keychain
-        // never carried left the old key alive here, opening this library's
-        // pre-Castle copies, with neither the door nor §3.1's first exception
-        // showing. PROVISIONAL P-U4-9 (VX-305 U4, found by the scenario world).
-        if let shared = predecessor?.oldSharedKey {
-            section.oldSharedKey = shared
-        } else if predecessor == nil,
-                  let retired = allSections.compactMap(\.oldSharedKey).filter({ $0.retiredAt != nil })
-                    .min(by: { ($0.retiredAt ?? .distantFuture) < ($1.retiredAt ?? .distantFuture) }) {
-            section.oldSharedKey = retired
-        } else if predecessor == nil, case let standing = allSections.compactMap(\.oldSharedKey), !standing.isEmpty {
-            // …and with no retirement listed, a STANDING record any section
-            // lists: the key still wraps this library's pre-Castle copies, so
-            // the replacement shows the door and §3.1's first exception too —
-            // it fell away with no predecessor named, leaving those copies open
-            // through the Apple account unsaid (VX-305 U4, the soak's seed 7;
-            // P-U4-9 extended). The pick (VX-305 ladder round 1, NIT 5): the
-            // record whose id the live key file's shared wrap names — the old
-            // shared key that actually wraps THIS library's key; else the
-            // smallest id, never the record's storage order. (The retirement
-            // deletes by the recorded id first, so a record of another Apple
-            // account's key would miss this Mac's; where none matches that
-            // stays P-U4-1's known-leftover class, her P-U4-9 "any standing
-            // record" wording.)
-            section.oldSharedKey = standing.first { $0.id == keyFileSharedAppleKeyID }
-                ?? standing.min { $0.id < $1.id }
-        }
         return section
     }
 
@@ -435,7 +368,7 @@ public enum DeviceFacts {
     /// is minted. Returns the section and how it was found.
     public static func thisMacsSection(
         memory: DeviceMemory?, recordSections: [DeviceSection], marker: HardwareMarker,
-        keyFileOwnAppleKeyIDs: [String], keyFileSharedAppleKeyID: String? = nil, mintDeviceID: () -> String,
+        keyFileOwnAppleKeyIDs: [String], mintDeviceID: () -> String,
         guards: ProtectionGuards = .all
     ) -> (section: DeviceSection, resolution: IdentityResolution) {
         let resolution = resolveIdentity(
@@ -478,14 +411,14 @@ public enum DeviceFacts {
                 guard !recordSections.isEmpty else { return fresh() }
                 return (takingOver(
                     predecessor: nil, allSections: recordSections, newDeviceID: mintDeviceID(), marker: marker,
-                    keyFileOwnAppleKeyIDs: keyFileOwnAppleKeyIDs, keyFileSharedAppleKeyID: keyFileSharedAppleKeyID),
+                    keyFileOwnAppleKeyIDs: keyFileOwnAppleKeyIDs),
                         resolution)
             }
             let predecessor = reconcile(
                 record: recordSection(predecessorID), memory: memory?.deviceSection, guards: guards)
             return (takingOver(
                 predecessor: predecessor, allSections: recordSections, newDeviceID: mintDeviceID(),
-                marker: marker, keyFileOwnAppleKeyIDs: keyFileOwnAppleKeyIDs, keyFileSharedAppleKeyID: keyFileSharedAppleKeyID),
+                marker: marker, keyFileOwnAppleKeyIDs: keyFileOwnAppleKeyIDs),
                     resolution)
         }
     }

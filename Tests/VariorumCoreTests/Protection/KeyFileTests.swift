@@ -46,11 +46,10 @@ struct KeyFileWrapTests {
         let key = StoreKey.mint()
         let apple = AppleKeyMaterial.mint()
         let shared = AppleKeyMaterial.mint()
-        var file = try KeyFile.building(
+        let file = try KeyFile.building(
             libraryID: world.library, key: key, epoch: 1,
             locks: NewKeyLocks(passphrase: world.p, words: world.w, master: world.master,
                                masterWordsCopy: try world.masterWordsCopy, apple: apple))
-        file.sharedApple = AppleWrap(keyID: shared.id, wrapped: try AES.KeyWrap.wrap(SymmetricKey(data: key.data), using: shared.key))
 
         #expect(try file.open(passphrase: .passphrase(world.passphrase), floor: PF.floor) == key)
         #expect(try file.open(passphrase: .passphraseKey(world.p), floor: PF.floor) == key)
@@ -70,8 +69,7 @@ struct KeyFileWrapTests {
         #expect(throws: KeyFileError.doesNotOpen(.apple)) {
             _ = try file.open(apple: AppleKeyMaterial(id: apple.id, key: SymmetricKey(size: .bits256)))
         }
-        #expect(try file.open(sharedApple: shared) == key)
-        #expect(file.roads == [.passphrase, .words, .master, .masterThroughWords, .apple, .sharedApple])
+        #expect(file.roads == [.passphrase, .words, .master, .masterThroughWords, .apple])
         // The words open the file by either road (§3.5a).
         var wordsOnlyThroughMaster = file
         wordsOnlyThroughMaster.words = nil
@@ -135,18 +133,6 @@ struct KeyHistoryTests {
         #expect(throws: KeyFileError.keyIsNotThisFilesKey) { _ = try newest.historyKeys(currentKey: keys[2]) }
     }
 
-    /// The re-key drops the old shared key's wrap: this build never writes
-    /// under it (§3.5 points 1–2).
-    @Test func aReKeyDropsTheOldSharedWrap() throws {
-        let world = try KeyWorld()
-        let k0 = StoreKey.mint(), k1 = StoreKey.mint()
-        var file = try world.castleFile(k0)
-        let shared = AppleKeyMaterial.mint()
-        file.sharedApple = AppleWrap(keyID: shared.id, wrapped: try AES.KeyWrap.wrap(SymmetricKey(data: k0.data), using: shared.key))
-        let next = try file.rekeyed(.withinMode, from: k0, to: k1, locks: world.castleLocks(), at: PF.day(1)).keyFile
-        #expect(next.sharedApple == nil)
-        #expect(next.apple == nil)
-    }
 }
 
 @Suite("VX-305 U1 — the crossings (design §3.4)")

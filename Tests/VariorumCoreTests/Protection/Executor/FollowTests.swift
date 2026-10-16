@@ -48,20 +48,6 @@ struct ReplaceAllKeysTests {
         expectSettled(fixture, library)
     }
 
-    @Test func onAnAccountStillOnTheOldSharedKeyItReLinksFirst() async throws {
-        let fixture = try EX(.standard, synced: true)
-        // The account's vault on the old shared key (today's shape).
-        let shared = fixture.accountApple!
-        fixture.world.icloud.oldShared = shared
-        let executor = fixture.executor()
-        var library = try fixture.unlocked(executor)
-        _ = try await executor.replaceAllKeys(&library, typed: fixture.typed)
-        let vault = try #require(fixture.world.server.snapshot(fixture.account!))
-        let fresh = try #require(library.section.appleKeys.first { $0.purpose == .account && $0.id != shared.id })
-        #expect(vault.mode == .standard(appleKeyID: fresh.id))
-        #expect(fixture.world.icloud.oldShared?.id == shared.id)  // nothing written under it, nothing deleted
-    }
-
     @Test func aCrashAfterEveryWriteFinishes() async throws {
         var k0: StoreKey!
         try await CrashHarness.everywhere(

@@ -66,7 +66,6 @@ extension ProtectionExecutor {
         switch repair {
         case .deleteSilentItem: return "deleteSilentItem"
         case .deleteRetiredAppleKey: return "deleteRetiredAppleKey"
-        case .deleteRetiredOldSharedKey: return "deleteRetiredOldSharedKey"
         case .landAppleWrap: return "landAppleWrap"
         case .refreshMemory: return "refreshMemory"
         case .refreshRecordSection: return "refreshRecordSection"
@@ -125,13 +124,6 @@ extension ProtectionExecutor {
             try leaves.apple.deleteAppleKey(id: id)
             return nil
 
-        case .deleteRetiredOldSharedKey(let id):
-            guard castleConfirmed(library) else { return .wrongMode }
-            guard let shared = library.section.oldSharedKey, shared.retiredAt != nil, shared.id == id else {
-                return .preconditionDoesNotVerify
-            }
-            return try leaves.apple.deleteOldSharedAppleKey(id: id) ? nil : .nothingThere
-
         case .landAppleWrap(let id):
             guard let record = library.record, record.mode == .standard else { return .wrongMode }
             // Decision 35: nothing Apple-reachable without a fresh vault read.
@@ -168,7 +160,6 @@ extension ProtectionExecutor {
             let live = try liveFormat3()
             var restored = mirror
             restored.apple = live?.fingerprint == mirror.fingerprint ? live?.apple : nil
-            restored.sharedApple = live?.fingerprint == mirror.fingerprint ? live?.sharedApple : nil
             try writeLiveKeyFile(restored, &library)
             try writeMemory(&library)
             return nil
@@ -196,7 +187,6 @@ extension ProtectionExecutor {
             if let present, try !setAsideLiveKeyFile(fingerprint: present.fingerprint) { return .preconditionDoesNotVerify }
             // Never an Apple wrap re-added: those leave legitimately.
             copy.apple = nil
-            copy.sharedApple = nil
             try writeLiveKeyFile(copy, &library)
             try writeMemory(&library)
             return nil
@@ -329,7 +319,6 @@ extension ProtectionExecutor {
             let present = try leaves.keyFiles.readLiveKeyFile()
             if let present, try !setAsideLiveKeyFile(fingerprint: present.fingerprint) { return .preconditionDoesNotVerify }
             live.apple = nil
-            live.sharedApple = nil
             try writeLiveKeyFile(live, &library)
             log("the memory's own key file restored from its mirror — the library file came back alone")
         }

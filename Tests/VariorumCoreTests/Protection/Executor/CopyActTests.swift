@@ -35,14 +35,12 @@ struct SmallCopyActTests {
         #expect(fixture.world.exports == ["out"])
     }
 
-    @Test func theOfferDeletesOnlyThisMacsCopiesOfAnotherLibraryAndTheLastCopysAppleKey() async throws {
+    /// The offer deletes this Mac's copies of another library — copies only
+    /// (rule 19; the last copy's own key file and Apple key, the move's gift,
+    /// left with VX-378 U1).
+    @Test func theOfferDeletesOnlyThisMacsCopiesOfAnotherLibrary() async throws {
         let fixture = try EX(.castle)
         let other = "cccc3333-0000-4000-8000-000000000003"
-        let otherKey = AppleKeyMaterial.mint()
-        fixture.world.icloud.keys[otherKey.id] = otherKey
-        let otherLibraryKey = StoreKey.mint()
-        let own = try KeyFile(libraryID: other, key: otherLibraryKey, epoch: 1).settingApple(otherKey, for: otherLibraryKey)
-        fixture.world.ownKeyFiles[other] = own
         let mine = CatalogCopy(
             id: "c:mine", place: .container, folders: [], name: "a", kind: .backup, stamp: PF.t0, nameFingerprint8: nil,
             servingKeyFiles: [], fingerprint: nil, candidateFingerprints: [], library: other, mac: .thisMacsContainer)
@@ -59,6 +57,5 @@ struct SmallCopyActTests {
             &library, copies: [mine, anotherMacs, thisLibrarys], catalog: Catalog(copies: [mine, anotherMacs, thisLibrarys]))
         #expect(fixture.world.copies["c:mine"] == nil)
         #expect(fixture.world.copies["f:theirs"] != nil && fixture.world.copies["c:ours"] != nil)
-        #expect(fixture.world.icloud.keys[otherKey.id] == nil)
     }
 }

@@ -48,8 +48,8 @@ public protocol SyncKeysLeaf: AnyObject {
 }
 
 /// Apple keys: iCloud Keychain items, synchronizable, NAMED BY THEIR OWN ID
-/// (`<scope>-apple-key-<id>`), plus the old shared `<scope>-apple-key` this
-/// build only reads and retires (§3.5).
+/// (`<scope>-apple-key-<id>`) (§3.5; the old shared `<scope>-apple-key` left
+/// with rule 26).
 public protocol AppleKeysLeaf: AnyObject {
     /// The ids of this scope's own-named items readable here.
     func readableAppleKeyIDs() throws -> Set<String>
@@ -58,13 +58,6 @@ public protocol AppleKeysLeaf: AnyObject {
     /// wherever it is on — Variorum can't see).
     func addAppleKey(_ key: AppleKeyMaterial) throws
     func deleteAppleKey(id: String) throws
-    /// The old shared key's `{id, key}`, while readable here.
-    func readOldSharedAppleKey() throws -> AppleKeyMaterial?
-    /// Delete the old-name item — but only when the item there now carries
-    /// `id` (the leaf reads its value first; a new old-name item an older
-    /// build minted later has another id and is left alone). Returns whether
-    /// it deleted.
-    func deleteOldSharedAppleKey(id: String) throws -> Bool
 }
 
 /// The vault (server) — the existing protocol, unchanged (§3.12): CAS on the
@@ -117,15 +110,14 @@ public protocol LibraryFileLeaf: AnyObject {
     func exportPlaintext(with key: StoreKey, to destination: String) throws
 }
 
-/// Key files: THE live one beside the library, and this Mac's own key files
-/// for other libraries (`Backups/<library8>/<mac8>/`). Format 3 only (rule 26).
+/// Key files: THE live one beside the library. Format 3 only (rule 26; this
+/// Mac's own key files for other libraries — the move's gifts — left with
+/// rule 19).
 public protocol KeyFileStoreLeaf: AnyObject {
     func readLiveKeyFile() throws -> KeyFile?
     func writeLiveKeyFile(_ file: KeyFile) throws
-    func readOwnKeyFile(libraryID: String, deviceID: String) throws -> KeyFile?
-    func writeOwnKeyFile(_ file: KeyFile, deviceID: String) throws
     /// Any key file the catalog lists, by its catalog id (a copy's serving
-    /// file — the move reads another library's key through it).
+    /// file).
     func readKeyFile(catalogID: String) throws -> KeyFile?
     /// Move whatever sits in the live place aside, to `name` beside the
     /// library — never deleting it, never overwriting: false (nothing moved)
@@ -209,9 +201,6 @@ public enum ProtectionDiagnostic: Equatable, Sendable {
     /// record after it, with no plan to resume (§3.6).
     case actRolledBack(ProtectionAct)
     case actFinishedFromRecord(ProtectionAct)
-    /// The old shared key stayed at Use Castle's last step: a vault it can
-    /// read now names it (the last-step race, §3.5 point 4).
-    case oldSharedKeyStayed(account: String)
     /// A repair skipped because its precondition did not verify.
     case repairSkipped(String)
 

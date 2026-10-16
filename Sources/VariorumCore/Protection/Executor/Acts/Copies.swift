@@ -10,8 +10,8 @@ import Foundation
 //   - SEND LIBRARY writes the pair — a copy (rule 18), with no sharing note.
 //   - A PLAINTEXT EXPORT carries its library ID.
 //   - THE OFFER deletes another library's copies at her press — this Mac's
-//     copies of it only, never another Mac's; deleting the last copy this Mac
-//     holds of a library deletes its key file and its Apple key too.
+//     copies of it only, never another Mac's (rule 19; the last copy's own key
+//     file and Apple key — the move's gift — left with VX-378 U1).
 
 /// MAKE THIS MY LIBRARY's stub (rule 17). The landing that kept a pair's own
 /// library identity, its held synced landing and Resume Sync are gone (VX-378
@@ -48,23 +48,10 @@ struct PlaintextExportProgram: ActProgram {
 
 struct OfferDeleteProgram: ActProgram {
     let act = ProtectionAct.offerDelete
-    func steps(_ parameters: ActParameters, guards: ProtectionGuards) -> [String] { ["deleteCopies", "lastCopyKeys"] }
+    func steps(_ parameters: ActParameters, guards: ProtectionGuards) -> [String] { ["deleteCopies"] }
 
     func run(_ step: String, _ ctx: ActContext) async throws {
-        switch step {
-        case "deleteCopies":
-            if let ids = ctx.parameters.copyIDs, !ids.isEmpty { try ctx.leaves.backups.deleteCopies(ids: ids) }
-        case "lastCopyKeys":
-            // The last copy this Mac held of a library: its own key file's
-            // Apple key goes too (the key file goes with the folder).
-            for library in ctx.parameters.keyFileIDs ?? [] {
-                if let own = try ctx.leaves.keyFiles.readOwnKeyFile(libraryID: library, deviceID: ctx.deviceID),
-                   let id = own.apple?.keyID {
-                    try ctx.leaves.apple.deleteAppleKey(id: id)
-                }
-            }
-        default: throw ExecutorRefusal.nothingToDo
-        }
+        if let ids = ctx.parameters.copyIDs, !ids.isEmpty { try ctx.leaves.backups.deleteCopies(ids: ids) }
     }
 }
 
@@ -86,20 +73,13 @@ extension ProtectionExecutor {
     }
 
     /// **The offer's delete** — another library's copies, at her press: this
-    /// Mac's copies of it only (never another Mac's, never this library's);
-    /// the last copy of a library takes its key file's Apple key with it.
+    /// Mac's copies of it only (never another Mac's, never this library's).
     public func offerDelete(_ library: inout UnlockedLibrary, copies: [CatalogCopy], catalog: Catalog) async throws -> ActOutcome {
         let thisLibrary = library.record?.libraryID
         let mine = library.section.mac8
         let deletable = copies.filter { $0.library != nil && $0.library != thisLibrary && $0.mac.isMac(mine) }
-        let ids = Set(deletable.map(\.id))
-        var emptied: [String] = []
-        for other in Set(deletable.compactMap(\.library)) {
-            let remaining = catalog.copies(ofLibrary: other).filter { $0.mac.isMac(mine) && !ids.contains($0.id) }
-            if remaining.isEmpty { emptied.append(other) }
-        }
         return try await perform(
-            OfferDeleteProgram(), parameters: ActParameters(copyIDs: ids.sorted(), keyFileIDs: emptied.sorted()),
+            OfferDeleteProgram(), parameters: ActParameters(copyIDs: Set(deletable.map(\.id)).sorted()),
             secrets: ActSecrets(), library: &library)
     }
 }

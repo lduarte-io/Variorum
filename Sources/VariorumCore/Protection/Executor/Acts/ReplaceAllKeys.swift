@@ -18,8 +18,7 @@ struct ReplaceAllKeysProgram: ActProgram {
     static let afterCommit = ["memory", "retireOldCustody", "backup"]
 
     func steps(_ parameters: ActParameters, guards: ProtectionGuards) -> [String] {
-        var steps: [String] = parameters.relinksFirst == true ? ["relinkAccount"] : []
-        steps += ["rotationWrite", "walk", "rotationComplete"]
+        let steps = ["rotationWrite", "walk", "rotationComplete"]
         return steps + LibraryRekey.steps(guards) + Self.afterCommit
     }
 
@@ -29,8 +28,6 @@ struct ReplaceAllKeysProgram: ActProgram {
     func run(_ step: String, _ ctx: ActContext) async throws {
         let kind = try ctx.parameters.newKind ?? ctx.requireRecord().mode
         switch step {
-        case "relinkAccount":
-            try await ctx.relinkAccount()
         case "rotationWrite":
             if kind == .standard {
                 // Decision 30: under the SAME account key — read here and the
@@ -65,50 +62,13 @@ struct ReplaceAllKeysProgram: ActProgram {
 extension ActContext {
     /// This Mac's EXISTING own Apple key for the library, when readable here
     /// (a Standard re-key within its mode mints nothing; with none readable
-    /// the new file carries no Apple wrap — the Apple road is lost and
-    /// Re-link's library arm is offered).
+    /// the new file carries no Apple wrap — the Apple road is lost, reported,
+    /// and rule 8's quiet re-make is U2's).
     func existingOwnAppleKey() -> AppleKeyMaterial? {
         guard let id = parameters.ownAppleKeyID ?? library.keyFile?.apple?.keyID,
               library.section.appleKeys.contains(where: { $0.id == id && $0.isOwnLibraryKey && $0.retiredAt == nil })
         else { return nil }
         return try? leaves.apple.readAppleKey(id: id)
-    }
-
-    /// Re-link the account (17m's door, reshaped — §3.9): a FRESH account
-    /// key minted at the press, the vault's Apple copy of the master landed
-    /// under it with the vault's CAS. Never the old shared key; re-keys
-    /// nothing. Idempotent: a vault already naming this act's key is done.
-    func relinkAccount() async throws {
-        let snapshot = try await freshRead()
-        if let id = parameters.accountAppleKeyID, snapshot.format.appleKeyID == id,
-           snapshot.format.masterWrappedByAppleHeld != nil {
-            return
-        }
-        let key = try mintAppleKey(purpose: .account)
-        let held = try material(for: snapshot)
-        let format = try snapshot.format.settingAppleHeldCopy(
-            masterKey: held.masterSymmetricKey, appleKey: key.key, appleKeyID: key.id)
-        // Stamped BEFORE the write (a re-key act's commit point — `pastCommitPoint`):
-        // a resume that can't reach the vault never rolls back over a write that
-        // may have landed (it would delete the key the vault now names).
-        if parameters.accountWriteBegun != true {
-            var stamped = parameters
-            stamped.accountWriteBegun = true
-            plan.parameters = stamped
-            try leaves.plans.writePlan(try plan.sealed(under: library.key))
-        }
-        let written = try await leaves.vault.updateVault(
-            format, accountID: snapshot.accountID, expectedRevision: snapshot.revision,
-            proofMaster: held.masterSymmetricKey, device: deviceName)
-        executor.noteFresh(written)
-        // This act's own write moved the revision: the rotation's first write
-        // takes this one (VX-109's door revision is the vault as this act
-        // left it, never a re-fetch past someone else's write).
-        var next = parameters
-        next.doorRevision = written.revision
-        next.oldCorpusKeyID = written.corpusKeyID
-        plan.parameters = next
-        log("the account re-linked under a fresh key")
     }
 
     /// Every door that replaces a secret while an anchor exists says what
@@ -139,16 +99,12 @@ extension ProtectionExecutor {
             gate: library.section.settings.gateStyle, synced: true, accountID: account, newKind: record.mode,
             ownAppleKeyID: library.keyFile?.apple?.keyID)
         let secrets = try await doorSecrets(library, typed: typed, wordsMayBeNew: true, parameters: &parameters)
-        if let vault = freshVaults[account], vault.format.masterWrappedByAppleHeld != nil,
-           let id = vault.format.appleKeyID, let shared = try leaves.apple.readOldSharedAppleKey(), shared.id == id {
-            parameters.relinksFirst = true
-        }
         // Decision 30, at the DOOR: a Standard Replace All Keys keeps the new
         // master under the account's own Apple key, read here — never minted.
         // With none readable (and no re-link first), it is refused before any
         // write (refused from inside the plan, it left the act in flight with
         // nothing able to finish it — VX-305 U4, found by the scenario world).
-        if record.mode == .standard, parameters.relinksFirst != true, let vault = freshVaults[account],
+        if record.mode == .standard, let vault = freshVaults[account],
            vault.format.masterWrappedByAppleHeld != nil {
             guard let id = vault.format.appleKeyID, try leaves.apple.readAppleKey(id: id) != nil else {
                 throw ExecutorRefusal.appleKeyUnreadable

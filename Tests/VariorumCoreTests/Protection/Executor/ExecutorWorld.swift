@@ -27,7 +27,6 @@ enum WorldWrite: Equatable, CustomStringConvertible {
     case syncKeysDelete(ProtectionNames.CustodyClass)
     case appleAdd(String)
     case appleDelete(String)
-    case oldSharedDelete(String)
     case vaultCreate
     case vaultUpdate(String)
     case reencrypt
@@ -38,7 +37,6 @@ enum WorldWrite: Equatable, CustomStringConvertible {
     case discardStaged
     case keyFile(String)
     case keyFileAside(String)
-    case ownKeyFile(String)
     case memory(String)
     case plan
     case planDelete
@@ -55,7 +53,6 @@ enum WorldWrite: Equatable, CustomStringConvertible {
         case .syncKeysDelete(let c): return "sync- \(c.rawValue)"
         case .appleAdd(let id): return "apple+ \(id)"
         case .appleDelete(let id): return "apple- \(id)"
-        case .oldSharedDelete(let id): return "shared- \(id)"
         case .vaultCreate: return "vault create"
         case .vaultUpdate(let what): return "vault \(what)"
         case .reencrypt: return "reencrypt"
@@ -66,7 +63,6 @@ enum WorldWrite: Equatable, CustomStringConvertible {
         case .discardStaged: return "discard-staged"
         case .keyFile(let fp): return "keyfile \(fp)"
         case .keyFileAside(let name): return "keyfile-aside \(name)"
-        case .ownKeyFile(let library): return "own-keyfile \(library)"
         case .memory(let fp): return "memory \(fp)"
         case .plan: return "plan"
         case .planDelete: return "plan-"
@@ -85,7 +81,6 @@ func f8(_ fingerprint: String) -> String { String(fingerprint.prefix(8)) }
 /// propagation; U4's fake adds the delay, the off switch and the same-name rule).
 final class ICloudKeychain {
     var keys: [String: AppleKeyMaterial] = [:]
-    var oldShared: AppleKeyMaterial?
 }
 
 /// The server's vault: CAS on the revision, the key proof, one rotation at a
@@ -194,7 +189,6 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     var aside: [LibraryFile] = []
     var copies: [String: LibraryFile] = [:]
     var liveKeyFile: KeyFile?
-    var ownKeyFiles: [String: KeyFile] = [:]
     var catalogKeyFiles: [String: KeyFile] = [:]
     /// Key files moved out of the live place, by their set-aside names.
     var setAsideKeyFiles: [String: KeyFile] = [:]
@@ -296,15 +290,6 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
         guard icloud.keys[id] != nil else { return }
         icloud.keys[id] = nil
         try wrote(.appleDelete(String(id.prefix(8))))
-    }
-
-    func readOldSharedAppleKey() throws -> AppleKeyMaterial? { icloud.oldShared }
-
-    func deleteOldSharedAppleKey(id: String) throws -> Bool {
-        guard let shared = icloud.oldShared, shared.id == id else { return false }
-        icloud.oldShared = nil
-        try wrote(.oldSharedDelete(String(id.prefix(8))))
-        return true
     }
 
     // MARK: - The vault (this device's port onto the shared server)
@@ -409,13 +394,6 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     func writeLiveKeyFile(_ file: KeyFile) throws {
         liveKeyFile = file
         try wrote(.keyFile(f8(file.fingerprint)))
-    }
-
-    func readOwnKeyFile(libraryID: String, deviceID: String) throws -> KeyFile? { ownKeyFiles[libraryID] }
-
-    func writeOwnKeyFile(_ file: KeyFile, deviceID: String) throws {
-        ownKeyFiles[file.libraryID] = file
-        try wrote(.ownKeyFile(String(file.libraryID.prefix(8))))
     }
 
     func readKeyFile(catalogID: String) throws -> KeyFile? { catalogKeyFiles[catalogID] }
