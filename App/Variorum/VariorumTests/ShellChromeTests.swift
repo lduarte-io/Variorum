@@ -101,9 +101,29 @@ struct SidebarLayoutTests {
         #expect(!SidebarLayout.compressesRows(columnHeight: 0, rows: 40))
     }
 
-    @Test func theOpenStripWindowIsHerSevenAndAHalf() {
-        #expect(SidebarLayout.openStripWindow == 7)
-        #expect(SidebarLayout.openStripMaxHeight(rowHeight: 30) == 225)
+    /// **EDITED IN PLACE BY HER ASK — VX-285** (the VX-283 run, U1; her words
+    /// 2026-10-13: *"Open tabs should extend the full height of the screen
+    /// that they can (until the synced portion of the bottom row starts,
+    /// wherever that is)"*). This pin held the strip's ~7½-row window (Act 10
+    /// item 9's ruled shape); her later ask SUPERSEDES that window for the
+    /// Open list, so the claim it held is gone by her word, not by a defect —
+    /// the ruled-change class, no red-on-old owed for the edit itself (the
+    /// mounted pins in `OpenListLayoutTests` carry VX-285's red-on-old).
+    /// What it holds now: the list's tallest form is the room down to the
+    /// footer, floored; and the column's FIT TEST still counts the strip at
+    /// seven, unchanged (VX-285 moves how far the list grows, never when the
+    /// column compresses). RENAMED at the VX-283 ladder's R1-5 — it was
+    /// `theOpenStripWindowIsHerSevenAndAHalf`, a name still claiming the cap
+    /// its body now asserts the list grows past.
+    @Test func theOpenListsTallestFormIsTheRoomDownToTheFooter() {
+        // The room under the list: visible 800, list top at 400, 12 of air.
+        #expect(SidebarLayout.openListMaxHeight(
+            visibleHeight: 800, listTop: 400, bottomPadding: 12, rowHeight: 30) == 388)
+        // No longer the old 7½-row cap: a tall column gives the list far more.
+        #expect(SidebarLayout.openListMaxHeight(
+            visibleHeight: 1000, listTop: 300, bottomPadding: 12, rowHeight: 30) > 225)
+        // The fit test's count is unchanged at seven.
+        #expect(SidebarLayout.openListFitRows == 7)
         #expect(SidebarLayout.openStripRowsCounted(openNotes: 3) == 3)
         #expect(SidebarLayout.openStripRowsCounted(openNotes: 20) == 7)
     }

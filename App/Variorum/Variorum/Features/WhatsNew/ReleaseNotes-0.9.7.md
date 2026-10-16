@@ -10,6 +10,16 @@
 - In the book panel, a chapter that is one note wears that note's shared-with-AI mark.
 - The undo warning no longer shouts "BEFORE".
 
+**The sidebar and the Library, tidier.**
+- The Open list grows down the sidebar to just above the sync row, and its scroll bar no longer covers a row's ✕ (or a Starred row's ★).
+- ⇧⌘W closes the note you're looking at and moves you to the next one in the Open list, so you can close them all quickly; View ▸ Close All Notes clears the list. Clicking ✕ on the note you're looking at does the same as ⇧⌘W.
+- The Open and Starred lists fade softly at an edge where there's more to scroll, instead of cutting a row in half. The Open list follows the note you open, close or go back to, and never pulls back from where you scrolled.
+- Dragging a note in the Open list shows a line where it will land, carries its title under the pointer, and settles into place.
+- Messages no longer cover quick entry on the Bookcase.
+- The Library's search, scope, view, sort and day controls wrap onto two lines when the window is narrow, keeping the info panel on screen, and typing, searching or changing the sort never makes them jump.
+- In dark mode, the Library List's "books" and "notes" headings no longer draw a grey band across the black room.
+- The View menu no longer shows two separators in a row.
+
 ## Feedback
 
 - Anything odd, anything you love: **Help ▸ Send Feedback…**, or write to support@stargazing.tech.

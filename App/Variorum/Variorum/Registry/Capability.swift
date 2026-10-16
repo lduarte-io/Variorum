@@ -314,6 +314,12 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// icon GREY with a tooltip on a bookless note, which is exactly what
     /// `.unavailable` means in this registry.
     var canAscendToBook = false
+    /// **The focused pane is showing a NOTE** (VX-287, the VX-283 run) — a
+    /// `.post`, the kind the Open list tracks — i.e. Close Note (⌘⇧W) has a
+    /// note to close. The `canStarCurrent` family: a fact about what the
+    /// pane is SHOWING. A book, a place or a scraps container is not a note
+    /// the Open list holds, so the key is honestly grey there.
+    var focusedPaneShowsNote = false
     /// **The KEY window's kind** (18o U1 — 17e (12)); nil while no window has
     /// registered. The sidebar toggle's gate — only a FULL window has a
     /// sidebar — lived as a per-view if-statement on its View-menu item while
@@ -661,6 +667,17 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // one declaration for ⌘1–⌘6 — a family of ordinal keys wired per index
     // by the menu, with every one of them a menu item (R73/R91/R93).
     case openNote, navigateBack, navigateForward
+    // VX-287 / VX-289 (the VX-283 run, U1) — CLOSING from the keyboard and the
+    // menu, her ruling (2026-10-13): *"for command W - can we do shift
+    // command W? i like that better than control, it's more natural to type.
+    // i think landing in the next note on the list is perfect-that way you
+    // can close them all quickly."* — and, for Close All, *"close all now is
+    // good"* (her VX-283 triage). TWO declarations on the
+    // `.moveTakeEarlier`/`.moveTakeLater` grounds: each its own door, words
+    // and enablement (one needs a note in the pane, the other an open row).
+    // Both are VIEW-ONLY — a row and a pane are view state; no note is
+    // touched.
+    case closeNote, closeAllNotes
     // (13f batch 5's `toggleTagChips` — W20(b)'s fold, repointed by 13k
     // K11/K12 at the tag cards — RETIRED at the Act 10 correction round,
     // row 15: the masthead has ONE tag door, and ⌘⇧I now belongs to

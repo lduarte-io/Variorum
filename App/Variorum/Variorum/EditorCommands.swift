@@ -140,6 +140,9 @@ struct EditorCommands: Commands {
         .restoreClassicsGathering,
         // 13f batch 3 (W3/A27 + W16): the navigation core's menu doors.
         .openNote, .navigateBack, .navigateForward,
+        // VX-287 / VX-289 (the VX-283 run): closing — ⌘⇧W and its sibling,
+        // under the Open Notes submenu.
+        .closeNote, .closeAllNotes,
         // 13f batch 4 (W1/A25): the split's.
         .openBeside, .closeSplit,
         // The Act 10 correction round (row 15): ⌘⇧I is TAG NOTE — the
@@ -313,6 +316,14 @@ struct EditorCommands: Commands {
         // ⌘Z/⌘⇧Z hint arm). No bracket anywhere carries ⌥.
         case .navigateBack: ("[", [.command, .option])
         case .navigateForward: ("]", [.command, .option])
+        // VX-287 (the VX-283 run) — her ruling: *"can we do shift command W? i
+        // like that better than control, it's more natural to type."* ⌘W is
+        // NOT ours (the system's File ▸ Close — it still closes the window).
+        // THE COLLISION SWEEP'S RESULT is in the registry row and the U1
+        // record's P0: ⌘⇧W is free across this table, every
+        // `.keyboardShortcut(` call site, every `NSMenuItem` keyEquivalent, the
+        // key overrides and the local monitors.
+        case .closeNote: ("w", [.command, .shift])
         // 13k K8's pair, keyed at 13u4 UNIT S1. ⇥ / ⇧⇥ remain the primary
         // door and are deliberately NOT menu key equivalents (binding ⇥
         // would take Tab from every control in the app); these are the
@@ -988,6 +999,16 @@ struct EditorCommands: Commands {
                 }
             }
             .disabled(!enabled(.openNote))
+            // VX-287 (the VX-283 run): ⌘⇧W — the note you're in leaves the
+            // Open list and the pane moves on to the next one. Grey with no
+            // note in the pane, and in a note-only or quick-note window (the
+            // registry's gate — only a full window has an Open list).
+            Button(verb(.closeNote)) { if let router { Self.closeNote(in: router) } }
+                .keyboardShortcut("w", modifiers: [.command, .shift])
+                .disabled(!enabled(.closeNote))
+            // VX-289: the Open list's right-click twin — every row closes.
+            Button(verb(.closeAllNotes)) { if let router { Self.closeAllNotes(in: router) } }
+                .disabled(!enabled(.closeAllNotes))
             Divider()
             // 13f batch 4 (W1/A25 — her two-panes ruling): the split's
             // keyboard-reachable doors. Open Beside from here means "put
@@ -999,7 +1020,9 @@ struct EditorCommands: Commands {
                 .disabled(!enabled(.openBeside))
             Button(verb(.closeSplit)) { router?.closeSplit() }
                 .disabled(!enabled(.closeSplit))
-            Divider()
+            // VX-359: no trailing `Divider()` — SwiftUI separates command
+            // groups itself, so one here drew a second hairline beside the
+            // group boundary's (`ViewMenuSeparatorTests`).
         }
         // ⌘/ — the shortcut helper + dictionary (Sitting 9, R73/R91).
         // 13b Stage 2 (R113): the tutorial's Help-menu doors — open the
@@ -1139,6 +1162,24 @@ struct EditorCommands: Commands {
         // door and this one ask the same question.
         guard let glyph = CalloutMenu.promptEmoji() else { return }
         actions.dispatch(.callout(.emoji(glyph)))
+    }
+
+    /// **⌘⇧W's act** (VX-287): the workspace closes the focused pane's note
+    /// and names where the pane lands; the landing takes the shell's EXISTING
+    /// open-note road — `pendingSelection`, adopted by `RootView` exactly as
+    /// ⌘⇧1–9 and View ▸ Open Note's rows are — never a new landing authority.
+    static func closeNote(in router: ShellRouter) {
+        if let landing = router.workspace.closeFocusedNote() {
+            router.pendingSelection = landing
+        }
+    }
+
+    /// **View ▸ Close All Notes** (VX-289): every row closes; the focused
+    /// pane's landing takes the same road as ⌘⇧W's.
+    static func closeAllNotes(in router: ShellRouter) {
+        if let landing = router.workspace.closeAllNotes() {
+            router.pendingSelection = landing
+        }
     }
 
     /// Pure label derivation, tested directly ("Undo Divide", "Undo

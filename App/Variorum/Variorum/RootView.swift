@@ -260,15 +260,10 @@ struct RootView: View {
                 // every transient outcome (refusals, undo reports, routed
                 // speech) renders HERE, mode- and surface-independent,
                 // with the one auto-dismiss policy.
-                .overlay(alignment: .bottom) {
-                    if let item = session.status.current {
-                        StatusToast(
-                            item: item,
-                            tokens: theme.tokens(for: scheme),
-                            onDismiss: { session.status.clear() })
-                            .padding(.bottom, 46)
-                    }
-                }
+                // VX-121: placed by RULE — its resting 46 pt, lifted above
+                // any band the panes mark as kept clear (the quick-entry
+                // bar's), never a per-toast offset.
+                .statusToastHost(session.status, tokens: theme.tokens(for: scheme))
         }
         .toolbar {
             // The sidebar's own door, leading — where the split view's
@@ -682,6 +677,11 @@ struct RootView: View {
         // focused pane showing a thing a star can point at?
         session.commandRouter.canStarCurrent = {
             StarTargeting.target(for: windows.activeRouter?.workspace.focusedSelection) != nil
+        }
+        // VX-287 (the VX-283 run): Close Note's gate — is the key window's
+        // focused pane showing a note it can close?
+        session.commandRouter.focusedPaneShowsNote = {
+            windows.activeRouter?.workspace.closeNoteTarget != nil
         }
         // 18o U1 (17e (12)): the key window's kind — the sidebar toggle's
         // gate, now a registry fact the View-menu item reads back.

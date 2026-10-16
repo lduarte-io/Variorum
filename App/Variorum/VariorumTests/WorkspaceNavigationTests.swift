@@ -225,9 +225,12 @@ struct OpenNotesTests {
     }
 
     /// Her ruling's second half — the manual reorder, in the `onMove`
-    /// convention (`destination` is a PRE-move index). The drag route
-    /// itself is AppKit's inside the List and is visual-verification-only;
-    /// this is the arithmetic under it.
+    /// convention (`destination` is a PRE-move index). This is the move
+    /// arithmetic only. (VX-288, the VX-283 run: the List this comment once
+    /// named is long gone — the Open list is a flat column whose rows drag
+    /// with the system drag, and WHICH gap a drop names — the slot before the
+    /// targeted row, or the end zone's last slot (U2d, P-U2d-1) — is
+    /// `SidebarLayout.OpenListDrop`, pinned in `OpenListDragTests`.)
     @Test func theManualReorderMovesRowsAndTheKeysFollowThem() {
         var open = OpenNotes()
         for id in ["a", "b", "c", "d"] { open.opened(id) }
@@ -383,8 +386,8 @@ struct WorkspaceModelTests {
                 "arriving IS opening, however you got there — for the BOUND")
     }
 
-    /// The reorder reaches the strip through the model (the sidebar's
-    /// `onMove` calls exactly this).
+    /// The reorder reaches the strip through the model (the Open list's
+    /// drop calls exactly this — VX-288; there is no `onMove` any more).
     @Test func theModelPassesAManualReorderThrough() {
         let workspace = WorkspaceModel()
         workspace.visit(.post("p1"))

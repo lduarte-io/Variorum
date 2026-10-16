@@ -217,6 +217,14 @@ struct HelperView: View {
         // still a door, and this is where she looks for it.
         ShortcutGroup(title: "Windows & panes", items: [
             ("⌘⇧1–9", "jump to the 1st–9th note in the sidebar's Open list"),
+            // VX-287 (the VX-283 run): her chord, and her reason for the
+            // landing — "that way you can close them all quickly".
+            ("⌘⇧W", "close the note you're in \u{2014} its row leaves the Open list and the "
+                + "pane moves on to the next note, so pressing it again closes the next "
+                + "(\u{2318}W still closes the window)"),
+            // VX-289: the keyless sibling, by its menu path and its right-click.
+            ("View ▸ Close All Notes", "empty the Open list \u{2014} also on any Open row's "
+                + "right-click; the notes themselves are untouched"),
             // The Act 10 correction round, batch A (row 2): the sidebar is
             // the app's own now (`ShellSplit`), so its toggle is a declared
             // door with the platform's chord — and a row here, where every
@@ -477,8 +485,9 @@ struct HelperView: View {
         ("the Open list",
          "The sidebar's list of notes this window has open, in the order you opened "
          + "them — ⌘⇧1 through ⌘⇧9 jump to them. Drag rows to rearrange; ✕ closes a "
-         + "ROW and nothing else (the note is untouched and comes back the next time "
-         + "you open it)."),
+         + "ROW (the note is untouched and comes back the next time you open it). "
+         + "Closing the note you're in — its ✕, or ⌘⇧W — moves you on to the next one; "
+         + "View ▸ Close All Notes empties the list."),
         ("context bar",
          "The thin line above a pane, always the same doors: ← back, the book "
          + "this note sits in (click to open that book right at this note; ⌘-click, or "

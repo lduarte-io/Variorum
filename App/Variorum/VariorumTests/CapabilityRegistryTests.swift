@@ -84,6 +84,14 @@ struct CapabilityRegistryTests {
         // it `.switchWing` (⌘L, grey with one wing — P-2) would read
         // `.unavailable` everywhere the walk looks.
         contexts.append(CapabilityContext(mode: nil, wingCount: 2))
+        // VX-287 / VX-289 (justified edit, the ritual): the CLOSE gates — a
+        // FULL window whose focused pane shows a note (Close Note, ⌘⇧W) and a
+        // full window with an open row (Close All Notes). Facts about the
+        // window and what its pane shows, never a mode; without them both
+        // read `.unavailable` everywhere the walk looks (the VX-283 U1 batch
+        // measured exactly that, red, before this line).
+        contexts.append(CapabilityContext(mode: nil, focusedPaneShowsNote: true, windowKind: .full))
+        contexts.append(CapabilityContext(mode: nil, openNoteCount: 1, windowKind: .full))
         return contexts
     }
 
@@ -352,6 +360,10 @@ struct CapabilityRegistryTests {
             // context door (`.deleteTag`, declared at last — its visible twin
             // is the surface walk's line).
             .union(TagManagerPane.contextMenuCapabilities)
+            // VX-289 (A JUSTIFIED EDIT, the same class — a new renderer is a
+            // new line): the Open list's own right-click act, Close All Notes,
+            // beyond the shared note-row grammar its rows also render.
+            .union(SidebarView.openListMenuCapabilities)
         #expect(rendered == CapabilityRegistry.doored(.contextMenu))
     }
 

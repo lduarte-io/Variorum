@@ -785,6 +785,9 @@ final class CommandRouter {
     /// 13f batch 6 (W4): is the focused pane showing a thing a star can
     /// point at? Wired the same way, to the KEY window's workspace.
     @ObservationIgnored var canStarCurrent: () -> Bool = { false }
+    /// VX-287 (the VX-283 run): is the KEY window's focused pane showing a
+    /// note — Close Note's gate. Wired the same way, to its workspace.
+    @ObservationIgnored var focusedPaneShowsNote: () -> Bool = { false }
     /// 18o U1 (17e (12)): the KEY window's kind — the sidebar toggle's gate
     /// as a registry fact. Wired the same way, through the window registry.
     @ObservationIgnored var windowKind: () -> WindowRegistry.Kind? = { nil }
@@ -811,6 +814,7 @@ final class CommandRouter {
             paneCount: paneCount(),
             canOpenBeside: canOpenBeside(),
             canStarCurrent: canStarCurrent(),
+            focusedPaneShowsNote: focusedPaneShowsNote(),
             windowKind: windowKind(),
             wingCount: wingCount())
     }

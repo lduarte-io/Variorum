@@ -131,6 +131,9 @@ struct LibraryCatalogView: View {
     // environment — fall back to the leading voice's tokens.
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
+    /// VX-175 (P-U3-5): the font context the controls row's stable widths
+    /// are measured in — the same one its field and labels resolve in.
+    @Environment(\.fontResolutionContext) private var fontContext
     /// 13n-c U3: the window's road to the MCP door (nil in harness mounts —
     /// no share door; VX-272 — none without an approved client).
     @Environment(\.mcpShareRoad) private var mcpShareRoad
@@ -166,6 +169,16 @@ struct LibraryCatalogView: View {
     /// read here (a `.global` read inside a macOS `ScrollView` answers in
     /// the scroll view's space — batch C's lesson).
     static let probeSpace = "library-catalog"
+
+    /// The search field's prompt — one home for the field and for the floor
+    /// the controls row's wrap decision counts it at (VX-175, P-U3-5).
+    static let searchPrompt = "Search books, notes, blocks…"
+
+    /// The search field's widest — its frame's cap, and the most the wrap
+    /// decision's floor for it may ask (the VX-283 ladder's R1-6): a floor
+    /// past what the field can ever be given would hold the row at two
+    /// lines at every width. One number for both, so they cannot drift.
+    static let searchFieldMaxWidth: CGFloat = 320
 
     /// Row 24 (the panel half): the panel's presence animates — the column
     /// slides and fades in and out with the row selection. The mutation
@@ -602,15 +615,30 @@ struct LibraryCatalogView: View {
                     .frame(width: 28)
                 }
             }
-            HStack(spacing: 10) {
-                TextField(tokens.chromeLabel("Search books, notes, blocks…"),
+            // VX-175 (P-U3-2, ruled): ONE line when it fits — placed exactly
+            // as the old HStack — else search · scope over mode · sort · when,
+            // the SAME views either way (never `ViewThatFits`: two copies of
+            // the field would swap on the re-flow the panel's opening makes,
+            // dropping her caret). The order below IS the flow's order: the
+            // field first, scope second (`LibraryControlsFlow`).
+            // P-U3-5: the wrap reads STABLE widths only — the field at its
+            // PROMPT (never its typed text) and the sort slot at its WIDEST
+            // form (every sort × direction, and the relevance label), so
+            // typing, a sort pick or a search never changes the line count.
+            let stable = LibraryControlsStableWidths.row(
+                tokens: tokens, prompt: Self.searchPrompt,
+                fieldMaxWidth: Self.searchFieldMaxWidth, in: fontContext)
+            LibraryControlsFlow(spacing: 10, lineSpacing: 8) {
+                TextField(tokens.chromeLabel(Self.searchPrompt),
                           text: Binding(get: { model.query }, set: { value in
                               model.query = value
                               Task { await model.search() }
                           }))
                     .textFieldStyle(.roundedBorder)
                     .font(tokens.small)
-                    .frame(maxWidth: 320)
+                    .frame(maxWidth: Self.searchFieldMaxWidth)
+                    .libraryGeometryProbe(.searchField)
+                    .libraryControlsFloor(stable.fieldFloor)
                 // 17y B-WALK W-2 (her ruling): picking All while in Cards
                 // moves the view to List — the model's door decides.
                 Picker("", selection: Binding(get: { model.scope }, set: { model.pickScope($0); Task { await model.search() } })) {
@@ -619,6 +647,16 @@ struct LibraryCatalogView: View {
                     }
                 }
                 .pickerStyle(.segmented)
+                // VX-175 (P-U3c-1): fixed horizontally, so the segmented
+                // control answers its NATURAL width in every state. Unfixed,
+                // it answered in two modes in one model state (the U3c trace):
+                // rigid at its natural width, or — after a landed search,
+                // until a sort pick — squeezed below it (scope 254 → 220.5 pt,
+                // Terminal), which moved the controls row's wrap decision and
+                // cramped its segments. Now P-U3-5's "the wrap reads stable
+                // widths only" holds for both pickers. (The swept P-8 lint is
+                // the bare form; a segmented control is no label that wraps.)
+                .fixedSize(horizontal: true, vertical: false)
                 .frame(maxWidth: 280)
                 // 18h batch 2: a day names NOTES — books and blocks carry no
                 // edit stamp and stand down while one is armed, so the scope
@@ -642,6 +680,9 @@ struct LibraryCatalogView: View {
                     }
                 }
                 .pickerStyle(.segmented)
+                // VX-175 (P-U3c-1): fixed horizontally — the scope picker's
+                // reason above (unfixed: 224 → 180 pt Terminal after a search).
+                .fixedSize(horizontal: true, vertical: false)
                 .frame(maxWidth: 230)
                 // 18h batch 1 (her row 10): the notes' order, hers to
                 // choose. The Timeline mode is its own order by definition,
@@ -663,11 +704,20 @@ struct LibraryCatalogView: View {
                         // could not change that order — stands down for the
                         // mockup's own words, a label (P-2: a door that
                         // cannot act is not drawn).
+                        // P-U3-5 / P-8: one line, holding its words — the
+                        // label once wrapped onto three lines when the row
+                        // squeezed it (the walk's F-1); the sort door's own
+                        // `VoicedMenu` and `when ▾` already carry the same
+                        // policy at their homes.
                         Text(tokens.chromeLabel(LibrarySearchCopy.relevance))
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
+                            .lineLimit(1)
+                            .fixedSize()
                             .help(LibrarySearchCopy.relevanceHelp)
                             .offset(y: Self.segmentedLabelDrop)
+                            .libraryGeometryProbe(.sortSlot)
+                            .libraryControlsWidest(stable.sortWidest)
                     } else {
                         LibrarySortMenu(
                             tokens: tokens, sort: model.sort, direction: model.direction,
@@ -680,6 +730,8 @@ struct LibraryCatalogView: View {
                                 Task { await model.search() }
                             })
                         .offset(y: Self.segmentedLabelDrop)
+                        .libraryGeometryProbe(.sortSlot)
+                        .libraryControlsWidest(stable.sortWidest)
                     }
                     // 18h batch 2 (her row 11): *"search for any note edited
                     // on a particular day."* 13o U2 (her R-13o-13): the door
@@ -698,6 +750,7 @@ struct LibraryCatalogView: View {
                     .offset(y: Self.segmentedLabelDrop)
                 }
             }
+            .libraryGeometryProbe(.controls)
             // 13n-c UX walk W-UX-3 (T-1): the bulk doors on a ROW OF THEIR
             // OWN under the controls while several notes are picked. In the
             // controls' row they ran out of width at the default window and

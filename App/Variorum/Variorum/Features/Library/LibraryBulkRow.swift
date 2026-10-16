@@ -83,6 +83,9 @@ struct LibraryBulkRow: View {
         actDoors
     }
 
+    // P-8 (VX-245): every door here is a one-line label — its whole words on
+    // one line (the `fixedSize` is W-UX-3's point), the row WRAPPING above
+    // (UXR1-3's ViewThatFits) rather than any label.
     @ViewBuilder private var tagDoors: some View {
         Menu(tokens.chromeLabel("Tag \(count) notes")) {
             ForEach(tags, id: \.id) { tag in
@@ -90,6 +93,7 @@ struct LibraryBulkRow: View {
             }
         }
         .font(tokens.small)
+        .lineLimit(1)
         .fixedSize()
         if !worn.isEmpty {
             Menu(tokens.chromeLabel("Untag \(count) notes")) {
@@ -98,6 +102,7 @@ struct LibraryBulkRow: View {
                 }
             }
             .font(tokens.small)
+            .lineLimit(1)
             .fixedSize()
         }
     }
@@ -106,10 +111,12 @@ struct LibraryBulkRow: View {
         if canShare {
             Button(tokens.chromeLabel(MCPShareCopy.shareNotes(count)), action: onShare)
                 .font(tokens.small)
+                .lineLimit(1)
                 .fixedSize()
         }
         Button(tokens.chromeLabel("Delete \(count) notes\u{2026}"), role: .destructive, action: onDelete)
             .font(tokens.small)
+            .lineLimit(1)
             .fixedSize()
     }
 }

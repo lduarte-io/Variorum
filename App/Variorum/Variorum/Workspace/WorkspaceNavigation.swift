@@ -329,6 +329,35 @@ nonisolated struct OpenNotes: Equatable {
         recency.removeAll { $0 == id }
     }
 
+    /// **Close All Notes** (VX-289): every row closes. Nothing is deleted.
+    mutating func closeAll() {
+        ids.removeAll()
+        recency.removeAll()
+    }
+
+    /// **Where a pane lands when `id`'s row closes** (VX-287, her ruling:
+    /// *"landing in the next note on the list is perfect-that way you can
+    /// close them all quickly"*): the NEXT row in strip order; on the last
+    /// row, the PREVIOUS one; nil when no row is left — the caller lands the
+    /// Library (the ticket's two fallbacks, PROVISIONAL P-U1-1).
+    ///
+    /// - `skipping`: notes another pane of the window is showing. A split
+    ///   never shows one note twice (her round-7.3 rule), so landing on one
+    ///   of those would move the FOCUS instead of the pane and speak the
+    ///   same-note refusal; the walk passes over them (PROVISIONAL P-U1-2).
+    /// - A note with NO row (its ✕ already pressed while it stayed on screen)
+    ///   reads as sitting past the end — where re-opening it would put it —
+    ///   so its neighbour is the last row (PROVISIONAL P-U1-2).
+    ///
+    /// Pure arithmetic over ids, in strip order; recency plays no part (the
+    /// ordinals are hers, and "the next note on the list" is the list's).
+    func neighbour(ofClosing id: String, skipping: Set<String> = []) -> String? {
+        let index = ids.firstIndex(of: id) ?? ids.count
+        let eligible = { (candidate: String) in candidate != id && !skipping.contains(candidate) }
+        if let next = ids.dropFirst(index + 1).first(where: eligible) { return next }
+        return ids.prefix(index).reversed().first(where: eligible)
+    }
+
     /// The manual reorder (her ruling's second half), in the `onMove`
     /// convention: `destination` is an index in the PRE-move list.
     ///

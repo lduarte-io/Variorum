@@ -13,7 +13,6 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | Castle rebuild, phase 1 — the headless core | VX-305 · `vx-305-castle-core` | `~/dev/variorum-vx-305` · the Pro | In progress (architect shape; plan `notes/plans/vx-305-castle-core.md`). Holds the ONE Sync/-or-custody slot. Surfaces: NEW `Sources/VariorumCore/Protection/` + `Tests/VariorumCoreTests/Protection/` only — no `App/`, no `Sync/`, no migrations; headless, no stage. |
-| Run: Sidebar & Library polish | VX-283 · `vx-283-sidebar-library-polish` | `~/dev/variorum-vx-283` · the Pro | In progress (architect shape, kicked off 2026-10-14; TRIMMED at her triage to nine members — the runway plan's VX-283 section; record `notes/plans/fixes/vx-283-sidebar-library-polish.md`). Zero `Sync/`/custody/editor seam. Surfaces: the sidebar's Open list (`SidebarView`, `SidebarLayout`, `WorkspaceModel`), a Close Note / Close All act (registry + `EditorCommands`), the toast placement over the Bookcase, the Library's controls row, the dark heading band, six chrome `.fixedSize()` sites. Stage via the coordinator: Mac batches + Opus screenshot walks on the dev store. |
 
 ### Latest closeout
 
