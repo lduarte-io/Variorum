@@ -1415,7 +1415,14 @@ sitting block above, which predated her widening.)
   VX-307's plan drops the old-build interference choreography; VX-329's plan carries the update-every-device-first
   procedure line.
 
-## 9. The ladder (the Fable reviewer's report per round, committed unedited, then the dispositions)
+### HER RULING, 2026-10-15 (at the U4 close) — THE LADDER'S CAP RAISED FOR THIS PHASE
+
+**Her words, verbatim:** *"this doesn't have a hard cap on 3 - you can do up to 5 if majors are still being found."*
+For this phase's ladder: up to FIVE rounds while BLOCKERs/MAJORs are still being found; everything else unchanged
+(a fresh reviewer per round, `notes/REVIEW_PROMPT.md` verbatim with zero framing, findings and dispositions
+repo-first, the cross-model flow, the final round's fixes checked line-by-line by the orchestrator).
+
+## 9. The ladder (the Fable reviewer's report per round, committed unedited, then the dispositions — her 2026-10-15 ruling: up to five rounds while MAJORs are still found)
 
 *(empty)*
 
