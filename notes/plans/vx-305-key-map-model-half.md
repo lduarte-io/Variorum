@@ -45,7 +45,7 @@ flight, not this file's.
 - The phase-1 model arms the cut kills (the fold beyond the current key, the gifts) stay built and green: "phase 1
   closes with the model as built and green"; they are "removed with their tests at phase 2's first act".
 
-**LIVE STATUS:** C-1…C-11 written (the row blocks below); H-1…H-5, S-1…S-7, R-1…R-6, T-1…T-8, A-1…A-4, L-1, K-1…K-4,
+**LIVE STATUS:** C-1…C-11, H-1…H-5, S-1…S-7 written (the row blocks below); R-1…R-6, T-1…T-8, A-1…A-4, L-1, K-1…K-4,
 O-1 PENDING; the tally and the GAP and CUT lists PENDING.
 
 ---
@@ -314,4 +314,240 @@ their *Opens with* line says so; they can be deleted.
   words — `honestWords`).
 **Code half.** "They can be deleted": the delete door on this library's own copies (Data Safety, VX-265) — phase 5; the
 walk — phase 5.
+
+### H-1 · PROVEN
+**Element.** A fresh key at every crossing — entering and leaving Castle, leaving an account in either mode, a
+different library landing — plus Replace All Keys and the follow; every key born Castle or Standard keeps that kind
+for life, and no repair changes it.
+**Model proof.**
+- Kind for life: `FamilyTreeTests.everyMintedKeyIsRecordedWithItsKindAndItsMac` (born with its kind and Mac; the mode is
+  the current key's kind); `ProtectionNamesTests.theCustodyClassFollowsTheKeysKindForLife`; `UseCastleStates.finished`
+  (the new key's tree entry `.castle`); `AssessRepairTests.noRepairMakesATouchIDItemOrChangesAKeysKind` (every repair the
+  shapes owe is a delete, a wrap under an existing key, a refresh or a quiet record — none re-kinds a key);
+  `FamilyTreeTests.mergingTakesTheSafeSide` (two homes disagreeing on a kind take Castle — PROVISIONAL P-U1-3).
+- A fresh key: `UseCastleStates.finished`, `UseStandardStates.finished` (current ≠ K0); `LeaveAccountTests.aCastleLeaveReKeysWithBothSecretsAndNothingAfterOpensThroughTheAccount`,
+  `.moveLeavesOneAccountAndJoinsTheSignedInOne`, `AssessAccountTests.everyLeaveReKeysInBothModes`; `LandTests.aCastlePairLandsWithItsPassphraseAloneTheWordsMadeNew`
+  (`library.key != sender.key`); `ReplaceAllKeysTests.castleReplaceAllKeysRotatesTheAccountAndGrowsTheHistory`;
+  `FollowTests.aStandardDeviceFollowsIntoCastleTypingOneSecret`; `MigrationScenarios.corner45sAmbiguousCase` (confirming
+  Standard is a key change).
+- The fixed scenarios the element names: `CopyAndCrossingScenarios.leavingCastleLocalAndSynced`, `.aLibraryLeavingItsAccountByEachAct`
+  (three acts × both modes: a new fingerprint, no account), `CornerScenarios.aLibraryLeavingByMoveThenTheAccountLeavesCastle`
+  (the fourth act), `CopyAndCrossingScenarios.sendLibraryAfterThisChange` (all four landing typings: a fresh key).
+- Pins (the re-key at every crossing): `ScenarioMutationPins.theRekeyAtEveryCrossing`, `ExecutorGuardMutationTests.aStandardLeaveKeepsItsKeyWithTheGuardOff`,
+  `AssessGuardMutationTests.rekeyAtEveryCrossing` (the landing's fresh key too).
+**Code half.** None beyond the acts' own phases (3, 4, 5).
+
+### H-2 · PROVEN
+**Element.** The history: entering Castle takes everything (an anchor folded in, or kept beside unchanged when the
+typed secrets can't open it); within a mode it grows, the anchor carried unchanged; leaving Castle and a landing take
+nothing — the new key's history starts empty.
+**Model proof.** `KeyFileCrossingTests.enteringCastleTakesEverything`, `.castleToStandardToCastleFoldsTheAnchorBack`,
+`.anUnopenableAnchorIsKeptAndDoesNotFailTheEntry`, `.withinAModeTheHistoryGrowsAndTheAnchorRides`,
+`.leavingCastleTakesNothing_theAnchorOpensWithThePassphraseAndTheWords`, `.aLandingStartsEmpty`;
+`KeyHistoryTests.theHistorySurvivesThreeReKeys`; at the act: `UseStandardTests.useStandardLocalWritesExactlyThisInOrder`
+(`historyKeys(currentKey: K1).isEmpty`), `LandTests.aCastlePairLandsWithItsPassphraseAloneTheWordsMadeNew` (history empty,
+no anchor), `LeaveAccountTests.aCastleLeaveReKeysWithBothSecretsAndNothingAfterOpensThroughTheAccount` (the leave's
+history takes K0); the fixed scenarios the element names: `CopyAndCrossingScenarios.castleStandardCastle`,
+`.sendLibraryAfterThisChange` (`history.isEmpty` on the receiver).
+**Code half.** None.
+
+### H-3 · PROVEN (CUT clause: an older build's leave)
+**Element.** The anchor is written first at every leave, by the act and by each follow — the outgoing key with its
+whole history (and any earlier anchor) under one anchor key locked only with what opened that device that day: the
+acting device's typed P and W; a follower's typed secret plus the outgoing key with its own locks copied beside it; a
+words-only device's anchor opening with the words alone; in the key file and every later pair.
+**Model proof.**
+- Written first: `KeyFileCrossingTests.leavingCastleTakesNothing_theAnchorOpensWithThePassphraseAndTheWords` (a leave
+  without it refuses `anchorNotWrittenFirst`; carried byte for byte); `UseStandardTests.useStandardLocalWritesExactlyThisInOrder`
+  and `.syncedUseStandardMarksTheLeaveThenCompletesIt` (`keyfile K0` — the anchor — is the first write after the act is
+  named); the follow's step order begins `"anchor"` (`Executor/Acts/Follow.swift`) and
+  `FollowTests.aFollowerMeetingALeaveInProgressHoldsItsReKeyWithItsKeysTheCastleWay` shows it written while the library
+  re-key holds. Pins: `ProtectionGuardMutationTests.anchorWrittenFirst`; `ExecutorGuardMutationTests.swappingBeforeTheKeyFileStrandsTheLibraryWithTheGuardOff`
+  (prepare-then-commit).
+- The acting device's locks: `UseStandardStates.finished` (opens with the passphrase and with the words to K0) and
+  `anchor.locks.outgoingKey == nil` (nothing Apple-reachable); crash after every write on Touch ID and on Always ask:
+  `UseStandardTests.aCrashAfterEveryWriteFinishesOnResume`, `.aCrashAfterEveryWriteOnAlwaysAskFinishesOnResume`,
+  `.withThePlanGoneItRollsBackBeforeTheSwapAndFinishesFromTheRecordAfter`, `.syncedUseStandardCrashAfterEveryWriteFinishes_AlwaysAsk`.
+- A follower's locks: `CastleAnchorTests.aFollowersAnchorOpensWithTheTypedSecretAndWithWhatOpenedThatDevice` (the typed
+  secret; the older passphrase it held; the words; the master copy alone); `FollowTests.aCastleDeviceFollowsIntoStandardAndItsAnchorOpensWithTheSecretTypedAtItsFollow`;
+  `CastleAnchorTests.aWordsOnlyFollowersAnchorSaysTheWords`, `.noValueEverHoldsAMasterUnderThePassphrase`,
+  `.aTamperedAnchorOpensNothing`; `RouteFinderRoadTests.aFollowersAnchorWithThePassphraseTyped`,
+  `.aFollowersAnchorWithTheWordsTypedAndAStaleCopiedPassphrase`, `.aWordsOnlyFollowersCopiesSayTheWordsNotThePassphrase`.
+- An earlier anchor kept beside: `KeyFileCrossingTests.anUnopenableAnchorIsKeptAndDoesNotFailTheEntry` (sealed inside the
+  next anchor); in every later pair: a pair's key file is the live one (`SmallCopyActTests.sendLibraryWritesThePairWithNoSharingNote`),
+  the anchor survives encoding (`KeyFileWrapTests.aFormat3FileRoundTrips`).
+- The fixed scenarios the element names: `CopyAndCrossingScenarios.leavingCastleLocalAndSynced`;
+  `CornerScenarios.followersAnchorsOpenWithWhatOpenedThem` (an Always-ask follower relocked after the rotation, and a
+  words-typed one); `CornerScenarios.aWordsOnlyFollowerLeavingCastle`; the passphrase changed during Castle on another
+  device: `ScenarioMutationPins.aFollowersAnchorOpensWithTheSecretTypedAtItsFollow` (pin: a follower's anchor under the
+  secret typed at its follow) and `ExecutorGuardMutationTests.aFollowersAnchorMissesTheSecretTypedAtItsFollowWithTheGuardOff`.
+**CUT clause (LCW).** "The master's road left out when the vault's master is still the Castle-era one (an older build's
+leave)" and "a follow after an older build's leave": old builds as live actors drop. The model's switch stays pinned
+(`CastleAnchorTests.withTheMasterUnchangedSinceCastleTheMastersRoadIsLeftOut`); the older-build half of
+`CornerScenarios.followersAnchorsOpenWithWhatOpenedThem` is kept while green.
+**Code half.** None.
+
+### H-4 · GAP (narrow: four doors' sentences, and the enroll's anchor at the act)
+**Element.** The anchor keeps the secrets of its day: never re-locked; the key doors re-lock only the current key;
+every later re-key carries it unchanged, an enroll under a differing passphrase leaves it untouched; pre-leave copies
+open with the leave day's secrets, the route finder naming the day; while an anchor exists, every door that replaces a
+secret says its one sentence (the words doors, change passphrase, Standard's reset road, a Use Castle that can't fold).
+**Model proof — what is asserted.**
+- Never re-locked, carried unchanged: `CastleAnchorTests.noDoorReLocksItAndEveryReKeyCarriesItUnchanged`
+  (`settingPassphrase`, `settingWords`, a re-key: byte-identical; opens with the day's secrets, not the new ones);
+  `KeyFileCrossingTests.withinAModeTheHistoryGrowsAndTheAnchorRides`; `ExecutorKeyDoorTests.changePassphraseReWrapsTheCurrentKeyAndTheAnchorKeepsItsDay`.
+  Pins (the anchor carried by every re-key): `ProtectionGuardMutationTests.anchorCarriedByEveryRekey`,
+  `ScenarioMutationPins.theAnchorCarriedByEveryRekey` (a leave from an account after Use Standard).
+- The day named: `RouteFinderRoadTests.aPassphraseChangedAfterTheLeaveIsNamedByTheLeavesDay`; `AnchorSentenceTests.afterASecondPassphraseChangeTheSentenceNamesTheDay`;
+  promises 5 and 9 over `CopyAndCrossingScenarios.afterALeaveTheKeyDoors` (change passphrase here, new words on another
+  device, a reset — copies from before the leave open with the leave day's secrets everywhere).
+- The sentences: `AnchorSentenceTests.everyDoorThatReplacesASecretSaysItsSentence` (the words doors, change passphrase,
+  the reset road naming that day's words only, Use Castle that can't fold), `.noAnchorNoSentence`;
+  `AssessDoorTests.theKeyDoorsSayTheirAnchorSentenceWhileAnAnchorExists` (New Words', Change Passphrase's and the reset
+  door's specs); in the Done: `ExecutorKeyDoorTests.changePassphraseReWrapsTheCurrentKeyAndTheAnchorKeepsItsDay`,
+  `.theResetRoadNeverPointsAtTheForgottenPassphrase`, `CopyAndCrossingScenarios.afterALeaveTheKeyDoors` (the reset).
+- The joining case the design names: `CornerScenarios.aCastleLibraryJoiningAStandardAccount` (the anchor written at the
+  join opens with the secrets typed there).
+**The gap.** (a) The sentence on four doors is coded but unasserted: New Words' Done (`Executor/Acts/KeyDoors.swift:75`),
+Replace All Keys' Done (`ReplaceAllKeys.swift:57`) and its door spec (`Assess/Assess.swift:795`), a leave from an
+account's Done (`AccountActs.swift:99`, said on every leave) and the leave doors' specs (`Assess.swift:855`), sync
+setup's Done when it makes new words (`AccountActs.swift:135`). (b) "An enroll under a differing account passphrase leaves it
+untouched" is asserted only through the primitive the enroll uses (`AccountActs.swift:188`, `settingPassphrase` —
+pinned anchor-identical above), never at the act. **Needed:** after a leave (an anchor exists): `regenerateWords`,
+`replaceAllKeys`, `leaveAccount` (each of the three) and `setUpSync` making new words → each
+`outcome.done` holds `.anchor(s)` with `s.door == .replacesWords` and the leave's day; `assess`'s `.replaceAllKeys`,
+`.thisMacOnly`, `.stopSyncingHere` and `.deleteAccountHere` specs carry it; and an enroll of a Standard library carrying
+an anchor into a Standard account whose passphrase differs → the live key file's anchor byte-identical.
+**Code half.** The walk (the sentences' faces) — phases 4 and 5.
+
+### H-5 · PROVEN
+**Element.** The family tree lists every key the library has had — kind, Mac, dates, no secret — in two homes unioned
+at open, seeded at the migration with every fingerprint the catalog's key files name, reached or not; it decides
+whether a copy is this library's own.
+**Model proof.** `FamilyTreeTests.everyMintedKeyIsRecordedWithItsKindAndItsMac`, `.theTwoHomesUnion_aRolledBackLibraryStillKnowsItsLaterKeys`
+(union laws), `.itCanBeSeededWithUnreachedFingerprints`, `.mergingTakesTheSafeSide`; the migration's seed:
+`ProtectionMigrationTests.aStandardLibraryMigratesFoldsItsOlderKeyAndMovesBesideTheOldSharedKey`
+(`familyTree.contains(older)` from `catalogFingerprints`); no secret: `ProtectionScanTests.noSecretAppearsInAnyValueWrittenToDisk`
+(the record and the memory scanned); deciding "ours": `OpenRuleTests.thisLibrarysOwnCastleEraCopyAfterALeaveReadsAsOurs`,
+`.everyCopyKindAgainstEveryLibraryState`. The fixed scenarios and pins the element names:
+`ScenarioMutationPins.ownCastleEraCopyRestoredAfterALeave` (own-line check, on a new-system pair as LC re-points it) and
+`AssessGuardMutationTests.ownLineByFamilyTree`; `ScenarioMutationPins.aTimeMachineRollbackPastARekey` (its two homes) and
+`ProtectionGuardMutationTests.familyTreeTwoHomes`.
+**Note (not a ruling of mine).** The migration's seeding exists for copies made before the switch to read as their own;
+LC drops those copies' opening ("pre-rebuild copies opening on the new system"). The seed is built and pinned as above;
+whether phase 2 keeps it is phase 2's to record under LC.
+**Code half.** The record's table and the memory item going live — phase 2.
+
+### S-1 · PROVEN
+**Element.** Standard: a Standard key's device copy is its silent item; never a Touch ID item.
+**Model proof.** Promise 3 as built checks the Standard library's Apple road, not its custody; the silent item is pinned
+by: `ProtectionNamesTests.theCustodyClassFollowsTheKeysKindForLife` (`.standard → .silent`); `UseStandardStates.finished`
+(`custody == [.silent]`) and `UseStandardTests.useStandardLocalWritesExactlyThisInOrder` (`custody+ silent K1`,
+`custody- touchid K0`); `ExecutorDeviceActTests.aNewLibraryIsBornStandardWithThisMacsOwnAppleKey`;
+`LandTests.aStandardPairThroughAReadableAppleKeyLandsWithNothingTyped`; `ProtectionMigrationTests.aStandardLibraryMigratesFoldsItsOlderKeyAndMovesBesideTheOldSharedKey`.
+Never a Touch ID item: no executor road makes one for a Standard key (the custody step takes the key's own kind,
+`newCustodyItem(kind:)`); one found is reported and never deleted by a repair —
+`AssessRepairTests.inStandardNothingDestructiveRunsOnTheRecordsWordAlone`, `ExecutorRepairTests.noRepairEverMakesATouchIDItemAndNothingDestructiveRunsOnAStandardRecordsWord`,
+pins `AssessGuardMutationTests.standardRecordNoDestructiveRepair`, `ExecutorGuardMutationTests.aTouchIDItemIsDeletedOnAStandardRecordsWordWithTheGuardOff`
+(PROVISIONAL P-U2-1 (a)).
+**Note.** P-U2-1's "it goes at the next act a person presses" is not asserted; by reading, the next re-key's custody step
+deletes only the outgoing key's items (`Executor/Acts/CommonSteps.swift:220–230`), so a stray item of another key would
+stay. For the closeout's QUESTIONS entry, not this row.
+**Code half.** The drill (the silent item's accessibility class) — phases 2 and 3.
+
+### S-2 · GAP (narrow: a follower's new Standard key file, lock by lock)
+**Element.** Standard: each device's key file locks its current key with its own Apple key for the library (by id),
+synced with the master beside its words copy, with the passphrase and words where it has them — a follower's carries
+the secret it typed.
+**Model proof — what is asserted.**
+- The own Apple wrap, named by id: promise 3 at every settle (the wrap under this Mac's OWN readable key);
+  `KeyFileWrapTests.everyWrapOpensWithTheRightSecretAndRefusesAWrongOne` (`appleKeyMismatch` on another id);
+  `UseStandardStates.finished` (the wrap's key listed own and live in iCloud).
+- The master and its copy: `AccountJoinTests.setUpSyncInStandardMintsTheAccountKeyAndKeepsTheLibraryKey`. The passphrase
+  where it has one: `LeaveAccountTests.aStandardLeaveWithAForgottenPassphraseSetNewMintsNothing`.
+- The fixed scenario the element names: `CopyAndCrossingScenarios.leavingCastleLocalAndSynced` (each follower Standard,
+  promise 3 at the settle).
+**The gap.** A follow INTO Standard's new key file is not asserted lock by lock (the code: `Executor/Acts/Follow.swift`,
+the `keyFile` step — the typed secret's lock, the master, this Mac's fresh own Apple key). **Needed:** after
+`FollowTests`'s follow into Standard typing the passphrase (and again typing the words): the live file opens with the
+typed secret and not the other, opens through the new master and through `wordsThroughMaster`, carries `masterWordsCopy
+== vault.masterWrappedByRecovery`, and its Apple wrap is under a key the follower minted (own, live).
+**Code half.** The drill — phase 3.
+
+### S-3 · PROVEN
+**Element.** Apple keys: one per library per Mac (minted and named by that Mac) and one per account (the vault's master
+only); minted only by a deliberate act or the migration, under fresh ids; two minters for one account → the vault's CAS
+keeps one and the other deletes its own; a device that can't read the account's key waits for silent setup only.
+**Model proof.**
+- One per library per Mac: `LandTests.aStandardPairThroughAReadableAppleKeyLandsWithNothingTyped` (this Mac's OWN key, not
+  the sender's); `CornerScenarios.oneLocalLibraryOnTwoMacs`; `MoreScenarios.twoMacOSLoginsOnOneMac`;
+  `AccountScenarios.replaceAllKeysOnAnAccountStillOnTheOldSharedKey` (a new device joining: its key file under its own key).
+- One per account, the master only: `AssessRepairTests.theLibraryWrapNeverLandsUnderTheAccountsKey`;
+  `UseStandardTests.syncedUseStandardMarksTheLeaveThenCompletesIt` (`vault.mode == .standard(appleKeyID: <the account key>)`).
+- Minted only by acts: `AssessRepairTests.inStandardTheWrapLandsUnderThisMacsOwnKeyAndNoRepairMintsOne`;
+  `ReplaceAllKeysTests.standardReplaceAllKeysKeepsTheAccountKeyAndThisMacsOwn` and `LeaveAccountTests.aStandardLeaveWithAForgottenPassphraseSetNewMintsNothing`
+  (no `appleAdd`); the minting acts' writes: `ExecutorDeviceActTests.aNewLibraryIsBornStandardWithThisMacsOwnAppleKey`,
+  `UseStandardTests.useStandardLocalWritesExactlyThisInOrder` (`apple+ <fresh own>`), `.syncedUseStandardMarksTheLeaveThenCompletesIt`
+  (`apple+ <fresh account>`); `GeneratorFoundScenarios.aSetUpWhoseAccountKeyWasLostMintsAfresh` (one minter, mint afresh).
+- Two minters: `ExecutorEdgeTests.theDeviceWhoseLeaveLostTheRaceDeletesTheAccountKeyItMinted` (the loser's key deleted,
+  recorded retired, not the vault's).
+- Waiting for silent setup only: `AssessVaultTests.theAccountMovingElsewhereIsAFollow` (the account key unreadable here → the
+  follow types one secret instead of waiting).
+**Code half.** The convergence suite for the mint, wait and delete rules — phase 3 (design §3.5: "its convergence pins
+live in phase 3").
+
+### S-4 · PROVEN (CUT clause: an older build's Re-link)
+**Element.** Standard, synced: the vault's Apple copy is under the account's Apple key, named by its id; an account
+from before this change stays on the old shared key until it enters Castle or is re-linked; nothing moves a vault
+automatically.
+**Model proof.**
+- Under the account's key, by id: `AccountJoinTests.setUpSyncInStandardMintsTheAccountKeyAndKeepsTheLibraryKey`,
+  `UseStandardTests.syncedUseStandardMarksTheLeaveThenCompletesIt`, `ReplaceAllKeysTests.standardReplaceAllKeysKeepsTheAccountKeyAndThisMacsOwn`
+  (decision 30), `SharedKeyActTests.reLinkMintsAFreshAccountKeyNeverTheOldSharedOne`.
+- Moves only by a deliberate act: `ReplaceAllKeysTests.onAnAccountStillOnTheOldSharedKeyItReLinksFirst`,
+  `AccountScenarios.replaceAllKeysOnAnAccountStillOnTheOldSharedKey`; never by a repair (no repair case writes the vault —
+  the enumeration in `AssessRepairTests.noRepairMakesATouchIDItemOrChangesAKeysKind`); never by a settle: the first
+  assertion of `CornerScenarios.anOlderBuildsRelinkAndTheLastStepRace` (today's account vault, on the old shared key, still
+  there after two settles — current-store shaped, though the test as a whole is beyond scope under LCW).
+**CUT clause (LCW).** The element's proof "an older build's Re-link": "an older build's Re-link re-landing a vault"
+drops; that scenario and `ScenarioMutationPins.anOlderBuildsRelinkLandsTheVaultOnTheOldKey` are kept while green.
+**Code half.** The fake-server suite (the real vault's `apple_key_id`) — phase 3 (Fable).
+
+### S-5 · PROVEN
+**Element.** Re-link mints a fresh account key under the vault's CAS, and Replace All Keys re-links an account still on
+the old shared key first; nothing this build writes is locked with the old shared key.
+**Model proof.** `SharedKeyActTests.reLinkMintsAFreshAccountKeyNeverTheOldSharedOne` (a fresh account key, never the old
+one; re-keys nothing); `ReplaceAllKeysTests.onAnAccountStillOnTheOldSharedKeyItReLinksFirst` (nothing written under the
+old key, nothing deleted); `AccountScenarios.replaceAllKeysOnAnAccountStillOnTheOldSharedKey` (and refused before any
+write where the account's key can't be read); `AssessDoorTests.replaceAllKeysOnAnAccountStillOnTheOldSharedKeyReLinksFirst`;
+`KeyHistoryTests.aReKeyDropsTheOldSharedWrap` (no re-key carries a wrap under it); `GeneratorFoundScenarios.aStaleDeviceNeverRelinksACastleAccount`.
+**Code half.** The vault's CAS race for Re-link — phase 3's convergence suite; Re-link's door and the drill — phase 4.
+
+### S-6 · PROVEN
+**Element.** Standard: the history holds the older keys since the library came into Standard, each locked with today's
+key; older copies open through it, and copies from before a leave through the anchor with the leave day's secrets.
+**Model proof.** `KeyFileCrossingTests.withinAModeTheHistoryGrowsAndTheAnchorRides`, `.leavingCastleTakesNothing_theAnchorOpensWithThePassphraseAndTheWords`;
+`KeyHistoryTests.theHistorySurvivesThreeReKeys`; `RouteFinderRoadTests.afterALeaveCastleCopiesOpenWithTheDaysSecretsAndNothingAppleReachable`,
+`.aPassphraseChangedAfterTheLeaveIsNamedByTheLeavesDay`; `OpenCopyTests.aCastleEraCopyOpenedIntoAStandardLibraryTakesTheStandardModeAndNeverLowersAnything`
+(opened through the anchor with the leave day's passphrase); promise 5 over `CopyAndCrossingScenarios.afterALeaveTheKeyDoors`.
+**Code half.** The restore drill — phases 2 and 5.
+
+### S-7 · GAP (narrow: "re-keying nothing") (CUT clause: other libraries' key files)
+**Element.** Re-link's library arm: where a Standard library's own Apple key can't be read here, no repair mints one —
+the assessment says the road is lost and offers the arm, which mints a fresh own key and re-locks every Standard key
+file here that needs one (other libraries' and local-only included), re-keying nothing; then promise 3 settles.
+**Model proof — what is asserted.**
+- No repair mints; the road lost; the arm offered: `AssessRepairTests.inStandardTheWrapLandsUnderThisMacsOwnKeyAndNoRepairMintsOne`;
+  `GeneratorFoundScenarios.aReplacedMacIsOfferedReLinkForALocalLibraryWithNoAppleWrap`.
+- The arm: `SharedKeyActTests.theLibraryArmMintsAFreshOwnKeyAndThenUseCastleRetiresBoth` (a fresh own key, live in iCloud,
+  on the live file).
+- Then promise 3 settles (the world's settle presses the arm wherever it's offered): `MoreScenarios.aStandardLibrarysOwnAppleKeyLost`
+  (local-only), `CornerScenarios.aSyncedStandardLibrarysOwnAppleKeyLost`, `MoreScenarios.aLivingMacClonedOntoNewHardware`.
+**The gap.** "Re-keying nothing" is unasserted for the library arm (the code re-wraps the same key: `Executor/Acts/SharedKeyAndRelink.swift:58–66`;
+the account Re-link's test does assert it). **Needed:** after `relinkLibraryArm`: `library.key`, the live key file's
+fingerprint, epoch and history unchanged, and the record's tree unchanged.
+**CUT clause (LC).** "Other libraries' ... included": other libraries' own key files are §3.5 point 2's gifts, which drop
+("§3.5 point 2's gift machinery (per-library key files + own Apple keys for OTHER libraries' old copies)"); the arm's
+other-library half is built (PROVISIONAL P-U3-5) and unpinned, and goes with the gifts at phase 2's first act.
+**Code half.** Re-link's library-arm door and the drill — phase 4.
 
