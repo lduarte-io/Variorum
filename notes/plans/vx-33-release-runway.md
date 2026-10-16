@@ -30,7 +30,7 @@ units) are scope, not durations.
 | **VX-246** MCP door fixes & AI docs | the door's security, correctness, wire asks, then the AI's docs last | 21 | Opus / **Fable** | now |
 | **VX-281** MCP settings pane & shared icon | the pane in tabs, the code block, the Library's shared icon | 4 | Opus / Opus | now |
 | **VX-282** Editor & notes fixes | backspace, the italics flicker, take panel, capture box, comments family | 9 | Opus / **Fable** (editor seam) | now |
-| **VX-283** Sidebar & Library polish | the Open list, Library polish, the red lint (trimmed at her 2026-10-14 triage) | 9 | Opus / Fable | merged 2026-10-16 (PR #<PR>); cut 0.9.7 with VX-336 |
+| **VX-283** Sidebar & Library polish | the Open list, Library polish, the red lint (trimmed at her 2026-10-14 triage) | 9 | Opus / Fable | merged 2026-10-16 (PR #167); cut 0.9.7 with VX-336 |
 | **VX-284** Books, gatherings & tags | her VX-214 follow-ups, tag undo, the book view's doors and Index slice, VX-216 last | 17 | Opus / Opus | now |
 
 Plus **her own track** (§4) and **the release itself** (§5).
@@ -192,7 +192,7 @@ Read `notes/TEXTKIT2_NOTES.md`. **Mobile-visible:** VX-296's shared face reaches
 (say so in the MOBILE PARITY line); VX-290 is Mac-only (the phone has no carve).
 
 ### VX-283 — Run: Sidebar & Library polish
-**CLOSED 2026-10-16** — merged (PR #<PR>) and released in the ONE 0.9.7 with VX-336 (her 15:58 call); her hand check of the Open list drag is VX-376; the handoff `notes/handoffs/vx-283-handoff.md`.
+**CLOSED 2026-10-16** — merged (PR #167) and released in the ONE 0.9.7 with VX-336 (her 15:58 call); her hand check of the Open list drag is VX-376; the handoff `notes/handoffs/vx-283-handoff.md`.
 **TRIMMED at her kickoff triage (2026-10-14; the record is `notes/plans/fixes/vx-283-sidebar-library-polish.md`
 on the run's branch).** Parked until after launch, her words on each ticket: VX-123 and VX-122 (*"I don't want
 to contort VX-123 to be fixed incorrectly when it's really a sync issue … those are niche nits"*), VX-19, VX-125,

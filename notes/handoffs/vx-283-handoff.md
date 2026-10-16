@@ -1,6 +1,6 @@
 # VX-283 handoff — the Open list grows, closes with ⇧⌘W and reorders by drag; the Library's controls row steadies (2026-10-16)
 
-**Run:** VX-283 "Run: Sidebar & Library polish" · PR #<PR>, merged to `main` as a merge commit (<SHA>) · the record
+**Run:** VX-283 "Run: Sidebar & Library polish" · PR #167, merged to `main` as a merge commit (e2efdc79) · the record
 `notes/plans/fixes/vx-283-sidebar-library-polish.md` (your triage and rulings, every unit's record and PROVISIONALs,
 the stage windows, the walks, the review) · built 2026-10-14/16 on the Pro under your kickoff answers, your walk rule
 (*"I want you to have an opus on xhigh walk with screenshots of the areas where the UI changed - especially the tab bar,
@@ -22,7 +22,7 @@ and your second: *"I'll be sleeping finish everything and send the fresh install
    any drop fails, say so: the fallback is one commit, main's exact road, without the line.**
 2. **Try 0.9.7: one release covering VX-336's AI work and this run** (your 2026-10-15 call, *"x283 will release a single
    release (0.9.7) covering both your work & their work. it should not bump the version again"*). It is on the
-   website, and installed in /Applications as the same build: <BUILD — filled after the release>. What's new in the
+   website, and installed in /Applications as the same build: **0.9.7 (7933)** (the site commit `a37a275d`; the replaced 0.9.5 (7503) is in your Trash, and a safety copy of your store is `Backups/safety-copies/vx283-refresh-20261016T180250Z`). What's new in the
    sidebar and Library:
    - **The Open list** runs down to just above the sync row and stops there. Its scroll bar sits in the margin, clear
      of every ✕ (and Starred's ★).

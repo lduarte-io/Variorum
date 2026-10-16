@@ -402,7 +402,7 @@ trailer of any kind.
 | U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **PROVEN on pins and parity, CLOSED; the landing is her hand check (VX-376).** U2d (F2 on main's per-row API, P-U2d-1): window 08:04–08:42, pins 60/7, every revert exactly as named (R-W in the worktree), batch 725/144 with only VX-115; the re-walk holds D1'/D4/D5'/D7'. Synthetic drags cannot reach sidebar drops (the main-build control; VX-375). |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **PROVEN, CLOSED.** W1/W3/W4/W5 (U3); VX-175 via U3b + U3c (P-U3c-1): window 16:43–16:54 green, R-P exactly 4 red; D8 HOLDS on the re-walk in both voices. VX-374 (R2-3/R2-4) ticketed. |
 | Ladder | `fable-reviewer` at xhigh (her word), fresh per round, cross-model | **CLOSED at two rounds.** Round 1 (tip 448f9450): 0B/0M/2m/4n, all dispositioned. Round 2 (tip 5147b7e5): 0B/0M/2m/2n — R2-1/R2-2 the orchestrator's (done / sequenced), R2-3/R2-4 → VX-374. |
-| Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, release | **IN PROGRESS** (2026-10-16 ~08:45): main into the branch, the release-notes section, canon, the merged-tip Mac run, the PR and merge ask, then the ONE 0.9.7 + the /Applications refresh (her second overnight mandate). |
+| Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, release | **DONE 2026-10-16.** The whole Mac target 4,854/800 (VX-115 + VX-167 standing, no new red); canon on the branch; **PR #167 merged as e2efdc79** (11:49, at the coordinator's GO); **0.9.7 (7933) released** (the stamp e2efdc79, DMG sha256 d522317a…, both verify-published PASS, site a37a275d) and **installed in /Applications** (codesign + spctl, A1 vx283-refresh-20261016T180250Z, store cmp SAME); members Done; her hand check VX-376 open. |
 
 ## Stage traffic log (oct13coordinator protocol)
 
@@ -4829,6 +4829,31 @@ notes review stays waived (her overnight word). **The worked road is VX-336's "T
   serves staged beside, codesign + spctl, swap, verify again, nothing launched, no real-store MCP calls, no re-seed). The
   A1's name in step 5 reads `vx283-refresh-<UTC stamp>`.
 - Installed before: 0.9.5 (7503).
+
+## THE RELEASE — DONE (2026-10-16, claim `vx283-release` 11:50:06 → RELEASED 12:04:10)
+
+The coordinator's GO at 11:49 (origin/main = `e2efdc794`, build count 7933, both MARKETING_VERSION lines 0.9.7, the
+notes' three sections, zero instances, the mcp page 200, the live appcast at 0.9.6 (7517), /Applications at 0.9.5 (7503)).
+ONE fresh release runner (`opus-implementer`, xhigh) ran VX-336's road minus the bump:
+- **release.sh** (17:52Z → ~18:00Z, exit 0): **CFBundleVersion 7933**, stamped `e2efdc7947e2`. Both notarizations were
+  Accepted with 0 issues, and every VERDICT PASSED. One warning: LaunchServices still holds the DMG mount-point
+  registration, the same leftover 0.9.3–0.9.6 have; no 0.9.7 app is registered.
+- **DMG** `Variorum-0.9.7.dmg`, 29,268,959 bytes, sha256 `d522317afd57f8076ab9ae9671b28162184e1bb3978ee209b3c72cb378b5e11e`.
+  It went to R2 first; `verify-published.sh dmg` PASS (HTTP 200, the bytes IDENTICAL).
+- **The site:** the appcast copied, `variorum.json` → 0.9.7, build + deploy (Worker `6b65e333`); `verify-published.sh
+  appcast` PASS (HTTP 200, BYTE-IDENTICAL, enclosure live). Site commit `a37a275d` (master, pushed). The mcp page is 200.
+- **The /Applications refresh:**
+  - the A1 `…/Variorum/Backups/safety-copies/vx283-refresh-20261016T180250Z/` (7 files, all `cmp` SAME);
+  - staged from the verified DMG, codesign + spctl + stapler validated;
+  - the old **0.9.5 (7503) moved to the Trash** (`Variorum-0.9.5-7503-replaced-by-0.9.7-20261016T180321Z.app`);
+  - **installed 0.9.7 (7933)**, codesign valid, spctl accepted (Notarized Developer ID);
+  - the store `cmp` SAME against the A1 after the install;
+  - nothing launched.
+- **The orchestrator's own checks after the report:** the installed Info.plist reads 0.9.7 / 7933, codesign and spctl
+  pass, the live appcast tops at 0.9.7 / 7933 (cache-busted), the DMG answers 200, zero instances, main clean at
+  `e2efdc79`.
+- The main freeze lifted at the release. `default.profraw` stays at `/tmp/default.profraw-vx283-20261016T174909Z`
+  (moved, never deleted).
 
 ## Ladder
 

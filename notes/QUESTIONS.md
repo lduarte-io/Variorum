@@ -2906,7 +2906,7 @@ Status: RATIFIED 2026-10-15 — every item above answered; P-VX311-2 to be exten
 
 ## VX-283 — Run: Sidebar & Library polish (2026-10-16)
 
-#228 — **THE VX-283 RATIFY BUNDLE (merged 2026-10-16, PR #<PR>, merge commit <SHA>; the binding record is
+#228 — **THE VX-283 RATIFY BUNDLE (merged 2026-10-16, PR #167, merge commit e2efdc79; the binding record is
 `notes/plans/fixes/vx-283-sidebar-library-polish.md` — your triage and rulings, each unit's PROVISIONALs with their
 options, the orchestrator's rulings, THE LADDER; your handoff `notes/handoffs/vx-283-handoff.md`).** Built under your
 walk rule (an Opus xhigh screenshot walk after every unit) and your two overnight words, the second *"I'll be sleeping
