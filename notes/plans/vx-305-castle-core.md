@@ -570,7 +570,7 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   **DONE** (NEW-2 a checker bug, NEW-1 a model bug under P-U4-6 (a); verified Debug 432/70 · Release 371/65); round 2
   **DONE** (0 MAJOR · 1 MINOR · 4 NIT, all applied, checked line by line, Debug 434/71 · Release 372/66). **THE
   LADDER IS CLOSED** — code tree `63cf038f1`.
-- The go/no-go record: **IN FLIGHT** — the fresh soak (seeds 1–20 × 1,000 × ≤ 60, one seed per call, Debug then
+- The go/no-go record: **ATTEMPT 1 NO-GO** (§10: 13 of 20 seeds fail, both configurations; the key map written, 11 GAPs) — the census, triage batches, ladder round 3 and a fresh soak follow. Was: the fresh soak (seeds 1–20 × 1,000 × ≤ 60, one seed per call, Debug then
   Release) on `63cf038f1`; the key map's model half by a fresh implementer, read-only on code while the soak runs.
 
 ---
@@ -1655,7 +1655,72 @@ disposition above; the triage's two pre-existing finds are fixed and re-checked.
 
 ## 10. The go/no-go and the key map's model half (filled at close)
 
-*(empty)*
+### Attempt 1 — 2026-10-16, on code tree `63cf038f1` (the ladder's close): **NO-GO**
+
+**The soak** (seeds 1–20 × 1,000 sequences × ≤ 60 steps, `PROTECTION_SOAK=1 PROTECTION_SEED=n PROTECTION_SOAK_SEEDS=1
+PROTECTION_SOAK_SEQUENCES=1000`, one seed per call, Debug then `-c release`; the orchestrator's script, logs in the
+session scratchpad): **13 of 20 seeds FAIL, the SAME 13 in both configurations** (the generator is deterministic — the
+optimizer is not the cause). Green: seeds 2 (44,486 steps; Debug 332.2 s · Release 209.3 s), 3 (45,192; 421.4 · 218.6),
+4 (45,124; 372.8 · 222.4), 13 (44,538; 399.9 · 209.8), 15 (44,156; 328.8 · 199.8), 17 (45,540; 343.6 · 213.8), 20
+(45,218; 338.1 · 206.3). Each failing seed stops at its first violation (sequence, promise, minimal length):
+
+| seed | seq | promise | minimal | first violation (short) |
+|---|---|---|---|---|
+| 1 | 615 | 9 | 5 | a backup's *Opens with* line names today's words, which don't open it (crashed New Words + crashed key-file replay) |
+| 5 | 335 | 9 | 5 | the line names today's passphrase/words, which don't open it (a landing, then a tamper group) |
+| 6 | 528 | 2 | 7 | a login-password holder opens copies (a landing, sync on, Use Castle Always ask, a replayed library file) |
+| 7 | 141 | 8 · 2 | 3 | **no tamper:** a 13p-era library first opened after switching Apple ID, then switched back — the current key reachable |
+| 8 | 230 | 5 | 7 | copies open by no road (a crashed Use Castle, Time Machine rollback, both homes replayed) |
+| 9 | 720 | 5 | 5 | copies open by no road (switch Apple ID, a tamper group, a backup, the keychain wiped) |
+| 10 | 446 | 5 | 4 | **no tamper:** copies open by no road (Time Machine rollback across Use Castle, then a replacement Mac without memory) |
+| 11 | 343 | 4 | 6 | the record's account dropped at an ordinary launch (a landing after Stop Syncing Here, a crashed replay) |
+| 12 | 565 | 9 | 4 | **no tamper:** the line names a passphrase day that doesn't open it (a crashed corner-45 answer, Change Passphrase on the other Mac, the old shared key retired) |
+| 14 | 949 | 9 | 5 | the line names today's passphrase, which doesn't open it (a tamper group) |
+| 16 | 80 | 10 | 5 | after a replayed library file the mode is Standard (a crashed Always-ask Use Castle, key doors, a tamper group) |
+| 18 | 268 | 6 | 5 | **no tamper:** an act left in flight (Time Machine rollback across a crashed Use Castle, then Move Off Shared Key) |
+| 19 | 129 | 6 | 3 | **no tamper:** an act left in flight, copies paused (a crashed Replace All Keys, Use Castle on the other Mac, a backup) |
+
+**The orchestrator's bisect** (each minimal sequence replayed as a throwaway test in a scratch worktree — never
+committed — by `ScenarioGenerator.replay` from its start state and world seed; all 13 reproduce on `63cf038f1`):
+- **Seeds 1, 6, 7, 8, 10, 12, 18, 19 FAIL on the U4 final tree `6128c8de` too** — pre-existing model or checker
+  behaviour the U4 soak never drew (its streams were different; its table stands as that run's honest record).
+- **Seeds 5, 9, 14, 16** use `.tamperSequence` (round 1's soak-visibility action) and fail from the round-1 fixes
+  tree `74c638dab` onward — pre-existing states that action newly reaches.
+- **Seed 11 is the one REGRESSION:** green through `59d5d9289`, red from `69336aa21` — the triage's NEW-1 model fix
+  (the memory's facts win over a replayed file; the record's account follows the memory to "none" at a launch that
+  finished a crashed tamper's relaunch, which promise 4 reads as an undeliberate change). Whether the model or the
+  checker is wrong is the triage's to trace.
+- Because each seed stops at its first violation, more finds may sit behind these: a CENSUS run (the same 20 × 1,000,
+  patched in the scratch worktree only to record every failing sequence and continue) is sizing the whole set before
+  the triage batches are cut.
+
+**The key map's model half — written** (`notes/plans/vx-305-key-map-model-half.md`, a fresh Opus implementer, commits
+`68a21c8c1` · `e8ec5f433` · `d5aafa926` · `07074efd5`; against `63cf038f1`, test names read, not run): **47 rows — 31
+PROVEN · 2 PARTLY (R-4: the lobby's memory-mirror road, her P-U4-13 (b), and P-R1-1's copy-less refusal; T-5: the
+empty-slot landing, phase 5 / VX-309) · 1 NOT A MODEL CLAIM (A-2, persistence, phase 4 / VX-314) · 2 CUT (K-3, K-4 —
+her legacy cut, quoted) · 11 GAP.** The GAPs:
+- **Substantive — C-2:** a planted Apple lock on a Castle key is "answered with a re-key" (the key map, the design);
+  `assess` owes `OwedAct.rekeyForFault` (Assess.swift:575–576) but NOTHING in `Executor/` runs it — verified by the
+  orchestrator (`grep rekeyForFault` finds only the owe and the enum case) — and the world cannot reach the state
+  (`plantAppleWrap` needs a silent item). A model gap: phase 1 builds the executor's road plus a fixed scenario and a
+  mutation twin.
+- **Substantive — T-8:** bringing a plaintext export in — the open rule's verdict is pinned, but no act exists (the
+  world's `openCopyByRule` throws `nothingToDo`). **Orchestrator's adjudication, PROVISIONAL for her bundle:** hand
+  forward to phase 5's open road beside T-5's empty-slot landing (VX-309) — the act lands a library, the same family
+  as the landing phase 5 owns — unless she rules it into phase 1.
+- **Narrow (the code road exists; the assertion is missing) — C-3, C-6, C-9, H-4, S-2, S-7, T-1, T-7, A-4:** tests to
+  write, each named in the file.
+- **Two notes for her bundle:** S-1 — P-U2-1 says a stray Touch ID item "goes at the next act a person presses", but
+  the code deletes only the outgoing key's items, so another key's stray item stays (a line for P-U2-1's QUESTIONS
+  entry); H-5 — the migration seeds the family tree from old copies' fingerprints, which her legacy cut drops; phase
+  2's record should say whether the seeding stays.
+
+**The road to GO (the orchestrator's plan, under her "go even if it delays launch"):** (1) the census sizes the finds;
+(2) triage batches, a fresh Opus implementer each (trace → classify model / checker / ruled limit → pin red-first →
+fix, or PROVISIONAL options for anything that is hers), the no-tamper roads and the seed-11 regression first; (3) one
+batch closes the key map's GAPs (C-2's executor road; the nine assertions); (4) **ladder round 3** — a fresh Fable
+reviewer over everything since `816cb6888` (her cap: up to five rounds), since these are model changes no round has
+read; (5) a fresh 20 × 1,000 soak in both configurations; (6) the key-map table re-read against the final tree.
 
 ## 11. Closeout
 
