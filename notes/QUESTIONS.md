@@ -2903,3 +2903,80 @@ renumbers. #227 was free at the merge.)*
     question about tags is answered on the ticket: a duplicate wears the original's tags as copied rows, so no
     tag-collecting book seats it or rings for it (P-17y-B3-c1); gatherings show it at once.
 Status: RATIFIED 2026-10-15 — every item above answered; P-VX311-2 to be extended by VX-371 (pre-launch).
+
+## VX-283 — Run: Sidebar & Library polish (2026-10-16)
+
+#228 — **THE VX-283 RATIFY BUNDLE (merged 2026-10-16, PR #<PR>, merge commit <SHA>; the binding record is
+`notes/plans/fixes/vx-283-sidebar-library-polish.md` — your triage and rulings, each unit's PROVISIONALs with their
+options, the orchestrator's rulings, THE LADDER; your handoff `notes/handoffs/vx-283-handoff.md`).** Built under your
+walk rule (an Opus xhigh screenshot walk after every unit) and your two overnight words, the second *"I'll be sleeping
+finish everything and send the fresh install to the website overnight."* Each was built as stated below, with a line
+to reverse it.
+- **The ones most worth your eye:**
+  - **The Open list's drag is verified by tests and by matching main's own road. Your hand check is owed (VX-376,
+    High).** Synthetic drags can't reach any drop in the sidebar; main's own drag failed the same test (the run's
+    main-build control). So no walk could land one.
+    - **P-U2d-1** (the orchestrator's), as built:
+      - each Open row is its own drop on main's own API (the road your hands used);
+      - a thin line at the top of the row you're over;
+      - the drop lands before that row with a short settle;
+      - the room under the last row is the last slot;
+      - the dragged row's own place does nothing.
+    - Lost from U2's first design: the half-row precision. The line sits at the top of the row you're over, not at
+      its nearer edge.
+    - Options: (b) main's exact road, no line; (c) the half-row design on the newer drop API (built as U2c; no drop on
+      this road ever consulted it, so it is unverifiable).
+    - If a drop fails in your hands, the fallback is one commit.
+  - **P-U2d-2 — the end zone is never absent.** As built: the room under the rows (up to 28 pt) plus the column's 12-pt
+    bottom padding, so the last slot is reachable even while the list scrolls, your usual state. Options: (b)
+    unreachable while the list scrolls, as on main; (c) a tail inside the list's scroll (it would disturb the fades).
+  - **P-U3c-1 — the Library's two segmented controls keep their natural width.** After a search they answered
+    squeezed, which flipped the row between one line and two. As built: fixed at their natural width.
+    - At the 1240-pt default with a 210-pt sidebar: one line with the panel closed, two lines with it open.
+    - With the dev store's ~231-pt sidebar, Terminal reads two lines with the panel closed, and stays two.
+    - Option: (b) let them squeeze again (the flip returns).
+  - **P-U3-4 — the dark heading is drawn in the List's paper colour (`surface`), not the black room.** Under a
+    palette the paper carries the palette's hue, so `room` would draw a black band over a hued list. Option: (b)
+    `room` (black), as the ruling's words literally say.
+- **The Open list (U1):**
+  - **P-U1-4 — the floor on a short window:** 3½ rows. Options: (b) 3; (c) 5½.
+  - **P-U1-1 — where ⇧⌘W lands:** the next note, else the previous, else the Library. Options: (b) next, else the
+    Library (never backwards); (c) next, else previous, else the Bookcase.
+  - **P-U1-2 — two edges.** (i) In a split, a note the other pane shows is passed over. (ii) A note shown with no row
+    is still closable, and lands on the last row; option (ii)(b): ⇧⌘W grey without a row.
+  - **P-U1-3 / P-U1-5 — the other pane of a split.** Close All, and a ✕ on a row the other pane shows, land that pane
+    on the Library in place, focus kept. Options: (b) only the focused pane lands; (c) Close All folds the split.
+  - **The edge fade (P-U1-6, reshaped by your ruling):** always half a row deep, its strength easing in, capped at 0.8
+    (**P-U1d-3**), drawn from the voice's room as an overlay (**P-U1b-4**). **P-U1e-1:** the strength reaches full over
+    the row's own text padding (7 pt at the 30-pt pitch, 4 at 24), so a row cut near its foot fades before its
+    letters. It supersedes P-U1d-2's half-row ramp. Options: (b) the half-row ramp; (c) a smoothstep.
+  - **P-U1b-1 — the reveal's air:** a revealed row lands a fade's depth inside an edge with more beyond it. Options:
+    (b) the minimal reveal, under the fade; (c) a whole row of air.
+  - **P-U1d-1 — re-selecting the note already shown is not an act** (a list you scrolled stays put). Option: (b) every
+    navigation request is an act.
+  - **P-U1d-4 — each section follows on its own.** Option: (b) a hand scroll in either list stops both.
+- **The drag (U2), still standing:**
+  - P-U2-1: a drop never scrolls the list; following is unchanged.
+  - P-U2-3: a drop acts only on the list its drag began in.
+  - P-U2-4: the settle is `.snappy` over the column's 0.22-s beat.
+  - P-U2-5: the chip is the row's title alone.
+  - P-U2-6: the line is drawn above the fade.
+  Superseded: P-U2-2 by P-U2d-2; P-U2b-1 and P-U2c-1 with F1.
+- **The Library (U3):**
+  - P-U3-1: toasts sit above the quick-entry band.
+  - P-U3-3: the Library's quick-entry band is kept clear too, not only the Bookcase's.
+  - P-U3-2: became your composition ruling (C).
+  - P-U3-5: the wrap reads stable widths only.
+  - P-U3b-1: the field's floor includes its bezel.
+  - P-U3b-2: Timeline is judged without sort and when, so a mode switch may re-flow the row.
+- **Mechanism-only, no choice for you:** P-U1b-2/3 (superseded by your follow and fade rulings), P-U1b-5/6/7,
+  P-U1b-8 (reverted), P-U1c-1.
+- **For your eye, not provisional:**
+  - O-1: typing into an EMPTY search field with the info panel open closes the panel on the first letter. That is the
+    existing selection-follows-results design.
+  - O-2: one keyboard sort pick closed the panel once, and could not be reproduced.
+  - The 0.9.7 notes' VX-283 section was written without your review, at your word.
+Cross-refs: VX-285 · VX-286 · VX-287 · VX-288 · VX-289 · VX-121 · VX-175 · VX-20 · VX-245 · VX-359 · VX-344 ·
+VX-360 · VX-373 · VX-374 · VX-375 · VX-376.
+*(Numbering: the next free number on main when written; #228 was free at the merge.)*
+Status: open — your eye; the handoff's checklist leads with the drag.

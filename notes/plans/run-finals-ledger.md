@@ -2,6 +2,12 @@
 
 **What this is (her ruling 2026-10-14, VX-341):** AppSpec §14 keeps the most recent ~five efforts' entries slimmed to contract and provenance; the finals and ladder tallies stripped from each entry live HERE verbatim, newest first. A rolled entry's full original text also remains in `notes/AppSpecDeltaArchive.md` (VX-246's finals live only here until its roll). Future closeouts write the slim entry in §14 and append the finals/ladder text here in the same commit.
 
+## VX-283
+
+the ladder CLOSED at round 2 — Fable xhigh R1 0B/0M/2m/4n (R1-1 the LIVE STATUS currency, fixed by the orchestrator; R1-2 the windows owed, run; R1-3…R1-6 applied by the implementer) → Fable xhigh R2 0B/0M/2m/2n (R2-1/R2-2 the orchestrator's, done; R2-3/R2-4 → VX-374); no final-round code fixes.
+
+Finals: the merged-tip WHOLE Mac target <FINALS — filled after the closeout window>. Per-unit windows: U1d 434/96; U2 722/144 (VX-115 only); U3b 511/103 (one real red → U3c); U3c 513/103 green; U2d 725/144 (VX-115 only); every pin red-on-old as named (U2d's R-W in the worktree, a source read). Walks: U1, U1b, U1d, U3, U2 (D1/D2 a road limit — the main-build control), and the U2d + U3c re-walk, every row holding.
+
 ## VX-336
 
 the ladder CLOSED at round 2 — Fable xhigh R1 0B/1M/2m/2n (R1-1, U9's window then pending, closed by its evidence; R1-2, the canon owed, landed in-branch before the merge; R1-4/R1-5 nits, no change; no code fix) → Fable xhigh R2 0B/0M/1m/3n (R2-1, a wire Compare landing's armed posture outliving a named peer that never projected, fixed red-first in PHASE B and checked line by line; R2-2 one comment clause; R2-3 one handoff line; R2-4 a nit, no change); no round 3 earned
