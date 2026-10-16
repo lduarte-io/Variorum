@@ -1,6 +1,12 @@
 # VX-305 ladder round 1 — the fixes (the Opus implementer, applying the reviewer's final call)
 
-**Not done, first:** IN PROGRESS — see LIVE STATUS.
+**Not done, first:** (1) **a fully green generator slice** — two PRE-EXISTING classes the compound generator's
+shifted random stream now reaches (NEW-1, promise 3; **NEW-2, promise 13 with no tamper in it**) fail 3 of 750
+sequences on seeds 1–3 × 250; both reproduce on the round's base `e4ee1f083` with only the actions that existed there,
+neither is one of the six findings, so neither is fixed (a second unit — for the orchestrator/reviewer, §"Found by the
+generator, outside the round"). The go/no-go soak (gate 1) will meet them until they're triaged. (2) The final call's
+optional `.crash(...)` wrap of a tamper group — not built, with the reason in §1(c). (3) P-R1-1's door (the copy-less
+rebuild) — recorded, not built, as ruled. (4) The phase plan's §9 dispositions entry — left to the orchestrator.
 
 The binding text is `notes/plans/vx-305-ladder-round-1-final-call.md` (all six findings CONFIRMED, FINDER-FIXES
 none). The pins the implementer's answer ran red are `Tests/VariorumCoreTests/Protection/Scenario/LadderRound1Pins.swift`
@@ -11,17 +17,18 @@ none). The pins the implementer's answer ran red are `Tests/VariorumCoreTests/Pr
 
 - **2 · MINOR** — assess reads the live key file only when it is the current key's: **DONE** (`1dfbb85f8`).
 - **1 · MAJOR** — the stray-file wedge: (a) both gates widened, (b) the stray file set aside, (d) the pins flipped —
-  **DONE** (`95fbf9349`); (c) promise 1's clause + the compound-tamper action — **DONE** (this commit).
+  **DONE** (`95fbf9349`); (c) promise 1's clause + the compound-tamper action — **DONE** (`3ac5e5a95`).
 - **TWO PRE-EXISTING CLASSES the compound generator's shifted stream surfaced — NOT this round's, NOT fixed, for the
   orchestrator/reviewer (§"Found by the generator, outside the round" below):** NEW-1 (promise 3, a different
   library's file swapped into the slot) and **NEW-2 (promise 13, no tamper at all — a landing, Use Castle, Use
   Standard)**. Both reproduce on the round's base `e4ee1f083`. They keep a generator slice from running fully green.
-- **5 · NIT** — `takingOver`'s standing old-shared pick: **DONE** (this commit).
-- **6 · NIT** — the lobby's Touch ID line before unlock: **DONE** (this commit).
-- **3 · NIT** — DeviceActs' dead "memory" arm: **DONE** (this commit).
-- **4 · NIT** — the P-U3-7 → P-U3-5 comment: **DONE** (this commit).
-- The runs (the protection set in Debug, `swift build -c release`, a generator slice with tamper composition):
-  PENDING.
+- **5 · NIT** — `takingOver`'s standing old-shared pick: **DONE** (`5c36da3d8`).
+- **6 · NIT** — the lobby's Touch ID line before unlock: **DONE** (`5c36da3d8`).
+- **3 · NIT** — DeviceActs' dead "memory" arm: **DONE** (`5c36da3d8`).
+- **4 · NIT** — the P-U3-7 → P-U3-5 comment: **DONE** (`5c36da3d8`).
+- The runs: **DONE** (§"The runs at the end" — Debug 429/69 green; `swift build -c release` green; the protection
+  set under `-c release` 368/64 green; the generator slice: 750 sequences, 312 tamper groups, the only failures the two
+  pre-existing classes).
 
 ## 2 · MINOR — assess reads the live key file only when it is the current key's
 
@@ -241,3 +248,45 @@ protection set green after.
 
 **The fix.** `SharedKeyAndRelink.swift`'s library-arm comment now cites **P-U3-5** (the skip-and-report call, the U3
 record); P-U3-7 is the no-repair-while-in-flight call. No pin.
+
+## The runs at the end (on the final tree, `5c36da3d8` — every later commit is this record)
+
+- **The protection set, Debug** (every `@Suite` under `Tests/VariorumCoreTests/Protection/`, 69 — the round added
+  `LiveKeyFileIsTheCurrentKeysTests`, `LadderRound1MajorPin`, `TakingOverStandingOldSharedTests`,
+  `TouchIDLobbyWithNoHintTests`): `✔ Test run with 429 tests in 69 suites passed after 14.566 seconds.` (413 + 16; the
+  pins-off mutation suites among them, green — each asserts guarded-green AND unguarded-fail in one test.)
+- **Release:** `swift build -c release` — `Build complete! (93.37 sec)`. The compiled subset:
+  `swift build -c release --build-tests -Xswiftc -enable-testing` (7:45 wall), then `swift test -c release --skip-build`
+  over the same 69 names — `✔ Test run with 368 tests in 64 suites passed after 4.009 seconds.` (429 − 61 DEBUG-only
+  = 368; 69 − 5 = 64 — U4's arithmetic, plus this round's 16 tests in 4 suites.)
+- **A generator slice with tamper composition** (soak shape ≤ 60 steps; a temporary first-violation probe, not
+  committed): seeds 1–3 × 250 — `750 sequences, 33728 steps, 3 failing; tamper groups 312 (done 308); 290.0 s`; the
+  three failures are NEW-1 (×1) and NEW-2 (×2), both pre-existing, nothing else. The everyday generator loop inside the
+  protection set (2 seeds × 8) is green.
+- **Scope:** `git diff --stat df5fa9b43..HEAD` touches only `Sources/VariorumCore/Protection/`,
+  `Tests/VariorumCoreTests/Protection/` and this record — zero `Sync/`, `App/`, `Server/`, `Persistence/`, migration
+  or `Package.swift` lines; no new dependency.
+
+## For round 2's re-check (the final call's list, answered where it points)
+
+- **The two widened gates agree:** assess owes `restoreKeyFileFromCopy` under exactly the executor's conditions —
+  nothing in flight (`runRepairs` skips everything in flight; assess now says so too), no format-3 file of the current
+  key in the live place, no current mirror, a catalogued frozen copy of the current key **with the same library ID**
+  (assess now filters on it, as the executor verifies it).
+- **The set-aside is non-destructive and catalogued:** the leaf never overwrites (false when the name is taken); the
+  name is today's set-aside shape, parsed by the one parser as `.setAside`; `expectWedgeRepaired` asserts the stray file
+  catalogued `.setAside` in every wedge pin. The mirror and plan restores still overwrite (recorded in §1(b)).
+- **Promise 1's clause is keyed on "no repair owed", not blind-green:** red on the pre-fix gates in two generator-found
+  roads (`aTamperGroupReachesTheWedge`, `aLibraryFileReplayedAfterALeave`), green on the fixed tree.
+- **The compound action keeps the seed-9 pre-settle:** `step` runs ONE pre-launch settle before a group exactly as
+  before a single tamper (the bracket is shared code, `tampered`).
+- **The MINOR's guard didn't break `libraryFileLosesToMemory`:** the raw live file feeds that arm; its existing pins
+  (`aLibraryFileReplayedAloneInCastle`, `aLibraryFileReplayedFromBeforeAJoinChangesNothing`, the
+  `libraryFileLosesToMemory` mutation pin) are green in the 429.
+- **The `.first` pin is red-on-old:** shown with the parameter threaded and the old pick kept (§5).
+- **The Touch ID fallback ripples nowhere:** every existing Touch ID test green, none edited.
+
+## Commits
+
+`1dfbb85f8` (2 · MINOR) · `95fbf9349` (1 · MAJOR (a)(b)(d)) · `3ac5e5a95` (1 · MAJOR (c), and NEW-1/NEW-2 recorded) ·
+`5c36da3d8` (the four NITs) · this record's closing commit. Each pushed to `origin/vx-305-castle-core` as it landed.
