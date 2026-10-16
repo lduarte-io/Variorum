@@ -1583,7 +1583,22 @@ our current decisions."*
    DROPPED:** *"we do NOT need to be concerned with pre designed stores. we just don't."* **C5 — VX-307 owns the vault's
    server change (the SyncSpec §12 lockstep).** The wording and plan tightenings (F1, F6, F7, F8, F11, F12, F13, S2, S3,
    S4, C2, C3, C4, C6) apply as the orchestrator proposed.
-15. **THE LIFECYCLE PAGE FIRST.** *"I agree with building the lifecycle as a test and a page, before more triage. that's
+15. **HER RULING, 2026-10-16 (later) — ONE POSTURE AT A TIME; THE LEAVE HANDS EVERYTHING TO STANDARD.** Her words:
+   *"do you think it would simplify the design to say that after you go from castle -> standard, your castle backups are
+   openable by the new standard? and just keep the rule the same all the time … maybe we need to say that a castle era
+   backup is only safe while you're still in castle."* — *"yeah. let's make this decision, seems like it simplifies a
+   lot."* — *"another *solid* rule I want you to weigh the design against is that an account only can have one posture
+   at a time, really. that means if you're in castle, you're in castle. if you move back to standard, you don't keep
+   some castle benefits."* — *"any place where we're trying to protect the user from their choice has caused problems."*
+   The orchestrator's clincher, accepted: leaving requires the passphrase, which already opens every Castle backup, so
+   keeping them sealed protected against nobody. **Consequences:** a key change ALWAYS carries the history (rule 4 loses
+   its exception); the leave is an ordinary re-key plus the Apple road returned; the former rules 12–13 collapse to one
+   line; the core sentence is true unqualified; the leave screen says plainly that all backups open through Apple and
+   this Mac again; the "Castle anchor" ledger entry's supersession pointer changes. Entering Castle is the mirror:
+   the Apple and on-device items are DELETED (propagating account-wide), so Standard-era backups become Castle-protected
+   with the live library — nothing to encourage deleting. The scheduled-export turn-off stays a NOTICE the user may
+   reverse (her "never protect from their choice" frame).
+16. **THE LIFECYCLE PAGE FIRST.** *"I agree with building the lifecycle as a test and a page, before more triage. that's
    obviously the right thing to do & handling that should be first and foremost."* Written as the TARGET spec (every stage ×
    every user choice × every way in, plain words), ruled on by her, then proven by a test as the cuts land. Local HTML,
    never an Artifact.

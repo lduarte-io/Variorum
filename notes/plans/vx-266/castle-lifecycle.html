@@ -34,7 +34,7 @@
   <span class="roads"><span class="q">quiet road</span> opens without typing</span>
   <span class="roads"><span class="x">gone</span> a road that no longer opens anything</span>
 </div>
-<p class="note">Two facts hold on every row below. A <b>quiet road opens only a key it directly holds</b> — it never reaches through the key file's list of earlier keys; only typed secrets do that [4]. And the Apple road, being your iCloud Keychain, <b>also works on your other Macs</b> signed into the same Apple account [8].</p>
+<p class="note">Three facts hold on every row below. <b>One posture at a time:</b> Castle protects your library while it is in Castle — entering takes everything in, leaving hands everything out [11–13]. A <b>quiet road opens only a key it directly holds</b> — it never reaches through the key file's list of earlier keys; only typed secrets do that [4]. And the Apple road, being your iCloud Keychain, <b>also works on your other Macs</b> signed into the same Apple account [8].</p>
 
 <h2>The three kinds of road</h2>
 <table>
@@ -82,10 +82,10 @@
 
 <div class="stage cas"><h3>6 · Use Castle <small>Castle — Touch ID or Always ask</small></h3>
 <dl>
-<dt>What happens</dt><dd>You type your passphrase. A new Castle key is made; every earlier key moves into its history, under the new key [4, 11]. The Apple keychain entry is <b>deleted</b>. If you chose Touch ID, this Mac keeps the key behind your fingerprint; under Always ask, no copy stays on the device. The scheduled plain-text export is turned off, with one notice. Synced: the account gets a new sync key in one write and keeps the old one in its list; every other device must type a secret once to follow [10, 15].</dd>
+<dt>What happens</dt><dd>You type your passphrase. A new Castle key is made; every earlier key moves into its history, under the new key [4, 11]. The Apple and on-device keychain entries are <b>deleted</b> — and the Apple deletion reaches your other Macs too, so backup A's quiet locks die everywhere. If you chose Touch ID, this Mac keeps the new key behind your fingerprint; under Always ask, no copy stays on the device. The scheduled plain-text export is turned off, with one notice you may reverse. Synced: the account gets a new sync key in one write and keeps the old one in its list; every other device must type a secret once to follow [10, 15].</dd>
 <dt>Opens the library</dt><dd class="roads"><span class="s">passphrase</span><span class="s">twelve words</span><span class="q">Touch ID (if chosen)</span><span class="x">Apple road</span><span class="x">login password</span></dd>
 <dt>Opens backup A (Standard era)</dt><dd class="roads"><span class="s">today's passphrase or words (through the history)</span><span class="s">its day's secrets</span><span class="x">its Apple lock</span></dd>
-</dl><p class="note">Standard-era backups are not stranded by entering Castle. Your Castle secrets reach them through the history [4].</p></div>
+</dl><p class="note">Entering takes everything in: backup A is now Castle-protected along with the live library — its quiet locks are dead and only typed secrets reach it, through the history [4, 11].</p></div>
 
 <div class="stage cas"><h3>7 · In Castle: new words, or a backup <small>Castle</small></h3>
 <dl>
@@ -95,16 +95,16 @@
 
 <div class="stage std"><h3>8 · Use Standard (you leave Castle) <small>Standard again</small></h3>
 <dl>
-<dt>What happens</dt><dd>You type your passphrase. A <b>fresh</b> Standard key with an <b>empty</b> history and a fresh Apple road [12]. Your text, the server's rows and the sync key are Standard from now on — leaving is your choice about your writing. This Mac's Touch ID item and its sealed key-file copy now hold the new key. Other devices follow out quietly, with a notice.</dd>
+<dt>What happens</dt><dd>You type your passphrase. A new Standard key carrying every earlier key — the Castle ones included — with a fresh Apple road and the on-device road back [12]. Your text, the server's rows, the sync key and <b>every backup you have ever made</b> are Standard from now on. This Mac's Touch ID item and its sealed key-file copy now hold the new key. Other devices follow out quietly, with a notice.</dd>
 <dt>Opens the library</dt><dd class="roads"><span class="s">passphrase</span><span class="s">twelve words</span><span class="q">Apple road</span><span class="q">on-device road</span></dd>
-<dt>Opens backup B (Castle era)</dt><dd class="roads"><span class="s">the Castle passphrase or words of its day</span><span class="x">today's secrets</span><span class="x">Apple road</span><span class="x">Touch ID</span></dd>
-<dt>Opens backup A (before Castle)</dt><dd class="roads"><span class="s">its day's secrets</span><span class="s">the Castle secrets (its key is in the Castle key file's history)</span><span class="x">today's Standard secrets</span></dd>
-</dl><p class="note"><b>The only thing that stays Castle-only after leaving is a backup you made while in Castle</b> [13]. Anything else from before the leave opens with the secrets of <em>its</em> day — today's new Standard secrets reach nothing older than the leave. The leave screen says: keep your Castle passphrase and words — your Castle backups will always need them.</p></div>
+<dt>Opens backup B (Castle era)</dt><dd class="roads"><span class="s">today's passphrase or words (through the history)</span><span class="s">its day's Castle secrets</span><span class="x">quiet roads (they hold only the new key)</span></dd>
+<dt>Opens backup A (before Castle)</dt><dd class="roads"><span class="s">today's passphrase or words (through the history)</span><span class="s">its day's secrets</span><span class="x">quiet roads</span></dd>
+</dl><p class="note"><b>One posture at a time: leaving hands everything to Standard</b> [12, 13]. A Castle-era backup was protected while your library was in Castle; now your typed Standard secrets open it like any other backup (quiet roads still open only the live key they hold — a backup file never opens through iCloud by itself). The leave screen says: <em>your library and all your backups will open through your Apple account and this Mac again; if you want Castle-era writing to stay Castle-protected, don't leave.</em></p></div>
 
 <div class="stage any"><h3>9 · You open a Castle-era backup after leaving <small>Look inside, or Make this my library</small></h3>
 <dl>
-<dt>Look inside</dt><dd>Type backup B's Castle passphrase or words. It opens read-only. Nothing is written — no key file, no keychain item, no change to your library. Close it and the app forgets it [17].</dd>
-<dt>Make this my library</dt><dd>One confirmed door. Backup B becomes a <b>new library</b> with a fresh key in the posture you are in now (Standard, here), under your current pair, and your current library steps aside whole into Previous Libraries [17]. Backup B itself is untouched and still Castle-only. The app's Restore from Backup button is this door.</dd>
+<dt>Look inside</dt><dd>Type your current passphrase or words (or backup B's own Castle ones). It opens read-only. Nothing is written — no key file, no keychain item, no change to your library. Close it and the app forgets it [17].</dd>
+<dt>Make this my library</dt><dd>One confirmed door. Backup B becomes a <b>new library</b> with a fresh key in the posture you are in now (Standard, here), under your current pair, and your current library steps aside whole into Previous Libraries [17]. Backup B itself is untouched. The app's Restore from Backup button is this door.</dd>
 </dl></div>
 
 <div class="stage any"><h3>10 · Someone AirDrops you their library <small>any posture</small></h3>

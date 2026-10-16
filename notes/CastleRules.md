@@ -33,10 +33,9 @@ open it. Everything else is a convenience.**
    your twelve words to ensure continued access"): at the third launch, then weekly twice, then with a "don't show
    again"; and always right before the first backup and at the first launch after a quiet road has failed. The
    passphrase is a convenience over the words; either one can reset the other.
-4. **The key file carries the library's earlier keys**, sealed under the current one. So your *current* passphrase or
-   words also open every older backup whose key the current key file still carries. Entering Castle takes every earlier
-   key in; leaving Castle takes none out (rule 12). Only typed secrets reach through this list — a quiet road opens only
-   a key it directly holds.
+4. **The key file carries every earlier key the library has had**, sealed under the current one, and **every key change
+   carries that list forward — no exceptions.** So your *current* passphrase or words open every backup you have ever
+   made. Only typed secrets reach through the list; a quiet road opens only a key it directly holds.
 5. **A backup is the library plus the key file of its day.** It opens with the secrets of its day, with your current
    secrets through rule 4, or — while the backup's key is still the live key — through this Mac's quiet roads.
 6. **Changing the passphrase or making new words re-locks the current key; it does not change the key.** Older backups
@@ -49,7 +48,11 @@ open it. Everything else is a convenience.**
    changes the key. The key doors change the library's and the account's locks together. Make-this-my-library (rule 17)
    keeps your current pair. Only creating a library shows fresh words.
 
-## Two postures
+## Two postures — and only one at a time
+
+**A library (and the account it syncs with) is in exactly one posture. Castle protects your library while it is in
+Castle. Entering takes everything in; leaving hands everything out. The app never keeps a protection you chose to leave,
+and never leaves a hole you chose to close.**
 
 8. **Standard is a convenience posture.** Besides your secrets, the app may keep **quiet roads** to the key: an Apple
    road (your iCloud Keychain, through your Apple account — which also reaches your other Macs on that account) and an
@@ -62,17 +65,20 @@ open it. Everything else is a convenience.**
 10. **Castle is account-wide.** When one device enters, every device of the account follows, each typing a secret once.
     Until a device follows, it can still read what it already has — its own local copy — through its own quiet road.
     That is accepted and said plainly.
-11. **Entering Castle types your passphrase.** On this device: a new library key (its history taking every earlier key),
-    the quiet Apple road deleted, the on-device road kept only as Touch ID if you choose it, and the scheduled plain-text
-    export turned off with one notice (a plain copy on disk would undo the promise). On the account: a new sync key, in
-    one write (rule 15). Other devices follow by typing one secret.
-12. **Leaving Castle types your passphrase.** On this device: a fresh Standard key with an **empty** history and a fresh
-    Apple road; this Mac's Touch ID item and sealed key-file copy now hold the new key. Your text, the server's rows and
-    the sync key are Standard from now on — leaving is your choice about your writing. Other devices follow out quietly,
-    with a notice; one that lagged through the whole Castle stretch types a secret once to catch up.
-13. **After leaving Castle, the only thing that stays Castle-only is a backup you made while in Castle.** It opens with
-    the Castle passphrase or words of its day, never through Apple. Anything else from before the leave — a Standard-era
-    backup — opens with the secrets of *its* day. The leave screen says: keep that paper.
+11. **Entering Castle types your passphrase.** On this device: a new library key carrying every earlier key, the Apple
+    and on-device keychain items **deleted** (an Apple item's deletion reaches every device on the Apple account — so
+    your Standard-era backups' quiet locks die with it, and they are now Castle-protected along with the live library),
+    the on-device road kept only as Touch ID if you choose it, and the scheduled plain-text export turned off with one
+    notice you may reverse (a plain copy on disk would undo the promise; it is your call). On the account: a new sync
+    key, in one write (rule 15). Other devices follow by typing one secret.
+12. **Leaving Castle types your passphrase, and hands everything to Standard.** On this device: a new Standard key
+    carrying every earlier key — the Castle ones included — with a fresh Apple road and the on-device road back; this
+    Mac's Touch ID item and sealed key-file copy now hold the new key. Your text, the server's rows, the sync key and
+    **every backup you have ever made** are Standard from now on. The leave screen says so plainly: *your library and all
+    your backups will open through your Apple account and this Mac again; if you want Castle-era writing to stay
+    Castle-protected, don't leave.* Other devices follow out quietly, with a notice; one that lagged through the whole
+    Castle stretch types a secret once to catch up.
+13. **A Castle-era backup is protected while your library is in Castle.** Nothing else is promised about it.
 
 ## Sync
 
@@ -83,7 +89,8 @@ open it. Everything else is a convenience.**
     every sync key it has ever had**, each sealed under the current master — rule 4's idea applied to the account, so a
     device joining years later reads everything. The sync key changes only when the account enters Castle; while the
     account stays in Castle, writing made there is sealed under a key no quiet road holds, and a device that has not
-    followed cannot sync until it does. Leaving Castle hands that writing to Standard (rule 12).
+    followed cannot sync until it does. Leaving Castle hands that writing to Standard (rule 12) — the server's keys and
+    the library's follow the same one-posture rule.
 16. **Leaving an account changes none of your library's keys or secrets** — it stops syncing, and the server keeps what
     you pushed (removing it is the account-deletion road). Signing back in is a join (rule 7).
 
@@ -135,8 +142,11 @@ open it. Everything else is a convenience.**
   redundancy of the key file — and rule 7 — one pair at a time — buy the same safety without either.
 - **Re-sealing the whole account under a new sync key at each Castle entry** — *not pursued.* Rule 15's kept list of
   earlier sync keys reads every row with no bulk operation and no crash window.
-- **The Castle anchor** (carrying the leave-day secrets forward so pre-leave copies open on the new Standard side) and
-  **the stuck leave** that served it — *superseded by rules 12–13.* Castle backups need Castle secrets; that is the line.
+- **The Castle anchor** (a separately locked pocket carrying Castle keys out of a leave so that typed secrets reached
+  Castle backups but the Apple road did not) and **the stuck leave** that served it — *superseded by rules 4 and 12.*
+  Also superseded, the same day: **"Castle backups need Castle secrets forever"** (the leave with an empty history). Her
+  reasoning: leaving requires the passphrase, which already opens every Castle backup, so sealing them protected against
+  nobody; one posture at a time; never protect the user from their own choice.
 - **An Apple lock in the account vault and joining sync without a secret** — *superseded by rule 14.*
 - **Automatic repair of a swapped-in or replayed file** ("memory wins", set-aside files, mirror restores) and **the
   family tree** that let the app recognise a library's own past keys — *superseded by rules 17 and 21.* A copy is a
@@ -146,8 +156,8 @@ open it. Everything else is a convenience.**
   concerned with pre-design stores").
 - **One library on two Macs by hand-off, an identity-preserving restore, and the replacement-Mac takeover of a
   predecessor's keys** (the salted hardware+login marker) — *superseded by rules 17–18 and 23.*
-- **The "Opens with" route finder as a promise** — reduced to one sentence: *your passphrase or words of its day; on
-  this Mac, its quiet road if it still holds that key.*
+- **The "Opens with" route finder as a promise** — reduced to one sentence: *your current passphrase or words; on this
+  Mac, its quiet road if it still holds that key.*
 - **Re-link as a repair act** ("heal the quiet road") — with secrets from birth it is just the lobby's normal path
   (rule 8).
 - **The newest-copy offer on the unlock screen** — dropped at her P-U4-10 ruling, 2026-10-15.

@@ -135,16 +135,16 @@ control (apple)"* and *"castle is castle, castle backups are castle backups."*
 | 1 key file essential + redundant | KEEP key file format 3 (minus the anchor); KEEP the device memory's sealed key-file mirror as THE on-device copy, restored ONLY when the live key file is ABSENT (redundancy, never a repair of a stray); the "copy-less rebuild" door is NOT built (rule 27 says the honest outcome). **LOAD-BEARING, do not cut as anchor collateral:** the key file's MASTER wrap and its twelve-words copy of the master (old design §3.5a, present in the built `KeyFile`) — they are what let a one-secret follow produce a file both secrets open | U1, U2 |
 | 2 words at birth | `createLibrary` always mints words; `KeyFile` always carries a words wrap; the "no words" wrap state and every secretless branch (assess's secretless arms, corner 45) DELETED | U1, U2 |
 | 3 passphrase asked + reminders | the record carries `passphraseSet: Bool` and `reminderDismissals: Int` (facts only; the faces are phase 3's); assess owes `.askPassphrase` on the schedule's two model-side moments (before a backup; at the first launch after a quiet road failed) | U2 |
-| 4 history within the key file; quiet roads never traverse it | KEEP; entering takes everything (as built); leaving takes nothing (as built); the route finder reduces to ONE sentence — *"your passphrase or words of its day; on this Mac, its quiet road if it still holds that key"* — and stops being a promise | U1 |
+| 4 the key file carries EVERY earlier key; every key change carries it forward; quiet roads never traverse it | KEEP the history; **the leave's "empty history" arm DELETED** (LeaveCastle re-keys exactly as ReplaceAllKeys does, plus the Apple wrap and the on-device item back); the route finder reduces to ONE sentence — *"your current passphrase or words; on this Mac, its quiet road if it still holds that key"* — and stops being a promise | U1 |
 | 5 a backup = library + its day's key file | KEEP | — |
 | 6 re-lock, not re-key | KEEP (`ChangePassphrase`, `ResetPassphrase`, `RegenerateWords` re-wrap the current key); the anchor sentences in their doors DELETED | U1 |
 | 7 one pair of secrets per account | `SetUpSync` hands the library's pair up (the vault's P and W wraps are the library's); `Enroll`/join re-wraps the key file under the account's pair and reports `wordsReplaced` (the face says it); the key doors change key file AND vault together (already the built shape — `KeyDoors.swift`); `MakeMine` keeps the device's current pair; only `createLibrary` mints words | U2 |
 | 8 Standard = convenience; quiet roads re-made, asked only when none remains | the Apple wrap on Standard keys KEEP; **the on-device road in Standard is today's SILENT login-keychain item** (`WhenUnlockedThisDeviceOnly`, no biometric ACL — a gated item would prompt on every read and stop Standard being quiet; "login password or Touch ID" is what that item already means in honest terms, apple-facts §12); the lobby's path at a failed quiet road: open by any quiet road that still works → re-mint the Apple item silently; ask a secret only when none works. Re-link's "library arm" act DELETED | U1, U2 |
 | 9 Castle: no Apple road ever | KEEP (promise 2/3 as built, minus the anchor exemptions) | — |
 | 10 Castle account-wide; lagging device reads its own copy | KEEP the follow (types one secret IN; quiet OUT); the older-build actor already gone; the "lagging device" boundary stays a stated limit in the promises | U4 |
-| 11 entering Castle types the passphrase | KEEP EnterCastle minus: the anchor, the account Apple wrap handling, the rotation choreography. The sync-key change becomes ONE vault-row CAS write (new master, new row key, the earlier row keys re-wrapped under the new master — rule 15); export-off notice KEEP; retire own Apple keys KEEP, by library | U1, U2 |
-| 12 leaving Castle types the passphrase | LeaveCastle = fresh Standard key, empty history, Apple wrap added, Touch ID item + mirror replaced, the vault row's MODE flag flipped (no key change on the server); other devices follow out quietly. DELETE: the anchor write, the stuck-leave wait, promise 6's vault-reach qualifier, "the one write that completes the leave" | U1, U2 |
-| 13 only Castle backups stay Castle-only | a promise (U4) — stated exactly in her words; plus the honest line that anything older than the leave opens with the secrets of its day | U4 |
+| 11 entering Castle types the passphrase; entering takes everything in | KEEP EnterCastle minus: the anchor, the account Apple wrap handling, the rotation choreography. Deletes the Apple item AND the Standard on-device item (the Apple delete propagates — the fake models it); the sync-key change becomes ONE vault-row CAS write (new master, new row key, the earlier row keys re-wrapped under the new master — rule 15); export-off NOTICE kept, reversible by the user (a setting, not a lock); retire own Apple keys KEEP, by library | U1, U2 |
+| 12 leaving Castle types the passphrase; leaving hands everything out | LeaveCastle = a new Standard key CARRYING the history (Castle keys included), Apple wrap added, on-device item back, Touch ID item + mirror replaced, the vault row's MODE flag flipped (no key change on the server); other devices follow out quietly. DELETE: the anchor write, the empty-history arm, the stuck-leave wait, promise 6's vault-reach qualifier, "the one write that completes the leave", promise 13's pre-leave-copies reading entirely | U1, U2 |
+| 13 a Castle backup is protected while the library is in Castle | NOT a standalone promise — it falls out of rule 9 (no Apple road while in Castle) + rule 4; U4's promises carry nothing about pre-leave copies | U4 |
 | 14 vault wrapped by P and W only; join types a secret | the vault model loses its Apple wrap and `RotationAppleCopy`; `SetUpSync`/`Enroll` require a typed secret; the "silently joined device" start state DELETED | U1, U2 |
 | 15 rows sealed under the key current at write; the account keeps every sync key | the vault model: `currentRowKeyID` changes only at EnterCastle; **`earlierRowKeys: [keyID: wrapped-under-master]` REPLACES `previousCorpusKey`** and grows by one per entry; the row reader picks by the row's keyID label (14b's AAD already carries it); LeaveCastle leaves keys alone; lagging followers refuse to sync until they follow (a fact the world checks). The rotation fields and walk go WHOLE: `previousCorpusKey`, `rotationStartedSeq`, `rowsBelowRotationSeq`, `reencryptBelowRotationSeq`, the completing write, their crash arms. Sync-key CUSTODY follows the account's mode (Castle → Castle-way items; Standard → silent), never "what it can reach" | U1, U2, U4 |
 | 16 leaving an account changes no keys | `StopSyncingHere`/`DeleteAccountHere`/`ThisMacOnly` KEEP as "stop syncing"; NO re-key; the pair stays as it was | U1 |
@@ -156,10 +156,15 @@ control (apple)"* and *"castle is castle, castle backups are castle backups."*
 | 22 delete after replacement verifies | KEEP (a guard + mutation pin) | — |
 | 23 plain device ID | `HardwareMarker` and `resolveIdentity`'s takeover/anotherLogin DELETED; the device section keyed by a random `deviceID` minted at creation and stored in the memory item | U1, U2 |
 | 24 both configurations | KEEP | — |
-| 25 no Apple promise | the promises never require an Apple road to work; promise 13 shrinks to rules 13 + 15 | U4 |
+| 25 no Apple promise | the promises never require an Apple road to work; promise 13 shrinks to rule 15's "while the account stays in Castle" clause (the lagging-device lockout) | U4 |
 | 26 no migration, no handling of pre-design stores | DELETE `Migration` act, `LegacyReaders` (all), the 13p escrow/stuck-marker/old-shared-key reads and the old shared key's retirement ask and door, corner 45's notice and answer, every "today's store" starting state and fixture; the record's "unconfirmed mode" arm. No refusal string either — her word | U1 |
 | 27 lost everything = lost | an honest refusal (`noKeyFileAnywhere`) naming the roads that would have worked; synced: the account road (rule 14) | U2 |
 | considered-and-not-pursued | nothing from that list is built; a reviewer finding that proposes one is dispositioned by pointing at the list | all |
+
+**One posture at a time (her 2026-10-16 ruling, `vx-305-castle-core.md` §8 item 15):** entering takes everything in,
+leaving hands everything out; the library key and the sync key follow the same rule; the app never keeps a protection
+the user chose to leave and never protects the user from their own choice. Every unit weighs its work against this
+sentence.
 
 **What each crossing types (rules 11–12, 7):** Use Castle — the passphrase; Use Standard — the passphrase; a follow INTO
 Castle — one secret (passphrase or words); a follow OUT — nothing (quiet, with a notice); a lagging device catching up —
@@ -222,13 +227,16 @@ committed; the facts-diff (empty, or listed) recorded.
 
 ### U4 — THE WORLD AND THE SOAK (one session)
 
-Rewrite the promises to the rules — expected around ten, each quoting its rule: no Apple road reaches a Castle key or
-Castle-made copy (8); only Castle backups stay Castle-only after a leave (12); rows written in Castle are under a key no
-quiet road held (14); a lagging device syncs nothing until it follows (14); a backup opens with its day's secrets and
-with current secrets within a mode (4, 5); every copy opens by SOME road the rules name, or the refusal names what would
-have (26); a crash leaves old or new, said which (19); a disagreement refuses, never writes (20); deletes only after
-replacement verified (21); nothing silent changes mode, account or roads outside a deliberate act (the kept core of
-promise 10). The adversary alphabet keeps file replay/deletion as DETECTION tests (the app refuses), never repair
+Rewrite the promises to the rules — expected around nine, each quoting its rule: **ONE POSTURE** — while the library is
+in Castle, no quiet road reaches its current key, any earlier key, or any copy of it, on any device that has followed
+(9, 11, 13); the moment it leaves, every copy opens with the current typed secrets (4, 12); rows written while the
+account is in Castle are under a key no quiet road holds while it stays in Castle, and a lagging device syncs nothing
+until it follows (15); your current passphrase or words open every copy you have ever made (4, 5 — the core sentence as
+a promise); every copy opens by SOME road the rules name, or the refusal names what would have (27); a crash leaves old
+or new, said which (20); a disagreement refuses, never writes (21); deletes only after replacement verified (22);
+nothing silent changes posture, account or roads outside a deliberate act (the kept core of promise 10). There is NO
+promise about pre-leave copies after a leave — that is the ruled one-posture rule, and a reviewer proposing one is
+pointed at the ledger. The adversary alphabet keeps file replay/deletion as DETECTION tests (the app refuses), never repair
 expectations. Starting states: the new-system shapes only (a fresh library; Standard with and without a passphrase; Castle
 Touch ID and Always ask; synced variants; a Castle backup after a leave; a lagging device). Mutation pins for every guard
 that survives. Then the discovery run (seeds 21–40) and the gate soak. **Evidence:** gate items 1–3.
