@@ -570,8 +570,9 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   **DONE** (NEW-2 a checker bug, NEW-1 a model bug under P-U4-6 (a); verified Debug 432/70 · Release 371/65); round 2
   **DONE** (0 MAJOR · 1 MINOR · 4 NIT, all applied, checked line by line, Debug 434/71 · Release 372/66). **THE
   LADDER IS CLOSED** — code tree `63cf038f1`.
-- The go/no-go record: **ATTEMPT 1 NO-GO** (§10: 13 of 20 seeds fail, both configurations; the key map written, 11 GAPs) — the census, triage batches, ladder round 3 and a fresh soak follow. Was: the fresh soak (seeds 1–20 × 1,000 × ≤ 60, one seed per call, Debug then
-  Release) on `63cf038f1`; the key map's model half by a fresh implementer, read-only on code while the soak runs.
+- The go/no-go record: **ATTEMPT 1 NO-GO** on `63cf038f1` (§10: 13 of 20 seeds fail, the same in both
+  configurations; the key map's model half written — 31 PROVEN, 11 GAPs). Next: the census, triage batches, the
+  GAP batch, ladder round 3, a fresh soak.
 
 ---
 
