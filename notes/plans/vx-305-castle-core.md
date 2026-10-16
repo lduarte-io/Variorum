@@ -1542,7 +1542,19 @@ our current decisions."*
    follows (the design's "after that device follows"). **B — a landed copy is a new library: RULED IN** — *"a landed copy
    *should* be a new library, sync is the way of handling it, and if you airdrop a library to a device it should
    ABSOLUTELY treat it as a new library that can diverge, unless you sign both into the same account to sync it."*
-12. **THE LIFECYCLE PAGE FIRST.** *"I agree with building the lifecycle as a test and a page, before more triage. that's
+12. **A SETTLED (her words and the correction).** Entering: *"we can rotate just the sync key when entering castle and
+   that will make the server + new writing in castle safe from standard devices, while letting them keep having the
+   standard writing that they already have"* — RULED. Leaving: *"the leave carries nothing applied to the server — all the
+   text that was castle, as soon as it's moved into standard, is now in standard mode"* — RULED; the orchestrator's
+   "re-seal the corpus" idea is WITHDRAWN as solving a problem this ruling removes. **The leave touches no server key:**
+   devices keep the Castle-era sync key, held the Standard way, to read Castle-era rows (the server holds one copy of each
+   row under the key current at its last write — no exposure beyond the live Standard library). **The leave touches each
+   device's own library key:** a fresh Standard key with its Apple road and an empty history, so Castle backups (under the
+   Castle-born key, in their own key files) keep needing Castle secrets. Mode is account-wide: the leaving device flips the
+   vault row's mode flag; every other device follows OUT quietly (no typing — it already holds its keys), with a notice; a
+   device that lagged through the whole Castle stretch types a secret once to catch up. Accepted boundary, her words: *"it's
+   fine that a device that lags can still read what it has locally through its own quiet road — that's accepted."*
+13. **THE LIFECYCLE PAGE FIRST.** *"I agree with building the lifecycle as a test and a page, before more triage. that's
    obviously the right thing to do & handling that should be first and foremost."* Written as the TARGET spec (every stage ×
    every user choice × every way in, plain words), ruled on by her, then proven by a test as the cuts land. Local HTML,
    never an Artifact.
