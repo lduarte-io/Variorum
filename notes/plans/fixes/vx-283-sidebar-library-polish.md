@@ -4896,3 +4896,20 @@ Round 2 raised no BLOCKER and no MAJOR, so the ladder closes at two rounds. R2-1
 (record currency; sequencing — the owed hand check, the re-walk with D8, and O-2's closeout ticket). R2-3 and
 R2-4 are optional next-touch cleanliness for the implementer; neither needs a pin (R2-3 is a guard of R1-6's
 class — a natural-≤-cap pin would be red only by construction) and neither blocks closeout.
+
+### Ladder round 2 — the orchestrator's dispositions (2026-10-16 ~08:50; the ladder CLOSED at two rounds)
+
+- **R2-1 — AGREED, fixed by the orchestrator** at the re-walk's close: the LIVE STATUS rows refreshed and the
+  `vx283-u2d` traffic entries appended (the GO, the SEAM's "continue", the RELEASE).
+- **R2-2 — AGREED, sequencing:**
+  - (1) her hand check of the drop's delivery is the FIRST item of her handoff checklist, with the one-commit fallback
+    to main's road;
+  - (2) the U2d + U3c re-walk was running at the review's tip, and its record is the closing evidence for VX-288's
+    source side and VX-175;
+  - (3) O-2 is ticketed at the closeout, as ruled.
+- **R2-3 / R2-4 — AGREED as next-touch, NOT built in this run.** Neither is reachable today (the natural widths fit
+  their caps; `single` is five bounded probes). A product change now would cost another window for nothing she could
+  see. They are filed together as ONE Debt ticket (Low, Library & sidebar) at the closeout: "Library controls row:
+  drop the segmented pickers' dead `maxWidth` caps (or pin natural ≤ cap); compute `single` only on the one-line road".
+- Round 2's own record commit `5fea115e` carries no attribution trailer (checked). No FINDER-FIXES; no `Sync/` lines;
+  no final-round fixes exist to check line by line.
