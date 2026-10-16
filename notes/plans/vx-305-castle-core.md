@@ -1527,7 +1527,22 @@ our current decisions."*
    device deleting its own quiet roads at its follow); (B) a landed copy is a NEW library with a fresh ID — collapses the
    marker takeover, the whose-Apple-key rules (C-4) and replacement-Mac inheritance; two Macs share a library through sync,
    not files.
-11. **THE LIFECYCLE PAGE FIRST.** *"I agree with building the lifecycle as a test and a page, before more triage. that's
+11. **A AND B RULED (later the same sitting).** **Words-as-root: withdrawal ACCEPTED** — *"leave a line in the updated
+   plan that it was considered and not pursued and why, so no other session considers it."* **A — the Apple lock leaves
+   the account vault: RULED IN** — *"sounds perfect, and setting up a new account is now the moment at which a user that
+   isn't aware of their 12 words or hasn't set a passphrase is reminded to do so … so yeah, no quick setup."* Her safety
+   question (*"is no rotation safe if the apple lock is not in the account vault?"*) — the orchestrator's trace: a lagging
+   Standard device holds the account's SHARED keys quietly, so without rotation new Castle writing synced to the server
+   would be readable through that device's quiet road until it follows — **rotation is KEPT, shrunk to one CAS row flip**
+   (new master + new row-sealing key wrapped by P and W only) at each crossing: lagging devices refuse to sync until they
+   type a secret and follow; pre-Castle rows stay under the old key (rule 3); **the LEAVE re-seals the corpus under the new
+   Standard key from the leaving device** (deliberate, once, a progress bar), so the Castle-era key is never held quietly
+   and a later device still gets the whole library. Her AirDropped-key-file fear specifically is unfounded (per-device
+   keys; B re-keys every landing). The honest boundary stands: a lagging device reads its OWN local copy quietly until it
+   follows (the design's "after that device follows"). **B — a landed copy is a new library: RULED IN** — *"a landed copy
+   *should* be a new library, sync is the way of handling it, and if you airdrop a library to a device it should
+   ABSOLUTELY treat it as a new library that can diverge, unless you sign both into the same account to sync it."*
+12. **THE LIFECYCLE PAGE FIRST.** *"I agree with building the lifecycle as a test and a page, before more triage. that's
    obviously the right thing to do & handling that should be first and foremost."* Written as the TARGET spec (every stage ×
    every user choice × every way in, plain words), ruled on by her, then proven by a test as the cuts land. Local HTML,
    never an Artifact.
