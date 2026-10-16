@@ -277,11 +277,25 @@ struct ScenarioGenerator {
 
     /// Two or three distinct tampers for one closed window. The adversary's
     /// claims are single items "or both homes of this Mac's facts together"
-    /// (design §4.1, promise 10, §3.6's stated limit); a group never rolls
-    /// the library file back together with what it would otherwise lose to
-    /// or be checked against — this Mac's memory item, or the live key file —
-    /// since that IS the stated limit's shape, already modelled by
-    /// `.replayBothHomes` with its truth bookkeeping (VX-305 ladder round 1).
+    /// (design §4.1, promise 10, §3.6's stated limit) — so `.replayBothHomes`
+    /// never joins a group (it carries its own stated-limit bookkeeping), and
+    /// `replayLibraryFile` never composes with (`rollsBackBothHomes`):
+    /// — a tamper on this Mac's MEMORY home (`deleteMemoryItem`,
+    ///   `editSealedSetting`, `replayMemory`, `deleteKeyFileAndMemory`): the
+    ///   library file rolled back together with what it would lose to IS
+    ///   §3.6's stated limit, already modelled by `.replayBothHomes`;
+    /// — `replayKeyFile`: the file replayed with its own key file is the
+    ///   whole-pair shape her P-U4-12 ruling keeps as a deliberate restore's
+    ///   road (P-U4-6's carve-out — "the deliberate whole-pair restore keeps
+    ///   its own road"), which promise 10 would otherwise read as a violation;
+    /// — `deleteKeyFile`: where the live key file is the memory key's only
+    ///   road on this Mac (Always ask, no frozen pair), deleting it leaves the
+    ///   memory unverifiable and the older file wins by the two-homes rule —
+    ///   P-U4-13 (b)'s ruled phase-2 class (the lobby's memory-mirror road is a
+    ///   vx-306 deliverable). NARROW this exclusion when that road lands; the
+    ///   absent arm itself is pinned deterministically
+    ///   (`LadderRound2AbsentArmPin`).
+    /// (VX-305 ladder rounds 1 and 2 — the round-2 final call §1(c): KEEP.)
     mutating func tamperGroup() -> [Tamper] {
         let pool = Tamper.allCases.filter { $0 != .replayBothHomes }
         let size = rng.chance(70) ? 2 : 3
