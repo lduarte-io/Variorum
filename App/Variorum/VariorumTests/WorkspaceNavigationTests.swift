@@ -228,9 +228,9 @@ struct OpenNotesTests {
     /// convention (`destination` is a PRE-move index). This is the move
     /// arithmetic only. (VX-288, the VX-283 run: the List this comment once
     /// named is long gone — the Open list is a flat column whose rows drag
-    /// with the system drag, and WHICH gap a drop names — the half of the row
-    /// under the pointer — is `SidebarLayout.OpenListDrop`, pinned in
-    /// `OpenListDragTests`.)
+    /// with the system drag, and WHICH gap a drop names — the slot before the
+    /// targeted row, or the end zone's last slot (U2d, P-U2d-1) — is
+    /// `SidebarLayout.OpenListDrop`, pinned in `OpenListDragTests`.)
     @Test func theManualReorderMovesRowsAndTheKeysFollowThem() {
         var open = OpenNotes()
         for id in ["a", "b", "c", "d"] { open.opened(id) }

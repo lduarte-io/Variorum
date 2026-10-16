@@ -8,31 +8,41 @@
 //  line showing as you hover and a nice fit / snap into place because right now
 //  it feels janky to use."* Her ruling on the shape: the light version first.
 //
-//  The traced bug under the jank (the U2 record): every drop landed in the gap
-//  BEFORE the row under the pointer, whatever half of it the pointer was on — so
-//  the row just below was unreachable, every downward drop landed one row short,
-//  and the slot after the last row could not be reached.
+//  The traced jank (the U2 record): main's road — each row its own drop, every
+//  drop landing in the gap BEFORE the row it was released on — showed nothing
+//  while she dragged, moved without a settle, and had no slot after the last
+//  row at all.
 //
-//  Red-on-old, stated: these pins run against `SidebarLayout.OpenListDrop`; the
-//  behavioural revert R-K puts the old rule back into `gap(at:)` (the row under
-//  the pointer, no end slot) and the pins that name it go red. The rows' own
-//  move arithmetic (`OpenNotes.move`) is unchanged and keeps its own pins
-//  (`WorkspaceNavigationTests`).
+//  **U2d — the orchestrator's P-U2d-1: F2, the book navigator's road on MAIN's
+//  own per-row API.** No synthetic road reaches a drop in the sidebar, on main
+//  too (the U2c main-build control), so the drop stays on the API her hands
+//  have used — each Open row a classic `dropDestination(for:action:isTargeted:)`
+//  — and gains what she asked for: the TARGETED row draws the 2-pt line at its
+//  top and the drop lands before it (main's own landing) with the settle; the
+//  end zone takes the last slot; the dragged row's own place (its own row and
+//  the row right after it) draws no line and moves nothing. The half-row
+//  refinement, the macOS 26 session form and the move configuration are gone,
+//  and so are their pins — each named in the record's "### U2d — the build"
+//  ("retired by P-U2d-1"): `theHalfOfTheRowUnderThePointerNamesTheGap`,
+//  `theRowJustBelowIsReachable`, `aDownwardDropNoLongerLandsOneRowShort`,
+//  `theLastSlotIsReachable`, `anUpwardDropLandsWhereItLooks`,
+//  `everyDropLandsBesideTheRowUnderThePointer`,
+//  `aRowsOwnLocationNamesTheGapForEveryRowAndBothHalves`,
+//  `theLineSitsOnTheBoundaryTheHoverNames`, `theLineFollowsTheHover`,
+//  `theLineFollowsAScrollUnderAStillPointer`,
+//  `aScrollUnderAStillPointerMovesTheGap`,
+//  `aRowsOwnLocationDrawsTheLineAndLandsThere`,
+//  `movingBetweenRowsNeverBlanksTheHover`,
+//  `eachRowIsATransferableDropAndItsSourceAllowsTheMove`.
 //
-//  **U2c (the orchestrator's P-U2b-1 — the drag that never landed under a real
-//  system drag).** U2's one legacy `onDrop(of:delegate:)` on the scroll
-//  content's root was never consulted (U2b's trace: zero `validateDrop`); every
-//  live drop inside scroll content in this app is a per-row Transferable
-//  `dropDestination`. So each Open row is its own drop again, in the macOS 26
-//  SESSION form, and the row-local location maps into the same pure half-row
-//  rule; the source allows a move; the drag session's end clears the drag.
-//  Three pins, each red-on-old by its own named revert: P-T3-1 (the wiring,
-//  read — R-T), P-T3-2 (the row-local location → the gap, for every row and
-//  both halves — R-U), P-T3-3 (the session's end clears the drag — R-V). The
-//  door pins that built an `NSItemProvider` take the decoded tokens now
-//  (edited in place); every other pin above and below is unchanged. Delivery
-//  itself — that AppKit offers the drag to the rows — has no headless pin: only
-//  a real drag (the window's G1–G5, then the re-walk) proves it.
+//  The pins, each red-on-old by its own named revert (the record): (a) the
+//  wiring, read — R-W; (b) the pure rule, the targeted row → the line and the
+//  gap, the own place, the end zone — R-X; (c) the state and the door — an
+//  un-target clears only the target it set (R-Y), the source session's end
+//  clears the drag (R-Z), the action lands before the targeted row with the
+//  settle (R-X); and P-U2d-2's end zone, which takes the column's bottom padding
+//  so it is never absent — R-Q. Delivery itself — that AppKit offers a real drag
+//  to the rows — has no headless pin and no synthetic road: her hand proves it.
 //
 
 import AppKit
@@ -45,14 +55,15 @@ import VariorumCore
 
 private typealias Drop = SidebarLayout.OpenListDrop
 
-/// Drops `dragged` at a pointer `y` over `ids` (rows `rowHeight` tall) the way
-/// the list's drop does — the gap the pointer names, the destination it means —
-/// and returns the order after (unchanged where the drop would change nothing).
-private func dropping(_ dragged: String, atY y: CGFloat, in ids: [String], rowHeight: CGFloat = 30) -> [String] {
+/// Drops `dragged` onto `hover` — a row (by its index) or the end zone — over
+/// `ids` the way the list's drop does: the gap the target names, the
+/// destination it means. Returns the order after (unchanged where the drop
+/// would change nothing).
+private func dropping(_ dragged: String, onto hover: Drop.Hover, in ids: [String]) -> [String] {
     var open = OpenNotes()
     for id in ids { open.opened(id) }
     guard let from = ids.firstIndex(of: dragged),
-          let gap = Drop.gap(at: y, rowHeight: rowHeight, rows: ids.count),
+          let gap = Drop.gap(for: hover, rows: ids.count),
           let to = Drop.destination(gap: gap, dragged: from, rows: ids.count)
     else { return open.ids }
     open.move(fromOffsets: IndexSet(integer: from), toOffset: to)
@@ -63,58 +74,82 @@ private func dropping(_ dragged: String, atY y: CGFloat, in ids: [String], rowHe
 struct OpenListDropRuleTests {
     private let rows = ["a", "b", "c", "d"]
 
-    /// The half of the row decides: the lower half is the gap after it, the
-    /// upper half the gap before it; above the rows the first gap, below them
-    /// the end.
-    @Test func theHalfOfTheRowUnderThePointerNamesTheGap() {
-        #expect(Drop.gap(at: 10, rowHeight: 30, rows: 4) == 0, "a's upper half: before a")
-        #expect(Drop.gap(at: 15, rowHeight: 30, rows: 4) == 1, "a's midpoint counts as lower: after a")
-        #expect(Drop.gap(at: 44, rowHeight: 30, rows: 4) == 1, "b's upper half: before b")
-        #expect(Drop.gap(at: 46, rowHeight: 30, rows: 4) == 2, "b's lower half: after b")
-        #expect(Drop.gap(at: 119, rowHeight: 30, rows: 4) == 4, "d's lower half: the end")
-        #expect(Drop.gap(at: 500, rowHeight: 30, rows: 4) == 4, "below the rows: the end")
-        #expect(Drop.gap(at: -5, rowHeight: 30, rows: 4) == 0, "above the rows: the first gap")
-        #expect(Drop.gap(at: 30, rowHeight: 24, rows: 4) == 1, "the compact pitch reads its own halves")
-        #expect(Drop.gap(at: 10, rowHeight: 0, rows: 4) == nil, "nothing laid out: no gap")
-        #expect(Drop.gap(at: 10, rowHeight: 30, rows: 0) == nil, "no rows: no gap")
+    /// **P-U2d-1 (b) — RED ON OLD (R-X).** A targeted row names the slot
+    /// BEFORE it — its own index; the end zone names the slot after the last
+    /// row; a row off the list, or a list with no rows, names nothing.
+    @Test func theTargetedRowNamesTheSlotBeforeItAndTheEndZoneTheLast() {
+        for count in 1...8 {
+            for row in 0..<count {
+                #expect(Drop.gap(for: .row(row), rows: count) == row, "row \(row) of \(count): the slot before it")
+            }
+            #expect(Drop.gap(for: .row(count), rows: count) == nil, "a row past the list names nothing")
+            #expect(Drop.gap(for: .row(-1), rows: count) == nil, "a row before the list names nothing")
+            #expect(Drop.gap(for: .end, rows: count) == count, "the end zone: the slot after the last row")
+        }
+        #expect(Drop.gap(for: .row(0), rows: 0) == nil, "no rows: no slot")
+        #expect(Drop.gap(for: .end, rows: 0) == nil, "no rows: no end")
     }
 
-    /// **RED ON OLD (R-K).** A drop on the lower half of the row just below
-    /// lands the dragged row after it — the old rule's drop there changed
-    /// nothing (`move([0], toOffset: 1)`).
-    @Test func theRowJustBelowIsReachable() {
-        #expect(dropping("a", atY: 50, in: rows) == ["b", "a", "c", "d"],
-                "a dropped on b's lower half lands after b")
+    /// **P-U2d-1 (b), exhaustively — RED ON OLD (R-X).** Every list of 1…6
+    /// rows, every dragged row, every target: a drop on another row lands the
+    /// dragged row right BEFORE it; a drop in the end zone lands it last; on
+    /// its own place — its own row, or the row right after it, and the end
+    /// zone when it is already last — nothing moves.
+    @Test func everyDropLandsBeforeTheTargetedRow() {
+        for count in 1...6 {
+            let ids = (0..<count).map { "r\($0)" }
+            for (from, dragged) in ids.enumerated() {
+                for (row, target) in ids.enumerated() {
+                    let after = dropping(dragged, onto: .row(row), in: ids)
+                    #expect(Set(after) == Set(ids) && after.count == ids.count, "rows survive")
+                    if row == from || row == from + 1 {
+                        #expect(after == ids, "\(dragged) onto \(target) (its own place, \(count) rows): nothing moves")
+                    } else {
+                        #expect(after.firstIndex(of: dragged)! == after.firstIndex(of: target)! - 1,
+                                "\(dragged) onto \(target) (\(count) rows) lands right before it: \(after)")
+                    }
+                }
+                let atEnd = dropping(dragged, onto: .end, in: ids)
+                if from == count - 1 {
+                    #expect(atEnd == ids, "the last row onto the end zone: nothing moves")
+                } else {
+                    #expect(atEnd.last == dragged && atEnd.count == ids.count,
+                            "\(dragged) onto the end zone (\(count) rows) lands last: \(atEnd)")
+                }
+            }
+        }
     }
 
-    /// **RED ON OLD (R-K).** A long downward drop lands where it looks — on
-    /// d's lower half, after d — never one row short (the old [b, c, a, d]).
-    @Test func aDownwardDropNoLongerLandsOneRowShort() {
-        #expect(dropping("a", atY: 105, in: rows) == ["b", "c", "d", "a"], "after d")
-        #expect(dropping("a", atY: 80, in: rows) == ["b", "c", "a", "d"], "c's lower half: after c")
-        #expect(dropping("b", atY: 110, in: rows) == ["a", "c", "d", "b"], "d's lower half: after d")
-        #expect(dropping("b", atY: 100, in: rows) == ["a", "c", "b", "d"], "d's upper half: before d")
-    }
-
-    /// **RED ON OLD (R-K).** The slot after the last row is reachable — below
-    /// the rows (the end zone's road) and on the last row's lower half.
-    @Test func theLastSlotIsReachable() {
-        #expect(dropping("b", atY: 125, in: rows) == ["a", "c", "d", "b"], "below the rows")
-        #expect(Drop.gap(for: .end, offset: 0, rowHeight: 30, rows: 4) == 4, "the end zone names the end")
-        #expect(Drop.destination(gap: 4, dragged: 1, rows: 4) == 4)
-    }
-
-    /// An upward drop lands before the row on its upper half and after it on
-    /// its lower half (the old rule had the upper half right — exact behaviour).
-    @Test func anUpwardDropLandsWhereItLooks() {
-        #expect(dropping("d", atY: 35, in: rows) == ["a", "d", "b", "c"], "b's upper half: before b")
-        #expect(dropping("d", atY: 50, in: rows) == ["a", "b", "d", "c"], "b's lower half: after b")
-        #expect(dropping("d", atY: 2, in: rows) == ["d", "a", "b", "c"], "the top")
+    /// **The ticket's three, in F2's terms — RED ON OLD (R-X).** Every slot
+    /// the dragged row can move to is reached by exactly one target (the row
+    /// that will follow it, or the end zone): the row just below her row is
+    /// passed by dropping on the row after it; a long downward drop lands
+    /// before the row it is released on; the last slot is the end zone's.
+    @Test func everySlotIsReachedByExactlyOneTarget() {
+        for count in 1...6 {
+            for dragged in 0..<count {
+                for gap in 0...count where gap != dragged && gap != dragged + 1 {
+                    let targets: [Drop.Hover] = (0..<count).map { .row($0) } + [.end]
+                    let naming = targets.filter { Drop.gap(for: $0, rows: count) == gap }
+                    #expect(naming.count == 1, "gap \(gap) of \(count) (row \(dragged) dragged): \(naming)")
+                    #expect(Drop.destination(gap: gap, dragged: dragged, rows: count) == gap)
+                }
+            }
+        }
+        #expect(dropping("a", onto: .row(2), in: rows) == ["b", "a", "c", "d"], "just below b: drop on c")
+        #expect(dropping("a", onto: .row(3), in: rows) == ["b", "c", "a", "d"], "released on d: before d")
+        #expect(dropping("a", onto: .end, in: rows) == ["b", "c", "d", "a"], "the last slot: the end zone")
+        #expect(dropping("d", onto: .row(1), in: rows) == ["a", "d", "b", "c"], "upward: before b")
+        #expect(dropping("d", onto: .row(0), in: rows) == ["d", "a", "b", "c"], "the top")
     }
 
     /// §12's false-offer rule: the dragged row's own two gaps would change
     /// nothing — no destination there (so no line, and no drop); every other
     /// gap moves it.
+    ///
+    /// **U2d (P-U2d-1) — edited in place:** the last two lines named the
+    /// half-row rule's pointer heights; they name the two own-place targets
+    /// now (its own row, and the row right after it). The loop is unchanged.
     @Test func theDraggedRowsOwnGapsOfferNothing() {
         for dragged in 0..<4 {
             for gap in 0...4 {
@@ -125,131 +160,86 @@ struct OpenListDropRuleTests {
         }
         #expect(Drop.destination(gap: 5, dragged: 0, rows: 4) == nil, "off the list")
         #expect(Drop.destination(gap: 0, dragged: 4, rows: 4) == nil, "a row that is not there")
-        #expect(dropping("b", atY: 40, in: rows) == rows, "its own upper half: nothing moves")
-        #expect(dropping("b", atY: 65, in: rows) == rows, "c's upper half = b's own lower gap")
+        #expect(dropping("b", onto: .row(1), in: rows) == rows, "its own row: nothing moves")
+        #expect(dropping("b", onto: .row(2), in: rows) == rows, "the row right after it = b's own lower gap")
     }
 
-    /// **"Drops land where they look", exhaustively** — every list of 1…6 rows,
-    /// every dragged row, every target row and both its halves at several
-    /// depths: after the drop the dragged row sits right AFTER the target (its
-    /// lower half) or right BEFORE it (its upper half); on its own row nothing
-    /// moves. RED ON OLD (R-K) — every lower-half drop.
-    @Test func everyDropLandsBesideTheRowUnderThePointer() {
-        for count in 1...6 {
-            let ids = (0..<count).map { "r\($0)" }
-            for dragged in ids {
-                for (row, target) in ids.enumerated() {
-                    for fraction in [0.05, 0.3, 0.49, 0.5, 0.7, 0.95] {
-                        let y = (CGFloat(row) + CGFloat(fraction)) * 30
-                        let after = dropping(dragged, atY: y, in: ids)
-                        #expect(Set(after) == Set(ids) && after.count == ids.count, "rows survive")
-                        guard target != dragged else {
-                            #expect(after == ids, "on its own row nothing moves")
-                            continue
-                        }
-                        let movedTo = after.firstIndex(of: dragged)!
-                        let targetAt = after.firstIndex(of: target)!
-                        if fraction >= 0.5 {
-                            #expect(movedTo == targetAt + 1,
-                                    "\(dragged) on \(target)'s lower half (\(count) rows): \(after)")
-                        } else {
-                            #expect(movedTo == targetAt - 1,
-                                    "\(dragged) on \(target)'s upper half (\(count) rows): \(after)")
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /// **P-T3-2 (U2c — P-U2b-1; RED ON OLD, revert R-U).** Each row is its own
-    /// drop, and its session reports the pointer in the ROW's space (the SDK:
-    /// "the location of the drag in the coordinate space of the drop view"):
-    /// the row's index × the pitch + that location is the rows' own space,
-    /// which the unchanged half-row rule reads — so every row, at either half,
-    /// names the gap beside ITSELF (never row 0's, the dropped index term).
-    @Test func aRowsOwnLocationNamesTheGapForEveryRowAndBothHalves() {
-        for pitch: CGFloat in [30, 24] {
-            for count in 1...8 {
-                for row in 0..<count {
-                    for fraction in [0.0, 0.05, 0.3, 0.49, 0.5, 0.7, 0.95] {
-                        let y = CGFloat(fraction) * pitch
-                        let content = Drop.contentY(row: row, yInRow: y, rowHeight: pitch)
-                        #expect(content == CGFloat(row) * pitch + y,
-                                "row \(row)'s y \(y) is \(CGFloat(row) * pitch + y) in the rows' space at \(pitch)")
-                        #expect(Drop.gap(at: content, rowHeight: pitch, rows: count) == (fraction >= 0.5 ? row + 1 : row),
-                                "row \(row) of \(count), \(fraction) down it, at \(pitch): the gap beside it")
-                    }
-                }
-            }
-        }
-    }
-
-    // MARK: - The line (the overlay/sink delivery law: hover, scroll, list change)
+    // MARK: - The line (the overlay/sink delivery law: target, scroll, list change)
 
     private func window(offset: CGFloat = 0, viewport: CGFloat = 120, content: CGFloat = 120)
         -> SidebarLayout.ScrollWindow {
         SidebarLayout.ScrollWindow(offset: offset, viewport: viewport, content: content)
     }
 
-    /// The line sits centred on the boundary the hover names, in the viewport.
-    @Test func theLineSitsOnTheBoundaryTheHoverNames() {
+    /// **P-U2d-1 (b) — RED ON OLD (R-X).** The line sits at the TARGETED
+    /// row's top, centred on that boundary, in the viewport — held inside the
+    /// rows at both ends; the end zone's line at the last row's bottom; none
+    /// on the dragged row's own place.
+    @Test func theLineSitsAtTheTargetedRowsTop() {
         let w = window()
-        #expect(Drop.lineTop(hover: .rows(viewportY: 50), dragged: 3, rows: 4, rowHeight: 30, window: w) == 59,
-                "b's lower half: the b/c boundary at 60, the 2-pt line from 59")
-        #expect(Drop.lineTop(hover: .rows(viewportY: 35), dragged: 3, rows: 4, rowHeight: 30, window: w) == 29)
-        #expect(Drop.lineTop(hover: .rows(viewportY: 2), dragged: 3, rows: 4, rowHeight: 30, window: w) == 0,
-                "the first gap is held inside the rows, never half off the top")
+        #expect(Drop.lineTop(hover: .row(2), dragged: 3, rows: 4, rowHeight: 30, window: w) == 59,
+                "c targeted: its top (the b/c boundary) at 60, the 2-pt line from 59")
+        #expect(Drop.lineTop(hover: .row(1), dragged: 3, rows: 4, rowHeight: 30, window: w) == 29)
+        #expect(Drop.lineTop(hover: .row(0), dragged: 3, rows: 4, rowHeight: 30, window: w) == 0,
+                "the first row's top is held inside the rows, never half off the top")
         #expect(Drop.lineTop(hover: .end, dragged: 0, rows: 4, rowHeight: 30, window: w) == 118,
-                "the end is held inside the rows, never half off the bottom")
-        #expect(Drop.lineTop(hover: .rows(viewportY: 110), dragged: 0, rows: 4, rowHeight: 30, window: w) == 118,
-                "the last row's lower half draws the same end line")
+                "the end zone: the last row's bottom, held inside the rows")
+        #expect(Drop.lineTop(hover: .row(3), dragged: 3, rows: 4, rowHeight: 30, window: w) == nil,
+                "the dragged row targeted: its own place, no line")
+        #expect(Drop.lineTop(hover: .row(0), dragged: 0, rows: 4, rowHeight: 30, window: w) == nil)
+        #expect(Drop.lineTop(hover: .row(1), dragged: 0, rows: 4, rowHeight: 30, window: w) == nil,
+                "the row right after the dragged one: its own lower gap, no line")
     }
 
-    /// Hover axis: the pointer moves, the line moves with the gap it names.
-    @Test func theLineFollowsTheHover() {
+    /// **P-U2d-1 (c), the pure half — RED ON OLD (R-X).** A change of target
+    /// moves the line: row by row down the list, then the end zone.
+    @Test func aTargetChangeMovesTheLine() {
         let w = window()
-        let tops = [10, 25, 40, 55, 70, 85, 100].map {
-            Drop.lineTop(hover: .rows(viewportY: CGFloat($0)), dragged: 0, rows: 4, rowHeight: 30, window: w)
+        let tops = ([.row(0), .row(1), .row(2), .row(3), .end] as [Drop.Hover]).map {
+            Drop.lineTop(hover: $0, dragged: 0, rows: 4, rowHeight: 30, window: w)
         }
-        #expect(tops == [nil, nil, nil, 59, 59, 89, 89],
-                "a's own gaps (0, 1) and b's upper half (= 1) offer nothing; then 2, 2, 3, 3")
+        #expect(tops == [nil, nil, 59, 89, 118],
+                "a's own row and the row right after it offer nothing; then c's top, d's top, the end")
     }
 
-    /// Scroll axis: a scroll under a STILL pointer moves the gap it names —
-    /// the line follows the rows, read against the offset as it now stands.
-    @Test func theLineFollowsAScrollUnderAStillPointer() {
-        let still = Drop.Hover.rows(viewportY: 50)
+    /// The scroll axis: the line rides its targeted row — read against the
+    /// list's offset as it now stands; a top scrolled past the window's top
+    /// edge shows AT that edge. RED ON OLD (R-X).
+    @Test func theLineRidesTheTargetedRowThroughAScroll() {
         func top(_ offset: CGFloat) -> CGFloat? {
-            Drop.lineTop(hover: still, dragged: 9, rows: 10, rowHeight: 30,
+            Drop.lineTop(hover: .row(3), dragged: 9, rows: 10, rowHeight: 30,
                          window: window(offset: offset, viewport: 120, content: 300))
         }
-        #expect(top(0) == 59, "content 50: b's lower half — the boundary at 60")
-        #expect(top(20) == 39, "content 70: c's upper half — the same boundary, 20 pt higher on screen")
-        #expect(top(30) == 59, "content 80: c's lower half — the next boundary (90) at 60 on screen")
-        #expect(top(90) == 59, "content 140: e's lower half — the boundary at 150")
+        #expect(top(0) == 89, "row 3's top at 90")
+        #expect(top(20) == 69, "scrolled 20: 20 pt higher on screen")
+        #expect(top(60) == 29, "scrolled 60")
+        #expect(top(100) == 0, "its top 10 pt above the window: the line at the window's top edge")
     }
 
     /// List-change axis: the rows, the pitch and the dragged row's place are
-    /// inputs too — a row closing above the dragged one moves its no-offer
-    /// gaps; the pitch flipping 30 → 24 re-reads the halves.
+    /// inputs too — a row closing above the dragged one moves its own place;
+    /// the pitch flipping 30 → 24 re-reads the targeted row's top.
+    ///
+    /// **U2d (P-U2d-1) — edited in place:** the targets are rows now, not a
+    /// pointer's height.
     @Test func theLineFollowsAChangeOfTheList() {
         let w = window(viewport: 120, content: 120)
-        let hover = Drop.Hover.rows(viewportY: 50)
-        #expect(Drop.lineTop(hover: hover, dragged: 2, rows: 4, rowHeight: 30, window: w) == nil,
-                "gap 2 is row 2's own")
-        #expect(Drop.lineTop(hover: hover, dragged: 1, rows: 3, rowHeight: 30, window: w) == nil,
-                "a row above it closed: the dragged row is row 1 now, and gap 2 is still its own")
-        #expect(Drop.lineTop(hover: hover, dragged: 3, rows: 4, rowHeight: 30, window: w) == 59)
-        #expect(Drop.lineTop(hover: hover, dragged: 3, rows: 4, rowHeight: 24,
+        #expect(Drop.lineTop(hover: .row(2), dragged: 2, rows: 4, rowHeight: 30, window: w) == nil,
+                "the dragged row itself targeted")
+        #expect(Drop.lineTop(hover: .row(1), dragged: 1, rows: 3, rowHeight: 30, window: w) == nil,
+                "a row above it closed: the same row, one place up — still its own")
+        #expect(Drop.lineTop(hover: .row(2), dragged: 3, rows: 4, rowHeight: 30, window: w) == 59)
+        #expect(Drop.lineTop(hover: .row(2), dragged: 3, rows: 4, rowHeight: 24,
                              window: window(viewport: 96, content: 96)) == 47,
-                "at 24 pt the pointer is on c's upper half: the b/c boundary at 48")
+                "at 24 pt c's top is at 48")
     }
 
     /// Never computed before layout exists: no reading, no pitch, no rows, no
     /// drag of this list's — no line.
+    ///
+    /// **U2d (P-U2d-1) — edited in place:** the hover is a targeted row.
     @Test func noLineBeforeTheListIsReadOrWithoutADragOfItsOwn() {
-        let hover = Drop.Hover.rows(viewportY: 50)
+        let hover = Drop.Hover.row(1)
         #expect(Drop.lineTop(hover: hover, dragged: 3, rows: 4, rowHeight: 30, window: .unmeasured) == nil)
         #expect(Drop.lineTop(hover: hover, dragged: 3, rows: 4, rowHeight: 0, window: window()) == nil)
         #expect(Drop.lineTop(hover: hover, dragged: 0, rows: 0, rowHeight: 30, window: window()) == nil)
@@ -258,34 +248,42 @@ struct OpenListDropRuleTests {
         #expect(Drop.lineTop(hover: nil, dragged: 3, rows: 4, rowHeight: 30, window: window()) == nil)
     }
 
-    /// A boundary half a row past a scrolled edge shows AT that edge — the
-    /// line never draws outside the window.
+    /// A targeted row's top past a scrolled edge shows AT that edge — the line
+    /// never draws outside the window. RED ON OLD (R-X), its first half.
+    ///
+    /// **U2d (P-U2d-1) — edited in place:** the targets are rows now.
     @Test func theLineStaysInsideTheWindow() {
-        // The pointer at the very top of a window scrolled to 40: content 42 —
-        // b's upper half, whose boundary (30) is 10 pt above the window.
-        #expect(Drop.lineTop(hover: .rows(viewportY: 2), dragged: 9, rows: 10, rowHeight: 30,
+        // Row 1 targeted in a window scrolled to 40: its top (30) is 10 pt
+        // above the window.
+        #expect(Drop.lineTop(hover: .row(1), dragged: 9, rows: 10, rowHeight: 30,
                              window: window(offset: 40, viewport: 120, content: 300)) == 0)
-        // …and at the very bottom of one scrolled to 50: content 169 — f's
-        // lower half, whose boundary (180) is 10 pt below the window.
-        #expect(Drop.lineTop(hover: .rows(viewportY: 119), dragged: 0, rows: 10, rowHeight: 30,
+        // …and row 6 in one scrolled to 50: its top (180) is 10 pt below it.
+        #expect(Drop.lineTop(hover: .row(6), dragged: 0, rows: 10, rowHeight: 30,
                              window: window(offset: 50, viewport: 120, content: 300)) == 118)
     }
 
     // MARK: - The end zone
 
-    /// The room the list leaves under its rows, capped at 28 pt (the book
-    /// navigator's end zone); none when the rows fill the list, or before the
-    /// column is measured.
-    @Test func theEndZoneIsTheRoomUnderTheRowsCapped() {
+    /// **P-U2d-2 — RED ON OLD (R-Q).** The end zone is the room the list
+    /// leaves under its rows, capped at 28 pt (the book navigator's end zone),
+    /// PLUS the column's bottom padding, which moves into it while the list
+    /// shows — so the column's layout is unchanged and the zone is never
+    /// absent: a list that scrolls keeps the padding's 12 pt as its last-slot
+    /// target. No rows, no list: no zone.
+    ///
+    /// **U2d — edited in place by P-U2d-2** (was
+    /// `theEndZoneIsTheRoomUnderTheRowsCapped`, whose zone vanished once the
+    /// rows filled the list — F2 has no half row to stand in for it).
+    @Test func theEndZoneIsTheRoomUnderTheRowsCappedAndTheBottomPadding() {
         func zone(_ rows: Int, visible: CGFloat = 800, top: CGFloat = 300) -> CGFloat {
             Drop.endZoneHeight(visibleHeight: visible, listTop: top, bottomPadding: 12, rows: rows, rowHeight: 30)
         }
-        #expect(zone(5) == 28, "plenty of room: the whole zone")
-        #expect(zone(16) == 8, "488 − 480: the room that is there, no more")
-        #expect(zone(17) == 0, "the rows fill the list: no zone (the last row's lower half is the end)")
-        #expect(zone(5, visible: 0) == 0, "unmeasured")
-        #expect(zone(5, top: 0) == 0, "unmeasured")
-        #expect(zone(0) == 0, "no rows")
+        #expect(zone(5) == 40, "plenty of room: the whole 28 pt, and the padding under it")
+        #expect(zone(16) == 20, "488 − 480: the 8 pt that are there, and the padding")
+        #expect(zone(17) == 12, "the rows fill the list: the padding alone — the zone is never absent")
+        #expect(zone(5, visible: 0) == 12, "unmeasured: the padding alone (the layout never loses it)")
+        #expect(zone(5, top: 0) == 12, "unmeasured: the padding alone")
+        #expect(zone(0) == 0, "no rows, no list: no zone (the column keeps its own padding)")
         #expect(Drop.endZoneMaxHeight == 28 && Drop.lineThickness == 2, "the book navigator's numbers")
     }
 }
@@ -305,59 +303,68 @@ struct OpenListDropDoorTests {
         SidebarLayout.ScrollWindow(offset: offset, viewport: 120, content: CGFloat(rows) * 30)
     }
 
-    /// **RED ON OLD (R-K).** A drag of row a, hovering b's lower half, draws the
-    /// line after b — and the release lands a exactly there.
-    @Test func aDropLandsWhereTheLineWasDrawn() throws {
+    /// **RED ON OLD (R-X).** A drag of row a with c targeted draws the line at
+    /// c's top — and the release on c lands a exactly there.
+    ///
+    /// **U2d (P-U2d-1) — edited in place:** a targeted row, not a pointer's
+    /// half, names the slot; the release names its own row.
+    @Test func aDropLandsWhereTheLineWasDrawn() {
         let ids = ["a", "b", "c", "d"]
         let workspace = workspace(ids)
         let state = OpenListDragState()
         state.read(reading())
         state.began("a")
-        state.hoverRows(contentY: 50)
-        #expect(state.lineTop(rows: ids, rowHeight: 30) == 59, "the line after b")
-        #expect(OpenListDropDoor.proposal(state, rows: ids, rowHeight: 30).operation == .move)
-        let gap = try #require(state.gap(rows: ids.count, rowHeight: 30))
+        state.targeted(.row("c"), true)
+        #expect(state.lineTop(rows: ids, rowHeight: 30) == 59, "the line at c's top")
         let token = SidebarView.OpenNoteDragToken(noteID: "a", listID: state.listID)
-        #expect(OpenListDropDoor.land(token, atGap: gap, listID: state.listID, in: workspace, animation: nil))
+        #expect(OpenListDropDoor.perform([token], onto: .row("c"), state: state, workspace: workspace,
+                                         animation: nil))
         #expect(workspace.openNotes.ids == ["b", "a", "c", "d"])
     }
 
     /// The end zone names the last slot, and the release lands there.
+    ///
+    /// **U2d (P-U2d-1) — edited in place:** the zone is targeted, and the
+    /// last row over it is refused at the release (no proposal exists on
+    /// main's API).
     @Test func theEndZoneLandsTheLastSlot() {
         let ids = ["a", "b", "c", "d"]
         let workspace = workspace(ids)
         let state = OpenListDragState()
         state.read(reading())
         state.began("b")
-        state.hoverEnd()
-        #expect(state.gap(rows: 4, rowHeight: 30) == 4)
+        state.targeted(.end, true)
         #expect(state.lineTop(rows: ids, rowHeight: 30) == 118, "the line at the list's end")
         let token = SidebarView.OpenNoteDragToken(noteID: "b", listID: state.listID)
-        #expect(OpenListDropDoor.land(token, atGap: 4, listID: state.listID, in: workspace, animation: nil))
+        #expect(OpenListDropDoor.perform([token], onto: .end, state: state, workspace: workspace, animation: nil))
         #expect(workspace.openNotes.ids == ["a", "c", "d", "b"])
-        // …and the last row over the end zone would change nothing: no offer.
+        // …and the last row over the end zone would change nothing: no line,
+        // and the release moves nothing.
         state.began("b")
-        state.hoverEnd()
-        #expect(OpenListDropDoor.proposal(state, rows: ["a", "c", "d", "b"], rowHeight: 30).operation
-                == .forbidden)
+        state.targeted(.end, true)
+        #expect(state.lineTop(rows: ["a", "c", "d", "b"], rowHeight: 30) == nil)
+        #expect(!OpenListDropDoor.perform([token], onto: .end, state: state, workspace: workspace, animation: nil))
+        #expect(workspace.openNotes.ids == ["a", "c", "d", "b"])
     }
 
-    /// §12's false-offer rule at the door: on the dragged row's own place the
-    /// drop offers nothing (the image slides back) and the landing moves
-    /// nothing.
-    @Test func aDropOnItsOwnPlaceOffersNothingAndMovesNothing() throws {
+    /// §12's false-offer rule at the door: on the dragged row's own place —
+    /// its own row, and the row right after it — no line is drawn and the
+    /// release moves nothing (the image slides back). RED ON OLD (R-X), the
+    /// row-after half.
+    ///
+    /// **U2d (P-U2d-1) — edited in place:** the own place is two targets now.
+    @Test func aDropOnItsOwnPlaceOffersNothingAndMovesNothing() {
         let ids = ["a", "b", "c", "d"]
         let workspace = workspace(ids)
         let state = OpenListDragState()
         state.read(reading())
-        state.began("b")
-        for y: CGFloat in [32, 44, 46, 58, 62, 70] {  // b's halves and c's upper half
-            state.hoverRows(contentY: y)
-            #expect(state.lineTop(rows: ids, rowHeight: 30) == nil, "no line at \(y)")
-            #expect(OpenListDropDoor.proposal(state, rows: ids, rowHeight: 30).operation == .forbidden)
-            let gap = try #require(state.gap(rows: 4, rowHeight: 30))
+        for target: OpenListDragState.Target in [.row("b"), .row("c")] {
+            state.began("b")
+            state.targeted(target, true)
+            #expect(state.lineTop(rows: ids, rowHeight: 30) == nil, "no line on \(target)")
             let token = SidebarView.OpenNoteDragToken(noteID: "b", listID: state.listID)
-            #expect(!OpenListDropDoor.land(token, atGap: gap, listID: state.listID, in: workspace, animation: nil))
+            #expect(!OpenListDropDoor.perform([token], onto: target, state: state, workspace: workspace,
+                                              animation: nil))
         }
         #expect(workspace.openNotes.ids == ids)
     }
@@ -365,6 +372,9 @@ struct OpenListDropDoorTests {
     /// PROVISIONAL P-U2-3: a drop acts only on the list its drag began in — a
     /// row dragged from another window's Open list moves nothing here, even
     /// when this list holds the same note.
+    ///
+    /// **U2d (P-U2d-1) — edited in place:** the hover at the end is a targeted
+    /// row (d — the gap the old pointer height named).
     @Test func aDropActsOnlyOnTheListItsDragBeganIn() {
         let ids = ["a", "b", "c", "d"]
         let workspace = workspace(ids)
@@ -375,183 +385,196 @@ struct OpenListDropDoorTests {
         #expect(workspace.openNotes.ids == ids)
         // And no line is drawn here for a drag this list never saw begin.
         here.read(reading())
-        here.hoverRows(contentY: 80)
+        here.targeted(.row("d"), true)
         #expect(here.lineTop(rows: ids, rowHeight: 30) == nil)
     }
 
-    /// The scroll axis through the state: a scroll under a still pointer moves
-    /// the gap (the window is copied in only while a drag hovers).
-    @Test func aScrollUnderAStillPointerMovesTheGap() {
+    /// The scroll axis through the state: the line rides its targeted row as
+    /// the list scrolls (the window is copied in only while a target stands —
+    /// an ordinary scroll re-renders nothing). RED ON OLD (R-X).
+    @Test func aScrollMovesTheLineWithItsTargetedRow() {
         let ids = (0..<10).map { "n\($0)" }
         let state = OpenListDragState()
         state.read(reading(offset: 0, rows: 10))
         state.began("n9")
-        state.hoverRows(contentY: 50)  // viewport 50
-        #expect(state.gap(rows: 10, rowHeight: 30) == 2)
+        state.targeted(.row("n3"), true)
+        #expect(state.lineTop(rows: ids, rowHeight: 30) == 89, "n3's top at 90")
         state.read(reading(offset: 30, rows: 10))
-        #expect(state.gap(rows: 10, rowHeight: 30) == 3, "content 80 now: c's lower half")
-        #expect(state.lineTop(rows: ids, rowHeight: 30) == 59, "the boundary at 90, 60 on screen")
-        state.leftRows()
+        #expect(state.lineTop(rows: ids, rowHeight: 30) == 59, "scrolled 30: the line rode its row up")
+        state.targeted(.row("n3"), false)
         #expect(state.lineTop(rows: ids, rowHeight: 30) == nil, "the drag left: no line")
+        state.read(reading(offset: 60, rows: 10))
+        #expect(state.window.offset == 30, "with no target a scroll is not copied in")
     }
 
-    /// Leaving the rows for the end zone (or back) never blanks the line in
-    /// between, whichever exit arrives last.
+    /// The target is the row's NOTE, so a change of the list re-derives the
+    /// line from where that row now stands — and a target whose row closed
+    /// draws nothing. A guard of the per-row road (holding the row by its
+    /// note, as main's landing names it).
+    @Test func theTargetIsTheRowsNoteSoAListChangeRederivesTheLine() {
+        let state = OpenListDragState()
+        state.read(reading())
+        state.began("d")
+        state.targeted(.row("c"), true)
+        #expect(state.lineTop(rows: ["a", "b", "c", "d"], rowHeight: 30) == 59, "c is row 2")
+        #expect(state.lineTop(rows: ["b", "c", "d"], rowHeight: 30) == 29, "a closed: c is row 1 now")
+        #expect(state.lineTop(rows: ["b", "d"], rowHeight: 30) == nil, "c closed: its target is gone")
+    }
+
+    /// Leaving a row for the end zone (or back) never blanks the line in
+    /// between, whichever of the two `isTargeted` calls arrives last. RED ON
+    /// OLD (R-Y).
+    ///
+    /// **U2d (P-U2d-1) — edited in place:** the row is targeted (d), so its
+    /// line is d's top, not the end's.
     @Test func movingBetweenTheRowsAndTheEndZoneKeepsTheLine() {
         let ids = ["a", "b", "c", "d"]
         let state = OpenListDragState()
         state.read(reading())
         state.began("a")
-        state.hoverRows(contentY: 110)
-        state.hoverEnd()      // the zone entered before…
-        state.leftRows()      // …the rows' exit arrived
+        state.targeted(.row("d"), true)
+        state.targeted(.end, true)          // the zone targeted before…
+        state.targeted(.row("d"), false)    // …the row's un-target arrived
         #expect(state.lineTop(rows: ids, rowHeight: 30) == 118)
-        state.hoverRows(contentY: 110)
-        state.leftEnd()
-        #expect(state.lineTop(rows: ids, rowHeight: 30) == 118)
+        state.targeted(.row("d"), true)
+        state.targeted(.end, false)
+        #expect(state.lineTop(rows: ids, rowHeight: 30) == 89)
     }
 
     /// The release lands the PAYLOAD (the whole road a real drop takes after
-    /// SwiftUI, short of the pointer): the gap the line named, the token, the
-    /// move.
+    /// SwiftUI decodes it, short of the pointer): the target the drop names,
+    /// the token, the move — and the drop ends the drag.
     ///
-    /// **U2c (P-U2b-1) — edited in place by the ruling:** the door takes the
-    /// DECODED tokens now — the row's Transferable drop decodes them before
-    /// its action runs — so there is no item provider and no asynchronous load
-    /// to wait for (the old body registered the token on an `NSItemProvider`
-    /// and polled for the move).
+    /// **U2d (P-U2d-1) — edited in place:** the last slot is the end zone's.
     @Test func aReleaseReadsThePayloadAndLandsIt() {
         let ids = ["a", "b", "c", "d"]
         let workspace = workspace(ids)
         let state = OpenListDragState()
         state.read(reading())
         state.began("a")
-        state.hoverRows(contentY: 105)  // d's lower half: the end
+        state.targeted(.end, true)
         let token = SidebarView.OpenNoteDragToken(noteID: "a", listID: state.listID)
-        #expect(OpenListDropDoor.perform([token], state: state, rows: ids, rowHeight: 30, workspace: workspace,
-                                         animation: nil))
-        #expect(state.dragging == nil && state.hover == nil, "the drop ends the drag")
+        #expect(OpenListDropDoor.perform([token], onto: .end, state: state, workspace: workspace, animation: nil))
+        #expect(state.dragging == nil && state.target == nil, "the drop ends the drag")
         #expect(workspace.openNotes.ids == ["b", "c", "d", "a"])
     }
 
-    /// A release with no payload, or where the line offered nothing, refuses
+    /// A release with no payload, or on the dragged row's own place, refuses
     /// (the image slides back) — and either way the drag is over.
     ///
-    /// **U2c (P-U2b-1) — edited in place by the ruling:** the decoded tokens
-    /// replace the item providers (`[own]` for the provider carrying it, `[]`
-    /// for none).
+    /// **U2d (P-U2d-1) — edited in place:** the releases name their rows.
     @Test func aReleaseThatOffersNothingRefuses() {
         let ids = ["a", "b", "c", "d"]
         let workspace = workspace(ids)
         let state = OpenListDragState()
         state.read(reading())
         state.began("b")
-        state.hoverRows(contentY: 40)  // its own upper half
+        state.targeted(.row("b"), true)
         let own = SidebarView.OpenNoteDragToken(noteID: "b", listID: state.listID)
-        #expect(!OpenListDropDoor.perform([own], state: state, rows: ids, rowHeight: 30, workspace: workspace,
+        #expect(!OpenListDropDoor.perform([own], onto: .row("b"), state: state, workspace: workspace,
                                           animation: nil))
         #expect(state.dragging == nil)
         state.began("a")
-        state.hoverRows(contentY: 80)
-        #expect(!OpenListDropDoor.perform([], state: state, rows: ids, rowHeight: 30, workspace: workspace,
+        state.targeted(.row("d"), true)
+        #expect(!OpenListDropDoor.perform([], onto: .row("d"), state: state, workspace: workspace,
                                           animation: nil))
         #expect(workspace.openNotes.ids == ids)
     }
 
-    // MARK: - U2c (P-U2b-1): each row is its own drop; the drag session's end
-
-    /// **P-T3-2, through the state (U2c; RED ON OLD, revert R-U).** A row's
-    /// session reports the pointer in the row's own space; the state maps it
-    /// into the rows' space (index × pitch + y) and holds it in the viewport —
-    /// so in a list scrolled 45 pt, the pointer 20 pt down row 4 (the fifth)
-    /// names the gap after it, the line draws on that boundary, the drop
-    /// offers a move and the release lands the dragged row there.
-    @Test func aRowsOwnLocationDrawsTheLineAndLandsThere() {
-        let ids = (0..<10).map { "n\($0)" }
-        let workspace = workspace(ids)
-        let state = OpenListDragState()
-        state.read(SidebarLayout.ScrollWindow(offset: 45, viewport: 120, content: 300))
-        state.began("n0")
-        state.hoverRow(4, yInRow: 20, rowHeight: 30)  // the rows' space 140: n4's lower half
-        #expect(state.gap(rows: 10, rowHeight: 30) == 5, "the gap after n4")
-        #expect(state.lineTop(rows: ids, rowHeight: 30) == 104, "the n4/n5 boundary at 150, 105 on screen, from 104")
-        #expect(OpenListDropDoor.proposal(state, rows: ids, rowHeight: 30).operation == .move)
-        let token = SidebarView.OpenNoteDragToken(noteID: "n0", listID: state.listID)
-        #expect(OpenListDropDoor.perform([token], state: state, rows: ids, rowHeight: 30, workspace: workspace,
-                                         animation: nil))
-        #expect(workspace.openNotes.ids == ["n1", "n2", "n3", "n4", "n0", "n5", "n6", "n7", "n8", "n9"])
-    }
-
-    /// Moving from one row to the next never blanks the hover, whichever of
-    /// the two sessions' updates arrives first: a row's late EXIT clears only
-    /// a hover it wrote itself (each row is its own drop now — the end zone's
-    /// precedent, `movingBetweenTheRowsAndTheEndZoneKeepsTheLine`). A guard of
-    /// U2c's per-row road (not red-on-old: the road is new).
-    @Test func movingBetweenRowsNeverBlanksTheHover() {
+    /// **P-U2d-1 (c) — RED ON OLD (R-Y).** A change of target moves the line,
+    /// and an un-target clears only the target IT set: each row is its own
+    /// drop, so the next row's `isTargeted(true)` may arrive before this row's
+    /// `false` — in either order, the newest target stands.
+    @Test func aTargetChangeMovesTheLineAndAnUntargetClearsOnlyItsOwn() {
+        let ids = ["a", "b", "c", "d"]
         let state = OpenListDragState()
         state.read(reading())
         state.began("a")
-        state.hoverRow(2, yInRow: 20, rowHeight: 30)
-        state.hoverRow(3, yInRow: 5, rowHeight: 30)   // the next row entered before…
-        state.leftRow(2)                               // …the last one's exit arrived
-        #expect(state.hover != nil, "row 3's hover stands")
-        state.leftRow(3)
-        #expect(state.hover == nil, "the drag left the rows")
-        state.hoverRow(1, yInRow: 20, rowHeight: 30)
-        state.leftRow(1)                               // the other order: exit first…
-        state.hoverRow(2, yInRow: 5, rowHeight: 30)    // …then the next row's entry
-        #expect(state.hover != nil)
-        state.hoverEnd()
-        state.leftRow(2)                               // a row's late exit leaves the end zone's hover
-        #expect(state.hover == .end)
+        state.targeted(.row("c"), true)
+        #expect(state.lineTop(rows: ids, rowHeight: 30) == 59, "c's top")
+        state.targeted(.row("d"), true)     // the next row targeted before…
+        #expect(state.lineTop(rows: ids, rowHeight: 30) == 89, "the target moved: d's top")
+        state.targeted(.row("c"), false)    // …the last one's un-target arrived
+        #expect(state.target == .row("d"), "d's target stands")
+        #expect(state.lineTop(rows: ids, rowHeight: 30) == 89)
+        state.targeted(.row("d"), false)
+        #expect(state.target == nil && state.lineTop(rows: ids, rowHeight: 30) == nil, "the drag left the rows")
+        state.targeted(.row("b"), true)
+        state.targeted(.row("b"), false)    // the other order: the un-target first…
+        state.targeted(.row("c"), true)     // …then the next row's target
+        #expect(state.target == .row("c"))
+        state.targeted(.end, true)
+        state.targeted(.row("c"), false)    // a row's late un-target leaves the end zone's
+        #expect(state.target == .end)
     }
 
-    /// **P-T3-3 (U2c — P-U2b-1; RED ON OLD, revert R-V).** The drag SESSION's
-    /// end clears the list's drag — a release anywhere (a cancel off the list,
-    /// a drop elsewhere, a landed drop) — while a session still in flight keeps
-    /// it. U2's known edge, now pinned: before, only a drop on this list's own
-    /// targets cleared `dragging`, so a row dragged in from ANOTHER window's
-    /// list after a cancel read as this list's drag and drew a line.
+    /// **P-U2d-1 (c) — RED ON OLD (R-X).** The action lands the dragged row
+    /// BEFORE the targeted row, inside the settle (the door's default — the
+    /// rows' and the zone's actions pass no animation; pin (a) reads that).
+    @Test func theActionLandsBeforeTheTargetedRowWithTheSettle() {
+        let ids = ["a", "b", "c", "d"]
+        let workspace = workspace(ids)
+        let state = OpenListDragState()
+        state.read(reading())
+        state.began("a")
+        state.targeted(.row("d"), true)
+        let token = SidebarView.OpenNoteDragToken(noteID: "a", listID: state.listID)
+        #expect(OpenListDropDoor.perform([token], onto: .row("d"), state: state, workspace: workspace))
+        #expect(workspace.openNotes.ids == ["b", "c", "a", "d"], "before d")
+        #expect(OpenListDropDoor.lastLanding
+                == OpenListDropDoor.Landing(from: 0, to: 3, animation: OpenListDropDoor.settle),
+                "the move rode the settle: \(String(describing: OpenListDropDoor.lastLanding))")
+        #expect(OpenListDropDoor.settle == Animation.snappy(duration: SidebarLayout.railTransition),
+                "the settle: a snap on the column's one beat (P-U2-4)")
+    }
+
+    /// **P-T3-3 → P-U2d-1 (c) — RED ON OLD (R-Z).** The drag SESSION's end
+    /// clears the list's drag — a release anywhere (a cancel off the list, a
+    /// drop elsewhere, a landed drop) — while a session still in flight keeps
+    /// it. After a cancel, a row dragged in from ANOTHER window's list draws no
+    /// line here.
+    ///
+    /// **U2d (P-U2d-1) — edited in place:** the targets are rows; a landed
+    /// drop's session ends in a COPY on main's API.
     @Test func theDragSessionsEndClearsTheDrag() {
         let ids = ["a", "b", "c", "d"]
         let state = OpenListDragState()
         state.read(reading())
         state.began("a")
-        state.hoverRows(contentY: 50)
-        #expect(state.lineTop(rows: ids, rowHeight: 30) == 59, "a's drag over b's lower half")
+        state.targeted(.row("c"), true)
+        #expect(state.lineTop(rows: ids, rowHeight: 30) == 59, "a's drag with c targeted")
         state.dragSessionUpdated(.active)
         #expect(state.dragging == "a", "a session in flight keeps its drag")
         state.dragSessionUpdated(.ended(.cancel))
-        #expect(state.dragging == nil && state.hover == nil, "the session ended: the drag is over")
-        // A foreign drag (another window's list) hovering after the cancel:
-        // no line, nothing offered.
-        state.hoverRows(contentY: 80)
+        #expect(state.dragging == nil && state.target == nil, "the session ended: the drag is over")
+        // A foreign drag (another window's list) targeting a row after the
+        // cancel: no line.
+        state.targeted(.row("d"), true)
         #expect(state.lineTop(rows: ids, rowHeight: 30) == nil)
-        #expect(OpenListDropDoor.proposal(state, rows: ids, rowHeight: 30).operation == .forbidden)
-        state.leftRows()
+        state.targeted(.row("d"), false)
         // A landed drop's session end clears it too.
         state.began("b")
-        state.dragSessionUpdated(.ended(.move))
+        state.dragSessionUpdated(.ended(.copy))
         #expect(state.dragging == nil)
     }
 
     /// The source's session end and the drop's action may arrive in either
-    /// order (U2's record left it unverified — the reason the old road never
-    /// used the session); the drop lands either way, because the action names
-    /// its gap from its OWN location and `land` decides on the payload. A guard
-    /// (green on both sides of R-V by design).
+    /// order; the drop lands either way, because the action names its OWN row
+    /// and `land` decides on the payload. A guard (green on both sides of R-Z
+    /// by design).
+    ///
+    /// **U2d (P-U2d-1) — edited in place:** the action names its row.
     @Test func aSessionEndBeforeTheDropsActionStillLands() {
         let ids = ["a", "b", "c", "d"]
         let workspace = workspace(ids)
         let state = OpenListDragState()
         state.read(reading())
         state.began("a")
-        state.hoverRows(contentY: 50)                 // the line after b
-        state.dragSessionUpdated(.ended(.move))       // the source's end FIRST
-        state.hoverRows(contentY: 50)                 // the action: its own location…
+        state.targeted(.row("c"), true)               // the line at c's top
+        state.dragSessionUpdated(.ended(.copy))       // the source's end FIRST
         let token = SidebarView.OpenNoteDragToken(noteID: "a", listID: state.listID)
-        #expect(OpenListDropDoor.perform([token], state: state, rows: ids, rowHeight: 30, workspace: workspace,
-                                         animation: nil))  // …then the door
+        #expect(OpenListDropDoor.perform([token], onto: .row("c"), state: state, workspace: workspace,
+                                         animation: nil))  // …then the drop on c
         #expect(workspace.openNotes.ids == ["b", "a", "c", "d"])
     }
 }
@@ -599,8 +622,12 @@ struct OpenListDragFaceTests {
     /// location inside a row now decides the half (U2's traced bug was the row
     /// under the pointer deciding alone, never the per-row target itself); the
     /// assertion that the list's content carried ONE delegate is withdrawn
-    /// (that delegate was never consulted — U2b's trace). P-T3-1 below reads
-    /// the session form in full.
+    /// (that delegate was never consulted — U2b's trace).
+    ///
+    /// **U2d (P-U2d-1):** the assertions stand unchanged; only the second
+    /// message's half-row clause is withdrawn (the TARGETED row decides now),
+    /// and P-T3-1, which this note pointed to, is retired — pin (a) below
+    /// reads the road in full.
     @Test func theRowDragsItsChipAndIsItsOwnDrop() throws {
         let source = try String(
             contentsOf: Self.appRoot.appending(path: "Variorum/Features/Library/SidebarView.swift"),
@@ -610,7 +637,7 @@ struct OpenListDragFaceTests {
         #expect(row.contains("ChipDragSource(") && row.contains("Self.openRowChip("),
                 "the row's drag image is its title chip at the grab point")
         #expect(row.contains(".modifier(OpenListRowDrop("),
-                "each row is its own drop again — the location inside it decides the half (P-U2b-1)")
+                "each row is its own drop (P-U2b-1; the targeted row decides — P-U2d-1)")
         #expect(source.contains("openListEndZone(shown)"), "the end zone sits under the rows")
         #expect(source.contains(".overlay { openListLine(shown) }"), "the line lies over the list")
         let shelf = try String(
@@ -630,17 +657,16 @@ struct OpenListDragFaceTests {
         return String(rest[..<end])
     }
 
-    /// **P-T3-1 (U2c — P-U2b-1; RED ON OLD, revert R-T).** The Open list's drop
-    /// is the road proven to land inside scroll content in this app — a
-    /// Transferable `dropDestination` on each ROW (and on the end zone), in
-    /// the macOS 26 SESSION form, with its session's location feeding the line
-    /// and its configuration answering the operation — and NO legacy
-    /// `onDrop(of:delegate:)` remains on the list (U2's one, on the scroll
-    /// content's root, was never consulted: zero `validateDrop` under a real
-    /// drag). The row's source allows a MOVE (copy-only is the macOS default,
-    /// and AppKit intersects the destination's `.move` with it — G2), and its
-    /// drag session's end reaches the list's state.
-    @Test func eachRowIsATransferableDropAndItsSourceAllowsTheMove() throws {
+    /// **P-U2d-1 (a) — RED ON OLD (R-W).** The Open list's drop is MAIN's own
+    /// per-row road, the one her hands have used: each row a classic
+    /// Transferable `dropDestination(for:action:isTargeted:)` named by its
+    /// note, the end zone a drop of the same kind, each landing through the
+    /// door with its settle (no animation argument — the door's default). The
+    /// source keeps its half: the payload's evaluation arms the drag and the
+    /// drag session's end clears it. And none of what P-U2d-1 dropped remains
+    /// on the list — the macOS 26 session form, the move configuration, a
+    /// legacy drop, U2b's instrument.
+    @Test func eachRowIsATargetedDropOnMainsRoadAndNoSessionFormRemains() throws {
         let sidebar = try String(
             contentsOf: Self.appRoot.appending(path: "Variorum/Features/Library/SidebarView.swift"),
             encoding: .utf8)
@@ -648,25 +674,34 @@ struct OpenListDragFaceTests {
             contentsOf: Self.appRoot.appending(path: "Variorum/Features/Library/OpenListDrag.swift"),
             encoding: .utf8)
         let row = try Self.body(of: "private func openRow(", in: sidebar)
-        #expect(row.contains(".modifier(OpenListRowDrop("), "each Open row is its own drop")
-        #expect(row.contains(".dragConfiguration(DragConfiguration(allowMove: true))"),
-                "the row's source allows a move")
-        #expect(row.contains(".onDragSessionUpdated {") && row.contains("openListDrag.dragSessionUpdated("),
-                "the source's drag session reaches the list's state (its end clears the drag)")
         let group = try Self.body(of: "private var openGroup: some View {", in: sidebar)
         let endZone = try Self.body(of: "private func openListEndZone(", in: sidebar)
-        #expect(!group.contains("onDrop(of:") && !endZone.contains("onDrop(of:"),
-                "no legacy drop on the Open list")
-        #expect(endZone.contains(".modifier(OpenListEndZoneDrop("), "the end zone is the same kind of drop")
-        for name in ["struct OpenListRowDrop: ViewModifier {", "struct OpenListEndZoneDrop: ViewModifier {"] {
-            let modifier = try Self.body(of: name, in: drag, indent: "")
-            #expect(modifier.contains(".dropDestination(for: SidebarView.OpenNoteDragToken.self, isEnabled:"),
-                    "\(name) — the Transferable drop, session form")
-            #expect(modifier.contains(".onDropSessionUpdated {"), "\(name) — its session feeds the hover")
-            #expect(modifier.contains(".dropConfiguration {") && modifier.contains("OpenListDropDoor.configuration("),
-                    "\(name) — its configuration answers the door's operation")
+        let rowDrop = try Self.body(of: "struct OpenListRowDrop: ViewModifier {", in: drag, indent: "")
+        let endDrop = try Self.body(of: "struct OpenListEndZoneDrop: ViewModifier {", in: drag, indent: "")
+
+        #expect(row.contains(".modifier(OpenListRowDrop(state: openListDrag, noteID: noteID"),
+                "each Open row is its own drop, named by its note")
+        #expect(row.contains("openListDrag.began(noteID)"), "the payload's evaluation arms the drag")
+        #expect(row.contains(".onDragSessionUpdated {") && row.contains("openListDrag.dragSessionUpdated("),
+                "the source's drag session reaches the list's state (its end clears the drag)")
+        #expect(endZone.contains(".modifier(OpenListEndZoneDrop("), "the end zone is a per-zone drop")
+        for (name, body, target) in [("OpenListRowDrop", rowDrop, ".row(noteID)"),
+                                     ("OpenListEndZoneDrop", endDrop, ".end")] {
+            #expect(body.contains(".dropDestination(for: SidebarView.OpenNoteDragToken.self) {"),
+                    "\(name): main's per-row Transferable drop")
+            #expect(body.contains("} isTargeted: {"), "\(name): isTargeted marks the target")
+            #expect(body.contains("OpenListDropDoor.perform(tokens, onto: \(target), state: state, workspace: workspace)"),
+                    "\(name): lands through the door with its settle")
         }
+        for gone in ["onDropSessionUpdated", "dropConfiguration", "DragConfiguration", "dragConfiguration",
+                     "isEnabled:"] {
+            #expect(!row.contains(gone) && !group.contains(gone) && !endZone.contains(gone) && !drag.contains(gone),
+                    "no \(gone) on the Open list (P-U2d-1)")
+        }
+        #expect(!group.contains("onDrop(of:") && !endZone.contains("onDrop(of:"), "no legacy drop on the Open list")
         #expect(!drag.contains(": DropDelegate"), "no legacy drop delegate remains")
+        #expect(!sidebar.contains("OpenListDragTrace") && !drag.contains("OpenListDragTrace"),
+                "U2b's instrument is stripped (P-U2d-1)")
     }
 }
 
@@ -843,10 +878,12 @@ struct OpenListDragMountTests {
     }
 
     /// **The overlay/sink delivery law, as drawn** — the line lies where the
-    /// rule says, and RE-DERIVES on every input axis: the hover moving, the
-    /// list scrolling under a still pointer, the list changing under it; it
-    /// lights nowhere a drop would change nothing, and goes when the drag
-    /// leaves.
+    /// rule says, and RE-DERIVES on every input axis: the target moving, the
+    /// list scrolling under it, the list changing under it; it lights nowhere
+    /// a drop would change nothing, and goes when the drag leaves.
+    ///
+    /// **U2d (P-U2d-1) — edited in place:** the drag targets ROWS (by their
+    /// notes), and the line sits at the targeted row's top.
     @Test func theLineDrawsWhereTheDropWouldLandOnEveryAxis() async throws {
         // 700 pt: twenty rows overflow the list by several rows (it scrolls).
         try await withColumn(height: 700, openNotes: 20, startOn: nil) { column in
@@ -855,62 +892,60 @@ struct OpenListDragMountTests {
             #expect(pitch >= 24, "the list is laid out: \(pitch)")
             #expect(column.line == nil, "no drag, no line")
 
-            // Hover: row 3 dragged, the pointer on row 7's lower half → the
-            // line on the boundary after row 7.
+            // Target: row 3 dragged, row 8 targeted → the line at row 8's top.
             drag.began(column.notes[2])
-            drag.hoverRows(contentY: 6.7 * pitch)
+            drag.targeted(.row(column.notes[7]), true)
             await column.settle()
             let first = try #require(column.lineTopInList, "the line is drawn")
-            #expect(abs(first - (7 * pitch - 1)) <= 0.5, "after row 7: \(first) at pitch \(pitch)")
+            #expect(abs(first - (7 * pitch - 1)) <= 0.5, "at row 8's top: \(first) at pitch \(pitch)")
             #expect(abs(first - (column.lineTopByRule ?? -99)) <= 0.5)
 
-            // Hover moves: onto row 9's upper half → the boundary before row 9.
-            let pointer = 8.2 * pitch
-            drag.hoverRows(contentY: pointer)
+            // The target moves — the next row's target, then the last one's
+            // un-target — onto row 10: the line at its top.
+            drag.targeted(.row(column.notes[9]), true)
+            drag.targeted(.row(column.notes[7]), false)
             await column.settle()
             let moved = try #require(column.lineTopInList)
-            #expect(abs(moved - (8 * pitch - 1)) <= 0.5, "before row 9: \(moved)")
+            #expect(abs(moved - (9 * pitch - 1)) <= 0.5, "at row 10's top: \(moved)")
 
-            // Scroll: the list scrolls 1.5 rows under the STILL pointer — the
-            // gap under it changes, and the line is redrawn where the rule
-            // now says (never left where the old reading put it).
+            // Scroll: the list scrolls 1.5 rows under the same target — the
+            // line rides its row, redrawn where the rule now says.
             try await column.scrollList(to: 1.5 * pitch)
             let reading = try #require(column.list?.window)
             #expect(abs(reading.offset - 1.5 * pitch) <= 1, "the list scrolled: \(reading)")
             let scrolled = try #require(column.lineTopInList, "still drawn after the scroll")
             let wanted = try #require(SidebarLayout.OpenListDrop.lineTop(
-                hover: .rows(viewportY: pointer), dragged: 2, rows: 20, rowHeight: pitch, window: reading))
+                hover: .row(9), dragged: 2, rows: 20, rowHeight: pitch, window: reading))
             #expect(abs(scrolled - wanted) <= 0.5, "re-derived on the scroll: \(scrolled) vs \(wanted)")
-            #expect(abs(scrolled - moved) >= pitch / 2 - 0.5, "it really moved: \(moved) → \(scrolled)")
+            #expect(abs((moved - scrolled) - 1.5 * pitch) <= 1, "it rode its row up: \(moved) → \(scrolled)")
 
-            // List change: a row above closes — the line re-derives from the
-            // rows as they now stand…
+            // List change: a row above closes — the target is the row's note,
+            // so the line re-derives from where that row now stands…
             column.workspace.closeNote(column.notes[0])
             await column.settle()
             let afterClose = try #require(column.lineTopInList, "still drawn after a row closed")
             #expect(abs(afterClose - (column.lineTopByRule ?? -99)) <= 0.5,
                     "re-derived on the list's change: \(afterClose) vs \(String(describing: column.lineTopByRule))")
-            // …and when the list changes so the gap under the pointer becomes
-            // the dragged row's own (the row now sits just before it), the
-            // line goes: a drop there would change nothing.
-            let gap = try #require(drag.gap(rows: column.workspace.openNotes.shown.count, rowHeight: column.pitch))
-            let draggedAt = try #require(column.workspace.openNotes.shown.firstIndex(of: column.notes[2]))
-            column.workspace.moveOpenNotes(fromOffsets: IndexSet(integer: draggedAt), toOffset: gap)
+            // …and when the list changes so the targeted row is the one right
+            // after the dragged row, the line goes: a drop there changes nothing.
+            let shown = column.workspace.openNotes.shown
+            let targetAt = try #require(shown.firstIndex(of: column.notes[9]))
+            let draggedAt = try #require(shown.firstIndex(of: column.notes[2]))
+            column.workspace.moveOpenNotes(fromOffsets: IndexSet(integer: draggedAt), toOffset: targetAt)
             await column.settle()
-            #expect(column.workspace.openNotes.shown.firstIndex(of: column.notes[2]) == gap - 1)
-            #expect(column.line == nil, "the gap under the pointer is the dragged row's own now: no line")
+            #expect(column.workspace.openNotes.shown.firstIndex(of: column.notes[2]) == targetAt - 1)
+            #expect(column.line == nil, "the target is the row right after the dragged one now: no line")
 
-            // The pointer on the dragged row itself — no line either.
-            let draggedRow = gap - 1
-            drag.hoverRows(contentY: (CGFloat(draggedRow) + 0.3) * column.pitch)
+            // The dragged row itself targeted — no line either.
+            drag.targeted(.row(column.notes[2]), true)
             await column.settle()
             #expect(column.line == nil, "on the dragged row's own place nothing lights")
 
-            // Elsewhere it lights; and when the drag leaves the list, it goes.
-            drag.hoverRows(contentY: (CGFloat(draggedRow) + 3.7) * column.pitch)
+            // Elsewhere it lights; and when the drag leaves the rows, it goes.
+            drag.targeted(.row(column.notes[15]), true)
             await column.settle()
             #expect(column.line != nil)
-            drag.leftRows()
+            drag.targeted(.row(column.notes[15]), false)
             await column.settle()
             #expect(column.line == nil, "the drag left: no line")
         }
@@ -947,21 +982,32 @@ struct OpenListDragMountTests {
         }
     }
 
-    /// **The end zone, as laid out** — directly under the rows when the
-    /// column has room, the book navigator's 28 pt, never pushing the column
-    /// past the sync footer; absent when the rows fill the list.
-    @Test func theEndZoneTakesTheRoomUnderTheRowsAndNothingMore() async throws {
+    /// **P-U2d-2 — the end zone, as laid out; RED ON OLD (R-Q).** Directly
+    /// under the rows, inside the column, never past the sync footer: with
+    /// room, the book navigator's 28 pt and the column's bottom padding under
+    /// it; when the rows fill the list (it scrolls), the padding's 12 pt — a
+    /// list that scrolls keeps its last-slot target.
+    ///
+    /// **U2d — edited in place by P-U2d-2** (was
+    /// `theEndZoneTakesTheRoomUnderTheRowsAndNothingMore`, whose zone was
+    /// absent once the rows filled the list).
+    @Test func theEndZoneIsAlwaysUnderTheRowsAndNeverPastTheFooter() async throws {
         try await withColumn(height: 900, openNotes: 4, startOn: 0) { column in
             let zone = try #require(column.endZone, "a short list has an end zone")
             let list = try #require(column.list?.scroll)
             let outer = try #require(column.column)
-            #expect(abs(zone.height - SidebarLayout.OpenListDrop.endZoneMaxHeight) <= 0.5, "28 pt: \(zone)")
+            let whole = SidebarLayout.OpenListDrop.endZoneMaxHeight + SidebarLayout.contentBottomPadding
+            #expect(abs(zone.height - whole) <= 0.5, "28 pt and the padding: \(zone)")
             #expect(abs(zone.minY - list.maxY) <= 0.5, "right under the rows: zone \(zone), list \(list)")
-            #expect(zone.maxY <= outer.maxY - SidebarLayout.contentBottomPadding + 0.5,
-                    "inside the column, above the footer's air: zone \(zone), column \(outer)")
+            #expect(zone.maxY <= outer.maxY + 0.5, "inside the column: zone \(zone), column \(outer)")
         }
         try await withColumn(height: 900, openNotes: 20, startOn: 0) { column in
-            #expect(column.endZone == nil, "the rows fill the list: the last row's lower half is the end")
+            let zone = try #require(column.endZone, "a list that scrolls keeps its end zone (P-U2d-2)")
+            let list = try #require(column.list?.scroll)
+            let outer = try #require(column.column)
+            #expect(abs(zone.height - SidebarLayout.contentBottomPadding) <= 0.5, "the padding's 12 pt: \(zone)")
+            #expect(abs(zone.minY - list.maxY) <= 0.5, "right under the list: zone \(zone), list \(list)")
+            #expect(abs(zone.maxY - outer.maxY) <= 1.5, "down to the footer's edge: zone \(zone), column \(outer)")
         }
     }
 }
