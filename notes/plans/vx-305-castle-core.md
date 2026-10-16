@@ -555,38 +555,16 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   gaps — `5fbe5cb5`; the record — this commit. The protection suites (U1+U2+U3): 268 tests in 55 suites green in Debug;
   228 in 51 green under `swift test -c release` (the four DEBUG-only mutation suites compiled out). The full core suite
   green in Debug (3128 / 385, 240 / 51, 40 / 6). Not done (the record's first line): the empty-slot landing → phase 5.
-- U4 — the scenario world, fixed scenarios, mutation pins, the generator: **IN-PROGRESS — STOPPED AT A CLEAN SEAM
-  for a closer session** (Opus implementer, 2026-10-14, at `e281b846`; the record is §8's "U4 RECORD — PARTIAL",
-  whose first paragraph is the exact remaining work). Done: (a) the world; (b) today's stores + the older build; (c) the
-  alphabet + the promises; (d) every sentence of §6's fixed-scenario list a named test, with her 2026-10-14 legacy cut
-  applied (three superseded, two re-pointed — marked in place), plus 23 code bugs found since the first record, each
-  pinned red-on-old (`FixedScenariosFound.swift`, `FixedScenariosCorners.swift`, `FixedScenariosMore.swift`); (e) the mutation pins — 21 after the cut, each green
-  guarded and FAILING with its guard off; (f) the generator + `PROTECTION_SOAK=1` — seeds 1–20 × 60 green (each on the
-  tree of its day), seed 1 × 1000 green at `f1cad906` (44,873 steps, 357.8 s Debug). The protection set Debug: 376
-  tests in 65 suites green at `e281b846`. NOT DONE: the soak's seeds 2–20 × 1000 (seed 2 fails at sequence 432 — an
-  untriaged finding, the record names it), then (g) the full runs and the final record.
-  **THE CLOSER SESSION (Opus implementer, 2026-10-14, from `03d8e3e4`):** (h) her ruling 2 — the marker SPLIT into
-  salted hardware + login parts, `.anotherLogin` adopting nothing, P-U4-3's takeover new hardware's alone — DONE
-  (`f87db7c6`; the protection set Debug 377 tests in 65 suites green). (i) her ruling 1 — the stuck leave: the
-  executor reads a vault only for the session's account; a synced resume that can't reach it ROLLS BACK before its
-  commit point (`ProtectionPlan.pastCommitPoint`, one line for executor and checker; Re-link-first stamps its write)
-  and past it WAITS, named (`SettleOutcome.waiting`), copies re-paused; the world re-settles at the next vault reach;
-  promise 6's vault-reach qualifier; four fixed scenarios, three red-on-old — DONE (this commit; the protection set
-  Debug 381 tests in 65 suites green; `1cf72df9`). A world finding of a 60-sequence sweep (a crashed landing's
-  made-new passphrase lost from her truth) fixed in the world (`76d60234`). HER 2026-10-15 WIDENING applied: the
-  older-build acts left the generator's alphabet (an older device only updates), the older-build fixed scenarios and
-  the door-time pin marked "beyond scope, kept while green" (this commit; the protection set Debug 382 tests in 65
-  suites green; `41c9d63f`). (j) THE SOAK — IN PROGRESS, seed by seed, Debug: findings so far triaged and committed
-  one by one (code bugs with red-on-old pins: the landing resumed at its swap `e7ce22d6`, a Mac replaced mid-act with
-  no memory `81924cae`, Re-link unoffered after a replacement `3bff0ba5`; checker findings fixed in the world;
-  P-U4-12/13 recorded; the pre-migration snapshot class superseded by her cut). Through seed 15 every finding is
-  triaged and committed (code bugs pinned red-on-old; checker/world findings fixed in the world; P-U4-14 at
-  `d69e28f3`; the seed-9 model gap — reopening this Mac's own set-aside library — DEFERRED and RATIFIED to phase
-  5/VX-309 by the orchestrator). Seeds 17 and 18 found two more code bugs (another identity's replayed memory
-  taking the account; a rolled-back landing's key file restored only from a wiped mirror), each pinned and fixed. THE
-  FINAL TREE is `6128c8de` (code; later commits are records): ALL 20 SEEDS GREEN × 1000 × ≤ 60 IN DEBUG on it —
-  20,000 sequences, 898,884 steps, 7,067.4 s of test time (7,195 s wall, one seed per call). NEXT: the 20 under
-  `-c release` — PENDING; (k) the runs — PENDING; (l) the final record — PENDING.
+- U4 — the scenario world, fixed scenarios, mutation pins, the generator: **DONE** (2026-10-15; the record is §8's U4
+  record). The U4 session (partial, to `e281b846`): (a) the world; (b) today's stores + the older build; (c) the
+  alphabet + the promises; (d) every sentence of §6 a named test; (e) the 21 mutation pins; (f) the generator +
+  `PROTECTION_SOAK=1`. The closer (from `03d8e3e4`): (h) her ruling 2, the marker split `f87db7c6`; (i) her ruling 1,
+  the stuck leave + promise 6's vault-reach qualifier `1cf72df9`; her 2026-10-15 widening applied `41c9d63f`; (j) the
+  soak — 15 code bugs and 17 checker/world findings triaged and committed one by one, P-U4-12…15, the seed-9 model gap
+  ratified to phase 5/VX-309; THE FINAL TREE `6128c8de`: seeds 1–20 × 1000 × ≤ 60 green in Debug (898,884 steps,
+  7,067.4 s) and under `-c release` (898,884 steps, 4,528.9 s); (k) the runs — the protection set 413 tests in 65
+  suites green in Debug, 352 in 60 under `-c release`, the full core suite green in Debug (3273/395 · 240/51 · 40/6);
+  (l) the record — this commit.
 - The go/no-go record: **NOT-STARTED.**
 
 ---
@@ -1317,8 +1295,14 @@ older-build-Re-link sentence — WAIVED by her (2026-10-14/15, "there will not b
 | 20 | 1000 | 45245 | 356.5 | 363 | 229.3 | 232 |
 | **total** | **20,000** | **898,884** | **7,067.4** | **7,195** | **4,528.9** | **5,184** |
 
-**THE RUNS (on the final tree):** the protection set in Debug — PENDING; under `swift test -c release` — PENDING;
-the full core suite in Debug — PENDING.
+**THE RUNS (on the final tree):** the protection set in Debug (every `@Suite` type under `Protection/`, 65) — `✔ Test
+run with 413 tests in 65 suites passed after 27.367 seconds.`; under `swift test -c release` — `✔ Test run with 352
+tests in 60 suites passed after 3.136 seconds.` (the five DEBUG-only mutation suites compiled out: 61 tests; 8:04 wall
+with the release build); the full core suite in Debug — `✔ Test run with 3273 tests in 395 suites passed after 193.459
+seconds.` · `✔ Test run with 240 tests in 51 suites passed after 23.005 seconds.` · `✔ Test run with 40 tests in 6
+suites passed after 46.609 seconds.` (exit 0). Its first run met one 60-second time limit in
+`StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar` (13i-b, outside this unit) under load — green alone
+in 0.7 s and green on the full re-run above; a timing flake, not this unit's.
 
 **Commits:** the partial's (`git log --oneline 6020391b..e281b846`, then `efd45ff7`, `3a970ec1`) and the closer's
 (`git log --oneline 03d8e3e4..HEAD`): (h) the marker split `f87db7c6`; (i) the stuck leave `1cf72df9`; the 60-sequence
