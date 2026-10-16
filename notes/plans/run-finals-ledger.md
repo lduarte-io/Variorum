@@ -6,7 +6,7 @@
 
 the ladder CLOSED at round 2 — Fable xhigh R1 0B/0M/2m/4n (R1-1 the LIVE STATUS currency, fixed by the orchestrator; R1-2 the windows owed, run; R1-3…R1-6 applied by the implementer) → Fable xhigh R2 0B/0M/2m/2n (R2-1/R2-2 the orchestrator's, done; R2-3/R2-4 → VX-374); no final-round code fixes.
 
-Finals: the merged-tip WHOLE Mac target <FINALS — filled after the closeout window>. Per-unit windows: U1d 434/96; U2 722/144 (VX-115 only); U3b 511/103 (one real red → U3c); U3c 513/103 green; U2d 725/144 (VX-115 only); every pin red-on-old as named (U2d's R-W in the worktree, a source read). Walks: U1, U1b, U1d, U3, U2 (D1/D2 a road limit — the main-build control), and the U2d + U3c re-walk, every row holding.
+Finals: the merged-tip WHOLE Mac target 4,854 tests / 800 suites — 18 issues incl. 14 known; two reds, both standing on main (VX-115's `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads`; VX-167's `DestructiveUndoWarningTests.redoNeverAsks` under wide parallelism); VX-245's line-limit lint, red on main before this run, now GREEN; 32 gated skips; no new red. Per-unit windows: U1d 434/96; U2 722/144 (VX-115 only); U3b 511/103 (one real red → U3c); U3c 513/103 green; U2d 725/144 (VX-115 only); every pin red-on-old as named (U2d's R-W in the worktree, a source read). Walks: U1, U1b, U1d, U3, U2 (D1/D2 a road limit — the main-build control), and the U2d + U3c re-walk, every row holding.
 
 ## VX-336
 

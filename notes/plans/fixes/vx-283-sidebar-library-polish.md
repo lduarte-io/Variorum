@@ -408,6 +408,7 @@ trailer of any kind.
 
 *(The orchestrator appends each REQUEST / READY / GO / RELEASE here.)*
 
+- 2026-10-16 08:48 GO `vx283-close` (45 min); claimed 08:49:04; the whole Mac target ran to 09:29; **the claim EXPIRED at 09:34 unrestored (the orchestrator paused) — the coordinator restored the dev store at 11:42 under its hold, all five files SAME, PREFS CLEAN**; acknowledged ~11:47.
 - 2026-10-16 08:04 GO `vx283-u2d` (90 min, folded); the test part 08:04–08:13; SEAM, the coordinator's "continue"; the re-walk 08:14–08:41; RELEASED 08:42:58 (pgrep empty first) — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched".
 - 2026-10-16 07:04 GO `vx283-u2c` (90 min, folded); G1 failed → the main-build control folded in at the coordinator's yes (07:09–07:12); RELEASED 07:12:31 with the control's own instance still up (the slip — quit at ~07:13, the store re-verified, prefs clean; told).
 - 2026-10-15 17:06 GO `vx283-u2b` (25 min; HID idle 528 s at the GO, her clearance standing); RELEASED 17:08:32 — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched".
@@ -4769,6 +4770,42 @@ present. The claim was RELEASED at 08:42:58.
   - O-4: the drag chip is faintly see-through, the system drag image's own alpha.
   - O-5: a walking note (a Library row's empty area opens the panel).
   None is a regression of this run's members. O-2 is recorded, and a ticket follows if she sees it.
+
+## CLOSEOUT (2026-10-16)
+
+- **Main merged in:** `54bb199e` (origin/main `a7c0a25f` — the 0.9.7 bump `28ca7fd2` + VX-336's closeout notes; no
+  conflict). The 0.9.7 notes' VX-283 section is `cf7736e3`. The canon is `9f6a6b90`: QUESTIONS #228; AppSpec §12's four
+  contract lines; §14's VX-283 entry leading, with VX-184's rolled verbatim to the delta archive; the finals ledger; the
+  master plan's in-flight row retired; the runway plan closed. The handoff is `980347c4`; the release brief `af30f902`.
+- **THE CLOSEOUT WINDOW (claim `vx283-close` 08:49:04, 45 min):** `close/window.sh` pre (the tree clean at `980347c4`,
+  whose code = the tested `9f6a6b90`; all five store files copied to `close/store-before/20261016T144904Z`) → **the WHOLE
+  Mac target on `DerivedData/vx283-close` (built at the merged tip, the 0.9.7 notes confirmed bundled): 4,854 tests / 800 suites — 18 issues incl. 14 known; two reds, both standing on main (VX-115's `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads`; VX-167's `DestructiveUndoWarningTests.redoNeverAsks` under wide parallelism); VX-245's line-limit lint, red on main before this run, now GREEN; 32 gated skips; no new red** (`close/logs/whole.log`, ended 09:29).
+  - **A SLIP, owned:** the run ended at 09:29, but the orchestrator was paused (a usage limit or a held turn) until
+    ~11:46. The claim EXPIRED at 09:34 with the dev store unrestored and no release ping. The coordinator restored it
+    at 11:42 under its own hold with this run's `window.sh restore`: three db files restored + verified, both key files
+    unchanged, 16 added keys deleted, PREFS CLEAN, its own re-`cmp` of all five files SAME. The coordinator was
+    acknowledged at ~11:47. The release ping, missed; the lesson: a long background run under a claim needs a
+    fallback, so the restore and release happen even when the orchestrator is paused.
+- **The rulings reconciled** (her "every / all / any" wording re-read against what shipped):
+  - VX-121's "ANY toast" is covered on the one component that draws the band (both surfaces, P-U3-3);
+  - "Only on your next act" is built per its listed acts;
+  - VX-285's "the full height they can" runs to just above the footer (the floor and the outer scroll below it; VX-373
+    ticketed);
+  - VX-245's six sites are fixed (the lint green on the whole target);
+  - VX-289's "close all" is built;
+  - VX-288's "a nice little line … snap into place" is built on main's road, the hand check owed (VX-376).
+  No remainder beyond the filed tickets.
+- **Tickets FILED by this run, triaged to her labeling rule (assignees cleared):**
+  - High: VX-376 (her hand check, Task, Needs Lillian).
+  - Medium: VX-360 (Bug, App shell).
+  - Low: VX-373 (Bug), VX-374 (Debt), VX-375 (Exploration, Tests & tooling), VX-359 (Bug, App shell — fixed here,
+    closes with the merge).
+  - Parked: VX-344 (Feature).
+- **MOBILE PARITY:** nothing mobile-visible. The Open list, the Library's controls row and the View menu are Mac-only;
+  the diff touches no `Shared/`, `VariorumMobile/`, `Sources/` or `Server/` line (the coordinator's check at the GO).
+- **Members** close with the merge: VX-285 · VX-286 · VX-287 · VX-288 · VX-289 · VX-121 · VX-175 · VX-20 · VX-245 ·
+  VX-359, then VX-283 itself after the release.
+
 
 ## THE RELEASE BRIEF — the ONE 0.9.7 (VX-336 + VX-283) and the `/Applications` refresh (the orchestrator, 2026-10-16)
 

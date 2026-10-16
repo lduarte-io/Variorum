@@ -86,7 +86,7 @@ and your second: *"I'll be sleeping finish everything and send the fresh install
 - **Evidence:**
   - every unit's pins were red on the old code by a named revert;
   - every unit ran a Mac batch, and an Opus screenshot walk with the orchestrator's own look at the captures;
-  - the merged tip's whole Mac target: <FINALS — filled after the closeout window>.
+  - the merged tip's whole Mac target: 4,854 tests / 800 suites — 18 issues incl. 14 known; two reds, both standing on main (VX-115's `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads`; VX-167's `DestructiveUndoWarningTests.redoNeverAsks` under wide parallelism); VX-245's line-limit lint, red on main before this run, now GREEN; 32 gated skips; no new red.
 - **Your rulings reconciled against what shipped:**
   - VX-121's "ANY toast" is covered on the one component that draws the band, so both surfaces;
   - "Only on your next act" is built per its list of acts;
