@@ -218,12 +218,16 @@ line count to fall by roughly half.
 ### U2 — THE ADDITIONS (one session)
 
 Build, with red-on-old pins per behaviour: words at birth (rule 2); the passphrase-asked facts and `.askPassphrase`
-(rule 3); the on-device road in Standard (rule 7); the lobby's ask-and-re-make path for a failed quiet road (rule 7);
-the vault without an Apple wrap, typed-secret joins, the one-row rotation at EnterCastle and the mode-flag flip at
-LeaveCastle (rules 10–14); LeaveCastle's fresh key with the Touch ID item and mirror replaced (rule 11); `LookInside`
-with its zero-writes assertion (rule 15); `MakeMine` (rule 16); detect-and-refuse with `libraryDisagreesWithMemory` and
-`noKeyFileAnywhere` (rules 20, 26); the plain device ID (rule 22). **Evidence:** unit pins per rule; the executor's
-crash-after-every-write harness green over the new acts; both configurations green.
+(rule 3); one pair of secrets per account — `SetUpSync` hands the pair up, the join adopts and reports `wordsReplaced`,
+`MakeMine` keeps the current pair (rule 7); the on-device road in Standard (rule 8); the lobby's ask-and-re-make path
+for a failed quiet road, asking only when no quiet road remains (rule 8); the vault without an Apple wrap, typed-secret
+joins, the one-row rotation at EnterCastle with the earlier-row-keys list, and the mode-flag flip at LeaveCastle (rules
+11–15); LeaveCastle's fresh Standard key carrying the history, with the Apple road, the on-device item, the Touch ID
+item and the mirror replaced (rule 12); `LookInside` with its zero-writes assertion (rule 17); `MakeMine` (rule 17);
+detect-and-refuse with `libraryDisagreesWithMemory` and `noKeyFileAnywhere` (rules 21, 27); the plain device ID (rule
+23). **Evidence:** unit pins per rule; the executor's crash-after-every-write harness green over the new acts; both
+configurations green. *(Rule numbers re-pointed at the 2026-10-16 kickoff to the 27-rule contract — this section was
+written against the 26-rule draft; §3's table was already current.)*
 
 ### U3 — THE LIFECYCLE PROOF (one session)
 
@@ -271,12 +275,12 @@ that survives. Then the discovery run (seeds 21–40) and the gate soak. **Evide
   (P-6's tutorial-as-spec, applied to the words). This headless phase ships no copy; it hands the item forward with the
   rules as the text to write from.
 - **Later phases, re-planned to the rules:** VX-306 (the lobby / open road — the ask-and-re-make path's face, Touch ID
-  re-arm, the refusal faces of rules 20/26; the P-U4-13 keychain-mirror road is now rule 1's redundancy, not a rescue);
+  re-arm, the refusal faces of rules 21/27; the P-U4-13 keychain-mirror road is now rule 1's redundancy, not a rescue);
   VX-307 (crossings' faces — the leave screen's "keep your Castle secrets" sentence, the follow's one ask); the warning
   schedule's faces and the tutorial's last card (phase 3 / VX-3xx — ticket at kickoff); the field guide's **Start Here
   chapter** carries encryption, the twelve words, the passphrase and "Apple is a convenience" (a Wording ticket at
   kickoff); Look inside / Make this my library faces (phase 5 / VX-309, with T-8's plaintext-export-in and the
-  empty-slot landing); VX-329's rehearsal: every tester exports or signs in before the switch (rule 25).
+  empty-slot landing); VX-329's rehearsal: every tester exports or signs in before the switch (rule 26).
 - **The server's `key_vault` change — a SyncSpec §12 LOCKSTEP EVENT, owned by VX-307 (her word, 2026-10-16):** the
   Apple wrap and `apple_key_id` leave the vault; a MODE flag and the earlier-row-keys list arrive; the rotation fields
   and `sync_reencrypt` retire; a marker bump; the mirror deploy only on her explicit go. This phase models the vault's
