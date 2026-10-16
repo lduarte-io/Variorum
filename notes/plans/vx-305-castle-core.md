@@ -571,8 +571,11 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   **DONE** (0 MAJOR · 1 MINOR · 4 NIT, all applied, checked line by line, Debug 434/71 · Release 372/66). **THE
   LADDER IS CLOSED** — code tree `63cf038f1`.
 - The go/no-go record: **ATTEMPT 1 NO-GO** on `63cf038f1` (§10: 13 of 20 seeds fail, the same in both
-  configurations; the key map's model half written — 31 PROVEN, 11 GAPs). Next: the census, triage batches, the
-  GAP batch, ladder round 3, a fresh soak.
+  configurations; the census 17/20,000; the key map's model half written — 31 PROVEN, 11 GAPs). **THE GATE MOVES TO
+  THE CORRECTOR PHASE — VX-378, `notes/plans/vx-378-castle-simplified.md`, same branch, one merge at ITS GO closes both
+  tickets** (her 2026-10-16 sitting, §8). No triage of the 17 runs here: most sit in machinery the sitting cut, and
+  the rest are re-found or die under the rewritten promises. This plan's remaining job is its record; the contract is
+  `notes/CastleRules.md`, the walk `notes/plans/vx-266/castle-lifecycle.html`.
 
 ---
 
