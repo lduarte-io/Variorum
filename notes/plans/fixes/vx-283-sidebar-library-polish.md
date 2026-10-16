@@ -4334,11 +4334,13 @@ launch, no walk. The pins' runs, the reverts' runs and the batch are the orchest
 the hand check that proves delivery is hers (the morning checklist's first item, P-U2d-1).
 
 **LIVE STATUS (per piece)**
-- F0 — this section opened; the SDK confirmed (below): DONE (this commit).
-- F1 — the pins, red-first, no product line: NEXT.
-- F2 — the fix (F2 on main's per-row API; the instrument stripped).
-- F3 — the trees: the fix + one per named revert (each named here BEFORE it is applied), each restored; the superseded
-  `vx283-u2c*` trees deleted.
+- F0 — this section opened; the SDK confirmed (below): DONE (`766f7d61`).
+- F1 — the pins, red-first, no product line: DONE (`99565d41`).
+- F2 — the fix (F2 on main's per-row API; the instrument stripped): DONE (`63b8c191`); `build-for-testing` → TEST BUILD
+  SUCCEEDED on `DerivedData/vx283-u2d`, no warning in a touched file; the headless replica green (below).
+- F3 — the trees: the fix + one per named revert. The five reverts are NAMED below (this commit), before any is
+  applied; each will be applied, built into its own tree and restored by `git checkout --` with `git diff` empty. The
+  superseded `vx283-u2c*` trees get deleted once these build: NEXT.
 - F4 — `notes/plans/vx283-screens/u2d/window.sh` (gitignored) + READY FOR STAGE.
 
 **The SDK, confirmed before a line was written** (Xcode 27.0 27A266a, `MacOSX.sdk`, SwiftUI's
@@ -4351,6 +4353,206 @@ the hand check that proves delivery is hers (the morning checklist's first item,
   and the end zone `:873-875`).
 - `onDragSessionUpdated(_: (DragSession) -> Void)`, macOS 26 (`:32505-32509`): kept, per the ruling.
 - `Animation` is `Equatable` (SwiftUICore's interface `:24678`), so the settle can be pinned by value.
+
+**THE BUILD (`63b8c191`; paths under `App/Variorum/Variorum/`):**
+- `Core/Views/SidebarLayout.swift:578-683`, the pure rule (`OpenListDrop`), rewritten for F2:
+  - `Hover` is `.row(Int)` (the TARGETED row) or `.end` (`:607-612`);
+  - `gap(for:rows:)` (`:626-631`): a targeted row names the slot BEFORE it (its own index — main's landing), and the
+    end zone names the slot after the last row; a row off the list, or no rows, names nothing;
+  - `destination(gap:dragged:rows:)` (`:638-642`): unchanged (nil at the dragged row's own two gaps, i.e. its own row
+    targeted or the row right after it);
+  - `lineTop(hover:dragged:rows:rowHeight:window:)` (`:654-664`): the line centred on the targeted row's TOP (the end
+    zone's: the last row's bottom), held inside the rows and the window, and gated as before (it now also guards
+    `rowHeight > 0` itself, which `gap(at:)` used to guard);
+  - `endZoneHeight` (`:674-682`) per P-U2d-2 (below).
+  - Removed: `gap(at:rowHeight:rows:)` (the half-row rule), `contentY(row:yInRow:rowHeight:)`,
+    `gap(for:offset:rowHeight:rows:)` and `Hover.rows(viewportY:)`.
+- `Features/Library/OpenListDrag.swift` (653 → 283 lines):
+  - `OpenListDragState` (`:64-146`): `Target` (`:68-81`) is `.row(noteID)` or `.end`. The row is held by its NOTE, so
+    a list change re-derives where that row stands (main's landing names the row the same way). `targeted(_:_:)`
+    (`:116-123`): a target replaces whatever stood, and an un-target clears only the target IT set (the next row's
+    `true` may arrive before this row's `false`). `began` / `read` / `dragSessionUpdated` / `ended` / `lineTop` are
+    unchanged in meaning.
+  - `OpenListDropDoor` (`:149-209`): `perform(_:onto:state:workspace:animation:)` (`:164-174`). The release is named by
+    the drop that took it (its own row or the end zone), never by the hover state, and resolved against the rows as they
+    stand. `perform` ends the drag and hands off to `land`, which is unchanged but records the DEBUG oracle `Landing`
+    (`lastLanding`, `:198-208`: the move and the animation it rode — the settle's only observable). `proposal` and
+    `configuration` are removed: main's API has no proposal, and the system's copy applies.
+  - `OpenListRowDrop` (`:216-229`) and `OpenListEndZoneDrop` (`:234-246`): each a classic
+    `.dropDestination(for: SidebarView.OpenNoteDragToken.self) { tokens, _ in OpenListDropDoor.perform(tokens, onto: …,
+    state: state, workspace: workspace) } isTargeted: { state.targeted(…, $0) }`. They sit beside the door (P-9).
+  - `OpenListInsertionLine` (`:251-283`) is unchanged, less its trace lines.
+  - Removed: the instrument `OpenListDragTrace` (the whole `#if DEBUG` tail) and the `UniformTypeIdentifiers` import.
+- `Features/Library/SidebarView.swift`:
+  - `openRow` (`:1042`) keeps `ChipDragSource` with `began(noteID)` at the payload's evaluation (`:1116-1121`) and
+    `.onDragSessionUpdated` (`:1124-1126`), and carries `.modifier(OpenListRowDrop(state: openListDrag, noteID: noteID,
+    workspace: workspace))` (`:1129`). `.dragConfiguration(DragConfiguration(allowMove: true))` is removed, as is every
+    trace hook (the payload's and the preview's notes, the ROW-frame logger, the `.onHover` aim check).
+  - `openListEndZone` (`:982`) is always present while the list shows, with `OpenListEndZoneDrop(state:workspace:)`.
+  - The column's bottom padding (`:336`) applies only while the list is absent (P-U2d-2).
+  - The import drop's trace line is removed (the drop is byte-identical to main's again), and two comments are
+    corrected.
+- **Not touched:** `SidebarSectionWindow.swift`, `OpenNotes.move` / `WorkspaceModel.move`, the chip
+  (`DragChipCanvas.swift`), `ShelfView.swift`, the line's placement, `ShellActions`, `ShellRouter.swift`, the editor
+  seam, `Sync/`, custody, schema.
+
+**A consequence of F2, stated (P-U2d-1's own parity, not a provisional).** On main's API the drop accepts by type
+alone, and the system's copy applies (the source's default). So the cursor shows the copy badge over every row,
+the dragged row's own place included. There:
+- no line draws;
+- a release moves nothing, so the image slides back.
+
+There is no "forbidden" cursor: that needed the session form's configuration. A half-row placement is also out of
+reach. To put a row just below its neighbour, you drop it on the row after that neighbour (or in the end zone when the
+neighbour is last). The line always shows that slot first.
+
+**PROVISIONAL (U2d), one — P-U2d-2, the end zone's extent (supersedes P-U2-2).** P-U2-2's zone was the room under the
+rows, capped at 28 pt, and it was absent once the rows filled the list. That worked only because the last row's lower
+half was then the end slot. F2 has no half row, so a list that scrolls would have no road to the last slot at all. That
+is her usual state: the walk's 13 rows overflowed the list in a note view at a 900-pt window.
+
+What is built: the zone is the room under the rows, capped at 28 pt, PLUS the column's bottom padding (12 pt).
+- The padding moves into the zone while the list shows. The column drops its own padding then (`SidebarView.swift:336`),
+  and the zone's last 12 pt ARE the padding. So the column's layout is byte-identical in every state. VX-285's list
+  height and every U1 layout pin are untouched, because the list's frame and the content's total height are the same.
+- The zone is never absent while the list shows. At its smallest it is the padding's 12 pt, directly under the list's
+  bottom edge, above the footer.
+- Its line (the end) draws at the list's bottom edge, held inside the window, as U2 built it.
+
+Options:
+- (a) [built] the room under the rows (≤ 28) + the bottom padding.
+- (b) P-U2-2 unchanged: the last slot is unreachable while the list scrolls, which is main's behaviour there.
+- (c) the book navigator's exact road, a 28-pt tail inside the scroll content. It changes the list's content height, so
+  the bottom fade would stand over the last row and the reveal's fixed point would move. That is U1's proven geometry.
+
+(a) is small (12 pt; 13f W11a's lesson called 14 pt "nothing"), but it is the room that exists without taking any of
+VX-285's ruled height. Her hand check covers it ("to the end").
+
+**THE PINS (`VariorumTests/OpenListDragTests.swift`, `99565d41` — red-first, no product line).** Thirty tests in four
+suites: Rule 11 · Door 13 · Face 3 · Mount 3.
+- **(a) `OpenListDragFaceTests.eachRowIsATargetedDropOnMainsRoadAndNoSessionFormRemains`** (a source read). It checks:
+  - `openRow` carries `.modifier(OpenListRowDrop(state: openListDrag, noteID: noteID`, `openListDrag.began(noteID)` and
+    `.onDragSessionUpdated {` → `openListDrag.dragSessionUpdated(`;
+  - the end zone carries `.modifier(OpenListEndZoneDrop(`;
+  - BOTH modifiers carry `.dropDestination(for: SidebarView.OpenNoteDragToken.self) {`, `} isTargeted: {`, and
+    `OpenListDropDoor.perform(tokens, onto: <.row(noteID) | .end>, state: state, workspace: workspace)` — no
+    `animation:` argument, so the door's settle applies;
+  - none of `onDropSessionUpdated` / `dropConfiguration` / `DragConfiguration` / `dragConfiguration` / `isEnabled:`
+    appears in `openRow`, `openGroup`, `openListEndZone` or anywhere in `OpenListDrag.swift`;
+  - no `onDrop(of:` on the list, no `: DropDelegate`, and no `OpenListDragTrace` in either file.
+
+  It is **runtime-red on the pre-fix sources**: the face-only replica run against `99565d41`'s `SidebarView.swift` +
+  `OpenListDrag.swift` is RED on it, and `theRowDragsItsChipAndIsItsOwnDrop` is GREEN there.
+- **(b), the pure rule:**
+  - `theTargetedRowNamesTheSlotBeforeItAndTheEndZoneTheLast` (every row of 1…8; off-list and empty);
+  - `everyDropLandsBeforeTheTargetedRow` (exhaustive: 1…6 rows, every dragged row, every target and the end zone,
+    including the own place);
+  - `everySlotIsReachedByExactlyOneTarget` (the ticket's three in F2's terms, plus an upward drop and the top);
+  - `theLineSitsAtTheTargetedRowsTop`;
+  - `theLineRidesTheTargetedRowThroughAScroll`.
+- **(c), the state and the door:**
+  - `aTargetChangeMovesTheLine` (pure);
+  - `aTargetChangeMovesTheLineAndAnUntargetClearsOnlyItsOwn` (either order; a row's late un-target leaves the end zone's);
+  - `theActionLandsBeforeTheTargetedRowWithTheSettle` (the `Landing` oracle reads the settle, `== .snappy(duration:
+    railTransition)`);
+  - `theDragSessionsEndClearsTheDrag` (edited in place);
+  - `aScrollMovesTheLineWithItsTargetedRow` (the window is copied in only while a target stands);
+  - and a guard of the per-row road, `theTargetIsTheRowsNoteSoAListChangeRederivesTheLine` (not red-on-old: the road is
+    new).
+- **P-U2d-2:** `theEndZoneIsTheRoomUnderTheRowsCappedAndTheBottomPadding` (renamed from
+  `theEndZoneIsTheRoomUnderTheRowsCapped`, so the name says what the body asserts — R1-5's class) and the mounted
+  `theEndZoneIsAlwaysUnderTheRowsAndNeverPastTheFooter` (renamed from `theEndZoneTakesTheRoomUnderTheRowsAndNothingMore`:
+  with room, 28 + 12 pt right under the rows, inside the column; with twenty rows, 12 pt right under the list, down to
+  the footer's edge).
+- **Edited in place, annotated in the file** (their subject survives, their API went):
+  - Rule: `theDraggedRowsOwnGapsOfferNothing` (its last two lines name the own-place targets), `theLineFollowsAChangeOfTheList`,
+    `noLineBeforeTheListIsReadOrWithoutADragOfItsOwn`, `theLineStaysInsideTheWindow`.
+  - Door: `aDropLandsWhereTheLineWasDrawn`, `theEndZoneLandsTheLastSlot`, `aDropOnItsOwnPlaceOffersNothingAndMovesNothing`,
+    `aDropActsOnlyOnTheListItsDragBeganIn`, `movingBetweenTheRowsAndTheEndZoneKeepsTheLine`, `aReleaseReadsThePayloadAndLandsIt`,
+    `aReleaseThatOffersNothingRefuses`, `theDragSessionsEndClearsTheDrag`, `aSessionEndBeforeTheDropsActionStillLands`.
+  - Mount: `theLineDrawsWhereTheDropWouldLandOnEveryAxis` (targets by note; the line rides its row through the 1.5-row
+    scroll; the list-change and own-place steps kept).
+- **UNCHANGED:**
+  - `theOpenRowsChipIsItsTitleAtTheGrabPoint` (the chip);
+  - `theRowDragsItsChipAndIsItsOwnDrop`: its assertions unchanged; its second message's half-row clause and its pointer
+    to the retired P-T3-1 corrected, annotated;
+  - `aDropSettlesInPlaceAndNeverMovesTheList` (`land` is unchanged);
+  - every `SidebarSectionWindow` pin (the fade, the section window) and every close/menu/⇧⌘W pin (no file touched).
+  - Not touched at all: the column's file-import drop (now byte-identical to main's).
+  - `WorkspaceNavigationTests`' stale comment ("the half of the row under the pointer") is corrected. It is comment
+    only; the body is unchanged.
+- **RETIRED by P-U2d-1** (their subject no longer exists; deleted, and listed in the file's header):
+  - the half-row rule's `theHalfOfTheRowUnderThePointerNamesTheGap`, `theRowJustBelowIsReachable`,
+    `aDownwardDropNoLongerLandsOneRowShort`, `theLastSlotIsReachable`, `anUpwardDropLandsWhereItLooks`,
+    `everyDropLandsBesideTheRowUnderThePointer`, `theLineSitsOnTheBoundaryTheHoverNames`, `theLineFollowsTheHover`,
+    `theLineFollowsAScrollUnderAStillPointer` and `aScrollUnderAStillPointerMovesTheGap` (a still pointer's height
+    naming the gap). Their subjects in F2's terms are the new (b) pins and `aScrollMovesTheLineWithItsTargetedRow`.
+  - U2c's session-form P-T3-1 `eachRowIsATransferableDropAndItsSourceAllowsTheMove`, P-T3-2
+    `aRowsOwnLocationNamesTheGapForEveryRowAndBothHalves` + `aRowsOwnLocationDrawsTheLineAndLandsThere`, and the guard
+    `movingBetweenRowsNeverBlanksTheHover` (its subject is now (c)'s un-target pin).
+
+  That is fourteen tests.
+- **Their runs:** no suite was added or renamed, so `u2/batch-suites.txt` needs no line. Pins (b) and (c) and the edited
+  door pins name the fix's API (`Hover.row`, `Target`, `targeted`, `perform(onto:)`, `Landing`), so the test target
+  compiles only on the fix. Their runtime red-on-old is the named reverts below. No headless pin and no synthetic road
+  reaches delivery (U2c's main-build control). Her hand proves it.
+
+**Headless evidence:**
+- `build-for-testing` → TEST BUILD SUCCEEDED (`DerivedData/vx283-u2d`, `63b8c191`'s code; log `u2d/logs/bft.log`). The
+  one warning in a file this leg touched is the older `WorkspaceNavigationTests.swift:699` (`try` without a throw, a
+  line this leg did not touch).
+- A replica, in the scratchpad only, compiled with `swiftc -swift-version 6 -D DEBUG`. It holds the REAL
+  `SidebarLayout.swift`, the real `OpenNotes`, the real `OpenListDragState` + `OpenListDropDoor` cut from
+  `OpenListDrag.swift`, stubs for `WorkspaceModel` and the token, and the bodies of all 24 Rule + Door pins plus the two
+  face source reads run against the real files. Result: **26 tests, 545 checks, 0 failed**.
+
+**THE REVERTS — named BEFORE any is applied.** Each is applied to the committed tip, built with `build-for-testing` into
+its own `DerivedData/vx283-u2d-r<letter>`, then restored by `git checkout -- <file>` with `git diff` empty after. The
+patches are kept, gitignored, in `u2d/reverts/`. The expected lists below are traced by hand from each pin's body:
+- **R-W (pin (a) — P-U2d-1's dropped move configuration restored).** In `SidebarView.swift`'s `openRow`, re-add
+  `.dragConfiguration(DragConfiguration(allowMove: true))` on the line before `.onDragSessionUpdated {` (U2c's shape).
+  Products: `vx283-u2d-rw`. Expected on `OpenListDragFaceTests` (3):
+  - **RED exactly** `eachRowIsATargetedDropOnMainsRoadAndNoSessionFormRemains`;
+  - GREEN `theOpenRowsChipIsItsTitleAtTheGrabPoint` and `theRowDragsItsChipAndIsItsOwnDrop`.
+- **R-X (pins (b) and (c)'s landing — the targeted row names the slot AFTER it, the half-row road's lower arm as the
+  whole rule).** In `SidebarLayout.swift`'s `OpenListDrop.gap(for:rows:)`, the `.row` arm `(0..<rows).contains(index) ?
+  index : nil` becomes `(0..<rows).contains(index) ? index + 1 : nil`. Products: `vx283-u2d-rx`. Expected on
+  `OpenListDropRuleTests` + `OpenListDropDoorTests` + `OpenListDragMountTests` (27):
+  - **RED exactly 19:**
+    - Rule: `theTargetedRowNamesTheSlotBeforeItAndTheEndZoneTheLast`, `everyDropLandsBeforeTheTargetedRow`,
+      `everySlotIsReachedByExactlyOneTarget`, `theDraggedRowsOwnGapsOfferNothing`, `theLineSitsAtTheTargetedRowsTop`,
+      `aTargetChangeMovesTheLine`, `theLineRidesTheTargetedRowThroughAScroll`, `theLineFollowsAChangeOfTheList`,
+      `theLineStaysInsideTheWindow`;
+    - Door: `aDropLandsWhereTheLineWasDrawn`, `aDropOnItsOwnPlaceOffersNothingAndMovesNothing`,
+      `aScrollMovesTheLineWithItsTargetedRow`, `theTargetIsTheRowsNoteSoAListChangeRederivesTheLine`,
+      `movingBetweenTheRowsAndTheEndZoneKeepsTheLine`, `aTargetChangeMovesTheLineAndAnUntargetClearsOnlyItsOwn`,
+      `theActionLandsBeforeTheTargetedRowWithTheSettle`, `theDragSessionsEndClearsTheDrag` (its first line reads c's
+      top), `aSessionEndBeforeTheDropsActionStillLands`;
+    - Mount: `theLineDrawsWhereTheDropWouldLandOnEveryAxis`.
+  - **GREEN 8:** `noLineBeforeTheListIsReadOrWithoutADragOfItsOwn`,
+    `theEndZoneIsTheRoomUnderTheRowsCappedAndTheBottomPadding`, `theEndZoneLandsTheLastSlot`,
+    `aDropActsOnlyOnTheListItsDragBeganIn`, `aReleaseReadsThePayloadAndLandsIt`, `aReleaseThatOffersNothingRefuses`,
+    `aDropSettlesInPlaceAndNeverMovesTheList`, `theEndZoneIsAlwaysUnderTheRowsAndNeverPastTheFooter`.
+- **R-Y (pin (c) — an un-target clears whatever stands).** In `OpenListDrag.swift`'s `OpenListDragState.targeted(_:_:)`,
+  `} else if target == which {` becomes `} else {`. Products: `vx283-u2d-ry`. Expected on `OpenListDropDoorTests` +
+  `OpenListDragMountTests` (16):
+  - **RED exactly 3:** `aTargetChangeMovesTheLineAndAnUntargetClearsOnlyItsOwn`,
+    `movingBetweenTheRowsAndTheEndZoneKeepsTheLine`, `theLineDrawsWhereTheDropWouldLandOnEveryAxis` (row 7's late
+    un-target clears row 9's target, so `#require(lineTopInList)` fails);
+  - the other 13 GREEN.
+- **R-Z (pin (c) — the source session's end no longer clears the drag; U2c's R-V, re-run on F2).** In
+  `OpenListDragState.dragSessionUpdated(_:)`, its one `ended()` call is removed (the guard stays). Products:
+  `vx283-u2d-rz`. Expected on `OpenListDropDoorTests` (13):
+  - **RED exactly** `theDragSessionsEndClearsTheDrag`;
+  - the other 12 GREEN, including `aSessionEndBeforeTheDropsActionStillLands` (green on both sides by design).
+- **R-Q (P-U2d-2 — U2's end zone exactly).** In `SidebarLayout.swift`'s `endZoneHeight`, the unmeasured arm `return
+  bottomPadding` becomes `return 0` and `return bottomPadding + max(…)` becomes `return max(…)`. In `SidebarView.swift`,
+  the column's `.padding(.bottom, workspace.openNotes.shown.isEmpty ? SidebarLayout.contentBottomPadding : 0)` becomes
+  `.padding(.bottom, SidebarLayout.contentBottomPadding)`. Products: `vx283-u2d-rq`. Expected on
+  `OpenListDropRuleTests` + `OpenListDragMountTests` (14):
+  - **RED exactly 2:** `theEndZoneIsTheRoomUnderTheRowsCappedAndTheBottomPadding`,
+    `theEndZoneIsAlwaysUnderTheRowsAndNeverPastTheFooter` (28 ≠ 40 with room; with twenty rows a 0-pt zone ≠ 12);
+  - the other 12 GREEN.
 
 ## Ladder
 
