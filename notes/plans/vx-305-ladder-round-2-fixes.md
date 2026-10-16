@@ -18,8 +18,9 @@ this record.
 - **1(b) · MINOR — the mutation twin:** **DONE** (`e927333f9`) — `ScenarioMutationPins` 22/1 green; the twin red with
   its off-switch neutralized (§1(b)).
 - **1(c) · MINOR — `rollsBackBothHomes`'s comment, code unchanged:** **DONE** (`601cd9251` — comment lines only).
-- **2 · NIT — ExecutorWorld's set-aside doc comment:** **DONE** (this commit — comment lines only).
-- **3 · NIT — the two restores' deliberate-overwrite sentences:** PENDING.
+- **2 · NIT — ExecutorWorld's set-aside doc comment:** **DONE** (`ecf437996` — comment lines only).
+- **3 · NIT — the two restores' deliberate-overwrite sentences:** **DONE** (this commit — comment lines only, the two
+  Sources files).
 - **4 · NIT — `beforeRollback` cleared after a tamper step whose relaunch opened the library:** PENDING.
 - **5 · NIT (SPECULATIVE) — record only:** PENDING (this record's §5).
 - **The runs at the end:** PENDING.

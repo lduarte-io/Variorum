@@ -190,6 +190,11 @@ extension ProtectionExecutor {
                 return .preconditionDoesNotVerify
             }
             // Never an Apple wrap re-added: those leave legitimately.
+            // Another key's file in the live place is overwritten in place
+            // deliberately — a crashed act's never-used new-key file or a
+            // replayed genuine one, whose keys the mirror's history or anchor
+            // already holds; the copy repair's set-aside is the belt (VX-305
+            // ladder round 2, NIT 2).
             let live = try liveFormat3()
             var restored = mirror
             restored.apple = live?.fingerprint == mirror.fingerprint ? live?.apple : nil

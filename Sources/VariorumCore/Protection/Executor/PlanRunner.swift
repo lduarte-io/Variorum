@@ -332,7 +332,11 @@ extension ProtectionExecutor {
                 // file back from what the plan carried (the roll back's restore
                 // — the memory's mirror went with the old Mac; VX-305 U4, the
                 // soak's seed 2). Only a plan that verifies, only the current
-                // key's own file.
+                // key's own file. The stray is overwritten in place deliberately
+                // — a never-swapped act's new-key file or a replayed genuine one,
+                // whose keys the restored file's history or anchor already holds;
+                // the copy repair's set-aside is the belt (VX-305 ladder round 2,
+                // NIT 2).
                 if let outgoing = Self.outgoingKeyFile(verified(), for: library), library.keyFile?.fingerprint != library.fingerprint {
                     try writeLiveKeyFile(outgoing, &library)
                     log("settle: the current key's own file restored from an act no identity here resumes")
