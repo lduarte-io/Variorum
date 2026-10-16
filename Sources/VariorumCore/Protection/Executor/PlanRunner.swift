@@ -173,7 +173,8 @@ public final class ActContext {
         for index in plan.steps.indices { plan.steps[index].done = true }
     }
 
-    /// This Mac's facts, changed and written into both homes.
+    /// This Mac's facts, changed and written (the record's section, then what
+    /// this Mac remembers).
     func updateSection(_ change: (DeviceSection) -> DeviceSection) throws {
         try executor.writeFacts(&library, section: change(library.section))
     }
@@ -217,9 +218,9 @@ extension ProtectionExecutor {
             parameters.outgoingKeyFile = outgoing
         }
         let (section, sequence) = library.section.beginningAct(
-            program.act, from: library.fingerprint, to: toKey.map(Self.fp), at: at)
-        // The act in flight, named in both homes FIRST: a crash before the
-        // plan lands leaves an act with no plan — rolled back at the open.
+            program.act, from: library.fingerprint, to: toKey.map(Self.fp), fromKind: library.record?.mode, at: at)
+        // The act in flight, named in this Mac's section FIRST: a crash before
+        // the plan lands leaves an act with no plan — rolled back at the open.
         try writeFacts(&library, section: section)
         let plan = ProtectionPlan(
             libraryID: libraryID, deviceID: section.deviceID, sequence: sequence, act: program.act,
@@ -257,7 +258,8 @@ extension ProtectionExecutor {
         try endAct(ctx)
     }
 
-    /// The act ends: cleared in both homes, the plan deleted, copies resume.
+    /// The act ends: cleared in this Mac's section, the plan deleted, copies
+    /// resume.
     func endAct(_ ctx: ActContext) throws {
         let sequence = ctx.plan.sequence
         if ctx.library.section.actInFlight?.sequence == sequence {
@@ -305,12 +307,6 @@ extension ProtectionExecutor {
             if try leaves.library.stagedFingerprint() != nil {
                 try leaves.library.discardStaged()
                 log("settle: a staged file with nothing in flight — discarded")
-            }
-            // An act that ended between its two homes' writes (the record's
-            // landed, the memory's didn't): the memory follows the newer home.
-            if library.record != nil, let memory = library.memory, memory.deviceSection.actInFlight != nil,
-               memory.deviceSection.version < library.section.version {
-                try writeMemory(&library)
             }
             return .nothingInFlight
         }
@@ -496,7 +492,7 @@ extension ProtectionExecutor {
     /// act had replaced it, the new key's custody items deleted (a key the
     /// library never had), an own Apple key the act minted that wraps
     /// nothing retired (a Castle library — every other own key was retired at
-    /// its entry), the act cleared in both homes, the plan deleted.
+    /// its entry), the act cleared in this Mac's section, the plan deleted.
     /// `outgoingKeyFile`: the copy the act's plan carried — the restore's
     /// source when the memory's mirror is gone (a wiped keychain — VX-305 U4,
     /// the soak's seed 18).
@@ -511,7 +507,11 @@ extension ProtectionExecutor {
         } else {
             library.keyFile = live
         }
-        if let to = inFlight.toFingerprint, to != library.fingerprint, !library.familyTree.contains(to) {
+        // (A key the library never had: neither the current key nor one the
+        // live file's history holds — rule 4; the family tree left with
+        // VX-378 U1.)
+        if let to = inFlight.toFingerprint, to != library.fingerprint,
+           !(library.keyFile?.heldFingerprints.contains(to) ?? false) {
             for item in try leaves.custody.custodyItems() where item.fingerprint == to {
                 try leaves.custody.deleteCustody(fingerprint: item.fingerprint, itemClass: item.itemClass)
             }

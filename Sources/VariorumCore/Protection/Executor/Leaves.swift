@@ -169,9 +169,9 @@ public protocol BiometryLeaf: AnyObject {
     func biometryStateHash() -> Data?
 }
 
-/// The log and Diagnostics. Nothing written here ever carries key material, a
-/// hardware marker or the record's salt (design §3.2) — the executor speaks
-/// in act names, step names and eight-character fingerprints.
+/// The log and Diagnostics. Nothing written here ever carries key material
+/// (design §3.2) — the executor speaks in act names, step names and
+/// eight-character fingerprints.
 public protocol DiagnosticsLeaf: AnyObject {
     func log(_ line: String)
     func report(_ entry: ProtectionDiagnostic)

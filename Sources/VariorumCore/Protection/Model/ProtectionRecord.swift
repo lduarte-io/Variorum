@@ -2,10 +2,11 @@ import Foundation
 
 // VX-305 U1 — THE PROTECTION RECORD, as a value (design §3.2). The library's
 // own facts — library ID; the mode (the current key's kind); the account (none
-// or one id); the key epoch; the current key's
-// fingerprint; when it changed; the family tree; the salt every device's
-// hardware marker is computed under — and ONE SEALED DEVICE SECTION PER
-// DEVICE. Its SQLite table (`protection_record`, local-only, the plaintext
+// or one id); the key epoch; the current key's fingerprint; when it changed —
+// and ONE SEALED DEVICE SECTION PER DEVICE, keyed by its plain random device
+// ID (rule 23). (The family tree and the hardware marker's salt left with
+// VX-378 U1 — rules 21, 23: the key file's history is the list of keys the
+// library has had, rule 4.) Its SQLite table (`protection_record`, local-only, the plaintext
 // export leaves it behind) is phase 2's; this is the value it will hold.
 //
 // A copy carries only the library's own facts (§3.6): a device section counts
@@ -25,10 +26,6 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
     public var keyEpoch: Int
     public var currentFingerprint: String
     public var changedAt: Date
-    public var familyTree: FamilyTree
-    /// The random salt every device's hardware marker is computed under —
-    /// never logged (§3.2).
-    public var markerSalt: Data
     /// One per device, each sealed (purpose `device-section`) under the key
     /// in hand when it was written.
     public var deviceSections: [Sealed<DeviceSection>]
@@ -36,8 +33,7 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
     public init(
         format: Int = ProtectionRecord.currentFormat, libraryID: String, mode: ProtectionMode,
         account: String?, keyEpoch: Int, currentFingerprint: String,
-        changedAt: Date, familyTree: FamilyTree, markerSalt: Data,
-        deviceSections: [Sealed<DeviceSection>] = []
+        changedAt: Date, deviceSections: [Sealed<DeviceSection>] = []
     ) {
         self.format = format
         self.libraryID = libraryID
@@ -46,48 +42,29 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
         self.keyEpoch = keyEpoch
         self.currentFingerprint = currentFingerprint
         self.changedAt = changedAt
-        self.familyTree = familyTree
-        self.markerSalt = markerSalt
         self.deviceSections = deviceSections
     }
 
     /// A new record for a library whose current key is `currentKey`, born
-    /// `mode` on `madeBy` (the creation).
+    /// `mode` (the creation).
     public static func minting(
         libraryID: String, mode: ProtectionMode, account: String?,
-        currentFingerprint: String, keyEpoch: Int = 1, madeBy: String?, at: Date,
-        markerSalt: Data = HardwareMarker.mintSalt()
+        currentFingerprint: String, keyEpoch: Int = 1, at: Date
     ) -> ProtectionRecord {
-        let tree = madeBy.map {
-            FamilyTree().recordingBirth(fingerprint: currentFingerprint, kind: mode, madeBy: $0, madeAt: at)
-        } ?? FamilyTree(entries: [FamilyTree.Entry(fingerprint: currentFingerprint, kind: mode)])
-        return ProtectionRecord(
+        ProtectionRecord(
             libraryID: libraryID, mode: mode, account: account,
-            keyEpoch: keyEpoch, currentFingerprint: currentFingerprint, changedAt: at,
-            familyTree: tree, markerSalt: markerSalt)
+            keyEpoch: keyEpoch, currentFingerprint: currentFingerprint, changedAt: at)
     }
 
-    /// **A re-key or a landing** (§3.4): the new key is recorded in the family
-    /// tree with its kind for life and the Mac that made it, the old key
-    /// retired, the epoch advanced; the mode is the new key's kind (a key
-    /// changes only at a deliberate act — §3.12).
-    public func recordingRekey(
-        to newFingerprint: String, kind: ProtectionMode, by deviceID: String, at: Date
-    ) -> ProtectionRecord {
+    /// **A re-key** (§3.4): the new key current, the epoch advanced; the mode
+    /// is the new key's kind (a key changes only at a deliberate act — §3.12).
+    public func recordingRekey(to newFingerprint: String, kind: ProtectionMode, at: Date) -> ProtectionRecord {
         var next = self
-        next.familyTree = familyTree
-            .retiring(currentFingerprint, at: at)
-            .recordingBirth(fingerprint: newFingerprint, kind: kind, madeBy: deviceID, madeAt: at)
         next.currentFingerprint = newFingerprint
         next.keyEpoch += 1
         next.mode = kind
         next.changedAt = at
         return next
-    }
-
-    /// The marker THIS hardware and login compute under the record's salt.
-    public func marker(for machine: MachineIdentity) -> HardwareMarker {
-        HardwareMarker.compute(machine, salt: markerSalt)
     }
 
     // MARK: - The device sections

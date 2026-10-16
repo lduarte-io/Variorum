@@ -133,7 +133,7 @@ extension ActContext {
         if try libraryOpens(key) { return }
         let record = try requireRecord()
         let reach = executor.reach(key: library.key, keyFile: library.keyFile, extra: [fromKey].compactMap { $0 })
-        var next = record.recordingRekey(to: Self.fp(key), kind: kind, by: deviceID, at: now)
+        var next = record.recordingRekey(to: Self.fp(key), kind: kind, at: now)
         if parameters.changesAccount == true { next.account = parameters.targetAccount }
         let others = record.verifiedSections(reach: reach).filter { $0.deviceID != deviceID }
         next.deviceSections = try (others + [library.section]).map {
@@ -154,7 +154,6 @@ extension ActContext {
         library.key = key
         guard let record = try leaves.library.readRecord(with: key) else { throw ExecutorRefusal.recordMissing }
         library.record = record
-        library.familyTree = library.familyTree.union(record.familyTree)
         library.keyFile = try executor.liveFormat3()
         leaves.backups.resumeCopies()
         log("swapped — the library is under \(Self.fp8(Self.fp(key)))")
@@ -207,7 +206,9 @@ extension ActContext {
             guard let live, live.fingerprint == current else { return false }
             return (try? live.historyKey(fingerprint, currentKey: library.key)) != nil
         }
-        let tree = Set(library.familyTree.fingerprints)
+        // The keys the library has had: the live file's (rule 4 — the family
+        // tree left with VX-378 U1).
+        let tree = Set(live?.heldFingerprints ?? [])
         for item in try leaves.custody.custodyItems() where item.fingerprint != current {
             let outgoing = item.fingerprint == plan.fromFingerprint
             let sweep = sweepForCastle && item.itemClass == .silent && tree.contains(item.fingerprint)

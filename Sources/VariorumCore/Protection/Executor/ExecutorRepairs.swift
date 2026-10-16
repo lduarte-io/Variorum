@@ -68,7 +68,6 @@ extension ProtectionExecutor {
         case .deleteRetiredAppleKey: return "deleteRetiredAppleKey"
         case .landAppleWrap: return "landAppleWrap"
         case .refreshMemory: return "refreshMemory"
-        case .refreshRecordSection: return "refreshRecordSection"
         case .restoreKeyFileFromMirror: return "restoreKeyFileFromMirror"
         case .recordHeldSyncKeysFacts: return "recordHeldSyncKeysFacts"
         case .retireOwnAppleKeys: return "retireOwnAppleKeys"
@@ -138,10 +137,6 @@ extension ProtectionExecutor {
 
         case .refreshMemory:
             try writeMemory(&library)
-            return nil
-
-        case .refreshRecordSection:
-            try writeFacts(&library, section: library.section)
             return nil
 
         case .restoreKeyFileFromMirror:

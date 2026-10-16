@@ -19,7 +19,7 @@ struct MoreScenarios {
     @Test func replaysAndTheFileSwap() async throws {
         // (The key file and the library file replayed alone left with the
         // restores and "memory wins" — VX-378 U1, rule 21; U2 refuses them.)
-        for tamper in [Tamper.replayPlan, .replayMemory, .plantPlan, .editSealedSetting,
+        for tamper in [Tamper.replayPlan, .replayMemory, .plantPlan, .editMemoryItem,
                        .plantAppleWrap, .dropWordsLock, .deleteKeyFile, .deleteTouchIDItem, .deleteMemoryItem] {
             let world = try await scenarioWorld { try await $0.fresh(on: $0.macA) }
             await world.done([.launch("macA"), .useCastle("macA", .alwaysAsk, newWords: false), .setScheduledExport("macA", false)])
@@ -33,7 +33,7 @@ struct MoreScenarios {
     @Test func theEditedGateStylePlusAnEnrolledFinger() async throws {
         let world = try await scenarioWorld { try await $0.fresh(on: $0.macA, mode: .castle, gate: .alwaysAsk) }
         await world.done([.launch("macA"), .addFinger("macA")])
-        await world.step(.tamper("macA", .editSealedSetting))
+        await world.step(.tamper("macA", .editMemoryItem))
         #expect(!world.macA.keychain.local.contains { $0.key.service == ProtectionNames.custodyService && $0.value.touchID })
         #expect(!world.assessed(world.macA).acts.contains(.touchIDRearmQuestion))
         expectPromisesKept(world)
@@ -53,12 +53,20 @@ struct MoreScenarios {
     }
 
     /// "the memory item deleted alone on an Always-ask Castle Mac with an
-    /// enrolled finger: nothing changes"; "the lid closed at Castle entry".
+    /// enrolled finger: nothing weakens"; "the lid closed at Castle entry".
+    /// With nothing remembered the open takes a NEW plain device ID with no
+    /// choice yet (rule 23 — PROVISIONAL, the VX-378 heading in QUESTIONS;
+    /// the marker that found the old section left with VX-378 U1): no Touch
+    /// ID item, the mode unchanged.
     @Test func theMemoryItemDeletedAloneAndTheLidClosed() async throws {
         let world = try await scenarioWorld { try await $0.fresh(on: $0.macA, mode: .castle, gate: .alwaysAsk) }
         await world.done([.launch("macA")])
+        let before = try #require(world.macA.library?.section.deviceID)
         await world.step(.tamper("macA", .deleteMemoryItem))
-        #expect(world.macA.library?.section.settings.gateStyle == .alwaysAsk)
+        #expect(world.macA.library?.section.deviceID != before)
+        #expect(world.macA.library?.section.settings.gateStyle == nil)
+        #expect(world.macA.slot?.record?.mode == .castle)
+        #expect(!world.macA.keychain.local.contains { $0.key.service == ProtectionNames.custodyService && $0.value.touchID })
         let lid = try await scenarioWorld { try await $0.fresh(on: $0.macA) }
         await lid.done([.launch("macA"), .closeLid("macA"), .useCastle("macA", .touchID, newWords: false), .openLid("macA"), .settle])
         expectPromisesKept(world)

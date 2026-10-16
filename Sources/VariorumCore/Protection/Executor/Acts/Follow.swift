@@ -63,11 +63,10 @@ struct FollowProgram: ActProgram {
 
     func newKeySteps(_ parameters: ActParameters) -> Set<String> { LibraryRekey.newKeySteps }
 
-    /// With no plan: the kind read from the family tree — the outgoing key's
-    /// kind for life against the new one's.
+    /// With no plan: the kind read from the act in flight — the library's mode
+    /// when the act began against the record's now.
     func finishingSteps(_ library: UnlockedLibrary) -> [String] {
-        guard let inFlight = library.section.actInFlight, let from = inFlight.fromFingerprint,
-              let fromKind = library.familyTree.entry(from)?.kind, let toKind = library.record?.mode
+        guard let fromKind = library.section.actInFlight?.fromKind, let toKind = library.record?.mode
         else { return Self.afterCommit(.keysReplaced) }
         switch (fromKind, toKind) {
         case (.standard, .castle): return Self.afterCommit(.intoCastle)

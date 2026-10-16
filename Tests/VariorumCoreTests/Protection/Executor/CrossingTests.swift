@@ -23,7 +23,6 @@ enum UseCastleStates {
                 && live.apple == nil && live.history.contains { $0.fingerprint == PF.fp(k0) }
                 && !fixture.world.custody.keys.contains { $0.itemClass == .silent }
                 && ownApple.map { fixture.world.icloud.keys[$0] == nil && library.section.retiredAppleKeyIDs.contains($0) } ?? true
-                && record.familyTree.entry(current)?.kind == .castle
         }
     }
 

@@ -104,8 +104,10 @@ struct ExecutorDeviceActTests {
         settings.gateStyle = .alwaysAsk
         _ = try await executor.changeSettings(&library, to: settings)
         #expect(!fixture.custody(.touchid, fixture.key))
-        // Both homes carry the setting (the replay class VX-313 names).
-        #expect(fixture.memoryValue()?.deviceSection.settings.gateStyle == .alwaysAsk)
+        // The record's section carries the setting (its one home since VX-378 U1).
+        let record = try #require(fixture.liveRecord)
+        #expect(record.verifiedSections(reach: PF.reach([fixture.key])).first { $0.deviceID == library.section.deviceID }?
+            .settings.gateStyle == .alwaysAsk)
         expectSettled(fixture, library)
     }
 
@@ -124,7 +126,7 @@ struct ExecutorDeviceActTests {
         let world = ExecutorWorld()
         let executor = ProtectionExecutor(
             leaves: world.leaves,
-            configuration: ExecutorConfiguration(scope: EX.scope, libraryID: "", machine: PF.macA, deviceName: "Mac A", floor: PF.floor))
+            configuration: ExecutorConfiguration(scope: EX.scope, libraryID: "", deviceName: "Mac A", floor: PF.floor))
         let library = try executor.createLibrary()
         let record = try #require(world.live?.record)
         #expect(record.mode == .standard && record.account == nil)

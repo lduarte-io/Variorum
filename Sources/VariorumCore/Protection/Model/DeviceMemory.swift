@@ -7,13 +7,14 @@ import Foundation
 // newer record. Before unlock it is a display hint only and decides nothing
 // (§3.10).
 //
-// It holds: the library's location (scope), current fingerprint and epoch;
-// the mode and account last confirmed; the device identity with its hardware
-// marker (both inside the device section's second home below); the biometry
-// state hash when its Touch ID item was made (a hint, never a verdict —
-// §3.10); the vault facts today's key file caches; nudge dismissals; a mirror
-// of the key file's wraps and history; the family tree's mirror; and
-// THE SECOND HOME OF THIS MAC'S DEVICE SECTION (the same fields and version).
+// RULE 21 (`notes/CastleRules.md`): "This Mac remembers four things about its
+// library — its ID, its current key, its device ID and the sealed copy of its
+// key file — and only the app's own doors change them." Two hints ride beside
+// them until U2 gives each its home: the biometry state hash (§3.10's which-
+// line hint) and the vault facts (the follow's reading; U2 replaces the vault).
+// (The mode and account last confirmed, the key epoch, the nudge dismissals,
+// the family tree's mirror and the device section's second home left with
+// VX-378 U1 — rules 21, 23.)
 
 /// The vault facts today's key file caches (pre-13x §3.6; moved here by the
 /// design): what the local passphrase copy was last reconciled against.
@@ -36,78 +37,44 @@ public struct VaultFacts: Codable, Equatable, Sendable {
     }
 }
 
-/// The mode and account last CONFIRMED on this Mac (account nil = none).
-public struct ConfirmedFacts: Codable, Equatable, Sendable {
-    public var mode: ProtectionMode
-    public var account: String?
-
-    public init(mode: ProtectionMode, account: String?) {
-        self.mode = mode
-        self.account = account
-    }
-}
-
 public struct DeviceMemory: Codable, Equatable, Sendable {
     public static let currentFormat = 1
 
     public var format: Int
     public var libraryID: String
-    /// The store-variant scope the library lives under.
-    public var scope: String
     public var currentFingerprint: String
-    public var keyEpoch: Int
-    public var lastConfirmed: ConfirmedFacts?
+    /// This Mac's plain random device ID for the library (rule 23) — it names
+    /// this Mac's section of the record.
+    public var deviceID: String
+    /// The key file's mirror — its wraps and history (§3.2): THE on-device
+    /// copy, written back only into an empty live place (rule 1).
+    public var keyFileMirror: KeyFile?
     /// `LAEnvironment`'s biometry state hash when this Mac's Touch ID item was
     /// made — chooses which line shows after a press fails, nothing else.
     public var biometryStateHash: Data?
     public var vaultFacts: VaultFacts?
-    /// Nudge name → dismissed at.
-    public var nudgeDismissals: [String: Date]
-    /// The key file's mirror — its wraps and history (§3.2).
-    public var keyFileMirror: KeyFile?
-    /// The family tree's mirror — unioned with the record's at open.
-    public var familyTree: FamilyTree
-    /// The second home of this Mac's device section (§3.6).
-    public var deviceSection: DeviceSection
 
     public init(
-        format: Int = DeviceMemory.currentFormat, libraryID: String, scope: String,
-        currentFingerprint: String, keyEpoch: Int, lastConfirmed: ConfirmedFacts? = nil,
-        biometryStateHash: Data? = nil, vaultFacts: VaultFacts? = nil,
-        nudgeDismissals: [String: Date] = [:], keyFileMirror: KeyFile? = nil,
-        familyTree: FamilyTree, deviceSection: DeviceSection
+        format: Int = DeviceMemory.currentFormat, libraryID: String, currentFingerprint: String, deviceID: String,
+        keyFileMirror: KeyFile? = nil, biometryStateHash: Data? = nil, vaultFacts: VaultFacts? = nil
     ) {
         self.format = format
         self.libraryID = libraryID
-        self.scope = scope
         self.currentFingerprint = currentFingerprint
-        self.keyEpoch = keyEpoch
-        self.lastConfirmed = lastConfirmed
+        self.deviceID = deviceID
+        self.keyFileMirror = keyFileMirror
         self.biometryStateHash = biometryStateHash
         self.vaultFacts = vaultFacts
-        self.nudgeDismissals = nudgeDismissals
-        self.keyFileMirror = keyFileMirror
-        self.familyTree = familyTree
-        self.deviceSection = deviceSection
     }
-
-    /// The device identity (kept in the device section — one field, two
-    /// readings, never two values that could disagree).
-    public var deviceID: String { deviceSection.deviceID }
-    /// The hardware marker (likewise).
-    public var hardwareMarker: HardwareMarker { deviceSection.hardwareMarker }
-
-    /// The Keychain item's account.
-    public var itemAccount: String { ProtectionNames.memoryAccount(scope: scope, libraryID: libraryID) }
 
     /// Sealed whole under the library key in hand.
     public func sealed(under key: StoreKey) throws -> Sealed<DeviceMemory> {
         try Sealed.sealing(self, purpose: .memory, libraryID: libraryID, key: key)
     }
 
-    /// Open a memory item for `libraryID`: verified, else nil — a memory item
-    /// that fails its seal loses to the record's device section (§3.6; the
-    /// plan's U3 test). A memory item for another library is not this one's.
+    /// Open a memory item for `libraryID`: verified, else nil (a memory item
+    /// that fails its seal remembers nothing). A memory item for another
+    /// library is not this one's.
     public static func opening(
         _ sealed: Sealed<DeviceMemory>, libraryID: String, reach: (String) -> StoreKey?
     ) -> DeviceMemory? {

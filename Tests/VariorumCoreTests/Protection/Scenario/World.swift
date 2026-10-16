@@ -111,7 +111,6 @@ struct Truth {
 final class SDevice {
     let name: String
     let isPhone: Bool
-    var machine: MachineIdentity
     /// The Apple ID it is signed into.
     var appleAccount: String?
     /// iCloud Keychain's switch — the app can't see it (corner 46).
@@ -151,10 +150,9 @@ final class SDevice {
     /// one the locks end up under is read back once nothing is in flight.
     var pending: [(holder: String, passphrase: String?, words: [String]?)] = []
 
-    init(name: String, isPhone: Bool, machine: MachineIdentity) {
+    init(name: String, isPhone: Bool) {
         self.name = name
         self.isPhone = isPhone
-        self.machine = machine
     }
 
     var slot: LibraryImage? { container.files[SPath.slot]?.library }
@@ -239,8 +237,8 @@ final class SWorld {
     /// The account each device's library was last seen bound to.
     var lastBinding: [String: String?] = [:]
 
-    /// Two Macs and a phone on Apple account 1 (the phone and Mac A share a
-    /// login identity? never: each device its own hardware and login).
+    /// Two Macs and a phone on Apple account 1. (The world models no hardware
+    /// identity: the core reads none — rule 23.)
     init(seed: UInt64 = 1) {
         rng = SeededRandom(seed: seed)
         appleAccounts[Self.appleA] = AppleAccountFake(id: Self.appleA)
@@ -248,9 +246,7 @@ final class SWorld {
         farFolders[Self.appleA] = FolderFS()
         farFolders[Self.appleB] = FolderFS()
         for (name, phone) in [("macA", false), ("macB", false), ("phone", true)] {
-            let device = SDevice(
-                name: name, isPhone: phone,
-                machine: MachineIdentity(hardware: rng.uuid().uppercased(), login: rng.uuid().uppercased()))
+            let device = SDevice(name: name, isPhone: phone)
             device.appleAccount = Self.appleA
             devices.append(device)
         }
@@ -478,7 +474,7 @@ final class SWorld {
         ProtectionExecutor(
             leaves: leaves(device),
             configuration: ExecutorConfiguration(
-                scope: Self.scope, libraryID: libraryID, machine: device.machine, deviceName: device.name, floor: PF.floor,
+                scope: Self.scope, libraryID: libraryID, deviceName: device.name, floor: PF.floor,
                 session: device.session),
             guards: guards)
     }
@@ -758,15 +754,11 @@ final class SWorld {
         let apple = AppleKeyFacts(readable: Set(readableAppleKeys(device).keys))
         var unlocked: UnlockedFacts?
         if let library = device.library, let record = library.record {
-            let reach = device.executor?.reach(key: library.key, keyFile: library.keyFile) ?? PF.reach([library.key])
-            let recordSection = record.verifiedSections(reach: reach).first { $0.deviceID == library.section.deviceID }
             unlocked = UnlockedFacts(
-                record: record, familyTree: library.familyTree,
-                thisMac: library.section, identity: library.resolution, memory: library.memory,
+                record: record, thisMac: library.section, memory: library.memory,
                 currentFingerprint: library.fingerprint,
                 liveKeyFileID: device.container.files[SPath.liveKeyFile] == nil ? nil
-                    : Catalog.id(place: .container, folders: [], name: SPath.liveKeyFile),
-                recordSection: recordSection)
+                    : Catalog.id(place: .container, folders: [], name: SPath.liveKeyFile))
         }
         let sessionAccount = device.session.accountID
         let vault = sessionAccount.flatMap { device.executor?.freshVaults[$0]?.reading }
@@ -780,12 +772,11 @@ final class SWorld {
 
     func assessed(_ device: SDevice) -> Assessment { assess(facts(device), guards: guards) }
 
-    /// The family tree's births on `device`'s library, as ground truth.
+    /// The keys born in Castle on `device`'s library, as ground truth: each
+    /// Castle key, recorded while it is current (the family tree's births left
+    /// with VX-378 U1).
     func noteBirths(_ device: SDevice) {
         guard let record = device.library?.record else { return }
-        for entry in record.familyTree.entries where entry.kind == .castle && entry.madeBy != nil {
-            truth.castleBorn.insert(entry.fingerprint)
-        }
         if record.mode == .castle { truth.castleBorn.insert(record.currentFingerprint) }
     }
 }

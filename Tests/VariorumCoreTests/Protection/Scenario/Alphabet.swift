@@ -34,8 +34,9 @@ enum Tamper: String, Equatable, CaseIterable {
     case dropWordsLock
     /// A plan sealed under a key the library never had.
     case plantPlan
-    /// The memory item's sealed settings edited (gate, export) — its seal breaks.
-    case editSealedSetting
+    /// The memory item edited (its device ID) — its seal breaks. (It carried
+    /// this Mac's settings until the second home left with VX-378 U1.)
+    case editMemoryItem
     case replayPlan
     case replayMemory
     /// The library file replayed alone — kept for the rule-21 pin only
@@ -101,7 +102,6 @@ indirect enum Action: Equatable {
     case resetICloudKeychain(String)
     case wipeKeychain(String)
     case replaceMac(String, carriesMemory: Bool)
-    case cloneMac(from: String, to: String)
     case goOffline(String)
     case goOnline(String)
     case timeMachineSnapshot(String)
@@ -493,31 +493,12 @@ extension SWorld {
         case .replaceMac(let name, let carriesMemory):
             let d = device(name)
             lock(d)
-            d.machine = MachineIdentity(hardware: rng.uuid().uppercased(), login: d.machine.login)
             let memory = d.keychain.local.filter { $0.key.service == ProtectionNames.memoryService }
             loseQueuedDeletes(d)
             d.keychain = DeviceKeychain()
             if carriesMemory { d.keychain.local = memory }
             d.biometry = BiometryFake(generation: d.biometry.generation + 100)
             syncICloud(d)
-        case .cloneMac(let from, let to):
-            let source = device(from), clone = device(to)
-            lock(clone)
-            loseQueuedDeletes(clone)
-            clone.container = FolderFS()
-            clone.container.files = source.container.files
-            clone.machine = MachineIdentity(hardware: rng.uuid().uppercased(), login: source.machine.login)
-            clone.keychain = DeviceKeychain()
-            clone.keychain.local = source.keychain.local.filter { $0.key.service == ProtectionNames.memoryService }
-            clone.appleAccount = source.appleAccount
-            clone.session = source.session
-            clone.biometry = BiometryFake(generation: source.biometry.generation + 50)
-            // The same libraries, so the same secrets: a local library's
-            // holder is per device in the world's bookkeeping.
-            for (holder, known) in truth.known where holder.hasSuffix("@\(from)") {
-                truth.known[String(holder.dropLast(from.count)) + to] = known
-            }
-            syncICloud(clone)
         case .goOffline(let name): device(name).online = false
         case .goOnline(let name):
             let d = device(name)
@@ -642,7 +623,7 @@ extension SWorld {
         // A tamper on a Standard device is outside the protection claims (rule
         // 3: that person holds the key): its library's keys at that moment.
         if slot.record?.mode == .standard {
-            let tree = Set((slot.record?.familyTree.fingerprints ?? []) + (device.library?.familyTree.fingerprints ?? []) + [slot.fingerprint])
+            let tree = Set((liveKeyFile(device)?.heldFingerprints ?? []) + [slot.fingerprint])
             truth.tamperedStandard[device.name, default: []].formUnion(tree)
         }
         lock(device)
@@ -669,14 +650,12 @@ extension SWorld {
                 steps: [PlanStep(name: "settings")], createdAt: clock,
                 parameters: ActParameters(settings: DeviceSettings(gateStyle: .touchID, scheduledExport: true)))
             try leaf.writePlan(try plan.sealed(under: mintKey()))
-        case .editSealedSetting:
+        case .editMemoryItem:
             guard case .memory(let sealed)? = device.keychain.local[memoryName]?.value,
                   var memory = try? ProtectionCoding.decoder().decode(DeviceMemory.self, from: sealed.payload) else {
                 throw WorldRefusal.noLibrary
             }
-            memory.deviceSection.settings.scheduledExport = true
-            memory.deviceSection.settings.gateStyle = .touchID
-            memory.deviceSection.version += 100
+            memory.deviceID = rng.uuid()
             let payload = try ProtectionCoding.canonical(memory)
             device.keychain.local[memoryName]?.value = .memory(Sealed(payload: payload, seal: sealed.seal))
         case .replayPlan:

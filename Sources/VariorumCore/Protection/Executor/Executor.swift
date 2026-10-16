@@ -23,7 +23,7 @@ import Foundation
 //     the act's fixed remaining steps FINISH FROM THE RECORD. A synced
 //     rotation resumes from the server's own state (the device follows its own
 //     landed rotation as any follower would).
-//   - End: the act in flight cleared in both homes, the plan deleted.
+//   - End: the act in flight cleared in this Mac's section, the plan deleted.
 // So after a crash at any write and a relaunch, an act finishes or rolls
 // back — never a third state (promise 6) — and the tests prove it write by
 // write.
@@ -33,9 +33,6 @@ public struct ExecutorConfiguration: Sendable {
     public var scope: String
     /// The library in the slot.
     public var libraryID: String
-    /// This hardware and this macOS login — read by a leaf, hashed into the
-    /// marker, never stored or logged.
-    public var machine: MachineIdentity
     /// This device's name — the vault's `updated_by_device` (decision 34).
     public var deviceName: String
     /// The KDF floor every derivation checks first (tests: `.relaxedForTests`).
@@ -44,12 +41,11 @@ public struct ExecutorConfiguration: Sendable {
     public var session: SessionFact
 
     public init(
-        scope: String, libraryID: String, machine: MachineIdentity, deviceName: String,
+        scope: String, libraryID: String, deviceName: String,
         floor: PassphraseKDF.Floor = PassphraseKDF.floor, session: SessionFact = .signedOut
     ) {
         self.scope = scope
         self.libraryID = libraryID
-        self.machine = machine
         self.deviceName = deviceName
         self.floor = floor
         self.session = session
@@ -63,28 +59,22 @@ public struct UnlockedLibrary {
     public var key: StoreKey
     /// The record (a library with no record never unlocks — rule 26).
     public var record: ProtectionRecord?
-    /// This Mac's section at open (the two homes reconciled).
+    /// This Mac's section at open (`DeviceFacts.thisMacsSection`).
     public var section: DeviceSection
-    public var resolution: IdentityResolution
     public var memory: DeviceMemory?
     /// The live key file, when it is format 3.
     public var keyFile: KeyFile?
-    /// The family tree at open (its two homes unioned).
-    public var familyTree: FamilyTree
 
     public var fingerprint: String { StoreKeyEnvelope.fingerprint(of: key) }
 
     public init(
-        key: StoreKey, record: ProtectionRecord?, section: DeviceSection, resolution: IdentityResolution,
-        memory: DeviceMemory?, keyFile: KeyFile?, familyTree: FamilyTree
+        key: StoreKey, record: ProtectionRecord?, section: DeviceSection, memory: DeviceMemory?, keyFile: KeyFile?
     ) {
         self.key = key
         self.record = record
         self.section = section
-        self.resolution = resolution
         self.memory = memory
         self.keyFile = keyFile
-        self.familyTree = familyTree
     }
 }
 
@@ -242,26 +232,10 @@ public final class ProtectionExecutor {
             .flatMap { DeviceMemory.opening($0, libraryID: record.libraryID, reach: reach) }
         // The executor serves the slot's library (a landing changes it).
         configuration.libraryID = record.libraryID
-        let sections = record.verifiedSections(reach: reach)
-        // The key file a new identity's takeover reads (§3.5: "the Apple key
-        // ids its live key file's wraps name"): the live one — or, when the
-        // live place holds another key's file and a plan that verifies carried
-        // this key's own (an act its predecessor began), that one, which the
-        // settle then restores (VX-305 U4, the soak's seed 2).
-        var ownFile = liveFile
-        if liveFile?.fingerprint != StoreKeyEnvelope.fingerprint(of: key), let sealed = try leaves.plans.readPlan(),
-           let plan = try? sealed.open(purpose: .plan, libraryID: record.libraryID, reach: reach),
-           let outgoing = plan.parameters?.outgoingKeyFile, outgoing.fingerprint == StoreKeyEnvelope.fingerprint(of: key) {
-            ownFile = outgoing
-        }
-        let (section, resolution) = DeviceFacts.thisMacsSection(
-            memory: memory, recordSections: sections, marker: record.marker(for: configuration.machine),
-            keyFileOwnAppleKeyIDs: [ownFile?.apple?.keyID].compactMap { $0 },
-            mintDeviceID: { self.leaves.ids.mintID() }, guards: guards)
-        var unlocked = UnlockedLibrary(
-            key: key, record: record, section: section, resolution: resolution, memory: memory, keyFile: liveFile,
-            familyTree: FamilyTree.atOpen(record: record.familyTree, memory: memory?.familyTree, guards: guards))
-        return unlocked
+        let section = DeviceFacts.thisMacsSection(
+            memory: memory, recordSections: record.verifiedSections(reach: reach),
+            mintDeviceID: { self.leaves.ids.mintID() })
+        return UnlockedLibrary(key: key, record: record, section: section, memory: memory, keyFile: liveFile)
     }
 
     func liveFormat3() throws -> KeyFile? { try leaves.keyFiles.readLiveKeyFile() }
@@ -285,7 +259,7 @@ public final class ProtectionExecutor {
         }
     }
 
-    // MARK: - This Mac's facts, written into both homes
+    // MARK: - This Mac's facts: the record's section, and what this Mac remembers
 
     /// What this Mac remembers, agreeing with the record — the key file's
     /// mirror follows the live file only when it is the current key's (mid-act
@@ -296,16 +270,13 @@ public final class ProtectionExecutor {
         var mirror = old?.keyFileMirror
         if let live = library.keyFile, live.fingerprint == record.currentFingerprint { mirror = live }
         return DeviceMemory(
-            libraryID: record.libraryID, scope: configuration.scope, currentFingerprint: record.currentFingerprint,
-            keyEpoch: record.keyEpoch,
-            lastConfirmed: ConfirmedFacts(mode: record.mode, account: record.account),
-            biometryStateHash: old?.biometryStateHash, vaultFacts: old?.vaultFacts,
-            nudgeDismissals: old?.nudgeDismissals ?? [:], keyFileMirror: mirror,
-            familyTree: library.familyTree.union(record.familyTree), deviceSection: library.section)
+            libraryID: record.libraryID, currentFingerprint: record.currentFingerprint, deviceID: library.section.deviceID,
+            keyFileMirror: mirror, biometryStateHash: old?.biometryStateHash, vaultFacts: old?.vaultFacts)
     }
 
-    /// The record's home (inside the library, under the key in hand), then
-    /// what this Mac remembers — both carrying `section`.
+    /// This Mac's section into the record (inside the library, under the key
+    /// in hand), then what this Mac remembers (its device ID, the current key,
+    /// the mirror).
     func writeFacts(_ library: inout UnlockedLibrary, section: DeviceSection) throws {
         guard var record = library.record else { throw ExecutorRefusal.recordMissing }
         record = try record.storing(section, sealedUnder: library.key)

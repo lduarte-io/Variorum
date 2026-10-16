@@ -3,7 +3,7 @@ import Foundation
 
 // VX-305 U3 — THIS MAC'S ACTS (design §3.6, §3.10, §3.13): the settings that
 // could weaken protection (the gate style, the idle lock, the scheduled
-// export — sealed in this Mac's facts, written into both homes); the Touch ID
+// export — sealed in this Mac's section of the record); the Touch ID
 // re-arm (only after a press failed on an item that exists — her confirmed
 // call); and creating a library. (Confirming the mode left with rule 26.)
 
@@ -76,7 +76,7 @@ struct CreateLibraryProgram: ActProgram {
 extension ProtectionExecutor {
     /// **This Mac's settings** — the gate style (Touch ID on only here, with
     /// the passphrase; off deletes the item), the idle lock, the scheduled
-    /// export — written into both homes.
+    /// export — written into this Mac's section.
     public func changeSettings(_ library: inout UnlockedLibrary, to settings: DeviceSettings, passphrase: String? = nil) async throws -> ActOutcome {
         if settings.gateStyle == .touchID, library.section.settings.gateStyle != .touchID {
             guard library.record?.mode == .castle else { throw ExecutorRefusal.wrongMode(.standard) }
@@ -112,11 +112,9 @@ extension ProtectionExecutor {
         let at = now()
         configuration.libraryID = libraryID
         var record = ProtectionRecord.minting(
-            libraryID: libraryID, mode: .standard, account: nil,
-            currentFingerprint: Self.fp(key), madeBy: deviceID, at: at)
+            libraryID: libraryID, mode: .standard, account: nil, currentFingerprint: Self.fp(key), at: at)
         let apple = leaves.ids.mintAppleKey()
-        let section = DeviceSection(
-            deviceID: deviceID, hardwareMarker: record.marker(for: configuration.machine), settings: .noChoiceYet)
+        let section = DeviceSection(deviceID: deviceID, settings: .noChoiceYet)
             .recordingAppleKey(AppleKeyRecord(id: apple.id, purpose: .library, origin: .minted))
         record = try record.storing(section, sealedUnder: key)
         try leaves.custody.writeCustody(key, itemClass: .silent)
@@ -127,9 +125,7 @@ extension ProtectionExecutor {
         let file = try KeyFile.building(libraryID: libraryID, key: key, epoch: 1, locks: locks)
         try leaves.keyFiles.writeLiveKeyFile(file)
         try leaves.library.createLibrary(with: key, record: record)
-        var library = UnlockedLibrary(
-            key: key, record: record, section: section, resolution: .newIdentity(predecessorID: nil), memory: nil,
-            keyFile: file, familyTree: record.familyTree)
+        var library = UnlockedLibrary(key: key, record: record, section: section, memory: nil, keyFile: file)
         try writeMemory(&library)
         log("create library: \(Self.fp8(Self.fp(key))) in Standard")
         return library

@@ -141,15 +141,40 @@ struct CutPinsRule21Tests {
         #expect(world.macA.slot?.fingerprint != castleKey, "the replayed file was re-keyed to the memory's key")
     }
 
-    /// RULE 21: a library file replayed under the SAME key does not take the
-    /// facts this Mac last confirmed (the old `restoreRecordFactsFromMemory`).
-    @Test func aReplayedRecordDoesNotTakeTheMemorysFacts() throws {
-        var world = try AWorld(.standard)
-        var memory = world.agreeingMemory
-        memory.lastConfirmed = ConfirmedFacts(mode: .standard, account: "an-account")
-        memory.deviceSection = world.section.bumped()
-        world.memory = memory
-        let names = try world.assessed().repairs.map { "\($0)" }
-        #expect(!names.contains("restoreRecordFactsFromMemory"), "the record would take the memory's facts")
+}
+
+@Suite("VX-378 U1 — rules 21 and 23: four remembered things, a plain device ID (red on the pre-cut tree)")
+struct CutPinsRule23Tests {
+    /// RULE 21 ("this Mac remembers four things about its library — its ID,
+    /// its current key, its device ID and the sealed copy of its key file")
+    /// and RULE 23 ("no hardware fingerprinting"): no stored value carries a
+    /// hardware marker, its salt, a family tree, or a second home of this
+    /// Mac's section.
+    @Test func noStoredValueCarriesAMarkerATreeOrASecondHome() throws {
+        let fixture = try EX(.standard)
+        let record = try #require(fixture.liveRecord)
+        let recordText = String(decoding: try ProtectionCoding.canonical(record), as: UTF8.self)
+        #expect(!recordText.contains("markerSalt"), "the record carries a hardware marker's salt")
+        #expect(!recordText.contains("familyTree"), "the record carries a family tree")
+        for sealed in record.deviceSections {
+            #expect(!String(decoding: sealed.payload, as: UTF8.self).contains("hardwareMarker"),
+                    "a device section carries a hardware marker")
+        }
+        let memory = try #require(fixture.world.memories[fixture.libraryID])
+        let memoryText = String(decoding: memory.payload, as: UTF8.self)
+        for field in ["familyTree", "deviceSection", "hardwareMarker", "lastConfirmed"] {
+            #expect(!memoryText.contains(field), "what this Mac remembers carries \(field)")
+        }
+    }
+
+    /// RULE 23: the device ID is the plain random one this Mac remembers — a
+    /// memory item carried onto new hardware keeps it (no marker decides a
+    /// new identity, no takeover).
+    @Test func aMemoryItemCarriedToNewHardwareKeepsItsDeviceID() async throws {
+        let world = try await scenarioWorld { try await $0.fresh(on: $0.macA, mode: .castle, gate: .alwaysAsk) }
+        await world.done([.launch("macA")])
+        let id = try #require(world.macA.library?.section.deviceID)
+        await world.done([.replaceMac("macA", carriesMemory: true), .launch("macA")])
+        #expect(world.macA.library?.section.deviceID == id, "the device ID was recomputed from the hardware")
     }
 }

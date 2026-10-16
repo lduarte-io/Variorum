@@ -1,16 +1,15 @@
 import Foundation
 
 // VX-305 U1 — THIS MAC'S FACTS: one device section per device (design §3.2,
-// §3.6). Its device identity and hardware marker; the act in flight; the
-// settings that could weaken protection (the gate style, the idle lock, the
-// scheduled Markdown export); the Apple key ids this Mac minted or followed
-// for the library and its account, and whether each is retired; and a
-// version that only grows. (The old shared key's state left with rule 26.)
-//
-// It has TWO SEALED HOMES — its section of the protection record (inside the
-// encrypted library) and what this Mac remembers — and `DeviceFacts` below is
-// the one place they meet: at open the newer version wins and the retired
-// Apple key ids are the union, so replaying either home alone changes nothing.
+// §3.6), in the protection record (inside the encrypted library). Its plain
+// random device ID (rule 23 — made at creation, remembered by this Mac); the
+// act in flight; the settings that could weaken protection (the gate style,
+// the idle lock, the scheduled Markdown export); the Apple key ids this Mac
+// minted or followed for the library and its account, and whether each is
+// retired; and a version that only grows. (The old shared key's state left
+// with rule 26; the hardware marker, the second home in what this Mac
+// remembers, the identity resolution and the takeover left with VX-378 U1 —
+// rules 21, 23.)
 
 /// An act between its first step and its last (§3.2): its sequence number,
 /// the act, and the keys it moves between. A plan resumes only when this names
@@ -20,16 +19,21 @@ public struct ActInFlight: Codable, Equatable, Sendable {
     public var act: ProtectionAct
     public var fromFingerprint: String?
     public var toFingerprint: String?
+    /// The library's mode when the act began — what finishing a follow from
+    /// the record reads (the family tree's one act-time reading, carried here
+    /// when the tree left with VX-378 U1).
+    public var fromKind: ProtectionMode?
     public var startedAt: Date
 
     public init(
         sequence: Int, act: ProtectionAct, fromFingerprint: String? = nil,
-        toFingerprint: String? = nil, startedAt: Date
+        toFingerprint: String? = nil, fromKind: ProtectionMode? = nil, startedAt: Date
     ) {
         self.sequence = sequence
         self.act = act
         self.fromFingerprint = fromFingerprint
         self.toFingerprint = toFingerprint
+        self.fromKind = fromKind
         self.startedAt = startedAt
     }
 }
@@ -57,9 +61,6 @@ public struct DeviceSettings: Codable, Equatable, Sendable {
 
     /// A device with no choice yet (§3.10).
     public static let noChoiceYet = DeviceSettings(gateStyle: nil)
-    /// A NEW DEVICE IDENTITY — a replacement Mac (§3.10, §3.13): no act and so
-    /// no press, so Always ask; Touch ID comes on only from Settings.
-    public static let newIdentity = DeviceSettings(gateStyle: .alwaysAsk)
 }
 
 /// Whose Apple key an id is (§3.5): this Mac's own for the library, or the
@@ -69,13 +70,12 @@ public enum AppleKeyPurpose: String, Codable, Sendable {
     case account
 }
 
-/// How this Mac came to list it: minted here, followed (read — the account's
-/// key a follower picked up), or adopted from a predecessor's section by a
-/// replacement Mac (§3.5).
+/// How this Mac came to list it: minted here, or followed (read — the
+/// account's key a follower picked up). (Adopted from a predecessor by a
+/// replacement Mac left with the takeover — VX-378 U1, rule 23.)
 public enum AppleKeyOrigin: String, Codable, Sendable {
     case minted
     case followed
-    case adopted
 }
 
 public struct AppleKeyRecord: Codable, Equatable, Sendable {
@@ -99,17 +99,14 @@ public struct AppleKeyRecord: Codable, Equatable, Sendable {
         self.retiredAt = retiredAt
     }
 
-    /// "This Mac's own for the library": minted by it, or adopted from its
-    /// predecessor (§3.5 — "this Mac's own means minted and named by it").
+    /// "This Mac's own for the library": minted by it (§3.5 — "this Mac's own
+    /// means minted and named by it").
     public var isOwnLibraryKey: Bool { purpose == .library && origin != .followed }
 }
 
 public struct DeviceSection: Codable, Equatable, Sendable {
-    /// The device identity (`<mac8>` is its first eight characters).
+    /// The plain random device ID (`<mac8>` is its first eight characters).
     public var deviceID: String
-    /// `HardwareMarker.compute` — its two salted parts, never the identifiers
-    /// themselves.
-    public var hardwareMarker: HardwareMarker
     /// Only grows: every change to the section bumps it (§3.6).
     public var version: Int
     public var actInFlight: ActInFlight?
@@ -120,12 +117,11 @@ public struct DeviceSection: Codable, Equatable, Sendable {
     public var appleKeys: [AppleKeyRecord]
 
     public init(
-        deviceID: String, hardwareMarker: HardwareMarker, version: Int = 1,
+        deviceID: String, version: Int = 1,
         actInFlight: ActInFlight? = nil, lastActSequence: Int = 0,
         settings: DeviceSettings, appleKeys: [AppleKeyRecord] = []
     ) {
         self.deviceID = deviceID
-        self.hardwareMarker = hardwareMarker
         self.version = version
         self.actInFlight = actInFlight
         self.lastActSequence = lastActSequence
@@ -190,12 +186,13 @@ public struct DeviceSection: Codable, Equatable, Sendable {
 
     /// The act begins: the next sequence number, named in flight (§3.6).
     public func beginningAct(
-        _ act: ProtectionAct, from: String?, to: String?, at: Date
+        _ act: ProtectionAct, from: String?, to: String?, fromKind: ProtectionMode? = nil, at: Date
     ) -> (section: DeviceSection, sequence: Int) {
         var next = bumped()
         next.lastActSequence += 1
         next.actInFlight = ActInFlight(
-            sequence: next.lastActSequence, act: act, fromFingerprint: from, toFingerprint: to, startedAt: at)
+            sequence: next.lastActSequence, act: act, fromFingerprint: from, toFingerprint: to, fromKind: fromKind,
+            startedAt: at)
         return (next, next.lastActSequence)
     }
 
@@ -209,217 +206,22 @@ public struct DeviceSection: Codable, Equatable, Sendable {
 
 }
 
-// MARK: - The two homes, the identity, the takeover
-
-/// How a Mac found its own device identity at open (§3.6, §3.13).
-public enum IdentityResolution: Equatable, Sendable {
-    /// What this Mac remembers names an identity made on THIS hardware and
-    /// login — it continues.
-    case continuing(deviceID: String)
-    /// No usable memory item: the record's section whose marker is this
-    /// Mac's hardware and login — adopted, so its settings and retired ids
-    /// stay its own (deleting the memory item changes nothing on its own).
-    case foundByMarker(deviceID: String)
-    /// A new identity is minted for NEW HARDWARE (or a library nothing here
-    /// knows): what this Mac remembers turned up from other hardware (Quick
-    /// Start, Migration Assistant, a restored backup) — then it names its
-    /// PREDECESSOR, whose Apple keys the new identity takes over (§3.5); or no
-    /// memory item came along and no section of the record is this
-    /// hardware's — a replacement with no predecessor to name, taking over
-    /// what §3.5 needs no predecessor for (P-U4-3 as her split simplified it).
-    case newIdentity(predecessorID: String?)
-    /// ANOTHER macOS LOGIN on this same hardware (VX-340; her ruling
-    /// 2026-10-14/15 split the marker so it can be told apart): a section of
-    /// the record, or the memory item, carries THIS hardware's part under a
-    /// different login's part. It mints its own identity and ADOPTS NOTHING —
-    /// no settings, no Apple key ids, no retired ids; it starts with no choice
-    /// yet, like any brand-new identity with no predecessor (P-U1-7).
-    case anotherLogin
-}
+// MARK: - This Mac's section at open (rule 23)
 
 public enum DeviceFacts {
-    /// **The two homes at open** (§3.6): the newer version wins, and the
-    /// retired Apple key ids — and the old shared key's retirement — are the
-    /// union of both, so a library file replayed alone loses to the memory, a
-    /// memory item replayed alone loses to the record, and neither can weaken
-    /// delete on sight. A home that failed its seal is passed as nil and loses.
-    /// Equal versions take the record's (inside the encrypted library). Guard
-    /// off (DEBUG mutation pins only): the memory wins blindly.
-    public static func reconcile(
-        record: DeviceSection?, memory: DeviceSection?, guards: ProtectionGuards = .all
-    ) -> DeviceSection? {
-        guard guards.twoHomesOn else { return memory ?? record }
-        guard let record else { return memory }
-        guard let memory else { return record }
-        let (winner, loser) = memory.version > record.version ? (memory, record) : (record, memory)
-        var merged = winner
-        for retired in loser.appleKeys where retired.retiredAt != nil {
-            if let index = merged.appleKeys.firstIndex(where: { $0.id == retired.id }) {
-                let mine = merged.appleKeys[index].retiredAt
-                merged.appleKeys[index].retiredAt = [mine, retired.retiredAt].compactMap { $0 }.min()
-            } else {
-                merged.appleKeys.append(retired)
-            }
-        }
-        return merged
-    }
-
-    /// **Which identity is this Mac's** (§3.6, §3.13, VX-340). `memory` is
-    /// what this Mac remembers, verified (nil when absent or failing its
-    /// seal); `sections` are the record's verified sections; `marker` is
-    /// `HardwareMarker.compute` for this hardware and login under the
-    /// record's salt — its two parts (her ruling 2026-10-14/15).
-    ///
-    /// 1. The memory's identity, when its marker is this Mac's (both parts) →
-    ///    continuing.
-    /// 2. Else a record section whose marker is this Mac's (both parts) →
-    ///    found by marker (PROVISIONAL P-U1-2 ordering: a foreign memory item
-    ///    beside this Mac's own section yields to the section, which is the
-    ///    marker's own evidence of who this Mac is). Several → the highest
-    ///    version.
-    /// 3. Else a memory item, or with none a record section, from THIS
-    ///    hardware under another login → another login on this Mac: its own
-    ///    identity, adopting nothing (VX-340).
-    /// 4. Else, with a memory item from other hardware → a new identity
-    ///    naming the memory's identity as its predecessor (a replacement).
-    /// 5. Else, a record section on other hardware under THIS login's part →
-    ///    a new identity naming that section's identity as its predecessor
-    ///    (PROVISIONAL P-U4-14: the login part, carried with the user record,
-    ///    names the previous Mac when no memory item came along).
-    /// 6. Else → a new identity with no predecessor (new hardware with no
-    ///    memory item, or a library nothing here knows).
-    ///
-    /// Guard off (DEBUG mutation pins only): the memory's identity is trusted
-    /// wherever it turns up, and with no memory item the first section is
-    /// adopted — the two bugs the marker exists to close.
-    public static func resolveIdentity(
-        memory: DeviceMemory?, sections: [DeviceSection], marker: HardwareMarker,
-        guards: ProtectionGuards = .all
-    ) -> IdentityResolution {
-        guard guards.hardwareMarkerOn else {
-            if let memory { return .continuing(deviceID: memory.deviceID) }
-            if let first = sections.first { return .foundByMarker(deviceID: first.deviceID) }
-            return .newIdentity(predecessorID: nil)
-        }
-        if let memory, memory.hardwareMarker == marker {
-            return .continuing(deviceID: memory.deviceID)
-        }
-        let mine = sections.filter { $0.hardwareMarker == marker }
-            .max { ($0.version, $1.deviceID) < ($1.version, $0.deviceID) }
-        if let mine { return .foundByMarker(deviceID: mine.deviceID) }
-        if let memory {
-            return memory.hardwareMarker.sameHardware(as: marker)
-                ? .anotherLogin : .newIdentity(predecessorID: memory.deviceID)
-        }
-        if sections.contains(where: { $0.hardwareMarker.sameHardware(as: marker) }) { return .anotherLogin }
-        // No memory item came along (Migration Assistant never carries one):
-        // a section on OTHER hardware under THIS login's part is this login's
-        // previous Mac — the predecessor, named by her split marker's login
-        // part (PROVISIONAL P-U4-14; the closer's soak, seed 11: a Mac
-        // replaced mid-Use-Castle never learned its predecessor's own Apple
-        // keys, and the pre-Castle copies stayed open through the Apple
-        // account). Several → the highest version.
-        if let predecessor = sections.filter({ $0.hardwareMarker.login == marker.login })
-            .max(by: { ($0.version, $1.deviceID) < ($1.version, $0.deviceID) }) {
-            return .newIdentity(predecessorID: predecessor.deviceID)
-        }
-        return .newIdentity(predecessorID: nil)
-    }
-
-    /// **A replacement Mac takes over its predecessor's keys** (§3.5): a new
-    /// identity on new hardware adopts the Apple key ids its live key file's
-    /// wraps name as its own, every other id its predecessor's section lists
-    /// as its own for the library, and every id ANY section of the record
-    /// lists as retired (a retired key is dead everywhere). It starts on
-    /// Always ask (§3.10). The scheduled export and the idle lock start at
-    /// their defaults (§3.10's "a device with no choice yet").
-    public static func takingOver(
-        predecessor: DeviceSection?, allSections: [DeviceSection], newDeviceID: String,
-        marker: HardwareMarker, keyFileOwnAppleKeyIDs: [String]
-    ) -> DeviceSection {
-        var section = DeviceSection(
-            deviceID: newDeviceID, hardwareMarker: marker, settings: .newIdentity)
-        func adopt(_ record: AppleKeyRecord) {
-            if let index = section.appleKeys.firstIndex(where: { $0.id == record.id }) {
-                let mine = section.appleKeys[index].retiredAt
-                section.appleKeys[index].retiredAt = [mine, record.retiredAt].compactMap { $0 }.min()
-            } else {
-                section.appleKeys.append(record)
-            }
-        }
-        for id in keyFileOwnAppleKeyIDs {
-            adopt(AppleKeyRecord(id: id, purpose: .library, origin: .adopted))
-        }
-        for record in predecessor?.appleKeys ?? [] where record.isOwnLibraryKey {
-            adopt(AppleKeyRecord(id: record.id, purpose: .library, origin: .adopted, retiredAt: record.retiredAt))
-        }
-        for other in allSections + [predecessor].compactMap({ $0 }) {
-            for record in other.appleKeys where record.retiredAt != nil {
-                adopt(AppleKeyRecord(
-                    id: record.id, purpose: record.purpose, accountID: record.accountID,
-                    origin: .adopted, retiredAt: record.retiredAt))
-            }
-        }
-        return section
-    }
-
-    /// **This Mac's section, at open** — the resolution, the two homes, the
-    /// takeover, composed. `mintDeviceID` is called only when a new identity
-    /// is minted. Returns the section and how it was found.
+    /// **This Mac's section, at open** (rule 23: "a plain random device ID,
+    /// made at creation"; rule 21: what this Mac remembers names it). The
+    /// record's section for the device ID this Mac remembers — or, the record
+    /// holding none for it, a fresh section under that same ID. With nothing
+    /// remembered (no memory item, or one failing its seal) a NEW plain random
+    /// device ID with a fresh section: no choice yet, adopting nothing — never
+    /// a section guessed from the record. PROVISIONAL (QUESTIONS, the VX-378
+    /// heading): U2's detect-and-refuse may make that open a refusal.
     public static func thisMacsSection(
-        memory: DeviceMemory?, recordSections: [DeviceSection], marker: HardwareMarker,
-        keyFileOwnAppleKeyIDs: [String], mintDeviceID: () -> String,
-        guards: ProtectionGuards = .all
-    ) -> (section: DeviceSection, resolution: IdentityResolution) {
-        let resolution = resolveIdentity(
-            memory: memory, sections: recordSections, marker: marker, guards: guards)
-        func recordSection(_ id: String) -> DeviceSection? {
-            recordSections.filter { $0.deviceID == id }.max { $0.version < $1.version }
-        }
-        func fresh() -> (DeviceSection, IdentityResolution) {
-            (DeviceSection(deviceID: mintDeviceID(), hardwareMarker: marker, settings: .noChoiceYet),
-             .newIdentity(predecessorID: nil))
-        }
-        switch resolution {
-        case .continuing(let id):
-            guard let section = reconcile(
-                record: recordSection(id), memory: memory?.deviceSection, guards: guards)
-            else { return fresh() }
-            return (section, resolution)
-        case .foundByMarker(let id):
-            guard let section = recordSection(id) else { return fresh() }
-            return (section, resolution)
-        case .anotherLogin:
-            // Another macOS login on this hardware (VX-340): its own identity,
-            // adopting nothing — not the other login's settings, its own keys'
-            // list or its retired ids; no choice yet (P-U1-7).
-            return (DeviceSection(deviceID: mintDeviceID(), hardwareMarker: marker, settings: .noChoiceYet), .anotherLogin)
-        case .newIdentity(let predecessorID):
-            guard let predecessorID else {
-                // NEW HARDWARE whose memory item didn't come along — Migration
-                // Assistant reportedly doesn't carry Local Items (the Apple
-                // facts §3.7) — opening a library the record already knows
-                // (no section of it is this hardware's, so this is no second
-                // login — that is `.anotherLogin`): a replacement with no
-                // predecessor to name, but §3.5's other two takeovers need
-                // none — the Apple key ids ITS LIVE KEY FILE's wraps name as
-                // its own, and every id any section lists as retired ("a
-                // retired key is dead everywhere"). It starts on Always ask
-                // (§3.10: no act, no press). PROVISIONAL P-U4-3, as her
-                // 2026-10-14/15 split of the marker simplified it: the
-                // takeover is new hardware's alone.
-                guard !recordSections.isEmpty else { return fresh() }
-                return (takingOver(
-                    predecessor: nil, allSections: recordSections, newDeviceID: mintDeviceID(), marker: marker,
-                    keyFileOwnAppleKeyIDs: keyFileOwnAppleKeyIDs),
-                        resolution)
-            }
-            let predecessor = reconcile(
-                record: recordSection(predecessorID), memory: memory?.deviceSection, guards: guards)
-            return (takingOver(
-                predecessor: predecessor, allSections: recordSections, newDeviceID: mintDeviceID(),
-                marker: marker, keyFileOwnAppleKeyIDs: keyFileOwnAppleKeyIDs),
-                    resolution)
-        }
+        memory: DeviceMemory?, recordSections: [DeviceSection], mintDeviceID: () -> String
+    ) -> DeviceSection {
+        let id = memory?.deviceID ?? mintDeviceID()
+        return recordSections.filter { $0.deviceID == id }.max { $0.version < $1.version }
+            ?? DeviceSection(deviceID: id, settings: .noChoiceYet)
     }
 }

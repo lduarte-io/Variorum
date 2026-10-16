@@ -62,7 +62,7 @@ final class EX {
             world.icloud.keys[own.id] = own
         }
         var section = DeviceSection(
-            deviceID: deviceID, hardwareMarker: .stub(""), settings: DeviceSettings(gateStyle: self.gate, scheduledExport: scheduledExport))
+            deviceID: deviceID, settings: DeviceSettings(gateStyle: self.gate, scheduledExport: scheduledExport))
         if let own = ownApple { section = section.recordingAppleKey(AppleKeyRecord(id: own.id, purpose: .library, origin: .minted)) }
         var locks = NewKeyLocks(passphrase: p, words: w, apple: ownApple)
         if let other { self.account = other.account }
@@ -95,9 +95,7 @@ final class EX {
             }
         }
         var record = ProtectionRecord.minting(
-            libraryID: libraryID, mode: mode, account: self.account,
-            currentFingerprint: PF.fp(key), madeBy: deviceID, at: PF.t0)
-        section.hardwareMarker = record.marker(for: PF.macA)
+            libraryID: libraryID, mode: mode, account: self.account, currentFingerprint: PF.fp(key), at: PF.t0)
         record = try record.storing(section, sealedUnder: key)
         let file = try KeyFile.building(libraryID: libraryID, key: key, epoch: 1, locks: locks)
         world.live = ExecutorWorld.LibraryFile(fingerprint: PF.fp(key), record: record, generation: 1)
@@ -109,21 +107,19 @@ final class EX {
         }
         let vault = self.account.flatMap { world.server.snapshot($0) }
         let memory = DeviceMemory(
-            libraryID: libraryID, scope: Self.scope, currentFingerprint: PF.fp(key), keyEpoch: 1,
-            lastConfirmed: ConfirmedFacts(mode: mode, account: self.account),
-            vaultFacts: vault.map { VaultFacts(kdf: $0.format.kdf, corpusKeyID: $0.corpusKeyID, recoveryWrapDigest: $0.format.recoveryWrapDigest) },
-            keyFileMirror: file, familyTree: record.familyTree, deviceSection: section)
+            libraryID: libraryID, currentFingerprint: PF.fp(key), deviceID: deviceID, keyFileMirror: file,
+            vaultFacts: vault.map { VaultFacts(kdf: $0.format.kdf, corpusKeyID: $0.corpusKeyID, recoveryWrapDigest: $0.format.recoveryWrapDigest) })
         world.memories[libraryID] = try memory.sealed(under: key)
         world.writes = []
     }
 
     var session: SessionFact { account.map { .signedIn(accountID: $0, email: nil) } ?? .signedOut }
 
-    func executor(guards: ProtectionGuards = .all, session: SessionFact? = nil, machine: MachineIdentity = PF.macA) -> ProtectionExecutor {
+    func executor(guards: ProtectionGuards = .all, session: SessionFact? = nil) -> ProtectionExecutor {
         ProtectionExecutor(
             leaves: world.leaves,
             configuration: ExecutorConfiguration(
-                scope: Self.scope, libraryID: libraryID, machine: machine, deviceName: "Mac A", floor: PF.floor,
+                scope: Self.scope, libraryID: libraryID, deviceName: "Mac A", floor: PF.floor,
                 session: session ?? self.session),
             guards: guards)
     }
@@ -202,5 +198,5 @@ func expectSettled(_ fixture: EX, _ library: UnlockedLibrary, _ context: String 
     #expect(world.liveFormat3?.fingerprint == fingerprint, "\(context) the key file is another key's", sourceLocation: sourceLocation)
     let memory = fixture.memoryValue(library.key)
     #expect(memory?.currentFingerprint == fingerprint, "\(context) what this Mac remembers names another key", sourceLocation: sourceLocation)
-    #expect(memory?.deviceSection.actInFlight == nil, "\(context) the memory still names an act", sourceLocation: sourceLocation)
+    #expect(memory?.deviceID == library.section.deviceID, "\(context) what this Mac remembers names another device", sourceLocation: sourceLocation)
 }

@@ -69,25 +69,22 @@ struct SettleSealTests {
         #expect(fixture.world.diagnosticEntries.contains(.planIgnored(.notNamed)))
     }
 
-    @Test func aMemoryItemThatFailsItsSealLosesToTheRecordsDeviceSection() async throws {
+    /// A memory item that fails its seal remembers nothing (rule 21): the open
+    /// adopts no section of the record — it mints a new plain device ID with
+    /// a fresh section (rule 23; PROVISIONAL — the VX-378 heading in
+    /// QUESTIONS: U2's detect-and-refuse may make this open a refusal). The
+    /// marker that found this Mac's own section left with VX-378 U1.
+    @Test func aMemoryItemThatFailsItsSealRemembersNothing() async throws {
         let fixture = try EX(.standard)
         try await midUseCastle(fixture)
-        // An edited memory item (its seal broken) that says nothing is in flight.
         let sealed = try #require(fixture.world.memories[fixture.libraryID])
-        var memory = try sealed.open(purpose: .memory, libraryID: fixture.libraryID, key: fixture.key)
-        memory.deviceSection.actInFlight = nil
-        memory.deviceSection.version += 100
-        let honest = try memory.sealed(under: fixture.key)
-        fixture.world.memories[fixture.libraryID] = Sealed(payload: honest.payload, seal: Seal(keyFingerprint: honest.seal.keyFingerprint, mac: Data(repeating: 0, count: 32)))
-        let executor = fixture.executor()
-        let library = try executor.unlock(with: fixture.key)
+        let original = try sealed.open(purpose: .memory, libraryID: fixture.libraryID, key: fixture.key).deviceID
+        fixture.world.memories[fixture.libraryID] = Sealed(
+            payload: sealed.payload, seal: Seal(keyFingerprint: sealed.seal.keyFingerprint, mac: Data(repeating: 0, count: 32)))
+        let library = try fixture.executor().unlock(with: fixture.key)
         #expect(library.memory == nil)
-        #expect(library.section.actInFlight?.act == .enterCastle)
-        // The plan the record's section names resumes and finishes.
-        let (outcome, settled, _) = try await fixture.relaunchAndSettle()
-        if case .resumed = outcome {} else { Issue.record("expected the named plan to resume, got \(outcome)") }
-        #expect(fixture.liveRecord?.mode == .castle)
-        expectSettled(fixture, settled)
+        #expect(library.section.deviceID != original && library.section.actInFlight == nil)
+        #expect(library.section.settings == .noChoiceYet && library.section.appleKeys.isEmpty)
     }
 
     @Test func aStrayPlanWithNoActInFlightIsDeletedAndReported() async throws {

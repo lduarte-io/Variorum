@@ -152,12 +152,9 @@ public enum Repair: Hashable, Sendable {
     /// Standard: the live key file's Apple wrap, under this Mac's own Apple
     /// key for the library (never minted by a repair).
     case landAppleWrap(appleKeyID: String)
-    /// Always: what this Mac remembers agrees with the record (the two homes
-    /// reconciled — nothing lost: newer wins, retired ids and the tree union).
+    /// Always: what this Mac remembers names the record's current key and
+    /// this Mac's device ID, and its mirror is the live file of that key.
     case refreshMemory
-    /// Always: the record's home of this Mac's section is behind the newer
-    /// home — written forward (the same reconciliation).
-    case refreshRecordSection
     /// Always: the live key file is ABSENT and the sealed mirror in what this
     /// Mac remembers is the current key's — it is written back (rule 1: the
     /// mirror is the redundant copy, restored only when the live file is

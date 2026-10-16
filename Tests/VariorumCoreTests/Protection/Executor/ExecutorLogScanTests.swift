@@ -60,17 +60,7 @@ struct ExecutorLogScanTests {
             needles += [
                 ("the passphrase", Data(fixture.passphrase.utf8)), ("the words", Data(fixture.words.joined(separator: " ").utf8)),
                 ("the passphrase key", PF.bytes(fixture.p.key)), ("the words key", PF.bytes(fixture.w.key)),
-                ("the hardware identity", Data(PF.macA.hardware.utf8)), ("the login identity", Data(PF.macA.login.utf8)),
             ]
-            if let record = world.live?.record {
-                needles.append(("the record's salt", record.markerSalt))
-                let reach = fixture.executor().reach(key: fixture.key, keyFile: world.liveFormat3)
-                for section in record.verifiedSections(reach: reach) {
-                    // Both salted parts (her 2026-10-14/15 split): neither alone is logged.
-                    needles.append(("a marker's hardware part", Data(section.hardwareMarker.hardware.utf8)))
-                    needles.append(("a marker's login part", Data(section.hardwareMarker.login.utf8)))
-                }
-            }
             #expect(!world.logLines.isEmpty)
             for (name, needle) in needles where needle.count >= 8 {
                 #expect(!SecretScan.carries(written, needle), "the executor's log carries \(name)")

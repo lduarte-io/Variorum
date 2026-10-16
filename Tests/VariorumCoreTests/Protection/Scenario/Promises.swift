@@ -289,9 +289,9 @@ extension SWorld {
               let memory = DeviceMemory.opening(sealed, libraryID: record.libraryID, reach: reach) else {
             return [Violation(promise: 1, device: device.name, detail: "no verified memory item for the open library")]
         }
-        if memory.currentFingerprint != record.currentFingerprint || memory.keyEpoch != record.keyEpoch {
+        if memory.currentFingerprint != record.currentFingerprint || memory.deviceID != library.section.deviceID {
             return [Violation(promise: 1, device: device.name,
-                              detail: "the memory names \(f8(memory.currentFingerprint))#\(memory.keyEpoch), the record \(f8(record.currentFingerprint))#\(record.keyEpoch)")]
+                              detail: "the memory names \(f8(memory.currentFingerprint)) on \(memory.deviceID.prefix(8)), the record \(f8(record.currentFingerprint)) on \(library.section.mac8)")]
         }
         // (Its key-file clause — "no repair owed would bring the current key's
         // own file back" — left with the restores, VX-378 U1, rule 21: U2's
@@ -305,19 +305,19 @@ extension SWorld {
               record.mode == .castle else { return [] }
         var violations: [Violation] = []
         func fail(_ detail: String, _ promise: Int = 2) { violations.append(Violation(promise: promise, device: device.name, detail: detail)) }
-        let tree = Set(library.familyTree.fingerprints).union([record.currentFingerprint])
-        // A Time Machine rollback past a leave (her act): the later Standard
-        // stretch's key — born after the restored current key — keeps its
-        // silent item; it holds only what was Apple-reachable by design
-        // (PROVISIONAL P-U4-8).
-        // (A Standard key the restored record never knew is one born after it.)
-        func laterStandard(_ fingerprint: String) -> Bool {
-            guard let entry = library.familyTree.entry(fingerprint), entry.kind == .standard else { return false }
-            return !record.familyTree.contains(fingerprint)
+        // The keys the library has had: the live key file's current key and
+        // history (rule 4 — the family tree left with VX-378 U1). A Time
+        // Machine rollback past a leave (her act) leaves the later Standard
+        // stretch's key out of the restored file, so its silent item is not
+        // counted (PROVISIONAL P-U4-8).
+        let tree = Set(liveKeyFile(device)?.heldFingerprints ?? []).union([record.currentFingerprint])
+        // A Standard copy under a key the restored file never knew is the
+        // later stretch's, after a Time Machine rollback past a leave (P-U4-8).
+        func laterStandard(_ id: String, _ fingerprint: String) -> Bool {
+            !tree.contains(fingerprint) && truth.copies[id]?.mode == .standard
         }
         for name in device.keychain.local.keys where name.service == ProtectionNames.custodyService {
-            if let item = device.keychain.local[name], !item.touchID, let key = item.value.libraryKey, tree.contains(PF.fp(key)),
-               !laterStandard(PF.fp(key)) {
+            if let item = device.keychain.local[name], !item.touchID, let key = item.value.libraryKey, tree.contains(PF.fp(key)) {
                 fail("a silent custody item holds \(f8(key))")
             }
         }
@@ -351,7 +351,7 @@ extension SWorld {
                 continue
             }
             if senders.contains(where: { id.hasPrefix("container:\($0.key)/") && $0.value != device.name }) { continue }
-            if truth.rolledBackOver.contains(id) || laterStandard(image.fingerprint) { continue }
+            if truth.rolledBackOver.contains(id) || laterStandard(id, image.fingerprint) { continue }
             // A key a login-password holder already held in Standard (rule 3)
             // and tampered with there: entering Castle protects what's written
             // after (promise 8), never undoes what they took before.
@@ -430,9 +430,17 @@ extension SWorld {
         guard let live = liveKeyFile(device), live.fingerprint == record.currentFingerprint, let wrap = live.apple else {
             return [Violation(promise: 3, device: device.name, detail: "no Apple wrap of the current key")]
         }
-        let own = library.section.appleKeys.contains { $0.id == wrap.keyID && $0.isOwnLibraryKey && $0.retiredAt == nil }
-        guard own, readableAppleKeys(device)[wrap.keyID] != nil else {
-            return [Violation(promise: 3, device: device.name, detail: "the Apple wrap isn't under this Mac's own readable key")]
+        // The Apple road works here: its key is readable (rule 8). ("This Mac's
+        // own" left with the takeover — VX-378 U1, rule 23: a Mac with a new
+        // device ID owns no key it didn't mint, and the wrap's key reaches it
+        // through iCloud Keychain.)
+        guard readableAppleKeys(device)[wrap.keyID] != nil else {
+            // A lost Apple road (its key gone with a replaced or reset
+            // keychain) is detected — `Fault.appleRoadLost` — and rule 8's
+            // quiet re-make is U2's (Re-link left with VX-378 U1, rule 8).
+            let lost = assessed(device).faults.contains { if case .appleRoadLost = $0 { return true } else { return false } }
+            if lost { return [] }
+            return [Violation(promise: 3, device: device.name, detail: "the Apple wrap's key isn't readable here")]
         }
         return []
     }
@@ -488,12 +496,6 @@ extension SWorld {
             var retiredHere: Set<String> = []
             if truth.restoredPastCrossing.contains(device.name) {
                 retiredHere = device.library?.section.retiredAppleKeyIDs ?? []
-                for item in device.keychain.local.values {
-                    if case .memory(let sealed) = item.value,
-                       let memory = try? ProtectionCoding.decoder().decode(DeviceMemory.self, from: sealed.payload) {
-                        retiredHere.formUnion(memory.deviceSection.retiredAppleKeyIDs)
-                    }
-                }
             }
             let lost = truth.lostAppleKeys
             let gone = { (id: String) in lost.contains(id) || retiredHere.contains(id) }
@@ -590,7 +592,6 @@ extension SWorld {
         // Castle; promise 4 judges what the app does).
         case .timeMachineRollback(let d), .deleteContainerAndOpenOldCopy(let d), .tamper(let d, _), .tamperSequence(let d, _):
             return d == name
-        case .cloneMac(_, let d): return d == name
         case .useCastle(let d, _, _), .useStandard(let d), .follow(let d, _), .turnOnSync(let d),
              .move(let d), .thisMacOnly(let d, _), .stopSyncingHere(let d, _), .deleteAccountHere(let d), .replaceAllKeys(let d, _):
             return d == name

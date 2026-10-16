@@ -183,16 +183,15 @@ public enum AssessRules {
         // (A library file older than what this Mac remembers no longer loses
         // to the memory by a repair — "memory wins" left with VX-378 U1, rule
         // 21: U2 detects the disagreement and refuses.)
-        // ALWAYS: the two homes agree — nothing lost by construction (newer
-        // wins, the retired ids and the tree are unions).
+        // ALWAYS: what this Mac remembers names the record's current key and
+        // this Mac's device ID. (Its fingerprint arm follows the record until
+        // U2's refusal replaces it — rule 21; the two homes, the tree, the
+        // epoch and the facts last confirmed left with VX-378 U1.)
         do {
             let memory = unlocked.memory
             var stale = memory == nil
                 || memory?.currentFingerprint != record.currentFingerprint
-                || memory?.keyEpoch != record.keyEpoch
-                || memory?.familyTree != unlocked.familyTree
-                || memory?.deviceSection != unlocked.thisMac
-                || memory?.lastConfirmed != ConfirmedFacts(mode: record.mode, account: record.account)
+                || memory?.deviceID != unlocked.thisMac.deviceID
             // The key file and its mirror, for the current key: the mirror is
             // written back ONLY when the live file is absent (rule 1). Another
             // key's file in the live place, or a live file with fewer roads
@@ -206,7 +205,6 @@ public enum AssessRules {
                 }
             }
             if stale { repairs.append(.refreshMemory) }
-            if unlocked.recordSection != unlocked.thisMac { repairs.append(.refreshRecordSection) }
             // A synced library whose memory names no vault facts (the memory
             // item gone — a wiped keychain): the keys this device holds are
             // recorded, so a later replacement of the account's keys reads as
@@ -262,11 +260,13 @@ public enum AssessRules {
         vault: VaultVerdict?, guards: ProtectionGuards, repairs: inout [Repair], faults: inout [Fault]
     ) {
         let current = unlocked.currentFingerprint
-        let tree = Set(unlocked.familyTree.fingerprints).union([current])
+        // The keys the library has had: the current key's file and its
+        // history (rule 4 — the family tree left with VX-378 U1).
+        let tree = Set(live?.heldFingerprints ?? []).union([current])
         // No Apple key of this Mac's own for the library left unretired in
         // Castle — entering Castle retires every one (§3.5); an entry whose
-        // last steps no one ran (a Mac replaced past the commit point, its act
-        // its predecessor's) leaves them listed (VX-305 U4, the scenario world).
+        // last steps no one ran leaves them listed (VX-305 U4, the scenario
+        // world).
         let unretired = unlocked.thisMac.ownLibraryAppleKeyIDsToRetire
         if !unretired.isEmpty, unlocked.thisMac.actInFlight == nil {
             repairs.append(.retireOwnAppleKeys(ids: unretired))

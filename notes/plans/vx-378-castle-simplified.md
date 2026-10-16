@@ -353,6 +353,14 @@ record committed with PENDING numbers first.
   Reason: with "memory wins" and the restores gone and U2's refusal not yet built, a replayed file opens as itself and
   the old promises would read that as a violation — the honest answer (refuse, rule 21) is U2's and its world check
   U4's.
+- **What this Mac remembers keeps two hints beside rule 21's four things until U2 homes them**: the biometry state hash
+  (§3.10's which-line hint after a failed press) and the vault facts (the follow's reading — U2 replaces the vault).
+  `refreshMemory` stays, narrowed to the four things; its fingerprint arm (the memory follows the record) is the one
+  U2's refusal replaces (rule 21).
+- **Promise 3 reduced, not rewritten (U4's):** its "this Mac's own key" clause left with the takeover (rule 23 — a Mac
+  with a new device ID owns no key it didn't mint), and a lost Apple road is the detected `appleRoadLost` fault until
+  rule 8's quiet re-make lands (U2). Found when the cut shifted the generator's random stream (`createLibrary` →
+  `replaceMac` → `settle`); the gap dates from piece D's Re-link removal.
 - *(the rest filled at the close)*
 
 **Pieces (the resume map — a fresh session can finish U1 from this list and `git log`):**
@@ -371,7 +379,10 @@ record committed with PENDING numbers first.
   red on the pre-F tree (a scratch worktree at `92b7dceeb`: issues at `CutPinsTests.swift:85`, `:99`, `:112`, `:130`,
   `:141`, `:153` — "6 tests in 1 suite failed … with 6 issues"), green after; protection set Debug `✔ 228 tests in 54
   suites` (generator 16 sequences, 349 steps).
-- G — rules 21 · 23: the family tree, the hardware marker, identity resolution, the memory shrink: NOT-STARTED.
+- G — rules 21 · 23: the family tree, the hardware marker, identity resolution, the memory shrink: DONE — pins
+  `CutPinsRule23Tests` (2) red on the pre-G tree (issues at `CutPinsTests.swift:168`, `:169`, `:171`, `:177` ×4,
+  `:189` — "2 tests in 1 suite failed … with 8 issues"), green after; protection set Debug `✔ 211 tests in 51 suites`
+  (generator 16 sequences, 349 steps). PROVISIONAL P-VX378-U1-1 logged.
 - H — rule 16: leaving an account changes no keys (pin): NOT-STARTED.
 - I — rule 17: OpenCopy and the open rule deleted; Land a stub for U2's MakeMine: DONE (landed second, after B — it
   removes the legacy reader's and the family tree's biggest consumers before C and G) — protection set Debug `✔ 291
@@ -383,6 +394,10 @@ record committed with PENDING numbers first.
 
 | What died | Rule | Tests that went with it |
 |---|---|---|
+| **G.** The family tree (`Model/FamilyTree.swift` whole; `ProtectionRecord.familyTree`, `recordingRekey`'s `by:`, `minting`'s `madeBy:`; the memory's mirror; `UnlockedLibrary`/`UnlockedFacts.familyTree`; the swap's and unlock's unions; the guard `familyTreeTwoHomes`). "The keys the library has had" now reads the live key file (current + history — rule 4) in Castle's silent-item sweep, `retireOldCustody` and the roll back; the follow's finish-from-the-record reads a new `ActInFlight.fromKind` (the library's mode at the act's begin — the tree's one act-time reading, carried) | 21 · 4 | `FamilyTreeTests` (4: `everyMintedKeyIsRecordedWithItsKindAndItsMac`, `theTwoHomesUnion_aRolledBackLibraryStillKnowsItsLaterKeys`, `itCanBeSeededWithUnreachedFingerprints`, `mergingTakesTheSafeSide`); the `familyTreeTwoHomes` model pin; `inCastleNoSilentItemForAnyKeyTheLibraryHasHad`'s seeded-tree half (an unlisted key is now neither deleted nor reported); the world's tree-based births and tampered-Standard set; promise 2/8's `laterStandard` re-read from the key file |
+| The hardware marker and the machine (`Model/HardwareMarker.swift` whole — `HardwareMarker`, `MachineIdentity`; `ProtectionRecord.markerSalt`/`marker(for:)`, `DeviceSection.hardwareMarker`, `ExecutorConfiguration.machine`; the guard `hardwareMarker`) | 23 | `HardwareMarkerTests` (2); the `hardwareMarker` model pin; the scans' hardware/login/salt needles (`noSecretAppearsInAnyValueWrittenToDisk`, `theExecutorsLogCarriesNoSecret`); `PF.macA`/`macB`/`macASecondLogin`, `HardwareMarker.stub`; the world's `SDevice.machine` and `cloneMac` (one library on two Macs — rule 18's subject, its scenario gone at B) |
+| Identity resolution and the takeover (`IdentityResolution`, `DeviceFacts.resolveIdentity`, `takingOver`, the old `thisMacsSection`, `UnlockedLibrary.resolution`, `UnlockedFacts.identity`, `DeviceSettings.newIdentity`, `AppleKeyOrigin.adopted`, unlock's own-file read for a takeover) → one `thisMacsSection(memory:recordSections:mintDeviceID:)`: the remembered device ID's section, else a fresh section (PROVISIONAL P-VX378-U1-1) | 23 | the pin `CutPinsRule23Tests.aMemoryItemCarriedToNewHardwareKeepsItsDeviceID` (red on the pre-G tree, green after); `DeviceFactsTests`' `aMacWithNoMemoryItemFindsItsSectionByItsMarker`, `aSecondMacOSLoginStartsItsOwnIdentity`, `newHardwareWithNoMemoryItemTakesOverWhatNeedsNoPredecessor`, `newHardwareUnderThisLoginNamesItsPredecessor`, `aMemoryItemOnNewHardwareMintsANewIdentityThatTakesOver`, `theMemoryContinuesWhereItWasMade` → `theRememberedDeviceIDNamesThisMacsSection`; `AssessTests.aNewDeviceIdentityStartsOnAlwaysAsk`; rewritten: `aMemoryItemThatFailsItsSealLosesToTheRecordsDeviceSection` → `aMemoryItemThatFailsItsSealRemembersNothing`, `theMemoryItemDeletedAloneAndTheLidClosed` (a new ID, no choice yet); promise 3's "this Mac's own" clause |
+| The two homes and the memory's shrink to rule 21's four things: `DeviceFacts.reconcile`, the memory's `deviceSection` (and `scope`, `keyEpoch`, `lastConfirmed`/`ConfirmedFacts`, `nudgeDismissals`, `itemAccount`), `Repair.refreshRecordSection`, `UnlockedFacts.recordSection`, settle's "the memory follows the newer home" arm, the guard `twoHomes`; the memory now holds `libraryID`, `currentFingerprint`, `deviceID`, `keyFileMirror` (+ the two hints, "Not done" above); `refreshMemory` narrowed to them | 21 | the pin `CutPinsRule23Tests.noStoredValueCarriesAMarkerATreeOrASecondHome` (red on the pre-G tree, green after); `DeviceFactsTests.theNewerWinsAndTheRetiredIdsAreTheUnion`, `aReplayOfEitherHomeAloneChangesNothing`; the `twoHomes` model pin; `ProtectionGuardTests.swift` whole (its three model guards gone); F's `aReplayedRecordDoesNotTakeTheMemorysFacts` (superseded: the memory no longer holds the facts it would take); rewritten: `theTwoHomesAreRefreshedWhenEitherIsBehind` → `whatThisMacRemembersIsRefreshedWhenItIsMissingOrNamesAnotherDevice`, `aLibraryFileSwappedForAnOlderOneLosesToTheNewerMemoryWithTheRoadsKeys` → `…StillReadsTheNewerMemoryWithTheRoadsKeys`, the settings door's "both homes carry it" assertion, the round trip, `expectSettled`; the world's `editSealedSetting` tamper → `editMemoryItem` |
 | **F.** "Memory wins" — the older library file's re-key and the same-key twin (`Repair.rekeyOlderLibraryFile`, `.restoreRecordFactsFromMemory`, `AssessRules.olderLibraryFileProof`, assess's two FIRST arms, the executor's `rekeyOlderLibraryFile`, settle's repair-first arm, `ProtectionDiagnostic.olderLibraryFileRekeyed`, `UnlockedLibrary.keysInHand`, the guard `libraryFileLosesToMemory`) | 21 · 20 | the pins `CutPinsRule21Tests.aLibraryFileReplayedAloneIsNotReKeyedToTheMemorysKey` and `aReplayedRecordDoesNotTakeTheMemorysFacts` (red on the pre-F tree, green after); the world's `replayKeyFile` tamper; `replayLibraryFile` out of the generator's pool and out of `replaysAndTheFileSwap` |
 | The restores over a stray and from a copy: `Repair.restoreKeyFileFromCopy` (assess's arm, the executor's case), `restoreKeyFileFromMirror` over a PRESENT file (another key's, or one that lost a lock — `mirrorHoldsMore`), settle's restore of the current key's file from a plan no identity here resumes (`outgoingKeyFile(_:for:)`), `setAsideLiveKeyFile` (the executor's and the leaf's), `KeyFileStoreLeaf.readKeyFile(catalogID:)` (its one reader; U2's Look inside adds back what it needs). The mirror's restore stays — ONLY into an empty live place (rule 1) | 21 · 1 · 27 | the pins `aLiveKeyFileThatLostALockIsNotRewrittenFromTheMirror`, `anotherKeysFileInTheLivePlaceIsNotOverwrittenByARepair`, `theMirrorsRestoreNeverWritesOverAFileInTheLivePlace`, `noRepairRestoresTheLiveKeyFileFromACopy` (red on the pre-F tree, green after); rewritten: `theKeyFileAndItsMirrorAgreeNeverByShrinking` → `theMirrorIsWrittenBackOnlyIntoAnEmptyLivePlace`, `theKeyFileComesBackFromTheSealedMirrorButNeverItsAppleWrap` (now from an absent file); the world's `deleteKeyFileAndMemory` tamper and promise 1's key-file clause (keyed on a restore being owed) |
 | The set-aside shape: `ProtectionNames.setAsideKeyFilename`, `CatalogNames.FileName.setAsideKeyFile` and its parser, `KeyFileRole.setAside` — no writer of this design makes it (today's `StoreIdentity.setAside` is rule 26's) | 19 · 21 | `CatalogNameTests`' set-aside half (now: the shape is not read); `everyKeyFileHasItsRole` (6 files) and `foreignNamesAreListedNeverCatalogued` (the set-aside file is foreign) |
@@ -434,7 +449,12 @@ PENDING.
 
 **The runs (exit lines, both configurations):** PENDING.
 
-**PROVISIONAL calls:** *(none yet)*
+**PROVISIONAL calls:**
+- **P-VX378-U1-1 (piece G, rules 21 · 23) — with nothing remembered, which device section is this Mac's?** (a) BUILT:
+  a NEW plain random device ID with a fresh section, adopting nothing (a remembered ID the record has no section for
+  keeps that ID); (b) refuse the open (U2's detect-and-refuse); (c) adopt the record's only section (rejected — a
+  guess). Logged in `notes/QUESTIONS.md` under the VX-378 heading. Pinned by `aMemoryItemThatFailsItsSealRemembers
+  Nothing`, `theRememberedDeviceIDNamesThisMacsSection` and `theMemoryItemDeletedAloneAndTheLidClosed`.
 
 **Commits:** *(per piece)*
 

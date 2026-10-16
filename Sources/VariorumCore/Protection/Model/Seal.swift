@@ -8,7 +8,7 @@ import Foundation
 //                 message: the sealed fields' canonical JSON)
 //
 // naming the sealing key's fingerprint. A seal proves what a value SAYS, never
-// that it is current — freshness is the two homes' versions (§3.6), not this.
+// that it is current — freshness is the section's version (§3.6), not this.
 //
 // THE STORED-BYTES RULE: a `Sealed` value keeps the exact canonical bytes it
 // was sealed over and verifies THOSE, then decodes them — it never re-encodes

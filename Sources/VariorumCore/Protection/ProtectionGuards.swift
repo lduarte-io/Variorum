@@ -7,9 +7,10 @@ import Foundation
 // the mutation pins run in the Debug configuration and nothing a Release build
 // does can ever turn a guard off.
 //
-// U1 holds the guards that live in the model's own functions, U2 the ones in
-// `assess`, the route finder and retention; U3 and U4 add theirs to this same
-// value (one value, one place to look).
+// U2 holds the guards in `assess`, the route finder and retention; U3 adds the
+// executor's (one value, one place to look). (U1's model guards — the two
+// homes, the hardware marker, the family tree's two homes, the anchor's two —
+// and U4's `libraryFileLosesToMemory` left with VX-378 U1, rules 4, 21, 23.)
 
 public struct ProtectionGuards: Equatable, Sendable {
     /// Every guard on — the only value production code ever passes.
@@ -18,20 +19,6 @@ public struct ProtectionGuards: Equatable, Sendable {
     public init() {}
 
     #if DEBUG
-    /// THIS MAC'S FACTS IN TWO HOMES (§3.6): the newer version wins and the
-    /// retired Apple key ids are the union. Off: the memory item wins blindly
-    /// (the replay class VX-313 names).
-    public var twoHomes = true
-    /// THE DEVICE SECTION'S HARDWARE MARKER (§3.6, §3.13, VX-340): a memory
-    /// item keeps its identity only on the hardware and login it was made on,
-    /// and a Mac with no memory item adopts only a section whose marker is
-    /// its own. Off: identity is trusted without the marker.
-    public var hardwareMarker = true
-    /// THE FAMILY TREE's TWO HOMES (§3.4, §3.6): the record's tree and the
-    /// memory's mirror are unioned at open. Off: the record's tree alone (a
-    /// rolled-back library file makes its own later copies look foreign).
-    public var familyTreeTwoHomes = true
-
     // U2 — the guards in `assess`, the route finder and retention.
     /// RETENTION PER LIBRARY PER MAC (§3.7, VX-302): only this Mac's copies
     /// of this library are ever pruned. Off: today's whole-folder prune.
@@ -89,30 +76,6 @@ public struct ProtectionGuards: Equatable, Sendable {
     public var exportOffAtCastle = true
     // (U4's `libraryFileLosesToMemory` left with VX-378 U1 — rule 21.)
     #endif
-
-    public var twoHomesOn: Bool {
-        #if DEBUG
-        return twoHomes
-        #else
-        return true
-        #endif
-    }
-
-    public var hardwareMarkerOn: Bool {
-        #if DEBUG
-        return hardwareMarker
-        #else
-        return true
-        #endif
-    }
-
-    public var familyTreeTwoHomesOn: Bool {
-        #if DEBUG
-        return familyTreeTwoHomes
-        #else
-        return true
-        #endif
-    }
 
     public var pruneOwnCopiesOnlyOn: Bool {
         #if DEBUG

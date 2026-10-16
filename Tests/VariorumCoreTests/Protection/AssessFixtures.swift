@@ -30,8 +30,6 @@ struct AWorld {
     var section: DeviceSection
     var memory: DeviceMemory?
     var memoryAbsent = false
-    var recordSection: DeviceSection?
-    var tree: FamilyTree
     var unlocked = true
     var libraryAccountEmail: String?
     let own = AppleKeyMaterial.mint()
@@ -56,26 +54,18 @@ struct AWorld {
         custody = [CustodyItemFact(fingerprint: PF.fp(current), itemClass: mode == .castle ? .touchid : .silent)]
         appleKeys = AppleKeyFacts(readable: mode == .standard ? [own.id] : [])
         section = DeviceSection(
-            deviceID: CF.macA, hardwareMarker: .stub("marker"), settings: DeviceSettings(gateStyle: mode == .castle ? .touchID : nil),
+            deviceID: CF.macA, settings: DeviceSettings(gateStyle: mode == .castle ? .touchID : nil),
             appleKeys: mode == .standard ? [AppleKeyRecord(id: own.id, purpose: .library, origin: .minted)] : [])
-        tree = FamilyTree(entries: ([current] + history).map { FamilyTree.Entry(fingerprint: PF.fp($0), kind: mode) })
-        recordSection = section
     }
 
     var record: ProtectionRecord {
-        var record = ProtectionRecord.minting(
-            libraryID: world.library, mode: mode, account: account,
-            currentFingerprint: PF.fp(key), madeBy: CF.macA, at: PF.t0)
-        record.familyTree = tree
-        return record
+        ProtectionRecord.minting(
+            libraryID: world.library, mode: mode, account: account, currentFingerprint: PF.fp(key), at: PF.t0)
     }
 
     /// What this Mac remembers, agreeing with the record (unless set).
     var agreeingMemory: DeviceMemory {
-        DeviceMemory(
-            libraryID: world.library, scope: Self.scope, currentFingerprint: PF.fp(key), keyEpoch: record.keyEpoch,
-            lastConfirmed: ConfirmedFacts(mode: mode, account: account),
-            familyTree: tree, deviceSection: section)
+        DeviceMemory(libraryID: world.library, currentFingerprint: PF.fp(key), deviceID: section.deviceID)
     }
 
     func entries() throws -> [CatalogEntry] {
@@ -84,9 +74,8 @@ struct AWorld {
 
     func facts() throws -> ProtectionFacts {
         let unlockedFacts = unlocked ? UnlockedFacts(
-            record: record, familyTree: tree, thisMac: section,
-            identity: .continuing(deviceID: section.deviceID), memory: memoryAbsent ? nil : (memory ?? agreeingMemory),
-            currentFingerprint: PF.fp(key), liveKeyFileID: Self.liveKeyFileID, recordSection: recordSection) : nil
+            record: record, thisMac: section, memory: memoryAbsent ? nil : (memory ?? agreeingMemory),
+            currentFingerprint: PF.fp(key), liveKeyFileID: Self.liveKeyFileID) : nil
         return ProtectionFacts(
             scope: Self.scope, unlocked: unlockedFacts, slotFingerprintHint: PF.fp(key),
             rememberedModeHint: unlocked ? nil : mode, libraryAccountEmail: libraryAccountEmail,

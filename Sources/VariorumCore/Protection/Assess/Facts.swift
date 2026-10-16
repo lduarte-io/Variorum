@@ -152,35 +152,24 @@ public struct UnlockedFacts: Sendable {
     /// The record, verified. (A library with no record is from before this
     /// design and is not handled — rule 26; it never unlocks.)
     public var record: ProtectionRecord
-    /// The family tree at open (`FamilyTree.atOpen`: the two homes unioned).
-    public var familyTree: FamilyTree
     /// This Mac's section at open (`DeviceFacts.thisMacsSection`).
     public var thisMac: DeviceSection
-    /// How it was found.
-    public var identity: IdentityResolution
     /// What this Mac remembers, verified (nil: absent, or it failed its seal).
     public var memory: DeviceMemory?
     /// The key the library opened under.
     public var currentFingerprint: String
     /// The live key file's id in the catalog.
     public var liveKeyFileID: String?
-    /// This device's section as the RECORD holds it, verified (nil: none yet)
-    /// — so the assessment can tell when the record's home is behind.
-    public var recordSection: DeviceSection?
 
     public init(
-        record: ProtectionRecord, familyTree: FamilyTree,
-        thisMac: DeviceSection, identity: IdentityResolution, memory: DeviceMemory? = nil,
-        currentFingerprint: String, liveKeyFileID: String? = nil, recordSection: DeviceSection? = nil
+        record: ProtectionRecord, thisMac: DeviceSection, memory: DeviceMemory? = nil,
+        currentFingerprint: String, liveKeyFileID: String? = nil
     ) {
         self.record = record
-        self.familyTree = familyTree
         self.thisMac = thisMac
-        self.identity = identity
         self.memory = memory
         self.currentFingerprint = currentFingerprint
         self.liveKeyFileID = liveKeyFileID
-        self.recordSection = recordSection
     }
 }
 

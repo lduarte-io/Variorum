@@ -57,7 +57,6 @@ struct LiveKeyFileIsTheCurrentKeysTests {
             libraryID: world.world.library, key: other, epoch: 2,
             locks: NewKeyLocks(passphrase: world.world.p, words: world.world.w))
         world.section = world.section.beginningAct(.replaceAllKeys, from: PF.fp(world.key), to: PF.fp(other), at: PF.t0).section
-        world.recordSection = world.section
         let assessed = try world.assessed()
         #expect(!assessed.faults.contains(.liveKeyFileIsAnotherKeys(keyFileID: AWorld.liveKeyFileID)))
     }

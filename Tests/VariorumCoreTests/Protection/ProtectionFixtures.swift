@@ -37,12 +37,6 @@ enum PF {
     static let t0 = Date(timeIntervalSinceReferenceDate: 781_000_000.25)
     static func day(_ n: Double) -> Date { t0.addingTimeInterval(n * 86_400) }
 
-    static let macA = MachineIdentity(hardware: "11111111-AAAA-4AAA-8AAA-AAAAAAAAAAAA", login: "22222222-BBBB-4BBB-8BBB-BBBBBBBBBBBB")
-    /// The same Mac, a second macOS login (VX-340).
-    static let macASecondLogin = MachineIdentity(hardware: macA.hardware, login: "33333333-CCCC-4CCC-8CCC-CCCCCCCCCCCC")
-    /// Other hardware, the same login identity carried over (Migration Assistant).
-    static let macB = MachineIdentity(hardware: "44444444-DDDD-4DDD-8DDD-DDDDDDDDDDDD", login: macA.login)
-
     static func fp(_ key: StoreKey) -> String { StoreKeyEnvelope.fingerprint(of: key) }
 
     /// A reach over a set of keys, by fingerprint.
@@ -70,10 +64,4 @@ enum SecretScan {
         let utf8 = Data(needle.utf8)
         return carries(haystack, utf8) || String(decoding: haystack, as: UTF8.self).contains(needle)
     }
-}
-
-extension HardwareMarker {
-    /// A stand-in marker for tests that need a section, not a Mac: both parts
-    /// the same text (two stubs of different text are different hardware).
-    static func stub(_ text: String) -> HardwareMarker { HardwareMarker(hardware: text, login: text) }
 }

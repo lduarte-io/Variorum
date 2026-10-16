@@ -2738,3 +2738,20 @@ to reverse it.
   VX-259 · VX-260 · VX-275 · VX-276 · VX-277 · VX-119 · VX-323 · VX-336 · VM-16.
 *(Numbering: drafted as #220; VX-282 took #220–#224 and VX-266 #225 on main before this merge.)*
 Status: open — your eye; the handoff's checklist leads with this bundle.
+
+## VX-378 — Castle simplified, U1 THE CUT (2026-10-16; numbered at the merge)
+
+**P-VX378-U1-1 — With nothing remembered, which device section is this Mac's?** Rule 23 gives each library on each
+device a plain random device ID made at creation; rule 21 keeps it in what this Mac remembers. The hardware marker that
+used to find this Mac's own section when the memory item was gone left with the cut (rule 23). The rules don't say what
+an open does when the memory item is missing or fails its seal. Options:
+- **(a) BUILT, PROVISIONAL —** the open takes a NEW plain random device ID with a fresh section (no gate choice yet,
+  no Apple keys listed, adopting nothing). A remembered ID whose section the record lacks keeps that ID with a fresh
+  section. Most defensible: it never guesses (rule 21) and never reads hardware (rule 23). Cost: a deleted or edited
+  memory item mid-act leaves that act to the old ID's section, which nothing here resumes (`aMemoryItemThatFailsItsSeal
+  RemembersNothing`).
+- (b) the open refuses — the file isn't one this Mac remembers — with the facts and rule 17's two doors (U2's
+  detect-and-refuse; needs U2's face).
+- (c) adopt the record's section when it holds exactly one (rejected: a guess, against rule 21).
+Record: `notes/plans/vx-378-castle-simplified.md` §8, the U1 RECORD (piece G). Status: open — U2 decides (b) or keeps
+(a); her eye at the phase's close.

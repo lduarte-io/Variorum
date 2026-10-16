@@ -183,7 +183,6 @@ struct AssessVaultTests {
     @Test func thisDevicesOwnActInFlightIsNotAFollow() throws {
         var world = try Self.synced(.castle, vault: .standard(appleKeyID: PF.id()), previous: "c0").0
         world.section = world.section.beginningAct(.leaveCastle, from: PF.fp(world.key), to: nil, at: PF.t0).section
-        world.recordSection = world.section
         let assessed = try world.assessed()
         #expect(!assessed.acts.contains { if case .follow = $0 { return true } else { return false } })
     }
@@ -295,18 +294,6 @@ struct AssessTouchIDTests {
         #expect(!(try world.assessed().touchID.rearmQuestion))
     }
 
-    /// A new device identity starts on Always ask: nothing is recorded, no
-    /// item is made, nothing is asked.
-    @Test func aNewDeviceIdentityStartsOnAlwaysAsk() throws {
-        var world = try AWorld(.castle)
-        world.section = DeviceFacts.takingOver(
-            predecessor: world.section, allSections: [world.section], newDeviceID: PF.id(), marker: .stub("new"),
-            keyFileOwnAppleKeyIDs: [])
-        world.custody = []
-        #expect(world.section.settings.gateStyle == .alwaysAsk)
-        let assessed = try world.assessed()
-        #expect(!assessed.repairs.contains(.recordAlwaysAskQuietly) && !assessed.touchID.rearmQuestion)
-    }
 }
 
 @Suite("VX-305 U2 — assess: §3.3's repairs, guards included")
@@ -314,7 +301,6 @@ struct AssessRepairTests {
     @Test func inCastleNoSilentItemForAnyKeyTheLibraryHasHad() throws {
         let older = StoreKey.mint(), lost = StoreKey.mint()
         var world = try AWorld(.castle, history: [older])
-        world.tree = world.tree.seeding([PF.fp(lost)])
         world.custody += [
             CustodyItemFact(fingerprint: PF.fp(world.key), itemClass: .silent),
             CustodyItemFact(fingerprint: PF.fp(older), itemClass: .silent),
@@ -323,8 +309,10 @@ struct AssessRepairTests {
         let assessed = try world.assessed()
         #expect(assessed.repairs.contains(.deleteSilentItem(fingerprint: PF.fp(world.key), precondition: .currentKeyHasTypedRoad)))
         #expect(assessed.repairs.contains(.deleteSilentItem(fingerprint: PF.fp(older), precondition: .historyHolds(fingerprint: PF.fp(older)))))
-        #expect(assessed.faults.contains(.silentItemIsOnlyRoad(fingerprint: PF.fp(lost))),
-                "a key the history doesn't hold keeps its road")
+        // A key the key file doesn't list is no key the library has had (rule 4
+        // — the family tree, which could name one, left with VX-378 U1): its
+        // item is neither deleted nor reported.
+        #expect(!assessed.faults.contains(.silentItemIsOnlyRoad(fingerprint: PF.fp(lost))))
         #expect(!assessed.repairs.contains { if case .deleteSilentItem(let fp, _) = $0 { return fp == PF.fp(lost) } else { return false } })
     }
 
@@ -340,7 +328,6 @@ struct AssessRepairTests {
         var world = try AWorld(.castle)
         let retired = PF.id(), anotherMacs = PF.id()
         world.section = world.section.retiringAppleKey(id: retired, purpose: .library, origin: .minted, at: PF.t0)
-        world.recordSection = world.section
         world.appleKeys.readable = [retired, anotherMacs]
         let assessed = try world.assessed()
         #expect(assessed.repairs.contains(.deleteRetiredAppleKey(id: retired)))
@@ -399,7 +386,7 @@ struct AssessRepairTests {
                 switch repair {
                 case .makeTouchIDItem, .deleteTouchIDItem:
                     Issue.record("\(repair) — a guard's bug shape with every guard on")
-                case .deleteSilentItem, .deleteRetiredAppleKey, .landAppleWrap, .refreshMemory, .refreshRecordSection,
+                case .deleteSilentItem, .deleteRetiredAppleKey, .landAppleWrap, .refreshMemory,
                      .restoreKeyFileFromMirror, .recordAlwaysAskQuietly, .recordHeldSyncKeysFacts, .retireOwnAppleKeys:
                     continue
                 }
@@ -407,14 +394,19 @@ struct AssessRepairTests {
         }
     }
 
-    @Test func theTwoHomesAreRefreshedWhenEitherIsBehind() throws {
+    /// What this Mac remembers names the current key and this Mac's device ID
+    /// (rule 21): an absent item, or one naming another device ID, is
+    /// refreshed. (The second home's refresh left with VX-378 U1.)
+    @Test func whatThisMacRemembersIsRefreshedWhenItIsMissingOrNamesAnotherDevice() throws {
         var world = try AWorld(.castle)
         #expect(!(try world.assessed().repairs.contains(.refreshMemory)))
         world.memoryAbsent = true
         #expect(try world.assessed().repairs.contains(.refreshMemory))
         world.memoryAbsent = false
-        world.recordSection = world.section.bumped()
-        #expect(try world.assessed().repairs.contains(.refreshRecordSection))
+        var other = world.agreeingMemory
+        other.deviceID = PF.id()
+        world.memory = other
+        #expect(try world.assessed().repairs.contains(.refreshMemory))
     }
 
     /// The key file and the sealed mirror (rule 1): the mirror is written back
@@ -455,9 +447,8 @@ struct AssessRepairTests {
         world.liveFile = world.liveFile.droppingApple()
         let accountKey = PF.id()
         world.section = DeviceSection(
-            deviceID: CF.macA, hardwareMarker: .stub("marker"), settings: DeviceSettings(gateStyle: nil),
+            deviceID: CF.macA, settings: DeviceSettings(gateStyle: nil),
             appleKeys: [AppleKeyRecord(id: accountKey, purpose: .account, accountID: PF.id(), origin: .followed)])
-        world.recordSection = world.section
         world.appleKeys.readable = [accountKey]
         let assessed = try world.assessed()
         #expect(!assessed.repairs.contains { if case .landAppleWrap = $0 { return true } else { return false } })
@@ -477,15 +468,14 @@ struct AssessRepairTests {
 struct AssessDoorTests {
     @Test func useCastleRetiresEveryOwnKeyAndNamesWhatItCantDelete() throws {
         var world = try AWorld(.standard)
-        let relinked = PF.id(), adopted = PF.id(), formerAppleID = PF.id()
+        let relinked = PF.id(), minted = PF.id(), formerAppleID = PF.id()
         world.section = world.section
             .recordingAppleKey(AppleKeyRecord(id: relinked, purpose: .library, origin: .minted))
-            .recordingAppleKey(AppleKeyRecord(id: adopted, purpose: .library, origin: .adopted))
+            .recordingAppleKey(AppleKeyRecord(id: minted, purpose: .library, origin: .minted))
             .recordingAppleKey(AppleKeyRecord(id: formerAppleID, purpose: .library, origin: .minted))
             .recordingAppleKey(AppleKeyRecord(id: PF.id(), purpose: .account, accountID: PF.id(), origin: .followed))
         world.section.settings.scheduledExport = true
-        world.recordSection = world.section
-        world.appleKeys.readable = [world.own.id, relinked, adopted]
+        world.appleKeys.readable = [world.own.id, relinked, minted]
         // A copy under the key left in a former Apple ID.
         let copyKey = StoreKey.mint()
         let copyFile = try KeyFile.building(libraryID: world.world.library, key: copyKey, epoch: 1,
@@ -496,7 +486,7 @@ struct AssessDoorTests {
             CatalogEntry(place: .container, folders: folders, name: CF.pairName(CF.stamp(1), copyKey), bytes: try copyFile.encoded()),
         ]
         let spec = try #require(try world.assessed().door(.useCastle).spec)
-        #expect(Set(spec.retiresOwnAppleKeys) == [world.own.id, relinked, adopted, formerAppleID],
+        #expect(Set(spec.retiresOwnAppleKeys) == [world.own.id, relinked, minted, formerAppleID],
                 "every own key this Mac's section lists — never the account's")
         #expect(spec.rekeys && spec.requires == .passphraseAndWords(wordsMayBeNew: true))
         #expect(spec.words.contains(.floorSentence) && spec.words.contains(.exportAPlainCopyFirst))

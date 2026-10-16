@@ -120,9 +120,13 @@ struct ExecutorEdgeTests {
         #expect(phone.world.server.snapshot(phone.account!)!.format.appleKeyID != phoneMinted)
     }
 
-    @Test func aLibraryFileSwappedForAnOlderOneLosesToTheNewerMemoryWithTheRoadsKeys() async throws {
+    /// A library file swapped back for an older one: with the lobby road's
+    /// keys the newer memory still VERIFIES and names the newer key — the
+    /// disagreement U2's refusal reads (rule 21). It no longer lends the older
+    /// file its section (the second home left with VX-378 U1).
+    @Test func aLibraryFileSwappedForAnOlderOneStillReadsTheNewerMemoryWithTheRoadsKeys() async throws {
         let fixture = try EX(.standard)
-        let k0 = fixture.key, own = fixture.ownApple!.id
+        let k0 = fixture.key
         let older = fixture.world.live!
         let executor = fixture.executor()
         var library = try fixture.unlocked(executor)
@@ -133,10 +137,10 @@ struct ExecutorEdgeTests {
         // The lobby's road: the passphrase opens the live key file (K1); its
         // history opens the swapped-in file (K0).
         let swapped = try fixture.executor().unlock(with: k0, alsoInHand: [k1])
-        #expect(swapped.memory != nil)
-        #expect(swapped.section.retiredAppleKeyIDs.contains(own))  // delete on sight survives the replay
+        #expect(swapped.memory?.currentFingerprint == PF.fp(k1) && swapped.record?.currentFingerprint == PF.fp(k0))
+        #expect(swapped.section.deviceID == swapped.memory?.deviceID)
         // With the road's keys dropped, the newer memory could not verify.
         let blind = try fixture.executor().unlock(with: k0)
-        #expect(blind.memory == nil && !blind.section.retiredAppleKeyIDs.contains(own))
+        #expect(blind.memory == nil)
     }
 }
