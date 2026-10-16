@@ -1554,7 +1554,17 @@ our current decisions."*
    vault row's mode flag; every other device follows OUT quietly (no typing — it already holds its keys), with a notice; a
    device that lagged through the whole Castle stretch types a secret once to catch up. Accepted boundary, her words: *"it's
    fine that a device that lags can still read what it has locally through its own quiet road — that's accepted."*
-13. **THE LIFECYCLE PAGE FIRST.** *"I agree with building the lifecycle as a test and a page, before more triage. that's
+13. **THE SITTING CLOSES (her words):** *"agree on changing the hardware marker"* (a plain random device ID at creation
+   replaces the salted hardware+login split — her ruling 2 of 2026-10-14/15 superseded as a consequence of B); *"agree
+   with how you want to handle / simplify those 5"* (the Opens-with route finder reduced to one sentence and no longer a
+   promise; Re-link's act dropped — the lobby's normal ask-and-re-make path; corner 45, the old shared key's retirement
+   and the legacy readers go with migration; acts-in-flight across devices go with the stuck leave; the marker above);
+   *"let's make the rules document the absolute center of everything"*; *"agreed on superseding the 1,100 line design
+   document and the old design getting a banner saying so at its top"*; the four artifacts (the rules, the lifecycle page,
+   the corrector plan, its kickoff prompt) — *"go ahead and write all four now, rules first"*; the rules in natural
+   language, not trimmed to a page for its own sake. The consistency rule she named, now a rule: *"the only thing that has
+   to stay castle only after leaving castle is a backup you made while in castle."*
+14. **THE LIFECYCLE PAGE FIRST.** *"I agree with building the lifecycle as a test and a page, before more triage. that's
    obviously the right thing to do & handling that should be first and foremost."* Written as the TARGET spec (every stage ×
    every user choice × every way in, plain words), ruled on by her, then proven by a test as the cuts land. Local HTML,
    never an Artifact.
