@@ -1,6 +1,14 @@
 # VX-305 ladder round 1 — the two pre-existing generator finds (NEW-1, NEW-2): trace, classify, pin, fix
 
-**Not done, first:** (filled at close — PENDING.)
+**Not done, first:** (1) **the go/no-go soak** (20 seeds × 1,000, both configurations) — the orchestrator's, on the
+final tree; two soak-shape slices ran here instead, both green (seeds 1–3 and 4–6 × 250, §"The runs"). (2) **The phase
+plan's §9 entry** for this triage — left to the orchestrator (this record is the brief's one file outside the code).
+(3) **The round-2 notes** below (§"For round 2") — observed while tracing, none built: promise 10 blind to a swap that
+changes the slot's library; the landing's act left named in the outgoing library's memory; the generator's
+`rollsBackBothHomes` exclusion now wider than the model's stated limit; the world's day-named hand-off folder letting
+a same-day send overwrite a received pair; a stale roll back deleting its to-key's custody items. (4) **No PROVISIONAL
+minted and nothing for QUESTIONS:** NEW-2's fixes are the world's; NEW-1's is the ratified P-U4-6 outcome ("Memory
+wins") — its three mechanics are recorded as implementation calls for the reviewer, not product choices.
 
 The brief: the round-1 fixes record's §"Found by the generator, outside the round"
 (`notes/plans/vx-305-ladder-round-1-fixes.md`) carries both minimal sequences; both reproduce on the round's base
@@ -11,20 +19,22 @@ The brief: the round-1 fixes record's §"Found by the generator, outside the rou
 
 - **NEW-2 (promise 13, no tamper) — the priority:** traced; classified **a CHECKER bug** (no model change); the pin
   `LadderRound1NewFindsPins.aSentPairsHistoryIsTheSendersOwnAfterALeave` RED on the tree before the fix, GREEN after,
-  RED again with the fix stashed — **DONE** (this commit). The protection set after: `✔ Test run with 430 tests in 70
+  RED again with the fix stashed — **DONE** (`59d5d9289`). The protection set after: `✔ Test run with 430 tests in 70
   suites passed after 14.178 seconds.`
 - **NEW-1 (promise 3, a replayed pre-landing capture):** traced; classified **a MODEL bug** — P-U4-6's "memory wins"
   failed twice over (the settle's roll back of a landing act the outgoing library's memory still named wrote the older
   file's facts over the memory FIRST; and the memory-wins arm could verify only through the live place, which held the
   landed library's file); the pin `LadderRound1NewFindsPins.aLoneOlderFileOfALibrarySetAsideByALandingLosesToItsMemory`
   (both forms) RED before, GREEN after, RED with the fix stashed whole AND with either link alone stashed — **DONE**
-  (this commit). The protection set after: `✔ Test run with 431 tests in 70 suites passed after 13.178 seconds.`
+  (`69336aa21`). The protection set after: `✔ Test run with 431 tests in 70 suites passed after 13.178 seconds.`
 - **NEW-2's second road** (the slice re-run on `69336aa21` met sequence 222 again by a 17-step road — the same class, the
   sender's pair in a Time Machine snapshot after a same-day send overwrote its folder): traced; the world exemption now
   reads the sent pair by identity; the pin `aSentPairsSnapshotIsTheSendersOwnToo` RED before, GREEN after, RED with the
-  fix stashed — **DONE** (this commit). The protection set after: `✔ Test run with 432 tests in 70 suites passed after
+  fix stashed — **DONE** (`ca48bbf65`). The protection set after: `✔ Test run with 432 tests in 70 suites passed after
   12.768 seconds.`
-- The runs at the end (the generator slice again, the protection set in Debug, `swift build -c release`) — PENDING.
+- **The runs at the end — DONE** (on `ca48bbf65`, the final code; every later commit is this record): two generator
+  slices green; the protection set green in Debug (432/70) and compiled under `-c release` (371/65); `swift build -c
+  release` green (§"The runs at the end").
 
 ## NEW-2 — promise 13 with no tamper: a CHECKER bug
 
@@ -75,7 +85,9 @@ only within a mode, §3.4). No model change: §3.7 ("the sent pair is never writ
 **The fix (the world, `Promises.swift` `castleStaysCastles`):** for each sent Standard pair in a hand-off folder on this
 device, the exemption takes the image's fingerprint AND `reachableInItsDay(record, keyFile: <the pair's key file>)` —
 its current key and its key file's history (never an anchor's), the existing helper the stated-limit bookkeeping
-already uses for "what a Standard state reached through Apple in its day".
+already uses for "what a Standard state reached through Apple in its day". *(Superseded in its READING by the second
+road's fix below — the same set, recorded at the send and read by the pair's identity rather than its folder; the rule
+is unchanged.)*
 
 **The pin — `LadderRound1NewFindsPins.aSentPairsHistoryIsTheSendersOwnAfterALeave`** (the 10-step sequence through
 `step`, then the trace asserted so the exemption can hide no exposure: (1) no Castle-born key kept by the leave is
@@ -237,3 +249,69 @@ key), but ending it there at the swap would be the cleaner bookkeeping; (3) the 
 — with the mirror proof, the deleted-key-file case is no longer one (the memory now wins it), so that exclusion could
 narrow; (4) the stale act's roll back deletes custody items of its to-key not in the slot library's tree (X's, if X had
 one) — pre-existing (the Time Machine road to before a landing meets it too), unchanged here.
+
+## NEW-1's implementation calls (mechanics of the ratified outcome, recorded for the reviewer — not PROVISIONAL)
+
+- **Where the file loses first:** in `settle`, before it reads its plan, when this Mac's section names an act — because
+  every road the settle takes from there (resume, finish from the record, roll back) writes facts from the record it
+  meets. With nothing in flight, assess's first arm owes the same re-key as before (the executor skips repairs while in
+  flight, so the arm alone could never have reached this state).
+- **What proves it:** the live file of the memory's key (today's), or the memory's own SEALED mirror when the live place
+  holds no key file of THIS library. The library-ID test is what keeps her whole-pair Time Machine restore (P-U4-12 —
+  the restored file's own key file live beside it) believed, and what keeps a same-library mid-act file (an act's new
+  key's file) from ever being set aside by this road.
+- **What happens to the stray file:** set ASIDE under today's `.stale-<epoch>` shape (the round-1 final call's rule for
+  another key's file in the live place), never deleted; the mirror comes back with Apple wraps stripped
+  (`restoreKeyFileFromMirror`'s rule). The executor's re-key also checks the memory is THIS Mac's own (assess's seed-17
+  rule, now said on both sides).
+
+## The runs at the end (on `ca48bbf65` — the final code; every later commit is this record)
+
+- **The generator, soak shape** (`PROTECTION_SOAK=1 PROTECTION_SOAK_SEQUENCES=250 PROTECTION_SOAK_SEEDS=3`, ≤ 60 steps):
+  - seeds 1–3: `PROTECTION GENERATOR: 3 seeds × 250 sequences, 750 sequences, 33684 steps, max 60 steps, 252.3 s (SOAK)` —
+    `✔ Test run with 1 test in 1 suite passed after 252.262 seconds.` (round 1's slice on the same seeds failed 3 of
+    750: NEW-1 once, NEW-2 twice; the first re-run here, after the first two fixes, met NEW-2's second road at sequence
+    222 — pinned and fixed above);
+  - seeds 4–6: `PROTECTION GENERATOR: 3 seeds × 250 sequences, 750 sequences, 33744 steps, max 60 steps, 249.0 s (SOAK)` —
+    `✔ Test run with 1 test in 1 suite passed after 249.027 seconds.`
+  - The settle's new first step changes write counts inside crash windows, so seeds' streams shift again: the go/no-go
+    soak runs fresh on the final tree (as round 1 already said).
+- **The protection set, Debug** (every `@Suite` under `Tests/VariorumCoreTests/Protection/`, 70 — this batch added
+  `LadderRound1NewFindsPins`): `✔ Test run with 432 tests in 70 suites passed after 12.591 seconds.` (429 + 3: the two
+  NEW-2 pins, the NEW-1 pin with its 2 cases counted as one test; the mutation suites green — the
+  `libraryFileLosesToMemory` pin still failing with its guard off.)
+- **Release:** `swift build -c release` — `Build complete! (94.52 sec)`. The compiled subset: `swift build -c release
+  --build-tests -Xswiftc -enable-testing` (7:44 wall), then `swift test -c release --skip-build` over the same 70 names —
+  `✔ Test run with 371 tests in 65 suites passed after 3.645 seconds.` (432 − 61 DEBUG-only = 371; 70 − 5 = 65.)
+- **Scope:** `git diff --stat 48bd6b84e..HEAD` touches only `Sources/VariorumCore/Protection/` (Assess.swift,
+  ExecutorRepairs.swift, PlanRunner.swift), `Tests/VariorumCoreTests/Protection/Scenario/` (Promises.swift, World.swift,
+  Alphabet.swift, the new LadderRound1NewFindsPins.swift) and this record — zero `Sync/`, `App/`, `Server/`,
+  `Persistence/`, migration or `Package.swift` lines; no new dependency; the scratch probe used for the traces was
+  deleted, never committed.
+
+## For round 2 (observed while tracing — none built; each outside these two finds)
+
+1. **Promise 10's checker skips a step that changes the slot's library** (`sealed(_:before:tampers:)`: `now.libraryID ==
+   was.libraryID`), so NEW-1's lowering of a remembered Castle library by one replayed file showed only as promise 3's
+   symptom. A check that reads a swapped-in library against THIS Mac's own memory of it would see it directly.
+2. **The landing leaves its act named in the outgoing library's memory** ("named in BOTH libraries" — Copies.swift's
+   own design) and nothing ends it there after the swap. Harmless after NEW-1's fix (an older file of that library
+   re-keys first; the act then ends against its own key, as the Time Machine road to before a landing already met), but
+   ending it at the swap would be cleaner bookkeeping — with a crash window between the swap and that write to handle.
+3. **The generator's `rollsBackBothHomes`** keeps `replayLibraryFile` out of a group with `deleteKeyFile` /
+   `replayKeyFile` as "the stated limit's shape" (round 1's recorded choice). With the mirror proof, the
+   deleted-key-file case is no longer that shape (this Mac's memory now wins it), so the exclusion could narrow.
+4. **The world's hand-off folders are named by their day**, so a device's own Send Library the same day overwrites a
+   pair it received (and the folder → sender map) — a fake's simplification (the destination is hers to pick, phase 5);
+   promise 13 now reads sent pairs by identity, but other bookkeeping keyed on `senders` (promise 2's copy skip, the
+   stated limit's Send-pair sweep) keeps the folder reading.
+5. **A plan-less roll back deletes custody items of its act's to-key** not in the slot library's family tree — for a
+   stale landing act that is the LANDED library's (X's) item, if it had one. Pre-existing on every road that meets a
+   stale landing act; unchanged here.
+
+## Commits
+
+`d77bedebd` (the record opens, the classifications) · `59d5d9289` (NEW-2: the pin + the checker's history exemption) ·
+`69336aa21` (NEW-1: the pin + the model fix — the proof, the executor's re-key, the settle's first step) · `ca48bbf65`
+(NEW-2's second road: the pin + the identity-based exemption) · this record's closing commit. Each pushed to
+`origin/vx-305-castle-core` as it landed.
