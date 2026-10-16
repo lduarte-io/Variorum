@@ -565,6 +565,10 @@ small enough for the everyday loop, plus a `PROTECTION_SOAK=1` environment switc
   7,067.4 s) and under `-c release` (898,884 steps, 4,528.9 s); (k) the runs — the protection set 413 tests in 65
   suites green in Debug, 352 in 60 under `-c release`, the full core suite green in Debug (3273/395 · 240/51 · 40/6);
   (l) the record — this commit.
+- The ladder (§9; up to five rounds while MAJORs are found, her word): round 1 **DONE** (1 MAJOR · 1 MINOR · 4 NIT,
+  all six fixed and verified, Debug 429/69 · Release 368/64); the triage of the two pre-existing generator finds
+  **DONE** (NEW-2 a checker bug, NEW-1 a model bug under P-U4-6 (a); verified Debug 432/70 · Release 371/65); round 2
+  **IN FLIGHT**.
 - The go/no-go record: **NOT-STARTED.**
 
 ---
@@ -1515,6 +1519,51 @@ fixes; triage before the go/no-go soak; minimal sequences in the fixes record):*
 
 **Triage: a fresh implementer (trace → classify → pin red-first → fix or PROVISIONAL), then round 2 re-checks the
 round-1 fixes and the triage together.**
+
+**The triage — a fresh Opus implementer, 2026-10-16 (the record `notes/plans/vx-305-ladder-round-1-newfinds.md`;
+commits `d77bedebd` · `59d5d9289` · `69336aa21` · `ca48bbf65` · `b65d29390`, each pushed); verified by the
+orchestrator:**
+- **NEW-2 — a CHECKER bug, two roads, no model change.** The one key reached after the leave is the SENDING phone's
+  own Standard pair, kept in macB's hand-off folder exactly as §3.7 keeps it ("never written, keeps its own locks"):
+  its key and that key file's own history, all the phone's Standard stretch. Nothing made in Castle and no copy macB
+  made before the leave is reached; the pins assert that trace on both trees, so the exemption hides nothing. The
+  closer's seed-2/661 exemption covered the sent pair's own key but not its history (first fix); the slice re-run
+  then met the same class by a 17-step road — the pair surviving only in a Time Machine snapshot after macB's own
+  same-day send overwrote the day-named folder (second fix: the world records each sent Standard pair's reach AT THE
+  SEND, and promise 13 exempts it by the pair's identity, wherever its files sit). Pins
+  `aSentPairsHistoryIsTheSendersOwnAfterALeave`, `aSentPairsSnapshotIsTheSendersOwnToo` — red before, green after,
+  red with the fix stashed.
+- **NEW-1 — a MODEL bug, under her ratified P-U4-6 (a), "Memory wins"; not P-U4-10's ceiling** (that limit covers a
+  tamper on a Standard device; this device was Castle, and the memory's key reaches the replayed file's key through
+  history). A landing set library Y aside to Previous Libraries while Y's memory still named the landing in flight;
+  one replayed Standard-era file of Y then beat Y's own Castle memory twice — the settle rolled the stale act back
+  against the replayed record first, and the memory-wins arm could verify only through the live place, which held
+  the landed library's file. Fix, three links of one rule: `AssessRules.olderLibraryFileProof` (the proof is the live
+  file of the memory's key OR the memory's own sealed mirror when the live place holds no key file of THIS library —
+  a whole-pair Time Machine restore, P-U4-12, never qualifies); `rekeyOlderLibraryFile` takes that proof, sets the
+  stray live file ASIDE (never deleted), restores the mirror with Apple wraps stripped, and now also checks the
+  memory is this Mac's own; `settle` runs that re-key FIRST when this Mac's section names an act. Pin
+  `aLoneOlderFileOfALibrarySetAsideByALandingLosesToItsMemory(group:)`, both forms — red before, green after, red
+  with all three links stashed and with either the settle link or the proof link alone stashed.
+- **No PROVISIONAL minted, nothing for QUESTIONS** — NEW-2's fixes are the world's; NEW-1's mechanics deliver an
+  outcome she already ruled (recorded as implementation calls for round 2).
+- **The orchestrator's verification:** scope `48bd6b84e..HEAD` clean (Protection's Assess / ExecutorRepairs /
+  PlanRunner, the Scenario world files, the new pins file, the record — zero `Sync/`, `App/`, migration or
+  `Package.swift` lines); the protection set re-run EXACT — Debug `✔ Test run with 432 tests in 70 suites passed`,
+  `-c release` `✔ Test run with 371 tests in 65 suites passed`; an independent revert of the three source files to
+  `59d5d9289` turns the NEW-1 pin red (`slot.record?.mode == .castle` … `promise 3 on macB: no Apple wrap of the
+  current key`), restored clean. The implementer's two soak-shape slices (seeds 1–3 and 4–6 × 250) green. The
+  settle's new first step shifts the streams again — the go/no-go soak runs fresh on the final tree, as already
+  recorded.
+- **Five observations handed to round 2, none built** (the record's §"For round 2"): promise 10 skips a step that
+  changes the slot's library; the landing leaves its act named in the outgoing library's memory; the generator's
+  `rollsBackBothHomes` exclusion is now wider than the model's limit; the world's day-named hand-off folders; a
+  stale act's plan-less roll back deleting its to-key's custody items (pre-existing).
+
+### Round 2 — fresh `fable-reviewer`, zero framing; the diff `e4ee1f083..HEAD` (round 1's fixes + the triage), the report committed UNEDITED as `notes/plans/vx-305-ladder-round-2.md`
+
+*(launched 2026-10-16 after the triage's verification — her word at the model switch: "you can do another Fable
+ladder after the opus implementer")*
 
 ## 10. The go/no-go and the key map's model half (filled at close)
 
