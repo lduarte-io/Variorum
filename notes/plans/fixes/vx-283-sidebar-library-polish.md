@@ -399,7 +399,7 @@ trailer of any kind.
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-286 · VX-285 · VX-287 · VX-289 — the Open list's layout and closing | **PROVEN — awaiting U2's walk for P-U1e-1** (the fade ramp rides U2): U1 built + walked; U1b/U1c fix legs; U1d (her memo rulings) window GREEN (434/96, R-I/R-J red as named, 01:44–01:50) and re-walk HOLD on R0–R3, R5–R8 (R6 her scroll never pulled back); R4's 7–9-pt slice → P-U1e-1 built in U2's leg, verified by U2's window + walk. |
-| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **READY FOR STAGE — U2c window (drag checks → pins/reverts/batch), ≈30 min, then the re-walk.** U2's walk failed D1/D2 (a real system drag never drew the line or landed — the legacy content-root delegate was never consulted, U2b's trace); D5 (P-U1e-1) and D6 HOLD by eye. U2c built F1 as P-U2b-1 rules (`e93e4246`, pins `51253c7c`): each row a Transferable `dropDestination` in the session form, the end zone the same, `.move` with the source's `allowMove`, the session's end clears the drag; trees `vx283-u2c` + `-rt`/`-ru`/`-rv` prebuilt, no revert in the tree; `u2c/window.sh` pre · drag (G1–G5, stops after G1 if it does not land) · pins · rt · ru · rv · batch · restore. F2 and the second-drag micro-leg held for the window's answers. |
+| U2 | VX-288 (+ the chip on the Open list's rows) — the drag, light version; + P-U1e-1 (VX-286's fade ramp) | **The drag's road settled:** synthetic drags cannot reach sidebar drops, on main too (the main-build control, 07:09–07:12), so the walk's "does not land" was the road. U2c's F1 (session form) is unverifiable and dropped. **→ U2d builds F2 on main's own per-row API** (P-U2d-1); her hand check goes first in her morning checklist. D5 (P-U1e-1) and D6 HOLD. |
 | U3 | VX-121 · VX-175 · VX-20 · VX-245 (+ VX-359) — the Library and the red lint | **W1/W3/W4/W5 PROVEN.** U3b's band traced (U3c: the segmented pickers answered two ways after a search) → **P-U3c-1 built and PROVEN** (window 16:43–16:54: pins 23/3 green; R-P exactly 4 red; U3b's 103-suite batch 513 green). **OWED: D8's re-walk** on `vx283-u3c` (folded with U2b's). |
 | Ladder | `fable-reviewer` at xhigh (her word, superseding opus at max), fresh per round, cross-model | **ROUND 1 DONE** (tip 448f9450; findings in the Ladder section, `9ef6fba3`): 0 BLOCKER · 0 MAJOR · 2 MINOR (R1-1 this table — fixed here; R1-2 sequencing — the windows owed) · 4 NIT (R1-3…6 → the implementer). Round 2 re-reviews the fixes + the U2/U3b window results. |
 | Closeout | the merged-tip runs, canon deltas, tickets, MOBILE PARITY, handoff, merge, refresh | NOT-STARTED |
@@ -408,6 +408,7 @@ trailer of any kind.
 
 *(The orchestrator appends each REQUEST / READY / GO / RELEASE here.)*
 
+- 2026-10-16 07:04 GO `vx283-u2c` (90 min, folded); G1 failed → the main-build control folded in at the coordinator's yes (07:09–07:12); RELEASED 07:12:31 with the control's own instance still up (the slip — quit at ~07:13, the store re-verified, prefs clean; told).
 - 2026-10-15 17:06 GO `vx283-u2b` (25 min; HID idle 528 s at the GO, her clearance standing); RELEASED 17:08:32 — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched".
 - 2026-10-15 16:43 GO `vx283-u3c` (25 min); RELEASED 16:54:31 — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched".
 - 2026-10-15 15:59 GO `vx283-walk` (15:58:41, 65 min); the walk 15:59–16:21; SEAM, continue pre-given; the U3c probe folded in 16:23–16:25; RELEASED 16:25:43 — "dev store restored + verified, prefs diff clean, posture Standard/unlocked, castle-W1 untouched".
@@ -4272,6 +4273,57 @@ Open rows) → `aim` OK (row 2 `D4C23B6A` at 133,413) → **G1: DID NOT LAND.**
     bisect of the branch's sidebar changes.
   - Main's drag does not land → synthetic drags cannot reach sidebar drops, and the walk road is invalid for this
     question. Then the evidence has to come another way, and this is said plainly in the morning handoff.
+
+#### U2c — THE MAIN-BUILD CONTROL (the same claim, 07:09–07:12, the coordinator's yes; `u2c/main-control/`)
+
+Main's own Debug build (`a7c0a25f`; the branch carries no `Sources/` diff, so no schema the store doesn't know), headless
+into `DerivedData/vx283-main`. A fresh copy of all FIVE store files (3 db + 2 key json, `main-control/store-before/
+20261016T130945Z`) → launch (the 0.9.7 What's New sheet, dismissed with its own Continue) → the same rows as the
+branch (row 2 at y≈412, pitch 30). Then three `cliclick` drags of row 2 (each with a hover before the press) → row 3's
+lower quarter → row 5's upper quarter → release.
+- **Main's drag DID NOT LAND either:** its default drag image rides at the cursor (`c1-mid-*.png`), the rows never react,
+  and the list is unchanged after each release (`c1`, `c2`, `c3` changed-bbox None). Main's per-row
+  `.dropDestination` (the road her hands used, her "janky", landing before the row under the pointer) is NOT reached by
+  the synthetic road. **So synthetic `cliclick` drags cannot reach drop targets in the window's sidebar, on main or
+  this branch.** The walk's D1/D2 "does not land" (and U2b's and U2c's zero delegate/session calls) are this road's
+  limit, NOT evidence that U2 broke the drag. The Bookcase control lit its ＋ because its targets sit in the main
+  content, not the sidebar.
+- **The second drag:** on main, consecutive drags of the same row each STARTED (`c2`, `c3` show the image). Those
+  presses came after a hover. U2c's G4a (after a hover) also started, while G3b and G5a (pressed with no hover) did not.
+  **The every-other-press pattern is the road's press-without-hover** (T3's reading), not a product fault. A hand always
+  hovers before it presses. Recorded, no fix.
+- **THE RESTORE AND A SLIP:** the control script's `restore` called its own `quit` without execute permission, so it
+  restored the store and RELEASED the claim (07:12:31) with the control's own instance (PID 32411) still up. It was
+  caught at once: that instance was quit at ~07:13, then all five files were re-checked. They were `cmp`-identical
+  before the re-copy (the app wrote nothing), re-copied and verified, prefs re-checked after the quit: PREFS CLEAN.
+  Zero instances, castle-W1 untouched, `vx283-main` deleted. The coordinator was told the same.
+
+#### U2 — THE ORCHESTRATOR'S RULING AFTER THE CONTROL (2026-10-16 ~07:20 — P-U2d-1, the drag's evidence standard and the build)
+
+- **P-U2d-1 (PROVISIONAL, the orchestrator's, in her overnight absence): build F2 (pre-ruled), the book navigator's road,
+  on MAIN's own per-row API** — `.dropDestination(for: OpenNoteDragToken.self, action:isTargeted:)` on each Open row:
+  - the 2-pt ring line at the targeted row's top;
+  - the drop lands before that row (main's own landing, which her hands have used);
+  - an end-zone drop below the last row for the last slot;
+  - the settle;
+  - no line and no move on the dragged row's own place.
+  The source keeps the chip at the cursor and `dragging` set at the payload's evaluation (proven at drag start by U2b's
+  run) and cleared at the source session's `ended` (proven delivered). Dropped:
+  - the macOS 26 session form (F1: `onDropSessionUpdated`, `dropConfiguration`), unproven by any hand;
+  - `DragConfiguration(allowMove:)` (main's copy default, for parity);
+  - the half-row refinement (with its pure-rule parts and pins, retired and annotated, no dead code);
+  - the U2b trace instrument (stripped; history keeps it).
+  F2 is main's proven landing plus her asked-for line, end zone and settle. That makes it the most defensible ship
+  that cannot be verified by the synthetic road.
+- **THE EVIDENCE STANDARD for the sidebar drop:** no synthetic road reaches it, as main's own control proves. So
+  acceptance is:
+  - the pins (the targeted row → the line and the gap; the landing; the end zone; the own place);
+  - the source parity with main's per-row road;
+  - the walk on everything a synthetic road CAN see: the chip at the cursor, the rows' click / ✕ / right-click / ⇧⌘W
+    unchanged, D5/D6 already held, and D8 for U3c.
+  **Her hand check is the FIRST item of her morning checklist**: drag an Open row down one, down several, to the end,
+  and up. It names the one-commit fallback (main's road exactly) if any drop fails.
+- The build is leg **U2d**, a FRESH implementer (U2c's is at its context cliff).
 
 ## Ladder
 
