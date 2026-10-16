@@ -1450,7 +1450,24 @@ repo-first, the cross-model flow, the final round's fixes checked line-by-line b
 
 ## 9. The ladder (the Fable reviewer's report per round, committed unedited, then the dispositions — her 2026-10-15 ruling: up to five rounds while MAJORs are still found)
 
-*(empty)*
+### Round 1 — 2026-10-16, fresh `fable-reviewer`, zero framing; the report committed UNEDITED as `notes/plans/vx-305-ladder-round-1.md`
+
+**Tally: 1 MAJOR · 1 MINOR · 4 NIT, plus a clean bill otherwise.** The MAJOR (PlanRunner `rollBack` + `Assess`): a plan-less
+rollback after a crash mid-re-key — the memory item deleted AND an earlier genuine plan replayed over the live one, both
+tampers in the adversary alphabet — leaves another key's file in the live place with no repair that restores the current
+key's own file; every later `needsLiveKeyFile` act refuses `noLiveKeyFile` permanently (VX-235's unfinishable class back
+by a new door, against §3.6's "a missing or unmatched plan never blocks"). The checker is structurally blind to the state,
+so the 898k-step soak never saw it. Reviewer's annotation: adversarial-only reachability; availability of the protection
+acts only, never content. The MINOR is the same state's diagnosis quality in `assess`; the four NITs are small (a dead
+switch arm, a doc-comment misnumber, an order-dependent `.first` pick, a lobby Touch ID line misspeaking pre-unlock).
+
+**The reviewer's own verification recorded:** diff scope clean; Debug 413/65 exact; a Release spot filter green; a
+deterministic soak slice reproduced; `LegacyModeReader` hand-diffed against the live `Posture.derive` (matches); the
+mutation-pin harness and the promise checker's key-reach engine inspected and found genuinely biting.
+
+**Dispositions:** pending the cross-model flow — the findings to a fresh Opus implementer VERBATIM (the report file),
+its agree/dispute back to the round-1 reviewer for the final call, the implementer then applies the confirmed fixes
+(red-on-old pin per finding, the suite green), and round 2's fresh reviewer re-checks them.
 
 ## 10. The go/no-go and the key map's model half (filled at close)
 
