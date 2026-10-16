@@ -38,15 +38,20 @@ enum Tamper: String, Equatable, CaseIterable {
     case editSealedSetting
     case replayPlan
     case replayMemory
-    case replayKeyFile
+    /// The library file replayed alone — kept for the rule-21 pin only
+    /// (`CutPinsRule21Tests`): out of the generator's pool (`generated`) until
+    /// U4 rebuilds it against U2's refusal. (`replayKeyFile` and
+    /// `deleteKeyFileAndMemory` left with the restores — VX-378 U1, rules 21,
+    /// 27.)
     case replayLibraryFile
     /// Both homes of this Mac's facts rolled back together (the stated limit).
     case replayBothHomes
     case deleteMemoryItem
     case deleteTouchIDItem
     case deleteKeyFile
-    /// The key file and the memory item both deleted.
-    case deleteKeyFileAndMemory
+
+    /// The tampers the generator draws from.
+    static let generated = allCases.filter { $0 != .replayLibraryFile }
 }
 
 indirect enum Action: Equatable {
@@ -682,9 +687,6 @@ extension SWorld {
                 throw WorldRefusal.noLibrary
             }
             device.keychain.local[name] = capture.memory
-        case .replayKeyFile:
-            guard let file = device.captures.compactMap(\.liveKeyFile).first else { throw WorldRefusal.noLibrary }
-            device.container.files[SPath.liveKeyFile] = file
         case .replayLibraryFile:
             guard let file = device.captures.compactMap(\.slot).first else { throw WorldRefusal.noLibrary }
             device.container.files[SPath.slot] = file
@@ -715,9 +717,6 @@ extension SWorld {
             }
         case .deleteKeyFile:
             device.container.files[SPath.liveKeyFile] = nil
-        case .deleteKeyFileAndMemory:
-            device.container.files[SPath.liveKeyFile] = nil
-            device.keychain.local[memoryName] = nil
         }
     }
 

@@ -54,10 +54,7 @@ extension SWorld {
         var inner = action
         if case .crash(let wrapped, _) = action { inner = wrapped }
         switch inner {
-        case .timeMachineRollback(let name), .tamper(let name, .replayLibraryFile), .tamper(let name, .replayKeyFile),
-             .deleteContainerAndOpenOldCopy(let name):
-            if let was = before[name] { truth.beforeRollback[name] = (was.mode, was.account) }
-        case .tamperSequence(let name, let tampers) where tampers.contains(.replayLibraryFile) || tampers.contains(.replayKeyFile):
+        case .timeMachineRollback(let name), .tamper(let name, .replayLibraryFile), .deleteContainerAndOpenOldCopy(let name):
             if let was = before[name] { truth.beforeRollback[name] = (was.mode, was.account) }
         default: break
         }
@@ -89,8 +86,7 @@ extension SWorld {
         // A tamper step whose relaunch OPENED the library has had its replay's
         // effect land and be judged here, inside this deliberate step (promise
         // 10 above; promise 4 counts the step deliberate), so its
-        // `beforeRollback` entry is spent — skipped, lost to the memory or won
-        // alike. Kept when the relaunch didn't open: the later open is that
+        // `beforeRollback` entry is spent. Kept when the relaunch didn't open: the later open is that
         // entry's one legitimate consumer. VX-305 ladder round 2, NIT 3 (the
         // final call §4).
         if let name = reopened { truth.beforeRollback[name] = nil }
@@ -157,40 +153,19 @@ struct ScenarioGenerator {
     /// Two or three distinct tampers for one closed window. The adversary's
     /// claims are single items "or both homes of this Mac's facts together"
     /// (design §4.1, promise 10, §3.6's stated limit) — so `.replayBothHomes`
-    /// never joins a group (it carries its own stated-limit bookkeeping), and
-    /// `replayLibraryFile` never composes with (`rollsBackBothHomes`):
-    /// — a tamper on this Mac's MEMORY home (`deleteMemoryItem`,
-    ///   `editSealedSetting`, `replayMemory`, `deleteKeyFileAndMemory`): the
-    ///   library file rolled back together with what it would lose to IS
-    ///   §3.6's stated limit, already modelled by `.replayBothHomes`;
-    /// — `replayKeyFile`: the file replayed with its own key file is the
-    ///   whole-pair shape her P-U4-12 ruling keeps as a deliberate restore's
-    ///   road (P-U4-6's carve-out — "the deliberate whole-pair restore keeps
-    ///   its own road"), which promise 10 would otherwise read as a violation;
-    /// — `deleteKeyFile`: where the live key file is the memory key's only
-    ///   road on this Mac (Always ask, no frozen pair), deleting it leaves the
-    ///   memory unverifiable and the older file wins by the two-homes rule —
-    ///   P-U4-13 (b)'s ruled phase-2 class (the lobby's memory-mirror road is a
-    ///   vx-306 deliverable). NARROW this exclusion when that road lands; the
-    ///   absent arm itself is pinned deterministically
-    ///   (`LadderRound2AbsentArmPin`).
-    /// (VX-305 ladder rounds 1 and 2 — the round-2 final call §1(c): KEEP.)
+    /// never joins a group (it carries its own stated-limit bookkeeping).
+    /// (The composition rule `rollsBackBothHomes` left with `replayLibraryFile`
+    /// from the pool — VX-378 U1, rule 21.)
     mutating func tamperGroup() -> [Tamper] {
-        let pool = Tamper.allCases.filter { $0 != .replayBothHomes }
+        let pool = Tamper.generated.filter { $0 != .replayBothHomes }
         let size = rng.chance(70) ? 2 : 3
         var group: [Tamper] = []
         for _ in 0..<24 where group.count < size {
             let tamper = rng.pick(pool)!
-            if group.contains(tamper) || Self.rollsBackBothHomes(group + [tamper]) { continue }
+            if group.contains(tamper) { continue }
             group.append(tamper)
         }
         return group
-    }
-
-    static func rollsBackBothHomes(_ group: [Tamper]) -> Bool {
-        let otherHomes: Set<Tamper> = [.deleteMemoryItem, .editSealedSetting, .replayMemory, .deleteKeyFileAndMemory,
-                                       .replayKeyFile, .deleteKeyFile]
-        return group.contains(.replayLibraryFile) && group.contains { otherHomes.contains($0) }
     }
 
     /// THE ALPHABET, by name and weight. VX-378 U1 cut the acts whose doors
@@ -245,7 +220,7 @@ struct ScenarioGenerator {
         case "online": return rng.chance(50) ? .goOffline(name) : .goOnline(name)
         case "timeMachineSnapshot": return .timeMachineSnapshot(name)
         case "timeMachineRollback": return .timeMachineRollback(name)
-        case "tamper": return .tamper(name, rng.pick(Tamper.allCases)!)
+        case "tamper": return .tamper(name, rng.pick(Tamper.generated)!)
         case "plantPair": return .plantPair(name)
         case "tamperSequence": return .tamperSequence(name, tamperGroup())
         default: return .settle

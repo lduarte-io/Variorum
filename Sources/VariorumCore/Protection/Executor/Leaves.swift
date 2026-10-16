@@ -116,14 +116,6 @@ public protocol LibraryFileLeaf: AnyObject {
 public protocol KeyFileStoreLeaf: AnyObject {
     func readLiveKeyFile() throws -> KeyFile?
     func writeLiveKeyFile(_ file: KeyFile) throws
-    /// Any key file the catalog lists, by its catalog id (a copy's serving
-    /// file).
-    func readKeyFile(catalogID: String) throws -> KeyFile?
-    /// Move whatever sits in the live place aside, to `name` beside the
-    /// library — never deleting it, never overwriting: false (nothing moved)
-    /// when `name` is taken; true when moved, or when the live place is empty
-    /// (VX-305 ladder round 1).
-    func setAsideLiveKeyFile(as name: String) throws -> Bool
 }
 
 /// What this Mac remembers — one sealed non-secret item per library ID.
@@ -187,10 +179,6 @@ public protocol DiagnosticsLeaf: AnyObject {
 
 /// What Diagnostics lists — typed, so no entry can carry a secret.
 public enum ProtectionDiagnostic: Equatable, Sendable {
-    /// A library file older than what this Mac remembers (a library file
-    /// replayed alone, §3.6) — re-encrypted under the current key, the
-    /// memory's facts kept (VX-305 U4). Eight-character prefixes only.
-    case olderLibraryFileRekeyed(older8: String, current8: String)
     /// A plan on disk this Mac's section doesn't name, or one failing its
     /// seal — ignored (§3.6).
     case planIgnored(PlanIgnoredReason)

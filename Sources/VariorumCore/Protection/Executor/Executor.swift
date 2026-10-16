@@ -71,10 +71,6 @@ public struct UnlockedLibrary {
     public var keyFile: KeyFile?
     /// The family tree at open (its two homes unioned).
     public var familyTree: FamilyTree
-    /// The other keys the lobby's road reached on the way (the live key file's
-    /// current key when the library opened through its history) — what the
-    /// older-library-file repair re-encrypts under.
-    public var keysInHand: [StoreKey] = []
 
     public var fingerprint: String { StoreKeyEnvelope.fingerprint(of: key) }
 
@@ -233,8 +229,8 @@ public final class ProtectionExecutor {
     /// `alsoInHand`: every other key the lobby's road reached on the way (the
     /// live key file's current key when the library opened through its
     /// history — a library file swapped for an older one) — a home sealed under
-    /// any of them still verifies, so a replayed library file alone loses to
-    /// the newer memory (§3.6).
+    /// any of them still verifies. (The older library file no longer loses to
+    /// the memory by a repair — VX-378 U1, rule 21.)
     public func unlock(with key: StoreKey, alsoInHand: [StoreKey] = []) throws -> UnlockedLibrary {
         guard try leaves.library.libraryOpens(with: key) else { throw ExecutorRefusal.keyDoesNotOpenLibrary }
         let liveFile = try liveFormat3()
@@ -265,7 +261,6 @@ public final class ProtectionExecutor {
         var unlocked = UnlockedLibrary(
             key: key, record: record, section: section, resolution: resolution, memory: memory, keyFile: liveFile,
             familyTree: FamilyTree.atOpen(record: record.familyTree, memory: memory?.familyTree, guards: guards))
-        unlocked.keysInHand = alsoInHand
         return unlocked
     }
 

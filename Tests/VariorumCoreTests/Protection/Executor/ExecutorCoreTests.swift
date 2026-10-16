@@ -240,12 +240,12 @@ struct ExecutorRepairTests {
         #expect(castle.world.writes.isEmpty)
     }
 
+    /// An ABSENT live key file comes back from the sealed mirror (rule 1),
+    /// never with its Apple wrap.
     @Test func theKeyFileComesBackFromTheSealedMirrorButNeverItsAppleWrap() async throws {
         let fixture = try EX(.standard)
         let live = try #require(fixture.world.liveFormat3)
-        var shrunk = live.droppingApple()
-        shrunk.words = nil
-        fixture.world.liveKeyFile = (shrunk)
+        fixture.world.liveKeyFile = nil
         let executor = fixture.executor()
         var library = try fixture.unlocked(executor)
         try executor.runRepairs([.restoreKeyFileFromMirror], on: &library)

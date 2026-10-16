@@ -71,8 +71,6 @@ public enum CatalogNames {
         case snapshotKeyFile(stamp: Date, fingerprint8: String?)
         /// `variorum-library-keys.json` — format 3.
         case keyFile
-        /// A key file moved aside: `variorum-keys[-<fp16>].stale-<epoch>.json`.
-        case setAsideKeyFile(fingerprint: String?, setAsideAt: Date)
         /// `variorum.sqlite` — the slot's name; the store inside an aside or
         /// safety-copy folder; the hand-off folder's snapshot.
         case library
@@ -86,7 +84,7 @@ public enum CatalogNames {
         /// A key file of any format (the names the route finder reads).
         public var isKeyFile: Bool {
             switch self {
-            case .snapshotKeyFile, .keyFile, .setAsideKeyFile: return true
+            case .snapshotKeyFile, .keyFile: return true
             default: return false
             }
         }
@@ -118,7 +116,6 @@ public enum CatalogNames {
             }
             return nil
         }
-        if name.hasPrefix("variorum-keys") { return setAsideName(name) }
         return nil
     }
 
@@ -134,21 +131,6 @@ public enum CatalogNames {
         guard tail.count == 9, tail.first == "-",
               tail.dropFirst().allSatisfy({ "0123456789abcdef".contains($0) }) else { return nil }
         return (stamp, String(tail.dropFirst()))
-    }
-
-    /// The set-aside shape `variorum-keys[-<fp16>].stale-<epoch>.json`.
-    private static func setAsideName(_ name: String) -> FileName? {
-        // The set-aside shape: `url.deletingPathExtension()
-        // .appendingPathExtension("stale-<Int(epoch)>.json")`.
-        guard name.hasSuffix(".json"), let marker = name.range(of: ".stale-", options: .backwards) else { return nil }
-        let base = String(name[..<marker.lowerBound])
-        let epochText = name[marker.upperBound...].dropLast(".json".count)
-        guard !epochText.isEmpty, epochText.allSatisfy({ "0123456789".contains($0) }),
-              let epoch = Int(epochText) else { return nil }
-        let setAsideAt = Date(timeIntervalSince1970: TimeInterval(epoch))
-        if base == "variorum-keys" { return .setAsideKeyFile(fingerprint: nil, setAsideAt: setAsideAt) }
-        guard let fingerprint = StoreKeyEnvelope.fingerprint(fromFilename: base + ".json") else { return nil }
-        return .setAsideKeyFile(fingerprint: fingerprint, setAsideAt: setAsideAt)
     }
 
     // MARK: - Folder names

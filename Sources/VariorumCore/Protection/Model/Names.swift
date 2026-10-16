@@ -114,17 +114,6 @@ public enum ProtectionNames {
     public static let keyFilename = "variorum-library-keys.json"
     /// The one plan beside the library (excluded from backups).
     public static let planFilename = "variorum-plan.json"
-    /// A key file moved out of the live place: today's set-aside shape
-    /// (`variorum-keys[-<fp16>].stale-<epoch>.json` — the catalog's one parser
-    /// reads it as role `.setAside`, its document decoded from its bytes),
-    /// named by the fingerprint of the key whose file it is (VX-305 ladder
-    /// round 1: another key's file in the live place goes aside, never deleted).
-    public static func setAsideKeyFilename(fingerprint: String?, epoch: Int) -> String {
-        let base = fingerprint.flatMap { isFingerprint16($0) ? StoreKeyEnvelope.filename(forFingerprint: $0) : nil }
-            ?? StoreKeyEnvelope.legacyFilename
-        return String(base.dropLast(".json".count)) + ".stale-\(epoch).json"
-    }
-
     /// `<library8>` — the library ID's first eight characters.
     public static func library8(_ libraryID: String) -> String { String(libraryID.prefix(8)) }
     /// `<mac8>` — the device identity's first eight characters (§3.2).

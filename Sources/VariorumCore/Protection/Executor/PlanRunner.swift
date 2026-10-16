@@ -277,23 +277,6 @@ extension ProtectionExecutor {
     /// is ignored, reported and deleted. `typed`: the secrets a resume may
     /// need (a plan never holds one).
     public func settle(_ library: inout UnlockedLibrary, typed: TypedSecrets = .none) async throws -> SettleOutcome {
-        // FIRST, before the settle acts on anything against the file's record:
-        // a library file older than this Mac's own memory loses to it (§3.6,
-        // P-U4-6 ratified (a) — assess's first arm, run here when this Mac's
-        // newer section names an act, since rolling that act back or finishing
-        // it against the stale record writes the stale facts over the memory).
-        // The road that found it: a landing names its act in the OUTGOING
-        // library's memory too, and that library's older file, captured before
-        // and written back into the slot alone, rolled the long-done landing
-        // back against itself — Castle remembered, Standard believed (VX-305
-        // ladder round 1, NEW-1). With nothing in flight assess owes the same
-        // re-key as a repair.
-        if guards.libraryFileLosesToMemoryOn, library.section.actInFlight != nil, let record = library.record,
-           let memory = library.memory, memory.deviceSection.deviceID == library.section.deviceID,
-           memory.keyEpoch > record.keyEpoch, memory.currentFingerprint != record.currentFingerprint,
-           try rekeyOlderLibraryFile(to: memory.currentFingerprint, &library) == nil {
-            log("settle: the library file was older than this Mac remembers — it lost to the memory first")
-        }
         let sealed = try leaves.plans.readPlan()
         let reach = reach(key: library.key, keyFile: library.keyFile)
         func verified() -> ProtectionPlan? {
@@ -308,21 +291,9 @@ extension ProtectionExecutor {
                     // names resumes — the planted and the replayed plan.
                     return .resumed(try await resume(plan, &library, typed: typed))
                 }
-                // An act no identity here can resume — a Mac replaced mid-act
-                // (its predecessor's) — left another key's file in the live
-                // place: before the plan goes, the current key gets its own
-                // file back from what the plan carried (the roll back's restore
-                // — the memory's mirror went with the old Mac; VX-305 U4, the
-                // soak's seed 2). Only a plan that verifies, only the current
-                // key's own file. The stray is overwritten in place deliberately
-                // — a never-swapped act's new-key file or a replayed genuine one,
-                // whose keys the restored file's history already holds;
-                // the copy repair's set-aside is the belt (VX-305 ladder round 2,
-                // NIT 2).
-                if let outgoing = Self.outgoingKeyFile(verified(), for: library), library.keyFile?.fingerprint != library.fingerprint {
-                    try writeLiveKeyFile(outgoing, &library)
-                    log("settle: the current key's own file restored from an act no identity here resumes")
-                }
+                // (A plan nothing here names never restores a key file — the
+                // restore for an act no identity here resumes left with VX-378
+                // U1, rules 21 and 23.)
                 leaves.diagnostics.report(.planIgnored(.noActInFlight))
                 log("settle: a plan this Mac's section doesn't name — ignored")
                 try leaves.plans.deletePlan()
@@ -400,13 +371,6 @@ extension ProtectionExecutor {
         case VaultRefusal.unreachable, VaultRefusal.notSignedIn: return true
         default: return false
         }
-    }
-
-    /// The current key's own file a re-key's plan carried, when it is that.
-    static func outgoingKeyFile(_ plan: ProtectionPlan?, for library: UnlockedLibrary) -> KeyFile? {
-        guard let outgoing = plan?.parameters?.outgoingKeyFile, outgoing.fingerprint == library.fingerprint,
-              outgoing.libraryID == (library.record?.libraryID ?? outgoing.libraryID) else { return nil }
-        return outgoing
     }
 
     func resume(_ plan: ProtectionPlan, _ library: inout UnlockedLibrary, typed: TypedSecrets) async throws -> ActOutcome {

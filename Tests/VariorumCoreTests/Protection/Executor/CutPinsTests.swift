@@ -70,3 +70,86 @@ struct CutPinsTests {
                 "a leave's first vault write left an Apple key id with no wrap — the stuck leave's window (rule 12)")
     }
 }
+
+@Suite("VX-378 U1 — rule 21: no repair by guessing (red on the pre-cut tree)")
+struct CutPinsRule21Tests {
+    /// RULE 1 + RULE 21: the sealed mirror is the redundant copy, restored
+    /// ONLY into an empty live place. A live key file that lost a lock is not
+    /// rewritten from the mirror by a repair (the old `mirrorHoldsMore` arm).
+    @Test func aLiveKeyFileThatLostALockIsNotRewrittenFromTheMirror() throws {
+        var world = try AWorld(.castle)
+        var memory = world.agreeingMemory
+        memory.keyFileMirror = world.liveFile
+        world.memory = memory
+        world.liveFile.words = nil
+        #expect(!(try world.assessed().repairs.contains(.restoreKeyFileFromMirror)),
+                "a present live key file was owed a rewrite from the mirror")
+    }
+
+    /// RULE 21: another key's file in the live place is never overwritten —
+    /// neither from the mirror nor from a catalogued copy.
+    @Test func anotherKeysFileInTheLivePlaceIsNotOverwrittenByARepair() throws {
+        var world = try AWorld(.castle)
+        var memory = world.agreeingMemory
+        memory.keyFileMirror = world.liveFile
+        world.memory = memory
+        world.liveFile = try KeyFile.building(
+            libraryID: world.world.library, key: StoreKey.mint(), epoch: 9, locks: NewKeyLocks(passphrase: world.world.p))
+        let restores = try world.assessed().repairs.filter { "\($0)".hasPrefix("restoreKeyFile") }
+        #expect(restores.isEmpty, "a repair would overwrite the stray: \(restores)")
+    }
+
+    /// RULE 21, at the executor: the mirror's restore never writes over a file
+    /// in the live place.
+    @Test func theMirrorsRestoreNeverWritesOverAFileInTheLivePlace() async throws {
+        let fixture = try EX(.standard)
+        var present = try #require(fixture.world.liveFormat3)
+        present.words = nil
+        fixture.world.liveKeyFile = present
+        let executor = fixture.executor()
+        var library = try fixture.unlocked(executor)
+        try executor.runRepairs([.restoreKeyFileFromMirror], on: &library)
+        #expect(fixture.world.liveFormat3 == present, "the restore wrote over the file in the live place")
+    }
+
+    /// RULE 21 ("it never repairs by guessing"): with the live key file AND
+    /// its mirror gone, no repair puts a catalogued copy's key file in the
+    /// live place (rule 27's honest outcome is U2's refusal).
+    @Test func noRepairRestoresTheLiveKeyFileFromACopy() throws {
+        var world = try AWorld(.castle)
+        world.memoryAbsent = true
+        let frozen = world.liveFile
+        let folders = CF.macFolder(world.world.library, CF.macA)
+        world.extraEntries = [
+            CatalogEntry(place: .container, folders: folders, name: CF.snapshotName(CF.stamp(2), world.key)),
+            CatalogEntry(place: .container, folders: folders, name: CF.pairName(CF.stamp(2), world.key), bytes: try frozen.encoded()),
+        ]
+        var facts = try world.facts()
+        facts.catalog = Catalog.build(Array(try world.entries().dropFirst()))
+        let restores = assess(facts).repairs.filter { "\($0)".hasPrefix("restoreKeyFile") }
+        #expect(restores.isEmpty, "a repair would restore the live key file from a copy: \(restores)")
+    }
+
+    /// RULE 21: a library file older than what this Mac remembers is not
+    /// re-encrypted under the memory's key by the open ("memory wins" — the
+    /// older-library-file re-key). U2 refuses instead.
+    @Test func aLibraryFileReplayedAloneIsNotReKeyedToTheMemorysKey() async throws {
+        let world = try await scenarioWorld { try await $0.fresh(on: $0.macA) }
+        await world.done([.launch("macA"), .useCastle("macA", .alwaysAsk, newWords: false)])
+        let castleKey = try #require(world.macA.slot?.fingerprint)
+        await world.step(.tamper("macA", .replayLibraryFile))
+        #expect(world.macA.slot?.fingerprint != castleKey, "the replayed file was re-keyed to the memory's key")
+    }
+
+    /// RULE 21: a library file replayed under the SAME key does not take the
+    /// facts this Mac last confirmed (the old `restoreRecordFactsFromMemory`).
+    @Test func aReplayedRecordDoesNotTakeTheMemorysFacts() throws {
+        var world = try AWorld(.standard)
+        var memory = world.agreeingMemory
+        memory.lastConfirmed = ConfirmedFacts(mode: .standard, account: "an-account")
+        memory.deviceSection = world.section.bumped()
+        world.memory = memory
+        let names = try world.assessed().repairs.map { "\($0)" }
+        #expect(!names.contains("restoreRecordFactsFromMemory"), "the record would take the memory's facts")
+    }
+}

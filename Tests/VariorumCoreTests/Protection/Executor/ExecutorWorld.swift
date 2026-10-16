@@ -36,7 +36,6 @@ enum WorldWrite: Equatable, CustomStringConvertible {
     case swap(String)
     case discardStaged
     case keyFile(String)
-    case keyFileAside(String)
     case memory(String)
     case plan
     case planDelete
@@ -62,7 +61,6 @@ enum WorldWrite: Equatable, CustomStringConvertible {
         case .swap(let fp): return "swap \(fp)"
         case .discardStaged: return "discard-staged"
         case .keyFile(let fp): return "keyfile \(fp)"
-        case .keyFileAside(let name): return "keyfile-aside \(name)"
         case .memory(let fp): return "memory \(fp)"
         case .plan: return "plan"
         case .planDelete: return "plan-"
@@ -188,9 +186,6 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     var aside: [LibraryFile] = []
     var copies: [String: LibraryFile] = [:]
     var liveKeyFile: KeyFile?
-    var catalogKeyFiles: [String: KeyFile] = [:]
-    /// Key files moved out of the live place, by their set-aside names.
-    var setAsideKeyFiles: [String: KeyFile] = [:]
     var memories: [String: Sealed<DeviceMemory>] = [:]
     var plan: Sealed<ProtectionPlan>?
     var paused = false
@@ -393,23 +388,6 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     func writeLiveKeyFile(_ file: KeyFile) throws {
         liveKeyFile = file
         try wrote(.keyFile(f8(file.fingerprint)))
-    }
-
-    func readKeyFile(catalogID: String) throws -> KeyFile? { catalogKeyFiles[catalogID] }
-
-    /// The move, never a delete, and an existing name refused — but this U3
-    /// harness keeps set-aside files OUT of its catalog view: it has none
-    /// (`catalogKeyFiles` is a test-filled lookup by id), so a set-aside file
-    /// is not readable here by catalog id. The scenario world (`DeviceLeaves`)
-    /// models that half — the file stays in the container, catalogued as
-    /// `.setAside` — and its pins assert it. VX-305 ladder round 2, NIT 1.
-    func setAsideLiveKeyFile(as name: String) throws -> Bool {
-        guard let file = liveKeyFile else { return true }
-        guard setAsideKeyFiles[name] == nil else { return false }
-        setAsideKeyFiles[name] = file
-        liveKeyFile = nil
-        try wrote(.keyFileAside(name))
-        return true
     }
 
     // MARK: - Memory, plans

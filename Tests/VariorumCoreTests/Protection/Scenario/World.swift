@@ -1030,19 +1030,6 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
         try wrote("keyfile \(f8(file.fingerprint))")
     }
 
-    func readKeyFile(catalogID: String) throws -> KeyFile? {
-        guard let (fs, path) = resolve(catalogID) else { return nil }
-        return fs.files[path]?.keyFile
-    }
-
-    func setAsideLiveKeyFile(as name: String) throws -> Bool {
-        guard let file = device.container.files[SPath.liveKeyFile] else { return true }
-        guard device.container.files[name] == nil else { return false }
-        device.container.files[name] = file
-        device.container.files[SPath.liveKeyFile] = nil
-        try wrote("keyfile-aside \(name)")
-        return true
-    }
 
     // MARK: Memory, plans
 

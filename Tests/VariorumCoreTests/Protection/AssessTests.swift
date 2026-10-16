@@ -400,7 +400,7 @@ struct AssessRepairTests {
                 case .makeTouchIDItem, .deleteTouchIDItem:
                     Issue.record("\(repair) — a guard's bug shape with every guard on")
                 case .deleteSilentItem, .deleteRetiredAppleKey, .landAppleWrap, .refreshMemory, .refreshRecordSection,
-                     .restoreKeyFileFromMirror, .restoreKeyFileFromCopy, .recordAlwaysAskQuietly, .rekeyOlderLibraryFile, .recordHeldSyncKeysFacts, .restoreRecordFactsFromMemory, .retireOwnAppleKeys:
+                     .restoreKeyFileFromMirror, .recordAlwaysAskQuietly, .recordHeldSyncKeysFacts, .retireOwnAppleKeys:
                     continue
                 }
             }
@@ -417,22 +417,23 @@ struct AssessRepairTests {
         #expect(try world.assessed().repairs.contains(.refreshRecordSection))
     }
 
-    /// The key file and the sealed mirror agree — never by shrinking: a file
-    /// that lost a road (or went missing) is written back from the mirror; a
-    /// file that changed a wrap (a key door) is followed by the mirror.
-    @Test func theKeyFileAndItsMirrorAgreeNeverByShrinking() throws {
+    /// The key file and the sealed mirror (rule 1): the mirror is written back
+    /// ONLY into an empty live place; a present file is never rewritten from
+    /// it (rule 21 — VX-378 U1); a file that changed a wrap (a key door) is
+    /// followed by the mirror.
+    @Test func theMirrorIsWrittenBackOnlyIntoAnEmptyLivePlace() throws {
         var world = try AWorld(.castle)
         var memory = world.agreeingMemory
         memory.keyFileMirror = world.liveFile
         world.memory = memory
         #expect(!(try world.assessed().repairs.contains(.restoreKeyFileFromMirror)))
         #expect(!(try world.assessed().repairs.contains(.refreshMemory)))
-        // A words wrap removed from the file: written back.
+        // A words wrap removed from the file: NOT written back (rule 21).
         var stripped = world.liveFile
         stripped.words = nil
         let full = world.liveFile
         world.liveFile = stripped
-        #expect(try world.assessed().repairs.contains(.restoreKeyFileFromMirror))
+        #expect(!(try world.assessed().repairs.contains(.restoreKeyFileFromMirror)))
         // The passphrase changed by a key door: the mirror follows.
         world.liveFile = try full.settingPassphrase(try PF.passphraseKey("changed"), for: world.key)
         let changed = try world.assessed().repairs

@@ -17,7 +17,9 @@ struct MoreScenarios {
     /// "replays: a plan, a memory item, and a library file alone, each
     /// changing nothing" — the file swap by a login-password holder among them.
     @Test func replaysAndTheFileSwap() async throws {
-        for tamper in [Tamper.replayPlan, .replayMemory, .replayKeyFile, .replayLibraryFile, .plantPlan, .editSealedSetting,
+        // (The key file and the library file replayed alone left with the
+        // restores and "memory wins" — VX-378 U1, rule 21; U2 refuses them.)
+        for tamper in [Tamper.replayPlan, .replayMemory, .plantPlan, .editSealedSetting,
                        .plantAppleWrap, .dropWordsLock, .deleteKeyFile, .deleteTouchIDItem, .deleteMemoryItem] {
             let world = try await scenarioWorld { try await $0.fresh(on: $0.macA) }
             await world.done([.launch("macA"), .useCastle("macA", .alwaysAsk, newWords: false), .setScheduledExport("macA", false)])

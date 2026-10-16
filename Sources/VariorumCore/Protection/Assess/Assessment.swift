@@ -158,25 +158,14 @@ public enum Repair: Hashable, Sendable {
     /// Always: the record's home of this Mac's section is behind the newer
     /// home — written forward (the same reconciliation).
     case refreshRecordSection
-    /// Always: the live key file is missing, or lost a road the sealed mirror
-    /// in what this Mac remembers still holds (a passphrase, words or master
-    /// lock, a history entry) — it is written back from the
-    /// mirror. Never an Apple wrap: those leave legitimately (a retirement, a
-    /// re-key) and are never re-added by a repair.
+    /// Always: the live key file is ABSENT and the sealed mirror in what this
+    /// Mac remembers is the current key's — it is written back (rule 1: the
+    /// mirror is the redundant copy, restored only when the live file is
+    /// absent — never a repair of a stray). Never an Apple wrap: those are
+    /// never re-added by a repair. (The restores from a copy and over a
+    /// stray, and the older library file's re-key, left with VX-378 U1 —
+    /// rule 21.)
     case restoreKeyFileFromMirror
-    /// Always: the live key file AND its mirror are gone (both deleted) but a
-    /// copy's frozen key file of the CURRENT key is catalogued — the newest is
-    /// put back as the live file (its Apple wraps never re-added). VX-305 U4.
-    case restoreKeyFileFromCopy(keyFileID: String)
-    /// Always, first: the library file is OLDER than what this Mac remembers
-    /// — a library file replayed alone (§3.6, promise 10): the memory names a
-    /// newer key epoch and current key, the live key file is that key's, and
-    /// its history holds the file's key. The file is re-encrypted under the
-    /// current key and takes the memory's facts (the current key's kind as
-    /// the mode; the account last confirmed) — the open rule's same-library
-    /// branch applied to the slot (§3.7: never lowers the mode, never keeps
-    /// its own key). PROVISIONAL P-U4-6. VX-305 U4.
-    case rekeyOlderLibraryFile(toFingerprint: String)
     /// Always, synced: what this Mac remembers names no vault facts (its
     /// memory item went — a wiped keychain) while this device holds the
     /// account's sync keys silently or for the session — the held keys'
@@ -184,11 +173,6 @@ public enum Repair: Hashable, Sendable {
     /// keys later reads as a follow owed. A Touch ID item is never read for it
     /// (no repair prompts). VX-305 U4.
     case recordHeldSyncKeysFacts
-    /// Always, first: a library file replayed from before an act that changed
-    /// its facts under the same key (a join) — the memory's newer section says
-    /// so — takes back the mode and account last confirmed here (§3.6,
-    /// promise 10). PROVISIONAL P-U4-6. VX-305 U4.
-    case restoreRecordFactsFromMemory
     /// Castle: an Apple key this Mac's section lists as its own for the
     /// library and not retired — retired (recorded), then deleted on sight.
     /// VX-305 U4.

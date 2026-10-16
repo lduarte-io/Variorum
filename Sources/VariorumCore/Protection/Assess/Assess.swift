@@ -173,27 +173,6 @@ public enum AssessRules {
         return facts.catalog.keyFile(id: id)?.document
     }
 
-    /// P-U4-6 (ratified (a), "Memory wins"; §3.6 "a library file replayed
-    /// alone loses to the memory"): the key file that PROVES a library file
-    /// older than this Mac's own memory loses to it — the memory's current
-    /// key's file whose history holds the file's key. The live one; or, when
-    /// the file came back ALONE — the live place holds no key file of THIS
-    /// library (absent, or another library's, as a landing that set this one
-    /// aside leaves it) — the memory's own sealed mirror of that file (VX-305
-    /// ladder round 1, NEW-1). A whole-pair restore — the file's own key file
-    /// live beside it, her Time Machine restore (P-U4-12) — never qualifies.
-    /// One reading, shared by assess's arm, the
-    /// executor's re-key and the settle that runs it first.
-    static func olderLibraryFileProof(
-        memoryFingerprint: String, mirror: KeyFile?, live: KeyFile?, fileFingerprint: String, libraryID: String
-    ) -> KeyFile? {
-        func holds(_ file: KeyFile) -> Bool { file.history.contains { $0.fingerprint == fileFingerprint } }
-        if let live, live.fingerprint == memoryFingerprint { return holds(live) ? live : nil }
-        guard live.map({ $0.libraryID != libraryID }) ?? true, let mirror, mirror.fingerprint == memoryFingerprint,
-              mirror.libraryID == libraryID, holds(mirror) else { return nil }
-        return mirror
-    }
-
     public static func repairs(
         _ facts: ProtectionFacts, _ unlocked: UnlockedFacts, mode: ModeVerdict, account: AccountVerdict,
         vault: VaultVerdict?, guards: ProtectionGuards
@@ -201,35 +180,9 @@ public enum AssessRules {
         var repairs: [Repair] = []
         var faults: [Fault] = []
         let record = unlocked.record
-        // FIRST: a library file older than what this Mac remembers (a library
-        // file replayed alone, §3.6) loses to the memory — before any repair
-        // moves toward its stale record.
-        // (Only THIS Mac's memory speaks for it: an item another identity
-        // left — a replayed one from the Mac this one replaced — names
-        // another section, and its versions mean nothing here; VX-305 U4, the
-        // soak's seed 17.)
-        let ownMemory = unlocked.memory.flatMap { $0.deviceSection.deviceID == unlocked.thisMac.deviceID ? $0 : nil }
-        // (The proof: the live file of the memory's key, or — the file back
-        // alone, the live place holding no file of this library — the
-        // memory's own sealed mirror; `olderLibraryFileProof`.)
-        if guards.libraryFileLosesToMemoryOn, let memory = ownMemory, memory.keyEpoch > record.keyEpoch,
-           memory.currentFingerprint != record.currentFingerprint,
-           olderLibraryFileProof(
-               memoryFingerprint: memory.currentFingerprint, mirror: memory.keyFileMirror, live: liveKeyFile(facts, unlocked),
-               fileFingerprint: unlocked.currentFingerprint, libraryID: record.libraryID) != nil {
-            return ([.rekeyOlderLibraryFile(toFingerprint: memory.currentFingerprint)], faults)
-        }
-        // …and under the SAME key: a library file replayed from before an act
-        // that changed the library's facts without a re-key (joining an
-        // account) — this Mac's section in the memory is newer than the file's,
-        // and the facts last confirmed here differ from the file's.
-        if guards.libraryFileLosesToMemoryOn, let memory = ownMemory, memory.keyEpoch == record.keyEpoch,
-           memory.currentFingerprint == record.currentFingerprint, let recordSection = unlocked.recordSection,
-           memory.deviceSection.version > recordSection.version, let confirmed = memory.lastConfirmed,
-           confirmed != ConfirmedFacts(mode: record.mode, account: record.account),
-           unlocked.familyTree.entry(record.currentFingerprint).map({ $0.kind == confirmed.mode }) ?? true {
-            return ([.restoreRecordFactsFromMemory], faults)
-        }
+        // (A library file older than what this Mac remembers no longer loses
+        // to the memory by a repair — "memory wins" left with VX-378 U1, rule
+        // 21: U2 detects the disagreement and refuses.)
         // ALWAYS: the two homes agree — nothing lost by construction (newer
         // wins, the retired ids and the tree are unions).
         do {
@@ -240,50 +193,17 @@ public enum AssessRules {
                 || memory?.familyTree != unlocked.familyTree
                 || memory?.deviceSection != unlocked.thisMac
                 || memory?.lastConfirmed != ConfirmedFacts(mode: record.mode, account: record.account)
-            // The key file and its mirror, for the current key: the file never
-            // shrinks to match the mirror's word, nor the mirror to the file's.
+            // The key file and its mirror, for the current key: the mirror is
+            // written back ONLY when the live file is absent (rule 1). Another
+            // key's file in the live place, or a live file with fewer roads
+            // than the mirror, is no repair's to undo (rule 21 — the restore
+            // over a stray and `mirrorHoldsMore` left with VX-378 U1).
             if let mirror = memory?.keyFileMirror, mirror.fingerprint == unlocked.currentFingerprint {
                 if let live = liveKeyFile(facts, unlocked) {
-                    if live.fingerprint != mirror.fingerprint {
-                        // Another key's file in the live place with nothing in
-                        // flight: an act its own identity can't resume (a Mac
-                        // replaced mid-act) left it — the roll back's restore
-                        // (VX-305 U4, found by the scenario world).
-                        repairs.append(.restoreKeyFileFromMirror)
-                    } else if mirrorHoldsMore(mirror, than: live) {
-                        repairs.append(.restoreKeyFileFromMirror)
-                    } else if live != mirror {
-                        stale = true
-                    }
+                    if live.fingerprint == mirror.fingerprint, live != mirror { stale = true }
                 } else {
                     repairs.append(.restoreKeyFileFromMirror)
                 }
-            }
-            // No file of the current key in the live place — both gone (a
-            // login-password holder deleted the live file and its mirror), OR
-            // ANOTHER key's file there with no mirror of the current key's (a
-            // roll back with no plan to trust and the memory item gone: VX-305
-            // ladder round 1, the MAJOR — §3.3's "Always: the record, what this
-            // Mac remembers and the key file agree") — with nothing in flight:
-            // the newest catalogued frozen copy of the current key's own file,
-            // same library, comes back (the executor sets another key's file
-            // ASIDE first, never deleting it). This repairs the LIVE KEY FILE
-            // from this Mac's own catalogued frozen pair: it never offers, opens
-            // or restores a library copy, never touches the library file and
-            // adds no unlock-screen face — it is not her dropped newest-copy
-            // offer (P-U4-10, "lets drop the healthy copy deal"). A restored
-            // file keeps the locks of its day; re-locking under current secrets
-            // is P-R1-1's door. With no such copy the state stays — P-R1-1.
-            if unlocked.thisMac.actInFlight == nil,
-               liveKeyFile(facts, unlocked)?.fingerprint != unlocked.currentFingerprint,
-               memory?.keyFileMirror.map({ $0.fingerprint != unlocked.currentFingerprint }) ?? true,
-               let copy = facts.catalog.keyFiles
-                .filter({ file in
-                    guard let keyFile = file.document else { return false }
-                    return keyFile.fingerprint == unlocked.currentFingerprint && keyFile.libraryID == record.libraryID
-                })
-                .max(by: { ($0.frozenAt ?? .distantPast, $0.id) < ($1.frozenAt ?? .distantPast, $1.id) }) {
-                repairs.append(.restoreKeyFileFromCopy(keyFileID: copy.id))
             }
             if stale { repairs.append(.refreshMemory) }
             if unlocked.recordSection != unlocked.thisMac { repairs.append(.refreshRecordSection) }
@@ -297,12 +217,10 @@ public enum AssessRules {
             }
         }
         // The mode's repairs and faults read the live file only when it is the
-        // CURRENT key's: another key's file in the live place (a roll back
-        // with nothing to restore from — VX-305 ladder round 1) is no "Castle
+        // CURRENT key's: another key's file in the live place is no "Castle
         // key with an Apple wrap" and owes no Standard wrap — it is its own
-        // fault. Mid-act the live file is the act's new key's by design (no
-        // fault). The raw file stays for the arms above that need it whatever
-        // its key (`rekeyOlderLibraryFile`, the restores).
+        // fault (U2 makes it the refusal of rule 21). Mid-act the live file is
+        // the act's new key's by design (no fault).
         let rawLive = liveKeyFile(facts, unlocked)
         let live = rawLive.flatMap { $0.fingerprint == unlocked.currentFingerprint ? $0 : nil }
         if rawLive != nil, live == nil, unlocked.thisMac.actInFlight == nil, let id = unlocked.liveKeyFileID {
@@ -325,15 +243,6 @@ public enum AssessRules {
                             repairs: &repairs, faults: &faults)
         }
         return (repairs, faults)
-    }
-
-    /// Does the sealed mirror hold a road the live file (same key) lost — a
-    /// secret or master lock, a history entry? Apple wraps are
-    /// left out: they leave legitimately and a repair never re-adds one.
-    static func mirrorHoldsMore(_ mirror: KeyFile, than live: KeyFile) -> Bool {
-        let roads: Set<KeyFileRoad> = [.passphrase, .words, .master, .masterThroughWords]
-        if !mirror.roads.intersection(roads).isSubset(of: live.roads) { return true }
-        return !Set(mirror.history.map(\.fingerprint)).isSubset(of: Set(live.history.map(\.fingerprint)))
     }
 
     /// The precondition under which a key's copy may go: the current key's

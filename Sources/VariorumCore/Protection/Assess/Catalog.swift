@@ -86,8 +86,6 @@ public enum CopyKind: String, Codable, Sendable, CaseIterable {
 public enum KeyFileRole: String, Codable, Sendable, CaseIterable {
     /// `variorum-library-keys.json` beside the slot — the live key file.
     case live
-    /// A `.stale-*` key file beside the slot (the set-aside shape).
-    case setAside
     /// A snapshot's own key file (`<snapshot>.keys.json`).
     case snapshotPair
     /// A key file inside a `Previous Libraries` or safety-copy folder.
@@ -277,7 +275,6 @@ public struct Catalog: Equatable, Sendable {
     private static func keyFileRole(_ name: CatalogNames.FileName, _ location: Location) -> KeyFileRole? {
         switch (location, name) {
         case (.besideLibrary, .keyFile): return .live
-        case (.besideLibrary, .setAsideKeyFile): return .setAside
         case (_, .snapshotKeyFile): return .snapshotPair
         case (.previousLibrary, _), (.adoptionSafety, _): return .asideCopy
         case (.besideLibrary, _), (.macFolder, _), (.notACopyPlace, _), (.copyHome, _): return nil
@@ -289,14 +286,12 @@ public struct Catalog: Equatable, Sendable {
         return place == .container ? .thisMacsContainer : .unattributed
     }
 
-    /// The day a key file was frozen: a snapshot pair's stamp, a set-aside
-    /// file's epoch, an aside folder's stamp (its files moved there whole on
-    /// that day). Nil where its place doesn't say (the live file, a folder
-    /// key file written once when absent).
+    /// The day a key file was frozen: a snapshot pair's stamp, an aside
+    /// folder's stamp (its files moved there whole on that day). Nil where
+    /// its place doesn't say (the live file).
     private static func frozenAt(_ name: CatalogNames.FileName, _ location: Location) -> Date? {
         switch name {
         case .snapshotKeyFile(let stamp, _): return stamp
-        case .setAsideKeyFile(_, let at): return at
         default: break
         }
         switch location {

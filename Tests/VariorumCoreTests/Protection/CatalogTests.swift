@@ -73,14 +73,13 @@ struct CatalogNameTests {
         // Today's key-file names are not read (rule 26).
         #expect(CatalogNames.parseFile(StoreKeyEnvelope.filename(forFingerprint: fp)) == nil)
         #expect(CatalogNames.parseFile(StoreKeyEnvelope.legacyFilename) == nil)
-        // The set-aside writers (`StoreIdentity.setAside`, the launch gate's): the
-        // same expression, restated here.
+        // The set-aside shape (today's `StoreIdentity.setAside`, and the repair
+        // layer's set-aside that left with VX-378 U1 — rules 19, 21) is not
+        // read: no writer of this design makes it.
         for base in [StoreKeyEnvelope.filename(forFingerprint: fp), StoreKeyEnvelope.legacyFilename] {
             let aside = URL(fileURLWithPath: "/x/" + base).deletingPathExtension()
                 .appendingPathExtension("stale-\(Int(when.timeIntervalSince1970)).json").lastPathComponent
-            let expected: CatalogNames.FileName = .setAsideKeyFile(
-                fingerprint: base == StoreKeyEnvelope.legacyFilename ? nil : fp, setAsideAt: when)
-            #expect(CatalogNames.parseFile(aside) == expected, "\(aside)")
+            #expect(CatalogNames.parseFile(aside) == nil, "\(aside)")
         }
         // The adoption's two stamp folders (`LibraryAdoption.plan`).
         let store = URL(fileURLWithPath: "/lib/variorum.sqlite")
@@ -204,7 +203,8 @@ struct CatalogAttributionTests {
         entries.append(CatalogEntry(place: .container, folders: safety, name: "variorum.sqlite"))
         entries.append(CatalogEntry(place: .container, folders: safety, name: ProtectionNames.keyFilename,
                                     bytes: try CF.format3(library: CF.lib1, key: old)))
-        // Beside the slot: the live file, a set-aside file, the slot itself.
+        // Beside the slot: the live file, the slot itself — and a set-aside
+        // file, foreign now (rules 19, 21).
         entries.append(CatalogEntry(place: .container, name: "variorum.sqlite"))
         entries.append(CatalogEntry(place: .container, name: ProtectionNames.keyFilename,
                                     bytes: try CF.format3(library: CF.lib1, key: live, epoch: 2, history: [old])))
@@ -244,10 +244,10 @@ struct CatalogAttributionTests {
         let (catalog, _) = try Self.world()
         func roles(_ role: KeyFileRole) -> Int { catalog.keyFiles.filter { $0.role == role }.count }
         #expect(roles(.live) == 1)
-        #expect(roles(.setAside) == 1)
         #expect(roles(.snapshotPair) == 3)
         #expect(roles(.asideCopy) == 2)
-        #expect(catalog.keyFiles.count == 7, "the Mac folder's own key file (the move's gift) is not this design's — rule 19")
+        #expect(catalog.keyFiles.count == 6,
+                "the Mac folder's own key file (the move's gift) and the set-aside file are not this design's — rules 19, 21")
         #expect(catalog.liveKeyFile?.heldFingerprints.count == 2, "the live file leads to its history too")
     }
 
@@ -257,6 +257,7 @@ struct CatalogAttributionTests {
         #expect(names.contains("variorum-backup-a1-2026-10-05-101010.sqlite"))
         #expect(names.contains("variorum-backup-seed-drill-1.sqlite"))
         #expect(names.contains(StoreKeyEnvelope.legacyFilename), "today's key files are foreign now (rule 26)")
+        #expect(names.contains("variorum-keys.stale-1791000000.json"), "the set-aside shape is foreign now (rules 19, 21)")
         #expect(catalog.foreign.contains { $0.folders == ["Backups", "zzzz"] })
         #expect(!names.contains("note.md"), "an export is hers, not foreign to a copy's place")
         #expect(!catalog.copies.contains { $0.name.hasPrefix("variorum-backup-a1-") || $0.name.contains("seed-drill") })

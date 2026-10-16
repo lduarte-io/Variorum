@@ -293,32 +293,9 @@ extension SWorld {
             return [Violation(promise: 1, device: device.name,
                               detail: "the memory names \(f8(memory.currentFingerprint))#\(memory.keyEpoch), the record \(f8(record.currentFingerprint))#\(record.keyEpoch)")]
         }
-        // …and THE KEY FILE agrees (§3.3's "Always: the record, what this Mac
-        // remembers and the key file agree" — VX-305 ladder round 1, the final
-        // call §1(c)): with nothing in flight and no repair owed that would
-        // bring the current key's own file back, the live place's format-3
-        // file IS the record's current key's. Keyed on "no repair owed", so a
-        // repair pending its run passes, and a state no repair can leave (the
-        // round-1 wedge) fails. Stated residue: PROVISIONAL P-R1-1 — no
-        // catalogued frozen copy of the current key's file to restore from
-        // (the honest refusal stands).
-        if liveKeyFile(device)?.fingerprint != record.currentFingerprint {
-            let assessment = assessed(device)
-            let owed = assessment.repairs.contains { repair in
-                switch repair {
-                case .restoreKeyFileFromCopy, .restoreKeyFileFromMirror, .rekeyOlderLibraryFile: return true
-                default: return false
-                }
-            }
-            let copyExists = catalog(device).keyFiles.contains { file in
-                guard let keyFile = file.document else { return false }
-                return keyFile.fingerprint == record.currentFingerprint && keyFile.libraryID == record.libraryID
-            }
-            if !owed, copyExists {
-                return [Violation(promise: 1, device: device.name,
-                                  detail: "the live key file is \(liveKeyFile(device).map { f8($0.fingerprint) } ?? "absent"), the record's key \(f8(record.currentFingerprint)) — and no repair brings its own file back")]
-            }
-        }
+        // (Its key-file clause — "no repair owed would bring the current key's
+        // own file back" — left with the restores, VX-378 U1, rule 21: U2's
+        // refusal is the answer and U4 rewrites the promise.)
         return []
     }
 
@@ -632,9 +609,8 @@ extension SWorld {
     }
 
     /// …and over a GROUP of tampers in one closed window (VX-305 ladder round
-    /// 1): the same claims, the group drawn so it never takes the stated
-    /// limit's shape (`ScenarioGenerator.rollsBackBothHomes`) — except a group
-    /// that holds `.replayBothHomes` itself (a fixed scenario's).
+    /// 1): the same claims — the stated limit's shape only in a group that
+    /// holds `.replayBothHomes` itself (a fixed scenario's).
     func sealed(_ device: SDevice, before was: Posture, tampers: [Tamper]) -> [Violation] {
         guard was.mode == .castle else { return [] }
         let now = posture(device)
