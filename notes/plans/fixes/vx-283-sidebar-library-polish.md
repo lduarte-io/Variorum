@@ -4325,6 +4325,33 @@ lower quarter → row 5's upper quarter → release.
   and up. It names the one-commit fallback (main's road exactly) if any drop fails.
 - The build is leg **U2d**, a FRESH implementer (U2c's is at its context cliff).
 
+### U2d — the build (F2, as P-U2d-1 rules)
+
+**Implementer:** a fresh Opus 5.5 at xhigh (2026-10-16, morning, under her second overnight mandate), worktree
+`~/dev/variorum-vx-283`, DerivedData `App/Variorum/DerivedData/vx283-u2d` (+ one tree per named revert,
+`vx283-u2d-r<letter>`). **Not done by this session (first line):** no stage work of any kind — no `xcodebuild test`, no
+launch, no walk. The pins' runs, the reverts' runs and the batch are the orchestrator's window (`u2d/window.sh`), and
+the hand check that proves delivery is hers (the morning checklist's first item, P-U2d-1).
+
+**LIVE STATUS (per piece)**
+- F0 — this section opened; the SDK confirmed (below): DONE (this commit).
+- F1 — the pins, red-first, no product line: NEXT.
+- F2 — the fix (F2 on main's per-row API; the instrument stripped).
+- F3 — the trees: the fix + one per named revert (each named here BEFORE it is applied), each restored; the superseded
+  `vx283-u2c*` trees deleted.
+- F4 — `notes/plans/vx283-screens/u2d/window.sh` (gitignored) + READY FOR STAGE.
+
+**The SDK, confirmed before a line was written** (Xcode 27.0 27A266a, `MacOSX.sdk`, SwiftUI's
+`arm64e-apple-macos.swiftinterface`):
+- `dropDestination<T>(for payloadType: T.Type = T.self, action: @escaping (_ items: [T], _ location: CGPoint) -> Bool,
+  isTargeted: @escaping (Bool) -> Void = { _ in }) -> some View` (`:2709-2713`). It carries `@available(macOS,
+  introduced: 13.0, deprecated: 100000.0, …)`, the far-future form that emits no warning at a macOS 26 target, and
+  `@_disfavoredOverload`. With a `Bool`-returning two-parameter action plus an `isTargeted:` closure, the call can
+  resolve to this overload only. It is main's own road (main's `SidebarView.swift` Open row; `BookView.swift:840-850`
+  and the end zone `:873-875`).
+- `onDragSessionUpdated(_: (DragSession) -> Void)`, macOS 26 (`:32505-32509`): kept, per the ruling.
+- `Animation` is `Equatable` (SwiftUICore's interface `:24678`), so the settle can be pinned by value.
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
