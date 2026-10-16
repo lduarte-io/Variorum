@@ -4639,6 +4639,113 @@ Every revert tree was deleted after its step.
 (red on main, untouched). Restore: pgrep empty first; all five files `cmp`-identical to the copy; nine added keys
 deleted; PREFS CLEAN; castle-W1 present. **U2d is PROVEN by its pins and reverts.** The landing itself is unwalkable
 (the main-build control); the re-walk covers the source side, the rows, the footer edge and D8.
+
+#### U2d + U3c — RE-WALK RECORD
+
+**Walker:** a fresh Opus 5.5 at xhigh (no implementer of any VX-283 leg), 2026-10-16 08:14 → 08:41 MDT, on the
+orchestrator's claim `vx283-u2d` (not claimed, stolen or released by the walker; store copy + prefs export were the
+orchestrator's, `u2d/walk/store-before/` + `prefs-before.plist`, not redone). **Product:** the one prebuilt
+`App/Variorum/DerivedData/vx283-u2d/Build/Products/Debug/Variorum.app` (not rebuilt), launched with `open -n`, **PID
+53246**, told apart by its path; her app absent throughout; host `AX: true SCREEN: true`. Posture at launch: Standard,
+unlocked (the Bookcase came up), voice Study, appearance follow system (light); **no What's New sheet showed**. Window:
+AX-asked 1380 × 1081, macOS gave **1380 × 1010 at (60, 36)** (the screen's visible frame — so "the tallest window" is
+1010, the same as U1d's walk) for D1′–D7′; **1240 × 900** for D8. **Sidebar rect 60,36,236,1010**, captured as 2× region
+captures (D4a's and D4b's sidebar captures used a 900-pt rect by a helper default, fixed at once; every row they judge
+is in frame). Voice and appearance were flipped through Settings ▸ General's radio groups by AX. Screens in the gitignored
+`notes/plans/vx283-screens/u2d/walk/`; every image cited was opened and looked at; D5′ and D8's widths are also
+pixel-measured.
+
+- **D1′ — the drag's SOURCE, both voices · HOLDS.** Study light (the Bookcase, 14 rows): hover on row 3 "o museu", then
+  `dd:` and 14 `dm:` steps down to row 6. Held: the title chip rides AT the cursor (the cursor tip inside the chip at the
+  grab point, no offset) and the row's own place stays drawn. Carried back and released over its own place: the chip
+  slides back (a ghost at t+0.3 s) and nothing moves (before = after, bbox None). Hovering off and back, the same row
+  dragged again at once: it starts. Terminal dark (a note view, 4 rows, "a escola"): the same in every part, the second
+  drag started too. Files: `D1p-study-light-strip.png` (before · held · held-back · t0 · t0.3 · after) +
+  `D1p-study-light-held-zoom.png`, `D1p2-study-light-strip.png`, `D1p-terminal-dark-strip.png`,
+  `D1p2-terminal-dark-held-zoom.png`. **Landing not walkable (the sidebar road; the main-build control)** — no landing
+  and no insertion line was judged.
+- **D4 — nothing regressed on the rows (Study light) · HOLDS, all five.**
+  - (a) Click "a escola" on the Bookcase → it opens in Write, its row washed: `D4a-click-study-light-{before,after}{,-window}.png`.
+  - (b) ✕ on "2026-10-08" (not the shown note) → only that row goes; "a escola" stays current (⌘⇧4 → ⌘⇧3) and the pane is
+    unchanged: `D4b-x-other-study-light-strip.png` + `-after-window.png`.
+  - (c) ✕ on the shown "a escola" → the pane moves to the next note, the "2026-10-12" below it (now ⌘⇧3, washed; her ✕
+    rule): `D4c-x-shown-study-light-strip.png` + `-after-window.png`.
+  - (d) Right-click → Open Beside · Open in New Window · Star · **Close** · **Close All Notes**; ⎋ dismisses it and the
+    sidebar is byte-identical to before: `D4d-rightclick-study-light-menu.png` (+ `-before`, `-dismissed`).
+  - (e) ⇧⌘W on that "2026-10-12" (905 w) → closed, landing on the next row, the other "2026-10-12" (0 w):
+    `D4e-shiftcmdw-study-light-strip.png` + `-after-window.png`.
+  - **The file drop: SKIPPED** — the column's import drop is a sidebar drop too, so the synthetic road cannot reach it
+    (the main-build control); U2d left it byte-identical to main's.
+- **D5′ — the list's foot and the footer, unchanged by P-U2d-2 · HOLDS, both voices.**
+  - Overflowing (16 rows in a note view, the list at its end, the current row last): Study light, the footer hairline at
+    px 1975 and the last row's ink foot at px 1928 (2×) — **exactly U1d's walk at the same window** (`u1d/walk/R2c-study-light.png`:
+    1975 / 1928); Terminal dark, 1969 / 1928 against U1d's 1969 / 1928. Files:
+    `D5p-overflow-end-{study-light,terminal-dark}.png` and `-vs-u1d.png` side by side. The first walk (`u2/walk/`) ran at
+    900 pt, so its pixel rows don't compare; its D5-7 zooms do (below).
+  - 4 rows: the list hugs its rows, the "Open" header at px 1147 exactly where the 16-row list's is at its top, the
+    footer hairline at 1975, the room below is the column's own: `D5p-4rows-note-study-light{,-window}.png`,
+    `D5p-4rows-vs-16rows-study-light.png`, `D5p-4rows-note-terminal-dark{,-window}.png`.
+  - Shallow overflow (the end, then `pxscroll` 7 px up): the last row FADES — the current row's wash clipped flat at the
+    list's edge, the glyph feet eased to a ghost, never sliced; the same picture and the same ~12.5-pt clip-to-hairline
+    spacing as the first walk's `u2/walk/D5-7-{study-light,terminal-dark}-zoom-bottom.png`:
+    `D5p-shallow7-{study-light,terminal-dark}-zoom-bottom.png`.
+- **D7′ — her own scroll is never pulled back (Study light) · HOLDS.** 16 rows, the current row last; `walk-scroll` to the
+  top (the current row out of view); a drag of row 2 "o museu" started (chip), carried down and back, released over its
+  own place; then 20 s with no input. The after-release, after-drag and t+20 s captures are **byte-identical** to the
+  scrolled capture (bbox None each). Files: `D7p-strip-study-light.png` (scrolled · held · held-back · t+20),
+  `D7p-1-scrolled-…`, `D7p-2-drag-…-{held,heldback,after}`, `D7p-3-afterdrag-…`, `D7p-4-t20-…`.
+- **D8 — the controls row on this same product, 1240 pt, the dev store's sidebar (~231 pt) · HOLDS, both voices.**
+  - **Terminal dark.** Panel closed: **two lines** (search · scope / mode · sort · when) — the wider-than-210 sidebar's
+    answer that P-U3c-1 allows — stable through a list scroll and back (`D8-closed-scroll-terminal-dark-strip.png`).
+    Panel open (a row's empty area clicked): two lines. Typing with the panel open (a space after "wings", the panel on a
+    result): two lines, the field full (~320 pt), "relevance · best first" one line
+    (`D8-search-open-typing-terminal-dark-strip.png`; also `D8-open-typing-terminal-dark-strip.png`). Sort edited →
+    created → title with the panel open, then a list scroll: two lines every time (`D8-open-sort-terminal-dark-strip.png`).
+    Panel closed: search "wings", clear, pick "edited": two lines in every state, and the selected segments keep their
+    widths (All 127 px, List 144 px at 2×, in all five states) — never cramped (`D8-closed-search-sort-terminal-dark-strip.png`).
+  - **Study light.** Panel closed: **one line**, stable through a list scroll (`D8-closed-scroll-study-light-strip.png`).
+    Panel open: two lines (`D8-3-open-study-light.png`). Typing with the panel open (on the "wings" result: space, ⌫, ⌫ to
+    "wing" — 8 notes —, "s"): two lines, the field full, the sort label one line (`D8-search-open-typing-study-light-strip.png`).
+    Sort created → title with the panel open, by click and by keys, then a list scroll: two lines
+    (`D8-open-sort-click-and-keys-study-light-strip.png`, `D8-6o-open-title-scrolled-study-light-region.png`) — O-2 records
+    one pick that closed the panel. Panel closed: search "wings", clear, pick "edited": **one line in every state**; the
+    selected segments keep their widths (All 128 px, List 150 px at 2×, all five states) — never cramped, full natural
+    width after the search (`D8-closed-search-sort-study-light-strip.png`).
+- **RESTORE · DONE.** My instance quit by identity (`tell application id "io.lduarte.Variorum.debug" to quit`); both strict
+  pgreps EMPTY after 2 s. Store, with zero instances: `variorum.sqlite` already identical, `-wal`/`-shm` changed → the three
+  copied back from `u2d/walk/store-before/`, each `cmp`-identical; the two `variorum-keys-*.json` `cmp`-identical to their
+  copies (never written). No new file in `Backups/` (newest Oct 15 15:32). `castle-W1-20261013` untouched (its files dated
+  Oct 13). Prefs: the walk ADDED 14 `currentBlock.*` keys (each deleted by hand) and CHANGED 8 (the main and the Settings window
+  frames, `openNotes.remembered.ids`/`.recency`, the backup log, the idle-sweep mark, the calm-asks day counters);
+  after `defaults import` of `prefs-before.plist` and a re-export (`u2d/walk/prefs-after-restore.plist`) the diff is
+  CLEAN, 1602 = 1602, none added, removed or changed; `appearanceChoice` reads `system`. The voice was returned to Study
+  in-app and the store restore carries it regardless. Posture Standard/unlocked throughout. The claim was left to the
+  orchestrator.
+
+**OBSERVATIONS (outside the verdicts, for the orchestrator's eye):**
+- **O-1 — a keystroke that drops the selected note from the results closes the info panel, and a one-letter query lists
+  nothing ("w" — nothing found).** So typing into an EMPTY field with the panel open always closes the panel at the first
+  letter (both voices: `D8-open-typing-terminal-dark-strip.png` row 3, `D8-4b-open-typed-w-study-light-region.png`);
+  "wings w" did the same, and backspacing back to a match does not reopen it (`D8-search-open-typing-terminal-dark-strip.png`
+  rows 4–5). The row's line count followed the panel each time (never a flip with the panel standing). The walk proved
+  "typing with the panel open" by opening the panel on a search result and typing keystrokes that keep it listed. Likely
+  the selection-follows-results design and outside VX-175's row; for her eye.
+- **O-2 — one sort pick closed the panel, not reproduced.** Study light, the panel open on "wings" (selected during a
+  search and kept through the clear), the menu opened by click, "title" type-selected + ⏎ → the sort read title · A–Z
+  and the panel was closed, the row one line (the closed answer): `D8-6f-open-sort-title-study-light.png`. Three tries
+  after it kept the panel open: the click road and the same keys road on a fresh selection ("comments & tags",
+  `D8-open-sort-click-and-keys-study-light-strip.png`), and Terminal's identical keys road earlier. The cause is not
+  visible from outside.
+- **O-3 — in Study's one-line row the gap between the scope and the mode control moves by ~8 pt with the sort label's
+  width** (the scope pill at px 588 / 682 / 617 for edited / title / relevance, the mode pill 545 / 561 / 547 px after it);
+  the controls' own widths never change — the field and the gaps take the slack (`D8-closed-search-sort-study-light-strip.png`).
+- **O-4 — the drag chip is slightly translucent:** the row under it shows through faintly ("2026-10-12" behind "o museu",
+  "› what the" behind "a escola"): `D1p-study-light-held-zoom.png`, `D1p2-terminal-dark-held-zoom.png`. Probably the
+  system's drag-image alpha; noted because a still shows it.
+- **O-5 — a click on a Library row's TITLE opens the note** (an attempt to open the panel on "how to use it" opened it in
+  Write), while a click on the row's empty part selects it and opens the info panel. Noted for later walkers: click the
+  row's empty area.
+
 ## Ladder
 
 *(Findings and dispositions land here, repo-first, before any fix session sees them.)*
