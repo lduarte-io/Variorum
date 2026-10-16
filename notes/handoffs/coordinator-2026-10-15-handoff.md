@@ -34,7 +34,27 @@ The first version of this handoff (10:50 on the 15th) is kept below as written. 
 5. **What merged since:** PR #166 (VX-336), merge commit `4f47720d`, with its notes fill `9e6df7b4`; then `f45417c8`,
    `591bb8e8`, the bump `28ca7fd2`, VX-336's record of the stopped release `35b00b83`, and your QUESTIONS #227 answers
    and runway notes through `a7c0a25f`.
-6. **The release and the refresh:** *(filled in when VX-283's release finishes.)*
+6. **The release and the refresh are done.** VX-283 merged as PR #167 (merge commit `e2efdc794`, 11:49 on the 16th).
+   Its release window ran 11:50–12:04 under the main freeze.
+   - **0.9.7 (build 7933)** covers VX-336 and VX-283. It's stamped `e2efdc794`, and both notarizations were Accepted.
+   - **Published:** `Variorum-0.9.7.dmg`. Both verify-published checks PASS (DMG and appcast). The live appcast tops at
+     0.9.7 / 7933. Site commit `a37a275d`. The MCP guide page returns 200.
+   - **Your `/Applications/Variorum.app` is 0.9.7 (7933).** codesign and spctl both pass. The old 0.9.5 (7503) is in the
+     Trash.
+   - **A1 of your real store:** `vx283-refresh-20261016T180250Z`, cmp-identical on all 7 files. I pruned the older
+     `vx246-refresh-20261014T172650Z`, so only the newest remains.
+   - **Check the Open list drag by hand first.** Synthetic drags can't reach the sidebar's drops, on main or on the
+     branch, so the drag ships proven only by its pins and by using the same road as the book navigator. VX-376 is the
+     hand check, and vx-283's handoff names a one-commit fallback.
+   - release.sh again warned about the leftover LaunchServices registration of the DMG mount point (the same as
+     0.9.3–0.9.6).
+   - VX-283's walk evidence (screenshots and logs, 376 MB, gitignored) now lives in
+     `~/dev/variorum/notes/plans/vx283-screens`.
+   - Old release intermediates (0.9.3 ×2, 0.9.6) are still in `App/Variorum/DerivedData/release/`, for you to decide.
+7. **I overreached again on the 16th.** vx-283's closeout claim expired with the dev store unrestored. I ran its
+   restore myself, though it had only been paused by the same usage limit as me. It was harmless: its own script, and
+   the store cmp-identical to the copy. Your rule is now in my memory: *"as coordinator you should not be so proactive
+   about things … your only real role is to keep track of the stage."*
 
 ## Your checklist (as written at 10:50 on the 15th)
 
