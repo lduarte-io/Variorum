@@ -4036,11 +4036,153 @@ the reverts' runs and the batch are the orchestrator's window (`u2c/window.sh`).
 NOT built (pre-ruled, held for the window's answers).
 
 **LIVE STATUS (per piece)**
-- C0 — this section opened; the SDK's session-form API confirmed (below): IN PROGRESS.
-- C1 — the pins, red-first (no product line): NOT STARTED.
-- C2 — F1, the fix: NOT STARTED.
-- C3 — the three revert trees named, built and restored: NOT STARTED.
+- C0 — this section opened (`5589be29`); the SDK's session-form API confirmed (below): DONE.
+- C1 — the pins, red-first, no product line: DONE (`51253c7c`).
+- C2 — F1, the fix: DONE (`e93e4246`); `build-for-testing` → TEST BUILD SUCCEEDED on `DerivedData/vx283-u2c`, no
+  warning in a touched file; the headless replica green (below).
+- C3 — the three revert trees: R-T / R-U / R-V NAMED below, BEFORE any is applied; build + restore IN PROGRESS.
 - C4 — `u2c/window.sh` + READY FOR STAGE: NOT STARTED.
+
+**The SDK, confirmed before a session-form call was written** (Xcode 27, `MacOSX.sdk`, SwiftUI's
+`arm64e-apple-macos.swiftinterface` and its `.swiftdoc`). Every API exists as T3 assumed; nothing was built around a
+gap:
+- `dropDestination<T>(for:isEnabled: Bool = true, action: ([T], DropSession) -> Void)` — macOS 26 (`:2720`);
+- `onDropSessionUpdated(_: (DropSession) -> Void)` and `dropConfiguration(_: (DropSession) -> DropConfiguration)` —
+  `@available(iOS 27.0, macOS 26.0)` (`:2727`, `:2729`);
+- `DropSession` — `phase` (`entering · active · exiting · ended(DropOperation) · dataTransferCompleted`),
+  `location: CGPoint`, `suggestedOperations`, `itemsCount` (`:11073`). Its doc comment: **"The location of the drag in
+  the coordinate space of the drop view"** — the row's own space, T3's assumption, now the SDK's word;
+- `DropConfiguration(operation:)` (`:15069`); the doc: "The closure that provides the configuration is called
+  frequently to allow specifying different operations for different drop locations in a view";
+- `onDropSessionUpdated`'s doc: "called when the closest drop session in the child view hierarchy becomes active" —
+  so it wraps the `dropDestination` (applied after it), the documented example's order for `dropConfiguration` too;
+- `dragConfiguration(_: DragConfiguration)` + `DragConfiguration(allowMove:)`; `OperationsWithinApp.init(allowCopy:
+  true, allowMove: false, …)` — copy-only by default on macOS (`:19938`, `:32514`);
+- `onDragSessionUpdated(_: (DragSession) -> Void)`, `DragSession.Phase.ended(DropOperation)` on macOS (`ending` is
+  macOS-unavailable) (`:4177`, `:32509`).
+
+**THE BUILD (`e93e4246`; paths under `App/Variorum/Variorum/`):**
+- `Core/Views/SidebarLayout.swift:631-639` — `OpenListDrop.contentY(row:yInRow:rowHeight:)` = index × pitch + the
+  row-local y (the rows abut: `LazyVStack(spacing: 0)` with horizontal padding only, each row `rowChrome`'s
+  `.frame(height: rowHeight)`, the first at the top). The half-row rule (`gap(at:)`, `destination`, `lineTop`,
+  `endZoneHeight`) is untouched.
+- `Features/Library/OpenListDrag.swift` (rewritten around the same state, door and line):
+  - `OpenListDragState` (`:66-183`): new `hoverRow(_:yInRow:rowHeight:)` (the pure mapping, then the unchanged
+    `hoverRows(contentY:)`); `leftRow(_:)` (clears only a hover THAT row wrote — `rowSource`, the row the last update
+    came from: each row is its own drop now, so the next row's entry may arrive before the last one's exit — the end
+    zone's precedent); `dragSessionUpdated(_ phase: DragSession.Phase)` (its `.ended` calls `ended()`; any other phase
+    changes nothing). `began`'s R1-4 known-edge note is replaced by what now holds.
+  - `OpenListDropDoor` (`:187-270`): `types` gone (nothing reads it); new `configuration(_:rows:rowHeight:)` =
+    `DropConfiguration(operation: proposal(…).operation)` (the one decision; `proposal` unchanged); `perform` takes the
+    DECODED tokens (`[OpenNoteDragToken]`, `animation:` defaulting to the settle) — synchronous, no item provider, no
+    `loadTransferable`, so R1-4's "accepted and silent" cases shrink to the rows changing between the last update and
+    the release (`land` re-validates); `land` unchanged.
+  - `OpenListRowDrop` (`:276-321`, NEW, a `ViewModifier`): `.dropDestination(for: SidebarView.OpenNoteDragToken.self,
+    isEnabled: true) { tokens, session in … }` — the action refreshes the hover from ITS OWN location, then `perform`;
+    `.onDropSessionUpdated` — `entering`/`active` → `hoverRow(index, yInRow: location.y, …)`, every other phase →
+    `leftRow(index)`; `.dropConfiguration` — the hover refreshed too (P-U2c-1), then `OpenListDropDoor.configuration`.
+  - `OpenListEndZoneDrop` (`:325-360`, NEW): the same form, `hoverEnd` / `leftEnd`.
+  - The `DropDelegate`s `OpenListRowsDrop` / `OpenListEndZoneDrop` REMOVED (the end zone's name now belongs to its
+    modifier). `OpenListInsertionLine` unchanged.
+  - The instrument (`#if DEBUG`, `:405-652`) KEPT, marker-gated as before (`vx283-u2b-drag.on` / `.log`, subsystem
+    `io.lduarte.variorum.vx283-u2b` — names unchanged), re-hooked: `<site> DROP-SESSION phase=… loc=… suggested=…
+    items=… · <gate>` and `<site> CONFIG → move|forbidden|copy …`, each ONE line per change of what the site decides
+    (phase, dragging, gap, line), the identical ticks folded into a count; `<site> ACTION phase=… loc=… tokens=[row@list]`;
+    `DOOR perform … tokens=…`, `DOOR land` / `land REFUSED`; `LINE drawn` / `gone`; `SOURCE payload evaluated`, `SOURCE
+    preview appeared`, `SESSION row=… phase=… loc=…` (the source's drag session); `STATE began`, `STATE the drag session
+    ended (…)`, `STATE ended`; `ENDZONE laid out`; `COLUMN import drop performed`; `ROW n=… screen=…` and `HOVER n=…`.
+    Sites are `ROW n=<ordinal>` and `END`. U2b's probes `load`, `session`, `allowmove` RETIRED (no `DropInfo` to load
+    from; the session hook and `allowMove` are the product); `copy` KEPT as a diagnostic (the configuration offers COPY
+    where it would offer MOVE — the window's optional `g1copy`).
+- `Features/Library/SidebarView.swift`: the scroll content's `.contentShape(Rectangle())` + legacy `.onDrop(of:
+  delegate:)` removed (`:857-859` keeps a note); the end zone carries `.modifier(OpenListEndZoneDrop(…))` (`:989`);
+  `openRow` (`:1138-1151`) carries `.dragConfiguration(DragConfiguration(allowMove: true))`, `.onDragSessionUpdated {
+  … openListDrag.dragSessionUpdated(session.phase) }` (+ the DEBUG `SESSION` line) and `.modifier(OpenListRowDrop(state:,
+  index: ordinal - 1, rows: workspace.openNotes.shown, rowHeight:, workspace:))`; U2b's `OpenListDragTraceSource` gone.
+  `openRow` grew ~470 characters; the source reads that bound it by a prefix still reach its context menu
+  (`Button("Close")` at 6 475 of `theXAndRightClickCloseBothRunTheOneAct`'s 8 000; the body ends at 7 098).
+- **Not touched:** `SidebarSectionWindow.swift`, `OpenNotes.move` / `WorkspaceModel.move`, the chip
+  (`DragChipCanvas.swift`, `ChipDragSource`), the line, `ShelfView.swift`, `ShellActions`, `ShellRouter.swift`, the
+  editor seam, `Sync/`, custody, schema.
+
+**A consequence of F1, stated (the ruled shape's geometry, not a provisional):** the drop targets are the ROWS, so the
+Open list's 12-pt side margins (`scrollingSectionMargin`, inside the scroll) take no drop — a pointer there is over no
+row, the hover clears, no line draws and a release there slides back. Main's per-row road had the same; U2's
+content-root delegate had covered the margins. The line spans exactly the rows' width, so line and target agree.
+
+**PROVISIONAL (U2c), one:**
+- **P-U2c-1 — the drop side's non-entering phases clear the row's own hover** (`exiting`, `ended`,
+  `dataTransferCompleted` → `leftRow(index)`), and the configuration closure refreshes the hover too. The SDK states
+  neither the order of a tick's `onDropSessionUpdated` against its `dropConfiguration` nor whether `ended` precedes the
+  action; the build is order-proof by construction: the action re-derives its gap from its own session location before
+  the door, `leftRow` never clears another row's hover, and the source's session end (which clears everything) may land
+  before or after the drop. Options: (a) [built]; (b) refresh only in `onDropSessionUpdated` (a configuration could
+  answer one tick stale at a boundary); (c) clear on `exiting` only (an `ended` over a row would leave the hover until
+  the source's session end clears it). The window's trace shows the real order.
+
+**THE PINS (`VariorumTests/OpenListDragTests.swift`, `51253c7c` — red-first, no product line):**
+- **P-T3-1** `OpenListDragFaceTests.eachRowIsATransferableDropAndItsSourceAllowsTheMove` (source read): `openRow`
+  carries `.modifier(OpenListRowDrop(`, `.dragConfiguration(DragConfiguration(allowMove: true))` and an
+  `.onDragSessionUpdated {` into `openListDrag.dragSessionUpdated(`; `openGroup` and `openListEndZone` carry no
+  `onDrop(of:`; the end zone carries `.modifier(OpenListEndZoneDrop(`; BOTH modifiers' bodies (in `OpenListDrag.swift`)
+  carry `.dropDestination(for: SidebarView.OpenNoteDragToken.self, isEnabled:`, `.onDropSessionUpdated {` and
+  `.dropConfiguration {` answering `OpenListDropDoor.configuration(`; no `: DropDelegate` remains in the drag file.
+  **The reading of the ruling's "inside `openRow`":** the drop's three calls live in the `OpenListRowDrop` modifier
+  beside the door (P-9 — `SidebarView` is ~1 500 lines), applied inside `openRow`; the pin reads both. Red on the
+  pre-fix tree at runtime (it compiles there).
+- **P-T3-2** `OpenListDropRuleTests.aRowsOwnLocationNamesTheGapForEveryRowAndBothHalves` (pure: 1…8 rows × both pitches
+  × every row × fractions 0, .05, .3, .49, .5, .7, .95 — `contentY` = index × pitch + y, and `gap(at:)` of it is the gap
+  beside THAT row) + its state road `OpenListDropDoorTests.aRowsOwnLocationDrawsTheLineAndLandsThere` (a list scrolled
+  45 pt; row 4, 20 pt down → gap 5, the line at 104, `.move`, the release lands n0 after n4).
+- **P-T3-3** `OpenListDropDoorTests.theDragSessionsEndClearsTheDrag`: `began(a)` + a line → `.active` keeps the drag →
+  `.ended(.cancel)` clears `dragging` and the hover → a foreign hover after it draws no line and is offered `.forbidden`
+  (U2's known edge, pinned) → `.ended(.move)` clears too.
+- **Guards (new behaviour, not red-on-old):** `movingBetweenRowsNeverBlanksTheHover` (either arrival order between two
+  rows; a row's late exit leaves the end zone's hover) and `aSessionEndBeforeTheDropsActionStillLands` (the source's end
+  first, then the action: it lands — green on both sides of R-V by design).
+- **Edited in place by the ruling, annotated:** `theRowDragsItsChipAndTheListIsTheOneDrop` → renamed
+  **`theRowDragsItsChipAndIsItsOwnDrop`** (the old name would contradict the body — R1-5's class): "no row is its own
+  drop target" INVERTS to `row.contains(".modifier(OpenListRowDrop(")`, and "the list's rows are one drop target"
+  (`delegate: OpenListRowsDrop(`) is withdrawn. `aReleaseReadsThePayloadAndLandsIt` and
+  `aReleaseThatOffersNothingRefuses` take the decoded tokens (no `NSItemProvider`, no polling; `animation: nil`).
+- **Unchanged:** every other pure, door and mount pin of U2 (the half-row rule, the line on every axis, the end zone,
+  the settle-in-place) and every `SidebarSectionWindow` pin. **No suite was added or renamed** — the new pins join the
+  existing four suites, so `u2/batch-suites.txt` needs no line.
+- **The red-first commit does not COMPILE the test target on the pre-fix tree** (P-T3-2/P-T3-3 and the edited door pins
+  name the fix's new API — `contentY`, `hoverRow`/`leftRow`, `dragSessionUpdated`, the token-taking `perform`); only
+  P-T3-1 is runtime-red there. Each pin's runtime red-on-old is its named revert tree below.
+- **No headless pin for delivery or for G2's mask:** `registeredDraggedTypes` reads 0 even above live targets and the
+  test host cannot post a drag. Only the window's G1–G5 and the re-walk prove that AppKit offers the drag to the rows and
+  that `.move` is allowed.
+
+**Headless evidence:** `build-for-testing` → TEST BUILD SUCCEEDED (`DerivedData/vx283-u2c`, `e93e4246`'s code; log
+`u2c/logs/bft.log`). A replica (scratchpad only): the REAL `SidebarLayout.swift`, the real `OpenNotes` struct, the real
+`OpenListDragState` + `OpenListDropDoor` cut from `OpenListDrag.swift` (non-DEBUG), a two-line `WorkspaceModel` stub,
+and the bodies of P-T3-2 (both), P-T3-3, the two guards and the two edited door pins — compiled with `swiftc
+-swift-version 6 -default-isolation MainActor`: **1035 checks, 0 failed**; with R-U applied **789 failed, all in P-T3-2's
+two pins** (784 pure, 5 state); with R-V **4 failed, all in P-T3-3**.
+
+**THE REVERTS — named BEFORE any is applied** (each applied to the committed tip, built with `build-for-testing` into
+its own DerivedData, then restored by `git checkout -- <file>`, `git diff` empty after; the patches kept gitignored in
+`u2c/reverts/`):
+- **R-T (P-T3-1 — the legacy attachment restored, the shape the pin guards against).** In `SidebarView.swift`:
+  `openRow` loses `.dragConfiguration(DragConfiguration(allowMove: true))` and the three-line
+  `.modifier(OpenListRowDrop(…))`; `openGroup`'s scroll content regains, after its horizontal padding,
+  `.contentShape(Rectangle())` + `.onDrop(of: [OpenNoteDragToken.contentType], isTargeted: nil) { _ in false }` — the
+  legacy `onDrop(of:)` form (the delegate types no longer exist, so the stand-in accepts nothing; the pin reads the
+  attachment, not its delegate). Products `DerivedData/vx283-u2c-rt`. Expected on `OpenListDragFaceTests` (3 tests):
+  **RED exactly** `eachRowIsATransferableDropAndItsSourceAllowsTheMove` and `theRowDragsItsChipAndIsItsOwnDrop`; GREEN
+  `theOpenRowsChipIsItsTitleAtTheGrabPoint`.
+- **R-U (P-T3-2 — the index term dropped).** In `SidebarLayout.swift`, `OpenListDrop.contentY`'s body
+  `CGFloat(row) * rowHeight + yInRow` → `yInRow` (every row maps to row 0's gaps). Products `DerivedData/vx283-u2c-ru`.
+  Expected on `OpenListDropRuleTests` + `OpenListDropDoorTests` (15 + 12 = 27 tests): **RED exactly**
+  `OpenListDropRuleTests.aRowsOwnLocationNamesTheGapForEveryRowAndBothHalves` and
+  `OpenListDropDoorTests.aRowsOwnLocationDrawsTheLineAndLandsThere`; the other 25 GREEN (incl. the two guards and P-T3-3
+  — they drive `hoverRows(contentY:)` or read only the hover's presence).
+- **R-V (P-T3-3 — the session's end handling removed).** In `OpenListDrag.swift`, `OpenListDragState.dragSessionUpdated`
+  loses its one `ended()` call (the guard and the DEBUG line stay). Products `DerivedData/vx283-u2c-rv`. Expected on
+  `OpenListDropDoorTests` (12 tests): **RED exactly** `theDragSessionsEndClearsTheDrag`; the other 11 GREEN (incl.
+  `aSessionEndBeforeTheDropsActionStillLands`, green on both sides by design).
 
 ## Ladder
 
