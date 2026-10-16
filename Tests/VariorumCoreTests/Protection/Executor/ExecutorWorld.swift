@@ -467,6 +467,12 @@ final class ExecutorWorld: CustodyLeaf, LegacyItemsLeaf, SyncKeysLeaf, AppleKeys
 
     func readKeyFile(catalogID: String) throws -> KeyFileDocument? { catalogKeyFiles[catalogID] }
 
+    /// The move, never a delete, and an existing name refused — but this U3
+    /// harness keeps set-aside files OUT of its catalog view: it has none
+    /// (`catalogKeyFiles` is a test-filled lookup by id), so a set-aside file
+    /// is not readable here by catalog id. The scenario world (`DeviceLeaves`)
+    /// models that half — the file stays in the container, catalogued as
+    /// `.setAside` — and its pins assert it. VX-305 ladder round 2, NIT 1.
     func setAsideLiveKeyFile(as name: String) throws -> Bool {
         guard let file = liveKeyFile else { return true }
         guard setAsideKeyFiles[name] == nil else { return false }
