@@ -22,16 +22,14 @@ import Foundation
 
 /// A builder step refused or crashed.
 struct StartingStateRefused: Error, CustomStringConvertible {
-    var action: Action
-    var result: StepResult
-    var description: String { "\(action) → \(result)" }
+    var description: String
 }
 
 extension SWorld {
     /// One builder step: applied, and it must be done.
     func build(_ action: Action) async throws {
         let result = await apply(action)
-        guard result == .done else { throw StartingStateRefused(action: action, result: result) }
+        guard result == .done else { throw StartingStateRefused(description: "\(action) → \(result)") }
     }
 
     /// A library created on `device` by the app's own door — always with twelve

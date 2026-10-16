@@ -19,7 +19,7 @@ struct ExecutorGuardsOnTests {
         let guards = ProtectionGuards.all
         #expect(guards.planNamedBySectionOn && guards.repairPreconditionsVerifiedOn && guards.repairNeverMakesTouchIDItemOn)
         #expect(guards.prepareBeforeCommitOn && guards.exportOffAtCastleOn && guards.followerAnchorTypedLockOn)
-        #expect(guards.oldSharedKeyDeletedByRecordedIDOn && guards.copyActClearedOnOpenOn && guards.moveKeepsOldWrapOn)
+        #expect(guards.oldSharedKeyDeletedByRecordedIDOn && guards.moveKeepsOldWrapOn)
         #expect(guards.retirementRerunsMovesOn && guards.freshPairAfterMoveOn)
     }
 }
@@ -133,21 +133,6 @@ struct ExecutorGuardMutationTests {
             try executor.writeFacts(&library, section: { var s = library.section.bumped(); s.oldSharedKey = OldSharedKeyRecord(id: recorded.id); return s }())
             _ = try await executor.retireOldSharedKey(&library)
             #expect((fixture.world.icloud.oldShared != nil) == guarded)
-        }
-    }
-
-    @Test func aCopysActInFlightIsCarriedWithTheGuardOff() async throws {
-        for guarded in [true, false] {
-            let fixture = try EX(.standard)
-            let executor = fixture.executor(guards: guarded ? .all : Self.off { $0.copyActClearedOnOpen = false })
-            var library = try fixture.unlocked(executor)
-            let (inFlight, _) = library.section.beginningAct(.replaceAllKeys, from: library.fingerprint, to: nil, at: PF.t0)
-            try executor.writeFacts(&library, section: inFlight)
-            let copy = copyOfToday(fixture)
-            try executor.writeFacts(&library, section: library.section.endingAct(sequence: inFlight.actInFlight!.sequence))
-            _ = try await executor.openCopy(&library, copyID: copy, opener: fixture.key, copyRecord: fixture.world.copies[copy]?.record)
-            let reopened = try fixture.executor().unlock(with: fixture.key)
-            #expect((reopened.section.actInFlight == nil) == guarded)
         }
     }
 

@@ -57,25 +57,6 @@ struct ExactWritesTests {
         ])
     }
 
-    @Test func aLanding() async throws {
-        let sender = try EX(.castle)
-        let receiver = try EX(.standard)
-        let k0 = receiver.key
-        let pair = sentPair(sender, into: receiver)
-        let executor = receiver.executor()
-        var library = try receiver.unlocked(executor)
-        _ = try await executor.land(
-            &library, pair: pair, opener: sender.key,
-            typed: TypedSecrets(passphrase: sender.passphrase, words: try PF.words(), wordsAreNew: true), gate: .touchID)
-        #expect(receiver.world.writeLog(naming: [PF.fp(k0): "K0", PF.fp(library.key): "K1"]) == [
-            "record K0", "memory K0", "plan",                        // named in the library that goes aside
-            "stage K1", "plan",                                      // the pair re-encrypted under a FRESH key
-            "custody+ touchid K1", "plan", "keyfile K1", "plan",     // the key file before the store lands
-            "staged-record K1", "plan", "swap K1", "plan",           // the record in; the old library aside
-            "memory K1", "plan", "record K1", "memory K1", "plan-",
-        ])
-    }
-
     @Test func aKeyDoorSynced() async throws {
         let fixture = try EX(.castle, synced: true)
         let executor = fixture.executor()
@@ -109,28 +90,6 @@ struct ExactWritesTests {
 
 @Suite("VX-305 U3 — Resume Sync after a landing; the losing device's account key; the file swap's road keys")
 struct ExecutorEdgeTests {
-    @Test func aSyncedPairsPassphraseMadeNewBecomesTheAccountsAtResumeSync() async throws {
-        let sender = try EX(.castle, synced: true)
-        let receiver = try EX(.standard, world: ExecutorWorld(icloud: sender.world.icloud, server: sender.world.server))
-        let pair = sentPair(sender, into: receiver)
-        let executor = receiver.executor()
-        var library = try receiver.unlocked(executor)
-        let landed = try await executor.land(
-            &library, pair: pair, opener: sender.key, typed: TypedSecrets(words: sender.words, newPassphrase: "forgot it"),
-            gate: .alwaysAsk)
-        #expect(landed.notices == [.madeNewSecretBecomesAccountsAtResumeSync])
-        #expect(receiver.liveRecord?.account == sender.account)  // it lands held: no keys of the account here
-        #expect(receiver.world.syncItems.isEmpty)
-        let resumer = receiver.executor(session: sender.session)
-        var again = try resumer.unlock(with: library.key)
-        _ = try await resumer.resumeSyncAfterLanding(&again, typed: TypedSecrets(passphrase: "forgot it", words: sender.words))
-        let vault = try #require(receiver.world.server.snapshot(sender.account!))
-        let typed = try PassphraseKey.derive("forgot it", kdf: vault.format.kdf)
-        #expect(VaultModel.master(of: vault.format, passphrase: typed, words: nil) != nil)  // the account's now
-        #expect(receiver.world.liveFormat3?.master != nil && again.key == library.key)  // the key stays
-        expectSettled(receiver, again)
-    }
-
     @Test func theDeviceWhoseLeaveLostTheRaceDeletesTheAccountKeyItMinted() async throws {
         let mac = try EX(.castle, synced: true)
         let phone = try EX(.castle, synced: true, joining: mac)

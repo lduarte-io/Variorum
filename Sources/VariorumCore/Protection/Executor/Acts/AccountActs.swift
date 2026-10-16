@@ -45,7 +45,6 @@ struct AccountMoveProgram: ActProgram {
         let leaving = from == .castle && to == .standard, entering = from == .standard && to == .castle
         var steps: [String] = leaving && Self.rekeys(parameters) ? ["anchor"] : []
         if parameters.targetAccount != nil { steps.append("pickUpJoinKeys") }
-        if parameters.adoptsMadeNewSecret != nil { steps.append("adoptMadeNewSecret") }
         if Self.rekeys(parameters) {
             steps += LibraryRekey.steps(guards, mintsOwnAppleKey: leaving)
             steps += ["memory", "retireOldCustody"]
@@ -101,7 +100,6 @@ struct AccountMoveProgram: ActProgram {
         case "exportOff": try ctx.turnExportOff()
         case "retireOwnAppleKeys": try ctx.retireOwnAppleKeys()
         case "retireOldSharedKey": try await ctx.retireOldSharedKey()
-        case "adoptMadeNewSecret": try await ctx.adoptMadeNewSecret()
         case "joinKeyFile": try ctx.joinKeyFile()
         case "bindAccount": try ctx.bindAccount(ctx.parameters.targetAccount)
         case "forgetOldSyncKeys": try ctx.forgetSyncKeys(of: ctx.parameters.forgetsAccount)
@@ -128,7 +126,6 @@ struct SetUpSyncProgram: ActProgram {
         switch step {
         case "mintAccountAppleKey": _ = try ctx.mintAppleKey(purpose: .account)
         case "createVault": try await ctx.createVault()
-        case "adoptMadeNewSecret": try await ctx.adoptMadeNewSecret()
         case "joinKeyFile": try ctx.joinKeyFile()
         case "bindAccount":
             try ctx.bindAccount(ctx.parameters.targetAccount)
@@ -193,31 +190,6 @@ extension ActContext {
             file = try file.settingApple(try mintAppleKey(purpose: .library), for: library.key)
         }
         try executor.writeLiveKeyFile(file, &library)
-    }
-
-    /// Resume Sync after a landing (§3.7): the secret made new at the landing
-    /// becomes the account's through the account's own forgot road, with the
-    /// other secret — the one that opens the vault — just typed.
-    func adoptMadeNewSecret() async throws {
-        let snapshot = try await freshRead()
-        let held = try material(for: snapshot)
-        var format = snapshot.format
-        switch parameters.adoptsMadeNewSecret {
-        case "passphrase":
-            let passphrase = try requirePassphrase()
-            if format.kdf == passphrase.kdf { return }
-            format = try format.rewrappingPassphrase(masterKey: held.masterSymmetricKey, passphraseKey: passphrase.key, kdf: passphrase.kdf)
-        case "words":
-            guard let words = secrets.words else { throw ExecutorRefusal.secretsRequired(act) }
-            if VaultModel.master(of: format, passphrase: nil, words: words) != nil { return }
-            format = try format.replacingRecoveryWrap(masterKey: held.masterSymmetricKey, recoveryKey: words.key)
-        default:
-            return
-        }
-        let written = try await leaves.vault.updateVault(
-            format, accountID: snapshot.accountID, expectedRevision: snapshot.revision,
-            proofMaster: held.masterSymmetricKey, device: deviceName)
-        executor.noteFresh(written)
     }
 
     /// The record names the account (none, or one id) — written into the
@@ -291,46 +263,6 @@ extension ProtectionExecutor {
         guard record.account == nil else { throw ExecutorRefusal.nothingToDo }
         guard let account = configuration.session.accountID else { throw ExecutorRefusal.noAccountSignedIn }
         return try await join(.enroll, account: account, leaving: nil, library: &library, typed: typed, gate: gate)
-    }
-
-    /// **Resume Sync after a landing** — a synced pair landed held: its record
-    /// names the account, this Mac holds none of its keys. Both secrets typed:
-    /// the one that opens the vault, and the one made new at the landing (it
-    /// opens the landed key file) — which becomes the account's, through the
-    /// account's own forgot road. The library key stays.
-    public func resumeSyncAfterLanding(_ library: inout UnlockedLibrary, typed: TypedSecrets) async throws -> ActOutcome {
-        guard let record = library.record, let account = record.account else { throw ExecutorRefusal.notSynced }
-        try requireSignedIn(as: account)
-        guard let vault = try await readVault(accountID: account) else { throw ExecutorRefusal.needsFreshVault }
-        guard let text = typed.passphrase ?? typed.newPassphrase, let words = typed.words else { throw ExecutorRefusal.secretMissing }
-        let live = library.keyFile
-        let wordsKey = try WordsKey.derive(words)
-        let vaultPassphrase = try PassphraseKey.derive(text, kdf: vault.format.kdf)
-        let passphraseOpensVault = VaultModel.master(of: vault.format, passphrase: vaultPassphrase, words: nil) != nil
-        let wordsOpenVault = VaultModel.master(of: vault.format, passphrase: nil, words: wordsKey) != nil
-        var parameters = ActParameters(synced: true, accountID: account, newKind: record.mode)
-        parameters.fromKind = record.mode
-        parameters.rekeys = false
-        var secrets = ActSecrets(words: wordsKey)
-        switch (passphraseOpensVault, wordsOpenVault) {
-        case (true, true):
-            secrets.passphrase = vaultPassphrase
-        case (true, false):
-            // The words were made new at the landing: they open the landed file.
-            guard (try? live?.open(words: words)) != nil else { throw ExecutorRefusal.wordsDoNotOpen }
-            secrets.passphrase = vaultPassphrase
-            parameters.adoptsMadeNewSecret = "words"
-        case (false, true):
-            // The passphrase was made new at the landing: it opens the landed file.
-            secrets.passphrase = try verifiedPassphrase(text, against: live)
-            parameters.adoptsMadeNewSecret = "passphrase"
-        case (false, false):
-            throw ExecutorRefusal.passphraseDoesNotOpen
-        }
-        parameters.passphraseKDF = secrets.passphrase?.kdf
-        parameters.targetAccount = account
-        return try await perform(
-            AccountMoveProgram(act: .enroll), parameters: parameters, secrets: secrets, typed: typed, library: &library)
     }
 
     /// **Move it to the signed-in account** — leave the record's account (a

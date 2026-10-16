@@ -24,7 +24,7 @@ public enum ProtectionAct: String, Codable, Sendable, CaseIterable {
     case leaveCastle = "leave_castle"
     case replaceAllKeys = "replace_all_keys"
     case follow
-    case openCopy = "open_copy"
+    /// Make this my library's stub (rule 17) — U2 rebuilds it as MakeMine.
     case land
     case sendLibrary = "send_library"
     case migration

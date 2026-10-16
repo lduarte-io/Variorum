@@ -41,9 +41,6 @@ public enum ActNotice: Equatable, Sendable {
     case anchorKeptUnopened(day: Date)
     /// A follow that holds its library re-key while the rotation finishes.
     case heldForRotation
-    /// A synced pair's secret made new at its landing becomes the account's
-    /// at Resume Sync (§3.7).
-    case madeNewSecretBecomesAccountsAtResumeSync
 }
 
 /// What the open's settle did with an act in flight.
@@ -109,7 +106,7 @@ protocol ActProgram {
 extension ActProgram {
     var needsLiveKeyFile: Bool {
         switch act {
-        case .deviceSettings, .touchIDRearm, .confirmMode, .offerDelete, .plaintextExport, .openCopy, .land,
+        case .deviceSettings, .touchIDRearm, .confirmMode, .offerDelete, .plaintextExport, .land,
              .createLibrary, .migration, .moveOffSharedKey, .retireSharedKey, .relinkApple:
             return false
         default:
@@ -199,7 +196,6 @@ extension ProtectionExecutor {
         case .leaveCastle: return LeaveCastleProgram()
         case .replaceAllKeys: return ReplaceAllKeysProgram()
         case .follow: return FollowProgram()
-        case .openCopy: return OpenCopyProgram()
         case .land: return LandProgram()
         case .sendLibrary: return SendLibraryProgram()
         case .migration: return MigrationProgram()

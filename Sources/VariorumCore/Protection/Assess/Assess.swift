@@ -25,8 +25,9 @@ import Foundation
 //     reach;
 //   - §3.8: the four account situations; every leave re-keying in both modes;
 //     the joining rules;
-//   - §3.10: the Touch ID road, VX-310's lobby rule as data;
-//   - §3.7: the open rule — `OpenRule.swift`.
+//   - §3.10: the Touch ID road, VX-310's lobby rule as data.
+// (A copy is a copy — rule 17: the open rule left with VX-378 U1; Look inside
+// and Make this my library are U2's.)
 
 /// **The assessment.** `guards` is `.all` everywhere but the DEBUG mutation
 /// pins.

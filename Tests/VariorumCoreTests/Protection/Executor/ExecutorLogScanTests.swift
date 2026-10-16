@@ -19,8 +19,8 @@ struct ExecutorLogScanTests {
     @Test func nothingTheExecutorLogsCarriesASecretAMarkerOrTheSalt() async throws {
         var fixtures: [EX] = []
         // Use Castle (synced), then a planted plan settled; Use Standard
-        // (synced); a follow; a leave; a landing; the key doors; repairs; the
-        // migration of today's shape.
+        // (synced); a follow; a leave; the key doors; repairs; the migration
+        // of today's shape. (The landing left with rule 17 — VX-378 U1.)
         let a = try EX(.standard, synced: true, scheduledExport: true)
         let ae = a.executor()
         var al = try a.unlocked(ae)
@@ -47,10 +47,6 @@ struct ExecutorLogScanTests {
         let ce = c.executor()
         var cl = try c.unlocked(ce)
         _ = try await ce.leaveAccount(.stopSyncingHere, &cl, typed: c.typed)
-        let sender = try EX(.castle)
-        let pair = sentPair(sender, into: c)
-        _ = try await ce.land(&cl, pair: pair, opener: sender.key,
-                              typed: TypedSecrets(passphrase: sender.passphrase, words: try PF.words(), wordsAreNew: true))
         try ce.runRepairs([.refreshMemory, .makeTouchIDItem(fingerprint: PF.fp(cl.key))], on: &cl)
         fixtures.append(c)
 

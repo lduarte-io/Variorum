@@ -18,7 +18,7 @@ struct AssessGuardsOnTests {
     @Test func everyU2GuardIsOnByDefault() {
         let guards = ProtectionGuards.all
         #expect(guards.pruneOwnCopiesOnlyOn && guards.noRepairMakesTouchIDOn && guards.noRearmWithoutItemOn)
-        #expect(guards.ownLineByFamilyTreeOn && guards.neverLowerOnOpenOn && guards.doorTimeVaultCheckOn)
+        #expect(guards.doorTimeVaultCheckOn)
         #expect(guards.deleteOnSightByIDOnlyOn && guards.everyOwnKeyRetiredAtCastleOn && guards.leaveIDGatesCompletionOn)
         #expect(guards.castleKindCustodyThroughLeaveOn && guards.giftsOnlyForThisMacsCopiesOn)
         #expect(guards.unconfirmedModeNoCustodyRepairOn && guards.standardRecordNoDestructiveRepairOn)
@@ -51,32 +51,6 @@ struct AssessGuardMutationTests {
         off.noRearmWithoutItem = false
         #expect(try world.assessed(guards: off).acts.contains(.touchIDRearmQuestion),
                 "red with the guard off: the re-arm question with no item behind it")
-    }
-
-    /// THE FAMILY TREE's OWN-LINE CHECK: after a leave the history is empty,
-    /// so a history-based check reads this library's own Castle-era copy as
-    /// another's and raises the library.
-    @Test func ownLineByFamilyTree() {
-        let (target, fp) = OpenRuleTests.target(.standard)
-        let facts = OpenFacts(libraryID: CF.lib1, keyFingerprint: fp["c1"], recordMode: .castle, target: target)
-        guard case .ownLine = OpenRule.verdict(facts) else { Issue.record("on: not ours"); return }
-        var off = ProtectionGuards()
-        off.ownLineByFamilyTree = false
-        #expect(OpenRule.verdict(facts, guards: off) == .raisesToCastle,
-                "red with the guard off: its own copy reads as foreign")
-    }
-
-    /// OPENING A COPY NEVER LOWERS THE MODE (VX-209's way back).
-    @Test func neverLowerOnOpen() {
-        let (target, fp) = OpenRuleTests.target(.castle)
-        let facts = OpenFacts(libraryID: CF.lib1, keyFingerprint: fp["s0"], recordMode: .standard, target: target)
-        guard case .ownLine(let on) = OpenRule.verdict(facts), on.takesMode == .castle else {
-            Issue.record("on: lowered"); return
-        }
-        var off = ProtectionGuards()
-        off.neverLowerOnOpen = false
-        guard case .ownLine(let broken) = OpenRule.verdict(facts, guards: off) else { Issue.record("off"); return }
-        #expect(broken.takesMode == .standard, "red with the guard off: the Standard-era copy lowered the library")
     }
 
     /// THE DOOR-TIME VAULT CHECK: a vault still on the old shared key would
@@ -206,23 +180,19 @@ struct AssessGuardMutationTests {
                 "red with the guard off: Apple-reachable with no fresh vault")
     }
 
-    /// THE RE-KEY AT EVERY CROSSING: leaving an account in Standard, and a
-    /// landing, would keep the key — the account you left keeping what you
-    /// write after; a key held by two Macs.
+    /// THE RE-KEY AT EVERY CROSSING: leaving an account in Standard would keep
+    /// the key — the account you left keeping what you write after. (The
+    /// landing's half left with rule 17 — VX-378 U1.)
     @Test func rekeyAtEveryCrossing() throws {
         let x = PF.id()
         var world = try AWorld(.standard, account: x)
         world.session = .signedIn(accountID: x, email: nil)
         world.vault = AWorld.vault(x, .standard(appleKeyID: PF.id()))
         #expect(try world.assessed().door(.thisMacOnly).spec?.rekeys == true)
-        let landing = OpenFacts(libraryID: CF.lib2, keyFingerprint: "d000000000000000", recordMode: .castle, target: nil)
-        guard case .differentLibrary(let on) = OpenRule.verdict(landing), on.freshKey else { Issue.record("on"); return }
         var off = ProtectionGuards()
         off.rekeyAtEveryCrossing = false
         #expect(try world.assessed(guards: off).door(.thisMacOnly).spec?.rekeys == false,
                 "red with the guard off: a Standard leave keeps the key")
-        guard case .differentLibrary(let broken) = OpenRule.verdict(landing, guards: off) else { Issue.record("off"); return }
-        #expect(!broken.freshKey, "red with the guard off: a landing keeps the key it came with")
     }
 }
 #endif

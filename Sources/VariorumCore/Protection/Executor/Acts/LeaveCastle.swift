@@ -92,14 +92,6 @@ extension ActContext {
         // for (and a resume, which reads no vault, must not stick on it —
         // VX-305 U4, found by the scenario world).
         if parameters.changesAccount == true, parameters.targetAccount == nil { return }
-        // A landing writes for the LANDED library: a local pair has no vault
-        // to read; a synced pair's is its own account's (never the outgoing
-        // library's — a refusal there stuck the landing mid-act).
-        if act == .land {
-            guard executor.guards.freshVaultBeforeAppleWriteOn, parameters.synced == true, let account = parameters.accountID else { return }
-            guard executor.readThisSession(account) else { throw ExecutorRefusal.needsFreshVault }
-            return
-        }
         guard executor.guards.freshVaultBeforeAppleWriteOn, let account = library.record?.account ?? accountID else { return }
         guard executor.readThisSession(account) else { throw ExecutorRefusal.needsFreshVault }
     }

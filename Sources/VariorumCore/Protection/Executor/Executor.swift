@@ -190,11 +190,6 @@ public final class ProtectionExecutor {
     public internal(set) var freshVaults: [String: VaultSnapshot] = [:]
     /// Every account whose vault this session has read (present or absent).
     var vaultsReadThisSession: Set<String> = []
-    /// A copy act's in-hand facts, for its span only (never stored): the
-    /// copy's own key, its record, a landing's new record and section.
-    var copyOpenerInHand: StoreKey?
-    var copyRecordInHand: ProtectionRecord?
-    var landingInHand: (record: ProtectionRecord, section: DeviceSection)?
 
     public init(leaves: ExecutorLeaves, configuration: ExecutorConfiguration, guards: ProtectionGuards = .all) {
         self.leaves = leaves

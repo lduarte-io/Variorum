@@ -9,8 +9,7 @@ import Foundation
 // export leaves it behind) is phase 2's; this is the value it will hold.
 //
 // A copy carries only the library's own facts (§3.6): a device section counts
-// only on its own Mac, and a copy's act in flight is cleared whenever it's
-// opened.
+// only on its own Mac.
 
 public struct ProtectionRecord: Codable, Equatable, Sendable {
     public static let currentFormat = 1
@@ -119,20 +118,6 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
             return id != section.deviceID
         }
         next.deviceSections = others + [sealed]
-        return next
-    }
-
-    /// **A copy opened** (§3.6, §3.7, promise 6): every section's act in
-    /// flight cleared and the section re-sealed under the key the copy now
-    /// lives under; a section no reachable key verifies is dropped (it could
-    /// never count, and it could carry an act).
-    public func clearingActsInFlight(
-        reach: (String) -> StoreKey?, resealUnder key: StoreKey
-    ) throws -> ProtectionRecord {
-        var next = self
-        next.deviceSections = try verifiedSections(reach: reach).map {
-            try Sealed.sealing($0.clearingActInFlight(), purpose: .deviceSection, libraryID: libraryID, key: key)
-        }
         return next
     }
 

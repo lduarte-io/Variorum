@@ -92,9 +92,6 @@ public struct ActParameters: Codable, Equatable, Sendable {
     public var rekeys: Bool?
     /// The account this Mac stops using (its sync keys forgotten).
     public var forgetsAccount: String?
-    /// Resume Sync after a landing: the secret made new there — "passphrase"
-    /// or "words" — becomes the account's (§3.7).
-    public var adoptsMadeNewSecret: String?
     /// A vault write of a re-key act that carries no corpus key stamp (Re-link
     /// first, inside Replace All Keys) — stamped in the plan BEFORE the write,
     /// like `newCorpusKeyID`, so a resume that can't reach the vault knows the

@@ -51,13 +51,6 @@ public struct ProtectionGuards: Equatable, Sendable {
     /// follows only a press that failed on an item that exists. Off: a Touch
     /// ID choice with no item asks it.
     public var noRearmWithoutItem = true
-    /// THE FAMILY TREE's OWN-LINE CHECK (§3.7): "is it ours?" reads the
-    /// tree. Off: it reads the live key file's history (after a leave, this
-    /// library's own Castle-era copies read as another library's).
-    public var ownLineByFamilyTree = true
-    /// OPENING A COPY NEVER LOWERS THE MODE (§3.7, VX-209). Off: the copy's
-    /// own mode wins.
-    public var neverLowerOnOpen = true
     /// THE DOOR-TIME VAULT CHECK (§3.5 point 4): a vault this device can
     /// read, or the record's account while signed out, still on the old
     /// shared key stops Use Castle at its door. Off: the door opens.
@@ -130,9 +123,6 @@ public struct ProtectionGuards: Equatable, Sendable {
     /// a new old-name item an older build minted later is left alone. Off:
     /// whatever id the item carries now.
     public var oldSharedKeyDeletedByRecordedID = true
-    /// A COPY'S ACT IN FLIGHT IS CLEARED WHENEVER IT'S OPENED (§3.6, §3.7).
-    /// Off: the copy's sections keep their acts.
-    public var copyActClearedOnOpen = true
     /// THE MOVE KEEPS THE OLD WRAP (§3.5 point 2): a key of this Mac's own
     /// beside the old shared key's wrap, never instead of it. Off: the old
     /// wrap is dropped.
@@ -226,21 +216,7 @@ public struct ProtectionGuards: Equatable, Sendable {
         #endif
     }
 
-    public var ownLineByFamilyTreeOn: Bool {
-        #if DEBUG
-        return ownLineByFamilyTree
-        #else
-        return true
-        #endif
-    }
 
-    public var neverLowerOnOpenOn: Bool {
-        #if DEBUG
-        return neverLowerOnOpen
-        #else
-        return true
-        #endif
-    }
 
     public var doorTimeVaultCheckOn: Bool {
         #if DEBUG
@@ -378,13 +354,6 @@ public struct ProtectionGuards: Equatable, Sendable {
         #endif
     }
 
-    public var copyActClearedOnOpenOn: Bool {
-        #if DEBUG
-        return copyActClearedOnOpen
-        #else
-        return true
-        #endif
-    }
 
     public var moveKeepsOldWrapOn: Bool {
         #if DEBUG

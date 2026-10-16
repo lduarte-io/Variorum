@@ -396,27 +396,6 @@ struct DeviceFactsTests {
 
 @Suite("VX-305 U1 — the record's sealed sections, the memory's seal, plans named by the act")
 struct SealedHomesAndPlansTests {
-    @Test func aCopysActsInFlightAreClearedWhenItIsOpened() throws {
-        let sent = StoreKey.mint(), landed = StoreKey.mint()
-        let library = PF.id()
-        let busy = DeviceSection(deviceID: PF.id(), hardwareMarker: .stub("m"), settings: .noChoiceYet)
-            .beginningAct(.replaceAllKeys, from: "a", to: "b", at: PF.t0).section
-        var record = try ProtectionRecord.minting(
-            libraryID: library, mode: .castle, modeConfirmed: true, account: nil,
-            currentFingerprint: PF.fp(sent), madeBy: busy.deviceID, at: PF.t0)
-            .storing(busy, sealedUnder: sent)
-        // A planted section no reachable key verifies.
-        let planted = try Sealed.sealing(
-            DeviceSection(deviceID: PF.id(), hardwareMarker: .stub("x"), settings: .noChoiceYet)
-                .beginningAct(.enterCastle, from: nil, to: nil, at: PF.t0).section,
-            purpose: .deviceSection, libraryID: library, key: StoreKey.mint())
-        record.deviceSections.append(planted)
-        let opened = try record.clearingActsInFlight(reach: PF.reach([sent]), resealUnder: landed)
-        let sections = opened.verifiedSections(reach: PF.reach([landed]))
-        #expect(sections.count == 1)
-        #expect(sections.allSatisfy { $0.actInFlight == nil })
-    }
-
     @Test func storingReplacesThatDevicesSectionOnly() throws {
         let key = StoreKey.mint()
         let a = DeviceSection(deviceID: PF.id(), hardwareMarker: .stub("a"), settings: .noChoiceYet)

@@ -231,13 +231,6 @@ public struct DeviceSection: Codable, Equatable, Sendable {
         return next
     }
 
-    /// A copy's act in flight is cleared whenever it's opened (§3.6, §3.7).
-    public func clearingActInFlight() -> DeviceSection {
-        guard actInFlight != nil else { return self }
-        var next = bumped()
-        next.actInFlight = nil
-        return next
-    }
 }
 
 // MARK: - The two homes, the identity, the takeover
