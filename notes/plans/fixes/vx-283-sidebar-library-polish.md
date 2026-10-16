@@ -4809,3 +4809,90 @@ comment, a rename or a guard: no reachable behaviour changes, so no red-on-old i
   unaffected — R1-3/R1-4 are comments, the renamed test is in none of the reverted runs' suites, and R1-6's two pins
   are absent from `-rv` (on a rebuilt `-rv` they would be GREEN: neither reads R-S's two edits). The pins' runs
   PENDING U2's / U3b's windows; this leg is otherwise CLOSED.
+
+### Round 2 — the cold review (fable-reviewer at xhigh, 2026-10-16, on tip `5147b7e5`; `notes/REVIEW_PROMPT.md` verbatim, the whole run's diff `origin/main...HEAD`)
+
+**No BLOCKER, no MAJOR — and no new BLOCKER/MAJOR, so no round 3 is earned.** Round 2's anchor: round 1's six
+findings and their dispositions, re-checked in code; plus everything landed since round 1's tip (the R1 fix leg
+D0–D5, U3c's trace + fix, U2b's trace, U2c, U2d, and the window records). The `448f9450..HEAD` churn in
+`Sources/VariorumCore` and `VariorumMCP` was verified to be origin/main's own (VX-336), arriving via the merge
+`6860bd54` — the run's diff (`origin/main...HEAD`) stays entirely inside `App/Variorum` + `.gitignore` + the two
+run-record files. No "Review foci" section exists (re-checked). Findings:
+
+- **[MINOR] R2-1 · this record, the LIVE STATUS table + the stage traffic log · stale at the tip again (R1-1's
+  class recurring).** Evidence: the U2 row reads "READY FOR STAGE — U2d window (pins/reverts/batch), then the
+  re-walk" while "U2d — THE WINDOW'S TEST PART" records that window RUN AND COMPLETE (pins 60/7 green, the reverts
+  exactly as named, batch 725/144, restore clean); the U1 row still leads "PROVEN — awaiting U2's walk for
+  P-U1e-1" though its own tail (and the walk record's D5 + the orchestrator's eye) records that acceptance; the
+  stage traffic log's last row is `vx283-u2c` 07:04 — the `vx283-u2d` claim (08:04:32 →) has no GO/RELEASE row
+  and its section leaves the claim unclosed on paper. The handoff sends a successor to LIVE STATUS first. Fix:
+  refresh the two rows and append the u2d traffic entries at the next record touch. Doc-class — no pin.
+- **[MINOR] R2-2 · §U2d + §U3c (sequencing — R1-2's successor) · two pieces of owed evidence this review must not
+  be mistaken for.** (1) **Her hand check of the drag's delivery**: no real pointer has ever exercised U2d's drop
+  on this build — the U2 walk proved synthetic drags do not reach sidebar drops, the pins stop short of AppKit
+  delivery by design, and the main-build control proved only the API class's reachability, never that THIS build's
+  drop lands. Until her hand lands one, "the drop lands" rests on parity reasoning alone (the record says exactly
+  this; the morning checklist's first item). (2) **The U2d re-walk including D8 on `vx283-u3c`** — named as
+  VX-175's closing evidence (P-U3c-1's in-use verdict) — has not run. Also riding the closeout: the orchestrator's
+  own O-2 ruling ("ticketed at the closeout" — the 620-pt window's current row under the footer's edge) must not
+  be dropped there. Fix: none in code — run both before the units close; ticket O-2 at closeout as ruled.
+- **[NIT] R2-3 · `LibraryCatalogView.swift` ≈:659-660 / :685-686 · the pickers' frame caps are dead weight with
+  zero headroom** — with `.fixedSize(horizontal: true)` (U3c's fix) the `.frame(maxWidth: 280 / 230)` can no
+  longer squeeze, only under-report: a voice or metrics change pushing a picker's natural width past its cap
+  (Study's mode picker already measures exactly 230 of 230) would overlap its neighbour silently by the excess.
+  R1-6's independent-numbers class, one layer up. No reachable red today (the 10-pt spacing absorbs a hair; the
+  mounted pin's ≥-intrinsic assertion stays green either way). Fix (optional, next touch): drop the caps, or pin
+  each picker's natural ≤ its cap beside the stable-widths pins.
+- **[NIT] R2-4 · `LibraryControlsFlow.swift` ≈:134 `arrange` · `single` is computed unconditionally** — the
+  full-width distribution (one `sizeThatFits` probe per child) runs on the two-line road too, where it is unused.
+  Bounded (5 children, per layout pass); cleanliness only. Fix: compute it lazily inside the one-line branch.
+
+**CLEAN BILL (checked and found solid):**
+- **Round 1's dispositions, each verified in code:** D1 — R1-3's bound named at `revealOffset`
+  (`SidebarLayout.swift:454-472`, including the implementer's corrected first/last-row band) + the pointer at the
+  fixed-point pin; D2 — R1-4's known-edge comments at `began(_:)`/`perform`, and the edge itself NARROWED
+  product-side by the session-end clearing (U2c, kept by U2d); D3 — the rename
+  `theOpenListsTallestFormIsTheRoomDownToTheFooter` with the old name's note; D4 — R1-6's clamp: the cap named
+  once (`searchFieldMaxWidth`, :181), read by the field's frame AND handed into `fieldFloor = min(cell, cap)`,
+  both guard pins present and RUN (U3b's 511-test batch, then U3c's 513-green batch).
+- **U2d, the final drag shape, hand-verified end to end:** `gap`/`destination`/`lineTop`/`endZoneHeight`
+  re-derived (the line at gap × pitch − 1, clamped into the rows and the window; own-place nils; the end zone
+  = padding + min(28, room), never absent, unmeasured ⇒ the padding alone); the door (`perform` names the DROP's
+  own target, never the hover state; ends the drag either way; `land` re-validates against FRESH rows and refuses
+  a foreign listID ⇒ slide-back); the false-offer rule held at the line (a foreign drag — `dragged` nil — and the
+  own place draw nothing); the state (an un-target clears only its own; the window copied in only while a target
+  stands, so her scroll re-renders nothing; the session's end clears the drag wherever the release fell);
+  P-U2d-2's padding hand-off (the column drops its own padding exactly while the list shows — the content height
+  byte-identical, and the mount pin ran in the window); P-U2-1 holds by construction (a drop is neither an act
+  nor a phase, so no reveal road fires) and by its mounted pin.
+- **The U2d pins and reverts:** exhaustive pure coverage through the REAL `OpenNotes.move` (every list 1…6 ×
+  every dragged row × every target and the end zone); the door, source-read and mounted pins' arithmetic
+  re-derived by hand and correct; the five reverts named BEFORE application with hand-traced red lists, and the
+  window's results match them exactly — including R-W's prebuilt-tree green correctly diagnosed as a METHOD
+  artifact (a source-read pin reads the worktree) and re-run with the revert in the worktree: 1 red of 3.
+- **U3c:** the traced mechanism (a segmented picker answering in two modes in one model state after a landed
+  search) closed by `.fixedSize(horizontal:)` ahead of the frames, so P-U3-5's "the wrap reads stable widths
+  only" now holds for every changing child; the mounted pin asserts both controls at no less than intrinsic width
+  and a stable row height across the probe's exact state road; R-P red ×4 as named; the previously-red sweep pin
+  UNCHANGED and now green (the pin was not weakened to pass); the probe suite env-gated and assertion-free.
+- **The scope fence, re-verified from the diff itself:** zero core, `Sync/`, custody, Keychain, schema or
+  editor-seam lines in the run's diff; shared ledgers untouched; 154 commits, zero forbidden trailers.
+- **`SidebarSectionWindow` re-read cold:** the proxy-anchor conversion `a = (rowTop − target) / (viewport −
+  rowHeight)` re-derived and exact (clamps correct at both ends and at `viewport ≤ rowHeight`); the follow gate
+  covers EVERY reveal road (reading, pitch, settled check) with `act()` on current-change and mount; episode
+  supersession sound; a new row appended lands via the discrete request's settle backstop; every probe, seam and
+  oracle DEBUG-gated (`sectionReport` / `sectionPhaseSeam` return nil in Release — checked at the source).
+- **The close family re-traced:** `closeRow`/`closeAllNotes`/`neighbour` view-only (the store AND outbox pin is
+  real — read), landings through the one adopt road, other panes in place with focus kept, pass-over and
+  rowless-note semantics exact; the ⌘⇧W table entry and registry gates as declared.
+- **VX-121/VX-20 re-sampled:** the toast placement pure (max(resting, host − highest band + 8)), ONE keep-clear
+  mark inside `QuickEntryBar` (both surfaces by construction), the host at `RootView`; `pinnedFace` token-only
+  (dark = the voice's surface + hairline; light byte-kept). No literal colour in any new chrome; every new
+  per-frame computation bounded or memoized (P1); no word-level tracking; no text copied across entities.
+
+### Ladder round 2 — the reviewer's note on the ladder's close
+
+Round 2 raised no BLOCKER and no MAJOR, so the ladder closes at two rounds. R2-1 and R2-2 are the orchestrator's
+(record currency; sequencing — the owed hand check, the re-walk with D8, and O-2's closeout ticket). R2-3 and
+R2-4 are optional next-touch cleanliness for the implementer; neither needs a pin (R2-3 is a guard of R1-6's
+class — a natural-≤-cap pin would be red only by construction) and neither blocks closeout.
