@@ -354,5 +354,26 @@ struct ScenarioMutationPins {
             return (world, world.macA.slot?.record?.mode == .castle && world.macA.slot?.fingerprint == current)
         }
     }
+
+    /// …and through the memory's own sealed MIRROR when the file came back
+    /// ALONE — the live place ABSENT (NEW-1's absent arm; the fixed scenario is
+    /// `LadderRound2AbsentArmPin`): the key file deleted and the library file
+    /// replayed, the older file loses to the memory — the slot back under the
+    /// remembered key at its epoch. With the guard off the older file wins: the
+    /// scenario's own check fails while the violation list stays empty
+    /// (promise 10 watches the mode, account, custody and gate style, never the
+    /// key or the epoch, and the replayed file here is Castle-born). VX-305
+    /// ladder round 2, the final call §1(b).
+    @Test func aLibraryFileReplayedWithItsKeyFileDeletedLosesToTheMemory() async throws {
+        try await mutationPin("the lone older file loses to the memory through its mirror", off: { $0.libraryFileLosesToMemory = false }) { guards in
+            let world = try scenarioWorld(guards: guards) { try $0.today(on: $0.macA, TodaySpec(mode: .castle, gate: .touchID)) }
+            await world.done([.launch("macA"), .useStandard("macA"), .useCastle("macA", .touchID, newWords: false)])
+            let remembered = try #require(world.macA.slot?.record)
+            await world.step(.tamperSequence("macA", [.deleteKeyFile, .replayLibraryFile]))
+            await world.step(.settle)
+            return (world, world.macA.slot?.fingerprint == remembered.currentFingerprint
+                && world.macA.slot?.record?.keyEpoch == remembered.keyEpoch)
+        }
+    }
 }
 #endif

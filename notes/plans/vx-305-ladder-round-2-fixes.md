@@ -14,8 +14,9 @@ this record.
 
 ## LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
 
-- **1(a) · MINOR — the absent-arm pin committed as built:** **DONE** (this record's first commit).
-- **1(b) · MINOR — the mutation twin:** PENDING.
+- **1(a) · MINOR — the absent-arm pin committed as built:** **DONE** (`4d8234068`).
+- **1(b) · MINOR — the mutation twin:** **DONE** (this commit) — `ScenarioMutationPins` 22/1 green; the twin red with
+  its off-switch neutralized (§1(b)).
 - **1(c) · MINOR — `rollsBackBothHomes`'s comment, code unchanged:** PENDING.
 - **2 · NIT — ExecutorWorld's set-aside doc comment:** PENDING.
 - **3 · NIT — the two restores' deliberate-overwrite sentences:** PENDING.
