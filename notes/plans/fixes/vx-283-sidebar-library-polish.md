@@ -4610,7 +4610,8 @@ and here:
 - **The re-walk** (P-U2d-1's evidence standard): everything a synthetic road CAN see.
   - The chip at the cursor.
   - The rows' click / ✕ / right-click / ⇧⌘W unchanged.
-  - The file drop on the list still importing (U2's D4, owed).
+  - The file drop on the list still importing (U2's D4, owed), but only if the road reaches it. The column's import
+    drop is a sidebar drop too, so it is more likely her hand's. U2d left that drop byte-identical to main's.
   - The end zone's 12 pt under a scrolling list leaving the layout unchanged (a capture of the list's foot above the
     footer against U2's walk).
   - D8 on `vx283-u3c`.
