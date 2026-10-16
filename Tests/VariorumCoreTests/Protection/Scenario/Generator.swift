@@ -25,7 +25,16 @@ extension SWorld {
     /// in `violations`.
     @discardableResult
     func step(_ action: Action, words: Bool = false) async -> StepResult {
-        if case .tamper(let name, _) = action, device(name).build == .new, !device(name).isOpen {
+        // A single tamper and a group (`.tamperSequence`) are bracketed alike:
+        // ONE pre-launch settle before, ONE relaunch and promise-10 check after.
+        let tampered: (name: String, tampers: [Tamper])? = {
+            switch action {
+            case .tamper(let name, let tamper): return (name, [tamper])
+            case .tamperSequence(let name, let tampers): return (name, tampers)
+            default: return nil
+            }
+        }()
+        if let name = tampered?.name, device(name).build == .new, !device(name).isOpen {
             // Its true posture before the tamper is what an open reads — and a
             // resume that open ran settles what its press chose BEFORE the
             // tamper can take the lock it would be read back from (the closer's
@@ -53,6 +62,8 @@ extension SWorld {
         case .timeMachineRollback(let name), .tamper(let name, .replayLibraryFile), .tamper(let name, .replayKeyFile),
              .deleteContainerAndOpenOldCopy(let name):
             if let was = before[name] { truth.beforeRollback[name] = (was.mode, was.account) }
+        case .tamperSequence(let name, let tampers) where tampers.contains(.replayLibraryFile) || tampers.contains(.replayKeyFile):
+            if let was = before[name] { truth.beforeRollback[name] = (was.mode, was.account) }
         default: break
         }
         var result = await apply(action)
@@ -64,13 +75,13 @@ extension SWorld {
         syncHolders()
         for device in devices { adoptPending(device) }
         var found: [Violation] = []
-        if case .tamper(let name, let tamper) = action {
+        if let (name, tampers) = tampered {
             // The next open is when a planted or replayed thing would act.
             let d = device(name)
             if d.build == .new {
                 do { try await launch(d) } catch { stepLog.append("  (the tampered library didn't open: \(error))") }
                 crashed.remove(name)
-                found += sealed(d, before: before[name]!, tamper: tamper)
+                found += sealed(d, before: before[name]!, tampers: tampers)
             }
         }
         if case .launch(let name) = action, result == .done { crashed.remove(name) }
@@ -225,8 +236,11 @@ struct ScenarioGenerator {
         }
         if d.slot == nil { return rng.chance(70) ? .createLibrary(name, secrets: rng.chance(70)) : .settle }
         let account = world.server.accounts.keys.sorted().first ?? "00000000-0000-4000-8000-000000000000"
+        // (VX-305 ladder round 1: kind 46, the tamper GROUP, weight 1 — every
+        // seed's stream shifted with it, so the U4 soak table's step counts
+        // are of the tree before it.)
         let weights = [6, 3, 5, 5, 3, 4, 2, 3, 2, 2, 2, 2, 1, 3, 2, 2, 6, 3, 1, 2, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1, 1, 1, 2, 2, 1, 2,
-                       3, 1, 1, 1, 1, 1, 1, 2, 1, 3]
+                       3, 1, 1, 1, 1, 1, 1, 2, 1, 3, 1]
         var roll = rng.int(0..<weights.reduce(0, +))
         var kind = 0
         while roll >= weights[kind] { roll -= weights[kind]; kind += 1 }
@@ -251,8 +265,39 @@ struct ScenarioGenerator {
         // Until that road is built, the generator doesn't reopen a library
         // this Mac remembers; reopening another library's set-aside copy stays.
         if case .openOlderLibrary = action, world.newestOlderLibraryIsRemembered(d) { action = .launch(name) }
-        if kind != 45, rng.chance(12) { return .crash(action, afterWrites: rng.int(1..<24)) }
+        // Never `.crash`-wrapped: the settle (45), and the tamper group (46) —
+        // its edits are the adversary's file and item writes, not an act's,
+        // so a crash "after n writes" of it means nothing; and the seed-9
+        // pre-settle (kept, the final call §1(c)) settles a crashed act before
+        // any group, so a group never lands inside a crash window here (the
+        // fixed scenarios in LadderRound1Pins.swift hold that road).
+        if kind != 45, kind != 46, rng.chance(12) { return .crash(action, afterWrites: rng.int(1..<24)) }
         return action
+    }
+
+    /// Two or three distinct tampers for one closed window. The adversary's
+    /// claims are single items "or both homes of this Mac's facts together"
+    /// (design §4.1, promise 10, §3.6's stated limit); a group never rolls
+    /// the library file back together with what it would otherwise lose to
+    /// or be checked against — this Mac's memory item, or the live key file —
+    /// since that IS the stated limit's shape, already modelled by
+    /// `.replayBothHomes` with its truth bookkeeping (VX-305 ladder round 1).
+    mutating func tamperGroup() -> [Tamper] {
+        let pool = Tamper.allCases.filter { $0 != .replayBothHomes }
+        let size = rng.chance(70) ? 2 : 3
+        var group: [Tamper] = []
+        for _ in 0..<24 where group.count < size {
+            let tamper = rng.pick(pool)!
+            if group.contains(tamper) || Self.rollsBackBothHomes(group + [tamper]) { continue }
+            group.append(tamper)
+        }
+        return group
+    }
+
+    static func rollsBackBothHomes(_ group: [Tamper]) -> Bool {
+        let otherHomes: Set<Tamper> = [.deleteMemoryItem, .editSealedSetting, .replayMemory, .deleteKeyFileAndMemory,
+                                       .replayKeyFile, .deleteKeyFile]
+        return group.contains(.replayLibraryFile) && group.contains { otherHomes.contains($0) }
     }
 
     mutating func make(_ kind: Int, _ name: String, _ other: String, _ account: String) -> Action {
@@ -302,6 +347,7 @@ struct ScenarioGenerator {
         case 42: return .timeMachineRollback(name)
         case 43: return .tamper(name, rng.pick(Tamper.allCases)!)
         case 44: return .plantPair(name)
+        case 46: return .tamperSequence(name, tamperGroup())
         default: return .settle
         }
     }

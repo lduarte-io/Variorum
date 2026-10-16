@@ -137,6 +137,12 @@ indirect enum Action: Equatable {
     case updateToNewBuild(String)
     // The adversary.
     case tamper(String, Tamper)
+    /// Two or three tampers in ONE closed window (VX-305 ladder round 1, the
+    /// final call §1(c)): the world's pre-launch settle runs ONCE before the
+    /// group (the seed-9 lesson), the posture is captured before it, and the
+    /// one relaunch and promise-10 check come after it — so tampers COMPOSE,
+    /// which single `.tamper` steps (each bracketed by launches) never do.
+    case tamperSequence(String, [Tamper])
     case plantPair(String)
     /// The world settles: iCloud propagates, every device opens, follows and
     /// heals what it's offered.
@@ -709,6 +715,22 @@ extension SWorld {
         // MARK: The adversary
         case .tamper(let name, let tamper):
             try tamperWith(device(name), tamper)
+        case .tamperSequence(let name, let tampers):
+            // Each applies in turn, the app closed throughout; one that finds
+            // nothing to act on (no capture to replay) is skipped and said —
+            // the group is refused only when none applied.
+            var applied = 0
+            var lastRefusal: Error?
+            for tamper in tampers {
+                do {
+                    try tamperWith(device(name), tamper)
+                    applied += 1
+                } catch {
+                    stepLog.append("  (\(tamper) didn't apply: \(error))")
+                    lastRefusal = error
+                }
+            }
+            if applied == 0, let lastRefusal { throw lastRefusal }
         case .plantPair(let name):
             try plantPair(device(name))
         case .settle:

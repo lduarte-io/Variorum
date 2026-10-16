@@ -366,6 +366,34 @@ extension SWorld {
             return [Violation(promise: 1, device: device.name,
                               detail: "the memory names \(f8(memory.currentFingerprint))#\(memory.keyEpoch), the record \(f8(record.currentFingerprint))#\(record.keyEpoch)")]
         }
+        // …and THE KEY FILE agrees (§3.3's "Always: the record, what this Mac
+        // remembers and the key file agree" — VX-305 ladder round 1, the final
+        // call §1(c)): with nothing in flight and no repair owed that would
+        // bring the current key's own file back, the live place's format-3
+        // file IS the record's current key's. Keyed on "no repair owed", so a
+        // repair pending its run passes, and a state no repair can leave (the
+        // round-1 wedge) fails. Stated residue: PROVISIONAL P-R1-1 — no
+        // catalogued frozen copy of the current key's file to restore from
+        // (the honest refusal stands).
+        if liveKeyFile(device)?.fingerprint != record.currentFingerprint {
+            let assessment = assessed(device)
+            let owed = assessment.repairs.contains { repair in
+                switch repair {
+                case .restoreKeyFileFromCopy, .restoreKeyFileFromMirror, .rekeyOlderLibraryFile: return true
+                default: return false
+                }
+            }
+            let copyExists = catalog(device).keyFiles.contains { file in
+                if case .format3(let keyFile)? = file.document {
+                    return keyFile.fingerprint == record.currentFingerprint && keyFile.libraryID == record.libraryID
+                }
+                return false
+            }
+            if !owed, copyExists {
+                return [Violation(promise: 1, device: device.name,
+                                  detail: "the live key file is \(liveKeyFile(device).map { f8($0.fingerprint) } ?? "absent"), the record's key \(f8(record.currentFingerprint)) — and no repair brings its own file back")]
+            }
+        }
         return []
     }
 
@@ -775,7 +803,8 @@ extension SWorld {
         case .settle: return true
         // Files replaced from outside the app (promise 10 judges a tamper in
         // Castle; promise 4 judges what the app does).
-        case .timeMachineRollback(let d), .deleteContainerAndOpenOldCopy(let d), .tamper(let d, _): return d == name
+        case .timeMachineRollback(let d), .deleteContainerAndOpenOldCopy(let d), .tamper(let d, _), .tamperSequence(let d, _):
+            return d == name
         case .cloneMac(_, let d): return d == name
         case .useCastle(let d, _, _), .useStandard(let d), .follow(let d, _), .finishLeave(let d, _), .turnOnSync(let d),
              .move(let d), .thisMacOnly(let d, _), .stopSyncingHere(let d, _), .deleteAccountHere(let d), .resumeSync(let d),
@@ -795,19 +824,29 @@ extension SWorld {
     /// when an item vanished never weakens anything). The stated limit (both
     /// homes together) may return this Mac's settings.
     func sealed(_ device: SDevice, before was: Posture, tamper: Tamper) -> [Violation] {
+        sealed(device, before: was, tampers: [tamper])
+    }
+
+    /// …and over a GROUP of tampers in one closed window (VX-305 ladder round
+    /// 1): the same claims, the group drawn so it never takes the stated
+    /// limit's shape (`ScenarioGenerator.rollsBackBothHomes`) — except a group
+    /// that holds `.replayBothHomes` itself (a fixed scenario's).
+    func sealed(_ device: SDevice, before was: Posture, tampers: [Tamper]) -> [Violation] {
         guard was.mode == .castle, was.confirmed == true else { return [] }
         let now = posture(device)
         var violations: [Violation] = []
-        func fail(_ what: String) { violations.append(Violation(promise: 10, device: device.name, detail: "after \(tamper): \(what)")) }
+        let label = tampers.map { "\($0)" }.joined(separator: " + ")
+        func fail(_ what: String) { violations.append(Violation(promise: 10, device: device.name, detail: "after \(label): \(what)")) }
+        let statedLimit = tampers.contains(.replayBothHomes)
         // The stated limit (§3.6): both homes rolled back together return this
         // Mac — the library file's record with it — to that earlier state.
-        if now.libraryID == was.libraryID, tamper != .replayBothHomes {
+        if now.libraryID == was.libraryID, !statedLimit {
             if now.mode != .castle { fail("the mode is \(now.mode.map { "\($0)" } ?? "unknown")") }
             if now.account != was.account { fail("the account changed") }
         }
         if !now.silentItems.subtracting(was.silentItems).isEmpty { fail("a silent custody item appeared") }
         if !now.touchIDItems.subtracting(was.touchIDItems).isEmpty { fail("a Touch ID item appeared") }
-        if tamper != .replayBothHomes {
+        if !statedLimit {
             if was.gate != .touchID, now.gate == .touchID { fail("the gate style became Touch ID") }
             if was.scheduledExport == false, now.scheduledExport == true { fail("the scheduled export turned on") }
         }

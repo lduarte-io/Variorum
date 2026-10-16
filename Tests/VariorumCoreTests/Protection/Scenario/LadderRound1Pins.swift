@@ -261,6 +261,42 @@ struct LadderRound1MajorPin {
     /// ID item; nothing can bring the key file back, so the next act refuses
     /// `noLiveKeyFile` — the hand-forward's door (a rebuild under secrets typed
     /// and set at it) is the author's call.
+    /// THE GENERATOR'S COMPOUND ROAD (the final call §1(c)): with promise 1's
+    /// live-key-file clause and `.tamperSequence`, a seeded run on the tree
+    /// before the fix reached the wedge — seed 1, sequence 96 (world seed
+    /// 1000099, after 97 sequences / 4,515 steps, 51 tamper groups), shrunk to
+    /// these three steps: the group (an Apple wrap planted, an earlier key's
+    /// file replayed, an earlier memory item replayed) leaves the pre-Castle
+    /// key's file live with no mirror of the current one. Before the fix:
+    /// `promise 1 on macB: the live key file is d30d1b73, the record's key
+    /// e79f11e3 — and no repair brings its own file back`.
+    @Test func aTamperGroupReachesTheWedge() async throws {
+        let world = try GeneratorFoundScenarios.start("VX-209's victim", seed: 1_000_099)
+        for action in [Action.createLibrary("macB", secrets: false), .useCastle("macB", .touchID, newWords: false),
+                       .tamperSequence("macB", [.plantAppleWrap, .replayKeyFile, .replayMemory])] {
+            await world.step(action)
+        }
+        #expect(world.liveKeyFile(world.macB)?.fingerprint == world.macB.slot?.record?.currentFingerprint)
+        expectPromisesKept(world)
+    }
+
+    /// …and the wedge was reachable by ONE tamper (the generator, seed 1
+    /// sequence 37 on the tree before the fix): a library file replayed after
+    /// a leave. The leave's new key takes no history (the anchor holds the old
+    /// one), so `libraryFileLosesToMemory` can't verify and the replayed record
+    /// stays — P-U4-6's "a file only the ANCHOR reaches stays the replayed
+    /// record" (her P-U4-10 ruling) — while the newer key's file stayed live
+    /// with nothing owed. Now its own key file comes back and the newer one goes
+    /// aside. Before the fix: `promise 1 on macA: the live key file is 1546fc58,
+    /// the record's key 06a3e65a — and no repair brings its own file back`.
+    @Test func aLibraryFileReplayedAfterALeave() async throws {
+        let world = try GeneratorFoundScenarios.start("13p escrow items", seed: 1_000_040)
+        for action in [Action.useStandard("macA"), .tamper("macA", .replayLibraryFile)] { await world.step(action) }
+        #expect(world.liveKeyFile(world.macA)?.fingerprint == world.macA.slot?.record?.currentFingerprint)
+        #expect(world.catalog(world.macA).keyFiles.contains { $0.role == .setAside })
+        expectPromisesKept(world)
+    }
+
     @Test func theCopyLessCaseIsP_R1_1sHonestRefusal() async throws {
         let world = try scenarioWorld { try $0.today(on: $0.macA, TodaySpec(mode: .castle, gate: .touchID)) }
         await world.done([.launch("macA")])
