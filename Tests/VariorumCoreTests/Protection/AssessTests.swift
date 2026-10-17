@@ -481,7 +481,7 @@ struct AssessDoorTests {
         // A copy under the key left in a former Apple ID.
         let copyKey = StoreKey.mint()
         let copyFile = try KeyFile.building(libraryID: world.world.library, key: copyKey, epoch: 1,
-                                            locks: NewKeyLocks(apple: AppleKeyMaterial(id: formerAppleID, key: SymmetricKey(size: .bits256))))
+                                            locks: NewKeyLocks(words: world.world.w, apple: AppleKeyMaterial(id: formerAppleID, key: SymmetricKey(size: .bits256))))
         let folders = CF.macFolder(world.world.library, CF.macA)
         world.extraEntries = [
             CatalogEntry(place: .container, folders: folders, name: CF.snapshotName(CF.stamp(1), copyKey)),

@@ -100,12 +100,14 @@ extension ProtectionExecutor {
     }
 
     /// **Create a library** in an empty slot — in Standard (the default): its
-    /// key, its silent item, this Mac's own Apple key, its key file (the
-    /// passphrase and words when given), its record and this Mac's section, what
-    /// this Mac remembers. Nothing to protect yet and nothing to resume: a crash
-    /// leaves the slot empty and the creation runs again (a recorded
-    /// refinement — no plan in an empty slot).
-    public func createLibrary(passphrase: String? = nil, words: [String]? = nil) throws -> UnlockedLibrary {
+    /// key, its silent item, this Mac's own Apple key, its key file (its
+    /// twelve words always — rule 2, minted here and handed back to be shown
+    /// once, never stored — and the passphrase when given, rule 3), its record
+    /// and this Mac's section, what this Mac remembers. Nothing to protect yet
+    /// and nothing to resume: a crash leaves the slot empty and the creation
+    /// runs again (a recorded refinement — no plan in an empty slot).
+    public func createLibrary(passphrase: String? = nil) throws -> CreatedLibrary {
+        let words = leaves.ids.mintWords()
         let key = leaves.ids.mintLibraryKey()
         let libraryID = leaves.ids.mintID()
         let deviceID = leaves.ids.mintID()
@@ -120,14 +122,22 @@ extension ProtectionExecutor {
         try leaves.custody.writeCustody(key, itemClass: .silent)
         try leaves.apple.addAppleKey(apple)
         let locks = NewKeyLocks(
-            passphrase: try passphrase.map { try freshPassphrase($0) }, words: try words.map { try WordsKey.derive($0) },
-            apple: apple)
+            passphrase: try passphrase.map { try freshPassphrase($0) }, words: try WordsKey.derive(words), apple: apple)
         let file = try KeyFile.building(libraryID: libraryID, key: key, epoch: 1, locks: locks)
         try leaves.keyFiles.writeLiveKeyFile(file)
         try leaves.library.createLibrary(with: key, record: record)
         var library = UnlockedLibrary(key: key, record: record, section: section, memory: nil, keyFile: file)
         try writeMemory(&library)
         log("create library: \(Self.fp8(Self.fp(key))) in Standard")
-        return library
+        return CreatedLibrary(library: library, words: words)
     }
+}
+
+/// **A library just created** (rule 2): the library, and its twelve words —
+/// shown once ("write these down now"), held only for that, never stored.
+public struct CreatedLibrary: CustomStringConvertible {
+    public var library: UnlockedLibrary
+    public let words: [String]
+
+    public var description: String { "CreatedLibrary(words redacted)" }
 }

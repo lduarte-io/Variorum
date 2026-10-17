@@ -127,7 +127,7 @@ struct ExecutorDeviceActTests {
         let executor = ProtectionExecutor(
             leaves: world.leaves,
             configuration: ExecutorConfiguration(scope: EX.scope, libraryID: "", deviceName: "Mac A", floor: PF.floor))
-        let library = try executor.createLibrary()
+        let library = try executor.createLibrary().library
         let record = try #require(world.live?.record)
         #expect(record.mode == .standard && record.account == nil)
         let own = try #require(world.liveFormat3?.apple?.keyID)

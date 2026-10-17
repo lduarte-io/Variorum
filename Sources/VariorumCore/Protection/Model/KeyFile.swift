@@ -40,6 +40,10 @@ public enum KeyFileError: Error, Equatable, Sendable {
     case appleWrapOnACastleKey
     /// A re-key to the key already current.
     case newKeyIsTheCurrentKey
+    /// A new key file the twelve words would not open — neither a words lock
+    /// nor the master with its twelve-words copy (rule 2: "there is no such
+    /// thing as a library with no secret").
+    case noWordsLock
     /// A file whose format is not 3 (rule 26: an older format is not read).
     case notFormat3(Int)
     /// A file written by a newer build — refused, never guessed.
@@ -262,6 +266,10 @@ public struct KeyFile: Codable, Equatable, Sendable {
         }
         return try verified(Lock.unwrapStoreKey(wrap.wrapped, under: apple.key), .apple)
     }
+
+    /// The twelve words open this file — by its words lock, or through the
+    /// master's twelve-words copy beside a master lock (rule 2).
+    public var opensWithTheWords: Bool { words != nil || (master != nil && masterWordsCopy != nil) }
 
     /// The roads this file carries (no secret needed to tell).
     public var roads: Set<KeyFileRoad> {

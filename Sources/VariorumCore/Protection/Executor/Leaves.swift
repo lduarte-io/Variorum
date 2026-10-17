@@ -160,6 +160,10 @@ public protocol IDsLeaf: AnyObject {
     /// finder's `.current` reading rests on it: an equal descriptor is the
     /// same passphrase; U2's hand-forward).
     func mintPassphraseKDF() -> PassphraseKDF.Descriptor
+    /// A library's twelve words, minted at its creation (rule 2: "every
+    /// library has twelve words from the moment it is created") — BIP-39,
+    /// shown once, never stored.
+    func mintWords() -> [String]
 }
 
 /// `LAEnvironment` (the Apple facts §5).

@@ -40,9 +40,10 @@ extension SWorld {
     /// machinery the today-shaped states hid by presetting it; VX-378 U1's
     /// record hands it forward). Its app is closed at the end.
     func fresh(on device: SDevice, mode: ProtectionMode = .standard, gate: GateStyle = .touchID, passphrase: Bool = true) async throws {
-        let p = passphrase ? newPassphrase() : nil, w = newWords()
+        let p = passphrase ? newPassphrase() : nil
         let executor = newExecutor(device, libraryID: "")
-        let library = try executor.createLibrary(passphrase: p, words: w)
+        let created = try executor.createLibrary(passphrase: p)
+        let library = created.library, w = created.words
         device.executor = executor
         device.library = library
         setKnown(holder(device, account: nil, libraryID: library.record!.libraryID), passphrase: p, words: w)

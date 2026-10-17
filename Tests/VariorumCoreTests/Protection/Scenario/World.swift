@@ -1056,6 +1056,7 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
     func mintAppleKey() -> AppleKeyMaterial { world.mintApple() }
     func mintSymmetricKey() -> SymmetricKey { SymmetricKey(data: world.rng.bytes(32)) }
     func mintPassphraseKDF() -> PassphraseKDF.Descriptor { world.fastKDF() }
+    func mintWords() -> [String] { world.newWords() }
     func biometry() -> BiometryFacts { device.biometry.facts }
     func biometryStateHash() -> Data? { device.biometry.stateHash }
     func log(_ line: String) { device.logLines.append(line) }

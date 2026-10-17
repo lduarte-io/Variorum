@@ -470,6 +470,7 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
         return key
     }
     func mintPassphraseKDF() -> PassphraseKDF.Descriptor { PF.fastKDF() }
+    func mintWords() -> [String] { (try? PF.words()) ?? [] }
 
     func biometry() -> BiometryFacts { bio }
     func biometryStateHash() -> Data? { stateHash }

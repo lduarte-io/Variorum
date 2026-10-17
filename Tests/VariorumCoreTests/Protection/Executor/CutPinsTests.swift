@@ -94,7 +94,7 @@ struct CutPinsRule21Tests {
         memory.keyFileMirror = world.liveFile
         world.memory = memory
         world.liveFile = try KeyFile.building(
-            libraryID: world.world.library, key: StoreKey.mint(), epoch: 9, locks: NewKeyLocks(passphrase: world.world.p))
+            libraryID: world.world.library, key: StoreKey.mint(), epoch: 9, locks: NewKeyLocks(passphrase: world.world.p, words: world.world.w))
         let restores = try world.assessed().repairs.filter { "\($0)".hasPrefix("restoreKeyFile") }
         #expect(restores.isEmpty, "a repair would overwrite the stray: \(restores)")
     }

@@ -61,7 +61,9 @@ extension KeyFile {
         return try next.locking(newKey, with: locks)
     }
 
-    /// Lock this file's current key under `locks`.
+    /// Lock this file's current key under `locks`. A NEW key file always
+    /// opens with the twelve words — its words lock, or the master with its
+    /// twelve-words copy (rule 2) — or it is refused before it is written.
     func locking(_ key: StoreKey, with locks: NewKeyLocks) throws -> KeyFile {
         var file = self
         if let passphrase = locks.passphrase { file = try file.settingPassphrase(passphrase, for: key) }
@@ -70,6 +72,7 @@ extension KeyFile {
             file = try file.settingMaster(master, wordsCopy: locks.masterWordsCopy, for: key)
         }
         if let apple = locks.apple { file = try file.settingApple(apple, for: key) }
+        guard file.opensWithTheWords else { throw KeyFileError.noWordsLock }
         return file
     }
 

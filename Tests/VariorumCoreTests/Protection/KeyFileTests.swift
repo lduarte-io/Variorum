@@ -92,7 +92,7 @@ struct KeyFileWrapTests {
         let world = try KeyWorld()
         let k1 = StoreKey.mint(), k2 = StoreKey.mint()
         let left = try world.castleFile(k1)
-            .rekeyed(from: k1, to: k2, kind: .standard, locks: NewKeyLocks(passphrase: world.p), at: PF.day(1))
+            .rekeyed(from: k1, to: k2, kind: .standard, locks: NewKeyLocks(passphrase: world.p, words: world.w), at: PF.day(1))
         let data = try left.encoded()
         let reread = try ProtectionCoding.decoder().decode(KeyFile.self, from: data)
         #expect(reread == left)
@@ -141,15 +141,15 @@ struct KeyFileCrossingTests {
         let s0 = StoreKey.mint(), s1 = StoreKey.mint(), c = StoreKey.mint()
         let apple = AppleKeyMaterial.mint()
         let standard0 = try KeyFile.building(
-            libraryID: world.library, key: s0, epoch: 1, locks: NewKeyLocks(apple: apple))
+            libraryID: world.library, key: s0, epoch: 1, locks: NewKeyLocks(words: world.w, apple: apple))
         let standard1 = try standard0.rekeyed(
-            from: s0, to: s1, kind: .standard, locks: NewKeyLocks(passphrase: world.p, apple: apple), at: PF.day(1))
+            from: s0, to: s1, kind: .standard, locks: NewKeyLocks(passphrase: world.p, words: world.w, apple: apple), at: PF.day(1))
         let castle = try standard1.rekeyed(from: s1, to: c, kind: .castle, locks: world.castleLocks(), at: PF.day(2))
         #expect(try castle.historyKeys(currentKey: c).map(\.key) == [s1, s0])
         #expect(castle.apple == nil)
         #expect(throws: KeyFileError.appleWrapOnACastleKey) {
             _ = try standard1.rekeyed(from: s1, to: c, kind: .castle,
-                                       locks: NewKeyLocks(passphrase: world.p, apple: apple), at: PF.day(2))
+                                       locks: NewKeyLocks(passphrase: world.p, words: world.w, apple: apple), at: PF.day(2))
         }
     }
 
@@ -191,7 +191,7 @@ struct KeyFileCrossingTests {
     @Test func aLandingStartsEmpty() throws {
         let world = try KeyWorld()
         let landed = try KeyFile.building(
-            libraryID: world.library, key: StoreKey.mint(), epoch: 5, locks: NewKeyLocks(passphrase: world.p))
+            libraryID: world.library, key: StoreKey.mint(), epoch: 5, locks: NewKeyLocks(passphrase: world.p, words: world.w))
         #expect(landed.history.isEmpty)
         #expect(landed.epoch == 5)
     }

@@ -232,9 +232,10 @@ extension SWorld {
         case .createLibrary(let name, let passphrase):
             let d = device(name)
             guard d.slot == nil else { throw WorldRefusal.noLibrary }
-            let p = passphrase ? newPassphrase() : nil, w = newWords()
+            let p = passphrase ? newPassphrase() : nil
             let executor = newExecutor(d, libraryID: "")
-            let library = try executor.createLibrary(passphrase: p, words: w)
+            let created = try executor.createLibrary(passphrase: p)
+            let library = created.library, w = created.words
             d.executor = executor
             d.library = library
             setKnown(holder(d, account: nil, libraryID: library.record!.libraryID), passphrase: p, words: w)
@@ -678,11 +679,11 @@ extension SWorld {
             throw WorldRefusal.noLibrary
         }
         let key = mintKey()
-        let p = newPassphrase()
-        setKnown("planted", passphrase: p, words: nil)
+        let p = newPassphrase(), w = newWords()
+        setKnown("planted", passphrase: p, words: w)
         let file = try KeyFile.building(
             libraryID: slot.libraryID, key: key, epoch: 1,
-            locks: NewKeyLocks(passphrase: passphraseKey(p, fastKDF())))
+            locks: NewKeyLocks(passphrase: passphraseKey(p, fastKDF()), words: wordsKey(w).map { WordsKey(key: $0) }))
         let name = SPath.snapshot(tick(), PF.fp(key))
         let folder = "\(CatalogNames.backupsFolderName)/\(ProtectionNames.library8(slot.libraryID))/ffffffff"
         far.files["\(folder)/\(name)"] = .library(LibraryImage(libraryID: slot.libraryID, fingerprint: PF.fp(key), record: nil, writing: 99))
