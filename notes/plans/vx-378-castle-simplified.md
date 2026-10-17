@@ -327,12 +327,11 @@ record committed with PENDING numbers first.
   for her). After (code tree `389162a09`): the protection set Debug `✔ 259 tests in 69 suites`, `-c release` `✔ 237 in
   65`, the full core suite green in Debug; `Sources/…/Protection/` untouched (7,562), tests 12,068.
 - U4 — the world and the soak: **STOPPED at a design find — P-VX378-U4-3, hers** (Opus implementer, 2026-10-16/17) —
-  §8's U4 RECORD (the resume map; piece E carries the trace). Piece
-  A (this record) DONE; B (her FACTS DIFF rulings) DONE; B2 (her P-VX378-U4-1 ruling — Make this my library carries
-  the key history) DONE; C (the promises, the alphabet, the starting states) DONE; D (the promises' discrimination,
-  mutation pins) DONE; E (the discovery
-  run, seeds 21–40) STOPPED at P-VX378-U4-3 (seed 21 seq 83); F (the gate soak, seeds 1–20 both configurations), G (the record closed) NOT-STARTED. Counts
-  PENDING.
+  §8's U4 RECORD (the resume map; piece E carries the trace and the census). A, B, B2 (her P-VX378-U4-1 ruling), C, D
+  DONE; E STOPPED at P-VX378-U4-3 (seed 21 seq 83; the census of seeds 21–23 sized the rest: 88 failing sequences in
+  3,000, classes (A)–(I)); F NOT RUN; G DONE. After (code tree `0bd112c9c`): the protection set Debug `━ 278 tests in 72
+  suites passed with 2 known issues`, `-c release` `━ 255 in 68 … 2 known issues`, the full core suite green in Debug;
+  7,604 source lines, 13,038 test lines.
 - The ladder: not started.
 - The gate: not started.
 
@@ -1083,9 +1082,18 @@ says (the lead's last sentence, the footer, the `.note.diff` style, the three un
 The rules' and the page's wording changes (rules 12, 25; stages 1, 6, 8) are applied by U4's fixture/page piece under
 her rulings above, never silently; the fixture diffs FD-1…3 close with them.
 
-### U4 RECORD — THE WORLD AND THE SOAK (Opus implementer, 2026-10-16; IN PROGRESS)
+### U4 RECORD — THE WORLD AND THE SOAK (Opus implementer, 2026-10-16/17; STOPPED at a design find — P-VX378-U4-3, hers)
 
-**Not done in U4, first:** PENDING (filled as the unit runs; nothing skipped yet).
+**Not done in U4, first:** **the discovery run was not completed and the gate soak did not run — the unit STOPPED at a
+design find (the plan's stop rule: "a red you cannot close without changing a rule … STOPS the unit at a clean seam"):
+P-VX378-U4-3, a device that lagged while BOTH secrets changed and the account entered Castle opens with no secret of
+today (rules 4 and 12 fail there; closing it needs a mechanism the rules don't name, or a rule — hers).** Gate items 1
+(both soaks) and therefore the GO are open; items 2 (every fixed scenario green both configurations — yes, with the stop's
+pin a known issue) and 3 (every mutation pin red with its guard off — yes, Debug) hold on this tree. The census sized the
+rest (seeds 21–23: 88 failing sequences in 3,000) into classes (A)–(I) in piece E — none of (B)–(I) was fixed, by the stop.
+Also not done: rule 17's added words name the copy's key history only while the built history also carries the previous
+library's keys (piece B2's reading (1) — the orchestrator may want her to amend the sentence); the status line of
+`notes/CastleRules.md` doesn't yet name the FACTS DIFF and P-VX378-U4-1 amendments (the brief's "only these edits").
 
 **Pieces (the resume map — a fresh session can finish U4 from this list and `git log`):**
 - A — the record skeleton and LIVE STATUS: DONE (this commit).
@@ -1242,10 +1250,94 @@ her rulings above, never silently; the fixture diffs FD-1…3 close with them.
      sends to her) or a rule stating the limit — hers either way. Pinned as a KNOWN ISSUE
      (`U4LaggingPairScenarios.todaysSecretsOpenALaggingDevicesLibraryAfterBothChangedAndANewMaster`, `withKnownIssue` —
      green while it waits, red the day the model closes it); options in QUESTIONS P-VX378-U4-3.
-  Table: none closed — the discovery seeds were not run to completion (the stop). The census below sizes the rest.
-- F — the gate soak: seeds 1–20 × 1,000 × ≤60, `swift test` AND `swift test -c release`, on the FINAL tree:
-  NOT-STARTED. Tables: PENDING.
-- G — the closing runs, the counts, this record closed: NOT-STARTED.
+  Table: none closed — the discovery seeds were not run to completion (the stop).
+
+  **THE CENSUS (sizing, after the stop — VX-305's diagnostic, a SCRATCH worktree at `0bd112c9c` only, never committed:
+  the generator patched to record every failing sequence and continue, shrinking the first two per promise; `swift test
+  -c release`, one seed per call).** Seeds 21–23 × 1,000 × ≤60: **88 failing sequences in 3,000 (2.9%)** — seed 21: 29
+  (44,575 steps, 255.3 s), seed 22: 31 (44,258 steps, 268.9 s), seed 23: 28 (44,721 steps, 272.8 s). By promise: 4 ×18 ·
+  1 ×18 · 3 ×22 · 2 ×10 · 5 ×9 · 7 ×6 · 9 ×4 · 6 ×1. Seeds 24–40 not run (the classes repeat across the three; a full
+  census on a tree with known checker gaps would be stale the moment her rulings land). **The classes, with how far each
+  is known** (TRACED = replayed and read here; SHRUNK = read from the minimal sequence only, not traced):
+  - **(A) P-VX378-U4-3, the lagging pair — HERS (the stop).** Most P4s: seed 21 seq 83 (TRACED) and seq 651, seed 23
+    seq 86 and 143 (SHRUNK — the same pattern: both secrets changed and a Castle entry while another device lagged). It
+    is reachable in TWO steps from the "lagging device" starting state.
+  - **(B) the replayed library file while what this Mac remembers can't speak — P-VX378-U4-2's family** (SHRUNK: P2 ×10,
+    several P3/P7 — a library-file replay grouped with a memory tamper, OR followed by a keychain wipe or a replacement
+    Mac without its memory item): the app opens the older file through the newer key file's history and then holds a
+    library whose key file in the live place is another key's (P2 "no key file of the current key"). Under (a) of
+    P-VX378-U4-2 this is L4 and the promises it touches need L4 (checker); under (b) it is a model refusal. Hers.
+  - **(C) the key file and the memory item both deleted (rule 1's row — no copy-less rebuild):** a device with no key
+    file of its current key can't follow, so P3's convergence fails (seed 21 seq 633, seed 23 seq 514/578, seed 22 seq
+    78 — SHRUNK). Checker, as promise 4 already reads it: exempt a device with no key file of its current key, require the
+    honest fault.
+  - **(D) the lobby's rule-27 refusal withheld by a memory item with no sealed copy** (P5 ×9 — SHRUNK: the key file and
+    memory deleted, the next open re-writes a memory item with no mirror, a replacement Mac carries it): `LobbyRoads`
+    says nothing while any memory item exists, although that item holds no key file. A small MODEL gap in rule 27's
+    honest refusal (the lobby could read whether the item carries a mirror — its payload is not secret). Triage, model.
+  - **(E) after a keychain wipe or a replacement Mac without its memory item, an entry into Castle leaves the Apple key
+    made before it alive** (P1 — seed 21 seq 411, seed 22 seq 23, seed 23 seq 34 — SHRUNK): the new device ID's section
+    lists none of the old Apple keys (P-VX378-U1-1 (a)), and the entry retires the section's keys and the outgoing file's
+    wrap key only (U2 piece G); an older key that locks older backups' key files survives — rule 11's "Standard-era
+    backups' quiet locks die with it" broken. MODEL gap within rule 11 — a fix (retire the Apple keys this library's own
+    copies' key files name for keys its history holds) is the triage's, pinned red-first.
+  - **(F) Make this my library on a SYNCED device leaves the account's sync keys on this Mac** (P1 — seed 22 seq 5,
+    TRACED; seed 23 seq 122 SHRUNK, the same two steps): the new library is local (P-VX378-U2-4 (a)), yet the silent
+    sync-keys item stays; the account's master opens the previous library's key files through their master wraps,
+    reaching a key the new library's history carries (B2) — after Use Castle a quiet road to an earlier key (rule 9/11).
+    Under U2-4 (a) the rule-16 fix is MakeMine forgetting the account's sync keys as a leave does; under (b) the new library
+    stays on the account. Tied to her pending P-VX378-U2-4 — hers with it.
+  - **(G) a crashed Make this my library on a synced Standard library stays in flight** (P6, seed 22 seq 499 — TRACED):
+    the resume's `mintOwnAppleKey` needs decision 35's fresh vault read, the act's parameters don't mark it synced, so the
+    resume never reads the vault and throws `needsFreshVault`. MODEL gap in U2's act (newly reachable — Make this my
+    library joined the alphabet in U4); triage, model.
+  - **(H) promise 9's Make-this-my-library posture clause after a resumed crashed act** (P9 ×4 — SHRUNK: a crashed Use
+    Standard or Use Castle finishes at the launch Make this my library opens on, then the door keeps the new posture):
+    CHECKER — the clause must compare with the posture at the press, not before the step.
+  - **(I) not yet classified:** P7 "the sealed copy isn't the current key's file" with a replayed key file and the memory
+    deleted (seed 21 seq 154/964, seed 23 seq 6/283, seed 22 seq 394), and P4 after a complete replay with secrets
+    changed elsewhere (seed 22 seq 181/327). Need traces.
+  None of (B)–(I) was fixed: the stop came first, and the census only sizes. The resume map after her rulings: (A) and
+  (F) as she rules; (B) per P-VX378-U4-2; then the checker fixes (C, H), the model fixes (D, E, G, each pinned red-first),
+  the traces of (I), the discovery re-run (seeds 21–40) and the gate soak (seeds 1–20, both configurations).
+- F — the gate soak: NOT RUN (the stop). Tables: none.
+- G — the closing runs, the counts, this record closed: DONE (this commit).
+
+**The runs (exit lines, both configurations; code tree `0bd112c9c` — this commit changes only this plan):**
+- The protection set, Debug (`swift test --filter 'VariorumCoreTests\.(<the 72 suites under
+  Tests/VariorumCoreTests/Protection>)/'`, exit 0): `━ Test run with 278 tests in 72 suites passed after 3.839 seconds
+  with 2 known issues.` (the two are the stop's pin, `withKnownIssue`; generator 16 sequences, 355 steps). Before U4
+  (U3's close): `✔ 259 tests in 69 suites`.
+- The protection set, Release (`swift test -c release --filter <the same>`, exit 0): `━ Test run with 255 tests in 68
+  suites passed after 2.775 seconds with 2 known issues.` (the DEBUG mutation pins compile out).
+- `swift build -c release` (exit 0): `Build complete! (88.75 sec)`.
+- The full core suite, Debug (`swift test`, exit 0): `✔ Test run with 240 tests in 51 suites passed after 23.110
+  seconds.` · `━ Test run with 3138 tests in 402 suites passed after 194.108 seconds with 2 known issues.` · `✔ Test run
+  with 40 tests in 6 suites passed after 45.903 seconds.`
+- The lifecycle page: rendered from the fixture, `cmp`-identical to the committed page (pieces B and B2).
+- The census (scratch, release, seeds 21–23): table in piece E.
+- Line counts: `Sources/VariorumCore/Protection/` 7,562 → **7,604** (B2's three files); `Tests/VariorumCoreTests/
+  Protection/` 12,068 → **13,038**. The diff `e0c9f9b17..HEAD`: 21 files (+1,579 −338) — `Sources/…/Protection/` (3, her
+  ruling), `Tests/…/Protection/` (14), `notes/CastleRules.md` (rules 12, 25 at the FACTS DIFF rulings; rule 17 at her
+  P-VX378-U4-1 ruling), the page, this plan, `notes/QUESTIONS.md`.
+
+**PROVISIONAL calls and her rulings** (QUESTIONS, under "VX-378 U4 THE WORLD AND THE SOAK"):
+- **P-VX378-U4-1 — RULED (her words, piece B2):** Make this my library carries the key history forward; option (b) not
+  chosen; the core sentence unscoped.
+- **P-VX378-U4-2 — PROVISIONAL (a):** a library-file replay grouped with a memory tamper (or met by a keychain wipe) is
+  P-U4-5's "both homes" stated limit (L4) — (b) a model refusal keyed on the live pair broken; (c) a stop. Census class (B).
+- **P-VX378-U4-3 — OPEN, HERS — THE STOP:** the lagging pair (options (a) the vault keeps earlier masters; (c) a rule
+  stating the limit; (b) listed as not reaching it).
+- The ruled-limit readings applied, each with its pointer: rule 1's row (no copy-less rebuild → promise 4 requires the
+  honest fault), L1–L5 in `Promises.swift`'s header (L4 = P-U4-5 + P-U4-12, her rulings carried).
+
+**Design issues (the stop rule):** P-VX378-U4-3 stopped the unit. Nearest after it: census class (E) — after a keychain
+wipe an entry into Castle leaves the old Apple key alive (rule 11 not met, a model fix exists within the rule); class (F)
+— Make this my library on a synced device keeps the account's sync keys, which B2's carried history turns into a quiet
+road after an entry (tied to P-VX378-U2-4); class (B) — P-VX378-U4-2's family. None was changed.
+
+**Commits:** A `f3f24b29f` · B `a8fe1f349` · B2 `b468a306c` · C `027e80ae4` · D `2faefe2ee` · E (the stop) `0bd112c9c` ·
+G (this record's close — the next commit).
 
 ## 9. The ladder
 
