@@ -1742,7 +1742,13 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
   | 33 | 44,878 | 345.5 | `✔ Test run with 1 test in 1 suite passed after 345.474 seconds.` |
   | 34 | 44,879 | 359.3 | `✔ Test run with 1 test in 1 suite passed after 359.337 seconds.` |
   (the rest PENDING — landing as they complete)
-  **THE GATE SOAK:** NOT-STARTED (after a green discovery run).
+  **MACHINERY NOTE (the orchestrator, 2026-10-17):** the resumption session DIED on the Opus session limit after seed 34
+  (its tree clean, everything pushed at `ce3ee92e7`; the resiliency protocol's budget-death road — the remainder needs no
+  Opus judgment). The orchestrator runs seeds 35–40 and then the gate soak from the SAME final tree `bec58a576` (code
+  unchanged through `ce3ee92e7` — `git diff --stat bec58a576..HEAD -- Sources Tests` empty) by one script, one seed per
+  call, the exit lines landing here as they complete; ladder round 1 launched in parallel on a read-only review worktree
+  at `ce3ee92e7` (its own build directory) so neither run disturbs the other.
+  **THE GATE SOAK:** RUNNING after the discovery run (the same script; seeds 1–20, Debug then Release).
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.
 
 ## 9. The ladder
