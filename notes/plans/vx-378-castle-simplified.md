@@ -178,11 +178,15 @@ leaving hands everything out; the library key and the sync key follow the same r
 the user chose to leave and never protects the user from their own choice. Every unit weighs its work against this
 sentence.
 
-**What each crossing types (rules 11–12, 7):** Use Castle — the passphrase; Use Standard — the passphrase; a follow INTO
-Castle — one secret (passphrase or words); a follow OUT — nothing (quiet, with a notice); a lagging device catching up —
-one secret; turning sync on — nothing new (the library's pair becomes the account's); joining an account — the account's
-passphrase or words; Make this my library — the copy's own secrets at its door, then your current pair; a local-only
-crossing on an unsynced library — the passphrase (the words wrap is re-made through the passphrase-opened key).
+**What each crossing types (rules 11–12, 7; HER RULING 2026-10-16 on P-VX378-U2-2 — both secrets at a crossing, local
+or synced):** Use Castle — the passphrase AND the twelve words; Use Standard — the passphrase AND the twelve words (a
+user without their words paper does New Words first, passphrase-only, then crosses); a follow INTO Castle — one secret
+(passphrase or words; the untyped one's lock comes through the vault's master and its twelve-words copy); a follow OUT —
+nothing (quiet, with a notice); a lagging device catching up — one secret; turning sync on — nothing new (the library's
+pair, both verified, becomes the account's); joining an account — the account's passphrase or words; Make this my
+library — the copy's own secrets at its door, then your current pair. *(The earlier "the words wrap is re-made through
+the passphrase-opened key" named a mechanism that does not exist — U2's finding; the cross-wrap that would make it exist
+was offered to her and declined.)*
 
 **Acts after the cut (the expected set, ~13):** CreateLibrary · EnterCastle · LeaveCastle · Follow (in: types a secret;
 out: quiet) · ReplaceAllKeys · ChangePassphrase · ResetPassphrase · RegenerateWords · DeviceSettings (gate style, idle
@@ -318,7 +322,7 @@ record committed with PENDING numbers first.
   A–J with their commits and red-on-old evidence; five PROVISIONALs). After (code tree `320579718`): the protection
   set Debug `✔ 254 tests in 67 suites`, `-c release` `✔ 232 in 63`, the full core suite green in Debug; 7,562
   source lines, 9,380 test lines.
-- U3 — the lifecycle proof: not started.
+- U3 — the lifecycle proof: **NEXT** (spawned 2026-10-16 after U2's verification and her crossings ruling).
 - U4 — the world and the soak: not started.
 - The ladder: not started.
 - The gate: not started.
@@ -820,6 +824,47 @@ names), fixed red-first in G.
 
 **Commits:** A `0572dd3c0` · B `3631ecbde` · C `ef6c6bf54` · D `67ed68490` · E `db1c1ac55` · F `a01b622db` · G
 `1a02354bd` · H `21cc0377a` · I `320579718` · J (this record's close — the next commit).
+
+### ORCHESTRATOR NOTE after U2 (2026-10-16 — verified, adjudicated; HER RULING on the crossings)
+
+**Verified, never trusted:** tree clean at `014592e4b`, in sync with origin; the scope diff `d992d2906..HEAD` touches
+only the two Protection folders, this plan and `notes/QUESTIONS.md` (63 files). Orchestrator re-runs on `014592e4b`:
+the protection set under a wider filter in Debug `✔ 391 tests in 158 suites passed` (subsuming the record's 254/67);
+under `-c release` `✘ 312 tests in 135 suites … 1 issue` — the one red is VX-380's Sync attacker test again, swept in
+by the filter, nothing of Protection's; the full core suite in Debug `✔ 240/51` · `✔ 3114/397` · `✔ 40/6`, matching
+the record's lines. **Revert check:** piece F's `U2PinsRule21Tests` run on a scratch worktree at `a01b622db^` with the
+pin file copied in — `✘ 7 tests in 1 suite failed … with 10 issues` (`:36`, `:56`, `:73`, `:95`–`:97`, `:109` ×3,
+`:124`), exactly the record's; green on HEAD; the worktree removed.
+
+**HER RULING (2026-10-16, the question put to her with three options — the recommended one her pick, verbatim: *"Both
+secrets, as built (Recommended)"*):** Use Castle and Use Standard type the passphrase AND the twelve words, local or
+synced; no cross-wrap machinery; rules 11 and 12 gain "and your twelve words" (applied to `notes/CastleRules.md` in this
+commit — the one amendment this phase makes to the rules, at her word); the lifecycle page's stages 6 and 8 say so; the
+plan's crossings table rewritten. A user without their words paper does New Words first (passphrase-only, rule 6), then
+crosses. P-VX378-U2-2 → RULED (a). The declined options stay listed in QUESTIONS so no later session re-proposes them.
+
+**Adjudications (the orchestrator; PROVISIONAL where product-flavoured, bundled for her):**
+1. **P-VX378-U2-1 (Replace All Keys re-keys the library only) — (a) stands:** rule 15 fixes when the sync key changes;
+   a new master alone cuts nothing off. Her eye at the bundle (whether a LOCAL library gets the door is a face call).
+2. **P-VX378-U2-3 ("here they are" at a passphrase-typed join) — (a) stands:** a face's sentence; the model reports
+   `wordsReplacedByAccount`. Bundled with the faces (VX-308).
+3. **P-VX378-U2-4 (Make this my library's new library is local; the device's settings carry) — (a) stands** as the
+   rule-17 reading ("a fresh identity"); hers at VX-309 with the faces.
+4. **P-VX378-U2-5 (a key door's one-write window with the vault out of reach at the relaunch rolls back, leaving the
+   pair split until the next key door) — (a) stands as a STATED LIMIT:** nothing is lost, both secrets still open the
+   library by one road each; U4's promises read it so; the record carries it for the handoff's residue list.
+5. **Rule 21's two doors on the LIVE PLACE's stray → VX-309 beside T-5** (the refusal offers the doors as values; acting
+   on a stray with no catalogued copy and no current library in hand is the empty-slot landing's own question). The
+   rules checklist's row 21 says so honestly.
+6. **E's found gap (an entry into Castle after a lost memory item left the old Apple key alive)** — fixed red-first in
+   G by retiring the key the live key file names: accepted; it is rule 11's own sentence, not new machinery.
+7. **The crash harness's find (a resumed join missing its vault read)** — fixed in I: accepted, pinned by the harness.
+8. **U4 inherits:** promise 6 strict; promise 3 to tighten (rule 8 re-makes the Apple road at the same open);
+   `resumeAtVaultReach` to delete; the replay tampers back as detection against U2's pinned refusal.
+
+**For U3 (binding):** the fixture's facts for stages 6 and 8 carry her ruling (both secrets typed); rule 5's reading is
+P-VX378-O1-1's (a); P-VX378-U2-3's "here they are" fact at stage 12 reads "the words are shown when they were typed";
+everything else on the page stands as its facts.
 
 ## 9. The ladder
 

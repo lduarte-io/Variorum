@@ -1,7 +1,8 @@
 # Castle Rules — how Variorum protects a library
 
 **Status: THE CONTRACT for library protection, ruled by the author at the VX-305 simplification sitting (2026-10-16),
-amended the same day at her rulings on the design cold read (`notes/plans/vx-378-design-cold-read.md`).**
+amended the same day at her rulings on the design cold read (`notes/plans/vx-378-design-cold-read.md`), and again at her
+U2 ruling (rules 11–12: both secrets at a crossing — P-VX378-U2-2, the plan's §8).**
 Where this document and `notes/plans/vx-266-castle-backups-prelaunch.md` differ, this document wins; that design keeps
 its research and its Apple-facts pointers (`notes/plans/vx-266/second-opinion-apple-facts.md`). The walk-through of
 these rules — one person, one library, every stage — is `notes/plans/vx-266/castle-lifecycle.html`, and the corrector
@@ -65,13 +66,13 @@ and never leaves a hole you chose to close.**
 10. **Castle is account-wide.** When one device enters, every device of the account follows, each typing a secret once.
     Until a device follows, it can still read what it already has — its own local copy — through its own quiet road.
     That is accepted and said plainly.
-11. **Entering Castle types your passphrase.** On this device: a new library key carrying every earlier key, the Apple
+11. **Entering Castle types your passphrase and your twelve words.** On this device: a new library key carrying every earlier key, the Apple
     and on-device keychain items **deleted** (an Apple item's deletion reaches every device on the Apple account — so
     your Standard-era backups' quiet locks die with it, and they are now Castle-protected along with the live library),
     the on-device road kept only as Touch ID if you choose it, and the scheduled plain-text export turned off with one
     notice you may reverse (a plain copy on disk would undo the promise; it is your call). On the account: a new sync
     key, in one write (rule 15). Other devices follow by typing one secret.
-12. **Leaving Castle types your passphrase, and hands everything to Standard.** On this device: a new Standard key
+12. **Leaving Castle types your passphrase and your twelve words, and hands everything to Standard.** On this device: a new Standard key
     carrying every earlier key — the Castle ones included — with a fresh Apple road and the on-device road back; this
     Mac's Touch ID item and sealed key-file copy now hold the new key. Your text, the server's rows, the sync key and
     **every backup you have ever made** are Standard from now on. The leave screen says so plainly: *your library and all

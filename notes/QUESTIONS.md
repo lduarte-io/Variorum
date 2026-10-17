@@ -2808,8 +2808,9 @@ Options:
 - (c) a new key-file mechanism that keeps the words' key under the library key so the passphrase alone can re-make the
   words lock — new machinery to make a sentence hold (rejected by the phase's stop rule; listed so it is not
   re-proposed).
-Record: the plan's §8 U2 RECORD, piece E. Status: open — the orchestrator's and her eye (a plan-wording gap, not a rule
-conflict: rules 2, 11, 12, 14 all hold under (a)).
+Record: the plan's §8 U2 RECORD, piece E. **Status: RULED 2026-10-16 — (a), her pick of the recommended option
+("Both secrets, as built"); rules 11–12 amended to "types your passphrase and your twelve words"; the cross-wrap (c)
+declined — do not re-propose.**
 
 **P-VX378-U2-3 — "Here they are": which words a join can show (rule 7).** Rule 7 tells a joining device "your
 library's twelve words are now your account's twelve words; here they are", and rule 14 lets the join type ONE secret.
