@@ -39,7 +39,7 @@ struct Seeds {
     var masters: [Data] = []
     var passphrases: [String] = []
     var words: [[String]] = []
-    var vaults: [KeyVaultFormat] = []
+    var vaults: [AccountVault] = []
 }
 
 extension SWorld {
@@ -76,13 +76,13 @@ extension SWorld {
                 changed = true
             }
             for vault in seeds.vaults {
+                // The vault opens by the passphrase and the words only — never
+                // by Apple (rule 14).
                 let before = masters.count
-                if let id = vault.appleKeyID, let apple = seeds.apple[id], vault.masterWrappedByAppleHeld != nil,
-                   let master = try? vault.unwrapMaster(withAppleKey: apple) { addMaster(master) }
                 for p in seeds.passphrases {
-                    if let pk = passphraseKey(p, vault.kdf), let master = try? vault.unwrapMaster(withPassphraseKey: pk.key) { addMaster(master) }
+                    if let pk = passphraseKey(p, vault.kdf), let master = vault.master(passphrase: pk, words: nil) { addMaster(master) }
                 }
-                for wk in wordsKeys { if let master = try? vault.unwrapMaster(withRecoveryKey: wk) { addMaster(master) } }
+                for wk in wordsKeys { if let master = vault.master(passphrase: nil, words: WordsKey(key: wk)) { addMaster(master) } }
                 if masters.count != before { changed = true }
             }
             for file in files {
@@ -201,7 +201,7 @@ extension SWorld {
         for item in items where !item.touchID {
             switch item.value {
             case .key(let key): seeds.keys.append(key)
-            case .syncKeys(let material): seeds.masters.append(material.masterKey)
+            case .syncKeys(let material): seeds.masters.append(material.master)
             case .apple(let id, let bytes):
                 // A deliberate delete that never reached iCloud (P-U4-1).
                 if truth.deletesNotCarried.contains(id) { continue }
@@ -215,7 +215,7 @@ extension SWorld {
         }
         if let account = device.library?.record?.account, device.session.accountID == account,
            let vault = server.snapshot(account) {
-            seeds.vaults.append(vault.format)
+            seeds.vaults.append(vault.vault)
         }
         return seeds
     }
@@ -228,12 +228,12 @@ extension SWorld {
             guard let value = pressRead(device, item) else { continue }
             switch value {
             case .key(let key): seeds.keys.append(key)
-            case .syncKeys(let material): seeds.masters.append(material.masterKey)
+            case .syncKeys(let material): seeds.masters.append(material.master)
             case .apple(let id, let bytes): seeds.apple[id] = SymmetricKey(data: bytes)
             default: break
             }
         }
-        for material in device.sessionMemory.values { seeds.masters.append(material.masterKey) }
+        for material in device.sessionMemory.values { seeds.masters.append(material.master) }
         if let library = device.library { seeds.keys.append(library.key) }
         // Her Apple accounts' keychains are hers — the switch off on this
         // device only hides one until she turns it back on, and an Apple ID
@@ -252,7 +252,7 @@ extension SWorld {
         // her secrets — "only the server brings its writing back" (§3.5a) is a
         // road, not a stranding (the closer's soak, seed 3 sequence 211).
         for account in server.accounts.keys.sorted() {
-            if let vault = server.snapshot(account) { seeds.vaults.append(vault.format) }
+            if let vault = server.snapshot(account) { seeds.vaults.append(vault.vault) }
         }
         return seeds
     }
@@ -323,8 +323,8 @@ extension SWorld {
         }
         for name in device.keychain.local.keys where name.service == ProtectionNames.syncKeysService {
             if let item = device.keychain.local[name], !item.touchID, case .syncKeys(let m) = item.value,
-               let vault = record.account.flatMap({ server.snapshot($0) }), m.corpusKeyID == vault.corpusKeyID,
-               vault.mode.settled != .standard {
+               let vault = record.account.flatMap({ server.snapshot($0) }), m.rowKeyID == vault.rowKeyID,
+               vault.mode != .standard {
                 fail("a silent sync-keys item holds the account's Castle-era keys")
             }
         }
@@ -363,30 +363,17 @@ extension SWorld {
         return violations
     }
 
-    /// PROMISE 6 — crash-safe: with nothing running, no act is half-done —
-    /// the act finished or rolled back, the library open, no copy carrying a
-    /// half-finished act. THE VAULT-REACH QUALIFIER (her ruling 2026-10-14/15,
-    /// the soak's seed 2): a SYNCED act PAST ITS COMMIT POINT whose account's
-    /// vault this device can't reach — signed out, signed into another
-    /// account, or offline — stays in flight NAMED and WAITING: this Mac's
-    /// section names it, its plan on disk is the one the section names, the
-    /// library is open, and copies stay paused while the re-key is unswapped;
-    /// it finishes at the next vault reach. That is no third state. Anything
-    /// else in flight is (a crash before the commit point rolls back).
+    /// PROMISE 6 — crash-safe (rule 20): with nothing running, no act is
+    /// half-done — the act finished or rolled back, the library open, no copy
+    /// carrying a half-finished act. (The vault-reach qualifier — an act named
+    /// and waiting for an unreachable vault — left with VX-378 U2: no act waits
+    /// on a vault; one that can't reach it before its swap rolls back.)
     func crashSafe(_ device: SDevice) -> [Violation] {
         guard device.isOpen, let library = device.library else { return [] }
         var violations: [Violation] = []
         func fail(_ detail: String) { violations.append(Violation(promise: 6, device: device.name, detail: detail)) }
-        var waiting = false
         if let inFlight = library.section.actInFlight {
-            if let why = notNamedAndWaiting(device, library, inFlight) {
-                fail("an act is still in flight (\(inFlight.act)) — \(why)")
-            } else {
-                waiting = true
-                if let to = inFlight.toFingerprint, library.fingerprint != to, !device.paused {
-                    fail("copies run while \(inFlight.act) waits, its re-key unswapped")
-                }
-            }
+            fail("an act is still in flight (\(inFlight.act))")
         }
         if library.section.actInFlight == nil, device.container.files[SPath.plan] != nil {
             fail("a plan is left on disk with nothing in flight")
@@ -394,28 +381,8 @@ extension SWorld {
         if library.section.actInFlight == nil, device.staged != nil {
             fail("a staged file is left")
         }
-        if device.paused, !waiting { fail("copies are still paused") }
+        if device.paused { fail("copies are still paused") }
         return violations
-    }
-
-    /// Why an act in flight is NOT named and waiting (nil when it is): the
-    /// plan on disk the one this Mac's section names; a synced act; its
-    /// account's vault out of this device's reach now; past its commit point
-    /// (`ProtectionPlan.pastCommitPoint` — the executor's own line).
-    func notNamedAndWaiting(_ device: SDevice, _ library: UnlockedLibrary, _ inFlight: ActInFlight) -> String? {
-        guard case .plan(let sealed)? = device.container.files[SPath.plan],
-              let plan = try? ProtectionCoding.decoder().decode(ProtectionPlan.self, from: sealed.payload) else {
-            return "no plan on disk"
-        }
-        guard plan.isNamed(by: library.section) else { return "the plan on disk isn't the one this Mac's section names" }
-        guard plan.parameters?.synced == true, let account = plan.parameters?.accountID ?? library.record?.account else {
-            return "not a synced act"
-        }
-        guard !device.online || device.session.accountID != account else { return "its account's vault is in reach" }
-        guard plan.pastCommitPoint(libraryFingerprint: library.fingerprint) else {
-            return "before its commit point (it rolls back)"
-        }
-        return nil
     }
 
     /// PROMISE 3 (settled) — Standard means Standard.
@@ -454,14 +421,14 @@ extension SWorld {
         // 3), until a deliberate act mints a key past them (P-U4-10).
         if truth.tamperedStandard[device.name]?.contains(record.currentFingerprint) == true { return [] }
         var violations: [Violation] = []
-        let mode = vault.mode.settled
+        let mode = vault.mode
         if mode != record.mode {
             violations.append(Violation(promise: 7, device: device.name, detail: "the library is \(record.mode), the account \(mode)"))
         }
         let leaf = DeviceLeaves(world: self, device: device)
         let held = [ProtectionNames.CustodyClass.touchid, .silent].lazy.compactMap { try? leaf.readSyncKeys(accountID: account, itemClass: $0) }.first
             ?? device.sessionMemory[account]
-        if let held, held.corpusKeyID != vault.corpusKeyID {
+        if let held, held.rowKeyID != vault.rowKeyID {
             violations.append(Violation(promise: 7, device: device.name, detail: "its sync keys are not the account's"))
         }
         return violations

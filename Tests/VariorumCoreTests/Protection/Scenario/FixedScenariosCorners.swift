@@ -59,9 +59,8 @@ struct CornerScenarios {
     }
 
     /// "VX-109's concurrent Use Standard": two devices press Use Standard on
-    /// one account, the second on a door read before the first's write — its
-    /// rotation's first write carries the door's revision and refuses; it
-    /// follows instead, and the account leaves Castle once.
+    /// one account; the second meets the account already in Standard and
+    /// follows instead — the account leaves Castle once.
     @Test func vx109sConcurrentUseStandard() async throws {
         let (world, account) = try await syncedWorld(.castle, devices: ["macA", "macB"])
         await world.done([.launch("macA"), .launch("macB"), .useStandard("macA")])
@@ -69,15 +68,15 @@ struct CornerScenarios {
         #expect(second != .done, "the second Use Standard ran on a stale door")
         await world.done([.settle])
         let vault = try #require(world.server.snapshot(account))
-        #expect(vault.mode.settled == .standard && vault.format.previousCorpusKey == nil)
+        #expect(vault.mode == .standard)
         #expect(world.macB.slot?.record?.mode == .standard)
         expectPromisesKept(world)
     }
 
     // MARK: - Leaves and follows
 
-    /// "an acting device lost mid-way through a Castle Replace All Keys:
-    /// finished by anyone, with no Apple copy, the account never lowered".
+    /// "an acting device lost mid-way through a Castle Replace All Keys: the
+    /// account never lowered" (Replace All Keys writes no vault — rule 15).
     @Test func anActingDeviceLostMidReplaceAllKeys() async throws {
         for n in [2, 4, 6] {
             let (world, account) = try await syncedWorld(.castle, devices: ["macA", "phone"])
@@ -88,7 +87,7 @@ struct CornerScenarios {
             world.macA.keychain.local = [:]
             await world.done([.settle])
             let vault = try #require(world.server.snapshot(account))
-            #expect(vault.format.masterWrappedByAppleHeld == nil && vault.mode.settled == .castle, "after write \(n)")
+            #expect(vault.mode == .castle, "after write \(n)")
             #expect(world.phone.slot?.record?.mode == .castle)
             expectPromisesKept(world, "after write \(n)")
         }
@@ -106,28 +105,30 @@ struct CornerScenarios {
     }
 
     /// Found by the generator (promise 7): a synced device whose keychain was
-    /// wiped (its memory item with it) opens Always ask, its sync keys picked
-    /// up for the session; the account then replaces its keys elsewhere — the
-    /// device must still see the follow owed and converge.
-    @Test func aWipedKeychainStillFollowsAKeyReplacement() async throws {
+    /// wiped (its memory item with it); the account then leaves and re-enters
+    /// Castle elsewhere — a new sync key (rule 15) — and the device must still
+    /// see the follow owed and converge (the record names the key it follows).
+    @Test func aWipedKeychainStillFollowsTheAccountBackIntoCastle() async throws {
         let (world, account) = try await syncedWorld(.castle, devices: ["macA", "phone"])
         await world.done([.launch("phone"), .launch("macA"), .wipeKeychain("macA"), .settle,
-                          .replaceAllKeys("phone", newWords: true), .settle])
-        let held = world.macA.sessionMemory[account]?.corpusKeyID
-        #expect(held == world.server.snapshot(account)?.corpusKeyID, "the wiped device never followed the replacement")
+                          .useStandard("phone"), .settle, .useCastle("phone", .touchID, newWords: false), .settle])
+        let leaf = DeviceLeaves(world: world, device: world.macA)
+        let held = [ProtectionNames.CustodyClass.touchid, .silent].lazy
+            .compactMap { (try? leaf.readSyncKeys(accountID: account, itemClass: $0)) ?? nil }.first ?? world.macA.sessionMemory[account]
+        #expect(held?.rowKeyID == world.server.snapshot(account)?.rowKeyID, "the wiped device never followed the entry")
         expectPromisesKept(world)
     }
-    /// Found by the generator (promise 7): the account replaces its keys on
+    /// Found by the generator (promise 7): the account enters Castle on
     /// another device; this device, freshly relaunched, changes a setting
-    /// before it follows — the settings act must not record vault facts it
-    /// never followed, or the follow owed disappears for good.
+    /// before it follows — the settings act must not hide the follow owed.
     @Test func aSettingsChangeNeverHidesAFollowOwed() async throws {
         let (world, account) = try await syncedWorld(.standard, devices: ["macA", "phone"], seed: 6000039)
-        await world.done([.launch("macA"), .launch("phone"), .replaceAllKeys("phone", newWords: false),
+        await world.done([.launch("macA"), .launch("phone"), .useCastle("phone", .touchID, newWords: false),
                           .setGate("macA", .alwaysAsk), .settle])
         let leaf = DeviceLeaves(world: world, device: world.macA)
-        let held = ((try? leaf.readSyncKeys(accountID: account, itemClass: .silent)) ?? nil) ?? world.macA.sessionMemory[account]
-        #expect(held?.corpusKeyID == world.server.snapshot(account)?.corpusKeyID, "the follow owed was hidden")
+        let held = [ProtectionNames.CustodyClass.touchid, .silent].lazy
+            .compactMap { (try? leaf.readSyncKeys(accountID: account, itemClass: $0)) ?? nil }.first ?? world.macA.sessionMemory[account]
+        #expect(held?.rowKeyID == world.server.snapshot(account)?.rowKeyID, "the follow owed was hidden")
         expectPromisesKept(world)
     }
 }

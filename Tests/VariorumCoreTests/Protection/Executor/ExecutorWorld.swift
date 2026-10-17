@@ -29,7 +29,6 @@ enum WorldWrite: Equatable, CustomStringConvertible {
     case appleDelete(String)
     case vaultCreate
     case vaultUpdate(String)
-    case reencrypt
     case record(String)
     case stage(String)
     case stagedRecord(String)
@@ -54,7 +53,6 @@ enum WorldWrite: Equatable, CustomStringConvertible {
         case .appleDelete(let id): return "apple- \(id)"
         case .vaultCreate: return "vault create"
         case .vaultUpdate(let what): return "vault \(what)"
-        case .reencrypt: return "reencrypt"
         case .record(let fp): return "record \(fp)"
         case .stage(let fp): return "stage \(fp)"
         case .stagedRecord(let fp): return "staged-record \(fp)"
@@ -81,78 +79,44 @@ final class ICloudKeychain {
     var keys: [String: AppleKeyMaterial] = [:]
 }
 
-/// The server's vault: CAS on the revision, the key proof, one rotation at a
-/// time, completion refused while rows remain below the seq.
+/// The server's vault (the model's row — VX-378 U2): CAS on the revision and
+/// the key proof. Nothing else: no rotation, no walk.
 final class ExecutorVault {
     struct Account {
         var revision: Int
-        var format: KeyVaultFormat
-        var rows: Int
+        var vault: AccountVault
         var updatedAt: Date?
     }
 
     var accounts: [String: Account] = [:]
-    /// The rows a rotation finds below its seq.
-    var corpusRows = 3
     var reachable = true
     var clock = Date(timeIntervalSinceReferenceDate: 790_000_000)
 
     func snapshot(_ id: String) -> VaultSnapshot? {
-        accounts[id].map {
-            VaultSnapshot(accountID: id, revision: $0.revision, format: $0.format, rowsBelowRotationSeq: $0.rows,
-                          updatedAt: $0.updatedAt)
-        }
+        accounts[id].map { VaultSnapshot(accountID: id, revision: $0.revision, vault: $0.vault, updatedAt: $0.updatedAt) }
     }
 
-    static func describe(_ format: KeyVaultFormat) -> String {
-        var parts: [String] = []
-        if format.previousCorpusKey != nil { parts.append("rotating") }
-        if format.masterWrappedByAppleHeld != nil { parts.append("apple-wrap") }
-        return parts.isEmpty ? "castle" : parts.joined(separator: " ")
-    }
+    static func describe(_ vault: AccountVault) -> String { vault.mode.rawValue }
 
-    func create(_ format: KeyVaultFormat, accountID: String) throws -> VaultSnapshot {
+    func create(_ vault: AccountVault, accountID: String) throws -> VaultSnapshot {
         guard reachable else { throw VaultRefusal.unreachable }
         guard accounts[accountID] == nil else { throw VaultRefusal.vaultExists }
         clock += 60
-        accounts[accountID] = Account(revision: 1, format: format, rows: 0, updatedAt: clock)
+        accounts[accountID] = Account(revision: 1, vault: vault, updatedAt: clock)
         return snapshot(accountID)!
     }
 
-    func update(_ format: KeyVaultFormat, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey) throws -> VaultSnapshot {
+    func update(_ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey) throws -> VaultSnapshot {
         guard reachable else { throw VaultRefusal.unreachable }
         guard var account = accounts[accountID] else { throw VaultRefusal.vaultAbsent }
         guard account.revision == expectedRevision else { throw VaultRefusal.revisionConflict }
-        guard KeyProof.hash(master: proofMaster) == account.format.keyProofHash else { throw VaultRefusal.keyProofRefused }
-        var next = format
-        if let incoming = format.previousCorpusKey {
-            if let standing = account.format.previousCorpusKey {
-                guard standing.keyID == incoming.keyID else { throw VaultRefusal.rotationInProgress }
-            } else {
-                account.rows = corpusRows
-                next.rotationStartedSeq = Int64(account.revision + 100)
-            }
-        } else if account.format.previousCorpusKey != nil, account.rows > 0 {
-            throw VaultRefusal.rotationRowsRemain
-        }
+        guard KeyProof.hash(master: proofMaster) == account.vault.keyProofHash else { throw VaultRefusal.keyProofRefused }
         clock += 60
-        account.format = next
+        account.vault = vault
         account.revision += 1
         account.updatedAt = clock
         accounts[accountID] = account
         return snapshot(accountID)!
-    }
-
-    func reencrypt(accountID: String, material: DeviceKeyMaterial) throws -> Int {
-        guard reachable else { throw VaultRefusal.unreachable }
-        guard var account = accounts[accountID] else { throw VaultRefusal.vaultAbsent }
-        guard material.corpusKeyID == account.format.classKey(for: .corpus)?.keyID,
-              material.previousCorpusKeyID == account.format.previousCorpusKey?.keyID
-        else { throw VaultRefusal.keyProofRefused }
-        let count = account.rows
-        account.rows = 0
-        accounts[accountID] = account
-        return count
     }
 }
 
@@ -175,8 +139,8 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
 
     // The keychain.
     var custody: [CustodyItemFact: StoreKey] = [:]
-    var syncItems: [SyncKeysItemFact: DeviceKeyMaterial] = [:]
-    var session: [String: DeviceKeyMaterial] = [:]
+    var syncItems: [SyncKeysItemFact: AccountKeys] = [:]
+    var session: [String: AccountKeys] = [:]
     let icloud: ICloudKeychain
     let server: ExecutorVault
 
@@ -252,13 +216,13 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
 
     func syncKeyItems() throws -> [SyncKeysItemFact] { Array(syncItems.keys) }
 
-    func readSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws -> DeviceKeyMaterial? {
+    func readSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws -> AccountKeys? {
         if itemClass == .touchid, !(bio.hardware && bio.enrolled && bio.transient == nil) { return nil }
         return syncItems[SyncKeysItemFact(accountID: accountID, itemClass: itemClass)]
     }
 
-    func writeSyncKeys(_ material: DeviceKeyMaterial, accountID: String, itemClass: ProtectionNames.CustodyClass) throws {
-        syncItems[SyncKeysItemFact(accountID: accountID, itemClass: itemClass)] = material
+    func writeSyncKeys(_ keys: AccountKeys, accountID: String, itemClass: ProtectionNames.CustodyClass) throws {
+        syncItems[SyncKeysItemFact(accountID: accountID, itemClass: itemClass)] = keys
         try wrote(.syncKeys(itemClass))
     }
 
@@ -267,8 +231,8 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
         try wrote(.syncKeysDelete(itemClass))
     }
 
-    func holdInSession(_ material: DeviceKeyMaterial?, accountID: String) { session[accountID] = material }
-    func sessionSyncKeys(accountID: String) -> DeviceKeyMaterial? { session[accountID] }
+    func holdInSession(_ keys: AccountKeys?, accountID: String) { session[accountID] = keys }
+    func sessionSyncKeys(accountID: String) -> AccountKeys? { session[accountID] }
 
     // MARK: - Apple keys
 
@@ -293,8 +257,8 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
         return server.snapshot(accountID)
     }
 
-    func createVault(_ format: KeyVaultFormat, accountID: String, device: String) async throws -> VaultSnapshot {
-        var named = format
+    func createVault(_ vault: AccountVault, accountID: String, device: String) async throws -> VaultSnapshot {
+        var named = vault
         named.updatedByDevice = device
         let snapshot = try server.create(named, accountID: accountID)
         try wrote(.vaultCreate)
@@ -302,19 +266,13 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     }
 
     func updateVault(
-        _ format: KeyVaultFormat, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey, device: String
+        _ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey, device: String
     ) async throws -> VaultSnapshot {
-        var named = format
+        var named = vault
         named.updatedByDevice = device
         let snapshot = try server.update(named, accountID: accountID, expectedRevision: expectedRevision, proofMaster: proofMaster)
-        try wrote(.vaultUpdate(ExecutorVault.describe(snapshot.format)))
+        try wrote(.vaultUpdate(ExecutorVault.describe(snapshot.vault)))
         return snapshot
-    }
-
-    func reencryptBelowRotationSeq(accountID: String, material: DeviceKeyMaterial) async throws -> Int {
-        let count = try server.reencrypt(accountID: accountID, material: material)
-        try wrote(.reencrypt)
-        return count
     }
 
     // MARK: - The library file

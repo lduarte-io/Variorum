@@ -28,35 +28,21 @@ public enum SessionFact: Equatable, Sendable {
     }
 }
 
-/// **The vault's mode** — an Apple wrap: Standard; none: Castle. (The third
-/// state — an id with no wrap, a leave in progress — left with VX-378 U1: no
-/// leave writes it, rule 12; U2 replaces the reading with the row's mode flag.)
-public enum VaultMode: Equatable, Sendable {
-    case standard(appleKeyID: String?)
-    case castle
-
-    /// The mode it reads as.
-    public var settled: ProtectionMode {
-        switch self {
-        case .standard: return .standard
-        case .castle: return .castle
-        }
-    }
-}
-
 /// The vault as read THIS session for the session's account — decision 35's
-/// "fresh vault read". Non-secret fields only (the wraps' presence, ids).
+/// "fresh vault read". Non-secret fields only (rules 14, 15: the mode flag, the
+/// current sync key's id, the recovery wrap's bytes).
 public struct VaultReading: Equatable, Sendable {
     public var accountID: String
-    /// `master_wrapped_by_apple_held` present.
-    public var hasAppleWrap: Bool
-    /// `apple_key_id`.
-    public var appleKeyID: String?
-    /// The previous corpus key standing — a rotation in progress (decision 31).
-    public var previousCorpusKeyID: String?
-    public var corpusKeyID: String?
-    /// The recovery wrap (the master under the words), as read — what proves
-    /// a key file's master current (§3.5a).
+    /// THE MODE FLAG — the account's one posture.
+    public var mode: ProtectionMode
+    /// The current sync key's id — what a library compares with the one it
+    /// follows (`ProtectionRecord.accountRowKeyID`).
+    public var rowKeyID: String
+    /// The passphrase lock's descriptor (VX-113: a passphrase changed elsewhere
+    /// is named by it).
+    public var kdf: PassphraseKDF.Descriptor?
+    /// The recovery wrap (the master under the words), as read — what proves a
+    /// key file's master words copy current (old design §3.5a).
     public var recoveryWrap: Data?
     /// Decision 34's device name and the row's day — the notices' *[device] on
     /// [day]*.
@@ -64,26 +50,17 @@ public struct VaultReading: Equatable, Sendable {
     public var updatedAt: Date?
 
     public init(
-        accountID: String, hasAppleWrap: Bool, appleKeyID: String? = nil, previousCorpusKeyID: String? = nil,
-        corpusKeyID: String? = nil, recoveryWrap: Data? = nil, updatedByDevice: String? = nil, updatedAt: Date? = nil
+        accountID: String, mode: ProtectionMode, rowKeyID: String, kdf: PassphraseKDF.Descriptor? = nil,
+        recoveryWrap: Data? = nil, updatedByDevice: String? = nil, updatedAt: Date? = nil
     ) {
         self.accountID = accountID
-        self.hasAppleWrap = hasAppleWrap
-        self.appleKeyID = appleKeyID
-        self.previousCorpusKeyID = previousCorpusKeyID
-        self.corpusKeyID = corpusKeyID
+        self.mode = mode
+        self.rowKeyID = rowKeyID
+        self.kdf = kdf
         self.recoveryWrap = recoveryWrap
         self.updatedByDevice = updatedByDevice
         self.updatedAt = updatedAt
     }
-
-    /// The vault's mode — read by every device of this build.
-    public var mode: VaultMode {
-        hasAppleWrap ? .standard(appleKeyID: appleKeyID) : .castle
-    }
-
-    /// A rotation is in progress: a previous corpus key standing.
-    public var rotationInProgress: Bool { previousCorpusKeyID != nil }
 }
 
 /// The Apple keys this device can see in this scope's family (§3.5).

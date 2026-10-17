@@ -111,7 +111,7 @@ struct SettleSealTests {
         for (name, secret) in [
             ("passphrase", Data(fixture.passphrase.utf8)), ("words", Data(fixture.words.joined(separator: " ").utf8)),
             ("passphrase key", PF.bytes(fixture.p.key)), ("words key", PF.bytes(fixture.w.key)),
-            ("library key", fixture.key.data), ("master", fixture.material!.masterKey),
+            ("library key", fixture.key.data), ("master", fixture.material!.master),
         ] {
             #expect(!SecretScan.carries(bytes, secret), "the plan carries the \(name)")
         }

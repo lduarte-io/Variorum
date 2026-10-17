@@ -14,35 +14,35 @@ import Testing
 
 @testable import VariorumCore
 
-@Suite("VX-305 U3 — Replace All Keys: within its mode, the history grows")
+@Suite("VX-305 U3 — Replace All Keys: within its mode, the history grows; the account's sync key stays (rule 15)")
 struct ReplaceAllKeysTests {
-    @Test func castleReplaceAllKeysRotatesTheAccountAndGrowsTheHistory() async throws {
+    @Test func castleReplaceAllKeysGrowsTheHistoryAndLeavesTheAccountsSyncKey() async throws {
         let fixture = try EX(.castle, synced: true)
         let k0 = fixture.key
+        let before = try #require(fixture.world.server.snapshot(fixture.account!))
         let executor = fixture.executor()
         var library = try fixture.unlocked(executor)
         _ = try await executor.replaceAllKeys(&library, typed: fixture.typed)
         let k1 = library.key
         #expect(fixture.world.writeLog(naming: [PF.fp(k0): "K0", PF.fp(k1): "K1"]) == [
             "record K0", "memory K0", "plan",
-            "plan", "vault rotating", "sync+ touchid", "plan", "reencrypt", "plan", "vault castle", "sync+ touchid", "plan",
             "custody+ touchid K1", "plan", "keyfile K1", "plan", "stage K1", "plan", "staged-record K1", "plan", "swap K1", "plan",
             "memory K1", "plan", "custody- touchid K0", "plan", "backup K1", "plan", "record K1", "memory K1", "plan-",
         ])
         #expect(fixture.liveRecord?.mode == .castle)
         #expect(try fixture.world.liveFormat3?.historyKey(PF.fp(k0), currentKey: k1) == k0)
+        #expect(fixture.world.server.snapshot(fixture.account!) == before, "Replace All Keys wrote the vault")
         expectSettled(fixture, library)
     }
 
-    @Test func standardReplaceAllKeysKeepsTheAccountKeyAndThisMacsOwn() async throws {
+    @Test func standardReplaceAllKeysKeepsThisMacsOwnAppleKeyAndTheVault() async throws {
         let fixture = try EX(.standard, synced: true)
         let k0 = fixture.key
+        let before = try #require(fixture.world.server.snapshot(fixture.account!))
         let executor = fixture.executor()
         var library = try fixture.unlocked(executor)
         _ = try await executor.replaceAllKeys(&library, typed: fixture.typed)
-        let vault = try #require(fixture.world.server.snapshot(fixture.account!))
-        // Decision 30: under the SAME account key; this Mac's existing own key.
-        #expect(vault.mode == .standard(appleKeyID: fixture.accountApple!.id))
+        #expect(fixture.world.server.snapshot(fixture.account!) == before)
         #expect(fixture.world.liveFormat3?.apple?.keyID == fixture.ownApple!.id)
         #expect(fixture.world.writes.allSatisfy { if case .appleAdd = $0 { return false } else { return true } })
         #expect(try fixture.world.liveFormat3?.historyKey(PF.fp(k0), currentKey: library.key) == k0)
@@ -54,10 +54,7 @@ struct ReplaceAllKeysTests {
         try await CrashHarness.everywhere(
             { let f = try EX(.castle, synced: true, gate: .alwaysAsk); k0 = f.key; return f },
             act: { fixture, executor, library in _ = try await executor.replaceAllKeys(&library, typed: fixture.typed) },
-            finished: { fixture, _ in
-                fixture.liveRecord?.mode == .castle && fixture.world.live!.fingerprint != PF.fp(k0)
-                    && fixture.world.server.snapshot(fixture.account!)!.format.previousCorpusKey == nil
-            },
+            finished: { fixture, _ in fixture.liveRecord?.mode == .castle && fixture.world.live!.fingerprint != PF.fp(k0) },
             neverHappened: { fixture, _ in fixture.world.live!.fingerprint == PF.fp(k0) })
     }
 
@@ -69,34 +66,45 @@ struct ReplaceAllKeysTests {
     }
 }
 
-@Suite("VX-305 U3 — the follow: one secret typed, the history carried, a rotation's window")
+@Suite("VX-305 U3 — the follow: into Castle one secret, out of Castle quiet, a lagging device catching up")
 struct FollowTests {
     @Test func aStandardDeviceFollowsIntoCastleTypingOneSecret() async throws {
         let mac = try EX(.standard, synced: true)
         let phone = try EX(.standard, synced: true, joining: mac)
         let k0 = phone.key, phoneOwn = phone.ownApple!.id
+        let original = try #require(phone.material?.rowKeyID)
         let macExecutor = mac.executor()
         var macLibrary = try mac.unlocked(macExecutor)
         _ = try await macExecutor.useCastle(&macLibrary, typed: mac.typed, gate: .touchID)
         let executor = phone.executor()
         var library = try phone.unlocked(executor)
         phone.world.writes = []
-        let outcome = try await executor.follow(&library, kind: .intoCastle, typed: TypedSecrets(words: phone.words))
-        #expect(!outcome.held)
+        _ = try await executor.follow(&library, kind: .intoCastle, typed: TypedSecrets(words: phone.words))
         #expect(phone.liveRecord?.mode == .castle)
         let live = try #require(phone.world.liveFormat3)
         // Locked under the secret typed and the new master, its words copy beside.
         #expect(live.words != nil && live.passphrase == nil && live.master != nil)
         #expect(try live.open(wordsThroughMaster: phone.words) == library.key)
         #expect(try live.historyKey(PF.fp(k0), currentKey: library.key) == k0)
-        // Its own key retired and deleted; the account's recorded retired.
+        // Its own key retired and deleted.
         #expect(phone.world.icloud.keys[phoneOwn] == nil)
-        #expect(library.section.retiredAppleKeyIDs.isSuperset(of: [phoneOwn, mac.accountApple!.id]))
+        #expect(library.section.retiredAppleKeyIDs.contains(phoneOwn))
         #expect(!phone.world.custody.keys.contains { $0.itemClass == .silent })
+        // Rule 15: it follows the account's new sync key and still reads rows
+        // sealed under the one before.
+        let vault = try #require(phone.world.server.snapshot(phone.account!))
+        #expect(phone.liveRecord?.accountRowKeyID == vault.rowKeyID && vault.rowKeyID != original)
+        let held = try #require(phone.world.syncItems[SyncKeysItemFact(accountID: phone.account!, itemClass: .touchid)])
+        #expect(held.rowKey(for: original) != nil && held.rowKey(for: vault.rowKeyID) != nil)
         expectSettled(phone, library)
     }
 
-    @Test func aCastleDeviceFollowsIntoStandardAndItsHistoryOpensWithTheSecretTypedAtItsFollow() async throws {
+    /// Rule 12: the account left Castle elsewhere; this device follows out
+    /// QUIETLY — nothing typed (the leave changed no key) — with the notice.
+    /// Its new Standard key's history carries the Castle key (rule 4), and the
+    /// account's words open it through the master's copy, its passphrase
+    /// through the vault.
+    @Test func aCastleDeviceFollowsOutQuietlyAndItsHistoryOpensWithTheAccountsSecrets() async throws {
         let mac = try EX(.castle, synced: true)
         let phone = try EX(.castle, synced: true, joining: mac)
         let k0 = phone.key
@@ -105,51 +113,45 @@ struct FollowTests {
         _ = try await macExecutor.useStandard(&macLibrary, typed: mac.typed)
         let executor = phone.executor()
         var library = try phone.unlocked(executor)
-        let outcome = try await executor.follow(&library, kind: .intoStandard, typed: TypedSecrets(passphrase: phone.passphrase))
-        #expect(outcome.done == [.ruleFive] && !outcome.held)
+        let outcome = try await executor.follow(&library, kind: .intoStandard, typed: .none)
+        #expect(outcome.done == [.ruleFive] && outcome.notices.contains(.followedOutOfCastle))
         #expect(phone.liveRecord?.mode == .standard)
-        // Rule 4: the new Standard key's history carries the Castle key, and
-        // the secret typed at the follow opens it — the words too, through
-        // the new master's words copy.
         let live = try #require(phone.world.liveFormat3)
-        let byPassphrase = try live.open(.passphrase(phone.passphrase), floor: PF.floor)
-        #expect(try live.historyKey(PF.fp(k0), currentKey: byPassphrase) == k0)
         #expect(try live.historyKey(PF.fp(k0), currentKey: try live.open(wordsThroughMaster: phone.words)) == k0)
+        let vault = try #require(phone.world.server.snapshot(phone.account!)).vault
+        let master = try #require(vault.master(passphrase: phone.p, words: nil))
+        #expect(try live.historyKey(PF.fp(k0), currentKey: try live.open(master: master)) == k0)
+        #expect(phone.world.syncItems.keys.map(\.itemClass) == [.silent])
         expectSettled(phone, library)
     }
 
-    /// A leave stopped right after the vault's first write: the vault reads
-    /// Standard already (the wrap went in at that write — rule 12), and a
-    /// follower that never received the account's fresh Apple key follows
-    /// out by its typed secret, completing the rotation itself. Nothing waits
-    /// on an Apple key (the stuck leave left with VX-378 U1).
-    @Test func aFollowerMeetingALeavesRotationCompletesItAndFollowsOut() async throws {
-        let mac = try EX(.castle, synced: true)
-        let phone = try EX(.castle, synced: true, joining: mac)
-        let k0 = phone.key
-        let clean = try EX(.castle, synced: true)
-        let ce = clean.executor()
-        var cl = try clean.unlocked(ce)
-        _ = try await ce.useStandard(&cl, typed: clean.typed)
-        let firstVaultWrite = try #require(clean.world.writes.firstIndex { $0.description.hasPrefix("vault") })
-        mac.world.crashAfterWrites = firstVaultWrite + 1
+    /// Rule 15: a device that lagged through a whole Castle stretch (in and out
+    /// again) types a secret once to catch up — its old master opens nothing
+    /// written since; the account's earlier sync keys come with the new master.
+    @Test func aDeviceThatLaggedThroughCastleCatchesUpWithOneSecret() async throws {
+        let mac = try EX(.standard, synced: true)
+        let phone = try EX(.standard, synced: true, joining: mac)
+        let original = try #require(phone.material?.rowKeyID)
         let macExecutor = mac.executor()
         var macLibrary = try mac.unlocked(macExecutor)
-        await #expect(throws: SimulatedCrash.self) { _ = try await macExecutor.useStandard(&macLibrary, typed: mac.typed) }
+        _ = try await macExecutor.useCastle(&macLibrary, typed: mac.typed, gate: .touchID)
+        _ = try await macExecutor.useStandard(&macLibrary, typed: mac.typed)
         let vault = try #require(phone.world.server.snapshot(phone.account!))
-        #expect(vault.format.masterWrappedByAppleHeld != nil && vault.format.previousCorpusKey != nil)
-        // The account's fresh key hasn't reached this device's iCloud Keychain.
-        let named = try #require(vault.format.appleKeyID)
-        phone.world.icloud.keys.removeValue(forKey: named)
+        #expect(vault.mode == .standard && vault.rowKeyID != original)
+        #expect(throws: (any Error).self, "a lagging device's master still opens the account's keys") {
+            _ = try vault.vault.keys(master: phone.material!.masterKey)
+        }
+        await #expect(throws: ExecutorRefusal.secretMissing) {
+            let e = phone.executor()
+            var l = try phone.unlocked(e)
+            _ = try await e.follow(&l, kind: .keysReplaced, typed: .none)
+        }
         let executor = phone.executor()
         var library = try phone.unlocked(executor)
-        let outcome = try await executor.follow(&library, kind: .intoStandard, typed: TypedSecrets(passphrase: phone.passphrase))
-        #expect(!outcome.held)
-        let after = try #require(phone.world.server.snapshot(phone.account!))
-        #expect(after.rowsBelowRotationSeq == 0 && after.format.previousCorpusKey == nil)
-        #expect(after.format.masterWrappedByAppleHeld != nil)
-        #expect(phone.liveRecord?.mode == .standard && phone.world.live!.fingerprint != PF.fp(k0))
-        #expect(phone.world.syncItems.keys.map(\.itemClass) == [.silent])
+        _ = try await executor.follow(&library, kind: .keysReplaced, typed: TypedSecrets(passphrase: phone.passphrase))
+        #expect(phone.liveRecord?.accountRowKeyID == vault.rowKeyID)
+        let held = try #require(phone.world.syncItems[SyncKeysItemFact(accountID: phone.account!, itemClass: .silent)])
+        #expect(held.rowKey(for: original) != nil && held.rowKey(for: vault.rowKeyID) != nil)
         expectSettled(phone, library)
     }
 
@@ -159,9 +161,8 @@ struct FollowTests {
         // The Mac changed the account's passphrase (a fresh descriptor).
         var account = mac.world.server.accounts[mac.account!]!
         let fresh = try PassphraseKey.derive("a new passphrase", kdf: PF.fastKDF())
-        account.format = try account.format.rewrappingPassphrase(
-            masterKey: mac.material!.masterSymmetricKey, passphraseKey: fresh.key, kdf: fresh.kdf)
-        account.format.updatedByDevice = "Lillian's Air"
+        account.vault = try VaultModel.rewrappingPassphrase(
+            account.vault, master: mac.material!.masterKey, passphrase: fresh, device: "Lillian's Air")
         mac.world.server.accounts[mac.account!] = account
         let executor = phone.executor()
         var library = try phone.unlocked(executor)

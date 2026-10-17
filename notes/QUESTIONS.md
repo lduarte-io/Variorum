@@ -2778,3 +2778,44 @@ Options:
   rule 5 holds literally and older Standard backups open only with typed secrets through the history.
 The one-sentence change to CastleRules rule 5 is yours to accept; the rules are not edited by the phase. Record: the
 plan's §8 ORCHESTRATOR NOTE after U1, adjudication 4. Status: open — your eye at the phase's close.
+
+### VX-378 U2 THE ADDITIONS (2026-10-16; the plan's §8 U2 RECORD)
+
+**P-VX378-U2-1 — What does Replace All Keys do on the account?** Rule 15: "the sync key changes only when the account
+enters Castle." The old Replace All Keys rotated the account's master and class keys with the library key. Options:
+- **(a) BUILT, PROVISIONAL —** the library's key only (re-keyed within its posture, the history carried — rule 4); no
+  vault write. A new master alone would cut nothing off (a device that held the old master also holds the sync key it
+  unwraps), and a new sync key is what rule 15 forbids outside an entry into Castle.
+- (b) a new master as well (the sync keys re-sealed under it, none replaced) — rule 15 allows it, nothing asks for it.
+- (c) a new sync key — refused by rule 15 as written.
+The door stays synced-only as built (its old reason — the account's rotation — is gone; whether a local library gets the
+door is a face question). Record: the plan's §8 U2 RECORD, piece E. Status: open — her eye at the phase's close.
+
+**P-VX378-U2-2 — What the crossings type (rule 11 / rule 12 / the plan's crossings table).** Rules 11 and 12 say
+entering and leaving "type your passphrase"; the plan's §3 crossings table adds, for a local-only crossing, "the
+passphrase (the words wrap is re-made through the passphrase-opened key)". That mechanism doesn't exist: a words lock
+is the key wrapped under the WORDS' key, and nothing in the key file yields the words' key from the library key (the
+design cold read's F14 said the same: "local-only crossings have no master, so they must type both secrets — nothing
+else can make the wraps"). Synced, entering Castle mints a new master that must be locked under the words too (rule 14).
+Options:
+- **(a) BUILT, PROVISIONAL —** Use Castle and Use Standard type the passphrase AND the words, local and synced (the
+  door as built — decision 33 — with the words never made new, rule 7). Rule 2 and rule 14 hold; rule 11's and 12's
+  "types your passphrase" is read as "at least".
+- (b) as (a), but a SYNCED leave types the passphrase alone (the new key file takes the master with its twelve-words
+  copy, so the words open it through the master) — a narrower door, one shape more.
+- (c) a new key-file mechanism that keeps the words' key under the library key so the passphrase alone can re-make the
+  words lock — new machinery to make a sentence hold (rejected by the phase's stop rule; listed so it is not
+  re-proposed).
+Record: the plan's §8 U2 RECORD, piece E. Status: open — the orchestrator's and her eye (a plan-wording gap, not a rule
+conflict: rules 2, 11, 12, 14 all hold under (a)).
+
+**P-VX378-U2-3 — "Here they are": which words a join can show (rule 7).** Rule 7 tells a joining device "your
+library's twelve words are now your account's twelve words; here they are", and rule 14 lets the join type ONE secret.
+When the secret typed is the passphrase, the device never holds the account's words (they are never stored, and the
+vault keeps only the master under them). Options:
+- **(a) BUILT, PROVISIONAL —** the join reports `ActNotice.wordsReplacedByAccount` (unless the words typed were already
+  the library's); the face shows the words when they were typed and otherwise says the account's words now open the
+  library (the face is phase 3's).
+- (b) a join whose words would be replaced asks for the account's words as well (both typed), so they can be shown.
+- (c) the face sends her to New Words after the join.
+Record: the plan's §8 U2 RECORD, piece E. Status: open — her eye with the faces.

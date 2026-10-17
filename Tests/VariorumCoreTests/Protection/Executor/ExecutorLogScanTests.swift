@@ -55,7 +55,7 @@ struct ExecutorLogScanTests {
             let written = Data((world.logLines + world.diagnosticEntries.map { "\($0)" }).joined(separator: "\n").utf8)
             var needles: [(String, Data)] = world.minted.enumerated().map { ("minted secret \($0.offset)", $0.element) }
             needles += world.custody.values.map { ("a custody item's key", $0.data) }
-            needles += world.syncItems.values.flatMap { [("a master", $0.masterKey), ("a corpus key", $0.corpusKey)] }
+            needles += world.syncItems.values.flatMap { [("a master", $0.master), ("a sync key", $0.rowKey)] }
             needles += world.icloud.keys.values.map { ("an Apple key", PF.bytes($0.key)) }
             needles += [
                 ("the passphrase", Data(fixture.passphrase.utf8)), ("the words", Data(fixture.words.joined(separator: " ").utf8)),

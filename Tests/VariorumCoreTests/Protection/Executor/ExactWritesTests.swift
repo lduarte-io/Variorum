@@ -29,15 +29,13 @@ struct ExactWritesTests {
         _ = try await executor.follow(&library, kind: .intoCastle, typed: TypedSecrets(words: phone.words))
         #expect(phone.world.writeLog(naming: [PF.fp(k0): "K0", PF.fp(library.key): "K1", phone.ownApple!.id: "OWN"]) == [
             "record K0", "memory K0", "plan",                        // the act named (its gate chosen at this press)
-            "sync+ touchid", "sync- silent", "plan",                 // the new master, the Castle way; one item per account
-            "plan",                                                  // the corpus key it took, stamped (VX-305 U4)
-            "plan",                                                  // no rotation left to help
+            "sync+ touchid", "sync- silent",                         // the new master, the Castle way; one item per account
+            "plan", "plan",                                          // the sync key it took, stamped; the step done
             "custody+ touchid K1", "plan", "keyfile K1", "plan", "stage K1", "plan", "staged-record K1", "plan",
             "swap K1", "plan", "memory K1", "plan",
             "custody- silent K0", "plan",                            // no silent item for any key the library has had
             "plan",                                                  // the export was off
             "apple- OWN", "record K1", "memory K1", "plan",          // its own key deleted, recorded retired
-            "record K1", "memory K1", "plan",                        // the account's recorded retired
             "backup K1", "plan", "record K1", "memory K1", "plan-",
         ])
     }
@@ -90,36 +88,35 @@ struct ExactWritesTests {
     }
 }
 
-@Suite("VX-305 U3 — Resume Sync after a landing; the losing device's account key; the file swap's road keys")
+@Suite("VX-305 U3 — two leaves at once; the file swap's road keys")
 struct ExecutorEdgeTests {
-    @Test func theDeviceWhoseLeaveLostTheRaceDeletesTheAccountKeyItMinted() async throws {
+    /// Two devices leaving Castle at once (rule 12's mode flag): the phone's
+    /// leave stops just before its vault write; the Mac's lands; the phone's
+    /// resume finds the flag flipped already and finishes its own library's
+    /// leave with no second write — nothing on the server waited, nothing was
+    /// minted for the account.
+    @Test func theSecondLeaveFindsTheFlagFlippedAndWritesNothingMore() async throws {
         let mac = try EX(.castle, synced: true)
         let phone = try EX(.castle, synced: true, joining: mac)
-        // The phone starts its leave and stops right after minting its account key.
         let clean = try EX(.castle, synced: true)
         let ce = clean.executor()
         var cl = try clean.unlocked(ce)
         _ = try await ce.useStandard(&cl, typed: clean.typed)
-        phone.world.crashAfterWrites = try #require(clean.world.writes.firstIndex { $0.description.hasPrefix("apple+") }) + 1
+        phone.world.crashAfterWrites = try #require(clean.world.writes.firstIndex { $0.description.hasPrefix("vault") })
         let pe = phone.executor()
         var pl = try phone.unlocked(pe)
         await #expect(throws: SimulatedCrash.self) { _ = try await pe.useStandard(&pl, typed: phone.typed) }
-        // A Castle account holds no Apple key: the one in iCloud Keychain now is
-        // the phone's fresh account key (added before its record — the crash
-        // came between).
-        #expect(phone.world.icloud.keys.count == 1)
-        let phoneMinted = try #require(phone.world.icloud.keys.keys.first)
-        // The Mac's leave lands meanwhile.
+        #expect(phone.world.server.snapshot(phone.account!)!.mode == .castle, "the phone's write landed before the crash")
         let me = mac.executor()
         var ml = try mac.unlocked(me)
         _ = try await me.useStandard(&ml, typed: mac.typed)
-        // The phone's resume finds the account moved: it rolls back, and the
-        // key it minted — which the vault doesn't name — goes, recorded retired.
+        let afterMac = try #require(phone.world.server.snapshot(phone.account!))
         let (outcome, library, _) = try await phone.relaunchAndSettle()
-        #expect(outcome == .rolledBack(.leaveCastle))
-        #expect(phone.world.icloud.keys[phoneMinted] == nil)
-        #expect(library.section.retiredAppleKeyIDs.contains(phoneMinted))
-        #expect(phone.world.server.snapshot(phone.account!)!.format.appleKeyID != phoneMinted)
+        guard case .resumed = outcome else { Issue.record("the phone's leave did not resume: \(outcome)"); return }
+        #expect(phone.liveRecord?.mode == .standard)
+        #expect(phone.world.server.snapshot(phone.account!) == afterMac, "the second leave wrote the vault again")
+        #expect(!phone.world.writes.contains { if case .vaultUpdate = $0 { return true } else { return false } })
+        expectSettled(phone, library)
     }
 
     /// A library file swapped back for an older one: with the lobby road's

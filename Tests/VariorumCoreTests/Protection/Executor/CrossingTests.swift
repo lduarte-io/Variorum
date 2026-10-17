@@ -98,31 +98,40 @@ struct UseCastleTests {
             dropPlan: true)
     }
 
-    @Test func syncedUseCastleRotatesTheAccountThenTheLibrary() async throws {
+    /// Rules 11 + 15: the account's part of the entry is ONE vault write — a
+    /// new master and a new sync key, the outgoing sync key kept under the new
+    /// master — then the library's own re-key.
+    @Test func syncedUseCastleWritesTheAccountOnceThenTheLibrary() async throws {
         let fixture = try EX(.standard, synced: true)
-        let k0 = fixture.key, own = fixture.ownApple!.id, accountKey = fixture.accountApple!.id
+        let k0 = fixture.key, own = fixture.ownApple!.id
+        let before = try #require(fixture.world.server.snapshot(fixture.account!))
         let executor = fixture.executor()
         var library = try fixture.unlocked(executor)
         _ = try await executor.useCastle(&library, typed: fixture.typed, gate: .touchID)
         let k1 = library.key
         #expect(fixture.world.writeLog(naming: [PF.fp(k0): "K0", PF.fp(k1): "K1"]) == [
             "record K0", "memory K0", "plan",
-            "plan", "vault rotating", "sync+ touchid", "sync- silent", "plan",     // the account's commit point
-            "reencrypt", "plan",                                                 // the walk
-            "vault castle", "sync+ touchid", "apple- \(accountKey.prefix(8))", "record K0", "memory K0", "plan",
+            "plan", "vault castle", "sync+ touchid", "sync- silent", "plan",     // the account's ONE write
             "custody+ touchid K1", "plan", "keyfile K1", "plan", "stage K1", "plan", "staged-record K1", "plan",
             "swap K1", "plan", "memory K1", "plan", "custody- silent K0", "plan",
             "plan", "backup K1", "plan", "apple- \(own.prefix(8))", "record K1", "memory K1", "plan",
             "record K1", "memory K1", "plan-",
         ])
         let vault = try #require(fixture.world.server.snapshot(fixture.account!))
-        #expect(vault.mode == .castle && vault.format.previousCorpusKey == nil)
-        // No Castle-era key under anything Apple-reachable; the sync keys the Castle way.
+        #expect(vault.mode == .castle && vault.rowKeyID != before.rowKeyID)
+        // Rule 15: every earlier sync key kept, under the NEW master; the old
+        // master opens nothing in the vault any more.
+        #expect(Set(vault.vault.earlierRowKeys.keys) == [before.rowKeyID])
+        let held = try #require(fixture.world.syncItems[SyncKeysItemFact(accountID: fixture.account!, itemClass: .touchid)])
+        #expect(held.rowKey(for: before.rowKeyID).map(PF.bytes) == fixture.material!.rowKey)
+        #expect(throws: (any Error).self) { _ = try vault.vault.keys(master: fixture.material!.masterKey) }
+        #expect(fixture.liveRecord?.accountRowKeyID == vault.rowKeyID)
+        // The sync keys the Castle way; no Apple road to anything.
         #expect(fixture.world.syncItems.keys.map(\.itemClass) == [.touchid])
-        #expect(library.section.retiredAppleKeyIDs == [own, accountKey])
+        #expect(library.section.retiredAppleKeyIDs == [own])
         // The new key file carries the new master with its words copy (§3.5a).
         let live = try #require(fixture.world.liveFormat3)
-        #expect(live.masterWordsCopy == vault.format.masterWrappedByRecovery)
+        #expect(live.masterWordsCopy == vault.vault.masterByWords)
         #expect(try live.open(wordsThroughMaster: fixture.words) == k1)
         expectSettled(fixture, library)
     }
@@ -161,19 +170,20 @@ struct UseCastleTests {
         await #expect(throws: ExecutorRefusal.signedOutUseThisMacOnly) {
             _ = try await e3.useCastle(&l3, typed: synced.typed, gate: .touchID)
         }
-        // Decision 32: a rotation still finishing.
-        let rotating = try EX(.standard, synced: true)
-        var account = rotating.world.server.accounts[rotating.account!]!
-        account.format = try account.format.carryingPreviousCorpusKey(
-            SymmetricKey(size: .bits256), keyID: "old", masterKey: rotating.material!.masterSymmetricKey)
-        rotating.world.server.accounts[rotating.account!] = account
-        let e4 = rotating.executor()
-        var l4 = try rotating.unlocked(e4)
-        await #expect(throws: ExecutorRefusal.rotationInProgress) {
-            _ = try await e4.useCastle(&l4, typed: rotating.typed, gate: .touchID)
+        // The account's sync key moved on elsewhere: follow first.
+        let lagging = try EX(.standard, synced: true)
+        lagging.world.server.accounts[lagging.account!]!.vault.rowKey.keyID = "moved-on"
+        let e4 = lagging.executor()
+        var l4 = try lagging.unlocked(e4)
+        await #expect(throws: ExecutorRefusal.accountMoved) {
+            _ = try await e4.useCastle(&l4, typed: lagging.typed, gate: .touchID)
+        }
+        // Rule 7: only creating a library shows fresh words.
+        await #expect(throws: ExecutorRefusal.wordsMustBeTyped) {
+            _ = try await e2.useCastle(&l2, typed: TypedSecrets(passphrase: standard.passphrase, words: try PF.words(), wordsAreNew: true), gate: .touchID)
         }
         // Nothing was written by any refused door.
-        for fixture in [castle, standard, synced, rotating] { #expect(fixture.world.writes.isEmpty) }
+        for fixture in [castle, standard, synced, lagging] { #expect(fixture.world.writes.isEmpty) }
         // An act already in flight.
         let busy = try EX(.standard)
         busy.world.crashAfterWrites = 4

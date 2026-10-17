@@ -73,10 +73,10 @@ struct ExecutorKeyDoorTests {
         _ = try await executor.regenerateWords(&library, passphrase: fixture.passphrase, newWords: fresh)
         let vault = try #require(fixture.world.server.snapshot(fixture.account!))
         let live = try #require(fixture.world.liveFormat3)
-        #expect(live.masterWordsCopy == vault.format.masterWrappedByRecovery)
+        #expect(live.masterWordsCopy == vault.vault.masterByWords)
         #expect(try live.open(words: fresh) == library.key)
         #expect(try live.open(wordsThroughMaster: fresh) == library.key)
-        #expect(VaultModel.master(of: vault.format, passphrase: nil, words: try WordsKey.derive(fixture.words)) == nil)
+        #expect(VaultModel.master(of: vault.vault, passphrase: nil, words: try WordsKey.derive(fixture.words)) == nil)
         expectSettled(fixture, library)
     }
 

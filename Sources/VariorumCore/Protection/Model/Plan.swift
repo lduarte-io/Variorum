@@ -31,20 +31,23 @@ public struct ActParameters: Codable, Equatable, Sendable {
     /// A new Castle key's gate, chosen at THIS press: Touch ID (an item made
     /// at this press) or Always ask (none) — §3.10.
     public var gate: GateStyle?
-    /// The act runs on the account (a vault write, a rotation).
+    /// The act runs on the account (a vault write).
     public var synced: Bool?
     /// The account the act writes the vault of.
     public var accountID: String?
-    /// VX-109: the vault revision the door read — a rotation's first write
-    /// takes it, never a re-fetch.
+    /// VX-109: the vault revision the door read — the act's vault write takes
+    /// it, never a re-fetch.
     public var doorRevision: Int?
     /// The descriptor the typed passphrase is derived under: the door's
     /// (reused by a re-key), or a NEW passphrase's fresh one.
     public var passphraseKDF: PassphraseKDF.Descriptor?
     public var passphraseIsNew: Bool?
     public var wordsAreNew: Bool?
-    /// Which secret a follow typed — "passphrase" or "words".
+    /// Which secret a follow or a join typed — "passphrase" or "words".
     public var typedSecret: String?
+    /// Rule 7: a join replaced the library's twelve words with the account's
+    /// (its notice is said at the act's end, a resume included).
+    public var wordsReplaced: Bool?
     /// A follow's kind — `FollowKind`'s name.
     public var follow: String?
     /// The new library key's kind.
@@ -53,9 +56,6 @@ public struct ActParameters: Codable, Equatable, Sendable {
     public var targetAccount: String?
     /// Whether `targetAccount` is to be set (a leave clears it).
     public var changesAccount: Bool?
-    /// The account Apple key a leave minted (the new master's Apple wrap goes
-    /// under it).
-    public var accountAppleKeyID: String?
     /// This Mac's own Apple key the act minted for the library.
     public var ownAppleKeyID: String?
     /// Copies and folders.
@@ -64,15 +64,13 @@ public struct ActParameters: Codable, Equatable, Sendable {
     public var destination: String?
     /// Device settings an act writes.
     public var settings: DeviceSettings?
-    /// The account's corpus key id when the act began, and the new one a
-    /// rotation's first write carries — stamped in the plan BEFORE the write,
-    /// so a resume tells its own landed write from another device's rotation.
-    public var oldCorpusKeyID: String?
-    public var newCorpusKeyID: String?
+    /// The account's sync key id the door read, and the new one Use Castle's
+    /// one write carries — stamped in the plan BEFORE the write, so a resume
+    /// tells its own landed write from another device's (rule 15).
+    public var doorRowKeyID: String?
+    public var newRowKeyID: String?
     /// This Mac's own Apple key the outgoing key file named at the door.
     public var outgoingAppleKeyID: String?
-    /// The account's Apple key a rotation into Castle retires once it completes.
-    public var retiringAccountAppleKeyID: String?
     /// The library's key kind before the act (the account family's crossing).
     public var fromKind: ProtectionMode?
     /// Whether the act re-keys the library (every leave does — §3.8).
@@ -85,21 +83,20 @@ public struct ActParameters: Codable, Equatable, Sendable {
     /// (Migration Assistant never carries it) has only this to give the
     /// current key its own file back (VX-305 U4, the soak's seed 2).
     public var outgoingKeyFile: KeyFile?
-    /// The corpus key a follow (or a join) PICKED UP — stamped when it took
-    /// the keys, so the facts it records are the ones it followed, never a
-    /// vault that moved on before its resume finished (VX-305 U4, the soak's
-    /// seed 11).
-    public var followedCorpusKeyID: String?
+    /// The sync key a follow (or a join) PICKED UP — stamped when it took the
+    /// keys, so the record names the key it followed, never a vault that moved
+    /// on before its resume finished (VX-305 U4, the soak's seed 11).
+    public var followedRowKeyID: String?
 
     public init(
         gate: GateStyle? = nil, synced: Bool? = nil, accountID: String? = nil, doorRevision: Int? = nil,
         passphraseKDF: PassphraseKDF.Descriptor? = nil, passphraseIsNew: Bool? = nil, wordsAreNew: Bool? = nil,
         typedSecret: String? = nil, follow: String? = nil, newKind: ProtectionMode? = nil,
         targetAccount: String? = nil, changesAccount: Bool? = nil,
-        accountAppleKeyID: String? = nil, ownAppleKeyID: String? = nil, copyID: String? = nil,
+        ownAppleKeyID: String? = nil, copyID: String? = nil,
         copyIDs: [String]? = nil, destination: String? = nil,
-        settings: DeviceSettings? = nil, oldCorpusKeyID: String? = nil, newCorpusKeyID: String? = nil,
-        outgoingAppleKeyID: String? = nil, retiringAccountAppleKeyID: String? = nil
+        settings: DeviceSettings? = nil, doorRowKeyID: String? = nil, newRowKeyID: String? = nil,
+        outgoingAppleKeyID: String? = nil
     ) {
         self.gate = gate
         self.synced = synced
@@ -113,16 +110,14 @@ public struct ActParameters: Codable, Equatable, Sendable {
         self.newKind = newKind
         self.targetAccount = targetAccount
         self.changesAccount = changesAccount
-        self.accountAppleKeyID = accountAppleKeyID
         self.ownAppleKeyID = ownAppleKeyID
         self.copyID = copyID
         self.copyIDs = copyIDs
         self.destination = destination
         self.settings = settings
-        self.oldCorpusKeyID = oldCorpusKeyID
-        self.newCorpusKeyID = newCorpusKeyID
+        self.doorRowKeyID = doorRowKeyID
+        self.newRowKeyID = newRowKeyID
         self.outgoingAppleKeyID = outgoingAppleKeyID
-        self.retiringAccountAppleKeyID = retiringAccountAppleKeyID
     }
 }
 
@@ -164,17 +159,17 @@ public struct ProtectionPlan: Codable, Equatable, Sendable {
     public var firstUnfinishedStep: Int? { steps.firstIndex { !$0.done } }
 
     /// **Past the act's commit point** (§3.6, VX-235's class): the library
-    /// already under the act's new key; an act that re-keys nothing (the
-    /// plan-less rule's "committed" — its remaining steps finish); or the
-    /// account's first vault write begun — its stamp written into the plan
-    /// before the write (her ruling 2026-10-14/15: a synced act crashed past
-    /// the rotation's first write WAITS for the vault, named; one crashed
-    /// before it still rolls back). One function, so the executor's choice and
-    /// the scenario world's promise 6 read the same line.
+    /// already under the act's new key, or an act that re-keys nothing (the
+    /// plan-less rule's "committed" — its remaining steps finish). Before it, a
+    /// resume that can't reach its account's vault rolls back — even past its
+    /// one vault write, which a follow then picks up as any device's would
+    /// (VX-378 U2: no act waits on a vault — the named wait left with the
+    /// multi-write rotation; rule 20's "the old state or the new one"). One
+    /// function, so the executor's choice and the scenario world's promise 6
+    /// read the same line.
     public func pastCommitPoint(libraryFingerprint: String) -> Bool {
         guard let to = toFingerprint else { return true }
-        if libraryFingerprint == to { return true }
-        return parameters?.newCorpusKeyID != nil
+        return libraryFingerprint == to
     }
 
     /// Does `section` (this Mac's, at open) name this plan? The device, the

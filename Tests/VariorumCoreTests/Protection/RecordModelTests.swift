@@ -21,17 +21,16 @@ struct ProtectionValueRoundTripTests {
         let device = PF.id()
         var section = DeviceSection(
             deviceID: device, settings: DeviceSettings(gateStyle: .touchID, idleLockMinutes: 30, scheduledExport: true))
-        section = section.recordingAppleKey(AppleKeyRecord(id: PF.id(), purpose: .library, origin: .minted))
+        section = section.recordingAppleKey(AppleKeyRecord(id: PF.id()))
         section = section.recordingAppleKey(
-            AppleKeyRecord(id: PF.id(), purpose: .account, accountID: PF.id(), origin: .followed, retiredAt: PF.day(1)))
+            AppleKeyRecord(id: PF.id(), retiredAt: PF.day(1)))
         section = section.beginningAct(.enterCastle, from: PF.fp(key), to: nil, fromKind: .standard, at: PF.day(2)).section
         let record = try ProtectionRecord.minting(
             libraryID: library, mode: .standard, account: PF.id(), currentFingerprint: PF.fp(key), at: PF.t0)
             .storing(section, sealedUnder: key)
         let memory = DeviceMemory(
             libraryID: library, currentFingerprint: PF.fp(key), deviceID: device,
-            keyFileMirror: KeyFile(libraryID: library, key: key, epoch: 1), biometryStateHash: Data([9, 9]),
-            vaultFacts: VaultFacts(kdf: PF.fastKDF(), corpusKeyID: PF.id()))
+            keyFileMirror: KeyFile(libraryID: library, key: key, epoch: 1), biometryStateHash: Data([9, 9]))
         let plan = ProtectionPlan(
             libraryID: library, deviceID: device, sequence: 1, act: .enterCastle,
             fromFingerprint: PF.fp(key), steps: [PlanStep(name: "custody", done: true), PlanStep(name: "swap")],
@@ -93,8 +92,8 @@ struct DeviceFactsTests {
         #expect(second == 2, "a sequence is never reused")
         #expect(ended.version > one.version && one.version > start.version)
         // A retired id is never un-retired by a later record of it.
-        let retired = start.retiringAppleKey(id: "k", purpose: .library, origin: .minted, at: PF.day(1))
-            .recordingAppleKey(AppleKeyRecord(id: "k", purpose: .library, origin: .minted))
+        let retired = start.retiringAppleKey(id: "k", at: PF.day(1))
+            .recordingAppleKey(AppleKeyRecord(id: "k"))
         #expect(retired.retiredAppleKeyIDs == ["k"])
     }
 }

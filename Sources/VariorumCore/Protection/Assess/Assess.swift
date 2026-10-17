@@ -98,11 +98,7 @@ public enum AssessRules {
 
     public static func vault(_ facts: ProtectionFacts, account: AccountVerdict, guards: ProtectionGuards) -> VaultVerdict? {
         guard let reading = facts.freshVault(for: account.account) else { return nil }
-        let mode = reading.mode
-        return VaultVerdict(
-            mode: mode, rotationInProgress: reading.rotationInProgress,
-            completesWithoutAppleCopy: reading.previousCorpusKeyID != nil && reading.appleKeyID == nil && !reading.hasAppleWrap,
-            syncKeysCustody: mode == .castle ? .castleWay : .silent, followHoldsLibraryRekey: reading.rotationInProgress)
+        return VaultVerdict(mode: reading.mode, syncKeysCustody: reading.mode == .castle ? .castleWay : .silent)
     }
 
     // MARK: - Touch ID (§3.10, VX-310)
@@ -197,14 +193,9 @@ public enum AssessRules {
                 }
             }
             if stale { repairs.append(.refreshMemory) }
-            // A synced library whose memory names no vault facts (the memory
-            // item gone — a wiped keychain): the keys this device holds are
-            // recorded, so a later replacement of the account's keys reads as
-            // a follow owed (VX-305 U4, found by the scenario world).
-            if let account = record.account, facts.session.accountID == account, facts.freshVault(for: account) != nil,
-               memory != nil, memory?.vaultFacts?.corpusKeyID == nil {
-                repairs.append(.recordHeldSyncKeysFacts)
-            }
+            // (The held keys' vault facts left with VX-378 U2: the RECORD names
+            // the sync key the library follows — `accountRowKeyID` — so a
+            // wiped keychain loses nothing a follow reads.)
         }
         // The mode's repairs and faults read the live file only when it is the
         // CURRENT key's: another key's file in the live place is no "Castle
@@ -312,11 +303,11 @@ public enum AssessRules {
                     faults.append(.appleRoadLost(keyFileID: id))
                 }
             } else if let own = unlocked.thisMac.appleKeys
-                .first(where: { $0.isOwnLibraryKey && $0.retiredAt == nil && facts.appleKeys.readable.contains($0.id) }) {
+                .first(where: { $0.retiredAt == nil && facts.appleKeys.readable.contains($0.id) }) {
                 // This Mac's own key, readable: the wrap lands (no repair
                 // ever mints one).
                 if appleWriteAllowed { repairs.append(.landAppleWrap(appleKeyID: own.id)) }
-            } else if unlocked.thisMac.appleKeys.contains(where: { $0.isOwnLibraryKey && $0.retiredAt == nil }) {
+            } else if unlocked.thisMac.appleKeys.contains(where: { $0.retiredAt == nil }) {
                 faults.append(.appleRoadLost(keyFileID: id))
             }
         }
@@ -345,27 +336,21 @@ public enum AssessRules {
         // as the account moving elsewhere.
         let ownActInFlight = unlocked.thisMac.actInFlight != nil
         if let vault, let reading, !ownActInFlight {
-            // The account moved elsewhere: the follow.
-            let known = unlocked.memory?.vaultFacts?.corpusKeyID
-            switch vault.mode {
-            case .standard where current == .castle:
-                acts.append(.follow(.intoStandard, typesOneSecret: true, holdsLibraryRekey: vault.rotationInProgress))
-            case .castle where current == .standard:
-                acts.append(.follow(.intoCastle, typesOneSecret: true, holdsLibraryRekey: vault.rotationInProgress))
+            // The account moved elsewhere: the follow (one posture — rules 10,
+            // 12, 15).
+            switch (vault.mode, current) {
+            case (.standard, .castle):
+                // Out of Castle: quiet — the device already holds the account's
+                // keys (the leave changed none).
+                acts.append(.follow(.intoStandard, typesOneSecret: false))
+            case (.castle, .standard):
+                acts.append(.follow(.intoCastle, typesOneSecret: true))
             default:
-                // What this Mac remembers names no vault facts (its memory item
-                // went): the library's master words copy against the vault's
-                // recovery wrap tells whether its master is the account's.
-                let behind = known == nil && liveKeyFile(facts, unlocked).map { live in
-                    live.master != nil && live.masterWordsCopy != nil && live.masterWordsCopy != reading.recoveryWrap
-                } == true
-                if (known.map { known in reading.corpusKeyID.map { $0 != known } ?? false } ?? false) || behind {
-                    // Keys replaced in the same mode: Castle types one secret;
-                    // Standard reads the new master through the account's Apple
-                    // key, or takes a secret when it can't be read here.
-                    let typed = current == .castle
-                        || !(reading.appleKeyID.map { facts.appleKeys.readable.contains($0) } ?? false)
-                    acts.append(.follow(.keysReplaced, typesOneSecret: typed, holdsLibraryRekey: vault.rotationInProgress))
+                // Same posture, a sync key this library doesn't follow: it lagged
+                // through an entry into Castle (the master changed with the key)
+                // — one secret catches it up.
+                if unlocked.record.accountRowKeyID != reading.rowKeyID {
+                    acts.append(.follow(.keysReplaced, typesOneSecret: true))
                 }
             }
         }
@@ -418,18 +403,12 @@ public enum AssessRules {
         case .signedOut: signedOut = true
         case .otherAccount(_, _, let same): otherAccount = true; sameEmail = same
         }
-        let rotation: DoorRefusal? = reading.flatMap {
-            $0.rotationInProgress ? .rotationInProgress(device: $0.updatedByDevice, day: $0.updatedAt) : nil
-        }
         /// The common gates of a key or mode door: another account signed in,
-        /// a follow owed, a synced act without its fresh vault, a rotation.
+        /// a follow owed, a synced act without its fresh vault.
         func gate(syncedAct: Bool) -> DoorRefusal? {
             if otherAccount { return .otherAccountSignedIn }
             if followOwed { return .followOwed }
-            if syncedAct, inSync {
-                if reading == nil { return .needsFreshVault }
-                if let rotation { return rotation }
-            }
+            if syncedAct, inSync, reading == nil { return .needsFreshVault }
             return nil
         }
 
@@ -452,7 +431,8 @@ public enum AssessRules {
         doors[.replaceAllKeys] = {
             if let refusal = gate(syncedAct: true) { return .refused(refusal) }
             guard inSync else { return .refused(signedOut ? .signedOutUseThisMacOnly : .notSynced) }
-            return .open(DoorSpec(requires: .passphraseAndWords(wordsMayBeNew: true), rekeys: true, synced: true))
+            // Rule 7: only creating a library shows fresh words — typed here.
+            return .open(DoorSpec(requires: .passphraseAndWords(wordsMayBeNew: false), rekeys: true, synced: true))
         }()
         // THE KEY DOORS — re-wrap the current key only (rule 6).
         for (door, requires) in [
@@ -497,7 +477,7 @@ public enum AssessRules {
         // THE FOLLOW.
         doors[.followNow] = {
             guard let follow = acts.first(where: { if case .follow = $0 { return true } else { return false } }),
-                  case .follow(let kind, let typed, _) = follow else { return .refused(.nothingToDo) }
+                  case .follow(let kind, let typed) = follow else { return .refused(.nothingToDo) }
             let leaves = kind == .intoStandard
             return .open(DoorSpec(requires: typed ? .oneSecret : .none, rekeys: true,
                                   retiresOwnAppleKeys: kind == .intoCastle ? ownKeysToRetire(facts, unlocked, guards: guards) : [],
@@ -522,7 +502,7 @@ public enum AssessRules {
         // its own and can't read here (one left in an Apple account it no
         // longer uses) wrapping the copy's key in its own key file — named,
         // with what that means.
-        let notReadable = Set(unlocked.thisMac.appleKeys.filter { $0.isOwnLibraryKey && $0.retiredAt == nil }.map(\.id))
+        let notReadable = Set(unlocked.thisMac.appleKeys.filter { $0.retiredAt == nil }.map(\.id))
             .subtracting(facts.appleKeys.readable)
         let undeletable = facts.catalog.copies.filter { copy in
             facts.catalog.servingKeyFiles(of: copy).contains { file in
@@ -532,15 +512,19 @@ public enum AssessRules {
         }.map(\.id)
         if !undeletable.isEmpty { words.append(.copiesUnderAKeyThisMacCantDelete(undeletable)) }
         if unlocked.thisMac.settings.scheduledExport { words.append(.scheduledExportTurnsOff) }
+        // The passphrase AND the words (rule 11's passphrase; the words because
+        // nothing else can lock the new key — or, synced, the new master — under
+        // them: rules 2, 14), both TYPED — rule 7: only creating a library shows
+        // fresh words.
         return DoorSpec(
-            requires: .passphraseAndWords(wordsMayBeNew: true), rekeys: true,
+            requires: .passphraseAndWords(wordsMayBeNew: false), rekeys: true,
             retiresOwnAppleKeys: ownKeysToRetire(facts, unlocked, guards: guards), synced: synced, words: words)
     }
 
     /// §3.8's joining rules: the account's mode against the library's.
     public static func joinPlan(library: ProtectionMode, vault: VaultReading?) -> JoinPlan {
         guard let vault else { return .setsUpInLibrarysMode }
-        switch (vault.mode.settled, library) {
+        switch (vault.mode, library) {
         case (.castle, .standard): return .entersCastle
         case (.standard, .castle): return .leavesCastle
         default: return .sameMode
@@ -552,15 +536,22 @@ public enum AssessRules {
         guards: ProtectionGuards
     ) -> DoorSpec {
         switch join {
+        // Joining types ONE of the account's secrets (rule 14) and adopts the
+        // account's pair (rule 7) — the master with its twelve-words copy makes
+        // the other secret open the re-locked file.
         case .entersCastle:
             var spec = useCastleSpec(facts, unlocked, synced: true, guards: guards)
+            spec.requires = .oneSecret
             spec.join = join
             return spec
         case .leavesCastle:
-            return DoorSpec(requires: .passphraseAndWords(wordsMayBeNew: false), rekeys: true, synced: true, join: join,
-                            words: [.ruleFive])
-        case .sameMode, .setsUpInLibrarysMode:
-            return DoorSpec(requires: .passphraseAndWords(wordsMayBeNew: true), synced: true, join: join)
+            return DoorSpec(requires: .oneSecret, rekeys: true, synced: true, join: join, words: [.ruleFive])
+        case .sameMode:
+            return DoorSpec(requires: .oneSecret, synced: true, join: join)
+        case .setsUpInLibrarysMode:
+            // The first device hands its library's pair up (rule 7): both
+            // typed, the words never made new.
+            return DoorSpec(requires: .passphraseAndWords(wordsMayBeNew: false), synced: true, join: join)
         }
     }
 }

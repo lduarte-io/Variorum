@@ -12,17 +12,13 @@ public struct ActOutcome: Equatable, Sendable {
     public var act: ProtectionAct
     /// The key the library is under at the end.
     public var fingerprint: String
-    /// A follow that picked up the keys and holds its library's re-key while
-    /// the vault reads a rotation in progress (§3.9).
-    public var held: Bool
     public var notices: [ActNotice]
     /// The Done's typed words (rule 5's sentence after a leave).
     public var done: [Words]
 
-    public init(act: ProtectionAct, fingerprint: String, held: Bool = false, notices: [ActNotice] = [], done: [Words] = []) {
+    public init(act: ProtectionAct, fingerprint: String, notices: [ActNotice] = [], done: [Words] = []) {
         self.act = act
         self.fingerprint = fingerprint
-        self.held = held
         self.notices = notices
         self.done = done
     }
@@ -32,8 +28,14 @@ public struct ActOutcome: Equatable, Sendable {
 public enum ActNotice: Equatable, Sendable {
     /// Entering Castle turned this device's scheduled Markdown export off.
     case scheduledExportTurnedOff
-    /// A follow that holds its library re-key while the rotation finishes.
-    case heldForRotation
+    /// RULE 7: joining an account replaced the library's twelve words with the
+    /// account's — "your library's twelve words are now your account's twelve
+    /// words … the old ones still open backups you made before today". Not said
+    /// when the words typed at the join were already the library's.
+    case wordsReplacedByAccount
+    /// RULE 12: the account left Castle elsewhere and this device followed it
+    /// out quietly — "with a notice".
+    case followedOutOfCastle
 }
 
 /// What the open's settle did with an act in flight.
@@ -47,22 +49,10 @@ public enum SettleOutcome: Equatable, Sendable {
     case finishedFromRecord(ActOutcome)
     /// No usable plan, before the commit point: the act rolled back.
     case rolledBack(ProtectionAct)
-    /// THE ACT NAMED AND WAITING (her ruling 2026-10-14/15, the soak's seed
-    /// 2): a synced act past its commit point whose account's vault can't be
-    /// reached this session — signed out, signed into another account, or
-    /// offline. It stays in flight, named by this Mac's section and its plan;
-    /// the library is open, sync waits, copies stay paused; it finishes at the
-    /// next vault reach (signing in here — or another device of the account
-    /// finishes the rotation). Before the commit point the act rolled back
-    /// instead. The face ("Finish leaving Castle — sign in to finish") is
-    /// phase 3/4's.
-    case waiting(ProtectionAct, account: String)
-}
-
-/// A resume stopped for a vault it can't reach, past its commit point.
-struct ActWaiting: Error {
-    var act: ProtectionAct
-    var account: String
+    // (The act named and WAITING for its account's vault left with VX-378 U2:
+    // past the library's swap nothing an act still does needs the vault, and
+    // before it a resume that can't reach the vault rolls back — a vault write
+    // it already made is picked up by a follow, as any device's.)
 }
 
 /// A step's way of saying the act must roll back now (before its commit
@@ -125,7 +115,7 @@ public final class ActContext {
     /// The outgoing key, held from the begin for the act's span.
     var heldFromKey: StoreKey?
     /// The account's sync keys in hand (custody, session memory, or the vault).
-    var material: DeviceKeyMaterial?
+    var material: AccountKeys?
     var outcome: ActOutcome
     /// A resume after a relaunch (no press made the item a door would).
     let resuming: Bool
@@ -248,7 +238,6 @@ extension ProtectionExecutor {
             do {
                 try await program.run(step, ctx)
             } catch let stop as ActRollback {
-                try dropUnlandedAccountKey(ctx)
                 try rollBack(&ctx.library, act: ctx.act, outgoingKeyFile: ctx.plan.parameters?.outgoingKeyFile)
                 throw ActRolledBack(act: ctx.act, refusal: stop.refusal)
             }
@@ -329,9 +318,6 @@ extension ProtectionExecutor {
                 return .resumed(try await resume(resumable, &library, typed: typed))
             } catch let rolledBack as ActRolledBack {
                 return .rolledBack(rolledBack.act)
-            } catch let waiting as ActWaiting {
-                log("settle: \(waiting.act.rawValue) waits for its account's vault — named, copies paused")
-                return .waiting(waiting.act, account: waiting.account)
             }
         }
         // No plan to trust. Past the commit point (the library opens under
@@ -395,36 +381,30 @@ extension ProtectionExecutor {
             resuming: true)
         defer { library = ctx.library }
         log("\(plan.act.rawValue): resumes #\(plan.sequence) at step \(plan.firstUnfinishedStep.map(String.init) ?? "end")")
-        var waitsFor: String?
-        if plan.parameters?.synced == true, let account = ctx.accountID {
-            // A synced act resumes from the vault as it stands now.
+        if plan.parameters?.synced == true, let account = ctx.accountID,
+           !plan.pastCommitPoint(libraryFingerprint: ctx.library.fingerprint) {
+            // A synced act not yet swapped resumes from the vault as it stands
+            // now.
             do {
                 let vault = try await readVault(accountID: account)
                 // …and a passphrase derived under the vault's own descriptor must
                 // open the vault (the press's did — one descriptor, one passphrase).
-                if let vault, let derived = secrets.passphrase, derived.kdf == vault.format.kdf,
-                   VaultModel.master(of: vault.format, passphrase: derived, words: nil) == nil {
+                if let vault, let derived = secrets.passphrase, derived.kdf == vault.vault.kdf,
+                   VaultModel.master(of: vault.vault, passphrase: derived, words: nil) == nil {
                     throw ExecutorRefusal.passphraseDoesNotOpen
                 }
             } catch where Self.vaultOutOfReach(error) {
-                // Her ruling 2026-10-14/15: before the commit point — the
-                // rotation's first write never begun, the library not swapped —
-                // the act ROLLS BACK (nothing account-side happened); past it,
-                // it runs what needs no vault and WAITS, named, for the rest.
-                guard plan.pastCommitPoint(libraryFingerprint: ctx.library.fingerprint) else {
-                    try dropUnlandedAccountKey(ctx)
-                    try rollBack(&ctx.library, act: plan.act, outgoingKeyFile: plan.parameters?.outgoingKeyFile)
-                    throw ActRolledBack(act: plan.act, refusal: .vaultOutOfReach(account: account))
-                }
-                waitsFor = account
+                // Before the swap a resume that can't reach the vault ROLLS BACK
+                // (rule 20): if its one vault write had landed, the account moved
+                // and this device follows it, as any device would. (The named
+                // wait left with VX-378 U2.)
+                try rollBack(&ctx.library, act: plan.act, outgoingKeyFile: plan.parameters?.outgoingKeyFile)
+                throw ActRolledBack(act: plan.act, refusal: .vaultOutOfReach(account: account))
             }
         }
-        do {
-            try reachNewKey(ctx, program)
-            try await drive(program, ctx)
-        } catch where waitsFor != nil && Self.vaultOutOfReach(error) {
-            throw ActWaiting(act: plan.act, account: waitsFor!)
-        }
+        // Past the swap, nothing the act still does needs the vault.
+        try reachNewKey(ctx, program)
+        try await drive(program, ctx)
         return ctx.outcome
     }
 
@@ -475,18 +455,6 @@ extension ProtectionExecutor {
 
     // MARK: - Roll back (before the commit point)
 
-    /// Two devices minted for one account and the vault's CAS kept the other's
-    /// (§3.5): the key this act minted, which the vault does not name, is
-    /// deleted and recorded retired — it wraps nothing.
-    func dropUnlandedAccountKey(_ ctx: ActContext) throws {
-        guard let minted = ctx.parameters.accountAppleKeyID, let account = ctx.accountID else { return }
-        if freshVaults[account]?.format.appleKeyID == minted { return }
-        try leaves.apple.deleteAppleKey(id: minted)
-        try ctx.updateSection {
-            $0.retiringAppleKey(id: minted, purpose: .account, accountID: account, origin: .minted, at: now())
-        }
-    }
-
     /// Undo an act that never reached its commit point: the staged file
     /// discarded, the live key file restored from the sealed mirror when the
     /// act had replaced it, the new key's custody items deleted (a key the
@@ -521,7 +489,7 @@ extension ProtectionExecutor {
             let wrapped = library.keyFile?.apple?.keyID
             for id in section.ownLibraryAppleKeyIDsToRetire where id != wrapped {
                 try leaves.apple.deleteAppleKey(id: id)
-                section = section.retiringAppleKey(id: id, purpose: .library, origin: .minted, at: now())
+                section = section.retiringAppleKey(id: id, at: now())
             }
         }
         try writeFacts(&library, section: section)

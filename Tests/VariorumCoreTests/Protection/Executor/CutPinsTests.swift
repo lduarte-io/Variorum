@@ -66,8 +66,8 @@ struct CutPinsTests {
         var library = try fixture.unlocked(executor)
         await #expect(throws: SimulatedCrash.self) { _ = try await executor.useStandard(&library, typed: fixture.typed) }
         let vault = try #require(fixture.world.server.snapshot(fixture.account!))
-        #expect(vault.format.masterWrappedByAppleHeld != nil,
-                "a leave's first vault write left an Apple key id with no wrap — the stuck leave's window (rule 12)")
+        #expect(vault.mode == .standard,
+                "a leave's vault write left the account short of Standard — the stuck leave's window (rule 12)")
     }
 }
 

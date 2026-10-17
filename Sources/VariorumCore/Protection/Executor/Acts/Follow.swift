@@ -1,28 +1,29 @@
 import CryptoKit
 import Foundation
 
-// VX-305 U3 — THE FOLLOW (design §3.9: into Castle, into Standard, keys
-// replaced). On a plan carrying every fact a resume needs; EVERY follow into
-// or out of Castle types ONE secret, once — the passphrase or the words,
-// through the vault — and no follow waits on an Apple key.
-//   - A follower that sees a rotation in progress (a previous corpus key
-//     standing) follows the keys (held the account's way — rule 15's
-//     custody), walks and re-encrypts, completes the rotation (anyone may),
-//     and HOLDS its own library's re-key while the vault still reads a
-//     rotation in progress.
-//   - Into Standard: a new Standard key (its silent item, this Mac's own
-//     FRESH Apple key) whose history carries the Castle key and every key
-//     before it (rule 4); the Castle key's Touch ID item goes with its key;
-//     rule 5's sentence.
-//   - Into Castle: a new Castle key (a Touch ID item made at this press where
-//     this device's gate style says so, or none), its history taking every
-//     older key; every own Apple key deleted and recorded retired, the
-//     account's recorded retired; the scheduled export off, with one notice.
-//   - Keys replaced, same mode: the history grows.
-// A follower's new key file is locked under the secret it typed and under the
-// new master, with that master's words copy beside it — plus, in Standard,
-// this Mac's own Apple key. (The follower's anchor, its typed lock and the
-// finish of a stuck leave left with VX-378 U1 — rules 4, 12.)
+// VX-305 U3 — THE FOLLOW (rules 10, 12, 15; design §3.9): the account's posture
+// or sync key changed on another device, and this one follows — on a plan
+// carrying every fact a resume needs; no follow waits on an Apple key.
+//   - INTO CASTLE (rule 10: "each typing a secret once"): the new master from
+//     the vault by the typed secret (the passphrase or the words); a new Castle
+//     key (a Touch ID item made at this press where this device's gate style
+//     says so, or none), its history taking every older key; every own Apple key
+//     deleted and recorded retired; the scheduled export off, with one notice.
+//   - OUT OF CASTLE (rule 12: "other devices follow out quietly, with a
+//     notice"): nothing typed — the leave changed no key, so the keys this
+//     device holds still open the vault; a new Standard key (its silent item,
+//     this Mac's own FRESH Apple key) whose history carries the Castle key and
+//     every key before it (rule 4); the Castle key's Touch ID item goes with its
+//     key; rule 5's sentence, and the notice.
+//   - KEYS REPLACED, same posture: a device that lagged through an entry into
+//     Castle catches up — one secret, the new master; the history grows.
+// A follower's new key file is locked under the secret it typed (if any) and
+// under the new master, with that master's twelve-words copy beside it (old
+// design §3.5a — so both secrets open it: the words through the copy, the
+// passphrase directly or through the vault) — plus, in Standard, this Mac's own
+// Apple key. (The follower's anchor, its typed lock and the finish of a stuck
+// leave left with VX-378 U1 — rules 4, 12; the rotation it helped and held for
+// with VX-378 U2 — rule 15.)
 
 struct FollowProgram: ActProgram {
     let act = ProtectionAct.follow
@@ -45,20 +46,14 @@ struct FollowProgram: ActProgram {
 
     static func afterCommit(_ kind: FollowKind) -> [String] {
         switch kind {
-        case .intoCastle: return ["memory", "retireOldCustody", "exportOff", "retireOwnAppleKeys", "recordAccountKeyRetired", "backup"]
+        case .intoCastle: return ["memory", "retireOldCustody", "exportOff", "retireOwnAppleKeys", "backup"]
         case .intoStandard, .keysReplaced: return ["memory", "retireOldCustody", "backup"]
         }
     }
 
     func steps(_ parameters: ActParameters, guards: ProtectionGuards) -> [String] {
         let kind = Self.kind(parameters)
-        switch kind {
-        case .intoStandard:
-            return ["pickUpKeys", "helpRotation"] + LibraryRekey.steps(guards, mintsOwnAppleKey: true)
-                + Self.afterCommit(kind)
-        case .intoCastle, .keysReplaced:
-            return ["pickUpKeys", "helpRotation"] + LibraryRekey.steps(guards) + Self.afterCommit(kind)
-        }
+        return ["pickUpKeys"] + LibraryRekey.steps(guards, mintsOwnAppleKey: kind == .intoStandard) + Self.afterCommit(kind)
     }
 
     func newKeySteps(_ parameters: ActParameters) -> Set<String> { LibraryRekey.newKeySteps }
@@ -80,11 +75,9 @@ struct FollowProgram: ActProgram {
         let newKind = try ctx.parameters.newKind ?? ctx.requireRecord().mode
         switch step {
         case "pickUpKeys": try await ctx.pickUpKeys()
-        case "helpRotation": try await ctx.helpRotation()
-        case "mintOwnAppleKey": _ = try ctx.mintAppleKey(purpose: .library)
+        case "mintOwnAppleKey": _ = try ctx.mintOwnAppleKey()
         case "custodyItem": try ctx.newCustodyItem(kind: newKind)
         case "keyFile":
-            let typedIsWords = ctx.parameters.typedSecret == "words"
             var apple: AppleKeyMaterial?
             if kind == .intoStandard {
                 apple = try ctx.ownAppleKey()
@@ -92,18 +85,20 @@ struct FollowProgram: ActProgram {
                 apple = ctx.existingOwnAppleKey()
             }
             let locks = try ctx.newLocks(
-                passphrase: !typedIsWords && ctx.secrets.passphrase != nil, words: typedIsWords, master: true, apple: apple)
+                passphrase: ctx.secrets.passphrase != nil, words: ctx.secrets.words != nil, master: true, apple: apple)
             try ctx.newKeyFile(rekeyTo: newKind, locks: locks)
         case "stage": try ctx.stage()
         case "recordIntoStaged": try ctx.recordIntoStaged(kind: newKind)
         case "swap": try ctx.swap { try ctx.stage(); try ctx.recordIntoStaged(kind: newKind) }
         case "memory":
             try ctx.rememberNewKey()
-            if kind == .intoStandard { ctx.outcome.done = [.ruleFive] }
+            if kind == .intoStandard {
+                ctx.outcome.done = [.ruleFive]
+                ctx.outcome.notices.append(.followedOutOfCastle)
+            }
         case "retireOldCustody": try ctx.retireOldCustody(sweepForCastle: kind == .intoCastle)
         case "exportOff": try ctx.turnExportOff()
         case "retireOwnAppleKeys": try ctx.retireOwnAppleKeys()
-        case "recordAccountKeyRetired": try ctx.recordAccountKeyRetired()
         case "backup": try ctx.freshBackup()
         default: throw ExecutorRefusal.nothingToDo
         }
@@ -111,79 +106,34 @@ struct FollowProgram: ActProgram {
 }
 
 extension ActContext {
-    /// The new master from the vault by the typed secret (nothing unwrapped
-    /// on the server), the class keys and — while a rotation stands — the
-    /// previous corpus key; held the account's way.
+    /// The account's keys from the vault: the keys this device holds when they
+    /// still open it (the quiet follow out — the leave changed no key), else the
+    /// master by the typed secret (nothing unwrapped on the server); held the
+    /// account's way (rule 15's custody), and the sync key taken stamped.
     func pickUpKeys() async throws {
         let snapshot = try await freshRead()
-        var master = VaultModel.master(of: snapshot.format, passphrase: secrets.passphrase, words: secrets.words)
-        if master == nil, secrets.isEmpty, let id = snapshot.format.appleKeyID,
-           let apple = try leaves.apple.readAppleKey(id: id) {
-            // Keys replaced in Standard: the new master through the account's
-            // Apple key, as today — nothing typed.
-            master = try? snapshot.format.unwrapMaster(withAppleKey: apple.key)
-        }
-        guard let master else { throw ExecutorRefusal.secretsRequired(act) }
-        let following = try VaultModel.material(following: snapshot.format, master: master)
-        try holdSyncKeys(following, castleWay: snapshot.mode == .castle)
-        try stampFollowed(following.corpusKeyID)
+        let keys = try material(for: snapshot)
+        try holdSyncKeys(keys, castleWay: snapshot.mode == .castle)
+        try stampFollowed(keys.rowKeyID)
     }
 
-    /// The corpus key this act took, stamped in its plan (see
-    /// `ActParameters.followedCorpusKeyID`).
-    func stampFollowed(_ corpusKeyID: String) throws {
-        guard parameters.followedCorpusKeyID != corpusKeyID else { return }
+    /// The sync key this act took, stamped in its plan (see
+    /// `ActParameters.followedRowKeyID`).
+    func stampFollowed(_ rowKeyID: String) throws {
+        guard parameters.followedRowKeyID != rowKeyID else { return }
         var next = parameters
-        next.followedCorpusKeyID = corpusKeyID
+        next.followedRowKeyID = rowKeyID
         plan.parameters = next
         try leaves.plans.writePlan(try plan.sealed(under: library.key))
-    }
-
-    /// A follower in a rotation's window: walk; complete it; then hold the
-    /// library's re-key while the vault still reads a rotation in progress.
-    func helpRotation() async throws {
-        var snapshot = try await freshRead()
-        if snapshot.format.previousCorpusKey != nil, snapshot.rowsBelowRotationSeq > 0 {
-            _ = try await leaves.vault.reencryptBelowRotationSeq(
-                accountID: snapshot.accountID, material: try material(for: snapshot))
-            snapshot = try await freshRead()
-        }
-        if snapshot.format.previousCorpusKey != nil {
-            try await completeRotation(castleWayAfter: snapshot.mode == .castle)
-            snapshot = try await freshRead()
-        }
-        if snapshot.reading.rotationInProgress {
-            outcome.held = true
-            outcome.notices.append(.heldForRotation)
-            log("holds its library re-key — the vault reads a rotation in progress")
-            skipRemaining()
-            return
-        }
-        try holdSyncKeys(try material(for: snapshot), castleWay: snapshot.mode == .castle)
-    }
-
-    /// A device that follows into Castle records the account's key as
-    /// retired (and deletes its own — `retireOwnAppleKeys`), never the old
-    /// shared key (§3.5).
-    func recordAccountKeyRetired() throws {
-        let ids = library.section.appleKeys
-            .filter { $0.purpose == .account && $0.retiredAt == nil && ($0.accountID == nil || $0.accountID == accountID) }
-            .map(\.id)
-        guard !ids.isEmpty else { return }
-        try updateSection { section in
-            ids.reduce(section) {
-                $0.retiringAppleKey(id: $1, purpose: .account, accountID: accountID, origin: .followed, at: now)
-            }
-        }
     }
 }
 
 extension ProtectionExecutor {
-    /// **The follow** — `typed`: the passphrase or the words, once (nothing
-    /// for keys replaced in Standard when the account's Apple key reads here);
-    /// `gate`: into Castle, this device's gate style — none chosen yet: Touch
-    /// ID where a finger is enrolled, the item made at this press, else Always
-    /// ask (§3.10).
+    /// **The follow** — `typed`: the passphrase or the words, once (nothing for
+    /// the quiet follow out of Castle, while this device holds the account's
+    /// keys); `gate`: into Castle, this device's gate style — none chosen yet:
+    /// Touch ID where a finger is enrolled, the item made at this press, else
+    /// Always ask (§3.10).
     public func follow(
         _ library: inout UnlockedLibrary, kind: FollowKind, typed: TypedSecrets, gate: GateStyle? = nil
     ) async throws -> ActOutcome {
@@ -194,12 +144,14 @@ extension ProtectionExecutor {
         var secrets = ActSecrets()
         var typedSecret: String?
         if let text = typed.passphrase {
-            try vault.format.kdf.validateFloor(configuration.floor)
-            let passphrase = try PassphraseKey.derive(text, kdf: vault.format.kdf)
-            guard VaultModel.master(of: vault.format, passphrase: passphrase, words: nil) != nil else {
-                // VX-113: the old passphrase after a change elsewhere — named.
-                if let known = library.memory?.vaultFacts?.kdf, known != vault.format.kdf {
-                    throw ExecutorRefusal.passphraseChangedElsewhere(device: vault.format.updatedByDevice, day: vault.updatedAt)
+            try vault.vault.kdf.validateFloor(configuration.floor)
+            let passphrase = try PassphraseKey.derive(text, kdf: vault.vault.kdf)
+            guard VaultModel.master(of: vault.vault, passphrase: passphrase, words: nil) != nil else {
+                // VX-113: the old passphrase after a change elsewhere — named
+                // (the live key file's passphrase lock is the account's as this
+                // library last knew it — rule 7's one pair).
+                if let known = library.keyFile?.passphrase?.kdf, known != vault.vault.kdf {
+                    throw ExecutorRefusal.passphraseChangedElsewhere(device: vault.vault.updatedByDevice, day: vault.updatedAt)
                 }
                 throw ExecutorRefusal.passphraseDoesNotOpen
             }
@@ -207,12 +159,14 @@ extension ProtectionExecutor {
             typedSecret = "passphrase"
         } else if let words = typed.words {
             let wordsKey = try WordsKey.derive(words)
-            guard VaultModel.master(of: vault.format, passphrase: nil, words: wordsKey) != nil else {
+            guard VaultModel.master(of: vault.vault, passphrase: nil, words: wordsKey) != nil else {
                 throw ExecutorRefusal.wordsDoNotOpen
             }
             secrets.words = wordsKey
             typedSecret = "words"
-        } else if kind != .keysReplaced || record.mode != .standard {
+        } else if kind != .intoStandard {
+            // Into Castle, and catching up on a replaced sync key, type one
+            // secret (rules 10, 15); only the follow out is quiet (rule 12).
             throw ExecutorRefusal.secretMissing
         }
         var parameters = ActParameters(

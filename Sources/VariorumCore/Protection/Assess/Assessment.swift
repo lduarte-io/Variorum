@@ -68,18 +68,14 @@ public enum SyncKeysCustody: Equatable, Sendable {
     case silent
 }
 
-/// The vault, read (§3.9).
+/// The vault, read (rules 14, 15): the account's posture, and how this device
+/// holds its sync keys by it. (The rotation in progress, its hold and its
+/// Apple-copy reading left with VX-378 U2 — no rotation is ever in progress:
+/// the sync key changes in ONE write.)
 public struct VaultVerdict: Equatable, Sendable {
-    public var mode: VaultMode
-    public var rotationInProgress: Bool
-    /// A rotation with no id — completed by anyone, never with an Apple copy.
-    public var completesWithoutAppleCopy: Bool
+    public var mode: ProtectionMode
     /// How this device holds the account's sync keys now.
     public var syncKeysCustody: SyncKeysCustody
-    /// A follower that sees the master replaced while a rotation is in
-    /// progress follows the keys but holds its library's re-key until the
-    /// vault reads Standard or Castle.
-    public var followHoldsLibraryRekey: Bool
 }
 
 // MARK: - Touch ID (§3.10, VX-310)
@@ -171,13 +167,6 @@ public enum Repair: Hashable, Sendable {
     /// stray, and the older library file's re-key, left with VX-378 U1 —
     /// rule 21.)
     case restoreKeyFileFromMirror
-    /// Always, synced: what this Mac remembers names no vault facts (its
-    /// memory item went — a wiped keychain) while this device holds the
-    /// account's sync keys silently or for the session — the held keys'
-    /// corpus key id is recorded (non-secret), so the account replacing its
-    /// keys later reads as a follow owed. A Touch ID item is never read for it
-    /// (no repair prompts). VX-305 U4.
-    case recordHeldSyncKeysFacts
     /// Castle: an Apple key this Mac's section lists as its own for the
     /// library and not retired — retired (recorded), then deleted on sight.
     /// VX-305 U4.
@@ -228,10 +217,12 @@ public enum FollowKind: Equatable, Sendable {
 
 /// An act owed — a press, a notice, or an act the executor runs on a plan.
 public enum OwedAct: Equatable, Sendable {
-    /// The account's mode or keys changed elsewhere: the follow. Every follow
-    /// into or out of Castle types one secret; it holds its library re-key
-    /// while a rotation is in progress.
-    case follow(FollowKind, typesOneSecret: Bool, holdsLibraryRekey: Bool)
+    /// The account's mode or keys changed elsewhere: the follow. Into Castle,
+    /// and catching up on a sync key replaced while this device lagged, it
+    /// types one secret (rules 10, 12); out of Castle it is quiet — the device
+    /// already holds the account's keys (rule 12: "other devices follow out
+    /// quietly, with a notice").
+    case follow(FollowKind, typesOneSecret: Bool)
     /// A Castle key with an Apple wrap — re-keyed.
     case rekeyForFault
     /// The re-arm question, after the passphrase opened.
@@ -310,8 +301,6 @@ public enum DoorRefusal: Equatable, Sendable {
     case signedOutUseThisMacOnly
     /// A synced act needs the vault read fresh this session.
     case needsFreshVault
-    /// Decision 32: one rotation at a time.
-    case rotationInProgress(device: String?, day: Date?)
     /// The account's keys changed elsewhere: pick them up first.
     case followOwed
     case notSynced
@@ -342,7 +331,7 @@ public struct DoorSpec: Equatable, Sendable {
     /// Every own Apple key this Mac's section lists for the library, retired
     /// after the switch commits (entering Castle).
     public var retiresOwnAppleKeys: [String]
-    /// The act runs on the account (a rotation) — synced.
+    /// The act runs on the account (a vault read or write) — synced.
     public var synced: Bool
     public var join: JoinPlan?
     public var words: [Words]

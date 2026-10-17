@@ -34,6 +34,8 @@ struct AWorld {
     var libraryAccountEmail: String?
     /// Rule 3's record fact; nil reads it from the live file (and the account).
     var passphraseSet: Bool?
+    /// The account's sync key the record says the library follows (rule 15).
+    var followedRowKeyID = "c1"
     let own = AppleKeyMaterial.mint()
 
     /// A library in `mode`: Castle — passphrase and words, a Touch ID item,
@@ -57,12 +59,13 @@ struct AWorld {
         appleKeys = AppleKeyFacts(readable: mode == .standard ? [own.id] : [])
         section = DeviceSection(
             deviceID: CF.macA, settings: DeviceSettings(gateStyle: mode == .castle ? .touchID : nil),
-            appleKeys: mode == .standard ? [AppleKeyRecord(id: own.id, purpose: .library, origin: .minted)] : [])
+            appleKeys: mode == .standard ? [AppleKeyRecord(id: own.id)] : [])
     }
 
     var record: ProtectionRecord {
         ProtectionRecord.minting(
-            libraryID: world.library, mode: mode, account: account, currentFingerprint: PF.fp(key),
+            libraryID: world.library, mode: mode, account: account,
+            accountRowKeyID: account == nil ? nil : followedRowKeyID, currentFingerprint: PF.fp(key),
             passphraseSet: passphraseSet ?? ProtectionRecord.passphraseExists(keyFile: liveFile, account: account), at: PF.t0)
     }
 
@@ -88,17 +91,11 @@ struct AWorld {
 
     func assessed(guards: ProtectionGuards = .all) throws -> Assessment { assess(try facts(), guards: guards) }
 
-    /// The account's vault as read this session.
-    static func vault(_ account: String, _ mode: VaultMode, previous: String? = nil, corpus: String = "c1",
+    /// The account's vault as read this session (rules 14, 15: the mode flag
+    /// and the current sync key's id).
+    static func vault(_ account: String, _ mode: ProtectionMode, rowKey: String = "c1",
                       device: String? = "Lillian's Air", day: Date? = CF.stamp(9)) -> VaultReading {
-        switch mode {
-        case .standard(let id):
-            return VaultReading(accountID: account, hasAppleWrap: true, appleKeyID: id, previousCorpusKeyID: previous,
-                                corpusKeyID: corpus, updatedByDevice: device, updatedAt: day)
-        case .castle:
-            return VaultReading(accountID: account, hasAppleWrap: false, previousCorpusKeyID: previous,
-                                corpusKeyID: corpus, updatedByDevice: device, updatedAt: day)
-        }
+        VaultReading(accountID: account, mode: mode, rowKeyID: rowKey, updatedByDevice: device, updatedAt: day)
     }
 }
 

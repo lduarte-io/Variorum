@@ -56,7 +56,7 @@ struct AssessGuardMutationTests {
     @Test func deleteOnSightByIDOnly() throws {
         var world = try AWorld(.castle)
         let retired = PF.id(), anotherMacs = PF.id()
-        world.section = world.section.retiringAppleKey(id: retired, purpose: .library, origin: .minted, at: PF.t0)
+        world.section = world.section.retiringAppleKey(id: retired, at: PF.t0)
         world.appleKeys.readable = [retired, anotherMacs]
         #expect(!(try world.assessed().repairs.contains(.deleteRetiredAppleKey(id: anotherMacs))))
         var off = ProtectionGuards()
@@ -70,7 +70,7 @@ struct AssessGuardMutationTests {
     @Test func everyOwnKeyRetiredAtCastle() throws {
         var world = try AWorld(.standard)
         let relinked = PF.id()
-        world.section = world.section.recordingAppleKey(AppleKeyRecord(id: relinked, purpose: .library, origin: .minted))
+        world.section = world.section.recordingAppleKey(AppleKeyRecord(id: relinked))
         #expect(try world.assessed().door(.useCastle).spec?.retiresOwnAppleKeys.contains(relinked) == true)
         var off = ProtectionGuards()
         off.everyOwnKeyRetiredAtCastle = false

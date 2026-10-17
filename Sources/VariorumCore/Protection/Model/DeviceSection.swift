@@ -63,45 +63,20 @@ public struct DeviceSettings: Codable, Equatable, Sendable {
     public static let noChoiceYet = DeviceSettings(gateStyle: nil)
 }
 
-/// Whose Apple key an id is (§3.5): this Mac's own for the library, or the
-/// sync account's (which locks only the account's master in the vault).
-public enum AppleKeyPurpose: String, Codable, Sendable {
-    case library
-    case account
-}
-
-/// How this Mac came to list it: minted here, or followed (read — the
-/// account's key a follower picked up). (Adopted from a predecessor by a
-/// replacement Mac left with the takeover — VX-378 U1, rule 23.)
-public enum AppleKeyOrigin: String, Codable, Sendable {
-    case minted
-    case followed
-}
-
+/// An Apple key this Mac minted for the library (§3.5: "this Mac's own means
+/// minted and named by it") — its id, and when it was retired. (The account's
+/// Apple key, its purpose and the "followed" origin left with VX-378 U2: the
+/// vault carries no Apple lock — rule 14.)
 public struct AppleKeyRecord: Codable, Equatable, Sendable {
     public var id: String
-    public var purpose: AppleKeyPurpose
-    /// The account an `.account` key belongs to.
-    public var accountID: String?
-    public var origin: AppleKeyOrigin
     /// When it was retired — deleted on sight from then on, by this id only
     /// (§3.5).
     public var retiredAt: Date?
 
-    public init(
-        id: String, purpose: AppleKeyPurpose, accountID: String? = nil,
-        origin: AppleKeyOrigin, retiredAt: Date? = nil
-    ) {
+    public init(id: String, retiredAt: Date? = nil) {
         self.id = id
-        self.purpose = purpose
-        self.accountID = accountID
-        self.origin = origin
         self.retiredAt = retiredAt
     }
-
-    /// "This Mac's own for the library": minted by it (§3.5 — "this Mac's own
-    /// means minted and named by it").
-    public var isOwnLibraryKey: Bool { purpose == .library && origin != .followed }
 }
 
 public struct DeviceSection: Codable, Equatable, Sendable {
@@ -136,7 +111,7 @@ public struct DeviceSection: Codable, Equatable, Sendable {
     /// Every id this Mac lists as its own for the library and not yet retired —
     /// what entering Castle retires (§3.5).
     public var ownLibraryAppleKeyIDsToRetire: [String] {
-        appleKeys.filter { $0.isOwnLibraryKey && $0.retiredAt == nil }.map(\.id)
+        appleKeys.filter { $0.retiredAt == nil }.map(\.id)
     }
 
     /// Every retired id — delete on sight, by id only (§3.5).
@@ -172,14 +147,10 @@ public struct DeviceSection: Codable, Equatable, Sendable {
         return next
     }
 
-    /// Retire an id (recording it first if this section never listed it — a
-    /// follower records the account's key as retired, §3.5).
-    public func retiringAppleKey(
-        id: String, purpose: AppleKeyPurpose, accountID: String? = nil,
-        origin: AppleKeyOrigin, at: Date
-    ) -> DeviceSection {
+    /// Retire an id (recording it first if this section never listed it).
+    public func retiringAppleKey(id: String, at: Date) -> DeviceSection {
         let existing = appleKeys.first { $0.id == id }
-        var record = existing ?? AppleKeyRecord(id: id, purpose: purpose, accountID: accountID, origin: origin)
+        var record = existing ?? AppleKeyRecord(id: id)
         record.retiredAt = existing?.retiredAt.map { min($0, at) } ?? at
         return recordingAppleKey(record)
     }

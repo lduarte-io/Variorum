@@ -118,7 +118,7 @@ extension ProtectionExecutor {
             passphraseSet: passphrase != nil, at: at)
         let apple = leaves.ids.mintAppleKey()
         let section = DeviceSection(deviceID: deviceID, settings: .noChoiceYet)
-            .recordingAppleKey(AppleKeyRecord(id: apple.id, purpose: .library, origin: .minted))
+            .recordingAppleKey(AppleKeyRecord(id: apple.id))
         record = try record.storing(section, sealedUnder: key)
         try leaves.custody.writeCustody(key, itemClass: .silent)
         try leaves.apple.addAppleKey(apple)

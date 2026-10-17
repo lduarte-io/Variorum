@@ -82,8 +82,8 @@ extension SWorld {
     /// The account's master, through the passphrase she knows for it.
     func accountMaster(_ account: String) -> SymmetricKey? {
         guard let vault = server.snapshot(account), let p = known(account).passphrase,
-              let pk = passphraseKey(p, vault.format.kdf) else { return nil }
-        return try? vault.format.unwrapMaster(withPassphraseKey: pk.key)
+              let pk = passphraseKey(p, vault.vault.kdf) else { return nil }
+        return vault.vault.master(passphrase: pk, words: nil)
     }
 }
 

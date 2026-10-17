@@ -69,7 +69,6 @@ extension ProtectionExecutor {
         case .landAppleWrap: return "landAppleWrap"
         case .refreshMemory: return "refreshMemory"
         case .restoreKeyFileFromMirror: return "restoreKeyFileFromMirror"
-        case .recordHeldSyncKeysFacts: return "recordHeldSyncKeysFacts"
         case .retireOwnAppleKeys: return "retireOwnAppleKeys"
         case .recordAlwaysAskQuietly: return "recordAlwaysAskQuietly"
         case .makeTouchIDItem: return "makeTouchIDItem"
@@ -124,9 +123,9 @@ extension ProtectionExecutor {
             guard let record = library.record, record.mode == .standard else { return .wrongMode }
             // Decision 35: nothing Apple-reachable without a fresh vault read.
             if guards.freshVaultBeforeAppleWriteOn, let account = record.account {
-                guard let vault = freshVault(for: account), vault.mode.settled == .standard else { return .needsFreshVault }
+                guard let vault = freshVault(for: account), vault.mode == .standard else { return .needsFreshVault }
             }
-            guard library.section.appleKeys.contains(where: { $0.id == id && $0.isOwnLibraryKey && $0.retiredAt == nil }),
+            guard library.section.appleKeys.contains(where: { $0.id == id && $0.retiredAt == nil }),
                   let apple = try leaves.apple.readAppleKey(id: id),
                   let live = library.keyFile, live.fingerprint == library.fingerprint
             else { return .preconditionDoesNotVerify }
@@ -158,33 +157,10 @@ extension ProtectionExecutor {
             let retiring = ids.filter { listed.contains($0) }
             guard !retiring.isEmpty else { return .nothingThere }
             var section = library.section.bumped()
-            for id in retiring { section = section.retiringAppleKey(id: id, purpose: .library, origin: .minted, at: leaves.clock.now()) }
+            for id in retiring { section = section.retiringAppleKey(id: id, at: leaves.clock.now()) }
             try writeFacts(&library, section: section)
             let readable = try leaves.apple.readableAppleKeyIDs()
             for id in retiring where readable.contains(id) { try leaves.apple.deleteAppleKey(id: id) }
-            return nil
-
-        case .recordHeldSyncKeysFacts:
-            guard let account = library.record?.account, library.memory != nil,
-                  library.memory?.vaultFacts?.corpusKeyID == nil else { return .nothingThere }
-            guard let held = try leaves.syncKeys.readSyncKeys(accountID: account, itemClass: .silent)
-                    ?? leaves.syncKeys.sessionSyncKeys(accountID: account) else { return .nothingThere }
-            // Only what the LIBRARY follows: its key file's master lock opens
-            // with the held master (keys fetched fresh from the vault for the
-            // session can be newer than the library — then the follow is owed,
-            // read by assess from the master's words copy).
-            if let live = library.keyFile, live.master != nil,
-               (try? live.open(master: held.masterSymmetricKey)).map({ Self.fp($0) == library.fingerprint }) != true {
-                // The library is behind the keys this device holds: a follow
-                // is owed — recorded so assess reads it.
-                try writeMemory(&library) { $0.vaultFacts = VaultFacts(corpusKeyID: VaultFacts.unfollowedCorpusKeyID) }
-                return nil
-            }
-            let vault = freshVaults[account]
-            let facts = vault.map { $0.corpusKeyID == held.corpusKeyID } == true
-                ? VaultFacts(kdf: vault?.format.kdf, corpusKeyID: held.corpusKeyID, recoveryWrapDigest: vault?.format.recoveryWrapDigest)
-                : VaultFacts(corpusKeyID: held.corpusKeyID)
-            try writeMemory(&library) { $0.vaultFacts = facts }
             return nil
 
         case .recordAlwaysAskQuietly:

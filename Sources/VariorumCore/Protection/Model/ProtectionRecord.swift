@@ -23,6 +23,12 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
     /// The Variorum account the library is bound to — none, or one id
     /// (§3.8). Signing in or out never changes it.
     public var account: String?
+    /// The account's sync key this library has followed (rule 15) — its id,
+    /// non-secret. The vault naming another current key means the account
+    /// entered Castle while this device lagged: a follow is owed. Written by the
+    /// acts that take the account's keys (sync setup, a join, a follow, Use
+    /// Castle's write); cleared with the account.
+    public var accountRowKeyID: String?
     public var keyEpoch: Int
     public var currentFingerprint: String
     public var changedAt: Date
@@ -41,7 +47,7 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
 
     public init(
         format: Int = ProtectionRecord.currentFormat, libraryID: String, mode: ProtectionMode,
-        account: String?, keyEpoch: Int, currentFingerprint: String,
+        account: String?, accountRowKeyID: String? = nil, keyEpoch: Int, currentFingerprint: String,
         changedAt: Date, passphraseSet: Bool = false, reminderDismissals: Int = 0,
         deviceSections: [Sealed<DeviceSection>] = []
     ) {
@@ -49,6 +55,7 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
         self.libraryID = libraryID
         self.mode = mode
         self.account = account
+        self.accountRowKeyID = accountRowKeyID
         self.keyEpoch = keyEpoch
         self.currentFingerprint = currentFingerprint
         self.changedAt = changedAt
@@ -60,11 +67,11 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
     /// A new record for a library whose current key is `currentKey`, born
     /// `mode` (the creation).
     public static func minting(
-        libraryID: String, mode: ProtectionMode, account: String?,
+        libraryID: String, mode: ProtectionMode, account: String?, accountRowKeyID: String? = nil,
         currentFingerprint: String, keyEpoch: Int = 1, passphraseSet: Bool = false, at: Date
     ) -> ProtectionRecord {
         ProtectionRecord(
-            libraryID: libraryID, mode: mode, account: account,
+            libraryID: libraryID, mode: mode, account: account, accountRowKeyID: accountRowKeyID,
             keyEpoch: keyEpoch, currentFingerprint: currentFingerprint, changedAt: at, passphraseSet: passphraseSet)
     }
 

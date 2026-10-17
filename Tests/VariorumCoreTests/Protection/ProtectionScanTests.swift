@@ -42,12 +42,11 @@ struct ProtectionScanTests {
             .recordingRekey(to: PF.fp(s2), kind: .standard, at: PF.day(2))
             .recordingRekey(to: PF.fp(s3), kind: .standard, at: PF.day(3))
         let section = DeviceSection(deviceID: device, settings: DeviceSettings(gateStyle: .touchID))
-            .recordingAppleKey(AppleKeyRecord(id: apple.id, purpose: .library, origin: .minted))
+            .recordingAppleKey(AppleKeyRecord(id: apple.id))
             .beginningAct(.replaceAllKeys, from: PF.fp(s3), to: nil, at: PF.day(4)).section
         record = try record.storing(section, sealedUnder: s3)
         let memory = DeviceMemory(
-            libraryID: library, currentFingerprint: PF.fp(s3), deviceID: device, keyFileMirror: standard3,
-            vaultFacts: VaultFacts(kdf: world.p.kdf, corpusKeyID: PF.id(), recoveryWrapDigest: "d"))
+            libraryID: library, currentFingerprint: PF.fp(s3), deviceID: device, keyFileMirror: standard3)
         let plan = ProtectionPlan(
             libraryID: library, deviceID: device, sequence: section.lastActSequence, act: .replaceAllKeys,
             fromFingerprint: PF.fp(s3), steps: [PlanStep(name: "prepare")], createdAt: PF.day(4))

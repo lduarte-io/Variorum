@@ -20,9 +20,10 @@ import Foundation
 //     is ignored and reported. A missing or unmatched plan never blocks:
 //     before the commit point (the swap) the act ROLLS BACK — the old custody
 //     item or the history still opens the library — and after it
-//     the act's fixed remaining steps FINISH FROM THE RECORD. A synced
-//     rotation resumes from the server's own state (the device follows its own
-//     landed rotation as any follower would).
+//     the act's fixed remaining steps FINISH FROM THE RECORD. A synced act
+//     resumes from the vault as it stands (a vault write it already made is
+//     picked up — or, out of reach before the swap, it rolls back and the
+//     device follows that write as any device would).
 //   - End: the act in flight cleared in this Mac's section, the plan deleted.
 // So after a crash at any write and a relaunch, an act finishes or rolls
 // back — never a third state (promise 6) — and the tests prove it write by
@@ -139,13 +140,9 @@ public enum ExecutorRefusal: Error, Equatable, Sendable {
     /// Decision 35 / a synced act: the vault must be read fresh this session.
     case needsFreshVault
     /// The account's vault can't be reached this session — signed out, signed
-    /// into another account, or offline: nothing was read or written. A synced
-    /// act past its commit point WAITS for it, named (her ruling 2026-10-14/15:
-    /// "Finish leaving Castle — sign in to finish"); before it, the act rolls
-    /// back.
+    /// into another account, or offline: nothing was read or written; an act
+    /// that needed it rolls back (VX-378 U2 — no act waits on a vault).
     case vaultOutOfReach(account: String)
-    /// Decision 32: one rotation at a time.
-    case rotationInProgress
     /// The account's keys moved elsewhere since the door — follow first.
     case accountMoved
     /// No Apple key readable where one is needed (never minted to make up).
@@ -269,7 +266,7 @@ public final class ProtectionExecutor {
         if let live = library.keyFile, live.fingerprint == record.currentFingerprint { mirror = live }
         return DeviceMemory(
             libraryID: record.libraryID, currentFingerprint: record.currentFingerprint, deviceID: library.section.deviceID,
-            keyFileMirror: mirror, biometryStateHash: old?.biometryStateHash, vaultFacts: old?.vaultFacts)
+            keyFileMirror: mirror, biometryStateHash: old?.biometryStateHash)
     }
 
     /// This Mac's section into the record (inside the library, under the key

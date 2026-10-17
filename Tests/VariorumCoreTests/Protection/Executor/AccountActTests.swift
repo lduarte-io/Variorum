@@ -13,49 +13,62 @@ import Testing
 
 @Suite("VX-305 U3 — set up sync and enroll: the joining rules")
 struct AccountJoinTests {
-    @Test func setUpSyncInStandardMintsTheAccountKeyAndKeepsTheLibraryKey() async throws {
+    /// Rule 7 + rule 14: the first device hands its library's pair up — the
+    /// vault is locked by the library's passphrase and words and nothing else;
+    /// the library key stays; no Apple key is minted for the account.
+    @Test func setUpSyncInStandardHandsTheLibrarysPairUpAndKeepsTheLibraryKey() async throws {
         let fixture = try EX(.standard)
         let account = PF.id()
         let executor = fixture.executor(session: .signedIn(accountID: account, email: nil))
         var library = try fixture.unlocked(executor)
         _ = try await executor.setUpSync(&library, typed: fixture.typed)
         let vault = try #require(fixture.world.server.snapshot(account))
-        let accountKey = try #require(library.section.appleKeys.first { $0.purpose == .account })
-        #expect(vault.mode == .standard(appleKeyID: accountKey.id))
+        #expect(vault.mode == .standard)
+        #expect(vault.vault.master(passphrase: try PassphraseKey.derive(fixture.passphrase, kdf: vault.vault.kdf), words: nil) != nil)
+        #expect(vault.vault.master(passphrase: nil, words: fixture.w) != nil)
         #expect(library.key == fixture.key && fixture.liveRecord?.account == account)
+        #expect(fixture.liveRecord?.accountRowKeyID == vault.rowKeyID)
         let live = try #require(fixture.world.liveFormat3)
-        #expect(live.master != nil && live.masterWordsCopy == vault.format.masterWrappedByRecovery)
+        #expect(live.master != nil && live.masterWordsCopy == vault.vault.masterByWords)
+        #expect(try live.open(words: fixture.words) == fixture.key, "the library's own words lock was dropped")
         #expect(fixture.world.syncItems.keys.map(\.itemClass) == [.silent])
+        #expect(fixture.world.writes.allSatisfy { if case .appleAdd = $0 { return false } else { return true } })
         expectSettled(fixture, library)
     }
 
-    @Test func setUpSyncInCastleGivesTheVaultNoAppleCopy() async throws {
+    @Test func setUpSyncInCastleGivesTheVaultTheCastleFlag() async throws {
         let fixture = try EX(.castle)
         let account = PF.id()
         let executor = fixture.executor(session: .signedIn(accountID: account, email: nil))
         var library = try fixture.unlocked(executor)
         _ = try await executor.setUpSync(&library, typed: fixture.typed)
         let vault = try #require(fixture.world.server.snapshot(account))
-        #expect(vault.mode == .castle && vault.format.appleKeyID == nil)
+        #expect(vault.mode == .castle)
         #expect(fixture.world.syncItems.keys.map(\.itemClass) == [.touchid])
         #expect(fixture.world.writes.allSatisfy { if case .appleAdd = $0 { return false } else { return true } })
         expectSettled(fixture, library)
     }
 
-    @Test func joiningInTheLibrarysOwnModeKeepsTheKeyAndReWrapsThePassphraseUnderTheAccounts() async throws {
+    /// Rule 7 + rule 14: joining types ONE of the account's secrets and adopts
+    /// the account's pair — the key stays, the passphrase lock is the
+    /// account's, the library's own words no longer open it (the account's do,
+    /// through the master's copy), and the face is told.
+    @Test func joiningInTheLibrarysOwnModeTypesOneSecretAndAdoptsTheAccountsPair() async throws {
         let mac = try EX(.standard, synced: true)
         let laptop = try EX(.standard, world: ExecutorWorld(icloud: mac.world.icloud, server: mac.world.server))
         let k0 = laptop.key
-        // The laptop's library has its own passphrase; joining types the account's.
         let executor = laptop.executor(session: mac.session)
         var library = try laptop.unlocked(executor)
-        _ = try await executor.enroll(&library, typed: TypedSecrets(passphrase: mac.passphrase, words: mac.words))
+        let outcome = try await executor.enroll(&library, typed: TypedSecrets(passphrase: mac.passphrase))
+        #expect(outcome.notices.contains(.wordsReplacedByAccount))
         #expect(library.key == k0 && laptop.liveRecord?.account == mac.account)
         let live = try #require(laptop.world.liveFormat3)
         let vault = try #require(mac.world.server.snapshot(mac.account!))
-        #expect(live.passphrase?.kdf == vault.format.kdf)  // corner 27
+        #expect(live.passphrase?.kdf == vault.vault.kdf)  // corner 27
         #expect(try live.open(passphrase: .passphrase(mac.passphrase), floor: PF.floor) == k0)
-        #expect(library.section.appleKeys.contains { $0.id == mac.accountApple!.id && $0.origin == .followed })
+        #expect(try live.open(.words(mac.words), floor: PF.floor) == k0)
+        #expect((try? live.open(.words(laptop.words), floor: PF.floor)) == nil, "the library's old words still open the live file")
+        #expect(laptop.liveRecord?.accountRowKeyID == vault.rowKeyID)
         expectSettled(laptop, library)
     }
 
@@ -65,7 +78,7 @@ struct AccountJoinTests {
         let k0 = laptop.key, own = laptop.ownApple!.id
         let executor = laptop.executor(session: mac.session)
         var library = try laptop.unlocked(executor)
-        _ = try await executor.enroll(&library, typed: TypedSecrets(passphrase: mac.passphrase, words: mac.words), gate: .touchID)
+        _ = try await executor.enroll(&library, typed: TypedSecrets(words: mac.words), gate: .touchID)
         #expect(laptop.liveRecord?.mode == .castle && laptop.liveRecord?.account == mac.account)
         #expect(library.key != k0 && laptop.world.icloud.keys[own] == nil)
         #expect(try laptop.world.liveFormat3?.historyKey(PF.fp(k0), currentKey: library.key) == k0)

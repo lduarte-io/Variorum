@@ -67,8 +67,8 @@ extension ActContext {
             guard let held = try snapshot.map({ try material(for: $0) }) ?? syncMaterial() else {
                 throw ExecutorRefusal.secretsRequired(act)
             }
-            locks.master = held.masterSymmetricKey
-            locks.masterWordsCopy = snapshot?.format.masterWrappedByRecovery
+            locks.master = held.masterKey
+            locks.masterWordsCopy = snapshot.flatMap { $0.vault.isMaster(held.masterKey) ? $0.vault.masterByWords : nil }
         }
         return locks
     }
@@ -134,7 +134,13 @@ extension ActContext {
         let record = try requireRecord()
         let reach = executor.reach(key: library.key, keyFile: library.keyFile, extra: [fromKey].compactMap { $0 })
         var next = record.recordingRekey(to: Self.fp(key), kind: kind, at: now)
-        if parameters.changesAccount == true { next.account = parameters.targetAccount }
+        if parameters.changesAccount == true {
+            next.account = parameters.targetAccount
+            if parameters.targetAccount == nil { next.accountRowKeyID = nil }
+        }
+        // The sync key the act took (rule 15) — Use Castle's own write, or the
+        // keys a follow or a join picked up.
+        if let taken = parameters.newRowKeyID ?? parameters.followedRowKeyID { next.accountRowKeyID = taken }
         next = next.stampingPassphraseFact(keyFile: library.keyFile)
         let others = record.verifiedSections(reach: reach).filter { $0.deviceID != deviceID }
         next.deviceSections = try (others + [library.section]).map {
@@ -163,35 +169,15 @@ extension ActContext {
     // MARK: - After the commit
 
     /// What this Mac remembers, agreeing with the record — the key file's
-    /// mirror, the vault facts a synced act read, the biometry hash when this
-    /// key has a Touch ID item (a hint, §3.10).
+    /// mirror, the biometry hash when this key has a Touch ID item (a hint,
+    /// §3.10). (The vault facts left with VX-378 U2: the record names the sync
+    /// key the library follows.)
     func rememberNewKey() throws {
         let hasTouchID = try leaves.custody.custodyItems()
             .contains(CustodyItemFact(fingerprint: library.fingerprint, itemClass: .touchid))
-        // The vault's facts are what this device FOLLOWED — recorded only by an
-        // act that worked the account's keys itself (a rotation, a follow, a
-        // join, a synced key door). A settings act after a fresh read must not
-        // record keys it never picked up: that hid the follow owed when the
-        // account had replaced its keys elsewhere (promise 7 — VX-305 U4,
-        // found by the scenario world).
-        let vault = parameters.synced == true ? accountID.flatMap { executor.freshVaults[$0] } : nil
-        // …and only the keys it TOOK: a vault read since that moved past them
-        // (the account replaced its keys again before a resume finished this
-        // act) leaves the follow owed — its corpus key recorded alone (VX-305
-        // U4, the soak's seed 11).
-        let took = parameters.followedCorpusKeyID ?? parameters.newCorpusKeyID
         let hash = hasTouchID ? leaves.biometry.biometryStateHash() : nil
         try executor.writeMemory(&library) { memory in
             if hasTouchID { memory.biometryStateHash = hash }
-            if let vault {
-                if let took, took != vault.corpusKeyID {
-                    memory.vaultFacts = VaultFacts(corpusKeyID: took)
-                } else {
-                    memory.vaultFacts = VaultFacts(
-                        kdf: vault.format.kdf, corpusKeyID: vault.corpusKeyID,
-                        recoveryWrapDigest: vault.format.recoveryWrapDigest)
-                }
-            }
         }
     }
 
@@ -249,9 +235,7 @@ extension ActContext {
         var section = library.section
         for id in ids {
             try leaves.apple.deleteAppleKey(id: id)
-            let record = section.appleKeys.first { $0.id == id }
-            section = section.retiringAppleKey(
-                id: id, purpose: .library, origin: record?.origin ?? .minted, at: now)
+            section = section.retiringAppleKey(id: id, at: now)
         }
         try executor.writeFacts(&library, section: section)
         log("retired \(ids.count) own Apple key(s)")
@@ -261,7 +245,7 @@ extension ActContext {
 
     /// The account's sync keys in hand: this act's, custody's (either class),
     /// session memory.
-    func syncMaterial() throws -> DeviceKeyMaterial? {
+    func syncMaterial() throws -> AccountKeys? {
         if let material { return material }
         guard let account = accountID else { return nil }
         for itemClass in [ProtectionNames.CustodyClass.touchid, .silent] {
@@ -279,7 +263,7 @@ extension ActContext {
     /// item where this press chose Touch ID and a finger is enrolled, else
     /// session memory; a silent item in Standard. One item per account: the
     /// other class goes.
-    func holdSyncKeys(_ held: DeviceKeyMaterial, castleWay: Bool) throws {
+    func holdSyncKeys(_ held: AccountKeys, castleWay: Bool) throws {
         guard let account = accountID else { return }
         let items = try leaves.syncKeys.syncKeyItems()
         func drop(_ itemClass: ProtectionNames.CustodyClass) throws {
@@ -312,106 +296,92 @@ extension ActContext {
         material = held
     }
 
-    /// The vault, read fresh (this act's read is the session's).
+    /// The vault, read fresh (this act's read is the session's). Out of reach —
+    /// signed out, signed into another account, offline — the act ROLLS BACK
+    /// (nothing account-side is left half-made: every step that reads the vault
+    /// runs before the library's swap; VX-378 U2 — no act waits on a vault).
     func freshRead() async throws -> VaultSnapshot {
         guard let account = accountID else { throw ExecutorRefusal.notSynced }
-        guard let snapshot = try await executor.readVault(accountID: account) else { throw ExecutorRefusal.needsFreshVault }
+        let snapshot: VaultSnapshot?
+        do {
+            snapshot = try await executor.readVault(accountID: account)
+        } catch where ProtectionExecutor.vaultOutOfReach(error) {
+            throw ActRollback(refusal: .vaultOutOfReach(account: account))
+        }
+        guard let snapshot else { throw ExecutorRefusal.needsFreshVault }
         return snapshot
     }
 
-    /// The material for the vault as read: custody's when it holds the
-    /// vault's current corpus key, else from the vault with the secrets in hand.
-    func material(for snapshot: VaultSnapshot) throws -> DeviceKeyMaterial {
-        if let held = try syncMaterial(), held.corpusKeyID == snapshot.corpusKeyID,
-           (snapshot.format.previousCorpusKey == nil || held.previousCorpusKeyID == snapshot.format.previousCorpusKey?.keyID) {
+    /// The keys for the vault as read: custody's when they are its current
+    /// sync key under its master, else from the vault with the secrets in hand.
+    func material(for snapshot: VaultSnapshot) throws -> AccountKeys {
+        if let held = try syncMaterial(), held.rowKeyID == snapshot.rowKeyID, snapshot.vault.isMaster(held.masterKey) {
             return held
         }
-        guard let master = VaultModel.master(of: snapshot.format, passphrase: secrets.passphrase, words: secrets.words) else {
+        guard let master = VaultModel.master(of: snapshot.vault, passphrase: secrets.passphrase, words: secrets.words) else {
             throw ExecutorRefusal.secretsRequired(act)
         }
-        let derived = try VaultModel.material(following: snapshot.format, master: master)
+        let derived = try snapshot.vault.keys(master: master)
         material = derived
         return derived
     }
 
-    /// **A rotation's first write** — the account's commit point (past it a
-    /// crash resumes, never rolls back). The new corpus key id is stamped in
-    /// the plan BEFORE the write, so a resume tells its own landed write (pick
-    /// the new keys up from the vault) from another device's rotation (the
-    /// account moved: this act rolls back and the device follows).
-    /// `apple` is read only when this act's write is still to be made (a
-    /// resume past a landed write never mints an account key).
-    func rotationWrite(apple: @autoclosure () throws -> RotationAppleCopy, castleWay: Bool) async throws {
+    /// **Use Castle's one vault write** (rules 11, 15) — the account's own
+    /// part of the entry: a new master and a new sync key, the outgoing sync
+    /// key and every earlier one re-sealed under the new master, the mode
+    /// Castle. The new sync key's id is stamped in the plan BEFORE the write, so
+    /// a resume tells its own landed write (pick the new keys up) from another
+    /// device's (the account moved: this act rolls back and the device follows).
+    func enterCastleWrite() async throws {
         let snapshot = try await freshRead()
-        if let stamped = parameters.newCorpusKeyID, snapshot.corpusKeyID == stamped {
-            try holdSyncKeys(try material(for: snapshot), castleWay: castleWay)
+        if let stamped = parameters.newRowKeyID, snapshot.rowKeyID == stamped {
+            try holdSyncKeys(try material(for: snapshot), castleWay: true)
             return
         }
-        guard snapshot.corpusKeyID == parameters.oldCorpusKeyID else { throw ActRollback(refusal: .accountMoved) }
-        if snapshot.format.previousCorpusKey != nil { throw ActRollback(refusal: .rotationInProgress) }
+        guard snapshot.rowKeyID == parameters.doorRowKeyID, snapshot.mode == .standard else {
+            throw ActRollback(refusal: .accountMoved)
+        }
         let passphrase = try requirePassphrase()
-        guard VaultModel.master(of: snapshot.format, passphrase: passphrase, words: nil) != nil else {
-            // The account's passphrase changed elsewhere since the press —
-            // before this device's first vault write the act rolls back (it
-            // refused and stuck in flight — VX-305 U4, found by the scenario
-            // world); the follow picks up the change, then she presses again.
+        guard let words = secrets.words else { throw ExecutorRefusal.secretsRequired(act) }
+        guard VaultModel.master(of: snapshot.vault, passphrase: passphrase, words: nil) != nil else {
+            // The account's passphrase changed elsewhere since the press — the
+            // act rolls back before its write; the follow picks the change up.
             throw ActRollback(refusal: .accountMoved)
         }
         let current = try material(for: snapshot)
-        let (format, fresh) = try VaultModel.rotationBegin(
-            current: current, passphrase: passphrase, words: secrets.words, apple: try apple(), device: deviceName,
-            ids: leaves.ids)
+        let (vault, fresh) = try VaultModel.enteringCastle(
+            snapshot.vault, held: current, passphrase: passphrase, words: words, device: deviceName, ids: leaves.ids)
         var stamped = parameters
-        stamped.newCorpusKeyID = fresh.corpusKeyID
+        stamped.newRowKeyID = fresh.rowKeyID
         plan.parameters = stamped
         try leaves.plans.writePlan(try plan.sealed(under: library.key))
         let revision = resuming ? snapshot.revision : (parameters.doorRevision ?? snapshot.revision)
         let written = try await leaves.vault.updateVault(
-            format, accountID: snapshot.accountID, expectedRevision: revision, proofMaster: current.masterSymmetricKey,
+            vault, accountID: snapshot.accountID, expectedRevision: revision, proofMaster: current.masterKey,
             device: deviceName)
         executor.noteFresh(written)
-        log("the vault rotated (\(Self.fp8(fresh.corpusKeyID)))")
-        try holdSyncKeys(fresh, castleWay: castleWay)
+        log("the account entered Castle (sync key \(Self.fp8(fresh.rowKeyID)))")
+        try holdSyncKeys(fresh, castleWay: true)
     }
 
-    /// THE WALK: every row below the rotation seq re-encrypted (any device
-    /// holding the new master may run it).
-    func walk() async throws {
+    /// **Use Standard's vault write** (rule 12) — the MODE flag flipped, no key
+    /// changed. Landed already (this act's, or another device's leave): the
+    /// keys are held the Standard way and nothing is written.
+    func leaveCastleWrite() async throws {
         let snapshot = try await freshRead()
-        guard snapshot.format.previousCorpusKey != nil, snapshot.rowsBelowRotationSeq > 0 else { return }
-        let held = try material(for: snapshot)
-        _ = try await leaves.vault.reencryptBelowRotationSeq(accountID: snapshot.accountID, material: held)
-    }
-
-    /// **The completing write**: the previous corpus key cleared, by any
-    /// device holding the new master. Then the sync keys are held by the
-    /// account's mode. (A leave's completion under a NAMED Apple key — the
-    /// stuck leave — left with VX-378 U1, rule 12.)
-    func completeRotation(castleWayAfter: Bool) async throws {
-        let snapshot = try await freshRead()
-        let held = try material(for: snapshot)
-        if snapshot.format.previousCorpusKey != nil {
-            let written = try await leaves.vault.updateVault(
-                VaultModel.completing(snapshot.format, device: deviceName), accountID: snapshot.accountID,
-                expectedRevision: snapshot.revision, proofMaster: held.masterSymmetricKey, device: deviceName)
-            executor.noteFresh(written)
+        if snapshot.mode == .standard {
+            try holdSyncKeys(try material(for: snapshot), castleWay: false)
+            return
         }
-        var settled = held
-        settled.previousCorpusKey = nil
-        settled.previousCorpusKeyID = nil
-        settled.rotationStartedSeq = nil
-        try holdSyncKeys(settled, castleWay: castleWayAfter)
-    }
-
-    /// Use Castle on a synced library: the account's former Apple key goes
-    /// once its rotation completes — deleted and recorded as retired by the
-    /// acting device (§3.5).
-    func retireAccountAppleKey() throws {
-        guard let id = parameters.retiringAccountAppleKeyID else { return }
-        try leaves.apple.deleteAppleKey(id: id)
-        try updateSection {
-            $0.retiringAppleKey(id: id, purpose: .account, accountID: accountID, origin: .minted, at: now)
-        }
+        guard snapshot.rowKeyID == parameters.doorRowKeyID else { throw ActRollback(refusal: .accountMoved) }
+        let held = try material(for: snapshot)
+        let revision = resuming ? snapshot.revision : (parameters.doorRevision ?? snapshot.revision)
+        let written = try await leaves.vault.updateVault(
+            VaultModel.leavingCastle(snapshot.vault, device: deviceName), accountID: snapshot.accountID,
+            expectedRevision: revision, proofMaster: held.masterKey, device: deviceName)
+        executor.noteFresh(written)
+        log("the account left Castle (its mode flag flipped; no key changed)")
+        try holdSyncKeys(held, castleWay: false)
     }
 }
 

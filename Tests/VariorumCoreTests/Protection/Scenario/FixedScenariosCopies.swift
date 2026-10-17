@@ -21,7 +21,7 @@ struct CopyAndCrossingScenarios {
     @Test func w1VX263() async throws {
         let (world, _) = try await syncedWorld(.standard, devices: ["macA"])
         await world.done([.launch("macA"), .backup("macA"), .useCastle("macA", .touchID, newWords: false), .backup("macA"),
-                          .replaceAllKeys("macA", newWords: true), .backup("macA"), .settle])
+                          .replaceAllKeys("macA", newWords: false), .backup("macA"), .settle])
         expectPromisesKept(world)
     }
 

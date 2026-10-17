@@ -22,8 +22,8 @@
 //      one survivor, the newer (§6(e): "one or the other is chosen");
 //    - FILE SYSTEMS with copies, Time Machine snapshots and rollback (the plan
 //      file is excluded from backups) and container deletion;
-//    - the VAULT with CAS, the key proof and the rotation fields (decisions 12,
-//      31, 32: one rotation at a time, completion refused while rows remain).
+//    - the VAULT with CAS and the key proof, over the model's row (VX-378 U2:
+//      P and W only, the mode flag, the earlier sync keys — rules 14, 15).
 //  Everything here is DUMB storage: it decides nothing about protection.
 //
 
@@ -68,8 +68,8 @@ struct KName: Hashable, Comparable, CustomStringConvertible {
 enum KValue: Equatable {
     /// A raw library key (custody).
     case key(StoreKey)
-    /// The account's sync keys (M, C, J).
-    case syncKeys(DeviceKeyMaterial)
+    /// The account's sync keys (the master, the current and earlier sync keys).
+    case syncKeys(AccountKeys)
     /// What this Mac remembers (non-secret, sealed).
     case memory(Sealed<DeviceMemory>)
     /// An Apple key `{id, key}` — the new per-id items and the old shared one.
@@ -85,7 +85,7 @@ enum KValue: Equatable {
         return nil
     }
 
-    var material: DeviceKeyMaterial? {
+    var material: AccountKeys? {
         if case .syncKeys(let material) = self { return material }
         return nil
     }
@@ -238,81 +238,46 @@ final class FolderFS {
 
 // MARK: - The server's vault
 
-/// The server: one vault per Variorum account — CAS on the revision, the key
-/// proof, one rotation at a time, completion refused while rows remain below
-/// the rotation seq. Its rows stand in for the account's synced writing.
+/// The server: one vault per Variorum account — CAS on the revision and the
+/// key proof (VX-378 U2: no rotation, no walk — rule 15's earlier sync keys
+/// live in the row).
 final class ServerFake {
     struct Account {
         var revision: Int
-        var format: KeyVaultFormat
-        /// The account's rows still below the rotation seq (decision 31).
-        var rowsBelowSeq: Int
+        var vault: AccountVault
         var updatedAt: Date?
     }
 
     var accounts: [String: Account] = [:]
-    /// The rows a rotation finds below its seq when it begins.
-    var corpusRows = 2
     var clock = Date(timeIntervalSinceReferenceDate: 790_000_000)
     /// Every vault write, in order — (account, what it read as).
     var writes: [(account: String, what: String)] = []
 
     func snapshot(_ id: String) -> VaultSnapshot? {
-        accounts[id].map {
-            VaultSnapshot(accountID: id, revision: $0.revision, format: $0.format, rowsBelowRotationSeq: $0.rowsBelowSeq,
-                          updatedAt: $0.updatedAt)
-        }
+        accounts[id].map { VaultSnapshot(accountID: id, revision: $0.revision, vault: $0.vault, updatedAt: $0.updatedAt) }
     }
 
-    static func describe(_ format: KeyVaultFormat) -> String {
-        var parts: [String] = []
-        if format.previousCorpusKey != nil { parts.append("rotating") }
-        if format.masterWrappedByAppleHeld != nil { parts.append("apple-wrap") }
-        return parts.isEmpty ? "castle" : parts.joined(separator: " ")
-    }
+    static func describe(_ vault: AccountVault) -> String { vault.mode.rawValue }
 
-    func create(_ format: KeyVaultFormat, accountID: String) throws -> VaultSnapshot {
+    func create(_ vault: AccountVault, accountID: String) throws -> VaultSnapshot {
         guard accounts[accountID] == nil else { throw VaultRefusal.vaultExists }
         clock += 60
-        accounts[accountID] = Account(revision: 1, format: format, rowsBelowSeq: 0, updatedAt: clock)
-        writes.append((accountID, "create " + Self.describe(format)))
+        accounts[accountID] = Account(revision: 1, vault: vault, updatedAt: clock)
+        writes.append((accountID, "create " + Self.describe(vault)))
         return snapshot(accountID)!
     }
 
-    func update(_ format: KeyVaultFormat, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey) throws -> VaultSnapshot {
+    func update(_ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey) throws -> VaultSnapshot {
         guard var account = accounts[accountID] else { throw VaultRefusal.vaultAbsent }
         guard account.revision == expectedRevision else { throw VaultRefusal.revisionConflict }
-        guard KeyProof.hash(master: proofMaster) == account.format.keyProofHash else { throw VaultRefusal.keyProofRefused }
-        var next = format
-        if let incoming = format.previousCorpusKey {
-            if let standing = account.format.previousCorpusKey {
-                guard standing.keyID == incoming.keyID else { throw VaultRefusal.rotationInProgress }
-                next.rotationStartedSeq = account.format.rotationStartedSeq
-            } else {
-                account.rowsBelowSeq = corpusRows
-                next.rotationStartedSeq = Int64(account.revision + 100)
-            }
-        } else if account.format.previousCorpusKey != nil, account.rowsBelowSeq > 0 {
-            throw VaultRefusal.rotationRowsRemain
-        }
+        guard KeyProof.hash(master: proofMaster) == account.vault.keyProofHash else { throw VaultRefusal.keyProofRefused }
         clock += 60
-        account.format = next
+        account.vault = vault
         account.revision += 1
         account.updatedAt = clock
         accounts[accountID] = account
-        writes.append((accountID, Self.describe(next)))
+        writes.append((accountID, Self.describe(vault)))
         return snapshot(accountID)!
-    }
-
-    func reencrypt(accountID: String, material: DeviceKeyMaterial) throws -> Int {
-        guard var account = accounts[accountID] else { throw VaultRefusal.vaultAbsent }
-        guard material.corpusKeyID == account.format.classKey(for: .corpus)?.keyID,
-              material.previousCorpusKeyID == account.format.previousCorpusKey?.keyID
-        else { throw VaultRefusal.keyProofRefused }
-        let count = account.rowsBelowSeq
-        account.rowsBelowSeq = 0
-        accounts[accountID] = account
-        return count
     }
 
     /// `account_purge` — the whole account gone (a bare session can do it).

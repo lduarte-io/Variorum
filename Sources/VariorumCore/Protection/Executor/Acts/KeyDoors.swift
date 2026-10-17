@@ -8,9 +8,11 @@ import Foundation
 // (this Mac holds the key). They RE-WRAP THE CURRENT KEY and re-lock nothing
 // else (rule 6): the history needs no secret — the current key opens it. A
 // NEW passphrase always takes a fresh KDF descriptor (U2's hand-forward: the
-// route finder's `.current` rests on it). Synced, the vault is re-wrapped too
-// (one CAS write under the proof — a convenience act, never a rotation). (The
-// anchor sentences these doors said left with VX-378 U1 — rule 6.)
+// route finder's `.current` rests on it). Synced, the vault's lock on the
+// master is re-made too (one CAS write under the proof — rule 7: "the key doors
+// change the library's and the account's locks together"; no key changes —
+// rule 15). (The anchor sentences these doors said left with VX-378 U1 — rule
+// 6.)
 
 struct KeyDoorProgram: ActProgram {
     let act: ProtectionAct
@@ -25,41 +27,39 @@ struct KeyDoorProgram: ActProgram {
         switch step {
         case "vault":
             let snapshot = try await ctx.freshRead()
-            var format = snapshot.format
             // Landed already (this act's own write): nothing to do.
             switch act {
             case .changePassphrase, .resetPassphrase:
-                if format.kdf == (try ctx.requirePassphrase()).kdf { return }
+                if snapshot.vault.kdf == (try ctx.requirePassphrase()).kdf { return }
             default:
                 guard let words = ctx.secrets.words else { throw ExecutorRefusal.secretsRequired(act) }
-                if VaultModel.master(of: format, passphrase: nil, words: words) != nil { return }
+                if VaultModel.master(of: snapshot.vault, passphrase: nil, words: words) != nil { return }
             }
             // Not landed, and no master in reach — the press's secret no longer
             // opens the vault (the account moved elsewhere since the press: a
             // passphrase changed on another device) and no held keys follow
             // it: before this, the act's first vault write, it ROLLS BACK, as a
-            // rotation's first write does; the follow picks the change up and
+            // vault write does; the follow picks the change up and
             // she presses again (VX-305 U4, the soak's seed 10 — it stuck in
             // flight with its vault in reach).
-            let held: DeviceKeyMaterial
+            let held: AccountKeys
             do {
                 held = try ctx.material(for: snapshot)
             } catch ExecutorRefusal.secretsRequired {
                 throw ActRollback(refusal: .accountMoved)
             }
+            let vault: AccountVault
             switch act {
             case .changePassphrase, .resetPassphrase:
-                let passphrase = try ctx.requirePassphrase()
-                format = try format.rewrappingPassphrase(
-                    masterKey: held.masterSymmetricKey, passphraseKey: passphrase.key, kdf: passphrase.kdf)
+                vault = try VaultModel.rewrappingPassphrase(
+                    snapshot.vault, master: held.masterKey, passphrase: try ctx.requirePassphrase(), device: ctx.deviceName)
             default:
                 guard let words = ctx.secrets.words else { throw ExecutorRefusal.secretsRequired(act) }
-                format = try format.replacingRecoveryWrap(masterKey: held.masterSymmetricKey, recoveryKey: words.key)
+                vault = try VaultModel.rewrappingWords(snapshot.vault, master: held.masterKey, words: words, device: ctx.deviceName)
             }
-            format.updatedByDevice = ctx.deviceName
             let written = try await ctx.leaves.vault.updateVault(
-                format, accountID: snapshot.accountID, expectedRevision: snapshot.revision,
-                proofMaster: held.masterSymmetricKey, device: ctx.deviceName)
+                vault, accountID: snapshot.accountID, expectedRevision: snapshot.revision,
+                proofMaster: held.masterKey, device: ctx.deviceName)
             ctx.executor.noteFresh(written)
         case "keyFile":
             guard var file = ctx.library.keyFile, file.fingerprint == ctx.library.fingerprint else {
@@ -77,9 +77,9 @@ struct KeyDoorProgram: ActProgram {
                 // the account's keys put the NEW master's copy beside the old
                 // master's lock — VX-305 U4, the soak's seed 6).
                 if let account = ctx.accountID, let vault = ctx.executor.freshVaults[account],
-                   let master = VaultModel.master(of: vault.format, passphrase: nil, words: words),
+                   let master = VaultModel.master(of: vault.vault, passphrase: nil, words: words),
                    (try? file.open(master: master)) != nil {
-                    file = file.refreshingMasterWordsCopy(vault.format.masterWrappedByRecovery)
+                    file = file.refreshingMasterWordsCopy(vault.vault.masterByWords)
                 }
             }
             try ctx.executor.writeLiveKeyFile(file, &ctx.library)
@@ -108,9 +108,9 @@ extension ProtectionExecutor {
     public func changePassphrase(_ library: inout UnlockedLibrary, current: String, new: String) async throws -> ActOutcome {
         let parameters = try await keyDoorParameters(library)
         if let account = parameters.accountID, let vault = freshVaults[account] {
-            try vault.format.kdf.validateFloor(configuration.floor)
-            let typed = try PassphraseKey.derive(current, kdf: vault.format.kdf)
-            guard VaultModel.master(of: vault.format, passphrase: typed, words: nil) != nil else {
+            try vault.vault.kdf.validateFloor(configuration.floor)
+            let typed = try PassphraseKey.derive(current, kdf: vault.vault.kdf)
+            guard VaultModel.master(of: vault.vault, passphrase: typed, words: nil) != nil else {
                 throw ExecutorRefusal.passphraseDoesNotOpen
             }
             try holdSyncKeysForTheSession(account: account, vault: vault, passphrase: typed, words: nil)
@@ -157,13 +157,13 @@ extension ProtectionExecutor {
     func holdSyncKeysForTheSession(account: String, vault: VaultSnapshot, passphrase: PassphraseKey?, words: WordsKey?) throws {
         for itemClass in [ProtectionNames.CustodyClass.touchid, .silent] {
             if let held = try leaves.syncKeys.readSyncKeys(accountID: account, itemClass: itemClass),
-               held.corpusKeyID == vault.corpusKeyID { return }
+               held.rowKeyID == vault.rowKeyID { return }
         }
-        if let held = leaves.syncKeys.sessionSyncKeys(accountID: account), held.corpusKeyID == vault.corpusKeyID { return }
-        guard let master = VaultModel.master(of: vault.format, passphrase: passphrase, words: words) else {
+        if let held = leaves.syncKeys.sessionSyncKeys(accountID: account), held.rowKeyID == vault.rowKeyID { return }
+        guard let master = VaultModel.master(of: vault.vault, passphrase: passphrase, words: words) else {
             throw ExecutorRefusal.secretsRequired(.changePassphrase)
         }
-        leaves.syncKeys.holdInSession(try VaultModel.material(following: vault.format, master: master), accountID: account)
+        leaves.syncKeys.holdInSession(try vault.vault.keys(master: master), accountID: account)
     }
 
     /// **New words** — asking the passphrase.
@@ -171,9 +171,9 @@ extension ProtectionExecutor {
         var parameters = try await keyDoorParameters(library)
         let current: PassphraseKey
         if let account = parameters.accountID, let vault = freshVaults[account] {
-            try vault.format.kdf.validateFloor(configuration.floor)
-            current = try PassphraseKey.derive(passphrase, kdf: vault.format.kdf)
-            guard VaultModel.master(of: vault.format, passphrase: current, words: nil) != nil else {
+            try vault.vault.kdf.validateFloor(configuration.floor)
+            current = try PassphraseKey.derive(passphrase, kdf: vault.vault.kdf)
+            guard VaultModel.master(of: vault.vault, passphrase: current, words: nil) != nil else {
                 throw ExecutorRefusal.passphraseDoesNotOpen
             }
         } else {
@@ -186,14 +186,10 @@ extension ProtectionExecutor {
             secrets: ActSecrets(passphrase: current, words: try WordsKey.derive(newWords)), library: &library)
     }
 
-    /// The account's keys moved past what this library follows (assess's
-    /// `follow(.keysReplaced)` read): the corpus key id this Mac remembers
-    /// following, or — its memory's vault facts gone — the library's master
-    /// words copy against the vault's recovery wrap.
+    /// The account's sync key moved past the one this library follows
+    /// (assess's `follow(.keysReplaced)` read — the record names it, rule 15).
     func libraryBehind(_ library: UnlockedLibrary, vault: VaultSnapshot) -> Bool {
-        if let known = library.memory?.vaultFacts?.corpusKeyID { return known != vault.corpusKeyID }
-        guard let live = library.keyFile, live.master != nil, let copy = live.masterWordsCopy else { return false }
-        return copy != vault.reading.recoveryWrap
+        library.record?.accountRowKeyID != vault.rowKeyID
     }
 
     func keyDoorParameters(_ library: UnlockedLibrary) async throws -> ActParameters {
@@ -206,7 +202,7 @@ extension ProtectionExecutor {
             // its mode: pick up the new keys first (assess's `followOwed`; begun
             // here, the door refused inside its plan with stale keys, leaving
             // the act in flight — VX-305 U4, found by the scenario world).
-            if vault.mode.settled != record.mode { throw ExecutorRefusal.accountMoved }
+            if vault.mode != record.mode { throw ExecutorRefusal.accountMoved }
             if libraryBehind(library, vault: vault) { throw ExecutorRefusal.accountMoved }
         }
         return parameters

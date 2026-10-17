@@ -556,7 +556,7 @@ extension SWorld {
     /// The follow `assess` owes this device, if any.
     func owedFollow(_ device: SDevice) -> FollowKind? {
         for act in assessed(device).acts {
-            if case .follow(let kind, _, _) = act { return kind }
+            if case .follow(let kind, _) = act { return kind }
         }
         return nil
     }

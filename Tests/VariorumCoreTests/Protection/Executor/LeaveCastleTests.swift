@@ -30,7 +30,7 @@ enum UseStandardStates {
             return record.mode == .standard && current != PF.fp(k0)
                 && historyOpens
                 && fixture.world.icloud.keys[apple.keyID] != nil
-                && library.section.appleKeys.contains { $0.id == apple.keyID && $0.isOwnLibraryKey && $0.retiredAt == nil }
+                && library.section.appleKeys.contains { $0.id == apple.keyID && $0.retiredAt == nil }
                 && fixture.world.custody.keys.map(\.itemClass) == [.silent]
         }
     }
@@ -103,21 +103,21 @@ struct UseStandardTests {
             dropPlan: true)
     }
 
-    @Test func syncedUseStandardWritesTheAppleWrapAtItsFirstWrite() async throws {
+    /// Rule 12 + rule 15: the account's part of the leave is the MODE flag,
+    /// flipped in one write — no key changes on the server — and the sync keys
+    /// go to a silent item (the account's mode is Standard).
+    @Test func syncedUseStandardFlipsTheModeFlagAndChangesNoKey() async throws {
         let fixture = try EX(.castle, synced: true)
         let k0 = fixture.key
+        let before = try #require(fixture.world.server.snapshot(fixture.account!))
         let executor = fixture.executor()
         var library = try fixture.unlocked(executor)
         _ = try await executor.useStandard(&library, typed: fixture.typed)
         let k1 = library.key
-        let account = try #require(library.section.appleKeys.first { $0.purpose == .account }?.id)
         let own = try #require(fixture.world.liveFormat3?.apple?.keyID)
         #expect(fixture.world.writeLog(naming: [PF.fp(k0): "K0", PF.fp(k1): "K1"]) == [
             "record K0", "memory K0", "plan",
-            "plan", "apple+ \(account.prefix(8))", "record K0", "memory K0", "plan",  // the account's FRESH key
-            "plan", "vault rotating apple-wrap", "sync+ silent", "sync- touchid", "plan",  // the wrap at the FIRST write; silent keys
-            "reencrypt", "plan",
-            "vault apple-wrap", "sync+ silent", "plan",                      // the completing write, by anyone
+            "vault standard", "sync+ silent", "sync- touchid", "plan",      // the flag, and the keys held the Standard way
             "custody+ silent K1", "plan",
             "plan", "apple+ \(own.prefix(8))", "record K0", "memory K0", "plan",
             "keyfile K1", "plan", "stage K1", "plan", "staged-record K1", "plan", "swap K1", "plan",
@@ -125,7 +125,11 @@ struct UseStandardTests {
             "record K1", "memory K1", "plan-",
         ])
         let vault = try #require(fixture.world.server.snapshot(fixture.account!))
-        #expect(vault.mode == .standard(appleKeyID: account) && vault.format.previousCorpusKey == nil)
+        #expect(vault.mode == .standard)
+        #expect(vault.rowKeyID == before.rowKeyID && vault.vault.keyProofHash == before.vault.keyProofHash,
+                "the leave changed a key on the server")
+        #expect(vault.vault.earlierRowKeys == before.vault.earlierRowKeys)
+        #expect(fixture.liveRecord?.accountRowKeyID == before.rowKeyID)
         #expect(UseStandardStates.finished(k0)(fixture, library))
         expectSettled(fixture, library)
     }
@@ -137,16 +141,16 @@ struct UseStandardTests {
             act: { fixture, executor, library in _ = try await executor.useStandard(&library, typed: fixture.typed) },
             finished: { fixture, library in
                 UseStandardStates.finished(k0)(fixture, library)
-                    && fixture.world.server.snapshot(fixture.account!)!.format.masterWrappedByAppleHeld != nil
+                    && fixture.world.server.snapshot(fixture.account!)!.mode == .standard
             },
             neverHappened: { UseStandardStates.neverHappened(k0)($0, $1) })
     }
 
-    @Test func pastTheVaultsFirstWriteWithThePlanGoneTheDeviceFollowsOutAsAnyFollower() async throws {
-        // The account's commit point passed; the plan is lost: the library
-        // half rolls back, the vault reads Standard already (the wrap went in
-        // at the first write — rule 12), and the follow into Standard
-        // completes the rotation. Never a stuck state.
+    @Test func pastTheVaultWriteWithThePlanGoneTheDeviceFollowsOutQuietly() async throws {
+        // The flag flipped; the plan is lost: the library half rolls back, the
+        // vault reads Standard already (rule 12), and the follow out is quiet —
+        // nothing typed, the device's keys still open the vault. Never a stuck
+        // state.
         let fixture = try EX(.castle, synced: true)
         let k0 = fixture.key
         let clean = try EX(.castle, synced: true)
@@ -161,13 +165,11 @@ struct UseStandardTests {
         let (settled, rolledBack, _) = try await fixture.relaunchAndSettle(dropPlan: true)
         #expect(settled == .rolledBack(.leaveCastle))
         #expect(UseStandardStates.neverHappened(k0)(fixture, rolledBack))
-        #expect(fixture.world.server.snapshot(fixture.account!)!.reading.mode == .standard(
-            appleKeyID: fixture.world.server.snapshot(fixture.account!)!.format.appleKeyID!))
+        #expect(fixture.world.server.snapshot(fixture.account!)!.mode == .standard)
         let finisher = fixture.executor()
         var again = try finisher.unlock(with: fixture.key)
-        let outcome = try await finisher.follow(&again, kind: .intoStandard, typed: TypedSecrets(passphrase: fixture.passphrase))
-        #expect(!outcome.held)
-        #expect(fixture.world.server.snapshot(fixture.account!)!.format.masterWrappedByAppleHeld != nil)
+        let outcome = try await finisher.follow(&again, kind: .intoStandard, typed: .none)
+        #expect(outcome.notices.contains(.followedOutOfCastle))
         #expect(fixture.liveRecord?.mode == .standard)
         expectSettled(fixture, again)
     }

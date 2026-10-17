@@ -28,19 +28,18 @@ final class EX {
     var mode: ProtectionMode
     var gate: GateStyle?
     var ownApple: AppleKeyMaterial?
-    var accountApple: AppleKeyMaterial?
-    var material: DeviceKeyMaterial?
+    var material: AccountKeys?
 
     var typed: TypedSecrets { TypedSecrets(passphrase: passphrase, words: words) }
 
     /// A library in `mode`. Standard: P, W and this Mac's own Apple key (in
-    /// iCloud Keychain), a silent item; synced, the account's vault with its
-    /// Apple wrap under the account's key and a silent sync-keys item. Castle:
-    /// P and W, a Touch ID item (or none under Always ask); synced, a Castle
-    /// vault and the sync keys the Castle way.
+    /// iCloud Keychain), a silent item; synced, the account's vault (P and W
+    /// only, its mode flag Standard — rule 14) and a silent sync-keys item.
+    /// Castle: P and W, a Touch ID item (or none under Always ask); synced, a
+    /// Castle vault and the sync keys the Castle way.
     /// `joining`: another device of the same account — this device's own
     /// library, on the same server and iCloud Keychain, holding the account's
-    /// keys (its section lists the account's Apple key as followed).
+    /// keys.
     init(_ mode: ProtectionMode, synced: Bool = false, gate: GateStyle? = nil, scheduledExport: Bool = false,
          world: ExecutorWorld? = nil, account: String? = nil, joining other: EX? = nil) throws {
         let world = world ?? other.map { ExecutorWorld(icloud: $0.world.icloud, server: $0.world.server) } ?? ExecutorWorld()
@@ -49,7 +48,7 @@ final class EX {
         self.gate = mode == .castle ? (gate ?? .touchID) : gate
         words = try other?.words ?? PF.words()
         if let other, let vault = other.account.flatMap({ world.server.snapshot($0) }) {
-            p = try PassphraseKey.derive(other.passphrase, kdf: vault.format.kdf)
+            p = try PassphraseKey.derive(other.passphrase, kdf: vault.vault.kdf)
         } else {
             p = try PF.passphraseKey(passphrase)
         }
@@ -63,31 +62,21 @@ final class EX {
         }
         var section = DeviceSection(
             deviceID: deviceID, settings: DeviceSettings(gateStyle: self.gate, scheduledExport: scheduledExport))
-        if let own = ownApple { section = section.recordingAppleKey(AppleKeyRecord(id: own.id, purpose: .library, origin: .minted)) }
+        if let own = ownApple { section = section.recordingAppleKey(AppleKeyRecord(id: own.id)) }
         var locks = NewKeyLocks(passphrase: p, words: w, apple: ownApple)
         if let other { self.account = other.account }
         if let account = self.account {
-            let format: KeyVaultFormat, material: DeviceKeyMaterial
-            if let other, let existing = world.server.snapshot(account) {
-                format = existing.format
-                material = try VaultModel.material(following: format, master: format.unwrapMaster(withPassphraseKey: p.key))
-                accountApple = other.accountApple
-                if let accountKey = other.accountApple {
-                    section = section.recordingAppleKey(AppleKeyRecord(id: accountKey.id, purpose: .account, accountID: account, origin: .followed))
-                }
+            let vault: AccountVault, material: AccountKeys
+            if let existing = world.server.snapshot(account) {
+                vault = existing.vault
+                material = try vault.keys(master: try #require(vault.master(passphrase: p, words: nil)))
             } else {
-                let accountKey: AppleKeyMaterial? = mode == .standard ? AppleKeyMaterial.mint() : nil
-                if let accountKey {
-                    accountApple = accountKey
-                    world.icloud.keys[accountKey.id] = accountKey
-                    section = section.recordingAppleKey(AppleKeyRecord(id: accountKey.id, purpose: .account, accountID: account, origin: .minted))
-                }
-                (format, material) = try VaultModel.creating(passphrase: p, words: w, apple: accountKey, device: "Mac A", ids: world)
-                world.server.accounts[account] = ExecutorVault.Account(revision: 1, format: format, rows: 0, updatedAt: nil)
+                (vault, material) = try VaultModel.creating(passphrase: p, words: w, mode: mode, device: "Mac A", ids: world)
+                world.server.accounts[account] = ExecutorVault.Account(revision: 1, vault: vault, updatedAt: nil)
             }
             self.material = material
-            locks.master = material.masterSymmetricKey
-            locks.masterWordsCopy = format.masterWrappedByRecovery
+            locks.master = material.masterKey
+            locks.masterWordsCopy = vault.masterByWords
             switch (mode, self.gate) {
             case (.standard, _): world.syncItems[SyncKeysItemFact(accountID: account, itemClass: .silent)] = material
             case (.castle, .touchID): world.syncItems[SyncKeysItemFact(accountID: account, itemClass: .touchid)] = material
@@ -95,7 +84,8 @@ final class EX {
             }
         }
         var record = ProtectionRecord.minting(
-            libraryID: libraryID, mode: mode, account: self.account, currentFingerprint: PF.fp(key), at: PF.t0)
+            libraryID: libraryID, mode: mode, account: self.account, accountRowKeyID: material?.rowKeyID,
+            currentFingerprint: PF.fp(key), passphraseSet: true, at: PF.t0)
         record = try record.storing(section, sealedUnder: key)
         let file = try KeyFile.building(libraryID: libraryID, key: key, epoch: 1, locks: locks)
         world.live = ExecutorWorld.LibraryFile(fingerprint: PF.fp(key), record: record, generation: 1)
@@ -105,10 +95,8 @@ final class EX {
         case (.castle, .touchID): world.custody[CustodyItemFact(fingerprint: PF.fp(key), itemClass: .touchid)] = key
         case (.castle, _): break
         }
-        let vault = self.account.flatMap { world.server.snapshot($0) }
         let memory = DeviceMemory(
-            libraryID: libraryID, currentFingerprint: PF.fp(key), deviceID: deviceID, keyFileMirror: file,
-            vaultFacts: vault.map { VaultFacts(kdf: $0.format.kdf, corpusKeyID: $0.corpusKeyID, recoveryWrapDigest: $0.format.recoveryWrapDigest) })
+            libraryID: libraryID, currentFingerprint: PF.fp(key), deviceID: deviceID, keyFileMirror: file)
         world.memories[libraryID] = try memory.sealed(under: key)
         world.writes = []
     }

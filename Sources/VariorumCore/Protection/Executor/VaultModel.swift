@@ -1,62 +1,184 @@
 import CryptoKit
 import Foundation
 
-// VX-305 U3 — THE VAULT, MODELLED (the phase plan §5: "the `Sync/` half is
-// phase 3's — model it here"). The vault protocol is today's, unchanged
-// (design §3.12): the master under the passphrase (with its descriptor), the
-// words and — Standard — the account's Apple key, naming `apple_key_id`; the
-// class keys under the master; the key proof; one rotation at a time, with
-// the previous corpus key under the new master and the rotation seq. The
-// vault reads Standard with an Apple wrap and Castle without one; a leave's
-// rotation writes the wrap under the account's fresh Apple key at its FIRST
-// write, like Standard's Replace All Keys (rule 12: no stuck leave — the
-// id-with-no-wrap mark and the named-key completion left with VX-378 U1; U2
-// replaces the rotation with the one-row write and the mode flag, rule 15).
-// The payloads are built here from the real
-// `KeyVaultFormat` (Crypto/, not Sync/), so the model is the true format; the
-// transport, the walk and the server's guards are the `VaultLeaf`'s.
+// VX-378 U2 — THE ACCOUNT'S VAULT, MODELLED TO THE RULES (`notes/CastleRules.md`
+// rules 7, 11, 12, 14, 15). The vault holds the account's master wrapped by the
+// passphrase (with its KDF descriptor) and by the twelve words — ONLY those two
+// (rule 14: "never by Apple"); a MODE flag, the account's one posture (rules
+// 10–12); the CURRENT sync key — the row-sealing key, under the master; and
+// EVERY EARLIER sync key the account has had, each sealed under the current
+// master (rule 15: "the account keeps every sync key it has ever had … so a
+// device joining years later reads everything"). A row is read with the key its
+// own key-id label names (14b's AAD already carries it), so no row is ever
+// re-encrypted.
+//   - The sync key changes ONLY when the account enters Castle — ONE CAS write:
+//     a new master, a new sync key, the earlier keys (the outgoing one among
+//     them) re-sealed under the new master (rule 11, rule 15).
+//   - Leaving Castle flips the MODE flag and changes no key (rule 12: "the
+//     server's keys and the library's follow the same one-posture rule").
+//   - The key doors re-wrap the master under a new passphrase or new words; the
+//     keys stay (rule 6's twin, rule 7: "the key doors change the library's and
+//     the account's locks together").
+// (Deleted with VX-378 U2 — the rotation of VX-305: the vault's Apple-held copy
+// and its key id, the previous corpus key and the rotation seq, the walk that
+// re-encrypted rows below it, the completing write, and every wait on them.)
+//
+// This is the MODEL the acts' order, resume and guards are fixed against. The
+// server's `key_vault` change — a SyncSpec §12 lockstep event — is VX-307's;
+// nothing here is the wire format. (The dormant journal-bridge class key of the
+// 14b format is not modelled: nothing reads it, and its fate in the new row is
+// VX-307's to decide.) Wraps are RFC 3394 `AES.KeyWrap`, as everywhere else.
 
-/// The vault as one fetch read it: the format, its CAS revision, and how many
-/// of the account's rows still sit below the rotation seq (decision 31).
+/// A key the vault keeps under the current master: its id (the label rows
+/// carry) and its wrap.
+public struct VaultKey: Codable, Equatable, Sendable {
+    public var keyID: String
+    public var wrappedByMaster: Data
+
+    public init(keyID: String, wrappedByMaster: Data) {
+        self.keyID = keyID
+        self.wrappedByMaster = wrappedByMaster
+    }
+}
+
+/// **The account's vault row** (rules 14, 15) — non-secret on its own: every
+/// key in it is wrapped.
+public struct AccountVault: Codable, Equatable, Sendable {
+    public static let currentFormatVersion = 1
+
+    public var formatVersion: Int
+    /// The passphrase lock's descriptor — truth for every derivation.
+    public var kdf: PassphraseKDF.Descriptor
+    /// The master under the passphrase.
+    public var masterByPassphrase: Data
+    /// The master under the twelve words — the account's recovery wrap, copied
+    /// byte for byte into every key file with a master lock (old design §3.5a).
+    public var masterByWords: Data
+    /// THE MODE FLAG — the account's one posture.
+    public var mode: ProtectionMode
+    /// The CURRENT sync key (rows written now are sealed under it).
+    public var rowKey: VaultKey
+    /// Every earlier sync key, by its id, each wrapped under the CURRENT master.
+    public var earlierRowKeys: [String: Data]
+    /// The key proof's hash (`KeyProof.hash(master:)`) — what the server checks
+    /// every write against.
+    public var keyProofHash: String
+    /// The name of the device that last wrote it (decision 34's notices).
+    public var updatedByDevice: String?
+
+    public init(
+        formatVersion: Int = AccountVault.currentFormatVersion, kdf: PassphraseKDF.Descriptor,
+        masterByPassphrase: Data, masterByWords: Data, mode: ProtectionMode, rowKey: VaultKey,
+        earlierRowKeys: [String: Data] = [:], keyProofHash: String, updatedByDevice: String? = nil
+    ) {
+        self.formatVersion = formatVersion
+        self.kdf = kdf
+        self.masterByPassphrase = masterByPassphrase
+        self.masterByWords = masterByWords
+        self.mode = mode
+        self.rowKey = rowKey
+        self.earlierRowKeys = earlierRowKeys
+        self.keyProofHash = keyProofHash
+        self.updatedByDevice = updatedByDevice
+    }
+
+    /// The master, by a typed secret: the passphrase under the vault's own
+    /// descriptor, or the words.
+    public func master(passphrase: PassphraseKey?, words: WordsKey?) -> SymmetricKey? {
+        if let passphrase, passphrase.kdf == kdf, let bytes = Lock.unwrap(masterByPassphrase, under: passphrase.key) {
+            return SymmetricKey(data: bytes)
+        }
+        if let words, let bytes = Lock.unwrap(masterByWords, under: words.key) { return SymmetricKey(data: bytes) }
+        return nil
+    }
+
+    /// Does `master` hold this vault (its proof)?
+    public func isMaster(_ master: SymmetricKey) -> Bool { KeyProof.hash(master: master) == keyProofHash }
+
+    /// Every sync key, opened with the master: the current one and every
+    /// earlier one (rule 15).
+    public func keys(master: SymmetricKey) throws -> AccountKeys {
+        guard isMaster(master), let current = Lock.unwrap(rowKey.wrappedByMaster, under: master) else {
+            throw AccountVaultError.notThisVaultsMaster
+        }
+        var earlier: [String: Data] = [:]
+        for (id, wrapped) in earlierRowKeys {
+            guard let key = Lock.unwrap(wrapped, under: master) else { throw AccountVaultError.notThisVaultsMaster }
+            earlier[id] = key
+        }
+        return AccountKeys(
+            master: VaultModel.bytes(master), rowKeyID: rowKey.keyID, rowKey: current, earlierRowKeys: earlier)
+    }
+}
+
+public enum AccountVaultError: Error, Equatable, Sendable {
+    /// The master offered is not this vault's (its proof, or a wrap, refuses).
+    case notThisVaultsMaster
+    /// The sync key changes only when the account ENTERS Castle (rule 15).
+    case alreadyInCastle
+}
+
+/// **The account's sync keys, as a device holds them** (custody — the
+/// account's way, rule 15) — the master, the current sync key, and every
+/// earlier sync key the account has had (rule 15). Secret: its description is
+/// redacted, and it is never logged.
+public struct AccountKeys: Codable, Equatable, Sendable, CustomStringConvertible {
+    public var master: Data
+    public var rowKeyID: String
+    public var rowKey: Data
+    public var earlierRowKeys: [String: Data]
+
+    public init(master: Data, rowKeyID: String, rowKey: Data, earlierRowKeys: [String: Data] = [:]) {
+        self.master = master
+        self.rowKeyID = rowKeyID
+        self.rowKey = rowKey
+        self.earlierRowKeys = earlierRowKeys
+    }
+
+    public var masterKey: SymmetricKey { SymmetricKey(data: master) }
+
+    /// THE ROW READER (rule 15): the key a row sealed under `keyID` opens with —
+    /// the current sync key or an earlier one, picked by the row's own label.
+    public func rowKey(for keyID: String) -> SymmetricKey? {
+        if keyID == rowKeyID { return SymmetricKey(data: rowKey) }
+        return earlierRowKeys[keyID].map { SymmetricKey(data: $0) }
+    }
+
+    public var description: String { "AccountKeys(\(rowKeyID.prefix(8)), \(earlierRowKeys.count) earlier, redacted)" }
+}
+
+/// The vault as one fetch read it: the row and its CAS revision.
 public struct VaultSnapshot: Equatable, Sendable {
     public var accountID: String
     public var revision: Int
-    public var format: KeyVaultFormat
-    public var rowsBelowRotationSeq: Int
+    public var vault: AccountVault
     public var updatedAt: Date?
 
-    public init(accountID: String, revision: Int, format: KeyVaultFormat, rowsBelowRotationSeq: Int = 0, updatedAt: Date? = nil) {
+    public init(accountID: String, revision: Int, vault: AccountVault, updatedAt: Date? = nil) {
         self.accountID = accountID
         self.revision = revision
-        self.format = format
-        self.rowsBelowRotationSeq = rowsBelowRotationSeq
+        self.vault = vault
         self.updatedAt = updatedAt
     }
 
-    /// U2's non-secret reading — what `assess` takes.
+    /// `assess`'s non-secret reading.
     public var reading: VaultReading {
         VaultReading(
-            accountID: accountID, hasAppleWrap: format.masterWrappedByAppleHeld != nil,
-            appleKeyID: format.appleKeyID, previousCorpusKeyID: format.previousCorpusKey?.keyID,
-            corpusKeyID: format.classKey(for: .corpus)?.keyID, recoveryWrap: format.masterWrappedByRecovery,
-            updatedByDevice: format.updatedByDevice, updatedAt: updatedAt)
+            accountID: accountID, mode: vault.mode, rowKeyID: vault.rowKey.keyID, kdf: vault.kdf,
+            recoveryWrap: vault.masterByWords, updatedByDevice: vault.updatedByDevice, updatedAt: updatedAt)
     }
 
-    public var mode: VaultMode { reading.mode }
-    public var corpusKeyID: String? { format.classKey(for: .corpus)?.keyID }
+    public var mode: ProtectionMode { vault.mode }
+    public var rowKeyID: String { vault.rowKey.keyID }
 }
 
 /// Typed refusals the vault (server) gives — the fakes throw these; phase 3
-/// maps today's `KeyVaultClientError` onto them.
+/// maps the client's errors onto them.
 public enum VaultRefusal: Error, Equatable, Sendable {
     /// The CAS: another write landed since this device's read.
     case revisionConflict
     /// The proof is not the current master's.
     case keyProofRefused
-    /// Decision 32: a payload setting a previous corpus key while one stands.
-    case rotationInProgress
-    /// A completing write while rows remain below the seq.
-    case rotationRowsRemain
     case vaultAbsent
     case vaultExists
     /// The network: nothing was read or written.
@@ -66,105 +188,89 @@ public enum VaultRefusal: Error, Equatable, Sendable {
     case notSignedIn
 }
 
-/// How a rotation's first write treats the Apple-held copy (§3.5, §3.9).
-public enum RotationAppleCopy: Sendable {
-    /// Use Castle, a Castle Replace All Keys: no Apple copy, no id.
-    case none
-    /// Standard's Replace All Keys (decision 30): M′ under the SAME account
-    /// key; Use Standard (a leave): M′ under the account's FRESH key.
-    case keptUnder(AppleKeyMaterial)
-}
-
 public enum VaultModel {
-    /// A brand-new vault (sync setup, the first device): M, C, J minted; M
-    /// under the passphrase and the words; Standard — M under the account's
-    /// fresh Apple key.
+    /// **A brand-new vault** (sync setup, the first device — rule 7: the
+    /// library's pair becomes the account's): a master and a sync key minted;
+    /// the master under the passphrase and the words (rule 14); the mode the
+    /// library's.
     public static func creating(
-        passphrase: PassphraseKey, words: WordsKey?, apple: AppleKeyMaterial?, device: String, ids: any IDsLeaf
-    ) throws -> (format: KeyVaultFormat, material: DeviceKeyMaterial) {
-        let master = ids.mintSymmetricKey(), corpus = ids.mintSymmetricKey(), journal = ids.mintSymmetricKey()
-        let corpusID = ids.mintID(), journalID = ids.mintID()
-        var format = try KeyVaultFormat.create(
-            masterKey: master, passphraseKey: passphrase.key, recoveryKey: words?.key,
-            classKeys: [(.corpus, corpusID, corpus), (.journalBridge, journalID, journal)], kdf: passphrase.kdf)
-        if let apple {
-            format = try format.settingAppleHeldCopy(masterKey: master, appleKey: apple.key, appleKeyID: apple.id)
-        }
-        format.updatedByDevice = device
-        return (format, DeviceKeyMaterial(
-            masterKey: bytes(master), corpusKey: bytes(corpus), corpusKeyID: corpusID,
-            journalBridgeKey: bytes(journal), journalBridgeKeyID: journalID))
+        passphrase: PassphraseKey, words: WordsKey, mode: ProtectionMode, device: String, ids: any IDsLeaf
+    ) throws -> (vault: AccountVault, keys: AccountKeys) {
+        let master = ids.mintSymmetricKey(), rowKey = ids.mintSymmetricKey()
+        let rowKeyID = ids.mintID()
+        let vault = AccountVault(
+            kdf: passphrase.kdf, masterByPassphrase: try Lock.wrap(bytes(master), under: passphrase.key),
+            masterByWords: try Lock.wrap(bytes(master), under: words.key), mode: mode,
+            rowKey: VaultKey(keyID: rowKeyID, wrappedByMaster: try Lock.wrap(bytes(rowKey), under: master)),
+            keyProofHash: KeyProof.hash(master: master), updatedByDevice: device)
+        return (vault, AccountKeys(master: bytes(master), rowKeyID: rowKeyID, rowKey: bytes(rowKey)))
     }
 
-    /// **A rotation's first write** (decision 6's shape, today's protocol):
-    /// M′, C′, J′ minted; M′ under the passphrase (the door's descriptor) and
-    /// the words; C′, J′ under M′; the OLD corpus key under M′ as the previous
-    /// key; the proof hash replaced; the Apple copy per `apple`. Returns the
-    /// payload and the material custody takes (M′, C′, J′ and the previous key).
-    public static func rotationBegin(
-        current: DeviceKeyMaterial, passphrase: PassphraseKey, words: WordsKey?, apple: RotationAppleCopy,
-        device: String, ids: any IDsLeaf
-    ) throws -> (format: KeyVaultFormat, material: DeviceKeyMaterial) {
-        let master = ids.mintSymmetricKey(), corpus = ids.mintSymmetricKey(), journal = ids.mintSymmetricKey()
-        let corpusID = ids.mintID(), journalID = ids.mintID()
-        var format = try KeyVaultFormat.create(
-            masterKey: master, passphraseKey: passphrase.key, recoveryKey: words?.key,
-            classKeys: [(.corpus, corpusID, corpus), (.journalBridge, journalID, journal)], kdf: passphrase.kdf)
-        format = try format.carryingPreviousCorpusKey(
-            current.corpusSymmetricKey, keyID: current.corpusKeyID, masterKey: master)
-        switch apple {
-        case .none:
-            break
-        case .keptUnder(let key):
-            format = try format.settingAppleHeldCopy(masterKey: master, appleKey: key.key, appleKeyID: key.id)
+    /// **Entering Castle — the ONE write** (rule 11, rule 15): a new master and
+    /// a new sync key; the outgoing sync key and every earlier one re-sealed
+    /// under the new master; the master under the passphrase typed at the press
+    /// (its descriptor reused) and the words; the mode Castle. A device that
+    /// has not followed holds only the outgoing master, which opens nothing
+    /// here any more — writing made in Castle is sealed under a key no quiet
+    /// road holds.
+    public static func enteringCastle(
+        _ vault: AccountVault, held: AccountKeys, passphrase: PassphraseKey, words: WordsKey, device: String,
+        ids: any IDsLeaf
+    ) throws -> (vault: AccountVault, keys: AccountKeys) {
+        guard vault.mode == .standard else { throw AccountVaultError.alreadyInCastle }
+        guard vault.isMaster(held.masterKey), held.rowKeyID == vault.rowKey.keyID else {
+            throw AccountVaultError.notThisVaultsMaster
         }
-        format.updatedByDevice = device
-        let material = DeviceKeyMaterial(
-            masterKey: bytes(master), corpusKey: bytes(corpus), corpusKeyID: corpusID,
-            journalBridgeKey: bytes(journal), journalBridgeKeyID: journalID)
-            .carryingPreviousCorpusKey(current.corpusKey, keyID: current.corpusKeyID, startedSeq: 1)
-        return (format, material)
+        let master = ids.mintSymmetricKey(), rowKey = ids.mintSymmetricKey()
+        let rowKeyID = ids.mintID()
+        var earlier = held.earlierRowKeys
+        earlier[held.rowKeyID] = held.rowKey
+        var next = vault
+        next.kdf = passphrase.kdf
+        next.masterByPassphrase = try Lock.wrap(bytes(master), under: passphrase.key)
+        next.masterByWords = try Lock.wrap(bytes(master), under: words.key)
+        next.mode = .castle
+        next.rowKey = VaultKey(keyID: rowKeyID, wrappedByMaster: try Lock.wrap(bytes(rowKey), under: master))
+        next.earlierRowKeys = try earlier.mapValues { try Lock.wrap($0, under: master) }
+        next.keyProofHash = KeyProof.hash(master: master)
+        next.updatedByDevice = device
+        return (next, AccountKeys(master: bytes(master), rowKeyID: rowKeyID, rowKey: bytes(rowKey), earlierRowKeys: earlier))
     }
 
-    /// **The completing write**: the previous corpus key cleared (any device
-    /// holding the new master may make it).
-    public static func completing(_ format: KeyVaultFormat, device: String) -> KeyVaultFormat {
-        var next = format.clearingPreviousCorpusKey()
+    /// **Leaving Castle — the mode flag, flipped** (rule 12): no key changes.
+    public static func leavingCastle(_ vault: AccountVault, device: String) -> AccountVault {
+        var next = vault
+        next.mode = .standard
         next.updatedByDevice = device
         return next
     }
 
-    /// The material a holder of the vault's master derives from it — the class
-    /// keys, and the previous corpus key while a rotation stands (today's
-    /// follower read, restated outside `Sync/`).
-    public static func material(following format: KeyVaultFormat, master: SymmetricKey) throws -> DeviceKeyMaterial {
-        guard let corpus = format.classKey(for: .corpus), let journal = format.classKey(for: .journalBridge) else {
-            throw KeyVaultError.unknownClassKey(.corpus)
-        }
-        var material = DeviceKeyMaterial(
-            masterKey: bytes(master),
-            corpusKey: bytes(try format.unwrapClassKey(.corpus, masterKey: master)), corpusKeyID: corpus.keyID,
-            journalBridgeKey: bytes(try format.unwrapClassKey(.journalBridge, masterKey: master)),
-            journalBridgeKeyID: journal.keyID)
-        if format.previousCorpusKey != nil {
-            let previous = try format.unwrapPreviousCorpusKey(masterKey: master)
-            material = material.carryingPreviousCorpusKey(
-                bytes(previous.key), keyID: previous.keyID, startedSeq: format.rotationStartedSeq ?? 1)
-        }
-        return material
+    /// A new passphrase's lock on the master (the key doors — rule 6's twin).
+    public static func rewrappingPassphrase(
+        _ vault: AccountVault, master: SymmetricKey, passphrase: PassphraseKey, device: String
+    ) throws -> AccountVault {
+        guard vault.isMaster(master) else { throw AccountVaultError.notThisVaultsMaster }
+        var next = vault
+        next.kdf = passphrase.kdf
+        next.masterByPassphrase = try Lock.wrap(bytes(master), under: passphrase.key)
+        next.updatedByDevice = device
+        return next
     }
 
-    /// The master, from the vault, by a typed secret: the passphrase under the
-    /// vault's own descriptor, or the words through the recovery wrap.
-    public static func master(
-        of format: KeyVaultFormat, passphrase: PassphraseKey?, words: WordsKey?
-    ) -> SymmetricKey? {
-        if let passphrase, passphrase.kdf == format.kdf,
-           let master = try? format.unwrapMaster(withPassphraseKey: passphrase.key) {
-            return master
-        }
-        if let words, let master = try? format.unwrapMaster(withRecoveryKey: words.key) { return master }
-        return nil
+    /// New words' lock on the master.
+    public static func rewrappingWords(
+        _ vault: AccountVault, master: SymmetricKey, words: WordsKey, device: String
+    ) throws -> AccountVault {
+        guard vault.isMaster(master) else { throw AccountVaultError.notThisVaultsMaster }
+        var next = vault
+        next.masterByWords = try Lock.wrap(bytes(master), under: words.key)
+        next.updatedByDevice = device
+        return next
+    }
+
+    /// The master, from the vault, by a typed secret.
+    public static func master(of vault: AccountVault, passphrase: PassphraseKey?, words: WordsKey?) -> SymmetricKey? {
+        vault.master(passphrase: passphrase, words: words)
     }
 
     static func bytes(_ key: SymmetricKey) -> Data { key.withUnsafeBytes { Data($0) } }

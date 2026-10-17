@@ -315,7 +315,7 @@ record committed with PENDING numbers first.
   `25dc1cd12`): Debug `✔ 211 tests in 54 suites`, `-c release` `✔ 189 in 50`, the full core suite green in Debug;
   7,068 source lines, 8,611 test lines.
 - U2 — the additions: **IN PROGRESS** (Opus implementer, 2026-10-16) — §8's U2 RECORD carries the resume map
-  (pieces A–J, each flipped in the commit that lands it). A–D DONE; next: **E** (the vault's account side). Counts PENDING.
+  (pieces A–J, each flipped in the commit that lands it). A–E DONE; next: **F** (rule 21). Counts PENDING.
 - U3 — the lifecycle proof: not started.
 - U4 — the world and the soak: not started.
 - The ladder: not started.
@@ -595,17 +595,58 @@ newest comment outranks an older body. Applied at the closeout's triage.
   in 1 suite failed … with 4 issues"; `aLibraryWithAPassphraseIsNeverAsked` is the guard, green both sides), green
   after; `U2PassphraseFactTests` (1) the new writer's. `AWorld` reads the fact from its live file. Protection set Debug
   `✔ 219 tests in 58 suites`.
-- D — adjudication 3: DONE (this commit) — Use Castle writes the press's gate style into this Mac's section with the
+- D — adjudication 3: DONE (`67ed68490`) — Use Castle writes the press's gate style into this Mac's section with the
   act's first write (the follow's existing shape; a rolled-back press keeps the choice, which means nothing in
   Standard). Pins `U2PinsGateTests` (2, the first over both gates) red on the pre-D tree (scratch worktree at
   `ef6c6bf54`: issues at `U2PinsGateTests.swift:23` ×2, `:25` ×2, `:36` — "2 tests in 1 suite failed … with 5
   issues"), green after. Protection set Debug `✔ 221 tests in 59 suites`.
-- E — rules 7 · 11 · 12 · 14 · 15: the vault's account side replaced whole — the vault modelled without an Apple wrap
-  (P and W only), a MODE flag and the earlier-row-keys list; the one-row CAS write at Use Castle; the mode flip at Use
-  Standard; typed-secret joins that adopt the account's pair and report `wordsReplaced`; sync setup handing the
-  library's pair up; the quiet follow out; the rotation walk, the completing write, `previousCorpusKey`, the vault's
-  Apple wrap, the named wait and the follower's hold deleted; the memory's vault facts deleted (the record names the
-  row key it follows): NOT STARTED.
+- E — rules 7 · 11 · 12 · 14 · 15: the vault's account side replaced whole: DONE (this commit).
+  - **The vault's new shape** (`Executor/VaultModel.swift`, modelled only — the server's `key_vault` change is VX-307's
+    §12 lockstep event): `AccountVault` = the master under the passphrase (with its descriptor) and under the twelve
+    words, NOTHING else (rule 14); a MODE flag (`mode`); the current sync key (`rowKey`: id + wrap under the master);
+    `earlierRowKeys: [keyID: wrapped under the CURRENT master]` (rule 15); the key proof's hash; the last writer's
+    name. The device holds `AccountKeys` (master, current sync key, every earlier one; `rowKey(for:)` is the row reader
+    by the row's own key-id label). **Use Castle's account part is ONE CAS write** (`VaultModel.enteringCastle` —
+    a new master, a new sync key, the outgoing and every earlier sync key re-sealed under the new master, the mode
+    Castle; its new key id stamped in the plan before the write). **Use Standard's is the mode flag flipped**
+    (`leavingCastle` — one write, no key changed). The key doors re-lock the master (`rewrappingPassphrase` /
+    `rewrappingWords`). **Died with the rotation:** the vault's Apple-held copy and `apple_key_id`, the account's Apple
+    key (minting, recording, retiring — and `AppleKeyRecord`'s purpose/origin with it: every recorded key is this
+    Mac's own for the library), `previousCorpusKey`/`rotationStartedSeq`, the walk (`reencryptBelowRotationSeq`), the
+    completing write, `RotationAppleCopy`, `VaultMode`, `VaultVerdict`'s rotation/hold/Apple-copy fields,
+    `DoorRefusal`/`ExecutorRefusal`/`VaultRefusal.rotationInProgress` (+ `rotationRowsRemain`), `OwedAct.follow`'s
+    hold, `ActOutcome.held`, `ActNotice.heldForRotation`, the named wait (`SettleOutcome.waiting`, `ActWaiting`, promise
+    6's vault-reach qualifier — `pastCommitPoint` is now the library's swap; a resume that can't reach its vault before
+    the swap ROLLS BACK, and a vault write it had made is picked up by a follow), `dropUnlandedAccountKey`, the
+    follower's `helpRotation`, Replace All Keys' rotation (it re-keys the library only — rule 15; P-VX378-U2-1), and
+    the memory's `VaultFacts` with the `recordHeldSyncKeysFacts` repair — **the RECORD names the sync key the library
+    follows** (`ProtectionRecord.accountRowKeyID`, written by sync setup, a join, a follow, Use Castle's write; cleared
+    with the account).
+  - **Rule 14:** a join types ONE of the account's secrets; the follow out of Castle is quiet (`ActNotice
+    .followedOutOfCastle`); into Castle and catching up on a replaced sync key type one. **Rule 7:** sync setup hands
+    the library's pair up (both typed and verified, never made new); a join adopts the account's pair
+    (`joinKeyFile`: the typed lock is the account's; the library's own other lock goes unless provably the
+    account's; the master with its twelve-words copy — `ActNotice.wordsReplacedByAccount` unless the typed words
+    were already the library's); no door but creation makes new words (Use Castle, Replace All Keys, Use Standard,
+    sync setup refuse `wordsAreNew` — `wordsMustBeTyped`). The doors' requirements follow (`oneSecret` for joins).
+  - Pins `U2PinsAccountTests` (8) red on the pre-E tree (scratch worktree at `67ed68490`: issues at
+    `U2PinsAccountTests.swift:31`, `:42`, `:43`, `:52`, `:62`, `:72`, `:78`, `:85`, `:96`, `:126`, `:127` — "8 tests
+    in 1 suite failed … with 11 issues"), green after. New-API tests (red by construction — the types didn't exist):
+    `CrossingTests.syncedUseCastleWritesTheAccountOnceThenTheLibrary` (the earlier sync key kept under the new master;
+    the old master opens nothing), `LeaveCastleTests.syncedUseStandardFlipsTheModeFlagAndChangesNoKey`,
+    `FollowTests.aDeviceThatLaggedThroughCastleCatchesUpWithOneSecret` (rule 15's lagging device),
+    `…FollowsOutQuietly…`, `AccountJoinTests` (the pair handed up; one secret adopts the account's pair),
+    `ExecutorEdgeTests.theSecondLeaveFindsTheFlagFlippedAndWritesNothingMore`, `AssessVaultTests` (rewritten to the
+    flag). Died with their subject: the rotation-in-progress, the named-key and the account-Apple-key tests
+    (`aFollowerMeetingALeavesRotationCompletesItAndFollowsOut`, `aRotationWithNoIdCompletesWithoutAnAppleCopy`,
+    `aWrapReadsStandardNoWrapReadsCastle`, `theDeviceWhoseLeaveLostTheRaceDeletesTheAccountKeyItMinted`, Use
+    Castle's decision-32 refusal — replaced by the lagging-account refusal and rule 7's).
+  - **Found while landing it (handed to piece G, red-first there):** a device whose keychain was wiped opens with a
+    NEW device ID (P-VX378-U1-1 (a)) and so a section listing none of the Apple keys it minted under the old ID; a
+    later entry into Castle then retires nothing, and a Standard-era backup still opens through the Apple road
+    (promise 2 caught it when `FixedScenariosCorners`' wiped-keychain scenario was re-pointed from Replace All Keys
+    to Use Castle). The scenario keeps its own subject (now `aWipedKeychainStillFollowsTheAccountBackIntoCastle`).
+  - Protection set Debug `✔ 219 tests in 59 suites`.
 - F — rule 21 (+ adjudications 2, 5, 7): detect and refuse (`libraryDisagreesWithMemory`, no write); the memory at
   exactly four things; an act stranded by a lost memory item finishes or rolls back from the on-disk plan: NOT STARTED.
 - G — rule 8: the quiet roads re-made at an open (a fresh Apple road, the on-device item); the lobby asks a secret only
@@ -623,7 +664,7 @@ newest comment outranks an older body. Applied at the closeout's triage.
 
 **PROVISIONAL calls:** PENDING (logged under the VX-378 heading in `notes/QUESTIONS.md`, P-VX378-U2-n).
 
-**Commits:** A `0572dd3c0` · B `3631ecbde` · C `ef6c6bf54` · D (this commit) · the rest PENDING.
+**Commits:** A `0572dd3c0` · B `3631ecbde` · C `ef6c6bf54` · D `67ed68490` · E (this commit) · the rest PENDING.
 
 ## 9. The ladder
 

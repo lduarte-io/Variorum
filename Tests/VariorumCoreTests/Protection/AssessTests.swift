@@ -77,7 +77,7 @@ struct AssessAccountTests {
             let x = PF.id()
             var world = try AWorld(mode, account: x)
             world.session = .signedIn(accountID: x, email: nil)
-            world.vault = AWorld.vault(x, mode == .castle ? .castle : .standard(appleKeyID: PF.id()))
+            world.vault = AWorld.vault(x, mode)
             let assessed = try world.assessed()
             for door in [Door.thisMacOnly, .stopSyncingHere, .deleteAccountHere] {
                 let spec = try #require(assessed.door(door).spec, "\(mode) \(door)")
@@ -95,10 +95,10 @@ struct AssessAccountTests {
     @Test func theJoiningRules() throws {
         let y = PF.id()
         for (library, vault, plan) in [
-            (ProtectionMode.standard, VaultMode.castle, JoinPlan.entersCastle),
-            (.castle, .standard(appleKeyID: PF.id()), .leavesCastle),
+            (ProtectionMode.standard, ProtectionMode.castle, JoinPlan.entersCastle),
+            (.castle, .standard, .leavesCastle),
             (.castle, .castle, .sameMode),
-            (.standard, .standard(appleKeyID: PF.id()), .sameMode),
+            (.standard, .standard, .sameMode),
         ] {
             var world = try AWorld(library)
             world.session = .signedIn(accountID: y, email: nil)
@@ -111,79 +111,54 @@ struct AssessAccountTests {
     }
 }
 
-@Suite("VX-305 U2 — assess: the vault's three states, and a follower's hold in the middle one (§3.9)")
+@Suite("VX-305 U2 — assess: the vault's mode flag, and the follow it owes (rules 10, 12, 15)")
 struct AssessVaultTests {
-    static func synced(_ mode: ProtectionMode, vault: VaultMode, previous: String? = nil,
-                       readable: Set<String> = []) throws -> (AWorld, String) {
+    static func synced(_ mode: ProtectionMode, vault: ProtectionMode, rowKey: String = "c1") throws -> (AWorld, String) {
         let x = PF.id()
         var world = try AWorld(mode, account: x)
         world.session = .signedIn(accountID: x, email: nil)
-        world.vault = AWorld.vault(x, vault, previous: previous)
-        world.appleKeys.readable.formUnion(readable)
+        world.vault = AWorld.vault(x, vault, rowKey: rowKey)
         return (world, x)
     }
 
-    /// A wrap reads Standard; no wrap reads Castle — an id with no wrap
-    /// included (the leave's third state left with VX-378 U1, rule 12).
-    @Test func aWrapReadsStandardNoWrapReadsCastle() throws {
-        let id = PF.id()
-        #expect(AWorld.vault("a", .standard(appleKeyID: id)).mode == .standard(appleKeyID: id))
-        #expect(AWorld.vault("a", .castle).mode == .castle)
-        #expect(VaultReading(accountID: "a", hasAppleWrap: false, appleKeyID: id).mode == .castle)
-        #expect(!VaultReading(accountID: "a", hasAppleWrap: false, appleKeyID: id).rotationInProgress)
-        #expect(AWorld.vault("a", .castle, previous: "c0").rotationInProgress)
-        #expect(!AWorld.vault("a", .castle).rotationInProgress)
-    }
-
-    /// A leave's rotation in progress reads Standard from its first write
-    /// (the wrap written at once — rule 12): the follower holds its re-key,
-    /// its sync keys held the account's way (rule 15's custody).
-    @Test func aFollowerThatSeesALeavesRotationHoldsItsReKey() throws {
-        let (world, _) = try Self.synced(.castle, vault: .standard(appleKeyID: PF.id()), previous: "c0")
+    /// Out of Castle the follow is quiet (rule 12); its sync keys held the
+    /// account's way (rule 15's custody).
+    @Test func aFollowOutOfCastleIsQuiet() throws {
+        let (world, _) = try Self.synced(.castle, vault: .standard)
         let assessed = try world.assessed()
-        #expect(assessed.acts.contains(.follow(.intoStandard, typesOneSecret: true, holdsLibraryRekey: true)))
+        #expect(assessed.acts.contains(.follow(.intoStandard, typesOneSecret: false)))
         let vault = try #require(assessed.vault)
         #expect(vault.syncKeysCustody == .silent, "custody by the account's mode, never by what the keys reach")
-        #expect(assessed.door(.followNow).spec?.requires == .oneSecret, "every follow out of Castle types one secret")
+        #expect(assessed.door(.followNow).spec?.requires == SecretRequirement.none, "the follow out types nothing")
         #expect(assessed.door(.useCastle).refusal == .followOwed)
-    }
-
-    @Test func aRotationWithNoIdCompletesWithoutAnAppleCopy() throws {
-        let (world, _) = try Self.synced(.castle, vault: .castle, previous: "c0")
-        let assessed = try world.assessed()
-        let vault = try #require(assessed.vault)
-        #expect(vault.completesWithoutAppleCopy)
-        #expect(assessed.door(.replaceAllKeys).refusal == .rotationInProgress(device: "Lillian's Air", day: CF.stamp(9)),
-                "decision 32: one rotation at a time, the device and day named")
     }
 
     @Test func syncKeysAreHeldByTheAccountsMode() throws {
         #expect(try Self.synced(.castle, vault: .castle).0.assessed().vault?.syncKeysCustody == .castleWay)
-        #expect(try Self.synced(.standard, vault: .standard(appleKeyID: PF.id())).0.assessed().vault?.syncKeysCustody == .silent)
-        #expect(try Self.synced(.castle, vault: .standard(appleKeyID: PF.id()), previous: "c0").0.assessed()
-            .vault?.syncKeysCustody == .silent)
+        #expect(try Self.synced(.standard, vault: .standard).0.assessed().vault?.syncKeysCustody == .silent)
+        #expect(try Self.synced(.castle, vault: .standard).0.assessed().vault?.syncKeysCustody == .silent)
     }
 
+    /// Into Castle one secret (rule 10); a sync key this library doesn't follow
+    /// in the same posture — it lagged through an entry into Castle — one
+    /// secret too (rule 15).
     @Test func theAccountMovingElsewhereIsAFollow() throws {
         let (intoCastle, _) = try Self.synced(.standard, vault: .castle)
-        #expect(try intoCastle.assessed().acts.contains(.follow(.intoCastle, typesOneSecret: true, holdsLibraryRekey: false)))
-        let (intoStandard, _) = try Self.synced(.castle, vault: .standard(appleKeyID: PF.id()))
-        #expect(try intoStandard.assessed().acts.contains(.follow(.intoStandard, typesOneSecret: true, holdsLibraryRekey: false)))
-        // Keys replaced in Standard: through the account's Apple key, nothing typed.
-        let accountKey = PF.id()
-        var replaced = try Self.synced(.standard, vault: .standard(appleKeyID: accountKey), readable: [accountKey]).0
-        var memory = replaced.agreeingMemory
-        memory.vaultFacts = VaultFacts(corpusKeyID: "c0")
-        replaced.memory = memory
-        #expect(try replaced.assessed().acts.contains(.follow(.keysReplaced, typesOneSecret: false, holdsLibraryRekey: false)))
-        replaced.appleKeys.readable.remove(accountKey)
-        #expect(try replaced.assessed().acts.contains(.follow(.keysReplaced, typesOneSecret: true, holdsLibraryRekey: false)))
+        #expect(try intoCastle.assessed().acts.contains(.follow(.intoCastle, typesOneSecret: true)))
+        let (intoStandard, _) = try Self.synced(.castle, vault: .standard)
+        #expect(try intoStandard.assessed().acts.contains(.follow(.intoStandard, typesOneSecret: false)))
+        for mode in ProtectionMode.allCases {
+            let (lagging, _) = try Self.synced(mode, vault: mode, rowKey: "c2")
+            #expect(try lagging.assessed().acts.contains(.follow(.keysReplaced, typesOneSecret: true)), "\(mode)")
+            let (current, _) = try Self.synced(mode, vault: mode)
+            #expect(try !current.assessed().acts.contains { if case .follow = $0 { return true } else { return false } })
+        }
     }
 
     /// This device's own leave, mid-way: its plan finishes it — never read as
     /// the account moving elsewhere.
     @Test func thisDevicesOwnActInFlightIsNotAFollow() throws {
-        var world = try Self.synced(.castle, vault: .standard(appleKeyID: PF.id()), previous: "c0").0
+        var world = try Self.synced(.castle, vault: .standard).0
         world.section = world.section.beginningAct(.leaveCastle, from: PF.fp(world.key), to: nil, at: PF.t0).section
         let assessed = try world.assessed()
         #expect(!assessed.acts.contains { if case .follow = $0 { return true } else { return false } })
@@ -193,7 +168,7 @@ struct AssessVaultTests {
         let x = PF.id()
         var world = try AWorld(.castle, account: x)
         world.session = .signedIn(accountID: x, email: nil)
-        world.vault = AWorld.vault(PF.id(), .standard(appleKeyID: PF.id()))
+        world.vault = AWorld.vault(PF.id(), .standard)
         let assessed = try world.assessed()
         #expect(assessed.vault == nil && !assessed.account.confirmed)
         #expect(!assessed.acts.contains { if case .follow = $0 { return true } else { return false } })
@@ -329,7 +304,7 @@ struct AssessRepairTests {
     @Test func deleteOnSightIsByRecordedIDOnly() throws {
         var world = try AWorld(.castle)
         let retired = PF.id(), anotherMacs = PF.id()
-        world.section = world.section.retiringAppleKey(id: retired, purpose: .library, origin: .minted, at: PF.t0)
+        world.section = world.section.retiringAppleKey(id: retired, at: PF.t0)
         world.appleKeys.readable = [retired, anotherMacs]
         let assessed = try world.assessed()
         #expect(assessed.repairs.contains(.deleteRetiredAppleKey(id: retired)))
@@ -356,7 +331,7 @@ struct AssessRepairTests {
         world.liveFile = world.liveFile.droppingApple()
         world.session = .signedIn(accountID: x, email: nil)
         #expect(!(try world.assessed().repairs.contains(.landAppleWrap(appleKeyID: world.own.id))))
-        world.vault = AWorld.vault(x, .standard(appleKeyID: PF.id()))
+        world.vault = AWorld.vault(x, .standard)
         #expect(try world.assessed().repairs.contains(.landAppleWrap(appleKeyID: world.own.id)))
     }
 
@@ -389,7 +364,7 @@ struct AssessRepairTests {
                 case .makeTouchIDItem, .deleteTouchIDItem:
                     Issue.record("\(repair) — a guard's bug shape with every guard on")
                 case .deleteSilentItem, .deleteRetiredAppleKey, .landAppleWrap, .refreshMemory,
-                     .restoreKeyFileFromMirror, .recordAlwaysAskQuietly, .recordHeldSyncKeysFacts, .retireOwnAppleKeys:
+                     .restoreKeyFileFromMirror, .recordAlwaysAskQuietly, .retireOwnAppleKeys:
                     continue
                 }
             }
@@ -442,16 +417,14 @@ struct AssessRepairTests {
         #expect(assess(facts).repairs.contains(.restoreKeyFileFromMirror))
     }
 
-    /// One Apple key per library per Mac and one per account: the library's
-    /// wrap lands only under this Mac's own key for it — never the account's.
-    @Test func theLibraryWrapNeverLandsUnderTheAccountsKey() throws {
+    /// One Apple key per library per Mac: the library's wrap lands only under
+    /// this Mac's own key for it — never another Mac's key it can read.
+    @Test func theLibraryWrapLandsOnlyUnderAKeyThisMacMinted() throws {
         var world = try AWorld(.standard)
         world.liveFile = world.liveFile.droppingApple()
-        let accountKey = PF.id()
-        world.section = DeviceSection(
-            deviceID: CF.macA, settings: DeviceSettings(gateStyle: nil),
-            appleKeys: [AppleKeyRecord(id: accountKey, purpose: .account, accountID: PF.id(), origin: .followed)])
-        world.appleKeys.readable = [accountKey]
+        let anotherMacs = PF.id()
+        world.section = DeviceSection(deviceID: CF.macA, settings: DeviceSettings(gateStyle: nil))
+        world.appleKeys.readable = [anotherMacs]
         let assessed = try world.assessed()
         #expect(!assessed.repairs.contains { if case .landAppleWrap = $0 { return true } else { return false } })
     }
@@ -472,10 +445,9 @@ struct AssessDoorTests {
         var world = try AWorld(.standard)
         let relinked = PF.id(), minted = PF.id(), formerAppleID = PF.id()
         world.section = world.section
-            .recordingAppleKey(AppleKeyRecord(id: relinked, purpose: .library, origin: .minted))
-            .recordingAppleKey(AppleKeyRecord(id: minted, purpose: .library, origin: .minted))
-            .recordingAppleKey(AppleKeyRecord(id: formerAppleID, purpose: .library, origin: .minted))
-            .recordingAppleKey(AppleKeyRecord(id: PF.id(), purpose: .account, accountID: PF.id(), origin: .followed))
+            .recordingAppleKey(AppleKeyRecord(id: relinked))
+            .recordingAppleKey(AppleKeyRecord(id: minted))
+            .recordingAppleKey(AppleKeyRecord(id: formerAppleID))
         world.section.settings.scheduledExport = true
         world.appleKeys.readable = [world.own.id, relinked, minted]
         // A copy under the key left in a former Apple ID.
@@ -489,8 +461,9 @@ struct AssessDoorTests {
         ]
         let spec = try #require(try world.assessed().door(.useCastle).spec)
         #expect(Set(spec.retiresOwnAppleKeys) == [world.own.id, relinked, minted, formerAppleID],
-                "every own key this Mac's section lists — never the account's")
-        #expect(spec.rekeys && spec.requires == .passphraseAndWords(wordsMayBeNew: true))
+                "every own key this Mac's section lists")
+        // Rule 7: the words typed, never made new.
+        #expect(spec.rekeys && spec.requires == .passphraseAndWords(wordsMayBeNew: false))
         #expect(spec.words.contains(.floorSentence) && spec.words.contains(.exportAPlainCopyFirst))
         #expect(spec.words.contains(.scheduledExportTurnsOff))
         let catalog = Catalog.build(try world.entries())

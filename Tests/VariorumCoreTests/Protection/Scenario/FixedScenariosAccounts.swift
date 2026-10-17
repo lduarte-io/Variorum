@@ -47,7 +47,7 @@ struct AccountScenarios {
     @Test func theKeyDoorsRefuseWhileAFollowIsOwed() async throws {
         let (world, _) = try await syncedWorld(.castle, devices: ["macA", "macB"])
         await world.done([.launch("macB"), .useStandard("macA"), .follow("macB", .passphrase), .settle,
-                          .useCastle("macA", .touchID, newWords: true)])
+                          .useCastle("macA", .touchID, newWords: false)])
         for door in [Action.changePassphrase("macB"), .regenerateWords("macB"), .resetPassphrase("macB", .plainConfirm)] {
             let result = await world.step(door)
             #expect(result != .done, "\(door) ran while a follow is owed")

@@ -7,7 +7,7 @@ import Foundation
 // protection system touches the world is one of these, and THE EXECUTOR IS THE
 // ONLY THING THAT CALLS A WRITING LEAF (design §3.3): `assess` takes plain
 // values and calls nothing. Phase 2 wires the real Keychain, file and
-// SQLCipher leaves, phase 3 the vault's RPCs and the rotation driver; U3 tests
+// SQLCipher leaves, phase 3 the vault's RPCs; U3 tests
 // against simple in-memory leaves and U4 brings the realistic fakes.
 //
 // The leaves are deliberately DUMB: a leaf reads or writes exactly what it is
@@ -33,18 +33,19 @@ public protocol CustodyLeaf: AnyObject {
     func deleteCustody(fingerprint: String, itemClass: ProtectionNames.CustodyClass) throws
 }
 
-/// The sync keys — M, C, J for the bound account — held by what they can
-/// reach (§3.2): a Touch ID item or session memory while they reach a
-/// Castle-era key, a silent item otherwise. One item per account.
+/// The sync keys — the bound account's master, its current sync key and every
+/// earlier one (`AccountKeys`, rule 15) — held by the ACCOUNT'S MODE (rule
+/// 15's custody): Castle, a Touch ID item or session memory; Standard, a silent
+/// item. One item per account.
 public protocol SyncKeysLeaf: AnyObject {
     func syncKeyItems() throws -> [SyncKeysItemFact]
-    func readSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws -> DeviceKeyMaterial?
-    func writeSyncKeys(_ material: DeviceKeyMaterial, accountID: String, itemClass: ProtectionNames.CustodyClass) throws
+    func readSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws -> AccountKeys?
+    func writeSyncKeys(_ keys: AccountKeys, accountID: String, itemClass: ProtectionNames.CustodyClass) throws
     func deleteSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws
     /// Session memory (Always ask): never a disk write, gone at a relock or a
     /// crash. nil clears it.
-    func holdInSession(_ material: DeviceKeyMaterial?, accountID: String)
-    func sessionSyncKeys(accountID: String) -> DeviceKeyMaterial?
+    func holdInSession(_ keys: AccountKeys?, accountID: String)
+    func sessionSyncKeys(accountID: String) -> AccountKeys?
 }
 
 /// Apple keys: iCloud Keychain items, synchronizable, NAMED BY THEIR OWN ID
@@ -60,24 +61,20 @@ public protocol AppleKeysLeaf: AnyObject {
     func deleteAppleKey(id: String) throws
 }
 
-/// The vault (server) — the existing protocol, unchanged (§3.12): CAS on the
-/// revision, the key proof, one rotation at a time, the rotation fields.
-/// Phase 3 wires `KeyVaultClient` and `CorpusRotation` behind it (the `Sync/`
-/// half, Fable's); here it is MODELLED, so the acts' order, resume and guards
-/// are fixed before any `Sync/` line is written.
+/// The vault (server): CAS on the revision and the key proof, over the row
+/// `AccountVault` models (rules 14, 15 — P and W only, the mode flag, the
+/// earlier sync keys; VX-378 U2). The server's change to this shape is a
+/// SyncSpec §12 lockstep event, VX-307's; phase 3 wires the client behind it.
+/// (The walk that re-encrypted rows below a rotation seq left with VX-378 U2:
+/// rows are read under the key their own label names, rule 15.)
 public protocol VaultLeaf: AnyObject {
     func fetchVault(accountID: String) async throws -> VaultSnapshot?
     /// Create the account's vault (sync setup, the first device).
-    func createVault(_ format: KeyVaultFormat, accountID: String, device: String) async throws -> VaultSnapshot
+    func createVault(_ vault: AccountVault, accountID: String, device: String) async throws -> VaultSnapshot
     /// One CAS write under the CURRENT master's proof (decision 12).
     func updateVault(
-        _ format: KeyVaultFormat, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey, device: String
+        _ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey, device: String
     ) async throws -> VaultSnapshot
-    /// THE WALK (decision 31): every row of the account still under the
-    /// previous corpus key, re-encrypted under the current one — version-
-    /// neutral; any device holding the new master may run it. Returns how
-    /// many rows it replaced.
-    func reencryptBelowRotationSeq(accountID: String, material: DeviceKeyMaterial) async throws -> Int
 }
 
 /// The library file — SQLCipher in the slot (phase 2). The record lives

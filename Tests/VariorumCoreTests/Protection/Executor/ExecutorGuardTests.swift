@@ -113,7 +113,7 @@ struct ExecutorGuardMutationTests {
             var library = try fixture.unlocked(executor)
             let minted = AppleKeyMaterial.mint()
             fixture.world.icloud.keys[minted.id] = minted
-            library.section = library.section.recordingAppleKey(AppleKeyRecord(id: minted.id, purpose: .library, origin: .minted))
+            library.section = library.section.recordingAppleKey(AppleKeyRecord(id: minted.id))
             _ = try await executor.useCastle(&library, typed: fixture.typed, gate: .touchID)
             #expect(library.section.retiredAppleKeyIDs.contains(minted.id) == guarded)
         }

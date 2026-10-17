@@ -109,7 +109,7 @@ final class SDevice {
     var timeMachine: [[String: SFile]] = []
     /// The staged file of an act's export-and-swap (on disk — it survives a crash).
     var staged: LibraryImage?
-    var sessionMemory: [String: DeviceKeyMaterial] = [:]
+    var sessionMemory: [String: AccountKeys] = [:]
     var paused = false
     var writeCount = 0
     var crashAfterWrites: Int?
@@ -324,8 +324,8 @@ final class SWorld {
             let isAccount = server.accounts[choice.holder] != nil
             if let p = choice.passphrase, p != k.passphrase {
                 var opens = false
-                if isAccount, let vault = server.snapshot(choice.holder), let pk = passphraseKey(p, vault.format.kdf) {
-                    opens = (try? vault.format.unwrapMaster(withPassphraseKey: pk.key)) != nil
+                if isAccount, let vault = server.snapshot(choice.holder), let pk = passphraseKey(p, vault.vault.kdf) {
+                    opens = vault.vault.master(passphrase: pk, words: nil) != nil
                 } else if let wrap = liveKeyFile(device)?.passphrase, let pk = passphraseKey(p, wrap.kdf) {
                     opens = Lock.unwrap(wrap.wrapped, under: pk.key) != nil
                 }
@@ -334,7 +334,7 @@ final class SWorld {
             if let w = choice.words, w != k.words, let wk = wordsKey(w) {
                 var opens = false
                 if isAccount, let vault = server.snapshot(choice.holder) {
-                    opens = (try? vault.format.unwrapMaster(withRecoveryKey: wk)) != nil
+                    opens = vault.vault.master(passphrase: nil, words: WordsKey(key: wk)) != nil
                 } else if let blob = liveKeyFile(device)?.words {
                     opens = Lock.unwrap(blob, under: wk) != nil
                 }
@@ -534,9 +534,9 @@ final class SWorld {
                 }
                 return files.compactMap(\.passphrase).filter { $0.kdf == kdf }
             }()
-            if let kdf = planKDF, let vault, vault.format.kdf == kdf,
+            if let kdf = planKDF, let vault, vault.vault.kdf == kdf,
                let opens = candidates.first(where: { p in
-                   passphraseKey(p, kdf).map { (try? vault.format.unwrapMaster(withPassphraseKey: $0.key)) != nil } == true
+                   passphraseKey(p, kdf).map { vault.vault.master(passphrase: $0, words: nil) != nil } == true
                }) {
                 typed = TypedSecrets(passphrase: opens, words: typed.words)
             } else if let kdf = planKDF, !planLocks.isEmpty,
@@ -589,12 +589,12 @@ final class SWorld {
         if let words = typed.words { secrets.append(.words(words)) }
         var masters: [SymmetricKey] = []
         if device.online, let account = device.session.accountID, let vault = server.snapshot(account) {
-            if let passphrase = typed.passphrase, let key = passphraseKey(passphrase, vault.format.kdf),
-               let master = try? vault.format.unwrapMaster(withPassphraseKey: key.key) {
+            if let passphrase = typed.passphrase, let key = passphraseKey(passphrase, vault.vault.kdf),
+               let master = vault.vault.master(passphrase: key, words: nil) {
                 masters.append(master)
             }
             if let words = typed.words, let wk = try? WordsKey.derive(words),
-               let master = try? vault.format.unwrapMaster(withRecoveryKey: wk.key) {
+               let master = vault.vault.master(passphrase: nil, words: wk) {
                 masters.append(master)
             }
         }
@@ -637,15 +637,11 @@ final class SWorld {
         device.lastSettle = nil
         do {
             device.lastSettle = try await executor.settle(&library, typed: typed)
-            if case .waiting(let act, let account)? = device.lastSettle {
-                stepLog.append("  \(device.name): \(act.rawValue) waits for \(account.prefix(8))'s vault — named, copies paused")
-            }
         } catch let crash as SimulatedCrash {
             throw crash
         } catch {
             // The lobby opens the library all the same; the act stays owed
-            // (promise 6 then says whether it may: a synced act past its
-            // commit point, its account's vault out of reach — named, waiting).
+            // (promise 6 then says whether it may).
             stepLog.append("  \(device.name): the act in flight couldn't settle now (\(error))")
         }
         device.library = library
@@ -658,9 +654,9 @@ final class SWorld {
             let held = [ProtectionNames.CustodyClass.touchid, .silent].contains { (try? leaf.readSyncKeys(accountID: account, itemClass: $0)) != nil }
             if !held, device.sessionMemory[account] == nil, let vault = server.snapshot(account) {
                 var master: SymmetricKey?
-                if let p = typed.passphrase, let pk = passphraseKey(p, vault.format.kdf) { master = try? vault.format.unwrapMaster(withPassphraseKey: pk.key) }
-                if master == nil, let w = typed.words, let wk = wordsKey(w) { master = try? vault.format.unwrapMaster(withRecoveryKey: wk) }
-                if let master { device.sessionMemory[account] = try? VaultModel.material(following: vault.format, master: master) }
+                if let p = typed.passphrase, let pk = passphraseKey(p, vault.vault.kdf) { master = vault.vault.master(passphrase: pk, words: nil) }
+                if master == nil, let w = typed.words, let wk = wordsKey(w) { master = vault.vault.master(passphrase: nil, words: WordsKey(key: wk)) }
+                if let master { device.sessionMemory[account] = try? vault.vault.keys(master: master) }
             }
         }
         try await runRepairs(device)
@@ -807,12 +803,12 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
         }
     }
 
-    func readSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws -> DeviceKeyMaterial? {
+    func readSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws -> AccountKeys? {
         guard let item = device.keychain.local[KName.syncKeys(scope, accountID, itemClass)] else { return nil }
         return world.pressRead(device, item)?.material
     }
 
-    func writeSyncKeys(_ material: DeviceKeyMaterial, accountID: String, itemClass: ProtectionNames.CustodyClass) throws {
+    func writeSyncKeys(_ material: AccountKeys, accountID: String, itemClass: ProtectionNames.CustodyClass) throws {
         device.keychain.local[KName.syncKeys(scope, accountID, itemClass)] = KItem(
             value: .syncKeys(material), touchID: itemClass == .touchid, enrollment: device.biometry.generation)
         try wrote("sync+ \(itemClass.rawValue)")
@@ -823,8 +819,8 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
         try wrote("sync- \(itemClass.rawValue)")
     }
 
-    func holdInSession(_ material: DeviceKeyMaterial?, accountID: String) { device.sessionMemory[accountID] = material }
-    func sessionSyncKeys(accountID: String) -> DeviceKeyMaterial? { device.sessionMemory[accountID] }
+    func holdInSession(_ material: AccountKeys?, accountID: String) { device.sessionMemory[accountID] = material }
+    func sessionSyncKeys(accountID: String) -> AccountKeys? { device.sessionMemory[accountID] }
 
     // MARK: Apple keys
 
@@ -863,9 +859,9 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
         return world.server.snapshot(accountID)
     }
 
-    func createVault(_ format: KeyVaultFormat, accountID: String, device name: String) async throws -> VaultSnapshot {
+    func createVault(_ vault: AccountVault, accountID: String, device name: String) async throws -> VaultSnapshot {
         try reach(accountID)
-        var named = format
+        var named = vault
         named.updatedByDevice = name
         let snapshot = try world.server.create(named, accountID: accountID)
         try wrote("vault create")
@@ -873,21 +869,14 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
     }
 
     func updateVault(
-        _ format: KeyVaultFormat, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey, device name: String
+        _ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey, device name: String
     ) async throws -> VaultSnapshot {
         try reach(accountID)
-        var named = format
+        var named = vault
         named.updatedByDevice = name
         let snapshot = try world.server.update(named, accountID: accountID, expectedRevision: expectedRevision, proofMaster: proofMaster)
-        try wrote("vault \(ServerFake.describe(snapshot.format))")
+        try wrote("vault \(ServerFake.describe(snapshot.vault))")
         return snapshot
-    }
-
-    func reencryptBelowRotationSeq(accountID: String, material: DeviceKeyMaterial) async throws -> Int {
-        try reach(accountID)
-        let count = try world.server.reencrypt(accountID: accountID, material: material)
-        try wrote("reencrypt")
-        return count
     }
 
     // MARK: The library file
