@@ -74,7 +74,7 @@ and never leaves a hole you chose to close.**
     key, in one write (rule 15). Other devices follow by typing one secret.
 12. **Leaving Castle types your passphrase and your twelve words, and hands everything to Standard.** On this device: a new Standard key
     carrying every earlier key — the Castle ones included — with a fresh Apple road and the on-device road back; this
-    Mac's Touch ID item and sealed key-file copy now hold the new key. Your text, the server's rows, the sync key and
+    Mac's on-device road and its sealed key-file copy now hold the new key. Your text, the server's rows, the sync key and
     **every backup you have ever made** are Standard from now on. The leave screen says so plainly: *your library and all
     your backups will open through your Apple account and this Mac again; if you want Castle-era writing to stay
     Castle-protected, don't leave.* Other devices follow out quietly, with a notice; one that lagged through the whole
@@ -127,7 +127,8 @@ and never leaves a hole you chose to close.**
 ## What we do not promise
 
 25. **We don't promise Apple's roads keep working** across Apple ID changes, iCloud sign-outs, keychain resets or a move
-    to a new Mac. We promise you never *need* them (rules 2, 3, 8).
+    to a new Mac. We promise you never *need* them (rules 2, 3, 8). A Standard-era backup locked under an Apple account
+    you have since left keeps that lock, which the app cannot delete.
 26. **We don't migrate stores from before this design, and we don't handle them.** Everyone with such a store exports
     their writing or signs into sync before the switch, then starts fresh; the people concerned are the author and a few
     testers, and they have been told.

@@ -327,8 +327,8 @@ record committed with PENDING numbers first.
   for her). After (code tree `389162a09`): the protection set Debug `✔ 259 tests in 69 suites`, `-c release` `✔ 237 in
   65`, the full core suite green in Debug; `Sources/…/Protection/` untouched (7,562), tests 12,068.
 - U4 — the world and the soak: **IN PROGRESS** (Opus implementer, 2026-10-16) — §8's U4 RECORD (the resume map). Piece
-  A (this record) DONE; B (her FACTS DIFF rulings) NEXT; C (the promises), D (starting states, alphabet, mutation pins),
-  E (the discovery run, seeds 21–40), F (the gate soak, seeds 1–20 both configurations), G (the record closed)
+  A (this record) DONE; B (her FACTS DIFF rulings) DONE; C (the promises) NEXT; D (starting states, alphabet, mutation
+  pins), E (the discovery run, seeds 21–40), F (the gate soak, seeds 1–20 both configurations), G (the record closed)
   NOT-STARTED. Counts PENDING.
 - The ladder: not started.
 - The gate: not started.
@@ -1087,8 +1087,24 @@ her rulings above, never silently; the fixture diffs FD-1…3 close with them.
 **Pieces (the resume map — a fresh session can finish U4 from this list and `git log`):**
 - A — the record skeleton and LIVE STATUS: DONE (this commit).
 - B — her FACTS DIFF rulings applied (FD-1 stage 1's note; FD-2 rule 25's one sentence + stage 6 on the Apple-ID road;
-  FD-3 stage 8 + rule 12): the fixture's facts to her wording, the three under-review notes dropped, the page
-  re-rendered (`cmp`), the lifecycle scenario green with ZERO diffs: NOT-STARTED.
+  FD-3 stage 8 + rule 12): DONE (this commit). `notes/CastleRules.md` — the ONLY rules edits of this unit: rule 12's
+  *"this Mac's Touch ID item and sealed key-file copy now hold the new key"* → *"this Mac's on-device road and its
+  sealed key-file copy now hold the new key"*; rule 25 gains *"A Standard-era backup locked under an Apple account you
+  have since left keeps that lock, which the app cannot delete."* (the status line's amendment list left as it was —
+  the brief's "only these edits"; the orchestrator may name the ruling there at closeout). The fixture: stage 1's note
+  and fact → *"Until you set a passphrase, the app reminds you — …"* / `.reminderTrigger(.noPassphraseYet)` asserted
+  (the `wordsNotWrittenDown` case retired); stage 6 gains the Apple-ID-road sentence *"(If your Apple ID changed at
+  stage 5, backup A's Apple lock sits under a key in the Apple account you have since left: backup A keeps that lock,
+  which the app cannot delete [25] — no device of yours reads it, and Use Castle names backup A as a copy under a key it
+  can't delete.)"*, typed as a new status `LStatus.onlyWhen(LStage5Event)` — `appleKeysDeleted` asserted on the
+  keychain-reset road only, the new fact `appleLockKeptInAnAccountSheLeft(.backupA)` with
+  `useCastleNamesCopiesItCantDelete(.backupA)` on the Apple-ID road only; stage 8's text and fact → *"This Mac's
+  on-device road and its sealed key-file copy now hold the new key"* / the custody fact (on-device, no Touch ID item for
+  any key it has had) asserted. `Lifecycle.factsDiff` is EMPTY (the mechanism kept for any future diff); the three
+  under-review notes gone. A new guard `eachRoadsOwnSentenceFailsOnTheOtherRoad` (each `onlyWhen` fact fails on the
+  other stage-5 road — no pass either way). Runs: `swift test --filter 'VariorumCoreTests\.(LifecycleScenarioTests|
+  LifecyclePageTests)/'` → `✔ Test run with 6 tests in 2 suites passed` (the four walks, the two discriminations, the
+  other-road guard's two, the fixture's wholeness, the page guard); the render `cmp`-IDENTICAL to the committed page.
 - C — the promises rewritten to the rules (each quoting its rule; promise 6 strict; promise 3 tightened;
   `resumeAtVaultReach` deleted; none about pre-leave copies after a leave; P-VX378-U4-1 the core sentence scoped to the
   library's own lineage, PROVISIONAL): NOT-STARTED.

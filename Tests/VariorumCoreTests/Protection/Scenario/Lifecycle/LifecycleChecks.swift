@@ -216,6 +216,10 @@ struct LifecycleChecks {
                 } else {
                     failures += check(entry.fact, ctx).map { "stage \(ctx.number) · “\(entry.quote)”: \($0)" }
                 }
+            case .onlyWhen(let event):
+                if event == walk.event {
+                    failures += check(entry.fact, ctx).map { "stage \(ctx.number) · “\(entry.quote)”: \($0)" }
+                }
             case .assertedAt, .branch, .notAModelFact:
                 continue
             }
@@ -389,8 +393,6 @@ struct LifecycleChecks {
             expect(asks == (ask.map { [$0] } ?? []), "the passphrase asks owed are \(asks)")
         case .reminderTrigger(let trigger):
             switch trigger {
-            case .wordsNotWrittenDown:
-                failures.append("the model has no fact of whether the words were written down; its reminder keys on the passphrase")
             case .noPassphraseYet:
                 let owed = world.assessed(mac).acts.contains(.askPassphrase(.beforeFirstBackup))
                 expect(owed && mac.slot?.record?.passphraseSet == false, "the reminder isn't owed while no passphrase exists")
@@ -610,6 +612,18 @@ struct LifecycleChecks {
             let id = target(subject)?.own?.apple?.keyID
             expect(id.map { library?.section.retiredAppleKeyIDs.contains($0) == true } ?? false,
                    "its Apple lock's key isn't recorded retired (deleted on sight)")
+        case .appleLockKeptInAnAccountSheLeft(let subject):
+            guard let id = target(subject)?.own?.apple?.keyID else {
+                failures.append("\(subject.rawValue)'s own key file has no Apple lock")
+                break
+            }
+            let holding = world.appleAccounts.filter { _, account in
+                account.liveItems.contains { $0.value.value.appleKey?.id == id }
+            }.map(\.key)
+            expect(!holding.isEmpty, "no Apple account still holds \(subject.rawValue)'s Apple key — it was deleted")
+            let signedIn = Set(walk.hers.compactMap(\.appleAccount))
+            expect(holding.allSatisfy { !signedIn.contains($0) },
+                   "an Apple account holding \(subject.rawValue)'s Apple key is one a device of hers is signed into")
         case .noTouchIDItemForAnyKeyItHasHad:
             let had = Set(live?.heldFingerprints ?? []).union([fingerprint].compactMap { $0 })
             let touch = mac.keychain.local.keys.filter { $0.service == ProtectionNames.custodyService }

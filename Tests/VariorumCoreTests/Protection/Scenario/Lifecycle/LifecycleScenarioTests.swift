@@ -71,6 +71,30 @@ struct LifecycleScenarioTests {
         #expect(chips > 0 && discriminating == chips)
     }
 
+    /// A fact the page states for ONE of stage 5's roads (her FD-2 ruling: stage
+    /// 6's Apple-ID-road sentence, rule 25) fails on the OTHER road — so each
+    /// road's sentence is the one that road makes true, never a pass either way.
+    @Test(arguments: LStage5Event.allCases)
+    func eachRoadsOwnSentenceFailsOnTheOtherRoad(event: LStage5Event) async throws {
+        let walk = LifecycleWalk(event: event, gate: .touchID)
+        let checks = LifecycleChecks(walk: walk)
+        var otherRoads = 0
+        for stage in Lifecycle.stages {
+            let ctx = walk.begin(stage.number)
+            try await walk.run(stage, ctx)
+            walk.timePasses()
+            for entry in stage.facts {
+                guard case .onlyWhen(let road) = entry.status, road != event else { continue }
+                otherRoads += 1
+                #expect(!checks.check(entry.fact, ctx).isEmpty,
+                        "stage \(stage.number) · “\(entry.quote)” (the \(road) road's) holds on the \(event) road too")
+            }
+            walk.noteLivePlace()
+            if stage.number == 11 { await walk.stage11After() }
+        }
+        #expect(otherRoads > 0)
+    }
+
     /// The fixture is whole: fourteen stages in order, each "asserted at" a
     /// later stage pointing forward at a stage that asserts the same fact, and
     /// every FACTS DIFF listed once with its reason.
@@ -94,7 +118,7 @@ struct LifecycleScenarioTests {
                 case .diff(let id, _), .diffWhen(_, let id, _):
                     #expect(Lifecycle.factsDiff.filter { $0.id == id && $0.stage == stage.number }.count == 1,
                             "stage \(stage.number): \(id) isn't listed once for this stage")
-                case .asserted:
+                case .asserted, .onlyWhen:
                     if case .notTypedHere = entry.fact { Issue.record("stage \(stage.number): “\(entry.quote)” asserts nothing") }
                 case .branch, .notAModelFact:
                     continue
