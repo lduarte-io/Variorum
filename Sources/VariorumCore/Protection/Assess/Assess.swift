@@ -236,6 +236,12 @@ public enum AssessRules {
                 } else {
                     repairs.append(.restoreKeyFileFromMirror)
                 }
+            } else if let live = liveKeyFile(facts, unlocked), live.fingerprint == unlocked.currentFingerprint {
+                // The sealed copy is missing, or another key's, while the key
+                // file of the current key is back beside the library (a Time
+                // Machine restore after an open that found none): the copy
+                // follows it (rule 1 — census class (K), VX-378 U4).
+                stale = true
             } else if liveKeyFile(facts, unlocked) == nil, unlocked.thisMac.actInFlight == nil,
                       !backupHoldsTheCurrentKeyFile(facts, unlocked) {
                 // RULE 27: opened (by a quiet road) with no key file anywhere —

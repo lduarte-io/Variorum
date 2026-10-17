@@ -376,11 +376,18 @@ struct AssessRepairTests {
     /// refreshed. (The second home's refresh left with VX-378 U1.)
     @Test func whatThisMacRemembersIsRefreshedWhenItIsMissingOrNamesAnotherDevice() throws {
         var world = try AWorld(.castle)
+        // (VX-378 U4, census class (K): what this Mac remembers carries the
+        // current key's file — an item without the copy is refreshed too.)
+        var agreeing = world.agreeingMemory
+        agreeing.keyFileMirror = world.liveFile
+        world.memory = agreeing
         #expect(!(try world.assessed().repairs.contains(.refreshMemory)))
+        world.memory = world.agreeingMemory
+        #expect(try world.assessed().repairs.contains(.refreshMemory), "an item without the key file's copy wasn't refreshed")
         world.memoryAbsent = true
         #expect(try world.assessed().repairs.contains(.refreshMemory))
         world.memoryAbsent = false
-        var other = world.agreeingMemory
+        var other = agreeing
         other.deviceID = PF.id()
         world.memory = other
         #expect(try world.assessed().repairs.contains(.refreshMemory))

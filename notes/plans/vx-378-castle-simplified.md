@@ -1618,6 +1618,21 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
     remembers, so it no longer silences rule 27's honest refusal (with nothing remembered, any key file still might).
     Pin `U4CensusPins.anotherLibrarysKeyFilesDontSilenceRule27` (census seq 998 replayed): red before — promise 5 —
     green after. (A reading, recorded: "every key-file copy … gone" is this library's copies.)
+  **Census on `65d483c2e`: seed 23 — 5 failing (45,213 steps, 303.1 s): P4 ×4 · P7 ×1.** Traced (throwaway replays,
+  deleted) and closed in the next commit:
+  - seq 974 (P7) — **NEW CLASS (K), MODEL — FIXED** (`Assess/Assess.swift`): a memory item re-made with NO copy (its
+    key file was gone at that open) never took the copy back once the key file of the current key returned (a Time
+    Machine restore) — the refresh is now owed whenever the sealed copy is missing or another key's while the live
+    key file is the current key's (rule 1). Pin `U4CensusPins.theMemorysCopyFollowsTheKeyFileOnceItIsBack` (census
+    seq 974 replayed): red before — promise 7 "the sealed copy isn't the current key's file" — green after;
+    `AssessTests.whatThisMacRemembersIsRefreshedWhenItIsMissingOrNamesAnotherDevice` now gives its agreeing memory the
+    copy and asserts the copy-less item is refreshed.
+  - seq 189 · 623 (P4 (b)) — CHECKER (L6, P-VX378-U4-7's family): a key file of the SAME key replayed from an earlier
+    day (its locks of that day) is undetectable by rule 21's four things, and the refresh then makes the sealed copy
+    follow it — the library opens with the secrets of that day (the floor). `replayKeyFile` of the same key marks L6.
+  - seq 89 · 712 (P4 (c)) — CHECKER (L6): under a library put back from outside, a copy the key file there doesn't
+    carry (an older key file put beside it later by the offer, say) is the replaced stretch's, for good — promise 4's
+    carry clause adds it to `rolledBackOver` when it meets it.
 - 5 — THE DISCOVERY RUN (seeds 21–40) and THE GATE SOAK (seeds 1–20, Debug and Release): NOT-STARTED. Tables land as
   they complete. PENDING.
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.

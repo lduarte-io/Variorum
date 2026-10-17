@@ -94,4 +94,21 @@ struct U4CensusPins {
         await world.step(.replaceMac("macA", carriesMemory: true))
         expectPromisesKept(world)
     }
+
+    /// NEW CLASS (K) — rule 1 ("a sealed copy in this Mac's keychain") and rule
+    /// 21's four things: what this Mac remembers carries the CURRENT key's file.
+    /// A memory item re-made with no copy in it (its key file was gone at that
+    /// open) never took the copy back once the key file returned (a Time Machine
+    /// restore): the refresh wasn't owed (census seed 23 sequence 974).
+    @Test func theMemorysCopyFollowsTheKeyFileOnceItIsBack() async throws {
+        let world = SWorld(seed: 23 &* 1_000_003 &+ 974)
+        try await StartingState.all[0].build(world)
+        for action in [Action.createLibrary("phone", passphrase: true), .timeMachineSnapshot("phone"),
+                       .tamper("phone", .deleteKeyFileAndMemory), .timeMachineRollback("phone"), .settle] {
+            await world.step(action)
+        }
+        let phone = world.device("phone")
+        #expect(phone.library?.memory?.keyFileMirror == world.liveKeyFile(phone), "the sealed copy isn't the current key's file")
+        expectPromisesKept(world)
+    }
 }

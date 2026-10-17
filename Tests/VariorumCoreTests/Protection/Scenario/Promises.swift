@@ -649,11 +649,20 @@ extension SWorld {
         }
         // (c) THE CARRY — within the same library, wherever today's open it.
         guard todayOpensIt else { return violations }
+        let carried = Set(base.flatMap(\.heldFingerprints))
+        let replaced = fromOutside(device) || dayOfRollback(device) != nil
         for (id, copy) in truth.copies.sorted(by: { $0.key < $1.key }) where copy.madeOn == device.name {
             if truth.rolledBackOver.contains(id) { continue }  // L4
             guard let (fs, path) = DeviceLeaves(world: self, device: device).resolve(id), let image = fs.files[path]?.library,
                   image.libraryID == record.libraryID else {
                 continue  // gone, or another library's copy (rule 19 — a new library has no previous keys)
+            }
+            // L4/L6: under a library (or key file) put back from outside, a copy
+            // the key file there doesn't carry is the replaced stretch's — for
+            // good (the carry is never promised across a replay).
+            if replaced, !carried.contains(image.fingerprint) {
+                truth.rolledBackOver.insert(id)
+                continue
             }
             if reach(seeds, files: base + [ownKeyFile(fs, path)].compactMap { $0 })[image.fingerprint] == nil {
                 fail("her current passphrase and words don't open the copy \(id) (\(f8(image.fingerprint))) of the same library")

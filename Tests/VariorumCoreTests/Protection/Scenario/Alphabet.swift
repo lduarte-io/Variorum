@@ -704,6 +704,9 @@ extension SWorld {
             guard let file = device.captures.compactMap(\.liveKeyFile)
                 .first(where: { $0 != device.container.files[SPath.liveKeyFile] }) else { throw WorldRefusal.noLibrary }
             device.container.files[SPath.liveKeyFile] = file
+            // L6: an older key file of the SAME key — rule 21's four things can't
+            // tell it (its locks of that day, P-VX378-U4-7's family).
+            if file.keyFile?.fingerprint == slot.fingerprint { truth.liveFromOutside[device.name] = slot.fingerprint }
         case .deleteKeyFileAndMemory:
             device.container.files[SPath.liveKeyFile] = nil
             device.keychain.local[memoryName] = nil
