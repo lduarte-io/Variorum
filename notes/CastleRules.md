@@ -2,7 +2,10 @@
 
 **Status: THE CONTRACT for library protection, ruled by the author at the VX-305 simplification sitting (2026-10-16),
 amended the same day at her rulings on the design cold read (`notes/plans/vx-378-design-cold-read.md`), and again at her
-U2 ruling (rules 11–12: both secrets at a crossing — P-VX378-U2-2, the plan's §8).**
+U2 ruling (rules 11–12: both secrets at a crossing — P-VX378-U2-2, the plan's §8) and her FACTS DIFF rulings (rules 12
+and 25 — FD-2, FD-3, the plan's §8 note after U3). Amended again at her rulings at the U4 stop (2026-10-17, the plan's §8):
+rules 4, 5 and 12 — the floor (a backup opens with the secrets you had when you made it; your current ones open older
+backups of the same library); rule 17 — Make this my library carries no keys.**
 Where this document and `notes/plans/vx-266-castle-backups-prelaunch.md` differ, this document wins; that design keeps
 its research and its Apple-facts pointers (`notes/plans/vx-266/second-opinion-apple-facts.md`). The walk-through of
 these rules — one person, one library, every stage — is `notes/plans/vx-266/castle-lifecycle.html`, and the corrector
@@ -35,10 +38,12 @@ open it. Everything else is a convenience.**
    again"; and always right before the first backup and at the first launch after a quiet road has failed. The
    passphrase is a convenience over the words; either one can reset the other.
 4. **The key file carries every earlier key the library has had**, sealed under the current one, and **every key change
-   carries that list forward — no exceptions.** So your *current* passphrase or words open every backup you have ever
-   made. Only typed secrets reach through the list; a quiet road opens only a key it directly holds.
-5. **A backup is the library plus the key file of its day.** It opens with the secrets of its day, with your current
-   secrets through rule 4, or — while the backup's key is still the live key — through this Mac's quiet roads.
+   carries that list forward — no exceptions.** A backup always opens with the passphrase and words you had when you
+   made it. Every key change also carries the earlier keys forward, so your current ones open older backups of the same
+   library. Only typed secrets reach through the list; a quiet road opens only a key it directly holds.
+5. **A backup is the library plus its key file.** It opens with the passphrase and words you had when you made it, with
+   your current secrets through rule 4, or — while the backup's key is still the live key — through this Mac's quiet
+   roads.
 6. **Changing the passphrase or making new words re-locks the current key; it does not change the key.** Older backups
    made under that same key still open with your new secrets; older keys still open through rule 4. The doors say so in
    one sentence.
@@ -78,7 +83,7 @@ and never leaves a hole you chose to close.**
     **every backup you have ever made** are Standard from now on. The leave screen says so plainly: *your library and all
     your backups will open through your Apple account and this Mac again; if you want Castle-era writing to stay
     Castle-protected, don't leave.* Other devices follow out quietly, with a notice; one that lagged through the whole
-    Castle stretch types a secret once to catch up.
+    Castle stretch types a secret once to catch up, today's or the one it had when it last synced.
 13. **A Castle-era backup is protected while your library is in Castle.** Nothing else is promised about it.
 
 ## Sync

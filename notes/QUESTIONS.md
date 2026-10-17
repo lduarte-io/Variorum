@@ -2957,3 +2957,38 @@ none built:
 Record: the plan's §8 U4 RECORD, piece E (the trace and the stop). Status: open — HERS (a rule decision or a mechanism
 to make rules 4 and 12 hold).
 
+**Status: RULED 2026-10-17 (the U4 stop sitting — the plan's §8 HER RULINGS AT THE U4 STOP, item 1): THE FLOOR — options
+(a), (b) and (c) all NOT chosen.** Her words: *"I'm not necessarily opposed to the idea that vault keeps master but I
+have noticed that a new promise is driving complexity an unreasonable amount. this whole thing where you can open past
+libraries with your current keys is a nice convenience but let's shrink our promise to "can always open with the keys
+that were their keys when you made them". and as a niceity we like to carry them forward."* The vault does NOT keep
+earlier masters (not (a)); no rule states a lag exception (not (c)) — the promise itself shrinks. **Rule 4's promise
+sentences, her final wording (relayed 2026-10-17, superseding the first accepted version):** *"A backup always opens
+with the passphrase and words you had when you made it. Every key change also carries the earlier keys forward, so your
+current ones open older backups of the same library."* — her words on it: *"yeah I like that better. of the same library
+makes it clear without making it seem like an exception. i prefer that wording."* Rule 5 drops "of its day" for the same
+words; rule 12's catch-up reads *"types a secret once to catch up, today's or the one it had when it last synced."*
+Built in the U4 resumption's piece 2: promise 4 rewritten to the floor (the copy opens with the pair it was made with;
+on a device that has caught up her current secrets open the library; where they do, they reach every older copy of the
+same library); `U4LaggingPairScenarios` flipped from a known issue to the floor's assertion (the lagged device opens with
+its last-sync secrets, then follows typing one secret and catches up). Do not re-propose (a) or (c).
+
+**P-VX378-U4-4 — Rule 12's catch-up on an ALWAYS-ASK device that lagged through both secrets and a new master: one
+secret, or two moments?** (Found building piece 2 — the floor.) Rule 12 now reads *"types a secret once to catch up,
+today's or the one it had when it last synced."* On such a device today's secrets open nothing (the floor), so she types
+the one it had when it last synced to OPEN it; the follow that catches it up reads the account's vault, which only
+today's secrets open — so a second typed secret (today's) is the follow's. On a device with a quiet road (Touch ID, or
+Standard's silent item) the open is quiet and the catch-up is the follow's one secret, exactly as written. The ruling
+block's own sentence ("the lagged device opens with its last-sync secrets, then follows") describes the two moments.
+Options:
+- **(a) BUILT, PROVISIONAL —** the two moments as the ruling block states them: the open types whichever opens the
+  library (today's, else the pair of its last sync — the world's lobby tries today's first); the follow types ONE secret,
+  today's (`U4LaggingPairScenarios`). The same reading covers a copy made on a synced device whose locks had not yet
+  followed a key door elsewhere: "the passphrase and words you had when you made it" is the pair that device's library
+  opened with then (the floor's write-time record, `CopyTruth.madeWith…`).
+- (b) the follow accepts the last-sync secret — it would need the vault to keep earlier masters, which her ruling
+  declined; listed so it is not proposed.
+- (c) rule 12's wording names the two moments for an Always-ask device ("types the one it had when it last synced to
+  open it, then today's once to catch up") — a rules edit, hers.
+Record: the plan's §8 U4 RESUMPTION RECORD, piece 2. Status: PROVISIONAL (a) — your eye at the bundle.
+

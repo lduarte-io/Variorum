@@ -11,10 +11,12 @@
 //      Castle no quiet road holds the key its rows are written under; a device
 //      holding that key has followed; the account keeps every sync key it has
 //      had; every device ends in the account's posture (settled).
-//    4 THE CORE SENTENCE (rules 4, 5, 6, 7, 17) — your current passphrase or
-//      words open every copy of this library you have made (a new library
-//      starts with no previous keys — her ruling of 2026-10-17 removed Make
-//      this my library's carry).
+//    4 THE FLOOR (rules 4, 5, 6, 7, 12 — her ruling at the U4 stop,
+//      2026-10-17) — every copy opens with the passphrase and words she had
+//      when she made it; on a device that has caught up, her current ones
+//      open the library; and every key change carries the earlier keys
+//      forward, so her current ones open older copies of the same library
+//      (never across a new library: Make this my library carries no keys).
 //    5 EVERY COPY OPENS BY SOME ROAD (rules 1, 27, 19) — or the refusal names
 //      what would have; copies leave only by her or this Mac's own retention.
 //    6 CRASH SAFE (rule 20) — strict: nothing left half-done, and the open says
@@ -529,24 +531,49 @@ extension SWorld {
         return agrees(slot.fingerprint) && (liveKeyFile(device).map { agrees($0.fingerprint) } ?? true)
     }
 
-    /// PROMISE 4 — THE CORE SENTENCE (rules 4, 5, 6, 7, 17): "Your passphrase or
-    /// your twelve words — together with any copy of your library — always open
-    /// it"; "your current passphrase or words open every backup you have ever
-    /// made" (4); re-locking keeps it (6); one pair at a time (7); a copy made
-    /// your library is a new library with no previous keys (17 — her ruling of
-    /// 2026-10-17 removed the carry, P-VX378-U4-1 re-ruled). Her CURRENT
-    /// secrets — typed, or through the account's vault they open (rule 7) —
-    /// reach every copy of THIS library this Mac made, through the key file in
-    /// the live place (or its sealed copy, rule 1) and the copy's own key file.
-    /// Judged while the live place is the library this Mac remembers (else
-    /// promise 7 refuses) with nothing in flight.
+    /// PROMISE 4 — THE FLOOR, AND THE CARRY WITHIN THE SAME LIBRARY (rules 4,
+    /// 5, 6, 7, 12 — her ruling at the U4 stop, 2026-10-17): "A backup always
+    /// opens with the passphrase and words you had when you made it. Every key
+    /// change also carries the earlier keys forward, so your current ones open
+    /// older backups of the same library" (4); a backup "opens with the
+    /// passphrase and words you had when you made it, with your current secrets
+    /// through rule 4" (5); re-locking keeps it (6); one pair at a time (7); a
+    /// device that lagged "types a secret once to catch up, today's or the one
+    /// it had when it last synced" (12). Three clauses:
+    ///   (a) THE FLOOR — every copy this Mac made opens, typed, through its own
+    ///       key file, with the pair she had when she made it (`CopyTruth
+    ///       .madeWith…`, found at the write — `recordMadeWith`).
+    ///   (b) CAUGHT UP — on a device in step with its holder (a library of its
+    ///       own; or synced, its record following the account's current sync
+    ///       key and posture), her current passphrase or words — typed, or
+    ///       through the account's vault they open (rule 7) — open the library.
+    ///   (c) THE CARRY — where her current secrets open the library (or its
+    ///       sealed copy, rule 1), they reach every copy of THIS library this
+    ///       Mac made, through it and the copy's own key file. Never across a
+    ///       new library (Make this my library carries no keys — her ruling).
+    /// (b) and (c) are judged while the live place is the library this Mac
+    /// remembers, with nothing in flight.
     func coreSentence(_ device: SDevice) -> [Violation] {
+        var violations: [Violation] = []
+        func fail(_ detail: String) { violations.append(Violation(promise: 4, device: device.name, detail: detail)) }
+        // (a) THE FLOOR — every copy, whatever the live place holds.
+        for (id, copy) in truth.copies.sorted(by: { $0.key < $1.key }) where copy.madeOn == device.name {
+            guard copy.madeWithPassphrase != nil || copy.madeWithWords != nil,
+                  let (fs, path) = DeviceLeaves(world: self, device: device).resolve(id), let image = fs.files[path]?.library,
+                  image.fingerprint == copy.fingerprint else { continue }
+            var seeds = Seeds()
+            seeds.passphrases = [copy.madeWithPassphrase].compactMap { $0 }
+            seeds.words = [copy.madeWithWords].compactMap { $0 }
+            if reach(seeds, files: [ownKeyFile(fs, path)].compactMap { $0 })[image.fingerprint] == nil {
+                fail("the copy \(id) (\(f8(image.fingerprint))) doesn't open with the secrets it was made with")
+            }
+        }
         guard let slot = device.slot, let record = slot.record, device.container.files[SPath.plan] == nil,
               device.library?.section.actInFlight == nil, livePlaceRemembered(device),
-              let holder = slotHolder(device) else { return [] }
+              let holder = slotHolder(device) else { return violations }
         // L3 (rule 3): a login-password holder rewrote this Standard key's file;
         // judged again once a key change mints one past them.
-        if truth.tamperedStandard[device.name]?.contains(slot.fingerprint) == true { return [] }
+        if truth.tamperedStandard[device.name]?.contains(slot.fingerprint) == true { return violations }
         let k = known(holder)
         var seeds = Seeds()
         seeds.passphrases = [k.passphrase].compactMap { $0 }
@@ -555,38 +582,55 @@ extension SWorld {
             seeds.passphrases += [day.passphrase].compactMap { $0 }
             seeds.words += [day.words].compactMap { $0 }
         }
-        if let account = record.account, let vault = server.snapshot(account) { seeds.vaults.append(vault.vault) }
+        var vault: VaultSnapshot?
+        if let account = record.account, let snapshot = server.snapshot(account) {
+            vault = snapshot
+            seeds.vaults.append(snapshot.vault)
+        }
         var base = [liveKeyFile(device)].compactMap { $0 }
         if case .memory(let sealed)? = device.keychain.local[KName.memory(Self.scope, slot.libraryID)]?.value,
            let memory = try? ProtectionCoding.decoder().decode(DeviceMemory.self, from: sealed.payload),
            let mirror = memory.keyFileMirror { base.append(mirror) }
-        var violations: [Violation] = []
         // Rule 1's row (§3 of the corrector plan): the key file in the live place
         // and its sealed copy both gone, nothing rebuilds one from the key — "the
         // copy-less rebuild door is NOT built (rule 27 says the honest outcome)":
-        // today's secrets then open only what a remaining key file carries (its
-        // copies keep their day's secrets — promise 5), and the open must SAY so.
+        // her secrets then open only what a remaining key file carries (its
+        // copies keep the floor), and the open must SAY so.
         if !base.contains(where: { $0.fingerprint == slot.fingerprint }) {
             if device.isOpen, !assessed(device).faults.contains(where: { if case .noKeyFileAnywhere = $0 { return true } else { return false } }) {
-                violations.append(Violation(promise: 4, device: device.name,
-                                            detail: "no key file of the current key is left and the open doesn't say so (rule 27)"))
+                fail("no key file of the current key is left and the open doesn't say so (rule 27)")
             }
             return violations
         }
-        let started = truth.freshStarts[device.name] ?? .distantPast
+        let todayOpensIt = reach(seeds, files: base)[slot.fingerprint] != nil
+        // (b) CAUGHT UP.
+        let caughtUp: Bool = {
+            guard record.account != nil else { return true }
+            guard let vault else { return false }
+            return record.accountRowKeyID == vault.rowKeyID && record.mode == vault.mode
+        }()
+        if caughtUp, !todayOpensIt {
+            fail("her current passphrase and words don't open the library, and it has caught up (rules 4, 7, 12)")
+        }
+        // (c) THE CARRY — within the same library, wherever today's open it.
+        guard todayOpensIt else { return violations }
         for (id, copy) in truth.copies.sorted(by: { $0.key < $1.key }) where copy.madeOn == device.name {
-            if copy.madeAt < started || truth.rolledBackOver.contains(id) { continue }  // another library's start; L4
+            if truth.rolledBackOver.contains(id) { continue }  // L4
             guard let (fs, path) = DeviceLeaves(world: self, device: device).resolve(id), let image = fs.files[path]?.library,
                   image.libraryID == record.libraryID else {
                 continue  // gone, or another library's copy (rule 19 — a new library has no previous keys)
             }
-            let own = fs.files[SPath.pair(of: path)]?.keyFile ?? fs.files[(path as NSString).deletingLastPathComponent + "/" + SPath.liveKeyFile]?.keyFile
-            if reach(seeds, files: base + [own].compactMap { $0 })[image.fingerprint] == nil {
-                violations.append(Violation(promise: 4, device: device.name,
-                                            detail: "her current passphrase and words don't open the copy \(id) (\(f8(image.fingerprint)))"))
+            if reach(seeds, files: base + [ownKeyFile(fs, path)].compactMap { $0 })[image.fingerprint] == nil {
+                fail("her current passphrase and words don't open the copy \(id) (\(f8(image.fingerprint))) of the same library")
             }
         }
         return violations
+    }
+
+    /// A copy's own key file: its pair, else the key file set aside beside it.
+    func ownKeyFile(_ fs: FolderFS, _ path: String) -> KeyFile? {
+        fs.files[SPath.pair(of: path)]?.keyFile
+            ?? fs.files[(path as NSString).deletingLastPathComponent + "/" + SPath.liveKeyFile]?.keyFile
     }
 
     /// PROMISE 5 — EVERY COPY OPENS BY SOME ROAD (rules 1, 27, 19): every copy
@@ -690,7 +734,9 @@ extension SWorld {
         violations += truth.strandings.map { Violation(promise: 8, device: $0.device, detail: $0.detail) }
         violations += truth.lookInsideWrites.map { Violation(promise: 9, device: $0.device, detail: $0.detail) }
         violations += truth.doorRefusals.map { Violation(promise: 4, device: $0.device, detail: $0.detail) }
+        violations += truth.madeWithNothing.map { Violation(promise: 4, device: $0.device, detail: $0.detail) }
         truth.doorRefusals.removeAll()
+        truth.madeWithNothing.removeAll()
         truth.refusals.removeAll()
         truth.strandings.removeAll()
         truth.lookInsideWrites.removeAll()

@@ -1432,8 +1432,48 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
   a quiet road is gone; the account-sync-keys residue on a Make-this-my-library'd synced device is P-VX378-U2-4's, hers
   with VX-309). Protection set Debug `━ 275 tests in 71 suites passed … with 2 known issues` (the stopped U4's lagging
   pin, piece 2's to flip).
-- 2 — THE FLOOR (her item 1): NOT-STARTED — rules 4, 5, 12 in her quoted words; promise 4 rewritten to the floor;
-  `U4LaggingPairScenarios` flipped to an assertion of the floor; QUESTIONS P-VX378-U4-3 → RULED (the floor). PENDING.
+- 2 — THE FLOOR (her item 1): DONE (this commit). **Her final rule-4 wording** (relayed by the coordinator mid-session,
+  2026-10-17, superseding the version §8's ruling block quotes): *"A backup always opens with the passphrase and words
+  you had when you made it. Every key change also carries the earlier keys forward, so your current ones open older
+  backups of the same library."* — her words on it: *"yeah I like that better. of the same library makes it clear
+  without making it seem like an exception. i prefer that wording."* **Rules** (`notes/CastleRules.md`): rule 4's promise
+  sentence ("So your current passphrase or words open every backup you have ever made.") replaced by her two sentences,
+  the rest of rule 4 untouched (its bold "every key change carries that list forward — no exceptions" now stands beside
+  her "Every key change also carries…" — a near-repeat left as she worded it, for her eye); rule 5 → *"A backup is the
+  library plus its key file. It opens with the passphrase and words you had when you made it, with your current secrets
+  through rule 4, or — while the backup's key is still the live key — through this Mac's quiet roads."* (only the two
+  "of its day" phrases replaced, by her "same words" — my rendering, for her eye); rule 12's last sentence gains *",
+  today's or the one it had when it last synced."*; the status line names the U4-stop amendments (4, 5, 12, 17 — 21
+  joins at piece 3) and the U3-seam FACTS DIFF ones (12, 25), which it hadn't named. **Promise 4 rewritten to the floor**
+  (`Promises.swift` `coreSentence`, three clauses): (a) THE FLOOR — every copy this Mac made opens, typed, through its own
+  key file, with the pair she had when she made it (the world records it at the write — `CopyTruth.madeWith…` via
+  `recordMadeWith`: a secret chosen at the act now running, then her current pair for the copy's holder or this device's
+  last holder, then each earlier pair, newest first; none opening → a write-time violation `madeWithNothing`; L3 exempt);
+  (b) CAUGHT UP — a library of its own, or a synced one whose record follows the account's current sync key and posture,
+  opens with her current passphrase or words (typed, or through the vault they open); (c) THE CARRY — where her current
+  secrets open the library or its sealed copy, they reach every copy of THE SAME LIBRARY this Mac made (never across a new
+  library). The rule-1-row clause (no key file of the current key → the honest fault) kept. **The world:** the lobby's
+  "she" types today's pair first and, when it opens nothing, the pair she had before, newest first (rule 12's "or the one
+  it had when it last synced" — `launch`); Look inside `.itsDay` types the copy's made-with pair, and refusing it while
+  that pair reaches the copy is a promise-4 door refusal. **The lagging pin flipped:** `U4LaggingPairScenarios
+  .aLaggingDeviceOpensWithItsLastSyncSecretsThenCatchesUpWithOneSecret` (no `withKnownIssue`) — today's secrets open
+  nothing on the lagged Always-ask device (typed or through the vault, which keeps no earlier master), its last-sync
+  passphrase and words each open it, it opens, owes the follow, follows typing ONE secret (today's), and is then in the
+  account's posture on its current sync key, today's passphrase opening it, the lagged key carried in its history, every
+  promise kept. **Evidence:** the model is unchanged by this piece (a promise rewrite); on the pre-piece tree (scratch at
+  `1f74825b6`, the scenario file copied in) the flipped pin is red at the world's typing and the old promise — `✘ … 7
+  issues` at `U4LaggingPairScenarios.swift:47` (the launch, which never typed the last-sync pair), `:48`, `:51`, `:52`,
+  `:54`, `:55`, `:59` (the old promise 4 firing on the lag) — while its model assertions (`:39`–`:43`: today's open
+  nothing, the last-sync pair opens) are green on both sides. Each new clause catches its breach planted by hand
+  (`U4PromiseCheckTests`): `theFloorCatchesACopyThatNoLongerOpensWithTheSecretsItWasMadeWith` (4a),
+  `caughtUpCatchesALibraryTodaysSecretsDontOpen` (4b), `theCoreSentenceCatchesADroppedHistory` (4c, kept). One finding
+  while landing it: the write-time floor check first fired on a Standard library whose words lock a login-password holder
+  dropped (generator seed 2 seq 7) — L3, exempted. The fixture's two `LDay` doc lines quote the new rule 4; the page
+  re-rendered `cmp`-IDENTICAL. QUESTIONS: P-VX378-U4-3 → RULED (the floor; (a)/(b)/(c) NOT chosen; her final wording);
+  **P-VX378-U4-4 PROVISIONAL (a)** — rule 12's catch-up on an Always-ask device is two moments (open with the last-sync
+  pair, follow with today's one secret), and "the passphrase and words you had when you made it" on a synced device whose
+  locks hadn't followed a key door elsewhere is the pair its library opened with then. **Census class (A) closed** (the
+  floor). Protection set Debug `✔ 277 tests in 71 suites passed` (no known issue left).
 - 3 — RULE 21: THE NOTICE AND THE OFFER (her item 3): NOT-STARTED — (a) rule 21's words; (b) the model opens and
   says one notice (her two strings), then remembers; (c) the key-file offer naming its source; (d) the refusal road
   deleted; (e) promise 7 rewritten, the tamper clauses, P-VX378-U4-2 CLOSED; (f) the fixture's stage 14, the page,

@@ -826,6 +826,11 @@ extension SWorld {
                 let k = slotHolder(device).map(known) ?? Known()
                 return TypedSecrets(passphrase: k.passphrase, words: k.words)
             }
+            // The secrets it was made with (the floor — rule 4), else its
+            // holder's of that moment.
+            if made.madeWithPassphrase != nil || made.madeWithWords != nil {
+                return TypedSecrets(passphrase: made.madeWithPassphrase, words: made.madeWithWords)
+            }
             let day = known(made.holder).at(made.madeAt)
             return TypedSecrets(passphrase: day.passphrase, words: day.words)
         }
@@ -861,6 +866,19 @@ extension SWorld {
             let own = catalog.servingKeyFiles(of: copy).compactMap(\.document)
             if reach(seeds, files: [liveKeyFile(device)].compactMap { $0 } + own)[image.fingerprint] != nil {
                 truth.doorRefusals.append((device.name, "Look inside refused \(copy.id) although her current secrets reach it (rule 4)"))
+            }
+        }
+        // …and with the secrets it was made with (the floor — rule 4: "A
+        // backup always opens with the passphrase and words you had when you
+        // made it"): they reach it through its own key file → it opens.
+        if typing == .itsDay, !opened, let made = truth.copies[copy.id],
+           made.madeWithPassphrase != nil || made.madeWithWords != nil,
+           let (fs, path) = DeviceLeaves(world: self, device: device).resolve(copy.id), let image = fs.files[path]?.library {
+            var seeds = Seeds()
+            seeds.passphrases = [made.madeWithPassphrase].compactMap { $0 }
+            seeds.words = [made.madeWithWords].compactMap { $0 }
+            if reach(seeds, files: catalog.servingKeyFiles(of: copy).compactMap(\.document))[image.fingerprint] != nil {
+                truth.doorRefusals.append((device.name, "Look inside refused \(copy.id) although the secrets it was made with open it (rule 4)"))
             }
         }
         if !opened { throw ExecutorRefusal.copyDoesNotOpen }

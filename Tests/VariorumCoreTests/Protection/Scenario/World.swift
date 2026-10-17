@@ -50,6 +50,14 @@ struct CopyTruth: Equatable {
     var mode: ProtectionMode?
     /// Whose secrets it was made under — an account, or the library's own.
     var holder: String
+    /// THE FLOOR (rule 4, her ruling at the U4 stop, 2026-10-17: "A backup
+    /// always opens with the passphrase and words you had when you made it"):
+    /// the pair she had for this library when it was written — the one that
+    /// opens its own key file then (on a device whose locks lagged its account,
+    /// the pair of its last sync — rule 12's "the one it had when it last
+    /// synced"). Promise 4 holds the copy to it for as long as it exists.
+    var madeWithPassphrase: String? = nil
+    var madeWithWords: [String]? = nil
 }
 
 /// The ground truth the promises read.
@@ -99,6 +107,9 @@ struct Truth {
     var lookInsideWrites: [(device: String, detail: String)] = []
     /// PROMISE 4 (rule 4): Look inside refused a copy her current secrets reach.
     var doorRefusals: [(device: String, detail: String)] = []
+    /// PROMISE 4 (rule 4's floor): a copy written that opens with none of the
+    /// secrets she had for its library — found at the write.
+    var madeWithNothing: [(device: String, detail: String)] = []
     /// THE COMPLETE REPLAY — the stated limit carried from P-U4-5 (her ruling
     /// 2026-10-14/15, "accept and state it"): this Mac's homes replayed
     /// together return it to that earlier state, its secrets of that day with
@@ -664,9 +675,27 @@ final class SWorld {
     func launch(_ device: SDevice, typed: TypedSecrets? = nil) async throws -> UnlockedLibrary {
         if device.isOpen, let library = device.library { return library }
         guard let slot = device.slot else { throw WorldRefusal.noLibrary }
-        let typed = typed ?? typedFor(device)
+        let asked = typed
+        var typed = typed ?? typedFor(device)
         device.touchIDPress = nil
-        guard let (key, also) = await walkLobby(device, typed: typed) else { throw WorldRefusal.cannotOpen }
+        var lobby = await walkLobby(device, typed: typed)
+        if lobby == nil, asked == nil, let holder = slotHolder(device) {
+            // THE FLOOR (her ruling at the U4 stop, 2026-10-17 — rule 12: a
+            // device that lagged "types a secret once to catch up, today's or
+            // the one it had when it last synced"): today's opening nothing,
+            // she types the pair she had before, newest first.
+            for entry in known(holder).timeline.reversed()
+            where entry.passphrase != typed.passphrase || entry.words != typed.words {
+                let older = TypedSecrets(passphrase: entry.passphrase, words: entry.words)
+                if let found = await walkLobby(device, typed: older) {
+                    lobby = found
+                    typed = older
+                    stepLog.append("  \(device.name): today's secrets open nothing here — she types the pair of its last sync (rule 12)")
+                    break
+                }
+            }
+        }
+        guard let (key, also) = lobby else { throw WorldRefusal.cannotOpen }
         let executor = newExecutor(device, libraryID: slot.record?.libraryID ?? slot.libraryID)
         device.executor = executor
         // PROMISE 7 (rule 21): the world's own reading of whether the live place
@@ -992,7 +1021,7 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
             let at = world.tick()
             let folder = "\(CatalogNames.previousLibrariesFolderName)/\(CatalogNames.stampString(at))"
             device.container.files["\(folder)/\(SPath.slot)"] = .library(outgoing)
-            world.truth.copies["container:\(folder)/\(SPath.slot)"] = CopyTruth(
+            var aside = CopyTruth(
                 libraryID: outgoing.libraryID, fingerprint: outgoing.fingerprint, madeAt: at, madeOn: device.name,
                 mode: outgoing.record?.mode,
                 holder: world.holder(device, account: outgoing.record?.account, libraryID: outgoing.libraryID))
@@ -1004,6 +1033,9 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
                     device.container.files["\(folder)/\(path)"] = .keyFile(document)
                 }
             }
+            world.recordMadeWith(&aside, id: "container:\(folder)/\(SPath.slot)", on: device,
+                                 keyFile: device.container.files["\(folder)/\(SPath.liveKeyFile)"]?.keyFile)
+            world.truth.copies["container:\(folder)/\(SPath.slot)"] = aside
         }
         slot = staged
         device.staged = nil
@@ -1141,11 +1173,49 @@ extension SWorld {
         for (place, fs) in places {
             fs.files["\(folder)/\(name)"] = .library(image)
             fs.files["\(folder)/\(SPath.pair(of: name))"] = .keyFile(keyFile)
-            truth.copies["\(place):\(folder)/\(name)"] = CopyTruth(
+            let copyHolder = holder(device, account: image.record?.account ?? (image.record == nil ? image.rowsOwner : nil), libraryID: image.libraryID)
+            var copy = CopyTruth(
                 libraryID: image.libraryID, fingerprint: image.fingerprint, madeAt: at, madeOn: device.name,
-                mode: image.record?.mode,
-                holder: holder(device, account: image.record?.account ?? (image.record == nil ? image.rowsOwner : nil), libraryID: image.libraryID))
+                mode: image.record?.mode, holder: copyHolder)
+            recordMadeWith(&copy, id: "\(place):\(folder)/\(name)", on: device, keyFile: keyFile)
+            truth.copies["\(place):\(folder)/\(name)"] = copy
         }
+    }
+
+    /// THE FLOOR at the write (rule 4: "A backup always opens with the
+    /// passphrase and words you had when you made it"): the pair she had for
+    /// this library — a secret chosen at the act now running first, then her
+    /// current pair for the copy's holder (or for this device's last holder —
+    /// Make this my library keeps the pair, rule 7), then each pair she had
+    /// before, newest first (a device whose locks lagged its account: the pair
+    /// of its last sync, rule 12) — the first whose passphrase or words open
+    /// the copy's own key file, typed. None: a copy written that her secrets
+    /// for it never opened.
+    func recordMadeWith(_ copy: inout CopyTruth, id: String, on device: SDevice, keyFile: KeyFile?) {
+        guard let keyFile, keyFile.fingerprint == copy.fingerprint else { return }
+        // L3 (rule 3): a login-password holder rewrote this Standard key's file
+        // (a lock dropped, a lock planted) — the copy carries what they left.
+        if truth.tamperedStandard[device.name]?.contains(copy.fingerprint) == true { return }
+        var holders = [copy.holder]
+        if let last = truth.lastHolder[device.name], !holders.contains(last) { holders.append(last) }
+        if let account = device.session.accountID, !holders.contains(account) { holders.append(account) }
+        var pairs: [(String?, [String]?)] = device.pending.reversed().map { ($0.passphrase, $0.words) }
+        for holder in holders {
+            let k = known(holder)
+            pairs.append((k.passphrase, k.words))
+            pairs += k.timeline.reversed().map { ($0.passphrase, $0.words) }
+        }
+        for (passphrase, words) in pairs {
+            var seeds = Seeds()
+            seeds.passphrases = [passphrase].compactMap { $0 }
+            seeds.words = [words].compactMap { $0 }
+            if reach(seeds, files: [keyFile])[copy.fingerprint] != nil {
+                copy.madeWithPassphrase = passphrase
+                copy.madeWithWords = words
+                return
+            }
+        }
+        truth.madeWithNothing.append((device.name, "the copy \(id) (\(copy.fingerprint.prefix(8))) opens with none of the secrets she had for it (rule 4)"))
     }
 }
 

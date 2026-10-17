@@ -53,8 +53,43 @@ struct U4PromiseCheckTests {
         #expect(world.accountOnePosture(settled: false).contains { $0.detail.contains("gone from the vault") })
     }
 
-    /// 4 — the key file's history dropped: today's secrets no longer reach an
-    /// older backup whose own file wants that day's secrets.
+    /// 4(a) — THE FLOOR (her ruling at the U4 stop): a copy whose own key
+    /// file no longer opens with the secrets it was made with.
+    @Test func theFloorCatchesACopyThatNoLongerOpensWithTheSecretsItWasMadeWith() async throws {
+        let world = try await scenarioWorld { try await $0.fresh(on: $0.macA) }
+        await world.done([.launch("macA"), .backup("macA")])
+        #expect(world.coreSentence(world.macA).isEmpty)
+        let (id, copy) = try #require(world.truth.copies.sorted { $0.key < $1.key }.first { $0.value.madeOn == "macA" })
+        #expect(copy.madeWithPassphrase != nil || copy.madeWithWords != nil, "the write recorded no pair")
+        let pairPath = SPath.pair(of: String(id.dropFirst("container:".count)))
+        var file = try #require(world.macA.container.files[pairPath]?.keyFile)
+        file.passphrase = nil
+        file.words = nil
+        file.masterWordsCopy = nil
+        world.macA.container.files[pairPath] = .keyFile(file)
+        let found = world.coreSentence(world.macA)
+        #expect(found.contains { $0.detail.contains("the secrets it was made with") }, "\(found)")
+    }
+
+    /// 4(b) — CAUGHT UP: a library of its own whose key file (and sealed copy)
+    /// her current secrets no longer open.
+    @Test func caughtUpCatchesALibraryTodaysSecretsDontOpen() async throws {
+        let world = try await scenarioWorld { try await $0.fresh(on: $0.macA) }
+        await world.done([.launch("macA"), .changePassphrase("macA")])
+        #expect(world.coreSentence(world.macA).isEmpty)
+        var live = try #require(world.liveKeyFile(world.macA))
+        live.passphrase = nil
+        live.words = nil
+        live.masterWordsCopy = nil
+        world.macA.container.files[SPath.liveKeyFile] = .keyFile(live)
+        world.macA.keychain.local = world.macA.keychain.local.filter { $0.key.service != ProtectionNames.memoryService }
+        let found = world.coreSentence(world.macA)
+        #expect(found.contains { $0.detail.contains("it has caught up") }, "\(found)")
+    }
+
+    /// 4(c) — THE CARRY: the key file's history dropped: today's secrets no
+    /// longer reach an older backup of the same library whose own file wants
+    /// that day's secrets.
     @Test func theCoreSentenceCatchesADroppedHistory() async throws {
         let world = try await scenarioWorld { try await $0.fresh(on: $0.macA) }
         await world.done([.launch("macA"), .backup("macA"), .changePassphrase("macA"), .regenerateWords("macA"),

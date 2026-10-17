@@ -62,10 +62,12 @@ enum LDay: String, Sendable {
     /// key file (its current key or its history) or the copy's own key file.
     case today
     /// Today's secret, through the LIVE key file — its current key or its
-    /// history (rule 4: "your current passphrase or words open every backup").
+    /// history (rule 4: "Every key change also carries the earlier keys
+    /// forward, so your current ones open older backups of the same library").
     case throughTheHistory
     /// The secret current the day the copy was made, on the copy's OWN key file
-    /// (rule 5: "the secrets of its day").
+    /// (rule 4: "A backup always opens with the passphrase and words you had
+    /// when you made it" — the floor; rule 5).
     case itsDay
 }
 
