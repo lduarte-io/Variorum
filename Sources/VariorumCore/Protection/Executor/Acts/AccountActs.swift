@@ -98,7 +98,7 @@ struct AccountMoveProgram: ActProgram {
         case "retireOldCustody": try ctx.retireOldCustody(sweepForCastle: entering)
         case "exportOff": try ctx.turnExportOff()
         case "retireOwnAppleKeys": try ctx.retireOwnAppleKeys()
-        case "joinKeyFile": try ctx.joinKeyFile()
+        case "joinKeyFile": try await ctx.joinKeyFile()
         case "bindAccount": try ctx.bindAccount(ctx.parameters.targetAccount)
         case "forgetOldSyncKeys": try ctx.forgetSyncKeys(of: ctx.parameters.forgetsAccount)
         case "forgetUnboundSyncKeys": try ctx.forgetUnboundSyncKeys()
@@ -123,7 +123,7 @@ struct SetUpSyncProgram: ActProgram {
     func run(_ step: String, _ ctx: ActContext) async throws {
         switch step {
         case "createVault": try await ctx.createVault()
-        case "joinKeyFile": try ctx.joinKeyFile()
+        case "joinKeyFile": try await ctx.joinKeyFile()
         case "bindAccount":
             try ctx.bindAccount(ctx.parameters.targetAccount)
         case "bindIfVaultIsOurs": try await ctx.bindIfVaultIsOurs()
@@ -175,8 +175,11 @@ extension ActContext {
     /// twelve-words copy beside it, so both of the account's secrets open the
     /// file (rule 2). Standard, this device's own Apple key for its key file if
     /// it has none.
-    func joinKeyFile() throws {
+    func joinKeyFile() async throws {
         guard var file = library.keyFile, file.fingerprint == library.fingerprint else { throw ExecutorRefusal.noLiveKeyFile }
+        // The vault's master and its words copy as the account holds them now —
+        // read here when this session hasn't (a resume after a crash).
+        if let account = accountID, executor.freshVaults[account] == nil { _ = try await freshRead() }
         let locks = try newLocks(passphrase: secrets.passphrase != nil, words: secrets.words != nil, master: true)
         let vaultKDF = accountID.flatMap { executor.freshVaults[$0] }?.vault.kdf
         if let passphrase = locks.passphrase {
@@ -243,7 +246,7 @@ extension ActContext {
         next.accountID = account
         next.newRowKeyID = held.rowKeyID
         plan.parameters = next
-        try joinKeyFile()
+        try await joinKeyFile()
         try bindAccount(account)
     }
 }

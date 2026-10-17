@@ -130,10 +130,39 @@ public struct LobbyRoads: Equatable, Sendable {
     public var typed: Set<TypedRoad>
     /// The vault road behind the typed secrets (signed in).
     public var vaultRoad: Bool
+    /// RULE 27: no road at all — the honest refusal, naming what would have
+    /// worked (nil whenever anything might still open the library).
+    public var noKeyFileAnywhere: NoKeyFileAnywhere?
     /// RULE 8: no quiet road to try (no silent item, no readable Apple wrap) —
     /// the lobby asks for the passphrase or the words at once. With one, it
     /// tries the quiet roads first and asks only when every one has failed.
     public var asksASecretAtOnce: Bool { silentItems.isEmpty && appleKeyID == nil }
+}
+
+/// The three homes rule 1 keeps a key file in.
+public enum KeyFileHome: String, Hashable, Sendable, CaseIterable {
+    case besideTheLibrary
+    case insideABackup
+    case thisMacsKeychain
+}
+
+/// RULE 27 ("A library whose every key-file copy and every backup are gone is
+/// gone. Synced libraries are the exception: the twelve words recover them from
+/// the account"): the honest refusal — the copies that would have opened it, and
+/// the account road when the library was (or may have been) synced. No
+/// copy-less rebuild exists (§3's rule-1 row).
+public struct NoKeyFileAnywhere: Hashable, Sendable {
+    /// Every home of rule 1 — each empty now.
+    public var wouldHaveWorked: [KeyFileHome]
+    /// Rule 27's exception (rule 14's road): the account's passphrase or words
+    /// bring a synced library's writing back from the account. Said when the
+    /// library names an account — or, before unlock, when a session is signed in.
+    public var accountRoad: Bool
+
+    public init(wouldHaveWorked: [KeyFileHome] = KeyFileHome.allCases, accountRoad: Bool) {
+        self.wouldHaveWorked = wouldHaveWorked
+        self.accountRoad = accountRoad
+    }
 }
 
 // MARK: - Repairs, faults, acts
@@ -224,6 +253,11 @@ public enum Fault: Hashable, Sendable {
     /// refuses, says what it found, and offers rule 17's two doors; no repair,
     /// no act, every door closed.
     case libraryDisagreesWithMemory(LibraryDisagreement)
+    /// RULE 27: the library opened by a quiet road, but no copy of its key file
+    /// is left anywhere — no live file, no sealed mirror to write back (rule 1).
+    /// Said honestly; nothing rebuilds a key file from the key (the acts that
+    /// need one refuse — export a plain copy).
+    case noKeyFileAnywhere(NoKeyFileAnywhere)
 }
 
 public enum FollowKind: Equatable, Sendable {

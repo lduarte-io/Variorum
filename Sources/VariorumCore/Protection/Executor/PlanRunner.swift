@@ -390,10 +390,8 @@ extension ProtectionExecutor {
             resuming: true)
         defer { library = ctx.library }
         log("\(plan.act.rawValue): resumes #\(plan.sequence) at step \(plan.firstUnfinishedStep.map(String.init) ?? "end")")
-        if plan.parameters?.synced == true, let account = ctx.accountID,
-           !plan.pastCommitPoint(libraryFingerprint: ctx.library.fingerprint) {
-            // A synced act not yet swapped resumes from the vault as it stands
-            // now.
+        if plan.parameters?.synced == true, let account = ctx.accountID {
+            // A synced act resumes from the vault as it stands now.
             do {
                 let vault = try await readVault(accountID: account)
                 // …and a passphrase derived under the vault's own descriptor must
@@ -406,12 +404,15 @@ extension ProtectionExecutor {
                 // Before the swap a resume that can't reach the vault ROLLS BACK
                 // (rule 20): if its one vault write had landed, the account moved
                 // and this device follows it, as any device would. (The named
-                // wait left with VX-378 U2.)
-                try rollBack(&ctx.library, act: plan.act, outgoingKeyFile: plan.parameters?.outgoingKeyFile)
-                throw ActRolledBack(act: plan.act, refusal: .vaultOutOfReach(account: account))
+                // wait left with VX-378 U2.) Past it, nothing the act still does
+                // needs the vault — and a step of an act that changes no key and
+                // still needs it reads it itself, rolling back if it can't.
+                if !plan.pastCommitPoint(libraryFingerprint: ctx.library.fingerprint) {
+                    try rollBack(&ctx.library, act: plan.act, outgoingKeyFile: plan.parameters?.outgoingKeyFile)
+                    throw ActRolledBack(act: plan.act, refusal: .vaultOutOfReach(account: account))
+                }
             }
         }
-        // Past the swap, nothing the act still does needs the vault.
         try reachNewKey(ctx, program)
         try await drive(program, ctx)
         return ctx.outcome

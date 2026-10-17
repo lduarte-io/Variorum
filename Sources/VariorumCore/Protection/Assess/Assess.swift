@@ -168,9 +168,19 @@ public enum AssessRules {
         // names — each verifies itself) and the live file's Apple wrap when its
         // key is readable here.
         let apple = live?.apple.flatMap { facts.appleKeys.readable.contains($0.keyID) ? $0.keyID : nil }
+        // RULE 27: a library in the slot and no road at all — no key file beside
+        // it, none in any copy, no memory item (its sealed mirror), no custody
+        // item holding a key. Anything that might still open it says nothing.
+        var nothing: NoKeyFileAnywhere?
+        if facts.unlocked == nil, facts.storeFile == .present, live == nil,
+           !facts.catalog.keyFiles.contains(where: { $0.document != nil }),
+           facts.rememberedLibraryIDs.isEmpty, facts.custody.isEmpty {
+            nothing = NoKeyFileAnywhere(accountRoad: facts.session.accountID != nil)
+        }
         return LobbyRoads(
             silentItems: facts.custody.filter { $0.itemClass == .silent }, appleKeyID: apple,
-            custodyItems: facts.custody, typed: typed, vaultRoad: facts.session.accountID != nil)
+            custodyItems: facts.custody, typed: typed, vaultRoad: facts.session.accountID != nil,
+            noKeyFileAnywhere: nothing)
     }
 
     // MARK: - Repairs (§3.3, guards included)
@@ -210,6 +220,10 @@ public enum AssessRules {
                 } else {
                     repairs.append(.restoreKeyFileFromMirror)
                 }
+            } else if liveKeyFile(facts, unlocked) == nil, unlocked.thisMac.actInFlight == nil {
+                // RULE 27: opened (by a quiet road) with no key file anywhere —
+                // nothing to write back; said, never rebuilt.
+                faults.append(.noKeyFileAnywhere(NoKeyFileAnywhere(accountRoad: record.account != nil)))
             }
             if stale { repairs.append(.refreshMemory) }
             // (The held keys' vault facts left with VX-378 U2: the RECORD names

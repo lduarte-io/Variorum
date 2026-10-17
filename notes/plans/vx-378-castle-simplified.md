@@ -315,7 +315,7 @@ record committed with PENDING numbers first.
   `25dc1cd12`): Debug `✔ 211 tests in 54 suites`, `-c release` `✔ 189 in 50`, the full core suite green in Debug;
   7,068 source lines, 8,611 test lines.
 - U2 — the additions: **IN PROGRESS** (Opus implementer, 2026-10-16) — §8's U2 RECORD carries the resume map
-  (pieces A–J, each flipped in the commit that lands it). A–H DONE; next: **I** (rule 27). Counts PENDING.
+  (pieces A–J, each flipped in the commit that lands it). A–I DONE; next: **J** (the closing runs). Counts PENDING.
 - U3 — the lifecycle proof: not started.
 - U4 — the world and the soak: not started.
 - The ladder: not started.
@@ -688,7 +688,7 @@ newest comment outranks an older body. Applied at the closeout's triage.
     `deleteOnSightByRecordedIDOnly` now checks Mac B's ORIGINAL Apple key (rule 8's re-make at Mac B's next open would
     otherwise heal the very delete it watches for — with the guard off it is still red).
   - Protection set Debug `✔ 240 tests in 63 suites`.
-- H — rule 17 (+ 23): DONE (this commit).
+- H — rule 17 (+ 23): DONE (`21cc0377a`).
   - **Look inside** (`ProtectionExecutor.lookInside(_:in:typed:)` → `LookedInside` {copy id, key held for the look,
     `CopyRoad`}): a catalogued copy opened read-only by its own secrets on its own key file (its history too), the
     current secrets through the live key file's history (rule 4), or its own quiet road on this Mac (a custody item
@@ -719,7 +719,25 @@ newest comment outranks an older body. Applied at the closeout's triage.
     posture "of now" with the remembered library's file gone): the same question as the empty-slot landing; both
     doors here take a catalogued copy and Make this my library takes the unlocked current library.
   - Protection set Debug `✔ 247 tests in 65 suites`.
-- I — rule 27: the honest `noKeyFileAnywhere` refusal naming the roads that would have worked: NOT STARTED.
+- I — rule 27 (+ the crash harness over E's changed acts): DONE (this commit).
+  - **The honest refusal** (`NoKeyFileAnywhere` {`wouldHaveWorked`: rule 1's three homes — beside the library, inside a
+    backup, this Mac's keychain; `accountRoad`: rule 27's exception, rule 14's road}): before unlock,
+    `LobbyRoads.noKeyFileAnywhere` when a library sits in the slot and NOTHING might open it — no key file beside it or
+    in any copy, no memory item (its sealed mirror), no custody item holding a key (the account road named when a
+    session is signed in); after an open by a quiet road with no live key file and no mirror to write back,
+    `Fault.noKeyFileAnywhere` (the account road named when the record names an account). Nothing rebuilds a key file
+    from the key (§3's rule-1 row — the copy-less rebuild door is not built).
+  - Pins `U2PinsRule27Tests` (3; `anythingThatMightStillOpenItSaysNothing` the guard, green both sides) red on the
+    pre-I tree (scratch worktree at `21cc0377a`: issues at `U2PinsRule27Tests.swift:29`, `:31`, `:65` — "3 tests in 1
+    suite failed … with 3 issues"), green after.
+  - **The crash harness over the acts E changed** (`U2CrashHarnessTests`, 4: sync setup handing the pair up, a
+    same-posture join typing one secret, a synced key door, a follow into Castle under Always ask) — the join's run was
+    RED at first ("crash after write 6 (plan): the settle threw .noWordsLock", the same at write 7): a resumed join
+    re-ran `joinKeyFile` with no vault read this session, so the master's twelve-words copy was missing and rule 2's
+    refusal fired. Fixed here (E's own gap): a synced resume reads the vault whenever it is reachable — rolling back
+    only before its commit point when it isn't — and `joinKeyFile` reads it itself when this session hasn't. Green
+    after.
+  - Protection set Debug `✔ 254 tests in 67 suites`.
 - J — the closing runs (the full core suite in Debug; the protection set under `-c release`), the counts, this record
   closed: NOT STARTED.
 
@@ -729,7 +747,7 @@ newest comment outranks an older body. Applied at the closeout's triage.
 
 **PROVISIONAL calls:** PENDING (logged under the VX-378 heading in `notes/QUESTIONS.md`, P-VX378-U2-n).
 
-**Commits:** A `0572dd3c0` · B `3631ecbde` · C `ef6c6bf54` · D `67ed68490` · E `db1c1ac55` · F `a01b622db` · G `1a02354bd` · H (this commit) · the rest PENDING.
+**Commits:** A `0572dd3c0` · B `3631ecbde` · C `ef6c6bf54` · D `67ed68490` · E `db1c1ac55` · F `a01b622db` · G `1a02354bd` · H `21cc0377a` · I (this commit) · J PENDING.
 
 ## 9. The ladder
 
