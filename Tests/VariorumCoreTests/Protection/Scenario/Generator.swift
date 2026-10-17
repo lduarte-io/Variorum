@@ -75,7 +75,7 @@ extension SWorld {
                 reopened = name
             } catch { stepLog.append("  (the tampered library didn't open: \(error))") }
             crashed.remove(name)
-            found += sealed(d, before: before[name]!, tampers: tampers)
+            found += sealed(d, before: before[name]!, tampers: tampers, opened: reopened == name)
         }
         if case .launch(let name) = action, result == .done { crashed.remove(name) }
         for device in devices { adoptPending(device) }
@@ -307,12 +307,18 @@ struct GeneratorTests {
                 guard let (violation, _) = world.violations.first else { continue }
                 let minimal = try await ScenarioGenerator.shrink(generated, promise: violation.promise)
                 let replayed = try await ScenarioGenerator.replay(generated, actions: minimal)
-                Issue.record("""
+                let report = """
                     seed \(seed) sequence \(sequenceIndex) (world seed \(sequenceSeed), start \(StartingState.all[generated.start])):
                     \(violation)
                     minimal sequence (\(minimal.count) steps): \(minimal)
                     \(replayed.log)
-                    """)
+                    """
+                // VX-378 U4: the soak's red written whole where asked (the
+                // console can drop a long issue).
+                if let out = ProcessInfo.processInfo.environment["PROTECTION_FAIL_OUT"] {
+                    try? Data(report.utf8).write(to: URL(fileURLWithPath: out))
+                }
+                Issue.record(Comment(rawValue: report))
                 return
             }
         }

@@ -326,11 +326,12 @@ record committed with PENDING numbers first.
   fixture first, the scenario's four walks, the page rendered from the fixture; three FACTS DIFF and two PROVISIONALs
   for her). After (code tree `389162a09`): the protection set Debug `✔ 259 tests in 69 suites`, `-c release` `✔ 237 in
   65`, the full core suite green in Debug; `Sources/…/Protection/` untouched (7,562), tests 12,068.
-- U4 — the world and the soak: **IN PROGRESS** (Opus implementer, 2026-10-16) — §8's U4 RECORD (the resume map). Piece
+- U4 — the world and the soak: **STOPPED at a design find — P-VX378-U4-3, hers** (Opus implementer, 2026-10-16/17) —
+  §8's U4 RECORD (the resume map; piece E carries the trace). Piece
   A (this record) DONE; B (her FACTS DIFF rulings) DONE; B2 (her P-VX378-U4-1 ruling — Make this my library carries
   the key history) DONE; C (the promises, the alphabet, the starting states) DONE; D (the promises' discrimination,
   mutation pins) DONE; E (the discovery
-  run, seeds 21–40) IN PROGRESS; F (the gate soak, seeds 1–20 both configurations), G (the record closed) NOT-STARTED. Counts
+  run, seeds 21–40) STOPPED at P-VX378-U4-3 (seed 21 seq 83); F (the gate soak, seeds 1–20 both configurations), G (the record closed) NOT-STARTED. Counts
   PENDING.
 - The ladder: not started.
 - The gate: not started.
@@ -1201,8 +1202,47 @@ her rulings above, never silently; the fixture diffs FD-1…3 close with them.
   `repairPreconditionsVerified` and `standardRecordNoDestructiveRepair` — the world can't plant the precondition the
   first needs (a live key file whose claims fail to verify is now rule 21's refusal) and the second's delete removes no
   road any promise reads. Each keeps its unit pin. Protection set Debug `✔ 276 tests in 71 suites`.
-- E — the discovery run: `PROTECTION_SOAK=1` seeds 21–40 × 1,000 × ≤60, Debug, one seed per call; every red triaged;
-  re-run after any fix: IN PROGRESS. Table: PENDING.
+- E — the discovery run: **STOPPED at a design find (P-VX378-U4-3) — the plan's stop rule; nothing after it ran as the
+  gate.** Seed 21 was walked in growing probes (100 → 400 sequences, Debug, `PROTECTION_SOAK=1 PROTECTION_SEED=21
+  PROTECTION_SOAK_SEEDS=1 PROTECTION_SOAK_SEQUENCES=n`); every red was traced (the generator now also writes a red's
+  whole report to `PROTECTION_FAIL_OUT` — the console dropped a long issue once). **The finds, in order:**
+  1. seq 20 — promise 7 "remembers another library": a login-password holder REPLAYED the old library's memory item
+     after Make this my library; the open is untouched (the live place is remembered). CHECKER: rule 21's "only the
+     app's own doors change them" binds the app; items a replay planted (`truth.plantedMemories`) are exempt.
+  2. seq 21 — promise 3 "a device that hasn't followed into Castle holds the key Castle rows are written under": the
+     WORLD's stand-in for the lobby's Always-ask duty (phase 2's wiring, `SWorld.launch`) held the vault's current keys
+     in session for a lagging device. WORLD: it holds them only for a record that already follows the vault's key and
+     posture; a lagging device's follow types its secret and holds them (rule 15).
+  3. seq 21 — promise 9 "the mode is standard" after a replay group: the open REFUSED correctly (rule 21); the clause
+     read the mode from the adversary's file on disk. CHECKER: after a refused relaunch only what the app could write is
+     judged (promise 7 holds the refusal to zero writes).
+  4. seq 32 — promise 1 "a silent custody item holds …": tampers made while the device was in STANDARD (L3, rule 3) —
+     the replayed older library file opened, memory broken, through the newer key file's history. CHECKER: L3 now
+     reaches promise 1's item clauses too; and PROVISIONAL P-VX378-U4-2 reads a library-file replay grouped with a
+     memory tamper as P-U4-5's "both homes" stated limit (L4) in the tamper clause.
+  5. seq 35 — promise 7 "remembers another library" after Make this my library then a complete replay: the later
+     library's memory item is the later stretch's. CHECKER: the clause yields to L4.
+  6. seq 40 — promise 4 on a Standard device whose words lock a login-password holder dropped (L3) with the key file
+     then deleted: CHECKER: L3 keyed on the library's current key, not on the (deleted) key file.
+  7. seq 59 — promise 4 after a login-password holder deleted the key file AND the memory item (its sealed copy): the
+     library opens by Touch ID, no key file of the current key is left, today's secrets open nothing new. RULED LIMIT:
+     the plan's §3 rule-1 row — "the 'copy-less rebuild' door is NOT built (rule 27 says the honest outcome)". Promise 4
+     now requires the honest fault (`noKeyFileAnywhere`) in that state instead of the core sentence.
+  8. **seq 83 — promise 4 on a LAGGING device: THE DESIGN FIND, P-VX378-U4-3 — THE STOP.** Trace (minimal, 5 steps, from
+     "a synced Castle account on two Macs and the phone", Always ask): macA Use Standard → New Words → Use Castle → Use
+     Standard → reset passphrase (plain confirm); macB never opened. macB's key file: the account's pair of its last
+     follow (P0, W0) and a master wrap under the master of that day (M0); today's account pair is (P2, W1) over the
+     master Use Castle minted (M2). The vault keeps every earlier SYNC key (rule 15), not earlier masters — so no
+     secret of today opens macB's key file, typed or through the vault, and on an Always-ask device macB does not open
+     with today's secrets at all (its old secrets do — nothing is lost, promise 5 holds). Rule 4's core sentence and
+     rule 12's "types a secret once to catch up" both fail there. The condition is exact — both secrets changed AND a
+     new master since the device last followed: with the master unchanged the vault road opens it and every promise
+     holds (`U4LaggingPairScenarios.withTheMasterUnchangedTheVaultRoadOpensIt`). Closing it needs either a mechanism
+     the rules don't name (the vault keeping earlier masters — "machinery to make a rule hold", which the stop rule
+     sends to her) or a rule stating the limit — hers either way. Pinned as a KNOWN ISSUE
+     (`U4LaggingPairScenarios.todaysSecretsOpenALaggingDevicesLibraryAfterBothChangedAndANewMaster`, `withKnownIssue` —
+     green while it waits, red the day the model closes it); options in QUESTIONS P-VX378-U4-3.
+  Table: none closed — the discovery seeds were not run to completion (the stop). The census below sizes the rest.
 - F — the gate soak: seeds 1–20 × 1,000 × ≤60, `swift test` AND `swift test -c release`, on the FINAL tree:
   NOT-STARTED. Tables: PENDING.
 - G — the closing runs, the counts, this record closed: NOT-STARTED.

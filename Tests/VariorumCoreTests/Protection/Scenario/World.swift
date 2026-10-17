@@ -106,6 +106,11 @@ struct Truth {
     var statedLimit: [String: (holder: String, at: Date, fingerprint: String)] = [:]
     /// PROMISE 3 (rule 15): every sync key each account has ever had.
     var accountRowKeys: [String: Set<String>] = [:]
+    /// PROMISE 7: memory items a login-password holder wrote back (a replay) —
+    /// by device, the library IDs they name. Rule 21's "only the app's own
+    /// doors change them" binds the app; an item planted beside the remembered
+    /// library changes nothing (promise 9) and is not the app's second library.
+    var plantedMemories: [String: Set<String>] = [:]
     /// PROMISE 4: when a device last CREATED a library (a fresh start, no past —
     /// what it made before belongs to a library it no longer carries).
     var freshStarts: [String: Date] = [:]
@@ -704,7 +709,12 @@ final class SWorld {
             // the secret typed at the unlock, held for the session.
             let leaf = DeviceLeaves(world: self, device: device)
             let held = [ProtectionNames.CustodyClass.touchid, .silent].contains { (try? leaf.readSyncKeys(accountID: account, itemClass: $0)) != nil }
-            if !held, device.sessionMemory[account] == nil, let vault = server.snapshot(account) {
+            // (VX-378 U4, found by discovery seed 21: only for a library that
+            // already follows the vault's current key and posture — a device
+            // that lagged owes its follow, which types its secret and holds the
+            // keys; until then it holds no key for rows written since — rule 15.)
+            if !held, device.sessionMemory[account] == nil, let vault = server.snapshot(account),
+               library.record?.accountRowKeyID == vault.rowKeyID, library.record?.mode == vault.mode {
                 var master: SymmetricKey?
                 if let p = typed.passphrase, let pk = passphraseKey(p, vault.vault.kdf) { master = vault.vault.master(passphrase: pk, words: nil) }
                 if master == nil, let w = typed.words, let wk = wordsKey(w) { master = vault.vault.master(passphrase: nil, words: WordsKey(key: wk)) }

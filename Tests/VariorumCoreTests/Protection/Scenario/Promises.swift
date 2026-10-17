@@ -351,12 +351,14 @@ extension SWorld {
         // history (rule 4). A rollback past a leave (L4) leaves the later
         // Standard stretch's keys out of the restored file.
         let tree = Set(live?.heldFingerprints ?? []).union([record.currentFingerprint])
+        let tampered = truth.tamperedStandard[device.name] ?? []  // L3
         for name in device.keychain.local.keys where name.service == ProtectionNames.custodyService {
-            if let item = device.keychain.local[name], !item.touchID, let key = item.value.libraryKey, tree.contains(PF.fp(key)) {
+            if let item = device.keychain.local[name], !item.touchID, let key = item.value.libraryKey, tree.contains(PF.fp(key)),
+               !tampered.contains(PF.fp(key)) {
                 fail("a silent custody item holds \(f8(key)) — rule 11's on-device road kept")
             }
         }
-        if let live, live.fingerprint == record.currentFingerprint, live.apple != nil {
+        if let live, live.fingerprint == record.currentFingerprint, live.apple != nil, !tampered.contains(live.fingerprint) {
             fail("an Apple wrap of the current key (rule 9)")
         }
         if settled {
@@ -377,7 +379,6 @@ extension SWorld {
         let mine = files.filter { $0.libraryID == record.libraryID }
         var reached = reach(seeds, files: mine)
         reached.merge(reach(own, files: files)) { a, _ in a }
-        let tampered = truth.tamperedStandard[device.name] ?? []
         for fingerprint in tree.sorted() where reached[fingerprint] != nil && !tampered.contains(fingerprint) {
             fail("a quiet road reaches \(fingerprint == record.currentFingerprint ? "the current key" : "an earlier key") \(fingerprint.prefix(8))")
         }
@@ -543,7 +544,7 @@ extension SWorld {
               let holder = slotHolder(device) else { return [] }
         // L3 (rule 3): a login-password holder rewrote this Standard key's file;
         // judged again once a key change mints one past them.
-        if let live = liveKeyFile(device), truth.tamperedStandard[device.name]?.contains(live.fingerprint) == true { return [] }
+        if truth.tamperedStandard[device.name]?.contains(slot.fingerprint) == true { return [] }
         let k = known(holder)
         var seeds = Seeds()
         seeds.passphrases = [k.passphrase].compactMap { $0 }
@@ -558,6 +559,18 @@ extension SWorld {
            let memory = try? ProtectionCoding.decoder().decode(DeviceMemory.self, from: sealed.payload),
            let mirror = memory.keyFileMirror { base.append(mirror) }
         var violations: [Violation] = []
+        // Rule 1's row (§3 of the corrector plan): the key file in the live place
+        // and its sealed copy both gone, nothing rebuilds one from the key — "the
+        // copy-less rebuild door is NOT built (rule 27 says the honest outcome)":
+        // today's secrets then open only what a remaining key file carries (its
+        // copies keep their day's secrets — promise 5), and the open must SAY so.
+        if !base.contains(where: { $0.fingerprint == slot.fingerprint }) {
+            if device.isOpen, !assessed(device).faults.contains(where: { if case .noKeyFileAnywhere = $0 { return true } else { return false } }) {
+                violations.append(Violation(promise: 4, device: device.name,
+                                            detail: "no key file of the current key is left and the open doesn't say so (rule 27)"))
+            }
+            return violations
+        }
         let started = truth.freshStarts[device.name] ?? .distantPast
         for (id, copy) in truth.copies.sorted(by: { $0.key < $1.key }) where copy.madeOn == device.name {
             if copy.madeAt < started || truth.rolledBackOver.contains(id) { continue }  // another library's start; L4
@@ -655,8 +668,14 @@ extension SWorld {
             return fail("the sealed copy isn't the current key's file")
         }
         let others = Set(device.keychain.names(service: ProtectionNames.memoryService)
-            .compactMap { ProtectionNames.parseMemoryAccount($0.account, scope: Self.scope) }).subtracting([record.libraryID])
-        if !others.isEmpty { return fail("this Mac remembers \(others.count) other librar(ies) too") }
+            .compactMap { ProtectionNames.parseMemoryAccount($0.account, scope: Self.scope) })
+            .subtracting([record.libraryID]).subtracting(truth.plantedMemories[device.name] ?? [])
+        // L4: a rollback returns the Mac to an earlier moment; a library this
+        // Mac came to remember after it (Make this my library's) is the later
+        // stretch's, left as it was.
+        if !others.isEmpty, truth.statedLimit[device.name] == nil {
+            return fail("this Mac remembers \(others.count) other librar(ies) too")
+        }
         return []
     }
 
@@ -759,20 +778,30 @@ extension SWorld {
     /// (Always ask recorded quietly when an item vanished weakens nothing).
     /// L4: a group that replays both of this Mac's homes together returns the
     /// Mac to that earlier moment.
-    func sealed(_ device: SDevice, before was: Posture, tampers: [Tamper]) -> [Violation] {
+    func sealed(_ device: SDevice, before was: Posture, tampers: [Tamper], opened: Bool = true) -> [Violation] {
         guard was.mode == .castle else { return [] }
         let now = posture(device)
+        // The relaunch refused (rule 21) or found no road: the files on disk are
+        // the adversary's, not a posture the app took — only what the app could
+        // have written is judged here (promise 7 holds the refusal to no write).
+        let judgesThePosture = opened
         var violations: [Violation] = []
         let label = tampers.map { "\($0)" }.joined(separator: " + ")
         func fail(_ what: String) { violations.append(Violation(promise: 9, device: device.name, detail: "after \(label): \(what)")) }
-        let statedLimit = tampers.contains(.replayBothHomes)
-        if now.libraryID == was.libraryID, !statedLimit {
+        // L4 — both homes of this Mac's facts returned together (P-U4-5): the
+        // complete replay, or the library file replayed while what this Mac
+        // remembers can't speak (deleted, edited past its seal, or replayed) —
+        // PROVISIONAL P-VX378-U4-2: the app can't tell what it doesn't remember
+        // (rule 21; the orchestrator's adjudication 5 after U1).
+        let memoryCantSpeak = tampers.contains { [.deleteMemoryItem, .editMemoryItem, .replayMemory, .deleteKeyFileAndMemory].contains($0) }
+        let statedLimit = tampers.contains(.replayBothHomes) || (tampers.contains(.replayLibraryFile) && memoryCantSpeak)
+        if now.libraryID == was.libraryID, !statedLimit, judgesThePosture {
             if now.mode != .castle { fail("the mode is \(now.mode.map { "\($0)" } ?? "unknown")") }
             if now.account != was.account { fail("the account changed") }
         }
         if !statedLimit, !now.silentItems.subtracting(was.silentItems).isEmpty { fail("a silent custody item appeared") }
         if !now.touchIDItems.subtracting(was.touchIDItems).isEmpty { fail("a Touch ID item appeared") }
-        if !statedLimit {
+        if !statedLimit, judgesThePosture {
             if was.gate != .touchID, now.gate == .touchID { fail("the gate style became Touch ID") }
             if was.scheduledExport == false, now.scheduledExport == true { fail("the scheduled export turned on") }
         }

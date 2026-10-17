@@ -2913,3 +2913,38 @@ entering Castle later retires them (rule 11). `notes/CastleRules.md` rule 17 gai
 forward (rule 4)". **Option (b) is NOT what she chose** — the set-aside key file is left alone; the carried history
 makes it unnecessary. Do not re-propose (a) or (b). The core sentence holds across Make this my library, unscoped.
 
+**P-VX378-U4-2 — THE ROLLBACK's reach (L4): a replayed library file while what this Mac remembers can't speak.** VX-305's
+stated limit (P-U4-5, her ruling 2026-10-14/15, "accept and state it") covers BOTH homes of this Mac's facts replayed
+together. With the family tree gone (rule 21) and the refusal keyed on a disagreement, never on absence (the
+orchestrator's adjudication 5 after U1), a login-password holder who replays an older library file AND deletes, edits past
+its seal, or replays the memory item gets the same outcome: the app remembers nothing that disagrees and opens the older
+file as it was (its posture with it), through the newer key file's history. The exposure is the replayed file's content,
+login-reachable in its day (P-U4-5's own reasoning). Options:
+- **(a) BUILT, PROVISIONAL —** read as P-U4-5's stated limit: the world's tamper clause (promise 9) counts a library-file
+  replay grouped with any memory tamper as "both homes" (`Promises.swift`, `sealed`).
+- (b) a model change: with nothing remembered, refuse a library file that is not under the key file beside it's current
+  key (the live pair broken), offering rule 17's two doors — a refusal keyed on the live place itself, not on absence.
+- (c) treat it as a stop (a Castle device can be flipped to Standard by two tampers).
+Record: the plan's §8 U4 RECORD, piece E. Status: open — your eye with the next finding.
+
+**P-VX378-U4-3 — A device that lagged while BOTH secrets changed and the account entered Castle: today's secrets open
+nothing there. THE UNIT STOPPED HERE (the plan's stop rule).** Found by the discovery run (seed 21, sequence 83; pinned as
+`U4LaggingPairScenarios`, a known issue). Each key door re-locks the acting device's key file and the vault (rule 7); a
+device that didn't open keeps the pair of its last follow, and its key file's master wrap is under the master of that
+day. Entering Castle mints a NEW master (U2's one-row rotation); the vault keeps every earlier SYNC key (rule 15) but not
+earlier masters. So once the passphrase AND the words have both changed elsewhere and a Castle entry has happened since
+the device last followed, none of today's secrets opens its key file — not typed, not through the vault — and on an
+Always-ask device it doesn't open with today's secrets at all; its old secrets still do (nothing is lost — promise 5
+holds). Rule 4's core sentence ("your current passphrase or words open every backup you have ever made") and rule 12's
+"types a secret once to catch up" both fail there. With the master unchanged the vault road opens it (pinned). Options,
+none built:
+- (a) the vault keeps every earlier master too, each sealed under the current master (rule 15's list, applied to masters
+  — her "carry the keys forward" frame); the lobby's vault road and the follow open a lagging key file through it.
+- (b) at a Castle entry, the outgoing master is carried in the new key files only — a lagging device's file still names
+  the old one, so (b) doesn't reach it; listed so it isn't proposed.
+- (c) a stated limit in the rules: a device that lagged through both secrets changing and a new master opens with the
+  secrets of its last follow, once, then follows with today's (rule 10's "it can still read what it already has",
+  extended to typed secrets).
+Record: the plan's §8 U4 RECORD, piece E (the trace and the stop). Status: open — HERS (a rule decision or a mechanism
+to make rules 4 and 12 hold).
+

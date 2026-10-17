@@ -682,6 +682,7 @@ extension SWorld {
                 throw WorldRefusal.noLibrary
             }
             device.keychain.local[name] = capture.memory
+            if let id = ProtectionNames.parseMemoryAccount(name.account, scope: Self.scope) { truth.plantedMemories[device.name, default: []].insert(id) }
         case .replayLibraryFile:
             guard let file = device.captures.compactMap(\.slot).first(where: { $0 != device.container.files[SPath.slot] }) else {
                 throw WorldRefusal.noLibrary
@@ -702,6 +703,7 @@ extension SWorld {
             device.container.files[SPath.liveKeyFile] = capture.liveKeyFile
             device.container.files[SPath.plan] = capture.plan
             device.keychain.local[name] = capture.memory
+            if let id = ProtectionNames.parseMemoryAccount(name.account, scope: Self.scope) { truth.plantedMemories[device.name, default: []].insert(id) }
             // L4: the Mac returns to the moment copied, its secrets of that day with it.
             if let image = capture.slot?.library, let holder = slotHolder(device) {
                 truth.statedLimit[device.name] = (holder, capture.at, image.fingerprint)
