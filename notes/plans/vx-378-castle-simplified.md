@@ -326,7 +326,9 @@ record committed with PENDING numbers first.
   fixture first, the scenario's four walks, the page rendered from the fixture; three FACTS DIFF and two PROVISIONALs
   for her). After (code tree `389162a09`): the protection set Debug `✔ 259 tests in 69 suites`, `-c release` `✔ 237 in
   65`, the full core suite green in Debug; `Sources/…/Protection/` untouched (7,562), tests 12,068.
-- U4 — the world and the soak: **STOPPED at P-VX378-U4-3 (2026-10-17, `0e220f524`), HER RULINGS taken (§8); RESUMED** — the resumption session: the carry reverted, the floor, rule 21's notice and offer, then the discovery run and the gate soak.
+- U4 — the world and the soak: **STOPPED at P-VX378-U4-3 (2026-10-17, `0e220f524`), HER RULINGS taken (§8); RESUMED —
+  IN PROGRESS** (Opus implementer, 2026-10-17) — §8's U4 RESUMPTION RECORD (pieces 1–6: the carry reverted, the floor,
+  rule 21's notice and offer, the census classes, the discovery run and the gate soak; every count PENDING).
   §8's U4 RECORD (the resume map; piece E carries the trace and the census). A, B, B2 (her P-VX378-U4-1 ruling), C, D
   DONE; E STOPPED at P-VX378-U4-3 (seed 21 seq 83; the census of seeds 21–23 sized the rest: 88 failing sequences in
   3,000, classes (A)–(I)); F NOT RUN; G DONE. After (code tree `0bd112c9c`): the protection set Debug `━ 278 tests in 72
@@ -1398,6 +1400,29 @@ told it to.
 **Rules edits this resumption makes at her word (and no others):** 4, 5, 12 (the floor); 17 (the carry's words
 removed); 21 (the fingerprint + wrapped copy; the notice; the offer). The status line of `CastleRules.md` names today's
 amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
+
+### U4 RESUMPTION RECORD — the carry reverted, the floor, rule 21's notice and offer, the census, the soaks (Opus implementer, 2026-10-17; IN PROGRESS)
+
+**Not done yet, first:** everything below is PENDING until its piece flips; the counts are PENDING until a run lands them.
+
+**Start:** tree `8d044191e` (clean, in sync). Before this session: the protection set Debug `━ 278 tests in 72 suites …
+2 known issues`, `-c release` `━ 255 in 68 … 2 known issues` (the stopped U4's close, code tree `0bd112c9c`).
+
+**Pieces (the resume map — a fresh session can finish the resumption from this list and `git log`):**
+- 1 — THE CARRY REVERTED (her item 2): NOT-STARTED — B2 (`b468a306c`) removed revert-shaped: `carrying:`, the
+  gathering at the door, the Apple-key records into the new section, `U4MakeMineHistoryTests` (keeping only the
+  no-choice guard), the fixture's stage 9/10 carry facts; rule 17 back to its pre-carry words; the page re-rendered,
+  `cmp` identical; QUESTIONS P-VX378-U4-1 → RE-RULED; the crash harness over `.makeMine` green. PENDING.
+- 2 — THE FLOOR (her item 1): NOT-STARTED — rules 4, 5, 12 in her quoted words; promise 4 rewritten to the floor;
+  `U4LaggingPairScenarios` flipped to an assertion of the floor; QUESTIONS P-VX378-U4-3 → RULED (the floor). PENDING.
+- 3 — RULE 21: THE NOTICE AND THE OFFER (her item 3): NOT-STARTED — (a) rule 21's words; (b) the model opens and
+  says one notice (her two strings), then remembers; (c) the key-file offer naming its source; (d) the refusal road
+  deleted; (e) promise 7 rewritten, the tamper clauses, P-VX378-U4-2 CLOSED; (f) the fixture's stage 14, the page,
+  `cmp`. Red-on-old per behaviour. PENDING.
+- 4 — THE CENSUS CLASSES (B)–(I) re-read under the rulings: NOT-STARTED. PENDING.
+- 5 — THE DISCOVERY RUN (seeds 21–40) and THE GATE SOAK (seeds 1–20, Debug and Release): NOT-STARTED. Tables land as
+  they complete. PENDING.
+- 6 — the closing runs, counts, this record closed: NOT-STARTED.
 
 ## 9. The ladder
 
