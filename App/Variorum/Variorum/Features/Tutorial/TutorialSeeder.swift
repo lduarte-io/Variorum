@@ -41,9 +41,9 @@ enum TutorialSeeder {
     nonisolated static let tagName = "tutorial"
     nonisolated static let scrapPoolTitle = "tutorial scraps"
 
-    /// The versions lesson's twin note — a `duplicateAsVersion` copy the
-    /// seed renames so the ⌘K palette never shows two identical rows (the
-    /// U7 walk finding). ONE constant since 17y B-DEDUPE: the mint and the
+    /// The versions lesson's twin note — a `duplicateAsVersion` copy (with
+    /// tags, VX-372) the seed renames so the ⌘K palette never shows two
+    /// identical rows (the U7 walk finding). ONE constant since 17y B-DEDUPE: the mint and the
     /// furniture fold's reserved-title facts read the same spelling.
     nonisolated static let twinTitle = "compare & versions \u{2014} the twin"
 
@@ -784,8 +784,9 @@ enum TutorialSeeder {
             + "the keeper.",
 
             "Fork the piece: when the structure should differ (a rearranged "
-            + "argument, a different opening), duplicate the note as a version "
-            + "and let the two grow apart, linked and comparable. A lens is the "
+            + "argument, a different opening), duplicate the note (Duplicate "
+            + "with Tags) and let the two grow apart as versions, linked and "
+            + "comparable. A lens is the "
             + "same structure with different choices; a version is a different "
             + "structure; promote is the bridge.",
         ])
@@ -1845,10 +1846,11 @@ enum TutorialSeeder {
 
         let versions = try lesson(looking, "compare & versions", [
             "A version is a different note related to this one. A version is a "
-            + "different structure. Two gestures share the word: Mark as Versions "
-            + "just draws a link between two existing notes; Duplicate as Version "
-            + "mints a whole copy (takes and all) and draws the link in one "
-            + "gesture. Mark = connect, duplicate = copy + connect.",
+            + "different structure. Two gestures make one: Mark as Versions "
+            + "just draws a link between two existing notes; Duplicate with Tags "
+            + "mints a whole copy (takes and all, and its tags) and draws the "
+            + "link in one gesture, and Duplicate without Tags leaves the tags "
+            + "behind. Mark = connect, duplicate = copy + connect.",
 
             "This lesson already has a version twin; it was duplicated when the "
             + "book was seeded. Open Compare (\u{2318}5): the notes sit side by "
@@ -1880,19 +1882,31 @@ enum TutorialSeeder {
             + "diff as a plain-text file, ready to hand to an AI agent.",
 
             "Unmark deletes only the connection; both notes stay exactly as "
-            + "they are. The library's right-click menu has Duplicate as Version "
-            + "for any note, any time.",
+            + "they are. The library's right-click menu has Duplicate with Tags "
+            + "and Duplicate without Tags for any note, any time.",
         ])
-        let twin = try ops.duplicateAsVersion(versions.post.id)
+        // VX-372 (VX-383 U1 — D-C-5): the twin is minted WITH TAGS, her
+        // door's default, said explicitly. Its lesson's one tag (the guide's)
+        // is now APPLIED through the one road rather than row-copied, so a
+        // living book collecting it would hear the twin. No seeded living
+        // book does: the guide is a plain book with no rule, and every seeded
+        // rule is a gathering's (classics, starred, quicknotes), which never
+        // seats. So on a fresh store — and on any store where she has not
+        // built a living book collecting the guide's tag — the seed's result
+        // is identical to today's (the twin, bookless, wearing the guide's
+        // tag, nothing written for it at any book). Where she HAS built one,
+        // the twin is heard like every one of its sibling lessons, whose
+        // `lesson()` apply has always been heard — the row-copied twin was the
+        // one lesson note no book could hear. (`.none` + the hand apply below
+        // would land the very same rows: that apply is an applying act too.)
+        let twin = try ops.duplicateAsVersion(versions.post.id, tags: .applied)
         // A distinct title (walk finding): the copy inherits the lesson's
         // title, and two identical rows in the ⌘K palette invite opening
         // the wrong one.
         try ops.renameContainer(twin.post.id, title: Self.twinTitle)
-        // 17y B3 item (c): Duplicate as Version now CARRIES the source's tags,
-        // so the twin is born wearing the guide's tag (a row copy) and this
-        // apply finds it already there. Tolerated ONLY for that refusal — the
-        // seeded result is identical (the twin wears the tag either way); any
-        // other refusal still aborts the seed.
+        // The belt (17y B3 item (c), kept): the twin is born wearing the
+        // guide's tag, so this apply finds it already there. Tolerated ONLY
+        // for that refusal — any other refusal still aborts the seed.
         do {
             try ops.applyTag(tagID, toPost: twin.post.id)
         } catch OperationError.alreadyTagged {}
