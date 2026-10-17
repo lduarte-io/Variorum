@@ -285,6 +285,10 @@ that survives. Then the discovery run (seeds 21–40) and the gate soak. **Evide
   built"** — a face that contradicts the rules, or a guide sentence the build made false, is a regression by definition
   (P-6's tutorial-as-spec, applied to the words). This headless phase ships no copy; it hands the item forward with the
   rules as the text to write from.
+- **The lobby face's typed roads (the ladder's round-1 N5):** `LobbyRoads.typed` reads the LIVE key file only; the
+  offer-era open's typed roads include rule 1's keychain mirror and every catalogued pair (the world's lobby walks
+  them). VX-306's plan names the mirror road in `LobbyRoads` or beside it, so the face never shows a stray's locks as
+  the typed roads in exactly the state the offer exists for.
 - **Later phases, re-planned to the rules:** VX-306 (the lobby / open road — the ask-and-re-make path's face, Touch ID
   re-arm, the refusal faces of rules 21/27; the P-U4-13 keychain-mirror road is now rule 1's redundancy, not a rescue);
   VX-307 (crossings' faces — the leave screen's "keep your Castle secrets" sentence, the follow's one ask); the warning
@@ -334,7 +338,7 @@ record committed with PENDING numbers first.
   3,000, classes (A)–(I)); F NOT RUN; G DONE. After (code tree `0bd112c9c`): the protection set Debug `━ 278 tests in 72
   suites passed with 2 known issues`, `-c release` `━ 255 in 68 … 2 known issues`, the full core suite green in Debug;
   7,604 source lines, 13,038 test lines.
-- The ladder: not started.
+- The ladder: round 1 **DONE** (0B·0M·2m·3N, all fixed and verified — §9); round 2 (the fixes) **RUNNING**.
 - The gate: not started.
 
 ---
@@ -1751,9 +1755,42 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
   **THE GATE SOAK:** RUNNING after the discovery run (the same script; seeds 1–20, Debug then Release).
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.
 
-## 9. The ladder
+## 9. The ladder (a fresh Fable reviewer per round, `notes/REVIEW_PROMPT.md` verbatim, zero framing; her cap: up to five rounds while a MAJOR is still found; a round that stalls on a safeguard reruns as Opus at max — none did)
 
-*(empty)*
+### Round 1 — 2026-10-17, fresh `fable-reviewer` over the WHOLE phase (`63cf038f1..ce3ee92e7`), read-only on a review worktree; the report committed UNEDITED as `notes/plans/vx-378-ladder-round-1.md` (`868369730`)
+
+**0 BLOCKER · 0 MAJOR · 2 MINOR · 3 NIT.** The clean bill's 13 items include the reviewer's own re-runs (Debug 296/74,
+release 273/70 matching the record), its own revert check of the lagging-pair pin (7 issues on the pre-piece tree,
+exactly the record's), the render `cmp`, and a seed-22 release soak re-run (44,838 steps, matching the census).
+
+**Dispositions and fixes (the orchestrator — the Opus pool was out on its session limit, so the Fable orchestrator
+applied them under the resiliency protocol's budget-death road; every change traced and the pin named):**
+1. **F1 (MINOR, `Assess.swift` lobby) — CONFIRMED, FIXED `37cf0d61f`.** Mechanism as traced: `custody.isEmpty`
+   silenced rule 27 for a silent item of a previous library's key (nothing deletes it; the Castle sweep touches the
+   live tree only). Fix: the class-(D) pattern — `ProtectionFacts.custodyOpensLibrary: Set<String>?` (the silent
+   items whose key verifiably opens the library; nil = the conservative reading; a Touch ID item always counts), the
+   world feeding it from each silent item's key tried against the slot; the lobby counts a silent item only when it
+   opens. Pin `U2PinsRule27Tests.aSilentItemThatOpensNothingDoesntSilenceRule27` (four arms: opens-nothing → the
+   refusal; opens → silence; Touch ID → silence; nil → silence). Red on the pre-fix tree BY CONSTRUCTION (the fact
+   did not exist; the old lobby said nothing for any custody item — the kept `anythingThatMightStillOpenItSaysNothing`
+   first line IS the old reading, now the nil case) — recorded honestly, the reviewer's own note said a world pin
+   needs a backups-deletion step the alphabet deliberately lacks.
+2. **F2 (MINOR, `DeviceMemory.swift` header) — CONFIRMED, FIXED `94f295c9e`:** the header teaches the notice design
+   and quotes rule 21 as ruled at the U4 stop; `LibraryDisagreement`'s last reference gone. Doc-only.
+3. **N3 (NIT, `CommonSteps.newKeyFile`) — CONFIRMED, FIXED `b6f5f7d6c`:** `kind` non-optional, the dead no-history
+   arm deleted (the one road that could have skipped rule 4's carry); every caller passed a kind; pure deletion, the
+   protection set green is the proof.
+4. **N4 (NIT, two comment drifts) — CONFIRMED, FIXED `94f295c9e`:** CatalogNames' set-aside bullet dropped;
+   StartingStates' fresh builder reworded (the Settings press is a belt, the gap closed at U2 piece D).
+5. **N5 (NIT, `LobbyRoads.typed` reads the live file only; the mirror and catalogued pairs are the offer-era roads)
+   — CONFIRMED as a FACE-PHASE hand-forward, no model change:** §5 gains the line for VX-306's plan (the lobby face
+   names rule 1's mirror road in `LobbyRoads` or beside it). No pin owed at this tier.
+
+**Verification after the fixes (the orchestrator, tree `94f295c9e`):** the protection set in Debug `✔ 385 tests in
+148 suites passed` (the wider filter; the new pin among them); `swift build -c release` complete; under `-c release`
+`✘ 362 tests in 144 suites … 1 issue` — VX-380's Sync attacker test, swept in by the filter, nothing of Protection's.
+Round 2 re-reviews the fixes (`ce3ee92e7..94f295c9e`); the gate's discovery run and soak then run on the FINAL tree.
+
 
 ## 10. The gate and the rules checklist
 
