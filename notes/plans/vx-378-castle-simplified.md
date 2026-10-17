@@ -314,7 +314,8 @@ record committed with PENDING numbers first.
   suites`, `-c release` `✔ 372 in 66` (tree `63cf038f1`); 11,928 source lines, 15,460 test lines. After (tree
   `25dc1cd12`): Debug `✔ 211 tests in 54 suites`, `-c release` `✔ 189 in 50`, the full core suite green in Debug;
   7,068 source lines, 8,611 test lines.
-- U2 — the additions: **NEXT** (spawned 2026-10-16 after U1's verification).
+- U2 — the additions: **IN PROGRESS** (Opus implementer, 2026-10-16) — §8's U2 RECORD carries the resume map
+  (pieces A–J, each flipped in the commit that lands it). Next: **B** (rule 2). Counts PENDING.
 - U3 — the lifecycle proof: not started.
 - U4 — the world and the soak: not started.
 - The ladder: not started.
@@ -569,6 +570,43 @@ rule and its tests, as the unit asked.
 **Linear, for the record (the VX-305 session's message, 2026-10-16, no files changed):** VX-228 and VX-340 canceled
 as superseded; re-scoping comments on VX-266/305/306/307/308/309/329; reshape notes on VX-263/301/209/213; a ticket's
 newest comment outranks an older body. Applied at the closeout's triage.
+
+### U2 RECORD — THE ADDITIONS (Opus implementer, 2026-10-16; IN PROGRESS)
+
+**Not done in U2, first:** PENDING (filled at the close).
+
+**Pieces (the resume map — a fresh session can finish U2 from this list and `git log`):**
+- A — the record skeleton and LIVE STATUS: DONE (this commit).
+- B — rule 2: words at birth (`createLibrary` mints the twelve words through the IDs leaf and hands them back to be
+  shown once; the key file always carries a words lock): NOT STARTED.
+- C — rule 3: the record's `passphraseSet` and `reminderDismissals`; `assess` owes `.askPassphrase` at the two
+  model-side moments (before the first backup; at the launch a quiet road failed): NOT STARTED.
+- D — adjudication 3: Use Castle's press records its gate style (rule 9's "Touch ID on this Mac is optional" chosen at
+  the press, so a later Castle re-key mints its Touch ID item): NOT STARTED.
+- E — rules 7 · 11 · 12 · 14 · 15: the vault's account side replaced whole — the vault modelled without an Apple wrap
+  (P and W only), a MODE flag and the earlier-row-keys list; the one-row CAS write at Use Castle; the mode flip at Use
+  Standard; typed-secret joins that adopt the account's pair and report `wordsReplaced`; sync setup handing the
+  library's pair up; the quiet follow out; the rotation walk, the completing write, `previousCorpusKey`, the vault's
+  Apple wrap, the named wait and the follower's hold deleted; the memory's vault facts deleted (the record names the
+  row key it follows): NOT STARTED.
+- F — rule 21 (+ adjudications 2, 5, 7): detect and refuse (`libraryDisagreesWithMemory`, no write); the memory at
+  exactly four things; an act stranded by a lost memory item finishes or rolls back from the on-disk plan: NOT STARTED.
+- G — rule 8: the quiet roads re-made at an open (a fresh Apple road, the on-device item); the lobby asks a secret only
+  when no quiet road remains: NOT STARTED.
+- H — rule 17 (+ 23): `LookInside` (writes nothing — asserted with the executor's write log) and `MakeMine` (a fresh
+  identity, key and device ID in the posture this device is in, under its current pair; the outgoing library into
+  Previous Libraries): NOT STARTED.
+- I — rule 27: the honest `noKeyFileAnywhere` refusal naming the roads that would have worked: NOT STARTED.
+- J — the closing runs (the full core suite in Debug; the protection set under `-c release`), the counts, this record
+  closed: NOT STARTED.
+
+**Red-on-old evidence, per piece:** PENDING.
+
+**The runs:** PENDING.
+
+**PROVISIONAL calls:** PENDING (logged under the VX-378 heading in `notes/QUESTIONS.md`, P-VX378-U2-n).
+
+**Commits:** A (this commit) · the rest PENDING.
 
 ## 9. The ladder
 
