@@ -182,8 +182,14 @@ public enum AssessRules {
         // nothing.
         var nothing: NoKeyFileAnywhere?
         let rememberedCopies = facts.rememberedKeyFileCopies.map { !$0.isEmpty } ?? !facts.rememberedLibraryIDs.isEmpty
-        if facts.unlocked == nil, facts.storeFile == .present, live == nil,
-           !facts.catalog.keyFiles.contains(where: { $0.document != nil }),
+        // A key file of another library can't open the one this Mac remembers
+        // (the other Mac's backups in a shared folder — census class (D)'s second
+        // road); with nothing remembered, any key file might.
+        let mightOpen = facts.catalog.keyFiles.contains { file in
+            guard let document = file.document else { return false }
+            return facts.rememberedLibraryIDs.isEmpty || facts.rememberedLibraryIDs.contains(document.libraryID)
+        }
+        if facts.unlocked == nil, facts.storeFile == .present, live == nil, !mightOpen,
            !rememberedCopies, facts.custody.isEmpty {
             nothing = NoKeyFileAnywhere(accountRoad: facts.session.accountID != nil)
         }

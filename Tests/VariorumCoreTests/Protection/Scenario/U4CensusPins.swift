@@ -81,4 +81,17 @@ struct U4CensusPins {
                 "a sync-keys item survived the rolled-back join")
         expectPromisesKept(world)
     }
+
+    /// CLASS (D), its second road — rule 27: before the open, a key file of
+    /// ANOTHER library (the other Mac's backups in a shared iCloud Drive folder)
+    /// can't open the library this Mac remembers, so it no longer silences the
+    /// lobby's honest refusal (census seed 22 sequence 998).
+    @Test func anotherLibrarysKeyFilesDontSilenceRule27() async throws {
+        let world = SWorld(seed: 22 &* 1_000_003 &+ 998)
+        try await StartingState.all[10].build(world)
+        await world.step(.tamperSequence("macA", [.deleteKeyFileAndMemory, .plantPlan]))
+        await world.step(.backup("macB"))
+        await world.step(.replaceMac("macA", carriesMemory: true))
+        expectPromisesKept(world)
+    }
 }

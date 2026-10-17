@@ -1612,6 +1612,12 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
     aside library's Standard key (its silent item) reaches the Castle-era key through its own key file's history; a later
     leave handed that key out (rule 12) and putting the copy back doesn't take it in again — promise 1 doesn't bind a
     library put in the live place from outside.
+  **Census on `159da7b83`: seed 22 — 1 failing (44,843 steps, 264.0 s):**
+  - seq 998 (P5) — **CLASS (D)'s second road, MODEL — FIXED** (`Assess/Assess.swift` `lobby`): before the open, a key
+    file of ANOTHER library (the other Mac's backups in a shared iCloud Drive folder) can't open the library this Mac
+    remembers, so it no longer silences rule 27's honest refusal (with nothing remembered, any key file still might).
+    Pin `U4CensusPins.anotherLibrarysKeyFilesDontSilenceRule27` (census seq 998 replayed): red before — promise 5 —
+    green after. (A reading, recorded: "every key-file copy … gone" is this library's copies.)
 - 5 — THE DISCOVERY RUN (seeds 21–40) and THE GATE SOAK (seeds 1–20, Debug and Release): NOT-STARTED. Tables land as
   they complete. PENDING.
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.
