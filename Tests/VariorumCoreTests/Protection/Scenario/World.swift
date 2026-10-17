@@ -842,6 +842,14 @@ final class SWorld {
         let catalog = catalog(device)
         let leaf = DeviceLeaves(world: self, device: device)
         let custody = (try? leaf.custodyItems()) ?? []
+        // Rule 27's fact (the ladder's round-1 finding 1): each SILENT item's key
+        // tried against the library in the slot — a read, no press.
+        let custodyOpens = Set(custody.compactMap { item -> String? in
+            guard item.itemClass == .silent,
+                  let key = try? leaf.readCustody(fingerprint: item.fingerprint, itemClass: .silent),
+                  (try? leaf.libraryOpens(with: key)) == true else { return nil }
+            return item.fingerprint
+        })
         let syncKeys = (try? leaf.syncKeyItems()) ?? []
         let apple = AppleKeyFacts(readable: Set(readableAppleKeys(device).keys))
         var unlocked: UnlockedFacts?
@@ -860,6 +868,7 @@ final class SWorld {
             slotFingerprintHint: liveKeyFile(device)?.fingerprint,
             rememberedLibraryIDs: (try? leaf.rememberedLibraryIDs()) ?? [],
             rememberedKeyFileCopies: Set(mirrors(device).map(\.fingerprint)), custody: custody,
+            custodyOpensLibrary: custodyOpens,
             syncKeys: syncKeys, appleKeys: apple, biometry: device.biometry.facts, touchIDPress: device.touchIDPress,
             session: device.session, vault: vault, catalog: catalog, now: clock)
     }

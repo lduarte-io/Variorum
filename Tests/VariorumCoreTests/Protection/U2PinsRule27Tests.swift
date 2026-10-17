@@ -16,12 +16,30 @@ import Testing
 
 @Suite("VX-378 U2 — rule 27: nothing left anywhere is said honestly, never rebuilt")
 struct U2PinsRule27Tests {
-    static func lobby(custody: [CustodyItemFact] = [], session: SessionFact = .signedOut,
-                      entries: [CatalogEntry] = []) -> String {
+    static func lobby(custody: [CustodyItemFact] = [], custodyOpensLibrary: Set<String>? = nil,
+                      session: SessionFact = .signedOut, entries: [CatalogEntry] = []) -> String {
         let facts = ProtectionFacts(
-            scope: AWorld.scope, storeFile: .present, unlocked: nil, custody: custody, session: session,
+            scope: AWorld.scope, storeFile: .present, unlocked: nil, custody: custody,
+            custodyOpensLibrary: custodyOpensLibrary, session: session,
             catalog: Catalog.build(entries), now: AWorld.now)
         return "\(assess(facts).lobby)"
+    }
+
+    /// THE LADDER'S ROUND-1 FINDING 1 (VX-378; census class (D)'s shape one tier
+    /// over): a SILENT item whose key verifiably opens nothing is no road, so it
+    /// does not silence rule 27's refusal; one that opens the library does; a
+    /// Touch ID item always does (it cannot be tried without a press); and with
+    /// the fact unread (nil) every item counts — the conservative old reading.
+    /// Red on the pre-fix tree by construction (the fact did not exist; the old
+    /// lobby said nothing for any custody item — `anythingThatMightStillOpenIt
+    /// SaysNothing`'s first line is that reading, kept here as the nil case).
+    @Test func aSilentItemThatOpensNothingDoesntSilenceRule27() {
+        let stray = CustodyItemFact(fingerprint: PF.fp(StoreKey.mint()), itemClass: .silent)
+        #expect(Self.lobby(custody: [stray], custodyOpensLibrary: []).contains("NoKeyFileAnywhere("))
+        #expect(!Self.lobby(custody: [stray], custodyOpensLibrary: [stray.fingerprint]).contains("NoKeyFileAnywhere("))
+        let touchID = CustodyItemFact(fingerprint: PF.fp(StoreKey.mint()), itemClass: .touchid)
+        #expect(!Self.lobby(custody: [touchID], custodyOpensLibrary: []).contains("NoKeyFileAnywhere("))
+        #expect(!Self.lobby(custody: [stray], custodyOpensLibrary: nil).contains("NoKeyFileAnywhere("))
     }
 
     @Test func aLibraryWithNoRoadAtAllIsTheHonestRefusal() {

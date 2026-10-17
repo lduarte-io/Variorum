@@ -182,6 +182,15 @@ public struct ProtectionFacts: Sendable {
     public var rememberedKeyFileCopies: Set<String>?
     /// This scope's custody items, enumerated.
     public var custody: [CustodyItemFact]
+    /// The SILENT custody items whose key verifiably opens the library in the
+    /// slot — their fingerprints (a silent item reads without a press, so the
+    /// fact is knowable before unlock). nil: not read (every item then counts
+    /// as one that might open it — the conservative reading). Rule 27's honest
+    /// refusal reads it: a silent item holding a key that opens nothing is no
+    /// road (VX-378 ladder round 1, finding 1 — census class (D)'s shape, one
+    /// tier over). A Touch ID item always counts: it cannot be tried without a
+    /// press.
+    public var custodyOpensLibrary: Set<String>?
     public var syncKeys: [SyncKeysItemFact]
     public var appleKeys: AppleKeyFacts
     public var biometry: BiometryFacts
@@ -197,6 +206,7 @@ public struct ProtectionFacts: Sendable {
         unlocked: UnlockedFacts? = nil, slotFingerprintHint: String? = nil, rememberedModeHint: ProtectionMode? = nil,
         libraryAccountEmail: String? = nil, rememberedLibraryIDs: Set<String> = [],
         rememberedKeyFileCopies: Set<String>? = nil, custody: [CustodyItemFact] = [],
+        custodyOpensLibrary: Set<String>? = nil,
         syncKeys: [SyncKeysItemFact] = [], appleKeys: AppleKeyFacts = AppleKeyFacts(),
         biometry: BiometryFacts = .ready, touchIDPress: TouchIDPress? = nil, session: SessionFact = .signedOut,
         vault: VaultReading? = nil, catalog: Catalog = Catalog(), now: Date
@@ -211,6 +221,7 @@ public struct ProtectionFacts: Sendable {
         self.rememberedLibraryIDs = rememberedLibraryIDs
         self.rememberedKeyFileCopies = rememberedKeyFileCopies
         self.custody = custody
+        self.custodyOpensLibrary = custodyOpensLibrary
         self.syncKeys = syncKeys
         self.appleKeys = appleKeys
         self.biometry = biometry

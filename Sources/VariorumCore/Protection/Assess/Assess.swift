@@ -178,9 +178,15 @@ public enum AssessRules {
         // RULE 27: a library in the slot and no road at all — no key file beside
         // it, none in any copy, no memory item carrying a copy of one (its sealed
         // mirror — an item with none opens nothing: census class (D)), no
-        // custody item holding a key. Anything that might still open it says
+        // custody item holding a key that opens it (a SILENT item verifiably
+        // opening nothing is no road either — the ladder's round-1 finding 1,
+        // class (D) one tier over; a Touch ID item always counts, it cannot be
+        // tried without a press). Anything that might still open it says
         // nothing.
         var nothing: NoKeyFileAnywhere?
+        let custodyMightOpen = facts.custody.contains { item in
+            item.itemClass != .silent || (facts.custodyOpensLibrary?.contains(item.fingerprint) ?? true)
+        }
         let rememberedCopies = facts.rememberedKeyFileCopies.map { !$0.isEmpty } ?? !facts.rememberedLibraryIDs.isEmpty
         // A key file of another library can't open the one this Mac remembers
         // (the other Mac's backups in a shared folder — census class (D)'s second
@@ -190,7 +196,7 @@ public enum AssessRules {
             return facts.rememberedLibraryIDs.isEmpty || facts.rememberedLibraryIDs.contains(document.libraryID)
         }
         if facts.unlocked == nil, facts.storeFile == .present, live == nil, !mightOpen,
-           !rememberedCopies, facts.custody.isEmpty {
+           !rememberedCopies, !custodyMightOpen {
             nothing = NoKeyFileAnywhere(accountRoad: facts.session.accountID != nil)
         }
         return LobbyRoads(
