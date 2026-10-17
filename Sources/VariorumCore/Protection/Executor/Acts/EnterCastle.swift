@@ -66,6 +66,14 @@ extension ProtectionExecutor {
         if let account = record.account, let vault = freshVaults[account] {
             parameters.retiringAccountAppleKeyID = vault.format.masterWrappedByAppleHeld != nil ? vault.format.appleKeyID : nil
         }
+        // Rule 9: "Touch ID on this Mac is optional" — chosen at THIS press and
+        // remembered in this Mac's section with the act's first write (the
+        // follow's shape), so a later Castle re-key makes its Touch ID item.
+        if library.section.settings.gateStyle != gate {
+            var settings = library.section.settings
+            settings.gateStyle = gate
+            library.section = library.section.withSettings(settings)
+        }
         return try await perform(
             EnterCastleProgram(), parameters: parameters, secrets: secrets, typed: typed,
             toKey: leaves.ids.mintLibraryKey(), library: &library)

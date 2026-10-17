@@ -315,7 +315,7 @@ record committed with PENDING numbers first.
   `25dc1cd12`): Debug `✔ 211 tests in 54 suites`, `-c release` `✔ 189 in 50`, the full core suite green in Debug;
   7,068 source lines, 8,611 test lines.
 - U2 — the additions: **IN PROGRESS** (Opus implementer, 2026-10-16) — §8's U2 RECORD carries the resume map
-  (pieces A–J, each flipped in the commit that lands it). A–C DONE; next: **D** (adjudication 3). Counts PENDING.
+  (pieces A–J, each flipped in the commit that lands it). A–D DONE; next: **E** (the vault's account side). Counts PENDING.
 - U3 — the lifecycle proof: not started.
 - U4 — the world and the soak: not started.
 - The ladder: not started.
@@ -585,7 +585,7 @@ newest comment outranks an older body. Applied at the closeout's triage.
   green after; `U2CreatedWordsTests` (1) is the new API's (red by construction — the old creation took its words from
   the caller). Fixtures that built a file with no words lock now carry one (`KeyFileTests` ×4, `AssessTests`, U1's
   `CutPinsTests`, the world's planted pair). Protection set Debug `✔ 214 tests in 56 suites`.
-- C — rule 3: DONE (this commit) — `ProtectionRecord.passphraseSet` and `.reminderDismissals`; the fact is
+- C — rule 3: DONE (`ef6c6bf54`) — `ProtectionRecord.passphraseSet` and `.reminderDismissals`; the fact is
   stamped at every record the executor writes (`stampingPassphraseFact` in `writeFacts`, `recordIntoStaged`,
   `bindAccount`, the creation): a passphrase lock on the key file, or the account's (rule 7 — bound, the vault always
   carries one); `recordPassphraseReminderDismissed` counts a dismissal (one record write). `assess` owes
@@ -595,8 +595,11 @@ newest comment outranks an older body. Applied at the closeout's triage.
   in 1 suite failed … with 4 issues"; `aLibraryWithAPassphraseIsNeverAsked` is the guard, green both sides), green
   after; `U2PassphraseFactTests` (1) the new writer's. `AWorld` reads the fact from its live file. Protection set Debug
   `✔ 219 tests in 58 suites`.
-- D — adjudication 3: Use Castle's press records its gate style (rule 9's "Touch ID on this Mac is optional" chosen at
-  the press, so a later Castle re-key mints its Touch ID item): NOT STARTED.
+- D — adjudication 3: DONE (this commit) — Use Castle writes the press's gate style into this Mac's section with the
+  act's first write (the follow's existing shape; a rolled-back press keeps the choice, which means nothing in
+  Standard). Pins `U2PinsGateTests` (2, the first over both gates) red on the pre-D tree (scratch worktree at
+  `ef6c6bf54`: issues at `U2PinsGateTests.swift:23` ×2, `:25` ×2, `:36` — "2 tests in 1 suite failed … with 5
+  issues"), green after. Protection set Debug `✔ 221 tests in 59 suites`.
 - E — rules 7 · 11 · 12 · 14 · 15: the vault's account side replaced whole — the vault modelled without an Apple wrap
   (P and W only), a MODE flag and the earlier-row-keys list; the one-row CAS write at Use Castle; the mode flip at Use
   Standard; typed-secret joins that adopt the account's pair and report `wordsReplaced`; sync setup handing the
@@ -620,7 +623,7 @@ newest comment outranks an older body. Applied at the closeout's triage.
 
 **PROVISIONAL calls:** PENDING (logged under the VX-378 heading in `notes/QUESTIONS.md`, P-VX378-U2-n).
 
-**Commits:** A `0572dd3c0` · B `3631ecbde` · C (this commit) · the rest PENDING.
+**Commits:** A `0572dd3c0` · B `3631ecbde` · C `ef6c6bf54` · D (this commit) · the rest PENDING.
 
 ## 9. The ladder
 
