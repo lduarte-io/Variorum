@@ -1409,10 +1409,29 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
 2 known issues`, `-c release` `━ 255 in 68 … 2 known issues` (the stopped U4's close, code tree `0bd112c9c`).
 
 **Pieces (the resume map — a fresh session can finish the resumption from this list and `git log`):**
-- 1 — THE CARRY REVERTED (her item 2): NOT-STARTED — B2 (`b468a306c`) removed revert-shaped: `carrying:`, the
-  gathering at the door, the Apple-key records into the new section, `U4MakeMineHistoryTests` (keeping only the
-  no-choice guard), the fixture's stage 9/10 carry facts; rule 17 back to its pre-carry words; the page re-rendered,
-  `cmp` identical; QUESTIONS P-VX378-U4-1 → RE-RULED; the crash harness over `.makeMine` green. PENDING.
+- 1 — THE CARRY REVERTED (her item 2): DONE (this commit). `git revert --no-commit b468a306c` (the plan and QUESTIONS
+  hunks kept as records — the plan's B2 record is history): `KeyFile.building(…, carrying:)` gone, `ActContext.carriedKeys`
+  and the gathering at the door gone, the previous section's Apple-key records no longer move into the new section,
+  `U4MakeMineHistoryTests` deleted (its five tests) except the guard her ruling kept —
+  `theDoorAlwaysVerifiesTheCurrentPairAndOffersNoChoice` moved into `U2MakeMineTests` (green both sides: the posture of
+  now, no choice, the current pair always typed); `U2MakeMineTests`' "no past" assertion back; the fixture's stage 9/10
+  carry text, hidden roads and facts back to their pre-carry state (and `LifecycleChecks`' `makeMine` back to "no
+  past"); rule 17 back to its words before the carry (`notes/CastleRules.md` byte-equal to `a8fe1f349`'s rule 17); the
+  page re-rendered (`CASTLE_LIFECYCLE_PAGE_OUT=… swift test --filter LifecyclePageTests`) — `cmp`-IDENTICAL to the
+  committed (reverted) page. **Turned with it:** promise 4 judges copies of THIS library only (`image.libraryID ==
+  record.libraryID` — the pre-carry scoping; piece 2 rewrites it to the floor); the fixed scenario
+  `makeThisMyLibraryThenUseCastleRetiresThePreviousLibrarysAppleKey` (piece D — it asserted the carried Apple-key
+  records) → `makeThisMyLibraryThenUseCastleKeepsEveryPromise` (the new library enters Castle, every promise kept); the
+  mutation-pin comment's pointer to it dropped. **New pin (red-on-old):**
+  `U2MakeMineTests.theNewLibraryStartsWithNoPreviousKeysAndAnOldBackupOpensWithItsOwnSecrets` — on the pre-piece tree
+  (scratch worktree at `97b1927ea`, the test file copied in): `✘ … 6 tests in 1 suite failed … with 3 issues` —
+  `U2CopyDoorTests.swift:113` (the restored "no past" assertion), `:210` (the new key file carries history), `:217`
+  (today's passphrase reached the previous library's backup through the carried history); green after (`✔ 6 tests in 1
+  suite`). The crash harness over `.makeMine` (`U2MakeMineTests.aCrashAfterEveryWriteFinishesOrNeverHappened`) green.
+  QUESTIONS P-VX378-U4-1 → RE-RULED with her words. **Census class (F) dies here** (the carried history it turned into
+  a quiet road is gone; the account-sync-keys residue on a Make-this-my-library'd synced device is P-VX378-U2-4's, hers
+  with VX-309). Protection set Debug `━ 275 tests in 71 suites passed … with 2 known issues` (the stopped U4's lagging
+  pin, piece 2's to flip).
 - 2 — THE FLOOR (her item 1): NOT-STARTED — rules 4, 5, 12 in her quoted words; promise 4 rewritten to the floor;
   `U4LaggingPairScenarios` flipped to an assertion of the floor; QUESTIONS P-VX378-U4-3 → RULED (the floor). PENDING.
 - 3 — RULE 21: THE NOTICE AND THE OFFER (her item 3): NOT-STARTED — (a) rule 21's words; (b) the model opens and

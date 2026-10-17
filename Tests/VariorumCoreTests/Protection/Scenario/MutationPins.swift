@@ -134,8 +134,7 @@ struct ScenarioMutationPins {
     // (EVERY OWN APPLE KEY RETIRED AT ENTERING CASTLE has no world pin: with
     // the guard off, the after-act repair `retireOwnAppleKeys` retires the
     // missed key at once — two lines of defence, and the guard's alone is
-    // invisible from the world. Its unit pin stands; the sequence is the fixed
-    // scenario `makeThisMyLibraryThenUseCastleRetiresThePreviousLibrarysAppleKey`.)
+    // invisible from the world. Its unit pin stands.)
 
     /// PREPARE-THEN-COMMIT (VX-235): a crash at any write of Use Castle leaves
     /// the library openable — the new key's file exists before the swap. Off,

@@ -12,8 +12,9 @@
 //      holding that key has followed; the account keeps every sync key it has
 //      had; every device ends in the account's posture (settled).
 //    4 THE CORE SENTENCE (rules 4, 5, 6, 7, 17) — your current passphrase or
-//      words open every copy you have ever made (across Make this my library
-//      too — her ruling on P-VX378-U4-1).
+//      words open every copy of this library you have made (a new library
+//      starts with no previous keys — her ruling of 2026-10-17 removed Make
+//      this my library's carry).
 //    5 EVERY COPY OPENS BY SOME ROAD (rules 1, 27, 19) — or the refusal names
 //      what would have; copies leave only by her or this Mac's own retention.
 //    6 CRASH SAFE (rule 20) — strict: nothing left half-done, and the open says
@@ -531,13 +532,14 @@ extension SWorld {
     /// PROMISE 4 — THE CORE SENTENCE (rules 4, 5, 6, 7, 17): "Your passphrase or
     /// your twelve words — together with any copy of your library — always open
     /// it"; "your current passphrase or words open every backup you have ever
-    /// made" (4); re-locking keeps it (6); one pair at a time (7); Make this my
-    /// library carries the key history forward (17 — her ruling on
-    /// P-VX378-U4-1). Her CURRENT secrets — typed, or through the account's
-    /// vault they open (rule 7) — reach every copy this Mac ever made, through
-    /// the key file in the live place (or its sealed copy, rule 1) and the copy's
-    /// own key file. Judged while the live place is the library this Mac
-    /// remembers (else promise 7 refuses) with nothing in flight.
+    /// made" (4); re-locking keeps it (6); one pair at a time (7); a copy made
+    /// your library is a new library with no previous keys (17 — her ruling of
+    /// 2026-10-17 removed the carry, P-VX378-U4-1 re-ruled). Her CURRENT
+    /// secrets — typed, or through the account's vault they open (rule 7) —
+    /// reach every copy of THIS library this Mac made, through the key file in
+    /// the live place (or its sealed copy, rule 1) and the copy's own key file.
+    /// Judged while the live place is the library this Mac remembers (else
+    /// promise 7 refuses) with nothing in flight.
     func coreSentence(_ device: SDevice) -> [Violation] {
         guard let slot = device.slot, let record = slot.record, device.container.files[SPath.plan] == nil,
               device.library?.section.actInFlight == nil, livePlaceRemembered(device),
@@ -574,8 +576,9 @@ extension SWorld {
         let started = truth.freshStarts[device.name] ?? .distantPast
         for (id, copy) in truth.copies.sorted(by: { $0.key < $1.key }) where copy.madeOn == device.name {
             if copy.madeAt < started || truth.rolledBackOver.contains(id) { continue }  // another library's start; L4
-            guard let (fs, path) = DeviceLeaves(world: self, device: device).resolve(id), let image = fs.files[path]?.library else {
-                continue
+            guard let (fs, path) = DeviceLeaves(world: self, device: device).resolve(id), let image = fs.files[path]?.library,
+                  image.libraryID == record.libraryID else {
+                continue  // gone, or another library's copy (rule 19 — a new library has no previous keys)
             }
             let own = fs.files[SPath.pair(of: path)]?.keyFile ?? fs.files[(path as NSString).deletingLastPathComponent + "/" + SPath.liveKeyFile]?.keyFile
             if reach(seeds, files: base + [own].compactMap { $0 })[image.fingerprint] == nil {

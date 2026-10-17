@@ -35,17 +35,12 @@ public struct NewKeyLocks: Sendable {
 }
 
 extension KeyFile {
-    /// A NEW file for a fresh key — a library's creation (no past), or Make
-    /// this my library's new library, whose history `carrying` holds (her
-    /// ruling on P-VX378-U4-1, 2026-10-16: rule 4 applied at the door — the
-    /// copy's key and its history, and the previous library's key and its
-    /// history, each wrapped directly under the new key).
+    /// A NEW file for a key with no past — a library's creation, or a
+    /// different library's landing (§3.7: "a fresh key with no history").
     public static func building(
-        libraryID: String, key: StoreKey, epoch: Int, locks: NewKeyLocks, carrying: [OpenedKey] = []
+        libraryID: String, key: StoreKey, epoch: Int, locks: NewKeyLocks
     ) throws -> KeyFile {
-        var file = KeyFile(libraryID: libraryID, key: key, epoch: epoch)
-        file.history = try wrapping(carrying, under: key)
-        return try file.locking(key, with: locks)
+        try KeyFile(libraryID: libraryID, key: key, epoch: epoch).locking(key, with: locks)
     }
 
     /// **The re-key**: a new file for `newKey` (of `kind`), built from this

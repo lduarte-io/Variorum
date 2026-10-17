@@ -110,10 +110,7 @@ struct U2MakeMineTests {
         #expect(mine.world.live?.generation == 42 && library.key != k0 && library.key != theirs.key)
         #expect(library.section.deviceID != oldDevice, "rule 23: a fresh device ID for the new library")
         let live = try #require(mine.world.liveFormat3)
-        // (Her ruling on P-VX378-U4-1, VX-378 U4: the new key carries the key
-        // history forward — the copy's and the previous library's.)
-        #expect(live.libraryID == record.libraryID && live.heldFingerprints.contains(PF.fp(k0))
-                && live.heldFingerprints.contains(PF.fp(theirs.key)))
+        #expect(live.libraryID == record.libraryID && live.history.isEmpty)
         #expect(try live.open(passphrase: .passphrase(mine.passphrase), floor: PF.floor) == library.key)
         #expect(try live.open(words: mine.words) == library.key)
         #expect((try? live.open(.words(theirs.words), floor: PF.floor)) == nil, "the copy's own secrets lock the new library")
@@ -169,6 +166,58 @@ struct U2MakeMineTests {
                 fixture.liveRecord?.libraryID == oldID && Set(fixture.world.memories.keys) == [oldID]
             },
             resumeMayRollBack: true)
+    }
+
+    /// No choice at the door and never quiet: the current pair is always typed
+    /// and verified — with nothing typed for it the door refuses before any
+    /// write, even when the copy itself would open by a quiet road here. (Kept
+    /// from VX-378 U4's piece B2 at her ruling of 2026-10-17, which removed the
+    /// carry but not this guard: the posture of now, no choice, the current
+    /// pair always typed.)
+    @Test func theDoorAlwaysVerifiesTheCurrentPairAndOffersNoChoice() async throws {
+        let mine = try EX(.standard)
+        let (copy, catalog) = try plantCopy(
+            mine, libraryID: PF.id(), key: mine.key, keyFile: try #require(mine.world.liveKeyFile), record: mine.liveRecord)
+        let executor = mine.executor()
+        var library = try mine.unlocked(executor)
+        mine.world.writes = []
+        await #expect(throws: ExecutorRefusal.secretMissing) {
+            _ = try await executor.makeThisMyLibrary(&library, copy: copy, in: catalog, currentPair: .none)
+        }
+        #expect(mine.world.writes.isEmpty)
+    }
+
+    /// Her ruling at the U4 stop (2026-10-17): "let's remove "Make this my
+    /// library" carrying keys." A new library starts with no previous keys —
+    /// so a backup of the library that stepped aside opens with the secrets it
+    /// was made with (the floor, rule 4), and today's secrets, changed since,
+    /// no longer reach it through the new library.
+    @Test func theNewLibraryStartsWithNoPreviousKeysAndAnOldBackupOpensWithItsOwnSecrets() async throws {
+        let mine = try EX(.standard)
+        let theirs = try EX(.castle, gate: .alwaysAsk)
+        let k0 = mine.key, oldLibraryID = mine.libraryID
+        let backupFile = try #require(mine.world.liveKeyFile)
+        let executor = mine.executor()
+        var library = try mine.unlocked(executor)
+        let today = "a passphrase of today"
+        _ = try await executor.changePassphrase(&library, current: mine.passphrase, new: today)
+        let (copy, catalog) = try plantCopy(
+            mine, libraryID: theirs.libraryID, key: theirs.key, keyFile: try #require(theirs.world.liveKeyFile),
+            record: theirs.liveRecord)
+        _ = try await executor.makeThisMyLibrary(
+            &library, copy: copy, in: catalog, copySecrets: theirs.typed,
+            currentPair: TypedSecrets(passphrase: today, words: mine.words))
+        #expect(try #require(mine.world.liveFormat3).history.isEmpty, "the new library carries previous keys")
+        let (old, after) = try plantCopy(mine, libraryID: oldLibraryID, key: k0, keyFile: backupFile, record: nil)
+        // The previous library's quiet roads (its silent item, its Apple lock)
+        // would open it with nothing typed; the roads under test are the typed
+        // ones.
+        mine.world.custody[CustodyItemFact(fingerprint: PF.fp(k0), itemClass: .silent)] = nil
+        if let apple = backupFile.apple { mine.world.icloud.keys[apple.keyID] = nil }
+        #expect((try? executor.lookInside(old, in: after, typed: TypedSecrets(passphrase: today))) == nil,
+                "today's passphrase reached the previous library's backup")
+        let looked = try executor.lookInside(old, in: after, typed: TypedSecrets(passphrase: mine.passphrase))
+        #expect(looked.key == k0 && looked.road == .itsOwnSecrets)
     }
 
     @Test func theRefusalsWriteNothing() async throws {

@@ -2913,6 +2913,15 @@ entering Castle later retires them (rule 11). `notes/CastleRules.md` rule 17 gai
 forward (rule 4)". **Option (b) is NOT what she chose** — the set-aside key file is left alone; the carried history
 makes it unnecessary. Do not re-propose (a) or (b). The core sentence holds across Make this my library, unscoped.
 
+**Status: RE-RULED 2026-10-17 (the U4 stop sitting — the plan's §8 HER RULINGS AT THE U4 STOP, item 2), verbatim:**
+*"let's remove "Make this my library" carrying keys. Agreed, I didn't really love it when I approved it earlier but it
+made sense but now let's just get rid of it completely for being weird."* The carry (piece B2, `b468a306c`) is REVERTED
+whole in the U4 resumption's piece 1: no `carrying:` builder, no gathering at the door, no Apple-key records moved into
+the new section; rule 17 back to its words before the carry. A new library has a fresh key and no previous keys; the
+previous library's backups are another library's copies (rule 19) and open with the secrets they were made with (the
+floor — rule 4 as reworded at the same sitting). Option (a)'s reading stands in effect (the core sentence scoped to the
+library's own lineage — "older backups of the same library"); (b) and (c) are NOT chosen. Do not re-propose the carry.
+
 **P-VX378-U4-2 — THE ROLLBACK's reach (L4): a replayed library file while what this Mac remembers can't speak.** VX-305's
 stated limit (P-U4-5, her ruling 2026-10-14/15, "accept and state it") covers BOTH homes of this Mac's facts replayed
 together. With the family tree gone (rule 21) and the refusal keyed on a disagreement, never on absence (the

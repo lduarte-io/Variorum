@@ -260,10 +260,8 @@ indirect enum LFact: Sendable {
     /// Make this my library from `subject`: a NEW library — a fresh identity,
     /// key and device ID, in the posture of now, locked under the current pair
     /// (and not under the copy's own secrets unless they are the same), with no
-    /// account, its key CARRYING THE KEY HISTORY FORWARD (her ruling on
-    /// P-VX378-U4-1, VX-378 U4: the copy's key and its key file's history, and
-    /// the previous library's key and its history); the previous library aside
-    /// whole (with its key file) in Previous Libraries; the copy untouched.
+    /// past and no account; the previous library aside whole (with its key
+    /// file) in Previous Libraries; the copy untouched.
     case makeMine(LSubject)
     /// The copy's owner keeps theirs: their library and their account's vault
     /// exactly as before.
@@ -753,17 +751,9 @@ enum Lifecycle {
             road: "Look inside backup B (each secret typed in turn), then Make this my library from it",
             rows: [
                 LRow(term: #"Look inside"#, content: .text(#"Type your current passphrase or words (or backup B's own Castle ones). It opens read-only. Nothing is written — no key file, no keychain item, no change to your library. Close it and the app forgets it [17]."#)),
-                LRow(term: #"Make this my library"#, content: .text(#"One confirmed door. Backup B becomes a <b>new library</b> with a fresh key in the posture you are in now (Standard, here), under your current pair — the new key carrying backup B's key history forward, and your previous library's keys with it, so every earlier backup still opens with today's secrets [4, 17] — and your current library steps aside whole into Previous Libraries [17]. Backup B itself is untouched. The app's Restore from Backup button is this door."#)),
+                LRow(term: #"Make this my library"#, content: .text(#"One confirmed door. Backup B becomes a <b>new library</b> with a fresh key in the posture you are in now (Standard, here), under your current pair, and your current library steps aside whole into Previous Libraries [17]. Backup B itself is untouched. The app's Restore from Backup button is this door."#)),
             ],
             note: nil,
-            hidden: [
-                LHiddenRoads(subject: .backupA, chips: [
-                    LChip(road: .typed(.either, .throughTheHistory), state: .opens, label: "today's passphrase or words, through the new library's history"),
-                ], source: "stated in the stage's words: \"every earlier backup still opens with today's secrets\" (her ruling on P-VX378-U4-1)"),
-                LHiddenRoads(subject: .backupB, chips: [
-                    LChip(road: .typed(.either, .throughTheHistory), state: .opens, label: "today's passphrase or words, through the new library's history"),
-                ], source: "stated in the stage's words: \"the new key carrying backup B's key history forward\" (her ruling on P-VX378-U4-1)"),
-            ],
             facts: [
                 LFactEntry(
                     fact: .lookInside(
@@ -773,8 +763,8 @@ enum Lifecycle {
                     rules: [17]),
                 LFactEntry(
                     fact: .makeMine(.backupB),
-                    quote: "Backup B becomes a new library with a fresh key in the posture you are in now (Standard, here), under your current pair — the new key carrying backup B's key history forward, and your previous library's keys with it … — and your current library steps aside whole into Previous Libraries [17]. Backup B itself is untouched.",
-                    rules: [4, 17]),
+                    quote: "Backup B becomes a new library with a fresh key in the posture you are in now (Standard, here), under your current pair, and your current library steps aside whole into Previous Libraries [17]. Backup B itself is untouched.",
+                    rules: [17]),
                 LFactEntry(
                     fact: .notTypedHere, quote: "The app's Restore from Backup button is this door.", rules: [17],
                     status: .notAModelFact("the face — VX-309 (the model has the one door, `makeThisMyLibrary`)")),
@@ -786,20 +776,9 @@ enum Lifecycle {
             road: "their library made on their Mac (another Apple ID, their own account), sent to this Mac; Look inside it, then Make this my library from it",
             rows: [
                 LRow(term: #"Look inside"#, content: .text(#"Opens with <em>their</em> secrets, read-only, writes nothing [17]."#)),
-                LRow(term: #"Make this my library"#, content: .text(#"It becomes a new library of yours, with a fresh identity and a fresh key in your posture, under your current pair — the new key carrying their library's key history forward, and your previous library's keys with it, so your own earlier backups still open with today's secrets [4, 17]; you never leave Castle by opening something [17, 18]. From here the two copies diverge — sharing a library across devices is what sync is for. If you sync, their writing joins <em>your</em> account as a copy and nothing leaves theirs: the server keeps every account's rows apart, reachable only with that account's own sign-in and sync key [18]."#)),
+                LRow(term: #"Make this my library"#, content: .text(#"It becomes a new library of yours, with a fresh identity and a fresh key in your posture, under your current pair; you never leave Castle by opening something [17, 18]. From here the two copies diverge — sharing a library across devices is what sync is for. If you sync, their writing joins <em>your</em> account as a copy and nothing leaves theirs: the server keeps every account's rows apart, reachable only with that account's own sign-in and sync key [18]."#)),
             ],
             note: nil,
-            hidden: [
-                LHiddenRoads(subject: .backupA, chips: [
-                    LChip(road: .typed(.either, .throughTheHistory), state: .opens, label: "today's passphrase or words, through the new library's history"),
-                ], source: "stated in the stage's words: \"your own earlier backups still open with today's secrets\" (her ruling on P-VX378-U4-1)"),
-                LHiddenRoads(subject: .backupB, chips: [
-                    LChip(road: .typed(.either, .throughTheHistory), state: .opens, label: "today's passphrase or words, through the new library's history"),
-                ], source: "stated in the stage's words: \"your own earlier backups still open with today's secrets\" (her ruling on P-VX378-U4-1)"),
-                LHiddenRoads(subject: .theirs, chips: [
-                    LChip(road: .typed(.either, .throughTheHistory), state: .opens, label: "today's passphrase or words, through the new library's history"),
-                ], source: "stated in the stage's words: \"the new key carrying their library's key history forward\" (her ruling on P-VX378-U4-1)"),
-            ],
             facts: [
                 LFactEntry(
                     fact: .lookInside(
@@ -808,8 +787,8 @@ enum Lifecycle {
                     quote: "Opens with their secrets, read-only, writes nothing [17].", rules: [17]),
                 LFactEntry(
                     fact: .makeMine(.theirs),
-                    quote: "It becomes a new library of yours, with a fresh identity and a fresh key in your posture, under your current pair — the new key carrying their library's key history forward, and your previous library's keys with it",
-                    rules: [4, 17, 18]),
+                    quote: "It becomes a new library of yours, with a fresh identity and a fresh key in your posture, under your current pair",
+                    rules: [17, 18]),
                 LFactEntry(
                     fact: .notTypedHere, quote: "you never leave Castle by opening something [17, 18].", rules: [17],
                     status: .branch("not on this road (Standard here) — `U2MakeMineTests.inCastleTheNewLibraryIsCastle`")),

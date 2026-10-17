@@ -114,10 +114,6 @@ public final class ActContext {
     /// Make this my library: the copy's key, held from the press for the act's
     /// span — never stored (a resume before the swap rolls back without it).
     var copyKey: StoreKey?
-    /// Make this my library: the keys the new key carries (her ruling on
-    /// P-VX378-U4-1 — rule 4 at the door), held from the press with the copy's
-    /// key and never stored; a resume without them rolls back.
-    var carriedKeys: [OpenedKey]?
     /// The outgoing key, held from the begin for the act's span.
     var heldFromKey: StoreKey?
     /// The account's sync keys in hand (custody, session memory, or the vault).
@@ -203,8 +199,7 @@ extension ProtectionExecutor {
     /// at its press (named in the act in flight from the first write).
     func perform(
         _ program: any ActProgram, parameters: ActParameters, secrets: ActSecrets, typed: TypedSecrets? = nil,
-        toKey: StoreKey? = nil, copyKey: StoreKey? = nil, carriedKeys: [OpenedKey]? = nil,
-        library: inout UnlockedLibrary
+        toKey: StoreKey? = nil, copyKey: StoreKey? = nil, library: inout UnlockedLibrary
     ) async throws -> ActOutcome {
         guard library.record != nil else { throw ExecutorRefusal.recordMissing }
         if let inFlight = library.section.actInFlight { throw ExecutorRefusal.actInFlight(inFlight.act) }
@@ -230,7 +225,6 @@ extension ProtectionExecutor {
             executor: self, library: library, plan: plan, secrets: secrets, typed: typed, toKey: toKey,
             resuming: false)
         ctx.copyKey = copyKey
-        ctx.carriedKeys = carriedKeys
         defer { library = ctx.library }
         do {
             try await drive(program, ctx)

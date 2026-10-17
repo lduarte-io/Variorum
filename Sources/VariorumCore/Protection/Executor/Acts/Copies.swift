@@ -42,10 +42,8 @@ public enum CopyRoad: Equatable, Sendable {
 }
 
 /// MAKE THIS MY LIBRARY (rule 17). On a plan (rule 20): the new key's custody
-/// item; Standard, a fresh own Apple key; the NEW library's key file (a fresh
-/// key, under the current pair, CARRYING THE KEY HISTORY FORWARD — her ruling on
-/// P-VX378-U4-1: the copy's key and its history, the previous library's key and
-/// its history) in the live place, the outgoing one held
+/// item; Standard, a fresh own Apple key; the NEW library's key file (no past —
+/// a fresh key, under the current pair) in the live place, the outgoing one held
 /// by the plan and the mirror; the copy re-encrypted under the new key into the
 /// staged file; the new record (a fresh library ID, the posture of now, this
 /// device's new section carrying the act) into it; the new library's memory
@@ -96,29 +94,17 @@ extension ActContext {
         return (libraryID, deviceID)
     }
 
-    /// The new library's key file: a fresh key locked under the current pair
-    /// (the passphrase when there is one, the words always) and, Standard, the
-    /// fresh own Apple key — carrying the key history forward (her ruling on
-    /// P-VX378-U4-1, 2026-10-16: "if you've decided that this is your library
-    /// from now on, then why should it *not* have the old keys to your previous
-    /// library? we say clearly that your new library always carries keys
-    /// forward"): the copy's key and its key file's history, and the previous
-    /// library's key and its history, each sealed under the new key (rule 4).
-    /// Quiet roads still open only the new key directly. Never the account's
-    /// master: the new library carries no sync identity. A resume holds none of
-    /// the carried keys (a plan never holds a key): it rolls back.
+    /// The new library's key file: a fresh key with no past, locked under the
+    /// current pair (the passphrase when there is one, the words always) and,
+    /// Standard, the fresh own Apple key. Never the account's master: the new
+    /// library carries no sync identity.
     func makeMineKeyFile(kind: ProtectionMode) throws {
         let key = try requireToKey()
         if let live = library.keyFile, live.fingerprint == Self.fp(key) { return }
-        guard let carriedKeys else { throw ActRollback(refusal: .secretsRequired(act)) }
         let (libraryID, _) = try makeMineIdentity()
         let apple = kind == .standard ? try ownAppleKey() : nil
         let locks = try newLocks(passphrase: secrets.passphrase != nil, words: true, master: false, apple: apple)
-        let at = now
-        let carried = carriedKeys.map {
-            OpenedKey(fingerprint: $0.fingerprint, epoch: $0.epoch, retiredAt: $0.retiredAt ?? at, key: $0.key)
-        }
-        let file = try KeyFile.building(libraryID: libraryID, key: key, epoch: 1, locks: locks, carrying: carried)
+        let file = try KeyFile.building(libraryID: libraryID, key: key, epoch: 1, locks: locks)
         try executor.writeLiveKeyFile(file, &library)
         log("the new library's key file written (\(Self.fp8(file.fingerprint)))")
     }
@@ -146,11 +132,6 @@ extension ActContext {
             libraryID: libraryID, mode: kind, account: nil, currentFingerprint: Self.fp(key),
             passphraseSet: secrets.passphrase != nil, at: now)
         var section = DeviceSection(deviceID: deviceID, settings: library.section.settings)
-        // The Apple keys this Mac made for the previous library come with its
-        // keys (her ruling on P-VX378-U4-1): they wrap keys the new library's
-        // history now holds, so entering Castle retires them (rule 11) and a
-        // retired one stays deleted on sight.
-        section.appleKeys = library.section.appleKeys
         if let own = parameters.ownAppleKeyID { section = section.recordingAppleKey(AppleKeyRecord(id: own)) }
         section.actInFlight = library.section.actInFlight
         section.lastActSequence = library.section.lastActSequence
@@ -324,18 +305,6 @@ extension ProtectionExecutor {
         }
         let (copyKey, _) = try openCopy(copy, in: catalog, typed: copySecrets)
         guard !currentPair.wordsAreNew else { throw ExecutorRefusal.wordsMustBeTyped }
-        // Rule 4 at the door (her ruling on P-VX378-U4-1): the keys the new key
-        // will carry — the copy's key and its own key file's history, then the
-        // previous library's key and its history — gathered now, held for the
-        // act's span with the copy's key, never stored.
-        var carried: [OpenedKey] = []
-        let copyFiles = catalog.servingKeyFiles(of: copy).compactMap(\.document).filter { $0.fingerprint == Self.fp(copyKey) }
-        carried.append(OpenedKey(fingerprint: Self.fp(copyKey), epoch: copyFiles.first?.epoch ?? 1, retiredAt: nil, key: copyKey))
-        for file in copyFiles { carried += (try? file.historyKeys(currentKey: copyKey)) ?? [] }
-        if let live = library.keyFile, live.fingerprint == library.fingerprint {
-            carried.append(OpenedKey(fingerprint: library.fingerprint, epoch: live.epoch, retiredAt: nil, key: library.key))
-            carried += try live.historyKeys(currentKey: library.key)
-        }
         var secrets = ActSecrets()
         if library.keyFile?.passphrase != nil {
             secrets.passphrase = try verifiedPassphrase(currentPair.passphrase, against: library.keyFile)
@@ -349,7 +318,7 @@ extension ProtectionExecutor {
         let program = MakeMineProgram()
         let toKey = leaves.ids.mintLibraryKey()
         return try await perform(program, parameters: parameters, secrets: secrets, typed: currentPair, toKey: toKey,
-                                 copyKey: copyKey, carriedKeys: carried, library: &library)
+                                 copyKey: copyKey, library: &library)
     }
 
     /// **Send Library**: the pair, written to the folder she picked — no
