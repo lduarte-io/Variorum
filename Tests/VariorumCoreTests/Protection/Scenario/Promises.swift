@@ -370,7 +370,10 @@ extension SWorld {
         if fromOutside(device) { return [] }
         var violations: [Violation] = []
         func fail(_ detail: String) { violations.append(Violation(promise: 1, device: device.name, detail: detail)) }
-        let live = liveKeyFile(device)
+        // The key file beside the library — when it is this library's (a stray
+        // of another library's, put there from outside, names keys this library
+        // never had — census seed 25 sequence 367).
+        let live = liveKeyFile(device).flatMap { $0.libraryID == record.libraryID ? $0 : nil }
         // The keys the library has had: the live key file's current key and
         // history (rule 4). A rollback past a leave (L4) leaves the later
         // Standard stretch's keys out of the restored file.
@@ -706,6 +709,14 @@ extension SWorld {
         }
         for device in devices where !device.isOpen {
             guard let slot = device.slot, slot.record != nil, reached(device)[slot.fingerprint] == nil else { continue }
+            // Before the open, with nothing remembered, the lobby can't tell which
+            // library is in the live place: another library's key file there (the
+            // other Mac's backups in a shared folder) might be its own — rule 27's
+            // refusal can't be certain, so it isn't owed (census seed 25 seq 555).
+            let remembered = device.keychain.names(service: ProtectionNames.memoryService)
+            if remembered.isEmpty, catalog(device).keyFiles.contains(where: { $0.document.map { $0.libraryID != slot.libraryID } ?? false }) {
+                continue
+            }
             var closed = facts(device)
             closed.unlocked = nil
             if AssessRules.lobby(closed).noKeyFileAnywhere == nil {

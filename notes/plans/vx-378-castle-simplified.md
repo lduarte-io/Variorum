@@ -1642,6 +1642,14 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
     puts it beside the library: it opens with the secrets she had then, not today's. `truth.keyFileFromBackup` exempts
     the caught-up clause while that key file stands unchanged. (A face consequence for VX-306, added to P-VX378-U4-6:
     the offer's words don't say the found file may want an earlier passphrase.)
+  **Census on `5c992b949`: seed 25 — 2 failing (44,434 steps, 255.6 s): P1 · P5.** Closed in the next commit, both
+  CHECKER:
+  - seq 367 (P1): another library's key file replayed beside the library (the library this Mac made its own before)
+    named keys this library never had — promise 1's "keys the library has had" now reads the key file beside it only
+    when it is THIS library's.
+  - seq 555 (P5): before the open, with NOTHING remembered (a keychain wipe), another library's key files in a shared
+    iCloud Drive folder might be the live library's own — the lobby can't tell which library is in the slot, so rule
+    27's refusal isn't owed there (it stays owed whenever the lobby can tell — class (D)'s two fixes).
 - 5 — THE DISCOVERY RUN (seeds 21–40) and THE GATE SOAK (seeds 1–20, Debug and Release): NOT-STARTED. Tables land as
   they complete. PENDING.
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.
