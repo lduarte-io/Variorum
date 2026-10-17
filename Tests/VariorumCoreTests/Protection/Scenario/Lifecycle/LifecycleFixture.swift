@@ -442,7 +442,7 @@ enum Lifecycle {
             id: "FD-3", stage: 8,
             page: #"“This Mac's Touch ID item … now hold[s] the new key.”"#,
             model: #"The Castle key's Touch ID item goes with its key; the new Standard key sits in the on-device road (the silent login-keychain item) — no Touch ID item."#,
-            reason: #"In Standard the on-device road is the SILENT item, no biometric gate (the plan's §3 rule-8 row, her F13 ruling; U2's first reading, accepted): “login password or Touch ID” is what that item means in honest terms. Rule 12 carries the same words. Proposed: “This Mac's on-device road and its sealed key-file copy now hold the new key.”"#),
+            reason: #"In Standard the on-device road is the silent item, no biometric gate (the plan's §3 rule-8 row, her F13 ruling; U2's first reading, accepted): “login password or Touch ID” is what that item means in honest terms. Rule 12 carries the same words. Proposed: “This Mac's on-device road and its sealed key-file copy now hold the new key.”"#),
     ]
 
     static let stages: [LStage] = [

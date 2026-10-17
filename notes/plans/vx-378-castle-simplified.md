@@ -323,7 +323,7 @@ record committed with PENDING numbers first.
   set Debug `✔ 254 tests in 67 suites`, `-c release` `✔ 232 in 63`, the full core suite green in Debug; 7,562
   source lines, 9,380 test lines.
 - U3 — the lifecycle proof: **IN-PROGRESS** (Opus implementer, 2026-10-16) — §8's U3 RECORD (pieces A–F; counts
-  PENDING). Next: piece C, the scenario.
+  PENDING). Next: piece E's QUESTIONS, then F (the closing runs).
 - U4 — the world and the soak: not started.
 - The ladder: not started.
 - The gate: not started.
@@ -885,7 +885,18 @@ everything else on the page stands as its facts.
   fact). The page's two "or"s before stage 6 are walked both ways (`LStage5Event`: an Apple ID change, an iCloud Keychain
   reset; the gate: Touch ID, Always ask). The fixture was written BEFORE any test; it states the page as written —
   nothing in it anticipates the model.
-- PENDING — the world the scenario walks; the renderer's home.
+- **The world the scenario walks is the scenario world (`SWorld`)** — its devices' leaves run the real
+  `ProtectionExecutor` acts. Read with the brief's "the executor world's real acts" as the real acts, on the world
+  with the realistic fakes: the page's stages 5, 6 and 11 need an Apple account whose items (and deletions) reach other
+  Macs, an Apple-ID change, an iCloud Keychain reset and a new Mac with a fresh keychain — `SWorld` models all of them
+  with the measured Apple facts (`Fakes.swift`), the executor harness (`ExecutorWorld`) none. Her Mac is `macA`, her
+  other Mac `macB` (stage 6's "other Macs", stage 12's second device), someone else's Mac `theirMac` (its own Apple ID
+  and Variorum account, stage 10). The promises are not checked on this walk (U4 rewrites them); its only authority is
+  the fixture.
+- **The renderer is test-side** (`LifecyclePage.swift`, its prose in `LifecycleProse.swift`, the guard
+  `LifecyclePageTests.theCommittedPageIsTheRenderedOne`), not `Tools/castle-lifecycle-page`: a tool needs a
+  `Package.swift` target (outside this unit's scope diff), and the test target reads the fixture's own types with no
+  second copy. Regeneration: `CASTLE_LIFECYCLE_PAGE_OUT=<path> swift test --filter LifecyclePageTests`, then `cmp`.
 
 **Pieces (the resume map — a fresh session can finish U3 from this list and `git log`):**
 - A — the record skeleton and LIVE STATUS: DONE (this commit).
@@ -899,7 +910,12 @@ everything else on the page stands as its facts.
   fails the same world). One fixture addition before that first run, recorded: stage 6's "deleted" typed as its own
   fact (`appleKeysDeleted`) — piece B had typed only "die everywhere". The FACTS DIFF marked in the next commit
   (E): the suite green in all four walks.
-- D — the renderer and the regenerated page (`cmp`): NOT-STARTED.
+- D — the renderer and the regenerated page (`cmp`): DONE (this commit). **Lossless first:** rendering the fixture with
+  the target's own lead and footer and no review notes reproduces the target page BYTE FOR BYTE (`cmp` identical to the
+  page as committed at `bb0550230`). Then the regenerated page: prose changed only where recorded (the lead's last
+  sentence and the footer now say the page is rendered from the fixture; one style line, `.note.diff`, for the "under
+  review" note each FACTS DIFF puts on its stage — FD-1 on stage 1, FD-2 on 6, FD-3 on 8); `cmp` of the render
+  (`CASTLE_LIFECYCLE_PAGE_OUT`) with the committed page: identical; the guard test green.
 - E — FACTS DIFF and PROVISIONALs (QUESTIONS): IN-PROGRESS — the three diffs marked (this commit: `Lifecycle.factsDiff`,
   the statuses, the observed facts); QUESTIONS next.
 - F — the closing runs, counts, this record closed: NOT-STARTED.
