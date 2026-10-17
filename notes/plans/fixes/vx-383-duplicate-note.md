@@ -280,3 +280,39 @@ store's Castle credentials, if a lock screen appears, are `~/.variorum/dev-castl
 ## Unit records
 
 *(Each unit's implementer writes its section here.)*
+
+## U1 UNIT RECORD — VX-372: the op's tag choice, the two doors, promote, the seeder (opus-implementer, from 2026-10-17)
+
+**NOT DONE YET (the record's first line, per the contract): read-in done; no product code, no pins yet.** No stage
+claimed, no app launched, no `xcodebuild test`, no store touched by this session (the Mac batch and the walk are the
+orchestrator's, in a stage window).
+
+**Read in (in full, this session's own context):** CLAUDE.md + its canon; this file whole; `notes/MCPSpec.md` whole;
+`notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md` §U6a (D-311-1…8, THE ORCHESTRATOR'S RULINGS ON U6a's FORKS);
+`notes/QUESTIONS.md` #227 (with her answers — P-VX311-1…3, P-VX361-1, VX-371's shape); `notes/plans/phase-17-standing-fixes.md`
+B3 row 3 + P-17y-B3-c1; `notes/SessionResiliencyProtocol.md`. Code (every pointer re-verified at `438846fb1`):
+`Operations+Versions.swift` (`duplicateAsVersion`/`duplicateAsVersionBody`/`copyPost`/`revertMintedContainer`),
+`Operations+Ownership.swift` (`copyLiveTags`), `Operations+Intake.swift` (`insertPostTag`, the event, `applyAutoTag`),
+`Operations+UndoInverses.swift` (`registerMintedContainerEntry`), `Operations+Container.swift` (`restoreContainer`'s exact-stamp
+revival), the container tombstone trigger, `Operations+NoteVersions.swift` (save/promote), `Operations+MCPDuplicate.swift`,
+the registry (`Capability.swift`, `CapabilityRegistry.swift`, `ShellActions.swift`, `EditorCommands.swift`), the doors
+(`LibraryCatalogView`, `PoolPostsView`, `TakesBoardView`, `LensesBoardView`, `MembershipChip`, `CommitBar`,
+`TakesBottomBar`), `TutorialSeeder.swift`, `CapabilityRegistryTests.swift`, `DuplicateCarriesTagsTests.swift`,
+`MCPDuplicateNoteActsTests.swift`.
+
+**Housekeeping:** `.gitignore` gains `notes/plans/vx383-screens/` (this run's logs and captures; the vx-336 precedent).
+Headless logs: `notes/plans/vx383-screens/u1/logs/`.
+
+### LIVE STATUS — U1's pieces (flipped in the same commit as each piece)
+
+| # | piece | status |
+|---|---|---|
+| 0 | read-in, this record, the gitignore line | DONE (this commit) |
+| 1 | D-C-1 pins (core) — committed AHEAD of the fix, run RED on the pre-fix tree | NOT-STARTED |
+| 2 | D-C-1 fix — `Operations.DuplicateTags`, `duplicateAsVersion(_:tags:)`, the body's parameter, the undo label | NOT-STARTED |
+| 3 | D-C-3 — promote applies the original's tags (pins ahead, then the fix) | NOT-STARTED |
+| 4 | D-C-5 — the seeder's twin (+ P-C-1's three guide sentences) | NOT-STARTED |
+| 5 | D-C-2 — the two capabilities, every door, the inline doors routed, P-C-1's faces | NOT-STARTED |
+| 6 | revert checks (announced here before any revert starts) | NOT-STARTED |
+| 7 | headless finals + the Mac `build-for-testing` (no runner) | NOT-STARTED |
+| 8 | the Mac batch's suite list + the walk steps + the self-assessment | NOT-STARTED |
