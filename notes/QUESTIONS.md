@@ -2754,7 +2754,9 @@ an open does when the memory item is missing or fails its seal. Options:
   detect-and-refuse; needs U2's face).
 - (c) adopt the record's section when it holds exactly one (rejected: a guess, against rule 21).
 Record: `notes/plans/vx-378-castle-simplified.md` §8, the U1 RECORD (piece G). Status: open — U2 decides (b) or keeps
-(a); her eye at the phase's close.
+(a); her eye at the phase's close. **U2 (2026-10-16):** (a) KEPT, per the orchestrator's adjudication 5 (rule 21's
+refusal keys on a disagreement, never on absence); the stranded-act cost is closed — an act in flight resumes in the
+section the plan on disk names, and the fresh device ID is taken once it has settled (the U2 RECORD, piece F).
 
 **P-VX378-U1-2 — Does leaving an account ask for a secret?** Rule 16: leaving changes none of the library's keys or
 secrets — it stops syncing. The leave used to re-key, and asked for both secrets to lock the new key. With nothing
@@ -2831,3 +2833,17 @@ was bound to, or which of this device's settings it takes. Options:
   its words copy added, the account's sync keys kept).
 - (c) settings start fresh (no choice yet), the gate chosen at the door.
 Record: the plan's §8 U2 RECORD, piece H. Status: open — her eye with the faces (VX-309).
+
+**P-VX378-U2-5 — A key door's one-write window when the vault is out of reach at the relaunch (rule 20).** With the
+named wait gone (the orchestrator's adjudication 1), a resume that can't reach its account's vault rolls back. A synced
+key door writes the vault's new lock first, then the key file. If it crashes in the one write between the vault's
+accepting and the plan marking that step done, and the relaunch finds the vault out of reach, the door rolls back: the
+vault holds the new passphrase (or words) lock, the library's key file the old one. Nothing is lost — the new secret
+opens the library through the vault road (the master lock), the old one through its key file — but the pair is split
+until the next key door. Options:
+- **(a) BUILT, PROVISIONAL —** as above (a stated limit; Use Castle's same window is no residue — the follow picks the
+  landed write up).
+- (b) the key door writes the key file first and the vault last (the mirror restores the key file when the vault can't
+  be reached) — the same window, mirrored.
+- (c) a named wait for key doors only — rejected by adjudication 1 (the qualifier dies whole).
+Record: the plan's §8 U2 RECORD, piece E. Status: open — the orchestrator's eye.

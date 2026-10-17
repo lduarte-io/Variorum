@@ -314,8 +314,10 @@ record committed with PENDING numbers first.
   suites`, `-c release` `✔ 372 in 66` (tree `63cf038f1`); 11,928 source lines, 15,460 test lines. After (tree
   `25dc1cd12`): Debug `✔ 211 tests in 54 suites`, `-c release` `✔ 189 in 50`, the full core suite green in Debug;
   7,068 source lines, 8,611 test lines.
-- U2 — the additions: **IN PROGRESS** (Opus implementer, 2026-10-16) — §8's U2 RECORD carries the resume map
-  (pieces A–J, each flipped in the commit that lands it). A–I DONE; next: **J** (the closing runs). Counts PENDING.
+- U2 — the additions: **DONE, awaiting the cold review** (Opus implementer, 2026-10-16) — §8's U2 RECORD (pieces
+  A–J with their commits and red-on-old evidence; five PROVISIONALs). After (code tree `320579718`): the protection
+  set Debug `✔ 254 tests in 67 suites`, `-c release` `✔ 232 in 63`, the full core suite green in Debug; 7,562
+  source lines, 9,380 test lines.
 - U3 — the lifecycle proof: not started.
 - U4 — the world and the soak: not started.
 - The ladder: not started.
@@ -571,9 +573,35 @@ rule and its tests, as the unit asked.
 as superseded; re-scoping comments on VX-266/305/306/307/308/309/329; reshape notes on VX-263/301/209/213; a ticket's
 newest comment outranks an older body. Applied at the closeout's triage.
 
-### U2 RECORD — THE ADDITIONS (Opus implementer, 2026-10-16; IN PROGRESS)
+### U2 RECORD — THE ADDITIONS (Opus implementer, 2026-10-16; DONE — awaiting the cold review)
 
-**Not done in U2, first:** PENDING (filled at the close).
+**Not done in U2, first (each with its reason and owner):**
+- **Rule 21's two doors on the LIVE PLACE's stray** — `lookInside` and `makeThisMyLibrary` take a catalogued copy, and
+  Make this my library the unlocked current library; at the refusal the stray sits in the live place and the
+  remembered library's file is gone (no "posture of now" in hand). The same question as T-5's empty-slot landing:
+  VX-309 (the refusal offers the doors as values — `LibraryDisagreement.offers`).
+- **The world and its promises are U4's:** promise 6 is now strict (any act left in flight breaks it — the qualifier
+  died); promise 3 still tolerates a detected lost Apple road although rule 8 now re-makes it at the same open (U4 may
+  tighten); the world's `resumeAtVaultReach` is now only a re-settle (no act waits — U4's to delete); the replay
+  tampers come back as DETECTION in U4 (adjudication 2) — U2 pinned the executor's refusal (`U2PinsRule21Tests`).
+- **The server's `key_vault` change** (the Apple wrap and its id out, the mode flag and the earlier-row-keys list in,
+  the rotation fields and `sync_reencrypt` retired, the journal-bridge key's fate) — VX-307's SyncSpec §12 lockstep
+  event; this phase models the row in `VaultModel` only.
+- **The faces** of everything new (`askPassphrase`, `asksASecretAtOnce`, `noKeyFileAnywhere`, the rule-21 refusal and
+  its doors, `wordsReplacedByAccount`, `followedOutOfCastle`, Look inside / Make this my library) and rule 3's
+  launch-counted reminders — phase 3 and VX-306/307/309. Castle's Touch ID re-arm on new hardware (the lifecycle's
+  stage 11) stays the face's: no repair makes a Touch ID item (the guard stands).
+- `ExecutorRefusal.repairForbidden` is still unused — left as found (U1 noted it).
+
+**What the faces will read changed shape** (for VX-306/307/309's plans; nothing in `App/` reads them yet):
+`VaultReading` (the mode flag, `rowKeyID`, `kdf`, the recovery wrap), `VaultVerdict` (mode, custody), `OwedAct.follow
+(kind, typesOneSecret:)`, `OwedAct.askPassphrase`, `LobbyRoads.noKeyFileAnywhere`/`asksASecretAtOnce`,
+`Fault.libraryDisagreesWithMemory`/`.noKeyFileAnywhere`, `DoorRefusal.libraryDisagreesWithMemory`; the leaves —
+`SyncKeysLeaf` holds `AccountKeys`, `VaultLeaf` speaks `AccountVault` (no walk), `LibraryFileLeaf.copyOpens` and
+`swapStaged(setAside:asideKeyFile:)`, `MemoryStoreLeaf.rememberedLibraryIDs`/`deleteMemory`, `IDsLeaf.mintWords`,
+`BiometryLeaf` lost `biometryStateHash`; `createLibrary` → `CreatedLibrary`; `ProtectionRecord` gains
+`passphraseSet`/`reminderDismissals`/`accountRowKeyID`; `DeviceMemory` is the four things; `AppleKeyRecord` is
+{`id`, `retiredAt`}; `ProtectionAct.land` → `.makeMine`.
 
 **Pieces (the resume map — a fresh session can finish U2 from this list and `git log`):**
 - A — the record skeleton and LIVE STATUS: DONE (this commit).
@@ -719,7 +747,7 @@ newest comment outranks an older body. Applied at the closeout's triage.
     posture "of now" with the remembered library's file gone): the same question as the empty-slot landing; both
     doors here take a catalogued copy and Make this my library takes the unlocked current library.
   - Protection set Debug `✔ 247 tests in 65 suites`.
-- I — rule 27 (+ the crash harness over E's changed acts): DONE (this commit).
+- I — rule 27 (+ the crash harness over E's changed acts): DONE (`320579718`).
   - **The honest refusal** (`NoKeyFileAnywhere` {`wouldHaveWorked`: rule 1's three homes — beside the library, inside a
     backup, this Mac's keychain; `accountRoad`: rule 27's exception, rule 14's road}): before unlock,
     `LobbyRoads.noKeyFileAnywhere` when a library sits in the slot and NOTHING might open it — no key file beside it or
@@ -738,16 +766,60 @@ newest comment outranks an older body. Applied at the closeout's triage.
     only before its commit point when it isn't — and `joinKeyFile` reads it itself when this session hasn't. Green
     after.
   - Protection set Debug `✔ 254 tests in 67 suites`.
-- J — the closing runs (the full core suite in Debug; the protection set under `-c release`), the counts, this record
-  closed: NOT STARTED.
+- J — the closing runs, the counts, this record closed: DONE (this commit). The scratch worktree used for every
+  red-on-old run (checked out at each piece's parent, the piece's pin file copied in) is REMOVED (`git worktree
+  remove`; `git worktree list` shows only `main`, the mobile worktree and this branch).
 
-**Red-on-old evidence, per piece:** PENDING.
+**Readings made while building (each traced to the rules; none is a rule change):**
+- **Rule 12's "this Mac's Touch ID item … now hold[s] the new key"** read with §3's rule-8 row (F13: Standard's
+  on-device road is the SILENT item, no biometric ACL): the Castle key's Touch ID item goes with its key and the new
+  Standard key's silent item is made — the on-device road "back". (Already the built leave; no change.)
+- **Rule 7's "joining … never changes the key"** read as the same-posture join: a join that crosses postures is rules
+  10–12's entry or leave (one posture at a time) and re-keys, as built since VX-305.
+- **What the crossings type** — rules 11/12's "types your passphrase" vs the plan's crossings-table mechanism for local
+  crossings, which doesn't exist: P-VX378-U2-2 (the doors keep both typed).
+- **Rule 7's "Only creating a library shows fresh words"** read as scoped to the pair-changing doors (sync setup, a join,
+  Make this my library, the crossings, Replace All Keys); New Words (rule 6's re-lock) keeps making new words.
+- **The account's Apple key** died with the vault's Apple lock (rule 14), so `AppleKeyRecord` keeps only this Mac's own
+  keys for the library (`purpose`/`origin`/`accountID` gone).
 
-**The runs:** PENDING.
+**Red-on-old evidence, per piece:** in each piece's line above (scratch worktree `$SCRATCH/old`, checked out at each
+piece's parent commit, the piece's pin file copied in; removed at the close).
 
-**PROVISIONAL calls:** PENDING (logged under the VX-378 heading in `notes/QUESTIONS.md`, P-VX378-U2-n).
+**The runs (exit lines, both configurations; code tree `320579718`):**
+- The protection set, Debug (`swift test --filter <every suite under Tests/VariorumCoreTests/Protection>`, exit 0):
+  `✔ Test run with 254 tests in 67 suites passed after 2.051 seconds.` (generator 16 sequences, 363 steps). Before U2
+  (`d992d2906`): `✔ 211 tests in 54 suites`.
+- The full core suite, Debug (`swift test`, exit 0): `✔ Test run with 240 tests in 51 suites passed after 22.692
+  seconds.` · `✔ Test run with 3114 tests in 397 suites passed after 196.791 seconds.` · `✔ Test run with 40 tests in
+  6 suites passed after 46.137 seconds.`
+- `swift build -c release` (exit 0): `Build complete! (88.50 sec)`.
+- The protection set, Release (`swift test -c release --filter <the same>`, exit 0): `✔ Test run with 232 tests in 63
+  suites passed after 1.347 seconds.` (the DEBUG mutation pins compile out).
+- Line counts: `Sources/VariorumCore/Protection/` 7,068 → **7,562**; `Tests/VariorumCoreTests/Protection/` 8,611 →
+  **9,380**. The diff `d992d2906..HEAD`: 63 files (+3,044 −1,549), only the two Protection folders, this plan and
+  `notes/QUESTIONS.md`.
 
-**Commits:** A `0572dd3c0` · B `3631ecbde` · C `ef6c6bf54` · D `67ed68490` · E `db1c1ac55` · F `a01b622db` · G `1a02354bd` · H `21cc0377a` · I (this commit) · J PENDING.
+**PROVISIONAL calls** (logged under the VX-378 heading in `notes/QUESTIONS.md`):
+- **P-VX378-U2-1** — Replace All Keys re-keys the library only; the account's sync key stays (rule 15). Piece E.
+- **P-VX378-U2-2** — what the crossings type: both secrets at Use Castle and Use Standard (the plan's crossings-table
+  mechanism for a local crossing — "the words wrap re-made through the passphrase-opened key" — does not exist; rules
+  2, 11, 12, 14 hold). Piece E. **For the orchestrator: a plan-wording gap, not a rule conflict.**
+- **P-VX378-U2-3** — "here they are": a join typing the passphrase holds no words to show; the notice says they were
+  replaced, the face shows them when typed. Piece E.
+- **P-VX378-U2-4** — Make this my library's new library is local, the device's settings carried. Piece H.
+- **P-VX378-U2-5** — a key door's one-write window with the vault out of reach at the relaunch rolls back (the pair
+  split until the next key door; nothing lost). Piece E.
+- P-VX378-U1-1's status updated: (a) kept per adjudication 5, with the plan-named resume of piece F.
+
+**Design issues (the stop rule):** none stopped the unit. Nearest: P-VX378-U2-2 (the plan's crossings table describes
+an impossible mechanism; the rules themselves are buildable and hold) and P-VX378-U2-3 (rule 7's "here they are" with
+rule 14's one secret — a face's sentence, not a model gap). E's found gap (an entry into Castle after a lost memory
+item left the old Apple key alive — Castle's promise) was a model gap with a model answer (the key the live key file
+names), fixed red-first in G.
+
+**Commits:** A `0572dd3c0` · B `3631ecbde` · C `ef6c6bf54` · D `67ed68490` · E `db1c1ac55` · F `a01b622db` · G
+`1a02354bd` · H `21cc0377a` · I `320579718` · J (this record's close — the next commit).
 
 ## 9. The ladder
 
