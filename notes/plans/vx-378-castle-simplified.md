@@ -1543,7 +1543,22 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
   - QUESTIONS: P-VX378-U4-2 → CLOSED (her words); **P-VX378-U4-5** and **P-VX378-U4-6** PROVISIONAL (a). **Census class
     (B) closed here** (the L4 clause is outside the promise; the refusal it fought is gone). Protection set Debug `✔ 287
     tests in 73 suites passed` (generator 16 sequences).
-- 4 — THE CENSUS CLASSES (B)–(I) re-read under the rulings: IN-PROGRESS. A fresh census of seed 21 on the piece-3
+- 4 — THE CENSUS CLASSES (B)–(I) re-read under the rulings: DONE (this commit closes it). **The dispositions:** (A)
+  CLOSED by piece 2 (the floor); (B) CLOSED by piece 3 (P-VX378-U4-2 outside the promise) and its consequence, the
+  split pair, read as L6 (P-VX378-U4-6); (C) CLOSED — CHECKER: folded into rule 21's offer (a backup's key file is
+  offered) and, with no key file anywhere, promise 3 no longer asks a device that can't re-key to converge while the
+  open says rule 27 (promise 4 holds it to that); (D) FIXED — MODEL, two roads (a memory item carrying no copy;
+  another library's key files), each pinned; (E) FIXED — MODEL, pinned; (F) DIED with piece 1; (G) FIXED — MODEL,
+  pinned; (H) FIXED — CHECKER; (I) TRACED and classified — its first shape (the sealed copy not the current key's
+  after a replayed key file and the memory deleted) is class (K), FIXED — MODEL, pinned, plus rule 21's offer; its
+  second (P4 after a complete replay with secrets changed elsewhere) is L4/L6 — CHECKER; its third (the Always-ask
+  device opened offline, census seed 21 seq 912/913) is WORLD. **New classes the census found, each a MODEL fix pinned
+  red-first:** (J) a roll back leaves the sync keys the act took (two roads); (K) the sealed copy follows the key file
+  once it is back; (L) entering Castle deletes a silent sync-keys item for an account the library doesn't name; (M) a
+  resumed follow into a posture the account no longer has rolls back. **The census at the end** (scratch, release, tree
+  `b6d2456be`, one seed per call): seeds 21–28, 31, 33, 35–40 — 0 failing each (the per-seed table below); seeds 29,
+  30, 32, 34 last censused clean on `f6926a8e3`–`b1cfcee89` (the formal discovery re-runs every seed on the final
+  tree). Earlier in the piece: A fresh census of seed 21 on the piece-3
   tree (scratch worktree at `3cdca77cd`, the census patch never committed; `-c release`): **35 failing in 1,000
   sequences (44,710 steps, 311.9 s)** — P2 ×19 · P9 ×5 · P3 ×3 · P5 ×3 · P1 ×2 · P4 ×2 · P6 ×1. Read against the old
   classes: (A) gone (piece 2); (B) gone as a refusal and back as its consequence — the SPLIT PAIR (P2 ×19: an older
@@ -1697,6 +1712,14 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
     — they open without a press), a Touch ID sync-keys item while the library is back in Standard (Standard files them
     silently). The follow, typing a secret, picks the keys up. Pin `U4CensusPins
     .aRolledBackUseCastleLetsGoOfTheSyncKeysItTook` (census seq 513 replayed): red before — promise 3 — green after.
+  **The census on `b6d2456be` (release, scratch; steps · seconds):** 21 — 0 (44,768 · 244.3) · 22 — 0 (44,838 · 249.5)
+  · 23 — 0 (45,219 · 248.0) · 24 — 0 (44,688 · 246.4) · 25 — 0 (44,369 · 239.1) · 26 — 0 (45,226 · 253.1) · 27 — 0
+  (44,410 · 244.9) · 28 — 0 (45,147 · 258.5) · 31 — 0 (45,186 · 253.8) · 33 — 0 (44,878 · 246.4) · 35 — 0 (45,494 ·
+  266.4) · 36 — 0 (45,124 · 249.3) · 37 — 0 (45,386 · 252.9) · 38 — 0 (45,220 · 241.6) · 39 — 0 (44,830 · 244.7) · 40
+  — 0 (44,511 · 249.6). The census patch is never committed (the scratch worktree only).
+  **Class (C)'s checker line** lands with this record's close: promise 3's settled convergence skips a device whose
+  live place lacks its current key's file while the open says rule 27. Protection set Debug `✔ 296 tests in 74 suites
+  passed`.
 - 5 — THE DISCOVERY RUN (seeds 21–40) and THE GATE SOAK (seeds 1–20, Debug and Release): NOT-STARTED. Tables land as
   they complete. PENDING.
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.

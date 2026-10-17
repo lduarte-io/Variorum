@@ -526,8 +526,14 @@ extension SWorld {
                 }
                 // Settled: every device of the account, signed in and online,
                 // ends in its posture and holds its current sync key.
+                // (Census class (C), rule 1's row: a device with no key file of
+                // its current key anywhere can't re-key, so can't follow — the
+                // open says rule 27 instead, which promise 4 holds it to.)
+                let keyFileGone = liveKeyFile(device)?.fingerprint != record.currentFingerprint
+                    && assessed(device).faults.contains { if case .noKeyFileAnywhere = $0 { return true } else { return false } }
                 if settled, record.account == id, device.session.accountID == id, device.online, device.isOpen,
-                   truth.tamperedStandard[device.name]?.contains(record.currentFingerprint) != true, !splitPair(device) {
+                   truth.tamperedStandard[device.name]?.contains(record.currentFingerprint) != true, !splitPair(device),
+                   !keyFileGone {
                     if record.mode != vault.mode { fail(device.name, "the library is \(record.mode), the account \(vault.mode)") }
                     if !heldSyncKeys(device, id).contains(where: { $0.rowKeyID == current }) {
                         fail(device.name, "it doesn't hold the account's current sync key")
