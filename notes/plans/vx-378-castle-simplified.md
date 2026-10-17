@@ -1817,9 +1817,74 @@ had begun on (`94f295c9e` — discovery seeds 22, 23 green there, 44,838 and 45,
 script's parse, re-run below). The gate's discovery run and soak run ONCE on the final tree — the commit after this.
 
 
-## 10. The gate and the rules checklist
+## 10. The gate and the rules checklist (filled 2026-10-17 on the FINAL tree `4a4af3164` — the ladder's close; the code tree is `4a4af3164`, every later commit on the branch touches notes only)
 
-*(empty)*
+**The six items of §1:**
+
+1. **The generated runs on the final tree — the discovery run (seeds 21–40) FIRST, then the gate soak (seeds 1–20)
+   under `swift test` AND `swift test -c release`** — the tables below, landed as the runs completed (one seed per
+   call, `PROTECTION_SOAK=1 PROTECTION_SEED=n PROTECTION_SOAK_SEEDS=1 PROTECTION_SOAK_SEQUENCES=1000 swift test [-c
+   release] --filter 'VariorumCoreTests\.GeneratorTests/'`; the orchestrator's script, its log in the session
+   scratchpad — deleted at closeout per the 13x rule; these tables are the evidence). SOAK_TABLES_PENDING
+2. **Every fixed scenario green in both configurations** — the protection + lifecycle suites on `4a4af3164`, run by
+   the orchestrator in a clean review worktree: Debug `✔ Test run with 385 tests in 148 suites passed after 10.142
+   seconds.` (the wider filter — every suite under `Tests/VariorumCoreTests/Protection/` plus a few by name; the
+   lifecycle's four walks among them); `swift build -c release` `Build complete! (91.11 sec)`; release `✘ 362 tests in
+   144 suites … 1 issue` — the one red is `MultiTenantSyncAttackerTests` (VX-380: a SYNC test's DEBUG-only Argon2
+   parameters, swept in by the wider filter; nothing of Protection's; the protection set alone is green — the round-2
+   reviewer's own run `✔ 274 tests in 70 suites`). The full core suite in Debug on the same tree: `✔ 240 tests in 51
+   suites` · `✔ 3157 tests in 404 suites` · `✔ 40 tests in 6 suites`, exit 0.
+3. **Every mutation pin red with its guard off, green with it** — the DEBUG mutation suites (`ExecutorGuardTests`,
+   `AssessGuardTests`, the world's `mutationPin` helper asserting both sides) ran green inside item 2's Debug set; the
+   round-1 reviewer verified all 12 surviving guards carry a red-with-guard-off pin (its clean bill, item 8); the four
+   without a world pin are recorded with why (the U4 RECORD).
+4. **The Fable cold-review ladder CLOSED at two rounds** (§9): round 1 0B·0M·2m·3N, round 2 0B·0M·0m·2N, every
+   finding dispositioned and fixed, the final round's two doc fixes checked line by line by the orchestrator (they
+   are the two comment edits of `4a4af3164`); no round stalled on a safeguard, so her Opus-fallback rider was never
+   needed.
+5. **The rules checklist — below** (one row per rule of `notes/CastleRules.md`, naming the test that proves the model
+   does it, or honestly the later phase that owns the row). It REPLACES the 47-row key map's acceptance checklist;
+   `notes/plans/vx-305-key-map-model-half.md` is history (its banner says so).
+6. **The lifecycle page is rendered from the fixture the lifecycle test asserts against** — `LifecyclePageTests
+   .theCommittedPageIsTheRenderedOne` guards the byte-equality (re-checked by the orchestrator at U3 and by both
+   reviewers); the FACTS DIFF is EMPTY after her rulings (FD-1…3 accepted/ruled; the carry's facts reverted; stages 6,
+   8, 9, 14 as ruled).
+
+**VERDICT:** GATE_VERDICT_PENDING
+
+### The rules checklist (gate item 5 — one row per rule of `notes/CastleRules.md`; it replaces the 47-row key map's acceptance checklist, `notes/plans/vx-305-key-map-model-half.md` becoming history)
+
+| Rule | Proved in this phase by | Owned later (honestly) |
+|---|---|---|
+| 1 key file essential, kept redundant | `CutPinsRule21Tests.theMirrorIsWrittenBackOnlyIntoAnEmptyLivePlace` · `U4CensusPins.theMemorysCopyFollowsTheKeyFileOnceItIsBack` (the sealed copy follows the key file) · `U4KeyFileOfferTests` (a copy found in the keychain or a backup, offered by name) · promise 5 · lifecycle stage 14 | the faces of the offer — VX-306 |
+| 2 words at birth | `U2PinsRule2Tests` · `U2CreatedWordsTests` · `CutPinsRule2Tests` (no secretless arm survives) · lifecycle stage 1 | the "write these down now" card — phase 3 (VX-306/VX-379) |
+| 3 passphrase asked; the reminders | `U2PinsRule3Tests` (the facts; the two model-side moments: before the first backup, after a failed quiet road) · lifecycle stages 1–3 | the launch-counted schedule and the tutorial's last card — phase 3 (VX-306); P-VX378-U3-1 (which door sets the first passphrase) |
+| 4 every key change carries the list; the floor; quiet roads never traverse | VX-305 U1 "every key change carries the history (rule 4)" · `CutPinsTests.leavingCastleCarriesTheHistory` / `aFollowOutOfCastleCarriesTheHistory` · `CutPinsRule4QuietRoadTests` · promise 4 (the floor, her 2026-10-17 wording) · `U4LaggingPairScenarios` (the floor on a lagged device) · lifecycle stages 4, 6, 7, 8 | — |
+| 5 a backup = library + key file; opens with its day's secrets | promise 5 · lifecycle stages 3, 5, 7, 8 · `U4CensusPins` (the offer's key file opens with the secrets of its day) | — |
+| 6 re-lock, not re-key | VX-305 U3 "the key doors re-wrap the current key only (rule 6)" · lifecycle stages 4, 7 | — |
+| 7 one pair per account | `U2PinsAccountTests` (sync setup hands the pair up; a join adopts it, `wordsReplacedByAccount`) · `AccountJoinTests` · `U2MakeMineTests.theDoorAlwaysVerifiesTheCurrentPairAndOffersNoChoice` · lifecycle stage 12 | the "here they are" face — VX-308 (P-VX378-U2-3) |
+| 8 Standard = convenience; quiet roads re-made; ask only when none remains | `U2PinsRule8Scenarios` · `U2Rule8AssessTests` · promise 2 (tightened: a lost Apple road is no excuse) · lifecycle stage 5 | — |
+| 9 Castle: no Apple road, ever; Touch ID optional; Always ask = nothing on device | promise 1 · `U2PinsGateTests` (the press records its gate) · the executor's no-Touch-ID-item-by-repair guard and its mutation pin · lifecycle stage 6 | — |
+| 10 account-wide; a lagging device reads its own copy | promise 3 · `FollowTests` (into Castle one secret; the lagging device catches up) · the stated limit L in `Promises.swift` · lifecycle stage 12 | — |
+| 11 entering types P+W; takes everything in | `CrossingTests.syncedUseCastleWritesTheAccountOnceThenTheLibrary` · `U2PinsAccountTests` · `U4CensusPins` (classes (E) and (L): the keys retired at entry) · promise 1 · lifecycle stage 6 (both roads) | the faces — VX-307 |
+| 12 leaving types P+W; hands everything out; the catch-up's one secret | `LeaveCastleTests` · `CutPinsTests.leavingCastleCarriesTheHistory` · `U4LaggingPairScenarios` (catch-up with the last-sync secret) · promise 2 · lifecycle stage 8 | the leave screen — VX-307 |
+| 13 a Castle backup is protected while in Castle | falls out of promises 1 and 4 (no standalone promise, by design) · lifecycle stage 7 | — |
+| 14 the vault wrapped by P and W only; a join types one | `U2PinsAccountTests` (no Apple wrap; `oneSecret`) · `AccountJoinTests` | — |
+| 15 rows under the key current at write; every sync key kept | `U2PinsAccountTests` (the earlier sync key kept under the new master) · `FollowTests.aDeviceThatLaggedThroughCastleCatchesUpWithOneSecret` · promise 3 · `U4CensusPins` (class (J): a roll back lets go of the keys it took) | THE SERVER'S `key_vault` SHAPE — VX-307's SyncSpec §12 lockstep (modelled here in `VaultModel` only) |
+| 16 leaving an account changes no keys | `CutPinsRule16Tests` · lifecycle stage 12 | — |
+| 17 a copy is a copy: Look inside / Make this my library | `U2LookInsideTests` (zero writes, the crash switch armed at the first write) · `U2MakeMineTests` (a new library, the posture of now, the current pair, no previous keys — the carry reverted at her ruling) · lifecycle stages 9, 10 | the two doors' faces and a picked folder that is not catalogued — VX-309 (T-5, T-8) |
+| 18 sync, not files | lifecycle stage 10 (the AirDropped copy diverges) · the "one library on two Macs" state deleted (U1) | the server keeps accounts apart — 14c's RLS, not a model claim |
+| 19 copies listed, deletable | `CatalogAttributionTests` (only this design's folders) · `RetentionTests` · the offer's delete test (this Mac's copies only) | the listing's face — VX-309 |
+| 20 crash safety | `U2CrashHarnessTests` · the executor's crash-after-every-write harnesses (U3's, U2's) · promise 6 (strict) · the world's prepare-before-commit mutation pin | — |
+| 21 four things; the notice; the key-file offer | `U2PinsRule21Tests` (four things; absence is no disagreement; a stranded act settles from its plan) · `U4NoticeTests` (the open goes on, says so once, remembers) · `U4KeyFileOfferTests` · promise 7 ("noticed and said") · lifecycle stage 14 | the notice's and offer's faces — VX-306 |
+| 22 delete after replacement verified | promise 8 (checked at every delete) · the executor guard and its mutation pin | — |
+| 23 a plain device ID | `CutPinsRule23Tests` · VX-305 U1 "this Mac's section at open: the plain device ID it remembers (rule 23)" · P-VX378-U1-1 pins | — |
+| 24 both configurations | the protection set under `swift test -c release` (the gate's table) · "ProtectionGuards: a Release build has no off-switch" | — |
+| 25 no Apple promise; a lock left in an account you left | promise 2 (no excuse for a lost road) · lifecycle stages 5, 11 · the fixture's `appleLockKeptInAnAccountSheLeft` (FD-2, her ruling) | — |
+| 26 no migration, no handling of pre-design stores | proof by absence: `LegacyReaders`, `Migration`, corner 45 and the old shared key are gone (U1's record table); `recordMissing` refuses with no face; the scans | the testers export or sign in before the switch — VX-329 |
+| 27 lost everything = lost; synced: the words recover from the account | `U2PinsRule27Tests` · `U4CensusPins` (class (D): another library's key files don't silence it) · lifecycle stage 14 | — |
+
+
 
 ## 11. Closeout
 
