@@ -219,6 +219,8 @@ right after it's done"*). **Pins that change by her ask:** `ShellChromeTests.the
 and the shared-constant pin in `StarredScrollTests` (Starred keeps its 7, her words).
 
 ### VX-284 — Run: Books, gatherings & tags
+**SPLIT 2026-10-17 at her kickoff sitting (her ruling, the question tool: "Three runs + VX-216 alone"; her words: the phase "has grown too large", run "what can be run without my involvement", "we also can't do anything with sync / custody").** VX-284 is now the UMBRELLA; its parts run in parallel, each its own run ticket, branch, worktree and PR: **VX-381** Gatherings & tags (`notes/plans/fixes/vx-381-gatherings-tags.md`) · **VX-382** Book view doors & reds (`notes/plans/fixes/vx-382-book-view-doors.md`) · **VX-383** Duplicate a note — the Mac door and the wire, VX-372 + VX-371 (`notes/plans/fixes/vx-383-duplicate-note.md`, kicked off at the sitting; Fable orchestrates + reviews, Opus implements, xhigh). VX-216 stays hers, after VX-381 merges. The member list and units below are the pre-split text, kept for the record; the three files govern.
+
 **Members:**
 - Gatherings and tags: VX-250 (her copy, NOT terms; closes VX-240) · VX-240 · VX-241 · VX-249 (collecting
   sets the star; pre-launch at her word) · VX-247 (tag-delete undo) · VX-111 (the shared-note notice) ·
