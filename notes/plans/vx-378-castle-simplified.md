@@ -229,6 +229,13 @@ detect-and-refuse with `libraryDisagreesWithMemory` and `noKeyFileAnywhere` (rul
 configurations green. *(Rule numbers re-pointed at the 2026-10-16 kickoff to the 27-rule contract — this section was
 written against the 26-rule draft; §3's table was already current.)*
 
+**Additions from the orchestrator's U1 note (binding for U2 — read §8's ORCHESTRATOR NOTE after U1 in full):** the
+vault's account side is replaced WHOLE here (adjudication 1); the rule-21 refusal keys on disagreement, never absence,
+and a lost memory item mid-act finishes or rolls back from the on-disk plan (adjudication 5); Use Castle's press records
+its gate style (adjudication 3); the memory ends at exactly four things (adjudication 7); the replay refusal is pinned
+at the executor so U4 can bring the tampers back as detection (adjudication 2); rule 5's reading (b) is the fixture's
+(adjudication 4). The U1 record's "Not done" list and its "What the faces will read" paragraph are U2's starting map.
+
 ### U3 — THE LIFECYCLE PROOF (one session)
 
 FIXTURE FIRST: extract the target page's facts — stage × {what was written; the roads that open the live library; the
@@ -307,7 +314,7 @@ record committed with PENDING numbers first.
   suites`, `-c release` `✔ 372 in 66` (tree `63cf038f1`); 11,928 source lines, 15,460 test lines. After (tree
   `25dc1cd12`): Debug `✔ 211 tests in 54 suites`, `-c release` `✔ 189 in 50`, the full core suite green in Debug;
   7,068 source lines, 8,611 test lines.
-- U2 — the additions: not started.
+- U2 — the additions: **NEXT** (spawned 2026-10-16 after U1's verification).
 - U3 — the lifecycle proof: not started.
 - U4 — the world and the soak: not started.
 - The ladder: not started.
@@ -508,6 +515,60 @@ heading with P-VX378-U1-1 and -2, as the kickoff's rule against guessing asks).
 
 **Commits:** A `8ed8be1be` · B `15f46c8b0` · I `f8dd3ff7d` · C `c4ebc68d3` · D `ab9cbade8` · E `92b7dceeb` · F
 `3b354bcc3` · G `484017f3e` · H `f3d0b23ea` · J `cc66f32b9` · K `25dc1cd12` (the cut) · this record's close (the next).
+
+### ORCHESTRATOR NOTE after U1 (2026-10-16 — verified, adjudicated; the U2 brief's additions follow)
+
+**Verified, never trusted:** tree clean at `a07b1a403`, in sync with origin; the scope diff `8ed8be1be^..HEAD` touches
+only the two Protection folders, this plan and `notes/QUESTIONS.md` (the PROVISIONALs' home — the exception the brief
+meant); line counts re-counted exact (7,068 / 8,611). Re-runs by the orchestrator on `a07b1a403`: the protection set
+under a WIDER filter in Debug `✔ Test run with 347 tests in 145 suites passed` (it subsumes the implementer's 211/54) and
+under `-c release` `✘ 325 tests in 141 suites … 1 issue` — the one red is `MultiTenantSyncAttackerTests`, a SYNC suite
+the wider filter swept in, failing on the Argon2 production floor (its 256 KiB test parameters are relaxed only under
+`#if DEBUG`): pre-existing, outside Protection, the VX-345 class one test over — **ticketed VX-380** (Parked, Low,
+Test-only). The full core suite in Debug (orchestrator re-run, exit 0): `✔ 240 tests in 51 suites` · `✔ 3071 tests in 384 suites` · `✔ 40 tests in 6 suites` — matching the record's lines exactly. **Revert check:** piece E's three pins (`CutPinsTests`)
+run on a scratch worktree at `92b7dceeb^` with the pin file copied in — `✘ 3 tests in 1 suite failed … with 3 issues`
+(`:30`, `:49`, `:69`), green on HEAD; the worktree removed. The record table reads one row per deleted thing with its
+rule and its tests, as the unit asked.
+
+**Adjudications (the orchestrator, against the rules; PROVISIONAL where product-flavoured, bundled for her):**
+1. **The vault's account side moves WHOLE into U2** — the implementer's trace is right: the rotation walk, the
+   completing write, `previousCorpusKey`/`rotationStartedSeq` and the vault's Apple wrap cannot leave before rule 15's
+   `earlierRowKeys` list and the MODE flag exist, or earlier rows become unreadable and every vault reads Castle. U2
+   replaces them in one piece; promise 6's vault-reach qualifier and the follower's hold die in the same piece.
+2. **The replay tampers return in U4 as DETECTION** (the app refuses — rule 21), after U2 builds the refusal; U2 pins
+   the refusal at the executor (a replayed library file or key file in the live place → `libraryDisagreesWithMemory`,
+   no write).
+3. **Use Castle's press records no gate style (found while cutting, item 1):** U2's, red-first — rule 9's "Touch ID on
+   this Mac is optional" is chosen at the press and must be remembered by it, so a later Castle Replace All Keys mints
+   its Touch ID item.
+4. **Rule 5's quiet-road clause vs Standard's Replace All Keys (item 2) — PROVISIONAL, reading (b) stands as built:**
+   a Standard re-key keeps this Mac's existing own Apple key, so an older backup's key file — locked under that Apple
+   key — still opens through the Apple road; rule 4's "a quiet road opens only a key it directly holds" is exactly what
+   happens (the old key file holds the old key under a lock this Mac still reads). Rule 5's "while the backup's key is
+   still the live key" is the common case's wording, not a narrower promise. Option (a) — Replace All Keys in Standard
+   also mints a fresh Apple key and retires the old one — would make rule 5 literal, but buys nothing: the Apple road
+   reaches the NEW key the moment it is wrapped, so replacing the Apple key closes no hole and only costs older backups
+   a convenience. U3's fixture and U4's promises read rule 5 as *"through this Mac's quiet roads while they still hold
+   the key the backup's key file is locked under"*; the one-sentence wording for CastleRules rule 5 is HERS to accept
+   at the bundle — the rules are never edited here. (P-VX378-O1-1 in QUESTIONS at the merge.)
+5. **P-VX378-U1-1 (which section with nothing remembered) — (a) STANDS, with the orchestrator's reading:** a keychain
+   reset is a NAMED Standard event in rule 8 ("the next open … asks for your passphrase or words only when no quiet road
+   remains") — so a missing memory item must NOT refuse the open; U2's detect-and-refuse (rule 21) keys on a
+   DISAGREEMENT (a memory item present that names another file), never on absence. The stranded-act corner (a memory
+   item lost mid-act) is rule 20's: the plan beside the library is on disk, so U2 finishes or rolls back an act in
+   flight FROM THE ON-DISK PLAN regardless of which section the record names, and says which — pinned red-first; the
+   section the plan names is the one the act resumes in, the fresh device ID is minted only after the act settles.
+6. **P-VX378-U1-2 (does leaving an account ask a secret) — (a) stands:** rule 16 changes nothing, so the door has
+   nothing to lock; consent is the face's sentence (phase 3/4's). Her eye at the bundle.
+7. **The two memory hints (biometry state hash, vault facts) and `refreshMemory`'s fingerprint arm:** U2 homes or
+   deletes them as its rule-21 piece lands; the memory ends U2 at exactly rule 21's four things (a pin: no stored
+   value beyond them).
+8. **The faces' changed shapes** (`OpensWith`, `LobbyRoads`, `UnlockedLibrary`, `ExecutorConfiguration`,
+   `leaveAccount`): handed to VX-306/307's plans at closeout; nothing in `App/` reads them yet.
+
+**Linear, for the record (the VX-305 session's message, 2026-10-16, no files changed):** VX-228 and VX-340 canceled
+as superseded; re-scoping comments on VX-266/305/306/307/308/309/329; reshape notes on VX-263/301/209/213; a ticket's
+newest comment outranks an older body. Applied at the closeout's triage.
 
 ## 9. The ladder
 

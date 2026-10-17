@@ -2764,3 +2764,17 @@ re-keyed or re-locked, the rules don't say whether the door still asks. Options:
 - (b) the passphrase typed as consent, verified against the key file (deleting the account from this Mac is the
   heaviest of the three).
 Record: the plan's §8 U1 RECORD (piece H). Status: open — her eye at the phase's close (the faces are phase 3/4's).
+
+**P-VX378-O1-1 — Rule 5's quiet-road clause after a Standard "Replace All Keys" (the orchestrator's reading after U1).**
+Rule 5 says a backup opens through this Mac's quiet roads "while the backup's key is still the live key". A Standard
+re-key keeps this Mac's existing own Apple key, so an older backup's key file — locked under that Apple key — still
+opens through the Apple road after the re-key: rule 4's own mechanism (a quiet road opens a key it directly holds).
+Options:
+- **(a) BUILT as found, PROVISIONAL —** reading (b) of the U1 record: rule 5's clause is the common case's wording;
+  the honest sentence is *"through this Mac's quiet roads while they still hold the key the backup's key file is locked
+  under"*. Replacing the Apple key would close no hole (the Apple road reaches the new key the moment it is wrapped) and
+  only cost older backups a convenience. U3's fixture and U4's promises read it this way.
+- (b) Replace All Keys in Standard also mints a fresh Apple key and retires the old after verification (rule 22), so
+  rule 5 holds literally and older Standard backups open only with typed secrets through the history.
+The one-sentence change to CastleRules rule 5 is yours to accept; the rules are not edited by the phase. Record: the
+plan's §8 ORCHESTRATOR NOTE after U1, adjudication 4. Status: open — your eye at the phase's close.
