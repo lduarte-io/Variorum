@@ -30,6 +30,8 @@ struct AWorld {
     var section: DeviceSection
     var memory: DeviceMemory?
     var memoryAbsent = false
+    /// Rule 21's notice the open said (her ruling at the U4 stop).
+    var notice: LibraryNotice?
     var unlocked = true
     var libraryAccountEmail: String?
     /// Rule 3's record fact; nil reads it from the live file (and the account).
@@ -81,7 +83,7 @@ struct AWorld {
     func facts() throws -> ProtectionFacts {
         let unlockedFacts = unlocked ? UnlockedFacts(
             record: record, thisMac: section, memory: memoryAbsent ? nil : (memory ?? agreeingMemory),
-            currentFingerprint: PF.fp(key), liveKeyFileID: Self.liveKeyFileID) : nil
+            currentFingerprint: PF.fp(key), liveKeyFileID: Self.liveKeyFileID, notice: notice) : nil
         return ProtectionFacts(
             scope: Self.scope, unlocked: unlockedFacts, slotFingerprintHint: PF.fp(key),
             rememberedModeHint: unlocked ? nil : mode, libraryAccountEmail: libraryAccountEmail,

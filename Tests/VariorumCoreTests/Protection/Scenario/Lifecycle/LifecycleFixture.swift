@@ -314,9 +314,16 @@ indirect enum LFact: Sendable {
     // Something wrong on disk (stage 14).
     /// What this Mac remembers is four things, and they match the live place.
     case fourThingsRemembered
-    /// The live place isn't what this Mac remembers: the open refuses before
-    /// any write, says what it found and offers the two doors.
-    case refusesWhatItDoesntRemember(LStray)
+    /// The library in the live place isn't the one this Mac last opened: the
+    /// open goes on, writes nothing itself, says so once in her words (an older
+    /// copy, dated; a different library), and this Mac remembers it from then
+    /// on — the next open says nothing (her ruling at the U4 stop, 2026-10-17).
+    case noticesWhatItDoesntRemember(LStray)
+    /// The key file beside the library doesn't open it: the app finds the one
+    /// that does where it keeps key files, offers it naming where (her words),
+    /// writes nothing before the yes, and the yes puts it beside the library
+    /// (her ruling at the U4 stop).
+    case offersTheKeyFileThatOpensIt
     /// The live key file lost: the next open writes it back from the sealed
     /// copy in this Mac's keychain; every backup carries its own.
     case lostKeyFileComesBack
@@ -907,30 +914,40 @@ enum Lifecycle {
         // MARK: 14
         LStage(
             number: 14, title: #"Something is wrong on disk"#, posture: .any, postureLabel: #"any posture"#,
-            road: "a backup pair copied into the live place by hand, a replayed old library file, someone else's file swapped in — each opened, then put back; the live key file deleted; then every key-file copy gone",
+            road: "the live key file deleted; a backup pair copied into the live place by hand, a replayed old library file, someone else's library swapped in — each opened, then put back; an old key file beside the library; then every key-file copy gone",
             rows: [
-                LRow(term: #"What happens"#, content: .text(#"This Mac remembers four things about its library: its ID, its current key, its device ID and a sealed copy of its key file — and only the app's own doors change them [21]. If the file in the live place isn't the one it remembers — a swapped-in file, a replayed old file, or a backup pair you copied in by hand — the app refuses to open, says what it found, and offers the two doors: Look inside, or Make this my library. It never repairs by guessing. The honest way to go back to a backup is the app's own Restore from Backup door (stage 9)."#)),
+                LRow(term: #"What happens"#, content: .text(#"This Mac remembers four things about its library: its ID, its device ID, a fingerprint of its current key, and a copy of its key file — the key itself, still wrapped under your locks — and only the app's own doors change them [21]. If the library in the live place isn't the one this Mac last opened — a backup pair you copied in by hand, a replayed old file, or someone else's library — the app opens it and says so once: <em>“This is an older copy of your library, from &lt;date&gt;”</em> or <em>“This is a different library than the one this Mac last had open”</em>. Then it remembers this one. It never repairs by guessing. The honest way to go back to a backup is the app's own Restore from Backup door (stage 9)."#)),
+                LRow(term: #"The key file doesn't open it?"#, content: .text(#"The app looks for one that does where it keeps them — this Mac's keychain copy, and every backup — and offers what it found, saying where: <em>“The key file beside your library doesn't open it. This Mac's keychain holds a copy that does. Use it?”</em> Nothing is written before your yes; if no key file anywhere opens it, the app says so [21, 27]."#)),
                 LRow(term: #"Lost the key file?"#, content: .text(#"The app kept copies: beside the library, inside every backup, sealed in this Mac's keychain [1]. Synced libraries recover from the account with the twelve words [27]."#)),
             ],
             note: nil,
             facts: [
                 LFactEntry(
                     fact: .fourThingsRemembered,
-                    quote: "This Mac remembers four things about its library: its ID, its current key, its device ID and a sealed copy of its key file",
+                    quote: "This Mac remembers four things about its library: its ID, its device ID, a fingerprint of its current key, and a copy of its key file — the key itself, still wrapped under your locks",
                     rules: [21]),
                 LFactEntry(
-                    fact: .refusesWhatItDoesntRemember(.backupPairCopiedInByHand),
-                    quote: "a backup pair you copied in by hand — the app refuses to open, says what it found, and offers the two doors: Look inside, or Make this my library. It never repairs by guessing.",
+                    fact: .noticesWhatItDoesntRemember(.backupPairCopiedInByHand),
+                    quote: "a backup pair you copied in by hand — the app opens it and says so once: “This is an older copy of your library, from <date>” … Then it remembers this one. It never repairs by guessing.",
                     rules: [21]),
                 LFactEntry(
-                    fact: .refusesWhatItDoesntRemember(.replayedOldLibraryFile),
-                    quote: "a replayed old file — the app refuses to open, says what it found, and offers the two doors", rules: [21]),
+                    fact: .noticesWhatItDoesntRemember(.replayedOldLibraryFile),
+                    quote: "a replayed old file — the app opens it and says so once: “This is an older copy of your library, from <date>” … Then it remembers this one.",
+                    rules: [21]),
                 LFactEntry(
-                    fact: .refusesWhatItDoesntRemember(.swappedInFile),
-                    quote: "a swapped-in file — the app refuses to open, says what it found, and offers the two doors", rules: [21]),
+                    fact: .noticesWhatItDoesntRemember(.swappedInFile),
+                    quote: "someone else's library — the app opens it and says so once: … “This is a different library than the one this Mac last had open”. Then it remembers this one.",
+                    rules: [21]),
                 LFactEntry(
                     fact: .notTypedHere, quote: "The honest way to go back to a backup is the app's own Restore from Backup door (stage 9).",
                     rules: [17, 21], status: .notAModelFact("the face — VX-309 (the door is stage 9's Make this my library)")),
+                LFactEntry(
+                    fact: .offersTheKeyFileThatOpensIt,
+                    quote: "The app looks for one that does where it keeps them — this Mac's keychain copy, and every backup — and offers what it found, saying where: “The key file beside your library doesn't open it. This Mac's keychain holds a copy that does. Use it?” Nothing is written before your yes",
+                    rules: [1, 21]),
+                LFactEntry(
+                    fact: .notTypedHere, quote: "if no key file anywhere opens it, the app says so [21, 27].", rules: [27],
+                    status: .branch("not on this road (a copy of the key file is kept) — `U4KeyFileOfferTests.withNoKeyFileAnywhereTheSearchSaysRule27`")),
                 LFactEntry(
                     fact: .lostKeyFileComesBack,
                     quote: "The app kept copies: beside the library, inside every backup, sealed in this Mac's keychain [1].", rules: [1]),

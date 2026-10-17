@@ -42,6 +42,10 @@ public enum ProtectionAct: String, Codable, Sendable, CaseIterable {
     case touchIDRearm = "touch_id_rearm"
     case offerDelete = "offer_delete"
     case plaintextExport = "plaintext_export"
+    /// RULE 21's key-file offer, accepted (her ruling at the U4 stop,
+    /// 2026-10-17): the key file found in one of the places the app keeps them
+    /// written beside the library.
+    case useKeyFile = "use_key_file"
 }
 
 /// **The gate style — Touch ID or Always ask** (design §3.10): stored per

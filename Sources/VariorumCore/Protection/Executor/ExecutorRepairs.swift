@@ -162,7 +162,15 @@ extension ProtectionExecutor {
             return nil
 
         case .refreshMemory:
+            // RULE 21: what this Mac remembers follows the library in the live
+            // place (after the open's notice, when there was one) — and this
+            // Mac remembers ONE library: every other library's item goes.
             try writeMemory(&library)
+            if let current = library.record?.libraryID {
+                for other in try leaves.memory.rememberedLibraryIDs() where other != current {
+                    try leaves.memory.deleteMemory(libraryID: other)
+                }
+            }
             return nil
 
         case .restoreKeyFileFromMirror:

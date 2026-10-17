@@ -69,6 +69,11 @@ public struct UnlockedLibrary {
     /// plan on disk names resumes in the section the plan names; this Mac
     /// takes its fresh device ID only once that act has settled.
     public var sectionFromThePlan = false
+    /// RULE 21 (her ruling at the U4 stop, 2026-10-17): what the open says
+    /// ONCE when the library in the live place is not the one this Mac last
+    /// opened — her words, `LibraryNotice.words`. The open went on; what this
+    /// Mac remembers follows the library at the open's repairs.
+    public var notice: LibraryNotice?
 
     public var fingerprint: String { StoreKeyEnvelope.fingerprint(of: key) }
 
@@ -123,9 +128,6 @@ public struct ActSecrets: Sendable {
 /// Every refusal the executor names (the doors' sentences are phase 4's).
 public enum ExecutorRefusal: Error, Equatable, Sendable {
     case keyDoesNotOpenLibrary
-    /// RULE 21: the live place is not what this Mac remembers — nothing was
-    /// written; the face says what was found and offers rule 17's two doors.
-    case libraryDisagreesWithMemory(LibraryDisagreement)
     /// An act is already in flight on this device — resume it first.
     case actInFlight(ProtectionAct)
     /// A resume needs the secrets typed again (a plan never holds one).
@@ -224,7 +226,8 @@ public final class ProtectionExecutor {
     /// live key file's current key when the library opened through its
     /// history — a library file swapped for an older one) — a home sealed under
     /// any of them still verifies. (The older library file no longer loses to
-    /// the memory by a repair — VX-378 U1, rule 21.)
+    /// the memory by a repair — VX-378 U1, rule 21 — and no longer refuses:
+    /// it opens with rule 21's notice — her ruling at the U4 stop.)
     public func unlock(with key: StoreKey, alsoInHand: [StoreKey] = []) throws -> UnlockedLibrary {
         guard try leaves.library.libraryOpens(with: key) else { throw ExecutorRefusal.keyDoesNotOpenLibrary }
         let liveFile = try liveFormat3()
@@ -246,18 +249,22 @@ public final class ProtectionExecutor {
         }
         let section = fromPlan ?? DeviceFacts.thisMacsSection(
             memory: memory, recordSections: sections, mintDeviceID: { self.leaves.ids.mintID() })
-        // RULE 21 — detect and refuse, before anything is written.
-        if let disagreement = LibraryDisagreement.check(
-            libraryID: record.libraryID, libraryFingerprint: Self.fp(key), memory: memory,
+        // RULE 21 — the notice (her ruling at the U4 stop): the open goes on and
+        // says so once; nothing is written here (the memory follows at the
+        // open's repairs).
+        let named = LibraryNotice.rememberedFingerprint(
+            try leaves.memory.readMemory(libraryID: record.libraryID), libraryID: record.libraryID)
+        let notice = LibraryNotice.check(
+            libraryID: record.libraryID, libraryFingerprint: Self.fp(key), recordDate: record.changedAt,
+            rememberedFingerprint: memory?.currentFingerprint ?? named,
             rememberedLibraryIDs: try leaves.memory.rememberedLibraryIDs(),
-            liveKeyFileFingerprint: liveFile?.fingerprint, actInFlight: section.actInFlight) {
-            log("unlock: the live place is not what this Mac remembers — refused")
-            throw ExecutorRefusal.libraryDisagreesWithMemory(disagreement)
-        }
+            liveKeyFile: liveFile, actInFlight: section.actInFlight)
+        if let notice { log("unlock: the library in the live place is not the one this Mac last opened — \(notice.words)") }
         // The executor serves the slot's library (a landing changes it).
         configuration.libraryID = record.libraryID
         var library = UnlockedLibrary(key: key, record: record, section: section, memory: memory, keyFile: liveFile)
         library.sectionFromThePlan = fromPlan != nil
+        library.notice = notice
         return library
     }
 

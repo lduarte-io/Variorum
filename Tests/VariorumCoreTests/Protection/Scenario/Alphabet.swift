@@ -141,6 +141,9 @@ indirect enum Action: Equatable {
     /// Make this my library from a catalogued copy, its own door typed as
     /// `typing` says, then the current pair.
     case makeMine(String, pick: Int, typing: CopyTyping)
+    /// RULE 21's key-file offer (her ruling at the U4 stop): the search, and her
+    /// yes to what it found — refused when nothing is offered.
+    case useKeyFileOffer(String)
     /// The world settles: iCloud propagates, every device opens, follows and
     /// heals what it's offered.
     case settle
@@ -579,6 +582,13 @@ extension SWorld {
                     &library, copy: copy, in: catalog, copySecrets: self.copySecrets(d, copy, typing),
                     currentPair: TypedSecrets(passphrase: pair.passphrase, words: pair.words))
             }
+        case .useKeyFileOffer(let name):
+            let d = device(name)
+            try await act(d) { executor, library in
+                let found = try executor.searchKeyFiles(library, catalog: self.catalog(d), typed: self.typedFor(d))
+                guard case .offer(let offer) = found else { throw ExecutorRefusal.nothingToDo }
+                return try await executor.useOfferedKeyFile(&library, offer)
+            }
         case .settle:
             await settleWorld()
         }
@@ -796,6 +806,8 @@ extension SWorld {
                 try? await runRepairs(device)
                 let assessment = assessed(device)
                 for act in assessment.acts {
+                    // Her yes to rule 21's key-file offer (the next pass follows).
+                    if act == .offerKeyFile { _ = await apply(.useKeyFileOffer(device.name)) }
                     if case .follow = act { _ = await apply(.follow(device.name, .passphrase)) }
                 }
             }

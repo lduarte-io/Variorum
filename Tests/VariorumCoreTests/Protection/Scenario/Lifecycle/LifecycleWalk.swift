@@ -74,11 +74,33 @@ struct LLookResult {
     var wroteNothing: Bool
 }
 
-/// One stray in the live place (stage 14), as the open met it.
+/// One stray in the live place (stage 14), as the open met it (her ruling at
+/// the U4 stop: opened, said once, then remembered).
 struct LStrayResult {
-    var refused: LibraryDisagreement?
+    var opened = false
+    var notice: LibraryNotice?
     var otherError: String?
-    var wroteNothing: Bool
+    /// The stray's library and key file left exactly as found by the open.
+    var strayUntouched = false
+    /// The stray's record date (an older copy's notice carries it).
+    var strayDate: Date?
+    /// After the open, what this Mac remembers names the stray (and no other
+    /// library).
+    var memoryFollowed = false
+    /// The next open of the same live place said nothing.
+    var secondOpenSilent = false
+}
+
+/// Stage 14's key-file offer, as the driver met it.
+struct LOfferSeen {
+    var tried = false
+    var opened = false
+    var offer: KeyFileOffer?
+    var owed = false
+    var searchWroteNothing = false
+    var mirrorBefore: KeyFile?
+    var liveAfterYes: KeyFile?
+    var owedAfterYes = true
 }
 
 /// Everything a stage's checks read that the world can't give back afterwards.
@@ -102,6 +124,7 @@ final class LStageContext {
     var observed: Set<LObs> = []
     var looks: [String: [LLookResult]] = [:]
     var strays: [LStray: LStrayResult] = [:]
+    var offerSeen = LOfferSeen()
     // Compound facts' before/after (stages 9–14).
     var makeMine: [LSubject: MakeMineSeen] = [:]
     var moveBefore: (slot: SFile?, keyFile: SFile?, deviceID: String, section: DeviceSection)?
@@ -717,8 +740,32 @@ final class LifecycleWalk {
         let catalog = world.catalog(mac)
         let older = catalog.copies.filter { $0.kind == .backup && $0.library == current.libraryID && $0.fingerprint != current.fingerprint }
             .max { $0.id < $1.id }
+        // She types today's pair, else one she had before (the floor — rule 4).
+        func openTyping(_ first: TypedSecrets) async throws {
+            var pairs = [first]
+            for entry in world.known(world.slotHolder(mac) ?? "").timeline.reversed() {
+                pairs.append(TypedSecrets(passphrase: entry.passphrase, words: entry.words))
+            }
+            var lastError: Error = WorldRefusal.cannotOpen
+            for pair in pairs {
+                do { try await open(mac, typed: pair); return } catch { lastError = error }
+            }
+            throw lastError
+        }
+        try await open(mac, typed: today)
+        // The live key file lost.
+        ctx.lostKeyFile.keyFileBefore = liveFile
+        world.lock(mac)
+        mac.container.files[SPath.liveKeyFile] = nil
+        try await open(mac, typed: .none)
+        ctx.lostKeyFile.keyFileAfter = liveKeyFile
+        ctx.lostKeyFile.mirrorAfter = mac.library?.memory?.keyFileMirror
+        ctx.lostKeyFile.backupPairsHaveKeyFiles = world.catalog(mac).copies
+            .filter { $0.kind == .backup && $0.library == current.libraryID }
+            .map { copy in !world.catalog(mac).servingKeyFiles(of: copy).compactMap(\.document).isEmpty }
+        try await open(mac, typed: today)
         for entry in stage.facts {
-            guard case .refusesWhatItDoesntRemember(let stray) = entry.fact else { continue }
+            guard case .noticesWhatItDoesntRemember(let stray) = entry.fact else { continue }
             world.lock(mac)
             var typed = today
             switch stray {
@@ -737,34 +784,72 @@ final class LifecycleWalk {
                 mac.container.files[SPath.liveKeyFile] = mac.container.files[copy.pairPath]
                 typed = TypedSecrets(passphrase: theirPassphrase)
             }
-            let before = LSnapshot(mac)
-            var result = LStrayResult(refused: nil, otherError: nil, wroteNothing: false)
+            let straySlot = mac.container.files[SPath.slot], strayKeyFile = mac.container.files[SPath.liveKeyFile]
+            var result = LStrayResult()
+            result.strayDate = straySlot?.library?.record?.changedAt
             do {
-                try await open(mac, typed: typed)
-                result.otherError = "it opened"
-            } catch ExecutorRefusal.libraryDisagreesWithMemory(let disagreement) {
-                result.refused = disagreement
+                try await openTyping(typed)
+                result.opened = true
+                result.notice = mac.library?.notice
+                // Nothing repaired over what she put there: the library under
+                // the same key, its identity, posture and account as found (an
+                // act its record carried may finish — rule 20 — writing only
+                // its record), the key file still the same key under the same
+                // locks of hers (rule 8's quiet Apple road may be re-made at any
+                // open).
+                let nowSlot = mac.container.files[SPath.slot]?.library, wasSlot = straySlot?.library
+                let nowKeyFile = mac.container.files[SPath.liveKeyFile]?.keyFile, wasKeyFile = strayKeyFile?.keyFile
+                result.strayUntouched = nowSlot?.fingerprint == wasSlot?.fingerprint && nowSlot?.libraryID == wasSlot?.libraryID
+                    && nowSlot?.record?.mode == wasSlot?.record?.mode && nowSlot?.record?.account == wasSlot?.record?.account
+                    && nowKeyFile?.fingerprint == wasKeyFile?.fingerprint && nowKeyFile?.passphrase == wasKeyFile?.passphrase
+                    && nowKeyFile?.words == wasKeyFile?.words && nowKeyFile?.history == wasKeyFile?.history
+                let named = Set(mac.keychain.names(service: ProtectionNames.memoryService)
+                    .compactMap { ProtectionNames.parseMemoryAccount($0.account, scope: SWorld.scope) })
+                result.memoryFollowed = named == [straySlot?.library?.libraryID].compactMap { $0 }.reduce(into: Set<String>()) { $0.insert($1) }
+                    && mac.library?.memory?.currentFingerprint == straySlot?.library?.fingerprint
+                world.lock(mac)
+                try await openTyping(typed)
+                result.secondOpenSilent = mac.library?.notice == nil
             } catch {
                 result.otherError = String(describing: error)
             }
-            result.wroteNothing = LSnapshot(mac) == before
             ctx.strays[stray] = result
             // She puts her files back.
             world.lock(mac)
             mac.container.files[SPath.slot] = liveSlotFile
             mac.container.files[SPath.liveKeyFile] = liveKeyFileFile
+            try await openTyping(today)
         }
-        try await open(mac, typed: today)
-        // The live key file lost.
-        ctx.lostKeyFile.keyFileBefore = liveFile
-        world.lock(mac)
-        mac.container.files[SPath.liveKeyFile] = nil
-        try await open(mac, typed: .none)
-        ctx.lostKeyFile.keyFileAfter = liveKeyFile
-        ctx.lostKeyFile.mirrorAfter = mac.library?.memory?.keyFileMirror
-        ctx.lostKeyFile.backupPairsHaveKeyFiles = world.catalog(mac).copies
-            .filter { $0.kind == .backup && $0.library == current.libraryID }
-            .map { copy in !world.catalog(mac).servingKeyFiles(of: copy).compactMap(\.document).isEmpty }
+        // An old key file beside the library: the offer (her ruling at the U4 stop).
+        if stage.facts.contains(where: { if case .offersTheKeyFileThatOpensIt = $0.fact { return true } else { return false } }),
+           let older {
+            ctx.offerSeen.tried = true
+            world.lock(mac)
+            let path = String(older.id.dropFirst("container:".count))
+            mac.container.files[SPath.liveKeyFile] = mac.container.files[SPath.pair(of: path)]
+            do {
+                try await openTyping(today)
+                ctx.offerSeen.opened = true
+                ctx.offerSeen.owed = world.assessed(mac).acts.contains(.offerKeyFile)
+                ctx.offerSeen.mirrorBefore = mac.library?.memory?.keyFileMirror
+                let before = LSnapshot(mac)
+                if let executor = mac.executor, let library = mac.library,
+                   case .offer(let offer) = try executor.searchKeyFiles(library, catalog: world.catalog(mac), typed: today) {
+                    ctx.offerSeen.offer = offer
+                    ctx.offerSeen.searchWroteNothing = LSnapshot(mac) == before
+                    _ = try await act(mac) { executor, library in try await executor.useOfferedKeyFile(&library, offer) }
+                    ctx.offerSeen.liveAfterYes = liveKeyFile
+                    world.lock(mac)
+                    try await openTyping(today)
+                    ctx.offerSeen.owedAfterYes = world.assessed(mac).acts.contains(.offerKeyFile)
+                }
+            } catch {
+                ctx.offerSeen.opened = false
+            }
+            world.lock(mac)
+            mac.container.files[SPath.slot] = liveSlotFile
+            mac.container.files[SPath.liveKeyFile] = liveKeyFileFile
+        }
         // Every key-file copy gone — beside the library, in every backup, the
         // sealed copy in this Mac's keychain — and the keychain's items with it.
         world.lock(mac)

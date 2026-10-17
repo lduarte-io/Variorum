@@ -2936,6 +2936,12 @@ login-reachable in its day (P-U4-5's own reasoning). Options:
 - (c) treat it as a stop (a Castle device can be flipped to Standard by two tampers).
 Record: the plan's §8 U4 RECORD, piece E. Status: open — your eye with the next finding.
 
+**Status: CLOSED 2026-10-17 as outside the promise (the U4 stop sitting — the plan's §8 HER RULINGS AT THE U4 STOP, item
+3).** Her words: *"someone with access to your computer can of course delete your library"*. The refusal it leaned on is
+gone (rule 21 is now a notice — the open goes on and says so once); the world's tamper clauses no longer treat a
+replay-plus-memory-tamper as something the app must catch (`Promises.swift` `sealed`, which keeps L4 as a stated limit,
+not a breach). Neither (b) nor (c) is built.
+
 **P-VX378-U4-3 — A device that lagged while BOTH secrets changed and the account entered Castle: today's secrets open
 nothing there. THE UNIT STOPPED HERE (the plan's stop rule).** Found by the discovery run (seed 21, sequence 83; pinned as
 `U4LaggingPairScenarios`, a known issue). Each key door re-locks the acting device's key file and the vault (rule 7); a
@@ -2991,4 +2997,40 @@ Options:
 - (c) rule 12's wording names the two moments for an Always-ask device ("types the one it had when it last synced to
   open it, then today's once to catch up") — a rules edit, hers.
 Record: the plan's §8 U4 RESUMPTION RECORD, piece 2. Status: PROVISIONAL (a) — your eye at the bundle.
+
+**P-VX378-U4-5 — Rule 21's notice at its edges: a library NEWER than what this Mac remembers, the date it names, and an
+item the keys in reach can't verify.** (Found building piece 3 — the notice.) Your strings name two cases: *"This is an
+older copy of your library, from <date>"* and *"This is a different library than the one this Mac last had open"*.
+Three edges they don't settle:
+- **A library that moved ON past what this Mac remembers** (the memory item is from an earlier moment — a restored or
+  replayed keychain item; the library's own key file carries the remembered key in its history). Neither sentence is
+  true of it. **(a) BUILT, PROVISIONAL —** no notice; the memory follows it (the memory is this Mac's note, not a posture,
+  account or road — nothing changes silently). (b) say the older-copy sentence anyway; (c) a third sentence, yours.
+- **The date:** the model holds no file-system date, so the older copy's date is the one its record carries — the day
+  its key began (`ProtectionRecord.changedAt`). **(a) BUILT, PROVISIONAL —** that date; the face (VX-306) may read the
+  file's own date instead. (b) a new record field stamped at every record write (a schema-shaped change, not built).
+- **A memory item the keys in reach can't verify** (sealed under a newer key than the library in the live place — the
+  common shape of a hand-restored older copy on an Always-ask Mac): **(a) BUILT, PROVISIONAL —** the notice reads what
+  the item NAMES (its payload) — the notice changes nothing but the memory write that follows, which happens either way;
+  absence (no item) is still never a notice. (b) only a verified item speaks — the tree before this piece opened such a
+  copy SILENTLY on an Always-ask Mac (the red-on-old run of `aBackupPairCopiedInByHandOpensAndSaysItIsAnOlderCopy`),
+  so (b) would leave your hand-copied pair unsaid there.
+Record: the plan's §8 U4 RESUMPTION RECORD, piece 3. Status: PROVISIONAL (a), all three — your eye at the bundle.
+
+**P-VX378-U4-6 — Rule 21's key-file offer at its edges: a key file that reaches the library only through its history,
+and an absent key file a backup holds.** (Found building piece 3 — the offer.) Your ruling: *"The one case that needs a
+hand — the key file beside the library does not open it — is an OFFER"*. Two edges:
+- **The key file beside reaches the library only through its HISTORY** (an older library file put back by hand beside
+  today's key file). It opens — but the pair is split: its own quiet road can't be re-made (the Apple road wraps the key
+  file's own key), and every act that needs the library's own key file refuses at its door, the follow among them.
+  **(a) BUILT, PROVISIONAL —** the offer looks for the library's OWN key file (this Mac's keychain copy, a backup's) and
+  offers it, naming where; with none anywhere, the split pair is said (`.besideOpensItOnlyThroughItsHistory`), never
+  refused and never rule 27 (the library opened). (b) no offer — the beside file "opens it" in your words, so the pair
+  stays split until a Restore from Backup; (c) the app builds a key file for the library's key under today's pair (a
+  repair — against your "no repair").
+- **No key file beside the library, no keychain copy of its key, and a backup holding it:** rule 1 restores ONLY from
+  the sealed keychain copy, automatically. **(a) BUILT, PROVISIONAL —** the backup's key file is OFFERED (your offer's
+  candidates include every backup's key file), never restored without the yes; rule 27 is said only when no home holds
+  it. (b) restore automatically from the backup too (rule 1's "without asking").
+Record: the plan's §8 U4 RESUMPTION RECORD, piece 3. Status: PROVISIONAL (a), both — your eye at the bundle.
 

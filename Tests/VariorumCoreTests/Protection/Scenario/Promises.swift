@@ -21,15 +21,18 @@
 //      what would have; copies leave only by her or this Mac's own retention.
 //    6 CRASH SAFE (rule 20) — strict: nothing left half-done, and the open says
 //      which.
-//    7 FOUR THINGS; A DISAGREEMENT REFUSES (rules 21, 23) — what this Mac
-//      remembers matches the live place; when it doesn't, the open refuses and
-//      writes nothing.
+//    7 FOUR THINGS; A DISAGREEMENT IS NOTICED AND SAID (rules 21, 23 — her
+//      ruling at the U4 stop, 2026-10-17) — what this Mac remembers matches the
+//      live place; when the library there isn't the one this Mac last opened,
+//      the open goes on, says so once (her words) and the memory follows;
+//      nothing changes posture, account or roads silently (promise 9).
 //    8 DELETED ONLY AFTER REPLACEMENT (rule 22) — no delete leaves the library
 //      in the live place with no road of hers.
 //    9 NOTHING SILENT (the kept core of VX-305's promise 10; rule 17) — the
-//      posture, the account and the roads change only at a deliberate act; in
-//      Castle no single tampered file or item changes them; Look inside writes
-//      nothing; Make this my library keeps the posture of now.
+//      posture, the account and the roads change only at a deliberate act, or
+//      at an open that said rule 21's notice; in Castle no tampered file or
+//      item changes them silently; Look inside writes nothing; Make this my
+//      library keeps the posture of now.
 //
 //  NO PROMISE is made about pre-leave copies after a leave: one posture at a
 //  time (rules 12, 13 — her 2026-10-16 ruling; a reviewer proposing one is
@@ -596,9 +599,18 @@ extension SWorld {
         // copy-less rebuild door is NOT built (rule 27 says the honest outcome)":
         // her secrets then open only what a remaining key file carries (its
         // copies keep the floor), and the open must SAY so.
+        // A backup the app lists still holding the library's own key file:
+        // rule 21's offer is owed instead (her ruling at the U4 stop).
         if !base.contains(where: { $0.fingerprint == slot.fingerprint }) {
-            if device.isOpen, !assessed(device).faults.contains(where: { if case .noKeyFileAnywhere = $0 { return true } else { return false } }) {
-                fail("no key file of the current key is left and the open doesn't say so (rule 27)")
+            if device.isOpen {
+                let assessment = assessed(device)
+                if catalog(device).keyFiles.contains(where: { $0.role != .live && $0.fingerprint == slot.fingerprint }) {
+                    if !assessment.acts.contains(.offerKeyFile) {
+                        fail("a backup holds the library's own key file and the open doesn't offer it (rule 21)")
+                    }
+                } else if !assessment.faults.contains(where: { if case .noKeyFileAnywhere = $0 { return true } else { return false } }) {
+                    fail("no key file of the current key is left and the open doesn't say so (rule 27)")
+                }
             }
             return violations
         }
@@ -691,15 +703,17 @@ extension SWorld {
         return violations
     }
 
-    /// PROMISE 7 — FOUR THINGS; A DISAGREEMENT REFUSES (rules 21, 23): "This
-    /// Mac remembers four things about its library — its ID, its current key,
-    /// its device ID and the sealed copy of its key file … If the file in the
-    /// live place is not the one this Mac remembers, the app refuses to open,
-    /// says what it found, and offers the two doors of rule 17. It never repairs
-    /// by guessing" (21); a plain random device ID (23). With the library open
-    /// and nothing in flight, a verified memory item names it, its current key
-    /// and this Mac's device ID, carries the current key's file, and names no
-    /// other library. (The refusals are judged at the launch — `refusals`.)
+    /// PROMISE 7 — FOUR THINGS; A DISAGREEMENT IS NOTICED AND SAID (rules 21,
+    /// 23 — her ruling at the U4 stop, 2026-10-17): "This Mac remembers four
+    /// things about its library — its ID, its device ID, a fingerprint of its
+    /// current key, and a copy of its key file: the key itself, still wrapped
+    /// under your locks — and only the app's own doors change them" (21); a
+    /// plain random device ID (23). With the library open and nothing in
+    /// flight, a verified memory item names it, its current key and this Mac's
+    /// device ID, carries the current key's file, and names no other library.
+    /// The notice is judged at the launch (`noticeMismatches`): the open says
+    /// exactly what the live place calls for — and nothing it then takes is
+    /// silent (promise 9).
     func fourThings(_ device: SDevice) -> [Violation] {
         guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record else { return [] }
         func fail(_ detail: String) -> [Violation] { [Violation(promise: 7, device: device.name, detail: detail)] }
@@ -730,14 +744,14 @@ extension SWorld {
     /// refusals, promise 8's strandings, promise 9's Look inside writes.
     func foundAtTheWrite() -> [Violation] {
         var violations: [Violation] = []
-        violations += truth.refusals.map { Violation(promise: 7, device: $0.device, detail: $0.detail) }
+        violations += truth.noticeMismatches.map { Violation(promise: 7, device: $0.device, detail: $0.detail) }
         violations += truth.strandings.map { Violation(promise: 8, device: $0.device, detail: $0.detail) }
         violations += truth.lookInsideWrites.map { Violation(promise: 9, device: $0.device, detail: $0.detail) }
         violations += truth.doorRefusals.map { Violation(promise: 4, device: $0.device, detail: $0.detail) }
         violations += truth.madeWithNothing.map { Violation(promise: 4, device: $0.device, detail: $0.detail) }
         truth.doorRefusals.removeAll()
         truth.madeWithNothing.removeAll()
-        truth.refusals.removeAll()
+        truth.noticeMismatches.removeAll()
         truth.strandings.removeAll()
         truth.lookInsideWrites.removeAll()
         return violations
@@ -778,6 +792,9 @@ extension SWorld {
         var violations: [Violation] = []
         for device in devices {
             guard let was = before[device.name] else { continue }
+            // An open that said rule 21's notice said what it took (her ruling
+            // at the U4 stop): the copy's posture and account are its own.
+            if noticedThisStep.contains(device.name) { continue }
             let now = posture(device)
             if case .makeMine(let name, _, _) = innerAction(action), name == device.name, was.libraryID != now.libraryID,
                let from = was.mode, let to = now.mode, from != to {
@@ -823,16 +840,22 @@ extension SWorld {
     /// PROMISE 9's tamper clause (the kept core of VX-305's promise 10): in
     /// Castle, no planted, edited, replayed or deleted file or item — alone, or
     /// in a group in one closed window — changes the mode, the account, the
-    /// custody, the gate style or the scheduled export in a weakening direction
-    /// (Always ask recorded quietly when an item vanished weakens nothing).
-    /// L4: a group that replays both of this Mac's homes together returns the
-    /// Mac to that earlier moment.
-    func sealed(_ device: SDevice, before was: Posture, tampers: [Tamper], opened: Bool = true) -> [Violation] {
-        guard was.mode == .castle else { return [] }
+    /// custody, the gate style or the scheduled export SILENTLY in a weakening
+    /// direction (Always ask recorded quietly when an item vanished weakens
+    /// nothing). A relaunch that said rule 21's notice said what it took — the
+    /// replayed copy's own posture and roads (her ruling at the U4 stop: "we
+    /// also do not need to protect them from hand copying an old library over -
+    /// they have to just remember that at that point"). Outside the promise
+    /// (P-VX378-U4-2, CLOSED at the same sitting — her words: "someone with
+    /// access to your computer can of course delete your library"): a group
+    /// that replays both of this Mac's homes together, or the library file
+    /// while what this Mac remembers is deleted, edited or replayed — L4.
+    func sealed(_ device: SDevice, before was: Posture, tampers: [Tamper], opened: Bool = true, noticed: Bool = false) -> [Violation] {
+        guard was.mode == .castle, !noticed else { return [] }
         let now = posture(device)
-        // The relaunch refused (rule 21) or found no road: the files on disk are
-        // the adversary's, not a posture the app took — only what the app could
-        // have written is judged here (promise 7 holds the refusal to no write).
+        // The relaunch found no road: the files on disk are the adversary's,
+        // not a posture the app took — only what the app could have written is
+        // judged here.
         let judgesThePosture = opened
         var violations: [Violation] = []
         let label = tampers.map { "\($0)" }.joined(separator: " + ")
@@ -840,8 +863,7 @@ extension SWorld {
         // L4 — both homes of this Mac's facts returned together (P-U4-5): the
         // complete replay, or the library file replayed while what this Mac
         // remembers can't speak (deleted, edited past its seal, or replayed) —
-        // PROVISIONAL P-VX378-U4-2: the app can't tell what it doesn't remember
-        // (rule 21; the orchestrator's adjudication 5 after U1).
+        // outside the promise (P-VX378-U4-2, CLOSED at her ruling).
         let memoryCantSpeak = tampers.contains { [.deleteMemoryItem, .editMemoryItem, .replayMemory, .deleteKeyFileAndMemory].contains($0) }
         let statedLimit = tampers.contains(.replayBothHomes) || (tampers.contains(.replayLibraryFile) && memoryCantSpeak)
         if now.libraryID == was.libraryID, !statedLimit, judgesThePosture {

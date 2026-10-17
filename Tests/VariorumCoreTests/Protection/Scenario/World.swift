@@ -97,9 +97,11 @@ struct Truth {
     var prunes: [(by: String, mac8: String, library: String, copy: CatalogCopy)] = []
     // VX-378 U4 — the bookkeeping the rewritten promises read. (The open-copy
     // road's `opens` left with rule 17 — a copy is a copy.)
-    /// PROMISE 7 (rule 21): an open that went on over a disagreement, refused
-    /// without one, or wrote anything while refusing — found at the launch.
-    var refusals: [(device: String, detail: String)] = []
+    /// PROMISE 7 (rule 21, her ruling at the U4 stop): an open whose notice
+    /// isn't the one the live place calls for — none when the library isn't
+    /// the one this Mac last opened, one when it is, or the wrong one (its
+    /// kind, its date) — found at the launch.
+    var noticeMismatches: [(device: String, detail: String)] = []
     /// PROMISE 8 (rule 22): a delete after which the library in the live place
     /// opened by none of her roads — found at the write.
     var strandings: [(device: String, detail: String)] = []
@@ -255,6 +257,10 @@ final class SWorld {
     var senders: [String: String] = [:]
     /// Devices whose last act crashed (their next launch finishes it).
     var crashed: Set<String> = []
+    /// Devices whose open at this step said rule 21's notice: what that open
+    /// went on to take — the copy's posture, its roads — was said, never silent
+    /// (promise 9).
+    var noticedThisStep: Set<String> = []
     /// Every promise violation, with the log line it surfaced at.
     var violations: [(Violation, Int)] = []
     /// Each action kind's outcomes (the generator's coverage).
@@ -627,9 +633,12 @@ final class SWorld {
                 device.touchIDPress = .failedOnExistingItem
             }
         }
-        // Every key file this device holds beside the slot, and the catalog's.
+        // Every key file this device holds beside the slot, and the catalog's —
+        // and this Mac's keychain copy (rule 1's third home: the sealed copy in
+        // what this Mac remembers is a key file the lobby can open with her
+        // secret — VX-378 U4 resumption, rule 21's offer).
         let catalog = catalog(device)
-        let files = catalog.keyFiles.compactMap(\.document)
+        let files = catalog.keyFiles.compactMap(\.document) + mirrors(device)
         let apple = readableAppleKeys(device)
         var secrets: [ProtectionSecret] = []
         if let passphrase = typed.passphrase { secrets.append(.passphrase(passphrase)) }
@@ -698,27 +707,21 @@ final class SWorld {
         guard let (key, also) = lobby else { throw WorldRefusal.cannotOpen }
         let executor = newExecutor(device, libraryID: slot.record?.libraryID ?? slot.libraryID)
         device.executor = executor
-        // PROMISE 7 (rule 21): the world's own reading of whether the live place
-        // is what this Mac remembers — and the open must refuse exactly then,
-        // writing nothing.
-        let disagrees = liveDisagrees(device, key: key, also: also, executor: executor)
+        // PROMISE 7 (rule 21, her ruling at the U4 stop): the world's own reading
+        // of whether the library in the live place is the one this Mac last
+        // opened — the open must go on and say exactly that notice (its kind,
+        // its date), writing nothing itself.
+        let expected = expectedNotice(device, key: key, also: also, executor: executor)
         let writesBefore = device.writeCount
-        var library: UnlockedLibrary
-        do {
-            library = try executor.unlock(with: key, alsoInHand: also)
-        } catch ExecutorRefusal.libraryDisagreesWithMemory(let found) {
-            device.executor = nil
-            if device.writeCount != writesBefore {
-                truth.refusals.append((device.name, "the refused open wrote \(device.writeCount - writesBefore) time(s)"))
-            }
-            if !disagrees {
-                truth.refusals.append((device.name, "the open refused (\(found.findings)) with nothing this Mac remembers disagreeing"))
-            }
-            throw ExecutorRefusal.libraryDisagreesWithMemory(found)
+        var library = try executor.unlock(with: key, alsoInHand: also)
+        if device.writeCount != writesBefore {
+            truth.noticeMismatches.append((device.name, "the open itself wrote \(device.writeCount - writesBefore) time(s)"))
         }
-        if disagrees {
-            truth.refusals.append((device.name, "the open went on although the live place is not what this Mac remembers"))
+        if library.notice?.kind != expected {
+            truth.noticeMismatches.append((device.name,
+                "the open said \(library.notice.map { "\($0.kind)" } ?? "nothing"); the live place calls for \(expected.map { "\($0)" } ?? "nothing")"))
         }
+        if library.notice != nil { noticedThisStep.insert(device.name) }
         device.library = library
         device.lastSettle = nil
         do {
@@ -1222,31 +1225,35 @@ extension SWorld {
 // MARK: - VX-378 U4: the oracles the rewritten promises read
 
 extension SWorld {
-    /// PROMISE 7's oracle (rule 21): the live place disagrees with what this
-    /// Mac remembers — the memory item for the slot's library, verified with
-    /// the keys the lobby reached, names another key than the library file or
-    /// the key file beside it (unless this Mac's own act in flight, in the
-    /// section the memory names, moves between exactly those two keys); or,
-    /// remembering nothing for this library, the memory items name other
-    /// libraries only. Absence is never a disagreement (rule 8's keychain
-    /// reset — the orchestrator's adjudication 5 after U1).
-    func liveDisagrees(_ device: SDevice, key: StoreKey, also: [StoreKey], executor: ProtectionExecutor) -> Bool {
-        guard let slot = device.slot, let record = slot.record else { return false }
+    /// PROMISE 7's oracle (rule 21, her ruling at the U4 stop): the notice the
+    /// live place calls for, read from the device itself — what the memory item
+    /// for the slot's library NAMES (its payload, as the item states it) against
+    /// the library file: another key → an older copy (dated by the library's
+    /// record), unless this Mac's own act in flight moves between exactly those
+    /// two keys, or the library moved on past what is remembered (its own key
+    /// file's history carries the remembered key — PROVISIONAL P-VX378-U4-5);
+    /// nothing remembered for this library while other libraries are → a
+    /// different library. Absence is never a notice (rule 8's keychain reset).
+    func expectedNotice(_ device: SDevice, key: StoreKey, also: [StoreKey], executor: ProtectionExecutor) -> LibraryNotice.Kind? {
+        guard let slot = device.slot, let record = slot.record else { return nil }
         let live = liveKeyFile(device)
         let reach = executor.reach(key: key, keyFile: live, extra: also)
         let remembered = Set(device.keychain.names(service: ProtectionNames.memoryService)
             .compactMap { ProtectionNames.parseMemoryAccount($0.account, scope: Self.scope) })
         var memory: DeviceMemory?
-        if case .memory(let sealed)? = device.keychain.local[KName.memory(Self.scope, record.libraryID)]?.value {
-            memory = DeviceMemory.opening(sealed, libraryID: record.libraryID, reach: reach)
+        if case .memory(let sealed)? = device.keychain.local[KName.memory(Self.scope, record.libraryID)]?.value,
+           let named = try? ProtectionCoding.decoder().decode(DeviceMemory.self, from: sealed.payload), named.libraryID == record.libraryID {
+            memory = named
         }
-        guard let memory else { return !remembered.isEmpty && !remembered.contains(record.libraryID) }
+        guard let memory else { return !remembered.isEmpty && !remembered.contains(record.libraryID) ? .differentLibrary : nil }
+        if slot.fingerprint == memory.currentFingerprint { return nil }
         let inFlight = record.verifiedSections(reach: reach).first { $0.deviceID == memory.deviceID }?.actInFlight
         let actKeys = Set([inFlight?.fromFingerprint, inFlight?.toFingerprint].compactMap { $0 })
-        func agrees(_ fingerprint: String) -> Bool {
-            fingerprint == memory.currentFingerprint || (actKeys.contains(fingerprint) && actKeys.contains(memory.currentFingerprint))
+        if actKeys.contains(slot.fingerprint), actKeys.contains(memory.currentFingerprint) { return nil }
+        if let live, live.fingerprint == slot.fingerprint, live.history.contains(where: { $0.fingerprint == memory.currentFingerprint }) {
+            return nil
         }
-        return !agrees(slot.fingerprint) || !(live.map { agrees($0.fingerprint) } ?? true)
+        return .olderCopy(date: record.changedAt)
     }
 
     /// Every key-file copy this Mac's memory items carry (rule 1's sealed copy).

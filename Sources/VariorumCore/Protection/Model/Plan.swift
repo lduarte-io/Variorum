@@ -91,6 +91,10 @@ public struct ActParameters: Codable, Equatable, Sendable {
     /// keys, so the record names the key it followed, never a vault that moved
     /// on before its resume finished (VX-305 U4, the soak's seed 11).
     public var followedRowKeyID: String?
+    /// RULE 21's key-file offer, accepted (her ruling at the U4 stop): the key
+    /// file found in one of the places the app keeps them, to be written beside
+    /// the library (sealed with the plan; a key file holds no secret).
+    public var offeredKeyFile: KeyFile?
 
     public init(
         gate: GateStyle? = nil, synced: Bool? = nil, accountID: String? = nil, doorRevision: Int? = nil,

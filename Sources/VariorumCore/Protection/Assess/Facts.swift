@@ -137,16 +137,20 @@ public struct UnlockedFacts: Sendable {
     public var currentFingerprint: String
     /// The live key file's id in the catalog.
     public var liveKeyFileID: String?
+    /// RULE 21: what the open said — the library in the live place is not the
+    /// one this Mac last opened (`UnlockedLibrary.notice`).
+    public var notice: LibraryNotice?
 
     public init(
         record: ProtectionRecord, thisMac: DeviceSection, memory: DeviceMemory? = nil,
-        currentFingerprint: String, liveKeyFileID: String? = nil
+        currentFingerprint: String, liveKeyFileID: String? = nil, notice: LibraryNotice? = nil
     ) {
         self.record = record
         self.thisMac = thisMac
         self.memory = memory
         self.currentFingerprint = currentFingerprint
         self.liveKeyFileID = liveKeyFileID
+        self.notice = notice
     }
 }
 

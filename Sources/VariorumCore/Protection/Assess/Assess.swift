@@ -38,17 +38,14 @@ public func assess(_ facts: ProtectionFacts, guards: ProtectionGuards = .all) ->
     var repairs: [Repair] = []
     var faults: [Fault] = []
     var acts: [OwedAct] = []
-    // RULE 21: the live place is not what this Mac remembers — refused, said,
-    // the two doors offered; no repair, no act, every door closed.
-    if let unlocked = facts.unlocked, let disagreement = AssessRules.disagreement(facts, unlocked) {
-        var doors: [Door: DoorState] = [:]
-        for door in Door.allCases { doors[door] = .refused(.libraryDisagreesWithMemory) }
-        return Assessment(
-            launch: launch, mode: mode, account: account, vault: vault, lobby: AssessRules.lobby(facts), touchID: touchID,
-            repairs: [], faults: [.libraryDisagreesWithMemory(disagreement)], acts: [], doors: doors, opensWith: [:])
-    }
     if let unlocked = facts.unlocked {
-        (repairs, faults) = AssessRules.repairs(facts, unlocked, mode: mode, account: account, vault: vault, guards: guards)
+        // RULE 21 (her ruling at the U4 stop): what the open said, reported
+        // until what this Mac remembers has followed the library — no door
+        // closes, nothing is repaired over it.
+        if let notice = AssessRules.notice(facts, unlocked) { faults.append(.libraryNotice(notice)) }
+        var found: [Fault] = []
+        (repairs, found) = AssessRules.repairs(facts, unlocked, mode: mode, account: account, vault: vault, guards: guards)
+        faults += found
         acts = AssessRules.acts(facts, unlocked, mode: mode, account: account, vault: vault, faults: faults,
                                 touchID: touchID)
     }
@@ -64,12 +61,22 @@ public func assess(_ facts: ProtectionFacts, guards: ProtectionGuards = .all) ->
 public enum AssessRules {
     // MARK: - Rule 21
 
-    /// The disagreement, from the unlocked facts.
-    public static func disagreement(_ facts: ProtectionFacts, _ unlocked: UnlockedFacts) -> LibraryDisagreement? {
-        LibraryDisagreement.check(
-            libraryID: unlocked.record.libraryID, libraryFingerprint: unlocked.currentFingerprint,
-            memory: unlocked.memory, rememberedLibraryIDs: facts.rememberedLibraryIDs,
-            liveKeyFileFingerprint: liveKeyFile(facts, unlocked)?.fingerprint, actInFlight: unlocked.thisMac.actInFlight)
+    /// The open's notice while what this Mac remembers hasn't followed the
+    /// library yet (it names another key, or nothing, or other libraries too).
+    public static func notice(_ facts: ProtectionFacts, _ unlocked: UnlockedFacts) -> LibraryNotice? {
+        guard let notice = unlocked.notice else { return nil }
+        return memoryFollows(facts, unlocked) ? nil : notice
+    }
+
+    /// What this Mac remembers names the library in the live place, its
+    /// current key and this Mac's device ID — and no other library (rule 21:
+    /// "This Mac remembers four things about its library").
+    static func memoryFollows(_ facts: ProtectionFacts, _ unlocked: UnlockedFacts) -> Bool {
+        guard let memory = unlocked.memory else { return false }
+        return memory.libraryID == unlocked.record.libraryID
+            && memory.currentFingerprint == unlocked.record.currentFingerprint
+            && memory.deviceID == unlocked.thisMac.deviceID
+            && facts.rememberedLibraryIDs.subtracting([unlocked.record.libraryID]).isEmpty
     }
 
     // MARK: - The launch
@@ -199,16 +206,16 @@ public enum AssessRules {
         let record = unlocked.record
         // (A library file older than what this Mac remembers no longer loses
         // to the memory by a repair — "memory wins" left with VX-378 U1, rule
-        // 21: U2 detects the disagreement and refuses.)
-        // ALWAYS: what this Mac remembers names the record's current key and
-        // this Mac's device ID. (Its fingerprint arm follows the record until
-        // U2's refusal replaces it — rule 21; the two homes, the tree, the
-        // epoch and the facts last confirmed left with VX-378 U1.)
+        // 21.)
+        // ALWAYS: what this Mac remembers names the library in the live place,
+        // the record's current key and this Mac's device ID, and no other
+        // library. ITS FINGERPRINT ARM IS BACK (her ruling at the U4 stop,
+        // 2026-10-17: the memory follows the file after rule 21's notice — one
+        // write, no repair); a refresh forgets every other library's item (this
+        // Mac remembers ONE library). Never mid-act (the repairs don't run).
         do {
             let memory = unlocked.memory
-            // (Its fingerprint arm — the memory following the record — left with
-            // VX-378 U2: a memory naming another key is rule 21's refusal.)
-            var stale = memory == nil || memory?.deviceID != unlocked.thisMac.deviceID
+            var stale = !memoryFollows(facts, unlocked)
             // The key file and its mirror, for the current key: the mirror is
             // written back ONLY when the live file is absent (rule 1). Another
             // key's file in the live place, or a live file with fewer roads
@@ -220,9 +227,11 @@ public enum AssessRules {
                 } else {
                     repairs.append(.restoreKeyFileFromMirror)
                 }
-            } else if liveKeyFile(facts, unlocked) == nil, unlocked.thisMac.actInFlight == nil {
+            } else if liveKeyFile(facts, unlocked) == nil, unlocked.thisMac.actInFlight == nil,
+                      !backupHoldsTheCurrentKeyFile(facts, unlocked) {
                 // RULE 27: opened (by a quiet road) with no key file anywhere —
-                // nothing to write back; said, never rebuilt.
+                // nothing to write back; said, never rebuilt. (A backup holding
+                // the current key's file is rule 21's offer — `acts`.)
                 faults.append(.noKeyFileAnywhere(NoKeyFileAnywhere(accountRoad: record.account != nil)))
             }
             if stale { repairs.append(.refreshMemory) }
@@ -237,8 +246,14 @@ public enum AssessRules {
         // the act's new key's by design (no fault).
         let rawLive = liveKeyFile(facts, unlocked)
         let live = rawLive.flatMap { $0.fingerprint == unlocked.currentFingerprint ? $0 : nil }
-        if rawLive != nil, live == nil, unlocked.thisMac.actInFlight == nil, let id = unlocked.liveKeyFileID {
+        if let rawLive, live == nil, unlocked.thisMac.actInFlight == nil, let id = unlocked.liveKeyFileID {
             faults.append(.liveKeyFileIsAnotherKeys(keyFileID: id))
+            // RULE 27: and no home holds the library's own key file, nor does the
+            // stray reach it through its history — said, never rebuilt.
+            if unlocked.memory?.keyFileMirror?.fingerprint != unlocked.currentFingerprint,
+               !backupHoldsTheCurrentKeyFile(facts, unlocked), !rawLive.heldFingerprints.contains(unlocked.currentFingerprint) {
+                faults.append(.noKeyFileAnywhere(NoKeyFileAnywhere(accountRoad: record.account != nil)))
+            }
         }
         guard let current = mode.mode else { return (repairs, faults) }
         // §3.10: a choice of Touch ID with no item behind it records Always
@@ -402,9 +417,26 @@ public enum AssessRules {
         if faults.contains(where: { if case .appleWrapOnCastleKey = $0 { return true } else { return false } }) {
             acts.append(.rekeyForFault)
         }
+        // RULE 21's key-file offer (her ruling at the U4 stop): the key file
+        // beside the library isn't its own — another key's, or none the sealed
+        // copy can write back — and a home the app keeps key files in holds the
+        // library's own (this Mac's keychain copy, a backup's): an offer, never a
+        // refusal (nothing in flight).
+        if !ownActInFlight, liveKeyFile(facts, unlocked)?.fingerprint != unlocked.currentFingerprint,
+           unlocked.memory?.keyFileMirror?.fingerprint == unlocked.currentFingerprint
+               ? liveKeyFile(facts, unlocked) != nil : backupHoldsTheCurrentKeyFile(facts, unlocked) {
+            acts.append(.offerKeyFile)
+        }
         if touchID.rearmQuestion { acts.append(.touchIDRearmQuestion) }
         acts += passphraseAsks(facts, unlocked, current: current, faults: faults)
         return acts
+    }
+
+    /// A key file of the library's current key in one of rule 19's folders (a
+    /// backup's pair, an aside copy) — read by the name the file claims; the
+    /// offer's search verifies it against the library (rule 21).
+    static func backupHoldsTheCurrentKeyFile(_ facts: ProtectionFacts, _ unlocked: UnlockedFacts) -> Bool {
+        facts.catalog.keyFiles.contains { $0.role != .live && $0.fingerprint == unlocked.currentFingerprint }
     }
 
     /// RULE 3: a library with no passphrase is asked for one right before its

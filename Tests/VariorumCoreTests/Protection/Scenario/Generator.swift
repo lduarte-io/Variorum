@@ -25,6 +25,7 @@ extension SWorld {
     /// in `violations`.
     @discardableResult
     func step(_ action: Action) async -> StepResult {
+        noticedThisStep.removeAll()
         // A single tamper and a group (`.tamperSequence`) are bracketed alike:
         // ONE pre-launch settle before, ONE relaunch and promise-10 check after.
         let tampered: (name: String, tampers: [Tamper])? = {
@@ -75,7 +76,8 @@ extension SWorld {
                 reopened = name
             } catch { stepLog.append("  (the tampered library didn't open: \(error))") }
             crashed.remove(name)
-            found += sealed(d, before: before[name]!, tampers: tampers, opened: reopened == name)
+            found += sealed(d, before: before[name]!, tampers: tampers, opened: reopened == name,
+                            noticed: noticedThisStep.contains(name))
         }
         if case .launch(let name) = action, result == .done { crashed.remove(name) }
         for device in devices { adoptPending(device) }
@@ -180,7 +182,7 @@ struct ScenarioGenerator {
         ("setScheduledExport", 2), ("finger", 2), ("lid", 2), ("macOSUpdate", 1), ("iCloudSwitch", 2), ("syncICloud", 3),
         ("wipeKeychain", 1), ("switchAppleID", 1), ("replaceMac", 1), ("online", 1), ("timeMachineSnapshot", 1),
         ("timeMachineRollback", 1), ("tamper", 2), ("plantPair", 1), ("settle", 3), ("tamperSequence", 1),
-        ("lookInside", 2), ("makeMine", 1),
+        ("lookInside", 2), ("makeMine", 1), ("useKeyFileOffer", 2),
     ]
 
     mutating func make(_ kind: String, _ name: String, _ other: String, _ account: String) -> Action {
@@ -224,6 +226,7 @@ struct ScenarioGenerator {
         case "tamperSequence": return .tamperSequence(name, tamperGroup())
         case "lookInside": return .lookInside(name, pick: rng.int(0..<8), typing: rng.pick(CopyTyping.allCases)!)
         case "makeMine": return .makeMine(name, pick: rng.int(0..<8), typing: rng.chance(70) ? .itsDay : .current)
+        case "useKeyFileOffer": return .useKeyFileOffer(name)
         default: return .settle
         }
     }

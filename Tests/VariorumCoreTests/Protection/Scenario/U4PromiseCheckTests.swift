@@ -134,26 +134,35 @@ struct U4PromiseCheckTests {
         #expect(world.crashSafe(world.macA).count == 2)
     }
 
-    /// 7 — the oracle says a replayed key file disagrees and absence doesn't;
-    /// a memory naming another device is caught.
-    @Test func fourThingsCatchesADisagreementAndAForeignMemory() async throws {
+    /// 7 — the oracle calls for an older copy's notice when the library file
+    /// is replayed (and none when nothing is remembered); the open saying
+    /// anything else is caught; a memory naming another device is caught.
+    @Test func fourThingsCatchesAWrongNoticeAndAForeignMemory() async throws {
         let world = try await scenarioWorld { try await $0.fresh(on: $0.macA) }
         await world.done([.launch("macA")])
         let k1 = try #require(world.macA.library?.key)
-        let oldFile = world.macA.container.files[SPath.liveKeyFile]
+        let oldSlot = world.macA.container.files[SPath.slot]
         await world.done([.useCastle("macA", .alwaysAsk, newWords: false)])
         let library = try #require(world.macA.library)
-        #expect(!world.liveDisagrees(world.macA, key: library.key, also: [], executor: try #require(world.macA.executor)))
+        let executor = try #require(world.macA.executor)
+        #expect(world.expectedNotice(world.macA, key: library.key, also: [], executor: executor) == nil)
         #expect(world.fourThings(world.macA).isEmpty)
-        world.macA.container.files[SPath.liveKeyFile] = oldFile
-        #expect(world.liveDisagrees(world.macA, key: library.key, also: [k1], executor: try #require(world.macA.executor)))
+        let liveSlot = world.macA.container.files[SPath.slot]
+        world.macA.container.files[SPath.slot] = oldSlot
+        if case .olderCopy? = world.expectedNotice(world.macA, key: k1, also: [library.key], executor: executor) {} else {
+            Issue.record("a replayed library file calls for no older copy's notice")
+        }
         let memoryName = KName.memory(SWorld.scope, library.record!.libraryID)
         let memory = world.macA.keychain.local[memoryName]
         world.macA.keychain.local[memoryName] = nil
-        #expect(!world.liveDisagrees(world.macA, key: library.key, also: [k1], executor: try #require(world.macA.executor)),
-                "absence is never a disagreement")
+        #expect(world.expectedNotice(world.macA, key: k1, also: [library.key], executor: executor) == nil,
+                "absence is never a notice")
         world.macA.keychain.local[memoryName] = memory
-        world.macA.container.files[SPath.liveKeyFile] = .keyFile(try #require(library.keyFile))
+        world.macA.container.files[SPath.slot] = liveSlot
+        // The open saying nothing where the oracle calls for a notice: caught
+        // at the launch (`noticeMismatches`, promise 7).
+        world.truth.noticeMismatches.append(("macA", "planted"))
+        #expect(Self.promises(world.foundAtTheWrite()) == [7])
         var other = library
         other.section.deviceID = world.rng.uuid()
         world.macA.library = other

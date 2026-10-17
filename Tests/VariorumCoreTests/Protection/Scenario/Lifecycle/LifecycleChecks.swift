@@ -567,25 +567,36 @@ struct LifecycleChecks {
             expect(labels == ["format", "libraryID", "currentFingerprint", "deviceID", "keyFileMirror"], "it remembers \(labels.sorted())")
             expect(memory.libraryID == seen.libraryID && memory.currentFingerprint == seen.fingerprint
                    && memory.deviceID == seen.deviceID && memory.keyFileMirror == seen.live, "what it remembers doesn't match the live place")
-        case .refusesWhatItDoesntRemember(let stray):
+        case .noticesWhatItDoesntRemember(let stray):
             guard let result = ctx.strays[stray] else { failures.append("not tried"); break }
-            expect(result.refused != nil, "it didn't refuse: \(result.otherError ?? "")")
-            expect(result.wroteNothing, "it wrote something")
-            if let disagreement = result.refused {
-                expect(disagreement.offers == [.lookInside, .makeThisMyLibrary], "it offered \(disagreement.offers)")
-                let kinds = disagreement.findings.map { finding -> String in
-                    switch finding {
-                    case .anotherLibrary: return "anotherLibrary"
-                    case .libraryFileUnderAnotherKey: return "libraryFile"
-                    case .keyFileOfAnotherKey: return "keyFile"
-                    }
+            expect(result.opened, "it didn't open: \(result.otherError ?? "")")
+            expect(result.strayUntouched, "the open repaired the file it found (its library file, its key, or her locks)")
+            switch stray {
+            case .backupPairCopiedInByHand, .replayedOldLibraryFile:
+                if case .olderCopy(let date)? = result.notice?.kind {
+                    expect(date == result.strayDate, "the older copy's date isn't the copy's")
+                } else {
+                    failures.append("it said \(result.notice.map { "\($0.kind)" } ?? "nothing"), not the older copy")
                 }
-                switch stray {
-                case .backupPairCopiedInByHand: expect(Set(kinds) == ["libraryFile", "keyFile"], "it found \(kinds)")
-                case .replayedOldLibraryFile: expect(kinds == ["libraryFile"], "it found \(kinds)")
-                case .swappedInFile: expect(kinds == ["anotherLibrary"], "it found \(kinds)")
-                }
+                expect(result.notice?.words == "This is an older copy of your library, from <date>", "the words aren't hers")
+            case .swappedInFile:
+                expect(result.notice?.kind == .differentLibrary, "it said \(result.notice.map { "\($0.kind)" } ?? "nothing"), not a different library")
+                expect(result.notice?.words == "This is a different library than the one this Mac last had open", "the words aren't hers")
             }
+            expect(result.memoryFollowed, "this Mac doesn't remember the library it opened (or still remembers another)")
+            expect(result.secondOpenSilent, "it said so twice")
+        case .offersTheKeyFileThatOpensIt:
+            let seen = ctx.offerSeen
+            expect(seen.tried && seen.opened, "the library with an old key file beside it didn't open")
+            expect(seen.owed, "the offer wasn't owed")
+            guard let offer = seen.offer else { failures.append("nothing was offered"); break }
+            expect(offer.source == .thisMacsKeychain, "it offered \(offer.source), not this Mac's keychain copy")
+            expect(offer.words == "The key file beside your library doesn't open it. This Mac's keychain holds a copy that does. Use it?",
+                   "the words aren't hers")
+            expect(offer.keyFile == seen.mirrorBefore, "it offered something other than the keychain copy")
+            expect(seen.searchWroteNothing, "the search wrote something before her yes")
+            expect(seen.liveAfterYes == seen.mirrorBefore, "her yes didn't put the keychain copy beside the library")
+            expect(!seen.owedAfterYes, "the offer is still owed after her yes")
         case .lostKeyFileComesBack:
             expect(ctx.lostKeyFile.keyFileAfter != nil && ctx.lostKeyFile.keyFileAfter == ctx.lostKeyFile.keyFileBefore,
                    "the key file didn't come back as it was")

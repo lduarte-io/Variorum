@@ -89,7 +89,7 @@ protocol ActProgram {
 extension ActProgram {
     var needsLiveKeyFile: Bool {
         switch act {
-        case .deviceSettings, .touchIDRearm, .offerDelete, .plaintextExport, .createLibrary:
+        case .deviceSettings, .touchIDRearm, .offerDelete, .plaintextExport, .createLibrary, .useKeyFile:
             return false
         default:
             return true
@@ -190,6 +190,7 @@ extension ProtectionExecutor {
         case .touchIDRearm: return TouchIDRearmProgram()
         case .offerDelete: return OfferDeleteProgram()
         case .plaintextExport: return PlaintextExportProgram()
+        case .useKeyFile: return UseKeyFileProgram()
         }
     }
 

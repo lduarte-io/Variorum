@@ -1474,10 +1474,75 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
   pair, follow with today's one secret), and "the passphrase and words you had when you made it" on a synced device whose
   locks hadn't followed a key door elsewhere is the pair its library opened with then. **Census class (A) closed** (the
   floor). Protection set Debug `✔ 277 tests in 71 suites passed` (no known issue left).
-- 3 — RULE 21: THE NOTICE AND THE OFFER (her item 3): NOT-STARTED — (a) rule 21's words; (b) the model opens and
-  says one notice (her two strings), then remembers; (c) the key-file offer naming its source; (d) the refusal road
-  deleted; (e) promise 7 rewritten, the tamper clauses, P-VX378-U4-2 CLOSED; (f) the fixture's stage 14, the page,
-  `cmp`. Red-on-old per behaviour. PENDING.
+- 3 — RULE 21: THE NOTICE AND THE OFFER (her item 3): DONE (this commit).
+  - **(a) Rule 21's words** (`notes/CastleRules.md`, the only rule touched in this piece): the four things are *"its
+    ID, its device ID, a fingerprint of its current key, and a copy of its key file: the key itself, still wrapped under
+    your locks"*; the refusal replaced by the notice (her two strings) and the key-file offer (her backup sentence as
+    the example); the parenthetical now says a hand-restored pair opens with the notice, the Restore door still the
+    honest road; the status line names rule 21's amendment.
+  - **(b) The notice** (`Assess/LibraryNotice.swift`, `git mv` of `LibraryDisagreement.swift`): `LibraryNotice` {`kind`:
+    `.olderCopy(date:)` · `.differentLibrary`; her strings verbatim as `olderCopyWords` / `differentLibraryWords`;
+    `sentence(date:)` writes the date in}; one pure `check`. `unlock` OPENS and carries it (`UnlockedLibrary.notice`) —
+    writing nothing itself; what the memory item NAMES is read from its payload when its seal can't be verified with the
+    keys in reach (P-VX378-U4-5 (c)); a library that moved on past the memory (its own key file's history holds the
+    remembered key) says nothing (P-VX378-U4-5 (a)); the date is the record's (U4-5 (b)). `assess` reports
+    `Fault.libraryNotice` (renamed from the refusal's fault) until the memory follows, closes no door, owes no act for
+    it; `refreshMemory`'s FINGERPRINT ARM IS BACK (the memory follows the record — one write, no repair), and a refresh
+    forgets every other library's item (this Mac remembers ONE library — so after a different library, the original one
+    returning is itself a different library: a fresh device ID, P-VX378-U1-1 (a)'s road).
+  - **(c) The offer** (`Executor/Acts/KeyFileOffer.swift`): `KeyFileOffer` {`source`: `.thisMacsKeychain` ·
+    `.backup(keyFileID:date:)`; her sentences verbatim — `besideDoesNotOpenIt` + `keychainHoldsOne` / `backupHoldsOne`;
+    `sentence(date:)`}; `searchKeyFiles(_:catalog:typed:)` READS ONLY — candidates this Mac's keychain copy then every
+    catalogued key file outside the live place, newest first; each yields the keys it can (the key in hand when the file
+    names it, the typed secret, its own quiet road — a silent custody item for its key, its Apple wrap readable here);
+    each key TRIED against the library file (`libraryOpens`); the first that opens it is offered; none → `.besideOpensIt
+    OnlyThroughItsHistory` when the stray reaches the library through its history (P-VX378-U4-6 (a)), else
+    `.noKeyFileAnywhere` (rule 27, its three homes named). `useOfferedKeyFile` — the act `.useKeyFile` (a new
+    `ProtectionAct`, raw `use_key_file`) on a plan: `keyFile` (the offered file beside the library — only the library's
+    own; idempotent) then `memory`; the file rides the plan (`ActParameters.offeredKeyFile` — a key file holds no
+    secret). `assess` owes `OwedAct.offerKeyFile` when the key file beside isn't the library's own (another key's; or
+    none the sealed copy can write back) and a home holds the library's own; with none and the stray reaching nothing,
+    `Fault.noKeyFileAnywhere` (P-VX378-U4-6 (b) — an absent key file a backup holds is offered, not restored).
+  - **(d) The refusal road deleted:** `ExecutorRefusal.libraryDisagreesWithMemory`, `DoorRefusal.libraryDisagreesWith
+    Memory`, `Fault.libraryDisagreesWithMemory`, `LibraryDisagreement` (+ `.offers`, its findings), `CopyDoor`,
+    `AssessRules.disagreement`, `assess`'s every-door-closed early return. Tests that died with it:
+    `U2PinsRule21Tests.aReplayedLibraryFileIsRefused` · `aReplayedKeyFileIsRefused` ·
+    `anotherLibraryInTheLivePlaceIsRefused` · `assessReportsItAndOpensNoDoor` (each red on this tree — the ruling
+    reversed them; the suite keeps its absence, stranded-act and four-things pins).
+  - **(e) The world:** promise 7 → *"FOUR THINGS; A DISAGREEMENT IS NOTICED AND SAID"* — the launch's oracle
+    (`expectedNotice`, read from the device's own items and files) must equal the open's notice kind (and its date), and
+    the open itself writes nothing (`noticeMismatches`, replacing `refusals`); promise 9's tamper clause and the
+    silent-change check pass a step whose open said the notice (it said what it took); the L4 replay-plus-memory clause
+    kept as OUTSIDE the promise (P-VX378-U4-2 CLOSED). The world's lobby walks this Mac's keychain copy too (rule 1's
+    third home); the alphabet gains `.useKeyFileOffer` (weight 2) and the settle says yes to an owed offer before
+    following; promise 4's rule-1-row clause requires the offer when a backup holds the library's own key file, rule 27
+    only when nothing does. `U4PromiseCheckTests.fourThingsCatchesAWrongNoticeAndAForeignMemory` replaces the refusal
+    oracle's test.
+  - **(f) The lifecycle:** stage 14 rewritten in the FIXTURE (her ruling — the stage's two notices and the offer, her
+    strings): `LFact.noticesWhatItDoesntRemember(LStray)` (renamed from `refusesWhatItDoesntRemember`) and the new
+    `.offersTheKeyFileThatOpensIt`; a new row "The key file doesn't open it?"; the rule-27 sentence a branch proven by
+    `U4KeyFileOfferTests.withNoKeyFileAnywhereTheSearchSaysRule27`. The walk: the live key file's loss first (so the
+    different library's memory change can't reach that fact), then each stray opened (today's pair, else an earlier
+    one), the notice read, the stray left as found (its key, identity, posture and her locks — an act its record carried
+    may finish, rule 20, and rule 8 may re-make the quiet Apple road), the memory followed, the second open silent, put
+    back; then an old key file beside the library → the keychain copy offered in her words, the search writing nothing,
+    her yes putting it beside the library. The page re-rendered from the fixture, `cmp`-IDENTICAL (stage 14's rows only).
+    Lifecycle suites green in all four walks.
+  - **Pins (red-on-old):** `U4NoticeTests` (8) — the five behaviour pins read the notice by reflection and run on the
+    pre-piece tree (scratch at `a407e130e`, those five copied in): `✘ … 5 tests in 1 suite failed … with 5 issues` — four
+    REFUSED (`U4NoticeTests.swift:35`, `:75`, `:92`, `:109`: `.libraryDisagreesWithMemory`), and
+    `aBackupPairCopiedInByHandOpensAndSaysItIsAnOlderCopy` at `:68` OPENED SILENTLY (the old tree verified the memory
+    item or treated it as absent — on an Always-ask Mac a hand-restored pair said nothing); the three others (her words,
+    the date, `assess`) new API, red by construction. `U4KeyFileOfferTests` (6) — new API (red by construction): the
+    keychain copy offered and her yes, a backup's day named, rule 27 with nothing anywhere, the history-only split pair
+    (U4-6), `assess` owing the offer (and rule 27 without a home), and a hand-written crash loop over her yes (every
+    write: finished or never happened, nothing in flight — `CrashHarness`'s settled-state check assumes the key file
+    beside is the library's own, which this act's "never happened" side is not).
+  - **Withdrawn:** the U2 record's VX-309 hand-forward ("rule 21's two doors on the LIVE PLACE's stray") — the doors are no
+    longer offered there (her ruling).
+  - QUESTIONS: P-VX378-U4-2 → CLOSED (her words); **P-VX378-U4-5** and **P-VX378-U4-6** PROVISIONAL (a). **Census class
+    (B) closed here** (the L4 clause is outside the promise; the refusal it fought is gone). Protection set Debug `✔ 287
+    tests in 73 suites passed` (generator 16 sequences).
 - 4 — THE CENSUS CLASSES (B)–(I) re-read under the rulings: NOT-STARTED. PENDING.
 - 5 — THE DISCOVERY RUN (seeds 21–40) and THE GATE SOAK (seeds 1–20, Debug and Release): NOT-STARTED. Tables land as
   they complete. PENDING.

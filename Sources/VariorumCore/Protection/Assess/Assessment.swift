@@ -245,14 +245,16 @@ public enum Fault: Hashable, Sendable {
     /// re-make (`remakeAppleRoad`) answers it at the same open.
     case appleRoadLost(keyFileID: String)
     /// The live place holds ANOTHER key's file than the record's current key
-    /// (nothing in flight, nothing remembered to compare it with — with a
-    /// memory it is the refusal below): reported; no repair restores over it
-    /// (rule 21 — the restores from a copy left with VX-378 U1).
+    /// (nothing in flight): reported; no repair restores over it (rule 21 —
+    /// the restores from a copy left with VX-378 U1); the key-file OFFER
+    /// (`OwedAct.offerKeyFile`) is the hand it needs.
     case liveKeyFileIsAnotherKeys(keyFileID: String)
-    /// RULE 21: the live place is not what this Mac remembers — the open
-    /// refuses, says what it found, and offers rule 17's two doors; no repair,
-    /// no act, every door closed.
-    case libraryDisagreesWithMemory(LibraryDisagreement)
+    /// RULE 21 (her ruling at the U4 stop, 2026-10-17): the library in the live
+    /// place is not the one this Mac last opened — the open went on and says so
+    /// once (her words: `LibraryNotice.words`); reported until what this Mac
+    /// remembers has followed it (`refreshMemory`). No door closes, nothing is
+    /// repaired.
+    case libraryNotice(LibraryNotice)
     /// RULE 27: the library opened by a quiet road, but no copy of its key file
     /// is left anywhere — no live file, no sealed mirror to write back (rule 1).
     /// Said honestly; nothing rebuilds a key file from the key (the acts that
@@ -282,6 +284,12 @@ public enum OwedAct: Equatable, Sendable {
     /// model-side moments — the face asks (its words and the launch-counted
     /// reminders are phase 3's).
     case askPassphrase(PassphraseAsk)
+    /// RULE 21 (her ruling at the U4 stop, 2026-10-17): the key file beside the
+    /// library is not its own — the app looks for one that is in the places it
+    /// keeps them and OFFERS what it found, naming where
+    /// (`ProtectionExecutor.searchKeyFiles`); nothing is written before her yes
+    /// (`useOfferedKeyFile`). An offer, never a refusal.
+    case offerKeyFile
 }
 
 /// Rule 3's two moments the model owns ("always right before the first
@@ -345,8 +353,6 @@ public enum JoinPlan: Equatable, Sendable {
 
 public enum DoorRefusal: Equatable, Sendable {
     case locked
-    /// Rule 21: the live place is not what this Mac remembers.
-    case libraryDisagreesWithMemory
     case wrongMode(ProtectionMode)
     /// Another account is signed in: the one screen (Move or Sign out).
     case otherAccountSignedIn

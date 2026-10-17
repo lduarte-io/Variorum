@@ -5,7 +5,8 @@ amended the same day at her rulings on the design cold read (`notes/plans/vx-378
 U2 ruling (rules 11–12: both secrets at a crossing — P-VX378-U2-2, the plan's §8) and her FACTS DIFF rulings (rules 12
 and 25 — FD-2, FD-3, the plan's §8 note after U3). Amended again at her rulings at the U4 stop (2026-10-17, the plan's §8):
 rules 4, 5 and 12 — the floor (a backup opens with the secrets you had when you made it; your current ones open older
-backups of the same library); rule 17 — Make this my library carries no keys.**
+backups of the same library); rule 17 — Make this my library carries no keys; rule 21 — the fingerprint and the wrapped
+copy, the notice instead of the refusal, and the key-file offer.**
 Where this document and `notes/plans/vx-266-castle-backups-prelaunch.md` differ, this document wins; that design keeps
 its research and its Apple-facts pointers (`notes/plans/vx-266/second-opinion-apple-facts.md`). The walk-through of
 these rules — one person, one library, every stage — is `notes/plans/vx-266/castle-lifecycle.html`, and the corrector
@@ -119,11 +120,17 @@ and never leaves a hole you chose to close.**
 
 20. **Every act that changes keys is planned, and a crash at any point leaves either the old state or the new one.**
     The next open finishes the act or rolls it back from what is on disk, and says which.
-21. **This Mac remembers four things about its library — its ID, its current key, its device ID and the sealed copy of
-    its key file — and only the app's own doors change them.** If the file in the live place is not the one this Mac
-    remembers, the app refuses to open, says what it found, and offers the two doors of rule 17. It never repairs by
-    guessing, and it never decides for you. (Hand-restoring a backup pair into the live place is therefore a refusal
-    with Make-this-my-library offered; the app's own Restore door is the honest road.)
+21. **This Mac remembers four things about its library — its ID, its device ID, a fingerprint of its current key, and
+    a copy of its key file: the key itself, still wrapped under your locks — and only the app's own doors change them.**
+    If the library in the live place is not the one this Mac last opened, the app opens it and says so once — *"This
+    is an older copy of your library, from <date>"* or *"This is a different library than the one this Mac last had
+    open"* — and remembers this one from then on; its posture follows the account's as any device's does. If the key
+    file beside the library doesn't open it, the app looks for one that does in the places it keeps them — this Mac's
+    keychain copy and each backup's key file — and offers what it found, saying where (*"The key file beside your
+    library doesn't open it. The backup from August 3 holds a key file that does. Use it?"*); nothing is written before
+    your yes, and if none opens it, rule 27 says so. It never repairs by guessing, and it never decides for you.
+    (Hand-restoring a backup pair into the live place therefore opens it, with the notice; the app's own Restore door is
+    still the honest road.)
 22. **A key is deleted only after its replacement has been verified.**
 23. **Each library on each device has a plain random device ID, made at creation.** No hardware fingerprinting.
 24. **The core compiles in both configurations.** Nothing is behind `#if DEBUG` except the test switches that turn a
