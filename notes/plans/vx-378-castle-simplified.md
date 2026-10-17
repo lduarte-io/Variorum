@@ -302,10 +302,11 @@ record committed with PENDING numbers first.
 
 ## 7. LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
 
-- U1 — the cut: **IN-PROGRESS** (Opus implementer, 2026-10-16) — the piece order and what is done live in §8's U1
-  RECORD (its "Pieces" list is the resume map: DONE (hash) / IN-PROGRESS / NOT-STARTED). Baseline before U1: the
-  protection set Debug `✔ 434 tests in 71 suites`, `-c release` `✔ 372 in 66` (VX-305 §9 item 7, tree `63cf038f1`);
-  `Sources/VariorumCore/Protection/` 11,928 lines, `Tests/VariorumCoreTests/Protection/` 15,460 lines.
+- U1 — the cut: **DONE, awaiting the cold review** (Opus implementer, 2026-10-16) — §8's U1 RECORD (every piece DONE
+  with its commit; the record table; two PROVISIONALs). Before U1: the protection set Debug `✔ 434 tests in 71
+  suites`, `-c release` `✔ 372 in 66` (tree `63cf038f1`); 11,928 source lines, 15,460 test lines. After (tree
+  `25dc1cd12`): Debug `✔ 211 tests in 54 suites`, `-c release` `✔ 189 in 50`, the full core suite green in Debug;
+  7,068 source lines, 8,611 test lines.
 - U2 — the additions: not started.
 - U3 — the lifecycle proof: not started.
 - U4 — the world and the soak: not started.
@@ -336,7 +337,7 @@ record committed with PENDING numbers first.
   26-rule draft's; re-pointed to the 27-rule contract (`43e5ff0e4`). §3's table, the crossings table and U4 were
   already current. The in-flight row on `main` gained this plan (`aecb509d0`).
 
-### U1 RECORD — THE CUT (Opus implementer, 2026-10-16; IN-PROGRESS — every count PENDING until its run lands)
+### U1 RECORD — THE CUT (Opus implementer, 2026-10-16; DONE — awaiting the cold review)
 
 **Not done in U1, first (each stated with its reason; the orchestrator may redirect):**
 - **The vault's account side stays as built — the rotation, its walk, the completing write, `previousCorpusKey` and
@@ -361,42 +362,55 @@ record committed with PENDING numbers first.
   with a new device ID owns no key it didn't mint), and a lost Apple road is the detected `appleRoadLost` fault until
   rule 8's quiet re-make lands (U2). Found when the cut shifted the generator's random stream (`createLibrary` →
   `replaceMac` → `settle`); the gap dates from piece D's Re-link removal.
-- *(the rest filled at the close)*
+- **Promise 6's vault-reach qualifier stays** (the plan's U1 list names it): the executor still makes a synced act past
+  its commit point WAIT, named, for an unreachable vault — the multi-write rotation it waits on is U2's to replace
+  (the first bullet), and the promise must keep reading that state until then.
+- **Words at birth is U2's addition** (rule 2's row, U1 · U2): U1 deleted the secretless arms (piece K); `createLibrary`
+  still takes its words from the caller (every caller in the tree passes them).
+- **What the faces will read changed shape** (for U2 and the face phases): `OpensWith` is rule 4's sentence
+  (`currentSecrets`, `quietRoads`); `LobbyRoads` names `silentItems`, `appleKeyID`, `typed: Set<TypedRoad>`;
+  `UnlockedLibrary` lost `resolution`/`familyTree`; `ExecutorConfiguration` lost `machine`; `leaveAccount(_:_:)` takes no
+  secrets; `KeyFileStoreLeaf` lost `readKeyFile(catalogID:)` (U2's Look inside adds back the read it needs).
+- `ExecutorRefusal.repairForbidden` was already unused before U1 — left as found (not this cut's).
 
 **Pieces (the resume map — a fresh session can finish U1 from this list and `git log`):**
-- A — the record skeleton and LIVE STATUS: this commit.
-- B — the world and the generator cut to the new-system shapes (tests only): DONE (the commit after `8ed8be1be`) —
+- A — the record skeleton and LIVE STATUS: DONE (`8ed8be1be`).
+- B — the world and the generator cut to the new-system shapes (tests only): DONE (`15f46c8b0`) —
   protection set Debug `✔ 311 tests in 66 suites` (generator 16 sequences, 349 steps).
-- C — rule 26: the migration, the legacy readers, corner 45, the unconfirmed mode, today's items and key files: DONE —
+- C — rule 26: the migration, the legacy readers, corner 45, the unconfirmed mode, today's items and key files: DONE
+  (`c4ebc68d3`) —
   protection set Debug `✔ 263 tests in 57 suites`.
-- D — rules 26 · 19 · 8: the old shared key, the gift machinery, Re-link: DONE — protection set Debug `✔ 243 tests in
-  54 suites`.
-- E — rules 4 · 6 · 12 · 13 (+ 15's custody): the anchor and the stuck leave: DONE — pins
+- D — rules 26 · 19 · 8: the old shared key, the gift machinery, Re-link: DONE (`ab9cbade8`) — protection set Debug
+  `✔ 243 tests in 54 suites`.
+- E — rules 4 · 6 · 12 · 13 (+ 15's custody): the anchor and the stuck leave: DONE (`92b7dceeb`) — pins
   `CutPinsTests` (3) red on the pre-cut tree (`leavingCastleCarriesTheHistory` at `:30`, `aFollowOutOfCastleCarries
   TheHistory` at `:49`, `aCrashedLeaveNeverLeavesTheVaultWaitingForANamedKey` at `:69` — "3 tests in 1 suite failed …
   with 3 issues"), green after; protection set Debug `✔ 222 tests in 53 suites` (generator 16 sequences, 349 steps).
-- F — rules 20 · 21 (+ 1's mirror row, 19's catalog row): the repair layer: DONE — pins `CutPinsRule21Tests` (6)
+- F — rules 20 · 21 (+ 1's mirror row, 19's catalog row): the repair layer: DONE (`3b354bcc3`) — pins
+  `CutPinsRule21Tests` (6)
   red on the pre-F tree (a scratch worktree at `92b7dceeb`: issues at `CutPinsTests.swift:85`, `:99`, `:112`, `:130`,
   `:141`, `:153` — "6 tests in 1 suite failed … with 6 issues"), green after; protection set Debug `✔ 228 tests in 54
-  suites` (generator 16 sequences, 349 steps).
-- G — rules 21 · 23: the family tree, the hardware marker, identity resolution, the memory shrink: DONE — pins
+  suites` (generator 16 sequences, 349 steps). (The `:153` pin was superseded at G — its memory field is gone.)
+- G — rules 21 · 23: the family tree, the hardware marker, identity resolution, the memory shrink: DONE
+  (`484017f3e`) — pins
   `CutPinsRule23Tests` (2) red on the pre-G tree (issues at `CutPinsTests.swift:168`, `:169`, `:171`, `:177` ×4,
   `:189` — "2 tests in 1 suite failed … with 8 issues"), green after; protection set Debug `✔ 211 tests in 51 suites`
   (generator 16 sequences, 349 steps). PROVISIONAL P-VX378-U1-1 logged.
-- H — rule 16: leaving an account changes no keys: DONE — pins `CutPinsRule16Tests` (2) red on the pre-H tree
+- H — rule 16: leaving an account changes no keys: DONE (`f3d0b23ea`) — pins `CutPinsRule16Tests` (2) red on the
+  pre-H tree
   (issues at `CutPinsTests.swift:197`, `:199` ×6 each, `:215` — "2 tests in 1 suite failed … with 13 issues"), green
   after (the call site drops `typed:` with the API); protection set Debug `✔ 208 tests in 52 suites` (generator 16
   sequences, 363 steps). PROVISIONAL P-VX378-U1-2 logged.
-- I — rule 17: OpenCopy and the open rule deleted; Land a stub for U2's MakeMine: DONE (landed second, after B — it
+- I — rule 17: OpenCopy and the open rule deleted; Land a stub for U2's MakeMine: DONE (`f8dd3ff7d`; landed second,
+  after B — it
   removes the legacy reader's and the family tree's biggest consumers before C and G) — protection set Debug `✔ 291
   tests in 63 suites`.
-- J — rule 4: the route finder to its one sentence: DONE — pin `CutPinsRule4QuietRoadTests.aCastleCopyAfterALeave
+- J — rule 4: the route finder to its one sentence: DONE (`cc66f32b9`) — pin `CutPinsRule4QuietRoadTests.aCastleCopyAfterALeave
   NamesNoQuietRoad` red on the pre-J tree (a scratch worktree at `f3d0b23ea`: issue at `CutPinsTests.swift:244` — "1
   test in 1 suite failed … with 1 issue"), green after; protection set Debug `✔ 210 tests in 53 suites` (generator 16
   sequences, 363 steps).
-- K — rule 2's secretless arms, the promises' reductions, the counts and this record closed: IN-PROGRESS — the cut
-  DONE (pin `CutPinsRule2Tests` red on the pre-K tree, green after; protection set Debug `✔ 211 tests in 54
-  suites`, generator 16 sequences, 363 steps); the closing runs and counts below.
+- K — rule 2's secretless arms, the promises' reductions, the counts and this record closed: DONE (`25dc1cd12` and
+  this record's close) — pin `CutPinsRule2Tests` red on the pre-K tree, green after; the closing runs below.
 
 **THE RECORD TABLE** (one row per deleted thing: what · rule · the tests that went with it) — filled per piece.
 
@@ -454,11 +468,33 @@ record committed with PENDING numbers first.
   `gate: nil` and mints its new key with no Touch ID item (`ReplaceAllKeys.swift`'s `gate:
   library.section.settings.gateStyle` → `newCustodyItem` makes none). U1's builders press Settings after Use Castle to
   stand in. Owner: U2 (rule 9's "Touch ID on this Mac is optional", chosen at the press), pinned there red-first.
+- **Rule 5's quiet-road clause and Standard's Replace All Keys.** Rule 5 says a backup opens through this Mac's quiet
+  roads "while the backup's key is still the live key"; rule 4 says a quiet road opens only a key it holds directly.
+  A Standard re-key within its mode keeps this Mac's EXISTING own Apple key (`ReplaceAllKeys.swift`'s
+  `existingOwnAppleKey`, decision 30's shape), so an older backup's own pair file stays wrapped under a key this Mac
+  still reads — the one sentence (piece J), computed literally, names the Apple road for it. Nothing breaks (more roads,
+  never fewer, and rule 4 holds: that wrap holds the old key directly); it is a reading for U3's lifecycle proof and
+  U4's promises to settle, not a U1 change.
+- **A memory item deleted or edited mid-act** strands that act under PROVISIONAL P-VX378-U1-1 (a), since the new device
+  ID's section names nothing; (b) — U2's refusal — would answer it. Recorded with the PROVISIONAL, not a stop: no rule
+  conflicts.
 
-**Source line counts:** before 11,928 (`Sources/VariorumCore/Protection/`) · after PENDING. Tests: before 15,460 · after
-PENDING.
+**Source line counts:** before 11,928 (`Sources/VariorumCore/Protection/`) · after **7,068** (−4,860, −41%; the plan
+expected about half — the vault's account side, U2's, is the largest piece still standing). Tests
+(`Tests/VariorumCoreTests/Protection/`): before 15,460 · after **8,611** (−6,849). The diff from the first U1 commit
+(`8ed8be1be^..HEAD`): 87 files, +2,058 −13,602 — `Sources/VariorumCore/Protection/` 38 files (+709 −5,569),
+`Tests/VariorumCoreTests/Protection/` 47 files (+1,183 −8,032), this plan, and `notes/QUESTIONS.md` (+26: the VX-378
+heading with P-VX378-U1-1 and -2, as the kickoff's rule against guessing asks).
 
-**The runs (exit lines, both configurations):** PENDING.
+**The runs (exit lines, both configurations; tree `25dc1cd12`):**
+- The protection set, Debug (`swift test --filter <every suite under Tests/VariorumCoreTests/Protection>`, exit 0):
+  `✔ Test run with 211 tests in 54 suites passed after 2.290 seconds.` (generator 16 sequences, 363 steps).
+- The full core suite, Debug (`swift test`, exit 0): `✔ Test run with 240 tests in 51 suites passed after 23.256
+  seconds.` · `✔ Test run with 3071 tests in 384 suites passed after 199.046 seconds.` · `✔ Test run with 40 tests in 6
+  suites passed after 45.994 seconds.`
+- `swift build -c release` (exit 0): `Build complete! (88.29 sec)`.
+- The protection set, Release (`swift test -c release --filter <the same>`, exit 0): `✔ Test run with 189 tests in 50
+  suites passed after 1.468 seconds.` (the DEBUG mutation pins compile out).
 
 **PROVISIONAL calls:**
 - **P-VX378-U1-1 (piece G, rules 21 · 23) — with nothing remembered, which device section is this Mac's?** (a) BUILT:
@@ -470,7 +506,8 @@ PENDING.
   re-keys and re-locks nothing, the three doors require `.none`; (b) the passphrase typed as consent. Logged under
   the VX-378 heading. Pinned by `noLeaveReKeysOrAsksASecretInEitherMode`.
 
-**Commits:** *(per piece)*
+**Commits:** A `8ed8be1be` · B `15f46c8b0` · I `f8dd3ff7d` · C `c4ebc68d3` · D `ab9cbade8` · E `92b7dceeb` · F
+`3b354bcc3` · G `484017f3e` · H `f3d0b23ea` · J `cc66f32b9` · K `25dc1cd12` (the cut) · this record's close (the next).
 
 ## 9. The ladder
 
