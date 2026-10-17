@@ -322,7 +322,8 @@ record committed with PENDING numbers first.
   A–J with their commits and red-on-old evidence; five PROVISIONALs). After (code tree `320579718`): the protection
   set Debug `✔ 254 tests in 67 suites`, `-c release` `✔ 232 in 63`, the full core suite green in Debug; 7,562
   source lines, 9,380 test lines.
-- U3 — the lifecycle proof: **NEXT** (spawned 2026-10-16 after U2's verification and her crossings ruling).
+- U3 — the lifecycle proof: **IN-PROGRESS** (Opus implementer, 2026-10-16) — §8's U3 RECORD (pieces A–F; counts
+  PENDING). Next: piece B, the fixture alone.
 - U4 — the world and the soak: not started.
 - The ladder: not started.
 - The gate: not started.
@@ -865,6 +866,29 @@ crosses. P-VX378-U2-2 → RULED (a). The declined options stay listed in QUESTIO
 **For U3 (binding):** the fixture's facts for stages 6 and 8 carry her ruling (both secrets typed); rule 5's reading is
 P-VX378-O1-1's (a); P-VX378-U2-3's "here they are" fact at stage 12 reads "the words are shown when they were typed";
 everything else on the page stands as its facts.
+
+### U3 RECORD — THE LIFECYCLE PROOF (Opus implementer, 2026-10-16; IN-PROGRESS)
+
+**Not done in U3, first:** PENDING (filled at the close).
+
+**The calls (each recorded with its reason):** PENDING — the fixture's home and shape; the world the scenario walks;
+the renderer's home.
+
+**Pieces (the resume map — a fresh session can finish U3 from this list and `git log`):**
+- A — the record skeleton and LIVE STATUS: DONE (this commit).
+- B — the fixture alone (the page's fourteen stages as typed facts, the prose riding as data): NOT-STARTED.
+- C — the scenario: the fourteen stages walked through the real acts, asserting against the fixture: NOT-STARTED.
+- D — the renderer and the regenerated page (`cmp`): NOT-STARTED.
+- E — FACTS DIFF and PROVISIONALs (QUESTIONS): NOT-STARTED.
+- F — the closing runs, counts, this record closed: NOT-STARTED.
+
+**FACTS DIFF** (each hers to accept; never a silent edit of the fixture): PENDING.
+
+**The runs (exit lines, both configurations):** PENDING.
+
+**PROVISIONAL calls:** PENDING.
+
+**Commits:** A (this commit).
 
 ## 9. The ladder
 
