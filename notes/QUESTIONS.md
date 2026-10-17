@@ -2819,3 +2819,15 @@ vault keeps only the master under them). Options:
 - (b) a join whose words would be replaced asks for the account's words as well (both typed), so they can be shown.
 - (c) the face sends her to New Words after the join.
 Record: the plan's §8 U2 RECORD, piece E. Status: open — her eye with the faces.
+
+**P-VX378-U2-4 — Make this my library: sync identity and the device's settings (rule 17).** Rule 17 makes the copy "a
+new library — a fresh identity and a fresh key in the posture you are in now, under your current pair"; §3's row 17
+says it "never carries sync identity". The rules don't say whether the new library joins the account the outgoing one
+was bound to, or which of this device's settings it takes. Options:
+- **(a) BUILT, PROVISIONAL —** the new library is LOCAL (no account; a later join is rule 7's — and since it already
+  holds the current pair, which is the account's when the device was synced, no words are replaced); this device's
+  settings (gate style, idle lock, scheduled export) carry into its new section.
+- (b) the new library binds to the outgoing library's account at once (a join folded into the door — the master and
+  its words copy added, the account's sync keys kept).
+- (c) settings start fresh (no choice yet), the gate chosen at the door.
+Record: the plan's §8 U2 RECORD, piece H. Status: open — her eye with the faces (VX-309).

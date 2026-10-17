@@ -89,8 +89,7 @@ protocol ActProgram {
 extension ActProgram {
     var needsLiveKeyFile: Bool {
         switch act {
-        case .deviceSettings, .touchIDRearm, .offerDelete, .plaintextExport, .land,
-             .createLibrary:
+        case .deviceSettings, .touchIDRearm, .offerDelete, .plaintextExport, .createLibrary:
             return false
         default:
             return true
@@ -112,6 +111,9 @@ public final class ActContext {
     /// key's file by the words road).
     var typedWords: [String]?
     var toKey: StoreKey?
+    /// Make this my library: the copy's key, held from the press for the act's
+    /// span — never stored (a resume before the swap rolls back without it).
+    var copyKey: StoreKey?
     /// The outgoing key, held from the begin for the act's span.
     var heldFromKey: StoreKey?
     /// The account's sync keys in hand (custody, session memory, or the vault).
@@ -178,7 +180,7 @@ extension ProtectionExecutor {
         case .leaveCastle: return LeaveCastleProgram()
         case .replaceAllKeys: return ReplaceAllKeysProgram()
         case .follow: return FollowProgram()
-        case .land: return LandProgram()
+        case .makeMine: return MakeMineProgram()
         case .sendLibrary: return SendLibraryProgram()
         case .createLibrary: return CreateLibraryProgram()
         case .setUpSync: return SetUpSyncProgram()
@@ -197,7 +199,7 @@ extension ProtectionExecutor {
     /// at its press (named in the act in flight from the first write).
     func perform(
         _ program: any ActProgram, parameters: ActParameters, secrets: ActSecrets, typed: TypedSecrets? = nil,
-        toKey: StoreKey? = nil, library: inout UnlockedLibrary
+        toKey: StoreKey? = nil, copyKey: StoreKey? = nil, library: inout UnlockedLibrary
     ) async throws -> ActOutcome {
         guard library.record != nil else { throw ExecutorRefusal.recordMissing }
         if let inFlight = library.section.actInFlight { throw ExecutorRefusal.actInFlight(inFlight.act) }
@@ -222,6 +224,7 @@ extension ProtectionExecutor {
         let ctx = ActContext(
             executor: self, library: library, plan: plan, secrets: secrets, typed: typed, toKey: toKey,
             resuming: false)
+        ctx.copyKey = copyKey
         defer { library = ctx.library }
         do {
             try await drive(program, ctx)
@@ -491,6 +494,14 @@ extension ProtectionExecutor {
             }
         }
         var section = library.section.endingAct(sequence: inFlight.sequence)
+        // Make this my library, undone before its swap: the library in the live
+        // place stays this Mac's ONE library (rule 21) — the new library's
+        // memory item, if it was written, goes.
+        if act == .makeMine, let current = library.record?.libraryID {
+            for other in try leaves.memory.rememberedLibraryIDs() where other != current {
+                try leaves.memory.deleteMemory(libraryID: other)
+            }
+        }
         if library.record?.mode == .castle {
             let wrapped = library.keyFile?.apple?.keyID
             for id in section.ownLibraryAppleKeyIDsToRetire where id != wrapped {

@@ -923,6 +923,11 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
         try wrote("stage-copy \(f8(newKey))")
     }
 
+    func copyOpens(copyID: String, with key: StoreKey) throws -> Bool {
+        guard let (fs, path) = resolve(copyID) else { return false }
+        return fs.files[path]?.library?.fingerprint == PF.fp(key)
+    }
+
     func stagedFingerprint() throws -> String? { device.staged?.fingerprint }
 
     func writeStagedRecord(_ record: ProtectionRecord, with newKey: StoreKey) throws {
@@ -932,16 +937,22 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
         try wrote("staged-record \(f8(newKey))")
     }
 
-    func swapStaged(setAside: Bool) throws {
+    func swapStaged(setAside: Bool, asideKeyFile: KeyFile?) throws {
         guard let staged = device.staged else { throw ExecutorRefusal.nothingToDo }
         if setAside, let outgoing = slot {
-            // The library she had goes to her older libraries, WITH every key
-            // file the slot holds for it (LibraryAsideCopies' shape).
+            // The library she had goes to her older libraries, WITH its own key
+            // file — the one the executor names (the live place may already
+            // hold the incoming library's), else every one the slot holds for
+            // it (LibraryAsideCopies' shape).
             let folder = "\(CatalogNames.previousLibrariesFolderName)/\(CatalogNames.stampString(world.tick()))"
             device.container.files["\(folder)/\(SPath.slot)"] = .library(outgoing)
-            for path in device.container.files.keys where !path.contains("/") {
-                guard let document = device.container.files[path]?.keyFile, document.libraryID == outgoing.libraryID else { continue }
-                device.container.files["\(folder)/\(path)"] = .keyFile(document)
+            if let asideKeyFile {
+                device.container.files["\(folder)/\(SPath.liveKeyFile)"] = .keyFile(asideKeyFile)
+            } else {
+                for path in device.container.files.keys where !path.contains("/") {
+                    guard let document = device.container.files[path]?.keyFile, document.libraryID == outgoing.libraryID else { continue }
+                    device.container.files["\(folder)/\(path)"] = .keyFile(document)
+                }
             }
         }
         slot = staged

@@ -156,6 +156,8 @@ public enum ExecutorRefusal: Error, Equatable, Sendable {
     case appleKeyUnreadable
     case noLiveKeyFile
     case recordMissing
+    /// Rule 17: nothing typed and no quiet road on this Mac opens the copy.
+    case copyDoesNotOpen
     case nothingToDo
     /// A repair the guards forbid: it would make a Touch ID item, or act
     /// destructively on a Standard record's word alone.

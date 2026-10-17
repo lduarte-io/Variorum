@@ -315,7 +315,7 @@ record committed with PENDING numbers first.
   `25dc1cd12`): Debug `✔ 211 tests in 54 suites`, `-c release` `✔ 189 in 50`, the full core suite green in Debug;
   7,068 source lines, 8,611 test lines.
 - U2 — the additions: **IN PROGRESS** (Opus implementer, 2026-10-16) — §8's U2 RECORD carries the resume map
-  (pieces A–J, each flipped in the commit that lands it). A–G DONE; next: **H** (rule 17). Counts PENDING.
+  (pieces A–J, each flipped in the commit that lands it). A–H DONE; next: **I** (rule 27). Counts PENDING.
 - U3 — the lifecycle proof: not started.
 - U4 — the world and the soak: not started.
 - The ladder: not started.
@@ -670,7 +670,7 @@ newest comment outranks an older body. Applied at the closeout's triage.
     .aMemoryItemThatFailsItsSealRemembersNothing` narrowed to nothing in flight (with an act in flight it is the pin
     above); `ExecutorEdgeTests.aLibraryFileSwappedForAnOlderOne…` moved into the pins as `aReplayedLibraryFileIsRefused`.
   - Protection set Debug `✔ 233 tests in 61 suites`.
-- G — rule 8 (+ rule 11's entry, found in E): DONE (this commit).
+- G — rule 8 (+ rule 11's entry, found in E): DONE (`1a02354bd`).
   - **The quiet roads re-made at an open** (Standard): `Repair.remakeAppleRoad` — the Apple road failed and no own key of
     this Mac reads here: a FRESH Apple key minted, recorded in this Mac's section first (so an entry into Castle retires
     it even if the rest never lands), added, the current key wrapped under it (decision 35's fresh vault read first
@@ -688,9 +688,37 @@ newest comment outranks an older body. Applied at the closeout's triage.
     `deleteOnSightByRecordedIDOnly` now checks Mac B's ORIGINAL Apple key (rule 8's re-make at Mac B's next open would
     otherwise heal the very delete it watches for — with the guard off it is still red).
   - Protection set Debug `✔ 240 tests in 63 suites`.
-- H — rule 17 (+ 23): `LookInside` (writes nothing — asserted with the executor's write log) and `MakeMine` (a fresh
-  identity, key and device ID in the posture this device is in, under its current pair; the outgoing library into
-  Previous Libraries): NOT STARTED.
+- H — rule 17 (+ 23): DONE (this commit).
+  - **Look inside** (`ProtectionExecutor.lookInside(_:in:typed:)` → `LookedInside` {copy id, key held for the look,
+    `CopyRoad`}): a catalogued copy opened read-only by its own secrets on its own key file (its history too), the
+    current secrets through the live key file's history (rule 4), or its own quiet road on this Mac (a custody item
+    holding its key directly, an Apple wrap readable here); every road verified against the copy's file
+    (`LibraryFileLeaf.copyOpens`, a read). It is no act: no plan, no leaf write — asserted with the executor world's
+    crash switch armed at the FIRST write (any write would crash) and the write log empty; custody, memory and the
+    live key file unchanged. Nothing opens → `ExecutorRefusal.copyDoesNotOpen`.
+  - **Make this my library** (`makeThisMyLibrary`, the act `ProtectionAct.makeMine` replacing U1's `land` stub): the
+    copy's own secrets (or its quiet road, or the current secrets through the history) at its door, the CURRENT PAIR
+    verified (the passphrase when the library has one, the words always — never made new); on a plan (rule 20): the
+    new key's custody item (the posture of now — Standard silent; Castle a Touch ID item when this Mac's gate says so),
+    Standard a fresh own Apple key, the new library's key file (a fresh key with no past, a fresh library ID, the
+    current pair; no master — no sync identity), the copy re-encrypted under the new key into the staged file, the new
+    record (the posture of now, this device's settings, a FRESH device ID — rule 23 — carrying the act), the new
+    library's memory item, THE SWAP (the plan re-sealed for the new library first; the outgoing library and ITS key
+    file set aside whole — `swapStaged(setAside:asideKeyFile:)`), then every other library's memory item forgotten
+    (rule 21: one library) and a fresh pair. Before the swap a resume holds no copy key and rolls back; a roll back
+    forgets the new library's memory item. A Castle Mac's new library is Castle ("you never leave Castle by opening
+    something"). PROVISIONAL P-VX378-U2-4 (no sync identity; the device settings carried).
+  - Tests (new API — the old tree's `land` was a registry stub with no entry, red by construction):
+    `U2LookInsideTests` (3: her old backup by her secrets through the history with nothing written, someone else's
+    library by its own secrets, a backup under the current key by this Mac's quiet road), `U2MakeMineTests` (4: a new
+    Standard library under the current pair with the outgoing one aside with its key file and one memory item; a
+    Castle Mac's new library is Castle; the crash harness after every write — finishes or never happened; the
+    refusals write nothing).
+  - **Handed forward (VX-309, beside T-5's empty-slot landing):** the two doors offered at rule 21's refusal act on the
+    LIVE PLACE's stray, where no catalogued copy and — for Make this my library — no current library is in hand (the
+    posture "of now" with the remembered library's file gone): the same question as the empty-slot landing; both
+    doors here take a catalogued copy and Make this my library takes the unlocked current library.
+  - Protection set Debug `✔ 247 tests in 65 suites`.
 - I — rule 27: the honest `noKeyFileAnywhere` refusal naming the roads that would have worked: NOT STARTED.
 - J — the closing runs (the full core suite in Debug; the protection set under `-c release`), the counts, this record
   closed: NOT STARTED.
@@ -701,7 +729,7 @@ newest comment outranks an older body. Applied at the closeout's triage.
 
 **PROVISIONAL calls:** PENDING (logged under the VX-378 heading in `notes/QUESTIONS.md`, P-VX378-U2-n).
 
-**Commits:** A `0572dd3c0` · B `3631ecbde` · C `ef6c6bf54` · D `67ed68490` · E `db1c1ac55` · F `a01b622db` · G (this commit) · the rest PENDING.
+**Commits:** A `0572dd3c0` · B `3631ecbde` · C `ef6c6bf54` · D `67ed68490` · E `db1c1ac55` · F `a01b622db` · G `1a02354bd` · H (this commit) · the rest PENDING.
 
 ## 9. The ladder
 

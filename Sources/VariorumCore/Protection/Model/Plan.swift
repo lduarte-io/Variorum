@@ -48,6 +48,10 @@ public struct ActParameters: Codable, Equatable, Sendable {
     /// Rule 7: a join replaced the library's twelve words with the account's
     /// (its notice is said at the act's end, a resume included).
     public var wordsReplaced: Bool?
+    /// Make this my library (rule 17): the NEW library's identity and this
+    /// device's fresh device ID for it (rule 23), minted at the press.
+    public var newLibraryID: String?
+    public var newDeviceID: String?
     /// A follow's kind — `FollowKind`'s name.
     public var follow: String?
     /// The new library key's kind.

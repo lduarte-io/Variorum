@@ -24,8 +24,9 @@ public enum ProtectionAct: String, Codable, Sendable, CaseIterable {
     case leaveCastle = "leave_castle"
     case replaceAllKeys = "replace_all_keys"
     case follow
-    /// Make this my library's stub (rule 17) — U2 rebuilds it as MakeMine.
-    case land
+    /// Make this my library (rule 17): a copy takes the live place as a NEW
+    /// library. (Look inside writes nothing, so it is no act.)
+    case makeMine = "make_mine"
     case sendLibrary = "send_library"
     case createLibrary = "create_library"
     case setUpSync = "set_up_sync"

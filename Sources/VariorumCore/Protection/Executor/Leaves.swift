@@ -91,15 +91,21 @@ public protocol LibraryFileLeaf: AnyObject {
     /// staged file under `newKey` (`sqlcipher_export`), the live file untouched.
     func stageReencryption(from key: StoreKey, to newKey: StoreKey) throws
     /// A copy (by its catalog id) re-encrypted into the staged file under
-    /// `newKey`, opened with `opener` — opening a copy, a landing.
+    /// `newKey`, opened with `opener` — Make this my library (rule 17).
     func stageCopy(copyID: String, opener: StoreKey, to newKey: StoreKey) throws
+    /// Does `key` open the copy (by its catalog id)? A READ — Look inside's
+    /// proof, which writes nothing (rule 17).
+    func copyOpens(copyID: String, with key: StoreKey) throws -> Bool
     /// The fingerprint of the key the staged file is under (nil: none staged).
     func stagedFingerprint() throws -> String?
     /// The record written into the staged file before the swap (§3.4).
     func writeStagedRecord(_ record: ProtectionRecord, with newKey: StoreKey) throws
     /// THE SWAP — the staged file into the slot, atomically. `setAside` keeps
-    /// the outgoing library as an older library (`Previous Libraries/`).
-    func swapStaged(setAside: Bool) throws
+    /// the outgoing library as an older library (`Previous Libraries/`), WITH
+    /// `asideKeyFile` — its own key file (rule 1: the key file is as essential
+    /// as the library), which the executor names since the live place may
+    /// already hold the incoming library's.
+    func swapStaged(setAside: Bool, asideKeyFile: KeyFile?) throws
     func discardStaged() throws
     /// A new library in the empty slot, under `key`, its record inside.
     func createLibrary(with key: StoreKey, record: ProtectionRecord) throws

@@ -150,6 +150,8 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     var live: LibraryFile?
     var staged: LibraryFile?
     var aside: [LibraryFile] = []
+    /// The key file set aside with each, in the same order.
+    var asideKeyFiles: [KeyFile?] = []
     var copies: [String: LibraryFile] = [:]
     var liveKeyFile: KeyFile?
     var memories: [String: Sealed<DeviceMemory>] = [:]
@@ -303,6 +305,8 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
         try wrote(.stage(f8(newKey)))
     }
 
+    func copyOpens(copyID: String, with key: StoreKey) throws -> Bool { copies[copyID]?.fingerprint == PF.fp(key) }
+
     func stagedFingerprint() throws -> String? { staged?.fingerprint }
 
     func writeStagedRecord(_ record: ProtectionRecord, with newKey: StoreKey) throws {
@@ -311,9 +315,12 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
         try wrote(.stagedRecord(f8(newKey)))
     }
 
-    func swapStaged(setAside: Bool) throws {
+    func swapStaged(setAside: Bool, asideKeyFile: KeyFile?) throws {
         guard let staged else { throw ExecutorRefusal.nothingToDo }
-        if setAside, let live { aside.append(live) }
+        if setAside, let live {
+            aside.append(live)
+            asideKeyFiles.append(asideKeyFile)
+        }
         live = staged
         self.staged = nil
         try wrote(.swap(f8(staged.fingerprint)))

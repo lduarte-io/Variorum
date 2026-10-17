@@ -155,7 +155,7 @@ extension ActContext {
         let key = try requireToKey()
         if !(try libraryOpens(key)) {
             if try leaves.library.stagedFingerprint() != Self.fp(key) { try restage() }
-            try leaves.library.swapStaged(setAside: false)
+            try leaves.library.swapStaged(setAside: false, asideKeyFile: nil)
         }
         if heldFromKey == nil { heldFromKey = fromKey }
         library.key = key
