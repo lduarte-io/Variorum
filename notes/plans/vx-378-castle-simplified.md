@@ -328,7 +328,8 @@ record committed with PENDING numbers first.
   65`, the full core suite green in Debug; `Sources/…/Protection/` untouched (7,562), tests 12,068.
 - U4 — the world and the soak: **IN PROGRESS** (Opus implementer, 2026-10-16) — §8's U4 RECORD (the resume map). Piece
   A (this record) DONE; B (her FACTS DIFF rulings) DONE; B2 (her P-VX378-U4-1 ruling — Make this my library carries
-  the key history) DONE; C (the promises) IN PROGRESS; D (starting states, alphabet, mutation pins), E (the discovery
+  the key history) DONE; C (the promises, the alphabet, the starting states) DONE; D (the promises' discrimination,
+  mutation pins) IN PROGRESS; E (the discovery
   run, seeds 21–40), F (the gate soak, seeds 1–20 both configurations), G (the record closed) NOT-STARTED. Counts
   PENDING.
 - The ladder: not started.
@@ -1140,11 +1141,45 @@ her rulings above, never silently; the fixture diffs FD-1…3 close with them.
   opens" at stages 9 and 10, `everyChipDiscriminates` "passes either way" there), green after; the page re-rendered,
   `cmp`-identical; lifecycle suites `✔ 6 tests in 2 suites`. QUESTIONS: P-VX378-U4-1 → RULED, option (b) recorded as
   not chosen.
-- C — the promises rewritten to the rules (each quoting its rule; promise 6 strict; promise 3 tightened;
-  `resumeAtVaultReach` deleted; none about pre-leave copies after a leave; the core sentence UNSCOPED — it holds across
-  Make this my library at her ruling, B2): IN PROGRESS.
-- D — starting states (the new-system shapes), the adversary alphabet (the replay tampers back as DETECTION), the
-  mutation pins (every surviving guard red with its guard off): NOT-STARTED.
+- C — the promises rewritten to the rules: DONE (this commit). **Nine promises, each quoting its rule**
+  (`Scenario/Promises.swift`'s header carries the list and the stated limits): **1 ONE POSTURE** (9, 11, 13 — in Castle
+  no silent item for any key the library has had, no Apple wrap of the current key, no retired Apple key readable once
+  settled, and THE ATTACKER — a login-password holder on the device plus the Apple account's iCloud Keychain — reaches no
+  key the live key file carries and opens no copy of it); **2 STANDARD HANDS EVERYTHING OUT** (8, 12 — settled: the current
+  key opens by an Apple road readable here AND its on-device item; the old promise 3 TIGHTENED — a detected lost Apple
+  road no longer excuses it, rule 8 re-makes it at the same open; decision 35's synced wait kept); **3 THE ACCOUNT IS ONE
+  POSTURE** (10, 14, 15 — every sync key the account has had stays in the vault under the current master, which her
+  current secrets open; while Castle no silent sync-keys item holds the current row key and a device holding it has
+  followed; settled, every device ends in the account's posture holding its current sync key); **4 THE CORE SENTENCE**
+  (4, 5, 6, 7, 17 — her CURRENT passphrase or words, typed or through the account's vault, reach every copy this Mac ever
+  made through the live key file, its sealed copy and the copy's own file; UNSCOPED across Make this my library at her
+  ruling, B2); **5 EVERY COPY OPENS BY SOME ROAD** (1, 27, 19 — by her roads with nothing in the app's hands, the live
+  library too or the lobby's honest `noKeyFileAnywhere`; retention prunes only this Mac's copies of this library — the
+  old promise 11 folded in); **6 CRASH SAFE** (20 — STRICT: an open app with an act in flight, a plan or staged file
+  left, or copies paused is a violation; no qualifier); **7 FOUR THINGS; A DISAGREEMENT REFUSES** (21, 23 — a verified
+  memory item names the library, its key and this Mac's device ID, carries the current key's file and names no other
+  library; at every launch the world's own oracle `liveDisagrees` must match the open: a disagreement refuses and writes
+  nothing, none opens); **8 DELETED ONLY AFTER REPLACEMENT** (22 — at every delete the world checks the library in the
+  live place still opens by her roads with nothing in hand, `SWorld.deleting`); **9 NOTHING SILENT** (the kept core of
+  promise 10 + 17 — posture and account change only at a deliberate act; in Castle no tampered file or item, alone or in
+  a group, weakens the mode, account, custody, gate or export; Look inside writes NOTHING, judged on everything the
+  device holds; Make this my library keeps the posture of now). **NO promise about pre-leave copies after a leave.**
+  **Stated limits:** L1 rule 10 (a lagging device), L2 rule 25 (Apple's roads; FD-2), L3 rule 3 (a Standard tamper),
+  L4 THE ROLLBACK (P-U4-5 + P-U4-12, her rulings, carried: files returned with the memory gone or returned too), L5 rules
+  17–18 (a key carried in from another library's copy keeps that library's own roads). **Deleted:** `resumeAtVaultReach`
+  (and its three callers); promise 6's tolerance already gone at U2; the old open-copy bookkeeping (`opens`). **The
+  alphabet:** rule 17's two doors as acts (`.lookInside` with current / its day's / no secrets, `.makeMine`), the replay
+  tampers back as DETECTION (`replayLibraryFile`, `replayKeyFile`, `deleteKeyFileAndMemory` — `Tamper.generated` is
+  every tamper); the door-agreement check (Look inside with her current secrets must open what her typed roads reach —
+  promise 4). **Starting states (11):** nothing yet; fresh Standard; Standard with no passphrase; Castle Touch ID; Castle
+  Always ask; synced Standard on two Macs; synced Castle on three devices (Always ask); synced Castle with Touch ID; a
+  Castle backup after a leave; a lagging device (the account entered Castle on another); two Macs sharing an iCloud
+  Drive backup folder. **Found while writing them (world, not model):** `act()`'s `defer` wrote the act-time library
+  back over the one the after-act repairs updated, so the next act sealed a stale key-file copy into the memory —
+  promise 7's new mirror clause caught it (generator seed 2 sequence 2); fixed in the world. Protection set Debug
+  `✔ 265 tests in 70 suites` (generator 16 sequences).
+- D — each promise shown to catch its own violation (a planted breach per promise, the checker red), and the mutation
+  pins (every surviving guard red with its guard off; world pins for the guards that had only unit pins): IN PROGRESS.
 - E — the discovery run: `PROTECTION_SOAK=1` seeds 21–40 × 1,000 × ≤60, Debug, one seed per call; every red triaged;
   re-run after any fix: NOT-STARTED. Table: PENDING.
 - F — the gate soak: seeds 1–20 × 1,000 × ≤60, `swift test` AND `swift test -c release`, on the FINAL tree:

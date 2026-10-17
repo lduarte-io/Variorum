@@ -6,14 +6,12 @@
 //  everyday loop, plus a `PROTECTION_SOAK=1` environment switch for the
 //  go/no-go run").
 //
-//  The runner applies a step and checks the promises after it: every step's
-//  (1, 2, 4, 5, 6, 8, 11), the settle's (2's retired-key clause, 3, 7) and the
-//  tampering steps' (10 — the device is relaunched as part of the step, the
-//  next open being when a planted or replayed thing would act). (Promise 12
-//  left with the move off the old shared key — VX-378 U1, rule 26; promise 13's
-//  pre-leave reading and the vault's Castle-era-key invariant left with the
-//  anchor — rules 12, 13, 15; promise 9, the honest words, left with the route
-//  finder — rule 4.)
+//  The runner applies a step and checks the promises after it (VX-378 U4's
+//  nine, `Promises.swift`): every step's, the settle's clauses (1's retired-key
+//  clause, 2, 3's convergence), the launch's and the write's findings (7, 8),
+//  and the tampering steps' (9's tamper clause — the device is relaunched as
+//  part of the step, the next open being when a planted or replayed thing
+//  would act).
 //
 
 import CryptoKit
@@ -171,7 +169,9 @@ struct ScenarioGenerator {
     /// key's retirement and move (rule 26), the finish of a stuck leave (rule
     /// 12), corner 45's answer and the mode confirm (rule 26), the open copy's
     /// own line, the landing and the older library's open (rule 17), the older
-    /// build (rule 26). The stream shifted with it; U4 rewrites the alphabet.
+    /// build (rule 26). VX-378 U4 added rule 17's two doors — Look inside and
+    /// Make this my library — and brought the replay tampers back as detection
+    /// (`Tamper.generated`).
     static let kinds: [(name: String, weight: Int)] = [
         ("launch", 6), ("lock", 3), ("useCastle", 5), ("useStandard", 5), ("replaceAllKeys", 3), ("follow", 4),
         ("turnOnSync", 3), ("signIn", 2), ("signOut", 2), ("thisMacOnly", 2), ("stopSyncingHere", 2), ("move", 1),
@@ -180,6 +180,7 @@ struct ScenarioGenerator {
         ("setScheduledExport", 2), ("finger", 2), ("lid", 2), ("macOSUpdate", 1), ("iCloudSwitch", 2), ("syncICloud", 3),
         ("wipeKeychain", 1), ("switchAppleID", 1), ("replaceMac", 1), ("online", 1), ("timeMachineSnapshot", 1),
         ("timeMachineRollback", 1), ("tamper", 2), ("plantPair", 1), ("settle", 3), ("tamperSequence", 1),
+        ("lookInside", 2), ("makeMine", 1),
     ]
 
     mutating func make(_ kind: String, _ name: String, _ other: String, _ account: String) -> Action {
@@ -221,6 +222,8 @@ struct ScenarioGenerator {
         case "tamper": return .tamper(name, rng.pick(Tamper.generated)!)
         case "plantPair": return .plantPair(name)
         case "tamperSequence": return .tamperSequence(name, tamperGroup())
+        case "lookInside": return .lookInside(name, pick: rng.int(0..<8), typing: rng.pick(CopyTyping.allCases)!)
+        case "makeMine": return .makeMine(name, pick: rng.int(0..<8), typing: rng.chance(70) ? .itsDay : .current)
         default: return .settle
         }
     }

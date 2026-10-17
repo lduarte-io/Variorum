@@ -87,8 +87,32 @@ struct Truth {
     var beforeRollback: [String: (mode: ProtectionMode?, account: String?)] = [:]
     /// Every copy retention pruned: who, under which Mac, for which library.
     var prunes: [(by: String, mac8: String, library: String, copy: CatalogCopy)] = []
-    /// Every copy opened into a library: the record before and after.
-    var opens: [(device: String, before: ProtectionRecord, after: ProtectionRecord?)] = []
+    // VX-378 U4 — the bookkeeping the rewritten promises read. (The open-copy
+    // road's `opens` left with rule 17 — a copy is a copy.)
+    /// PROMISE 7 (rule 21): an open that went on over a disagreement, refused
+    /// without one, or wrote anything while refusing — found at the launch.
+    var refusals: [(device: String, detail: String)] = []
+    /// PROMISE 8 (rule 22): a delete after which the library in the live place
+    /// opened by none of her roads — found at the write.
+    var strandings: [(device: String, detail: String)] = []
+    /// PROMISE 9 (rule 17): Look inside wrote something.
+    var lookInsideWrites: [(device: String, detail: String)] = []
+    /// PROMISE 4 (rule 4): Look inside refused a copy her current secrets reach.
+    var doorRefusals: [(device: String, detail: String)] = []
+    /// THE COMPLETE REPLAY — the stated limit carried from P-U4-5 (her ruling
+    /// 2026-10-14/15, "accept and state it"): this Mac's homes replayed
+    /// together return it to that earlier state, its secrets of that day with
+    /// it — by device: whose secrets, the moment returned to, the key then.
+    var statedLimit: [String: (holder: String, at: Date, fingerprint: String)] = [:]
+    /// PROMISE 3 (rule 15): every sync key each account has ever had.
+    var accountRowKeys: [String: Set<String>] = [:]
+    /// PROMISE 4: when a device last CREATED a library (a fresh start, no past —
+    /// what it made before belongs to a library it no longer carries).
+    var freshStarts: [String: Date] = [:]
+    /// Each device's last library holder: its pair carries into a library Make
+    /// this my library made (rule 7: "Make-this-my-library keeps your current
+    /// pair").
+    var lastHolder: [String: String] = [:]
 }
 
 final class SDevice {
@@ -156,6 +180,8 @@ final class SDevice {
 /// One earlier moment of a device, as a login-password holder could have
 /// copied it: the library file, the live key file, the memory item, the plan.
 struct DeviceCapture {
+    /// When it was copied (the complete replay returns the Mac to this moment).
+    var at: Date
     var slot: SFile?
     var liveKeyFile: SFile?
     var memory: KItem?
@@ -308,6 +334,12 @@ final class SWorld {
                 }
             }
             lastBinding[key] = .some(record.account)
+            let current = holder(device, account: record.account, libraryID: slot.libraryID)
+            if truth.known[current] == nil, record.account == nil, let previous = truth.lastHolder[device.name] {
+                let k = known(previous)
+                setKnown(current, passphrase: k.passphrase, words: k.words)
+            }
+            truth.lastHolder[device.name] = current
         }
     }
 
@@ -632,7 +664,27 @@ final class SWorld {
         guard let (key, also) = await walkLobby(device, typed: typed) else { throw WorldRefusal.cannotOpen }
         let executor = newExecutor(device, libraryID: slot.record?.libraryID ?? slot.libraryID)
         device.executor = executor
-        var library = try executor.unlock(with: key, alsoInHand: also)
+        // PROMISE 7 (rule 21): the world's own reading of whether the live place
+        // is what this Mac remembers — and the open must refuse exactly then,
+        // writing nothing.
+        let disagrees = liveDisagrees(device, key: key, also: also, executor: executor)
+        let writesBefore = device.writeCount
+        var library: UnlockedLibrary
+        do {
+            library = try executor.unlock(with: key, alsoInHand: also)
+        } catch ExecutorRefusal.libraryDisagreesWithMemory(let found) {
+            device.executor = nil
+            if device.writeCount != writesBefore {
+                truth.refusals.append((device.name, "the refused open wrote \(device.writeCount - writesBefore) time(s)"))
+            }
+            if !disagrees {
+                truth.refusals.append((device.name, "the open refused (\(found.findings)) with nothing this Mac remembers disagreeing"))
+            }
+            throw ExecutorRefusal.libraryDisagreesWithMemory(found)
+        }
+        if disagrees {
+            truth.refusals.append((device.name, "the open went on although the live place is not what this Mac remembers"))
+        }
         device.library = library
         device.lastSettle = nil
         do {
@@ -663,31 +715,10 @@ final class SWorld {
         return device.library!
     }
 
-    /// THE NEXT VAULT REACH (her ruling 2026-10-14/15): an open library
-    /// whose act waits for its account's vault resumes the moment the vault is
-    /// reachable — signing in here, coming back online — as the app re-settles
-    /// (phase 2/3's wiring; the executor's `settle` is the one road).
-    func resumeAtVaultReach(_ device: SDevice) async {
-        guard let executor = device.executor, var library = device.library,
-              library.section.actInFlight != nil, device.online else { return }
-        // Only an act waiting for THIS session's account (the plan names it).
-        if case .plan(let sealed)? = device.container.files[SPath.plan],
-           let plan = try? ProtectionCoding.decoder().decode(ProtectionPlan.self, from: sealed.payload),
-           let account = plan.parameters?.accountID ?? library.record?.account, plan.parameters?.synced == true,
-           device.session.accountID != account {
-            return
-        }
-        stepLog.append("  \(device.name): the vault is in reach — the act in flight resumes")
-        do {
-            device.lastSettle = try await executor.settle(&library, typed: typedFor(device))
-        } catch {
-            stepLog.append("  \(device.name): the act in flight couldn't settle now (\(error))")
-        }
-        device.library = library
-        adoptPending(device)
-        syncHolders()
-        try? await runRepairs(device)
-    }
+    // (THE NEXT VAULT REACH — the world's re-settle of an act waiting for its
+    // account's vault — left with VX-378 U4: no act waits on a vault since U2;
+    // one that can't reach it before its swap rolls back, and the next open
+    // settles anything left — promise 6, strict.)
 
     /// `assess`'s repairs, run by the executor.
     func runRepairs(_ device: SDevice) async throws {
@@ -790,7 +821,9 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
     }
 
     func deleteCustody(fingerprint: String, itemClass: ProtectionNames.CustodyClass) throws {
-        device.keychain.local[KName.custody(scope, fingerprint, itemClass)] = nil
+        try world.deleting(device, "custody- \(itemClass.rawValue) \(f8(fingerprint))") {
+            device.keychain.local[KName.custody(scope, fingerprint, itemClass)] = nil
+        }
         try wrote("custody- \(itemClass.rawValue) \(f8(fingerprint))")
     }
 
@@ -816,7 +849,9 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
     }
 
     func deleteSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws {
-        device.keychain.local[KName.syncKeys(scope, accountID, itemClass)] = nil
+        try world.deleting(device, "sync- \(itemClass.rawValue)") {
+            device.keychain.local[KName.syncKeys(scope, accountID, itemClass)] = nil
+        }
         try wrote("sync- \(itemClass.rawValue)")
     }
 
@@ -842,7 +877,7 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
             world.truth.deletesNotCarried.insert(id)
             return
         }
-        world.deleteSynced(device, KName.apple(scope, id))
+        try world.deleting(device, "apple- \(id.prefix(8))") { world.deleteSynced(device, KName.apple(scope, id)) }
         try wrote("apple- \(id.prefix(8))")
     }
 
@@ -944,8 +979,13 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
             // file — the one the executor names (the live place may already
             // hold the incoming library's), else every one the slot holds for
             // it (LibraryAsideCopies' shape).
-            let folder = "\(CatalogNames.previousLibrariesFolderName)/\(CatalogNames.stampString(world.tick()))"
+            let at = world.tick()
+            let folder = "\(CatalogNames.previousLibrariesFolderName)/\(CatalogNames.stampString(at))"
             device.container.files["\(folder)/\(SPath.slot)"] = .library(outgoing)
+            world.truth.copies["container:\(folder)/\(SPath.slot)"] = CopyTruth(
+                libraryID: outgoing.libraryID, fingerprint: outgoing.fingerprint, madeAt: at, madeOn: device.name,
+                mode: outgoing.record?.mode,
+                holder: world.holder(device, account: outgoing.record?.account, libraryID: outgoing.libraryID))
             if let asideKeyFile {
                 device.container.files["\(folder)/\(SPath.liveKeyFile)"] = .keyFile(asideKeyFile)
             } else {
@@ -984,7 +1024,10 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
     func readLiveKeyFile() throws -> KeyFile? { device.container.files[SPath.liveKeyFile]?.keyFile }
 
     func writeLiveKeyFile(_ file: KeyFile) throws {
-        device.container.files[SPath.liveKeyFile] = .keyFile(file)
+        // The live key file REPLACED is a delete of the one it overwrites.
+        try world.deleting(device, "keyfile \(f8(file.fingerprint))") {
+            device.container.files[SPath.liveKeyFile] = .keyFile(file)
+        }
         try wrote("keyfile \(f8(file.fingerprint))")
     }
 
@@ -999,7 +1042,7 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
 
     func deleteMemory(libraryID: String) throws {
         guard device.keychain.local[KName.memory(scope, libraryID)] != nil else { return }
-        device.keychain.local[KName.memory(scope, libraryID)] = nil
+        try world.deleting(device, "memory- \(libraryID.prefix(8))") { device.keychain.local[KName.memory(scope, libraryID)] = nil }
         try wrote("memory- \(libraryID.prefix(8))")
     }
 
@@ -1092,6 +1135,64 @@ extension SWorld {
                 libraryID: image.libraryID, fingerprint: image.fingerprint, madeAt: at, madeOn: device.name,
                 mode: image.record?.mode,
                 holder: holder(device, account: image.record?.account ?? (image.record == nil ? image.rowsOwner : nil), libraryID: image.libraryID))
+        }
+    }
+}
+
+// MARK: - VX-378 U4: the oracles the rewritten promises read
+
+extension SWorld {
+    /// PROMISE 7's oracle (rule 21): the live place disagrees with what this
+    /// Mac remembers — the memory item for the slot's library, verified with
+    /// the keys the lobby reached, names another key than the library file or
+    /// the key file beside it (unless this Mac's own act in flight, in the
+    /// section the memory names, moves between exactly those two keys); or,
+    /// remembering nothing for this library, the memory items name other
+    /// libraries only. Absence is never a disagreement (rule 8's keychain
+    /// reset — the orchestrator's adjudication 5 after U1).
+    func liveDisagrees(_ device: SDevice, key: StoreKey, also: [StoreKey], executor: ProtectionExecutor) -> Bool {
+        guard let slot = device.slot, let record = slot.record else { return false }
+        let live = liveKeyFile(device)
+        let reach = executor.reach(key: key, keyFile: live, extra: also)
+        let remembered = Set(device.keychain.names(service: ProtectionNames.memoryService)
+            .compactMap { ProtectionNames.parseMemoryAccount($0.account, scope: Self.scope) })
+        var memory: DeviceMemory?
+        if case .memory(let sealed)? = device.keychain.local[KName.memory(Self.scope, record.libraryID)]?.value {
+            memory = DeviceMemory.opening(sealed, libraryID: record.libraryID, reach: reach)
+        }
+        guard let memory else { return !remembered.isEmpty && !remembered.contains(record.libraryID) }
+        let inFlight = record.verifiedSections(reach: reach).first { $0.deviceID == memory.deviceID }?.actInFlight
+        let actKeys = Set([inFlight?.fromFingerprint, inFlight?.toFingerprint].compactMap { $0 })
+        func agrees(_ fingerprint: String) -> Bool {
+            fingerprint == memory.currentFingerprint || (actKeys.contains(fingerprint) && actKeys.contains(memory.currentFingerprint))
+        }
+        return !agrees(slot.fingerprint) || !(live.map { agrees($0.fingerprint) } ?? true)
+    }
+
+    /// Every key-file copy this Mac's memory items carry (rule 1's sealed copy).
+    func mirrors(_ device: SDevice) -> [KeyFile] {
+        device.keychain.local.values.compactMap { item in
+            guard case .memory(let sealed) = item.value,
+                  let memory = try? ProtectionCoding.decoder().decode(DeviceMemory.self, from: sealed.payload) else { return nil }
+            return memory.keyFileMirror
+        }
+    }
+
+    /// Does the library in the live place open by her roads — with nothing in
+    /// the app's hands (a crash now would drop the key in memory)?
+    func opensByHerRoads(_ device: SDevice) -> Bool {
+        guard let slot = device.slot else { return true }
+        return reach(herSeeds(device, inHand: false), files: keyFilesOn(device) + mirrors(device))[slot.fingerprint] != nil
+    }
+
+    /// PROMISE 8 (rule 22): a delete (`body`) after which the library in the
+    /// live place no longer opens by any road of hers — when it did just before
+    /// — is a key deleted before its replacement verified.
+    func deleting(_ device: SDevice, _ what: String, _ body: () -> Void) throws {
+        let before = opensByHerRoads(device)
+        body()
+        if before, !opensByHerRoads(device) {
+            truth.strandings.append((device.name, "after \(what) no road of hers opens the library in the live place"))
         }
     }
 }

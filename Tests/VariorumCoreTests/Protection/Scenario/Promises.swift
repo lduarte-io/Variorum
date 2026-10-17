@@ -1,21 +1,63 @@
 //
 //  Promises.swift
-//  VariorumCoreTests — VX-305 U4: THE THIRTEEN PROMISES (design §4.1), checked
-//  after every step — 2's retired-key clause, 3 and 7 once the world settles
-//  (propagation done, followers followed).
+//  VariorumCoreTests — VX-378 U4: THE PROMISES, rewritten to `notes/CastleRules.md`
+//  (VX-305's thirteen, cut at U1, rewritten here — each quotes its rule):
 //
-//  The checks rest on one engine, `KeyReach`: from SEEDS (keys, Apple keys,
+//    1 ONE POSTURE (rules 9, 11, 13) — while the library is in Castle, no quiet
+//      road reaches its current key, any earlier key, or any copy of it.
+//    2 STANDARD HANDS EVERYTHING OUT (rules 8, 12) — in Standard the current
+//      key opens by this Mac's quiet roads, re-made at the open (settled).
+//    3 THE ACCOUNT IS ONE POSTURE (rules 10, 14, 15) — while the account is in
+//      Castle no quiet road holds the key its rows are written under; a device
+//      holding that key has followed; the account keeps every sync key it has
+//      had; every device ends in the account's posture (settled).
+//    4 THE CORE SENTENCE (rules 4, 5, 6, 7, 17) — your current passphrase or
+//      words open every copy you have ever made (across Make this my library
+//      too — her ruling on P-VX378-U4-1).
+//    5 EVERY COPY OPENS BY SOME ROAD (rules 1, 27, 19) — or the refusal names
+//      what would have; copies leave only by her or this Mac's own retention.
+//    6 CRASH SAFE (rule 20) — strict: nothing left half-done, and the open says
+//      which.
+//    7 FOUR THINGS; A DISAGREEMENT REFUSES (rules 21, 23) — what this Mac
+//      remembers matches the live place; when it doesn't, the open refuses and
+//      writes nothing.
+//    8 DELETED ONLY AFTER REPLACEMENT (rule 22) — no delete leaves the library
+//      in the live place with no road of hers.
+//    9 NOTHING SILENT (the kept core of VX-305's promise 10; rule 17) — the
+//      posture, the account and the roads change only at a deliberate act; in
+//      Castle no single tampered file or item changes them; Look inside writes
+//      nothing; Make this my library keeps the posture of now.
+//
+//  NO PROMISE is made about pre-leave copies after a leave: one posture at a
+//  time (rules 12, 13 — her 2026-10-16 ruling; a reviewer proposing one is
+//  pointed at CastleRules's considered-and-not-pursued list).
+//
+//  THE STATED LIMITS (each with its pointer, each read where it applies):
+//    L1 rule 10 — a device that has not followed reads its own copy through its
+//       own quiet road (it is still Standard; promise 1 is the followers').
+//    L2 rule 25 — Apple's roads are Apple's: a key left in an Apple account she
+//       has since left keeps its lock (FD-2), and a delete made while iCloud
+//       Keychain's switch is off reaches iCloud only when it's on.
+//    L3 rule 3 — a login-password holder's tamper in Standard: they hold the key
+//       (until a key change mints one past them).
+//    L4 THE ROLLBACK (P-U4-5, her ruling 2026-10-14/15 "accept and state it";
+//       P-U4-12): the library file and its key file returned to an earlier
+//       moment while what this Mac remembers is gone or returned with them (a
+//       Time Machine restore, a hand restore over a wiped keychain, a complete
+//       replay) put the Mac back in that moment, its secrets of that day with it;
+//       copies made after it are the later stretch's.
+//    L5 rules 17, 18 — a key carried in from another library's copy keeps that
+//       library's own quiet roads (another Mac's own Apple key is never deleted
+//       here — §3.5's delete-on-sight-by-recorded-id).
+//
+//  The checks rest on one engine, `reach`: from SEEDS (keys, Apple keys,
 //  masters, secrets, the vault's wrapped copies a session can fetch) it closes
-//  over every key file a device holds — every lock, every history — to the
-//  library keys reached. (Promise 13's pre-leave reading and the anchor left
-//  with VX-378 U1 — rules 12, 13.) Two readers:
-//    - THE ATTACKER (promises 2, 8): a login-password holder on the device
-//      (every keychain item but a Touch ID item's secret, every file, the
-//      session's vault) and the Apple account (its iCloud Keychain) — with the
-//      STATED EXCEPTIONS taken out of the seeds, exactly as §3.1 rule 2 names
-//      them, so whatever is left must open nothing protected;
-//    - HER OWN ROADS (promises 5, 12): her finger, her custody, her secrets of
-//      every day, her Apple keys, the vault through her secrets.
+//  over key files — every lock, every history — to the library keys reached.
+//  Two readers: THE ATTACKER (promise 1 — a login-password holder on the device,
+//  every keychain item but a Touch ID item's secret, every file, and the Apple
+//  account's iCloud Keychain, minus L2's exceptions) and HER OWN ROADS (promises
+//  5, 8 — her finger, her items, her secrets of every day, her Apple keys, the
+//  vault through her secrets).
 //
 
 import CryptoKit
@@ -222,7 +264,7 @@ extension SWorld {
 
     /// HER roads on `device`: everything she holds, every secret she has ever
     /// had for the libraries and accounts it touches, the vault through them.
-    func herSeeds(_ device: SDevice) -> Seeds {
+    func herSeeds(_ device: SDevice, inHand: Bool = true) -> Seeds {
         var seeds = Seeds()
         for item in Array(device.keychain.local.values) + device.keychain.synced.values.compactMap(\.item) {
             guard let value = pressRead(device, item) else { continue }
@@ -233,8 +275,10 @@ extension SWorld {
             default: break
             }
         }
-        for material in device.sessionMemory.values { seeds.masters.append(material.master) }
-        if let library = device.library { seeds.keys.append(library.key) }
+        if inHand {
+            for material in device.sessionMemory.values { seeds.masters.append(material.master) }
+            if let library = device.library { seeds.keys.append(library.key) }
+        }
         // Her Apple accounts' keychains are hers — the switch off on this
         // device only hides one until she turns it back on, and an Apple ID
         // this Mac left still holds what it carried ("open through that former
@@ -257,223 +301,383 @@ extension SWorld {
         return seeds
     }
 
+
     // MARK: - The checks
 
     /// Every promise that applies after a step. `settled`: the world has just
-    /// settled — 2's retired-key clause, 3 and 7 are checked too.
+    /// settled (propagation done, followers followed) — the clauses that need
+    /// it are checked too.
     func checkPromises(settled: Bool) -> [Violation] {
+        noteAccountRowKeys()
         var violations: [Violation] = []
         for device in devices {
-            violations += known(device)
-            violations += castleMeansCastle(device, settled: settled)
+            violations += onePosture(device, settled: settled)
+            if settled { violations += standardHandsEverythingOut(device) }
+            violations += coreSentence(device)
             violations += crashSafe(device)
-            if settled {
-                violations += standardMeansStandard(device)
-                violations += converges(device)
-            }
+            violations += fourThings(device)
         }
-        violations += nothingStranded()
-        violations += ownCopiesOnly()
+        violations += accountOnePosture(settled: settled)
+        violations += everyCopyOpens()
+        violations += foundAtTheWrite()
         return violations
     }
 
-    /// PROMISE 1 — Known: one record per live library, and what this Mac
-    /// remembers agrees with it.
-    func known(_ device: SDevice) -> [Violation] {
-        guard let library = device.library, library.section.actInFlight == nil else { return [] }
-        guard let record = device.slot?.record else {
-            return [Violation(promise: 1, device: device.name, detail: "an open library with no record")]
+    /// Whose secrets, the moment and its day's secrets — L4's (the rollback).
+    func dayOfRollback(_ device: SDevice) -> (passphrase: String?, words: [String]?)? {
+        guard let limit = truth.statedLimit[device.name] else { return nil }
+        if device.slot?.fingerprint != limit.fingerprint, device.slot != nil,
+           !(liveKeyFile(device)?.heldFingerprints.contains(limit.fingerprint) ?? false) {
+            truth.statedLimit[device.name] = nil
+            return nil
         }
-        let reach = device.executor?.reach(key: library.key, keyFile: library.keyFile) ?? PF.reach([library.key])
-        guard case .memory(let sealed)? = device.keychain.local[KName.memory(Self.scope, record.libraryID)]?.value,
-              let memory = DeviceMemory.opening(sealed, libraryID: record.libraryID, reach: reach) else {
-            return [Violation(promise: 1, device: device.name, detail: "no verified memory item for the open library")]
-        }
-        if memory.currentFingerprint != record.currentFingerprint || memory.deviceID != library.section.deviceID {
-            return [Violation(promise: 1, device: device.name,
-                              detail: "the memory names \(f8(memory.currentFingerprint)) on \(memory.deviceID.prefix(8)), the record \(f8(record.currentFingerprint)) on \(library.section.mac8)")]
-        }
-        // (Its key-file clause — "no repair owed would bring the current key's
-        // own file back" — left with the restores, VX-378 U1, rule 21: U2's
-        // refusal is the answer and U4 rewrites the promise.)
-        return []
+        return known(limit.holder).at(limit.at)
     }
 
-    /// PROMISES 2 and 8 — Castle means Castle; the posture law.
-    func castleMeansCastle(_ device: SDevice, settled: Bool) -> [Violation] {
+    /// PROMISE 1 — ONE POSTURE (rules 9, 11, 13): "Castle is one promise: no
+    /// quiet road through Apple, ever, on any device of the account" (9);
+    /// "Entering Castle … the Apple and on-device keychain items deleted … your
+    /// Standard-era backups' quiet locks die with it" (11); "A Castle-era backup
+    /// is protected while your library is in Castle" (13). While the library is
+    /// in Castle no road that opens without a typed secret or a Touch ID press
+    /// reaches its current key, any key its key file carries, or any copy of it.
+    func onePosture(_ device: SDevice, settled: Bool) -> [Violation] {
         guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record,
               record.mode == .castle else { return [] }
         var violations: [Violation] = []
-        func fail(_ detail: String, _ promise: Int = 2) { violations.append(Violation(promise: promise, device: device.name, detail: detail)) }
+        func fail(_ detail: String) { violations.append(Violation(promise: 1, device: device.name, detail: detail)) }
+        let live = liveKeyFile(device)
         // The keys the library has had: the live key file's current key and
-        // history (rule 4 — the family tree left with VX-378 U1). A Time
-        // Machine rollback past a leave (her act) leaves the later Standard
-        // stretch's key out of the restored file, so its silent item is not
-        // counted (PROVISIONAL P-U4-8).
-        let tree = Set(liveKeyFile(device)?.heldFingerprints ?? []).union([record.currentFingerprint])
-        // A Standard copy under a key the restored file never knew is the
-        // later stretch's, after a Time Machine rollback past a leave (P-U4-8).
-        func laterStandard(_ id: String, _ fingerprint: String) -> Bool {
-            !tree.contains(fingerprint) && truth.copies[id]?.mode == .standard
-        }
+        // history (rule 4). A rollback past a leave (L4) leaves the later
+        // Standard stretch's keys out of the restored file.
+        let tree = Set(live?.heldFingerprints ?? []).union([record.currentFingerprint])
         for name in device.keychain.local.keys where name.service == ProtectionNames.custodyService {
             if let item = device.keychain.local[name], !item.touchID, let key = item.value.libraryKey, tree.contains(PF.fp(key)) {
-                fail("a silent custody item holds \(f8(key))")
+                fail("a silent custody item holds \(f8(key)) — rule 11's on-device road kept")
             }
         }
-        for name in device.keychain.local.keys where name.service == ProtectionNames.syncKeysService {
-            if let item = device.keychain.local[name], !item.touchID, case .syncKeys(let m) = item.value,
-               let vault = record.account.flatMap({ server.snapshot($0) }), m.rowKeyID == vault.rowKeyID,
-               vault.mode != .standard {
-                fail("a silent sync-keys item holds the account's Castle-era keys")
-            }
-        }
-        if let live = liveKeyFile(device), live.fingerprint == record.currentFingerprint, live.apple != nil {
-            fail("an Apple wrap of the current key")
+        if let live, live.fingerprint == record.currentFingerprint, live.apple != nil {
+            fail("an Apple wrap of the current key (rule 9)")
         }
         if settled {
             let readable = Set(readableAppleKeys(device).keys)
             for id in library.section.retiredAppleKeyIDs where readable.contains(id) && device.iCloudOn {
-                fail("a retired Apple key (\(id.prefix(8))) still exists here")
+                fail("a retired Apple key (\(id.prefix(8))) still exists here (rule 11)")
             }
         }
-        // Nothing a login-password holder can read opens the library or any
-        // copy of it made here (the stated exceptions taken out of the seeds).
-        let attacker = reach(attackerSeeds(device, appleAccount: false, settled: settled), files: keyFilesOn(device))
-        if attacker[record.currentFingerprint] != nil {
-            fail("a login-password holder reaches the current key \(f8(record.currentFingerprint))", 8)
+        // THE ATTACKER. This library's own key files take every seed; another
+        // library's key file (a copy made hers carried its keys in — L5) only
+        // the Apple keys this Mac made itself, so another library's own roads
+        // stay that library's.
+        let seeds = attackerSeeds(device, appleAccount: true, settled: settled)
+        var own = seeds
+        let ownApple = Set(library.section.appleKeys.map(\.id)).union([live?.apple?.keyID].compactMap { $0 })
+        own.apple = seeds.apple.filter { ownApple.contains($0.key) }
+        let files = keyFilesOn(device) + mirrors(device)
+        let mine = files.filter { $0.libraryID == record.libraryID }
+        var reached = reach(seeds, files: mine)
+        reached.merge(reach(own, files: files)) { a, _ in a }
+        let tampered = truth.tamperedStandard[device.name] ?? []
+        for fingerprint in tree.sorted() where reached[fingerprint] != nil && !tampered.contains(fingerprint) {
+            fail("a quiet road reaches \(fingerprint == record.currentFingerprint ? "the current key" : "an earlier key") \(fingerprint.prefix(8))")
         }
         for (id, image) in imagesOn(device) where image.libraryID == record.libraryID && id != "container:\(SPath.slot)" {
-            // "any copy made on this Mac or on a device of its account that has
-            // followed": a pair another Mac sent here (its own Standard copy,
-            // under its own key) isn't one.
+            // "any copy … on any device that has followed": a pair another Mac
+            // sent here (its own, under its own key) isn't one (L5).
             if let made = truth.copies[id], made.madeOn != device.name, record.account == nil || made.holder != record.account {
                 continue
             }
             if senders.contains(where: { id.hasPrefix("container:\($0.key)/") && $0.value != device.name }) { continue }
-            if truth.rolledBackOver.contains(id) || laterStandard(id, image.fingerprint) { continue }
-            // A key a login-password holder already held in Standard (rule 3)
-            // and tampered with there: entering Castle protects what's written
-            // after (promise 8), never undoes what they took before.
-            if truth.tamperedStandard[device.name]?.contains(image.fingerprint) == true { continue }
-            if attacker[image.fingerprint] != nil {
-                fail("a login-password holder opens the copy \(id) (\(f8(image.fingerprint)))")
+            if truth.rolledBackOver.contains(id) || tampered.contains(image.fingerprint) { continue }
+            if !tree.contains(image.fingerprint), truth.copies[id]?.mode == .standard { continue }  // L4: the later stretch's
+            if reached[image.fingerprint] != nil { fail("a quiet road opens the copy \(id) (\(f8(image.fingerprint)))") }
+        }
+        return violations
+    }
+
+    /// PROMISE 2 (settled) — STANDARD HANDS EVERYTHING OUT (rules 8, 12): "the
+    /// next open uses whatever quiet road still works and quietly makes a fresh
+    /// Apple road" (8); leaving Castle comes "with a fresh Apple road and the
+    /// on-device road back" (12). In Standard the current key opens on this Mac
+    /// by its Apple road and its on-device item — re-made at the open (rule 8;
+    /// the detected lost road no longer excuses it, U2 re-makes it).
+    func standardHandsEverythingOut(_ device: SDevice) -> [Violation] {
+        guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record,
+              record.mode == .standard else { return [] }
+        if truth.tamperedStandard[device.name]?.contains(record.currentFingerprint) == true { return [] }  // L3
+        // Decision 35: a synced library makes nothing Apple-reachable without a
+        // fresh read of a vault in Standard — signed out, elsewhere, offline or
+        // lagging (L1, promise 3's), it waits.
+        if let account = record.account {
+            guard device.session.accountID == account, device.online, server.snapshot(account)?.mode == .standard else { return [] }
+        }
+        var violations: [Violation] = []
+        func fail(_ detail: String) { violations.append(Violation(promise: 2, device: device.name, detail: detail)) }
+        guard let live = liveKeyFile(device), live.fingerprint == record.currentFingerprint else {
+            return [Violation(promise: 2, device: device.name, detail: "no key file of the current key in the live place")]
+        }
+        if let wrap = live.apple, let apple = readableAppleKeys(device)[wrap.keyID],
+           (try? live.open(apple: apple)).map(PF.fp) == record.currentFingerprint {
+        } else {
+            fail("the Apple road doesn't open the current key here (rule 8 re-makes it at the open)")
+        }
+        let item = device.keychain.local[KName.custody(Self.scope, record.currentFingerprint, .silent)]
+        if item?.value.libraryKey.map(PF.fp) != record.currentFingerprint {
+            fail("no on-device item holds the current key (rule 8)")
+        }
+        return violations
+    }
+
+    /// Every sync key each account has had — read after every step (rule 15).
+    func noteAccountRowKeys() {
+        for (id, account) in server.accounts {
+            truth.accountRowKeys[id, default: []].insert(account.vault.rowKey.keyID)
+            truth.accountRowKeys[id, default: []].formUnion(account.vault.earlierRowKeys.keys)
+        }
+    }
+
+    /// The sync keys a device holds for `account` — its items and its session.
+    func heldSyncKeys(_ device: SDevice, _ account: String, quietOnly: Bool = false) -> [AccountKeys] {
+        var held: [AccountKeys] = []
+        for itemClass in [ProtectionNames.CustodyClass.silent, .touchid] {
+            guard let item = device.keychain.local[KName.syncKeys(Self.scope, account, itemClass)] else { continue }
+            if quietOnly, item.touchID { continue }
+            if let material = item.value.material { held.append(material) }
+        }
+        if !quietOnly, let session = device.sessionMemory[account] { held.append(session) }
+        return held
+    }
+
+    /// PROMISE 3 — THE ACCOUNT IS ONE POSTURE (rules 10, 14, 15): "Castle is
+    /// account-wide" (10); "The account's shared keys are wrapped by the
+    /// passphrase and the twelve words only — never by Apple" (14); "Each row on
+    /// the server is sealed under the sync key that was current when it was
+    /// written, and the account keeps every sync key it has ever had … while the
+    /// account stays in Castle, writing made there is sealed under a key no quiet
+    /// road holds, and a device that has not followed cannot sync until it does"
+    /// (15).
+    func accountOnePosture(settled: Bool) -> [Violation] {
+        var violations: [Violation] = []
+        for id in server.accounts.keys.sorted() {
+            guard let snapshot = server.snapshot(id) else { continue }
+            let vault = snapshot.vault
+            let current = vault.rowKey.keyID
+            func fail(_ device: String, _ detail: String) {
+                violations.append(Violation(promise: 3, device: device, detail: "account \(id.prefix(8)): \(detail)"))
+            }
+            // The account keeps every sync key it has had, each under the
+            // current master (her current secrets open the master).
+            let had = truth.accountRowKeys[id] ?? []
+            let kept = Set(vault.earlierRowKeys.keys).union([current])
+            if !had.isSubset(of: kept) { fail("server", "\(had.subtracting(kept).count) sync key(s) it had are gone from the vault") }
+            let k = known(id)
+            var master: SymmetricKey?
+            if let p = k.passphrase, let pk = passphraseKey(p, vault.kdf) { master = vault.master(passphrase: pk, words: nil) }
+            if master == nil, let w = k.words, let wk = wordsKey(w) { master = vault.master(passphrase: nil, words: WordsKey(key: wk)) }
+            if let master {
+                if (try? vault.keys(master: master)) == nil { fail("server", "a sync key doesn't open under the current master") }
+            } else {
+                fail("server", "her current passphrase and words open no master")
+            }
+            for device in devices {
+                guard let record = device.slot?.record, device.library?.section.actInFlight == nil,
+                      device.container.files[SPath.plan] == nil else { continue }
+                if vault.mode == .castle {
+                    // No quiet road holds the key Castle rows are written under.
+                    if heldSyncKeys(device, id, quietOnly: true).contains(where: { $0.rowKey(for: current) != nil }) {
+                        fail(device.name, "a silent sync-keys item holds the key Castle rows are written under")
+                    }
+                    // A device holding that key has followed into Castle.
+                    if record.account == id, record.mode != .castle,
+                       heldSyncKeys(device, id).contains(where: { $0.rowKey(for: current) != nil }) {
+                        fail(device.name, "a device that hasn't followed into Castle holds the key Castle rows are written under")
+                    }
+                }
+                // Settled: every device of the account, signed in and online,
+                // ends in its posture and holds its current sync key.
+                if settled, record.account == id, device.session.accountID == id, device.online, device.isOpen,
+                   truth.tamperedStandard[device.name]?.contains(record.currentFingerprint) != true {
+                    if record.mode != vault.mode { fail(device.name, "the library is \(record.mode), the account \(vault.mode)") }
+                    if !heldSyncKeys(device, id).contains(where: { $0.rowKeyID == current }) {
+                        fail(device.name, "it doesn't hold the account's current sync key")
+                    }
+                }
             }
         }
         return violations
     }
 
-    /// PROMISE 6 — crash-safe (rule 20): with nothing running, no act is
-    /// half-done — the act finished or rolled back, the library open, no copy
-    /// carrying a half-finished act. (The vault-reach qualifier — an act named
-    /// and waiting for an unreachable vault — left with VX-378 U2: no act waits
-    /// on a vault; one that can't reach it before its swap rolls back.)
-    func crashSafe(_ device: SDevice) -> [Violation] {
-        guard device.isOpen, let library = device.library else { return [] }
-        var violations: [Violation] = []
-        func fail(_ detail: String) { violations.append(Violation(promise: 6, device: device.name, detail: detail)) }
-        if let inFlight = library.section.actInFlight {
-            fail("an act is still in flight (\(inFlight.act))")
+    /// The live place as this Mac remembers it, read without the app: the
+    /// memory item's library and key agree with the slot and the key file (an
+    /// act in flight between exactly those two keys explains it), or nothing is
+    /// remembered for it (L4's road).
+    func livePlaceRemembered(_ device: SDevice) -> Bool {
+        guard let slot = device.slot else { return false }
+        let names = Set(device.keychain.names(service: ProtectionNames.memoryService)
+            .compactMap { ProtectionNames.parseMemoryAccount($0.account, scope: Self.scope) })
+        guard case .memory(let sealed)? = device.keychain.local[KName.memory(Self.scope, slot.libraryID)]?.value,
+              let memory = try? ProtectionCoding.decoder().decode(DeviceMemory.self, from: sealed.payload) else {
+            return names.isEmpty || names.contains(slot.libraryID)
         }
-        if library.section.actInFlight == nil, device.container.files[SPath.plan] != nil {
-            fail("a plan is left on disk with nothing in flight")
+        let inFlight = device.library?.section.actInFlight
+        let actKeys = Set([inFlight?.fromFingerprint, inFlight?.toFingerprint].compactMap { $0 })
+        func agrees(_ fingerprint: String) -> Bool {
+            fingerprint == memory.currentFingerprint || (actKeys.contains(fingerprint) && actKeys.contains(memory.currentFingerprint))
         }
-        if library.section.actInFlight == nil, device.staged != nil {
-            fail("a staged file is left")
-        }
-        if device.paused { fail("copies are still paused") }
-        return violations
+        return agrees(slot.fingerprint) && (liveKeyFile(device).map { agrees($0.fingerprint) } ?? true)
     }
 
-    /// PROMISE 3 (settled) — Standard means Standard.
-    func standardMeansStandard(_ device: SDevice) -> [Violation] {
-        guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record,
-              record.mode == .standard else { return [] }
-        if truth.tamperedStandard[device.name]?.contains(record.currentFingerprint) == true { return [] }
-        // Decision 35: a synced library writes nothing Apple-reachable without
-        // a fresh read of its account's vault — signed out, in another account
-        // or offline, its own Apple key waits (Re-link's library arm too).
-        if let account = record.account, device.session.accountID != account || !device.online { return [] }
-        guard let live = liveKeyFile(device), live.fingerprint == record.currentFingerprint, let wrap = live.apple else {
-            return [Violation(promise: 3, device: device.name, detail: "no Apple wrap of the current key")]
+    /// PROMISE 4 — THE CORE SENTENCE (rules 4, 5, 6, 7, 17): "Your passphrase or
+    /// your twelve words — together with any copy of your library — always open
+    /// it"; "your current passphrase or words open every backup you have ever
+    /// made" (4); re-locking keeps it (6); one pair at a time (7); Make this my
+    /// library carries the key history forward (17 — her ruling on
+    /// P-VX378-U4-1). Her CURRENT secrets — typed, or through the account's
+    /// vault they open (rule 7) — reach every copy this Mac ever made, through
+    /// the key file in the live place (or its sealed copy, rule 1) and the copy's
+    /// own key file. Judged while the live place is the library this Mac
+    /// remembers (else promise 7 refuses) with nothing in flight.
+    func coreSentence(_ device: SDevice) -> [Violation] {
+        guard let slot = device.slot, let record = slot.record, device.container.files[SPath.plan] == nil,
+              device.library?.section.actInFlight == nil, livePlaceRemembered(device),
+              let holder = slotHolder(device) else { return [] }
+        // L3 (rule 3): a login-password holder rewrote this Standard key's file;
+        // judged again once a key change mints one past them.
+        if let live = liveKeyFile(device), truth.tamperedStandard[device.name]?.contains(live.fingerprint) == true { return [] }
+        let k = known(holder)
+        var seeds = Seeds()
+        seeds.passphrases = [k.passphrase].compactMap { $0 }
+        seeds.words = [k.words].compactMap { $0 }
+        if let day = dayOfRollback(device) {  // L4
+            seeds.passphrases += [day.passphrase].compactMap { $0 }
+            seeds.words += [day.words].compactMap { $0 }
         }
-        // The Apple road works here: its key is readable (rule 8). ("This Mac's
-        // own" left with the takeover — VX-378 U1, rule 23: a Mac with a new
-        // device ID owns no key it didn't mint, and the wrap's key reaches it
-        // through iCloud Keychain.)
-        guard readableAppleKeys(device)[wrap.keyID] != nil else {
-            // A lost Apple road (its key gone with a replaced or reset
-            // keychain) is detected — `Fault.appleRoadLost` — and rule 8's
-            // quiet re-make is U2's (Re-link left with VX-378 U1, rule 8).
-            let lost = assessed(device).faults.contains { if case .appleRoadLost = $0 { return true } else { return false } }
-            if lost { return [] }
-            return [Violation(promise: 3, device: device.name, detail: "the Apple wrap's key isn't readable here")]
-        }
-        return []
-    }
-
-    /// PROMISE 7 (settled) — every device of an account ends in its mode and keys.
-    func converges(_ device: SDevice) -> [Violation] {
-        guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record,
-              let account = record.account, device.session.accountID == account, device.online,
-              let vault = server.snapshot(account) else { return [] }
-        // A Standard device's files tampered with (outside the claims — rule
-        // 3), until a deliberate act mints a key past them (P-U4-10).
-        if truth.tamperedStandard[device.name]?.contains(record.currentFingerprint) == true { return [] }
+        if let account = record.account, let vault = server.snapshot(account) { seeds.vaults.append(vault.vault) }
+        var base = [liveKeyFile(device)].compactMap { $0 }
+        if case .memory(let sealed)? = device.keychain.local[KName.memory(Self.scope, slot.libraryID)]?.value,
+           let memory = try? ProtectionCoding.decoder().decode(DeviceMemory.self, from: sealed.payload),
+           let mirror = memory.keyFileMirror { base.append(mirror) }
         var violations: [Violation] = []
-        let mode = vault.mode
-        if mode != record.mode {
-            violations.append(Violation(promise: 7, device: device.name, detail: "the library is \(record.mode), the account \(mode)"))
-        }
-        let leaf = DeviceLeaves(world: self, device: device)
-        let held = [ProtectionNames.CustodyClass.touchid, .silent].lazy.compactMap { try? leaf.readSyncKeys(accountID: account, itemClass: $0) }.first
-            ?? device.sessionMemory[account]
-        if let held, held.rowKeyID != vault.rowKeyID {
-            violations.append(Violation(promise: 7, device: device.name, detail: "its sync keys are not the account's"))
+        let started = truth.freshStarts[device.name] ?? .distantPast
+        for (id, copy) in truth.copies.sorted(by: { $0.key < $1.key }) where copy.madeOn == device.name {
+            if copy.madeAt < started || truth.rolledBackOver.contains(id) { continue }  // another library's start; L4
+            guard let (fs, path) = DeviceLeaves(world: self, device: device).resolve(id), let image = fs.files[path]?.library else {
+                continue
+            }
+            let own = fs.files[SPath.pair(of: path)]?.keyFile ?? fs.files[(path as NSString).deletingLastPathComponent + "/" + SPath.liveKeyFile]?.keyFile
+            if reach(seeds, files: base + [own].compactMap { $0 })[image.fingerprint] == nil {
+                violations.append(Violation(promise: 4, device: device.name,
+                                            detail: "her current passphrase and words don't open the copy \(id) (\(f8(image.fingerprint)))"))
+            }
         }
         return violations
     }
 
-    /// PROMISE 5 — nothing stranded: every copy Variorum wrote opens, on the
-    /// device that made it, by the roads she has (her secrets of every day
-    /// among them) — except the stated ones.
-    func nothingStranded() -> [Violation] {
+    /// PROMISE 5 — EVERY COPY OPENS BY SOME ROAD (rules 1, 27, 19): every copy
+    /// Variorum wrote opens, on the device that made it, by the roads she has —
+    /// her secrets of every day among them, nothing in the app's hands; the
+    /// library in the live place too, or the lobby says honestly that no key
+    /// file is left (27); a copy leaves only by her delete or this Mac's own
+    /// retention of this library (19, VX-302).
+    func everyCopyOpens() -> [Violation] {
         var violations: [Violation] = []
         var reachCache: [String: [String: StoreKey]] = [:]
+        func reached(_ device: SDevice) -> [String: StoreKey] {
+            if let held = reachCache[device.name] { return held }
+            let found = reach(herSeeds(device, inHand: false), files: keyFilesOn(device) + mirrors(device))
+            reachCache[device.name] = found
+            return found
+        }
         for (id, copy) in truth.copies.sorted(by: { $0.key < $1.key }) {
             let device = device(copy.madeOn)
             guard let (fs, path) = DeviceLeaves(world: self, device: device).resolve(id), let image = fs.files[path]?.library else {
                 continue  // deleted (by her, by retention, by a wiped container)
             }
-            let reached = reachCache[device.name] ?? reach(herSeeds(device), files: keyFilesOn(device))
-            reachCache[device.name] = reached
-            if reached[image.fingerprint] != nil { continue }
-            // (The secretless copy's exception — a copy made with no
-            // passphrase or words whose Apple keys were lost — left with rule
-            // 2: no library is without its words.)
-            violations.append(Violation(promise: 5, device: device.name, detail: "the copy \(id) (\(f8(image.fingerprint))) opens by no road"))
+            if reached(device)[image.fingerprint] == nil {
+                violations.append(Violation(promise: 5, device: device.name, detail: "the copy \(id) (\(f8(image.fingerprint))) opens by no road"))
+            }
         }
-        return violations
-    }
-
-
-
-    /// PROMISE 11 — own copies only: retention prunes only this Mac's copies
-    /// of this library.
-    func ownCopiesOnly() -> [Violation] {
-        var violations: [Violation] = []
+        for device in devices where !device.isOpen {
+            guard let slot = device.slot, slot.record != nil, reached(device)[slot.fingerprint] == nil else { continue }
+            var closed = facts(device)
+            closed.unlocked = nil
+            if AssessRules.lobby(closed).noKeyFileAnywhere == nil {
+                violations.append(Violation(promise: 5, device: device.name,
+                                            detail: "the library in the live place opens by no road, and the lobby doesn't say so (rule 27)"))
+            }
+        }
         for prune in truth.prunes {
             if prune.copy.mac != .mac8(prune.mac8.lowercased()) || prune.copy.library != prune.library {
-                violations.append(Violation(promise: 11, device: prune.by, detail: "retention pruned \(prune.copy.id), not this Mac's copy of this library"))
+                violations.append(Violation(promise: 5, device: prune.by, detail: "retention pruned \(prune.copy.id), not this Mac's copy of this library"))
             }
         }
         truth.prunes.removeAll()
         return violations
     }
 
-    // MARK: - Promises with a before and an after
+    /// PROMISE 6 — CRASH SAFE (rule 20): "a crash at any point leaves either
+    /// the old state or the new one. The next open finishes the act or rolls it
+    /// back from what is on disk, and says which." Strict: with the app open,
+    /// nothing is half-done — no act in flight, no plan or staged file left,
+    /// copies not paused. (The vault-reach qualifier left with VX-378 U2.)
+    func crashSafe(_ device: SDevice) -> [Violation] {
+        guard device.isOpen, let library = device.library else { return [] }
+        var violations: [Violation] = []
+        func fail(_ detail: String) { violations.append(Violation(promise: 6, device: device.name, detail: detail)) }
+        if let inFlight = library.section.actInFlight { fail("an act is still in flight (\(inFlight.act))") }
+        if library.section.actInFlight == nil, device.container.files[SPath.plan] != nil { fail("a plan is left on disk with nothing in flight") }
+        if library.section.actInFlight == nil, device.staged != nil { fail("a staged file is left") }
+        if device.paused { fail("copies are still paused") }
+        return violations
+    }
 
-    /// What a step may change on a device (promise 4, 10).
+    /// PROMISE 7 — FOUR THINGS; A DISAGREEMENT REFUSES (rules 21, 23): "This
+    /// Mac remembers four things about its library — its ID, its current key,
+    /// its device ID and the sealed copy of its key file … If the file in the
+    /// live place is not the one this Mac remembers, the app refuses to open,
+    /// says what it found, and offers the two doors of rule 17. It never repairs
+    /// by guessing" (21); a plain random device ID (23). With the library open
+    /// and nothing in flight, a verified memory item names it, its current key
+    /// and this Mac's device ID, carries the current key's file, and names no
+    /// other library. (The refusals are judged at the launch — `refusals`.)
+    func fourThings(_ device: SDevice) -> [Violation] {
+        guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record else { return [] }
+        func fail(_ detail: String) -> [Violation] { [Violation(promise: 7, device: device.name, detail: detail)] }
+        let reach = device.executor?.reach(key: library.key, keyFile: library.keyFile) ?? PF.reach([library.key])
+        guard case .memory(let sealed)? = device.keychain.local[KName.memory(Self.scope, record.libraryID)]?.value,
+              let memory = DeviceMemory.opening(sealed, libraryID: record.libraryID, reach: reach) else {
+            return fail("no verified memory item for the open library")
+        }
+        if memory.currentFingerprint != record.currentFingerprint || memory.deviceID != library.section.deviceID {
+            return fail("the memory names \(f8(memory.currentFingerprint)) on \(memory.deviceID.prefix(8)), the record \(f8(record.currentFingerprint)) on \(library.section.mac8)")
+        }
+        if let live = liveKeyFile(device), live.fingerprint == record.currentFingerprint, memory.keyFileMirror != live {
+            return fail("the sealed copy isn't the current key's file")
+        }
+        let others = Set(device.keychain.names(service: ProtectionNames.memoryService)
+            .compactMap { ProtectionNames.parseMemoryAccount($0.account, scope: Self.scope) }).subtracting([record.libraryID])
+        if !others.isEmpty { return fail("this Mac remembers \(others.count) other librar(ies) too") }
+        return []
+    }
+
+    /// The findings the world made at the write or at the launch: promise 7's
+    /// refusals, promise 8's strandings, promise 9's Look inside writes.
+    func foundAtTheWrite() -> [Violation] {
+        var violations: [Violation] = []
+        violations += truth.refusals.map { Violation(promise: 7, device: $0.device, detail: $0.detail) }
+        violations += truth.strandings.map { Violation(promise: 8, device: $0.device, detail: $0.detail) }
+        violations += truth.lookInsideWrites.map { Violation(promise: 9, device: $0.device, detail: $0.detail) }
+        violations += truth.doorRefusals.map { Violation(promise: 4, device: $0.device, detail: $0.detail) }
+        truth.doorRefusals.removeAll()
+        truth.refusals.removeAll()
+        truth.strandings.removeAll()
+        truth.lookInsideWrites.removeAll()
+        return violations
+    }
+
+    // MARK: - Promise 9, with a before and an after
+
+    /// What a step may change on a device.
     struct Posture: Equatable {
         var libraryID: String?
         var mode: ProtectionMode?
@@ -499,14 +703,18 @@ extension SWorld {
             scheduledExport: section?.settings.scheduledExport, silentItems: silent, touchIDItems: touch)
     }
 
-    /// PROMISE 4 — no silent change: the mode and the account change only at
-    /// a deliberate act or its follow; a copy never lowers the mode or brings
-    /// its own key.
+    /// PROMISE 9 — NOTHING SILENT: the mode and the account change only at a
+    /// deliberate act or its follow; Make this my library keeps the posture of
+    /// now ("You never leave Castle by opening something" — rule 17).
     func noSilentChange(_ action: Action, before: [String: Posture], crashedBefore: Set<String>) -> [Violation] {
         var violations: [Violation] = []
         for device in devices {
             guard let was = before[device.name] else { continue }
             let now = posture(device)
+            if case .makeMine(let name, _, _) = innerAction(action), name == device.name, was.libraryID != now.libraryID,
+               let from = was.mode, let to = now.mode, from != to {
+                violations.append(Violation(promise: 9, device: device.name, detail: "Make this my library moved the posture \(from) → \(to)"))
+            }
             guard was.libraryID == now.libraryID, was.mode != nil, now.mode != nil else { continue }
             let changed = was.mode != now.mode || was.account != now.account
             guard changed else { continue }
@@ -516,64 +724,53 @@ extension SWorld {
                 continue
             }
             violations.append(Violation(
-                promise: 4, device: device.name,
+                promise: 9, device: device.name,
                 detail: "\(was.mode.map { "\($0)" } ?? "-")/\(was.account?.prefix(8) ?? "none") → \(now.mode.map { "\($0)" } ?? "-")/\(now.account?.prefix(8) ?? "none") at a step that isn't a deliberate act"))
         }
-        for open in truth.opens {
-            guard let after = open.after else { continue }
-            if open.before.mode == .castle, after.mode == .standard {
-                violations.append(Violation(promise: 4, device: open.device, detail: "opening a copy lowered the mode"))
-            }
-            if after.currentFingerprint != open.before.currentFingerprint {
-                violations.append(Violation(promise: 4, device: open.device, detail: "opening a copy brought its own key"))
-            }
-        }
-        truth.opens.removeAll()
         return violations
+    }
+
+    func innerAction(_ action: Action) -> Action {
+        if case .crash(let inner, _) = action { return innerAction(inner) }
+        return action
     }
 
     func deliberate(_ action: Action, on name: String) -> Bool {
         switch action {
         case .crash(let inner, _): return deliberate(inner, on: name)
         case .settle: return true
-        // Files replaced from outside the app (promise 10 judges a tamper in
-        // Castle; promise 4 judges what the app does).
+        // Files replaced from outside the app (the tamper check below judges a
+        // tamper in Castle; this one judges what the app does).
         case .timeMachineRollback(let d), .deleteContainerAndOpenOldCopy(let d), .tamper(let d, _), .tamperSequence(let d, _):
             return d == name
         case .useCastle(let d, _, _), .useStandard(let d), .follow(let d, _), .turnOnSync(let d),
-             .move(let d), .thisMacOnly(let d), .stopSyncingHere(let d), .deleteAccountHere(let d), .replaceAllKeys(let d, _):
+             .move(let d), .thisMacOnly(let d), .stopSyncingHere(let d), .deleteAccountHere(let d), .replaceAllKeys(let d, _),
+             .makeMine(let d, _, _):
             return d == name
         default:
             return false
         }
     }
 
-    /// PROMISE 10 — sealed: in Castle, no planted, edited, replayed or deleted
-    /// file or item ALONE changes the mode, the account, the custody or the
-    /// gate style — the weakening directions (Always ask recorded quietly
-    /// when an item vanished never weakens anything). The stated limit (both
-    /// homes together) may return this Mac's settings.
-    func sealed(_ device: SDevice, before was: Posture, tamper: Tamper) -> [Violation] {
-        sealed(device, before: was, tampers: [tamper])
-    }
-
-    /// …and over a GROUP of tampers in one closed window (VX-305 ladder round
-    /// 1): the same claims — the stated limit's shape only in a group that
-    /// holds `.replayBothHomes` itself (a fixed scenario's).
+    /// PROMISE 9's tamper clause (the kept core of VX-305's promise 10): in
+    /// Castle, no planted, edited, replayed or deleted file or item — alone, or
+    /// in a group in one closed window — changes the mode, the account, the
+    /// custody, the gate style or the scheduled export in a weakening direction
+    /// (Always ask recorded quietly when an item vanished weakens nothing).
+    /// L4: a group that replays both of this Mac's homes together returns the
+    /// Mac to that earlier moment.
     func sealed(_ device: SDevice, before was: Posture, tampers: [Tamper]) -> [Violation] {
         guard was.mode == .castle else { return [] }
         let now = posture(device)
         var violations: [Violation] = []
         let label = tampers.map { "\($0)" }.joined(separator: " + ")
-        func fail(_ what: String) { violations.append(Violation(promise: 10, device: device.name, detail: "after \(label): \(what)")) }
+        func fail(_ what: String) { violations.append(Violation(promise: 9, device: device.name, detail: "after \(label): \(what)")) }
         let statedLimit = tampers.contains(.replayBothHomes)
-        // The stated limit (§3.6): both homes rolled back together return this
-        // Mac — the library file's record with it — to that earlier state.
         if now.libraryID == was.libraryID, !statedLimit {
             if now.mode != .castle { fail("the mode is \(now.mode.map { "\($0)" } ?? "unknown")") }
             if now.account != was.account { fail("the account changed") }
         }
-        if !now.silentItems.subtracting(was.silentItems).isEmpty { fail("a silent custody item appeared") }
+        if !statedLimit, !now.silentItems.subtracting(was.silentItems).isEmpty { fail("a silent custody item appeared") }
         if !now.touchIDItems.subtracting(was.touchIDItems).isEmpty { fail("a Touch ID item appeared") }
         if !statedLimit {
             if was.gate != .touchID, now.gate == .touchID { fail("the gate style became Touch ID") }
@@ -581,5 +778,4 @@ extension SWorld {
         }
         return violations
     }
-
 }

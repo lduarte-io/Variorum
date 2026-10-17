@@ -9,10 +9,11 @@
 //  actions (`apply`), so the truth bookkeeping is the acts' own, and close every
 //  app at the end (a starting state is a closed app).
 //
-//  U1's list is the cut's stand-in; U4 rewrites it to the rules' shapes ("a
-//  fresh library; Standard with and without a passphrase; Castle Touch ID and
-//  Always ask; synced variants; a Castle backup after a leave; a lagging
-//  device" — the corrector plan §4).
+//  VX-378 U4's list — the rules' shapes ("a fresh library; Standard with and
+//  without a passphrase; Castle Touch ID and Always ask; synced variants; a
+//  Castle backup after a leave; a lagging device" — the corrector plan §4),
+//  plus two Macs sharing an iCloud Drive backup folder (a new-system shape:
+//  retention per library per Mac, VX-302).
 //
 
 import CryptoKit
@@ -47,6 +48,7 @@ extension SWorld {
         device.executor = executor
         device.library = library
         setKnown(holder(device, account: nil, libraryID: library.record!.libraryID), passphrase: p, words: w)
+        truth.freshStarts[device.name] = clock
         if mode == .castle {
             try await build(.useCastle(device.name, gate, newWords: false))
             if device.library?.section.settings.gateStyle != gate { try await build(.setGate(device.name, gate)) }
@@ -93,8 +95,9 @@ struct StartingState: CustomStringConvertible, Sendable {
     var build: @Sendable (SWorld) async throws -> Void
     var description: String { name }
 
-    /// U1's new-system shapes (U4 rewrites the list to the rules).
+    /// The rules' shapes (VX-378 U4).
     static let all: [StartingState] = [
+        StartingState(name: "nothing yet — every device starts fresh") { _ in },
         StartingState(name: "a fresh Standard library") { w in try await w.fresh(on: w.macA) },
         StartingState(name: "a fresh Standard library with no passphrase") { w in try await w.fresh(on: w.macA, passphrase: false) },
         StartingState(name: "Castle with Touch ID") { w in try await w.fresh(on: w.macA, mode: .castle, gate: .touchID) },
@@ -104,6 +107,20 @@ struct StartingState: CustomStringConvertible, Sendable {
         },
         StartingState(name: "a synced Castle account on two Macs and the phone") { w in
             try await w.freshAccount(w.rng.uuid(), mode: .castle, devices: [w.macA, w.macB, w.phone], gate: .alwaysAsk)
+        },
+        StartingState(name: "a synced Castle account with Touch ID on two Macs") { w in
+            try await w.freshAccount(w.rng.uuid(), mode: .castle, devices: [w.macA, w.macB], gate: .touchID)
+        },
+        StartingState(name: "a Castle backup after a leave") { w in
+            try await w.fresh(on: w.macA, mode: .castle, gate: .touchID)
+            try await w.build(.backup("macA"))
+            try await w.build(.useStandard("macA"))
+            w.lock(w.macA)
+        },
+        StartingState(name: "a lagging device — the account entered Castle on another") { w in
+            try await w.freshAccount(w.rng.uuid(), mode: .standard, devices: [w.macA, w.phone])
+            try await w.build(.useCastle("macA", .alwaysAsk, newWords: false))
+            w.lock(w.macA)
         },
         StartingState(name: "two Macs sharing an iCloud Drive backup folder") { w in
             try await w.fresh(on: w.macA)

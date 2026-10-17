@@ -20,6 +20,16 @@ enum Typing: String, Equatable, CaseIterable {
     case oldPassphrase
 }
 
+/// What she types at a copy's door (rule 17).
+enum CopyTyping: String, Equatable, CaseIterable {
+    /// Her current passphrase and words.
+    case current
+    /// The secrets of the copy's day (its holder's at the moment it was made).
+    case itsDay
+    /// Nothing — its own quiet road on this Mac, if any.
+    case nothing
+}
+
 enum ResetVia: String, Equatable, CaseIterable {
     case touchID
     case words
@@ -39,20 +49,25 @@ enum Tamper: String, Equatable, CaseIterable {
     case editMemoryItem
     case replayPlan
     case replayMemory
-    /// The library file replayed alone — kept for the rule-21 pin only
-    /// (`CutPinsRule21Tests`): out of the generator's pool (`generated`) until
-    /// U4 rebuilds it against U2's refusal. (`replayKeyFile` and
-    /// `deleteKeyFileAndMemory` left with the restores — VX-378 U1, rules 21,
-    /// 27.)
+    /// The library file replayed alone — DETECTION (VX-378 U4, rule 21): the
+    /// open refuses, writes nothing (promise 7).
     case replayLibraryFile
+    /// The live key file replayed alone — detection, as above. (Back in U4:
+    /// U1 parked it with the restores it used to exercise.)
+    case replayKeyFile
+    /// The live key file and the memory item both deleted: the open goes on by
+    /// any road left — a copy's key file, a quiet road — or the lobby says no
+    /// key file is left (rule 27); nothing is rebuilt. (Back in U4.)
+    case deleteKeyFileAndMemory
     /// Both homes of this Mac's facts rolled back together (the stated limit).
     case replayBothHomes
     case deleteMemoryItem
     case deleteTouchIDItem
     case deleteKeyFile
 
-    /// The tampers the generator draws from.
-    static let generated = allCases.filter { $0 != .replayLibraryFile }
+    /// The tampers the generator draws from — every one (VX-378 U4: the
+    /// replays are back, as detection).
+    static let generated = allCases
 }
 
 indirect enum Action: Equatable {
@@ -119,6 +134,13 @@ indirect enum Action: Equatable {
     /// which single `.tamper` steps (each bracketed by launches) never do.
     case tamperSequence(String, [Tamper])
     case plantPair(String)
+    // Rule 17's two doors (VX-378 U4).
+    /// Look inside a catalogued copy (the `pick`-th, wrapping), typing what
+    /// `typing` says. Writes NOTHING (promise 9).
+    case lookInside(String, pick: Int, typing: CopyTyping)
+    /// Make this my library from a catalogued copy, its own door typed as
+    /// `typing` says, then the current pair.
+    case makeMine(String, pick: Int, typing: CopyTyping)
     /// The world settles: iCloud propagates, every device opens, follows and
     /// heals what it's offered.
     case settle
@@ -180,10 +202,17 @@ extension SWorld {
         syncHolders()
         var library = start
         let before = library.record
-        defer {
+        let outcome: ActOutcome?
+        do {
+            outcome = try await body(executor, &library)
+        } catch {
             if device.executor != nil { device.library = library }
+            throw error
         }
-        let outcome = try await body(executor, &library)
+        // (VX-378 U4, found writing promise 7's mirror clause: a `defer` here
+        // used to write this act-time copy back AFTER the repairs below had
+        // updated the library in hand, so the next act sealed a stale key-file
+        // copy into what this Mac remembers — the world's bug, not the model's.)
         device.lastOutcome = outcome
         device.library = library
         afterAct(device, before: before)
@@ -212,7 +241,7 @@ extension SWorld {
         let slot = device.slot.flatMap { device.container.files[SPath.slot] == nil ? nil : SFile.library($0) }
         let memoryName = device.slot.map { KName.memory(Self.scope, $0.libraryID) }
         device.captures.append(DeviceCapture(
-            slot: slot, liveKeyFile: device.container.files[SPath.liveKeyFile],
+            at: clock, slot: slot, liveKeyFile: device.container.files[SPath.liveKeyFile],
             memory: memoryName.flatMap { device.keychain.local[$0] }, memoryName: memoryName,
             plan: device.container.files[SPath.plan]))
         if device.captures.count > 8 { device.captures.removeFirst() }
@@ -239,6 +268,7 @@ extension SWorld {
             d.executor = executor
             d.library = library
             setKnown(holder(d, account: nil, libraryID: library.record!.libraryID), passphrase: p, words: w)
+            truth.freshStarts[name] = clock
         case .useCastle(let name, let gate, let makeNewWords):
             let d = device(name)
             try await act(d) { executor, library in
@@ -274,7 +304,6 @@ extension SWorld {
             d.session = .signedIn(accountID: account, email: nil)
             d.executor?.configuration.session = d.session
             if let executor = d.executor, d.online { _ = try? await executor.readVault(accountID: account) }
-            await resumeAtVaultReach(d)
         case .signOut(let name):
             let d = device(name)
             d.session = .signedOut
@@ -477,7 +506,6 @@ extension SWorld {
         case .goOnline(let name):
             let d = device(name)
             d.online = true
-            await resumeAtVaultReach(d)
         case .timeMachineSnapshot(let name):
             let d = device(name)
             var files = d.container.snapshot()
@@ -499,6 +527,9 @@ extension SWorld {
             // are its own again — Re-link's arm may re-wrap them — and Standard
             // copies made after its moment are the later stretch's (PROVISIONAL
             // P-U4-12: the acceptance read to cover a Time Machine restore).
+            if let restored = d.slot?.record, let holder = slotHolder(d) {
+                truth.statedLimit[name] = (holder, restored.changedAt, restored.currentFingerprint)
+            }
             if let restored = d.slot?.record, restored.currentFingerprint != was {
                 for (id, copy) in truth.copies where copy.madeOn == d.name && copy.mode == .standard && copy.madeAt > restored.changedAt {
                     truth.rolledBackOver.insert(id)
@@ -536,6 +567,18 @@ extension SWorld {
             if applied == 0, let lastRefusal { throw lastRefusal }
         case .plantPair(let name):
             try plantPair(device(name))
+        case .lookInside(let name, let pick, let typing):
+            try await lookInside(device(name), pick: pick, typing: typing)
+        case .makeMine(let name, let pick, let typing):
+            let d = device(name)
+            try await act(d) { executor, library in
+                let catalog = self.catalog(d)
+                guard let copy = self.copyPick(catalog, pick) else { throw ExecutorRefusal.nothingToDo }
+                let pair = self.known(self.slotHolder(d)!)
+                return try await executor.makeThisMyLibrary(
+                    &library, copy: copy, in: catalog, copySecrets: self.copySecrets(d, copy, typing),
+                    currentPair: TypedSecrets(passphrase: pair.passphrase, words: pair.words))
+            }
         case .settle:
             await settleWorld()
         }
@@ -640,8 +683,17 @@ extension SWorld {
             }
             device.keychain.local[name] = capture.memory
         case .replayLibraryFile:
-            guard let file = device.captures.compactMap(\.slot).first else { throw WorldRefusal.noLibrary }
+            guard let file = device.captures.compactMap(\.slot).first(where: { $0 != device.container.files[SPath.slot] }) else {
+                throw WorldRefusal.noLibrary
+            }
             device.container.files[SPath.slot] = file
+        case .replayKeyFile:
+            guard let file = device.captures.compactMap(\.liveKeyFile)
+                .first(where: { $0 != device.container.files[SPath.liveKeyFile] }) else { throw WorldRefusal.noLibrary }
+            device.container.files[SPath.liveKeyFile] = file
+        case .deleteKeyFileAndMemory:
+            device.container.files[SPath.liveKeyFile] = nil
+            device.keychain.local[memoryName] = nil
         case .replayBothHomes:
             guard let capture = device.captures.first(where: { $0.slot != nil && $0.memory != nil }), let name = capture.memoryName else {
                 throw WorldRefusal.noLibrary
@@ -650,6 +702,10 @@ extension SWorld {
             device.container.files[SPath.liveKeyFile] = capture.liveKeyFile
             device.container.files[SPath.plan] = capture.plan
             device.keychain.local[name] = capture.memory
+            // L4: the Mac returns to the moment copied, its secrets of that day with it.
+            if let image = capture.slot?.library, let holder = slotHolder(device) {
+                truth.statedLimit[device.name] = (holder, capture.at, image.fingerprint)
+            }
             if let since = capture.slot?.library?.record?.changedAt {
                 for (id, copy) in truth.copies where copy.madeOn == device.name && copy.mode == .standard && copy.madeAt > since {
                     truth.rolledBackOver.insert(id)
@@ -711,6 +767,14 @@ extension SWorld {
         device.container = FolderFS()
         device.container.files[SPath.slot] = .library(source.image)
         device.container.files[SPath.liveKeyFile] = .keyFile(source.keyFile)
+        // L4 (her hand restore — rule 21 refuses it while this Mac remembers the
+        // later key; with nothing remembered it opens that moment as it was).
+        if let record = source.image.record {
+            if let holder = slotHolder(device) { truth.statedLimit[device.name] = (holder, record.changedAt, source.image.fingerprint) }
+            for (id, copy) in truth.copies where copy.madeOn == device.name && copy.madeAt > record.changedAt {
+                truth.rolledBackOver.insert(id)
+            }
+        }
     }
 
     // MARK: - The world settles
@@ -727,7 +791,6 @@ extension SWorld {
                 if let account = device.library?.record?.account, device.session.accountID == account, device.online {
                     _ = try? await device.executor?.readVault(accountID: account)
                 }
-                await resumeAtVaultReach(device)
                 try? await runRepairs(device)
                 let assessment = assessed(device)
                 for act in assessment.acts {
@@ -737,5 +800,67 @@ extension SWorld {
         }
         propagateAll()
         for device in devices where device.isOpen { try? await runRepairs(device) }
+    }
+}
+
+// MARK: - Rule 17's two doors in the world (VX-378 U4)
+
+extension SWorld {
+    /// The `pick`-th catalogued copy this device lists (wrapping), or nil.
+    func copyPick(_ catalog: Catalog, _ pick: Int) -> CatalogCopy? {
+        let copies = catalog.copies.sorted { $0.id < $1.id }
+        return copies.isEmpty ? nil : copies[pick % copies.count]
+    }
+
+    /// What she types at a copy's door.
+    func copySecrets(_ device: SDevice, _ copy: CatalogCopy, _ typing: CopyTyping) -> TypedSecrets {
+        switch typing {
+        case .nothing: return .none
+        case .current:
+            let k = slotHolder(device).map(known) ?? Known()
+            return TypedSecrets(passphrase: k.passphrase, words: k.words)
+        case .itsDay:
+            guard let made = truth.copies[copy.id] else {
+                let k = slotHolder(device).map(known) ?? Known()
+                return TypedSecrets(passphrase: k.passphrase, words: k.words)
+            }
+            let day = known(made.holder).at(made.madeAt)
+            return TypedSecrets(passphrase: day.passphrase, words: day.words)
+        }
+    }
+
+    /// Everything a device holds on disk and in its keychain — Look inside must
+    /// leave it exactly as it was.
+    func everythingOn(_ device: SDevice) -> String {
+        "\(device.container.files.sorted { $0.key < $1.key }.map { "\($0.key)=\($0.value)" })|\(device.keychain.local.sorted { $0.key < $1.key }.map { "\($0.key)=\($0.value)" })|\(device.keychain.synced.sorted { $0.key < $1.key }.map { "\($0.key)=\($0.value)" })|\(String(describing: device.staged))|\(device.writeCount)"
+    }
+
+    /// LOOK INSIDE (rule 17: "The app writes nothing: no key file, no keychain
+    /// item, no change to your library"): the copy opened read-only by the
+    /// model's own door; promise 9 holds it to zero writes, and promise 4 to
+    /// agreeing with her current secrets' roads.
+    func lookInside(_ device: SDevice, pick: Int, typing: CopyTyping) async throws {
+        let (executor, _) = try await opened(device)
+        let catalog = catalog(device)
+        guard let copy = copyPick(catalog, pick) else { throw ExecutorRefusal.nothingToDo }
+        let typed = copySecrets(device, copy, typing)
+        let before = everythingOn(device)
+        let opened = (try? executor.lookInside(copy, in: catalog, typed: typed)) != nil
+        if everythingOn(device) != before {
+            truth.lookInsideWrites.append((device.name, "Look inside \(copy.id) wrote something"))
+        }
+        // The door agrees with the roads (rule 4): her current typed secrets
+        // reach the copy through the live key file or its own → it opens.
+        if typing == .current, !opened, let (fs, path) = DeviceLeaves(world: self, device: device).resolve(copy.id),
+           let image = fs.files[path]?.library {
+            var seeds = Seeds()
+            seeds.passphrases = [typed.passphrase].compactMap { $0 }
+            seeds.words = [typed.words].compactMap { $0 }
+            let own = catalog.servingKeyFiles(of: copy).compactMap(\.document)
+            if reach(seeds, files: [liveKeyFile(device)].compactMap { $0 } + own)[image.fingerprint] != nil {
+                truth.doorRefusals.append((device.name, "Look inside refused \(copy.id) although her current secrets reach it (rule 4)"))
+            }
+        }
+        if !opened { throw ExecutorRefusal.copyDoesNotOpen }
     }
 }
