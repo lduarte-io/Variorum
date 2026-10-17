@@ -715,6 +715,7 @@ extension SWorld {
             device.container.files[SPath.liveKeyFile] = capture.liveKeyFile
             device.container.files[SPath.plan] = capture.plan
             device.keychain.local[name] = capture.memory
+            if let image = capture.slot?.library { truth.liveFromOutside[device.name] = image.fingerprint }  // L6
             if let id = ProtectionNames.parseMemoryAccount(name.account, scope: Self.scope) { truth.plantedMemories[device.name, default: []].insert(id) }
             // L4: the Mac returns to the moment copied, its secrets of that day with it.
             if let image = capture.slot?.library, let holder = slotHolder(device) {
@@ -806,6 +807,17 @@ extension SWorld {
                     _ = try? await device.executor?.readVault(accountID: account)
                 }
                 try? await runRepairs(device)
+                // An Always-ask device opened while it couldn't reach its vault
+                // holds no sync key (the secret typed at the unlock is never
+                // kept): online, the app asks again and she types it (the
+                // lobby's Always-ask duty — census class (I), VX-378 U4).
+                if let account = device.library?.record?.account, device.session.accountID == account, device.online,
+                   device.sessionMemory[account] == nil, heldSyncKeys(device, account).isEmpty,
+                   let vault = server.snapshot(account), device.library?.record?.accountRowKeyID == vault.rowKeyID,
+                   device.library?.record?.mode == vault.mode {
+                    lock(device)
+                    _ = try? await launch(device)
+                }
                 let assessment = assessed(device)
                 for act in assessment.acts {
                     // Her yes to rule 21's key-file offer (the next pass follows).

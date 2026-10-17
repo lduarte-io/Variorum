@@ -566,11 +566,13 @@ final class SWorld {
         return false
     }
 
-    /// L6's split pair: the key file beside the library is another key's that
-    /// reaches it only through its history (P-VX378-U4-6).
+    /// L6's split pair: the library put in the live place from outside has no
+    /// key file of its own beside it — the one there is another key's (reaching
+    /// it through its history, or another library's), or none — and no home the
+    /// offer reads held its own (P-VX378-U4-6).
     func splitPair(_ device: SDevice) -> Bool {
-        guard fromOutside(device), let slot = device.slot, let live = liveKeyFile(device) else { return false }
-        return live.fingerprint != slot.fingerprint && live.heldFingerprints.contains(slot.fingerprint)
+        guard fromOutside(device), let slot = device.slot else { return false }
+        return liveKeyFile(device)?.fingerprint != slot.fingerprint
     }
 
     func slotHolder(_ device: SDevice) -> String? {

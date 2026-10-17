@@ -1581,8 +1581,21 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
     treats ANY library-file replay as the copy's own day — the notice is promise 7's to judge, and a same-key replay is
     one rule 21's four things can't tell (**P-VX378-U4-7**, PROVISIONAL). Her words for the frame: "they have to just
     remember that at that point"; P-VX378-U4-2's closure.
-  Remaining: census re-run on this tree; (I) and anything new traced. Protection set Debug `✔ 290 tests in 74 suites
-  passed`.
+  **The census re-run on that tree (`f04d0ef19`, seed 21, release): 7 failing in 1,000 (44,818 steps, 292.0 s)** — P2
+  ×4 · P3 ×2 · P1 ×1 — each traced (a throwaway replay test, deleted) and closed in the next commit:
+  - seq 424 · 603 · 882 · 590 (P2) — CHECKER: a library put in the live place from outside with NO key file of its own
+    anywhere (the key file beside deleted, or another library's after Make this my library; the copy's key reachable
+    only through a newer key file's history): L6's split pair widened to "the live place lacks the library's own key
+    file" (`splitPair`).
+  - seq 281 (P3) — CHECKER: `replayBothHomes` now marks L6 too (the library file comes from outside with the memory).
+  - seq 763 (P1) — CHECKER (one posture per account): a crashed Use Standard's vault write landed, then a Time Machine
+    restore put the library back in Castle — the account is Standard, the device owes its quiet follow out, and promise
+    1 no longer binds a device whose account has left Castle (rule 12: "Your text, the server's rows, the sync key and
+    every backup you have ever made are Standard from now on").
+  - seq 912 (P3, the old class (I)) — WORLD: an Always-ask device opened while its vault was out of reach holds no sync
+    key (the secret typed at the unlock is never kept); at the settle, online and in step, the app asks again and she
+    types it (`settleWorld` re-opens it).
+  Protection set Debug `✔ 290 tests in 74 suites passed`.
 - 5 — THE DISCOVERY RUN (seeds 21–40) and THE GATE SOAK (seeds 1–20, Debug and Release): NOT-STARTED. Tables land as
   they complete. PENDING.
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.

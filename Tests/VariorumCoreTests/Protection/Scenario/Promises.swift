@@ -357,6 +357,12 @@ extension SWorld {
     func onePosture(_ device: SDevice, settled: Bool) -> [Violation] {
         guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record,
               record.mode == .castle else { return [] }
+        // ONE POSTURE PER ACCOUNT (her 2026-10-16 ruling): once the account has
+        // left Castle, "your text, the server's rows, the sync key and every
+        // backup you have ever made are Standard from now on" (rule 12) — a
+        // device that hasn't followed out yet holds no Castle promise the account
+        // gave up (its quiet follow out is owed).
+        if let account = record.account, server.snapshot(account)?.mode == .standard { return [] }
         var violations: [Violation] = []
         func fail(_ detail: String) { violations.append(Violation(promise: 1, device: device.name, detail: detail)) }
         let live = liveKeyFile(device)
