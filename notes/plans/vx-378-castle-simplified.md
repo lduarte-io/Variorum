@@ -1737,6 +1737,10 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
   | 28 | 45,147 | 361.5 | `✔ Test run with 1 test in 1 suite passed after 361.492 seconds.` |
   | 29 | 44,411 | 342.8 | `✔ Test run with 1 test in 1 suite passed after 342.843 seconds.` |
   | 30 | 45,437 | 352.6 | `✔ Test run with 1 test in 1 suite passed after 352.605 seconds.` |
+  | 31 | 45,186 | 355.0 | `✔ Test run with 1 test in 1 suite passed after 355.005 seconds.` |
+  | 32 | 44,726 | 348.9 | `✔ Test run with 1 test in 1 suite passed after 348.899 seconds.` |
+  | 33 | 44,878 | 345.5 | `✔ Test run with 1 test in 1 suite passed after 345.474 seconds.` |
+  | 34 | 44,879 | 359.3 | `✔ Test run with 1 test in 1 suite passed after 359.337 seconds.` |
   (the rest PENDING — landing as they complete)
   **THE GATE SOAK:** NOT-STARTED (after a green discovery run).
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.
