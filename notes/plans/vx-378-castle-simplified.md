@@ -1633,6 +1633,15 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
   - seq 89 · 712 (P4 (c)) — CHECKER (L6): under a library put back from outside, a copy the key file there doesn't
     carry (an older key file put beside it later by the offer, say) is the replaced stretch's, for good — promise 4's
     carry clause adds it to `rolledBackOver` when it meets it.
+  **Census on `3f5df168a`: seed 24 — 3 failing (44,595 steps, 265.8 s): P3 ×2 · P4 ×1.** Closed in the next commit:
+  - seq 107 · 597 (P3) — CHECKER (L6): a Time Machine restore across Use Castle put the Standard-era library back (L4);
+    `timeMachineRollback` and the hand restore (`deleteContainerAndOpenOldCopy`) now mark L6 too, so the copy holds the
+    account's Castle keys in its own posture until it follows.
+  - seq 913 (P4 (b)) — CHECKER (the floor): the key file and the keychain copy deleted after two key doors; the offer
+    finds Use Castle's closing backup's key file — the CURRENT key, under the locks of that backup's day — and her yes
+    puts it beside the library: it opens with the secrets she had then, not today's. `truth.keyFileFromBackup` exempts
+    the caught-up clause while that key file stands unchanged. (A face consequence for VX-306, added to P-VX378-U4-6:
+    the offer's words don't say the found file may want an earlier passphrase.)
 - 5 — THE DISCOVERY RUN (seeds 21–40) and THE GATE SOAK (seeds 1–20, Debug and Release): NOT-STARTED. Tables land as
   they complete. PENDING.
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.

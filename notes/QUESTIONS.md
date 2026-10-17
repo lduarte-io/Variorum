@@ -3032,6 +3032,11 @@ hand — the key file beside the library does not open it — is an OFFER"*. Two
   the sealed keychain copy, automatically. **(a) BUILT, PROVISIONAL —** the backup's key file is OFFERED (your offer's
   candidates include every backup's key file), never restored without the yes; rule 27 is said only when no home holds
   it. (b) restore automatically from the backup too (rule 1's "without asking").
+- **(Found in piece 4's census — a consequence, for the face):** a backup's key file carries the locks of its day. After a
+  key door (Change Passphrase, New Words), accepting a backup's key file of the CURRENT key means the library on this Mac
+  opens with the passphrase and words of that backup's day — the floor — not today's (nothing else can verify today's
+  once the key file beside the library and the keychain copy are both gone). Your offer's words don't say so; VX-306's
+  face may want a clause ("it may ask for the passphrase you had on August 3").
 Record: the plan's §8 U4 RESUMPTION RECORD, piece 3. Status: PROVISIONAL (a), both — your eye at the bundle.
 
 **P-VX378-U4-7 — An older copy under the SAME key opens with no notice.** (Found by the census of piece 4.) Rule 21's

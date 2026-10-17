@@ -146,6 +146,10 @@ struct Truth {
     /// posture at Make this my library's press — after the open it pressed on
     /// settled anything in flight.
     var makeMinePressMode: [String: ProtectionMode] = [:]
+    /// PROMISE 4 (the floor): a backup's key file rule 21's offer put beside
+    /// the library — it opens with the secrets of its day, not necessarily
+    /// today's, until a key door re-locks it.
+    var keyFileFromBackup: [String: KeyFile] = [:]
 }
 
 final class SDevice {

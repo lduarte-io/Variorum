@@ -522,6 +522,7 @@ extension SWorld {
             let was = d.slot?.record?.currentFingerprint
             d.container.files = files
             d.container.files[SPath.plan] = plan
+            if let image = d.slot { truth.liveFromOutside[name] = image.fingerprint }  // L6 (her restore)
             // Her restore: the library file and its key file come back together
             // and the open believes them (the memory follows the restored
             // current key — P-U4-8's rollback, her act). Past a crossing, that
@@ -588,7 +589,10 @@ extension SWorld {
             try await act(d) { executor, library in
                 let found = try executor.searchKeyFiles(library, catalog: self.catalog(d), typed: self.typedFor(d))
                 guard case .offer(let offer) = found else { throw ExecutorRefusal.nothingToDo }
-                return try await executor.useOfferedKeyFile(&library, offer)
+                let outcome = try await executor.useOfferedKeyFile(&library, offer)
+                // A backup's key file carries the locks of its day (the floor).
+                if case .backup = offer.source { self.truth.keyFileFromBackup[name] = offer.keyFile }
+                return outcome
             }
         case .settle:
             await settleWorld()
@@ -785,6 +789,7 @@ extension SWorld {
         device.container = FolderFS()
         device.container.files[SPath.slot] = .library(source.image)
         device.container.files[SPath.liveKeyFile] = .keyFile(source.keyFile)
+        truth.liveFromOutside[device.name] = source.image.fingerprint  // L6 (her hand restore)
         // L4 (her hand restore — rule 21 refuses it while this Mac remembers the
         // later key; with nothing remembered it opens that moment as it was).
         if let record = source.image.record {

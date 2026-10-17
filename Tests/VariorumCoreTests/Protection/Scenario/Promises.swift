@@ -644,7 +644,10 @@ extension SWorld {
         }()
         // L6: a library put in the live place from outside opens with the
         // secrets it was made with (the floor), not necessarily today's.
-        if caughtUp, !todayOpensIt, !fromOutside(device) {
+        // …and a backup's key file the offer put beside it carries the locks of
+        // its day (the floor), until a key door re-locks it.
+        let fromABackup = truth.keyFileFromBackup[device.name].map { $0 == liveKeyFile(device) } ?? false
+        if caughtUp, !todayOpensIt, !fromOutside(device), !fromABackup {
             fail("her current passphrase and words don't open the library, and it has caught up (rules 4, 7, 12)")
         }
         // (c) THE CARRY — within the same library, wherever today's open it.
