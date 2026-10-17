@@ -36,10 +36,11 @@ extension SWorld {
     /// A library created on `device` by the app's own door — always with twelve
     /// words (rule 2), with a passphrase unless `passphrase: false` (rule 3's
     /// "until a passphrase exists") — then, in Castle, Use Castle with `gate`,
-    /// and that choice recorded in this Mac's settings by a Settings press
-    /// (Use Castle's own press records no gate style — a gap in the kept
-    /// machinery the today-shaped states hid by presetting it; VX-378 U1's
-    /// record hands it forward). Its app is closed at the end.
+    /// and that choice also pressed into this Mac's settings by a Settings
+    /// press (a belt: Use Castle's own press records its gate style since VX-378
+    /// U2 piece D — `U2PinsGateTests` — so the Settings press changes nothing
+    /// here and stays only as the shape every Castle starting state shares).
+    /// Its app is closed at the end.
     func fresh(on device: SDevice, mode: ProtectionMode = .standard, gate: GateStyle = .touchID, passphrase: Bool = true) async throws {
         let p = passphrase ? newPassphrase() : nil
         let executor = newExecutor(device, libraryID: "")

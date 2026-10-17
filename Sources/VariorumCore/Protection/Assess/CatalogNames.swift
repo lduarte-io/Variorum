@@ -14,8 +14,6 @@ import Foundation
 //     with a stamp, the A1 rail's `variorum-backup-a1-…`, is not the app's);
 //   - `Previous Libraries/<stamp>/` and `Backups/safety-copies/variorum-adopt-
 //     safety-<stamp>/`, the stamp reading back exactly;
-//   - the set-aside `.stale-<epoch>.json` shape the repair layer writes beside
-//     the slot (until VX-378 U1's repair piece);
 //   - beside them, the folders that are hers (`md-exports/`, the hand-off folder
 //     `Variorum Library — <day>`).
 // Today's fingerprint-named and fixed-name key files, the flat `Backups/` files

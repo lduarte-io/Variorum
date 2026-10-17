@@ -7,15 +7,22 @@ import Foundation
 // newer record. Before unlock it is a display hint only and decides nothing
 // (§3.10).
 //
-// RULE 21 (`notes/CastleRules.md`): "This Mac remembers four things about its
-// library — its ID, its current key, its device ID and the sealed copy of its
-// key file — and only the app's own doors change them." EXACTLY those four
-// (VX-378 U2, adjudication 7): the biometry state hash left — §3.10's
-// which-line hint is the face's to read from `LAEnvironment` — and the vault
-// facts left with the vault's rotation (the record names the sync key the
-// library follows). A memory naming another library, or another key, than the
-// one in the live place is rule 21's disagreement — the open refuses
-// (`LibraryDisagreement`); an ABSENT memory is not (rule 8's keychain reset).
+// RULE 21 (`notes/CastleRules.md`, as ruled at the U4 stop, 2026-10-17): "This
+// Mac remembers four things about its library — its ID, its device ID, a
+// fingerprint of its current key, and a copy of its key file: the key itself,
+// still wrapped under your locks — and only the app's own doors change them."
+// EXACTLY those four (VX-378 U2, adjudication 7): the biometry state hash left —
+// §3.10's which-line hint is the face's to read from `LAEnvironment` — and the
+// vault facts left with the vault's rotation (the record names the sync key the
+// library follows). The memory is used for two things: rule 1's redundancy (the
+// wrapped copy comes back when the live key file is absent) and NOTICING — a
+// memory naming another library, or another key, than the one in the live
+// place is rule 21's disagreement, and the open GOES ON, says so once
+// (`LibraryNotice`: "This is an older copy of your library, from <date>" /
+// "This is a different library than the one this Mac last had open"), then
+// remembers this library at the open's repairs. Nothing refuses and nothing
+// repairs by guessing (the refusal design left at the U4 resumption's piece 3).
+// An ABSENT memory is no disagreement (rule 8's keychain reset).
 // (The mode and account last confirmed, the key epoch, the nudge dismissals,
 // the family tree's mirror and the device section's second home left with
 // VX-378 U1 — rules 21, 23.)
