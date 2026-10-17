@@ -93,6 +93,20 @@ struct CopyAndCrossingScenarios {
         expectPromisesKept(world)
     }
 
+    /// Her ruling on P-VX378-U4-1 (VX-378 U4): Make this my library carries the
+    /// key history forward — and the Apple key this Mac made for the previous
+    /// library comes with it, so a later Use Castle retires it (rule 11); every
+    /// promise holds through it, the core sentence across the door included.
+    @Test func makeThisMyLibraryThenUseCastleRetiresThePreviousLibrarysAppleKey() async throws {
+        let world = try await scenarioWorld { try await $0.fresh(on: $0.macA) }
+        await world.done([.launch("macA")])
+        let previous = try #require(world.liveKeyFile(world.macA)?.apple?.keyID)
+        await world.done([.backup("macA"), .changePassphrase("macA"), .makeMine("macA", pick: 0, typing: .itsDay),
+                          .useCastle("macA", .alwaysAsk, newWords: false), .settle])
+        #expect(world.readableAppleKeys(world.macA)[previous] == nil, "the previous library's Apple key survived Use Castle")
+        expectPromisesKept(world)
+    }
+
     /// "a library leaving its account by each of the acts, in Castle and in
     /// Standard": it stops syncing and changes none of its keys or secrets
     /// (rule 16 — the leave's re-key left with VX-378 U1).

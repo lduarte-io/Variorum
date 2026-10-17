@@ -329,8 +329,8 @@ record committed with PENDING numbers first.
 - U4 — the world and the soak: **IN PROGRESS** (Opus implementer, 2026-10-16) — §8's U4 RECORD (the resume map). Piece
   A (this record) DONE; B (her FACTS DIFF rulings) DONE; B2 (her P-VX378-U4-1 ruling — Make this my library carries
   the key history) DONE; C (the promises, the alphabet, the starting states) DONE; D (the promises' discrimination,
-  mutation pins) IN PROGRESS; E (the discovery
-  run, seeds 21–40), F (the gate soak, seeds 1–20 both configurations), G (the record closed) NOT-STARTED. Counts
+  mutation pins) DONE; E (the discovery
+  run, seeds 21–40) IN PROGRESS; F (the gate soak, seeds 1–20 both configurations), G (the record closed) NOT-STARTED. Counts
   PENDING.
 - The ladder: not started.
 - The gate: not started.
@@ -1178,10 +1178,31 @@ her rulings above, never silently; the fixture diffs FD-1…3 close with them.
   back over the one the after-act repairs updated, so the next act sealed a stale key-file copy into the memory —
   promise 7's new mirror clause caught it (generator seed 2 sequence 2); fixed in the world. Protection set Debug
   `✔ 265 tests in 70 suites` (generator 16 sequences).
-- D — each promise shown to catch its own violation (a planted breach per promise, the checker red), and the mutation
-  pins (every surviving guard red with its guard off; world pins for the guards that had only unit pins): IN PROGRESS.
+- D — each promise catches its own breach, and the mutation pins: DONE (this commit). **`U4PromiseCheckTests` (9, one
+  per promise):** each checker is quiet on a clean world and red with its breach planted by hand — 1 a silent item for an
+  EARLIER key of a Castle library; 2 Standard's Apple road and on-device item gone; 3 a silent sync-keys item holding a
+  Castle account's current row key, and an earlier row key gone from the vault; 4 the live key file's history dropped
+  (today's secrets no longer reach an older backup); 5 a copy no road opens, and a closed library no road opens while
+  the lobby says nothing; 6 copies paused and a plan left; 7 the oracle reads a replayed key file as a disagreement and
+  an absent memory as none, and a memory naming another device is caught; 8 a delete taking every key file (Use
+  Castle's closing backup is a road the check rightly counted at first); 9 a mode moved at a non-deliberate step, a
+  weakening tamper group (and the complete replay as L4, quiet), Make this my library leaving Castle. **Mutation
+  pins — every one of the 12 surviving guards has at least one, each red with its guard off** (the `mutationPin`
+  helper and the unit pins assert it; the Debug run is the proof): world pins (7) `thePlantedPlan` (planNamedBySection),
+  `noRepairMakesATouchIDItem` (noRepairMakesTouchID + repairNeverMakesTouchIDItem), `noRearmQuestionWithoutAnItem`,
+  `enteringCastleWithTheScheduledExportOn` (exportOffAtCastle), `theCrossMacPrune` (pruneOwnCopiesOnly),
+  `deleteOnSightByRecordedIDOnly`, and NEW `aCrashAtAnyWriteOfUseCastleLeavesTheLibraryOpenable` (prepareBeforeCommit —
+  crashes after writes 1…24, red with the guard off: a crash past the swap strands the library, promise 5); unit pins
+  (`AssessGuardMutationTests`, `ExecutorGuardMutationTests`, `RetentionTests`) for every guard. **No world pin, recorded:**
+  `everyOwnKeyRetiredAtCastle` — with it off the after-act repair `retireOwnAppleKeys` retires the missed key at once
+  (two lines of defence; the sequence lives on as the fixed scenario
+  `makeThisMyLibraryThenUseCastleRetiresThePreviousLibrarysAppleKey`); `freshVaultBeforeAppleWrite` — the Apple road a
+  lagging device would re-make is rule 10's accepted lag and its follow retires it (the section lists it first);
+  `repairPreconditionsVerified` and `standardRecordNoDestructiveRepair` — the world can't plant the precondition the
+  first needs (a live key file whose claims fail to verify is now rule 21's refusal) and the second's delete removes no
+  road any promise reads. Each keeps its unit pin. Protection set Debug `✔ 276 tests in 71 suites`.
 - E — the discovery run: `PROTECTION_SOAK=1` seeds 21–40 × 1,000 × ≤60, Debug, one seed per call; every red triaged;
-  re-run after any fix: NOT-STARTED. Table: PENDING.
+  re-run after any fix: IN PROGRESS. Table: PENDING.
 - F — the gate soak: seeds 1–20 × 1,000 × ≤60, `swift test` AND `swift test -c release`, on the FINAL tree:
   NOT-STARTED. Tables: PENDING.
 - G — the closing runs, the counts, this record closed: NOT-STARTED.

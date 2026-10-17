@@ -127,5 +127,33 @@ struct ScenarioMutationPins {
             return (world, macBsKey.map { world.readableAppleKeys(world.macB)[$0] != nil } == true)
         }
     }
+
+    // VX-378 U4 — world pins for the guards that had only unit pins (the
+    // others' world consequence is recorded in the plan's U4 RECORD).
+
+    // (EVERY OWN APPLE KEY RETIRED AT ENTERING CASTLE has no world pin: with
+    // the guard off, the after-act repair `retireOwnAppleKeys` retires the
+    // missed key at once — two lines of defence, and the guard's alone is
+    // invisible from the world. Its unit pin stands; the sequence is the fixed
+    // scenario `makeThisMyLibraryThenUseCastleRetiresThePreviousLibrarysAppleKey`.)
+
+    /// PREPARE-THEN-COMMIT (VX-235): a crash at any write of Use Castle leaves
+    /// the library openable — the new key's file exists before the swap. Off,
+    /// some crash strands it (promise 5: no road, and the lobby can't say so).
+    @Test func aCrashAtAnyWriteOfUseCastleLeavesTheLibraryOpenable() async throws {
+        try await mutationPin("prepare before commit", off: { $0.prepareBeforeCommit = false }) { guards in
+            var first: SWorld?
+            for n in 1...24 {
+                let world = try await scenarioWorld(guards: guards) { try await $0.fresh(on: $0.macA) }
+                await world.step(.launch("macA"))
+                await world.step(.crash(.useCastle("macA", .alwaysAsk, newWords: false), afterWrites: n))
+                await world.step(.launch("macA"))
+                await world.step(.settle)
+                first = first ?? world
+                if !world.violations.isEmpty { return (world, true) }
+            }
+            return (first!, true)
+        }
+    }
 }
 #endif
