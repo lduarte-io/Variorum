@@ -152,4 +152,22 @@ struct U4CensusPins {
         #expect(world.macB.slot?.record?.mode == .castle, "the resumed follow took the library out of Castle under a Castle account")
         expectPromisesKept(world)
     }
+
+    /// CLASS (J), its second road — rule 15 ("a device that has not followed
+    /// cannot sync until it does") and rule 20: Use Castle's one vault write
+    /// landed, then the act rolled back before its swap (signed out, so the
+    /// resume couldn't reach the vault) — the library back in Standard, but this
+    /// Mac still held the account's NEW sync keys the act had taken: a device
+    /// that hasn't followed into Castle holding the key Castle rows are written
+    /// under. The roll back now lets go of the keys the act took — the follow,
+    /// typing a secret, picks them up (census seed 35 sequence 513).
+    @Test func aRolledBackUseCastleLetsGoOfTheSyncKeysItTook() async throws {
+        let world = SWorld(seed: 35 &* 1_000_003 &+ 513)
+        try await StartingState.all[7].build(world)
+        for action in [Action.useStandard("macA"), .crash(.useCastle("macA", .touchID, newWords: false), afterWrites: 6),
+                       .signOut("macA"), .crash(.macOSUpdate("macA"), afterWrites: 7)] {
+            await world.step(action)
+        }
+        expectPromisesKept(world)
+    }
 }

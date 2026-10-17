@@ -242,7 +242,8 @@ extension ProtectionExecutor {
             do {
                 try await program.run(step, ctx)
             } catch let stop as ActRollback {
-                try rollBack(&ctx.library, act: ctx.act, outgoingKeyFile: ctx.plan.parameters?.outgoingKeyFile)
+                try rollBack(&ctx.library, act: ctx.act, outgoingKeyFile: ctx.plan.parameters?.outgoingKeyFile,
+                             parameters: ctx.plan.parameters)
                 throw ActRolledBack(act: ctx.act, refusal: stop.refusal)
             }
             if ctx.plan.firstUnfinishedStep == index { ctx.plan.steps[index].done = true }
@@ -409,7 +410,8 @@ extension ProtectionExecutor {
                 // needs the vault — and a step of an act that changes no key and
                 // still needs it reads it itself, rolling back if it can't.
                 if !plan.pastCommitPoint(libraryFingerprint: ctx.library.fingerprint) {
-                    try rollBack(&ctx.library, act: plan.act, outgoingKeyFile: plan.parameters?.outgoingKeyFile)
+                    try rollBack(&ctx.library, act: plan.act, outgoingKeyFile: plan.parameters?.outgoingKeyFile,
+                                 parameters: plan.parameters)
                     throw ActRolledBack(act: plan.act, refusal: .vaultOutOfReach(account: account))
                 }
             }
@@ -475,7 +477,9 @@ extension ProtectionExecutor {
     /// `outgoingKeyFile`: the copy the act's plan carried — the restore's
     /// source when the memory's mirror is gone (a wiped keychain — VX-305 U4,
     /// the soak's seed 18).
-    func rollBack(_ library: inout UnlockedLibrary, act: ProtectionAct, outgoingKeyFile: KeyFile? = nil) throws {
+    func rollBack(
+        _ library: inout UnlockedLibrary, act: ProtectionAct, outgoingKeyFile: KeyFile? = nil, parameters: ActParameters? = nil
+    ) throws {
         guard let inFlight = library.section.actInFlight else { return }
         try leaves.library.discardStaged()
         let live = try liveFormat3()
@@ -507,6 +511,29 @@ extension ProtectionExecutor {
         }
         if let signedIn = configuration.session.accountID, signedIn != bound {
             leaves.syncKeys.holdInSession(nil, accountID: signedIn)
+        }
+        // …and the bound account's keys this act TOOK — a sync key the record,
+        // rolled back, doesn't follow (Use Castle's one vault write landed, or a
+        // follow picked the new keys up): a device that hasn't followed can't
+        // sync until it does (rule 15) — the follow, typing a secret, picks them
+        // up again (census class (J)'s second road, VX-378 U4).
+        // Only what the act took goes: a silent item or the session holding the
+        // taken key (read — they open without a press); a Touch ID item while
+        // the library is back in Standard (Standard files the keys silently, so
+        // that item is the act's Castle-way filing).
+        if let bound, let taken = parameters?.newRowKeyID ?? parameters?.followedRowKeyID,
+           library.record?.accountRowKeyID != taken {
+            for item in try leaves.syncKeys.syncKeyItems() where item.accountID == bound {
+                let theAct: Bool
+                switch item.itemClass {
+                case .silent: theAct = (try leaves.syncKeys.readSyncKeys(accountID: bound, itemClass: .silent))?.rowKeyID == taken
+                case .touchid: theAct = library.record?.mode == .standard
+                }
+                if theAct { try leaves.syncKeys.deleteSyncKeys(accountID: bound, itemClass: item.itemClass) }
+            }
+            if leaves.syncKeys.sessionSyncKeys(accountID: bound)?.rowKeyID == taken {
+                leaves.syncKeys.holdInSession(nil, accountID: bound)
+            }
         }
         // Make this my library, undone before its swap: the library in the live
         // place stays this Mac's ONE library (rule 21) — the new library's

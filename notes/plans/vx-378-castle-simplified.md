@@ -1687,6 +1687,16 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
   - seq 315 (P4 (c)) — CHECKER (L6): the offer put an older key file beside a replayed library inside the settle, and a
     follow then ended L6 before any check noted the replaced stretch's copies — the world's offer action now notes them
     the moment the older key file goes beside the library.
+  **Census on `b1cfcee89`: seed 34 — 0 failing (44,879 steps, 255.1 s); seed 35 — 1 failing (45,493 steps, 264.9 s):
+  P3.** Closed in the next commit:
+  - seq 513 (P3) — **CLASS (J)'s second road, MODEL — FIXED** (`Executor/PlanRunner.swift` `rollBack`, which now takes
+    the plan's parameters): Use Castle's one vault write landed, the act rolled back before its swap (signed out, the
+    resume couldn't reach the vault), and this Mac kept the account's NEW sync keys the act had taken — a device back in
+    Standard holding the key Castle rows are written under (rule 15: "a device that has not followed cannot sync until it
+    does"). The roll back lets go of exactly what the act took: a silent item or the session holding the taken key (read
+    — they open without a press), a Touch ID sync-keys item while the library is back in Standard (Standard files them
+    silently). The follow, typing a secret, picks the keys up. Pin `U4CensusPins
+    .aRolledBackUseCastleLetsGoOfTheSyncKeysItTook` (census seq 513 replayed): red before — promise 3 — green after.
 - 5 — THE DISCOVERY RUN (seeds 21–40) and THE GATE SOAK (seeds 1–20, Debug and Release): NOT-STARTED. Tables land as
   they complete. PENDING.
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.
