@@ -115,8 +115,10 @@ extension Operations {
 
     /// The source's live applications of live tags in its own wing, copied
     /// onto `targetID` as fresh rows (application order kept). A row copy —
-    /// see `ceremonyCopy` for why it is not an act. Internal since 17y B3
-    /// item (c): `duplicateAsVersion` rides the same road.
+    /// see `ceremonyCopy` for why it is not an act. (Internal since 17y B3
+    /// item (c), when `duplicateAsVersion` rode it too; since VX-372 — D-C-1 —
+    /// the duplicate APPLIES its tags through `applyLiveTags` instead, and the
+    /// ceremony copy is this road's one caller.)
     func copyLiveTags(
         _ db: Database, from sourceID: String, to targetID: String, wingID: String, now: Date
     ) throws {

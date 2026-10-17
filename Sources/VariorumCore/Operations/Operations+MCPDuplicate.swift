@@ -22,8 +22,11 @@ extension Operations {
     /// slot with its whole live fan, archived takes riding with their statuses,
     /// commits never copied, parent trees remapped, comments, presentation and
     /// block names riding; one `derived_from` edge per copied block and ONE
-    /// `version_of` anchor; the note's live tags riding as a row copy, never an
-    /// applying act; BOOKLESS in the source's wing — reading memberships,
+    /// `version_of` anchor; the note's live tags by `tags` — `.applied` (the
+    /// default, P-C-3) APPLIES each through the one road so intake hears it
+    /// (VX-372, D-C-1 — a living book may seat or bell the copy in this same
+    /// transaction), `.none` leaves them; BOOKLESS in the source's wing (unless
+    /// intake took it in) — reading memberships,
     /// references and lenses never ride), the caller's guard FIRST inside the
     /// transaction (the wire's two decisions, re-made on the act's own facts,
     /// once grants stamped there — AF-10 (a)'s seam). A sealed source is legal
@@ -41,13 +44,19 @@ extension Operations {
     /// Returns her door's result with `blocks` — what the copy minted, per
     /// block (VX-252's records, `sourceBlockID` set), from the copy machine's
     /// own rows (∝ the copy, no second read).
+    ///
+    /// **`tags`** (VX-372, VX-383 U1): the SAME choice as her door's, through
+    /// the same body, so the two can never drift (D-C-1). Defaulted to her
+    /// door's `.applied` — the ruled wire default (P-C-3); the wire's
+    /// `with_tags` argument is VX-371's (U2, D-C-4).
     @discardableResult
     public func duplicateNoteForClient(
-        _ postID: String, undoLabel: String, guardedBy guardian: WriteGuard? = nil
+        _ postID: String, tags: DuplicateTags = .applied, undoLabel: String,
+        guardedBy guardian: WriteGuard? = nil
     ) throws -> PostCopyResult {
         let result: PostCopyResult = try database.write { db in
             try guardian?(db)
-            return try duplicateAsVersionBody(db, postID)
+            return try duplicateAsVersionBody(db, postID, tags: tags)
         }
         registerMintedContainerEntry(label: undoLabel, result.post.id)
         return result

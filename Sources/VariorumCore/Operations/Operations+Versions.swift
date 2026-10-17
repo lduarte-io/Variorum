@@ -201,39 +201,112 @@ extension Operations {
     /// recorded as build-time calls in the closeout). A sealed source is
     /// legal — reading isn't authoring; the source is never touched.
     ///
-    /// **17y item (c) — the note's TAGS RIDE** (her ruling, QUESTIONS #169's
-    /// tail: "it's meant to be a duplication… let's just build it now"): the
-    /// copy wears every live tag application the source wears, as fresh rows
-    /// — the ceremony copy's `copyLiveTags` (the source's own wing's live
-    /// tags, application order kept). A ROW copy, never an applying act: no
-    /// living book hears the duplicate (PROVISIONAL P-17y-B3-c1 — the copy
-    /// family's letter, P-13ic-U2-1). The ride lives HERE, in this op's own
-    /// transaction, never in `copyPost`: Diverge (`divergePostForReading`)
-    /// and `promoteLens` compose that body and stay tag-less (her lean — a
-    /// diverged copy is meant to differ). Undo's tombstone cascades the
-    /// copy's applications; redo's `restoreContainer` revives them on the
-    /// exact stamp. Pinned `DuplicateCarriesTagsTests`.
-    @discardableResult
-    public func duplicateAsVersion(_ postID: String) throws -> PostCopyResult {
-        let result: PostCopyResult = try database.write { db in
-            try duplicateAsVersionBody(db, postID)
+    /// **What a duplicate does with the note's TAGS** (VX-372, VX-383 U1 —
+    /// D-C-1; her ticket: *"a direct duplicate door, with tags / without tags;
+    /// a duplicate with tags counts as tagging"*). Her two doors, one act each
+    /// — `verb` is the door's word (P-C-1, PROVISIONAL for her VX-234 wording
+    /// pass: "Duplicate as Version" retires as a label; the versions machinery
+    /// and the `version_of` edge are unchanged) and the undo entry's label.
+    public enum DuplicateTags: String, Equatable, Sendable, CaseIterable {
+        /// **Duplicate with Tags** — each live tag the source wears in its
+        /// wing is APPLIED to the copy through the one application road
+        /// (`insertPostTag`), so intake hears it exactly as when she tags.
+        case applied
+        /// **Duplicate without Tags** — the copy wears none, so no book hears it.
+        case none
+
+        /// The door's word, and the undo entry's label.
+        public var verb: String {
+            switch self {
+            case .applied: "Duplicate with Tags"
+            case .none: "Duplicate without Tags"
+            }
         }
-        registerMintedContainerEntry(label: "Duplicate as Version", result.post.id)
+    }
+
+    /// **The note's TAGS, by her choice** (VX-372 — D-C-1, superseding 17y
+    /// item (c)'s ROW copy, PROVISIONAL P-17y-B3-c1, for this door). With
+    /// `.applied` (the default — her door's, and P-C-3's for the wire) the
+    /// copy is then TAGGED: each live tag the source wears in its wing,
+    /// application order kept, applied through `insertPostTag`, in this op's
+    /// own transaction — so every living book whose rule hears a tag decides
+    /// by `IntakeDecision` exactly as when she tags: a book that joins
+    /// quietly SEATS the copy, one whose dial says Arrivals BELLS it, capacity
+    /// waits at the door, and the ownership table holds (the copy is membered
+    /// nowhere until the first seat). Finished, sealed and archived books stay
+    /// paused (the one table). With `.none` the copy wears no tag at all. The
+    /// tags live HERE, never in `copyPost`: Diverge (`divergePostForReading`)
+    /// and `promoteLens` compose that body and stay tag-less (her lean — a
+    /// diverged copy is meant to differ).
+    ///
+    /// **ONE undo entry covers the seats** (`registerMintedContainerEntry`):
+    /// the inverse tombstones the copy, and the container trigger takes its
+    /// applications, memberships and arrivals on that ONE stamp; the redo's
+    /// `restoreContainer` revives exactly those on it — so a row she judged
+    /// in between (a dismissal, on her own stamp; a seat she pressed, the same
+    /// row) stays as she judged it. Pinned `DuplicateAppliesTagsTests`,
+    /// `DuplicateWithoutTagsTests`, `DuplicateCarriesTagsTests`.
+    @discardableResult
+    public func duplicateAsVersion(
+        _ postID: String, tags: DuplicateTags = .applied
+    ) throws -> PostCopyResult {
+        let result: PostCopyResult = try database.write { db in
+            try duplicateAsVersionBody(db, postID, tags: tags)
+        }
+        registerMintedContainerEntry(label: tags.verb, result.post.id)
         return result
     }
 
-    /// **Duplicate as Version's ROWS, inside the caller's transaction** — her
-    /// door's body, extracted ONCE (VX-311, VX-336 U6a — D-311-1, the
-    /// orchestrator's ruling) so her door and the MCP door's `duplicate_note`
+    /// **The duplicate's ROWS, inside the caller's transaction** — her door's
+    /// body, extracted ONCE (VX-311, VX-336 U6a — D-311-1, the orchestrator's
+    /// ruling) so her door and the MCP door's `duplicate_note`
     /// (`duplicateNoteForClient`, its guard first) run the very same brain and
-    /// can never drift: the copy machine with the source's own chosen and
-    /// whole fans, then the note's live tags riding (17y item (c)).
-    func duplicateAsVersionBody(_ db: Database, _ postID: String) throws -> PostCopyResult {
+    /// can never drift — the tag choice included (VX-372, D-C-1): the copy
+    /// machine with the source's own chosen and whole fans, then, with
+    /// `.applied`, the note's live tags APPLIED (`applyLiveTags`).
+    func duplicateAsVersionBody(
+        _ db: Database, _ postID: String, tags: DuplicateTags
+    ) throws -> PostCopyResult {
         let copy = try copyPost(db, sourceID: postID, chosenPicks: nil, carryFans: true)
-        let source = try livePost(db, postID)
-        try copyLiveTags(
-            db, from: postID, to: copy.post.id, wingID: source.wingId, now: date.now)
+        switch tags {
+        case .applied:
+            try applyLiveTags(db, from: postID, to: copy.post.id, now: date.now)
+        case .none:
+            break
+        }
         return copy
+    }
+
+    /// **The source's live tags, APPLIED to `targetID`** (VX-372 — D-C-1 and
+    /// D-C-3's one road): every live application of a live tag in the
+    /// TARGET's wing (a duplicate's and a saved version's wing is the
+    /// source's — this is also the wing belt `applyAutoTag` keeps, so no tag
+    /// ever crosses wings), in the source's application order, each through
+    /// `insertPostTag` — the ONE post-tag insert road, so each application is
+    /// an applying ACT that intake hears. A tag the target already wears
+    /// (impossible on a fresh copy, kept as the guard) is skipped, as is
+    /// every application once the target is gone.
+    func applyLiveTags(
+        _ db: Database, from sourceID: String, to targetID: String, now: Date
+    ) throws {
+        guard let target = try Container.fetchOne(db, key: targetID),
+              target.deletedAt == nil, target.kind == .post
+        else { return }
+        let tagIDs = try String.fetchAll(
+            db,
+            sql: """
+                SELECT pt.tag_id FROM post_tag pt
+                JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL AND t.wing_id = ?
+                WHERE pt.post_id = ? AND pt.deleted_at IS NULL
+                ORDER BY pt.created_at, pt.id
+                """,
+            arguments: [target.wingId, sourceID])
+        for tagID in tagIDs {
+            guard try liveApplication(db, table: "post_tag", tagID: tagID,
+                                      targetColumn: "post_id", targetID: targetID) == nil
+            else { continue }
+            try insertPostTag(db, tagID: tagID, postID: targetID, now: now)
+        }
     }
 
     /// MAKE OUTLINE POST (taste checkpoint, Sitting 9 — R99; her batch-10
