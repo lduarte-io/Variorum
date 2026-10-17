@@ -127,6 +127,9 @@ enum LStatus: Sendable {
     /// A FACTS DIFF: the model produces `observed` instead (the scenario asserts
     /// that); `Lifecycle.factsDiff` carries the reason. Hers to accept.
     case diff(String, observed: LFact)
+    /// A FACTS DIFF on one of stage 5's roads only; on the other the page's fact
+    /// is asserted.
+    case diffWhen(LStage5Event, String, observed: LFact)
 }
 
 /// A road chip: the road, whether it opens, its words.
@@ -317,6 +320,17 @@ indirect enum LFact: Sendable {
     /// A sentence this road does not type — its status says where it is proven
     /// or whose it is.
     case notTypedHere
+    // (Added with the FACTS DIFF, as the facts the model produces instead.)
+    /// Every one of these.
+    case all([LFact])
+    /// Use Castle's door names the copy as one under a key this Mac can't delete
+    /// (its Apple lock's key sits in an Apple account this Mac has left), and
+    /// this Mac records that key retired — deleted on sight if it ever comes
+    /// back (the door words `copiesUnderAKeyThisMacCantDelete`; the repair
+    /// `deleteRetiredAppleKey`).
+    case useCastleNamesCopiesItCantDelete(LSubject)
+    /// No Touch ID item on this Mac for any key the library has had.
+    case noTouchIDItemForAnyKeyItHasHad
 }
 
 /// What someone put in the live place (stage 14).
@@ -410,9 +424,26 @@ enum Lifecycle {
         return all
     }
 
-    /// Every FACTS DIFF (none at extraction; each later one recorded with its
-    /// reason in the plan's U3 RECORD).
-    static let factsDiff: [LFactsDiff] = []
+    /// Every FACTS DIFF — none at extraction (piece B); each found by the
+    /// scenario's first run (piece C) and recorded here and in the plan's U3
+    /// RECORD. Hers to accept: the page's words are unchanged until she does.
+    static let factsDiff: [LFactsDiff] = [
+        LFactsDiff(
+            id: "FD-1", stage: 1,
+            page: #"“If you skip writing the words down, the app reminds you”"#,
+            model: #"The reminder keys on the passphrase: it is owed while no passphrase exists (`passphraseSet` false) — whatever happened to the words."#,
+            reason: #"Rule 3 is the contract (“Until a passphrase exists, the app says so now and then”), and the model cannot know whether words were written down. Proposed words for the note: “Until you set a passphrase, the app reminds you — …”."#),
+        LFactsDiff(
+            id: "FD-2", stage: 6,
+            page: #"“The Apple and on-device keychain entries are deleted” — on the road where her Apple ID changed at stage 5"#,
+            model: #"The library's first Apple key lives in the Apple account she left: no Mac can delete it from there. It is unreadable on every device of hers; Use Castle's door names backup A as a copy under a key this Mac can't delete, and the key is recorded retired — deleted on sight if it ever reaches this Mac again."#,
+            reason: #"Rule 11's deletion reaches every device on the Apple account the item lives in — this Mac is no longer signed into that one (rules 8 and 25: Apple's road, not the app's). On the iCloud Keychain reset road the page's fact holds."#),
+        LFactsDiff(
+            id: "FD-3", stage: 8,
+            page: #"“This Mac's Touch ID item … now hold[s] the new key.”"#,
+            model: #"The Castle key's Touch ID item goes with its key; the new Standard key sits in the on-device road (the silent login-keychain item) — no Touch ID item."#,
+            reason: #"In Standard the on-device road is the SILENT item, no biometric gate (the plan's §3 rule-8 row, her F13 ruling; U2's first reading, accepted): “login password or Touch ID” is what that item means in honest terms. Rule 12 carries the same words. Proposed: “This Mac's on-device road and its sealed key-file copy now hold the new key.”"#),
+    ]
 
     static let stages: [LStage] = [
         // MARK: 1
@@ -445,7 +476,8 @@ enum Lifecycle {
                 LFactEntry(fact: .passphraseAsk(.beforeFirstBackup), quote: "…and always before your first backup [3].", rules: [3]),
                 LFactEntry(
                     fact: .reminderTrigger(.wordsNotWrittenDown),
-                    quote: "If you skip writing the words down, the app reminds you", rules: [3]),
+                    quote: "If you skip writing the words down, the app reminds you", rules: [3],
+                    status: .diff("FD-1", observed: .reminderTrigger(.noPassphraseYet))),
                 LFactEntry(
                     fact: .notTypedHere, quote: #"at the third launch, weekly twice, then with "don't show again""#, rules: [3],
                     status: .notAModelFact("the schedule's face — phase 3 (the model keeps the facts: `passphraseSet`, `reminderDismissals`)")),
@@ -613,7 +645,11 @@ enum Lifecycle {
                     fact: .appleKeysDeletedEverywhere,
                     quote: "The Apple and on-device keychain entries are deleted — and the Apple deletion reaches your other Macs too, so backup A's quiet locks die everywhere.",
                     rules: [9, 11]),
-                LFactEntry(fact: .appleKeysDeleted, quote: "The Apple and on-device keychain entries are deleted", rules: [11]),
+                LFactEntry(
+                    fact: .appleKeysDeleted, quote: "The Apple and on-device keychain entries are deleted", rules: [11],
+                    status: .diffWhen(
+                        .appleIDChanged, "FD-2",
+                        observed: .all([.appleKeysDeletedEverywhere, .useCastleNamesCopiesItCantDelete(.backupA)]))),
                 LFactEntry(fact: .noOnDeviceItemForAnyKeyItHasHad, quote: "The Apple and on-device keychain entries are deleted", rules: [11]),
                 LFactEntry(
                     fact: .touchIDItemIfChosen,
@@ -696,7 +732,9 @@ enum Lifecycle {
                 LFactEntry(fact: .keyFileLocks(has: [.passphrase, .words, .apple], lacks: [.master]), quote: "You type your passphrase and your twelve words.", rules: [12]),
                 LFactEntry(fact: .freshAppleRoad, quote: "with a fresh Apple road", rules: [12]),
                 LFactEntry(fact: .custody(has: [.onDevice], lacks: []), quote: "and the on-device road back [12].", rules: [8, 12]),
-                LFactEntry(fact: .custody(has: [.touchID], lacks: []), quote: "This Mac's Touch ID item … now hold[s] the new key.", rules: [12]),
+                LFactEntry(
+                    fact: .custody(has: [.touchID], lacks: []), quote: "This Mac's Touch ID item … now hold[s] the new key.", rules: [12],
+                    status: .diff("FD-3", observed: .all([.custody(has: [.onDevice], lacks: [.touchID]), .noTouchIDItemForAnyKeyItHasHad]))),
                 LFactEntry(fact: .sealedKeyFileCopy, quote: "…and its sealed key-file copy now hold the new key.", rules: [1, 12]),
                 LFactEntry(
                     fact: .accountLeavesCastleOtherDevicesFollowQuietly,

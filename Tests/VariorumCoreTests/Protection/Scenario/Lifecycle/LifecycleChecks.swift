@@ -204,13 +204,26 @@ struct LifecycleChecks {
             case .asserted:
                 failures += check(entry.fact, ctx).map { "stage \(ctx.number) · “\(entry.quote)”: \($0)" }
             case .diff(let id, let observed):
-                failures += check(observed, ctx).map { "stage \(ctx.number) · \(id) (observed): \($0)" }
-                if check(entry.fact, ctx).isEmpty {
-                    failures.append("stage \(ctx.number) · \(id): the page's fact now holds — the FACTS DIFF no longer stands")
+                failures += diff(id, entry, observed, ctx)
+            case .diffWhen(let event, let id, let observed):
+                if event == walk.event {
+                    failures += diff(id, entry, observed, ctx)
+                } else {
+                    failures += check(entry.fact, ctx).map { "stage \(ctx.number) · “\(entry.quote)”: \($0)" }
                 }
             case .assertedAt, .branch, .notAModelFact:
                 continue
             }
+        }
+        return failures
+    }
+
+    /// A FACTS DIFF: the model's observed fact holds — and the page's still
+    /// doesn't (a diff the model has since closed is stale, and says so).
+    func diff(_ id: String, _ entry: LFactEntry, _ observed: LFact, _ ctx: LStageContext) -> [String] {
+        var failures = check(observed, ctx).map { "stage \(ctx.number) · \(id) (observed): \($0)" }
+        if check(entry.fact, ctx).isEmpty {
+            failures.append("stage \(ctx.number) · \(id): the page's fact now holds — the FACTS DIFF no longer stands")
         }
         return failures
     }
@@ -580,6 +593,24 @@ struct LifecycleChecks {
             expect(ctx.recovery.heldEveryKey, "the account doesn't give back every sync key it has had")
         case .notTypedHere:
             failures.append("a sentence this road doesn't type was asked to hold")
+        case .all(let facts):
+            for fact in facts { failures += check(fact, ctx) }
+        case .useCastleNamesCopiesItCantDelete(let subject):
+            guard let copy = walk.copies[subject] else { failures.append("no \(subject.rawValue)"); break }
+            let named = ctx.useCastleDoor?.words.contains { words in
+                if case .copiesUnderAKeyThisMacCantDelete(let ids) = words { return ids.contains(copy.id) }
+                return false
+            } ?? false
+            expect(named, "Use Castle's door didn't name \(subject.rawValue) as under a key this Mac can't delete")
+            let id = target(subject)?.own?.apple?.keyID
+            expect(id.map { library?.section.retiredAppleKeyIDs.contains($0) == true } ?? false,
+                   "its Apple lock's key isn't recorded retired (deleted on sight)")
+        case .noTouchIDItemForAnyKeyItHasHad:
+            let had = Set(live?.heldFingerprints ?? []).union([fingerprint].compactMap { $0 })
+            let touch = mac.keychain.local.keys.filter { $0.service == ProtectionNames.custodyService }
+                .compactMap { ProtectionNames.parseCustodyAccount($0.account, scope: SWorld.scope) }
+                .filter { $0.class == .touchid && had.contains($0.fingerprint) }
+            expect(touch.isEmpty, "\(touch.count) Touch ID item(s) left for keys the library has had")
         }
         return failures
     }

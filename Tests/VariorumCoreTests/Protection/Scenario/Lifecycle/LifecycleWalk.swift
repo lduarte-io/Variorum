@@ -110,6 +110,8 @@ final class LStageContext {
     var crash = CrashSeen()
     var lostKeyFile = LostKeyFileSeen()
     var recovery = RecoverySeen()
+    /// Stage 6: Use Castle's door, read the moment before the press.
+    var useCastleDoor: DoorSpec?
     /// Stage 14: what this Mac remembers, and the live place, before anything
     /// is put in it.
     var remembered: (memory: DeviceMemory?, libraryID: String?, fingerprint: String?, deviceID: String?, live: KeyFile?)?
@@ -423,6 +425,7 @@ final class LifecycleWalk {
             return try await executor.changeSettings(&library, to: settings)
         }
         let typed = today, gate = gate
+        ctx.useCastleDoor = world.assessed(mac).door(.useCastle).spec
         ctx.outcome = try await act(mac) { executor, library in
             try await executor.useCastle(&library, typed: typed, gate: gate)
         }

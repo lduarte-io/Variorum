@@ -91,8 +91,9 @@ struct LifecycleScenarioTests {
                         return false
                     }
                     #expect(same, "stage \(stage.number): “\(entry.quote)” — stage \(later) asserts no such fact")
-                case .diff(let id, _):
-                    #expect(Lifecycle.factsDiff.filter { $0.id == id }.count == 1, "stage \(stage.number): \(id) isn't listed once")
+                case .diff(let id, _), .diffWhen(_, let id, _):
+                    #expect(Lifecycle.factsDiff.filter { $0.id == id && $0.stage == stage.number }.count == 1,
+                            "stage \(stage.number): \(id) isn't listed once for this stage")
                 case .asserted:
                     if case .notTypedHere = entry.fact { Issue.record("stage \(stage.number): “\(entry.quote)” asserts nothing") }
                 case .branch, .notAModelFact:

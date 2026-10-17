@@ -897,12 +897,39 @@ everything else on the page stands as its facts.
   the model does not produce (FD-1 stage 1, FD-2 stage 6 under the Apple-ID road, FD-3 stage 8 — the FACTS DIFF
   below), every other chip and fact green in all four walks; `everyChipDiscriminates` green (every chip, flipped,
   fails the same world). One fixture addition before that first run, recorded: stage 6's "deleted" typed as its own
-  fact (`appleKeysDeleted`) — piece B had typed only "die everywhere". Next: the FACTS DIFF marked (piece E's start).
+  fact (`appleKeysDeleted`) — piece B had typed only "die everywhere". The FACTS DIFF marked in the next commit
+  (E): the suite green in all four walks.
 - D — the renderer and the regenerated page (`cmp`): NOT-STARTED.
-- E — FACTS DIFF and PROVISIONALs (QUESTIONS): NOT-STARTED.
+- E — FACTS DIFF and PROVISIONALs (QUESTIONS): IN-PROGRESS — the three diffs marked (this commit: `Lifecycle.factsDiff`,
+  the statuses, the observed facts); QUESTIONS next.
 - F — the closing runs, counts, this record closed: NOT-STARTED.
 
-**FACTS DIFF** (each hers to accept; never a silent edit of the fixture): PENDING.
+**FACTS DIFF** (each hers to accept; never a silent edit of the fixture — the page's fact stays in the fixture as the
+page states it, the status names the diff and the fact the model produces instead, which the scenario asserts; it also
+asserts the page's fact still fails, so a diff the model later closes reports itself stale). All three were found by the
+scenario's FIRST run (piece C, `bdd19624e`); none was anticipated in the fixture:
+- **FD-1 — stage 1's note, the reminder's trigger.** Page: *"If you skip writing the words down, the app reminds you"*.
+  Model: the reminder keys on the passphrase — owed while no passphrase exists (`passphraseSet` false, U2 piece C),
+  whatever happened to the words. Reason: rule 3 is the contract (*"Until a passphrase exists, the app says so now and
+  then"*), and no model can know whether words were written down. Proposed words for the note: *"Until you set a
+  passphrase, the app reminds you — at the third launch, …"*. A page-wording diff, not a rule matter.
+- **FD-2 — stage 6, "the Apple and on-device keychain entries are deleted", on the road where her Apple ID changed at
+  stage 5** (on the iCloud Keychain reset road the page's fact holds). Model: the library's first Apple key lives in the
+  Apple account she left; no Mac can delete it from there (the world: `deleteAppleKey` finds no item to delete on a Mac
+  signed into another Apple ID). It is unreadable on every device of hers, Use Castle's door names backup A as a copy
+  under a key this Mac can't delete (`Words.copiesUnderAKeyThisMacCantDelete`), and the key is recorded retired —
+  deleted on sight if it ever reaches this Mac again (`Repair.deleteRetiredAppleKey`). Reason: rule 11's deletion
+  reaches every device on the Apple account the item lives in — this Mac is no longer signed into that one; rules 8 and
+  25 say Apple's road is Apple's. **The nearest rule question (for her, not a stop):** rule 11's parenthetical ("so your
+  Standard-era backups' quiet locks die with it") cannot reach a key left in an Apple account she has left — no device
+  of the account reads it, so rule 9 holds, but someone holding her OLD Apple account and backup A's file could open it.
+  Rule 25 speaks of Apple roads that stop working, not of one the app cannot kill; a sentence there would state it.
+- **FD-3 — stage 8, "This Mac's Touch ID item … now hold[s] the new key".** Model: the Castle key's Touch ID item goes
+  with its key; the new Standard key sits in the on-device road — the silent login-keychain item, no biometric gate — and
+  no Touch ID item exists. Reason: §3's rule-8 row (her F13 ruling): in Standard the on-device road is the SILENT item
+  ("login password or Touch ID" in honest terms — Apple facts §12; a gated item would prompt on every read); U2's first
+  reading, accepted by the orchestrator. Rule 12 carries the same words. Proposed page words: *"This Mac's on-device
+  road and its sealed key-file copy now hold the new key."*
 
 **The runs (exit lines, both configurations):** PENDING.
 
