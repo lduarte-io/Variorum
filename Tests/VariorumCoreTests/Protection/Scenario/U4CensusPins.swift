@@ -111,4 +111,24 @@ struct U4CensusPins {
         #expect(phone.library?.memory?.keyFileMirror == world.liveKeyFile(phone), "the sealed copy isn't the current key's file")
         expectPromisesKept(world)
     }
+
+    /// NEW CLASS (L) — rule 11 ("Entering Castle … the Apple and on-device
+    /// keychain items deleted"): a silent sync-keys item for an account the
+    /// library no longer names (a join a Time Machine restore took back — the
+    /// keychain isn't restored) holds that account's master, a quiet road to
+    /// every key file wrapped under it — a backup's among them; entering Castle
+    /// now deletes it (census seed 31 sequence 572).
+    @Test func enteringCastleDeletesASilentSyncKeysItemForAnAccountTheLibraryDoesntName() async throws {
+        let world = SWorld(seed: 31 &* 1_000_003 &+ 572)
+        try await StartingState.all[6].build(world)
+        for action in [Action.useStandard("macA"), .settle, .thisMacOnly("phone"), .timeMachineSnapshot("phone"),
+                       .turnOnSync("phone"), .timeMachineRollback("phone"), .useCastle("phone", .touchID, newWords: false)] {
+            await world.step(action)
+        }
+        let phone = world.device("phone")
+        #expect(phone.slot?.record?.mode == .castle && phone.slot?.record?.account == nil)
+        #expect(!phone.keychain.local.contains { $0.key.service == ProtectionNames.syncKeysService && !$0.value.touchID },
+                "a silent sync-keys item survived the entry into Castle")
+        expectPromisesKept(world)
+    }
 }

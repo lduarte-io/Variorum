@@ -199,6 +199,18 @@ extension ActContext {
             if item.itemClass == .silent, sweepForCastle, !historyHolds(item.fingerprint) { continue }
             try leaves.custody.deleteCustody(fingerprint: item.fingerprint, itemClass: item.itemClass)
         }
+        // Entering Castle also takes in a SILENT sync-keys item for an account
+        // the library doesn't name (a join a restore took back — the keychain
+        // isn't restored): it holds that account's master, a quiet road to every
+        // key file wrapped under it, a backup's among them (rule 11 — census
+        // class (L), VX-378 U4). The bound account's keys are filed the Castle
+        // way by the act itself (rule 15's custody).
+        if sweepForCastle {
+            let bound = library.record?.account
+            for item in try leaves.syncKeys.syncKeyItems() where item.itemClass == .silent && item.accountID != bound {
+                try leaves.syncKeys.deleteSyncKeys(accountID: item.accountID, itemClass: .silent)
+            }
+        }
     }
 
     /// Entering Castle turns this device's scheduled Markdown export off, with

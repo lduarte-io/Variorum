@@ -656,12 +656,17 @@ extension SWorld {
         // L4/L6: under a library (or key file) put back from outside, a copy the
         // key file there doesn't carry is the replaced stretch's — for good (the
         // carry is never promised across a replay), noted whatever today's open.
-        let carried = Set(base.flatMap(\.heldFingerprints))
+        // (Noted against the key file a later key change carries forward — the
+        // live one, else the sealed copy; the carry itself isn't asked while
+        // the replay stands.)
         if fromOutside(device) || dayOfRollback(device) != nil {
+            let lineage = liveKeyFile(device).flatMap { $0.libraryID == record.libraryID ? $0 : nil } ?? base.last
+            let carried = Set(lineage?.heldFingerprints ?? [])
             for (id, copy) in truth.copies where copy.madeOn == device.name && copy.libraryID == record.libraryID
                 && !carried.contains(copy.fingerprint) {
                 truth.rolledBackOver.insert(id)
             }
+            return violations
         }
         // (c) THE CARRY — within the same library, wherever today's open it.
         guard todayOpensIt else { return violations }

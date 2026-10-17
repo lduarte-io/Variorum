@@ -1663,6 +1663,18 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
     the open then reads — the same replay class as a library file's (rule 21 keys on the library; an item older than the
     library "moved on", P-VX378-U4-5): the tamper clause reads any replay of this Mac's homes as outside the promise
     (P-VX378-U4-7's family, noted there).
+  **Census on `f6926a8e3`: seeds 28 · 29 · 30 — 0 failing each (45,147 / 44,411 / 45,437 steps; 257.0 / 247.4 / 254.0
+  s); seed 31 — 2 failing (45,108 steps, 287.2 s): P1 · P4.** Closed in the next commit:
+  - seq 572 (P1) — **NEW CLASS (L), MODEL — FIXED** (`Executor/Acts/CommonSteps.swift` `retireOldCustody`): a join a
+    Time Machine restore took back left a SILENT sync-keys item for an account the library no longer names (the keychain
+    isn't restored) — the account's master, a quiet road to every key file wrapped under it (the join's backup among
+    them); entering Castle now deletes such an item (rule 11's "the Apple and on-device keychain items deleted"; the
+    bound account's keys stay the act's to file the Castle way). Pin `U4CensusPins
+    .enteringCastleDeletesASilentSyncKeysItemForAnAccountTheLibraryDoesntName` (census seq 572 replayed): red before —
+    promise 1 "a quiet road reaches an earlier key" ×3 — green after.
+  - seq 415 (P4 (c)) — CHECKER (L6): the carry isn't asked while a replay stands (only the floor is); the replaced
+    stretch's copies are noted against the key file a later key change carries forward (the live one, else the sealed
+    copy) rather than the union of both.
 - 5 — THE DISCOVERY RUN (seeds 21–40) and THE GATE SOAK (seeds 1–20, Debug and Release): NOT-STARTED. Tables land as
   they complete. PENDING.
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.
