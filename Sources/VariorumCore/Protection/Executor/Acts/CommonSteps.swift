@@ -94,21 +94,19 @@ extension ActContext {
     }
 
     /// The new key file — a re-key to a key of `kind`, its history carrying
-    /// every earlier key (rule 4); `kind` nil builds a file with no past (a
-    /// landing, a creation).
-    func newKeyFile(rekeyTo kind: ProtectionMode?, locks: NewKeyLocks) throws {
+    /// every earlier key (rule 4). Every re-key goes through here; a file with
+    /// no history is only ever a creation's (`createLibrary`) or Make this my
+    /// library's own (`makeMineKeyFile`), never a re-key's (the ladder's round-1
+    /// NIT: the nil arm that built one was dead and was the one road that would
+    /// have skipped rule 4's carry).
+    func newKeyFile(rekeyTo kind: ProtectionMode, locks: NewKeyLocks) throws {
         let key = try requireToKey()
         if !(try libraryOpens(key)) { leaves.backups.pauseCopies() }
         if let live = library.keyFile, live.fingerprint == Self.fp(key) { return }
         guard let from = fromKey, let outgoing = library.keyFile, outgoing.fingerprint == Self.fp(from) else {
             throw ExecutorRefusal.noLiveKeyFile
         }
-        let file: KeyFile
-        if let kind {
-            file = try outgoing.rekeyed(from: from, to: key, kind: kind, locks: locks, at: now)
-        } else {
-            file = try KeyFile.building(libraryID: outgoing.libraryID, key: key, epoch: outgoing.epoch + 1, locks: locks)
-        }
+        let file = try outgoing.rekeyed(from: from, to: key, kind: kind, locks: locks, at: now)
         try executor.writeLiveKeyFile(file, &library)
         log("the new key file written (\(Self.fp8(file.fingerprint)), history \(file.history.count))")
     }
