@@ -326,7 +326,10 @@ record committed with PENDING numbers first.
   fixture first, the scenario's four walks, the page rendered from the fixture; three FACTS DIFF and two PROVISIONALs
   for her). After (code tree `389162a09`): the protection set Debug `✔ 259 tests in 69 suites`, `-c release` `✔ 237 in
   65`, the full core suite green in Debug; `Sources/…/Protection/` untouched (7,562), tests 12,068.
-- U4 — the world and the soak: not started.
+- U4 — the world and the soak: **IN PROGRESS** (Opus implementer, 2026-10-16) — §8's U4 RECORD (the resume map). Piece
+  A (this record) DONE; B (her FACTS DIFF rulings) NEXT; C (the promises), D (starting states, alphabet, mutation pins),
+  E (the discovery run, seeds 21–40), F (the gate soak, seeds 1–20 both configurations), G (the record closed)
+  NOT-STARTED. Counts PENDING.
 - The ladder: not started.
 - The gate: not started.
 
@@ -1076,6 +1079,26 @@ says (the lead's last sentence, the footer, the `.note.diff` style, the three un
   told the one open question.
 The rules' and the page's wording changes (rules 12, 25; stages 1, 6, 8) are applied by U4's fixture/page piece under
 her rulings above, never silently; the fixture diffs FD-1…3 close with them.
+
+### U4 RECORD — THE WORLD AND THE SOAK (Opus implementer, 2026-10-16; IN PROGRESS)
+
+**Not done in U4, first:** PENDING (filled as the unit runs; nothing skipped yet).
+
+**Pieces (the resume map — a fresh session can finish U4 from this list and `git log`):**
+- A — the record skeleton and LIVE STATUS: DONE (this commit).
+- B — her FACTS DIFF rulings applied (FD-1 stage 1's note; FD-2 rule 25's one sentence + stage 6 on the Apple-ID road;
+  FD-3 stage 8 + rule 12): the fixture's facts to her wording, the three under-review notes dropped, the page
+  re-rendered (`cmp`), the lifecycle scenario green with ZERO diffs: NOT-STARTED.
+- C — the promises rewritten to the rules (each quoting its rule; promise 6 strict; promise 3 tightened;
+  `resumeAtVaultReach` deleted; none about pre-leave copies after a leave; P-VX378-U4-1 the core sentence scoped to the
+  library's own lineage, PROVISIONAL): NOT-STARTED.
+- D — starting states (the new-system shapes), the adversary alphabet (the replay tampers back as DETECTION), the
+  mutation pins (every surviving guard red with its guard off): NOT-STARTED.
+- E — the discovery run: `PROTECTION_SOAK=1` seeds 21–40 × 1,000 × ≤60, Debug, one seed per call; every red triaged;
+  re-run after any fix: NOT-STARTED. Table: PENDING.
+- F — the gate soak: seeds 1–20 × 1,000 × ≤60, `swift test` AND `swift test -c release`, on the FINAL tree:
+  NOT-STARTED. Tables: PENDING.
+- G — the closing runs, the counts, this record closed: NOT-STARTED.
 
 ## 9. The ladder
 
