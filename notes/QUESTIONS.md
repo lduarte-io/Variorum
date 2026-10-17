@@ -2848,3 +2848,41 @@ until the next key door. Options:
   be reached) — the same window, mirrored.
 - (c) a named wait for key doors only — rejected by adjudication 1 (the qualifier dies whole).
 Record: the plan's §8 U2 RECORD, piece E. Status: open — the orchestrator's eye.
+
+### VX-378 U3 THE LIFECYCLE PROOF (2026-10-16; the plan's §8 U3 RECORD)
+
+**P-VX378-U3-1 — Which door is "you set a passphrase" (the lifecycle's stage 2; rule 3)?** The page's stage 2 has the
+tutorial's last card set the first passphrase on a Standard library that has none. The model has no act named for it:
+Change Passphrase verifies a current passphrase (and refuses with none), Use Castle sets one only as it enters Castle,
+sync setup sets one only as it hands the pair up. Options:
+- **(a) BUILT, PROVISIONAL (no new code — the reading the lifecycle walks) —** the Standard road of the forgotten-
+  passphrase door, `resetPassphrase(.plainConfirm)`: rule 6's re-lock of the current key under a new passphrase on a
+  fresh descriptor, the record's `passphraseSet` stamped at the act's end. The tutorial's card is its face (phase 3).
+- (b) a dedicated set-passphrase act with the same steps, refusing when a passphrase exists — a name for the face, one
+  act more.
+- (c) Change Passphrase accepts no current passphrase when none exists.
+Record: the plan's §8 U3 RECORD. Status: open — her eye with the faces (phase 3).
+
+**P-VX378-U3-2 — "You change your Apple ID" (stage 5): this Mac, or every device of hers?** The page's stage 6 then says
+the Apple deletion "reaches your other Macs too, so backup A's quiet locks die everywhere". Options:
+- **(a) BUILT, PROVISIONAL —** the person's Apple ID changes: every device of hers moves to it (the lifecycle walk's
+  road), so "everywhere" is every device of hers — and the first Apple key, left in the old Apple account, is FD-2.
+- (b) only this Mac moves: her other Macs, still on the old Apple ID, keep reading the library's first Apple key, so
+  "backup A's quiet locks die everywhere" would fail there too (one more diff on that road; no device holds backup A's
+  file but this Mac).
+Record: the plan's §8 U3 RECORD. Status: open — her eye with FD-2.
+
+**The FACTS DIFF of the lifecycle proof (FD-1 · FD-2 · FD-3) — each hers to accept.** The page keeps its words until she
+rules; each stage shows an "under review" note; the scenario asserts what the build does and that the page's line still
+differs. Full text: the plan's §8 U3 RECORD, "FACTS DIFF", and `Lifecycle.factsDiff`.
+- **FD-1 (stage 1's note):** the reminder keys on the passphrase (rule 3), not on whether the words were written down.
+  (a) accept — the note reads "Until you set a passphrase, the app reminds you — …"; (b) keep the page, and the faces
+  decide what "skip writing the words down" means (no model fact can know it).
+- **FD-2 (stage 6, after an Apple ID change):** a key left in the Apple account she left can't be deleted from here;
+  it is unreadable on every device of hers, named at Use Castle's door, and deleted on sight if it returns. (a) accept —
+  the page and rule 25 say so in a sentence; (b) keep rule 11's words as they are (the stage-5 iCloud Keychain reset road
+  holds them).
+- **FD-3 (stage 8):** the new Standard key sits in the on-device road (the silent item), not a Touch ID item — her F13
+  ruling (rule 8's row). (a) accept — the page (and rule 12) read "this Mac's on-device road and its sealed key-file copy
+  now hold the new key"; (b) re-open F13 (a Touch ID-gated item in Standard, prompting at every quiet open — against
+  rule 8's "quiet").

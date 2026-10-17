@@ -323,7 +323,7 @@ record committed with PENDING numbers first.
   set Debug `✔ 254 tests in 67 suites`, `-c release` `✔ 232 in 63`, the full core suite green in Debug; 7,562
   source lines, 9,380 test lines.
 - U3 — the lifecycle proof: **IN-PROGRESS** (Opus implementer, 2026-10-16) — §8's U3 RECORD (pieces A–F; counts
-  PENDING). Next: piece E's QUESTIONS, then F (the closing runs).
+  PENDING). Next: piece F, the closing runs.
 - U4 — the world and the soak: not started.
 - The ladder: not started.
 - The gate: not started.
@@ -916,8 +916,8 @@ everything else on the page stands as its facts.
   sentence and the footer now say the page is rendered from the fixture; one style line, `.note.diff`, for the "under
   review" note each FACTS DIFF puts on its stage — FD-1 on stage 1, FD-2 on 6, FD-3 on 8); `cmp` of the render
   (`CASTLE_LIFECYCLE_PAGE_OUT`) with the committed page: identical; the guard test green.
-- E — FACTS DIFF and PROVISIONALs (QUESTIONS): IN-PROGRESS — the three diffs marked (this commit: `Lifecycle.factsDiff`,
-  the statuses, the observed facts); QUESTIONS next.
+- E — FACTS DIFF and PROVISIONALs (QUESTIONS): DONE — the three diffs marked (`a83c44d21`); QUESTIONS (this commit):
+  P-VX378-U3-1, P-VX378-U3-2 and the FACTS DIFF bundle.
 - F — the closing runs, counts, this record closed: NOT-STARTED.
 
 **FACTS DIFF** (each hers to accept; never a silent edit of the fixture — the page's fact stays in the fixture as the
@@ -949,7 +949,12 @@ scenario's FIRST run (piece C, `bdd19624e`); none was anticipated in the fixture
 
 **The runs (exit lines, both configurations):** PENDING.
 
-**PROVISIONAL calls:** PENDING.
+**PROVISIONAL calls** (logged under the VX-378 heading in `notes/QUESTIONS.md`, "VX-378 U3 THE LIFECYCLE PROOF"):
+- **P-VX378-U3-1** — "you set a passphrase" (stage 2) is the Standard road of the forgotten-passphrase door,
+  `resetPassphrase(.plainConfirm)` (rule 6's re-lock; no new act); options (b) a named set-passphrase act, (c) Change
+  Passphrase without a current one.
+- **P-VX378-U3-2** — "you change your Apple ID" (stage 5) moves every device of hers; option (b) this Mac alone.
+- The three FACTS DIFF are logged there too, each with its (a)/(b), for her bundle.
 
 **Commits:** A (this commit).
 
