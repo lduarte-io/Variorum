@@ -131,6 +131,21 @@ struct Truth {
     /// this my library made (rule 7: "Make-this-my-library keeps your current
     /// pair").
     var lastHolder: [String: String] = [:]
+    /// L6 — A LIBRARY PUT IN THE LIVE PLACE FROM OUTSIDE (her ruling at the U4
+    /// stop, 2026-10-17: "we also do not need to protect them from hand copying
+    /// an old library over - they have to just remember that at that point";
+    /// P-VX378-U4-2 CLOSED, "someone with access to your computer can of course
+    /// delete your library"): by device, the key of a library file a replay put
+    /// there, or one an open said rule 21's notice for. While the live place
+    /// still holds it, the promises read the copy's own day — its posture until
+    /// it follows, the secrets it was made with (the floor), and, beside a key
+    /// file that reaches it only through its history, no quiet road the split
+    /// pair can't carry (P-VX378-U4-6).
+    var liveFromOutside: [String: String] = [:]
+    /// PROMISE 9 (rule 17's "you never leave Castle by opening something"): the
+    /// posture at Make this my library's press — after the open it pressed on
+    /// settled anything in flight.
+    var makeMinePressMode: [String: ProtectionMode] = [:]
 }
 
 final class SDevice {
@@ -543,6 +558,21 @@ final class SWorld {
         account ?? "\(libraryID)@\(device.name)"
     }
 
+    /// L6: the live place still holds the library put there from outside.
+    func fromOutside(_ device: SDevice) -> Bool {
+        guard let mark = truth.liveFromOutside[device.name] else { return false }
+        if device.slot?.fingerprint == mark { return true }
+        truth.liveFromOutside[device.name] = nil
+        return false
+    }
+
+    /// L6's split pair: the key file beside the library is another key's that
+    /// reaches it only through its history (P-VX378-U4-6).
+    func splitPair(_ device: SDevice) -> Bool {
+        guard fromOutside(device), let slot = device.slot, let live = liveKeyFile(device) else { return false }
+        return live.fingerprint != slot.fingerprint && live.heldFingerprints.contains(slot.fingerprint)
+    }
+
     func slotHolder(_ device: SDevice) -> String? {
         guard let slot = device.slot else { return nil }
         return holder(device, account: slot.record?.account ?? (slot.record == nil ? slot.rowsOwner : nil), libraryID: slot.libraryID)
@@ -721,7 +751,10 @@ final class SWorld {
             truth.noticeMismatches.append((device.name,
                 "the open said \(library.notice.map { "\($0.kind)" } ?? "nothing"); the live place calls for \(expected.map { "\($0)" } ?? "nothing")"))
         }
-        if library.notice != nil { noticedThisStep.insert(device.name) }
+        if library.notice != nil {
+            noticedThisStep.insert(device.name)
+            truth.liveFromOutside[device.name] = slot.fingerprint
+        }
         device.library = library
         device.lastSettle = nil
         do {
@@ -808,7 +841,8 @@ final class SWorld {
             scope: Self.scope, storeFile: device.slot == nil ? .absent : .present,
             containerMarker: device.container.files[SPath.marker] != nil, unlocked: unlocked,
             slotFingerprintHint: liveKeyFile(device)?.fingerprint,
-            rememberedLibraryIDs: (try? leaf.rememberedLibraryIDs()) ?? [], custody: custody,
+            rememberedLibraryIDs: (try? leaf.rememberedLibraryIDs()) ?? [],
+            rememberedKeyFileCopies: Set(mirrors(device).map(\.fingerprint)), custody: custody,
             syncKeys: syncKeys, appleKeys: apple, biometry: device.biometry.facts, touchIDPress: device.touchIDPress,
             session: device.session, vault: vault, catalog: catalog, now: clock)
     }

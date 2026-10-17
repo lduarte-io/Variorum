@@ -578,6 +578,7 @@ extension SWorld {
                 let catalog = self.catalog(d)
                 guard let copy = self.copyPick(catalog, pick) else { throw ExecutorRefusal.nothingToDo }
                 let pair = self.known(self.slotHolder(d)!)
+                if let mode = library.record?.mode { self.truth.makeMinePressMode[name] = mode }
                 return try await executor.makeThisMyLibrary(
                     &library, copy: copy, in: catalog, copySecrets: self.copySecrets(d, copy, typing),
                     currentPair: TypedSecrets(passphrase: pair.passphrase, words: pair.words))
@@ -698,6 +699,7 @@ extension SWorld {
                 throw WorldRefusal.noLibrary
             }
             device.container.files[SPath.slot] = file
+            if let image = file.library { truth.liveFromOutside[device.name] = image.fingerprint }  // L6
         case .replayKeyFile:
             guard let file = device.captures.compactMap(\.liveKeyFile)
                 .first(where: { $0 != device.container.files[SPath.liveKeyFile] }) else { throw WorldRefusal.noLibrary }

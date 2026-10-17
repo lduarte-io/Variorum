@@ -55,6 +55,13 @@
 //    L5 rules 17, 18 — a key carried in from another library's copy keeps that
 //       library's own quiet roads (another Mac's own Apple key is never deleted
 //       here — §3.5's delete-on-sight-by-recorded-id).
+//    L6 rule 21 — A LIBRARY PUT IN THE LIVE PLACE FROM OUTSIDE (her ruling at the
+//       U4 stop: "they have to just remember that at that point"; P-VX378-U4-2
+//       CLOSED as outside the promise): a replayed or hand-copied library file,
+//       or one an open said the notice for, is read in its own day — its posture
+//       until it follows, the secrets it was made with — and beside a key file
+//       that reaches it only through its history (the split pair, P-VX378-U4-6)
+//       it has no Apple road and no follow until the pair is whole again.
 //
 //  The checks rest on one engine, `reach`: from SEEDS (keys, Apple keys,
 //  masters, secrets, the vault's wrapped copies a session can fetch) it closes
@@ -412,6 +419,7 @@ extension SWorld {
         guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record,
               record.mode == .standard else { return [] }
         if truth.tamperedStandard[device.name]?.contains(record.currentFingerprint) == true { return [] }  // L3
+        if splitPair(device) { return [] }  // L6
         // Decision 35: a synced library makes nothing Apple-reachable without a
         // fresh read of a vault in Standard — signed out, elsewhere, offline or
         // lagging (L1, promise 3's), it waits.
@@ -494,8 +502,10 @@ extension SWorld {
                     if heldSyncKeys(device, id, quietOnly: true).contains(where: { $0.rowKey(for: current) != nil }) {
                         fail(device.name, "a silent sync-keys item holds the key Castle rows are written under")
                     }
-                    // A device holding that key has followed into Castle.
-                    if record.account == id, record.mode != .castle,
+                    // A device holding that key has followed into Castle — or its
+                    // live place holds a library put there from outside, in that
+                    // copy's own posture until it follows (L6).
+                    if record.account == id, record.mode != .castle, !fromOutside(device),
                        heldSyncKeys(device, id).contains(where: { $0.rowKey(for: current) != nil }) {
                         fail(device.name, "a device that hasn't followed into Castle holds the key Castle rows are written under")
                     }
@@ -503,7 +513,7 @@ extension SWorld {
                 // Settled: every device of the account, signed in and online,
                 // ends in its posture and holds its current sync key.
                 if settled, record.account == id, device.session.accountID == id, device.online, device.isOpen,
-                   truth.tamperedStandard[device.name]?.contains(record.currentFingerprint) != true {
+                   truth.tamperedStandard[device.name]?.contains(record.currentFingerprint) != true, !splitPair(device) {
                     if record.mode != vault.mode { fail(device.name, "the library is \(record.mode), the account \(vault.mode)") }
                     if !heldSyncKeys(device, id).contains(where: { $0.rowKeyID == current }) {
                         fail(device.name, "it doesn't hold the account's current sync key")
@@ -621,7 +631,9 @@ extension SWorld {
             guard let vault else { return false }
             return record.accountRowKeyID == vault.rowKeyID && record.mode == vault.mode
         }()
-        if caughtUp, !todayOpensIt {
+        // L6: a library put in the live place from outside opens with the
+        // secrets it was made with (the floor), not necessarily today's.
+        if caughtUp, !todayOpensIt, !fromOutside(device) {
             fail("her current passphrase and words don't open the library, and it has caught up (rules 4, 7, 12)")
         }
         // (c) THE CARRY — within the same library, wherever today's open it.
@@ -797,7 +809,7 @@ extension SWorld {
             if noticedThisStep.contains(device.name) { continue }
             let now = posture(device)
             if case .makeMine(let name, _, _) = innerAction(action), name == device.name, was.libraryID != now.libraryID,
-               let from = was.mode, let to = now.mode, from != to {
+               let from = truth.makeMinePressMode[name] ?? was.mode, let to = now.mode, from != to {
                 violations.append(Violation(promise: 9, device: device.name, detail: "Make this my library moved the posture \(from) → \(to)"))
             }
             guard was.libraryID == now.libraryID, was.mode != nil, now.mode != nil else { continue }
@@ -864,8 +876,11 @@ extension SWorld {
         // complete replay, or the library file replayed while what this Mac
         // remembers can't speak (deleted, edited past its seal, or replayed) —
         // outside the promise (P-VX378-U4-2, CLOSED at her ruling).
-        let memoryCantSpeak = tampers.contains { [.deleteMemoryItem, .editMemoryItem, .replayMemory, .deleteKeyFileAndMemory].contains($0) }
-        let statedLimit = tampers.contains(.replayBothHomes) || (tampers.contains(.replayLibraryFile) && memoryCantSpeak)
+        // L6: a library file replayed into the live place — said by rule 21's
+        // notice (promise 7 judges it), or under the same key the memory names,
+        // which rule 21's four things can't tell from the one this Mac last
+        // opened (PROVISIONAL P-VX378-U4-7) — is the copy's own day.
+        let statedLimit = tampers.contains(.replayBothHomes) || tampers.contains(.replayLibraryFile)
         if now.libraryID == was.libraryID, !statedLimit, judgesThePosture {
             if now.mode != .castle { fail("the mode is \(now.mode.map { "\($0)" } ?? "unknown")") }
             if now.account != was.account { fail("the account changed") }

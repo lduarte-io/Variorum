@@ -228,8 +228,21 @@ extension ActContext {
         // P-VX378-U1-1 (a); rule 11: "the Apple … keychain items deleted").
         let outgoing = [parameters.outgoingAppleKeyID].compactMap { $0 }
         let retired = library.section.retiredAppleKeyIDs
+        // …and every Apple key an EARLIER section of this library's own record
+        // lists unretired — this Mac's under a device ID it no longer
+        // remembers (a keychain wipe, a new Mac without its memory item, a
+        // library this Mac left and came back to — P-VX378-U1-1 (a)): each one
+        // wraps a key this library has had, so an older backup's key file is
+        // locked under it (census class (E), VX-378 U4 — rule 11: "your
+        // Standard-era backups' quiet locks die with it"). Only sections that
+        // verify with this library's own keys count — another Mac's library
+        // seals its sections under keys of its own and never verifies here.
+        let reach = executor.reach(key: library.key, keyFile: library.keyFile)
+        let earlier = (library.record?.verifiedSections(reach: reach) ?? [])
+            .filter { $0.deviceID != library.section.deviceID }
+            .flatMap(\.ownLibraryAppleKeyIDsToRetire)
         let ids = (executor.guards.everyOwnKeyRetiredAtCastleOn
-            ? Array(Set(library.section.ownLibraryAppleKeyIDsToRetire).union(outgoing)).sorted()
+            ? Array(Set(library.section.ownLibraryAppleKeyIDsToRetire).union(outgoing).union(earlier)).sorted()
             : outgoing).filter { !retired.contains($0) }
         guard !ids.isEmpty else { return }
         var section = library.section

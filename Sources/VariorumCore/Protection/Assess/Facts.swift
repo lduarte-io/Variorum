@@ -174,6 +174,12 @@ public struct ProtectionFacts: Sendable {
     public var libraryAccountEmail: String?
     /// The library IDs this scope's memory items name (enumerated by name).
     public var rememberedLibraryIDs: Set<String>
+    /// The key-file copies this scope's memory items carry — their
+    /// fingerprints, read as the items state them (a key file holds no secret).
+    /// nil: not read (every remembered library then counts as one that might).
+    /// Rule 27's honest refusal reads it: a memory item with no copy in it opens
+    /// nothing (census class (D), VX-378 U4).
+    public var rememberedKeyFileCopies: Set<String>?
     /// This scope's custody items, enumerated.
     public var custody: [CustodyItemFact]
     public var syncKeys: [SyncKeysItemFact]
@@ -189,7 +195,8 @@ public struct ProtectionFacts: Sendable {
     public init(
         scope: String, storeFile: StoreFileFact = .present, containerMarker: Bool = true,
         unlocked: UnlockedFacts? = nil, slotFingerprintHint: String? = nil, rememberedModeHint: ProtectionMode? = nil,
-        libraryAccountEmail: String? = nil, rememberedLibraryIDs: Set<String> = [], custody: [CustodyItemFact] = [],
+        libraryAccountEmail: String? = nil, rememberedLibraryIDs: Set<String> = [],
+        rememberedKeyFileCopies: Set<String>? = nil, custody: [CustodyItemFact] = [],
         syncKeys: [SyncKeysItemFact] = [], appleKeys: AppleKeyFacts = AppleKeyFacts(),
         biometry: BiometryFacts = .ready, touchIDPress: TouchIDPress? = nil, session: SessionFact = .signedOut,
         vault: VaultReading? = nil, catalog: Catalog = Catalog(), now: Date
@@ -202,6 +209,7 @@ public struct ProtectionFacts: Sendable {
         self.rememberedModeHint = rememberedModeHint
         self.libraryAccountEmail = libraryAccountEmail
         self.rememberedLibraryIDs = rememberedLibraryIDs
+        self.rememberedKeyFileCopies = rememberedKeyFileCopies
         self.custody = custody
         self.syncKeys = syncKeys
         self.appleKeys = appleKeys

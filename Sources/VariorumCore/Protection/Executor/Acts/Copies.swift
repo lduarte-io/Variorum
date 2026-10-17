@@ -55,6 +55,9 @@ public enum CopyRoad: Equatable, Sendable {
 struct MakeMineProgram: ActProgram {
     let act = ProtectionAct.makeMine
     static let afterCommit = ["forgetOtherLibraries", "backup"]
+    /// The steps up to the copy's stage — the ones a resume can't finish
+    /// without the copy's key.
+    static let beforeTheStage: Set<String> = ["custodyItem", "mintOwnAppleKey", "keyFile", "stage"]
 
     func steps(_ parameters: ActParameters, guards: ProtectionGuards) -> [String] {
         var steps = ["custodyItem"]
@@ -70,6 +73,15 @@ struct MakeMineProgram: ActProgram {
 
     func run(_ step: String, _ ctx: ActContext) async throws {
         let kind = try ctx.parameters.newKind ?? ctx.requireRecord().mode
+        // A resume holds no copy key (a plan never holds one): before the copy
+        // is staged under the new key, it can't finish — roll back at once,
+        // before any step that would write or need its account's vault
+        // (census class (G), VX-378 U4: the own Apple key's fresh-vault check
+        // stopped such a resume with the act left in flight).
+        if ctx.resuming, ctx.copyKey == nil, Self.beforeTheStage.contains(step),
+           try ctx.leaves.library.stagedFingerprint() == nil || ctx.toKey.map(ActContext.fp) != (try ctx.leaves.library.stagedFingerprint()) {
+            throw ActRollback(refusal: .secretsRequired(ctx.act))
+        }
         switch step {
         case "custodyItem": try ctx.newCustodyItem(kind: kind)
         case "mintOwnAppleKey": _ = try ctx.mintOwnAppleKey()

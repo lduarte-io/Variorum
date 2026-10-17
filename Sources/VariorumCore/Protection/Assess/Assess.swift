@@ -176,12 +176,15 @@ public enum AssessRules {
         // key is readable here.
         let apple = live?.apple.flatMap { facts.appleKeys.readable.contains($0.keyID) ? $0.keyID : nil }
         // RULE 27: a library in the slot and no road at all — no key file beside
-        // it, none in any copy, no memory item (its sealed mirror), no custody
-        // item holding a key. Anything that might still open it says nothing.
+        // it, none in any copy, no memory item carrying a copy of one (its sealed
+        // mirror — an item with none opens nothing: census class (D)), no
+        // custody item holding a key. Anything that might still open it says
+        // nothing.
         var nothing: NoKeyFileAnywhere?
+        let rememberedCopies = facts.rememberedKeyFileCopies.map { !$0.isEmpty } ?? !facts.rememberedLibraryIDs.isEmpty
         if facts.unlocked == nil, facts.storeFile == .present, live == nil,
            !facts.catalog.keyFiles.contains(where: { $0.document != nil }),
-           facts.rememberedLibraryIDs.isEmpty, facts.custody.isEmpty {
+           !rememberedCopies, facts.custody.isEmpty {
             nothing = NoKeyFileAnywhere(accountRoad: facts.session.accountID != nil)
         }
         return LobbyRoads(

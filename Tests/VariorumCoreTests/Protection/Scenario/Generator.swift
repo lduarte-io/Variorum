@@ -26,6 +26,7 @@ extension SWorld {
     @discardableResult
     func step(_ action: Action) async -> StepResult {
         noticedThisStep.removeAll()
+        truth.makeMinePressMode.removeAll()
         // A single tamper and a group (`.tamperSequence`) are bracketed alike:
         // ONE pre-launch settle before, ONE relaunch and promise-10 check after.
         let tampered: (name: String, tampers: [Tamper])? = {

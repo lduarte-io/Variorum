@@ -1543,7 +1543,46 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
   - QUESTIONS: P-VX378-U4-2 → CLOSED (her words); **P-VX378-U4-5** and **P-VX378-U4-6** PROVISIONAL (a). **Census class
     (B) closed here** (the L4 clause is outside the promise; the refusal it fought is gone). Protection set Debug `✔ 287
     tests in 73 suites passed` (generator 16 sequences).
-- 4 — THE CENSUS CLASSES (B)–(I) re-read under the rulings: NOT-STARTED. PENDING.
+- 4 — THE CENSUS CLASSES (B)–(I) re-read under the rulings: IN-PROGRESS. A fresh census of seed 21 on the piece-3
+  tree (scratch worktree at `3cdca77cd`, the census patch never committed; `-c release`): **35 failing in 1,000
+  sequences (44,710 steps, 311.9 s)** — P2 ×19 · P9 ×5 · P3 ×3 · P5 ×3 · P1 ×2 · P4 ×2 · P6 ×1. Read against the old
+  classes: (A) gone (piece 2); (B) gone as a refusal and back as its consequence — the SPLIT PAIR (P2 ×19: an older
+  library file replayed beside today's key file opens through its history and can't take Standard's Apple road); (F)
+  gone (piece 1); (C) folded into rule 21's offer; (D), (E), (G) reproduced; (H) reproduced; new — P3/P4 on a library
+  put in the live place from outside, and P9's account change by a same-key replay. **Done in this commit:**
+  - **(G) MODEL — FIXED** (`Executor/Acts/Copies.swift`): a resume of Make this my library holds no copy key, so before
+    the copy is staged under the new key it rolls back at its FIRST step (`MakeMineProgram.beforeTheStage`) — it used to
+    run the steps before the stage and stop at the own Apple key's fresh-vault check (decision 35; the act isn't marked
+    synced, so the resume reads no vault), leaving the act in flight. Pin `U4CensusPins
+    .aCrashedMakeThisMyLibraryOnASyncedLibraryNeverStaysInFlight` (a synced Standard library, a crash after each of
+    writes 1–12, then the next open): red before the fix — crashes after writes 3–10 left the act in flight ("couldn't
+    settle now (needsFreshVault)", promise 6) — green after; `U2MakeMineTests` (its crash harness included) green.
+  - **(E) MODEL — FIXED** (`Executor/Acts/CommonSteps.swift` `retireOwnAppleKeys`): entering Castle (Use Castle, a
+    follow or a join into Castle) also retires every Apple key an EARLIER section of this library's own record lists
+    unretired — this Mac's under a device ID it no longer remembers (a keychain wipe, a new Mac without its memory item,
+    a library it left and came back to); only sections that verify with this library's own keys count (another Mac's
+    library seals its sections under its own keys). Rule 11's own words: "your Standard-era backups' quiet locks die with
+    it". Pin `U4CensusPins.enteringCastleAfterAKeychainWipeRetiresTheAppleKeysMadeBeforeIt` (census seed 21 seq 756,
+    replayed step for step): red before — promise 1 "a quiet road reaches an earlier key" and "opens the copy" (the
+    pre-wipe Apple key locking the first backup's key file), the key not recorded retired — green after.
+  - **(D) MODEL — FIXED** (`Assess/Facts.swift`, `Assess/Assess.swift` `lobby`): `ProtectionFacts
+    .rememberedKeyFileCopies` (the copies the memory items carry, read as the items state them; nil = not read, the old
+    reading); rule 27's lobby refusal no longer waits on a memory item that carries NO copy (it opens nothing). Pin
+    `U4CensusPins.aMemoryItemWithNoKeyFileCopyDoesntSilenceRule27` (census seed 21 seq 789): red before — promise 5 "the
+    library in the live place opens by no road, and the lobby doesn't say so" — green after.
+  - **(H) CHECKER — FIXED** (`Promises.swift` promise 9): Make this my library's posture clause compares with the posture
+    AT THE PRESS (`truth.makeMinePressMode`, recorded inside the act after the open settled a crashed crossing), not the
+    one before the step (census seq 22, 219, 509).
+  - **L6 CHECKER — a library put in the live place from outside** (`truth.liveFromOutside`, set by a replayed library
+    file and by any open that said rule 21's notice; `fromOutside`, `splitPair`): promise 2 skips a SPLIT PAIR (no Apple
+    road can be re-made into a key file of another key — P-VX378-U4-6 (a)); promise 3 lets that copy hold the account's
+    keys in its own posture until it follows, and doesn't ask a split pair (which can't follow) to converge; promise 4's
+    caught-up clause reads the floor for it (it opens with the secrets it was made with); promise 9's tamper clause
+    treats ANY library-file replay as the copy's own day — the notice is promise 7's to judge, and a same-key replay is
+    one rule 21's four things can't tell (**P-VX378-U4-7**, PROVISIONAL). Her words for the frame: "they have to just
+    remember that at that point"; P-VX378-U4-2's closure.
+  Remaining: census re-run on this tree; (I) and anything new traced. Protection set Debug `✔ 290 tests in 74 suites
+  passed`.
 - 5 — THE DISCOVERY RUN (seeds 21–40) and THE GATE SOAK (seeds 1–20, Debug and Release): NOT-STARTED. Tables land as
   they complete. PENDING.
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.

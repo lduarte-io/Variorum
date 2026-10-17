@@ -3034,3 +3034,17 @@ hand — the key file beside the library does not open it — is an OFFER"*. Two
   it. (b) restore automatically from the backup too (rule 1's "without asking").
 Record: the plan's §8 U4 RESUMPTION RECORD, piece 3. Status: PROVISIONAL (a), both — your eye at the bundle.
 
+**P-VX378-U4-7 — An older copy under the SAME key opens with no notice.** (Found by the census of piece 4.) Rule 21's
+four things name the library by its ID and its key; a key changes only at a key change, so a backup made since the last
+one is, by those four things, "the one this Mac last opened". Copied into the live place (or replayed), it opens SILENTLY
+— its record of that day with it: the account it was bound to then (turning sync on and leaving an account change no
+key — rules 7, 16), this Mac's settings of that day. Options:
+- **(a) BUILT, PROVISIONAL —** as rule 21 reads: what this Mac remembers can't tell it, so nothing is said; the world
+  reads such a replay as outside the promise (P-VX378-U4-2's closure — "someone with access to your computer can of
+  course delete your library"); sync catches the content up at its next round.
+- (b) a fifth remembered thing (the record's date) so a same-key older copy is noticed too — against rule 21's "four
+  things", yours to rule.
+- (c) the key changes at every account change (sync setup, a join, a leave), so a copy across one always differs —
+  against rules 7 and 16 ("never changes the key"), listed so it isn't proposed.
+Record: the plan's §8 U4 RESUMPTION RECORD, piece 4. Status: PROVISIONAL (a) — your eye at the bundle.
+
