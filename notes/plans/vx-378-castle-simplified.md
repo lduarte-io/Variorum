@@ -322,8 +322,10 @@ record committed with PENDING numbers first.
   A–J with their commits and red-on-old evidence; five PROVISIONALs). After (code tree `320579718`): the protection
   set Debug `✔ 254 tests in 67 suites`, `-c release` `✔ 232 in 63`, the full core suite green in Debug; 7,562
   source lines, 9,380 test lines.
-- U3 — the lifecycle proof: **IN-PROGRESS** (Opus implementer, 2026-10-16) — §8's U3 RECORD (pieces A–F; counts
-  PENDING). Next: piece F, the closing runs.
+- U3 — the lifecycle proof: **DONE, awaiting the cold review** (Opus implementer, 2026-10-16) — §8's U3 RECORD (the
+  fixture first, the scenario's four walks, the page rendered from the fixture; three FACTS DIFF and two PROVISIONALs
+  for her). After (code tree `389162a09`): the protection set Debug `✔ 259 tests in 69 suites`, `-c release` `✔ 237 in
+  65`, the full core suite green in Debug; `Sources/…/Protection/` untouched (7,562), tests 12,068.
 - U4 — the world and the soak: not started.
 - The ladder: not started.
 - The gate: not started.
@@ -867,9 +869,22 @@ crosses. P-VX378-U2-2 → RULED (a). The declined options stay listed in QUESTIO
 P-VX378-O1-1's (a); P-VX378-U2-3's "here they are" fact at stage 12 reads "the words are shown when they were typed";
 everything else on the page stands as its facts.
 
-### U3 RECORD — THE LIFECYCLE PROOF (Opus implementer, 2026-10-16; IN-PROGRESS)
+### U3 RECORD — THE LIFECYCLE PROOF (Opus implementer, 2026-10-16; DONE — awaiting the cold review)
 
-**Not done in U3, first:** PENDING (filled at the close).
+**Not done in U3, first (each with its reason):**
+- **No model change.** `Sources/VariorumCore/Protection/` is untouched (7,562 lines, as U2 left it): every page fact the
+  model doesn't produce is a FACTS DIFF, hers to accept — never a model edit to make the fixture pass.
+- **The page's words are unchanged where a FACTS DIFF stands** (FD-1, FD-2, FD-3): each stage shows an "under review"
+  note until she rules; the fixture keeps the page's fact with the diff on its status.
+- **Branches the page offers but this road doesn't take are not walked** — each is named in the fixture with where it
+  is proven or whose it is (`LStatus.branch` / `.notAModelFact`): "either secret can reset the other" (the key-door
+  tests), a library with no passphrase entering Castle (`doorSecrets` sets one), "you never leave Castle by opening
+  something" (`U2MakeMineTests.inCastleTheNewLibraryIsCastle`), Castle's Touch ID re-arm on new hardware (a press, never
+  a repair — the guard and its pins; the face VX-306's), a device that lagged through the whole Castle stretch
+  (`FollowTests.aDeviceThatLaggedThroughCastleCatchesUpWithOneSecret`); and the faces' and Apple's sentences (the
+  reminder schedule, the leave screen's words, "shows the words", the Restore from Backup button, the server's
+  row-level security, what Apple carries to a new Mac).
+- **The promises are not checked on this walk** — U4 rewrites them; the lifecycle's only authority is the fixture.
 
 **The calls (each recorded with its reason):**
 - **The fixture is a Swift literal**, `Tests/VariorumCoreTests/Protection/Scenario/Lifecycle/LifecycleFixture.swift`
@@ -899,26 +914,68 @@ everything else on the page stands as its facts.
   second copy. Regeneration: `CASTLE_LIFECYCLE_PAGE_OUT=<path> swift test --filter LifecyclePageTests`, then `cmp`.
 
 **Pieces (the resume map — a fresh session can finish U3 from this list and `git log`):**
-- A — the record skeleton and LIVE STATUS: DONE (this commit).
-- B — the fixture alone (the page's fourteen stages as typed facts, the prose riding as data): DONE (this commit) —
+- A — the record skeleton and LIVE STATUS: DONE (`81cc3534d`).
+- B — the fixture alone (the page's fourteen stages as typed facts, the prose riding as data): DONE (`bb0550230`) —
   compiles in the test target (`swift build --build-tests`); no test reads it yet.
-- C — the scenario: the fourteen stages walked through the real acts, asserting against the fixture: IN-PROGRESS —
+- C — the scenario: the fourteen stages walked through the real acts, asserting against the fixture: DONE (`bdd19624e`,
+  the posture check `389162a09`) —
   the walk (`LifecycleWalk.swift`), the fixture's judgment (`LifecycleChecks.swift`) and the suite
-  (`LifecycleScenarioTests.swift`) committed (this commit) in the state of their FIRST RUN: red at exactly the facts
+  (`LifecycleScenarioTests.swift`) committed in the state of their FIRST RUN: red at exactly the facts
   the model does not produce (FD-1 stage 1, FD-2 stage 6 under the Apple-ID road, FD-3 stage 8 — the FACTS DIFF
   below), every other chip and fact green in all four walks; `everyChipDiscriminates` green (every chip, flipped,
   fails the same world). One fixture addition before that first run, recorded: stage 6's "deleted" typed as its own
   fact (`appleKeysDeleted`) — piece B had typed only "die everywhere". The FACTS DIFF marked in the next commit
-  (E): the suite green in all four walks.
-- D — the renderer and the regenerated page (`cmp`): DONE (this commit). **Lossless first:** rendering the fixture with
+  (E(1), `a83c44d21`): the suite green in all four walks.
+- D — the renderer and the regenerated page (`cmp`): DONE (`475d91177`). **Lossless first:** rendering the fixture with
   the target's own lead and footer and no review notes reproduces the target page BYTE FOR BYTE (`cmp` identical to the
   page as committed at `bb0550230`). Then the regenerated page: prose changed only where recorded (the lead's last
   sentence and the footer now say the page is rendered from the fixture; one style line, `.note.diff`, for the "under
   review" note each FACTS DIFF puts on its stage — FD-1 on stage 1, FD-2 on 6, FD-3 on 8); `cmp` of the render
   (`CASTLE_LIFECYCLE_PAGE_OUT`) with the committed page: identical; the guard test green.
-- E — FACTS DIFF and PROVISIONALs (QUESTIONS): DONE — the three diffs marked (`a83c44d21`); QUESTIONS (this commit):
+- E — FACTS DIFF and PROVISIONALs (QUESTIONS): DONE — the three diffs marked (`a83c44d21`); QUESTIONS (`6f24fada4`):
   P-VX378-U3-1, P-VX378-U3-2 and the FACTS DIFF bundle.
-- F — the closing runs, counts, this record closed: NOT-STARTED.
+- F — the closing runs, counts, this record closed: DONE (this commit).
+
+**The stage that first went red, and why that proves the fixture is the authority.** The scenario's first run went red
+first at **stage 1** — the note's *"If you skip writing the words down, the app reminds you"* (FD-1) — then at stage 6
+on the Apple-ID road (FD-2) and stage 8 (FD-3), every other chip and written fact green in all four walks (one more red
+that first run, at stage 14's "four things remembered", was the TEST's own timing — it read what this Mac remembers
+after the stage's deliberate deletions; the observation moved to the stage's start, no fixture change). Those reds are
+page sentences the model doesn't produce, found where the page and the build differ: the fixture was committed alone (`bb0550230`) before any test existed and anticipates nothing about the model; the
+checks try each road for real (a typed secret against a key file and its history, an Apple key against a lock, an
+item's key against a file, the model's own Look inside door agreeing) and never read the model's route sentence or
+`assess`'s opinion of a road. **`everyChipDiscriminates`** shows it for every chip: in two walks, each of the stages'
+road chips (shown and hidden) asked to show the opposite of what the fixture says FAILS the same world — no chip
+passes either way. On a tree before U2 the scenario doesn't compile (the creation took its words from the caller; Look
+inside and Make this my library didn't exist) — red by construction, as U2's new-API tests were.
+
+**What the walk does, stage by stage** (`LifecycleWalk.swift`; the fixture's `road` line names each): 1 create (no
+passphrase) · 2 the plain-confirm passphrase door (P-VX378-U3-1) · 3 backup A · 4 Change Passphrase · 5 each "or": her
+devices to another Apple ID (P-VX378-U3-2) / iCloud Keychain reset, then the next open with nothing typed · 6 the
+scheduled export on, Use Castle typing both secrets — each gate, Touch ID and Always ask — then the export turned back
+on · 7 New Words, backup B · 8 Use Standard typing both · 9 Look inside backup B (every secret the page names, and none)
+then Make this my library · 10 their library on their Mac (another Apple ID, their own account), Send Library to her
+Mac, Look inside it, Make this my library · 11 new hardware with no keychain item arriving, the first open · 12 sync on
+first; her other Mac makes a library, backs it up, joins typing the account's passphrase; it enters Castle, her Mac
+lags then follows typing one secret; her Mac leaves Castle, the other follows out quietly; the other leaves the account
+and signs back in · 13 Replace All Keys crashed after its first write, then after its plan, each with the next open ·
+14 a backup pair copied in by hand, a replayed old library file, someone else's file swapped in (each opened, then put
+back), the live key file deleted, then every key-file copy gone. Four walks (two stage-5 roads × two gates), ~0.7 s.
+
+**Found while proving (for the orchestrator — none stopped the unit; none is a model change of mine):**
+- **After Make this my library, today's secrets no longer open the old library's backups through Look inside.** The
+  new library's key file has no past (rule 17), and Look inside tries only the copy's own key file and the LIVE key
+  file's history, so backup A (stage 3's) refuses today's passphrase and words after stage 9 — only its day's secrets
+  open it — although the library that stepped aside, in Previous Libraries, carries a key file whose history reaches it
+  with today's passphrase (probed, not committed: `lookInside(A)` today P/W refused, its-day words opened, the Previous
+  Libraries key file reaches A). Not a page fact (the page follows no backup past stage 8), but it meets the core
+  sentence and U4's planned promise *"your current passphrase or words open every copy you have ever made"* — U4's to
+  settle (rule 19 calls them another library's copies; the road exists in the catalog).
+- **The copy doors take a catalogued copy; an AirDropped folder isn't one.** Send Library's hand-off folder is "not a
+  copy place" to the catalog, so stage 10 files what arrived where the catalog reads another library's copy
+  (`Backups/<their library8>/<their mac8>/`) before the doors — the picker that hands an arbitrary folder to Look inside
+  is VX-309's (beside T-5), as U2 recorded.
+- **FD-2's rule question** (rule 11's parenthetical vs a key left in an Apple account she has left) — in FACTS DIFF.
 
 **FACTS DIFF** (each hers to accept; never a silent edit of the fixture — the page's fact stays in the fixture as the
 page states it, the status names the diff and the fact the model produces instead, which the scenario asserts; it also
@@ -947,7 +1004,22 @@ scenario's FIRST run (piece C, `bdd19624e`); none was anticipated in the fixture
   reading, accepted by the orchestrator. Rule 12 carries the same words. Proposed page words: *"This Mac's on-device
   road and its sealed key-file copy now hold the new key."*
 
-**The runs (exit lines, both configurations):** PENDING.
+**The runs (exit lines, both configurations; code tree `389162a09`):**
+- The protection set, Debug (`swift test --filter 'VariorumCoreTests\.(<the 69 suites under
+  Tests/VariorumCoreTests/Protection>)/'`, exit 0): `✔ Test run with 259 tests in 69 suites passed after 2.731
+  seconds.` Before U3 (U2's close): `✔ 254 tests in 67 suites`.
+- The full core suite, Debug (`swift test`, exit 0): `✔ Test run with 240 tests in 51 suites passed after 22.803
+  seconds.` · `✔ Test run with 3119 tests in 399 suites passed after 186.167 seconds.` · `✔ Test run with 40 tests in
+  6 suites passed after 45.492 seconds.`
+- `swift build -c release` (exit 0): `Build complete! (87.74 sec)`.
+- The protection set, Release (`swift test -c release --filter <the same>`, exit 0): `✔ Test run with 237 tests in 65
+  suites passed after 2.139 seconds.` — the lifecycle suites run there too (no DEBUG switch in them): the scenario's
+  four walks, the discrimination's two, the fixture's wholeness, the page guard.
+- `cmp` of the render with the committed page: identical (piece D, and the guard test green in both configurations).
+- Line counts: `Sources/VariorumCore/Protection/` 7,562 → **7,562** (untouched); `Tests/VariorumCoreTests/Protection/`
+  9,380 → **12,068**. The diff `e6ca657ce..HEAD`: 10 files — the seven new files under
+  `Tests/VariorumCoreTests/Protection/Scenario/Lifecycle/`, `notes/plans/vx-266/castle-lifecycle.html` (regenerated),
+  this plan and `notes/QUESTIONS.md`.
 
 **PROVISIONAL calls** (logged under the VX-378 heading in `notes/QUESTIONS.md`, "VX-378 U3 THE LIFECYCLE PROOF"):
 - **P-VX378-U3-1** — "you set a passphrase" (stage 2) is the Standard road of the forgotten-passphrase door,
@@ -956,7 +1028,9 @@ scenario's FIRST run (piece C, `bdd19624e`); none was anticipated in the fixture
 - **P-VX378-U3-2** — "you change your Apple ID" (stage 5) moves every device of hers; option (b) this Mac alone.
 - The three FACTS DIFF are logged there too, each with its (a)/(b), for her bundle.
 
-**Commits:** A (this commit).
+**Commits:** A `81cc3534d` · B `bb0550230` (the fixture alone) · C `bdd19624e` (the scenario at its first run) · E(1)
+`a83c44d21` (the FACTS DIFF marked) · D `475d91177` (the renderer and the page) · E(2) `6f24fada4` (QUESTIONS) · the
+posture check `389162a09` · F (this record's close — the next commit).
 
 ## 9. The ladder
 
