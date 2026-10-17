@@ -327,9 +327,10 @@ record committed with PENDING numbers first.
   for her). After (code tree `389162a09`): the protection set Debug `✔ 259 tests in 69 suites`, `-c release` `✔ 237 in
   65`, the full core suite green in Debug; `Sources/…/Protection/` untouched (7,562), tests 12,068.
 - U4 — the world and the soak: **IN PROGRESS** (Opus implementer, 2026-10-16) — §8's U4 RECORD (the resume map). Piece
-  A (this record) DONE; B (her FACTS DIFF rulings) DONE; C (the promises) NEXT; D (starting states, alphabet, mutation
-  pins), E (the discovery run, seeds 21–40), F (the gate soak, seeds 1–20 both configurations), G (the record closed)
-  NOT-STARTED. Counts PENDING.
+  A (this record) DONE; B (her FACTS DIFF rulings) DONE; B2 (her P-VX378-U4-1 ruling — Make this my library carries
+  the key history) DONE; C (the promises) IN PROGRESS; D (starting states, alphabet, mutation pins), E (the discovery
+  run, seeds 21–40), F (the gate soak, seeds 1–20 both configurations), G (the record closed) NOT-STARTED. Counts
+  PENDING.
 - The ladder: not started.
 - The gate: not started.
 
@@ -1105,9 +1106,43 @@ her rulings above, never silently; the fixture diffs FD-1…3 close with them.
   other stage-5 road — no pass either way). Runs: `swift test --filter 'VariorumCoreTests\.(LifecycleScenarioTests|
   LifecyclePageTests)/'` → `✔ Test run with 6 tests in 2 suites passed` (the four walks, the two discriminations, the
   other-road guard's two, the fixture's wholeness, the page guard); the render `cmp`-IDENTICAL to the committed page.
+- B2 — HER RULING ON P-VX378-U4-1 (2026-10-16, relayed by the orchestrator mid-unit — binding): Make this my library
+  CARRIES THE KEY HISTORY FORWARD. Her words, verbatim: *"let's just keep carrying the key history file forward - I see
+  no particular reason to not do it, if you've decided that this is your library from now on, then why should it *not*
+  have the old keys to your previous library? we say clearly that your new library always carries keys forward."* — and,
+  earlier in the same sitting, agreeing the posture and the no-setting shape: *"ok yes, I'm happy with this."* DONE (this
+  commit). **The model** (`Sources/…/Protection/`, three files): `KeyFile.building(…, carrying:)`; `makeThisMyLibrary`
+  gathers at the press — held with the copy's key, never stored — the copy's key and its own key file's history, then
+  the previous library's key and its history; `makeMineKeyFile` seals them under the new key (a resume without them
+  rolls back, as the stage step already did without the copy's key); `makeMineRecord` carries the previous section's
+  Apple-key records into the new section. **Two readings, recorded:** (1) the history holds BOTH the copy's keys (the
+  orchestrator's mechanism, rule 17's new words, her pins 1(c)) AND the previous library's keys — her own words ("the
+  old keys to your previous library"), the stage-10 fact the orchestrator named ("the same mechanism": her backups still
+  open after someone else's library is made hers) and the unscoped core sentence all need the second set; the copy's
+  history alone would leave stage 10 and the core sentence false. Rule 17's added words name the copy's history only —
+  **for the orchestrator: she may want "and your previous library's" in that sentence** (not edited here — the one
+  wording given was applied verbatim). (2) The previous library's own Apple-key records come into the new section:
+  without them, a later Use Castle on the new library would leave the Apple key that wraps a key its history now holds
+  (the previous library's) alive — rule 11's "entering takes everything in" broken by the carried history; with them,
+  the entry retires it (pinned). **Pins** `U4MakeMineHistoryTests` (5): red on the pre-piece tree (scratch worktree at
+  `a8fe1f349`, the pin file copied in — "4 tests in 1 suite failed … with 6 issues": `:63` the previous library's backup
+  doesn't open with today's passphrase through the new history (the old tree opened it only by its own Apple lock),
+  `:81`/`:82` a Castle Mac's new Castle key carries neither the Standard copy's keys nor the previous library's key,
+  `:105` a Standard Mac's new key carries no Castle keys, `:126`/`:127` the previous library's Apple key survives a later
+  Use Castle); `theDoorAlwaysVerifiesTheCurrentPairAndOffersNoChoice` is the guard her "make sure a pin says so" asked
+  for — green both sides (the built shape unchanged: the posture of now, no choice, the current pair always typed). The
+  crash harness over the changed act (`U2MakeMineTests.aCrashAfterEveryWriteFinishesOrNeverHappened`) green;
+  `U2MakeMineTests`' "no past" assertion turned to the carried history. **Rules:** `notes/CastleRules.md` rule 17 gains
+  *"carrying the copy's key history forward (rule 4)"* — the one wording change at her ruling. **The lifecycle:** stage 9's
+  and 10's Make-this-my-library text and facts carry the history (the `makeMine` check now asserts the carried set), and
+  hidden roads assert backups A and B (and, at stage 10, their library) open with today's secrets through the new
+  library's history — red on the pre-ruling model in all four walks (scratch run: "Look inside refused a secret the road
+  opens" at stages 9 and 10, `everyChipDiscriminates` "passes either way" there), green after; the page re-rendered,
+  `cmp`-identical; lifecycle suites `✔ 6 tests in 2 suites`. QUESTIONS: P-VX378-U4-1 → RULED, option (b) recorded as
+  not chosen.
 - C — the promises rewritten to the rules (each quoting its rule; promise 6 strict; promise 3 tightened;
-  `resumeAtVaultReach` deleted; none about pre-leave copies after a leave; P-VX378-U4-1 the core sentence scoped to the
-  library's own lineage, PROVISIONAL): NOT-STARTED.
+  `resumeAtVaultReach` deleted; none about pre-leave copies after a leave; the core sentence UNSCOPED — it holds across
+  Make this my library at her ruling, B2): IN PROGRESS.
 - D — starting states (the new-system shapes), the adversary alphabet (the replay tampers back as DETECTION), the
   mutation pins (every surviving guard red with its guard off): NOT-STARTED.
 - E — the discovery run: `PROTECTION_SOAK=1` seeds 21–40 × 1,000 × ≤60, Debug, one seed per call; every red triaged;

@@ -2886,3 +2886,30 @@ differs. Full text: the plan's §8 U3 RECORD, "FACTS DIFF", and `Lifecycle.facts
   ruling (rule 8's row). (a) accept — the page (and rule 12) read "this Mac's on-device road and its sealed key-file copy
   now hold the new key"; (b) re-open F13 (a Touch ID-gated item in Standard, prompting at every quiet open — against
   rule 8's "quiet").
+
+### VX-378 U4 THE WORLD AND THE SOAK (2026-10-16; the plan's §8 U4 RECORD)
+
+**P-VX378-U4-1 — After Make this my library, do today's secrets still open the previous library's backups (U3's
+found-while-proving item 1)?** Rule 17 made the new library's key a fresh key "with no past", and Look inside tries only a
+copy's own key file and the live key file's history, so after Make this my library a backup of the library that stepped
+aside opened only with the secrets of its day. Options put to her:
+- (a) scoped as built: the core sentence ("your current passphrase or words open every copy you have ever made") holds
+  within one library's own lineage; the stepped-aside library's copies open with their day's secrets or through its own
+  set-aside key file in Previous Libraries.
+- (b) Look inside also reads any catalogued key file of the same library ID (the Previous Libraries key file among them),
+  so today's secrets keep opening the old library's backups.
+- **(c) — her ruling — Make this my library CARRIES THE KEY HISTORY FORWARD**, rule 4 applied at the door.
+
+**Status: RULED 2026-10-16 (the author, to the orchestrator), verbatim:** *"let's just keep carrying the key history file
+forward - I see no particular reason to not do it, if you've decided that this is your library from now on, then why
+should it *not* have the old keys to your previous library? we say clearly that your new library always carries keys
+forward."* Earlier in the same sitting, agreeing the posture and the no-setting shape: *"ok yes, I'm happy with this."*
+Built in U4 (the plan's §8 U4 RECORD, piece B2): the new library's key is still a FRESH key (a fresh library ID, a fresh
+device ID, the posture of now, under the current pair); its history holds the copy's key and the copy's key file's
+history, and the previous library's key and its history ("the old keys to your previous library"), each sealed under the
+new key; quiet roads still open only the new key directly; the posture of now always wins at the door, with no setting
+or choice there; the Apple keys this Mac made for the previous library come with its keys into the new section, so
+entering Castle later retires them (rule 11). `notes/CastleRules.md` rule 17 gains "carrying the copy's key history
+forward (rule 4)". **Option (b) is NOT what she chose** — the set-aside key file is left alone; the carried history
+makes it unnecessary. Do not re-propose (a) or (b). The core sentence holds across Make this my library, unscoped.
+

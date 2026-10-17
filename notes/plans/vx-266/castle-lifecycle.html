@@ -105,13 +105,13 @@
 <div class="stage any"><h3>9 · You open a Castle-era backup after leaving <small>Look inside, or Make this my library</small></h3>
 <dl>
 <dt>Look inside</dt><dd>Type your current passphrase or words (or backup B's own Castle ones). It opens read-only. Nothing is written — no key file, no keychain item, no change to your library. Close it and the app forgets it [17].</dd>
-<dt>Make this my library</dt><dd>One confirmed door. Backup B becomes a <b>new library</b> with a fresh key in the posture you are in now (Standard, here), under your current pair, and your current library steps aside whole into Previous Libraries [17]. Backup B itself is untouched. The app's Restore from Backup button is this door.</dd>
+<dt>Make this my library</dt><dd>One confirmed door. Backup B becomes a <b>new library</b> with a fresh key in the posture you are in now (Standard, here), under your current pair — the new key carrying backup B's key history forward, and your previous library's keys with it, so every earlier backup still opens with today's secrets [4, 17] — and your current library steps aside whole into Previous Libraries [17]. Backup B itself is untouched. The app's Restore from Backup button is this door.</dd>
 </dl></div>
 
 <div class="stage any"><h3>10 · Someone AirDrops you their library <small>any posture</small></h3>
 <dl>
 <dt>Look inside</dt><dd>Opens with <em>their</em> secrets, read-only, writes nothing [17].</dd>
-<dt>Make this my library</dt><dd>It becomes a new library of yours, with a fresh identity and a fresh key in your posture, under your current pair; you never leave Castle by opening something [17, 18]. From here the two copies diverge — sharing a library across devices is what sync is for. If you sync, their writing joins <em>your</em> account as a copy and nothing leaves theirs: the server keeps every account's rows apart, reachable only with that account's own sign-in and sync key [18].</dd>
+<dt>Make this my library</dt><dd>It becomes a new library of yours, with a fresh identity and a fresh key in your posture, under your current pair — the new key carrying their library's key history forward, and your previous library's keys with it, so your own earlier backups still open with today's secrets [4, 17]; you never leave Castle by opening something [17, 18]. From here the two copies diverge — sharing a library across devices is what sync is for. If you sync, their writing joins <em>your</em> account as a copy and nothing leaves theirs: the server keeps every account's rows apart, reachable only with that account's own sign-in and sync key [18].</dd>
 </dl></div>
 
 <div class="stage any"><h3>11 · You move to a new Mac with Migration Assistant <small>any posture</small></h3>

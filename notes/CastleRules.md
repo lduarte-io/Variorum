@@ -100,8 +100,9 @@ and never leaves a hole you chose to close.**
 17. **A copy is a copy.** *Look inside:* any copy — your old backup, someone else's library — opens read-only with its
     own secrets (or its own quiet road on this Mac). The app writes nothing: no key file, no keychain item, no change to
     your library. Close it and the app forgets it. *Make this my library:* one confirmed door. The copy takes the live
-    place as a **new library** — a fresh identity and a fresh key in the posture you are in now, under your current pair
-    — and your previous library steps aside whole into Previous Libraries. The app's Restore from Backup is this door.
+    place as a **new library** — a fresh identity and a fresh key in the posture you are in now, under your current pair,
+    carrying the copy's key history forward (rule 4) — and your previous library steps aside whole into Previous
+    Libraries. The app's Restore from Backup is this door.
     You never leave Castle by opening something.
 18. **Two devices share a library through sync, never through files.** An AirDropped library is a copy; it becomes its
     own library on arrival and may diverge, unless both devices sign into the same account. A restored copy that joins

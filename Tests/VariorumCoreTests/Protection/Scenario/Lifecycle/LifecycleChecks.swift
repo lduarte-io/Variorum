@@ -436,7 +436,14 @@ struct LifecycleChecks {
             expect(library.section.deviceID != seen.oldDeviceID, "not a fresh device ID")
             expect(record.mode == seen.oldMode, "the posture of now was \(seen.oldMode.rawValue); it's \(record.mode.rawValue)")
             expect(record.account == nil && live?.master == nil, "it carries an account")
-            expect(live?.history.isEmpty == true, "it has a past")
+            // Her ruling on P-VX378-U4-1: the key history carried forward — the
+            // copy's key and its key file's history, the previous library's key
+            // and its history.
+            var carried = Set([seen.oldFingerprint] + (seen.oldKeyFile?.history.map(\.fingerprint) ?? []))
+            if let image = seen.copyFiles.0?.library { carried.insert(image.fingerprint) }
+            carried.formUnion(seen.copyFiles.1?.keyFile?.history.map(\.fingerprint) ?? [])
+            let held = Set(live?.heldFingerprints ?? [])
+            expect(carried.isSubset(of: held), "it doesn't carry \(carried.subtracting(held).count) of the keys it carries forward")
             expect(secretOpensLive(walk.passphrase.map { .passphrase($0) }), "the current passphrase doesn't open it")
             expect(secretOpensLive(.words(walk.words)), "the current words don't open it")
             if let p = seen.copySecrets.passphrase, p != walk.passphrase {

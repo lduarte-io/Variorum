@@ -110,7 +110,10 @@ struct U2MakeMineTests {
         #expect(mine.world.live?.generation == 42 && library.key != k0 && library.key != theirs.key)
         #expect(library.section.deviceID != oldDevice, "rule 23: a fresh device ID for the new library")
         let live = try #require(mine.world.liveFormat3)
-        #expect(live.libraryID == record.libraryID && live.history.isEmpty)
+        // (Her ruling on P-VX378-U4-1, VX-378 U4: the new key carries the key
+        // history forward — the copy's and the previous library's.)
+        #expect(live.libraryID == record.libraryID && live.heldFingerprints.contains(PF.fp(k0))
+                && live.heldFingerprints.contains(PF.fp(theirs.key)))
         #expect(try live.open(passphrase: .passphrase(mine.passphrase), floor: PF.floor) == library.key)
         #expect(try live.open(words: mine.words) == library.key)
         #expect((try? live.open(.words(theirs.words), floor: PF.floor)) == nil, "the copy's own secrets lock the new library")
