@@ -189,6 +189,11 @@ struct LifecycleChecks {
 
     func verify(_ stage: LStage, _ ctx: LStageContext) -> [String] {
         var failures: [String] = []
+        // The stage's posture: the live library's mode at the stage's end.
+        let mode: ProtectionMode? = stage.posture == .standard ? .standard : stage.posture == .castle ? .castle : nil
+        if let mode, walk.mac.slot?.record?.mode != mode {
+            failures.append("stage \(ctx.number): the page's posture is \(mode.rawValue), the library is \(walk.mac.slot?.record?.mode.rawValue ?? "nothing")")
+        }
         for row in stage.rows {
             switch row.content {
             case .text: break
