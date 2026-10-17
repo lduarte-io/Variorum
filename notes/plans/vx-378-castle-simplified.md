@@ -1650,6 +1650,10 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
   - seq 555 (P5): before the open, with NOTHING remembered (a keychain wipe), another library's key files in a shared
     iCloud Drive folder might be the live library's own — the lobby can't tell which library is in the slot, so rule
     27's refusal isn't owed there (it stays owed whenever the lobby can tell — class (D)'s two fixes).
+  **Census on `80ebce0f4`: seed 26 — 2 failing (45,155 steps, 259.7 s): P5 ×2.** Closed in the next commit, CHECKER:
+  seq 511 · 521 — a Standard library with no passphrase whose only typed lock a login-password holder dropped (L3, rule
+  3: they hold the key), then a new Mac or a wiped keychain took its quiet roads: no road is left, and that is the
+  tamper's — promise 5 now reads L3 for the library in the live place and for its copies.
 - 5 — THE DISCOVERY RUN (seeds 21–40) and THE GATE SOAK (seeds 1–20, Debug and Release): NOT-STARTED. Tables land as
   they complete. PENDING.
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.

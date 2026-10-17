@@ -703,12 +703,17 @@ extension SWorld {
             guard let (fs, path) = DeviceLeaves(world: self, device: device).resolve(id), let image = fs.files[path]?.library else {
                 continue  // deleted (by her, by retention, by a wiped container)
             }
+            if truth.tamperedStandard[device.name]?.contains(image.fingerprint) == true { continue }  // L3
             if reached(device)[image.fingerprint] == nil {
                 violations.append(Violation(promise: 5, device: device.name, detail: "the copy \(id) (\(f8(image.fingerprint))) opens by no road"))
             }
         }
         for device in devices where !device.isOpen {
             guard let slot = device.slot, slot.record != nil, reached(device)[slot.fingerprint] == nil else { continue }
+            // L3 (rule 3): a login-password holder rewrote this Standard key's
+            // file (its only typed lock dropped) — they hold the key; what they
+            // left is theirs (census seed 26 sequences 511, 521).
+            if truth.tamperedStandard[device.name]?.contains(slot.fingerprint) == true { continue }
             // Before the open, with nothing remembered, the lobby can't tell which
             // library is in the live place: another library's key file there (the
             // other Mac's backups in a shared folder) might be its own — rule 27's
