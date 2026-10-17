@@ -113,14 +113,18 @@ extension ProtectionExecutor {
             if library.keyFile?.passphrase != nil {
                 secrets.passphrase = try verifiedPassphrase(typed.passphrase, against: library.keyFile)
             } else {
-                // The passphrase typed — set if none (an exposed-era library).
+                // The passphrase typed — set if none yet (rule 3: a library is
+                // asked for one; until then it has its words, rule 2).
                 guard let text = typed.passphrase ?? typed.newPassphrase else { throw ExecutorRefusal.secretMissing }
                 secrets.passphrase = try freshPassphrase(text)
                 parameters.passphraseIsNew = true
             }
             guard let words = typed.words else { throw ExecutorRefusal.secretMissing }
-            if typed.wordsAreNew || library.keyFile?.words == nil {
-                guard wordsMayBeNew || library.keyFile?.words == nil else { throw ExecutorRefusal.wordsMustBeTyped }
+            // Rule 2: every library has its words — typed ones are verified,
+            // or made new where the door allows; never adopted unverified (the
+            // no-words arm left with VX-378 U1).
+            if typed.wordsAreNew {
+                guard wordsMayBeNew else { throw ExecutorRefusal.wordsMustBeTyped }
                 secrets.words = try WordsKey.derive(words)
             } else {
                 secrets.words = try verifiedWords(words, against: library.keyFile)

@@ -153,8 +153,6 @@ public enum ExecutorRefusal: Error, Equatable, Sendable {
     case noLiveKeyFile
     case recordMissing
     case nothingToDo
-    /// The act's subject is not this library.
-    case wrongLibrary
     /// A repair the guards forbid: it would make a Touch ID item, or act
     /// destructively on a Standard record's word alone.
     case repairForbidden(String)

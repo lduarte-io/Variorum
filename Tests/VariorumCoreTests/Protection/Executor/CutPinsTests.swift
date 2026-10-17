@@ -245,3 +245,23 @@ struct CutPinsRule4QuietRoadTests {
                 "a quiet road reached through the history: \(sentence)")
     }
 }
+
+@Suite("VX-378 U1 — rule 2: no library without a secret (red on the pre-cut tree)")
+struct CutPinsRule2Tests {
+    /// RULE 2: "There is no such thing as a library with no secret." A key
+    /// file with no words lock is never a library whose words a door may take
+    /// as new: words it can't verify are refused, never adopted (the
+    /// secretless arm — "no words: the typed ones become the words").
+    @Test func wordsTheKeyFileCannotVerifyAreNeverTakenAsTheLibrarysWords() async throws {
+        let fixture = try EX(.standard)
+        var live = try #require(fixture.world.liveFormat3)
+        live.words = nil
+        fixture.world.liveKeyFile = live
+        let executor = fixture.executor()
+        var library = try fixture.unlocked(executor)
+        await #expect(throws: ExecutorRefusal.wordsDoNotOpen) {
+            _ = try await executor.useCastle(&library, typed: fixture.typed, gate: .touchID)
+        }
+        #expect(fixture.liveRecord?.mode == .standard)
+    }
+}

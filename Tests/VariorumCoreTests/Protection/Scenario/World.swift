@@ -62,21 +62,10 @@ struct Truth {
     var allWords: [[String]] = []
     /// Every copy written, by its path ("<place>:<path>").
     var copies: [String: CopyTruth] = [:]
-    /// Keys made in Castle — by the record's family tree at their birth.
-    var castleBorn: Set<String> = []
     /// Standard copies made after the moment both homes were rolled back to
     /// (the stated limit, P-U4-5): the restored Castle state doesn't reach back
     /// over them.
     var rolledBackOver: Set<String> = []
-    /// §3.1 rule 2's second exception: a library key that was current while
-    /// the library synced with an account in Standard — its copies open
-    /// through that account until the account replaces its keys or enters
-    /// Castle (the vault's corpus key id then changes).
-    var standardSynced: [String: (account: String, corpusKeyID: String)] = [:]
-    /// Apple key ids lost to an Apple-ID switch, an iCloud Keychain reset or a
-    /// wiped keychain (promise 5's "its own Apple key and this Mac's are both
-    /// gone").
-    var lostAppleKeys: Set<String> = []
     /// Devices whose STANDARD key file a login-password holder rewrote, with
     /// the key it was then under — rule 3: in Standard that person can rewrite
     /// anything, and no repair acts on a Standard record's word (§3.3), so
@@ -96,12 +85,6 @@ struct Truth {
     /// from what the Mac remembers is the rollback's consequence, not a silent
     /// change (P-U4-6).
     var beforeRollback: [String: (mode: ProtectionMode?, account: String?)] = [:]
-    /// Devices whose whole container she restored by Time Machine past a
-    /// crossing — with it, the newer key files (and their history) went: a
-    /// copy that had no passphrase or words is then promise 5's stated
-    /// exception once its own Apple key is gone, retired by her Use Castle
-    /// included (PROVISIONAL P-U4-13).
-    var restoredPastCrossing: Set<String> = []
     /// Every copy retention pruned: who, under which Mac, for which library.
     var prunes: [(by: String, mac8: String, library: String, copy: CatalogCopy)] = []
     /// Every copy opened into a library: the record before and after.
@@ -325,10 +308,6 @@ final class SWorld {
                 }
             }
             lastBinding[key] = .some(record.account)
-            if let account = record.account, record.mode == .standard,
-               let corpus = server.snapshot(account)?.corpusKeyID, truth.standardSynced[record.currentFingerprint] == nil {
-                truth.standardSynced[record.currentFingerprint] = (account, corpus)
-            }
         }
     }
 
@@ -446,12 +425,6 @@ final class SWorld {
     /// The device's keychain goes (replaced, wiped, signed into another Apple
     /// ID): its queued deletes never reach iCloud.
     func loseQueuedDeletes(_ device: SDevice) {
-        // Apple keys that lived only here (made while off, or queued and never
-        // uploaded) are gone with the keychain.
-        let cloud = device.appleAccount.flatMap { appleAccounts[$0]?.cloud } ?? [:]
-        for (name, replica) in device.keychain.synced where replica.item != nil && cloud[name]?.item == nil {
-            if let id = replica.item?.value.appleKey?.id { truth.lostAppleKeys.insert(id) }
-        }
         for (name, replica) in device.keychain.synced where replica.dirty && replica.item == nil {
             // Any lost delete: the cloud's copy comes back here (P-U4-1's class).
             truth.deletedWhileOff.insert(name)
@@ -772,13 +745,6 @@ final class SWorld {
 
     func assessed(_ device: SDevice) -> Assessment { assess(facts(device), guards: guards) }
 
-    /// The keys born in Castle on `device`'s library, as ground truth: each
-    /// Castle key, recorded while it is current (the family tree's births left
-    /// with VX-378 U1).
-    func noteBirths(_ device: SDevice) {
-        guard let record = device.library?.record else { return }
-        if record.mode == .castle { truth.castleBorn.insert(record.currentFingerprint) }
-    }
 }
 
 // MARK: - The leaves: one device's view of the world

@@ -319,8 +319,8 @@ extension ProtectionExecutor {
     }
 
     /// Secrets checked against the live key file (no vault in the act): the
-    /// passphrase typed — or, where there is none, set new; the words typed,
-    /// or made new where allowed.
+    /// passphrase typed — or, where there is none yet (rule 3), set new; the
+    /// words typed, or made new where allowed.
     func localSecrets(
         _ library: UnlockedLibrary, typed: TypedSecrets, wordsMayBeNew: Bool, parameters: inout ActParameters
     ) throws -> ActSecrets {
@@ -336,8 +336,10 @@ extension ProtectionExecutor {
             parameters.passphraseIsNew = true
         }
         guard let words = typed.words else { throw ExecutorRefusal.secretMissing }
-        if typed.wordsAreNew || library.keyFile?.words == nil {
-            guard wordsMayBeNew || library.keyFile?.words == nil else { throw ExecutorRefusal.wordsMustBeTyped }
+        // Rule 2: verified, or made new where allowed — never adopted
+        // unverified (the no-words arm left with VX-378 U1).
+        if typed.wordsAreNew {
+            guard wordsMayBeNew else { throw ExecutorRefusal.wordsMustBeTyped }
             secrets.words = try WordsKey.derive(words)
         } else {
             secrets.words = try verifiedWords(words, against: library.keyFile)

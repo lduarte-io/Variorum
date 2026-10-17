@@ -193,11 +193,10 @@ extension SWorld {
         try await runRepairs(device)
     }
 
-    /// The truth an act leaves: the keys born in Castle; a leave of the
-    /// account's secrets. (A leave of Castle's moment — promise 13's — left
-    /// with VX-378 U1, rule 13.)
+    /// The truth an act leaves: a leave of the account's secrets. (A leave of
+    /// Castle's moment — promise 13's — and the keys born in Castle left with
+    /// VX-378 U1, rules 13, 21.)
     func afterAct(_ device: SDevice, before: ProtectionRecord?) {
-        noteBirths(device)
         guard let record = device.library?.record else { return }
         if before?.libraryID == record.libraryID, let account = before?.account, record.account == nil {
             // A leave: the library's own secrets start from the account's.
@@ -450,20 +449,13 @@ extension SWorld {
         case .switchAppleID(let name, let to):
             let d = device(name)
             loseQueuedDeletes(d)
-            truth.lostAppleKeys.formUnion(readableAppleKeys(d).keys)
             d.keychain.synced.removeAll()
             d.appleAccount = to
             syncICloud(d)
         case .resetICloudKeychain(let name):
             let d = device(name)
             guard let id = d.appleAccount, let account = appleAccounts[id] else { throw WorldRefusal.notOpen }
-            for other in devices where other.appleAccount == id {
-                truth.lostAppleKeys.formUnion(readableAppleKeys(other).keys)
-                other.keychain.synced.removeAll()
-            }
-            truth.lostAppleKeys.formUnion(account.cloud.keys.compactMap {
-                ProtectionNames.parseAppleKeyAccount($0.account, scope: Self.scope)
-            })
+            for other in devices where other.appleAccount == id { other.keychain.synced.removeAll() }
             account.cloud.removeAll()
         case .wipeKeychain(let name):
             let d = device(name)
@@ -507,7 +499,6 @@ extension SWorld {
             // copies made after its moment are the later stretch's (PROVISIONAL
             // P-U4-12: the acceptance read to cover a Time Machine restore).
             if let restored = d.slot?.record, restored.currentFingerprint != was {
-                truth.restoredPastCrossing.insert(d.name)
                 for (id, copy) in truth.copies where copy.madeOn == d.name && copy.mode == .standard && copy.madeAt > restored.changedAt {
                     truth.rolledBackOver.insert(id)
                 }

@@ -481,34 +481,15 @@ extension SWorld {
             let reached = reachCache[device.name] ?? reach(herSeeds(device), files: keyFilesOn(device))
             reachCache[device.name] = reached
             if reached[image.fingerprint] != nil { continue }
-            // A Standard copy made with no passphrase or words, once its own
-            // Apple key and this Mac's are both gone (promise 5's exception):
-            // every key file here holding its key is secretless, a key that
-            // wrapped it was LOST (an Apple-ID switch, a reset, a wiped
-            // keychain), and none that wraps it reads here now.
-            let holders = keyFilesOn(device).filter { $0.fingerprint == image.fingerprint }
-            let ids = holders.compactMap { $0.apple?.keyID }
-            let readable = Set(readableAppleKeys(device).keys)
-            // "Gone" includes a key her own Use Castle retired, once she
-            // restored the container past it by Time Machine (the newer key
-            // file whose history held this copy's key went with the restore —
-            // PROVISIONAL P-U4-13).
-            var retiredHere: Set<String> = []
-            if truth.restoredPastCrossing.contains(device.name) {
-                retiredHere = device.library?.section.retiredAppleKeyIDs ?? []
-            }
-            let lost = truth.lostAppleKeys
-            let gone = { (id: String) in lost.contains(id) || retiredHere.contains(id) }
-            if !holders.isEmpty, holders.allSatisfy(secretless), ids.contains(where: gone),
-               !ids.contains(where: readable.contains) { continue }
+            // (The secretless copy's exception — a copy made with no
+            // passphrase or words whose Apple keys were lost — left with rule
+            // 2: no library is without its words.)
             violations.append(Violation(promise: 5, device: device.name, detail: "the copy \(id) (\(f8(image.fingerprint))) opens by no road"))
         }
         return violations
     }
 
-    /// A key file with no passphrase, words or master lock whose Apple keys
-    /// are all gone (an Apple-ID switch, an iCloud Keychain reset).
-    func secretless(_ file: KeyFile) -> Bool { file.passphrase == nil && file.words == nil && file.master == nil }
+
 
     /// PROMISE 11 — own copies only: retention prunes only this Mac's copies
     /// of this library.
