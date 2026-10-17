@@ -203,6 +203,11 @@ indirect enum LFact: Sendable {
     /// No Apple key that any of the library's key files ever named is readable
     /// on any device of hers (after iCloud Keychain syncs).
     case appleKeysDeletedEverywhere
+    /// Every Apple key any of the library's key files ever named is DELETED:
+    /// held by no Apple account's iCloud Keychain and by no device. (Added at
+    /// piece C, before the scenario first ran: piece B typed only "die
+    /// everywhere"; the sentence also says "deleted".)
+    case appleKeysDeleted
     /// The live key file's Apple lock names an Apple key it never named before,
     /// readable here.
     case freshAppleRoad
@@ -391,6 +396,20 @@ struct LFactsDiff: Sendable {
 // MARK: - The fixture
 
 enum Lifecycle {
+    /// Every road chip of a stage — shown and hidden — with its subject.
+    static func chips(of stage: LStage) -> [(LSubject, LChip)] {
+        var all: [(LSubject, LChip)] = []
+        for row in stage.rows {
+            switch row.content {
+            case .text: break
+            case .chips(let subject, let chips), .textStating(_, let subject, let chips):
+                all += chips.map { (subject, $0) }
+            }
+        }
+        for hidden in stage.hidden { all += hidden.chips.map { (hidden.subject, $0) } }
+        return all
+    }
+
     /// Every FACTS DIFF (none at extraction; each later one recorded with its
     /// reason in the plan's U3 RECORD).
     static let factsDiff: [LFactsDiff] = []
@@ -594,6 +613,7 @@ enum Lifecycle {
                     fact: .appleKeysDeletedEverywhere,
                     quote: "The Apple and on-device keychain entries are deleted — and the Apple deletion reaches your other Macs too, so backup A's quiet locks die everywhere.",
                     rules: [9, 11]),
+                LFactEntry(fact: .appleKeysDeleted, quote: "The Apple and on-device keychain entries are deleted", rules: [11]),
                 LFactEntry(fact: .noOnDeviceItemForAnyKeyItHasHad, quote: "The Apple and on-device keychain entries are deleted", rules: [11]),
                 LFactEntry(
                     fact: .touchIDItemIfChosen,

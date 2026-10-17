@@ -891,7 +891,13 @@ everything else on the page stands as its facts.
 - A — the record skeleton and LIVE STATUS: DONE (this commit).
 - B — the fixture alone (the page's fourteen stages as typed facts, the prose riding as data): DONE (this commit) —
   compiles in the test target (`swift build --build-tests`); no test reads it yet.
-- C — the scenario: the fourteen stages walked through the real acts, asserting against the fixture: NOT-STARTED.
+- C — the scenario: the fourteen stages walked through the real acts, asserting against the fixture: IN-PROGRESS —
+  the walk (`LifecycleWalk.swift`), the fixture's judgment (`LifecycleChecks.swift`) and the suite
+  (`LifecycleScenarioTests.swift`) committed (this commit) in the state of their FIRST RUN: red at exactly the facts
+  the model does not produce (FD-1 stage 1, FD-2 stage 6 under the Apple-ID road, FD-3 stage 8 — the FACTS DIFF
+  below), every other chip and fact green in all four walks; `everyChipDiscriminates` green (every chip, flipped,
+  fails the same world). One fixture addition before that first run, recorded: stage 6's "deleted" typed as its own
+  fact (`appleKeysDeleted`) — piece B had typed only "die everywhere". Next: the FACTS DIFF marked (piece E's start).
 - D — the renderer and the regenerated page (`cmp`): NOT-STARTED.
 - E — FACTS DIFF and PROVISIONALs (QUESTIONS): NOT-STARTED.
 - F — the closing runs, counts, this record closed: NOT-STARTED.
