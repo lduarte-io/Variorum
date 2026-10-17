@@ -70,6 +70,11 @@ extension SWorld {
         var found: [Violation] = []
         var reopened: String?
         if let (name, tampers) = tampered {
+            // L6: a library file put in the live place from outside — the copies
+            // made in the stretch it replaced, under keys the key file now beside
+            // it doesn't carry, are that stretch's (the carry is never promised
+            // across a replay — promise 4's L4/L6 reading).
+            noteAbandonedStretch(device(name))
             // The next open is when a planted or replayed thing would act.
             let d = device(name)
             do {

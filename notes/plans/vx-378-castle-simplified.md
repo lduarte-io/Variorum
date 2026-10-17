@@ -1596,6 +1596,22 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
     key (the secret typed at the unlock is never kept); at the settle, online and in step, the app asks again and she
     types it (`settleWorld` re-opens it).
   Protection set Debug `✔ 290 tests in 74 suites passed`.
+  **Census on `594c3ac52`: seed 21 — 0 failing in 1,000 (44,768 steps, 255.2 s); seed 22 — 5 failing (44,963 steps,
+  301.0 s): P4 ×3 · P1 ×2.** Traced and closed in the next commit:
+  - seq 460 (P1) — **NEW CLASS (J), MODEL — FIXED** (`Executor/PlanRunner.swift` `rollBack`): a join that crosses
+    postures picks up the account's sync keys at its first step; rolled back before its swap it left them — a silent
+    sync-keys item for an account the library isn't bound to (a third state, rule 20; here a quiet road to the master
+    on a Castle library). The rollback now deletes every sync-keys item (and the session's keys) for an account the
+    library doesn't name. Pin `U4CensusPins.aRolledBackJoinLeavesNoSyncKeysBehind` (census seq 460 replayed): red
+    before — the item survived, promise 1 "a quiet road reaches the current key" — green after.
+  - seq 588 · 750 · 953 (P4 (c)) — CHECKER (L6/L4): a replay of the key file (alone, in a group, or with both homes)
+    leaves copies made in the replaced stretch under keys the key file now beside the library doesn't carry; those are
+    that stretch's (`noteAbandonedStretch` adds them to `rolledBackOver`, as L4's restore does) — the carry is never
+    promised across a replay.
+  - seq 691 (P1) — CHECKER (L6): an old Castle copy put back (both homes) over a later Standard stretch — the stepped-
+    aside library's Standard key (its silent item) reaches the Castle-era key through its own key file's history; a later
+    leave handed that key out (rule 12) and putting the copy back doesn't take it in again — promise 1 doesn't bind a
+    library put in the live place from outside.
 - 5 — THE DISCOVERY RUN (seeds 21–40) and THE GATE SOAK (seeds 1–20, Debug and Release): NOT-STARTED. Tables land as
   they complete. PENDING.
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.

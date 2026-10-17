@@ -566,6 +566,17 @@ final class SWorld {
         return false
     }
 
+    /// L6: the copies this device made under keys the key file in the live
+    /// place no longer carries, once a library file came from outside — the
+    /// replaced stretch's (read like L4's `rolledBackOver`).
+    func noteAbandonedStretch(_ device: SDevice) {
+        guard fromOutside(device) else { return }
+        let held = Set(liveKeyFile(device)?.heldFingerprints ?? [])
+        for (id, copy) in truth.copies where copy.madeOn == device.name && !held.contains(copy.fingerprint) {
+            truth.rolledBackOver.insert(id)
+        }
+    }
+
     /// L6's split pair: the library put in the live place from outside has no
     /// key file of its own beside it — the one there is another key's (reaching
     /// it through its history, or another library's), or none — and no home the

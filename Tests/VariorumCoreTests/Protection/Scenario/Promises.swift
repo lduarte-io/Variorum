@@ -363,6 +363,11 @@ extension SWorld {
         // device that hasn't followed out yet holds no Castle promise the account
         // gave up (its quiet follow out is owed).
         if let account = record.account, server.snapshot(account)?.mode == .standard { return [] }
+        // L6: a library put back in the live place from outside (an old Castle
+        // copy over a later Standard stretch) is in its own day — a later leave
+        // handed its keys out (rule 12), and putting the copy back doesn't take
+        // them in again.
+        if fromOutside(device) { return [] }
         var violations: [Violation] = []
         func fail(_ detail: String) { violations.append(Violation(promise: 1, device: device.name, detail: detail)) }
         let live = liveKeyFile(device)

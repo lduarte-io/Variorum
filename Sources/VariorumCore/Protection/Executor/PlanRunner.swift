@@ -496,6 +496,18 @@ extension ProtectionExecutor {
             }
         }
         var section = library.section.endingAct(sequence: inFlight.sequence)
+        // An act that picked up an account's sync keys before its swap (a join
+        // that crosses postures, a Move), undone: this Mac holds the sync keys
+        // of the account its library names, and only those — the keys it picked
+        // up go with it (rule 20: the old state; census class (J), VX-378 U4).
+        let bound = library.record?.account
+        for item in try leaves.syncKeys.syncKeyItems() where item.accountID != bound {
+            try leaves.syncKeys.deleteSyncKeys(accountID: item.accountID, itemClass: item.itemClass)
+            leaves.syncKeys.holdInSession(nil, accountID: item.accountID)
+        }
+        if let signedIn = configuration.session.accountID, signedIn != bound {
+            leaves.syncKeys.holdInSession(nil, accountID: signedIn)
+        }
         // Make this my library, undone before its swap: the library in the live
         // place stays this Mac's ONE library (rule 21) — the new library's
         // memory item, if it was written, goes.

@@ -62,4 +62,23 @@ struct U4CensusPins {
         await world.step(.replaceMac("macA", carriesMemory: true))
         expectPromisesKept(world)
     }
+
+    /// NEW CLASS (J) — rule 20 ("a crash at any point leaves either the old state
+    /// or the new one"): a join that crosses postures (a re-key) picks up the
+    /// account's sync keys at its first step; rolled back before its swap, it
+    /// used to leave them behind — a silent sync-keys item for an account the
+    /// library isn't bound to, a third state (here a quiet road to the master on
+    /// a Castle library — census seed 22 sequence 460).
+    @Test func aRolledBackJoinLeavesNoSyncKeysBehind() async throws {
+        let world = SWorld(seed: 22 &* 1_000_003 &+ 460)
+        try await StartingState.all[9].build(world)
+        for action in [Action.thisMacOnly("macA"), .follow("phone", .words), .useStandard("phone"),
+                       .crash(.turnOnSync("macA"), afterWrites: 13), .signOut("macA"), .settle] {
+            await world.step(action)
+        }
+        #expect(world.macA.slot?.record?.account == nil)
+        #expect(!world.macA.keychain.local.keys.contains { $0.service == ProtectionNames.syncKeysService },
+                "a sync-keys item survived the rolled-back join")
+        expectPromisesKept(world)
+    }
 }
