@@ -845,6 +845,8 @@ synced; no cross-wrap machinery; rules 11 and 12 gain "and your twelve words" (a
 commit — the one amendment this phase makes to the rules, at her word); the lifecycle page's stages 6 and 8 say so; the
 plan's crossings table rewritten. A user without their words paper does New Words first (passphrase-only, rule 6), then
 crosses. P-VX378-U2-2 → RULED (a). The declined options stay listed in QUESTIONS so no later session re-proposes them.
+Her reasoning, added after the pick (verbatim, 2026-10-16): *"and whenever someone has their passphrase, they can easily
+regenerate the 12 words, so this isn't even particularly onerous."*
 
 **Adjudications (the orchestrator; PROVISIONAL where product-flavoured, bundled for her):**
 1. **P-VX378-U2-1 (Replace All Keys re-keys the library only) — (a) stands:** rule 15 fixes when the sync key changes;
@@ -1031,6 +1033,49 @@ scenario's FIRST run (piece C, `bdd19624e`); none was anticipated in the fixture
 **Commits:** A `81cc3534d` · B `bb0550230` (the fixture alone) · C `bdd19624e` (the scenario at its first run) · E(1)
 `a83c44d21` (the FACTS DIFF marked) · D `475d91177` (the renderer and the page) · E(2) `6f24fada4` (QUESTIONS) · the
 posture check `389162a09` · F (this record's close — the next commit).
+
+### ORCHESTRATOR NOTE after U3 (2026-10-16 — verified, adjudicated; her calls on the FACTS DIFF below)
+
+**Verified, never trusted:** tree clean at `c973e7f38`, in sync with origin; the scope diff `e6ca657ce..HEAD` is ten
+files — the seven new Lifecycle test files, the regenerated page, this plan and QUESTIONS; ZERO lines in `Sources/`
+(the model untouched at 7,562). Orchestrator re-runs on `c973e7f38`: the protection + lifecycle suites under a wider
+filter in Debug `✔ 347 tests in 143 suites passed` (subsuming the record's 259/69); under `-c release` `✘ 325 tests in
+139 suites … 1 issue` — VX-380's Sync test again, nothing of Protection's (the lifecycle suites run and pass there too);
+the full core suite in Debug (exit 0): `✔ 240/51` · `✔ 3119/399` · `✔ 40/6`, matching the record's lines. **The renderer's byte-equality re-checked:** the page rendered from the
+fixture (`CASTLE_LIFECYCLE_PAGE_OUT=… swift test --filter LifecyclePageTests`) `cmp`-identical to the committed
+`castle-lifecycle.html`. **Red-on-old by construction, checked:** the fixture commit `bb0550230` precedes the scenario
+commit `bdd19624e`, whose message records the first run red at exactly FD-1/FD-2/FD-3 and green everywhere else;
+`everyChipDiscriminates` asks every chip for its opposite and fails. The page's prose changed only where the record
+says (the lead's last sentence, the footer, the `.note.diff` style, the three under-review notes).
+
+**Adjudications:**
+1. **FD-1 / FD-2 / FD-3 and the "found while proving" item 1 are HERS** — put to her at this seam (four options
+   batches, the recommended first); her answers are recorded below and the fixture/page/rules follow them in U4's
+   window or at the closeout, never silently. Until she rules, the page keeps its words and shows the under-review notes.
+2. **P-VX378-U3-1 ("you set a passphrase" is the reset door's Standard road, no new act) — (a) stands:** rule 6's
+   re-lock, no machinery; the face names it (phase 3).
+3. **P-VX378-U3-2 (an Apple ID change moves every device of hers) — (a) stands** as the ordinary reading of "you change
+   your Apple ID"; (b) is a per-device corner the world may still draw.
+4. **Found item 3 (the copy doors take a catalogued copy; an AirDropped folder is filed first)** — VX-309's, as U2 recorded.
+5. **Found item 2 (a Standard-era Apple key left in an Apple account she LEFT cannot be deleted from here)** is FD-2's
+   rule question — hers, below.
+
+**HER RULINGS at this seam (2026-10-16, the question tool; the recommended option her pick where quoted):**
+- **FD-1 — ACCEPTED:** *"Accept the new wording"* — stage 1's note reads "Until you set a passphrase, the app reminds
+  you — …"; rule 3 unchanged. The fixture's fact changes to the page's new line; the under-review note goes.
+- **FD-2 — RULED "Say it in rule 25":** rule 25 gains one sentence — a Standard-era backup locked under an Apple
+  account you have since left keeps that lock, which the app cannot delete; the page's stage 6 says it on the Apple-ID
+  road; rule 9 untouched (no device of the account reads that key). Rule 11's words stand for the keychain-reset road.
+- **FD-3 — ACCEPTED:** *"Accept the new wording"* — the page's stage 8 and rule 12 read "this Mac's on-device road and
+  its sealed key-file copy now hold the new key"; F13 stands.
+- **The Look-inside question after Make this my library — IN DISCUSSION** (her words: *"hmm let's talk about this a bit
+  more. seems like it's adding a bit of complexity - if you make this my library, it's no longer the same library, so
+  today's secrets not opening the old library's backups makes sense to me. I don't really get what … what are you
+  trying to open exactly? the old library?"*). The orchestrator's plain restatement and her call follow in the next
+  entry; U4 is briefed with the promise SCOPED to the library's own lineage meanwhile (the no-machinery reading), and
+  told the one open question.
+The rules' and the page's wording changes (rules 12, 25; stages 1, 6, 8) are applied by U4's fixture/page piece under
+her rulings above, never silently; the fixture diffs FD-1…3 close with them.
 
 ## 9. The ladder
 
