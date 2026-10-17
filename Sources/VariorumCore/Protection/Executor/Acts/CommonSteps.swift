@@ -222,9 +222,15 @@ extension ActContext {
     /// not yet retired, not only the one the outgoing key file named: each
     /// deleted, its id recorded as retired, with no sheet.
     func retireOwnAppleKeys() throws {
-        let ids = executor.guards.everyOwnKeyRetiredAtCastleOn
-            ? library.section.ownLibraryAppleKeyIDsToRetire
-            : [parameters.outgoingAppleKeyID].compactMap { $0 }
+        // …and the Apple key the OUTGOING key file's wrap named — this Mac's own
+        // for the library by definition, even when the section no longer lists
+        // it (a memory item lost, and with it the device ID that listed it —
+        // P-VX378-U1-1 (a); rule 11: "the Apple … keychain items deleted").
+        let outgoing = [parameters.outgoingAppleKeyID].compactMap { $0 }
+        let retired = library.section.retiredAppleKeyIDs
+        let ids = (executor.guards.everyOwnKeyRetiredAtCastleOn
+            ? Array(Set(library.section.ownLibraryAppleKeyIDsToRetire).union(outgoing)).sorted()
+            : outgoing).filter { !retired.contains($0) }
         guard !ids.isEmpty else { return }
         var section = library.section
         for id in ids {

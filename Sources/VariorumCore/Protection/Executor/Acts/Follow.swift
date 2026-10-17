@@ -173,7 +173,8 @@ extension ProtectionExecutor {
             synced: true, accountID: account, passphraseKDF: secrets.passphrase?.kdf, typedSecret: typedSecret,
             follow: FollowProgram.name(kind),
             newKind: kind == .intoCastle ? .castle : kind == .intoStandard ? .standard : record.mode,
-            ownAppleKeyID: kind == .keysReplaced ? library.keyFile?.apple?.keyID : nil)
+            ownAppleKeyID: kind == .keysReplaced ? library.keyFile?.apple?.keyID : nil,
+            outgoingAppleKeyID: library.keyFile?.apple?.keyID)
         if kind == .intoCastle {
             let chosen = gate ?? library.section.settings.gateStyle
                 ?? (leaves.biometry.biometry().enrolled ? .touchID : .alwaysAsk)

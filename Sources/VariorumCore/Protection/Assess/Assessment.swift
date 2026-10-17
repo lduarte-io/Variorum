@@ -130,6 +130,10 @@ public struct LobbyRoads: Equatable, Sendable {
     public var typed: Set<TypedRoad>
     /// The vault road behind the typed secrets (signed in).
     public var vaultRoad: Bool
+    /// RULE 8: no quiet road to try (no silent item, no readable Apple wrap) —
+    /// the lobby asks for the passphrase or the words at once. With one, it
+    /// tries the quiet roads first and asks only when every one has failed.
+    public var asksASecretAtOnce: Bool { silentItems.isEmpty && appleKeyID == nil }
 }
 
 // MARK: - Repairs, faults, acts
@@ -154,8 +158,17 @@ public enum Repair: Hashable, Sendable {
     /// sight, by its id only.
     case deleteRetiredAppleKey(id: String)
     /// Standard: the live key file's Apple wrap, under this Mac's own Apple
-    /// key for the library (never minted by a repair).
+    /// key for the library, readable here.
     case landAppleWrap(appleKeyID: String)
+    /// RULE 8, Standard: the Apple road failed and no own key of this Mac reads
+    /// here — a FRESH Apple key is made and the current key wrapped under it
+    /// ("quietly makes a fresh Apple road"; decision 35's fresh vault read
+    /// first when synced).
+    case remakeAppleRoad
+    /// RULE 8, Standard: the on-device road — the silent item for the current
+    /// key — is gone (a keychain reset, a new Mac): re-made with the key in
+    /// hand.
+    case remakeOnDeviceItem
     /// Always: what this Mac remembers names the record's current key and
     /// this Mac's device ID, and its mirror is the live file of that key.
     case refreshMemory
@@ -197,9 +210,10 @@ public enum Fault: Hashable, Sendable {
     /// A silent sync-keys item for the library's account while its keys reach
     /// a Castle-era key (PROVISIONAL P-U2-2: reported; the acts re-file them).
     case silentSyncKeysWhileCastleWay(account: String)
-    /// Standard: the live key file's own Apple key can't be read here — the
-    /// Apple road is lost (no repair mints; rule 8's quiet re-make is U2's —
-    /// Re-link left with VX-378 U1).
+    /// Standard: the Apple road failed — the live key file's own Apple key
+    /// can't be read here (a changed Apple ID, a keychain reset). Reported (rule
+    /// 3's "at the first launch after a quiet road has failed"); rule 8's quiet
+    /// re-make (`remakeAppleRoad`) answers it at the same open.
     case appleRoadLost(keyFileID: String)
     /// The live place holds ANOTHER key's file than the record's current key
     /// (nothing in flight, nothing remembered to compare it with — with a

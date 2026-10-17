@@ -315,7 +315,7 @@ record committed with PENDING numbers first.
   `25dc1cd12`): Debug `✔ 211 tests in 54 suites`, `-c release` `✔ 189 in 50`, the full core suite green in Debug;
   7,068 source lines, 8,611 test lines.
 - U2 — the additions: **IN PROGRESS** (Opus implementer, 2026-10-16) — §8's U2 RECORD carries the resume map
-  (pieces A–J, each flipped in the commit that lands it). A–F DONE; next: **G** (rule 8). Counts PENDING.
+  (pieces A–J, each flipped in the commit that lands it). A–G DONE; next: **H** (rule 17). Counts PENDING.
 - U3 — the lifecycle proof: not started.
 - U4 — the world and the soak: not started.
 - The ladder: not started.
@@ -647,7 +647,7 @@ newest comment outranks an older body. Applied at the closeout's triage.
     (promise 2 caught it when `FixedScenariosCorners`' wiped-keychain scenario was re-pointed from Replace All Keys
     to Use Castle). The scenario keeps its own subject (now `aWipedKeychainStillFollowsTheAccountBackIntoCastle`).
   - Protection set Debug `✔ 219 tests in 59 suites`.
-- F — rule 21 (+ adjudications 2, 5, 7): DONE (this commit).
+- F — rule 21 (+ adjudications 2, 5, 7): DONE (`a01b622db`).
   - **Detect and refuse** (`Assess/LibraryDisagreement.swift`, one pure `check` read by the executor's `unlock` — which
     throws `ExecutorRefusal.libraryDisagreesWithMemory` before anything is written — and by `assess`, which reports
     `Fault.libraryDisagreesWithMemory`, owes no repair and no act, and closes every door with
@@ -670,8 +670,24 @@ newest comment outranks an older body. Applied at the closeout's triage.
     .aMemoryItemThatFailsItsSealRemembersNothing` narrowed to nothing in flight (with an act in flight it is the pin
     above); `ExecutorEdgeTests.aLibraryFileSwappedForAnOlderOne…` moved into the pins as `aReplayedLibraryFileIsRefused`.
   - Protection set Debug `✔ 233 tests in 61 suites`.
-- G — rule 8: the quiet roads re-made at an open (a fresh Apple road, the on-device item); the lobby asks a secret only
-  when no quiet road remains: NOT STARTED.
+- G — rule 8 (+ rule 11's entry, found in E): DONE (this commit).
+  - **The quiet roads re-made at an open** (Standard): `Repair.remakeAppleRoad` — the Apple road failed and no own key of
+    this Mac reads here: a FRESH Apple key minted, recorded in this Mac's section first (so an entry into Castle retires
+    it even if the rest never lands), added, the current key wrapped under it (decision 35's fresh vault read first
+    when synced, and the vault must read Standard); `Repair.remakeOnDeviceItem` — the silent item for the current key
+    re-made with the key in hand. `Fault.appleRoadLost` stays as the report (rule 3's ask reads it at that launch).
+    `LobbyRoads.asksASecretAtOnce` — no silent item and no readable Apple wrap: ask at once; else try the quiet roads
+    first. Nothing is re-made in Castle (rule 9; a Touch ID item only at a press — the guard stands).
+  - **Rule 11 under a lost memory** (E's finding): entering Castle — Use Castle, a follow into Castle, a join into
+    Castle — retires the own keys the section lists AND the Apple key the outgoing key file's wrap names
+    (`retireOwnAppleKeys`, `ownKeysToRetire`; the follow now carries `outgoingAppleKeyID`), already-retired ids
+    skipped.
+  - Pins `U2PinsRule8Scenarios` (3) red on the pre-G tree (scratch worktree at `a01b622db`: issues at
+    `U2PinsRule8Scenarios.swift:27`, `:39`, `:41`, `:54` — "3 tests in 1 suite failed … with 4 issues"), green after;
+    `U2Rule8AssessTests` (4) the new repairs' and the lobby fact's (red by construction). The mutation pin
+    `deleteOnSightByRecordedIDOnly` now checks Mac B's ORIGINAL Apple key (rule 8's re-make at Mac B's next open would
+    otherwise heal the very delete it watches for — with the guard off it is still red).
+  - Protection set Debug `✔ 240 tests in 63 suites`.
 - H — rule 17 (+ 23): `LookInside` (writes nothing — asserted with the executor's write log) and `MakeMine` (a fresh
   identity, key and device ID in the posture this device is in, under its current pair; the outgoing library into
   Previous Libraries): NOT STARTED.
@@ -685,7 +701,7 @@ newest comment outranks an older body. Applied at the closeout's triage.
 
 **PROVISIONAL calls:** PENDING (logged under the VX-378 heading in `notes/QUESTIONS.md`, P-VX378-U2-n).
 
-**Commits:** A `0572dd3c0` · B `3631ecbde` · C `ef6c6bf54` · D `67ed68490` · E `db1c1ac55` · F (this commit) · the rest PENDING.
+**Commits:** A `0572dd3c0` · B `3631ecbde` · C `ef6c6bf54` · D `67ed68490` · E `db1c1ac55` · F `a01b622db` · G (this commit) · the rest PENDING.
 
 ## 9. The ladder
 

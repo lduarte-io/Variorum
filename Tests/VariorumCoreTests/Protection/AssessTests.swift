@@ -363,7 +363,7 @@ struct AssessRepairTests {
                 switch repair {
                 case .makeTouchIDItem, .deleteTouchIDItem:
                     Issue.record("\(repair) — a guard's bug shape with every guard on")
-                case .deleteSilentItem, .deleteRetiredAppleKey, .landAppleWrap, .refreshMemory,
+                case .deleteSilentItem, .deleteRetiredAppleKey, .landAppleWrap, .remakeAppleRoad, .remakeOnDeviceItem, .refreshMemory,
                      .restoreKeyFileFromMirror, .recordAlwaysAskQuietly, .retireOwnAppleKeys:
                     continue
                 }

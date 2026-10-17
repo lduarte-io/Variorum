@@ -67,6 +67,8 @@ extension ProtectionExecutor {
         case .deleteSilentItem: return "deleteSilentItem"
         case .deleteRetiredAppleKey: return "deleteRetiredAppleKey"
         case .landAppleWrap: return "landAppleWrap"
+        case .remakeAppleRoad: return "remakeAppleRoad"
+        case .remakeOnDeviceItem: return "remakeOnDeviceItem"
         case .refreshMemory: return "refreshMemory"
         case .restoreKeyFileFromMirror: return "restoreKeyFileFromMirror"
         case .retireOwnAppleKeys: return "retireOwnAppleKeys"
@@ -132,6 +134,31 @@ extension ProtectionExecutor {
             if live.apple?.keyID == id { return .nothingThere }
             try writeLiveKeyFile(try live.settingApple(apple, for: library.key), &library)
             try writeMemory(&library)
+            return nil
+
+        case .remakeAppleRoad:
+            // Rule 8: a fresh Apple road, quietly. The id is recorded in this
+            // Mac's section first (so an entry into Castle retires it even if
+            // the rest never lands), then the key added, then the wrap.
+            guard let record = library.record, record.mode == .standard else { return .wrongMode }
+            if guards.freshVaultBeforeAppleWriteOn, let account = record.account {
+                guard let vault = freshVault(for: account), vault.mode == .standard else { return .needsFreshVault }
+            }
+            guard let live = library.keyFile, live.fingerprint == library.fingerprint else { return .preconditionDoesNotVerify }
+            let readable = try leaves.apple.readableAppleKeyIDs()
+            if let wrap = live.apple, readable.contains(wrap.keyID) { return .nothingThere }
+            let apple = leaves.ids.mintAppleKey()
+            try writeFacts(&library, section: library.section.recordingAppleKey(AppleKeyRecord(id: apple.id)))
+            try leaves.apple.addAppleKey(apple)
+            try writeLiveKeyFile(try live.settingApple(apple, for: library.key), &library)
+            try writeMemory(&library)
+            return nil
+
+        case .remakeOnDeviceItem:
+            guard library.record?.mode == .standard else { return .wrongMode }
+            let item = CustodyItemFact(fingerprint: library.fingerprint, itemClass: .silent)
+            guard !(try leaves.custody.custodyItems().contains(item)) else { return .nothingThere }
+            try leaves.custody.writeCustody(library.key, itemClass: .silent)
             return nil
 
         case .refreshMemory:

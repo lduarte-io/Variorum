@@ -111,16 +111,19 @@ struct ScenarioMutationPins {
     }
     /// "delete on sight, by recorded id only": a Mac in Castle never deletes
     /// another Mac's own Apple key it can see (that Mac's library is in
-    /// Standard under a key of its own).
+    /// Standard under a key of its own). The key checked is the one Mac B had
+    /// BEFORE — rule 8 re-makes a lost Apple road at Mac B's next open (VX-378
+    /// U2), which would otherwise hide the delete.
     @Test func deleteOnSightByRecordedIDOnly() async throws {
         try await mutationPin("another Mac's own Apple key survives", off: { $0.deleteOnSightByIDOnly = false }) { guards in
             let world = try await scenarioWorld(guards: guards) { w in
                 try await w.fresh(on: w.macA)
                 try await w.fresh(on: w.macB)
             }
-            await world.done([.launch("macB"), .settle, .useCastle("macA", .touchID, newWords: false), .settle, .launch("macA"),
-                              .syncICloud("macA"), .syncICloud("macB")])
+            await world.done([.launch("macB"), .settle])
             let macBsKey = world.liveKeyFile(world.macB)?.apple?.keyID
+            await world.done([.useCastle("macA", .touchID, newWords: false), .settle, .launch("macA"),
+                              .syncICloud("macA"), .syncICloud("macB")])
             return (world, macBsKey.map { world.readableAppleKeys(world.macB)[$0] != nil } == true)
         }
     }

@@ -316,19 +316,31 @@ public enum AssessRules {
         let synced = account.account != nil
         let appleWriteAllowed = !synced || facts.freshVault(for: account.account) != nil
             || !guards.freshVaultBeforeAppleWriteOn
+        // RULE 8: the quiet roads are RE-MADE at an open, never asked for while
+        // one works. The Apple road: the live key file's own wrap readable here
+        // — else this Mac's own readable key takes the wrap, else a fresh Apple
+        // key is made for it ("quietly makes a fresh Apple road"). A road that
+        // was there and failed is also reported (rule 3's ask reads it).
         if let live, let id = unlocked.liveKeyFileID {
-            if let wrap = live.apple {
-                if !facts.appleKeys.readable.contains(wrap.keyID) {
+            let works = live.apple.map { facts.appleKeys.readable.contains($0.keyID) } ?? false
+            if !works {
+                if live.apple != nil || unlocked.thisMac.appleKeys.contains(where: { $0.retiredAt == nil }) {
                     faults.append(.appleRoadLost(keyFileID: id))
                 }
-            } else if let own = unlocked.thisMac.appleKeys
-                .first(where: { $0.retiredAt == nil && facts.appleKeys.readable.contains($0.id) }) {
-                // This Mac's own key, readable: the wrap lands (no repair
-                // ever mints one).
-                if appleWriteAllowed { repairs.append(.landAppleWrap(appleKeyID: own.id)) }
-            } else if unlocked.thisMac.appleKeys.contains(where: { $0.retiredAt == nil }) {
-                faults.append(.appleRoadLost(keyFileID: id))
+                if appleWriteAllowed {
+                    if let own = unlocked.thisMac.appleKeys
+                        .first(where: { $0.retiredAt == nil && facts.appleKeys.readable.contains($0.id) }) {
+                        repairs.append(.landAppleWrap(appleKeyID: own.id))
+                    } else {
+                        repairs.append(.remakeAppleRoad)
+                    }
+                }
             }
+        }
+        // The on-device road: Standard's silent item for the current key (rule
+        // 8's "this Mac's login keychain"), re-made with the key in hand.
+        if !facts.custody.contains(CustodyItemFact(fingerprint: unlocked.currentFingerprint, itemClass: .silent)) {
+            repairs.append(.remakeOnDeviceItem)
         }
         // No Touch ID item for a Standard key — and nothing destructive on a
         // Standard record's word alone (a login-password holder can rewrite
@@ -509,8 +521,11 @@ public enum AssessRules {
     /// Mac's section lists as its own for the library — not only the one the
     /// live key file names.
     static func ownKeysToRetire(_ facts: ProtectionFacts, _ unlocked: UnlockedFacts, guards: ProtectionGuards) -> [String] {
-        if guards.everyOwnKeyRetiredAtCastleOn { return unlocked.thisMac.ownLibraryAppleKeyIDsToRetire }
-        return [liveKeyFile(facts, unlocked)?.apple?.keyID].compactMap { $0 }
+        let outgoing = [liveKeyFile(facts, unlocked)?.apple?.keyID].compactMap { $0 }
+        if guards.everyOwnKeyRetiredAtCastleOn {
+            return Array(Set(unlocked.thisMac.ownLibraryAppleKeyIDsToRetire).union(outgoing)).sorted()
+        }
+        return outgoing
     }
 
     static func useCastleSpec(
