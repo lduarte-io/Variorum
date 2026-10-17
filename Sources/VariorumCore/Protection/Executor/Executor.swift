@@ -65,6 +65,10 @@ public struct UnlockedLibrary {
     public var memory: DeviceMemory?
     /// The live key file, when it is format 3.
     public var keyFile: KeyFile?
+    /// Adjudication 5 (after VX-378 U1): with nothing remembered, an act the
+    /// plan on disk names resumes in the section the plan names; this Mac
+    /// takes its fresh device ID only once that act has settled.
+    public var sectionFromThePlan = false
 
     public var fingerprint: String { StoreKeyEnvelope.fingerprint(of: key) }
 
@@ -119,6 +123,9 @@ public struct ActSecrets: Sendable {
 /// Every refusal the executor names (the doors' sentences are phase 4's).
 public enum ExecutorRefusal: Error, Equatable, Sendable {
     case keyDoesNotOpenLibrary
+    /// RULE 21: the live place is not what this Mac remembers — nothing was
+    /// written; the face says what was found and offers rule 17's two doors.
+    case libraryDisagreesWithMemory(LibraryDisagreement)
     /// An act is already in flight on this device — resume it first.
     case actInFlight(ProtectionAct)
     /// A resume needs the secrets typed again (a plan never holds one).
@@ -225,12 +232,41 @@ public final class ProtectionExecutor {
         guard let record = try leaves.library.readRecord(with: key) else { throw ExecutorRefusal.recordMissing }
         let memory = try leaves.memory.readMemory(libraryID: record.libraryID)
             .flatMap { DeviceMemory.opening($0, libraryID: record.libraryID, reach: reach) }
+        let sections = record.verifiedSections(reach: reach)
+        // Adjudication 5: nothing remembered, and a plan on disk this library's
+        // key seals naming a section of the record with that act in flight —
+        // the act resumes there (rule 20), never stranded under a fresh ID.
+        var fromPlan: DeviceSection?
+        if memory == nil, let sealed = try leaves.plans.readPlan(),
+           let plan = try? sealed.open(purpose: .plan, libraryID: record.libraryID, reach: reach),
+           plan.libraryID == record.libraryID {
+            fromPlan = sections.filter { plan.isNamed(by: $0) }.max { $0.version < $1.version }
+        }
+        let section = fromPlan ?? DeviceFacts.thisMacsSection(
+            memory: memory, recordSections: sections, mintDeviceID: { self.leaves.ids.mintID() })
+        // RULE 21 — detect and refuse, before anything is written.
+        if let disagreement = LibraryDisagreement.check(
+            libraryID: record.libraryID, libraryFingerprint: Self.fp(key), memory: memory,
+            rememberedLibraryIDs: try leaves.memory.rememberedLibraryIDs(),
+            liveKeyFileFingerprint: liveFile?.fingerprint, actInFlight: section.actInFlight) {
+            log("unlock: the live place is not what this Mac remembers — refused")
+            throw ExecutorRefusal.libraryDisagreesWithMemory(disagreement)
+        }
         // The executor serves the slot's library (a landing changes it).
         configuration.libraryID = record.libraryID
-        let section = DeviceFacts.thisMacsSection(
-            memory: memory, recordSections: record.verifiedSections(reach: reach),
-            mintDeviceID: { self.leaves.ids.mintID() })
-        return UnlockedLibrary(key: key, record: record, section: section, memory: memory, keyFile: liveFile)
+        var library = UnlockedLibrary(key: key, record: record, section: section, memory: memory, keyFile: liveFile)
+        library.sectionFromThePlan = fromPlan != nil
+        return library
+    }
+
+    /// Adjudication 5's other half: once the act the plan named has settled,
+    /// this Mac — remembering nothing — takes a fresh plain device ID with a
+    /// fresh section (P-VX378-U1-1 (a)).
+    func takeFreshDeviceIDAfterTheSettle(_ library: inout UnlockedLibrary) throws {
+        guard library.sectionFromThePlan, library.section.actInFlight == nil else { return }
+        library.sectionFromThePlan = false
+        try writeFacts(&library, section: DeviceSection(deviceID: leaves.ids.mintID(), settings: .noChoiceYet))
+        log("settle: the act the plan named settled — this Mac takes a fresh device ID")
     }
 
     func liveFormat3() throws -> KeyFile? { try leaves.keyFiles.readLiveKeyFile() }
@@ -266,7 +302,7 @@ public final class ProtectionExecutor {
         if let live = library.keyFile, live.fingerprint == record.currentFingerprint { mirror = live }
         return DeviceMemory(
             libraryID: record.libraryID, currentFingerprint: record.currentFingerprint, deviceID: library.section.deviceID,
-            keyFileMirror: mirror, biometryStateHash: old?.biometryStateHash)
+            keyFileMirror: mirror)
     }
 
     /// This Mac's section into the record (inside the library, under the key

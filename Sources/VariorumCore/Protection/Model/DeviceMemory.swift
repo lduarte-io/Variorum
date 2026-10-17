@@ -9,10 +9,13 @@ import Foundation
 //
 // RULE 21 (`notes/CastleRules.md`): "This Mac remembers four things about its
 // library — its ID, its current key, its device ID and the sealed copy of its
-// key file — and only the app's own doors change them." One hint rides beside
-// them until U2's rule-21 piece: the biometry state hash (§3.10's which-line
-// hint). (The vault facts left with VX-378 U2's vault: the record names the
-// sync key the library follows.)
+// key file — and only the app's own doors change them." EXACTLY those four
+// (VX-378 U2, adjudication 7): the biometry state hash left — §3.10's
+// which-line hint is the face's to read from `LAEnvironment` — and the vault
+// facts left with the vault's rotation (the record names the sync key the
+// library follows). A memory naming another library, or another key, than the
+// one in the live place is rule 21's disagreement — the open refuses
+// (`LibraryDisagreement`); an ABSENT memory is not (rule 8's keychain reset).
 // (The mode and account last confirmed, the key epoch, the nudge dismissals,
 // the family tree's mirror and the device section's second home left with
 // VX-378 U1 — rules 21, 23.)
@@ -29,20 +32,16 @@ public struct DeviceMemory: Codable, Equatable, Sendable {
     /// The key file's mirror — its wraps and history (§3.2): THE on-device
     /// copy, written back only into an empty live place (rule 1).
     public var keyFileMirror: KeyFile?
-    /// `LAEnvironment`'s biometry state hash when this Mac's Touch ID item was
-    /// made — chooses which line shows after a press fails, nothing else.
-    public var biometryStateHash: Data?
 
     public init(
         format: Int = DeviceMemory.currentFormat, libraryID: String, currentFingerprint: String, deviceID: String,
-        keyFileMirror: KeyFile? = nil, biometryStateHash: Data? = nil
+        keyFileMirror: KeyFile? = nil
     ) {
         self.format = format
         self.libraryID = libraryID
         self.currentFingerprint = currentFingerprint
         self.deviceID = deviceID
         self.keyFileMirror = keyFileMirror
-        self.biometryStateHash = biometryStateHash
     }
 
     /// Sealed whole under the library key in hand.

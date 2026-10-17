@@ -268,6 +268,12 @@ extension ProtectionExecutor {
     /// is ignored, reported and deleted. `typed`: the secrets a resume may
     /// need (a plan never holds one).
     public func settle(_ library: inout UnlockedLibrary, typed: TypedSecrets = .none) async throws -> SettleOutcome {
+        let outcome = try await settleAct(&library, typed: typed)
+        try takeFreshDeviceIDAfterTheSettle(&library)
+        return outcome
+    }
+
+    func settleAct(_ library: inout UnlockedLibrary, typed: TypedSecrets) async throws -> SettleOutcome {
         let sealed = try leaves.plans.readPlan()
         let reach = reach(key: library.key, keyFile: library.keyFile)
         func verified() -> ProtectionPlan? {

@@ -168,6 +168,8 @@ public struct ProtectionFacts: Sendable {
     /// The email this device last knew for the library's account (the
     /// other-account screen names the same email with a different account).
     public var libraryAccountEmail: String?
+    /// The library IDs this scope's memory items name (enumerated by name).
+    public var rememberedLibraryIDs: Set<String>
     /// This scope's custody items, enumerated.
     public var custody: [CustodyItemFact]
     public var syncKeys: [SyncKeysItemFact]
@@ -183,7 +185,7 @@ public struct ProtectionFacts: Sendable {
     public init(
         scope: String, storeFile: StoreFileFact = .present, containerMarker: Bool = true,
         unlocked: UnlockedFacts? = nil, slotFingerprintHint: String? = nil, rememberedModeHint: ProtectionMode? = nil,
-        libraryAccountEmail: String? = nil, custody: [CustodyItemFact] = [],
+        libraryAccountEmail: String? = nil, rememberedLibraryIDs: Set<String> = [], custody: [CustodyItemFact] = [],
         syncKeys: [SyncKeysItemFact] = [], appleKeys: AppleKeyFacts = AppleKeyFacts(),
         biometry: BiometryFacts = .ready, touchIDPress: TouchIDPress? = nil, session: SessionFact = .signedOut,
         vault: VaultReading? = nil, catalog: Catalog = Catalog(), now: Date
@@ -195,6 +197,7 @@ public struct ProtectionFacts: Sendable {
         self.slotFingerprintHint = slotFingerprintHint
         self.rememberedModeHint = rememberedModeHint
         self.libraryAccountEmail = libraryAccountEmail
+        self.rememberedLibraryIDs = rememberedLibraryIDs
         self.custody = custody
         self.syncKeys = syncKeys
         self.appleKeys = appleKeys

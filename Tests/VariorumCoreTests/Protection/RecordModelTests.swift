@@ -30,7 +30,7 @@ struct ProtectionValueRoundTripTests {
             .storing(section, sealedUnder: key)
         let memory = DeviceMemory(
             libraryID: library, currentFingerprint: PF.fp(key), deviceID: device,
-            keyFileMirror: KeyFile(libraryID: library, key: key, epoch: 1), biometryStateHash: Data([9, 9]))
+            keyFileMirror: KeyFile(libraryID: library, key: key, epoch: 1))
         let plan = ProtectionPlan(
             libraryID: library, deviceID: device, sequence: 1, act: .enterCastle,
             fromFingerprint: PF.fp(key), steps: [PlanStep(name: "custody", done: true), PlanStep(name: "swap")],

@@ -36,6 +36,7 @@ enum WorldWrite: Equatable, CustomStringConvertible {
     case discardStaged
     case keyFile(String)
     case memory(String)
+    case memoryDelete(String)
     case plan
     case planDelete
     case backup(String)
@@ -60,6 +61,7 @@ enum WorldWrite: Equatable, CustomStringConvertible {
         case .discardStaged: return "discard-staged"
         case .keyFile(let fp): return "keyfile \(fp)"
         case .memory(let fp): return "memory \(fp)"
+        case .memoryDelete(let id): return "memory- \(id)"
         case .plan: return "plan"
         case .planDelete: return "plan-"
         case .backup(let fp): return "backup \(fp)"
@@ -160,7 +162,6 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     // The rest.
     var clockTime = Date(timeIntervalSinceReferenceDate: 790_000_000)
     var bio = BiometryFacts.ready
-    var stateHash: Data? = Data([7, 7])
     var logLines: [String] = []
     var diagnosticEntries: [ProtectionDiagnostic] = []
 
@@ -351,6 +352,13 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     // MARK: - Memory, plans
 
     func readMemory(libraryID: String) throws -> Sealed<DeviceMemory>? { memories[libraryID] }
+    func rememberedLibraryIDs() throws -> Set<String> { Set(memories.keys) }
+
+    func deleteMemory(libraryID: String) throws {
+        guard memories[libraryID] != nil else { return }
+        memories[libraryID] = nil
+        try wrote(.memoryDelete(String(libraryID.prefix(8))))
+    }
 
     func writeMemory(_ memory: Sealed<DeviceMemory>, libraryID: String) throws {
         memories[libraryID] = memory
@@ -431,7 +439,6 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     func mintWords() -> [String] { (try? PF.words()) ?? [] }
 
     func biometry() -> BiometryFacts { bio }
-    func biometryStateHash() -> Data? { stateHash }
 
     func log(_ line: String) { logLines.append(line) }
     func report(_ entry: ProtectionDiagnostic) { diagnosticEntries.append(entry) }

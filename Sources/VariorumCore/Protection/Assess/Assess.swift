@@ -38,6 +38,15 @@ public func assess(_ facts: ProtectionFacts, guards: ProtectionGuards = .all) ->
     var repairs: [Repair] = []
     var faults: [Fault] = []
     var acts: [OwedAct] = []
+    // RULE 21: the live place is not what this Mac remembers — refused, said,
+    // the two doors offered; no repair, no act, every door closed.
+    if let unlocked = facts.unlocked, let disagreement = AssessRules.disagreement(facts, unlocked) {
+        var doors: [Door: DoorState] = [:]
+        for door in Door.allCases { doors[door] = .refused(.libraryDisagreesWithMemory) }
+        return Assessment(
+            launch: launch, mode: mode, account: account, vault: vault, lobby: AssessRules.lobby(facts), touchID: touchID,
+            repairs: [], faults: [.libraryDisagreesWithMemory(disagreement)], acts: [], doors: doors, opensWith: [:])
+    }
     if let unlocked = facts.unlocked {
         (repairs, faults) = AssessRules.repairs(facts, unlocked, mode: mode, account: account, vault: vault, guards: guards)
         acts = AssessRules.acts(facts, unlocked, mode: mode, account: account, vault: vault, faults: faults,
@@ -53,6 +62,16 @@ public func assess(_ facts: ProtectionFacts, guards: ProtectionGuards = .all) ->
 }
 
 public enum AssessRules {
+    // MARK: - Rule 21
+
+    /// The disagreement, from the unlocked facts.
+    public static func disagreement(_ facts: ProtectionFacts, _ unlocked: UnlockedFacts) -> LibraryDisagreement? {
+        LibraryDisagreement.check(
+            libraryID: unlocked.record.libraryID, libraryFingerprint: unlocked.currentFingerprint,
+            memory: unlocked.memory, rememberedLibraryIDs: facts.rememberedLibraryIDs,
+            liveKeyFileFingerprint: liveKeyFile(facts, unlocked)?.fingerprint, actInFlight: unlocked.thisMac.actInFlight)
+    }
+
     // MARK: - The launch
 
     public static func launch(_ facts: ProtectionFacts) -> LaunchVerdict {
@@ -177,9 +196,9 @@ public enum AssessRules {
         // epoch and the facts last confirmed left with VX-378 U1.)
         do {
             let memory = unlocked.memory
-            var stale = memory == nil
-                || memory?.currentFingerprint != record.currentFingerprint
-                || memory?.deviceID != unlocked.thisMac.deviceID
+            // (Its fingerprint arm — the memory following the record — left with
+            // VX-378 U2: a memory naming another key is rule 21's refusal.)
+            var stale = memory == nil || memory?.deviceID != unlocked.thisMac.deviceID
             // The key file and its mirror, for the current key: the mirror is
             // written back ONLY when the live file is absent (rule 1). Another
             // key's file in the live place, or a live file with fewer roads

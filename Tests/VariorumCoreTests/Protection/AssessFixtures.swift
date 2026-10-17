@@ -85,6 +85,7 @@ struct AWorld {
         return ProtectionFacts(
             scope: Self.scope, unlocked: unlockedFacts, slotFingerprintHint: PF.fp(key),
             rememberedModeHint: unlocked ? nil : mode, libraryAccountEmail: libraryAccountEmail,
+            rememberedLibraryIDs: memoryAbsent ? [] : [world.library],
             custody: custody, syncKeys: syncKeys, appleKeys: appleKeys, biometry: biometry,
             touchIDPress: press, session: session, vault: vault, catalog: Catalog.build(try entries()), now: Self.now)
     }

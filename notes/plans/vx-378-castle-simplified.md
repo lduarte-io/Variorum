@@ -315,7 +315,7 @@ record committed with PENDING numbers first.
   `25dc1cd12`): Debug `✔ 211 tests in 54 suites`, `-c release` `✔ 189 in 50`, the full core suite green in Debug;
   7,068 source lines, 8,611 test lines.
 - U2 — the additions: **IN PROGRESS** (Opus implementer, 2026-10-16) — §8's U2 RECORD carries the resume map
-  (pieces A–J, each flipped in the commit that lands it). A–E DONE; next: **F** (rule 21). Counts PENDING.
+  (pieces A–J, each flipped in the commit that lands it). A–F DONE; next: **G** (rule 8). Counts PENDING.
 - U3 — the lifecycle proof: not started.
 - U4 — the world and the soak: not started.
 - The ladder: not started.
@@ -600,7 +600,7 @@ newest comment outranks an older body. Applied at the closeout's triage.
   Standard). Pins `U2PinsGateTests` (2, the first over both gates) red on the pre-D tree (scratch worktree at
   `ef6c6bf54`: issues at `U2PinsGateTests.swift:23` ×2, `:25` ×2, `:36` — "2 tests in 1 suite failed … with 5
   issues"), green after. Protection set Debug `✔ 221 tests in 59 suites`.
-- E — rules 7 · 11 · 12 · 14 · 15: the vault's account side replaced whole: DONE (this commit).
+- E — rules 7 · 11 · 12 · 14 · 15: the vault's account side replaced whole: DONE (`db1c1ac55`).
   - **The vault's new shape** (`Executor/VaultModel.swift`, modelled only — the server's `key_vault` change is VX-307's
     §12 lockstep event): `AccountVault` = the master under the passphrase (with its descriptor) and under the twelve
     words, NOTHING else (rule 14); a MODE flag (`mode`); the current sync key (`rowKey`: id + wrap under the master);
@@ -647,8 +647,29 @@ newest comment outranks an older body. Applied at the closeout's triage.
     (promise 2 caught it when `FixedScenariosCorners`' wiped-keychain scenario was re-pointed from Replace All Keys
     to Use Castle). The scenario keeps its own subject (now `aWipedKeychainStillFollowsTheAccountBackIntoCastle`).
   - Protection set Debug `✔ 219 tests in 59 suites`.
-- F — rule 21 (+ adjudications 2, 5, 7): detect and refuse (`libraryDisagreesWithMemory`, no write); the memory at
-  exactly four things; an act stranded by a lost memory item finishes or rolls back from the on-disk plan: NOT STARTED.
+- F — rule 21 (+ adjudications 2, 5, 7): DONE (this commit).
+  - **Detect and refuse** (`Assess/LibraryDisagreement.swift`, one pure `check` read by the executor's `unlock` — which
+    throws `ExecutorRefusal.libraryDisagreesWithMemory` before anything is written — and by `assess`, which reports
+    `Fault.libraryDisagreesWithMemory`, owes no repair and no act, and closes every door with
+    `DoorRefusal.libraryDisagreesWithMemory`). Findings: `anotherLibrary` (the memory items name other libraries and
+    none this one — `MemoryStoreLeaf.rememberedLibraryIDs()`, enumerated by name), `libraryFileUnderAnotherKey`,
+    `keyFileOfAnotherKey` — each unless this Mac's own act in flight moves between exactly those two keys. It keys on a
+    DISAGREEMENT, never on absence (a memory absent or failing its seal opens on — rule 8's keychain reset). The two
+    doors are offered as values (`CopyDoor`); what they open is piece H's. `assess`'s `refreshMemory` lost its
+    fingerprint arm (the memory following the record) — the refusal replaced it. Creating a library deletes every other
+    library's memory item in the scope (`deleteMemory`): this Mac remembers ONE library.
+  - **The memory at exactly four things** (adjudication 7): `DeviceMemory.biometryStateHash` and the
+    `BiometryLeaf.biometryStateHash()` it was fed by deleted (§3.10's which-line hint is the face's to read); the vault
+    facts left in E.
+  - **An act stranded by a lost memory item** (adjudication 5): with nothing remembered, `unlock` resumes the act in the
+    section the plan on disk names (sealed under this library's key, the section naming it — `sectionFromThePlan`);
+    `settle` then gives this Mac its fresh plain device ID (`takeFreshDeviceIDAfterTheSettle`, P-VX378-U1-1 (a)).
+  - Pins `U2PinsRule21Tests` (7; `anAbsentMemoryIsNoDisagreement` the guard, green both sides) red on the pre-F tree
+    (scratch worktree at `db1c1ac55`: issues at `U2PinsRule21Tests.swift:36`, `:56`, `:73`, `:95`, `:96`, `:97`,
+    `:109` ×3, `:124` — "7 tests in 1 suite failed … with 10 issues"), green after. `ExecutorCoreTests
+    .aMemoryItemThatFailsItsSealRemembersNothing` narrowed to nothing in flight (with an act in flight it is the pin
+    above); `ExecutorEdgeTests.aLibraryFileSwappedForAnOlderOne…` moved into the pins as `aReplayedLibraryFileIsRefused`.
+  - Protection set Debug `✔ 233 tests in 61 suites`.
 - G — rule 8: the quiet roads re-made at an open (a fresh Apple road, the on-device item); the lobby asks a secret only
   when no quiet road remains: NOT STARTED.
 - H — rule 17 (+ 23): `LookInside` (writes nothing — asserted with the executor's write log) and `MakeMine` (a fresh
@@ -664,7 +685,7 @@ newest comment outranks an older body. Applied at the closeout's triage.
 
 **PROVISIONAL calls:** PENDING (logged under the VX-378 heading in `notes/QUESTIONS.md`, P-VX378-U2-n).
 
-**Commits:** A `0572dd3c0` · B `3631ecbde` · C `ef6c6bf54` · D `67ed68490` · E (this commit) · the rest PENDING.
+**Commits:** A `0572dd3c0` · B `3631ecbde` · C `ef6c6bf54` · D `67ed68490` · E `db1c1ac55` · F (this commit) · the rest PENDING.
 
 ## 9. The ladder
 

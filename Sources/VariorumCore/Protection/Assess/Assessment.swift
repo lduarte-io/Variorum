@@ -201,12 +201,15 @@ public enum Fault: Hashable, Sendable {
     /// Apple road is lost (no repair mints; rule 8's quiet re-make is U2's —
     /// Re-link left with VX-378 U1).
     case appleRoadLost(keyFileID: String)
-    /// The live place holds ANOTHER key's file (nothing in flight): the
-    /// record, what this Mac remembers and the key file don't agree (§3.3's
-    /// "Always"). The current key's own file comes back by
-    /// `restoreKeyFileFromCopy` (or the mirror) when one exists; with none it
-    /// stays — PROVISIONAL P-R1-1 (VX-305 ladder round 1).
+    /// The live place holds ANOTHER key's file than the record's current key
+    /// (nothing in flight, nothing remembered to compare it with — with a
+    /// memory it is the refusal below): reported; no repair restores over it
+    /// (rule 21 — the restores from a copy left with VX-378 U1).
     case liveKeyFileIsAnotherKeys(keyFileID: String)
+    /// RULE 21: the live place is not what this Mac remembers — the open
+    /// refuses, says what it found, and offers rule 17's two doors; no repair,
+    /// no act, every door closed.
+    case libraryDisagreesWithMemory(LibraryDisagreement)
 }
 
 public enum FollowKind: Equatable, Sendable {
@@ -294,6 +297,8 @@ public enum JoinPlan: Equatable, Sendable {
 
 public enum DoorRefusal: Equatable, Sendable {
     case locked
+    /// Rule 21: the live place is not what this Mac remembers.
+    case libraryDisagreesWithMemory
     case wrongMode(ProtectionMode)
     /// Another account is signed in: the one screen (Move or Sign out).
     case otherAccountSignedIn

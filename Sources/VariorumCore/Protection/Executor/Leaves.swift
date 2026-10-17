@@ -119,6 +119,12 @@ public protocol KeyFileStoreLeaf: AnyObject {
 public protocol MemoryStoreLeaf: AnyObject {
     func readMemory(libraryID: String) throws -> Sealed<DeviceMemory>?
     func writeMemory(_ memory: Sealed<DeviceMemory>, libraryID: String) throws
+    /// The library IDs this scope's memory items name, enumerated by name — no
+    /// item read (rule 21: "this Mac remembers … its library").
+    func rememberedLibraryIDs() throws -> Set<String>
+    /// The item for `libraryID` deleted — only at a door that makes another
+    /// library this Mac's (a creation, Make this my library).
+    func deleteMemory(libraryID: String) throws
 }
 
 /// The plan beside the library (one at a time; excluded from backups).
@@ -166,8 +172,6 @@ public protocol IDsLeaf: AnyObject {
 /// `LAEnvironment` (the Apple facts §5).
 public protocol BiometryLeaf: AnyObject {
     func biometry() -> BiometryFacts
-    /// The enrollment state hash — a hint, never a verdict (§3.10).
-    func biometryStateHash() -> Data?
 }
 
 /// The log and Diagnostics. Nothing written here ever carries key material

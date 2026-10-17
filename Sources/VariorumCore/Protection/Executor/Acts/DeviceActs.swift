@@ -129,6 +129,10 @@ extension ProtectionExecutor {
         try leaves.library.createLibrary(with: key, record: record)
         var library = UnlockedLibrary(key: key, record: record, section: section, memory: nil, keyFile: file)
         try writeMemory(&library)
+        // Rule 21: this Mac remembers ONE library — the one it just made.
+        for other in try leaves.memory.rememberedLibraryIDs() where other != libraryID {
+            try leaves.memory.deleteMemory(libraryID: other)
+        }
         log("create library: \(Self.fp8(Self.fp(key))) in Standard")
         return CreatedLibrary(library: library, words: words)
     }

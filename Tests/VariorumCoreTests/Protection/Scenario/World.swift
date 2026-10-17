@@ -734,7 +734,8 @@ final class SWorld {
         return ProtectionFacts(
             scope: Self.scope, storeFile: device.slot == nil ? .absent : .present,
             containerMarker: device.container.files[SPath.marker] != nil, unlocked: unlocked,
-            slotFingerprintHint: liveKeyFile(device)?.fingerprint, custody: custody,
+            slotFingerprintHint: liveKeyFile(device)?.fingerprint,
+            rememberedLibraryIDs: (try? leaf.rememberedLibraryIDs()) ?? [], custody: custody,
             syncKeys: syncKeys, appleKeys: apple, biometry: device.biometry.facts, touchIDPress: device.touchIDPress,
             session: device.session, vault: vault, catalog: catalog, now: clock)
     }
@@ -979,6 +980,18 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
 
     // MARK: Memory, plans
 
+    func rememberedLibraryIDs() throws -> Set<String> {
+        Set(device.keychain.names(service: ProtectionNames.memoryService).compactMap {
+            ProtectionNames.parseMemoryAccount($0.account, scope: scope)
+        })
+    }
+
+    func deleteMemory(libraryID: String) throws {
+        guard device.keychain.local[KName.memory(scope, libraryID)] != nil else { return }
+        device.keychain.local[KName.memory(scope, libraryID)] = nil
+        try wrote("memory- \(libraryID.prefix(8))")
+    }
+
     func readMemory(libraryID: String) throws -> Sealed<DeviceMemory>? {
         if case .memory(let sealed)? = device.keychain.local[KName.memory(scope, libraryID)]?.value { return sealed }
         return nil
@@ -1047,7 +1060,6 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
     func mintPassphraseKDF() -> PassphraseKDF.Descriptor { world.fastKDF() }
     func mintWords() -> [String] { world.newWords() }
     func biometry() -> BiometryFacts { device.biometry.facts }
-    func biometryStateHash() -> Data? { device.biometry.stateHash }
     func log(_ line: String) { device.logLines.append(line) }
     func report(_ entry: ProtectionDiagnostic) { device.diagnostics.append(entry) }
 }

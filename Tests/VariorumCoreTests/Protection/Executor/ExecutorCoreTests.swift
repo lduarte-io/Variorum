@@ -69,14 +69,13 @@ struct SettleSealTests {
         #expect(fixture.world.diagnosticEntries.contains(.planIgnored(.notNamed)))
     }
 
-    /// A memory item that fails its seal remembers nothing (rule 21): the open
-    /// adopts no section of the record — it mints a new plain device ID with
-    /// a fresh section (rule 23; PROVISIONAL — the VX-378 heading in
-    /// QUESTIONS: U2's detect-and-refuse may make this open a refusal). The
-    /// marker that found this Mac's own section left with VX-378 U1.
+    /// A memory item that fails its seal remembers nothing (rule 21) — and is
+    /// no disagreement (adjudication 5): with nothing in flight the open adopts
+    /// no section of the record and mints a new plain device ID with a fresh
+    /// section (rule 23; PROVISIONAL P-VX378-U1-1 (a)). (With an act in flight
+    /// the plan on disk names its section — `U2PinsRule21Tests`.)
     @Test func aMemoryItemThatFailsItsSealRemembersNothing() async throws {
         let fixture = try EX(.standard)
-        try await midUseCastle(fixture)
         let sealed = try #require(fixture.world.memories[fixture.libraryID])
         let original = try sealed.open(purpose: .memory, libraryID: fixture.libraryID, key: fixture.key).deviceID
         fixture.world.memories[fixture.libraryID] = Sealed(

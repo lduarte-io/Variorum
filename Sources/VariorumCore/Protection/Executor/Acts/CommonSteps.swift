@@ -168,17 +168,11 @@ extension ActContext {
 
     // MARK: - After the commit
 
-    /// What this Mac remembers, agreeing with the record — the key file's
-    /// mirror, the biometry hash when this key has a Touch ID item (a hint,
-    /// §3.10). (The vault facts left with VX-378 U2: the record names the sync
-    /// key the library follows.)
+    /// What this Mac remembers, agreeing with the record — its four things
+    /// (rule 21), the key file's mirror among them. (The vault facts and the
+    /// biometry hint left with VX-378 U2.)
     func rememberNewKey() throws {
-        let hasTouchID = try leaves.custody.custodyItems()
-            .contains(CustodyItemFact(fingerprint: library.fingerprint, itemClass: .touchid))
-        let hash = hasTouchID ? leaves.biometry.biometryStateHash() : nil
-        try executor.writeMemory(&library) { memory in
-            if hasTouchID { memory.biometryStateHash = hash }
-        }
+        try executor.writeMemory(&library)
     }
 
     /// The outgoing key's custody items go — only after the swap. Entering
