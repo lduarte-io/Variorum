@@ -73,6 +73,17 @@ struct FollowProgram: ActProgram {
     func run(_ step: String, _ ctx: ActContext) async throws {
         let kind = Self.kind(ctx.parameters)
         let newKind = try ctx.parameters.newKind ?? ctx.requireRecord().mode
+        // One posture per account (rule 20 too): a follow RESUMED after the
+        // account moved on to another posture elsewhere — before its swap —
+        // follows into a posture the account no longer has; it rolls back, and
+        // the follow now owed runs instead (census class (M), VX-378 U4: a
+        // follow out resumed after the account went back into Castle left the
+        // library Standard under a Castle account, holding the Castle rows' key).
+        if ctx.resuming, ctx.library.fingerprint == ctx.plan.fromFingerprint,
+           step == "pickUpKeys" || step == "mintOwnAppleKey" || LibraryRekey.newKeySteps.contains(step),
+           let account = ctx.accountID, let vault = ctx.executor.freshVault(for: account), vault.mode != newKind {
+            throw ActRollback(refusal: .accountMoved)
+        }
         switch step {
         case "pickUpKeys": try await ctx.pickUpKeys()
         case "mintOwnAppleKey": _ = try ctx.mintOwnAppleKey()

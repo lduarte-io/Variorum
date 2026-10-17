@@ -1675,6 +1675,18 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
   - seq 415 (P4 (c)) — CHECKER (L6): the carry isn't asked while a replay stands (only the floor is); the replaced
     stretch's copies are noted against the key file a later key change carries forward (the live one, else the sealed
     copy) rather than the union of both.
+  **Census on `74d24b4f8`: seed 32 — 0 failing (44,726 steps, 247.6 s); seed 33 — 2 failing (44,838 steps, 255.7 s):
+  P3 · P4.** Closed in the next commit:
+  - seq 230 (P3) — **NEW CLASS (M), MODEL — FIXED** (`Executor/Acts/Follow.swift`): a follow OUT of Castle crashed,
+    the account went back INTO Castle elsewhere (a new sync key), and the follow's resume finished the follow out — the
+    library Standard under a Castle account, holding the key Castle rows are written under (one posture broken; rule 20's
+    "old state or new" broken too: neither the account's old posture nor its new one). A resumed follow whose account is
+    no longer in the posture it follows into rolls back before its swap; the follow now owed runs instead. Pin
+    `U4CensusPins.aResumedFollowOutRollsBackWhenTheAccountWentBackIntoCastle` (census seq 230 replayed): red before —
+    the library Standard, promise 3 — green after; `FollowTests`, `U2CrashHarnessTests` green.
+  - seq 315 (P4 (c)) — CHECKER (L6): the offer put an older key file beside a replayed library inside the settle, and a
+    follow then ended L6 before any check noted the replaced stretch's copies — the world's offer action now notes them
+    the moment the older key file goes beside the library.
 - 5 — THE DISCOVERY RUN (seeds 21–40) and THE GATE SOAK (seeds 1–20, Debug and Release): NOT-STARTED. Tables land as
   they complete. PENDING.
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.

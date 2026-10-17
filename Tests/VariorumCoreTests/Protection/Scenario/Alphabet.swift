@@ -592,6 +592,10 @@ extension SWorld {
                 let outcome = try await executor.useOfferedKeyFile(&library, offer)
                 // A backup's key file carries the locks of its day (the floor).
                 if case .backup = offer.source { self.truth.keyFileFromBackup[name] = offer.keyFile }
+                // Under L6, the older key file now beside the library no longer
+                // carries the replaced stretch's keys: its copies are that
+                // stretch's (census seed 33 sequence 315).
+                self.noteAbandonedStretch(d)
                 return outcome
             }
         case .settle:

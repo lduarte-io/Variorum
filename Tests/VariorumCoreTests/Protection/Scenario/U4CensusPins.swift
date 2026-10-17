@@ -131,4 +131,25 @@ struct U4CensusPins {
                 "a silent sync-keys item survived the entry into Castle")
         expectPromisesKept(world)
     }
+
+    /// NEW CLASS (M) — one posture per account, rule 20: a follow OUT of Castle
+    /// that crashed, resumed after the account went BACK into Castle elsewhere,
+    /// used to finish the follow out — the library Standard under a Castle
+    /// account, holding the key Castle rows are written under. A resumed follow
+    /// whose account is no longer in the posture it follows into rolls back
+    /// before its swap (and the follow now owed runs instead) — census seed 33
+    /// sequence 230.
+    @Test func aResumedFollowOutRollsBackWhenTheAccountWentBackIntoCastle() async throws {
+        let world = SWorld(seed: 33 &* 1_000_003 &+ 230)
+        try await StartingState.all[6].build(world)
+        for action in [Action.crash(.useStandard("macA"), afterWrites: 18), .crash(.follow("macB", .words), afterWrites: 3),
+                       .follow("phone", .words), .crash(.useCastle("phone", .touchID, newWords: false), afterWrites: 11),
+                       .launch("macB")] {
+            await world.step(action)
+        }
+        let account = try #require(world.server.accounts.keys.first)
+        #expect(world.server.snapshot(account)?.mode == .castle)
+        #expect(world.macB.slot?.record?.mode == .castle, "the resumed follow took the library out of Castle under a Castle account")
+        expectPromisesKept(world)
+    }
 }
