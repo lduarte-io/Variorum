@@ -73,6 +73,9 @@ struct TakesBottomBar: View {
             // time controls, in `note ▾` — Write's bar's pair, here too
             // (R118's letter: no surface is privileged).
             .saveNoteVersion, .showNoteVersions,
+            // VX-372 (VX-383 U1 — D-C-2): the two duplicates — Write's bar's
+            // pair, here too (R6-2).
+            .duplicateNoteWithTags, .duplicateNoteWithoutTags,
             // 13n-a (R-13n-11): Copy for AI — Write's bar's twin (R6-2).
             .copyForAI,
             // 13n-b U2 (R-13nb-4): the Private row, beside it.
@@ -469,6 +472,14 @@ struct TakesBottomBar: View {
                 Task { await model.saveNoteVersion() }
             }
             Button(VersionsPath.menuLabel) { model.requestNoteVersions() }
+            // VX-372 (VX-383 U1 — D-C-2): Write's bar's two duplicate rows, in
+            // the same place (R6-2) — through the board's own door, which lifts
+            // her hand off the article landing first, then runs the ONE act.
+            ForEach(Operations.DuplicateTags.allCases, id: \.self) { tags in
+                Button(DuplicateCopy.verb(tags)) {
+                    Task { await model.duplicateAsVersion(tags: tags) }
+                }
+            }
             Divider()
             // 13n-a (R-13n-11): Copy for AI — Write's bar's row, here too.
             Button(CapabilityRegistry.capability(.copyForAI).menuTitle()) {

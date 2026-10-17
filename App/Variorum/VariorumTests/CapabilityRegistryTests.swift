@@ -394,6 +394,9 @@ struct CapabilityRegistryTests {
     /// per-surface statics, walk-asserted like the routed door tables.
     @Test func theSurfacesRenderExactlyTheDeclaredSurfaceActs() {
         let rendered = Set(TakesBoardView.surfaceCapabilities)
+            // VX-372 (A JUSTIFIED EDIT, the E2/E8 class — a new renderer is a
+            // new line): the Lenses board's Chosen-column duplicate door.
+            .union(LensesBoardView.surfaceCapabilities)
             .union(WriteTakesPanel.surfaceCapabilities)
             // 13b 4D (N32(c)): the scrap tag door's three surfaces.
             .union(BlocksAreaView.surfaceCapabilities)

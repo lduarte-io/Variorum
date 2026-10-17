@@ -479,6 +479,14 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // moment (⌘⇧S) and opening the listing of them.
     case saveNoteVersion
     case showNoteVersions
+    // VX-372 (VX-383 U1 — D-C-2): DUPLICATE A NOTE, declared at last — her
+    // ticket, *"a direct duplicate door, with tags / without tags; a duplicate
+    // with tags counts as tagging"*. TWO acts (one verb each, P-C-1's words):
+    // the copy WEARS the note's tags, applied so books that collect a tag hear
+    // it (`Operations.DuplicateTags.applied`), or wears none. The old inline
+    // "Duplicate as Version" rows (never declared) route to the first.
+    case duplicateNoteWithTags
+    case duplicateNoteWithoutTags
     // 13l Act 2 (ledger item 3) — DELETE NOTE, at last. Her report at 13j's
     // close was that she could not find a way to delete the note she was
     // standing in; the Library and the Pool had a door and neither asked

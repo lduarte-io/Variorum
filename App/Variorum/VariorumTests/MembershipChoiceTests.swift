@@ -456,7 +456,7 @@ struct MembershipChoiceTests {
             MembershipChoiceProbe.shown = nil
             try await mounted(PoolPostsView(
                 session: session, model: model,
-                onDuplicateAsVersion: { _ in }, onArchive: { _ in },
+                onDuplicateAsVersion: { _, _ in }, onArchive: { _ in },
                 readings: ReadingsViewModel(session: session),
                 tags: TagsViewModel(session: session),
                 onOpen: { _ in })

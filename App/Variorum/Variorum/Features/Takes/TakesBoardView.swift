@@ -94,6 +94,10 @@ struct TakesBoardView: View {
         .deleteSelectedBlocks,
         // 18c batch 3 (her U-6): …and the newline repair over that selection.
         .splitSelectedBlocksAtNewlines,
+        // VX-372 (VX-383 U1 — D-C-2): the header's `note actions` row — the
+        // shipped "Duplicate as Version", declared at last and running the
+        // with-tags act under its verb.
+        .duplicateNoteWithTags,
     ]
 
     /// Batch 14 (her image-#9 report — TWO live rings): the fan CARDS pane
@@ -616,11 +620,14 @@ struct TakesBoardView: View {
                 Button("Save choices as lens…") { lensNamePrompt = true }
                     .help("Keep the note's current takes as a named way of looking (a lens) — "
                         + "you can bring it back or compare against it in Lenses")
-                Button("Duplicate as Version") { Task { await model.duplicateAsVersion() } }
-                    .help("A full copy of this note — takes and all — as a new note, linked as a version")
+                // VX-372 (D-C-2, P-C-1): the shipped row, under its declared verb.
+                Button(CapabilityRegistry.capability(.duplicateNoteWithTags).verb) {
+                    Task { await model.duplicateAsVersion(tags: .applied) }
+                }
+                .help(DuplicateCopy.help(.applied))
             }
             .help("The rare whole-note acts: a rewrite pass, saving choices as a lens, "
-                + "duplicating as a version")
+                + "duplicating the note")
     }
 
     /// 18f batch 1 (U-4/U-16): the picked run's two roads. Its own function

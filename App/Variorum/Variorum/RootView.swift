@@ -1191,7 +1191,7 @@ struct RootView: View {
                 // P39a: the PARENT owns the sibling and passes its acts down
                 // (CLAUDE.md's cross-feature rule — "parents construct;
                 // features receive view models, values, and closures").
-                onDuplicateAsVersion: { await library.duplicateAsVersion(postID: $0) },
+                onDuplicateAsVersion: { await library.duplicateAsVersion(postID: $0, tags: $1) },
                 onArchive: { await library.archive(postID: $0) },
                 readings: readings, tags: tags,
                 onOpen: openHere,
