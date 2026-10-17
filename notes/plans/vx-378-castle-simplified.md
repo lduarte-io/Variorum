@@ -1720,8 +1720,17 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
   **Class (C)'s checker line** lands with this record's close: promise 3's settled convergence skips a device whose
   live place lacks its current key's file while the open says rule 27. Protection set Debug `✔ 296 tests in 74 suites
   passed`.
-- 5 — THE DISCOVERY RUN (seeds 21–40) and THE GATE SOAK (seeds 1–20, Debug and Release): NOT-STARTED. Tables land as
-  they complete. PENDING.
+- 5 — THE DISCOVERY RUN (seeds 21–40) and THE GATE SOAK (seeds 1–20, Debug and Release): IN-PROGRESS on the FINAL
+  tree **`bec58a576`** (`PROTECTION_SOAK=1 PROTECTION_SEED=n PROTECTION_SOAK_SEEDS=1 PROTECTION_SOAK_SEQUENCES=1000`,
+  `swift test --filter 'VariorumCoreTests\.GeneratorTests/'`, one seed per call; the `-c release` protection set on
+  this tree `✔ 273 tests in 70 suites passed`; `swift build -c release` `Build complete! (81.66 sec)`).
+  **THE DISCOVERY RUN (Debug; seed · steps · seconds · exit):**
+  | seed | steps | Debug s | result |
+  |---|---|---|---|
+  | 21 | 44,768 | 352.1 | `✔ Test run with 1 test in 1 suite passed after 352.065 seconds.` |
+  | 22 | 44,838 | 355.1 | `✔ Test run with 1 test in 1 suite passed after 355.070 seconds.` |
+  (the rest PENDING — landing as they complete)
+  **THE GATE SOAK:** NOT-STARTED (after a green discovery run).
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.
 
 ## 9. The ladder
