@@ -326,7 +326,7 @@ record committed with PENDING numbers first.
   fixture first, the scenario's four walks, the page rendered from the fixture; three FACTS DIFF and two PROVISIONALs
   for her). After (code tree `389162a09`): the protection set Debug `✔ 259 tests in 69 suites`, `-c release` `✔ 237 in
   65`, the full core suite green in Debug; `Sources/…/Protection/` untouched (7,562), tests 12,068.
-- U4 — the world and the soak: **STOPPED at a design find — P-VX378-U4-3, hers** (Opus implementer, 2026-10-16/17) —
+- U4 — the world and the soak: **STOPPED at P-VX378-U4-3 (2026-10-17, `0e220f524`), HER RULINGS taken (§8); RESUMED** — the resumption session: the carry reverted, the floor, rule 21's notice and offer, then the discovery run and the gate soak.
   §8's U4 RECORD (the resume map; piece E carries the trace and the census). A, B, B2 (her P-VX378-U4-1 ruling), C, D
   DONE; E STOPPED at P-VX378-U4-3 (seed 21 seq 83; the census of seeds 21–23 sized the rest: 88 failing sequences in
   3,000, classes (A)–(I)); F NOT RUN; G DONE. After (code tree `0bd112c9c`): the protection set Debug `━ 278 tests in 72
@@ -1338,6 +1338,66 @@ road after an entry (tied to P-VX378-U2-4); class (B) — P-VX378-U4-2's family.
 
 **Commits:** A `f3f24b29f` · B `a8fe1f349` · B2 `b468a306c` · C `027e80ae4` · D `2faefe2ee` · E (the stop) `0bd112c9c` ·
 G (this record's close — the next commit).
+
+### HER RULINGS AT THE U4 STOP — 2026-10-17 (the sitting over P-VX378-U4-3, P-VX378-U4-2 and the history carry; her words verbatim where quoted; U4 resumes to these)
+
+**The verified hand-back first:** tree clean at `0e220f524`, in sync; the scope diff `e0c9f9b17..HEAD` within the allowed
+paths; the protection set re-run by the orchestrator in Debug `━ 366 tests in 146 suites passed … with 2 known issues`
+(the stop's pin, as recorded); rules 12, 17, 25 carried her U3-seam rulings exactly. The unit stopped where the brief
+told it to.
+
+1. **THE PROMISE SHRINKS TO THE FLOOR (closes P-VX378-U4-3 without machinery).** Her words: *"I'm not necessarily
+   opposed to the idea that vault keeps master but I have noticed that a new promise is driving complexity an
+   unreasonable amount. this whole thing where you can open past libraries with your current keys is a nice convenience
+   but let's shrink our promise to "can always open with the keys that were their keys when you made them". and as a
+   niceity we like to carry them forward."* The vault does NOT keep earlier masters. **Rule 4's promise sentence, her
+   accepted wording:** *"A backup always opens with the passphrase and words you had when you made it. Because every
+   key change carries the earlier keys forward, your current ones usually open it too; they won't once you make a
+   different copy your library, since a new library starts with no previous keys."* (her edits: plain words, one true
+   example instead of "not a promise", "no previous keys" instead of "no past"). Rule 5 drops "of its day" for the same
+   words. Rule 12's catch-up: *"types a secret once to catch up, today's or the one it had when it last synced."* The
+   lagging-pair pin flips from a known issue to an assertion of the floor (the lagged device opens with its last-sync
+   secrets, then follows).
+2. **THE HISTORY CARRY AT MAKE THIS MY LIBRARY IS REMOVED (P-VX378-U4-1 re-ruled).** Her words: *"let's remove "Make
+   this my library" carrying keys. Agreed, I didn't really love it when I approved it earlier but it made sense but now
+   let's just get rid of it completely for being weird."* Piece B2 (`b468a306c`) is REVERTED whole — the `carrying:`
+   builder, the gathering at the door, the Apple-key records moving to the new section, its five pins, the fixture's
+   stage 9/10 facts, the page's render; **rule 17 returns to its words before the carry.** A new library has a fresh key
+   and no previous keys; its old backups open with the secrets they were made with (the floor). Census class (F) dies
+   with it.
+3. **RULE 21 REWORDED — the fingerprint, the wrapped copy, and the NOTICE instead of the refusal.** Her questions
+   settled it: the Mac never holds the plain key — the memory item holds *"its ID, its device ID, a fingerprint of its
+   current key, and a copy of its key file: the key itself, still wrapped under your locks"* (her: *"if it's more
+   accurate to say "a fingerprint of its current key" … let's update that wording. if you want to say "it's wrapped
+   key" you can also add that"*). **The refusal goes** — her words: *"we also do not need to protect them from hand
+   copying an old library over - they have to just remember that at that point"*; *"I think we can have a popup that
+   it's probably an issue without banning it from working"*; and the orchestrator's own finding that the refusal was a
+   dead end (its two doors cannot act on a file already in the live place — U2's VX-309 hand-forward). **As ruled:**
+   when the library in the live place is not the one this Mac last opened, the app OPENS it, says so ONCE — her
+   accepted strings, verbatim: *"This is an older copy of your library, from <date>"* / *"This is a different library
+   than the one this Mac last had open"* — and then remembers this one; posture is the ordinary follow (an old
+   Standard-era file under a Castle account asks a secret to follow); sync catches it up at its next round. **The one
+   case that needs a hand — the key file beside the library does not open it — is an OFFER, naming where the working
+   key file was found** (her ask: *"it should say where it found it. like "in the backups from august 3rd""*): the app
+   asks for a secret once, opens the candidate key files in the places it writes them (this Mac's keychain copy; each
+   backup's key file in the folders of rule 19), tries each key against the library, and offers the one that works —
+   *"The key file beside your library doesn't open it. This Mac's keychain holds a copy that does. Use it?"* /
+   *"…The backup from August 3 holds a key file that does. Use it?"*; none → rule 27's refusal naming the places it
+   looked. Nothing guessed; nothing written before her yes. **Removed with the refusal:** `Fault/DoorRefusal/
+   ExecutorRefusal.libraryDisagreesWithMemory` as a REFUSAL (it becomes the notice), the `CopyDoor` offers at the
+   refusal, the VX-309 hand-forward about acting on a live-place stray, and the world's promise 7 "a disagreement
+   refuses, never writes" → *"a disagreement is noticed and said; nothing changes posture, account or roads silently"*
+   (promise 9's kept core). The memory's "follows the file after the notice" write returns (one record write, no
+   repair). P-VX378-U4-2 CLOSES as outside the promise — her words: *"someone with access to your computer can of
+   course delete your library"* — the world's tamper clauses stop treating a replay-plus-memory-tamper as something
+   the app must catch; stage 14 of the page is rewritten to the notice and the offer.
+4. **A standing principle, her words (2026-10-16):** *"I think that this fits my instincts of not wanting to have to
+   tell users any sort of weird exception."* — and on the floor: the promise is the floor; carrying keys forward is
+   what the app does, said as a convenience with its one true example.
+
+**Rules edits this resumption makes at her word (and no others):** 4, 5, 12 (the floor); 17 (the carry's words
+removed); 21 (the fingerprint + wrapped copy; the notice; the offer). The status line of `CastleRules.md` names today's
+amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
 
 ## 9. The ladder
 
