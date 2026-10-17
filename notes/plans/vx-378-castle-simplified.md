@@ -1041,7 +1041,7 @@ files — the seven new Lifecycle test files, the regenerated page, this plan an
 (the model untouched at 7,562). Orchestrator re-runs on `c973e7f38`: the protection + lifecycle suites under a wider
 filter in Debug `✔ 347 tests in 143 suites passed` (subsuming the record's 259/69); under `-c release` `✘ 325 tests in
 139 suites … 1 issue` — VX-380's Sync test again, nothing of Protection's (the lifecycle suites run and pass there too);
-the full core suite in Debug (exit 0): `✔ 240/51` · `✔ 3119/399` · `✔ 40/6`, matching the record's lines. **The renderer's byte-equality re-checked:** the page rendered from the
+the full core suite in Debug: `✔ 240/51` · `✘ 3119/399 … 1 issue` · `✔ 40/6` — the one red a TIMING failure outside Protection (`StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar`, "Time limit was exceeded: 60.000 seconds" under the full-suite load; `swift test --filter StarContextTests` alone `✔ 11 tests in 1 suite passed after 0.737 seconds`) — the VX-305 record's known perf-timing-under-load class, not a model red; the implementer's own full run was green. **The renderer's byte-equality re-checked:** the page rendered from the
 fixture (`CASTLE_LIFECYCLE_PAGE_OUT=… swift test --filter LifecyclePageTests`) `cmp`-identical to the committed
 `castle-lifecycle.html`. **Red-on-old by construction, checked:** the fixture commit `bb0550230` precedes the scenario
 commit `bdd19624e`, whose message records the first run red at exactly FD-1/FD-2/FD-3 and green everywhere else;
