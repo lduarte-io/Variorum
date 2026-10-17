@@ -230,7 +230,8 @@ struct RedoStackTests {
             try stack.undo(with: ops)
             #expect(try db.deletedAt("container", copy.post.id) != nil)
 
-            #expect(try stack.redo(with: ops) == "Duplicate as Version")
+            // VX-372 (P-C-1 — JUSTIFIED EDIT): the label is the door's verb now.
+            #expect(try stack.redo(with: ops) == "Duplicate with Tags")
             #expect(try db.deletedAt("container", copy.post.id) == nil)
             #expect(try liveBlockOrder(db, in: copy.post.id) == copiedBlocks)
         }

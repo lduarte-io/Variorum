@@ -283,7 +283,7 @@ store's Castle credentials, if a lock screen appears, are `~/.variorum/dev-castl
 
 ## U1 UNIT RECORD — VX-372: the op's tag choice, the two doors, promote, the seeder (opus-implementer, from 2026-10-17)
 
-**NOT DONE YET (the record's first line, per the contract): read-in done; no product code, no pins yet.** No stage
+**NOT DONE YET (the record's first line, per the contract): D-C-1's pins are in and red on the pre-fix tree; no product code yet.** No stage
 claimed, no app launched, no `xcodebuild test`, no store touched by this session (the Mac batch and the walk are the
 orchestrator's, in a stage window).
 
@@ -308,7 +308,7 @@ Headless logs: `notes/plans/vx383-screens/u1/logs/`.
 | # | piece | status |
 |---|---|---|
 | 0 | read-in, this record, the gitignore line | DONE (this commit) |
-| 1 | D-C-1 pins (core) — committed AHEAD of the fix, run RED on the pre-fix tree | NOT-STARTED |
+| 1 | D-C-1 pins (core) — committed AHEAD of the fix, run RED on the pre-fix tree | DONE (this commit) — NEW `Tests/VariorumCoreTests/DuplicateAppliesTagsTests.swift` (9 tests; every one calls the door's PRE-EXISTING spelling — `duplicateAsVersion(_:)`, whose default becomes with-tags, and `duplicateNoteForClient` — so it compiles on the pre-fix tree): a quiet book SEATS the copy (end, unsectioned, the seat stamped by the application's own act) · the Arrivals dial BELLS it · a full book bells it · the application ORDER is kept and the ownership table holds (an owned book claims the free copy, a plain book then bells it) · the wire's duplicate is heard the same way (one body) · ONE entry: undo leaves the book without the copy (the seat tombstoned on the copy's stamp), redo brings the SAME row back · a dismissal she made between stays decided (her stamp) · a bell she seated between comes back seated · CONTROL: finished and archived books stay paused. **JUSTIFIED EDITS:** `DuplicateCarriesTagsTests` — P-17y-B3-c1's control flips to `theRidingTagsAreAppliedSoALivingBookHearsThem` (superseded by D-C-1), the undo label reads "Duplicate with Tags" (P-C-1), the suite's doc says so; `RedoStackTests.redoingAPostMintBringsTheWholeCopyBack` — the label. **RED on the pre-fix tree (`2b3b3cd3a` + these files): "Test run with 40 tests in 4 suites failed … with 12 issues"** — 11 tests failed, each on its designed line (`p1-pins-red.log`, `p1-pins-red.pairs`): `DuplicateAppliesTagsTests` `:93` `:118` `:135` `:157` `:176` `:196` `:227` `:253` (the pair row never exists — the copy was never heard), `DuplicateCarriesTagsTests` `:104` `:109` (the label) and `:134` (the flipped control), `RedoStackTests` `:234` (the label); the control `finishedAndArchivedBooksStayPaused` and the four other `DuplicateCarriesTagsTests` GREEN |
 | 2 | D-C-1 fix — `Operations.DuplicateTags`, `duplicateAsVersion(_:tags:)`, the body's parameter, the undo label | NOT-STARTED |
 | 3 | D-C-3 — promote applies the original's tags (pins ahead, then the fix) | NOT-STARTED |
 | 4 | D-C-5 — the seeder's twin (+ P-C-1's three guide sentences) | NOT-STARTED |
