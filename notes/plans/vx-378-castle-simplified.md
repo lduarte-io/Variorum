@@ -323,7 +323,7 @@ record committed with PENDING numbers first.
   set Debug `✔ 254 tests in 67 suites`, `-c release` `✔ 232 in 63`, the full core suite green in Debug; 7,562
   source lines, 9,380 test lines.
 - U3 — the lifecycle proof: **IN-PROGRESS** (Opus implementer, 2026-10-16) — §8's U3 RECORD (pieces A–F; counts
-  PENDING). Next: piece B, the fixture alone.
+  PENDING). Next: piece C, the scenario.
 - U4 — the world and the soak: not started.
 - The ladder: not started.
 - The gate: not started.
@@ -871,12 +871,26 @@ everything else on the page stands as its facts.
 
 **Not done in U3, first:** PENDING (filled at the close).
 
-**The calls (each recorded with its reason):** PENDING — the fixture's home and shape; the world the scenario walks;
-the renderer's home.
+**The calls (each recorded with its reason):**
+- **The fixture is a Swift literal**, `Tests/VariorumCoreTests/Protection/Scenario/Lifecycle/LifecycleFixture.swift`
+  (`Lifecycle.stages`, `Lifecycle.factsDiff`), not JSON: a JSON file in the test target needs a resource declaration in
+  `Package.swift` (outside this unit's scope diff) or draws SwiftPM's unhandled-file warning; and the compiler holds
+  every road, fact and status to a known case, so a typo can't quietly turn a fact into nothing. **Its shape:** per stage
+  — the posture, the page's rows (prose as data; the road chips TYPED: `LRoad` — a typed secret by whose day and which
+  road · the Apple road · the on-device road · Touch ID · every quiet road — with `LState` opens/gone, a condition for
+  "(if chosen)" and "everywhere" for the Apple deletion reaching her other Macs), hidden road rows the page implies but
+  shows none for (each naming its source — "carried from stage N" or "stated in the stage's words"), and the written
+  facts (`LFact`, each quoting the page words it types, its rules and a status: asserted · asserted at a later stage ·
+  a branch not on this road (where proven) · not a protection-model fact (whose) · a FACTS DIFF with the observed
+  fact). The page's two "or"s before stage 6 are walked both ways (`LStage5Event`: an Apple ID change, an iCloud Keychain
+  reset; the gate: Touch ID, Always ask). The fixture was written BEFORE any test; it states the page as written —
+  nothing in it anticipates the model.
+- PENDING — the world the scenario walks; the renderer's home.
 
 **Pieces (the resume map — a fresh session can finish U3 from this list and `git log`):**
 - A — the record skeleton and LIVE STATUS: DONE (this commit).
-- B — the fixture alone (the page's fourteen stages as typed facts, the prose riding as data): NOT-STARTED.
+- B — the fixture alone (the page's fourteen stages as typed facts, the prose riding as data): DONE (this commit) —
+  compiles in the test target (`swift build --build-tests`); no test reads it yet.
 - C — the scenario: the fourteen stages walked through the real acts, asserting against the fixture: NOT-STARTED.
 - D — the renderer and the regenerated page (`cmp`): NOT-STARTED.
 - E — FACTS DIFF and PROVISIONALs (QUESTIONS): NOT-STARTED.
