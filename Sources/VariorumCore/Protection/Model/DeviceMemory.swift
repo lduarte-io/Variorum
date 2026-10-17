@@ -22,7 +22,10 @@ import Foundation
 // "This is a different library than the one this Mac last had open"), then
 // remembers this library at the open's repairs. Nothing refuses and nothing
 // repairs by guessing (the refusal design left at the U4 resumption's piece 3).
-// An ABSENT memory is no disagreement (rule 8's keychain reset).
+// Two another-key cases say NOTHING, by design (`LibraryNotice.check`): this
+// Mac's own act in flight explains the two keys, and the library moved on past
+// the memory — its live key file's history carries the remembered key
+// (P-VX378-U4-5). An ABSENT memory is no disagreement (rule 8's keychain reset).
 // (The mode and account last confirmed, the key epoch, the nudge dismissals,
 // the family tree's mirror and the device section's second home left with
 // VX-378 U1 — rules 21, 23.)

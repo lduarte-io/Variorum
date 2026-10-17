@@ -289,6 +289,9 @@ that survives. Then the discovery run (seeds 21–40) and the gate soak. **Evide
   offer-era open's typed roads include rule 1's keychain mirror and every catalogued pair (the world's lobby walks
   them). VX-306's plan names the mirror road in `LobbyRoads` or beside it, so the face never shows a stray's locks as
   the typed roads in exactly the state the offer exists for.
+- **The lobby's custody fact (the ladder's round-2 NIT 2):** VX-306's production feeder of `ProtectionFacts.custodyOpensLibrary`
+  treats an item it could not READ as unknown (nil, or the fingerprint included) — never as verified-fails — so a
+  transient keychain error can never surface rule 27's refusal while a working quiet road exists.
 - **Later phases, re-planned to the rules:** VX-306 (the lobby / open road — the ask-and-re-make path's face, Touch ID
   re-arm, the refusal faces of rules 21/27; the P-U4-13 keychain-mirror road is now rule 1's redundancy, not a rescue);
   VX-307 (crossings' faces — the leave screen's "keep your Castle secrets" sentence, the follow's one ask); the warning
@@ -338,7 +341,7 @@ record committed with PENDING numbers first.
   3,000, classes (A)–(I)); F NOT RUN; G DONE. After (code tree `0bd112c9c`): the protection set Debug `━ 278 tests in 72
   suites passed with 2 known issues`, `-c release` `━ 255 in 68 … 2 known issues`, the full core suite green in Debug;
   7,604 source lines, 13,038 test lines.
-- The ladder: round 1 **DONE** (0B·0M·2m·3N, all fixed and verified — §9); round 2 (the fixes) **RUNNING**.
+- The ladder: **CLOSED at two rounds** (round 1: 0B·0M·2m·3N, fixed; round 2: 0B·0M·0m·2N, fixed — §9).
 - The gate: not started.
 
 ---
@@ -1790,6 +1793,28 @@ applied them under the resiliency protocol's budget-death road; every change tra
 148 suites passed` (the wider filter; the new pin among them); `swift build -c release` complete; under `-c release`
 `✘ 362 tests in 144 suites … 1 issue` — VX-380's Sync attacker test, swept in by the filter, nothing of Protection's.
 Round 2 re-reviews the fixes (`ce3ee92e7..94f295c9e`); the gate's discovery run and soak then run on the FINAL tree.
+
+### Round 2 — 2026-10-17, fresh `fable-reviewer` over the round-1 fixes (`ce3ee92e7..94f295c9e`), read-only on the review worktree; the report committed UNEDITED as `notes/plans/vx-378-ladder-round-2.md`
+
+**0 BLOCKER · 0 MAJOR · 0 MINOR · 2 NIT — THE LADDER CLOSES at two rounds** (no MAJOR found, so rounds three to five
+never open under her cap). The reviewer's own revert check went past the recorded "red by construction": with ONLY
+`Assess.swift` reverted to `ce3ee92e7` (the fact and the pin kept so it compiles), `U2PinsRule27Tests` fails with
+exactly one issue — the new pin's first arm — and is green on HEAD: a true behavioural red-on-old for F1. Its counts:
+Debug `✔ 297/74`, release `✔ 274/70` (round 1's plus the pin). Every round-1 fix judged SOUND (its items 1–5).
+
+**Dispositions (the orchestrator; both doc lines, applied by the orchestrator under the budget-death road and checked
+line by line as the final round's fixes):**
+1. **NIT 1 (`DeviceMemory.swift` header over-claims "says so once" for two another-key cases that say nothing) —
+   CONFIRMED, FIXED:** one parenthetical naming the two exemptions (`LibraryNotice.check`: this Mac's own act in flight;
+   the library moved on past the memory — P-VX378-U4-5). Doc-only.
+2. **NIT 2 (the new fact's contract is silent on a FAILED silent-item read; the world's `try?` shape would read
+   could-not-read as opens-nothing — unreachable in the world, SPECULATIVE at the production tier) — CONFIRMED as a
+   contract sentence + a §5 hand-forward, FIXED:** the fact's doc says a feeder that cannot read an item feeds nil or
+   includes the fingerprint, never omits it; §5 carries the line for VX-306's production feeder. No pin (no production
+   feeder exists yet; the world's read cannot fail).
+These two edits touch two source files' COMMENTS only, so the final code tree moves past the one the second gate script
+had begun on (`94f295c9e` — discovery seeds 22, 23 green there, 44,838 and 45,219 steps; seed 21's line garbled by the
+script's parse, re-run below). The gate's discovery run and soak run ONCE on the final tree — the commit after this.
 
 
 ## 10. The gate and the rules checklist

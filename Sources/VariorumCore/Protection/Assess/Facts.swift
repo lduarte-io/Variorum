@@ -189,7 +189,10 @@ public struct ProtectionFacts: Sendable {
     /// refusal reads it: a silent item holding a key that opens nothing is no
     /// road (VX-378 ladder round 1, finding 1 — census class (D)'s shape, one
     /// tier over). A Touch ID item always counts: it cannot be tried without a
-    /// press.
+    /// press. A FEEDER THAT CANNOT READ an item (a transient keychain error)
+    /// feeds nil, or includes that item's fingerprint — never omits it as
+    /// "opens nothing": could-not-read is not verified-fails (the ladder's
+    /// round-2 NIT; the production feeder is VX-306's).
     public var custodyOpensLibrary: Set<String>?
     public var syncKeys: [SyncKeysItemFact]
     public var appleKeys: AppleKeyFacts
