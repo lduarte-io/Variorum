@@ -373,7 +373,27 @@ public enum AssessRules {
             acts.append(.rekeyForFault)
         }
         if touchID.rearmQuestion { acts.append(.touchIDRearmQuestion) }
+        acts += passphraseAsks(facts, unlocked, current: current, faults: faults)
         return acts
+    }
+
+    /// RULE 3: a library with no passphrase is asked for one right before its
+    /// first backup and at the first launch after a quiet road failed — the
+    /// launch that finds it (the Apple road lost, or Standard's on-device item
+    /// gone for the current key).
+    static func passphraseAsks(
+        _ facts: ProtectionFacts, _ unlocked: UnlockedFacts, current: ProtectionMode, faults: [Fault]
+    ) -> [OwedAct] {
+        guard !unlocked.record.passphraseSet else { return [] }
+        var asks: [OwedAct] = []
+        if !facts.catalog.copies(ofLibrary: unlocked.record.libraryID).contains(where: { $0.kind == .backup }) {
+            asks.append(.askPassphrase(.beforeFirstBackup))
+        }
+        let appleRoadLost = faults.contains { if case .appleRoadLost = $0 { return true } else { return false } }
+        let onDeviceItemGone = current == .standard
+            && !facts.custody.contains(CustodyItemFact(fingerprint: unlocked.currentFingerprint, itemClass: .silent))
+        if appleRoadLost || onDeviceItemGone { asks.append(.askPassphrase(.quietRoadFailed)) }
+        return asks
     }
 
     // MARK: - Doors

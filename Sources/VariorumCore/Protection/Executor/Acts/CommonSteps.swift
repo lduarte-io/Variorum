@@ -135,6 +135,7 @@ extension ActContext {
         let reach = executor.reach(key: library.key, keyFile: library.keyFile, extra: [fromKey].compactMap { $0 })
         var next = record.recordingRekey(to: Self.fp(key), kind: kind, at: now)
         if parameters.changesAccount == true { next.account = parameters.targetAccount }
+        next = next.stampingPassphraseFact(keyFile: library.keyFile)
         let others = record.verifiedSections(reach: reach).filter { $0.deviceID != deviceID }
         next.deviceSections = try (others + [library.section]).map {
             try Sealed.sealing($0, purpose: .deviceSection, libraryID: next.libraryID, key: key)

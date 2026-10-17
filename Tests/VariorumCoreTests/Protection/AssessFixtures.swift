@@ -32,6 +32,8 @@ struct AWorld {
     var memoryAbsent = false
     var unlocked = true
     var libraryAccountEmail: String?
+    /// Rule 3's record fact; nil reads it from the live file (and the account).
+    var passphraseSet: Bool?
     let own = AppleKeyMaterial.mint()
 
     /// A library in `mode`: Castle — passphrase and words, a Touch ID item,
@@ -60,7 +62,8 @@ struct AWorld {
 
     var record: ProtectionRecord {
         ProtectionRecord.minting(
-            libraryID: world.library, mode: mode, account: account, currentFingerprint: PF.fp(key), at: PF.t0)
+            libraryID: world.library, mode: mode, account: account, currentFingerprint: PF.fp(key),
+            passphraseSet: passphraseSet ?? ProtectionRecord.passphraseExists(keyFile: liveFile, account: account), at: PF.t0)
     }
 
     /// What this Mac remembers, agreeing with the record (unless set).

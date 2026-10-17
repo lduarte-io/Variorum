@@ -192,6 +192,7 @@ extension ActContext {
         guard var record = library.record else { throw ExecutorRefusal.recordMissing }
         guard record.account != account else { return }
         record.account = account
+        record = record.stampingPassphraseFact(keyFile: library.keyFile)
         try leaves.library.writeRecord(record, with: library.key)
         library.record = record
         try rememberNewKey()

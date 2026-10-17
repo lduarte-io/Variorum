@@ -236,6 +236,20 @@ public enum OwedAct: Equatable, Sendable {
     case rekeyForFault
     /// The re-arm question, after the passphrase opened.
     case touchIDRearmQuestion
+    /// RULE 3: no passphrase exists yet, at one of the schedule's two
+    /// model-side moments — the face asks (its words and the launch-counted
+    /// reminders are phase 3's).
+    case askPassphrase(PassphraseAsk)
+}
+
+/// Rule 3's two moments the model owns ("always right before the first
+/// backup and at the first launch after a quiet road has failed").
+public enum PassphraseAsk: Equatable, Sendable {
+    /// No backup of this library exists yet — asked right before the first.
+    case beforeFirstBackup
+    /// A quiet road failed at this launch (the Apple road lost, or the
+    /// on-device item gone).
+    case quietRoadFailed
 }
 
 // MARK: - Doors

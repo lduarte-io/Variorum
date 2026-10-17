@@ -315,7 +315,7 @@ record committed with PENDING numbers first.
   `25dc1cd12`): Debug `✔ 211 tests in 54 suites`, `-c release` `✔ 189 in 50`, the full core suite green in Debug;
   7,068 source lines, 8,611 test lines.
 - U2 — the additions: **IN PROGRESS** (Opus implementer, 2026-10-16) — §8's U2 RECORD carries the resume map
-  (pieces A–J, each flipped in the commit that lands it). A, B DONE; next: **C** (rule 3). Counts PENDING.
+  (pieces A–J, each flipped in the commit that lands it). A–C DONE; next: **D** (adjudication 3). Counts PENDING.
 - U3 — the lifecycle proof: not started.
 - U4 — the world and the soak: not started.
 - The ladder: not started.
@@ -577,7 +577,7 @@ newest comment outranks an older body. Applied at the closeout's triage.
 
 **Pieces (the resume map — a fresh session can finish U2 from this list and `git log`):**
 - A — the record skeleton and LIVE STATUS: DONE (this commit).
-- B — rule 2: words at birth: DONE (this commit) — `IDsLeaf.mintWords()`; `createLibrary(passphrase:)` mints the
+- B — rule 2: words at birth: DONE (`3631ecbde`) — `IDsLeaf.mintWords()`; `createLibrary(passphrase:)` mints the
   twelve words and hands them back once (`CreatedLibrary`, words redacted from its description); `KeyFile.locking`
   refuses a new file the words would not open (`KeyFileError.noWordsLock` — its words lock, or the master with its
   twelve-words copy; `KeyFile.opensWithTheWords`). Pins `U2PinsRule2Tests` (2) red on the pre-B tree (scratch worktree
@@ -585,8 +585,16 @@ newest comment outranks an older body. Applied at the closeout's triage.
   green after; `U2CreatedWordsTests` (1) is the new API's (red by construction — the old creation took its words from
   the caller). Fixtures that built a file with no words lock now carry one (`KeyFileTests` ×4, `AssessTests`, U1's
   `CutPinsTests`, the world's planted pair). Protection set Debug `✔ 214 tests in 56 suites`.
-- C — rule 3: the record's `passphraseSet` and `reminderDismissals`; `assess` owes `.askPassphrase` at the two
-  model-side moments (before the first backup; at the launch a quiet road failed): NOT STARTED.
+- C — rule 3: DONE (this commit) — `ProtectionRecord.passphraseSet` and `.reminderDismissals`; the fact is
+  stamped at every record the executor writes (`stampingPassphraseFact` in `writeFacts`, `recordIntoStaged`,
+  `bindAccount`, the creation): a passphrase lock on the key file, or the account's (rule 7 — bound, the vault always
+  carries one); `recordPassphraseReminderDismissed` counts a dismissal (one record write). `assess` owes
+  `OwedAct.askPassphrase(.beforeFirstBackup)` while no backup of the library exists and `(.quietRoadFailed)` at the
+  launch that finds the Apple road lost or Standard's on-device item gone. Pins `U2PinsRule3Tests` (4) red on the
+  pre-C tree (scratch worktree at `3631ecbde`: issues at `U2PinsRule3Tests.swift:30`, `:46`, `:64`, `:70` — "4 tests
+  in 1 suite failed … with 4 issues"; `aLibraryWithAPassphraseIsNeverAsked` is the guard, green both sides), green
+  after; `U2PassphraseFactTests` (1) the new writer's. `AWorld` reads the fact from its live file. Protection set Debug
+  `✔ 219 tests in 58 suites`.
 - D — adjudication 3: Use Castle's press records its gate style (rule 9's "Touch ID on this Mac is optional" chosen at
   the press, so a later Castle re-key mints its Touch ID item): NOT STARTED.
 - E — rules 7 · 11 · 12 · 14 · 15: the vault's account side replaced whole — the vault modelled without an Apple wrap
@@ -612,7 +620,7 @@ newest comment outranks an older body. Applied at the closeout's triage.
 
 **PROVISIONAL calls:** PENDING (logged under the VX-378 heading in `notes/QUESTIONS.md`, P-VX378-U2-n).
 
-**Commits:** A `0572dd3c0` · B (this commit) · the rest PENDING.
+**Commits:** A `0572dd3c0` · B `3631ecbde` · C (this commit) · the rest PENDING.
 
 ## 9. The ladder
 

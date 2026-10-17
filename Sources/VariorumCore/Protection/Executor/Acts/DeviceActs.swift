@@ -114,7 +114,8 @@ extension ProtectionExecutor {
         let at = now()
         configuration.libraryID = libraryID
         var record = ProtectionRecord.minting(
-            libraryID: libraryID, mode: .standard, account: nil, currentFingerprint: Self.fp(key), at: at)
+            libraryID: libraryID, mode: .standard, account: nil, currentFingerprint: Self.fp(key),
+            passphraseSet: passphrase != nil, at: at)
         let apple = leaves.ids.mintAppleKey()
         let section = DeviceSection(deviceID: deviceID, settings: .noChoiceYet)
             .recordingAppleKey(AppleKeyRecord(id: apple.id, purpose: .library, origin: .minted))

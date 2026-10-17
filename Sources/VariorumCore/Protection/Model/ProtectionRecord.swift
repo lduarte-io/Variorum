@@ -26,6 +26,15 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
     public var keyEpoch: Int
     public var currentFingerprint: String
     public var changedAt: Date
+    /// RULE 3 ("every library is asked for a passphrase"): whether a passphrase
+    /// exists for the library — a passphrase lock on its key file, or, bound to
+    /// an account, the account's (rule 7: one pair; the vault always carries
+    /// one). A fact the executor keeps fresh at every record it writes; the
+    /// reminders' faces are phase 3's.
+    public var passphraseSet: Bool
+    /// How many times the returning reminder was dismissed (rule 3's "then with
+    /// a 'don't show again'"). A fact only: the schedule is the face's.
+    public var reminderDismissals: Int
     /// One per device, each sealed (purpose `device-section`) under the key
     /// in hand when it was written.
     public var deviceSections: [Sealed<DeviceSection>]
@@ -33,7 +42,8 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
     public init(
         format: Int = ProtectionRecord.currentFormat, libraryID: String, mode: ProtectionMode,
         account: String?, keyEpoch: Int, currentFingerprint: String,
-        changedAt: Date, deviceSections: [Sealed<DeviceSection>] = []
+        changedAt: Date, passphraseSet: Bool = false, reminderDismissals: Int = 0,
+        deviceSections: [Sealed<DeviceSection>] = []
     ) {
         self.format = format
         self.libraryID = libraryID
@@ -42,6 +52,8 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
         self.keyEpoch = keyEpoch
         self.currentFingerprint = currentFingerprint
         self.changedAt = changedAt
+        self.passphraseSet = passphraseSet
+        self.reminderDismissals = reminderDismissals
         self.deviceSections = deviceSections
     }
 
@@ -49,11 +61,25 @@ public struct ProtectionRecord: Codable, Equatable, Sendable {
     /// `mode` (the creation).
     public static func minting(
         libraryID: String, mode: ProtectionMode, account: String?,
-        currentFingerprint: String, keyEpoch: Int = 1, at: Date
+        currentFingerprint: String, keyEpoch: Int = 1, passphraseSet: Bool = false, at: Date
     ) -> ProtectionRecord {
         ProtectionRecord(
             libraryID: libraryID, mode: mode, account: account,
-            keyEpoch: keyEpoch, currentFingerprint: currentFingerprint, changedAt: at)
+            keyEpoch: keyEpoch, currentFingerprint: currentFingerprint, changedAt: at, passphraseSet: passphraseSet)
+    }
+
+    /// Rule 3's fact as the library stands: a passphrase lock on `keyFile`,
+    /// or the account's passphrase (rule 7 — bound, the device holds the
+    /// account's pair, and the vault always carries a passphrase lock).
+    public static func passphraseExists(keyFile: KeyFile?, account: String?) -> Bool {
+        keyFile?.passphrase != nil || account != nil
+    }
+
+    /// This record with rule 3's fact brought to `keyFile`.
+    public func stampingPassphraseFact(keyFile: KeyFile?) -> ProtectionRecord {
+        var next = self
+        next.passphraseSet = Self.passphraseExists(keyFile: keyFile, account: account)
+        return next
     }
 
     /// **A re-key** (§3.4): the new key current, the epoch advanced; the mode

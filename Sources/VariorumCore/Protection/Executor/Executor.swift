@@ -277,7 +277,7 @@ public final class ProtectionExecutor {
     /// the mirror).
     func writeFacts(_ library: inout UnlockedLibrary, section: DeviceSection) throws {
         guard var record = library.record else { throw ExecutorRefusal.recordMissing }
-        record = try record.storing(section, sealedUnder: library.key)
+        record = try record.stampingPassphraseFact(keyFile: library.keyFile).storing(section, sealedUnder: library.key)
         try leaves.library.writeRecord(record, with: library.key)
         library.record = record
         library.section = section
@@ -290,6 +290,17 @@ public final class ProtectionExecutor {
         edit?(&memory)
         try leaves.memory.writeMemory(try memory.sealed(under: library.key), libraryID: memory.libraryID)
         library.memory = memory
+    }
+
+    /// **Rule 3's dismissal, recorded** (the returning reminder's "don't show
+    /// again" counts three): one record write, nothing else — the schedule
+    /// and its words are phase 3's.
+    public func recordPassphraseReminderDismissed(_ library: inout UnlockedLibrary) throws {
+        guard var record = library.record else { throw ExecutorRefusal.recordMissing }
+        record.reminderDismissals += 1
+        record = record.stampingPassphraseFact(keyFile: library.keyFile)
+        try leaves.library.writeRecord(record, with: library.key)
+        library.record = record
     }
 
     /// The live key file — and the in-hand copy follows.
