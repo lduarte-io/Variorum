@@ -3051,5 +3051,9 @@ key — rules 7, 16), this Mac's settings of that day. Options:
   things", yours to rule.
 - (c) the key changes at every account change (sync setup, a join, a leave), so a copy across one always differs —
   against rules 7 and 16 ("never changes the key"), listed so it isn't proposed.
+The same reading covers a KEY FILE of the same key replayed from an earlier day (its locks of that day: the library then
+opens with that day's secrets — the floor) and a MEMORY ITEM replayed alone (it names this Mac's earlier device ID, so
+the open reads that section — this Mac's settings of that day, its gate among them): what this Mac remembers can't tell
+either from its own, so nothing is said (census of piece 4, seeds 23 and 27).
 Record: the plan's §8 U4 RESUMPTION RECORD, piece 4. Status: PROVISIONAL (a) — your eye at the bundle.
 

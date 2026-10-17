@@ -653,22 +653,23 @@ extension SWorld {
         if caughtUp, !todayOpensIt, !fromOutside(device), !fromABackup {
             fail("her current passphrase and words don't open the library, and it has caught up (rules 4, 7, 12)")
         }
+        // L4/L6: under a library (or key file) put back from outside, a copy the
+        // key file there doesn't carry is the replaced stretch's — for good (the
+        // carry is never promised across a replay), noted whatever today's open.
+        let carried = Set(base.flatMap(\.heldFingerprints))
+        if fromOutside(device) || dayOfRollback(device) != nil {
+            for (id, copy) in truth.copies where copy.madeOn == device.name && copy.libraryID == record.libraryID
+                && !carried.contains(copy.fingerprint) {
+                truth.rolledBackOver.insert(id)
+            }
+        }
         // (c) THE CARRY — within the same library, wherever today's open it.
         guard todayOpensIt else { return violations }
-        let carried = Set(base.flatMap(\.heldFingerprints))
-        let replaced = fromOutside(device) || dayOfRollback(device) != nil
         for (id, copy) in truth.copies.sorted(by: { $0.key < $1.key }) where copy.madeOn == device.name {
-            if truth.rolledBackOver.contains(id) { continue }  // L4
+            if truth.rolledBackOver.contains(id) { continue }  // L4, L6
             guard let (fs, path) = DeviceLeaves(world: self, device: device).resolve(id), let image = fs.files[path]?.library,
                   image.libraryID == record.libraryID else {
                 continue  // gone, or another library's copy (rule 19 — a new library has no previous keys)
-            }
-            // L4/L6: under a library (or key file) put back from outside, a copy
-            // the key file there doesn't carry is the replaced stretch's — for
-            // good (the carry is never promised across a replay).
-            if replaced, !carried.contains(image.fingerprint) {
-                truth.rolledBackOver.insert(id)
-                continue
             }
             if reach(seeds, files: base + [ownKeyFile(fs, path)].compactMap { $0 })[image.fingerprint] == nil {
                 fail("her current passphrase and words don't open the copy \(id) (\(f8(image.fingerprint))) of the same library")
@@ -919,7 +920,12 @@ extension SWorld {
         // notice (promise 7 judges it), or under the same key the memory names,
         // which rule 21's four things can't tell from the one this Mac last
         // opened (PROVISIONAL P-VX378-U4-7) — is the copy's own day.
+        // A replayed memory item is the same class (census seed 27 sequence 980:
+        // an earlier item names this Mac's earlier device ID, whose section —
+        // its gate of that day — the open then reads; rule 21 keys on the
+        // library, and a memory item older than it "moved on" — P-VX378-U4-5).
         let statedLimit = tampers.contains(.replayBothHomes) || tampers.contains(.replayLibraryFile)
+            || tampers.contains(.replayMemory)
         if now.libraryID == was.libraryID, !statedLimit, judgesThePosture {
             if now.mode != .castle { fail("the mode is \(now.mode.map { "\($0)" } ?? "unknown")") }
             if now.account != was.account { fail("the account changed") }

@@ -1654,6 +1654,15 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
   seq 511 · 521 — a Standard library with no passphrase whose only typed lock a login-password holder dropped (L3, rule
   3: they hold the key), then a new Mac or a wiped keychain took its quiet roads: no road is left, and that is the
   tamper's — promise 5 now reads L3 for the library in the live place and for its copies.
+  **Census on `82b3dbebd`: seed 27 — 3 failing (44,349 steps, 275.7 s): P4 ×2 · P9.** Closed in the next commit,
+  CHECKER:
+  - seq 263 · 310 (P4 (c)): a replayed library file, then the offer put its own older key file beside it, and a key
+    change later ended L6 — the replaced stretch's copies were noted only while today's secrets opened the library; the
+    noting now runs whenever L6/L4 holds, before that gate.
+  - seq 980 (P9): a memory item replayed ALONE names this Mac's earlier device ID, whose section (its gate of that day)
+    the open then reads — the same replay class as a library file's (rule 21 keys on the library; an item older than the
+    library "moved on", P-VX378-U4-5): the tamper clause reads any replay of this Mac's homes as outside the promise
+    (P-VX378-U4-7's family, noted there).
 - 5 — THE DISCOVERY RUN (seeds 21–40) and THE GATE SOAK (seeds 1–20, Debug and Release): NOT-STARTED. Tables land as
   they complete. PENDING.
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.
