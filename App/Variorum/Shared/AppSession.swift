@@ -653,15 +653,18 @@ final class AppSession {
     /// just an FYI"*). The target is the first CURATED book in the chooser's
     /// own order, which is ONE rule that reduces to "the book you came from"
     /// in exactly the case that matters, because arriving at a book floats it
-    /// to the top of that order. No curated book (every membership derived)
-    /// ⇒ the note speaks without a button rather than guessing a target.
+    /// to the top of that order. Since VX-111 the count and the target read
+    /// books only, so whenever the note speaks a target exists; the plain
+    /// arm below stays as `divergeTarget`'s nil contract (ladder r1 F-8).
     private func noteMultiBookEdit(_ postID: String) {
         guard !MultiBookEditNote.hasBeenSeen() else { return }
         Task { @MainActor [weak self] in
             guard let self else { return }
-            let books = (try? await self.database.read { db in
+            // VX-111: BOOKS only — a gathering the note appears in holds
+            // nothing, so it never counts toward "in N books".
+            let books = MultiBookEditNote.memberBooks((try? await self.database.read { db in
                 try Queries.readingsContaining(db, postID: postID)
-            }) ?? []
+            }) ?? [])
             guard MultiBookEditNote.shouldSpeak(
                 bookCount: books.count, seen: MultiBookEditNote.hasBeenSeen())
             else { return }

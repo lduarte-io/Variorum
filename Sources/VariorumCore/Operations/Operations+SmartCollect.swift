@@ -10,12 +10,14 @@ import GRDB
 // #25a) — the add IS the tagging. The 13i sitting's §14.6 recast keeps this
 // exactly: "adding a note to a GATHERING applies the tag."
 //
-// 13i-a: the stored rule is the v2 grammar (Domain/RuleGrammar). The
-// collection walk reads the tree's TOP-LEVEL conjuncts — the shapes every
-// migrated and door-written rule has (AND of tag terms / one OR-of-tags /
-// legacy terms). Anything deeper (NOT, nested trees — authorable only from
-// 13i-b's grammar faces) falls through to the end probe, whose standing
-// refusal already says the honest thing: tagging alone can't satisfy it.
+// 13i-a: the stored rule is the v2 grammar (Domain/RuleGrammar). VX-249: what
+// the note must wear is decided by the mint's planner (`GatheringMint
+// .outcome`, through `Queries.gatheringCollectOutcome`), started from what
+// the note already wears — ONE authority for the two doors, a ★ term
+// satisfiable by starring. The legacy date/profile pre-checks keep R98's
+// descriptive refusals; any shape the planner can't aim at refuses with the
+// standing honest sentence (tagging alone can't satisfy it), and the end
+// probe — the assembly's own predicate — stays the belt.
 extension Operations {
     /// What collecting did — the report half of apply-and-report.
     public struct SmartCollectResult: Equatable, Sendable {
@@ -23,12 +25,22 @@ extension Operations {
         /// matched the filter).
         public let appliedTagPaths: [String]
         public let alreadyMatched: Bool
+        /// VX-241: whether the gathering was ARCHIVED when the act ran (read
+        /// in its transaction). An archived gathering assembles EMPTY
+        /// everywhere (13i-e), so the receipt must not say it shows the note
+        /// now — the tags still apply (explicit adds stay open, R-13ie-4).
+        public let gatheringArchived: Bool
+        /// VX-249: whether the act STARRED the note — the rule's ★ term,
+        /// satisfied by the one star write (cap-exempt). False when the note
+        /// was starred already or the rule asks for no star.
+        public let starred: Bool
     }
 
-    /// Makes the post satisfy the gathering's rule by applying the tags the
-    /// rule needs: every missing top-level tag conjunct, plus the FIRST of
-    /// an any-of (OR) group when none matches — deterministic, reported.
-    /// One transaction: a refusal mid-way applies nothing.
+    /// Makes the post satisfy the gathering's rule by applying what the rule
+    /// needs — the mint's planner decides (VX-249): every missing top-level
+    /// tag conjunct, an any-of (OR) group's first satisfiable option when
+    /// none is met, and the STAR when the rule asks for one — deterministic,
+    /// reported. One transaction: a refusal mid-way writes nothing.
     @discardableResult
     public func collectPostIntoSmartReading(
         _ postID: String, into readingID: String
@@ -42,7 +54,7 @@ extension Operations {
             guard !reading.locked else {
                 throw OperationError.lockedReading(id: readingID)
             }
-            let term: RuleTerm?
+            let term: RuleTerm
             switch RuleGrammar.read(reading.querySpec) {
             case .malformed:
                 throw OperationError.smartFilterUnsatisfiable(
@@ -63,7 +75,9 @@ extension Operations {
             let starred = try stars.ids(db, for: term)
             if try matchesRule(
                 db, postID: postID, term: term, wingID: reading.wingId, starredNoteIDs: starred) {
-                return SmartCollectResult(appliedTagPaths: [], alreadyMatched: true)
+                return SmartCollectResult(
+                    appliedTagPaths: [], alreadyMatched: true,
+                    gatheringArchived: reading.archivedAt != nil, starred: false)
             }
             // The filters tagging cannot satisfy refuse BEFORE any write,
             // naming themselves (her "before June" example).
@@ -75,8 +89,7 @@ extension Operations {
             }
             let conjuncts: [RuleTerm] = switch term {
             case .and(let terms): terms
-            case .some(let single): [single]
-            case nil: []
+            default: [term]
             }
             for conjunct in conjuncts {
                 switch conjunct {
@@ -108,56 +121,37 @@ extension Operations {
                     break
                 }
             }
-            // The tag terms the rule needs: every top-level tag conjunct
-            // without a live application, plus an OR group's FIRST tag when
-            // none of its members matches (the v1 any-of rule, kept).
-            var neededTagIDs: [String] = []
-            for conjunct in conjuncts {
-                switch conjunct {
-                case .tag(let id):
-                    if try !hasLiveTagApplication(db, postID: postID, underTagID: id) {
-                        neededTagIDs.append(id)
-                    }
-                case .or(let options):
-                    let tagOptions = options.compactMap {
-                        if case .tag(let id) = $0 { return id } else { return nil as String? }
-                    }
-                    // A mixed OR (tags beside star/NOT terms) is not a
-                    // taggable group — leave it to the end probe.
-                    guard tagOptions.count == options.count, !tagOptions.isEmpty else { break }
-                    let satisfied = try tagOptions.contains {
-                        try hasLiveTagApplication(db, postID: postID, underTagID: $0)
-                    }
-                    if !satisfied, let first = tagOptions.first,
-                       !neededTagIDs.contains(first) {
-                        neededTagIDs.append(first)
-                    }
-                default:
-                    break
-                }
+            // VX-249 — THE ONE AUTHORITY: what the note must wear is the
+            // mint's planner's answer (`GatheringMint.outcome`), started from
+            // what this note already wears. So a ★ term is satisfiable here
+            // too (her answer to the star asymmetry, QUESTIONS #217): the plan
+            // stars the note. The planner's any-of pick (its first SATISFIABLE
+            // option, keeping the rule's NOTs holding) and its NOT semantics
+            // (VX-250 (3)) are R98's from here on.
+            let plan: GatheringMint.Plan
+            switch try Queries.gatheringCollectOutcome(
+                db, reading: reading, term: term, post: post, starredNoteIDs: starred) {
+            case .plan(let p):
+                plan = p
+            case .blocked(.deadTag(let path)):
+                // The tag row must EXIST AND BE LIVE — the op applies tags,
+                // it never mints taxonomy (a build-time call, batch 10). The
+                // refusal names the tag when any row (even a tombstone)
+                // still knows its path — the standing R98 copy.
+                let name = path.map { "the tag #\($0)" } ?? "a tag"
+                throw OperationError.smartFilterUnsatisfiable(
+                    readingID: readingID,
+                    reason: "its filter needs \(name), which doesn't exist "
+                        + "right now — recreate it (Settings → Tags) first")
+            case .blocked:
+                throw OperationError.smartFilterUnsatisfiable(
+                    readingID: readingID,
+                    reason: "tagging alone can't satisfy its filter")
             }
             var applied: [String] = []
             let now = date.now
-            for tagID in neededTagIDs {
-                // The tag row must EXIST AND BE LIVE — the op applies tags,
-                // it never mints taxonomy (a build-time call, batch 10). A
-                // dead term ('' or a deleted tag) can never be satisfied.
-                guard let path = try String.fetchOne(
-                    db,
-                    sql: "SELECT path FROM tag WHERE id = ? AND deleted_at IS NULL",
-                    arguments: [tagID])
-                else {
-                    // Name the tag when any row (even a tombstone) still
-                    // knows its path — the refusal names the filter, the
-                    // standing R98 copy.
-                    let known = try String.fetchOne(
-                        db, sql: "SELECT path FROM tag WHERE id = ?", arguments: [tagID])
-                    let name = known.map { "the tag #\($0)" } ?? "a tag"
-                    throw OperationError.smartFilterUnsatisfiable(
-                        readingID: readingID,
-                        reason: "its filter needs \(name), which doesn't exist "
-                            + "right now — recreate it (Settings → Tags) first")
-                }
+            for tagID in plan.tagIDs {
+                let path = try liveTag(db, tagID).path
                 let alreadyApplied = try Bool.fetchOne(
                     db,
                     sql: """
@@ -173,17 +167,31 @@ extension Operations {
                 }
                 applied.append(path)
             }
+            // VX-249: the star the rule needs, through the ONE star write —
+            // so intake hears it (starring a note is an applying act, 13i-b
+            // U1). CAP-EXEMPT by her ruling (2026-10-13 — P-VX217-c's twin:
+            // "starring an existing note to collect it ignores the 15-star
+            // limit, like the mint"): the limit never blocks the collect.
+            if plan.star {
+                try writeStar(db, .post(postID), starred: true, enforcingCap: false)
+            }
             // The probe must pass now — a rule this op can't satisfy by
-            // tagging refuses loudly, and the transaction unwinds the
-            // applications (never a half-tagged post).
+            // tagging and starring refuses loudly, and the transaction
+            // unwinds every write (never a half-tagged or stray-starred
+            // post). The star context is read AGAIN: the plan may have just
+            // written the star.
+            var after = Queries.StarContext()
             guard try matchesRule(
-                db, postID: postID, term: term, wingID: reading.wingId, starredNoteIDs: starred)
+                db, postID: postID, term: term, wingID: reading.wingId,
+                starredNoteIDs: try after.ids(db, for: term))
             else {
                 throw OperationError.smartFilterUnsatisfiable(
                     readingID: readingID,
                     reason: "tagging alone can't satisfy its filter")
             }
-            return SmartCollectResult(appliedTagPaths: applied, alreadyMatched: false)
+            return SmartCollectResult(
+                appliedTagPaths: applied, alreadyMatched: false,
+                gatheringArchived: reading.archivedAt != nil, starred: plan.star)
         }
     }
 
@@ -267,37 +275,7 @@ extension Operations {
         _ db: Database, postID: String, term: RuleTerm?, wingID: String,
         starredNoteIDs: [String]
     ) throws -> Bool {
-        let match = Queries.ruleMatchSQL(term, wingID: wingID, starredNoteIDs: starredNoteIDs)
-        let conditions = [
-            "c.id = ?", "c.deleted_at IS NULL", "c.archived_at IS NULL", "c.kind = 'post'",
-        ] + match.conditions
-        var arguments: [(any DatabaseValueConvertible)?] = [postID]
-        arguments += match.arguments
-        return try Bool.fetchOne(
-            db,
-            sql: "SELECT EXISTS (SELECT 1 FROM container c WHERE "
-                + conditions.joined(separator: " AND ") + ")",
-            arguments: StatementArguments(arguments)) ?? false
-    }
-
-    /// A live application of a live tag at-or-under the REFERENCED tag's
-    /// subtree (the `ruleMatchSQL` tag test, single-post form — the root is
-    /// reached by ID, §19's rule). Wing-scoped exactly as `ruleSQL` is
-    /// (13i-b U1 — the two probes must never disagree about a term).
-    private func hasLiveTagApplication(
-        _ db: Database, postID: String, underTagID tagID: String
-    ) throws -> Bool {
-        try Bool.fetchOne(
-            db,
-            sql: """
-                SELECT EXISTS (SELECT 1 FROM post_tag pt
-                 JOIN tag applied ON applied.id = pt.tag_id AND applied.deleted_at IS NULL
-                 JOIN tag root ON root.id = ? AND root.deleted_at IS NULL
-                WHERE pt.post_id = ? AND pt.deleted_at IS NULL
-                  AND applied.wing_id = root.wing_id
-                  AND (applied.path = root.path
-                       OR substr(applied.path, 1, length(root.path) + 1) = root.path || '/'))
-                """,
-            arguments: [tagID, postID]) ?? false
+        try Queries.postMatchesRule(
+            db, postID: postID, term: term, wingID: wingID, starredNoteIDs: starredNoteIDs)
     }
 }

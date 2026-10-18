@@ -1,5 +1,13 @@
 # VX-266 — Castle & backups before launch: the design and the plan
 
+> **SUPERSEDED WHERE THEY DIFFER by `notes/CastleRules.md` (the author's simplification sitting, 2026-10-16 — the
+> record is `notes/plans/vx-305-castle-core.md` §8).** The rules are the binding design for library protection; this
+> document keeps its research, its Apple-facts pointers (`notes/plans/vx-266/second-opinion-apple-facts.md`) and its
+> history. In particular the Castle anchor, the stuck leave, the migration road and its legacy readers, the automatic
+> repair of swapped-in files, the vault's Apple wrap and silent join, the hand-off's shared library identity and the
+> hardware marker described below are NOT built — see the rules' "considered and not pursued" list. The corrector phase
+> is `notes/plans/vx-378-castle-simplified.md`.
+
 **Status: DESIGN RULED, 2026-10-13; revised at her round-2 ruling the same night and her round-3 rulings on
 2026-10-14 (§1), then for the late extra read of round 3, with calls made provisionally overnight at her word and
 confirmed by her the same morning (§9) — the rehearsal's method excepted, hers to pick (§9).

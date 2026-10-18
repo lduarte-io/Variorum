@@ -292,6 +292,7 @@ struct MarkdownSyntaxTests {
 
     // MARK: - The P1 instrument
 
+    #if DEBUG  // MarkdownScanCount is a DEBUG-only oracle (VX-345)
     @Test func theScannerCountsExactlyWhatItWasHanded() {
         // The counter is the editing face's P1 pin (a keystroke must rescan
         // the edited line, never the note) — so its own arithmetic is pinned
@@ -305,6 +306,7 @@ struct MarkdownSyntaxTests {
         MarkdownScanCount.reset()
         #expect(MarkdownScanCount.current == 0)
     }
+    #endif
 
     // MARK: - The Act 10 correction round, batch G — row 84 (R-cor-10(4))
 

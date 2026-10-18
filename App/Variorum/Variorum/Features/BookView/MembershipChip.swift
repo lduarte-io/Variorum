@@ -440,9 +440,8 @@ struct MembershipChip: View {
                 let result = try await session.runner.run { [postID] ops in
                     try ops.collectPostIntoSmartReading(postID, into: book.id)
                 }
-                status = result.alreadyMatched
-                    ? "Already collected — it matches “\(book.name)”'s filter."
-                    : "Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) — “\(book.name)” collects by filter."
+                // VX-241: an archived gathering says the honest thing.
+                status = AddToBookCopy.collected(result, gatheringName: book.name)
             } catch let error as OperationError {
                 if case .smartFilterUnsatisfiable(_, let reason) = error {
                     status = "“\(book.name)” can't take this note: \(reason)"

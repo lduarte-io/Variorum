@@ -14,14 +14,17 @@ import Foundation
 ///
 /// Her R-VX214-4 widens R98's walk for a MINT: a star term is satisfiable at
 /// creation ("i don't see why you couldn't autostar a note at creation for a
-/// gathering based on being starred"). R98's collect-EXISTING door is
-/// untouched (its ★ refusal stands — the asymmetry is flagged for her).
+/// gathering based on being starred"). VX-249 (her answer to the star
+/// asymmetry, QUESTIONS #217) closes it: R98's collect-EXISTING door plans
+/// through this same planner, starting from what the note already wears, so
+/// it sets the star a rule needs too.
 ///
 /// THE ONE AUTHORITY (the architect's rider 2): this pure planner decides
 /// both what the op writes and whether the door can act — the book view's
 /// render-time read and the op's in-transaction re-check both call
-/// `Queries.gatheringMintOutcome`, which calls this. Never a second
-/// derivation.
+/// `Queries.gatheringMintOutcome`, which calls this; R98's collect calls
+/// `Queries.gatheringCollectOutcome`, which calls this for the note as it
+/// stands. Never a second derivation.
 public enum GatheringMint {
     /// What a fresh note must wear for the rule to match it: the tags to
     /// apply (rule order, deduplicated) and whether to star it.
@@ -55,34 +58,44 @@ public enum GatheringMint {
         case datedRule
         /// A legacy profile term — a fresh note has no profile.
         case kindRule
-        /// A NOT term, a mixed or empty any-of group, or another shape a
-        /// fresh note can't be made to match by tagging and starring.
+        /// A NOT that contradicts what the note must wear (VX-250 (3): a NOT
+        /// a fresh note meets is allowed), an empty any-of group or one with
+        /// a nested group or legacy term, or another shape a fresh note
+        /// can't be made to match by tagging and starring.
         case unreachableTerm
 
-        /// The reason fragment, in R98's descriptive register (lowercase, it
-        /// follows "This gathering can't take a new note: "). ONE home for
-        /// the words: the door's hover and the op's refusal both say this.
+        /// The whole sentence the greyed door's hover says — and the op's
+        /// refusal, word for word. ONE home for the words.
+        ///
+        /// VX-250 (2) — her SHORTER register (QUESTIONS #217, verbatim for
+        /// three of them): "Archived — unarchive it to add notes." · "Its rule
+        /// needs #essays, which no longer exists." · "Its rule can't match a
+        /// new note." — and, when no row knows the dead tag's path (purged, or
+        /// a sync gap), "Its rule needs a tag that no longer exists." The
+        /// rest are drafted into the same register (PROVISIONAL, the run
+        /// record): finished, no rule, an unreadable rule, the legacy
+        /// date/kind terms. The old "This gathering can't take a new note: …"
+        /// frame is retired with the long fragments it carried.
         public var reason: String {
             switch self {
             case .archived:
-                "it's archived, and an archived gathering shows nothing \u{2014} unarchive it first"
+                "Archived \u{2014} unarchive it to add notes."
             case .finished:
-                "it's finished \u{2014} reopen it first"
+                "Finished \u{2014} reopen it to add notes."
             case .noRule:
-                "it has no rule yet \u{2014} give it one first"
+                "No rule yet \u{2014} give it one to add notes."
             case .malformedRule:
-                "its rule can't be read \u{2014} edit the rule first"
-            case .deadTag(let path):
-                "its rule needs " + (path.map { "the tag #\($0)" } ?? "a tag")
-                    + ", which doesn't exist right now \u{2014} recreate it (Settings \u{2192} Tags) "
-                    + "or edit the rule"
+                "Its rule can't be read \u{2014} edit it to add notes."
+            case .deadTag(let path?):
+                "Its rule needs #\(path), which no longer exists."
+            case .deadTag(nil):
+                "Its rule needs a tag that no longer exists."
             case .datedRule:
-                "its rule picks notes by entry date, and a new note has none yet"
+                "Its rule needs an entry date, which a new note doesn't have."
             case .kindRule:
-                "its rule picks one kind of note, and a new note isn't that kind"
+                "Its rule needs a kind of note, which a new note doesn't have."
             case .unreachableTerm:
-                "its rule leaves notes out, or nests its terms, in a way a new note "
-                    + "can't be made to match"
+                "Its rule can't match a new note."
             }
         }
     }
@@ -94,8 +107,10 @@ public enum GatheringMint {
 
     /// The reason the op's belt speaks if a plan ever fails the assembly's
     /// own probe (the probe is the authority on matching; the planner only
-    /// proposes). Unreachable for every shape the planner admits.
-    public static let unmatchedReason = "a new note can't be made to match its rule"
+    /// proposes). Unreachable for every shape the planner admits — and it
+    /// says what the greyed door would have: her "Its rule can't match a new
+    /// note." (VX-250 (2)).
+    public static let unmatchedReason = Blocker.unreachableTerm.reason
 
     /// **THE PLANNER** — pure over the gathering's state, its rule and the
     /// liveness of the tags the rule names.
@@ -109,12 +124,53 @@ public enum GatheringMint {
     ///   dead — a determinism device either way, and a dead first option
     ///   need not grey a door another option can open.
     /// Nested AND groups flatten (a conjunction of conjunctions is one
-    /// conjunction). Everything else a fresh note can't be made to match
-    /// blocks: NOT terms, legacy date/profile terms, an empty or mixed
-    /// any-of group — her ruling's unsatisfiable class.
+    /// conjunction).
+    ///
+    /// **NOT TERMS (VX-250 (3) — her answer to P-VX217-d, QUESTIONS #217:
+    /// "ALLOW NOT terms").** A fresh note wears only what the plan gives it,
+    /// so it meets `NOT #x` by not wearing #x. A NOT conjunct, and an any-of
+    /// group with a NOT option, are therefore DEFERRED: once the positive
+    /// walk has made the plan, a deferred group not already met takes its
+    /// first satisfiable positive option, and then EVERY conjunct is checked
+    /// against the note the plan makes (`freshNoteMatches` — the assembly's
+    /// own predicate, `ruleSQL`, evaluated for that note). A NOT that
+    /// contradicts something the plan must apply — `#a AND NOT #a`, or a
+    /// planned tag inside the NOT's subtree (`tagCovers`) — still greys. The
+    /// in-transaction `matchesRule` belt is untouched.
+    ///
+    /// What still blocks: legacy date/profile terms, an empty any-of group,
+    /// an any-of group with a nested group or a legacy term among its
+    /// options — the remainder of her ruling's unsatisfiable class — each
+    /// unless the note ALREADY meets it by what it wears (an existing note
+    /// only; VX-249 below).
+    ///
+    /// `tagCovers(ruleTag, wornTag)` answers whether a note wearing `wornTag`
+    /// matches the rule's `ruleTag` term — the same tag or one inside its
+    /// subtree (§19's subtree matching; both live in the gathering's wing).
+    /// The default knows identity only.
+    ///
+    /// **THE NOTE THE PLAN STARTS FROM (VX-249 — R98's collect-EXISTING door
+    /// plans through here too, so ONE authority decides what a note must
+    /// wear).** A fresh note wears nothing, so the three defaults describe it
+    /// and the mint's plans are exactly what they were. For an existing note:
+    /// - `noteWears(ruleTag)` — it already wears a live tag that the rule's
+    ///   tag term covers (`ruleSQL`'s tag test, read for that note);
+    /// - `noteStarred` — it is already starred;
+    /// - `noteMeetsLegacy(term)` — its profile/entry date against a legacy
+    ///   term, three-valued as SQL is (nil when the column is NULL).
+    /// What it already wears is never planned again: a conjunct it meets
+    /// adds nothing, and an any-of group it already meets BY WHAT IT WEARS
+    /// (`alreadyMet` — positive evidence only, so adding to the plan can
+    /// never undo it) needs no option. Every other rule — the NOT deferral,
+    /// the any-of pick, the final check — reads the note the plan makes:
+    /// what it wore, plus what the plan gives it.
     public static func outcome(
         archived: Bool, finished: Bool, rule: RuleGrammar.ReadResult,
-        tagIsLive: (String) -> Bool, deadTagPath: (String) -> String? = { _ in nil }
+        tagIsLive: (String) -> Bool, deadTagPath: (String) -> String? = { _ in nil },
+        tagCovers: (_ ruleTag: String, _ wornTag: String) -> Bool = { $0 == $1 },
+        noteWears: (_ ruleTag: String) -> Bool = { _ in false },
+        noteStarred: Bool = false,
+        noteMeetsLegacy: (RuleTerm) -> Bool? = { _ in nil }
     ) -> Outcome {
         if archived { return .blocked(.archived) }
         if finished { return .blocked(.finished) }
@@ -152,7 +208,95 @@ public enum GatheringMint {
         }
         flatten(term)
 
+        /// A positive option a mint can take: the star, or a live tag.
+        func satisfiable(_ atom: RuleTerm) -> Bool {
+            switch atom {
+            case .star: true
+            case .tag(let id): tagIsLive(id)
+            default: false
+            }
+        }
+
+        /// **The fresh note against a term — `ruleSQL`'s semantics exactly**,
+        /// for the note the plan makes: it wears the planned tags and the
+        /// planned star, and nothing else — no entry date, no profile (SQL
+        /// NULL, so a legacy comparison is UNKNOWN: nil, three-valued as SQL
+        /// is). A tag term holds when its tag is live in the wing and covers
+        /// a planned tag (a dead or foreign tag matches nothing, so its NOT
+        /// holds); an empty all-of holds and an empty any-of does not
+        /// (`ruleSQL`'s "1"/"0").
+        func freshNoteMatches(_ t: RuleTerm) -> Bool? {
+            switch t {
+            case .star:
+                return star || noteStarred
+            case .tag(let id):
+                return tagIsLive(id) && (noteWears(id) || tagIDs.contains { tagCovers(id, $0) })
+            case .not(let inner):
+                return freshNoteMatches(inner).map { !$0 }
+            case .and(let terms):
+                var result: Bool? = true
+                for term in terms {
+                    switch freshNoteMatches(term) {
+                    case false?: return false
+                    case nil: result = nil
+                    case true?: break
+                    }
+                }
+                return result
+            case .or(let terms):
+                var result: Bool? = false
+                for term in terms {
+                    switch freshNoteMatches(term) {
+                    case true?: return true
+                    case nil: result = nil
+                    case false?: break
+                    }
+                }
+                return result
+            case .legacyProfile, .legacyEntryDateFrom, .legacyEntryDateTo:
+                return noteMeetsLegacy(t)
+            }
+        }
+
+        /// VX-249: does the note ALREADY meet this term by what it wears —
+        /// positive evidence only (a NOT is never evidence: the plan could
+        /// still break it), so nothing the plan adds can undo it. Always
+        /// false for a fresh note, which wears nothing.
+        func alreadyMet(_ t: RuleTerm) -> Bool {
+            switch t {
+            case .star: noteStarred
+            case .tag(let id): tagIsLive(id) && noteWears(id)
+            case .legacyProfile, .legacyEntryDateFrom, .legacyEntryDateTo: noteMeetsLegacy(t) == true
+            case .and(let terms): !terms.isEmpty && terms.allSatisfy(alreadyMet)
+            case .or(let terms): terms.contains(where: alreadyMet)
+            case .not: false
+            }
+        }
+
+        // An any-of group's pick is a CHOICE, not a must: prefer the first
+        // satisfiable option that keeps every top-level NOT holding, so
+        // `(#a OR #c) AND NOT #a` takes #c rather than greying a door a new
+        // note could open; with none, the first satisfiable (the final check
+        // then greys it honestly).
+        let negations = conjuncts.filter { if case .not = $0 { true } else { false } }
+        func keepsNegations(_ option: RuleTerm) -> Bool {
+            let saved = (tagIDs, star)
+            defer { (tagIDs, star) = saved }
+            take(option)
+            return negations.allSatisfy { freshNoteMatches($0) != false }
+        }
+        func choose(_ options: [RuleTerm]) -> RuleTerm? {
+            options.first { satisfiable($0) && keepsNegations($0) }
+                ?? options.first(where: satisfiable)
+        }
+
+        // The positive walk: what the note must wear. NOT conjuncts, and
+        // any-of groups with a NOT option, wait for the plan (VX-250 (3)).
+        var deferredGroups: [[RuleTerm]] = []
         for conjunct in conjuncts {
+            // VX-249: a conjunct the note already meets by what it wears adds
+            // nothing (never true for a fresh note).
+            if alreadyMet(conjunct) { continue }
             switch conjunct {
             case .star:
                 take(.star)
@@ -160,24 +304,22 @@ public enum GatheringMint {
                 guard tagIsLive(id) else { return .blocked(.deadTag(path: deadTagPath(id))) }
                 take(.tag(id))
             case .or(let options):
-                // An any-of group of ATOMS (tags and the star) only; a mixed
-                // or empty group is not something a mint can aim at.
-                let atoms = options.allSatisfy {
+                // An any-of group of ATOMS (tags and the star) and NOT
+                // options only; an empty group, or one with a nested group
+                // or a legacy term, is not something a mint can aim at.
+                let aimable = options.allSatisfy {
                     switch $0 {
-                    case .star, .tag: true
+                    case .star, .tag, .not: true
                     default: false
                     }
                 }
-                guard atoms, !options.isEmpty else { return .blocked(.unreachableTerm) }
+                guard aimable, !options.isEmpty else { return .blocked(.unreachableTerm) }
+                if options.contains(where: { if case .not = $0 { true } else { false } }) {
+                    deferredGroups.append(options)
+                    continue
+                }
                 if options.contains(where: plans) { continue }  // already met
-                let satisfiable = options.first {
-                    switch $0 {
-                    case .star: true
-                    case .tag(let id): tagIsLive(id)
-                    default: false
-                    }
-                }
-                guard let choice = satisfiable else {
+                guard let choice = choose(options) else {
                     // Every option a dead tag: name the first, as R98 does.
                     if case .tag(let id) = options[0] {
                         return .blocked(.deadTag(path: deadTagPath(id)))
@@ -189,9 +331,26 @@ public enum GatheringMint {
                 return .blocked(.datedRule)
             case .legacyProfile:
                 return .blocked(.kindRule)
-            case .not, .and:
+            case .not:
+                continue  // checked against the finished plan below
+            case .and:
+                return .blocked(.unreachableTerm)  // unreachable: flattened above
+            }
+        }
+        // A deferred group the note already meets as planned (a NOT option
+        // it vacuously satisfies) needs nothing; otherwise it takes its
+        // first satisfiable positive option, as an atoms-only group does.
+        for options in deferredGroups where freshNoteMatches(.or(options)) != true {
+            guard let choice = choose(options) else {
                 return .blocked(.unreachableTerm)
             }
+            take(choice)
+        }
+        // The check: the note the plan makes matches EVERY conjunct — so a
+        // NOT contradicting what the plan applies greys the door here, and a
+        // door never shows enabled for a press the belt would refuse.
+        for conjunct in conjuncts where freshNoteMatches(conjunct) != true {
+            return .blocked(.unreachableTerm)
         }
         return .plan(Plan(tagIDs: tagIDs, star: star))
     }
