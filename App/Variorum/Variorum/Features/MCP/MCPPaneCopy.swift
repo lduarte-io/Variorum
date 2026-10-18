@@ -434,6 +434,10 @@ nonisolated enum MCPPaneCopy {
         // VX-336 U7 — VX-261: a client reading its OWN recent acts (target-less;
         // PROVISIONAL words, her copy pass — VX-234).
         case "list_my_activity": return "checking its recent activity"
+        // VX-348 U5 — VX-392: a client listing the wings shared with it
+        // (target-less, like every listing; PROVISIONAL words, her copy pass —
+        // VX-234).
+        case "list_wings": return "listing its shared wings"
         // VX-188 — a client deleting a comment (its own, at suggest).
         case "delete_comment": return "deleting a comment in \(at)"
         // VX-190 — un-tagging a note at edit.
@@ -560,6 +564,8 @@ nonisolated enum MCPPaneCopy {
         // VX-336 U7 — VX-261: the client read its own recent acts (PROVISIONAL
         // words, her copy pass — VX-234).
         case "list_my_activity": return "checked its recent activity" + times
+        // VX-348 U5 — VX-392 (PROVISIONAL words, her copy pass — VX-234).
+        case "list_wings": return "listed its shared wings" + times
         case "delete_comment": return n == 1 ? "deleted a comment in \(at)" : "deleted \(n) comments in \(at)"
         case "remove_tag": return "removed a tag from \(at)" + times
         case "link_versions": return "linked \(at) and another note as versions" + times

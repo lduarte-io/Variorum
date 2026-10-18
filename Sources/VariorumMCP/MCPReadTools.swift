@@ -57,6 +57,7 @@ struct MCPReadTools: Sendable {
             case MCPToolCatalog.exportNote.name: return try readNote(args, clientName: clientName, plain: true)
             case MCPToolCatalog.search.name: return try search(args, clientName: clientName)
             case MCPToolCatalog.listMyActivity.name: return try listMyActivity(args, clientName: clientName)
+            case MCPToolCatalog.listWings.name: return try listWings(clientName: clientName)
             default: return Outcome(text: "Unknown tool: \(name).", isError: true)
             }
         } catch let failure as ArgumentFailure {
@@ -68,6 +69,8 @@ struct MCPReadTools: Sendable {
 
     static let handledToolNames: Set<String> = [
         "list_books", "list_notes", "read_note", "export_note", "search", "list_my_activity",
+        // VX-348 U5 — VX-392.
+        "list_wings",
     ]
 
     // MARK: - read_note / export_note
@@ -325,6 +328,154 @@ struct MCPReadTools: Sendable {
         let bookFacts = try MCPBookFacts.facts(db, readingID: id)
         for key in ["rule", "rule_unreadable"] { entry[key] = bookFacts[key] }
         return entry
+    }
+
+    // MARK: - list_wings (VX-392 — VX-348 U5, her ruling R-VX348-5)
+
+    /// **The wings this client holds a grant on** — the one listing that can
+    /// name a wing holding nothing (an empty wing lists no note and no book,
+    /// so before this a client granted one could never learn its id, and so
+    /// never make its first write there).
+    ///
+    /// The answer's whole domain is the client's OWN live grants of wing scope
+    /// — once grants included, since a listing never spends one and an
+    /// unlisted once wing grant could never be used (PROVISIONAL P-VX392-2) —
+    /// so no oracle arises: a wing it holds no grant on is simply absent, a
+    /// gone wing too (its title no longer resolves), and the open book, which
+    /// is no grant on any wing, lists none (P-VX392-3). Each wing says its
+    /// rungs and the duration of the grant giving them, read OFF `decideWing`
+    /// (the grant `create_note` / `create_book` would use — never a parallel
+    /// rule), every live grant it holds there, and its contents counted
+    /// EXACTLY as `list_notes(wing_id:)` and `list_books` would list them at
+    /// rest — each note and book through the ONE rule, so a fenced one never
+    /// counts (counting it would disclose it — Round 1 F2's rule), nothing
+    /// archived either.
+    ///
+    /// F3's shape: one read snapshot, then the activity line in its own short
+    /// write. P1: ∝ the GRANTED wings — the readings of each (shelf-scale) and
+    /// each one's own notes' facts, batched; the wing filter rides
+    /// `container`'s scan as `list_notes(wing_id:)`'s does (no wing index
+    /// exists, and one would be synced-schema DDL). Never the other wings'
+    /// notes' facts, never the corpus's.
+    private func listWings(clientName: String) throws -> Outcome {
+        let outcome: Outcome = try database.read { db in
+            let standing = try MCPGrantAuthority.standing(db, clientName: clientName)
+            guard standing.state == .approved else {
+                return refusal(MCPGrantAuthority.decide(standing, note: nil, rung: .read, consumes: false), .wing)
+            }
+            let byWing = Dictionary(grouping: standing.liveGrants.filter { $0.scopeKind == .wing }, by: \.scopeID)
+            // Home first (virtual — never gone), then the switcher's order; a
+            // wing deleted since its grant is absent.
+            let additional = try String.fetchAll(
+                db,
+                sql: """
+                    SELECT id FROM wing WHERE deleted_at IS NULL AND id IN (SELECT value FROM json_each(?))
+                    ORDER BY position, id
+                    """,
+                arguments: [try json(byWing.keys.filter { !$0.isEmpty }.sorted())])
+            var wings: [[String: Any]] = []
+            for wingID in (byWing[""] == nil ? [] : [""]) + additional {
+                guard let grants = byWing[wingID], let highest = grants.map(\.rung).max(),
+                      let name = try Queries.mcpScopeTitle(db, kind: .wing, id: wingID, calendar: calendar)
+                else { continue }
+                // The grant the rule itself would use at the top rung.
+                let giving: MCPGrantRule.Grant? =
+                    if case .allow(let grantID, _) = MCPGrantAuthority.decideWing(standing, wingID: wingID, rung: highest) {
+                        standing.grant(id: grantID)
+                    } else { nil }
+                let strongestFirst = grants.sorted {
+                    ($0.rung, Self.durationWeight($0.duration), $1.id) > ($1.rung, Self.durationWeight($1.duration), $0.id)
+                }
+                var entry: [String: Any] = [
+                    "wing_id": wingID, "name": name,
+                    "rungs": MCPGrantRule.Rung.allCases.filter { $0 <= highest }.map(\.rawValue),
+                    "duration": Self.durationWord((giving ?? strongestFirst[0]).duration),
+                    "grants": strongestFirst.map { ["rung": $0.rung.rawValue, "duration": Self.durationWord($0.duration)] },
+                    "notes": try readableNoteCount(db, wingID: wingID, standing: standing),
+                ]
+                let (books, gatherings) = try readableReadingCounts(db, wingID: wingID, standing: standing)
+                entry["books"] = books
+                entry["gatherings"] = gatherings
+                wings.append(entry)
+            }
+            return Outcome(text: try encode(["wings": wings]), isError: false)
+        }
+        try logAfter(clientName, MCPToolCatalog.listWings.name, nil, nil, allowed: !outcome.isError)
+        return outcome
+    }
+
+    /// A grant's duration on the wire (PROVISIONAL P-VX392-4 — the advice's
+    /// own "until you disconnect", as a token).
+    static func durationWord(_ duration: MCPGrantRule.Duration) -> String {
+        switch duration {
+        case .once: "once"
+        case .connection: "until_disconnect"
+        case .always: "always"
+        }
+    }
+
+    private static func durationWeight(_ duration: MCPGrantRule.Duration) -> Int {
+        switch duration {
+        case .once: 0
+        case .connection: 1
+        case .always: 2
+        }
+    }
+
+    /// How many notes `list_notes(wing_id:)` would list in the wing at rest:
+    /// its living notes (no archived one, no saved version, no scraps), each
+    /// through the ONE rule (`decide`) on its batched facts. ∝ the wing's own
+    /// notes.
+    private func readableNoteCount(
+        _ db: Database, wingID: String, standing: MCPGrantAuthority.Standing
+    ) throws -> Int {
+        let scope = Queries.wingScope(column: "c.wing_id", wingID: wingID)
+        let ids = try String.fetchAll(
+            db,
+            sql: """
+                SELECT c.id FROM container c
+                WHERE c.deleted_at IS NULL AND c.kind = 'post' AND c.archived_at IS NULL AND \(scope.sql)
+                """,
+            arguments: StatementArguments(scope.arguments))
+        var readable = 0
+        var start = 0
+        while start < ids.count {
+            let chunk = Array(ids[start..<min(start + 500, ids.count)])
+            let facts = try Queries.mcpNoteFacts(db, noteIDs: chunk)
+            readable += chunk.count { id in
+                MCPGrantAuthority.decide(standing, note: facts[id], rung: .read, consumes: false).isAllowed
+            }
+            start += chunk.count
+        }
+        return readable
+    }
+
+    /// How many books and gatherings `list_books` would list in the wing at
+    /// rest (no archived one), each decided as it decides them — a book
+    /// through `decide`, a gathering through `decideGathering`; a fenced one
+    /// never counts. ∝ the wing's readings (shelf-scale).
+    private func readableReadingCounts(
+        _ db: Database, wingID: String, standing: MCPGrantAuthority.Standing
+    ) throws -> (books: Int, gatherings: Int) {
+        var books = 0, gatherings = 0
+        for row in try Row.fetchAll(
+            db,
+            sql: """
+                SELECT r.id, r.kind FROM reading r
+                WHERE r.deleted_at IS NULL AND r.kind IN ('book', 'gathering') AND r.archived_at IS NULL
+                  AND \(Self.resolvedWing("r.wing_id")) = ?
+                """,
+            arguments: [wingID]) {
+            let id: String = row["id"]
+            if (row["kind"] as String) == ReadingKind.gathering.rawValue {
+                if MCPGrantAuthority.decide(standing, gathering: try Queries.mcpGatheringFacts(db, readingID: id))
+                    .isAllowed { gatherings += 1 }
+            } else if MCPGrantAuthority.decide(
+                standing, book: try Queries.mcpBookFacts(db, readingID: id), rung: .read).isAllowed {
+                books += 1
+            }
+        }
+        return (books, gatherings)
     }
 
     // MARK: - list_notes

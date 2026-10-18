@@ -43,6 +43,12 @@ struct MCPToolDeclaration: Sendable {
     /// that can never act), and recovery after a dropped "until you
     /// disconnect" grant is the case it exists for.
     var listedWhenApproved: Bool = false
+    /// VX-392 (VX-348 U5 — PROVISIONAL P-VX392-3): listed ONLY by a live grant
+    /// of a scope kind the tool acts under — never by the open book alone.
+    /// `list_wings` answers the client's own wing grants; the open book is a
+    /// switch, not a grant on any wing, so for it the tool could only ever
+    /// answer an empty list (P-2 on the wire: no door that can never act).
+    var grantOnly: Bool = false
 
     /// Listed for this standing? Approved, and the open book (read) or a
     /// live grant at this rung of a scope kind the tool acts under —
@@ -50,7 +56,7 @@ struct MCPToolDeclaration: Sendable {
     func isListed(for standing: MCPGrantAuthority.Standing) -> Bool {
         guard standing.state == .approved else { return false }
         if listedWhenApproved { return true }
-        if standing.openBook, rung == .read { return true }
+        if standing.openBook, rung == .read, !grantOnly { return true }
         let grants = needsStandingReach ? standing.searchGrants : standing.liveGrants
         return grants.contains { grant in grant.rung >= rung && scopes.contains(grant.scopeKind) }
     }
@@ -95,6 +101,9 @@ enum MCPToolCatalog {
         listBooks, listNotes, readNote, search, exportNote,
         // VX-336 U7 — VX-261: the client's own recent acts (listed when approved).
         listMyActivity,
+        // VX-348 U5 — VX-392 (R-VX348-5): the wings the client holds a grant
+        // on, empty ones too (listed only by a wing grant).
+        listWings,
     ]
     static let suggest: [MCPToolDeclaration] = [
         addTake, addComment, saveLens,
@@ -205,7 +214,8 @@ enum MCPToolCatalog {
             or collecting now. Archived books appear only with include_archived: true. The daily \
             Journal and Private books are never listed. A wing shared with you (or the open book) also \
             lists its gatherings (kind "gathering"): saved rules that gather notes by tag or star, \
-            read-only — list_notes and search take their id like a book's. Returns JSON.
+            read-only — list_notes and search take their id like a book's. A wing holding no book lists \
+            nothing here — list_wings lists the wings themselves. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",
@@ -224,7 +234,7 @@ enum MCPToolCatalog {
             the chapter it is filed under (section_id, section_name) when it has one, and the \
             book's chapters in order (chapters: section_id, name — empty ones too) — or a \
             gathering's notes, in its own order. With \
-            wing_id: that wing's notes, most recently edited first. With neither: every note \
+            wing_id (list_wings gives them): that wing's notes, most recently edited first. With neither: every note \
             shared with this client, most recently edited first. Paged — pass next_cursor back \
             as cursor. Archived notes appear only with include_archived: true (marked archived). \
             Daily Journal entries and Private notes appear only when shared one ask at a time. Returns JSON.
@@ -397,6 +407,35 @@ enum MCPToolCatalog {
         ]),
         scopes: MCPToolDeclaration.everyScope,
         listedWhenApproved: true)
+
+    /// **VX-392 (VX-348 U5 — her ruling R-VX348-5, the run record
+    /// `notes/plans/fixes/vx-348-prelaunch-sweep.md` §U5):** the wings this
+    /// client holds a grant on — the one listing that names a wing that holds
+    /// nothing, so a client granted an empty wing can make its first write
+    /// there. The client's OWN grants only (no oracle arises: an ungranted
+    /// wing is simply absent), each wing's counts exactly what `list_notes`
+    /// and `list_books` would list in it.
+    static let listWings = MCPToolDeclaration(
+        name: "list_wings", rung: .read, title: "List wings",
+        description: """
+            The Variorum wings shared with this client — a wing is a separate library in Variorum; \
+            this lists every wing you hold a grant on, empty ones too, Home first. Each has its \
+            wing_id ("" is Home) — what create_note, create_book, import_document, list_notes, \
+            move_note_to_wing and show_in_app take as wing_id — and its name; rungs (what you may do \
+            in it now: read, suggest, write_new, edit, each including those before it); duration \
+            (how long the grant giving those rungs lasts: "once", "until_disconnect" or "always"); \
+            grants (each grant you hold on it, strongest first: rung and duration); and notes, books \
+            and gatherings (how many list_notes and list_books would show there now, archived ones \
+            aside). A wing you reach only through a book or a note grant inside it is not listed — \
+            list_books and list_notes give those wing_ids. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([:]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.wing],
+        grantOnly: true)
 
     // MARK: - The SUGGEST rung (U2 — "it cannot touch a word you wrote")
 
@@ -584,7 +623,8 @@ enum MCPToolCatalog {
         name: "create_note", rung: .writeNew, title: "Create a note",
         description: """
             Create a new note inside a shared book (book_id — it joins the book at its end) or a \
-            shared wing (wing_id; "" is Home — it lands bookless). Give EITHER text (plain prose: \
+            shared wing (wing_id; "" is Home — it lands bookless; list_wings gives the wing_id of every \
+            wing shared with you, empty ones too). Give EITHER text (plain prose: \
             each paragraph becomes a block) OR blocks (structured: each block's shown text exactly \
             — a blank line inside it stays inside the one block — with an optional name and its \
             other takes, each with an optional label). Each label is stored as given (trimmed; a \
@@ -648,7 +688,7 @@ enum MCPToolCatalog {
             sections as extra takes, each labeled as its take: line says — \(labelNotPrefixed); \
             with {v:2} first in the header, "--- next block ---" lines \
             separate the blocks and blank lines stay inside them. Either one `document` into a shared book (book_id) or wing \
-            (wing_id), or a whole `book` {name, chapters: [{name, documents}], documents} into a \
+            (wing_id — list_wings gives every shared wing's), or a whole `book` {name, chapters: [{name, documents}], documents} into a \
             shared wing. One import is one undo for the author. Returns JSON with the new ids — \
             for one document also blocks, as create_note answers them (each block's shown_take_id \
             and every take's take_id, label and sha256), and tag_ids and tags (their paths): every \
@@ -704,7 +744,8 @@ enum MCPToolCatalog {
     static let createBook = MCPToolDeclaration(
         name: "create_book", rung: .writeNew, title: "Create a book",
         description: """
-            Create a new, empty book in a shared wing ("" is Home). Returns JSON with the book_id.
+            Create a new, empty book in a shared wing ("" is Home). list_wings gives the wing_id of \
+            every wing shared with you, empty ones too. Returns JSON with the book_id.
             """,
         inputSchema: .object([
             "type": "object",
@@ -887,7 +928,8 @@ enum MCPToolCatalog {
     static let moveNoteToWing = MCPToolDeclaration(
         name: "move_note_to_wing", rung: .edit, title: "Move a note to another wing",
         description: """
-            Move a note to another wing (wing_id; "" is Home) — each wing is a separate library, \
+            Move a note to another wing (wing_id; "" is Home; list_wings gives every wing shared with \
+            you, empty ones too) — each wing is a separate library, \
             so the note leaves every book it is in here, lands bookless in that wing's Pool, and \
             its tags come with it (a tag the other wing lacks is made there by its path). Needs \
             edit on the note and write new on the wing it goes to. A note in a finished or sealed \
@@ -1778,7 +1820,8 @@ enum MCPToolCatalog {
                 "lens_id": .object(["type": "string"]),
                 "book_id": .object(["type": "string"]),
                 "section_id": .object(["type": "string", "description": "A chapter of the book."]),
-                "wing_id": .object(["type": "string", "description": "The wing (\"\" is Home)."]),
+                "wing_id": .object(["type": "string",
+                                    "description": "The wing (\"\" is Home; list_wings lists the ones shared with you)."]),
                 "peer_ids": .object([
                     "type": "array", "minItems": 1, "maxItems": .int(MCPShowTool.comparePeerCap),
                     "items": .object(["type": "string"]),

@@ -680,10 +680,113 @@ the build notes; the Environment traps; the kickoff sitting and her overnight ma
 
 ### LIVE STATUS (per member)
 
-- **VX-392 (an empty granted wing can't be discovered):** NOT-STARTED — the settled design: a read-rung `list_wings`
-  (R-VX348-5), the descriptions pointing at it, the non-empty wing road and the gatherings-only wing proven by pin.
+- **VX-392 (an empty granted wing can't be discovered):** DONE (this commit) — FIXED: `list_wings` (R-VX348-5) with
+  its pins, 5 of them verified RED on the pre-fix tree, all 8 green after; the descriptions point at it; the
+  non-empty wing road and the empty-book-alone road proven by guards (green on both sides — those halves HOLLOW,
+  recorded). **PENDING:** the Mac pin's run (`listWingsSpeaksItsOwnWords` — compile at the unit's Mac seam) and the
+  real-client live round (its steps in the VX-392 section). Its section below.
 - **VX-393 (duplicate grant rows for one client × target):** NOT-STARTED — trace first; then R-VX348-6's
   upgrade-in-place on every grant road + a LOCAL-ONLY grants-family migration that dedupes.
 - **VX-394 (mid-session disconnect while the pane says running):** NOT-STARTED — investigation first; the Activity
   drop line ships regardless.
 - **No behavioural revert is in flight.**
+
+### VX-392 — `list_wings`: a granted wing is discoverable, empty or not
+
+**The trace (inputs → wrong state).** A client approved with `edit · always` on a wing that holds no note and no book
+has, before this fix, exactly four roads to a wing id, and none of them names that wing: `list_books` selects readings
+whose resolved wing is a granted wing (`MCPReadTools.listBooks`, the `json_each(:wings)` arm) — an empty wing has no
+reading row to return; `list_notes` with no argument pages each granted wing's notes (`sharedPage` →
+`recencyPage(wingID:)`) — an empty wing has no `container` row; `search` reaches a wing's notes and books only through
+their rows (`reachedScopes` → `searchPassages`); `list_my_activity` answers only the caller's own logged acts. Every
+wing-scoped write (`create_note` / `import_document` with `wing_id`, `create_book`, `move_note_to_wing`) needs the id
+up front (`MCPWriteTools.inWing` decides on it). So the client could never make its FIRST write into a wing it was
+explicitly granted — the report's critical, exactly (her workaround: hand-add a note so its `wing_id` leaks through
+`list_notes`). Not a rule gap: `decideWing` allows the write the moment the id is known.
+
+**The fix (her R-VX348-5, as built).**
+- `list_wings` (`MCPToolCatalog.listWings`, read rung, scope `[.wing]`; handler `MCPReadTools.listWings`): every wing the
+  client holds a LIVE grant on, Home first, then the switcher's order (`wing.position`); per wing `wing_id`, `name`,
+  `rungs` (the cumulative rungs of its strongest live grant there), `duration` (of the grant `decideWing` itself would
+  authorize at that rung — read OFF the rule, never a parallel one), `grants` (every live grant held there, strongest
+  first: `rung`, `duration`), and `notes` / `books` / `gatherings` — counted exactly as `list_notes(wing_id:)` and
+  `list_books` list them at rest: each note through `decide` on batched `mcpNoteFacts` (500 per batch), each book
+  through `decide`, each gathering through `decideGathering`; archived ones aside (both listings' resting posture).
+- The answer's whole domain is the client's own grants, so no oracle arises: an ungranted wing, a wing deleted since
+  its grant, and a wing reached only through a book or note grant inside it are all simply absent (pinned).
+- **Listed only by a live wing grant** — a new `MCPToolDeclaration.grantOnly` flag skips the open-book clause of
+  `isListed` (PROVISIONAL **P-VX392-3**); called anyway (the list is a courtesy, the rule the boundary) it answers
+  `{"wings": []}`.
+- Logged like every listing (F3: one read snapshot, then the activity line in its own short write; target-less);
+  Activity speaks it (`MCPPaneCopy`: "listed its shared wings", refused: "listing its shared wings" — PROVISIONAL
+  words, VX-234's pass). `list_my_activity` lists it only under `include_reads` (it is a read — automatic, the
+  catalog-derived act list).
+- **The AI's docs:** `create_book`, `create_note`, `import_document`, `list_notes`, `move_note_to_wing` and
+  `show_in_app` (its `wing_id` input) each say `list_wings` gives the wing id; `list_books` says an empty wing lists
+  nothing there and points at `list_wings`; pinned so a future wing-taking tool must say it too.
+  `MCPSession.instructions` is UNTOUCHED (the brief's rule: only if a sentence there became untrue — none did; see
+  P-VX392-5 for the ruling's letter).
+- P1: ∝ the GRANTED wings — each wing's readings (shelf-scale) and its own notes' facts, batched; the wing filter rides
+  `container`'s scan exactly as `list_notes(wing_id:)` does today (no index on `container.wing_id` exists; adding one is
+  synced-schema DDL, out of this lane — recorded, not built).
+
+**The neighbouring claims, each traced (the report's "also check" and her framing):**
+- *An empty BOOK granted on its own:* `list_books` already lists it (its `bookIDs` arm), with `wing_id` and
+  `notes: 0`, and `create_note(book_id:)` lands in it — guard `anEmptyBookGrantedAloneIsListed`, GREEN on the pre-fix
+  tree too: **that half is HOLLOW** (nothing fixed; R-VX348-5's "list_books also fixed" had nothing to fix).
+- *A wing with gatherings but no books:* `list_books` already lists the gathering (kind `gathering`) with the wing's
+  id (VX-273) — the `list_books` half of `aWingWithOnlyAGatheringIsReadThroughBothListings` was green before; its
+  `list_wings` half is new.
+- *Her framing, "even when there's a whole wing grant, claude can't see it or write in it", for a wing that HOLDS
+  things (no Home grant at all):* every listing surfaces its notes and books (`list_notes()`, `list_notes(wing_id:)`,
+  `list_books`, `search`), and each rung writes exactly what it should there (read refuses `create_note` with the
+  rung sentence; write new lands a note and a book and refuses `edit_take`; edit rewrites her take) — guard
+  `aWingGrantSurfacesItsNotesAndBooksAndWritesAtTheRightRungs`, GREEN on the pre-fix tree: **the non-empty road was
+  never broken; the empty wing was the whole gap.** (Her screenshot's duplicate rows are VX-393's, below.)
+
+**Pins** (`Tests/VariorumMCPTests/MCPListWingsServerTests.swift`; RED-ON-OLD verified on the pre-fix tree — the new
+file built against the tree before the fix, `DerivedData/u5-logs/vx392-red.log`: 5 failures, each "Unknown tool" /
+"list_wings" not listed; `vx392-green.log`: 8 of 8 green after):
+`aFreshClientGrantedAnEmptyWingFindsItInOneCallAndMakesABookThere` (the done-when, headless: ONE call finds the wing,
+`create_book` lands in it, the count follows) · `onlyTheClientsOwnWingGrantsAreListed` (book- and note-reached wings,
+ungranted, deleted, revoked and the open book alone all absent; the tool unlisted with no wing grant) ·
+`theCountsAreWhatTheListingsList` (a Private note and book, an archived note and book never count; the counts equal
+the listings') · `aOnceWingGrantIsListedAndTheListingSpendsNothing` — all RED on old; guards
+`anEmptyBookGrantedAloneIsListed`, `aWingWithOnlyAGatheringIsReadThroughBothListings` (its `list_books` half),
+`aWingGrantSurfacesItsNotesAndBooksAndWritesAtTheRightRungs` (green on both sides by design — the hollow halves) and
+`everyToolThatTakesAWingIDSaysWhereItComesFrom` (the docs). Justified edits (the ritual): `MCPServerTests`' catalog
+walk (the read set gains `list_wings`) and `MCPWriteServerTests`' completeness subtraction (it names no note, block or
+take). Mac pin `MCPWingFacesTests.listWingsSpeaksItsOwnWords` — written; its run PENDING the batch (red on old: the
+fallback said "used list wings").
+
+**PROVISIONAL (for the merge's QUESTIONS bundle):**
+- **P-VX392-1** — the answer's shape (keys `wing_id`, `name`, `rungs`, `duration`, `grants`, `notes`, `books`,
+  `gatherings`; Home's `wing_id` is `""`). Alternatives: (b) the report's other option, a `wings` array on
+  `list_books` (not chosen — her pick was the tool); (c) no `grants` array (simpler, but a once grant beside a standing
+  one would go unsaid).
+- **P-VX392-2** — a live ONCE wing grant is listed (the ruling says "standing wing grant"; read here as "a grant the
+  client holds on the wing itself": a listing never spends a once grant, and an unlisted once wing grant could never be
+  used — the very gap). Alternative: (b) standing grants only (once wing grants stay undiscoverable when empty).
+- **P-VX392-3** — the open book alone neither lists the tool nor answers any wing (it is a switch, not a grant on a
+  wing; it holds no write). Alternative: (b) under the open book, list every live wing at `read` with `via:
+  open_book`.
+- **P-VX392-4** — the duration tokens `once` · `until_disconnect` · `always` (the advice's "until you disconnect" as a
+  token; the store says `connection`). Alternative: the stored words.
+- **P-VX392-5** — `MCPSession.instructions` untouched, by the brief's rule (no sentence became untrue; 2,969 of its
+  3,000 characters are used). R-VX348-5's letter says "the instructions and the create_book/create_note docs point at
+  it" — the docs do; the smallest instructions pointer that fits is " (list_wings lists yours)" after "Each names a
+  note, a book or a wing" (2,994 / 3,000), left for the orchestrator's or her call.
+
+**The real-client live round (the done-when — PENDING a stage window; the orchestrator drives it):**
+1. Under a held stage claim, run the Debug dev-store build from this branch (`io.lduarte.Variorum.debug`), Settings ▸
+   MCP ▸ the server ON; the dev Claude Code client (`variorum-dev`) approved (re-run its setup from the Claude Code tab
+   if its key is stale).
+2. ⌘L ▸ new wing "U5 empty wing" — nothing in it.
+3. Settings ▸ MCP ▸ Shared with AI ▸ Share… — WHO the client, WHERE the wing, `read, suggest, write new and edit ·
+   always`.
+4. In a FRESH Claude Code session with no prior context, ask only: *"A wing called 'U5 empty wing' is shared with you
+   in Variorum. Make a book called 'first book' in it."* Expected: the client calls `list_wings` (one call), takes the
+   wing_id, calls `create_book` — it lands; ⌘L to the wing shows "first book" on its Bookcase.
+5. Captures (into the run's screens folder): the client's transcript of the two calls; Settings ▸ MCP ▸ Activity
+   showing "… listed its shared wings" and "… made the book “first book”" in BOTH voices.
+

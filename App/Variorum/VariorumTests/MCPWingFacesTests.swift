@@ -169,6 +169,22 @@ struct MCPWingFacesTests {
         }
     }
 
+    /// **VX-392 (VX-348 U5):** `list_wings` — a client listing the wings
+    /// shared with it, logged target-less like every listing — says so in
+    /// words. Red on the tree before it: the walk above stays green there (the
+    /// fallback says "used list wings" — no underscore, no tool id), so the
+    /// words get their own pin.
+    @Test func listWingsSpeaksItsOwnWords() {
+        func said(allowed: Bool, count: Int) -> String {
+            MCPPaneCopy.activityLine(MCPActivityFace.Line(
+                id: 1, clientName: "claude-code", act: "list_wings", targetKind: nil, targetID: nil,
+                targetTitle: nil, allowed: allowed, count: count, at: "2026-10-18T00:00:00.000Z"))
+        }
+        #expect(said(allowed: true, count: 1) == "claude-code listed its shared wings")
+        #expect(said(allowed: true, count: 3) == "claude-code listed its shared wings (3 times)")
+        #expect(said(allowed: false, count: 1) == "claude-code was refused listing its shared wings")
+    }
+
     /// **VX-261 (VX-336 U7):** `list_my_activity` — a client reading its OWN
     /// recent acts, logged target-less like every read — says so in words.
     /// Red on the tree before it: the walk above stays green there (the
