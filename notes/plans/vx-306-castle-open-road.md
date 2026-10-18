@@ -1,6 +1,6 @@
 # VX-306 — Castle rebuild, phase 2: the open road (the headless core goes live in Debug builds, to the rules)
 
-**Status: PLANNED — written 2026-10-17 at VX-378's closeout, to `notes/CastleRules.md` (the contract) and VX-306's
+**Status: PLANNED — READY TO KICK OFF (VX-378 merged 2026-10-18). Written 2026-10-17 at VX-378's closeout, to `notes/CastleRules.md` (the contract) and VX-306's
 2026-10-16 re-scoping comment (the migration is GONE — rule 26). Kicks off at the author's word with
 `/architect-phase vx-306` (recommended: the phase is face- and design-heavy, and her sittings rule the words).**
 
@@ -19,15 +19,13 @@
 > **KICKOFF MESSAGE** (paste-ready; the orchestrator's brief for each implementer session is this plan's unit section
 > plus the standing rules below).
 >
-> **STEP 0 — THE MERGE (her word, 2026-10-17: "I'll have my kickoff of VX-306 start with merging the PR if I approve
-> it").** Before anything else: her approval of `notes/handoffs/vx-378-handoff.md` is the GO's ratification. Then,
-> from `~/dev/variorum` on `main`: merge the PR `VX-378: …` with a MERGE COMMIT (never squash); `git pull`; retire the
-> VX-305/VX-378 row from the master plan's in-flight table and add this phase's row (ticket · branch · worktree ·
-> machine) in one atomic pull → edit → commit → push; `git worktree remove ~/dev/variorum-vx-305`; delete the merged
-> branch on GitHub and locally (`git push origin --delete vx-305-castle-core`; `git branch -D vx-305-castle-core`);
-> `Tools/vx sync`, commit "board snapshot", push. THEN seat this phase: `git worktree add -b vx-306-castle-open-road
-> ~/dev/variorum-vx-306 origin/main`, push the branch. Linear: VX-378, VX-305 and VX-345 ride Done on the merge
-> (check); VX-306 → In Progress.
+> **STEP 0 — SEAT THE PHASE (the merge is DONE: her word 2026-10-18, PR #171, merge commit `aeabdd75b`; the VX-378 session
+> retired the VX-305/VX-378 in-flight row, removed `~/dev/variorum-vx-305` and the branch, took the board snapshot, moved
+> VX-378/VX-305/VX-345 to Done and noted the Sync/-or-custody slot's hand-over in the stage log).** From `~/dev/variorum`
+> on `main`: `git pull`; `git worktree add -b vx-306-castle-open-road ~/dev/variorum-vx-306 origin/main`, push the branch;
+> add this phase's in-flight row (ticket · branch · worktree · machine — it HOLDS the one Sync/-or-custody slot) in one
+> atomic pull → edit → commit → push; Linear: VX-306 → In Progress. Announce yourself to the stage coordinator
+> (oct18coordinator at the time of writing) before the first `xcodebuild test` or dev-store walk.
 >
 > You are building **the open road**: the first time the rebuilt protection core touches the app. Nothing here changes
 > a rule; where a face would need one, STOP and bring it to the author (the VX-378 stop rule, carried forward).

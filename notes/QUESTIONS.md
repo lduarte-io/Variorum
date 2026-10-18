@@ -3041,7 +3041,7 @@ Status: PROVISIONAL — awaiting her ratification.
 
 #231 — **THE VX-378 RATIFY BUNDLE (the binding record is `notes/plans/vx-378-castle-simplified.md` — §8 her rulings verbatim
 (KICKOFF SITTING · HER RULINGS AT THE U4 STOP · HER MORNING SITTING), §9 the ladder, §10 the gate's GO; the contract
-`notes/CastleRules.md`; PR #171, merge commit at her word).** The entries below, by status: **stand as built (your eye):**
+`notes/CastleRules.md`; merged 2026-10-18, PR #171, merge commit aeabdd75b).** The entries below, by status: **stand as built (your eye):**
 P-VX378-U1-1 (a) · U1-2 (a) · U2-1 (a) · U2-3 (a) · U2-4 (a) · U2-5 (a) · U3-1 (a) · U3-2 (a) · U4-4 (a) · U4-5 (a, all
 three) · U4-6 (a, both). **RULED by you:** O1-1 (2026-10-18, rule 5 reworded) · U2-2 (2026-10-16, both secrets) · U4-1
 (2026-10-16, re-ruled 2026-10-17: the floor, no carry) · U4-3 (2026-10-17, the floor) · U4-7 (2026-10-18, no notice) · O2-1
