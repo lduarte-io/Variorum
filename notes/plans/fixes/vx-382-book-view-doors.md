@@ -243,7 +243,7 @@ tickets:
 |---|---|
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
 | U1a — VX-303 (the landing road) | VERIFIED 2026-10-18 (`vx-382-u1a` window) — red-on-old A·B·C red as planned, both guard probes red, tree restored clean between each; batch `Test run with 1590 tests in 259 suites` — 4 issues + 5 known: VX-115's standing red (BookCollectingDoorsTests) + `DestructiveUndoWarningTests.redoNeverAsks` (the known VX-167 parallelism flake, signature :141–143); VX-77's standing red did NOT reproduce (passed). 9 skipped (2 disabled suites). §U1a RECORD → batch results. Code tip f0d1b414f |
-| U1b — VX-304 (the box door + Index takes) | IN WINDOW `vx-382-u1b` (claimed 2026-10-18) — red-on-old RUNNING as in-place edits from the committed tree 99e0634e4 (a successor: `git diff` shows what is reverted right now; restore = `git checkout -- <file>`); then the batch, then the walk. BUILT state: §U1b RECORD |
+| U1b — VX-304 (the box door + Index takes) | SEAM (stage released 2026-10-18 ~03:29 to VX-381's batch) — red-on-old B·C·D + both guard probes RED as planned; batch 1998 tests / 332 suites: standing reds only (VX-115; VX-167's redoNeverAsks, red alone, same signature) + FINDING D-2 (the carry's mounted pin red — traced: the departing Outline eats the reveal); D-2's fix BUILT (headless green), its verification + the U1 WALK PENDING the `vx-382-u1b-walk` window. OutlineRoomTests PASSED. §U1b RECORD ▸ Batch results, FINDING D-2 |
 | U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | NOT STARTED |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
 | Closeout (canon deltas, tickets, PR, handoff) | NOT STARTED |
@@ -669,3 +669,50 @@ driven by CLICKS (cliclick's keyboard never reaches a popover).
 8. **Restore & quit:** no typing was done; delete any take W9 minted; the dev store stays UNLOCKED; appearance
    default unchanged (verify `defaults read`); quit by identity (`tell application id "io.lduarte.Variorum.debug" to
    quit`), then `pgrep -fl 'Variorum.app/Contents/MacOS'` EMPTY before reporting. The stage is NOT released by me.
+
+### Batch results — the `vx-382-u1b` window, red-on-old + batch half (2026-10-18; logs in the gitignored `scratchpad/u1b/`)
+
+Each family from the committed tree (99e0634e4), in place, restored with `git checkout -- <file>` to a clean
+`git diff` before the next. Zero app instances before and after.
+
+- **B — the box door** (`redB.log`): 7 issues — `openInWrite` nil at the selected `#require` (spread, index :316) and
+  the live one (outline :331); faces "open" 0 and no door frame in both voices (:458, :472). Red as planned.
+- **C — the Index's takes** (`redC.log`): 7 issues — the index arm's `openTakes` (:343); the "takes" face 0 in both
+  voices (:465); the badge nil (:507); the box hands no Takes (:539); the request never taken — no sheet (:600) and
+  the slot unconsumed (:603). Red as planned.
+- **Guard probe — the flush** (`probe-flush.log`): 2 issues — the store lacked her letter when the sheet appeared
+  (:558) and the panel's chosen card lacked it (:568). Red as planned.
+- **Guard probe — the release** (`probe-release.log`): 1 issue — the Index's live pane was NOT released (:572). Red
+  as planned.
+- **D — the carry** (`redD.log`): 3 issues — `pendingLanding` nil (:654); no live pane in the Index (:687, :688). Red —
+  BUT see FINDING D-2: the mounted pin is red on the full tree too.
+- **Green batch** (`batch.log`, 332 suites): `Test run with 1998 tests in 332 suites failed after 1029.719 seconds with
+  20 issues (including 14 known issues)`; 15 skips (the two disabled suites — the VX-144 capture harness and the
+  opt-in unkeyed-oracle suite — plus their tests). The 14 known issues are the suites' own `withKnownIssue`s
+  (`CommentPanelHostLifecycleTests` ×9 — VX-229's recorded runner retention; `IndexTierMetricsTests` ×4;
+  `TakesFindBoardTests` ×1). The 6 non-known:
+  - `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` — VX-115's standing red (:101). U2's member.
+  - `DestructiveUndoWarningTests.redoNeverAsks` — 3 issues :141–143; re-run ALONE (`undo-alone.log`): red again, the
+    same signature — the known VX-167 flake (VX-184's record measured it red alone 2/2). Not attributed.
+  - **`BookCarryLiveBlockTests.outlineToIndexLandsWithHerBlockLiveAtHerCaret` — 2 issues (:687 pane nil, :688) — a
+    FINDING (D-2 below); red alone too (`carry-alone.log`).**
+  - `OutlineRoomTests.bothColumnsChromeStaysInsideThemAtTheirFloors` (VX-77) PASSED.
+  - All other VX-304 suites passed (the box door per mode, the faces in both voices, the badge and both sheet roads).
+
+### FINDING D-2 — the departing Outline eats the click-over's reveal (traced; FIX BUILT, verification PENDING the walk window)
+
+Traced with temporary prints (`diag-carry*.log`; reverted): after the mode door, the carry HAD parked the reveal and the
+block landing (note + block 2; the memory held block 2 at 9). Then the departing OUTLINE's `.onChange(of:
+model.pendingReveal)` fired in the switch's own update — `landOutlineReveal` ran with `structure.mode == .index` — and
+`consumeReveal()` cleared BOTH; the Index's `landOrSeed` found nothing and SEEDED on the focused note. So the
+note-level Outline → Index carry has only ever "worked" by that seed's accident (`focusedPostID`), and a block could
+never ride it. **Fix (in this commit):** `landOutlineReveal` acts only while Outline IS the mode (`guard structure.mode
+== .outline`) — W21's own contract ("the arriving surface consumes"); every road that lands the Outline arrives with
+the mode already Outline (the tabs, `takeChapterRequest`'s `switchMode`). Pin: the mounted carry pin, red on the full
+pre-fix tree (batch + alone + diagnostic). Owed in the walk window BEFORE the walk: `BookCarryLiveBlockTests` green, then
+the reveal/landing family (`scratchpad/u1b/fixD2-suites.args`, 64 suites — every suite reading `pendingReveal`,
+`carryPlace`, the reveal/chapter landings, the book surfaces); red-on-old for D-2 = delete the guard line.
+Recorded, not fixed (out of the slice): the SAME departing-consumer class stands in `SpreadBookView.landReveal`,
+`PagedReadView`'s `.onChange(of: pendingReveal)` and the flow's `reveal:` — a carry out of those modes is likewise
+eaten on the way out and the arriving Index/Outline falls back to its seed (the note carry survives through the
+standing anchor; no block rides those arms today, by the brief's letter). Owner: the orchestrator / VX-300.

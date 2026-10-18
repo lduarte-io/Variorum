@@ -2039,6 +2039,17 @@ struct BookView: View {
     /// foreign and is dropped as before — a stale request must never land
     /// on a later navigation.
     private func landOutlineReveal(_ proxy: ScrollViewProxy) {
+        // VX-304 — ONLY WHILE OUTLINE IS THE MODE. A click-over FROM Outline
+        // parks its reveal for the ARRIVING surface (W21: "the arriving
+        // surface consumes"), but this departing Outline's `onChange(of:
+        // pendingReveal)` still fires in the switch's own update — traced in
+        // the `vx-382-u1b` window: it ran with the mode already `.index` and
+        // consumed the reveal AND its block landing (`consumeReveal`), so the
+        // Index's `landOrSeed` found nothing and seeded on the focused note.
+        // The note "carried" only by that seed's accident; the block never
+        // could. Every road that lands the Outline does so with the mode
+        // already Outline (the tabs, the chapter landing's `switchMode`).
+        guard structure.mode == .outline else { return }
         if let sectionID = model.pendingChapterReveal {
             if structure.sections.contains(where: { $0.id == sectionID }) {
                 model.consumeChapterReveal()
