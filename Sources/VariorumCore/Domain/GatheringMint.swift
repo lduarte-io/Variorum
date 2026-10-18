@@ -14,14 +14,17 @@ import Foundation
 ///
 /// Her R-VX214-4 widens R98's walk for a MINT: a star term is satisfiable at
 /// creation ("i don't see why you couldn't autostar a note at creation for a
-/// gathering based on being starred"). R98's collect-EXISTING door is
-/// untouched (its ★ refusal stands — the asymmetry is flagged for her).
+/// gathering based on being starred"). VX-249 (her answer to the star
+/// asymmetry, QUESTIONS #217) closes it: R98's collect-EXISTING door plans
+/// through this same planner, starting from what the note already wears, so
+/// it sets the star a rule needs too.
 ///
 /// THE ONE AUTHORITY (the architect's rider 2): this pure planner decides
 /// both what the op writes and whether the door can act — the book view's
 /// render-time read and the op's in-transaction re-check both call
-/// `Queries.gatheringMintOutcome`, which calls this. Never a second
-/// derivation.
+/// `Queries.gatheringMintOutcome`, which calls this; R98's collect calls
+/// `Queries.gatheringCollectOutcome`, which calls this for the note as it
+/// stands. Never a second derivation.
 public enum GatheringMint {
     /// What a fresh note must wear for the rule to match it: the tags to
     /// apply (rule order, deduplicated) and whether to star it.
@@ -137,16 +140,37 @@ public enum GatheringMint {
     ///
     /// What still blocks: legacy date/profile terms, an empty any-of group,
     /// an any-of group with a nested group or a legacy term among its
-    /// options — the remainder of her ruling's unsatisfiable class.
+    /// options — the remainder of her ruling's unsatisfiable class — each
+    /// unless the note ALREADY meets it by what it wears (an existing note
+    /// only; VX-249 below).
     ///
     /// `tagCovers(ruleTag, wornTag)` answers whether a note wearing `wornTag`
     /// matches the rule's `ruleTag` term — the same tag or one inside its
     /// subtree (§19's subtree matching; both live in the gathering's wing).
     /// The default knows identity only.
+    ///
+    /// **THE NOTE THE PLAN STARTS FROM (VX-249 — R98's collect-EXISTING door
+    /// plans through here too, so ONE authority decides what a note must
+    /// wear).** A fresh note wears nothing, so the three defaults describe it
+    /// and the mint's plans are exactly what they were. For an existing note:
+    /// - `noteWears(ruleTag)` — it already wears a live tag that the rule's
+    ///   tag term covers (`ruleSQL`'s tag test, read for that note);
+    /// - `noteStarred` — it is already starred;
+    /// - `noteMeetsLegacy(term)` — its profile/entry date against a legacy
+    ///   term, three-valued as SQL is (nil when the column is NULL).
+    /// What it already wears is never planned again: a conjunct it meets
+    /// adds nothing, and an any-of group it already meets BY WHAT IT WEARS
+    /// (`alreadyMet` — positive evidence only, so adding to the plan can
+    /// never undo it) needs no option. Every other rule — the NOT deferral,
+    /// the any-of pick, the final check — reads the note the plan makes:
+    /// what it wore, plus what the plan gives it.
     public static func outcome(
         archived: Bool, finished: Bool, rule: RuleGrammar.ReadResult,
         tagIsLive: (String) -> Bool, deadTagPath: (String) -> String? = { _ in nil },
-        tagCovers: (_ ruleTag: String, _ wornTag: String) -> Bool = { $0 == $1 }
+        tagCovers: (_ ruleTag: String, _ wornTag: String) -> Bool = { $0 == $1 },
+        noteWears: (_ ruleTag: String) -> Bool = { _ in false },
+        noteStarred: Bool = false,
+        noteMeetsLegacy: (RuleTerm) -> Bool? = { _ in nil }
     ) -> Outcome {
         if archived { return .blocked(.archived) }
         if finished { return .blocked(.finished) }
@@ -204,9 +228,9 @@ public enum GatheringMint {
         func freshNoteMatches(_ t: RuleTerm) -> Bool? {
             switch t {
             case .star:
-                return star
+                return star || noteStarred
             case .tag(let id):
-                return tagIsLive(id) && tagIDs.contains { tagCovers(id, $0) }
+                return tagIsLive(id) && (noteWears(id) || tagIDs.contains { tagCovers(id, $0) })
             case .not(let inner):
                 return freshNoteMatches(inner).map { !$0 }
             case .and(let terms):
@@ -230,7 +254,22 @@ public enum GatheringMint {
                 }
                 return result
             case .legacyProfile, .legacyEntryDateFrom, .legacyEntryDateTo:
-                return nil
+                return noteMeetsLegacy(t)
+            }
+        }
+
+        /// VX-249: does the note ALREADY meet this term by what it wears —
+        /// positive evidence only (a NOT is never evidence: the plan could
+        /// still break it), so nothing the plan adds can undo it. Always
+        /// false for a fresh note, which wears nothing.
+        func alreadyMet(_ t: RuleTerm) -> Bool {
+            switch t {
+            case .star: noteStarred
+            case .tag(let id): tagIsLive(id) && noteWears(id)
+            case .legacyProfile, .legacyEntryDateFrom, .legacyEntryDateTo: noteMeetsLegacy(t) == true
+            case .and(let terms): !terms.isEmpty && terms.allSatisfy(alreadyMet)
+            case .or(let terms): terms.contains(where: alreadyMet)
+            case .not: false
             }
         }
 
@@ -255,6 +294,9 @@ public enum GatheringMint {
         // any-of groups with a NOT option, wait for the plan (VX-250 (3)).
         var deferredGroups: [[RuleTerm]] = []
         for conjunct in conjuncts {
+            // VX-249: a conjunct the note already meets by what it wears adds
+            // nothing (never true for a fresh note).
+            if alreadyMet(conjunct) { continue }
             switch conjunct {
             case .star:
                 take(.star)
