@@ -1,7 +1,7 @@
 # VX-381 — Run: Gatherings & tags (VX-284 part A)
 
-**STATUS: IN PROGRESS — kicked off 2026-10-18 (the kickoff record below); written 2026-10-17 at her VX-284 split sitting;
-branch `vx-381-gatherings-tags`, worktree `~/dev/variorum-vx-381`.** Members (sub-issues of VX-381): **VX-250 ·
+**STATUS: CLOSED 2026-10-18 — built, laddered (closed at round 2), walked and merged in one overnight run under her
+mandate; PR #170; the handoff `notes/handoffs/vx-381-handoff.md`; the ratify bundle QUESTIONS #230.** Members (sub-issues of VX-381): **VX-250 ·
 VX-240 · VX-241 · VX-249 · VX-247 · VX-111 · VX-194.** Umbrella: VX-284 (`notes/plans/fixes/vx-383-duplicate-note.md`
 §"The split" carries her rulings verbatim). Cast (her word 2026-10-17): Opus orchestrates (her 2026-10-13 cast
 rule), `opus-implementer` builds, `opus-reviewer` cold-reviews — all at **xhigh**; no editor seam, `Sync/`, custody,
@@ -599,3 +599,19 @@ disposition here.
     reviewer's probe tree were removed by the orchestrator; this leg deleted only its own two RED products after the
     batch, ~5 GB.) The GREEN products stay under the gitignored `App/Variorum/DerivedData/` (`vx381-fix-green` 2.6 GB ·
     `vx381-fix-green-ios` 2.4 GB) for a same-tree re-run; the run logs sit beside them.
+
+
+## CLOSEOUT (2026-10-18, the orchestrator)
+
+Both units landed whole; every member fixed with a red-on-old, revert-verified pin; her #217 words byte-for-byte.
+The ladder CLOSED at round 2 (r1 2B/1M/2m/6n — all confirmed findings fixed and re-verified by a fresh reviewer;
+r2 0B/0M/1m/2n — N-1 built by the orchestrator with both legs verified first-hand). The orchestrator's
+both-voices walk PASSED (the walk record above). Finals in `notes/plans/run-finals-ledger.md`. Canon: AppSpec §9
+(deleteTag in the structural-undo list; Excluded reads tag APPLICATIONS) + §14's entry (VX-282 rolled to the
+delta archive); the VX-246 record's sweep table row 86; MobileSoul PL-49 (VM-21 the one phone fix owed);
+QUESTIONS #230 the ratify bundle. Born and triaged: VM-21 · VX-387 · VX-388 · VX-391 · VX-398. Routed to her
+VX-216 sitting: the chip's receipt voices, F-9's sentence pair, the empty-gathering line. Her overnight release
+plan honoured: FIRST merger — no release, no bump, no refresh; the `ReleaseNotes-0.9.8.md` section rides for the
+LAST merger. Members VX-250 · VX-240 · VX-241 · VX-249 · VX-247 · VX-111 · VX-194 close Done at the merge; the
+worktree and branch are removed after it; the run/walk evidence and the four DerivedData products deleted at the
+tidy. MOBILE PARITY: PL-49 (VM-21 owed; everything else inherits through shared core, phone suites green).
