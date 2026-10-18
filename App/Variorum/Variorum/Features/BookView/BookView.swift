@@ -435,8 +435,13 @@ struct BookView: View {
         // VX-304: the box's DOORS are mode-shaped (the Index's live box hands
         // "Takes"; Outline's hands none — its bar has one), and a mode switch
         // can leave the report itself equal (the same note live on both
-        // sides), so the doors are re-handed with the mode.
-        .onChange(of: structure.mode) { _, _ in publishNoteBox() }
+        // sides), so the doors are re-handed with the mode. FOCUSED panes only
+        // — the VX-143 gain-only rule's reason: an unfocused pane's report is
+        // nil, and its nil landing for a book the focused pane also shows
+        // would decline the box under the focused pane.
+        .onChange(of: structure.mode) { _, _ in
+            if paneFocused { publishNoteBox() }
+        }
         .onDisappear {
             onNoteBox?(readingID, nil, nil)
             // 18o U4 (R-18k-6): the book leaving its pane is a leaving for the

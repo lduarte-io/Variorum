@@ -216,7 +216,7 @@ tickets:
 |---|---|
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
 | U1a — VX-303 (the landing road) | VERIFIED 2026-10-18 (`vx-382-u1a` window) — red-on-old A·B·C red as planned, both guard probes red, tree restored clean between each; batch `Test run with 1590 tests in 259 suites` — 4 issues + 5 known: VX-115's standing red (BookCollectingDoorsTests) + `DestructiveUndoWarningTests.redoNeverAsks` (the known VX-167 parallelism flake, signature :141–143); VX-77's standing red did NOT reproduce (passed). 9 skipped (2 disabled suites). §U1a RECORD → batch results. Code tip f0d1b414f |
-| U1b — VX-304 (the box door + Index takes) | BUILT — batch + walk PENDING the `vx-382-u1b` window. Pieces A · pins · B · C · D committed (§U1b RECORD ▸ Commits; code tip 6ee8a8ec2); headless build green; core suite green (one unrelated MCP timing pin, passes alone); suite list `scratchpad/u1b/only-testing.args` (332 suites); red-on-old plan and THE U1 WALK plan in §U1b RECORD |
+| U1b — VX-304 (the box door + Index takes) | BUILT — batch + walk PENDING the `vx-382-u1b` window. Pieces A · pins · B · C · D committed (§U1b RECORD ▸ Commits; code tip: the focused-pane guard commit); headless build green; core suite green (one unrelated MCP timing pin, passes alone); suite list `scratchpad/u1b/only-testing.args` (332 suites); red-on-old plan and THE U1 WALK plan in §U1b RECORD |
 | U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | NOT STARTED |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
 | Closeout (canon deltas, tickets, PR, handoff) | NOT STARTED |
@@ -516,7 +516,9 @@ is coordinator-held; everything to here was built and verified headless.
    `WriteTakesPanel(session:postID:blockID:onClose:)` as its own sheet (DEBUG: `BookIndexGeometry.takesSheets`).
    `BookView.takesDoor(report)` hands `NoteBoxDoor.openTakes` only in Index with a live note (the block read at the
    press); `SidebarNoteBox` draws "Takes" in the door row while live with no bar (P-U1b-5; DEBUG face "takes"); the
-   doors are re-handed on a mode change (`.onChange(of: structure.mode)` — a switch can leave the report equal).
+   doors are re-handed on a mode change, FOCUSED panes only (`.onChange(of: structure.mode)` — a switch can leave the
+   report equal; an unfocused pane's nil would decline the box under a focused pane showing the same book — the
+   VX-143 gain-only rule's reason).
    "Open Takes mode" in the panel refuses inside a book unchanged (`requestMode`: no detail mounted). Red-on-old: C
    reverted ⇒ `BookIndexTakesTests` (no badge, no Takes door, no sheet), the Index arm's `openTakes` line in
    `BookNoteBoxOpenDoorTests`, the Index-live "takes" face in `SidebarNoteBoxDoorFacesTests`.
@@ -560,7 +562,8 @@ is coordinator-held; everything to here was built and verified headless.
 ### Commits (all on `vx-382-book-view-doors`, pushed)
 
 a45d93a6c (A · seams) · 030e96915 (the pins) · 28fd701f1 (B · the box door) · a0c59c10f (C · Index badges + the
-sheet) · a12df00ce (D · the carry) · 6ee8a8ec2 (P-8's line policy on the two new `fixedSize` sites).
+sheet) · a12df00ce (D · the carry) · 6ee8a8ec2 (P-8's line policy on the two new `fixedSize` sites) · the
+focused-pane guard on C's mode republish (self-review: the VX-143 gain-only class).
 
 ### Verified headless (no stage)
 
