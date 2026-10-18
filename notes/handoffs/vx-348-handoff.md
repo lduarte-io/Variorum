@@ -15,14 +15,11 @@
   upgrade-in-place; say if replacement should never downgrade.
 - [ ] **QUESTIONS #233:** the run's ratify bundle (the P- numbers, the sitting rulings R-VX348-1…6, the
   ladder's NIT-3 clarification).
-- [ ] **THE 0.9.8 RELEASE — HELD, the one thing the night could not finish:** the version bump is on main
-  (`58515fe9c`, both configurations) and the notes are drafted per your standing rule (rewrite anything before
-  you publicise), but the permission system denied `Tools/Release/release.sh --version 0.9.8` as a production
-  deploy — and a denial is yours to lift, so no agent re-ran it. To finish: approve a Bash permission rule for
-  `Tools/Release/release.sh` (and the Step-4 `npx wrangler r2 object put` + `npm run deploy` legs, likely the
-  `/Applications` swap too), then say the word and a fresh runner resumes at Step 3 — or run release.sh yourself
-  and hand off the publish + refresh legs. Nothing was built or published; `/Applications` is still 0.9.7 (7973).
-  The full state and resume brief: the run record's THE 0.9.8 RELEASE section.
+- [x] **The release: 0.9.8 (build 8503) is LIVE** — you lifted the permission block in-session (2026-10-18
+  ~13:35 MDT) and the window ran whole: the site serves the DMG and appcast (both verified byte-identical),
+  `/Applications` refreshed from the verified feed DMG (codesign + spctl pass; your store cmp-SAME against the
+  A1, `…/safety-copies/vx348-refresh-20261018T193150Z/`). The notes were drafted per your standing rule —
+  rewrite anything before you publicise. The full result: the run record's THE 0.9.8 RELEASE section.
 - [ ] **The 1892 stamps are honest:** sherlock's seeded notes really are stamped 1892 by the seeder's own clock
   (its m6 note "still pending her nod") — the book box now shows "edited Oct 13, 1892" with the whole-fact hover.
   Say if you'd rather the sample library carry 2026 stamps.
