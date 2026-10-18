@@ -527,4 +527,10 @@ disposition here.
     - RUN 3 phone RED (`vx381-fix-red-ios`, `platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2`):
       MobileRefusalTableTests — EXPECTED: exactly the new pin red.
     - RUN 4 phone GREEN (`vx381-fix-green-ios`): MobileRefusalTableTests · MobileTagManagerTests · MobileUndoDoorTests.
-  - The batch (via the orchestrator's relayed GO): READY, waiting on the GO.
+  - **Core (headless) on the green tree, DONE:** full `swift test` — VariorumCoreTests "2927 tests in 340 suites passed"
+    (U2's 2923/340 + this leg's four new pins), the 6-suite target 40/40; the 362-test MCP package's ONE red is U1's
+    recorded load flake `MCPHarnessTimeLimitTests.aPeerThatNeverAnswers…` (20.5 s against its 15 s bound under full
+    parallel load) — 3/3 green alone. (The coordinator's disk chore: U1/U2's superseded dd-red/dd-green trees and the
+    reviewer's probe tree were removed by the orchestrator; this leg deleted nothing.)
+  - The batch (via the orchestrator's relayed GO): READY, holding — the stage is held by vx-382's window; GO at its
+    seam.
