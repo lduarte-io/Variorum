@@ -23,10 +23,13 @@ import VariorumCore
 @Observable
 final class LibraryOpenPresenter {
     var model: LibraryOpenModel?
+    /// VX-306 U3 — the two doors on the NEW road (nil on today's road): a picked copy's flow, or a Restore row's
+    /// Make this my library. Today's adoption step is retired behind it there (today's road keeps `model`).
+    var roadDoors: CopyDoorsModel?
 
     /// The File-menu / face door: pick a thing, then run the one flow.
     func openPanel(bootstrap: AppBootstrap) {
-        guard model == nil else { return }
+        guard model == nil, roadDoors == nil else { return }
         let panel = NSOpenPanel()
         panel.title = LibraryOpenCopy.sheetTitle
         panel.canChooseFiles = true
@@ -36,7 +39,38 @@ final class LibraryOpenPresenter {
         // classifies honestly rather than being unpickable.
         panel.allowedContentTypes = [.folder, .data]
         guard panel.runModal() == .OK, let picked = panel.url else { return }
+        // VX-306 U3: on the new road a picked copy is filed first and the two doors act on it (P-VX306-U3-0 (a)) — with
+        // a library open both doors; with none (the missing face, rule 27's lobby) Look inside alone (P-VX306-U3-7).
+        if bootstrap.newRoad {
+            guard let roads = bootstrap.copyDoorsRoads() ?? bootstrap.copyDoorsRoadsWithoutALibrary() else { return }
+            let fresh = CopyDoorsModel(roads: roads)
+            roadDoors = fresh
+            Task { await fresh.begin(picked: picked) }
+            return
+        }
         begin(bootstrap: bootstrap, picked: picked)
+    }
+
+    /// VX-306 U3 — a Restore row's *Look inside…* on the new road (P-VX306-U3-15).
+    func beginLookInside(roads: CopyDoorsRoads, row: CopyDoorRow) {
+        guard model == nil, roadDoors == nil else { return }
+        let fresh = CopyDoorsModel(roads: roads)
+        roadDoors = fresh
+        Task { await fresh.openLookInside(row) }
+    }
+
+    /// VX-306 U3 — a Restore row's *Make this my library…* on the new road.
+    func beginMakeMine(roads: CopyDoorsRoads, row: CopyDoorRow) {
+        guard model == nil, roadDoors == nil else { return }
+        let fresh = CopyDoorsModel(roads: roads)
+        roadDoors = fresh
+        Task { await fresh.openMakeMine(row) }
+    }
+
+    func dismissRoad() {
+        // A look standing is forgotten (its reader closed, its private folder deleted) whatever closed the sheet.
+        roadDoors?.close()
+        roadDoors = nil
     }
 
     /// The restore surface's per-row door (the source already known).

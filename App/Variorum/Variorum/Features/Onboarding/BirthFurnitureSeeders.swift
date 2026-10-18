@@ -100,8 +100,23 @@ enum ReadmeSeeder {
         .init(title: title, kind: "post")
     }
 
-    /// The five blocks, in order (her reference's bytes).
-    nonisolated static let paragraphs: [String] = [
+    /// The blocks a fresh store's readme is born with: her five ALWAYS, then — only where the store opened on the
+    /// NEW road — the four Start Here passages (VX-306 ladder round 2, m2: they speak the new road's truths — the key
+    /// file and its copies, the twelve words shown once at the creation, a new-words door in Data Safety — which are
+    /// false on TODAY's road, so Release and a Debug build pointed at the real store seed her five alone until the
+    /// road switches, VX-329; the same rule every other VX-379 row follows).
+    nonisolated static func paragraphs(onTheNewRoad newRoad: Bool) -> [String] {
+        newRoad ? herBlocks + startHerePassages : herBlocks
+    }
+
+    /// The DEV store's seed in this build (the new road's in a Debug build, today's in Release) — what a launch over
+    /// the dev store seeds (`LaunchFurniture`), read by the pins.
+    nonisolated static var paragraphs: [String] {
+        Self.paragraphs(onTheNewRoad: ProtectionRoad.opensOnTheNewRoad(devStore: true))
+    }
+
+    /// Her five blocks, in order (her reference's bytes) — seeded on every road.
+    nonisolated static let herBlocks: [String] = [
         "Welcome to Variorum! I'm Lillian, the developer behind this app, and I'm excited "
         + "that you've downloaded it.",
 
@@ -119,6 +134,34 @@ enum ReadmeSeeder {
 
         "This book is a full guide to all the features of variorum and how to use them. "
         + "Move through the chapters, which are interactive guides, to discover them all.",
+    ]
+
+    /// VX-306 (2026-10-18, her kickoff word: the Start Here chapter drafted from `notes/CastleRules.md`, built as
+    /// drafted, PROVISIONAL — P-VX306-W-1): the four passages of the plan's §7c (5), byte-pinned to the plan by
+    /// `ReadmeStartHerePlanTests`, appended after her five blocks (untouched) — and ONLY on the new road
+    /// (`paragraphs(onTheNewRoad:)`, ladder round 2 m2).
+    nonisolated static let startHerePassages: [String] = [
+        "Your work is encrypted. Every library is locked with its own random key, kept "
+        + "in a small key file beside it. Variorum keeps copies of that key file for you "
+        + "\u{2014} beside the library, inside every backup, and sealed in this Mac's "
+        + "keychain \u{2014} so you never have to think about it.",
+
+        "Write down your twelve words. Every library has twelve words from the moment "
+        + "it is made, and they open it for as long as they are its words. They were "
+        + "shown once, when the library was created. If you didn't write them down then, "
+        + "you can make new ones in Settings \u{25B8} Data Safety \u{2014} and write those "
+        + "down.",
+
+        "Set a passphrase. A passphrase is a convenience over the words: easier to type, "
+        + "and either one can reset the other. Until you set one, Variorum reminds you "
+        + "now and then.",
+
+        "The Apple road is a convenience. In Standard, Variorum also keeps quiet roads to "
+        + "your key \u{2014} through your iCloud Keychain and this Mac's login \u{2014} so "
+        + "most people never type anything, and for most people that simply works "
+        + "forever. If it ever stops, your passphrase or your words open the library, and "
+        + "nothing was ever at risk. Castle is the one promise that there is no quiet road "
+        + "through Apple, ever; it is a choice you can make in Settings.",
     ]
 
     /// The alternates, as REAL takes: block index → the take texts, in fan
@@ -146,15 +189,20 @@ enum ReadmeSeeder {
     private static let log = Logger(
         subsystem: "io.lduarte.Variorum", category: "birth-furniture")
 
+    /// `onTheNewRoad`: whether the store opened on the new road (`LaunchFurniture` passes the road's own rule for its
+    /// store variant); the default is the dev store's road in this build (`paragraphs`) — the direct callers are pins.
     @discardableResult
-    static func seedAtBirth(session: AppSession) async -> BirthSeed {
-        let outcome = await perform(session: session)
+    static func seedAtBirth(
+        session: AppSession,
+        onTheNewRoad: Bool = ProtectionRoad.opensOnTheNewRoad(devStore: true)
+    ) async -> BirthSeed {
+        let outcome = await perform(session: session, blocks: Self.paragraphs(onTheNewRoad: onTheNewRoad))
         log.notice(
             "readme at a fresh store's birth: \(String(describing: outcome), privacy: .public)")
         return outcome
     }
 
-    private static func perform(session: AppSession) async -> BirthSeed {
+    private static func perform(session: AppSession, blocks: [String]) async -> BirthSeed {
         do {
             let (liveID, tombstoned) = try await session.database.read { db in
                 (try String.fetchOne(
@@ -180,7 +228,7 @@ enum ReadmeSeeder {
                 let ops = Operations(undoStack: nil)
                 @Dependency(\.database) var database
                 let note = try ops.importPost(
-                    title: title, text: paragraphs.joined(separator: "\n"),
+                    title: title, text: blocks.joined(separator: "\n"),
                     undoLabel: "readme", segmentation: .paragraph, wingId: "")
                 for (index, texts) in takes.sorted(by: { $0.key < $1.key }) {
                     guard note.blockIDs.indices.contains(index) else { continue }

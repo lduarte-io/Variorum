@@ -45,7 +45,8 @@ struct SettingsSceneContent: View {
     static func libraryClosed(_ state: AppBootstrap.State) -> Bool {
         switch state {
         case .ready, .opening: false
-        case .locked, .waitingForICloudKeychain, .libraryMissing, .failed: true
+        case .locked, .waitingForICloudKeychain, .libraryMissing, .failed, .roadLobby, .newLibraryWords,
+             .roadInterlude: true
         }
     }
 
@@ -111,6 +112,16 @@ struct SettingsSceneContent: View {
                 // Settings' OWN presenter, the restore door's pattern.
                 handOffDoor: {
                     handOff.openPanel(session: session, bootstrap: bootstrap)
+                },
+                // VX-306 U2: the new road's *Set a passphrase…* row (nil on today's road).
+                roadStanding: bootstrap.roadStanding,
+                // VX-306 U3: the new road's Restore list — Make this my library on a catalogued copy, through
+                // Settings' OWN presenter (nil on today's road).
+                roadDoors: bootstrap.copyDoorsRoads().map { roads in
+                    RoadDoorsHost(
+                        roads: roads,
+                        lookInside: { row in libraryOpen.beginLookInside(roads: roads, row: row) },
+                        makeMine: { row in libraryOpen.beginMakeMine(roads: roads, row: row) })
                 })
                 .sheet(isPresented: Binding(
                     get: { libraryOpen.model != nil },
@@ -118,6 +129,15 @@ struct SettingsSceneContent: View {
                 ) {
                     if let model = libraryOpen.model {
                         LibraryOpenSheet(model: model) { libraryOpen.dismiss() }
+                    }
+                }
+                // VX-306 U3: the two doors' sheet (the new road only).
+                .sheet(isPresented: Binding(
+                    get: { libraryOpen.roadDoors != nil },
+                    set: { if !$0 { libraryOpen.dismissRoad() } })
+                ) {
+                    if let doors = libraryOpen.roadDoors {
+                        CopyDoorsSheet(model: doors) { libraryOpen.dismissRoad() }
                     }
                 }
                 .sheet(isPresented: Binding(

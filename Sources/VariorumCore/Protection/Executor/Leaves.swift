@@ -27,9 +27,11 @@ public protocol CustodyLeaf: AnyObject {
     /// The key an item holds. A Touch ID item's read is a press (nil: no such
     /// item, the press failed, or Touch ID is unusable for now).
     func readCustody(fingerprint: String, itemClass: ProtectionNames.CustodyClass) throws -> StoreKey?
-    /// Write (or replace) the item for `key`. A Touch ID item is made only at
-    /// a person's press — an act's step, never a repair (§3.10).
-    func writeCustody(_ key: StoreKey, itemClass: ProtectionNames.CustodyClass) throws
+    /// Write (or replace) the item for `key`, STAMPED with `libraryID` — the
+    /// library it is made for (VX-390: entering Castle sweeps this library's
+    /// silent items by the stamp). A Touch ID item is made only at a person's
+    /// press — an act's step, never a repair (§3.10).
+    func writeCustody(_ key: StoreKey, itemClass: ProtectionNames.CustodyClass, libraryID: String) throws
     func deleteCustody(fingerprint: String, itemClass: ProtectionNames.CustodyClass) throws
 }
 
@@ -55,10 +57,15 @@ public protocol AppleKeysLeaf: AnyObject {
     /// The ids of this scope's own-named items readable here.
     func readableAppleKeyIDs() throws -> Set<String>
     func readAppleKey(id: String) throws -> AppleKeyMaterial?
-    /// Add a freshly minted key under its own name (iCloud Keychain carries it
-    /// wherever it is on — Variorum can't see).
-    func addAppleKey(_ key: AppleKeyMaterial) throws
+    /// Add a freshly minted key under its own name, STAMPED with `libraryID`
+    /// — the library whose key file it wraps (VX-390). iCloud Keychain carries
+    /// it wherever it is on — Variorum can't see.
+    func addAppleKey(_ key: AppleKeyMaterial, libraryID: String) throws
     func deleteAppleKey(id: String) throws
+    /// VX-390: the ids of every own-named item stamped with `libraryID` that
+    /// this device can SEE — readable or not (rule 11's deletion reaches the
+    /// Apple account, and a delete is by id). A READ of attributes only.
+    func appleKeyIDs(ofLibrary libraryID: String) throws -> Set<String>
 }
 
 /// The vault (server): CAS on the revision and the key proof, over the row
@@ -107,6 +114,9 @@ public protocol LibraryFileLeaf: AnyObject {
     /// already hold the incoming library's.
     func swapStaged(setAside: Bool, asideKeyFile: KeyFile?) throws
     func discardStaged() throws
+    /// Does anything stand in the slot — the live library's file? A READ: the creation's no-clobber preflight
+    /// (VX-306 ladder round 2, m3), asked before the act mints or writes anything.
+    func slotIsOccupied() throws -> Bool
     /// A new library in the empty slot, under `key`, its record inside.
     func createLibrary(with key: StoreKey, record: ProtectionRecord) throws
     /// A plaintext export carrying its library ID (§3.7).

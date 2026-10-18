@@ -29,6 +29,48 @@ struct U4PromiseCheckTests {
         #expect(found.contains { $0.detail.contains("an earlier key") }, "\(found)")
     }
 
+    /// 1 (the synced arm — VX-386, the ladder's round-4 MINOR) — the
+    /// lagging-device exemption never swallows a device that HAS followed: a
+    /// silent item on a followed Castle device still fires.
+    @Test func onePostureStillCatchesAFollowedSyncedDevice() async throws {
+        let world = SWorld(seed: 424_242)
+        let synced = try #require(StartingState.all.firstIndex { $0.name.contains("Castle account with Touch ID") })
+        try await StartingState.all[synced].build(world)
+        await world.done([.launch("macB")])
+        let record = try #require(world.macB.slot?.record)
+        let account = try #require(record.account)
+        let current = try #require(world.server.snapshot(account)?.rowKeyID)
+        #expect(record.accountRowKeyID == current, "macB should have followed in this start state")
+        #expect(world.onePosture(world.macB, settled: true).isEmpty, "clean before the plant")
+        let key = try #require(world.macB.library?.key)
+        world.macB.keychain.local[KName.custody(SWorld.scope, PF.fp(key), .silent)] = KItem(value: .key(key))
+        #expect(!world.onePosture(world.macB, settled: true).isEmpty, "promise 1 must still fire on a followed device")
+    }
+
+    /// 1 (the stamp — VX-390, rule 11): a SILENT item or an Apple key this Mac
+    /// made, STAMPED with this library's ID, surviving the entry fires — whatever
+    /// key it holds; an UNSTAMPED one outside the key file's keys is rule 25's
+    /// stated limit and says nothing.
+    @Test func theStampClauseCatchesAStampedSurvivorAndLeavesAnUnstampedOne() async throws {
+        let world = try await scenarioWorld { try await $0.fresh(on: $0.macA) }
+        await world.done([.launch("macA"), .useCastle("macA", .alwaysAsk, newWords: false)])
+        #expect(world.entrySurvivors(world.macA).isEmpty, "clean after the entry")
+        let libraryID = try #require(world.macA.slot?.libraryID)
+        let stray = world.mintKey()
+        let name = KName.custody(SWorld.scope, PF.fp(stray), .silent)
+        world.macA.keychain.local[name] = KItem(value: .key(stray))
+        #expect(world.entrySurvivors(world.macA).isEmpty, "an unstamped item is rule 25's stated limit")
+        world.macA.keychain.local[name]?.libraryID = libraryID
+        #expect(world.entrySurvivors(world.macA).contains { $0.detail.contains("silent custody item stamped") })
+        world.macA.keychain.local[name] = nil
+        let apple = world.mintApple()
+        world.addSynced(world.macA, KName.apple(SWorld.scope, apple.id),
+                        KItem(value: .apple(id: apple.id, bytes: PF.bytes(apple.key)), libraryID: libraryID))
+        #expect(world.entrySurvivors(world.macA).isEmpty, "another Mac's key for this library is not this Mac's")
+        world.truth.appleKeyMintedOn[apple.id] = "macA"
+        #expect(world.entrySurvivors(world.macA).contains { $0.detail.contains("Apple key this Mac made") })
+    }
+
     /// 2 — Standard with its Apple road and its on-device item gone, unrepaired.
     @Test func standardCatchesALostQuietRoad() async throws {
         let world = try await scenarioWorld { try await $0.fresh(on: $0.macA) }

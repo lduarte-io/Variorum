@@ -150,6 +150,13 @@ struct Truth {
     /// the library — it opens with the secrets of its day, not necessarily
     /// today's, until a key door re-locks it.
     var keyFileFromBackup: [String: KeyFile] = [:]
+    /// VX-390: the device each Apple key was minted on — the stamp clause of
+    /// promise 1 holds a device to the Apple keys IT made for this library.
+    var appleKeyMintedOn: [String: String] = [:]
+    /// VX-390: a Castle entry this device's record took that the stamp clause
+    /// has not yet judged (judged once nothing is in flight — a crashed entry
+    /// finishes at the next open).
+    var castleEntriesToJudge: Set<String> = []  // "<device>|<libraryID>"
 }
 
 final class SDevice {
@@ -286,6 +293,10 @@ final class SWorld {
     var stats: [String: [String: Int]] = [:]
     /// The account each device's library was last seen bound to.
     var lastBinding: [String: String?] = [:]
+    /// VX-390's pin (the gate's seed 3 replayed with the catalogue leaf off):
+    /// every device's `catalogedKeyFiles(ofLibrary:)` answers empty — the
+    /// world's own catalog (the facts `assess` reads) is untouched.
+    var catalogedKeyFilesAnswerEmpty = false
 
     /// Two Macs and a phone on Apple account 1. (The world models no hardware
     /// identity: the core reads none — rule 23.)
@@ -906,8 +917,10 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
     // MARK: Custody
 
     func custodyItems() throws -> [CustodyItemFact] {
-        device.keychain.names(service: ProtectionNames.custodyService).compactMap {
-            ProtectionNames.parseCustodyAccount($0.account, scope: scope).map { CustodyItemFact(fingerprint: $0.fingerprint, itemClass: $0.class) }
+        device.keychain.names(service: ProtectionNames.custodyService).compactMap { name in
+            ProtectionNames.parseCustodyAccount(name.account, scope: scope).map {
+                CustodyItemFact(fingerprint: $0.fingerprint, itemClass: $0.class, libraryID: device.keychain.item(name)?.libraryID)
+            }
         }
     }
 
@@ -916,9 +929,10 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
         return world.pressRead(device, item)?.libraryKey
     }
 
-    func writeCustody(_ key: StoreKey, itemClass: ProtectionNames.CustodyClass) throws {
+    func writeCustody(_ key: StoreKey, itemClass: ProtectionNames.CustodyClass, libraryID: String) throws {
         device.keychain.local[KName.custody(scope, PF.fp(key), itemClass)] = KItem(
-            value: .key(key), touchID: itemClass == .touchid, enrollment: device.biometry.generation)
+            value: .key(key), touchID: itemClass == .touchid, enrollment: device.biometry.generation,
+            libraryID: libraryID)
         try wrote("custody+ \(itemClass.rawValue) \(f8(key))")
     }
 
@@ -965,9 +979,21 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
     func readableAppleKeyIDs() throws -> Set<String> { Set(world.readableAppleKeys(device).keys) }
     func readAppleKey(id: String) throws -> AppleKeyMaterial? { world.readableAppleKeys(device)[id] }
 
-    func addAppleKey(_ key: AppleKeyMaterial) throws {
-        world.addSynced(device, KName.apple(scope, key.id), KItem(value: .apple(id: key.id, bytes: PF.bytes(key.key))))
+    func addAppleKey(_ key: AppleKeyMaterial, libraryID: String) throws {
+        world.addSynced(
+            device, KName.apple(scope, key.id),
+            KItem(value: .apple(id: key.id, bytes: PF.bytes(key.key)), libraryID: libraryID))
+        world.truth.appleKeyMintedOn[key.id] = device.name
         try wrote("apple+ \(key.id.prefix(8))")
+    }
+
+    /// VX-390: every own-named Apple item this device holds a replica of,
+    /// stamped with `libraryID` — present here, readable or not.
+    func appleKeyIDs(ofLibrary libraryID: String) throws -> Set<String> {
+        Set(device.keychain.synced.compactMap { name, replica -> String? in
+            guard name.service == ProtectionNames.appleKeyService, replica.item?.libraryID == libraryID else { return nil }
+            return ProtectionNames.parseAppleKeyAccount(name.account, scope: scope)
+        })
     }
 
     func deleteAppleKey(id: String) throws {
@@ -1111,6 +1137,9 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
         try wrote("discard-staged")
     }
 
+    /// Anything at the slot's path (the production leaf's `fileExists` — any file, not only a library image).
+    func slotIsOccupied() throws -> Bool { device.container.files[SPath.slot] != nil }
+
     func createLibrary(with key: StoreKey, record: ProtectionRecord) throws {
         guard slot == nil else { throw ExecutorRefusal.nothingToDo }
         slot = LibraryImage(libraryID: record.libraryID, fingerprint: PF.fp(key), record: record, writing: 1)
@@ -1132,7 +1161,10 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
     /// world's catalog for the device (its container and the far folder it
     /// shares), filtered by the files' own libraryID (rule 11's sweep).
     func catalogedKeyFiles(ofLibrary libraryID: String) throws -> [KeyFile] {
-        world.catalog(device).keyFiles.filter { $0.role != .live }.compactMap(\.document).filter { $0.libraryID == libraryID }
+        // VX-390's pin: the catalogue leaf answering EMPTY (the stamp alone must
+        // close the rollback corner on this Mac).
+        if world.catalogedKeyFilesAnswerEmpty { return [] }
+        return world.catalog(device).keyFiles.filter { $0.role != .live }.compactMap(\.document).filter { $0.libraryID == libraryID }
     }
 
     func writeLiveKeyFile(_ file: KeyFile) throws {

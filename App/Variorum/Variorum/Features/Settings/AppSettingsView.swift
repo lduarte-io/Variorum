@@ -84,6 +84,11 @@ struct AppSettingsView: View {
     /// 13x F1 (R1-MAJOR): Data Safety's hand-off twin (Settings' own
     /// presenter behind it). nil hosts render no door.
     let handOffDoor: (() -> Void)?
+    /// VX-306 U2: the new road's open library faces (nil on today's road) —
+    /// the Protection pane's one *Set a passphrase…* row reads it.
+    let roadStanding: RoadStandingModel?
+    /// VX-306 U3: the new road's Restore list (nil on today's road) — Data Safety's rows read it.
+    let roadDoors: RoadDoorsHost?
 
     init(
         session: AppSession, services: AppServices? = nil,
@@ -93,7 +98,9 @@ struct AppSettingsView: View {
         crashReports: CrashReporting? = nil,
         mcp: MCPDoor? = nil,
         restoreDoor: ((URL) -> Void)? = nil,
-        handOffDoor: (() -> Void)? = nil
+        handOffDoor: (() -> Void)? = nil,
+        roadStanding: RoadStandingModel? = nil,
+        roadDoors: RoadDoorsHost? = nil
     ) {
         self.session = session
         self.services = services
@@ -104,6 +111,8 @@ struct AppSettingsView: View {
         self.mcp = mcp
         self.restoreDoor = restoreDoor
         self.handOffDoor = handOffDoor
+        self.roadStanding = roadStanding
+        self.roadDoors = roadDoors
         _theme = State(initialValue: ThemeStore(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
     }
@@ -389,7 +398,7 @@ struct AppSettingsView: View {
             if let protection {
                 // 13p Batch 2: the at-open modes, presets, escrow, and the
                 // passphrase/recovery doors (R13p-5/6/7/9).
-                ProtectionPane(controller: protection, services: services)
+                ProtectionPane(controller: protection, services: services, roadStanding: roadStanding)
             }
         case .dataSafety:
             // 13l Act 4 (ledger row 12): backups, their freshness, and what
@@ -397,7 +406,7 @@ struct AppSettingsView: View {
             // 13x U2: + the Restore from Backup rows (QB's second door).
             DataSafetyPane(
                 services: services, protection: protection, restoreDoor: restoreDoor,
-                handOffDoor: handOffDoor)
+                handOffDoor: handOffDoor, roadDoors: roadDoors)
         case .diagnostics:
             // 13r U3-B (R-13r-5; the architect's Option A): the crash-report
             // opt-in at the head, the received reports verbatim under it.

@@ -30,6 +30,10 @@ extension ActContext {
     static func fp8(_ fingerprint: String?) -> String { ProtectionExecutor.fp8(fingerprint) }
 
     var deviceID: String { library.section.deviceID }
+    /// VX-390 — the library a custody item or an Apple key this act makes is
+    /// FOR (its stamp): Make this my library's new library (the press minted
+    /// its ID), else the library in hand.
+    var stampLibraryID: String { parameters.newLibraryID ?? library.record?.libraryID ?? executor.libraryID }
     var deviceName: String { executor.configuration.deviceName }
     var accountID: String? { parameters.accountID ?? library.record?.account }
 
@@ -84,11 +88,11 @@ extension ActContext {
         if !(try libraryOpens(key)) { leaves.backups.pauseCopies() }
         switch kind {
         case .standard:
-            try leaves.custody.writeCustody(key, itemClass: .silent)
+            try leaves.custody.writeCustody(key, itemClass: .silent, libraryID: stampLibraryID)
         case .castle:
             let biometry = leaves.biometry.biometry()
             if parameters.gate == .touchID, biometry.hardware, biometry.enrolled {
-                try leaves.custody.writeCustody(key, itemClass: .touchid)
+                try leaves.custody.writeCustody(key, itemClass: .touchid, libraryID: stampLibraryID)
             }
         }
     }
@@ -197,15 +201,24 @@ extension ActContext {
         let catalogued: Set<String> = sweepForCastle
             ? Set(catalogedKeyFilesOfThisLibrary().flatMap(\.heldFingerprints)).subtracting([current])
             : []
+        // VX-390 — THE STAMP: every SILENT item stamped with THIS library's ID
+        // goes at the entry, whatever the live key file or the catalogue still
+        // remembers of its key (rule 11: "the Apple and on-device keychain items
+        // deleted"; the gate's seed 3 with the catalogue leaf answering empty).
+        // The catalogue's sweep above stays as the belt; another library's
+        // items, and an item carrying no stamp, are untouched (rule 17's Look
+        // inside road; rule 25's stated limit).
+        let thisLibrary = library.record?.libraryID
         for item in try leaves.custody.custodyItems() where item.fingerprint != current {
             let outgoing = item.fingerprint == plan.fromFingerprint
             let vouched = sweepForCastle && item.itemClass == .silent && catalogued.contains(item.fingerprint)
+            let stamped = sweepForCastle && item.itemClass == .silent && thisLibrary != nil && item.libraryID == thisLibrary
             let sweep = sweepForCastle && item.itemClass == .silent && tree.contains(item.fingerprint)
-            guard outgoing || sweep || vouched else { continue }
+            guard outgoing || sweep || vouched || stamped else { continue }
             // The outgoing key's Touch ID item goes with its key; a silent
             // item goes only once the history holds its key — or a catalogued
-            // key file of this library names it.
-            if item.itemClass == .silent, sweepForCastle, !vouched, !historyHolds(item.fingerprint) { continue }
+            // key file of this library names it, or it is stamped this library's.
+            if item.itemClass == .silent, sweepForCastle, !vouched, !stamped, !historyHolds(item.fingerprint) { continue }
             try leaves.custody.deleteCustody(fingerprint: item.fingerprint, itemClass: item.itemClass)
         }
         // Entering Castle also takes in a SILENT sync-keys item for an account
@@ -274,8 +287,16 @@ extension ActContext {
         // wrapped under — a Standard-era backup's quiet lock whose key the live
         // history forgot (the gate's seed 3: a Time Machine rollback; rule 11).
         let catalogued = catalogedKeyFilesOfThisLibrary().compactMap { $0.apple?.keyID }
+        // VX-390 — …and every Apple key STAMPED with this library's ID that this
+        // device can see, readable or not — whatever the live key file, the
+        // record's sections or the catalogue still remember (rule 11; the
+        // gate's seed 3 with the catalogue leaf answering empty). A listing the
+        // leaf cannot read retires nothing by it (never guessed; the belts above
+        // stand).
+        let stamped = library.record.map { (try? leaves.apple.appleKeyIDs(ofLibrary: $0.libraryID)) ?? [] } ?? []
         let ids = (executor.guards.everyOwnKeyRetiredAtCastleOn
-            ? Array(Set(library.section.ownLibraryAppleKeyIDsToRetire).union(outgoing).union(earlier).union(catalogued)).sorted()
+            ? Array(Set(library.section.ownLibraryAppleKeyIDsToRetire).union(outgoing).union(earlier).union(catalogued)
+                .union(stamped)).sorted()
             : outgoing).filter { !retired.contains($0) }
         guard !ids.isEmpty else { return }
         var section = library.section

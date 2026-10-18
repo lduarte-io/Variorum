@@ -78,6 +78,13 @@ struct TravellingDotsIndicatorTests {
             "Shared/SyncEnrollmentView.swift", "Shared/SecretCheck.swift",
             "Variorum/StoreLockView.swift", "Variorum/LibraryMissingView.swift",
             "Variorum/Features/Settings/ProtectionPane.swift",
+            // VX-306 U2: the new road's interlude card and set-passphrase sheet.
+            "Variorum/Features/Protection/RoadInterludeCard.swift",
+            "Variorum/Features/Protection/SetPassphraseSheet.swift",
+            // VX-306 U3: the two doors' sheet; the phone's new-road faces.
+            "Variorum/Features/Protection/CopyDoorsSheet.swift",
+            "Variorum/Features/Protection/LookInsideSheet.swift",
+            "VariorumMobile/Features/Protection/MobileRoadFaces.swift",
             "VariorumMobile/Features/Protection/MobilePostureSheets.swift",
             "VariorumMobile/Features/Protection/MobileProtectionCeremonies.swift",
             "VariorumMobile/Features/Protection/MobileStoreLockView.swift",

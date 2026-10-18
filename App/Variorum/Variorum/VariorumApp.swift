@@ -73,6 +73,15 @@ struct VariorumApp: App {
                         LibraryOpenSheet(model: model) { libraryOpen.dismiss() }
                     }
                 }
+                // VX-306 U3 (the new road only — nil on today's): a picked copy's doors, Make this my library.
+                .sheet(isPresented: Binding(
+                    get: { libraryOpen.roadDoors != nil },
+                    set: { if !$0 { libraryOpen.dismissRoad() } })
+                ) {
+                    if let doors = libraryOpen.roadDoors {
+                        CopyDoorsSheet(model: doors) { libraryOpen.dismissRoad() }
+                    }
+                }
                 // 13x F1 (R1-MAJOR): the hand-off sheet — the File door's
                 // progress/done/refusal face, beside the adoption sheet.
                 .sheet(isPresented: Binding(
@@ -197,6 +206,10 @@ struct VariorumApp: App {
                         // server OFF before it could start (ledger row 10).
                         appDelegate.mcp.attach(
                             session: session, storeURL: bootstrap.liveStoreURL, windows: windows)
+                        // VX-306 U2: the new road's receipts (rule 1's restore, the offer's *Use it*, the
+                        // passphrase set) are spoken on this window's status seam — `receipt_style` governs them as
+                        // every receipt; the receipts the open owes are spoken once, here.
+                        bootstrap.roadStanding?.speak = { text in session.status.receipt(text) }
                         if restoreHold == nil {
                             restoreHold = RestoreHoldModel(storeURL: bootstrap.liveStoreURL)
                         } else {
@@ -222,6 +235,10 @@ struct VariorumApp: App {
                             // seam (pre-13x 1a); production names the real one.
                             legacyCleanup: { LegacyPasteInCleanup.clear() })
                         services = fresh
+                        // VX-306 U1b (P-VX306-K4): on the new road every backup run that wrote a snapshot also
+                        // lands rule 5's pair (the library + its key file) — today's runs untouched; nothing on
+                        // today's road (no session).
+                        ProtectionBackupHook.attach(to: fresh.backup, session: bootstrap.roadSession)
                         // 13x U2 row 7: the restore-hold's gate — wired
                         // BEFORE start() so no first round outruns it; the
                         // one Resume press clears the hold and catches up
@@ -297,7 +314,11 @@ struct VariorumApp: App {
                         // road with the controller's custody and the
                         // services' vault; the services are read LIVE
                         // (the reopen rebuilds them).
-                        if let storeURL = try? AppDatabase.defaultStoreURL(
+                        // VX-306 U1b (P-VX306-U1b-6): NOT on the new road — today's posture switches re-key the
+                        // library under today's key file, which the protection core's key file would no longer
+                        // open; with no runner the choose doors do not render (P-2). Castle's crossings on the
+                        // new road are VX-307's.
+                        if !bootstrap.newRoad, let storeURL = try? AppDatabase.defaultStoreURL(
                             variant: bootstrap.storeVariant) {
                             let runner = PostureSwitchRunner(leaves: .live(
                                 bootstrap: bootstrap,
@@ -418,6 +439,9 @@ struct VariorumApp: App {
                             }
                             ProtectionNoticeBar(
                                 controller: bootstrap.protection, services: services)
+                            // VX-306 U2 (the new road only — nil on today's): rule 27's banner, the split pair's
+                            // line, rule 3's reminder and its set-passphrase sheet.
+                            ProtectionRoadBar(model: bootstrap.roadStanding)
                         }
                     }
                     .onReceive(NotificationCenter.default.publisher(
@@ -448,6 +472,8 @@ struct VariorumApp: App {
                 // pre-13x 1a (§3.7): the three-door face — the lock stays.
                 // 13x U2 row 6: the third door lands (copy §3's "Open an
                 // Existing Library…", shipped unrendered since 1a).
+                // VX-306 U3: on the new road the door leads to the picked flow — filed, then Look inside (Make this my
+                // library needs a library open; the empty-slot landing, T-5, is VX-309's) — P-VX306-U3-7 narrowed.
                 LibraryMissingView(lobby: lobby, openDoor: {
                     libraryOpen.openPanel(bootstrap: bootstrap)
                 })
@@ -456,6 +482,19 @@ struct VariorumApp: App {
                 // unlock road — non-nil when the key custody is empty but
                 // `variorum-keys.json` with wraps sits beside the store.
                 StoreFailureView(error: error, recovery: recovery) { bootstrap.retry() }
+            case .roadLobby(let lobby):
+                // VX-306 U1b (Debug, the one switch): the new road's lobby — roads only, before unlock. U2: rule
+                // 27's face carries the missing face's doors (the app's Backups folder, the 13x open door).
+                RoadLockView(
+                    lobby: lobby, backupsFolder: bootstrap.liveStoreURL.flatMap(RoadLockView.backupsFolder(besideStore:)),
+                    // VX-306 U3: the door leads to the picked flow — filed, then Look inside (P-VX306-U3-7 narrowed).
+                    openDoor: { libraryOpen.openPanel(bootstrap: bootstrap) })
+            case .newLibraryWords(let card):
+                // VX-306 U1b: the once-shown words card of a library just created (rule 2).
+                LibraryWordsCard(model: card)
+            case .roadInterlude(let interlude):
+                // VX-306 U2: rule 21's notice, then the key-file offer — once, before the library shows.
+                RoadInterludeCard(model: interlude)
             }
     }
 
@@ -480,7 +519,8 @@ struct VariorumApp: App {
                 StoreFailureView(error: error) { bootstrap.retry() }
             case (.opening, _):
                 StoreOpeningView()
-            case (.locked, _), (.waitingForICloudKeychain, _):
+            case (.locked, _), (.waitingForICloudKeychain, _), (.roadLobby, _), (.newLibraryWords, _),
+                 (.roadInterlude, _):
                 // 13p: note windows never outlive a lock (the whole
                 // `.ready` tree tears down); a restored one says so.
                 Text("Variorum is locked — unlock it in the main window.")

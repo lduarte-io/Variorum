@@ -306,3 +306,22 @@ state (`NSEvent.modifierFlags` the class property) and for driving other apps.
   app's own front surface. Guard key-posting test cells so an unexpected key window fails the premise
   by name.
 
+
+## Walker facts from the VX-306 walks (2026-10-18 — the new protection road's Debug build)
+
+- **The unified log shows NONE of the Debug app's `os_log` lines** (`log show --predicate 'subsystem == "io.lduarte.Variorum"'`
+  returns nothing, whatever the level). Launch the BINARY directly with `OS_ACTIVITY_DT_MODE=YES` and stderr to a file —
+  every `[protection] road: …` / `WALK SWITCH …` / `backup pair: …` line lands there:
+  `OS_ACTIVITY_DT_MODE=YES App/Variorum/DerivedData/<dd>/Build/Products/Debug/Variorum.app/Contents/MacOS/Variorum 2> run.log &`.
+- **The data-protection keychain has no CLI reach** (DTS: no command-line access; `security find/delete-generic-password`
+  see only the file-based keychain): the new road's custody/memory/sync-keys items and its iCloud Apple keys cannot be
+  listed or deleted by hand. The Debug-only `VARIORUM_WALK_FORGET=silent|apple|memory` (comma-joined) forgets them once per
+  launch through the production leaves (absent from the Release binary).
+- **Move the slot's library WITH its sidecars.** After a quit the slot can still hold `variorum.sqlite-wal`/`-shm`; moving
+  `variorum.sqlite` alone strands the WAL's frames. Always move the three together (and the key file + the store-id stub).
+- **The dev scope's per-scope seed marks survive a store reset** (`SampleLibrarySeeded.Variorum-dev`,
+  `StarredGatheringSeeded.Variorum-dev`, the welcome arrangement's): a fresh dev store seeds nothing until they are
+  `defaults delete`d and the app relaunched with `VARIORUM_SEED_GATE_UNOWNED=1`.
+- **Quiet receipts fade in ~6 s** — capture at once after the act; a `walk-cap` taken 7 s later catches them mid-fade.
+- **`defaults read io.lduarte.Variorum.debug appearanceChoice`** before a walk and restore it after: another session's walk
+  may have left `dark`.

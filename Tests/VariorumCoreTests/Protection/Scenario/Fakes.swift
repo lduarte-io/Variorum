@@ -100,6 +100,10 @@ struct KItem: Equatable {
     var synchronizable = false
     /// An attribute Keychain Access can edit (it changes nothing the app reads).
     var label: String?
+    /// VX-390 — THE STAMP: the library this custody item or Apple key was made
+    /// for (production: a plain queryable attribute beside the item). nil: an
+    /// item that carries none (a plant — rule 25's stated limit).
+    var libraryID: String?
 }
 
 // MARK: - Biometry (`LAEnvironment`)

@@ -56,6 +56,26 @@ struct ScenarioMutationPins {
         }
     }
 
+    /// VX-390 — the stamp, at the step: an Apple key this Mac made for the
+    /// library under a device ID it no longer remembers (only its stamp says
+    /// whose it is) goes at Castle entry. Off (only the outgoing wrap's key
+    /// retired): it survives, and promise 1's stamp clause says so at the entry.
+    @Test func theStampedAppleKeyGoesAtEntry() async throws {
+        try await mutationPin("every Apple key this Mac made for the library goes at Castle entry, by its stamp",
+                              off: { $0.everyOwnKeyRetiredAtCastle = false }) { guards in
+            let world = try await scenarioWorld(guards: guards) { try await $0.fresh(on: $0.macA) }
+            await world.done([.launch("macA")])
+            let libraryID = try #require(world.macA.slot?.libraryID)
+            let forgotten = world.mintApple()
+            let name = KName.apple(SWorld.scope, forgotten.id)
+            world.addSynced(world.macA, name,
+                            KItem(value: .apple(id: forgotten.id, bytes: PF.bytes(forgotten.key)), libraryID: libraryID))
+            world.truth.appleKeyMintedOn[forgotten.id] = "macA"
+            await world.done([.useCastle("macA", .alwaysAsk, newWords: false)])
+            return (world, world.macA.keychain.synced[name]?.item == nil)
+        }
+    }
+
     /// No repair ever makes a Touch ID item: a Touch ID choice with no item
     /// behind it records Always ask quietly (§3.10).
     @Test func noRepairMakesATouchIDItem() async throws {

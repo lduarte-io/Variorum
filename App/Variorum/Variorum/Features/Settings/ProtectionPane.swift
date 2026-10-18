@@ -165,6 +165,10 @@ struct PassphraseSetSheet: View {
 struct ProtectionPane: View {
     @Bindable var controller: ProtectionController
     let services: AppServices?
+    /// VX-306 U2 — the new road's open library faces (nil on today's road): the pane's ONE new row, *Set a
+    /// passphrase…*, opens the set-passphrase sheet (P-VX306-U2-0 (a)). The pane's other doors stay today's.
+    var roadStanding: RoadStandingModel? = nil
+    @State private var roadSheet: SetPassphraseModel?
 
     @State private var setSheetModel: PassphraseSetModel?
     @State private var reminderCheck: SecretCheckModel?
@@ -175,6 +179,10 @@ struct ProtectionPane: View {
 
     var body: some View {
         Form {
+            // VX-306 ladder round 1, NIT 4: the row only while the library has no passphrase (P-2).
+            if let roadStanding, roadStanding.offersSetPassphrase {
+                roadPassphraseSection(roadStanding)
+            }
             leadSection
             checklistSection
             postureSection
@@ -201,6 +209,10 @@ struct ProtectionPane: View {
         .sheet(item: $setSheetModel) { model in
             PassphraseSetSheet(model: model) { setSheetModel = nil }
         }
+        // VX-306 U2: the new road's set-passphrase sheet (this pane's own — the main window's bar holds its own).
+        .sheet(item: $roadSheet) { model in
+            SetPassphraseSheet(model: model)
+        }
         // RUN A batch A3 (17m): the re-link door's own sheet. Held in this
         // pane's `@State` and NOT on the controller (the ceremony sits there
         // because a re-key reopens the `.ready` tree under it — this door
@@ -226,6 +238,21 @@ struct ProtectionPane: View {
             set: { if $0 == nil { controller.closeFollow() } })
         ) { model in
             FollowSheet(model: model) { controller.closeFollow() }
+        }
+    }
+
+    // MARK: VX-306 U2 — the new road's one row
+
+    /// The ask's other home (P-VX306-U2-0 (a)): one row, *Set a passphrase…* — rendered only while no passphrase exists
+    /// (`RoadStandingModel.offersSetPassphrase`; the sheet still refuses if one appears meanwhile).
+    private func roadPassphraseSection(_ standing: RoadStandingModel) -> some View {
+        Section {
+            HStack {
+                Button(ProtectionWords.reminderSetDoor) {
+                    roadSheet = standing.makeSetPassphraseSheet { roadSheet = nil }
+                }
+                Spacer()
+            }
         }
     }
 

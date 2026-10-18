@@ -366,6 +366,7 @@ public enum SyncSchema {
     /// `v1_16_drop_bridge_tables` dropped them, 2026-09-04.)
     public static let localOnlyTables: Set<String> = [
         "sync_outbox", "sync_state", "sync_row_seq", "_sync_applying",
+        "protection_record",  // VX-306 U1a: v1_31 (v1_30 at U1a; renumbered at the fold of VX-348 — its v1_30 was on main first), the library's protection facts (P-VX306-K6)
     ]
 
     /// DERIVED machinery — equally local-only under SYNC (never in a payload

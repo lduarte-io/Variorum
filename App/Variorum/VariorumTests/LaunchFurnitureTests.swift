@@ -326,7 +326,7 @@ struct LaunchFurnitureTests {
                 }
                 return fans
             }
-            #expect(fans.count == 5, "five blocks — the reference's paragraphs")
+            #expect(fans.count == ReadmeSeeder.paragraphs.count, "her five blocks + the four Start Here passages (VX-306, P-VX306-W-1)")
             for (index, texts) in fans {
                 let expected = [ReadmeSeeder.paragraphs[index]] + (ReadmeSeeder.takes[index] ?? [])
                 #expect(texts == expected, "block \(index)'s fan, chosen first, byte-exact")
@@ -355,6 +355,39 @@ struct LaunchFurnitureTests {
                     arguments: [created])
             }
             #expect(posts == [ReadmeSeeder.title], "nothing seeds after the readme")
+        }
+    }
+
+    /// **VX-306 ladder round 2, m2 — TODAY'S ROAD seeds her five blocks alone.** The four Start Here passages speak the
+    /// new road's truths (the key file and its copies, the twelve words shown once at the creation, a new-words door in
+    /// Data Safety), false on today's road — so a fresh store whose variant keeps today's road (the real store's, as
+    /// every Release build's) is born with her readme exactly as she wrote it, until the road switches (VX-329). Driven
+    /// through the PRODUCTION composition with the real variant (the marks injected — no defaults are touched); written
+    /// against what both trees carry (her five blocks are the seed's first five on either side), so it runs RED on the
+    /// tree before the gate: nine blocks.
+    @Test func aFreshStoreOnTodaysRoadSeedsHerFiveBlocksAlone() async throws {
+        try await withLaunchWorld { session, db in
+            let device = DeviceMarks()
+            _ = await LaunchFurniture.seed(
+                session: session, storeVariant: .real,
+                gate: gate(account: false, clean: true), marks: device.marks)
+            let readme = try await db.read { db in
+                try String.fetchOne(
+                    db,
+                    sql: "SELECT id FROM container WHERE kind = 'post' AND title = ? AND deleted_at IS NULL",
+                    arguments: [ReadmeSeeder.title])
+            }
+            let id = try #require(readme, "the readme placeholder seeds on today's road too")
+            let (blocks, rendered) = try await db.read { db in
+                (try Int.fetchOne(
+                    db,
+                    sql: "SELECT COUNT(*) FROM container_block WHERE container_id = ? AND deleted_at IS NULL",
+                    arguments: [id]) ?? 0,
+                 try Queries.renderedText(db, containerID: id))
+            }
+            let herFive = Array(ReadmeSeeder.paragraphs.prefix(5))
+            #expect(blocks == 5, "today's road seeded \(blocks) blocks — the Start Here passages rode along")
+            #expect(rendered == herFive.joined(separator: "\n\n"), "her five blocks, byte-exact, and nothing after them")
         }
     }
 

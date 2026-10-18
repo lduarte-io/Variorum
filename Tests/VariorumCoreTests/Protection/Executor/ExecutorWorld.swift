@@ -79,6 +79,8 @@ func f8(_ fingerprint: String) -> String { String(fingerprint.prefix(8)) }
 /// propagation; U4's fake adds the delay, the off switch and the same-name rule).
 final class ICloudKeychain {
     var keys: [String: AppleKeyMaterial] = [:]
+    /// VX-390: each key's stamp — the library it was made for.
+    var stamps: [String: String] = [:]
 }
 
 /// The server's vault (the model's row — VX-378 U2): CAS on the revision and
@@ -172,6 +174,8 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     var crashAfterWrites: Int?
     /// Pauses and resumes of copies — in-process, not writes.
     var copyEvents: [String] = []
+    /// Every Touch ID item READ — each one a press (VX-306 ladder round 1, m2: a face's automatic probe presses none).
+    var touchIDPresses = 0
 
     init(icloud: ICloudKeychain = ICloudKeychain(), server: ExecutorVault = ExecutorVault()) {
         self.icloud = icloud
@@ -201,12 +205,17 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     func custodyItems() throws -> [CustodyItemFact] { Array(custody.keys).sorted { "\($0)" < "\($1)" } }
 
     func readCustody(fingerprint: String, itemClass: ProtectionNames.CustodyClass) throws -> StoreKey? {
+        if itemClass == .touchid { touchIDPresses += 1 }
         if itemClass == .touchid, !(bio.hardware && bio.enrolled && bio.transient == nil) { return nil }
         return custody[CustodyItemFact(fingerprint: fingerprint, itemClass: itemClass)]
     }
 
-    func writeCustody(_ key: StoreKey, itemClass: ProtectionNames.CustodyClass) throws {
-        custody[CustodyItemFact(fingerprint: PF.fp(key), itemClass: itemClass)] = key
+    func writeCustody(_ key: StoreKey, itemClass: ProtectionNames.CustodyClass, libraryID: String) throws {
+        // The stamp rides the fact (identity is the name — remove first so the
+        // stored key carries the new stamp).
+        let fact = CustodyItemFact(fingerprint: PF.fp(key), itemClass: itemClass, libraryID: libraryID)
+        custody.removeValue(forKey: fact)
+        custody[fact] = key
         try wrote(.custody(f8(key), itemClass))
     }
 
@@ -242,15 +251,21 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     func readableAppleKeyIDs() throws -> Set<String> { Set(icloud.keys.keys) }
     func readAppleKey(id: String) throws -> AppleKeyMaterial? { icloud.keys[id] }
 
-    func addAppleKey(_ key: AppleKeyMaterial) throws {
+    func addAppleKey(_ key: AppleKeyMaterial, libraryID: String) throws {
         icloud.keys[key.id] = key
+        icloud.stamps[key.id] = libraryID
         try wrote(.appleAdd(String(key.id.prefix(8))))
     }
 
     func deleteAppleKey(id: String) throws {
         guard icloud.keys[id] != nil else { return }
         icloud.keys[id] = nil
+        icloud.stamps[id] = nil
         try wrote(.appleDelete(String(id.prefix(8))))
+    }
+
+    func appleKeyIDs(ofLibrary libraryID: String) throws -> Set<String> {
+        Set(icloud.keys.keys.filter { icloud.stamps[$0] == libraryID })
     }
 
     // MARK: - The vault (this device's port onto the shared server)
@@ -331,6 +346,8 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
         staged = nil
         try wrote(.discardStaged)
     }
+
+    func slotIsOccupied() throws -> Bool { live != nil }
 
     func createLibrary(with key: StoreKey, record: ProtectionRecord) throws {
         guard live == nil else { throw ExecutorRefusal.nothingToDo }

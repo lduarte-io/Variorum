@@ -79,6 +79,16 @@ final class AppBootstrap {
         /// (same envelope road, never a new crypto road; same-machine
         /// scope — the full new-machine adoption door is 13x's).
         case failed(AppDatabase.StoreOpenError, recovery: StoreLobby?)
+        /// VX-306 U1b — THE NEW ROAD's lobby (Debug, the one switch): roads only, before unlock; the quiet
+        /// roads were already tried at once (`ProtectionOpenRoad.route`).
+        case roadLobby(ProtectionLobbyModel)
+        /// VX-306 U1b — the once-shown words card of a library just created on the new road (rule 2); its
+        /// one button opens the library.
+        case newLibraryWords(LibraryWordsCardModel)
+        /// VX-306 U2 — the open's INTERLUDE on the new road, in the lobby's room between the unlock and the
+        /// library's open (PROVISIONAL P-VX306-U2-1): rule 21's notice (once), then the key-file offer; the last
+        /// card answered, the open goes on.
+        case roadInterlude(RoadInterludeModel)
     }
 
     private(set) var state: State = .opening
@@ -150,6 +160,28 @@ final class AppBootstrap {
     /// missing-library act work beside — never the real dev home.
     @ObservationIgnored private let testPresence: StoreFilePresence
     @ObservationIgnored private let testStoreURL: URL?
+    /// VX-306 U1b — whether THIS bootstrap takes the rebuilt protection core's open road: the one switch
+    /// (`ProtectionRoad.newRoadIsLive` — a Debug build on the Mac) for the production instance; OFF by default
+    /// under a test opener, so every existing route suite runs today's road unchanged (the Release check's
+    /// test override). Read at the head of `routeAndOpen`.
+    @ObservationIgnored let newRoad: Bool
+    /// VX-306 U1b — the new road's inputs (nil on today's road): the protection system composed per open on
+    /// the main actor, the sign-in read off-main, whether the road may write (never in a hosted test run), and —
+    /// under a test — the opener that takes the key in hand.
+    @ObservationIgnored private let roadInputs: RoadInputs?
+    /// VX-306 U1b — the library open on the new road (nil on today's road, and before the first open): the
+    /// backup hook's key, key file and device ID; U2's faces read its report (the notice, the repairs, the
+    /// faults, the acts owed).
+    @ObservationIgnored private(set) var roadSession: ProtectionRoadSession?
+    /// VX-306 U2 — the open library's protection faces on the new road (nil on today's road): rule 27's banner,
+    /// the split pair's line, rule 3's reminder and its set-passphrase sheet, the receipts the open owes.
+    private(set) var roadStanding: RoadStandingModel?
+    /// VX-306 U2 — rule 3's local schedule (this Mac's defaults; a test bootstrap writes its own suite, never the
+    /// app's domain).
+    @ObservationIgnored private let reminderLedger: PassphraseReminderLedger
+    /// VX-306 U3 — receipts the NEXT open on the new road owes the status seam (Make this my library's §7c (9)):
+    /// handed to the session the reopen makes, then spoken by the ready composition like every owed receipt.
+    @ObservationIgnored private var receiptsForNextRoadOpen: [String] = []
 
     init(
         variant: AppDatabase.StoreVariant = StoreLocation.resolve(),
@@ -160,6 +192,11 @@ final class AppBootstrap {
         testOpener = nil
         testPresence = .encryptedOrUnknown
         testStoreURL = nil
+        // P-VX306-U1b-5: the new road reaches ONLY the fenced dev store — a Debug build opted into the real
+        // store's variant keeps today's road (the phase's one law: "it reaches only the fenced dev store").
+        newRoad = ProtectionRoad.opensOnTheNewRoad(devStore: variant == .dev)
+        roadInputs = newRoad ? RoadInputs.live(variant: variant) : nil
+        reminderLedger = PassphraseReminderLedger()
         lobbyVaultRoad = LobbyVaultRoad.live(scope: variant.rawValue)
         protection = ProtectionController(configuration: .init(
             scope: variant.rawValue,
@@ -207,13 +244,20 @@ final class AppBootstrap {
         syncCustodyLeaves: (@Sendable (_ storeID: String) -> E2EECustodyLeaves)? = nil,
         syncCustodySession: SyncCustodySession = .shared,
         // pre-13x 4a: a scripted vault road for the lobby's pins (nil = none).
-        lobbyVaultRoad: LobbyVaultRoad? = nil
+        lobbyVaultRoad: LobbyVaultRoad? = nil,
+        // VX-306 U1b: the one switch's test override — OFF (today's road) unless a new-road pin hands in its
+        // harness: a protection system over a temp slot and a throwaway scope, and the keyed opener.
+        protectionRoad: ProtectionRoadTestHarness? = nil
     ) {
         storeVariant = .dev
         self.gate = gate
         self.testOpener = testOpener
         self.testPresence = testPresence
         self.testStoreURL = testStoreURL
+        newRoad = protectionRoad != nil
+        roadInputs = protectionRoad.map(RoadInputs.test)
+        reminderLedger = PassphraseReminderLedger(
+            defaults: UserDefaults(suiteName: PassphraseReminderLedger.testSuiteName) ?? .standard)
         self.lobbyVaultRoad = lobbyVaultRoad
         protection = ProtectionController(configuration: .init(
             scope: AppDatabase.StoreVariant.dev.rawValue,
@@ -238,7 +282,7 @@ final class AppBootstrap {
 
     // MARK: - The open road (routes first — 13p)
 
-    private func beginOpening(unlockedKey: StoreKey? = nil) {
+    private func beginOpening(unlockedKey: StoreKey? = nil, roadOpened: ProtectionRoadSession? = nil) {
         guard opening == nil else { return }
         state = .opening
         let variant = storeVariant
@@ -246,16 +290,20 @@ final class AppBootstrap {
         let testPresence = testPresence
         let testStoreURL = testStoreURL
         let gate = gate
+        // VX-306 U1b: the new road's system, composed ONCE per open on the main actor (U1a's hand-forward).
+        let newRoad = newRoad
+        let road = newRoad ? roadInputs?.compose() : nil
         opening = Task { [weak self] in
             // OFF the main actor: routing (a defaults read + a 16-byte
             // header classification), then — on the open routes only —
             // `openStore`, which runs the migration set. The demanded
             // routes DEFER all of that behind the lobby.
             let outcome = await Task.detached(priority: .userInitiated) {
-                Self.routeAndOpen(
+                await Self.routeAndOpen(
                     variant: variant, gate: gate,
                     unlockedKey: unlockedKey, testOpener: testOpener,
-                    testPresence: testPresence, testStoreURL: testStoreURL)
+                    testPresence: testPresence, testStoreURL: testStoreURL,
+                    newRoad: newRoad, road: road, roadOpened: roadOpened)
             }.value
             guard let self else { return }
             // …and back, for `install` (a process-global dependency
@@ -265,7 +313,13 @@ final class AppBootstrap {
     }
 
     private enum OpenOutcome: Sendable {
-        case ready(AppDatabase, unlockedKey: StoreKey?)
+        case ready(AppDatabase, unlockedKey: StoreKey?, road: ProtectionRoadSession? = nil)
+        /// VX-306 U1b: the new road's lobby, its facts and the context its presses run in.
+        case roadLobby(RoadLobbyFacts, RoadContext)
+        /// VX-306 U1b: a library created on the new road — the words card first.
+        case roadCreated(ProtectionRoadSession, OnceShownWords)
+        /// VX-306 U2: an open on the new road that owes the interlude (rule 21's notice, the offer) first.
+        case roadInterlude(ProtectionRoadSession, RoadContext)
         case locked(LobbyFacts)
         /// pre-13x 2a (§3.8): Standard's waiting state.
         case waiting(LobbyFacts)
@@ -309,14 +363,29 @@ final class AppBootstrap {
         unlockedKey: StoreKey?,
         testOpener: (@Sendable () -> Result<AppDatabase, AppDatabase.StoreOpenError>)?,
         testPresence: StoreFilePresence,
-        testStoreURL: URL?
-    ) -> OpenOutcome {
+        testStoreURL: URL?,
+        newRoad: Bool = false,
+        road: ComposedRoad? = nil,
+        roadOpened: ProtectionRoadSession? = nil
+    ) async -> OpenOutcome {
         let scope = variant.rawValue
         // Under a test opener the route works beside the test's SCRATCH url
         // (nil = none) — never the real dev home.
         let storeURL = testOpener != nil
             ? testStoreURL
             : (try? AppDatabase.defaultStoreURL(variant: variant))
+
+        // VX-306 U1b — THE ONE SWITCH, read here: the new road (a Debug build on the Mac, the dev store) takes
+        // the whole route; today's road below runs byte-for-byte as before when it is off.
+        if newRoad {
+            guard let road else {
+                return .failed(AppDatabase.StoreOpenError(
+                    storePath: storeURL?.path ?? "", reason: ProtectionWords.somethingWentWrong), recovery: nil)
+            }
+            return await routeOnNewRoad(
+                road, variant: variant, gate: gate, unlockedKey: unlockedKey, roadOpened: roadOpened,
+                storeURL: storeURL)
+        }
 
         // An unlocked key means the lobby already ran — go straight to the
         // open with that key as custody.
@@ -409,6 +478,82 @@ final class AppBootstrap {
         }
     }
 
+    // MARK: - VX-306 U1b: THE NEW ROAD (reached only behind the one switch)
+
+    /// The new road's route (`ProtectionOpenRoad.route` decides nothing — `assess` does), then the app's open
+    /// with the key in hand. A session already opened (the lobby's press, the words card's button) goes
+    /// straight to the open.
+    private nonisolated static func routeOnNewRoad(
+        _ road: ComposedRoad, variant: AppDatabase.StoreVariant, gate: StoreLaunchGate,
+        unlockedKey: StoreKey?, roadOpened: ProtectionRoadSession?, storeURL: URL?
+    ) async -> OpenOutcome {
+        if let roadOpened {
+            // VX-306 U2: a session the lobby's press opened may owe the interlude too (shown once per open).
+            if roadOpened.owesInterlude { return .roadInterlude(roadOpened, road.context()) }
+            return openOnNewRoad(roadOpened, road: road, variant: variant, gate: gate)
+        }
+        let ctx = road.context()
+        #if DEBUG
+        // Walk machinery (P-VX306-U1b-9): a launch asked to forget a quiet road does so once, before the facts.
+        if road.open == nil { ProtectionWalkSwitch.forgetOnceIfAsked(ctx) }
+        #endif
+        switch await ProtectionOpenRoad.route(ctx, keyInHand: unlockedKey) {
+        case .opened(let session):
+            // VX-306 U2: rule 21's notice and the key-file offer are said before the library shows.
+            if session.owesInterlude { return .roadInterlude(session, ctx) }
+            return openOnNewRoad(session, road: road, variant: variant, gate: gate)
+        case .created(let session, let words):
+            return .roadCreated(session, words)
+        case .lobby(let facts):
+            return .roadLobby(facts, ctx)
+        case .libraryMissing:
+            // `.libraryMissing`, and K5's `recordMissing` — the three-door face, no sentence about the store.
+            return .libraryMissing(demand: .auto, storeURL: storeURL)
+        case .failed(let sentence):
+            return .failed(
+                AppDatabase.StoreOpenError(storePath: road.system.places.slot.path, reason: sentence), recovery: nil)
+        }
+    }
+
+    /// The app's open on the new road: the store identity (today's mint, so the rest of the app keeps its
+    /// footing), then today's `openStoreOffMain` with the key in hand (`StoreKeyCustody.inMemory` — the device
+    /// keychain's today-road items are never read on this road, rule 26).
+    private nonisolated static func openOnNewRoad(
+        _ session: ProtectionRoadSession, road: ComposedRoad, variant: AppDatabase.StoreVariant, gate: StoreLaunchGate
+    ) -> OpenOutcome {
+        let key = session.key
+        if road.writes {
+            ensureStoreIdentity(
+                slot: road.system.places.slot, key: key, fresh: session.isFresh, gate: gate, scope: variant.rawValue)
+        }
+        let opened = road.open?(key) ?? openStoreOffMain(variant: variant, custody: .inMemory(initial: key))
+        switch opened {
+        case .success(let database): return .ready(database, unlockedKey: key, road: session)
+        case .failure(let error): return .failed(error, recovery: nil)
+        }
+    }
+
+    /// TODAY'S STORE ID beside the store (`StoreIdentity` — sync custody, the dials and the backup log are
+    /// keyed by it): a library created on the new road mints a NEW one exactly as today's `startNewLibrary`
+    /// does (the old key file aside, `establish` under the new key, the new id's own Auto dials — never today's
+    /// silent custody, rule 26); a later open mints one only when none is there (a creation that died before it
+    /// landed). An existing id is never re-minted (a later key change must not change it).
+    nonisolated static func ensureStoreIdentity(
+        slot: URL, key: StoreKey, fresh: Bool, gate: StoreLaunchGate, scope: String
+    ) {
+        if fresh {
+            gate.setAsideEnvelope(slot)
+        } else {
+            guard case .none = StoreIdentity.resolve(besideStore: slot) else { return }
+        }
+        do {
+            let storeID = try StoreIdentity.establish(besideStore: slot, key: key)
+            gate.saveDials(ProtectionDials(), scope, storeID)
+        } catch {
+            ProtectionOpenRoad.log("road: the store id could not be written beside the library — \(String(describing: error))")
+        }
+    }
+
     /// 13p ladder R1-M3: a failed open lands `.failed` — and when the
     /// failure is the encrypted-store-with-empty-custody refusal (typed:
     /// `keyUnavailable`) with a wraps-bearing sidecar beside the store, it
@@ -463,7 +608,16 @@ final class AppBootstrap {
     private func finish(_ outcome: OpenOutcome) {
         opening = nil
         switch outcome {
-        case .ready(let database, let unlockedKey):
+        case .ready(let database, let unlockedKey, let road):
+            // VX-306 U1b: the library open on the new road (nil on today's road).
+            roadSession = road
+            // VX-306 U3: a receipt an act owed this reopen (Make this my library) joins the open's own.
+            if let road {
+                for receipt in receiptsForNextRoadOpen { road.addReceipt(receipt) }
+                receiptsForNextRoadOpen = []
+            }
+            // VX-306 U2: its protection faces (rule 27's banner, the split pair, rule 3's reminder, the receipts).
+            roadStanding = road.map { RoadStandingModel.make($0, ledger: reminderLedger) }
             let view: AppDatabase
             if let binding {
                 // The re-open after a lock: the SAME ambient view adopts
@@ -545,7 +699,9 @@ final class AppBootstrap {
             // no gate. The async marker read is safe only on that road; the
             // in-memory flags are re-read after it, and the save rides the
             // custody queue, ahead of any custody move enqueued later.
-            if let unlockedKey, !switchInProgress, !currentEffectiveGate.isDemanded {
+            // VX-306 U1b: NEVER on the new road — the re-landing writes today's silent item (a quiet road the
+            // protection core would not know of; rule 26: the new road writes none of today's names).
+            if !newRoad, let unlockedKey, !switchInProgress, !currentEffectiveGate.isDemanded {
                 let protection = protection
                 relanding = Task { [weak self] in
                     let pending = await protection.readSwitchPending?() ?? false
@@ -578,6 +734,83 @@ final class AppBootstrap {
             state = .libraryMissing(makeMissingLobby(demand: demand, storeURL: storeURL))
         case .failed(let error, let recoveryFacts):
             state = .failed(error, recovery: recoveryFacts.map(makeLobby))
+        case .roadLobby(let facts, let ctx):
+            state = .roadLobby(makeRoadLobby(facts, ctx))
+        case .roadCreated(let session, let words):
+            state = .newLibraryWords(LibraryWordsCardModel(words: words.words) { [weak self] in
+                self?.beginOpening(roadOpened: session)
+            })
+        case .roadInterlude(let session, let ctx):
+            state = .roadInterlude(makeInterlude(session, ctx))
+        }
+    }
+
+    /// VX-306 U2 — the interlude (rule 21): the notice, then the offer; *Use it* runs off the main actor through
+    /// the road; when the last card is answered the open goes on with the same session (shown once per open).
+    private func makeInterlude(_ session: ProtectionRoadSession, _ ctx: RoadContext) -> RoadInterludeModel {
+        RoadInterludeModel(
+            cards: RoadInterlude.cards(session.report),
+            useOffer: { offer in
+                await Task.detached(priority: .userInitiated) {
+                    await ProtectionOpenRoad.useOffer(ctx, session: session, offer: offer)
+                }.value
+            },
+            receipt: { session.addReceipt($0) },
+            finished: { [weak self] in
+                session.markInterludeShown()
+                self?.beginOpening(roadOpened: session)
+            })
+    }
+
+    /// VX-306 U1b — the new road's lobby: its presses run off the main actor through the road; an opened
+    /// session continues into the app's open; K5's `recordMissing` lands on the missing face.
+    private func makeRoadLobby(_ facts: RoadLobbyFacts, _ ctx: RoadContext) -> ProtectionLobbyModel {
+        ProtectionLobbyModel(
+            standing: facts,
+            typedRoad: { secret in
+                await Task.detached(priority: .userInitiated) {
+                    await ProtectionOpenRoad.openTyped(ctx, secret: secret)
+                }.value
+            },
+            touchIDRoad: { facts in
+                await Task.detached(priority: .userInitiated) {
+                    await ProtectionOpenRoad.pressTouchID(ctx, facts: facts)
+                }.value
+            },
+            refreshRoad: {
+                await Task.detached(priority: .userInitiated) { ProtectionOpenRoad.lobbyFacts(ctx) }.value
+            },
+            opened: { [weak self] session in self?.beginOpening(roadOpened: session) },
+            recordMissing: { [weak self] in
+                guard let self else { return }
+                self.state = .libraryMissing(self.makeMissingLobby(demand: .auto, storeURL: self.liveStoreURL))
+            },
+            // VX-306 U2 — rule 27's face's *Start a New Library*: the library no key file opens steps aside whole
+            // first (PROVISIONAL P-VX306-U2-5), then the creation and the words card.
+            startNew: { [weak self] in
+                guard let self else { return nil }
+                return await self.createOnNewRoadFromAFace()
+            })
+    }
+
+    /// VX-306 — a face's *Start a New Library* on the new road (the missing face — K5's record-less store among the
+    /// states it shows — and rule 27's face): whatever stands in the slot steps aside first, never written over
+    /// (`ProtectionOpenRoad.startNewLibraryFromAFace`: P-VX306-U1b-3, P-VX306-U2-5; the ladder's round-1 m1), then the
+    /// creation (rule 2) and the words card. nil = done; else the sentence the face shows.
+    private func createOnNewRoadFromAFace() async -> String? {
+        guard let road = roadInputs?.compose() else { return ProtectionWords.couldNotCreate }
+        let route = await Task.detached(priority: .userInitiated) {
+            // The context off the main actor: it reads the sign-in (a Keychain read).
+            await ProtectionOpenRoad.startNewLibraryFromAFace(road.context())
+        }.value
+        switch route {
+        case .created(let session, let words):
+            finish(.roadCreated(session, words))
+            return nil
+        case .failed(let sentence):
+            return sentence
+        case .opened, .lobby, .libraryMissing:
+            return ProtectionWords.couldNotCreate
         }
     }
 
@@ -610,6 +843,11 @@ final class AppBootstrap {
     }
 
     private func readyHousekeepingBody(database: AppDatabase, unlockedKey: StoreKey?) async {
+        // VX-306 U1b: today's ready housekeeping (the §11 migration, the reconcile's custody arms — the Apple
+        // arm mints today's shared Apple key and lands its wrap in today's key file) is TODAY's road's; the new
+        // road's repairs already ran at its open (`ProtectionOpenRoad.open` → `repairPasses`). Rule 26: the new road
+        // writes none of today's names.
+        guard !newRoad else { return }
         await runMigrationIfNeeded(database: database, unlockedKey: unlockedKey)
         if testOpener == nil || makeMigrationLeaves != nil {
             await protection.reconcile()
@@ -701,12 +939,21 @@ final class AppBootstrap {
     /// mints a fresh library under a NEW store id through the GATE (the
     /// guard seam — scripted in tests, the Keychain in production).
     private func makeMissingLobby(demand: StoreAtOpenMode, storeURL: URL?) -> LibraryMissingLobby {
-        LibraryMissingLobby(
+        // VX-306 U1b: on the new road, Start a New Library is the protection core's creation.
+        var newRoadCreate: (@MainActor () async -> String?)?
+        if newRoad {
+            newRoadCreate = { [weak self] in
+                guard let self else { return nil }
+                return await self.createOnNewRoadFromAFace()
+            }
+        }
+        return LibraryMissingLobby(
             demand: demand,
             storeURL: storeURL,
             gate: gate,
             scope: storeVariant.rawValue,
-            begin: { [weak self] in self?.beginOpening() })
+            begin: { [weak self] in self?.beginOpening() },
+            newRoadCreate: newRoadCreate)
     }
 
     private func makeLobby(_ facts: LobbyFacts) -> StoreLobby {
@@ -821,6 +1068,122 @@ final class AppBootstrap {
         beginOpening(unlockedKey: key)
     }
 
+    // MARK: - VX-306 U3: THE TWO DOORS (the new road only — rule 17)
+
+    /// The two doors' roads on the new road (nil on today's road, before a library opens, and on a hosted test run's
+    /// read-only road). Each road reads the CURRENT session at its call (a reopen replaces it).
+    func copyDoorsRoads() -> CopyDoorsRoads? {
+        guard newRoad, case .ready = state, let session = roadSession, session.writes else { return nil }
+        return CopyDoorsRoads(
+            listing: { [weak self] in
+                guard let session = self?.roadSession else { return .empty }
+                return await Task.detached(priority: .userInitiated) { ProtectionCopyDoors.listing(session) }.value
+            },
+            opensQuietly: { [weak self] copy in
+                guard let session = self?.roadSession else { return false }
+                return await Task.detached(priority: .userInitiated) {
+                    ProtectionCopyDoors.opensQuietly(session, copy)
+                }.value
+            },
+            passphraseSet: { [weak self] in self?.roadSession?.library.keyFile?.passphrase != nil },
+            makeMine: { [weak self] row, copySecrets, currentPair in
+                guard let self else { return .refused(.failed) }
+                return await self.makeThisMyLibrary(row, copySecrets: copySecrets, currentPair: currentPair)
+            },
+            pick: { [weak self] url in
+                guard let session = self?.roadSession else {
+                    return .refused(ProtectionWords.makeMineFailed, detail: nil)
+                }
+                return await Task.detached(priority: .userInitiated) {
+                    ProtectionCopyDoors.pick(url, session: session)
+                }.value
+            },
+            // VX-306 U3 — LOOK INSIDE (P-VX306-U3-15): read-only, writes nothing, closing forgets.
+            lookInside: { [weak self] copy, typed, quietRoads in
+                guard let session = self?.roadSession else { return .refused(.failed) }
+                return await Task.detached(priority: .userInitiated) {
+                    ProtectionCopyDoors.lookInside(CopyDoorsContext(session), copy: copy, typed: typed, quietRoads: quietRoads)
+                }.value
+            })
+    }
+
+    /// VX-306 U3 — the two doors' roads with NO library open (the missing face's and rule 27's *Open Library…*,
+    /// P-VX306-U3-7 narrowed at the ruling): a pick filed, then Look inside; Make this my library is not offered (no
+    /// current pair to verify — the empty-slot landing, T-5, is VX-309's). nil on today's road and on a hosted test run's
+    /// read-only road (the filing writes).
+    func copyDoorsRoadsWithoutALibrary() -> CopyDoorsRoads? {
+        guard newRoad, let road = roadInputs?.compose(), road.writes else { return nil }
+        // The road's context (its sign-in read) is taken off the main actor, inside each detached read.
+        let context: @Sendable () -> CopyDoorsContext = { CopyDoorsContext(road.context()) }
+        return CopyDoorsRoads(
+            listing: {
+                await Task.detached(priority: .userInitiated) { ProtectionCopyDoors.listing(context()) }.value
+            },
+            opensQuietly: { copy in
+                await Task.detached(priority: .userInitiated) { ProtectionCopyDoors.opensQuietly(context(), copy) }.value
+            },
+            passphraseSet: { false },
+            makeMine: nil,
+            pick: { url in
+                await Task.detached(priority: .userInitiated) { ProtectionCopyDoors.pick(url, context()) }.value
+            },
+            lookInside: { copy, typed, quietRoads in
+                await Task.detached(priority: .userInitiated) {
+                    ProtectionCopyDoors.lookInside(context(), copy: copy, typed: typed, quietRoads: quietRoads)
+                }.value
+            })
+    }
+
+    /// **MAKE THIS MY LIBRARY** (rule 17; the plan's U3 addendum) — one confirmed door, on the new road at ready. Every
+    /// check first, all reads (`ProtectionCopyDoors.preflight` — a typo never tears the window down); then
+    /// `adoptLibrary`'s seam shape: the composition root's teardown (`onWillLock` — flush, savepoint, stop), the
+    /// `.ready` tree down, the app's pool CLOSED through the binding (a checkpoint-truncate, then the close — the
+    /// swap's precondition), and the act off the main actor (`ProtectionCopyDoors.makeMine`: the restore hold by the
+    /// core writer, the executor's plan, today's store id minted fresh); then the reopen THROUGH THE NEW ROAD with the
+    /// key that opens the slot now in hand (the new library's; the old one's when nothing swapped). The receipt
+    /// (§7c (9)) is owed to the reopened session. One act at a time on the session.
+    func makeThisMyLibrary(
+        _ row: CopyDoorRow, copySecrets: TypedSecrets, currentPair: TypedSecrets
+    ) async -> CopyDoorOutcome {
+        guard newRoad, case .ready = state, let binding, let session = roadSession, session.writes else {
+            return .refused(.failed)
+        }
+        guard session.beginAct() else { return .refused(.busy) }
+        let preflight = await Task.detached(priority: .userInitiated) {
+            ProtectionCopyDoors.preflight(session, row: row, copySecrets: copySecrets, currentPair: currentPair)
+        }.value
+        let copy: CatalogCopy
+        let catalog: Catalog
+        switch preflight {
+        case .refused(let why):
+            session.endAct()
+            return .refused(why)
+        case .ready(let ready, let listed):
+            copy = ready
+            catalog = listed
+        }
+        await onWillLock?()
+        state = .opening
+        protection.dropResident()
+        protection.resetPerOpenDeferrals()
+        protection.syncCustodySession.drop()
+        let gate = gate
+        let scope = storeVariant.rawValue
+        let result = await Task.detached(priority: .userInitiated) {
+            binding.lock()
+            return await ProtectionCopyDoors.makeMine(
+                session, copy: copy, catalog: catalog, row: row, copySecrets: copySecrets, currentPair: currentPair,
+                mintStoreIdentity: { key in
+                    Self.ensureStoreIdentity(slot: session.system.places.slot, key: key, fresh: true, gate: gate, scope: scope)
+                })
+        }.value
+        session.endAct()
+        if result.outcome == .made { receiptsForNextRoadOpen.append(ProtectionWords.makeMineReceipt) }
+        beginOpening(unlockedKey: result.reopenKey)
+        await awaitOpen()
+        return result.outcome
+    }
+
     // MARK: - pre-13x 2b: THE RE-KEY ROAD (§4 step 4 — "the pool closed
     // first; off-main")
 
@@ -895,6 +1258,9 @@ final class AppBootstrap {
     /// projection is current; `lock()` keeps consulting the persisted gate
     /// as the ACTING authority.
     var canLock: Bool {
+        // VX-306 U1b: no lock on the new road this phase — every library it opens is Standard (no Castle entry
+        // exists before VX-307), and Standard never locks (rule 8's quiet roads; today's Auto refusal).
+        guard !newRoad else { return false }
         guard case .ready = state, binding != nil else { return false }
         return protection.effectiveGate.isDemanded
     }
@@ -907,6 +1273,7 @@ final class AppBootstrap {
     /// refuses silently: a lock whose key auto-releases at the next open
     /// is theater, and no theater ships (R13p-14).
     func lock() async {
+        guard !newRoad else { return }  // VX-306 U1b: see `canLock`
         guard case .ready = state, let binding else { return }
         let scope = storeVariant.rawValue
         // pre-13x 2a: the derived effective gate is the acting authority.
@@ -1057,16 +1424,21 @@ final class LibraryMissingLobby {
     private let gate: StoreLaunchGate
     private let scope: String
     private let begin: @MainActor () -> Void
+    /// VX-306 U1b — on the new road (the one switch), the deliberate act is the protection core's creation;
+    /// nil on today's road (the act below, unchanged). Answers the face's sentence, nil when it went on.
+    private let newRoadCreate: (@MainActor () async -> String?)?
 
     init(
         demand: StoreAtOpenMode, storeURL: URL?, gate: StoreLaunchGate,
-        scope: String, begin: @escaping @MainActor () -> Void
+        scope: String, begin: @escaping @MainActor () -> Void,
+        newRoadCreate: (@MainActor () async -> String?)? = nil
     ) {
         self.demand = demand
         self.storeURL = storeURL
         self.gate = gate
         self.scope = scope
         self.begin = begin
+        self.newRoadCreate = newRoadCreate
     }
 
     /// The app's own Backups folder beside the (absent) store — the Mac's
@@ -1084,6 +1456,10 @@ final class LibraryMissingLobby {
         busy = true
         lastError = nil
         defer { busy = false }
+        if let newRoadCreate {
+            lastError = await newRoadCreate()
+            return
+        }
         let gate = gate
         let scope = scope
         let outcome = await Task.detached(priority: .userInitiated) { () -> String? in
