@@ -32,6 +32,7 @@ units) are scope, not durations.
 | **VX-282** Editor & notes fixes | backspace, the italics flicker, take panel, capture box, comments family | 9 | Opus / **Fable** (editor seam) | now |
 | **VX-283** Sidebar & Library polish | the Open list, Library polish, the red lint (trimmed at her 2026-10-14 triage) | 9 | Opus / Fable | merged 2026-10-16 (PR #167); cut 0.9.7 with VX-336 |
 | **VX-284** Books, gatherings & tags | her VX-214 follow-ups, tag undo, the book view's doors and Index slice, VX-216 last | 17 | Opus / Opus | now |
+| **VX-348** Pre-launch bug sweep | her running list (⌘S commits, the exact edit time, the Library at narrow widths, the NUL strip, the doubled header line) + the today's-road pair VX-338/339 + the riders VX-384/385 — `notes/plans/fixes/vx-348-prelaunch-sweep.md` | 9 | Opus / **Fable** (her word 2026-10-18, VX-338 named) | now (one kickoff sitting: VX-351) |
 
 Plus **her own track** (§4) and **the release itself** (§5).
 
@@ -318,6 +319,16 @@ The launch build ships at her explicit word only, after:
 
 The road is the proven one (memory: Variorum release publishing): bump the version, `Tools/Release/release.sh`
 at a zero-instance window with no commits during it, then DMG first and appcast second on the site.
+
+**NUMBERING (her word 2026-10-18, this section's rule):** 0.9.7 (build 7933, 2026-10-16) was the last 0.9. **The
+next release is 0.10.0**, and every pre-launch release after it is a 0.10.x patch bump; **1.0.0 is reserved for the
+build that flips Castle's release switch (VX-329)** — her actual launch, since Castle is her gate. Sparkle orders
+updates by the build number (the commit count), so the display version is free to follow this. **The three runs in
+flight each MINT A RELEASE at their merge** (her word 2026-10-18): VX-381, VX-382 and VX-348 take 0.10.0, 0.10.1 and
+0.10.2 in whichever order they merge; closeouts serialize, so the numbers never race. The notes rule stands (she
+writes them unless she delegates the draft at a kickoff); each release ends with the /Applications refresh on the
+same build. The eight releases so far: 0.9.0 (4911) · 0.9.1 (4913) · 0.9.2 (5178) · 0.9.3 (6497) · 0.9.4 (6518) ·
+0.9.5 (7055) · 0.9.6 (7517) · 0.9.7 (7933).
 
 ---
 
