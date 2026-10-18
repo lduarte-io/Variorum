@@ -1373,3 +1373,17 @@ proof that the reverted files compiled, and the two paths.
   Activity rows' frozen relative stamps (no TimelineView; the LIST refreshes fine — the live round's "stale list"
   caveat is resolved by this trace, strengthening the gap's confirmation) → **VX-401** (Improvement, Confirmed,
   MCP, Low).
+
+## VX-348 IS THE LAST MERGER (2026-10-18 ~06:3x — the coordinator's notice at VX-382's merge)
+
+main moved to `e6874b1d8` (VX-382, PR #172; footprint: Features/BookView, Core/Views, Features/Editor, the Registry,
+one Queries file, Mac + core tests, and `ReleaseNotes-0.9.8.md` now carrying VX-381's and VX-382's sections). Both
+siblings are in, so **this run mints the ONE 0.9.8 at its closeout** (her word, confirmed in-session): after this
+run's merge ask and the coordinator's GO — the only bump; our notes section APPENDED to the two already in the file
+(on this branch, before the merge ask); `release.sh` (DMG, appcast, site deploy) plus the folded /Applications
+refresh (A1 safety copy of her REAL store first, zero-instance checks, codesign verify) under a coordinator-GO'd
+release window with the full rule card. The fold of `e6874b1d8` is relayed to U2's implementer at its next commit
+boundary (its uncommitted `Core/Views/SavepointNameField.swift` is the named collision candidate — commit first,
+keep-both-sides, REBUILD the u2 products from the folded tree, overlap answer in its record); the orchestrator
+rebuilds `u5-fix` incrementally post-fold so the owed door-pin run is post-fold too. Disk note: ~13 GiB of verified
+products pruned at the coordinator's ask (u1-red/u1-fixed/u5-red/u5-fixed/u5-mobile); `u5-fix` kept.
