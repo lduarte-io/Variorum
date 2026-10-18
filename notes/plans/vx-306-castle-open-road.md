@@ -1885,6 +1885,28 @@ state — traced on this tree:
   close commit) — the protection surfaces' no-spinner rule applied to the doors' sheet (`758f151bc`, its grep pin gaining
   `CopyDoorsSheet` and the phone's `MobileRoadFaces`); the final tree's `build-for-testing` lines and the record below.
 
+- Piece 7 — LOOK INSIDE, BUILT TO THE RULING ((b), the read-only facts sheet — P-VX306-U3-15), after the record's first
+  close; the U3 RECORD's later sections still describe the tree before it where they say "not built" — this piece's lines
+  and the "LOOK INSIDE AS BUILT" section at the record's end supersede them:
+  - 7a — the core read road `Sources/VariorumCore/Protection/Files/ProtectionCopyPeek.swift`: DONE (this commit). `open`
+    byte-copies the catalogued file and its non-empty `-wal` into a FRESH private folder (`ProtectionLibraryFiles
+    .privateCopy`) and opens ONE keyed, READ-ONLY connection on the copy (a wrong key refuses at the first page read, the
+    private folder removed); `Reader` — `books()` (the books with their live member counts — member-class when the column
+    exists; gatherings, which hold no membership, not listed), `notes(offset:limit:)` (the living notes — not archived,
+    which keeps saved versions out, not deleted — newest first by `last_touched_at`, a page of 100), `note(id:)` (the
+    blocks in order, each its chosen take, the block's default when the chosen one is gone or archived), `close()`
+    (idempotent; the connection closed, its key with it, the private folder deleted; `deinit` the same) — RAW SQL, never
+    the migrator, `Operations` or the ambient database; a copy holding no app tables yet reads empty. **P1, measured:** the
+    first plan was `SEARCH container USING INDEX idx_container_kind (kind=?) | USE TEMP B-TREE FOR ORDER BY` (no planner
+    statistics — a sort of the whole corpus per page; the pin RED); `+kind` keeps the planner on `idx_container_touched`
+    walked backward (the pin GREEN). `ProtectionCopyPeekTests` (4, core — headless, both configurations): a look over a
+    library planted through the operations (two living notes, a chosen second take, an archived note, a deleted one, a
+    book, a gathering) reads the books and counts, the notes newest first and by page, a note's text as its page reads;
+    the catalogued folder byte-identical after look → read → close (no sidecar beside it); the private folder gone; reads
+    after close refuse; a wrong key refuses with no private folder left; the notes plan on the touched index with no temp
+    sort; a never-opened library reads empty. Debug `✔ Test run with 4 tests in 1 suite passed`; release (`swift test -c
+    release`) `✔ Test run with 4 tests in 1 suite passed`.
+
 **THE ROAD AS BUILT (for the ladder):** the doors' brain is `Shared/Protection/CopyDoorsModel.swift` (pure; every act an
 injected `CopyDoorsRoads`); their off-main roads are `ProtectionCopyDoors.swift` (listing · quiet probe · preflight · the act
 · the pick) over `PickedCopy.swift` (classify · file); the bootstrap holds the swap's precondition (`AppBootstrap
