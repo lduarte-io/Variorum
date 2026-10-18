@@ -532,7 +532,7 @@ struct LibrarySearchToggle: View {
     let onPress: () -> Void
 
     /// The door's one size — a stable width for the row's decision.
-    static let size = CGSize(width: 28, height: 22)
+    nonisolated static let size = CGSize(width: 28, height: 22)
 
     var body: some View {
         Button(action: onPress) {

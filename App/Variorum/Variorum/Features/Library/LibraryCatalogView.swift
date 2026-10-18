@@ -208,7 +208,12 @@ struct LibraryCatalogView: View {
         // slides and fades with the row selection; the subject swap fades
         // inside the panel — nothing teleports.
         HStack(spacing: 0) {
-            VStack(spacing: 0) {
+            // VX-350: LEADING-aligned — every child fills the column, so
+            // nothing moves at a usable width; when one child's minimum
+            // outgrows a narrow column (the search band's chips), the others
+            // keep their leading edge instead of centring on the wider child
+            // (the controls would slide right, under the clip).
+            VStack(alignment: .leading, spacing: 0) {
                 header
                 Divider().overlay(tokens.line)
                 // 13o U2 (Direction C, R-13o-15): the search state's ONE
@@ -612,6 +617,9 @@ struct LibraryCatalogView: View {
                 Text(tokens.path(["Library"]))
                     .font(tokens.heading)
                     .foregroundStyle(tokens.accent)
+                    // VX-350: the surface's own name keeps its words before
+                    // the quiet line beside it gives way.
+                    .layoutPriority(1)
                 // 13n-c U4 — round 5, her words: the wing switcher "lives on
                 // the Bookcase only, which is weird". The Library lists ONE
                 // wing, so it says which — "Library · Home ▾" — and cycles
@@ -622,6 +630,11 @@ struct LibraryCatalogView: View {
                 Text(tokens.chromeLabel("everything — sortable, searchable"))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
+                    // VX-350 (PROVISIONAL P-VX350-7): at a narrow width the
+                    // masthead's quiet line gives way first, on ONE line
+                    // (ending in …) — never wrapping the masthead taller.
+                    .lineLimit(1)
+                    .truncationMode(.tail)
                 Spacer()
                 ForEach(Self.mastheadDoors, id: \.self) { door in
                     Button {

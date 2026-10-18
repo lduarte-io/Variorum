@@ -943,6 +943,11 @@ struct VX350NarrowLibraryTests {
                     if read.controls.width > room + 0.5 {
                         faults.append("\(room) \(state.name): the row is \(read.controls.width) wide in a \(room)-pt room")
                     }
+                    // The row keeps the header's 24-pt inset whatever else in
+                    // the column (the search band's chips) outgrows the room.
+                    if abs(read.controls.minX - (read.root.minX + 24)) > 0.5 {
+                        faults.append("\(room) \(state.name): the row starts at \(read.controls.minX), not the header's inset")
+                    }
                     let shown = read.field.maxX > read.root.minX
                     if shown && read.field.width < read.prompt - 0.5 {
                         faults.append("\(room) \(state.name): the field is a pill — \(read.field.width) of its \(read.prompt)")
