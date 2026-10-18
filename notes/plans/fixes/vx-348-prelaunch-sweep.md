@@ -363,10 +363,13 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
 - **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** BUILT — all four FIXED with pins (`98b878662`
   · `b2dcef63f` · `6757ea121` · `e09d00b96` VX-351; `b32ebe484` VX-384; `fd4470556` VX-385 + VX-355); the headless suites
   green but VX-353's flake; the batch ran (RED exact; FIXED 353/363 — three clusters); **THE U4 FIX LEG** done
-  (`ac612ec20`, test-only: clusters 2 and 3 were the pins' readings; cluster 1 not U4's by mechanism — re-classed to
-  VX-167 pending the discriminator), both products REBUILT at `ac612ec20`; **PENDING:** the re-run window (four commands
-  in the U4 record's fix-leg section), the walk (the list in the U4 UNIT RECORD), the QUESTIONS bundle (P-VX351-1…7,
-  P-VX384-1, P-VX385-1).
+  (`ac612ec20`, test-only: clusters 2 and 3 were the pins' readings; cluster 1 VX-167's flake — the discriminator
+  settled it) and re-run GREEN (U4 batch-verified whole — the orchestrator's re-run record); **the walk's W2-1**
+  answered (`77c8f7f16`, test-only: one stamps-line composer, no second copy — the hover IS composed, the live render
+  not established; the 1892 words honest; the ⌘S receipt's band named; an Index-live receipt-home gap traced for a
+  ticket), both products REBUILT at `77c8f7f16`; **PENDING:** W2-1's one-suite red/fixed run and the walk's W2-1
+  re-check (the AX discriminator with the panel as control, the ⌘S band) — both in the U4 record's W2-1 section — and
+  the QUESTIONS bundle (P-VX351-1…7, P-VX384-1, P-VX385-1).
 - Then the ladder (fresh Fable per round, whole diff), closeout, merge. **Her overnight mandate (2026-10-18):**
   rule PROVISIONALLY and continue; merge to main at this run's own finish (finish-order serialization with
   VX-381/VX-382); leave the handoff AND, separately, the completed checklist block in her format. **Release (her
@@ -1908,8 +1911,8 @@ in). Disjoint files by design (the U2/U3 precedent); every U4 commit is path-lim
 - **Products (u4-fixed / u4-red):** DONE — both PREBUILT from durable checkouts of `e09d00b96` (paths, the revert patch,
   the confirmed recompiles, the commands and every expected red: "The Mac products" below). The batch RAN (the
   orchestrator's "THE U4 BATCH" section): RED exact; FIXED 353/363 with three clusters → **THE U4 FIX LEG** (below):
-  both products REBUILT at `ac612ec20` (the two reshaped pins); its re-run is PENDING the next window. This worktree is
-  never reverted.
+  both products REBUILT at `ac612ec20` (the two reshaped pins), re-run GREEN; then **W2-1** (below): both REBUILT at
+  `77c8f7f16` (the book box's pin), its one-suite run PENDING. This worktree is never reverted.
 - **No behavioural revert is in flight in this worktree.**
 
 ### VX-351 — the exact edit time past today, as ruled (R-VX348-1/3)
@@ -2169,6 +2172,91 @@ xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home
 ```
 With (b) and (c) as expected, the fixed leg's two U4 clusters close; every other suite in the batch's 57 was already
 green, and (a)/(d) settle cluster (1)'s attribution.
+
+### W2-1 (the walk's finding — the book's note box stamps line; the coordinator's routing, 2026-10-18 ~10:2x)
+
+**(1) The hover gap — the composer sweep found NO second copy.** Every composer of a stamps line, by the sweep table's
+method (grep `stampsLine`, `stampsHelp`, `savedAt`, `"saved "`, every `SidebarNoteBox(`/`BookNoteBox` site):
+- `NoteBoxCopy.stampsLine` (`Core/Views/NoteBox.swift`) has ONE caller: `SidebarNoteBox.factsBlock`, which carries
+  `.stampHelp(NoteBoxCopy.stampsHelp(…))` since `6757ea121`.
+- `RootView.noteBoxView` builds `SidebarNoteBox` — and nothing else — for EVERY book mode and state (its two
+  `SidebarNoteBox(` sites: the held empty face and the reported box). `BookNoteBox` is a pure rule enum (which modes
+  show the box, which note it points at, where the book's quiet receipt sits); it composes no line.
+- The box draws the stamps line in exactly two states: SELECTED (Outline's focus, Index's selection, the spread's page)
+  and LIVE WITHOUT A BAR (Index — its liveness is one block's `PaneTextAuthority` pane, never an `EditorViewModel`, so
+  `RootView`'s `barModel` is nil and the facts stay). Outline's and the spread's live box show the bar instead.
+- The walk's words prove the line came from this seam: "edited Oct 13, 1892 · saved Oct 11" is the glance rule over
+  a stamp from another year and one from this year. (The pre-fix date-only form says the same words for these two
+  stamps, so the words alone cannot tell the builds apart. The hover is what U4 added.)
+- **So the hover IS composed on the book's box** — pinned red on old by `VX351StampGapsTests.theNoteBoxHoversBothFactsWhole`
+  (green on u4-fixed in the batch) and now `VX351BookBoxStampsTests` (below), the walk's own state and stamps. **Why no
+  tooltip rendered live is NOT established by reading:** the code is the same modifier, words and kind of view (a muted
+  `Text` with `lineLimit`/`fixedSize`) as the info panel's line, whose tooltip rendered under the same method. The one
+  structural difference is WHERE it sits: inside the box's own `ScrollView`, inside the sidebar's outer `ScrollView`,
+  handed to the sidebar as an `AnyView`. That is recorded, not acted on — no mechanism traced, so no fix (the
+  hallucination guard). The walk's re-check needs a deterministic discriminator (below), with the info panel's line as
+  the CONTROL. The 17y record's walk fact ("tooltips don't render under synthetic hover; help strings are pin-guarded
+  instead") and VX-283's ✕ tooltip that DID render show that synthetic-dwell rendering is inconsistent, so a missing
+  render on its own is not evidence.
+
+**(2) The 1892 words — HONEST.** `SampleLibrarySeeder` mints the classics under the library's own clock:
+`publicationStamp = "1892-10-14T00:00:00.000Z"` (m6, PROVISIONAL, her nod pending — its doc), the whole seed scoped by
+`withDependencies { $0.date = .constant(publicationDate) }`, so `created_at`, `updated_at` and `last_touched_at` ARE
+1892-10-14 00:00 UTC. The box's edited fact is `Queries.noteStamps`' `lastTouchedAt ?? createdAt`, worded in her zone
+by the store calendar: 00:00 UTC on Oct 14 is the evening of **Oct 13** in Denver — so "edited Oct 13, 1892" is the
+stored stamp, said truthfully. Nothing passes a story or entry date through the edited slot (there is no `entry_date`
+on that road at all). The "saved Oct 11" beside it is a later commit that did not touch `last_touched_at`: a manual
+commit stamps it (`registerTextChange`'s `lastTouchedAt = now`), so this must be a QUIET (auto) savepoint — sealing or
+locking a dirty never-committed take, for instance, which commits without touching the note. Consistent with the
+stamps; no pin owed. Its hover will read "Edited Oct 13, 1892 at <the zone's evening time> · Saved Oct 11, 2026 at
+…" — the seed's synthetic minute, honest to the store.
+
+**(3) The book host's ⌘S receipt — WHERE it renders** (`BookNoteBox.quietReceiptHome`): ⌘S on the book's editing
+modes runs through the full editor (`EditorView` `.inSidebarBox` — U2's sweep row), which makes the box LIVE WITH
+ITS BAR. `quietReceiptHome(…, box: .live)` answers `.liveNoteBox`, so the book's own hosts stand empty and **the
+receipt ("Committed." / "Committed “…”") renders in the SIDEBAR's note box: the bar's FOOTER (`CommitBar.boxFooter`) —
+directly under the footer's hairline, ABOVE the word counts and the `?` door, ONE line, truncated at the ~200-pt
+column's edge (the whole sentence in its help).** It does NOT render at the book's page foot, which is the home only
+while the box is NOT live (Outline's foot · Read's flow; Book/Read pages' flip bar; Index's column footer). The re-walk
+captures the sidebar box's footer band.
+- **A gap traced by reading, NOT observed — for the orchestrator (a ticket candidate, not this unit's):** in INDEX with a
+  LIVE block, the box is `.live` but has NO bar (no `EditorViewModel` — see (1)), and `quietReceiptHome` still answers
+  `.liveNoteBox`, so the Index column footer's quiet line stands at opacity 0 (`BookView` passes `hostsQuietReceipt:
+  quietReceiptHome == .indexColumnFooter`). A RECEIPT spoken while an Index block is live (an Arrivals Add/Dismiss, a
+  Remove/Release) would then have NO visible home under quiet. That is the VX-385 class on the book surface:
+  P-13id-U3-6's premise ("the LIVE box's bar already hosts the one quiet slot") does not hold for Index's bar-less live
+  box. Whether ⌘S reaches Index's block pane at all is U2's sweep's call (its book host is the full editor).
+
+**The pin** (`VariorumTests/VX351StampHoverTests.swift`, `77c8f7f16`, red on old by behaviour — pre-fix APIs only):
+`VX351BookBoxStampsTests.theBookBoxHoversItsStampsWhereverItDrawsThem` × (Terminal, Study) × (selected, Index-live
+without a bar), over the walk's own stamps (edited 1892-10-14T00:00Z, saved Oct 11 2026, now Oct 18): the line's words
+composed (premise — green on both) and both whole facts in its composition. Expected RED on u4-red: 4 of 4 (the two
+hover expectations in each; the premise green).
+
+**Products REBUILT at `77c8f7f16`** (incremental; TEST BUILD SUCCEEDED both; the pin recompiled from each product's own
+checkout): **u4-fixed** — `<home>/dev/variorum-vx-348-u4fixed` moved to `77c8f7f16`, clean (log
+`DerivedData/u4-fixed-rebuild2.log`); **u4-red** — its checkout's `VX351StampHoverTests.swift` set to `77c8f7f16`'s content
+(cmp = the tip), the 25 product files re-confirmed cmp-identical to `69ba370cc`, `StampHelp.swift` absent, the three
+new-API test files still removed (log `DerivedData/u4-red-rebuild2.log`).
+
+**The re-run (under a held stage claim; confirm each "Test run with N tests" line):**
+```
+cd <home>/dev/variorum-vx-348/App/Variorum
+# RED — expect VX351BookBoxStampsTests 4 of 4 fail at the two hover expectations (the premise green)
+xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u4-red test-without-building -only-testing:VariorumTests/VX351BookBoxStampsTests
+# FIXED — expect all green
+xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u4-fixed test-without-building -only-testing:VariorumTests/VX351BookBoxStampsTests -only-testing:VariorumTests/VX351StampGapsTests -only-testing:VariorumTests/NoteBoxCopyTests -only-testing:VariorumTests/NoteBoxCompositionTests -only-testing:VariorumTests/NoteBoxGeometryTests -only-testing:VariorumTests/SidebarNoteBoxDoorFacesTests
+```
+
+**The walk's W2-1 re-check (the deterministic discriminator, both voices):** on sherlock, Index, a note SELECTED (and
+again with an Index block LIVE): (a) READ the stamps line's accessibility help (`AXHelp` of its static text — System
+Events or the WalkKit AX probe) and, as the CONTROL by the same method, the Library info panel's facts line. If the panel
+answers its whole fact and the box's line answers "Edited Oct 13, 1892 at … · Saved Oct 11, 2026 at …", the hover is
+attached and only the synthetic dwell failed to render it. If the panel answers and the box does not, route back with
+that pair: it is then a real gap at the sidebar's host, and the AX pair is the red. If NEITHER answers, AX is not
+carrying `.help` here and (a) proves nothing. (b) Then a dwell with Variorum FRONTMOST, its window key, the pointer
+resting ≥ 2 s on the line's TEXT (not the box's padding), no other events. (c) The ⌘S receipt: Outline (or the spread)
+with the caret in a note → ⌘S ⏎ → capture the SIDEBAR box's footer band (under the hairline, above the counts) — see (3).
 
 ### PROVISIONAL (for the merge's QUESTIONS bundle)
 
