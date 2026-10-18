@@ -282,8 +282,11 @@ window, if the batch allows).
   allows). Its section below.
 - **VX-338 (two Macs prune each other's backups):** NOT-STARTED.
 - **VX-339 (Resume Sync clears the banner over a failed marker removal):** NOT-STARTED.
-- **No behavioural revert is in flight.** (The targeted `editCommentForClient` revert ran and was restored by
-  `git checkout --` on committed `85640635b`; `git diff` clean after.)
+- **REVERT IN FLIGHT (named before it starts — addendum 2), on committed `cf194996b`:** the Mac red product's two
+  files — `App/Variorum/Shared/StoreBackup.swift` set to its pre-fix content (`git show 231b44d24:…`) and
+  `App/Variorum/Shared/RestoreHoldModel.swift` behaviourally reverted (the seam kept, the old press: the clear's answer
+  ignored); built into `DerivedData/u1-red`, then restored by `git checkout -- <both files>` (safe: committed —
+  addendum 11).
 
 ### VX-357 — U+0000 is stripped in the operations layer; the wire says how many
 
