@@ -334,5 +334,18 @@ disposition here.
     same overclaim — a VM ticket candidate (`gatheringArchived` now reaches it for free). (3) The MCP time-limit
     test's load flake above. (4) U2's VX-249 extends `SmartCollectResult` and `collectPostIntoSmartReading` — the
     new `gatheringArchived` field rides beside its star report.
-- **U2 (VX-249 · VX-247 · VX-111):** NOT-STARTED — brief above is settled; runs after U1.
+- **U2 (VX-249 · VX-247 · VX-111):** IN-PROGRESS 2026-10-18 (the U2 implementer, one session). No revert in flight.
+  Order: core pins first (headless red → fix → green), then the app pins, then ONE stage window (RUN 1 red-on-old on
+  a prebuilt behaviourally reverted tree, RUN 2 green) via the orchestrator's relayed GO.
+  - U2.1 **VX-249 — the collect door sets the star:** NOT-STARTED. Design: `GatheringMint.outcome` gains the note's
+    STARTING state (what it already wears, its star, its legacy values — all empty for a fresh note, so the mint's
+    plans are unchanged); R98's walk becomes that planner (ONE authority); a planned star is written through
+    `writeStar(…, enforcingCap: false)` in the op's transaction, the belt re-reads the star context; the result
+    gains `starred`; the board and chip receipts name it in the mint's family.
+  - U2.2 **VX-247 — undo for tag delete:** NOT-STARTED. Design: `deleteTag` registers ONE entry ("Delete Tag"); the
+    inverse revives exactly the rows the last forward half tombstoned, while still dead on ITS stamp, plus their
+    applications dead on that stamp (live targets only); the redo re-tombstones what the undo revived (with the
+    delete's own subtree rule) on a fresh stamp and records it; quiet halves retire the entry.
+  - U2.3 **VX-111 — the notice counts books only:** NOT-STARTED. Traced: `AppSession.noteMultiBookEdit` counts
+    `Queries.readingsContaining` — books AND every gathering whose rule shows the note.
 - **Ladder:** NOT-STARTED. **Walk:** NOT-STARTED. **Closeout:** NOT-STARTED.
