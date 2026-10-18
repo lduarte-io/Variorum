@@ -215,7 +215,7 @@ tickets:
 | Piece | State |
 |---|---|
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
-| U1a — VX-303 (the landing road) | IN-PROGRESS — piece 1 (seams, behavior-neutral) committed; piece 2 (the doors carry her place) next; the edit-here rider awaits a design ruling (U1a RECORD, R-1). Record: §U1a RECORD below |
+| U1a — VX-303 (the landing road) | IN-PROGRESS — piece 1 (seams) 482549002 · piece 2 (the fix) 7cbaf633b · pins committed, compiling (build-for-testing green) — batch + red-on-old PENDING the `vx-382-u1a` window; the edit-here rider awaits the orchestrator's ruling on R-1 (§U1a RECORD) |
 | U1b — VX-304 (the box door + Index takes) | NOT STARTED |
 | U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | NOT STARTED |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
@@ -223,8 +223,8 @@ tickets:
 
 ## U1a RECORD — VX-303 (implementer: opus-implementer, 2026-10-18)
 
-**Not done yet (kept current):** piece 2 (the doors carry her place), the pins, the edit-here rider (design fork
-R-1 below, awaiting the orchestrator's ruling), the Mac batch (PENDING the `vx-382-u1a` window).
+**Not done yet (kept current):** the edit-here rider (design fork R-1 below, awaiting the orchestrator's ruling —
+not built); red-on-old and the Mac batch (PENDING the `vx-382-u1a` window). No walk this unit (U1b's covers U1).
 
 ### The trace, re-verified on the tip (a87980768)
 
@@ -256,10 +256,32 @@ R-1 below, awaiting the orchestrator's ruling), the Mac batch (PENDING the `vx-3
    `onSelectionChange` consumed — no `PaneSurface` edit); the five buttons now call ONE function,
    `BookView.openInWrite(_:)`, whose body is TODAY'S broadcast (so this commit changes no behavior), published in
    DEBUG as `BookOutlineGeometry.openDoors` (the focus door's pattern) for the pins.
-2. **The doors carry her place** — NEXT: `openInWrite` consults `BookOpenDoor.place`, flushes the note's pending
-   typing (`flushExistingAutosave` — the store must hold the text the caret's offset is measured in before `jump`
-   reads it), and rides `onOpenSearchHit(postID, block, offset, nil)`; nothing live ⇒ the same road with no block
-   (a plain open). Red-on-old = revert THIS piece's commit alone (piece 1 keeps every seam the pins call).
+2. **The doors carry her place** — DONE 7cbaf633b: `openInWrite` consults `BookOpenDoor.place`, flushes the
+   note's pending typing (`flushExistingAutosave` — the store must hold the text the caret's offset is measured in
+   before `jump` reads it), and rides `onOpenSearchHit(postID, block, offset, nil)`; nothing live ⇒ the same road
+   with no block (a plain open); no road (a hostless book) ⇒ nothing (the search passage's rule; the old broadcast
+   was app-wide). Red-on-old = revert 7cbaf633b ALONE (piece 1 keeps every seam the pins call).
+3. **The pins** — committed with this record flip, compiling (build-for-testing green; runs PENDING the window):
+   `VariorumTests/BookOpenDoorTests.swift` — `BookOpenDoorRuleTests` (pure: the brain per mode, the clamped landing
+   offset, the offset riding the park; new-API, not red-on-old by construction), `BookOpenDoorMountTests` (per mode
+   — outline · spread · index — through a mounted book with the road captured: the live note's door rides with
+   (block 2, her offset), another note's door — the collapsed card's case — rides plainly; RED ON OLD expected: nothing
+   rides, the door broadcast), `BookOpenDoorShellTests` (the real shell: the note left in Lenses opens in WRITE with
+   the caret at block 2's start + 9; RED ON OLD expected: Lenses / no Write caret at her place).
+
+### Recorded edges (not fixed here)
+
+- **VX-360's seam, touched not fixed:** the door rides `ShellRouter.adopt` once per press, after one `await` (the
+  flush); a SECOND navigation adopted in the same frame (another door, a broadcast) replaces the park
+  (`park` keeps one landing) — the last adopt wins and the first landing is dropped, as on every block-naming door.
+  The flush's hop widens that window by one turn for a door carrying a place.
+- **The collapsed card's two doors are always plain opens** (focus implies expansion, so its note is never live) —
+  their coverage is the mount pin's "another note" arm, a non-regression line, not red-on-old.
+- **Spread in its Takes form:** the active page mounts the takes board, not an `EditorViewModel`, so no editor is
+  under the caret for that note — the door opens plainly (the brief names the editor under the caret only).
+- **The open tail:** a caret in the Outline editor's open tail (no block yet) has no `caretIdentity` — plain open.
+- **Nothing live ⇒ the remembered mode still decides** (the brief's "today's plain open"); her ruling's "never the
+  note's remembered mode" is met wherever a place rides. Flagged for the orchestrator, not re-opened.
 
 ### R-1 — the edit-here rider's design fork (PROPOSED to the orchestrator; NOT built)
 
