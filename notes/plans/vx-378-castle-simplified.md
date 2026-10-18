@@ -1904,7 +1904,37 @@ minimal sequence in a scratch worktree, state dumped after every step) and FIXED
 After the fixes: the protection set in Debug `✔ 387 tests in 149 suites passed` (the wider filter; the two pins among
 them); release `swift build -c release` complete; `✘ 364 tests in 145 suites … 1 issue` — VX-380's Sync test under the wider filter, nothing of Protection's. **The FINAL TREE is `c84375010` (the second fix's commit); ATTEMPT 2 — the discovery run AND the gate soak — runs on it
 from the start (gate item 1: both runs on the FINAL tree), started 2026-10-18T01:1xZ; a fresh Fable ROUND 3 reads the two
-fixes in parallel (model changes no round had read — VX-305's precedent).** ATTEMPT2_PENDING
+fixes in parallel (model changes no round had read — VX-305's precedent).** 
+
+**ATTEMPT 2 on the FINAL tree `c84375010` — THE DISCOVERY RUN, seeds 21–40 × 1,000 × ≤60, Debug (started 2026-10-18T01:00Z, DONE 03:08Z, zero failing):**
+
+| seed | steps | Debug s | exit line |
+|---|---|---|---|
+| 21 | 44,768 | 370.993 | `✔ Test run with 1 test in 1 suite passed after 370.993 seconds.` |
+| 22 | 44,838 | 380.118 | `✔ Test run with 1 test in 1 suite passed after 380.118 seconds.` |
+| 23 | 45,219 | 412.523 | `✔ Test run with 1 test in 1 suite passed after 412.523 seconds.` |
+| 24 | 44,688 | 422.651 | `✔ Test run with 1 test in 1 suite passed after 422.651 seconds.` |
+| 25 | 44,369 | 390.663 | `✔ Test run with 1 test in 1 suite passed after 390.663 seconds.` |
+| 26 | 45,226 | 372.694 | `✔ Test run with 1 test in 1 suite passed after 372.694 seconds.` |
+| 27 | 44,410 | 362.287 | `✔ Test run with 1 test in 1 suite passed after 362.287 seconds.` |
+| 28 | 45,147 | 382.929 | `✔ Test run with 1 test in 1 suite passed after 382.929 seconds.` |
+| 29 | 44,411 | 362.843 | `✔ Test run with 1 test in 1 suite passed after 362.843 seconds.` |
+| 30 | 45,437 | 368.689 | `✔ Test run with 1 test in 1 suite passed after 368.689 seconds.` |
+| 31 | 45,186 | 374.273 | `✔ Test run with 1 test in 1 suite passed after 374.273 seconds.` |
+| 32 | 44,726 | 363.437 | `✔ Test run with 1 test in 1 suite passed after 363.437 seconds.` |
+| 33 | 44,878 | 365.968 | `✔ Test run with 1 test in 1 suite passed after 365.968 seconds.` |
+| 34 | 44,879 | 432.734 | `✔ Test run with 1 test in 1 suite passed after 432.734 seconds.` |
+| 35 | 45,494 | 380.071 | `✔ Test run with 1 test in 1 suite passed after 380.071 seconds.` |
+| 36 | 45,124 | 362.090 | `✔ Test run with 1 test in 1 suite passed after 362.090 seconds.` |
+| 37 | 45,386 | 366.672 | `✔ Test run with 1 test in 1 suite passed after 366.672 seconds.` |
+| 38 | 45,220 | 352.719 | `✔ Test run with 1 test in 1 suite passed after 352.719 seconds.` |
+| 39 | 44,830 | 363.169 | `✔ Test run with 1 test in 1 suite passed after 363.169 seconds.` |
+| 40 | 44,511 | 366.977 | `✔ Test run with 1 test in 1 suite passed after 366.977 seconds.` |
+
+Total 898,747 steps over 20,000 sequences, every seed `✔` (the step counts equal attempt 1's seed for seed — the generator is deterministic and the fixes changed no path these seeds draw).
+
+**ATTEMPT 2 — THE GATE SOAK, seeds 1–20, Debug then `-c release`, on `c84375010`:** RUNNING — the tables land here as the configurations complete. GATE_SOAK2_PENDING
+
 
 2. **Every fixed scenario green in both configurations** — on the FINAL tree `c84375010` (after the gate's two fixes), the
    orchestrator's runs: the protection + lifecycle suites in Debug `✔ Test run with 387 tests in 149 suites passed` (the
