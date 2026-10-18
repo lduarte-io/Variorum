@@ -39,6 +39,8 @@ struct CopyRegisterPinTests {
         "Variorum/ProtectionStatusRow.swift",
         "Variorum/Features/Settings/ProtectionPane.swift",
         "Variorum/Features/Settings/DataSafetyPane.swift",
+        // VX-306 U2: the rebuilt protection core's words, in ONE file (§7c — the faces read them from here).
+        "Shared/Protection/ProtectionWords.swift",
     ]
 
     /// The known violators OUTSIDE the copy homes proper — 14b-era

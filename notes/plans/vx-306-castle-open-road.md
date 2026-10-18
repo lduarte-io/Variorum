@@ -388,7 +388,7 @@ store this build has written — coordinators told.
   SUCCEEDED **`; the tripwire's own suite proved every real-scope mutation refused from the test process. VX-406 filed
   (the release-floor reds, Low). The ladder reads U1a with U1b.
 - U1b — the lobby on roads, Debug-gated (+ VX-310, the creation card, the Release check, the dev store's fresh start): BUILT 2026-10-18 (Opus implementer) — commits `fdda1a67b`…`cd00b20cb` + the record (§9 U1b RECORD); Release build green on the final tree, Debug `build-for-testing` and the phone build green, 27 of the new tests green HEADLESS; the Mac suites (the record's list) and the walk (K1's fresh start, stages 1, 3, 5, the lobby, Touch ID) PENDING — the ORCHESTRATOR's, under the stage.
-- U2 — the honest faces (+ rule 3's reminder, the set-passphrase sheet, W-2's fix): IN-PROGRESS 2026-10-18 (Opus implementer) — the §9 U2 RECORD carries the per-piece LIVE STATUS; the Mac suites and the walk PENDING (the ORCHESTRATOR's, under the stage).
+- U2 — the honest faces (+ rule 3's reminder, the set-passphrase sheet, W-2's fix): BUILT 2026-10-18 (Opus implementer) — commits `d35b82290`…the close (the §9 U2 RECORD); `build-for-testing` and the phone build green on the final tree; the new pure and planted suites green HEADLESS (69 in the session harness), the core's protection set green in both configurations (315 / 291); the Mac suites (the record's list) and the walk (stages 2, 14, rule 1's restore, W-2's pair, rule 27 both moments) PENDING — the ORCHESTRATOR's, under the stage.
 - U3 — the two doors; the phone opens: not started.
 - The ladder (Fable — custody code; her cap: up to five rounds while MAJORs are still found): not started.
 - Closeout: the words checked (VX-379's first pass — the Start Here chapter §7c); canon: AppSpec §12's LIBRARY
@@ -1182,9 +1182,34 @@ the old store whole in the safety copy; `dev-castle.env`'s Castle values unchang
 - **W-6 (note for U2):** rule 3's `beforeFirstBackup` act was owed at the first open (`acts 1`) and has no face yet — U2's
   reminder; the open said nothing, as the plan intends until U2.
 
-### U2 RECORD — THE HONEST FACES (Opus implementer, 2026-10-18; IN-PROGRESS)
+### U2 RECORD — THE HONEST FACES (Opus implementer, 2026-10-18; BUILT — the Mac suites and the walk PENDING)
 
-**Not done in U2, first:** (filled at the close — PENDING)
+**Not done in U2, first:**
+- **No Mac suite was RUN** (the brief: no `xcodebuild test`, no stage) — only built (`build-for-testing` green). The
+  orchestrator runs the list at this record's end under a stage claim and flips the counts. What DID run: the new
+  pure and planted suites HEADLESS in the session's SwiftPM harness over the real `Shared/Protection/` files (below),
+  and the core's protection set in both configurations.
+- **The walk was not done** (the orchestrator's — the recipe below). No Debug app was launched; the dev store, the
+  real store and `/Applications` were never touched.
+- **The Release build was not re-run** on this tree (§8: no Release build this phase; the gate's Release check is
+  U1b's and the orchestrator's to repeat). Release BEHAVIOUR is unchanged by construction — every new line is a new
+  file or sits behind the switch (`roadStanding` and the interlude exist only when the new road opened a session;
+  in Release `ProtectionRoadBar(model: nil)` and the pane's `roadStanding == nil` render nothing) — but the Release
+  binary is not byte-identical: the new types compile in both configurations (rule 24, U1b's precedent).
+- **Stage 13 is not walkable** (a key door interrupted needs a crash harness in the app) — it stands on the core's
+  crash harness, as the addendum says.
+- **The OLDER-COPY notice is not walkable by a hand-swapped pair this phase.** Rule 21's check keys on a KEY
+  disagreement (`LibraryNotice.check`: this Mac remembers the library under one key, the live place holds it under
+  another, P-VX378-U4-5) — and nothing in this phase changes a library's key (Use Castle / Replace All Keys are
+  VX-307's; the passphrase door re-wraps, rule 6), so an older pair of the dev library carries the SAME key and the
+  open rightly says nothing. The DIFFERENT-LIBRARY notice IS walkable (the recipe's row 5); the older-copy sentence
+  stands on `ProtectionNoticeFaceTests` (the same card, the model's other constant). No walk switch was added for it.
+- **The split-pair line has no reachable state** (P-VX306-U2-6 — a finding): built, pinned on the derive, never
+  walked.
+- **Today's Protection pane still renders today's passphrase doors on the new road** (U1b's note stands): the pane's
+  passphrase section's *Set a Passphrase…* (title case) acts on TODAY's machinery; U2's ONE new row sits at the TOP of
+  the pane, *Set a passphrase…* (sentence case). The walker presses only the top row. The rule-27 face's *Open
+  Library…* is the missing face's 13x door (today's adoption road) — the walker does not press it either (U3).
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton: DONE (this commit).
@@ -1295,7 +1320,8 @@ the old store whole in the safety copy; `dev-castle.env`'s Castle values unchang
   failed … with 1 issue`, the folder `[….keys.json, ….sqlite, ….sqlite-shm, ….sqlite-wal]`; the worktree removed),
   GREEN on this tree headless (`✔ Test run with 10 tests in 1 suite passed`); its Mac run PENDING under the stage.
   The core suite's release leg PENDING (the close).
-- Piece 8 — the Mac tests + `build-for-testing` + the phone build + the close (suites, walk recipe): IN-PROGRESS —
+- Piece 8 — the Mac tests + `build-for-testing` + the phone build + the close (suites, walk recipe): DONE (the close
+  commit — the final tree's `build-for-testing` and phone lines below; the Mac suites and the walk PENDING) —
   `ProtectionFacesRouteTests` (5, through `AppBootstrap` on a throwaway scope + temp slot, Mac only: a stray beside →
   the `.roadInterlude` STATE, *Use it* → `.ready` with the library's own file back and the keychain receipt owed;
   *Not now* → `.ready`, the stray byte-identical, the memory items unchanged; the live key file gone → `.ready`,
@@ -1305,3 +1331,240 @@ the old store whole in the safety copy; `dev-castle.env`'s Castle values unchang
   `xcodebuild … -configuration Debug -derivedDataPath DerivedData/vx306 build-for-testing` → `** TEST BUILD
   SUCCEEDED **`; the phone `-scheme VariorumMobile -destination 'generic/platform=iOS Simulator' build` → `** BUILD
   SUCCEEDED **`. The record's close (the suites, the walk recipe, the PROVISIONALs) is next.
+
+**THE FACES AS BUILT (for the ladder):** the open's report now carries every act any repair pass found owed (`acts`,
+the union — rule 3's quiet-road moment is the first pass's) and the key-file search (`keyFileSearch`, run at the open
+only when `assess` owes `.offerKeyFile` — a READ over this Mac's keychain copy and every catalogued key file); the
+session holds `library`/`report` under one lock (the backup hook reads them while an act writes), the interlude's
+once-per-open flag, the receipts owed and one-act-at-a-time. THE INTERLUDE (P-VX306-U2-1): `routeOnNewRoad` — for a
+route's `.opened` session AND a lobby press's — returns `.roadInterlude` when the session owes it (`writes` and a
+notice or an offer); the state `.roadInterlude(RoadInterludeModel)` renders `RoadInterludeCard` in the lobby's room;
+its last answer marks the session and calls `beginOpening(roadOpened:)` again, which then opens. *Use it* runs
+`ProtectionOpenRoad.useOffer` off the main actor (`useOfferedKeyFile`, then the repairs' passes again, the search
+re-run) and owes the receipt naming the source; *Not now* calls nothing. AT READY the bootstrap builds
+`roadStanding = RoadStandingModel.make(session, ledger:)` (observable): the standing faces (`RoadStandingFaces` — rule
+27's banner from the faults or the search, the split pair, rule 3's moment, rule 1's receipt), the reminder (its
+launch counted once per process on a writing road, then evaluated), and the set-passphrase sheet's factory; the Mac's
+ready `.task` hands it the status seam (`session.status.receipt`), which speaks the owed receipts once. The Mac's
+bottom stack carries `ProtectionRoadBar` under today's notice bar; Settings ▸ Protection carries the one new row. Rule
+27 before unlock: `RoadLockView` renders the missing face's three doors (the Backups folder revealed, 13x's open door,
+*Start a New Library* → `createOnNewRoad(setAsideLiveKeyFile: true, setAsideUnopenableLibrary: true)`). The core's one
+change is W-2's (`ProtectionLibraryFiles.snapshot`). Zero `Sync/`, `Server/`, `StoreBackup.swift`,
+`BackupRetention.swift`, `RestoreHoldModel.swift` lines; no new dependency.
+
+**Counts (the tree `f875c9343` + the close commit's two pin-list lines and this record):**
+- HEADLESS (the session's SwiftPM harness — not durable; the recipe: a package in the scratchpad whose `Variorum`
+  target SYMLINKS every `App/Variorum/Shared/Protection/*.swift` but `ProtectionBackupHook.swift`, plus one stub file
+  of one-line stand-ins (`DeviceName`, `KeychainTestTripwire`, `KeychainPartition`, `AppleKeyKeychain`, `AppleKey`,
+  `BackupDestination`, `AuthTokens`/`KeychainAuthStorage`, `EncryptionSession.words`), with the app's concurrency
+  settings (default `MainActor` isolation, `NonisolatedNonsendingByDefault`, `InferIsolatedConformances`,
+  `MemberImportVisibility`), depending on the worktree's core by path; its test target symlinks
+  `ProtectionTestSupport`, `ProtectionFacesSupport`, the five per-piece face suites, `PassphraseReminderTests`,
+  `ProtectionWordsPlanTests`, `ProtectionFileLeavesTests`, `ProtectionOpenRoadPlantedTests`, `ProtectionLobbyModelTests`,
+  `ProtectionWalkSwitchTests`, and a one-line `RoadWorld.RoadWorldError` stub): `✔ Test run with 69 tests in 11 suites
+  passed after 0.537 seconds.`
+- The MUTATION run (piece 6): `RoadOpenReport.acts` reverted to the last pass only → `✘ Test run with 16 tests in 1
+  suite failed … with 1 issue` (the quiet-road moment's expectation); restored, `git diff`-clean.
+- W-2's red-on-old: piece 7's line (core RED/GREEN; the app pin RED against a scratch worktree at `e305daefd`, GREEN
+  here; the worktree removed — `git worktree list` shows none of this session's).
+- The core's protection set (every `@Test` under `Tests/VariorumCoreTests/Protection` — 77 suite types): Debug `✔ Test
+  run with 315 tests in 77 suites passed after 6.775 seconds.`; Release (`swift test -c release`, the same filter) `✔
+  Test run with 291 tests in 73 suites passed after 3.995 seconds.`
+- On the FINAL tree (this close commit's code): `xcodebuild -scheme Variorum -destination 'platform=macOS'
+  -configuration Debug -derivedDataPath DerivedData/vx306 build-for-testing` → `** TEST BUILD SUCCEEDED **`; the phone
+  `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/vx306
+  build` → `** BUILD SUCCEEDED **`; no new warning in a touched file.
+
+**THE MAC SUITES THE ORCHESTRATOR RUNS UNDER THE STAGE (from `App/Variorum/`; PENDING):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx306 test \
+  -only-testing:VariorumTests/ProtectionWordsPlanTests \
+  -only-testing:VariorumTests/ProtectionNoticeFaceTests \
+  -only-testing:VariorumTests/ProtectionOfferFaceTests \
+  -only-testing:VariorumTests/ProtectionRule27FaceTests \
+  -only-testing:VariorumTests/ProtectionRestoreReceiptTests \
+  -only-testing:VariorumTests/ProtectionReminderRoadTests \
+  -only-testing:VariorumTests/PassphraseReminderTests \
+  -only-testing:VariorumTests/ProtectionFacesRouteTests \
+  -only-testing:VariorumTests/ProtectionFileLeavesTests \
+  -only-testing:VariorumTests/ProtectionWalkSwitchTests \
+  -only-testing:VariorumTests/ProtectionOpenRoadPlantedTests \
+  -only-testing:VariorumTests/ProtectionLobbyModelTests \
+  -only-testing:VariorumTests/ProtectionRoadRouteTests \
+  -only-testing:VariorumTests/LibraryWordsCardTests \
+  -only-testing:VariorumTests/ProtectionBackupHookTests \
+  -only-testing:VariorumTests/ProtectionRoadSwitchTests \
+  -only-testing:VariorumTests/VX310TodayLobbyWitnessTests \
+  -only-testing:VariorumTests/ProtectionKeychainFamilyTests \
+  -only-testing:VariorumTests/KeychainTripwireTests \
+  -only-testing:VariorumTests/KeychainLeavesTests \
+  -only-testing:VariorumTests/ProtectionFactsGathererTests \
+  -only-testing:VariorumTests/ProtectionSystemCompositionTests \
+  -only-testing:VariorumTests/StoreLaunchRouteTests \
+  -only-testing:VariorumTests/Phase13pLobbyTests \
+  -only-testing:VariorumTests/AppBootstrapOffMainTests \
+  -only-testing:VariorumTests/LibraryPortabilityDoorTests \
+  -only-testing:VariorumTests/VX202ReopenRaceTests \
+  -only-testing:VariorumTests/VX206ProtectionLandingTests \
+  -only-testing:VariorumTests/SettingsLockCloseTests \
+  -only-testing:VariorumTests/ProtectionSurfaceRenderTests \
+  -only-testing:VariorumTests/ProtectionTierFaceTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests \
+  -only-testing:VariorumTests/TravellingDotsIndicatorTests \
+  -only-testing:VariorumTests/StatusSeamVocabularyTests \
+  -only-testing:VariorumTests/ICloudDriveOfferTests
+```
+The first ten are U2's new or grown suites (3 + 4 + 5 + 3 + 1 + 3 + 12 + 5 + 10 + 4 = 50 tests; `ProtectionFacesRouteTests`
+and the keychain suites need the signed test host); then U1b's and U1a's suites (the road changed under them — the
+report's acts, the session's lock, the interlude; `VX310TodayLobbyWitnessTests` still reports its 2 tests with KNOWN
+ISSUES — expected, a pass of either is a FAILURE; the tripwire's exact count must hold); then today's road and the
+surfaces whose files changed (the bootstrap, the Settings window's closed-library rule, the Protection pane, the lobby
+view) and the source pins over the edited files (`CopyRegisterPinTests` now also reads `ProtectionWords.swift`;
+`TravellingDotsIndicatorTests` now also reads the interlude card and the sheet). Read the `skipped:` lines. A test
+bootstrap's reminder ledger writes the defaults suite `io.lduarte.Variorum.vx306-reminder-tests`, never the app's
+domain.
+
+**THE WALK RECIPE (the orchestrator's, under a held stage claim `vx-306-u2-walk`; DEV STORE ONLY; both appearances
+where a face changed — the lobby's room and its cards speak the leading voice's fallback, the bottom bars are system
+chrome, so a light and a dark capture each):**
+0. Zero Debug instances (`pgrep -fl 'DerivedData/vx306/Build/Products/Debug/Variorum.app/Contents/MacOS'`; a
+   `/Applications` instance is NEVER touched). Build: `cd App/Variorum && xcodebuild -scheme Variorum -destination
+   'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx306 build`. Launch every time as the BINARY
+   with stderr captured (W-4): `OS_ACTIVITY_DT_MODE=YES [VARIORUM_WALK_FORGET=…] App/Variorum/DerivedData/vx306/Build/
+   Products/Debug/Variorum.app/Contents/MacOS/Variorum 2> ~/vx306-walk/run-N.log &`, quit with ⌘Q, and read the
+   `road:` lines. `DC` = `~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Application Support/Variorum-dev`;
+   the library's ID is `"libraryID"` in `DC/variorum-library-keys.json`. Before any file move, quit and confirm no
+   `-wal`/`-shm` beside `DC/variorum.sqlite`. `source ~/.variorum/dev-castle.env` for the dev values (never typed into
+   a record). Expected start: U1b's posture (Standard, no passphrase, one backup pair).
+1. **W-2 — Back Up Now** (Settings ▸ Data Safety) → `ls DC/Backups/<lib8>/<mac8>/` shows the NEW pair as exactly two
+   files (`….sqlite` + `….keys.json`) — no `-wal`/`-shm` (U1b's pair, written before the fix, still has its two; leave
+   them or remove those two files by hand).
+2. **Stage 2 — rule 3's reminder and the set-passphrase sheet.** (a) Launch with `VARIORUM_WALK_FORGET=silent` → the
+   library opens through the Apple wrap (`repairs [remakeOnDeviceItem]`) and the bottom stack shows the reminder bar:
+   *Your library is only secured through iCloud Keychain right now — please add a passphrase and keep your twelve words
+   to ensure continued access.* · *Set a passphrase…* · *Not now* (no *Don't show again* — a moment, not the
+   schedule); the log line `road: rule 3's reminder shows — scheduled false, moment quietRoadFailed`. Capture (light,
+   dark). (b) *Set a passphrase…* → the sheet: *Set a passphrase*, the lead, *Passphrase* / *Again*, *Cancel* · *Set
+   passphrase* (off until both are typed). Type two different values → *The two passphrases don't match.* Then type
+   the dev passphrase from `dev-castle.env` twice (NEVER a new value — CLAUDE.md; note in the env file that the new-road
+   dev library now carries it) → the sheet closes, the bar goes, and the bottom bar's quiet line reads *Passphrase set.
+   Your twelve words still open the library too.* (receipt_style quiet — it fades after 6 s; capture at once). `grep -c
+   '"passphrase"' DC/variorum-library-keys.json` → 1; the log `road: a passphrase was set …`. (c) Settings ▸ Protection →
+   the TOP row *Set a passphrase…* → the sheet refuses at once: *This library already has a passphrase.* (press
+   *Cancel*; never press the pane's lower title-case *Set a Passphrase…* — today's machinery). (d) Quit; launch with
+   `VARIORUM_WALK_FORGET=silent,apple` → THE LOBBY: *Enter your passphrase or your twelve words to open your
+   library.*, the *Passphrase* field, *Use your twelve words instead* — stage 2's "the lobby's typed roads now say
+   passphrase"; type it → opens (`repairs [remakeAppleRoad, remakeOnDeviceItem…]`), and NO reminder bar.
+   (Optional — the schedule: only BEFORE (b) on a fresh library; it needs three launches, or `defaults write
+   ~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Preferences/io.lduarte.Variorum.debug.plist
+   variorum.calmAsks.passphrase.<libraryID>.launches -int 2` then one launch → `scheduled true`; its *Not now* logs
+   `road: rule 3's reminder dismissed — the record counts 1`.)
+3. **Rule 1's restore.** Quit; `mkdir -p ~/vx306-walk && mv DC/variorum-library-keys.json ~/vx306-walk/live-keys.json`;
+   launch → the silent item opens it, `repairs [restoreKeyFileFromMirror, …]`, `DC/variorum-library-keys.json` is back,
+   and the bottom bar's quiet line reads *The key file beside your library was missing. This Mac's sealed copy was put
+   back.* (6 s — capture at once). Remove `~/vx306-walk/live-keys.json` after `cmp`-ing its `libraryID`.
+4. **Stage 13** — not walkable (the core's crash harness carries it).
+5. **Stage 14 (a) — the DIFFERENT-LIBRARY notice.** Quit. Library A aside: `mkdir -p ~/vx306-walk/A && mv DC/variorum.sqlite
+   DC/variorum-library-keys.json DC/variorum-keys-*.json ~/vx306-walk/A/` (the slot, its key file, today's store-id
+   stub). Launch → the missing face → *Start a New Library* → B's words card (B is throwaway — do not record its words)
+   → *I've written them down* → B opens. Quit. B aside, A back: `mkdir -p ~/vx306-walk/B && mv DC/variorum.sqlite
+   DC/variorum-library-keys.json DC/variorum-keys-*.json ~/vx306-walk/B/ && mv ~/vx306-walk/A/* DC/`. Launch → A opens
+   by its silent item and the CARD in the lobby's room reads *This is a different library than the one this Mac last
+   had open* with one *OK* (log `notice true`). Capture (light, dark). *OK* → A opens. Quit; relaunch → no card (said
+   once).
+6. **Stage 14 (b) — the OFFER naming this Mac's keychain.** Quit. `mv DC/variorum-library-keys.json ~/vx306-walk/A-keys.json
+   && cp ~/vx306-walk/B/variorum-library-keys.json DC/variorum-library-keys.json` (B's file — a stray beside A). Launch →
+   A opens by its silent item; the CARD: *The key file beside your library doesn't open it. This Mac's keychain holds a
+   copy that does. Use it?* · *Not now* · *Use it*. Capture. *Not now* → A opens (log `the key-file offer put off (Not
+   now) — nothing written`); quit; `cmp DC/variorum-library-keys.json ~/vx306-walk/B/variorum-library-keys.json` → equal
+   (nothing written). Relaunch → the card again → *Use it* → A opens, the quiet line *Key file restored from this
+   Mac's keychain.*; `cmp DC/variorum-library-keys.json ~/vx306-walk/A-keys.json` may differ only in the Apple wrap the
+   repairs re-made — its `"libraryID"` is A's. Remove `~/vx306-walk/A-keys.json`.
+7. **Stage 14 (c) — RULE 27 before unlock (everything gone).** Quit. Every format-3 key file in the container out, kept:
+   `cd DC && find . \( -name 'variorum-library-keys.json' -o -name 'variorum-backup-*.keys.json' \) -not -path
+   './Backups/safety-copies/*' > ~/vx306-walk/keys.list && tar -cf ~/vx306-walk/keys.tar -T ~/vx306-walk/keys.list && xargs
+   rm < ~/vx306-walk/keys.list` (today's flat `….keys.json` copies ride along — harmless, restored with the rest). Launch
+   with `VARIORUM_WALK_FORGET=silent,memory` (no `apple` needed — with no key file there is no Apple wrap to open, and
+   the Apple key left standing is what lets row 8 reopen quietly) → THE LOBBY's rule-27 face: the lock, *Open your
+   library*, *No key file opens this library. Variorum looked beside the library, inside every backup, and in this Mac's
+   keychain, and found none that opens it. Without one, there is nothing left to open.* (and *This library syncs with
+   your account…* ONLY if the dev scope is signed in — record which), then *Restore from Backup…* · *Open Library…* ·
+   *Start a New Library* with its sub-line. Capture (light, dark). PRESS NOTHING; quit.
+8. **Rule 27 after a quiet-road open (the banner).** Restore first: `cd DC && tar -xf ~/vx306-walk/keys.tar`; launch → the
+   library opens QUIETLY through the live key file's Apple wrap (`repairs [remakeOnDeviceItem, refreshMemory…]` — the
+   silent item and this Mac's memory re-made). Quit. Now the banner: `cd DC && xargs rm < ~/vx306-walk/keys.list`; launch
+   with `VARIORUM_WALK_FORGET=memory` → the silent item opens the library quietly with no key file anywhere, and the
+   bottom stack shows the STANDING banner — §7c (3)'s sentence (and the account sentence only if signed in), no doors,
+   no card (log `faults 1`). Capture (light, dark). Quit; `cd DC && tar -xf ~/vx306-walk/keys.tar`; launch → a quiet
+   open, no banner (`repairs [refreshMemory…]` — this Mac's sealed copy follows the file again). `rm -r
+   ~/vx306-walk/keys.tar ~/vx306-walk/keys.list ~/vx306-walk/A`.
+9. **Posture after the window:** library A in Standard with the dev passphrase, quiet roads re-made, B kept aside in
+   `~/vx306-walk/B` (delete it, or keep it for U3's Look inside) and B's custody/memory items harmless in the dev
+   scope; record it for the coordinator and the next walker.
+
+**PROVISIONALs (each built as its option (a); bundled under QUESTIONS #233 in plain words):**
+- **P-VX306-U2-0** (the orchestrator's, built as ruled) — the set-passphrase sheet on the reset door's Standard road
+  (`resetPassphrase(_:authorization: .plainConfirm, new:)`), refused when a passphrase exists; from the reminder and the
+  Protection pane's one row.
+- **P-VX306-U2-1 — the interlude.** (a) BUILT — the notice and the offer on a card in the lobby's room BETWEEN the
+  unlock and the library's open (the words card's idiom: shown once per open, then the open goes on; the key file lands
+  before the app's store opens); §7c (2)'s "on *Not now* … the lobby stays" read as: nothing is written, nothing decided
+  for her, and the library opens either way (rule 21: "it never decides for you") — the offer owed again at the next
+  open; (b) a sheet over the open library window (it competes with the window's own sheets — What's New, the iCloud
+  offer — and the store would already be open under the stray); (c) a line in the bottom stack (the notice is not a
+  standing fact).
+- **P-VX306-U2-2 — U2's undrafted lines** (`ProtectionWords`): *Cancel* · *The two passphrases don't match.* · *This
+  library already has a passphrase.* · *Variorum couldn't set the passphrase just now. Try again.* · *Variorum couldn't
+  put that key file beside your library just now.* · *an earlier day* (a backup the catalogue can't date — her
+  sentence's `<date>`) · the day's form `ProtectionWords.day` (*August 3* — her example's; the year added when it isn't
+  this year's). (b) blank until her sitting; (c) other words. Her taste call.
+- **P-VX306-U2-3 — the schedule.** (a) BUILT — a LOCAL per-library ledger beside `CalmAskScheduler`'s keys: the first
+  showing at the third LAUNCH (a process's first writing open of the library), each later one 7 × 24 h after the last,
+  weekly from then on; *Don't show again* offered once the record counts three dismissals (the executor's own doc for
+  `reminderDismissals`); the reminder is its own bar in the bottom stack, not one of the two calm asks; (b) *Don't show
+  again* from the fourth showing whatever was pressed; (c) register with `CalmAskScheduler` (one ask a day, calm
+  moments — but days of use, not launches; rule 3 counts launches).
+- **P-VX306-U2-4 — the two "always" moments.** (a) BUILT — they show at the open that owes them even after *Don't show
+  again* (rule 3: "always"), their *Not now* writes nothing (only the returning reminder's answers are its dismissals);
+  (b) *Don't show again* silencing everything; (c) every *Not now* recorded.
+- **P-VX306-U2-5 — rule 27's *Start a New Library*.** (a) BUILT — the library no key file opens moves WHOLE (the file,
+  its sidecars, anything in the live place) into `Previous Libraries/<stamp>/` first, never deleted (a key file found
+  later still opens it there — rule 1's spirit, U1b-3's precedent); (b) refuse while it sits there (a door that
+  refuses); (c) no *Start a New Library* on that face (the brief names the three doors).
+- **P-VX306-U2-6 — the split pair, a finding.** No planted state reaches `.besideOpensItOnlyThroughItsHistory`
+  through `assess`: `.offerKeyFile` is owed only when this Mac's copy (current) or a backup (by name) holds the
+  library's own key file, and the search then always verifies that candidate (its key is the key in hand), answering
+  `.offer`; the state the line describes (a replayed old library file, a newer key file beside it whose history holds
+  the library's key) owes no offer and is said by the older-copy notice. (a) BUILT as the brief (search only on the
+  owed offer; the line ready if a later model change owes it); (b) search also on `liveKeyFileIsAnotherKeys` when the
+  live file's history holds the current key (the line would stand beside the notice); (c) drop the line. Likewise the
+  search's own `.noKeyFileAnywhere` is unreachable through the owed offer — rule 27's banner stands on the FAULT.
+- **P-VX306-U2-7 — her words, two notes (no build choice):** the post-open banner says §7c (3) verbatim, ending
+  *Without one, there is nothing left to open.* over a library that just opened; and with the live place EMPTY while a
+  backup holds the right file, her offer sentence still begins *The key file beside your library doesn't open it.*
+  Variants are hers.
+- **P-VX306-U2-8 — the walk switch gains `memory`** (every memory item of the dev scope), P-VX306-U1b-9's fences.
+- **P-VX306-U2-9 — the first-backup moment at the creation's open.** (a) BUILT — rule 3's "always right before the
+  first backup": the bar shows at the first open, right after the words card (the first backup runs at that launch),
+  a calm bar, never a popup (R-13r-11 holds); (b) wait until the first backup begins (a hook inside today's
+  `StoreBackup` — VX-348's file); (c) skip the first day as the calm asks do (rule 3 says always).
+
+**Recorded refinements (not product calls):** the faces' factory lives in `ProtectionOpenFaces.swift`
+(`RoadStandingModel.make`), so the phone (U3) and the tests compose the same thing the bootstrap does; the
+interlude never shows on a read-only road (a hosted test run could answer nothing); each sheet host holds its own
+sheet (two windows never show one); one act at a time per session (`beginAct`); the session's `library`/`report`
+under one lock; a test bootstrap's reminder ledger writes its own defaults suite; two source pins now also read the
+new files (`CopyRegisterPinTests` ← `ProtectionWords.swift`; `TravellingDotsIndicatorTests` ← the interlude card and
+the sheet); the walk's Diagnostics lines (the reminder's showing, a dismissal's count, the offer put off).
+
+**Hand-forwards (U3, VX-307/308/379):**
+- U3 (the phone): `RoadStandingModel.make` and `RoadInterlude`/`RoadInterludeModel` are Shared — the phone's faces
+  render them; `.roadInterlude` is the phone's unreachable arm until then.
+- U3 (the two doors): the rule-27 face's *Restore from Backup…* reveals the Backups folder and *Open Library…* is 13x's
+  adoption door — both retire behind Make this my library.
+- VX-308: the pane's lower passphrase section (today's machinery) and the sheet's refusal once a passphrase exists
+  (a change is the key door's).
+- VX-379: every U2 string is in `ProtectionWords.swift`, pinned byte-equal to §7c.
+
+**Notes:** no machinery deaths; no Sonnet lookup; one scratch worktree (W-2's red-on-old at `e305daefd`), removed.
