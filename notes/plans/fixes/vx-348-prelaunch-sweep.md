@@ -1309,6 +1309,17 @@ first card's. **Close window** — ⌘S, close the window by its button: reopene
 up: +1. **Block History rename** — Rename, type, click away: the name unchanged. **The hint** — in both voices at the
 field's width, three lines at most, no truncation. **⎋ on every host** — nothing filed.
 
+### The Mac products (PREBUILT — the batch window runs `test-without-building` only)
+
+**ANNOUNCED BEFORE IT STARTS (addendum 2):** both legs build from SCRATCH `git worktree add --detach` checkouts of the
+U2 tip in the session scratchpad — this worktree is never reverted, so it is never mid-revert. The RED checkout restores
+the PRE-FIX content of U2's eleven source files (`git checkout acbe5e5cb^ -- <file>` for `SavepointNameField.swift`,
+`EditorViewModel.swift`, `TakesViewModel.swift`, `CanvasViewModel.swift`, `CompareBoardView.swift`, `CommitBar.swift`,
+`EditorView.swift`, `TakesBottomBar.swift`, `WriteTakesPanel.swift`, `CanvasView.swift`, `HelperView.swift`) and removes
+`VX347SavepointLeaveRuleTests.swift` (new API — the red tree cannot compile it; the project's folders are synchronized,
+so the file's absence is its absence from the build). Every other test file is the U2 tip's. PENDING: the build logs'
+proof that the reverted files compiled, and the two paths.
+
 ### For the orchestrator's closeout (not U2's to apply)
 
 - **QUESTIONS #121(b) is superseded** by her VX-347 ruling (the closeout marks it); #121(a)'s "⌘S opens a field" stands.
