@@ -88,6 +88,8 @@ struct LibrarySearchSheet<NoteHead: View, BookRow: View>: View {
             }
             .padding(.bottom, LibraryListFace.bottomInset)
         }
+        // VX-349: the headers float only once the sheet has scrolled under them.
+        .libraryListScrollReader()
         .background(tokens.surface)
     }
 
