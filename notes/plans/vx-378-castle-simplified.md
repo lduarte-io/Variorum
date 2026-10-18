@@ -1802,6 +1802,13 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
   into the *current* writing. that is our north star … I don't think that we need to focus on building machinery out to close
   this corner completely - we can just accept the limitations of what we can't control."* The honest limit is now rule 25's
   last sentence (CastleRules amended at her word); the tagged-item idea is dropped, not deferred. No code moves.
+  **Her follow-up (same sitting):** *"yeah let's add a pointer to the exception … make it clear what will happen (your standard
+  backups don't open the way they used to) and ALSO make what the exception really is clear, so it doesn't feel like Castle
+  protection isn't as good as it actually is for your current library."* Rule 11 now ends: *"Rule 25 names the exceptions: two
+  kinds of older lock the app cannot reach, neither of them a road to your current writing."* And the stamping idea RETURNS as
+  deferred work at her word (*"we're already here in this area … especially given the lack of a real downside"*): VX-306 U1
+  gains it beside the production keychain leaf — **VX-390** (Improvement, Castle & sync, Medium, in the Castle project); the
+  VX-306 plan carries the design paragraph. The "dropped" above is superseded.
 
 ## 9. The ladder (a fresh Fable reviewer per round, `notes/REVIEW_PROMPT.md` verbatim, zero framing; her cap: up to five rounds while a MAJOR is still found; a round that stalls on a safeguard reruns as Opus at max — none did)
 

@@ -102,6 +102,17 @@ promise-1 oracle arm on a synced FOLLOWED device (the round-4 report's appendix 
 LIMITS L1 parenthetical widens (a lagging device may be Castle-recorded). All three = **VX-386**, this phase's FIRST
 commit (no behaviour change; the protection set green is the proof).
 
+**Her addition at VX-378's morning sitting (2026-10-18, P-VX378-O2-2 — "we're already here in this area"): STAMP THE LIBRARY ID
+ON THE KEYCHAIN ITEMS.** Every custody item (silent and Touch ID) and every Apple key this Mac mints for a library carries the
+library's ID as a plain attribute (the key file already says it in the clear; nothing new is revealed). Castle entry's sweep
+then deletes every SILENT custody item and retires every Apple key OF THIS LIBRARY by the stamp — whatever the live key file
+or the catalogue remembers — so the rollback corner rule 25's last sentence states closes on this Mac; the catalogue sweep
+stays as the belt. Another library's items carry its own ID and are untouched (rule 17's Look-inside road for a Previous
+Library survives); the sync-keys items stay per account. No migration (rule 26; Castle is Debug-only until VX-329). Lands
+with the production keychain leaf in this unit; the scenario world's fake keychain gains the stamp first and the promise
+checker's L6/rule-25 reading narrows with it; a red-on-old pin replays the gate's seed 3 WITHOUT the catalogue leaf. When it
+ships, rule 25's last sentence may go at her word. Ticket: VX-390.
+
 The Debug app's unlock reads `assess(facts)`'s `LobbyRoads` and nothing else before unlock: the typed roads (rule 4's
 one sentence), the silent item and the Apple road (rule 8), the Touch ID button and line (VX-310: the button whenever a
 Touch ID item for the current key exists; a quiet line when no finger is enrolled or no item; a press that is only

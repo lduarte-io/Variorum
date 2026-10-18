@@ -7,7 +7,7 @@ and 25 — FD-2, FD-3, the plan's §8 note after U3). Amended again at her rulin
 rules 4, 5 and 12 — the floor (a backup opens with the secrets you had when you made it; your current ones open older
 backups of the same library); rule 17 — Make this my library carries no keys; rule 21 — the fingerprint and the wrapped
 copy, the notice instead of the refusal, and the key-file offer. Amended at her morning sitting after the gate (2026-10-18,
-the plan's §8): rule 5's quiet-road clause reads as built — P-VX378-O1-1; rule 25 states the honest limit of the entry sweep —
+the plan's §8): rule 5's quiet-road clause reads as built — P-VX378-O1-1; rule 25 states the honest limit of the entry sweep and rule 11 points at it —
 P-VX378-O2-2.**
 Where this document and `notes/plans/vx-266-castle-backups-prelaunch.md` differ, this document wins; that design keeps
 its research and its Apple-facts pointers (`notes/plans/vx-266/second-opinion-apple-facts.md`). The walk-through of
@@ -79,7 +79,8 @@ and never leaves a hole you chose to close.**
     your Standard-era backups' quiet locks die with it, and they are now Castle-protected along with the live library),
     the on-device road kept only as Touch ID if you choose it, and the scheduled plain-text export turned off with one
     notice you may reverse (a plain copy on disk would undo the promise; it is your call). On the account: a new sync
-    key, in one write (rule 15). Other devices follow by typing one secret.
+    key, in one write (rule 15). Other devices follow by typing one secret. Rule 25 names the exceptions: two kinds of older
+    lock the app cannot reach, neither of them a road to your current writing.
 12. **Leaving Castle types your passphrase and your twelve words, and hands everything to Standard.** On this device: a new Standard key
     carrying every earlier key — the Castle ones included — with a fresh Apple road and the on-device road back; this
     Mac's on-device road and its sealed key-file copy now hold the new key. Your text, the server's rows, the sync key and
