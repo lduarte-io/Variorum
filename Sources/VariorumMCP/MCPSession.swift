@@ -51,6 +51,45 @@ final class MCPSession: @unchecked Sendable {
     /// The name `initialize` declared, waiting or not.
     private var declaredName: String? { lock.withLock { name } }
 
+    // MARK: - How the connection ended (VX-394 — VX-348 U5)
+
+    /// The end the HOST said when it ended the connection (a stop, before its
+    /// hang-up); nil while the connection's own end decides.
+    private var endReason: MCPConnectionEnd?
+    /// This connection's end line is written (or being written) — it is said
+    /// once, whichever road says it first.
+    private var endSaid = false
+    /// The transport ended on a message past its cap.
+    private var endedOverLimit = false
+
+    /// The host is ending this connection, for `reason` (a stop): kept unless
+    /// an earlier road already said why.
+    func markEnding(_ reason: MCPConnectionEnd) {
+        lock.withLock { if endReason == nil { endReason = reason } }
+    }
+
+    /// **Claim this connection's end line** — once. A connection that never
+    /// named itself (refused at the key, never initialized, or still waiting
+    /// for her OK — `clientName`'s rule) has no line. `reason` is the caller's
+    /// when it ends the connection itself (`MCPServerHost.recordConnectionEnds`
+    /// — the library closing); nil asks the connection's own end: what the
+    /// host said at its stop, else the over-cap answer, else the client's
+    /// close. Returns the client name and the end to log, or nil.
+    func claimEndLine(_ reason: MCPConnectionEnd? = nil) -> (clientName: String, end: MCPConnectionEnd)? {
+        lock.withLock {
+            guard !endSaid, awaitingKey == nil, let name else { return nil }
+            endSaid = true
+            if let reason, endReason == nil { endReason = reason }
+            return (name, endReason ?? (endedOverLimit ? .overLimit : .clientClosed))
+        }
+    }
+
+    /// A claimed line that could not be written goes back, so the
+    /// connection's own end may still say it.
+    func releaseEndLine() {
+        lock.withLock { endSaid = false }
+    }
+
     /// **VX-258 — does this connection still wait for her OK?** True while
     /// its key waits; it flips, once and for good, when the name's bound key
     /// IS this connection's key (her Allow). One indexed read per call.
@@ -276,6 +315,9 @@ final class MCPSession: @unchecked Sendable {
             // A transport that would not start ends the session; the host
             // closes the socket either way.
         }
+        // VX-394: the over-cap end is the transport's to know.
+        let overLimit = await transport.endedOverLimit
+        lock.withLock { endedOverLimit = overLimit }
         await server.stop()
     }
 

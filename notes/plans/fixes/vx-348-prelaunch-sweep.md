@@ -699,8 +699,12 @@ the build notes; the Environment traps; the kickoff sitting and her overnight ma
   added one); pins verified RED on the pre-fix tree (`DerivedData/u5-logs/vx393-red.log`: 7 of 8, the
   other-clients guard green), 8 of 8 green after; the whole headless suite green after the op change (MCP 376/70,
   core 2916/340, the third target 40/6). Its section below.
-- **VX-394 (mid-session disconnect while the pane says running):** NOT-STARTED — investigation first; the Activity
-  drop line ships regardless.
+- **VX-394 (mid-session disconnect while the pane says running):** IN-PROGRESS — the mechanism traced by code reading
+  (the library's LOCK under Castle — sleep · screen lock · time away counted from HER use only — detaches the door and
+  hangs up every connection; App Nap, socket idle timeouts and the path ruled out — the section below, being written);
+  the drop line's core + host half landed with its headless pins (green; their red leg by a behavioural revert is
+  NEXT). Still to do: the app side (the door's two stop reasons, the lock road's pre-close record via `macWillLock`,
+  the Activity words) + its Mac pins (compile-only), the record section, MCPSpec's line.
 - **No behavioural revert is in flight.**
 - **THE FOLD (the orchestrator's instruction, her word via the coordinator):** IN — `460d39785` merges main
   `d8bb24488` (VX-381's `d4b104e8a` + Castle's `aeabdd75b` + two notes-only commits) into the branch after
