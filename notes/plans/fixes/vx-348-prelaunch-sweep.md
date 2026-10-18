@@ -362,9 +362,11 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   the record), the QUESTIONS bundle (P-VX176-1, P-VX349-1, P-VX350-1…7). The U3 UNIT RECORD carries the rest.
 - **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** BUILT — all four FIXED with pins (`98b878662`
   · `b2dcef63f` · `6757ea121` · `e09d00b96` VX-351; `b32ebe484` VX-384; `fd4470556` VX-385 + VX-355); the headless suites
-  green but VX-353's flake; both Mac products PREBUILT (`DerivedData/u4-fixed`, `DerivedData/u4-red` — the commands and
-  expected reds in the U4 record); **PENDING:** the Mac batch (red leg first), the
-  walk (the list in the U4 UNIT RECORD), the QUESTIONS bundle (P-VX351-1…7, P-VX384-1, P-VX385-1).
+  green but VX-353's flake; the batch ran (RED exact; FIXED 353/363 — three clusters); **THE U4 FIX LEG** done
+  (`ac612ec20`, test-only: clusters 2 and 3 were the pins' readings; cluster 1 not U4's by mechanism — re-classed to
+  VX-167 pending the discriminator), both products REBUILT at `ac612ec20`; **PENDING:** the re-run window (four commands
+  in the U4 record's fix-leg section), the walk (the list in the U4 UNIT RECORD), the QUESTIONS bundle (P-VX351-1…7,
+  P-VX384-1, P-VX385-1).
 - Then the ladder (fresh Fable per round, whole diff), closeout, merge. **Her overnight mandate (2026-10-18):**
   rule PROVISIONALLY and continue; merge to main at this run's own finish (finish-order serialization with
   VX-381/VX-382); leave the handoff AND, separately, the completed checklist block in her format. **Release (her
@@ -1904,8 +1906,10 @@ in). Disjoint files by design (the U2/U3 precedent); every U4 commit is path-lim
   line). The mobile target compiles (`xcodebuild -scheme VariorumMobile -destination "generic/platform=iOS Simulator"
   build`, BUILD SUCCEEDED — `Shared/BlockHistoryFace.swift`'s three pure additions; its products deleted after).
 - **Products (u4-fixed / u4-red):** DONE — both PREBUILT from durable checkouts of `e09d00b96` (paths, the revert patch,
-  the confirmed recompiles, the commands and every expected red: "The Mac products" below). Their RUN is PENDING the
-  orchestrator's batch (RED leg first). This worktree is never reverted.
+  the confirmed recompiles, the commands and every expected red: "The Mac products" below). The batch RAN (the
+  orchestrator's "THE U4 BATCH" section): RED exact; FIXED 353/363 with three clusters → **THE U4 FIX LEG** (below):
+  both products REBUILT at `ac612ec20` (the two reshaped pins); its re-run is PENDING the next window. This worktree is
+  never reverted.
 - **No behavioural revert is in flight in this worktree.**
 
 ### VX-351 — the exact edit time past today, as ruled (R-VX348-1/3)
@@ -2097,6 +2101,74 @@ before these were built):
 - **Note for the orchestrator:** `e09d00b96` contains U3's fix leg (`e35c034fa` is its ancestor — checked with
   `git merge-base --is-ancestor`), so U3's owed one-suite re-run (`VX350ControlsWidthClassTests`) can ride `u4-fixed`
   if it is the run's final product.
+
+### THE U4 FIX LEG (the batch's three clusters — the coordinator's routing, 2026-10-18 ~09:50)
+
+**Cluster (1) — `DestructiveUndoWarningTests.redoNeverAsks` (red solo on u4-fixed, :141–143): NOT U4's by mechanism;
+re-classed to VX-167's standing flake, PENDING the coordinator's discriminator (the suite on `u4-red`, the pre-U4
+product, at the next window). No fix built (the coordinator's word: never on suspicion).** The read-only trace, the
+question being "can the listing follow interleave with a structural undo/redo flight at all":
+- *In that suite: impossible.* `withEditor` (`EditorTestSupport.swift:175`) builds a fresh in-memory `AppSession`, an
+  `EditorViewModel` and a bare text view — no `LibraryViewModel`, no `LibraryCatalogView`, no `PoolPostsView`, no
+  `SidebarNoteBox`; the solo run loads only this suite. `listingMoves` is a property of a `LibraryViewModel` instance
+  and `followListingMove()` is called from exactly one site, `LibraryCatalogView`'s `.onChange(of:
+  library.listingMoves)` — so no U4 follow exists in that process to run. The suite's whole road
+  (`ShellActions.structuralUndo/Redo`, `UndoStack`, `StatusCenter`, `AppSession`'s door latch, the editor) carries
+  ZERO U4 lines; the only U4 code it can reach at all is `TimeStampFace`'s pure additions, which nothing on that road
+  calls. The coordinator's cross-run record agrees: the same :141–143 signature went red tonight in VX-382's batches on
+  trees carrying none of U4's lines.
+- *In the app: a follow can run DURING a flight, and cannot move the world beneath it.* The held `observeLibrary`
+  delivers after the undo's write commits, so `followListingMove → refresh()` may run while the redo's door is
+  in flight — but `refresh()` is `LibraryCatalogModel.read`, a `session.database.read` on the reader pool (P2): it
+  writes no row, never enters `session.runner`, never touches `undoStack` or the structural door's latch
+  (`beginStructuralUndoDoor`). A read cannot make a redo find its rows moved. No guard is owed.
+
+**Cluster (2) — VX-385's suite (5 issues solo): the PIN's reading, not the foot.** The trace (a scratch `dump` probe of
+the Pool's exact shape — `VStack { masthead; ScrollView { LazyVStack { ForEach } }; if speaking { Divider; line
+.padding.padding.frame } }.background.task`, compiled with `swiftc`): an `if` in a view builder composes an `Optional`
+whose generic TYPE names its content, so `dump` spells the line's type in the body's signature even while the branch is
+untaken — **5 mentions untaken, 15 taken**. The pin's `contains("QuietReceiptLine")` was therefore TRUE on the fixed tree
+whether or not anything spoke: the four cells' premise "nothing speaks, so the foot is not composed" plus the undo
+cell's "silence again" = the batch's 5 issues. The foot's lifecycle is as built (composed ONLY while a receipt shows —
+`PoolReceiptFoot`), and there was no cross-cell bleed (each cell builds its own `AppSession`, so its own
+`StatusCenter`). **Fix (`ac612ec20`, test-only):** `hostsTheLine` reads the composed INSTANCE — the one dump line that ENDS
+with the type's name and carries no generic brackets (`▿ content: Variorum.QuietReceiptLine`); the probe: false untaken,
+true taken. RED on old by construction (the pre-fix tree has no `QuietReceiptLine` in the Pool at all — no line, no
+instance). The other composition pins read a hover's WORDS (a value, present only in the taken branch) and are not
+exposed to this.
+
+**Cluster (3) — VX-384's pin premise (2 issues solo): the PIN's shape, as the coordinator read it.** The cell named the
+copy by a LISTING set-difference read after the act; the fix lists the copy before that read lands, so the difference was
+empty and `#require` stopped the cell — the copy was already listed (the follow works). **Fix (`ac612ec20`,
+test-only):** the copy is named by the STORE — `Queries.library` ids snapshotted before the act and after, exactly one
+new id required — never by the listing; the act stays the row menu's own (`library.duplicateAsVersion`, whose road
+returns nothing, so the store is the act's own fact). RED on old unchanged in kind: the premise now passes on both trees,
+and the pre-fix List never re-asks, so `noteHits.contains(copy)` fails there.
+
+**Products REBUILT at `ac612ec20`** (incremental; the logs `DerivedData/u4-fixed-rebuild.log`,
+`DerivedData/u4-red-rebuild.log`, TEST BUILD SUCCEEDED both): **u4-fixed** — its checkout
+`<home>/dev/variorum-vx-348-u4fixed` moved to `ac612ec20` (clean, unmodified); **u4-red** — its checkout's two
+reshaped pins set to `ac612ec20`'s content (`git checkout ac612ec20 --` those two test files; cmp = the tip), the 25 product
+files re-confirmed cmp-identical to `69ba370cc`, `StampHelp.swift` still absent, the three new-API test files still
+removed; both pins confirmed recompiled from each product's own checkout in its log.
+
+**What the re-run window must run** (under a held stage claim; confirm each "Test run with N tests" line):
+```
+cd <home>/dev/variorum-vx-348/App/Variorum
+# (a) THE DISCRIMINATOR for cluster (1) — the shipped suite on the PRE-U4 product: red here ⇒ VX-167's flake, not U4's
+xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u4-red test-without-building -only-testing:VariorumTests/DestructiveUndoWarningTests
+# (b) RE-VERIFY the reshaped pins RED on old — expect VX384LibraryFollowsMintsTests: aRowMenuDuplicateListsTheCopyWithoutReEntry
+#   2 of 2 fail at "the List lists the copy without re-entry" (the premise "exactly one copy" GREEN), the typing guard
+#   PASSES; VX385PoolQuietReceiptTests 4 of 4 fail at the composition clauses (every premise GREEN, "silence again" GREEN)
+xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u4-red test-without-building -only-testing:VariorumTests/VX384LibraryFollowsMintsTests -only-testing:VariorumTests/VX385PoolQuietReceiptTests
+# (c) the reshaped pins GREEN on the fixed product — expect 3 / 3 and 4 / 4 (7 tests across 2 suites, counting the
+#   two-argument cells as cases)
+xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u4-fixed test-without-building -only-testing:VariorumTests/VX384LibraryFollowsMintsTests -only-testing:VariorumTests/VX385PoolQuietReceiptTests
+# (d) the shipped suite on the rebuilt fixed product (expected: as on u4-red — the discriminator decides attribution)
+xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u4-fixed test-without-building -only-testing:VariorumTests/DestructiveUndoWarningTests
+```
+With (b) and (c) as expected, the fixed leg's two U4 clusters close; every other suite in the batch's 57 was already
+green, and (a)/(d) settle cluster (1)'s attribution.
 
 ### PROVISIONAL (for the merge's QUESTIONS bundle)
 
