@@ -2785,7 +2785,8 @@ enum TutorialSeeder {
 
             "For a revision, grant Edit on the note's wing and ask your AI to "
             + "duplicate the note and rewrite the copy. The copy lands in that "
-            + "wing's Pool, in no book, and your original never changes. Because "
+            + "wing's Pool unless you name a book for it or a book collects its "
+            + "tags, and your original never changes. Because "
             + "each block of the copy remembers the block it came from, Compare "
             + "(\u{2318}5) lines the two up row by row. Ask your AI to show you the "
             + "two side by side and, while Variorum is the app in front, it opens "

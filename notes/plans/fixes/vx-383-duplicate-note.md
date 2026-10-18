@@ -267,6 +267,13 @@ store's Castle credentials, if a lock screen appears, are `~/.variorum/dev-castl
 | Ladder | — | NOT-STARTED |
 | Closeout | — | NOT-STARTED |
 
+## THE ORCHESTRATOR'S RULINGS AND DISPOSITIONS (2026-10-17, the stage window)
+
+- **R-C-1 — the field guide's recipe 6 (U2's OWED):** adopted, in one sentence without a parenthesis: *"The copy lands in that wing's Pool unless you name a book for it or a book collects its tags, and your original never changes."* Written by the orchestrator (the architect's small-code latitude) in `TutorialSeeder.swift` and its exact-text pin `TutorialMCPChapterTests.revisionRecipe`; the real store's field guide is re-seeded at the closeout behind A1 (P-C-1 already owed it).
+- **P-U2-3 — an ARCHIVED destination takes the copy: (a) stands.** The U2 brief's "archived" in the refusal list was the orchestrator's slip; AppSpec §9's 13i-e family ("EXPLICIT adds land — no `readingArchived` refusal exists") and `create_note`'s road are the law, and the implementer built to them correctly.
+- **P-U1-1…6, P-U2-1/2/4/5:** accepted as built for the ladder; bundled for her at the merge.
+- **U1's MOBILE PARITY correction** accepted (D-C-3 is mobile-visible through the shared `VersionActs.promote`): a `notes/MobileSoul.md` row at the closeout.
+
 ## PROVISIONALS (to the QUESTIONS bundle at the merge)
 
 - **P-C-1** the verbs "Duplicate with Tags" / "Duplicate without Tags"; "Duplicate as Version" retires as a label.
@@ -275,7 +282,8 @@ store's Castle credentials, if a lock screen appears, are `~/.variorum/dev-castl
 
 ## Stage traffic log
 
-*(REQUEST / claim / release lines, appended by the orchestrator.)*
+- 2026-10-17 19:02 CLAIMED `vx383` (240 min; her word at the sitting: "Now, I'm off the Pro"; no coordinator session live, the stage read FREE; her app absent, HID idle hours). **The Mac batch on the tip product `vx383-u2`** (382 suites = U1's Tier A + U2's 61 + U1's 367, deduped; the product built at `3c8e84b85`, no source line changed since — `batch-all.txt`/`batch-all.log` in `notes/plans/vx383-screens/`): **"Test run with 2402 tests in 379 suites failed after 950.745 seconds with 5 issues (including 1 known issue)"** — the 5 issues are VX-115's standing pin (`BookCollectingDoorsTests` — VX-382's member, by design not this run's) and VX-167's standing parallel-run red (`DestructiveUndoWarningTests.redoNeverAsks`, 3 issues — Parked, "goes red only in wide parallel runs"); 36 env-gated capture harnesses skipped by design; **VX-372's `DuplicateDoorsTests` and VX-371's `MCPDuplicateFilingFacesTests` PASSED**. The faces pin's red run on `vx383-u2-red`, the guide pins after the recipe edit, `MobileVersionsTests`, the walk and the live round follow in the same window.
+- Dev-store safety copy taken at the zero-instance moment 19:20 (`<scratchpad>/prestage/`: sqlite c17923414b2e668e · wal 7f2fcf1ec90d4cc8 · shm e4e2b900d45c90ca; Debug prefs exported, 211 KB); her user-scope MCP servers fingerprint `['linear-server', 'variorum'] bc64543e2f4e8e58` (= VX-246/VX-336's). Consent probe on this host: AX 1 SCREEN 1.
 
 ## Unit records
 
