@@ -3405,3 +3405,7 @@ after the discussion: (a) — "I want to keep the fix and I think that as long a
 north star is that no previous key file reaches the CURRENT writing; no machinery to close the corner completely ("we can just
 accept the limitations of what we can't control"). The honest limit lands as one sentence in rule 25 (CastleRules amended at
 her word; its wording hers to adjust).**
+
+## VX-306 — Castle rebuild, phase 2: the open road (2026-10-18, overnight under her mandate)
+
+#232 — **THE VX-306 PROVISIONAL BUNDLE (the binding record is `notes/plans/vx-306-castle-open-road.md` — §7 her kickoff rulings verbatim, §7b the orchestrator's provisional rulings P-VX306-K1…K7, §7c the words drafts, §9 the unit records; the entries each unit adds land under this heading).** The kickoff calls, each PROVISIONAL (a) built: **K1** the dev store takes rule 26's own road (set aside whole, recreated fresh — no conversion machinery) · **K2** U1 as two implementer sessions (no production leaf existed) · **K3** the vault leaf unreachable this phase, the sync keys on today's custody · **K4** stage 3 by the `StoreBackup.onRun` hook → the leaf's pair · **K5** a record-less store routes to the missing face with no sentence · **K6** the one `Sync/` line (the local-only registry) · **K7** the words card: one button, no Copy, no later. The words (§7c: the card, the offer, rule 27, the notice as yours, the Start Here chapter) are yours at the bundle. Status: open — her morning read.
