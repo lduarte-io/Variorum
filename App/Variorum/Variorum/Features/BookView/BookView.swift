@@ -1165,9 +1165,58 @@ struct BookView: View {
     /// this with their note: Outline's expanded header and its collapsed
     /// card's body and "open ↗" (`OutlinePostRow`), Index's "Open in the full
     /// editor" (`BookIndexView`), the spread page's "open ↗" (`SpreadPage`).
+    ///
+    /// Her ruling (2026-10-13): *"it can land in Write at the block - more
+    /// consistent and useful than the note's last used mode."* So the door
+    /// rides the shell's block-landing road (13o U3's search-hit road; `jump`
+    /// forces Write) with HER PLACE in the note — `BookOpenDoor` holds the
+    /// rule. Before, every door posted `.variorumOpenPost` with the note's id
+    /// alone: a plain note-open, which R-18l-1 lands at the note's START in
+    /// its remembered mode — a deep link that dropped its target.
+    ///
+    /// **Her typing lands first** when a place rides the door: the landing's
+    /// offset is measured in the editor's buffer, and `jump` measures the
+    /// block's start in the STORE, so the note's pending autosave is flushed
+    /// before the road is taken (the doors' flush-first precedent —
+    /// `divergePostForReading`'s doors, the MCP door's pre-act flush). Nothing
+    /// live ⇒ no place ⇒ the same road with no block: today's plain open.
+    ///
+    /// No road (a host without the shell — a pin over the book alone) does
+    /// nothing, the search passage's own rule beside it; the old broadcast is
+    /// app-wide, and a door in a hostless book must not navigate somebody
+    /// else's window.
     private func openInWrite(_ postID: String) {
-        NotificationCenter.default.post(
-            name: .variorumOpenPost, object: nil, userInfo: ["postID": postID])
+        guard let road = onOpenSearchHit else { return }
+        guard let place = openPlace(of: postID) else {
+            road(postID, nil, nil, nil)
+            return
+        }
+        let session = session
+        Task {
+            await session.flushExistingAutosave(forPost: postID)
+            road(postID, place.blockID, place.offsetInBlock, nil)
+        }
+    }
+
+    /// Her place in `postID` right now, assembled for `BookOpenDoor` from the
+    /// book's own reports and the editor under the caret — read only when it
+    /// is THIS note's (`EditorRouter.editing`, never `active`'s shadow: the
+    /// 18d ladder's MINOR-1). `caretIdentity` is the editor's existing
+    /// read-only answer (block + UTF-16 offset; nil in the open tail).
+    private func openPlace(of postID: String) -> BookOpenDoor.Place? {
+        let editor = session.editorRouter.editing
+        let editorCaret: BookOpenDoor.Place? = editor?.postID == postID
+            ? editor?.caretIdentity().map {
+                BookOpenDoor.Place(blockID: $0.blockID, offsetInBlock: $0.offset)
+            }
+            : nil
+        let indexCaret = model.indexCaret
+        return BookOpenDoor.place(
+            of: postID, mode: structure.mode,
+            live: BookOpenDoor.Live(
+                editorPostID: model.liveFocusedPostID, editorCaret: editorCaret,
+                indexPostID: model.indexLivePostID, indexBlockID: model.indexLiveBlockID,
+                indexCaret: indexCaret?.postID == postID ? indexCaret?.place : nil))
     }
 
     /// 13f W20(a) — the ascent, adopted. The shell's one-shot request becomes
