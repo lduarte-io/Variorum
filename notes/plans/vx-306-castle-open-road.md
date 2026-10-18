@@ -91,6 +91,14 @@ split is by surface, each unit's walk its own evidence.
 
 ### U1 — THE LOBBY ON ROADS (the open road, Debug-gated)
 
+**Two obligations from VX-378's close, FIRST in this unit:** (1) the production `KeyFileStoreLeaf` implements
+`catalogedKeyFiles(ofLibrary:)` — every catalogued key file of THIS library outside the live place (the real backups in
+this Mac's and the shared iCloud Drive folders, Previous Libraries), filtered by the files' own `libraryID`; Castle
+entry's sweep and its Apple-key retirement read it (rule 11; the gate's seed 3 — a missing conformer re-opens that
+class); (2) VX-378's ladder round 3 NIT 1 — `PlanRunner.swift`'s DEBUG-guard-off resume call (`settleAct`, the
+`!guards.planNamedBySectionOn` branch) gains the same `catch ActRolledBack` as the normal call (a defensive, DEBUG-only
+line, deferred so VX-378's soaked tree stayed its final tree) — this phase's first commit.
+
 The Debug app's unlock reads `assess(facts)`'s `LobbyRoads` and nothing else before unlock: the typed roads (rule 4's
 one sentence), the silent item and the Apple road (rule 8), the Touch ID button and line (VX-310: the button whenever a
 Touch ID item for the current key exists; a quiet line when no finger is enrolled or no item; a press that is only

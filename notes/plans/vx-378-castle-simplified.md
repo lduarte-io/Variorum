@@ -289,6 +289,10 @@ that survives. Then the discovery run (seeds 21–40) and the gate soak. **Evide
   offer-era open's typed roads include rule 1's keychain mirror and every catalogued pair (the world's lobby walks
   them). VX-306's plan names the mirror road in `LobbyRoads` or beside it, so the face never shows a stray's locks as
   the typed roads in exactly the state the offer exists for.
+- **The catalogue leaf (the gate's seed 3, round 3's NIT 2):** VX-306's production `KeyFileStoreLeaf` implements
+  `catalogedKeyFiles(ofLibrary:)` over the real backups, Previous Libraries and the shared iCloud folder, filtered to this
+  library's `libraryID` — a missing conformer re-opens the seed-3 class. **Round 3's NIT 1** (the DEBUG-guard-off resume
+  call's `catch ActRolledBack`) is VX-306's FIRST commit.
 - **The lobby's custody fact (the ladder's round-2 NIT 2):** VX-306's production feeder of `ProtectionFacts.custodyOpensLibrary`
   treats an item it could not READ as unknown (nil, or the fingerprint included) — never as verified-fails — so a
   transient keychain error can never surface rule 27's refusal while a working quiet road exists.
@@ -341,7 +345,7 @@ record committed with PENDING numbers first.
   3,000, classes (A)–(I)); F NOT RUN; G DONE. After (code tree `0bd112c9c`): the protection set Debug `━ 278 tests in 72
   suites passed with 2 known issues`, `-c release` `━ 255 in 68 … 2 known issues`, the full core suite green in Debug;
   7,604 source lines, 13,038 test lines.
-- The ladder: **CLOSED at two rounds** (round 1: 0B·0M·2m·3N, fixed; round 2: 0B·0M·0m·2N, fixed — §9).
+- The ladder: **CLOSED** — round 1 0B·0M·2m·3N (fixed) · round 2 0B·0M·0m·2N (fixed) · round 3 over the gate's two fixes 0B·0M·0m·2N (one docs fix, one deferred to VX-306's first commit) — §9.
 - The gate: not started.
 
 ---
@@ -1816,6 +1820,26 @@ These two edits touch two source files' COMMENTS only, so the final code tree mo
 had begun on (`94f295c9e` — discovery seeds 22, 23 green there, 44,838 and 45,219 steps; seed 21's line garbled by the
 script's parse, re-run below). The gate's discovery run and soak run ONCE on the final tree — the commit after this.
 
+
+### Round 3 — 2026-10-18, fresh `fable-reviewer` over the GATE's two fixes (`4a4af3164..c84375010`; model changes no round had read — VX-305's precedent); the report committed UNEDITED as `notes/plans/vx-378-ladder-round-3.md`
+
+**0 BLOCKER · 0 MAJOR · 0 MINOR · 2 NIT — THE LADDER STAYS CLOSED** (no MAJOR; rounds four and five never open). Both
+fixes SOUND and rule-true; both pins re-proved red-on-old by the reviewer's own single-file reverts (fix 1: 3 issues;
+fix 2: 1 issue — matching the record); both PROVISIONAL readings judged the only rule-defensible ones (O2-1 (b) is the
+removed stuck state; O2-2 (b) breaks rule 17 and (c) contradicts "Castle is Castle"); its own runs on `c84375010` green
+(`U4GatePins` 2/2; the touched suites 58/14; the guards, the crash harness, the default generator).
+
+**Dispositions (the orchestrator):**
+1. **NIT 1 (`PlanRunner.swift:289-295` — the DEBUG-guard-off resume call lacks a `catch ActRolledBack` for fix 1's new
+   pre-commit throw; reachable only with `planNamedBySectionOn` OFF, `actInFlight == nil`, a planted plan, a typed
+   passphrase under the plan's descriptor and a non-opening lock; in that branch `rollBack` is a no-op, the throw is
+   pure, no state changes) — CONFIRMED as a defensive catch, DEFERRED one commit:** it is a DEBUG-only, mutation-pin-only
+   road no test reaches, and applying it would move the gate's final tree once more (gate item 1 wants both soaks on the
+   FINAL tree). It lands as the FIRST commit of VX-306 (its plan names it) — the soaked tree `c84375010` stays the gate's
+   tree. No pin owed (nothing can redden it).
+2. **NIT 2 (the VX-306 plan does not name the new production obligation `KeyFileStoreLeaf.catalogedKeyFiles(ofLibrary:)`)
+   — CONFIRMED, FIXED (docs):** the VX-306 plan's U1 names the leaf (the real backups, Previous Libraries and the shared
+   folder, filtered to this library's `libraryID`) beside the N5 lobby-roads line; §5 of this plan carries the same line.
 
 ## 10. The gate and the rules checklist (filled 2026-10-17 on the FINAL tree `4a4af3164` — the ladder's close; the code tree is `4a4af3164`, every later commit on the branch touches notes only)
 
