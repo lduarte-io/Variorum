@@ -180,6 +180,26 @@ final class BookIndexEditModel {
         }
     }
 
+    /// **VX-304 — the in-place Takes sheet's road in** (P-U1b-4). The live
+    /// pane is released FIRST, synchronously: a live `PaneSurfaceView` is
+    /// buffer-authoritative (it never adopts the store's text while live), so
+    /// a pane left live under the sheet could never show the panel's edits —
+    /// and her next keystroke there would autosave its pre-sheet text over
+    /// them. Then every pending text of the leaving note AND of the sheet's
+    /// note is WRITTEN before this returns — awaited here rather than riding
+    /// `blur()`'s detached flush, because a second concurrent `flushNow`
+    /// returns at once while the first's write is still in flight (it takes
+    /// the batch and clears `pending` before it awaits), and the sheet's own
+    /// model reads the store the moment it starts.
+    func releaseForTakesSheet(on postID: String) async {
+        let leaving = authority.livePane
+        authority.blur()
+        if let leaving, !leaving.context.isEmpty, leaving.context != postID {
+            await coordinator(for: leaving.context).flushNow()
+        }
+        _ = await session.flushExistingAutosave(forPost: postID)
+    }
+
     /// A row's displayed text: the authority's overlay over the store's
     /// text (a read pane mirroring a dirty variant never renders staler
     /// text than the buffer).

@@ -216,7 +216,7 @@ tickets:
 |---|---|
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
 | U1a — VX-303 (the landing road) | VERIFIED 2026-10-18 (`vx-382-u1a` window) — red-on-old A·B·C red as planned, both guard probes red, tree restored clean between each; batch `Test run with 1590 tests in 259 suites` — 4 issues + 5 known: VX-115's standing red (BookCollectingDoorsTests) + `DestructiveUndoWarningTests.redoNeverAsks` (the known VX-167 parallelism flake, signature :141–143); VX-77's standing red did NOT reproduce (passed). 9 skipped (2 disabled suites). §U1a RECORD → batch results. Code tip f0d1b414f |
-| U1b — VX-304 (the box door + Index takes) | IN-PROGRESS — piece A (seams) a45d93a6c; the pins committed (compiling, red by design until B/C/D); B (the box door) committed; C (Index badges + sheet), D (the carry) remain. §U1b RECORD |
+| U1b — VX-304 (the box door + Index takes) | IN-PROGRESS — piece A (seams) a45d93a6c; the pins committed (compiling, red by design until B/C/D); B (the box door) and C (Index badges + sheet) committed; D (the carry) remains. §U1b RECORD |
 | U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | NOT STARTED |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
 | Closeout (canon deltas, tickets, PR, handoff) | NOT STARTED |
@@ -507,7 +507,19 @@ the stage is coordinator-held; this session builds headless only.
    "open" + the frame oracle. `BookView.openDoor(report)` hands `NoteBoxDoor.openInWrite` = the book's ONE open door
    (`openInWrite`) for the box's note, read at the PRESS; none without a landing road (P-2). Red-on-old: B reverted ⇒
    `BookNoteBoxOpenDoorTests` (every `openInWrite` nil) and `SidebarNoteBoxDoorFacesTests` (no "open" face, no frame).
-4. **C — Index badges + the in-place sheet** — PENDING.
+4. **C — Index badges + the in-place sheet** — committed (see the commit naming it): `BookIndexPaneNote` overlays
+   "⑂N" (`TOCRow.activeVariantCount`) on every block with takes, hung `takesBadgeGap` (6) outside the row's trailing
+   edge at the first line (`readTierTop`), both tiers — an overlay, so no prose moves; a press asks the book's ONE
+   takes slot (`BookViewModel.requestIndexTakes`). `BookIndexView` takes the slot (`takeTakesRequest`, on appear and
+   on change): `BookIndexEditModel.releaseForTakesSheet` (the live pane released synchronously, then the leaving
+   note's and the sheet note's pending text WRITTEN, awaited — not `blur()`'s detached flush), then presents
+   `WriteTakesPanel(session:postID:blockID:onClose:)` as its own sheet (DEBUG: `BookIndexGeometry.takesSheets`).
+   `BookView.takesDoor(report)` hands `NoteBoxDoor.openTakes` only in Index with a live note (the block read at the
+   press); `SidebarNoteBox` draws "Takes" in the door row while live with no bar (P-U1b-5; DEBUG face "takes"); the
+   doors are re-handed on a mode change (`.onChange(of: structure.mode)` — a switch can leave the report equal).
+   "Open Takes mode" in the panel refuses inside a book unchanged (`requestMode`: no detail mounted). Red-on-old: C
+   reverted ⇒ `BookIndexTakesTests` (no badge, no Takes door, no sheet), the Index arm's `openTakes` line in
+   `BookNoteBoxOpenDoorTests`, the Index-live "takes" face in `SidebarNoteBoxDoorFacesTests`.
 5. **D — Outline → Index carries the live block** — PENDING.
 
 ### PROVISIONAL choices (her bundle at the merge)

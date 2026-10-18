@@ -147,6 +147,11 @@ struct SidebarNoteBox: View {
             // auto`), OUTSIDE the scroll: it is the state's one act and it
             // must never scroll out of reach under a long title.
             if case .selected = state { editDoor }
+            // VX-304 (P-U1b-5): a live note with NO bar (the Index — its
+            // liveness is one block's pane, not an editor) gets the block's
+            // "Takes" in the same place, so it never scrolls out of reach
+            // either. A bar carries its own Takes door; none is handed then.
+            if state.isLive, bar == nil, let onOpenTakes { takesDoor(onOpenTakes) }
             }
         }
         .padding(Self.inset)
@@ -326,6 +331,38 @@ struct SidebarNoteBox: View {
 #if DEBUG
         .onAppear { SidebarGeometry.noteBoxFaces[subjectKey, default: [:]]["door", default: 0] += 1 }
         .onDisappear { SidebarGeometry.noteBoxFaces[subjectKey, default: [:]]["door", default: 0] -= 1 }
+#endif
+    }
+
+    /// **VX-304 — the Index-live box's "Takes"** (P-U1b-5): the live block's
+    /// takes, in place over the book — one cell in the bar's own grammar
+    /// (`CommitBar`'s bordered box cell, its "Takes" word), at the bar's cell
+    /// height, so the Index's box reads like the Outline's where the two
+    /// overlap.
+    ///
+    /// The cell's height is the bar's (`CommitBar.boxCellHeight`, 24) restated
+    /// rather than read: this shared-chrome home reads no `Features/` type
+    /// (the 18d round 2 MINOR-4 move — the box is HANDED the bar, never
+    /// names it).
+    static let takesCellHeight: CGFloat = 24
+
+    private func takesDoor(_ act: @escaping () -> Void) -> some View {
+        let door = Button(tokens.chromeLabel(NoteBoxCopy.takesDoor), action: act)
+            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+            .lineLimit(1)
+            .fixedSize()
+            .frame(maxWidth: .infinity)
+            .frame(height: Self.takesCellHeight)
+            .background(tokens.surface, in: RoundedRectangle(cornerRadius: 6))
+            .overlay(RoundedRectangle(cornerRadius: 6).stroke(tokens.line, lineWidth: 1))
+            .contentShape(Rectangle())
+            .help(NoteBoxCopy.takesDoorHelp)
+#if DEBUG
+        return door
+            .onAppear { SidebarGeometry.noteBoxFaces[subjectKey, default: [:]]["takes", default: 0] += 1 }
+            .onDisappear { SidebarGeometry.noteBoxFaces[subjectKey, default: [:]]["takes", default: 0] -= 1 }
+#else
+        return door
 #endif
     }
 

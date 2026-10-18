@@ -432,6 +432,11 @@ struct BookView: View {
             publishNoteBox()
             reportNotePlace()
         }
+        // VX-304: the box's DOORS are mode-shaped (the Index's live box hands
+        // "Takes"; Outline's hands none — its bar has one), and a mode switch
+        // can leave the report itself equal (the same note live on both
+        // sides), so the doors are re-handed with the mode.
+        .onChange(of: structure.mode) { _, _ in publishNoteBox() }
         .onDisappear {
             onNoteBox?(readingID, nil, nil)
             // 18o U4 (R-18k-6): the book leaving its pane is a leaving for the
@@ -1102,8 +1107,24 @@ struct BookView: View {
                 NoteBoxDoor(
                     editHere: { editHere(report) },
                     removeFromBook: removeDoor(report),
-                    openInWrite: openDoor(report))
+                    openInWrite: openDoor(report),
+                    openTakes: takesDoor(report))
             })
+    }
+
+    /// **VX-304 — the Index-live box's "Takes"**: the LIVE block's takes, in
+    /// place, over the book — asked through the book's one takes slot, which
+    /// the Index takes (releasing its live pane and writing her typing first;
+    /// P-U1b-4). Index only: Outline and the spread's live box carries the
+    /// editor's bar, whose own Takes door is the one (no second door). The
+    /// live block is read at the PRESS (it moves inside one note).
+    private func takesDoor(_ report: NoteBoxReport) -> (() -> Void)? {
+        guard structure.mode == .index, let live = report.live else { return nil }
+        let model = model
+        return {
+            guard model.indexLivePostID == live, let block = model.indexLiveBlockID else { return }
+            model.requestIndexTakes(LandingTarget(postID: live, blockID: block))
+        }
     }
 
     /// **VX-304 — the box's "open ↗"**: the book's ONE open door

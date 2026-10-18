@@ -431,6 +431,13 @@ enum BookIndexMaterialization {
 
 // MARK: - The view
 
+/// VX-304: the block whose takes the Index's in-place sheet holds.
+private struct IndexTakesSheet: Identifiable, Equatable {
+    let postID: String
+    let blockID: String
+    var id: String { "\(postID)|\(blockID)" }
+}
+
 struct BookIndexView<Masthead: View>: View {
     let session: AppSession
     let model: BookViewModel
@@ -491,6 +498,12 @@ struct BookIndexView<Masthead: View>: View {
     @State private var paneTarget: String?
     @State private var columnTarget: String?
     @State private var seeded = false
+    /// **VX-304 — the in-place Takes sheet** (her *"index can get take
+    /// badges"*): the block whose takes are up over the book, nil when none.
+    /// Raised only through `takeTakesRequest` (the badge and the box's
+    /// "Takes" both ask the book's one slot), so the live pane is always
+    /// released and her typing written first.
+    @State private var takesSheet: IndexTakesSheet?
 
     /// **THE ONE LANDING AUTHORITY** (13u4 UNIT F1 — `Surface/LandingAuthority.swift`).
     /// The aim/hold/quiet/hop discipline that the book Outline and the reading
@@ -698,6 +711,30 @@ struct BookIndexView<Masthead: View>: View {
             model.noteIndexLive(edit.livePostID)
             // VX-303: …and its live BLOCK, for the open doors.
             model.noteIndexLiveBlock(edit.liveBlockID)
+            // VX-304: a takes request parked before this Index mounted.
+            takeTakesRequest()
+        }
+        // VX-304: the book's one takes slot — the badge's and the box's.
+        .onChange(of: model.pendingIndexTakes) { _, _ in takeTakesRequest() }
+        .sheet(item: $takesSheet) { sheet in
+            // The note's own Write take machinery, scoped to ONE block (the
+            // panel Write's ⑂ opens), over the book. Its "Open Takes mode"
+            // refuses here as it does over the Outline: no note detail is
+            // mounted inside a book (`CommandRouter.requestMode`).
+            WriteTakesPanel(
+                session: session, postID: sheet.postID, blockID: sheet.blockID,
+                onClose: { takesSheet = nil })
+            #if DEBUG
+                .onAppear {
+                    BookIndexGeometry.recordTakesSheet(
+                        model.readingID,
+                        LandingTarget(postID: sheet.postID, blockID: sheet.blockID),
+                        owner: oracleOwner)
+                }
+                .onDisappear {
+                    BookIndexGeometry.withdrawTakesSheet(model.readingID, owner: oracleOwner)
+                }
+            #endif
         }
         // 13i-d U3: the grouped-by control's one held read (and the filter
         // bar's tag menu), keyed by the notes shown and the chosen family.
@@ -826,6 +863,21 @@ struct BookIndexView<Masthead: View>: View {
         session.commandRouter.noteFocusedBlock(
             caret.blockID, variantID: caret.variantID, postID: postID,
             utf16Offset: caret.offset, remembersOtherNotes: true)
+    }
+
+    /// **VX-304 — the book asked for a block's takes** (the badge, or the
+    /// sidebar box's "Takes" on the live block): taken ONCE; the live pane is
+    /// released and every pending text written (`releaseForTakesSheet` —
+    /// P-U1b-4 says why both), then the sheet opens on that block.
+    private func takeTakesRequest() {
+        guard let target = model.pendingIndexTakes else { return }
+        model.consumeIndexTakes()
+        guard let blockID = target.blockID else { return }
+        let edit = edit
+        Task {
+            await edit.releaseForTakesSheet(on: target.postID)
+            takesSheet = IndexTakesSheet(postID: target.postID, blockID: blockID)
+        }
     }
 
     private func select(_ postID: String, scrollPane: Bool, report: Bool = true) {
@@ -1120,6 +1172,12 @@ struct BookIndexView<Masthead: View>: View {
                                         row.id, postID: entry.postID),
                                     onTap: { select(entry.postID, scrollPane: false) },
                                     onLandedBlock: { blockID in paneTarget = blockID },
+                                    // VX-304: a block's ⑂ badge asks the book's
+                                    // one takes slot (the box's road too).
+                                    onOpenTakes: { blockID in
+                                        model.requestIndexTakes(LandingTarget(
+                                            postID: entry.postID, blockID: blockID))
+                                    },
                                     // VX-303: the live pane's caret — to the
                                     // book for its open doors, and (R-U1a-1)
                                     // to the note's one memory when it is
@@ -1501,6 +1559,8 @@ private struct BookIndexPaneNote: View {
     let onTap: () -> Void
     /// A landing made a block live here — the pane may scroll to it.
     let onLandedBlock: (String) -> Void
+    /// VX-304: a block's ⑂ badge was pressed — show its takes in place.
+    let onOpenTakes: (String) -> Void
     /// VX-303: the live pane's caret moved — the block and take it is in and
     /// the caret's UTF-16 offset inside the take (`PaneSurfaceView
     /// .onSelectionChange`, consumed as every reporting host consumes it).
@@ -1529,6 +1589,7 @@ private struct BookIndexPaneNote: View {
         indicator: EditingIndicatorStyle, entry: Queries.ReadingEntry,
         edit: BookIndexEditModel, selected: Bool, reserved: CGFloat,
         onTap: @escaping () -> Void, onLandedBlock: @escaping (String) -> Void,
+        onOpenTakes: @escaping (String) -> Void = { _ in },
         onCaret: @escaping (BookIndexEditModel.PaneCaret) -> Void = { _ in },
         onBlockTop: @escaping (String, CGFloat) -> Void,
         onMeasured: @escaping (CGFloat) -> Void
@@ -1542,6 +1603,7 @@ private struct BookIndexPaneNote: View {
         self.reserved = reserved
         self.onTap = onTap
         self.onLandedBlock = onLandedBlock
+        self.onOpenTakes = onOpenTakes
         self.onCaret = onCaret
         self.onBlockTop = onBlockTop
         self.onMeasured = onMeasured
@@ -1592,6 +1654,9 @@ private struct BookIndexPaneNote: View {
                 // nothing per-row may be more than it has to be).
                 let anchor = "bip-\(row.blockID)"
                 blockView(row)
+                    // VX-304: a block with takes wears "⑂N" — an OVERLAY, so
+                    // neither tier's prose moves for it (R-13u3-3).
+                    .overlay(alignment: .topTrailing) { takesBadge(row) }
                     .id(anchor)
                     .onGeometryChange(for: CGFloat.self) { geometry in
                         geometry.frame(in: .named(BookIndexColumn.paneSpace)).minY
@@ -1651,6 +1716,58 @@ private struct BookIndexPaneNote: View {
             } catch {
                 session.status.refuse(OpsRefusalCopy.message(for: error))
             }
+        }
+    }
+
+    /// How far beyond the block's trailing edge the ⑂ badge hangs — the
+    /// Outline badge's own gap from the prose column (`ReadBadgeOverlay`:
+    /// `columnRight + 6`).
+    nonisolated static let takesBadgeGap: CGFloat = 6
+
+    /// **VX-304 — the block's takes badge** (her *"index can get take
+    /// badges"*; P-U1b-3): "⑂N" for a block that keeps more than one take —
+    /// the Outline badge's word and count — hung OUTSIDE the block's trailing
+    /// edge at its first line, so no prose moves for it, in both tiers (the
+    /// overlay sits on the row, whose edges the two tiers share). A press
+    /// shows the block's takes in place (`onOpenTakes` — the book's one
+    /// takes slot). Blocks with one take wear nothing (AppSpec §12: a corner
+    /// badge only on fanned blocks).
+    @ViewBuilder
+    private func takesBadge(_ row: Queries.TOCRow) -> some View {
+        if row.hasFan {
+            Button {
+                onOpenTakes(row.blockID)
+            } label: {
+                Text("\u{2442}\(row.activeVariantCount)")
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.ring)
+                    .lineLimit(1)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 1)
+                    .background(tokens.card, in: Capsule())
+                    .overlay(Capsule().stroke(tokens.line, lineWidth: 1))
+                    .contentShape(Capsule())
+            }
+            .buttonStyle(.plain)
+            .fixedSize()
+            .help("This block keeps \(row.activeVariantCount) takes — click to see them here")
+            .padding(.top, Self.readTierTop)
+            .alignmentGuide(.trailing) { $0[.leading] - Self.takesBadgeGap }
+            #if DEBUG
+            .onAppear {
+                BookIndexGeometry.recordTakesBadge(
+                    row.blockID, count: row.activeVariantCount,
+                    owner: oracleOwner ?? DebugOracleOwner.unowned)
+            }
+            .onChange(of: row.activeVariantCount) { _, count in
+                BookIndexGeometry.recordTakesBadge(
+                    row.blockID, count: count, owner: oracleOwner ?? DebugOracleOwner.unowned)
+            }
+            .onDisappear {
+                BookIndexGeometry.withdrawTakesBadge(
+                    row.blockID, owner: oracleOwner ?? DebugOracleOwner.unowned)
+            }
+            #endif
         }
     }
 
