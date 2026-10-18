@@ -2918,3 +2918,27 @@ xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -
    *[removed for publication]*
    `MobileProtectionTests` · `MobileProtectionSurfaceTests` · `MobileTravellingDotsTests` · `MobileLobbyVaultRoadTests` ·
    `MobileEmptyStoreTests` (round 1's batch: `✔ 20 tests in 5 suites`).
+
+**THE ORCHESTRATOR'S LINE-BY-LINE CHECK of the round-2 fixes (2026-10-18 — the ladder's last fixes, which no later round reads):**
+- **m3 (`fbc3ce10b`)** — `createLibrary` now reads `leaves.library.slotIsOccupied()` BEFORE minting anything and throws the new
+  `ExecutorRefusal.libraryAlreadyInSlot` with nothing written; the read is the library FILE alone (a crashed creation's leftovers
+  beside an empty slot never stop it — the act's own doc); the production leaf (`SQLCipherLibraryLeaf.slotIsOccupied`: any file at the
+  slot's path, the same fact the belt checks) and both fakes conform; the pin `CreateLibraryPreflightTests` (3: a standing library, a
+  record-less store, the empty-slot guard) red on the parent tree (8 issues — the writes `custody+ silent`, `apple+`, `keyfile` and the
+  refusal `nothingToDo`), green after; the protection set green Debug 323/79 and release 299/75 (two halves). CHECKED: correct.
+- **m2 (`fda287bc3`)** — `ReadmeSeeder.paragraphs(onTheNewRoad:)` = her five + the four passages only on the new road; the seed path
+  passes `ProtectionRoad.opensOnTheNewRoad(devStore: storeVariant == .dev)` — ONE pure rule (`newRoadIsLive && devStore`) the bootstrap's
+  own gate now reads too (identical behaviour); Release and a real-variant Debug store get her five alone. The implementer's engineering
+  call (the dev-variant fence beside the switch, narrower than the disposition's "only while `newRoadIsLive`") is ACCEPTED by the
+  orchestrator: it is P-VX306-U1b-5's own fence, and the alternative would seed the passages into a Debug build pointed at her REAL
+  store. Pins: `LaunchFurnitureTests.aFreshStoreOnTodaysRoadSeedsHerFiveBlocksAlone` (red by construction on the old tree — nine),
+  `ReadmeStartHerePlanTests` +2 (the rule both ways; the source pin — its logic replicated in Python red on the old seeder). CHECKED:
+  correct; the batch under the stage runs the red legs by one-line reverts.
+- **NIT 3 (`76c298832`)** — `ProtectionCopyDoors.pick` calls `tellCopiesChanged()` once a filing lands (the `copiesChanged` post on the
+  main actor — m4's seam); the pin `CopyDoorsPickRefreshTests` (a standing list over the real listing road shows the filed copy; red by
+  construction on the old tree, run ALONE since m4's suites post the same notification). CHECKED: correct.
+- **Two compile-risk edits before any build** (`0db56c46b`): `Self.`-qualified calls and a `@MainActor` counter — the build-for-testing
+  below is their proof. **The edge the implementer named** (an empty slot holding a MISSING library's key file, a caller skipping the
+  set-aside — unreachable: both faces set aside first; telling it from a crashed creation's leftovers needs the lived-here marker on the
+  executor's leaf) → VX-307's plan, by name.
+
