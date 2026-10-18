@@ -1107,3 +1107,77 @@ worktree).
   library, the read-only road). HEADLESS (the harness — all of `Shared/Protection/` but the backup hook, eight one-line app
   stubs, the support file, this suite and the lobby suite): `✔ Test run with 24 tests in 2 suites passed after 0.154
   seconds.` The Mac runs PENDING under the stage.
+
+### U1b WALK RECORD — THE CONVERSION (the orchestrator, 2026-10-18 08:37–08:50 MDT, claim `vx-306-u1b`; the dev store only)
+
+**The batch (A):** the 33 suites → `✘ Test run with 212 tests in 33 suites … 4 issues (including 3 known issues)` on the
+first run — the three known issues are `VX310TodayLobbyWitnessTests`' expected red-on-old witnesses (bug 1: two lines,
+bug 2: one) and the ONE real red was a test-construction fault: `ProtectionRoadSwitchTests
+.theReleaseArmIsTheCompileTimeElseAndNothingCanFlipIt` matched the word "environment" inside `ProtectionRoad.swift`'s own
+header comment; fixed to scan code lines only (`2b6a866ad`), rebuilt, re-run `✔ Test run with 4 tests in 1 suite passed`.
+0 skipped. The Release check's three legs therefore stand: the switch pins green, the twelve existing route suites green
+with the switch off, the Release build green.
+
+**The conversion (B), P-VX306-K1 as ruled:** step 0 with zero instances — the pre-design dev store (`variorum.sqlite` +
+`-wal`/`-shm` + the two `variorum-keys-*.json`) copied into `Backups/safety-copies/variorum-vx306-predesign-2026-10-18-144152/`,
+each file `cmp`-verified, then moved out of the slot (the originals ride in the same folder as `moved-*.orig`); `Backups/`
+and `Previous Libraries/` left in place. Then the walk, the Debug product launched as the BINARY with `OS_ACTIVITY_DT_MODE=YES`
+and stderr captured (W-4 below):
+- **Stage 1 — the creation card:** exactly §7c (1): the key glyph, *Your twelve words*, the lead, twelve words in two
+  numbered mono columns (not selectable), the foot, the one button *I've written them down*. The button opened the
+  library; the road line `road: created — library 818912e0 key 88173013 device c7592aa6; custody silent 1 touchid 0; Apple
+  keys readable [5e3a0032]; memory items 1; live key file roads [apple,words]` (read at the next launch as `opened`).
+  Beside the slot: `variorum-library-keys.json` (format 3: `apple` + `words` wraps, no `passphrase`, history empty,
+  `libraryID`), `variorum-library-lived-here`, today's store-id stub `variorum-keys-881730135471ec9f.json` (format,
+  fingerprint, storeID — no key). The words went into `~/.variorum/dev-castle.env` as `VARIORUM_DEV_NEWROAD_WORDS` (the
+  coordinator's term; CLAUDE.md's "update the file in the same window"), the old store's values untouched; the card's
+  capture was deleted from the scratchpad at once (the words never ride a record).
+- **Stage 3 — Back Up Now:** `backup pair: written under 88173013 in Backups/818912e0/c7592aa6` —
+  `variorum-backup-2026-10-18-144548-88173013.sqlite` (557,056 bytes) + `….keys.json` (format 3, apple + words). Today's
+  flat writer wrote its own `Backups/variorum-backup-…-88173013.sqlite` beside its copy of the STUB as `….keys.json` and to
+  the far folder ("Copied, checked, ok. Copied to your folder too, 1 old copy retired").
+- **Stage 5 — the quiet roads (the on-device half + the typed lobby):** plain relaunch → `road: opened … repairs []; acts 1`
+  (rule 3's `beforeFirstBackup` ask owed before stage 3; `acts 0` after it). `VARIORUM_WALK_FORGET=silent` → `WALK SWITCH …
+  forgot 1 silent custody item(s)` then `road: opened … repairs [remakeOnDeviceItem]; custody silent 1` — the Apple wrap
+  opened it silently and the on-device road was re-made (rule 8). `VARIORUM_WALK_FORGET=silent,apple` → `forgot 1 silent …`,
+  `forgot 1 Apple key(s) of library 818912e0`, and THE LOBBY at once: the lock glyph, *Open your library*, *Enter your
+  twelve words to open your library.*, the quiet line *Touch ID isn't set up for this library.* (the Pro has an enrolled
+  finger; no item exists — VX-310's quiet-line rule), the words field, the one button *Open with the words* (disabled until
+  text). A wrong attempt (eleven words) → the refusal *There are twelve words — you entered 11.* under the button, the field
+  cleared. The twelve words typed → `road: opened … Apple keys readable [9358575a]; repairs [remakeAppleRoad,
+  remakeOnDeviceItem]` — a FRESH Apple key and the silent item re-made (rule 8's "quietly makes a fresh Apple road").
+- **Touch ID rows:** no Touch ID item can exist this phase (no Castle entry), so the walk shows only the quiet line and no
+  button — VX-310's rule for that state; the press rows and U1a's one Unknown (the probe's no-prompt with a real
+  `.biometryCurrentSet` item) stand on `KeychainLeavesTests.aTouchIDItemIsListedByNameAndNeverPressed`, green twice under
+  the stage on this enrolled Mac. Both voices: the lobby's room and the card render in the leading voice's fallback (the
+  store's voice is unreadable before unlock — one face), captured once.
+- **The furniture:** the first open seeded nothing — the per-scope seed marks (`SampleLibrarySeeded.Variorum-dev`,
+  `StarredGatheringSeeded.Variorum-dev`) survive a store reset (the 13s-b corner, QUESTIONS #183 — pre-existing, not this
+  road's); cleared both and relaunched with `VARIORUM_SEED_GATE_UNOWNED=1` → sherlock (13 notes) + starred notes seeded. The
+  Welcome arrangement reads `alreadySettled` by its own mark, so the field guide, readme and snippet are NOT in the fresh dev
+  store — a later walker who needs them clears that mark too (W-5).
+
+**POSTURE AFTER THE WINDOW:** a fresh dev library in STANDARD under the new road, no passphrase, unlocked and silently
+openable by this branch's Debug build (a silent item, an Apple key, the memory item under `Variorum-dev`; one backup pair);
+the old store whole in the safety copy; `dev-castle.env`'s Castle values unchanged. Instances 0; stage released 08:50.
+
+**Walk findings (routed):**
+- **W-1 (words — VX-379's pane row, U2 carries the posture box's sentence if it touches it):** the sidebar's posture box
+  reads today's *Standard — Right now, only this Mac can open your work.* — FALSE under the rules (rule 8: the Apple road
+  reaches her other Macs on the Apple account). Every today's-road sentence on the new road is VX-379's; this one is noted
+  for its rewrite.
+- **W-2 (MINOR, bug-class — U2 fixes with a red-on-old pin):** the backup pair's folder carries `…sqlite-wal` (0 bytes) and
+  `…sqlite-shm` (32 KiB) sidecars beside the frozen snapshot. A pair is the snapshot + its key file; a frozen copy must be
+  ONE self-contained file (a later reader without the sidecars must lose nothing; the catalogue's sidecar entries are
+  noise). Mechanism: `FileBackupsLeaf.takeBackupPair` copies with the WAL journal mode live; fix: checkpoint and write the
+  snapshot in `journal_mode=DELETE` (or remove the sidecars after a verified clean checkpoint), pinned on a temp slot.
+- **W-3 (note, expected coexistence — retired at U3/VX-379):** today's flat backup writer copies the store-id STUB as the
+  flat snapshot's `.keys.json`, and today's Restore list speaks today's words over the new store (*Opens with your current
+  passphrase or Touch ID on this Mac.* for the new pair; the fourteen old flat copies listed). The Debug-only two-road
+  coexistence; U3 replaces the Restore list behind Make this my library, VX-379 the words.
+- **W-4 (walker fact — WalkKit README at closeout):** `log show` by the `io.lduarte.Variorum` subsystem returns NOTHING for
+  the Debug app's `os_log` lines (not persisted/visible here); the walk's road is launching the BINARY directly with
+  `OS_ACTIVITY_DT_MODE=YES` and stderr to a file — the `road:` / `WALK SWITCH` / `backup pair:` lines all land there.
+- **W-5 (note, pre-existing):** the seed marks above; the Welcome arrangement's mark left as found.
+- **W-6 (note for U2):** rule 3's `beforeFirstBackup` act was owed at the first open (`acts 1`) and has no face yet — U2's
+  reminder; the open said nothing, as the plan intends until U2.
