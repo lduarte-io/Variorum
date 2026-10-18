@@ -394,12 +394,18 @@ disposition here.
     red-on-old PENDING (Mac RUN 1). **PROVISIONAL (P-VX381-U2-3):** the path-collision undo REFUSES (keeps the
     entry) rather than reviving beside or skipping quietly. **(P-VX381-U2-4):** the redo takes a child she made
     under a revived tag since the undo (the delete's subtree rule — no live tag left under a dead parent; the
-    deleteBlock-cascade precedent), and the next undo brings it back on that stamp. **(P-VX381-U2-5):** an
+    deleteBlock-cascade precedent: `performDeleteBlock`'s redo takes a take branched since the undo, and an
+    application she made since rides the same trigger cascade), and the next undo brings it back on that stamp.
+    The recorded alternative: a redo that finds the revived subtree GROWN is QUIET and retires (the strictest
+    reading of "never writes over a change of hers"; the door would say "Nothing to redo — Delete Tag was already
+    undone or changed since.") — one guard to add. **(P-VX381-U2-5):** an
     application whose NOTE (or block) died after the tag delete stays dead on the undo (no live row under a dead
     note — the sweep's invariant) — so a later Put back of that note returns it without that tag (its
     application died on the tag's stamp, not the note's); the restoreReading "left out — add it back by hand"
     corner's twin. **Canon delta for the closeout:** AppSpec §9's structural-undo list gains `deleteTag` (its
-    "Excluded: … tags" means applications — `applyTag`/`removeTag` — which stay excluded).
+    "Excluded: … tags" means applications — `applyTag`/`removeTag` — which stay excluded); the VX-246 record's
+    SWEEP TABLE (every registration's quiet-half answer) gains this site's row at the closeout — the inverse is
+    quiet when no pass row is still dead on its stamp, the redo when no revived tag still stands.
   - U2.3 **VX-111 — the notice counts books only:** DONE (725ad2db). Traced: `AppSession.noteMultiBookEdit`
     counted `Queries.readingsContaining` whole — the chip's list: every live book with a member row PLUS every
     gathering whose rule shows the note — so a bookless note two gatherings show said "This note is in 2 books…"
