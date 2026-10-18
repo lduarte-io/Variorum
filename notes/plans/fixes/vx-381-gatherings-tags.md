@@ -233,6 +233,23 @@ Debug launch, dismiss a What's New sheet if one shows. Merges serialize with vx-
   face; if the opacity was the only signal on an enabled-but-inert button, wire the disable rather than losing
   the face).
 
+## U1 COPY APPROVALS (the orchestrator, 2026-10-18 — the implementer's drafts, each still PROVISIONAL for her bundle)
+
+- **APPROVED — VX-241's receipt pair:** "Tagged #essays — the gathering shows it once it's unarchived." /
+  "It already matches — the gathering shows it once it's unarchived." (her register, sentence case, honest claim).
+- **APPROVED — the remaining blocker hovers:** "Finished — reopen it to add notes." · "No rule yet — give it one
+  to add notes." · "Its rule can't be read — edit it to add notes." · "Its rule needs an entry date, which a new
+  note doesn't have." · "Its rule needs a kind of note, which a new note doesn't have." (the terse register of
+  her three, held).
+- **SUSTAINED — P-VX381-U1-1:** an any-of whose NOT option the fresh note already meets takes no tag
+  (`#a OR NOT #b` mints bare; receipt "Added to the gathering.") — the vacuous-satisfaction reading, coherent
+  with her ALLOW-NOT ruling; bundled for QUESTIONS.
+- **Observations routed:** the chip's live-gathering receipt (a third voice for R98's receipt) → VX-216's
+  sitting (noted for her handoff); the phone's twin of VX-241 (MobileMembership lists archived gatherings and
+  overclaims) → a VM ticket minted at this approval; the cross-wing-tag hover corner ("…which no longer
+  exists." for a live tag of ANOTHER wing — wings isolate, so the tag is genuinely unreachable here) →
+  recorded for her bundle, no ticket unless she wants the wording split.
+
 ## LADDER (after U2 — one ladder over the run's combined diff)
 
 Fresh `opus-reviewer` at xhigh per round, `notes/REVIEW_PROMPT.md` VERBATIM, zero framing, over the combined
