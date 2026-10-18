@@ -129,22 +129,42 @@ struct VocabularySweepTests {
         #expect(GatheringNoteDoorCopy.help(archived)
                 == "This gathering can't take a new note: " + GatheringMint.Blocker.archived.reason + ".")
 
+        // (A JUSTIFIED EDIT at VX-250: the receipt's words are her SHORTER
+        // ones now — pinned verbatim in `herShorterMintReceiptsLandVerbatim`.)
         #expect(BookcaseCopy.shownByMint(["poems"], starred: false)
                 == BookcaseCopy.shownByTagging(["poems"]), "tags alone read exactly the tagging receipt")
         #expect(BookcaseCopy.shownByMint(["poems"], starred: true)
-                == "Tagged #poems and starred \u{2014} the gathering shows it now, as its rule matches.")
+                == "Tagged #poems and starred \u{2014} the gathering shows it now.")
         #expect(BookcaseCopy.shownByMint([], starred: true)
-                == "Starred \u{2014} the gathering shows it now, as its rule matches.")
+                == "Starred \u{2014} the gathering shows it now.")
         for line in [GatheringNoteDoorCopy.help(both), BookcaseCopy.shownByMint(["a"], starred: true)] {
             #expect(!line.contains("collect") && !line.contains("added"), "\(line)")
         }
     }
 
+    /// VX-250 (1) — her answer to #VX217-b (QUESTIONS #217), byte for byte:
+    /// the mint's receipt SHORTER, every arm. Under P-VX381-1 (PROVISIONAL,
+    /// the kickoff) R98's collect receipt shortens with it, so the tags-only
+    /// arm still reads exactly `shownByTagging`.
+    @Test func herShorterMintReceiptsLandVerbatim() {
+        #expect(BookcaseCopy.shownByMint(["essays"], starred: false)
+                == "Tagged #essays \u{2014} the gathering shows it now.")
+        #expect(BookcaseCopy.shownByMint(["essays"], starred: true)
+                == "Tagged #essays and starred \u{2014} the gathering shows it now.")
+        #expect(BookcaseCopy.shownByMint([], starred: true)
+                == "Starred \u{2014} the gathering shows it now.")
+        #expect(BookcaseCopy.shownByMint([], starred: false) == "Added to the gathering.")
+        #expect(BookcaseCopy.shownByTagging(["essays"])
+                == "Tagged #essays \u{2014} the gathering shows it now.",
+                "P-VX381-1: the collect receipt speaks in the same register")
+    }
+
     /// (a) — the Bookcase's own words for what a gathering is and does.
     @Test func theBookcaseSaysWhatAGatheringDoes() {
         #expect(BookcaseCopy.newBookMessage.contains("a gathering shows every note its rule matches"))
+        // (JUSTIFIED EDIT at VX-250 — P-VX381-1's shorter register.)
         #expect(BookcaseCopy.shownByTagging(["poems", "odes"])
-                == "Tagged #poems #odes \u{2014} the gathering shows it now, as its rule matches.")
+                == "Tagged #poems #odes \u{2014} the gathering shows it now.")
         #expect(RuleEditorCopy.mintTitle == "Create Gathering")
     }
 

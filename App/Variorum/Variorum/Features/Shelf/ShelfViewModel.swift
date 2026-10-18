@@ -733,24 +733,33 @@ nonisolated enum BookcaseCopy {
 
     /// A note dropped on a GATHERING's row (R98 — adding IS tagging): the
     /// receipts say what the act did — it tagged — and why the gathering now
-    /// shows the note. Never "collected"/"added" (a gathering holds nothing).
+    /// shows the note. Never "collected"/"added" (a gathering holds nothing)
+    /// — save her own "Added to the gathering." (#217), the mint's arm for a
+    /// new note that needed to wear nothing.
     static let alreadyShowing = "Already showing \u{2014} it matches this gathering's rule."
+    /// VX-250 (P-VX381-1, PROVISIONAL — the kickoff's ruling): R98's collect
+    /// receipt SHORTENS with the mint's, to her register (QUESTIONS #217),
+    /// so the one receipt family keeps one voice.
     static func shownByTagging(_ paths: [String]) -> String {
-        "Tagged " + paths.map { "#\($0)" }.joined(separator: " ")
-            + " \u{2014} the gathering shows it now, as its rule matches."
+        "Tagged " + paths.map { "#\($0)" }.joined(separator: " ") + shownNowTail
     }
 
-    /// VX-217 — a NEW note minted inside a gathering (PROVISIONAL #VX217-b):
-    /// the tagging receipt's own pattern, extended for the star her
-    /// R-VX214-4 lets a mint set. Tags alone read exactly `shownByTagging`.
+    /// The receipts' shared ending — her words, #217.
+    private static let shownNowTail = " \u{2014} the gathering shows it now."
+
+    /// VX-217 — a NEW note minted inside a gathering. VX-250 (1): her SHORTER
+    /// words, verbatim (QUESTIONS #217): "Tagged #essays — the gathering shows
+    /// it now." · "Tagged #essays and starred — the gathering shows it now." ·
+    /// "Starred — the gathering shows it now." · "Added to the gathering."
+    /// Tags alone read exactly `shownByTagging`. The last arm — nothing worn —
+    /// is a rule a fresh note meets as it is (a NOT-only rule, VX-250 (3)).
     static func shownByMint(_ paths: [String], starred: Bool) -> String {
-        let tail = " \u{2014} the gathering shows it now, as its rule matches."
         let tags = paths.map { "#\($0)" }.joined(separator: " ")
         switch (paths.isEmpty, starred) {
         case (false, false): return shownByTagging(paths)
-        case (false, true): return "Tagged " + tags + " and starred" + tail
-        case (true, true): return "Starred" + tail
-        case (true, false): return "The gathering shows it now, as its rule matches."
+        case (false, true): return "Tagged " + tags + " and starred" + shownNowTail
+        case (true, true): return "Starred" + shownNowTail
+        case (true, false): return "Added to the gathering."
         }
     }
 
