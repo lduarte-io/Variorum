@@ -1854,7 +1854,32 @@ script's parse, re-run below). The gate's discovery run and soak run ONCE on the
 
 Total: 898,747 steps over 20,000 sequences, every seed `✔`. (The earlier partial runs — seeds 35–38 on `bec58a576` and 21–24 on `94f295c9e`, green — were superseded by the ladder's fixes and are not the gate's evidence.)
 
-**THE GATE SOAK — seeds 1–20, Debug then `-c release`, on `4a4af3164`:** RUNNING — the tables land here as the configurations complete. GATE_SOAK_PENDING
+**THE GATE SOAK, ATTEMPT 1 on `4a4af3164` (2026-10-18T00:25Z): NO-GO — seeds 2 and 3 RED in Debug** (seed 1 green,
+44,486 steps; the run was stopped at seed 3 — the tree changes). Both finds traced by the orchestrator (the replay of each
+minimal sequence in a scratch worktree, state dumped after every step) and FIXED red-first, the Opus pool still out:
+- **Seed 2, sequence 585 (promise 6 — rule 20), minimal 6 steps, start "a fresh Standard library with no passphrase":**
+  a crashed Make this my library (after its 11th write — the new library's key file ALREADY in the live place beside the
+  old library file, the copy staged, no swap) → a keychain wipe (both memory items gone) → the next open reached the
+  library through the backup's key file with the pair of ITS day (rule 21's offer road) — not the press's pair — so
+  `resume`'s new-key check threw `passphraseDoesNotOpen` as a REFUSAL and the act stayed in flight with copies paused.
+  **FIX (`PlanRunner.resume`, commit below):** before the commit point, a resume whose secrets are not the press's ROLLS
+  BACK from what is on disk (the staged file discarded, the live key file restored from the plan's copy, the new key's
+  items deleted by fingerprint — no new key needed) and says so; past it the case cannot arise. PROVISIONAL
+  P-VX378-O2-1. Pin `U4GatePins.aCrashedMakeMineThenAWipedKeychainRollsBackAtTheNextOpen` — red on `4a4af3164` (3
+  issues: the act in flight, copies paused, promise 6), green after.
+- **Seed 3, sequence 310 (promise 1 — rules 9/11), minimal 6 steps, start "two Macs sharing an iCloud Drive backup
+  folder":** a Time Machine rollback put an older library file back while the keychain kept the rolled-back stretch's
+  SILENT item (key 96a14fbd, minted by the first Use Standard); the live key file's history no longer knew it, so Castle
+  entry's sweep skipped it — yet that key's backup pair in the shared folder carries THIS library's earlier keys in its
+  own history, so a login-password holder reached the Castle-era backup under 412b37b4. **FIX (commit below):** entering
+  Castle also sweeps the keys every CATALOGUED key file of this library names (the file's own libraryID vouches) and
+  retires the Apple keys those files are wrapped under — rule 11 read with the catalogue as the memory the rolled-back
+  file lost; a new read-only leaf `KeyFileStoreLeaf.catalogedKeyFiles(ofLibrary:)`, implemented by both test worlds
+  (VX-306's production leaf over the real folders). PROVISIONAL P-VX378-O2-2. Pin
+  `U4GatePins.aRolledBackStretchsSilentItemAndAppleKeyGoAtCastleEntry` — red on `4a4af3164` (1 issue), green after.
+After the fixes: the protection set in Debug `✔ 387 tests in 149 suites passed` (the wider filter; the two pins among
+them); release: RELEASE_AFTER_FIX_PENDING. **The final tree moves to the second fix's commit; ATTEMPT 2 — the discovery
+run AND the gate soak — runs on it from the start (gate item 1: both runs on the FINAL tree).** ATTEMPT2_PENDING
 
 2. **Every fixed scenario green in both configurations** — the protection + lifecycle suites on `4a4af3164`, run by
    the orchestrator in a clean review worktree: Debug `✔ Test run with 385 tests in 148 suites passed after 10.142

@@ -3057,3 +3057,31 @@ the open reads that section — this Mac's settings of that day, its gate among 
 either from its own, so nothing is said (census of piece 4, seeds 23 and 27).
 Record: the plan's §8 U4 RESUMPTION RECORD, piece 4. Status: PROVISIONAL (a) — your eye at the bundle.
 
+
+**P-VX378-O2-1 — A resume whose typed secrets are not the press's (the gate's seed 2; rule 20).** A crashed Make this
+my library had written the new library's key file into the live place beside the old library and staged the copy, a
+keychain wipe took both memory items, and the next open reached the library through a backup's key file with the pair
+of THAT backup's day — so the resume could not open the new key file (today's pair) and left the act in flight with
+copies paused. Options:
+- **(a) BUILT, PROVISIONAL —** before the commit point, a resume whose secrets are not the press's ROLLS BACK from what
+  is on disk (no new key is needed: the staged file discarded, the live key file restored from the plan's copy, the new
+  key's items deleted by fingerprint) and says so — rule 20's "finishes the act or rolls it back"; the person does Make
+  this my library again when they like. Past the commit point the case cannot arise (the library already opens under
+  the act's key).
+- (b) hold the act in flight and ask for the press's pair at the face — the stuck state her stuck-leave ruling removed.
+Record: the plan's §10 (attempt 1's triage). Status: open — your eye; the face is VX-306's.
+
+**P-VX378-O2-2 — Castle entry's sweep reads the catalogue (the gate's seed 3; rule 11).** A Time Machine rollback put an
+older library file back but not the keychain, so a silent item for a key the rolled-back stretch minted survived; the
+live key file's history no longer knew that key and the sweep skipped it, yet that key's backup in the shared iCloud
+folder carried this library's earlier keys in its own history — a login-password holder reached a Castle-era backup.
+Options:
+- **(a) BUILT, PROVISIONAL —** entering Castle also sweeps the keys every CATALOGUED key file OF THIS LIBRARY names
+  (the file's own libraryID vouches; the folders the app writes — backups, Previous Libraries, the shared folder) and
+  retires the Apple keys those files are wrapped under: rule 11's "the Apple and on-device keychain items deleted",
+  read with the catalogue as the memory the rolled-back file lost. A read-only leaf (`catalogedKeyFiles(ofLibrary:)`);
+  VX-306's production leaf implements it over the real folders.
+- (b) sweep every silent item in the scope at Castle entry — breaks Look inside's quiet road for another library's copy
+  (rule 17).
+- (c) accept as a stated limit (a Time Machine rollback is outside the promise) — against "Castle is Castle".
+Record: the plan's §10 (attempt 1's triage). Status: open — your eye.
