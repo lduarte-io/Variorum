@@ -344,7 +344,8 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   VX-353's flake; the fold of main is in (`460d39785`). **PENDING:** the Mac batch (products prebuilt from the folded
   tree — the U5 record's last sections), VX-392's real-client live round, the QUESTIONS bundle (P-VX392-1…5,
   P-VX393-1…3, P-VX394-1…6). The U5 UNIT RECORD (at the end of this file) carries the rest.
-- **U2 (VX-347 — ⌘S):** NOT-STARTED.
+- **U2 (VX-347 — ⌘S):** IN-PROGRESS — `opus-implementer` (fresh session, 2026-10-18); the U2 UNIT RECORD (at the end of
+  this file) carries the live state.
 - **U3 (VX-350 · VX-349 · VX-176 — the Library's row and header):** NOT-STARTED.
 - **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** NOT-STARTED.
 - Then the ladder (fresh Fable per round, whole diff), closeout, merge. **Her overnight mandate (2026-10-18):**
@@ -1069,3 +1070,23 @@ addendum):
 - **Next:** U5's batch + live round READY once the fixed product's incremental rebuild (the adjudication edit)
   lands; U1's two leftovers (the VX-339 banner walk, the VX-357 wire check) ride the same window. U2 spawns after
   the rebuild so the tree stays still beneath it.
+
+## U2 UNIT RECORD (VX-347 — ⌘S always commits; only ⎋ doesn't)
+
+*Implementer: `opus-implementer` at xhigh, fresh session, 2026-10-18. Read in its own context before any code: this plan
+(the VX-347 member section with her ruling, the Environment traps, the kickoff sitting, her overnight mandate, the U1/U5
+records), `notes/SessionResiliencyProtocol.md`, `notes/plans/phase-13u3-faces.md`'s UNIT D brief + record + the
+adjudications after it, QUESTIONS #121, CLAUDE.md + its canon, the ticket body. Lane: SwiftUI chrome (the shared field
+in `Core/Views`) + the hosts' commit doors and `EditorCommands` routing; no `Sync/`, custody, Keychain, `Protection/`,
+synced schema or TK2-seam line.*
+
+**NOT DONE BY THIS UNIT (first line, by the brief's rule):** PENDING — written at the close.
+
+### LIVE STATUS
+
+- **The trace + the design:** IN-PROGRESS.
+- **The fix at the shared seam + the hosts:** NOT-STARTED.
+- **The pins (the flipped `cancellingTheFieldFilesNothingAtAll` + the new leave-ways):** NOT-STARTED.
+- **The prebuilt Mac products (u2-fixed / u2-red):** NOT-STARTED.
+- **No behavioural revert is in flight.**
+
