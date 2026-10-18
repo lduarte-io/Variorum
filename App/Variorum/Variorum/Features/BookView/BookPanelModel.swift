@@ -266,8 +266,19 @@ nonisolated enum BookPanelBrain {
     /// has nowhere to go — every drop of it resolves to nothing (`dropPlan`)
     /// — so its grip is not drawn; with another chapter to move past, it is
     /// (a finished book keeps it and refuses WITH the road — U2-8).
-    static func chapterGripDrawn(chapterCount: Int) -> Bool {
-        chapterCount > 1
+    ///
+    /// **VX-21 (was VR-127 — her 0.9.2 use: "you shouldn't see draggable bars
+    /// when you can't drag"): the grips draw only while the book is in MANUAL
+    /// order.** Under a stamp order (her Journal, by entry date) no note can
+    /// be placed by hand, and a grip there reads as "arrange this by hand" —
+    /// the false-offer class (AppSpec §12: a drop outline lights only where
+    /// the drop would act; the Bookcase's grips show only while its rows are
+    /// placed by hand, P-17y-B2-1). What stays, deliberately: every row still
+    /// DRAGS (the panel's note rows never wore a grip), a note dropped to
+    /// re-place it in a stamp order still speaks the Manual-order refusal
+    /// with its road, and the row menus keep their doors.
+    static func chapterGripDrawn(chapterCount: Int, manualOrder: Bool) -> Bool {
+        manualOrder && chapterCount > 1
     }
 
     /// Move Chapter Up / Down — `BookStructureModel.moveChapter(_:up:)`'s
