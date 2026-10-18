@@ -1164,6 +1164,10 @@ built.
 - **The fold of main `e6874b1d8` (VX-382):** DONE (`fba169abb`, clean; shared files and headless counts below).
 - **The prebuilt Mac products (u2-fixed / u2-red):** DONE — rebuilt from the FOLDED tree (paths + commands below); their
   RUN is PENDING the batch.
+- **THE FIX LEG (the batch's two findings, routed 2026-10-18 ~07:2x):** IN-PROGRESS — (1) the double-file on the
+  panel's routed ⌘S (`WriteTakesPanelRoutedCommandTests.commitAsksForTheTakeTheRingIsInAndFilesIt`): TRACED (the
+  FIX LEG section below), the fix next; (2) the hollow mount cells (`fieldPopover() → nil` on both trees): the rig is
+  re-shaped next, then the red re-proof and the rebuilt products.
 - **No behavioural revert is in flight** in this worktree (the red product is built from its own durable checkout,
   `<home>/dev/variorum-vx-348-u2red`, which holds the revert by design until the batch has run).
 - **Machinery note (honesty):** while this unit worked, the U5 fix leg's implementer was live in the SAME checkout
