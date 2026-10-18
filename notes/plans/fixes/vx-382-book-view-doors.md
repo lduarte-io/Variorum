@@ -215,7 +215,7 @@ tickets:
 | Piece | State |
 |---|---|
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
-| U1a — VX-303 (the landing road) | IN-PROGRESS — piece 1 (seams) 482549002 · piece 2 (the fix) 7cbaf633b · pins committed, compiling (build-for-testing green) — batch + red-on-old PENDING the `vx-382-u1a` window; the edit-here rider awaits the orchestrator's ruling on R-1 (§U1a RECORD) |
+| U1a — VX-303 (the landing road) | BUILT — batch PENDING the `vx-382-u1a` window (red-on-old per family + the batch; §U1a RECORD's red-on-old plan). Commits 482549002 · 7cbaf633b · 370f79514 · e3d44a189 · 406fb417c · e7cd4fdd9 · 74c632b61; build-for-testing green |
 | U1b — VX-304 (the box door + Index takes) | NOT STARTED |
 | U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | NOT STARTED |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
@@ -223,8 +223,8 @@ tickets:
 
 ## U1a RECORD — VX-303 (implementer: opus-implementer, 2026-10-18)
 
-**Not done yet (kept current):** the edit-here rider (design fork R-1 below, awaiting the orchestrator's ruling —
-not built); red-on-old and the Mac batch (PENDING the `vx-382-u1a` window). No walk this unit (U1b's covers U1).
+**Not done yet (kept current):** red-on-old per pin family and the Mac batch — PENDING the `vx-382-u1a` window (the
+plan below). No walk this unit (U1b's covers U1). Every pin count/green claim below is PENDING until that window.
 
 ### The trace, re-verified on the tip (a87980768)
 
@@ -269,6 +269,72 @@ not built); red-on-old and the Mac batch (PENDING the `vx-382-u1a` window). No w
    rides, the door broadcast), `BookOpenDoorShellTests` (the real shell: the note left in Lenses opens in WRITE with
    the caret at block 2's start + 9; RED ON OLD expected: Lenses / no Write caret at her place).
 
+4. **The rulings' seams and the pins, pins first** — e3d44a189 (behavior-neutral): the road carries ONE value,
+   `BookOpenDoor.Landing` (note · block · offset · find · MODE); `ShellRouter.ModeLanding` parked beside the block
+   landing in the same `adopt` (rule one/two kept; one generation per park) + `landingMode(for:)`;
+   `PostDetailView.initialMode` (arrives in the named mode; writes the note's mode memory when it differs — the
+   switch's own write, which a mount's first assignment never fires); `CommandRouter.duringCaretPlacement` (a depth)
+   bracketing `EditorViewModel.applyProjection`'s initialRender arm (the fill's END + the focus seeds — the ONLY
+   editor lines touched: a bracket around three existing statements); `BookIndexEditModel.caretReportIsHers` (the
+   Index pane's going-live placement — its `string` write's END and a landing's armed place — is not hers; a click's
+   place is; her edit ends a placement an empty take never reported); the Index pane's caret reaches the router
+   through that test. The pins, reworked: see §the pins below.
+5. **R-U1a-2 — every door names Write** — DONE 406fb417c: `openInWrite` rides with `mode: .write` on both arms; a
+   nothing-live note arrives with the plain open's PLACE (R-18l-1), in Write.
+6. **R-U1a-1's opt-in seam** — e7cd4fdd9 (behavior-neutral): `noteFocusedBlock(…, remembersOtherNotes:)`, default
+   false; the editor (`updateCaretContext`) and the Index pane host opt in.
+7. **R-U1a-1 — the memory** — DONE 74c632b61: the other-note arm feeds `currentBlocks.remember` only — never the
+   observed identity or its offset (guard (ii)) — and only for an opted-in reporter, outside a placement bracket,
+   with a block (guard (i)). "Edit here" (which already reads `currentBlock(for:)`) lands where she was in the book.
+
+### Guard (i), verified — what fires a report for a note no detail shows, at mount
+
+- **The book's inline editor (Outline, the spread's Write form):** `applyProjection`'s `.initialRender` arm — the
+  fill parks the insertion point at the document's END and `renderFull` reports it (the arm's own comment names it);
+  then `applyFocusSeeds` — the book's caret seed (a CLICK's place, or a bare focus's 0 = the note's very start, row
+  44), a parked `WriteIntent` ("edit here" in Outline/spread), the find seed. All synchronous inside the arm, all now
+  inside `duringCaretPlacement` → never remembered for another note. Cost recorded: a click-focus's seed (her place)
+  is dropped with them (the editor cannot tell it from a bare focus's); her NEXT caret move or keystroke records it.
+  Re-renders while mounted (`fullRender`/`differential`/forced) restore her caret by identity and report it again —
+  her place, unbracketed by design.
+- **The book Index's pane:** going live, `makeNSView`'s `string =` reports the take's END, then the armed landing
+  reports its place (`.start` / `.offset(remembered)` for a landing; `.offset(click)` for a click). Filtered by
+  `caretReportIsHers`: the END and a landing's place never feed; a click's place does; everything after does.
+- **The Takes board (the spread's Takes form; a non-key window's Takes mode):** its N9 entry reads the MOUNTED
+  detail's `focusedBlock`, so a note no detail shows enters on its FIRST slot, and the live pane reports that
+  placement (`notePaneSelection`). Unguardable without Takes code → the board does NOT opt in: its other-note
+  reports keep today's drop. Recorded remainder (owner: VX-300 / the orchestrator): the spread's Takes form neither
+  feeds nor clobbers the memory.
+- **The shadow `InlineEditorSurface`** (the Outline's second model): no projection, no caret — reports nothing.
+
+### The pins (`App/Variorum/VariorumTests/BookOpenDoorTests.swift`; runs PENDING the window)
+
+- `BookOpenDoorRuleTests` — pure: the place rule per mode, the clamped landing offset, the offset and the MODE riding
+  the one park (new API — not red-on-old by construction).
+- `BookPlaceMemoryTests` — the router: another note's opted-in report feeds its memory while the mounted detail's
+  observed fact and offset stay put (guard (ii)); a default reporter feeds nothing; a placement bracket feeds nothing
+  while the detail's own reports in it land (guard (i)); the Index pane's placement rule.
+- `BookOpenDoorMountTests` (outline · spread · index) — the live note's door rides (block 2, her offset, Write);
+  another note's (the collapsed card's case) rides (no block, Write); guard (i) at the mount (the seed / the landing
+  not remembered); the Index arm's pane move IS remembered.
+- `BookOpenDoorShellTests` — the real shell: Write at her caret over a note left in Lenses (and its mode memory
+  says Write after); the NOTHING-LIVE door: Write, at the start (the session's first open), never Lenses.
+- `BookEditHereRiderTests` — the spread: the note's own editor left her at block 1 + 2; she writes at block 3 + 4 in
+  the book, clicks out, presses "edit here" → block 3 + 4.
+
+### Red-on-old plan (each family by ITSELF, tree committed first, restored exactly after)
+
+| Family | Revert | Run | Expected red |
+|---|---|---|---|
+| A — the doors carry her place (piece 2) | in place: `BookView.openInWrite`'s body → piece 1's, byte for byte: `NotificationCenter.default.post(name: .variorumOpenPost, object: nil, userInfo: ["postID": postID])` (7cbaf633b no longer reverts cleanly — e3d44a189/406fb417c re-shaped the same lines) | `BookOpenDoorMountTests` alone, then `BookOpenDoorShellTests` alone (the reverted door broadcasts app-wide) | Mount: nothing rides (all three modes). Shell: Lenses at the start / not opened if another window claimed the broadcast |
+| B — R-U1a-2, Write forced | `git revert --no-commit 406fb417c` | `BookOpenDoorMountTests`, `BookOpenDoorShellTests` | Mount: every ride's `mode` is nil. Shell nothing-live arm: Lenses. (Shell live arm stays green: its block landing forces Write via `jump` — expected) |
+| C — R-U1a-1, the memory | `git revert --no-commit 74c632b61` | `BookPlaceMemoryTests`, `BookEditHereRiderTests`, `BookOpenDoorMountTests` | Router feed: B's memory nil. Rider: lands block 1 + 2 (the note's own editor's place). Mount index arm: her pane move not remembered. (`aSurfacesOwnPlacement…` fails too — its premise needs the memory arm; expected) |
+| Guard (i) probe — the bracket | in place: delete `, caretPlacementDepth == 0` in `CommandRouter.noteFocusedBlock`'s other-note arm | `BookPlaceMemoryTests`, `BookOpenDoorMountTests` | Router: the bracketed placement replaces b5/30. Mount outline/spread: the seed is remembered |
+| Guard (i) probe — the Index filter | in place: `caretReportIsHers` → `return true` first line | `BookPlaceMemoryTests`, `BookOpenDoorMountTests` | The Index placement rule's false arms; mount index arm: the landing's placement remembered |
+
+Restore each with `git checkout -- <file>` (safe: the tree is committed) or `git revert --abort`; `git diff` clean
+against 74c632b61 (or the tip) before the next family.
+
 ### Recorded edges (not fixed here)
 
 - **VX-360's seam, touched not fixed** (`pendingSelection`'s `onChange` writes its own value, so the second of two
@@ -280,10 +346,16 @@ not built); red-on-old and the Mac batch (PENDING the `vx-382-u1a` window). No w
 - **The collapsed card's two doors are always plain opens** (focus implies expansion, so its note is never live) —
   their coverage is the mount pin's "another note" arm, a non-regression line, not red-on-old.
 - **Spread in its Takes form:** the active page mounts the takes board, not an `EditorViewModel`, so no editor is
-  under the caret for that note — the door opens plainly (the brief names the editor under the caret only).
+  under the caret for that note — the door carries no place (in Write, R-U1a-2); and the board neither feeds nor
+  clobbers the note's memory (guard (i), above).
 - **The open tail:** a caret in the Outline editor's open tail (no block yet) has no `caretIdentity` — plain open.
-- **Nothing live ⇒ the remembered mode still decides** (the brief's "today's plain open"); her ruling's "never the
-  note's remembered mode" is met wherever a place rides. Flagged for the orchestrator, not re-opened.
+- ~~Nothing live ⇒ the remembered mode still decides~~ — RULED R-U1a-2, built 406fb417c: every door lands in Write.
+- **Relaunch:** another note's memory is persisted at a BLOCK change only (`CurrentBlockMemory.remember`); its
+  offset within the block is persisted at the active detail's leave/quit only, so after a relaunch a book-edited
+  note's memory keeps the right block with the offset of its last block change — the hard-quit class the memory
+  already accepts.
+- **R-18l-1's re-open:** a note re-opened this run restores a place she last had in the book (R-U1a-1's recorded
+  consequence — PROVISIONAL, her bundle).
 
 ### R-1 — the edit-here rider's design fork (PROPOSED to the orchestrator; NOT built)
 
