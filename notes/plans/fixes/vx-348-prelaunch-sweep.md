@@ -2192,3 +2192,19 @@ this branch's Debug build (dev-castle.env only if its lock shows); at the end, z
 files BACK byte-identical (cmp-verified), nothing deleted, both copies' paths in the RELEASE line. The U4 batch note:
 mounted suites run on their own fixtures, but the test host's own launch sits at the lobby on the fresh store —
 watched for lobby-shaped failures in the U4 batch.
+
+## THE U4 BATCH + U3's RE-RUN (the orchestrator, 2026-10-18 ~09:27–09:45, claim `vx-348-u4-batch`)
+
+- **U4 RED leg:** all six suites red EXACTLY as predicted (VX351 gaps 4/4 · hovers 2/2 · VX384's pair 2/2 with the
+  typing guard green · VX385 4/4 · one justified pin each in LibraryPreviewBrainTests and NoteBoxCopyTests) —
+  red-on-old whole.
+- **The carried U3 re-run:** `VX350ControlsWidthClassTests` 10/10 GREEN on u4-fixed — **U3 is fully batch-verified**
+  (its walk rides the combined window).
+- **U4 FIXED leg:** 353/363 across 57 suites, THREE deterministic clusters (each red SOLO on the fixed product —
+  real, not load; the logs in `DerivedData/u4-logs/`): (1) `DestructiveUndoWarningTests.redoNeverAsks` — a SHIPPED
+  suite: after divide→undo the redo never applies (depth 1, no "Redid", slots joined) — the real-smelling one, the
+  suspect being the listing follow interleaving with the structural undo/redo flight; (2) VX385's suite — the foot
+  composes when nothing speaks (lifecycle or cross-cell receipt bleed); (3) VX384's pin premise breaks BECAUSE the
+  fix lists the copy instantly — a test-shape fix (take the id from the act's return). All three routed to U4's
+  implementer as a fix leg; the re-run window follows its report; the swap-and-walk REQUEST moves after that. No
+  lobby-shaped failures.
