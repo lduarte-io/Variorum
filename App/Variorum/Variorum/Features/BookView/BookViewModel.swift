@@ -1211,11 +1211,19 @@ final class BookViewModel {
         from mode: BookStructureModel.ViewMode, readForm: BookStructureModel.ReadForm,
         livePostID: String? = nil, liveBlockID: String? = nil
     ) {
-        guard let post = BookAnchor.currentPost(
-            mode: mode, readForm: readForm, place: anchorPlace)
+        var place = anchorPlace
+        place.livePostID = livePostID
+        place.liveBlockID = liveBlockID
+        guard let target = BookAnchor.landing(mode: mode, readForm: readForm, place: place)
         else { return }
-        standingAnchorPostID = post
-        pendingReveal = post
+        standingAnchorPostID = target.postID
+        pendingReveal = target.postID
+        // VX-304: leaving Outline with her caret live in the carried note, the
+        // BLOCK rides beside the note — the slot the Index consumes (the Read
+        // click's road, row 38); every other surface consumes the note half
+        // and drops it (`consumeReveal`). A carry naming no block leaves the
+        // slot exactly as it always did.
+        if target.blockID != nil { pendingLanding = target }
     }
 
     /// An outside door (W20's ascent) asking this book to open AT a post.

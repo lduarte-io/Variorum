@@ -216,7 +216,7 @@ tickets:
 |---|---|
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
 | U1a — VX-303 (the landing road) | VERIFIED 2026-10-18 (`vx-382-u1a` window) — red-on-old A·B·C red as planned, both guard probes red, tree restored clean between each; batch `Test run with 1590 tests in 259 suites` — 4 issues + 5 known: VX-115's standing red (BookCollectingDoorsTests) + `DestructiveUndoWarningTests.redoNeverAsks` (the known VX-167 parallelism flake, signature :141–143); VX-77's standing red did NOT reproduce (passed). 9 skipped (2 disabled suites). §U1a RECORD → batch results. Code tip f0d1b414f |
-| U1b — VX-304 (the box door + Index takes) | IN-PROGRESS — piece A (seams) a45d93a6c; the pins committed (compiling, red by design until B/C/D); B (the box door) and C (Index badges + sheet) committed; D (the carry) remains. §U1b RECORD |
+| U1b — VX-304 (the box door + Index takes) | IN-PROGRESS — piece A (seams) a45d93a6c; the pins committed (compiling, red by design until B/C/D); B (the box door), C (Index badges + sheet) and D (the carry) committed — BUILT, batch + walk PENDING the `vx-382-u1b` window. §U1b RECORD |
 | U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | NOT STARTED |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
 | Closeout (canon deltas, tickets, PR, handoff) | NOT STARTED |
@@ -520,7 +520,14 @@ the stage is coordinator-held; this session builds headless only.
    "Open Takes mode" in the panel refuses inside a book unchanged (`requestMode`: no detail mounted). Red-on-old: C
    reverted ⇒ `BookIndexTakesTests` (no badge, no Takes door, no sheet), the Index arm's `openTakes` line in
    `BookNoteBoxOpenDoorTests`, the Index-live "takes" face in `SidebarNoteBoxDoorFacesTests`.
-5. **D — Outline → Index carries the live block** — PENDING.
+5. **D — Outline → Index carries the live block** — committed (see the commit naming it): `BookView.switchMode`
+   reads `liveCaretBlock()` (the editor under the caret, only for the book's live note — `openPlace`'s rule) and
+   hands it to `carryPlace`, which now asks the pure `BookAnchor.landing`: leaving OUTLINE with her caret live in
+   the carried note parks `pendingLanding` (note + block) beside the reveal; every other arm carries the note alone
+   and leaves the slot as before. Index's `landOrSeed` already consumes it (`edit.requestLiveBlock`, the Read
+   click's road) and enters the block at the note's remembered caret (`PaneCaretLanding.entering` — her Outline
+   move is in the memory since R-U1a-1). Red-on-old: D reverted ⇒ `BookCarryLiveBlockTests`' model pin
+   (`pendingLanding` nil) and mounted pin (no live pane in the Index).
 
 ### PROVISIONAL choices (her bundle at the merge)
 

@@ -1292,8 +1292,27 @@ struct BookView: View {
     /// spread and a page domain).
     private func switchMode(to newMode: BookStructureModel.ViewMode) {
         guard newMode != structure.mode else { return }
-        model.carryPlace(from: structure.mode, readForm: structure.readForm)
+        // VX-304: the click-over carries her BLOCK out of Outline too (Index
+        // arrives with it live — `BookAnchor.landing`).
+        let live = liveCaretBlock()
+        model.carryPlace(
+            from: structure.mode, readForm: structure.readForm,
+            livePostID: live?.postID, liveBlockID: live?.blockID)
         structure.mode = newMode
+    }
+
+    /// **VX-304 — the book's live note and the block her caret stands in**,
+    /// read at the switch from the editor under the caret, only when it is
+    /// the book's live note (`EditorRouter.editing`, never `active`'s shadow
+    /// — `openPlace`'s rule; `caretIdentity` is the editor's existing
+    /// read-only answer, nil in the open tail). The model holds no editor, so
+    /// the view hands it the fact.
+    private func liveCaretBlock() -> (postID: String, blockID: String)? {
+        guard let live = model.liveFocusedPostID,
+              let editor = session.editorRouter.editing, editor.postID == live,
+              let block = editor.caretIdentity()?.blockID
+        else { return nil }
+        return (live, block)
     }
 
     /// Read's two faces are a mode switch by any other name — the same
