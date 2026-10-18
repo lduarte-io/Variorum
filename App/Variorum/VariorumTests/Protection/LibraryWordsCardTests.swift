@@ -58,6 +58,7 @@ struct LibraryWordsCardTests {
             #expect(!code.contains(road), "no copy road and no later door (\(road))")
         }
         #expect(code.contains(".textSelection(.disabled)"))
+        #expect(!code.contains("keyboardShortcut"), "no stray Return puts the once-shown words away")
         #expect(code.components(separatedBy: "Button(").count == 2, "exactly one button")
     }
 }

@@ -841,8 +841,8 @@ present stay on U1a's `KeychainLeavesTests.aTouchIDItemIsListedByNameAndNeverPre
 
 **Counts (the tree `cd00b20cb` + this record):**
 - `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Release -derivedDataPath DerivedData/vx306
-  build` → `** BUILD SUCCEEDED **` on piece 1's tree, on `ea99ea24c`, and on the FINAL source tree `cd00b20cb` (no install,
-  no launch); in the Release binary `strings … | grep -c VARIORUM_WALK_FORGET` → `0` (the Debug dylib: `1`) — the walk
+  build` → `** BUILD SUCCEEDED **` on piece 1's tree, on `ea99ea24c`, on `cd00b20cb`, and on the FINAL tree (the card's
+  Return shortcut dropped — below) (no install, no launch); in the Release binary `strings … | grep -c VARIORUM_WALK_FORGET` → `0` (the Debug dylib: `1`) — the walk
   switch is not in Release.
 - `xcodebuild … -configuration Debug -derivedDataPath DerivedData/vx306 build-for-testing` → `** TEST BUILD SUCCEEDED **`
   (final tree); zero warnings in the touched files.
@@ -917,7 +917,8 @@ present stay on U1a's `KeychainLeavesTests.aTouchIDItemIsListedByNameAndNeverPre
 - **P-VX306-U1b-10 — a keychain that could not be listed shows no Touch ID face** (and both typed roads with the reason).
   (a) BUILT — nothing listed, nothing claimed; (b) a Touch ID button whenever biometry is usable (a press may find nothing).
 
-**Recorded refinements (not product calls):** a backup run that found nothing due takes no pair (the hourly re-check
+**Recorded refinements (not product calls):** the words card's one button carries NO Return shortcut (a stray Return
+must never put the once-shown words away — pinned in `LibraryWordsCardTests`); a backup run that found nothing due takes no pair (the hourly re-check
 would otherwise mint a pair an hour); today's store id is re-minted at a later open only when none is there (a key change
 later must never change it); the creation runs the repairs' passes but no settle (no plan in an empty slot); every new
 OpenOutcome/State case is reachable only with the switch on (the cases compile in both configurations — rule 24's

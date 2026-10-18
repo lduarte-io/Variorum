@@ -56,9 +56,10 @@ struct LibraryWordsCard: View {
                 .multilineTextAlignment(.center)
                 .lineLimit(4)
                 .fixedSize(horizontal: false, vertical: true)
+            // No Return shortcut on purpose: the words are shown once, so a stray Return must never put them away
+            // — the button is pressed deliberately.
             Button(ProtectionWords.wordsCardButton) { model.iveWrittenThemDown() }
                 .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
-                .keyboardShortcut(.defaultAction)
                 .disabled(model.words.isEmpty)
         }
         .padding(28)
