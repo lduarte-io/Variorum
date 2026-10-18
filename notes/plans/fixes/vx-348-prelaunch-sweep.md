@@ -1265,6 +1265,10 @@ still insures dirty text.
 
 ### The pins (compiled; the RUN is PENDING the batch)
 
+*(As first written — the FIX LEG section below re-shapes the click-away cells onto `dismissTheField`, adds
+`thePopoversOwnCloseFilesTheCommit` and `VX347OneCommitPerFieldTests`, and its commands carry the CURRENT expected reds
+per leg; the batch's run of the first-pass products found seven of these cells hollow.)*
+
 **Red on old by BEHAVIOUR — they use only pre-fix APIs, so the red product is the TRUE pre-fix tree for these files:**
 - `SavepointCommitDoorTests.onlyEscapeLeavesTheFieldWithoutACommit` — **THE FLIPPED PIN** (was
   `cancellingTheFieldFilesNothingAtAll`; a justified edit naming VX-347): Write's real bar mounted; the field left as a
