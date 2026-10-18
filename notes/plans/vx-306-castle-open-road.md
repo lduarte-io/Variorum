@@ -1193,8 +1193,17 @@ the old store whole in the safety copy; `dev-castle.env`'s Castle values unchang
   whitespace runs collapsed; the model's sentences — the notice's two, the offer's — found in §7c AND absent from the words
   file; the day's form). HEADLESS (the session harness — the record's close says how): green with the other planted
   suites; the Mac run PENDING under the stage. U2's undrafted lines are P-VX306-U2-2's.
+- THE FACES' CODE for pieces 2–6, one COMPILING commit (WIP — their pins land per piece below): the open's report
+  (`RoadOpenReport.acts` the union of every pass's — rule 3's `.quietRoadFailed` is owed at the open's FIRST pass,
+  which the same open's repairs then answer; `keyFileSearch`), the session (`library`/`report` under one lock, the
+  interlude once per open, the receipts owed, one act at a time), `ProtectionRoadActs.swift` (the search, *Use it*,
+  the first passphrase, the dismissal, rule 27's set-aside), `ProtectionOpenFaces.swift` (the interlude, the standing
+  faces, the open library's faces model), `PassphraseReminder.swift`, `SetPassphraseModel.swift`; the bootstrap's
+  `.roadInterlude` state + `roadStanding`; the Mac faces `Features/Protection/RoadInterludeCard.swift` ·
+  `ProtectionRoadBar.swift` · `SetPassphraseSheet.swift`, rule 27's doors on `RoadLockView`, the Protection pane's one
+  row; the phone's unreachable arm. Debug `build` → `** BUILD SUCCEEDED **`: DONE (this commit).
 - Piece 2 — the notice (`UnlockedLibrary.notice` via the open's report — a card in the lobby's room between the
-  unlock and the library's open, OK once, then the open): NOT-STARTED.
+  unlock and the library's open, OK once, then the open): CODE DONE (the WIP commit); its pins NOT-STARTED.
 - Piece 3 — the offer (`OwedAct.offerKeyFile` → `searchKeyFiles` at the open → the offer card; *Use it* =
   `useOfferedKeyFile` + the receipt; *Not now* writes nothing; the split pair's standing line; `.noKeyFileAnywhere` →
   rule 27's banner): NOT-STARTED.

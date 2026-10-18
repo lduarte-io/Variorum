@@ -38,6 +38,7 @@
 //  followed by another unasked sheet — the button is her road after that.
 //
 
+import AppKit
 import SwiftUI
 import VariorumCore
 
@@ -296,8 +297,20 @@ struct StoreLockView: View {
 /// second bug — never a relaunch to bring a road back).
 struct RoadLockView: View {
     @Bindable var lobby: ProtectionLobbyModel
+    /// VX-306 U2 — rule 27's face's *Restore from Backup…*: the app's own Backups folder beside the library, revealed
+    /// (the missing face's road); nil: none to show, the door does not render (P-2).
+    var backupsFolder: URL? = nil
+    /// VX-306 U2 — rule 27's face's *Open Library…* (13x's open door, the missing face's); nil: not rendered.
+    var openDoor: (() -> Void)? = nil
     /// VX-140: whether Variorum is the active app RIGHT NOW — the automatic ask's one input beyond the lobby.
     var appIsActive: () -> Bool = { NSApp.isActive }
+
+    /// The app's own Backups folder beside the library — the missing face's rule (`LibraryMissingLobby
+    /// .backupsFolderURL`): nil when there is none.
+    static func backupsFolder(besideStore storeURL: URL) -> URL? {
+        let folder = storeURL.deletingLastPathComponent().appendingPathComponent("Backups", isDirectory: true)
+        return FileManager.default.fileExists(atPath: folder.path) ? folder : nil
+    }
 
     @State private var passphrase = ""
     @State private var wordsText = ""
@@ -339,8 +352,11 @@ struct RoadLockView: View {
                 .foregroundStyle(tokens.ink)
                 .lineLimit(1)
             if let nothing = face.noKeyFileAnywhere {
+                // RULE 27 before unlock — §7c (3), the account sentence only when the account road is named, and
+                // the missing face's three doors beneath (VX-306 U2).
                 sentence(ProtectionWords.noKeyFileAnywhere)
                 if nothing.accountRoad { sentence(ProtectionWords.noKeyFileAnywhereAccountRoad) }
+                noKeyFileDoors
             } else {
                 sentence(face.keychainUnreadable ? ProtectionWords.keychainUnreadable : face.lead)
                 roads
@@ -386,6 +402,36 @@ struct RoadLockView: View {
             .multilineTextAlignment(.center)
             .lineLimit(6)
             .fixedSize(horizontal: false, vertical: true)
+    }
+
+    /// Rule 27's doors — the missing face's three, §7c (3)'s words; each renders only where it can act (P-2).
+    @ViewBuilder
+    private var noKeyFileDoors: some View {
+        if let backupsFolder {
+            Button(ProtectionWords.noKeyFileRestoreDoor) {
+                NSWorkspace.shared.activateFileViewerSelecting([backupsFolder])
+            }
+            .buttonStyle(CalmButtonStyle(tokens: tokens))
+            .disabled(lobby.busy)
+        }
+        if let openDoor {
+            Button(ProtectionWords.noKeyFileOpenDoor) { openDoor() }
+                .buttonStyle(CalmButtonStyle(tokens: tokens))
+                .disabled(lobby.busy)
+        }
+        if lobby.offersStartNew {
+            VStack(spacing: 4) {
+                Button(ProtectionWords.noKeyFileStartDoor) {
+                    Task { await lobby.startNewLibrary() }
+                }
+                .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
+                .disabled(lobby.busy)
+                Text(ProtectionCopy.libraryMissingStartSubline)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(2)
+            }
+        }
     }
 
     @ViewBuilder

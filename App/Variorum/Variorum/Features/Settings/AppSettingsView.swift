@@ -84,6 +84,9 @@ struct AppSettingsView: View {
     /// 13x F1 (R1-MAJOR): Data Safety's hand-off twin (Settings' own
     /// presenter behind it). nil hosts render no door.
     let handOffDoor: (() -> Void)?
+    /// VX-306 U2: the new road's open library faces (nil on today's road) —
+    /// the Protection pane's one *Set a passphrase…* row reads it.
+    let roadStanding: RoadStandingModel?
 
     init(
         session: AppSession, services: AppServices? = nil,
@@ -93,7 +96,8 @@ struct AppSettingsView: View {
         crashReports: CrashReporting? = nil,
         mcp: MCPDoor? = nil,
         restoreDoor: ((URL) -> Void)? = nil,
-        handOffDoor: (() -> Void)? = nil
+        handOffDoor: (() -> Void)? = nil,
+        roadStanding: RoadStandingModel? = nil
     ) {
         self.session = session
         self.services = services
@@ -104,6 +108,7 @@ struct AppSettingsView: View {
         self.mcp = mcp
         self.restoreDoor = restoreDoor
         self.handOffDoor = handOffDoor
+        self.roadStanding = roadStanding
         _theme = State(initialValue: ThemeStore(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
     }
@@ -389,7 +394,7 @@ struct AppSettingsView: View {
             if let protection {
                 // 13p Batch 2: the at-open modes, presets, escrow, and the
                 // passphrase/recovery doors (R13p-5/6/7/9).
-                ProtectionPane(controller: protection, services: services)
+                ProtectionPane(controller: protection, services: services, roadStanding: roadStanding)
             }
         case .dataSafety:
             // 13l Act 4 (ledger row 12): backups, their freshness, and what

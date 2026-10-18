@@ -50,35 +50,92 @@ nonisolated struct RoadOpenReport: Sendable {
     var notice: LibraryNotice?
     var repairsDone: [Repair] = []
     var repairsSkipped: [RepairReport.Skipped] = []
+    /// The faults standing after the open's repairs (the last pass's).
     var faults: [Fault] = []
+    /// VX-306 U2: EVERY act any pass of the open's repairs found owed, in the order found — not only the last
+    /// pass's. Rule 3's `.askPassphrase(.quietRoadFailed)` is owed at "the first launch after a quiet road has
+    /// failed": the FIRST pass finds it (the on-device item gone, the Apple road lost) and the same open's repairs
+    /// then re-make the road, so the last pass no longer owes it.
     var acts: [OwedAct] = []
+    /// VX-306 U2 — RULE 21's key-file search, run at the open when `.offerKeyFile` is owed (a READ —
+    /// `ProtectionExecutor.searchKeyFiles`): the offer, the split pair, or rule 27. nil = not owed, or the search
+    /// could not read (logged).
+    var keyFileSearch: KeyFileSearch?
     /// What the settle did (a word for Diagnostics), or why it could not.
     var settle: String?
 }
 
-/// The library open on the new road — what the app's open, the backup hook and U2's faces hold. Used serially
-/// (the road, then the main actor).
+/// The library open on the new road — what the app's open, the backup hook and U2's faces hold. Used from the
+/// road (off the main actor), the main actor and the backup hook's detached pair, so `library` and `report` are
+/// read and written under one lock (VX-306 U2: the set-passphrase sheet and the offer's *Use it* write them while
+/// a backup pair may read them).
 nonisolated final class ProtectionRoadSession: @unchecked Sendable {
     let system: ProtectionSystem
     let executor: ProtectionExecutor
-    var library: UnlockedLibrary
-    var report: RoadOpenReport
     /// Created by THIS open (the store identity is minted fresh beside it — today's `startNewLibrary` mint).
     let isFresh: Bool
     /// Whether the road may write (false in a hosted test run — the backup hook stays off there too).
     let writes: Bool
 
+    private let lock = NSLock()
+    private var held: UnlockedLibrary
+    private var heldReport: RoadOpenReport
+    private var interludeShown = false
+    private var receipts: [String] = []
+    private var acting = false
+
     init(system: ProtectionSystem, executor: ProtectionExecutor, library: UnlockedLibrary, report: RoadOpenReport,
          isFresh: Bool, writes: Bool) {
         self.system = system
         self.executor = executor
-        self.library = library
-        self.report = report
+        held = library
+        heldReport = report
         self.isFresh = isFresh
         self.writes = writes
     }
 
+    var library: UnlockedLibrary {
+        get { lock.withLock { held } }
+        set { lock.withLock { held = newValue } }
+    }
+
+    var report: RoadOpenReport {
+        get { lock.withLock { heldReport } }
+        set { lock.withLock { heldReport = newValue } }
+    }
+
     var key: StoreKey { library.key }
+
+    /// VX-306 U2 — the interlude (rule 21's notice, then the offer) is shown ONCE per open, before the library's
+    /// open continues (`RoadInterlude.cards`); a hosted test run's read-only road shows none (nothing could act).
+    var owesInterlude: Bool {
+        lock.withLock { writes && !interludeShown && !RoadInterlude.cards(heldReport).isEmpty }
+    }
+
+    func markInterludeShown() { lock.withLock { interludeShown = true } }
+
+    /// VX-306 U2 — receipts the open owes the status seam once the library is open (rule 1's restore — derived
+    /// from the report at the open; the offer's *Use it*): added here, taken ONCE by the ready composition.
+    func addReceipt(_ text: String) { lock.withLock { receipts.append(text) } }
+
+    func takeReceipts() -> [String] {
+        lock.withLock {
+            defer { receipts = [] }
+            return receipts
+        }
+    }
+
+    /// VX-306 U2 — one act at a time on the session (the set-passphrase sheet may be open in two places): a
+    /// second begin while one runs answers false.
+    func beginAct() -> Bool {
+        lock.withLock {
+            guard !acting else { return false }
+            acting = true
+            return true
+        }
+    }
+
+    func endAct() { lock.withLock { acting = false } }
 }
 
 /// The lobby's facts — before unlock, roads only.
@@ -184,9 +241,15 @@ nonisolated enum ProtectionOpenRoad {
     /// `setAsideLiveKeyFile`: the missing face's *Start a New Library* — a key file of the missing library still
     /// in the live place steps aside into `Previous Libraries/<stamp>/` first (P-VX306-U1b-3: rule 1 — the key
     /// file is as essential as the library; the creation would write over it).
-    static func create(_ ctx: RoadContext, setAsideLiveKeyFile: Bool) async -> RoadRoute {
+    /// `setAsideUnopenableLibrary` (VX-306 U2 — rule 27's face's *Start a New Library*, PROVISIONAL P-VX306-U2-5): the
+    /// library in the slot that no key file opens is moved WHOLE (the file, its sidecars, any file in the live
+    /// place) into `Previous Libraries/<stamp>/` first — never deleted (a key file found later still opens it there).
+    static func create(
+        _ ctx: RoadContext, setAsideLiveKeyFile: Bool, setAsideUnopenableLibrary: Bool = false
+    ) async -> RoadRoute {
         guard ctx.writes else { return .failed(ProtectionWords.testRunNeverCreates) }
         do {
+            if setAsideUnopenableLibrary { try setAsideUnopenableLibraryFor(ctx.system.places) }
             if setAsideLiveKeyFile { try setAsideLiveKeyFileFor(ctx.system.places) }
             let executor = ctx.system.executor(session: ctx.session)
             let created = try executor.createLibrary(passphrase: nil)
@@ -405,10 +468,13 @@ nonisolated enum ProtectionOpenRoad {
                 report.settle = "read-only (a hosted test run)"
             }
             repairPasses(ctx, executor, &unlocked, &report)
+            report.keyFileSearch = searchIfOwed(ctx, executor, unlocked, report)
             logSummary(ctx, unlocked, report, how: "opened")
-            return .opened(ProtectionRoadSession(
+            let session = ProtectionRoadSession(
                 system: ctx.system, executor: executor, library: unlocked, report: report, isFresh: false,
-                writes: ctx.writes))
+                writes: ctx.writes)
+            for receipt in RoadStandingFaces.derive(report).receipts { session.addReceipt(receipt) }
+            return .opened(session)
         } catch ExecutorRefusal.recordMissing {
             return .recordMissing
         } catch FileKeyFileStoreLeaf.KeyFileStoreError.unreadableLiveKeyFile {
@@ -425,11 +491,13 @@ nonisolated enum ProtectionOpenRoad {
         _ ctx: RoadContext, _ executor: ProtectionExecutor, _ library: inout UnlockedLibrary,
         _ report: inout RoadOpenReport
     ) {
+        var acts: [OwedAct] = []
+        defer { report.acts = acts }
         for pass in 0..<4 {
             guard let facts = try? ctx.system.facts(session: ctx.session, unlocked: library) else { break }
             let assessment = assess(facts)
             report.faults = assessment.faults
-            report.acts = assessment.acts
+            for act in assessment.acts where !acts.contains(act) { acts.append(act) }
             guard ctx.writes, pass < 3, !assessment.repairs.isEmpty else { break }
             do {
                 let ran = try executor.runRepairs(assessment.repairs, on: &library)

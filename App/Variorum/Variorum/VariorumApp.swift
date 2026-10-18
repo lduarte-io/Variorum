@@ -197,6 +197,10 @@ struct VariorumApp: App {
                         // server OFF before it could start (ledger row 10).
                         appDelegate.mcp.attach(
                             session: session, storeURL: bootstrap.liveStoreURL, windows: windows)
+                        // VX-306 U2: the new road's receipts (rule 1's restore, the offer's *Use it*, the
+                        // passphrase set) are spoken on this window's status seam — `receipt_style` governs them as
+                        // every receipt; the receipts the open owes are spoken once, here.
+                        bootstrap.roadStanding?.speak = { text in session.status.receipt(text) }
                         if restoreHold == nil {
                             restoreHold = RestoreHoldModel(storeURL: bootstrap.liveStoreURL)
                         } else {
@@ -421,6 +425,9 @@ struct VariorumApp: App {
                             }
                             ProtectionNoticeBar(
                                 controller: bootstrap.protection, services: services)
+                            // VX-306 U2 (the new road only — nil on today's): rule 27's banner, the split pair's
+                            // line, rule 3's reminder and its set-passphrase sheet.
+                            ProtectionRoadBar(model: bootstrap.roadStanding)
                         }
                     }
                     .onReceive(NotificationCenter.default.publisher(
@@ -460,11 +467,17 @@ struct VariorumApp: App {
                 // `variorum-keys.json` with wraps sits beside the store.
                 StoreFailureView(error: error, recovery: recovery) { bootstrap.retry() }
             case .roadLobby(let lobby):
-                // VX-306 U1b (Debug, the one switch): the new road's lobby — roads only, before unlock.
-                RoadLockView(lobby: lobby)
+                // VX-306 U1b (Debug, the one switch): the new road's lobby — roads only, before unlock. U2: rule
+                // 27's face carries the missing face's doors (the app's Backups folder, the 13x open door).
+                RoadLockView(
+                    lobby: lobby, backupsFolder: bootstrap.liveStoreURL.flatMap(RoadLockView.backupsFolder(besideStore:)),
+                    openDoor: { libraryOpen.openPanel(bootstrap: bootstrap) })
             case .newLibraryWords(let card):
                 // VX-306 U1b: the once-shown words card of a library just created (rule 2).
                 LibraryWordsCard(model: card)
+            case .roadInterlude(let interlude):
+                // VX-306 U2: rule 21's notice, then the key-file offer — once, before the library shows.
+                RoadInterludeCard(model: interlude)
             }
     }
 
@@ -489,7 +502,8 @@ struct VariorumApp: App {
                 StoreFailureView(error: error) { bootstrap.retry() }
             case (.opening, _):
                 StoreOpeningView()
-            case (.locked, _), (.waitingForICloudKeychain, _), (.roadLobby, _), (.newLibraryWords, _):
+            case (.locked, _), (.waitingForICloudKeychain, _), (.roadLobby, _), (.newLibraryWords, _),
+                 (.roadInterlude, _):
                 // 13p: note windows never outlive a lock (the whole
                 // `.ready` tree tears down); a restored one says so.
                 Text("Variorum is locked — unlock it in the main window.")

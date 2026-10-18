@@ -45,6 +45,9 @@ final class ProtectionLobbyModel {
     @ObservationIgnored private let refreshRoad: () async -> RoadLobbyFacts
     @ObservationIgnored private let opened: (ProtectionRoadSession) -> Void
     @ObservationIgnored private let recordMissing: () -> Void
+    /// VX-306 U2 — rule 27's face's *Start a New Library* (nil: not offered): the library no key file opens steps
+    /// aside whole, then the creation. Answers the sentence to show, nil when it went on.
+    @ObservationIgnored private let startNewRoad: (() async -> String?)?
 
     init(
         standing: RoadLobbyFacts,
@@ -52,7 +55,8 @@ final class ProtectionLobbyModel {
         touchIDRoad: @escaping (ProtectionFacts?) async -> RoadAttempt,
         refreshRoad: @escaping () async -> RoadLobbyFacts,
         opened: @escaping (ProtectionRoadSession) -> Void,
-        recordMissing: @escaping () -> Void
+        recordMissing: @escaping () -> Void,
+        startNew: (() async -> String?)? = nil
     ) {
         self.standing = standing
         self.typedRoad = typedRoad
@@ -60,7 +64,23 @@ final class ProtectionLobbyModel {
         self.refreshRoad = refreshRoad
         self.opened = opened
         self.recordMissing = recordMissing
+        startNewRoad = startNew
         face = ProtectionLobbyFace.derive(standing)
+    }
+
+    // MARK: - Rule 27's doors (VX-306 U2)
+
+    /// *Start a New Library* is offered (rule 27's face, with the creation wired).
+    var offersStartNew: Bool { face.noKeyFileAnywhere != nil && startNewRoad != nil }
+
+    /// Rule 27's *Start a New Library*.
+    func startNewLibrary() async {
+        guard offersStartNew, let startNewRoad, !busy else { return }
+        busy = true
+        message = nil
+        let sentence = await startNewRoad()
+        busy = false
+        if let sentence { message = sentence }
     }
 
     // MARK: - Touch ID (VX-310)

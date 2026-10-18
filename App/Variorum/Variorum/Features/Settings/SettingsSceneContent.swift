@@ -45,7 +45,8 @@ struct SettingsSceneContent: View {
     static func libraryClosed(_ state: AppBootstrap.State) -> Bool {
         switch state {
         case .ready, .opening: false
-        case .locked, .waitingForICloudKeychain, .libraryMissing, .failed, .roadLobby, .newLibraryWords: true
+        case .locked, .waitingForICloudKeychain, .libraryMissing, .failed, .roadLobby, .newLibraryWords,
+             .roadInterlude: true
         }
     }
 
@@ -111,7 +112,9 @@ struct SettingsSceneContent: View {
                 // Settings' OWN presenter, the restore door's pattern.
                 handOffDoor: {
                     handOff.openPanel(session: session, bootstrap: bootstrap)
-                })
+                },
+                // VX-306 U2: the new road's *Set a passphrase…* row (nil on today's road).
+                roadStanding: bootstrap.roadStanding)
                 .sheet(isPresented: Binding(
                     get: { libraryOpen.model != nil },
                     set: { if !$0 { libraryOpen.dismiss() } })

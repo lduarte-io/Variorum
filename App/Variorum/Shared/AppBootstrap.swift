@@ -85,6 +85,10 @@ final class AppBootstrap {
         /// VX-306 U1b — the once-shown words card of a library just created on the new road (rule 2); its
         /// one button opens the library.
         case newLibraryWords(LibraryWordsCardModel)
+        /// VX-306 U2 — the open's INTERLUDE on the new road, in the lobby's room between the unlock and the
+        /// library's open (PROVISIONAL P-VX306-U2-1): rule 21's notice (once), then the key-file offer; the last
+        /// card answered, the open goes on.
+        case roadInterlude(RoadInterludeModel)
     }
 
     private(set) var state: State = .opening
@@ -169,6 +173,9 @@ final class AppBootstrap {
     /// backup hook's key, key file and device ID; U2's faces read its report (the notice, the repairs, the
     /// faults, the acts owed).
     @ObservationIgnored private(set) var roadSession: ProtectionRoadSession?
+    /// VX-306 U2 — the open library's protection faces on the new road (nil on today's road): rule 27's banner,
+    /// the split pair's line, rule 3's reminder and its set-passphrase sheet, the receipts the open owes.
+    private(set) var roadStanding: RoadStandingModel?
 
     init(
         variant: AppDatabase.StoreVariant = StoreLocation.resolve(),
@@ -302,6 +309,8 @@ final class AppBootstrap {
         case roadLobby(RoadLobbyFacts, RoadContext)
         /// VX-306 U1b: a library created on the new road — the words card first.
         case roadCreated(ProtectionRoadSession, OnceShownWords)
+        /// VX-306 U2: an open on the new road that owes the interlude (rule 21's notice, the offer) first.
+        case roadInterlude(ProtectionRoadSession, RoadContext)
         case locked(LobbyFacts)
         /// pre-13x 2a (§3.8): Standard's waiting state.
         case waiting(LobbyFacts)
@@ -469,7 +478,11 @@ final class AppBootstrap {
         _ road: ComposedRoad, variant: AppDatabase.StoreVariant, gate: StoreLaunchGate,
         unlockedKey: StoreKey?, roadOpened: ProtectionRoadSession?, storeURL: URL?
     ) async -> OpenOutcome {
-        if let roadOpened { return openOnNewRoad(roadOpened, road: road, variant: variant, gate: gate) }
+        if let roadOpened {
+            // VX-306 U2: a session the lobby's press opened may owe the interlude too (shown once per open).
+            if roadOpened.owesInterlude { return .roadInterlude(roadOpened, road.context()) }
+            return openOnNewRoad(roadOpened, road: road, variant: variant, gate: gate)
+        }
         let ctx = road.context()
         #if DEBUG
         // Walk machinery (P-VX306-U1b-9): a launch asked to forget a quiet road does so once, before the facts.
@@ -477,6 +490,8 @@ final class AppBootstrap {
         #endif
         switch await ProtectionOpenRoad.route(ctx, keyInHand: unlockedKey) {
         case .opened(let session):
+            // VX-306 U2: rule 21's notice and the key-file offer are said before the library shows.
+            if session.owesInterlude { return .roadInterlude(session, ctx) }
             return openOnNewRoad(session, road: road, variant: variant, gate: gate)
         case .created(let session, let words):
             return .roadCreated(session, words)
@@ -587,6 +602,8 @@ final class AppBootstrap {
         case .ready(let database, let unlockedKey, let road):
             // VX-306 U1b: the library open on the new road (nil on today's road).
             roadSession = road
+            // VX-306 U2: its protection faces (rule 27's banner, the split pair, rule 3's reminder, the receipts).
+            roadStanding = road.map(Self.makeStanding)
             let view: AppDatabase
             if let binding {
                 // The re-open after a lock: the SAME ambient view adopts
@@ -709,7 +726,59 @@ final class AppBootstrap {
             state = .newLibraryWords(LibraryWordsCardModel(words: words.words) { [weak self] in
                 self?.beginOpening(roadOpened: session)
             })
+        case .roadInterlude(let session, let ctx):
+            state = .roadInterlude(makeInterlude(session, ctx))
         }
+    }
+
+    /// VX-306 U2 — the interlude (rule 21): the notice, then the offer; *Use it* runs off the main actor through
+    /// the road; when the last card is answered the open goes on with the same session (shown once per open).
+    private func makeInterlude(_ session: ProtectionRoadSession, _ ctx: RoadContext) -> RoadInterludeModel {
+        RoadInterludeModel(
+            cards: RoadInterlude.cards(session.report),
+            useOffer: { offer in
+                await Task.detached(priority: .userInitiated) {
+                    await ProtectionOpenRoad.useOffer(ctx, session: session, offer: offer)
+                }.value
+            },
+            receipt: { session.addReceipt($0) },
+            finished: { [weak self] in
+                session.markInterludeShown()
+                self?.beginOpening(roadOpened: session)
+            })
+    }
+
+    /// VX-306 U2 — the open library's protection faces, from its session: the standing faces read from the open's
+    /// report, rule 3's reminder (its launch counted once per process on a writing road, then evaluated), and the
+    /// set-passphrase sheet's road through the session's executor.
+    static func makeStanding(_ session: ProtectionRoadSession) -> RoadStandingModel {
+        let faces = RoadStandingFaces.derive(session.report)
+        let libraryID = session.library.record?.libraryID ?? ""
+        let ledger = PassphraseReminderLedger()
+        if session.writes, !libraryID.isEmpty { ledger.noteLaunchOncePerProcess(libraryID) }
+        let reminder = PassphraseReminderModel(
+            libraryID: libraryID, moment: session.writes ? faces.passphraseMoment : nil, ledger: ledger,
+            facts: {
+                let library = session.library
+                // A read-only road (a hosted test run) never reminds: nothing could be set or recorded.
+                return (passphraseSet: !session.writes || ProtectionOpenRoad.passphraseExists(library),
+                        dismissals: library.record?.reminderDismissals ?? 0)
+            },
+            recordDismissal: {
+                await Task.detached(priority: .userInitiated) {
+                    ProtectionOpenRoad.recordReminderDismissed(session: session)
+                }.value
+            })
+        reminder.evaluate()
+        return RoadStandingModel(
+            faces: faces, reminder: reminder,
+            setPassphrase: { passphrase in
+                await Task.detached(priority: .userInitiated) {
+                    await ProtectionOpenRoad.setFirstPassphrase(session: session, new: passphrase)
+                }.value
+            },
+            passphraseExists: { ProtectionOpenRoad.passphraseExists(session.library) },
+            receiptsOwed: { session.takeReceipts() })
     }
 
     /// VX-306 U1b — the new road's lobby: its presses run off the main actor through the road; an opened
@@ -734,6 +803,12 @@ final class AppBootstrap {
             recordMissing: { [weak self] in
                 guard let self else { return }
                 self.state = .libraryMissing(self.makeMissingLobby(demand: .auto, storeURL: self.liveStoreURL))
+            },
+            // VX-306 U2 — rule 27's face's *Start a New Library*: the library no key file opens steps aside whole
+            // first (PROVISIONAL P-VX306-U2-5), then the creation and the words card.
+            startNew: { [weak self] in
+                guard let self else { return nil }
+                return await self.createOnNewRoad(setAsideLiveKeyFile: true, setAsideUnopenableLibrary: true)
             })
     }
 
@@ -741,10 +816,18 @@ final class AppBootstrap {
     /// library's key file stepping aside first (P-VX306-U1b-3); the words card follows. nil = done; else the
     /// sentence the face shows.
     private func createOnNewRoadFromMissingFace() async -> String? {
+        await createOnNewRoad(setAsideLiveKeyFile: true, setAsideUnopenableLibrary: false)
+    }
+
+    /// The new road's creation from a face (the missing face; rule 27's face) — the words card follows. nil = done;
+    /// else the sentence the face shows.
+    private func createOnNewRoad(setAsideLiveKeyFile: Bool, setAsideUnopenableLibrary: Bool) async -> String? {
         guard let road = roadInputs?.compose() else { return ProtectionWords.couldNotCreate }
         let route = await Task.detached(priority: .userInitiated) {
             // The context off the main actor: it reads the sign-in (a Keychain read).
-            await ProtectionOpenRoad.create(road.context(), setAsideLiveKeyFile: true)
+            await ProtectionOpenRoad.create(
+                road.context(), setAsideLiveKeyFile: setAsideLiveKeyFile,
+                setAsideUnopenableLibrary: setAsideUnopenableLibrary)
         }.value
         switch route {
         case .created(let session, let words):
