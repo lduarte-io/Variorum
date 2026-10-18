@@ -7,7 +7,8 @@ and 25 — FD-2, FD-3, the plan's §8 note after U3). Amended again at her rulin
 rules 4, 5 and 12 — the floor (a backup opens with the secrets you had when you made it; your current ones open older
 backups of the same library); rule 17 — Make this my library carries no keys; rule 21 — the fingerprint and the wrapped
 copy, the notice instead of the refusal, and the key-file offer. Amended at her morning sitting after the gate (2026-10-18,
-the plan's §8): rule 5's quiet-road clause reads as built — P-VX378-O1-1.**
+the plan's §8): rule 5's quiet-road clause reads as built — P-VX378-O1-1; rule 25 states the honest limit of the entry sweep —
+P-VX378-O2-2.**
 Where this document and `notes/plans/vx-266-castle-backups-prelaunch.md` differ, this document wins; that design keeps
 its research and its Apple-facts pointers (`notes/plans/vx-266/second-opinion-apple-facts.md`). The walk-through of
 these rules — one person, one library, every stage — is `notes/plans/vx-266/castle-lifecycle.html`, and the corrector
@@ -141,7 +142,9 @@ and never leaves a hole you chose to close.**
 
 25. **We don't promise Apple's roads keep working** across Apple ID changes, iCloud sign-outs, keychain resets or a move
     to a new Mac. We promise you never *need* them (rules 2, 3, 8). A Standard-era backup locked under an Apple account
-    you have since left keeps that lock, which the app cannot delete.
+    you have since left keeps that lock, which the app cannot delete. Likewise a quiet lock this Mac no longer remembers — a
+    key file kept outside the app's own folders, after a rollback — survives entering Castle; it reaches only backups from
+    before you entered, never your current writing (rules 9, 11).
 26. **We don't migrate stores from before this design, and we don't handle them.** Everyone with such a store exports
     their writing or signs into sync before the switch, then starts fresh; the people concerned are the author and a few
     testers, and they have been told.

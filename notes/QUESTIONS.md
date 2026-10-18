@@ -3090,4 +3090,8 @@ Options:
 Record: the plan's §10 (attempt 1's triage). Status: UNDER DISCUSSION at her morning sitting (2026-10-18) — her words: *"don't we
 support castle is castle by removing the apple wrap from castle? because someone could always have a key stashed somewhere
 else - isn't our guarantee more that the apple key won't work to get you into castle anymore, rather than 'we got rid of every
-apple key'? let's discuss this one."* The orchestrator's reading is in the plan's §8 (HER MORNING SITTING).
+apple key'? let's discuss this one."* The orchestrator's reading is in the plan's §8 (HER MORNING SITTING). **RULED 2026-10-18,
+after the discussion: (a) — "I want to keep the fix and I think that as long as we record the honest limit, it's okay"; the
+north star is that no previous key file reaches the CURRENT writing; no machinery to close the corner completely ("we can just
+accept the limitations of what we can't control"). The honest limit lands as one sentence in rule 25 (CastleRules amended at
+her word; its wording hers to adjust).**

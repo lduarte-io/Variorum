@@ -1797,6 +1797,11 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
   account this library doesn't name (census class L), whose cost is one typed secret at a later Turn on sync, never access;
   (3) a complete closure exists for VX-306's production keychain leaf if wanted — items tagged with their libraryID, the entry
   sweeping every silent item OF THIS LIBRARY whatever the files remember — offered, not recommended now.
+  **RULED (a):** *"I want to follow your advice … I want to keep the fix and I think that as long as we record the honest limit,
+  it's okay. What I *really* care about is that once you've moved into castle, no amount of the previous key file can get you
+  into the *current* writing. that is our north star … I don't think that we need to focus on building machinery out to close
+  this corner completely - we can just accept the limitations of what we can't control."* The honest limit is now rule 25's
+  last sentence (CastleRules amended at her word); the tagged-item idea is dropped, not deferred. No code moves.
 
 ## 9. The ladder (a fresh Fable reviewer per round, `notes/REVIEW_PROMPT.md` verbatim, zero framing; her cap: up to five rounds while a MAJOR is still found; a round that stalls on a safeguard reruns as Opus at max — none did)
 
