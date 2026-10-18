@@ -434,7 +434,7 @@ store this build has written — coordinators told.
   (the release-floor reds, Low). The ladder reads U1a with U1b.
 - U1b — the lobby on roads, Debug-gated (+ VX-310, the creation card, the Release check, the dev store's fresh start): DONE 2026-10-18 — built by the Opus implementer (`fdda1a67b`…`137281318`, the §9 U1b RECORD), the batch under `vx-306-u1b` 212/33 (3 known = VX-310's witnesses; the pin fix `2b6a866ad`), THE CONVERSION walked (the §9 U1b WALK RECORD; findings W-1…W-6, W-2 fixed in U2).
 - U2 — the honest faces (+ rule 3's reminder, the set-passphrase sheet, W-2's fix): BUILT 2026-10-18 (Opus implementer) — commits `d35b82290`…the close (the §9 U2 RECORD); `build-for-testing` and the phone build green on the final tree; the new pure and planted suites green HEADLESS (69 in the session harness), the core's protection set green in both configurations (315 / 291); the Mac suites (the record's list) and the walk (stages 2, 14, rule 1's restore, W-2's pair, rule 27 both moments) PENDING — the ORCHESTRATOR's, under the stage.
-- U3 — the two doors; the phone opens: IN PROGRESS (Opus implementer, 2026-10-18; DerivedData `vx306-u3`) — the §9 U3 RECORD's LIVE STATUS carries each piece.
+- U3 — the two doors; the phone opens: BUILT 2026-10-18 but for LOOK INSIDE (Opus implementer; DerivedData `vx306-u3`) — Make this my library on a catalogued copy and on a picked (filed-first) copy, the phone's faces and its switch, commits `eaeed1126`…the close (the §9 U3 RECORD); Look inside PROPOSED (piece 4 — (b), the read-only facts sheet, recommended), its build waiting on the orchestrator's ruling; `build-for-testing` green on both platforms; the planted suites green HEADLESS (57 in 8); the Mac and phone suites and the walk PENDING — the ORCHESTRATOR's, under the stage.
 - The ladder (Fable — custody code; her cap: up to five rounds while MAJORs are still found): not started.
 - Closeout: the words checked (VX-379's first pass — the Start Here chapter §7c); canon: AppSpec §12's LIBRARY
   PORTABILITY line (the doors replace 13x's landing wording); the handoff with HER-HANDS items (Look inside on a byte-copy
@@ -1682,9 +1682,29 @@ B's five files under `~/vx306-walk/B` (for U3's Look inside); instances 0; stage
 - **W-10 (note):** every memory-forget mints a fresh device ID for A (`4e648d28` → `fb3534f5` → `06853752`) — P-VX378-U1-1
   (a) as built; harmless on the dev store, worth her eye at the bundle (the record's sections accumulate one per forget).
 
-### U3 RECORD — THE TWO DOORS: Look inside / Make this my library (+ the phone opens) (Opus implementer, 2026-10-18; IN PROGRESS)
+### U3 RECORD — THE TWO DOORS: Look inside / Make this my library (+ the phone opens) (Opus implementer, 2026-10-18; BUILT but for LOOK INSIDE, which waits on the ruling — the Mac and phone suites and the walk PENDING)
 
-**Not done in U3, first:** PENDING (written at the record's close).
+**Not done in U3, first:**
+- **LOOK INSIDE IS NOT BUILT** — propose-then-rule: the PROPOSAL is piece 4's (below; (b), the read-only facts sheet,
+  recommended — on this tree (a) is not isolated). No *Look inside…* door renders anywhere until the ruling (P-2). The
+  missing face's and rule 27's *Open Library…* stay retired on the new road until then (P-VX306-U3-7).
+- **No Mac suite and no phone suite was RUN** (the brief: no `xcodebuild test`, no stage) — only built (`build-for-testing`
+  green, both). What DID run: the planted suites HEADLESS in the session's SwiftPM harness (below) — the two suites that
+  need the keychain or the bootstrap (`MakeMineRouteTests`; the phone's `MobileProtectionRoadTests`) did not run anywhere.
+- **The walk was not done** (the orchestrator's — the recipe below), nor the simulator's open. No Debug app or simulator was
+  launched; the dev store, the real store and `/Applications` were never touched.
+- **The Release build was not re-run** (§8: no Release build this phase; the gate's Release check is the orchestrator's to
+  repeat). Every new line is a new file or behind the switch: `copyDoorsRoads()` answers nil off the new road (Data Safety
+  keeps today's rows, `roadDoors` stays nil, File ▸ Open Library… keeps today's flow), the phone's new arms are reached only
+  by new-road states, and the biometry lines read byte-for-byte as before on the Mac (Release included).
+- **A plain-text export is NOT given today's road on the new road** — a DEVIATION from the addendum's "a picked plaintext
+  export keeps today's road", made on a trace (P-VX306-U3-5: today's adoption on the new road sets the library aside
+  without its format-3 key file, lands a library the new road cannot open, and mints today's custody). It refuses in
+  words instead; T-8 stays VX-309's. The orchestrator's eye.
+- **The phone has no reminder bar, no set-passphrase sheet and no receipts** this unit (the brief names the lobby, the card,
+  the interlude and rule 27's faces); `RoadStandingModel` is made at the phone's ready too, with no face there.
+- **The empty-slot landing (T-5) is VX-309's**: Make this my library needs a library open (her current pair is verified
+  against it), so neither the missing face nor rule 27's lobby offers it.
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton: DONE (this commit).
@@ -1861,5 +1881,294 @@ state — traced on this tree:
   BUILD SUCCEEDED **`, no warning in a touched file; the Mac `build-for-testing` (the same DerivedData) → `** TEST BUILD
   SUCCEEDED **`; the headless planted suites green again (57 in 8 — the Mac's lobby pins read "Touch ID isn't set up on
   this Mac." byte-for-byte). The phone suites' RUN and the simulator's open are the orchestrator's — PENDING.
-- Piece 6 — the Mac `build-for-testing` + the record's close (the suites, the walk recipe, the PROVISIONALs):
-  NOT-STARTED.
+- Piece 6 — the Mac `build-for-testing` + the record's close (the suites, the walk recipe, the PROVISIONALs): DONE (the
+  close commit) — the protection surfaces' no-spinner rule applied to the doors' sheet (`758f151bc`, its grep pin gaining
+  `CopyDoorsSheet` and the phone's `MobileRoadFaces`); the final tree's `build-for-testing` lines and the record below.
+
+**THE ROAD AS BUILT (for the ladder):** the doors' brain is `Shared/Protection/CopyDoorsModel.swift` (pure; every act an
+injected `CopyDoorsRoads`); their off-main roads are `ProtectionCopyDoors.swift` (listing · quiet probe · preflight · the act
+· the pick) over `PickedCopy.swift` (classify · file); the bootstrap holds the swap's precondition (`AppBootstrap
+.makeThisMyLibrary` — one act at a time, the preflight, `onWillLock`, `.opening`, `binding.lock()` (checkpoint-truncate then
+close), the act detached, the reopen through the new road with the key that opens the slot) and owes §7c (9)'s receipt to the
+reopened session (`receiptsForNextRoadOpen`, handed over in `finish(.ready)`). The executor does every write
+(`makeThisMyLibrary` on its plan); the app writes only the restore-hold marker (the core writer, before the act; put back as
+it stood when nothing swapped), today's store-id stub (the creation's mint, injected), and — for a pick — the filed copy (the
+picked thing only read). Zero `Sources/`, `Sync/`, `Server/`, `StoreBackup.swift`, `BackupRetention.swift`,
+`RestoreHoldModel.swift` lines; no new dependency.
+
+**Counts (the final tree `758f151bc` + this record):**
+- HEADLESS (the session's SwiftPM harness — not durable; the recipe: a package in the scratchpad, swift-tools 6.2, macOS 26,
+  the app's concurrency settings — default `MainActor` isolation, `NonisolatedNonsendingByDefault`,
+  `InferIsolatedConformances`, `MemberImportVisibility` — depending on the worktree's core by path; its `Variorum` target
+  SYMLINKS every `App/Variorum/Shared/Protection/*.swift` but `ProtectionBackupHook.swift`, plus `Shared/LibraryOpenCopy.swift`,
+  plus one stub file of one-line stand-ins (`DeviceName`, `KeychainTestTripwire`, `KeychainPartition`, `AppleKeyKeychain`,
+  `AppleKey`, `BackupDestination`, `AuthTokens`/`KeychainAuthStorage`, `EncryptionSession.words`, `ProtectionCopy`'s three
+  names); its test target symlinks `ProtectionTestSupport`, `ProtectionOpenRoadPlantedTests`, `CopyDoorsModelTests`,
+  `MakeMineRoadTests`, `PickedCopyRoadTests`, `ProtectionWordsPlanTests`, `ProtectionLobbyModelTests`,
+  `ProtectionWalkSwitchTests`, `ProtectionFileLeavesTests`, and a one-line `RoadWorld.RoadWorldError` stub): `✔ Test run with
+  57 tests in 8 suites passed after 0.862 seconds.` (9 + 3 + 3 + 4 + 9 + 15 + 4 + 10).
+- The MUTATION run (piece 2): `ProtectionCopyDoors.restoreHold` a no-op → `✘ Test run with 6 tests in 1 suite failed after
+  0.580 seconds with 2 issues.` (both at `aRefusalInsideTheActPutsTheHoldBackAsItStood` — no hold must stand; the standing
+  marker's bytes); restored from the pre-mutation copy and `cmp`-checked.
+- `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx306-u3
+  build-for-testing` → `** TEST BUILD SUCCEEDED **`; `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS
+  Simulator' -configuration Debug -derivedDataPath DerivedData/vx306-u3 build-for-testing` → `** TEST BUILD SUCCEEDED **`
+  (both on the final tree); no new warning in a touched file (the build's three test-file warnings are pre-existing:
+  `Phase13pProtectionBrainTests` 2, `ProtectionRoadRouteTests` 1).
+
+**THE MAC SUITES THE ORCHESTRATOR RUNS UNDER THE STAGE (from `App/Variorum/`; PENDING):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx306-u3 test \
+  -only-testing:VariorumTests/CopyDoorsModelTests \
+  -only-testing:VariorumTests/MakeMineRoadTests \
+  -only-testing:VariorumTests/PickedCopyRoadTests \
+  -only-testing:VariorumTests/MakeMineRouteTests \
+  -only-testing:VariorumTests/ProtectionWordsPlanTests \
+  -only-testing:VariorumTests/ProtectionRoadSwitchTests \
+  -only-testing:VariorumTests/TravellingDotsIndicatorTests \
+  -only-testing:VariorumTests/ProtectionLobbyModelTests \
+  -only-testing:VariorumTests/VX310TodayLobbyWitnessTests \
+  -only-testing:VariorumTests/LibraryWordsCardTests \
+  -only-testing:VariorumTests/ProtectionRoadRouteTests \
+  -only-testing:VariorumTests/ProtectionFacesRouteTests \
+  -only-testing:VariorumTests/ProtectionOpenRoadPlantedTests \
+  -only-testing:VariorumTests/ProtectionNoticeFaceTests \
+  -only-testing:VariorumTests/ProtectionOfferFaceTests \
+  -only-testing:VariorumTests/ProtectionRule27FaceTests \
+  -only-testing:VariorumTests/ProtectionRestoreReceiptTests \
+  -only-testing:VariorumTests/ProtectionReminderRoadTests \
+  -only-testing:VariorumTests/PassphraseReminderTests \
+  -only-testing:VariorumTests/ProtectionBackupHookTests \
+  -only-testing:VariorumTests/ProtectionFileLeavesTests \
+  -only-testing:VariorumTests/ProtectionWalkSwitchTests \
+  -only-testing:VariorumTests/KeychainTripwireTests \
+  -only-testing:VariorumTests/KeychainLeavesTests \
+  -only-testing:VariorumTests/ProtectionFactsGathererTests \
+  -only-testing:VariorumTests/ProtectionSystemCompositionTests \
+  -only-testing:VariorumTests/LibraryPortabilityDoorTests \
+  -only-testing:VariorumTests/VX209GuideWarningTests \
+  -only-testing:VariorumTests/VX209LeavesCastleConfirmTests \
+  -only-testing:VariorumTests/SettingsLockCloseTests \
+  -only-testing:VariorumTests/StoreLaunchRouteTests \
+  -only-testing:VariorumTests/Phase13pLobbyTests \
+  -only-testing:VariorumTests/AppBootstrapOffMainTests \
+  -only-testing:VariorumTests/VX202ReopenRaceTests \
+  -only-testing:VariorumTests/VX206ProtectionLandingTests \
+  -only-testing:VariorumTests/ProtectionSurfaceRenderTests \
+  -only-testing:VariorumTests/BackupFutureStampTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/CapabilityRegistryTests \
+  -only-testing:VariorumTests/MCPAsksWaitTests \
+  -only-testing:VariorumTests/Phase9cAuthWiringTests \
+  -only-testing:VariorumTests/DeadVocabularyTests
+```
+The first seven are U3's new or grown suites (9 + 3 + 3 + 2 + 4 + 4 + the dots pin's own; `MakeMineRouteTests` needs the
+signed test host — the keychain); then U2's, U1b's and U1a's suites (the road changed under them — `finish(.ready)`'s receipt
+handover, the words file, the switch; `VX310TodayLobbyWitnessTests` still reports its 2 tests with KNOWN ISSUES — expected, a
+pass of either is a FAILURE; the tripwire's exact count must hold — `MakeMineRouteTests` writes only its throwaway scope);
+then today's road and the surfaces whose files changed (`LibraryOpenPresenter`, Data Safety, Settings' composition, the
+main window's sheets) and the source pins over the edited files. Read the `skipped:` lines.
+
+**THE PHONE'S SUITES (the simulator — under the stage, CoreSimulator is shared state; PENDING):**
+```
+*[removed for publication]*
+  -configuration Debug -derivedDataPath DerivedData/vx306-u3 test \
+  -only-testing:VariorumMobileTests/MobileProtectionRoadTests \
+  -only-testing:VariorumMobileTests/MobileProtectionTests \
+  -only-testing:VariorumMobileTests/MobileProtectionSurfaceTests \
+  -only-testing:VariorumMobileTests/MobileTravellingDotsTests \
+  -only-testing:VariorumMobileTests/MobileLobbyVaultRoadTests \
+  -only-testing:VariorumMobileTests/MobileEmptyStoreTests
+```
+*[removed for publication]*
+`MobileProtectionRoadTests` (6) is new. NOTE for the run: the phone's TEST HOST now takes the new road in its Debug build
+(read-only in a hosted run — the tripwire is armed — so over an empty simulator dev store it lands `.failed` with
+*A test run never creates a library.*, exactly as the Mac's test host has since U1b); the suites above build their own
+stores and do not read the host's state.
+
+**THE WALK RECIPE (the orchestrator's, under a held stage claim `vx-306-u3-walk`; DEV STORE ONLY; both appearances where a
+face changed — the sheets are system chrome on the Mac, so a light and a dark capture of the confirm and the Restore list):**
+0. Zero Debug instances (`pgrep -fl 'Variorum.app/Contents/MacOS'` — a `/Applications` instance is NEVER touched). Build:
+   `cd App/Variorum && xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath
+   DerivedData/vx306-u3 build`. Launch every time as the BINARY with stderr captured (W-4): `OS_ACTIVITY_DT_MODE=YES
+   App/Variorum/DerivedData/vx306-u3/Build/Products/Debug/Variorum.app/Contents/MacOS/Variorum 2> ~/vx306-walk/u3-run-N.log &`,
+   quit with ⌘Q. `DC` = `~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Application Support/Variorum-dev`. Expected
+   start (U2's posture): library A (`818912e0`) in Standard with the dev passphrase, its pairs in `DC/Backups/818912e0/<mac8>/`;
+   B's files in `~/vx306-walk/B`. `source ~/.variorum/dev-castle.env` (`VARIORUM_DEV_NEWROAD_WORDS` and the dev passphrase —
+   never typed into a record).
+1. **The Restore list.** Settings ▸ Data Safety → the *Restore from Backup* section under the new road: the lead
+   (*Look inside a copy to read it without changing anything, or make it your library — your current one steps aside into
+   Previous Libraries.* — P-VX306-U3-2; note it names Look inside, whose door the ruling brings), A's pairs newest first
+   (each its date and time, *Backup*, *Make this my library…*), and *Other libraries on this Mac* if any other library's
+   catalogued copy is here (B's backup pair if one ran while B was open; record what lists). Today's flat copies are NOT
+   listed (rule 26). Capture (light, dark).
+2. **Stage 9 — Make this my library on A's newest backup.** *Make this my library…* → the confirm: *Make this my library?*,
+   the lead (§7c (8) as drafted — A has a passphrase), *Checking the copy…* then NO copy field (A's silent item opens its
+   own backup), *Your twelve words*, *Your passphrase*, *Cancel* · *Make this my library* (off until both are typed).
+   Capture. (a) A WRONG word first (eleven words) → *There are twelve words — you entered 11.*; a wrong-but-valid set →
+   *Those twelve words don't open this library.* — the window NEVER goes to *Opening your library…* (the preflight). (b) The
+   real words + the dev passphrase → *Making this copy your library…* → the windows show *Opening your library…* → the
+   library reopens: the RESTORE HOLD banner (*This is your library as of <the backup's day>. Sync is waiting …* + *Resume
+   Sync*) and the quiet receipt *This is your library now. The previous one is in Previous Libraries.* (6 s — capture at
+   once; W-7: a long receipt may run into the bottom bar's hint). Log: `road: made a copy this Mac's library — library <new8>
+   key <fp8>; …; held`, then `road: opened — library <new8> … repairs […]`. Files: `DC/Previous Libraries/<stamp>/` holds
+   `variorum.sqlite` + `variorum-library-keys.json` (A's, its `"libraryID"` 818912e0…); `DC/variorum-library-keys.json`'s
+   `"libraryID"` is NEW, `"history"` empty, locks `apple`/`passphrase`/`words`; `DC/variorum-restore-hold.json` present; a new
+   `variorum-keys-<fp>.json` stub beside the slot and A's renamed `….stale-<ts>.json`. The Restore list now shows A under
+   *Other libraries on this Mac* as *Previous library*. Press *Resume Sync* → the banner goes. **The dev library is now a NEW
+   library (C)** — under the same words and passphrase (her current pair), so `dev-castle.env` still opens it; tell the
+   coordinator the dev library's ID changed (the `818912e0` key file now lives in Previous Libraries).
+3. **"Make it your library again"** (§7c (8)'s promise — optional, it mints another new library): *Make this my library…* on
+   A's previous-library row → the same confirm (A's silent item still opens A's file quietly) → a library D with A's
+   content; C steps aside into Previous Libraries. Record the IDs.
+4. **Stage 10 — an AirDropped copy.** `mkdir -p ~/Downloads/vx306-airdrop && cp ~/vx306-walk/B/variorum.sqlite
+   ~/vx306-walk/B/variorum-library-keys.json ~/Downloads/vx306-airdrop/` (and B's `-wal` if it is non-empty; never its
+   `-shm`); `shasum ~/Downloads/vx306-airdrop/*`. File ▸ Open Library… → pick `~/Downloads/vx306-airdrop` → the sheet
+   *Open a Library* · *Reading what you picked…* → *A copy from <B's day>.* · *Cancel* · *Make this my library…*. Capture.
+   `ls "DC/Backups/safety-copies/"` → a `variorum-adopt-safety-<stamp>/` holding `variorum.sqlite` + `variorum-library-keys.json`
+   (B's); `shasum` the picked folder again → identical (only read). *Cancel* (making B's throwaway library this Mac's is
+   optional — it swaps the dev library's content to B's; Previous Libraries brings C/D back). The Restore list now lists B's
+   filed copy under *Other libraries on this Mac* as *Opened copy*. Also: pick `DC/variorum.sqlite` itself → *That's the
+   library you have open now.*; a plain-text export → *Opening a plain-text copy isn't ready in this build yet.* (optional —
+   only with a plain-text `.sqlite` export already at hand; Data Safety's *Export an unencrypted copy…* is one of today's
+   protection doors, which the walker does not press on the new road; `PickedCopyRoadTests.thePicksRefusalsAndTheChooser`
+   carries the row).
+5. **Look inside** — NOT walkable until the ruling's build (the recipe's rows: on the stage-3 pair → read-only, the live key
+   file `cmp`-identical, no new keychain item (the open's Diagnostics line counts), the private copy gone at close; on B's
+   filed copy).
+6. **The missing face under the new road** (optional): with the slot moved aside (and its sidecars — W-9) the missing face
+   shows *Start a New Library* and *Restore from Backup…* and NO *Open Library…* (P-VX306-U3-7). Put the slot back.
+7. **The simulator's open (the phone):**
+   ```
+   *[removed for publication]*
+   xcrun simctl boot $UDID 2>/dev/null; open -a Simulator
+   xcrun simctl install $UDID App/Variorum/DerivedData/vx306-u3/Build/Products/Debug-iphonesimulator/VariorumMobile.app
+   DATA=$(xcrun simctl get_app_container $UDID io.lduarte.VariorumMobile data)
+   ls -la "$DATA/Library/Application Support/Variorum-dev/"      # THE SIMULATOR'S DEV STORE
+   ```
+   If a pre-design store sits there (an earlier phone build's — `variorum.sqlite` with a `variorum-keys-*.json` and no
+   `variorum-library-keys.json`), set it aside first as K1 did (rule 26): `cd "$DATA/Library/Application Support/Variorum-dev"
+   && mkdir -p Backups/safety-copies/variorum-vx306-predesign-$(date -u +%Y-%m-%d-%H%M%S) && mv variorum.sqlite*
+   variorum-keys*.json Backups/safety-copies/variorum-vx306-predesign-*/` (or `xcrun simctl uninstall $UDID
+   io.lduarte.VariorumMobile` for a fresh container — the simulator keychain keeps its items; the new road's names never
+   collide with today's). Launch with the log on the console:
+   `SIMCTL_CHILD_OS_ACTIVITY_DT_MODE=YES xcrun simctl launch --console-pty --terminate-running-process $UDID
+   io.lduarte.VariorumMobile 2>&1 | tee ~/vx306-walk/sim-1.log` (Ctrl-C ends the console; `xcrun simctl terminate $UDID
+   io.lduarte.VariorumMobile` quits the app). EXPECTED: the words card (*Your twelve words*, the lead, the twelve words in
+   two numbered columns, the foot, *I've written them down*) → the shell opens; the log `road: created — library …`.
+   Capture: `xcrun simctl io $UDID screenshot ~/vx306-walk/sim-card.png` (the words are throwaway — delete the capture after
+   checking it, as at U1b). Relaunch → a silent open (`road: opened … repairs []`). Then
+   `SIMCTL_CHILD_VARIORUM_WALK_FORGET=silent,apple xcrun simctl launch --console-pty --terminate-running-process $UDID
+   io.lduarte.VariorumMobile …` → THE PHONE'S LOBBY: *Open your library*, *Enter your twelve words to open your library.*,
+   the words field, the quiet line *Face ID isn't set up for this library.* (or *…on this iPhone.* — whatever the
+   simulator's Features ▸ Face ID ▸ Enrolled says); a wrong count → *There are twelve words — you entered N.*; the words →
+   opens (`repairs [remakeAppleRoad, remakeOnDeviceItem]`). Capture. KNOWN RISK (F-U3-5): the creation mints an Apple key
+   into the SHARED access group (synchronizable); if the simulator build lacks that keychain group the creation fails with
+   *Variorum couldn't create your library.* and the log names the keychain status — record it, the fix is the
+   entitlement's, not the road's. A DEVICE install is HER hands (the handoff — optional).
+8. **Posture after the window:** record the dev library's new ID (C or D), the Previous Libraries folders made, the filed
+   B copy, the hold resumed; `dev-castle.env`'s values unchanged (the new libraries carry her current pair).
+
+**PROVISIONALs (each built as its option (a); bundled under QUESTIONS #233 in plain words):**
+- **P-VX306-U3-0** (the orchestrator's, built as ruled) — a picked pair or library folder is filed first into this Mac's
+  `Backups/safety-copies/variorum-adopt-safety-<stamp>/` and the doors act on the catalogued copy. A note: the filed copy
+  then stays listed (rule 19) until VX-309's delete — a tension with Look inside's "close it and the app forgets it" when a
+  pick is only to be looked at (the look writes nothing; the filing does).
+- **P-VX306-U3-1 — the Restore list holds this library's copies AND every other library's catalogued copy on this Mac**
+  (*Other libraries on this Mac*), each with the doors. (a) BUILT — §7c (8)'s lead promises the library that stepped aside
+  is "where you can look inside it or make it your library again", and after Make this my library it is ANOTHER library's
+  copy (a fresh ID); rule 19 lists copies of other libraries; (b) this library's copies only (the promise false until
+  VX-309's list); (c) other libraries' Previous Libraries only (their backups and opened copies hidden). No delete door
+  (VX-309's).
+- **P-VX306-U3-2 — U3's words §7c does not draft** (`ProtectionWords`): the list's lead *Look inside a copy to read it without
+  changing anything, or make it your library — your current one steps aside into Previous Libraries.* · *Other libraries on
+  this Mac* · the kinds *Backup* / *Previous library* / *Opened copy* · the copy field's note *Leave it empty if your own
+  passphrase and words open it.* · *Cancel* · *Making this copy your library…* · *Checking the copy…* · *That doesn't open
+  this copy. Enter the copy's own passphrase or twelve words.* · *That copy isn't there any more.* · *Another change to your
+  library is still running. Try again in a moment.* · *Variorum couldn't make this copy your library just now. Nothing
+  changed.* · *Opening a plain-text copy isn't ready in this build yet.* · *This file couldn't be read as a library.* (today's
+  own, reused) · *That's the library you have open now.* · *Variorum couldn't keep a copy of what you picked. Nothing you
+  picked was changed.* · *Reading what you picked…* · *A copy from <day>.* (b) blank until her sitting; (c) other words.
+  Her taste call.
+- **P-VX306-U3-3 — the confirm's lead without a passphrase.** (a) BUILT — §7c (8) exactly as drafted when the library has a
+  passphrase; with none, the same sentence without "and passphrase" (*… under your current twelve words — with a fresh key
+  of its own …*) — a library with no passphrase is not under one (§3: a sentence the build makes false is a regression);
+  (b) the drafted sentence always; (c) a variant of hers.
+- **P-VX306-U3-4 — the copy's own secret.** (a) BUILT — its field shows only when its quiet road doesn't open it (tried
+  once, a READ, at the confirm's open); an EMPTY field tries her own pair (rule 4: her current secrets open older backups
+  of the same library); twelve words that validate are the words, anything else a passphrase (untrimmed); (b) the field,
+  when shown, required; (c) two fields (passphrase / words).
+- **P-VX306-U3-5 — a picked plain-text export on the new road REFUSES** (*Opening a plain-text copy isn't ready in this build
+  yet.*) — a deviation from the addendum's "keeps today's road", on a trace: today's adoption (`LibraryOpenModel` →
+  `LibraryAdoption.execute`) sets the library aside with TODAY's key-file names only (`StoreKeyEnvelope.keyFileURLs` — the
+  format-3 `variorum-library-keys.json` is left in the live place), lands a plaintext store the new road cannot open (no
+  protection record → `recordMissing` → the missing face, K5), and mints today's silent custody (`saveAuto`). (a) BUILT;
+  (b) today's road (the trace above); (c) build T-8 now (VX-309's).
+- **P-VX306-U3-6 — a picked copy under TODAY's key-file format** (rule 26 — from before this design): today's own *This file
+  couldn't be read as a library.* (a) BUILT — her "no refusal string either" read as no NEW sentence naming the old design,
+  while a door that did nothing still speaks (§12); (b) a sentence naming the earlier design; (c) today's adoption (it
+  would land a library the new road cannot open).
+- **P-VX306-U3-7 — the missing face's and rule 27's *Open Library…* retire on the new road** until Look inside lands: no
+  library is open whose current pair could make a copy its own (T-5 is VX-309's), and 13x's door there would run today's
+  adoption on the new road. (a) BUILT (P-2); (b) keep 13x's door (the trace of U3-5 applies); (c) file-then-Look-inside
+  once (b) of the proposal is ruled — the proposal says so.
+- **P-VX306-U3-8 — the biometry lines name the platform's own** (`ProtectionCopy.biometryName` / `.deviceName`): the Mac's
+  read "Touch ID" / "this Mac" byte-for-byte as before; the phone's *Unlock with Face ID*, *Face ID isn't set up on this
+  iPhone.* / *…for this library.* (a) BUILT; (b) the Mac's words on the phone (false there); (c) separate phone constants.
+- **P-VX306-U3-9 — today's store id is minted FRESH for the new library** at Make this my library (the creation's own mint —
+  the outgoing stub set aside, `StoreIdentity.establish` under the new key, the new id's Auto dials), so the rest of the
+  app — today's sync custody keyed by store id, the dials, the backup log — starts fresh with the new library (rule 17: a
+  fresh identity; rule 18: a copy made one's own joins one's account as a copy). (a) BUILT; (b) keep the outgoing
+  library's store id (the new library would inherit the old one's sync custody and dials); (c) leave it to the next open
+  (the next open keeps an existing stub — the same as (b)).
+- **P-VX306-U3-10 — the restore hold around the act.** (a) BUILT — written BEFORE the act by the core writer (13x's order:
+  nothing lands un-held); when nothing swapped (a refusal, a rollback) it is put back exactly as it stood (none, or the
+  standing marker's bytes); past the swap it stays and the door says made (the act's last steps finish at the next open);
+  (b) a failure always leaves the hold (13x's conservative direction — a library never replaced would sit held until
+  Resume); (c) the hold written after the act (a crash between the swap and the write would land un-held).
+- **P-VX306-U3-11 — the preflight.** (a) BUILT — every check as READS before the window comes down: the copy catalogued, it
+  opens with what she typed, its schema one this build opens (a newer Variorum's copy refused, never landed), her pair
+  against the open library; (b) let the act refuse after the teardown (a typo reloads every window); (c) no schema check
+  (a newer copy would land and fail to open after the swap).
+- **P-VX306-U3-12 — the pick's edges.** (a) BUILT — a copy already in this Mac's catalogue, picked by hand, is used where it
+  is (never filed twice); the open library itself (or its folder) refused; a folder of several pairs offered; (b) file
+  every pick; (c) refuse picks inside the container.
+- **P-VX306-U3-13 — rule 27 after a quiet open, on the phone,** is a sheet once per open (§7c (3)'s words, *OK*, no doors);
+  the reminder and the receipts have no phone face this unit. (a) BUILT; (b) a standing banner in the phone's shell (a
+  shell file of another surface); (c) nothing on the phone.
+- **P-VX306-U3-14 — §7c (9)'s receipt is spoken on the MAIN window's status seam after the reopen** (owed to the reopened
+  session), wherever the door was pressed (Settings included). (a) BUILT — the status seam is the main window's, and the
+  reopen rebuilds it; (b) a line in the Settings sheet before it closes (the sheet closes on the reopen); (c) none.
+
+**Findings (routed):**
+- **F-U3-1 (words — VX-379's pass):** Settings ▸ Data Safety's *Restoring a copy* section (today's) still says *Restoring is
+  a Finder operation, not a button …* on the new road, beside the Restore list's *Make this my library…* — false there;
+  and the hand-off's (*Send Library to Another Mac…*) is today's road (VX-309's). VX-379's sentence pass, or hide the
+  section on the new road.
+- **F-U3-2 (cosmetic, W-7's class):** §7c (9)'s receipt is ~70 characters — it may run into the bottom bar's hint as rule 1's
+  did (W-7).
+- **F-U3-3 (minor):** a Make this my library pressed in Settings reopens the library and the Settings window rebuilds at its
+  default pane (the re-key road asks for its pane back — `requestProtectionPaneForCeremony`; this door does not).
+- **F-U3-4 (the TODAY'S-CLASSIFIER fact, for the ladder):** `LibraryClassifier` reads today's `StoreKeyEnvelope`, which a
+  format-3 key file does not decode as (no `storeID`) — so today's classifier sees this design's pairs as bare stores; the
+  new road classifies them first (`PickedCopy`). Traced, not pinned against today's classifier.
+- **F-U3-5 (the walk's risk):** the creation mints an Apple key into the shared access group on the simulator too; if the
+  simulator build lacks the group, the phone's creation fails in words (recipe row 7).
+- **F-U3-6 (note):** each Make this my library mints a fresh library ID, device ID, key, Apple key (iCloud, dev-scope names)
+  and silent item by design (rules 17, 23); the walk's rows 2–3 mint two — W-10's accumulation class.
+
+**Hand-forwards:**
+- **Look inside** — the ruling, then its build (the proposal's (b): `ProtectionCopyPeek` in core, `LookInsideModel`,
+  `LookInsideSheet`, *Look inside…* on every Restore row and a picked copy's doors, the write-nothing proof; the missing face's
+  and rule 27's *Open Library…* back as file-then-Look-inside if ruled).
+- The phone's reminder bar, set-passphrase sheet and receipts (a later phone unit / the mobile catch-up).
+- VX-379: every U3 string is in `ProtectionWords.swift` (§7c (8)–(10) pinned byte-equal; P-VX306-U3-2's undrafted).
+- VX-309: T-5 (the empty-slot landing), T-8 (the plain-text export in), the copies list's delete door, Send Library on the
+  new road.
+
+**Notes:** no machinery deaths; no Sonnet lookup. The one MUTATION (piece 2) was applied to a file not yet committed, with
+its pre-mutation copy in the session scratchpad — the protocol's rule is "commit before you revert" (a crash there would
+have left a mutated, uncommitted file); restored at once and `cmp`-checked. `git worktree list` shows none of this session's
+(no scratch worktree was used — the doors are new code, their pins red by construction on the pre-unit tree, which had none
+of these types).
