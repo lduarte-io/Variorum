@@ -244,7 +244,7 @@ tickets:
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
 | U1a — VX-303 (the landing road) | VERIFIED 2026-10-18 (`vx-382-u1a` window) — red-on-old A·B·C red as planned, both guard probes red, tree restored clean between each; batch `Test run with 1590 tests in 259 suites` — 4 issues + 5 known: VX-115's standing red (BookCollectingDoorsTests) + `DestructiveUndoWarningTests.redoNeverAsks` (the known VX-167 parallelism flake, signature :141–143); VX-77's standing red did NOT reproduce (passed). 9 skipped (2 disabled suites). §U1a RECORD → batch results. Code tip f0d1b414f |
 | U1b — VX-304 (the box door + Index takes) | VERIFIED 2026-10-18 (windows `vx-382-u1b` + `vx-382-u1b-walk`) — red-on-old B·C·D + both guard probes red as planned; batch 1998 tests / 332 suites: standing reds only (VX-115; VX-167's redoNeverAsks, red alone, same signature) + FINDING D-2, FIXED ab3db8f19 (the departing Outline ate the reveal) — 64-suite family 308/64 green (4 known), its red-on-old red; OutlineRoomTests PASSED; THE U1 WALK: Study 11 rows PASS (W1/W3 not walked — same road, pinned), Terminal 6 face/act rows PASS; posture restored, 0 instances, 0 GiB pruned (nothing superseded). §U1b RECORD |
-| U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | BUILT — batch + walk PENDING the `vx-382-u2` window (implementer: opus-implementer, fresh, 2026-10-18). VX-291 (a8e774ea5) · VX-21 as first built (ac24bedbf — R-U2-A2: the panel has only chapter grips; no re-cut) · VX-69 (ef0405784) · VX-115 (18e121a08, contains-style accepted) · VX-77 archaeology + R-U2-B `.aqua` pinning (8b38c88bb); `build-for-testing` green. Window: the REVISED sequence (rows 0–1c VX-77, row 2 VX-21 restored, 3–5) + THE U2 WALK (W4 restored with the chapter-drag check) — §U2 RECORD |
+| U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | VERIFIED 2026-10-18 (window `vx-382-u2`) — VX-77: row 0 green 22/2, the dark probe RED "ink at 0.0" (VM-5's 2 issues + the navigator pin) → hypothesis CONFIRMED, R-U2-B (8b38c88bb) green under dark → DISMISSED AS HOLLOW, `appearanceChoice` restored `system`; red-on-old VX-21 4 issues · VX-69 1 · VX-291 probe 8 (each restored clean); batch 649 tests / 125 suites — 7 issues incl. 4 known, the only other red VX-167's `redoNeverAsks` (red alone, same signature, not attributed), VX-115 GREEN; **walk FINDING W-1** (the fold overhang took the hover, dropped the click) FIXED 4d8367ec5 + pin `aClickInTheOverhangUnfoldsTheNote` (red-on-old red, green 3/1, guard set 54/10 green); THE U2 WALK — Study W1–W5 PASS, Terminal faces W1′–W4′ PASS (W2′ edge noted); one untraced observation (Book Panel Close in Terminal) for the orchestrator; posture restored, zero instances, stage held. §U2 RECORD |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
 | Closeout (canon deltas, tickets, PR, handoff) | NOT STARTED |
 
@@ -1161,3 +1161,47 @@ rides an overlay centred on it — its bounds ARE the target. Pin first: a real 
   BookCardHeightStabilityTests · BookIndexEditingTests · BookIndexColumnHeightsTests · ChromeLineLimitTests ·
   BookIndexLandingTests · BookViewTests` — `54 tests in 10 suites passed` (`w1-guards.log`). The batch's other 115
   suites ran on the pre-W-1 tree; the change is local to the control (its two hosts' guards re-run above).
+
+### THE U2 WALK — verdicts (dev store, the window's Debug build — W1's first look on the pre-W-1 tree, then the fixed tree 4d8367ec5 relaunched; sherlock; screens `scratchpad/u2/screens/`)
+
+Gate: her `/Applications` app absent throughout; no What's New; no lock screen. Found posture: voice Study, appearance
+`system` (Settings ▸ General read: Theme Study · Appearance Follow system). VX-381's live posture taken as found.
+
+**Study (voice 1):**
+- W1 the card's ▸ — at rest the 13-pt glyph (`60-…-z`); hover → the 22-pt wash (`02-W1-hover`); a click in the LEFT
+  overhang (screen 626,296 — outside the old 11-pt box) → **unfolds in place, never Write** — **PASS on the fixed tree**
+  (`61-W1-overhang-unfolds`). (On the pre-W-1 tree the same click did nothing — FINDING W-1, fixed and pinned above.)
+- W2 the header's ▾ — the same box, washed under the pointer; a click BELOW the glyph (619,301) → folds back to its
+  card, the cards below at their old y (heights unchanged by eye) — **PASS** (`62-W2-overhang-folds`).
+- W3 the Index chapter fold — hover wash on the ▾ (`64-W3-hover-z`); a click in its left overhang (306,381) → the
+  chapter folds (▸, its note row gone); again → unfolds — **PASS** (`65-…-z`, `66-…-z`).
+- W4 the Book Panel grips — (i) manual: ⠿ on every chapter row (`72-W4-panel-z`); (ii) a real chapter drag (The
+  Red-Headed League onto A Scandal in Bohemia) MOVED it (`73-W4-chapter-dragged`), the reverse drag put it back
+  (`74-…-z` — order restored; the two rows' position keys are new, the ORDER is the found one); (iii) order ▾ → Entry
+  date ↑ → Save as This Book's Order → the story's panel draws NO ⠿ on any row, names unmoved (`81-W4-panel-entrydate`);
+  (iv) order ▾ → Manual order → Save → the label reads "Manual order" (muted — the book's own) and the ⠿s are back
+  (`85-…-z`, `87-W4-panel-manual-z`) — **PASS**. (The navigator's ⠿ under Entry date stays drawn — R-U2-A2's siblings,
+  unchanged by ruling, `82-W4-book`.)
+- W5 the order popover — open (`50`) → Esc → closed (`51z`) — **PASS**; `abc` typed in the quick entry, order ▾ open
+  (`52`), Esc → the popover closed and the field still reads `abc` (`53`) — **PASS**; the field cleared (select-all +
+  delete — nothing filed); № open → Esc → the census STAYS (`55`) — **PASS**; № closed again (found state).
+
+**Terminal (voice 2 — the faces, plus the acts once more):** W4(i) the panel's ⠿ in manual (`92-T-W4-panel`) **PASS**;
+W1′ hover wash + a left-overhang click unfolds (`97-…-z`, `98-T-W1-unfolded`) **PASS**; W2′ the ▾'s lower overhang:
+the first click at 288 (≈1.7 pt inside the box's bottom edge by my read of the capture) did not fold, the retry 1 pt
+higher (287) folded (`99`, `106-…-z`) — **PASS, edge noted** (within the coordinate read's error; the pin's card arm
+clicks 1.5 pt inside the edge and passes); W3′ hover + overhang fold/unfold (`102`–`104`) **PASS**.
+
+**Observation, NOT traced, not a U2 row (for the orchestrator):** in Terminal, right after closing Settings, two clicks
+on the Book Panel's "Close" (and one on the back arrow, in the same burst) did nothing visible though "Close" showed
+its hover wash; the panel stayed open (`93`, `94`); the next click (the sidebar's bookcase) acted. The Book Panel's
+Close is pre-existing and outside this unit; unverified whether it is the panel or the moment (the first click after
+a Settings close). Owner: the orchestrator's call (a probe, or VX-300).
+
+**Machinery note:** the walk guard tripped once on "HID idle 1s" — my OWN click 1.5 s earlier (cliclick resets the HID
+idle clock; acts ≥2.5 s apart cure it — U1's recorded self-trip), not a person; HID idle then grew steadily.
+
+**Restore:** sherlock's order saved back to Manual order (read back on the label, both voices); its chapter order as
+found; the quick entry empty, nothing filed, no note text typed; the census closed; the Book Panel left open on "About
+this book" (view state — the Close observation above); voice Study (Settings read back); `appearanceChoice` = `system`
+(read back); the app quit by bundle id; `pgrep -fl 'Variorum.app/Contents/MacOS'` EMPTY. The stage is NOT released.
