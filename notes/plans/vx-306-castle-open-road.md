@@ -435,7 +435,7 @@ store this build has written — coordinators told.
 - U1b — the lobby on roads, Debug-gated (+ VX-310, the creation card, the Release check, the dev store's fresh start): DONE 2026-10-18 — built by the Opus implementer (`fdda1a67b`…`137281318`, the §9 U1b RECORD), the batch under `vx-306-u1b` 212/33 (3 known = VX-310's witnesses; the pin fix `2b6a866ad`), THE CONVERSION walked (the §9 U1b WALK RECORD; findings W-1…W-6, W-2 fixed in U2).
 - U2 — the honest faces (+ rule 3's reminder, the set-passphrase sheet, W-2's fix): BUILT 2026-10-18 (Opus implementer) — commits `d35b82290`…the close (the §9 U2 RECORD); `build-for-testing` and the phone build green on the final tree; the new pure and planted suites green HEADLESS (69 in the session harness), the core's protection set green in both configurations (315 / 291); the Mac suites (the record's list) and the walk (stages 2, 14, rule 1's restore, W-2's pair, rule 27 both moments) PENDING — the ORCHESTRATOR's, under the stage.
 - U3 — the two doors; the phone opens: DONE 2026-10-18 — built by the Opus implementer (`eaeed1126`…`e46837f2a`, the §9 U3 RECORD; Look inside ruled (b) and built), the batches under `vx-306-u3` (Mac 290/44, phone 20/5 on the iOS 26.2 sim), the walk (the U3 BATCH + WALK RECORD: Look inside, the AirDropped road, Make this my library → the dev library is now 86a82b4f, the hold standing; the phone's open in the simulator; findings W-11…W-17, W-13 a MINOR).
-- The ladder (Fable — custody code; her cap: up to five rounds while MAJORs are still found): NEXT — round 1 over the whole phase diff (`9eff28e3e..HEAD`, the merges of main excluded by reading the branch's own commits).
+- The ladder (Fable — custody code; her cap: up to five rounds while MAJORs are still found): CLOSED 2026-10-18 at round 2 — r1 0B/0M/4m/4N (`notes/plans/vx-306-ladder-round-1.md`; m1/m2/m4 + the NITs fixed red-on-old, m3 → VX-411), r2 0B/0M/3m/3N over the fixes (`-round-2.md`; m2/m3/NIT 3 fixed red-on-old, NITs 1–2 → VX-307's plan); every batch under the stage (§10).
 - Closeout: the words checked (VX-379's first pass — the Start Here chapter §7c); canon: AppSpec §12's LIBRARY
   PORTABILITY line (the doors replace 13x's landing wording); the handoff with HER-HANDS items (Look inside on a byte-copy
   of her real store with her credentials; the real store's field-guide re-seed); VX-307's plan written to the rules (the
@@ -2941,4 +2941,13 @@ xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -
   below is their proof. **The edge the implementer named** (an empty slot holding a MISSING library's key file, a caller skipping the
   set-aside — unreachable: both faces set aside first; telling it from a crashed creation's leftovers needs the lived-here marker on the
   executor's leaf) → VX-307's plan, by name.
+
+**ROUND-2 FIX LEG — THE BATCH (the orchestrator, 2026-10-18 13:59–14:18 MDT, claim `vx-306-l2`, tip bd3534628 + the fold ae7c7a41a of main
+5bbbcb5ad):** Mac → `━ Test run with 244 tests in 47 suites passed after 98.227 seconds with 3 known issues.` (VX-310's witnesses); the two
+RED LEGS, each alone on a one-line revert restored by `git checkout` — NIT 3's post removed → `CopyDoorsPickRefreshTests` `✘ … 1 test … 2
+issues` (`:73`: the standing list missed the filed copy); m2's rule returning nine blocks on both roads → `aFreshStoreOnTodaysRoadSeedsHer
+FiveBlocksAlone` red (2 issues), `theFourPassagesSeedOnlyWhereTheStoreOpensOnTheNewRoad` red (`:68`), `theFourPassagesSitBehindTheRoadInThe
+Source` red (`:98`) — `✘ 13 tests in 2 suites … 121 issues (including 117 warnings)`; the phone's six → `✔ 20 tests in 5 suites`; the simulator
+shut down; the Mac product rebuilt on the restored tree; the tree clean. **THE LADDER CLOSED at round 2** (0B/0M/4m/4N · 0B/0M/3m/3N; no
+BLOCKER/MAJOR ⇒ no round 3; the round-2 fixes line-by-line checked above).
 
