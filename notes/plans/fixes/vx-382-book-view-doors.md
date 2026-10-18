@@ -1095,3 +1095,10 @@ revert to the first READY's forms.
 change; window row 2 and walk row W4 are back to the first READY's forms above (W4 gains the manual-order chapter-drag
 check the re-rule asks for). The siblings (the navigator's and the Outline headings' ⠿) are untouched. P-U2-4 carries
 options (a)–(c) for her bundle.
+
+### The `vx-382-u2` window — IN PROGRESS (claimed 2026-10-18 by `vx-382-u2`, 60 min)
+
+Found posture: `appearanceChoice` = `system`; zero app instances. Steps run in the REVISED order; each revert is in
+place from the committed tree (a265d0afc) and restored with `git checkout --` to a clean diff before the next. Logs:
+`scratchpad/u2/` (gitignored). **No revert in flight at this line.**
+
