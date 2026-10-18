@@ -206,9 +206,12 @@ struct SavepointCommitDoorTests {
     /// always commit your take even without an extra keystroke to enter (but
     /// if you click escape, then that can deliberately not save)"*). It now
     /// drives the PRODUCT's presenter (Write's bar) and leaves the field the
-    /// way a click away does — the popover closing itself — which files ONE
-    /// commit, unnamed; then a second ⌘S left by ⎋ files nothing. **RED ON
-    /// OLD** by behaviour (the pre-fix presenter filed nothing on the close).
+    /// way a click away ENDS — SwiftUI writing nil through the host's binding,
+    /// which also closes the popover (VX-347's fix leg re-shaped this road:
+    /// the first rig looked the popover up before AppKit announced it, so the
+    /// cell never reached the behaviour) — which files ONE commit, unnamed;
+    /// then a second ⌘S left by ⎋ files nothing. **RED ON OLD** by behaviour
+    /// (the pre-fix presenter filed nothing on a dismissal).
     @Test func onlyEscapeLeavesTheFieldWithoutACommit() async throws {
         try await withEditor(seedBlocks: ["draft text"]) { h in
             let mounted = await SavepointFieldRig.mountWritesBar(h.model)
@@ -217,7 +220,7 @@ struct SavepointCommitDoorTests {
             h.model.updateCaretContext()
 
             _ = try await SavepointFieldRig.pressCommandS(h.model, mounted)
-            try await SavepointFieldRig.clickAway(mounted)  // a click outside / the window going
+            await SavepointFieldRig.dismissTheField(h.model)  // a click outside, as it ends
             await SavepointFieldRig.awaitSavepoints(h, count: 1)
 
             let afterAClickAway = try savepoints(h)

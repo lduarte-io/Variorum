@@ -37,29 +37,40 @@ import VariorumCore
 
 // MARK: - The rig
 
-/// Catches every popover that shows while it listens, so a cell can close
-/// the field's popover the way a click away closes it (`performClose`, the
-/// road AppKit's transient dismissal ends on — `willClose`, then the binding).
+/// Catches every popover that shows while it listens, so ONE cell can close
+/// the field's popover by its own `performClose` (the road AppKit's transient
+/// dismissal ends on — `willClose`, then the binding).
+///
+/// **FIX LEG (the batch's harness finding):** the first rig listened for
+/// `didShowNotification` only, which AppKit posts when the show ANIMATION
+/// ends — the cells looked the popover up the moment its window appeared, so
+/// `fieldPopover()` answered nil on both trees and the cells never tested the
+/// behaviour. `willShowNotification` is posted synchronously inside the show
+/// itself, before the window exists; both are heard, and the lookup waits.
 @MainActor
 final class SavepointPopoverCatcher {
     private(set) var shown: [NSPopover] = []
-    private var token: NSObjectProtocol?
+    private var tokens: [NSObjectProtocol] = []
 
     init() {
-        token = NotificationCenter.default.addObserver(
-            forName: NSPopover.didShowNotification, object: nil, queue: .main
-        ) { [weak self] note in
-            // Read before the hop: the notification itself is not Sendable.
-            let popover = note.object as? NSPopover
-            MainActor.assumeIsolated {
-                if let popover { self?.shown.append(popover) }
-            }
+        for name in [NSPopover.willShowNotification, NSPopover.didShowNotification] {
+            tokens.append(NotificationCenter.default.addObserver(
+                forName: name, object: nil, queue: .main
+            ) { [weak self] note in
+                // Read before the hop: the notification itself is not Sendable.
+                let popover = note.object as? NSPopover
+                MainActor.assumeIsolated {
+                    guard let self, let popover, !self.shown.contains(where: { $0 === popover })
+                    else { return }
+                    self.shown.append(popover)
+                }
+            })
         }
     }
 
     func stop() {
-        if let token { NotificationCenter.default.removeObserver(token) }
-        token = nil
+        for token in tokens { NotificationCenter.default.removeObserver(token) }
+        tokens = []
         shown = []
     }
 }
@@ -162,9 +173,24 @@ enum SavepointFieldRig {
         return popover
     }
 
-    /// The field's popover closing as a click away closes it.
-    static func clickAway(_ mounted: Mounted) async throws {
-        let popover = try #require(mounted.fieldPopover(), "premise: the field's popover showed")
+    /// **A CLICK AWAY, AS IT ENDS** (FIX LEG — the deterministic road). A
+    /// transient dismissal closes the popover and SwiftUI then writes nil
+    /// through the host's binding (`set: { model.savepointAsk = $0 }`) — the
+    /// road VX-179's `closingThePopoverSavesADirtyInPlaceEdit` dismisses by
+    /// ("the road a click-away and the panel's own close both end on"). The
+    /// binding going nil closes the popover too, so BOTH of the presenter's
+    /// dismissal reports run — the host's change and the popover's own
+    /// `willClose` — and the cell holds that they file ONE commit.
+    static func dismissTheField(_ model: EditorViewModel) async {
+        model.savepointAsk = nil  // SwiftUI's own write at the dismissal's end
+        await turns(40)
+    }
+
+    /// The field's popover closing by its OWN `performClose` — the watcher's
+    /// road (`willClose`). Looked up after it is caught, never assumed.
+    static func closeThePopoverItself(_ mounted: Mounted) async throws {
+        await turns(until: { mounted.fieldPopover() != nil }, max: 100)
+        let popover = try #require(mounted.fieldPopover(), "premise: the field's popover was caught showing")
         popover.performClose(nil)
         await turns(40)
     }
@@ -244,7 +270,9 @@ struct VX347CommitLeavesMountTests {
 
     /// **A CLICK AWAY FILES IT, UNNAMED — RED ON OLD.** The pre-fix
     /// presenter cancelled on every dismissal ("one road, so a dismissal can
-    /// never half-commit"), so ⌘S was really ⌘S ⏎.
+    /// never half-commit"), so ⌘S was really ⌘S ⏎. Left the way a click away
+    /// ends (`dismissTheField` — both of the presenter's dismissal reports
+    /// run, and they file ONE commit).
     @Test func aClickAwayFilesTheCommitUnnamed() async throws {
         try await withEditor(seedBlocks: ["draft text"]) { h in
             let mounted = await Rig.mountWritesBar(h.model)
@@ -253,7 +281,7 @@ struct VX347CommitLeavesMountTests {
             _ = try await Rig.pressCommandS(h.model, mounted)
             #expect(try Rig.savepoints(h).isEmpty, "premise: the door itself writes nothing")
 
-            try await Rig.clickAway(mounted)
+            await Rig.dismissTheField(h.model)
             await Rig.awaitSavepoints(h, count: 1)
 
             let saved = try Rig.savepoints(h)
@@ -277,12 +305,34 @@ struct VX347CommitLeavesMountTests {
             await Rig.type("kept", to: try Rig.deliveryWindow(for: popover))
             #expect(try Rig.savepoints(h).isEmpty, "premise: typing files nothing yet")
 
-            try await Rig.clickAway(mounted)
+            await Rig.dismissTheField(h.model)
             await Rig.awaitSavepoints(h, count: 1)
 
             let saved = try Rig.savepoints(h)
             #expect(saved.count == 1)
             #expect(saved.first?.message == "kept", "the name typed into the field rides the click away")
+        }
+    }
+
+    /// **THE POPOVER CLOSING ITSELF FILES IT — RED ON OLD.** The watcher's
+    /// road: AppKit's transient dismissal closes the popover (`performClose`)
+    /// and the presenter hears its `willClose` — one commit, whatever the
+    /// binding does after.
+    @Test func thePopoversOwnCloseFilesTheCommit() async throws {
+        try await withEditor(seedBlocks: ["draft text"]) { h in
+            let mounted = await Rig.mountWritesBar(h.model)
+            defer { mounted.tearDown() }
+            caretInFirstBlock(h)
+            _ = try await Rig.pressCommandS(h.model, mounted)
+
+            try await Rig.closeThePopoverItself(mounted)
+            await Rig.awaitSavepoints(h, count: 1)
+            await Rig.turns(40)  // the binding's own write after the close
+
+            let saved = try Rig.savepoints(h)
+            #expect(saved.count == 1, "the popover's own close files the commit — once")
+            #expect(saved.first?.message == nil)
+            #expect(h.model.savepointAsk == nil)
         }
     }
 
@@ -413,7 +463,7 @@ struct VX347CommitLeavesMountTests {
             let second = ("first block" as NSString).length + 1 + 3
             h.textView.setSelectedRange(NSRange(location: second, length: 0))
             h.model.updateCaretContext()
-            try await Rig.clickAway(mounted)  // …and the popover closes on it
+            await Rig.dismissTheField(h.model)  // …and the popover closes on it
             await Rig.awaitSavepoints(h, slot: 0, count: 1)
 
             #expect(try Rig.savepoints(h, slot: 0).count == 1, "the take ⌘S asked about is committed")
@@ -431,7 +481,7 @@ struct VX347CommitLeavesMountTests {
             caretInFirstBlock(h)
             _ = try await Rig.pressCommandS(h.model, mounted)
 
-            try await Rig.clickAway(mounted)  // the click back into the take…
+            await Rig.dismissTheField(h.model)  // the click back into the take…
             await Rig.awaitSavepoints(h, count: 1)  // …files at once…
             h.type(" and more", at: ("draft text" as NSString).length)  // …and she types on
             await h.flush()
@@ -456,7 +506,7 @@ struct VX347CommitLeavesMountTests {
             caretInFirstBlock(h)
             _ = try await Rig.pressCommandS(h.model, mounted)
 
-            try await Rig.clickAway(mounted)
+            await Rig.dismissTheField(h.model)
             let spoke = await Rig.turns(until: { h.model.statusMessage != nil }, max: 200)
 
             #expect(spoke, "the refusal speaks")
@@ -476,7 +526,7 @@ struct VX347CommitLeavesMountTests {
             _ = try await Rig.pressCommandS(h.model, mounted)
             try h.session.operations.lockPost(h.postID)
 
-            try await Rig.clickAway(mounted)
+            await Rig.dismissTheField(h.model)
             let spoke = await Rig.turns(until: { h.model.statusMessage != nil }, max: 200)
 
             #expect(spoke, "the seal's refusal speaks")

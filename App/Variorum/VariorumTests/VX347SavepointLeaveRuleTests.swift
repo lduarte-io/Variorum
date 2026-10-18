@@ -448,3 +448,106 @@ struct VX347AskedTakeFilingTests {
         }
     }
 }
+
+// MARK: - FIX LEG: one commit per field, whoever files it
+
+/// **THE DOUBLE-FILE CLASS** (VX-347's fix leg — the batch's one real
+/// regression: the shipped VX-154 pin
+/// `WriteTakesPanelRoutedCommandTests.commitAsksForTheTakeTheRingIsInAndFilesIt`
+/// saw TWO identical commits of the ring's take). A model's own
+/// `fileSavepoint(named:)` lets go of its ask; the mounted presenter reads a
+/// host's ask going nil while its field is open as a leave and files the same
+/// field again. Every model shares the shape, so every model is pinned: the
+/// model's own ⏎ and the presenter's late report of the SAME field are ONE
+/// commit — and a second ⌘S on the same take is still a second commit (her
+/// ⌘S never dedupes). RED on the first-pass fix (`1c3ae3c5a` — no ledger).
+@MainActor
+@Suite("VX-347 fix leg — one commit per field, whichever road files it", .serialized)
+struct VX347OneCommitPerFieldTests {
+    @Test func theLedgerNumbersEachPressAndFilesEachFieldOnce() {
+        var ledger = SavepointAskLedger()
+        let first = ledger.naming(variantID: "v1")
+        let second = ledger.naming(variantID: "v1")
+        #expect(first != second, "two presses on one take are two fields")
+        #expect(first.id == second.id, "…presented at the same door (the popover's identity is the target)")
+        #expect(ledger.claimFiling(first))
+        #expect(!ledger.claimFiling(first), "the same field filed again is a no-op")
+        #expect(ledger.claimFiling(second), "a second press files its own commit")
+        let compare = ledger.naming(variantID: "v2", context: "post")
+        #expect(compare.context == "post" && compare.targetID == "v2")
+    }
+
+    @Test func write() async throws {
+        try await withEditor(seedBlocks: ["draft text"]) { h in
+            h.textView.setSelectedRange(NSRange(location: 3, length: 0))
+            h.model.updateCaretContext()
+            let take = try #require(try h.storeSlots()[0].variantID)
+            h.model.commitCaretVariant()
+            let ask = try #require(h.model.savepointAsk)
+            await h.model.fileSavepoint(named: "kept")       // the model's own ⏎
+            await h.model.fileSavepoint(ask, named: nil)     // the presenter's late report
+            #expect(try await manualCommits(h.database, take) == 1, "one field, one commit")
+            h.model.commitCaretVariant()                      // a second ⌘S…
+            await h.model.fileSavepoint(named: nil)
+            #expect(try await manualCommits(h.database, take) == 2, "…is a second commit")
+        }
+    }
+
+    @Test func takes() async throws {
+        try await withTwoBlockWorld { session, db, postID in
+            let model = TakesViewModel(session: session, postID: postID)
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: postID) })
+            let slot = model.projection.slots[0]
+            let take = try #require(slot.variantID)
+            model.focus(.init(columnID: TakesViewModel.takesMainColumnID,
+                              blockID: slot.blockID, variantID: take))
+            model.askSavepointName()
+            let ask = try #require(model.savepointAsk)
+            await model.fileSavepoint(named: "vx154")
+            await model.fileSavepoint(ask, named: nil)
+            #expect(try await manualCommits(db, take) == 1, "one field, one commit (the panel's road)")
+            model.askSavepointName()
+            await model.fileSavepoint(named: nil)
+            #expect(try await manualCommits(db, take) == 2)
+        }
+    }
+
+    @Test func canvas() async throws {
+        try await withTwoBlockWorld { session, db, postID in
+            let model = CanvasViewModel(session: session, containerID: postID)
+            model.adopt(try await db.read { try Queries.canvasProjection($0, container: postID) })
+            let slot = try await db.read { try Queries.renderPost($0, containerID: postID) }[0]
+            let take = try #require(slot.variantID)
+            model.focus(blockID: slot.blockID, variantID: take)
+            model.askSavepointName()
+            let ask = try #require(model.savepointAsk)
+            await model.fileSavepoint(named: "kept")
+            await model.fileSavepoint(ask, named: nil)
+            #expect(try await manualCommits(db, take) == 1)
+            model.askSavepointName()
+            await model.fileSavepoint(named: nil)
+            #expect(try await manualCommits(db, take) == 2)
+        }
+    }
+
+    @Test func compare() async throws {
+        try await withTwoBlockWorld { session, db, postID in
+            let model = CompareViewModel(session: session, anchorPostID: postID)
+            model.adopt(try await db.read { db in
+                try CompareViewModel.read(db, anchor: postID, peers: [])
+            })
+            let slot = try #require(model.face(for: postID)?.slots.first)
+            let take = try #require(slot.variantID)
+            model.focus(.init(columnID: "compare-\(postID)", blockID: slot.blockID,
+                              variantID: take, context: postID))
+            model.askSavepointName()
+            let ask = try #require(model.savepointAsk)
+            await model.fileSavepoint(named: "kept")
+            await model.fileSavepoint(ask, named: nil)
+            #expect(try await manualCommits(db, take) == 1)
+            model.askSavepointName()
+            await model.fileSavepoint(named: nil)
+            #expect(try await manualCommits(db, take) == 2)
+        }
+    }
+}
