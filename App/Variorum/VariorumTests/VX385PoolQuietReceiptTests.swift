@@ -97,9 +97,20 @@ struct VX385PoolQuietReceiptTests {
         }
     }
 
-    /// Does the Pool's composition carry the one quiet line?
+    /// Does the Pool's composition carry the one quiet line — an INSTANCE of it?
+    ///
+    /// **Not the type's name** (the U4 batch's catch, traced with a scratch
+    /// `dump` probe): an `if` in a view builder composes an `Optional` whose
+    /// generic TYPE names its content, so `dump` spells `QuietReceiptLine`
+    /// inside the body's type signature (three times in the probe) even while
+    /// the branch is untaken — a plain `contains` was true on the fixed tree
+    /// whether or not anything spoke. A composed instance has its own value
+    /// line, `▿ content: Variorum.QuietReceiptLine` — the one line that ENDS
+    /// with the name and carries no generic brackets.
     private static func hostsTheLine(_ pool: PoolPostsView) -> Bool {
-        SurfaceComposition.text(of: pool.body).contains("QuietReceiptLine")
+        SurfaceComposition.text(of: pool.body)
+            .split(separator: "\n")
+            .contains { $0.hasSuffix("QuietReceiptLine") && !$0.contains("<") }
     }
 
     /// **VX-385's case.** A row's Duplicate with Tags and without: the act's

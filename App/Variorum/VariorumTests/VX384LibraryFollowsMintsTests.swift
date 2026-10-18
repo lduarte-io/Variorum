@@ -124,12 +124,19 @@ struct VX384LibraryFollowsMintsTests {
     func aRowMenuDuplicateListsTheCopyWithoutReEntry(tags: Operations.DuplicateTags) async throws {
         try await withMountedLibrary { session, model, library, window, hosting in
             let source = try #require(model.noteHits.first)
-            await library.duplicateAsVersion(postID: source.id, tags: tags)
-            let all = try await session.database.read { db in
-                try Queries.library(db, limit: nil).map(\.postID)
+            // The copy is named by the STORE, before and after the act — never
+            // by the listing (the fix lists it so fast that a listing read
+            // after the act already holds it; the U4 batch's catch).
+            func storeNotes() async throws -> Set<String> {
+                Set(try await session.database.read { db in
+                    try Queries.library(db, limit: nil).map(\.postID)
+                })
             }
-            let copy = try #require(Set(all).subtracting(model.noteHits.map(\.id)).first,
-                                    "the premise: the act minted a copy")
+            let before = try await storeNotes()
+            await library.duplicateAsVersion(postID: source.id, tags: tags)
+            let minted = try await storeNotes().subtracting(before)
+            try #require(minted.count == 1, "the premise: the act minted exactly one copy (\(minted.count))")
+            let copy = try #require(minted.first)
             await settle(window, hosting, timeout: 4, until: { model.noteHits.contains { $0.id == copy } })
             #expect(model.noteHits.contains { $0.id == copy },
                     "the List lists the copy without re-entry (listed \(model.noteHits.count) of 4)")
