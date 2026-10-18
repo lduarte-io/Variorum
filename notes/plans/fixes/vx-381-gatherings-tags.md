@@ -500,15 +500,31 @@ disposition here.
     constants holding the shipped SQL verbatim): 6 issues, 3 per statement; green after: 12/12 (the behavioural pins —
     live-target guard, exact rows — unchanged). `restoreContainer`/`restoreBlock`'s pre-existing twin untouched
     (VX-387's).
-  - F-3 (the shared table's `duplicateTagPath` arm): IN-PROGRESS — pins written at the RED-TREE commit (below), the
-    arm NOT yet: Mac `TagAndFolderTests.theUndoDoorSaysTheCollidingTagAndTheRoadNeverTheRawCase` (the real ⌥⌘Z door,
-    then the rename road) · phone `MobileRefusalTableTests.theTagUndoCollisionSpeaksTheSharedSentence` (the arm is in
-    `Shared/OpsRefusalTable.swift`, which the phone compiles — the phone pin runs only if the orchestrator adds the
-    phone suite to the batch).
-  - F-7 (the archived receipt's empty arm): IN-PROGRESS — pin `GatheringCollectStarReceiptTests.
-    anArchivedCollectThatWoreNothingNeverClaimsATag` written at the RED-TREE commit; the guard NOT yet.
-  - F-8 (the identity `cannot` wrapper, `divergeTarget`'s doc): NOT-STARTED (a refactor + doc; no pin owed).
-  - **The RED TREE = the commit carrying this line** (pins present, F-3's arm and F-7's guard absent — no revert
-    needed). Plan: build-for-testing it into `App/Variorum/DerivedData/vx381-fix-red` (Mac) + `…-red-ios` (phone), then
-    land the fixes and build `…-green` / `…-green-ios`; the stage window is test-only.
-  - The Mac batch (via the orchestrator's relayed GO): NOT-STARTED.
+  - F-3 (the shared table's `duplicateTagPath` arm): LANDED (20894e80) — red/green PENDING the stage window. Sentence
+    (PROVISIONAL, for the orchestrator): "A tag named “work” already exists — rename it, then try again." (act-less:
+    the table can't know its door — the undo doors frame it "Undo failed: …", and the rule editor's make-a-tag door,
+    `RuleEditorModel.createTag`, reaches the same table on a race, where "undo again" would be false). Pins: Mac
+    `TagAndFolderTests.theUndoDoorSaysTheCollidingTagAndTheRoadNeverTheRawCase` (the real ⌥⌘Z door, then the rename
+    road) · phone `MobileRefusalTableTests.theTagUndoCollisionSpeaksTheSharedSentence` (the arm is in
+    `Shared/OpsRefusalTable.swift`, which the phone compiles).
+  - F-7 (the archived receipt's empty arm): LANDED (b1d38659) — "Added — the gathering shows it once it's unarchived."
+    (PROVISIONAL) — red/green PENDING the stage window. Pin `GatheringCollectStarReceiptTests.
+    anArchivedCollectThatWoreNothingNeverClaimsATag`.
+  - F-8: DONE (f2644865) — `GatheringNoteDoorCopy.cannot` deleted, its TWO callers (the hover in `help` and
+    `BookStructureModel.newPostInGathering`'s refusal line) say the reason directly (byte-identical); `divergeTarget`'s
+    doc and its twin in `AppSession.noteMultiBookEdit`'s doc corrected. No behaviour change, no pin owed.
+  - **The RED TREE = dd3ba271** (pins present, F-3's arm and F-7's guard absent — no revert was needed); the GREEN
+    TREE = f2644865. All four test products BUILT ("TEST BUILD SUCCEEDED" each), gitignored under
+    `App/Variorum/DerivedData/`: `vx381-fix-red` · `vx381-fix-green` (Mac) · `vx381-fix-red-ios` · `vx381-fix-green-ios`
+    (phone, `generic/platform=iOS Simulator`). The window is test-only (`test-without-building`), from `App/Variorum/`:
+    - RUN 1 Mac RED (`vx381-fix-red`): TagAndFolderTests · GatheringCollectStarReceiptTests — EXPECTED: exactly the two
+      new pins red.
+    - RUN 2 Mac GREEN (`vx381-fix-green`), 18 suites: TagAndFolderTests · GatheringCollectReceiptTests ·
+      GatheringCollectStarReceiptTests · OpsRefusalTableIntegrityTests · MCPWireRefusalSweepTests · VocabularySweepTests ·
+      MultiBookEditNoteRuleTests · MultiBookEditNoteTriggerTests · DivergeDoorTests · ShelfModelTests · BindDoorTests ·
+      OutflowChooserTests · RuleEditorTests · SpawnAndBindLimbTests · WingSwitcherTests · CapabilityRegistryTests ·
+      BookArchiveFacesTests · TutorialBooksChapterTests.
+    - RUN 3 phone RED (`vx381-fix-red-ios`, `platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2`):
+      MobileRefusalTableTests — EXPECTED: exactly the new pin red.
+    - RUN 4 phone GREEN (`vx381-fix-green-ios`): MobileRefusalTableTests · MobileTagManagerTests · MobileUndoDoorTests.
+  - The batch (via the orchestrator's relayed GO): READY, waiting on the GO.
