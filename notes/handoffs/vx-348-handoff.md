@@ -13,9 +13,9 @@
 - [ ] **P-VX393-1's consequence:** a new grant on the same place REPLACES in full — answering an ask "until it
   disconnects" on a place that held "always" leaves nothing after the disconnect. The literal reading of your
   upgrade-in-place; say if replacement should never downgrade.
-- [ ] **QUESTIONS #<PENDING>:** the run's ratify bundle (the P- numbers, the sitting rulings R-VX348-1…6, the
+- [ ] **QUESTIONS #233:** the run's ratify bundle (the P- numbers, the sitting rulings R-VX348-1…6, the
   ladder's NIT-3 clarification).
-- [ ] **The release:** 0.9.8 is <PENDING: minted/announced state at handoff time> — the notes (one line per
+- [ ] **The release:** 0.9.8 is minted by this closeout (the release window's result line in the run record carries the build number) — the notes (one line per
   bullet, all three runs' sections) were drafted for you per your standing rule; rewrite anything before you
   publicise.
 - [ ] **The 1892 stamps are honest:** sherlock's seeded notes really are stamped 1892 by the seeder's own clock
@@ -62,7 +62,7 @@
 
 ## The run in numbers
 
-<PENDING: filled at closeout — units, batches, pins, ladder counts, walk rows, the merge SHA, the release build>
+Five units + three red-first fix legs; headless finals core 3251/419 · MCP 383/71 (VX-353's flake green alone); every Mac batch's reds exactly as predicted after the fix legs (U2 206/206, U3 10/10, U4 5/5+7/7, U5's door pin 19/4); the combined walk under the reversible store swap (cmp-verified both ways, both voices); live rounds proved VX-392's done-when, the U+0000 strip, the one-row double-share, both banner halves and the connection-end lines; the ladder ONE round, 0B/0M/3m/3n; merged as PR #173 (8611a7e17), the last of your three runs. The full tallies: notes/plans/run-finals-ledger.md.
 
 ## Where everything is
 

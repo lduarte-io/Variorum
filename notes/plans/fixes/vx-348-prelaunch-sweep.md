@@ -1,8 +1,6 @@
 # VX-348 — Run: Pre-launch bug sweep (her running list)
 
-**STATUS: IN PROGRESS — kicked off 2026-10-18 (architect shape; Fable orchestrates at her launch, superseding the
-plan's Opus-orchestrates default for this run). Branch `vx-348-prelaunch-sweep`, worktree `~/dev/variorum-vx-348`,
-in-flight row added. The kickoff sitting ran (below); the rest of the run needs nothing from her.**
+**STATUS: CLOSED 2026-10-18 — merged to main as PR #173 (merge commit 8611a7e17), the LAST of the three runs; the 0.9.8 release is this closeout's (her word, recorded below). All FOURTEEN members Done (VX-394's code half shipped; its Castle-lock product call sits Needs Lillian). The ladder closed at round 1 (0B/0M/3m/3n). The ratify bundle is QUESTIONS #233; the handoff `notes/handoffs/vx-348-handoff.md`.**
 
 ## KICKOFF SITTING (2026-10-18) — VX-351's design pass, her rulings verbatim
 
