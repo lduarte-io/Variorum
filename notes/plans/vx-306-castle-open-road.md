@@ -1775,7 +1775,64 @@ B's five files under `~/vx306-walk/B` (for U3's Look inside); instances 0; stage
   safety-copies folder made; the open library, a plain-text export, a bare store refused in their words; two pairs in one
   folder offered). HEADLESS: the U3 and neighbouring planted suites `✔ Test run with 57 tests in 8 suites passed`; the Mac
   runs PENDING under the stage.
-- Piece 4 — LOOK INSIDE: the PROPOSAL (propose-then-rule; the build waits on the orchestrator's ruling): NOT-STARTED.
+- Piece 4 — LOOK INSIDE: the PROPOSAL (propose-then-rule; the build waits on the orchestrator's ruling): PROPOSED (this
+  commit — the proposal below, "LOOK INSIDE — THE PROPOSAL"); the BUILD NOT-STARTED (waits on the ruling). Until it lands,
+  no *Look inside…* door renders anywhere (P-2: `CopyDoorsSheet` and `RoadRestoreRows` carry only *Make this my
+  library…*).
+
+**LOOK INSIDE — THE PROPOSAL (the implementer's, 2026-10-18; for the orchestrator's ruling — the addendum's fork):**
+
+The two options as the addendum names them, with what each costs and whether a second session can exist without global
+state — traced on this tree:
+
+- **(a) A read-only WINDOW over a second `AppDatabase` on the private byte copy, rendering the Library/Book read tier.**
+  - *The open is feasible:* `lookInside` hands back the copy's key; `ProtectionLibraryFiles.privateCopy` makes the byte
+    copy; `AppDatabase.onDisk(url:key:)` on THAT copy runs the migrator against our own copy (an older copy migrates up;
+    the catalogued file is never touched). A newer-schema copy would refuse (the migrator's superseded check).
+  - *The window is not isolated — global state everywhere, and one of it is unsafe:* the read tier's views read through
+    `session.database` (per session — good), but every write door they carry goes through `Operations`, whose database is
+    the AMBIENT `@Dependency(\.database)` (`Sources/VariorumCore/Operations/Operations.swift:16`) — the binding's view of
+    HER LIVE LIBRARY. A "read-only" window built from the app's surfaces would send any edit, mode memory write, idle
+    commit or structural act to the live library under the copy's row IDs. Fencing that means auditing every surface the
+    read tier composes (Library cards, the Book's four modes, the note box, the Book Panel, the context bars) for every
+    operation it can reach, plus the per-note LOCAL stores keyed by row ID (mode memory, note lengths, the reminder-style
+    `UserDefaults` keys — shared with the live library's IDs on a same-library backup), `AppSession`'s own wiring
+    (`SampleLibrarySeeder` marks by variant, the status seam, `wing.attachMemory(.standard)`), the MCP door's `attach`
+    (per session, the live store's path), the deleted-notes notification road (`.variorumNotesDeleted`) and the
+    `WindowRegistry`. A second `AppSession` cannot exist without global state on this tree.
+  - *Cost:* a new read-only session kind and a write fence across the read tier — a design unit of its own, far past
+    "cheap and isolated"; and P3/P1 questions (a whole second library's surfaces live at once).
+- **(b) A read-only SHEET of the copy's facts.** **RECOMMENDED — and on this tree the only tractable road.**
+  - *What it shows:* §7c (10)'s frame line first (*This is a copy from <date>. Nothing you do here changes it or your
+    library.*); the copy's kind and day; its books (name, and how many notes each holds); its notes, newest first, a page
+    at a time (title and day — P1: bounded by the page, never the corpus); a note's text rendered read-only on selection
+    (the blocks in order, each its chosen take — falling back to the block's default — exactly as the page reads);
+    *Make this my library…* beside *Close* (the same copy, the same confirm); nothing editable anywhere.
+  - *How it reads — writes nothing:* `lookInside` (the executor's READ — its own quiet road, or what she typed) → the key;
+    the catalogued file and its non-empty `-wal` byte-copied into a PRIVATE folder (`ProtectionLibraryFiles.privateCopy`
+    — the catalogued file is never opened in place, 13x's rule); ONE keyed read connection on the private copy with RAW
+    SQL over the columns every schema since Phase 1 carries (`reading.name/kind/deleted_at`, `reading_post`, `container
+    .title/kind/entry_date/updated_at/deleted_at`, `container_block.position/chosen_variant_id`, `block
+    .default_variant_id`, `variant.working_text`) — never the migrator, never `Operations`, never the ambient database, so
+    no write can reach the live library by construction; a page of 100 notes per read. No key file, no keychain item, no
+    record, no memory item, no `UserDefaults` key is written. **Closing forgets:** the key dropped from the model, the
+    connection closed, the private folder deleted (a crash mid-look leaves a private temp folder only — the 13x staged-read
+    residue class).
+  - *Where:* the reads in core beside the keying (`Protection/Files/ProtectionCopyPeek.swift` — headless-testable in both
+    configurations, P1-bounded queries pinned); the brain `Shared/Protection/LookInsideModel.swift` (the key held only while
+    the sheet stands; `close()` forgets); the Mac face `Features/Protection/LookInsideSheet.swift`; *Look inside…* on every
+    Restore row and on a picked copy's doors. **The proof (the addendum's):** a test with the executor's write log EMPTY
+    and every keychain item and container byte unchanged across look → read → close, the private folder gone after
+    close; the frame line pinned byte-equal to §7c (10).
+  - *Cost:* ~4 files (one core helper, one model, one face, one suite + the words pin already landed); no new global, no
+    core protocol change; the executor untouched.
+  - *Where Look inside can be offered:* at ready (the Restore rows; a picked copy's doors). At the MISSING FACE and rule
+    27's lobby (no library open) Look inside needs no current pair — so if (b) is ruled, those faces' *Open Library…* can
+    come back as "file, then Look inside" (the empty-slot landing, T-5, stays VX-309's); the filed copy then stays listed
+    (rule 19) until VX-309's delete — a tension with "close it and the app forgets it" the orchestrator may want to rule
+    (P-VX306-U3-0's filing writes a copy of the PICK; the look itself writes nothing).
+  - *What it can't do:* show takes beyond the chosen one, comments, chapters or the book's own order (a later polish, if
+    she wants them — still raw reads).
 - Piece 5 — THE PHONE: the switch on in the phone's Debug build (P-VX306-U1b-1 superseded); `MobileStoreLockView` renders
   the lobby model, the creation card, the interlude and rule 27's face; the phone's pins; `build-for-testing`:
   NOT-STARTED.
