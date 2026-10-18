@@ -221,6 +221,43 @@ struct ProtectionRoadRouteTests {
         }
     }
 
+    /// THE LADDER'S ROUND-1 m1, through the bootstrap (the reviewer's pin): a format-3 key file and a silent item whose
+    /// key opens a RECORD-LESS store → the route → the missing face (K5) → *Start a New Library* → the store aside WHOLE
+    /// in `Previous Libraries/<stamp>/` (its key file with it, never written over) and the words card. Before the fix
+    /// the face's one act met the creation's no-clobber belt and said *Variorum couldn't create your library.* forever.
+    @Test func startANewLibraryOnTheMissingFaceOverARecordLessStoreSetsItAsideAndShowsTheWords() async throws {
+        try await withRoadDependencies {
+            let world = RoadWorld()
+            defer { world.scope.purge() }
+            let (old, _) = try await world.created()
+            let oldKey = old.key
+            let oldKeyFile = try Data(contentsOf: world.slot.places.liveKeyFile)
+            // The slot's library replaced by a record-less store under the SAME key (its record table empty).
+            ProtectionLibraryFiles.removeWithSidecars(world.slotURL)
+            do { _ = try AppDatabase.onDisk(url: world.slotURL, key: oldKey) }
+            let bootstrap = world.bootstrap()
+            await bootstrap.awaitOpen()
+            guard case .libraryMissing(let missing) = bootstrap.state else {
+                Issue.record("K5: the silent item opens a store with no record — the missing face: \(bootstrap.state)")
+                return
+            }
+            await missing.startNewLibrary()
+            #expect(missing.lastError == nil, "the face's one act succeeds: \(missing.lastError ?? "")")
+            guard case .newLibraryWords(let card) = bootstrap.state else {
+                Issue.record("the creation's words card: \(bootstrap.state)")
+                return
+            }
+            #expect(card.words.count == 12)
+            let aside = try FileManager.default.contentsOfDirectory(atPath: world.slot.places.previousLibraries.path)
+            let folder = world.slot.places.previousLibraries.appendingPathComponent(try #require(aside.first), isDirectory: true)
+            #expect(aside.count == 1)
+            #expect(try Data(contentsOf: folder.appendingPathComponent(ProtectionNames.keyFilename)) == oldKeyFile,
+                    "the record-less store's key file stepped aside byte-equal, never written over")
+            #expect(ProtectionLibraryFiles.opens(folder.appendingPathComponent(CatalogNames.libraryFilename), key: oldKey),
+                    "the record-less store stepped aside whole")
+        }
+    }
+
     /// A hosted test run (the test host IS the dev-store app) runs the road read-only: it never creates.
     @Test func aReadOnlyRoadNeverCreates() async throws {
         try await withRoadDependencies {

@@ -268,6 +268,16 @@ nonisolated enum ProtectionOpenRoad {
         }
     }
 
+    /// A FACE's *Start a New Library* — the missing face (K5's record-less store among the states it shows) and rule
+    /// 27's face (VX-306 ladder round 1, m1): whatever stands in the slot steps aside first, never written over — a
+    /// library no road here opens moves WHOLE, with its sidecars and its key file (P-VX306-U2-5), else a missing
+    /// library's key file alone (P-VX306-U1b-3) — then the creation and its words. Before round 1 the missing face set
+    /// the key file aside only when the slot was EMPTY, so over a record-less store its one act met the creation's
+    /// no-clobber belt ("a library is already in the slot") and could never succeed.
+    static func startNewLibraryFromAFace(_ ctx: RoadContext) async -> RoadRoute {
+        await create(ctx, setAsideLiveKeyFile: true, setAsideUnopenableLibrary: true)
+    }
+
     /// A live key file in an EMPTY slot, moved (never deleted) into `Previous Libraries/<stamp>/`.
     static func setAsideLiveKeyFileFor(_ places: ProtectionPlaces) throws {
         let manager = FileManager.default

@@ -161,6 +161,43 @@ struct ProtectionOpenRoadPlantedTests {
         }
     }
 
+    /// THE LADDER'S ROUND-1 m1 (K5's missing face): a format-3 key file and a silent item whose key opens a
+    /// RECORD-LESS store (rule 26's class — a hand-emptied record table, a recreation-shaped store) route to the missing
+    /// face; its *Start a New Library* (`startNewLibraryFromAFace` — the bootstrap's one road for both faces) sets that
+    /// store aside WHOLE, its key file with it, never written over, and the creation goes on to the words. RED on the
+    /// pre-fix road (the missing face set the key file aside only over an EMPTY slot): the creation met its no-clobber
+    /// belt — `.failed`, nothing aside, the live key file already written over by the new library's.
+    @Test func startANewLibraryOverARecordLessStoreSetsItAsideWholeAndCreates() async throws {
+        let road = PlantedRoad()
+        let (old, _) = try await road.created()
+        let oldKey = old.key
+        let oldKeyFile = try Data(contentsOf: road.slot.places.liveKeyFile)
+        // The slot's library replaced by a record-less store under the SAME key (its record table empty).
+        ProtectionLibraryFiles.removeWithSidecars(road.slot.places.slot)
+        do { _ = try AppDatabase.onDisk(url: road.slot.places.slot, key: oldKey) }
+        guard case .libraryMissing = await ProtectionOpenRoad.route(road.context()) else {
+            Issue.record("K5: the silent item opens a store with no record — the missing face")
+            return
+        }
+        guard case .created(let created, let words) = await ProtectionOpenRoad.startNewLibraryFromAFace(road.context()) else {
+            Issue.record("the missing face's Start a New Library acts: the store aside, the creation, the words")
+            return
+        }
+        #expect(words.words.count == 12)
+        #expect(created.key != oldKey)
+        let newLive = try #require(try road.system().leaves.keyFiles.readLiveKeyFile())
+        #expect(newLive.libraryID == created.library.record?.libraryID && newLive.fingerprint == created.library.fingerprint)
+        #expect(ProtectionLibraryFiles.opens(road.slot.places.slot, key: created.key), "the new library in the slot")
+        // The record-less store and its key file, WHOLE in Previous Libraries — never written over.
+        let aside = try FileManager.default.contentsOfDirectory(atPath: road.slot.places.previousLibraries.path)
+        #expect(aside.count == 1, "one folder aside: \(aside)")
+        let folder = road.slot.places.previousLibraries.appendingPathComponent(try #require(aside.first), isDirectory: true)
+        #expect(try Data(contentsOf: folder.appendingPathComponent(ProtectionNames.keyFilename)) == oldKeyFile,
+                "the record-less store's key file stepped aside byte-equal, never written over")
+        #expect(ProtectionLibraryFiles.opens(folder.appendingPathComponent(CatalogNames.libraryFilename), key: oldKey),
+                "the record-less store stepped aside whole — it still opens with its own key")
+    }
+
     /// P-VX306-U1a-2: a file in the live place that is no key file never crashes — the lobby, its flag set.
     @Test func aLivePlaceHoldingNoKeyFileLeavesTheLobbyStanding() async throws {
         let road = PlantedRoad()

@@ -789,26 +789,19 @@ final class AppBootstrap {
             // first (PROVISIONAL P-VX306-U2-5), then the creation and the words card.
             startNew: { [weak self] in
                 guard let self else { return nil }
-                return await self.createOnNewRoad(setAsideLiveKeyFile: true, setAsideUnopenableLibrary: true)
+                return await self.createOnNewRoadFromAFace()
             })
     }
 
-    /// VX-306 U1b — the missing face's *Start a New Library* on the new road: a creation (rule 2), the missing
-    /// library's key file stepping aside first (P-VX306-U1b-3); the words card follows. nil = done; else the
-    /// sentence the face shows.
-    private func createOnNewRoadFromMissingFace() async -> String? {
-        await createOnNewRoad(setAsideLiveKeyFile: true, setAsideUnopenableLibrary: false)
-    }
-
-    /// The new road's creation from a face (the missing face; rule 27's face) — the words card follows. nil = done;
-    /// else the sentence the face shows.
-    private func createOnNewRoad(setAsideLiveKeyFile: Bool, setAsideUnopenableLibrary: Bool) async -> String? {
+    /// VX-306 — a face's *Start a New Library* on the new road (the missing face — K5's record-less store among the
+    /// states it shows — and rule 27's face): whatever stands in the slot steps aside first, never written over
+    /// (`ProtectionOpenRoad.startNewLibraryFromAFace`: P-VX306-U1b-3, P-VX306-U2-5; the ladder's round-1 m1), then the
+    /// creation (rule 2) and the words card. nil = done; else the sentence the face shows.
+    private func createOnNewRoadFromAFace() async -> String? {
         guard let road = roadInputs?.compose() else { return ProtectionWords.couldNotCreate }
         let route = await Task.detached(priority: .userInitiated) {
             // The context off the main actor: it reads the sign-in (a Keychain read).
-            await ProtectionOpenRoad.create(
-                road.context(), setAsideLiveKeyFile: setAsideLiveKeyFile,
-                setAsideUnopenableLibrary: setAsideUnopenableLibrary)
+            await ProtectionOpenRoad.startNewLibraryFromAFace(road.context())
         }.value
         switch route {
         case .created(let session, let words):
@@ -951,7 +944,7 @@ final class AppBootstrap {
         if newRoad {
             newRoadCreate = { [weak self] in
                 guard let self else { return nil }
-                return await self.createOnNewRoadFromMissingFace()
+                return await self.createOnNewRoadFromAFace()
             }
         }
         return LibraryMissingLobby(

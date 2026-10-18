@@ -2408,7 +2408,7 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton: DONE (this commit).
-- m1 — K5's missing face over a record-less store: NOT-STARTED.
+- m1 — K5's missing face over a record-less store: IN-PROGRESS — the fix and both pins committed here (`startNewLibraryFromAFace`; the bootstrap's two faces on it); the red-on-old run (the pre-fix flag restored on the committed tree) next.
 - m2 — the copy doors' automatic quiet probe never presses Touch ID: NOT-STARTED.
 - m4 — the new-road Restore list re-reads on a landed backup pair: NOT-STARTED.
 - NIT 1 · NIT 2 · NIT 3 · NIT 4: NOT-STARTED.
