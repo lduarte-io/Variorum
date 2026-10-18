@@ -164,13 +164,18 @@ struct LibraryPreviewBrainTests {
         }
     }
 
-    /// The column's width: the inspector's own numbers (420 ideal, 280
-    /// minimum — the note-side sibling's), a third of the library between.
+    /// The column's width: the inspector's own ideal (420), a third of the
+    /// library between. *(VX-350 — a JUSTIFIED EDIT by the VX-348 run's U3:
+    /// the floor was the note-side sibling's 280, which held the panel at
+    /// 280 while the window narrowed and pushed it off the window's edge — her
+    /// "steadily cut off". The floor is 200 now and the third keeps shrinking
+    /// the panel until it: 700 → 238, was 280. The 0 / 1488 / 900 rows are
+    /// unchanged; `VX350ControlsWidthClassTests` pins the rest.)*
     @Test func thePanelWidthIsTheInspectorsNumbersClampedToTheRoom() {
         #expect(LibraryPanelLayout.width(total: 0) == 420, "unmeasured: the ideal")
         #expect(LibraryPanelLayout.width(total: 1488) == 420)
         #expect(LibraryPanelLayout.width(total: 900) == 306)
-        #expect(LibraryPanelLayout.width(total: 700) == 280)
+        #expect(LibraryPanelLayout.width(total: 700) == 238)
     }
 }
 

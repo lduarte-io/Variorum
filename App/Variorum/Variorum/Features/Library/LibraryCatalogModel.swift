@@ -256,6 +256,38 @@ final class LibraryCatalogModel {
     /// is the SEARCH STATE (`searchState` — Direction C's answer sheet), and
     /// the shipped title-LIKE narrowing on this road is retired with it.
     var query = ""
+
+    /// **VX-350 — the 🔍 door's field is open** (the narrow class only shows
+    /// the field while this is so — `LibraryControlsFlow.searchOpen`). HER
+    /// state, set by her acts alone — the 🔍 press, or the field taking the
+    /// keyboard — and never by the text, so neither typing nor a search asked
+    /// from elsewhere (a tag chip, the band) adds or removes the field's line.
+    /// Session-only, like the rest of the catalog's view state.
+    var searchFieldOpened = false
+
+    /// What a press of the 🔍 door does (VX-350, PROVISIONAL P-VX350-2).
+    enum SearchTogglePress: Equatable {
+        /// The field opens below the controls, the caret in it.
+        case openAndFocus
+        /// The field is open and holds a question: the caret goes back into
+        /// it (a question is never hidden by a press).
+        case focus
+        /// The field is open and empty: it closes.
+        case close
+    }
+
+    /// The 🔍 door pressed: open → caret; open with a question → caret;
+    /// open and empty → closed.
+    func pressSearchToggle() -> SearchTogglePress {
+        guard searchFieldOpened else {
+            searchFieldOpened = true
+            return .openAndFocus
+        }
+        if !query.isEmpty { return .focus }
+        searchFieldOpened = false
+        return .close
+    }
+
     /// **The search state's own brain** (13o U2, D8 — P-9): the question, the
     /// band's numbers, the Books section, the groups and their expansions.
     /// Owned here the way `bookRowDoors` is; this model routes the field's

@@ -55,6 +55,10 @@ nonisolated enum LibraryCopy {
     /// The paged listing's end while the next page is on its way (17y B1 (k)).
     static let loadingMoreNotes = "loading more notes…"
 
+    /// VX-350: the 🔍 door's spoken name (its tooltip is the field's own
+    /// prompt). PROVISIONAL words (P-VX350-6), her copy pass.
+    static let searchToggleLabel = "Search"
+
     /// A note with no words in it yet — the Notes card's quiet second line
     /// (13g's own literal, moved here at 13u3 UNIT B when the card's second
     /// line stopped being "whatever the snippet was").

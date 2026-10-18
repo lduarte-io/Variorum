@@ -229,20 +229,37 @@ nonisolated enum LibraryPreview {
     }
 }
 
-/// The panel column's width — the note-side inspector's own numbers (the
-/// panel is that column's sibling: same widths, so moving between a note
-/// and the library keeps the right region one steady thing), clamped to the
-/// room the library has. Pure, pinned.
+/// The panel column's width — the note-side inspector's own ideal (the
+/// panel is that column's sibling: same widths at a roomy window, so moving
+/// between a note and the library keeps the right region one steady thing),
+/// a third of the library between, clamped to the room the library has.
+/// Pure, pinned.
+///
+/// **VX-350 (the VX-348 run, U3) — it adjusts as the window narrows.** Her
+/// words: *"the library's side pane is not adjusting, as you make the window
+/// smaller it just gets steadily cut off"* (its Close button gone past the
+/// window's edge). It held the note-side column's 280-pt minimum while the
+/// list column beside it could not shrink below its controls row, so the two
+/// together overflowed the window and the panel was pushed off. Now its
+/// floor is 200 pt (the third keeps shrinking it until then — PROVISIONAL
+/// P-VX350-4) and it is never wider than the library itself; the catalog
+/// gives it its width FIRST and the list column takes the rest (the list,
+/// never the panel, yields when the window is narrower than both can hold).
 nonisolated enum LibraryPanelLayout {
     static let ideal: CGFloat = 420
-    static let minimum: CGFloat = 280
+    /// The narrowest the third takes the panel (VX-350 — was the note-side
+    /// column's 280).
+    static let minimum: CGFloat = 200
     /// The share of the library's width the panel takes when the ideal does
     /// not fit beside a usable list.
     static let share: CGFloat = 0.34
 
     static func width(total: CGFloat) -> CGFloat {
         guard total > 0 else { return ideal }   // unmeasured: the ideal
-        return min(ideal, max(minimum, (total * share).rounded(.down)))
+        let wanted = min(ideal, max(minimum, (total * share).rounded(.down)))
+        // Never wider than the library (the 1-pt divider beside it): the
+        // panel stays whole on screen at any width.
+        return min(wanted, max(0, total - 1))
     }
 }
 
@@ -280,8 +297,12 @@ struct LibraryInfoPanel: View {
                     .foregroundStyle(tokens.ink)
                     .lineLimit(2)
                 Spacer()
+                // VX-350: the Close door keeps its word at any panel width —
+                // the title gives way (its two lines), never the door.
                 Button("Close") { onClose() }
                     .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
+                    .lineLimit(1)
+                    .fixedSize()
             }
             Text(tokens.chromeLabel(factsLine))
                 .font(tokens.small)
@@ -594,6 +615,8 @@ enum LibraryPanelOracle {
     /// P-U3-5: the sort slot — never wider than the stable widest the row
     /// counts it at, and always one line.
     static var sortSlotFrame: CGRect? { frameStore[.sortSlot] }
+    /// VX-350: the 🔍 door — inside the row only in its collapsed class.
+    static var searchToggleFrame: CGRect? { frameStore[.searchToggle] }
     /// A book row's LINE — its width must span the row (row 33 (a)).
     static var bookLineFrame: CGRect? { frameStore[.bookLine] }
     /// 17y B1 (k): the capped books region (only when the books are split
@@ -644,6 +667,8 @@ enum LibraryProbeSlot: Hashable {
     /// VX-175: the controls row and its search field; P-U3-5: the sort slot
     /// (the `sort ▾` door, or the relevance label while she searches).
     case controls, searchField, sortSlot
+    /// VX-350: the 🔍 door the field collapses to at a narrow width.
+    case searchToggle
     case noteRow(String)
     /// 17y B1 (k): the capped books List and the list beside it.
     case booksRegion, notesRegion

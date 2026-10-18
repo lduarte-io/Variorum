@@ -888,6 +888,105 @@ struct LibraryControlsGeometryTests {
     }
 }
 
+// MARK: - VX-350 — the Library at narrow widths (the VX-348 run, U3)
+
+/// **VX-350 — the R-P/R-S harness extended to the narrow widths** (her words:
+/// the side pane "is not adjusting, as you make the window smaller it just
+/// gets steadily cut off"; the empty pill left of All is "just what search
+/// collapses down to when the side pane is open"). THE MECHANISM (traced):
+/// VX-175's row has two classes, and its narrowest — two lines — still needs
+/// the field beside scope and mode · sort · when on one line (Terminal ≈478,
+/// Study ≈432 of row); below that the row is wider than its column, the field
+/// squeezes toward its own ≈75-pt sliver (the pill), and the column's minimum
+/// (the row + 48) with the panel's fixed 280 overflows the catalog — the
+/// panel is pushed past the window's edge, its Close with it.
+///
+/// THE PINS, RED ON OLD BY BEHAVIOUR (pre-fix APIs only — the U3b/U3c rig):
+/// at rooms of 300…480 pt with the panel closed, every state (three sorts, a
+/// typed word, a question past the prompt, empty again) — the row fits its
+/// room, the field is never a pill (shown at its prompt, or not shown), one
+/// line count per room; and at library widths of 1029 down to 560 with the
+/// panel open — the catalog fits the window, the panel stays whole inside it
+/// at no less than its floor, the controls stay left of its divider.
+@MainActor
+@Suite("VX-350 — the Library's controls and panel at narrow widths", .serialized)
+struct VX350NarrowLibraryTests {
+    private static let states: [(name: String, act: (LibraryControlsGeometryTests.Rig) async -> Void)] = [
+        ("edited · newest", { await $0.pick(.lastTouched) }),
+        ("title · A–Z", { await $0.pick(.title) }),
+        ("created · oldest", { await $0.pick(.createdAt, .asc) }),
+        ("typed a word", { await $0.ask("pick") }),
+        ("typed past the prompt", { await $0.ask("note pick from listing note pick") }),
+        ("empty again", { await $0.ask("") }),
+    ]
+
+    /// **RED ON OLD — the empty pill.** The panel closed, the library column
+    /// swept through the narrow rooms: the row fits its room, the field is
+    /// either not shown (placed outside the catalog) or at least its prompt
+    /// wide, and every state gives the room ONE line count.
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func atNarrowRoomsTheFieldIsNeverAPillAndTheRowFits(voice: ThemeVoice) async throws {
+        try await LibraryControlsGeometryTests().withCatalog(
+            voice: voice, width: LibraryControlsGeometryTests.defaultLibraryWidth, panelOpen: false
+        ) { rig in
+            var faults: [String] = []
+            for room in stride(from: CGFloat(300), through: 480, by: 20) {
+                await rig.resize(to: room + 48)
+                var heights: [String: CGFloat] = [:]
+                for state in Self.states {
+                    await state.act(rig)
+                    let read = try rig.read()
+                    if abs(read.root.width - (room + 48)) > 1 {
+                        faults.append("\(room) \(state.name): the catalog is \(read.root.width) wide, not \(room + 48)")
+                    }
+                    heights[state.name] = read.controls.height
+                    if read.controls.width > room + 0.5 {
+                        faults.append("\(room) \(state.name): the row is \(read.controls.width) wide in a \(room)-pt room")
+                    }
+                    let shown = read.field.maxX > read.root.minX
+                    if shown && read.field.width < read.prompt - 0.5 {
+                        faults.append("\(room) \(state.name): the field is a pill — \(read.field.width) of its \(read.prompt)")
+                    }
+                }
+                let lines = Set(heights.values.map { ($0 * 2).rounded() / 2 })
+                print("[VX-350 narrow] \(voice) · room \(room) · heights \(heights.sorted { $0.key < $1.key })")
+                if lines.count != 1 { faults.append("\(room): the line count moved — \(heights.sorted { $0.key < $1.key })") }
+            }
+            #expect(faults.isEmpty, "\(voice): \(faults.prefix(8))")
+        }
+    }
+
+    /// **RED ON OLD — the panel pushed off.** The panel open, the library
+    /// narrowed from the default window's 1029 pt to 560: the catalog never
+    /// grows past the window, the panel's right edge stays inside it at no
+    /// less than its floor (200 pt), and the controls row stays left of the
+    /// panel's divider — the list column, never the panel, gives way.
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func atNarrowWindowsThePanelStaysWhole(voice: ThemeVoice) async throws {
+        try await LibraryControlsGeometryTests().withCatalog(
+            voice: voice, width: LibraryControlsGeometryTests.defaultLibraryWidth, panelOpen: true
+        ) { rig in
+            var faults: [String] = []
+            for width: CGFloat in [1029, 900, 800, 700, 640, 600, 560] {
+                await rig.resize(to: width)
+                let read = try rig.read()
+                guard let panel = read.panel else {
+                    faults.append("\(width): the panel closed")
+                    continue
+                }
+                print("[VX-350 panel] \(voice) · width \(width) · root \(read.root) · panel \(panel) · controls \(read.controls) · divider \(String(describing: read.divider))")
+                if read.root.width > width + 0.5 { faults.append("\(width): the catalog is \(read.root.width) wide") }
+                if panel.maxX > width + 0.5 { faults.append("\(width): the panel ends at \(panel.maxX), past the window") }
+                if panel.width < 200 - 0.5 { faults.append("\(width): the panel is \(panel.width), under its floor") }
+                if let divider = read.divider, read.controls.maxX > divider.minX + 0.5 {
+                    faults.append("\(width): the controls end at \(read.controls.maxX), past the divider at \(divider.minX)")
+                }
+            }
+            #expect(faults.isEmpty, "\(voice): \(faults)")
+        }
+    }
+}
+
 // MARK: - U3c — the trace leg's probe (env-gated; asserts nothing)
 
 /// **VX-283 U3c — the closed-panel band, probed** (the record's "U3c — THE
