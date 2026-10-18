@@ -233,6 +233,22 @@ Debug launch, dismiss a What's New sheet if one shows. Merges serialize with vx-
   face; if the opacity was the only signal on an enabled-but-inert button, wire the disable rather than losing
   the face).
 
+- **R-VX381-A3 (2026-10-18, U2 / VX-247 — the confirm's false sentence):** the shared tag-delete confirm
+  (`TagDeletion.consequence`, Mac AND phone) ends "There is no undo for this." — false once `deleteTag`
+  registers its entry. Ruled (a): DROP the sentence on both platforms; the confirm still names the consequence,
+  and the calm idiom doesn't advertise mechanisms in confirms (the Delete Book confirm's precedent). The true
+  replacement line ((b), "You can undo this with Undo Delete Tag.") is the recorded alternative — one line to
+  add if she wants the road said. PROVISIONAL for her bundle (a copy call).
+- **R-VX381-A4 (U2 / VX-249 — the phone):** the core change makes the PHONE's ★-rule collect succeed too, with
+  a receipt that names no star ("Added by tagging — …" for a star-only collect). Ruled (a): the phone stays
+  untouched this run (mobile is its own project; no simulator window beside this stage), and the star case
+  joins VM-21 (the phone's VX-241 twin — one phone receipt fix covers both arms). The closeout's MOBILE PARITY
+  line carries it.
+- **R-VX381-A5 (U2 / VX-249 — the chip):** a collect that SET the star speaks the mint family verbatim
+  ("Starred — the gathering shows it now." / "Tagged #x and starred — the gathering shows it now."); the chip's
+  LIVE-gathering tags-only receipts keep their shipped words — two voices on the chip until VX-216 unifies them
+  (her sitting; already routed there at U1). PROVISIONAL.
+
 ## U1 COPY APPROVALS (the orchestrator, 2026-10-18 — the implementer's drafts, each still PROVISIONAL for her bundle)
 
 - **APPROVED — VX-241's receipt pair:** "Tagged #essays — the gathering shows it once it's unarchived." /
