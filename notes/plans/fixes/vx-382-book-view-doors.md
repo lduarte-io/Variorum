@@ -1150,3 +1150,14 @@ press in the overhang is taken and then dropped. The geometry oracle measured re
 green over a dead target. Fix: the footprint becomes a hidden layout stand-in and the BUTTON (its frame the 22-pt box)
 rides an overlay centred on it — its bounds ARE the target. Pin first: a real click in the overhang (the
 `SharedIconRig` road) unfolds the note — red on this tree.
+- **W-1 fixed and verified (in the window):** 4d8367ec5 — the button rides an overlay of a hidden footprint (its own
+  frame the 22-pt square); the pin `aClickInTheOverhangUnfoldsTheNote` (a real click via `SharedIconRig`, 1.5 pt
+  inside the box's left edge, clear of the footprint). Its first run measured the conversion: SwiftUI's `.global`
+  runs from the window's top INCLUDING the title bar (a centre click lands only with the frame's height — the first
+  red run, `w1-red.log`, used the content height and is void; its header arm hung over a draggable row and was cut).
+  **Red-on-old** (the pre-fix control restored in place from 4d8367ec5^): the click pin RED — the overhang press did
+  not unfold (`w1-red2.log`); restored clean. **Green** on the fix: `BookFoldDisclosureTests` 3/1; the guard set
+  `BookFoldDisclosureTests · BookOutlineLandingTests · OutlineRoomTests · BookOutlineCostTests ·
+  BookCardHeightStabilityTests · BookIndexEditingTests · BookIndexColumnHeightsTests · ChromeLineLimitTests ·
+  BookIndexLandingTests · BookViewTests` — `54 tests in 10 suites passed` (`w1-guards.log`). The batch's other 115
+  suites ran on the pre-W-1 tree; the change is local to the control (its two hosts' guards re-run above).
