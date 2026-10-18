@@ -225,12 +225,23 @@ struct SidebarNoteBox: View {
     @ViewBuilder private var identityBlock: some View {
         if let identity {
             VStack(alignment: .leading, spacing: 2) {
-                Text(identity.title)
-                    .font(tokens.heading)
-                    .foregroundStyle(tokens.ink)
-                    .lineLimit(2)
-                    .truncationMode(.tail)
-                    .fixedSize(horizontal: false, vertical: true)
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(identity.title)
+                        .font(tokens.heading)
+                        .foregroundStyle(tokens.ink)
+                        .lineLimit(2)
+                        .truncationMode(.tail)
+                        .fixedSize(horizontal: false, vertical: true)
+                    // VX-304 (P-U1b-2): while LIVE the door stands by the
+                    // TITLE, where the book's own "open ↗" stands by its
+                    // title — at no height cost, because the live box's bar
+                    // fills the rail's height (the 18d floor). Selected, it
+                    // stands beside "edit here" instead (`editDoor`).
+                    if state.isLive, let onOpenInWrite {
+                        Spacer(minLength: 0)
+                        titleOpenDoor(onOpenInWrite)
+                    }
+                }
                 let line = NoteBoxCopy.whereLine(
                     chapter: identity.chapter, index: identity.index,
                     total: identity.total, totalIsAtLeast: identity.totalIsAtLeast,
@@ -283,29 +294,83 @@ struct SidebarNoteBox: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
+    /// The selected state's door row: "edit here" (into the note, INSIDE the
+    /// book) and, beside it, VX-304's "open ↗" (out of the book, into the
+    /// note's own editor — P-U1b-2: the state's two ways in, side by side).
     @ViewBuilder private var editDoor: some View {
-        if let onEditHere {
-            Button(action: onEditHere) {
-                Text(tokens.chromeLabel(NoteBoxCopy.editDoor))
-                    .font(tokens.small)
-                    .fontWeight(.semibold)
-                    .lineLimit(1)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 5)
-                    .background(tokens.accent, in: RoundedRectangle(cornerRadius: 6))
-                    .foregroundStyle(tokens.card)
-                    .contentShape(Rectangle())
+        if onEditHere != nil || onOpenInWrite != nil {
+            HStack(spacing: 6) {
+                if let onEditHere { editHereButton(onEditHere) }
+                if let onOpenInWrite { rowOpenDoor(onOpenInWrite) }
             }
-            .buttonStyle(.plain)
-            .help(NoteBoxCopy.editDoorHelp)
-            // 13s-b U2: step 10's first beat points here ("edit here drops
-            // you back into it").
-            .tourAnchor(.noteBoxEditHere, cornerRadius: 6)
-#if DEBUG
-            .onAppear { SidebarGeometry.noteBoxFaces[subjectKey, default: [:]]["door", default: 0] += 1 }
-            .onDisappear { SidebarGeometry.noteBoxFaces[subjectKey, default: [:]]["door", default: 0] -= 1 }
-#endif
         }
+    }
+
+    private func editHereButton(_ act: @escaping () -> Void) -> some View {
+        Button(action: act) {
+            Text(tokens.chromeLabel(NoteBoxCopy.editDoor))
+                .font(tokens.small)
+                .fontWeight(.semibold)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 5)
+                .background(tokens.accent, in: RoundedRectangle(cornerRadius: 6))
+                .foregroundStyle(tokens.card)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(NoteBoxCopy.editDoorHelp)
+        // 13s-b U2: step 10's first beat points here ("edit here drops
+        // you back into it").
+        .tourAnchor(.noteBoxEditHere, cornerRadius: 6)
+#if DEBUG
+        .onAppear { SidebarGeometry.noteBoxFaces[subjectKey, default: [:]]["door", default: 0] += 1 }
+        .onDisappear { SidebarGeometry.noteBoxFaces[subjectKey, default: [:]]["door", default: 0] -= 1 }
+#endif
+    }
+
+    /// **VX-304 — "open ↗" in the selected row** (P-U1b-1: the book's own
+    /// words for the act): the bar's bordered-cell grammar beside the filled
+    /// "edit here", at the same height, so the row reads as two doors. With
+    /// no caret in the note, it opens the note in Write with the plain open's
+    /// place (R-U1a-2) — and its hover says so.
+    private func rowOpenDoor(_ act: @escaping () -> Void) -> some View {
+        let door = Button(action: act) {
+            Text(tokens.chromeLabel(NoteBoxCopy.openDoor))
+                .font(tokens.small)
+                .fontWeight(.semibold)
+                .lineLimit(1)
+                .fixedSize()
+                .padding(.horizontal, 8)
+                .padding(.vertical, 5)
+                .foregroundStyle(tokens.accent)
+                .background(tokens.surface, in: RoundedRectangle(cornerRadius: 6))
+                .overlay(RoundedRectangle(cornerRadius: 6).stroke(tokens.line, lineWidth: 1))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(NoteBoxCopy.openDoorHelpSelected)
+#if DEBUG
+        return door.modifier(OpenDoorOracle(subjectKey: subjectKey, owner: oracleOwner))
+#else
+        return door
+#endif
+    }
+
+    /// **VX-304 — "open ↗" by the title, while LIVE**: the book's title door,
+    /// word for word and in its voiced grammar, in the accent (her report is
+    /// that she could not SEE it). It carries her caret's block (VX-303's
+    /// road) — and its hover says so.
+    private func titleOpenDoor(_ act: @escaping () -> Void) -> some View {
+        let door = Button(tokens.chromeLabel(NoteBoxCopy.openDoor), action: act)
+            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+            .fixedSize()
+            .help(NoteBoxCopy.openDoorHelpLive)
+#if DEBUG
+        return door.modifier(OpenDoorOracle(subjectKey: subjectKey, owner: oracleOwner))
+#else
+        return door
+#endif
     }
 
     // MARK: - State 3 — the mark
@@ -325,3 +390,23 @@ struct SidebarNoteBox: View {
         }
     }
 }
+
+#if DEBUG
+/// **VX-304 — the box's "open ↗" in the DEBUG oracle**: its FACE (a +1/−1
+/// refcount, the "door" face's shape) and its FRAME (owned by the box that
+/// drew it, released with that box) — so "the door is drawn, whole, inside
+/// the box" is read off what was drawn.
+private struct OpenDoorOracle: ViewModifier {
+    let subjectKey: String
+    let owner: UUID
+
+    func body(content: Content) -> some View {
+        content
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                SidebarGeometry.recordBoxOpenDoor(subjectKey, $0, owner: owner)
+            }
+            .onAppear { SidebarGeometry.noteBoxFaces[subjectKey, default: [:]]["open", default: 0] += 1 }
+            .onDisappear { SidebarGeometry.noteBoxFaces[subjectKey, default: [:]]["open", default: 0] -= 1 }
+    }
+}
+#endif

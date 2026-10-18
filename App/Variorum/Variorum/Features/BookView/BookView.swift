@@ -1101,8 +1101,23 @@ struct BookView: View {
             report.map { report in
                 NoteBoxDoor(
                     editHere: { editHere(report) },
-                    removeFromBook: removeDoor(report))
+                    removeFromBook: removeDoor(report),
+                    openInWrite: openDoor(report))
             })
+    }
+
+    /// **VX-304 — the box's "open ↗"**: the book's ONE open door
+    /// (`openInWrite`) for the box's note, in every book mode — so the door
+    /// she could not see by a long note's title stands in the box. It reads
+    /// her place at the PRESS (live: her caret's block and offset; selected:
+    /// none — the plain open's place, in Write). A book with no landing road
+    /// (a hostless pin) hands none: a door that can never act is not drawn
+    /// (P-2).
+    private func openDoor(_ report: NoteBoxReport) -> (() -> Void)? {
+        guard onOpenSearchHit != nil, let postID = report.live ?? report.selected else {
+            return nil
+        }
+        return { openInWrite(postID) }
     }
 
     /// 13i-c U4 (§20) — the note box's book context: the remove/release door

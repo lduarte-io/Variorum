@@ -216,7 +216,7 @@ tickets:
 |---|---|
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
 | U1a — VX-303 (the landing road) | VERIFIED 2026-10-18 (`vx-382-u1a` window) — red-on-old A·B·C red as planned, both guard probes red, tree restored clean between each; batch `Test run with 1590 tests in 259 suites` — 4 issues + 5 known: VX-115's standing red (BookCollectingDoorsTests) + `DestructiveUndoWarningTests.redoNeverAsks` (the known VX-167 parallelism flake, signature :141–143); VX-77's standing red did NOT reproduce (passed). 9 skipped (2 disabled suites). §U1a RECORD → batch results. Code tip f0d1b414f |
-| U1b — VX-304 (the box door + Index takes) | IN-PROGRESS — piece A (seams) a45d93a6c; the pins committed (compiling, red by design until B/C/D); B (the box door), C (Index badges + sheet), D (the carry) remain. §U1b RECORD |
+| U1b — VX-304 (the box door + Index takes) | IN-PROGRESS — piece A (seams) a45d93a6c; the pins committed (compiling, red by design until B/C/D); B (the box door) committed; C (Index badges + sheet), D (the carry) remain. §U1b RECORD |
 | U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | NOT STARTED |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
 | Closeout (canon deltas, tickets, PR, handoff) | NOT STARTED |
@@ -501,7 +501,12 @@ the stage is coordinator-held; this session builds headless only.
    card, the live pane released, "Open Takes mode" refusing — non-regression; the request slot with nothing live),
    `BookCarryLiveBlockTests` (the pure rule; the model's parked block landing; the mounted click-over through the
    published mode door: block 2 LIVE in the Index at her caret). Core: `BlockTOCTakesCountTests` (green — new API).
-3. **B — the box door** — PENDING.
+3. **B — the box door** — committed (see the commit naming it): `SidebarNoteBox` draws "open ↗" — SELECTED in the
+   door row beside "edit here" (the bar's bordered-cell grammar, the same height as the filled door), LIVE trailing the
+   title (the book's own voiced title door, in the accent); hovers per state (`NoteBoxCopy.openDoor*`); DEBUG face
+   "open" + the frame oracle. `BookView.openDoor(report)` hands `NoteBoxDoor.openInWrite` = the book's ONE open door
+   (`openInWrite`) for the box's note, read at the PRESS; none without a landing road (P-2). Red-on-old: B reverted ⇒
+   `BookNoteBoxOpenDoorTests` (every `openInWrite` nil) and `SidebarNoteBoxDoorFacesTests` (no "open" face, no frame).
 4. **C — Index badges + the in-place sheet** — PENDING.
 5. **D — Outline → Index carries the live block** — PENDING.
 
