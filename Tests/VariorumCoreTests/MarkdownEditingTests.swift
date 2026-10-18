@@ -351,6 +351,7 @@ struct MarkdownEditingTests {
 
     // MARK: - P1: the scan is the LINES, never the note
 
+    #if DEBUG  // MarkdownScanCount is a DEBUG-only oracle (VX-345)
     @Test func planningScansOnlyTheLinesItWasHanded() {
         // The app hands whole lines in and shifts the result, exactly as
         // `MarkdownStyling.restyle` does — so this pin is what makes "⌘B
@@ -363,6 +364,7 @@ struct MarkdownEditingTests {
         #expect(MarkdownScanCount.current == lines.utf16.count,
                 "one scan, of exactly the text handed in")
     }
+    #endif
 }
 
 /// **13k K5 — what ⏎ does on a list line** (her ruling: *⏎ at the end of a
