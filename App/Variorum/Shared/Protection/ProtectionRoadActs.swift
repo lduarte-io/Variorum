@@ -116,6 +116,7 @@ nonisolated extension ProtectionOpenRoad {
         do {
             try session.executor.recordPassphraseReminderDismissed(&library)
             session.library = library
+            log("road: rule 3's reminder dismissed — the record counts \(library.record?.reminderDismissals ?? 0)")
             return true
         } catch {
             log("road: the reminder's dismissal could not be recorded — \(String(describing: error))")

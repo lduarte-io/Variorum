@@ -114,6 +114,7 @@ final class RoadInterludeModel {
     func notNow() {
         guard case .offer? = current, !busy else { return }
         message = nil
+        ProtectionOpenRoad.log("road: the key-file offer put off (Not now) — nothing written")
         advance()
     }
 

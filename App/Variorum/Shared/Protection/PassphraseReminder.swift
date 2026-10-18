@@ -162,6 +162,9 @@ final class PassphraseReminderModel {
         else { return }
         if next.scheduled { ledger.recordScheduledShow(libraryID, at: now()) }
         showing = next
+        // The walk reads it (W-4's road): which showing, never anything secret.
+        ProtectionOpenRoad.log("road: rule 3's reminder shows — scheduled \(next.scheduled), moment "
+            + "\(next.moment.map { String(describing: $0) } ?? "none"), don't-show-again \(next.offersDontShowAgain)")
     }
 
     /// *Not now*: the bar goes; a scheduled showing records a dismissal (one record write).
