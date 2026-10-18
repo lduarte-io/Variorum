@@ -337,10 +337,13 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   leg 7/2: VX-338 4 of 5 red + the pure guard green, VX-339 2 of 2 red, exactly as predicted; FIXED leg 78 tests /
   13 suites ALL GREEN. U1's pins are verified red-on-old whole. **Still PENDING:** VX-357's real-client wire round
   (a later window) and the VX-339 banner walk. The U1 UNIT RECORD (below) carries the rest.
-- **U5 (VX-392 · VX-393 · VX-394 — the urgent MCP trio, joined 2026-10-18 at her word):** IN-PROGRESS — its
-  implementer (`opus-implementer`, fresh session) started 2026-10-18 after U1's adjudication; the per-member LIVE
-  STATUS is the U5 UNIT RECORD's (at the end of this file). FOURTEEN members now; rulings R-VX348-5/6 and the report
-  verbatim in §U5.
+- **U5 (VX-392 · VX-393 · VX-394 — the urgent MCP trio, joined 2026-10-18 at her word):** BUILT — VX-392 FIXED
+  (`7998e88a5` — `list_wings`), VX-393 FIXED (`00c754151` the local-only `v1_30` · `98c88a686` the one-row rule),
+  VX-394's drop line SHIPPED (`6306a21ff` · `0784d8b9a`; the mechanism established — Castle's re-lock stops the server —
+  and HER lock question recorded, not built); every headless pin verified red-on-old; the headless suites green but
+  VX-353's flake; the fold of main is in (`460d39785`). **PENDING:** the Mac batch (products prebuilt from the folded
+  tree — the U5 record's last sections), VX-392's real-client live round, the QUESTIONS bundle (P-VX392-1…5,
+  P-VX393-1…3, P-VX394-1…6). The U5 UNIT RECORD (at the end of this file) carries the rest.
 - **U2 (VX-347 — ⌘S):** NOT-STARTED.
 - **U3 (VX-350 · VX-349 · VX-176 — the Library's row and header):** NOT-STARTED.
 - **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** NOT-STARTED.
@@ -685,21 +688,27 @@ the build notes; the Environment traps; the kickoff sitting and her overnight ma
 `notes/SessionResiliencyProtocol.md`, CLAUDE.md + its canon. Lane: no `Sources/VariorumCore/Sync/`, custody, Keychain,
 `Protection/`, synced schema or editor-seam line; grants are LOCAL-ONLY (their family may grow by a local migration).*
 
-**NOT DONE BY THIS UNIT (first line, by the brief's rule):** filled at the unit's close.
+**NOT DONE BY THIS UNIT (first line, by the brief's rule):** no `xcodebuild test` and no walk (the brief: the stage is
+the orchestrator's) — the Mac pins (`MCPConnectionEndDoorTests` ×3, `MCPWingFacesTests.listWingsSpeaksItsOwnWords`) are
+written, compiled, and their red and fixed products PREBUILT from the folded tree (the commands at the end of this
+record), their run PENDING the batch; VX-392's done-when real-client live round on the dev store is PENDING a stage
+window (its exact steps in VX-392's section); no faces were walked (the only face change is the Activity list's words).
+VX-394's remainder — whether a connected AI's work should count as "use" for Castle's lock after time away — is HER
+call (author-only; options recorded), not built.
 
 ### LIVE STATUS (per member)
 
-- **VX-392 (an empty granted wing can't be discovered):** DONE (this commit) — FIXED: `list_wings` (R-VX348-5) with
+- **VX-392 (an empty granted wing can't be discovered):** DONE (`7998e88a5`) — FIXED: `list_wings` (R-VX348-5) with
   its pins, 5 of them verified RED on the pre-fix tree, all 8 green after; the descriptions point at it; the
   non-empty wing road and the empty-book-alone road proven by guards (green on both sides — those halves HOLLOW,
   recorded). **PENDING:** the Mac pin's run (`listWingsSpeaksItsOwnWords` — compile at the unit's Mac seam) and the
   real-client live round (its steps in the VX-392 section). Its section below.
-- **VX-393 (duplicate grant rows for one client × target):** DONE (`00c754151` the schema · this commit the op) —
+- **VX-393 (duplicate grant rows for one client × target):** DONE (`00c754151` the schema · `98c88a686` the op) —
   FIXED: traced (the one mint, `insertMCPGrant`, never looked at the place's existing row; every road but Change…
   added one); pins verified RED on the pre-fix tree (`DerivedData/u5-logs/vx393-red.log`: 7 of 8, the
   other-clients guard green), 8 of 8 green after; the whole headless suite green after the op change (MCP 376/70,
   core 2916/340, the third target 40/6). Its section below.
-- **VX-394 (mid-session disconnect while the pane says running):** DONE (`6306a21ff` the core + host · this commit
+- **VX-394 (mid-session disconnect while the pane says running):** DONE (`6306a21ff` the core + host · `0784d8b9a`
   the app side) — the mechanism ESTABLISHED by code reading as a definite kill path (the library's LOCK under Castle —
   sleep · screen lock · ten minutes of time away counted from HER use only — detaches the door and hangs up every
   connection; App Nap, socket idle timeouts, the path and the SDK loop ruled out); whether it was HER night's cause is
@@ -707,11 +716,9 @@ the build notes; the Environment traps; the kickoff sitting and her overnight ma
   6, the guards green), 6 of 6 green. **PENDING:** the Mac pins' run (`MCPConnectionEndDoorTests` — prebuilt). The
   ticket's remainder is HER call (does a connected AI's work count as "use" for Castle's lock after time away? — an
   author-only lock relaxation, recorded with options, not built). Its section below.
-- **A BEHAVIOURAL REVERT IS IN FLIGHT (the Mac red product):** over the committed `0784d8b9a` — `MCPPaneCopy.swift`
-  (the two `list_wings` cases and the `connectionEndPhrase` call removed), `MacWillLock.swift` (the
-  `await endingConnections()` line removed), `MCPServerHost.swift` (the end-line write and `recordConnectionEnds`'s body
-  removed); restore with `git checkout -- App/Variorum/Variorum/Features/MCP/MCPPaneCopy.swift
-  App/Variorum/Variorum/MacWillLock.swift Sources/VariorumMCP/MCPServerHost.swift` (no other uncommitted work in them).
+- **No behavioural revert is in flight.** The Mac red product's reverts (`MCPPaneCopy.swift`, `MacWillLock.swift`,
+  `MCPServerHost.swift` over the committed `0784d8b9a`) were built into `DerivedData/u5-red` — all three files confirmed
+  recompiled in its log — and restored by `git checkout --`; `git diff` clean after.
 - (VX-394's headless red leg ran and was restored: `MCPServerHost.swift` reverted over
   the committed `6306a21ff` — the end-line write and `recordConnectionEnds`'s body removed — 4 of 6 pins RED, the two
   guards green, `DerivedData/u5-logs/vx394-red.log`; restored by `git checkout --`, `git diff` clean, 6 of 6 green.)
@@ -989,4 +996,51 @@ below).
 - **P-VX394-5** — a QUIT logs nothing (the process ends with the store; a client's next connect hears "Variorum must be
   open" — VX-181); alternative: a line from `applicationShouldTerminate`'s road (its cancel arm makes that fiddly).
 - **P-VX394-6** — a pending connection request's end is logged too (it named itself); alternative: approved clients only.
+
+### U5's suites (headless, at the end — the folded tree)
+
+`swift test` whole on the final tree: VariorumCoreTests **3248 tests / 418 suites passed** (Castle's suites ride the
+fold); the third target **40 / 6 passed**; VariorumMCPTests **382 / 71 with ONE failure**,
+`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (≈19 s against its 15 s bound
+at a load average of 10–16 — other sessions' builds), **green alone (3 / 3, 2.1 s)** — VX-353's standing load-dependent
+flake (a fake peer, not the host this unit changed). The VX-180 / VX-181 no-regress suites, run on the final tree:
+`MCPDiscoverProbeServerTests`, `MCPShimClosedAppTests`, `MCPPreInitializeWindowTests`, `MCPShimTests` — **30 / 4 green**
+(the closed-app sentence and the mid-session connect-once-the-app-opens unchanged). The phone target builds with U5's
+core changes (`xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' build` — BUILD SUCCEEDED;
+no simulator, no test run).
+
+### The Mac products (PREBUILT from the FOLDED tree — the batch window runs `test-without-building` only)
+
+Both `build-for-testing` from `App/Variorum/`, scheme `Variorum`, destination `platform=macOS`, Debug (no custom
+configuration), each AFTER the fold (`460d39785` is in both products' history — the coordinator's Castle-phase-2
+addendum):
+- **FIXED:** `<home>/dev/variorum-vx-348/DerivedData/u5-fixed`
+  (`Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`) — the code at `0784d8b9a` (log
+  `DerivedData/u5-fixed-build.log`, TEST BUILD SUCCEEDED).
+- **RED:** `<home>/dev/variorum-vx-348/DerivedData/u5-red` — `0784d8b9a` with `MCPPaneCopy.swift` (no
+  `list_wings` words, no `connectionEndPhrase`), `MacWillLock.swift` (no `endingConnections` call) and
+  `MCPServerHost.swift` (no end lines) behaviourally reverted, the three confirmed recompiled in
+  `DerivedData/u5-red-build.log`, the tree restored after.
+- **The commands** (under a held stage claim; confirm each "Test run with N tests" line):
+  ```
+  cd <home>/dev/variorum-vx-348/App/Variorum
+  # RED — expect MCPConnectionEndDoorTests 3 of 3 red; MCPWingFacesTests: listWingsSpeaksItsOwnWords red, the rest green
+  xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u5-red test-without-building -only-testing:VariorumTests/MCPConnectionEndDoorTests -only-testing:VariorumTests/MCPWingFacesTests
+  # FIXED — the pins and every MCP-door / grants / lock-road neighbour, all green
+  xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u5-fixed test-without-building -only-testing:VariorumTests/MCPConnectionEndDoorTests -only-testing:VariorumTests/MCPWingFacesTests -only-testing:VariorumTests/MacWillLockTests -only-testing:VariorumTests/AutosaveRegistryLifecycleTests -only-testing:VariorumTests/LandingOffsetTests -only-testing:VariorumTests/MCPPaneTests -only-testing:VariorumTests/MCPPaneTabsTests -only-testing:VariorumTests/MCPHerEditorDoorTests -only-testing:VariorumTests/MCPShareFacesTests -only-testing:VariorumTests/MCPSharedRowsTests -only-testing:VariorumTests/MCPSharedIconClickTests -only-testing:VariorumTests/MCPGrantSheetTests -only-testing:VariorumTests/MCPAskAndReceiptTests -only-testing:VariorumTests/MCPAsksWaitTests -only-testing:VariorumTests/MCPRebindFaceTests -only-testing:VariorumTests/MCPSetupKeyFacesTests -only-testing:VariorumTests/MCPSetupTabKeyTests -only-testing:VariorumTests/MCPSetupMenuTests -only-testing:VariorumTests/MCPEditFacesTests -only-testing:VariorumTests/MCPEditParityFacesTests -only-testing:VariorumTests/MCPLibraryParityFacesTests -only-testing:VariorumTests/MCPDeliberateFacesTests -only-testing:VariorumTests/MCPDoorErgonomicsFacesTests -only-testing:VariorumTests/MCPDuplicateFilingFacesTests -only-testing:VariorumTests/MCPCompareLandingTests -only-testing:VariorumTests/MCPNavigationTests -only-testing:VariorumTests/MCPGatheringIconTests -only-testing:VariorumTests/BookPanelMCPMarksTests -only-testing:VariorumTests/MCPWireRefusalSweepTests -only-testing:VariorumTests/TutorialMCPChapterTests -only-testing:VariorumTests/VX206ProtectionLandingTests
+  ```
+  Anything the batch finds red in the FIXED leg that the headless suites did not (the grants faces reading two rows
+  where one now stands, say) is a revealed dependency of VX-393's one-row rule — say so to the orchestrator, never
+  re-add the duplicate.
+
+### For the orchestrator (not U5's to apply)
+- **The PROVISIONALs for the merge's QUESTIONS bundle:** P-VX392-1…5, P-VX393-1…3, P-VX394-1…6.
+- **Her call (author-only):** VX-394's lock question (a connected AI's work as "use" for Castle's lock after time away —
+  options (a)/(b)/(c) in VX-394's section); my recommendation is that VX-394 stays open as "Needs Lillian" on it.
+- **P-VX392-5:** R-VX348-5's "the instructions … point at it" — the docs do; the instructions are untouched by the
+  brief's rule (the 25-character pointer that fits is in VX-392's section).
+- **The real-client live round** (VX-392's done-when — steps in VX-392's section); it can also watch VX-393's one row
+  (share the wing twice from a fresh sheet: Shared with AI shows it once) and VX-394's line (quit the client: "…
+  disconnected"; lock the dev library: "… was disconnected when the library locked or closed").
+- **AppSpec §7's grants-family line** may want `v1_30` named beside v1_24→v1_29 (a canon delta — the closeout's).
 
