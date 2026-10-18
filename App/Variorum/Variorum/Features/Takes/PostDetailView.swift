@@ -32,6 +32,11 @@ struct PostDetailView: View {
     /// the block landing — the arriving Write editor selects the match and
     /// arms the find bar (`EditorFindSeed`). nil for every other landing.
     var initialFind: EditorFindSeed? = nil
+    /// VX-303 (R-U1a-2): the mode a door NAMED for this arrival — a book's
+    /// open door names WRITE, her ruling (*"more consistent and useful than
+    /// the note's last used mode"*), whether or not a block rides it. nil —
+    /// every other door — is the note's remembered mode, as before.
+    var initialMode: PostMode? = nil
     /// 13f W20(c): the window's recently-visited books, most recent first —
     /// the membership chip's chooser floats them inside their group (her
     /// round-10 shaping). Defaults empty: curated-before-smart alone orders
@@ -548,7 +553,17 @@ struct PostDetailView: View {
         // mirror (both notification channels are retired; a request with
         // no detail mounted SPEAKS instead of vanishing).
         .onAppear {
-            mode = Self.rememberedMode(postID: postID)
+            let remembered = Self.rememberedMode(postID: postID)
+            mode = initialMode ?? remembered
+            // VX-303 (R-U1a-2): a named mode is where she now IS in this note,
+            // so its memory says so — the write a switch makes through
+            // `onChange(of: mode)`, which a mount's first assignment never
+            // fires (the `@State` starts at `.write`). Without it a door
+            // into Write over a note left in Lenses would leave "Lenses" as
+            // the note's last used mode after she had worked in Write.
+            if let initialMode, initialMode != remembered {
+                UserDefaults.standard.set(initialMode.rawValue, forKey: "postMode.\(postID)")
+            }
             if let initialBlockID {
                 jump(to: initialBlockID, offsetInBlock: initialOffsetInBlock, find: initialFind)
             }

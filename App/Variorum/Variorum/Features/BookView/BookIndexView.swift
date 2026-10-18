@@ -779,6 +779,22 @@ struct BookIndexView<Masthead: View>: View {
         landing.noteTop(anchorID, top)
     }
 
+    /// **VX-303 — the live pane's caret, handed on.** The book always hears
+    /// it (its open doors carry the LIVE caret — `BookOpenDoor`); the note's
+    /// one per-note memory hears it only when it is HER place
+    /// (`BookIndexEditModel.caretReportIsHers` — R-U1a-1's guard (i)): the
+    /// pane's own going-live placement never overwrites where she was. The
+    /// router's other-note arm is what remembers it ("edit here" reads it).
+    private func noteLivePaneCaret(_ caret: BookIndexEditModel.PaneCaret, postID: String) {
+        model.noteIndexCaret(postID: postID, blockID: caret.blockID, offsetInBlock: caret.offset)
+        guard edit.caretReportIsHers(
+            variantID: caret.variantID, offset: caret.offset, textLength: caret.textLength)
+        else { return }
+        session.commandRouter.noteFocusedBlock(
+            caret.blockID, variantID: caret.variantID, postID: postID,
+            utf16Offset: caret.offset)
+    }
+
     private func select(_ postID: String, scrollPane: Bool, report: Bool = true) {
         selectedPostID = postID
         if scrollPane {
@@ -1071,12 +1087,12 @@ struct BookIndexView<Masthead: View>: View {
                                         row.id, postID: entry.postID),
                                     onTap: { select(entry.postID, scrollPane: false) },
                                     onLandedBlock: { blockID in paneTarget = blockID },
-                                    // VX-303: the live pane's caret, reported
-                                    // to the book for its open doors.
-                                    onCaret: { blockID, offset in
-                                        model.noteIndexCaret(
-                                            postID: entry.postID, blockID: blockID,
-                                            offsetInBlock: offset)
+                                    // VX-303: the live pane's caret — to the
+                                    // book for its open doors, and (R-U1a-1)
+                                    // to the note's one memory when it is
+                                    // HERS, never the pane's own placement.
+                                    onCaret: { caret in
+                                        noteLivePaneCaret(caret, postID: entry.postID)
                                     },
                                     onBlockTop: paneBlockAnchorMoved,
                                     onMeasured: { height in
@@ -1452,11 +1468,10 @@ private struct BookIndexPaneNote: View {
     let onTap: () -> Void
     /// A landing made a block live here — the pane may scroll to it.
     let onLandedBlock: (String) -> Void
-    /// VX-303: the live pane's caret moved — the block it is in and the
-    /// caret's UTF-16 offset inside it (`PaneSurfaceView.onSelectionChange`,
-    /// consumed as every reporting host consumes it). The book's open doors
-    /// carry it.
-    let onCaret: (String, Int) -> Void
+    /// VX-303: the live pane's caret moved — the block and take it is in and
+    /// the caret's UTF-16 offset inside the take (`PaneSurfaceView
+    /// .onSelectionChange`, consumed as every reporting host consumes it).
+    let onCaret: (BookIndexEditModel.PaneCaret) -> Void
     /// 13u4 UNIT F1: where one of this note's BLOCKS sits, for a landing whose
     /// target is that block (the pane gates the report on its pending anchor).
     let onBlockTop: (String, CGFloat) -> Void
@@ -1481,7 +1496,7 @@ private struct BookIndexPaneNote: View {
         indicator: EditingIndicatorStyle, entry: Queries.ReadingEntry,
         edit: BookIndexEditModel, selected: Bool, reserved: CGFloat,
         onTap: @escaping () -> Void, onLandedBlock: @escaping (String) -> Void,
-        onCaret: @escaping (String, Int) -> Void = { _, _ in },
+        onCaret: @escaping (BookIndexEditModel.PaneCaret) -> Void = { _ in },
         onBlockTop: @escaping (String, CGFloat) -> Void,
         onMeasured: @escaping (CGFloat) -> Void
     ) {
@@ -1631,7 +1646,11 @@ private struct BookIndexPaneNote: View {
                 // VX-303: where her caret is inside this block — the book's
                 // open doors carry it into Write (ReadEditPane's precedent:
                 // the live pane's caret is the note's place).
-                onSelectionChange: { range in onCaret(row.blockID, range.location) },
+                onSelectionChange: { range in
+                    onCaret(BookIndexEditModel.PaneCaret(
+                        blockID: row.blockID, variantID: variantID, offset: range.location,
+                        textLength: (text as NSString).length))
+                },
                 // 18l U0 (her Index-click report): the click's own place; a
                 // LANDING's block start (18l-b U4, #153); `.leave` for a pane's
                 // own focus request.

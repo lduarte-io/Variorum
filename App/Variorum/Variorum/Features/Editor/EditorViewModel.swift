@@ -871,9 +871,15 @@ final class EditorViewModel {
             // would honor its own fill's side effect (the first cut did —
             // and landed at the last block's start).
             let arrivalFact = session.commandRouter.focusedBlock
-            structural.renderFull(new, preserveTail: false)
-            loaded = true
-            applyFocusSeeds(arrivalFact: arrivalFact)
+            // VX-303 (R-U1a-1's guard): the fill's END and the focus seeds are
+            // the MOUNT placing the caret, not her — bracketed so a note that
+            // is not the mounted detail's (a book's inline editor) never takes
+            // them as her place. The bracket changes nothing else.
+            session.commandRouter.duringCaretPlacement {
+                structural.renderFull(new, preserveTail: false)
+                loaded = true
+                applyFocusSeeds(arrivalFact: arrivalFact)
+            }
         case .deferUntilClean:
             pendingProjection = new
         case .forcedFullRender:

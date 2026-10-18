@@ -73,19 +73,29 @@ final class BookIndexEditModel {
     func makeLive(postID: String, blockID: String, variantID: String, clickOffset: Int? = nil) {
         goLive(
             postID: postID, blockID: blockID, variantID: variantID,
-            caret: clickOffset.map(PaneCaretLanding.offset))
+            caret: clickOffset.map(PaneCaretLanding.offset), placedByHer: true)
     }
 
     /// THIS block goes live, its pane handed `caret` for that take (nil ⇒
     /// `.leave`) — the one road both the click and the landing take.
+    /// `placedByHer` (VX-303): a click's place is hers; a landing's is the
+    /// surface's (`caretReportIsHers`).
     private func goLive(
-        postID: String, blockID: String, variantID: String, caret: PaneCaretLanding?
+        postID: String, blockID: String, variantID: String, caret: PaneCaretLanding?,
+        placedByHer: Bool
     ) {
         paneCaretLanding = caret.map { (variantID: variantID, landing: $0) }
+        // VX-303: the pane about to mount places its caret itself — armed
+        // before the ring moves, like the landing beside it.
+        arrivalPlacement = caret.map {
+            (variantID: variantID, landing: $0, placedByHer: placedByHer)
+        }
         let key = PaneTextAuthority.PaneKey(
             columnID: Self.columnID, blockID: blockID, variantID: variantID, context: postID)
         switch authority.focus(key) {
         case .unchanged:
+            // Already live: no pane mounts, so no placement will report.
+            arrivalPlacement = nil
             return
         case .migrated(let from):
             if let from, !from.context.isEmpty {
@@ -107,6 +117,61 @@ final class BookIndexEditModel {
         paneCaretLanding.map { $0.variantID == variantID ? $0.landing : .leave } ?? .leave
     }
 
+    // MARK: - VX-303 (R-U1a-1's guard (i)) — whose caret a report is
+
+    /// One live-pane caret report, as the host hands it on (the pane's
+    /// `onSelectionChange`, consumed): the block and take it is in, the
+    /// caret's UTF-16 offset inside the take, and the take's length.
+    struct PaneCaret: Equatable, Sendable {
+        let blockID: String
+        let variantID: String
+        let offset: Int
+        let textLength: Int
+    }
+
+    /// **The going-live's OWN placement, until it has landed.** A pane going
+    /// live places its caret itself before she touches it: its `string`
+    /// write leaves the selection at the take's END and reports that, then the
+    /// armed landing (`caretLanding`) lands and reports ITS place. A click's
+    /// place is hers; a LANDING's (the Read click-through's block start, a
+    /// title click's first block, "edit here"'s remembered caret) is the
+    /// surface's — and the END before either is nobody's. Ends when the
+    /// placement reports, or at her first edit (an EMPTY take's placement may
+    /// report nothing at all — its END and its start are the same 0).
+    @ObservationIgnored private var arrivalPlacement:
+        (variantID: String, landing: PaneCaretLanding, placedByHer: Bool)?
+
+    /// **Is this live-pane caret report HER place?** False for the going-live
+    /// placement's reports — the `string` write's END, and a landing's own
+    /// armed place — true for a click's own place and for every report after
+    /// the placement has landed (her keys, her clicks inside the pane). The
+    /// note's per-note memory takes only hers (`CommandRouter
+    /// .noteFocusedBlock`), so a landing's default never clobbers the place
+    /// she had (the orchestrator's guard (i)). The doors read the LIVE caret
+    /// regardless (`BookViewModel.noteIndexCaret`) — this decides memory only.
+    ///
+    /// `textLength` is the pane's take length (UTF-16), so an armed offset is
+    /// compared exactly as the pane clamps it (`PaneSurface`'s own clamp).
+    func caretReportIsHers(variantID: String, offset: Int, textLength: Int) -> Bool {
+        guard let arrival = arrivalPlacement, arrival.variantID == variantID else { return true }
+        let placed: Int?
+        switch arrival.landing {
+        case .leave: placed = nil
+        case .start: placed = 0
+        case .end: placed = textLength
+        case .offset(let landing): placed = min(max(0, landing), textLength)
+        case .select(let range): placed = min(max(0, range.location), textLength)
+        }
+        // `.leave` places nothing: the pane shows what it shows, and it is hers.
+        guard let placed else {
+            arrivalPlacement = nil
+            return true
+        }
+        guard offset == placed else { return false }  // the `string` write's END
+        arrivalPlacement = nil  // the placement landed: what follows is hers
+        return arrival.placedByHer
+    }
+
     func blur() {
         if let leaving = authority.livePane {
             authority.blur()
@@ -124,6 +189,9 @@ final class BookIndexEditModel {
     }
 
     func paneEdited(postID: String, variantID: String, oldText: String, newText: String) {
+        // VX-303: her edit ends any placement still pending (an empty take's
+        // placement can report nothing) — what she types is hers.
+        if arrivalPlacement?.variantID == variantID { arrivalPlacement = nil }
         let old = authority.text(variantID: variantID, storeText: oldText)
         let cost = TakeEditCost.utf16Cost(from: old, to: newText)
         guard cost > 0 else { return }
@@ -182,7 +250,9 @@ final class BookIndexEditModel {
             postID: postID, blockID: row.blockID, variantID: variantID,
             caret: PaneCaretLanding.entering(
                 session.commandRouter.currentBlock(for: postID), block: row.blockID
-            ) ?? .start
+            ) ?? .start,
+            // VX-303: a landing's place is the surface's, never hers.
+            placedByHer: false
         )
         return row.blockID
     }

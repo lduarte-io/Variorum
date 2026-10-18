@@ -40,6 +40,23 @@
 import Foundation
 
 nonisolated enum BookOpenDoor {
+    /// **What a book hands the shell's landing road** (`BookView
+    /// .onOpenSearchHit` → `RootView.open` → `ShellRouter.adopt`): the note,
+    /// and — when it has them — the block and caret to land at, a search
+    /// passage's words, and the mode the note arrives in.
+    struct Landing: Equatable, Sendable {
+        var postID: String
+        var blockID: String? = nil
+        /// UTF-16, inside `blockID`; nil = the block's start.
+        var offsetInBlock: Int? = nil
+        /// A search passage's matched words (13o U2, D6).
+        var find: EditorFindSeed? = nil
+        /// The mode the note arrives in — WRITE for every open door (VX-303,
+        /// R-U1a-2); nil = the note's remembered mode (a search passage
+        /// names none: its block landing forces Write already).
+        var mode: PostMode? = nil
+    }
+
     /// Her place inside a note, as an open door carries it: the block her
     /// caret stands in, and the caret's UTF-16 offset inside that block (nil
     /// ⇒ unknown, which every landing spells "the block's start").

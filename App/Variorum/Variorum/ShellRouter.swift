@@ -198,6 +198,30 @@ final class ShellRouter {
         }
     }
 
+    /// **VX-303 (R-U1a-2) — the MODE a navigation names for its note's
+    /// arrival, parked beside the block landing.** A book's open door lands
+    /// in WRITE — her ruling, *"more consistent and useful than the note's
+    /// last used mode"* — even when no block rides it (nothing of hers is
+    /// live in that note: the plain open's PLACE, shown in Write). It is the
+    /// same kind of fact as the block landing — what a door named for the
+    /// mount that consumes it — so it lives in the same park and keeps both
+    /// rules: parked only by `adopt` (one statement with the navigation),
+    /// expired by the next navigation, spent when the detail mounts.
+    private(set) var modeLanding: ModeLanding?
+
+    struct ModeLanding: Equatable, Sendable {
+        let containerID: String
+        let mode: PostMode
+
+        /// A mode landing for a destination, if it is a NOTE (the only
+        /// container with modes) and a mode was actually named.
+        init?(_ destination: SidebarSelection, mode: PostMode?) {
+            guard let mode, case .post(let id) = destination else { return nil }
+            self.containerID = id
+            self.mode = mode
+        }
+    }
+
     /// **RULE ONE — a NAVIGATION expires whatever is parked, and parks only
     /// what it names.**
     ///
@@ -228,13 +252,17 @@ final class ShellRouter {
     /// becoming key — neither of which passes through a navigation door. An
     /// unspent park therefore re-threw her to the block a door named an hour
     /// ago every time she came back (round 2's MAJOR).
-    private func park(_ landing: BlockLanding?) {
+    private func park(_ landing: BlockLanding?, mode: ModeLanding? = nil) {
         blockLanding = landing
+        // VX-303 (R-U1a-2): the mode rides the same park — set and expired
+        // in the same statement as the block landing, never apart from it.
+        modeLanding = mode
         // Only a NEW park bumps the generation; spending one must not, or
         // the mount's identity would change under a view that has already
-        // landed and SwiftUI would rebuild it, throwing the caret away.
-        if let landing {
-            landingGenerations[landing.containerID, default: 0] += 1
+        // landed and SwiftUI would rebuild it, throwing the caret away. A
+        // park naming both a block and a mode for one note is ONE new park.
+        if let containerID = landing?.containerID ?? mode?.containerID {
+            landingGenerations[containerID, default: 0] += 1
         }
     }
 
@@ -254,11 +282,21 @@ final class ShellRouter {
         in pane: PaneID? = nil,
         landing blockID: String? = nil,
         offset offsetInBlock: Int? = nil,
-        find: EditorFindSeed? = nil
+        find: EditorFindSeed? = nil,
+        mode: PostMode? = nil
     ) -> WorkspaceModel.SelectionOutcome {
-        park(BlockLanding(
-            destination, blockID: blockID, offsetInBlock: offsetInBlock, find: find))
+        park(
+            BlockLanding(
+                destination, blockID: blockID, offsetInBlock: offsetInBlock, find: find),
+            mode: ModeLanding(destination, mode: mode))
         return workspace.select(destination, in: pane)
+    }
+
+    /// VX-303 (R-U1a-2): the mode the parked navigation named for this
+    /// container's arrival, if the park is its own — spent and expired with
+    /// the park (`landingFind`'s shape).
+    func landingMode(for containerID: String) -> PostMode? {
+        modeLanding?.containerID == containerID ? modeLanding?.mode : nil
     }
 
     /// What a mounting container should land on, if this park is its own.
@@ -286,6 +324,10 @@ final class ShellRouter {
     /// nothing of this container's is parked, so re-mounts are free.
     func spendLanding(for containerID: String) {
         if blockLanding?.containerID == containerID { blockLanding = nil }
+        // VX-303 (R-U1a-2): the mode rides the park, so it is spent with it —
+        // a re-mount (a split's focus round trip) is not a door and restores
+        // the remembered mode, which the arrival has already written.
+        if modeLanding?.containerID == containerID { modeLanding = nil }
     }
 
     /// **How many landings this container has been handed.** The detail's

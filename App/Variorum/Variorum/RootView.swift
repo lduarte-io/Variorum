@@ -725,7 +725,7 @@ struct RootView: View {
     /// adding a door, and is spoken in one voice wherever it fires.
     private func adopt(
         _ destination: SidebarSelection, in pane: PaneID, landing blockID: String? = nil,
-        offset offsetInBlock: Int? = nil, find: EditorFindSeed? = nil
+        offset offsetInBlock: Int? = nil, find: EditorFindSeed? = nil, mode: PostMode? = nil
     ) {
         // 17o c/d/e round 1 (MAJOR-2) + round 2 (MINOR-1): **a navigation
         // expires a parked block landing and installs the one it names — in
@@ -740,7 +740,8 @@ struct RootView: View {
         // because saying the same-note refusal out loud is the shell's job,
         // not the router's (P-4).
         switch router.adopt(
-            destination, in: pane, landing: blockID, offset: offsetInBlock, find: find) {
+            destination, in: pane, landing: blockID, offset: offsetInBlock, find: find,
+            mode: mode) {
         case .adopted:
             break
         case .focusedExistingPane:
@@ -1222,6 +1223,9 @@ struct RootView: View {
                     // same park, spent with it below.
                     initialOffsetInBlock: router.landingOffset(for: postID),
                     initialFind: router.landingFind(for: postID),
+                    // VX-303 (R-U1a-2): the mode a book door named — the
+                    // same park, spent with it below.
+                    initialMode: router.landingMode(for: postID),
                     recentBookIDs: router.workspace.recentBookIDs)
                     // **The park is spent when it lands.** A re-mount is not
                     // a navigation — the shell re-creates this view whenever
@@ -1276,11 +1280,13 @@ struct RootView: View {
                 // 13o U3 (the architect's F1): a book's search passage lands
                 // exactly as the Library's — Write at its block, find seeded.
                 // VX-303: the book's five OPEN doors ride the same road,
-                // carrying her caret's block and offset (or nothing, when no
-                // note is live — a plain open).
-                onOpenSearchHit: { postID, blockID, offsetInBlock, find in
+                // carrying her caret's block and offset (no block when
+                // nothing of hers is live in that note) and the mode the
+                // note arrives in (`BookOpenDoor.Landing`).
+                onOpenSearchHit: { landing in
                     open(
-                        .post(postID), blockID: blockID, offset: offsetInBlock, find: find,
+                        .post(landing.postID), blockID: landing.blockID,
+                        offset: landing.offsetInBlock, find: landing.find, mode: landing.mode,
                         in: pane)
                 })
                 .id(readingID)
@@ -1383,14 +1389,15 @@ struct RootView: View {
 
     /// Navigation with an optional caret-precise block landing (Stage C) —
     /// and, for a search passage, its find seed (13o U2, D6); for a book's
-    /// open door, her caret's offset inside that block (VX-303).
+    /// open door, her caret's offset inside that block and the mode the note
+    /// arrives in (VX-303 — Write, R-U1a-2).
     private func open(
         _ picked: SidebarSelection, blockID: String?, offset offsetInBlock: Int? = nil,
-        find: EditorFindSeed? = nil, in pane: PaneID? = nil
+        find: EditorFindSeed? = nil, mode: PostMode? = nil, in pane: PaneID? = nil
     ) {
         adopt(
             picked, in: pane ?? router.workspace.focusedPane, landing: blockID,
-            offset: offsetInBlock, find: find)
+            offset: offsetInBlock, find: find, mode: mode)
     }
 
 #if DEBUG

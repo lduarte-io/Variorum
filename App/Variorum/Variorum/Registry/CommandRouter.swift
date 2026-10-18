@@ -237,6 +237,25 @@ final class CommandRouter {
     /// The caret-rate half — read at a landing, watched by nobody.
     @ObservationIgnored private var focusedOffset: Int?
 
+    /// **VX-303 (R-U1a-1's guard (i)) — a surface PLACING its own caret.**
+    /// An editor mounting a note places the caret itself before she has
+    /// touched it: the first render's fill parks the insertion point at the
+    /// document's END and reports THAT (`EditorViewModel.applyProjection`'s
+    /// own note on it), then the focus seeds land — in a book, a bare focus
+    /// seeds the note's very start (`BookViewModel.focus`, row 44). Those
+    /// reports describe the mount, not her; the surface brackets them here so
+    /// a note that is NOT the mounted detail's never takes them as her place
+    /// (`noteFocusedBlock`'s other-note arm). Nested brackets count; the
+    /// mounted detail's own reports are untouched by it.
+    func duringCaretPlacement(_ body: () -> Void) {
+        caretPlacementDepth += 1
+        defer { caretPlacementDepth -= 1 }
+        body()
+    }
+
+    /// How many caret placements are in flight (see `duringCaretPlacement`).
+    @ObservationIgnored private(set) var caretPlacementDepth = 0
+
     /// A mounted writing surface reports where its caret is. Ignored for any
     /// note other than the one on screen — a background pane's caret is not
     /// "the block you're in" for the panel beside the foreground one.

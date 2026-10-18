@@ -75,11 +75,10 @@ struct BookView: View {
     ///
     /// **VX-303: the book's five OPEN doors ride this same road**
     /// (`openInWrite`), carrying her caret's block and its offset inside the
-    /// block (`offsetInBlock`; a search passage names none — its `find`
-    /// selects the match). A nil block is a plain note-open.
-    var onOpenSearchHit: ((
-        _ postID: String, _ blockID: String?, _ offsetInBlock: Int?, _ find: EditorFindSeed?
-    ) -> Void)?
+    /// block (a search passage names none — its `find` selects the match) and
+    /// the mode the note arrives in — one value, `BookOpenDoor.Landing`. A
+    /// nil block is a plain note-open.
+    var onOpenSearchHit: ((BookOpenDoor.Landing) -> Void)?
     @State private var model: BookViewModel
     @State private var structure: BookStructureModel
     /// 13i-b U2 — the book's DOOR (the Arrivals face's model). Its own model
@@ -125,7 +124,7 @@ struct BookView: View {
         onRevealSectionConsumed: (() -> Void)? = nil,
         onNoteBox: ((String, NoteBoxReport?, NoteBoxDoor?) -> Void)? = nil,
         bookSearch: BookSearchModel? = nil,
-        onOpenSearchHit: ((String, String?, Int?, EditorFindSeed?) -> Void)? = nil
+        onOpenSearchHit: ((BookOpenDoor.Landing) -> Void)? = nil
     ) {
         self.session = session
         self.readingID = readingID
@@ -527,7 +526,7 @@ struct BookView: View {
     /// The book's answer sheet — the passages land through the shell's road.
     private var searchSheet: some View {
         BookSearchSheet(tokens: tokens, model: bookSearch) { postID, blockID, find in
-            onOpenSearchHit?(postID, blockID, nil, find)
+            onOpenSearchHit?(BookOpenDoor.Landing(postID: postID, blockID: blockID, find: find))
         }
     }
 
@@ -1188,13 +1187,14 @@ struct BookView: View {
     private func openInWrite(_ postID: String) {
         guard let road = onOpenSearchHit else { return }
         guard let place = openPlace(of: postID) else {
-            road(postID, nil, nil, nil)
+            road(BookOpenDoor.Landing(postID: postID))
             return
         }
         let session = session
         Task {
             await session.flushExistingAutosave(forPost: postID)
-            road(postID, place.blockID, place.offsetInBlock, nil)
+            road(BookOpenDoor.Landing(
+                postID: postID, blockID: place.blockID, offsetInBlock: place.offsetInBlock))
         }
     }
 
