@@ -1220,7 +1220,13 @@ struct BookView: View {
     /// offset is measured in the editor's buffer, and `jump` measures the
     /// block's start in the STORE, so the note's pending autosave is flushed
     /// before the road is taken (the doors' flush-first precedent —
-    /// `divergePostForReading`'s doors, the MCP door's pre-act flush). Nothing
+    /// `divergePostForReading`'s doors, the MCP door's pre-act flush). Not
+    /// closed by it (the ladder's R1-3, ticketed at closeout): a write
+    /// ALREADY in flight when the door is pressed (the coordinator's debounce
+    /// took the batch) leaves nothing pending, so the flush returns before
+    /// that write lands and `jump` may measure the pre-write store — its
+    /// clamp then lands the caret short (`BookIndexEditModel
+    /// .releaseForTakesSheet` names the same window). Nothing
     /// live ⇒ no place ⇒ the same road with no block: the plain open's place,
     /// in WRITE all the same (R-U1a-2 — every door names the mode).
     ///

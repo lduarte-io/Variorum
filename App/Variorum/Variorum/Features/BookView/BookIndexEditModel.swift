@@ -185,12 +185,22 @@ final class BookIndexEditModel {
     /// buffer-authoritative (it never adopts the store's text while live), so
     /// a pane left live under the sheet could never show the panel's edits —
     /// and her next keystroke there would autosave its pre-sheet text over
-    /// them. Then every pending text of the leaving note AND of the sheet's
-    /// note is WRITTEN before this returns — awaited here rather than riding
-    /// `blur()`'s detached flush, because a second concurrent `flushNow`
-    /// returns at once while the first's write is still in flight (it takes
-    /// the batch and clears `pending` before it awaits), and the sheet's own
-    /// model reads the store the moment it starts.
+    /// them. Then the pending text of the leaving note AND of the sheet's
+    /// note is flushed and AWAITED before this returns, rather than riding
+    /// `blur()`'s detached flush, because the sheet's own model reads the
+    /// store the moment it starts.
+    ///
+    /// **The window this does NOT close** (the VX-382 ladder's R1-3, recorded
+    /// honestly): `flushNow` takes its batch and clears `pending` BEFORE it
+    /// awaits the write, so when a write is ALREADY in flight — the
+    /// coordinator's own 500-ms debounce, or another door's detached flush
+    /// that took the batch first — the awaited flush here finds nothing
+    /// pending and returns at once, while that write is still landing (the
+    /// helper's `false` — `isDirty` counts flights — is not consulted). For
+    /// those few milliseconds the sheet can read the pre-write store. The
+    /// class is the shared helper's (`AppSession.flushExistingAutosave` under
+    /// every flush-first door) and is ticketed at the run's closeout — a
+    /// helper that waits for its coordinator to settle — not closed here.
     func releaseForTakesSheet(on postID: String) async {
         let leaving = authority.livePane
         authority.blur()
