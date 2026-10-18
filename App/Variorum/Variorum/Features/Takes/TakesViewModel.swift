@@ -2126,14 +2126,22 @@ final class TakesViewModel {
 
     /// **THE COMMIT DOOR'S PENDING NAME** (13u3 UNIT D — item 14). The bar
     /// presents it at the commit door; Takes and Lenses share this model, so
-    /// one slot serves both surfaces exactly as one bar does.
+    /// one slot serves both surfaces exactly as one bar does. **VX-347:** the
+    /// presenter decides what leaving the field means (every leave but ⎋
+    /// files), so letting go of the ask while the field is up LEAVES it.
     var savepointAsk: SavepointNameAsk?
 
     /// ⌘S and the bar's commit button — the DOOR. It summons the optional
-    /// name; ⏎ on the empty field files what ⌘S has always filed. Where no
+    /// name; leaving the field any way but ⎋ files it (VX-347). Where no
     /// take is focused the door refuses HERE, before a field opens over a
     /// gesture that cannot land (P-2).
     func askSavepointName() {
+        // VX-347: ⌘S again while its field is up LEAVES the field — and
+        // every leave but ⎋ files it (PROVISIONAL P-VX347-2). No second field.
+        if savepointAsk != nil {
+            savepointAsk = nil
+            return
+        }
         guard let variantID = focusedPane?.variantID else {
             setRefusal("Click into a take first — ⌘S commits the take you're in.")  // J38
             return
@@ -2150,9 +2158,19 @@ final class TakesViewModel {
         savepointAsk = .naming(variantID: variantID)
     }
 
+    /// ⏎ on the PENDING field (the pins' road to the field's ⏎).
     func fileSavepoint(named name: String?) async {
-        savepointAsk = nil
-        await commitFocusedTake(named: name)
+        guard let ask = savepointAsk else { return }
+        await fileSavepoint(ask, named: name)
+    }
+
+    /// **A LEFT FIELD FILES ITS ASK** (VX-347 — every leave but ⎋ lands
+    /// here): the take ⌘S ASKED about (`ask.targetID`), never the ring's at
+    /// filing time — a click away into another take is a way of leaving,
+    /// and that click moves the ring first.
+    func fileSavepoint(_ ask: SavepointNameAsk, named name: String?) async {
+        if savepointAsk == ask { savepointAsk = nil }
+        await commitTake(ask.targetID, named: name)
     }
 
     /// Commit the FOCUSED take's buffer (⌘S in takes surfaces), optionally
@@ -2163,6 +2181,11 @@ final class TakesViewModel {
             setRefusal("Click into a take first — ⌘S commits the take you're in.")  // J38
             return
         }
+        await commitTake(variantID, named: name)
+    }
+
+    /// The filing itself, for the take it is told.
+    private func commitTake(_ variantID: String, named name: String?) async {
         await autosave.flushNow()
         await run { ops in _ = try ops.commit(variantID, message: name) }
         if status == nil {

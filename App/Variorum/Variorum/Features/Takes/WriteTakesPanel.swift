@@ -122,8 +122,9 @@ struct WriteTakesPanel: View {
                     .savepointNameAsk(
                         Binding(get: { model.savepointAsk }, set: { model.savepointAsk = $0 }),
                         tokens: tokens, arrowEdge: .bottom
-                    ) { _, name in
-                        Task { await model.fileSavepoint(named: name) }
+                    ) { pending, name in
+                        // VX-347: the take ⌘S ASKED about, whichever way the field was left.
+                        Task { await model.fileSavepoint(pending, named: name) }
                     }
                 Spacer()
                 Button("Open Takes mode") {
@@ -369,8 +370,8 @@ struct WriteTakesPanel: View {
     /// SHOWS (PROVISIONAL P-U3-1 — P-VX150-1's ratified rule for ⌘T, and what
     /// Write's caret arm committed when the panel was the caret block's). The
     /// ring moves onto that take FIRST, so the take being committed is the one
-    /// wearing the ring and the filing — which commits the take the ring is in
-    /// at ⏎ — agrees with the ask. The ask is the Takes board's
+    /// wearing the ring and the filing — which commits the take the ASK names
+    /// (VX-347), whichever way the field is left — agrees with it. The ask is the Takes board's
     /// (`askSavepointName`: its seal refusal, its field), presented here.
     private func commitRingTakeElseShown(slot: Queries.RenderedBlock) {
         if ringTakeID == nil, let shown = slot.variantID {

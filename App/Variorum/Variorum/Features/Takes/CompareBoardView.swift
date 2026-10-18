@@ -922,12 +922,19 @@ final class CompareViewModel {
     /// coordinator (the cross-context handback's rule); no focus speaks.
     /// **THE COMMIT DOOR'S PENDING NAME** (13u3 UNIT D — item 14): the
     /// board's header presents it, since this board renders no commit door
-    /// of its own (⌘S is its whole commit road).
+    /// of its own (⌘S is its whole commit road). **VX-347:** the presenter
+    /// decides what leaving the field means (every leave but ⎋ files).
     var savepointAsk: SavepointNameAsk?
 
-    /// ⌘S — the DOOR. It summons the optional name; ⏎ on the empty field
-    /// files what it has always filed; no live pane refuses HERE (P-2).
+    /// ⌘S — the DOOR. It summons the optional name; leaving the field any
+    /// way but ⎋ files it (VX-347); no live pane refuses HERE (P-2).
     func askSavepointName() {
+        // VX-347: ⌘S again while its field is up LEAVES the field — and
+        // every leave but ⎋ files it (PROVISIONAL P-VX347-2). No second field.
+        if savepointAsk != nil {
+            savepointAsk = nil
+            return
+        }
         guard let pane = authority.livePane else {
             statusMessage = "Click into a pane first — ⌘S commits the take you're in."
             return
@@ -949,12 +956,24 @@ final class CompareViewModel {
                 for: OperationError.lockedPost(id: pane.context))
             return
         }
-        savepointAsk = .naming(variantID: pane.variantID)
+        // The pane's own post rides the ask, so the filer flushes THAT
+        // post's coordinator even after the live pane has moved (VX-347).
+        savepointAsk = .naming(variantID: pane.variantID, context: pane.context)
     }
 
+    /// ⏎ on the PENDING field (the pins' road to the field's ⏎).
     func fileSavepoint(named name: String?) async {
-        savepointAsk = nil
-        await commitFocusedTake(named: name)
+        guard let ask = savepointAsk else { return }
+        await fileSavepoint(ask, named: name)
+    }
+
+    /// **A LEFT FIELD FILES ITS ASK** (VX-347): the pane take ⌘S ASKED
+    /// about (`ask.targetID`, flushed through `ask.context`'s coordinator),
+    /// never the live pane at filing time — a click away into another
+    /// column is a way of leaving, and it moves the pane.
+    func fileSavepoint(_ ask: SavepointNameAsk, named name: String?) async {
+        if savepointAsk == ask { savepointAsk = nil }
+        await commitTake(ask.targetID, inPost: ask.context, named: name)
     }
 
     func commitFocusedTake(named name: String? = nil) async {
@@ -962,12 +981,17 @@ final class CompareViewModel {
             statusMessage = "Click into a pane first — ⌘S commits the take you're in."
             return
         }
-        let postID = pane.context.isEmpty ? anchorPostID : pane.context
+        await commitTake(pane.variantID, inPost: pane.context, named: name)
+    }
+
+    /// The filing itself, for the take (and its post) it is told.
+    private func commitTake(_ variantID: String, inPost context: String, named name: String?) async {
+        let postID = context.isEmpty ? anchorPostID : context
         await coordinator(for: postID).flushNow()
         statusMessage = nil
         do {
             try await session.runner.run { ops in
-                _ = try ops.commit(pane.variantID, message: name)
+                _ = try ops.commit(variantID, message: name)
             }
             showReceipt(name.map(SavepointNameCopy.filed) ?? SavepointNameCopy.unnamedReceipt)
         } catch {
@@ -1231,8 +1255,9 @@ struct CompareBoardView: View {
                 .savepointNameAsk(
                     Binding(get: { model.savepointAsk }, set: { model.savepointAsk = $0 }),
                     tokens: tokens, arrowEdge: .bottom
-                ) { _, name in
-                    Task { await model.fileSavepoint(named: name) }
+                ) { pending, name in
+                    // VX-347: the take ⌘S ASKED about, whichever way the field was left.
+                    Task { await model.fileSavepoint(pending, named: name) }
                 }
         }
     }

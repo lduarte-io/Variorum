@@ -159,8 +159,9 @@ final class EditorViewModel {
     /// **THE COMMIT DOOR'S PENDING NAME** (13u3 UNIT D — item 14: *"an
     /// optional name at the manual-commit door, enter-to-skip keeps ⌘S
     /// instant"*). Non-nil while the field is up; the bar presents it at the
-    /// commit door. Nil-ing it without filing IS the cancel (the one road —
-    /// ⎋, a click outside, a window going away).
+    /// commit door. **VX-347:** the presenter decides what leaving it means
+    /// (`SavepointNameLeaving` — every leave but ⎋ files), so a host that
+    /// lets go of its ask while the field is up is LEAVING it, not cancelling.
     var savepointAsk: SavepointNameAsk?
     /// Per-command gesture enablement (Phase 9) — recomputed on every caret/
     /// selection change from THE planner, so the menu bar, context menu, and
@@ -3268,11 +3269,12 @@ final class EditorViewModel {
 
     /// **⌘S AND THE COMMIT BUTTON — the door** (13u3 UNIT D, item 14).
     ///
-    /// The door now SUMMONS the name field instead of writing the savepoint
-    /// itself: ⏎ on the empty field files it unnamed, so the fast road is
-    /// two keys and the savepoint she has always got is the savepoint she
-    /// still gets. Where the caret can commit nothing the door refuses HERE,
-    /// before a field opens over a gesture that cannot land (P-2).
+    /// The door SUMMONS the name field instead of writing the savepoint
+    /// itself, and **VX-347** (her ruling, superseding #121(b)): every way of
+    /// leaving that field but ⎋ files the commit — ⏎, a click away, the host
+    /// or window going, ⌘S again — named or not; ⎋ alone is "don't save".
+    /// Where the caret can commit nothing the door refuses HERE, before a
+    /// field opens over a gesture that cannot land (P-2).
     func commitCaretVariant() {
         askSavepointName()
     }
@@ -3283,6 +3285,12 @@ final class EditorViewModel {
     private static let noCaretToCommit = "Place the caret in a block to commit."
 
     func askSavepointName() {
+        // VX-347: ⌘S again while its field is up LEAVES the field — and
+        // every leave but ⎋ files it (PROVISIONAL P-VX347-2). No second field.
+        if savepointAsk != nil {
+            savepointAsk = nil
+            return
+        }
         guard let variantID = caretVariantID else {
             refuse(Self.noCaretToCommit)
             return
@@ -3311,22 +3319,37 @@ final class EditorViewModel {
         savepointAsk = .naming(variantID: variantID)
     }
 
-    /// ⏎ in the field. The name is already through the one rule; nil is the
-    /// skip road and files exactly what ⌘S has always filed.
+    /// ⏎ on the PENDING field (the pins' road to the field's ⏎). The name is
+    /// already through the one rule; nil is the skip road.
     func fileSavepoint(named name: String?) async {
-        savepointAsk = nil
-        await commitCaret(named: name)
+        guard let ask = savepointAsk else { return }
+        await fileSavepoint(ask, named: name)
     }
 
-    /// The filing itself — unchanged in every respect but the optional name
-    /// it now carries (the flush-then-commit ordering, the caret guard and
-    /// the refusal road are byte-identical, which is why the shipped pins on
-    /// this road ride unmodified).
+    /// **A LEFT FIELD FILES ITS ASK** (VX-347 — every leave but ⎋ lands
+    /// here). It commits the take ⌘S ASKED about — `ask.targetID` — never
+    /// the caret's take at filing time: a click away into another block is
+    /// one of the ways of leaving, and that click moves the caret first.
+    func fileSavepoint(_ ask: SavepointNameAsk, named name: String?) async {
+        if savepointAsk == ask { savepointAsk = nil }
+        await commitTake(ask.targetID, named: name)
+    }
+
+    /// The caret's take, filed now (the filer's road for a caller with no
+    /// ask — the seal pin's stale-header moment).
     func commitCaret(named name: String? = nil) async {
         guard let variantID = caretVariantID else {
             statusMessage = Self.noCaretToCommit
             return
         }
+        await commitTake(variantID, named: name)
+    }
+
+    /// The filing itself — unchanged in every respect but the optional name
+    /// it carries and the take it is told (the flush-then-commit ordering
+    /// and the refusal road are byte-identical, which is why the shipped
+    /// pins on this road ride unmodified).
+    private func commitTake(_ variantID: String, named name: String?) async {
         await autosave.flushNow()
         do {
             _ = try await session.runner.run { ops in
