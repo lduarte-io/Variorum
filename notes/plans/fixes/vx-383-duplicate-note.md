@@ -135,7 +135,7 @@ editor-seam file is touched; the implementer says so in its record if a trace le
 - Promote: `promoteNoteVersion` (`Operations+NoteVersions.swift:315`) flips `archived_at`/`locked` and nothing else
   — the promoted copy wears NO tags (`mintNoteVersion` copies none; VX-336's D-311-1 measured it). Not undoable by
   her ruling.
-- The phone: no duplicate door, no Versions door (grepped) — **MOBILE PARITY: nothing mobile-visible.**
+- The phone: no duplicate door — but **Promote IS on the phone** (Note ⋯ ▸ Versions…, the shared `VersionActs.promote`; U1's implementer corrected the kickoff's grep), so D-C-3 is MOBILE-VISIBLE through the shared op with zero phone code changed. **MOBILE PARITY: a `notes/MobileSoul.md` ledger row at the closeout** (a promoted version now wears the original's tags and is heard by living books, on both platforms).
 
 **D-C-1 — the op grows a TAG CHOICE; "with tags" APPLIES.** `duplicateAsVersion(_:tags:)` with
 `DuplicateTags = .applied | .none` (names the implementer's): `.applied` copies the family, then applies each live
@@ -263,7 +263,7 @@ store's Castle credentials, if a lock screen appears, are `~/.variorum/dev-castl
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-372 | BUILT — headless green, the Mac compiled (the U1 UNIT RECORD); the Mac batch (Tier A + B), `MobileVersionsTests` and the walk W0–W10 are OWED in a stage window (the orchestrator's) |
-| U2 | VX-371 | NOT-STARTED — after U1 |
+| U2 | VX-371 | IN FLIGHT — implementer spawned 2026-10-17 after U1's headless close; U1's Mac batch + walk owed in the orchestrator's stage window |
 | Ladder | — | NOT-STARTED |
 | Closeout | — | NOT-STARTED |
 
