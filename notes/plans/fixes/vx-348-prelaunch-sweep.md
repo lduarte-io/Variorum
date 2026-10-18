@@ -1044,3 +1044,28 @@ addendum):
   disconnected"; lock the dev library: "… was disconnected when the library locked or closed").
 - **AppSpec §7's grants-family line** may want `v1_30` named beside v1_24→v1_29 (a canon delta — the closeout's).
 
+
+## U5 ADJUDICATION (the orchestrator, 2026-10-18 — after spot-verification)
+
+- **Verified:** tip clean and pushed; the fold `460d39785` is a true merge of main `d8bb24488` (the one shared file
+  `Operations+Tag.swift` auto-merged; `OpsRefusalTable.swift` untouched by this branch — the overlap question is
+  CLOSED: no overlap); both Mac products built post-fold; per-piece commits, no trailers; the record complete; the
+  one headless red is VX-353's known flake (green alone), again.
+- **P-VX392-5 RULED AND APPLIED (the orchestrator's own small fix, `b570feb17`):** R-VX348-5's letter — "the
+  instructions point at it" — wins over the brief's caution: the grants clause now reads "…a note, a book or a wing
+  (list_wings lists yours)…", 2,994 of 3,000; the tool-names truth pin gains `list_wings` as a justified edit;
+  `MCPAdviceServerTests` 14/14 and `MCPListWingsServerTests` 8/8 green after.
+- **The two hollow halves stand as recorded** (the hallucination guard working as designed): a granted empty BOOK
+  already listed; a NON-empty wing already read and wrote at every rung — her "can't see it or write in it" was the
+  empty-wing case, now closed by `list_wings`.
+- **P-VX393-1's consequence is FLAGGED for her** (the merge bundle, prominently): answering an ask "until it
+  disconnects" on a place holding an "always" grant REPLACES it in full — nothing remains after the disconnect. The
+  literal reading of her "upgrade in place"; she may prefer replace-never-downgrades.
+- **VX-394 → "Needs Lillian":** the drop line shipped and the mechanism is traced (Castle's re-lock on her-use-only
+  idle stops the server — matching every fact in the report; App Nap, timeouts, the path ruled out), but whether a
+  connected AI's work counts as "use" for Castle's lock is a product call that is HERS alone: (a) as built — only
+  her use holds the library open; (b) a client's calls count; (c) a Castle setting, off by default. No keep-alive
+  built. Her confirmation that the night's library was in Castle is also owed.
+- **Next:** U5's batch + live round READY once the fixed product's incremental rebuild (the adjudication edit)
+  lands; U1's two leftovers (the VX-339 banner walk, the VX-357 wire check) ride the same window. U2 spawns after
+  the rebuild so the tree stays still beneath it.
