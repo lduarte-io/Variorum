@@ -659,9 +659,11 @@ final class AppSession {
         guard !MultiBookEditNote.hasBeenSeen() else { return }
         Task { @MainActor [weak self] in
             guard let self else { return }
-            let books = (try? await self.database.read { db in
+            // VX-111: BOOKS only — a gathering the note appears in holds
+            // nothing, so it never counts toward "in N books".
+            let books = MultiBookEditNote.memberBooks((try? await self.database.read { db in
                 try Queries.readingsContaining(db, postID: postID)
-            }) ?? []
+            }) ?? [])
             guard MultiBookEditNote.shouldSpeak(
                 bookCount: books.count, seen: MultiBookEditNote.hasBeenSeen())
             else { return }

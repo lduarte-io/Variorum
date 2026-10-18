@@ -42,6 +42,20 @@ nonisolated enum MultiBookEditNote {
             + "(the book chip under the title)."
     }
 
+    /// **VX-111 — the BOOKS the note is in, and only those.** The trigger
+    /// reads `Queries.readingsContaining` — the chip's list, which is every
+    /// live BOOK holding a membership row (archived books included:
+    /// membership is a fact, P-13ie-U1-8) PLUS every gathering whose rule
+    /// SHOWS the note. A gathering holds nothing (§1), so editing a note
+    /// edits it "everywhere" only across its books; counting the gatherings
+    /// made a bookless note in two gatherings say "This note is in 2 books".
+    /// The membership readers are ruled to count BOOK rows only, live books
+    /// only (13i-c); this is the masthead's own count (`MembershipChip`'s
+    /// `kind == .book`).
+    static func memberBooks(_ readings: [Reading]) -> [Reading] {
+        readings.filter { $0.kind == .book }
+    }
+
     /// Should the note be said for a post in `bookCount` books? The two
     /// conditions, in one place so the trigger site cannot drift from them.
     static func shouldSpeak(bookCount: Int, seen: Bool) -> Bool {
