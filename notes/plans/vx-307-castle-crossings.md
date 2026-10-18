@@ -61,7 +61,7 @@ retired columns left in place, unread), the RPC bodies redefined; the production
 `updateVault`; the engine's key provider reads `AccountKeys` from the new custody. The choreography: the mirror FIRST at
 her go, then her Mac's Debug build (the Release road never reads the new columns until VX-329 — say so in the checklist:
 a marker-14 mirror with a marker-13 Release client means the RELEASE app visibly refuses to sync until VX-329 ships; the
-bump therefore WAITS for VX-329 unless she rules otherwise — PROVISIONAL at kickoff, her call).
+bump therefore WAITS for VX-329 unless she rules otherwise — PROVISIONAL at kickoff, her call). **HER RULING (2026-10-18, at VX-306's close, verbatim): "I think it makes sense to wait to bump the mirror until we're ready to release this so that my client doesn't stop syncing." — RULED, no longer provisional: the mirror deploy and the marker-13→14 bump WAIT for the release that carries VX-329's switch; VX-307 ships the SQL artifact and the production vault leaf behind the Debug-only switch, proven on the two-client fake server (U1's suites), and no deploy checklist row runs before that release's window. The kickoff call above is answered.**
 
 **Closes on USE-shaped evidence:** the dev store walked through stages 6, 7, 8 and 12 (sync setup on the dev account? —
 the dev scope's sync is OFF by the A4 fence; the account rows need a real account: HER call at kickoff whether the dev
