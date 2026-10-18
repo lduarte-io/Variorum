@@ -216,7 +216,7 @@ tickets:
 |---|---|
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
 | U1a — VX-303 (the landing road) | VERIFIED 2026-10-18 (`vx-382-u1a` window) — red-on-old A·B·C red as planned, both guard probes red, tree restored clean between each; batch `Test run with 1590 tests in 259 suites` — 4 issues + 5 known: VX-115's standing red (BookCollectingDoorsTests) + `DestructiveUndoWarningTests.redoNeverAsks` (the known VX-167 parallelism flake, signature :141–143); VX-77's standing red did NOT reproduce (passed). 9 skipped (2 disabled suites). §U1a RECORD → batch results. Code tip f0d1b414f |
-| U1b — VX-304 (the box door + Index takes) | IN-PROGRESS — piece A (seams, behavior-neutral) committed; pins, then B (the box door), C (Index badges + sheet), D (the carry) remain. §U1b RECORD |
+| U1b — VX-304 (the box door + Index takes) | IN-PROGRESS — piece A (seams) a45d93a6c; the pins committed (compiling, red by design until B/C/D); B (the box door), C (Index badges + sheet), D (the carry) remain. §U1b RECORD |
 | U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | NOT STARTED |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
 | Closeout (canon deltas, tickets, PR, handoff) | NOT STARTED |
@@ -490,7 +490,17 @@ the stage is coordinator-held; this session builds headless only.
    (unread); `carryPlace(…, livePostID:, liveBlockID:)` (accepted, unread); DEBUG oracles —
    `BookOutlineGeometry.modeDoors` (the tabs' one act, `switchMode`), `BookIndexGeometry.takesBadges` /
    `.takesSheets` (published by C). Builds headless (`build-for-testing` green).
-2. **The pins** — PENDING.
+2. **The pins** — committed (compiling against piece 1; runs PENDING the window):
+   `VariorumTests/BookNoteBoxDoorsTests.swift` — `BookNoteBoxOpenDoorTests` (per mode — outline · spread · index —
+   through a mounted book with the box's door and the road captured: SELECTED (spread, Index) rides the note + Write;
+   LIVE rides block 2 + her offset + Write; the Index-live box hands Takes, Outline/spread's none),
+   `SidebarNoteBoxDoorFacesTests` (both voices, the column at its default width, a wrapping title: the faces drawn —
+   "open" in every state, "door" beside it while selected, "takes" in the Index-live case — and the door's frame
+   WHOLE inside the box), `BookIndexTakesTests` (the ⑂2 badge on the fanned block only; the box's Takes on the live
+   block: the sheet on that block, her letter written before the sheet read the store, shown on the panel's chosen
+   card, the live pane released, "Open Takes mode" refusing — non-regression; the request slot with nothing live),
+   `BookCarryLiveBlockTests` (the pure rule; the model's parked block landing; the mounted click-over through the
+   published mode door: block 2 LIVE in the Index at her caret). Core: `BlockTOCTakesCountTests` (green — new API).
 3. **B — the box door** — PENDING.
 4. **C — Index badges + the in-place sheet** — PENDING.
 5. **D — Outline → Index carries the live block** — PENDING.
