@@ -243,7 +243,7 @@ tickets:
 |---|---|
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
 | U1a — VX-303 (the landing road) | VERIFIED 2026-10-18 (`vx-382-u1a` window) — red-on-old A·B·C red as planned, both guard probes red, tree restored clean between each; batch `Test run with 1590 tests in 259 suites` — 4 issues + 5 known: VX-115's standing red (BookCollectingDoorsTests) + `DestructiveUndoWarningTests.redoNeverAsks` (the known VX-167 parallelism flake, signature :141–143); VX-77's standing red did NOT reproduce (passed). 9 skipped (2 disabled suites). §U1a RECORD → batch results. Code tip f0d1b414f |
-| U1b — VX-304 (the box door + Index takes) | SEAM (stage released 2026-10-18 ~03:29 to VX-381's batch) — red-on-old B·C·D + both guard probes RED as planned; batch 1998 tests / 332 suites: standing reds only (VX-115; VX-167's redoNeverAsks, red alone, same signature) + FINDING D-2 (the carry's mounted pin red — traced: the departing Outline eats the reveal); D-2's fix BUILT (headless green), its verification + the U1 WALK PENDING the `vx-382-u1b-walk` window. OutlineRoomTests PASSED. §U1b RECORD ▸ Batch results, FINDING D-2 |
+| U1b — VX-304 (the box door + Index takes) | VERIFIED 2026-10-18 (windows `vx-382-u1b` + `vx-382-u1b-walk`) — red-on-old B·C·D + both guard probes red as planned; batch 1998 tests / 332 suites: standing reds only (VX-115; VX-167's redoNeverAsks, red alone, same signature) + FINDING D-2, FIXED ab3db8f19 (the departing Outline ate the reveal) — 64-suite family 308/64 green (4 known), its red-on-old red; OutlineRoomTests PASSED; THE U1 WALK: Study 11 rows PASS (W1/W3 not walked — same road, pinned), Terminal 6 face/act rows PASS; posture restored, 0 instances, 0 GiB pruned (nothing superseded). §U1b RECORD |
 | U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | NOT STARTED |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
 | Closeout (canon deltas, tickets, PR, handoff) | NOT STARTED |
@@ -716,3 +716,73 @@ Recorded, not fixed (out of the slice): the SAME departing-consumer class stands
 `PagedReadView`'s `.onChange(of: pendingReveal)` and the flow's `reveal:` — a carry out of those modes is likewise
 eaten on the way out and the arriving Index/Outline falls back to its seed (the note carry survives through the
 standing anchor; no block rides those arms today, by the brief's letter). Owner: the orchestrator / VX-300.
+
+### D-2 verified — the `vx-382-u1b-walk` window (2026-10-18; logs `scratchpad/u1b/fixD2-batch.log`, `redD2.log`)
+
+- **Green on the tip (ab3db8f19):** the 64-suite reveal/landing family (`fixD2-suites.args`, incl. `BookCarryLiveBlockTests`)
+  — `Test run with 308 tests in 64 suites passed after 226.453 seconds with 4 known issues` (the suites' own
+  `withKnownIssue`s). `BookCarryLiveBlockTests` passed (0.43 s).
+- **Red-on-old (the guard line deleted in place, restored to a clean diff):** `BookCarryLiveBlockTests` — 2 issues,
+  `pane != nil` (:687) and the caret (:688). Red for the traced reason.
+
+### D-2's CLASS SWEEP — the leaving-mode reveal-eat class (a departing book surface consumes the reveal a click-over parked for the ARRIVING one)
+
+| Instance (switch out of) | Host / consumer | Disposition | Mechanism today |
+|---|---|---|---|
+| Outline → any mode | `BookView.landOutlineReveal` via the Outline's `.onChange(of: pendingReveal)` | **FIXED** (ab3db8f19) — acts only while `structure.mode == .outline`. Pin: `BookCarryLiveBlockTests.outlineToIndexLandsWithHerBlockLiveAtHerCaret` (red on old, green on the tip) | — |
+| Book (the spread) → any mode | `SpreadBookView.landReveal` via `.onChange(of: model.pendingReveal)` | **SAFE today, recorded** | The spread arm of `BookAnchor.landing` carries the NOTE only (no block rides it — the brief's letter), so an eaten reveal loses nothing the arriving surface needs: `carryPlace` also writes `standingAnchorPostID`, and Index's `landOrSeed` / Outline's seed fall back to it (and to `focusedPostID`), landing the same note |
+| Read ▸ Pages → any mode | `PagedReadView` `.onChange(of: model.pendingReveal)` → `consumeReveal()` | **SAFE today, recorded** | Same: the read arm carries the note only; the standing anchor carries it |
+| Read ▸ Scroll → any mode | `ReadingFlowView`'s `reveal:` / `onRevealLanded` → `consumeReveal()` | **SAFE today, recorded** | Same; and the flow's own block door (`onWake` → `requestLanding` + `mode = .index`) parks its landing WITHOUT a carry, so it is not this class |
+
+Future block-carry out of the spread or Read (one more arm of `BookAnchor.landing` each) must first give that surface
+the same mode guard — owner **VX-300** (the book view's after-launch remainder).
+
+### THE U1 WALK — verdicts (dev store, Debug build `Variorum-dkbmlpshalzxqeftsymzimjxpdhl` from the tip; the book "o ladrão de raios"; screens `scratchpad/u1b/screens/`)
+
+Gate: her `/Applications` app absent (`guard.sh` OK throughout), no What's New sheet (same 0.9.7), no lock screen.
+Starting posture: voice Study, appearance `system`.
+
+**Study (voice 1):**
+- W2 collapsed card's "open ↗" (nothing live) → Write at the note's start (block 1/3) — **PASS** (`W2-card-open`).
+- W4 the spread page's "open ↗" with the editor live → Write at block 2/3 — **PASS** (`W4-study-page-open-result`).
+- W5 the rider: the spread's box SELECTED [edit here][open ↗] → "edit here" → live at block 2/3, where she last was —
+  **PASS** (`W4-spread`, `W5-study-edit-here`).
+- W6 Outline live: the box's title wears "open ↗" (block 2/3 in the where-line) → Write at block 2/3 — **PASS**
+  (`W6-study-live-box`, `W6-study-box-open-result`).
+- W7 face: the SELECTED box's row [edit here][open ↗] — **PASS** (seen under the sheets and after them).
+- W8 Index live (o museu, block 2): box with title "open ↗" + the "Takes" cell → "open ↗" → Write at block 2/3 —
+  **PASS** (`W8-study-index-live`, `W8-study-open-here-result`).
+- W9 badges: ⑂4 · ⑂3 · ⑂3 · ⑂3 · ⑂2 · ⑂2 · ⑂2 right of each fanned block's first line, nothing on one-take blocks —
+  **PASS** (`W12-study-carry`). No take minted (the book is fanned already).
+- W10 a ⑂3 badge → the in-place sheet on THAT block (a escola, its 3 takes) — **PASS**; the badge-click geometry risk is
+  SETTLED (the overlay hangs outside its block and takes the click) (`W10-study-badge-sheet`).
+- W10b the panel's "Open Takes mode" inside the book → the refusal toast "Open a note first — the modes live inside a
+  note." and the panel dismissed itself (Outline's behaviour) — **PASS** (`W10b-study-open-takes-mode`).
+- W11 the box's "Takes" on the live block (abertura block 3) → the sheet on block 3 (4 takes); under it the box is
+  SELECTED (the live pane released, P-U1b-4) — **PASS** (`W11-study-sheet`).
+- W12 Outline, caret in block 3 at "par|te" → the Index tab → Index arrives with block 3 LIVE, caret at "par|te" —
+  **PASS** (D-2's fix in use) (`W12-pre`, `W12-study-carry`).
+- **Not walked:** W1 (Outline's expanded-header "open ↗") and W3 (Index row ⋯ ▸ "Open in the full editor") — the same
+  `BookView.openInWrite` road W6 (Outline arm) and W8 (Index arm) walked, pinned per door by U1a's
+  `BookOpenDoorMountTests`/`BookOpenDoorShellTests` (green in this unit's 332-suite batch).
+
+**Terminal (voice 2 — the faces):**
+- W6′ Outline live box with the title "open ↗" — **PASS** (`T-W6-pre`). (The box's footer scrolls under the Terminal
+  identity lines — the 18d-recorded Terminal floor fact, unchanged; the title door adds no height.)
+- W12′ Outline (block 2, "qu|e") → Index: block 2 LIVE at "qu|e" — **PASS** (`T-W12-carry`).
+- W8′ Index-live box: title "open ↗" + "takes" cell — **PASS**; W9′ badges — **PASS** (`T-W12-carry`). Taste note: on
+  a line that runs to the column's edge the ⑂ badge sits its 6 pt gap from the last character ("amigos.⑂2") — legible,
+  recorded for her eye.
+- W10′ badge → the sheet on that block; W7′ the SELECTED row under it — **PASS** (`T-W10-badge-sheet`).
+- W7′ act: the selected box's "open ↗" → Write (a re-open this session: the restored block 2/3, R-18l-1 + R-U1a-1) —
+  **PASS** (`T-W7-selected-open-result`).
+
+Restore: voice back to Study (read back in Settings ▸ General), appearance `system` (`defaults read` after), no typing
+and no take minted, no Castle/lock, app quit by bundle id, `pgrep -fl 'Variorum.app/Contents/MacOS'` EMPTY.
+
+**Prune:** nothing superseded under this worktree — it has no `App/Variorum/DerivedData/` (its builds use the shared
+per-workspace cache `~/Library/Developer/Xcode/DerivedData/Variorum-dkbmlpshalzxqeftsymzimjxpdhl`, the current build,
+kept), U1a's reverts were in place (no revert-build cache), and Xcode already keeps only the two newest xcresults. **0
+GiB freed.** Seen, not touched (not this worktree's): two untagged caches `Variorum-dwsllegayujwheeyiqdaxidevnxh`
+(22 MB) and `Variorum-fpwbhptcstaitjfwausnqrbvbqqe` (88 MB), both 2026-10-17 19:23, no `info.plist` — the
+coordinator's to judge.
