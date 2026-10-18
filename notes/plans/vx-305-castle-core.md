@@ -1,7 +1,10 @@
 # VX-305 — Castle rebuild, phase 1: the headless core
 
-**Status: OPEN — kicked off 2026-10-14 (`/architect-phase vx-305`; plan written 2026-10-13; revised the same night to
-the design's round-2 shape, and on 2026-10-14 to round 3 and its late extra read).**
+**Status: SUPERSEDED-AND-CLOSED 2026-10-18 — by VX-378 (`notes/plans/vx-378-castle-simplified.md`): its gate came back NO-GO on
+2026-10-16, the simplification sitting wrote `notes/CastleRules.md`, and the corrector rebuilt the core to the rules on this same
+branch; VX-378's gate passed (GO 2026-10-18) and the one PR closes both tickets. This file is the history of the first build.
+Kicked off 2026-10-14 (`/architect-phase vx-305`; plan written 2026-10-13; revised the same night to the design's round-2
+shape, and on 2026-10-14 to round 3 and its late extra read).**
 
 > **KICKOFF SITTING (2026-10-14, the author via the question tool — recorded before the first spawn):**
 > - **The cast: the standing default, her pick** — Fable (this session) orchestrates and cold-reviews

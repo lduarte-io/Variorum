@@ -1,7 +1,8 @@
 # VX-378 — Castle, simplified: the phase 1 corrector (the headless core rebuilt to the rules)
 
-**Status: OPEN — written 2026-10-16 by the VX-305 orchestrator from the simplification sitting; kicks off at the
-author's word with `/architect-phase vx-378`.** Same branch and worktree as VX-305 (`vx-305-castle-core`,
+**Status: CLOSED 2026-10-18 — GO (§10: the gate on the final tree `66f7561e1`, both configurations, three attempts; the
+ladder closed at four rounds, 0 BLOCKER / 0 MAJOR throughout). PR #PR_PENDING (merge commit at her word). Written 2026-10-16 by
+the VX-305 orchestrator from the simplification sitting; kicked off 2026-10-16 with `/architect-phase vx-378`.** Same branch and worktree as VX-305 (`vx-305-castle-core`,
 `~/dev/variorum-vx-305`); ONE merge to `main` at this phase's GO closes both tickets. The in-flight row for VX-305 gains
 this plan file beside its own and keeps the one Sync/-or-custody slot.
 
@@ -337,16 +338,17 @@ record committed with PENDING numbers first.
   fixture first, the scenario's four walks, the page rendered from the fixture; three FACTS DIFF and two PROVISIONALs
   for her). After (code tree `389162a09`): the protection set Debug `✔ 259 tests in 69 suites`, `-c release` `✔ 237 in
   65`, the full core suite green in Debug; `Sources/…/Protection/` untouched (7,562), tests 12,068.
-- U4 — the world and the soak: **STOPPED at P-VX378-U4-3 (2026-10-17, `0e220f524`), HER RULINGS taken (§8); RESUMED —
-  IN PROGRESS** (Opus implementer, 2026-10-17) — §8's U4 RESUMPTION RECORD (pieces 1–6: the carry reverted, the floor,
-  rule 21's notice and offer, the census classes, the discovery run and the gate soak; every count PENDING).
-  §8's U4 RECORD (the resume map; piece E carries the trace and the census). A, B, B2 (her P-VX378-U4-1 ruling), C, D
-  DONE; E STOPPED at P-VX378-U4-3 (seed 21 seq 83; the census of seeds 21–23 sized the rest: 88 failing sequences in
-  3,000, classes (A)–(I)); F NOT RUN; G DONE. After (code tree `0bd112c9c`): the protection set Debug `━ 278 tests in 72
-  suites passed with 2 known issues`, `-c release` `━ 255 in 68 … 2 known issues`, the full core suite green in Debug;
-  7,604 source lines, 13,038 test lines.
+- U4 — the world and the soak: **DONE** (Opus implementer to piece 5 of the resumption; the orchestrator from there under the
+  budget-death road — the gate runs, the three gate fixes, the census) — §8's U4 RECORD + U4 RESUMPTION RECORD; the STOP at
+  P-VX378-U4-3 and HER RULINGS (the floor, no carry, the notice and the offer) taken 2026-10-17. Final tree `66f7561e1`:
+  the protection set Debug `✔ 388 tests in 149 suites`, `-c release` green minus VX-380's one Sync test; the full core
+  suite `✔ 3160 tests in 405 suites`.
 - The ladder: **CLOSED** — round 1 0B·0M·2m·3N (fixed) · round 2 0B·0M·0m·2N (fixed) · round 3 (the gate's two fixes) 0B·0M·0m·2N · round 4 (the checker fix) 0B·0M·1m·1N — rounds 3–4's three test/DEBUG-only residues deferred to VX-306's first commit as VX-386 so the soaked tree stays the final tree (§9).
-- The gate: not started.
+- The gate: **GO (2026-10-18T10:30Z)** — §10: discovery seeds 21–40 green, gate seeds 1–20 green in Debug AND release on the
+  final tree; items 2–6 recorded; the 27-row rules checklist; three attempts (two real faults and one checker fault found,
+  fixed red-first, re-read, re-gated whole).
+- Her morning sitting 2026-10-18 (§8): O1-1, O2-1, O2-2, U4-7 ruled; rules 5, 11, 25 amended at her word; VX-390 born
+  (the library-ID stamp, VX-306 U1, Pre-launch).
 
 ---
 
@@ -2085,12 +2087,37 @@ the worktree's HEAD during the run was the record commit `023ecf947`, `git diff 
 | 19 | 45,165 | ✔ | 407 |
 | 20 | 44,850 | ✔ | 420 |
 
-**Release — RE-RUN IN PROGRESS, same tree, same seeds.** The soak script's release leg never ran: the script was zsh, which does
-not word-split an unquoted scalar, so its `-c release` reached `swift test` as ONE argument (`error: Unknown option '-c release'`),
-every release seed exited at once with an empty result line, and the script's own `fail=1` marker recorded exactly that — a script
-fault, not a tree fault (verified by running the release command directly on the same tree: it builds and passes). The Debug
-results above stand (the tree has not changed); the release pass runs now from a release-only script with the flag spelled as
-two words (`soak3-release.sh`, appending to the same log under a `RELEASE RERUN START` marker). GATE_SOAK3_RELEASE_PENDING
+**Release (`-c release`) — twenty of twenty green**, same tree, same seeds (899,918 steps in all, mean 326 s per seed;
+`GATE RELEASE RERUN DONE fail=0 2026-10-18T10:30:01Z`). The soak script's release leg had to be re-run: the script was zsh,
+which does not word-split an unquoted scalar, so its `-c release` reached `swift test` as ONE argument (`error: Unknown option
+'-c release'`); every release seed exited at once with an empty result line and the script's own `fail=1` marker recorded exactly
+that — a script fault, not a tree fault (verified by running the release command directly on the same tree). The release pass
+then ran whole from a release-only script with the flag spelled as two words (`notes/plans/vx-378-gate-soak-release.sh`,
+appending to the same log under a `RELEASE RERUN START` marker); the Debug results above stand (the tree did not change):
+
+| seed | steps | result | seconds |
+|---|---|---|---|
+| 1 | 45,208 | ✔ | 288 |
+| 2 | 44,648 | ✔ | 388 |
+| 3 | 45,034 | ✔ | 337 |
+| 4 | 45,556 | ✔ | 387 |
+| 5 | 44,247 | ✔ | 308 |
+| 6 | 45,194 | ✔ | 282 |
+| 7 | 45,061 | ✔ | 267 |
+| 8 | 45,006 | ✔ | 282 |
+| 9 | 44,925 | ✔ | 276 |
+| 10 | 44,577 | ✔ | 269 |
+| 11 | 45,292 | ✔ | 291 |
+| 12 | 44,639 | ✔ | 273 |
+| 13 | 45,642 | ✔ | 362 |
+| 14 | 45,341 | ✔ | 471 |
+| 15 | 44,534 | ✔ | 262 |
+| 16 | 44,946 | ✔ | 284 |
+| 17 | 44,948 | ✔ | 555 |
+| 18 | 45,105 | ✔ | 282 |
+| 19 | 45,165 | ✔ | 401 |
+| 20 | 44,850 | ✔ | 263 |
+
 
 
 
@@ -2123,7 +2150,17 @@ two words (`soak3-release.sh`, appending to the same log under a `RELEASE RERUN 
    reviewers); the FACTS DIFF is EMPTY after her rulings (FD-1…3 accepted/ruled; the carry's facts reverted; stages 6,
    8, 9, 14 as ruled).
 
-**VERDICT:** GATE_VERDICT_PENDING
+**VERDICT: GO (2026-10-18T10:30Z).** The six items are met on the final tree — `Sources/VariorumCore/Protection/` and
+`Tests/VariorumCoreTests/Protection/` byte-identical to `66f7561e1` (every later commit on the branch touches notes only; the
+merge of `main` into the branch before the PR brought no Protection change — checked by `git diff --stat`). Item 1 took three
+attempts: attempt 1 (tree `4a4af3164`) found two real faults in Debug seeds 2 and 3 (a crashed Make this my library stranded
+after a keychain wipe — now rolled back before the commit point; a rolled-back stretch's silent item surviving Castle entry —
+now swept by the catalogue), each traced by replay, pinned red-on-old and read by a fresh Fable round 3; attempt 2 (tree
+`c84375010`) ran the discovery run green and found a CHECKER fault in Debug seed 8 (promise 1 lacked rule 10's lagging-device
+exemption), pinned, fixed, read by a fresh Fable round 4; attempt 3 on `66f7561e1` ran the discovery run (seeds 21–40) and the
+gate soak (seeds 1–20) green in Debug and in release — 2,698,000 generated steps in all, zero promise violations. Items 2–6 as
+recorded above. Her acceptance of this GO is her kickoff of VX-306 (her word 2026-10-17), after her morning sitting of
+2026-10-18 ruled the bundle's open items (§8, HER MORNING SITTING).
 
 ### The rules checklist (gate item 5 — one row per rule of `notes/CastleRules.md`; it replaces the 47-row key map's acceptance checklist, `notes/plans/vx-305-key-map-model-half.md` becoming history)
 
