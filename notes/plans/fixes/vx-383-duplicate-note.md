@@ -521,7 +521,8 @@ changed (`MCPPaneCopy` is Mac-only; the core change reaches the phone's build bu
 Names in « » are the ids the setup answers. Every expected answer below is the JSON field as built (the answer is
 sorted-keys JSON); words in quotes are byte-exact.
 
-- **L0 — set-up (an EDIT grant on Home, "until it disconnects", via the grant sheet; then through the client):**
+- **L0 — set-up (Settings ▸ MCP's open book OFF — else every unfenced book reads and L4's unnamed book would be named; an
+  EDIT grant on Home, "until it disconnects", via the grant sheet; then through the client):**
   `create_book {"name": "u2 drafts", "wing_id": ""}` → «B»; `create_section {"book_id": «B», "name": "second drafts"}`
   → «C»; `create_book {"name": "u2 living", "wing_id": ""}` → «L»; `set_book_rule {"book_id": «L», "rule": {"tag":
   "u2dup"}}` (no backfill seats — P-13nb-U4-16; new matches join quietly); `create_book {"name": "u2 finished",
@@ -552,7 +553,7 @@ sorted-keys JSON); words in quotes are byte-exact.
   `book_id` «B». Then `duplicate_note {"note_id": «S»}` (no book) → error **"That wing isn't shared with this client, or
   doesn't exist. The author can share it from Variorum ▸ Settings ▸ MCP."** and her ASK for the wing **Home at write
   new** waits (the pending mark / the pane's Waiting) → answer **Don't allow**. Activity: **"claude-code was refused
-  duplicating a note in Home"** (as logged — `wingName` unquoted? it reads the logged title; capture what it says).
+  duplicating a note in “Home”"** (the wing side, as VX-311 logs it — Home's logged title is "Home", quoted by the line).
 - **L5 — A BOOK OF ANOTHER WING:** grant write new on the wing "u2 elsewhere" (`list_books` there gives «E»).
   `duplicate_note {"note_id": «S», "book_id": «E»}` → error **"That book isn't shared with this client, or doesn't
   exist. The author can share it from Variorum ▸ Settings ▸ MCP."** — byte-identical to `duplicate_note {"note_id":
