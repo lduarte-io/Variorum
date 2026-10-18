@@ -348,8 +348,10 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   (a connection now writes its own end through its own store; the cause was the door dropping its host before the
   host's sessions ended), headless proof green; the Mac pin's re-run on `DerivedData/u5-fix` rides the orchestrator's
   next stage window (the U5 record's "VX-394 fix leg" section has the command).**
-- **U2 (VX-347 — ⌘S):** IN-PROGRESS — `opus-implementer` (fresh session, 2026-10-18); the U2 UNIT RECORD (at the end of
-  this file) carries the live state.
+- **U2 (VX-347 — ⌘S):** BUILT — FIXED at the one shared seam (`acbe5e5cb` the fix · `36c715ac2` the pins: every leave of the
+  ⌘S name field but ⎋ files, the filers commit the ASKED take); compiled; **PENDING:** the Mac batch (red leg first —
+  products in the U2 record), the walk (both voices, every host — the list in the record), the QUESTIONS bundle
+  (P-VX347-1…5). The U2 UNIT RECORD (at the end of this file) carries the rest.
 - **U3 (VX-350 · VX-349 · VX-176 — the Library's row and header):** NOT-STARTED.
 - **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** NOT-STARTED.
 - Then the ladder (fresh Fable per round, whole diff), closeout, merge. **Her overnight mandate (2026-10-18):**
@@ -1146,16 +1148,174 @@ adjudications after it, QUESTIONS #121, CLAUDE.md + its canon, the ticket body. 
 in `Core/Views`) + the hosts' commit doors and `EditorCommands` routing; no `Sync/`, custody, Keychain, `Protection/`,
 synced schema or TK2-seam line.*
 
-**NOT DONE BY THIS UNIT (first line, by the brief's rule):** PENDING — written at the close.
+**NOT DONE BY THIS UNIT (first line, by the brief's rule):** no `xcodebuild test` and no walk (the brief: the stage is the
+orchestrator's) — every pin is written and compiled (`build-for-testing` green), and both legs are PREBUILT (`u2-fixed`,
+`u2-red` — paths and commands at the end of this record), their RUN PENDING the batch; the walk (both voices, every
+host) is PENDING the orchestrator's window — what it must show per host is listed below. "Typing on" is built on the
+reading P-VX347-1 states (the field keeps the keyboard, as built); the other reading is a redesign recorded for her, not
+built.
 
 ### LIVE STATUS
 
-- **The trace + the design:** IN-PROGRESS.
-- **The fix at the shared seam + the hosts:** NOT-STARTED.
-- **The pins (the flipped `cancellingTheFieldFilesNothingAtAll` + the new leave-ways):** NOT-STARTED.
-- **The prebuilt Mac products (u2-fixed / u2-red):** NOT-STARTED.
-- **No behavioural revert is in flight.**
+- **The trace + the design:** DONE (below).
+- **The fix at the shared seam + the hosts:** DONE (`acbe5e5cb`; the classifier narrowed in `36c715ac2`).
+- **The pins (the flipped `cancellingTheFieldFilesNothingAtAll` + the new leave-ways):** DONE (`36c715ac2`) — compiled;
+  their run PENDING the batch (red leg first).
+- **The prebuilt Mac products (u2-fixed / u2-red):** IN-PROGRESS (next commit).
+- **No behavioural revert is in flight** (the red product is built from a SCRATCH checkout — this worktree is never
+  reverted; announced in the products section before it starts).
+- **Machinery note (honesty):** while this unit worked, the U5 fix leg's implementer was live in the SAME checkout
+  (`Sources/VariorumMCP/` + its tests — disjoint from every U2 file; it committed `0ebf5c926` / `04d849d8d` and built its
+  product from a clean checkout "U2's uncommitted work excluded"). Every U2 commit was staged path-limited; no U2 commit
+  carries a U5 line and no U5 file was touched. Both U2 products are built from clean checkouts for the same reason.
 
+### The trace (inputs → wrong state)
+
+Her report: *"command S should always commit your take even without an extra keystroke to enter (but if you click escape,
+then that can deliberately not save. the keyboard shortcut is lying right now since it's really command S enter)."*
+
+1. ⌘S (`EditorCommands`' `.commitTake` → `ShellActions.commitTake` → `router.dispatch(.commit)` → the mounted surface's
+   handler) reaches each model's DOOR — `EditorViewModel.commitCaretVariant` → `askSavepointName`,
+   `TakesViewModel`/`CanvasViewModel`/`CompareViewModel.askSavepointName` — which only sets `savepointAsk`. Nothing is
+   written at the press.
+2. Every host presents that ask through ONE shared modifier, `savepointNameAsk` (`Core/Views/SavepointNameField.swift`):
+   `popover(item:)` over `SavepointNameField`. Pre-fix it wired exactly ONE road to the host's filer — the field's
+   `onSubmit` (⏎). ⎋ (`onExitCommand`) set the binding nil; a click away (AppKit's transient dismissal) and the host or
+   window going ended at the same binding going nil; and "a dismissal that is not a filing is a cancel, by construction —
+   the binding goes nil and nothing else happens" (the file's own doc, #121(b)). So the commit landed ONLY on ⏎: ⌘S was
+   really ⌘S ⏎ — the "lying" shortcut.
+3. A second defect the new rule would have exposed (found reading the filers, fixed with the rule): every filer re-read
+   the CARET/RING at filing time (`commitCaret` → `caretVariantID`; `commitFocusedTake` → `focusedPane`/`livePane`), not
+   the take ⌘S asked about. Under ⏎-only that was harmless (the field holds the keyboard, nothing moves); under the new
+   rule a click away INTO ANOTHER BLOCK is a way of leaving, and that click moves the caret before the filing runs — so
+   it would have committed the wrong take. Pinned (`aClickIntoAnotherBlockCommitsTheTakeAskedAbout`,
+   `VX347AskedTakeFilingTests`).
+4. A measured fact the fix must respect (VX-179's R1-2, `notes/plans/fixes/vx-179-comment-polish.md`): SwiftUI never
+   tears a dismissed popover's content down, so `.onDisappear` on popover CONTENT never fires — the popover's own
+   `NSPopover.willCloseNotification` is the one moment every dismissal shares.
+
+### The field's home — ONE shared component (no per-host inline field)
+
+`Core/Views/SavepointNameField.swift` — `SavepointNameAsk` (the value), `SavepointNameField` (the view),
+`savepointNameAsk` (the modifier every host composes). The book's editing modes present it from `EditorView` (the
+`.inSidebarBox` placement hangs it on the prose; the sidebar note box's `commit ⌘S` calls the live editor's
+`commitCaretVariant`) — **nothing inline in `BookView` / `BookIndexView` / `SpreadBookView`, so no VX-382 residue and no
+rebase owed by either run.**
+
+### The fix (at the one seam; the hosts only file the ask they were given)
+
+- **The rule — `SavepointNameLeave`** (pure): `.returnKey` · `.escape` · `.away` (every other way). `files(kind)`: at the
+  commit door every leave but ⎋ files; at the RENAME door ⏎ alone renames (P-VX347-3). `closing(...)`: a popover closing
+  with no key of the field's own is ⎋ ONLY when the event AppKit is dispatching is a fresh (< 1 s) ⎋ or ⌘. addressed to
+  the field's popover window or the window it hangs from — so a popover that cancels itself on ⎋ can never file, and a
+  stale event can never keep a commit from filing.
+- **The box — `SavepointNameLeaving`** (one per host, the modifier's `@State`): every road reports a leave; the FIRST
+  report decides, every later one for the same field is a no-op (⏎ then the popover's own close files once; ⎋ then the
+  close files nothing). A settled field stays settled until the host's ask moves, so a late closing can never re-open it;
+  a fresh ⌘S is a fresh field. The name is what was typed (the field's binding writes it synchronously), through the ONE
+  `SavepointName` rule (spaces = no name).
+- **The roads** — the field's ⏎ (`onSubmit`) and ⎋ (`onExitCommand`, settled BEFORE the popover closes); the popover's
+  own closing (`SavepointPopoverClosingWatcher`, on `CommentPanelHostWatcher.isHost` — VX-179's identity rule); the
+  host's ask moving (`.onChange` — always `.away`); the host going (`.onDisappear` on the HOST, which does fire).
+- **The filers** — each model gains `fileSavepoint(_ ask:, named:)`, committing `ask.targetID` (Compare flushes
+  `ask.context`'s coordinator — the pane's own post rides the ask); `fileSavepoint(named:)` stays as "⏎ on the pending
+  ask" (the shipped pins' road); `commitCaret`/`commitFocusedTake` keep their shipped behaviour for their callers. The
+  flush-then-commit ordering, the refusal roads and the receipts are unchanged.
+- **⌘S again** while the field is up lets go of the ask — which LEAVES the field, so it files (P-VX347-2); no second
+  field opens. (A click on a bar's `commit ⌘S` button with the field up is a click away first — it files — and then the
+  button opens a fresh field: recorded consequence.)
+- **The words** (PROVISIONAL, P-VX347-4): the field's hint "⏎ or clicking away commits it · ⎋ doesn't. An empty name is
+  fine."; the two `commit ⌘S` doors' helps; the helper's commit entry and ⌘S row. The vocabulary is "commit"
+  (R-13s-31).
+- **Not changed:** the commit op (append always — her ⌘S never dedupes, P-VX168-U2-1's note), the door's seal refusal,
+  the rename op, the tutorial lesson and the cheat sheet (still true — "press ⏎ to save it unnamed"), every `Sync/`,
+  custody, schema and TK2-seam line. Zero `Shared/` lines: nothing mobile-visible (the phone's commit files at once).
+
+### THE SWEEP TABLE — every host × every leave-way
+
+All seven hosts compose the ONE presenter, so the mechanism column is the same for every row; what differs per host is
+the filer (which take, which coordinator) and how "the window" closes.
+
+| host (presenter site · filer) | ⏎ | ⎋ | click away | type on | close window |
+|---|---|---|---|---|---|
+| **Write** (`CommitBar` · `EditorViewModel.fileSavepoint(ask)`) | FIXED — files once (`onSubmit`; the closing after it is the same leave) | SAFE — `onExitCommand` settles ⎋ first; backstop: the closing classified ⎋ | FIXED — the transient close → `willClose` → files; files `ask.targetID` though the click moved the caret | FIXED via the click — the field keeps the keyboard (P-VX347-1), so going back to type is a click into the prose: the commit files on that click, before her first keystroke lands (the filing Task runs on the main queue ahead of the next event; `flushNow` snapshots synchronously) | FIXED — the parent window's close closes the popover (`willClose`) and/or the host leaves (`.onDisappear`) |
+| **The book's editing modes** (`EditorView` `.inSidebarBox` · the same `EditorViewModel`) | FIXED (same) | SAFE (same) | FIXED (same) | FIXED (same) | FIXED (same; ⇧⌘W / a note switch = the host going) |
+| **Takes / Lenses** (`TakesBottomBar` · `TakesViewModel.fileSavepoint(ask)`) | FIXED | SAFE | FIXED — files the asked take though the click moved the ring | FIXED via the click | FIXED (a mode switch = the host going) |
+| **Write's take panel** (`WriteTakesPanel` header · its `TakesViewModel`) | FIXED | SAFE | FIXED | FIXED via the click | FIXED — the panel (a sheet) closing (⌘⇧T, its close) = the host going |
+| **Canvas** (Debug; the strip's overlay · `CanvasViewModel.fileSavepoint(ask)`) | FIXED | SAFE | FIXED — files the asked card's take though the click moved the live pane | FIXED via the click | FIXED |
+| **Compare** (the header's overlay · `CompareViewModel.fileSavepoint(ask)`) | FIXED | SAFE | FIXED — files the asked pane's take, flushed through ITS post's coordinator (`ask.context`) | FIXED via the click | FIXED |
+| **Block History rename** (the row's Name/Rename button · `BlockHistoryModel.rename`) | unchanged — renames | unchanged — leaves it as it was | SAFE (by rule) — a rename dismissed keeps the name as it was (P-VX347-3) | n/a (no take behind it) | SAFE (by rule) — as before |
+
+Beyond her five: **⌘S again** — FIXED on all four models (files; no second field — P-VX347-2); **the app switching
+away / ⌘W** — the popover's closing, classified away → files; **⌘Q with the field up** — NOT on her list and NOT built
+(P-VX347-5): the quit road does not wait for the filing's Task; the take's leaving savepoint (`closeAutoCommit`, quiet)
+still insures dirty text.
+
+### The pins (compiled; the RUN is PENDING the batch)
+
+**Red on old by BEHAVIOUR — they use only pre-fix APIs, so the red product is the TRUE pre-fix tree for these files:**
+- `SavepointCommitDoorTests.onlyEscapeLeavesTheFieldWithoutACommit` — **THE FLIPPED PIN** (was
+  `cancellingTheFieldFilesNothingAtAll`; a justified edit naming VX-347): Write's real bar mounted; the field left as a
+  click away leaves it → ONE unnamed manual commit; a second ⌘S left by ⎋ → still one. Expected RED (0 commits).
+- `VX347CommitLeavesMountTests` (the product's presenter — `CommitBar` over the real `EditorViewModel`, VX-179's offscreen
+  popover rig): `aClickAwayFilesTheCommitUnnamed` · `aClickAwayFilesTheNameSheTyped` · `theHostGoingFilesTheCommit` ·
+  `theWindowClosingFilesTheCommit` · `commandSAgainFilesTheOpenField` · `aClickIntoAnotherBlockCommitsTheTakeAskedAbout` ·
+  `typingOnAfterTheFieldLeavesKeepsTheCommitAsItWas` · `aLockedTakeStillRefusesWhenTheFieldIsLeft` ·
+  `aSealThatLandsWhileTheFieldIsUpStillRefuses` — each expected RED; GUARDS (green on both sides by design):
+  `escapeAloneFilesNothing` · `returnFilesExactlyOnce` · `anUnchangedTakeCommittedTwiceIsTwoCommits` (the dedupe
+  unchanged: append always).
+- Copy: `SavepointNameAskTests.theFieldTeachesItsTwoKeys` and `SavepointNameCopyTests.theHelperTeachesTheNameAndTheSkipKey`
+  gain the new contract's words (justified edits) — expected RED on the shipped copy.
+
+**The new seam's own pins** (`VX347SavepointLeaveRuleTests` — new API; NOT in the red product, which cannot compile
+them): `VX347LeaveRuleTests` (the leave table · the ⎋ classifier · no event = away · the hint) · `VX347LeavingBoxTests`
+(first report decides · ⎋ then the closing files nothing · a click away files what was typed · a fresh ⌘S is a fresh
+field · the model letting go files · a field the box never saw open still files · the host going · an ask replaced
+leaves the first · the rename door renames on ⏎ only) · `VX347AskedTakeFilingTests` (Write · Takes · Canvas · Compare
+each file `ask.targetID` after the caret/ring/pane moved; ⌘S again lets go on all four models).
+
+**Shipped pins riding unmodified** on the touched roads: `SavepointCommitDoorTests`' other four, `SavepointTakesDoorTests`,
+`SavepointSealedDoorTests` (all five doors refuse a seal before a field), `SavepointRenameDoorTests`,
+`WriteTakesPanelRoutedTests`, `CommandRoutingTests`' routed ⌘S, `CompareBoardTests`/`CanvasAndPoolTests`'
+`commitFocusedTake` pins, `EditorSessionTests`' flush-then-commit pins, `TutorialWalkTests`' ⌘S arms.
+
+### PROVISIONAL (for the merge's QUESTIONS bundle)
+
+- **P-VX347-1 — "typing on".** Built: the field keeps the keyboard on appear (as UNIT D built it; her "the field
+  stays"), so typing after ⌘S types the NAME; going back to the take to type on is a click into it — a way of leaving,
+  which files the commit before her first keystroke lands. Alternative (b), NOT built: the field opens WITHOUT the
+  keyboard — typing on in the take files the commit unnamed and the keystroke lands in the take; a click into the field
+  names it; ⎋ while it shows takes it back. (b) needs a key intercept over every host while the field shows — Write's
+  included, whose text view is the TK2 editor seam (out of this lane, Fable-reviewed) — and a first-keystroke snapshot
+  rule; it is her call whether (b) is what she meant.
+- **P-VX347-2 — ⌘S again** while the field is up leaves it (files, named with what was typed) and opens no second
+  field. Alternatives: (b) it files the first AND opens a second field (two commits); (c) nothing (pre-fix).
+- **P-VX347-3 — the rename door keeps ⏎-only** (a dismissed rename keeps the name as it was — its shipped "⎋ leaves it as
+  it was"). Her ruling names ⌘S. Alternative: (b) one rule for the one field — any leave but ⎋ renames too.
+- **P-VX347-4 — the words** (the hint, the two doors' helps, the helper's entry and ⌘S row); the tutorial lesson and the
+  cheat sheet left as they were (still true). Her copy pass.
+- **P-VX347-5 — ⌘Q with the field up** files nothing (not on her list; the quit road does not wait for the filing). The
+  quiet leaving savepoint still insures dirty text. Alternative: a step on the termination road.
+
+### What the walk must show (the orchestrator's window — both voices, the dev store)
+
+Per host, each a capture: **Write** (the bar) — ⌘S, click into the prose: the receipt "Committed." and Block History +1;
+⌘S, type "named", click away: Block History leads with "named"; ⌘S then ⎋: no receipt, no new row; ⌘S ⌘S: one new row,
+no second field. **A book's editing mode** (Index edit or the Book page's inline editor) — ⌘S on a note's prose, click
+another note: the commit is on the first note's take. **Takes** — ⌘S on take 1, click take 2: the commit is take 1's.
+**Lenses** — the same bar. **Write's take panel** — ⌘S in the panel, then ⌘⇧T: the commit lands. **Compare** — ⌘S in a
+peer pane, click the anchor column: the commit is the peer's. **Canvas (Debug)** — ⌘S on a card, click another card: the
+first card's. **Close window** — ⌘S, close the window by its button: reopened, Block History +1. **⇧⌘W** with the field
+up: +1. **Block History rename** — Rename, type, click away: the name unchanged. **The hint** — in both voices at the
+field's width, three lines at most, no truncation. **⎋ on every host** — nothing filed.
+
+### For the orchestrator's closeout (not U2's to apply)
+
+- **QUESTIONS #121(b) is superseded** by her VX-347 ruling (the closeout marks it); #121(a)'s "⌘S opens a field" stands.
+- **AppSpec §12** may want one contract line: ⌘S's optional name field — every way of leaving it but ⎋ files the commit,
+  named or unnamed (VX-347), the rename door unchanged.
+- **The PROVISIONALs:** P-VX347-1…5 (P-VX347-1 the one with a redesign behind it — worth her eye first).
+- **No VX-382 overlap** (the field is not inline in the book views).
 
 ## THE U5 BATCH + LIVE ROUND (the orchestrator, 2026-10-18 ~05:47–06:20, claim `vx-348-u5-batch`)
 
