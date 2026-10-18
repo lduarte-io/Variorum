@@ -702,6 +702,14 @@ the build notes; the Environment traps; the kickoff sitting and her overnight ma
 - **VX-394 (mid-session disconnect while the pane says running):** NOT-STARTED — investigation first; the Activity
   drop line ships regardless.
 - **No behavioural revert is in flight.**
+- **THE FOLD (the orchestrator's instruction, her word via the coordinator):** IN — `460d39785` merges main
+  `d8bb24488` (VX-381's `d4b104e8a` + Castle's `aeabdd75b` + two notes-only commits) into the branch after
+  `98c88a686`, cleanly (no conflict). The incoming delta shares ONE file with this branch's touched set,
+  `Sources/VariorumCore/Operations/Operations+Tag.swift` (U1's VX-357 strip ⇄ VX-381's tag undo) — auto-merged;
+  `Shared/OpsRefusalTable.swift`: NOT touched by this branch (no). No incoming migration (`v1_30` stays this run's).
+  Re-run on the folded tree: `swift build --build-tests` green; the core target whole, 3248 tests / 418 suites green
+  (Castle's suites included). Every Mac product this unit prebuilds is built FROM the folded tree (the coordinator's
+  Castle-phase-2 addendum — none was built before the fold).
 
 ### VX-392 — `list_wings`: a granted wing is discoverable, empty or not
 
