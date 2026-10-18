@@ -359,10 +359,14 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   affected suites headless. Every later unit builds on the merged tree. **Castle MERGED (main `aeabdd75b`, PR #171, closes
   VX-378/305/345; the coordinator's verified footprint: `Protection/` + its tests + three core test files + CLAUDE.md
   — `notes/CastleRules.md` joins the read-explicitly list — + notes; zero `Sync/`, `App/` or `Server/` lines, nothing
-  on this run's surfaces, no re-test owed):** ONE fold at the next seam covers both main moves (`d4b104e8a` +
-  `aeabdd75b`). The release rule unchanged: Castle never mints, isn't counted; the last of VX-382/VX-348 mints 0.9.8
-  and carries Castle. The Sync/-custody slot is now free; nothing in this run's lane needs it — the kickoff fence
-  stands regardless.
+  on this run's surfaces, no re-test owed):** ONE fold covers both main moves — **and HER WORD (~05:0x, via the
+  coordinator) SUPERSEDES the next-seam plan: every session folds main at the NEXT AVAILABLE CHANCE, before any new
+  walk or stage window. main is `d8bb24488` (VX-381 + Castle + two notes-only commits). The U5 implementer is
+  instructed: fold at its next commit boundary (fetch + merge origin/main, keep-both-sides on any conflict, a merge
+  commit, `swift build` sanity, the overlap answer in its record); no U5 batch or live round takes the stage until
+  the fold is in; U5's READY states the fold and the OpsRefusalTable overlap answer.** The release rule unchanged:
+  Castle never mints, isn't counted; the last of VX-382/VX-348 mints 0.9.8 and carries Castle. The Sync/-custody
+  slot is now free; nothing in this run's lane needs it — the kickoff fence stands regardless.
 - **The trailer slip, closed:** the kickoff's in-flight-row commit briefly carried a `Co-Authored-By` trailer; at
   her word she force-pushed the amended commit herself — main `d35b07515` → `fdce74de3`, identical tree. No other
   commit carries one.
