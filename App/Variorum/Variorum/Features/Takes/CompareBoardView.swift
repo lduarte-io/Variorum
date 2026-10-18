@@ -925,6 +925,8 @@ final class CompareViewModel {
     /// of its own (⌘S is its whole commit road). **VX-347:** the presenter
     /// decides what leaving the field means (every leave but ⎋ files).
     var savepointAsk: SavepointNameAsk?
+    /// Numbers each ⌘S and files each field once (VX-347's fix leg).
+    @ObservationIgnored private var savepointLedger = SavepointAskLedger()
 
     /// ⌘S — the DOOR. It summons the optional name; leaving the field any
     /// way but ⎋ files it (VX-347); no live pane refuses HERE (P-2).
@@ -958,7 +960,7 @@ final class CompareViewModel {
         }
         // The pane's own post rides the ask, so the filer flushes THAT
         // post's coordinator even after the live pane has moved (VX-347).
-        savepointAsk = .naming(variantID: pane.variantID, context: pane.context)
+        savepointAsk = savepointLedger.naming(variantID: pane.variantID, context: pane.context)
     }
 
     /// ⏎ on the PENDING field (the pins' road to the field's ⏎).
@@ -973,6 +975,8 @@ final class CompareViewModel {
     /// column is a way of leaving, and it moves the pane.
     func fileSavepoint(_ ask: SavepointNameAsk, named name: String?) async {
         if savepointAsk == ask { savepointAsk = nil }
+        // VX-347's fix leg: one commit per field, whichever road reports it.
+        guard savepointLedger.claimFiling(ask) else { return }
         await commitTake(ask.targetID, inPost: ask.context, named: name)
     }
 

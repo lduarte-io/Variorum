@@ -2130,6 +2130,8 @@ final class TakesViewModel {
     /// presenter decides what leaving the field means (every leave but ⎋
     /// files), so letting go of the ask while the field is up LEAVES it.
     var savepointAsk: SavepointNameAsk?
+    /// Numbers each ⌘S and files each field once (VX-347's fix leg).
+    @ObservationIgnored private var savepointLedger = SavepointAskLedger()
 
     /// ⌘S and the bar's commit button — the DOOR. It summons the optional
     /// name; leaving the field any way but ⎋ files it (VX-347). Where no
@@ -2155,7 +2157,7 @@ final class TakesViewModel {
             setRefusal(OpsRefusalCopy.message(for: OperationError.lockedPost(id: postID)))
             return
         }
-        savepointAsk = .naming(variantID: variantID)
+        savepointAsk = savepointLedger.naming(variantID: variantID)
     }
 
     /// ⏎ on the PENDING field (the pins' road to the field's ⏎).
@@ -2170,6 +2172,8 @@ final class TakesViewModel {
     /// and that click moves the ring first.
     func fileSavepoint(_ ask: SavepointNameAsk, named name: String?) async {
         if savepointAsk == ask { savepointAsk = nil }
+        // VX-347's fix leg: one commit per field, whichever road reports it.
+        guard savepointLedger.claimFiling(ask) else { return }
         await commitTake(ask.targetID, named: name)
     }
 

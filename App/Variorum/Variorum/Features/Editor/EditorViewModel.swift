@@ -163,6 +163,8 @@ final class EditorViewModel {
     /// (`SavepointNameLeaving` — every leave but ⎋ files), so a host that
     /// lets go of its ask while the field is up is LEAVING it, not cancelling.
     var savepointAsk: SavepointNameAsk?
+    /// Numbers each ⌘S and files each field once (VX-347's fix leg).
+    @ObservationIgnored private var savepointLedger = SavepointAskLedger()
     /// Per-command gesture enablement (Phase 9) — recomputed on every caret/
     /// selection change from THE planner, so the menu bar, context menu, and
     /// shortcuts all read one brain's verdicts.
@@ -3339,7 +3341,7 @@ final class EditorViewModel {
             refuse(OpsRefusalCopy.message(for: OperationError.lockedPost(id: postID)))
             return
         }
-        savepointAsk = .naming(variantID: variantID)
+        savepointAsk = savepointLedger.naming(variantID: variantID)
     }
 
     /// ⏎ on the PENDING field (the pins' road to the field's ⏎). The name is
@@ -3355,6 +3357,8 @@ final class EditorViewModel {
     /// one of the ways of leaving, and that click moves the caret first.
     func fileSavepoint(_ ask: SavepointNameAsk, named name: String?) async {
         if savepointAsk == ask { savepointAsk = nil }
+        // VX-347's fix leg: one commit per field, whichever road reports it.
+        guard savepointLedger.claimFiling(ask) else { return }
         await commitTake(ask.targetID, named: name)
     }
 

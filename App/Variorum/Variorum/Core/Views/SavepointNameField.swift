@@ -89,17 +89,54 @@ nonisolated struct SavepointNameAsk: Identifiable, Equatable {
     /// (Compare: the filer flushes that post's own coordinator). Empty
     /// everywhere else — the host's one post.
     var context: String = ""
+    /// **WHICH ⌘S this is** (VX-347's fix leg) — minted by the model's
+    /// `SavepointAskLedger`, one per press, so two presses on one take are
+    /// two fields (two commits) while two reports of ONE field are one. Not
+    /// part of `id`: the popover's identity is the target, as before.
+    var presentation: Int = 0
 
     var id: String { "\(kind == .rename ? "rename" : "new"):\(targetID)" }
 
-    static func naming(variantID: String, context: String = "") -> Self {
-        SavepointNameAsk(kind: .newSavepoint, targetID: variantID, context: context)
+    static func naming(variantID: String, context: String = "", presentation: Int = 0) -> Self {
+        SavepointNameAsk(
+            kind: .newSavepoint, targetID: variantID, context: context,
+            presentation: presentation)
     }
 
     static func renaming(_ commit: CommitPoint) -> Self {
         SavepointNameAsk(
             kind: .rename, targetID: commit.id,
             seed: SavepointRowFace.name(commit) ?? "")
+    }
+}
+
+/// **ONE COMMIT PER FIELD, WHOEVER FILES IT** (VX-347's fix leg — the batch's
+/// one real regression, traced). A model files its ask from TWO places: the
+/// presenter's box (every leave — ⏎, a click away, the host going) and its own
+/// `fileSavepoint(named:)`, the ⏎ stand-in a caller can reach directly. The
+/// model's filer lets go of its ask (`savepointAsk = nil`), and to the
+/// presenter a host's ask going nil while its field is open IS a leave — so a
+/// filing that did not come through the box was filed AGAIN by the box
+/// (`WriteTakesPanelRoutedCommandTests.commitAsksForTheTakeTheRingIsInAndFilesIt`:
+/// two identical commits of the ring's take). The presenter cannot tell "the
+/// model filed and let go" from "the model let go" (⌘S again), so the model is
+/// the last word: each press mints its own `presentation`, and a filing for a
+/// presentation already filed is a no-op. Two presses stay two commits — her
+/// ⌘S never dedupes; one press is one commit, whichever roads report it.
+struct SavepointAskLedger {
+    private var minted = 0
+    private var filed: Set<Int> = []
+
+    /// ⌘S's ask, numbered.
+    mutating func naming(variantID: String, context: String = "") -> SavepointNameAsk {
+        minted += 1
+        return .naming(variantID: variantID, context: context, presentation: minted)
+    }
+
+    /// True the FIRST time this field is filed; false for every later filing
+    /// of the same field (the presenter's report after the model's own ⏎).
+    mutating func claimFiling(_ ask: SavepointNameAsk) -> Bool {
+        filed.insert(ask.presentation).inserted
     }
 }
 
