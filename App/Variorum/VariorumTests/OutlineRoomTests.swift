@@ -213,6 +213,12 @@ struct OutlineRoomTests {
             contentRect: NSRect(x: 60, y: 60, width: width, height: height),
             styleMask: [.titled], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
+        // VX-77 (R-U2-B): the containment scan reads LUMINANCE, so a host
+        // left dark (the test host IS the dev-store app, and a walk can leave
+        // its `appearanceChoice` on dark) draws a black room the scan reads as
+        // "ink at 0.0". The window is pinned light, so the verdict is the
+        // chrome's and never the host's posture.
+        window.appearance = NSAppearance(named: .aqua)
         let hosting = NSHostingView(
             rootView: BookView(
                 session: book.session, readingID: book.readingID,
@@ -516,6 +522,8 @@ struct OutlineRoomTests {
                 contentRect: NSRect(x: 100, y: 100, width: 1100, height: 750),
                 styleMask: [.titled], backing: .buffered, defer: false)
             window.isReleasedWhenClosed = false
+            // VX-77 (R-U2-B): pinned light — the scan's verdict never the host's.
+            window.appearance = NSAppearance(named: .aqua)
             let hosting = NSHostingView(rootView: AnyView(
                 ReadModeView(session: session, postID: post.id, model: model)
                     .environment(ThemeStore(session: session))))

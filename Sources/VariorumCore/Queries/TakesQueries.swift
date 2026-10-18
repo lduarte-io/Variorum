@@ -296,10 +296,17 @@ extension Queries {
         public let text: String?
         public let hasFan: Bool
         public let variantLocked: Bool
+        /// How many ACTIVE takes the block keeps (VX-304 — the book Index's
+        /// "⑂N" badge, the Outline badge's own count). Read from the same
+        /// `renderPost` slot `hasFan` comes from, so the two never disagree;
+        /// a caller that builds a row by hand and names no count gets the
+        /// smallest count its `hasFan` allows (2 for a fan, else 1).
+        public let activeVariantCount: Int
 
         public init(
             blockID: String, placementID: String, name: String?,
-            variantID: String?, text: String?, hasFan: Bool, variantLocked: Bool
+            variantID: String?, text: String?, hasFan: Bool, variantLocked: Bool,
+            activeVariantCount: Int? = nil
         ) {
             self.blockID = blockID
             self.placementID = placementID
@@ -308,6 +315,7 @@ extension Queries {
             self.text = text
             self.hasFan = hasFan
             self.variantLocked = variantLocked
+            self.activeVariantCount = activeVariantCount ?? (hasFan ? 2 : 1)
         }
     }
 
@@ -335,7 +343,8 @@ extension Queries {
                 blockID: slot.blockID, placementID: slot.placementID,
                 name: names[slot.blockID],
                 variantID: slot.variantID, text: slot.text,
-                hasFan: slot.hasFan, variantLocked: slot.variantLocked)
+                hasFan: slot.hasFan, variantLocked: slot.variantLocked,
+                activeVariantCount: slot.activeVariantCount)
         }
     }
 

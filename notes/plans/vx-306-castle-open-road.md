@@ -379,7 +379,7 @@ orchestrator reads her "no Sync/ line" as "no protocol/engine/server change" and
 Fable-reviewed as every custody line is (P-VX306-K6 — her eye at the bundle; if she reads it strictly, the registration
 moves to a local-only registry outside `Sync/` in one commit).
 
-## 7b. THE ORCHESTRATOR'S KICKOFF READING AND PROVISIONAL RULINGS (2026-10-18, overnight — bundled as QUESTIONS #232)
+## 7b. THE ORCHESTRATOR'S KICKOFF READING AND PROVISIONAL RULINGS (2026-10-18, overnight — bundled as QUESTIONS #233)
 
 - **P-VX306-K1 — how the dev store "converts" (her approval: "the dev store converting to the new system on first open is
   APPROVED").** Rule 26 is explicit: stores from before this design are neither migrated nor handled; everyone with one
@@ -630,7 +630,7 @@ survives the context's externalization is the lookup's one Unknown — the walk 
 - A sample soak at piece 3 (seeds 1–3 × 350 sequences, Debug — the new stamp clause's false-positive check):
   `✔ Test run with 1 test in 1 suite passed after 414.916 seconds.`
 
-**PROVISIONALs (each built as its option (a); bundled under QUESTIONS #232):**
+**PROVISIONALs (each built as its option (a); bundled under QUESTIONS #233):**
 - **P-VX306-U1a-1 — "a library lived here" (`ProtectionFacts.containerMarker`).** Traced as the brief asked: today's
   `.libraryMissing` arm (`StoreLaunchRoute.resolve(gate:presence:)`, `StoreLaunchGate.swift`) fires on a DEMANDED
   effective gate over an absent store — the gate derived from the 13p stored mode, today's envelope beside the store and

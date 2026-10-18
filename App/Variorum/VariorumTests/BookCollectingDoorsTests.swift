@@ -98,7 +98,13 @@ struct BookCollectingDoorsTests {
         #expect(act.scope == .book)
         #expect(ShelfView.contextMenuCapabilities.contains(.openBookSettings),
                 "the Bookcase row's menu renders it (§4's second road)")
-        #expect(BookView.surfaceCapabilities == [.openBookSettings],
+        // VX-115: the gear's act is DECLARED on the book's surface. Not the
+        // whole set by equality — that went stale twice (13o U3 declared the
+        // masthead's 🔍 `.searchThisBook`, VX-217 the gathering's "+ new
+        // note"); the full declared ⇔ rendered set is the registry walk's
+        // (`CapabilityRegistryTests`), and `BookSearchTests` pins its own door
+        // the same way.
+        #expect(BookView.surfaceCapabilities.contains(.openBookSettings),
                 "the book masthead's gear is the book's own door")
         #expect(CollectingCopy.openVerb(isBook: true) == "Book Settings\u{2026}")
         #expect(CollectingCopy.openVerb(isBook: false) == "Gathering Settings\u{2026}")

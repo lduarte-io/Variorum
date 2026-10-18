@@ -725,7 +725,7 @@ struct RootView: View {
     /// adding a door, and is spoken in one voice wherever it fires.
     private func adopt(
         _ destination: SidebarSelection, in pane: PaneID, landing blockID: String? = nil,
-        find: EditorFindSeed? = nil
+        offset offsetInBlock: Int? = nil, find: EditorFindSeed? = nil, mode: PostMode? = nil
     ) {
         // 17o c/d/e round 1 (MAJOR-2) + round 2 (MINOR-1): **a navigation
         // expires a parked block landing and installs the one it names — in
@@ -739,7 +739,9 @@ struct RootView: View {
         // no door can park without navigating. The shell keeps the outcome,
         // because saying the same-note refusal out loud is the shell's job,
         // not the router's (P-4).
-        switch router.adopt(destination, in: pane, landing: blockID, find: find) {
+        switch router.adopt(
+            destination, in: pane, landing: blockID, offset: offsetInBlock, find: find,
+            mode: mode) {
         case .adopted:
             break
         case .focusedExistingPane:
@@ -882,6 +884,10 @@ struct RootView: View {
             onEditHere: noteBoxDoor?.editHere,
             // 13i-c U4 (§20): the box's book-context remove/release door.
             removeDoor: noteBoxDoor?.removeFromBook.map { (verb: $0.verb, act: $0.act) },
+            // VX-304: the box's "open ↗" (every book mode) and the Index's
+            // in-place "Takes" — the book's own acts, handed up as closures.
+            onOpenInWrite: noteBoxDoor?.openInWrite,
+            onOpenTakes: noteBoxDoor?.openTakes,
             bar: barModel.map { AnyView(CommitBar(model: $0, axis: .box)) }))
     }
 
@@ -1217,7 +1223,13 @@ struct RootView: View {
                 PostDetailView(
                     session: session, postID: postID,
                     initialBlockID: target(for: postID),
+                    // VX-303: a book door's caret inside that block — the
+                    // same park, spent with it below.
+                    initialOffsetInBlock: router.landingOffset(for: postID),
                     initialFind: router.landingFind(for: postID),
+                    // VX-303 (R-U1a-2): the mode a book door named — the
+                    // same park, spent with it below.
+                    initialMode: router.landingMode(for: postID),
                     recentBookIDs: router.workspace.recentBookIDs)
                     // **The park is spent when it lands.** A re-mount is not
                     // a navigation — the shell re-creates this view whenever
@@ -1271,8 +1283,15 @@ struct RootView: View {
                 },
                 // 13o U3 (the architect's F1): a book's search passage lands
                 // exactly as the Library's — Write at its block, find seeded.
-                onOpenSearchHit: { postID, blockID, find in
-                    open(.post(postID), blockID: blockID, find: find, in: pane)
+                // VX-303: the book's five OPEN doors ride the same road,
+                // carrying her caret's block and offset (no block when
+                // nothing of hers is live in that note) and the mode the
+                // note arrives in (`BookOpenDoor.Landing`).
+                onOpenSearchHit: { landing in
+                    open(
+                        .post(landing.postID), blockID: landing.blockID,
+                        offset: landing.offsetInBlock, find: landing.find, mode: landing.mode,
+                        in: pane)
                 })
                 .id(readingID)
         case .pool(let poolID):
@@ -1373,12 +1392,16 @@ struct RootView: View {
     }
 
     /// Navigation with an optional caret-precise block landing (Stage C) —
-    /// and, for a search passage, its find seed (13o U2, D6).
+    /// and, for a search passage, its find seed (13o U2, D6); for a book's
+    /// open door, her caret's offset inside that block and the mode the note
+    /// arrives in (VX-303 — Write, R-U1a-2).
     private func open(
-        _ picked: SidebarSelection, blockID: String?, find: EditorFindSeed? = nil,
-        in pane: PaneID? = nil
+        _ picked: SidebarSelection, blockID: String?, offset offsetInBlock: Int? = nil,
+        find: EditorFindSeed? = nil, mode: PostMode? = nil, in pane: PaneID? = nil
     ) {
-        adopt(picked, in: pane ?? router.workspace.focusedPane, landing: blockID, find: find)
+        adopt(
+            picked, in: pane ?? router.workspace.focusedPane, landing: blockID,
+            offset: offsetInBlock, find: find, mode: mode)
     }
 
 #if DEBUG

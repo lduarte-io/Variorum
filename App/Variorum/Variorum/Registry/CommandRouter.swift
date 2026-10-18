@@ -237,17 +237,66 @@ final class CommandRouter {
     /// The caret-rate half — read at a landing, watched by nobody.
     @ObservationIgnored private var focusedOffset: Int?
 
-    /// A mounted writing surface reports where its caret is. Ignored for any
-    /// note other than the one on screen — a background pane's caret is not
-    /// "the block you're in" for the panel beside the foreground one.
+    /// **VX-303 (R-U1a-1's guard (i)) — a surface PLACING its own caret.**
+    /// An editor mounting a note places the caret itself before she has
+    /// touched it: the first render's fill parks the insertion point at the
+    /// document's END and reports THAT (`EditorViewModel.applyProjection`'s
+    /// own note on it), then the focus seeds land — in a book, a bare focus
+    /// seeds the note's very start (`BookViewModel.focus`, row 44). Those
+    /// reports describe the mount, not her; the surface brackets them here so
+    /// a note that is NOT the mounted detail's never takes them as her place
+    /// (`noteFocusedBlock`'s other-note arm). Nested brackets count; the
+    /// mounted detail's own reports are untouched by it.
+    func duringCaretPlacement(_ body: () -> Void) {
+        caretPlacementDepth += 1
+        defer { caretPlacementDepth -= 1 }
+        body()
+    }
+
+    /// How many caret placements are in flight (see `duringCaretPlacement`).
+    @ObservationIgnored private(set) var caretPlacementDepth = 0
+
+    /// A mounted writing surface reports where its caret is. The OBSERVED
+    /// fact is only ever the mounted detail's note — a background pane's
+    /// caret is not "the block you're in" for the panel beside the foreground
+    /// one.
+    ///
+    /// **VX-303 (R-U1a-1, ruled (A) — PROVISIONAL): a report for ANOTHER
+    /// note feeds that note's MEMORY, and nothing else.** A book's surfaces
+    /// (its Outline/spread editor, its Index pane) show notes no detail has
+    /// registered, so before this the book never recorded her caret and the
+    /// note box's "edit here" landed where she last was in the note's OWN
+    /// editor. `CurrentBlockMemory`'s doctrine is one current block per
+    /// note, every surface reporting; the memory takes the report, while the
+    /// mounted detail's observed identity and its offset do not move (guard
+    /// (ii)). Guard (i) — a surface placing its own caret is not her place —
+    /// is three exclusions: only a reporter that excludes its own placements
+    /// feeds (`remembersOtherNotes`), never inside a mount's bracket
+    /// (`duringCaretPlacement`), and a block-less report names nothing. The
+    /// ruling's recorded consequence: R-18l-1's re-open this run
+    /// (`sessionFact`) restores a place she last had in the book too.
     ///
     /// `utf16Offset` is nil for a surface that holds no caret (Blocks' row,
     /// the outline's card) — nil is UNKNOWN, not zero, and the memory's own
     /// rule keeps a known offset for the same block rather than erasing it.
+    ///
+    /// `remembersOtherNotes`: the reporter excludes its own caret PLACEMENTS
+    /// from what it reports for a note no detail shows — the editor brackets
+    /// its mount, the book Index's pane filters its going-live
+    /// (`BookIndexEditModel.caretReportIsHers`). Every other reporter passes
+    /// nothing (the Takes board's entry lands such a note on its FIRST slot
+    /// and would report that as her place).
     func noteFocusedBlock(
-        _ blockID: String?, variantID: String?, postID: String, utf16Offset: Int? = nil
+        _ blockID: String?, variantID: String?, postID: String, utf16Offset: Int? = nil,
+        remembersOtherNotes: Bool = false
     ) {
-        guard activePostID == postID else { return }
+        guard activePostID == postID else {
+            guard remembersOtherNotes, let blockID, caretPlacementDepth == 0 else { return }
+            currentBlocks.remember(FocusedBlock(
+                postID: postID, blockID: blockID, variantID: variantID,
+                utf16Offset: utf16Offset))
+            return
+        }
         guard let blockID else {
             focusedBlockIdentity = nil
             focusedOffset = nil
