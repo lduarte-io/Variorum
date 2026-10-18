@@ -348,10 +348,11 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   (a connection now writes its own end through its own store; the cause was the door dropping its host before the
   host's sessions ended), headless proof green; the Mac pin's re-run on `DerivedData/u5-fix` rides the orchestrator's
   next stage window (the U5 record's "VX-394 fix leg" section has the command).**
-- **U2 (VX-347 — ⌘S):** BUILT — FIXED at the one shared seam (`acbe5e5cb` the fix · `36c715ac2` the pins: every leave of the
-  ⌘S name field but ⎋ files, the filers commit the ASKED take); compiled; **PENDING:** the Mac batch (red leg first —
-  products in the U2 record), the walk (both voices, every host — the list in the record), the QUESTIONS bundle
-  (P-VX347-1…5). The U2 UNIT RECORD (at the end of this file) carries the rest.
+- **U2 (VX-347 — ⌘S):** BUILT + FIX LEG DONE — FIXED at the one shared seam (`acbe5e5cb` · `36c715ac2`); the batch's
+  two findings fixed (`d702f8643` the double-file — one commit per field via the ask's presentation + the shared ledger;
+  `1da9c3bc1`/`4804d7b1b` the rig re-shaped off the hollow popover lookup + the double-file class pinned on all four
+  models); **PENDING:** the re-batch on the three post-fix-leg products (u2-fixed · u2-red · u2-fixleg-red — commands and
+  expected reds in the U2 record), the walk (both voices, every host), the QUESTIONS bundle (P-VX347-1…5).
 - **U3 (VX-350 · VX-349 · VX-176 — the Library's row and header):** IN-PROGRESS (its implementer, 2026-10-18) — the U3
   UNIT RECORD (at the end of this file) carries the live state.
 - **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** NOT-STARTED.
@@ -1165,10 +1166,10 @@ built.
 - **The fold of main `e6874b1d8` (VX-382):** DONE (`fba169abb`, clean; shared files and headless counts below).
 - **The prebuilt Mac products (u2-fixed / u2-red):** DONE — rebuilt from the FOLDED tree (paths + commands below); their
   RUN is PENDING the batch.
-- **THE FIX LEG (the batch's two findings, routed 2026-10-18 ~07:2x):** IN-PROGRESS — (1) the double-file on the
-  panel's routed ⌘S (`WriteTakesPanelRoutedCommandTests.commitAsksForTheTakeTheRingIsInAndFilesIt`): TRACED (the
-  FIX LEG section below), the fix next; (2) the hollow mount cells (`fieldPopover() → nil` on both trees): the rig is
-  re-shaped next, then the red re-proof and the rebuilt products.
+- **THE FIX LEG (the batch's two findings, routed 2026-10-18 ~07:2x):** DONE — the double-file traced and fixed
+  (`d702f8643`), the rig re-shaped and the double-file class pinned on all four models (`1da9c3bc1`, `4804d7b1b`); THREE
+  products rebuilt at the fix-leg tip (`u2-fixed`, `u2-red`, `u2-fixleg-red`); their RUN is PENDING the next batch.
+  The FIX LEG section below.
 - **FIX-LEG RED LEG ANNOUNCED BEFORE IT STARTS (addendum 2):** a third durable checkout,
   `<home>/dev/variorum-vx-348-u2fixlegred` at `4804d7b1b`, with ONE behavioural revert —
   `SavepointAskLedger.claimFiling` answers `true` always (the first pass's "every report files") — built into
@@ -1337,43 +1338,81 @@ failure** — `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheC
 15 s bound at a load average of 17–22), **green alone (3 / 3, 2.2 s)**: VX-353's standing flake, not U2's (U2 has zero
 core lines).
 
-### The Mac products (PREBUILT from the FOLDED tree — the batch window runs `test-without-building` only)
+### THE FIX LEG (the U2 batch's two findings — the orchestrator's routing, 2026-10-18)
 
-Both legs build from DURABLE detached checkouts of the post-fold tip `fba169abb` beside this worktree (the U5 fix leg's
-`-u5fix` precedent) — this worktree is never reverted, so it is never mid-revert:
-- **FIXED:** `<home>/dev/variorum-vx-348/DerivedData/u2-fixed`
-  (`Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`) — built from
-  `<home>/dev/variorum-vx-348-u2fixed` at `1c3ae3c5a` (the fold `fba169abb` + one box pin's three
-  lines), unmodified (log `DerivedData/u2-fixed-build.log`, TEST BUILD SUCCEEDED). The red checkout stays at
-  `fba169abb`: the only file that moved after it is the rule-tests file the red build excludes, so every file in the
-  red build is the same.
-- **RED:** `<home>/dev/variorum-vx-348/DerivedData/u2-red` — built from
-  `<home>/dev/variorum-vx-348-u2red` at `fba169abb` with EXACTLY U2's hunks reverse-applied to its eleven
-  app files (`git diff acbe5e5cb^ 36c715ac2 -- <the eleven> | git apply -R`; the patch kept at
-  `DerivedData/u2-red-revert.patch`) — so the nine files the fold did not touch are byte-identical to their pre-fix
-  content (checked), and `EditorView.swift` / `EditorViewModel.swift` are the folded files minus U2's hunks alone
-  (VX-382's lines kept — checked); `VX347SavepointLeaveRuleTests.swift` is removed (new API; the folders are
-  synchronized, so its absence is its absence from the build). All eleven files confirmed compiled from the red checkout
-  in `DerivedData/u2-red-build.log`; the rule-tests file in the fixed log only. TEST BUILD SUCCEEDED.
-- **Clean-up after the batch** (the orchestrator's): `git worktree remove --force <home>/dev/variorum-vx-348-u2red`
-  and `git worktree remove <home>/dev/variorum-vx-348-u2fixed` (the products' xctestrun files name these
-  sources for their source-file mapping, so they stay until the batch has run).
-- **The commands** (under a held stage claim; confirm each "Test run with N tests" line):
+**1 — THE DOUBLE-FILE (real; the shipped VX-154 pin `WriteTakesPanelRoutedCommandTests.commitAsksForTheTakeTheRingIsInAndFilesIt`
+saw TWO identical commits of the ring's take).** The traced mechanism: a model files its ask from TWO places — the
+presenter's box (every leave) and its own `fileSavepoint(named:)`, the ⏎ stand-in that pin calls directly ("the
+popover's onFile is exactly this call" — true before U2, not after). The model's filer lets go of its ask
+(`savepointAsk = nil`); to the MOUNTED presenter a host's ask going nil while its field is open IS a leave (that is how
+⌘S again files), so `onChange(A → nil)` (and the popover's `willClose` after it) reported the open field as left
+"away" and the box filed it AGAIN, unnamed: commit 1 "vx154", commit 2 unnamed. The box was not re-armed and not
+unshared — it simply never heard the model's own filing, and cannot tell "the model filed and let go" from "the model let
+go". **Not the SwiftUI "Modifying state during view update" warnings:** the run's action log shows them 2–3 per test
+across the WHOLE panel suite — comments, callout, copy-all, archive, delete-block, the close — field or no field.
+**Reachable by her?** No shipped door files that way today (every app call of `fileSavepoint(_:named:)` is the box's
+own `onFile`), so the pin caught a seam that double-files any filing not routed through the box — fixed by
+construction, not left to callers.
+**The fix (`d702f8643`, at the seam):** `SavepointNameAsk.presentation` (minted per press; NOT part of `id`, so the
+popover's identity is unchanged) and the shared `SavepointAskLedger` — `naming(…)` mints, `claimFiling(_:)` answers true
+ONCE per presentation; Write, Takes (the panel's model), Canvas and Compare mint through it, and their
+`fileSavepoint(_:named:)` is a no-op for a presentation already filed. Two presses stay two commits (her ⌘S never
+dedupes). The box's own comparisons get sharper for free (two presses on one take are no longer equal asks).
+**Pins (`VX347OneCommitPerFieldTests`):** the ledger's rule, and `write` · `takes` · `canvas` · `compare` — the model's own
+⏎ then the presenter's late report of the SAME field = ONE commit, a second ⌘S = a second. Expected RED on the fix-leg
+red product (below); the shipped panel pin is the original red (observed red on the first-pass product by the batch).
+
+**2 — THE HOLLOW MOUNT CELLS (harness; `fieldPopover() → nil` on BOTH trees).** The traced mechanism: the rig caught the
+field's `NSPopover` from `didShowNotification` ONLY, which AppKit posts when the show ANIMATION ends; `pressCommandS`
+returns the moment the popover's window is visible (its own premise held on both trees — the ⏎/⎋ guards and the
+host-going/window/⌘S-again cells, which never ask for the popover, ran honestly), and the click-away cells asked for the
+popover at once — before AppKit had announced it. **The re-shape:** the click-away family (and the flipped
+`onlyEscapeLeavesTheFieldWithoutACommit`) now leave the way a click away ENDS — SwiftUI writing nil through the host's
+binding (`SavepointFieldRig.dismissTheField`; VX-179's `closingThePopoverSavesADirtyInPlaceEdit` dismisses by this road,
+"the road a click-away and the panel's own close both end on") — which also closes the popover, so BOTH of the
+presenter's dismissal reports run and each cell holds ONE commit; deterministic, no popover lookup. ONE new cell,
+`thePopoversOwnCloseFilesTheCommit`, keeps the watcher's own road (`performClose` → `willClose`): the catcher now hears
+`willShowNotification` (posted synchronously inside the show, before the window exists) as well as `didShow`, and the
+lookup WAITS (up to 100 turns) instead of assuming — its premise is said by name if the environment still cannot surface
+the popover, so it can fail loudly but never pass hollow. Every mount cell still uses pre-fix APIs only.
+
+### The Mac products (PREBUILT at the fix-leg tip — the batch window runs `test-without-building` only)
+
+All three build from DURABLE detached checkouts beside this worktree; this worktree is never reverted:
+- **FIXED:** `<home>/dev/variorum-vx-348/DerivedData/u2-fixed` — from
+  `<home>/dev/variorum-vx-348-u2fixed` at `4804d7b1b`, unmodified (log `DerivedData/u2-fixed-build.log`).
+- **RED (the pre-fix code):** `<home>/dev/variorum-vx-348/DerivedData/u2-red` — from
+  `<home>/dev/variorum-vx-348-u2red` at `4804d7b1b` with U2's eleven app files at main `e6874b1d8`'s content
+  (since main, only U2's commits touch them — checked: the nine VX-382 never touched are byte-identical to `acbe5e5cb^`,
+  `EditorView`/`EditorViewModel` are the fold minus exactly U2's hunks, VX-382's caret-seed lines kept, no U2 seam symbol
+  left) and `VX347SavepointLeaveRuleTests.swift` removed (new API). Every other test file is the tip's (log
+  `DerivedData/u2-red-build.log`).
+- **FIX-LEG RED:** `<home>/dev/variorum-vx-348/DerivedData/u2-fixleg-red` — from
+  `<home>/dev/variorum-vx-348-u2fixlegred` at `4804d7b1b` with ONE behavioural revert:
+  `SavepointAskLedger.claimFiling` answers `true` always (the first pass's "every report files"); confirmed compiled
+  from that checkout (log `DerivedData/u2-fixleg-red-build.log`).
+- **Clean-up after the batch** (the orchestrator's): `git worktree remove --force` on
+  `<home>/dev/variorum-vx-348-u2red` and `<home>/dev/variorum-vx-348-u2fixlegred`, and
+  `git worktree remove <home>/dev/variorum-vx-348-u2fixed` (the xctestrun files name these sources).
+- **The commands** (under a held stage claim; confirm each "Test run with N tests" line; a red counts only if it is the
+  BEHAVIOUR's expectation, never a premise):
   ```
   cd <home>/dev/variorum-vx-348/App/Variorum
-  # RED — expect: VX347CommitLeavesMountTests 9 of 12 fail (the three GUARDS pass: escapeAloneFilesNothing ·
+  # RED (pre-fix) — expect: VX347CommitLeavesMountTests 10 of 13 fail (GUARDS pass: escapeAloneFilesNothing ·
   #   returnFilesExactlyOnce · anUnchangedTakeCommittedTwiceIsTwoCommits); SavepointCommitDoorTests: ONLY
-  #   onlyEscapeLeavesTheFieldWithoutACommit fails (the other four pass); SavepointNameAskTests: ONLY
-  #   theFieldTeachesItsTwoKeys fails; SavepointNameCopyTests: theHelperTeachesTheNameAndTheSkipKey fails
-  xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u2-red test-without-building -only-testing:VariorumTests/VX347CommitLeavesMountTests -only-testing:VariorumTests/SavepointCommitDoorTests -only-testing:VariorumTests/SavepointNameAskTests -only-testing:VariorumTests/SavepointNameCopyTests
-  # FIXED — the pins and every neighbour on the commit road, all green
-  xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u2-fixed test-without-building -only-testing:VariorumTests/VX347CommitLeavesMountTests -only-testing:VariorumTests/VX347LeaveRuleTests -only-testing:VariorumTests/VX347LeavingBoxTests -only-testing:VariorumTests/VX347AskedTakeFilingTests -only-testing:VariorumTests/SavepointNameFaceTests -only-testing:VariorumTests/SavepointNameAskTests -only-testing:VariorumTests/SavepointCommitDoorTests -only-testing:VariorumTests/SavepointTakesDoorTests -only-testing:VariorumTests/SavepointSealedDoorTests -only-testing:VariorumTests/SavepointRenameDoorTests -only-testing:VariorumTests/SavepointNameCopyTests -only-testing:VariorumTests/CommitVocabularyTests -only-testing:VariorumTests/DeadVocabularyTests -only-testing:VariorumTests/HelperCurrencyTests -only-testing:VariorumTests/MoveAndExecuteTests -only-testing:VariorumTests/WriteTakesPanelRoutedCommandTests -only-testing:VariorumTests/CompareViewModelTests -only-testing:VariorumTests/CanvasAndPoolTests -only-testing:VariorumTests/CommitFlowTests -only-testing:VariorumTests/ConfirmationsSettingTests -only-testing:VariorumTests/TakeToBlockDoorTests -only-testing:VariorumTests/CommitBarLayoutTests -only-testing:VariorumTests/BlockHistoryPaneTests -only-testing:VariorumTests/TutorialBookShapeTests -only-testing:VariorumTests/TutorialWherePlacesActsTests -only-testing:VariorumTests/TutorialTakesActsTests -only-testing:VariorumTests/TutorialLibraryActsTests -only-testing:VariorumTests/CommentPanelFixLeg2Tests
+  #   onlyEscapeLeavesTheFieldWithoutACommit fails; SavepointNameAskTests: ONLY theFieldTeachesItsTwoKeys fails;
+  #   SavepointNameCopyTests fails; WriteTakesPanelRoutedCommandTests ALL PASS (a control: the pre-fix filer filed once)
+  xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u2-red test-without-building -only-testing:VariorumTests/VX347CommitLeavesMountTests -only-testing:VariorumTests/SavepointCommitDoorTests -only-testing:VariorumTests/SavepointNameAskTests -only-testing:VariorumTests/SavepointNameCopyTests -only-testing:VariorumTests/WriteTakesPanelRoutedCommandTests
+  # FIX-LEG RED (the ledger's claim reverted) — expect: VX347OneCommitPerFieldTests 5 of 5 fail; in
+  #   WriteTakesPanelRoutedCommandTests ONLY commitAsksForTheTakeTheRingIsInAndFilesIt fails (two commits);
+  #   VX347CommitLeavesMountTests ALL PASS (a control: the box's own roads file once without the ledger)
+  xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u2-fixleg-red test-without-building -only-testing:VariorumTests/VX347OneCommitPerFieldTests -only-testing:VariorumTests/WriteTakesPanelRoutedCommandTests -only-testing:VariorumTests/VX347CommitLeavesMountTests
+  # FIXED — every pin and every neighbour on the commit road, all green
+  xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u2-fixed test-without-building -only-testing:VariorumTests/VX347CommitLeavesMountTests -only-testing:VariorumTests/VX347LeaveRuleTests -only-testing:VariorumTests/VX347LeavingBoxTests -only-testing:VariorumTests/VX347AskedTakeFilingTests -only-testing:VariorumTests/VX347OneCommitPerFieldTests -only-testing:VariorumTests/SavepointNameFaceTests -only-testing:VariorumTests/SavepointNameAskTests -only-testing:VariorumTests/SavepointCommitDoorTests -only-testing:VariorumTests/SavepointTakesDoorTests -only-testing:VariorumTests/SavepointSealedDoorTests -only-testing:VariorumTests/SavepointRenameDoorTests -only-testing:VariorumTests/SavepointNameCopyTests -only-testing:VariorumTests/CommitVocabularyTests -only-testing:VariorumTests/DeadVocabularyTests -only-testing:VariorumTests/HelperCurrencyTests -only-testing:VariorumTests/MoveAndExecuteTests -only-testing:VariorumTests/WriteTakesPanelRoutedCommandTests -only-testing:VariorumTests/CompareViewModelTests -only-testing:VariorumTests/CanvasAndPoolTests -only-testing:VariorumTests/CommitFlowTests -only-testing:VariorumTests/ConfirmationsSettingTests -only-testing:VariorumTests/TakeToBlockDoorTests -only-testing:VariorumTests/CommitBarLayoutTests -only-testing:VariorumTests/BlockHistoryPaneTests -only-testing:VariorumTests/TutorialBookShapeTests -only-testing:VariorumTests/TutorialWherePlacesActsTests -only-testing:VariorumTests/TutorialTakesActsTests -only-testing:VariorumTests/TutorialLibraryActsTests -only-testing:VariorumTests/CommentPanelFixLeg2Tests
   ```
-  The mount cells use VX-179's offscreen popover rig (a borderless window off every display at alpha 0, keys posted only
-  through `deliveryWindow(for:)`); like VX-179's cells they need the test host's own windows NOT to hold the key window
-  (the cell stops by name on that premise rather than type into it). A red in the FIXED leg's mount cells that the rule/
-  box/model cells do not share is a harness-shape question first (say so to the orchestrator) — the decision itself is
-  pinned headlessly in `VX347LeavingBoxTests` and per model in `VX347AskedTakeFilingTests`.
+  `thePopoversOwnCloseFilesTheCommit` is the one cell with a popover premise: on RED it must fail at the commit count
+  (behaviour), on FIXED pass; a failure AT its premise ("the field's popover was caught showing") on either tree means
+  the environment still cannot surface the NSPopover — say so; the click-away family no longer depends on it.
 
 ### For the orchestrator's closeout (not U2's to apply)
 
