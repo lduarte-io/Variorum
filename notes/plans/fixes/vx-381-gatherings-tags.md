@@ -261,13 +261,29 @@ disposition here.
     orchestrator at the unit close):** finished "Finished — reopen it to add notes." · no rule "No rule yet — give it
     one to add notes." · unreadable "Its rule can't be read — edit it to add notes." · legacy date "Its rule needs an
     entry date, which a new note doesn't have." · legacy kind "Its rule needs a kind of note, which a new note
-    doesn't have." Core `GatheringMint` 20/2 green; red-on-old: PENDING (next). App pin edit: PENDING (Mac batch).
+    doesn't have." DONE (9c6d2611). Core `GatheringMint` 20/2 green; RED-ON-OLD VERIFIED (the pre-fix
+    `GatheringMint.swift` restored from 9c6d2611~1: `herShorterHoversLandVerbatim` + `everyReasonIsATerseSentence…`
+    failed, 27 issues; restored → 20/2 green). App pin edit (`VocabularySweepTests` hovers): PENDING (Mac batch).
     Observation (pre-existing, not changed): a rule naming a LIVE tag of ANOTHER wing reads as dead in the
     gathering's wing, so it says "…which no longer exists." (the old words said "doesn't exist right now").
-  - U1.4 VX-250 (3) NOT terms at the mint: NOT-STARTED — design: a fresh-note evaluator mirroring `ruleSQL` exactly
-    (Kleene logic for the legacy NULLs; subtree `tagCovers`), NOT conjuncts and NOT options in an any-of DEFERRED
-    and verified against the final plan, so a door never shows enabled for a press that refuses.
-  - U1.5 VX-240 `.opening` face: NOT-STARTED.
+  - U1.4 VX-250 (3) NOT terms at the mint: DONE (6adfd7c6) — a fresh-note evaluator mirroring `ruleSQL` exactly
+    (three-valued for the legacy NULLs; subtree `tagCovers` fed live paths by the query); NOT conjuncts and NOT
+    options in an any-of DEFERRED, then every conjunct checked against the note the plan makes, so a door never shows
+    enabled for a press the belt would refuse; an any-of pick prefers an option keeping the NOTs true
+    (`(#a OR #c) AND NOT #a` takes #c — her "a NOT contradicting a tag it MUST apply greys": an any-of pick is not a
+    must). Still blocked: legacy date/kind terms, an empty any-of, an any-of with a nested group or legacy option.
+    Core `GatheringMint` 26/2 green. RED-ON-OLD VERIFIED by behavioural revert (`.not` → blocked, NOT options out of
+    the aimable set): 5 tests failed, 15 issues — the NOT-plans, any-of-with-NOT, pick-avoids, op-mints-and-shows and
+    store-subtree-steer pins; the contradiction guards (`#a AND NOT #a`, subtree, ★) green on both sides as designed;
+    restored → 26/2 green. **PROVISIONAL P-VX381-U1-1:** an any-of group containing a NOT option is met with NO
+    tag when the fresh note already meets its NOT (`#a OR NOT #b` mints wearing nothing). The alternative, taking #a
+    anyway, applies a tag nothing requires.
+  - U1.5 VX-240 `.opening` face: DONE (this commit) — `SettingsSceneContent.nonReadyFace` (`.opening` → her
+    "Opening your library…" (U+2026) beside a small spinner; every settled closed state keeps the stub). Pins in
+    `SettingsLockCloseTests`: `theOpeningFaceSaysHerWordsAndEverySettledClosedStateKeepsTheStub` (pure) +
+    `aReopenRoadShowsTheOpeningSpinnerMidCeremony` (a real bootstrap's adoption held on a gate in `.opening`; the
+    spinner is an `NSProgressIndicator` subview, measured offscreen first — SwiftUI `Text` is not reachable through
+    accessibility there, so the words ride the pure pin). Build + run + red-on-old: PENDING (Mac batch).
   - U1.6 VX-241 archived-target receipt: NOT-STARTED.
 - **U2 (VX-249 · VX-247 · VX-111):** NOT-STARTED — brief above is settled; runs after U1.
 - **Ladder:** NOT-STARTED. **Walk:** NOT-STARTED. **Closeout:** NOT-STARTED.

@@ -140,6 +140,13 @@ struct SettingsLockCloseTests {
         return found
     }
 
+    /// VX-240: the spinners the hosting view draws (a SwiftUI `ProgressView`
+    /// is an `NSProgressIndicator` underneath — measured offscreen before the
+    /// pin was written).
+    private func spinners(in view: NSView) -> Int {
+        (view is NSProgressIndicator ? 1 : 0) + view.subviews.map { spinners(in: $0) }.reduce(0, +)
+    }
+
     // MARK: - Her report (RED ON OLD)
 
     /// Settings open over an unlocked library; Lock Library Now. The window
@@ -223,6 +230,76 @@ struct SettingsLockCloseTests {
             #expect(SettingsSceneContent.libraryClosed(world.bootstrap.state))
             try await unlock(world)
             #expect(!SettingsSceneContent.libraryClosed(world.bootstrap.state), "ready is open")
+        }
+    }
+
+    // MARK: - VX-240: the mid-ceremony face (RED ON OLD)
+
+    /// The reopen roads keep this window open through `.opening` — and the
+    /// window used to show the stub's instruction, "Open the main window
+    /// first.", a wrong one mid-ceremony. Her words now (QUESTIONS #217):
+    /// "Opening your library…" with a spinner. Every settled closed state
+    /// keeps the stub.
+    @Test func theOpeningFaceSaysHerWordsAndEverySettledClosedStateKeepsTheStub() async throws {
+        try await withDeps {
+            #expect(SettingsSceneContent.nonReadyFace(.opening) == .opening)
+            #expect(SettingsSceneContent.Copy.opening == "Opening your library\u{2026}")
+            #expect(SettingsSceneContent.nonReadyFace(.failed(
+                AppDatabase.StoreOpenError(storePath: "", reason: "x"), recovery: nil)) == .stub)
+            let world = try demandedWorld()
+            defer { try? FileManager.default.removeItem(at: world.directory) }
+            await world.bootstrap.awaitOpen()
+            guard case .locked = world.bootstrap.state else {
+                Issue.record("expected the demanded world to start .locked")
+                return
+            }
+            #expect(SettingsSceneContent.nonReadyFace(world.bootstrap.state) == .stub)
+        }
+    }
+
+    /// The real road, caught in its middle: Settings open over the unlocked
+    /// library, an adoption whose work is held on a gate, so the window sits
+    /// in `.opening` long enough to look at — it shows the spinner.
+    @Test func aReopenRoadShowsTheOpeningSpinnerMidCeremony() async throws {
+        try await withDeps {
+            let world = try demandedWorld()
+            defer { try? FileManager.default.removeItem(at: world.directory) }
+            try await unlock(world)
+            let (window, hosting) = mountSettings(world.bootstrap)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, until: { false }, maxTurns: 10)
+
+            let gate = DispatchSemaphore(value: 0)
+            let key = world.key
+            let bootstrap = world.bootstrap
+            let road = Task { @MainActor in
+                try await bootstrap.adoptLibrary(reopeningWith: key, work: {
+                    _ = gate.wait(timeout: .now() + 20)
+                })
+            }
+            func opening() -> Bool {
+                if case .opening = bootstrap.state { return true }
+                return false
+            }
+            await settle(window, hosting, until: { opening() && spinners(in: hosting) > 0 })
+            let caughtOpening = opening()
+            let shown = spinners(in: hosting)
+            let texts = renderedTexts(hosting)
+            gate.signal()
+            try await road.value
+
+            #expect(caughtOpening, "the road was caught in its .opening middle")
+            #expect(shown > 0,
+                    "mid-ceremony the window shows the opening spinner, never the stub — it showed: \(texts.joined(separator: " · "))")
+            await settle(window, hosting, until: { false }, maxTurns: 10)
+            guard case .ready = bootstrap.state else {
+                Issue.record("expected the reopen to land .ready")
+                return
+            }
+            #expect(window.isVisible, "the window survives the road")
         }
     }
 }
