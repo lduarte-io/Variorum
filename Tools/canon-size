@@ -1,0 +1,18 @@
+#!/bin/sh
+# canon-size — REPORTS the size of the auto-loaded instruction files against the harness limit.
+# It never edits anything. A crossing is a line in the closeout handoff for the author's triage;
+# a session never removes canon to fit (CLAUDE.md, "Build workflow" — the VX-419 rule).
+cd "$(dirname "$0")/.." || exit 1
+LIMIT=150000
+FILES="CLAUDE.md notes/CoreDescription.md notes/OverallModel.md notes/AppSpec.md"
+total=0
+for f in $FILES; do
+  n=$(wc -c < "$f" | tr -d ' ')
+  printf '%8d  %s\n' "$n" "$f"
+  total=$((total + n))
+done
+printf '%8d  total (harness limit %d, headroom %d)\n' "$total" "$LIMIT" "$((LIMIT - total))"
+if [ "$total" -gt "$LIMIT" ]; then
+  echo "OVER the limit: say so in the handoff for her triage — never slim canon to fit (CLAUDE.md, VX-419)."
+  exit 2
+fi
