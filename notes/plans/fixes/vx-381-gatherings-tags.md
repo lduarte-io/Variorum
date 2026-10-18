@@ -378,11 +378,44 @@ disposition here.
     extreme corner (nested NOTs are authorable only in the rule editor). **PROVISIONAL (P-VX381-U2-2):** R98 now
     reads tag liveness in the GATHERING'S wing (the planner's `tagIsLive`), so a rule naming another wing's tag
     refuses by name instead of applying a cross-wing tag (wings isolate; U1's cross-wing hover observation's twin).
-  - U2.2 **VX-247 — undo for tag delete:** IN-PROGRESS — core DONE (752fa49d): `deleteTag` registers "Delete
-    Tag"; pins `TagDeleteUndoTests` (8) green; the sweep (`InvariantSweepTests`, which now undoes tag deletes at
-    random) + tag/sync suites 131/10 green. **A CORE behavioural revert is starting now** (`Operations+Tag.swift`:
-    the registration call removed — the old row work is byte-identical; restore = `git checkout --` that file,
-    committed at 752fa49d). The confirm's copy (R-VX381-A3) and the Mac door pin: NOT-STARTED.
-  - U2.3 **VX-111 — the notice counts books only:** NOT-STARTED. Traced: `AppSession.noteMultiBookEdit` counts
-    `Queries.readingsContaining` — books AND every gathering whose rule shows the note.
+  - U2.2 **VX-247 — undo for tag delete:** core DONE (752fa49d), copy + door pin DONE (58a1ecc8). Traced:
+    `deleteTag` tombstoned the subtree and registered nothing, so ⌥⌘Z reached past the act. Fix: the delete
+    records its pass (tag rows in path order + the one stamp the cascade trigger gave their applications); the
+    inverse revives each still dead on that stamp — parents first; a dead parent or a dead wing leaves it dead
+    (quiet: there is no road to bring those back, so a refusal would wedge the stack); a live same-path tag in the
+    wing REFUSES `duplicateTagPath` (resolvable — rename hers, undo again; the entry stays) — with its
+    `post_tag`/`block_tag` rows dead on the stamp, onto LIVE targets only, never beside a live twin; the redo
+    re-tombstones what the undo revived through the delete's own subtree rule on ONE fresh stamp and hands that
+    pass to the next undo; quiet halves retire the entry. Registered inside the op, so every door rides it
+    (Settings ▸ Tags' trash + context row, the phone's tag manager; no MCP tag-delete tool exists). The confirm's
+    "There is no undo for this." DROPPED on both platforms (R-VX381-A3). **Core red-on-old VERIFIED** (the
+    registration call removed — the row work is byte-identical to the old op): "8 tests in 1 suite failed with 22
+    issues"; restored green 8/8. App pin `TagAndFolderTests.theDeleteDoorIsUndoableThroughTheSessionsStack`:
+    red-on-old PENDING (Mac RUN 1). **PROVISIONAL (P-VX381-U2-3):** the path-collision undo REFUSES (keeps the
+    entry) rather than reviving beside or skipping quietly. **(P-VX381-U2-4):** the redo takes a child she made
+    under a revived tag since the undo (the delete's subtree rule — no live tag left under a dead parent; the
+    deleteBlock-cascade precedent), and the next undo brings it back on that stamp. **(P-VX381-U2-5):** an
+    application whose NOTE (or block) died after the tag delete stays dead on the undo (no live row under a dead
+    note — the sweep's invariant) — so a later Put back of that note returns it without that tag (its
+    application died on the tag's stamp, not the note's); the restoreReading "left out — add it back by hand"
+    corner's twin. **Canon delta for the closeout:** AppSpec §9's structural-undo list gains `deleteTag` (its
+    "Excluded: … tags" means applications — `applyTag`/`removeTag` — which stay excluded).
+  - U2.3 **VX-111 — the notice counts books only:** DONE (725ad2db). Traced: `AppSession.noteMultiBookEdit`
+    counted `Queries.readingsContaining` whole — the chip's list: every live book with a member row PLUS every
+    gathering whose rule shows the note — so a bookless note two gatherings show said "This note is in 2 books…"
+    (the masthead, counting `kind == .book`, said "in no book · 2 gatherings"). Fix: `MultiBookEditNote.memberBooks`
+    (books only — archived books stay, membership is a fact), and the trigger counts, words and targets from it.
+    Pins: `MultiBookEditNoteRuleTests.onlyBooksCountTowardTheNote` + `MultiBookEditNoteTriggerTests`' three
+    (bookless in 2 gatherings → silent; 2 books + a gathering → "2 books"; 1 book + a gathering → silent) —
+    red-on-old PENDING (Mac RUN 1).
+  - U2.4 **The Mac batch:** the fixed tree BUILT (`dd-green`, TEST BUILD SUCCEEDED at 725ad2db). **APP REVERT
+    STARTING NOW (all committed at 725ad2db — restore = `git checkout --` each file):** `ShelfViewModel.swift`
+    (collectReceipt/taggedWhileArchived ignore `starred`) · `MembershipChoice.swift` (`collected` ignores
+    `starred`) · `Operations+Tag.swift` (no registration) · `TagDeletionCopy.swift` (the old "no undo" sentence) ·
+    `AppSession.swift` (the notice counts `readingsContaining` whole) · `MultiBookEditNote.swift` (`memberBooks`
+    = identity) — built into `dd-red`, then the tree restored. Suites (17): GatheringCollectReceiptTests ·
+    GatheringCollectStarReceiptTests · VocabularySweepTests · MembershipChoiceTests · ShelfModelTests ·
+    TimelineAndReadingsTests · AddToBookMintTests · TagAndFolderTests · MultiBookEditNoteRuleTests ·
+    MultiBookEditNoteTriggerTests · DivergeDoorTests · DuplicateDoorsTests · BindDoorTests · WingSwitcherTests ·
+    SpawnAndBindLimbTests · OutflowChooserTests · RuleEditorTests. The full core suite: PENDING.
 - **Ladder:** NOT-STARTED. **Walk:** NOT-STARTED. **Closeout:** NOT-STARTED.
