@@ -2280,3 +2280,14 @@ watched for lobby-shaped failures in the U4 batch.
   fix lists the copy instantly — a test-shape fix (take the id from the act's return). All three routed to U4's
   implementer as a fix leg; the re-run window follows its report; the swap-and-walk REQUEST moves after that. No
   lobby-shaped failures.
+
+## THE U4 RE-RUN + THE DISCRIMINATOR (the orchestrator, 2026-10-18 ~09:43–09:51, claim `vx-348-u4-rerun`)
+
+- **The discriminator settles the redo cluster:** `redoNeverAsks` RED on u4-RED (zero U4 lines, six siblings green,
+  the same :141–143 signature) and 7/7 green on u4-fixed minutes later — **VX-167's standing intermittent flake,
+  not this run's regression.** Tonight's whole evidence chain (VX-382's three sightings + this pair + the fix leg's
+  read-only exoneration) is appended to VX-167.
+- **The reshaped pins:** red on u4-red at their BEHAVIOR expectations with zero premise failures; **5/5 and 7/7
+  GREEN on u4-fixed.**
+- **U4 IS BATCH-VERIFIED WHOLE — all five units now are.** The build-and-batch phase of the run is COMPLETE. What
+  remains: the road-(b) swap-and-walk (REQUESTED, ~90 min), the ladder over the whole diff, the closeout.
