@@ -471,6 +471,10 @@ final class AppBootstrap {
     ) async -> OpenOutcome {
         if let roadOpened { return openOnNewRoad(roadOpened, road: road, variant: variant, gate: gate) }
         let ctx = road.context()
+        #if DEBUG
+        // Walk machinery (P-VX306-U1b-9): a launch asked to forget a quiet road does so once, before the facts.
+        if road.open == nil { ProtectionWalkSwitch.forgetOnceIfAsked(ctx) }
+        #endif
         switch await ProtectionOpenRoad.route(ctx, keyInHand: unlockedKey) {
         case .opened(let session):
             return openOnNewRoad(session, road: road, variant: variant, gate: gate)
