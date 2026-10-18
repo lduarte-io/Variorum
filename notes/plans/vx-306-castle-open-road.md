@@ -1253,7 +1253,29 @@ the old store whole in the safety copy; `dev-castle.env`'s Castle values unchang
   run PENDING under the stage.
 - Piece 6 — rule 3's reminder (the model's two moments + the launch-counted schedule, local, beside `CalmAsks`' keys;
   dismissals through `recordPassphraseReminderDismissed`) + the set-passphrase sheet (`resetPassphrase(.plainConfirm)`;
-  the ask and the Protection pane's one row): NOT-STARTED.
+  the ask and the Protection pane's one row): DONE (the WIP commit's code + this commit's pins). **As built:** the
+  model's moments are `assess`'s (`.askPassphrase(.beforeFirstBackup / .quietRoadFailed)`, read from the open's
+  report — the union of every repair pass's acts, so the quiet-road moment survives the same open's repair that
+  re-makes the road); the schedule is `PassphraseReminderRules` over a LOCAL per-library ledger in this Mac's defaults
+  (`variorum.calmAsks.passphrase.<libraryID>.{launches,shows,lastShownAt,retired}` — beside `CalmAskScheduler`'s
+  keys; a launch counted once per process, only on a writing road): the first showing at the third launch, each later
+  one 7 × 24 h after the last, *Don't show again* offered once the record counts three dismissals (PROVISIONAL
+  P-VX306-U2-3); the two moments show whatever the schedule, even retired (rule 3's "always"); a scheduled *Not now* /
+  *Don't show again* records one dismissal (`recordPassphraseReminderDismissed`), a moment's *Not now* writes nothing
+  (P-VX306-U2-4); never once a passphrase exists. The face: `ProtectionRoadBar`'s calm bar in the window's bottom
+  stack (§7c (7) — the line, *Set a passphrase…* · *Not now* · *Don't show again*), re-read when the app becomes
+  active (a week can pass in one session). The sheet (`SetPassphraseSheet`, §7c (7)) — two fields, one button, a way
+  out, refused at once when a passphrase exists — from the bar AND the Protection pane's one new row (*Set a
+  passphrase…*; the pane's other doors untouched), each host holding its own sheet; on success the reminder retires
+  and §7c (7)'s receipt is spoken on the status seam. **Pins:** `PassphraseReminderTests` (12, pure — the arithmetic,
+  retired ⇒ only the moments, the ledger in throwaway defaults suites, the presses, the sheet's refusals, the faces
+  model's set → retire + receipt + a second sheet refusing at once); `ProtectionReminderRoadTests` (3, planted — the
+  moments read from real opens, the quiet-road moment surviving its repair (MUTATION: `acts` = the last pass only → RED,
+  `✘ Test run with 16 tests in 1 suite failed … with 1 issue` at the moment's line, restored and `git diff`-clean), the
+  dismissal one record write read back from the file, THE SET-PASSPHRASE ROAD through the executor: `.set`, the key
+  file gains the passphrase lock under the SAME key, the record's `passphraseSet` read back true, a second set
+  `.alreadySet`, the lobby's typed roads now offer the passphrase and it opens the library, no reminder after).
+  HEADLESS green; the Mac run PENDING under the stage.
 - Piece 7 — W-2's fix (`ProtectionLibraryFiles.snapshot` — one self-contained file; red-on-old pin): DONE (this commit).
   **THE MECHANISM (traced):** the live library is a WAL-mode file (the app's pool); SQLite's backup API copies its
   pages, page 1's WAL marks included, so the snapshot came out a WAL-mode file; `snapshot` removed the sidecars and THEN
