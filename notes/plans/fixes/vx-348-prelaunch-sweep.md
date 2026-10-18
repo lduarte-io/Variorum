@@ -57,6 +57,21 @@ VX-385 — if the one `QuietReceiptLine` at the Pool's foot proves both tickets'
 record says so). ELEVEN members now. Rule PROVISIONALLY overnight and bundle for QUESTIONS at the merge; the merge
 runs at this run's own finish, serialized with VX-381/VX-382 in whatever order the runs finish.
 
+**HER RELEASE WORD (03:3x MDT, given to the coordinator and then CONFIRMED by her directly in this session — her
+words verbatim: *"I told the coordinator but I want the LAST of you current 3 sessions (381, 382, 348) that merges
+to mint a release. I also have a castle effort live but it's fine if the release carries it and it won't be doing
+the release, so that might merge in but doesn't need to be considered one of the efforts for release purposes."*):** the Pro stays
+fully available overnight; VX-381, VX-382 and VX-348 merge to main in whatever order they finish; **ONLY THE LAST of
+the three to merge mints ONE release — 0.9.8 — covering all three** (VX-378 never mints; a release may carry it if
+merged by then). The mechanics, per the coordinator: before the merge ask, this run lands its own section in
+`ReleaseNotes-0.9.8.md` on this branch (one-line bullets, the 10-16 precedent) so the last merger's notes cover all
+three without reaching into another branch; merge asks carry branch, tested tree, tip (must contain main
+`fdce74de3`); first/second merger = merge + closeout only, NO bump, NO refresh; the LAST merger — told so explicitly
+by the coordinator — mints 0.9.8 (release.sh: DMG, appcast, site deploy) plus the folded /Applications refresh under
+a coordinator-GO'd stage window with the full rule card (A1 safety copy first, zero-instance checks, codesign
+verify). This is the standing runway rule (ONE release when the last run of a set is done) now carrying her explicit
+word for this set.
+
 **The trailer slip is FIXED at her word:** she ran the force-push herself — main `d35b07515` → `fdce74de3`,
 identical tree, the message without the trailer. (History rewrite authorized by the author in person; the lease
 pinned exactly the trailer commit.)
@@ -237,8 +252,12 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
 - **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** NOT-STARTED.
 - Then the ladder (fresh Fable per round, whole diff), closeout, merge. **Her overnight mandate (2026-10-18):**
   rule PROVISIONALLY and continue; merge to main at this run's own finish (finish-order serialization with
-  VX-381/VX-382); leave the handoff AND, separately, the completed checklist block in her format. A release is her
-  explicit word only.
+  VX-381/VX-382); leave the handoff AND, separately, the completed checklist block in her format. **Release (her
+  word, confirmed in-session):** the LAST of the three runs to merge mints ONE 0.9.8 covering all three; VX-378 may
+  merge in and ride but never mints and is not counted. BEFORE this run's merge ask: land its section in
+  `ReleaseNotes-0.9.8.md` on this branch (one-line bullets). First/second merger: no bump, no refresh. Last (the
+  coordinator says so explicitly): release.sh + the folded /Applications refresh under a GO'd stage window, full
+  rule card.
 - **The trailer slip, closed:** the kickoff's in-flight-row commit briefly carried a `Co-Authored-By` trailer; at
   her word she force-pushed the amended commit herself — main `d35b07515` → `fdce74de3`, identical tree. No other
   commit carries one.
