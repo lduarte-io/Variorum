@@ -215,8 +215,69 @@ tickets:
 | Piece | State |
 |---|---|
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
-| U1a — VX-303 (the landing road) | NOT STARTED |
+| U1a — VX-303 (the landing road) | IN-PROGRESS — piece 1 (seams, behavior-neutral) committed; piece 2 (the doors carry her place) next; the edit-here rider awaits a design ruling (U1a RECORD, R-1). Record: §U1a RECORD below |
 | U1b — VX-304 (the box door + Index takes) | NOT STARTED |
 | U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | NOT STARTED |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
 | Closeout (canon deltas, tickets, PR, handoff) | NOT STARTED |
+
+## U1a RECORD — VX-303 (implementer: opus-implementer, 2026-10-18)
+
+**Not done yet (kept current):** piece 2 (the doors carry her place), the pins, the edit-here rider (design fork
+R-1 below, awaiting the orchestrator's ruling), the Mac batch (PENDING the `vx-382-u1a` window).
+
+### The trace, re-verified on the tip (a87980768)
+
+- The five doors: `BookView.swift` ~:2710 (expanded header), ~:2734 / ~:2765 (collapsed card body / its open ↗),
+  `BookIndexView.swift` ~:934, `SpreadBookView.swift` ~:335 — each posted `.variorumOpenPost` with the note id only;
+  `RootView` (~:454) turned it into `router.pendingSelection = .post(id)` → `adopt` with no landing → a plain open, so
+  R-18l-1's first-open rule showed the note's START in its remembered mode. Confirmed by reading.
+- The road: `BookView.onOpenSearchHit` → `RootView` (~:1274) `open(.post, blockID:, find:, in: pane)` →
+  `ShellRouter.adopt(landing:)` parks a `BlockLanding` → `PostDetailView(initialBlockID:)` → `jump(to:)`, which reads
+  the block's start in `Queries.renderPost` and forces `mode = .write`. `BlockLanding` carried no offset.
+- Her place: Outline/spread mount the book's one editor (`BookViewModel.liveFocusedPostID`); `EditorRouter.editing`
+  is the editor under the caret and `EditorViewModel.caretIdentity()` (existing, read-only) gives (block, offset).
+  Index: `BookIndexEditModel.liveBlockID`/`livePostID`; its live `PaneSurfaceView` passed no `onSelectionChange`, so
+  nothing reported the pane's caret.
+- The rider: `CommandRouter.noteFocusedBlock` (~:247) returns at `guard activePostID == postID` — in a book no detail
+  is registered, so book carets never reach `CurrentBlockMemory`; `BookView.editHere` (~:1131) reads
+  `currentBlock(for:)` = the note's OWN editor's memory. "edit here" renders only in the box's `.selected` state
+  (`SidebarNoteBox.editDoor`), i.e. exactly when NO note is live — so "the same place" as the doors' (a LIVE place)
+  is always nil at that moment: the rider needs the book's place REMEMBERED past the live state. That is R-1.
+
+### Pieces
+
+1. **Seams, behavior-neutral** (commit below): `ShellRouter.BlockLanding.offsetInBlock` + `adopt(…offset:)` +
+   `landingOffset(for:)` (parked/expired/spent with the landing, `landingFind`'s shape); `PostDetailView
+   .initialOffsetInBlock` + `jump(to:offsetInBlock:find:)` via the pure `PostDetailView.landingOffset` (clamped to the
+   block's length; nil = the block's start, every existing road unchanged); `RootView`'s road widened; the pure brain
+   `Features/BookView/BookOpenDoor.swift` (not yet consulted); the Index's live block + pane caret reported to
+   `BookViewModel` (`noteIndexLiveBlock` / `noteIndexCaret`, `@ObservationIgnored`; the pane's existing
+   `onSelectionChange` consumed — no `PaneSurface` edit); the five buttons now call ONE function,
+   `BookView.openInWrite(_:)`, whose body is TODAY'S broadcast (so this commit changes no behavior), published in
+   DEBUG as `BookOutlineGeometry.openDoors` (the focus door's pattern) for the pins.
+2. **The doors carry her place** — NEXT: `openInWrite` consults `BookOpenDoor.place`, flushes the note's pending
+   typing (`flushExistingAutosave` — the store must hold the text the caret's offset is measured in before `jump`
+   reads it), and rides `onOpenSearchHit(postID, block, offset, nil)`; nothing live ⇒ the same road with no block
+   (a plain open). Red-on-old = revert THIS piece's commit alone (piece 1 keeps every seam the pins call).
+
+### R-1 — the edit-here rider's design fork (PROPOSED to the orchestrator; NOT built)
+
+The plan says "fix with the same place", but at the press of "edit here" nothing is live (above), so the book's
+place must be REMEMBERED. Where it lives is not decided by the plan:
+
+- **(A) — recommended.** `CommandRouter.noteFocusedBlock`: a report for a note OTHER than the active detail's feeds
+  the per-note MEMORY (`currentBlocks.remember`) and nothing else — the observed identity and its offset stay the
+  active detail's (the guard's documented purpose: "a background pane's caret is not 'the block you're in' for the
+  panel beside the foreground one"). Plus the Index's live pane reports through the same door (ReadEditPane's
+  precedent). Then `editHere` (which already reads `currentBlock(for:)`) and the Index landing's entry caret
+  (`PaneCaretLanding.entering`) land where she was in the book, with no new state. Spec ground: `CurrentBlockMemory`'s
+  own doctrine — ONE current block per note, every surface reports, every mode enters on it. Visible side effect (the
+  reason it is a ruling, not a fix): R-18l-1's RE-open this run (`sessionFact`) would also restore a place she last
+  had in the book (or in a Compare/Lenses peer column) — arguably exactly "restores where you were", but it reaches a
+  door outside the book.
+- **(B)** A book-scoped memory on `BookViewModel` (per note, session-only), fed by the Index pane's report and, for
+  Outline/spread, by a NEW caret callback out of the inline `EditorView`/`EditorViewModel` (the book cannot hear the
+  editor's caret offset otherwise without sampling it at transitions, which races the editor's teardown). No effect
+  outside the book; costs an editor-adjacent hook.
+- **(C)** Leave the rider as recorded and fold it into VX-304/VX-300 (the box's own door redesign).

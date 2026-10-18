@@ -25,6 +25,9 @@ struct PostDetailView: View {
     /// Stage C: a caret-precise landing (palette/Library block hits) —
     /// the Write editor opens with its caret seeded at this block.
     var initialBlockID: String? = nil
+    /// VX-303: where INSIDE that block the caret lands (UTF-16) — a book's
+    /// open door carries her caret. nil = the block's start, as before.
+    var initialOffsetInBlock: Int? = nil
     /// 13o U2 (D6 — land-at-match): a search passage's matched words, riding
     /// the block landing — the arriving Write editor selects the match and
     /// arms the find bar (`EditorFindSeed`). nil for every other landing.
@@ -546,7 +549,9 @@ struct PostDetailView: View {
         // no detail mounted SPEAKS instead of vanishing).
         .onAppear {
             mode = Self.rememberedMode(postID: postID)
-            if let initialBlockID { jump(to: initialBlockID, find: initialFind) }
+            if let initialBlockID {
+                jump(to: initialBlockID, offsetInBlock: initialOffsetInBlock, find: initialFind)
+            }
             let binding = $mode
             let panel = $inspectorPanel
             let tagField = $tagFieldOpen
@@ -1008,14 +1013,29 @@ struct PostDetailView: View {
 
     /// `find` (13o U2, D6): a search passage's landing seeds the match too;
     /// every other road names none, which also clears a seed left standing.
-    private func jump(to blockID: String, find: EditorFindSeed? = nil) {
+    ///
+    /// `offsetInBlock` (VX-303): a book's open door lands at her CARET inside
+    /// the block, not its first character. Clamped to the block's length as
+    /// the store holds it now — the doors flush her pending typing first, and
+    /// a block that shrank since must never push the caret into the next one
+    /// (`EditorViewModel.rememberedArrivalLanding`'s own clamp, one road over).
+    /// nil — every other road — is the block's start, as before.
+    nonisolated static func landingOffset(blockRange: NSRange, offsetInBlock: Int?) -> Int {
+        blockRange.location + min(max(0, offsetInBlock ?? 0), blockRange.length)
+    }
+
+    private func jump(
+        to blockID: String, offsetInBlock: Int? = nil, find: EditorFindSeed? = nil
+    ) {
         Task {
             let offset: Int? = try? await session.database.read { [postID] db in
                 let slots = try Queries.renderPost(db, containerID: postID)
                 guard let i = slots.firstIndex(where: { $0.blockID == blockID }) else {
                     return nil
                 }
-                return BlockRangeIndex(slots: slots, tail: nil).range(ofEntryAt: i).location
+                return Self.landingOffset(
+                    blockRange: BlockRangeIndex(slots: slots, tail: nil).range(ofEntryAt: i),
+                    offsetInBlock: offsetInBlock)
             }
             // Set BEFORE the caret: the caret is what re-keys the editor, and
             // the new editor must be born holding both seeds.

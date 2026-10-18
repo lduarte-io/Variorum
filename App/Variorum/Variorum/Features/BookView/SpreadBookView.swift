@@ -61,6 +61,10 @@ struct SpreadBookView: View {
     /// bar, so its trailing end hosts the quiet receipt — when
     /// `BookNoteBox.quietReceiptHome` says so (one receipt never draws twice).
     var hostsQuietReceipt: Bool = true
+    /// VX-303: the page header's "open ↗" — the book's ONE open door
+    /// (`BookView.openInWrite`), which carries her place in that note. A host
+    /// without the book's road (a pin over the spread alone) passes nothing.
+    var onOpenInWrite: (String) -> Void = { _ in }
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -131,7 +135,7 @@ struct SpreadBookView: View {
         if let entry {
             SpreadPage(
                 session: session, model: model, entry: entry, tokens: tokens,
-                chapter: chapterName(entry))
+                chapter: chapterName(entry), onOpenInWrite: onOpenInWrite)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             // The blank leaf: an odd book ends on a single page rather than
@@ -281,16 +285,19 @@ private struct SpreadPage: View {
     let entry: Queries.ReadingEntry
     let tokens: VoiceTokens
     let chapter: String?
+    /// VX-303: the header's "open ↗" (`BookView.openInWrite`).
+    let onOpenInWrite: (String) -> Void
 
     init(
         session: AppSession, model: BookViewModel, entry: Queries.ReadingEntry,
-        tokens: VoiceTokens, chapter: String?
+        tokens: VoiceTokens, chapter: String?, onOpenInWrite: @escaping (String) -> Void
     ) {
         self.session = session
         self.model = model
         self.entry = entry
         self.tokens = tokens
         self.chapter = chapter
+        self.onOpenInWrite = onOpenInWrite
         #if DEBUG
         BookSpreadMaterialization.count += 1
         #endif
@@ -332,11 +339,8 @@ private struct SpreadPage: View {
                 }
             }
             Spacer()
-            Button(tokens.chromeLabel("open ↗")) {
-                NotificationCenter.default.post(
-                    name: .variorumOpenPost, object: nil,
-                    userInfo: ["postID": entry.postID])
-            }
+            // VX-303: the book's ONE open door — her place rides it.
+            Button(tokens.chromeLabel("open ↗")) { onOpenInWrite(entry.postID) }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
             .help("Open this note in the full editor (Write · Takes · Lenses · …)")
         }

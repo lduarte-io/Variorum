@@ -1120,6 +1120,23 @@ final class BookViewModel {
         indexLivePostID = postID
     }
 
+    /// **VX-303 — the Index's live BLOCK and its pane's CARET**, reported the
+    /// same way its live note is, for the open doors (`BookOpenDoor`): the
+    /// block the one live pane holds, and the last caret that pane reported
+    /// (`PaneSurfaceView.onSelectionChange` — consumed, never changed), with
+    /// the block it reported from. Read only at a door's press, so neither is
+    /// observed: a caret walking inside a block wakes nobody.
+    @ObservationIgnored private(set) var indexLiveBlockID: String?
+    @ObservationIgnored private(set) var indexCaret: (postID: String, place: BookOpenDoor.Place)?
+
+    func noteIndexLiveBlock(_ blockID: String?) {
+        indexLiveBlockID = blockID
+    }
+
+    func noteIndexCaret(postID: String, blockID: String, offsetInBlock: Int) {
+        indexCaret = (postID, BookOpenDoor.Place(blockID: blockID, offsetInBlock: offsetInBlock))
+    }
+
     // MARK: - 18o U4 (R-18k-6) — the note she LEAVES inside the book
 
     /// The note her caret was last in (`BookNoteTrail` holds the rule).

@@ -155,6 +155,15 @@ final class ShellRouter {
     struct BlockLanding: Equatable, Sendable {
         let containerID: String
         let blockID: String
+        /// **VX-303 — where INSIDE the block the caret lands** (UTF-16, the
+        /// offset the editors report). A book's open door carries her caret
+        /// here, so Write opens where she was writing rather than at the
+        /// block's first character. nil = the block's START, which is every
+        /// other door's landing exactly as before (a search passage lands on
+        /// its match through `find`; the rest name a block and nothing more).
+        /// Clamped to the block's length where it lands (`PostDetailView.jump`),
+        /// never here: the block may have changed since the door read it.
+        var offsetInBlock: Int? = nil
         /// 13o U2 (D6 — land-at-match): a search passage's matched words,
         /// riding the landing they belong to — parked, expired and spent
         /// WITH it (never a second park that could outlive its block).
@@ -164,19 +173,27 @@ final class ShellRouter {
         /// that can hold one and a block was actually named. Living here is
         /// what lets the one adoption door take a `String?` and still be the
         /// only place the pair is assembled.
-        init?(_ destination: SidebarSelection, blockID: String?, find: EditorFindSeed? = nil) {
+        init?(
+            _ destination: SidebarSelection, blockID: String?, offsetInBlock: Int? = nil,
+            find: EditorFindSeed? = nil
+        ) {
             guard let blockID else { return nil }
             switch destination {
             case .post(let id), .pool(let id):
-                self.init(containerID: id, blockID: blockID, find: find)
+                self.init(
+                    containerID: id, blockID: blockID, offsetInBlock: offsetInBlock, find: find)
             default:
                 return nil
             }
         }
 
-        init(containerID: String, blockID: String, find: EditorFindSeed? = nil) {
+        init(
+            containerID: String, blockID: String, offsetInBlock: Int? = nil,
+            find: EditorFindSeed? = nil
+        ) {
             self.containerID = containerID
             self.blockID = blockID
+            self.offsetInBlock = offsetInBlock
             self.find = find
         }
     }
@@ -236,15 +253,24 @@ final class ShellRouter {
         _ destination: SidebarSelection,
         in pane: PaneID? = nil,
         landing blockID: String? = nil,
+        offset offsetInBlock: Int? = nil,
         find: EditorFindSeed? = nil
     ) -> WorkspaceModel.SelectionOutcome {
-        park(BlockLanding(destination, blockID: blockID, find: find))
+        park(BlockLanding(
+            destination, blockID: blockID, offsetInBlock: offsetInBlock, find: find))
         return workspace.select(destination, in: pane)
     }
 
     /// What a mounting container should land on, if this park is its own.
     func landing(for containerID: String) -> String? {
         blockLanding?.containerID == containerID ? blockLanding?.blockID : nil
+    }
+
+    /// VX-303: the parked landing's caret offset inside its block, if the
+    /// park is this container's — the same park, so it is spent and expired
+    /// with it (`landingFind`'s shape exactly).
+    func landingOffset(for containerID: String) -> Int? {
+        blockLanding?.containerID == containerID ? blockLanding?.offsetInBlock : nil
     }
 
     /// The parked landing's find seed (13o U2, D6), if the park is this
