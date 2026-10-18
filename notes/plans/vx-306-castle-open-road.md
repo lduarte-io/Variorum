@@ -434,7 +434,7 @@ store this build has written — coordinators told.
   (the release-floor reds, Low). The ladder reads U1a with U1b.
 - U1b — the lobby on roads, Debug-gated (+ VX-310, the creation card, the Release check, the dev store's fresh start): DONE 2026-10-18 — built by the Opus implementer (`fdda1a67b`…`137281318`, the §9 U1b RECORD), the batch under `vx-306-u1b` 212/33 (3 known = VX-310's witnesses; the pin fix `2b6a866ad`), THE CONVERSION walked (the §9 U1b WALK RECORD; findings W-1…W-6, W-2 fixed in U2).
 - U2 — the honest faces (+ rule 3's reminder, the set-passphrase sheet, W-2's fix): BUILT 2026-10-18 (Opus implementer) — commits `d35b82290`…the close (the §9 U2 RECORD); `build-for-testing` and the phone build green on the final tree; the new pure and planted suites green HEADLESS (69 in the session harness), the core's protection set green in both configurations (315 / 291); the Mac suites (the record's list) and the walk (stages 2, 14, rule 1's restore, W-2's pair, rule 27 both moments) PENDING — the ORCHESTRATOR's, under the stage.
-- U3 — the two doors; the phone opens: not started.
+- U3 — the two doors; the phone opens: IN PROGRESS (Opus implementer, 2026-10-18; DerivedData `vx306-u3`) — the §9 U3 RECORD's LIVE STATUS carries each piece.
 - The ladder (Fable — custody code; her cap: up to five rounds while MAJORs are still found): not started.
 - Closeout: the words checked (VX-379's first pass — the Start Here chapter §7c); canon: AppSpec §12's LIBRARY
   PORTABILITY line (the doors replace 13x's landing wording); the handoff with HER-HANDS items (Look inside on a byte-copy
@@ -1626,3 +1626,25 @@ the sheet); the walk's Diagnostics lines (the reminder's showing, a dismissal's 
 - VX-379: every U2 string is in `ProtectionWords.swift`, pinned byte-equal to §7c.
 
 **Notes:** no machinery deaths; no Sonnet lookup; one scratch worktree (W-2's red-on-old at `e305daefd`), removed.
+
+### U3 RECORD — THE TWO DOORS: Look inside / Make this my library (+ the phone opens) (Opus implementer, 2026-10-18; IN PROGRESS)
+
+**Not done in U3, first:** PENDING (written at the record's close).
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece 0 — this record skeleton: DONE (this commit).
+- Piece 1 — the shared `CopyDoorsModel` (pure, testable) over the executor's two doors and the catalogue + the words §7c
+  (8)–(10) in `ProtectionWords.swift` + the plan-byte-equality pin: NOT-STARTED.
+- Piece 2 — MAKE THIS MY LIBRARY on a catalogued copy (Settings ▸ Data Safety's Restore list under the new road — the
+  catalogue's copies, newest first; the confirm §7c (8); the secrets the executor requires; the act with the pool CLOSED
+  through `AppBootstrap`'s adoption seam; the restore HOLD by the core writer; the reopen through the new road with the new
+  key in hand; the receipt §7c (9)) + pins: NOT-STARTED.
+- Piece 3 — A PICKED FOLDER under the new road (File ▸ Open Library…): filed first into `Backups/safety-copies/
+  variorum-adopt-safety-<stamp>/` (P-VX306-U3-0 (a)), then the doors on the catalogued copy; the plaintext export and the
+  empty slot: NOT-STARTED.
+- Piece 4 — LOOK INSIDE: the PROPOSAL (propose-then-rule; the build waits on the orchestrator's ruling): NOT-STARTED.
+- Piece 5 — THE PHONE: the switch on in the phone's Debug build (P-VX306-U1b-1 superseded); `MobileStoreLockView` renders
+  the lobby model, the creation card, the interlude and rule 27's face; the phone's pins; `build-for-testing`:
+  NOT-STARTED.
+- Piece 6 — the Mac `build-for-testing` + the record's close (the suites, the walk recipe, the PROVISIONALs):
+  NOT-STARTED.
