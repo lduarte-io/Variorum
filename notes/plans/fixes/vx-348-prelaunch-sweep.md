@@ -355,9 +355,10 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   rebuilt. **PENDING:** that one suite's re-run on u2-fixed (expected 13/13), the walk (both voices, every host), the
   QUESTIONS bundle (P-VX347-1…5).
 - **U3 (VX-350 · VX-349 · VX-176 — the Library's row and header):** BUILT — all three FIXED with pins (`a198c6fd5` VX-176 ·
-  `d16eb1933` VX-349 · `dda6ea9f3` + `8ac266063` + `7c3604726` VX-350); compiled; both Mac legs PREBUILT from durable
-  checkouts of `7c3604726` (`DerivedData/u3-fixed`, `DerivedData/u3-red`); **PENDING:** the Mac batch (red leg first —
-  the commands and expected reds in the U3 record), the walk (three widths × both voices, light and dark — the list in
+  `d16eb1933` VX-349 · `dda6ea9f3` + `8ac266063` + `7c3604726` VX-350); the batch RAN (red exact, every member pin green
+  — the U3 BATCH record) and its one red, the unit's own pure pin, is FIXED by the fix leg `e35c034fa` (whole-point
+  decision; headless replica green, red on the old rule); **PENDING:** the one-suite re-run
+  (`VX350ControlsWidthClassTests`, the next window, the final product), the walk (three widths × both voices, light and dark — the list in
   the record), the QUESTIONS bundle (P-VX176-1, P-VX349-1, P-VX350-1…7). The U3 UNIT RECORD carries the rest.
 - **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** NOT-STARTED.
 - Then the ladder (fresh Fable per round, whole diff), closeout, merge. **Her overnight mandate (2026-10-18):**
@@ -1560,9 +1561,10 @@ below) is PENDING the orchestrator's window.
 - **VX-349 (the doubled line under the List's first header at rest):** DONE (`d16eb1933`) — traced (half: the at-rest
   doubling is traced and fixed; "one line while scrolling" is consistent with the trace, never reproduced live — see its
   section), FIXED; pins compiled; RUN PENDING the batch.
-- **VX-350 (the Library at narrow widths):** DONE (`dda6ea9f3` · `8ac266063` · `7c3604726`) — FIXED; pins compiled; RUN PENDING the
+- **VX-350 (the Library at narrow widths):** DONE (`dda6ea9f3` · `8ac266063` · `7c3604726` · fix leg `e35c034fa`) — FIXED; pins compiled; RUN PENDING the
   batch; the walk PENDING (the list below).
-- **Products (u3-fixed / u3-red):** DONE — both PREBUILT from durable checkouts of `7c3604726` (paths, the revert patch,
+- **Products (u3-fixed / u3-red):** RAN at the orchestrator's U3 batch, then PRUNED with their checkouts (its record
+  below). Were PREBUILT from durable checkouts of `7c3604726` (paths, the revert patch,
   the confirmed recompiles, the commands and every expected red: "The Mac products" below). Their RUN is PENDING the
   orchestrator's batch (RED leg first). THIS worktree is never reverted.
 - **No behavioural revert is in flight in this worktree.**
@@ -1772,6 +1774,46 @@ worktree, which U2's fix leg shares, is never reverted and never built into a pr
   The opt-in rig suites (`LibraryListFaceRigTests`, `LibraryControlsU3cProbe`) skip by design. A red on
   `typingWithThePanelOpenNeverChangesTheLineCount` would be the one place the 🔍's "the field taking the keyboard opens
   it" meets VX-175's road (the panel-open default window is two lines, where `searchOpen` changes nothing — pinned pure).
+
+### THE U3 FIX LEG (VX-350 — the batch's one red, 2026-10-18)
+
+*The same implementer, resumed at the orchestrator's word (relayed by the coordinator) after the U3 batch: every member
+pin green and the red leg exact; the one red was this unit's own new pure pin `placingAtTheReportedWidthArrangesTheSameRow`
+(both voices) — Study at an offered 301.5 pt with the field open, "collapsed re-placed at 302.0".*
+
+**The trace (inputs → wrong state).** At 301.5 the collapsed flow fits the 🔍 and scope on one line using the half-point
+slack (28 + 10 + 264 = 302 ≤ 301.5 + 0.5), so the row's own width is 302 — and `7c3604726`'s report, `max(rowWidth,
+width)`, said 302. The placement pass re-decides at what the container places (`placeSubviews` at `bounds.width`): at 302
+the field's line is 302 wide where it was measured at 301.5 — the placed arrangement is not the measured one (Terminal the
+same at 299.5: 28 + 10 + 262 = 300). And a sub-point report meets the container's pixel rounding on top (the
+orchestrator's reading: 301.5 placed at 302.0) — any half-point delta at a break or class threshold could flip lines.
+
+**The fix (the deciding width identical in both passes — the orchestrator's first option, quantize).**
+`LibraryControlsFlowRule.decidingWidth(_:)` floors the offered width to a whole point (zero and an unbounded offer — the
+minimum and ideal queries — as they are), and `arrangeRow` decides AND arranges at it (every class: the class, VX-175's
+`arrange` for the wide ones, the flow's breaks, the field's line). A collapsed row reports exactly that whole point while
+its lines fit it, the slack included; only a row truly wider than its room (below its floor) reports its own width. A
+whole-point width is on every display's pixel grid, so the container places the row at what it reported, unrounded, and
+the placement pass floors the same number — the measured arrangement IS the placed one. Rejected: carrying the sizing
+decision through the Layout cache (the cache outlives property changes — `searchOpen` — and must pick among the min /
+ideal / real sizing calls; more machinery for the same guarantee). Consequence, said: at a FRACTIONAL offered width the
+wide classes arrange at the floor too — the row up to one point short of its room, the field up to a point narrower;
+at whole-point widths (every pin's, the default window's) VX-175's frames are unchanged.
+
+**The pin's expectation after the fix** (`VariorumTests/VX350ControlsWidthClassTests.swift`, strengthened in place —
+its meaning kept and widened): at every half-point width 270…1400, both voices, field open and closed, the row re-placed at
+its REPORTED width AND at that width snapped to the half-point and whole-point pixel grids arranges exactly the measured
+frames; a collapsed row's report is a whole point. NEW `theHalfPointPastAWholePointIsDecidedAtTheWholePoint` states the
+batch's case: offered 301.5 in Study with the field open ⇒ decided at 301, reports 301, the 🔍 and scope on lines of their
+own, the field 301 wide; at 302 the 🔍 beside scope, re-placed at its report unchanged. **Verified headless** (no stage —
+the rule is pure Swift): every assertion of `VX350ControlsWidthClassTests` replicated against the rule compiled standalone
+from the fixed source — ALL PASS; the same harness against `7c3604726`'s rule FAILS at every collapsed half-point width
+(the report 270.5, 271.5 … and their pixel-rounded re-placements) — the strengthened pin bites on the pre-fix rule.
+
+**PENDING (nothing rebuilt here, by the orchestrator's word):** the one-suite re-run — `VX350ControlsWidthClassTests` —
+rides the next stage window on the run's final product (the old u3 products and checkouts are pruned; the walk-era build
+covers it). Expected: all green. The mounted VX-350 / VX-175 cells measure at whole-point widths, so the floor changes
+nothing they read.
 
 ### What the walk must show (the orchestrator's window — the dev store, BOTH voices, light and dark Terminal)
 
