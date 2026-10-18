@@ -269,6 +269,21 @@ set), the Protection tests, and the new `App/Variorum/Shared/Protection/` folder
   typed → open; the Touch ID rows per VX-310 as far as this Mac's enrollment allows (the Pro has Touch ID hardware; the
   enrolled state is whatever it is — record it).
 
+- **Hand-forwards from U1a (read its §9 record first):** `KeychainCustodyLeaf.lastPress` is the lobby's `TouchIDPress`
+  fact (`ProtectionSystem.facts` reads it); `FileBackupsLeaf.copiesArePaused` is what the `onRun` hook honours; the
+  "library lived here" marker is the file `variorum-library-lived-here` beside the slot, written by `createLibrary`
+  (P-VX306-U1a-1); a non-format-3 file in the live place makes `unlock` THROW (P-VX306-U1a-2 — the route must catch it and
+  show the lobby with the typed roads, never crash; U2 gives it a face); an unlistable keychain makes gathering throw
+  (P-VX306-U1a-3 — the route catches `GatherError` and shows the lobby's typed field with a one-line reason, PROVISIONAL);
+  Touch ID items are found by name over `touchIDCandidates` (P-VX306-U1a-5 — the composition root feeds them); the
+  composition root is `ProtectionSystem` (compose it once per open on the main actor; `deviceName` is main-actor on iOS).
+  The dev scope's store variant raw value is the scope (`AppDatabase.StoreVariant.dev` = `Variorum-dev`).
+- **The walk's Touch ID rows settle U1a's one Unknown:** whether the non-prompting existence probe truly never prompts
+  with a real `.biometryCurrentSet` item present — the walk makes a Touch ID item impossible this phase (no Castle entry),
+  so the row reads: with NO Touch ID item, the lobby shows no button and the quiet line; the probe's no-prompt claim
+  stays on `KeychainLeavesTests.aTouchIDItemIsListedByNameAndNeverPressed` where a finger is enrolled. Say which in the
+  record.
+
 **U1b evidence:** the walk above with captures; the pins (the switch, the lobby model on `LobbyRoads`/`TouchIDAssessment`
 from planted facts — pure, no keychain; VX-310's two red-on-old pins); the Release check; the Mac suites that exercise
 every changed source file green under the stage.
