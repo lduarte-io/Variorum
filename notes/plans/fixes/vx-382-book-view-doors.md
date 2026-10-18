@@ -271,10 +271,12 @@ not built); red-on-old and the Mac batch (PENDING the `vx-382-u1a` window). No w
 
 ### Recorded edges (not fixed here)
 
-- **VX-360's seam, touched not fixed:** the door rides `ShellRouter.adopt` once per press, after one `await` (the
-  flush); a SECOND navigation adopted in the same frame (another door, a broadcast) replaces the park
-  (`park` keeps one landing) — the last adopt wins and the first landing is dropped, as on every block-naming door.
-  The flush's hop widens that window by one turn for a door carrying a place.
+- **VX-360's seam, touched not fixed** (`pendingSelection`'s `onChange` writes its own value, so the second of two
+  requests in one frame is dropped): the doors no longer ride `pendingSelection` — they call `RootView.open` →
+  `ShellRouter.adopt` directly, as the search passages do — so a door's OWN request is outside that drop. Where a
+  door's landing can still be lost: a `pendingSelection` request (⌘K, a broadcast, back/forward) adopted in the same
+  frame AFTER the door's adopt expires its park (rule one — a navigation expires the park) and the later navigation
+  wins; a door carrying a place awaits one flush before its adopt, which widens that window by a turn.
 - **The collapsed card's two doors are always plain opens** (focus implies expansion, so its note is never live) —
   their coverage is the mount pin's "another note" arm, a non-regression line, not red-on-old.
 - **Spread in its Takes form:** the active page mounts the takes board, not an `EditorViewModel`, so no editor is
