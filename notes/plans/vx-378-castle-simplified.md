@@ -1780,6 +1780,23 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
   revoked; L3). Her narrower framing — Castle protects from entry forward, pre-entry backups keep whatever roads they had — is a
   rule 11 rewording and a promise-1 loosening, not a code need; the built sweep stays correct under either reading (it deletes
   what the app can see). Options put to her in the reply; the ruling lands here.
+  **Her second message:** *"we do say that when you leave castle you're making all of your castle backups potentially vulnerable.
+  going back into castle doesn't necessarily fix that. so I'm not terribly concerned about this consistency wise - do you agree
+  with that reading? or do you think this is a genuinely broader attack vector that I'm not seeing? I think that even if we do
+  rule 11 and keep the fix, our promise isn't that much weaker since it's true outside of the app folders too. … what if someone
+  just has a standard library that they sometimes switch to? could it mess things up for that standard library to have this
+  sweep and delete of unrelated keys?"* The orchestrator's advice (verified against `CommonSteps.retireOldCustody` /
+  `retireOwnAppleKeys`, `AppleKeyRecord`, rule 17): (1) agree — re-entry closes the ON-DEVICE roads (the only quiet roads a
+  Standard-era backup has) and can never revoke a key copied out during the Standard stretch; seed 3 is a rollback corner of
+  the on-device case, and the fix narrows it to "what the app's own folders name" — a hand-stashed key file whose key the live
+  history forgot leaves the same shape of hole, so the promise's KIND is unchanged with or without the fix; (2) the sweep is
+  scoped by libraryID for custody items (keys are per library; a stepped-aside library's items keep their own fingerprints) and
+  by this library's own record and catalogued files for Apple keys (an Apple key is "minted by this Mac for the library" — per
+  Mac per library, never shared), so another library's quiet roads survive — rule 17's Look-inside road for a Previous Library
+  is exactly what option (b) would have broken and (a) preserves; the ONE cross-library touch is the silent SYNC-KEYS item of an
+  account this library doesn't name (census class L), whose cost is one typed secret at a later Turn on sync, never access;
+  (3) a complete closure exists for VX-306's production keychain leaf if wanted — items tagged with their libraryID, the entry
+  sweeping every silent item OF THIS LIBRARY whatever the files remember — offered, not recommended now.
 
 ## 9. The ladder (a fresh Fable reviewer per round, `notes/REVIEW_PROMPT.md` verbatim, zero framing; her cap: up to five rounds while a MAJOR is still found; a round that stalls on a safeguard reruns as Opus at max — none did)
 
