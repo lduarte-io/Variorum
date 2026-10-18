@@ -56,9 +56,12 @@ struct MCPAdviceServerTests {
         // names the copy road (duplicate_note) — and the paging clause names
         // ONE parameter, read_note's ids_only, which must be a declared input
         // of read_note (a parameter is not a tool).
+        // VX-392 (VX-348 U5 adjudication — A JUSTIFIED EDIT, the ritual): the
+        // grants clause says where a wing_id comes from (list_wings), per
+        // R-VX348-5's "the instructions point at it".
         let parameters: Set<String> = ["ids_only"]
         #expect(Set(names) == Set(["read_note", "show_in_app", "list_books", "move_note_to_wing",
-                                   "list_my_activity", "duplicate_note"]).union(parameters),
+                                   "list_my_activity", "duplicate_note", "list_wings"]).union(parameters),
                 "the tools and parameters it names: \(names)")
         for name in Set(names).subtracting(parameters).union(["search"]) {
             #expect(MCPToolCatalog.declaration(named: name) != nil, "\(name) is a declared tool")

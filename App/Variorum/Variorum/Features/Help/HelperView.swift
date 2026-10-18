@@ -85,8 +85,10 @@ struct HelperView: View {
             // 13s-b U4 (R-13s-31): the definition rides the app's plain
             // gloss, the saved moment — "commit" defining itself would read
             // twice (her R-13s-32 note; PROVISIONAL P-U4-1).
+            // VX-347 (PROVISIONAL words, P-VX347-4): every way out of the
+            // field but ⎋ commits, so ⏎ is no longer the only road.
             ("⌘S", "commit — an immutable saved moment of the take you're in; "
-                + "name it or press ⏎ to save it unnamed"),
+                + "name it or press ⏎ — any way out of the field but ⎋ commits it"),
             // The post-13l polish round (rows 16/23): the pairing IS the
             // lesson — this take's moment, and this note's.
             ("⌘⇧S", "save a version — the whole note as it is, in Versions"),
@@ -426,8 +428,10 @@ struct HelperView: View {
          + "Make Block (⌘⇧K) does the same for a middle span. Both work from Takes — "
          + "select in your take, and the app carries the selection to Write and acts."),
         ("commit",
+         // VX-347 (PROVISIONAL words, P-VX347-4): leaving the field commits.
          "An immutable saved moment of one take (⌘S). It can carry a NAME — ⌘S "
-         + "offers a field, ⏎ saves it named or not — and the name is editable "
+         + "offers a field, ⏎ saves it named or not, and so does any other way out "
+         + "of the field but ⎋ — and the name is editable "
          + "afterwards from Block History. Commits are append-only: restoring "
          + "one never erases another, and a name never touches the text."),
         ("seal",

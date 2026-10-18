@@ -43,7 +43,7 @@ struct MigrationTests {
         // VX-258 (A JUSTIFIED EDIT, the ritual — VX-246 U1): v1_28's waiting
         // re-binds join the local-only grants family.
         "mcp_rebind_request",
-        // VX-306 U1a (A JUSTIFIED EDIT, the ritual): v1_30's protection
+        // VX-306 U1a (A JUSTIFIED EDIT, the ritual): v1_31's protection
         // record — LOCAL-ONLY by registration (`SyncSchema.localOnlyTables`).
         "protection_record",
     ]
@@ -94,6 +94,9 @@ struct MigrationTests {
         // VX-258 (A JUSTIFIED EDIT, the ritual): v1_28's one wait per client
         // and one per key.
         "uq_mcp_rebind_request_client", "uq_mcp_rebind_request_key",
+        // VX-393 (A JUSTIFIED EDIT, the ritual — VX-348 U5): v1_30's one live
+        // standing grant per client × place.
+        "uq_mcp_grant_standing_place",
     ]
 
     // Tables synced to the server — all carry sync_version (AppSpec §6).
@@ -169,14 +172,16 @@ struct MigrationTests {
         // 13i-a: the full chain past v1_16 now adds v1_17's day-search
         // index AND v1_18's shelf-order index; 13o: v1_22's two; 13n-b:
         // v1_24's two grants-store indexes; VX-168: v1_26's two; VX-258 (A
-        // JUSTIFIED EDIT, the ritual): v1_28's two.
+        // JUSTIFIED EDIT, the ritual): v1_28's two. VX-393 (A JUSTIFIED EDIT,
+        // the ritual — VX-348 U5): v1_30's one.
         #expect(after.subtracting(before) == [
             "idx_commit_created", "idx_shelf_wing",
             "uq_search_doc_src", "idx_container_undated_created",
             "uq_mcp_client_name", "idx_mcp_grant_client",
             "uq_mcp_client_setup_key", "idx_mcp_setup_key_minted",
             "uq_mcp_rebind_request_client", "uq_mcp_rebind_request_key",
-        ], "v1_17 + v1_18 + v1_22 + v1_24 + v1_26 + v1_28 add exactly these indexes")
+            "uq_mcp_grant_standing_place",
+        ], "v1_17 + v1_18 + v1_22 + v1_24 + v1_26 + v1_28 + v1_30 add exactly these indexes")
         #expect(after == Self.expectedIndexes)
     }
 

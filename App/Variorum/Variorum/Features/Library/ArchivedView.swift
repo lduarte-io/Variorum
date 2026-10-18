@@ -327,6 +327,8 @@ struct ArchivedView: View {
                     HStack(spacing: 6) {
                         if let date = item.entryDate {
                             Text(date).font(tokens.small).foregroundStyle(tokens.muted)
+                                // VX-351: the stated day, whole (its year).
+                                .stampHelp(TimeStampFace.tooltip(.dated, day: date))
                         }
                         if let stamp = TrayRowPreview.stampText(item.stamp, verb: "archived") {
                             Text(stamp).font(tokens.small).foregroundStyle(tokens.faint)

@@ -349,8 +349,9 @@ struct TakesBottomBar: View {
         .savepointNameAsk(
             Binding(get: { model.savepointAsk }, set: { model.savepointAsk = $0 }),
             tokens: tokens
-        ) { _, name in
-            Task { await model.fileSavepoint(named: name) }
+        ) { pending, name in
+            // VX-347: the take ⌘S ASKED about, whichever way the field was left.
+            Task { await model.fileSavepoint(pending, named: name) }
         }
     }
 
@@ -381,13 +382,14 @@ struct TakesBottomBar: View {
         .help("A new take on the block you're in, branched from what's shown (⌘T)")
         Button(tokens.chromeLabel("commit ⌘S")) {
             // 13u3 UNIT D (item 14): the door summons the optional name;
-            // ⏎ on the empty field files what it has always filed.
+            // VX-347: leaving the field any way but ⎋ files the commit.
             model.askSavepointName()
         }
         .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
         .disabled(model.projection.sealed)
-        .help("An immutable saved moment of the take you're in — name it, or "
-            + "press ⏎ to save it unnamed")
+        // VX-347 (PROVISIONAL words, P-VX347-4): leaving commits, ⎋ doesn't.
+        .help("An immutable saved moment of the take you're in — name it if you "
+            + "like; leaving the field commits it, only ⎋ doesn't")
         // Ledger row 17 — the pair, Write's bar's twin. Never disabled: a
         // sealed note's history is still readable (the seal freezes writing,
         // not looking), and with no block in reach the act SPEAKS (P-2).

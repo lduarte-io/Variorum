@@ -294,6 +294,11 @@ nonisolated enum DeletedTakeFace {
         return ["deleted " + deletedAt.formatted(date: .abbreviated, time: .omitted)]
     }
 
+    /// VX-351: the lead's hover — *Deleted Oct 13, 2026 at 4:02 PM*.
+    static func leadHelp(_ take: Variant) -> String? {
+        take.deletedAt.map { TimeStampFace.tooltip(labelled: "Deleted", date: $0) }
+    }
+
     static func clockSlot(_ take: Variant, now: Date) -> String? {
         guard let deletedAt = take.deletedAt else { return nil }
         // The window's own arithmetic, over the ONE canonical stamp shape the
@@ -353,6 +358,16 @@ nonisolated enum TrayRowPreview {
     static func stampTextDateOnly(_ stamp: String, verb: String) -> String? {
         guard let date = DateFormatter.variorumISO8601.date(from: stamp) else { return nil }
         return "\(verb) \(date.formatted(date: .abbreviated, time: .omitted))"
+    }
+
+    /// **A date-only stamp's hover — the whole fact** (VX-351 — the VX-348
+    /// run, U4; her R-VX348-1/3): *Deleted Oct 13, 2026 at 4:02 PM* — the
+    /// row keeps its date-only glance (row 63's ruling); the minute is one
+    /// hover away. The verb is the row's own, capitalised; nil on the same
+    /// terms as `stampText`.
+    static func stampHelp(_ stamp: String?, verb: String) -> String? {
+        guard let stamp, DateFormatter.variorumISO8601.date(from: stamp) != nil else { return nil }
+        return TimeStampFace.tooltip(labelled: verb.capitalized, iso: stamp)
     }
 }
 
@@ -434,6 +449,14 @@ nonisolated enum OriginPeekCopy {
     static func stamp(_ raw: String) -> String? {
         guard let date = DateFormatter.variorumISO8601.date(from: raw) else { return nil }
         return date.formatted(date: .abbreviated, time: .omitted)
+    }
+
+    /// **The lineage row's hover — the whole fact, verbless** (VX-351): the
+    /// row's own words name the act ("From a divide on Aug 12 …"), so the
+    /// hover adds only what the date-only glance leaves out — *Aug 12, 2026
+    /// at 6:30 AM*. nil on the same terms as `stamp`.
+    static func lineageHelp(at raw: String) -> String? {
+        DateFormatter.variorumISO8601.date(from: raw).map { TimeStampFace.whole($0) }
     }
 }
 

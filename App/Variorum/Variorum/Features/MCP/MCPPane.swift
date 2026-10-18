@@ -505,6 +505,15 @@ struct MCPPane: View {
         formatter.dateTimeStyle = .named
         return formatter.localizedString(for: date, relativeTo: now)
     }
+
+    /// **The hover of a relative stamp — the whole fact** (VX-351 — the
+    /// VX-348 run, U4; her R-VX348-1/3): *Oct 18, 2026 at 4:02 PM*, verbless,
+    /// because the line beside it already names the act (an AI's act on her
+    /// writing; an ask waiting on it). The one stamp brain's words
+    /// (`TimeStampFace.whole`); nil for a stamp that is not one.
+    static func whole(_ stamp: String) -> String? {
+        DateFormatter.variorumISO8601.date(from: stamp).map { TimeStampFace.whole($0) }
+    }
 }
 
 /// **One waiting ask in Settings ▸ MCP ▸ Waiting** (13n-c U4; mockup §4's
@@ -531,6 +540,8 @@ struct MCPWaitingRowView: View {
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
+                // VX-351: the age hovers its whole fact (the line names the ask).
+                .help(TimeStampFace.whole(entry.askedAt))
             }
             Spacer(minLength: 0)
             Button(CapabilityRegistry.capability(.mcpOpenAsk).verb, action: answer)
@@ -916,6 +927,8 @@ struct MCPActivityRowView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
+                // VX-351: the act's whole fact on hover (the line names the act).
+                .stampHelp(MCPPane.whole(line.at))
         }
     }
 }

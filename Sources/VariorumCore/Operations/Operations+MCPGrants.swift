@@ -152,6 +152,10 @@ extension Operations {
     /// book grant there would reach nothing; a journal-TRAIT book is a book
     /// like any other since 13n-c's VX-163), and an "always" grant on a
     /// fenced note (the ask never offers it — R-13n-4).
+    ///
+    /// VX-393 (R-VX348-6): a standing grant on a place the client already
+    /// holds a standing grant on REPLACES it (`insertMCPGrant` — every
+    /// minting road shares it), so Shared with AI shows the place once.
     @discardableResult
     public func grantMCPAccess(_ clientID: String, _ spec: MCPGrantSpec) throws -> String {
         try database.write { db in
@@ -270,6 +274,26 @@ extension Operations {
             guard spec.scopeID.isEmpty || liveWing else {
                 throw OperationError.mcpGrantScopeNotFound(kind: spec.scopeKind.rawValue, id: spec.scopeID)
             }
+        }
+        // VX-393 (VX-348 U5 — her ruling R-VX348-6, "Upgrade in place"): ONE
+        // row per client × place. A STANDING grant (while connected · always)
+        // REPLACES the client's standing row on this place — revoked on THIS
+        // act's stamp, in this transaction, before the insert — on every road
+        // that mints (Change…'s semantics, applied everywhere: the sheet's new
+        // grant, ⌥⌘A, an ask's answer, approve-with-grant, the bulk share), so
+        // the new grant is the place's whole standing reach, a lower rung or a
+        // shorter duration included (PROVISIONAL P-VX393-1), and revoking that
+        // one row leaves nothing behind. A ONCE grant is one act's permission,
+        // not a standing row: it neither replaces nor is replaced (P-VX393-3).
+        // `uq_mcp_grant_standing_place` (v1_30) refuses any road that forgets.
+        if spec.duration != .once {
+            try db.execute(
+                sql: """
+                    UPDATE mcp_grant SET revoked_at = ?
+                    WHERE client_id = ? AND scope_kind = ? AND scope_id = ? AND revoked_at IS NULL
+                      AND duration IN ('connection', 'always')
+                    """,
+                arguments: [now, clientID, spec.scopeKind.rawValue, spec.scopeID])
         }
         let id = newID()
         try db.execute(

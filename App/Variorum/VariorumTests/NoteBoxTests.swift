@@ -213,18 +213,25 @@ struct NoteBoxCopyTests {
         #expect(NoteBoxCopy.countsLine(words: 0, blocks: 0) == "0 words · 0 blocks")
     }
 
-    /// The stamps line is DATE-ONLY (the recovery family's rule: glanceable,
-    /// never forensic), and it says only what it knows.
-    @Test func theStampsLineIsDateOnlyAndOmitsWhatItDoesNotKnow() {
+    /// The stamps line speaks the ONE stamp rule's glance words, and it says
+    /// only what it knows.
+    ///
+    /// VX-351 (the VX-348 run, U4 — her R-VX348-1/3), a JUSTIFIED EDIT: this
+    /// pin was "DATE-ONLY … no time of day, ever" — the old rule her ruling
+    /// retires (a note edited a minute ago read "edited Aug 29" here while
+    /// every other stamp said "today 9:20 PM"). Today's edit carries its time;
+    /// a day past today carries none (the glances stay calm).
+    @Test func theStampsLineSpeaksTheGlanceRuleAndOmitsWhatItDoesNotKnow() {
         let edited = Date(timeIntervalSince1970: 1_788_000_000)
         let saved = Date(timeIntervalSince1970: 1_787_800_000)
         let both = NoteBoxCopy.stampsLine(
             edited: edited, saved: saved, now: now, calendar: calendar, locale: locale)
         #expect(both != nil)
-        #expect(both?.hasPrefix("edited ") == true)
+        #expect(both?.hasPrefix("edited today ") == true, "\(both ?? "nil")")
         #expect(both?.contains(" · saved ") == true)
-        // No time of day, ever.
-        #expect(both?.contains(":") == false)
+        // Today's edit carries its time; the commit two days back, none.
+        #expect(both?.contains(":") == true)
+        #expect(both?.hasSuffix(" · saved Aug 27") == true, "\(both ?? "nil")")
         // A note nobody has committed says only when it was edited.
         let editedOnly = NoteBoxCopy.stampsLine(
             edited: edited, saved: nil, now: now, calendar: calendar, locale: locale)

@@ -12,7 +12,7 @@ import GRDB
 // NOT a SyncSpec §12 lockstep event: nothing on the wire changes, the marker stays 13 (the MCP grants
 // family's and the search index's class).
 //
-// ONE VALUE, TWO USERS: the migration `v1_30_protection_record` and the production library leaf
+// ONE VALUE, TWO USERS: the migration `v1_31_protection_record` and the production library leaf
 // (`SQLCipherLibraryLeaf.createLibrary(with:record:)` writes a fresh keyed file holding only this table,
 // before the app's ordinary open runs every migration over it — hence `IF NOT EXISTS`).
 //

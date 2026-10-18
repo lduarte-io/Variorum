@@ -128,6 +128,10 @@ struct SavepointNameAskTests {
         let new = SavepointNameCopy.hint(.newSavepoint)
         #expect(new.contains("\u{23CE}") && new.contains("\u{238B}"))
         #expect(new.lowercased().contains("empty name is fine"))
+        // VX-347 (a justified edit): the commit door's hint says the new
+        // contract — leaving commits, ⎋ doesn't. RED on the shipped hint
+        // ("⏎ saves it · ⎋ cancels").
+        #expect(new.contains("clicking away commits it"))
         let rename = SavepointNameCopy.hint(.rename)
         #expect(rename.contains("Clearing the field removes the name"))
         // I5 is the DOOR's help sentence, not the field's hint: the hint ran
@@ -195,21 +199,45 @@ struct SavepointCommitDoorTests {
         }
     }
 
-    /// **⎋ CANCELS THE COMMIT WHOLE** (PROVISIONAL, #121): the ask goes away
-    /// and nothing was written — which is also what a click outside and a
-    /// closing window do, because they are all the same road.
-    @Test func cancellingTheFieldFilesNothingAtAll() async throws {
+    /// **ONLY ⎋ LEAVES THE FIELD WITHOUT A COMMIT — FLIPPED FOR VX-347**
+    /// (a justified edit: this cell was `cancellingTheFieldFilesNothingAtAll`
+    /// and encoded #121(b)'s PROVISIONAL — "⎋, a click outside and a closing
+    /// window all cancel" — which her ruling supersedes: *"command S should
+    /// always commit your take even without an extra keystroke to enter (but
+    /// if you click escape, then that can deliberately not save)"*). It now
+    /// drives the PRODUCT's presenter (Write's bar) and leaves the field the
+    /// way a click away ENDS — SwiftUI writing nil through the host's binding,
+    /// which also closes the popover (VX-347's fix leg re-shaped this road:
+    /// the first rig looked the popover up before AppKit announced it, so the
+    /// cell never reached the behaviour) — which files ONE commit, unnamed;
+    /// then a second ⌘S left by ⎋ files nothing. **RED ON OLD** by behaviour
+    /// (the pre-fix presenter filed nothing on a dismissal).
+    @Test func onlyEscapeLeavesTheFieldWithoutACommit() async throws {
         try await withEditor(seedBlocks: ["draft text"]) { h in
+            let mounted = await SavepointFieldRig.mountWritesBar(h.model)
+            defer { mounted.tearDown() }
             h.textView.setSelectedRange(NSRange(location: 3, length: 0))
             h.model.updateCaretContext()
 
-            h.model.commitCaretVariant()
-            #expect(h.model.savepointAsk != nil)
-            h.model.savepointAsk = nil  // ⎋ / a click outside / the window going
+            _ = try await SavepointFieldRig.pressCommandS(h.model, mounted)
+            await SavepointFieldRig.dismissTheField(h.model)  // a click outside, as it ends
+            await SavepointFieldRig.awaitSavepoints(h, count: 1)
 
-            let after = try savepoints(h)
-            #expect(after.isEmpty,
-                    "a cancelled ask is not a savepoint with no name — it is no savepoint")
+            let afterAClickAway = try savepoints(h)
+            #expect(afterAClickAway.count == 1,
+                    "leaving the field any way but \u{238B} files the commit (VX-347)")
+            #expect(afterAClickAway.first?.message == nil, "unnamed when nothing was typed")
+            #expect(afterAClickAway.first?.kind == .manual)
+
+            let popover = try await SavepointFieldRig.pressCommandS(h.model, mounted)
+            try await SavepointFieldRig.focusTheField(in: popover)
+            await SavepointFieldRig.key(
+                "\u{1b}", keyCode: 53, to: try SavepointFieldRig.deliveryWindow(for: popover))
+            await SavepointFieldRig.turns(until: { h.model.savepointAsk == nil }, max: 120)
+            await SavepointFieldRig.turns(60)
+
+            #expect(try savepoints(h).count == 1,
+                    "\u{238B} alone is the deliberate \u{201C}don't save\u{201D}")
         }
     }
 
@@ -694,6 +722,9 @@ struct SavepointNameCopyTests {
         #expect(entry.definition.contains("editable"),
                 "her R-13u3-1 — a name is editable after the fact")
         #expect(entry.definition.contains("a name never touches the text"), "I5")
+        // VX-347 (a justified edit): the definition says every way out of the
+        // field but ⎋ commits — RED on the shipped entry.
+        #expect(entry.definition.contains("any other way out of the field but \u{238B}"))
 
         let row = try #require(
             HelperView.groups.flatMap { $0.items }.first { $0.keys == "\u{2318}S" })

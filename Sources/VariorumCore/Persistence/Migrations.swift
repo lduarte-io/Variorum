@@ -1011,6 +1011,29 @@ extension AppDatabase {
         migrator.registerMigration("v1_29_mcp_comment_words") { db in
             try db.execute(sql: MCPGrantSchema.v1_29DDL)
         }
+        // **VX-393 — ONE GRANT ROW PER CLIENT × PLACE** (VX-348 U5; her ruling
+        // R-VX348-6 "Upgrade in place" — the run record
+        // `notes/plans/fixes/vx-348-prelaunch-sweep.md` §U5): Shared with AI
+        // listed one wing twice for one client, because every grant road but
+        // Change… ADDED a row. Each place's duplicates merge to its strongest
+        // standing row (the rest revoked on one stamp — never deleted), then a
+        // partial unique index holds the family to one live standing grant per
+        // client × place. `Persistence/MCPGrantSchema.swift` carries the shape
+        // and the merge's order.
+        //
+        // **NOT a SyncSpec §12 lockstep event** — v1_24's road exactly (its own
+        // commit, ahead of the code that relies on it): no `sync_version`, no
+        // outbox trigger, nothing pushed, no mirror change, the marker stays 13;
+        // the plaintext export keeps the family EMPTY. A real clock stamps the
+        // merge (v1_20's precedent): the pane and the rule read a revoked row
+        // as revoked whatever its stamp.
+        migrator.registerMigration("v1_30_mcp_one_grant_per_place") { db in
+            try db.execute(
+                sql: MCPGrantSchema.v1_30MergeSQL,
+                arguments: [DateFormatter.variorumISO8601.string(from: Date())])
+            try db.execute(sql: MCPGrantSchema.v1_30DDL)
+        }
+
         // **VX-306 U1a — THE PROTECTION RECORD'S HOME** (`notes/plans/vx-306-castle-open-road.md` §2 U1a,
         // design §3.2): `protection_record`, the library's own protection facts inside the library file
         // (`Persistence/ProtectionRecordSchema.swift` carries the ONE DDL value the production library leaf
@@ -1018,7 +1041,7 @@ extension AppDatabase {
         // (`SyncSchema.localOnlyTables`: no `sync_version`, no outbox trigger, never a payload or a mirror;
         // the plaintext export drops it; `LocalMachineryRecreation` re-creates it empty); the marker stays
         // 13. No backfill: a store from before this design has no record and is not handled (rule 26).
-        migrator.registerMigration("v1_30_protection_record") { db in
+        migrator.registerMigration("v1_31_protection_record") { db in
             try db.execute(sql: ProtectionRecordSchema.ddl)
         }
         return migrator

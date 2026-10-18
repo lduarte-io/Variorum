@@ -364,22 +364,22 @@ struct MCPWriteDigestServerTests {
         }
     }
 
-    // MARK: - THE U+0000 CHECK (the orchestrator's carried OWED 2 — RECORDED, not fixed)
+    // MARK: - THE U+0000 CHECK (VX-357 — FIXED in VX-348 U1; was the carried OWED 2)
 
-    /// **A KNOWN DOOR BUG, pinned as found (builder A, 2026-10-14):** a take
-    /// holding U+0000 is STORED TRUNCATED at its first NUL — GRDB binds TEXT
-    /// with length -1 (`sqlite3_bind_text(…, -1, …)`, its
-    /// `StandardLibrary.swift:625`), so SQLite reads the value only up to the
-    /// NUL as the row is written. "before\0after" (12 bytes) lands as
-    /// "before" (6). The write's digest is computed from the act's own row in
-    /// memory (D-254-1's rule — no second read), so for such a take it digests
-    /// the 12 bytes SENT while the store holds 6: the one case where the
-    /// answer's sha256 overclaims. Out of U7's scope by the orchestrator's
-    /// ruling (record it, mint nothing, fix nothing here); the orchestrator
-    /// tickets it. The truncation is pinned as fact; the agreement the digest
-    /// promises is a KNOWN ISSUE — this test goes RED the day the door keeps
-    /// the bytes (or refuses them), so whoever fixes it flips it.
-    @Test func aTakeHoldingUPlus0000IsStoredTruncatedSoItsDigestOverclaims() async throws {
+    /// **VX-357, FLIPPED from the known issue it was pinned as** (builder A,
+    /// 2026-10-14: a take holding U+0000 was STORED TRUNCATED at its first NUL
+    /// — GRDB binds TEXT with length -1, `StandardLibrary.swift:625`, so
+    /// "before\0after" (12 bytes) landed as "before" (6) while the answer's
+    /// sha256 digested the 12 bytes sent: the one case where the digest
+    /// overclaimed). Her ruling (2026-10-15): STRIP it in the operations layer
+    /// and, on this door, ALWAYS say it. So the store keeps "beforeafter" (11
+    /// bytes — nothing after the null is lost), `read_note` returns it, the
+    /// answer's sha256 digests exactly that (the stored text — the fingerprint
+    /// stays true), and `null_characters_removed` says 1. RED ON OLD: the store
+    /// held 6 bytes, a read returned "before", the digest was the sent bytes'
+    /// and no count was said (the run record's red-on-old leg, on the pre-fix
+    /// tree).
+    @Test func aTakeHoldingUPlus0000IsStoredWithoutItAndTheAnswerSaysHowMany() async throws {
         let h = try ServerHarness()
         defer { h.tearDown() }
         try await h.within {
@@ -399,12 +399,12 @@ struct MCPWriteDigestServerTests {
                 try Int.fetchOne(
                     db, sql: "SELECT length(CAST(working_text AS BLOB)) FROM variant WHERE id = ?", arguments: [id])
             }
-            #expect(Array(sent.utf8).count == 12 && storedBytes == 6, "stored up to the NUL only")
-            #expect(read == "before", "read_note returns what the store holds")
-            #expect(answer["sha256"] as? String == digest(sent), "the answer digests the act's row, as sent")
-            withKnownIssue("U+0000 truncates at bind (GRDB's -1 length): the store keeps 6 of 12 bytes") {
-                #expect(answer["sha256"] as? String == read.map(digest), "the answer digests what a read returns")
-            }
+            #expect(Array(sent.utf8).count == 12 && storedBytes == 11, "every byte but the NUL kept")
+            #expect(read == "beforeafter", "read_note returns what the store holds")
+            #expect(answer["sha256"] as? String == digest("beforeafter"), "the answer digests the STORED text")
+            #expect(answer["sha256"] as? String == read.map(digest), "the answer digests what a read returns")
+            #expect(answer["sha256"] as? String != digest(sent), "never the bytes sent")
+            #expect(answer["null_characters_removed"] as? Int == 1, "the door says how many it removed")
             await h.hangUp(connection)
         }
     }

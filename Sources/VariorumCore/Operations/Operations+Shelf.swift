@@ -30,7 +30,8 @@ extension Operations {
     @discardableResult
     public func createShelf(name: String, wingID: String = "") throws -> Shelf {
         try database.write { db in
-            let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            // VX-357: U+0000 removed first (`StoredText`), then the trim.
+            let trimmed = StoredText.stripped(name).trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmed.isEmpty else { throw OperationError.invalidShelfName(name: name) }
             try requireLiveWing(db, wingID)
             let now = date.now
@@ -48,7 +49,7 @@ extension Operations {
     public func renameShelf(_ id: String, to name: String) throws {
         try database.write { db in
             var shelf = try liveShelf(db, id)
-            let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmed = StoredText.stripped(name).trimmingCharacters(in: .whitespacesAndNewlines)  // VX-357
             guard !trimmed.isEmpty else { throw OperationError.invalidShelfName(name: name) }
             guard shelf.name != trimmed else { return }
             shelf.name = trimmed
@@ -62,7 +63,7 @@ extension Operations {
     public func setShelfGlyph(_ id: String, glyph: String?) throws {
         try database.write { db in
             var shelf = try liveShelf(db, id)
-            let normalized = ShelfGlyph.normalize(glyph)
+            let normalized = ShelfGlyph.normalize(StoredText.stripped(glyph))  // VX-357
             guard normalized.valid else {
                 throw OperationError.invalidShelfGlyph(value: glyph ?? "")
             }

@@ -60,7 +60,7 @@ extension Operations {
                 throw OperationError.gatheringRequiresRule(id: readingID)
             }
             let gathering = Reading(
-                id: newID(), ownerId: currentOwnerID(), name: name, kind: .gathering,
+                id: newID(), ownerId: currentOwnerID(), name: StoredText.stripped(name), kind: .gathering,  // VX-357
                 querySpec: spec,
                 wingId: source.wingId,
                 createdAt: now, updatedAt: now)

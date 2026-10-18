@@ -28,7 +28,8 @@ extension Operations {
     public func createLens(post postID: String, name: String) throws -> Lens {
         try database.write { db in
             _ = try livePost(db, postID)
-            let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            // VX-357: U+0000 removed first (`StoredText`), then the trim.
+            let trimmed = StoredText.stripped(name).trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmed.isEmpty else {
                 throw OperationError.invalidLensName(name: name)
             }
@@ -44,7 +45,7 @@ extension Operations {
     public func renameLens(_ lensID: String, newName: String) throws {
         try database.write { db in
             var lens = try liveLens(db, lensID)
-            let trimmed = newName.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmed = StoredText.stripped(newName).trimmingCharacters(in: .whitespacesAndNewlines)  // VX-357
             guard !trimmed.isEmpty else {
                 throw OperationError.invalidLensName(name: newName)
             }
@@ -63,7 +64,7 @@ extension Operations {
     public func duplicateLens(_ lensID: String, name: String? = nil) throws -> Lens {
         try database.write { db in
             let source = try liveLens(db, lensID)
-            let trimmed = name?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmed = StoredText.stripped(name)?.trimmingCharacters(in: .whitespacesAndNewlines)  // VX-357
             let copyName = (trimmed?.isEmpty ?? true) ? source.name + " copy" : trimmed!
             let now = date.now
             let copy = Lens(

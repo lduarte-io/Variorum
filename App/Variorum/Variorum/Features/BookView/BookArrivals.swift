@@ -116,6 +116,13 @@ nonisolated enum ArrivalsCopy {
         return "arrived " + TimeStampFace.relative(date, now: now)
     }
 
+    /// **Its hover — the whole fact** (VX-351 — the VX-348 run, U4; her
+    /// R-VX348-3): *Arrived Oct 13, 2026 at 4:02 PM*. nil on the same terms.
+    static func arrivedHelp(_ iso: String) -> String? {
+        guard DateFormatter.variorumISO8601.date(from: iso) != nil else { return nil }
+        return TimeStampFace.tooltip(labelled: "Arrived", iso: iso)
+    }
+
     /// The expansion's tail when more wait than the window lists — the count
     /// is the door's whole answer, so the listing never pretends to be all.
     static func more(_ hidden: Int) -> String { "and \(hidden) more waiting" }
@@ -677,6 +684,7 @@ struct BookArrivalsList: View {
                     .foregroundStyle(tokens.faint)
                     .lineLimit(1)
                     .fixedSize()
+                    .help(ArrivalsCopy.arrivedHelp(arrival.arrivedAt) ?? stamp)  // VX-351
             }
             // 13i-c U4: the row's arms are DATA (`ArrivalArms`) — one
             // renderer per act, in the table's order.

@@ -339,8 +339,10 @@ struct MCPWriteServerTests {
             }
             // VX-336 U7 (justified edit, the ritual): VX-261's list_my_activity
             // names no note, block or take — it reads the caller's own log rows.
+            // VX-348 U5 (justified edit, the ritual): nor does VX-392's
+            // list_wings — it lists the caller's own wing grants.
             #expect(Set(calls.map(\.0)) == Set(MCPToolCatalog.all.map(\.name))
-                .subtracting(["list_books", "list_notes", "search", "list_my_activity"]),
+                .subtracting(["list_books", "list_notes", "search", "list_my_activity", "list_wings"]),
                     "every door that names a note, a block or a take was tried")
             #expect(try snapshot() == before,
                     "every take that existed, every chosen pointer and every default is byte-identical")

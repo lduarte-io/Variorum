@@ -281,8 +281,9 @@ struct CommitBar: View {
         .savepointNameAsk(
             Binding(get: { model.savepointAsk }, set: { model.savepointAsk = $0 }),
             tokens: tokens
-        ) { _, name in
-            Task { await model.fileSavepoint(named: name) }
+        ) { pending, name in
+            // VX-347: the take ⌘S ASKED about, whichever way the field was left.
+            Task { await model.fileSavepoint(pending, named: name) }
         }
     }
 
@@ -615,8 +616,9 @@ struct CommitBar: View {
         Button(tokens.chromeLabel("commit ⌘S")) { model.commitCaretVariant() }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
             .disabled(model.caretVariantID == nil || model.header?.locked == true)
-            .help("An immutable saved moment of the take under the caret — name it, "
-            + "or press ⏎ to save it unnamed")
+            // VX-347 (PROVISIONAL words, P-VX347-4): leaving commits, ⎋ doesn't.
+            .help("An immutable saved moment of the take under the caret — name it "
+            + "if you like; leaving the field commits it, only ⎋ doesn't")
     }
 
     /// Ledger row 17 — THE PAIR. It is never disabled: unlike commit,

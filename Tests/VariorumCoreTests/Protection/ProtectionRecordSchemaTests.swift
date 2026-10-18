@@ -1,7 +1,7 @@
 //
 //  ProtectionRecordSchemaTests.swift
 //  VariorumCoreTests — VX-306 U1a piece 2: the protection record's table
-//  (`v1_30_protection_record`, LOCAL-ONLY) and its one-row codec.
+//  (`v1_31_protection_record`, LOCAL-ONLY) and its one-row codec.
 //
 
 import Foundation

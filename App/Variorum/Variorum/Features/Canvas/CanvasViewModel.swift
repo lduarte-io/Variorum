@@ -738,13 +738,22 @@ final class CanvasViewModel {
 
     /// **THE COMMIT DOOR'S PENDING NAME** (13u3 UNIT D — item 14): the top
     /// strip presents it, since this board renders no commit door of its own
-    /// (⌘S is its whole commit road).
+    /// (⌘S is its whole commit road). **VX-347:** the presenter decides what
+    /// leaving the field means (every leave but ⎋ files).
     var savepointAsk: SavepointNameAsk?
+    /// Numbers each ⌘S and files each field once (VX-347's fix leg).
+    @ObservationIgnored private var savepointLedger = SavepointAskLedger()
 
-    /// ⌘S — the DOOR. It summons the optional name; ⏎ on the empty field
-    /// files what it has always filed. No live pane refuses HERE, before a
+    /// ⌘S — the DOOR. It summons the optional name; leaving the field any
+    /// way but ⎋ files it (VX-347). No live pane refuses HERE, before a
     /// field opens over a gesture that cannot land (P-2).
     func askSavepointName() {
+        // VX-347: ⌘S again while its field is up LEAVES the field — and
+        // every leave but ⎋ files it (PROVISIONAL P-VX347-2). No second field.
+        if savepointAsk != nil {
+            savepointAsk = nil
+            return
+        }
         guard let pane = authority.livePane else {
             statusMessage = "Click into a card first — ⌘S commits the take you're editing."
             return
@@ -758,12 +767,23 @@ final class CanvasViewModel {
                 for: OperationError.lockedPost(id: containerID))
             return
         }
-        savepointAsk = .naming(variantID: pane.variantID)
+        savepointAsk = savepointLedger.naming(variantID: pane.variantID)
     }
 
+    /// ⏎ on the PENDING field (the pins' road to the field's ⏎).
     func fileSavepoint(named name: String?) async {
-        savepointAsk = nil
-        await commitFocusedTake(named: name)
+        guard let ask = savepointAsk else { return }
+        await fileSavepoint(ask, named: name)
+    }
+
+    /// **A LEFT FIELD FILES ITS ASK** (VX-347): the card take ⌘S ASKED
+    /// about (`ask.targetID`), never the live pane at filing time — a click
+    /// away onto another card is a way of leaving, and it moves the pane.
+    func fileSavepoint(_ ask: SavepointNameAsk, named name: String?) async {
+        if savepointAsk == ask { savepointAsk = nil }
+        // VX-347's fix leg: one commit per field, whichever road reports it.
+        guard savepointLedger.claimFiling(ask) else { return }
+        await commitTake(ask.targetID, named: name)
     }
 
     /// ⌘S in canvas (the Phase-1 ruling's (c)(2) — the 4D compare
@@ -774,11 +794,16 @@ final class CanvasViewModel {
             statusMessage = "Click into a card first — ⌘S commits the take you're editing."
             return
         }
+        await commitTake(pane.variantID, named: name)
+    }
+
+    /// The filing itself, for the take it is told.
+    private func commitTake(_ variantID: String, named name: String?) async {
         await coordinator.flushNow()
         statusMessage = nil
         do {
             try await session.runner.run { ops in
-                _ = try ops.commit(pane.variantID, message: name)
+                _ = try ops.commit(variantID, message: name)
             }
             showReceipt(name.map(SavepointNameCopy.filed) ?? SavepointNameCopy.unnamedReceipt)
         } catch {

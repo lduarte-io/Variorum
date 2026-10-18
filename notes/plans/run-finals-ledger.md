@@ -63,3 +63,22 @@ Finals: core full `swift test` 2,927/340 (the one red = VX-353's standing load f
 Ladder: round 1 (opus) 0B/0M/3m/5n — CLOSED AT ROUND 1: R1-1 hollow by measurement (the Index→Outline carry pin green both roads, kept as non-regression), R1-2 (the click-is-her-place fix) and R1-7 (the Takes cell's dead zone) confirmed-fixed red-on-old, both orchestrator-line-checked; R1-3 → VX-402 (+ the comment corrected in-run); R1-6 → VX-403; R1-4/R1-5 → VX-300's notes; R1-8 hygiene done.
 
 Finals: Mac batches — U1a 1,590/259 · U1b 1,998/332 + the D-2 verify 308/64 · U2 649/125 · the FOLD batch on the combined tree 700/132 · the ladder guard batch 342/71 — the only non-known red in every run VX-167's standing flake (red alone with its exact signature, not attributed); red-on-old: U1a 3 families + 2 guard probes, U1b 4 families + 2 probes, U2 3 families + the VX-77 dark probe (red at "ink at 0.0", green under dark with the .aqua pinning), the ladder's 2; core `swift test` 2,897/338 (U1b); walks — THE U1 WALK both voices (W-1 found there, fixed, re-walked) and THE U2 WALK both voices, all walked rows PASS.
+
+## VX-348 — Run: Pre-launch bug sweep (2026-10-18; PR #173, merge 8611a7e17)
+- Units: U1 (VX-357+VX-338+VX-339) · U5 (the urgent trio, joined mid-run) · U2 (VX-347) · U3 (VX-350+VX-349+VX-176) ·
+  U4 (VX-351+VX-384+VX-385+VX-355) — five units, three fix legs (U2's double-file+rig, U4's three clusters, U5's
+  stop-road), every fix red-first.
+- Headless finals on the folded tree: core 3251/419 · third target 40/6 · MCP 383/71 (VX-353's standing flake green
+  alone) · no-regress VX-180/181 30/4.
+- Mac batches: U1 red 7/2 exact + fixed 78/13; U5 red 13/2 exact + fixed 242/31 (the one red live-confirmed real,
+  fixed, door pin then 19/4 green); U2 red 13 behavioral + fix-leg red 5+1 + fixed 206/206; U3 red 10/4 exact +
+  fixed 147/149→10/10 after the sub-pixel fix; U4 red 22/6 exact + fixed 353/363→5/5+7/7 after the test-only fix
+  leg; W2-1's pin red 8-issues/fixed 18/6.
+- The walk: two parts under the reversible store swap (six files aside / five in / six back, cmp-verified both
+  ways), both voices, every member's face seen; one finding (W2-1) resolved honestly (no drift copy; the 1892
+  stamps the seeder's own clock).
+- Live rounds: VX-392's done-when (list_wings → create_book unaided), VX-357's wire strip
+  (null_characters_removed: 1, the stored digest), VX-393's one-row double-share, VX-339's both banner halves,
+  VX-394's clientClosed line + the serverOff gap confirmed then proven fixed on the real door.
+- The ladder: ONE round, 0B/0M/3m/3n, all dispositioned repo-first; VX-338's deletion-safety argument independently
+  re-derived.

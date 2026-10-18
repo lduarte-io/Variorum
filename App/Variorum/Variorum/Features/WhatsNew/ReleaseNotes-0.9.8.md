@@ -19,6 +19,21 @@
 - The Book Panel no longer shows drag bars beside chapters when the book is date-ordered and nothing can be placed by hand.
 - The Bookcase's order menu closes on Escape, like any menu.
 
+**A sweep of small fixes before launch.**
+- ⌘S commits the moment you leave the name field — click away, keep typing, or close the window; only ⎋ means don't save.
+- Hover any "edited" or "created" stamp to see the exact date and time, everywhere one shows — the Library's info panel and the book's note box included.
+- The Library adapts to narrow windows: search collapses to a 🔍 button that still searches, the info panel stays whole, and nothing is cut off.
+- The doubled line under the Library's "Notes" header is one line again.
+- The Library's controls wear the voice's colour in dark Terminal instead of system blue.
+- A note duplicated from a Library row shows up in the list immediately.
+- The Pool has a home for quiet confirmations — duplicates, undo and redo now speak at its foot.
+- An AI client granted an empty wing can find it: the new list_wings tool names the wings you shared, so it can make its first book there without help.
+- Sharing the same place with the same client again keeps one grant — the newest; revoking what you see revokes everything.
+- When an AI client disconnects — or the server stops, or the library locks — the Activity list says so, with the reason.
+- Text pasted or sent with a hidden null character is stored without it, and an AI that writes one is told how many were removed.
+- Two Macs sharing a backup folder no longer prune each other's backups.
+- If the sync hold's marker can't be removed, Resume Sync says so and keeps the banner instead of pretending.
+
 ## Feedback
 
 - Anything odd, anything you love: **Help ▸ Send Feedback…**, or write to support@stargazing.tech.

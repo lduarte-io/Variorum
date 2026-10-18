@@ -38,6 +38,17 @@
 //  form), so it is a function of the column's width alone: typing, a sort pick
 //  or a search never changes the line count.
 //
+//  **VX-350 (the VX-348 run, U3) — the narrow widths.** Below VX-175's two
+//  lines the row was wider than its column: the field squeezed to its own
+//  sliver (her "empty pill") and, with the info panel open, the column's
+//  minimum and the panel's together pushed the panel off the window. A third
+//  class, decided the same way (stable widths only): COLLAPSED — the field
+//  becomes the 🔍 door (`LibrarySearchToggle`) beside scope, mode · sort ·
+//  when wrap in their own order, and the field opens on its own last line
+//  while she has it open (her state, never the text — so typing or a search
+//  still never changes the line count). Still ONE Layout over one set of
+//  views; a control a class does not show is placed outside the row.
+//
 
 import AppKit
 import SwiftUI
@@ -155,16 +166,185 @@ nonisolated enum LibraryControlsFlowRule {
         }
         return Arrangement(oneLine: oneLine, frames: frames, size: CGSize(width: rowWidth, height: y))
     }
+
+    // MARK: VX-350 — the narrow widths: the field collapses to 🔍
+
+    /// **The row's width classes** (VX-350, the VX-348 run's U3 — her words:
+    /// the search field squeezed to "an empty pill" left of All when the info
+    /// panel was open; *"it should at least turn into a search icon like
+    /// magnifying glass and clicking on it should still do something, even if
+    /// just opening it in the pane below"*). Widest to narrowest, each decided
+    /// from STABLE widths only (P-U3-5 — the field at its floor, the sort slot
+    /// at its widest, the rigid controls at their natural widths), so a
+    /// width's class never moves with what is typed, picked or searched:
+    enum WidthClass: Equatable, Sendable {
+        /// field · scope · mode · sort · when — VX-175's one line.
+        case oneLine
+        /// field · scope / mode · sort · when — VX-175's ruled (C) wrap.
+        case twoLines
+        /// 🔍 · scope / mode · sort · when — the field's floor no longer fits
+        /// beside scope, so the field becomes the 🔍 door and opens on a line
+        /// of its own BELOW the controls when she asks for it (never a
+        /// squeezed field); each group wraps in its own order as the room
+        /// narrows further (🔍 · scope, then mode · sort · when).
+        case collapsed
+    }
+
+    /// The row by role (VX-350): the field, the 🔍 door, scope, then the
+    /// rest in the row's order (mode, and sort · when where they show).
+    struct Row {
+        var field: Child
+        var toggle: Child
+        var scope: Child
+        var rest: [Child]
+    }
+
+    /// The row placed: each child's frame in the flat order field · toggle ·
+    /// scope · rest — nil for a child this class does not show (the layout
+    /// places it outside the row, never squeezed: the empty pill WAS a
+    /// squeezed field).
+    struct RowArrangement: Equatable {
+        var widthClass: WidthClass
+        var frames: [CGRect?]
+        var size: CGSize
+        var lineCount: Int
+    }
+
+    /// **The class, decided** — from the counted (stable) widths alone: one
+    /// line while VX-175's line fits; two while field · scope (the field at
+    /// its floor) and mode · sort · when each fit a line; else collapsed.
+    static func widthClass(_ row: Row, width: CGFloat, spacing: CGFloat) -> WidthClass {
+        if fitsOneLine([row.field, row.scope] + row.rest, width: width, spacing: spacing) { return .oneLine }
+        if fitsOneLine([row.field, row.scope], width: width, spacing: spacing),
+           fitsOneLine(row.rest, width: width, spacing: spacing) {
+            return .twoLines
+        }
+        return .collapsed
+    }
+
+    /// The width the row is decided and arranged at (the U3 fix leg): the
+    /// offered width floored to a whole point; zero and an unbounded offer
+    /// (the minimum and ideal queries) as they are.
+    static func decidingWidth(_ offered: CGFloat) -> CGFloat {
+        offered.isFinite && offered > 0 ? offered.rounded(.down) : offered
+    }
+
+    /// **The row's arrangement** (VX-350). The two wide classes are VX-175's
+    /// `arrange`, frame for frame (the 🔍 not shown). Collapsed: the 🔍 and
+    /// scope flow onto as few lines as they fit, then mode · sort · when the
+    /// same way — each line's breaks counted at the STABLE widths (the sort
+    /// slot at its widest, so a sort pick never moves a break), placed at the
+    /// live ones — then, while `searchOpen`, the field on its own last line
+    /// (as wide as the row lets it be, up to its own cap). `searchOpen` is HER
+    /// state (the 🔍 pressed, or the field holding the keyboard) — never the
+    /// text — so typing or a search never adds or removes that line.
+    ///
+    /// **Decided at WHOLE POINTS** (the VX-348 U3 fix leg — the batch's catch:
+    /// Study at 301.5 pt with the field open, the row reported 302 and was
+    /// re-decided there, the field's line half a point wider than measured).
+    /// The row is arranged at `decidingWidth(width)` — the offered width
+    /// floored to a whole point — and a collapsed row reports exactly that
+    /// whole width while its lines fit it. A whole-point width is on every
+    /// display's pixel grid, so the container places the row at what it
+    /// reported unrounded, and the placement pass, flooring the same number,
+    /// arranges exactly what the sizing pass measured — whatever sub-point
+    /// width the row was first offered.
+    static func arrangeRow(
+        _ row: Row, width offered: CGFloat, spacing: CGFloat, lineSpacing: CGFloat, searchOpen: Bool
+    ) -> RowArrangement {
+        let width = decidingWidth(offered)
+        let decided = widthClass(row, width: width, spacing: spacing)
+        switch decided {
+        case .oneLine, .twoLines:
+            let wide = arrange([row.field, row.scope] + row.rest, lineOneCount: 2, width: width,
+                               spacing: spacing, lineSpacing: lineSpacing)
+            let frames: [CGRect?] = [wide.frames[0], nil, wide.frames[1]] + wide.frames.dropFirst(2).map { $0 }
+            return RowArrangement(widthClass: decided, frames: frames, size: wide.size,
+                                  lineCount: wide.oneLine ? 1 : 2)
+        case .collapsed:
+            let flat = [row.field, row.toggle, row.scope] + row.rest
+            // Each group flows on its own lines, its own order kept: a line
+            // takes the next control while the COUNTED widths fit. Every
+            // control here is rigid (the pickers fixed by P-U3c-1, the doors
+            // and labels fixed): each is counted, and placed, at its
+            // narrowest — its natural width (the sort slot counted at its
+            // widest form, placed at its live words).
+            var lines: [[Int]] = []
+            func flow(_ members: [Int]) {
+                var line: [Int] = []
+                var used: CGFloat = 0
+                for index in members {
+                    let counted = counted(flat[index]).width(0)
+                    if line.isEmpty {
+                        line = [index]
+                        used = counted
+                    } else if used + spacing + counted <= width + 0.5 {
+                        line.append(index)
+                        used += spacing + counted
+                    } else {
+                        lines.append(line)
+                        line = [index]
+                        used = counted
+                    }
+                }
+                if !line.isEmpty { lines.append(line) }
+            }
+            flow([1, 2])
+            flow(Array(3..<flat.count))
+            if searchOpen { lines.append([0]) }
+            var frames: [CGRect?] = Array(repeating: nil, count: flat.count)
+            var y: CGFloat = 0
+            var rowWidth: CGFloat = 0
+            for (number, line) in lines.enumerated() {
+                // The field (alone on its line) as wide as the row lets it be
+                // — up to its own cap; every other control at its narrowest.
+                let widths = line.map { $0 == 0 ? flat[0].width(width) : flat[$0].width(0) }
+                let heights = zip(line, widths).map { flat[$0].height($1) }
+                let lineHeight = heights.max() ?? 0
+                var x: CGFloat = 0
+                for (offset, index) in line.enumerated() {
+                    frames[index] = CGRect(
+                        x: x, y: y + (lineHeight - heights[offset]) / 2,
+                        width: widths[offset], height: heights[offset])
+                    x += widths[offset] + spacing
+                }
+                rowWidth = max(rowWidth, x - spacing)
+                y += lineHeight + (number < lines.count - 1 ? lineSpacing : 0)
+            }
+            // The collapsed row reports the WHOLE (whole-point) width it was
+            // offered: its container places it at its reported width, and the
+            // placement pass re-decides at that width (`placeSubviews`) — a
+            // narrower report would re-flow the groups' breaks there, so the
+            // placed lines could differ from the measured ones (measured
+            // offscreen: offered 432, reported 369, re-flowed at 369). It
+            // reports that whole point even when a line uses the half-point
+            // slack past it (the batch's 301.5 → 302 case: reporting the line's
+            // own 302 re-decided at 302). Only a row truly wider than its room
+            // (below its floor) reports its own width. The wide classes need
+            // no such care: their reported width re-decides to the same
+            // arrangement (U3c's T1 §7). All pinned.
+            let fits = rowWidth <= width + 0.5
+            let reported = width.isFinite && width > 0 && fits ? width : rowWidth
+            return RowArrangement(widthClass: .collapsed, frames: frames,
+                                  size: CGSize(width: reported, height: y), lineCount: lines.count)
+        }
+    }
 }
 
 /// **The controls row's layout** (VX-175): the search field FIRST, scope
 /// second, then mode · sort · when — one line when the rule says it fits,
-/// else the first two on line 1 and the rest on line 2.
+/// else the first two on line 1 and the rest on line 2. **VX-350:** with a
+/// 🔍 door among its subviews (`Role.toggle`) the row has a third, narrow
+/// class — 🔍 · scope / mode · sort · when, the field on its own last line
+/// while `searchOpen` (`LibraryControlsFlowRule.arrangeRow`).
 struct LibraryControlsFlow: Layout {
     var spacing: CGFloat = 10
     var lineSpacing: CGFloat = 8
     /// Search · scope.
     var lineOneCount: Int = 2
+    /// VX-350: whether the field shows in the collapsed class — HER state
+    /// (the 🔍 pressed, or the field holding the keyboard), never the text.
+    var searchOpen: Bool = false
 
     /// The field's floor, handed down by the header (P-U3-5 — the field's
     /// own ideal follows the typed text, so the layout never asks it).
@@ -176,6 +356,18 @@ struct LibraryControlsFlow: Layout {
     struct WidestKey: LayoutValueKey {
         static let defaultValue: CGFloat? = nil
     }
+
+    /// VX-350: which subview is the field and which the 🔍 door; every other
+    /// subview is scope, then the rest, in the row's order.
+    enum Role: Equatable, Sendable { case field, toggle, other }
+
+    struct RoleKey: LayoutValueKey {
+        static let defaultValue: Role = .other
+    }
+
+    /// Where a subview the class does not show is placed: outside the row
+    /// (and every window), at its own size — never squeezed to a sliver.
+    static let unshownOffset: CGFloat = -100_000
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         #if DEBUG
@@ -197,15 +389,29 @@ struct LibraryControlsFlow: Layout {
         #endif
         let arranged = arrangement(width: bounds.width, subviews: subviews)
         for (index, subview) in subviews.enumerated() {
-            let frame = arranged.frames[index]
-            subview.place(
-                at: CGPoint(x: bounds.minX + frame.minX, y: bounds.minY + frame.minY),
-                anchor: .topLeading,
-                proposal: ProposedViewSize(width: frame.width, height: frame.height))
+            if let frame = arranged.frames[index] {
+                subview.place(
+                    at: CGPoint(x: bounds.minX + frame.minX, y: bounds.minY + frame.minY),
+                    anchor: .topLeading,
+                    proposal: ProposedViewSize(width: frame.width, height: frame.height))
+            } else {
+                // VX-350: not shown in this class — outside the row at its
+                // own size (the field keeps its identity, text and caret road).
+                subview.place(
+                    at: CGPoint(x: bounds.minX + Self.unshownOffset, y: bounds.minY),
+                    anchor: .topLeading, proposal: .unspecified)
+            }
         }
     }
 
-    private func arrangement(width: CGFloat, subviews: Subviews) -> LibraryControlsFlowRule.Arrangement {
+    /// The row as the layout arranged it: frames in SUBVIEW order (nil = not
+    /// shown), its size.
+    struct Placed {
+        var frames: [CGRect?]
+        var size: CGSize
+    }
+
+    private func arrangement(width: CGFloat, subviews: Subviews) -> Placed {
         let children = subviews.map { subview in
             let narrowest = subview.sizeThatFits(ProposedViewSize(width: 0, height: nil)).width
             let widestWidth = subview.sizeThatFits(ProposedViewSize(width: .infinity, height: nil)).width
@@ -216,16 +422,37 @@ struct LibraryControlsFlow: Layout {
                 floor: subview[FloorKey.self],
                 widest: subview[WidestKey.self])
         }
-        let arranged = LibraryControlsFlowRule.arrange(
-            children, lineOneCount: lineOneCount, width: width,
-            spacing: spacing, lineSpacing: lineSpacing)
+        let roles = subviews.map { $0[RoleKey.self] }
+        guard let fieldIndex = roles.firstIndex(of: .field),
+              let toggleIndex = roles.firstIndex(of: .toggle) else {
+            // No 🔍 door among the subviews: VX-175's two classes, as shipped.
+            let arranged = LibraryControlsFlowRule.arrange(
+                children, lineOneCount: lineOneCount, width: width,
+                spacing: spacing, lineSpacing: lineSpacing)
+            return Placed(frames: arranged.frames.map { $0 }, size: arranged.size)
+        }
+        let others = roles.indices.filter { roles[$0] == .other }
+        guard let scopeIndex = others.first else {
+            return Placed(frames: Array(repeating: nil, count: subviews.count), size: .zero)
+        }
+        let restIndices = Array(others.dropFirst())
+        let row = LibraryControlsFlowRule.Row(
+            field: children[fieldIndex], toggle: children[toggleIndex], scope: children[scopeIndex],
+            rest: restIndices.map { children[$0] })
+        let arranged = LibraryControlsFlowRule.arrangeRow(
+            row, width: width, spacing: spacing, lineSpacing: lineSpacing, searchOpen: searchOpen)
+        // The rule's flat order (field · toggle · scope · rest) back to the
+        // subviews' own.
+        let order = [fieldIndex, toggleIndex, scopeIndex] + restIndices
+        var frames: [CGRect?] = Array(repeating: nil, count: subviews.count)
+        for (flat, index) in order.enumerated() { frames[index] = arranged.frames[flat] }
         #if DEBUG
         if LibraryControlsFlowTrace.sink != nil {
             LibraryControlsFlowTrace.record(
-                width: width, subviews: subviews, children: children, arranged: arranged, spacing: spacing)
+                width: width, subviews: subviews, row: row, arranged: arranged, spacing: spacing)
         }
         #endif
-        return arranged
+        return Placed(frames: frames, size: arranged.size)
     }
 }
 
@@ -258,15 +485,17 @@ nonisolated enum LibraryControlsFlowTrace {
     }
 
     static func record(
-        width: CGFloat, subviews: LayoutSubviews, children: [LibraryControlsFlowRule.Child],
-        arranged: LibraryControlsFlowRule.Arrangement, spacing: CGFloat
+        width: CGFloat, subviews: LayoutSubviews, row: LibraryControlsFlowRule.Row,
+        arranged: LibraryControlsFlowRule.RowArrangement, spacing: CGFloat
     ) {
         guard let sink else { return }
         // The decision, replayed through the real rule with each child's
         // width answer recorded as it is asked (a counted child — the sort
-        // slot — never asks; it is its widest, rigid).
+        // slot — never asks; it is its widest, rigid). VX-350: the replay is
+        // the row's class (`widthClass`), over the rule's flat order —
+        // [0] field · [1] 🔍 · [2] scope · [3…] the rest.
         var steps: [String] = []
-        let recorded = children.enumerated().map { index, child in
+        func recorded(_ child: LibraryControlsFlowRule.Child, _ index: Int) -> LibraryControlsFlowRule.Child {
             var copy = child
             copy.width = { offered in
                 let taken = child.width(offered)
@@ -275,17 +504,24 @@ nonisolated enum LibraryControlsFlowTrace {
             }
             return copy
         }
-        let decided = LibraryControlsFlowRule.fitsOneLine(recorded, width: width, spacing: spacing)
+        let replay = LibraryControlsFlowRule.Row(
+            field: recorded(row.field, 0), toggle: recorded(row.toggle, 1), scope: recorded(row.scope, 2),
+            rest: row.rest.enumerated().map { recorded($1, $0 + 3) })
+        let decided = LibraryControlsFlowRule.widthClass(replay, width: width, spacing: spacing)
         let readings = subviews.enumerated().map { index, subview in
             let narrowest = subview.sizeThatFits(ProposedViewSize(width: 0, height: nil)).width
             let widest = subview.sizeThatFits(ProposedViewSize(width: .infinity, height: nil)).width
             let ideal = subview.sizeThatFits(.unspecified).width
-            return "[\(index)] n=\(text(narrowest)) w=\(text(widest)) flex=\(text(children[index].flexibility))"
+            return "[\(index)] n=\(text(narrowest)) w=\(text(widest)) flex=\(text(widest - narrowest))"
                 + " ideal=\(text(ideal)) floor=\(text(subview[LibraryControlsFlow.FloorKey.self]))"
                 + " widest=\(text(subview[LibraryControlsFlow.WidestKey.self]))"
+                + " role=\(subview[LibraryControlsFlow.RoleKey.self])"
         }
-        let frames = arranged.frames.map { "\(text($0.minX))+\(text($0.width))@\(text($0.minY))" }
-        sink("\(pass) w=\(text(width)) · decided=\(decided) arranged.oneLine=\(arranged.oneLine)"
+        let frames = arranged.frames.map { frame in
+            frame.map { "\(text($0.minX))+\(text($0.width))@\(text($0.minY))" } ?? "unshown"
+        }
+        sink("\(pass) w=\(text(width)) · decided=\(decided) arranged.class=\(arranged.widthClass)"
+             + " lines=\(arranged.lineCount)"
              + " size=\(text(arranged.size.width))x\(text(arranged.size.height))"
              + " · decision steps \(steps.joined(separator: " "))"
              + " · frames \(frames.joined(separator: " "))"
@@ -303,6 +539,49 @@ extension View {
     /// The widest a changing label in `LibraryControlsFlow` can read.
     func libraryControlsWidest(_ width: CGFloat) -> some View {
         layoutValue(key: LibraryControlsFlow.WidestKey.self, value: width)
+    }
+
+    /// VX-350: this subview's role in `LibraryControlsFlow` (the field, or
+    /// the 🔍 door; every other subview is `.other`).
+    func libraryControlsRole(_ role: LibraryControlsFlow.Role) -> some View {
+        layoutValue(key: LibraryControlsFlow.RoleKey.self, value: role)
+    }
+}
+
+// MARK: - The 🔍 door (VX-350)
+
+/// **The search field's narrow face** (VX-350): a magnifying glass that
+/// opens the field on its own line below the controls, the caret in it.
+/// Shown only in the row's collapsed class (`LibraryControlsFlow`); it says
+/// when the field is open (the voice's wash behind it) and when a question
+/// is asked while the field is closed (the glyph in the voice's accent).
+struct LibrarySearchToggle: View {
+    let tokens: VoiceTokens
+    /// The field is open below the controls.
+    let open: Bool
+    /// A question is asked (the band says it) — worth a mark while the field
+    /// is closed.
+    let asking: Bool
+    let onPress: () -> Void
+
+    /// The door's one size — a stable width for the row's decision.
+    nonisolated static let size = CGSize(width: 28, height: 22)
+
+    var body: some View {
+        Button(action: onPress) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(asking && !open ? tokens.accent : tokens.muted)
+                .frame(width: Self.size.width, height: Self.size.height)
+                .background {
+                    if open {
+                        RoundedRectangle(cornerRadius: 5).fill(tokens.wash)
+                    }
+                }
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.borderless)
+        .help(tokens.chromeLabel(LibraryCatalogView.searchPrompt))
+        .accessibilityLabel(LibraryCopy.searchToggleLabel)
     }
 }
 

@@ -56,15 +56,19 @@ extension Operations {
                 if let expected = edit.expectedText, variant.workingText != expected {
                     throw OperationError.bufferChangedSinceGesture(variantID: edit.variantID)
                 }
-                guard variant.workingText != edit.newText else { continue }
+                // VX-357: the new text with U+0000 removed (`StoredText`) —
+                // the no-op check, the row and the entry's pre-image read what
+                // is stored; `expectedText` compares with the stored buffer.
+                let newText = StoredText.stripped(edit.newText)
+                guard variant.workingText != newText else { continue }
                 if try isDirty(db, variant) {
                     _ = try insertCommit(db, variant: variant, kind: .auto, message: nil, now: now)
                 }
                 pre.append(TextPreImage(
                     variantID: variant.id,
                     text: variant.workingText,
-                    postOpText: edit.newText))
-                variant.workingText = edit.newText
+                    postOpText: newText))
+                variant.workingText = newText
                 variant.updatedAt = now
                 try variant.update(db)
                 try registerTextChange(

@@ -108,7 +108,7 @@ Pieces, in order, EACH its own commit (`Part of VX-386` / `Part of VX-390` / `Pa
    report's appendix probe — `notes/plans/vx-378-ladder-round-4.md`); `Promises.swift`'s STATED LIMITS L1 parenthetical
    widens (a lagging device may be Castle-recorded). Proof: the protection set green in both configurations.
 2. **The `protection_record` table — a LOCAL-ONLY migration, its own commit** (CLAUDE.md's schema-commit rule):
-   `v1_30_protection_record` — `protection_record(library_id TEXT PRIMARY KEY, record TEXT NOT NULL, updated_at TEXT NOT
+   `v1_31_protection_record` (born `v1_30_protection_record`; renumbered at the fold of main after VX-348 merged its own v1_30 — theirs registers first) — `protection_record(library_id TEXT PRIMARY KEY, record TEXT NOT NULL, updated_at TEXT NOT
    NULL)`, the `ProtectionRecord` as `ProtectionCoding` JSON. Registered in `SyncSchema.localOnlyTables` (never a payload,
    never a mirror — the completeness walk pins it; the plaintext export DROPS it, as the record's own doc says: *"the
    plaintext export leaves it behind"*; `LocalMachineryRecreation` re-creates it empty). The DDL lives in ONE value
@@ -643,7 +643,7 @@ from <date>. Nothing you do here changes it or your library.*
 - Piece 1 — VX-386, the three residues (`PlanRunner` guard-off resume's `catch ActRolledBack`; `U4PromiseCheckTests
   .onePostureStillCatchesAFollowedSyncedDevice`; `Promises.swift` L1's parenthetical): DONE (this commit) — the
   protection set's counts in both configurations PENDING (run at the unit's close).
-- Piece 2 — the `protection_record` LOCAL-ONLY migration `v1_30_protection_record`: DONE (this commit) —
+- Piece 2 — the `protection_record` LOCAL-ONLY migration `v1_31_protection_record` (born `v1_30_protection_record`; renumbered at the fold of main after VX-348 merged its own v1_30 — theirs registers first): DONE (this commit) —
   `Persistence/ProtectionRecordSchema.swift` (the ONE DDL value + the one-row codec: a write replaces every row, a
   read of two refuses `moreThanOneRecord`), the migration, the ONE `Sync/` line (`SyncSchema.localOnlyTables`), the
   `LocalMachineryRecreation` map entry (the shared value, re-created EMPTY), `MigrationTests.expectedTables` (the
@@ -2172,3 +2172,24 @@ its pre-mutation copy in the session scratchpad — the protocol's rule is "comm
 have left a mutated, uncommitted file); restored at once and `cmp`-checked. `git worktree list` shows none of this session's
 (no scratch worktree was used — the doors are new code, their pins red by construction on the pre-unit tree, which had none
 of these types).
+
+**ORCHESTRATOR RULING on the Look-inside fork (2026-10-18, at U3's proposal — P-VX306-U3-15, bundled under #233):** **(b), the
+read-only facts sheet, as proposed** — rule 17's "opens read-only, writes nothing, closing forgets" at its honest minimum:
+§7c (10)'s line first, the copy's kind and day, its books with note counts, its notes newest first a page at a time, a note's
+text read-only on pick (blocks in order, the chosen take, the default as fallback), *Make this my library…* beside *Close*;
+the key from `lookInside` (a read), a private byte copy (the catalogued file and its non-empty `-wal` copied; never the
+catalogued file itself), ONE keyed read connection over raw SQL on columns every schema since Phase 1 carries — never the
+migrator, never `Operations`, never the ambient database; nothing written (no key file, keychain item, record, memory item or
+defaults key) — proven by a test with the executor's write log empty and every keychain item and container byte unchanged
+across look → read → close; closing drops the key, closes the connection, deletes the private folder. (a) is refused for
+this phase on the implementer's trace: a second `AppSession` cannot exist without global state on this tree, and the read
+tier's doors write through the ambient `Operations` database — a "read-only" window built from the app's surfaces would
+write to the LIVE library under the copy's row IDs; it is a design unit of its own, not a door. **With (b) ruled, the
+missing face's and rule 27's *Open Library…* doors COME BACK as "file, then the two doors"** (P-VX306-U3-7 narrowed: the
+door renders again on the new road and leads to the picked flow). **The filing tension:** the filed copy stays listed (rule
+19: copies of other libraries are listed and can be deleted — VX-309's delete) while the LOOK itself forgets; the filing
+writes a copy of the pick, never anything of hers — accepted, said in the bundle. **Also ruled at this seam:** P-VX306-U3-5
+(the plain-text export REFUSES on the new road with its sentence; T-8 stays VX-309's) — accepted, the implementer's trace
+shows today's road unsafe there; P-VX306-U3-3 (the confirm's lead drops "and passphrase" over a library with none) —
+accepted, truth over verbatim. The fold of main at this seam renumbered U1a's migration to `v1_31_protection_record` (VX-348's
+`v1_30` registers first); the dev store, which applied the old name, re-applies the idempotent DDL at its next open.

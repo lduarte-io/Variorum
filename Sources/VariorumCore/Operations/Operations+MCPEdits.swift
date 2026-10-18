@@ -80,6 +80,12 @@ extension Operations {
         undoLabel: String, guardedBy guardian: WriteGuard? = nil
     ) throws -> MCPTakeEdit {
         let names = Self.mcpEditCommitNames(client: client)
+        // VX-357: the new text with U+0000 removed (`StoredText`) — the no-op
+        // check, the churn, the row, the after-commit, the entry's pre-image
+        // and the answer's digest all read what is stored. `expectedText`
+        // stays as sent: a precondition compares with the stored buffer,
+        // which never holds a null character.
+        let newText = StoredText.stripped(newText)
         let landed: (edit: MCPTakeEdit, preImage: TextPreImage?) = try database.write { db in
             try guardian?(db)
             var variant = try editableVariant(db, variantID)
@@ -146,7 +152,8 @@ extension Operations {
             try guardian?(db)
             var block = try liveBlock(db, blockID)
             try ensurePlacementUnlocked(db, blockID: blockID)
-            let trimmed = name?.trimmingCharacters(in: .whitespacesAndNewlines)
+            // VX-357: U+0000 removed first (her `setBlockName`'s rule).
+            let trimmed = StoredText.stripped(name)?.trimmingCharacters(in: .whitespacesAndNewlines)
             let normalized = (trimmed?.isEmpty ?? true) ? nil : trimmed
             guard block.name != normalized else { return nil }
             let old = block.name

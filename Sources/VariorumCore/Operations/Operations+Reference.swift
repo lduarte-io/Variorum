@@ -20,7 +20,8 @@ extension Operations {
             let now = date.now
             let reference = Reference(
                 id: newID(), ownerId: currentOwnerID(), containerId: postID,
-                kind: kind, name: name, url: url, fileBookmark: fileBookmark,
+                kind: kind, name: StoredText.stripped(name), url: StoredText.stripped(url),  // VX-357
+                fileBookmark: fileBookmark,
                 position: try referencePosition(db, containerID: postID, at: insert),
                 createdAt: now, updatedAt: now)
             try reference.insert(db)

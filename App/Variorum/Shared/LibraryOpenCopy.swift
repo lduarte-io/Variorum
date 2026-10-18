@@ -99,6 +99,12 @@ nonisolated enum LibraryOpenCopy {
             + "from this backup, duplicate it first — duplicates stay."
     }
     static let resumeSyncDoor = "Resume Sync"
+    /// VX-339 (PROVISIONAL words — the run record's P-VX339-1): the banner's
+    /// line when Resume could not remove the hold's marker beside the
+    /// library — the hold still stands, so the banner stays and says so.
+    static let resumeMarkerNotRemoved =
+        "Sync is still waiting: Variorum couldn't remove the restore marker beside your library. "
+        + "Press Resume Sync to try again."
 
     // MARK: - The restore surface's rows (decision 11 rendered)
 

@@ -59,6 +59,10 @@ nonisolated enum SearchAnswerCopy {
     /// to being commits": within search the rows wear the chip's word): the
     /// kind and the day it was saved — "commit · Oct 6".
     static func savepoint(day: String) -> String { "commit \u{00B7} \(day)" }
+    /// VX-351 (the VX-348 run, U4): a commit line's hover leads with this
+    /// verb — *Committed Oct 6, 2026 at 4:02 PM* (the commit vocabulary,
+    /// R-13s-31/32).
+    static let savepointHoverVerb = "Committed"
 
     /// An archived group's mark (only ever drawn under the facet) — and,
     /// since 13o U3, the badge an archived passage wears.
@@ -222,6 +226,9 @@ struct LibrarySearchLine: View {
                     .foregroundStyle(tokens.faint)
                     .lineLimit(1)  // P-8 (R-13u4-5): a kind word is one line
                     .fixedSize()
+                    // VX-351 (her R-VX348-3): a commit's line hovers its whole
+                    // fact; every other kind word hovers nothing.
+                    .stampHelp(LibrarySearchFace.kindHelp(kind: passage.kind, savedAt: passage.savedAt))
             }
             Text(LibrarySearchFace.snippet(passage.snippet, tokens: tokens))
                 .font(tokens.small)
@@ -319,6 +326,20 @@ enum LibrarySearchFace {
               let saved = savedAt.flatMap({ DateFormatter.variorumISO8601.date(from: $0) })
         else { return word }
         return SearchAnswerCopy.savepoint(day: TimeStampFace.day(saved, now: now, calendar: calendar, locale: locale))
+    }
+
+    /// **What a passage line's kind word HOVERS** (VX-351 — the VX-348 run,
+    /// U4; her R-VX348-1/3): a savepoint's whole fact, *Committed Oct 6, 2026
+    /// at 4:02 PM* — the glance says only the day. nil for every other kind
+    /// (they say no stamp) and for a stamp that is not one.
+    nonisolated static func kindHelp(
+        kind: SearchPassage.Kind, savedAt: String?,
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
+    ) -> String? {
+        guard kind == .savepoint else { return nil }
+        return TimeStampFace.tooltip(
+            labelled: SearchAnswerCopy.savepointHoverVerb, iso: savedAt,
+            calendar: calendar, locale: locale)
     }
 
     /// **The band's counts lead** (F-W-3, the VX-83 walk's W4 oddity): the
