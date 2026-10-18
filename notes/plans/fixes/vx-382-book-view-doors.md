@@ -1,7 +1,11 @@
 # VX-382 — Run: Book view doors & reds (VX-284 part B)
 
-**STATUS: OPEN — kicked off 2026-10-18 (architect shape). Branch `vx-382-book-view-doors` · worktree
-`~/dev/variorum-vx-382` · the Pro. Orchestrator session `vx-382`.** Members (sub-issues of VX-382), in order:
+**STATUS: CLOSED 2026-10-18 — all seven members Done; the ladder CLOSED at round 1 (0B/0M/3m/5n); PR #172
+merged to main (merge commit — the PR carries the SHA). The ratify bundle is QUESTIONS #232; the handoff
+`notes/handoffs/vx-382-handoff.md`; finals in `notes/plans/run-finals-ledger.md`; born VX-402 · VX-403 · VX-404 ·
+VX-405 (triaged). MOBILE PARITY: nothing mobile-visible (Mac book surfaces only). This run merged SECOND of the
+night's three — no release here; the ONE 0.9.8 is the last merger's (VX-348), this run's notes section already on
+the file.** Members (sub-issues of VX-382), in order:
 **VX-303 · VX-304 · VX-291 · VX-21 · VX-69 · VX-77 · VX-115.** Umbrella: VX-284 (`notes/plans/fixes/
 vx-383-duplicate-note.md` §"The split" carries her rulings verbatim). Cast (her word 2026-10-17): Opus orchestrates,
 `opus-implementer` builds, `opus-reviewer` cold-reviews — all at **xhigh**; no editor seam (VX-303/304 are routing

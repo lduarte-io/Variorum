@@ -57,3 +57,9 @@ Finals: core 2,895/337 · workbook 40/6 · VariorumMCPTests 362/68 (VX-353's sta
 Ladder: round 1 (opus) 2B/1M/2m/6n — F-1/F-2 BLOCKERs + F-3 MAJOR confirmed-fixed, F-7/F-8 riders, F-4 → VX-388, F-5 → VM-21, F-6/F-10/F-11 recorded, F-9 → VX-216; round 2 (fresh opus) CLOSED THE LADDER — all five fixes hold, 0B/0M/1m/2n (N-1 the sweep predicate + witness seed 82, built by the orchestrator, both legs verified first-hand; N-3 → VX-391).
 
 Finals: core full `swift test` 2,927/340 (the one red = VX-353's standing load flake, 3/3 alone); Mac batches — U1 red 29/4 (the 9 new pins exactly) · U1 green 135/18 · U2 red 18/4 (the 7 new pins) · U2 green 132/17 · fix leg red 11/2 + phone red 8/1 (exactly the new pins) · fix leg green 143/18 + phone 23/3; the orchestrator's both-voices walk PASSED (the run record's walk section).
+
+## VX-382
+
+Ladder: round 1 (opus) 0B/0M/3m/5n — CLOSED AT ROUND 1: R1-1 hollow by measurement (the Index→Outline carry pin green both roads, kept as non-regression), R1-2 (the click-is-her-place fix) and R1-7 (the Takes cell's dead zone) confirmed-fixed red-on-old, both orchestrator-line-checked; R1-3 → VX-402 (+ the comment corrected in-run); R1-6 → VX-403; R1-4/R1-5 → VX-300's notes; R1-8 hygiene done.
+
+Finals: Mac batches — U1a 1,590/259 · U1b 1,998/332 + the D-2 verify 308/64 · U2 649/125 · the FOLD batch on the combined tree 700/132 · the ladder guard batch 342/71 — the only non-known red in every run VX-167's standing flake (red alone with its exact signature, not attributed); red-on-old: U1a 3 families + 2 guard probes, U1b 4 families + 2 probes, U2 3 families + the VX-77 dark probe (red at "ink at 0.0", green under dark with the .aqua pinning), the ladder's 2; core `swift test` 2,897/338 (U1b); walks — THE U1 WALK both voices (W-1 found there, fixed, re-walked) and THE U2 WALK both voices, all walked rows PASS.
