@@ -1102,3 +1102,15 @@ Found posture: `appearanceChoice` = `system`; zero app instances. Steps run in t
 place from the committed tree (a265d0afc) and restored with `git checkout --` to a clean diff before the next. Logs:
 `scratchpad/u2/` (gitignored). **No revert in flight at this line.**
 
+- **Step 0 (found posture `system`, the tip):** `OutlineRoomTests` + `BookOrderConversionTests` alone — `Test run with
+  22 tests in 2 suites passed` (Index panel ink 15.0 pt, Read column 20.0 pt). GREEN (`step0.log`).
+- **Step 1 (dev domain `appearanceChoice` = dark, zero instances; the three `.aqua` lines deleted in place):** `22 tests
+  in 2 suites failed … with 3 issues` — `bothColumnsChromeStaysInsideThemAtTheirFloors`: "Index chapter panel clipped
+  at its 240-pt floor: ink at 0.0 pt" AND "Read contents column clipped … ink at 0.0 pt" (VM-5's exact 2-issue
+  signature); `theNavigatorsChromeStaysInsideItsColumn`: "ink at 0.0 pt" (VX-75's third issue). **VX-77's hypothesis
+  CONFIRMED; R-U2-B's red-on-old RED** (`step1.log`).
+- **Step 1b (`.aqua` restored by `git checkout --`, clean diff; still dark):** `22 tests in 2 suites passed` (15.0 /
+  20.0 pt) — the scans are host-independent (`step1b.log`).
+- **Step 1c:** `appearanceChoice` written back to `system`; read back `system`.
+- **VX-77 disposition: DISMISSED AS HOLLOW** — no product regression ever existed; the red was the test host's dark
+  posture, now structurally excluded by R-U2-B (8b38c88bb). No product code changed.
