@@ -300,6 +300,41 @@ counter beside them, `reminderDismissals` recorded through the op). Evidence: th
 store (a hand-swapped older file → the notice; a wrong key file beside the library → the offer; everything gone →
 rule 27); pins per face-state from planted facts.
 
+**U2 brief addendum (the orchestrator, 2026-10-18, after U1a — read with the U2 paragraph above):**
+- **Where the faces go:** a new Mac feature module `App/Variorum/Variorum/Features/Protection/` (the notice sheet, the
+  offer sheet, rule 27's face, the reminder's calm ask, the set-passphrase sheet); the WORDS in ONE cross-platform file
+  `App/Variorum/Shared/Protection/ProtectionWords.swift` (the phone reuses them at U3), each string exactly as §7c drafts
+  it — the notice's two sentences are the MODEL's constants (`LibraryNotice.olderCopyWords`/`differentLibraryWords`,
+  hers; the face never restates them).
+- **The notice** consumes `UnlockedLibrary.notice` at the open (U1b hands it through the route) — shown ONCE as §7c (4),
+  then the library opens; the executor's `refreshMemory` repair has already made this Mac remember this one.
+- **The offer** is `OwedAct.offerKeyFile` → `ProtectionExecutor.searchKeyFiles(_:catalog:typed:)` (a READ) → `KeyFileOffer`
+  rendered by §7c (2) → her yes = `useOfferedKeyFile` (the act `.useKeyFile` on a plan); *Not now* writes nothing. The
+  split pair (`.besideOpensItOnlyThroughItsHistory`) reads §7c (2)'s last sentence. The `.noKeyFileAnywhere` answer of
+  the search is rule 27's face.
+- **Rule 27** has two moments: before unlock `LobbyRoads.noKeyFileAnywhere` (the lobby's face per §7c (3), its doors
+  the missing face's); after a quiet-road open `Fault.noKeyFileAnywhere` (a standing banner on the open library in the
+  same words, minus the doors — nothing rebuilds a key file from the key).
+- **Rule 1's restore** is `Repair.restoreKeyFileFromMirror`, run by the executor's `runRepairs` at the open (U1b wires
+  the pass) — U2 gives it its RECEIPT on the status seam: §7c (6).
+- **Rule 3's reminder:** `OwedAct.askPassphrase(.beforeFirstBackup)` / `(.quietRoadFailed)` are the model's two moments;
+  the launch-counted schedule (the third launch, then weekly twice, then with "don't show again" — rule 3) is a LOCAL
+  counter beside them on `CalmAsks`' cadence (`Features/CalmAsks/CalmAsks.swift`); a dismissal is recorded through
+  `recordPassphraseReminderDismissed` (one record write); the words are rule 3's sentence in sentence case (§7c (7)).
+  The ask leads to the SET-PASSPHRASE sheet — P-VX378-U3-1 (a)'s road, `resetPassphrase(_:.plainConfirm, …)`
+  (`Acts/KeyDoors.swift:125`): a new passphrase typed twice, nothing else asked (Standard: this Mac holds the key); the
+  sheet refuses when a passphrase already exists. Built here so the reminder leads somewhere and stage 2 walks —
+  **P-VX306-U2-0 (the orchestrator's provisional ruling):** options (a) BUILT — the minimal sheet on the reset door's
+  Standard road; (b) wait for VX-308's key doors (a reminder leading nowhere); (c) Change Passphrase accepting none
+  (P-VX378-U3-1 (c), a model change). The tutorial's last card (the lifecycle's stage 2 as her sitting had it) is NOT
+  rewritten here — the sheet is reachable from the reminder and from Settings ▸ Data Safety's protection pane under the
+  new road.
+- **Evidence (the orchestrator's walk, `vx-306-u2-walk`):** stage 2 (the ask → the sheet → the key file gains a
+  passphrase lock → the lobby's typed roads now say passphrase), stage 13 (a key door interrupted — NOT walkable without
+  a crash harness in the app; stands on the core's crash harness, said so), stage 14 (a hand-swapped OLDER dev-store
+  pair → the older-copy notice; a stray key file beside the library → the offer naming this Mac's keychain; everything
+  gone → rule 27's face), rule 1's restore (the live key file moved away by hand → the receipt and the file back).
+
 ### U3 — THE TWO DOORS: Look inside / Make this my library (+ the phone opens)
 
 Look inside (read-only; the executor's `lookInside`; the face is a window that says it is a copy and writes nothing —
@@ -493,6 +528,16 @@ one this Mac last had open* — with one button, *OK*; shown once, then the libr
 > Keychain and this Mac's login — so most people never type anything, and for most people that simply works forever.
 > If it ever stops, your passphrase or your words open the library, and nothing was ever at risk. Castle is the one
 > promise that there is no quiet road through Apple, ever; it is a choice you can make in Settings.
+
+**(6) Rule 1's restore receipt** (`Repair.restoreKeyFileFromMirror`, a quiet repair): *The key file beside your library was
+missing. This Mac's sealed copy was put back.*
+
+**(7) Rule 3's reminder** (her sentence in rule 3, sentence case; the calm ask's one line + two doors): *Your library is only
+secured through iCloud Keychain right now — please add a passphrase and keep your twelve words to ensure continued
+access.* Doors: *Set a passphrase…* · *Not now* (and, at the third return, *Don't show again*). **The set-passphrase
+sheet:** title *Set a passphrase*; lead *A passphrase is a convenience over your twelve words — easier to type, and either
+one can reset the other.*; two fields (*Passphrase* / *Again*); one button *Set passphrase*; the receipt *Passphrase
+set. Your twelve words still open the library too.*
 
 ## 8. ENVIRONMENT TRAPS AND THE BATCH PROTOCOL (carried verbatim into every brief)
 
