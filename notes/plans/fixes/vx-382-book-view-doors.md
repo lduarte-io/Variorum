@@ -216,7 +216,7 @@ tickets:
 |---|---|
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
 | U1a — VX-303 (the landing road) | VERIFIED 2026-10-18 (`vx-382-u1a` window) — red-on-old A·B·C red as planned, both guard probes red, tree restored clean between each; batch `Test run with 1590 tests in 259 suites` — 4 issues + 5 known: VX-115's standing red (BookCollectingDoorsTests) + `DestructiveUndoWarningTests.redoNeverAsks` (the known VX-167 parallelism flake, signature :141–143); VX-77's standing red did NOT reproduce (passed). 9 skipped (2 disabled suites). §U1a RECORD → batch results. Code tip f0d1b414f |
-| U1b — VX-304 (the box door + Index takes) | BUILT — batch + walk PENDING the `vx-382-u1b` window. Pieces A · pins · B · C · D committed (§U1b RECORD ▸ Commits; code tip: the focused-pane guard commit); headless build green; core suite green (one unrelated MCP timing pin, passes alone); suite list `scratchpad/u1b/only-testing.args` (332 suites); red-on-old plan and THE U1 WALK plan in §U1b RECORD |
+| U1b — VX-304 (the box door + Index takes) | IN WINDOW `vx-382-u1b` (claimed 2026-10-18) — red-on-old RUNNING as in-place edits from the committed tree 99e0634e4 (a successor: `git diff` shows what is reverted right now; restore = `git checkout -- <file>`); then the batch, then the walk. BUILT state: §U1b RECORD |
 | U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | NOT STARTED |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
 | Closeout (canon deltas, tickets, PR, handoff) | NOT STARTED |
