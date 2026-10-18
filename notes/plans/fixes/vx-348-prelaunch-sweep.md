@@ -360,8 +360,10 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   decision; headless replica green, red on the old rule); **PENDING:** the one-suite re-run
   (`VX350ControlsWidthClassTests`, the next window, the final product), the walk (three widths × both voices, light and dark — the list in
   the record), the QUESTIONS bundle (P-VX176-1, P-VX349-1, P-VX350-1…7). The U3 UNIT RECORD carries the rest.
-- **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** IN-PROGRESS — the U4 UNIT RECORD (at the end
-  of this file) carries the live status.
+- **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** BUILT — all four FIXED with pins (`98b878662`
+  · `b2dcef63f` · `6757ea121` · `e09d00b96` VX-351; `b32ebe484` VX-384; `fd4470556` VX-385 + VX-355); the headless suites
+  green but VX-353's flake; the Mac pins compiled; products IN-PROGRESS; **PENDING:** the Mac batch (red leg first), the
+  walk (the list in the U4 UNIT RECORD), the QUESTIONS bundle (P-VX351-1…7, P-VX384-1, P-VX385-1).
 - Then the ladder (fresh Fable per round, whole diff), closeout, merge. **Her overnight mandate (2026-10-18):**
   rule PROVISIONALLY and continue; merge to main at this run's own finish (finish-order serialization with
   VX-381/VX-382); leave the handoff AND, separately, the completed checklist block in her format. **Release (her
@@ -1887,12 +1889,217 @@ in). Disjoint files by design (the U2/U3 precedent); every U4 commit is path-lim
 
 ### LIVE STATUS (per member)
 
-- **VX-351 (the exact edit time past today, as ruled):** IN-PROGRESS — the sweep read; the design below; nothing built.
-- **VX-384 (a row-menu mint not listed until re-entry):** NOT-STARTED — traced (below); the fix rides VX-231's road.
-- **VX-385 + VX-355 (the Pool's quiet-receipt home):** NOT-STARTED — the shape: the shared `QuietReceiptLine` laid out
-  at the Pool's foot.
-- **Products (u4-fixed / u4-red):** NOT-STARTED.
+- **VX-351 (the exact edit time past today, as ruled):** DONE (`98b878662` core · `b2dcef63f` the two gaps · `6757ea121`
+  every speaker · `e09d00b96` the pins' split) — FIXED; the core pin GREEN headless; the Mac pins compiled, their RUN
+  PENDING the batch (red leg first); the walk PENDING (the list below).
+- **VX-384 (a row-menu mint not listed until re-entry):** DONE (`b32ebe484`) — FIXED on VX-231's road; pins compiled,
+  RUN PENDING the batch.
+- **VX-385 + VX-355 (the Pool's quiet-receipt home):** DONE (`fd4470556`) — FIXED (one fix, both tickets' cases pinned);
+  pins compiled, RUN PENDING the batch.
+- **Headless:** `swift test` whole at `e09d00b96` (`DerivedData/u4-swifttest.log`): VariorumCoreTests **3251 / 419
+  passed** (U3's 3250 + `everySpeakerSaysTheWholeFactInOneRule`); the third target 40 / 6 passed; VariorumMCPTests 383 /
+  71 with ONE failure — `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (19.1 s
+  against its 15 s bound), green alone (3 / 3, 2.2 s): VX-353's standing flake, not U4's (U4 touches no MCP-target
+  line). The mobile target compiles (`xcodebuild -scheme VariorumMobile -destination "generic/platform=iOS Simulator"
+  build`, BUILD SUCCEEDED — `Shared/BlockHistoryFace.swift`'s three pure additions; its products deleted after).
+- **Products (u4-fixed / u4-red):** IN-PROGRESS — durable detached checkouts of `e09d00b96` beside this worktree
+  (`~/dev/variorum-vx-348-u4fixed`, `~/dev/variorum-vx-348-u4red`); the red revert patch is
+  `DerivedData/u4-red-revert.patch` = `git diff 69ba370cc e09d00b96 --` the 26 product files (no other commit in that
+  range touches them — checked), applied `-R` in the RED CHECKOUT ONLY. This worktree is never reverted.
 - **No behavioural revert is in flight in this worktree.**
+
+### VX-351 — the exact edit time past today, as ruled (R-VX348-1/3)
+
+**The trace (inputs → wrong output).** `TimeStampFace` (core Domain) is the one stamp-wording brain; its whole-fact
+hover (`tooltip`) shipped on three speakers (List rows, Cards, the masthead). Everywhere else a stamp spoke with no
+hover, and two faces spoke their own rule:
+1. *The info panel's facts line* (`LibraryInfoPanel`, `LibraryPreview.note`): `lastEdited =
+   JournalDay.dayString(container.lastMajorRevisionAt ?? container.lastTouchedAt)` → "edited 2026-10-13" — the RAW day
+   key (a second wording rule, the drift class) AND a second fact under the same verb (the last MAJOR revision, where
+   the List row beside it says the last TOUCH: one note, two "edited" times on one screen). No hover.
+2. *The note box's stamps line* (`NoteBoxCopy.stampsLine`, rendered by `SidebarNoteBox`): `TimeStampFace.day` →
+   date-only, so a note edited minutes ago read "edited Oct 18" while every other stamp said "edited today 1:33 AM".
+   No hover.
+3. *Every other speaker* (the sweep table): glance words, no hover — her ask unmet anywhere but the three.
+
+**The fix.**
+- *Core* (`98b878662`, pure, Swift Testing): `TimeStampFace.whole(_:dayPrecision:)` — the verbless whole fact, *Sep
+  9, 2026 at 4:02 PM* (the year always, the minute whenever the stamp holds one; a day key its day alone, never an
+  invented noon) — and `tooltip(labelled:date:)` / `tooltip(labelled:iso:)` for a speaker whose verb is not one of the
+  three subjects. The three subjects' tooltips are the same door, byte for byte (pinned, every existing tooltip pin
+  green). No glance form changed; no setting; no click-flip change (R-VX348-2's setting is VX-389).
+- *The two gaps* (`b2dcef63f`): the panel's line says the row's own fact (`container.lastTouchedAt ??
+  container.createdAt` — `Queries.noteStamps`' rule) in the row's words (`TimeStampFace.relative`), hovering
+  `NotePreview.factsHelp`; `LibraryPreview.day` (the drift copy) is deleted. The note box's line speaks the glance
+  rule (`TimeStampFace.stamp(.edited)` · `"saved " + relative`) and hovers both facts whole
+  (`NoteBoxCopy.stampsHelp`, the line's order, joined " · ").
+- *Every speaker* (`6757ea121`): each face's hover from the one brain, through ONE modifier that says "no hover"
+  (`Core/Views/StampHelp.swift` — `.stampHelp(_:)` applies no tooltip at all for nil, never an empty one); the
+  pickers' rows carry it as data (`SearchPickerOption.help`, both `SearchPicker` renderers; `NotePickerRow.detailHelp`
+  — the grant picker's note feed reads it too, `MCPGrantPicker.NoteRow.dayHelp`).
+- *P1:* every hover spells a stamp the face already held — zero new reads; built eagerly per DRAWN row (`.help` takes
+  a value) through the cached formatter (sub-µs — the 18h ladder's R1-5 measurement); the lists stay lazy.
+
+**THE SWEEP TABLE** (speaker × words source × hover — every stamp-rendering site found by grepping
+`TimeStampFace.`, `JournalDay.dayString`, `DisplayTitle.day(fromStamp:`, `.formatted(date:`, `RelativeDateTimeFormatter`,
+`DateFormatter()`, `stampText`, and every `"edited "`/`"archived "`/`"deleted "`/`"saved "`/`"arrived "` literal in the Mac
+app and `Shared/`):
+
+| # | Speaker (face) | Words source | Hover |
+|---|---|---|---|
+| 1 | Library List row — trailing stamp + beside-title day (`CatalogRowStamp`) | `TimeStampFace.stamp` | ALREADY COVERED (18h) |
+| 2 | Library Cards — the pair / the click-flip (`CatalogCardStamps`) | `TimeStampFace` | ALREADY COVERED |
+| 3 | Note masthead stamp (`MastheadStamp`) | `TimeStampFace` | ALREADY COVERED |
+| 4 | Search answer sheet — note heads (`postRow` → `CatalogRowStamp`) | `TimeStampFace` | ALREADY COVERED |
+| 5 | Search answer sheet — a commit passage's "commit · Oct 6" (`LibrarySearchLine`) | `TimeStampFace.day` | **FIXED** — *Committed Oct 6, 2026 at …* (`LibrarySearchFace.kindHelp`) |
+| 6 | Library info panel — the facts line (`LibraryInfoPanel`) | was the raw day key of the last MAJOR revision → `TimeStampFace.relative` of the last touch | **FIXED** — words + fact + *Edited …* (`NotePreview.factsHelp`) |
+| 7 | Book sidebar note box — the stamps line (`SidebarNoteBox`) | was `TimeStampFace.day` → the glance rule | **FIXED** — words + both facts (`NoteBoxCopy.stampsHelp`) |
+| 8 | Timeline — trailing stamp (`TimelineView.row`) | `TimeStampFace` | ALREADY COVERED |
+| 9 | Timeline — beside-title stated day | `TimeStampFace.stamp(.dated)` | **FIXED** — *Dated Oct 13, 2026* |
+| 10 | Book Arrivals — "arrived …" (`BookArrivalsList`) | `TimeStampFace.relative` | **FIXED** — *Arrived …* (`ArrivalsCopy.arrivedHelp`) |
+| 11 | Book Archived line — "archived …" (`BookArchivedLine`) | `TimeStampFace.relative` | **FIXED** — *Archived …* (`ArchivedLineCopy.archivedHelp`) |
+| 12 | MCP grant picker — a note row's day | `TimeStampFace.day` over the feed's day key | **FIXED** — the minute of the last edit, or the stated day with its year (`SearchPickerOption.help` ← `NotePickerRow.detailHelp`); a fence word stands in the day's place → no hover |
+| 13 | MCP grant picker — a book row's context "… · edited Oct 3" (`PlaceLabels.context`) | `TimeStampFace.stamp(.edited)` | **FIXED** — *Edited …* to the minute (`MCPGrantPicker.bookOption`) |
+| 14 | Settings ▸ MCP ▸ Activity — a line's age, "39 seconds ago" (`MCPActivityRowView`) | `RelativeDateTimeFormatter` | **FIXED** — verbless whole fact (`MCPPane.whole`); words unchanged (P-VX351-7) |
+| 15 | Settings ▸ MCP ▸ Waiting — an ask's age (`MCPWaitingRowView`) | `RelativeDateTimeFormatter` | **FIXED** — verbless whole fact |
+| 16 | Note pickers — a row's day detail (Mark/Unmark as Versions; the grant picker's feed) (`NotePickerSheet`) | raw day key (`entry_date ?? touched day`) | **FIXED** (found) — hover only (P-VX351-4) |
+| 17 | Pool — a row's day (`PoolPostsView.row`) | raw day key of the last touch | **FIXED** (found) — *Edited …* (the picker's rule); words unchanged |
+| 18 | Snippets — a card's "edited <key>" (`BlocksAreaView`, `SnippetCardFace`) | raw day key | **FIXED** (found) — *Edited …* (`SnippetCardFace.editedHelp`); words unchanged |
+| 19 | Blocks workbench — a row's "edited <key>" and the context panel's edited fact (`BlocksWorkbenchView`) | raw day key | **FIXED** (found) ×2 — words unchanged |
+| 20 | Archived surface — a note row's stated day (`ArchivedView`) | raw `entry_date` | **FIXED** (found) — *Dated …*; words unchanged |
+| 21 | This Note's Tray — block and take rows' "deleted / archived <date>" (`TrayRowFace` / `TrayTakeFace.lead`) | Foundation date-only (row 63's glance) | **FIXED** (found) — *Deleted / Archived …*; glance kept |
+| 22 | Block History — a deleted take's "deleted <date>" (`DeletedTakeFace.lead`) | date-only (row 63) | **FIXED** (found) — *Deleted …* |
+| 23 | Block History — the lineage row "From a divide on Aug 12 — …" (`OriginPeekCopy.lineageRow`) | date-only (its ruling) | **FIXED** (found) — verbless whole fact |
+| 24 | ⌘K palette — a note row's stated day (`CommandPalette`) | `CatalogHit.detail` (raw key) | **FIXED** (found) — *Dated …*; words unchanged |
+| 25 | Library Trash rows — "deleted Oct 13, 2026 at 4:02 PM" (`RecoveryView`) | `TrayRowPreview.stampText` (date + minute) | ALREADY COVERED (the minute shown) |
+| 26 | Archived surface — "archived <date at time>" (notes and the BOOKS group) | `stampText` | ALREADY COVERED |
+| 27 | Note ▸ Versions rows · Block History commit rows · the comments panel | `.formatted(date:time: .shortened)` | ALREADY COVERED |
+
+**NOT speakers (P-VX351-1's scope):** a nameless note's DAY NAME (`DisplayTitle` — a title, not a stamp) and the cards'
+leads (`NoteCardFace`/`PoolCardFace`); the Library's when ▾ door, day chip and band ("edited on Oct 6" — a question she
+asked); the entry-date pickers (inputs); `PlaceLabels`' "made Oct 9" distinguisher (a disambiguator that grows its own
+minute when it must); app-state times (an MCP client's last seen / a request's first seen, sync rounds, backups, the
+subscription, crash reports, encryption dates, the restore hold).
+
+**Pins** (red on old by behaviour, pre-fix APIs only, in `VariorumTests/VX351StampHoverTests.swift`):
+- `VX351StampGapsTests.thePanelSaysTheRowsEditStampInTheOneRule` — a note committed Mar 2 2025 and touched Mar 5: the
+  facts line == "6 words · 1 block · " + `TimeStampFace.stamp(.edited, date: touched, now:)`, no raw key. RED on old:
+  "edited 2025-03-02" (both the wording and the fact).
+- `VX351StampGapsTests.theNoteBoxsLineSpeaksTheGlanceRule` — edited ten minutes ago: "edited today 10:30 AM · saved Aug
+  27". RED on old: "edited Aug 29 · saved Aug 27".
+- `VX351StampGapsTests.theNoteBoxHoversBothFactsWhole` × (Terminal, Study) — `SidebarNoteBox` composed in its selected
+  state: the line composed (premise — green on both) and both facts' whole words in its composition. RED on old: 2 of 2
+  (no hover).
+- `VX351SpeakerHoverCompositionTests.theAnswerSheetsCommitLineHoversItsWholeFact` — a REAL savepoint passage (the `+
+  commits` facet's road) composed in `LibrarySearchLine`. RED on old.
+- `VX351SpeakerHoverCompositionTests.theActivityLineHoversItsWholeFact` — `MCPActivityRowView`. RED on old.
+- **Justified edits** (each says so in place): `LibraryPreviewBrainTests.aNotePreviewsItsBlocksInOrderWithOneFactsLine`
+  (`LibraryPanelTests.swift` — its raw-key expectation now the one rule; RED on old) and
+  `NoteBoxCopyTests.theStampsLineSpeaksTheGlanceRuleAndOmitsWhatItDoesNotKnow` (`NoteBoxTests.swift` — was
+  `…IsDateOnly…` with "no time of day, ever", the rule her ruling retires; RED on old).
+- New API, fixed-only: `VX351HoverWordsTests.swift` (every speaker's hover words: the named, the gaps, the pickers incl.
+  the grant picker's note and book options, the found) and the headless `TimeStampFaceTests.everySpeakerSaysTheWholeFactInOneRule`
+  (GREEN, `swift test`).
+- The speakers drawn inside a `ForEach` (Timeline, Arrivals, Archived, the pickers' rows, Pool, Snippets, Blocks, Tray,
+  Block History, ⌘K) — their composition is out of `dump`'s reach (a ForEach's content is a closure): their words are
+  pinned, their faces are the walk's.
+
+### VX-384 — a note minted from the Library List's own row menu shows without re-entry
+
+**The trace (inputs → wrong state).** The List draws `LibraryCatalogModel.noteHits`, set only by its one read
+(`search()` / `refresh()`), re-asked by its own doors (rename, tag, archive…), a wing (`.task(id: wing)`), a mode
+(`modeChanged`) and the `.variorumNotesDeleted` signal. `LibraryViewModel.start()` — held by `RootView` for the
+window's life (`.task(id: wing) { await library.start() }`) — observes `observeLibrary(lastTouched desc, 200)` into
+`posts`, which NO face reads. The row menu's Duplicate (`postRowMenu` → `library.duplicateAsVersion` →
+`NoteDuplicate.perform` → `ops.duplicateAsVersion`, the copy minted with `last_touched_at = now`) re-asked neither,
+so the copy stood unlisted until a wing/mode/re-entry re-asked the catalog.
+
+**The fix — VX-231's road** (the VX-246 record: "the Bookcase already HOLDS an observation that moves exactly when
+membership does; only its one-shot twin does not follow it"; no new signal): the held listing counts its MEMBERSHIP
+moves (`LibraryViewModel.listingMoves`, `adoptHeldMembership` — `LibraryListingFollow.moved`: a delivery after the
+first whose SET of ids differs; order is not membership, so typing moves nothing), and the catalog follows it
+(`.onChange(of: library.listingMoves)` → `LibraryCatalogModel.followListingMove()` → `refresh()` in place —
+single-flight, never in the observation's own turn, the Bookcase's `followHeldMove` shape). A (re)started listing (a
+wing switch) takes its own baseline. **P1:** `observeLibrary` already re-runs at autosave rate (its region holds
+`container`); the new work per delivery is one Set of ≤ 200 ids — ∝ the held window, never the corpus; the re-read
+runs at membership rate (a note entering or leaving the newest-200 window), ∝ the listed rows, once per move.
+
+**Pins.** `VariorumTests/VX384LibraryFollowsMintsTests.swift` (red on old, pre-fix APIs only — the mounted catalog with
+the held listing started as `RootView` starts it): `aRowMenuDuplicateListsTheCopyWithoutReEntry` × (with tags,
+without) — RED on old 2 of 2 (the List keeps 3 of 4); `typingInAListedNoteNeverReAsksTheList` — the P1 guard
+(`searchGeneration` unchanged across six autosaves while the held listing re-orders), GREEN on both by nature.
+`VariorumTests/VX384ListingFollowRuleTests.swift` (new API, fixed-only): the rule and the counter.
+
+### VX-385 + VX-355 — the Pool gets a quiet-receipt home (one fix)
+
+**The trace.** `StatusCenter` routes a RECEIPT under her default `receipt_style` quiet to `quietLine`, which has a face
+only where a surface composes the one `QuietReceiptLine` (18i): the Library, Archived, the Bookcase, the Takes and commit
+bars and the book views do; `PoolPostsView` did not (its only bottom face was the error overlay). So, with the Pool
+open: a row's Duplicate with/without Tags (VX-385 — `NoteDuplicate.perform`'s receipt with its Open ›), an AI write's
+receipt and her ⌥⌘Z / ⇧⌥⌘Z "Undid / Redid" (VX-355 — `ShellActions.structuralUndo/Redo` → `status.receipt`) all landed
+in the quiet slot and spoke nowhere.
+
+**The fix** (`fd4470556`): the Pool composes the shared `QuietReceiptLine` at its FOOT — laid out below the cards, a
+hairline above it, present only while a receipt speaks and the Pool's own error does not (`PoolReceiptFoot.shows` — the
+Library's message-slot order; no reserved blank line). **VX-355's open question** ("a page-foot home or a toast?") is
+answered by the ruled fix shape: the Pool gains the line home — **PROVISIONAL P-VX385-1**. VX-121's band rule applies
+if a quick-entry band is ever added there.
+
+**Pins.** `VariorumTests/VX385PoolQuietReceiptTests.swift` (red on old — the open Pool's composition over the REAL roads;
+each starts from the fixed-tree premise "nothing speaks, no foot", green on both): `aRowDuplicateSpeaksAtThePoolsFoot` ×
+(with tags, without) — the receipt in the quiet slot (premise) and the Pool composing the line; `herUndoAndRedoSpeakAtThePoolsFoot`
+— the shell's ⌥⌘Z then ⇧⌥⌘Z doors over the duplicate's undo entry, the foot composed for each and gone between;
+`anAIsReceiptSpeaksAtThePoolsFoot` — a receipt carrying its Open › on the one seam the door speaks on. RED on old 4 of 4
+(the composition clauses). `VariorumTests/VX385PoolReceiptFootRuleTests.swift` (new API, fixed-only): the slot rule.
+
+### PROVISIONAL (for the merge's QUESTIONS bundle)
+
+- **P-VX351-1** — the sweep's SCOPE: a stamp speaker is a face that says WHEN something in her library happened (a note,
+  book, block, take, commit or comment; an arrival, archive or deletion; an AI's act on her writing) in words short of
+  the date-and-minute; every such face hovers the whole fact; a face already showing the minute is covered. Out: day
+  NAMES, a question's chosen day, inputs, distinguishers, app-state times (the list above). Alternatives: (b) the
+  ticket's named list only; (c) app-state times too (sync, backups, an MCP client's last seen).
+- **P-VX351-2** — the info panel's "edited" is the List row's fact (last touch, falling back to the mint), no longer the
+  last major revision. Alternative: (b) keep the major-revision fact under its own words ("revised …").
+- **P-VX351-3** — the note box's stamps line speaks the glance rule (today shows its time). Alternative: (b) keep it
+  date-only and add the hover alone.
+- **P-VX351-4** — the FOUND speakers keep their words (the raw day keys of the note pickers, Pool rows, Snippets cards,
+  the Blocks workbench, the Archived surface's stated day, ⌘K's note day): hover only. Their words are the same drift
+  class as the info panel's gap; a follow-up ticket would route them onto `TimeStampFace` (where a day key mirrors a
+  day-NAMED note's title — the pickers' and the Pool's suppression rule — her call whether the day key stays).
+- **P-VX351-5** — the hover's verb is the speaker's own glance word, capitalised (Edited · Created · Dated · Saved ·
+  Arrived · Archived · Deleted), "Committed" for the commit line (R-13s-31/32); VERBLESS where the line already names
+  the act (the lineage row, the MCP Activity line, a Waiting ask).
+- **P-VX351-6** — a two-fact line (the note box's "edited … · saved …") hovers both facts whole, in the line's order,
+  joined " · ".
+- **P-VX351-7** — the MCP Activity and Waiting ages gain only the hover; their relative words (a third wording rule)
+  stay — VX-401 owns their freshness, and whether they join `TimeStampFace`'s words is that ticket's.
+- **P-VX384-1** — the follow road is the held newest-200 window's MEMBERSHIP: a move outside it (an old note archived or
+  restored from another pane in a library past 200 notes) still does not re-ask — VX-122's remainder (Parked) stays its
+  own (this road may cover some of VX-122's cases inside the window; not claimed). An act whose own door re-asks reads
+  twice (VX-231's accepted double read).
+- **P-VX385-1** — the Pool's quiet line is a laid-out FOOT present only while a receipt speaks (the Library's message
+  row's shape), the Pool's own error first. Alternatives: (b) an overlay at the bottom (Archived's shape — over the
+  last card); (c) a permanent bottom bar (new chrome). VX-355 closes with VX-385 on this one fix.
+
+### What the walk must show (the run's ONE combined window — the dev store, BOTH voices; captures into `notes/plans/vx348-screens/u4/`, gitignored)
+
+- **VX-351 (hover each, both voices; the glance words unchanged except the two gaps):** the Library info panel's facts
+  line — a note edited today ("edited today …") and one edited days ago ("edited Oct 13"), each hovering "Edited <date>,
+  <year> at <time>"; a book's sidebar note box in its SELECTED state — the stamps line's words and its two-fact hover;
+  the Timeline — a dated note's beside-title day; the search answer sheet with `+ commits` — a commit line; a book's
+  Arrivals row (a living book with "wait at Arrivals") and its Archived line; the MCP grant sheet's WHERE picker — a note
+  row's day and a book row's "edited …"; Settings ▸ MCP ▸ Activity — a line's age (and a Waiting ask if one is open);
+  then the found speakers — the Mark as Versions picker's day, a Pool row's day, a Snippets card's edited part, the
+  Blocks workbench's row and panel, the Archived surface's stated day, This Note's Tray rows (Leaving and Archived),
+  Block History's deleted take and lineage row, ⌘K's note day. Regressions: the List row / Cards / masthead hovers
+  unchanged.
+- **VX-384:** the Library List open → right-click a note row → Duplicate with Tags → the copy appears in the List within
+  a moment, the receipt speaking, WITHOUT leaving; the same for Duplicate without Tags; in a split beside a note being
+  typed into, the List neither flickers nor jumps.
+- **VX-385 + VX-355:** the Pool open (receipts quiet — the default) → a row's Duplicate with Tags and without → the
+  receipt line at the Pool's foot with its Open ›, gone after ~6 s, nothing reserved at rest; ⌥⌘Z → "Undid: Duplicate
+  with Tags" at the foot; ⇧⌥⌘Z → "Redid: …"; if the window's live round writes into the Pool, the AI's receipt there.
 
 ## WALK-PLANNING NOTE (2026-10-18 ~08:4x — the coordinator's VX-306 heads-up)
 
