@@ -34,11 +34,26 @@ nonisolated enum MultiBookEditNote {
 
     /// Her ruled copy grammar, verbatim from round 9: *"editing here edits
     /// it everywhere — Duplicate as Version to diverge"*, said in the app's
-    /// own sentence and naming where the door is.
+    /// own sentence and naming where the door is. VX-372 (P-C-1): the door is
+    /// named by its verb now (the chip's row runs Duplicate with Tags).
     static func sentence(bookCount: Int) -> String {
         "This note is in \(bookCount) books — editing here edits it everywhere. "
-            + "To make a copy that can diverge, use Duplicate as Version "
+            + "To make a copy that can diverge, use \(DuplicateCopy.withTagsVerb) "
             + "(the book chip under the title)."
+    }
+
+    /// **VX-111 — the BOOKS the note is in, and only those.** The trigger
+    /// reads `Queries.readingsContaining` — the chip's list, which is every
+    /// live BOOK holding a membership row (archived books included:
+    /// membership is a fact, P-13ie-U1-8) PLUS every gathering whose rule
+    /// SHOWS the note. A gathering holds nothing (§1), so editing a note
+    /// edits it "everywhere" only across its books; counting the gatherings
+    /// made a bookless note in two gatherings say "This note is in 2 books".
+    /// The membership readers are ruled to count BOOK rows only, live books
+    /// only (13i-c); this is the masthead's own count (`MembershipChip`'s
+    /// `kind == .book`).
+    static func memberBooks(_ readings: [Reading]) -> [Reading] {
+        readings.filter { $0.kind == .book }
     }
 
     /// Should the note be said for a post in `bookCount` books? The two
@@ -50,9 +65,14 @@ nonisolated enum MultiBookEditNote {
     /// W23's target for the note's button: the first CURATED book in the
     /// chooser's own order. ONE rule that reduces to "the book you came
     /// from" in exactly the case that matters, because arriving at a book
-    /// floats it to the top of that order — and nil where every membership
-    /// is derived, so the note speaks WITHOUT a button rather than offering
-    /// an act that could only refuse (P-2, at a status offer).
+    /// floats it to the top of that order.
+    ///
+    /// Since VX-111 the trigger hands this `memberBooks` — books only, and at
+    /// least two whenever the note speaks — so at the trigger a target always
+    /// exists (ladder r1 F-8: the old "nil where every membership is derived"
+    /// line described the pre-VX-111 input). The `kind == .book` filter and the
+    /// nil answer stay as this function's own contract for a mixed list (P-2:
+    /// never offer an act that could only refuse; `BookAscentTests` pins it).
     ///
     /// It lives here rather than inside the trigger's closure for the reason
     /// `MembershipChip.ascend` does: a promise made inside a closure is a

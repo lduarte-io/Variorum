@@ -169,6 +169,22 @@ struct MCPWingFacesTests {
         }
     }
 
+    /// **VX-261 (VX-336 U7):** `list_my_activity` — a client reading its OWN
+    /// recent acts, logged target-less like every read — says so in words.
+    /// Red on the tree before it: the walk above stays green there (the
+    /// table's fallback says "used list my activity" — no underscore, no tool
+    /// id), so the words get their own pin.
+    @Test func listMyActivitySpeaksItsOwnWords() {
+        func said(allowed: Bool, count: Int) -> String {
+            MCPPaneCopy.activityLine(MCPActivityFace.Line(
+                id: 1, clientName: "claude-code", act: "list_my_activity", targetKind: nil, targetID: nil,
+                targetTitle: nil, allowed: allowed, count: count, at: "2026-10-14T00:00:00.000Z"))
+        }
+        #expect(said(allowed: true, count: 1) == "claude-code checked its recent activity")
+        #expect(said(allowed: true, count: 3) == "claude-code checked its recent activity (3 times)")
+        #expect(said(allowed: false, count: 1) == "claude-code was refused checking its recent activity")
+    }
+
     /// **The UX-fix ladder's UXR1-1 (round 1, MINOR):** a TWO-SIDED act logs
     /// the side that refused — the wing move's DESTINATION wing, the add's and
     /// the filing's BOOK — and the line spoke it as the thing moved ("refused

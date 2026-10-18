@@ -644,9 +644,10 @@ final class ShelfViewModel {
                 let result = try await session.runner.run { ops in
                     try ops.collectPostIntoSmartReading(postID, into: readingID)
                 }
-                receipt(result.alreadyMatched
-                    ? BookcaseCopy.alreadyShowing
-                    : BookcaseCopy.shownByTagging(result.appliedTagPaths))
+                // VX-241: the op's in-transaction fact decides "shows it
+                // now" (the board lists unarchived books, but the row can be
+                // stale under an archive from another door).
+                receipt(BookcaseCopy.collectReceipt(result))
             } else {
                 // 13i-c U4 (§4 row 17): the one membership road — an
                 // ownership refusal OPENS the choice sheet (P-2).
@@ -733,25 +734,76 @@ nonisolated enum BookcaseCopy {
 
     /// A note dropped on a GATHERING's row (R98 — adding IS tagging): the
     /// receipts say what the act did — it tagged — and why the gathering now
-    /// shows the note. Never "collected"/"added" (a gathering holds nothing).
+    /// shows the note. Never "collected"/"added" (a gathering holds nothing)
+    /// — save her own "Added to the gathering." (#217), the mint's arm for a
+    /// new note that needed to wear nothing.
     static let alreadyShowing = "Already showing \u{2014} it matches this gathering's rule."
+    /// VX-250 (P-VX381-1, PROVISIONAL — the kickoff's ruling): R98's collect
+    /// receipt SHORTENS with the mint's, to her register (QUESTIONS #217),
+    /// so the one receipt family keeps one voice.
     static func shownByTagging(_ paths: [String]) -> String {
-        "Tagged " + paths.map { "#\($0)" }.joined(separator: " ")
-            + " \u{2014} the gathering shows it now, as its rule matches."
+        "Tagged " + paths.map { "#\($0)" }.joined(separator: " ") + shownNowTail
     }
 
-    /// VX-217 — a NEW note minted inside a gathering (PROVISIONAL #VX217-b):
-    /// the tagging receipt's own pattern, extended for the star her
-    /// R-VX214-4 lets a mint set. Tags alone read exactly `shownByTagging`.
-    static func shownByMint(_ paths: [String], starred: Bool) -> String {
-        let tail = " \u{2014} the gathering shows it now, as its rule matches."
+    /// The receipts' shared ending — her words, #217.
+    private static let shownNowTail = " \u{2014} the gathering shows it now."
+
+    /// **VX-241 — R98's collect on an ARCHIVED gathering** (PROVISIONAL
+    /// wording, for her bundle). An archived gathering assembles EMPTY
+    /// everywhere (13i-e), so "shows it now" would be false; the tags ARE
+    /// applied (explicit adds stay open). The receipt says both halves:
+    /// what the act did, and when the gathering will show it.
+    ///
+    /// VX-249: a collect that also STARRED the note names the star, composed
+    /// as the mint's family composes it ("Tagged #essays and starred — …",
+    /// "Starred — …"), with this arm's honest tail (R-VX381-A5's composition).
+    ///
+    /// Ladder r1 F-7: an act that wore NOTHING reads "Added — …" (the live
+    /// arm's "Added to the gathering." twin, PROVISIONAL), never "Tagged  — …"
+    /// with no tag in it. Unreachable through the op today (an empty plan that
+    /// isn't already met is a planner/belt disagreement, and the belt throws).
+    static func taggedWhileArchived(_ paths: [String], starred: Bool = false) -> String {
+        (wore(paths, starred: starred) ?? "Added") + shownAfterUnarchiveTail
+    }
+    /// …and when the note already matched the rule (nothing was applied).
+    static let alreadyMatchesWhileArchived = "It already matches" + shownAfterUnarchiveTail
+    private static let shownAfterUnarchiveTail =
+        " \u{2014} the gathering shows it once it's unarchived."
+
+    /// The board's collect receipt (a note dropped on a gathering's row):
+    /// the op's own in-transaction fact decides whether "shows it now" is
+    /// true (VX-241). VX-249: a collect that SET the star names it — the
+    /// mint's family exactly (`shownByMint`, whose tags-only arm IS
+    /// `shownByTagging`, so a tags-only collect reads as it did).
+    static func collectReceipt(_ result: Operations.SmartCollectResult) -> String {
+        switch (result.gatheringArchived, result.alreadyMatched) {
+        case (false, true): alreadyShowing
+        case (false, false): shownByMint(result.appliedTagPaths, starred: result.starred)
+        case (true, true): alreadyMatchesWhileArchived
+        case (true, false): taggedWhileArchived(result.appliedTagPaths, starred: result.starred)
+        }
+    }
+
+    /// What the act made the note wear, as the family says it: "Tagged #a
+    /// #b", "Tagged #a and starred", "Starred" — nil when it wore nothing.
+    private static func wore(_ paths: [String], starred: Bool) -> String? {
         let tags = paths.map { "#\($0)" }.joined(separator: " ")
         switch (paths.isEmpty, starred) {
-        case (false, false): return shownByTagging(paths)
-        case (false, true): return "Tagged " + tags + " and starred" + tail
-        case (true, true): return "Starred" + tail
-        case (true, false): return "The gathering shows it now, as its rule matches."
+        case (false, false): return "Tagged " + tags
+        case (false, true): return "Tagged " + tags + " and starred"
+        case (true, true): return "Starred"
+        case (true, false): return nil
         }
+    }
+
+    /// VX-217 — a NEW note minted inside a gathering. VX-250 (1): her SHORTER
+    /// words, verbatim (QUESTIONS #217): "Tagged #essays — the gathering shows
+    /// it now." · "Tagged #essays and starred — the gathering shows it now." ·
+    /// "Starred — the gathering shows it now." · "Added to the gathering."
+    /// Tags alone read exactly `shownByTagging`. The last arm — nothing worn —
+    /// is a rule a fresh note meets as it is (a NOT-only rule, VX-250 (3)).
+    static func shownByMint(_ paths: [String], starred: Bool) -> String {
+        wore(paths, starred: starred).map { $0 + shownNowTail } ?? "Added to the gathering."
     }
 
     // The registry's verbs (13i-d U1).

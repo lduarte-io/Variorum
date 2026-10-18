@@ -206,15 +206,15 @@ final class LibraryViewModel {
     /// (`AppSession.runCopying`) — a row duplicated while its post is open
     /// and dirty must carry what she just typed. The library and pool rows
     /// can name a post that is not open at all; the flush is a no-op there.
-    func duplicateAsVersion(postID: String) async {
-        do {
-            _ = try await session.runCopying(from: postID) { ops in
-                try ops.duplicateAsVersion(postID)
-            }
-            lastError = nil
-        } catch {
-            lastError = String(describing: error)
-        }
+    ///
+    /// VX-372 (VX-383 U1 — D-C-2): the rows' two doors run the ONE act every
+    /// duplicate door runs (`NoteDuplicate` — the same flush-first entry, her
+    /// tag choice, the receipt saying where the copy landed with its Open ›,
+    /// and a refusal in the app's words on the status centre, where this used
+    /// to keep a raw error dump nothing rendered). With tags is the default.
+    func duplicateAsVersion(postID: String, tags: Operations.DuplicateTags = .applied) async {
+        lastError = nil
+        await NoteDuplicate.perform(postID: postID, tags: tags, session: session)
     }
 
     /// `receipt` (ledger row 25) is what to SAY when the act lands. It is a

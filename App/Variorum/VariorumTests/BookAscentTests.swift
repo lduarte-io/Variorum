@@ -535,12 +535,27 @@ struct MultiBookEditNoteRuleTests {
                 "ONE TIME EVER — she learns the rule once")
     }
 
+    /// VX-111 (Part of VX-381): only BOOKS count — a gathering the note
+    /// appears in holds nothing. The masthead's own count.
+    @Test func onlyBooksCountTowardTheNote() {
+        let now = Date(timeIntervalSince1970: 1_782_864_000)
+        func reading(_ id: String, _ kind: ReadingKind) -> Reading {
+            Reading(id: id, name: id, kind: kind, createdAt: now, updatedAt: now)
+        }
+        let listed = [reading("g1", .gathering), reading("b1", .book), reading("g2", .gathering)]
+        #expect(MultiBookEditNote.memberBooks(listed).map(\.id) == ["b1"])
+        #expect(MultiBookEditNote.memberBooks([reading("g1", .gathering), reading("g2", .gathering)])
+                    .isEmpty)
+    }
+
     /// Her ruled copy: the rule, and the door by name.
     @Test func theSentenceStatesTheRuleAndNamesTheDoor() {
         let sentence = MultiBookEditNote.sentence(bookCount: 3)
         #expect(sentence.contains("3 books"))
         #expect(sentence.contains("editing here edits it everywhere"))
-        #expect(sentence.contains("Duplicate as Version"))
+        // VX-372 (P-C-1 — JUSTIFIED EDIT): the door by its declared verb.
+        #expect(sentence.contains(CapabilityRegistry.capability(.duplicateNoteWithTags).verb))
+        #expect(!sentence.contains("Duplicate as Version"))
     }
 }
 
@@ -605,7 +620,8 @@ struct MultiBookEditNoteTriggerTests {
             }
             let spoken = try #require(session.status.current?.text)
             #expect(spoken.contains("2 books"))
-            #expect(spoken.contains("Duplicate as Version"))
+            // VX-372 (P-C-1 — JUSTIFIED EDIT): the door by its declared verb.
+            #expect(spoken.contains(CapabilityRegistry.capability(.duplicateNoteWithTags).verb))
             #expect(MultiBookEditNote.hasBeenSeen(), "the flag is set — once, ever")
 
             let after = try await db.read { db -> [Int] in
@@ -614,6 +630,115 @@ struct MultiBookEditNoteTriggerTests {
                  try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM sync_outbox") ?? -1]
             }
             #expect(after == before, "the NOTE writes nothing — it reads and it speaks")
+        }
+    }
+
+    /// VX-111 (Part of VX-381) — her 13s U2 walk's case: a BOOKLESS note
+    /// that two gatherings show said "This note is in 2 books — editing here
+    /// edits it everywhere…" while its masthead read "in no book · 2
+    /// gatherings". RED ON OLD (the trigger counted `readingsContaining`
+    /// whole). Gatherings hold nothing, so nothing is said and the note
+    /// stays owed.
+    @Test func aBooklessNoteTwoGatheringsShowSaysNothing() async throws {
+        let db = try AppDatabase.inMemory()
+        let defaults = UserDefaults.standard
+        defaults.removeObject(forKey: MultiBookEditNote.seenKey)
+        defer { defaults.removeObject(forKey: MultiBookEditNote.seenKey) }
+
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "loose")
+            let block = try session.operations.newBlock(in: post.id, text: "Some prose.")
+            let work = try session.operations.createTag(name: "work")
+            _ = try session.operations.applyTag(work.id, toPost: post.id)
+            for name in ["Shown here", "And here"] {
+                _ = try session.operations.createReading(
+                    name: name, kind: .gathering, querySpec: try RuleGrammar.encode(.tag(work.id)))
+            }
+            let listed = try await db.read { try Queries.readingsContaining($0, postID: post.id) }
+            #expect(listed.count == 2 && listed.allSatisfy { $0.kind == .gathering },
+                    "the fixture: in no book, two gatherings show it")
+
+            session.autosave(forPost: post.id)
+                .record(variantID: block.variant.id, text: "Some prose!", charDelta: 1)
+            for _ in 0..<8 { try? await Task.sleep(for: .milliseconds(25)) }
+            #expect(session.status.spoken == nil, "a gathering is not a book — nothing is said")
+            #expect(!MultiBookEditNote.hasBeenSeen(), "still owed")
+        }
+    }
+
+    /// VX-111: a note in TWO books that a gathering also shows says "2
+    /// books" — never "3". RED ON OLD (it said "This note is in 3 books").
+    @Test func aTwoBookNoteAGatheringShowsCountsOnlyItsBooks() async throws {
+        let db = try AppDatabase.inMemory()
+        let defaults = UserDefaults.standard
+        defaults.removeObject(forKey: MultiBookEditNote.seenKey)
+        defer { defaults.removeObject(forKey: MultiBookEditNote.seenKey) }
+
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "shared")
+            let block = try session.operations.newBlock(in: post.id, text: "Some prose.")
+            for name in ["Orbit", "Field Notes"] {
+                let reading = try session.operations.createReading(name: name, kind: .book)
+                try session.operations.addPostToReading(post.id, to: reading.id)
+            }
+            let work = try session.operations.createTag(name: "work")
+            _ = try session.operations.applyTag(work.id, toPost: post.id)
+            _ = try session.operations.createReading(
+                name: "Shown here", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(work.id)))
+
+            session.autosave(forPost: post.id)
+                .record(variantID: block.variant.id, text: "Some prose!", charDelta: 1)
+            for _ in 0..<20 {
+                try? await Task.sleep(for: .milliseconds(25))
+                if session.status.current != nil { break }
+            }
+            let spoken = try #require(session.status.current?.text)
+            #expect(spoken.contains("2 books"), "\(spoken)")
+            #expect(!spoken.contains("3 books"), "the gathering is not counted")
+        }
+    }
+
+    /// VX-111: ONE book plus a gathering is one book — nothing is said.
+    /// RED ON OLD (it counted two and spoke).
+    @Test func aOneBookNoteAGatheringShowsSaysNothing() async throws {
+        let db = try AppDatabase.inMemory()
+        let defaults = UserDefaults.standard
+        defaults.removeObject(forKey: MultiBookEditNote.seenKey)
+        defer { defaults.removeObject(forKey: MultiBookEditNote.seenKey) }
+
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 7))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "one home")
+            let block = try session.operations.newBlock(in: post.id, text: "Some prose.")
+            let book = try session.operations.createReading(name: "Orbit", kind: .book)
+            try session.operations.addPostToReading(post.id, to: book.id)
+            let work = try session.operations.createTag(name: "work")
+            _ = try session.operations.applyTag(work.id, toPost: post.id)
+            _ = try session.operations.createReading(
+                name: "Shown here", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(work.id)))
+
+            session.autosave(forPost: post.id)
+                .record(variantID: block.variant.id, text: "Some prose!", charDelta: 1)
+            for _ in 0..<8 { try? await Task.sleep(for: .milliseconds(25)) }
+            #expect(session.status.spoken == nil)
+            #expect(!MultiBookEditNote.hasBeenSeen(), "still owed")
         }
     }
 
@@ -686,7 +811,9 @@ struct DivergeDoorTests {
         let smart = DivergeCopy.refusal(
             for: OperationError.wrongReadingKind(id: "r", expected: .book), book: "Dreams")
         #expect(smart.contains("tags"), "it names the tag road rather than staying silent")
-        #expect(smart.contains("Duplicate as Version"))
+        // VX-372 (P-C-1 — JUSTIFIED EDIT): the door by its declared verb.
+        #expect(smart.contains(CapabilityRegistry.capability(.duplicateNoteWithTags).verb))
+        #expect(!smart.contains("Duplicate as Version"))
         // Everything else falls through to the standing chip wording.
         #expect(DivergeCopy.refusal(for: OperationError.lockedReading(id: "r"), book: "Orbit")
                 == ChipRefusals.message(

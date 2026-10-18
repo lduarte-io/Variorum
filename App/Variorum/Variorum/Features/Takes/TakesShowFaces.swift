@@ -182,6 +182,8 @@ struct TakesShowPopover: View {
         .menuStyle(.button)
         .buttonStyle(.plain)
         .menuIndicator(.hidden)
+        // P-8 (VX-245): the lens's name and its ▾ are one-line chrome.
+        .lineLimit(1)
         .fixedSize()
         .disabled(!named)
     }

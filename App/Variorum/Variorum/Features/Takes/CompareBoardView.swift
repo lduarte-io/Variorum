@@ -100,6 +100,21 @@ nonisolated enum CompareRow: Equatable, Identifiable {
     }
 }
 
+// MARK: - The wire's landing (VX-298)
+
+/// **A Compare landing parked on the router** (VX-336 U6a — VX-298, the run
+/// record's D-298-5): `show_in_app`'s compare target and `link_versions`'
+/// receipt Open ›, delivered on the lens target's model (`MCPNavigator`): the
+/// anchor opened, this parked on `CommandRouter.pendingCompareLanding`, then her
+/// Compare mode requested. The board for `postID` consumes it (post-stamped — a
+/// landing for another note is left alone) and shows exactly `peerIDs` beside
+/// the anchor, replacing the columns open (her answer (4)). A SIGNAL with no
+/// posture (P-4): the board decides "related blocks only" (F-8 (a)).
+nonisolated struct CompareLanding: Equatable, Sendable {
+    let postID: String
+    let peerIDs: [String]
+}
+
 // MARK: - The model
 
 @MainActor
@@ -144,6 +159,12 @@ final class CompareViewModel {
             let departed = oldValue.compactMap(\.postID)
                 .filter { !picked.contains($0) && $0 != anchorPostID }
             if !departed.isEmpty { onNotesLeft(departed) }
+            // VX-298 (R2-1): a NAMED peer's column leaving ends the landing's
+            // round (`landingPostureFor`). `land` arms before it replaces the
+            // columns, and the peers that replacement drops are never named.
+            if let landed = landingPostureFor, departed.contains(where: { landed.contains($0) }) {
+                landingPostureFor = nil
+            }
         }
     }
 
@@ -186,10 +207,25 @@ final class CompareViewModel {
     /// live-ring release are 2E's, byte for byte.
     var relatedOnly = true {
         didSet {
+            // VX-298 (R2-1): any set of the toggle ends a landing's round
+            // (`landingPostureFor`), so a later projection never overwrites her
+            // pick. The model's own two writes are ordered so this never ends a
+            // round they mean to keep: `land` sets the toggle BEFORE it arms,
+            // `adopt` disarms BEFORE it sets.
+            landingPostureFor = nil
             guard relatedOnly != oldValue else { return }
             releaseLivePaneIfFilteredAway()
         }
     }
+    /// VX-298 (D-298-5): the peers a wire LANDING named, until the first
+    /// projection holding every one of them applies the landing posture
+    /// (`CompareComposition.landingShowsRelatedOnly`) — once; nil afterwards,
+    /// so a later projection never flips her own toggle. **The round also ends,
+    /// unapplied (R2-1, the ladder's round 2), at the first of: the board's
+    /// `teardown()`, a named peer's column leaving (`peerSlots`), or any set of
+    /// `relatedOnly` — so a named peer that never projects leaves nothing
+    /// armed to flip her toggle long after the landing.**
+    @ObservationIgnored private var landingPostureFor: [String]?
     /// In-cell fan blooms — session-only, like the takes board's.
     private(set) var expandedBlocks: Set<String> = []
     /// THE pane-text/liveness authority — ONE across every post context
@@ -375,10 +411,57 @@ final class CompareViewModel {
             autoFilled = true
             peerSlots[0].postID = first  // a linked peer is the natural default
         }
+        // VX-298 (D-298-4/5, F-9 (a) — PROVISIONAL P-VX298-1): a wire landing's
+        // posture, from the board's OWN projection (F-8 (a) — the kinship it
+        // computes to draw the rows anyway), once the projection holds every
+        // landed peer: ON only when EVERY named peer shares lineage with the
+        // anchor, else OFF — no column the AI named opens filtered empty.
+        if let landed = landingPostureFor, landed.allSatisfy({ new.peers[$0] != nil }) {
+            landingPostureFor = nil
+            relatedOnly = CompareComposition.landingShowsRelatedOnly(
+                peerKinships: landed.map { new.kinship[$0] ?? [:] })
+        }
+    }
+
+    // MARK: The wire's landing (VX-298 — D-298-5)
+
+    /// The router's parked Compare landing, consumed if it is THIS note's
+    /// (post-stamped — a landing for another note is left alone; the Lenses
+    /// board's `consumePendingLensLanding` pattern).
+    func consumePendingCompareLanding() {
+        guard let landing = session.commandRouter.pendingCompareLanding, landing.postID == anchorPostID else { return }
+        session.commandRouter.pendingCompareLanding = nil
+        land(peers: landing.peerIDs)
+    }
+
+    /// **The board shows exactly what was named** (her answer (4)): the peer
+    /// columns REPLACED by `peers`, in order — the auto-default never refills
+    /// them; a departing column's live pane released first (4C's NIT-1 — the
+    /// ring never stays on a pane nothing renders, and that post's typing
+    /// flushes through its own coordinator); the departed peers leave through
+    /// the board's own leaving road (`peerSlots.didSet` → `onNotesLeft`, 18o
+    /// U4). "Related blocks only" goes OFF while the lineage is read (nothing
+    /// named is hidden); `adopt` applies the landing posture once. The board's
+    /// own slot API only: at most three peers, never the anchor, each once.
+    func land(peers: [String]) {
+        var named: [String] = []
+        for peer in peers where peer != anchorPostID && !named.contains(peer) && named.count < 3 {
+            named.append(peer)
+        }
+        guard !named.isEmpty else { return }
+        autoFilled = true
+        for departing in peerSlots.compactMap(\.postID) where !named.contains(departing) {
+            releaseLivePane(leavingPost: departing)
+        }
+        relatedOnly = false
+        landingPostureFor = named
+        peerSlots = named.map { PeerSlot(postID: $0) }
     }
 
     func teardown() {
         observation?.cancel()
+        // VX-298 (R2-1): the board going ends a landing's round, unapplied.
+        landingPostureFor = nil
         for (postID, token) in coordinatorTokens {
             coordinators[postID]?.stopObserving(token)
         }
@@ -1017,6 +1100,9 @@ struct CompareBoardView: View {
             // 18o U4 (PROVISIONAL #163): the board's peers leave through the
             // one leaving road.
             SavepointOnLeave.wire(compare: model, session: session)
+            // VX-298 (D-298-5): a parked wire landing (show_in_app's compare
+            // target / link_versions' Open ›) — the Lenses board's pattern.
+            model.consumePendingCompareLanding()
             // 13b 4D (the 4C handoff): ⌘S acts where it's advertised — the
             // one routed command this board consumes; the rest return
             // false and keep falling through (compare's editing is direct
@@ -1039,6 +1125,10 @@ struct CompareBoardView: View {
                     return false
                 }
             }
+        }
+        // VX-298: a landing parked while this board is already mounted.
+        .onChange(of: session.commandRouter.pendingCompareLanding) { _, _ in
+            model.consumePendingCompareLanding()
         }
         .onDisappear {
             if let commandToken {

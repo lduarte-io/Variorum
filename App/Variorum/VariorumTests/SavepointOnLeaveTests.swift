@@ -207,6 +207,12 @@ struct SavepointOnLeaveTests {
     /// Closing an Open-strip row is deliberately NOT a leaving — its own
     /// contract is that it "closes a ROW and nothing else", and the pane goes
     /// on showing the note.
+    ///
+    /// *VX-283 U1 (a comment, the assertions untouched):* this pins the
+    /// ROW-ONLY PRIMITIVE, `WorkspaceModel.closeNote`, whose contract stands.
+    /// The ✕ DOOR no longer calls it bare: on the note the focused pane shows,
+    /// her ruling (*"Yes, same as ⇧⌘W"*) moves the pane on, and THAT arrival
+    /// is an ordinary leaving (`OpenListRowCloseDoorTests`).
     @Test func closingAnOpenStripRowIsNotALeaving() async throws {
         let workspace = WorkspaceModel()
         workspace.select(.post("a"))

@@ -37,12 +37,19 @@ struct MCPToolDeclaration: Sendable {
     /// comment, a tombstone, one undo), so its hint says so, honest as the
     /// edit rung's (P-13nb-U3-16). nil = the rung decides (edit ⇒ true).
     var destructive: Bool?
+    /// VX-261 (VX-336 U7 — F-261-2 (a), PROVISIONAL P-VX261-2): listed for
+    /// EVERY approved client, no grant needed — `list_my_activity` reads only
+    /// the caller's own log rows, so it always acts (P-2 holds: never a door
+    /// that can never act), and recovery after a dropped "until you
+    /// disconnect" grant is the case it exists for.
+    var listedWhenApproved: Bool = false
 
     /// Listed for this standing? Approved, and the open book (read) or a
     /// live grant at this rung of a scope kind the tool acts under —
     /// standing (non-once) when the tool never serves a once grant.
     func isListed(for standing: MCPGrantAuthority.Standing) -> Bool {
         guard standing.state == .approved else { return false }
+        if listedWhenApproved { return true }
         if standing.openBook, rung == .read { return true }
         let grants = needsStandingReach ? standing.searchGrants : standing.liveGrants
         return grants.contains { grant in grant.rung >= rung && scopes.contains(grant.scopeKind) }
@@ -84,7 +91,11 @@ public enum MCPToolFacts {
 }
 
 enum MCPToolCatalog {
-    static let read: [MCPToolDeclaration] = [listBooks, listNotes, readNote, search, exportNote]
+    static let read: [MCPToolDeclaration] = [
+        listBooks, listNotes, readNote, search, exportNote,
+        // VX-336 U7 — VX-261: the client's own recent acts (listed when approved).
+        listMyActivity,
+    ]
     static let suggest: [MCPToolDeclaration] = [
         addTake, addComment, saveLens,
         // VX-184 U3 — VX-173's batch doors (one note, one act, the cap stated).
@@ -98,6 +109,13 @@ enum MCPToolCatalog {
         saveVersion, fileNoteInChapter, setBookRule,
         // VX-184 U3 — VX-187: two notes linked as versions by named pairs (R-VX187-1).
         linkVersions,
+        // VX-336 U5b — VX-255: blocks added to a note (write new at its end,
+        // edit anywhere — the call's rung read from its arguments).
+        insertBlocks,
+        // VX-336 U6a — VX-311: her Duplicate (read on the note, write new on
+        // its wing — the copy lands bookless there; VX-371: or on a book of
+        // that wing, the copy filed there).
+        duplicateNote,
     ]
     static let edit: [MCPToolDeclaration] = [
         editTake, divideBlock, mergeBlocks, moveBlock, deleteBlock, setBlockName,
@@ -130,6 +148,29 @@ enum MCPToolCatalog {
     /// its own handler (it awaits the app), its own list.
     static let navigation: [MCPToolDeclaration] = [showInApp]
     static let all: [MCPToolDeclaration] = read + navigation + suggest + writeNew + edit
+
+    /// VX-254 (VX-336 U7 — D-254-1, the FOR VX-234 list): THE DIGEST
+    /// SENTENCE, said once and shared by every tool that answers a take's
+    /// `sha256` (`MCPTextDigest`) — so every description states the algorithm
+    /// and the byte rule in the same words.
+    static let digestSentence = """
+        Each sha256 is the SHA-256 of that take's text exactly as stored, as UTF-8 bytes, in \
+        lowercase hex — nothing normalized or trimmed — so a digest of your own text proves it \
+        landed byte for byte.
+        """
+
+    /// VX-197 (VX-336 U8a): THE LABEL RULE, said in one set of words by every
+    /// tool that writes a take's label. Her split (VX-197): the client's name
+    /// is worn only by takes a client adds at SUGGEST, inside her writing
+    /// (`add_take`, `add_takes`), in VX-267's form — `MCPWriteTools.aiLabel`,
+    /// whose separator the sentence reads, never retypes.
+    static let suggestedLabelRule = """
+        labeled with your client name, then "\(MCPWriteTools.labelSeparator)" and your label when you \
+        give one (e.g. "<your client name>\(MCPWriteTools.labelSeparator)english"; a blank label is none)
+        """
+
+    /// …and the split's other half, on every other tool that writes a label.
+    static let labelNotPrefixed = "your client name is added only by add_take and add_takes"
 
     static func declaration(named name: String) -> MCPToolDeclaration? {
         all.first { $0.name == name }
@@ -219,7 +260,16 @@ enum MCPToolCatalog {
             lens_id reads the note through one of its lenses, in either form: each block shows the \
             take the lens shows there, else its chosen take; with with_ids each block's \
             shown_take_id is that take and via says which ("lens" or "chosen"), and chosen still \
-            marks the note's own chosen take.
+            marks the note's own chosen take. Big notes read in pages: pass limit (blocks per page, \
+            1–200), then each answer's next_cursor as cursor until none comes back (a cursor alone \
+            reads 50). A page also ends once the answer reaches about 32,000 characters (a block is \
+            never split; a single larger block comes alone), and commit text rides in what is left \
+            of that; the first page says block_count. Pages imply with_ids; with_tray and \
+            with_versions ride the first page, and each page's lenses pick only among its own \
+            blocks. Pages are read one at a time, \
+            not as a snapshot — if the note may have changed, read it again. A note shared once is \
+            read in one call. ids_only: true gives each take without its text, with its sha256 \
+            instead — page it to check a whole note against your source cheaply. \(digestSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -245,6 +295,13 @@ enum MCPToolCatalog {
                                        "description": "Read this saved version of the note instead."]),
                 "lens_id": .object(["type": "string",
                                     "description": "Read the note through this lens of it (with_lenses lists them)."]),
+                // VX-256 (VX-336 U7): pages, and the digests in place of the words.
+                "limit": .object(["type": "integer", "minimum": 1, "maximum": 200,
+                                  "description": "Blocks per page (default 50); asks for pages (implies with_ids)."]),
+                "cursor": .object(["type": "string",
+                                   "description": "next_cursor from the previous page (implies with_ids)."]),
+                "ids_only": .object(["type": "boolean",
+                                     "description": "Each take's sha256 instead of its text (implies with_ids)."]),
             ]),
             "required": .array(["note_id"]),
             "additionalProperties": false,
@@ -299,15 +356,46 @@ enum MCPToolCatalog {
         ]),
         scopes: MCPToolDeclaration.everyScope)
 
+    /// VX-261 (VX-336 U7 — D-261-1/2, F-261-1 (a)): a client reads its OWN
+    /// recent acts from the activity log (`MCPOwnActivity`), to learn whether
+    /// a call landed after a dropped connection or a lost context.
+    static let listMyActivity = MCPToolDeclaration(
+        name: "list_my_activity", rung: .read, title: "List my recent activity",
+        description: """
+            What this client did in Variorum, newest first, from its activity log: each act's \
+            tool, whether it was allowed or refused, when, and the id it named (for a note or book \
+            it made, the book or wing it was made in). An allowed act also says what its target was \
+            called at the time; a refused one never does, and names only an id you sent. Use it \
+            after a dropped call or a lost context to learn whether a call landed — for a made \
+            note, look for its title with list_notes (two rows with one title mean two notes). It \
+            lists every session under this client's name since the author last approved it, never \
+            another client's. Reads join with include_reads: true. The log keeps the library's \
+            last 500 acts across all clients. Paged — pass next_cursor back as cursor. Returns JSON.
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "include_reads": .object(["type": "boolean",
+                                          "description": "Also list reads (default false)."]),
+                "cursor": .object(["type": "string", "description": "next_cursor from the previous page."]),
+                "limit": .object(["type": "integer", "minimum": 1, "maximum": 200,
+                                  "description": "Page size (default 50)."]),
+            ]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope,
+        listedWhenApproved: true)
+
     // MARK: - The SUGGEST rung (U2 — "it cannot touch a word you wrote")
 
     static let addTake = MCPToolDeclaration(
         name: "add_take", rung: .suggest, title: "Add a take",
         description: """
             Add a new take (an alternative text) to one block, at the END of its fan. The take is \
-            labeled with this client's name (plus your label, if given), is never chosen and \
+            \(suggestedLabelRule), so the author sees who suggested it; it is never chosen and \
             never locked — the author's text is never touched; they choose. Get block ids from \
-            read_note with with_ids: true. Returns JSON with the new take_id.
+            read_note with with_ids: true. Returns JSON with the new take_id and its sha256. \
+            \(digestSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -346,12 +434,13 @@ enum MCPToolCatalog {
         name: "add_takes", rung: .suggest, title: "Add takes to many blocks",
         description: """
             Add many takes in one act: each item adds a new take (an alternative text) to one block \
-            of note_id, at the END of that block's fan, exactly as add_take does — labeled with this \
-            client's name (plus the item's label, if given), never chosen and never locked; an \
-            empty text adds a blank take. Every block must be a block of that note (read_note with \
+            of note_id, at the END of that block's fan, exactly as add_take does — \
+            \(suggestedLabelRule) — never chosen and never locked; an empty text adds a blank take. \
+            Every block must be a block of that note (read_note with \
             with_ids: true gives the ids). One call carries at most 200 takes. All or nothing: if \
             any item can't land, none does, and the refusal names the item. The whole batch is one \
-            undo for the author. Returns JSON with the new take_ids, in the items' order.
+            undo for the author. Returns JSON with the new take_ids, in the items' order, and takes: \
+            per item its take_id, block_id, label as stored, and sha256. \(digestSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -415,9 +504,11 @@ enum MCPToolCatalog {
         name: "delete_comment", rung: .suggest, title: "Delete your comment",
         description: """
             Delete a comment. With suggest you may delete only a comment you left (with add_comment \
-            or add_comments): one Variorum doesn't have on file as yours (the author's, another \
-            client's, or one left before Variorum kept that record) is refused. With edit on the \
-            note you may delete any comment. Nothing is destroyed: the comment joins the block's \
+            or add_comments) whose words no one has changed since you wrote them; any other is \
+            refused — the author's, another client's, one left before Variorum kept a record of its \
+            words, or one whose words were changed after you wrote them (by the author on any \
+            device, or by another client). With edit on the note you may delete any comment. \
+            Nothing is destroyed: the comment joins the block's \
             deleted comments, where the author can bring it back (so can restore_comment), and the \
             delete is one undo for them. Get comment ids from read_note with with_ids: true. \
             Returns JSON.
@@ -435,10 +526,24 @@ enum MCPToolCatalog {
 
     static let saveLens = MCPToolDeclaration(
         name: "save_lens", rung: .suggest, title: "Save a lens",
+        // VX-253 (VX-336 U5a): three explicit fills — take_ids, label, pin_chosen.
         description: """
-            Save a named lens on a note: a way of reading it that shows the given takes in place \
-            of the chosen ones (at most one take per block; other blocks show their chosen take). \
-            A lens never changes what the note shows by default. Returns JSON with the lens_id.
+            Save a named lens on a note: a way of reading it that shows other takes in place of \
+            the chosen ones, at most one take per block. A lens never changes what the note shows \
+            by default. Fill it explicitly, in any of three ways: take_ids (the take to show on \
+            each block you name), label (each block shows its take with that label), or \
+            pin_chosen: true (each block keeps the take the note shows now, even if the author \
+            later chooses another). take_ids may ride with label or pin_chosen: they are applied \
+            first, block by block, and the rule fills every other block; label and pin_chosen \
+            don't combine. A label matches a take's label exactly as stored, and your own \
+            suggested takes by their own part: "english" also matches "<your client name> · \
+            english" and older takes' "<your client name> · suggested · english" — never another \
+            client's. A block with no take of that label shows its chosen take and is listed in \
+            unmatched_blocks (the first 200; unmatched_count counts them all). If a block that \
+            take_ids doesn't cover has two or more takes with that label, nothing is saved: the \
+            refusal names those blocks and their matching takes — call again with the same label \
+            and take_ids for exactly those blocks. A label no take in the note wears is refused. \
+            Returns JSON with the lens_id.
             """,
         inputSchema: .object([
             "type": "object",
@@ -446,9 +551,16 @@ enum MCPToolCatalog {
                 "note_id": .object(["type": "string", "description": "The note."]),
                 "name": .object(["type": "string", "description": "The lens's name."]),
                 "take_ids": .object(["type": "array", "items": .object(["type": "string"]),
-                                     "description": "The takes the lens shows, one per block."]),
+                                     "description": "The take to show per block, one per block (applied first)."]),
+                "label": .object(["type": "string", "description": """
+                    Show each other block's take with this label (exactly as stored; your own \
+                    suggestions also by their own part).
+                    """]),
+                "pin_chosen": .object(["type": "boolean", "description": """
+                    true: each other block keeps the take the note shows now.
+                    """]),
             ]),
-            "required": .array(["note_id", "name", "take_ids"]),
+            "required": .array(["note_id", "name"]),
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
@@ -462,8 +574,17 @@ enum MCPToolCatalog {
             shared wing (wing_id; "" is Home — it lands bookless). Give EITHER text (plain prose: \
             each paragraph becomes a block) OR blocks (structured: each block's shown text exactly \
             — a blank line inside it stays inside the one block — with an optional name and its \
-            other takes, each with an optional label). entry_date (yyyy-MM-dd) sets the \
-            note's date, e.g. for old journal entries. Returns JSON with the note_id and its block_ids.
+            other takes, each with an optional label). Each label is stored as given (trimmed; a \
+            blank label is none) — \(labelNotPrefixed). entry_date (yyyy-MM-dd) sets the \
+            note's date, e.g. for old journal entries. section_id (with book_id) files the note \
+            under one of that book's chapters in the same call (list_notes or create_section \
+            gives chapter ids). Returns JSON with the note_id, its block_ids, and blocks: per \
+            block its block_id, the shown_take_id, and every take in fan order (take_id, label \
+            where it has one, and sha256), the shown one included — no read_note needed to learn \
+            them. Its tag_ids and tags (their paths) list every tag the note wears once it lands, \
+            a book's outflow included, so there is nothing to tag again. \(digestSentence) With \
+            text, Variorum splits the prose into blocks by its own setting; to verify byte for \
+            byte, send blocks.
             """,
         inputSchema: .object([
             "type": "object",
@@ -497,6 +618,8 @@ enum MCPToolCatalog {
                 ]),
                 "entry_date": .object(["type": "string", "description": "The note's date, yyyy-MM-dd."]),
                 "book_id": .object(["type": "string", "description": "Create it in this book."]),
+                "section_id": .object(["type": "string",
+                                       "description": "File it under this chapter of book_id (with book_id only)."]),
                 "wing_id": .object(["type": "string", "description": "Create it bookless in this wing."]),
             ]),
             "additionalProperties": false,
@@ -508,10 +631,16 @@ enum MCPToolCatalog {
         description: """
             Import text in the Variorum document format (what read_note returns): a header \
             {t:"title"} {#tag/path}, paragraphs as blocks, "--- Alternates for this block ---" \
-            sections as extra takes; with {v:2} first in the header, "--- next block ---" lines \
+            sections as extra takes, each labeled as its take: line says — \(labelNotPrefixed); \
+            with {v:2} first in the header, "--- next block ---" lines \
             separate the blocks and blank lines stay inside them. Either one `document` into a shared book (book_id) or wing \
             (wing_id), or a whole `book` {name, chapters: [{name, documents}], documents} into a \
-            shared wing. One import is one undo for the author. Returns JSON with the new ids.
+            shared wing. One import is one undo for the author. Returns JSON with the new ids — \
+            for one document also blocks, as create_note answers them (each block's shown_take_id \
+            and every take's take_id, label and sha256), and tag_ids and tags (their paths): every \
+            tag the note wears, the header's first, then a book's outflow; for a book, its \
+            book_id, note_ids and chapter_ids (no sha256 — check a book's notes with read_note). \
+            \(digestSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -544,7 +673,8 @@ enum MCPToolCatalog {
         description: """
             Apply a tag to a note by its path (e.g. "percy/pt-en"); a missing tag is created in the \
             note's wing. Books that collect by that tag hear it, as when the author tags. Returns \
-            JSON with the tag_id.
+            JSON with the tag_id and changed — false when the note already wore the tag: nothing \
+            was written and there is nothing to undo.
             """,
         inputSchema: .object([
             "type": "object",
@@ -616,9 +746,14 @@ enum MCPToolCatalog {
         description: """
             Replace one take's text. expected_text must be the take's text EXACTLY as you read it \
             (read_note with with_ids: true) — if the author changed it since, the edit is refused and \
-            nothing is written; read again. Variorum saves a commit named "before <your name>'s edit" \
-            and one named "after <your name>'s edit", so the author can always compare and come back, \
-            and the edit is one undo for the author. Returns JSON with the commit ids.
+            nothing is written; read again. Variorum first commits the words it replaces, named \
+            "before <your client name>'s edit" (unless they are already the take's latest commit, or \
+            the take is blank and was never committed — then the answer has no before_commit_id), and \
+            then the new text, named "after <your client name>'s edit", so the author can always \
+            compare and come back; these commits stay even if the edit is undone. Writing the text the \
+            take already has changes nothing (changed: false). The edit is one undo for the author. \
+            Returns JSON with the commit ids and sha256, the take's text as it now stands. \
+            \(digestSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -771,7 +906,8 @@ enum MCPToolCatalog {
             (Compare lines its rows up by the notes' shared history, not by these pairs). Needs \
             write new on both notes, which must be in the same wing. One call carries at most 200 \
             pairs. All or nothing: a pair that names the wrong note, repeats, or is already linked \
-            is refused, named. One undo for the author removes every pair. Returns JSON.
+            is refused, named. One undo for the author removes every pair. The author's receipt for \
+            it opens the two side by side in Compare. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",
@@ -795,6 +931,121 @@ enum MCPToolCatalog {
             "additionalProperties": false,
         ]),
         scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - VX-336 U5b — VX-255 insert_blocks
+
+    /// VX-255 (her ruling: write new adds at the end, edit anywhere): the rung
+    /// is read from the arguments — no anchor is write new; any anchor or the
+    /// start is edit (P-VX255-1/2). Declared at write new (listed from write
+    /// new up); the call's own rung is decided per call.
+    static let insertBlocks = MCPToolDeclaration(
+        name: "insert_blocks", rung: .writeNew, title: "Add blocks to a note",
+        description: """
+            Add blocks to a note that already exists, in the order given. With no after_block_id \
+            (or at: "end") they go at the note's END — write new on the note is enough. Placing them \
+            anywhere else needs edit: after_block_id puts them right after that block of the note \
+            (any block, the last one included) and at: "start" before its first block (read_note \
+            with with_ids: true gives the block ids). Each item is exactly one block, as in \
+            create_note's blocks: its shown text exactly (a blank line inside stays inside the one \
+            block), an optional name, and its other takes, never chosen (an empty text is a blank \
+            take). Each label is stored as given (trimmed; a blank label is none) — \
+            \(labelNotPrefixed). One call carries at most 200 blocks. The whole call is \
+            one undo for the author. Returns JSON with the note_id, the new block_ids, and blocks: \
+            per block its block_id, the shown_take_id, and every take in fan order (take_id, label \
+            where it has one, and sha256), as create_note answers them. \(digestSentence)
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note to add the blocks to."]),
+                "after_block_id": .object(["type": "string",
+                                           "description": "Put them right after this block of the note (needs edit)."]),
+                "at": .object(["type": "string", "enum": .array(["start", "end"]),
+                               "description": "start (needs edit) or end (the default)."]),
+                "blocks": .object([
+                    "type": "array", "minItems": 1, "maxItems": .int(MCPWriteTools.batchCap),
+                    "description": "The new blocks, in order (at most 200).",
+                    "items": .object([
+                        "type": "object",
+                        "properties": .object([
+                            "text": .object(["type": "string", "description": "The block's shown text."]),
+                            "name": .object(["type": "string", "description": "A name for the block."]),
+                            "takes": .object([
+                                "type": "array",
+                                "description": "Other takes, joining the block's fan (never chosen).",
+                                "items": .object([
+                                    "type": "object",
+                                    "properties": .object([
+                                        "text": .object(["type": "string",
+                                                         "description": "The take's text (empty: a blank take)."]),
+                                        "label": .object(["type": "string"]),
+                                    ]),
+                                    "required": .array(["text"]),
+                                ]),
+                            ]),
+                        ]),
+                        "required": .array(["text"]),
+                    ]),
+                ]),
+            ]),
+            "required": .array(["note_id", "blocks"]),
+            "additionalProperties": false,
+        ]),
+        scopes: MCPToolDeclaration.everyScope)
+
+    // MARK: - VX-336 U6a — VX-311 duplicate_note (+ VX-383 U2 — VX-371's book road, with_tags)
+
+    /// VX-311 (her Duplicate; P-VX311-1…3): READ on the note and WRITE NEW on
+    /// where the copy lands. VX-371 (VX-383 U2 — D-C-4): the landing is the
+    /// note's wing (its Pool) OR, with `book_id`, a book of that wing at write
+    /// new — `create_note`'s book road — so it acts under a BOOK grant too
+    /// (`scopes: [.book, .wing]` — the W-UX-14 truth pin's sense: a book-level
+    /// client CAN land a copy now; a note grant never names a landing).
+    /// `with_tags` (default true — her Duplicate with Tags, P-C-3).
+    static let duplicateNote = MCPToolDeclaration(
+        name: "duplicate_note", rung: .writeNew, title: "Duplicate a note",
+        description: """
+            Duplicate a note as it is now: every block with every take (the chosen ones chosen), \
+            their comments and block names, linked to the original block by block and as a version \
+            of it. So Variorum's Compare lines the copy up with the original row for row (a note \
+            made with create_note shares no history, so Compare shows it beside the original \
+            unaligned). with_tags (default true — the author's Duplicate with Tags) applies the \
+            note's tags to the copy, and books that collect by those tags hear the copy, as when the \
+            author tags, so one may take it in; with_tags: false (Duplicate without Tags) copies no \
+            tags. Needs read on the note and write new on its wing, where the copy lands in that \
+            wing's Pool unless a book collecting its tags takes it in. With book_id (a book in the \
+            note's wing) it needs write new on that book instead, and the copy joins that book at \
+            its end, wearing the book's outflow tags as any note added there does; section_id (with \
+            book_id) files it under one of that book's chapters. A note shared with you only per ask \
+            can't be duplicated. The original is never changed. In the copy every take keeps its \
+            label — \(labelNotPrefixed). One undo for the author removes the copy, from every book it \
+            joined. Returns JSON: the copy's note_id, its block_ids, and blocks — per block its \
+            block_id, the source_block_id it was copied from, the shown_take_id, and every take in \
+            fan order (take_id, label where it has one, and sha256 — equal to its source take's), \
+            as create_note answers them — its tag_ids and tags (their paths: every tag the copy \
+            wears once it lands, a book's outflow included), the book_id and section_id you gave, \
+            and landed: where the copy is. \(digestSentence)
+            """,
+        inputSchema: .object([
+            "type": "object",
+            "properties": .object([
+                "note_id": .object(["type": "string", "description": "The note to duplicate."]),
+                "with_tags": .object([
+                    "type": "boolean",
+                    "description": "Apply the note's tags to the copy (default true); false copies none.",
+                ]),
+                "book_id": .object([
+                    "type": "string",
+                    "description": "File the copy into this book (in the note's wing), at its end.",
+                ]),
+                "section_id": .object([
+                    "type": "string", "description": "File it under this chapter of book_id (with book_id only).",
+                ]),
+            ]),
+            "required": .array(["note_id"]),
+            "additionalProperties": false,
+        ]),
+        scopes: [.book, .wing])
 
     // MARK: - VX-184 U3 — VX-190 remove_tag
 
@@ -944,7 +1195,8 @@ enum MCPToolCatalog {
         name: "set_take_label", rung: .edit, title: "Label a take",
         description: """
             Give one take a label — a short name the author sees on it, such as "english" — or \
-            clear it with null or a blank. A locked or archived take may be labeled. One undo for the \
+            clear it with null or a blank. The label is stored as given (trimmed) — \
+            \(labelNotPrefixed). A locked or archived take may be labeled. One undo for the \
             author. Returns JSON.
             """,
         inputSchema: .object([
@@ -998,12 +1250,14 @@ enum MCPToolCatalog {
         description: """
             Bring a commit's text back into its take, as the author's own restore does (read_note \
             with with_commits: true lists each take's commits). Variorum first commits the words it \
-            replaces, named "before <your name>'s restore" (unless they are already the take's latest \
-            commit — then that commit holds them and the answer has no before_commit_id), and then the \
-            restored text, named "after <your name>'s restore", so the author can always compare and \
-            come back; these commits stay even if the restore is undone. A locked or archived take refuses, as does a sealed \
-            note; a take already reading that text changes nothing. One undo for the author puts the \
-            replaced words back. Returns JSON with the commit ids.
+            replaces, named "before <your client name>'s restore" (unless they are already the take's \
+            latest commit — then that commit holds them and the answer has no before_commit_id), and \
+            then the restored text, named "after <your client name>'s restore", so the author can \
+            always compare and come back; these commits stay even if the restore is undone. A locked \
+            or archived take refuses, as does a sealed note; a take already reading that text changes \
+            nothing. One undo for the author puts the \
+            replaced words back. Returns JSON with the commit ids and sha256, the take's text as it \
+            now stands. \(digestSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -1088,10 +1342,10 @@ enum MCPToolCatalog {
     static let renameBook = MCPToolDeclaration(
         name: "rename_book", rung: .edit, title: "Rename a book",
         description: """
-            Give a book a new name. A name another live book already wears (ignoring case) is \
-            refused, as the author's rename is; a finished or sealed book can still be renamed. \
-            Gatherings are the author's to rename. One undo for the author puts the old name back. \
-            Returns JSON.
+            Give a book a new name. A name already worn (ignoring case) by another live, unarchived \
+            book or gathering that you can read is refused; one you can't read never counts, so it \
+            can't block the name. A finished or sealed book can still be renamed. Gatherings are the \
+            author's to rename. One undo for the author puts the old name back. Returns JSON.
             """,
         inputSchema: .object([
             "type": "object",
@@ -1322,7 +1576,7 @@ enum MCPToolCatalog {
         description: """
             Commit one take: save its text as it stands now as a commit (a saved moment the author \
             can compare against and come back to), with your message. The commit is stored as \
-            "<your name>: <message>", so the author's history says who saved it. The take's text \
+            "<your client name>: <message>", so the author's history says who saved it. The take's text \
             does not change. A commit is kept for good: the author's undo does not remove it, as \
             it does not remove their own. Get take ids from read_note with with_ids: true. \
             Returns JSON with the commit_id.
@@ -1490,13 +1744,18 @@ enum MCPToolCatalog {
             block, and select — words in that block's shown take — selects them with the find \
             bar ready), "takes" (note_id + block_id: the note's Takes, that block's takes open), \
             "lens" (note_id + lens_id: the Lenses board showing that lens), "book" (book_id, \
-            optionally section_id: that chapter) or "wing" (wing_id; "" is Home: Variorum switches \
-            to that wing, as its own wing switcher does). Returns JSON, or why nothing moved.
+            optionally section_id: that chapter), "wing" (wing_id; "" is Home: Variorum switches \
+            to that wing, as its own wing switcher does) or "compare" (note_id + peer_ids — one to \
+            three other notes in the same wing: Variorum's Compare with note_id first and each peer \
+            beside it, replacing the columns open; rows line up where the notes share history, as \
+            duplicate_note's copies do, and "related blocks only" opens off when they don't). \
+            Returns JSON, or why nothing moved.
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
-                "target": .object(["type": "string", "enum": .array(["note", "takes", "lens", "book", "wing"]),
+                "target": .object(["type": "string",
+                                   "enum": .array(["note", "takes", "lens", "book", "wing", "compare"]),
                                    "description": "What to show (default note)."]),
                 "note_id": .object(["type": "string"]),
                 "block_id": .object(["type": "string"]),
@@ -1505,6 +1764,11 @@ enum MCPToolCatalog {
                 "book_id": .object(["type": "string"]),
                 "section_id": .object(["type": "string", "description": "A chapter of the book."]),
                 "wing_id": .object(["type": "string", "description": "The wing (\"\" is Home)."]),
+                "peer_ids": .object([
+                    "type": "array", "minItems": 1, "maxItems": .int(MCPShowTool.comparePeerCap),
+                    "items": .object(["type": "string"]),
+                    "description": "target compare: the notes beside note_id, in column order (one to three).",
+                ]),
             ]),
             "additionalProperties": false,
         ]),

@@ -311,6 +311,17 @@ extension Operations {
     /// an inverse that restored `archived_at = created_at` would quietly
     /// re-mint a birth fact this row no longer has.
     ///
+    /// **…and it ends like Duplicate with Tags** (VX-372, VX-383 U1 — D-C-3;
+    /// her ticket: *"Save Version → Promote ends the same way"*). A saved
+    /// version wears no tag (`mintNoteVersion` copies none — the save-time set
+    /// is not on record), so the promoted note is TAGGED in this same
+    /// transaction with the ORIGINAL note's live tags NOW, in its wing,
+    /// application order kept — each through the one application road
+    /// (`applyLiveTags` → `insertPostTag`), after the flips, so the note is
+    /// live and unarchived when intake hears it: a living book seats or bells
+    /// the promoted note exactly as it would a duplicate with tags (PROVISIONAL
+    /// P-C-2). The seats ride the act (still no undo entry — her ruling).
+    ///
     /// Refuses anything that is not version history of the named note.
     public func promoteNoteVersion(_ versionID: String, of postID: String) throws {
         try database.write { db in
@@ -318,11 +329,13 @@ extension Operations {
                 throw OperationError.notVersionHistory(version: versionID, note: postID)
             }
             var version = try liveContainer(db, versionID)
+            let now = date.now
             version.archivedAt = nil
             version.locked = false
             version.lockedAt = nil
-            version.updatedAt = date.now
+            version.updatedAt = now
             try version.update(db)
+            try applyLiveTags(db, from: postID, to: versionID, now: now)
         }
     }
 

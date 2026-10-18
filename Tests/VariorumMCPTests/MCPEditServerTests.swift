@@ -119,6 +119,96 @@ struct MCPEditServerTests {
         }
     }
 
+    // MARK: - VX-197 (VX-336 U8a): edit_take's description says the dedupe
+
+    /// The "before" commit is DEDUPED (`isDirty`, the standing rule every
+    /// quiet occasion shares): none when the take's latest commit already
+    /// holds the words it replaces, or when the take is blank and was never
+    /// committed — then the answer has no before_commit_id. Writing the text a
+    /// take already has changes nothing (`changed: false`: no commit, no undo
+    /// entry), and an edit's commits stay when it is undone (P-13nb-U3-2). The
+    /// mechanics run here, and the description must say each of them — red on
+    /// the old words, which promised a "before" commit on every edit (the
+    /// class Claude Code caught live on restore_commit in VX-184 U4).
+    @Test func editTakesBeforeCommitIsDedupedAndTheDescriptionSaysSo() async throws {
+        let words = MCPToolCatalog.editTake.description
+        #expect(words.contains("""
+            Variorum first commits the words it replaces, named "before <your client name>'s edit" \
+            (unless they are already the take's latest commit, or the take is blank and was never \
+            committed — then the answer has no before_commit_id), and then the new text, named \
+            "after <your client name>'s edit", so the author can always compare and come back; \
+            these commits stay even if the edit is undone.
+            """), "the dedupe, said: \(words)")
+        #expect(words.contains("Writing the text the take already has changes nothing (changed: false)."))
+        #expect(!words.contains("Variorum saves a commit named"), "the old every-edit promise is gone")
+
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        try await h.within {
+            let book = try h.operations.createReading(name: "drafts", kind: .book)
+            let note = try h.operations.createPost(title: "ch 1")
+            _ = try h.operations.addPostToReading(note.id, to: book.id)
+            let committed = try h.operations.newBlock(in: note.id, text: "Her committed line.", registeringUndo: false)
+            _ = try h.operations.commit(committed.variant.id, message: "her moment")
+            let blank = try h.operations.newBlock(in: note.id, text: "", registeringUndo: false)
+            let connection = try await h.connect(as: "claude-code")
+            _ = try h.approve("claude-code", spec(.edit, .book, book.id))
+            func history(_ takeID: String) async throws -> [String] {
+                try await h.database.read { db in
+                    try String.fetchAll(
+                        db, sql: """
+                            SELECT COALESCE(message, '') FROM commit_point WHERE variant_id = ?
+                            ORDER BY created_at DESC, id DESC
+                            """,
+                        arguments: [takeID])
+                }
+            }
+
+            // (1) The words it replaces are already the take's latest commit.
+            let one = try await call(connection, "edit_take", [
+                "take_id": .string(committed.variant.id), "text": .string("A new line."),
+                "expected_text": .string("Her committed line."),
+            ])
+            #expect(one.isError != true, "\(text(one))")
+            let first = try json(one)
+            #expect(first["before_commit_id"] == nil && first["after_commit_id"] is String
+                    && first["changed"] as? Bool == true, "\(first)")
+            #expect(try await history(committed.variant.id) == ["after claude-code's edit", "her moment"],
+                    "her commit already holds the replaced words — no before commit")
+
+            // (2) A blank take that was never committed.
+            let two = try await call(connection, "edit_take", [
+                "take_id": .string(blank.variant.id), "text": .string("Words at last."), "expected_text": .string(""),
+            ])
+            #expect(two.isError != true, "\(text(two))")
+            let second = try json(two)
+            #expect(second["before_commit_id"] == nil && second["after_commit_id"] is String, "\(second)")
+            #expect(try await history(blank.variant.id) == ["after claude-code's edit"])
+
+            // (3) The text it already has: nothing written, nothing to undo.
+            let depth = h.undoStack.depth
+            let three = try await call(connection, "edit_take", [
+                "take_id": .string(committed.variant.id), "text": .string("A new line."),
+                "expected_text": .string("A new line."),
+            ])
+            #expect(three.isError != true, "\(text(three))")
+            let third = try json(three)
+            #expect(third["changed"] as? Bool == false && third["before_commit_id"] == nil
+                    && third["after_commit_id"] == nil, "\(third)")
+            #expect(try await history(committed.variant.id) == ["after claude-code's edit", "her moment"])
+            #expect(h.undoStack.depth == depth, "no undo entry for a write that changed nothing")
+
+            // (4) Undone: the text goes back, the commits stay.
+            #expect(try h.undoStack.undo(with: h.writeOperations) == "claude-code's edit")
+            #expect(try await h.database.read { db in
+                try String.fetchOne(db, sql: "SELECT working_text FROM variant WHERE id = ?",
+                                    arguments: [blank.variant.id])
+            } == "")
+            #expect(try await history(blank.variant.id) == ["after claude-code's edit"], "the commits stay")
+            await h.hangUp(connection)
+        }
+    }
+
     // MARK: - The structural tools: her doors' acts, one undo each
 
     @Test func theStructuralToolsAreHerDoorsActsEachOneClientNamedUndo() async throws {

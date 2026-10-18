@@ -217,6 +217,14 @@ struct HelperView: View {
         // still a door, and this is where she looks for it.
         ShortcutGroup(title: "Windows & panes", items: [
             ("⌘⇧1–9", "jump to the 1st–9th note in the sidebar's Open list"),
+            // VX-287 (the VX-283 run): her chord, and her reason for the
+            // landing — "that way you can close them all quickly".
+            ("⌘⇧W", "close the note you're in \u{2014} its row leaves the Open list and the "
+                + "pane moves on to the next note, so pressing it again closes the next "
+                + "(\u{2318}W still closes the window)"),
+            // VX-289: the keyless sibling, by its menu path and its right-click.
+            ("View ▸ Close All Notes", "empty the Open list \u{2014} also on any Open row's "
+                + "right-click; the notes themselves are untouched"),
             // The Act 10 correction round, batch A (row 2): the sidebar is
             // the app's own now (`ShellSplit`), so its toggle is a declared
             // door with the platform's chord — and a row here, where every
@@ -381,12 +389,16 @@ struct HelperView: View {
         ("promote (⧉ make this a note)",
          "A new note minted from a lens or column, linked to the original as a version. "
          + "\"Promote is the bridge\" from a way of looking to a thing of its own."),
+        // VX-372 (P-C-1): the copy door by its new verbs ("Duplicate as
+        // Version" retired as a label), read from the registry's source.
         ("version",
-         "A different NOTE related to this one. Two gestures share the word, and they do "
+         "A different NOTE related to this one. Two gestures make one, and they do "
          + "different things: MARK AS VERSIONS is a CONNECTION ONLY — it draws a link "
          + "between two notes that already exist; nothing is copied, neither note changes; "
-         + "the link just lets Compare pair them. DUPLICATE AS VERSION is a COPY — it mints "
-         + "a whole new note (takes and all) and draws that same link in one gesture. "
+         + "the link just lets Compare pair them. \(DuplicateCopy.withTagsVerb.uppercased()) "
+         + "is a COPY — it mints a whole new note (takes and all, wearing the note's tags, so "
+         + "a book that collects one hears it) and draws that same link in one gesture; "
+         + "\(DuplicateCopy.withoutTagsVerb.uppercased()) leaves the tags behind. "
          + "Rule of thumb: mark = connect, duplicate = copy + connect. UNMARK deletes only "
          + "the connection — both notes stay exactly as they are."),
         ("divide / divide choosing takes",
@@ -477,8 +489,9 @@ struct HelperView: View {
         ("the Open list",
          "The sidebar's list of notes this window has open, in the order you opened "
          + "them — ⌘⇧1 through ⌘⇧9 jump to them. Drag rows to rearrange; ✕ closes a "
-         + "ROW and nothing else (the note is untouched and comes back the next time "
-         + "you open it)."),
+         + "ROW (the note is untouched and comes back the next time you open it). "
+         + "Closing the note you're in — its ✕, or ⌘⇧W — moves you on to the next one; "
+         + "View ▸ Close All Notes empties the list."),
         ("context bar",
          "The thin line above a pane, always the same doors: ← back, the book "
          + "this note sits in (click to open that book right at this note; ⌘-click, or "

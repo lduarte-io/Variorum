@@ -101,7 +101,7 @@ struct PoolTuckFaceTests {
         let hosting = NSHostingView(
             rootView: PoolPostsView(
                 session: session, model: model,
-                onDuplicateAsVersion: { _ in }, onArchive: { _ in },
+                onDuplicateAsVersion: { _, _ in }, onArchive: { _ in },
                 readings: ReadingsViewModel(session: session),
                 tags: TagsViewModel(session: session),
                 onOpen: { _ in }))
@@ -205,7 +205,7 @@ struct PoolTuckFaceTests {
             let again = NSHostingView(
                 rootView: PoolPostsView(
                     session: session, model: hosted.model,
-                    onDuplicateAsVersion: { _ in }, onArchive: { _ in },
+                    onDuplicateAsVersion: { _, _ in }, onArchive: { _ in },
                     readings: ReadingsViewModel(session: session),
                     tags: TagsViewModel(session: session),
                     onOpen: { _ in }))

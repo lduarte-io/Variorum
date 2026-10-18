@@ -152,6 +152,9 @@ struct CommitBar: View {
             // grain pairing with commit/history one line up IS the teaching
             // moment her G4 chapter names.
             .saveNoteVersion, .showNoteVersions,
+            // VX-372 (VX-383 U1 — D-C-2): the two duplicates, under the note's
+            // two time controls (NOTE contexts only — the kind gate below).
+            .duplicateNoteWithTags, .duplicateNoteWithoutTags,
             // 13n-a (R-13n-11): Copy for AI — the note ▾ menu's push gesture.
             .copyForAI,
             // 13n-b U2 (R-13nb-4): the Private row, beside it (NOTE contexts).
@@ -813,6 +816,20 @@ struct CommitBar: View {
                 Task { await model.saveNoteVersion() }
             }
             Button(VersionsPath.menuLabel) { model.requestNoteVersions() }
+            // VX-372 (VX-383 U1 — D-C-2): her two duplicate doors, beside the
+            // version pair — the ONE act (`NoteDuplicate`) every door runs.
+            // NOTE contexts only: the scraps editor composes this bar with a
+            // POOL's id, and a scraps group is never a duplicate's target (P-2;
+            // the delete door's own gate).
+            if model.header?.kind == .post {
+                ForEach(Operations.DuplicateTags.allCases, id: \.self) { tags in
+                    Button(DuplicateCopy.verb(tags)) {
+                        let session = model.session
+                        let postID = model.postID
+                        Task { await NoteDuplicate.perform(postID: postID, tags: tags, session: session) }
+                    }
+                }
+            }
             Divider()
             // 13n-a (R-13n-11) — COPY FOR AI: the note in the Variorum
             // document format, onto the clipboard (reads only). NOTE contexts

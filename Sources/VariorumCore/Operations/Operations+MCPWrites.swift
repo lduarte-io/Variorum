@@ -64,6 +64,15 @@ extension Operations {
         // entry per batch, its label plural ("Undo claude-code's takes"); the
         // receipt counts the batch's items (`MCPWriteReceipt.count`).
         case takes, comments
+        // VX-336 U5b — VX-255's `insert_blocks` (write new at the note's end,
+        // edit anywhere): ONE entry per call, its label plural ("Undo
+        // claude-code's blocks" — the takes batch's twin); the receipt counts
+        // the blocks (`MCPWriteReceipt.count`).
+        case blocks
+        // VX-336 U6a — VX-311's `duplicate_note` (her Duplicate as Version on
+        // the wire): ONE entry ("Undo claude-code's duplicate"); the receipt
+        // names the copy and opens it (PROVISIONAL words, her copy pass).
+        case duplicate
         // VX-184 U3 — VX-188's suggest-rung delete of a client's OWN comment
         // ("Undo claude-code's comment deletion").
         case commentDelete = "comment deletion"
@@ -414,12 +423,18 @@ extension Operations {
     /// able to set the date on a note"*): the minted note's date, `yyyy-MM-dd`
     /// (a malformed key refuses `invalidEntryDate` and mints nothing), set in
     /// the same transaction.
+    ///
+    /// `section` (VX-252 — VX-336 U5b D2): file the new membership under that
+    /// CHAPTER of the destination book in the same transaction — a live section
+    /// of THAT book (`sectionNotFound` / `sectionNotInReading`, checked before
+    /// anything is minted; a wing destination has no chapter). The note's ONE
+    /// undo entry takes the filing with it, and the redo returns it filed.
     @discardableResult
     public func createNote(
         title: String?, text: String, entryDate: String? = nil, in destination: MCPNoteDestination,
-        undoLabel: String
+        section: String? = nil, undoLabel: String
     ) throws -> DocumentImport {
-        try mintNoteEntry(undoLabel: undoLabel) { db in
+        try mintNoteEntry(undoLabel: undoLabel, section: section) { db in
             let blocks = SegmentationRules
                 .bulkSegments(text, mode: try Queries.defaultSegmentation(db))
                 .map { VariorumDocument.Block(text: $0) }
@@ -465,10 +480,12 @@ extension Operations {
     /// block as an empty line. Until this unit it was silently DROPPED (the
     /// format's rule, P-13nb-U3-9's "empty-text takes drop" — superseded at
     /// this door only; the file doors keep it).
+    ///
+    /// `section` (VX-252): `createNote`'s — the chapter of the destination book.
     @discardableResult
     public func createStructuredNote(
         title: String?, entryDate: String?, blocks: [MCPNoteBlock],
-        in destination: MCPNoteDestination, undoLabel: String
+        in destination: MCPNoteDestination, section: String? = nil, undoLabel: String
     ) throws -> DocumentImport {
         let trimmed = title?.trimmingCharacters(in: .whitespacesAndNewlines)
         let document = VariorumDocument.NamedDocument(
@@ -477,7 +494,7 @@ extension Operations {
                 title: (trimmed?.isEmpty ?? true) ? nil : trimmed, tagPaths: [],
                 blocks: blocks.map { VariorumDocument.Block(text: $0.text, alternates: $0.takes) }))
         return try mintNoteEntry(
-            undoLabel: undoLabel, keepingBlankTakes: true
+            undoLabel: undoLabel, keepingBlankTakes: true, section: section
         ) { _ in document } destination: { destination } finish: { db, minted in
             for (blockID, block) in zip(minted.blockIDs, blocks) {
                 let name = block.name?.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -514,9 +531,14 @@ extension Operations {
     /// entry date), written on the minted rows in the SAME transaction,
     /// before the note joins a book (so the hand-add's gates see the note
     /// as it will stand).
+    /// `section` (VX-252): the chapter of the destination BOOK the membership
+    /// is filed under — her New Note in a Book's order (`newPostInReading`):
+    /// the book's gates, then the chapter, checked BEFORE the mint; the pointer
+    /// rides the membership row the hand-add wrote, in this transaction.
     private func mintNoteEntry(
         undoLabel: String,
         keepingBlankTakes: Bool = false,
+        section sectionID: String? = nil,
         document: (Database) throws -> VariorumDocument.NamedDocument,
         destination: () -> MCPNoteDestination,
         finish: (Database, MintedDocument) throws -> Void = { _, _ in }
@@ -525,14 +547,24 @@ extension Operations {
             let named = try document(db)
             let wing: String
             var bookID: String?
+            var outflow: [String] = []
             switch destination() {
             case .book(let id):
                 let book = try liveReading(db, id)
                 guard book.kind == .book else { throw OperationError.wrongReadingKind(id: id, expected: .book) }
                 guard !book.locked else { throw OperationError.lockedReading(id: id) }
+                if let sectionID {
+                    let section = try liveSection(db, sectionID)
+                    guard section.readingId == id else {
+                        throw OperationError.sectionNotInReading(sectionID: sectionID, readingID: id)
+                    }
+                }
                 wing = try Queries.wingIsLive(db, id: book.wingId) ? book.wingId : ""
                 bookID = id
+                outflow = book.autoTagIDs
             case .wing(let id):
+                // A wing holds no chapters: a section here names none.
+                if let sectionID { throw OperationError.sectionNotFound(id: sectionID) }
                 try requireLiveWing(db, id)
                 wing = id
             }
@@ -544,17 +576,60 @@ extension Operations {
                 // gates, its outflow) — BEFORE the header's tags, so this
                 // book's own pair is decided and the tagging act is heard by
                 // the OTHER living books (`newPostInReading`'s order).
-                _ = try addPostToReading(db, minted.post.id, to: bookID, at: .end)
+                var membership = try addPostToReading(db, minted.post.id, to: bookID, at: .end)
+                if let sectionID {
+                    membership.sectionId = sectionID
+                    try membership.update(db)
+                }
             }
-            let tagIDs = try applyDocumentTags(
+            let header = try applyDocumentTags(
                 db, named.document.tagPaths, to: minted.post.id, wingId: wing, now: now)
+            let worn = try mintedNoteTags(db, postID: minted.post.id, header: header.map(\.id), outflow: outflow)
             return DocumentImport(
-                post: minted.post, blockIDs: minted.blockIDs,
-                alternateCount: minted.alternateCount, tagIDs: tagIDs)
+                post: minted.post, blockIDs: minted.blockIDs, alternateCount: minted.alternateCount,
+                tagIDs: worn.map(\.id), tagPaths: worn.map(\.path), blocks: minted.blocks)
         }
         let postID = result.post.id
         registerMintedContainerEntry(label: undoLabel, postID)
         return result
+    }
+
+    /// **VX-361 — every tag the minted note wears when the act lands** (the
+    /// VX-336 run record's U9 D1 + F-1 (a), PROVISIONAL P-VX361-1): the
+    /// header's tags in header order — one the book's outflow also applied is
+    /// listed once, at its header place — then the rest in the destination
+    /// book's OUTFLOW order (`autoTagIDs`), and last (a belt: nothing else in
+    /// this act tags the note — intake SEATS, it never applies an outflow) any
+    /// other by path. Read inside the act's transaction from the note's own
+    /// live applications: ∝ what this act applied, never the corpus (P1), and
+    /// never a read after the commit (no race — U5b's D1).
+    ///
+    /// VX-371 (VX-383 U2): shared with `duplicate_note`, whose "header" is the
+    /// tags its copy was APPLIED from the source (application order) — so the
+    /// two answers list a note's tags by ONE rule (P-VX361-1's shape).
+    func mintedNoteTags(
+        _ db: Database, postID: String, header: [String], outflow: [String]
+    ) throws -> [(id: String, path: String)] {
+        var paths: [String: String] = [:]
+        for row in try Row.fetchAll(
+            db,
+            sql: """
+                SELECT t.id, t.path FROM post_tag pt
+                JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL
+                WHERE pt.post_id = ? AND pt.deleted_at IS NULL
+                """,
+            arguments: [postID]) {
+            paths[row["id"]] = row["path"]
+        }
+        var worn: [(id: String, path: String)] = []
+        func list(_ id: String) {
+            guard let path = paths.removeValue(forKey: id) else { return }
+            worn.append((id, path))
+        }
+        header.forEach(list)
+        outflow.forEach(list)
+        paths.sorted { ($0.value, $0.key) < ($1.value, $1.key) }.forEach { worn.append(($0.key, $0.value)) }
+        return worn
     }
 
     // MARK: - WRITE NEW: a whole book (the bulk door)
@@ -562,13 +637,16 @@ extension Operations {
     /// `importBook`'s act (a new unshelved book in `wingId`, chapters and
     /// seated notes, the E13 name guard) with its ONE entry relabeled for the
     /// client — the bulk door that undoes in a single press (R-13n-6).
+    /// VX-363: `namesCountedBy` — the readings the name guard counts (the wire
+    /// passes the ones the client can READ, VX-259's rule); nil counts every
+    /// reading.
     @discardableResult
     public func importBook(
-        _ book: VariorumDocument.Book, wingId: String, undoLabel: String
+        _ book: VariorumDocument.Book, wingId: String, undoLabel: String, namesCountedBy reach: BookNameReach? = nil
     ) throws -> BookImport {
-        guard let undoStack else { return try importBook(book, wingId: wingId, shelfId: nil) }
+        guard let undoStack else { return try importBook(book, wingId: wingId, shelfId: nil, namesCountedBy: reach) }
         return try undoStack.withCompound(label: undoLabel, operations: self) {
-            try importBook(book, wingId: wingId, shelfId: nil)
+            try importBook(book, wingId: wingId, shelfId: nil, namesCountedBy: reach)
         }
     }
 

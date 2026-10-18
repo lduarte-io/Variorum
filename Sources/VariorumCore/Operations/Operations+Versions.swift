@@ -172,6 +172,14 @@ extension Operations {
         /// Source block id → its copy, in position order.
         public let blockCopies: [(source: String, copy: String)]
         public let versionEdge: Edge
+        /// VX-311 (VX-336 U6a — D-311-4): what the copy MINTED, per copied
+        /// block in position order — VX-252's record (`MintedBlockTakes`), its
+        /// `sourceBlockID` set — built from the copy machine's own rows, never
+        /// a second read. Filled by `copyPost`; empty where a caller builds
+        /// its own result (the outline, the saved version). Outside `==`
+        /// (a projection of the rows `blockCopies` already names), so every
+        /// existing construction and comparison is unchanged.
+        public var blocks: [MintedBlockTakes] = []
 
         public static func == (lhs: PostCopyResult, rhs: PostCopyResult) -> Bool {
             lhs.post == rhs.post && lhs.versionEdge == rhs.versionEdge
@@ -193,29 +201,170 @@ extension Operations {
     /// recorded as build-time calls in the closeout). A sealed source is
     /// legal — reading isn't authoring; the source is never touched.
     ///
-    /// **17y item (c) — the note's TAGS RIDE** (her ruling, QUESTIONS #169's
-    /// tail: "it's meant to be a duplication… let's just build it now"): the
-    /// copy wears every live tag application the source wears, as fresh rows
-    /// — the ceremony copy's `copyLiveTags` (the source's own wing's live
-    /// tags, application order kept). A ROW copy, never an applying act: no
-    /// living book hears the duplicate (PROVISIONAL P-17y-B3-c1 — the copy
-    /// family's letter, P-13ic-U2-1). The ride lives HERE, in this op's own
-    /// transaction, never in `copyPost`: Diverge (`divergePostForReading`)
-    /// and `promoteLens` compose that body and stay tag-less (her lean — a
-    /// diverged copy is meant to differ). Undo's tombstone cascades the
-    /// copy's applications; redo's `restoreContainer` revives them on the
-    /// exact stamp. Pinned `DuplicateCarriesTagsTests`.
-    @discardableResult
-    public func duplicateAsVersion(_ postID: String) throws -> PostCopyResult {
-        let result: PostCopyResult = try database.write { db in
-            let copy = try copyPost(db, sourceID: postID, chosenPicks: nil, carryFans: true)
-            let source = try livePost(db, postID)
-            try copyLiveTags(
-                db, from: postID, to: copy.post.id, wingID: source.wingId, now: date.now)
-            return copy
+    /// **What a duplicate does with the note's TAGS** (VX-372, VX-383 U1 —
+    /// D-C-1; her ticket: *"a direct duplicate door, with tags / without tags;
+    /// a duplicate with tags counts as tagging"*). Her two doors, one act each
+    /// — `verb` is the door's word (P-C-1, PROVISIONAL for her VX-234 wording
+    /// pass: "Duplicate as Version" retires as a label; the versions machinery
+    /// and the `version_of` edge are unchanged) and the undo entry's label.
+    public enum DuplicateTags: String, Equatable, Sendable, CaseIterable {
+        /// **Duplicate with Tags** — each live tag the source wears in its
+        /// wing is APPLIED to the copy through the one application road
+        /// (`insertPostTag`), so intake hears it exactly as when she tags.
+        case applied
+        /// **Duplicate without Tags** — the copy wears none, so no book hears it.
+        case none
+
+        /// The door's word, and the undo entry's label.
+        public var verb: String {
+            switch self {
+            case .applied: "Duplicate with Tags"
+            case .none: "Duplicate without Tags"
+            }
         }
-        registerMintedContainerEntry(label: "Duplicate as Version", result.post.id)
+    }
+
+    /// **The note's TAGS, by her choice** (VX-372 — D-C-1, superseding 17y
+    /// item (c)'s ROW copy, PROVISIONAL P-17y-B3-c1, for this door). With
+    /// `.applied` (the default — her door's, and P-C-3's for the wire) the
+    /// copy is then TAGGED: each live tag the source wears in its wing,
+    /// application order kept, applied through `insertPostTag`, in this op's
+    /// own transaction — so every living book whose rule hears a tag decides
+    /// by `IntakeDecision` exactly as when she tags: a book that joins
+    /// quietly SEATS the copy, one whose dial says Arrivals BELLS it, capacity
+    /// waits at the door, and the ownership table holds (the copy is membered
+    /// nowhere until the first seat). Finished, sealed and archived books stay
+    /// paused (the one table). With `.none` the copy wears no tag at all. The
+    /// tags live HERE, never in `copyPost`: Diverge (`divergePostForReading`)
+    /// and `promoteLens` compose that body and stay tag-less (her lean — a
+    /// diverged copy is meant to differ).
+    ///
+    /// **ONE undo entry covers the seats** (`registerMintedContainerEntry`):
+    /// the inverse tombstones the copy, and the container trigger takes its
+    /// applications, memberships and arrivals on that ONE stamp; the redo's
+    /// `restoreContainer` revives exactly those on it — so a row she judged
+    /// in between (a dismissal, on her own stamp; a seat she pressed, the same
+    /// row) stays as she judged it. Pinned `DuplicateAppliesTagsTests`,
+    /// `DuplicateWithoutTagsTests`, `DuplicateCarriesTagsTests`.
+    @discardableResult
+    public func duplicateAsVersion(
+        _ postID: String, tags: DuplicateTags = .applied
+    ) throws -> PostCopyResult {
+        let result: PostCopyResult = try database.write { db in
+            try duplicateAsVersionBody(db, postID, tags: tags)
+        }
+        registerMintedContainerEntry(label: tags.verb, result.post.id)
         return result
+    }
+
+    /// **Where a duplicate is FILED** (VX-371, VX-383 U2 — D-C-4): a BOOK of
+    /// the source's wing, and optionally a chapter of it. Only the MCP door's
+    /// `duplicate_note` files (`create_note`'s book road, applied to a copy);
+    /// her own doors pass none, so their rows are byte-unchanged.
+    public struct DuplicateFiling: Equatable, Sendable {
+        public let bookID: String
+        public let sectionID: String?
+
+        public init(bookID: String, sectionID: String? = nil) {
+            self.bookID = bookID
+            self.sectionID = sectionID
+        }
+    }
+
+    /// **The duplicate's ROWS, inside the caller's transaction** — her door's
+    /// body, extracted ONCE (VX-311, VX-336 U6a — D-311-1, the orchestrator's
+    /// ruling) so her door and the MCP door's `duplicate_note`
+    /// (`duplicateNoteForClient`, its guard first) run the very same brain and
+    /// can never drift — the tag choice included (VX-372, D-C-1): the copy
+    /// machine with the source's own chosen and whole fans, then, with
+    /// `.applied`, the note's live tags APPLIED (`applyLiveTags`).
+    ///
+    /// **`filing`** (VX-371 — D-C-4; nil for every door of hers): the copy
+    /// joins that book in this same transaction, in `create_note`'s order
+    /// (`mintNoteEntry`): the book's gates and the chapter are checked BEFORE
+    /// anything is minted (a live book — a gathering refuses
+    /// `wrongReadingKind`, a finished one `lockedReading`; a chapter of THAT
+    /// book — `sectionNotFound` / `sectionNotInReading`); then the family
+    /// copy; then the MEMBERSHIP through the hand-add's one choke point
+    /// (`addPostToReading` — capacity, the wing, ownership, the book's
+    /// OUTFLOW), the chapter stamped on that row; and only THEN the tags. The
+    /// order is load-bearing: the book's own pair is decided before any tag is
+    /// applied, so a destination that collects one of the copy's tags takes it
+    /// ONCE, filed (tags first, intake would seat it and the filing would
+    /// refuse `alreadyInReading`), and the applications are heard by the OTHER
+    /// books — an owned destination's copy then BELLS at a plain collecting
+    /// book (the ownership table). An ARCHIVED book takes the add (explicit
+    /// adds land — AppSpec §9, 13i-e).
+    func duplicateAsVersionBody(
+        _ db: Database, _ postID: String, tags: DuplicateTags, filing: DuplicateFiling? = nil
+    ) throws -> PostCopyResult {
+        if let filing {
+            let book = try liveReading(db, filing.bookID)
+            guard book.kind == .book else {
+                throw OperationError.wrongReadingKind(id: filing.bookID, expected: .book)
+            }
+            guard !book.locked else { throw OperationError.lockedReading(id: filing.bookID) }
+            if let sectionID = filing.sectionID {
+                let section = try liveSection(db, sectionID)
+                guard section.readingId == filing.bookID else {
+                    throw OperationError.sectionNotInReading(sectionID: sectionID, readingID: filing.bookID)
+                }
+            }
+        }
+        let copy = try copyPost(db, sourceID: postID, chosenPicks: nil, carryFans: true)
+        if let filing {
+            var membership = try addPostToReading(db, copy.post.id, to: filing.bookID, at: .end)
+            if let sectionID = filing.sectionID {
+                membership.sectionId = sectionID
+                try membership.update(db)
+            }
+        }
+        switch tags {
+        case .applied:
+            try applyLiveTags(db, from: postID, to: copy.post.id, now: date.now)
+        case .none:
+            break
+        }
+        return copy
+    }
+
+    /// **The source's live tags, APPLIED to `targetID`** (VX-372 — D-C-1 and
+    /// D-C-3's one road): every live application of a live tag in the
+    /// TARGET's wing (a duplicate's and a saved version's wing is the
+    /// source's — this is also the wing belt `applyAutoTag` keeps, so no tag
+    /// ever crosses wings), in the source's application order, each through
+    /// `insertPostTag` — the ONE post-tag insert road, so each application is
+    /// an applying ACT that intake hears. A tag the target already wears
+    /// (impossible on a fresh copy, kept as the guard) is skipped, as is
+    /// every application once the target is gone.
+    func applyLiveTags(
+        _ db: Database, from sourceID: String, to targetID: String, now: Date
+    ) throws {
+        guard let target = try Container.fetchOne(db, key: targetID),
+              target.deletedAt == nil, target.kind == .post
+        else { return }
+        for tagID in try liveTagIDs(db, of: sourceID, inWing: target.wingId) {
+            guard try liveApplication(db, table: "post_tag", tagID: tagID,
+                                      targetColumn: "post_id", targetID: targetID) == nil
+            else { continue }
+            try insertPostTag(db, tagID: tagID, postID: targetID, now: now)
+        }
+    }
+
+    /// The note's live tags in `wingID` — every live application of a live tag
+    /// of that wing, in application order (`created_at, id`): what
+    /// `applyLiveTags` applies, and (VX-371) the head of `duplicate_note`'s
+    /// answered tag list — one statement, so the two can never disagree.
+    func liveTagIDs(_ db: Database, of postID: String, inWing wingID: String) throws -> [String] {
+        try String.fetchAll(
+            db,
+            sql: """
+                SELECT pt.tag_id FROM post_tag pt
+                JOIN tag t ON t.id = pt.tag_id AND t.deleted_at IS NULL AND t.wing_id = ?
+                WHERE pt.post_id = ? AND pt.deleted_at IS NULL
+                ORDER BY pt.created_at, pt.id
+                """,
+            arguments: [wingID, postID])
     }
 
     /// MAKE OUTLINE POST (taste checkpoint, Sitting 9 — R99; her batch-10
@@ -660,7 +809,8 @@ extension Operations {
         try copy.update(db)
 
         return PostCopyResult(
-            post: copy, blockCopies: outcome.blockCopies, versionEdge: versionEdge)
+            post: copy, blockCopies: outcome.blockCopies, versionEdge: versionEdge,
+            blocks: outcome.minted)
     }
 
     /// What one run of the block-copy loop produced.
@@ -670,6 +820,9 @@ extension Operations {
         /// `(source block, its copy)` for the FIRST slot that copied — the
         /// `version_of` anchor's pair where a caller mints one.
         var firstPair: (String, String)?
+        /// VX-311 (VX-336 U6a — D-311-4): each copied block's record, from the
+        /// rows this loop wrote (additive — no caller's rows change).
+        var minted: [MintedBlockTakes] = []
     }
 
     /// **The block-copy loop, over an EXISTING target container** (the
@@ -797,6 +950,24 @@ extension Operations {
 
             if outcome.firstPair == nil { outcome.firstPair = (block.id, blockCopy.id) }
             outcome.blockCopies.append((source: block.id, copy: blockCopy.id))
+            // VX-311 (VX-336 U6a — D-311-4, F-3 (a)): what this slot MINTED,
+            // said from the rows just written (never a second read): the copy's
+            // ACTIVE takes in the store's own fan order — the copies' own
+            // `(fan_position, id)`, exactly what `read_note` lists — and the
+            // take it SHOWS by the read-time rule (the chosen copy while it is
+            // an active take, else the default copy, else the first active —
+            // AppSpec §7's fallback, read_note's own). Archived copies ride the
+            // note (her door's) but sit outside the fan, as read_note's resting
+            // answer has them.
+            let activeCopies = copiedVariants.filter { $0.status == .active }
+                .sorted { ($0.fanPosition, $0.id) < ($1.fanPosition, $1.id) }
+            let activeIDs = Set(activeCopies.map(\.id))
+            let shownCopyID = [chosenCopyID, defaultCopyID].compactMap { $0 }.first(where: activeIDs.contains)
+                ?? activeCopies.first?.id ?? defaultCopyID
+            outcome.minted.append(MintedBlockTakes(
+                blockID: blockCopy.id, shownTakeID: shownCopyID,
+                takes: activeCopies.map { MintedTake(id: $0.id, label: $0.label, text: $0.workingText) },
+                sourceBlockID: block.id))
             if let shownText = (chosenCopyID.flatMap { id in copiedVariants.first { $0.id == id } }
                                 ?? copiedVariants.first(where: { $0.id == defaultCopyID }))?
                 .workingText, !shownText.isEmpty {

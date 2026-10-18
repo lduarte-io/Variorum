@@ -165,8 +165,10 @@ struct CeremonySheetFooter: View {
                 Button(confirmTitle) { confirm() }
                     .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
                     .keyboardShortcut(.defaultAction)
+                    // VX-194 (R-VX381-A2): the disabled face is the STYLE's
+                    // now — it reads this `.disabled`. The local 0.45 fade
+                    // that stood here would have dimmed it twice.
                     .disabled(!canConfirm)
-                    .opacity(canConfirm ? 1 : 0.45)
             }
             .padding(.top, 12)
         }

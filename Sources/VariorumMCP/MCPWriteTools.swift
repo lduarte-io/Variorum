@@ -72,10 +72,13 @@ struct MCPWriteTools: Sendable {
     enum Job: Sendable {
         case addTake(blockID: String, text: String, label: String?)
         case addComment(blockID: String, text: String)
-        case saveLens(noteID: String, name: String, takeIDs: [String])
+        /// VX-253: the picks (`take_ids`) and, optionally, a rule that fills
+        /// every block the picks don't cover (`MCPWriteTools+LensRule`).
+        case saveLens(noteID: String, name: String, takeIDs: [String], rule: LensRule?)
         /// U3 (R-13nb-11 G-2): EITHER payload — plain prose, or the
         /// wire-document subset — and an optional entry date (R-13nb-26 (b)).
-        case createNote(title: String?, payload: NotePayload, entryDate: String?, place: Place)
+        /// VX-252: an optional chapter of the book (`section_id`).
+        case createNote(title: String?, payload: NotePayload, entryDate: String?, place: Place, sectionID: String?)
         case importNote(VariorumDocument.NamedDocument, place: Place)
         case importBook(VariorumDocument.Book, wingID: String)
         case applyTag(noteID: String, path: String)
@@ -99,6 +102,14 @@ struct MCPWriteTools: Sendable {
         case noteEdit(NoteEditJob)
         /// VX-184 U5 (VX-196): edit parity across the library (`MCPWriteTools+LibraryEdits`).
         case libraryEdit(LibraryEditJob)
+        /// VX-336 U5b (VX-255): blocks added to a note — at its end at write
+        /// new, anywhere at edit (`MCPWriteTools+InsertBlocks`).
+        case insertBlocks(noteID: String, place: BlockInsertPlace, blocks: [Operations.MCPNoteBlock])
+        /// VX-336 U6a (VX-311): her Duplicate on the wire — the copy bookless in
+        /// the source's wing (`MCPWriteTools+DuplicateNote`). VX-371 (VX-383
+        /// U2): `with_tags` (default true) and the book road (`book_id`, with
+        /// an optional `section_id`).
+        case duplicateNote(noteID: String, withTags: Bool, bookID: String?, sectionID: String?)
 
         var tool: String {
             switch self {
@@ -119,6 +130,8 @@ struct MCPWriteTools: Sendable {
             case .applyTag: "apply_tag"
             case .createBook: "create_book"
             case .addNoteToBook: "add_note_to_book"
+            case .insertBlocks: "insert_blocks"
+            case .duplicateNote: "duplicate_note"
             }
         }
 
@@ -145,6 +158,23 @@ struct MCPWriteTools: Sendable {
             case .addTake, .addComment, .saveLens, .createNote, .importNote, .importBook, .applyTag,
                  .createBook, .addNoteToBook, .deleteComment, .removeTag, .linkVersions:
                 false
+            // VX-255 (the run record's D8): new blocks, and no take's text
+            // read, rewritten, copied, frozen or tombstoned. Her caret's block
+            // survives the act (same take, live, unlocked, same place), so her
+            // flush lands where she typed and the editor's full render restores
+            // her caret by identity; her open tail stays below the stored
+            // blocks and crystallizes after the run, where the screen showed it.
+            case .insertBlocks:
+                false
+            // VX-311 (the run record's D-311-6, argued from VX-246 U3's COPY
+            // row): a duplicate COPIES every take of the note — `copyPlacements`
+            // reads the stored `working_text` rows — so it would miss her last
+            // words while answering success; her own Duplicate as Version
+            // flushes first (every door rides `AppSession.runCopying(from:)`,
+            // 13e E10's "THE COPY FAMILY'S ONE ENTRY"). The same class as
+            // `save_version`, so the same answer.
+            case .duplicateNote:
+                true
             }
         }
     }
@@ -186,12 +216,17 @@ struct MCPWriteTools: Sendable {
         case MCPToolCatalog.addComment.name:
             return .addComment(blockID: try requiredString(args, "block_id"), text: try requiredText(args, "text"))
         case MCPToolCatalog.saveLens.name:
-            let takeIDs = try stringArray(args, "take_ids") ?? []
-            guard Set(takeIDs).count == takeIDs.count else {
+            let takeIDs = try stringArray(args, "take_ids")
+            if let takeIDs, Set(takeIDs).count != takeIDs.count {
                 throw ArgumentFailure(message: "take_ids lists a take twice.")
             }
+            // VX-253: three explicit fills, never a magic word — the picks,
+            // a label, or pin_chosen; the picks may ride either rule.
+            let rule = try parseLensRule(args)
+            guard takeIDs != nil || rule != nil else { throw ArgumentFailure(message: Self.noLensFillWords) }
             return .saveLens(
-                noteID: try requiredString(args, "note_id"), name: try requiredText(args, "name"), takeIDs: takeIDs)
+                noteID: try requiredString(args, "note_id"), name: try requiredText(args, "name"),
+                takeIDs: takeIDs ?? [], rule: rule)
         case MCPToolCatalog.createNote.name:
             let text = try optionalString(args, "text")
             let blocksValue = args["blocks"].flatMap { $0 == .null ? nil : $0 }
@@ -202,9 +237,15 @@ struct MCPWriteTools: Sendable {
             case (.some, .some): throw ArgumentFailure(message: "Pass text or blocks, not both.")
             case (nil, nil): throw ArgumentFailure(message: "Pass text (plain prose) or blocks (structured).")
             }
+            // VX-252 (D2): a chapter is a chapter OF the book the note joins —
+            // said at the parse, before any decision (independent of any target).
+            let sectionID = try optionalString(args, "section_id")
+            if sectionID != nil, try optionalString(args, "book_id") == nil {
+                throw ArgumentFailure(message: Self.sectionWithoutBookWords)
+            }
             return .createNote(
                 title: try optionalString(args, "title"), payload: payload,
-                entryDate: try entryDate(args), place: try place(args))
+                entryDate: try entryDate(args), place: try place(args), sectionID: sectionID)
         case MCPToolCatalog.importDocument.name:
             return try parseImport(args)
         case MCPToolCatalog.applyTag.name:
@@ -218,6 +259,10 @@ struct MCPWriteTools: Sendable {
             return .addNoteToBook(
                 noteID: try requiredString(args, "note_id"), bookID: try requiredString(args, "book_id"),
                 sectionID: try optionalString(args, "section_id"))
+        case MCPToolCatalog.insertBlocks.name:
+            return try parseInsertBlocks(args)
+        case MCPToolCatalog.duplicateNote.name:
+            return try parseDuplicateNote(args)
         default:
             if let job = try parseEdit(name, args) { return .edit(job) }
             if let job = try parseCarriage(name, args) { return .carriage(job) }
@@ -234,8 +279,9 @@ struct MCPWriteTools: Sendable {
         }
     }
 
-    /// The structured payload: `[{text, name?, takes?: [{text, label?}]}]`.
-    private func noteBlocks(_ value: Value) throws -> [Operations.MCPNoteBlock] {
+    /// The structured payload: `[{text, name?, takes?: [{text, label?}]}]` —
+    /// `create_note`'s, and (VX-255) `insert_blocks`' one block parse.
+    func noteBlocks(_ value: Value) throws -> [Operations.MCPNoteBlock] {
         guard let items = value.arrayValue else { throw ArgumentFailure(message: "blocks must be an array.") }
         return try items.enumerated().map { index, item in
             guard let fields = item.objectValue, let text = fields["text"]?.stringValue else {
@@ -274,10 +320,15 @@ struct MCPWriteTools: Sendable {
         formatter.timeZone = TimeZone(identifier: "UTC")
         formatter.dateFormat = "yyyy-MM-dd"
         guard raw.count == 10, let day = formatter.date(from: raw), formatter.string(from: day) == raw else {
-            throw ArgumentFailure(message: "entry_date must be a real day written yyyy-MM-dd (e.g. 2019-03-04).")
+            throw ArgumentFailure(message: Self.entryDateWords)
         }
         return raw
     }
+
+    /// `entry_date`'s one sentence — the parse's, and (VX-362) the op's own
+    /// `invalidEntryDate` on the wire (`MCPWireRefusalCopy`): two validators,
+    /// one sentence.
+    static let entryDateWords = "entry_date must be a real day written yyyy-MM-dd (e.g. 2019-03-04)."
 
     private func place(_ args: [String: Value]) throws -> Place {
         let bookID = try optionalString(args, "book_id")
@@ -360,7 +411,9 @@ struct MCPWriteTools: Sendable {
                 let take = try ops.addTake(
                     toBlock: blockID, text: text, label: Self.aiLabel(client: clientName, own: takeLabel),
                     undoLabel: label(.take))
-                return (["take_id": take.id, "block_id": blockID, "note_id": note],
+                // VX-254 (D-254-2): the digest of the text the act stored.
+                return (["take_id": take.id, "block_id": blockID, "note_id": note,
+                         "sha256": MCPTextDigest.sha256(take.workingText)],
                         MCPWriteReceipt(clientName: clientName, act: .take, targetID: note, targetTitle: title,
                                         show: .takes(noteID: note, blockID: blockID)))
             }
@@ -373,26 +426,45 @@ struct MCPWriteTools: Sendable {
                         MCPWriteReceipt(clientName: clientName, act: .comment, targetID: note, targetTitle: title,
                                         show: .note(noteID: note, blockID: blockID, select: nil)))
             }
-        case .saveLens(let noteID, let name, let takeIDs):
+        case .saveLens(let noteID, let name, let takeIDs, let rule):
             return try onNote(noteID, rung: .suggest, job: job, clientName: clientName) { title in
-                let picks = try picks(noteID: noteID, takeIDs: takeIDs)
+                var picks = try picks(noteID: noteID, takeIDs: takeIDs)
+                var answer: [String: Any] = [:]
+                // VX-253: the picks FIRST; the rule fills only the blocks they
+                // don't cover — inside this closure, so only after the decision
+                // allowed the note (an unreachable one never reaches the rule).
+                if let rule {
+                    let filled = try fillLens(rule, noteID: noteID, clientName: clientName, covered: Set(picks.keys))
+                    picks.merge(filled.picks) { pick, _ in pick }
+                    answer["unmatched_blocks"] = Array(filled.unmatched.prefix(Self.lensListCap))
+                    answer["unmatched_count"] = filled.unmatched.count
+                }
                 let lens = try ops.saveLens(post: noteID, name: name, picks: picks, undoLabel: label(.lens))
-                return (["lens_id": lens.id, "note_id": noteID],
+                answer["lens_id"] = lens.id
+                answer["note_id"] = noteID
+                return (answer,
                         MCPWriteReceipt(clientName: clientName, act: .lens, targetID: noteID,
                                         targetTitle: title, detail: lens.name,
                                         show: .lens(noteID: noteID, lensID: lens.id)))
             }
-        case .createNote(let title, let payload, let entryDate, let place):
+        case .createNote(let title, let payload, let entryDate, let place, let sectionID):
+            // VX-252 (F-3): the BOOK is decided first (`into`), so an
+            // unreachable book answers the one not-shared sentence whatever
+            // `section_id` names; inside, every id that isn't a live chapter of
+            // THAT book speaks the one sentence its siblings speak
+            // (`MCPWireRefusalCopy`) — hidden is never told from missing.
             return try into(place, job: job, clientName: clientName) { destination in
                 let minted: Operations.DocumentImport = switch payload {
                 case .text(let text):
                     try ops.createNote(
-                        title: title, text: text, entryDate: entryDate, in: destination, undoLabel: label(.note))
+                        title: title, text: text, entryDate: entryDate, in: destination, section: sectionID,
+                        undoLabel: label(.note))
                 case .blocks(let blocks):
                     try ops.createStructuredNote(
-                        title: title, entryDate: entryDate, blocks: blocks, in: destination, undoLabel: label(.note))
+                        title: title, entryDate: entryDate, blocks: blocks, in: destination, section: sectionID,
+                        undoLabel: label(.note))
                 }
-                return try noteAnswer(minted, act: .note, clientName: clientName)
+                return try noteAnswer(minted, act: .note, clientName: clientName, sectionID: sectionID)
             }
         case .importNote(let named, let place):
             return try into(place, job: job, clientName: clientName) { destination in
@@ -401,7 +473,11 @@ struct MCPWriteTools: Sendable {
             }
         case .importBook(let book, let wingID):
             return try inWing(wingID, job: job, clientName: clientName) {
-                let result = try ops.importBook(book, wingId: wingID, undoLabel: label(.importBook))
+                // VX-363: the book's name is checked only against the books
+                // this client can READ (VX-259's rule, on the third road that
+                // names a book) — a hidden one neither blocks it nor is named.
+                let result = try ops.importBook(
+                    book, wingId: wingID, undoLabel: label(.importBook), namesCountedBy: readableBooks(clientName))
                 return (["book_id": result.reading.id, "note_ids": result.postIDs, "chapter_ids": result.sectionIDs],
                         MCPWriteReceipt(clientName: clientName, act: .importBook, targetID: result.reading.id,
                                         targetTitle: result.reading.name, count: result.postIDs.count,
@@ -409,14 +485,32 @@ struct MCPWriteTools: Sendable {
             }
         case .applyTag(let noteID, let path):
             return try onNote(noteID, rung: .writeNew, job: job, clientName: clientName) { title in
-                let application = try ops.applyTagPath(path, toPost: noteID, undoLabel: label(.tag))
+                // VX-362 (a) (the run record's U9, F-2 — PROVISIONAL P-VX362-1):
+                // a tag the note ALREADY wears is done, as at every tag door of
+                // hers (seven catch `alreadyTagged` and move on — `TypedTagPath`:
+                // "typing it again is a no-op, never an error"). The op threw, so
+                // its transaction rolled back and it registered no undo entry;
+                // the answer says `changed: false` and there is no receipt (a
+                // receipt may only claim what landed). The Activity line is the
+                // act's landed one, as every no-op on the wire logs.
+                let tagID: String
+                let changed: Bool
+                do {
+                    tagID = try ops.applyTagPath(path, toPost: noteID, undoLabel: label(.tag)).tagId
+                    changed = true
+                } catch OperationError.alreadyTagged(let worn, _) {
+                    tagID = worn
+                    changed = false
+                }
                 let tagPath = try database.read { db in
-                    try String.fetchOne(db, sql: "SELECT path FROM tag WHERE id = ?", arguments: [application.tagId])
+                    try String.fetchOne(db, sql: "SELECT path FROM tag WHERE id = ?", arguments: [tagID])
                 } ?? path
-                return (["tag_id": application.tagId, "tag": tagPath, "note_id": noteID],
-                        MCPWriteReceipt(clientName: clientName, act: .tag, targetID: noteID,
-                                        targetTitle: title, detail: tagPath,
-                                        show: .note(noteID: noteID, blockID: nil, select: nil)))
+                return (["tag_id": tagID, "tag": tagPath, "note_id": noteID, "changed": changed],
+                        changed
+                            ? MCPWriteReceipt(clientName: clientName, act: .tag, targetID: noteID,
+                                              targetTitle: title, detail: tagPath,
+                                              show: .note(noteID: noteID, blockID: nil, select: nil))
+                            : nil)
             }
         case .createBook(let name, let wingID):
             return try inWing(wingID, job: job, clientName: clientName) {
@@ -455,6 +549,13 @@ struct MCPWriteTools: Sendable {
             return try performNoteEdit(edit, job: job, ops: ops, clientName: clientName)
         case .libraryEdit(let edit):
             return try performLibraryEdit(edit, job: job, ops: ops, clientName: clientName)
+        case .insertBlocks(let noteID, let place, let blocks):
+            return try performInsertBlocks(
+                noteID: noteID, place: place, blocks: blocks, job: job, ops: ops, clientName: clientName)
+        case .duplicateNote(let noteID, let withTags, let bookID, let sectionID):
+            return try performDuplicateNote(
+                noteID: noteID, withTags: withTags, bookID: bookID, sectionID: sectionID, job: job, ops: ops,
+                clientName: clientName)
         }
     }
 
@@ -657,7 +758,7 @@ struct MCPWriteTools: Sendable {
             return .failure(Refused(outcome: Outcome(text: failure.message, isError: true)))
         } catch {
             try log(clientName, job.tool, kind, id, title, allowed: false)
-            let words = MCPWireRefusalCopy.words(error) ?? hooks.refusalWords(error) ?? String(describing: error)
+            let words = MCPWireRefusalCopy.spoken(error, appWords: hooks.refusalWords)
             return .failure(Refused(outcome: Outcome(text: words, isError: true)))
         }
     }
@@ -696,7 +797,8 @@ struct MCPWriteTools: Sendable {
     /// that it's ok if that happens"): a reading counts only while THIS client
     /// can READ it now — the one rule `list_books` reads (a book at read under
     /// its grants or the open book, never a fenced one; a gathering under its
-    /// wing's reach) — so `rename_book` and `create_book` never refuse with,
+    /// wing's reach) — so `rename_book`, `create_book` and (VX-363)
+    /// `import_document`'s book form never refuse with,
     /// or because of, a book the client cannot reach (F-7: anything it can't
     /// reach answers as if it did not exist). Non-consuming: a name check
     /// never spends a once grant. Asked inside the act's transaction, only of
@@ -735,25 +837,56 @@ struct MCPWriteTools: Sendable {
         return picks
     }
 
+    /// A minted note's answer: its id, `block_ids` (kept — F-6), its tags, and
+    /// VX-252's `blocks` — every block's shown take and every take it was born
+    /// with (`MCPMintedBlocks`, the one shape). `section_id` echoes a chapter
+    /// the note was filed under (`add_note_to_book`'s echo).
+    ///
+    /// VX-361 (the run record's U9, F-1 (a) — PROVISIONAL P-VX361-1):
+    /// `tag_ids` is EVERY tag the note wears when the act lands — the header's
+    /// in header order, then the ones a book's outflow applied, in outflow
+    /// order (composed inside the act's transaction) — and `tags` their paths,
+    /// parallel: the wire's tag word, as `apply_tag` and `set_book_rule` speak
+    /// it. The header's list stays the prefix, so no caller loses what it had.
     func noteAnswer(
-        _ minted: Operations.DocumentImport, act: Operations.MCPWriteAct, clientName: String
+        _ minted: Operations.DocumentImport, act: Operations.MCPWriteAct, clientName: String,
+        sectionID: String? = nil
     ) throws -> Act {
         let title = try database.read { db in
             try Queries.mcpScopeTitle(db, kind: .note, id: minted.post.id, calendar: calendar)
         }
-        return (["note_id": minted.post.id, "block_ids": minted.blockIDs, "tag_ids": minted.tagIDs],
+        var answer: [String: Any] = [
+            "note_id": minted.post.id, "block_ids": minted.blockIDs, "tag_ids": minted.tagIDs,
+            "tags": minted.tagPaths, "blocks": MCPMintedBlocks.records(minted.blocks),
+        ]
+        if let sectionID { answer["section_id"] = sectionID }
+        return (answer,
                 MCPWriteReceipt(clientName: clientName, act: act, targetID: minted.post.id, targetTitle: title,
                                 show: .note(noteID: minted.post.id, blockID: nil, select: nil)))
     }
 
-    /// **The take label on an AI take** (P-13n-3's convention, hers to
-    /// re-voice at 13s-a): "<client> · suggested", then the client's own
-    /// label when it gives one — so the fan always says who.
+    /// VX-252 (D2): `create_note`'s `section_id` without a book to be a chapter of.
+    static let sectionWithoutBookWords =
+        "section_id goes with book_id: it files the note under a chapter of the book the note joins."
+
+    /// **The take label on an AI take** (P-13n-3's convention, re-voiced by
+    /// her VX-267 ruling — *"why do we need claude-code * suggested * english.
+    /// isn't it obvious it's suggested if it's claude? seems like an extra
+    /// word."*): the client's name, then ` · ` and the client's own label when
+    /// it gives one (trimmed; a blank label is none) — so the fan always says
+    /// who. Worn only by the takes a client adds at SUGGEST, inside her
+    /// writing (`add_take`, `add_takes` — her VX-197 split); every other
+    /// take-writing tool stores a label exactly as given. Takes labelled
+    /// before VX-267 keep `‹client› · suggested · ‹label›` (labels are text —
+    /// no migration); the lens rule's matcher reads both forms.
     static func aiLabel(client: String, own: String?) -> String {
-        let base = "\(client) \u{00B7} suggested"
-        guard let own = own?.trimmingCharacters(in: .whitespacesAndNewlines), !own.isEmpty else { return base }
-        return "\(base) \u{00B7} \(own)"
+        guard let own = own?.trimmingCharacters(in: .whitespacesAndNewlines), !own.isEmpty else { return client }
+        return client + labelSeparator + own
     }
+
+    /// The separator inside an AI take's label (`aiLabel`'s) — a spaced
+    /// middle dot.
+    static let labelSeparator = " \u{00B7} "
 
     // MARK: - Shared pieces
 

@@ -127,7 +127,19 @@ struct SidebarView: View {
         // doors"). The Open strip does not render them (`.deleteNote`'s
         // reason above).
         .moveNoteToWing, .copyNoteToWing,
+        // VX-372 (VX-383 U1 — D-C-2): her two DUPLICATE doors join the same
+        // grammar and the same two renderers (the Library's rows and the
+        // Pool's) — the shipped "Duplicate as Version" row is the first, under
+        // its verb. The Open strip does not render them (`.deleteNote`'s
+        // reason above: the strip is pure view state).
+        .duplicateNoteWithTags, .duplicateNoteWithoutTags,
     ]
+
+    /// **The OPEN LIST's own right-click acts** (VX-289, the VX-283 run) —
+    /// beyond the shared note-row grammar above, which the Library's and the
+    /// Pool's rows render too. Close All Notes is about the LIST, so only the
+    /// list renders it (the walk's union carries this as its own line).
+    static let openListMenuCapabilities: [CapabilityID] = [.closeAllNotes]
 
     /// The five areas, in R44's ruled order (+ Archived at the end, the
     /// post-13l polish round's addition). ONE table the column iterates —
@@ -205,10 +217,22 @@ struct SidebarView: View {
     /// The column's height, as laid out — the fit test's input
     /// (`SidebarLayout`). Zero on the first pass, which never compresses.
     @State private var columnHeight: CGFloat = 0
+    /// **VX-285's two measurements** — the Open list's height is a pure
+    /// function of them (`SidebarLayout.openListMaxHeight`): the outer
+    /// scroll's VISIBLE height (the column above the sync footer) and where
+    /// the list's top sits in the column's content. Both zero until geometry
+    /// lands, which answers the list's floor.
+    @State private var columnScrollHeight: CGFloat = 0
+    @State private var openListTop: CGFloat = 0
+    /// The column content's named space (VX-285): where `openListTop` is read.
+    private nonisolated static let columnContentSpace = "sidebar.column.content"
     /// 17y B3 item (f): the Open rows living in ANOTHER wing → that wing's
     /// name (the indicator). Read once per (rows, current wing) — bounded by
     /// the Open list.
     @State private var openRowWings: [String: String] = [:]
+    /// VX-288: the Open list's drag — which row is dragged, where it points,
+    /// the list's window as the insertion line reads it (`OpenListDrag.swift`).
+    @State private var openListDrag = OpenListDragState()
     #if DEBUG
     /// **This column's own name in the DEBUG oracle** (18k UNIT C4 — the
     /// `MastheadStamp.oracleOwner` shape): it owns the rail's drawn height.
@@ -264,6 +288,14 @@ struct SidebarView: View {
             columnHeight: columnHeight, rows: rowCount, headedGroups: headedGroupCount)
     }
 
+    /// VX-285: the Open list's tallest form — the room down to the sync
+    /// footer, from the two measurements above.
+    private var openListMaxHeight: CGFloat {
+        SidebarLayout.openListMaxHeight(
+            visibleHeight: columnScrollHeight, listTop: openListTop,
+            bottomPadding: SidebarLayout.contentBottomPadding, rowHeight: rowHeight)
+    }
+
     var body: some View {
 #if DEBUG
         // The round-end Fable pass, MAJOR-1's oracle: how many times THIS
@@ -293,18 +325,37 @@ struct SidebarView: View {
                         // rail's height — so the Open strip below never moves
                         // between a note and a book (her U-10's "measured to
                         // take up the same amount of room"). It fades in and
-                        // out on the same 0.22 s as the rail (row 24's
-                        // sidebar half: nothing on the left ever snaps).
+                        // out on the rail's own beat, `SidebarLayout.
+                        // railTransition` (row 24's sidebar half: nothing on
+                        // the left ever snaps).
                         noteBoxGroup(noteBox)
                             .transition(.opacity)
                     }
                     openGroup
                 }
-                .padding(.top, 14)
-                .padding(.bottom, 12)
+                .padding(.top, SidebarLayout.topPadding)
+                // VX-288 (U2d, P-U2d-2): while the Open list shows — the
+                // column's LAST group — its end zone carries this padding (the
+                // zone's last points ARE the padding, so the layout is
+                // unchanged and a list that scrolls keeps a last-slot target);
+                // the column keeps it only when there is no list.
+                .padding(.bottom, workspace.openNotes.shown.isEmpty ? SidebarLayout.contentBottomPadding : 0)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                // VX-285: the column content's own space — the Open list's
+                // top is read here, unmoved by the outer scroll's offset.
+                .coordinateSpace(.named(Self.columnContentSpace))
             }
             .scrollBounceBehavior(.basedOnSize)
+            // VX-285's first measurement: the outer scroll's VISIBLE height —
+            // everything above the sync footer (which sits outside it, below).
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
+                columnScrollHeight = $0
+            }
+            #if DEBUG
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                SidebarGeometry.columnScrollFrames[SidebarGeometry.bodyKey(for: workspace)] = frame
+            }
+            #endif
             if let bottom {
                 Divider().overlay(tokens.line)
                 bottom
@@ -320,9 +371,9 @@ struct SidebarView: View {
         #endif
         // Row 24 (the sidebar half): the rail fades in and out with the
         // note — the groups below it slide, nothing snaps.
-        .animation(.easeInOut(duration: 0.22), value: railPostID)
+        .animation(.easeInOut(duration: SidebarLayout.railTransition), value: railPostID)
         // …and on the box's arrival and departure, for the same reason.
-        .animation(.easeInOut(duration: 0.22), value: noteBox == nil)
+        .animation(.easeInOut(duration: SidebarLayout.railTransition), value: noteBox == nil)
         // The strip's names, HELD for exactly what is on screen (17o batch
         // d, ledger row 18 — her *"renaming a note won't rename it on the
         // sidebar until you click on something else"*). The key still names
@@ -369,6 +420,20 @@ struct SidebarView: View {
     //  private aliases: this file's own call sites keep reading two words.)
     private static var groupPadding: CGFloat { SidebarLayout.groupPadding }
     private static var rowPadding: CGFloat { SidebarLayout.rowPadding }
+
+    /// **VX-286 — where a scrolling section's side margin lives: INSIDE its
+    /// scroll view.** Her words (2026-10-13): *"the scroll bar on there goes
+    /// over the x out button"* · *"the tab close x gets hidden behind the
+    /// scroll"*. The traced mechanism: macOS draws an OVERLAY scroll bar over
+    /// the scroll view's own trailing edge, and both scrolling sections
+    /// (Starred, the Open list) took the group's `groupPadding` OUTSIDE their
+    /// scroll view — so the scroll view's trailing edge was the rows' own,
+    /// and the bar landed on the last thing in each row: the Open list's ✕
+    /// (8 pt in) and Starred's ★. With the margin as the scroll CONTENT's
+    /// padding, the scroll view spans the column and the bar rides in the
+    /// margin beside the rows. The rows land exactly where they did — same
+    /// edge, same width — which is why this is the group's own number.
+    private static var scrollingSectionMargin: CGFloat { SidebarLayout.groupPadding }
 
     /// Row 13 (17o batch d): the header ROW's pitch, and the air between the
     /// words and the first row's wash. Her punchlist 3 and its follow-up:
@@ -480,47 +545,73 @@ struct SidebarView: View {
     ///
     /// The CURRENT row is revealed when the selection lands on a starred
     /// target, so navigating to an eighth starred note never leaves its row
-    /// hidden — the strip's own newcomer-reveal reasoning.
+    /// hidden — the strip's own newcomer-reveal reasoning. **Since U1b (the
+    /// VX-283 run)** that reveal is the shared `SidebarSectionWindow`'s: clear
+    /// of the edge fades both sections now draw (F-2), and again whenever the
+    /// section's height changes (F-1's mechanism).
     @ViewBuilder
     private var starredGroup: some View {
         let items = stars.items
         if !items.isEmpty {
             VStack(alignment: .leading, spacing: 0) {
                 header(StarCopy.sectionHeader)
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 0) {
-                            ForEach(items, id: \.target) { item in
-                                starredRow(item)
-                                    .id(item.target)
-                            }
+                    // VX-286: the group's side margin moved off the group (see
+                    // `scrollingSectionMargin`), so the header carries its own.
+                    .padding(.horizontal, Self.groupPadding)
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        ForEach(items, id: \.target) { item in
+                            starredRow(item, first: item.target == items.first?.target)
+                                .id(item.target)
                         }
                     }
-                    .scrollBounceBehavior(.basedOnSize)
-                    .frame(maxHeight: SidebarLayout.scrollingSectionMaxHeight(rowHeight: rowHeight))
-                    .fixedSize(
-                        horizontal: false,
-                        vertical: items.count <= SidebarLayout.scrollingSectionWindow)
-                    .onChange(of: selection) { _, now in
-                        if let match = items.first(where: {
-                            StarTargeting.selection(for: $0.target) == now
-                        }) {
-                            proxy.scrollTo(match.target)
-                        }
-                    }
-                    #if DEBUG
-                    // Item 10's oracle: what the SECTION actually drew,
-                    // keyed by the column's own workspace (the DEBUG-oracle
-                    // keying rule — suites run in parallel, and a singleton
-                    // here would let another suite's column answer the pin).
-                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
-                        SidebarGeometry.starredSectionHeights[
-                            SidebarGeometry.bodyKey(for: workspace)] = height
-                    }
-                    #endif
+                    .padding(.horizontal, Self.scrollingSectionMargin)
                 }
+                .scrollBounceBehavior(.basedOnSize)
+                #if DEBUG
+                // U1b's oracle: the section's window over its rows.
+                .onScrollGeometryChange(for: SidebarLayout.ScrollWindow.self) {
+                    SidebarLayout.ScrollWindow($0)
+                } action: { _, window in
+                    SidebarGeometry.recordSection(.starred, window: window, for: workspace)
+                }
+                #endif
+                // U1b (F-2, P-U1-6; F-1's reveal, P-U1b-6): the section's
+                // window — the edges fade where more lies beyond them, and the
+                // CURRENT row is revealed clear of the fades at an exact
+                // offset on every input that moves its place. It replaces the
+                // minimal `scrollTo` on a selection change that stood here
+                // (its `ScrollViewReader` now lives inside the modifier —
+                // nothing else here used the proxy).
+                .modifier(SidebarSectionWindow(
+                    rows: items.map(\.target),
+                    current: items.first {
+                        StarTargeting.selection(for: $0.target) == selection
+                    }?.target,
+                    rowHeight: rowHeight, room: tokens.room,
+                    report: sectionReport(.starred), phaseSeam: sectionPhaseSeam(.starred)))
+                .frame(maxHeight: SidebarLayout.scrollingSectionMaxHeight(rowHeight: rowHeight))
+                .fixedSize(
+                    horizontal: false,
+                    vertical: items.count <= SidebarLayout.scrollingSectionWindow)
+                #if DEBUG
+                // Item 10's oracle: what the SECTION actually drew,
+                // keyed by the column's own workspace (the DEBUG-oracle
+                // keying rule — suites run in parallel, and a singleton
+                // here would let another suite's column answer the pin).
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                    SidebarGeometry.starredSectionHeights[
+                        SidebarGeometry.bodyKey(for: workspace)] = height
+                }
+                // VX-286's oracle: the section's scroll view as drawn —
+                // where its overlay scroll bar rides.
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                    SidebarGeometry.recordSection(.starred, scroll: frame, for: workspace)
+                }
+                #endif
             }
-            .padding(.horizontal, Self.groupPadding)
+            // (VX-286: the `.padding(.horizontal, groupPadding)` that stood
+            //  here put the margin OUTSIDE the scroll view — it moved inside.)
             // 17y B3 item (l): the starred books' facts (≤ the star cap) and
             // what their row menus present.
             .task(id: starredBookIDs) { await bookRowDoors?.load(starredBookIDs) }
@@ -534,7 +625,7 @@ struct SidebarView: View {
         stars.items.filter { $0.target.kind == .reading }.map(\.target.id)
     }
 
-    private func starredRow(_ item: Queries.StarredItem) -> some View {
+    private func starredRow(_ item: Queries.StarredItem, first: Bool) -> some View {
         let destination = StarTargeting.selection(for: item.target)
         let current = selection == destination
         return rowChrome(selected: current) {
@@ -561,6 +652,12 @@ struct SidebarView: View {
                 }
             }
         }
+        #if DEBUG
+        // VX-286's oracle: the first row's box — the ★ sits at its trailing end.
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { box in
+            if first { SidebarGeometry.recordSection(.starred, firstRow: box, for: workspace) }
+        }
+        #endif
         .onTapGesture { selection = destination }
         .contextMenu {
             // 17y B3 item (l): a starred BOOK's row carries the book row menu
@@ -709,13 +806,26 @@ struct SidebarView: View {
     /// **The reorder payload** — its own transfer type, deliberately not a
     /// plain String: the sidebar's whole surface is a `.plainText` import
     /// drop target, and a dragged row's id must never be importable as a
-    /// note's text.
-    struct OpenNoteDragToken: Codable, Transferable {
+    /// note's text. **VX-288:** it also names the LIST its drag began in
+    /// (`OpenListDragState.listID`), so a drop acts only on that list
+    /// (PROVISIONAL P-U2-3) — `nonisolated` + `Sendable` like the Bookcase's
+    /// tokens, because the drop reads it off the main thread.
+    nonisolated struct OpenNoteDragToken: Codable, Transferable, Sendable {
         let noteID: String
+        let listID: String
+
+        static let contentType = UTType(exportedAs: "io.lduarte.variorum.open-note-row")
+
         static var transferRepresentation: some TransferRepresentation {
-            CodableRepresentation(
-                contentType: UTType(exportedAs: "io.lduarte.variorum.open-note-row"))
+            CodableRepresentation(contentType: contentType)
         }
+    }
+
+    /// **The Open row's drag image** (VX-288 + her VX-70 ruling, *"Only on the
+    /// Open list's rows"*): the row's title as the compact chip, at the
+    /// sidebar's own register — the Bookcase's chip (R-LWP-3), shared.
+    static func openRowChip(_ title: String, tokens: VoiceTokens) -> some View {
+        DragTitleChip(title: title, font: tokens.navigation.weight(.semibold), tokens: tokens)
     }
 
     /// 13f batch 3 (W3/A27) — the OPEN strip. **Act 10 item 9 rebuilt it:**
@@ -735,30 +845,90 @@ struct SidebarView: View {
         let shown = workspace.openNotes.shown
         if !shown.isEmpty {
             separator
+            // VX-285: the list's tallest form is the room left above the sync
+            // footer (`SidebarLayout.openListMaxHeight`), read once per pass.
+            let maxHeight = openListMaxHeight
             VStack(alignment: .leading, spacing: 0) {
                 header(WorkspaceNaming.openSectionHeader)
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 0) {
-                            ForEach(shown, id: \.self) { noteID in
-                                openRow(noteID, ordinal: (shown.firstIndex(of: noteID) ?? 99) + 1)
-                                    .id(noteID)
-                            }
+                    // VX-286: the header carries the group's margin itself now.
+                    .padding(.horizontal, Self.groupPadding)
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        ForEach(shown, id: \.self) { noteID in
+                            openRow(noteID, ordinal: (shown.firstIndex(of: noteID) ?? 99) + 1)
+                                .id(noteID)
                         }
                     }
-                    .scrollBounceBehavior(.basedOnSize)
-                    .frame(maxHeight: SidebarLayout.openStripMaxHeight(rowHeight: rowHeight))
-                    .fixedSize(
-                        horizontal: false, vertical: shown.count <= SidebarLayout.openStripWindow)
-                    // The newcomer reveal: the most-recently-opened note
-                    // scrolls into view the moment it joins — "a newly
-                    // opened note never lands hidden", made literal.
-                    .onChange(of: workspace.openNotes.recency.first) { _, newest in
-                        if let newest { proxy.scrollTo(newest) }
-                    }
+                    // VX-286: the margin INSIDE the scroll, so the overlay
+                    // scroll bar rides beside the ✕, never over it.
+                    .padding(.horizontal, Self.scrollingSectionMargin)
+                    // (VX-288: each ROW is its own drop — `openRow`'s
+                    //  `OpenListRowDrop`, main's per-row road; U2d, P-U2d-1.)
                 }
+                .scrollBounceBehavior(.basedOnSize)
+                // VX-288: the line's scroll axis — the list's window as it stands.
+                .onScrollGeometryChange(for: SidebarLayout.ScrollWindow.self) {
+                    SidebarLayout.ScrollWindow($0)
+                } action: { _, window in
+                    openListDrag.read(window)
+                }
+                #if DEBUG
+                // U1b's oracle: the list's window over its rows.
+                .onScrollGeometryChange(for: SidebarLayout.ScrollWindow.self) {
+                    SidebarLayout.ScrollWindow($0)
+                } action: { _, window in
+                    SidebarGeometry.recordSection(.open, window: window, for: workspace)
+                }
+                #endif
+                // U1b (F-1 + F-2): the list's window — the CURRENT row
+                // wholly in view, clear of the fades, after an open, a
+                // ⌘⇧W/✕ landing, a return from a place, and every change
+                // of the viewport, the content height or the pitch (the
+                // traced cut: the old reveal ran once, against a viewport
+                // that settled a pass later); the edges fade where more lies
+                // beyond them. (The `ScrollViewReader` lives inside the
+                // modifier now — nothing else here used the proxy.)
+                .modifier(SidebarSectionWindow(
+                    rows: shown, current: currentOpenRow,
+                    rowHeight: rowHeight, room: tokens.room,
+                    report: sectionReport(.open), phaseSeam: sectionPhaseSeam(.open)))
+                // VX-288: the insertion line — over the list, ABOVE the edge
+                // fade, lit only where a drop would act.
+                .overlay { openListLine(shown) }
+                .frame(maxHeight: maxHeight)
+                // VX-285: hug the rows while they FIT the room; past it,
+                // take the room and scroll in place (the `count <= 7`
+                // switch asked only about the old window).
+                .fixedSize(
+                    horizontal: false,
+                    vertical: SidebarLayout.openListRowsFit(
+                        rows: shown.count, rowHeight: rowHeight, maxHeight: maxHeight))
+                // VX-285's second measurement: where the list STARTS in
+                // the column's content. Nothing above it depends on the
+                // list's own height, so this can never feed back.
+                .onGeometryChange(for: CGFloat.self) {
+                    $0.frame(in: .named(Self.columnContentSpace)).minY
+                } action: { openListTop = $0 }
+                #if DEBUG
+                // VX-285/286's oracle: the list's scroll view as drawn.
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                    SidebarGeometry.recordSection(.open, scroll: frame, for: workspace)
+                }
+                #endif
+                // (U1b: the newcomer reveal that stood here — one minimal
+                //  `scrollTo` when `recency.first` changed — is the
+                //  section window's current-row reveal above. Every open
+                //  takes the pane's focus, so the newcomer IS the current
+                //  row; and a return to the note already newest, which
+                //  never changed `recency.first`, now reveals too.)
+                openListEndZone(shown)
             }
-            .padding(.horizontal, Self.groupPadding)
+            #if DEBUG
+            // VX-288's oracle: this column's drag state, for a pin's hover.
+            .onAppear { SidebarGeometry.recordOpenListDrag(openListDrag, for: workspace) }
+            #endif
+            // (VX-286: the `.padding(.horizontal, groupPadding)` that stood
+            //  here put the margin OUTSIDE the scroll view — it moved inside.)
             // 17y (f): which open notes live in another wing (the indicator).
             .task(id: openWingsKey) {
                 let ids = workspace.openNotes.shown
@@ -770,10 +940,110 @@ struct SidebarView: View {
         }
     }
 
+    /// **The ✕'s and right-click ▸ Close's ONE act** (VX-287 — her ruling at
+    /// U1's READY, *"Yes, same as ⇧⌘W"*). The workspace closes the row and
+    /// names where the FOCUSED pane lands when it was showing that note
+    /// (`WorkspaceModel.closeRow`); the landing enters the shell through the
+    /// column's own navigation road — the selection binding, whose setter is
+    /// `RootView.adopt(_, in: focusedPane)`, the very call `pendingSelection`'s
+    /// adoption makes (⌘⇧W's road) — so no new landing authority and no
+    /// `ShellRouter.swift` edit. A row no pane shows just closes, as before.
+    /// Static so a pin drives exactly what the two doors run.
+    static func closeRow(
+        _ noteID: String, in workspace: WorkspaceModel, selection: Binding<SidebarSelection?>
+    ) {
+        if let landing = workspace.closeRow(noteID) { selection.wrappedValue = landing }
+    }
+
+    /// The ✕'s help: still view-only, and now says where closing the note
+    /// you're in takes you.
+    static let closeRowHelp =
+        "Close this row — the note itself is untouched (closing the note you're in moves you on to the next)"
+
+    /// **VX-288 — the insertion line** over the Open list (`OpenListInsertionLine`):
+    /// the ring token, across the rows' width, where a drop would land.
+    private func openListLine(_ shown: [String]) -> some View {
+        #if DEBUG
+        let workspace = workspace
+        return OpenListInsertionLine(
+            state: openListDrag, rows: shown, rowHeight: rowHeight,
+            inset: Self.scrollingSectionMargin, color: tokens.ring,
+            report: { SidebarGeometry.recordOpenListLine($0, for: workspace) })
+        #else
+        return OpenListInsertionLine(
+            state: openListDrag, rows: shown, rowHeight: rowHeight,
+            inset: Self.scrollingSectionMargin, color: tokens.ring)
+        #endif
+    }
+
+    /// **VX-288 — the END ZONE** under the Open list's rows: a drop anywhere in
+    /// it lands the row in the last slot (the book navigator's end zone). It
+    /// takes the room the list leaves above the sync footer, capped at 28 pt,
+    /// and the column's bottom padding under it (`SidebarLayout.OpenListDrop.
+    /// endZoneHeight`, from VX-285's own two measurements — PROVISIONAL
+    /// P-U2d-2): the column drops its own padding while the list shows, so the
+    /// zone never pushes the column, and it is never absent — when the rows
+    /// fill the list (it scrolls), the padding's 12 pt are the last-slot
+    /// target. Clear — nothing draws; the line shows at the list's end.
+    private func openListEndZone(_ shown: [String]) -> some View {
+        let height = SidebarLayout.OpenListDrop.endZoneHeight(
+            visibleHeight: columnScrollHeight, listTop: openListTop,
+            bottomPadding: SidebarLayout.contentBottomPadding, rows: shown.count, rowHeight: rowHeight)
+        return Color.clear
+            .frame(maxWidth: .infinity)
+            .frame(height: height)
+            .contentShape(Rectangle())
+            .modifier(OpenListEndZoneDrop(state: openListDrag, workspace: workspace))
+            #if DEBUG
+            // VX-288's oracle: the end zone as laid out.
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                SidebarGeometry.recordOpenListEndZone(frame, for: workspace)
+            }
+            .onDisappear { SidebarGeometry.recordOpenListEndZone(nil, for: workspace) }
+            #endif
+    }
+
     /// The indicator's read key: the rows shown and the wing she stands in.
     private var openWingsKey: String {
         workspace.openNotes.shown.joined(separator: ",") + "|" + session.wing.currentID
     }
+
+    /// U1b (F-1): the Open row of the note the pane shows — the highlighted
+    /// row, which the list keeps wholly in view. nil on a place, a book, a
+    /// scraps container, or a note shown without a row.
+    private var currentOpenRow: String? {
+        guard case .post(let noteID) = selection,
+              workspace.openNotes.shown.contains(noteID) else { return nil }
+        return noteID
+    }
+
+    /// U1b: the DEBUG oracle's tap for the fades a scrolling section drew (nil
+    /// in a shipping build).
+    private func sectionReport(_ section: SectionName) -> SidebarSectionWindowReport? {
+        #if DEBUG
+        let workspace = workspace
+        let named: SidebarGeometry.ScrollingSection = section == .open ? .open : .starred
+        return { fades in SidebarGeometry.recordSection(named, fades: fades, for: workspace) }
+        #else
+        return nil
+        #endif
+    }
+
+    /// U1d: the DEBUG seam through which a pin feeds a section a scroll phase
+    /// — a hand scroll without a real scroll-wheel event (nil in a shipping
+    /// build).
+    private func sectionPhaseSeam(_ section: SectionName) -> SidebarSectionPhaseSeam? {
+        #if DEBUG
+        let workspace = workspace
+        let named: SidebarGeometry.ScrollingSection = section == .open ? .open : .starred
+        return { feed in SidebarGeometry.recordSection(named, phaseFeed: feed, for: workspace) }
+        #else
+        return nil
+        #endif
+    }
+
+    /// The two scrolling sections, by name (the oracle's own enum is DEBUG-only).
+    private enum SectionName { case starred, open }
 
     private func openRow(_ noteID: String, ordinal: Int) -> some View {
         let destination = SidebarSelection.post(noteID)
@@ -808,11 +1078,13 @@ struct SidebarView: View {
                         .foregroundStyle(tokens.faint)
                         .lineLimit(1)
                 }
-                Button("\u{2715}") { workspace.closeNote(noteID) }
+                // Her ruling at U1's READY: on the note you're looking at, the
+                // ✕ behaves like ⌘⇧W (the pane moves on) — `Self.closeRow`.
+                Button("\u{2715}") { Self.closeRow(noteID, in: workspace, selection: $selection) }
                     .buttonStyle(.plain)
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
-                    .help("Close this row — the note itself is untouched")
+                    .help(Self.closeRowHelp)
             }
             #if DEBUG
             // Row 13's oracle: the FIRST strip row's content edge — what the
@@ -833,6 +1105,8 @@ struct SidebarView: View {
             if ordinal == 1 {
                 SidebarGeometry.recordFirstRowBox(
                     WorkspaceNaming.openSectionHeader, box, in: session.debugProbeScope)
+                // VX-286's oracle: the ✕ sits at this box's trailing end.
+                SidebarGeometry.recordSection(.open, firstRow: box, for: workspace)
             }
         }
         #endif
@@ -841,16 +1115,24 @@ struct SidebarView: View {
         // right-click carries Star). Inside the strip's own scroll, so the
         // ring sits on the row's edge rather than outside it.
         .tourAnchor(.sidebarOpenRow(noteID), cornerRadius: 6, outset: 0)
-        .draggable(OpenNoteDragToken(noteID: noteID))
-        .dropDestination(for: OpenNoteDragToken.self) { tokens, _ in
-            guard let dragged = tokens.first?.noteID, dragged != noteID,
-                  let source = workspace.openNotes.shown.firstIndex(of: dragged),
-                  let target = workspace.openNotes.shown.firstIndex(of: noteID)
-            else { return false }
-            // Drop-before-target, in the onMove convention (pre-move index).
-            workspace.moveOpenNotes(fromOffsets: IndexSet(integer: source), toOffset: target)
-            return true
+        // VX-288: the system drag, its image the row's title as the compact
+        // chip AT THE GRAB POINT (her VX-70 ruling — the Open list's rows
+        // only); the payload (made when the drag begins — U2b's trace) arms
+        // the list's drag and tells it which row it is.
+        .modifier(ChipDragSource(payload: {
+            openListDrag.began(noteID)
+            return OpenNoteDragToken(noteID: noteID, listID: openListDrag.listID)
+        }) {
+            Self.openRowChip(workspace.label(for: destination), tokens: tokens)
+        })
+        // The source's session END clears the list's drag wherever the
+        // release fell (U2c, kept by P-U2d-1).
+        .onDragSessionUpdated { session in
+            openListDrag.dragSessionUpdated(session.phase)
         }
+        // U2d (P-U2d-1): the row is its own drop on MAIN's per-row road — the
+        // targeted row draws the line at its top and takes the drop before it.
+        .modifier(OpenListRowDrop(state: openListDrag, noteID: noteID, workspace: workspace))
         .contextMenu {
             if let onOpenBeside {
                 Button(WorkspaceNaming.openBesideVerb) { onOpenBeside(noteID) }
@@ -865,7 +1147,15 @@ struct SidebarView: View {
                     starDoor.toggle(.post(noteID))
                 }
             }
-            Button("Close") { workspace.closeNote(noteID) }
+            Button("Close") { Self.closeRow(noteID, in: workspace, selection: $selection) }
+            // VX-289 (the VX-283 run): Close All Notes — every row closes; a
+            // pane showing a note lands by ⌘⇧W's rule (the list empty: the
+            // Library), through the column's own navigation road (the
+            // selection binding the shell adopts). Declared in
+            // `openListMenuCapabilities`; the View menu carries its twin.
+            Button(CapabilityRegistry.capability(.closeAllNotes).verb) {
+                if let landing = workspace.closeAllNotes() { selection = landing }
+            }
         }
     }
 }
@@ -947,6 +1237,109 @@ enum SidebarGeometry {
     /// list outgrows the window, which is a claim about a rectangle — and
     /// the section's own scroll view is the only thing that can answer it.
     static var starredSectionHeights: [String: CGFloat] = [:]
+
+    /// **VX-285 / VX-286 (the VX-283 run, U1) — the two SCROLLING sections
+    /// as drawn**, keyed by the column's workspace (an owner already, the
+    /// `starredSectionHeights` key). Her two asks are claims about
+    /// rectangles: the scroll bar rides in the margin BESIDE the rows (the
+    /// section's scroll view reaches past its first row's trailing edge),
+    /// and the Open list runs down to the sync footer and stops there (its
+    /// bottom against the column scroll's bottom, `columnScrollFrames`).
+    enum ScrollingSection: String, Sendable {
+        case starred, open
+    }
+
+    struct SectionDraw: Equatable, Sendable {
+        /// The section's scroll view, in global coordinates.
+        var scroll: CGRect?
+        /// Its FIRST row's box (the wash's rectangle), in global coordinates.
+        var firstRow: CGRect?
+        /// U1b: the section's window over its rows as its scroll view last
+        /// reported it (F-1's reveal reads it), and the fades it drew (F-2).
+        var window: SidebarLayout.ScrollWindow?
+        var fades: SidebarLayout.EdgeFades?
+    }
+
+    static var sectionDraws: [String: [ScrollingSection: SectionDraw]] = [:]
+    /// The column's outer scroll — the visible column ABOVE the sync footer.
+    static var columnScrollFrames: [String: CGRect] = [:]
+
+    static func recordSection(
+        _ section: ScrollingSection, scroll: CGRect, for workspace: WorkspaceModel
+    ) {
+        sectionDraws[bodyKey(for: workspace), default: [:]][section, default: SectionDraw()]
+            .scroll = scroll
+    }
+
+    static func recordSection(
+        _ section: ScrollingSection, firstRow: CGRect, for workspace: WorkspaceModel
+    ) {
+        sectionDraws[bodyKey(for: workspace), default: [:]][section, default: SectionDraw()]
+            .firstRow = firstRow
+    }
+
+    /// U1b: the section's window as its scroll view reads it — recorded by
+    /// its OWN oracle in the view, apart from `SidebarSectionWindow`, so a pin
+    /// measures where a row sits whether or not the window logic is there.
+    static func recordSection(
+        _ section: ScrollingSection, window: SidebarLayout.ScrollWindow, for workspace: WorkspaceModel
+    ) {
+        sectionDraws[bodyKey(for: workspace), default: [:]][section, default: SectionDraw()]
+            .window = window
+    }
+
+    /// U1b: the fades `SidebarSectionWindow` drew (F-2).
+    static func recordSection(
+        _ section: ScrollingSection, fades: SidebarLayout.EdgeFades, for workspace: WorkspaceModel
+    ) {
+        sectionDraws[bodyKey(for: workspace), default: [:]][section, default: SectionDraw()]
+            .fades = fades
+    }
+
+    /// U1d: each scrolling section's phase feed — the seam a pin uses to play
+    /// a hand scroll (`SidebarSectionPhaseSeam`), keyed by the column's
+    /// workspace like every oracle here.
+    static var sectionPhaseFeeds: [String: [ScrollingSection: (ScrollPhase) -> Void]] = [:]
+
+    static func recordSection(
+        _ section: ScrollingSection, phaseFeed: @escaping (ScrollPhase) -> Void,
+        for workspace: WorkspaceModel
+    ) {
+        sectionPhaseFeeds[bodyKey(for: workspace), default: [:]][section] = phaseFeed
+    }
+
+    /// **VX-288 (the VX-283 run, U2) — the Open list's drag, as drawn**, keyed
+    /// by the column's workspace: the column's drag state (a pin plays a target
+    /// through it — a real drag cannot be posted in the test host), the
+    /// insertion line as drawn (global; absent when none is), the end zone as
+    /// laid out (global; absent with the list — P-U2d-2 keeps it while the list
+    /// shows).
+    static var openListDrags: [String: OpenListDragState] = [:]
+    static var openListLines: [String: CGRect] = [:]
+    static var openListEndZones: [String: CGRect] = [:]
+
+    static func recordOpenListDrag(_ state: OpenListDragState, for workspace: WorkspaceModel) {
+        openListDrags[bodyKey(for: workspace)] = state
+    }
+
+    static func recordOpenListLine(_ frame: CGRect?, for workspace: WorkspaceModel) {
+        openListLines[bodyKey(for: workspace)] = frame
+    }
+
+    static func recordOpenListEndZone(_ frame: CGRect?, for workspace: WorkspaceModel) {
+        openListEndZones[bodyKey(for: workspace)] = frame
+    }
+
+    /// A pin clears ITS OWN column's rows and no other (the keying rule).
+    static func forgetSections(for workspace: WorkspaceModel) {
+        let key = bodyKey(for: workspace)
+        sectionDraws[key] = nil
+        columnScrollFrames[key] = nil
+        sectionPhaseFeeds[key] = nil
+        openListDrags[key] = nil
+        openListLines[key] = nil
+        openListEndZones[key] = nil
+    }
     /// 18d batch 1: what the NOTE BOX drew — the whole box, and its header's
     /// words. The geometry oracle compares these two rectangles against the
     /// rail's, because "the box is measured to take up the same amount of

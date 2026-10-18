@@ -338,6 +338,11 @@ struct QuickEntryBar: View {
         }
         .padding(.horizontal, 28)
         .padding(.vertical, 10)
+        // VX-121: the whole band — box, title chip, refusal line and their
+        // air — is one a status toast never covers (the shell's host lifts the
+        // toast above it: `StatusToastPlacement`). The bar marks itself, so
+        // the Bookcase's foot and the Library's are kept clear alike.
+        .statusToastKeepClear()
         .task {
             guard autofocus else { return }
             if openingFocus?.claim() == true {

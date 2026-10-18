@@ -19,6 +19,9 @@
 //    chapter landing parked for it (`ShellRouter.pendingBookChapter`);
 //  · a WING (13n-c U6) — the app's one wing, switched as her switcher
 //    switches it, the "Now in …" receipt naming the client.
+//  · COMPARE (VX-336 U6a — VX-298) — the anchor opened, then its Compare
+//    board told to show these notes beside it, replacing its columns
+//    (`CommandRouter.pendingCompareLanding` + `requestMode(.compare)`).
 //
 //  It decides nothing about WHETHER to move — `MCPShowRule` decides that, in
 //  `MCPDoor`, before this is ever called (P-4: composition, never a
@@ -69,6 +72,18 @@ struct MCPNavigator {
             session.commandRouter.pendingLensLanding = LensLanding(postID: noteID, lensID: lensID)
             if !session.commandRouter.requestMode(.lenses, postID: noteID) {
                 session.commandRouter.pendingLensLanding = nil
+                return false
+            }
+            return true
+        case .compare(let noteID, let peerIDs):
+            // VX-298 (D-298-5): the lens target's model — the anchor opened,
+            // the landing parked for its Compare board (which replaces its
+            // columns with exactly these and decides "related blocks only"
+            // from its own projection), then her Compare mode requested.
+            guard await open(noteID, in: router), stillStanding() else { return false }
+            session.commandRouter.pendingCompareLanding = CompareLanding(postID: noteID, peerIDs: peerIDs)
+            if !session.commandRouter.requestMode(.compare, postID: noteID) {
+                session.commandRouter.pendingCompareLanding = nil
                 return false
             }
             return true

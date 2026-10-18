@@ -30,8 +30,9 @@ units) are scope, not durations.
 | **VX-246** MCP door fixes & AI docs | the door's security, correctness, wire asks, then the AI's docs last | 21 | Opus / **Fable** | now |
 | **VX-281** MCP settings pane & shared icon | the pane in tabs, the code block, the Library's shared icon | 4 | Opus / Opus | now |
 | **VX-282** Editor & notes fixes | backspace, the italics flicker, take panel, capture box, comments family | 9 | Opus / **Fable** (editor seam) | now |
-| **VX-283** Sidebar & Library polish | the Open list, navigate-away, Library polish, exports, the test reds | 16 | Opus / Opus | now |
-| **VX-284** Books, gatherings & tags | her VX-214 follow-ups, tag undo, the book view's doors and Index slice, VX-216 last | 15 | Opus / Opus | now |
+| **VX-283** Sidebar & Library polish | the Open list, Library polish, the red lint (trimmed at her 2026-10-14 triage) | 9 | Opus / Fable | merged 2026-10-16 (PR #167); cut 0.9.7 with VX-336 |
+| **VX-284** Books, gatherings & tags | her VX-214 follow-ups, tag undo, the book view's doors and Index slice, VX-216 last | 17 | Opus / Opus | now |
+| **VX-348** Pre-launch bug sweep | her running list (⌘S commits, the exact edit time, the Library at narrow widths, the NUL strip, the doubled header line) + the today's-road pair VX-338/339 + the riders VX-384/385 — `notes/plans/fixes/vx-348-prelaunch-sweep.md` | 9 | Opus / **Fable** (her word 2026-10-18, VX-338 named) | now (one kickoff sitting: VX-351) |
 
 Plus **her own track** (§4) and **the release itself** (§5).
 
@@ -70,16 +71,16 @@ The dependencies, all of them:
 8. **Closeouts serialize** (CLAUDE.md): first ready merges first, and the next rebases onto it.
 
 **Shared files to watch** (the conflict map — any two runs here rebase carefully):
-- **The navigate-away road** (`.variorumNotesDeleted` → `WorkspaceModel.notesDeleted`): VX-283 (VX-123 routes
-  sync applies and `deleteReadingWithNotes` through it; the new Close Note act moves the pane on) and
-  VX-246 (VX-275 sends her editor away before a wire delete). Whichever lands second builds on the first's
-  road, never a second road.
+- **The navigate-away road** (`.variorumNotesDeleted` → `WorkspaceModel.notesDeleted`): VX-283 (the new Close
+  Note act moves the pane on; VX-123 left the run at her 2026-10-14 triage) and VX-246 (VX-275 sends her
+  editor away before a wire delete — merged). Whoever builds on it second uses the first's road, never a
+  second road.
 - **Landing at a block:** VX-284 (VX-303 and VX-304 send book doors through `ShellRouter.adopt(landing:)` →
   `jump`) and VX-283 (Close Note's landing on the next note). Both use the existing roads; neither invents
   a new landing authority.
-- **Faces refreshing after writes:** VX-283's VX-122 (one revival signal for the Library) and VX-246's
-  VX-231 (stale Bookcase counts after an MCP write) may share a cause. VX-246 checks VX-283's signal before
-  inventing its own.
+- **Faces refreshing after writes:** VX-122 (a live Library missing revivals) and VX-231 (stale Bookcase
+  counts after an MCP write) may share a cause. VX-122 left VX-283 at her 2026-10-14 triage (Parked, after
+  launch), so no revival signal is coming from that run; whoever fixes VX-231 owns the signal.
 - **`TutorialSeeder`:** VX-246 (docs), VX-292 (hers), VX-266 (Castle's words).
 - **Settings:** VX-281 (the MCP pane), VX-284 (VX-240's "Opening your library…" face in the Settings
   scene's `.opening` arm), VX-266 (the Protection / Data Safety ceremonies), VX-234 (her wording).
@@ -192,33 +193,45 @@ Read `notes/TEXTKIT2_NOTES.md`. **Mobile-visible:** VX-296's shared face reaches
 (say so in the MOBILE PARITY line); VX-290 is Mac-only (the phone has no carve).
 
 ### VX-283 — Run: Sidebar & Library polish
+**CLOSED 2026-10-16** — merged (PR #167) and released in the ONE 0.9.7 with VX-336 (her 15:58 call); her hand check of the Open list drag is VX-376; the handoff `notes/handoffs/vx-283-handoff.md`.
+**TRIMMED at her kickoff triage (2026-10-14; the record is `notes/plans/fixes/vx-283-sidebar-library-polish.md`
+on the run's branch).** Parked until after launch, her words on each ticket: VX-123 and VX-122 (*"I don't want
+to contort VX-123 to be fixed incorrectly when it's really a sync issue … those are niche nits"*), VX-19, VX-125,
+VX-126, VX-167, VX-70 (the chip ships only on the Open list's rows, inside VX-288). VX-289's multi-select half
+→ VX-344 (Parked).
+
 **Members:**
 - The Open list (her 2026-10-13 asks): VX-285 (height) · VX-286 (scroll bar over ✕) · VX-287 (Close Note)
-  · VX-288 (the drag) · VX-289 (multi-select, Close All).
-- Navigation: VX-70 (the compact drag chip at the remaining rows, incl. the Open list's) · VX-123
-  (navigate-away gaps).
-- Library: VX-122 (revivals) · VX-19 (Timeline) · VX-20 (dark heading band) · VX-121 (toasts vs quick entry)
-  · VX-175 (the controls row at the 1240-pt default window; pre-launch at her word).
-- Exports: VX-125 · VX-126.
-- The reds: VX-245 (its six non-MCP sites) · VX-167 (two tests red only in wide parallel runs).
+  · VX-288 (the drag, with the compact chip on its rows) · VX-289 (Close All).
+- Library: VX-20 (dark heading band) · VX-121 (toasts vs quick entry) · VX-175 (the controls row at the
+  1240-pt default window; pre-launch at her word).
+- The red lint: VX-245 (its six non-MCP sites).
 
 **Units:**
 1. **The Open list's layout and closing:** VX-285, VX-286, VX-287, VX-289. **Her ruling on VX-287:** Close
    Note = **⇧⌘W** (⌘W keeps closing the window), landing on **the next note in the list** — *"that way you
    can close them all quickly."* Verify ⇧⌘W is free first.
-2. **The drag:** VX-288 — **the light version first** (her ruling) — + VX-70.
-3. **Navigate-away and Library revivals:** VX-123, VX-122 — one signal each, on the existing roads.
-4. **Library polish:** VX-19, VX-20, VX-121, VX-175.
-5. **The exports:** VX-125, VX-126 — the format's one home stays `Domain/VariorumDocument`.
-6. **The reds:** VX-245, VX-167.
+2. **The drag:** VX-288 — **the light version first** (her ruling) — with the chip on the Open list's rows.
+3. **Library polish and the red lint:** VX-20, VX-121, VX-175, VX-245.
 
-**Cast:** Opus / Opus. **Pins that change by her ask:** `ShellChromeTests.theOpenStripWindowIsHerSevenAndAHalf`
+**Cast:** Opus orchestrates; Opus builds at xhigh and cold-reviews at max (her word). **After each unit a fresh
+Opus at xhigh walks the changed areas with screenshots** — the Open list especially (her word: *"it should look
+right after it's done"*). **Pins that change by her ask:** `ShellChromeTests.theOpenStripWindowIsHerSevenAndAHalf`
 and the shared-constant pin in `StarredScrollTests` (Starred keeps its 7, her words).
 
 ### VX-284 — Run: Books, gatherings & tags
+**SPLIT 2026-10-17 at her kickoff sitting (her ruling, the question tool: "Three runs + VX-216 alone"; her words: the phase "has grown too large", run "what can be run without my involvement", "we also can't do anything with sync / custody").** VX-284 is now the UMBRELLA; its parts run in parallel, each its own run ticket, branch, worktree and PR: **VX-381** Gatherings & tags (`notes/plans/fixes/vx-381-gatherings-tags.md`) · **VX-382** Book view doors & reds (`notes/plans/fixes/vx-382-book-view-doors.md`) · **VX-383** Duplicate a note — the Mac door and the wire, VX-372 + VX-371 (`notes/plans/fixes/vx-383-duplicate-note.md`, kicked off at the sitting; Fable orchestrates + reviews, Opus implements, xhigh). VX-216 stays hers, after VX-381 merges. The member list and units below are the pre-split text, kept for the record; the three files govern.
+
 **Members:**
 - Gatherings and tags: VX-250 (her copy, NOT terms; closes VX-240) · VX-240 · VX-241 · VX-249 (collecting
-  sets the star; pre-launch at her word) · VX-247 (tag-delete undo) · VX-111 (the shared-note notice).
+  sets the star; pre-launch at her word) · VX-247 (tag-delete undo) · VX-111 (the shared-note notice) ·
+  **VX-372** (joined 2026-10-15 at her word, pre-launch: a direct duplicate door in the registry, Duplicate with tags /
+  without tags, and a duplicate with tags joins the books those tags collect; it reaches the AI's `duplicate_note`
+  through the shared body) · **VX-371** (joined 2026-10-15 at her word, pre-launch, moved from the sweep VX-348: the AI's
+  `duplicate_note` can file its copy into a book at Write new, as `create_note` can). VX-371 and VX-372 change the
+  same duplicate code: design them together, prove both in one real-client round (MCPSpec read in full — this run now
+  touches the MCP door), and keep them in the same part if the run is split. Their unit placement and any split are
+  hers at the kickoff.
 - The honest disabled button: VX-194.
 - The book view: **VX-303** (every open door lands in Write at her block — a bug against the deep-link rule,
   her words) · **VX-304** (an "open in Write" door in the left note box in every book mode — her ask: the title's
@@ -302,10 +315,18 @@ The launch build ships at her explicit word only, after:
 4. The MCP guide page is live (R-VX184-4).
 5. The privacy page is live (VX-294, a canon v1 gate).
 6. A clean install on a Mac with none of her accounts or machine state runs (the canon v1 row's acceptance).
-7. Her release notes are written.
+7. The release notes are written. **Her word 2026-10-18: while the app is pre-release, the notes are DRAFTED FOR HER
+   provisionally every time** ("I haven't been writing the release notes and I'm probably not going to start before
+   release") — the session cutting the release writes them, one line per bullet, and presents them.
 
 The road is the proven one (memory: Variorum release publishing): bump the version, `Tools/Release/release.sh`
 at a zero-instance window with no commits during it, then DMG first and appcast second on the site.
+
+**Numbering (her word 2026-10-18):** the next release is 0.9.8, then 0.9.9, and after that the expected number is
+0.10.0 (so the session cutting the release after 0.9.9 knows what to call it). The version does not reach 1.0 until she
+actually releases to the public. Releases so far: 0.9.0 (4911) · 0.9.1 (4913) · 0.9.2 (5178) · 0.9.3 (6497) ·
+0.9.4 (6518) · 0.9.5 (7055) · 0.9.6 (7517) · 0.9.7 (7933, 2026-10-16). A release happens only at her explicit word;
+she usually releases once the last of a set of runs is done.
 
 ---
 

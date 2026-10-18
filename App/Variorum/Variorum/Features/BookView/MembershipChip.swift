@@ -201,10 +201,12 @@ struct MembershipChip: View {
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: 280, alignment: .leading)
-                Button("Duplicate as Version") {
+                // VX-372 (VX-383 U1 — D-C-2, P-C-1): the shipped row, under
+                // its declared verb — the with-tags act.
+                Button(CapabilityRegistry.capability(.duplicateNoteWithTags).verb) {
                     duplicate()
                 }
-                .help("A full copy — takes and all — as a new note, linked to this one as a version")
+                .help(DuplicateCopy.help(.applied))
                 if let status {
                     Text(status)
                         .font(.caption)
@@ -328,6 +330,10 @@ struct MembershipChip: View {
         // 13i-c U4 (§20): the book rows' remove/release door, and a
         // gathering row's honest "remove #tag".
         .removeFromBook, .removeRuleTag,
+        // VX-372 (VX-383 U1 — D-C-2): the popover's duplicate row — the
+        // shipped "Duplicate as Version", declared at last and running the
+        // with-tags act under its verb.
+        .duplicateNoteWithTags,
     ]
 
     /// 13g cold review R1-1 (L17's explainer half — her WT-7 round-4
@@ -434,9 +440,8 @@ struct MembershipChip: View {
                 let result = try await session.runner.run { [postID] ops in
                     try ops.collectPostIntoSmartReading(postID, into: book.id)
                 }
-                status = result.alreadyMatched
-                    ? "Already collected — it matches “\(book.name)”'s filter."
-                    : "Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) — “\(book.name)” collects by filter."
+                // VX-241: an archived gathering says the honest thing.
+                status = AddToBookCopy.collected(result, gatheringName: book.name)
             } catch let error as OperationError {
                 if case .smartFilterUnsatisfiable(_, let reason) = error {
                     status = "“\(book.name)” can't take this note: \(reason)"
@@ -520,12 +525,17 @@ struct MembershipChip: View {
                 // (`session.divergeForBook` is the same body) — the chip
                 // sits in the masthead ABOVE a live editor, so its post is
                 // dirty whenever she is typing.
-                let result = try await session.runCopying(from: postID) { [postID] ops in
-                    try ops.duplicateAsVersion(postID)
-                }
-                duplicatedPostID = result.post.id
+                //
+                // VX-372 (VX-383 U1 — D-C-2): through the ONE act every
+                // duplicate door runs (`NoteDuplicate.run` — the same entry,
+                // with tags), in the chip's own voice. Its words now say WHERE
+                // the copy landed: its applied tags may have put it in a book,
+                // so "in the Pool until you shelve it" is no longer always true.
+                let landed = try await NoteDuplicate.run(
+                    postID: postID, tags: .applied, session: session)
+                duplicatedPostID = landed.copyID
                 copyBookName = nil  // 13g R1-1: a plain duplicate has no book to name
-                status = "Duplicated — the copy is its own note now (in the Pool until you shelve it)."
+                status = landed.words
             } catch {
                 status = ChipRefusals.message(for: error, bookName: nil)
             }
@@ -575,9 +585,11 @@ nonisolated enum DivergeCopy {
     /// rather than pretending or staying silent.
     static func refusal(for error: Error, book: String, sealed: Bool = false) -> String {
         if let error = error as? OperationError, case .wrongReadingKind = error {
+            // VX-372 (P-C-1): the door named by its new verb — and a copy
+            // made WITH tags carries the same tags, so it appears there at once.
             return "\u{201c}\(book)\u{201d} collects by its tags, so there is no membership to "
-                + "move — a copy would only appear there if it carried the same tags. "
-                + "Duplicate as Version, then tag the copy."
+                + "move — a copy appears there only if it carries the same tags. "
+                + "\(DuplicateCopy.withTagsVerb) makes one that does."
         }
         return ChipRefusals.message(for: error, bookName: book, sealed: sealed)
     }

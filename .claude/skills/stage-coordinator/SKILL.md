@@ -14,8 +14,9 @@ Don't send them back to the author. Author-only calls stay hers (CLAUDE.md's lis
 her real store, her credentials, canon, history rewrites). Surface those; never route
 around them.
 
-The history behind every rule: `notes/handoffs/coordinator-2026-10-07-handoff.md`
-and `notes/handoffs/coordinator-2026-10-12-handoff.md`.
+The history behind every rule: `notes/handoffs/coordinator-2026-10-07-handoff.md`,
+`notes/handoffs/coordinator-2026-10-12-handoff.md` and
+`notes/handoffs/coordinator-2026-10-13-handoff.md`.
 
 ## Startup
 1. Bout start per CLAUDE.md: `git pull` here and in the memory repo, `Tools/vx sync`,
@@ -27,8 +28,13 @@ and `notes/handoffs/coordinator-2026-10-12-handoff.md`.
    name, her priorities, the owed handoff) and index it, so compaction can't lose the
    role. Append to it at every merge and every ruling she gives.
 4. HOLD the stage between grants: `Tools/stage claim --who <you> --reason "HOLD:
-   coordinator queue — ask <you>" --minutes 180`. Renew before it expires.
-5. `ListAgents`; send each Variorum session the protocol below.
+   coordinator queue — ask <you>" --minutes 180`. Renew before it expires: re-check
+   `date` on every incoming message, since a hold that lapses unnoticed leaves you
+   reporting a hold you don't have.
+5. `ListAgents` to SEE who's there, and send nothing. Sessions that need you announce
+   themselves (she tells them to), and you answer each announcement with the protocol
+   below. Never message sessions unprompted: it wakes stale ones and costs tokens. A
+   sweep of active sessions happens only at her word (her rule, 2026-10-13).
 
 ## The protocol (paste into your first message to each session)
 - **REQUEST** = what (test batch / walk / live round / Debug launch / dev-store reset /
@@ -62,10 +68,12 @@ and `notes/handoffs/coordinator-2026-10-12-handoff.md`.
 ## Before every GO (mechanical, every time)
 - `Tools/stage status` (FREE or your own hold) and `date` (re-check the clock after any
   pause; forecasts drift).
-- `pgrep -lf "MacOS/Variorum$"` for app instances. The looser
+- `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` for app instances. The looser
   `pgrep -fl "Variorum.app/Contents/MacOS"` also matches off-stage builds' link and
-  codesign steps; tell them apart by path. Also run
-  `xcrun simctl list devices booted`.
+  codesign steps, and even headless `xcodebuild` command lines, so pass the strict forms
+  on to the sessions' own guards. Also run `xcrun simctl list devices booted`.
+- `Tools/stage status` exits 1 while a claim is held, so never put it inside an `&&`
+  chain.
 - Claim on the grantee's behalf: release your hold, `Tools/stage claim --who
   coord-for-<x> --minutes 10–20`, then send the GO with
   `Tools/stage release --who coord-for-<x> && Tools/stage claim --who <their-name> …`
@@ -75,6 +83,12 @@ and `notes/handoffs/coordinator-2026-10-12-handoff.md`.
   restores or reports the posture at release.
 - For a live round that needs the dev store: confirm the previous window left it
   restored and unlocked.
+- For any window that restores the Debug prefs: `defaults import` MERGES rather than
+  replaces, so the restore must re-export and diff against the pre-window export (two
+  walks on 2026-10-14 found a walk-added key left behind).
+- For a long window (an hour or more) while a merge-gating run may come READY: ask the
+  holder to run its tests first and ping "SEAM" before its dev-store copy, so a
+  merge-gating run can slot in cleanly there.
 
 ## After every RELEASE
 Verify it yourself: stage FREE, no instances, no booted simulators. For a refresh, also
@@ -95,8 +109,13 @@ holder answers "nothing further owed" at its hard stop.
 ## Merges
 They serialize. On a merge ask: verify the branch contains `origin/main`
 (`git merge-base --is-ancestor origin/main origin/<branch>`) and nobody else is
-merging, then send the GO (merge commit only). On the SHA: broadcast "main moved:
-<SHA>, merge it in before your merge" to every open effort.
+merging, then send the GO (merge commit only). Also verify that nothing outside
+`notes/` changed between the tree the merge-moment run tested and the branch tip, and
+in main's own delta since then (`git diff --name-only <tested> <tip> | grep -v
+'^notes/'`). A docs-only move needs no re-test. On the SHA: broadcast "main moved:
+<SHA>, merge it in before your merge" to every open effort. Batch the merge commit
+with its on-main ledger and handoff commits into one broadcast where you can, and send
+the merge SHA alone only when a waiting run can start its merge-in early.
 
 ## /Applications refreshes (her real store)
 - Prefer ONE folded refresh from merged main, run by the last merger of a burst. If

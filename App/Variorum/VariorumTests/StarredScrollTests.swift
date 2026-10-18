@@ -31,13 +31,23 @@ import VariorumCore
 @MainActor
 @Suite("Item 10 — Starred is a bounded, scrolling section")
 struct StarredScrollLayoutTests {
+    /// **EDITED IN PLACE BY HER ASK — VX-285** (the VX-283 run, U1). This pin
+    /// held ONE window constant for both scrolling sections; her VX-285 ask
+    /// (*"Open tabs should extend the full height of the screen that they can
+    /// … until the synced portion of the bottom row starts"*) splits it on
+    /// purpose — the Open list grows into the free space while STARRED keeps
+    /// its ~7 (her item-10 words above). The ruled-change class: the half of
+    /// the claim that survives is Starred's, unchanged, and the new half is
+    /// that the Open list no longer shares the window.
     @Test func theWindowIsOneConstantForBothScrollingSections() {
+        // Starred keeps its ~7, its 7½-row tallest form, unchanged.
         #expect(SidebarLayout.scrollingSectionWindow == 7)
-        // The Open strip's names still answer, unchanged.
-        #expect(SidebarLayout.openStripWindow == SidebarLayout.scrollingSectionWindow)
-        #expect(SidebarLayout.openStripMaxHeight(rowHeight: 30)
-                == SidebarLayout.scrollingSectionMaxHeight(rowHeight: 30))
         #expect(SidebarLayout.scrollingSectionMaxHeight(rowHeight: 30) == 225)
+        // The Open list no longer shares it: in a tall column it grows past
+        // Starred's window, down to the footer.
+        let open = SidebarLayout.openListMaxHeight(
+            visibleHeight: 900, listTop: 300, bottomPadding: 12, rowHeight: 30)
+        #expect(open > SidebarLayout.scrollingSectionMaxHeight(rowHeight: 30))
     }
 
     @Test func theFitTestCapsStarredAtItsWindow() {

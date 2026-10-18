@@ -20,6 +20,12 @@ public enum MCPShowTarget: Sendable, Equatable {
     /// the client's, so the receipt can say who moved her ("Now in “X” —
     /// claude-code showed you this wing."). `wingID` '' is Home.
     case wing(wingID: String, name: String, shownBy: String)
+    /// VX-336 U6a (VX-298 — her answers 2026-10-13): her Compare with `noteID`
+    /// as the first column and each of `peerIDs` (one to three, in column order)
+    /// beside it, REPLACING the columns open (answer (4)). Any notes her picker
+    /// would offer — no link required (1). A SIGNAL with no posture (P-4): the
+    /// board decides "related blocks only" from its own projection (F-8 (a)).
+    case compare(noteID: String, peerIDs: [String])
 }
 
 /// **THE MOVE DIAL's ETIQUETTE — her law, as one pure decision** (R-13nb-23,
@@ -169,9 +175,51 @@ struct MCPShowTool: Sendable {
                 throw ArgumentFailure(message: "target wing needs wing_id (\"\" is Home).")
             }
             return .wing(wingID: wing, name: "", shownBy: "")
+        case "compare":
+            return try parseCompare(args, string)
         default:
-            throw ArgumentFailure(message: "target must be \"note\", \"takes\", \"lens\", \"book\" or \"wing\".")
+            throw ArgumentFailure(
+                message: "target must be \"note\", \"takes\", \"lens\", \"book\", \"wing\" or \"compare\".")
         }
+    }
+
+    /// VX-298 (P-VX298-3, F-6 (a)): `note_id` + `peer_ids` — one to three OTHER
+    /// notes (her board holds four columns, `addPeerSlot`'s cap), in column
+    /// order. Every malformed form refuses here, before any read, naming what is
+    /// wrong (independent of any target — no oracle).
+    private func parseCompare(_ args: [String: Value], _ string: (String) throws -> String?) throws -> MCPShowTarget {
+        guard let note = try string("note_id"), let value = args["peer_ids"], value != .null else {
+            throw ArgumentFailure(message: Self.compareNeedsWords)
+        }
+        guard let items = value.arrayValue else { throw ArgumentFailure(message: "peer_ids must be an array of note ids.") }
+        guard (1...Self.comparePeerCap).contains(items.count) else { throw ArgumentFailure(message: Self.comparePeerCountWords) }
+        let peers = try items.map { item -> String in
+            guard let id = item.stringValue, !id.isEmpty else {
+                throw ArgumentFailure(message: "peer_ids must hold note ids (strings).")
+            }
+            return id
+        }
+        guard Set(peers).count == peers.count else { throw ArgumentFailure(message: "peer_ids names a note twice.") }
+        guard !peers.contains(note) else {
+            throw ArgumentFailure(message: "peer_ids can't include note_id \u{2014} it is the first column already.")
+        }
+        return .compare(noteID: note, peerIDs: peers)
+    }
+
+    /// Her board's peer columns beside the anchor (`CompareViewModel.addPeerSlot`).
+    static let comparePeerCap = 3
+
+    // The compare target's words (the MCP room's technical register, P-13n-1;
+    // PROVISIONAL, her copy pass — VX-234).
+    static let compareNeedsWords = "target compare needs note_id and peer_ids (one to three other notes)."
+    static let comparePeerCountWords =
+        "peer_ids must name one to three other notes \u{2014} Compare shows a note and up to three beside it."
+    static let compareDifferentWingsWords =
+        "Those notes are in different wings \u{2014} each wing is a separate library, so Compare can't show them "
+        + "side by side."
+    static func compareArchivedWords(_ title: String?) -> String {
+        "\(title.map { "\u{201C}\($0)\u{201D}" } ?? "That note") is archived \u{2014} Compare offers only notes in "
+            + "the library (unarchive_note first)."
     }
 
     // MARK: - The decision (read, on the target, never spending)
@@ -186,6 +234,8 @@ struct MCPShowTool: Sendable {
         switch target {
         case .note(let noteID, _, _), .takes(let noteID, _), .lens(let noteID, _):
             return try decideNote(db, target, noteID: noteID, standing: standing)
+        case .compare(let noteID, let peerIDs):
+            return try decideCompare(db, noteID: noteID, peerIDs: peerIDs, standing: standing)
         case .book(let bookID, let sectionID):
             // 13n-c VX-273: a book OR a gathering (read facts under
             // wing-level reach — her doors open one like a book; it has no
@@ -241,6 +291,50 @@ struct MCPShowTool: Sendable {
             return .refused(Outcome(text: misaddressed, isError: true), kind: "note", id: noteID, title: title)
         }
         return .allowed(kind: "note", id: noteID, title: title)
+    }
+
+    /// **VX-298 — the compare target's decision (D-298-2), on ONE read, never
+    /// spending.** Every note at READ in column order — the anchor, then each
+    /// peer — and the FIRST refusal answers with that note's refusal: the ONE
+    /// not-shared shape for anything unreachable (a version, a scraps group, a
+    /// stranger's id), byte-identical to an id naming nothing, logged on THAT
+    /// note (`link_versions`' order; no ask — `show_in_app`'s own road). Only
+    /// after every note is decided (so nothing is told about a note the client
+    /// can't read): (1) the SAME WING — every peer's resolved wing equal to the
+    /// anchor's, else one sentence; (2) only notes HER PICKER would offer
+    /// (`Queries.notePickerNotes`' WHERE: a live, non-archived post of the
+    /// anchor's wing, not the anchor) — an ARCHIVED peer refuses; the anchor may
+    /// be archived (she can open one and press ⌘5 — P-VX298-2, F-7 (a)). Both
+    /// logged on the refusing peer; an allowed show on the anchor. Cost ∝ the
+    /// named notes (≤ 4 facts reads + one archived read), never the corpus.
+    private func decideCompare(
+        _ db: Database, noteID: String, peerIDs: [String], standing: MCPGrantAuthority.Standing
+    ) throws -> Decided {
+        var wings: [String: String] = [:]
+        var titles: [String: String] = [:]
+        for id in [noteID] + peerIDs {
+            let facts = try Queries.mcpNoteFacts(db, noteID: id)
+            let title = facts == nil ? nil : try Queries.mcpScopeTitle(db, kind: .note, id: id, calendar: calendar)
+            let decision = MCPGrantAuthority.decide(standing, note: facts, rung: .read, consumes: false)
+            guard decision.isAllowed, let facts else {
+                return .refused(refusal(decision, .note), kind: "note", id: id, title: title)
+            }
+            wings[id] = facts.wingID
+            titles[id] = title
+        }
+        if let peer = peerIDs.first(where: { wings[$0] != wings[noteID] }) {
+            return .refused(Outcome(text: Self.compareDifferentWingsWords, isError: true),
+                            kind: "note", id: peer, title: titles[peer])
+        }
+        let archived = Set(try String.fetchAll(
+            db,
+            sql: "SELECT c.id FROM json_each(?) j CROSS JOIN container c ON c.id = j.value WHERE c.archived_at IS NOT NULL",
+            arguments: [String(decoding: try JSONEncoder().encode(peerIDs), as: UTF8.self)]))
+        if let peer = peerIDs.first(where: archived.contains) {
+            return .refused(Outcome(text: Self.compareArchivedWords(titles[peer]), isError: true),
+                            kind: "note", id: peer, title: titles[peer])
+        }
+        return .allowed(kind: "note", id: noteID, title: titles[noteID])
     }
 
     private func refusal(_ decision: MCPGrantRule.Decision, _ target: MCPRefusalCopy.Target) -> Outcome {

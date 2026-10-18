@@ -244,7 +244,9 @@ struct PoolPostsView: View {
     /// methods into them. The acts are byte-identical; what changes is that
     /// the Pool no longer knows a `LibraryViewModel` exists, and a pin can
     /// hand it two closures instead of a whole sibling.
-    let onDuplicateAsVersion: (String) async -> Void
+    /// VX-372: the duplicate act, with her tag choice (the parent's —
+    /// `LibraryViewModel.duplicateAsVersion(postID:tags:)`, P39a).
+    let onDuplicateAsVersion: (String, Operations.DuplicateTags) async -> Void
     let onArchive: (String) async -> Void
     let readings: ReadingsViewModel
     let tags: TagsViewModel
@@ -509,8 +511,14 @@ struct PoolPostsView: View {
                     onOpenInNewWindow(item.postID)
                 }
             }
-            Button("Duplicate as Version") {
-                Task { await onDuplicateAsVersion(item.postID) }
+            // VX-372 (VX-383 U1 — D-C-2): the note-row grammar's two
+            // duplicate doors (`SidebarView.contextMenuCapabilities`), the
+            // Library's twin — through the parent's act (P39a).
+            Button(CapabilityRegistry.capability(.duplicateNoteWithTags).verb) {
+                Task { await onDuplicateAsVersion(item.postID, .applied) }
+            }
+            Button(CapabilityRegistry.capability(.duplicateNoteWithoutTags).verb) {
+                Task { await onDuplicateAsVersion(item.postID, .none) }
             }
             // 13i-d U5 — the explicit cross-wing doors (the sitting record §9).
             if let wings {

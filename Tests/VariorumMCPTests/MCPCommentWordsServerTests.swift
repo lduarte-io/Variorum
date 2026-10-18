@@ -111,4 +111,22 @@ struct MCPCommentWordsServerTests {
             await h.hangUp(connection)
         }
     }
+
+    /// **VX-197 (VX-336 U8a): delete_comment's description says VX-260.** Its
+    /// VX-184 words said a suggest client may delete any comment "you left";
+    /// since VX-260 (option (b), the words' digest) a comment it left whose
+    /// words have changed since — the author's edit on any device, another
+    /// client's rewrite — is refused at suggest too, and a record from before
+    /// the digest is unproven. The two pins above run the mechanics; this one
+    /// holds the words to them (red on the old description).
+    @Test func deleteCommentsDescriptionSaysChangedWordsNeedEdit() {
+        let words = MCPToolCatalog.deleteComment.description
+        #expect(words.contains(
+            "With suggest you may delete only a comment you left (with add_comment or add_comments) whose "
+                + "words no one has changed since you wrote them;"), "\(words)")
+        #expect(words.contains(
+            "one left before Variorum kept a record of its words, or one whose words were changed after you "
+                + "wrote them (by the author on any device, or by another client)"), "\(words)")
+        #expect(words.contains("With edit on the note you may delete any comment."))
+    }
 }
