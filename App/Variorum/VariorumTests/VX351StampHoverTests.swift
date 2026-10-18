@@ -150,6 +150,44 @@ struct VX351StampGapsTests {
 }
 
 @MainActor
+@Suite("VX-351 W2-1 — the BOOK's note box hovers its stamps in every state that draws them", .serialized)
+struct VX351BookBoxStampsTests {
+    /// **The walk's W2-1, as a pin.** The sidebar note box is the BOOK's box
+    /// (`RootView.noteBoxView` builds `SidebarNoteBox` for every book mode —
+    /// there is no second box and no second stamps-line composer:
+    /// `NoteBoxCopy.stampsLine` has ONE caller, `factsBlock`). It draws the
+    /// stamps line in exactly two states: SELECTED (a note the book points
+    /// at — Outline's focus, Index's selection, the spread's page) and LIVE
+    /// WITHOUT A BAR (Index: its liveness is one block's pane, never a full
+    /// editor, so the facts stay where Outline's and the spread's live box
+    /// show the bar). Both compose the line's words AND its whole-fact hover;
+    /// a stamp from another YEAR (the seeded classics are stamped 1892 — the
+    /// seeder's own clock, m6) spells its year in both.
+    /// Pre-fix: the words, no hover — RED on old in all four cases.
+    @Test(arguments: [(ThemeVoice.terminal, false), (.study, false), (.terminal, true), (.study, true)])
+    func theBookBoxHoversItsStampsWhereverItDrawsThem(voice: ThemeVoice, indexLive: Bool) async throws {
+        let edited = try #require(DateFormatter.variorumISO8601.date(from: "1892-10-14T00:00:00.000Z"))
+        let saved = Date(timeIntervalSince1970: 1_791_720_000)          // 2026-10-11 12:00 UTC
+        let now = Date(timeIntervalSince1970: 1_792_324_800)            // 2026-10-18 12:00 UTC
+        let tokens = tokens(voice)
+        let note = "vx351-sherlock"
+        let box = SidebarNoteBox(
+            tokens: tokens, subjectKey: "vx351-book-\(voice)-\(indexLive)",
+            state: indexLive ? .live(note) : .selected(note),
+            identity: NoteBoxIdentity(postID: note, title: "A Scandal in Bohemia", index: 1, total: 13),
+            facts: NoteBoxFacts(words: 8_500, blocks: 120, fannedBlocks: 0, editedAt: edited, savedAt: saved),
+            caretLabel: nil, now: now)
+        await SurfaceComposition.host(box, size: NSSize(width: 230, height: 260))
+        let composed = SurfaceComposition.text(of: box.body)
+        let words = try #require(NoteBoxCopy.stampsLine(edited: edited, saved: saved, now: now))
+        #expect(SurfaceComposition.carries(tokens.chromeLabel(words), in: composed),
+                "the premise: the box draws the stamps line in this state (\(words))")
+        #expect(composes(wholeFact(edited), in: composed), "the edit's whole fact (its year and minute) hovers the line")
+        #expect(composes(wholeFact(saved), in: composed), "the commit's whole fact hovers the line")
+    }
+}
+
+@MainActor
 @Suite("VX-351 — the named speakers composed with their hover", .serialized)
 struct VX351SpeakerHoverCompositionTests {
     private final class Clock: @unchecked Sendable {
