@@ -260,7 +260,7 @@ the stage is coordinator-held; this leg builds headless and reports READY. **No 
 
 | Item | State |
 |---|---|
-| R1-1 — the Index → Outline decider pin | NOT STARTED |
+| R1-1 — the Index → Outline decider pin | PIN BUILT (see the commit naming it; `build-for-testing` green) — `BookNoteBoxDoorsTests.swift` › `BookIndexToOutlineCarryTests.theOutlineArrivesOnTheCarriedNote` (args: `modeTabs` through the published mode door, `showInOutline` replaying the row menu closure's three statements); a 40-note book, note 25 landed in the Index, then the road → the Outline must put `page-<note 25>` at its top (`BookOutlineGeometry.anchorTops`, ≤ 4 pt). **The verdict is PENDING the window.** If RED: the fix is ONE line atop `BookIndexView.landOrSeed` — `guard structure.mode == .index else { return }` (D-2's mirror) — and its red-on-old is deleting that line. If GREEN: hollow, no code change. The sweep table (plan file §D-2's CLASS SWEEP) gained the Index row (PENDING the verdict) and the Read ▸ Scroll delivery note |
 | R1-2 — her click into an Outline/spread note is her place | NOT STARTED |
 | R1-3 — the flush comments name the open window | NOT STARTED |
 | R1-7 — the box's Index "Takes" cell's click frame | NOT STARTED |

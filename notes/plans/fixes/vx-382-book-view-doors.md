@@ -733,9 +733,18 @@ standing anchor; no block rides those arms today, by the brief's letter). Owner:
 | Book (the spread) → any mode | `SpreadBookView.landReveal` via `.onChange(of: model.pendingReveal)` | **SAFE for the block today, recorded** | The spread arm of `BookAnchor.landing` carries the NOTE only (no block rides it — the brief's letter). If its departing `onChange` eats the reveal (whether it fires on the way out is UNVERIFIED for this host — the Outline's did), arriving at INDEX still lands the note: `carryPlace` wrote `standingAnchorPostID`, and `landOrSeed`'s seed reads `focusedPostID` then it. Arriving at OUTLINE has no seed: an eaten reveal would leave the Outline at its own scroll — a possible NOTE-carry miss, recorded for VX-300 |
 | Read ▸ Pages → any mode | `PagedReadView` `.onChange(of: model.pendingReveal)` → `consumeReveal()` | **SAFE for the block today, recorded** | Same as the spread: the read arm carries the note only; Index re-seeds on the standing anchor; the Outline arrival is the same possible note miss (UNVERIFIED) |
 | Read ▸ Scroll → any mode | `ReadingFlowView`'s `reveal:` / `onRevealLanded` → `consumeReveal()` | **SAFE for the block today, recorded** | Same; and the flow's own block door (`onWake` → `requestLanding` + `mode = .index`) parks its landing WITHOUT a carry, so it is not this class |
+| Index → any mode (ladder R1-1 — the row the first sweep missed) | `BookIndexView.landOrSeed` via `.onChange(of: model.pendingReveal)` — its reveal arm consumes UNCONDITIONALLY whenever the note is in `entries` (always, for a carry inside the book) | **PENDING the decider** (`BookIndexToOutlineCarryTests.theOutlineArrivesOnTheCarriedNote`, both roads: the mode tabs and the row menu's "Show in Outline") — RED on the tip ⇒ D-2's mirror (the mode guard atop `landOrSeed`); GREEN ⇒ hollow, the pin stays as the non-regression line | Arriving at OUTLINE has no seed, so an eaten reveal would leave a far note focused but off-screen |
+
+**Read ▸ Scroll now RECEIVES Outline-departure reveals (the ladder's R1-1 note).** Before D-2's guard, a click-over
+from Outline into Read ▸ Scroll had its reveal eaten on the way out by the departing Outline (the spread and Pages
+masked it with their focus seeds; the flow has none). Since ab3db8f19 the reveal reaches `ReadingFlowView`'s
+`reveal:` and the flow lands the carried note — W21's intended carry, now delivered. **No pin and no walk row covers
+this arrival** (recorded, not built; owner VX-300 beside the spread/Pages note above).
 
 Future block-carry out of the spread or Read (one more arm of `BookAnchor.landing` each) must first give that surface
-the same mode guard — owner **VX-300** (the book view's after-launch remainder).
+the same mode guard — owner **VX-300** (the book view's after-launch remainder). A mode-STAMPED reveal (the carry
+names its arriving mode and every consumer takes only a reveal addressed to it — five consumers, one rule) is the
+deeper cut the ladder's R1-1 named; not taken here, noted for VX-300's body.
 
 ### THE U1 WALK — verdicts (dev store, Debug build `Variorum-dkbmlpshalzxqeftsymzimjxpdhl` from the tip; the book "o ladrão de raios"; screens `scratchpad/u1b/screens/`)
 

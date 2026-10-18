@@ -691,3 +691,115 @@ struct BookCarryLiveBlockTests {
         }
     }
 }
+
+// MARK: - The ladder's R1-1 — D-2's class, the departing INDEX
+
+/// Forty one-block notes in one book (a realistic card preview each — the
+/// `BookOutlineLandingTests` fixture's), so a note far down the book sits far
+/// below the Outline's fold when the Outline arrives at its own top.
+@MainActor
+private func withLongBook<T>(
+    _ body: @MainActor (AppSession, AppDatabase, TakesBook) async throws -> T
+) async throws -> T {
+    let db = try AppDatabase.inMemory()
+    let start = Date(timeIntervalSince1970: 1_782_864_000)
+    let tick = LockIsolated(0)
+    return try await withDependencies {
+        $0.database = db
+        $0.uuid = UUIDGenerator { UUID() }
+        $0.date = DateGenerator {
+            let seconds = tick.withValue { value -> Int in
+                defer { value += 1 }
+                return value
+            }
+            return start.addingTimeInterval(Double(seconds))
+        }
+        $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 382))
+    } operation: { @MainActor in
+        let session = AppSession(database: db)
+        let reading = try session.operations.createReading(name: "the long book", kind: .book)
+        var postIDs: [String] = []
+        for p in 0..<40 {
+            let post = try session.operations.createPost(title: "note \(p)")
+            _ = try session.operations.newBlock(
+                in: post.id,
+                text: "Prose of note \(p). It was a cold morning of the early spring, and we "
+                    + "sat after breakfast on either side of a cheery fire in the old room at "
+                    + "Baker Street, with a thick fog rolling down between the lines of "
+                    + "dun-coloured houses opposite.",
+                at: .end)
+            try session.operations.addPostToReading(post.id, to: reading.id)
+            postIDs.append(post.id)
+        }
+        defer {
+            for id in postIDs { session.commandRouter.forgetCurrentBlock(for: id) }
+        }
+        return try await body(session, db, TakesBook(
+            readingID: reading.id, postIDs: postIDs, blocks: [:], variants: [:]))
+    }
+}
+
+@Suite("VX-382 ladder R1-1 — the departing Index never eats the reveal the arriving Outline lands on", .serialized)
+@MainActor
+struct BookIndexToOutlineCarryTests {
+    enum Road: String, CaseIterable, Sendable {
+        /// The masthead's mode tabs — `BookView.switchMode`, through the
+        /// published mode door (W21's click-over).
+        case modeTabs
+        /// The Index row menu's "Show in Outline" — `BookView`'s
+        /// `onEditInOutline` closure, its three statements replayed verbatim
+        /// (`focus` · `requestReveal` · `mode = .outline`, one synchronous
+        /// run): a row menu's closure is unreachable from a pin.
+        case showInOutline
+    }
+
+    /// **THE DECIDER (round 1's R1-1).** A note far down a long book is HER
+    /// place in the Index (the Index landed it — its own `select`); the road
+    /// leaves for the Outline. The ARRIVING Outline must land that note's row
+    /// at the top of its page (W21: "the arriving surface consumes"). If the
+    /// departing Index's `.onChange(of: pendingReveal)` fires in the switch's
+    /// own update — as the departing Outline's did (D-2) — `landOrSeed`
+    /// consumes the reveal on the way out, and the Outline arrives at its own
+    /// top with the note ~2,600 pt below the fold.
+    ///
+    /// RED on the tip ⇒ the Index needs D-2's mode guard; GREEN on the tip ⇒
+    /// R1-1 is hollow and this stays as the non-regression line.
+    @Test(arguments: Road.allCases)
+    func theOutlineArrivesOnTheCarriedNote(_ road: Road) async throws {
+        try await withLongBook { session, db, book in
+            let far = book.postIDs[25]
+            let mounted = try await mountBook(session, db, book, mode: .index)
+            defer { mounted.close(book.readingID) }
+#if DEBUG
+            // Her place in the Index: the far note, selected and shown.
+            mounted.model.requestReveal(far)
+            await settle(mounted.window, mounted.hosting, until: {
+                mounted.model.pendingReveal == nil && mounted.model.indexSelectedPostID == far
+            })
+            #expect(mounted.model.pendingReveal == nil && mounted.model.indexSelectedPostID == far,
+                    "the premise: the Index landed the far note (\(String(describing: mounted.model.indexSelectedPostID)))")
+
+            switch road {
+            case .modeTabs:
+                let modeDoor = try #require(
+                    BookOutlineGeometry.modeDoors[book.readingID], "the book published its mode door")
+                modeDoor(.outline)
+            case .showInOutline:
+                mounted.model.focus(far)
+                mounted.model.requestReveal(far)
+                mounted.structure.mode = .outline
+            }
+            let anchor = BookOutlineRows.Row.noteAnchor(far)
+            await settle(mounted.window, mounted.hosting, until: {
+                BookOutlineGeometry.anchorTops[anchor].map { abs($0) <= BookView.landingTolerance }
+                    ?? false
+            }, maxTurns: 240)
+            #expect(mounted.structure.mode == .outline, "\(road): the road arrived in Outline")
+            let top = BookOutlineGeometry.anchorTops[anchor]
+            #expect(top.map { abs($0) <= 4 } == true,
+                    "R1-1 — \(road): the arriving Outline lands the carried note at the top of its page, not \(String(describing: top)) pt away (the departing Index ate the reveal)")
+            #expect(mounted.model.pendingReveal == nil, "\(road): the reveal was consumed")
+#endif
+        }
+    }
+}
