@@ -562,5 +562,14 @@ one this Mac last had open* — with one button, *OK*; shown once, then the libr
     COMPILING (`xcodebuild … -configuration Debug build` → `** BUILD SUCCEEDED **`, zero warnings in the folder) — this
     commit; the Mac tests (piece 5) NOT STARTED; one external-facts lookup (the keychain's listing/press behaviour) in
     flight — its answers may adjust the keychain family.
-- Piece 5 — the Mac tests under `App/Variorum/VariorumTests/Protection/` + `xcodebuild build-for-testing`: NOT STARTED.
+- Piece 5 — the Mac tests under `App/Variorum/VariorumTests/Protection/` + `xcodebuild build-for-testing`: WRITTEN
+  (this commit) — `ProtectionKeychainFamilyTests` (structural, no Keychain traffic) + the per-leaf tripwire test as an
+  extension of the `.serialized` `KeychainTripwireTests` (its exact trip-count delta never interleaves) ·
+  `KeychainLeavesTests` (throwaway scopes, purged in `defer`) · `ICloudAppleKeysLeafTests` (OPT-IN,
+  `TEST_RUNNER_VARIORUM_APPLE_KEY_ROUND_TRIP=1`, the `AppleKeyRoundTripTests` pattern) · `ProtectionFileLeavesTests`
+  (temp folders) · `ProtectionFactsGathererTests` (planted leaves) · `ProtectionSystemCompositionTests` (end to end);
+  support `ProtectionTestSupport.swift`. `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration
+  Debug -derivedDataPath App/Variorum/DerivedData/vx306 build-for-testing` → `** TEST BUILD SUCCEEDED **`; the phone
+  target (`-scheme VariorumMobile -destination 'generic/platform=iOS Simulator' build`) → `** BUILD SUCCEEDED **` (the
+  Shared folder compiles for iOS). The Mac suites' RUN is the orchestrator's under the stage — PENDING.
 

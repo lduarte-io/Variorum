@@ -8,6 +8,9 @@
 //  else "" until unlock names it; the device name; the real `PassphraseKDF.floor`; the session), the executor,
 //  and the facts gatherer.
 //
+//  `deviceName` defaults to `DeviceName.current`, which on the PHONE reads `UIDevice` under
+//  `MainActor.assumeIsolated` — so the phone composes this on the main actor, or passes the name (U3).
+//
 //  The TYPES compile in both configurations (rule 24); their USE is U1b's Debug gate — nothing in
 //  `AppBootstrap` calls this yet. Tests compose it over a throwaway scope and a temp slot, overriding the
 //  leaves that must not reach iCloud.

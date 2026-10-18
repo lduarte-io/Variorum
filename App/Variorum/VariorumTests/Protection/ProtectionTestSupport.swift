@@ -159,3 +159,13 @@ nonisolated final class FastIDsLeaf: IDsLeaf, @unchecked Sendable {
     }
     func mintWords() -> [String] { system.mintWords() }
 }
+
+/// A sync-keys leaf holding nothing (the gatherer suite stays off the Keychain).
+nonisolated final class EmptySyncKeysLeaf: SyncKeysLeaf, @unchecked Sendable {
+    func syncKeyItems() throws -> [SyncKeysItemFact] { [] }
+    func readSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws -> AccountKeys? { nil }
+    func writeSyncKeys(_ keys: AccountKeys, accountID: String, itemClass: ProtectionNames.CustodyClass) throws {}
+    func deleteSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws {}
+    func holdInSession(_ keys: AccountKeys?, accountID: String) {}
+    func sessionSyncKeys(accountID: String) -> AccountKeys? { nil }
+}
