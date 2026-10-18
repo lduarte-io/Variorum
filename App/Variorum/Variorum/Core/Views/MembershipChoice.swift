@@ -607,11 +607,19 @@ nonisolated enum AddToBookCopy {
     /// which the picker offers (13i-e: explicit adds stay open) but which
     /// assembles empty — says the honest thing (VX-241, PROVISIONAL wording:
     /// the Bookcase's own sentence). The op's in-transaction fact decides.
+    ///
+    /// VX-249 (R-VX381-A5, PROVISIONAL): a collect that SET the star speaks
+    /// the mint's family verbatim ("Starred — the gathering shows it now." /
+    /// "Tagged #x and starred — …") — the chip's tags-only words stay as
+    /// shipped until VX-216 unifies its voice.
     static func collected(_ result: Operations.SmartCollectResult, gatheringName name: String) -> String {
         if result.gatheringArchived {
             return result.alreadyMatched
                 ? BookcaseCopy.alreadyMatchesWhileArchived
-                : BookcaseCopy.taggedWhileArchived(result.appliedTagPaths)
+                : BookcaseCopy.taggedWhileArchived(result.appliedTagPaths, starred: result.starred)
+        }
+        if result.starred {
+            return BookcaseCopy.shownByMint(result.appliedTagPaths, starred: true)
         }
         return result.alreadyMatched
             ? "Already collected \u{2014} it matches \u{201C}\(name)\u{201D}'s filter."

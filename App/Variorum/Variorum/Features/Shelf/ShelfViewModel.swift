@@ -753,8 +753,12 @@ nonisolated enum BookcaseCopy {
     /// everywhere (13i-e), so "shows it now" would be false; the tags ARE
     /// applied (explicit adds stay open). The receipt says both halves:
     /// what the act did, and when the gathering will show it.
-    static func taggedWhileArchived(_ paths: [String]) -> String {
-        "Tagged " + paths.map { "#\($0)" }.joined(separator: " ") + shownAfterUnarchiveTail
+    ///
+    /// VX-249: a collect that also STARRED the note names the star, composed
+    /// as the mint's family composes it ("Tagged #essays and starred — …",
+    /// "Starred — …"), with this arm's honest tail (R-VX381-A5's composition).
+    static func taggedWhileArchived(_ paths: [String], starred: Bool = false) -> String {
+        (wore(paths, starred: starred) ?? "Tagged ") + shownAfterUnarchiveTail
     }
     /// …and when the note already matched the rule (nothing was applied).
     static let alreadyMatchesWhileArchived = "It already matches" + shownAfterUnarchiveTail
@@ -763,13 +767,27 @@ nonisolated enum BookcaseCopy {
 
     /// The board's collect receipt (a note dropped on a gathering's row):
     /// the op's own in-transaction fact decides whether "shows it now" is
-    /// true (VX-241).
+    /// true (VX-241). VX-249: a collect that SET the star names it — the
+    /// mint's family exactly (`shownByMint`, whose tags-only arm IS
+    /// `shownByTagging`, so a tags-only collect reads as it did).
     static func collectReceipt(_ result: Operations.SmartCollectResult) -> String {
         switch (result.gatheringArchived, result.alreadyMatched) {
         case (false, true): alreadyShowing
-        case (false, false): shownByTagging(result.appliedTagPaths)
+        case (false, false): shownByMint(result.appliedTagPaths, starred: result.starred)
         case (true, true): alreadyMatchesWhileArchived
-        case (true, false): taggedWhileArchived(result.appliedTagPaths)
+        case (true, false): taggedWhileArchived(result.appliedTagPaths, starred: result.starred)
+        }
+    }
+
+    /// What the act made the note wear, as the family says it: "Tagged #a
+    /// #b", "Tagged #a and starred", "Starred" — nil when it wore nothing.
+    private static func wore(_ paths: [String], starred: Bool) -> String? {
+        let tags = paths.map { "#\($0)" }.joined(separator: " ")
+        switch (paths.isEmpty, starred) {
+        case (false, false): return "Tagged " + tags
+        case (false, true): return "Tagged " + tags + " and starred"
+        case (true, true): return "Starred"
+        case (true, false): return nil
         }
     }
 
@@ -780,13 +798,7 @@ nonisolated enum BookcaseCopy {
     /// Tags alone read exactly `shownByTagging`. The last arm — nothing worn —
     /// is a rule a fresh note meets as it is (a NOT-only rule, VX-250 (3)).
     static func shownByMint(_ paths: [String], starred: Bool) -> String {
-        let tags = paths.map { "#\($0)" }.joined(separator: " ")
-        switch (paths.isEmpty, starred) {
-        case (false, false): return shownByTagging(paths)
-        case (false, true): return "Tagged " + tags + " and starred" + shownNowTail
-        case (true, true): return "Starred" + shownNowTail
-        case (true, false): return "Added to the gathering."
-        }
+        wore(paths, starred: starred).map { $0 + shownNowTail } ?? "Added to the gathering."
     }
 
     // The registry's verbs (13i-d U1).

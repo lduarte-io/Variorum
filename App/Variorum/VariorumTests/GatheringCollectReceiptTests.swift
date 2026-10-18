@@ -92,3 +92,76 @@ struct GatheringCollectReceiptTests {
         }
     }
 }
+
+/// VX-249 (Part of VX-381) — the collect door now SETS the star a rule needs
+/// (her answer to the star asymmetry, QUESTIONS #217), and the receipt NAMES
+/// it: the mint's family verbatim on a live gathering (R-VX381-A5 — both Mac
+/// doors), and that family's head with VX-241's honest tail on an archived
+/// one. Red on old by behavioural revert (the deciders ignoring `starred`:
+/// the board said "Tagged  — …" with no tag and no star), recorded in the run
+/// file.
+@Suite("R98's receipt names the star it set (VX-249)")
+struct GatheringCollectStarReceiptTests {
+    private func withOps(_ body: (Operations) throws -> Void) throws {
+        let db = try AppDatabase.inMemory()
+        try withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 1))
+        } operation: {
+            try body(Operations())
+        }
+    }
+
+    @Test func aStarSetCollectNamesTheStarOnBothDoors() throws {
+        try withOps { ops in
+            let essays = try ops.createTag(name: "essays")
+            let starOnly = try ops.createReading(
+                name: "starred things", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            let both = try ops.createReading(
+                name: "starred essays", kind: .gathering,
+                querySpec: try RuleGrammar.encode(.and([.tag(essays.id), .star])))
+
+            let starred = try ops.collectPostIntoSmartReading(
+                try ops.createPost(title: "one").id, into: starOnly.id)
+            #expect(starred.starred)
+            #expect(BookcaseCopy.collectReceipt(starred) == "Starred \u{2014} the gathering shows it now.")
+            #expect(AddToBookCopy.collected(starred, gatheringName: starOnly.name)
+                    == "Starred \u{2014} the gathering shows it now.")
+
+            let tagged = try ops.collectPostIntoSmartReading(
+                try ops.createPost(title: "two").id, into: both.id)
+            let line = "Tagged #essays and starred \u{2014} the gathering shows it now."
+            #expect(BookcaseCopy.collectReceipt(tagged) == line)
+            #expect(AddToBookCopy.collected(tagged, gatheringName: both.name) == line)
+            #expect(line == BookcaseCopy.shownByMint(["essays"], starred: true),
+                    "the mint's own family, word for word")
+        }
+    }
+
+    @Test func anArchivedStarCollectNamesTheStarWithTheHonestTail() throws {
+        try withOps { ops in
+            let essays = try ops.createTag(name: "essays")
+            let starOnly = try ops.createReading(
+                name: "starred things", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            let both = try ops.createReading(
+                name: "starred essays", kind: .gathering,
+                querySpec: try RuleGrammar.encode(.and([.tag(essays.id), .star])))
+            try ops.archiveReading(starOnly.id)
+            try ops.archiveReading(both.id)
+
+            let starred = try ops.collectPostIntoSmartReading(
+                try ops.createPost(title: "one").id, into: starOnly.id)
+            let quiet = "Starred \u{2014} the gathering shows it once it's unarchived."
+            #expect(BookcaseCopy.collectReceipt(starred) == quiet)
+            #expect(AddToBookCopy.collected(starred, gatheringName: starOnly.name) == quiet)
+
+            let tagged = try ops.collectPostIntoSmartReading(
+                try ops.createPost(title: "two").id, into: both.id)
+            let line = "Tagged #essays and starred \u{2014} the gathering shows it once it's unarchived."
+            #expect(BookcaseCopy.collectReceipt(tagged) == line)
+            #expect(AddToBookCopy.collected(tagged, gatheringName: both.name) == line)
+        }
+    }
+}
