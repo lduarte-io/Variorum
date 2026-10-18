@@ -1559,11 +1559,9 @@ below) is PENDING the orchestrator's window.
   section), FIXED; pins compiled; RUN PENDING the batch.
 - **VX-350 (the Library at narrow widths):** DONE (`dda6ea9f3` · `8ac266063`) — FIXED; pins compiled; RUN PENDING the
   batch; the walk PENDING (the list below).
-- **Products (u3-fixed / u3-red):** IN-PROGRESS — both legs build from DURABLE detached checkouts of the tip `8ac266063`
-  beside this worktree (`~/dev/variorum-vx-348-u3fixed`, `~/dev/variorum-vx-348-u3red`); the red checkout carries U3's
-  product hunks REVERSE-APPLIED (`DerivedData/u3-red-revert.patch` = `git diff fe928e53e 8ac266063 --` the seven product
-  files, which no other commit in that range touches — checked) and the three new-API test files removed. THIS worktree
-  is never reverted.
+- **Products (u3-fixed / u3-red):** DONE — both PREBUILT from durable checkouts of `8ac266063` (paths, the revert patch,
+  the confirmed recompiles, the commands and every expected red: "The Mac products" below). Their RUN is PENDING the
+  orchestrator's batch (RED leg first). THIS worktree is never reverted.
 - **No behavioural revert is in flight in this worktree.**
 
 ### VX-176 — the Library's controls wear the voice's accent
@@ -1712,12 +1710,48 @@ reader's reading (rest, the elastic pull, a point scrolled, a top inset).
   row and the field is not shown; the press opens it BELOW the controls at its whole prompt, one line more; typing, a
   longer question and clearing it never move the line count; a press with a question keeps it; empty, the press closes
   it and the row returns to its lines. (The caret landing in the field is the view's half — the walk.)
-- **Justified edit:** `LibraryPanelTests.thePanelWidthIsTheInspectorsNumbersClampedToTheRoom` — 700 → 238 (was 280),
+- **Justified edit:** `LibraryPreviewBrainTests.thePanelWidthIsTheInspectorsNumbersClampedToTheRoom` (`LibraryPanelTests.swift`) — 700 → 238 (was 280),
   the floor's change; expected RED on u3-red (the old 280).
 
 ### The Mac products (PREBUILT — the batch window runs `test-without-building` only)
 
-PENDING — paths, logs, the confirmed recompiles and the exact commands land here when both builds finish.
+Both `build-for-testing` from `App/Variorum/`, scheme `Variorum`, destination `platform=macOS`, Debug (no custom
+configuration), each from a DURABLE detached checkout of the tip `8ac266063` beside this worktree (the U2 precedent — this
+worktree, which U2's fix leg shares, is never reverted and never built into a product):
+- **FIXED:** `<home>/dev/variorum-vx-348/DerivedData/u3-fixed`
+  (`Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`) — built from
+  `<home>/dev/variorum-vx-348-u3fixed` at `8ac266063`, unmodified (log `DerivedData/u3-fixed-build.log`,
+  TEST BUILD SUCCEEDED; every U3 source and test file compiled from that checkout, zero paths from this worktree).
+- **RED:** `<home>/dev/variorum-vx-348/DerivedData/u3-red` — built from
+  `<home>/dev/variorum-vx-348-u3red` at `8ac266063` with EXACTLY U3's product hunks reverse-applied
+  (`git apply -R <home>/dev/variorum-vx-348/DerivedData/u3-red-revert.patch`, the patch =
+  `git diff fe928e53e 8ac266063 --` the seven product files: `Features/Library/` `LibraryCatalogView` · `LibraryListFace`
+  · `LibrarySearchSheet` · `LibraryControlsFlow` · `LibraryCatalogModel` · `LibraryCopy` · `LibraryInfoPanel` — each
+  confirmed byte-identical to its `fe928e53e` content with `cmp`; no other commit in that range touches them) and the
+  three new-API test files removed (`VX349ListHeaderRuleTests`, `VX350ControlsWidthClassTests`,
+  `VX350SearchToggleMountTests` — the folders are synchronized, so their absence is their absence from the build). All
+  seven reverted files and the red-on-old test files confirmed compiled from the red checkout in
+  `DerivedData/u3-red-build.log`; the three new-API files absent from it. TEST BUILD SUCCEEDED.
+- **Clean-up after the batch** (the orchestrator's): `git worktree remove --force <home>/dev/variorum-vx-348-u3red`
+  and `git worktree remove <home>/dev/variorum-vx-348-u3fixed` (the xctestrun files name these sources).
+- **The commands** (under a held stage claim; confirm each "Test run with N tests" line; RED first):
+  ```
+  cd <home>/dev/variorum-vx-348/App/Variorum
+  # RED — expect: VX176LibraryTintTests 4 of 4 fail (nil bezel — the system accent); VX349ListHeaderRestTests 4 of 4 fail
+  #   (light ×2: the second line under the rule + the edge; dark ×2: the edge only — the full-width voice hairline);
+  #   VX350NarrowLibraryTests 4 of 4 fail (the pill + the row overflowing its room + the column growing; the panel past the
+  #   window at ≤ 800 pt); LibraryPreviewBrainTests (`LibraryPanelTests.swift`): ONLY
+  #   thePanelWidthIsTheInspectorsNumbersClampedToTheRoom fails (700 → 280).
+  #   Every other test in these suites passes on the red tree too (LibraryControlsFlowTests' VX-175 suites included).
+  xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u3-red test-without-building -only-testing:VariorumTests/VX176LibraryTintTests -only-testing:VariorumTests/VX349ListHeaderRestTests -only-testing:VariorumTests/VX350NarrowLibraryTests -only-testing:VariorumTests/LibraryPreviewBrainTests
+  # FIXED — the pins, the new seam's pins and every neighbour on the touched files, all green
+  xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u3-fixed test-without-building -only-testing:VariorumTests/VX176LibraryTintTests -only-testing:VariorumTests/VX349ListHeaderRestTests -only-testing:VariorumTests/VX349ListHeaderRuleTests -only-testing:VariorumTests/VX350NarrowLibraryTests -only-testing:VariorumTests/VX350ControlsWidthClassTests -only-testing:VariorumTests/VX350SearchToggleMountTests -only-testing:VariorumTests/LibraryControlsFlowRuleTests -only-testing:VariorumTests/LibraryControlsStableWidthsTests -only-testing:VariorumTests/LibraryControlsGeometryTests -only-testing:VariorumTests/LibraryPreviewBrainTests -only-testing:VariorumTests/LibraryPanelHostTests -only-testing:VariorumTests/LibraryBulkRowGeometryTests -only-testing:VariorumTests/LibraryListFaceTests -only-testing:VariorumTests/LibraryListHeaderDarkFaceTests -only-testing:VariorumTests/ChromeLineLimitTests -only-testing:VariorumTests/LibraryViewScopeSwitchTests -only-testing:VariorumTests/LibraryCardsWordTests -only-testing:VariorumTests/TutorialCurrencyTests -only-testing:VariorumTests/WingSwitcherChordTests -only-testing:VariorumTests/CapabilityRegistryTests -only-testing:VariorumTests/DuplicateDoorsTests -only-testing:VariorumTests/BookRowMenuTests -only-testing:VariorumTests/StatusToastPlacementShellTests -only-testing:VariorumTests/ChromeMinHeightTests
+  ```
+  Note for the FIXED leg: the mounted cells (VX-175's and VX-350's) carry the U3b/U3c rig's premise — the column really is
+  the width asked for; a premise fault is a harness question first (say so to the orchestrator), never a product claim.
+  The opt-in rig suites (`LibraryListFaceRigTests`, `LibraryControlsU3cProbe`) skip by design. A red on
+  `typingWithThePanelOpenNeverChangesTheLineCount` would be the one place the 🔍's "the field taking the keyboard opens
+  it" meets VX-175's road (the panel-open default window is two lines, where `searchOpen` changes nothing — pinned pure).
 
 ### What the walk must show (the orchestrator's window — the dev store, BOTH voices, light and dark Terminal)
 
