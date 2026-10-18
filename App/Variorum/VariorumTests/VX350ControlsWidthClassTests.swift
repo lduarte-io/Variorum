@@ -181,12 +181,17 @@ struct VX350ControlsWidthClassTests {
     }
 
     /// **The placement pass arranges what the sizing pass measured.** The row's
-    /// container places it at its REPORTED width and `placeSubviews` re-decides
-    /// there (U3c's T1 §7): at every width and class, both voices, field open
-    /// or not, arranging again at the reported width gives the same frames.
-    /// (Measured offscreen before the collapsed class reported its whole
-    /// offered width: offered 432, reported 369, and at 369 the groups broke
-    /// differently — the placed lines were not the measured ones.)
+    /// container places it at its REPORTED width — pixel-rounded — and
+    /// `placeSubviews` re-decides there (U3c's T1 §7): at every half-point
+    /// width and class, both voices, field open or not, arranging again at the
+    /// reported width, AND at that width snapped to the half-point and the
+    /// whole-point pixel grids, gives the same frames; and a collapsed row
+    /// reports a WHOLE-POINT width (on every display's grid, so no rounding
+    /// moves it). (Measured offscreen before the collapsed class reported its
+    /// offered width: offered 432, reported 369, the groups broke differently
+    /// at 369. Then the batch's catch, U3's fix leg: offered 301.5 in Study,
+    /// the field open — the row reported its own 302 and re-decided there, the
+    /// field's line half a point wider; Terminal the same at 299.5.)
     @Test(arguments: [ThemeVoice.terminal, .study])
     func placingAtTheReportedWidthArrangesTheSameRow(voice: ThemeVoice) {
         var faults: [String] = []
@@ -194,14 +199,37 @@ struct VX350ControlsWidthClassTests {
             for open in [false, true] {
                 let row = Self.row(voice)
                 let measured = Rule.arrangeRow(row, width: width, spacing: 10, lineSpacing: 8, searchOpen: open)
-                let placed = Rule.arrangeRow(row, width: measured.size.width, spacing: 10, lineSpacing: 8,
-                                             searchOpen: open)
-                if placed != measured {
-                    faults.append("\(width) open \(open): \(measured.widthClass) re-placed at \(measured.size.width)")
+                let reported = measured.size.width
+                if measured.widthClass == .collapsed, reported != reported.rounded(.down) {
+                    faults.append("\(width) open \(open): collapsed reported \(reported), not a whole point")
+                }
+                for placedAt in Set([reported, (reported * 2).rounded() / 2, reported.rounded()]) {
+                    let placed = Rule.arrangeRow(row, width: placedAt, spacing: 10, lineSpacing: 8, searchOpen: open)
+                    if placed != measured {
+                        faults.append("\(width) open \(open): \(measured.widthClass) reported \(reported), re-placed at \(placedAt)")
+                    }
                 }
             }
         }
         #expect(faults.isEmpty, "\(voice): \(faults.prefix(6))")
+    }
+
+    /// **The batch's exact case, said once** (the U3 fix leg): offered 301.5 in
+    /// Study with the field open, the row is decided at 301 and reports 301 —
+    /// 🔍 and scope (302 together) on lines of their own, the field 301 wide —
+    /// and re-placed at 301 or 302 it is what was measured at 301 / 302.
+    @Test func theHalfPointPastAWholePointIsDecidedAtTheWholePoint() {
+        let row = Self.row(.study)
+        let at301half = Rule.arrangeRow(row, width: 301.5, spacing: 10, lineSpacing: 8, searchOpen: true)
+        let at301 = Rule.arrangeRow(row, width: 301, spacing: 10, lineSpacing: 8, searchOpen: true)
+        #expect(at301half == at301, "301.5 is decided at 301")
+        #expect(at301half.size.width == 301 && at301half.frames[0]?.width == 301)
+        #expect((at301half.frames[1]?.midY ?? 0) < (at301half.frames[2]?.midY ?? 0), "🔍 above scope at 301")
+        let at302 = Rule.arrangeRow(row, width: 302, spacing: 10, lineSpacing: 8, searchOpen: true)
+        #expect(at302.frames[1]?.midY == at302.frames[2]?.midY, "🔍 beside scope at 302")
+        #expect(Rule.arrangeRow(row, width: at302.size.width, spacing: 10, lineSpacing: 8, searchOpen: true) == at302)
+        #expect(Rule.decidingWidth(301.5) == 301 && Rule.decidingWidth(0) == 0
+                && Rule.decidingWidth(.infinity) == .infinity)
     }
 
     /// The Timeline (sort and when stand down): 🔍 · scope / mode.

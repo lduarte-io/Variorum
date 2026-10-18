@@ -222,6 +222,13 @@ nonisolated enum LibraryControlsFlowRule {
         return .collapsed
     }
 
+    /// The width the row is decided and arranged at (the U3 fix leg): the
+    /// offered width floored to a whole point; zero and an unbounded offer
+    /// (the minimum and ideal queries) as they are.
+    static func decidingWidth(_ offered: CGFloat) -> CGFloat {
+        offered.isFinite && offered > 0 ? offered.rounded(.down) : offered
+    }
+
     /// **The row's arrangement** (VX-350). The two wide classes are VX-175's
     /// `arrange`, frame for frame (the 🔍 not shown). Collapsed: the 🔍 and
     /// scope flow onto as few lines as they fit, then mode · sort · when the
@@ -231,9 +238,21 @@ nonisolated enum LibraryControlsFlowRule {
     /// (as wide as the row lets it be, up to its own cap). `searchOpen` is HER
     /// state (the 🔍 pressed, or the field holding the keyboard) — never the
     /// text — so typing or a search never adds or removes that line.
+    ///
+    /// **Decided at WHOLE POINTS** (the VX-348 U3 fix leg — the batch's catch:
+    /// Study at 301.5 pt with the field open, the row reported 302 and was
+    /// re-decided there, the field's line half a point wider than measured).
+    /// The row is arranged at `decidingWidth(width)` — the offered width
+    /// floored to a whole point — and a collapsed row reports exactly that
+    /// whole width while its lines fit it. A whole-point width is on every
+    /// display's pixel grid, so the container places the row at what it
+    /// reported unrounded, and the placement pass, flooring the same number,
+    /// arranges exactly what the sizing pass measured — whatever sub-point
+    /// width the row was first offered.
     static func arrangeRow(
-        _ row: Row, width: CGFloat, spacing: CGFloat, lineSpacing: CGFloat, searchOpen: Bool
+        _ row: Row, width offered: CGFloat, spacing: CGFloat, lineSpacing: CGFloat, searchOpen: Bool
     ) -> RowArrangement {
+        let width = decidingWidth(offered)
         let decided = widthClass(row, width: width, spacing: spacing)
         switch decided {
         case .oneLine, .twoLines:
@@ -292,16 +311,20 @@ nonisolated enum LibraryControlsFlowRule {
                 rowWidth = max(rowWidth, x - spacing)
                 y += lineHeight + (number < lines.count - 1 ? lineSpacing : 0)
             }
-            // The collapsed row reports the WHOLE width it was offered (a
-            // finite one): its container places it at its reported width, and
-            // the placement pass re-decides at that width (`placeSubviews`) —
-            // a narrower report would re-flow the groups' breaks there, so the
+            // The collapsed row reports the WHOLE (whole-point) width it was
+            // offered: its container places it at its reported width, and the
+            // placement pass re-decides at that width (`placeSubviews`) — a
+            // narrower report would re-flow the groups' breaks there, so the
             // placed lines could differ from the measured ones (measured
-            // offscreen: offered 432, reported 369, re-flowed at 369). At the
-            // whole width the second pass arranges exactly what the first
-            // measured (pinned). The wide classes need no such care: their
-            // reported width re-decides to the same arrangement (U3c's T1 §7).
-            let reported = width.isFinite && width > 0 ? max(rowWidth, width) : rowWidth
+            // offscreen: offered 432, reported 369, re-flowed at 369). It
+            // reports that whole point even when a line uses the half-point
+            // slack past it (the batch's 301.5 → 302 case: reporting the line's
+            // own 302 re-decided at 302). Only a row truly wider than its room
+            // (below its floor) reports its own width. The wide classes need
+            // no such care: their reported width re-decides to the same
+            // arrangement (U3c's T1 §7). All pinned.
+            let fits = rowWidth <= width + 0.5
+            let reported = width.isFinite && width > 0 && fits ? width : rowWidth
             return RowArrangement(widthClass: .collapsed, frames: frames,
                                   size: CGSize(width: reported, height: y), lineCount: lines.count)
         }
