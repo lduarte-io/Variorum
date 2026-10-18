@@ -350,6 +350,11 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   `ReleaseNotes-0.9.8.md` on this branch (one-line bullets). First/second merger: no bump, no refresh. Last (the
   coordinator says so explicitly): release.sh + the folded /Applications refresh under a GO'd stage window, full
   rule card.
+- **VX-381 MERGED FIRST (main `d4b104e8a`, PR #170, 2026-10-18 ~04:4x — the coordinator's notice):** so the LAST of
+  VX-382/VX-348 mints 0.9.8. OWED at the next clean seam (U5's implementer holds the worktree now — the merge waits
+  for its finish): merge `origin/main` into this branch; its delta reaches `Shared/OpsRefusalTable.swift` and the
+  gathering doors — diff both sides for overlap with this run's surfaces, SAY SO in the merge ask, and re-run the
+  affected suites headless. Every later unit builds on the merged tree.
 - **The trailer slip, closed:** the kickoff's in-flight-row commit briefly carried a `Co-Authored-By` trailer; at
   her word she force-pushed the amended commit herself — main `d35b07515` → `fdce74de3`, identical tree. No other
   commit carries one.
