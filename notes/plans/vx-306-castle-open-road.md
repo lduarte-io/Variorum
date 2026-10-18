@@ -388,7 +388,7 @@ store this build has written — coordinators told.
   SUCCEEDED **`; the tripwire's own suite proved every real-scope mutation refused from the test process. VX-406 filed
   (the release-floor reds, Low). The ladder reads U1a with U1b.
 - U1b — the lobby on roads, Debug-gated (+ VX-310, the creation card, the Release check, the dev store's fresh start): BUILT 2026-10-18 (Opus implementer) — commits `fdda1a67b`…`cd00b20cb` + the record (§9 U1b RECORD); Release build green on the final tree, Debug `build-for-testing` and the phone build green, 27 of the new tests green HEADLESS; the Mac suites (the record's list) and the walk (K1's fresh start, stages 1, 3, 5, the lobby, Touch ID) PENDING — the ORCHESTRATOR's, under the stage.
-- U2 — the honest faces: not started.
+- U2 — the honest faces (+ rule 3's reminder, the set-passphrase sheet, W-2's fix): IN-PROGRESS 2026-10-18 (Opus implementer) — the §9 U2 RECORD carries the per-piece LIVE STATUS; the Mac suites and the walk PENDING (the ORCHESTRATOR's, under the stage).
 - U3 — the two doors; the phone opens: not started.
 - The ladder (Fable — custody code; her cap: up to five rounds while MAJORs are still found): not started.
 - Closeout: the words checked (VX-379's first pass — the Start Here chapter §7c); canon: AppSpec §12's LIBRARY
@@ -1181,3 +1181,24 @@ the old store whole in the safety copy; `dev-castle.env`'s Castle values unchang
 - **W-5 (note, pre-existing):** the seed marks above; the Welcome arrangement's mark left as found.
 - **W-6 (note for U2):** rule 3's `beforeFirstBackup` act was owed at the first open (`acts 1`) and has no face yet — U2's
   reminder; the open said nothing, as the plan intends until U2.
+
+### U2 RECORD — THE HONEST FACES (Opus implementer, 2026-10-18; IN-PROGRESS)
+
+**Not done in U2, first:** (filled at the close — PENDING)
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece 0 — this record skeleton: DONE (this commit).
+- Piece 1 — `ProtectionWords.swift` gains §7c (2) (3) (4) (6) (7) verbatim + the pin reading the plan file: NOT-STARTED.
+- Piece 2 — the notice (`UnlockedLibrary.notice` via the open's report — a card in the lobby's room between the
+  unlock and the library's open, OK once, then the open): NOT-STARTED.
+- Piece 3 — the offer (`OwedAct.offerKeyFile` → `searchKeyFiles` at the open → the offer card; *Use it* =
+  `useOfferedKeyFile` + the receipt; *Not now* writes nothing; the split pair's standing line; `.noKeyFileAnywhere` →
+  rule 27's banner): NOT-STARTED.
+- Piece 4 — rule 27 (the lobby's face + the missing face's three doors; after a quiet-road open the standing banner,
+  no doors): NOT-STARTED.
+- Piece 5 — rule 1's restore receipt (§7c (6) on the status seam): NOT-STARTED.
+- Piece 6 — rule 3's reminder (the model's two moments + the launch-counted schedule, local, beside `CalmAsks`' keys;
+  dismissals through `recordPassphraseReminderDismissed`) + the set-passphrase sheet (`resetPassphrase(.plainConfirm)`;
+  the ask and the Protection pane's one row): NOT-STARTED.
+- Piece 7 — W-2's fix (`ProtectionLibraryFiles.snapshot` — one self-contained file; red-on-old pin): NOT-STARTED.
+- Piece 8 — the Mac tests + `build-for-testing` + the phone build + the close (suites, walk recipe): NOT-STARTED.
