@@ -2311,3 +2311,24 @@ All passing, no findings. The evidence crops are in `notes/plans/vx348-screens/`
   second field.
 A SEAM at ~10:25 for VX-306's 12-min batch (app quit, pgrep empty, the predesign store left in place per the
 coordinator's confirmed terms); part 2 resumes as `vx-348-walk-2`.
+
+## THE COMBINED WALK — PART 2, Terminal/dark + live checks (the orchestrator, ~10:03–10:40, claim `vx-348-walk-2`)
+
+Passing: **VX-176** — the Library's segments wear Terminal's ACCENT in the black room (capture), system blue gone.
+**VX-393 LIVE** — granting the SAME wing × client a second time from a fresh sheet left ONE row (upgrade-in-place
+seen in the pane). **VX-339 LIVE, both halves** — with the marker made immovable (`chflags uchg`), Resume Sync kept
+the banner and spoke the new line verbatim ("Sync is still waiting: Variorum couldn't remove the restore marker
+beside your library. Press Resume Sync to try again."); unlocked, the next press cleared the banner and the marker
+left the disk. The MCP pane's Terminal faces banked (U5's deferred captures). The walk ran the book's Index, the
+Library, the Pool and the grant sheet in Terminal/dark without a mis-voiced face.
+
+**FINDING W2-1 (routed to U4's implementer):** the BOOK sidebar's note-box STAMPS LINE has NO hover (three dwells,
+no tooltip — the info panel's hover showed fine under the same method) and reads **"edited Oct 13, 1892 · saved
+Oct 11"** — the suspect: `SidebarNoteBox` carries a SECOND stamps-line copy that U4's `NoteBox` fix didn't reach,
+and the 1892 year needs a trace (an honestly-odd seeded stamp, or the line passing a story/entry date through the
+edited slot). The book host's ⌘S receipt check also needs a retry (the receipt home — the book page foot — missed
+my capture band); both ride ONE short window after the fix.
+
+**THE SWAP-BACK, VERIFIED:** the slot holds exactly the fresh library's six files, each cmp-identical to the
+set-aside copy (`…/variorum-vx348-freshlibrary-2026-10-18-155235/`); the predesign originals untouched in their
+folder; nothing deleted; pgrep empty at release. VX-306's walk is unblocked.
