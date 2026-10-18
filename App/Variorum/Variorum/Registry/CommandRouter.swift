@@ -256,25 +256,47 @@ final class CommandRouter {
     /// How many caret placements are in flight (see `duringCaretPlacement`).
     @ObservationIgnored private(set) var caretPlacementDepth = 0
 
-    /// A mounted writing surface reports where its caret is. Ignored for any
-    /// note other than the one on screen — a background pane's caret is not
-    /// "the block you're in" for the panel beside the foreground one.
+    /// A mounted writing surface reports where its caret is. The OBSERVED
+    /// fact is only ever the mounted detail's note — a background pane's
+    /// caret is not "the block you're in" for the panel beside the foreground
+    /// one.
+    ///
+    /// **VX-303 (R-U1a-1, ruled (A) — PROVISIONAL): a report for ANOTHER
+    /// note feeds that note's MEMORY, and nothing else.** A book's surfaces
+    /// (its Outline/spread editor, its Index pane) show notes no detail has
+    /// registered, so before this the book never recorded her caret and the
+    /// note box's "edit here" landed where she last was in the note's OWN
+    /// editor. `CurrentBlockMemory`'s doctrine is one current block per
+    /// note, every surface reporting; the memory takes the report, while the
+    /// mounted detail's observed identity and its offset do not move (guard
+    /// (ii)). Guard (i) — a surface placing its own caret is not her place —
+    /// is three exclusions: only a reporter that excludes its own placements
+    /// feeds (`remembersOtherNotes`), never inside a mount's bracket
+    /// (`duringCaretPlacement`), and a block-less report names nothing. The
+    /// ruling's recorded consequence: R-18l-1's re-open this run
+    /// (`sessionFact`) restores a place she last had in the book too.
     ///
     /// `utf16Offset` is nil for a surface that holds no caret (Blocks' row,
     /// the outline's card) — nil is UNKNOWN, not zero, and the memory's own
     /// rule keeps a known offset for the same block rather than erasing it.
     ///
-    /// `remembersOtherNotes` (VX-303, R-U1a-1): the reporter excludes its
-    /// own caret PLACEMENTS from what it reports for a note no detail shows —
-    /// the editor brackets its mount (`duringCaretPlacement`), the book
-    /// Index's pane filters its going-live (`BookIndexEditModel
-    /// .caretReportIsHers`) — so such a report may feed that note's memory.
-    /// Every other reporter passes nothing.
+    /// `remembersOtherNotes`: the reporter excludes its own caret PLACEMENTS
+    /// from what it reports for a note no detail shows — the editor brackets
+    /// its mount, the book Index's pane filters its going-live
+    /// (`BookIndexEditModel.caretReportIsHers`). Every other reporter passes
+    /// nothing (the Takes board's entry lands such a note on its FIRST slot
+    /// and would report that as her place).
     func noteFocusedBlock(
         _ blockID: String?, variantID: String?, postID: String, utf16Offset: Int? = nil,
         remembersOtherNotes: Bool = false
     ) {
-        guard activePostID == postID else { return }
+        guard activePostID == postID else {
+            guard remembersOtherNotes, let blockID, caretPlacementDepth == 0 else { return }
+            currentBlocks.remember(FocusedBlock(
+                postID: postID, blockID: blockID, variantID: variantID,
+                utf16Offset: utf16Offset))
+            return
+        }
         guard let blockID else {
             focusedBlockIdentity = nil
             focusedOffset = nil
