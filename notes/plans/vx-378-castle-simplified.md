@@ -345,7 +345,7 @@ record committed with PENDING numbers first.
   3,000, classes (A)–(I)); F NOT RUN; G DONE. After (code tree `0bd112c9c`): the protection set Debug `━ 278 tests in 72
   suites passed with 2 known issues`, `-c release` `━ 255 in 68 … 2 known issues`, the full core suite green in Debug;
   7,604 source lines, 13,038 test lines.
-- The ladder: **CLOSED** — round 1 0B·0M·2m·3N (fixed) · round 2 0B·0M·0m·2N (fixed) · round 3 (the gate's two fixes) 0B·0M·0m·2N · round 4 (the checker fix) 0B·0M·1m·1N — rounds 3–4's three test/DEBUG-only residues deferred to VX-306's first commit as VX-381 so the soaked tree stays the final tree (§9).
+- The ladder: **CLOSED** — round 1 0B·0M·2m·3N (fixed) · round 2 0B·0M·0m·2N (fixed) · round 3 (the gate's two fixes) 0B·0M·0m·2N · round 4 (the checker fix) 0B·0M·1m·1N — rounds 3–4's three test/DEBUG-only residues deferred to VX-306's first commit as VX-386 so the soaked tree stays the final tree (§9).
 - The gate: not started.
 
 ---
@@ -1852,13 +1852,13 @@ red-on-old by the reviewer's own single-file revert (1 issue), green in both con
 
 **Dispositions (the orchestrator):**
 1. **MINOR (`U4PromiseCheckTests` — the promise-1 oracle covers only the solo arm; no standing red proof that a synced
-   device that HAS followed is still held) — CONFIRMED as oracle completeness, DEFERRED one commit (VX-381):** the
+   device that HAS followed is still held) — CONFIRMED as oracle completeness, DEFERRED one commit (VX-386):** the
    reviewer ran the probe itself (a followed macB with a planted silent item → promise 1 fires, four violations), so there
    is no behaviour gap and no pin owed; the permanent arm (its appendix) lands as VX-306's first commit so attempt 3's
    soaked tree stays `66f7561e1`.
 2. **NIT (`Promises.swift` STATED LIMITS L1's parenthetical under-describes the limit after the fix) — CONFIRMED, DEFERRED
-   with it (VX-381).** Doc-only.
-**VX-381 minted** (Debt · Confirmed · Tests & tooling · Medium; project "Castle & backups before launch") to carry round
+   with it (VX-386).** Doc-only.
+**VX-386 minted** (Debt · Confirmed · Tests & tooling · Medium; project "Castle & backups before launch") to carry round
 3's NIT 1 and round 4's two findings as VX-306's FIRST commit; the VX-306 plan's U1 names all three.
 
 ## 10. The gate and the rules checklist (filled 2026-10-17 on the FINAL tree `4a4af3164` — the ladder's close; the code tree is `4a4af3164`, every later commit on the branch touches notes only)

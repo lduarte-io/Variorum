@@ -99,7 +99,7 @@ class); (2) VX-378's ladder round 3 NIT 1 — `PlanRunner.swift`'s DEBUG-guard-o
 `!guards.planNamedBySectionOn` branch) gains the same `catch ActRolledBack` as the normal call (a defensive, DEBUG-only
 line, deferred so VX-378's soaked tree stayed its final tree); (3) VX-378's round 4 — `U4PromiseCheckTests` gains the
 promise-1 oracle arm on a synced FOLLOWED device (the round-4 report's appendix probe) and `Promises.swift`'s STATED
-LIMITS L1 parenthetical widens (a lagging device may be Castle-recorded). All three = **VX-381**, this phase's FIRST
+LIMITS L1 parenthetical widens (a lagging device may be Castle-recorded). All three = **VX-386**, this phase's FIRST
 commit (no behaviour change; the protection set green is the proof).
 
 The Debug app's unlock reads `assess(facts)`'s `LobbyRoads` and nothing else before unlock: the typed roads (rule 4's
