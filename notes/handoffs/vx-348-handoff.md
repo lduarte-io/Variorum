@@ -15,9 +15,14 @@
   upgrade-in-place; say if replacement should never downgrade.
 - [ ] **QUESTIONS #233:** the run's ratify bundle (the P- numbers, the sitting rulings R-VX348-1…6, the
   ladder's NIT-3 clarification).
-- [ ] **The release:** 0.9.8 is minted by this closeout (the release window's result line in the run record carries the build number) — the notes (one line per
-  bullet, all three runs' sections) were drafted for you per your standing rule; rewrite anything before you
-  publicise.
+- [ ] **THE 0.9.8 RELEASE — HELD, the one thing the night could not finish:** the version bump is on main
+  (`58515fe9c`, both configurations) and the notes are drafted per your standing rule (rewrite anything before
+  you publicise), but the permission system denied `Tools/Release/release.sh --version 0.9.8` as a production
+  deploy — and a denial is yours to lift, so no agent re-ran it. To finish: approve a Bash permission rule for
+  `Tools/Release/release.sh` (and the Step-4 `npx wrangler r2 object put` + `npm run deploy` legs, likely the
+  `/Applications` swap too), then say the word and a fresh runner resumes at Step 3 — or run release.sh yourself
+  and hand off the publish + refresh legs. Nothing was built or published; `/Applications` is still 0.9.7 (7973).
+  The full state and resume brief: the run record's THE 0.9.8 RELEASE section.
 - [ ] **The 1892 stamps are honest:** sherlock's seeded notes really are stamped 1892 by the seeder's own clock
   (its m6 note "still pending her nod") — the book box now shows "edited Oct 13, 1892" with the whole-fact hover.
   Say if you'd rather the sample library carry 2026 stamps.
