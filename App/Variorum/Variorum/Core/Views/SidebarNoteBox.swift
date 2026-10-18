@@ -401,6 +401,7 @@ struct SidebarNoteBox: View {
     private func titleOpenDoor(_ act: @escaping () -> Void) -> some View {
         let door = Button(tokens.chromeLabel(NoteBoxCopy.openDoor), action: act)
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+            .lineLimit(1)  // P-8: a fixedSize chrome label states its line policy
             .fixedSize()
             .help(NoteBoxCopy.openDoorHelpLive)
 #if DEBUG

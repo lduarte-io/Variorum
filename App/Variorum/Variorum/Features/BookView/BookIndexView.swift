@@ -1749,6 +1749,7 @@ private struct BookIndexPaneNote: View {
                     .contentShape(Capsule())
             }
             .buttonStyle(.plain)
+            .lineLimit(1)  // P-8: a fixedSize chrome label states its line policy
             .fixedSize()
             .help("This block keeps \(row.activeVariantCount) takes — click to see them here")
             .padding(.top, Self.readTierTop)
