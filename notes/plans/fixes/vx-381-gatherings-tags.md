@@ -408,14 +408,20 @@ disposition here.
     Pins: `MultiBookEditNoteRuleTests.onlyBooksCountTowardTheNote` + `MultiBookEditNoteTriggerTests`' three
     (bookless in 2 gatherings → silent; 2 books + a gathering → "2 books"; 1 book + a gathering → silent) —
     red-on-old PENDING (Mac RUN 1).
-  - U2.4 **The Mac batch:** the fixed tree BUILT (`dd-green`, TEST BUILD SUCCEEDED at 725ad2db). **APP REVERT
-    STARTING NOW (all committed at 725ad2db — restore = `git checkout --` each file):** `ShelfViewModel.swift`
-    (collectReceipt/taggedWhileArchived ignore `starred`) · `MembershipChoice.swift` (`collected` ignores
-    `starred`) · `Operations+Tag.swift` (no registration) · `TagDeletionCopy.swift` (the old "no undo" sentence) ·
-    `AppSession.swift` (the notice counts `readingsContaining` whole) · `MultiBookEditNote.swift` (`memberBooks`
-    = identity) — built into `dd-red`, then the tree restored. Suites (17): GatheringCollectReceiptTests ·
-    GatheringCollectStarReceiptTests · VocabularySweepTests · MembershipChoiceTests · ShelfModelTests ·
-    TimelineAndReadingsTests · AddToBookMintTests · TagAndFolderTests · MultiBookEditNoteRuleTests ·
-    MultiBookEditNoteTriggerTests · DivergeDoorTests · DuplicateDoorsTests · BindDoorTests · WingSwitcherTests ·
-    SpawnAndBindLimbTests · OutflowChooserTests · RuleEditorTests. The full core suite: PENDING.
+  - U2.4 **The Mac batch:** BOTH RUNS PREBUILT, waiting for the stage GO. **No revert in flight:** the app revert
+    (from 725ad2db, every file committed — `ShelfViewModel.swift` collectReceipt/taggedWhileArchived ignoring
+    `starred` · `MembershipChoice.swift` `collected` ignoring `starred` · `Operations+Tag.swift` no registration ·
+    `TagDeletionCopy.swift` the old "no undo" sentence · `AppSession.swift` the notice counting `readingsContaining`
+    whole · `MultiBookEditNote.swift` `memberBooks` = identity) was BUILT into `dd-red` (TEST BUILD SUCCEEDED) and the
+    tree RESTORED clean (`git status` empty, zero revert markers); the fixed tree is built in `dd-green` (725ad2db's
+    sources). RUN 1 (red, `dd-red`) over the 4 pin-bearing suites: GatheringCollectStarReceiptTests ·
+    TagAndFolderTests · MultiBookEditNoteRuleTests · MultiBookEditNoteTriggerTests. RUN 2 (green, `dd-green`) over
+    the 17: GatheringCollectReceiptTests · GatheringCollectStarReceiptTests · VocabularySweepTests ·
+    MembershipChoiceTests · ShelfModelTests · TimelineAndReadingsTests · AddToBookMintTests · TagAndFolderTests ·
+    MultiBookEditNoteRuleTests · MultiBookEditNoteTriggerTests · DivergeDoorTests · DuplicateDoorsTests ·
+    BindDoorTests · WingSwitcherTests · SpawnAndBindLimbTests · OutflowChooserTests · RuleEditorTests.
+    **Core (headless), DONE:** full `swift test` — VariorumCoreTests "2923 tests in 340 suites passed" (U1's
+    2903/337 + this unit's 20 tests in 3 suites), the 6-suite target 40/40; the 362-test MCP package's ONE red is
+    U1's recorded load flake `MCPHarnessTimeLimitTests.aPeerThatNeverAnswers…` (20.1 s against its 15 s bound under
+    full parallel load) — 3/3 green alone.
 - **Ladder:** NOT-STARTED. **Walk:** NOT-STARTED. **Closeout:** NOT-STARTED.
