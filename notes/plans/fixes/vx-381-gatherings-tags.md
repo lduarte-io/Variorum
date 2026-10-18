@@ -249,6 +249,19 @@ Debug launch, dismiss a What's New sheet if one shows. Merges serialize with vx-
   LIVE-gathering tags-only receipts keep their shipped words — two voices on the chip until VX-216 unifies them
   (her sitting; already routed there at U1). PROVISIONAL.
 
+## HER OVERNIGHT MANDATE (2026-10-18, verbatim — recorded the turn it arrived)
+
+> "I want you to run ruling provisionally overnight. I'm going to sleep. You can merge to main when you're
+> done - if other sessions finish first that's fine, merge in the order you finish in. if you finish, I want
+> you to leave me with a handoff AND separately a completed block of everything that was done (including if
+> new items were minted during the run) in this sort of format: [her VX-381 checklist block, the run's seven
+> members as unchecked boxes]"
+
+Read as: PROVISIONAL-and-continue through the ladder, the walk and the closeout; the merge to main runs at
+this session's finish, serialized with vx-382 through the coordinator in FINISH ORDER; the deliverables are
+the author handoff (notes/handoffs/vx-381-handoff.md) AND, separately, a completed checklist block in her
+pasted format covering every member plus every item MINTED during the run.
+
 ## U1 COPY APPROVALS (the orchestrator, 2026-10-18 — the implementer's drafts, each still PROVISIONAL for her bundle)
 
 - **APPROVED — VX-241's receipt pair:** "Tagged #essays — the gathering shows it once it's unarchived." /
