@@ -1203,7 +1203,14 @@ the old store whole in the safety copy; `dev-castle.env`'s Castle values unchang
   `ProtectionRoadBar.swift` · `SetPassphraseSheet.swift`, rule 27's doors on `RoadLockView`, the Protection pane's one
   row; the phone's unreachable arm. Debug `build` → `** BUILD SUCCEEDED **`: DONE (this commit).
 - Piece 2 — the notice (`UnlockedLibrary.notice` via the open's report — a card in the lobby's room between the
-  unlock and the library's open, OK once, then the open): CODE DONE (the WIP commit); its pins NOT-STARTED.
+  unlock and the library's open, OK once, then the open — PROVISIONAL P-VX306-U2-1): DONE (the WIP commit's code +
+  this commit's pins). `ProtectionNoticeFaceTests` (4, planted facts): an OLDER COPY (the same library under another
+  key with that key's own file beside it, this Mac remembering the current one) → `.opened` owing the interlude, the
+  one card `.notice(.olderCopy(date: the record's date))`, the sentence = her string with `ProtectionWords.day(date)`
+  written in, the open's `refreshMemory` already done, the next open says nothing (ONCE); a DIFFERENT LIBRARY (this Mac
+  made a second library since — it remembers only that one) → her other string; an ordinary open → no card, and a
+  read-only road (a hosted test run) never owes the interlude even with an offer owed; the card's one *OK* → the open
+  goes on exactly once. HEADLESS green (the session harness); the Mac run PENDING under the stage.
 - Piece 3 — the offer (`OwedAct.offerKeyFile` → `searchKeyFiles` at the open → the offer card; *Use it* =
   `useOfferedKeyFile` + the receipt; *Not now* writes nothing; the split pair's standing line; `.noKeyFileAnywhere` →
   rule 27's banner): NOT-STARTED.
