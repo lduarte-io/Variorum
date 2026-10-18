@@ -554,7 +554,13 @@ one this Mac last had open* — with one button, *OK*; shown once, then the libr
     `sqlcipher_export` into a fresh file under a new key (verified by row counts), the no-clobber creation, the
     same-key snapshot (the backup API), the private byte copy (a catalogued copy is never written), the WAL belt.
     `ProtectionLibraryFilesTests` (5) Debug green: DONE (this commit).
-  - 4b — the keychain leaves (custody, sync keys, Apple keys, memory) + their shared query family: NOT STARTED.
-  - 4c — the file leaves, the system leaves, `CatalogLister`, `ProtectionFactsGatherer`, `ProtectionSystem`: NOT STARTED.
+  - 4b/4c — the leaves, the lister, the gatherer, the system — `App/Variorum/Shared/Protection/` (16 files: the
+    shared keychain family `ProtectionKeychain`; `KeychainCustodyLeaf` · `KeychainSyncKeysLeaf` · `ICloudAppleKeysLeaf`
+    · `UnreachableVaultLeaf` · `SQLCipherLibraryLeaf` · `FileKeyFileStoreLeaf` · `KeychainMemoryLeaf` ·
+    `FilePlanStoreLeaf` · `FileBackupsLeaf` · `SystemClockLeaf` · `SystemIDsLeaf` · `LAEnvironmentBiometryLeaf` ·
+    `AppDiagnosticsLeaf`; `ProtectionPlaces`, `CatalogLister`, `ProtectionFactsGatherer`, `ProtectionSystem`):
+    COMPILING (`xcodebuild … -configuration Debug build` → `** BUILD SUCCEEDED **`, zero warnings in the folder) — this
+    commit; the Mac tests (piece 5) NOT STARTED; one external-facts lookup (the keychain's listing/press behaviour) in
+    flight — its answers may adjust the keychain family.
 - Piece 5 — the Mac tests under `App/Variorum/VariorumTests/Protection/` + `xcodebuild build-for-testing`: NOT STARTED.
 
