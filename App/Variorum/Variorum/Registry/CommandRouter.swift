@@ -263,8 +263,16 @@ final class CommandRouter {
     /// `utf16Offset` is nil for a surface that holds no caret (Blocks' row,
     /// the outline's card) — nil is UNKNOWN, not zero, and the memory's own
     /// rule keeps a known offset for the same block rather than erasing it.
+    ///
+    /// `remembersOtherNotes` (VX-303, R-U1a-1): the reporter excludes its
+    /// own caret PLACEMENTS from what it reports for a note no detail shows —
+    /// the editor brackets its mount (`duringCaretPlacement`), the book
+    /// Index's pane filters its going-live (`BookIndexEditModel
+    /// .caretReportIsHers`) — so such a report may feed that note's memory.
+    /// Every other reporter passes nothing.
     func noteFocusedBlock(
-        _ blockID: String?, variantID: String?, postID: String, utf16Offset: Int? = nil
+        _ blockID: String?, variantID: String?, postID: String, utf16Offset: Int? = nil,
+        remembersOtherNotes: Bool = false
     ) {
         guard activePostID == postID else { return }
         guard let blockID else {

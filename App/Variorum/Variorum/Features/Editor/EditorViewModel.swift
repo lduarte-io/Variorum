@@ -3667,9 +3667,13 @@ final class EditorViewModel {
         // router's: it keeps the offset `@ObservationIgnored` beside the
         // observed identity, so a caret walking inside one paragraph still
         // wakes nobody (`CommandRouter.focusedBlock`).
+        // VX-303 (R-U1a-1): this editor brackets its mount's own placements
+        // (`applyProjection`'s initialRender arm), so a report for a note no
+        // detail shows — the book's inline editor — may feed that note's
+        // memory ("edit here" reads it).
         session.commandRouter.noteFocusedBlock(
             caretBlockID, variantID: caretVariantID, postID: postID,
-            utf16Offset: caretOffsetInBlock)
+            utf16Offset: caretOffsetInBlock, remembersOtherNotes: true)
     }
 
     // MARK: - The overlay layout-settle trigger (N14, 13b Stage 3F)

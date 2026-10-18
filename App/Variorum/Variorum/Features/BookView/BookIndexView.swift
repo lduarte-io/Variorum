@@ -792,7 +792,7 @@ struct BookIndexView<Masthead: View>: View {
         else { return }
         session.commandRouter.noteFocusedBlock(
             caret.blockID, variantID: caret.variantID, postID: postID,
-            utf16Offset: caret.offset)
+            utf16Offset: caret.offset, remembersOtherNotes: true)
     }
 
     private func select(_ postID: String, scrollPane: Bool, report: Bool = true) {

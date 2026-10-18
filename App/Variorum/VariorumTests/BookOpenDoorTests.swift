@@ -183,7 +183,14 @@ struct BookPlaceMemoryTests {
         router.noteFocusedBlock("a1", variantID: "va1", postID: "A", utf16Offset: 4)
         let mounted = router.focusedBlock
 
-        router.noteFocusedBlock("b2", variantID: "vb2", postID: "B", utf16Offset: 7)
+        // A reporter that does NOT exclude its own placements (the Takes
+        // board — the spread's Takes form) feeds nothing for another note.
+        router.noteFocusedBlock("b8", variantID: "vb8", postID: "B", utf16Offset: 1)
+        #expect(router.currentBlock(for: "B") == nil,
+                "a reporter that cannot exclude its own placements never feeds another note's memory")
+
+        router.noteFocusedBlock(
+            "b2", variantID: "vb2", postID: "B", utf16Offset: 7, remembersOtherNotes: true)
         #expect(router.currentBlock(for: "B")
                 == FocusedBlock(postID: "B", blockID: "b2", variantID: "vb2", utf16Offset: 7),
                 "RED ON OLD: B's caret is remembered for B — where she was in the book")
@@ -191,7 +198,7 @@ struct BookPlaceMemoryTests {
                 "guard (ii): the mounted detail's observed fact AND its offset are untouched")
         #expect(router.currentBlock(for: "A")?.blockID == "a1")
 
-        router.noteFocusedBlock(nil, variantID: nil, postID: "B")
+        router.noteFocusedBlock(nil, variantID: nil, postID: "B", remembersOtherNotes: true)
         #expect(router.focusedBlock == mounted, "a block-less report for B clears nothing of A's")
         #expect(router.currentBlock(for: "B")?.blockID == "b2", "…nor B's memory")
     }
@@ -206,12 +213,15 @@ struct BookPlaceMemoryTests {
         defer { for id in ["A", "B"] { router.forgetCurrentBlock(for: id) } }
         let token = router.registerDetail(postID: "A", mode: .write, applyMode: { _ in })
         defer { router.unregisterDetail(token) }
-        router.noteFocusedBlock("b5", variantID: "vb5", postID: "B", utf16Offset: 30)
+        router.noteFocusedBlock(
+            "b5", variantID: "vb5", postID: "B", utf16Offset: 30, remembersOtherNotes: true)
 
         router.duringCaretPlacement {
             // The fill's END, then a bare focus's seed at the note's start.
-            router.noteFocusedBlock("b9", variantID: "vb9", postID: "B", utf16Offset: 120)
-            router.noteFocusedBlock("b1", variantID: "vb1", postID: "B", utf16Offset: 0)
+            router.noteFocusedBlock(
+                "b9", variantID: "vb9", postID: "B", utf16Offset: 120, remembersOtherNotes: true)
+            router.noteFocusedBlock(
+                "b1", variantID: "vb1", postID: "B", utf16Offset: 0, remembersOtherNotes: true)
             // The detail's own report inside the same bracket.
             router.noteFocusedBlock("a3", variantID: "va3", postID: "A", utf16Offset: 2)
         }
@@ -223,7 +233,8 @@ struct BookPlaceMemoryTests {
                 "the detail's own road is untouched by the bracket")
 
         // After the bracket, her act is hers again.
-        router.noteFocusedBlock("b1", variantID: "vb1", postID: "B", utf16Offset: 6)
+        router.noteFocusedBlock(
+            "b1", variantID: "vb1", postID: "B", utf16Offset: 6, remembersOtherNotes: true)
         #expect(router.currentBlock(for: "B")?.blockID == "b1"
                 && router.currentBlock(for: "B")?.utf16Offset == 6)
     }
