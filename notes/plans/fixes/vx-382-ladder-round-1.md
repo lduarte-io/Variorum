@@ -295,3 +295,20 @@ target — W-1's own grammar, the fold control's wash fills its 22-pt square); r
 `CommitBar.boxCell` (the bar's cells) shares the inherited shape — NOT touched here (the disposition names the box's
 cell only); a ticket at closeout if the probe is red.
 | R1-8 — record hygiene in the plan file | **DONE** (the commit naming it) — the U1b and U2 RECORD headers flipped from "Not done yet (PENDING …)" to VERIFIED (the old text kept, named as the pre-window state); the stale "runs PENDING the window" sub-headers flipped (U1a's pins ×2, U1b's pins, D-2's header, VX-77/VX-291/VX-21/VX-69/VX-115); VX-291's "Built" bullet gains the AS-SHIPPED W-1 overlay shape (hidden footprint + the button in an overlay, its own frame the 22-pt square), its Evidence bullet and the window plan's "no red-on-old by construction" line both name W-1's red-on-old click pin `aClickInTheOverhangUnfoldsTheNote` |
+
+### THE FIX LEG'S WINDOW — the plan (run IN ORDER, foreground, from `App/Variorum/`; logs to the gitignored `scratchpad/ladder/`)
+
+Built headless on the tip (code = cd24cb59e; 6be7bd42a is record-only): `build-for-testing` green, the DerivedData
+products ARE the tip. **No revert is in flight.** Every in-place revert is made from the committed tree, rebuilt
+(`build-for-testing`), run with `test-without-building`, then restored with `git checkout -- <file>` to a clean
+`git diff` before the next row. Zero app instances before the first run (`pgrep -fl 'Variorum.app/Contents/MacOS'`,
+by PATH; never touch a real-store instance).
+
+| # | Step | Run (`-only-testing:VariorumTests/…`) | Expected / decides |
+|---|---|---|---|
+| 1 | **R1-1 decider** — the tip, no revert | `BookIndexToOutlineCarryTests` | GREEN (both args) ⇒ R1-1 HOLLOW: record, no code. RED ⇒ add `guard structure.mode == .index else { return }` as `BookIndexView.landOrSeed`'s first line (+ a comment naming D-2), commit, rebuild, re-run ⇒ GREEN; red-on-old = delete that line in place ⇒ RED; restore |
+| 2 | **R1-2 green** — the tip | `BookEditHereRiderTests` `BookCarryLiveBlockTests` `BookOpenDoorMountTests` `BookPlaceMemoryTests` | GREEN (the two new pins; the re-worded mount pin's bare-focus arm) |
+| 3 | **R1-2 red-on-old** — in place, `EditorViewModel` initialRender arm: `if seedWasHers { updateCaretContext() }` → `if false, seedWasHers { updateCaretContext() }` | `BookEditHereRiderTests` `BookCarryLiveBlockTests` | RED: `aClickIntoTheNoteIsHerPlaceForEditHere` (memory block 1 + 2; "edit here" lands block 1 + 2) and `aClickIntoOutlineThenIndexLandsAtTheClick` (the pane at the block's start, not 9); the suites' other pins green. Restore |
+| 4 | **Guard (i) probe on the re-worded arm** — in place, `CommandRouter.noteFocusedBlock`: delete `, caretPlacementDepth == 0` | `BookOpenDoorMountTests` | RED on the outline + spread arms: the bare focus's seed (block 1, 0) remembered — the re-worded arm still bites. Restore |
+| 5 | **R1-7 probe** — the tip | `SidebarNoteBoxTakesCellClickTests` | Both voices: the CONTROL (the word) must be green — if it is red the rig's coordinates are wrong: STOP, no verdict. Control green + edge GREEN ⇒ R1-7 HOLLOW: record. Edge RED ⇒ apply the PREPARED FIX above, commit, rebuild, re-run ⇒ GREEN; red-on-old = `git show <fix>^:App/Variorum/Variorum/Core/Views/SidebarNoteBox.swift` restored in place ⇒ RED; restore |
+| 6 | **The guard batch** — the tip after rows 1/5's outcomes | `$(cat scratchpad/ladder/guard-suites.args)` — **71 suites**: U1b's 64-suite reveal/landing family (`scratchpad/u1b/fixD2-suites.args` — every suite reading `pendingReveal`, `carryPlace`, the landings, the book surfaces, the box) + `BookIndexToOutlineCarryTests` `SidebarNoteBoxTakesCellClickTests` + the caret-seed readers `CurrentBlockContinuityTests` `FocusHandoffTests` `BareArrivalFocusTests` `LibrarySearchLandingTests` + `NoteBoxSlotTests` + `ChromeLineLimitTests` | GREEN except the suites' own `withKnownIssue`s (`IndexTierMetricsTests` ×4 seen in U2) and, possibly, `DestructiveUndoWarningTests`' VX-167 flake if it is in the set (it is not). Anything else red is a finding |
