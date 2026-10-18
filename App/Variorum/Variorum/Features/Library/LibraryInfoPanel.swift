@@ -56,15 +56,40 @@ nonisolated enum LibraryPreview {
     struct NotePreview: Equatable, Sendable {
         var words = 0
         var blocks: [Block] = []
-        var lastEdited: String?
+        /// **When the note was last edited** — the SAME fact the Library's row
+        /// beside it says (`container.last_touched_at`, falling back to the
+        /// mint: `Queries.noteStamps`' rule). VX-351 (the VX-348 run, U4 —
+        /// PROVISIONAL P-VX351-2): it was the last MAJOR revision, a second
+        /// fact under the same verb, so the row and the panel could name two
+        /// different times as "edited" for one note on one screen.
+        var editedAt: Date?
         var sealed = false
         var archived = false
 
         /// The calm facts line — the ONE line the panel shows under the title.
-        var factsLine: String {
+        var factsLine: String { factsLine(now: Date()) }
+
+        /// The facts line, worded by the ONE stamp brain (VX-351, her
+        /// R-VX348-1/3: *edited today 1:33 AM* · *edited yesterday* · *edited
+        /// Sep 9* — the List row's own words; the raw day key this line used
+        /// to print, `edited 2026-10-13`, was a second wording rule).
+        func factsLine(
+            now: Date, calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
+        ) -> String {
             LibraryPreview.factsLine(
-                words: words, blocks: blocks.count, edited: lastEdited,
+                words: words, blocks: blocks.count,
+                edited: editedAt.map {
+                    TimeStampFace.relative($0, now: now, calendar: calendar, locale: locale)
+                },
                 sealed: sealed, archived: archived)
+        }
+
+        /// **The line's hover — the whole fact** (VX-351): *Edited Oct 13,
+        /// 2026 at 4:02 PM*. nil when the note has no stamp to spell.
+        func factsHelp(
+            calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
+        ) -> String? {
+            editedAt.map { TimeStampFace.tooltip(.edited, date: $0, calendar: calendar, locale: locale) }
         }
     }
 
@@ -104,7 +129,7 @@ nonisolated enum LibraryPreview {
         }
     }
 
-    /// `N words · N blocks · edited <day>` — and the quiet state words only
+    /// `N words · N blocks · edited <when>` — and the quiet state words only
     /// when they are true. Nothing else (C-6: no metric without a reason; the
     /// row already wears the tags, the masthead the books).
     static func factsLine(
@@ -131,12 +156,6 @@ nonisolated enum LibraryPreview {
         return pieces.joined(separator: " \u{B7} ")
     }
 
-    /// A day out of a stored stamp — glanceable, not forensic.
-    static func day(_ date: Date?) -> String? {
-        guard let date else { return nil }
-        return JournalDay.dayString(from: date)
-    }
-
     static func note(_ db: Database, id: String) throws -> NotePreview? {
         guard let container = try Container.fetchOne(db, key: id) else { return nil }
         var preview = NotePreview()
@@ -149,7 +168,7 @@ nonisolated enum LibraryPreview {
         preview.words = slots.compactMap(\.text).reduce(0) { $0 + Queries.wordCount($1) }
         preview.sealed = container.locked
         preview.archived = container.archivedAt != nil
-        preview.lastEdited = day(container.lastMajorRevisionAt ?? container.lastTouchedAt)
+        preview.editedAt = container.lastTouchedAt ?? container.createdAt
         return preview
     }
 
@@ -309,6 +328,8 @@ struct LibraryInfoPanel: View {
                 .foregroundStyle(tokens.muted)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
+                // VX-351: the whole fact on hover (the List row's own rule).
+                .help(factsHelp ?? "")
             if multiCount > 1 {
                 CalmCard(tokens: tokens) {
                     // 13n-c UX walk W-UX-3 / T-12: the doors are named by
@@ -345,6 +366,12 @@ struct LibraryInfoPanel: View {
         case .book: book?.factsLine ?? "book"
         case .block: "block"
         }
+    }
+
+    /// VX-351: a note's line hovers its whole edit fact; a book's and a
+    /// block's say no stamp, so they hover nothing.
+    private var factsHelp: String? {
+        hit.kind == .post ? note?.factsHelp() : nil
     }
 
     /// The subject swap FADES (row 24's panel half — the column's presence

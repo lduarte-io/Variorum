@@ -73,8 +73,12 @@ struct LibraryPreviewBrainTests {
             #expect(preview.blocks.map(\.text)
                     == ["First block, four words.", "# A heading\n\nSecond block."])
             #expect(preview.words == 4 + 4)
-            let day = JournalDay.dayString(from: Date(timeIntervalSince1970: 1_782_864_000))
-            #expect(preview.factsLine == "8 words · 2 blocks · edited \(day)")
+            // VX-351 (the VX-348 run, U4), a JUSTIFIED EDIT: the line speaks the
+            // ONE stamp rule — the List row's words — where it printed the raw
+            // day key (`edited 2026-07-01`, a second wording rule).
+            let edited = TimeStampFace.stamp(
+                .edited, date: Date(timeIntervalSince1970: 1_782_864_000), now: Date())
+            #expect(preview.factsLine == "8 words · 2 blocks · \(edited)")
             #expect(!preview.sealed && !preview.archived)
         }
     }

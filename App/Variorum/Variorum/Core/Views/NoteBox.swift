@@ -201,18 +201,50 @@ nonisolated enum NoteBoxCopy {
         return "\u{2442} takes on \(fannedBlocks) block\(fannedBlocks == 1 ? "" : "s")"
     }
 
-    /// *"edited Sep 4 · saved Sep 2"* — DATE-ONLY (the recovery family's
-    /// rule: glanceable, never forensic). nil ⇒ neither stamp is known.
+    /// *"edited today 1:33 AM · saved Sep 2"* — in the ONE stamp rule's
+    /// glance words (`TimeStampFace.relative`: the time for today, the day
+    /// past it). nil ⇒ neither stamp is known.
+    ///
+    /// **VX-351 (the VX-348 run, U4 — her R-VX348-1/3, PROVISIONAL
+    /// P-VX351-3):** this line was DATE-ONLY (`TimeStampFace.day`, 18d's
+    /// shape), so a note edited four minutes ago read "edited Oct 18" here
+    /// while the Library's row and the masthead said "edited today 1:33 AM"
+    /// — two glances for one fact. It speaks the glance rule now, and its
+    /// hover (`stampsHelp`) says both facts whole.
     static func stampsLine(
         edited: Date?, saved: Date?, now: Date,
         calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
     ) -> String? {
         var pieces: [String] = []
         if let edited {
-            pieces.append("edited \(day(edited, now: now, calendar: calendar, locale: locale))")
+            pieces.append(TimeStampFace.stamp(
+                .edited, date: edited, now: now, calendar: calendar, locale: locale))
         }
         if let saved {
-            pieces.append("saved \(day(saved, now: now, calendar: calendar, locale: locale))")
+            pieces.append("\(savedVerb) "
+                + TimeStampFace.relative(saved, now: now, calendar: calendar, locale: locale))
+        }
+        return pieces.isEmpty ? nil : pieces.joined(separator: " \u{B7} ")
+    }
+
+    /// The stamps line's second fact's word — the note's last commit, said
+    /// as this box has always said it.
+    static let savedVerb = "saved"
+
+    /// **The stamps line's hover — both facts whole** (VX-351): *Edited Oct
+    /// 18, 2026 at 1:33 AM · Saved Sep 2, 2026 at 9:14 AM*, in the line's own
+    /// order. nil ⇒ the line is not drawn.
+    static func stampsHelp(
+        edited: Date?, saved: Date?,
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
+    ) -> String? {
+        var pieces: [String] = []
+        if let edited {
+            pieces.append(TimeStampFace.tooltip(.edited, date: edited, calendar: calendar, locale: locale))
+        }
+        if let saved {
+            pieces.append(TimeStampFace.tooltip(
+                labelled: savedVerb.capitalized, date: saved, calendar: calendar, locale: locale))
         }
         return pieces.isEmpty ? nil : pieces.joined(separator: " \u{B7} ")
     }
