@@ -1893,3 +1893,13 @@ in). Disjoint files by design (the U2/U3 precedent); every U4 commit is path-lim
   at the Pool's foot.
 - **Products (u4-fixed / u4-red):** NOT-STARTED.
 - **No behavioural revert is in flight in this worktree.**
+
+## WALK-PLANNING NOTE (2026-10-18 ~08:4x — the coordinator's VX-306 heads-up)
+
+VX-306's conversion window recreates the dev-store slot as a FRESH library (Standard posture, no Castle); the
+current store — U5's fixture content and grants included — is set aside whole under Backups/safety-copies and does
+not return. So the combined walk window RE-CREATES everything its live checks need on the fresh store: the
+claude-code approval + a fresh tab-key setup, a wing + grant for the VX-393 double-share check and the U5
+Terminal-voice captures, notes for U2's ⌘S hosts, and the VX-339 hold marker (no Castle on the fresh store; the old
+dev-castle.env values belong to the set-aside copy). The walk's Debug build comes from this branch's final tree
+(the Castle merge is in). The leftover u2fixed checkout is removed.
