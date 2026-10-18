@@ -263,7 +263,7 @@ store's Castle credentials, if a lock screen appears, are `~/.variorum/dev-castl
 | Unit | Members | State |
 |---|---|---|
 | U1 | VX-372 | BUILT — headless green, the Mac compiled (the U1 UNIT RECORD); the Mac batch (Tier A + B), `MobileVersionsTests` and the walk W0–W10 are OWED in a stage window (the orchestrator's) |
-| U2 | VX-371 | IN FLIGHT — implementer spawned 2026-10-17 after U1's headless close; U1's Mac batch + walk owed in the orchestrator's stage window |
+| U2 | VX-371 | BUILT — headless green, the Mac compiled (green `vx383-u2` + red `vx383-u2-red`; the U2 UNIT RECORD); the Mac batch (61 suites + the faces pin's red run) and the REAL-CLIENT LIVE ROUND are OWED in a stage window (the orchestrator's), beside U1's batch + walk (`vx383-u2` holds U1 + U2 — the tip) |
 | Ladder | — | NOT-STARTED |
 | Closeout | — | NOT-STARTED |
 
@@ -371,9 +371,7 @@ Headless logs: `notes/plans/vx383-screens/u1/logs/`.
 
 ## U2 UNIT RECORD — VX-371: `duplicate_note` files into a book; `with_tags`; the answer; the docs (opus-implementer, from 2026-10-17)
 
-**NOT DONE YET (the record's first line, per the contract): everything below is PENDING until its row says DONE.** No
-stage claimed, no app launched, no `xcodebuild test`, no store touched by this session (the Mac batch and the real-client
-live round are the orchestrator's, in a stage window — their exact lists are written at piece 7).
+**NOT DONE BY THIS SESSION (the record's first line, per the contract): the Mac test batch (61 suites + the faces pin's red run), the REAL-CLIENT LIVE ROUND and its captures in both voices — none run (they need a stage window, the orchestrator's; listed below, exact). Every Mac pin is therefore PENDING its first run. The field guide's recipe 6 and the public guide page are NOT touched (outside the brief — OWED below).** Everything else is DONE: D-C-4 built (the parse, the book road, the guard, the core's filing through the one body, the answer, the receipt, Activity, the scopes, the description); 13 wire pins committed ahead and RED on the pre-fix tree, then green; 6 core pins; four behavioural reverts red then restored by checksum; a red Mac product for the faces pin; the whole package green but VX-353's standing flake (green alone); the Mac app and its tests compiled twice (green and red products). No stage claimed, no app launched, no `xcodebuild test`, no store touched by this session.
 
 **Read in (in full, this session's own context):** CLAUDE.md + its canon; this file whole (the design D-C-1…5, the U2
 brief, the environment traps, U1's UNIT RECORD and its NOTES FOR U2); `notes/MCPSpec.md` whole;
@@ -471,5 +469,175 @@ description), `MCPTakeLabelFormServerTests`.
 | 3 | the wire: parse, the book road, the guard, the answer, the receipt, the catalog; justified edits | DONE (this commit) — `MCPWriteTools.swift`: `Job.duplicateNote(noteID:withTags:bookID:sectionID:)`, the parse and the dispatch. `MCPWriteTools+DuplicateNote.swift`: `parseDuplicateNote` (`with_tags` a boolean, default true, else "with_tags must be true or false."; `section_id` without `book_id` → `sectionWithoutBookWords`); `performDuplicateNote` — the note at READ and the fence UNCHANGED, then THE BOOK ROAD with `book_id` (`mcpBookFacts` read through `inWing` — another wing's book is nil, so `decide(book:)` answers the ONE not-shared shape with no ask; `decide(book:, .writeNew, consumes)` with `create_note`'s refusal + ask on the book; landed rows logged on the BOOK with its name, `logsReceiptTitle: false`) or else THE WING ROAD byte-for-byte (the same decision, refusal, ask and log line as VX-311); both call `duplicateNoteForClient(_:tags:filing:…)`; `guardDuplicate(_:noteID:bookID:)` re-decides the note, the fence and the landing side (the book through the same `inWing`, or the wing) on ONE standing read inside the act and spends the union; `duplicateAnswer` — VX-252's records, `source_note_id`, `block_ids`, `tag_ids` + `tags` (from the act), `book_id`/`section_id` echoed, `landed` (`duplicateLandedWords`, P-U2-1: "the end of “B”" [+ ", in its chapter “C”"], else the Pool words; then every book intake SEATED it in — named where the client reads it, else "a book not shared with you" — "…, which collects one of its tags"); the receipt `detail` = the book's name when filed, Open › the copy. `MCPToolCatalog.duplicateNote`: `scopes: [.book, .wing]`; the schema gains `with_tags`, `book_id`, `section_id`; the description rewritten (both roads, the default, `with_tags: false`, the books that collect by its tags hearing the copy, the outflow on a filed copy, the answer's new fields; "Duplicate as Version" retired; the substrings `TutorialMCPChapterTests:1048` and `MCPTakeLabelFormServerTests:128` read are kept). No justified edit was needed: no existing pin asserted the old answer's key set or the old scopes. **GREEN: the 13 VX-371 pins + VX-311's 7 — "Test run with 20 tests in 2 suites passed", EXIT 0** (`u2/logs/p3-pins-green.log`); **every MCP suite naming `duplicate_note`, the grant authority, the catalog/instructions pins, the refusal chain, create_note's minted answer + the core grant-rule suites — MCP "169 tests in 21 suites passed … with 1 known issue" (VX-357's `withKnownIssue`) and core "97 tests in 12 suites passed", EXIT 0** (`u2/logs/p3-mcp-wide.log`) |
 | 4 | the app's words (Activity, the receipt) + their pins; the Mac `build-for-testing` (no runner) | DONE (this commit; the pins' red and green PENDING the batch) — `MCPPaneCopy.swift`: Activity — a `duplicate_note` row of kind `book` says "duplicated a note into “B”" (×N: "duplicated N notes into “B”"), its refused book side "duplicating a note into “B”" (the note and wing sides unchanged); the receipt — "duplicated “X” into “B”" when `detail` names the book (unchanged without), and ONE filed duplicate too long for the bar keeps the BOOK, dropping the note's title ("duplicated a note into “B”" — the wing move's precedent) before the "made a change" fallback. NEW Mac pin `VariorumTests/MCPDuplicateFilingFacesTests.swift` (2 tests — Activity's book lines + the unchanged note/wing lines; the receipt with and without the book, the long line keeping the book within `budget`) — pure faces, red on the pre-fix tree BY ASSERTION (the book kind fell to the note's phrase; the receipt ignored `detail`): PENDING its red run on the red product piece 5 builds and its green run on `vx383-u2`. **The Mac `build-for-testing`** from `App/Variorum/` at this commit's tree (`xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath DerivedData/vx383-u2 build-for-testing`): **TEST BUILD SUCCEEDED, XCB-EXIT 0** in 3:04 (`u2/logs/p4-mac-build.log`), no warning in a touched file. The product `App/Variorum/DerivedData/vx383-u2` holds U1 + U2 (the tip) — the batch runs both units' Mac pins from it |
 | 5 | revert checks (announced in this record BEFORE any revert starts) | DONE (this commit; **NO REVERT IN FLIGHT** — every file restored from `<scratchpad>/u2-prerevert/`, each `sha256` equal to `git show HEAD:<file>`, `git status` clean) — announced at `3c8e84b85` before the first edit. **R1 the ORDER** (`duplicateAsVersionBody`'s applications moved before the filing) → wire **"13 tests … failed … with 4 issues"** + core **"6 tests … failed … with 2 issues"**: `MCPDuplicateNoteFilingServerTests.aDestinationThatCollectsItsTagTakesTheCopyOnceFiledInItsChapter` `:416`/`:397` and `anOwnedDestinationTakesTheCopyAndAnotherCollectingBookBellsIt` `:450`/`:434` (both refused); `MCPDuplicateFilingActsTests.theMembershipComesFirst…` `:120` (`alreadyInReading` — the quiet destination seated the copy first) and `anOwnedDestinationIsAPlainAdd…` `:144` (`noteMemberedElsewhere` — the plain book seated it first, so the owned book's add met a note membered elsewhere) — the order is load-bearing on BOTH its named consequences (`p5-R1-red.log`, `.pairs`). **R2 the wing filter** (`inWing` passing every book) → **"13 tests … failed … with 3 issues"**: `aBookOfAnotherWingAnswersTheOneNotSharedShapeAndRaisesNoAsk` `:283` ×2 (the writable other wing's book answered "Refused: crossWingMembership(…)" — the oracle) and `:288` (the third wing's book raised an ask). **R3 `with_tags` ignored** → **"13 tests … failed … with 6 issues"**: `withTagsFalseCopiesNoTagsSoNoBookHearsTheCopy` `:353`–`:356` and `theAnswerListsEveryTag…` `:609`/`:610` (the bare copy wore the applied tags). **R4 `scopes: [.wing]`** → **"13 tests … failed … with 1 issue"**: `itIsListedToABookLevelWriteNewAndNeverToANoteLevelOne` `:566`. **Restored:** "20 tests in 2 suites passed" + "6 tests in 1 suite passed", EXIT 0 (`p5-restored-green.log`). **R5 the app's words** (`MCPPaneCopy.swift` as at `80e97a6fa`) → the RED Mac product `App/Variorum/DerivedData/vx383-u2-red` (**TEST BUILD SUCCEEDED, XCB-EXIT 0**, `p5-R5-mac-red-build.log`; its `Variorum.debug.dylib` carries "duplicated a note into" ×0, `vx383-u2`'s ×2) — its run is the batch's: `MCPDuplicateFilingFacesTests` expected RED there on exactly `:39` `:40` `:42` `:44` (the book lines fall to the note's phrase / the fallback noun) and `:56` `:62` (the receipt ignores the book; the long line falls to "made a change"), with `:46` `:47` `:49` `:58` `:64` GREEN (the unchanged lines) — PENDING |
-| 6 | headless finals (the named suites, then the whole core + MCP packages once) | NOT-STARTED |
-| 7 | the Mac batch list, the LIVE ROUND SCRIPT, PROVISIONALs, the self-assessment | NOT-STARTED |
+| 6 | headless finals (the named suites, then the whole core + MCP packages once) | DONE — the named suites: pieces 2, 3 and 5 (core 269/28 · the duplicate wire 20/2 · MCP wide 169/21 + core grant-rule 97/12 · restored 20/2 + 6/1, all EXIT 0). **The whole package once** at `6271cc463` (`swift test`, `u2/logs/p6-whole-package.log`, load average 18–23 from another worktree's build): **VariorumCoreTests "2895 tests in 337 suites passed"** · **workbook "40 tests in 6 suites passed"** · **VariorumMCPTests "362 tests in 68 suites failed … with 2 issues (including 1 known issue)"** — the ONE failure is VX-353's standing flake `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (19.7 s past its 15 s bound under the load; untouched by this unit — U1 met it too) and the known issue VX-357's `withKnownIssue`; **re-run alone: "3 tests in 1 suite passed", EXIT 0** (`p6-timelimit-rerun.log`). `git diff --stat 3c8e84b85 -- App Sources Tests` is EMPTY, so both Mac products are the tip's sources |
+| 7 | the Mac batch list, the LIVE ROUND SCRIPT, PROVISIONALs, the self-assessment | DONE (this commit) — below |
+
+### THE MAC BATCH FOR U2 (for the orchestrator's stage window — every suite that exercises a changed SOURCE file)
+
+**Products** (both from `App/Variorum/`, `xcodebuild … build-for-testing`, no runner; each `Build/Products/
+Variorum_Variorum_macosx27.0-arm64.xctestrun`): **`App/Variorum/DerivedData/vx383-u2`** — THE TIP's sources (U1 + U2;
+`git diff --stat 3c8e84b85 -- App Sources Tests` empty) — and **`App/Variorum/DerivedData/vx383-u2-red`** — the same with
+`MCPPaneCopy.swift` as at `80e97a6fa` (piece 5's R5). Run: `xcodebuild test-without-building -xctestrun <file>
+-only-testing:VariorumTests/<Suite> …`, and confirm the "Test run with N tests" line.
+
+**The red run (first):** `vx383-u2-red` · `-only-testing:VariorumTests/MCPDuplicateFilingFacesTests` → expected **2 tests
+failed**, issues at exactly `:39` `:40` `:42` `:44` `:56` `:62` (record each pair); then the same suite on `vx383-u2` →
+green.
+
+**The green batch on `vx383-u2` — 61 suites** (the files under `App/Variorum/VariorumTests` naming a changed type or act —
+`MCPPaneCopy|MCPReceiptCopy|MCPActivityFace|MCPToolFacts|MCPToolCatalog|duplicateAsVersion|duplicateNoteForClient|
+createStructuredNote|importNote(|createNote(|MCPServerHost|MCPDoor|MCPWriteReceipt|mintedNoteTags|applyLiveTags|
+NoteDuplicate|DuplicateCopy|promoteNoteVersion` → 38 files — then every type with a `@Test` in them; each verified a real
+type in `vx383-u2`'s test bundle, `nm -j` + `swift-demangle --simplified`, ≥ 57 symbols each; the list is also
+`notes/plans/vx383-screens/u2/batch-suites.txt`, gitignored, on the Pro):
+
+`BranchDoorFlushTests` · `CompareAnchorWholeTests` · `CompareCompositionTests` · `CompareLensesAlignmentTests` ·
+`CompareOnePlacementTests` · `CompareViewModelTests` · `CopyDoorFlushTests` · `DuplicateDoorsTests` · `LensesReorderTests` ·
+`MCPAskAndReceiptTests` · `MCPAsksWaitCaptureTests` · `MCPAsksWaitTests` · `MCPCompareLandingTests` ·
+`MCPDeliberateFacesTests` · `MCPDoorErgonomicsFacesTests` · **`MCPDuplicateFilingFacesTests`** (NEW, 2) ·
+`MCPEditFacesTests` · `MCPEditParityFacesTests` · `MCPGrantSheetCaptureTests` · `MCPGrantSheetTests` ·
+`MCPGrantSheetU2CaptureTests` · `MCPHerEditorDoorTests` · `MCPLibraryParityFacesTests` · `MCPNavigationTests` ·
+`MCPPaneTabsCaptureTests` · `MCPPaneTabsTests` · `MCPPaneTests` · `MCPRebindFaceTests` · `MCPSetupKeyFacesTests` ·
+`MCPSetupMenuTests` · `MCPSetupTabKeyTests` · `MCPShareFacesCaptureTests` · `MCPShareFacesTests` · `MCPWingFacesTests` ·
+`MCPWireRefusalSweepTests` · `QuitFinalizeSurfacesTests` · `SavepointCommitDoorTests` · `SavepointNameAskTests` ·
+`SavepointNameCopyTests` · `SavepointNameFaceTests` · `SavepointRenameDoorTests` · `SavepointSealedDoorTests` ·
+`SavepointTakesDoorTests` · `ScrubAndOutlineTests` · `TakesBoardSoakTests` · `TakesBoardTests` ·
+`TakesBufferConvergenceTests` · `TakesPresentationTests` · `TutorialBookShapeTests` · `TutorialDeletionActsTests` ·
+`TutorialDoorTests` · `TutorialFannedMatrixTests` · `TutorialLibraryActsTests` · `TutorialLookingActsTests` ·
+`TutorialMCPChapterCaptureTests` · `TutorialMCPChapterTests` · `TutorialPrivacyChapterTests` ·
+`TutorialStructureActsTests` · `TutorialTakesActsTests` · `TutorialWherePlacesActsTests` · `TutorialWritingActsTests`
+
+Most of these are U1's Tier A/B already (one run of U1's list ∪ these on `vx383-u2` covers both units). The pins that read
+U2's words: `TutorialMCPChapterTests:1048` (the description keeps "Needs read on the note and write new on its wing"),
+`MCPWingFacesTests.activitySpeaksEveryActInWordsNeverAToolID` (every kind × allowed × count for `duplicate_note` — the
+book kind's new arm), `MCPAskAndReceiptTests` (the receipt line's budget fallback, now with the duplicate's book arm).
+**Expected standing reds this set may meet (not U2's):** VX-167's order-dependent `DestructiveUndoWarningTests.
+redoNeverAsks` is NOT in this set; U1's list carries VX-115's `BookCollectingDoorsTests` and VX-167. The pointer-injection
+suites demand an idle machine (the frozen archive's row 85). **No phone suite:** no phone source and no shared source U2
+changed (`MCPPaneCopy` is Mac-only; the core change reaches the phone's build but no phone door calls `filing:`).
+
+### THE LIVE ROUND SCRIPT FOR U2 (the orchestrator's stage window — the dev-store Debug build `io.lduarte.Variorum.debug`; Claude Code connected through its own setup tab; captures into `notes/plans/vx383-screens/u2/live/`; Study first, then Terminal for L2 and L5's faces)
+
+Names in « » are the ids the setup answers. Every expected answer below is the JSON field as built (the answer is
+sorted-keys JSON); words in quotes are byte-exact.
+
+- **L0 — set-up (an EDIT grant on Home, "until it disconnects", via the grant sheet; then through the client):**
+  `create_book {"name": "u2 drafts", "wing_id": ""}` → «B»; `create_section {"book_id": «B», "name": "second drafts"}`
+  → «C»; `create_book {"name": "u2 living", "wing_id": ""}` → «L»; `set_book_rule {"book_id": «L», "rule": {"tag":
+  "u2dup"}}` (no backfill seats — P-13nb-U4-16; new matches join quietly); `create_book {"name": "u2 finished",
+  "wing_id": ""}` → «F»; `finish_book {"book_id": «F»}`; `create_note {"wing_id": "", "title": "u2 source", "blocks":
+  [{"text": "The first paragraph."}, {"text": "The second paragraph.", "takes": [{"text": "The second, again.",
+  "label": "again"}]}]}` → «S»; `apply_tag {"note_id": «S», "tag": "u2dup"}` → `changed: true`, and «L» takes «S» in
+  (the applying act is heard). By her hand (⌘L ▸ new wing): a wing **"u2 elsewhere"** and in it a book **"u2 theirs"** →
+  «E» (read its id with `list_books` under a write-new grant on that wing, granted in L5).
+- **L1 — WITH TAGS, the wing road, a collecting book takes the copy in:** `duplicate_note {"note_id": «S»}` → no error;
+  `landed` = `“u2 living”, which collects one of its tags`; `tag_ids` = [the u2dup id], `tags` = `["u2dup"]`; no
+  `book_id`. App: the quiet receipt **"claude-code duplicated “u2 source” · ⌥⌘Z undoes"** with **Open ›** (opens the
+  copy); Activity **"claude-code duplicated “u2 source”"**; «L»'s Index lists the copy at its end. Edit menu **"Undo
+  claude-code's duplicate"** → ⌥⌘Z → the copy leaves «L» (in the Trash) → ⇧⌥⌘Z → back in «L» at the same place. Capture
+  each.
+- **L2 — INTO A CHAPTER (the book road):** `duplicate_note {"note_id": «S», "book_id": «B», "section_id": «C»}` →
+  `book_id` «B», `section_id` «C», `landed` = `the end of “u2 drafts”, in its chapter “second drafts”, and “u2 living”,
+  which collects one of its tags`, `tags` = `["u2dup"]`. App: receipt **"claude-code duplicated “u2 source” into “u2
+  drafts” · ⌥⌘Z undoes"**, Open › opens the copy; Activity **"claude-code duplicated a note into “u2 drafts”"**; «B»'s
+  Index shows the copy under "second drafts", and «L» took it too. ⌥⌘Z → both books without it; ⇧⌥⌘Z → filed again under
+  "second drafts". **Both voices** (Study, then Terminal): the receipt line and the Activity row.
+- **L3 — WITHOUT TAGS:** `duplicate_note {"note_id": «S», "with_tags": false}` → `tag_ids` `[]`, `tags` `[]`, `landed`
+  `the Pool of Home`; the copy is in the Pool, wears no tag, «L» did not take it. `duplicate_note {"note_id": «S»,
+  "with_tags": "no"}` → error **"with_tags must be true or false."**
+- **L4 — A BOOK-ONLY SHARE (VX-371's point):** revoke the Home edit grant (the pane's Revoke); grant claude-code **read on
+  the note "u2 source"** and **write new on the book "u2 drafts"** (the grant sheet, until it disconnects). `tools/list`
+  (re-announced) **lists `duplicate_note`**. `duplicate_note {"note_id": «S», "book_id": «B»}` → lands: `landed` = `the
+  end of “u2 drafts”, and a book not shared with you, which collects one of its tags` («L» is not this client's now),
+  `book_id` «B». Then `duplicate_note {"note_id": «S»}` (no book) → error **"That wing isn't shared with this client, or
+  doesn't exist. The author can share it from Variorum ▸ Settings ▸ MCP."** and her ASK for the wing **Home at write
+  new** waits (the pending mark / the pane's Waiting) → answer **Don't allow**. Activity: **"claude-code was refused
+  duplicating a note in Home"** (as logged — `wingName` unquoted? it reads the logged title; capture what it says).
+- **L5 — A BOOK OF ANOTHER WING:** grant write new on the wing "u2 elsewhere" (`list_books` there gives «E»).
+  `duplicate_note {"note_id": «S», "book_id": «E»}` → error **"That book isn't shared with this client, or doesn't
+  exist. The author can share it from Variorum ▸ Settings ▸ MCP."** — byte-identical to `duplicate_note {"note_id":
+  «S», "book_id": "no-such-book"}`; **no ask appears**; nothing minted. Activity **"claude-code was refused duplicating a
+  note into “u2 theirs”"** (both voices).
+- **L6 — A FINISHED BOOK:** grant write new on "u2 finished" (or Home again). `duplicate_note {"note_id": «S», "book_id":
+  «F»}` → error **"This book is finished — reopen it first; if it’s sealed, unseal it."** (her door's words through the
+  chain); nothing minted, no undo entry.
+- **L7 — the answer is the store:** for the L2 copy, `read_note {"note_id": «copy», "with_ids": true}` → its `blocks`
+  equal L2's answer record for record; each `sha256` equals the source take's.
+- **Posture after:** delete the round's notes and books (Trash), the "u2 elsewhere" wing (empty it first), the u2dup tag;
+  revoke every grant the round made; restore the voice; leave the dev store as found (memory: walks restore dev-store
+  posture). **Pass:** every expected line above, byte-exact where quoted; any deviation is a finding for the record.
+
+### PROVISIONALS (U2's — to the QUESTIONS bundle at the merge, beside P-C-1…3 and U1's)
+
+- **P-U2-1 — `landed`'s words:** (a) BUILT — filed: "the end of “B”" (+ ", in its chapter “C”") — `create_note`'s "it
+  joins the book at its end"; not filed: the Pool words as before, UNLESS a book collecting one of the applied tags took
+  the copy in; then every such book follows, NAMED where the client can read it and counted where it can't ("a book not
+  shared with you" — `move_note_to_wing`'s `left_books` precedent: ids/counts yes, names only with a grant), ", which
+  collects one of its tags"; an arrival is never said (no membership). (b) a structured `book_ids` beside a shorter
+  `landed` (list_notes' shape); (c) never mention a book the client can't read (then `landed` would claim "the Pool" for
+  a copy a hidden book holds — false, so not built).
+- **P-U2-2 — Activity on the book road logs the row on the BOOK:** (a) BUILT — "claude-code duplicated a note into “B”"
+  (×N "duplicated N notes into “B”"; refused "duplicating a note into “B”") — the row has ONE target, so the line names
+  the book (the plan's "in words naming the book"), and `list_my_activity` shows `target_kind: book` + the `book_id` the
+  client sent (P-VX261-4's "a creating act names where it was made"); the receipt says both ("duplicated “X” into
+  “B”"). (b) log on the source note as the wing road does ("duplicated “X”" — the book unnamed); (c) a line naming both
+  needs a second title on the local-only `mcp_activity` (a migration — not this unit's).
+- **P-U2-3 — an ARCHIVED destination takes the copy:** (a) BUILT — AppSpec §9's 13i-e family ("EXPLICIT adds land — no
+  `readingArchived` refusal exists") and `create_note`'s road agree; the brief's list named "archived" among the
+  refusals, the plan's D-C-4 does not. (b) refuse an archived destination on the wire (a refusal no door of hers has).
+- **P-U2-4 — a book of another wing is decided BEFORE the book's own decision, as no book:** (a) BUILT — the one
+  not-shared shape, NO ask (no grant could make it the landing; an ask would pester her for nothing), byte-identical to an
+  id naming nothing. (b) decide the book first and answer not-shared only after (a writable other-wing book would then
+  raise an ask she could never usefully grant).
+- **P-U2-5 — the receipt's long-line fallback keeps the book:** (a) BUILT — "claude-code duplicated a note into “B” ·
+  ⌥⌘Z undoes" (the wing move's precedent) before "made a change"; (b) the generic fallback.
+
+### FOR VX-234 (user-facing words, as built)
+
+- The wire (the MCP room's register): `duplicate_note`'s description (quoted whole in `MCPToolCatalog.duplicateNote`);
+  the `with_tags`/`book_id`/`section_id` schema lines; "with_tags must be true or false." (the read tools' sentence,
+  reused); `section_id`'s parse sentence (`create_note`'s, reused: "…the book the note joins."); the `landed` words
+  (P-U2-1).
+- Her surfaces: Activity "duplicated a note into “B”" · "duplicated N notes into “B”" · "duplicating a note into “B”";
+  the receipt "duplicated “X” into “B”" and its long form "duplicated a note into “B”".
+
+### OWED (for the orchestrator)
+
+- **The Mac batch** (above) and **the live round** (above), in a stage window.
+- **The field guide's recipe 6** (the MCP chapter's "how to use it", `TutorialSeeder`) still says "The copy lands in that
+  wing's Pool, in no book" — since U1 (D-C-1) a book collecting one of the note's tags may take the copy in, and since U2 a
+  client can file the copy into a book it names. Outside this brief (lesson 3 names no reach, so the brief's condition
+  for the guide was not met). Candidate words: "…The copy lands in that wing's Pool (or in a book you name), and your
+  original never changes." — its pin `TutorialMCPChapterTests` (`revisionRecipe`, exact text) and the closeout's
+  real-store re-seed would carry it. The orchestrator's ruling.
+- **The public guide page** (https://stargazing.tech/variorum/mcp): a line for her site agent in the handoff —
+  `duplicate_note` can now file its copy into a book (`book_id`, `section_id`) and choose its tags (`with_tags`).
+- **MCPSpec's contract line** at the closeout: the `duplicate_note` clause (P-VX311-2's wing-only rung) grows the book
+  road, `with_tags`, the new answer fields and the Activity/receipt words.
+- `MCPSession.instructions` is UNCHANGED (its revision sentence names no reach) — stated, not owed.
+
+### SELF-ASSESSMENT
+
+- **Sound:** the book road reuses every existing seam rather than restating one — `create_note`'s book decision
+  (`decide(book:)` at write new, its refusal and its ask), the hand-add's choke point (`addPostToReading`: capacity,
+  wing, ownership, the outflow), `add_note_to_book`'s chapter sentence (`MCPWireRefusalCopy`), the one refusal chain
+  for her doors' words, `mintedNoteTags` for P-VX361-1's listing, `registerMintedContainerEntry` for the one undo, and
+  `guardWingMove`'s union spend. The filing threads through THE ONE BODY her doors share (D-311-1), so the wire can't
+  drift from her Duplicate; her doors pass no filing and their rows are byte-unchanged (pinned). The ORDER is measured on
+  both of its consequences (R1: `alreadyInReading` at a collecting destination; `noteMemberedElsewhere` at an owned
+  one). The wing road is byte-for-byte (the same decision, words, ask and log line; VX-311's seven pins unchanged and
+  green). No oracle: another wing's book reads as no book before any decision (R2 measured the leak it closes: the raw
+  `crossWingMembership` and a pointless ask).
+- **Weakest points, for the reviewer's eye:** (1) every Mac line is compiled but UNRUN (the faces pin's red and green
+  are the batch's); (2) `landed`'s count of unreadable books ("a book not shared with you") tells a book-level client
+  that SOME book it can't read collects one of the note's tags — the `left_books` precedent gives ids of unreadable
+  books already, but the reviewer should weigh it against "anything you can't reach answers as if it did not exist"
+  (P-U2-1 (c) is the alternative); (3) the book road's Activity row names the book, not the note (P-U2-2); (4) a
+  race-time refusal inside the act (the guard's note side, after the snapshot allowed it) is logged on the book side —
+  harmless for the client (its answer is the guard's refusal), a slightly mislabelled row in her pane; (5) the names in
+  `landed` are decided on the SNAPSHOT standing (the one that authorized the act — `move_note_to_wing`'s rule), so a
+  once grant spent by this very act still names its book; (6) the field guide's recipe 6 overclaims since U1 — flagged,
+  not fixed (outside the brief).
+- **Not touched:** `Sources/VariorumCore/Sync/`, custody, the Keychain, any migration or schema (`mcp_activity` unchanged
+  — hence P-U2-2), the editor seam, U1's Mac doors (`NoteDuplicate`, the registry, the boards), `MCPSession.instructions`,
+  the field guide. No trace led to any of them.
