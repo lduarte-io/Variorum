@@ -93,6 +93,9 @@ struct EditorCommands: Commands {
         // The post-13l polish round (rows 16/23): ⌘⇧S, beside ⌘S in the File
         // menu — the two moments, one grain apart.
         .saveNoteVersion,
+        // VX-372 (VX-383 U1 — D-C-2): the two duplicates, beside the version
+        // door — a duplicate is a version you write on.
+        .duplicateNoteWithTags, .duplicateNoteWithoutTags,
         .importFiles, .exportLibrary, .exportCaretBlock,
         .structuralUndo, .structuralRedo,
         // 13n-b U4: the offer door's keyboard road, beside its veto.
@@ -537,6 +540,12 @@ struct EditorCommands: Commands {
             Button(verb(.saveNoteVersion)) { actions?.saveNoteVersion() }
                 .keyboardShortcut("s", modifiers: [.command, .shift])
                 .disabled(!enabled(.saveNoteVersion))
+            // VX-372 (VX-383 U1 — D-C-2): her two duplicate doors, beside the
+            // version door, on the note on screen (no chord — none asked).
+            Button(verb(.duplicateNoteWithTags)) { actions?.duplicateNote(tags: .applied) }
+                .disabled(!enabled(.duplicateNoteWithTags))
+            Button(verb(.duplicateNoteWithoutTags)) { actions?.duplicateNote(tags: .none) }
+                .disabled(!enabled(.duplicateNoteWithoutTags))
             // Phase 13p Batch 2 — the manual Lock Now act (THE DESIGN:
             // demanded modes ONLY; under Auto the key auto-releases at the
             // next open, so a lock there is theater and no theater ships,

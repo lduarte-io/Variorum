@@ -105,9 +105,11 @@ struct MCPWriteTools: Sendable {
         /// VX-336 U5b (VX-255): blocks added to a note — at its end at write
         /// new, anywhere at edit (`MCPWriteTools+InsertBlocks`).
         case insertBlocks(noteID: String, place: BlockInsertPlace, blocks: [Operations.MCPNoteBlock])
-        /// VX-336 U6a (VX-311): her Duplicate as Version on the wire — the copy
-        /// bookless in the source's wing (`MCPWriteTools+DuplicateNote`).
-        case duplicateNote(noteID: String)
+        /// VX-336 U6a (VX-311): her Duplicate on the wire — the copy bookless in
+        /// the source's wing (`MCPWriteTools+DuplicateNote`). VX-371 (VX-383
+        /// U2): `with_tags` (default true) and the book road (`book_id`, with
+        /// an optional `section_id`).
+        case duplicateNote(noteID: String, withTags: Bool, bookID: String?, sectionID: String?)
 
         var tool: String {
             switch self {
@@ -260,7 +262,7 @@ struct MCPWriteTools: Sendable {
         case MCPToolCatalog.insertBlocks.name:
             return try parseInsertBlocks(args)
         case MCPToolCatalog.duplicateNote.name:
-            return .duplicateNote(noteID: try requiredString(args, "note_id"))
+            return try parseDuplicateNote(args)
         default:
             if let job = try parseEdit(name, args) { return .edit(job) }
             if let job = try parseCarriage(name, args) { return .carriage(job) }
@@ -550,8 +552,10 @@ struct MCPWriteTools: Sendable {
         case .insertBlocks(let noteID, let place, let blocks):
             return try performInsertBlocks(
                 noteID: noteID, place: place, blocks: blocks, job: job, ops: ops, clientName: clientName)
-        case .duplicateNote(let noteID):
-            return try performDuplicateNote(noteID: noteID, job: job, ops: ops, clientName: clientName)
+        case .duplicateNote(let noteID, let withTags, let bookID, let sectionID):
+            return try performDuplicateNote(
+                noteID: noteID, withTags: withTags, bookID: bookID, sectionID: sectionID, job: job, ops: ops,
+                clientName: clientName)
         }
     }
 

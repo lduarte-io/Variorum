@@ -1699,8 +1699,17 @@ final class TakesViewModel {
     /// 13e E10: the copy family's flush-first entry, like every other copy
     /// door — this board's panes are live editors, so the buffer under the
     /// ring is exactly the text a duplicate would otherwise miss.
-    func duplicateAsVersion() async {
-        await runCopying { [postID] ops in _ = try ops.duplicateAsVersion(postID) }
+    ///
+    /// VX-372 (VX-383 U1 — D-C-2): the board's door runs the ONE act every
+    /// duplicate door runs (`NoteDuplicate` — the same flush-first entry, her
+    /// tag choice, the receipt with its Open › on the status centre); the
+    /// board's own part is only lifting her hand off the article landing
+    /// (R1-2), as `runCopying` did. With tags is the default — the act the
+    /// shipped inline rows (`note actions`, the Lenses Chosen column) now run.
+    func duplicateAsVersion(tags: Operations.DuplicateTags = .applied) async {
+        clearStatus()
+        board.clearArticleLanding()   // her hand (R1-2)
+        await NoteDuplicate.perform(postID: postID, tags: tags, session: session)
     }
 
     /// "Write new takes on every block" from the TAKES tab (R82: the door

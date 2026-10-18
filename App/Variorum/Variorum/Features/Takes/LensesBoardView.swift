@@ -105,6 +105,12 @@ struct LensesBoardView: View {
     /// walk-asserted with the other contextMenu statics).
     static let columnMenuCapabilities: [CapabilityID] = [.renameLens]
 
+    /// VX-372 (VX-383 U1 — D-C-2): the acts this board renders INLINE — the
+    /// Chosen column's `⧉` pull-down, the shipped "Duplicate as Version",
+    /// declared at last and running the with-tags act under its verb
+    /// (walk-asserted with the other `.surface` statics).
+    static let surfaceCapabilities: [CapabilityID] = [.duplicateNoteWithTags]
+
     /// The Act 10 correction round, row 16: the board's ONE horizontal inset
     /// — the toolbar leads where the rows lead (the ⠿ handle's edge); the
     /// toolbar sat at 24 while the rows sat at 12.
@@ -807,12 +813,14 @@ struct LensesBoardView: View {
         HStack(spacing: 5) {
             switch column.kind {
             case .main:
-                ChromePullDown("⧉ Duplicate as Version") {
-                    Button("A full copy of this note, linked as a version") {
+                // VX-372 (D-C-2, P-C-1): the shipped door under its declared
+                // verb; `promoteColumn` on the main column runs the with-tags act.
+                ChromePullDown("⧉ " + CapabilityRegistry.capability(.duplicateNoteWithTags).verb) {
+                    Button("A full copy of this note, wearing its tags, linked as a version") {
                         Task { await model.promoteColumn(column.id) }
                     }
                 }
-                .help("Copies the note exactly as it is — takes and all — into a new linked note")
+                .help(DuplicateCopy.help(.applied))
             case .scratch:
                 adoptDoor(column)
                 ChromePullDown("⧉ Make this a note") {

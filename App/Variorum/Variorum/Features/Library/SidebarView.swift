@@ -127,6 +127,12 @@ struct SidebarView: View {
         // doors"). The Open strip does not render them (`.deleteNote`'s
         // reason above).
         .moveNoteToWing, .copyNoteToWing,
+        // VX-372 (VX-383 U1 — D-C-2): her two DUPLICATE doors join the same
+        // grammar and the same two renderers (the Library's rows and the
+        // Pool's) — the shipped "Duplicate as Version" row is the first, under
+        // its verb. The Open strip does not render them (`.deleteNote`'s
+        // reason above: the strip is pure view state).
+        .duplicateNoteWithTags, .duplicateNoteWithoutTags,
     ]
 
     /// **The OPEN LIST's own right-click acts** (VX-289, the VX-283 run) —

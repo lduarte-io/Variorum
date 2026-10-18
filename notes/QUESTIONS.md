@@ -2986,3 +2986,52 @@ VX-360 · VX-373 · VX-374 · VX-375 · VX-376.
     going to have to see it and play around with it"*. That includes P-U2d-1, the drag's shape, which waits on her hand
     check (VX-376).
 Status: partly ratified (four calls); the rest provisional pending her use of 0.9.7; the drag's shape waits on VX-376.
+
+## VX-383 — Run: Duplicate a note, the Mac door and the wire (2026-10-17)
+
+#229 — **THE VX-383 RATIFY BUNDLE (the binding record is `notes/plans/fixes/vx-383-duplicate-note.md` — your split
+rulings, the design D-C-1…5, the units, the orchestrator's rulings, the walk, the live round, the ladder; the handoff
+`notes/handoffs/vx-383-handoff.md`).** Part C of VX-284's split, built under your kickoff answers (three runs + VX-216
+alone; this session on C; Fable reviews; xhigh; nothing in sync/custody). Every item below was built as stated, with
+a line to reverse it; the ladder closed at round 1 with nothing blocking.
+- **The ones most worth your eye:**
+  - **P-C-1 — the two verbs are your words: "Duplicate with Tags" and "Duplicate without Tags"; "Duplicate as
+    Version" is gone from every menu, the helper and the guide** (three guide sentences rewritten; your real store's
+    field guide is re-seeded by Help ▸ Restore Tutorial… — the handoff's step 2). Option (b): keep "Duplicate as
+    Version" as the with-tags verb and add only "Duplicate without Tags". Your VX-234 pass can rename either way.
+  - **P-C-2 — Save a Version → Promote now applies the original's CURRENT tags**, so living books hear the promoted
+    note exactly as a Duplicate with Tags (your "I suppose"). Walked: promote took the note into "u1 living" and rang
+    "u1 bell". On the phone too (the shared op; no phone code changed). Options: (b) leave promote tag-less; (c) the
+    tags at SAVE time (a schema change — not built).
+  - **P-C-3 — the AI's `duplicate_note` applies tags by default** (`with_tags` true; `false` makes a bare copy), the
+    same posture as its `apply_tag` and `create_note`'s tags header. Option (b): default false.
+  - **P-U2-1 — `landed`'s words:** a copy the AI filed reads "the end of “B”" (+ ", in its chapter “C”"); a copy a
+    collecting book took in names that book where the client can read it and otherwise counts it as "a book not
+    shared with you, which collects one of its tags". **Fenced books (Private, the daily Journal's) are among the
+    counted — a with-tags copy a Private living book collects is counted but never named** (the reviewer's F-1: the
+    client learns that SOME unreadable book collects a tag it can read; hidden stays byte-identical to missing).
+    Options: (b) a structured `book_ids` list beside a shorter `landed`; (c) never mention a book the client can't
+    read (then `landed` would claim "the Pool" for a copy a hidden book holds — false).
+  - **P-U2-2 — Activity logs a filed copy on the BOOK** ("claude-code duplicated a note into “B”"; the receipt says
+    both: "duplicated “X” into “B”"). Options: (b) log on the source note as the wing road does; (c) a line naming
+    both (a migration of the local-only activity row — not this run's).
+  - **P-U2-3 — an ARCHIVED destination book takes the copy** (explicit adds land, 13i-e; `create_note` agrees).
+    Option (b): refuse an archived destination on the wire.
+- **The rest, as built (each with its option in the record):**
+  - **P-U1-1** every duplicate door speaks ONE receipt with "Open ›" — the Library, Pool and Takes-board rows too
+    (they were silent); **P-U1-2** the receipt says WHERE ("…the copy is in “Book”." · "…in N books." · "…in the
+    Pool."; an Arrivals bell is not mentioned); **P-U1-3** ⌘K and the File menu act on the note you're writing in
+    when no note detail is mounted (a book's inline note); **P-U1-4** the three shipped inline doors (the Takes
+    board's note actions, the Lenses Chosen column, the book chip) carry with-tags only; **P-U1-5** placement — File
+    under Save a Version, both `note ▾` menus under Versions…, the rows where the old label stood; **P-U1-6** the
+    reworded sentences (the helper's version entry, the smart-book refusal, the first-edit note, the hover words).
+  - **P-U2-4** a book of another wing is decided as no book before the book's own decision (one sentence, no ask);
+    **P-U2-5** a receipt too long for the bar keeps the book ("claude-code duplicated a note into “B” · ⌥⌘Z undoes").
+- **Two pre-existing findings from the walk, ticketed Low (not this run's members):** **VX-384** the mounted
+  Library's list doesn't show a note minted from its own row menu until re-entered (VX-122/VX-231's class);
+  **VX-385** the Pool has no quiet-receipt line, so a row act there speaks nowhere under the quiet style.
+- **One half of the live round stands on its pin only:** a book in ANOTHER wing refusing with no ask — the walk
+  could not mint a second wing (the Bookcase's wing menu doesn't open under synthetic clicks). If you want it seen,
+  it's a one-minute hand check: ⌘L ▸ New Wing, a book there, then ask your client to duplicate into it.
+
+Status: PROVISIONAL — awaiting her ratification.

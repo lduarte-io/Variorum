@@ -44,3 +44,9 @@ the ladder R1 0B/0M/2m/1n → five fix legs → R2 0B/0M/0m/2n CLOSED, sanity pa
 
 Finals: the Mac comment set 103/103 across 15 suites at the merged tip; core 2,704/307 · workbook 40/6.
 
+
+## VX-383
+
+the FABLE ladder CLOSED at round 1 (0B/0M/2m/3n — F-1 a bundle sentence for her, F-2 accept-as-recorded, F-3/F-4 doc lines, F-5 no change); one stage window: the 382-suite Mac batch, the faces pin red-on-old redone on a rebuilt pre-fix product, the phone suite, the orchestrator's walk W1–W9 in both voices, the real-client live round L1–L7 (L5 half-live)
+
+Finals: core 2,895/337 · workbook 40/6 · VariorumMCPTests 362/68 (VX-353's standing flake green alone) headless; Mac: the tip batch 2,402 tests / 379 suites with only the two standing reds (VX-115, VX-167); the guide + door pins 37/4 after R-C-1; `MobileVersionsTests` 17/1 (iPhone 17 Pro, iOS 26.2).

@@ -1314,8 +1314,14 @@ struct LibraryCatalogView: View {
         Button("Unmark Versions with…") {
             versionPickTarget = VersionPickTarget(postID: hit.id, act: .unmark)
         }
-        Button("Duplicate as Version") {
-            Task { await library.duplicateAsVersion(postID: hit.id) }
+        // VX-372 (VX-383 U1 — D-C-2): her two duplicate doors, from the
+        // note-row grammar's declaration (`SidebarView.contextMenuCapabilities`)
+        // — the shipped "Duplicate as Version" row is the first, under its verb.
+        Button(CapabilityRegistry.capability(.duplicateNoteWithTags).verb) {
+            Task { await library.duplicateAsVersion(postID: hit.id, tags: .applied) }
+        }
+        Button(CapabilityRegistry.capability(.duplicateNoteWithoutTags).verb) {
+            Task { await library.duplicateAsVersion(postID: hit.id, tags: .none) }
         }
         // 13i-d U5 — the explicit cross-wing doors (the sitting record §9).
         if let wings {

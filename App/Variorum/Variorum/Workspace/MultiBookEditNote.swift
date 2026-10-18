@@ -34,10 +34,11 @@ nonisolated enum MultiBookEditNote {
 
     /// Her ruled copy grammar, verbatim from round 9: *"editing here edits
     /// it everywhere — Duplicate as Version to diverge"*, said in the app's
-    /// own sentence and naming where the door is.
+    /// own sentence and naming where the door is. VX-372 (P-C-1): the door is
+    /// named by its verb now (the chip's row runs Duplicate with Tags).
     static func sentence(bookCount: Int) -> String {
         "This note is in \(bookCount) books — editing here edits it everywhere. "
-            + "To make a copy that can diverge, use Duplicate as Version "
+            + "To make a copy that can diverge, use \(DuplicateCopy.withTagsVerb) "
             + "(the book chip under the title)."
     }
 

@@ -540,7 +540,9 @@ struct MultiBookEditNoteRuleTests {
         let sentence = MultiBookEditNote.sentence(bookCount: 3)
         #expect(sentence.contains("3 books"))
         #expect(sentence.contains("editing here edits it everywhere"))
-        #expect(sentence.contains("Duplicate as Version"))
+        // VX-372 (P-C-1 — JUSTIFIED EDIT): the door by its declared verb.
+        #expect(sentence.contains(CapabilityRegistry.capability(.duplicateNoteWithTags).verb))
+        #expect(!sentence.contains("Duplicate as Version"))
     }
 }
 
@@ -605,7 +607,8 @@ struct MultiBookEditNoteTriggerTests {
             }
             let spoken = try #require(session.status.current?.text)
             #expect(spoken.contains("2 books"))
-            #expect(spoken.contains("Duplicate as Version"))
+            // VX-372 (P-C-1 — JUSTIFIED EDIT): the door by its declared verb.
+            #expect(spoken.contains(CapabilityRegistry.capability(.duplicateNoteWithTags).verb))
             #expect(MultiBookEditNote.hasBeenSeen(), "the flag is set — once, ever")
 
             let after = try await db.read { db -> [Int] in
@@ -686,7 +689,9 @@ struct DivergeDoorTests {
         let smart = DivergeCopy.refusal(
             for: OperationError.wrongReadingKind(id: "r", expected: .book), book: "Dreams")
         #expect(smart.contains("tags"), "it names the tag road rather than staying silent")
-        #expect(smart.contains("Duplicate as Version"))
+        // VX-372 (P-C-1 — JUSTIFIED EDIT): the door by its declared verb.
+        #expect(smart.contains(CapabilityRegistry.capability(.duplicateNoteWithTags).verb))
+        #expect(!smart.contains("Duplicate as Version"))
         // Everything else falls through to the standing chip wording.
         #expect(DivergeCopy.refusal(for: OperationError.lockedReading(id: "r"), book: "Orbit")
                 == ChipRefusals.message(

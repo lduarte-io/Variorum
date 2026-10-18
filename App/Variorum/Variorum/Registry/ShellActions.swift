@@ -338,6 +338,28 @@ struct ShellActions {
         Task { @MainActor in await CopyForAI.copy(postID: postID, session: session) }
     }
 
+    /// **The File menu's and ⌘K's Duplicate with Tags / Duplicate without
+    /// Tags** (VX-372, VX-383 U1 — D-C-2): the note on screen, through the
+    /// ONE act every door runs (`NoteDuplicate` — the flush, her tag choice,
+    /// the receipt with its Open ›). The target is the mounted detail's note
+    /// (`copyForAI`'s road); with no detail mounted, the note she is WRITING
+    /// in — a book's inline note, whose editor `noteScoped` already counts —
+    /// as long as it is a note (a scraps editor is never a target). With
+    /// neither, the registry's honest note speaks (P-2).
+    func duplicateNote(tags: Operations.DuplicateTags) {
+        let editing = session.editorRouter.editingOrActive
+        let writingIn = editing?.header?.kind == .post ? editing?.postID : nil
+        guard let postID = router.activePostID ?? writingIn else {
+            let id: CapabilityID = tags == .applied
+                ? .duplicateNoteWithTags : .duplicateNoteWithoutTags
+            status.refuse(CapabilityRegistry.capability(id).unavailableNote)
+            return
+        }
+        Task { @MainActor in
+            await NoteDuplicate.perform(postID: postID, tags: tags, session: session)
+        }
+    }
+
     func exportLibrary() {
         guard let folder = ExportPanels.chooseFolder(prompt: "Export Library") else { return }
         Task { @MainActor in
@@ -787,6 +809,9 @@ struct ShellActions {
         .saveNoteVersion, .showNoteVersions,
         // 13n-a (R-13n-11): Copy for AI, typeable — the note on screen.
         .copyForAI,
+        // VX-372 (VX-383 U1 — D-C-2): the two duplicates, typeable — the note
+        // on screen, its tags applied or left behind.
+        .duplicateNoteWithTags, .duplicateNoteWithoutTags,
         // 13j J4/J4b (sitting round 4): the two ceremony doors, typeable —
         // her binding is "the Block menu, the block context menu, AND the
         // ⌘K palette; never only a buried item".
@@ -836,6 +861,8 @@ struct ShellActions {
         case .saveNoteVersion: return { saveNoteVersion() }
         case .showNoteVersions: return { dispatch(.showNoteVersions) }
         case .copyForAI: return { copyForAI() }
+        case .duplicateNoteWithTags: return { duplicateNote(tags: .applied) }
+        case .duplicateNoteWithoutTags: return { duplicateNote(tags: .none) }
         case .restoreTutorial: return { restoreTutorial() }
         case .restoreSampleLibrary: return { restoreSampleLibrary() }
         case .restoreJekyllBook: return { restoreJekyllBook() }

@@ -389,12 +389,16 @@ struct HelperView: View {
         ("promote (⧉ make this a note)",
          "A new note minted from a lens or column, linked to the original as a version. "
          + "\"Promote is the bridge\" from a way of looking to a thing of its own."),
+        // VX-372 (P-C-1): the copy door by its new verbs ("Duplicate as
+        // Version" retired as a label), read from the registry's source.
         ("version",
-         "A different NOTE related to this one. Two gestures share the word, and they do "
+         "A different NOTE related to this one. Two gestures make one, and they do "
          + "different things: MARK AS VERSIONS is a CONNECTION ONLY — it draws a link "
          + "between two notes that already exist; nothing is copied, neither note changes; "
-         + "the link just lets Compare pair them. DUPLICATE AS VERSION is a COPY — it mints "
-         + "a whole new note (takes and all) and draws that same link in one gesture. "
+         + "the link just lets Compare pair them. \(DuplicateCopy.withTagsVerb.uppercased()) "
+         + "is a COPY — it mints a whole new note (takes and all, wearing the note's tags, so "
+         + "a book that collects one hears it) and draws that same link in one gesture; "
+         + "\(DuplicateCopy.withoutTagsVerb.uppercased()) leaves the tags behind. "
          + "Rule of thumb: mark = connect, duplicate = copy + connect. UNMARK deletes only "
          + "the connection — both notes stay exactly as they are."),
         ("divide / divide choosing takes",

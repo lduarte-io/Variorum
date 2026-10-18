@@ -18,12 +18,16 @@ import Testing
 /// the ride must live in `duplicateAsVersion`'s own transaction, never in
 /// the shared copy machine.
 ///
-/// The riding tags are a ROW copy, never an APPLYING ACT (PROVISIONAL
-/// P-17y-B3-c1 — the copy family's standing letter, P-13ic-U2-1 and
-/// P-13id-U5-7): no living book hears the duplicate, so a book whose rule
-/// names the tag neither seats nor bells it. Undo tombstones the copy and
-/// its applications with it (the container cascade); redo revives them on
-/// the exact stamp (`restoreContainer`).
+/// **VX-372 (VX-383 U1 — D-C-1) SUPERSEDES P-17y-B3-c1 for this door** (her
+/// ticket: *"a duplicate with tags counts as tagging"*): the riding tags are
+/// now APPLIED through the one road, so a living book whose rule names a tag
+/// hears the duplicate exactly as when she tags (the intake arms are pinned in
+/// `DuplicateAppliesTagsTests`; the without-tags choice in
+/// `DuplicateWithoutTagsTests`). The ceremony copy keeps its row copy. Undo
+/// tombstones the copy and its applications with it (the container cascade);
+/// redo revives them on the exact stamp (`restoreContainer`). JUSTIFIED EDITS
+/// (VX-372): the control below flipped to the applying act it now pins, and
+/// the undo label reads the door's new verb (P-C-1, "Duplicate with Tags").
 ///
 /// Red-on-old, stated (MEASURED on the pre-fix tree a93fbf6d — 4 issues): the
 /// copy wears NO tag — `theDuplicateWearsEveryLiveTagOfTheSource` fails its
@@ -97,12 +101,12 @@ struct DuplicateCarriesTagsTests {
             let result = try ops.duplicateAsVersion(post.id)
             #expect(try liveTagPaths(db, post: result.post.id) == ["draft"])
 
-            #expect(try stack.undo(with: ops) == "Duplicate as Version")
+            #expect(try stack.undo(with: ops) == "Duplicate with Tags")
             #expect(try db.deletedAt("container", result.post.id) != nil)
             #expect(try liveTagPaths(db, post: result.post.id).isEmpty,
                     "undo takes the copy's applications with the copy")
 
-            #expect(try stack.redo(with: ops) == "Duplicate as Version")
+            #expect(try stack.redo(with: ops) == "Duplicate with Tags")
             #expect(try db.deletedAt("container", result.post.id) == nil)
             #expect(try liveTagPaths(db, post: result.post.id) == ["draft"],
                     "redo brings the copy back wearing its tags")
@@ -110,9 +114,11 @@ struct DuplicateCarriesTagsTests {
         }
     }
 
-    /// CONTROL — the riding tags are a row copy: a LIVING book whose rule
-    /// names the tag does not hear the duplicate (P-17y-B3-c1).
-    @Test func theRidingTagsAreARowCopyNoLivingBookHearsThem() throws {
+    /// VX-372 (D-C-1 — JUSTIFIED EDIT: this was P-17y-B3-c1's control, "no
+    /// living book hears the duplicate"; her ticket supersedes it): the riding
+    /// tags are APPLIED, so a LIVING book whose rule names the tag hears the
+    /// duplicate and takes it in.
+    @Test func theRidingTagsAreAppliedSoALivingBookHearsThem() throws {
         try withOperations { ops, db in
             let draft = try ops.createTag(name: "draft")
             let living = try ops.createReading(
@@ -126,9 +132,9 @@ struct DuplicateCarriesTagsTests {
 
             let result = try ops.duplicateAsVersion(post.id)
             #expect(try db.fetchInt(
-                "SELECT COUNT(*) FROM reading_post WHERE post_id = ?",
-                [result.post.id]) == 0,
-                "no membership, no arrival, no dismissal row — the copy was never heard")
+                "SELECT COUNT(*) FROM reading_post WHERE post_id = ? AND reading_id = ? AND status = 'member' AND deleted_at IS NULL",
+                [result.post.id, living.id]) == 1,
+                "the copy was heard: the living book took it in")
         }
     }
 

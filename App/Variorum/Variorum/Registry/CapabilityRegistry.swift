@@ -927,6 +927,43 @@ nonisolated enum CapabilityRegistry {
                 + "open one and its \(VersionsPath.name) lists them.",
             availability: noteScoped),
 
+        // **VX-372 (VX-383 U1 — D-C-2): DUPLICATE A NOTE, TWO ACTS, DECLARED
+        // ONCE.** Her ticket: *"a direct duplicate door, with tags / without
+        // tags; a duplicate with tags counts as tagging."* The verbs are hers
+        // (P-C-1, PROVISIONAL for her VX-234 wording pass — "Duplicate as
+        // Version" retires as a label; the versions machinery and the
+        // `version_of` edge are unchanged), read from the ONE source the undo
+        // entry's label reads (`Operations.DuplicateTags.verb`).
+        //
+        // Doors — the note-scoped neighbours' grammar, every place a note is
+        // the target: the File menu beside Save a Version (`.menuBar`), ⌘K
+        // (`.palette`), both bars' `note ▾` menus (`.bottomBar` — R6-2's one
+        // grammar), and the note-row menus the Library and the Pool share
+        // (`.contextMenu`, `SidebarView.contextMenuCapabilities`). WITH TAGS
+        // is also the act the three shipped inline doors now run
+        // (`.surface`): the Takes board's `note actions`, the Lenses board's
+        // Chosen column, the book chip — they keep working, under its verb.
+        //
+        // The CONTEXT rule (`noteScoped`) governs the menu-bar, palette and bar
+        // doors, which carry no target of their own; the ROW and INLINE doors
+        // carry theirs (`.deleteNote`'s stated split). No chord (none asked —
+        // and a key that mints a whole note is `.deleteNote`'s no-chord reason
+        // in the other direction). A version-history note is never a target
+        // (no door renders over one) and a scraps group is never one (the bars
+        // gate on the note kind; the op's own refusal stands behind them).
+        Capability(
+            id: .duplicateNoteWithTags, verb: DuplicateCopy.withTagsVerb, scope: .post,
+            doors: [.menuBar, .contextMenu, .palette, .bottomBar, .surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: DuplicateCopy.unavailableNote,
+            availability: noteScoped),
+        Capability(
+            id: .duplicateNoteWithoutTags, verb: DuplicateCopy.withoutTagsVerb, scope: .post,
+            doors: [.menuBar, .contextMenu, .palette, .bottomBar],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: DuplicateCopy.unavailableNote,
+            availability: noteScoped),
+
         // MARK: The deletion acts, and THE RULE THEY ALL INHERIT
         //
         // **THE CONFIRMATION-CONSISTENCY PRINCIPLE** (13j's close-of-day
