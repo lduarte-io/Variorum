@@ -159,6 +159,18 @@ enum MCPToolCatalog {
         landed byte for byte.
         """
 
+    /// VX-357 (VX-348 U1 — her ruling 2026-10-15: strip it, and on this door
+    /// always say it): THE NULL SENTENCE, said once and shared by every tool
+    /// that answers the sha256 of text the client SENT (`add_take`,
+    /// `add_takes`, `create_note`, `import_document`, `insert_blocks`,
+    /// `edit_take`) — where the strip meets the digest a client checks. The
+    /// answer key is `MCPNullCharacters.answerKey`'s, read here, never retyped.
+    static let nullSentence = """
+        A null character (U+0000) can't be stored: it is removed from the text you send before \
+        the write, the answer's \(MCPNullCharacters.answerKey) says how many, and each sha256 \
+        digests the text without it.
+        """
+
     /// VX-197 (VX-336 U8a): THE LABEL RULE, said in one set of words by every
     /// tool that writes a take's label. Her split (VX-197): the client's name
     /// is worn only by takes a client adds at SUGGEST, inside her writing
@@ -395,7 +407,7 @@ enum MCPToolCatalog {
             \(suggestedLabelRule), so the author sees who suggested it; it is never chosen and \
             never locked — the author's text is never touched; they choose. Get block ids from \
             read_note with with_ids: true. Returns JSON with the new take_id and its sha256. \
-            \(digestSentence)
+            \(digestSentence) \(nullSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -440,7 +452,8 @@ enum MCPToolCatalog {
             with_ids: true gives the ids). One call carries at most 200 takes. All or nothing: if \
             any item can't land, none does, and the refusal names the item. The whole batch is one \
             undo for the author. Returns JSON with the new take_ids, in the items' order, and takes: \
-            per item its take_id, block_id, label as stored, and sha256. \(digestSentence)
+            per item its take_id, block_id, label as stored, and sha256. \(digestSentence) \
+            \(nullSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -582,7 +595,8 @@ enum MCPToolCatalog {
             block its block_id, the shown_take_id, and every take in fan order (take_id, label \
             where it has one, and sha256), the shown one included — no read_note needed to learn \
             them. Its tag_ids and tags (their paths) list every tag the note wears once it lands, \
-            a book's outflow included, so there is nothing to tag again. \(digestSentence) With \
+            a book's outflow included, so there is nothing to tag again. \(digestSentence) \
+            \(nullSentence) With \
             text, Variorum splits the prose into blocks by its own setting; to verify byte for \
             byte, send blocks.
             """,
@@ -640,7 +654,7 @@ enum MCPToolCatalog {
             and every take's take_id, label and sha256), and tag_ids and tags (their paths): every \
             tag the note wears, the header's first, then a book's outflow; for a book, its \
             book_id, note_ids and chapter_ids (no sha256 — check a book's notes with read_note). \
-            \(digestSentence)
+            \(digestSentence) \(nullSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -753,7 +767,7 @@ enum MCPToolCatalog {
             compare and come back; these commits stay even if the edit is undone. Writing the text the \
             take already has changes nothing (changed: false). The edit is one undo for the author. \
             Returns JSON with the commit ids and sha256, the take's text as it now stands. \
-            \(digestSentence)
+            \(digestSentence) \(nullSentence)
             """,
         inputSchema: .object([
             "type": "object",
@@ -952,7 +966,8 @@ enum MCPToolCatalog {
             \(labelNotPrefixed). One call carries at most 200 blocks. The whole call is \
             one undo for the author. Returns JSON with the note_id, the new block_ids, and blocks: \
             per block its block_id, the shown_take_id, and every take in fan order (take_id, label \
-            where it has one, and sha256), as create_note answers them. \(digestSentence)
+            where it has one, and sha256), as create_note answers them. \(digestSentence) \
+            \(nullSentence)
             """,
         inputSchema: .object([
             "type": "object",

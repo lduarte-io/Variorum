@@ -184,6 +184,21 @@ struct MCPNullCharacterServerTests {
         }
     }
 
+    /// The AI's docs say the strip where it meets the digest: each tool that
+    /// answers the sha256 of text the client SENT carries the one null
+    /// sentence, naming the answer key; the tools that send no text don't.
+    @Test func theDigestToolsDescriptionsSayTheStrip() {
+        let sending = [MCPToolCatalog.addTake, MCPToolCatalog.addTakes, MCPToolCatalog.createNote,
+                       MCPToolCatalog.importDocument, MCPToolCatalog.insertBlocks, MCPToolCatalog.editTake]
+        for tool in sending {
+            #expect(tool.description.contains(MCPToolCatalog.nullSentence), "\(tool.name) says the strip")
+        }
+        #expect(MCPToolCatalog.nullSentence.contains(removedKey), "the sentence names the answer key")
+        for tool in [MCPToolCatalog.readNote, MCPToolCatalog.duplicateNote, MCPToolCatalog.restoreCommit] {
+            #expect(!tool.description.contains(MCPToolCatalog.nullSentence), "\(tool.name) sends no text")
+        }
+    }
+
     /// A write whose text holds no null character answers byte-unchanged:
     /// the key is absent (never 0).
     @Test func aWriteWithoutANullAnswersWithoutTheKey() async throws {

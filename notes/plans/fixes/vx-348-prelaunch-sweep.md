@@ -276,11 +276,124 @@ window, if the batch allows).
 
 ### LIVE STATUS (per member)
 
-- **VX-357 (U+0000 stored truncated):** IN-PROGRESS — WIP commit: the Domain rule (`StoredText`), its application
-  across the op families, and the wire's count (`MCPNullCharacters`, answered in `land`) compile; the pins, the
-  red-on-old revert, MCPSpec's clause and the tool descriptions remain.
+- **VX-357 (U+0000 stored truncated):** DONE (`9c3ec7ac2` the fix · `85640635b` the pins · the docs commit below) —
+  FIXED with its pins, every new pin verified RED on the pre-fix tree; the headless suites green at the end (one
+  load-dependent timing flake, green alone — below). The real-client wire round is PENDING (U3's window, if the batch
+  allows). Its section below.
 - **VX-338 (two Macs prune each other's backups):** NOT-STARTED.
 - **VX-339 (Resume Sync clears the banner over a failed marker removal):** NOT-STARTED.
-- **REVERT IN FLIGHT (named before it starts — addendum 2):** a targeted behavioural revert of ONE line in
-  `Operations+MCPNoteEdits.swift` (`editCommentForClient`'s entry strip), on committed tree `85640635b`; the restore is
-  `git checkout -- Sources/VariorumCore/Operations/Operations+MCPNoteEdits.swift` (safe: committed — addendum 11).
+- **No behavioural revert is in flight.** (The targeted `editCommentForClient` revert ran and was restored by
+  `git checkout --` on committed `85640635b`; `git diff` clean after.)
+
+### VX-357 — U+0000 is stripped in the operations layer; the wire says how many
+
+**The trace (inputs → wrong state).** GRDB binds every TEXT value with length -1 (`sqlite3_bind_text(…, -1, …)` —
+`GRDB/Core/Support/StandardLibrary/StandardLibrary.swift:625`), so SQLite reads a bound value only up to its first NUL.
+A take written as `"before\0after"` (12 bytes) is stored as `"before"` (6): everything after the null character is
+silently LOST, on every road text reaches the store (a paste into a block → `autosave`; a paste into the open tail →
+`importBlocks`; File ▸ Import → `importDocument`/`importBook`; a comment, a title, a label, a name, a commit message;
+the MCP door). The wire compounds it: VX-254's `sha256` is computed from the act's own row in memory (D-254-1 — no
+second read), so for such a take it digested the 12 bytes SENT while the store held 6 — the one case the fingerprint
+overclaimed (pinned as a known issue by VX-336 U7, `aTakeHoldingUPlus0000IsStoredTruncatedSoItsDigestOverclaims`).
+
+**The fix (her approved shape, no product invention).**
+- **ONE pure Domain rule** — `Sources/VariorumCore/Domain/StoredText.swift`: `stripped` removes every U+0000 and
+  nothing else (byte-level: 0x00 occurs in UTF-8 only as U+0000 itself, so the result is exact and valid; a
+  no-allocation fast path when there is none), `nullCount`, `containsNull`. It composes into the three Domain rules
+  faces also consult, so face and store agree: `SavepointName.normalized` (every savepoint name), `TagPath.segments`
+  (every typed tag path — applied, removed, a book rule's or outflow's), `BookNaming.key` (the book- and wing-name
+  guards collide a typed name as it will be stored).
+- **Applied in the operations layer, never door by door:** every op that writes caller-supplied text strips it FIRST
+  — before its validation, no-op guard, counts and undo capture — and the shared mints strip again at the row
+  (`mintBlock`, `mintFanBlock`, `insertPost`, `insertTag`), so no mint road, a future one included, can store a null.
+  The sweep, op by op (each FIXED, by family):
+  | family | ops (strip site) |
+  |---|---|
+  | takes | `autosave` · `newBlock` · `importPost` / `importBlocks` (before segmenting) · `editTakesAtomically` (each edit's new text) · `mintBlock` / `mintFanBlock` (the row — documents, structured notes, `insert_blocks`, every structural mint) · the wire's `insertSuggestedTake` (`add_take`/`add_takes`) · `editTakeUnderInsurance` (`edit_take`) |
+  | titles · notes · references | `insertPost` (the row — `createPost`, `importPost`, documents, `newPostInReading`, the wire's notes) · `createPool` · `renameContainer` · `renameNoteForClient` · `createNote`/`createStructuredNote` (before trimming) · `updateFloatingNotes` · `addReference` (name, url) |
+  | labels | `setTakeLabelRows` (her `setTakeLabel` + `set_take_label`) · `insertSuggestedTake` · `mintBlock`/`mintFanBlock` (import labels) · `MCPWriteTools.aiLabel` (the client's own label) |
+  | names | `setBlockName` (hers + the wire's) · structured-note / `insert_blocks` block names · lens: `createLens`, `renameLens`, `duplicateLens`, `branchAllFans`, `saveLens` · reading: `createReading`, `renameReading`, `duplicateReading`, `saveFilterAsGathering`, `createBook`, `renameBookForClient`, `importBook` (book + chapters) · chapter: `insertSection` (hers + `create_section`), `renameSectionRow` (hers + `rename_chapter`) · `createShelf`, `renameShelf`, `setShelfGlyph` · `createWing`, `renameWing` · tag: `insertTag` (every mint), `renameTag`, `TagPath` (every path) · commit messages: `SavepointName` (commit, rename, `save_commit`, `rename_commit`) + `mcpCommitMessage` |
+  | comments | `insertBlockComment` (hers, `add_comment`, `add_comments`) · `rewriteComment` (hers, `edit_comment`) · `editCommentForClient` (its undo capture) |
+  | the import | `importDocument`/`importBook` via the rows above; a take of nothing but nulls is blank as stored, so the file doors drop it like any blank take; the note's baseline counts the stored text |
+  | the wire | rides every op above; plus the count (below) |
+- **The wire, always said, in ONE place:** `MCPWriteTools.land` — every landed write's answer passes through it — adds
+  `null_characters_removed` (an integer: how many the act removed from the text it wrote) when it is > 0, read from
+  `Job.nullCharactersWritten` (`Sources/VariorumMCP/MCPNullCharacters.swift`), an EXHAUSTIVE switch over every
+  tool's parsed call and its nested jobs (`flushesHerEditorFirst`'s shape — a new tool cannot compile without
+  saying). Counted: the texts a call writes (take text and label, comment, title, every name, commit message, a tag
+  path applied or named in a rule/outflow, every text of an import). Not counted: ids, preconditions
+  (`expected_text`), locators (`second_half_starts_with`, a lens rule's label match, `remove_tag`'s path), validated
+  day keys. VX-254's `sha256` now digests the STORED text by construction (the row the op returns is the stripped
+  one), so the fingerprint is true again.
+- **The AI's docs:** `MCPToolCatalog.nullSentence` — one shared sentence naming the answer key — rides the six tools
+  that answer the sha256 of text the client SENT (`add_take`, `add_takes`, `create_note`, `import_document`,
+  `insert_blocks`, `edit_take`); `MCPSession.instructions` is untouched (no sentence in it became untrue; still inside
+  its 3,000 bound). **MCPSpec:** the write-digest clause's VX-357 sentence is now the contract line plus the pointer to
+  this record, and the record joins the binding-records list.
+
+**Deliberate exclusions (each argued, none silent).**
+- `resolveSyncConflict` and remote apply (Sync/'s): the text comes from the engine, and every device's store binds
+  the same way, so no stored row anywhere can hold a null to send — and the lane (VX-378's slot) is fenced. No
+  `Sources/VariorumCore/Sync/` line.
+- MCP client and setup NAMES (`recordMCPContact`, `admitMCPConnection`): an identity, not prose — and every LOOKUP
+  binds the same name too, so stripping only the writes would split the stored name from every query. **Recorded
+  for the orchestrator (a candidate ticket, not this unit's):** a `clientInfo.name` holding a NUL is, to every SQL read
+  and write of that session, the prefix before it (the same truncation, on an identifier); the A-4 setup-key binding
+  is what stands between such a name and the prefix's grants. Ids bound with a NUL resolve to their prefix the same way.
+- JSON-encoded columns (`block.presentation`, `reading.query_spec`/`auto_tag_ids`, a reference's `view_state`, canvas
+  layouts, lens picks): `JSONEncoder` escapes U+0000 as `\u0000`, so no raw null is ever bound there. Settings: typed
+  enums and validated values only (`ThemeTint` refuses anything but a colour).
+- Preconditions and locators (`expected_text` on `edit_take`/`edit_comment`/`moveSpanToNewTake`/the compound,
+  `second_half_starts_with`): compared with what is stored, which never holds a null, so one that holds a null never
+  matches — the honest refusal (`bufferChangedSinceGesture` / the stale-read sentence), never a wrong write.
+
+**FINDING FOR THE ORCHESTRATOR — the editor seam (out of U1's lane; nothing done).** A null pasted into the LIVE
+editor stays in its `NSTextStorage` until the note re-renders, while `autosave` stores the take without it. Until
+then a structural act from that block either refuses (an `expectedText` precondition no longer matches) or — for
+an offset-addressed act, `divide(_:cut:)` — lands its cut offset by the number of nulls before it. (Before the fix
+the same paste LOST everything after the null at the next autosave — strictly worse.) The tidy fix is the editor's
+own insert door (`EditorTextView.paste`/`insertText` passing pasted text through `StoredText.stripped`, and the
+phone's twin) — an editor-seam line (TEXTKIT2_NOTES; Fable's review), so it is NOT built here: a VX ticket or the
+editor-seam batch's call.
+
+**Pins (each a state-transition pin; RED ON OLD verified on the pre-fix tree — a scratch worktree at `231b44d24`
+with the new test files copied in: every new pin below failed there, for the truncation; the run log's lines read
+`row.text == expected`, `storedBytes == 11`, `null_characters_removed == 1` failing).**
+- `Tests/VariorumCoreTests/StoredTextNullStripTests.swift` — one per family, row text AND byte length:
+  `takesKeepEveryWordAroundANullCharacter` (newBlock · autosave · importBlocks),
+  `theCrossBlockCompoundStoresItsTextWithoutTheNull`, `titlesNotesAndReferencesStoreWithoutTheNull`,
+  `labelsNamesAndCommitMessagesStoreWithoutTheNull`, `libraryNamesStoreWithoutTheNull`, `commentsStoreWithoutTheNull`,
+  `theDocumentAndBookImportsStoreEveryTextWithoutTheNull`, `theBulkImportDoorStoresItsTitleAndTextWithoutTheNull`,
+  `theWiresActsStoreWithoutTheNullAndTheirUndoRoundTrips` (add_take, edit_take + its ⌥⌘Z/⇧⌥⌘Z, add_comment,
+  edit_comment + its undo/redo, rename_note + its undo) — 9 of 9 RED on old. The undo-capture leg was also proven by
+  a TARGETED behavioural revert on the fixed tree (`editCommentForClient`'s entry strip removed → the entry's undo
+  retired quietly, `edit_comment's undo` failed; restored by `git checkout --` on committed `85640635b`).
+- `Tests/VariorumMCPTests/MCPWriteDigestServerTests.swift` — the known-issue pin FLIPPED to
+  `aTakeHoldingUPlus0000IsStoredWithoutItAndTheAnswerSaysHowMany` (11 bytes stored, `read_note` = "beforeafter",
+  sha256 = the stored text's, `null_characters_removed` = 1) — RED on old (6 issues).
+- `Tests/VariorumMCPTests/MCPNullCharacterServerTests.swift` — `aStructuredNoteIsStoredWithoutItsNullsAndTheAnswerCountsThem`
+  (six nulls across title, text, name, take, label), `anEditIsStoredWithoutItsNullAndARespellingByNullsIsNoChange`,
+  `aCommentWithANullStaysTheClientsOwn` (VX-260's authorship digest reads the stored words — the client still deletes
+  its own comment at suggest), `aBatchAndATagCountEveryNullTheyRemoved` — 4 of 4 RED on old;
+  `aWriteWithoutANullAnswersWithoutTheKey` and `theDigestToolsDescriptionsSayTheStrip` are guards (green on both
+  sides by design: the byte-unchanged promise, and the docs).
+- `Tests/VariorumCoreTests/StoredTextTests.swift` — the rule itself (new API; a unit test, not a red-on-old pin).
+
+**Suites (headless, at the end of the piece):** `swift test` whole — VariorumCoreTests 2908 tests / 339 suites
+passed; the third target 40 / 6 passed; VariorumMCPTests 368 / 69 with ONE failure,
+`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (18.7 s against its 15 s
+bound while the machine's load average stood at 16–19 — other sessions' builds), green alone (3 / 3 in 2.2 s); the
+harness's own timing guard, untouched by this diff.
+
+**PROVISIONAL, for the merge's QUESTIONS bundle (the run's rule: decided here, bundled at the merge):**
+- **P-VX357-1** — the answer's key is `null_characters_removed`, an INTEGER (the count is the "worded" answer: a
+  plain-English key, never a Swift case); alternatives: (b) add a sentence key beside it; (c) one sentence only.
+- **P-VX357-2** — present only when > 0, so every other answer is byte-unchanged (MCPSpec's byte-unchanged promises);
+  alternative: always present (0 included).
+- **P-VX357-3** — the null sentence rides the six tools that answer a digest of SENT text; the other text-writing
+  tools (comments, names, labels, titles, messages, tags) answer the same key without a description line;
+  alternative: the sentence on every text-writing tool.
+- **P-VX357-4** — a precondition or locator holding a null is NOT stripped (it refuses honestly); alternative: strip
+  them too (an `expected_text` sent with a null would then match).
+- **P-VX357-5** — an `edit_take` whose text differs from the stored text only by nulls answers `changed: false` with
+  the count said.
