@@ -25,7 +25,7 @@ struct CopyDoorsSheet: View {
             case .reading:
                 Text(LibraryOpenCopy.sheetTitle).font(.title3.weight(.semibold))
                 HStack(spacing: 8) {
-                    ProgressView().controlSize(.small)
+                    TravellingDotsIndicator(ink: .secondary)
                     Text(ProtectionWords.filingLine).foregroundStyle(.secondary)
                 }
             case .refused(let message, let detail):
