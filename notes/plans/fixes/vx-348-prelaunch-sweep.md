@@ -354,8 +354,11 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   (`aLockedTakeStillRefusesWhenTheFieldIsLeft`, a counting bug in the cell on all three trees) fixed `e40e5dcf1`, u2-fixed
   rebuilt. **PENDING:** that one suite's re-run on u2-fixed (expected 13/13), the walk (both voices, every host), the
   QUESTIONS bundle (P-VX347-1…5).
-- **U3 (VX-350 · VX-349 · VX-176 — the Library's row and header):** IN-PROGRESS (its implementer, 2026-10-18) — the U3
-  UNIT RECORD (at the end of this file) carries the live state.
+- **U3 (VX-350 · VX-349 · VX-176 — the Library's row and header):** BUILT — all three FIXED with pins (`a198c6fd5` VX-176 ·
+  `d16eb1933` VX-349 · `dda6ea9f3` + `8ac266063` + `7c3604726` VX-350); compiled; both Mac legs PREBUILT from durable
+  checkouts of `7c3604726` (`DerivedData/u3-fixed`, `DerivedData/u3-red`); **PENDING:** the Mac batch (red leg first —
+  the commands and expected reds in the U3 record), the walk (three widths × both voices, light and dark — the list in
+  the record), the QUESTIONS bundle (P-VX176-1, P-VX349-1, P-VX350-1…7). The U3 UNIT RECORD carries the rest.
 - **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** NOT-STARTED.
 - Then the ladder (fresh Fable per round, whole diff), closeout, merge. **Her overnight mandate (2026-10-18):**
   rule PROVISIONALLY and continue; merge to main at this run's own finish (finish-order serialization with
@@ -1557,9 +1560,9 @@ below) is PENDING the orchestrator's window.
 - **VX-349 (the doubled line under the List's first header at rest):** DONE (`d16eb1933`) — traced (half: the at-rest
   doubling is traced and fixed; "one line while scrolling" is consistent with the trace, never reproduced live — see its
   section), FIXED; pins compiled; RUN PENDING the batch.
-- **VX-350 (the Library at narrow widths):** DONE (`dda6ea9f3` · `8ac266063`) — FIXED; pins compiled; RUN PENDING the
+- **VX-350 (the Library at narrow widths):** DONE (`dda6ea9f3` · `8ac266063` · `7c3604726`) — FIXED; pins compiled; RUN PENDING the
   batch; the walk PENDING (the list below).
-- **Products (u3-fixed / u3-red):** DONE — both PREBUILT from durable checkouts of `8ac266063` (paths, the revert patch,
+- **Products (u3-fixed / u3-red):** DONE — both PREBUILT from durable checkouts of `7c3604726` (paths, the revert patch,
   the confirmed recompiles, the commands and every expected red: "The Mac products" below). Their RUN is PENDING the
   orchestrator's batch (RED leg first). THIS worktree is never reverted.
 - **No behavioural revert is in flight in this worktree.**
@@ -1652,6 +1655,12 @@ reader's reading (rest, the elastic pull, a point scrolled, a top inset).
   `libraryControlsRole`), so its text and caret survive every re-flow (the panel's opening narrows the column under her
   typing); a control the class does not show is placed OUTSIDE the row at its own size (`unshownOffset`, −100 000 pt),
   never squeezed — and inside the list column's clip.
+- **The placement pass arranges what was measured** (`7c3604726`): the collapsed row reports the WHOLE width it was
+  offered. Its container places it at its reported width and `placeSubviews` re-decides there (U3c's T1 §7), so a
+  narrower report re-flowed the groups' breaks — measured with the real Layout over stand-in controls in a scratch
+  offscreen probe (never ordered on screen): offered 432, reported 369, re-placed at 369 with different lines. The wide
+  classes already re-decide to the same arrangement (their reported width only drops where the field is at its cap).
+  Pinned pure: `placingAtTheReportedWidthArrangesTheSameRow`.
 - **The panel stays whole** (`LibraryPanelLayout`, `LibraryInfoPanel.swift`): its floor is 200 pt (was the note-side
   column's 280; the third keeps shrinking it until then) and it is never wider than the library itself; the list column
   (`LibraryCatalogView` body) is `.frame(minWidth: 0, maxWidth: .infinity, alignment: .leading).clipped()` in a
@@ -1670,7 +1679,8 @@ reader's reading (rest, the elastic pull, a point scrolled, a top inset).
 
 **PROVISIONAL (for the merge's QUESTIONS bundle):**
 - **P-VX350-1** — the collapse order: one line → two (VX-175) → 🔍 · scope / mode · sort · when, each group wrapping in
-  its own order (greedy, the row's order kept — e.g. Study ≈374–432 reads mode · sort / when). Alternatives: (b) mode /
+  its own order (greedy, the row's order kept — Terminal ≈415–478 and Study ≈374–432 of row read mode · sort / when, the
+  `when ▾` door alone on its line). Alternatives: (b) mode /
   sort · when always kept as pairs; (c) collapse scope and mode into menus (more collapsing, more new UI).
 - **P-VX350-2** — the 🔍's press semantics (closed → open + caret; open with a question → caret, never hides; open and
   empty → close), and "the field taking the keyboard opens it" (so a field she used at a wide width shows open when the
@@ -1700,7 +1710,8 @@ reader's reading (rest, the elastic pull, a point scrolled, a top inset).
   `atNarrowWindowsThePanelStaysWhole` × 2 (the panel open, library 1029 → 560: the catalog never wider than the window,
   the panel's right edge inside it at ≥ 200 pt, the controls left of its divider). Expected RED on u3-red: 4 of 4
   (the pill + the row overflowing + the column growing; the panel past the window at ≤ 800 pt).
-- `VariorumTests/VX350ControlsWidthClassTests.swift` (new API, fixed only — pure): one class per width whatever the sort
+- `VariorumTests/VX350ControlsWidthClassTests.swift` (new API, fixed only — pure): the placement pass re-arranges exactly
+  what was measured, every width and class; one class per width whatever the sort
   slot shows, never narrowing as the width grows (200…1400 by 0.5, both voices); the wide classes = VX-175's `arrange`
   frame for frame; the thresholds (483.5 / 449; the default window unchanged); a collapsed row fits its room and never
   shows the field under its floor, the field on the last line (270…483 by 0.5, open and closed, every sort form);
@@ -1713,19 +1724,28 @@ reader's reading (rest, the elastic pull, a point scrolled, a top inset).
 - **Justified edit:** `LibraryPreviewBrainTests.thePanelWidthIsTheInspectorsNumbersClampedToTheRoom` (`LibraryPanelTests.swift`) — 700 → 238 (was 280),
   the floor's change; expected RED on u3-red (the old 280).
 
+### Headless suites (the folded tree — U3 has ZERO core lines, so these are the baseline, re-read)
+
+`swift test` whole at `8ac266063` (`DerivedData/u3-swifttest.log`): VariorumCoreTests **3250 tests / 419 suites passed**;
+the third target **40 / 6 passed**; VariorumMCPTests **383 / 71 with ONE failure** —
+`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (21.1 s against its 15 s bound at
+a load average of 15–19), **green alone (3 / 3, 2.2 s)**: VX-353's standing flake, not U3's. Products note: xcodebuild
+auto-resolves `Package.resolved` on every build (the coordinator's notice); it was restored in the fixed checkout before
+its build and is never staged — no dependency change rides U3.
+
 ### The Mac products (PREBUILT — the batch window runs `test-without-building` only)
 
 Both `build-for-testing` from `App/Variorum/`, scheme `Variorum`, destination `platform=macOS`, Debug (no custom
-configuration), each from a DURABLE detached checkout of the tip `8ac266063` beside this worktree (the U2 precedent — this
+configuration), each from a DURABLE detached checkout of the tip `7c3604726` beside this worktree (the U2 precedent — this
 worktree, which U2's fix leg shares, is never reverted and never built into a product):
 - **FIXED:** `<home>/dev/variorum-vx-348/DerivedData/u3-fixed`
   (`Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`) — built from
-  `<home>/dev/variorum-vx-348-u3fixed` at `8ac266063`, unmodified (log `DerivedData/u3-fixed-build.log`,
+  `<home>/dev/variorum-vx-348-u3fixed` at `7c3604726`, unmodified (log `DerivedData/u3-fixed-build.log`,
   TEST BUILD SUCCEEDED; every U3 source and test file compiled from that checkout, zero paths from this worktree).
 - **RED:** `<home>/dev/variorum-vx-348/DerivedData/u3-red` — built from
-  `<home>/dev/variorum-vx-348-u3red` at `8ac266063` with EXACTLY U3's product hunks reverse-applied
+  `<home>/dev/variorum-vx-348-u3red` at `7c3604726` with EXACTLY U3's product hunks reverse-applied
   (`git apply -R <home>/dev/variorum-vx-348/DerivedData/u3-red-revert.patch`, the patch =
-  `git diff fe928e53e 8ac266063 --` the seven product files: `Features/Library/` `LibraryCatalogView` · `LibraryListFace`
+  `git diff fe928e53e 7c3604726 --` the seven product files: `Features/Library/` `LibraryCatalogView` · `LibraryListFace`
   · `LibrarySearchSheet` · `LibraryControlsFlow` · `LibraryCatalogModel` · `LibraryCopy` · `LibraryInfoPanel` — each
   confirmed byte-identical to its `fe928e53e` content with `cmp`; no other commit in that range touches them) and the
   three new-API test files removed (`VX349ListHeaderRuleTests`, `VX350ControlsWidthClassTests`,
@@ -1762,7 +1782,8 @@ region of the controls row / panel / header per state:
   the lines hold, the caret kept. The segmented controls' selected segment in the VOICE's accent (VX-176) — Terminal
   dark (green, not blue) and Study; the Timeline mode's picker too.
 - **~940 pt:** panel closed (room ≈681) — two lines, both voices; panel open (library ≈729 → panel 247, room ≈433) —
-  COLLAPSED in both voices: 🔍 · scope / mode · sort · when (Study may read mode · sort / when) — the panel whole; press 🔍 — the field opens on its
+  COLLAPSED in both voices: Terminal 🔍 · scope / mode · sort / when ▾ (the counted sort widest 181 breaks before
+  when), Study 🔍 · scope / mode · sort · when — the panel whole; press 🔍 — the field opens on its
   own line below with the caret, type "wing" — the lines hold, the band answers; press 🔍 with the question — the caret
   back, nothing hides; clear, press 🔍 — closed; the 🔍's accent mark while a question stands and the field is closed.
 - **The window floor** (drag the window as narrow as it goes, sidebar shown; then sidebar hidden ⌃⌘S): the panel open —
