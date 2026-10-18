@@ -33,13 +33,15 @@
 //  · ⏎ and ⎋ — the field's own keys (`onSubmit`, `onExitCommand`; ⎋ is
 //    settled BEFORE the popover closes, so no closing road can file it).
 //  · The popover's own CLOSING — `NSPopover.willCloseNotification` for the
-//    popover whose content window is this field's (`CommentPanelHostWatcher`,
+//    popover whose content window is this field's
+//    (`SavepointPopoverClosingWatcher`, on `CommentPanelHostWatcher.isHost` —
 //    VX-179's MEASURED road: SwiftUI never tears a dismissed popover's
 //    content down, so `.onDisappear` on popover content never fires). Every
 //    dismissal ends there — a click away (AppKit's transient monitor), the
 //    binding going nil, the host or its window going. A closing heard while
-//    AppKit is dispatching ⎋ IS ⎋ (`SavepointNameLeave.closing(during:)`),
-//    so a popover that cancels itself on ⎋ can never file.
+//    AppKit dispatches a fresh ⎋ addressed to this popover IS ⎋
+//    (`SavepointNameLeave.closing(during:popoverWindow:)`), so a popover
+//    that cancels itself on ⎋ can never file.
 //  · The HOST's ask moving (`.onChange`) — nil'd or replaced while its field
 //    was still open (⌘S again; a model that let go).
 //  · The HOST going (`.onDisappear` on the host — which does fire): a mode
@@ -132,16 +134,20 @@ nonisolated enum SavepointNameLeave: Equatable, Sendable {
     /// seconds earlier elsewhere is not why anything closes now.
     static let causeWindow: TimeInterval = 1
 
-    /// **A closing that arrives with no key of the field's own:** ⎋ when the
-    /// event being dispatched IS a fresh ⎋ (or ⌘.) — the popover cancelling
-    /// itself — and `away` for everything else (a mouse-down outside it, a
-    /// chord, no event at all). The one bias is the safe one: only ⎋ can
-    /// keep a commit from filing.
+    /// **The field's popover closing with no key of the field's own:** ⎋
+    /// when the event AppKit is dispatching IS a fresh ⎋ (or ⌘.) delivered
+    /// to THIS popover — its own window, or the window it hangs from (AppKit
+    /// keeps the main window key and forwards into its popover) — which is
+    /// the popover cancelling itself; `away` for everything else (a
+    /// mouse-down outside it, a chord, a ⎋ meant for some other window, a
+    /// stale event, no event at all). The one bias is the safe one: only ⎋
+    /// can keep a commit from filing.
     static func closing(
         keyDown: Bool, keyCode: UInt16, characters: String?,
-        modifiers: NSEvent.ModifierFlags, age: TimeInterval
+        modifiers: NSEvent.ModifierFlags, age: TimeInterval,
+        addressedToThisPopover: Bool
     ) -> Self {
-        guard keyDown, age >= 0, age < causeWindow else { return .away }
+        guard keyDown, addressedToThisPopover, age >= 0, age < causeWindow else { return .away }
         let chord = modifiers.intersection(.deviceIndependentFlagsMask)
             .subtracting([.capsLock, .numericPad, .function])
         if keyCode == escapeKeyCode, chord.isEmpty { return .escape }
@@ -149,15 +155,70 @@ nonisolated enum SavepointNameLeave: Equatable, Sendable {
         return .away
     }
 
-    /// The same rule over the event AppKit is dispatching right now.
+    /// The same rule over the event AppKit is dispatching right now, for the
+    /// popover whose content lives in `popoverWindow`.
     @MainActor
-    static func closing(during event: NSEvent?) -> Self {
-        guard let event, event.type == .keyDown else { return .away }
+    static func closing(during event: NSEvent?, popoverWindow: NSWindow?) -> Self {
+        guard let event, event.type == .keyDown, let popoverWindow else { return .away }
+        let addressed = event.windowNumber == popoverWindow.windowNumber
+            || (popoverWindow.parent.map { event.windowNumber == $0.windowNumber } ?? false)
         return closing(
             keyDown: true, keyCode: event.keyCode,
             characters: event.charactersIgnoringModifiers,
             modifiers: event.modifierFlags,
-            age: ProcessInfo.processInfo.systemUptime - event.timestamp)
+            age: ProcessInfo.processInfo.systemUptime - event.timestamp,
+            addressedToThisPopover: addressed)
+    }
+}
+
+/// **The field's popover is closing** — `NSPopover.willCloseNotification`
+/// for the popover whose content window is this view's own (the identity
+/// rule is `CommentPanelHostWatcher.isHost`, VX-179's measured road: every
+/// dismissal ends here — a click away, the binding going nil, the host or
+/// its window going — and SwiftUI never tears popover content down, so
+/// `.onDisappear` there never fires). Hands the closing its window, so a ⎋
+/// can be told apart from every other way out.
+struct SavepointPopoverClosingWatcher: NSViewRepresentable {
+    let onClosing: (NSWindow) -> Void
+
+    func makeNSView(context: Context) -> WatcherView {
+        let view = WatcherView()
+        view.onClosing = onClosing
+        return view
+    }
+
+    func updateNSView(_ nsView: WatcherView, context: Context) {
+        nsView.onClosing = onClosing
+    }
+
+    final class WatcherView: NSView {
+        var onClosing: ((NSWindow) -> Void)?
+        private var observer: NSObjectProtocol?
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            if let observer {
+                NotificationCenter.default.removeObserver(observer)
+                self.observer = nil
+            }
+            guard window != nil else { return }
+            observer = NotificationCenter.default.addObserver(
+                forName: NSPopover.willCloseNotification, object: nil, queue: .main
+            ) { [weak self] note in
+                // Read before the hop: the notification itself is not
+                // Sendable; the popover (a main-actor class) is.
+                let closing = note.object as? NSPopover
+                MainActor.assumeIsolated {
+                    guard let self, let window = self.window,
+                          CommentPanelHostWatcher.isHost(closing, ofPanelIn: window)
+                    else { return }
+                    self.onClosing?(window)
+                }
+            }
+        }
+        // (No `deinit`: the view leaves its window before it dies, and
+        // `viewDidMoveToWindow` with a nil window removes the observer — the
+        // `CommentPanelHostWatcher` note, same reason.)
     }
 }
 
@@ -230,8 +291,9 @@ final class SavepointNameLeaving {
     }
 
     /// **The host's ask moved** (`.onChange`): a field still open for the
-    /// ask it moved FROM is left — `way` is how (a closing heard during ⎋ is
-    /// ⎋, anything else is away) — and the ask it moved TO opens fresh.
+    /// ask it moved FROM is left `way` (the presenter passes `.away` — a ⎋
+    /// always settles first, at the field or at the popover's closing) — and
+    /// the ask it moved TO opens fresh.
     func hostAskChanged(
         from old: SavepointNameAsk?, to new: SavepointNameAsk?,
         way: SavepointNameLeave, clear: Clear, file: File
@@ -416,16 +478,18 @@ private struct SavepointNameAskPresenter: ViewModifier {
                     onLeave: { way in leaving.leave(pending, way, clear: clear, file: file) })
                     // The popover's own closing — the one moment every
                     // dismissal road shares (VX-179's measured watcher).
-                    .background(CommentPanelHostWatcher(onHostClosing: {
+                    .background(SavepointPopoverClosingWatcher(onClosing: { window in
                         leaving.leave(
-                            pending, .closing(during: NSApp.currentEvent),
+                            pending,
+                            .closing(during: NSApp.currentEvent, popoverWindow: window),
                             clear: clear, file: file)
                     }))
             }
+            // The host's ask moving while its field is open (⌘S again; a
+            // model that let go): never ⎋ — a ⎋ settles at the field or at
+            // the popover's closing, both of which come first.
             .onChange(of: ask) { old, new in
-                leaving.hostAskChanged(
-                    from: old, to: new, way: .closing(during: NSApp.currentEvent),
-                    clear: clear, file: file)
+                leaving.hostAskChanged(from: old, to: new, way: .away, clear: clear, file: file)
             }
             .onDisappear {
                 leaving.hostLeft(holding: binding.wrappedValue, clear: clear, file: file)
