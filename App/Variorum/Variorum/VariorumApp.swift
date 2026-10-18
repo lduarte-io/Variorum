@@ -222,6 +222,10 @@ struct VariorumApp: App {
                             // seam (pre-13x 1a); production names the real one.
                             legacyCleanup: { LegacyPasteInCleanup.clear() })
                         services = fresh
+                        // VX-306 U1b (P-VX306-K4): on the new road every backup run that wrote a snapshot also
+                        // lands rule 5's pair (the library + its key file) — today's runs untouched; nothing on
+                        // today's road (no session).
+                        ProtectionBackupHook.attach(to: fresh.backup, session: bootstrap.roadSession)
                         // 13x U2 row 7: the restore-hold's gate — wired
                         // BEFORE start() so no first round outruns it; the
                         // one Resume press clears the hold and catches up

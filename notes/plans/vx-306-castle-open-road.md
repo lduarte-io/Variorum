@@ -824,5 +824,17 @@ no stray (both scratch worktrees removed).
   and opening once; §7c (1) verbatim; the face's source has no copy road, no later door, exactly one button). The words in
   `Shared/Protection/ProtectionWords.swift` (§7c (1) and (3) verbatim; the lobby's undrafted lines P-VX306-U1b-4). The
   run PENDING under the stage.
-- Piece 5 — the `StoreBackup.onRun` hook → `takeBackupPair`, honouring `copiesArePaused` (K4): NOT STARTED.
+- Piece 5 — the `StoreBackup.onRun` hook → `takeBackupPair`, honouring `copiesArePaused` (K4): DONE (this commit) —
+  `Shared/Protection/ProtectionBackupHook.swift`: attached ONCE per services instance in `VariorumApp`'s ready `.task`
+  (`ProtectionBackupHook.attach(to: fresh.backup, session: bootstrap.roadSession)` — nil on today's road, and never for a
+  read-only session); a run whose primary leg WROTE a snapshot (a due scheduled run, or Back Up Now) → off the main actor,
+  `takeBackupPair(with: key, keyFile: <the live key file, when it is the key's>, deviceID: <this Mac's device ID>)` →
+  `Backups/<library8>/<mac8>/variorum-backup-<stamp>-<fp8>.sqlite` + `.keys.json`; a run that found nothing due writes no
+  pair (the hourly re-check would otherwise mint one an hour — a recorded refinement); paused copies or another key's file ⇒
+  none, logged; a failure is logged, never raised. Zero edits to `StoreBackup.swift`; `RootView.swift` carries no `onRun`
+  (the `ICloudDriveOfferTests` pin). `ProtectionBackupHookTests` (5, throwaway scope, temp slot): the pair opens with the
+  library's key and its `.keys.json` IS the live key file, the catalogue reads it as this library's backup; nothing-due ⇒
+  none; paused ⇒ none, resumed ⇒ written; another key's live file ⇒ none; attached only for a writing session. Also here:
+  the open's ONE Diagnostics line (`ProtectionOpenRoad.logSummary` — counts and eight-character names only; the walk reads
+  it). Debug `build-for-testing` → `** TEST BUILD SUCCEEDED **`. The run PENDING under the stage.
 - Piece 6 — the Mac tests + `build-for-testing` + the phone build: NOT STARTED.

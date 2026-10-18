@@ -194,6 +194,7 @@ nonisolated enum ProtectionOpenRoad {
             var report = RoadOpenReport(notice: library.notice)
             // Nothing to settle in a library just made (no plan in an empty slot); the repairs' passes run.
             repairPasses(ctx, executor, &library, &report)
+            logSummary(ctx, library, report, how: "created")
             let session = ProtectionRoadSession(
                 system: ctx.system, executor: executor, library: library, report: report, isFresh: true,
                 writes: ctx.writes)
@@ -404,6 +405,7 @@ nonisolated enum ProtectionOpenRoad {
                 report.settle = "read-only (a hosted test run)"
             }
             repairPasses(ctx, executor, &unlocked, &report)
+            logSummary(ctx, unlocked, report, how: "opened")
             return .opened(ProtectionRoadSession(
                 system: ctx.system, executor: executor, library: unlocked, report: report, isFresh: false,
                 writes: ctx.writes))
@@ -439,6 +441,24 @@ nonisolated enum ProtectionOpenRoad {
                 break
             }
         }
+    }
+
+    /// ONE Diagnostics line per open (the walk reads it — `log show … category == "protection"`): what the
+    /// library and this Mac hold now, by count and eight-character name only — never key material.
+    static func logSummary(_ ctx: RoadContext, _ library: UnlockedLibrary, _ report: RoadOpenReport, how: String) {
+        let facts = try? ctx.system.facts(session: ctx.session, unlocked: library)
+        let silent = facts.map { String($0.custody.filter { $0.itemClass == .silent }.count) } ?? "?"
+        let touch = facts.map { String($0.custody.filter { $0.itemClass == .touchid }.count) } ?? "?"
+        let apple = facts.map { $0.appleKeys.readable.map { String($0.prefix(8)) }.sorted().joined(separator: ",") } ?? "?"
+        let memory = facts.map { String($0.rememberedLibraryIDs.count) } ?? "?"
+        let roads = library.keyFile.map { $0.roads.map(\.rawValue).sorted().joined(separator: ",") } ?? "none"
+        let libraryID = String((library.record?.libraryID ?? "none").prefix(8))
+        let repairs = report.repairsDone.map { String(String(describing: $0).prefix(32)) }.joined(separator: ",")
+        log("road: \(how) — library \(libraryID) key \(StoreKeyEnvelope.shortFingerprint(library.fingerprint)) "
+            + "device \(library.section.deviceID.prefix(8)); custody silent \(silent) touchid \(touch); Apple keys "
+            + "readable [\(apple)]; memory items \(memory); live key file roads [\(roads)]; notice "
+            + "\(report.notice != nil); repairs [\(repairs)]; faults \(report.faults.count); acts \(report.acts.count); "
+            + "settle \(report.settle ?? "-")")
     }
 
     // MARK: - Words for the refusals
