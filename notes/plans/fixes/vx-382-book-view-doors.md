@@ -1066,3 +1066,20 @@ Zero app instances before every dev-domain write; read `appearanceChoice` FIRST 
 | 3–5 | VX-69 family · VX-291 guard probe · the 125-suite green batch — as written above | | |
 
 The walk's W4 (the Book Panel grips) likewise waits on the re-rule; W1–W3 and W5 stand as written.
+
+### R-U2-A2 — the re-rule on VX-21 (2026-10-18, after the inventory check hit R-U2-A's stop clause)
+
+The premise correction: the Book Panel has ONLY chapter grips (note rows never drew one — they drag grip-less, the
+17y B2 trace says so), so her Journal's bars were chapter ⠿s sitting beside entries and reading as entry handles —
+her verbatim (the VR-127 issue): *"in the journal, you can't reorder the entries since they're date ordered, but you
+still see the draggable bar which isn't really true."* With no note-row grip to gate, R-U2-A's capability split has
+nothing to split. **RULED: the ticket's letter stands as FIRST BUILT (ac24bedbf) — the panel's chapter ⠿ renders
+under manual order only.** Grounds: her complaint names the visual lie in the case she lives in (the Journal), and
+the ticket (which is the ruled scope) says exactly this; the chapter capability survives everywhere (the row still
+drags grip-less, and Move Chapter Up/Down stay in its menu), so no door that acts is removed — only the misread
+affordance. The siblings (the navigator's and the Outline headings' always-on chapter ⠿s) are deliberately
+UNCHANGED tonight: they sit on heading-shaped rows, her complaint did not name them, and aligning them is option
+(c)'s taste territory. PROVISIONAL for her bundle as P-U2-4, options recorded: (a) as built — this ruling; (b)
+chapter ⠿ everywhere (puts back the bars she reported); (c) make the bars unmistakably the chapters' in every order
+(hover-only or trailing-edge — her taste call), possibly with the siblings aligned. Window row 2 and walk row W4
+revert to the first READY's forms.
