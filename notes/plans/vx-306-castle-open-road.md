@@ -434,7 +434,7 @@ store this build has written — coordinators told.
   (the release-floor reds, Low). The ladder reads U1a with U1b.
 - U1b — the lobby on roads, Debug-gated (+ VX-310, the creation card, the Release check, the dev store's fresh start): DONE 2026-10-18 — built by the Opus implementer (`fdda1a67b`…`137281318`, the §9 U1b RECORD), the batch under `vx-306-u1b` 212/33 (3 known = VX-310's witnesses; the pin fix `2b6a866ad`), THE CONVERSION walked (the §9 U1b WALK RECORD; findings W-1…W-6, W-2 fixed in U2).
 - U2 — the honest faces (+ rule 3's reminder, the set-passphrase sheet, W-2's fix): BUILT 2026-10-18 (Opus implementer) — commits `d35b82290`…the close (the §9 U2 RECORD); `build-for-testing` and the phone build green on the final tree; the new pure and planted suites green HEADLESS (69 in the session harness), the core's protection set green in both configurations (315 / 291); the Mac suites (the record's list) and the walk (stages 2, 14, rule 1's restore, W-2's pair, rule 27 both moments) PENDING — the ORCHESTRATOR's, under the stage.
-- U3 — the two doors; the phone opens: BUILT 2026-10-18 but for LOOK INSIDE (Opus implementer; DerivedData `vx306-u3`) — Make this my library on a catalogued copy and on a picked (filed-first) copy, the phone's faces and its switch, commits `eaeed1126`…the close (the §9 U3 RECORD); Look inside PROPOSED (piece 4 — (b), the read-only facts sheet, recommended), its build waiting on the orchestrator's ruling; `build-for-testing` green on both platforms; the planted suites green HEADLESS (57 in 8); the Mac and phone suites and the walk PENDING — the ORCHESTRATOR's, under the stage.
+- U3 — the two doors; the phone opens: BUILT 2026-10-18 (Opus implementer; DerivedData `vx306-u3`) — Make this my library on a catalogued copy and on a picked (filed-first) copy; LOOK INSIDE built to the orchestrator's ruling (P-VX306-U3-15, (b) the read-only facts sheet — pieces 7a/7b) with the missing face's and rule 27's *Open Library…* back as file-then-Look-inside; the phone's faces and its switch; commits `eaeed1126`…the Look-inside close (the §9 U3 RECORD); `build-for-testing` green on both platforms on the final tree; the planted suites green HEADLESS (62 in 9) and the core's `ProtectionCopyPeekTests` green in both configurations; the Mac and phone suites and the walk PENDING — the ORCHESTRATOR's, under the stage.
 - The ladder (Fable — custody code; her cap: up to five rounds while MAJORs are still found): not started.
 - Closeout: the words checked (VX-379's first pass — the Start Here chapter §7c); canon: AppSpec §12's LIBRARY
   PORTABILITY line (the doors replace 13x's landing wording); the handoff with HER-HANDS items (Look inside on a byte-copy
@@ -1682,12 +1682,12 @@ B's five files under `~/vx306-walk/B` (for U3's Look inside); instances 0; stage
 - **W-10 (note):** every memory-forget mints a fresh device ID for A (`4e648d28` → `fb3534f5` → `06853752`) — P-VX378-U1-1
   (a) as built; harmless on the dev store, worth her eye at the bundle (the record's sections accumulate one per forget).
 
-### U3 RECORD — THE TWO DOORS: Look inside / Make this my library (+ the phone opens) (Opus implementer, 2026-10-18; BUILT but for LOOK INSIDE, which waits on the ruling — the Mac and phone suites and the walk PENDING)
+### U3 RECORD — THE TWO DOORS: Look inside / Make this my library (+ the phone opens) (Opus implementer, 2026-10-18; BUILT — Look inside to the ruling at piece 7; the Mac and phone suites and the walk PENDING)
 
 **Not done in U3, first:**
-- **LOOK INSIDE IS NOT BUILT** — propose-then-rule: the PROPOSAL is piece 4's (below; (b), the read-only facts sheet,
-  recommended — on this tree (a) is not isolated). No *Look inside…* door renders anywhere until the ruling (P-2). The
-  missing face's and rule 27's *Open Library…* stay retired on the new road until then (P-VX306-U3-7).
+- **(At the first close Look inside was not built; it is now — piece 7, to the ruling. The phone has NO Look inside: no
+  phone door reaches a copy — the mobile catch-up's.)** The lines below that say "not built" or "retired" describe the
+  first close; piece 7 and the "LOOK INSIDE AS BUILT" section at this record's end supersede them.
 - **No Mac suite and no phone suite was RUN** (the brief: no `xcodebuild test`, no stage) — only built (`build-for-testing`
   green, both). What DID run: the planted suites HEADLESS in the session's SwiftPM harness (below) — the two suites that
   need the keychain or the bootstrap (`MakeMineRouteTests`; the phone's `MobileProtectionRoadTests`) did not run anywhere.
@@ -1795,8 +1795,9 @@ B's five files under `~/vx306-walk/B` (for U3's Look inside); instances 0; stage
   safety-copies folder made; the open library, a plain-text export, a bare store refused in their words; two pairs in one
   folder offered). HEADLESS: the U3 and neighbouring planted suites `✔ Test run with 57 tests in 8 suites passed`; the Mac
   runs PENDING under the stage.
-- Piece 4 — LOOK INSIDE: the PROPOSAL (propose-then-rule; the build waits on the orchestrator's ruling): PROPOSED (this
-  commit — the proposal below, "LOOK INSIDE — THE PROPOSAL"); the BUILD NOT-STARTED (waits on the ruling). Until it lands,
+- Piece 4 — LOOK INSIDE: the PROPOSAL (propose-then-rule; the build waits on the orchestrator's ruling): PROPOSED
+  (`011d21c87` — the proposal below, "LOOK INSIDE — THE PROPOSAL"); RULED (b) by the orchestrator (P-VX306-U3-15, the ruling
+  block below); BUILT at piece 7. Until it lands,
   no *Look inside…* door renders anywhere (P-2: `CopyDoorsSheet` and `RoadRestoreRows` carry only *Make this my
   library…*).
 
@@ -2243,3 +2244,67 @@ writes a copy of the pick, never anything of hers — accepted, said in the bund
 shows today's road unsafe there; P-VX306-U3-3 (the confirm's lead drops "and passphrase" over a library with none) —
 accepted, truth over verbatim. The fold of main at this seam renumbered U1a's migration to `v1_31_protection_record` (VX-348's
 `v1_30` registers first); the dev store, which applied the old name, re-applies the idempotent DDL at its next open.
+
+**LOOK INSIDE AS BUILT (piece 7, after the ruling — the implementer, 2026-10-18):**
+- **Commits:** `56364718d` (7a — the core read road `ProtectionCopyPeek` + `ProtectionCopyPeekTests`), `bbbbe2e4f` (7b — the
+  app's road, `LookInsideModel`, `LookInsideSheet`, the doors on every Restore row and picked copy, the missing face's and
+  rule 27's *Open Library…* back, `LookInsideRoadTests`, `CopyDoorsModelTests` +1, the planted leaves' write logs), this
+  record.
+- **What it writes: nothing.** The executor's `lookInside` is a READ; `ProtectionCopyPeek.open` byte-copies the catalogued
+  file and its non-empty `-wal` into a FRESH private folder under the slot's scratch (never beside the catalogued file) and
+  opens ONE keyed READ-ONLY connection there; the key lives only inside that connection; the reads are raw SQL; closing
+  (*Close*, the sheet going away, *Make this my library…*) closes the connection and deletes the private folder.
+- **The proof, MUTATION-checked:** a look that writes one custody item (`writeCustody` inside `lookInside`) → `✘ Test run with
+  4 tests in 1 suite failed after 0.234 seconds with 3 issues.` (`LookInsideRoadTests` — the write logs on both looks, and the
+  container state on the second); restored by `git checkout` from the committed piece (the protocol's "commit before you
+  revert"), green again (`✔ Test run with 62 tests in 9 suites passed`).
+- **P1, measured:** the notes page first walked `idx_container_kind` into a TEMP B-TREE sort of the whole corpus (no planner
+  statistics); `+kind` keeps it on `idx_container_touched` backward — pinned (`theNotesPageWalksTheTouchedIndexWithNoTempSort`).
+- **Counts:** core `ProtectionCopyPeekTests` Debug `✔ Test run with 4 tests in 1 suite passed after 0.189 seconds.`, release
+  `✔ Test run with 4 tests in 1 suite passed after 0.172 seconds.`; HEADLESS (the harness — now also symlinking
+  `LookInsideModel.swift` and `LookInsideRoadTests.swift`, its test target depending on `swift-dependencies`) `✔ Test run with
+  62 tests in 9 suites passed after 1.076 seconds.` (9 + 1 + 3 + 3 + 4 + 4 + 9 + 15 + 4 + 10 — the U3 and neighbouring
+  planted suites); `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath
+  DerivedData/vx306-u3 build-for-testing` → `** TEST BUILD SUCCEEDED **`; `xcodebuild -scheme VariorumMobile -destination
+  'generic/platform=iOS Simulator' -configuration Debug -derivedDataPath DerivedData/vx306-u3 build-for-testing` → `** TEST
+  BUILD SUCCEEDED **` (both on the final tree); no new warning in a touched file.
+- **The Mac suite list GROWS** (the list above, plus): `-only-testing:VariorumTests/LookInsideRoadTests` (4 — the planted proof;
+  no keychain) — and the core's `swift test --filter 'VariorumCoreTests\.ProtectionCopyPeekTests'` (4, headless, both
+  configurations — already green). `CopyDoorsModelTests` is 10 now; `TravellingDotsIndicatorTests` reads `LookInsideSheet`
+  too. The phone's list is unchanged.
+- **THE WALK ROW FOR LOOK INSIDE (the recipe's row 5, replacing "not walkable"; `DC` and the launch as in row 0):**
+  (a) **On the stage-3 pair** (A's — or C's — newest backup): `cp DC/variorum-library-keys.json ~/vx306-walk/live-before.json`;
+  `cmp`-ready. Settings ▸ Data Safety → the row's *Look inside…* → the sheet *Look inside* · *This is a copy from <the
+  backup's day>. Nothing you do here changes it or your library.* · *Backup* · *Opening the copy…* then *Books* (each *N notes*)
+  and *Notes* newest first (*Show more* past 100) — the copy opens by its own quiet road (no field). Pick a note → its text,
+  read-only; *Back*. Capture (light, dark). Log: `road: a look inside a copy (backup, road quietRoad(thisMac)) — read-only,
+  nothing written`. While it stands: `ls "$TMPDIR"variorum-protection/` (the app's container temp — in the sandbox:
+  `~/Library/Containers/io.lduarte.Variorum.debug/Data/tmp/variorum-protection/`) shows ONE `vx306-probe-<uuid>/`. *Close* →
+  that folder GONE; `cmp DC/variorum-library-keys.json ~/vx306-walk/live-before.json` → identical; no new keychain item (the
+  next launch's `road: opened …` line's counts — `custody silent N`, `memory items N`, `Apple keys readable […]` — unchanged
+  from the launch before the look); the catalogued pair's folder `ls -la` unchanged (no `-wal`/`-shm` appeared beside it).
+  (b) **On another library's copy — `~/vx306-walk/B`'s files:** `mkdir -p ~/Downloads/vx306-airdrop && cp
+  ~/vx306-walk/B/variorum.sqlite ~/vx306-walk/B/variorum-library-keys.json ~/Downloads/vx306-airdrop/` (row 4's), File ▸ Open
+  Library… → that folder → filed → *A copy from <day>.* · *Look inside…* · *Make this my library…* → *Look inside…*: B's
+  quiet roads may still be on this Mac (U2 created B here — its silent item and Apple key), so it may open with no field; if
+  it asks (*This copy doesn't open by itself on this Mac. Enter its passphrase or twelve words.*), B's words were never
+  recorded — any wrong text shows *That doesn't open this copy. Enter the copy's own passphrase or twelve words.* (the field
+  reads anything but twelve valid words as a passphrase); *Close*. Either way record which. Capture. (c) **With no library open:** the missing face
+  (row 6 — the slot and its sidecars moved aside) now shows *Open Library…* again → pick `~/Downloads/vx306-airdrop` → *Look
+  inside…* ALONE (no *Make this my library…* — T-5 is VX-309's) → the look as in (b); put the slot back.
+
+**PROVISIONALs added at piece 7 (bundled under QUESTIONS #233):**
+- **P-VX306-U3-15 — BUILT as ruled:** Look inside is the read-only facts sheet (the orchestrator's ruling (b)); the missing
+  face's and rule 27's *Open Library…* back as "file, then the doors" (Look inside alone there — Make this my library needs a
+  library open; P-VX306-U3-7 narrowed).
+- **P-VX306-U3-16 — Look inside's own lines §7c does not draft:** *Look inside* (the sheet's title) · *This copy doesn't open
+  by itself on this Mac. Enter its passphrase or twelve words.* · *Opening the copy…* · *Books* · *Notes* · *No books.* · *No
+  notes.* · *1 note* / *N notes* · *Show more* · *Back* · *Untitled* · *Close*; (b) blank until her sitting; (c) other words.
+- **P-VX306-U3-17 — what the sheet lists:** (a) BUILT — the BOOKS (gatherings hold no membership and assemble by rule, so they
+  are not listed), each with its live member count; the LIVING notes (not archived — which keeps saved versions out — not
+  deleted), newest first by last touched, a page of 100; a note's text as its page reads (the chosen take, the block's default
+  when the chosen one is gone); (b) archived notes listed too, marked; (c) gatherings listed without a count.
+- **P-VX306-U3-18 — the phone has no Look inside this unit:** no phone door reaches a copy (no Restore list, no Open Library),
+  so a twin sheet would have no entry point; the mobile catch-up's. (b) a phone Open Library door now (a file importer — not
+  one sheet).
+
