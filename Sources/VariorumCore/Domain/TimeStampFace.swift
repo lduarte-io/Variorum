@@ -158,9 +158,62 @@ public enum TimeStampFace {
         _ subject: Subject, date: Date,
         calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
     ) -> String {
-        let template = subject.isDayPrecision ? "MMMdyyyy" : "MMMdyyyyjmm"
-        return "\(subject.titleCased) "
-            + formatted(date, template: template, calendar: calendar, locale: locale)
+        tooltip(
+            labelled: subject.titleCased, date: date, dayPrecision: subject.isDayPrecision,
+            calendar: calendar, locale: locale)
+    }
+
+    // MARK: - The whole fact for every speaker (VX-351 — the VX-348 run, U4)
+
+    /// **The whole fact, with no verb** — *Sep 9, 2026 at 4:02 PM* for an
+    /// instant, *Sep 9, 2026* for a day (a day has no time to spell). The
+    /// hover's body: the YEAR always, and the minute whenever the stored
+    /// stamp holds one.
+    ///
+    /// Her ask (VX-351, 2026-10-14): *"you should be able to see the actual
+    /// time (with hours) that you last edited something at even if it's in
+    /// the past."* Her ruling at the run's kickoff sitting (R-VX348-1/3,
+    /// "Hover everywhere" · "All speakers"): the glances stay calm and EVERY
+    /// stamp speaker gains this hover — so the rule lives here once, and a
+    /// speaker whose verb is not one of the three subjects (a note's last
+    /// commit, an arrival, an archive, a deletion) still says its whole fact
+    /// in these words rather than spelling a format of its own.
+    public static func whole(
+        _ date: Date, dayPrecision: Bool = false,
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
+    ) -> String {
+        formatted(
+            date, template: dayPrecision ? "MMMdyyyy" : "MMMdyyyyjmm",
+            calendar: calendar, locale: locale)
+    }
+
+    /// **The hover for a stamp the speaker names with its own verb** —
+    /// *Arrived Sep 9, 2026 at 4:02 PM* · *Saved Sep 2, 2026 at 9:14 AM*.
+    /// `label` is the speaker's verb as a sentence starts it (its glance's
+    /// own word, capitalised by the speaker's copy — the brain does not guess
+    /// a capital). The three subjects' tooltips are this door with their own
+    /// word, byte for byte.
+    public static func tooltip(
+        labelled label: String, date: Date, dayPrecision: Bool = false,
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
+    ) -> String {
+        "\(label) " + whole(date, dayPrecision: dayPrecision, calendar: calendar, locale: locale)
+    }
+
+    /// The labelled hover for a stored stamp of either shape — an ISO instant
+    /// spells its minute, a day key (`entry_date`) its day alone, never an
+    /// invented noon. nil on the same terms as `stamp(_:iso:now:)`.
+    public static func tooltip(
+        labelled label: String, iso: String?,
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
+    ) -> String? {
+        guard let text = iso, !text.isEmpty else { return nil }
+        if let instant = DateFormatter.variorumISO8601.date(from: text) {
+            return tooltip(labelled: label, date: instant, calendar: calendar, locale: locale)
+        }
+        guard let day = JournalDay.date(from: text, calendar: calendar) else { return nil }
+        return tooltip(
+            labelled: label, date: day, dayPrecision: true, calendar: calendar, locale: locale)
     }
 
     /// The tooltip for a stored stamp of either shape; nil on the same terms
