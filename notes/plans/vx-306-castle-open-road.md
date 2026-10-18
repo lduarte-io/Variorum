@@ -837,4 +837,16 @@ no stray (both scratch worktrees removed).
   none; paused ⇒ none, resumed ⇒ written; another key's live file ⇒ none; attached only for a writing session. Also here:
   the open's ONE Diagnostics line (`ProtectionOpenRoad.logSummary` — counts and eight-character names only; the walk reads
   it). Debug `build-for-testing` → `** TEST BUILD SUCCEEDED **`. The run PENDING under the stage.
-- Piece 6 — the Mac tests + `build-for-testing` + the phone build: NOT STARTED.
+- Piece 6 — the Mac tests + `build-for-testing` + the phone build: DONE (this commit; the final checks are the close's) —
+  `ProtectionRoadRouteTests` (7, through `AppBootstrap` with the harness, throwaway scope + temp slot + the real custody and
+  memory leaves, an in-memory Apple leaf: stage 1 → the card → the open, rule 21's four things, today's store id, the
+  quiet relaunch, `canLock` off; stage 5's on-device half (the silent item gone → the Apple wrap → `remakeOnDeviceItem`);
+  both quiet roads gone → the words field → a wrong attempt refused → the words open, `remakeAppleRoad`; K5 → the missing
+  face with no sentence; a junk live key file → the lobby, never written over; an unlistable keychain → the typed field
+  with its reason; Start a New Library on the missing face → the old key file aside, the card; the read-only road creates
+  nothing); `ProtectionOpenRoadPlantedTests` (9, the road over PLANTED leaves — no keychain: the creation's every rule-1
+  home, the quiet reopen with nothing owed, rule 8 both ways, the words through the keychain MIRROR with the key file
+  written back (`restoreKeyFileFromMirror`), K5, the junk live file, the unlistable keychain over an empty slot and over a
+  library, the read-only road). HEADLESS (the harness — all of `Shared/Protection/` but the backup hook, eight one-line app
+  stubs, the support file, this suite and the lobby suite): `✔ Test run with 24 tests in 2 suites passed after 0.154
+  seconds.` The Mac runs PENDING under the stage.
