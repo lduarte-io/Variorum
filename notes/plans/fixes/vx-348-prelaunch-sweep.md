@@ -261,3 +261,22 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
 - **The trailer slip, closed:** the kickoff's in-flight-row commit briefly carried a `Co-Authored-By` trailer; at
   her word she force-pushed the amended commit herself — main `d35b07515` → `fdce74de3`, identical tree. No other
   commit carries one.
+
+## U1 UNIT RECORD (VX-357 · VX-338 · VX-339 — the core and the headless fixes)
+
+*Implementer: `opus-implementer` at xhigh, fresh session, 2026-10-18. Read in its own context before any code: this plan
+in full, `notes/SessionResiliencyProtocol.md`, `notes/MCPSpec.md` in full, CLAUDE.md + its canon, the three tickets'
+bodies and their parents' (VX-302, VX-317), the VX-266 plan's cut line (§5 "a filename tag would do") and design §5.*
+
+**NOT DONE BY THIS UNIT (first line, by the brief's rule):** the Mac batch (`xcodebuild test`) and every walk — the stage
+is the orchestrator's this window; the Mac-side pins are written, compiled `build-for-testing`, and their red-on-old
+legs PREBUILT (locations below) so the batch window only runs `test-without-building`. No real-client MCP round (U3's
+window, if the batch allows).
+
+### LIVE STATUS (per member)
+
+- **VX-357 (U+0000 stored truncated):** IN-PROGRESS — the Domain rule, the op families, the wire answer, MCPSpec's
+  clause and the tool descriptions remain.
+- **VX-338 (two Macs prune each other's backups):** NOT-STARTED.
+- **VX-339 (Resume Sync clears the banner over a failed marker removal):** NOT-STARTED.
+- **No behavioural revert is in flight.** (A revert starts only after this line names it — addendum 2.)
