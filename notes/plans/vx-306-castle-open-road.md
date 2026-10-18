@@ -1295,4 +1295,13 @@ the old store whole in the safety copy; `dev-castle.env`'s Castle values unchang
   failed … with 1 issue`, the folder `[….keys.json, ….sqlite, ….sqlite-shm, ….sqlite-wal]`; the worktree removed),
   GREEN on this tree headless (`✔ Test run with 10 tests in 1 suite passed`); its Mac run PENDING under the stage.
   The core suite's release leg PENDING (the close).
-- Piece 8 — the Mac tests + `build-for-testing` + the phone build + the close (suites, walk recipe): NOT-STARTED.
+- Piece 8 — the Mac tests + `build-for-testing` + the phone build + the close (suites, walk recipe): IN-PROGRESS —
+  `ProtectionFacesRouteTests` (5, through `AppBootstrap` on a throwaway scope + temp slot, Mac only: a stray beside →
+  the `.roadInterlude` STATE, *Use it* → `.ready` with the library's own file back and the keychain receipt owed;
+  *Not now* → `.ready`, the stray byte-identical, the memory items unchanged; the live key file gone → `.ready`,
+  rule 1's receipt spoken once, rule 3's first-backup moment showing; the set-passphrase sheet through the
+  bootstrap's faces model on the real custody → set, the receipt, the reminder done, the record's fact; rule 27's
+  lobby through the bootstrap → *Start a New Library* → the words card, the old library aside) (this commit).
+  `xcodebuild … -configuration Debug -derivedDataPath DerivedData/vx306 build-for-testing` → `** TEST BUILD
+  SUCCEEDED **`; the phone `-scheme VariorumMobile -destination 'generic/platform=iOS Simulator' build` → `** BUILD
+  SUCCEEDED **`. The record's close (the suites, the walk recipe, the PROVISIONALs) is next.

@@ -71,6 +71,7 @@ struct ProtectionOfferFaceTests {
             Issue.record("the offer")
             return
         }
+        #expect(offer.keyFile.fingerprint == created.library.fingerprint, "the offered file is the library's own")
         var receipts: [String] = []
         var finished = 0
         let model = RoadInterludeModel(
