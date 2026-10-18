@@ -1878,8 +1878,9 @@ minimal sequence in a scratch worktree, state dumped after every step) and FIXED
   (VX-306's production leaf over the real folders). PROVISIONAL P-VX378-O2-2. Pin
   `U4GatePins.aRolledBackStretchsSilentItemAndAppleKeyGoAtCastleEntry` — red on `4a4af3164` (1 issue), green after.
 After the fixes: the protection set in Debug `✔ 387 tests in 149 suites passed` (the wider filter; the two pins among
-them); release: RELEASE_AFTER_FIX_PENDING. **The final tree moves to the second fix's commit; ATTEMPT 2 — the discovery
-run AND the gate soak — runs on it from the start (gate item 1: both runs on the FINAL tree).** ATTEMPT2_PENDING
+them); release `swift build -c release` complete; `✘ 364 tests in 145 suites … 1 issue` — VX-380's Sync test under the wider filter, nothing of Protection's. **The FINAL TREE is `c84375010` (the second fix's commit); ATTEMPT 2 — the discovery run AND the gate soak — runs on it
+from the start (gate item 1: both runs on the FINAL tree), started 2026-10-18T01:1xZ; a fresh Fable ROUND 3 reads the two
+fixes in parallel (model changes no round had read — VX-305's precedent).** ATTEMPT2_PENDING
 
 2. **Every fixed scenario green in both configurations** — the protection + lifecycle suites on `4a4af3164`, run by
    the orchestrator in a clean review worktree: Debug `✔ Test run with 385 tests in 148 suites passed after 10.142
