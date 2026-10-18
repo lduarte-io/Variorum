@@ -354,7 +354,10 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   VX-382/VX-348 mints 0.9.8. OWED at the next clean seam (U5's implementer holds the worktree now — the merge waits
   for its finish): merge `origin/main` into this branch; its delta reaches `Shared/OpsRefusalTable.swift` and the
   gathering doors — diff both sides for overlap with this run's surfaces, SAY SO in the merge ask, and re-run the
-  affected suites headless. Every later unit builds on the merged tree.
+  affected suites headless. Every later unit builds on the merged tree. **Castle too (her word via the coordinator,
+  ~04:5x):** VX-378 (branch `vx-305-castle-core`) merges into main shortly — its lines are `Protection/` + its tests
+  + notes, none of this run's surfaces; the same next-seam fold takes it in. The release rule is unchanged: Castle
+  never mints, isn't counted; the last of VX-382/VX-348 mints 0.9.8 and carries Castle if it's in by then.
 - **The trailer slip, closed:** the kickoff's in-flight-row commit briefly carried a `Co-Authored-By` trailer; at
   her word she force-pushed the amended commit herself — main `d35b07515` → `fdce74de3`, identical tree. No other
   commit carries one.
