@@ -1,6 +1,6 @@
 # VX-383 — Run: Duplicate a note — the Mac door and the wire (VX-284 part C)
 
-**STATUS: OPEN — kicked off 2026-10-17 at her sitting.** Run ticket **VX-383** (project *v1 release readiness*; a
+**STATUS: CLOSED 2026-10-17 — the ladder closed at round 1; the canon, the bundle (QUESTIONS #229) and the handoff landed; the PR is the merge vehicle.** *(kicked off 2026-10-17 at her sitting)* Run ticket **VX-383** (project *v1 release readiness*; a
 child of the umbrella **VX-284**) · branch `vx-383-duplicate-note` · worktree `~/dev/variorum-vx-383` on the Pro ·
 PR `VX-383: …` (merge commit only). Shape: `/architect-phase vx-284`, split at her word into three runs (below).
 Orchestrator: the sitting's session (Fable 5.1), which holds the architect mandate for this run.
@@ -265,7 +265,7 @@ store's Castle credentials, if a lock screen appears, are `~/.variorum/dev-castl
 | U1 | VX-372 | **PROVEN, CLOSED** — headless green; the 382-suite Mac batch green but the two standing reds; `MobileVersionsTests` 17/1 on iPhone 17 Pro (iOS 26.2); the walk W1–W9 PASS (W3 pin-covered; W10 half) with two pre-existing findings ticketed (VX-384 · VX-385) |
 | U2 | VX-371 | **PROVEN, CLOSED** — headless green; its 61 suites in the batch; the faces pin red-on-old verified (six lines); the live round L1–L4, L6, L7 PASS byte-exact, L5 half-live (the pin stands); both voices |
 | Ladder | `fable-reviewer` at xhigh, cross-model | **CLOSED at round 1:** 0B/0M/2m/3n — F-1 a bundle sentence, F-2 accept-as-recorded, F-3/F-4 doc lines fixed by the orchestrator, F-5 no change |
-| Closeout | — | NOT-STARTED |
+| Closeout | — | **DONE 2026-10-17** — canon (AppSpec §9 + §14 with VX-281 rolled, MCPSpec's clause), QUESTIONS #229, the finals ledger, MobileSoul PL-48, P-17y-B3-c1's (b), the in-flight row retired, the handoff; the PR, the /Applications refresh and the worktree/branch tidy follow the merge |
 
 ## THE ORCHESTRATOR'S RULINGS AND DISPOSITIONS (2026-10-17, the stage window)
 
@@ -690,3 +690,12 @@ sorted-keys JSON); words in quotes are byte-exact.
 - **Not touched:** `Sources/VariorumCore/Sync/`, custody, the Keychain, any migration or schema (`mcp_activity` unchanged
   — hence P-U2-2), the editor seam, U1's Mac doors (`NoteDuplicate`, the registry, the boards), `MCPSession.instructions`,
   the field guide. No trace led to any of them.
+
+## CLOSEOUT (2026-10-17)
+
+- **FINALS:** core 2,895/337 · workbook 40/6 · VariorumMCPTests 362/68 headless (VX-353's standing flake, green alone); Mac: the 382-suite tip batch 2,402 tests / 379 suites, only the two standing reds (VX-115 — VX-382's; VX-167 — Parked); the guide + door pins 37/4 after R-C-1; `MobileVersionsTests` 17/1 (iPhone 17 Pro, iOS 26.2). The faces pin red-on-old verified on a rebuilt pre-fix product (six lines).
+- **Canon:** AppSpec §9's duplicate bullet (the two doors, the applying act, the one undo, the registry, the retired label) and Versions bullet (promote applies tags); §14's entry (VX-281's rolled to the delta archive); MCPSpec's `duplicate_note` clause GROWN; `notes/plans/phase-17-standing-fixes.md` P-17y-B3-c1 (b) BUILT for the duplicate door. Zero `Sync/`, custody, schema or editor-seam lines; marker 13 untouched; zero lockstep.
+- **QUESTIONS #229** — the ratify bundle (P-C-1…3, P-U1-1…6, P-U2-1…5 with the reviewer's fence sentence, VX-384/385, the L5 hand check).
+- **MOBILE PARITY:** `notes/MobileSoul.md` PL-48 — promote's tags are mobile-visible through the shared op; the phone has no duplicate door.
+- **Tickets:** VX-372 and VX-371 Done at the merge; VX-383 Done; filed VX-384 · VX-385 (Bug · Confirmed · Library & sidebar · Low; Pre-launch is hers to call) — triaged.
+- **Owed after the merge (this session):** the /Applications refresh at a zero-instance window behind the A1 rail; the worktree and branch deletion; the build-debris and evidence tidy (`App/Variorum/DerivedData/vx383-*`, `notes/plans/vx383-screens/`, the scratchpad). **Owed by her (the handoff):** Help ▸ Restore Tutorial… on her real store (the guide's four changed sentences), the #229 bundle, the L5 hand check at her option.

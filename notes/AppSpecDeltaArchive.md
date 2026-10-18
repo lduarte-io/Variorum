@@ -1,5 +1,9 @@
 # Variorum — AppSpec §14 Delta Archive
 
+## Rolled from §14 at the VX-383 closeout (2026-10-17) — the VX-281 entry, verbatim
+
+Before it — **VX-281 (a RUN, 2026-10-13/14 overnight, `notes/plans/fixes/vx-281-mcp-settings-pane-shared-icon.md` — the MCP settings pane in tabs and the shared icon everywhere the ask glyph is; members VX-199 · VX-205 · VX-232 · VX-268 + VX-245's two MCP sites; her kickoff cast redirect (implementers xhigh, Opus reviews at max, ONE Fable review at the run's end), her cross-model fix rule and her overnight mandate; two units, each proven by a Mac batch and a walk in both voices):** §12's THE MCP DOOR line gains THE PANE AND THE SHARED ICON. Zero `Sync/`, custody, editor-seam or schema lines; marker 13 untouched; zero lockstep. PR #159 (merge commit 0f5efe1c). The ratify bundle at QUESTIONS #219.
+
 ## Rolled from §14 at the 13r post-close sitting (2026-10-04) — the 18l-c and 18l-first-half tail entries, verbatim
 
 Before it — 18l-c (2026-09-28, `notes/plans/phase-18l-c-navigation-feel.md`): §7's NOT-seeded settings list gains `arrival_flash` (the round's one synced setting); TWO §12 contract lines DRAFTED AND PROPOSED to the author at the closeout, landing only at her word — the Takes find bar (her sitting rulings R-18l-6/9/10) and the mode-switch caret rule (R-18l-13); schema, migrations and `Sync/` untouched, marker 9. Before it — 18l, first half (2026-09-26, `notes/plans/phase-18l-navigation-feel.md`): the note-open rule (R-18l-1, §12); the 13g F-5 carve-out (R-18l-5, PROVISIONAL, #149); marker 9.

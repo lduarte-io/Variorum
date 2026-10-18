@@ -2865,7 +2865,7 @@ opening any file; or the broadcast pins capture at a seam as B3's now does.
 
 - **P-17y-B3-c1** a duplicate's riding tags are a ROW copy — no living book hears the duplicate (the
   copy family's letter). (a) BUILT · (b) an applying act: books whose rule names the tag take the
-  duplicate in (or bell it at Arrivals).
+  duplicate in (or bell it at Arrivals). **(b) BUILT at VX-372 (VX-383, 2026-10-17) for her Duplicate with Tags and the wire's `duplicate_note` (with_tags); the ceremony copy keeps (a).**
 - **P-17y-B3-i1** "unfiled" is lowercase in the move menus too (the headers' case). (a) BUILT · (b)
   "Unfiled" in menus.
 - **P-17y-B3-11a** the book view's sort refusal speaks on the book view's own error line (where its
