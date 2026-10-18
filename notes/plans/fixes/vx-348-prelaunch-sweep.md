@@ -40,6 +40,27 @@ whole-fact hover via `TimeStampFace.tooltip`; no glance-form change, no setting,
 red-on-old for the info panel's wording (the raw key is the old behavior) and for each speaker's hover presence
 where a pin can read it; the walk covers the rest.
 
+## HER OVERNIGHT MANDATE (2026-10-18, right after the sitting — verbatim)
+
+*"yes, let's bring these in: VX-176 (segmented controls draw system blue in dark Terminal — the exact controls row
+VX-350 reworks) and VX-355 (the Pool has no bottom bar for receipts — this looks like the same fix as VX-385's
+quiet-receipt line; if so it closes for free and I'd mark it). also, I want you to run ruling provisionally
+overnight. I'm going to sleep. You can merge to main when you're done - if other sessions finish first that's fine,
+merge in the order you finish in. if you finish, I want you to leave me with a handoff AND separately a completed
+block of everything that was done (including if new items were minted during the run) in this sort of format:"* —
+followed by her checklist format (a numbered run heading, the members as `- [ ]` lines grouped **Her running list ·
+Today's road (folded in 2026-10-18) · Riders**). The closeout writes that block with every member ticked and any
+run-minted items included, SEPARATE from the handoff.
+
+So: **VX-176 joins U3** (its code is the controls row U3 reworks) and **VX-355 joins U4** (expected the same fix as
+VX-385 — if the one `QuietReceiptLine` at the Pool's foot proves both tickets' cases, VX-355 closes with it and the
+record says so). ELEVEN members now. Rule PROVISIONALLY overnight and bundle for QUESTIONS at the merge; the merge
+runs at this run's own finish, serialized with VX-381/VX-382 in whatever order the runs finish.
+
+**The trailer slip is FIXED at her word:** she ran the force-push herself — main `d35b07515` → `fdce74de3`,
+identical tree, the message without the trailer. (History rewrite authorized by the author in person; the lease
+pinned exactly the trailer commit.)
+
 *(The original pre-kickoff banner follows, kept as written.)*
 
 **STATUS AT WRITING: READY FOR KICKOFF — written 2026-10-18 at her word ("I want to kick that sweep off soon / now so I'd like to
@@ -163,8 +184,11 @@ this run already opens)
    clause) · VX-338 · VX-339. Headless `swift test` throughout; no stage until the Mac batch; the wire half's
    real-client round rides U3's window if the batch allows.
 2. **U2 — ⌘S:** VX-347 across every host (the sweep table), walk both voices.
-3. **U3 — the Library's row and header:** VX-350 · VX-349. Walk both voices at three widths.
-4. **U4 — the Library's stamps and the riders:** VX-351 (built to her kickoff rulings) · VX-384 · VX-385. Walk.
+3. **U3 — the Library's row and header:** VX-350 · VX-349 · **VX-176 (joined at her overnight word — the same
+   controls row; dark Terminal is one of the walked voices)**. Walk both voices at three widths.
+4. **U4 — the Library's stamps and the riders:** VX-351 (built to her kickoff rulings) · VX-384 · VX-385 ·
+   **VX-355 (joined at her overnight word — expected the same fix as VX-385; prove its cases, close it with the
+   record saying so)**. Walk.
 
 Then the ladder (Fable, fresh per round, over the whole diff), the closeout, the merge.
 
@@ -209,9 +233,12 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   sync/custody slot is VX-378's — anything that looks like it needs it is DEFERRED (her kickoff word).
 - **U1 (VX-357 · VX-338 · VX-339 — the core and the headless fixes):** NOT-STARTED.
 - **U2 (VX-347 — ⌘S):** NOT-STARTED.
-- **U3 (VX-350 · VX-349 — the Library's row and header):** NOT-STARTED.
-- **U4 (VX-351 as ruled · VX-384 · VX-385 — stamps and riders):** NOT-STARTED.
-- Then the ladder (fresh Fable per round, whole diff), closeout, merge. A release is her explicit word only.
-- **Known slip, recorded:** the kickoff's in-flight-row commit on main carries a `Co-Authored-By` trailer against
-  CLAUDE.md's no-trailer rule (the harness injected it; pushed history is never rewritten, so it stands; no later
-  commit repeats it).
+- **U3 (VX-350 · VX-349 · VX-176 — the Library's row and header):** NOT-STARTED.
+- **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** NOT-STARTED.
+- Then the ladder (fresh Fable per round, whole diff), closeout, merge. **Her overnight mandate (2026-10-18):**
+  rule PROVISIONALLY and continue; merge to main at this run's own finish (finish-order serialization with
+  VX-381/VX-382); leave the handoff AND, separately, the completed checklist block in her format. A release is her
+  explicit word only.
+- **The trailer slip, closed:** the kickoff's in-flight-row commit briefly carried a `Co-Authored-By` trailer; at
+  her word she force-pushed the amended commit herself — main `d35b07515` → `fdce74de3`, identical tree. No other
+  commit carries one.
