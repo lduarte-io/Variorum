@@ -495,7 +495,11 @@ struct VX347CommitLeavesMountTests {
 
     /// **A LOCKED TAKE STILL REFUSES — RED ON OLD** (pre-fix, the click away
     /// said nothing at all): leaving the field reaches the same filer ⏎ does,
-    /// and the filer's refusal speaks. No commit.
+    /// and the filer's refusal speaks. No MANUAL commit. (The field does open
+    /// on a locked take — the door checks the seal, not the take's lock — and
+    /// locking this never-committed, so dirty, take first appends ONE quiet
+    /// auto commit: the lock insures what it guards, AppSpec §9. Fix leg: the
+    /// first cut counted that one and failed on every tree.)
     @Test func aLockedTakeStillRefusesWhenTheFieldIsLeft() async throws {
         try await withEditor(seedBlocks: ["draft text"]) { h in
             let mounted = await Rig.mountWritesBar(h.model)
@@ -510,7 +514,11 @@ struct VX347CommitLeavesMountTests {
             let spoke = await Rig.turns(until: { h.model.statusMessage != nil }, max: 200)
 
             #expect(spoke, "the refusal speaks")
-            #expect(try Rig.savepoints(h).isEmpty, "a locked take takes no commit, whichever way the field is left")
+            let saved = try Rig.savepoints(h)
+            #expect(saved.allSatisfy { $0.kind == .auto },
+                    "premise: only the lock's own quiet savepoint")
+            #expect(saved.filter { $0.kind == .manual }.isEmpty,
+                    "a locked take takes no commit, whichever way the field is left")
         }
     }
 
