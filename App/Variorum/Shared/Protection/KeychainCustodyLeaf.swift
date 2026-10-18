@@ -15,7 +15,15 @@
 //  says Touch ID is unusable for now (nothing is attempted; `lastPress` says why). `lastPress` records what
 //  the most recent press did (cancelled · failed on an item that exists · unusable for now) — the lobby's
 //  `TouchIDPress` fact (U1b).
-//  THE LISTING reads attributes only: no listing ever presses an item. VX-390's stamp is `kSecAttrLabel`.
+//  THE LISTING reads attributes only and SKIPS an item that would need authentication — no listing ever
+//  presses an item (`ProtectionKeychain`); the Touch ID items are then found BY NAME — a non-prompting
+//  existence probe of `<scope>-<fp>-touchid` for every fingerprint this device knows of
+//  (`touchIDCandidates`: the composition root's — every catalogued key file's keys, the live one's among
+//  them, what the memory items name, the plan's two keys, the staged key — plus every silent item's), so a
+//  Touch ID item for a key no file or memory here names is not listed (it opens nothing this Mac can reach,
+//  and it is no quiet road — rule 9) — P-VX306-U1a-5. A Touch ID item's stamp is not readable without a
+//  press, so it lists unstamped (the stamp sweep is the SILENT items' — rule 11). VX-390's stamp is
+//  `kSecAttrLabel`.
 //  Every mutation asks the test tripwire first (`ProtectionKeychain`).
 //
 
@@ -31,12 +39,18 @@ nonisolated final class KeychainCustodyLeaf: CustodyLeaf, @unchecked Sendable {
 
     let scope: String
     private let biometry: any BiometryLeaf
+    /// The fingerprints whose Touch ID item the listing probes for by name.
+    private let touchIDCandidates: @Sendable () -> Set<String>
     private let lock = NSLock()
     private var _lastPress: TouchIDPress?
 
-    init(scope: String, biometry: any BiometryLeaf = LAEnvironmentBiometryLeaf()) {
+    init(
+        scope: String, biometry: any BiometryLeaf = LAEnvironmentBiometryLeaf(),
+        touchIDCandidates: @escaping @Sendable () -> Set<String> = { [] }
+    ) {
         self.scope = scope
         self.biometry = biometry
+        self.touchIDCandidates = touchIDCandidates
     }
 
     /// What the most recent Touch ID press did — nil after one that read its item, or before any.
@@ -57,13 +71,21 @@ nonisolated final class KeychainCustodyLeaf: CustodyLeaf, @unchecked Sendable {
     }
 
     func custodyItems() throws -> [CustodyItemFact] {
-        try ProtectionKeychain.list(service: Self.service, residence: .deviceOnly).compactMap { attributes in
+        var items = Set(try ProtectionKeychain.list(service: Self.service, residence: .deviceOnly).compactMap { attributes in
             guard let account = ProtectionKeychain.account(of: attributes),
                   let parsed = ProtectionNames.parseCustodyAccount(account, scope: scope) else { return nil }
             return CustodyItemFact(
                 fingerprint: parsed.fingerprint, itemClass: parsed.class, libraryID: ProtectionKeychain.label(of: attributes))
+        } as [CustodyItemFact])
+        let known = touchIDCandidates().union(items.map(\.fingerprint))
+        for fingerprint in known where ProtectionNames.isFingerprint16(fingerprint) {
+            let fact = CustodyItemFact(fingerprint: fingerprint, itemClass: .touchid)
+            guard !items.contains(fact) else { continue }
+            if try ProtectionKeychain.exists(service: Self.service, account: account(fingerprint, .touchid), residence: .deviceOnly) {
+                items.insert(fact)
+            }
         }
-        .sorted { ($0.fingerprint, $0.itemClass.rawValue) < ($1.fingerprint, $1.itemClass.rawValue) }
+        return items.sorted { ($0.fingerprint, $0.itemClass.rawValue) < ($1.fingerprint, $1.itemClass.rawValue) }
     }
 
     func readCustody(fingerprint: String, itemClass: ProtectionNames.CustodyClass) throws -> StoreKey? {
@@ -86,7 +108,9 @@ nonisolated final class KeychainCustodyLeaf: CustodyLeaf, @unchecked Sendable {
             do {
                 let data = try ProtectionKeychain.readData(
                     service: Self.service, account: account, residence: .deviceOnly, context: context)
-                setLastPress(nil)
+                // An item the probe found that the press reads as absent was invalidated (the facts §4.5:
+                // older systems answer "not found" for an enrollment change) — failed on an item that exists.
+                setLastPress(data == nil ? .failedOnExistingItem : nil)
                 return data.flatMap { StoreKey(data: $0) }
             } catch ProtectionKeychain.KeychainError.status(let status, _) where status == errSecUserCanceled {
                 setLastPress(.cancelled)

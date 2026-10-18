@@ -41,7 +41,9 @@ nonisolated final class ProtectionSystem: @unchecked Sendable {
         self.deviceName = deviceName
         self.floor = floor
         let biometry = biometry ?? LAEnvironmentBiometryLeaf()
-        let custody = custody ?? KeychainCustodyLeaf(scope: scope, biometry: biometry)
+        let memory = memory ?? KeychainMemoryLeaf(scope: scope)
+        let custody = custody ?? KeychainCustodyLeaf(
+            scope: scope, biometry: biometry, touchIDCandidates: Self.touchIDCandidates(places: places, memory: memory))
         let backups = FileBackupsLeaf(places: places)
         let diagnostics = AppDiagnosticsLeaf()
         self.custody = custody
@@ -52,9 +54,36 @@ nonisolated final class ProtectionSystem: @unchecked Sendable {
             custody: custody, syncKeys: syncKeys ?? KeychainSyncKeysLeaf(scope: scope),
             apple: apple ?? ICloudAppleKeysLeaf(scope: scope), vault: UnreachableVaultLeaf(),
             library: SQLCipherLibraryLeaf(places: places), keyFiles: FileKeyFileStoreLeaf(places: places),
-            memory: memory ?? KeychainMemoryLeaf(scope: scope), plans: FilePlanStoreLeaf(places: places),
+            memory: memory, plans: FilePlanStoreLeaf(places: places),
             backups: backups, clock: clock ?? SystemClockLeaf(), ids: ids ?? SystemIDsLeaf(), biometry: biometry,
             diagnostics: diagnostics)
+    }
+
+    /// THE FINGERPRINTS THIS DEVICE KNOWS OF — whose Touch ID item the custody listing probes for by name
+    /// (P-VX306-U1a-5): every catalogued key file's keys (the live one, the backups', Previous Libraries'),
+    /// what each memory item names (its current key and its mirror's keys — read as stated, unverified: a
+    /// key file holds no secret), the plan's two keys, and the staged key. Reads only.
+    static func touchIDCandidates(places: ProtectionPlaces, memory: any MemoryStoreLeaf) -> @Sendable () -> Set<String> {
+        let lister = CatalogLister(places: places)
+        let library = SQLCipherLibraryLeaf(places: places)
+        let plans = FilePlanStoreLeaf(places: places)
+        nonisolated(unsafe) let memory = memory
+        return {
+            var known = Set(lister.catalog().keyFiles.flatMap(\.heldFingerprints))
+            for libraryID in (try? memory.rememberedLibraryIDs()) ?? [] {
+                guard let sealed = try? memory.readMemory(libraryID: libraryID),
+                      let named = try? ProtectionCoding.decoder().decode(DeviceMemory.self, from: sealed.payload)
+                else { continue }
+                known.insert(named.currentFingerprint)
+                known.formUnion(named.keyFileMirror?.heldFingerprints ?? [])
+            }
+            if let sealed = (try? plans.readPlan()) ?? nil,
+               let plan = try? ProtectionCoding.decoder().decode(ProtectionPlan.self, from: sealed.payload) {
+                known.formUnion([plan.fromFingerprint, plan.toFingerprint].compactMap { $0 })
+            }
+            if let staged = (try? library.stagedFingerprint()) ?? nil { known.insert(staged) }
+            return known
+        }
     }
 
     /// The store variant's protection system: its slot (`AppDatabase.defaultStoreURL`), and today's picked

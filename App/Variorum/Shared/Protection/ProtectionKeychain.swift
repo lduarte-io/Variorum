@@ -13,8 +13,14 @@
 //      synchronizable item cannot be ThisDeviceOnly);
 //    - VX-390's STAMP rides `kSecAttrLabel` — the library ID, non-secret (the key file says it in the
 //      clear) — a plain, queryable attribute beside the item;
-//    - a LISTING reads ATTRIBUTES ONLY (`kSecReturnAttributes`, never `kSecReturnData`), under a
-//      non-interactive context, so no listing ever presses a Touch ID item;
+//    - a LISTING reads ATTRIBUTES ONLY (`kSecReturnAttributes`, never `kSecReturnData`) and, device-only,
+//      with `kSecUseAuthenticationUISkip` — an item that would need authentication (a `.biometryCurrentSet`
+//      item: the Security sources gate even an attributes-only match on its ACL, and under a non-interactive
+//      context ONE such match fails the WHOLE listing with `errSecInteractionNotAllowed` — the U1a lookup,
+//      recorded in the U1a record) is SILENTLY SKIPPED, so no listing ever presses a Touch ID item or fails
+//      for one. Touch ID items are found by name instead (`exists` — today's measured non-prompting probe:
+//      `errSecInteractionNotAllowed` means present), over the fingerprints the device knows of
+//      (`KeychainCustodyLeaf.touchIDCandidates`, P-VX306-U1a-5);
 //    - EVERY MUTATION asks `KeychainTestTripwire.refusesRealScopeMutation(scope, leaf:)` FIRST — a test
 //      process never writes or deletes under a real scope (`Variorum`, `Variorum-dev`); a refused
 //      mutation THROWS (`refusedUnderTest`), since a leaf's write lands or throws.
@@ -68,16 +74,17 @@ nonisolated enum ProtectionKeychain {
         return query.merging(KeychainPartition.dataProtection) { a, _ in a }
     }
 
-    /// Every item of `service` — ATTRIBUTES ONLY, under a non-interactive context (no prompt, ever).
+    /// Every item of `service` — ATTRIBUTES ONLY; device-only, an item that would need authentication is
+    /// silently skipped (no prompt, ever; a synchronizable item can carry no ACL — the Apple facts §10).
     static func listingQuery(service: String, residence: Residence, label: String? = nil) -> [String: Any] {
         var query = base(service: service, residence: residence)
-        if residence == .synchronizable { query[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny }
+        switch residence {
+        case .deviceOnly: query[kSecUseAuthenticationUI as String] = kSecUseAuthenticationUISkip
+        case .synchronizable: query[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny
+        }
         if let label { query[kSecAttrLabel as String] = label }
         query[kSecReturnAttributes as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitAll
-        let context = LAContext()
-        context.interactionNotAllowed = true
-        query[kSecUseAuthenticationContext as String] = context
         return query
     }
 

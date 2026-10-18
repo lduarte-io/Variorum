@@ -23,22 +23,35 @@ nonisolated final class KeychainSyncKeysLeaf: SyncKeysLeaf, @unchecked Sendable 
     static let service = ProtectionNames.syncKeysService
 
     let scope: String
+    /// The account ids whose Touch ID item the listing probes for by name (the listing skips an item that
+    /// would need authentication — `ProtectionKeychain`); VX-308's sync setup wires the bound account here.
+    private let touchIDCandidates: @Sendable () -> Set<String>
     private let lock = NSLock()
     private var session: [String: AccountKeys] = [:]
 
-    init(scope: String) { self.scope = scope }
+    init(scope: String, touchIDCandidates: @escaping @Sendable () -> Set<String> = { [] }) {
+        self.scope = scope
+        self.touchIDCandidates = touchIDCandidates
+    }
 
     func account(_ accountID: String, _ itemClass: ProtectionNames.CustodyClass) -> String {
         ProtectionNames.syncKeysAccount(scope: scope, accountID: accountID, class: itemClass)
     }
 
     func syncKeyItems() throws -> [SyncKeysItemFact] {
-        try ProtectionKeychain.list(service: Self.service, residence: .deviceOnly).compactMap { attributes in
+        var items = Set(try ProtectionKeychain.list(service: Self.service, residence: .deviceOnly).compactMap { attributes in
             guard let account = ProtectionKeychain.account(of: attributes),
                   let parsed = ProtectionNames.parseSyncKeysAccount(account, scope: scope) else { return nil }
             return SyncKeysItemFact(accountID: parsed.accountID, itemClass: parsed.class)
+        } as [SyncKeysItemFact])
+        for accountID in touchIDCandidates().union(items.map(\.accountID)) where ProtectionNames.isUUID(accountID) {
+            let fact = SyncKeysItemFact(accountID: accountID, itemClass: .touchid)
+            guard !items.contains(fact) else { continue }
+            if try ProtectionKeychain.exists(service: Self.service, account: account(accountID, .touchid), residence: .deviceOnly) {
+                items.insert(fact)
+            }
         }
-        .sorted { ($0.accountID, $0.itemClass.rawValue) < ($1.accountID, $1.itemClass.rawValue) }
+        return items.sorted { ($0.accountID, $0.itemClass.rawValue) < ($1.accountID, $1.itemClass.rawValue) }
     }
 
     func readSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws -> AccountKeys? {
