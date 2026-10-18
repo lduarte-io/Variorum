@@ -79,6 +79,9 @@ nonisolated struct PassphraseReminderLedger: @unchecked Sendable {
 
     init(defaults: UserDefaults = .standard) { self.defaults = defaults }
 
+    /// The defaults suite a TEST bootstrap's ledger writes (never the app's own domain).
+    static let testSuiteName = "io.lduarte.Variorum.vx306-reminder-tests"
+
     /// The keys, beside `CalmAskScheduler.Key`'s (`variorum.calmAsks.*`).
     enum Key {
         static func launches(_ libraryID: String) -> String { "variorum.calmAsks.passphrase.\(libraryID).launches" }

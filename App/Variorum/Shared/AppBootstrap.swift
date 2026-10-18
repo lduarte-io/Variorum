@@ -176,6 +176,9 @@ final class AppBootstrap {
     /// VX-306 U2 — the open library's protection faces on the new road (nil on today's road): rule 27's banner,
     /// the split pair's line, rule 3's reminder and its set-passphrase sheet, the receipts the open owes.
     private(set) var roadStanding: RoadStandingModel?
+    /// VX-306 U2 — rule 3's local schedule (this Mac's defaults; a test bootstrap writes its own suite, never the
+    /// app's domain).
+    @ObservationIgnored private let reminderLedger: PassphraseReminderLedger
 
     init(
         variant: AppDatabase.StoreVariant = StoreLocation.resolve(),
@@ -190,6 +193,7 @@ final class AppBootstrap {
         // store's variant keeps today's road (the phase's one law: "it reaches only the fenced dev store").
         newRoad = ProtectionRoad.newRoadIsLive && variant == .dev
         roadInputs = newRoad ? RoadInputs.live(variant: variant) : nil
+        reminderLedger = PassphraseReminderLedger()
         lobbyVaultRoad = LobbyVaultRoad.live(scope: variant.rawValue)
         protection = ProtectionController(configuration: .init(
             scope: variant.rawValue,
@@ -249,6 +253,8 @@ final class AppBootstrap {
         self.testStoreURL = testStoreURL
         newRoad = protectionRoad != nil
         roadInputs = protectionRoad.map(RoadInputs.test)
+        reminderLedger = PassphraseReminderLedger(
+            defaults: UserDefaults(suiteName: PassphraseReminderLedger.testSuiteName) ?? .standard)
         self.lobbyVaultRoad = lobbyVaultRoad
         protection = ProtectionController(configuration: .init(
             scope: AppDatabase.StoreVariant.dev.rawValue,
@@ -603,7 +609,7 @@ final class AppBootstrap {
             // VX-306 U1b: the library open on the new road (nil on today's road).
             roadSession = road
             // VX-306 U2: its protection faces (rule 27's banner, the split pair, rule 3's reminder, the receipts).
-            roadStanding = road.map(Self.makeStanding)
+            roadStanding = road.map { RoadStandingModel.make($0, ledger: reminderLedger) }
             let view: AppDatabase
             if let binding {
                 // The re-open after a lock: the SAME ambient view adopts
@@ -746,39 +752,6 @@ final class AppBootstrap {
                 session.markInterludeShown()
                 self?.beginOpening(roadOpened: session)
             })
-    }
-
-    /// VX-306 U2 — the open library's protection faces, from its session: the standing faces read from the open's
-    /// report, rule 3's reminder (its launch counted once per process on a writing road, then evaluated), and the
-    /// set-passphrase sheet's road through the session's executor.
-    static func makeStanding(_ session: ProtectionRoadSession) -> RoadStandingModel {
-        let faces = RoadStandingFaces.derive(session.report)
-        let libraryID = session.library.record?.libraryID ?? ""
-        let ledger = PassphraseReminderLedger()
-        if session.writes, !libraryID.isEmpty { ledger.noteLaunchOncePerProcess(libraryID) }
-        let reminder = PassphraseReminderModel(
-            libraryID: libraryID, moment: session.writes ? faces.passphraseMoment : nil, ledger: ledger,
-            facts: {
-                let library = session.library
-                // A read-only road (a hosted test run) never reminds: nothing could be set or recorded.
-                return (passphraseSet: !session.writes || ProtectionOpenRoad.passphraseExists(library),
-                        dismissals: library.record?.reminderDismissals ?? 0)
-            },
-            recordDismissal: {
-                await Task.detached(priority: .userInitiated) {
-                    ProtectionOpenRoad.recordReminderDismissed(session: session)
-                }.value
-            })
-        reminder.evaluate()
-        return RoadStandingModel(
-            faces: faces, reminder: reminder,
-            setPassphrase: { passphrase in
-                await Task.detached(priority: .userInitiated) {
-                    await ProtectionOpenRoad.setFirstPassphrase(session: session, new: passphrase)
-                }.value
-            },
-            passphraseExists: { ProtectionOpenRoad.passphraseExists(session.library) },
-            receiptsOwed: { session.takeReceipts() })
     }
 
     /// VX-306 U1b — the new road's lobby: its presses run off the main actor through the road; an opened

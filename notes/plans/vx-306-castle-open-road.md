@@ -1242,7 +1242,15 @@ the old store whole in the safety copy; `dev-castle.env`'s Castle values unchang
   rebuilt. **The walk switch gains `memory`** (`VARIORUM_WALK_FORGET=memory` — every memory item of the dev scope, the
   sealed mirror with it; DEBUG only, P-VX306-U1b-9's fences) for the walk's rule-27 rows; `ProtectionWalkSwitchTests`
   +1 (4). HEADLESS green; the Mac run PENDING under the stage.
-- Piece 5 — rule 1's restore receipt (§7c (6) on the status seam): NOT-STARTED.
+- Piece 5 — rule 1's restore receipt (§7c (6) on the status seam): DONE (the WIP commit's code + this commit). The
+  open owes the receipt when its repairs include `restoreKeyFileFromMirror` (`RoadStandingFaces.receipts`, added to the
+  session at the open); the open library's faces model (`RoadStandingModel.make` — moved here from the bootstrap so
+  the phone and the tests compose the same thing; the bootstrap passes its reminder ledger, a test bootstrap's in its
+  own defaults suite, never the app's domain) speaks each owed receipt ONCE when the composition hands it the status
+  seam's door (`VariorumApp`'s ready `.task`: `session.status.receipt` — `receipt_style` governs it as every receipt).
+  `ProtectionRestoreReceiptTests` (1, planted): the live key file gone → the silent item opens it, the repair runs, the
+  file is back, the receipt owed — and spoken exactly once across two `speak` hand-overs. HEADLESS green; the Mac
+  run PENDING under the stage.
 - Piece 6 — rule 3's reminder (the model's two moments + the launch-counted schedule, local, beside `CalmAsks`' keys;
   dismissals through `recordPassphraseReminderDismissed`) + the set-passphrase sheet (`resetPassphrase(.plainConfirm)`;
   the ask and the Protection pane's one row): NOT-STARTED.

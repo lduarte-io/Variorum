@@ -207,6 +207,38 @@ final class RoadStandingModel {
         self.receiptsOwed = receiptsOwed
     }
 
+    /// The open library's protection faces, from its session (the bootstrap's `.ready` on the new road): the standing faces read from the open's
+    /// report, rule 3's reminder (its launch counted once per process on a writing road, then evaluated), and the
+    /// set-passphrase sheet's road through the session's executor.
+    static func make(_ session: ProtectionRoadSession, ledger: PassphraseReminderLedger) -> RoadStandingModel {
+        let faces = RoadStandingFaces.derive(session.report)
+        let libraryID = session.library.record?.libraryID ?? ""
+        if session.writes, !libraryID.isEmpty { ledger.noteLaunchOncePerProcess(libraryID) }
+        let reminder = PassphraseReminderModel(
+            libraryID: libraryID, moment: session.writes ? faces.passphraseMoment : nil, ledger: ledger,
+            facts: {
+                let library = session.library
+                // A read-only road (a hosted test run) never reminds: nothing could be set or recorded.
+                return (passphraseSet: !session.writes || ProtectionOpenRoad.passphraseExists(library),
+                        dismissals: library.record?.reminderDismissals ?? 0)
+            },
+            recordDismissal: {
+                await Task.detached(priority: .userInitiated) {
+                    ProtectionOpenRoad.recordReminderDismissed(session: session)
+                }.value
+            })
+        reminder.evaluate()
+        return RoadStandingModel(
+            faces: faces, reminder: reminder,
+            setPassphrase: { passphrase in
+                await Task.detached(priority: .userInitiated) {
+                    await ProtectionOpenRoad.setFirstPassphrase(session: session, new: passphrase)
+                }.value
+            },
+            passphraseExists: { ProtectionOpenRoad.passphraseExists(session.library) },
+            receiptsOwed: { session.takeReceipts() })
+    }
+
     /// The receipts the open owes, spoken once (each `receiptsOwed` call takes them).
     func speakOwedReceipts() {
         guard let speak else { return }
