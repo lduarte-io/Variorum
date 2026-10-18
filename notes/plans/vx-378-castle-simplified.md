@@ -1825,7 +1825,37 @@ script's parse, re-run below). The gate's discovery run and soak run ONCE on the
    under `swift test` AND `swift test -c release`** — the tables below, landed as the runs completed (one seed per
    call, `PROTECTION_SOAK=1 PROTECTION_SEED=n PROTECTION_SOAK_SEEDS=1 PROTECTION_SOAK_SEQUENCES=1000 swift test [-c
    release] --filter 'VariorumCoreTests\.GeneratorTests/'`; the orchestrator's script, its log in the session
-   scratchpad — deleted at closeout per the 13x rule; these tables are the evidence). SOAK_TABLES_PENDING
+   scratchpad — deleted at closeout per the 13x rule; these tables are the evidence). 
+
+**THE DISCOVERY RUN — seeds 21–40 × 1,000 sequences × ≤60 steps, Debug, on `4a4af3164` (one seed per call; started 2026-10-17T22:17Z, DONE 2026-10-18T00:25Z, zero failing):**
+
+| seed | steps | Debug s | exit line |
+|---|---|---|---|
+| 21 | 44,768 | 395.320 | `✔ Test run with 1 test in 1 suite passed after 395.320 seconds.` |
+| 22 | 44,838 | 418.548 | `✔ Test run with 1 test in 1 suite passed after 418.548 seconds.` |
+| 23 | 45,219 | 385.073 | `✔ Test run with 1 test in 1 suite passed after 385.073 seconds.` |
+| 24 | 44,688 | 361.319 | `✔ Test run with 1 test in 1 suite passed after 361.319 seconds.` |
+| 25 | 44,369 | 354.065 | `✔ Test run with 1 test in 1 suite passed after 354.065 seconds.` |
+| 26 | 45,226 | 370.508 | `✔ Test run with 1 test in 1 suite passed after 370.508 seconds.` |
+| 27 | 44,410 | 362.390 | `✔ Test run with 1 test in 1 suite passed after 362.390 seconds.` |
+| 28 | 45,147 | 374.302 | `✔ Test run with 1 test in 1 suite passed after 374.302 seconds.` |
+| 29 | 44,411 | 355.880 | `✔ Test run with 1 test in 1 suite passed after 355.880 seconds.` |
+| 30 | 45,437 | 365.366 | `✔ Test run with 1 test in 1 suite passed after 365.366 seconds.` |
+| 31 | 45,186 | 371.066 | `✔ Test run with 1 test in 1 suite passed after 371.066 seconds.` |
+| 32 | 44,726 | 360.783 | `✔ Test run with 1 test in 1 suite passed after 360.783 seconds.` |
+| 33 | 44,878 | 404.087 | `✔ Test run with 1 test in 1 suite passed after 404.087 seconds.` |
+| 34 | 44,879 | 376.640 | `✔ Test run with 1 test in 1 suite passed after 376.640 seconds.` |
+| 35 | 45,494 | 436.302 | `✔ Test run with 1 test in 1 suite passed after 436.302 seconds.` |
+| 36 | 45,124 | 424.974 | `✔ Test run with 1 test in 1 suite passed after 424.974 seconds.` |
+| 37 | 45,386 | 368.892 | `✔ Test run with 1 test in 1 suite passed after 368.892 seconds.` |
+| 38 | 45,220 | 352.628 | `✔ Test run with 1 test in 1 suite passed after 352.628 seconds.` |
+| 39 | 44,830 | 360.324 | `✔ Test run with 1 test in 1 suite passed after 360.324 seconds.` |
+| 40 | 44,511 | 382.175 | `✔ Test run with 1 test in 1 suite passed after 382.175 seconds.` |
+
+Total: 898,747 steps over 20,000 sequences, every seed `✔`. (The earlier partial runs — seeds 35–38 on `bec58a576` and 21–24 on `94f295c9e`, green — were superseded by the ladder's fixes and are not the gate's evidence.)
+
+**THE GATE SOAK — seeds 1–20, Debug then `-c release`, on `4a4af3164`:** RUNNING — the tables land here as the configurations complete. GATE_SOAK_PENDING
+
 2. **Every fixed scenario green in both configurations** — the protection + lifecycle suites on `4a4af3164`, run by
    the orchestrator in a clean review worktree: Debug `✔ Test run with 385 tests in 148 suites passed after 10.142
    seconds.` (the wider filter — every suite under `Tests/VariorumCoreTests/Protection/` plus a few by name; the
