@@ -1188,7 +1188,11 @@ the old store whole in the safety copy; `dev-castle.env`'s Castle values unchang
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton: DONE (this commit).
-- Piece 1 — `ProtectionWords.swift` gains §7c (2) (3) (4) (6) (7) verbatim + the pin reading the plan file: NOT-STARTED.
+- Piece 1 — `ProtectionWords.swift` gains §7c (2) (3) (4) (6) (7) verbatim + the pin reading the plan file: DONE (this
+  commit) — `ProtectionWordsPlanTests` (3: every drafted string found between its asterisks in §7c, the plan read with its
+  whitespace runs collapsed; the model's sentences — the notice's two, the offer's — found in §7c AND absent from the words
+  file; the day's form). HEADLESS (the session harness — the record's close says how): green with the other planted
+  suites; the Mac run PENDING under the stage. U2's undrafted lines are P-VX306-U2-2's.
 - Piece 2 — the notice (`UnlockedLibrary.notice` via the open's report — a card in the lobby's room between the
   unlock and the library's open, OK once, then the open): NOT-STARTED.
 - Piece 3 — the offer (`OwedAct.offerKeyFile` → `searchKeyFiles` at the open → the offer card; *Use it* =
