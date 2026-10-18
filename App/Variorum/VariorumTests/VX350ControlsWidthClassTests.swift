@@ -180,6 +180,30 @@ struct VX350ControlsWidthClassTests {
         #expect(narrowest.size.width == 262, "the row's floor is its widest control, scope (\(narrowest.size.width))")
     }
 
+    /// **The placement pass arranges what the sizing pass measured.** The row's
+    /// container places it at its REPORTED width and `placeSubviews` re-decides
+    /// there (U3c's T1 §7): at every width and class, both voices, field open
+    /// or not, arranging again at the reported width gives the same frames.
+    /// (Measured offscreen before the collapsed class reported its whole
+    /// offered width: offered 432, reported 369, and at 369 the groups broke
+    /// differently — the placed lines were not the measured ones.)
+    @Test(arguments: [ThemeVoice.terminal, .study])
+    func placingAtTheReportedWidthArrangesTheSameRow(voice: ThemeVoice) {
+        var faults: [String] = []
+        for width in stride(from: CGFloat(270), through: 1400, by: 0.5) {
+            for open in [false, true] {
+                let row = Self.row(voice)
+                let measured = Rule.arrangeRow(row, width: width, spacing: 10, lineSpacing: 8, searchOpen: open)
+                let placed = Rule.arrangeRow(row, width: measured.size.width, spacing: 10, lineSpacing: 8,
+                                             searchOpen: open)
+                if placed != measured {
+                    faults.append("\(width) open \(open): \(measured.widthClass) re-placed at \(measured.size.width)")
+                }
+            }
+        }
+        #expect(faults.isEmpty, "\(voice): \(faults.prefix(6))")
+    }
+
     /// The Timeline (sort and when stand down): 🔍 · scope / mode.
     @Test func inTheTimelineTheCollapsedRowIsTheModeAlone() {
         let placed = Rule.arrangeRow(Self.row(.terminal, timeline: true), width: 400, spacing: 10,

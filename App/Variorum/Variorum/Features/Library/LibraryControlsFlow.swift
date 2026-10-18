@@ -292,8 +292,18 @@ nonisolated enum LibraryControlsFlowRule {
                 rowWidth = max(rowWidth, x - spacing)
                 y += lineHeight + (number < lines.count - 1 ? lineSpacing : 0)
             }
+            // The collapsed row reports the WHOLE width it was offered (a
+            // finite one): its container places it at its reported width, and
+            // the placement pass re-decides at that width (`placeSubviews`) —
+            // a narrower report would re-flow the groups' breaks there, so the
+            // placed lines could differ from the measured ones (measured
+            // offscreen: offered 432, reported 369, re-flowed at 369). At the
+            // whole width the second pass arranges exactly what the first
+            // measured (pinned). The wide classes need no such care: their
+            // reported width re-decides to the same arrangement (U3c's T1 §7).
+            let reported = width.isFinite && width > 0 ? max(rowWidth, width) : rowWidth
             return RowArrangement(widthClass: .collapsed, frames: frames,
-                                  size: CGSize(width: rowWidth, height: y), lineCount: lines.count)
+                                  size: CGSize(width: reported, height: y), lineCount: lines.count)
         }
     }
 }
