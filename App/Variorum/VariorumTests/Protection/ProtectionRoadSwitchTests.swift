@@ -43,8 +43,13 @@ struct ProtectionRoadSwitchTests {
         #expect(source.contains(
             "static let isDebugBuild: Bool = {\n        #if DEBUG\n        return true\n        #else\n        return false\n        #endif\n    }()"))
         #expect(source.contains("static let newRoadIsLive: Bool = live(debug: isDebugBuild, mac: isMac)"))
+        // CODE lines only — the file's header comment may NAME the inputs it forbids (the orchestrator's fix at the
+        // U1b batch, 2026-10-18: the first run matched "environment" inside that comment).
+        let code = source.split(separator: "\n", omittingEmptySubsequences: false)
+            .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("//") }
+            .joined(separator: "\n")
         for input in ["UserDefaults", "ProcessInfo", "environment", "CommandLine"] {
-            #expect(!source.contains(input), "the switch reads nothing at run time (\(input))")
+            #expect(!code.contains(input), "the switch reads nothing at run time (\(input))")
         }
     }
 
