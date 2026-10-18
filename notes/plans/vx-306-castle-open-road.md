@@ -515,7 +515,12 @@ one this Mac last had open* — with one button, *OK*; shown once, then the libr
 - Piece 1 — VX-386, the three residues (`PlanRunner` guard-off resume's `catch ActRolledBack`; `U4PromiseCheckTests
   .onePostureStillCatchesAFollowedSyncedDevice`; `Promises.swift` L1's parenthetical): DONE (this commit) — the
   protection set's counts in both configurations PENDING (run at the unit's close).
-- Piece 2 — the `protection_record` LOCAL-ONLY migration `v1_30_protection_record`: NOT STARTED.
+- Piece 2 — the `protection_record` LOCAL-ONLY migration `v1_30_protection_record`: DONE (this commit) —
+  `Persistence/ProtectionRecordSchema.swift` (the ONE DDL value + the one-row codec: a write replaces every row, a
+  read of two refuses `moreThanOneRecord`), the migration, the ONE `Sync/` line (`SyncSchema.localOnlyTables`), the
+  `LocalMachineryRecreation` map entry (the shared value, re-created EMPTY), `MigrationTests.expectedTables` (the
+  ritual's justified edit); `ProtectionRecordSchemaTests` (5). The schema-touching suites `✔ 103 tests in 12 suites`
+  (Debug; the both-configuration counts PENDING at the close).
 - Piece 3 — VX-390, the library-ID stamp + the fakes + the seed-3 pin (catalogue leaf empty), red-on-old: NOT STARTED.
 - Piece 4 — the thirteen production leaves + `CatalogLister` + `ProtectionFactsGatherer` + `ProtectionSystem` under
   `App/Variorum/Shared/Protection/`: NOT STARTED.

@@ -1011,6 +1011,16 @@ extension AppDatabase {
         migrator.registerMigration("v1_29_mcp_comment_words") { db in
             try db.execute(sql: MCPGrantSchema.v1_29DDL)
         }
+        // **VX-306 U1a — THE PROTECTION RECORD'S HOME** (`notes/plans/vx-306-castle-open-road.md` §2 U1a,
+        // design §3.2): `protection_record`, the library's own protection facts inside the library file
+        // (`Persistence/ProtectionRecordSchema.swift` carries the ONE DDL value the production library leaf
+        // shares). **NOT a SyncSpec §12 lockstep event** — LOCAL-ONLY by registration
+        // (`SyncSchema.localOnlyTables`: no `sync_version`, no outbox trigger, never a payload or a mirror;
+        // the plaintext export drops it; `LocalMachineryRecreation` re-creates it empty); the marker stays
+        // 13. No backfill: a store from before this design has no record and is not handled (rule 26).
+        migrator.registerMigration("v1_30_protection_record") { db in
+            try db.execute(sql: ProtectionRecordSchema.ddl)
+        }
         return migrator
     }
 }

@@ -43,6 +43,9 @@ struct MigrationTests {
         // VX-258 (A JUSTIFIED EDIT, the ritual — VX-246 U1): v1_28's waiting
         // re-binds join the local-only grants family.
         "mcp_rebind_request",
+        // VX-306 U1a (A JUSTIFIED EDIT, the ritual): v1_30's protection
+        // record — LOCAL-ONLY by registration (`SyncSchema.localOnlyTables`).
+        "protection_record",
     ]
 
     static let expectedIndexes: Set<String> = [

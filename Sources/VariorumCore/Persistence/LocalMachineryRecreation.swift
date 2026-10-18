@@ -53,6 +53,10 @@ public enum LocalMachineryRecreation {
               applying INTEGER NOT NULL
             );
             """,
+        // VX-306 U1a (v1_30): the protection record's table — the ONE shared value, not a restatement,
+        // so it cannot drift; re-created EMPTY (an export carries no record — rule 26: a library with no
+        // record is not handled on the new road).
+        ProtectionRecordSchema.table: ProtectionRecordSchema.ddl,
     ]
 
     public struct RecreationError: Error, CustomStringConvertible, Equatable {
