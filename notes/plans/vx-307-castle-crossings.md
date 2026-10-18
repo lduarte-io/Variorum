@@ -86,7 +86,7 @@ VX-310's re-arm question after a failed press. Evidence: the dev store walked th
 Touch ID and under Always ask — `dev-castle.env`'s values; the walk restores Standard before release), 11's re-arm on a
 planted failure; pins per door from planted facts; the words checked against the rules (VX-379's standing item).
 
-### U3 — THE ACCOUNT FACES — MOVED TO VX-308 (VX-418) at the orchestrator's recommendation (2026-10-18, so this phase stays two units per the sizing guidance; her call at kickoff — if she keeps it here, the unit reads: sync setup, the join, the follow, leave the account, VX-107, VX-113, VX-314, VX-239/243's one presenter, VX-264's screens; evidence the convergence suites, the walk if her kickoff call allows a throwaway account, the words).
+### U3 — THE ACCOUNT FACES — MOVED TO VX-308 (VX-418). RULED by her, 2026-10-18: "yeah it's fine to keep them in phase 4" — this phase is TWO units (U1, U2) and the riders; nothing account-facing builds here (the wire and its convergence suites are U1's). For the record, the moved unit read: sync setup, the join, the follow, leave the account, VX-107, VX-113, VX-314, VX-239/243's one presenter, VX-264's screens; evidence the convergence suites, the walk if her kickoff call allows a throwaway account, the words).
 
 ## 2a. THE MEMBERS BY TICKET (her phase-3 list, reconciled 2026-10-18 — every one is a sub-issue of VX-307 on the board; the plan's units above are the build order, this table is the ledger)
 
@@ -106,7 +106,7 @@ planted failure; pins per door from planted facts; the words checked against the
 | **VX-414** The dropped split-pair line + her two U2-7 sentences | U2 | wording, pinned byte-equal |
 | **VX-379** (its rows) The guide and the panes to the rules | U2 | the Castle/backups chapters, Data Safety + the protection panes, the tutorial's last card |
 | ~~VX-263~~ The anchor written at the leave | — | SUPERSEDED at her word (one posture; the leave hands everything out) — CANCELED on the board 2026-10-18 |
-| → VX-308 | — | **VX-418** the account faces, with VX-107 · VX-113 · VX-314 · VX-239 · VX-243 · VX-264's screens — moved at the orchestrator's recommendation; her call at kickoff |
+| → VX-308 | — | **VX-418** the account faces, with VX-107 · VX-113 · VX-314 · VX-239 · VX-243 · VX-264's screens — moved; RULED by her 2026-10-18 ("it's fine to keep them in phase 4") |
 
 ## 3a. HER RULINGS OF 2026-10-18 ON THE VX-306 BUNDLE (verbatim where quoted; they bind this phase)
 
