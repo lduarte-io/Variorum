@@ -353,18 +353,36 @@ disposition here.
 - **U2 (VX-249 · VX-247 · VX-111):** IN-PROGRESS 2026-10-18 (the U2 implementer, one session). No revert in flight.
   Order: core pins first (headless red → fix → green), then the app pins, then ONE stage window (RUN 1 red-on-old on
   a prebuilt behaviourally reverted tree, RUN 2 green) via the orchestrator's relayed GO.
-  - U2.1 **VX-249 — the collect door sets the star:** IN-PROGRESS — core landed (171a17d4, core suites green
-    114/10 on the fixed tree); **a CORE behavioural revert is starting now** (`Operations+SmartCollect.swift`
-    → the pre-VX-249 walk with `starred: false`; restore = `git checkout --` that file, committed at 171a17d4).
-    Receipts (app) NOT-STARTED. Design: `GatheringMint.outcome` gains the note's
-    STARTING state (what it already wears, its star, its legacy values — all empty for a fresh note, so the mint's
-    plans are unchanged); R98's walk becomes that planner (ONE authority); a planned star is written through
-    `writeStar(…, enforcingCap: false)` in the op's transaction, the belt re-reads the star context; the result
-    gains `starred`; the board and chip receipts name it in the mint's family.
-  - U2.2 **VX-247 — undo for tag delete:** NOT-STARTED. Design: `deleteTag` registers ONE entry ("Delete Tag"); the
-    inverse revives exactly the rows the last forward half tombstoned, while still dead on ITS stamp, plus their
-    applications dead on that stamp (live targets only); the redo re-tombstones what the undo revived (with the
-    delete's own subtree rule) on a fresh stamp and records it; quiet halves retire the entry.
+  - U2.1 **VX-249 — the collect door sets the star:** IN-PROGRESS — core DONE (171a17d4), receipts DONE
+    (36ade6d6). Traced: `collectPostIntoSmartReading`'s walk knew only tag conjuncts and all-tag any-of groups; a ★
+    term fell through to the end probe, which fails for an unstarred note, so every ★-rule collect refused
+    ("tagging alone can't satisfy its filter"). Fix: `GatheringMint.outcome` gains the note's STARTING state
+    (`noteWears` · `noteStarred` · `noteMeetsLegacy` — defaults describe a fresh note, so every mint plan is
+    unchanged; `alreadyMet` = positive evidence only); `Queries.gatheringCollectOutcome` feeds it for an existing
+    note (`postMatchesRule` per rule tag — the one SQL, now shared with `Operations.matchesRule`); the op applies
+    the plan's tags through `insertPostTag`, its star through `writeStar(…, enforcingCap: false)` (intake hears
+    it), and the belt re-reads the star context; `SmartCollectResult.starred`. Receipts: the board's
+    `collectReceipt` → `shownByMint(paths, starred:)` (tags-only arm IS `shownByTagging`); archived →
+    `taggedWhileArchived(paths, starred:)`; the chip's star arm speaks the mint family (R-VX381-A5). **Core
+    red-on-old VERIFIED** by behavioural revert (the pre-VX-249 walk with `starred: false`): "30 tests in 4 suites
+    failed with 6 issues" — exactly the five new op pins (`aStarRuleCollectStarsTheNoteAndReportsIt` ·
+    `aTagAndStarRuleTagsAndStarsInOneAct` · `theCollectsStarIsCapExempt` ·
+    `theCollectsStarIsAnApplyingActALivingBookHears` · `theAnyOfPickKeepsTheRulesNot`) + StarContextTests'
+    JUSTIFIED EDIT (its old "★ refuses" control now collects by starring); the guards (the unwind, a nested option,
+    a NOT the note breaks) and the 4 pure planner pins green on both; restored green 30/4, and the wider set
+    (GatheringMint · RuleWingScoping · Intake · Phase13icOutflow …) 114/10. App pins
+    `GatheringCollectStarReceiptTests` (2): red-on-old PENDING (Mac RUN 1). **PROVISIONAL (P-VX381-U2-1):** R98 now
+    refuses a rule whose any-of is met ONLY by a nested option carrying a NOT (`#x AND (#a OR (#b AND NOT #c))`,
+    note wearing b) — the old walk skipped mixed groups and let its probe decide; the planner's `alreadyMet` takes
+    positive evidence only, so it keeps the mint's conservative class (fresh-note plans byte-identical). An
+    extreme corner (nested NOTs are authorable only in the rule editor). **PROVISIONAL (P-VX381-U2-2):** R98 now
+    reads tag liveness in the GATHERING'S wing (the planner's `tagIsLive`), so a rule naming another wing's tag
+    refuses by name instead of applying a cross-wing tag (wings isolate; U1's cross-wing hover observation's twin).
+  - U2.2 **VX-247 — undo for tag delete:** IN-PROGRESS — core DONE (752fa49d): `deleteTag` registers "Delete
+    Tag"; pins `TagDeleteUndoTests` (8) green; the sweep (`InvariantSweepTests`, which now undoes tag deletes at
+    random) + tag/sync suites 131/10 green. **A CORE behavioural revert is starting now** (`Operations+Tag.swift`:
+    the registration call removed — the old row work is byte-identical; restore = `git checkout --` that file,
+    committed at 752fa49d). The confirm's copy (R-VX381-A3) and the Mac door pin: NOT-STARTED.
   - U2.3 **VX-111 — the notice counts books only:** NOT-STARTED. Traced: `AppSession.noteMultiBookEdit` counts
     `Queries.readingsContaining` — books AND every gathering whose rule shows the note.
 - **Ladder:** NOT-STARTED. **Walk:** NOT-STARTED. **Closeout:** NOT-STARTED.
