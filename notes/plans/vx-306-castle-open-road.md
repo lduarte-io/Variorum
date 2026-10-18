@@ -331,7 +331,7 @@ store this build has written — coordinators told.
 - KICKOFF 2026-10-18 (her rulings §7; the orchestrator's provisional rulings §7b; the words drafts §7c): DONE — worktree
   `~/dev/variorum-vx-306`, branch pushed, the in-flight row on main (`99d49fc4a`, holds the Sync/-or-custody slot),
   VX-306 In Progress, the coordinator (`oct18coordinator`) announced and the slot granted explicitly.
-- U1a — the production leaves (+ VX-386 first, the `protection_record` migration, VX-390): IN-PROGRESS (Opus implementer, 2026-10-18) — the U1a RECORD in §9 carries the per-piece status.
+- U1a — the production leaves (+ VX-386 first, the `protection_record` migration, VX-390): BUILT (Opus implementer, 2026-10-18; commits `82e4ad038`…`e9bb71007`) — headless counts green both configurations (the release reds are pre-existing, traced in the record); the Mac Protection suites PENDING — the orchestrator runs them under a stage claim (the record names them).
 - U1b — the lobby on roads, Debug-gated (+ VX-310, the creation card, the Release check, the dev store's fresh start): not started.
 - U2 — the honest faces: not started.
 - U3 — the two doors; the phone opens: not started.
@@ -507,9 +507,19 @@ one this Mac last had open* — with one button, *OK*; shown once, then the libr
 
 ## 9. RECORDS (each unit appends: what shipped / counts both configurations / PROVISIONALs / commits / notes)
 
-### U1a RECORD — THE PRODUCTION LEAVES (Opus implementer, 2026-10-18; IN PROGRESS)
+### U1a RECORD — THE PRODUCTION LEAVES (Opus implementer, 2026-10-18; BUILT — the Mac suites PENDING under the stage)
 
-**Not done in U1a, first:** PENDING (filled at the close).
+**Not done in U1a, first:**
+- **The Mac suites were NOT RUN** (the brief: no `xcodebuild test`, no stage) — only built (`build-for-testing` green).
+  The orchestrator runs them under a coordinator-granted claim (the exact list closes this record) and flips the counts.
+- **The opt-in iCloud suite** (`ICloudAppleKeysLeafTests`) writes a synchronizable throwaway item into her iCloud
+  Keychain for moments (the `AppleKeyRoundTripTests` pattern) — run only by a deliberate choice
+  (`TEST_RUNNER_VARIORUM_APPLE_KEY_ROUND_TRIP=1`); the composition test uses an in-memory Apple leaf instead.
+- **A Touch ID item's PRESS is not testable headless** — the walk's row (U1b); so is the listing's no-prompt behaviour
+  with a real Touch ID item present (`KeychainLeavesTests.aTouchIDItemIsListedByNameAndNeverPressed` runs only where a
+  finger is enrolled on the test Mac).
+- **Nothing wires the road** — `AppBootstrap`, `StoreLockView`, the `StoreBackup.onRun` hook, the Debug gate are U1b's.
+- **The far folder's backup pair is not written** (P-VX306-U1a-4); Send Library's pair is minimal (VX-309's door).
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 1 — VX-386, the three residues (`PlanRunner` guard-off resume's `catch ActRolledBack`; `U4PromiseCheckTests
@@ -572,4 +582,118 @@ one this Mac last had open* — with one button, *OK*; shown once, then the libr
   Debug -derivedDataPath App/Variorum/DerivedData/vx306 build-for-testing` → `** TEST BUILD SUCCEEDED **`; the phone
   target (`-scheme VariorumMobile -destination 'generic/platform=iOS Simulator' build`) → `** BUILD SUCCEEDED **` (the
   Shared folder compiles for iOS). The Mac suites' RUN is the orchestrator's under the stage — PENDING.
+
+**THE KEYCHAIN FACTS THE LEAVES REST ON (the unit's one external lookup, Sonnet, read-only — sources: the macOS 27 SDK
+headers, Apple's open-source Security repo, DTS; tags as it gave them):** (1) an attributes-only `SecItemCopyMatching`
+over items carrying a `.biometryCurrentSet` ACL is GATED on the ACL [Src medium-high — `SecDbKeychainItem.m`
+`ks_decrypt_data` decrypts whenever the access control has constraints]; under a non-interactive context ONE such match
+fails the WHOLE listing with `errSecInteractionNotAllowed`, and with UI allowed the listing would PROMPT; `kSecUseAuthentication
+UISkip` (NOT deprecated — `API_AVAILABLE(macos(10.11))`, SecItem.h) silently skips them [Header] — so a device-only
+listing skips, and Touch ID items are found by name (P-VX306-U1a-5); (2) `kSecAttrLabel` is a stored, synced,
+exact-match attribute [Src] (the leaves filter by it client-side anyway); (3) updating any attribute of an ACL'd item
+re-encrypts it and would prompt [Src medium-high] — so a Touch ID item is never rewritten (an item already under the
+key's name is kept); (4) deleting an ACL'd item needs no auth [Src + DTS]; (5) an un-evaluated `LAContext` with
+`localizedReason` makes the read show the prompt; LA errors map to `errSecUserCanceled` (cancel), else
+`errSecAuthFailed` (lockout, lid closed [Inf]); an enrollment change answers `errSecAuthFailed` or `errSecItemNotFound`
+(Unknown on macOS) — both read as "failed on an item that exists"; (6) `kSecMatchLimitAll` with data is fine on the
+data-protection keychain; (7) a synchronizable item must not be ThisDeviceOnly and cannot carry an ACL [Header + Src] —
+`AfterFirstUnlock` is a sensible choice. The existence probe keeps today's MEASURED shape (an `interactionNotAllowed`
+context; `errSecInteractionNotAllowed` means present — `KeychainPartition`'s 2026-08-30 measurement); whether the flag
+survives the context's externalization is the lookup's one Unknown — the walk confirms no prompt (U1b).
+
+**Counts (the final tree `e9bb71007` + this record):**
+- The protection set (every `@Test` under `Tests/VariorumCoreTests/Protection` — 314 on the final tree), Debug
+  (`swift test --filter 'VariorumCoreTests\.(<its 79 suite types>)/'`): `✔ Test run with 314 tests in 77 suites passed
+  after 5.384 seconds.`; Release (`swift test -c release --filter <the same>`): `✔ Test run with 290 tests in 73 suites
+  passed after 3.908 seconds.` (the DEBUG-only mutation pins excluded by construction).
+- The full core suite, Debug (`swift test`): `✔ Test run with 3241 tests in 417 suites passed after 316.374 seconds.`
+  (VariorumCoreTests); `✔ Test run with 40 tests in 6 suites passed` (StringsWorkbookTests); VariorumMCPTests `✘ 362
+  tests in 68 suites … 2 issues (including 1 known issue)` — the one real issue `MCPHarnessTimeLimitTests
+  .aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (a wall-clock bound, 20.09 s against 15 s, under the
+  full parallel run on a shared machine) — alone: `✔ Test run with 3 tests in 1 suite passed after 2.208 seconds.`
+  Untouched by this diff (no MCP line).
+- The full core suite, Release (`swift test -c release`): VariorumCoreTests `✘ 3212 tests in 412 suites … 18 issues` —
+  EVERY issue `PassphraseKDFError.belowFloor("memory 256 KiB is below the floor of 19456 KiB")` (the release floor is
+  `.production` by construction; these legacy suites derive test-speed descriptors): `CorpusRotationTests` 12,
+  `StoreKeyEnvelopeTests`/`StoreKeyEnvelopeFormat2Tests` 5, `MultiTenantSyncAttackerTests` 1 (VX-380's known red);
+  StringsWorkbook `StoreUnlockTests` 2 (same class); MCP the same timing flake. **PRE-EXISTING, proven:** a scratch
+  worktree at the kickoff commit `9eff28e3e` (pre-U1a), the same suites in release: `CorpusRotationTests` 12 +
+  `StoreKeyEnvelopeTests` 3 (`✘ 32 tests in 2 suites … 15 issues`), `StoreKeyEnvelopeFormat2Tests` 2 (`✘ 10 tests in 1
+  suite … 2 issues`), `StoreUnlockTests` 2 (`✘ 7 tests in 1 suite … 2 issues`) — the same tests, the same lines; the
+  worktree removed. None is a protection suite and none touches this diff. **For the orchestrator:** the plan's "VX-380's
+  one Sync test is the known release red" undercounts the release reds of the FULL suite — the `.belowFloor` class is
+  wider and older (a ticket-worthy Tests & tooling debt, the orchestrator's to file).
+- `swift build -c release` (the core in both configurations, rule 24): `Build complete! (99.74 sec)`.
+- `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath
+  App/Variorum/DerivedData/vx306 build-for-testing` → `** TEST BUILD SUCCEEDED **`; the phone target `-scheme
+  VariorumMobile -destination 'generic/platform=iOS Simulator' build` → `** BUILD SUCCEEDED **`.
+- A sample soak at piece 3 (seeds 1–3 × 350 sequences, Debug — the new stamp clause's false-positive check):
+  `✔ Test run with 1 test in 1 suite passed after 414.916 seconds.`
+
+**PROVISIONALs (each built as its option (a); bundled under QUESTIONS #232):**
+- **P-VX306-U1a-1 — "a library lived here" (`ProtectionFacts.containerMarker`).** Traced as the brief asked: today's
+  `.libraryMissing` arm (`StoreLaunchRoute.resolve(gate:presence:)`, `StoreLaunchGate.swift`) fires on a DEMANDED
+  effective gate over an absent store — the gate derived from the 13p stored mode, today's envelope beside the store and
+  the dials, every one a pre-design file the new road never reads (rule 26) — so nothing of it carries over. Options:
+  (a) BUILT — the marker file `variorum-library-lived-here` beside the slot, written by `createLibrary(with:record:)`
+  after the library lands (design §3.2's home; the scenario world's exact shape); (b) the live key file beside an absent
+  slot (today's source restated — misreads a creation that crashed between the key file and the library as a MISSING
+  library); (c) either.
+- **P-VX306-U1a-2 — a file in the live place that is not a format-3 key file THROWS** (`unreadableLiveKeyFile`), so
+  `unlock` throws on it. Options: (a) BUILT — throw (rule 21: whatever sits there is never overwritten, and a nil would
+  let the mirror repair write over it); (b) nil; (c) move it aside first. U2's face will meet it.
+- **P-VX306-U1a-3 — an unlistable custody or memory keychain makes gathering THROW** (`GatherError`), never "no road" —
+  rule 27's refusal stands on those listings; the sync-keys and Apple listings fall back to empty (neither feeds rule
+  27). Options: (a) BUILT; (b) empty everywhere (a transient keychain error could show rule 27); (c) a per-fact
+  "unknown" (a core facts change).
+- **P-VX306-U1a-4 — backup pairs land in the CONTAINER only** (`Backups/<library8>/<mac8>/`); the far folder's pair is
+  not written this phase (the scenario world writes both; today's second leg still copies its own flat files there).
+  Options: (a) BUILT; (b) both, through today's destination; (c) the far folder only when one is picked and in reach.
+- **P-VX306-U1a-5 — Touch ID items are listed BY NAME** over the fingerprints this device knows of (every catalogued key
+  file's keys, the memory items' keys, the plan's two, the staged one, every silent item's), since a listing that does
+  not skip them would prompt or fail whole (the keychain facts above). A Touch ID item for a key nothing here names is
+  not listed (it opens nothing this Mac can reach; it is no quiet road — rule 9), and lists unstamped. Options: (a)
+  BUILT; (b) a listing that may prompt (the plan forbids it); (c) a separate service or an index item for Touch ID items
+  (a core names change). The sync-keys leaf probes the same way (its candidates are VX-308's to wire).
+
+**Recorded refinements (not product calls):** the SQLCipher mechanics live in core `Protection/Files/
+ProtectionLibraryFiles.swift`, beside the ONE keying implementation (`AppDatabase.configuration(key:)` is internal —
+the app would otherwise need a second keying road), and so run headless in both configurations; `CustodyItemFact`'s
+equality and hash stay its NAME (fingerprint + class) with the stamp an attribute, so every existing `contains` site
+keeps its meaning; the plan's protocol shapes are as written (no other protocol change).
+
+**Hand-forwards (U1b and later):**
+- `KeychainCustodyLeaf.lastPress` is the lobby's `TouchIDPress` (cancelled · failed on an item that exists · unusable
+  for now — the transient reason re-read after the press); `ProtectionSystem.facts` reads it by default.
+- `FileBackupsLeaf.copiesArePaused` is what the `StoreBackup.onRun` hook honours (P-VX306-K4).
+- THE SWAP: `SQLCipherLibraryLeaf.swapStaged` refuses while a WAL with frames sits beside the slot (`walNotDrained`) and
+  removes the slot's sidecars before ONE atomic rename — the act's caller MUST CLOSE THE APP'S POOL on the slot and
+  quiesce writes from the stage to the swap (`writeRecord` and `stageReencryption` drain the WAL); set-aside is a hard
+  link into `Previous Libraries/<stamp>/` first, so the slot is never empty (a crash after the link and before the
+  rename leaves a duplicate aside copy of the live library — harmless, listed as a Previous Library). Make this my
+  library (U3) meets this first.
+- The phone: `ProtectionSystem`'s default `deviceName` reads `DeviceName.current` (main-actor on iOS) — compose on the
+  main actor or pass the name (U3).
+- Today's sync custody, store-key custody and Apple key `<scope>-apple-key` are untouched; the new names never collide
+  with them (rule 26).
+
+**The Mac suites the orchestrator runs under the stage (from `App/Variorum/`; `-derivedDataPath DerivedData/vx306`;
+the record ends PENDING on them):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx306 test \
+  -only-testing:VariorumTests/ProtectionKeychainFamilyTests \
+  -only-testing:VariorumTests/KeychainTripwireTests \
+  -only-testing:VariorumTests/KeychainLeavesTests \
+  -only-testing:VariorumTests/ProtectionFileLeavesTests \
+  -only-testing:VariorumTests/ProtectionFactsGathererTests \
+  -only-testing:VariorumTests/ProtectionSystemCompositionTests
+```
+(`KeychainTripwireTests` carries the new per-leaf refusal test as an extension, inside its `.serialized` suite.) The
+expected shape: 4 + (the tripwire suite's own + 1) + 5 (one enabled only with an enrolled finger) + 9 + 4 + 1 tests —
+PENDING. Opt-in, only by a deliberate choice: `TEST_RUNNER_VARIORUM_APPLE_KEY_ROUND_TRIP=1 … -only-testing:
+VariorumTests/ICloudAppleKeysLeafTests` (1 test; a synchronizable throwaway item rides into iCloud Keychain for moments).
+
+**Commits:** `82e4ad038` (VX-386) · `d5642b5fa` (the migration) · `5cc3b0c8e` (VX-390) · `b12f49cf8` (4a) · `c224bd578`
+(4b/4c) · `2e2d56de0` (the keychain facts applied) · `e9bb71007` (the Mac suites) · this record. `git worktree list`:
+no stray (both scratch worktrees removed).
 
