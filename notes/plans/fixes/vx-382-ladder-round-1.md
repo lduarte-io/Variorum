@@ -312,3 +312,14 @@ by PATH; never touch a real-store instance).
 | 4 | **Guard (i) probe on the re-worded arm** — in place, `CommandRouter.noteFocusedBlock`: delete `, caretPlacementDepth == 0` | `BookOpenDoorMountTests` | RED on the outline + spread arms: the bare focus's seed (block 1, 0) remembered — the re-worded arm still bites. Restore |
 | 5 | **R1-7 probe** — the tip | `SidebarNoteBoxTakesCellClickTests` | Both voices: the CONTROL (the word) must be green — if it is red the rig's coordinates are wrong: STOP, no verdict. Control green + edge GREEN ⇒ R1-7 HOLLOW: record. Edge RED ⇒ apply the PREPARED FIX above, commit, rebuild, re-run ⇒ GREEN; red-on-old = `git show <fix>^:App/Variorum/Variorum/Core/Views/SidebarNoteBox.swift` restored in place ⇒ RED; restore |
 | 6 | **The guard batch** — the tip after rows 1/5's outcomes | `$(cat scratchpad/ladder/guard-suites.args)` — **71 suites**: U1b's 64-suite reveal/landing family (`scratchpad/u1b/fixD2-suites.args` — every suite reading `pendingReveal`, `carryPlace`, the landings, the book surfaces, the box) + `BookIndexToOutlineCarryTests` `SidebarNoteBoxTakesCellClickTests` + the caret-seed readers `CurrentBlockContinuityTests` `FocusHandoffTests` `BareArrivalFocusTests` `LibrarySearchLandingTests` + `NoteBoxSlotTests` + `ChromeLineLimitTests` | GREEN except the suites' own `withKnownIssue`s (`IndexTierMetricsTests` ×4 seen in U2) and, possibly, `DestructiveUndoWarningTests`' VX-167 flake if it is in the set (it is not). Anything else red is a finding |
+
+## THE ORCHESTRATOR'S LINE CHECK of R1-2's fix (pre-window, hunks read in full)
+
+PASSES, four grounds: (1) the "hers" bit's lifecycle is PAIRED — set only when a click passes its caret
+(`focus(_:caret:)` non-nil), cleared at every place the seed clears (blur, collapse-all, nil-focus), consumed
+one-shot with the seed in `applyFocusSeeds`; (2) the re-report runs OUTSIDE the bracket only when a seed was
+actually placed and was hers, and it reads the clamped caret from the text view — the truth as placed, not the raw
+seed; a mounted detail's duplicate report takes the normal arm harmlessly; (3) non-book editors pass the default
+false — behavior-neutral outside the book; (4) `applyFocusSeeds`' new return is compiler-checked across its paths
+(build-for-testing green). `EditorTextView`/`BlockRangeIndex`/`PaneSurface` untouched. The window's pins carry the
+empirical half (red-on-old by the `if false` edit; the guard probe re-run on the re-worded arm).
