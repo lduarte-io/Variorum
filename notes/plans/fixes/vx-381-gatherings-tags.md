@@ -213,6 +213,26 @@ posture (keys, store, Debug prefs re-export + diff) before RELEASE, or report wh
 Debug launch, dismiss a What's New sheet if one shows. Merges serialize with vx-382 through the coordinator
 (send branch · tested tree · tip; merge commit only, on its GO).
 
+## ARCHITECT RULINGS (in-batch forks — the implementer proposes, the architect rules; repo-first)
+
+- **R-VX381-A1 (2026-10-18, U1 / VX-194 — the fold step's premise was false):** the ticket's "fold the gathering
+  foot's one-off back into CalmButtonStyle" does not apply — `GatheringNoteDoor` was NEVER a calm button (it is
+  `.borderless` + accent/faint ink, drawn exactly like BookView's own "+ new note"/"+ new entry"/"+ new chapter"
+  foot doors; VX-214 batch 3's comment says VX-194's style "is not this surface's"). Ruled (a): the gathering
+  door KEEPS its local face (it already greys honestly per R-VX214-3), its stale comment corrected, the fold
+  recorded NOT APPLICABLE. (b) — moving it onto CalmButtonStyle — would put a bordered button beside the book's
+  borderless doors and break her VX-217 "the bottom of a book and the bottom of a gathering should look the
+  same"; (c) — a new shared foot-word style — would edit BookView's doors while VX-382 (part B, the book view
+  doors) is live in parallel. Her "fix it in the style" intent is served by the style gaining honesty app-wide;
+  marked PROVISIONAL for her bundle only because it departs from the ticket's literal step. One line to reverse
+  (build (b) or (c)).
+- **R-VX381-A2 (same exchange):** `CeremonySheetChrome`'s confirm button carries its own
+  `.opacity(canConfirm ? 1 : 0.45)` ON a CalmButtonStyle — a genuine one-off that would DOUBLE-DIM once the
+  style is honest. Ruled: fold it into the style (delete the local opacity) — WITH the check that the button is
+  actually `.disabled(…)` when `canConfirm` is false (the environment's `isEnabled` must be what carries the
+  face; if the opacity was the only signal on an enabled-but-inert button, wire the disable rather than losing
+  the face).
+
 ## LADDER (after U2 — one ladder over the run's combined diff)
 
 Fresh `opus-reviewer` at xhigh per round, `notes/REVIEW_PROMPT.md` VERBATIM, zero framing, over the combined
