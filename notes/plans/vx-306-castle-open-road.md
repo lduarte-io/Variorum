@@ -2670,3 +2670,18 @@ red-on-old runs: m1 by the pre-fix flag restored on
 the committed fix (`git checkout` after), m2 and m4 by their pins against the pre-fix Shared files before the fix was
 written (no revert needed), NIT 2 by a harness-only probe over a `git show HEAD:` extract, NIT 1 by the source pin's own
 logic over the pre-fix file; NIT 3 and NIT 4's composition pin by trace (stated per finding).
+
+**ROUND-1 FIX LEG — THE BATCH AND THE WALK (the orchestrator, 2026-10-18 13:02–13:20 MDT, claim `vx-306-l1`):** the 54-suite Mac
+run on the fix tip `6c19d57a2` + the words pass → `✘ Test run with 340 tests in 54 suites … 7 issues (including 3 known issues)`:
+the 3 known = VX-310's witnesses; the 4 real issues were three PINS, not product — (1) `LaunchFurnitureTests` hardcoded the
+readme's five blocks (the words pass made it nine: the pin now reads the seed's count — a justified edit); (2)
+`ReadmeStartHerePlanTests`' parser swallowed the header's tail and the (6)/(7) blocks (fixed: only the blockquote lines are
+the passages); (3) `ProtectionPaneRoadRowTests` (the fix leg's never-run composition pin) — `SurfaceComposition.text(of:)`
+does not reach a Form's conditional section before hosting; the pin now reads the MODEL's gate (`offersSetPassphrase` both
+ways) and SOURCE-PINS the pane's `if let roadStanding, roadStanding.offersSetPassphrase` guard, with the hosted smoke kept —
+all three re-run under the claim `✔ Test run with 11 tests in 3 suites passed` (commit `76e306925`). The phone's six → `✔ 20
+tests in 5 suites`. The walk on 86a82b4f: Back Up Now → the Restore list showed the new 1:11 PM pair IN PLACE (m4's fix) and
+the Protection pane rendered NO *Set a passphrase…* row with the passphrase set (NIT 4); the slot's key file unchanged; no
+posture change; the simulator shut down; instances 0; stage released 13:20. The round-2 reviewer (spawned at the fix tip,
+before these three test edits) reads `6c19d57a2`; the orchestrator's line-by-line check covers `76e306925` (test-only).
+
