@@ -16,8 +16,10 @@
 //
 //  **The shape:** a 13-pt glyph in the quiet ink, in a 22-pt square that IS
 //  the target (`.contentShape` AFTER the frame) and wears the voiced hover
-//  wash. The square GROWS OUTWARD: its layout footprint is pulled back to
-//  `footprint` by negative padding, so the row it sits in is laid out exactly
+//  wash. The square GROWS OUTWARD: the row lays out only a hidden `footprint`
+//  and the button rides an overlay centred on it (walk finding W-1 — the
+//  button's own frame must BE the square, or the overhang takes the hover and
+//  drops the click), so the row it sits in is laid out exactly
 //  as the 11.5-pt glyph laid it out — the Outline card keeps the height
 //  `BookOutlineHeights` learned (the 46-pt chrome constant), and the extra
 //  target reaches into the card's own padding and the row's spacing, never
@@ -66,12 +68,31 @@ struct BookFoldDisclosure: View {
         self.action = action
     }
 
+    private var glyph: String { folded ? "\u{25B8}" : "\u{25BE}" }
+
     var body: some View {
-        Button(action: action) {
-            Text(folded ? "\u{25B8}" : "\u{25BE}")
-        }
-        .buttonStyle(Style(tokens: tokens, probeKey: debugKey))
-        .help(help)
+        // **The FOOTPRINT** — what the row lays out: the glyph's own line,
+        // HIDDEN (it keeps the row's text baseline for a baseline-aligned
+        // host, the Index chapter row), framed to `footprint`.
+        Text(glyph)
+            .font(.system(size: Self.glyphSize))
+            .lineLimit(1)
+            .frame(width: Self.footprint.width, height: Self.footprint.height)
+            .hidden()
+            // **The TARGET** — the BUTTON rides an overlay centred on the
+            // footprint, so ITS OWN FRAME is the 22-pt square (walk finding
+            // W-1: with the negative padding inside the button's style, the
+            // button's frame was the footprint, and a press in the overhang
+            // was taken by hit-testing and then dropped — a macOS button
+            // counts a press that ends within its own bounds).
+            .overlay {
+                Button(action: action) {
+                    Text(glyph)
+                }
+                .buttonStyle(Style(tokens: tokens, probeKey: debugKey))
+                .help(help)
+            }
+            .foldProbe(debugKey, part: .layout)
     }
 
     private var debugKey: String? {
@@ -114,10 +135,8 @@ struct BookFoldDisclosure: View {
                     .contentShape(Rectangle())
                     .onHover { hovering = $0 }
                     .foldProbe(probeKey, part: .hit)
-                    // …and it grows OUTWARD: the row lays out the footprint.
-                    .padding(.horizontal, -BookFoldDisclosure.overhang.width)
-                    .padding(.vertical, -BookFoldDisclosure.overhang.height)
-                    .foldProbe(probeKey, part: .layout)
+                    // (It grows OUTWARD by riding an overlay of the footprint —
+                    // `BookFoldDisclosure.body` — so the row never lays it out.)
             }
         }
     }
