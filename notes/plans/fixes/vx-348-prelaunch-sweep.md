@@ -281,4 +281,6 @@ window, if the batch allows).
   red-on-old revert, MCPSpec's clause and the tool descriptions remain.
 - **VX-338 (two Macs prune each other's backups):** NOT-STARTED.
 - **VX-339 (Resume Sync clears the banner over a failed marker removal):** NOT-STARTED.
-- **No behavioural revert is in flight.** (A revert starts only after this line names it — addendum 2.)
+- **REVERT IN FLIGHT (named before it starts — addendum 2):** a targeted behavioural revert of ONE line in
+  `Operations+MCPNoteEdits.swift` (`editCommentForClient`'s entry strip), on committed tree `85640635b`; the restore is
+  `git checkout -- Sources/VariorumCore/Operations/Operations+MCPNoteEdits.swift` (safe: committed — addendum 11).
