@@ -7,6 +7,10 @@ commit at the stage coordinator's word (the merge commit is on `main`'s history;
 is with `oct18coordinator`). **The record:** `notes/plans/vx-306-castle-open-road.md` (§7 your rulings verbatim, §7b the
 provisional ones, §7c the words, §8 the environment traps, §9 the unit records and walks, §10 the ladder). **The contract:**
 `notes/CastleRules.md`. **The bundle:** `notes/QUESTIONS.md` #234 (renumbered from #233, which VX-348's bundle holds).
+**Scope, exactly:** `Sources/VariorumCore/Protection/` + `Persistence/`, `App/Variorum/Shared/Protection/` (new), the faces, the
+mobile target's new-road faces, the tests, the notes — and ONE `Sync/` line, `protection_record` added to
+`SyncSchema.localOnlyTables` (a local-only registration: no payload, no lockstep, marker 13 untouched; P-VX306-K6 — the
+kickoff's "zero `Sync/` lines" is corrected here; the ladder was Fable's, so the line was cold-read). Zero `Server/` lines.
 
 ## Your checklist (in order)
 
