@@ -205,7 +205,92 @@ this run already opens)
    **VX-355 (joined at her overnight word — expected the same fix as VX-385; prove its cases, close it with the
    record saying so)**. Walk.
 
+5. **U5 — the urgent MCP trio (joined 2026-10-18 while U1 ran, her word):** VX-392 · VX-393 · VX-394 — the section
+   below carries her words, the rulings and the client-session report VERBATIM. **Runs NEXT after U1** (urgent
+   outranks U2–U4). MCPSpec read IN FULL by its implementer first. Mostly headless (`Tests/VariorumMCPTests` + the
+   grants store) plus the pane's faces; VX-392's done-when is proven by a real-client live round on the dev store
+   (an empty wing granted → found in one call → a book created unaided) riding a coordinator window.
+
 Then the ladder (Fable, fresh per round, over the whole diff), the closeout, the merge.
+
+## U5 — THE URGENT MCP TRIO (2026-10-18, joined at her word while U1 ran)
+
+Her words, verbatim: *"ok there's an urgent ticket that is an MCP issue that I need you to add to the plan to fix
+within this sweep. I don't think the other sessions have anything running in the MCP area particularly so I don't
+anticipate conflicts. […] the issue is that even when there's a whole wing grant, claude can't see it or write in
+it."* And, after the tickets were minted: *"make sure you read the MCP document that claude.md points out before
+working on these if you haven't already"* — the orchestrator read `notes/MCPSpec.md` in full at this run's kickoff
+(before U1, for VX-357); U5's implementer is bound to the same full read by its brief. Her screenshot (Settings ▸
+MCP ▸ Shared with AI) shows the duplicate rows VX-393 names: PlanetLillian (wing) twice for claude-code —
+`read · always` AND `read, suggest, write new and edit · always` — and "o ladrão de raios" (book) twice.
+
+**The sitting's two rulings (asked while she was still up — the report itself says "Ask me before changing any
+user-facing grant semantics"):**
+
+- **R-VX348-5 (VX-392, discovery):** she picked **"list_wings tool"** (the recommended option, selected with its
+  preview): a new read-rung tool returning each wing the client holds a standing wing grant on — name, `wing_id`,
+  its own rungs and duration, note/book counts; ungranted wings simply absent (the no-oracle rule); the
+  instructions and the `create_book`/`create_note` docs point at it; `list_books` also fixed to list a
+  granted-but-empty book.
+- **R-VX348-6 (VX-393, duplicates):** she picked **"Upgrade in place"** (recommended): ONE row per client ×
+  target — a new grant on an existing pair REPLACES the row (the Change… sheet's semantics applied to every grant
+  road); existing duplicates merge to the strongest rung at migration; Revoke then means what it says, nothing
+  stronger left behind silently.
+
+**The client-session report she pasted (verbatim — the U5 implementer's trace source):**
+
+> I'm launching Variorum this week, and a Claude Code session using the Variorum MCP server just hit a serious
+> bug, plus a few smaller ones. Please investigate and fix them in priority order. For each one: reproduce it,
+> find the cause in the code, fix it, add a test, and tell me what changed. Ask me before changing any
+> user-facing grant semantics.
+>
+> **1. CRITICAL — a client can't discover a wing shared with it while the wing is empty**
+> Repro: 1. Create a new wing ("PlanetLillian") with no notes and no books. 2. In Settings ▸ MCP ▸ Shared with
+> AI, grant it to a client (`claude-code`) at `read, suggest, write new and edit · always`. 3. From that client,
+> call `list_books` and `list_notes` (with no arguments).
+> Observed: `list_books` returns only Home books. `list_notes` returns only notes with `wing_id: ""`. The shared
+> wing never appears anywhere. `create_book` and `create_note` need a `wing_id`, and `search` and
+> `list_my_activity` can't surface it either, so **the client has no way to make its first write into a wing it
+> was explicitly granted.** The grant UI shows the share, but the MCP's discoverable surface doesn't. Workaround:
+> the author manually adds a note so the wing's ID leaks through `list_notes`. Nobody will know to do that.
+> Expected: every wing granted to a client can be discovered, empty or not.
+> Suggested fix: add a `list_wings` tool that returns each shared wing's `wing_id`, name, grant rungs, duration
+> (once / until disconnect / always), and note and book counts. Or add a `wings` array to `list_books`. Either
+> way, update the server instructions and the `create_book` / `create_note` docs to say where `wing_id` comes
+> from. Also check the same gap for an empty book granted on its own, and for a wing with gatherings but no
+> books.
+> Done when: a fresh client granted an empty wing can find it with one call and create a book in it with no help
+> from the author.
+>
+> **2. Duplicate grants for the same client and target**
+> Shared with AI lists PlanetLillian twice for `claude-code` (`read · always` and `read, suggest, write new and
+> edit · always`), and "o ladrão de raios" twice as well. Find out how that happens: re-approval, a later
+> upgrade, or separate sessions. Then either merge grants for the same client and target into the strongest rung
+> (showing upgrades as an edit to the existing row), or label clearly why there are two rows. Make sure revoking
+> one row doesn't silently leave a stronger one in place without the author knowing.
+>
+> **3. Mid-session disconnect while the server says "running"**
+> Partway through a long Claude Code session (around 3–4 AM, Mac likely idle), all Variorum tools vanished with
+> "MCP server disconnected". The app still showed "running · socket in the app container". Running `/mcp` →
+> reconnect fixed it, and the `always` grants survived. Investigate: App Nap or idle throttling of the server
+> (consider `ProcessInfo.beginActivity` while clients are connected); idle timeouts on the socket; the socket
+> path changing across app restarts or sleep. Add a line to Settings ▸ MCP ▸ Diagnostics/Activity when a client
+> connection drops, with the reason if known.
+>
+> **Keep as is (it works well):** At session start, before Variorum was open, the client got a clear error
+> ("open Variorum and enable the MCP server"). Once the app opened, it connected mid-session without a restart.
+> Don't regress that.
+
+**U5 build notes (the orchestrator's, binding the brief):** VX-392 ALSO verifies the non-empty wing-grant road end
+to end (her framing is "can't see it or write in it", wider than the empty repro) and the gatherings-only wing.
+`list_wings` answers the CLIENT'S OWN grants — no oracle arises — and reads ∝ the granted wings, never the corpus
+(P1). VX-393's dedupe may need a LOCAL-ONLY grants-family migration (the v1_26–v1_29 precedent: local, zero
+lockstep, marker untouched — the in-flight row's "no schema" fence means the SYNCED schema); the trace must say
+which road minted the duplicates (the grant sheet's roads inserting where Change… replaces is the suspect). VX-394
+is investigation-first (no fix without a traced mechanism — if the cause cannot be reproduced, land the Activity
+drop line + the keep-alive only if its mechanism is established, else record findings and keep the ticket open,
+PROVISIONAL). The VX-180/VX-181 behaviors (closed-app sentence, mid-session connect) must not regress — their pins
+re-run in U5's batch.
 
 ## Overlaps to respect (the runway's §2 conflict map, as of 2026-10-18)
 
@@ -248,6 +333,8 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   sync/custody slot is VX-378's — anything that looks like it needs it is DEFERRED (her kickoff word).
 - **U1 (VX-357 · VX-338 · VX-339 — the core and the headless fixes):** IN-PROGRESS — the implementer's U1 UNIT RECORD
   (below) carries the per-member status.
+- **U5 (VX-392 · VX-393 · VX-394 — the urgent MCP trio, joined 2026-10-18 at her word):** NOT-STARTED — runs NEXT
+  after U1 (urgent outranks U2–U4). FOURTEEN members now; rulings R-VX348-5/6 and the report verbatim in §U5.
 - **U2 (VX-347 — ⌘S):** NOT-STARTED.
 - **U3 (VX-350 · VX-349 · VX-176 — the Library's row and header):** NOT-STARTED.
 - **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** NOT-STARTED.
