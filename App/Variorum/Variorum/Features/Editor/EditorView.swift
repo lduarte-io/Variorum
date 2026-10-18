@@ -69,7 +69,7 @@ struct EditorView: View {
 
     init(
         session: AppSession, postID: String, inline: Bool = false,
-        caretSeed: Int? = nil, fanSeed: String? = nil,
+        caretSeed: Int? = nil, caretSeedIsHers: Bool = false, fanSeed: String? = nil,
         findSeed: EditorFindSeed? = nil,
         barPlacement: BarPlacement = .bottom,
         gutter: ProseGutter = .contained,
@@ -83,6 +83,8 @@ struct EditorView: View {
         self.onLiveShowing = onLiveShowing
         let model = EditorViewModel(session: session, postID: postID)
         model.pendingCaretSeed = caretSeed
+        // VX-382 ladder R1-2: a book's CLICK seed is her place (see the model).
+        model.pendingCaretSeedIsHers = caretSeedIsHers
         model.pendingFanSeed = fanSeed
         // 13o U2 (D6): a search passage's landing — the third one-shot.
         model.pendingFindSeed = findSeed

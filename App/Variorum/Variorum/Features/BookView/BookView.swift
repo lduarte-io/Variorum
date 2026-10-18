@@ -2768,7 +2768,9 @@ private struct OutlinePostRow: View {
                                 ) {
                                     EditorView(
                                         session: session, postID: entry.postID, inline: true,
-                                        caretSeed: model.caretSeed, fanSeed: model.fanSeed,
+                                        caretSeed: model.caretSeed,
+                                        caretSeedIsHers: model.caretSeedIsHers,
+                                        fanSeed: model.fanSeed,
                                         barPlacement: .inSidebarBox,
                                         gutter: gutter,
                                         onLiveShowing: { liveShowing = true })

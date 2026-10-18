@@ -498,6 +498,11 @@ final class BookViewModel {
     /// caret (or the tapped badge's fan panel — interpretation 1, focus
     /// first).
     private(set) var caretSeed: Int?
+    /// VX-382 ladder R1-2: whether `caretSeed` is HER click's place (a
+    /// read-cheap click passes `caret`) rather than a bare focus's 0 — the
+    /// editor remembers the one and never the other (`EditorView`'s
+    /// `caretSeedIsHers`).
+    private(set) var caretSeedIsHers = false
     private(set) var fanSeed: String?
     /// The posts unfolded — Outline opens with its posts COLLAPSED.
     ///
@@ -1009,6 +1014,7 @@ final class BookViewModel {
         // model rather than being threaded through the views.
         if postID != nil, !paneFocused { onPaneFocusRequest?() }
         caretSeed = postID == nil ? nil : (caret ?? 0)
+        caretSeedIsHers = postID != nil && caret != nil
         fanSeed = fanBlock
         focusedPostID = postID
         if let postID {
@@ -1035,6 +1041,7 @@ final class BookViewModel {
         if focusedPostID == postID {
             focusedPostID = nil
             caretSeed = nil
+            caretSeedIsHers = false
             fanSeed = nil
         }
         // 13u2 UNIT A2: the card is about to show again, and the note may
@@ -1050,6 +1057,7 @@ final class BookViewModel {
         expandedPosts.removeAll()
         focusedPostID = nil
         caretSeed = nil
+        caretSeedIsHers = false
         fanSeed = nil
         refreshCardPreviews(wereOpen)
     }

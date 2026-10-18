@@ -322,6 +322,9 @@ memory (guard (i), recorded remainder). Red-on-old and the batch are DONE — §
   44), a parked `WriteIntent` ("edit here" in Outline/spread), the find seed. All synchronous inside the arm, all now
   inside `duringCaretPlacement` → never remembered for another note. Cost recorded: a click-focus's seed (her place)
   is dropped with them (the editor cannot tell it from a bare focus's); her NEXT caret move or keystroke records it.
+  **SUPERSEDED at the ladder's R1-2:** the premise was the editor's only — `BookViewModel.focus` DOES tell a click
+  (caret passed) from a bare focus; the bit now rides the seed (`caretSeedIsHers`) and a click's place is reported
+  once more OUTSIDE the bracket, so her click is remembered; the fill's END and a bare focus's 0 stay bracketed.
   Re-renders while mounted (`fullRender`/`differential`/forced) restore her caret by identity and report it again —
   her place, unbracketed by design.
 - **The book Index's pane:** going live, `makeNSView`'s `string =` reports the take's END, then the armed landing
@@ -452,6 +455,7 @@ own measured policy (~100 µs per block change, 17o b), so the per-caret-move op
 writing the remembered mode at mount mirrors the existing jump road's net effect (landing in Write leaves Write
 remembered), closing the gap only because mount's first assignment skips the usual write. Known accepted cost,
 recorded: a click-arrival seed during mount is dropped with the bare-focus seeds; her next caret act records it.
+*(Superseded at the ladder's R1-2 — the click's seed is now reported outside the bracket; see §Guard (i).)*
 Ladder note: the final reviewer-cast call is made at ladder time with the whole diff in view; these two hunks carry
 this check either way.
 
