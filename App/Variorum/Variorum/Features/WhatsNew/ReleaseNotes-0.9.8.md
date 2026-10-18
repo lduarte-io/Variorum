@@ -9,6 +9,16 @@
 - Disabled buttons look disabled everywhere: the calm button style fades and stops answering hover when a button can't act.
 - While your library is opening, the Settings window says "Opening your library…" instead of asking you to open the main window first.
 
+**Books, easier to move through.**
+- Opening a note from a book — "open ↗" or "Open in the full editor" — now lands in Write at the paragraph you were on, instead of at the top of the note in whatever mode it last used.
+- "Edit here" in the book's note box returns to where you were just working in the book, not where you last were in the note's own editor.
+- The note box offers "open ↗" in every book mode, so you can leave for Write however far the note's title has scrolled away.
+- In a book's Index, paragraphs with takes wear a small ⑂ badge; clicking it (or the box's "takes") opens that paragraph's takes right there, over the book.
+- Switching from Outline to Index keeps your paragraph live, with the caret where you left it.
+- The little ▸ that unfolds a note in a book is a real target now — bigger, with a hover glow — and a near miss no longer throws you out of the book. The chapter folds in Index grew the same way.
+- The Book Panel no longer shows drag bars beside chapters when the book is date-ordered and nothing can be placed by hand.
+- The Bookcase's order menu closes on Escape, like any menu.
+
 ## Feedback
 
 - Anything odd, anything you love: **Help ▸ Send Feedback…**, or write to support@stargazing.tech.
