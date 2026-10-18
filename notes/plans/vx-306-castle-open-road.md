@@ -2716,10 +2716,51 @@ configurations). No stage, no app launch, no dev or real store, no `/Application
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton: DONE (this commit).
-- m3 — the core creation's no-clobber preflight before its first write (core, headless): NOT-STARTED — the design: a READ
-  on the library leaf (is a file in the slot?) at the head of `ProtectionExecutor.createLibrary`, refusing with an
-  honestly named `ExecutorRefusal` before any mint or write; the pin in the executor's world (its write log), red on the
-  pre-fix tree in a scratch worktree, green after; the core protection set both configurations.
+- m3 — the core creation's no-clobber preflight before its first write (core, headless): DONE (this commit) — the core
+  fully verified (the pin red-on-old and green; the core protection set green Debug 323/79 and release 299/75); the
+  production leaf's one-line conformance (`SQLCipherLibraryLeaf.slotIsOccupied`) and its two lines in
+  `ProtectionFileLeavesTests` PENDING-BUILD (the stage hold).
 - m2 — the Start Here passages seed only where the new road opened the store (app, PENDING-BUILD): NOT-STARTED.
 - NIT 3 — a filed pick tells the standing Restore list (`copiesChanged`, m4's seam) (app, PENDING-BUILD): NOT-STARTED.
 - The close (the record, the Mac suites to run, `git worktree list` clean): NOT-STARTED.
+
+**THE FINDINGS, one by one (AGREE/DISPUTE with the trace; the pin's red-on-old; the commit):**
+
+- **m3 — AGREE (the trace is the round-1 fix leg's, re-read on this tree).** `ProtectionExecutor.createLibrary`
+  (`Executor/Acts/DeviceActs.swift`) minted the words, the key and two IDs, set `configuration.libraryID`, then wrote IN
+  ORDER the new key's silent item (`writeCustody`), this Mac's own Apple key (`addAppleKey`) and THE LIVE KEY FILE
+  (`writeLiveKeyFile` — an atomic replace) before `leaves.library.createLibrary` met the no-clobber belt
+  (`ProtectionLibraryFiles.createLibrary`: "a library is already in the slot"; the test worlds' `.nothingToDo`). Over a
+  slot a library stands in, the refusal came AFTER three writes: the standing library's key file written over, two orphan
+  keychain items. **The fix:** the library leaf gains ONE read, `slotIsOccupied()` (the production leaf: any file at the
+  slot's path — the very fact the belt checks), and the act reads it FIRST — a slot something stands in refuses
+  `ExecutorRefusal.libraryAlreadyInSlot` (new, named for what it means: the belt's own meaning, met before the first
+  write) with nothing minted, written or renamed, and one log line. The slot is the library's FILE alone: a crashed
+  creation's leftovers beside an EMPTY slot (its key file, its keychain items — the creation's own order) never stop the
+  creation from running again (the act's doc: "a crash leaves the slot empty and the creation runs again"), so the
+  preflight does not read the key file. The three leaf conformers: `SQLCipherLibraryLeaf` (app, Shared — Mac and phone;
+  PENDING-BUILD), `ExecutorWorld` (`live != nil`), the scenario world's `DeviceLeaves` (anything at `SPath.slot`, the
+  production leaf's any-file reading). The app's one consumer of a creation refusal (`ProtectionOpenRoad.create`'s catch
+  → *Variorum couldn't create your library.*) is unchanged; `ProtectionCopyDoors.refusal(for:)`'s switch has a default.
+  **The pin:** `CreateLibraryPreflightTests` (core, 3): a standing library (its key file beside it) and a RECORD-LESS
+  store (m1's shape) each → the second creation refuses with ZERO writes in the world's log, the slot, the live key file's
+  BYTES, every custody item, every Apple key and stamp and what this Mac remembers unchanged, the executor's
+  `configuration.libraryID` untouched, the refusal `libraryAlreadyInSlot`; and the guard against an over-eager preflight —
+  an empty slot still creates, and a creation crashed after its third write (key file + keychain items, no library) runs
+  again. Written against the API both trees share (the write log, `live`, `liveKeyFile`; the refusal read by its
+  description), so it compiles on both sides. **RED-ON-OLD** — run on the piece's parent tree (`f8e2156b0`, the skeleton
+  commit: the worktree with ONLY the pin file added, `git status` one untracked file and `git diff` empty — the fix not yet
+  written, so no scratch worktree was needed): `✘ Test run with 3 tests in 1 suite failed after 0.012 seconds with 8
+  issues.` — per refused creation: `world.writes.isEmpty` false (`[custody+ silent 81940334, apple+ 39a3bca7, keyfile
+  81940334]`), the standing state changed, `configuration.libraryID` set, the refusal `nothingToDo`; the empty-slot/crash
+  test green on both sides (a guard, by design). **GREEN** after: `✔ Test run with 3 tests in 1 suite passed after 0.009
+  seconds.` (Debug) and `✔ Test run with 3 tests in 1 suite passed after 0.008 seconds.` (release). The production leaf's
+  read gains two lines in `ProtectionFileLeavesTests.aCreatedLibraryOpensWithItsKeyAndMarksThatALibraryLivedHere` (empty
+  slot reads empty; the created library reads occupied) — Mac host / the headless harness, PENDING-BUILD.
+  **The core protection set** (every `@Suite` under `Tests/VariorumCoreTests/Protection` — 79 suite types, the filter
+  `VariorumCoreTests\.(<the 79 names>)\b`): Debug `✔ Test run with 323 tests in 79 suites passed after 5.237 seconds.`
+  (the round-1 leg's 320/78 + this pin's 3/1); release (`swift test -c release`) — the one 79-name filter matched NOTHING
+  in release (`warning: No matching test cases were run`, exit 0 — a release-run quirk of the long filter; the same filter
+  ran whole in Debug), so the set ran as its two halves (names 1–40, 41–79): `✔ Test run with 136 tests in 38 suites
+  passed after 3.517 seconds.` + `✔ Test run with 163 tests in 37 suites passed after 1.239 seconds.` = 299 in 75 (the
+  round-1 leg's 296/74 + 3/1). `swift build -c release` (rule 24) green as part of that run.

@@ -114,6 +114,9 @@ public protocol LibraryFileLeaf: AnyObject {
     /// already hold the incoming library's.
     func swapStaged(setAside: Bool, asideKeyFile: KeyFile?) throws
     func discardStaged() throws
+    /// Does anything stand in the slot — the live library's file? A READ: the creation's no-clobber preflight
+    /// (VX-306 ladder round 2, m3), asked before the act mints or writes anything.
+    func slotIsOccupied() throws -> Bool
     /// A new library in the empty slot, under `key`, its record inside.
     func createLibrary(with key: StoreKey, record: ProtectionRecord) throws
     /// A plaintext export carrying its library ID (§3.7).

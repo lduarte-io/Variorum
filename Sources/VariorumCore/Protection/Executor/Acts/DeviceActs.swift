@@ -106,7 +106,18 @@ extension ProtectionExecutor {
     /// and this Mac's section, what this Mac remembers. Nothing to protect yet
     /// and nothing to resume: a crash leaves the slot empty and the creation
     /// runs again (a recorded refinement — no plan in an empty slot).
+    ///
+    /// **The slot is read FIRST** (VX-306 ladder round 2, m3): a slot something already stands in refuses
+    /// (`libraryAlreadyInSlot`) before anything is minted or written. Before, the act wrote the silent item, this
+    /// Mac's Apple key and the live key file and only then met the library leaf's no-clobber belt — so a caller
+    /// reaching it over a library wrote over that library's key file and left two orphan keychain items behind the
+    /// refusal. A crashed creation's own leftovers (a key file and keychain items beside an EMPTY slot) never stop
+    /// it: the slot is the library's file alone.
     public func createLibrary(passphrase: String? = nil) throws -> CreatedLibrary {
+        guard try !leaves.library.slotIsOccupied() else {
+            log("create library: refused — something already stands in the slot (nothing written)")
+            throw ExecutorRefusal.libraryAlreadyInSlot
+        }
         let words = leaves.ids.mintWords()
         let key = leaves.ids.mintLibraryKey()
         let libraryID = leaves.ids.mintID()

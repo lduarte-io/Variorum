@@ -21,7 +21,8 @@
 //      crash leaves the old library or the new one (rule 20). THE CALLER CLOSES THE APP'S POOL ON THE SLOT
 //      before a swap (the sidecars go, and an open connection must never see a file change under it) — the
 //      act's door is U1b's / VX-307's; this leaf only refuses a WAL with frames in it.
-//    - `createLibrary` — a fresh keyed file holding `protection_record` only (no clobber), then the
+//    - `slotIsOccupied` — the creation's no-clobber preflight (any file at the slot's path; VX-306 ladder r2 m3);
+//      `createLibrary` — a fresh keyed file holding `protection_record` only (no clobber), then the
 //      "a library lived here" marker (P-VX306-U1a-1); `exportPlaintext` — `StorePlaintextExport`.
 //
 
@@ -137,6 +138,10 @@ nonisolated final class SQLCipherLibraryLeaf: LibraryFileLeaf, @unchecked Sendab
     }
 
     // MARK: - Creating, exporting
+
+    /// The creation's no-clobber preflight (VX-306 ladder round 2, m3) — the same fact the belt below checks
+    /// (`ProtectionLibraryFiles.createLibrary`: any file at the slot's path), read before the act writes anything.
+    func slotIsOccupied() throws -> Bool { FileManager.default.fileExists(atPath: places.slot.path) }
 
     func createLibrary(with key: StoreKey, record: ProtectionRecord) throws {
         try ProtectionLibraryFiles.createLibrary(at: places.slot, key: key, record: record, date: Date())

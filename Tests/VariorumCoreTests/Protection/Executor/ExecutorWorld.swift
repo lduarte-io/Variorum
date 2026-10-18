@@ -347,6 +347,8 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
         try wrote(.discardStaged)
     }
 
+    func slotIsOccupied() throws -> Bool { live != nil }
+
     func createLibrary(with key: StoreKey, record: ProtectionRecord) throws {
         guard live == nil else { throw ExecutorRefusal.nothingToDo }
         live = LibraryFile(fingerprint: PF.fp(key), record: record, generation: 1)

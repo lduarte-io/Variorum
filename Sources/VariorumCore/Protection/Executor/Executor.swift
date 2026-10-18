@@ -158,6 +158,10 @@ public enum ExecutorRefusal: Error, Equatable, Sendable {
     case appleKeyUnreadable
     case noLiveKeyFile
     case recordMissing
+    /// Creating a library refuses a slot something already stands in — the no-clobber belt (a library is never
+    /// written over; rule 1: its key file is as essential as it), met BEFORE the creation's first write (VX-306
+    /// ladder round 2, m3): no key minted, no custody item, no Apple key, no key file written.
+    case libraryAlreadyInSlot
     /// Rule 17: nothing typed and no quiet road on this Mac opens the copy.
     case copyDoesNotOpen
     case nothingToDo

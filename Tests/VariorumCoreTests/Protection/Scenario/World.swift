@@ -1137,6 +1137,9 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
         try wrote("discard-staged")
     }
 
+    /// Anything at the slot's path (the production leaf's `fileExists` — any file, not only a library image).
+    func slotIsOccupied() throws -> Bool { device.container.files[SPath.slot] != nil }
+
     func createLibrary(with key: StoreKey, record: ProtectionRecord) throws {
         guard slot == nil else { throw ExecutorRefusal.nothingToDo }
         slot = LibraryImage(libraryID: record.libraryID, fingerprint: PF.fp(key), record: record, writing: 1)
