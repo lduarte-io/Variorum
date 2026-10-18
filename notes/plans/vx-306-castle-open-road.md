@@ -789,7 +789,33 @@ no stray (both scratch worktrees removed).
   Start a New Library → the core's creation; the arms in `VariorumApp` / `SettingsSceneContent` / `VariorumMobileApp` (the
   phone's unreachable); today's posture runner NOT wired on the new road (P-VX306-U1b-6). The faces the route lands on
   (the model, the face, the card — pieces 3/4) ride this commit so it compiles.
-- Piece 3 — the lobby MODEL (pure, Shared) + `StoreLockView`'s road face + VX-310's two pins (red-on-old): NOT STARTED.
+- Piece 3 — the lobby MODEL (pure, Shared) + `StoreLockView`'s road face + VX-310's two pins (red-on-old): DONE — the
+  model/face/view rode piece 2 (`454db4417`: `Shared/Protection/ProtectionLobbyFace.swift` — the core's `TouchIDAssessment`
+  and `LobbyRoads` read into a face, no rule of its own; `ProtectionLobbyModel.swift` — the presses over injected roads;
+  `StoreLockView.swift`'s new `RoadLockView`); THIS commit the pins. **THE MECHANISMS (traced on today's road, re-read on
+  this tree):** bug 1 — `AppBootstrap.routeAndOpen`'s `.lobby` arm and `lock()` build `biometryOffered: demand ==
+  .biometric && guardSeam.gatedItemExists()`, a presence probe that never asks whether a finger is enrolled (hardware, no
+  finger ⇒ the button, the automatic ask, and the line *"Unlock your library with Touch ID."*); bug 2 — `StoreLobby
+  .biometryOffered` is a `let` fixed from ONE probe at the lobby's build and the lobby never re-reads, so a lobby built while
+  the probe answered "no" (the ticket's suspect: a re-lock just after a cancelled prompt) has no button until a relaunch
+  builds a new one (the probe's real-world "no" is not reproducible headless — Unknown; the scripted guard's
+  `gatedWritesAreInvisible` stands in for that one answer). **THE CURES on the new road:** the button is
+  `TouchIDAssessment.button` (item for the current key AND hardware AND an enrolled finger); a press moves ONLY the press
+  fact (never a re-listing); `refresh()` on her return to the app re-reads the roads, a failed read keeping the face and a
+  read that misses a Touch ID item seen before keeping it (only a press that finds the item gone drops the button).
+  **The pins:** `ProtectionLobbyModelTests` (15, planted facts, no keychain) — and **red-on-old twice over:** (i)
+  `VX310TodayLobbyWitnessTests` (2) drives TODAY'S road (the pre-fix code, byte-unchanged and still Release's until VX-329)
+  through the same scenarios, each expectation inside `withKnownIssue` — the red is the known issue, and the file is a
+  tripwire if today's road ever changes; its RUN is the orchestrator's under the stage — PENDING; (ii) a HEADLESS harness
+  (the real `ProtectionLobbyFace.swift` + `ProtectionLobbyModel.swift` + `ProtectionWords.swift` and the pin file, compiled
+  by SwiftPM against the worktree's core with the app's concurrency settings; the plain `RoadLobbyFacts`/`RoadAttempt`
+  declarations copied, `ProtectionRoadSession` an empty stub) — green `✔ Test run with 15 tests in 1 suite passed after
+  0.025 seconds.`; MUTATION A (the face's button = today's presence-only rule): `✘ Test run with 15 tests in 1 suite failed
+  … with 8 issues` — both bug-1 pins red (`!face.touchIDButton`, `!face.autoAsk`, the line; `roads.presses == 0`);
+  MUTATION B (a press re-reads the listing and adopts it; `refresh` a no-op — today's never-re-read lobby): `✘ … failed …
+  with 12 issues` — both bug-2 pins red (`model.face.touchIDButton` after a dismissal; the button not back after her
+  return); each mutation restored and `diff`-checked against the worktree file. The harness lived in the session
+  scratchpad (not durable; the recipe is this paragraph).
 - Piece 4 — the creation card (§7c (1) verbatim, one button) + `createLibrary(passphrase: nil)`: NOT STARTED.
 - Piece 5 — the `StoreBackup.onRun` hook → `takeBackupPair`, honouring `copiesArePaused` (K4): NOT STARTED.
 - Piece 6 — the Mac tests + `build-for-testing` + the phone build: NOT STARTED.
