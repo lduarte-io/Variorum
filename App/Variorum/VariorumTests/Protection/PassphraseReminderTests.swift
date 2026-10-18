@@ -220,11 +220,26 @@ struct PassphraseReminderTests {
         var spoken: [String] = []
         standing.speak = { spoken.append($0) }
         var closed = 0
+        #expect(standing.offersSetPassphrase, "no passphrase yet — the pane's row renders")
         let sheet = standing.makeSetPassphraseSheet { closed += 1 }
         #expect(!sheet.alreadySet)
         await sheet.submit(passphrase: "p", again: "p")
         #expect(closed == 1 && reminder.showing == nil)
         #expect(spoken == ["Passphrase set. Your twelve words still open the library too."])
+        #expect(!standing.offersSetPassphrase, "a passphrase now — the pane's row goes (NIT 4)")
         #expect(standing.makeSetPassphraseSheet {}.alreadySet, "a second sheet refuses at once")
+    }
+
+    /// THE LADDER'S ROUND-1 NIT 4: over a library that already has a passphrase the pane's *Set a passphrase…* row is
+    /// not offered (the sheet behind it could only refuse — P-2); a sheet opened anyway (the reminder never shows then)
+    /// still refuses at once.
+    @Test func aLibraryWithAPassphraseOffersNoSetPassphraseRow() {
+        let suite = Suite()
+        defer { withExtendedLifetime(suite) {} }
+        let standing = RoadStandingModel(
+            faces: .none, reminder: model(PassphraseReminderLedger(defaults: suite.defaults), moment: nil),
+            setPassphrase: { _ in .alreadySet }, passphraseExists: { true }, receiptsOwed: { [] })
+        #expect(!standing.offersSetPassphrase)
+        #expect(standing.makeSetPassphraseSheet {}.alreadySet)
     }
 }

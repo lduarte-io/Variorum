@@ -2411,7 +2411,7 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
 - m1 — K5's missing face over a record-less store: DONE (`0b759f8b8` the fix + both pins; this commit the evidence). The bootstrap twin's run PENDING (the stage).
 - m2 — the copy doors' automatic quiet probe never presses Touch ID: DONE (this commit). The core protection set Debug green here; its release leg at the close.
 - m4 — the new-road Restore list re-reads on a landed backup pair: DONE (this commit). The hook twin's run PENDING (the stage).
-- NIT 1: DONE (`3e6a6bff0`; the source pin's run PENDING the stage). NIT 2: DONE (`a1a19780e`). NIT 3: DONE (this commit). NIT 4: NOT-STARTED.
+- NIT 1: DONE (`3e6a6bff0`; the source pin's run PENDING the stage). NIT 2: DONE (`a1a19780e`). NIT 3: DONE (`b698944a0`). NIT 4: DONE (this commit; the composition pin's run PENDING the stage).
 - The close (Mac + phone `build-for-testing`, the core protection set both configurations, the suite list): NOT-STARTED.
 
 **THE FINDINGS, one by one (AGREE/DISPUTE with the trace; the pin's red-on-old; the commit):**
@@ -2538,3 +2538,17 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
   (`LookInsideRoadTests` — `aLook…ClosingForgets` reads the reader directly; `theLooksBrainAsks…ForgetsAtClose` and
   `makeThisMyLibraryFromTheLook…` now `await look.closing` before the private folder is checked, +1 line asserting the
   close is off the main actor). The harness: `✔ Test run with 73 tests in 10 suites passed`.
+- **NIT 4 — AGREE.** `ProtectionPane` rendered the new road's *Set a passphrase…* row whenever a road standing model
+  existed (`if let roadStanding`), so once a passphrase was set the row led, forever, to a sheet that refused at once
+  (P-2's tension; until VX-308's Change Passphrase). **The fix** (this commit): `RoadStandingModel.offersSetPassphrase`
+  (observable — born `!passphraseExists()`, re-read each time a set-passphrase sheet closes; `passphraseExists` is the same
+  fact the sheet refuses on: the record's `passphraseSet` or a passphrase lock on the key file) and the pane renders the
+  row only while it is true. The reminder's road to the sheet is untouched (the reminder never shows once a passphrase
+  exists — `PassphraseReminderRules`), and the sheet keeps its refusal sentence for the moment a passphrase appears while
+  it stands. **The pins:** `PassphraseReminderTests` +1 test (`aLibraryWithAPassphraseOffersNoSetPassphraseRow` — born
+  with one: not offered, a sheet still refuses) and +2 lines in the faces-model test (offered before the set, not after) —
+  headless, green (new API, no red side); `ProtectionPaneRoadRowTests.theRowRendersOnlyWhileTheLibraryHasNoPassphrase` — a
+  COMPOSITION pin over the real pane (`SurfaceComposition`, the 17f/P47 road: no passphrase → the row composed; one →
+  absent; then hosted in a window) — Mac host, PENDING the stage; its red side by construction (the pre-fix condition
+  composed the row for every standing model — the second expectation fails), not run here. Mac `build-for-testing` →
+  `** TEST BUILD SUCCEEDED **`.

@@ -184,6 +184,10 @@ nonisolated struct RoadStandingFaces: Equatable, Sendable {
 final class RoadStandingModel {
     private(set) var faces: RoadStandingFaces
     let reminder: PassphraseReminderModel
+    /// The Protection pane's *Set a passphrase…* row renders only while this library has NO passphrase — the sheet
+    /// would refuse at once otherwise, forever (P-2: a door that cannot act is not rendered; the ladder's round-1 NIT 4).
+    /// Re-read from the library each time a set-passphrase sheet closes.
+    private(set) var offersSetPassphrase: Bool
 
     @ObservationIgnored private let setPassphrase: (String) async -> SetPassphraseOutcome
     @ObservationIgnored private let passphraseExists: () -> Bool
@@ -206,6 +210,7 @@ final class RoadStandingModel {
         self.setPassphrase = setPassphrase
         self.passphraseExists = passphraseExists
         self.receiptsOwed = receiptsOwed
+        offersSetPassphrase = !passphraseExists()
     }
 
     /// The open library's protection faces, from its session (the bootstrap's `.ready` on the new road): the standing faces read from the open's
@@ -252,7 +257,9 @@ final class RoadStandingModel {
     func makeSetPassphraseSheet(close: @escaping () -> Void) -> SetPassphraseModel {
         SetPassphraseModel(alreadySet: passphraseExists(), setRoad: setPassphrase) { [weak self] wasSet in
             close()
-            guard let self, wasSet else { return }
+            guard let self else { return }
+            self.offersSetPassphrase = !self.passphraseExists()
+            guard wasSet else { return }
             self.reminder.passphraseWasSet()
             self.speak?(ProtectionWords.passphraseSetReceipt)
         }

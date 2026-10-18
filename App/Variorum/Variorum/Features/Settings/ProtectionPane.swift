@@ -179,7 +179,8 @@ struct ProtectionPane: View {
 
     var body: some View {
         Form {
-            if let roadStanding {
+            // VX-306 ladder round 1, NIT 4: the row only while the library has no passphrase (P-2).
+            if let roadStanding, roadStanding.offersSetPassphrase {
                 roadPassphraseSection(roadStanding)
             }
             leadSection
@@ -242,7 +243,8 @@ struct ProtectionPane: View {
 
     // MARK: VX-306 U2 — the new road's one row
 
-    /// The ask's other home (P-VX306-U2-0 (a)): one row, *Set a passphrase…* — the sheet refuses when one exists.
+    /// The ask's other home (P-VX306-U2-0 (a)): one row, *Set a passphrase…* — rendered only while no passphrase exists
+    /// (`RoadStandingModel.offersSetPassphrase`; the sheet still refuses if one appears meanwhile).
     private func roadPassphraseSection(_ standing: RoadStandingModel) -> some View {
         Section {
             HStack {
