@@ -347,16 +347,32 @@ struct SidebarNoteBox: View {
     static let takesCellHeight: CGFloat = 24
 
     private func takesDoor(_ act: @escaping () -> Void) -> some View {
-        let door = Button(tokens.chromeLabel(NoteBoxCopy.takesDoor), action: act)
-            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-            .lineLimit(1)
-            .fixedSize()
+        // The VX-382 ladder's R1-7 (walk finding W-1's lesson — a macOS button
+        // counts a press only inside its OWN bounds): the CELL is laid out
+        // bare and the BUTTON rides an overlay of it, its label filling the
+        // cell, so the button's own frame IS the bordered cell. Before, the
+        // Button was the word's size inside a full-width frame and a press
+        // anywhere else in the cell was dropped (measured: the probe's edge
+        // press, 4 pt inside the left border, opened nothing). The word, its
+        // ink and its place are unchanged; the hover wash covers the target.
+        let door = Color.clear
             .frame(maxWidth: .infinity)
             .frame(height: Self.takesCellHeight)
             .background(tokens.surface, in: RoundedRectangle(cornerRadius: 6))
-            .overlay(RoundedRectangle(cornerRadius: 6).stroke(tokens.line, lineWidth: 1))
-            .contentShape(Rectangle())
-            .help(NoteBoxCopy.takesDoorHelp)
+            .overlay {
+                Button(action: act) {
+                    Text(tokens.chromeLabel(NoteBoxCopy.takesDoor))
+                        .lineLimit(1)
+                        .fixedSize()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                .help(NoteBoxCopy.takesDoorHelp)
+            }
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(tokens.line, lineWidth: 1)
+                    .allowsHitTesting(false))
 #if DEBUG
         return door
             .onAppear { SidebarGeometry.noteBoxFaces[subjectKey, default: [:]]["takes", default: 0] += 1 }
