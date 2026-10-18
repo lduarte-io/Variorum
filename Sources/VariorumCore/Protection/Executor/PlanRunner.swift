@@ -384,6 +384,22 @@ extension ProtectionExecutor {
             let locks = [library.keyFile, library.memory?.keyFileMirror].compactMap { $0 }.filter { $0.passphrase?.kdf == kdf }
             if !locks.isEmpty,
                !locks.contains(where: { (try? $0.open(passphrase: .passphraseKey(derived), floor: configuration.floor)) != nil }) {
+                // The secrets in hand are not the press's. Past the commit point
+                // the library already opens under the act's key, so this cannot
+                // happen; BEFORE it, the act cannot finish with what was typed —
+                // and rule 20 says the next open finishes OR ROLLS BACK from what
+                // is on disk, never leaves it in flight. A roll back needs no new
+                // key (the staged file discarded, the live key file restored from
+                // the plan's copy or the mirror, the new key's items deleted by
+                // fingerprint). The gate's seed 2 (VX-378 U4): a crashed Make this
+                // my library, then a wiped keychain, then an open by the backup's
+                // key file with the pair of ITS day — the act stayed in flight
+                // with copies paused.
+                if !plan.pastCommitPoint(libraryFingerprint: library.fingerprint) {
+                    try rollBack(&library, act: plan.act, outgoingKeyFile: plan.parameters?.outgoingKeyFile,
+                                 parameters: plan.parameters)
+                    throw ActRolledBack(act: plan.act, refusal: .passphraseDoesNotOpen)
+                }
                 throw ExecutorRefusal.passphraseDoesNotOpen
             }
         }
