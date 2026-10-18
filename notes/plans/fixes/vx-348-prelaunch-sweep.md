@@ -364,7 +364,12 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   walk or stage window. main is `d8bb24488` (VX-381 + Castle + two notes-only commits). The U5 implementer is
   instructed: fold at its next commit boundary (fetch + merge origin/main, keep-both-sides on any conflict, a merge
   commit, `swift build` sanity, the overlap answer in its record); no U5 batch or live round takes the stage until
-  the fold is in; U5's READY states the fold and the OpsRefusalTable overlap answer.** The release rule unchanged:
+  the fold is in; U5's READY states the fold and the OpsRefusalTable overlap answer. THE MECHANISM (the coordinator,
+  from the closing VX-378 session): VX-306 — Castle phase 2, kicking off — converts the fenced dev store at its
+  first Debug open (new protection record + key file format 3), after which a Debug build or TEST HOST from a tree
+  without `aeabdd75b` cannot open the dev store at all — so the fold gates EVERY xcodebuild test batch, walk and
+  live round from here on, and every prebuilt test product must be built from the folded tree (the implementer told
+  so). The coordinator announces when the conversion has happened.** The release rule unchanged:
   Castle never mints, isn't counted; the last of VX-382/VX-348 mints 0.9.8 and carries Castle. The Sync/-custody
   slot is now free; nothing in this run's lane needs it — the kickoff fence stands regardless.
 - **The trailer slip, closed:** the kickoff's in-flight-row commit briefly carried a `Co-Authored-By` trailer; at
