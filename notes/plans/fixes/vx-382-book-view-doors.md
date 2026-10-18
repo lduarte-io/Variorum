@@ -1136,3 +1136,17 @@ place from the committed tree (a265d0afc) and restored with `git checkout --` to
   other suite. No finding (`batch.log`).
 - **SEAM** — the walk next, on this window's Debug build (`DerivedData/Variorum-dkbmlpshalzxqeftsymzimjxpdhl`, the
   committed tree 51b074945's code); the stage is held, not released.
+
+### FINDING W-1 (the walk, Study, W1) — the fold control's OVERHANG takes the hover but not the click
+
+On the window's Debug build (sherlock, Outline, the "About this book" card): at rest the 13-pt ▸ draws; hovering it
+draws the 22-pt wash (`02-W1-hover`); **a click INSIDE the 22-pt box but outside the old glyph box (screen 626,296 —
+~3.5 pt left of the old 11-pt box) did NOTHING — the note neither unfolded nor opened** (`03-W1-click-overhang`); the
+control click at the glyph's centre (635,296) unfolded it (`04-W1-click-center`). Mechanism (traced from the two
+outcomes): the overhang is reached by hit-testing (the hover answers there, and the click is swallowed — the card's own
+Button never fires), but the inner Button's own FRAME is the 12×13 footprint (the negative padding sits INSIDE the
+button style's body), and a SwiftUI Button on macOS counts a press only when it ends within its own bounds — so a
+press in the overhang is taken and then dropped. The geometry oracle measured rectangles, not clicks, so the pin was
+green over a dead target. Fix: the footprint becomes a hidden layout stand-in and the BUTTON (its frame the 22-pt box)
+rides an overlay centred on it — its bounds ARE the target. Pin first: a real click in the overhang (the
+`SharedIconRig` road) unfolds the note — red on this tree.
