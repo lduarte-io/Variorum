@@ -215,7 +215,7 @@ tickets:
 | Piece | State |
 |---|---|
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
-| U1a — VX-303 (the landing road) | BUILT — batch PENDING the `vx-382-u1a` window (red-on-old per family + the batch; §U1a RECORD's red-on-old plan). Commits 482549002 · 7cbaf633b · 370f79514 · e3d44a189 · 406fb417c · e7cd4fdd9 · 74c632b61 · ed0c887d6 (pin ids); build-for-testing green at ed0c887d6 |
+| U1a — VX-303 (the landing road) | VERIFIED 2026-10-18 (`vx-382-u1a` window) — red-on-old A·B·C red as planned, both guard probes red, tree restored clean between each; batch `Test run with 1590 tests in 259 suites` — 4 issues + 5 known: VX-115's standing red (BookCollectingDoorsTests) + `DestructiveUndoWarningTests.redoNeverAsks` (the known VX-167 parallelism flake, signature :141–143); VX-77's standing red did NOT reproduce (passed). 9 skipped (2 disabled suites). §U1a RECORD → batch results. Code tip f0d1b414f |
 | U1b — VX-304 (the box door + Index takes) | NOT STARTED |
 | U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | NOT STARTED |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
@@ -223,8 +223,8 @@ tickets:
 
 ## U1a RECORD — VX-303 (implementer: opus-implementer, 2026-10-18)
 
-**Not done yet (kept current):** red-on-old per pin family and the Mac batch — PENDING the `vx-382-u1a` window (the
-plan below). No walk this unit (U1b's covers U1). Every pin count/green claim below is PENDING until that window.
+**Not done in this unit:** the walk (U1b's walk covers U1, per the brief); the spread's Takes form stays out of the
+memory (guard (i), recorded remainder). Red-on-old and the batch are DONE — §Batch results.
 
 ### The trace, re-verified on the tip (a87980768)
 
@@ -334,6 +334,38 @@ plan below). No walk this unit (U1b's covers U1). Every pin count/green claim be
 
 Restore each with `git checkout -- <file>` (safe: the tree is committed) or `git revert --abort`; `git diff` clean
 against the tip (ed0c887d6 at this writing) before the next family.
+
+### Batch results — the `vx-382-u1a` window (2026-10-18; logs in the gitignored `scratchpad/u1a/`)
+
+Each family from the committed tree (code = f0d1b414f; the tip's 4f3388db1 is record-only), restored to a clean
+`git diff` before the next. Zero app instances before, between and after.
+
+- **A — the doors' road** (door body → piece 1's broadcast, in place). `BookOpenDoorMountTests` alone: 6 issues —
+  each mode's live door `rode: []` (:520) and other-note door (:529); premises, guard (i) and the Index memory arm
+  green. `BookOpenDoorShellTests` alone: 4 issues — the note opened, but `activeMode` = `.lenses` (:627, :674) and
+  no Write caret (`caret nil`, :630, :677). Red for the planned reason.
+- **B — forced Write** (`git revert --no-commit 406fb417c`). Mount: 6 issues — every ride carries `mode: nil`.
+  Shell: the nothing-live arm 2 issues (Lenses, caret nil); the live arm GREEN (its block landing forces Write via
+  `jump`) — as planned.
+- **C — the memory** (`git revert --no-commit 74c632b61`). `BookPlaceMemoryTests` 4 issues (B's memory nil at :199,
+  :208; the placement pin's premise at :234, :243); `theIndexPanesGoingLivePlacementIsNotHers` green (the filter is
+  not in C — expected); Mount: the Index arm's "her move is remembered" (:508); `BookEditHereRiderTests` 2 issues —
+  the book's caret not remembered (:758) and "edit here" landed `(block 1, offset: 2)`, the note's own editor's place
+  (:777). Red for the planned reason.
+- **Guard probe — the bracket** (`caretPlacementDepth == 0` deleted): 3 issues — the bracketed placement replaced
+  b5/30 (:234) and the outline and spread mounts remembered the focus seed (:484).
+- **Guard probe — the Index filter** (`caretReportIsHers` → `true`): 4 issues — the END, the landing's place and the
+  click arrival's END counted as hers (:263, :266, :276); the Index mount arm remembered the landing (:499).
+- **Green batch** (`only-testing.args`, 259 suites): `Test run with 1590 tests in 259 suites failed after 845.666
+  seconds with 9 issues (including 5 known issues)`. 9 tests skipped (two disabled suites: the VX-144 capture
+  harness and the opt-in unkeyed-oracle suite — their traits say so). All five VX-303 suites passed. The 4 issues:
+  - `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` — VX-115's standing red (`BookView
+    .surfaceCapabilities == [.openBookSettings]`, :101). U2's member.
+  - `DestructiveUndoWarningTests.redoNeverAsks` — 3 issues at :141–143 (slots one block, redoDepth 1, no "Redid")
+    — the KNOWN flake VX-167 (Parked: red only under in-process parallelism; VX-184's record measured it red alone
+    2/2). Here, alone: 1 pass, 1 fail — same signature. Not attributed to this unit; recorded, nothing restored.
+  - `OutlineRoomTests.bothColumnsChromeStaysInsideThemAtTheirFloors` (VX-77's standing red) PASSED in this batch —
+    recorded for U2, which owns it.
 
 ### Recorded edges (not fixed here)
 
