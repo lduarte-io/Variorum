@@ -252,3 +252,16 @@ No BLOCKER. No MAJOR. Three MINOR, five NIT.
 One fix leg (a fresh implementer) applies R1-1's pin-then-decide, R1-2, R1-3's comment, R1-7's probe-then-decide
 and R1-8; its new pins verify in one short stage window; the orchestrator's line-by-line check closes the ladder
 at round 1 (0B/0M — the standing precedent) unless a fix uncovers more.
+
+## FIX LEG RECORD (opus-implementer, fresh, 2026-10-18 — the dispositions above are its warrant, nothing more)
+
+**Not done yet:** every in-window run (the R1-1 decider, the R1-2 red-on-old, the R1-7 probe and the guard batch) —
+the stage is coordinator-held; this leg builds headless and reports READY. **No revert is in flight.**
+
+| Item | State |
+|---|---|
+| R1-1 — the Index → Outline decider pin | NOT STARTED |
+| R1-2 — her click into an Outline/spread note is her place | NOT STARTED |
+| R1-3 — the flush comments name the open window | NOT STARTED |
+| R1-7 — the box's Index "Takes" cell's click frame | NOT STARTED |
+| R1-8 — record hygiene in the plan file | NOT STARTED |
