@@ -2412,7 +2412,7 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
 - m2 — the copy doors' automatic quiet probe never presses Touch ID: DONE (this commit). The core protection set Debug green here; its release leg at the close.
 - m4 — the new-road Restore list re-reads on a landed backup pair: DONE (this commit). The hook twin's run PENDING (the stage).
 - NIT 1: DONE (`3e6a6bff0`; the source pin's run PENDING the stage). NIT 2: DONE (`a1a19780e`). NIT 3: DONE (`b698944a0`). NIT 4: DONE (this commit; the composition pin's run PENDING the stage).
-- The close (Mac + phone `build-for-testing`, the core protection set both configurations, the suite list): NOT-STARTED.
+- The close (Mac + phone `build-for-testing`, the core protection set both configurations, the suite list): DONE (this commit) — the Mac and phone suites PENDING the stage (the orchestrator's).
 
 **THE FINDINGS, one by one (AGREE/DISPUTE with the trace; the pin's red-on-old; the commit):**
 
@@ -2552,3 +2552,115 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
   absent; then hosted in a window) — Mac host, PENDING the stage; its red side by construction (the pre-fix condition
   composed the row for every standing model — the second expectation fails), not run here. Mac `build-for-testing` →
   `** TEST BUILD SUCCEEDED **`.
+- **m3 — not this leg's** (the disposition: TICKET, VX-411 — retention of this Mac's own pairs, rule-22-aware). Nothing
+  built.
+
+**A NOTE FOR ROUND 2 (no fix — not a disposition, recorded so the reviewer can rule it):** m1's trace shows the core's
+`ProtectionExecutor.createLibrary` (`Executor/Acts/DeviceActs.swift`) writes the new key's silent item, its own Apple key
+and the LIVE KEY FILE before `leaves.library.createLibrary` meets the no-clobber belt — so any caller that reaches it with
+a library in the slot writes over the live key file and leaves two orphan keychain items before the refusal. After m1 no
+app road does (`.startFresh` is an empty slot by verdict; both faces set the slot aside first), so it is unreachable; a
+core preflight (refuse a non-empty slot before the first write) would make the act honest on its own. Hers/the
+reviewer's to rule — a hand-forward for VX-307 if wanted, not built here.
+
+**PROVISIONALs:** none new — every call in this leg is the dispositions' or engineering (QUESTIONS #233 untouched).
+
+**Counts (the final tree `8ee311d87` + this record):**
+- HEADLESS (this leg's own harness in the session scratchpad — the U1b/U2/U3 records' recipe: every `Shared/Protection/
+  *.swift` but `ProtectionBackupHook.swift` + `Shared/LibraryOpenCopy.swift` symlinked, one stub file of one-line app
+  stand-ins, the app's concurrency settings, the worktree's core by path; tests symlinked: `ProtectionTestSupport`,
+  `ProtectionOpenRoadPlantedTests`, `CopyDoorsModelTests`, `MakeMineRoadTests`, `PickedCopyRoadTests`, `LookInsideRoadTests`,
+  `ProtectionFacesSupport`, `PassphraseReminderTests`, `ProtectionLobbyModelTests`, `ProtectionFileLeavesTests`,
+  `CopyDoorsQuietProbeTests`, `CopyDoorsListRefreshTests` + a one-line `RoadWorld.RoadWorldError` stub): baseline before
+  the leg `✔ Test run with 66 tests in 8 suites passed`; final `✔ Test run with 73 tests in 10 suites passed after 1.125
+  seconds.`
+- The core protection set (78 suite types under `Tests/VariorumCoreTests/Protection`): Debug `✔ Test run with 320 tests
+  in 78 suites passed after 5.276 seconds.`; release (`swift test -c release`) `✔ Test run with 296 tests in 74 suites
+  passed after 3.892 seconds.`
+- `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx306-u3
+  build-for-testing` → `** TEST BUILD SUCCEEDED **` (final tree); `xcodebuild -scheme VariorumMobile -destination
+  'generic/platform=iOS Simulator' -configuration Debug -derivedDataPath DerivedData/vx306-u3 build-for-testing` →
+  `** TEST BUILD SUCCEEDED **`; no new warning in a touched file (the build's pre-existing ones: `Phase13pProtectionBrainTests`
+  2, `ProtectionRoadRouteTests`' `aReadOnlyRoadNeverCreates` 1, two core ones in `CatalogNames`/`KeyDoors`).
+- Release: byte-unchanged in BEHAVIOUR — every app change is new-road code (`Shared/Protection/*`, the bootstrap's
+  new-road functions, `RoadLockView`, the pane's new-road row behind `roadStanding`); the core's one change adds an option
+  whose default keeps every existing call. The app's Release build was not re-run (§8).
+- No Debug app launched, no `xcodebuild test`, no stage, no dev or real store touched; no `Sync/`, `Server/`, schema,
+  dependency or `StoreBackup.swift` line. One scratch extract (`git show HEAD:` of `ProtectionOpenRoad.swift` for NIT 2's
+  probe, in the scratchpad); `git worktree list` shows no worktree of this leg's.
+
+**THE MAC SUITES THE ORCHESTRATOR RUNS UNDER THE STAGE (from `App/Variorum/`; PENDING):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx306-u3 test \
+  -only-testing:VariorumTests/CopyDoorsQuietProbeTests \
+  -only-testing:VariorumTests/CopyDoorsListRefreshTests \
+  -only-testing:VariorumTests/RoadLockViewNamesPinTests \
+  -only-testing:VariorumTests/ProtectionPaneRoadRowTests \
+  -only-testing:VariorumTests/ProtectionOpenRoadPlantedTests \
+  -only-testing:VariorumTests/ProtectionRoadRouteTests \
+  -only-testing:VariorumTests/ProtectionBackupHookTests \
+  -only-testing:VariorumTests/LookInsideRoadTests \
+  -only-testing:VariorumTests/CopyDoorsModelTests \
+  -only-testing:VariorumTests/PassphraseReminderTests \
+  -only-testing:VariorumTests/MakeMineRoadTests \
+  -only-testing:VariorumTests/MakeMineRouteTests \
+  -only-testing:VariorumTests/PickedCopyRoadTests \
+  -only-testing:VariorumTests/ProtectionFacesRouteTests \
+  -only-testing:VariorumTests/ProtectionNoticeFaceTests \
+  -only-testing:VariorumTests/ProtectionOfferFaceTests \
+  -only-testing:VariorumTests/ProtectionRule27FaceTests \
+  -only-testing:VariorumTests/ProtectionRestoreReceiptTests \
+  -only-testing:VariorumTests/ProtectionReminderRoadTests \
+  -only-testing:VariorumTests/ProtectionLobbyModelTests \
+  -only-testing:VariorumTests/ProtectionWalkSwitchTests \
+  -only-testing:VariorumTests/ProtectionWordsPlanTests \
+  -only-testing:VariorumTests/ProtectionRoadSwitchTests \
+  -only-testing:VariorumTests/LibraryWordsCardTests \
+  -only-testing:VariorumTests/VX310TodayLobbyWitnessTests \
+  -only-testing:VariorumTests/ProtectionFileLeavesTests \
+  -only-testing:VariorumTests/KeychainTripwireTests \
+  -only-testing:VariorumTests/KeychainLeavesTests \
+  -only-testing:VariorumTests/ProtectionFactsGathererTests \
+  -only-testing:VariorumTests/ProtectionSystemCompositionTests \
+  -only-testing:VariorumTests/ProtectionSurfaceRenderTests \
+  -only-testing:VariorumTests/ProtectionTierFaceTests \
+  -only-testing:VariorumTests/StoreLaunchRouteTests \
+  -only-testing:VariorumTests/Phase13pLobbyTests \
+  -only-testing:VariorumTests/AppBootstrapOffMainTests \
+  -only-testing:VariorumTests/VX202ReopenRaceTests \
+  -only-testing:VariorumTests/VX206ProtectionLandingTests \
+  -only-testing:VariorumTests/LibraryPortabilityDoorTests \
+  -only-testing:VariorumTests/SettingsLockCloseTests \
+  -only-testing:VariorumTests/VX209GuideWarningTests \
+  -only-testing:VariorumTests/VX209LeavesCastleConfirmTests \
+  -only-testing:VariorumTests/ICloudDriveOfferTests \
+  -only-testing:VariorumTests/BackupFutureStampTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/TravellingDotsIndicatorTests \
+  -only-testing:VariorumTests/CapabilityRegistryTests \
+  -only-testing:VariorumTests/DeadVocabularyTests \
+  -only-testing:VariorumTests/MCPAsksWaitTests \
+  -only-testing:VariorumTests/Phase9cAuthWiringTests
+```
+The first four are this leg's NEW suites (2 + 2 + 1 + 1 = 6 tests); then the suites a fix grew (`ProtectionOpenRoadPlantedTests`
++1, `ProtectionRoadRouteTests` +1, `ProtectionBackupHookTests` +1, `LookInsideRoadTests` +1, `CopyDoorsModelTests` grown in
+place, `PassphraseReminderTests` +1); then every suite over a changed source file — the bootstrap, the road, the doors,
+the look, the hook, the open faces, `StoreLockView`, the Protection pane — which is U3's list grown by these and by
+`ProtectionTierFaceTests` + `ICloudDriveOfferTests` (U2's, over the pane and the hook's seam). `VX310TodayLobbyWitnessTests`
+still reports its 2 tests with KNOWN ISSUES (expected; a pass of either is a FAILURE); the tripwire's exact count must hold
+(every new test writes only its throwaway scope or nothing). Read the `skipped:` lines. **Optional red legs** (not run —
+the stage's): `ProtectionPaneRoadRowTests` with the pane's one condition reverted to `if let roadStanding {` (expect the
+second expectation red), and `ProtectionBackupHookTests.aLandedPair…` with the hook's post removed (expect `heard.count`
+red) — each one line, restored by `git checkout`.
+
+**THE PHONE'S SUITES (the simulator — under the stage; PENDING):** the shared files the phone compiles changed (the
+bootstrap, the doors' and the look's brains, the open faces), so U3's six: `-only-testing:VariorumMobileTests/
+MobileProtectionRoadTests` · `MobileProtectionTests` · `MobileProtectionSurfaceTests` · `MobileTravellingDotsTests` ·
+`MobileLobbyVaultRoadTests` · `MobileEmptyStoreTests`, on the iOS 26.2 simulator U3's batch used
+*[removed for publication]*
+
+**Notes:** no machinery deaths; no Sonnet lookup; no subagents. The red-on-old runs: m1 by the pre-fix flag restored on
+the committed fix (`git checkout` after), m2 and m4 by their pins against the pre-fix Shared files before the fix was
+written (no revert needed), NIT 2 by a harness-only probe over a `git show HEAD:` extract, NIT 1 by the source pin's own
+logic over the pre-fix file; NIT 3 and NIT 4's composition pin by trace (stated per finding).
