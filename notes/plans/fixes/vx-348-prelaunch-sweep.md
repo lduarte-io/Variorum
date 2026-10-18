@@ -1809,3 +1809,18 @@ region of the controls row / panel / header per state:
   commit-count defect; the locked-refusal behavior is green under its two sibling pins (the door-refuses-before-
   opening pin, the seal cell). Routed to U2's implementer: trace, fix the cell or DROP it with the reason said; a
   changed cell re-runs as one suite at the walk window's start.
+
+## THE U3 BATCH + U2's LAST SUITE (the orchestrator, 2026-10-18 ~08:17–08:30, claim `vx-348-u3-batch`)
+
+- **U3 RED leg:** all four families red EXACTLY as predicted (VX176 tint 4/4 · VX349 header-rest 4/4 · VX350 narrow
+  2×2 · the justified LibraryPreviewBrainTests width pin), nothing unexpected — red-on-old whole.
+- **U3 FIXED leg:** 147 of 149 across 24 suites — every MEMBER pin green; the one red is the implementer's own new
+  pure pin `placingAtTheReportedWidthArrangesTheSameRow` catching a REAL sub-pixel edge (Study, width 301.5, field
+  open: the container pixel-rounds placement to 302.0 and the arrangement re-decides — a half-point delta at a class
+  threshold could flip the breaks). Routed to U3's implementer: make the deciding width identical in both passes;
+  the one-suite re-run rides the next window on the run's final product.
+- **U2's last suite** (the rebuilt mount suite on u2-fixed, folded into this window as flagged at READY): **13/13 —
+  U2's fixed leg stands 206/206, fully batch-verified** (the walk still owed).
+- **THE PRUNE (the coordinator's disk warning):** u2-red · u2-fixleg-red · u2-fixed · u5-fix · u3-red · u3-fixed and
+  their five durable checkouts removed after verification — 24 → 41 GiB free. The combined walk window runs on the
+  post-U4 product.
