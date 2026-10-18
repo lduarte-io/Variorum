@@ -70,6 +70,36 @@ struct TagAndFolderTests {
         }
     }
 
+    /// VX-247 (Part of VX-381): Settings ▸ Tags' delete door rides the op's
+    /// ONE registration — the session's stack holds "Delete Tag", the Edit
+    /// menu offers "Undo Delete Tag", and the undo brings the subtree back.
+    /// RED ON OLD (the op registered nothing: no top label, nothing undone).
+    /// And the confirm no longer says there is no undo (R-VX381-A3).
+    @Test func theDeleteDoorIsUndoableThroughTheSessionsStack() async throws {
+        try await withWorld { session, db in
+            let model = TagsViewModel(session: session)
+            await model.createTag(parentID: nil, name: "life")
+            let life = try #require(try await db.read { try Queries.allTags($0).first })
+            await model.createTag(parentID: life.id, name: "goals")
+
+            await model.deleteTag(life.id)
+            #expect(try await db.read { try Queries.allTags($0) }.isEmpty)
+            #expect(session.undoStack.topLabel == Operations.deleteTagUndoLabel)
+            #expect(EditorCommands.undoMenuTitle(for: session.undoStack.topLabel) == "Undo Delete Tag")
+
+            let stack = session.undoStack
+            let outcome = try await session.runner.run { ops in try stack.undoReporting(with: ops) }
+            #expect(outcome == UndoStack.Outcome(label: "Delete Tag", changed: true))
+            #expect(try await db.read { try Queries.allTags($0) }.map(\.path) == ["life", "life/goals"])
+
+            for count in [0, 2] {
+                let line = TagDeletion.consequence(name: "life", subtreeCount: count)
+                #expect(!line.lowercased().contains("undo"), "the confirm claims no 'no undo': \(line)")
+                #expect(line.hasSuffix("."), "\(line)")
+            }
+        }
+    }
+
     @Test func refusalCopySurfacesForDuplicatePathAndInvalidName() async throws {
         try await withWorld { session, _ in
             let model = TagsViewModel(session: session)

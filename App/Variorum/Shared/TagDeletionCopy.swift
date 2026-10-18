@@ -18,7 +18,15 @@
 //
 //  Why it confirms at all: the confirmation-consistency principle (13j,
 //  written at 13l — recoverability × scale): a tag delete takes the whole
-//  subtree off every note, with no undo and no restore road (VX-238).
+//  subtree off every note, and it has no restore road (VX-238).
+//
+//  VX-247 (Part of VX-381 — R-VX381-A3, PROVISIONAL): the delete gained ONE
+//  structural-undo entry ("Undo Delete Tag" — ⌥⌘Z on the Mac, the note ⋯
+//  sheet's undo on the phone: the same session stack), so the consequence's
+//  old last sentence, "There is no undo for this.", was false on both
+//  platforms and is DROPPED; the confirm still names the consequence. The
+//  recorded alternative is a true line naming the road ("You can undo this
+//  with Undo Delete Tag.").
 //
 
 import Foundation
@@ -42,11 +50,10 @@ nonisolated enum TagDeletion {
     /// C3 brief's letter). Two arms: a leaf tag, and a tag carrying a subtree.
     static func consequence(name: String, subtreeCount: Int) -> String {
         if subtreeCount == 0 {
-            return "Deleting “\(name)” takes it off every note that wears it. "
-                + "There is no undo for this."
+            return "Deleting “\(name)” takes it off every note that wears it."
         }
         let word = subtreeCount == 1 ? "sub-tag" : "sub-tags"
         return "Deleting “\(name)” also deletes its \(subtreeCount) \(word) — "
-            + "every note wearing any of them loses those tags. There is no undo for this."
+            + "every note wearing any of them loses those tags."
     }
 }
