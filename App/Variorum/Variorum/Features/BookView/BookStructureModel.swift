@@ -805,7 +805,7 @@ final class BookStructureModel {
             return result.post.id
         } catch let error as OperationError {
             if case .smartFilterUnsatisfiable(_, let reason) = error {
-                lastError = GatheringNoteDoorCopy.cannot(reason)
+                lastError = reason
             } else {
                 lastError = ReadingsViewModel.message(error)
             }

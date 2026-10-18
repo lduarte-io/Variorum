@@ -65,9 +65,14 @@ nonisolated enum MultiBookEditNote {
     /// W23's target for the note's button: the first CURATED book in the
     /// chooser's own order. ONE rule that reduces to "the book you came
     /// from" in exactly the case that matters, because arriving at a book
-    /// floats it to the top of that order — and nil where every membership
-    /// is derived, so the note speaks WITHOUT a button rather than offering
-    /// an act that could only refuse (P-2, at a status offer).
+    /// floats it to the top of that order.
+    ///
+    /// Since VX-111 the trigger hands this `memberBooks` — books only, and at
+    /// least two whenever the note speaks — so at the trigger a target always
+    /// exists (ladder r1 F-8: the old "nil where every membership is derived"
+    /// line described the pre-VX-111 input). The `kind == .book` filter and the
+    /// nil answer stay as this function's own contract for a mixed list (P-2:
+    /// never offer an act that could only refuse; `BookAscentTests` pins it).
     ///
     /// It lives here rather than inside the trigger's closure for the reason
     /// `MembershipChip.ascend` does: a promise made inside a closure is a
