@@ -331,7 +331,7 @@ store this build has written — coordinators told.
 - KICKOFF 2026-10-18 (her rulings §7; the orchestrator's provisional rulings §7b; the words drafts §7c): DONE — worktree
   `~/dev/variorum-vx-306`, branch pushed, the in-flight row on main (`99d49fc4a`, holds the Sync/-or-custody slot),
   VX-306 In Progress, the coordinator (`oct18coordinator`) announced and the slot granted explicitly.
-- U1a — the production leaves (+ VX-386 first, the `protection_record` migration, VX-390): NOT STARTED — NEXT.
+- U1a — the production leaves (+ VX-386 first, the `protection_record` migration, VX-390): IN-PROGRESS (Opus implementer, 2026-10-18) — the U1a RECORD in §9 carries the per-piece status.
 - U1b — the lobby on roads, Debug-gated (+ VX-310, the creation card, the Release check, the dev store's fresh start): not started.
 - U2 — the honest faces: not started.
 - U3 — the two doors; the phone opens: not started.
@@ -506,3 +506,18 @@ one this Mac last had open* — with one button, *OK*; shown once, then the libr
   silently.
 
 ## 9. RECORDS (each unit appends: what shipped / counts both configurations / PROVISIONALs / commits / notes)
+
+### U1a RECORD — THE PRODUCTION LEAVES (Opus implementer, 2026-10-18; IN PROGRESS)
+
+**Not done in U1a, first:** PENDING (filled at the close).
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece 1 — VX-386, the three residues (`PlanRunner` guard-off resume's `catch ActRolledBack`; `U4PromiseCheckTests
+  .onePostureStillCatchesAFollowedSyncedDevice`; `Promises.swift` L1's parenthetical): DONE (this commit) — the
+  protection set's counts in both configurations PENDING (run at the unit's close).
+- Piece 2 — the `protection_record` LOCAL-ONLY migration `v1_30_protection_record`: NOT STARTED.
+- Piece 3 — VX-390, the library-ID stamp + the fakes + the seed-3 pin (catalogue leaf empty), red-on-old: NOT STARTED.
+- Piece 4 — the thirteen production leaves + `CatalogLister` + `ProtectionFactsGatherer` + `ProtectionSystem` under
+  `App/Variorum/Shared/Protection/`: NOT STARTED.
+- Piece 5 — the Mac tests under `App/Variorum/VariorumTests/Protection/` + `xcodebuild build-for-testing`: NOT STARTED.
+

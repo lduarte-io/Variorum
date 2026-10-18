@@ -40,7 +40,9 @@
 //
 //  THE STATED LIMITS (each with its pointer, each read where it applies):
 //    L1 rule 10 — a device that has not followed reads its own copy through its
-//       own quiet road (it is still Standard; promise 1 is the followers').
+//       own quiet road (it is still in its own earlier posture — Standard, or an
+//       earlier Castle stretch whose record names an earlier sync key; promise 1
+//       is the followers').
 //    L2 rule 25 — Apple's roads are Apple's: a key left in an Apple account she
 //       has since left keeps its lock (FD-2), and a delete made while iCloud
 //       Keychain's switch is off reaches iCloud only when it's on.

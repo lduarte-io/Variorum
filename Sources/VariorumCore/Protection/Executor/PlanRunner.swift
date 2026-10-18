@@ -290,8 +290,15 @@ extension ProtectionExecutor {
             if sealed != nil {
                 if !guards.planNamedBySectionOn, let plan = verified() {
                     // Guard off (DEBUG mutation pins only): a plan nothing
-                    // names resumes — the planted and the replayed plan.
-                    return .resumed(try await resume(plan, &library, typed: typed))
+                    // names resumes — the planted and the replayed plan. A
+                    // pre-commit resume whose secrets are not the press's
+                    // rolls back (P-VX378-O2-1) exactly as the named road's
+                    // does below (VX-386 — the ladder's round-3 NIT 1).
+                    do {
+                        return .resumed(try await resume(plan, &library, typed: typed))
+                    } catch let rolledBack as ActRolledBack {
+                        return .rolledBack(rolledBack.act)
+                    }
                 }
                 // (A plan nothing here names never restores a key file — the
                 // restore for an act no identity here resumes left with VX-378

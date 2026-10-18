@@ -29,6 +29,24 @@ struct U4PromiseCheckTests {
         #expect(found.contains { $0.detail.contains("an earlier key") }, "\(found)")
     }
 
+    /// 1 (the synced arm — VX-386, the ladder's round-4 MINOR) — the
+    /// lagging-device exemption never swallows a device that HAS followed: a
+    /// silent item on a followed Castle device still fires.
+    @Test func onePostureStillCatchesAFollowedSyncedDevice() async throws {
+        let world = SWorld(seed: 424_242)
+        let synced = try #require(StartingState.all.firstIndex { $0.name.contains("Castle account with Touch ID") })
+        try await StartingState.all[synced].build(world)
+        await world.done([.launch("macB")])
+        let record = try #require(world.macB.slot?.record)
+        let account = try #require(record.account)
+        let current = try #require(world.server.snapshot(account)?.rowKeyID)
+        #expect(record.accountRowKeyID == current, "macB should have followed in this start state")
+        #expect(world.onePosture(world.macB, settled: true).isEmpty, "clean before the plant")
+        let key = try #require(world.macB.library?.key)
+        world.macB.keychain.local[KName.custody(SWorld.scope, PF.fp(key), .silent)] = KItem(value: .key(key))
+        #expect(!world.onePosture(world.macB, settled: true).isEmpty, "promise 1 must still fire on a followed device")
+    }
+
     /// 2 — Standard with its Apple road and its on-device item gone, unrepaired.
     @Test func standardCatchesALostQuietRoad() async throws {
         let world = try await scenarioWorld { try await $0.fresh(on: $0.macA) }
