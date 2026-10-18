@@ -352,7 +352,8 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   ⌘S name field but ⎋ files, the filers commit the ASKED take); compiled; **PENDING:** the Mac batch (red leg first —
   products in the U2 record), the walk (both voices, every host — the list in the record), the QUESTIONS bundle
   (P-VX347-1…5). The U2 UNIT RECORD (at the end of this file) carries the rest.
-- **U3 (VX-350 · VX-349 · VX-176 — the Library's row and header):** NOT-STARTED.
+- **U3 (VX-350 · VX-349 · VX-176 — the Library's row and header):** IN-PROGRESS (its implementer, 2026-10-18) — the U3
+  UNIT RECORD (at the end of this file) carries the live state.
 - **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** NOT-STARTED.
 - Then the ladder (fresh Fable per round, whole diff), closeout, merge. **Her overnight mandate (2026-10-18):**
   rule PROVISIONALLY and continue; merge to main at this run's own finish (finish-order serialization with
