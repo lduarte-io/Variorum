@@ -353,7 +353,10 @@ disposition here.
 - **U2 (VX-249 · VX-247 · VX-111):** IN-PROGRESS 2026-10-18 (the U2 implementer, one session). No revert in flight.
   Order: core pins first (headless red → fix → green), then the app pins, then ONE stage window (RUN 1 red-on-old on
   a prebuilt behaviourally reverted tree, RUN 2 green) via the orchestrator's relayed GO.
-  - U2.1 **VX-249 — the collect door sets the star:** NOT-STARTED. Design: `GatheringMint.outcome` gains the note's
+  - U2.1 **VX-249 — the collect door sets the star:** IN-PROGRESS — core landed (171a17d4, core suites green
+    114/10 on the fixed tree); **a CORE behavioural revert is starting now** (`Operations+SmartCollect.swift`
+    → the pre-VX-249 walk with `starred: false`; restore = `git checkout --` that file, committed at 171a17d4).
+    Receipts (app) NOT-STARTED. Design: `GatheringMint.outcome` gains the note's
     STARTING state (what it already wears, its star, its legacy values — all empty for a fresh note, so the mint's
     plans are unchanged); R98's walk becomes that planner (ONE authority); a planned star is written through
     `writeStar(…, enforcingCap: false)` in the op's transaction, the belt re-reads the star context; the result
