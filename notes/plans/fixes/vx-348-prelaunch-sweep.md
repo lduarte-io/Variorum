@@ -16,12 +16,8 @@ free for reviews; she redirects at kickoff. No `Sync/`, custody, Keychain, schem
 the questions are under VX-351 below, so the kickoff sitting answers them and the rest of the run needs nothing from
 her. Every other member is already ruled in her words on its ticket.
 
-**MINTS A RELEASE AT ITS CLOSE (her word 2026-10-18):** this run, VX-381 and VX-382 each publish a release when they
-merge — the next free number in merge order: 0.9.8, then 0.9.9, then 0.10.0 (her word: finish the 0.9 line first). The numbering rule is in
-`notes/plans/vx-33-release-runway.md` §5. Release notes: the standing rule is SHE writes them (memory: Variorum
-release publishing); if she delegates the draft at kickoff, write them one line per bullet and present them before the
-run. The release is followed by the /Applications refresh under the full rule card, installing the SAME version and
-build as the site; her Air then takes it through Sparkle.
+**The release:** at her explicit word only, never at a closeout (memory: Variorum release publishing); she usually
+releases once the last of a set of runs is done. The next number is 0.9.8; no 1.0 before her public launch.
 
 ## KICKOFF PROMPT (paste into a fresh session on the Pro, in `~/dev/variorum`)
 
@@ -36,8 +32,7 @@ build as the site; her Air then takes it through Sparkle.
 > (REQUEST → READY → GO → RELEASE). Open the kickoff sitting with VX-351's questions (one question-tool batch), record her
 > rulings in this file verbatim-faithful, then run without her. Where a ticket says "decide", decide PROVISIONALLY,
 > record it here, and bundle it for QUESTIONS at the merge. Read `notes/MCPSpec.md` in full before VX-357 (the wire
-> answer changes). Close with CLAUDE.md's full ritual, then — her word — publish the release (§5 of the runway names
-> the number) and refresh /Applications.
+> answer changes). Close with CLAUDE.md's full ritual; a release is her explicit word, not the closeout's.
 
 ## Members and the rulings they carry (each ticket's body is the trace; her words are already on them)
 
@@ -126,7 +121,7 @@ this run already opens)
 3. **U3 — the Library's row and header:** VX-350 · VX-349. Walk both voices at three widths.
 4. **U4 — the Library's stamps and the riders:** VX-351 (built to her kickoff rulings) · VX-384 · VX-385. Walk.
 
-Then the ladder (Fable, fresh per round, over the whole diff), the closeout, the merge, the release, the refresh.
+Then the ladder (Fable, fresh per round, over the whole diff), the closeout, the merge.
 
 ## Overlaps to respect (the runway's §2 conflict map, as of 2026-10-18)
 
@@ -140,8 +135,7 @@ Then the ladder (Fable, fresh per round, over the whole diff), the closeout, the
   slot. VX-338/VX-339 are fenced to today's backup and hold-banner code and never enter that folder.
 - **VX-234** (her Settings wording pass) may touch pane copy; VX-351's setting, if she wants one, lands in a pane —
   rebase carefully.
-- **Closeouts serialize** (CLAUDE.md): the three runs merge first-ready-first, each rebasing; each mints its release
-  in that order (0.9.8, 0.9.9, 0.10.0).
+- **Closeouts serialize** (CLAUDE.md): the three runs merge first-ready-first, each rebasing.
 
 ## Environment traps (carried verbatim into every brief)
 
