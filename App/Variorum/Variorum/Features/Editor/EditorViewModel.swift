@@ -370,6 +370,13 @@ final class EditorViewModel {
     /// (interpretation 1: focus FIRST, then the fan panel opens on the one
     /// live surface).
     @ObservationIgnored var pendingCaretSeed: Int?
+    /// **VX-382 ladder R1-2 — whether `pendingCaretSeed` is HER place.** A
+    /// book's read-cheap click hands its offset (`BookViewModel.focus(_:caret:)`);
+    /// a bare focus hands the note's start (0). Both land inside the mount's
+    /// placement bracket (`applyProjection`), which keeps a mount's own
+    /// placements out of another note's memory — so a click's place is
+    /// reported once more, outside it.
+    @ObservationIgnored var pendingCaretSeedIsHers = false
     @ObservationIgnored var pendingFanSeed: String?
     /// **13o U2 — the third one-shot: the FIND seed** (land-at-match, D6): a
     /// search passage's matched words, applied after the caret seed lands —
@@ -872,9 +879,19 @@ final class EditorViewModel {
             // would honor its own fill's side effect (the first cut did —
             // and landed at the last block's start).
             let arrivalFact = session.commandRouter.focusedBlock
-            structural.renderFull(new, preserveTail: false)
-            loaded = true
-            applyFocusSeeds(arrivalFact: arrivalFact)
+            // VX-303 (R-U1a-1's guard): the fill's END and the focus seeds are
+            // the MOUNT placing the caret, not her — bracketed so a note that
+            // is not the mounted detail's (a book's inline editor) never takes
+            // them as her place. The bracket changes nothing else.
+            var seedWasHers = false
+            session.commandRouter.duringCaretPlacement {
+                structural.renderFull(new, preserveTail: false)
+                loaded = true
+                seedWasHers = applyFocusSeeds(arrivalFact: arrivalFact)
+            }
+            // VX-382 ladder R1-2: …except a CLICK's seed, which IS her place —
+            // reported again, outside the bracket.
+            if seedWasHers { updateCaretContext() }
         case .deferUntilClean:
             pendingProjection = new
         case .forcedFullRender:
@@ -1980,11 +1997,16 @@ final class EditorViewModel {
 
     /// Applies the one-shot focus-handoff seeds after the first render
     /// (Step 3): caret placement from the read-tier click, then the
-    /// focus-then-fan panel where a badge tap drove the focus.
-    private func applyFocusSeeds(arrivalFact: FocusedBlock? = nil) {
+    /// focus-then-fan panel where a badge tap drove the focus. Answers
+    /// whether the caret seed it placed was HER click's place (VX-382 ladder
+    /// R1-2 — `pendingCaretSeedIsHers`).
+    private func applyFocusSeeds(arrivalFact: FocusedBlock? = nil) -> Bool {
         var caretClaimed = false
+        var seedWasHers = false
         if let seed = pendingCaretSeed, let textView {
             pendingCaretSeed = nil
+            seedWasHers = pendingCaretSeedIsHers
+            pendingCaretSeedIsHers = false
             let clamped = min(max(0, seed), max(0, index.documentLength))
             textView.setSelectedRange(NSRange(location: clamped, length: 0))
             textView.window?.makeFirstResponder(textView)
@@ -2142,6 +2164,7 @@ final class EditorViewModel {
                 Task { @MainActor in _ = claim() }
             }
         }
+        return seedWasHers
     }
 
     /// **13o U2 — a search passage lands at its match** (D6). The caret seed
@@ -3684,9 +3707,13 @@ final class EditorViewModel {
         // router's: it keeps the offset `@ObservationIgnored` beside the
         // observed identity, so a caret walking inside one paragraph still
         // wakes nobody (`CommandRouter.focusedBlock`).
+        // VX-303 (R-U1a-1): this editor brackets its mount's own placements
+        // (`applyProjection`'s initialRender arm), so a report for a note no
+        // detail shows — the book's inline editor — may feed that note's
+        // memory ("edit here" reads it).
         session.commandRouter.noteFocusedBlock(
             caretBlockID, variantID: caretVariantID, postID: postID,
-            utf16Offset: caretOffsetInBlock)
+            utf16Offset: caretOffsetInBlock, remembersOtherNotes: true)
     }
 
     // MARK: - The overlay layout-settle trigger (N14, 13b Stage 3F)

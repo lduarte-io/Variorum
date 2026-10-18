@@ -1422,6 +1422,17 @@ enum SidebarGeometry {
     private static var boxFrameStore = OwnedRegistrations<String, CGRect>()
     private static var boxHeaderStore = OwnedRegistrations<String, CGRect>()
     private static var whereLineStore = OwnedRegistrations<String, String>()
+    private static var boxOpenDoorStore = OwnedRegistrations<String, CGRect>()
+
+    /// **VX-304 — where the box's "open ↗" stands**, in the window's own
+    /// space, per subject: "the door is in the box, whole, in both voices at
+    /// the column's width" is a claim about two rectangles (this and
+    /// `noteBoxFrames`), so the pin reads the rectangles.
+    static var noteBoxOpenDoorFrames: [String: CGRect] { boxOpenDoorStore.current }
+
+    static func recordBoxOpenDoor(_ subject: String, _ frame: CGRect, owner: UUID) {
+        boxOpenDoorStore.publish(frame, for: subject, owner: owner)
+    }
 
     static func recordRail(_ postID: String, _ height: CGFloat, owner: UUID) {
         railStore.publish(height, for: postID, owner: owner)
@@ -1446,6 +1457,7 @@ enum SidebarGeometry {
         boxFrameStore.release(owner: owner)
         boxHeaderStore.release(owner: owner)
         whereLineStore.release(owner: owner)
+        boxOpenDoorStore.release(owner: owner)
     }
 
     /// A PIN's doors (they used to be `railGroupHeights[post] = nil` and
@@ -1474,6 +1486,7 @@ enum SidebarGeometry {
         boxHeaderStore.forget(subject)
         noteBoxFaces[subject] = nil
         whereLineStore.forget(subject)
+        boxOpenDoorStore.forget(subject)
     }
 
     // (`resetHeaders()` RETIRED at 13u2 UNIT E — the whole-oracle wipe it

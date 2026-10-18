@@ -28,9 +28,11 @@
 //  drop must keep filing, silently).
 //
 
+import AppKit
 import Dependencies
 import Foundation
 import GRDB
+import SwiftUI
 import Testing
 import VariorumCore
 @testable import Variorum
@@ -273,11 +275,109 @@ struct BookPanelDragGateTests {
     /// HER STANCE: a handle that cannot drag must not render. A lone
     /// chapter's ⠿ has nowhere to go (every drop resolves to nothing), so
     /// the grip is drawn only when there is another chapter to move past.
+    /// (VX-21: stated in MANUAL order — the order where a grip draws at all.)
     @Test func aLoneChapterDrawsNoGrip() {
-        #expect(!BookPanelBrain.chapterGripDrawn(chapterCount: 0))
-        #expect(!BookPanelBrain.chapterGripDrawn(chapterCount: 1),
+        #expect(!BookPanelBrain.chapterGripDrawn(chapterCount: 0, manualOrder: true))
+        #expect(!BookPanelBrain.chapterGripDrawn(chapterCount: 1, manualOrder: true),
                 "one chapter: no drop can move it — no handle")
-        #expect(BookPanelBrain.chapterGripDrawn(chapterCount: 2))
-        #expect(BookPanelBrain.chapterGripDrawn(chapterCount: 9))
+        #expect(BookPanelBrain.chapterGripDrawn(chapterCount: 2, manualOrder: true))
+        #expect(BookPanelBrain.chapterGripDrawn(chapterCount: 9, manualOrder: true))
+    }
+
+    // MARK: - VX-21 (was VR-127): no grips under a derived sort
+
+    /// HER 0.9.2 USE (her Journal, by entry date): *"you shouldn't see
+    /// draggable bars when you can't drag."* Under a stamp order no row is
+    /// placed by hand, so no grip draws, whatever the chapter count; in manual
+    /// order the 17y rule stands. RED ON OLD by behavioural revert (the gate
+    /// read the count alone).
+    @Test func aGripDrawsOnlyWhereTheBookIsPlacedByHand() {
+        for count in [2, 3, 9] {
+            #expect(!BookPanelBrain.chapterGripDrawn(chapterCount: count, manualOrder: false),
+                    "a stamp-ordered book with \(count) chapters draws no grip")
+            #expect(BookPanelBrain.chapterGripDrawn(chapterCount: count, manualOrder: true),
+                    "in manual order \(count) chapters draw theirs")
+        }
+        #expect(!BookPanelBrain.chapterGripDrawn(chapterCount: 1, manualOrder: false))
+    }
+
+    /// The same, MOUNTED — what the panel DRAWS (`BookPanelGripProbe`), so the
+    /// view's own reading of the book's order is pinned and not only the
+    /// brain's: a two-chapter book in entry-date order draws no grip on
+    /// either chapter row; switched to manual order, both draw. RED ON OLD
+    /// (the panel drew both grips under the stamp order).
+    @Test func theMountedPanelDrawsNoGripUnderAStampOrderAndBothInManual() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            // Live ids: the probe is keyed by chapter id and suites run in
+            // parallel (`.incrementing` would share ids across them).
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = .constant(stamp)
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 21))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let ops = session.operations
+            let book = try ops.createReading(name: "Journal-ish", kind: .book)
+            let one = try ops.createSection(in: book.id, name: "september")
+            let two = try ops.createSection(in: book.id, name: "october")
+            var ids: [String] = []
+            for title in ["a", "b", "c"] {
+                let note = try ops.createPost(title: title)
+                try ops.addPostToReading(note.id, to: book.id)
+                ids.append(note.id)
+            }
+            try ops.assignPostToSection(ids[0], in: book.id, section: one.id)
+            try ops.assignPostToSection(ids[1], in: book.id, section: two.id)
+            try ops.setReadingSort(book.id, field: .entryDate, direction: .desc)
+
+            let membership = NoteMembershipModel()
+            let model = BookPanelModel(session: session, postID: ids[0])
+            let track = Task { await membership.track(session: session, postID: ids[0]) }
+            let contents = Task { await model.observe(bookID: book.id) }
+            defer { track.cancel(); contents.cancel() }
+            try await settle {
+                model.snapshot(for: book.id)?.entries.count == 3
+                    && membership.readings(for: ids[0]).count == 1
+            }
+            #expect(model.manualOrder(for: book.id) == false, "the premise: a stamp order")
+
+            #if DEBUG
+            BookPanelGripProbe.drawn[one.id] = nil
+            BookPanelGripProbe.drawn[two.id] = nil
+            #endif
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 340, height: 600),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer { window.orderOut(nil); window.close() }
+            let hosting = NSHostingView(rootView: BookPanelView(
+                session: session, postID: ids[0], membership: membership, model: model)
+                .environment(ThemeStore(session: session)))
+            hosting.frame = NSRect(x: 0, y: 0, width: 340, height: 600)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            @MainActor func pump() async {
+                for _ in 0..<8 {
+                    hosting.layoutSubtreeIfNeeded()
+                    window.displayIfNeeded()
+                    try? await Task.sleep(for: .milliseconds(30))
+                }
+            }
+            await pump()
+            #if DEBUG
+            #expect(BookPanelGripProbe.drawn[one.id] == false && BookPanelGripProbe.drawn[two.id] == false,
+                    "entry-date order: neither chapter row draws its grip (drew \(String(describing: BookPanelGripProbe.drawn[one.id])), \(String(describing: BookPanelGripProbe.drawn[two.id])))")
+            #endif
+
+            // The same book, placed by hand: both grips draw.
+            try ops.setReadingSort(book.id, field: .manual, direction: .asc)
+            try await settle { model.manualOrder(for: book.id) }
+            await pump()
+            #if DEBUG
+            #expect(BookPanelGripProbe.drawn[one.id] == true && BookPanelGripProbe.drawn[two.id] == true,
+                    "manual order: both chapter rows draw their grips")
+            #endif
+        }
     }
 }

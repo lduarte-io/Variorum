@@ -340,4 +340,74 @@ struct BookcaseMastheadPopoverTests {
             #expect(model.censusOpen, "the census is a remembered float, never a menu")
         }
     }
+
+    // MARK: - VX-69 (was VR-128 — her #188(d)): the order popover takes Escape
+
+    /// Which presses close a menu, pure: Esc alone (Shift and Caps Lock don't
+    /// change it); an Esc chord holding ⌘, ⌥ or ⌃ is another command, and no
+    /// other key closes it.
+    @Test func escAloneIsAMenusCloseKey() {
+        #expect(MenuEscape.closes(keyCode: MenuEscape.keyCode, modifiers: []))
+        #expect(MenuEscape.closes(keyCode: MenuEscape.keyCode, modifiers: [.shift, .capsLock]))
+        #expect(!MenuEscape.closes(keyCode: MenuEscape.keyCode, modifiers: .command))
+        #expect(!MenuEscape.closes(keyCode: MenuEscape.keyCode, modifiers: .option))
+        #expect(!MenuEscape.closes(keyCode: MenuEscape.keyCode, modifiers: .control))
+        #expect(!MenuEscape.closes(keyCode: 36, modifiers: []), "Return is not Esc")
+    }
+
+    /// **Menu semantics' last gap (#188(d): "there is no Escape key for it
+    /// yet").** The MOUNTED board: the order popover open, an Esc pressed in
+    /// the board's window closes it — as a menu's Esc does. The census is a
+    /// remembered float, never a menu: an Esc leaves it standing. RED ON OLD
+    /// (the board mounted no Esc road: the popover stayed open).
+    @Test func escClosesTheOrderPopoverAndLeavesTheCensus() async throws {
+        try await withSession { session in
+            _ = try session.operations.createReading(name: "alpha", kind: .book)
+            let model = ShelfViewModel(session: session, defaults: try defaults())
+            model.censusOpen = false
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: 900, height: 600),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(rootView: ShelfView(
+                session: session, model: model, readings: ReadingsViewModel(session: session),
+                onOpen: { _ in }, onTodaysEntry: {}))
+            window.contentView = hosting
+            window.orderFrontRegardless()
+            defer { window.orderOut(nil); window.close() }
+            @MainActor func settle(_ turns: Int = 30) async {
+                for _ in 0..<turns {
+                    hosting.layoutSubtreeIfNeeded()
+                    window.displayIfNeeded()
+                    Self.pump()
+                    await Task.yield()
+                    try? await Task.sleep(for: .milliseconds(10))
+                }
+            }
+            func esc() throws -> NSEvent {
+                try #require(NSEvent.keyEvent(
+                    with: .keyDown, location: .zero, modifierFlags: [],
+                    timestamp: ProcessInfo.processInfo.systemUptime,
+                    windowNumber: window.windowNumber, context: nil,
+                    characters: "\u{1B}", charactersIgnoringModifiers: "\u{1B}",
+                    isARepeat: false, keyCode: MenuEscape.keyCode))
+            }
+            await settle(60)
+
+            model.toggleOrder()
+            await settle()
+            #expect(model.orderOpen, "the premise: the order popover is open")
+            NSApp.sendEvent(try esc())
+            await settle(10)
+            #expect(!model.orderOpen, "Esc closed the order popover, as a menu's Esc does")
+
+            model.toggleCensus()
+            await settle()
+            #expect(model.censusOpen && !model.orderOpen, "the premise: the census float is open")
+            NSApp.sendEvent(try esc())
+            await settle(10)
+            #expect(model.censusOpen, "the census is a remembered float, never a menu — Esc leaves it")
+            model.censusOpen = false
+        }
+    }
 }

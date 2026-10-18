@@ -188,6 +188,18 @@ struct NoteBoxDoor {
     /// from This Book" on an owned book. nil where the book holds no
     /// membership (a gathering — its honest door is the note's chip).
     var removeFromBook: NoteBoxRemoveDoor?
+    /// **VX-304 — the box's "open ↗"**: leave the book for the note's OWN
+    /// editor, in Write, at her caret's block — the book's ONE open door
+    /// (`BookView.openInWrite`, VX-303's road), handed up for the box's note.
+    /// Her report: *"you can't see the "open ↗" next to the note title very
+    /// easily if it's a long note even if your carat is in the right place.
+    /// can you add it somewhere in this menu on the left?"* nil ⇒ no door.
+    var openInWrite: (() -> Void)?
+    /// **VX-304 — the Index's "Takes"**: the live block's takes, in place,
+    /// over the book (`WriteTakesPanel`). Only the Index hands one: its live
+    /// note has no bar (Outline and the spread's bars carry their own Takes
+    /// door). nil ⇒ no door.
+    var openTakes: (() -> Void)?
 }
 
 /// The note box's remove/release door: the book's word and the act.

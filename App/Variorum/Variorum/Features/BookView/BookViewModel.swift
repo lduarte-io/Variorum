@@ -498,6 +498,11 @@ final class BookViewModel {
     /// caret (or the tapped badge's fan panel — interpretation 1, focus
     /// first).
     private(set) var caretSeed: Int?
+    /// VX-382 ladder R1-2: whether `caretSeed` is HER click's place (a
+    /// read-cheap click passes `caret`) rather than a bare focus's 0 — the
+    /// editor remembers the one and never the other (`EditorView`'s
+    /// `caretSeedIsHers`).
+    private(set) var caretSeedIsHers = false
     private(set) var fanSeed: String?
     /// The posts unfolded — Outline opens with its posts COLLAPSED.
     ///
@@ -1009,6 +1014,7 @@ final class BookViewModel {
         // model rather than being threaded through the views.
         if postID != nil, !paneFocused { onPaneFocusRequest?() }
         caretSeed = postID == nil ? nil : (caret ?? 0)
+        caretSeedIsHers = postID != nil && caret != nil
         fanSeed = fanBlock
         focusedPostID = postID
         if let postID {
@@ -1035,6 +1041,7 @@ final class BookViewModel {
         if focusedPostID == postID {
             focusedPostID = nil
             caretSeed = nil
+            caretSeedIsHers = false
             fanSeed = nil
         }
         // 13u2 UNIT A2: the card is about to show again, and the note may
@@ -1050,6 +1057,7 @@ final class BookViewModel {
         expandedPosts.removeAll()
         focusedPostID = nil
         caretSeed = nil
+        caretSeedIsHers = false
         fanSeed = nil
         refreshCardPreviews(wereOpen)
     }
@@ -1120,6 +1128,45 @@ final class BookViewModel {
         indexLivePostID = postID
     }
 
+    /// **VX-303 — the Index's live BLOCK and its pane's CARET**, reported the
+    /// same way its live note is, for the open doors (`BookOpenDoor`): the
+    /// block the one live pane holds, and the last caret that pane reported
+    /// (`PaneSurfaceView.onSelectionChange` — consumed, never changed), with
+    /// the block it reported from. Read only at a door's press, so neither is
+    /// observed: a caret walking inside a block wakes nobody.
+    @ObservationIgnored private(set) var indexLiveBlockID: String?
+    @ObservationIgnored private(set) var indexCaret: (postID: String, place: BookOpenDoor.Place)?
+
+    func noteIndexLiveBlock(_ blockID: String?) {
+        indexLiveBlockID = blockID
+    }
+
+    func noteIndexCaret(postID: String, blockID: String, offsetInBlock: Int) {
+        indexCaret = (postID, BookOpenDoor.Place(blockID: blockID, offsetInBlock: offsetInBlock))
+    }
+
+    // MARK: - VX-304 — the Index's in-place Takes sheet, asked from outside it
+
+    /// **A block whose takes the INDEX was asked to show in place** (the
+    /// sidebar box's "Takes" for the live block). One slot, consumed by the
+    /// Index — `pendingLanding`'s shape beside it, for its reason: the box
+    /// is composed by the shell from the BOOK's doors, and the sheet's host
+    /// is the Index, which owns the one live pane it must release first.
+    /// Set only through `requestIndexTakes`.
+    private(set) var pendingIndexTakes: LandingTarget?
+
+    /// Ask the Index to show `target.blockID`'s takes in place. A target
+    /// with no block names nothing and is not parked.
+    func requestIndexTakes(_ target: LandingTarget) {
+        guard target.blockID != nil else { return }
+        pendingIndexTakes = target
+    }
+
+    /// The Index took the request. Idempotent.
+    func consumeIndexTakes() {
+        pendingIndexTakes = nil
+    }
+
     // MARK: - 18o U4 (R-18k-6) — the note she LEAVES inside the book
 
     /// The note her caret was last in (`BookNoteTrail` holds the rule).
@@ -1163,12 +1210,28 @@ final class BookViewModel {
     /// A place it cannot name leaves both slots alone: a book with nothing
     /// focused and nothing read has no place to carry, and clearing the
     /// standing anchor there would throw away the last one she had.
-    func carryPlace(from mode: BookStructureModel.ViewMode, readForm: BookStructureModel.ReadForm) {
-        guard let post = BookAnchor.currentPost(
-            mode: mode, readForm: readForm, place: anchorPlace)
+    ///
+    /// VX-304: `livePostID`/`liveBlockID` — Outline's live note and the block
+    /// her caret stands in, read by the view from the editor under the caret
+    /// at the switch (the model holds no editor). nil ⇒ nothing to carry
+    /// beyond the note.
+    func carryPlace(
+        from mode: BookStructureModel.ViewMode, readForm: BookStructureModel.ReadForm,
+        livePostID: String? = nil, liveBlockID: String? = nil
+    ) {
+        var place = anchorPlace
+        place.livePostID = livePostID
+        place.liveBlockID = liveBlockID
+        guard let target = BookAnchor.landing(mode: mode, readForm: readForm, place: place)
         else { return }
-        standingAnchorPostID = post
-        pendingReveal = post
+        standingAnchorPostID = target.postID
+        pendingReveal = target.postID
+        // VX-304: leaving Outline with her caret live in the carried note, the
+        // BLOCK rides beside the note — the slot the Index consumes (the Read
+        // click's road, row 38); every other surface consumes the note half
+        // and drops it (`consumeReveal`). A carry naming no block leaves the
+        // slot exactly as it always did.
+        if target.blockID != nil { pendingLanding = target }
     }
 
     /// An outside door (W20's ascent) asking this book to open AT a post.
