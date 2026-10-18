@@ -331,6 +331,10 @@ struct BookOrderConversionTests {
                 contentRect: NSRect(x: 40, y: 40, width: 1000, height: 700),
                 styleMask: [.titled], backing: .buffered, defer: false)
             window.isReleasedWhenClosed = false
+            // VX-77 (R-U2-B): the scan reads LUMINANCE — a host left dark (the
+            // test host IS the dev-store app) draws a black room the scan reads
+            // as "ink at 0.0". Pinned light, so the verdict is the chrome's.
+            window.appearance = NSAppearance(named: .aqua)
             defer { window.orderOut(nil); window.close() }
             let hosting = NSHostingView(
                 rootView: BookView(
