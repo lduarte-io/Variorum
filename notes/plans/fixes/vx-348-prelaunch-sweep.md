@@ -362,7 +362,8 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   the record), the QUESTIONS bundle (P-VX176-1, P-VX349-1, P-VX350-1…7). The U3 UNIT RECORD carries the rest.
 - **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** BUILT — all four FIXED with pins (`98b878662`
   · `b2dcef63f` · `6757ea121` · `e09d00b96` VX-351; `b32ebe484` VX-384; `fd4470556` VX-385 + VX-355); the headless suites
-  green but VX-353's flake; the Mac pins compiled; products IN-PROGRESS; **PENDING:** the Mac batch (red leg first), the
+  green but VX-353's flake; both Mac products PREBUILT (`DerivedData/u4-fixed`, `DerivedData/u4-red` — the commands and
+  expected reds in the U4 record); **PENDING:** the Mac batch (red leg first), the
   walk (the list in the U4 UNIT RECORD), the QUESTIONS bundle (P-VX351-1…7, P-VX384-1, P-VX385-1).
 - Then the ladder (fresh Fable per round, whole diff), closeout, merge. **Her overnight mandate (2026-10-18):**
   rule PROVISIONALLY and continue; merge to main at this run's own finish (finish-order serialization with
@@ -1902,10 +1903,9 @@ in). Disjoint files by design (the U2/U3 precedent); every U4 commit is path-lim
   against its 15 s bound), green alone (3 / 3, 2.2 s): VX-353's standing flake, not U4's (U4 touches no MCP-target
   line). The mobile target compiles (`xcodebuild -scheme VariorumMobile -destination "generic/platform=iOS Simulator"
   build`, BUILD SUCCEEDED — `Shared/BlockHistoryFace.swift`'s three pure additions; its products deleted after).
-- **Products (u4-fixed / u4-red):** IN-PROGRESS — durable detached checkouts of `e09d00b96` beside this worktree
-  (`~/dev/variorum-vx-348-u4fixed`, `~/dev/variorum-vx-348-u4red`); the red revert patch is
-  `DerivedData/u4-red-revert.patch` = `git diff 69ba370cc e09d00b96 --` the 26 product files (no other commit in that
-  range touches them — checked), applied `-R` in the RED CHECKOUT ONLY. This worktree is never reverted.
+- **Products (u4-fixed / u4-red):** DONE — both PREBUILT from durable checkouts of `e09d00b96` (paths, the revert patch,
+  the confirmed recompiles, the commands and every expected red: "The Mac products" below). Their RUN is PENDING the
+  orchestrator's batch (RED leg first). This worktree is never reverted.
 - **No behavioural revert is in flight in this worktree.**
 
 ### VX-351 — the exact edit time past today, as ruled (R-VX348-1/3)
@@ -2051,6 +2051,52 @@ each starts from the fixed-tree premise "nothing speaks, no foot", green on both
 — the shell's ⌥⌘Z then ⇧⌥⌘Z doors over the duplicate's undo entry, the foot composed for each and gone between;
 `anAIsReceiptSpeaksAtThePoolsFoot` — a receipt carrying its Open › on the one seam the door speaks on. RED on old 4 of 4
 (the composition clauses). `VariorumTests/VX385PoolReceiptFootRuleTests.swift` (new API, fixed-only): the slot rule.
+
+### The Mac products (PREBUILT — the batch window runs `test-without-building` only)
+
+Both `build-for-testing` from `App/Variorum/`, scheme `Variorum`, destination `platform=macOS`, Debug (no custom
+configuration), each from a DURABLE detached checkout of the code tip `e09d00b96` beside this worktree (this worktree,
+which U3's fix leg shares, is never reverted and never built into a product; the dev compile's product was deleted
+before these were built):
+- **FIXED:** `<home>/dev/variorum-vx-348/DerivedData/u4-fixed`
+  (`Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`) — from `<home>/dev/variorum-vx-348-u4fixed`
+  at `e09d00b96`, unmodified (log `DerivedData/u4-fixed-build.log`, TEST BUILD SUCCEEDED; zero source paths from this
+  worktree; `StampHelp.swift` compiled from the checkout).
+- **RED:** `<home>/dev/variorum-vx-348/DerivedData/u4-red` — from `<home>/dev/variorum-vx-348-u4red`
+  at `e09d00b96` with EXACTLY U4's product hunks reverse-applied (`git apply -R
+  <home>/dev/variorum-vx-348/DerivedData/u4-red-revert.patch`; the patch = `git diff 69ba370cc e09d00b96 --`
+  the 26 product files — 25 confirmed byte-identical to their `69ba370cc` content with `cmp`, `Core/Views/StampHelp.swift`
+  absent as at the base; no other commit in that range touches them) and the three new-API test files removed
+  (`VX351HoverWordsTests`, `VX384ListingFollowRuleTests`, `VX385PoolReceiptFootRuleTests` — the folders are synchronized,
+  so their absence is their absence from the build). All 25 reverted files and the red-on-old test files
+  (`VX351StampHoverTests`, `VX384LibraryFollowsMintsTests`, `VX385PoolQuietReceiptTests`, `LibraryPanelTests`,
+  `NoteBoxTests`) confirmed compiled from the red checkout in `DerivedData/u4-red-build.log`; the three new-API files and
+  `StampHelp.swift` absent from it. TEST BUILD SUCCEEDED.
+- **Clean-up after the batch** (the orchestrator's): `git worktree remove --force <home>/dev/variorum-vx-348-u4red`
+  and `git worktree remove <home>/dev/variorum-vx-348-u4fixed` (the xctestrun files name these sources).
+- **The commands** (under a held stage claim; confirm each "Test run with N tests" line; RED first; the fresh dev store
+  leaves the test host's own launch at the lobby — a lobby-shaped failure is a harness question, never a product claim):
+  ```
+  cd <home>/dev/variorum-vx-348/App/Variorum
+  # RED — expect: VX351StampGapsTests 4 of 4 fail (the panel: the raw key "edited 2025-03-02" and the wrong fact; the
+  #   note box's line date-only "edited Aug 29 · saved Aug 27"; the box's hover ×2 — no hover; its premise line green);
+  #   VX351SpeakerHoverCompositionTests 2 of 2 fail (the commit line and the Activity line — no hover; the savepoint premise
+  #   green); VX384LibraryFollowsMintsTests: aRowMenuDuplicateListsTheCopyWithoutReEntry 2 of 2 fail (the List keeps 3 of
+  #   4), typingInAListedNoteNeverReAsksTheList PASSES (the P1 guard, green on both by nature); VX385PoolQuietReceiptTests
+  #   4 of 4 fail at the composition clause (the receipt reaches the quiet slot — premise green — and the Pool composes no
+  #   line); LibraryPreviewBrainTests: ONLY aNotePreviewsItsBlocksInOrderWithOneFactsLine fails (the raw key); NoteBoxCopyTests:
+  #   ONLY theStampsLineSpeaksTheGlanceRuleAndOmitsWhatItDoesNotKnow fails (no time today). Everything else in these
+  #   suites passes on the red tree too.
+  xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u4-red test-without-building -only-testing:VariorumTests/VX351StampGapsTests -only-testing:VariorumTests/VX351SpeakerHoverCompositionTests -only-testing:VariorumTests/VX384LibraryFollowsMintsTests -only-testing:VariorumTests/VX385PoolQuietReceiptTests -only-testing:VariorumTests/LibraryPreviewBrainTests -only-testing:VariorumTests/NoteBoxCopyTests
+  # FIXED — the pins, the new seams' pins and every neighbour on the touched files, all green (VX-167's two wide-run
+  #   flakes — LibraryInfiniteScroll's redraw pin, DestructiveUndoWarning.redoNeverAsks — re-run alone before any claim)
+  xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u4-fixed test-without-building -only-testing:VariorumTests/VX351StampGapsTests -only-testing:VariorumTests/VX351SpeakerHoverCompositionTests -only-testing:VariorumTests/VX351HoverWordsTests -only-testing:VariorumTests/VX384LibraryFollowsMintsTests -only-testing:VariorumTests/VX384ListingFollowRuleTests -only-testing:VariorumTests/VX385PoolQuietReceiptTests -only-testing:VariorumTests/VX385PoolReceiptFootRuleTests -only-testing:VariorumTests/LibraryPreviewBrainTests -only-testing:VariorumTests/LibraryPanelHostTests -only-testing:VariorumTests/NoteBoxStateTests -only-testing:VariorumTests/BookNoteBoxSubjectTests -only-testing:VariorumTests/NoteBoxHeightTests -only-testing:VariorumTests/NoteBoxCopyTests -only-testing:VariorumTests/NoteBoxGeometryTests -only-testing:VariorumTests/NoteBoxCompositionTests -only-testing:VariorumTests/BookNoteBoxOpenDoorTests -only-testing:VariorumTests/SidebarNoteBoxDoorFacesTests -only-testing:VariorumTests/SidebarNoteBoxTakesCellClickTests -only-testing:VariorumTests/LibrarySearchCommitsFacetTests -only-testing:VariorumTests/SearchPassageLineRhythmTests -only-testing:VariorumTests/MCPGrantSheetTests -only-testing:VariorumTests/NotePickerRankingTests -only-testing:VariorumTests/NotePickerSourceTests -only-testing:VariorumTests/SearchPickerBrainTests -only-testing:VariorumTests/SearchPickerPanelGeometryTests -only-testing:VariorumTests/PoolTuckFaceTests -only-testing:VariorumTests/MembershipChoiceTests -only-testing:VariorumTests/MCPSharedIconClickTests -only-testing:VariorumTests/BlocksWorkbenchFaceTests -only-testing:VariorumTests/TrayFilterTests -only-testing:VariorumTests/TrayPanelMoveTests -only-testing:VariorumTests/BlockHistoryPaneTests -only-testing:VariorumTests/LibraryInfiniteScrollTests -only-testing:VariorumTests/LibraryListFaceTests -only-testing:VariorumTests/DuplicateDoorsTests -only-testing:VariorumTests/ConfirmationsSettingTests -only-testing:VariorumTests/MCPAsksWaitTests -only-testing:VariorumTests/MCPPaneTests -only-testing:VariorumTests/MCPPaneTabsTests -only-testing:VariorumTests/TimelineReachWindowTests -only-testing:VariorumTests/LibrarySortMenuTests -only-testing:VariorumTests/BookArrivalsTests -only-testing:VariorumTests/ArrivalArmsTests -only-testing:VariorumTests/BookArchivedLineTests -only-testing:VariorumTests/PaletteSearchTests -only-testing:VariorumTests/PaletteReachTests -only-testing:VariorumTests/SnippetFilterTests -only-testing:VariorumTests/SnippetsVocabularyTests -only-testing:VariorumTests/SnippetsGroupDoorsTests -only-testing:VariorumTests/DestructiveUndoWarningTests -only-testing:VariorumTests/LibraryViewScopeSwitchTests -only-testing:VariorumTests/StatusToastPlacementShellTests -only-testing:VariorumTests/VX176LibraryTintTests -only-testing:VariorumTests/VX349ListHeaderRestTests -only-testing:VariorumTests/VX350SearchToggleMountTests -only-testing:VariorumTests/VX350NarrowLibraryTests -only-testing:VariorumTests/CapabilityRegistryTests
+  ```
+  The composition pins read the view's own `dump` (the `SurfaceComposition` road); a premise failure (`the premise: …`)
+  on either tree is a harness question first — say so to the orchestrator.
+- **Note for the orchestrator:** `e09d00b96` contains U3's fix leg (`e35c034fa` is its ancestor — checked with
+  `git merge-base --is-ancestor`), so U3's owed one-suite re-run (`VX350ControlsWidthClassTests`) can ride `u4-fixed`
+  if it is the run's final product.
 
 ### PROVISIONAL (for the merge's QUESTIONS bundle)
 
