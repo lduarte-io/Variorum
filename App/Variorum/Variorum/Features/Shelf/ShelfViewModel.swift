@@ -757,8 +757,13 @@ nonisolated enum BookcaseCopy {
     /// VX-249: a collect that also STARRED the note names the star, composed
     /// as the mint's family composes it ("Tagged #essays and starred — …",
     /// "Starred — …"), with this arm's honest tail (R-VX381-A5's composition).
+    ///
+    /// Ladder r1 F-7: an act that wore NOTHING reads "Added — …" (the live
+    /// arm's "Added to the gathering." twin, PROVISIONAL), never "Tagged  — …"
+    /// with no tag in it. Unreachable through the op today (an empty plan that
+    /// isn't already met is a planner/belt disagreement, and the belt throws).
     static func taggedWhileArchived(_ paths: [String], starred: Bool = false) -> String {
-        (wore(paths, starred: starred) ?? "Tagged ") + shownAfterUnarchiveTail
+        (wore(paths, starred: starred) ?? "Added") + shownAfterUnarchiveTail
     }
     /// …and when the note already matched the rule (nothing was applied).
     static let alreadyMatchesWhileArchived = "It already matches" + shownAfterUnarchiveTail
