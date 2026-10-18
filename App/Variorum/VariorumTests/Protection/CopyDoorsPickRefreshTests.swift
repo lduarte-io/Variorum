@@ -23,6 +23,7 @@ import VariorumCore
 @MainActor
 struct CopyDoorsPickRefreshTests {
     /// Counts every `CopyDoorsListModel.copiesChanged` heard while it stands — through the list's own observer.
+    @MainActor
     final class Heard {
         private(set) var count = 0
         private var observer: CopiesChangedObserver?

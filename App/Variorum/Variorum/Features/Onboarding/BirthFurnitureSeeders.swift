@@ -112,7 +112,7 @@ enum ReadmeSeeder {
     /// The DEV store's seed in this build (the new road's in a Debug build, today's in Release) — what a launch over
     /// the dev store seeds (`LaunchFurniture`), read by the pins.
     nonisolated static var paragraphs: [String] {
-        paragraphs(onTheNewRoad: ProtectionRoad.opensOnTheNewRoad(devStore: true))
+        Self.paragraphs(onTheNewRoad: ProtectionRoad.opensOnTheNewRoad(devStore: true))
     }
 
     /// Her five blocks, in order (her reference's bytes) — seeded on every road.
@@ -196,7 +196,7 @@ enum ReadmeSeeder {
         session: AppSession,
         onTheNewRoad: Bool = ProtectionRoad.opensOnTheNewRoad(devStore: true)
     ) async -> BirthSeed {
-        let outcome = await perform(session: session, blocks: paragraphs(onTheNewRoad: onTheNewRoad))
+        let outcome = await perform(session: session, blocks: Self.paragraphs(onTheNewRoad: onTheNewRoad))
         log.notice(
             "readme at a fresh store's birth: \(String(describing: outcome), privacy: .public)")
         return outcome

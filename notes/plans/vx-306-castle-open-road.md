@@ -2731,7 +2731,9 @@ configurations). No stage, no app launch, no dev or real store, no `/Application
   `ProtectionRoadSwitchTests` under the stage); the source pin's logic replicated over the files (green new, red old).
 - NIT 3 — a filed pick tells the standing Restore list (`copiesChanged`, m4's seam) (app): DONE (this commit) — WRITTEN,
   PENDING-BUILD (compile + `CopyDoorsPickRefreshTests` and its neighbours under the stage).
-- The close (the record, the Mac suites to run, `git worktree list` clean): NOT-STARTED.
+- The close (the record, the Mac and phone suites to run, `git worktree list` clean): DONE (this commit) — the Mac
+  `build-for-testing`, the phone's, the suites below and the optional red legs PENDING-BUILD (the orchestrator resumes
+  the leg when the hold lifts).
 
 **THE FINDINGS, one by one (AGREE/DISPUTE with the trace; the pin's red-on-old; the commit):**
 
@@ -2824,3 +2826,95 @@ configurations). No stage, no app launch, no dev or real store, no `/Application
   posters of the same name are m4's two suites, which could otherwise re-read the list for it). A "picks that file
   nothing say nothing" twin was written and DROPPED: with other suites free to post the same name in parallel, a strict
   zero cannot be held deterministically.
+- **NITs 1–2 — not this leg's** (the dispositions: the orchestrator's hand-forwards into the handoff and VX-307's plan).
+
+**Two compile-risk spots hardened before any build** (no behaviour): the readme's two calls of `paragraphs(onTheNewRoad:)`
+qualified `Self.` (a computed `paragraphs` and the rule share a base name, as `first` / `first(where:)` do); the NIT 3
+pin's counter class marked `@MainActor` (it is captured by the list observer's `@MainActor @Sendable` closure).
+
+**PROVISIONALs:** none new (QUESTIONS #233 gains only P-VX306-W-1's Release-reach fact). One engineering call for the
+orchestrator's eye: m2's gate reads the variant as well as the switch (`opensOnTheNewRoad(devStore:)`, the bootstrap's own
+ruled fence P-VX306-U1b-5) — a subset of the disposition's "only while `newRoadIsLive`", so the passages follow the road
+exactly; the alternative (the switch alone) leaves a Debug build on the real variant seeding them over today's road.
+
+**Counts (core only — the stage hold):** the m3 pin red-on-old `✘ Test run with 3 tests in 1 suite failed after 0.012
+seconds with 8 issues.` → green Debug `✔ Test run with 3 tests in 1 suite passed after 0.009 seconds.` / release `✔ Test
+run with 3 tests in 1 suite passed after 0.008 seconds.`; the core protection set Debug `✔ Test run with 323 tests in 79
+suites passed after 5.237 seconds.`, release 136/38 + 163/37 = 299 in 75 (the halves — the m3 entry says why), `swift
+build -c release` green in that run. No `xcodebuild` of any kind; no headless app harness (the brief: the core package
+only); no stage, no app launch, no dev or real store, no `/Applications`; no `Sync/`, `Server/`, schema, dependency or
+`StoreBackup.swift` line. No scratch worktree was made (m3's red ran on the parent tree before the fix was written; m2's
+and NIT 3's reds are by construction, PENDING the run) — `git worktree list` shows main, mobile and this worktree only.
+
+**WHEN THE HOLD LIFTS — the orchestrator's (or this leg resumed), from `App/Variorum/` (PENDING):**
+1. `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx306-u3
+   build-for-testing` and `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' -configuration
+   Debug -derivedDataPath DerivedData/vx306-u3 build-for-testing` (the Shared files the phone compiles changed:
+   `AppBootstrap`, `ProtectionRoad`, `SQLCipherLibraryLeaf`, `ProtectionCopyDoors`, `CopyDoorsModel`) — expect `** TEST
+   BUILD SUCCEEDED **` twice; no new warning in a touched file.
+2. Under a stage claim, the Mac batch:
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx306-u3 test \
+  -only-testing:VariorumTests/CopyDoorsPickRefreshTests \
+  -only-testing:VariorumTests/ReadmeStartHerePlanTests \
+  -only-testing:VariorumTests/LaunchFurnitureTests \
+  -only-testing:VariorumTests/TutorialFurnitureFoldTests \
+  -only-testing:VariorumTests/ProtectionFileLeavesTests \
+  -only-testing:VariorumTests/ProtectionRoadSwitchTests \
+  -only-testing:VariorumTests/CopyDoorsListRefreshTests \
+  -only-testing:VariorumTests/CopyDoorsQuietProbeTests \
+  -only-testing:VariorumTests/RoadLockViewNamesPinTests \
+  -only-testing:VariorumTests/ProtectionPaneRoadRowTests \
+  -only-testing:VariorumTests/ProtectionOpenRoadPlantedTests \
+  -only-testing:VariorumTests/ProtectionRoadRouteTests \
+  -only-testing:VariorumTests/ProtectionBackupHookTests \
+  -only-testing:VariorumTests/LookInsideRoadTests \
+  -only-testing:VariorumTests/CopyDoorsModelTests \
+  -only-testing:VariorumTests/PassphraseReminderTests \
+  -only-testing:VariorumTests/MakeMineRoadTests \
+  -only-testing:VariorumTests/MakeMineRouteTests \
+  -only-testing:VariorumTests/PickedCopyRoadTests \
+  -only-testing:VariorumTests/ProtectionFacesRouteTests \
+  -only-testing:VariorumTests/ProtectionNoticeFaceTests \
+  -only-testing:VariorumTests/ProtectionOfferFaceTests \
+  -only-testing:VariorumTests/ProtectionRule27FaceTests \
+  -only-testing:VariorumTests/ProtectionRestoreReceiptTests \
+  -only-testing:VariorumTests/ProtectionReminderRoadTests \
+  -only-testing:VariorumTests/ProtectionLobbyModelTests \
+  -only-testing:VariorumTests/ProtectionWalkSwitchTests \
+  -only-testing:VariorumTests/ProtectionWordsPlanTests \
+  -only-testing:VariorumTests/LibraryWordsCardTests \
+  -only-testing:VariorumTests/VX310TodayLobbyWitnessTests \
+  -only-testing:VariorumTests/KeychainTripwireTests \
+  -only-testing:VariorumTests/KeychainLeavesTests \
+  -only-testing:VariorumTests/ProtectionFactsGathererTests \
+  -only-testing:VariorumTests/ProtectionSystemCompositionTests \
+  -only-testing:VariorumTests/ProtectionSurfaceRenderTests \
+  -only-testing:VariorumTests/ProtectionTierFaceTests \
+  -only-testing:VariorumTests/StoreLaunchRouteTests \
+  -only-testing:VariorumTests/Phase13pLobbyTests \
+  -only-testing:VariorumTests/AppBootstrapOffMainTests \
+  -only-testing:VariorumTests/VX202ReopenRaceTests \
+  -only-testing:VariorumTests/VX206ProtectionLandingTests \
+  -only-testing:VariorumTests/LibraryPortabilityDoorTests \
+  -only-testing:VariorumTests/SettingsLockCloseTests \
+  -only-testing:VariorumTests/ICloudDriveOfferTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/TravellingDotsIndicatorTests
+```
+   The first six are this leg's new or grown suites (`CopyDoorsPickRefreshTests` 1 — new; `ReadmeStartHerePlanTests` +2 →
+   4; `LaunchFurnitureTests` +1; `TutorialFurnitureFoldTests` — the readme's default seed, unchanged; `ProtectionFileLeavesTests`
+   — two lines grown in place; `ProtectionRoadSwitchTests` — the switch file grew one rule); then the round-1 leg's list
+   over the files this leg touched again (the doors, the hook's seam, the bootstrap's road, the creation, the lobby).
+   `VX310TodayLobbyWitnessTests` still reports its 2 tests with KNOWN ISSUES (expected; a pass of either is a FAILURE); the
+   tripwire's exact count must hold (nothing new writes a keychain item). Read the `skipped:` lines.
+3. **The red legs (each one line, restored by `git checkout`; run each suite ALONE):** NIT 3 — delete the
+   `tellCopiesChanged()` call in `ProtectionCopyDoors.pick` → `CopyDoorsPickRefreshTests` red (`heard.count > 0` and the
+   other-libraries listing); m2 — in `ReadmeSeeder.paragraphs(onTheNewRoad:)` return `herBlocks + startHerePassages` for
+   both roads → `LaunchFurnitureTests/aFreshStoreOnTodaysRoadSeedsHerFiveBlocksAlone` red (nine blocks) and
+   `ReadmeStartHerePlanTests` red (the rule's false arm and the source pin's join line).
+4. **The phone** (the simulator, under the stage): U3's six on the iOS 26.2 iPhone 17 Pro simulator
+   *[removed for publication]*
+   `MobileProtectionTests` · `MobileProtectionSurfaceTests` · `MobileTravellingDotsTests` · `MobileLobbyVaultRoadTests` ·
+   `MobileEmptyStoreTests` (round 1's batch: `✔ 20 tests in 5 suites`).
