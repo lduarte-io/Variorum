@@ -662,3 +662,23 @@ configuration (Debug):
   mint per the labeling rule; none joins this run.
 - **Next:** U1's Mac batch is READY with the coordinator (the record's `test-without-building` commands, red legs
   first); U5 (the urgent MCP trio) spawns now and builds headless while the batch waits for its window.
+
+## U5 UNIT RECORD (VX-392 · VX-393 · VX-394 — the urgent MCP trio)
+
+*Implementer: `opus-implementer` at xhigh, fresh session, 2026-10-18. Read in its own context before any code:
+`notes/MCPSpec.md` in full, this plan in full (§U5 with her words, R-VX348-5/6 and the client-session report verbatim;
+the build notes; the Environment traps; the kickoff sitting and her overnight mandate; the U1 record's VX-357 section),
+`notes/SessionResiliencyProtocol.md`, CLAUDE.md + its canon. Lane: no `Sources/VariorumCore/Sync/`, custody, Keychain,
+`Protection/`, synced schema or editor-seam line; grants are LOCAL-ONLY (their family may grow by a local migration).*
+
+**NOT DONE BY THIS UNIT (first line, by the brief's rule):** filled at the unit's close.
+
+### LIVE STATUS (per member)
+
+- **VX-392 (an empty granted wing can't be discovered):** NOT-STARTED — the settled design: a read-rung `list_wings`
+  (R-VX348-5), the descriptions pointing at it, the non-empty wing road and the gatherings-only wing proven by pin.
+- **VX-393 (duplicate grant rows for one client × target):** NOT-STARTED — trace first; then R-VX348-6's
+  upgrade-in-place on every grant road + a LOCAL-ONLY grants-family migration that dedupes.
+- **VX-394 (mid-session disconnect while the pane says running):** NOT-STARTED — investigation first; the Activity
+  drop line ships regardless.
+- **No behavioural revert is in flight.**
