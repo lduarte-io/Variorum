@@ -242,6 +242,105 @@ struct TagDeleteUndoTests {
         }
     }
 
+    private func assembled(_ db: AppDatabase, _ readingID: String) throws -> [String] {
+        try db.read { try Queries.assembleReading($0, readingID: readingID).map(\.postID) }
+    }
+
+    private func tag(_ db: AppDatabase, _ id: String) throws -> VariorumCore.Tag? {
+        try db.read { try VariorumCore.Tag.fetchOne($0, key: id) }
+    }
+
+    /// **Ladder r1 F-2 (BLOCKER) — RED ON OLD.** `path` is the model's ONE
+    /// deliberate denormalization and `renameTag` rewrites only LIVE
+    /// descendants, so a parent renamed while its child lay dead leaves the
+    /// child's stored path stale. The old inverse revived that stale row as
+    /// it was — `life/goals` under `home` — so a gathering on `#home` lost the
+    /// note (subtree matching walks paths), and a later delete of `home`
+    /// (which takes the `home/` prefix) left `life/goals` LIVE under a dead
+    /// parent. The undo now rebuilds the path from the live parent.
+    @Test func aTagRevivedUnderARenamedParentTakesTheParentsNewPath() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let life = try ops.createTag(name: "life")
+            let goals = try ops.createTag(parent: life.id, name: "goals")
+            let note = try ops.createPost(title: "a note")
+            _ = try ops.applyTag(goals.id, toPost: note.id)
+            let gathering = try ops.createReading(
+                name: "home things", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(life.id)))
+            #expect(try assembled(db, gathering.id) == [note.id], "premise: the subtree rule shows the note")
+            stack.removeAll()
+
+            try ops.deleteTag(goals.id)
+            try ops.renameTag(life.id, newName: "home")
+            #expect(stack.topLabel == "Delete Tag", "a rename registers nothing — the delete is still the top")
+            _ = try stack.undo(with: ops)
+
+            let revived = try #require(try tag(db, goals.id))
+            #expect(revived.deletedAt == nil)
+            #expect(revived.parentId == life.id)
+            #expect(revived.path == "home/goals", "the path is rebuilt from the live parent, never the stale one")
+            #expect(try assembled(db, gathering.id) == [note.id], "the #home gathering shows the note again")
+
+            try ops.deleteTag(life.id)
+            #expect(try db.deletedAt("tag", goals.id) != nil, "the revived tag dies with its parent")
+            #expect(try liveTags(db).isEmpty, "no live tag is left under a dead parent")
+        }
+    }
+
+    /// F-2's deeper form — RED ON OLD. A pass rooted below a renamed tag
+    /// revives its whole chain parents first, each child's path built from
+    /// its revived parent's REBUILT path (never its own stale one).
+    @Test func aRevivedChainRebuildsEveryPathParentsFirst() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let w = try world(ops)
+            stack.removeAll()  // the fixture's own acts (its New Block) aren't this pin's
+
+            try ops.deleteTag(w.goals.id)  // takes life/goals and life/goals/2024
+            try ops.renameTag(w.life.id, newName: "home")
+            _ = try stack.undo(with: ops)
+
+            #expect(try tag(db, w.goals.id)?.path == "home/goals")
+            #expect(try tag(db, w.year.id)?.path == "home/goals/2024")
+            #expect(try liveTags(db) == ["home", "home/goals", "home/goals/2024", "work"])
+            #expect(try liveTagIDs(db, on: w.b.id) == [w.goals.id, w.work.id], "the applications ride back")
+
+            // …and the redo re-deletes by the CURRENT path, which the revival
+            // kept coherent — the whole chain goes again, nothing stranded.
+            _ = try stack.redo(with: ops)
+            #expect(try liveTags(db) == ["home", "work"])
+        }
+    }
+
+    /// F-2's collision half — RED ON OLD. The live-unique check reads the
+    /// REBUILT path: a `home/goals` she made since refuses the undo (the old
+    /// inverse checked the stale `life/goals`, found nothing, and revived a
+    /// second tag under `home` named `goals`).
+    @Test func theCollisionCheckReadsTheRebuiltPath() throws {
+        try withOperations { _, db in
+            let stack = UndoStack()
+            let ops = Operations(undoStack: stack)
+            let life = try ops.createTag(name: "life")
+            let goals = try ops.createTag(parent: life.id, name: "goals")
+            stack.removeAll()
+
+            try ops.deleteTag(goals.id)
+            try ops.renameTag(life.id, newName: "home")
+            let mine = try ops.createTag(parent: life.id, name: "goals")
+            #expect(throws: OperationError.duplicateTagPath(path: "home/goals")) {
+                try stack.undo(with: ops)
+            }
+            #expect(stack.depth == 1, "the entry stays for retry")
+            #expect(try db.deletedAt("tag", goals.id) != nil, "nothing revived")
+
+            try ops.renameTag(mine.id, newName: "aims")
+            _ = try stack.undo(with: ops)
+            #expect(try liveTags(db) == ["home", "home/aims", "home/goals"])
+        }
+    }
+
     /// A child she made under a revived tag goes with it on redo — the
     /// delete's own subtree rule (no live tag is left under a dead parent) —
     /// and the next undo brings it back on that same stamp.

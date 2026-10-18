@@ -475,7 +475,19 @@ disposition here.
   DISPOSITIONS). **Walk:** NOT-STARTED. **Closeout:** NOT-STARTED.
 - **Ladder round-1 FIX LEG (a fresh implementer, 2026-10-18 — scope = the r1 file's §DISPOSITIONS: F-2 · F-1 · F-3 +
   riders F-7 · F-8; nothing else):** IN-PROGRESS. No revert in flight.
-  - F-2 (revived tags rebuild their paths from the live parent): NOT-STARTED.
+  - F-2 (revived tags rebuild their paths from the live parent): FIXED (this commit). Mechanism (the reviewer's,
+    re-traced): `renameTag` rewrites only LIVE descendants, so a child dead across its parent's rename kept the stale
+    path and `revertTagDeletion` revived it as stored (`life/goals` under `home`); its collision check read that
+    stale path too. Fix: each revived tag's path = its LIVE parent's current path + "/" + name (a root: its name),
+    walked in the pass's delete-time path order (parents first, so a child reads its parent's rebuilt path), the
+    live-unique check against the REBUILT path, the path written with the revival. Pins (`TagDeleteUndoTests`):
+    `aTagRevivedUnderARenamedParentTakesTheParentsNewPath` (the reviewer's exact shape: `home/goals`, the `#home`
+    gathering shows the note, the tag dies with a later delete of `home`) · `aRevivedChainRebuildsEveryPathParentsFirst`
+    (a pass rooted below the renamed tag; the redo takes the whole chain) · `theCollisionCheckReadsTheRebuiltPath`
+    (a `home/goals` made since refuses with the rebuilt path; rename hers, the undo lands). RED ON OLD on the pre-fix
+    source: "11 tests in 1 suite failed with 11 issues" — exactly the three new pins (4 + 3 + 4); the eight shipped
+    pins green on both sides. Green after: 11/11; InvariantSweep · TagReferenceOperations · RuleWingScoping ·
+    SyncRepair 26/4.
   - F-1 (correlated EXISTS + the plan pin): NOT-STARTED.
   - F-3 (the shared table's `duplicateTagPath` arm): NOT-STARTED.
   - F-7 (the archived receipt's empty arm) · F-8 (the identity `cannot` wrapper, `divergeTarget`'s doc): NOT-STARTED.

@@ -196,6 +196,17 @@ extension Operations {
     /// tag, then undo again): it is hers, made since, and the path is unique.
     /// An application revives only onto a live note or block, and never
     /// beside a live twin of itself (`uq_post_tag_live` / `uq_block_tag_live`).
+    ///
+    /// **The path is REBUILT, never revived as stored** (ladder r1 F-2):
+    /// `path` is the ONE deliberate denormalization and `renameTag` rewrites
+    /// only LIVE descendants, so a parent renamed while this tag lay dead left
+    /// its stored path stale — reviving it as stored put `life/goals` under
+    /// `home`, broke subtree matching (gatherings, tag listings and search walk
+    /// paths) and let a later delete of `home` miss it. Each revived tag takes
+    /// its LIVE parent's CURRENT path plus its own name (a root, its name), and
+    /// the live-unique check reads that rebuilt path. The pass is walked in its
+    /// delete-time path order — coherent when the pass was written, so parents
+    /// come first and each child reads its revived parent's rebuilt path.
     func revertTagDeletion(_ pass: TagDeletionPass) throws -> [String] {
         try database.write { db in
             let nowStamp = DateFormatter.variorumISO8601.string(from: date.now)
@@ -207,16 +218,18 @@ extension Operations {
                 sql: "SELECT * FROM tag WHERE id IN (\(marks)) AND deleted_at = ? ORDER BY path, id",
                 arguments: StatementArguments(pass.tagIDs + [pass.stamp]))
             for tag in dead {
+                var path = tag.name
                 if let parentID = tag.parentId {
                     guard let parent = try Tag.fetchOne(db, key: parentID), parent.deletedAt == nil
                     else { continue }
+                    path = parent.path + "/" + tag.name
                 }
                 let wingStands = try tag.wingId.isEmpty || Queries.wingIsLive(db, id: tag.wingId)
                 guard wingStands else { continue }
-                try ensureNoLiveTagPath(db, tag.path, wingID: tag.wingId, excluding: tag.id)
+                try ensureNoLiveTagPath(db, path, wingID: tag.wingId, excluding: tag.id)
                 try db.execute(
-                    sql: "UPDATE tag SET deleted_at = NULL, updated_at = ? WHERE id = ?",
-                    arguments: [nowStamp, tag.id])
+                    sql: "UPDATE tag SET deleted_at = NULL, path = ?, updated_at = ? WHERE id = ?",
+                    arguments: [path, nowStamp, tag.id])
                 try db.execute(
                     sql: """
                         UPDATE post_tag SET deleted_at = NULL
