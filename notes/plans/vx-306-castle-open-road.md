@@ -816,6 +816,13 @@ no stray (both scratch worktrees removed).
   with 12 issues` — both bug-2 pins red (`model.face.touchIDButton` after a dismissal; the button not back after her
   return); each mutation restored and `diff`-checked against the worktree file. The harness lived in the session
   scratchpad (not durable; the recipe is this paragraph).
-- Piece 4 — the creation card (§7c (1) verbatim, one button) + `createLibrary(passphrase: nil)`: NOT STARTED.
+- Piece 4 — the creation card (§7c (1) verbatim, one button) + `createLibrary(passphrase: nil)`: DONE — the card rode
+  piece 2 (`454db4417`: `Shared/Protection/LibraryWordsCardModel.swift`, the face `Features/Protection/LibraryWordsCard.swift`
+  — the title, the lead, the twelve words numbered in two columns in the mono face, not selectable, privacy-sensitive, the
+  foot, ONE button; the route's `.startFresh` → `ProtectionOpenRoad.create` → `createLibrary(passphrase: nil)` → the card
+  → its button → the open); THIS commit `LibraryWordsCardTests` (3: the two columns and the one button forgetting the words
+  and opening once; §7c (1) verbatim; the face's source has no copy road, no later door, exactly one button). The words in
+  `Shared/Protection/ProtectionWords.swift` (§7c (1) and (3) verbatim; the lobby's undrafted lines P-VX306-U1b-4). The
+  run PENDING under the stage.
 - Piece 5 — the `StoreBackup.onRun` hook → `takeBackupPair`, honouring `copiesArePaused` (K4): NOT STARTED.
 - Piece 6 — the Mac tests + `build-for-testing` + the phone build: NOT STARTED.
