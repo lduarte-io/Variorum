@@ -690,6 +690,50 @@ struct BookCarryLiveBlockTests {
 #endif
         }
     }
+
+    /// **The ladder's R1-2, the carry's half.** Her CLICK into the Outline's
+    /// read-cheap card at block 2, nine characters in (the card's focus
+    /// request — `model.focus(x, caret:)`, the click road), and no caret move
+    /// after; the mode tabs switch to Index: block 2 arrives live AT HER
+    /// CLICK (the block rides the carry, the offset the note's one memory —
+    /// R-U1a-1).
+    ///
+    /// RED ON THE TIP (the fix reverted): the click's seed was bracketed with
+    /// the mount's own placements, so the memory never held it and the Index
+    /// entered block 2 at its start.
+    @Test func aClickIntoOutlineThenIndexLandsAtTheClick() async throws {
+        try await withTakesBook { session, db, book in
+            let x = book.postIDs[0]
+            let second = book.blocks[x]![1]
+            let chosen = book.variants[x]![1]
+            let inside = 9
+            let mounted = try await mountBook(session, db, book, mode: .outline)
+            defer { mounted.close(book.readingID) }
+            let range = try await blockRange(db, postID: x, block: 1)
+            mounted.model.focus(x, caret: range.location + inside)
+            await settle(mounted.window, mounted.hosting, until: {
+                guard let editing = session.editorRouter.editing, editing.postID == x,
+                      let place = editing.caretIdentity()
+                else { return false }
+                return place.blockID == second && place.offset == inside
+            })
+            let clicked = session.editorRouter.editing?.caretIdentity()
+            #expect(clicked?.blockID == second && clicked?.offset == inside,
+                    "the premise: the click put the caret in block 2 at \(inside) — \(String(describing: clicked))")
+#if DEBUG
+            let modeDoor = try #require(
+                BookOutlineGeometry.modeDoors[book.readingID], "the book published its mode door")
+            modeDoor(.index)
+            await settle(mounted.window, mounted.hosting, until: {
+                indexPane(chosen, in: mounted.hosting)?.selectedRange().location == inside
+            }, maxTurns: 240)
+            let pane = indexPane(chosen, in: mounted.hosting)
+            #expect(pane != nil, "the premise: block 2 arrives LIVE in the Index (the carry)")
+            #expect(pane?.selectedRange().location == inside,
+                    "RED ON OLD: the Index enters block 2 at her CLICK (\(inside)), not its start — \(String(describing: pane?.selectedRange()))")
+#endif
+        }
+    }
 }
 
 // MARK: - The ladder's R1-1 — D-2's class, the departing INDEX

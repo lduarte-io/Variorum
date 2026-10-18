@@ -422,9 +422,10 @@ struct BookOpenDoorMountTests {
     /// note — the collapsed card's case: its note is never the live one —
     /// carries no block, and Write all the same (R-U1a-2).
     ///
-    /// Guard (i) rides along: the mount's own caret placement (the editor's
-    /// focus seed, the Index pane's landing) leaves the note's memory as it
-    /// was; in Index, her own move inside the live pane feeds it.
+    /// Guard (i) rides along: the mount's own caret placement (a BARE focus's
+    /// seed — the note's start; the Index pane's landing) leaves the note's
+    /// memory as it was; her own move feeds it. (A CLICK's seed is hers — the
+    /// ladder's R1-2 — and is pinned in `BookEditHereRiderTests`.)
     ///
     /// RED ON OLD: piece 2 reverted — nothing rides the road; the mode
     /// commit reverted — the rides carry no mode; the memory commit reverted
@@ -470,19 +471,29 @@ struct BookOpenDoorMountTests {
             // HER PLACE: the caret in the second block, `inside` characters in.
             switch mode {
             case .outline, .spread:
-                // The book's ONE editor, focused with the caret where she is.
-                model.focus(x, caret: range.location + inside)
+                // The book's ONE editor, focused BARE (the navigator's row, the
+                // badge's road): its seed is the note's start — the mount
+                // placing the caret. (Her CLICK's seed IS hers — the ladder's
+                // R1-2, `BookEditHereRiderTests.aClickIntoTheNoteIsHerPlaceForEditHere`.)
+                model.focus(x)
                 await settle(window, hosting, until: {
-                    let editor = session.editorRouter.editing
-                    return editor?.postID == x
-                        && editor?.caretIdentity()?.blockID == second
-                        && editor?.caretIdentity()?.offset == inside
+                    session.editorRouter.editing?.postID == x
+                        && session.editorRouter.editing?.caretBlockID != nil
                 })
-                let caret = session.editorRouter.editing?.caretIdentity()
+                await settle(window, hosting, until: { false }, maxTurns: 4)
+                #expect(session.commandRouter.currentBlock(for: x) == nil,
+                        "\(mode) — guard (i): a bare focus's seed (the mount's own placement) is not remembered as her place")
+                // HER PLACE: her caret moves into the second block, `inside` in.
+                let editing = try #require(session.editorRouter.editing, "\(mode): the note is live")
+                let textView = try #require(editing.textView)
+                textView.setSelectedRange(NSRange(location: range.location + inside, length: 0))
+                await settle(window, hosting, until: {
+                    editing.caretIdentity()?.blockID == second
+                        && editing.caretIdentity()?.offset == inside
+                })
+                let caret = editing.caretIdentity()
                 #expect(caret?.blockID == second && caret?.offset == inside,
                         "\(mode): the premise — the editor's caret is in block 2 at \(inside): \(String(describing: caret))")
-                #expect(session.commandRouter.currentBlock(for: x) == nil,
-                        "\(mode) — guard (i): the mount's own placement (the focus seed) is not remembered as her place")
             case .index:
                 // The Index's one live pane on that block, then her click inside it.
                 model.requestLanding(LandingTarget(postID: x, blockID: second))
@@ -776,6 +787,92 @@ struct BookEditHereRiderTests {
             let landed = session.editorRouter.editing?.caretIdentity()
             #expect(landed?.blockID == third && landed?.offset == 4,
                     "RED ON OLD: \"edit here\" lands where she was in the book (block 3 at 4), not in the note's own editor's last place (block 1 at 2) — landed \(String(describing: landed))")
+        }
+    }
+
+    /// **The ladder's R1-2 — her CLICK into the note IS her place.** The
+    /// note's own editor last left her in block 1, two characters in. In the
+    /// spread she CLICKS into the read-cheap page at block 3, four characters
+    /// in (`ReadPostView`'s focus request — `model.focus(x, caret:)`, the
+    /// click road), and moves nothing after; she clicks out and presses "edit
+    /// here": the editor lands where she clicked — block 3 at 4.
+    ///
+    /// RED ON THE TIP (the fix reverted): the click's seed landed inside the
+    /// mount's placement bracket beside the bare-focus seeds, so it was never
+    /// remembered — "edit here" landed in block 1 at 2.
+    @Test func aClickIntoTheNoteIsHerPlaceForEditHere() async throws {
+        try await withOpenDoorBook { session, db, book in
+            let x = book.postIDs[0]
+            let router = session.commandRouter
+            // The note's own editor's last place: block 1, at 2.
+            let token = router.registerDetail(postID: x, mode: .write, applyMode: { _ in })
+            router.noteFocusedBlock(
+                book.blocks[x]![0], variantID: book.variants[x]![0], postID: x, utf16Offset: 2)
+            router.unregisterDetail(token)
+            #expect(router.currentBlock(for: x)?.blockID == book.blocks[x]![0],
+                    "the premise: the note's own editor left her in block 1")
+
+            let (model, structure) = try await loadedBook(
+                session: session, db: db, readingID: book.readingID)
+            structure.mode = .spread
+            let doors = LockIsolated<[NoteBoxState]>([])
+            let latest = DoorBox()
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: 1200, height: 800),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+#if DEBUG
+                BookOutlineGeometry.forgetOpenDoor(book.readingID)
+                BookOutlineGeometry.forgetFocusDoor(book.readingID)
+#endif
+            }
+            let hosting = NSHostingView(rootView: BookView(
+                session: session, readingID: book.readingID,
+                model: model, structure: structure,
+                onNoteBox: { _, report, door in
+                    doors.withValue { $0.append(report?.state ?? .empty) }
+                    if let door { latest.door = door }
+                })
+                .environment(ThemeStore(session: session)))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            await settle(window, hosting, until: { !model.spreadEntries.isEmpty }, maxTurns: 40)
+
+            // Her CLICK on the page: block 3, four characters in. No move after.
+            let third = book.blocks[x]![2]
+            let thirdRange = try await blockRange(db, postID: x, block: 2)
+            model.focus(x, caret: thirdRange.location + 4)
+            await settle(window, hosting, until: {
+                guard let editing = session.editorRouter.editing, editing.postID == x,
+                      let place = editing.caretIdentity()
+                else { return false }
+                return place.blockID == third && place.offset == 4
+            })
+            let clicked = session.editorRouter.editing?.caretIdentity()
+            #expect(clicked?.blockID == third && clicked?.offset == 4,
+                    "the premise: the click put the caret in block 3 at 4 — \(String(describing: clicked))")
+            #expect(router.currentBlock(for: x)?.blockID == third
+                    && router.currentBlock(for: x)?.utf16Offset == 4,
+                    "RED ON OLD: her click is the note's remembered place — memory \(String(describing: router.currentBlock(for: x)))")
+
+            // She clicks out, then "edit here".
+            model.focus(nil)
+            await settle(window, hosting, until: { doors.value.last == .selected(x) })
+            #expect(doors.value.last == .selected(x), "the box points at the note, read-cheap")
+            let door = try #require(latest.door, "the book handed the box its door")
+            door.editHere()
+            await settle(window, hosting, until: {
+                guard let live = session.editorRouter.editing, live.postID == x,
+                      let place = live.caretIdentity()
+                else { return false }
+                return place.blockID == third && place.offset == 4
+            }, maxTurns: 160)
+            let landed = session.editorRouter.editing?.caretIdentity()
+            #expect(landed?.blockID == third && landed?.offset == 4,
+                    "RED ON OLD: \"edit here\" lands where she CLICKED (block 3 at 4), not where the note's own editor left her (block 1 at 2) — landed \(String(describing: landed))")
         }
     }
 }
