@@ -685,8 +685,11 @@ the build notes; the Environment traps; the kickoff sitting and her overnight ma
   non-empty wing road and the empty-book-alone road proven by guards (green on both sides — those halves HOLLOW,
   recorded). **PENDING:** the Mac pin's run (`listWingsSpeaksItsOwnWords` — compile at the unit's Mac seam) and the
   real-client live round (its steps in the VX-392 section). Its section below.
-- **VX-393 (duplicate grant rows for one client × target):** NOT-STARTED — trace first; then R-VX348-6's
-  upgrade-in-place on every grant road + a LOCAL-ONLY grants-family migration that dedupes.
+- **VX-393 (duplicate grant rows for one client × target):** IN-PROGRESS — traced (the one mint, `insertMCPGrant`,
+  never looked at the place's existing row; every road but Change… added one); pins written and verified RED on the
+  pre-fix tree (`DerivedData/u5-logs/vx393-red.log`); the SCHEMA landed in its own commit (`v1_30_mcp_one_grant_per_place`:
+  the merge + the partial unique index, LOCAL-ONLY) — at that commit the op pins fail on the index's refusal, by
+  design, until the op replaces. NEXT: `insertMCPGrant` revokes the place's standing row first; the record section.
 - **VX-394 (mid-session disconnect while the pane says running):** NOT-STARTED — investigation first; the Activity
   drop line ships regardless.
 - **No behavioural revert is in flight.**

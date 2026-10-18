@@ -89,6 +89,24 @@ import GRDB
 ///   deleting it needs EDIT. NULL = UNPROVEN (a record written before this
 ///   column): never the client's own (the strict reading — the record may name
 ///   a comment she has rewritten since, on any device, and nothing can tell).
+///
+/// **VX-393 — ONE GRANT ROW PER CLIENT × PLACE** (`v1_30_mcp_one_grant_per_place`;
+/// VX-348 U5, her ruling R-VX348-6 "Upgrade in place" — the run record
+/// `notes/plans/fixes/vx-348-prelaunch-sweep.md` §U5): no new table — a
+/// partial unique index on `mcp_grant` and a one-time merge, born LOCAL-ONLY
+/// on the family's road (zero lockstep, the marker untouched, 13).
+/// - `uq_mcp_grant_standing_place` — at most ONE live STANDING grant (while
+///   connected · always) per client × scope kind × scope id. A once grant is
+///   one act's permission, not a standing row, so any number may stand beside
+///   it; a revoked row never counts. Every grant road replaces the place's row
+///   (`insertMCPGrant` revokes it on the act's stamp first), so the store
+///   refusing a second is what guarantees no future road can mint a duplicate
+///   silently.
+/// - The merge (`v1_30MergeSQL`): a store holding duplicates from before keeps
+///   each place's STRONGEST standing row and revokes the rest on one stamp
+///   (never a delete) — an "always" row over a while-connected one (none of
+///   those can be serving anything when a migration runs: every server start
+///   revokes them all), then the higher rung, then the newer.
 public enum MCPGrantSchema {
     /// The family's tables — the registration the completeness walk and the
     /// plaintext export consult.
@@ -212,5 +230,37 @@ public enum MCPGrantSchema {
     /// which reads as UNPROVEN (never the client's own).
     static let v1_29DDL = """
         ALTER TABLE mcp_comment_author ADD COLUMN text_digest TEXT;
+        """
+
+    /// `v1_30_mcp_one_grant_per_place`'s MERGE (VX-393) — FROZEN with the
+    /// migration that runs it. One argument: the merge's stamp (every revoked
+    /// duplicate carries it). Per client × scope kind × scope id, among the
+    /// live standing rows (while connected · always), the row ranked first
+    /// stays live: an "always" row before a while-connected one, then the
+    /// higher rung, then the newer `created_at`, then the larger id (pure
+    /// determinism). Once rows and revoked rows are never touched.
+    static let v1_30MergeSQL = """
+        UPDATE mcp_grant SET revoked_at = ?
+        WHERE revoked_at IS NULL AND duration IN ('connection', 'always')
+          AND id NOT IN (
+            SELECT id FROM (
+              SELECT id, ROW_NUMBER() OVER (
+                PARTITION BY client_id, scope_kind, scope_id
+                ORDER BY (duration = 'always') DESC,
+                         CASE rung WHEN 'edit' THEN 3 WHEN 'write_new' THEN 2 WHEN 'suggest' THEN 1 ELSE 0 END DESC,
+                         created_at DESC, id DESC) AS place_rank
+              FROM mcp_grant
+              WHERE revoked_at IS NULL AND duration IN ('connection', 'always'))
+            WHERE place_rank = 1)
+        """
+
+    /// `v1_30_mcp_one_grant_per_place`'s DDL (VX-393) — FROZEN with the
+    /// migration that runs it, AFTER the merge (the index could not be built
+    /// over the duplicates). Partial on the live standing rows; like the
+    /// family's other uniques it needs no live-row clause of the sync kind
+    /// (these rows are never synced, never tombstoned).
+    static let v1_30DDL = """
+        CREATE UNIQUE INDEX uq_mcp_grant_standing_place ON mcp_grant(client_id, scope_kind, scope_id)
+          WHERE revoked_at IS NULL AND duration IN ('connection', 'always');
         """
 }
