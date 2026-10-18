@@ -1229,7 +1229,19 @@ the old store whole in the safety copy; `dev-castle.env`'s Castle values unchang
   replayed-old-file state (a newer key file beside, its history holding the library's key) owes no offer and is said by
   the older-copy NOTICE instead.
 - Piece 4 — rule 27 (the lobby's face + the missing face's three doors; after a quiet-road open the standing banner,
-  no doors): NOT-STARTED.
+  no doors): DONE (the WIP commit's code + this commit's pins). The lobby's face (`RoadLockView`): §7c (3)'s sentence,
+  the account sentence only when `accountRoad`, then the missing face's three doors in §7c (3)'s words — *Restore from
+  Backup…* (reveals the app's own Backups folder, rendered only when it exists — the missing face's road), *Open
+  Library…* (13x's open door), *Start a New Library* with the missing face's sub-line — the library no key file opens
+  set aside WHOLE into `Previous Libraries/<stamp>/` first (PROVISIONAL P-VX306-U2-5), then the creation and the words
+  card. After a quiet-road open: `ProtectionRoadBar`'s standing banner, same words, no doors. `ProtectionRule27FaceTests`
+  (3, planted): everything gone (no live key file, no memory, no custody, no Apple key) → the lobby's face with
+  `noKeyFileAnywhere(accountRoad: false)`, no typed field, `accountRoad: true` with a sign-in; *Start a New Library* →
+  the old library opens with its key inside `Previous Libraries/<stamp>/`, a new library in the slot; an ordinary lobby
+  offers no fresh start; a quiet open with no key file anywhere → the standing faces' banner, no interlude, nothing
+  rebuilt. **The walk switch gains `memory`** (`VARIORUM_WALK_FORGET=memory` — every memory item of the dev scope, the
+  sealed mirror with it; DEBUG only, P-VX306-U1b-9's fences) for the walk's rule-27 rows; `ProtectionWalkSwitchTests`
+  +1 (4). HEADLESS green; the Mac run PENDING under the stage.
 - Piece 5 — rule 1's restore receipt (§7c (6) on the status seam): NOT-STARTED.
 - Piece 6 — rule 3's reminder (the model's two moments + the launch-counted schedule, local, beside `CalmAsks`' keys;
   dismissals through `recordPassphraseReminderDismissed`) + the set-passphrase sheet (`resetPassphrase(.plainConfirm)`;

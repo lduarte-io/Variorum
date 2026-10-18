@@ -1,8 +1,9 @@
 //
 //  ProtectionWalkSwitchTests.swift
-//  VariorumTests — VX-306 U1b: the DEBUG walk switch (P-VX306-U1b-9) over planted leaves — it parses only its two
-//  words, forgets exactly the scope's silent items and this library's Apple keys, and never acts on a read-only
-//  road. (The production call sits behind the new road and `road.open == nil`, so no test bootstrap reaches it.)
+//  VariorumTests — VX-306 U1b: the DEBUG walk switch (P-VX306-U1b-9) over planted leaves — it parses only its
+//  words, forgets exactly the scope's silent items, this library's Apple keys and (VX-306 U2) what this Mac remembers,
+//  and never acts on a read-only road. (The production call sits behind the new road and `road.open == nil`, so no
+//  test bootstrap reaches it.)
 //
 
 import Foundation
@@ -14,9 +15,10 @@ import VariorumCore
 @Suite("VX-306 U1b — the walk switch (DEBUG walk machinery)")
 @MainActor
 struct ProtectionWalkSwitchTests {
-    @Test func itParsesOnlyItsTwoWords() {
+    @Test func itParsesOnlyItsWords() {
         #expect(ProtectionWalkSwitch.parse("silent") == [.silent])
         #expect(ProtectionWalkSwitch.parse("apple, SILENT") == [.silent, .apple])
+        #expect(ProtectionWalkSwitch.parse("memory,silent,apple") == [.silent, .apple, .memory])
         #expect(ProtectionWalkSwitch.parse("everything").isEmpty)
         #expect(ProtectionWalkSwitch.parse(nil).isEmpty)
     }
@@ -36,6 +38,16 @@ struct ProtectionWalkSwitchTests {
             Issue.record("both quiet roads forgotten — the lobby")
             return
         }
+    }
+
+    /// VX-306 U2: `memory` forgets what this Mac remembers — every memory item of the scope, nothing else.
+    @Test func itForgetsWhatThisMacRemembers() async throws {
+        let road = PlantedRoad()
+        _ = try await road.created()
+        #expect(road.memory.items.count == 1)
+        ProtectionWalkSwitch.forget([.memory], road.system())
+        #expect(road.memory.items.isEmpty)
+        #expect(road.silentItems.count == 1, "only what was named")
     }
 
     @Test func aReadOnlyRoadNeverForgets() async throws {
