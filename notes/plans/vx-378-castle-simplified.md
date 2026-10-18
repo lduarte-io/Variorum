@@ -1982,12 +1982,13 @@ green now), seed 8 red; stopped there (the tree changes):
   **The FINAL TREE is `66f7561e1`; ATTEMPT 3 — the discovery run AND the gate soak — runs whole on it.** ATTEMPT3_PENDING
 
 
-2. **Every fixed scenario green in both configurations** — on the FINAL tree `c84375010` (after the gate's two fixes), the
-   orchestrator's runs: the protection + lifecycle suites in Debug `✔ Test run with 387 tests in 149 suites passed` (the
-   wider filter; `U4GatePins` among them); `swift build -c release` complete; release `✘ 364 tests in 145 suites … 1
-   issue` — VX-380's Sync test under the wider filter, nothing of Protection's; the full core suite in Debug in a clean
-   review worktree at `c84375010`: `✔ 240 tests in 51 suites` · `✔ 3159 tests in 405 suites` · `✔ 40 tests in 6 suites`,
-   exit 0. *(The same checks on the ladder-close tree `4a4af3164`, before the gate's fixes, for the record:* Debug `✔ Test run with 385 tests in 148 suites passed after 10.142
+2. **Every fixed scenario green in both configurations** — on the FINAL tree `66f7561e1` (after the gate's two model fixes
+   and the checker fix), the orchestrator's runs: the protection + lifecycle suites in Debug `✔ Test run with 388 tests in
+   149 suites passed` (the wider filter; `U4GatePins` 3 among them); `swift build -c release` complete; release `✘ 365
+   tests in 145 suites … 1 issue` — VX-380's Sync test under the wider filter, nothing of Protection's; the full core suite
+   in Debug in a clean review worktree at `66f7561e1`: `✔ 240 tests in 51 suites` · `✔ 3160 tests in 405 suites` · `✔ 40
+   tests in 6 suites`, exit 0. (On `c84375010`, before the checker fix: Debug 387/149, release 364/145 minus VX-380, the
+   full core 3159/405 — the same shape.) *(The same checks on the ladder-close tree `4a4af3164`, before the gate's fixes, for the record:* Debug `✔ Test run with 385 tests in 148 suites passed after 10.142
    seconds.` (the wider filter — every suite under `Tests/VariorumCoreTests/Protection/` plus a few by name; the
    lifecycle's four walks among them); `swift build -c release` `Build complete! (91.11 sec)`; release `✘ 362 tests in
    144 suites … 1 issue` — the one red is `MultiTenantSyncAttackerTests` (VX-380: a SYNC test's DEBUG-only Argon2
