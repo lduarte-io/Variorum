@@ -1090,3 +1090,34 @@ synced schema or TK2-seam line.*
 - **The prebuilt Mac products (u2-fixed / u2-red):** NOT-STARTED.
 - **No behavioural revert is in flight.**
 
+
+## THE U5 BATCH + LIVE ROUND (the orchestrator, 2026-10-18 ~05:47–06:20, claim `vx-348-u5-batch`)
+
+- **RED leg** (u5-red, test-without-building): exactly as predicted — `MCPConnectionEndDoorTests` 3 of 3 red,
+  `listWingsSpeaksItsOwnWords` red with the rest of `MCPWingFacesTests` green (13 tests / 2 suites).
+- **FIXED leg** (u5-fixed): 242 tests / 31 suites, ONE red — `theDoorsTwoStopRoadsSayTheirReasonsOnce`
+  (`ends == []` on the serverOff arm; deterministic alone; the suite's other two pins green alone).
+- **THE LIVE ROUND (the dev store, Debug from the u5-fixed product, a REAL Claude Code client over the real shim,
+  scratch config, never her user scope; captures in `notes/plans/vx348-screens/u5/`, gitignored):**
+  - **VX-392's done-when PROVEN:** wing "U5 empty wing" minted empty through her doors; granted to `claude-code` at
+    edit·always through THE one grant sheet (WHERE = A wing); a fresh `claude -p` found it in ONE `list_wings` call
+    (the only wing listed — the client's BOOK grant correctly listed no wing) and created "first book" in it
+    unaided. Activity spoke "claude-code listed its shared wings" and "claude-code made the book "first book"" —
+    the pinned wording, live. The VX-258 zero-click tab-key re-bind line observed live too.
+  - **The batch red is a REAL GAP, live-confirmed:** with a live initialized connection held open, her switch OFF
+    killed the shim (process gone) but wrote NO end line — the row set unchanged across tab flips, a reopened
+    window and a brand-new Settings window (a new row would have topped the list; none did). The clientClosed road
+    DOES write (the exited `claude -p`'s "claude-code disconnected" landed live). So the STOP roads (her switch;
+    presumably the lock road's stop half) lose their reason — the U5 implementer's fix leg, the red pin the proof.
+  - **A second small observation, recorded not ruled:** the Activity tab's relative stamps never recompute ("39
+    seconds ago" frozen across minutes and across a NEW window) — a candidate facelet finding for the ladder or a
+    ticket at closeout.
+  - **VX-357's wire half PROVEN (U1's owed item):** a REAL U+0000 sent through the real shim's `create_note`
+    (the model-driven leg double-escaped — the digest exposed it; the deterministic frame followed):
+    `null_characters_removed: 1` in the answer and `sha256 = 31c2400e…` = sha256("beforeafter"), the STORED
+    stripped text. The fingerprint is true.
+  - **Fixture residue, per the posture terms (content may grow):** the wing "U5 empty wing" (book "first book",
+    notes "u5 null check" ×2), `claude-code`'s wing grant (edit·always). The ⌥⌘A mis-fire's once note grant was
+    REVOKED in-window. Server back ON; Debug app QUIT by bundle id; pgrep empty at RELEASE.
+  - **Deferred to U3/U4's walk window:** VX-393's live double-share check (pin-proven already), the Terminal-voice
+    captures of the new faces, and the VX-339 banner walk.
