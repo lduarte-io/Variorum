@@ -2706,3 +2706,20 @@ revert).** No BLOCKER/MAJOR ⇒ no round 3 (CLAUDE.md's ladder); the round-2 fix
   hand-forward** (drop the core default; callers choose). **NIT 3 (a PICKED copy filed into safety copies is absent from the standing Restore list
   until the pane reopens — m4's class): FIX NOW** — the filing posts `copiesChanged` on m4's seam; pinned as m4's.
 
+### ROUND-2 FIX LEG — the Opus implementer, 2026-10-18 (the dispositions above: m3, m2 and NIT 3 FIX; m1 done at `76e306925`; NITs 1–2 the orchestrator's hand-forwards)
+
+**Not done in this leg, first:** A STAGE HOLD WAS IN FORCE (another session's release archive) — no `xcodebuild` of any kind
+ran this turn, not even `build-for-testing`: the Mac-side pieces (m2, NIT 3, and m3's one-line production-leaf conformance)
+are WRITTEN and PENDING-BUILD — the orchestrator resumes the leg ("the hold lifted") for `build-for-testing`, then runs the
+suites listed at this record's end under the stage. Only the core package ran (`swift build` / `swift test`, both
+configurations). No stage, no app launch, no dev or real store, no `/Applications`.
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece 0 — this record skeleton: DONE (this commit).
+- m3 — the core creation's no-clobber preflight before its first write (core, headless): NOT-STARTED — the design: a READ
+  on the library leaf (is a file in the slot?) at the head of `ProtectionExecutor.createLibrary`, refusing with an
+  honestly named `ExecutorRefusal` before any mint or write; the pin in the executor's world (its write log), red on the
+  pre-fix tree in a scratch worktree, green after; the core protection set both configurations.
+- m2 — the Start Here passages seed only where the new road opened the store (app, PENDING-BUILD): NOT-STARTED.
+- NIT 3 — a filed pick tells the standing Restore list (`copiesChanged`, m4's seam) (app, PENDING-BUILD): NOT-STARTED.
+- The close (the record, the Mac suites to run, `git worktree list` clean): NOT-STARTED.
