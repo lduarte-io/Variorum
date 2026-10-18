@@ -244,7 +244,7 @@ tickets:
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
 | U1a — VX-303 (the landing road) | VERIFIED 2026-10-18 (`vx-382-u1a` window) — red-on-old A·B·C red as planned, both guard probes red, tree restored clean between each; batch `Test run with 1590 tests in 259 suites` — 4 issues + 5 known: VX-115's standing red (BookCollectingDoorsTests) + `DestructiveUndoWarningTests.redoNeverAsks` (the known VX-167 parallelism flake, signature :141–143); VX-77's standing red did NOT reproduce (passed). 9 skipped (2 disabled suites). §U1a RECORD → batch results. Code tip f0d1b414f |
 | U1b — VX-304 (the box door + Index takes) | VERIFIED 2026-10-18 (windows `vx-382-u1b` + `vx-382-u1b-walk`) — red-on-old B·C·D + both guard probes red as planned; batch 1998 tests / 332 suites: standing reds only (VX-115; VX-167's redoNeverAsks, red alone, same signature) + FINDING D-2, FIXED ab3db8f19 (the departing Outline ate the reveal) — 64-suite family 308/64 green (4 known), its red-on-old red; OutlineRoomTests PASSED; THE U1 WALK: Study 11 rows PASS (W1/W3 not walked — same road, pinned), Terminal 6 face/act rows PASS; posture restored, 0 instances, 0 GiB pruned (nothing superseded). §U1b RECORD |
-| U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | BUILT except the VX-21 re-cut — **R-U2-A STOPPED at its inventory step** (the Book Panel has ONLY chapter grips, 0.9.2 and now; her Journal bars were chapter ⠿s — §R-U2-A inventory; ac24bedbf stands, awaiting the re-rule). R-U2-B BUILT 8b38c88bb (test-only `.aqua` pinning). VX-291 · VX-69 · VX-115 (accepted) built; `build-for-testing` green. Every run + THE U2 WALK PENDING the `vx-382-u2` window (REVISED sequence in §U2 RECORD; VX-21 rows held). Implementer: opus-implementer, fresh, 2026-10-18 |
+| U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | BUILT — batch + walk PENDING the `vx-382-u2` window (implementer: opus-implementer, fresh, 2026-10-18). VX-291 (a8e774ea5) · VX-21 as first built (ac24bedbf — R-U2-A2: the panel has only chapter grips; no re-cut) · VX-69 (ef0405784) · VX-115 (18e121a08, contains-style accepted) · VX-77 archaeology + R-U2-B `.aqua` pinning (8b38c88bb); `build-for-testing` green. Window: the REVISED sequence (rows 0–1c VX-77, row 2 VX-21 restored, 3–5) + THE U2 WALK (W4 restored with the chapter-drag check) — §U2 RECORD |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
 | Closeout (canon deltas, tickets, PR, handoff) | NOT STARTED |
 
@@ -1052,7 +1052,7 @@ Per the ruling's own stop clause, VX-21 is NOT re-cut; ac24bedbf stands untouche
 .theNavigatorsChromeStaysInsideItsColumn` (:337). `build-for-testing` green. Its in-place revert for the window: delete
 those three lines (no later commit touches either file, so `git revert --no-commit 8b38c88bb` is equivalent).
 
-### THE `vx-382-u2` WINDOW — REVISED sequence (supersedes rows 0–1 above; rows 2–5 unchanged except row 2)
+### THE `vx-382-u2` WINDOW — REVISED sequence (supersedes rows 0–1 above; row 2 as first planned, restored at R-U2-A2; rows 3–5 unchanged)
 
 Zero app instances before every dev-domain write; read `appearanceChoice` FIRST and restore exactly that value.
 
@@ -1062,10 +1062,17 @@ Zero app instances before every dev-domain write; read `appearanceChoice` FIRST 
 | 1 | `defaults write io.lduarte.Variorum.debug appearanceChoice dark` + R-U2-B reverted in place (the three `.aqua` lines deleted) | the same two suites | RED "ink at 0.0" on (a) the Index panel AND (b) Read's column (VM-5's 2 issues) + the navigator pin — the hypothesis CONFIRMED and R-U2-B's red-on-old. **If NOT red: stop — drop 8b38c88bb (revert commit) and VX-77 returns to bisect** |
 | 1b | R-U2-B restored (`git checkout -- <both files>`, clean diff), dark defaults kept | the same two suites | GREEN — host-independent |
 | 1c | `appearanceChoice` restored to the found value, read back | — | — |
-| 2 | **VX-21 — HELD for the re-rule** (as built, the family stands as written above; a re-cut rewrites it) | `BookPanelDragGateTests` | per the re-rule |
+| 2 | **VX-21 (R-U2-A2: as first built, ac24bedbf)** — un-gate in place: `BookPanelModel.chapterGripDrawn`'s `manualOrder && chapterCount > 1` → `chapterCount > 1` | `BookPanelDragGateTests` | RED on the stamp-order checks: `aGripDrawsOnlyWhereTheBookIsPlacedByHand`'s three stamp-order arms and the mounted pin's entry-date arm (both chapter rows drawn); the manual arms and `aLoneChapterDrawsNoGrip` green. Restore with `git checkout --`, clean diff |
 | 3–5 | VX-69 family · VX-291 guard probe · the 125-suite green batch — as written above | | |
 
-The walk's W4 (the Book Panel grips) likewise waits on the re-rule; W1–W3 and W5 stand as written.
+**The walk's W4, restored (R-U2-A2), with the drag check added:** a sherlock story in Write with the Book Panel
+shown — read the book's order label (expect manual): (i) MANUAL — the chapter rows wear ⠿ (capture); (ii) still in
+manual, drag one chapter row onto the chapter row above it (`cliclick dd:/dm:/du:` — the panel is in the note pane's
+side column, main content, where synthetic drags land) → the chapter MOVES (capture the new order), then put it back
+through that row's right-click ▸ Move Chapter Down (or the reverse drag) and capture the original order restored;
+(iii) the navigator's `order ▾` → "Entry date ↑" → "Save as This Book's Order" → the story's Book Panel: NO ⠿ on any
+chapter row (capture); (iv) RESTORE: `order ▾` → "Manual order" → "Save as This Book's Order" → the label reads manual
+and the ⠿s are back (capture). W1–W3 and W5 stand as written; voice 2 re-captures W4 (i)'s face.
 
 ### R-U2-A2 — the re-rule on VX-21 (2026-10-18, after the inventory check hit R-U2-A's stop clause)
 
@@ -1083,3 +1090,8 @@ UNCHANGED tonight: they sit on heading-shaped rows, her complaint did not name t
 chapter ⠿ everywhere (puts back the bars she reported); (c) make the bars unmistakably the chapters' in every order
 (hover-only or trailing-edge — her taste call), possibly with the siblings aligned. Window row 2 and walk row W4
 revert to the first READY's forms.
+
+**R-U2-A2 resolved with NO re-cut (implementer, 2026-10-18):** VX-21 stands as first built (ac24bedbf) — no code
+change; window row 2 and walk row W4 are back to the first READY's forms above (W4 gains the manual-order chapter-drag
+check the re-rule asks for). The siblings (the navigator's and the Outline headings' ⠿) are untouched. P-U2-4 carries
+options (a)–(c) for her bundle.
