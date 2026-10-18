@@ -220,3 +220,35 @@ No BLOCKER. No MAJOR. Three MINOR, five NIT.
   respected); no VX-381 file touched (`ShelfViewModel` untouched); no `Sync/`, custody, schema or seam-trio line.
   The run's PROVISIONALs (R-U1a-1, R-U1a-2, P-U1b-1…5, P-U2-1…5) are recorded for her bundle; no canon delta is
   owed before the closeout.
+
+## DISPOSITIONS (the orchestrator, same-model arbitration against the spec — 2026-10-18)
+
+- **R1-1 — CONFIRMED AS SPECULATIVE, pin decides.** The sweep's "SAFE today" verdict missed the Index's own
+  departure consumer; the reviewer's mounted Index → Outline pin is built FIRST. Red ⇒ apply D-2's mirror (the mode
+  guard on `landOrSeed` — the reviewed shape; a mode-stamped reveal is the deeper cut and goes to VX-300's note if
+  not taken). Green ⇒ hollow — record in the sweep table, no fix. Either way the sweep table gains the Index row
+  and the Read ▸ Scroll delivery note (intended W21 behavior, now stated with its no-pin status).
+- **R1-2 — CONFIRMED, fix.** The "the editor cannot tell" premise was wrong (`BookViewModel.focus` distinguishes a
+  click; the bit dies at `EditorView` ~:85). Her click IS her place — the run's own theme. Fix: carry the click bit
+  with the seed so a CLICK-arrival feeds the memory inside the bracket; a bare focus stays dropped. The reviewer's
+  red-on-tip pin lands with it. The mount pin's "mount noise" arm is re-worded to bare-focus-only.
+- **R1-3 — CONFIRMED AS A PRE-EXISTING CLASS, ticketed; the comment fixed in-run.** `flushNow`'s
+  nothing-pending-while-a-write-flies early return is the shared helper's own class, not this run's regression; the
+  run's sin is a doc comment claiming the hazard closed. In-run: correct the comment to name the open window.
+  Closeout mints the helper ticket (Bug · Suspected · Editor; the reviewer's pin sketch rides the ticket body).
+- **R1-4 — RECORD-ONLY.** The `onOpenSearchHit` name predates the run's widening; a rename tonight is churn
+  against two sibling merges for zero behavior. Noted for VX-300's body.
+- **R1-5 — RECORD-ONLY.** `TOCRow`'s init shape is the query layer's standing idiom; the new count rides it.
+  Noted for VX-300's body.
+- **R1-6 — RECORD + TICKET.** Constructing `WriteTakesPanel(session:postID:blockID:)` from the book is RENDERING a
+  sibling's view — legal under CLAUDE.md's own words ("the prohibition binds STATE AND OWNERSHIP, never
+  rendering"). The shared-home rule bites at the panel FILE's next touch, which this run did not make. Closeout
+  mints the move ticket (Low · Debt).
+- **R1-7 — CONFIRMED AS SPECULATIVE, probe decides.** The W-1 class's idiom checks the cell's click frame; if only
+  the word answers, the W-1 overlay fix applies to the cell. The walk's W11 clicked the word, so the live road
+  works either way — this is about the cell's dead zone.
+- **R1-8 — FIX.** Record hygiene: the stale PENDING headers flip and the VX-291 notes catch up to the W-1 shape.
+
+One fix leg (a fresh implementer) applies R1-1's pin-then-decide, R1-2, R1-3's comment, R1-7's probe-then-decide
+and R1-8; its new pins verify in one short stage window; the orchestrator's line-by-line check closes the ladder
+at round 1 (0B/0M — the standing precedent) unless a fix uncovers more.
