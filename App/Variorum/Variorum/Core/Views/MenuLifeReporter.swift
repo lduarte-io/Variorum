@@ -70,3 +70,79 @@ final class MenuLifeReporterView: NSView {
 
     @objc private func ended() { onEnd?() }
 }
+
+// MARK: - VX-69 — Escape ends a menu's life too (her #188(d): the last gap)
+
+/// **Which key press closes an in-window menu** — pure, so the pins classify a
+/// synthesized key without a window. A native menu closes on Esc alone; a
+/// chord holding ⌘, ⌥ or ⌃ is someone else's command and passes on (Shift and
+/// Caps Lock never change what Esc means).
+nonisolated enum MenuEscape {
+    /// Esc's virtual key code.
+    static let keyCode: UInt16 = 53
+
+    static func closes(keyCode: UInt16, modifiers: NSEvent.ModifierFlags) -> Bool {
+        keyCode == Self.keyCode
+            && modifiers.intersection([.command, .option, .control]).isEmpty
+    }
+}
+
+extension View {
+    /// **VX-69 — an in-window popover that lives like a menu takes the Escape
+    /// key** (librarywalkpolish #188(d): "there is no Escape key for it yet").
+    /// While `open`, an Esc pressed in THIS view's window — wherever the
+    /// keyboard is (the quick entry, the board, nothing) — closes it and is
+    /// CONSUMED, as a native menu's is: the press closes the menu and does
+    /// nothing else. Closed, nothing listens (the catcher is not mounted —
+    /// the condition sits INSIDE the background, so the host's own identity
+    /// never changes with the menu's state).
+    func closesOnEscape(while open: Bool, _ close: @escaping () -> Void) -> some View {
+        background {
+            if open { MenuEscapeCatcher(onEscape: close) }
+        }
+    }
+}
+
+/// The catcher: an inert AppKit view (never a click target) owning a local
+/// `keyDown` monitor for ITS window while it is mounted — `PageTurnKeyMonitor`'s
+/// and `WingSwitcherKeyCatcher`'s shape, so a pin's `NSApp.sendEvent` drives it.
+struct MenuEscapeCatcher: NSViewRepresentable {
+    let onEscape: () -> Void
+
+    func makeNSView(context: Context) -> CatcherView {
+        let view = CatcherView()
+        view.onEscape = onEscape
+        return view
+    }
+
+    func updateNSView(_ view: CatcherView, context: Context) {
+        view.onEscape = onEscape
+    }
+
+    final class CatcherView: NSView {
+        var onEscape: (() -> Void)?
+        private var monitor: Any?
+
+        /// Never a click target.
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            if let monitor {
+                NSEvent.removeMonitor(monitor)
+                self.monitor = nil
+            }
+            guard window != nil else { return }
+            monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+                guard let self, let window = self.window, event.window === window,
+                      MenuEscape.closes(keyCode: event.keyCode, modifiers: event.modifierFlags)
+                else { return event }
+                self.onEscape?()
+                return nil  // consumed — a menu's Esc closes the menu and nothing else
+            }
+        }
+        // (No `deinit`: the view leaves its window before it dies, and
+        // `viewDidMoveToWindow` — called then with a nil window — removes the
+        // monitor; `PageTurnKeyMonitor`'s note, same reason.)
+    }
+}

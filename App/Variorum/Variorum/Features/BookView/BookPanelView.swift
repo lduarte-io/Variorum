@@ -234,7 +234,10 @@ struct BookPanelView: View {
         book: Reading, snapshot: BookPanelModel.Snapshot, groups: [BookPanelBrain.Group]
     ) -> some View {
         let marked = collapsed?.postID == postID
-        let gripDrawn = BookPanelBrain.chapterGripDrawn(chapterCount: snapshot.sections.count)
+        // VX-21: only where a row can be placed by hand (manual order).
+        let gripDrawn = BookPanelBrain.chapterGripDrawn(
+            chapterCount: snapshot.sections.count,
+            manualOrder: snapshot.reading?.sortField == .manual)
         return Button {
             // A collapsed one-note chapter row IS the note's row (row 8):
             // its click is that note's click-through. A plain heading is a
@@ -251,6 +254,10 @@ struct BookPanelView: View {
                     .foregroundStyle(tokens.faint)
                     .opacity(gripDrawn ? 1 : 0)
                     .accessibilityHidden(!gripDrawn)
+                    #if DEBUG
+                    .onAppear { BookPanelGripProbe.drawn[section.id] = gripDrawn }
+                    .onChange(of: gripDrawn) { _, now in BookPanelGripProbe.drawn[section.id] = now }
+                    #endif
                 if marked { marker }
                 Text(tokens.chromeLabel(section.name))
                     .font(tokens.small.weight(.semibold))
@@ -443,6 +450,17 @@ struct BookPanelView: View {
         }
     }
 }
+
+#if DEBUG
+/// VX-21: whether each mounted chapter row DRAWS its ⠿ grip (the slot is
+/// always laid out; the opacity is the drawing), keyed by the chapter's id —
+/// the probe pattern (`BookFilterProbe`), so a pin reads what the panel drew
+/// rather than what the brain would say.
+@MainActor
+enum BookPanelGripProbe {
+    static var drawn: [String: Bool] = [:]
+}
+#endif
 
 // MARK: - The panel's drop site (its private token only)
 

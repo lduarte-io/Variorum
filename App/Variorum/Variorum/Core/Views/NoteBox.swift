@@ -145,6 +145,18 @@ nonisolated enum NoteBoxCopy {
         + "Click a note in the book and they appear here."
     static let editDoorHelp =
         "Write in this note, at the block you were last in"
+    /// **VX-304 — the box's way OUT of the book** (P-U1b-1, PROVISIONAL): the
+    /// book's own words for the act — the "open ↗" by each note's title,
+    /// which a long note scrolls out of sight (her report). One act, one face.
+    static let openDoor = "open ↗"
+    /// While LIVE the door carries her caret's block (VX-303's road).
+    static let openDoorHelpLive = "Open in Write at this block"
+    /// While SELECTED there is no caret: the note opens in Write with the
+    /// plain open's place (R-U1a-2).
+    static let openDoorHelpSelected = "Open this note in Write"
+    /// The Index-live box's takes door — the bar's own word for it.
+    static let takesDoor = "Takes"
+    static let takesDoorHelp = "This block's takes, right here in the book"
 
     /// *"chapter 2 · 5 of 12 in this book"* — and, while live, the caret's
     /// block joins it: *"chapter 2 · 5 of 12 · block 3/41"*.

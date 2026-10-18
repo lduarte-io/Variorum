@@ -72,7 +72,13 @@ struct BookView: View {
     /// BLOCK with the find seed, through the shell's caret-precise road —
     /// composition (`RootView`), never a sibling's model. nil = no landing
     /// road (a test host); the passage then does nothing.
-    var onOpenSearchHit: ((_ postID: String, _ blockID: String?, _ find: EditorFindSeed?) -> Void)?
+    ///
+    /// **VX-303: the book's five OPEN doors ride this same road**
+    /// (`openInWrite`), carrying her caret's block and its offset inside the
+    /// block (a search passage names none — its `find` selects the match) and
+    /// the mode the note arrives in — one value, `BookOpenDoor.Landing`. A
+    /// nil block is a plain note-open.
+    var onOpenSearchHit: ((BookOpenDoor.Landing) -> Void)?
     @State private var model: BookViewModel
     @State private var structure: BookStructureModel
     /// 13i-b U2 — the book's DOOR (the Arrivals face's model). Its own model
@@ -118,7 +124,7 @@ struct BookView: View {
         onRevealSectionConsumed: (() -> Void)? = nil,
         onNoteBox: ((String, NoteBoxReport?, NoteBoxDoor?) -> Void)? = nil,
         bookSearch: BookSearchModel? = nil,
-        onOpenSearchHit: ((String, String?, EditorFindSeed?) -> Void)? = nil
+        onOpenSearchHit: ((BookOpenDoor.Landing) -> Void)? = nil
     ) {
         self.session = session
         self.readingID = readingID
@@ -275,7 +281,9 @@ struct BookView: View {
                         model.focus(postID)
                         model.requestReveal(postID)
                         structure.mode = .outline
-                    })
+                    },
+                    // VX-303: the row menu's "Open in the full editor".
+                    onOpenInWrite: { openInWrite($0) })
             case .outline:
                 // 13i-d U4: the archived line atop the content (zero height
                 // when nothing is set aside). 17y B3 (h): the Arrivals line
@@ -298,7 +306,9 @@ struct BookView: View {
                     archived: archived,
                     // WA-1: its flip bar's trailing end hosts the receipt
                     // (the page foot only while an empty book draws no bar).
-                    hostsQuietReceipt: quietReceiptHome == .modeBottomBar)
+                    hostsQuietReceipt: quietReceiptHome == .modeBottomBar,
+                    // VX-303: the page header's "open ↗".
+                    onOpenInWrite: { openInWrite($0) })
                     .overlay(alignment: .bottomTrailing) { pageFootReceipt }
                     .overlay { searchAnswerOverlay }
             case .read:
@@ -412,11 +422,25 @@ struct BookView: View {
             // C4, under THIS view's own name, so a second window on the same
             // book neither overwrites it nor takes it down on leaving.
             BookOutlineGeometry.publishFocusDoor(readingID, owner: oracleOwner) { model.focus($0) }
+            // VX-303: …and its ONE open door, for the same reason.
+            BookOutlineGeometry.publishOpenDoor(readingID, owner: oracleOwner) { openInWrite($0) }
+            // VX-304: …and its mode tabs' one act (the click-over's carry).
+            BookOutlineGeometry.publishModeDoor(readingID, owner: oracleOwner) { switchMode(to: $0) }
 #endif
         }
         .onChange(of: noteBoxReport) { _, _ in
             publishNoteBox()
             reportNotePlace()
+        }
+        // VX-304: the box's DOORS are mode-shaped (the Index's live box hands
+        // "Takes"; Outline's hands none — its bar has one), and a mode switch
+        // can leave the report itself equal (the same note live on both
+        // sides), so the doors are re-handed with the mode. FOCUSED panes only
+        // — the VX-143 gain-only rule's reason: an unfocused pane's report is
+        // nil, and its nil landing for a book the focused pane also shows
+        // would decline the box under the focused pane.
+        .onChange(of: structure.mode) { _, _ in
+            if paneFocused { publishNoteBox() }
         }
         .onDisappear {
             onNoteBox?(readingID, nil, nil)
@@ -514,7 +538,7 @@ struct BookView: View {
     /// The book's answer sheet — the passages land through the shell's road.
     private var searchSheet: some View {
         BookSearchSheet(tokens: tokens, model: bookSearch) { postID, blockID, find in
-            onOpenSearchHit?(postID, blockID, find)
+            onOpenSearchHit?(BookOpenDoor.Landing(postID: postID, blockID: blockID, find: find))
         }
     }
 
@@ -1087,8 +1111,39 @@ struct BookView: View {
             report.map { report in
                 NoteBoxDoor(
                     editHere: { editHere(report) },
-                    removeFromBook: removeDoor(report))
+                    removeFromBook: removeDoor(report),
+                    openInWrite: openDoor(report),
+                    openTakes: takesDoor(report))
             })
+    }
+
+    /// **VX-304 — the Index-live box's "Takes"**: the LIVE block's takes, in
+    /// place, over the book — asked through the book's one takes slot, which
+    /// the Index takes (releasing its live pane and writing her typing first;
+    /// P-U1b-4). Index only: Outline and the spread's live box carries the
+    /// editor's bar, whose own Takes door is the one (no second door). The
+    /// live block is read at the PRESS (it moves inside one note).
+    private func takesDoor(_ report: NoteBoxReport) -> (() -> Void)? {
+        guard structure.mode == .index, let live = report.live else { return nil }
+        let model = model
+        return {
+            guard model.indexLivePostID == live, let block = model.indexLiveBlockID else { return }
+            model.requestIndexTakes(LandingTarget(postID: live, blockID: block))
+        }
+    }
+
+    /// **VX-304 — the box's "open ↗"**: the book's ONE open door
+    /// (`openInWrite`) for the box's note, in every book mode — so the door
+    /// she could not see by a long note's title stands in the box. It reads
+    /// her place at the PRESS (live: her caret's block and offset; selected:
+    /// none — the plain open's place, in Write). A book with no landing road
+    /// (a hostless pin) hands none: a door that can never act is not drawn
+    /// (P-2).
+    private func openDoor(_ report: NoteBoxReport) -> (() -> Void)? {
+        guard onOpenSearchHit != nil, let postID = report.live ?? report.selected else {
+            return nil
+        }
+        return { openInWrite(postID) }
     }
 
     /// 13i-c U4 (§20) — the note box's book context: the remove/release door
@@ -1148,6 +1203,76 @@ struct BookView: View {
         }
     }
 
+    /// **VX-303 — THE BOOK'S ONE OPEN DOOR.** All five "open" buttons call
+    /// this with their note: Outline's expanded header and its collapsed
+    /// card's body and "open ↗" (`OutlinePostRow`), Index's "Open in the full
+    /// editor" (`BookIndexView`), the spread page's "open ↗" (`SpreadPage`).
+    ///
+    /// Her ruling (2026-10-13): *"it can land in Write at the block - more
+    /// consistent and useful than the note's last used mode."* So the door
+    /// rides the shell's block-landing road (13o U3's search-hit road; `jump`
+    /// forces Write) with HER PLACE in the note — `BookOpenDoor` holds the
+    /// rule. Before, every door posted `.variorumOpenPost` with the note's id
+    /// alone: a plain note-open, which R-18l-1 lands at the note's START in
+    /// its remembered mode — a deep link that dropped its target.
+    ///
+    /// **Her typing lands first** when a place rides the door: the landing's
+    /// offset is measured in the editor's buffer, and `jump` measures the
+    /// block's start in the STORE, so the note's pending autosave is flushed
+    /// before the road is taken (the doors' flush-first precedent —
+    /// `divergePostForReading`'s doors, the MCP door's pre-act flush). Not
+    /// closed by it (the ladder's R1-3, ticketed at closeout): a write
+    /// ALREADY in flight when the door is pressed (the coordinator's debounce
+    /// took the batch) leaves nothing pending, so the flush returns before
+    /// that write lands and `jump` may measure the pre-write store — its
+    /// clamp then lands the caret short (`BookIndexEditModel
+    /// .releaseForTakesSheet` names the same window). Nothing
+    /// live ⇒ no place ⇒ the same road with no block: the plain open's place,
+    /// in WRITE all the same (R-U1a-2 — every door names the mode).
+    ///
+    /// No road (a host without the shell — a pin over the book alone) does
+    /// nothing, the search passage's own rule beside it; the old broadcast is
+    /// app-wide, and a door in a hostless book must not navigate somebody
+    /// else's window.
+    private func openInWrite(_ postID: String) {
+        guard let road = onOpenSearchHit else { return }
+        // R-U1a-2 (the orchestrator's ruling on her words): EVERY door lands
+        // in Write — a door with no place included, whose note then arrives
+        // with the plain open's place (R-18l-1), shown in Write.
+        guard let place = openPlace(of: postID) else {
+            road(BookOpenDoor.Landing(postID: postID, mode: .write))
+            return
+        }
+        let session = session
+        Task {
+            await session.flushExistingAutosave(forPost: postID)
+            road(BookOpenDoor.Landing(
+                postID: postID, blockID: place.blockID, offsetInBlock: place.offsetInBlock,
+                mode: .write))
+        }
+    }
+
+    /// Her place in `postID` right now, assembled for `BookOpenDoor` from the
+    /// book's own reports and the editor under the caret — read only when it
+    /// is THIS note's (`EditorRouter.editing`, never `active`'s shadow: the
+    /// 18d ladder's MINOR-1). `caretIdentity` is the editor's existing
+    /// read-only answer (block + UTF-16 offset; nil in the open tail).
+    private func openPlace(of postID: String) -> BookOpenDoor.Place? {
+        let editor = session.editorRouter.editing
+        let editorCaret: BookOpenDoor.Place? = editor?.postID == postID
+            ? editor?.caretIdentity().map {
+                BookOpenDoor.Place(blockID: $0.blockID, offsetInBlock: $0.offset)
+            }
+            : nil
+        let indexCaret = model.indexCaret
+        return BookOpenDoor.place(
+            of: postID, mode: structure.mode,
+            live: BookOpenDoor.Live(
+                editorPostID: model.liveFocusedPostID, editorCaret: editorCaret,
+                indexPostID: model.indexLivePostID, indexBlockID: model.indexLiveBlockID,
+                indexCaret: indexCaret?.postID == postID ? indexCaret?.place : nil))
+    }
+
     /// 13f W20(a) — the ascent, adopted. The shell's one-shot request becomes
     /// this book's landing (W21's slot), so "open the book at this post"
     /// needs no second mechanism: it is the same reveal a mode switch parks,
@@ -1178,8 +1303,27 @@ struct BookView: View {
     /// spread and a page domain).
     private func switchMode(to newMode: BookStructureModel.ViewMode) {
         guard newMode != structure.mode else { return }
-        model.carryPlace(from: structure.mode, readForm: structure.readForm)
+        // VX-304: the click-over carries her BLOCK out of Outline too (Index
+        // arrives with it live — `BookAnchor.landing`).
+        let live = liveCaretBlock()
+        model.carryPlace(
+            from: structure.mode, readForm: structure.readForm,
+            livePostID: live?.postID, liveBlockID: live?.blockID)
         structure.mode = newMode
+    }
+
+    /// **VX-304 — the book's live note and the block her caret stands in**,
+    /// read at the switch from the editor under the caret, only when it is
+    /// the book's live note (`EditorRouter.editing`, never `active`'s shadow
+    /// — `openPlace`'s rule; `caretIdentity` is the editor's existing
+    /// read-only answer, nil in the open tail). The model holds no editor, so
+    /// the view hands it the fact.
+    private func liveCaretBlock() -> (postID: String, blockID: String)? {
+        guard let live = model.liveFocusedPostID,
+              let editor = session.editorRouter.editing, editor.postID == live,
+              let block = editor.caretIdentity()?.blockID
+        else { return nil }
+        return (live, block)
     }
 
     /// Read's two faces are a mode switch by any other name — the same
@@ -1901,6 +2045,17 @@ struct BookView: View {
     /// foreign and is dropped as before — a stale request must never land
     /// on a later navigation.
     private func landOutlineReveal(_ proxy: ScrollViewProxy) {
+        // VX-304 — ONLY WHILE OUTLINE IS THE MODE. A click-over FROM Outline
+        // parks its reveal for the ARRIVING surface (W21: "the arriving
+        // surface consumes"), but this departing Outline's `onChange(of:
+        // pendingReveal)` still fires in the switch's own update — traced in
+        // the `vx-382-u1b` window: it ran with the mode already `.index` and
+        // consumed the reveal AND its block landing (`consumeReveal`), so the
+        // Index's `landOrSeed` found nothing and seeded on the focused note.
+        // The note "carried" only by that seed's accident; the block never
+        // could. Every road that lands the Outline does so with the mode
+        // already Outline (the tabs, the chapter landing's `switchMode`).
+        guard structure.mode == .outline else { return }
         if let sectionID = model.pendingChapterReveal {
             if structure.sections.contains(where: { $0.id == sectionID }) {
                 model.consumeChapterReveal()
@@ -2104,7 +2259,10 @@ struct BookView: View {
         OutlinePostRow(
             session: session, model: model, structure: structure,
             entry: entry, tokens: tokens, gutter: outlineGutter,
-            badge: ownershipBadge(entry.postID))
+            badge: ownershipBadge(entry.postID),
+            // VX-303: the row's three open doors (the expanded header's
+            // "open ↗", the collapsed card's body and its "open ↗").
+            onOpenInWrite: { openInWrite($0) })
     }
 }
 
@@ -2148,6 +2306,9 @@ enum BookOutlineGeometry {
     private static var navigatorChapterRowStore = OwnedRegistrations<String, CGRect>()
     private static var navigatorNoteRowStore = OwnedRegistrations<String, CGRect>()
     private static var focusDoorStore = OwnedRegistrations<String, @MainActor (String?) -> Void>()
+    private static var openDoorStore = OwnedRegistrations<String, @MainActor (String) -> Void>()
+    private static var modeDoorStore = OwnedRegistrations<
+        String, @MainActor (BookStructureModel.ViewMode) -> Void>()
 
     static var anchorTops: [String: CGFloat] { anchorTopStore.current }
     /// **13u2 UNIT A2: each anchor row's CURRENT height**, recorded on the
@@ -2188,6 +2349,19 @@ enum BookOutlineGeometry {
     /// that published it (18k C4): the most recently mounted book answers,
     /// and a book leaving takes only its own door.
     static var focusDoors: [String: @MainActor (String?) -> Void] { focusDoorStore.current }
+    /// **VX-303 — each mounted book's ONE open door** (`BookView.openInWrite`,
+    /// the act all five of its "open" buttons perform), published for the
+    /// focus door's reason: a button's closure is unreachable from a pin, and
+    /// the five buttons call this one function with their row's note. Keyed
+    /// and owned exactly as the focus door is.
+    static var openDoors: [String: @MainActor (String) -> Void] { openDoorStore.current }
+    /// **VX-304 — each mounted book's MODE door** (`BookView.switchMode`, the
+    /// act the masthead's mode tabs perform — the click-over that CARRIES her
+    /// place), published for the focus door's reason: a tab's closure is
+    /// unreachable from a pin. Keyed and owned exactly as the focus door is.
+    static var modeDoors: [String: @MainActor (BookStructureModel.ViewMode) -> Void] {
+        modeDoorStore.current
+    }
 
     // MARK: - The writes (each names its owner)
 
@@ -2214,6 +2388,19 @@ enum BookOutlineGeometry {
         focusDoorStore.publish(door, for: readingID, owner: owner)
     }
 
+    static func publishOpenDoor(
+        _ readingID: String, owner: UUID, _ door: @escaping @MainActor (String) -> Void
+    ) {
+        openDoorStore.publish(door, for: readingID, owner: owner)
+    }
+
+    static func publishModeDoor(
+        _ readingID: String, owner: UUID,
+        _ door: @escaping @MainActor (BookStructureModel.ViewMode) -> Void
+    ) {
+        modeDoorStore.publish(door, for: readingID, owner: owner)
+    }
+
     /// A `BookView` leaving: its own registrations, every one, and nothing
     /// another window's book still answers for.
     static func release(owner: UUID) {
@@ -2223,6 +2410,10 @@ enum BookOutlineGeometry {
         navigatorChapterRowStore.release(owner: owner)
         navigatorNoteRowStore.release(owner: owner)
         focusDoorStore.release(owner: owner)
+        openDoorStore.release(owner: owner)
+        modeDoorStore.release(owner: owner)
+        // VX-291: the Outline's fold controls' frames.
+        BookFoldGeometry.release(owner: owner)
     }
 
     // MARK: - A pin's doors (unconditional — a pin owns nothing)
@@ -2238,6 +2429,10 @@ enum BookOutlineGeometry {
     static func forgetRowHeights() { rowHeightStore.forgetAll() }
 
     static func forgetFocusDoor(_ readingID: String) { focusDoorStore.forget(readingID) }
+
+    static func forgetOpenDoor(_ readingID: String) { openDoorStore.forget(readingID) }
+
+    static func forgetModeDoor(_ readingID: String) { modeDoorStore.forget(readingID) }
 }
 #endif
 
@@ -2431,11 +2626,16 @@ private struct OutlinePostRow: View {
     /// 13i-c U4 (§6): the badge this row wears, or nil — decided by the book
     /// (`BookView.ownershipBadge`), drawn beside the title.
     let badge: OwnershipBadgeFace.Badge?
+    /// VX-303: the book's ONE open door (`BookView.openInWrite`) — this row's
+    /// expanded header, its collapsed card's body and that card's "open ↗"
+    /// all call it with the row's note.
+    let onOpenInWrite: (String) -> Void
 
     init(
         session: AppSession, model: BookViewModel, structure: BookStructureModel,
         entry: Queries.ReadingEntry, tokens: VoiceTokens, gutter: ProseGutter,
-        badge: OwnershipBadgeFace.Badge? = nil
+        badge: OwnershipBadgeFace.Badge? = nil,
+        onOpenInWrite: @escaping (String) -> Void = { _ in }
     ) {
         self.session = session
         self.model = model
@@ -2444,6 +2644,7 @@ private struct OutlinePostRow: View {
         self.tokens = tokens
         self.gutter = gutter
         self.badge = badge
+        self.onOpenInWrite = onOpenInWrite
     }
 
     /// Row 53: is this row near the viewport? An EXPANDED row far from it
@@ -2573,7 +2774,9 @@ private struct OutlinePostRow: View {
                                 ) {
                                     EditorView(
                                         session: session, postID: entry.postID, inline: true,
-                                        caretSeed: model.caretSeed, fanSeed: model.fanSeed,
+                                        caretSeed: model.caretSeed,
+                                        caretSeedIsHers: model.caretSeedIsHers,
+                                        fanSeed: model.fanSeed,
                                         barPlacement: .inSidebarBox,
                                         gutter: gutter,
                                         onLiveShowing: { liveShowing = true })
@@ -2691,9 +2894,12 @@ private struct OutlinePostRow: View {
         HStack(spacing: 6) {
             // 13b 3E (D1): the ONE collapse door — it releases focus too,
             // so collapsing the post you're typing in actually collapses it.
-            Button("▾") { model.collapse(entry.postID) }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                .help("Collapse this note back to its card")
+            // VX-291: the card's ▸ and this ▾ are ONE control (the 22-pt
+            // target, grown outward).
+            BookFoldDisclosure(
+                tokens: tokens, folded: false, help: "Collapse this note back to its card",
+                probeKey: "header-\(entry.postID)"
+            ) { model.collapse(entry.postID) }
             Text(outlineEntryTitle(entry))
                 .font(tokens.heading)
                 .foregroundStyle(tokens.ink)
@@ -2706,12 +2912,9 @@ private struct OutlinePostRow: View {
                 OwnershipBadgeView(tokens: tokens, badge: badge, postID: entry.postID)
             }
             // Sitting 9 batch 7: the door OUT of the book into the post's
-            // full editor (modes, takes, lenses — everything).
-            Button(tokens.chromeLabel("open ↗")) {
-                NotificationCenter.default.post(
-                    name: .variorumOpenPost, object: nil,
-                    userInfo: ["postID": entry.postID])
-            }
+            // full editor (modes, takes, lenses — everything). VX-303: the
+            // book's ONE open door, carrying her place in this note.
+            Button(tokens.chromeLabel("open ↗")) { onOpenInWrite(entry.postID) }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
             .help("Open this note in the full editor (Write · Takes · Lenses · …)")
         }
@@ -2731,24 +2934,23 @@ private struct OutlinePostRow: View {
     /// (N22): the card BODY opens the post in the full editor; the ▸
     /// disclosure unfolds it in place. Each target does what it looks like.
     private var collapsedPostCard: some View {
+        // VX-303: the card's body is the book's ONE open door too. A collapsed
+        // card's note is never the live one (focus implies expansion), so this
+        // door opens plainly — `BookOpenDoor`'s nothing-live arm.
         Button {
-            NotificationCenter.default.post(
-                name: .variorumOpenPost, object: nil,
-                userInfo: ["postID": entry.postID])
+            onOpenInWrite(entry.postID)
         } label: {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 6) {
-                    Button {
-                        model.expand(entry.postID)
-                    } label: {
-                        Text("▸")
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.faint)
-                            .padding(.horizontal, 2)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .help("Unfold this note in place — write in it right here")
+                    // VX-291 (her "that one little triangle could stand to
+                    // just be a bit bigger"): a 22-pt target grown OUTWARD —
+                    // the card lays out what it always did, so its learned
+                    // height holds, and a near miss no longer opens the note.
+                    BookFoldDisclosure(
+                        tokens: tokens, folded: true,
+                        help: "Unfold this note in place — write in it right here",
+                        probeKey: "card-\(entry.postID)"
+                    ) { model.expand(entry.postID) }
                     Text(outlineEntryTitle(entry))
                         .font(tokens.body.weight(.semibold))
                         .foregroundStyle(tokens.ink)
@@ -2762,11 +2964,7 @@ private struct OutlinePostRow: View {
                         OwnershipBadgeView(tokens: tokens, badge: badge, postID: entry.postID)
                     }
                     Spacer()
-                    Button(tokens.chromeLabel("open ↗")) {
-                        NotificationCenter.default.post(
-                            name: .variorumOpenPost, object: nil,
-                            userInfo: ["postID": entry.postID])
-                    }
+                    Button(tokens.chromeLabel("open ↗")) { onOpenInWrite(entry.postID) }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                     .help("Open this note in the full editor (Write · Takes · Lenses · …)")
                 }

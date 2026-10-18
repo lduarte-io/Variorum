@@ -63,6 +63,35 @@ enum BookIndexGeometry {
     private static var readTierFrameStore = OwnedRegistrations<String, CGRect>()
     private static var anchorTopStore = OwnedRegistrations<String, CGFloat>()
     private static var contentSpanStore = OwnedRegistrations<String, BookIndexContentSpan>()
+    private static var takesBadgeStore = OwnedRegistrations<String, Int>()
+    private static var takesSheetStore = OwnedRegistrations<String, LandingTarget>()
+
+    /// **VX-304 — the takes badge each realized Index block WEARS**: the
+    /// count it says ("⑂N"), keyed by the BLOCK's id (the subject-keyed
+    /// rule). Published while the badge is on screen and withdrawn when it
+    /// leaves, so "the fanned block wears ⑂2 and its neighbour wears none"
+    /// is a claim a pin reads off what was drawn.
+    static var takesBadges: [String: Int] { takesBadgeStore.current }
+    /// **VX-304 — the in-place Takes sheet the Index is SHOWING**, keyed by
+    /// the BOOK's id: the note and block whose takes it holds. Published by
+    /// the sheet's own content while it is up, withdrawn as it goes.
+    static var takesSheets: [String: LandingTarget] { takesSheetStore.current }
+
+    static func recordTakesBadge(_ blockID: String, count: Int, owner: UUID) {
+        takesBadgeStore.publish(count, for: blockID, owner: owner)
+    }
+
+    static func withdrawTakesBadge(_ blockID: String, owner: UUID) {
+        takesBadgeStore.withdraw(blockID, owner: owner)
+    }
+
+    static func recordTakesSheet(_ readingID: String, _ target: LandingTarget, owner: UUID) {
+        takesSheetStore.publish(target, for: readingID, owner: owner)
+    }
+
+    static func withdrawTakesSheet(_ readingID: String, owner: UUID) {
+        takesSheetStore.withdraw(readingID, owner: owner)
+    }
 
     static var chapterCountFrame: CGRect? { chapterCountSlot.value }
     static var noteMenuFrame: CGRect? { noteMenuSlot.value }
@@ -178,6 +207,10 @@ enum BookIndexGeometry {
         readTierFrameStore.release(owner: owner)
         anchorTopStore.release(owner: owner)
         contentSpanStore.release(owner: owner)
+        takesBadgeStore.release(owner: owner)
+        takesSheetStore.release(owner: owner)
+        // VX-291: the chapter rows' fold controls' frames.
+        BookFoldGeometry.release(owner: owner)
     }
 
     // MARK: - A pin's doors (unconditional — a pin owns nothing)
@@ -193,6 +226,8 @@ enum BookIndexGeometry {
         noteHeightStore.forgetAll()
         anchorTopStore.forgetAll()
         contentSpanStore.forgetAll()
+        takesBadgeStore.forgetAll()
+        takesSheetStore.forgetAll()
     }
 
     static func forgetContentSpans() { contentSpanStore.forgetAll() }
@@ -398,6 +433,13 @@ enum BookIndexMaterialization {
 
 // MARK: - The view
 
+/// VX-304: the block whose takes the Index's in-place sheet holds.
+private struct IndexTakesSheet: Identifiable, Equatable {
+    let postID: String
+    let blockID: String
+    var id: String { "\(postID)|\(blockID)" }
+}
+
 struct BookIndexView<Masthead: View>: View {
     let session: AppSession
     let model: BookViewModel
@@ -417,6 +459,9 @@ struct BookIndexView<Masthead: View>: View {
     /// Show this note focused in OUTLINE (a navigation door in the row
     /// menu since the correction round — editing happens HERE now).
     let onEditInOutline: (String) -> Void
+    /// VX-303: the row menu's "Open in the full editor" — the book's ONE open
+    /// door (`BookView.openInWrite`), which carries her place in that note.
+    let onOpenInWrite: (String) -> Void
     /// 13i-d U3 — the GROUPED-BY control's state (the masthead renders the
     /// control; this view regroups by it). nil — a host with no control, every
     /// pre-U3 pin — is the shipped look, exactly.
@@ -455,6 +500,12 @@ struct BookIndexView<Masthead: View>: View {
     @State private var paneTarget: String?
     @State private var columnTarget: String?
     @State private var seeded = false
+    /// **VX-304 — the in-place Takes sheet** (her *"index can get take
+    /// badges"*): the block whose takes are up over the book, nil when none.
+    /// Raised only through `takeTakesRequest` (the badge and the box's
+    /// "Takes" both ask the book's one slot), so the live pane is always
+    /// released and her typing written first.
+    @State private var takesSheet: IndexTakesSheet?
 
     /// **THE ONE LANDING AUTHORITY** (13u4 UNIT F1 — `Surface/LandingAuthority.swift`).
     /// The aim/hold/quiet/hop discipline that the book Outline and the reading
@@ -500,8 +551,10 @@ struct BookIndexView<Masthead: View>: View {
         grouping: BookIndexGroupingModel? = nil,
         hostsQuietReceipt: Bool = true,
         searchAnswer: AnyView? = nil,
-        onEditInOutline: @escaping (String) -> Void
+        onEditInOutline: @escaping (String) -> Void,
+        onOpenInWrite: @escaping (String) -> Void = { _ in }
     ) {
+        self.onOpenInWrite = onOpenInWrite
         self.hostsQuietReceipt = hostsQuietReceipt
         self.searchAnswer = searchAnswer
         self.session = session
@@ -658,6 +711,32 @@ struct BookIndexView<Masthead: View>: View {
             // answer in every editing mode, and this mode's liveness is its
             // own pane's, never the book's focus (P-3).
             model.noteIndexLive(edit.livePostID)
+            // VX-303: …and its live BLOCK, for the open doors.
+            model.noteIndexLiveBlock(edit.liveBlockID)
+            // VX-304: a takes request parked before this Index mounted.
+            takeTakesRequest()
+        }
+        // VX-304: the book's one takes slot — the badge's and the box's.
+        .onChange(of: model.pendingIndexTakes) { _, _ in takeTakesRequest() }
+        .sheet(item: $takesSheet) { sheet in
+            // The note's own Write take machinery, scoped to ONE block (the
+            // panel Write's ⑂ opens), over the book. Its "Open Takes mode"
+            // refuses here as it does over the Outline: no note detail is
+            // mounted inside a book (`CommandRouter.requestMode`).
+            WriteTakesPanel(
+                session: session, postID: sheet.postID, blockID: sheet.blockID,
+                onClose: { takesSheet = nil })
+            #if DEBUG
+                .onAppear {
+                    BookIndexGeometry.recordTakesSheet(
+                        model.readingID,
+                        LandingTarget(postID: sheet.postID, blockID: sheet.blockID),
+                        owner: oracleOwner)
+                }
+                .onDisappear {
+                    BookIndexGeometry.withdrawTakesSheet(model.readingID, owner: oracleOwner)
+                }
+            #endif
         }
         // 13i-d U3: the grouped-by control's one held read (and the filter
         // bar's tag menu), keyed by the notes shown and the chosen family.
@@ -686,11 +765,15 @@ struct BookIndexView<Masthead: View>: View {
         // (`theReadClickLandsInIndexAtThatBlock` read ZERO editable panes,
         // isolated and reproducible, with and without a next-turn deferral).
         .onChange(of: edit.livePostID) { _, live in model.noteIndexLive(live) }
+        // VX-303: the live BLOCK moves inside one note too (a click into the
+        // next paragraph keeps `livePostID` where it was).
+        .onChange(of: edit.liveBlockID) { _, block in model.noteIndexLiveBlock(block) }
         // Leaving the index releases its ring (the one live pane), flushing
         // whatever it held — the same discipline every pane host follows.
         .onDisappear {
             edit.teardown()
             model.noteIndexLive(nil)
+            model.noteIndexLiveBlock(nil)
             model.noteIndexSelection(nil)
             // 13i-d U3 (P-13id-U3-5): the filter's only face is this Index's
             // bar, so it never outlives it — every other mode reads the book
@@ -766,6 +849,37 @@ struct BookIndexView<Masthead: View>: View {
         BookIndexGeometry.trace.append("\(anchorID) top=\(top) hops=\(landing.corrections)")
         #endif
         landing.noteTop(anchorID, top)
+    }
+
+    /// **VX-303 — the live pane's caret, handed on.** The book always hears
+    /// it (its open doors carry the LIVE caret — `BookOpenDoor`); the note's
+    /// one per-note memory hears it only when it is HER place
+    /// (`BookIndexEditModel.caretReportIsHers` — R-U1a-1's guard (i)): the
+    /// pane's own going-live placement never overwrites where she was. The
+    /// router's other-note arm is what remembers it ("edit here" reads it).
+    private func noteLivePaneCaret(_ caret: BookIndexEditModel.PaneCaret, postID: String) {
+        model.noteIndexCaret(postID: postID, blockID: caret.blockID, offsetInBlock: caret.offset)
+        guard edit.caretReportIsHers(
+            variantID: caret.variantID, offset: caret.offset, textLength: caret.textLength)
+        else { return }
+        session.commandRouter.noteFocusedBlock(
+            caret.blockID, variantID: caret.variantID, postID: postID,
+            utf16Offset: caret.offset, remembersOtherNotes: true)
+    }
+
+    /// **VX-304 — the book asked for a block's takes** (the badge, or the
+    /// sidebar box's "Takes" on the live block): taken ONCE; the live pane is
+    /// released and every pending text written (`releaseForTakesSheet` —
+    /// P-U1b-4 says why both), then the sheet opens on that block.
+    private func takeTakesRequest() {
+        guard let target = model.pendingIndexTakes else { return }
+        model.consumeIndexTakes()
+        guard let blockID = target.blockID else { return }
+        let edit = edit
+        Task {
+            await edit.releaseForTakesSheet(on: target.postID)
+            takesSheet = IndexTakesSheet(postID: target.postID, blockID: blockID)
+        }
     }
 
     private func select(_ postID: String, scrollPane: Bool, report: Bool = true) {
@@ -864,14 +978,18 @@ struct BookIndexView<Masthead: View>: View {
         _ row: BookIndexColumn.Row, title: String, count: Int, folded: Bool
     ) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Button(folded ? "▸" : "▾") {
+            // VX-291 (PROVISIONAL — the ticket's "if she agrees"; the plan
+            // recommends it): the Outline's fold control, the same 22-pt
+            // target grown outward, so a chapter's ▸/▾ is not the 11.5-pt
+            // glyph the Outline's was.
+            BookFoldDisclosure(
+                tokens: tokens, folded: folded,
+                help: folded ? "Unfold this chapter" : "Fold this chapter to its heading",
+                probeKey: row.groupID.map { "chapter-\($0)" }
+            ) {
                 guard let groupID = row.groupID else { return }
                 if folded { collapsed.remove(groupID) } else { collapsed.insert(groupID) }
             }
-            .buttonStyle(.plain)
-            .font(tokens.small)
-            .foregroundStyle(tokens.faint)
-            .help(folded ? "Unfold this chapter" : "Fold this chapter to its heading")
             Text(tokens.chromeLabel(title))
                 .font(tokens.small.weight(.semibold))
                 .foregroundStyle(tokens.accent)
@@ -931,10 +1049,8 @@ struct BookIndexView<Masthead: View>: View {
     @ViewBuilder
     private func chapterFilingMenu(_ postID: String) -> some View {
         Button("Show in Outline") { onEditInOutline(postID) }
-        Button("Open in the full editor") {
-            NotificationCenter.default.post(
-                name: .variorumOpenPost, object: nil, userInfo: ["postID": postID])
-        }
+        // VX-303: the book's ONE open door (`BookView.openInWrite`).
+        Button("Open in the full editor") { onOpenInWrite(postID) }
         if structure.reading?.kind == .book {
             Divider()
             // 13i-d U3 (F-U2-3): "Move to Chapter ▸" / "No Chapter" — the
@@ -1062,6 +1178,19 @@ struct BookIndexView<Masthead: View>: View {
                                         row.id, postID: entry.postID),
                                     onTap: { select(entry.postID, scrollPane: false) },
                                     onLandedBlock: { blockID in paneTarget = blockID },
+                                    // VX-304: a block's ⑂ badge asks the book's
+                                    // one takes slot (the box's road too).
+                                    onOpenTakes: { blockID in
+                                        model.requestIndexTakes(LandingTarget(
+                                            postID: entry.postID, blockID: blockID))
+                                    },
+                                    // VX-303: the live pane's caret — to the
+                                    // book for its open doors, and (R-U1a-1)
+                                    // to the note's one memory when it is
+                                    // HERS, never the pane's own placement.
+                                    onCaret: { caret in
+                                        noteLivePaneCaret(caret, postID: entry.postID)
+                                    },
                                     onBlockTop: paneBlockAnchorMoved,
                                     onMeasured: { height in
                                         model.learnIndexPaneRowHeight(
@@ -1436,6 +1565,12 @@ private struct BookIndexPaneNote: View {
     let onTap: () -> Void
     /// A landing made a block live here — the pane may scroll to it.
     let onLandedBlock: (String) -> Void
+    /// VX-304: a block's ⑂ badge was pressed — show its takes in place.
+    let onOpenTakes: (String) -> Void
+    /// VX-303: the live pane's caret moved — the block and take it is in and
+    /// the caret's UTF-16 offset inside the take (`PaneSurfaceView
+    /// .onSelectionChange`, consumed as every reporting host consumes it).
+    let onCaret: (BookIndexEditModel.PaneCaret) -> Void
     /// 13u4 UNIT F1: where one of this note's BLOCKS sits, for a landing whose
     /// target is that block (the pane gates the report on its pending anchor).
     let onBlockTop: (String, CGFloat) -> Void
@@ -1460,6 +1595,8 @@ private struct BookIndexPaneNote: View {
         indicator: EditingIndicatorStyle, entry: Queries.ReadingEntry,
         edit: BookIndexEditModel, selected: Bool, reserved: CGFloat,
         onTap: @escaping () -> Void, onLandedBlock: @escaping (String) -> Void,
+        onOpenTakes: @escaping (String) -> Void = { _ in },
+        onCaret: @escaping (BookIndexEditModel.PaneCaret) -> Void = { _ in },
         onBlockTop: @escaping (String, CGFloat) -> Void,
         onMeasured: @escaping (CGFloat) -> Void
     ) {
@@ -1472,6 +1609,8 @@ private struct BookIndexPaneNote: View {
         self.reserved = reserved
         self.onTap = onTap
         self.onLandedBlock = onLandedBlock
+        self.onOpenTakes = onOpenTakes
+        self.onCaret = onCaret
         self.onBlockTop = onBlockTop
         self.onMeasured = onMeasured
         #if DEBUG
@@ -1521,6 +1660,9 @@ private struct BookIndexPaneNote: View {
                 // nothing per-row may be more than it has to be).
                 let anchor = "bip-\(row.blockID)"
                 blockView(row)
+                    // VX-304: a block with takes wears "⑂N" — an OVERLAY, so
+                    // neither tier's prose moves for it (R-13u3-3).
+                    .overlay(alignment: .topTrailing) { takesBadge(row) }
                     .id(anchor)
                     .onGeometryChange(for: CGFloat.self) { geometry in
                         geometry.frame(in: .named(BookIndexColumn.paneSpace)).minY
@@ -1583,6 +1725,59 @@ private struct BookIndexPaneNote: View {
         }
     }
 
+    /// How far beyond the block's trailing edge the ⑂ badge hangs — the
+    /// Outline badge's own gap from the prose column (`ReadBadgeOverlay`:
+    /// `columnRight + 6`).
+    nonisolated static let takesBadgeGap: CGFloat = 6
+
+    /// **VX-304 — the block's takes badge** (her *"index can get take
+    /// badges"*; P-U1b-3): "⑂N" for a block that keeps more than one take —
+    /// the Outline badge's word and count — hung OUTSIDE the block's trailing
+    /// edge at its first line, so no prose moves for it, in both tiers (the
+    /// overlay sits on the row, whose edges the two tiers share). A press
+    /// shows the block's takes in place (`onOpenTakes` — the book's one
+    /// takes slot). Blocks with one take wear nothing (AppSpec §12: a corner
+    /// badge only on fanned blocks).
+    @ViewBuilder
+    private func takesBadge(_ row: Queries.TOCRow) -> some View {
+        if row.hasFan {
+            Button {
+                onOpenTakes(row.blockID)
+            } label: {
+                Text("\u{2442}\(row.activeVariantCount)")
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.ring)
+                    .lineLimit(1)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 1)
+                    .background(tokens.card, in: Capsule())
+                    .overlay(Capsule().stroke(tokens.line, lineWidth: 1))
+                    .contentShape(Capsule())
+            }
+            .buttonStyle(.plain)
+            .lineLimit(1)  // P-8: a fixedSize chrome label states its line policy
+            .fixedSize()
+            .help("This block keeps \(row.activeVariantCount) takes — click to see them here")
+            .padding(.top, Self.readTierTop)
+            .alignmentGuide(.trailing) { $0[.leading] - Self.takesBadgeGap }
+            #if DEBUG
+            .onAppear {
+                BookIndexGeometry.recordTakesBadge(
+                    row.blockID, count: row.activeVariantCount,
+                    owner: oracleOwner ?? DebugOracleOwner.unowned)
+            }
+            .onChange(of: row.activeVariantCount) { _, count in
+                BookIndexGeometry.recordTakesBadge(
+                    row.blockID, count: count, owner: oracleOwner ?? DebugOracleOwner.unowned)
+            }
+            .onDisappear {
+                BookIndexGeometry.withdrawTakesBadge(
+                    row.blockID, owner: oracleOwner ?? DebugOracleOwner.unowned)
+            }
+            #endif
+        }
+    }
+
     /// One block: THE live pane when it is the clicked one, else its
     /// rendered paragraphs (a click on them is the upgrade).
     @ViewBuilder
@@ -1604,6 +1799,14 @@ private struct BookIndexPaneNote: View {
                     edit.paneEdited(
                         postID: entry.postID, variantID: variantID,
                         oldText: row.text ?? "", newText: newText)
+                },
+                // VX-303: where her caret is inside this block — the book's
+                // open doors carry it into Write (ReadEditPane's precedent:
+                // the live pane's caret is the note's place).
+                onSelectionChange: { range in
+                    onCaret(BookIndexEditModel.PaneCaret(
+                        blockID: row.blockID, variantID: variantID, offset: range.location,
+                        textLength: (text as NSString).length))
                 },
                 // 18l U0 (her Index-click report): the click's own place; a
                 // LANDING's block start (18l-b U4, #153); `.leave` for a pane's
