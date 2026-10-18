@@ -1527,3 +1527,17 @@ below) is PENDING the orchestrator's window.
 - **VX-350 (the Library at narrow widths):** NOT-STARTED — the settled design below.
 - **Products (u3-fixed / u3-red):** NOT-STARTED.
 - **No behavioural revert is in flight.**
+
+## THE U2 RE-RUN (the orchestrator, 2026-10-18 ~07:37–07:49, claim `vx-348-u2-rerun`)
+
+- **RED leg:** 13 behavioral reds EXACTLY as predicted (10 mount cells + the flipped door pin + the 2 copy pins),
+  ZERO premise failures (the rig re-shape is honest), guards green, the VX-154 panel suite all green (the control:
+  the pre-fix filer filed once). U2's red-on-old now stands whole.
+- **FIX-LEG RED** (claimFiling always-true): the five one-commit pins red + the VX-154 pin red, as predicted —
+  the ledger's necessity proven red-first. Control 12 of 13 (below).
+- **FIXED:** 205 of 206 across 29 suites — the double-file fix, the VX-154 shipped pin and every leave-rule pin
+  GREEN. The one red, `aLockedTakeStillRefusesWhenTheFieldIsLeft`, fails with the SAME
+  `try Rig.savepoints(h).isEmpty → <not evaluated>` THROW on all three trees — a rig-read/cell-setup issue, not a
+  commit-count defect; the locked-refusal behavior is green under its two sibling pins (the door-refuses-before-
+  opening pin, the seal cell). Routed to U2's implementer: trace, fix the cell or DROP it with the reason said; a
+  changed cell re-runs as one suite at the walk window's start.
