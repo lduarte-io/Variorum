@@ -1979,7 +1979,37 @@ green now), seed 8 red; stopped there (the tree changes):
   has not followed the current entry); a device that HAS followed is held to every clause. No model change. Pin
   `U4GatePins.aSignedOutDeviceThatLaggedTheReEntryReadsItsOwnCopyByItsOwnRoad` — red on `c84375010` (1 issue), green
   after. After the fix: the protection set in Debug `✔ 388 tests in 149 suites passed`; release `swift build -c release` complete; `✘ 365 tests in 145 suites … 1 issue` — VX-380's Sync test under the wider filter, nothing of Protection's (the protection set itself green).
-  **The FINAL TREE is `66f7561e1`; ATTEMPT 3 — the discovery run AND the gate soak — runs whole on it.** ATTEMPT3_PENDING
+  **The FINAL TREE is `66f7561e1`; ATTEMPT 3 — the discovery run AND the gate soak — runs whole on it.** 
+
+**ATTEMPT 3 on the FINAL tree `66f7561e1` (the soak log names `0c4e901bd`, the notes-only commit above it; `git diff 66f7561e1..0c4e901bd -- Sources Tests` is empty) — THE DISCOVERY RUN, seeds 21–40 × 1,000 × ≤60, Debug (started 2026-10-18T04:00Z, DONE 06:15Z, zero failing):**
+
+| seed | steps | Debug s | exit line |
+|---|---|---|---|
+| 21 | 44,768 | 358.719 | `✔ Test run with 1 test in 1 suite passed after 358.719 seconds.` |
+| 22 | 44,838 | 364.687 | `✔ Test run with 1 test in 1 suite passed after 364.687 seconds.` |
+| 23 | 45,219 | 418.271 | `✔ Test run with 1 test in 1 suite passed after 418.271 seconds.` |
+| 24 | 44,688 | 378.477 | `✔ Test run with 1 test in 1 suite passed after 378.477 seconds.` |
+| 25 | 44,369 | 385.792 | `✔ Test run with 1 test in 1 suite passed after 385.792 seconds.` |
+| 26 | 45,226 | 407.740 | `✔ Test run with 1 test in 1 suite passed after 407.740 seconds.` |
+| 27 | 44,410 | 357.078 | `✔ Test run with 1 test in 1 suite passed after 357.078 seconds.` |
+| 28 | 45,147 | 373.034 | `✔ Test run with 1 test in 1 suite passed after 373.034 seconds.` |
+| 29 | 44,411 | 352.509 | `✔ Test run with 1 test in 1 suite passed after 352.509 seconds.` |
+| 30 | 45,437 | 360.034 | `✔ Test run with 1 test in 1 suite passed after 360.034 seconds.` |
+| 31 | 45,186 | 363.502 | `✔ Test run with 1 test in 1 suite passed after 363.502 seconds.` |
+| 32 | 44,726 | 353.691 | `✔ Test run with 1 test in 1 suite passed after 353.691 seconds.` |
+| 33 | 44,878 | 355.240 | `✔ Test run with 1 test in 1 suite passed after 355.240 seconds.` |
+| 34 | 44,879 | 364.939 | `✔ Test run with 1 test in 1 suite passed after 364.939 seconds.` |
+| 35 | 45,494 | 377.881 | `✔ Test run with 1 test in 1 suite passed after 377.881 seconds.` |
+| 36 | 45,124 | 360.080 | `✔ Test run with 1 test in 1 suite passed after 360.080 seconds.` |
+| 37 | 45,386 | 364.701 | `✔ Test run with 1 test in 1 suite passed after 364.701 seconds.` |
+| 38 | 45,220 | 356.277 | `✔ Test run with 1 test in 1 suite passed after 356.277 seconds.` |
+| 39 | 44,830 | 362.287 | `✔ Test run with 1 test in 1 suite passed after 362.287 seconds.` |
+| 40 | 44,511 | 368.039 | `✔ Test run with 1 test in 1 suite passed after 368.039 seconds.` |
+
+Total 898,747 steps over 20,000 sequences, every seed `✔`.
+
+**ATTEMPT 3 — THE GATE SOAK, seeds 1–20, Debug then `-c release`, on the final tree:** RUNNING — the tables land here as the configurations complete. GATE_SOAK3_PENDING
+
 
 
 2. **Every fixed scenario green in both configurations** — on the FINAL tree `66f7561e1` (after the gate's two model fixes
