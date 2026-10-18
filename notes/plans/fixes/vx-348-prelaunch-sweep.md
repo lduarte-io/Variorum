@@ -337,8 +337,10 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   leg 7/2: VX-338 4 of 5 red + the pure guard green, VX-339 2 of 2 red, exactly as predicted; FIXED leg 78 tests /
   13 suites ALL GREEN. U1's pins are verified red-on-old whole. **Still PENDING:** VX-357's real-client wire round
   (a later window) and the VX-339 banner walk. The U1 UNIT RECORD (below) carries the rest.
-- **U5 (VX-392 · VX-393 · VX-394 — the urgent MCP trio, joined 2026-10-18 at her word):** NOT-STARTED — runs NEXT
-  after U1 (urgent outranks U2–U4). FOURTEEN members now; rulings R-VX348-5/6 and the report verbatim in §U5.
+- **U5 (VX-392 · VX-393 · VX-394 — the urgent MCP trio, joined 2026-10-18 at her word):** IN-PROGRESS — its
+  implementer (`opus-implementer`, fresh session) started 2026-10-18 after U1's adjudication; the per-member LIVE
+  STATUS is the U5 UNIT RECORD's (at the end of this file). FOURTEEN members now; rulings R-VX348-5/6 and the report
+  verbatim in §U5.
 - **U2 (VX-347 — ⌘S):** NOT-STARTED.
 - **U3 (VX-350 · VX-349 · VX-176 — the Library's row and header):** NOT-STARTED.
 - **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** NOT-STARTED.
