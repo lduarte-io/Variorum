@@ -288,7 +288,8 @@ memory (guard (i), recorded remainder). Red-on-old and the batch are DONE — §
    before `jump` reads it), and rides `onOpenSearchHit(postID, block, offset, nil)`; nothing live ⇒ the same road
    with no block (a plain open); no road (a hostless book) ⇒ nothing (the search passage's rule; the old broadcast
    was app-wide). Red-on-old = revert 7cbaf633b ALONE (piece 1 keeps every seam the pins call).
-3. **The pins** — committed with this record flip, compiling (build-for-testing green; runs PENDING the window):
+3. **The pins** — committed with this record flip, compiling (build-for-testing green; ~~runs PENDING the window~~
+   — RUN and green in the `vx-382-u1a` window, §Batch results):
    `VariorumTests/BookOpenDoorTests.swift` — `BookOpenDoorRuleTests` (pure: the brain per mode, the clamped landing
    offset, the offset riding the park; new-API, not red-on-old by construction), `BookOpenDoorMountTests` (per mode
    — outline · spread · index — through a mounted book with the road captured: the live note's door rides with
@@ -337,7 +338,7 @@ memory (guard (i), recorded remainder). Red-on-old and the batch are DONE — §
   feeds nor clobbers the memory.
 - **The shadow `InlineEditorSurface`** (the Outline's second model): no projection, no caret — reports nothing.
 
-### The pins (`App/Variorum/VariorumTests/BookOpenDoorTests.swift`; runs PENDING the window)
+### The pins (`App/Variorum/VariorumTests/BookOpenDoorTests.swift`; RUN in the `vx-382-u1a` window — §Batch results)
 
 - `BookOpenDoorRuleTests` — pure: the place rule per mode, the clamped landing offset, the offset and the MODE riding
   the one park (new API — not red-on-old by construction).
@@ -486,8 +487,9 @@ this check either way.
 
 ## U1b RECORD — VX-304 (implementer: opus-implementer, 2026-10-18)
 
-**Not done yet (PENDING the `vx-382-u1b` window):** the red-on-old runs, the green Mac batch and THE U1 WALK — the stage
-is coordinator-held; everything to here was built and verified headless.
+**VERIFIED (the `vx-382-u1b` and `vx-382-u1b-walk` windows — the ladder's R1-8 flip):** the red-on-old runs, the
+green Mac batch, FINDING D-2's fix and THE U1 WALK all ran — §Batch results, §D-2 verified, §THE U1 WALK — verdicts.
+*(Was: "Not done yet (PENDING the `vx-382-u1b` window)" — the pre-window state, kept struck for the record.)*
 
 ### The trace, re-verified on the tip (37bb72404)
 
@@ -521,7 +523,8 @@ is coordinator-held; everything to here was built and verified headless.
    (unread); `carryPlace(…, livePostID:, liveBlockID:)` (accepted, unread); DEBUG oracles —
    `BookOutlineGeometry.modeDoors` (the tabs' one act, `switchMode`), `BookIndexGeometry.takesBadges` /
    `.takesSheets` (published by C). Builds headless (`build-for-testing` green).
-2. **The pins** — committed (compiling against piece 1; runs PENDING the window):
+2. **The pins** — committed (compiling against piece 1; ~~runs PENDING the window~~ — RUN in the `vx-382-u1b`
+   window, §Batch results):
    `VariorumTests/BookNoteBoxDoorsTests.swift` — `BookNoteBoxOpenDoorTests` (per mode — outline · spread · index —
    through a mounted book with the box's door and the road captured: SELECTED (spread, Index) rides the note + Write;
    LIVE rides block 2 + her offset + Write; the Index-live box hands Takes, Outline/spread's none),
@@ -703,7 +706,7 @@ Each family from the committed tree (99e0634e4), in place, restored with `git ch
   - `OutlineRoomTests.bothColumnsChromeStaysInsideThemAtTheirFloors` (VX-77) PASSED.
   - All other VX-304 suites passed (the box door per mode, the faces in both voices, the badge and both sheet roads).
 
-### FINDING D-2 — the departing Outline eats the click-over's reveal (traced; FIX BUILT, verification PENDING the walk window)
+### FINDING D-2 — the departing Outline eats the click-over's reveal (traced; FIX BUILT; VERIFIED in the walk window — §D-2 verified)
 
 Traced with temporary prints (`diag-carry*.log`; reverted): after the mode door, the carry HAD parked the reveal and the
 block landing (note + block 2; the memory held block 2 at 9). Then the departing OUTLINE's `.onChange(of:
@@ -802,10 +805,12 @@ coordinator's to judge.
 
 ## U2 RECORD — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 (implementer: opus-implementer, fresh, 2026-10-18)
 
-**Not done yet (PENDING the `vx-382-u2` window):** every red-on-old run, the green Mac batch, VX-77's two confirming
-runs and THE U2 WALK — the stage is coordinator-held; everything here is built and verified headless.
+**VERIFIED (the `vx-382-u2` window — the ladder's R1-8 flip):** every red-on-old run, the green Mac batch, VX-77's
+confirming runs (DISMISSED AS HOLLOW), walk finding W-1's fix and pin, and THE U2 WALK all ran — §The `vx-382-u2`
+window, §FINDING W-1, §THE U2 WALK — verdicts. *(Was: "Not done yet (PENDING the `vx-382-u2` window)" — the
+pre-window state.)*
 
-### VX-77 — the archaeology (headless, 2026-10-18; the window confirms)
+### VX-77 — the archaeology (headless, 2026-10-18; CONFIRMED in the window — DISMISSED AS HOLLOW, R-U2-B)
 
 **Verdict (headless): no main-side code change restored the floor, because no product regression caused the red —
 the red was the TEST HOST'S APPEARANCE.** The window's two runs decide it (below); until then this is the leading
@@ -849,7 +854,7 @@ robustness — `window.appearance = NSAppearance(named: .aqua)` in the three lum
 the host's posture (the "suites share real UserDefaults" class CLAUDE.md names). A test-only change, red-on-old by the
 same dark probe. Owner if not ruled in: a Tests & tooling ticket.
 
-### VX-291 — the fold control (built; runs PENDING the window)
+### VX-291 — the fold control (built; VERIFIED in the `vx-382-u2` window — and RESHAPED by walk finding W-1, 4d8367ec5)
 
 - **Trace (re-read on the tip):** the Outline card's ▸ (`BookView.collapsedPostCard`) was `Text("▸")` at the voice's
   11.5-pt small size, faint, 2 pt of padding — measured off the font: 7.1×14 + 4 = **~11×14 pt**, inside the card's
@@ -865,6 +870,11 @@ same dark probe. Owner if not ruled in: a Tests & tooling ticket.
   footprint's top, the 11.5-pt title's ~11.1–11.3 under its own; the walk eyes it). The
   overhang (5 pt a side) is under every host's spacing (6 · 6 · 8), so the target never reaches a title. Used by
   the card's ▸, the header's ▾ and the Index chapter fold.
+  **As SHIPPED (walk finding W-1, 4d8367ec5 — supersedes the negative-padding shape above):** the negative padding
+  sat inside the button's style, so the Button's own frame was the 12×13 footprint and a press in the overhang was
+  taken by hit-testing and dropped. The row now lays out a HIDDEN footprint (the glyph's line at 12×13) and the
+  BUTTON rides an overlay centred on it, its style framing the label to the 22-pt square — so the button's own frame
+  IS the target. The footprint, the overhang and the learned heights are unchanged.
 - **PROVISIONAL (her bundle):** P-U2-1 — the Index chapter fold takes the same control (the ticket's "if she agrees",
   the plan's recommended yes). P-U2-2 — both glyphs wear the QUIET ink (the ▾'s, `tokens.muted`) where the ▸ wore
   `faint`: one control, one ink. P-U2-3 — the expanded header's title sits ~5 pt further left (the ▾'s footprint
@@ -875,9 +885,11 @@ same dark probe. Owner if not ruled in: a Tests & tooling ticket.
   `VariorumTests/BookFoldDisclosureTests.swift` — the card's ▸ and the header's ▾: target ≥ 22², grown outward past
   the footprint on all four sides, footprint ≤ the replaced 11.5-pt glyph's line, ▸ and ▾ the same box; the Index
   chapter folds the same. On the pre-fix tree nothing reports (red by absence, recorded — no oracle existed). The
-  walk checks the size, the hover wash and a click in the overhang (both voices).
+  walk checks the size, the hover wash and a click in the overhang (both voices). **Since W-1 the row HAS a
+  red-on-old pin:** `aClickInTheOverhangUnfoldsTheNote` (a real click 1.5 pt inside the box's left edge, clear of the
+  footprint) — red on the pre-W-1 control restored in place, green on 4d8367ec5 (§FINDING W-1).
 
-### VX-21 — the Book Panel's grips (built; runs PENDING the window)
+### VX-21 — the Book Panel's grips (built; VERIFIED in the `vx-382-u2` window — red-on-old row 2, walk W4)
 
 - **Trace:** the panel's only grip is the chapter row's ⠿ (`BookPanelView.chapterRow`; note rows never wore one — the
   row drags). `BookPanelBrain.chapterGripDrawn(chapterCount:)` read the count alone (17y B2's lone-chapter rule), so a
@@ -900,7 +912,7 @@ same dark probe. Owner if not ruled in: a Tests & tooling ticket.
   draws; switched to manual: both do). `aLoneChapterDrawsNoGrip` re-stated in manual order (a justified edit — the
   signature grew).
 
-### VX-69 — the order popover's Escape (built; runs PENDING the window)
+### VX-69 — the order popover's Escape (built; VERIFIED in the `vx-382-u2` window — red-on-old row 3, walk W5)
 
 - **Trace:** the Bookcase's order popover (VR-115) is the app's own drawing in the board's overlay, not an `NSMenu`, so
   AppKit routes no Esc to it; its closes were the board-local click catcher, the board leaving (`.onDisappear`), the
@@ -919,7 +931,7 @@ same dark probe. Owner if not ruled in: a Tests & tooling ticket.
   `escClosesTheOrderPopoverAndLeavesTheCensus` (the mounted board, an Esc keyDown sent through `NSApp.sendEvent` to
   the board's window — the `PagesArrowKeysHostTests` road).
 
-### VX-115 — the stale door pin (test-only; green PENDING the window)
+### VX-115 — the stale door pin (test-only; GREEN in the `vx-382-u2` window's batch)
 
 - `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` pinned `BookView.surfaceCapabilities ==
   [.openBookSettings]`; the declaration is now `[.openBookSettings, .searchThisBook, .newNoteInGathering]` (13o U3's 🔍
@@ -954,6 +966,8 @@ VX-381 file (`ShelfViewModel` deliberately untouched), no schema, no `Sync/`.
 | 5 | **Green batch** | — | `xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS' $(cat scratchpad/u2/only-testing.args)` — **125 suites** (`scratchpad/u2/suites.txt`: every suite whose file names a changed type — the book view / Index / Book Panel / Bookcase board / menu-life family — plus the lints, the registry walk, OutlineRoom, BookOrderConversion, the Bookcase-mounting shell suites and the tours) | GREEN except, possibly, `DestructiveUndoWarningTests.redoNeverAsks` (VX-167's parked load-flake — re-run ALONE before attributing). `BookCollectingDoorsTests` GREEN (VX-115). `OutlineRoomTests` GREEN. Anything else red is a finding |
 
 VX-291 has no red-on-old by construction (a taste row: a NEW oracle — nothing reports on the pre-fix tree).
+*(Superseded in the window: walk finding W-1 gave the row a click pin, `aClickInTheOverhangUnfoldsTheNote`, verified
+red-on-old against the pre-W-1 control and green on 4d8367ec5 — §FINDING W-1. The ladder's R1-8 note.)*
 
 ### THE U2 WALK — the plan (dev store, the batch's Debug product, no posture change; screens `scratchpad/u2/screens/`)
 

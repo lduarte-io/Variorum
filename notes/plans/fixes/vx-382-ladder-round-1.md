@@ -294,4 +294,4 @@ The word, its font, its muted ink and its place are unchanged; the voiced hover 
 target — W-1's own grammar, the fold control's wash fills its 22-pt square); recorded for her eye if built.
 `CommitBar.boxCell` (the bar's cells) shares the inherited shape — NOT touched here (the disposition names the box's
 cell only); a ticket at closeout if the probe is red.
-| R1-8 — record hygiene in the plan file | NOT STARTED |
+| R1-8 — record hygiene in the plan file | **DONE** (the commit naming it) — the U1b and U2 RECORD headers flipped from "Not done yet (PENDING …)" to VERIFIED (the old text kept, named as the pre-window state); the stale "runs PENDING the window" sub-headers flipped (U1a's pins ×2, U1b's pins, D-2's header, VX-77/VX-291/VX-21/VX-69/VX-115); VX-291's "Built" bullet gains the AS-SHIPPED W-1 overlay shape (hidden footprint + the button in an overlay, its own frame the 22-pt square), its Evidence bullet and the window plan's "no red-on-old by construction" line both name W-1's red-on-old click pin `aClickInTheOverhangUnfoldsTheNote` |
