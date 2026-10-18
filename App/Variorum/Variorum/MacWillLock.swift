@@ -35,9 +35,16 @@
 
 import Foundation
 
+//  VX-394 (VX-348 U5): `endingConnections` — the MCP door says each live
+//  connection's end ("the library locked or closed") in the activity log —
+//  runs AFTER every note's leaving savepoint and BEFORE the services stop: the
+//  store must still be open for its one write, and nothing of hers waits on
+//  it. A no-op by default, so every other caller (and the scripted pins)
+//  wires what it wired before.
 @MainActor
 func macWillLock(
     session: AppSession,
+    endingConnections: @escaping @MainActor () async -> Void = {},
     stopServices: @escaping @MainActor () -> Void
 ) -> @MainActor () async -> Void {
     {
@@ -49,6 +56,7 @@ func macWillLock(
             await pending.value
         }
         await session.quitFinalize.finalizeAll()
+        await endingConnections()
         stopServices()
     }
 }

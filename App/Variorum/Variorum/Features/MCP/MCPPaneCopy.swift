@@ -327,6 +327,7 @@ nonisolated enum MCPPaneCopy {
     static func activityLine(_ line: MCPActivityFace.Line) -> String {
         let target = line.targetTitle.map { "\u{201C}\($0)\u{201D}" }
         if let setup = rebindPhrase(line) { return setup }
+        if let ended = connectionEndPhrase(line) { return ended }
         guard line.allowed else {
             let times = line.count > 1 ? " (\(line.count) times)" : ""
             return "\(line.clientName) was refused "
@@ -355,6 +356,23 @@ nonisolated enum MCPPaneCopy {
             return "\(line.clientName)\u{2019}s new setup wasn\u{2019}t allowed" + times
         default:
             return nil
+        }
+    }
+
+    /// **VX-394 (VX-348 U5) — a connection's end, said with why** (PROVISIONAL
+    /// words, VX-234's pass): the four ends `MCPConnectionEnd` names — the
+    /// client's own close, the library locking or closing, her switch, a
+    /// message over the cap. Logged as an event (never a refusal), so it
+    /// reads as what happened. nil for any other act.
+    private static func connectionEndPhrase(_ line: MCPActivityFace.Line) -> String? {
+        guard let end = MCPConnectionEnd(act: line.act) else { return nil }
+        let times = line.count > 1 ? " (\(line.count) times)" : ""
+        let name = line.clientName
+        switch end {
+        case .clientClosed: return "\(name) disconnected" + times
+        case .libraryClosed: return "\(name) was disconnected when the library locked or closed" + times
+        case .serverOff: return "\(name) was disconnected when the MCP server was turned off" + times
+        case .overLimit: return "\(name) was disconnected after a message over the size limit" + times
         }
     }
 

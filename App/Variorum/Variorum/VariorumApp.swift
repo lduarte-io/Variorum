@@ -249,7 +249,12 @@ struct VariorumApp: App {
                         // the open tail and a pending cross-block compound
                         // were dropped by the registry-only shape (see
                         // MacWillLock.swift).
-                        bootstrap.onWillLock = macWillLock(session: session) {
+                        bootstrap.onWillLock = macWillLock(
+                            session: session,
+                            // VX-394 (VX-348 U5): each live MCP connection's
+                            // end is said while the store is still open.
+                            endingConnections: { await appDelegate.mcp.recordLibraryClosing() }
+                        ) {
                             services?.stop()
                             services = nil
                             // 13n-b U1 (A-8): a locked library serves no one.

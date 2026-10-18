@@ -354,11 +354,14 @@ final class MCPDoor {
     }
 
     /// The store is closing (lock, quit): stop the server — the socket is
-    /// unlinked, every session hung up — and let the store go.
+    /// unlinked, every session hung up — and let the store go. VX-394: each
+    /// connection it ends is said as the library's closing (the lock road has
+    /// already written those lines, before the store closed —
+    /// `recordLibraryClosing`; the host never says one twice).
     func detach() {
         observation?.cancel()
         observation = nil
-        stopServer()
+        stopServer(ending: .libraryClosed)
         adoptionLandingPending = false
         // A closed library's asks die with it (and so does every glyph — and
         // the ask watch, which an empty queue stops).
@@ -377,7 +380,8 @@ final class MCPDoor {
     /// Start or stop the server to match the toggle.
     private func reconcileServer() {
         guard snapshot.enabled else {
-            stopServer()
+            // VX-394: her switch OFF — each connection it ends says so.
+            stopServer(ending: .serverOff)
             serverState = .off
             return
         }
@@ -438,11 +442,26 @@ final class MCPDoor {
         }
     }
 
-    private func stopServer() {
-        host?.stop()
+    private func stopServer(ending reason: MCPConnectionEnd) {
+        host?.stop(ending: reason)
         host = nil
         starting = false
         connected = []
+    }
+
+    /// **VX-394 (VX-348 U5) — the library is about to lock or close: say each
+    /// live connection's end NOW, while the store is still open.** The lock
+    /// road (`macWillLock`, whose order is ruled) awaits this after every
+    /// note's leaving savepoint and before the services stop and the pool
+    /// closes — the line a connection's own end would write afterwards races
+    /// the close and is lost. Off the main thread (P2); one write, ∝ the
+    /// connections (≤ the session cap). A failed write is quiet — the hang-up
+    /// may still say it, if the store is still there.
+    func recordLibraryClosing() async {
+        guard let host else { return }
+        await Task.detached(priority: .userInitiated) {
+            try? host.recordConnectionEnds(.libraryClosed)
+        }.value
     }
 
     private func refreshConnected() {

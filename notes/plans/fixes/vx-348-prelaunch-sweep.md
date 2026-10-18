@@ -699,12 +699,14 @@ the build notes; the Environment traps; the kickoff sitting and her overnight ma
   added one); pins verified RED on the pre-fix tree (`DerivedData/u5-logs/vx393-red.log`: 7 of 8, the
   other-clients guard green), 8 of 8 green after; the whole headless suite green after the op change (MCP 376/70,
   core 2916/340, the third target 40/6). Its section below.
-- **VX-394 (mid-session disconnect while the pane says running):** IN-PROGRESS — the mechanism traced by code reading
-  (the library's LOCK under Castle — sleep · screen lock · time away counted from HER use only — detaches the door and
-  hangs up every connection; App Nap, socket idle timeouts and the path ruled out — the section below, being written);
-  the drop line's core + host half landed with its headless pins (green; their red leg by a behavioural revert is
-  NEXT). Still to do: the app side (the door's two stop reasons, the lock road's pre-close record via `macWillLock`,
-  the Activity words) + its Mac pins (compile-only), the record section, MCPSpec's line.
+- **VX-394 (mid-session disconnect while the pane says running):** DONE (`6306a21ff` the core + host · this commit
+  the app side) — the mechanism ESTABLISHED by code reading as a definite kill path (the library's LOCK under Castle —
+  sleep · screen lock · ten minutes of time away counted from HER use only — detaches the door and hangs up every
+  connection; App Nap, socket idle timeouts, the path and the SDK loop ruled out); whether it was HER night's cause is
+  not provable from here. The Activity drop line SHIPPED; its headless pins verified red on a behavioural revert (4 of
+  6, the guards green), 6 of 6 green. **PENDING:** the Mac pins' run (`MCPConnectionEndDoorTests` — prebuilt). The
+  ticket's remainder is HER call (does a connected AI's work count as "use" for Castle's lock after time away? — an
+  author-only lock relaxation, recorded with options, not built). Its section below.
 - **No behavioural revert is in flight.** (VX-394's red leg ran and was restored: `MCPServerHost.swift` reverted over
   the committed `6306a21ff` — the end-line write and `recordConnectionEnds`'s body removed — 4 of 6 pins RED, the two
   guards green, `DerivedData/u5-logs/vx394-red.log`; restored by `git checkout --`, `git diff` clean, 6 of 6 green.)
@@ -879,4 +881,107 @@ standing row; a once and a revoked row stand beside it; local-only) — all RED 
 - **P-VX393-3** — once grants are outside the one-row rule (an act-scoped permission, not a standing row): a once
   grant beside a standing one is shown as its own row ("· once") and spent by its one act. Alternative: (b) a new
   standing grant also revokes the place's pending once grants.
+
+### VX-394 — a mid-session disconnect while the pane says "running"
+
+**The trace (investigation first — every claim below read in the code, none run against her library).**
+1. *What "MCP server disconnected" is.* For a stdio server, Claude Code says it when the server's process exits — here
+   the `variorum-mcp` shim. The shim (`MCPShim.pump`) copies stdin → socket on a helper thread and socket → stdout on
+   its own; it returns, and the process exits, only when the socket → stdout copy ends: the APP closed or shut down the
+   socket (EOF), a read error, or a stdout write failure. Nothing in it times out (no `SO_RCVTIMEO` on the pumped
+   socket).
+2. *When the app ends a connection.* A session (`MCPSession.run`) ends only when its reader
+   (`MCPSocketTransport.readLines`) returns: EOF or an error from the peer (the client's own end), a line past the
+   16 MiB cap (answered, then closed — VX-184 U1), or the host's `stop()` → `hangUp()` (`shutdown(SHUT_RDWR)`). The SDK's
+   loop (swift-sdk 0.12.1, `Server.start`) catches every per-message error and answers it, so no message can end it.
+3. *When the host stops.* Only from the door (`MCPDoor`): the switch OFF (`reconcileServer`), and `detach()` — called
+   by the library's LOCK road (`AppBootstrap.lock` → `onWillLock` → `macWillLock` → `stopServices` →
+   `appDelegate.mcp.detach()`), by an adoption or a re-key (`adoptLibrary` / `rekeyLibrary`, the same `onWillLock`), and
+   by a new session's `attach`. A locked library serves no one BY DESIGN (A-8): locking closes the encrypted store and
+   drops its key, so there is nothing a server could read.
+4. *The definite kill path that fits every fact in her report.* Under CASTLE (`effectiveGate.isDemanded`; Standard is
+   `.auto` and never re-locks), `ProtectionController.startRelockMonitors` locks the library on
+   `NSWorkspace.willSleepNotification`, on `com.apple.screenIsLocked`, and — checked every 30 s — once
+   `IdleLockClock.isDue(lastUsedAt, relockAfterIdleMinutes)` (default 10 minutes) holds, where `lastUsedAt` is stamped
+   ONLY by her own use of Variorum (`noteActivity`: the local event monitor's key/mouse events, ready, became-active) —
+   never by an MCP client's calls. So: an AI session working on its own, ten minutes after her last keystroke or click in
+   Variorum (or the screen locking at 3–4 AM), locks the library → the door detaches → the server stops and hangs up
+   every connection → the shim reads EOF and exits → "MCP server disconnected". At her next unlock the door re-attaches
+   and starts the server again → the pane says "running · socket in the app container". Her `/mcp` reconnect then
+   works, "always" grants survive, and "until it disconnects" grants are gone (the start sweep) — exactly her report.
+   (Her real library is in Castle per her VX-266 rehearsal plan, "her real Castle account"; the dev store is too — for
+   her to confirm.)
+
+**Ruled out, each with its reason:**
+- *App Nap / idle throttling* — App Nap throttles timers and lowers priority; it closes no socket. The accept loop blocks
+  in `poll`, each reader in `read`, and both wake on I/O whatever the nap; the shim is a command-line child of the client,
+  never napped. A napped app answers later — it never disconnects. So a `ProcessInfo.beginActivity` keep-alive would not
+  touch this drop: **NOT built** (the hallucination guard — no speculative keep-alive).
+- *Socket idle timeouts* — none exists: a unix stream socket has no idle timeout, and no receive timeout is set on a
+  served connection (only on the over-cap refusal's helper thread) or on the shim's pumped socket.
+- *The socket path across restarts or sleep* — fixed (`<container>/Data/mcp.sock`); an accepted connection never reads
+  the path again, and a restart rebinds the same one — it changes only NEW connections, which find it (her reconnect
+  worked).
+- *A message that kills the SDK's loop* — none can (point 2).
+- *Sleep without Castle* — processes freeze; a unix socket survives the wake.
+
+**Not established:** which of the Castle triggers ended HER session (the idle lock, the screen lock, sleep), or that her
+library was in Castle that night, or — had it been Standard — whether the client itself restarted. That is what the drop
+line now answers.
+
+**The fix that ships (observability — "ships regardless").** Each connection that named itself (admitted past the setup
+key, its `initialize` read — `clientName`'s rule) leaves ONE line in the activity log when it ends, its act one of
+`MCPConnectionEnd`'s four (`Domain/MCPConnectionEnd.swift`): `disconnect_client` (the client's side closed — the server
+still running), `disconnect_library_closed` (the library locked or closed), `disconnect_server_off` (her switch),
+`disconnect_over_limit` (a message past the cap).
+- *The host* (`MCPServerHost`): `stop(ending:)` marks every live session with its reason before the hang-up; a session's
+  end (`ended`) writes its line — the stop's reason, else the over-cap answer (the transport's flag), else the client's
+  close — once (`MCPSession.claimEndLine`); `recordConnectionEnds(_:)` writes every live connection's line in ONE write,
+  NOW, and the hang-up that follows never says them again.
+- *The lock road* (her report's case — the store is about to close, and a line written by a session's own end races the
+  pool's close): `macWillLock` gains an `endingConnections` step, run AFTER every note's leaving savepoint and BEFORE the
+  services stop (the ruled order otherwise untouched; a no-op by default, so the phone and every pin wire what they
+  wired); `VariorumApp` passes `MCPDoor.recordLibraryClosing()` — the host's record, off the main thread (P2), awaited.
+  Adoption and re-key ride the same road. The door's `detach` stops with `.libraryClosed`, its switch-off with
+  `.serverOff`.
+- *The face:* Settings ▸ MCP ▸ Activity speaks the four (`MCPPaneCopy.connectionEndPhrase`, PROVISIONAL words):
+  "‹client› disconnected" · "‹client› was disconnected when the library locked or closed" · "… when the MCP server was
+  turned off" · "… after a message over the size limit" — with "(N times)" when a run coalesces.
+- No sync, custody, Keychain or `Protection/` line: the relock monitors are read, never changed; `ProtectionController`
+  and `AppBootstrap` are untouched.
+
+**The author's call this leaves (NOT built — relaxing a lock is author-only, CLAUDE.md):** the drop is the design working
+(A-8). Her one lever: *should a connected AI's work count as using Variorum for Castle's "Lock after time away"?* Options
+for the QUESTIONS bundle: (a) as built — only her own use holds the library open; an AI session ends when the library
+locks, and Activity now says so; (b) a connected client's calls count as use (the idle lock never fires mid-session;
+sleep and the screen lock still lock — a weaker lock while an AI works); (c) a Castle dial, "Stay unlocked while an AI
+client is connected", default off. And a docs half for her copy pass: `MCPSession.instructions` could tell the model "if
+Variorum's tools vanish, the library may have locked — tell the author; reconnect once they unlock it" (the advice is at
+2,969 of 3,000 characters — it would need room made). **Ticket disposition (the orchestrator's):** the mechanism is a
+definite, by-design path and the drop line ships; I recommend VX-394 stays OPEN as "Needs Lillian" on the lock question
+(or closes with a ticket minted for it).
+
+**Pins.** Headless — `Tests/VariorumMCPTests/MCPConnectionEndServerTests.swift`:
+`aClientThatClosesItsConnectionLeavesOneLineSayingSo` · `theServerSwitchedOffEndsEveryConnectionAndSaysSo` (two
+clients) · `theLibraryClosingIsSaidBeforeTheStoreGoesAndNeverTwice` · `aMessageOverTheCapEndsTheConnectionAndSaysSo` —
+RED ON OLD by a behavioural revert of `MCPServerHost.swift` over `6306a21ff` (the end-line write and
+`recordConnectionEnds`'s body removed: 4 of 6 red, `vx394-red.log`), restored, 6 of 6 green; guards
+`aConnectionThatNeverNamedItselfLeavesNoEndLine` (a bare shim, a connection that never initializes) and
+`theEndActsAreNoClientsActs` (never a catalog tool, never in `list_my_activity`). Mac —
+`App/Variorum/VariorumTests/MCPConnectionEndDoorTests.swift`: `theDoorsTwoStopRoadsSayTheirReasonsOnce` (a real host
+behind the door: her switch OFF says "server off"; the lock road's record then its detach say "library closed" ONCE),
+`theLockRoadSaysTheConnectionsEndAfterTheSavepointsAndBeforeTheStop` (the ruled order with the new step),
+`aConnectionsEndReadsInWords` — written, compiled (`build-for-testing` green), their run PENDING the batch (red product
+below).
+
+**PROVISIONAL (for the merge's QUESTIONS bundle):**
+- **P-VX394-1** — the four lines' words (her copy pass, VX-234).
+- **P-VX394-2** — one line per CONNECTION (a client with two connections open logs two); alternative: one per client.
+- **P-VX394-3** — the client's own close is logged too (every end, not only Variorum's) — it is what tells "the client
+  ended it" from "Variorum did"; alternative: only Variorum-side ends (fewer lines).
+- **P-VX394-4** — `list_my_activity` never lists the end lines (`MCPOwnActivity`'s rule for every connection row);
+  alternative: list them, so a reconnecting client can learn why it was dropped.
+- **P-VX394-5** — a QUIT logs nothing (the process ends with the store; a client's next connect hears "Variorum must be
+  open" — VX-181); alternative: a line from `applicationShouldTerminate`'s road (its cancel arm makes that fiddly).
+- **P-VX394-6** — a pending connection request's end is logged too (it named itself); alternative: approved clients only.
 
