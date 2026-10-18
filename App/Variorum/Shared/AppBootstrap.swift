@@ -179,6 +179,9 @@ final class AppBootstrap {
     /// VX-306 U2 — rule 3's local schedule (this Mac's defaults; a test bootstrap writes its own suite, never the
     /// app's domain).
     @ObservationIgnored private let reminderLedger: PassphraseReminderLedger
+    /// VX-306 U3 — receipts the NEXT open on the new road owes the status seam (Make this my library's §7c (9)):
+    /// handed to the session the reopen makes, then spoken by the ready composition like every owed receipt.
+    @ObservationIgnored private var receiptsForNextRoadOpen: [String] = []
 
     init(
         variant: AppDatabase.StoreVariant = StoreLocation.resolve(),
@@ -608,6 +611,11 @@ final class AppBootstrap {
         case .ready(let database, let unlockedKey, let road):
             // VX-306 U1b: the library open on the new road (nil on today's road).
             roadSession = road
+            // VX-306 U3: a receipt an act owed this reopen (Make this my library) joins the open's own.
+            if let road {
+                for receipt in receiptsForNextRoadOpen { road.addReceipt(receipt) }
+                receiptsForNextRoadOpen = []
+            }
             // VX-306 U2: its protection faces (rule 27's banner, the split pair, rule 3's reminder, the receipts).
             roadStanding = road.map { RoadStandingModel.make($0, ledger: reminderLedger) }
             let view: AppDatabase
@@ -1065,6 +1073,88 @@ final class AppBootstrap {
         if case .waitingForICloudKeychain(let lobby) = state { lobby.stopWaiting() }
         if case .locked(let lobby) = state { lobby.stopWaiting() }
         beginOpening(unlockedKey: key)
+    }
+
+    // MARK: - VX-306 U3: THE TWO DOORS (the new road only — rule 17)
+
+    /// The two doors' roads on the new road (nil on today's road, before a library opens, and on a hosted test run's
+    /// read-only road). Each road reads the CURRENT session at its call (a reopen replaces it).
+    func copyDoorsRoads() -> CopyDoorsRoads? {
+        guard newRoad, let session = roadSession, session.writes else { return nil }
+        return CopyDoorsRoads(
+            listing: { [weak self] in
+                guard let session = self?.roadSession else { return .empty }
+                return await Task.detached(priority: .userInitiated) { ProtectionCopyDoors.listing(session) }.value
+            },
+            opensQuietly: { [weak self] copy in
+                guard let session = self?.roadSession else { return false }
+                return await Task.detached(priority: .userInitiated) {
+                    ProtectionCopyDoors.opensQuietly(session, copy)
+                }.value
+            },
+            passphraseSet: { [weak self] in self?.roadSession?.library.keyFile?.passphrase != nil },
+            makeMine: { [weak self] row, copySecrets, currentPair in
+                guard let self else { return .refused(.failed) }
+                return await self.makeThisMyLibrary(row, copySecrets: copySecrets, currentPair: currentPair)
+            },
+            pick: { [weak self] url in
+                guard let session = self?.roadSession else {
+                    return .refused(ProtectionWords.makeMineFailed, detail: nil)
+                }
+                return await Task.detached(priority: .userInitiated) {
+                    ProtectionCopyDoors.pick(url, session: session)
+                }.value
+            })
+    }
+
+    /// **MAKE THIS MY LIBRARY** (rule 17; the plan's U3 addendum) — one confirmed door, on the new road at ready. Every
+    /// check first, all reads (`ProtectionCopyDoors.preflight` — a typo never tears the window down); then
+    /// `adoptLibrary`'s seam shape: the composition root's teardown (`onWillLock` — flush, savepoint, stop), the
+    /// `.ready` tree down, the app's pool CLOSED through the binding (a checkpoint-truncate, then the close — the
+    /// swap's precondition), and the act off the main actor (`ProtectionCopyDoors.makeMine`: the restore hold by the
+    /// core writer, the executor's plan, today's store id minted fresh); then the reopen THROUGH THE NEW ROAD with the
+    /// key that opens the slot now in hand (the new library's; the old one's when nothing swapped). The receipt
+    /// (§7c (9)) is owed to the reopened session. One act at a time on the session.
+    func makeThisMyLibrary(
+        _ row: CopyDoorRow, copySecrets: TypedSecrets, currentPair: TypedSecrets
+    ) async -> CopyDoorOutcome {
+        guard newRoad, case .ready = state, let binding, let session = roadSession, session.writes else {
+            return .refused(.failed)
+        }
+        guard session.beginAct() else { return .refused(.busy) }
+        let preflight = await Task.detached(priority: .userInitiated) {
+            ProtectionCopyDoors.preflight(session, row: row, copySecrets: copySecrets, currentPair: currentPair)
+        }.value
+        let copy: CatalogCopy
+        let catalog: Catalog
+        switch preflight {
+        case .refused(let why):
+            session.endAct()
+            return .refused(why)
+        case .ready(let ready, let listed):
+            copy = ready
+            catalog = listed
+        }
+        await onWillLock?()
+        state = .opening
+        protection.dropResident()
+        protection.resetPerOpenDeferrals()
+        protection.syncCustodySession.drop()
+        let gate = gate
+        let scope = storeVariant.rawValue
+        let result = await Task.detached(priority: .userInitiated) {
+            binding.lock()
+            return await ProtectionCopyDoors.makeMine(
+                session, copy: copy, catalog: catalog, row: row, copySecrets: copySecrets, currentPair: currentPair,
+                mintStoreIdentity: { key in
+                    Self.ensureStoreIdentity(slot: session.system.places.slot, key: key, fresh: true, gate: gate, scope: scope)
+                })
+        }.value
+        session.endAct()
+        if result.outcome == .made { receiptsForNextRoadOpen.append(ProtectionWords.makeMineReceipt) }
+        beginOpening(unlockedKey: result.reopenKey)
+        await awaitOpen()
+        return result.outcome
     }
 
     // MARK: - pre-13x 2b: THE RE-KEY ROAD (§4 step 4 — "the pool closed

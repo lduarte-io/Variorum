@@ -114,13 +114,27 @@ struct SettingsSceneContent: View {
                     handOff.openPanel(session: session, bootstrap: bootstrap)
                 },
                 // VX-306 U2: the new road's *Set a passphrase…* row (nil on today's road).
-                roadStanding: bootstrap.roadStanding)
+                roadStanding: bootstrap.roadStanding,
+                // VX-306 U3: the new road's Restore list — Make this my library on a catalogued copy, through
+                // Settings' OWN presenter (nil on today's road).
+                roadDoors: bootstrap.copyDoorsRoads().map { roads in
+                    RoadDoorsHost(roads: roads, makeMine: { row in libraryOpen.beginMakeMine(roads: roads, row: row) })
+                })
                 .sheet(isPresented: Binding(
                     get: { libraryOpen.model != nil },
                     set: { if !$0 { libraryOpen.dismiss() } })
                 ) {
                     if let model = libraryOpen.model {
                         LibraryOpenSheet(model: model) { libraryOpen.dismiss() }
+                    }
+                }
+                // VX-306 U3: the two doors' sheet (the new road only).
+                .sheet(isPresented: Binding(
+                    get: { libraryOpen.roadDoors != nil },
+                    set: { if !$0 { libraryOpen.dismissRoad() } })
+                ) {
+                    if let doors = libraryOpen.roadDoors {
+                        CopyDoorsSheet(model: doors) { libraryOpen.dismissRoad() }
                     }
                 }
                 .sheet(isPresented: Binding(

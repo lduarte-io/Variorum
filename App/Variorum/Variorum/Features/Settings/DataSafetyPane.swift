@@ -54,16 +54,22 @@ struct DataSafetyPane: View {
     /// 13x F1 (R1-MAJOR): the hand-off act's Data Safety twin — Settings'
     /// own presenter acts; nil hosts render no door (P-2).
     let handOffDoor: (() -> Void)?
+    /// VX-306 U3 — the new road's Restore list (nil on today's road): the catalogue's copies with *Make this my
+    /// library…* in place of today's rows (13x's adoption step retired behind the door there).
+    let roadDoors: RoadDoorsHost?
+    @State private var roadList: CopyDoorsListModel?
 
     init(
         services: AppServices?, protection: ProtectionController? = nil,
         restoreDoor: ((URL) -> Void)? = nil,
-        handOffDoor: (() -> Void)? = nil
+        handOffDoor: (() -> Void)? = nil,
+        roadDoors: RoadDoorsHost? = nil
     ) {
         self.services = services
         self.protection = protection
         self.restoreDoor = restoreDoor
         self.handOffDoor = handOffDoor
+        self.roadDoors = roadDoors
         _model = State(initialValue: DataSafetyModel(
             backup: services?.backup,
             sync: services?.sync,
@@ -77,7 +83,13 @@ struct DataSafetyPane: View {
         Form {
             if model.isWired {
                 copiesSection
-                restoreFromBackupSection
+                if let roadDoors {
+                    if let roadList {
+                        RoadRestoreRows(list: roadList, makeMine: roadDoors.makeMine)
+                    }
+                } else {
+                    restoreFromBackupSection
+                }
                 handOffSection
                 folderSection
                 exportsSection
@@ -94,7 +106,15 @@ struct DataSafetyPane: View {
             }
         }
         .formStyle(.grouped)
-        .task { await model.refresh() }
+        .task {
+            await model.refresh()
+            // VX-306 U3: the new road's list, re-read at each appearance (a reopen rebuilds the pane).
+            if let roadDoors {
+                let list = roadList ?? CopyDoorsListModel(roads: roadDoors.roads)
+                roadList = list
+                await list.refresh()
+            }
+        }
     }
 
     // MARK: - The evidence

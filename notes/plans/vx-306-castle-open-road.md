@@ -1704,7 +1704,42 @@ B's five files under `~/vx306-walk/B` (for U3's Look inside); instances 0; stage
 - Piece 2 — MAKE THIS MY LIBRARY on a catalogued copy (Settings ▸ Data Safety's Restore list under the new road — the
   catalogue's copies, newest first; the confirm §7c (8); the secrets the executor requires; the act with the pool CLOSED
   through `AppBootstrap`'s adoption seam; the restore HOLD by the core writer; the reopen through the new road with the new
-  key in hand; the receipt §7c (9)) + pins: NOT-STARTED.
+  key in hand; the receipt §7c (9)) + pins: DONE (this commit). **The road** (`Shared/Protection/ProtectionCopyDoors.swift`,
+  off the main actor): `listing` (a READ), `opensQuietly` (`lookInside` with nothing typed, on its own read executor),
+  `preflight` — ALL READS before anything closes: the copy still catalogued, it opens with what she typed (`lookInside`),
+  its schema one this build opens (`LibraryClassifier.schemaVerdict` on a private copy — a newer Variorum's copy is never
+  landed), her current pair against the open library's key file (the words always; the passphrase when its lock exists) —
+  so a typo never tears the window down; `makeMine` — THE RESTORE HOLD FIRST by the core writer (`LibraryRestoreHold.set`,
+  13x F1 R1-M2's order: before anything moves, so nothing lands un-held), then `ProtectionExecutor.makeThisMyLibrary` on
+  its plan, then today's store id minted FRESH for the new library (the creation's own mint, `ensureStoreIdentity(fresh:
+  true)`, injected); a refusal before the swap puts the hold back exactly as it stood (none, or its own bytes); past the
+  swap (the commit point) the copy IS the library and an act that threw there finishes at the next open's settle (rule 20)
+  — said as made. **The bootstrap** (`AppBootstrap.makeThisMyLibrary` + `copyDoorsRoads()`, new road only): one act at a
+  time on the session; the preflight; then `adoptLibrary`'s seam shape — `onWillLock` (flush, savepoint, stop), `.opening`,
+  the resident key and per-open deferrals dropped, the pool CLOSED through the binding (`StoreBinding.lock` checkpoints
+  TRUNCATE before the close — the swap's precondition, so `swapStaged` never meets `walNotDrained`), the act detached; then
+  the reopen THROUGH THE NEW ROAD with the key that opens the slot now in hand (`beginOpening(unlockedKey:)` →
+  `ProtectionOpenRoad.route(keyInHand:)`); §7c (9)'s receipt owed to the REOPENED session (`receiptsForNextRoadOpen`,
+  handed over in `finish(.ready)`) and spoken once by the ready composition's status seam. Every road reads the CURRENT
+  session at its call. **The faces** (`Features/Protection/CopyDoorsSheet.swift`): `CopyDoorsSheet` + `MakeMineConfirm`
+  (§7c (8): title, lead, the copy's field only when its quiet road fails with its quiet note, *Your twelve words*, *Your
+  passphrase* when set, *Cancel* · *Make this my library*; the working line) and `RoadRestoreRows` — Settings ▸ Data
+  Safety's Restore section under the new road (`DataSafetyPane(roadDoors:)` — today's rows on today's road unchanged):
+  this library's copies, then *Other libraries on this Mac*, each row its day and kind and *Make this my library…*
+  (through Settings' own presenter — `LibraryOpenPresenter.roadDoors` / `beginMakeMine`, its sheet in
+  `SettingsSceneContent`). The pick road's classifier and filer (`PickedCopy.swift`, `ProtectionCopyDoors.pick`) land here
+  so the file compiles; piece 3 wires File ▸ Open Library… to them. **Pins:** `MakeMineRoadTests` (3, planted — no
+  keychain: a backup becomes a NEW library — fresh ID and key, Standard, no account, no past keys, under her words — with
+  the outgoing library opening under the old key and ITS key file byte-equal in `Previous Libraries/<stamp>/`, the hold
+  marker's day the backup's, ONE memory item, the store id minted for the new key, the outgoing library listed as another
+  library's previous copy; the preflight refuses wrong words and writes NOTHING (the container's every byte, no hold); a
+  refusal INSIDE the act puts the hold back — none, or the standing marker's exact bytes — MUTATION: `restoreHold` a no-op
+  → `✘ Test run with 6 tests in 1 suite failed … with 2 issues`, restored and `cmp`-checked); `MakeMineRouteTests` (2,
+  through `AppBootstrap`, throwaway scope + temp slot, Mac only: the pair by the backup hook's road → the doors' roads →
+  `.made` → `.ready` on a FRESH session with a new library ID and key, the hold standing, the old library aside opening
+  under the old key, a store id under the new key, the receipt said exactly once; a wrong word → refused, still `.ready`
+  on the SAME session, no hold, nothing aside). HEADLESS (`MakeMineRoadTests` in the harness): green; the Mac runs PENDING
+  under the stage.
 - Piece 3 — A PICKED FOLDER under the new road (File ▸ Open Library…): filed first into `Backups/safety-copies/
   variorum-adopt-safety-<stamp>/` (P-VX306-U3-0 (a)), then the doors on the catalogued copy; the plaintext export and the
   empty slot: NOT-STARTED.

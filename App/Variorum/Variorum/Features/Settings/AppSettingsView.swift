@@ -87,6 +87,8 @@ struct AppSettingsView: View {
     /// VX-306 U2: the new road's open library faces (nil on today's road) —
     /// the Protection pane's one *Set a passphrase…* row reads it.
     let roadStanding: RoadStandingModel?
+    /// VX-306 U3: the new road's Restore list (nil on today's road) — Data Safety's rows read it.
+    let roadDoors: RoadDoorsHost?
 
     init(
         session: AppSession, services: AppServices? = nil,
@@ -97,7 +99,8 @@ struct AppSettingsView: View {
         mcp: MCPDoor? = nil,
         restoreDoor: ((URL) -> Void)? = nil,
         handOffDoor: (() -> Void)? = nil,
-        roadStanding: RoadStandingModel? = nil
+        roadStanding: RoadStandingModel? = nil,
+        roadDoors: RoadDoorsHost? = nil
     ) {
         self.session = session
         self.services = services
@@ -109,6 +112,7 @@ struct AppSettingsView: View {
         self.restoreDoor = restoreDoor
         self.handOffDoor = handOffDoor
         self.roadStanding = roadStanding
+        self.roadDoors = roadDoors
         _theme = State(initialValue: ThemeStore(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
     }
@@ -402,7 +406,7 @@ struct AppSettingsView: View {
             // 13x U2: + the Restore from Backup rows (QB's second door).
             DataSafetyPane(
                 services: services, protection: protection, restoreDoor: restoreDoor,
-                handOffDoor: handOffDoor)
+                handOffDoor: handOffDoor, roadDoors: roadDoors)
         case .diagnostics:
             // 13r U3-B (R-13r-5; the architect's Option A): the crash-report
             // opt-in at the head, the received reports verbatim under it.
