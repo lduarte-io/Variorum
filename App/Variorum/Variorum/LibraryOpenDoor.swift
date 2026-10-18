@@ -39,6 +39,14 @@ final class LibraryOpenPresenter {
         // classifies honestly rather than being unpickable.
         panel.allowedContentTypes = [.folder, .data]
         guard panel.runModal() == .OK, let picked = panel.url else { return }
+        // VX-306 U3: on the new road a picked copy is filed first and the two doors act on it (P-VX306-U3-0 (a)).
+        if bootstrap.newRoad {
+            guard let roads = bootstrap.copyDoorsRoads() else { return }
+            let fresh = CopyDoorsModel(roads: roads)
+            roadDoors = fresh
+            Task { await fresh.begin(picked: picked) }
+            return
+        }
         begin(bootstrap: bootstrap, picked: picked)
     }
 

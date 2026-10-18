@@ -1742,7 +1742,39 @@ B's five files under `~/vx306-walk/B` (for U3's Look inside); instances 0; stage
   under the stage.
 - Piece 3 — A PICKED FOLDER under the new road (File ▸ Open Library…): filed first into `Backups/safety-copies/
   variorum-adopt-safety-<stamp>/` (P-VX306-U3-0 (a)), then the doors on the catalogued copy; the plaintext export and the
-  empty slot: NOT-STARTED.
+  empty slot: DONE (this commit). **The road** (`PickedCopy.swift` + `ProtectionCopyDoors.pick`, from piece 2's commit):
+  this design's PAIR is a store (`variorum.sqlite`, or a backup snapshot) with a FORMAT-3 key file beside it — the backup's
+  own `<stem>.keys.json`, else the folder's `variorum-library-keys.json` (Send Library's pair writes exactly that); a picked
+  folder holding one is that pair, several are OFFERED (the chooser), never guessed; a pair is FILED — the store, its
+  non-empty `-wal` (never its `-shm`) and the key file's bytes COPIED into a hidden staging folder (the catalogue lists no
+  hidden name), sizes and the key file re-checked, then renamed whole into `variorum-adopt-safety-<stamp>/` under the
+  catalogue's names — so the picked thing is ONLY READ and a crash never leaves a half-filed copy listed; the filed copy is
+  then the catalogue's `adoptionSafetyCopy` and the doors act on it (its day is the picked file's own — the filed store
+  keeps its modification date); a copy ALREADY in this Mac's catalogue, picked by hand, is used where it is (never filed
+  twice); the open library itself (or its folder) is refused. **TODAY'S CLASSIFIER CANNOT SEE THIS DESIGN'S PAIRS** (it
+  reads today's `StoreKeyEnvelope`, which a format-3 file does not decode as — a new-road pair classifies there as a bare
+  store), so the new road classifies first and keeps today's classifier only for the honest words of everything else:
+  a plain-text export or library → *Opening a plain-text copy isn't ready in this build yet.* (P-VX306-U3-5 — TRACED: today's
+  adoption road on the new road would set the library aside WITHOUT its format-3 key file (`LibraryAdoption`'s departing set
+  is today's key-file names only — `StoreKeyEnvelope.keyFileURLs`), land a store the new road cannot open (no protection
+  record → `recordMissing` → the missing face, K5) and mint TODAY's silent custody; T-8 is VX-309's); an encrypted copy
+  under TODAY's key-file format → today's *This file couldn't be read as a library.* (rule 26 — not handled, no sentence
+  names it; P-VX306-U3-6); a bare store, a newer schema, not a library, unreadable → today's sentences. **The door**:
+  `LibraryOpenPresenter.openPanel` on the new road builds a `CopyDoorsModel` and begins the pick (today's road byte-for-
+  byte otherwise); the MAIN window's sheet renders `CopyDoorsSheet` (the picked copy's line, *Make this my library…*,
+  *Cancel*); Settings' sheet (piece 2) serves its rows. **The empty slot / the lobby faces** (P-VX306-U3-7): the missing
+  face's *Open Library…* and rule 27's lobby *Open Library…* RETIRE on the new road (no library is open whose current pair
+  could make a copy its own — T-5's empty-slot landing is VX-309's — and Look inside is propose-then-rule; P-2: a door that
+  cannot act is not rendered); today at an empty slot the new road shows the creation card (`.startFresh`), and at a
+  missing library the missing face with *Start a New Library* and *Restore from Backup…* (the Finder reveal — rule 21's
+  hand-restore opens with the notice). **The Bookcase drop is not an Open Library road** — it is 13n-a's document import
+  (`BookcaseImportDrop` → `DocumentImporter`), untouched. **Pins:** `PickedCopyRoadTests` (3, planted — no keychain: an
+  "AirDropped" library folder under a `Downloads/vx306-airdrop/` folder → filed, the picked folder byte-identical before and
+  after, catalogued as an opened copy of THEIR library; her pair refused on it (`copyDoesNotOpen`), their words + her pair
+  → made: a new library ID that is neither, locked under HER words only; a catalogued backup picked by hand → that row, no
+  safety-copies folder made; the open library, a plain-text export, a bare store refused in their words; two pairs in one
+  folder offered). HEADLESS: the U3 and neighbouring planted suites `✔ Test run with 57 tests in 8 suites passed`; the Mac
+  runs PENDING under the stage.
 - Piece 4 — LOOK INSIDE: the PROPOSAL (propose-then-rule; the build waits on the orchestrator's ruling): NOT-STARTED.
 - Piece 5 — THE PHONE: the switch on in the phone's Debug build (P-VX306-U1b-1 superseded); `MobileStoreLockView` renders
   the lobby model, the creation card, the interlude and rule 27's face; the phone's pins; `build-for-testing`:
