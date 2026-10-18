@@ -3418,3 +3418,45 @@ her word; its wording hers to adjust).**
 - **VX-77, closed as hollow** — the OutlineRoom "clipped at the floor" red was the TEST HOST rendering dark (a walker left the dev domain's appearance on dark, 2026-10-08); proven both ways in one window; the three luminance scans now pin `.aqua` (test-only). No product change. The ticket comment carries the story.
 - **Record-only nits** (R1-4/R1-5, in VX-300's body): `onOpenSearchHit` now misnames the book's one landing road; `TOCRow`'s init can hold a contradictory fan/count.
 Cross-refs: born VX-402 (the flushNow in-flight window — Medium, the one Suspected bug with real reach) · VX-403 (WriteTakesPanel's home, Parked) · VX-404 (the Book Panel Close dead-clicks, once, Terminal) · VX-405 (the CommitBar cell's dead zone); VX-353 and VX-300 annotated. Status: PROVISIONAL — awaiting her ratification.
+
+## VX-348 — Run: Pre-launch bug sweep (2026-10-18) — the ratify bundle
+
+#### #233 — the run's PROVISIONALs, bundled (the texts live in `notes/plans/fixes/vx-348-prelaunch-sweep.md`; every build-time call was made to your recorded rulings R-VX348-1…6)
+
+- **Needs you first — VX-394's product call (the ticket sits "Needs Lillian"):** should a connected AI's work count
+  as "use" for Castle's idle lock? (a) as built — only your use holds the library open (this is the traced cause of
+  the 3–4 AM disconnect you reported); (b) a client's calls count; (c) a Castle setting, off by default.
+- **P-VX347-1 (your eye):** "typing on" = the field keeps the keyboard, so typing means clicking back into the take,
+  which FILES. The no-keyboard alternative needs a TK2-seam key intercept (its own Fable-reviewed ticket if wanted).
+  P-VX347-2 ⌘S-again files the open field (a bar-button press then opens a fresh one — a recorded consequence);
+  P-VX347-3 the rename door stays ⏎-only; P-VX347-4 the new "commit" copy on the field hint/tooltips/helper;
+  P-VX347-5 ⌘Q with the field up files nothing (the quiet leaving savepoint still insures dirty text).
+- **P-VX393-1 (flagged):** a new grant on the same client × place REPLACES IN FULL — answering an ask "until it
+  disconnects" where "always" stood leaves nothing after the disconnect (the literal reading of your upgrade-in-place;
+  say if replacement should never downgrade). P-VX393-2 the migration keeps an always row over a while-connected one;
+  P-VX393-3 once grants sit outside the one-row rule.
+- **P-VX392-1…5:** the `list_wings` answer shape; ANY standing wing grant lists (once included); the open book alone
+  lists no wings; the duration words (`once · until_disconnect · always`); the instructions pointer "(list_wings
+  lists yours)" APPLIED at adjudication per your R-VX348-5's letter (2,994 of 3,000).
+- **P-VX394-1…6 + the ladder's clarification:** the four end-line wordings; one line per connection; the client's own
+  close logs too; `list_my_activity` never lists drop lines; quitting Variorum logs nothing; a pending request's drop
+  logs — and a connection that never presented its setup key says nothing at all (the `claimEndLine` guard's meaning,
+  said here at the reviewer's NIT).
+- **P-VX357-1…5:** `null_characters_removed` as the key, present only when > 0, the sentence on the six
+  digest-of-sent-text tools only; preconditions/locators deliberately NOT stripped; an edit differing only by nulls
+  answers `changed: false`.
+- **P-VX338-1…2:** the per-Mac OWN-COPIES LIST form (chosen over the brief's tag/subfolder — both break other
+  readers; the ladder re-derived the deletion-safety argument independently); this Mac's pre-fix far copies (≤18)
+  are never pruned — a one-time leftover, cleaning it would mean deleting files. P-VX339-1 the banner's failure
+  line's words (walked live, verbatim in the record).
+- **P-VX350-1…7:** the collapse order and greedy wrap; the 🔍 press/focus opens; hidden controls off-row (Tab can
+  reach them under Full Keyboard Access); the panel floor 200; **NO WINDOW FLOOR — your call** (below the narrowest
+  width the list clips under the panel; options: an app-wide floor, or the panel overlaying the list); the 🔍's
+  words; the masthead line truncates.
+- **P-VX351-1…7** (the hover scope rule, the panel's fact now the LAST TOUCH, the box's glance rule, found speakers
+  keeping their words → VX-407, the hover verbs, two-fact lines, the MCP ages keeping their words → VX-401);
+  **P-VX384-1** (the follow's window/double-read shape); **P-VX385-1** (the Pool's foot shape — answers VX-355's
+  open question: a line home, not a toast).
+- **P-VX349-1** the first header's plain look at rest; **P-VX176-1** the tint at the catalog root.
+- **Also recorded:** QUESTIONS #121(b) is SUPERSEDED by your VX-347 ruling; the sherlock "edited Oct 13, 1892"
+  stamps are the seeder's own deliberate clock (honest; say if the sample library should carry 2026 stamps instead).
