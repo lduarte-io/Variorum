@@ -1627,6 +1627,61 @@ the sheet); the walk's Diagnostics lines (the reminder's showing, a dismissal's 
 
 **Notes:** no machinery deaths; no Sonnet lookup; one scratch worktree (W-2's red-on-old at `e305daefd`), removed.
 
+**U2 WALK RECORD (the orchestrator, 2026-10-18 10:11–10:24 MDT, claim `vx-306-u2-walk`; the dev store; the Debug product
+from `DerivedData/vx306` at 87478297e; the dev domain's appearance read `dark` at the start and was left so — the bars and
+sheets captured dark, the lobby's room and its cards captured light by switching `appearanceChoice` for rows 5–8):**
+- **Row 1 / W-2:** folded into the existing pair check — the U1b pair (written before the fix) keeps its two sidecars; the
+  fix's proof is `ProtectionLibraryFilesTests`/`ProtectionFileLeavesTests`' red-on-old pins (the batch).
+- **Stage 2:** `VARIORUM_WALK_FORGET=silent` → `road: opened … repairs [remakeOnDeviceItem]; acts 1` and `road: rule 3's
+  reminder shows — scheduled false, moment quietRoadFailed, don't-show-again false`; the bottom stack's bar reads her rule-3
+  sentence with *Set a passphrase…* · *Not now*. The sheet (§7c (7)): *Passphrase* / *Again*, *Cancel* · *Set passphrase*
+  (off until both typed); two different values → *The two passphrases don't match.*; the dev passphrase twice →
+  `reset_passphrase: done #1 under 88173013`, `road: a passphrase was set — the key file carries the passphrase lock (true)`,
+  the sheet closed, the bar gone, the quiet receipt *Passphrase set. Your twelve words still open the library too.* on the
+  bottom bar; `grep -c '"passphrase"'` on the live key file → 1. Settings ▸ Protection's top row *Set a passphrase…* → the
+  sheet refuses at once *This library already has a passphrase.* (Cancel). `silent,apple` → THE LOBBY: *Enter your passphrase
+  or your twelve words to open your library.*, the *Passphrase* field, *Open*, *Use your twelve words instead*, the quiet
+  Touch ID line; the passphrase typed → `road: opened … live key file roads [apple,passphrase,words]; repairs
+  [remakeAppleRoad,remakeOnDeviceItem]; acts 0` — no reminder.
+- **Rule 1's restore:** the live key file moved away; launch → `repair restoreKeyFileFromMirror: done`, `road: opened …
+  repairs [restoreKeyFileFromMirror,landAppleWrap(…)]`, the file back with A's `libraryID` and all three locks; the quiet
+  receipt *The key file beside your library was missing. This Mac's sealed copy was put back.* caught mid-fade.
+- **Stage 13:** not walkable (the core's crash harness).
+- **Stage 14 (a), the different-library notice:** A set aside (its `-wal`/`-shm` moved WITH it — see the walker fact below),
+  the missing face → *Start a New Library* → B's words card (light; B's words never recorded) → B opened (`road: created —
+  library dfa07962 …; custody silent 2`; A's memory item forgotten — one library per Mac). B aside, A back → `road: opened —
+  library 818912e0 … device 4e648d28; notice true; repairs [refreshMemory]` and the card *This is a different library than
+  the one this Mac last had open* with *OK* (her string exactly); relaunch → `notice false` (said once). A FRESH device ID at
+  that open — P-VX378-U1-1 (a)'s road, as recorded.
+- **Stage 14 (b), the offer:** B's key file beside A → `road: opened … faults 1; acts 1` and the card *The key file beside
+  your library doesn't open it. This Mac's keychain holds a copy that does. Use it?* · *Not now* · *Use it* (her sentence).
+  *Not now* → `offer put off (Not now) — nothing written`, A opened; the stray `cmp`-identical to B's file. Relaunch → the
+  card → *Use it* → `use_key_file: the offered key file written beside the library (88173013)`, the receipt *Key file
+  restored from this Mac's keychain.*, the live file's `libraryID` A's with all three locks.
+- **Stage 14 (c), rule 27 before unlock:** all 18 format-3 key files tarred out (the live one, the new pair's, today's flat
+  `….keys.json` copies), `VARIORUM_WALK_FORGET=silent,memory` → the rule-27 lobby: *Open your library*, §7c (3)'s sentence,
+  THE ACCOUNT SENTENCE (the dev scope holds a signed-in session before unlock), *Restore from Backup…* · *Open Library…* ·
+  *Start a New Library* with its sub-line. Pressed nothing.
+- **Rule 27 after a quiet open (the banner):** keys back → a quiet open (`repairs [refreshMemory,remakeOnDeviceItem]`);
+  keys out again, `memory` forgotten → the silent item opened it, `faults 1`, the STANDING banner at the window's foot in
+  §7c (3)'s sentence (no account sentence — the record names none), no doors; keys back → a clean open (`faults 0`); all 18
+  files verified present; the live key file A's with `apple, passphrase, words`.
+
+**Posture after the window:** library A (818912e0) in Standard with the dev passphrase SET (noted in `~/.variorum/dev-
+castle.env`; the Castle values unchanged), quiet roads re-made, unlocked, silently openable by this branch's Debug build;
+B's five files under `~/vx306-walk/B` (for U3's Look inside); instances 0; stage released 10:24.
+
+**Walk findings (routed):**
+- **W-7 (MINOR, cosmetic — U3 or the closeout polish):** a long quiet receipt on the bottom bar runs INTO the trailing
+  `⌘J today · ⌘N new note` hint (rule 1's receipt overlapped it mid-fade; the shorter ones fit). The receipt slot needs a
+  line limit / truncation or the hint yields while a receipt shows.
+- **W-8 (note, her eye — P-VX306-U2-7 stands):** the banner's last sentence (*Without one, there is nothing left to open.*)
+  reads oddly over an OPEN library; the offer's first sentence assumes a key file is beside the library.
+- **W-9 (walker fact — WalkKit README at closeout):** moving the slot's `variorum.sqlite` aside after a quit can leave its
+  `-wal`/`-shm` behind (the app's quit does not always checkpoint): move the three files together, always.
+- **W-10 (note):** every memory-forget mints a fresh device ID for A (`4e648d28` → `fb3534f5` → `06853752`) — P-VX378-U1-1
+  (a) as built; harmless on the dev store, worth her eye at the bundle (the record's sections accumulate one per forget).
+
 ### U3 RECORD — THE TWO DOORS: Look inside / Make this my library (+ the phone opens) (Opus implementer, 2026-10-18; IN PROGRESS)
 
 **Not done in U3, first:** PENDING (written at the record's close).
