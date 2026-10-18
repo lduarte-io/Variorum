@@ -1334,8 +1334,10 @@ Both legs build from DURABLE detached checkouts of the post-fold tip `fba169abb`
 `-u5fix` precedent) — this worktree is never reverted, so it is never mid-revert:
 - **FIXED:** `<home>/dev/variorum-vx-348/DerivedData/u2-fixed`
   (`Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`) — built from
-  `<home>/dev/variorum-vx-348-u2fixed` at `fba169abb`, unmodified (log `DerivedData/u2-fixed-build.log`,
-  TEST BUILD SUCCEEDED).
+  `<home>/dev/variorum-vx-348-u2fixed` at `1c3ae3c5a` (the fold `fba169abb` + one box pin's three
+  lines), unmodified (log `DerivedData/u2-fixed-build.log`, TEST BUILD SUCCEEDED). The red checkout stays at
+  `fba169abb`: the only file that moved after it is the rule-tests file the red build excludes, so every file in the
+  red build is the same.
 - **RED:** `<home>/dev/variorum-vx-348/DerivedData/u2-red` — built from
   `<home>/dev/variorum-vx-348-u2red` at `fba169abb` with EXACTLY U2's hunks reverse-applied to its eleven
   app files (`git diff acbe5e5cb^ 36c715ac2 -- <the eleven> | git apply -R`; the patch kept at
