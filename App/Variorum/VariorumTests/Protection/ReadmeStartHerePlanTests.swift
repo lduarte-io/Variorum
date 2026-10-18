@@ -26,7 +26,11 @@ struct ReadmeStartHerePlanTests {
               let end = text.range(of: "## 8. ENVIRONMENT TRAPS", range: start.upperBound..<text.endIndex)
         else { return [] }
         let section = text[start.upperBound..<end.lowerBound]
-        return section.components(separatedBy: "\n>\n")
+        // Only the blockquote lines are the passages (the header's tail and the later (6)/(7) blocks are not);
+        // a bare ">" line separates two passages.
+        let quoted = section.split(separator: "\n", omittingEmptySubsequences: false)
+            .map(String.init).filter { $0.hasPrefix(">") }
+        return quoted.joined(separator: "\n").components(separatedBy: "\n>\n")
             .map { chunk in
                 chunk.split(separator: "\n").map { line -> String in
                     var l = String(line)

@@ -326,7 +326,7 @@ struct LaunchFurnitureTests {
                 }
                 return fans
             }
-            #expect(fans.count == 5, "five blocks — the reference's paragraphs")
+            #expect(fans.count == ReadmeSeeder.paragraphs.count, "her five blocks + the four Start Here passages (VX-306, P-VX306-W-1)")
             for (index, texts) in fans {
                 let expected = [ReadmeSeeder.paragraphs[index]] + (ReadmeSeeder.takes[index] ?? [])
                 #expect(texts == expected, "block \(index)'s fan, chosen first, byte-exact")

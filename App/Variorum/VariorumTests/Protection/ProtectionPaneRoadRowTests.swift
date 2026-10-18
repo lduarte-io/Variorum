@@ -43,13 +43,21 @@ struct ProtectionPaneRoadRowTests {
     @Test func theRowRendersOnlyWhileTheLibraryHasNoPassphrase() async {
         let suite = PassphraseReminderTests.Suite()
         defer { withExtendedLifetime(suite) {} }
-        let without = SurfaceComposition.text(of: ProtectionPane(
-            controller: controller(), services: nil, roadStanding: standing(passphraseExists: false, defaults: suite.defaults)))
-        #expect(SurfaceComposition.carries(ProtectionWords.reminderSetDoor, in: without), "no passphrase yet — the row")
+        // The orchestrator's adjudication at the ladder's round-1 batch (2026-10-18): `SurfaceComposition.text(of:)`
+        // does not reach a Form's conditional section before hosting, so the pin reads the MODEL's answer (the one
+        // the pane renders by) and SOURCE-PINS the pane's gate on it; the hosted smoke keeps the pane building.
+        #expect(standing(passphraseExists: false, defaults: suite.defaults).offersSetPassphrase, "no passphrase yet — the row")
+        #expect(!standing(passphraseExists: true, defaults: suite.defaults).offersSetPassphrase,
+                "a passphrase exists — the row (a sheet that could only refuse) is not rendered")
+        let source = try! String(
+            contentsOf: URL(fileURLWithPath: #filePath)
+                .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+                .appendingPathComponent("Variorum/Features/Settings/ProtectionPane.swift"),
+            encoding: .utf8)
+        #expect(source.contains("if let roadStanding, roadStanding.offersSetPassphrase {"),
+                "the pane renders the row only through the model's gate")
         let with = ProtectionPane(
             controller: controller(), services: nil, roadStanding: standing(passphraseExists: true, defaults: suite.defaults))
-        #expect(!SurfaceComposition.carries(ProtectionWords.reminderSetDoor, in: SurfaceComposition.text(of: with)),
-                "a passphrase exists — the row (a sheet that could only refuse) is not rendered")
         await SurfaceComposition.host(with, size: NSSize(width: 640, height: 900))
     }
 }
