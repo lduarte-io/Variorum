@@ -1178,7 +1178,8 @@ struct BookView: View {
     /// block's start in the STORE, so the note's pending autosave is flushed
     /// before the road is taken (the doors' flush-first precedent —
     /// `divergePostForReading`'s doors, the MCP door's pre-act flush). Nothing
-    /// live ⇒ no place ⇒ the same road with no block: today's plain open.
+    /// live ⇒ no place ⇒ the same road with no block: the plain open's place,
+    /// in WRITE all the same (R-U1a-2 — every door names the mode).
     ///
     /// No road (a host without the shell — a pin over the book alone) does
     /// nothing, the search passage's own rule beside it; the old broadcast is
@@ -1186,15 +1187,19 @@ struct BookView: View {
     /// else's window.
     private func openInWrite(_ postID: String) {
         guard let road = onOpenSearchHit else { return }
+        // R-U1a-2 (the orchestrator's ruling on her words): EVERY door lands
+        // in Write — a door with no place included, whose note then arrives
+        // with the plain open's place (R-18l-1), shown in Write.
         guard let place = openPlace(of: postID) else {
-            road(BookOpenDoor.Landing(postID: postID))
+            road(BookOpenDoor.Landing(postID: postID, mode: .write))
             return
         }
         let session = session
         Task {
             await session.flushExistingAutosave(forPost: postID)
             road(BookOpenDoor.Landing(
-                postID: postID, blockID: place.blockID, offsetInBlock: place.offsetInBlock))
+                postID: postID, blockID: place.blockID, offsetInBlock: place.offsetInBlock,
+                mode: .write))
         }
     }
 

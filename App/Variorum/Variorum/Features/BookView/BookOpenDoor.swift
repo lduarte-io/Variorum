@@ -32,9 +32,12 @@
 //    reported from another block is not an offset in this one, so it falls
 //    to the block's start.
 //  - Read is not editable (her A43): no place.
-//  - Nothing live in this note ⇒ nil ⇒ today's plain open (the brief's
-//    letter). The collapsed card is always this case: focus implies
-//    expansion, so a card's note is never the live one.
+//  - Nothing live in this note ⇒ nil ⇒ the plain open's PLACE (R-18l-1: the
+//    session's first open at the start, a re-open's restored page). The
+//    collapsed card is always this case: focus implies expansion, so a
+//    card's note is never the live one. The MODE is Write all the same —
+//    the orchestrator's R-U1a-2, her ruling's unconditional half: every
+//    door names it on the road (`Landing.mode`).
 //
 
 import Foundation
