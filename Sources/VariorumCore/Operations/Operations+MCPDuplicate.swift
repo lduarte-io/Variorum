@@ -79,7 +79,9 @@ extension Operations {
         public let tagPaths: [String]
         /// Every live BOOK the copy is a MEMBER of once the act lands (an
         /// arrival is no membership): the filing's book first, then any a
-        /// living book's intake SEATED it in, in seating order.
+        /// living book's intake SEATED it in (one act stamps one `created_at`,
+        /// so among several seated books the order is the row id's — the list
+        /// is a set, not a sequence).
         public let memberBookIDs: [String]
     }
 

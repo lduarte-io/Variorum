@@ -63,8 +63,10 @@ extension Operations {
     /// ONE `version_of` anchor — "always lineage-edged", §2) **with the
     /// note's live TAGS riding** (ruled §6 — "stripping would vandalize the
     /// status/type taxonomy"; P-13ic-5 kept the OLDER copy doors tag-less —
-    /// since 17y B3 item (c), her #169 tail ruling, Duplicate as Version
-    /// carries tags too, through `copyLiveTags`; Diverge stays tag-less).
+    /// since 17y B3 item (c), her #169 tail ruling, the duplicate carried
+    /// tags too through `copyLiveTags` — and since VX-372 (VX-383) her
+    /// Duplicate with Tags APPLIES them instead, through `applyLiveTags`, so
+    /// `copyLiveTags` serves only this ceremony copy; Diverge stays tag-less).
     ///
     /// The riding tags are a ROW copy, never an APPLYING ACT: no intake fires
     /// for them (PROVISIONAL P-13ic-U2-1 — the 13i-b record's F-6 reading of
