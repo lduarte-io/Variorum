@@ -245,7 +245,18 @@ disposition here.
 
 - **Kickoff (2026-10-18):** DONE — worktree seated, in-flight row flipped (`23608d43`), tickets In Progress,
   briefs written, P-VX381-1 ruled. Coordinator announce: PENDING.
-- **U1 (VX-194 · VX-250 · VX-240 · VX-241):** IN-PROGRESS (the U1 implementer, 2026-10-18). No revert in flight.
+- **U1 (VX-194 · VX-250 · VX-240 · VX-241):** IN-PROGRESS (the U1 implementer, 2026-10-18). **APP REVERT IN FLIGHT
+  (from 4c26f4a1, all committed — restore = `git checkout -- <file>`):** targeted behavioural reverts in CalmGrammar
+  (isEnabled ignored), CeremonySheetChrome (the old 0.45 opacity back), ShelfViewModel (old receipt tail + mint arm;
+  collectReceipt ignores the archive), MembershipChoice (`collected` ignores the archive), GatheringNoteDoor (`cannot`
+  re-frames), SettingsSceneContent (`nonReadyFace` always stub) — built into the scratch `dd-red` derived data, then
+  restored at once; the red RUN waits for the stage GO. If this line still stands with a dirty tree, the tree is
+  mid-revert: `git checkout --` the six files.
+  - THE MAC BATCH (18 suites, for the READY ping): CalmButtonDisabledFaceTests · VocabularySweepTests ·
+    SettingsLockCloseTests · GatheringCollectReceiptTests · VX209LeavesCastleConfirmTests · BlockTagSheetVoiceTests ·
+    MergeCeremonySheetTests · TakesDivideTests · DivideWCeremonyTests · MembershipChoiceTests · AddToBookMintTests ·
+    ArchivedMarkTests · ShelfModelTests · TimelineAndReadingsTests · ProtectionSurfaceRenderTests · LobbyAutoAskTests
+    · CopyRegisterPinTests · BlocksWorkbenchFaceTests. The red run: the first four only, on `dd-red`.
   - U1.1 VX-194 (CalmButtonStyle reads `isEnabled`; token-derived disabled face; the sweep): DONE (f20af818) —
     builds (`build-for-testing` green); pins `CalmButtonDisabledFaceTests` (3 tests) run + red-on-old: PENDING (the
     Mac batch). Sweep: 17 files (16 app + 1 test); ONE calm-button one-off — `CeremonySheetChrome`'s confirm
