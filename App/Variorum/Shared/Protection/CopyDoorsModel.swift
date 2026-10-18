@@ -152,8 +152,9 @@ struct CopyDoorsRoads {
     /// A picked thing classified and, when it is a pair or a library folder, filed (the picked thing is only read).
     var pick: @MainActor (URL) async -> PickOutcome
     /// LOOK INSIDE (rule 17; P-VX306-U3-15): the copy opened read-only on a private copy with what she typed (nothing:
-    /// its own quiet road). nil: the door is not offered.
-    var lookInside: (@MainActor (CatalogCopy, TypedSecrets) async -> LookInsideOpening)? = nil
+    /// its own quiet road), trying the quiet roads it is given (the look's automatic first try never presses Touch ID —
+    /// m2). nil: the door is not offered.
+    var lookInside: (@MainActor (CatalogCopy, TypedSecrets, CopyQuietRoads) async -> LookInsideOpening)? = nil
 }
 
 // MARK: - Make this my library's confirm (§7c (8))
@@ -194,7 +195,8 @@ final class MakeMineModel: Identifiable {
     /// The lead — §7c (8) (the passphrase clause only when one is set — P-VX306-U3-3).
     var lead: String { ProtectionWords.makeMineLeadShown(passphraseSet: passphraseSet) }
 
-    /// The quiet road tried once, at the confirm's open.
+    /// The quiet road tried once, at the confirm's open — AUTOMATIC, so the road it is given never presses Touch ID
+    /// (`ProtectionCopyDoors.opensQuietly` — m2).
     func begin() async {
         checking = true
         needsCopySecret = !(await opensQuietly())
@@ -300,7 +302,7 @@ final class CopyDoorsModel: Identifiable {
         guard let lookInside = roads.lookInside else { return }
         let model = LookInsideModel(
             row: row, offersMakeMine: roads.makeMine != nil,
-            open: { typed in await lookInside(row.copy, typed) },
+            open: { typed, quietRoads in await lookInside(row.copy, typed, quietRoads) },
             finished: { [weak self] exit in
                 guard let self else { return }
                 switch exit {

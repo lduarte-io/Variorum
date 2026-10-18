@@ -236,7 +236,11 @@ struct CopyDoorsModelTests {
     @Test func theDoorsOfferLookInsideAndMakeThisMyLibraryOnlyWithALibraryOpen() async throws {
         let planted = PlantedCopyDoors()
         var roads = planted.roads
-        roads.lookInside = { _, _ in .refused(.copyDoesNotOpen) }
+        var handed: [CopyQuietRoads] = []
+        roads.lookInside = { _, _, quietRoads in
+            handed.append(quietRoads)
+            return .refused(.copyDoesNotOpen)
+        }
         #expect(CopyDoorsModel(roads: roads).offersLookInside && CopyDoorsModel(roads: roads).offersMakeMine)
         roads.makeMine = nil
         let lookOnly = CopyDoorsModel(roads: roads)
@@ -253,6 +257,7 @@ struct CopyDoorsModelTests {
             return
         }
         #expect(look.phase == .needsSecret && !look.offersMakeMine)
+        #expect(handed == [.withoutAPress], "the look's first try, as its sheet opens, never presses Touch ID (m2)")
         look.close()
         guard case .done = lookOnly.phase else {
             Issue.record("Close ends the sheet: \(lookOnly.phase)")

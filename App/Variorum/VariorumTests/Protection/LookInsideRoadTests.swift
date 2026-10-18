@@ -113,8 +113,8 @@ struct LookInsideRoadTests {
         let ctx = CopyDoorsContext(session)
         let look = LookInsideModel(
             row: row, offersMakeMine: true,
-            open: { typed in
-                await Task.detached { ProtectionCopyDoors.lookInside(ctx, copy: row.copy, typed: typed) }.value
+            open: { typed, quietRoads in
+                await Task.detached { ProtectionCopyDoors.lookInside(ctx, copy: row.copy, typed: typed, quietRoads: quietRoads) }.value
             },
             finished: { exits.append($0) })
         let asOf = try #require(row.asOf)
@@ -150,12 +150,42 @@ struct LookInsideRoadTests {
         var exits: [LookInsideModel.Exit] = []
         let look = LookInsideModel(
             row: row, offersMakeMine: true,
-            open: { typed in await Task.detached { ProtectionCopyDoors.lookInside(ctx, copy: row.copy, typed: typed) }.value },
+            open: { typed, quietRoads in
+                await Task.detached { ProtectionCopyDoors.lookInside(ctx, copy: row.copy, typed: typed, quietRoads: quietRoads) }.value
+            },
             finished: { exits.append($0) })
         await look.begin()
         #expect(look.phase == .open)
         look.makeMine()
         #expect(exits == [.makeMine] && !look.isHoldingAReader && LookPlant.privateFolders(road).isEmpty)
+    }
+
+    /// THE LADDER'S ROUND-1 m2 at the look's brain: its first try, as the sheet opens, is AUTOMATIC — the road it hands
+    /// is `.withoutAPress` (no Touch ID item read; the copy's own secret is asked); her typed *Open* is a press — the road
+    /// it hands may read Touch ID, and a copy only Touch ID holds on this Mac opens at that press by that road.
+    @Test func theLooksFirstTryNeverPressesTouchIDAndHerOpenMay() async throws {
+        let road = PlantedRoad()
+        let (session, row) = try await QuietProbePlant.backupOnlyTouchIDOpens(road)
+        let ctx = CopyDoorsContext(session)
+        var handed: [CopyQuietRoads] = []
+        let look = LookInsideModel(
+            row: row, offersMakeMine: true,
+            open: { typed, quietRoads in
+                handed.append(quietRoads)
+                return await Task.detached {
+                    ProtectionCopyDoors.lookInside(ctx, copy: row.copy, typed: typed, quietRoads: quietRoads)
+                }.value
+            },
+            finished: { _ in })
+        let before = QuietProbePlant.touchIDReads(road)
+        await look.begin()
+        #expect(handed == [.withoutAPress] && QuietProbePlant.touchIDReads(road) == before, "the opening pressed Touch ID")
+        #expect(look.phase == .needsSecret && look.refusal == nil)
+        await look.submit(secret: "not this copy's passphrase")
+        #expect(handed == [.withoutAPress, .includingTouchID])
+        #expect(QuietProbePlant.touchIDReads(road) == before + 1, "her press of Open reads the Touch ID item — the press")
+        #expect(look.phase == .open, "the copy's own quiet road on this Mac (rule 17), at her press")
+        look.close()
     }
 
     /// The missing face's road: NO library open — Look inside stands on the road's system alone.

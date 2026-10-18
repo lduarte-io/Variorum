@@ -8,7 +8,10 @@
 //
 //    - THE LIST (`listing`) — the catalogue's copies (`CopyDoorsListing`), a READ.
 //    - THE QUIET PROBE (`opensQuietly`) — `lookInside` with nothing typed: the copy's own quiet road on this Mac, a
-//      READ (rule 17: Look inside writes nothing).
+//      READ (rule 17: Look inside writes nothing). AUTOMATIC — it runs as the confirm opens — so it reads only what
+//      never prompts: the silent item and the Apple wrap (`CopyQuietRoads.withoutAPress`; the ladder's round-1 m2 — a
+//      Touch ID item's read IS the system prompt). Touch ID only at her deliberate press (the preflight, the act, the
+//      look's typed *Open*).
 //    - THE PREFLIGHT (`preflight`) — every check before anything closes, all READS: the copy still catalogued; it
 //      opens with what she typed (`lookInside`); its schema is one this build can open (`LibraryClassifier
 //      .schemaVerdict`, on a private copy — a newer Variorum's copy is never landed); her current pair opens the library
@@ -104,7 +107,8 @@ nonisolated enum ProtectionCopyDoors {
     static func opensQuietly(_ ctx: CopyDoorsContext, _ copy: CatalogCopy) -> Bool {
         let catalog = ctx.system.lister.catalog()
         guard let current = catalog.copies.first(where: { $0.id == copy.id }) else { return false }
-        return (try? ctx.readExecutor().lookInside(current, in: catalog)) != nil
+        // The confirm's automatic probe — never a press (m2).
+        return (try? ctx.readExecutor().lookInside(current, in: catalog, quietRoads: .withoutAPress)) != nil
     }
 
     // MARK: - Look inside (rule 17 — P-VX306-U3-15, the read-only facts sheet)
@@ -113,13 +117,16 @@ nonisolated enum ProtectionCopyDoors {
     /// `ProtectionCopyPeek.open` byte-copies the catalogued file into a private folder and opens ONE read-only keyed
     /// connection on it. The key is not kept past this call (it lives only inside the connection). NOTHING is written:
     /// no key file, keychain item, record, memory item or defaults key — the private folder is the look's own, deleted
-    /// at its close.
-    static func lookInside(_ ctx: CopyDoorsContext, copy: CatalogCopy, typed: TypedSecrets) -> LookInsideOpening {
+    /// at its close. `quietRoads`: the look's first try, as its sheet opens, is AUTOMATIC — `.withoutAPress` (the
+    /// default: the silent item and the Apple wrap, never a Touch ID prompt — m2); her typed *Open* is a press.
+    static func lookInside(
+        _ ctx: CopyDoorsContext, copy: CatalogCopy, typed: TypedSecrets, quietRoads: CopyQuietRoads = .withoutAPress
+    ) -> LookInsideOpening {
         let catalog = ctx.system.lister.catalog()
         guard let current = catalog.copies.first(where: { $0.id == copy.id }) else { return .refused(.copyGone) }
         let looked: LookedInside
         do {
-            looked = try ctx.readExecutor().lookInside(current, in: catalog, typed: typed)
+            looked = try ctx.readExecutor().lookInside(current, in: catalog, typed: typed, quietRoads: quietRoads)
         } catch {
             return .refused(.copyDoesNotOpen)
         }
@@ -151,7 +158,9 @@ nonisolated enum ProtectionCopyDoors {
         guard let copy = catalog.copies.first(where: { $0.id == row.id }) else { return .refused(.copyGone) }
         let looked: LookedInside
         do {
-            looked = try CopyDoorsContext(session).readExecutor().lookInside(copy, in: catalog, typed: copySecrets)
+            // Her press of *Make this my library* — the copy's own quiet roads, Touch ID's included (m2).
+            looked = try CopyDoorsContext(session).readExecutor().lookInside(
+                copy, in: catalog, typed: copySecrets, quietRoads: .includingTouchID)
         } catch {
             return .refused(.copyDoesNotOpen)
         }

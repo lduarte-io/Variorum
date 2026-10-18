@@ -30,6 +30,17 @@ public struct LookedInside: CustomStringConvertible {
     public var description: String { "LookedInside(\(copyID), \(road), redacted)" }
 }
 
+/// Which of this Mac's quiet roads a copy door may try (VX-306 ladder round 1,
+/// m2): a face's AUTOMATIC probe — the one a sheet runs as it opens, before any
+/// press — reads only what never prompts (the silent item and the Apple wrap);
+/// Touch ID is pressed only at a person's deliberate press.
+public enum CopyQuietRoads: Equatable, Sendable {
+    /// The silent item and the Apple wrap — reads that never prompt.
+    case withoutAPress
+    /// Every quiet road, Touch ID's included — a deliberate press.
+    case includingTouchID
+}
+
 /// The road a copy opened by (rule 17: its own secrets, or its own quiet road
 /// on this Mac; rule 4: the current secrets through the history).
 public enum CopyRoad: Equatable, Sendable {
@@ -237,15 +248,23 @@ extension ProtectionExecutor {
     /// live key file's history (rule 4), or its own quiet road on this Mac.
     /// WRITES NOTHING: no key file, no keychain item, no change to the library;
     /// close it and the app forgets it. `typed`: what she typed at its door (none
-    /// tries only the quiet roads).
-    public func lookInside(_ copy: CatalogCopy, in catalog: Catalog, typed: TypedSecrets = .none) throws -> LookedInside {
-        let (key, road) = try openCopy(copy, in: catalog, typed: typed)
+    /// tries only the quiet roads). `quietRoads`: which of this Mac's quiet roads
+    /// may be tried — a face's automatic probe passes `.withoutAPress`, so it never
+    /// raises a Touch ID prompt nobody asked for (VX-306 ladder round 1, m2).
+    public func lookInside(
+        _ copy: CatalogCopy, in catalog: Catalog, typed: TypedSecrets = .none,
+        quietRoads: CopyQuietRoads = .includingTouchID
+    ) throws -> LookedInside {
+        let (key, road) = try openCopy(copy, in: catalog, typed: typed, quietRoads: quietRoads)
         return LookedInside(copyID: copy.id, key: key, road: road)
     }
 
     /// The key that opens a copy, and the road — every road verifies itself
-    /// against the copy's own file. Reads only.
-    func openCopy(_ copy: CatalogCopy, in catalog: Catalog, typed: TypedSecrets) throws -> (StoreKey, CopyRoad) {
+    /// against the copy's own file. Reads only (a Touch ID item is READ only under
+    /// `.includingTouchID` — that read is the press).
+    func openCopy(
+        _ copy: CatalogCopy, in catalog: Catalog, typed: TypedSecrets, quietRoads: CopyQuietRoads
+    ) throws -> (StoreKey, CopyRoad) {
         let files = catalog.servingKeyFiles(of: copy).compactMap(\.document)
         let candidates = Set(copy.fingerprint.map { [$0] } ?? copy.candidateFingerprints)
         func opens(_ key: StoreKey?) -> StoreKey? {
@@ -277,10 +296,12 @@ extension ProtectionExecutor {
                 }
             }
         }
-        // Its own quiet road on this Mac — a key it holds directly (rule 4).
+        // Its own quiet road on this Mac — a key it holds directly (rule 4). A
+        // Touch ID item's read IS a press: only when the door was pressed.
         let items = try leaves.custody.custodyItems()
+        let classes: [ProtectionNames.CustodyClass] = quietRoads == .includingTouchID ? [.silent, .touchid] : [.silent]
         for fingerprint in candidates.sorted() {
-            for itemClass in [ProtectionNames.CustodyClass.silent, .touchid]
+            for itemClass in classes
             where items.contains(CustodyItemFact(fingerprint: fingerprint, itemClass: itemClass)) {
                 if let key = opens(try leaves.custody.readCustody(fingerprint: fingerprint, itemClass: itemClass)) {
                     return (key, .quietRoad(itemClass == .silent ? .thisMac : .touchID))
@@ -315,7 +336,8 @@ extension ProtectionExecutor {
            !readThisSession(account) {
             throw ExecutorRefusal.needsFreshVault
         }
-        let (copyKey, _) = try openCopy(copy, in: catalog, typed: copySecrets)
+        // Her confirmed press — the copy's own quiet roads, Touch ID's included (m2).
+        let (copyKey, _) = try openCopy(copy, in: catalog, typed: copySecrets, quietRoads: .includingTouchID)
         guard !currentPair.wordsAreNew else { throw ExecutorRefusal.wordsMustBeTyped }
         var secrets = ActSecrets()
         if library.keyFile?.passphrase != nil {

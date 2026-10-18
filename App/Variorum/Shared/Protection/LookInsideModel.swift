@@ -6,7 +6,9 @@
 //  quiet road on this Mac). The app writes nothing … Close it and the app forgets it."; the orchestrator's ruling
 //  P-VX306-U3-15 — (b), the read-only facts sheet; §7c (10)'s line first). The open is an injected road (the
 //  bootstrap's, through the executor's `lookInside` and `ProtectionCopyPeek` off the main actor; a test's, planted): it
-//  tries the copy's own quiet road first, then what she types in the copy's field. The look holds ONE reader — a
+//  tries the copy's own quiet road first — AUTOMATICALLY, as the sheet opens, so that first try never presses Touch ID
+//  (`CopyQuietRoads.withoutAPress`: the silent item and the Apple wrap — the ladder's round-1 m2) — then what she types
+//  in the copy's field (her press of *Open*, which may). The look holds ONE reader — a
 //  read-only connection on a private copy — and NOTHING ELSE of the copy's: no key (it lives only inside the
 //  connection), nothing written. Every read runs off the main actor, a page of notes at a time. Closing — *Close*, the
 //  sheet going away, or *Make this my library…* — closes the reader: the connection closed, the private folder deleted.
@@ -53,13 +55,13 @@ final class LookInsideModel: Identifiable {
     private(set) var shown: ProtectionCopyPeek.NoteText?
 
     @ObservationIgnored private var reader: ProtectionCopyPeek.Reader?
-    @ObservationIgnored private let open: (TypedSecrets) async -> LookInsideOpening
+    @ObservationIgnored private let open: (TypedSecrets, CopyQuietRoads) async -> LookInsideOpening
     @ObservationIgnored private let finished: (Exit) -> Void
     @ObservationIgnored private let day: (Date) -> String
 
     init(
         row: CopyDoorRow, offersMakeMine: Bool,
-        open: @escaping (TypedSecrets) async -> LookInsideOpening,
+        open: @escaping (TypedSecrets, CopyQuietRoads) async -> LookInsideOpening,
         finished: @escaping (Exit) -> Void,
         day: @escaping (Date) -> String = { ProtectionWords.day($0) }
     ) {
@@ -79,19 +81,20 @@ final class LookInsideModel: Identifiable {
     /// Whether a look is holding a reader now (the write-nothing proof reads it).
     var isHoldingAReader: Bool { reader != nil }
 
-    /// The quiet road first (a READ).
-    func begin() async { await attempt(.none, quietly: true) }
+    /// The quiet road first (a READ) — automatic, so never a press (m2).
+    func begin() async { await attempt(.none, quietRoads: .withoutAPress, quietly: true) }
 
     /// What she typed in the copy's field — twelve valid words are the words, anything else a passphrase.
     func submit(secret: String) async {
         guard !secret.isEmpty, !busy else { return }
-        await attempt(MakeMineModel.copySecrets(secret, currentPair: .none), quietly: false)
+        // Her press of *Open* — the copy's own quiet roads, Touch ID's included.
+        await attempt(MakeMineModel.copySecrets(secret, currentPair: .none), quietRoads: .includingTouchID, quietly: false)
     }
 
-    private func attempt(_ typed: TypedSecrets, quietly: Bool) async {
+    private func attempt(_ typed: TypedSecrets, quietRoads: CopyQuietRoads, quietly: Bool) async {
         busy = true
         refusal = nil
-        let opening = await open(typed)
+        let opening = await open(typed, quietRoads)
         switch opening {
         case .opened(let opened):
             guard phase != .closed else {

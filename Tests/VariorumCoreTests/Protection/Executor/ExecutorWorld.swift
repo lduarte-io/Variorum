@@ -174,6 +174,8 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     var crashAfterWrites: Int?
     /// Pauses and resumes of copies — in-process, not writes.
     var copyEvents: [String] = []
+    /// Every Touch ID item READ — each one a press (VX-306 ladder round 1, m2: a face's automatic probe presses none).
+    var touchIDPresses = 0
 
     init(icloud: ICloudKeychain = ICloudKeychain(), server: ExecutorVault = ExecutorVault()) {
         self.icloud = icloud
@@ -203,6 +205,7 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     func custodyItems() throws -> [CustodyItemFact] { Array(custody.keys).sorted { "\($0)" < "\($1)" } }
 
     func readCustody(fingerprint: String, itemClass: ProtectionNames.CustodyClass) throws -> StoreKey? {
+        if itemClass == .touchid { touchIDPresses += 1 }
         if itemClass == .touchid, !(bio.hardware && bio.enrolled && bio.transient == nil) { return nil }
         return custody[CustodyItemFact(fingerprint: fingerprint, itemClass: itemClass)]
     }

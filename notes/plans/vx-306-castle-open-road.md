@@ -2409,7 +2409,7 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton: DONE (this commit).
 - m1 — K5's missing face over a record-less store: DONE (`0b759f8b8` the fix + both pins; this commit the evidence). The bootstrap twin's run PENDING (the stage).
-- m2 — the copy doors' automatic quiet probe never presses Touch ID: NOT-STARTED.
+- m2 — the copy doors' automatic quiet probe never presses Touch ID: DONE (this commit). The core protection set Debug green here; its release leg at the close.
 - m4 — the new-road Restore list re-reads on a landed backup pair: NOT-STARTED.
 - NIT 1 · NIT 2 · NIT 3 · NIT 4: NOT-STARTED.
 - The close (Mac + phone `build-for-testing`, the core protection set both configurations, the suite list): NOT-STARTED.
@@ -2446,3 +2446,41 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
   a harness-only probe of the same pre-fix call over the same state printed `failed=true liveKeyFileOverwritten=true
   silent 1->2 apple 1->2 previousLibraries=false` (the trace above, observed); restored by `git checkout` →
   `✔ Test run with 10 tests in 1 suite passed`. The probe was never in the worktree.
+- **m2 — AGREE.** Traced on this tree: `MakeMineModel.begin` → `CopyDoorsRoads.opensQuietly` →
+  `ProtectionCopyDoors.opensQuietly` → `ProtectionExecutor.lookInside(_:in:)` (nothing typed) → `openCopy`, whose quiet arm
+  walked `[.silent, .touchid]` for every candidate fingerprint the custody listing holds and called
+  `readCustody(fingerprint:, .touchid)` — which `KeychainCustodyLeaf` serves through an `LAContext` (the system Touch ID
+  sheet); `LookInsideModel.begin` → `attempt(.none)` → `ProtectionCopyDoors.lookInside(… typed: .none)` → the same arm. Both
+  run as their sheets open, before any press; and since the custody arm comes BEFORE the Apple-wrap arm, a copy whose key a
+  Touch ID item holds would prompt even when its Apple wrap opens it silently. Unreachable this phase (no act writes a
+  `.touchid` item before VX-307's Castle entry), pinnable now. **The fix** (this commit): the core's copy doors take a
+  scope — `CopyQuietRoads` (`.withoutAPress`: the silent item and the Apple wrap · `.includingTouchID`: every quiet road,
+  a deliberate press) on `lookInside(_:in:typed:quietRoads:)` (default `.includingTouchID` — the model's own door, rule
+  17's "its own quiet road on this Mac", so the scenario world, the lifecycle walk and every U2 copy-door test read
+  byte-for-byte as before) and `openCopy` (now required; `makeThisMyLibrary`'s act passes `.includingTouchID` — her
+  confirmed press). The app's two AUTOMATIC probes pass `.withoutAPress`: `ProtectionCopyDoors.opensQuietly` (the
+  confirm's) and the look's first try (`LookInsideModel.begin` hands `.withoutAPress` through `CopyDoorsRoads.lookInside`,
+  now `(copy, typed, quietRoads)`; `ProtectionCopyDoors.lookInside`'s own default is `.withoutAPress`, so a caller that
+  says nothing never prompts). The deliberate presses keep today's roads: the look's typed *Open* hands
+  `.includingTouchID`; the confirm's preflight (at her press of *Make this my library*) passes it explicitly; the act's
+  `openCopy` too. **The pins:** `CopyDoorsQuietProbeTests` (2, headless, planted — a backup of the library whose key only a
+  planted `.touchid` item holds, no silent item, no Apple key; a planted read of it counted as the press it would be):
+  `theConfirmsOpeningPressesNothing` (`MakeMineModel.begin` over the real `opensQuietly` → zero Touch ID reads, the copy's
+  field asked) and `theLooksOpeningPressesNothing` (the look's opening road with nothing typed → zero reads,
+  `.copyDoesNotOpen`) — written against roads that exist on both sides; **RED on the pre-fix Shared files** (the core
+  already carrying the scope with its behaviour-preserving default — the old call reads exactly the old `[.silent,
+  .touchid]`): `✘ … CopyDoorsQuietProbeTests.swift:47 Expectation failed: QuietProbePlant.touchIDReads(road) == before` ·
+  `:48 model.needsCopySecret` · `:59 touchIDReads` · `:62` (the look OPENED by the press) · `✘ Test run with 2 tests in 1
+  suite failed … with 4 issues`; GREEN after. Beside them (new API, green): `LookInsideRoadTests
+  .theLooksFirstTryNeverPressesTouchIDAndHerOpenMay` (the brain hands `.withoutAPress` at its opening — zero reads, the
+  secret asked — and `.includingTouchID` at her typed *Open*, one read, the look open by that road);
+  `CopyDoorsModelTests.theDoorsOfferLookInside…` +1 line (the doors' model hands the look's scope through); core
+  `U2LookInsideTests.theAutomaticProbeNeverPressesTouchIDAndAPressDoes` (headless, both configurations — a Castle +
+  Touch ID copy refuses `.withoutAPress` with ZERO presses — `ExecutorWorld.touchIDPresses`, a new read counter — and
+  opens by `.quietRoad(.touchID)` with one press by default). The harness: `✔ Test run with 70 tests in 9 suites passed`;
+  the core protection set (78 suite types) Debug `✔ Test run with 320 tests in 78 suites passed after 5.990 seconds.`
+  **Hand-forward to VX-307 (not built — the deliberate presses keep today's roads, as the disposition allows):** (i) at
+  *Make this my library* over a copy only Touch ID opens, the preflight's read and the act's `openCopy` each press — two
+  prompts for one press (the act takes the copy's secrets, not a key); (ii) the look's typed *Open* with a wrong secret
+  falls through to the copy's quiet roads, Touch ID's included — a prompt after a wrong secret. Both unreachable until a
+  `.touchid` item exists (VX-307's Castle entry), whose faces decide whether Touch ID gets a door of its own at the copies.

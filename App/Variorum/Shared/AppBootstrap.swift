@@ -1099,10 +1099,10 @@ final class AppBootstrap {
                 }.value
             },
             // VX-306 U3 — LOOK INSIDE (P-VX306-U3-15): read-only, writes nothing, closing forgets.
-            lookInside: { [weak self] copy, typed in
+            lookInside: { [weak self] copy, typed, quietRoads in
                 guard let session = self?.roadSession else { return .refused(.failed) }
                 return await Task.detached(priority: .userInitiated) {
-                    ProtectionCopyDoors.lookInside(CopyDoorsContext(session), copy: copy, typed: typed)
+                    ProtectionCopyDoors.lookInside(CopyDoorsContext(session), copy: copy, typed: typed, quietRoads: quietRoads)
                 }.value
             })
     }
@@ -1127,9 +1127,9 @@ final class AppBootstrap {
             pick: { url in
                 await Task.detached(priority: .userInitiated) { ProtectionCopyDoors.pick(url, context()) }.value
             },
-            lookInside: { copy, typed in
+            lookInside: { copy, typed, quietRoads in
                 await Task.detached(priority: .userInitiated) {
-                    ProtectionCopyDoors.lookInside(context(), copy: copy, typed: typed)
+                    ProtectionCopyDoors.lookInside(context(), copy: copy, typed: typed, quietRoads: quietRoads)
                 }.value
             })
     }

@@ -78,6 +78,25 @@ struct U2LookInsideTests {
         }
     }
 
+    /// VX-306 ladder round 1, m2: a face's AUTOMATIC probe (`.withoutAPress`)
+    /// never reads a Touch ID item — a copy only Touch ID holds on this Mac
+    /// refuses it with no press; the deliberate press (the default — the model's
+    /// own door, rule 17's "its own quiet road on this Mac") opens it by that road.
+    @Test func theAutomaticProbeNeverPressesTouchIDAndAPressDoes() throws {
+        let fixture = try EX(.castle, gate: .touchID)
+        let (copy, catalog) = try plantCopy(
+            fixture, libraryID: fixture.libraryID, key: fixture.key, keyFile: try #require(fixture.world.liveKeyFile),
+            record: fixture.liveRecord)
+        #expect(fixture.custody(.touchid, fixture.key) && !fixture.custody(.silent, fixture.key), "only Touch ID holds it")
+        #expect(throws: ExecutorRefusal.copyDoesNotOpen) {
+            _ = try fixture.executor().lookInside(copy, in: catalog, quietRoads: .withoutAPress)
+        }
+        #expect(fixture.world.touchIDPresses == 0, "the automatic probe pressed Touch ID")
+        let pressed = try fixture.executor().lookInside(copy, in: catalog)
+        #expect(pressed.road == .quietRoad(.touchID) && pressed.key == fixture.key)
+        #expect(fixture.world.touchIDPresses == 1)
+    }
+
     /// Its own quiet road on this Mac: a backup under the current Standard key
     /// opens by the silent item that holds that key directly (rule 4).
     @Test func aBackupUnderTheCurrentKeyOpensByThisMacsQuietRoad() throws {
