@@ -48,4 +48,9 @@ nonisolated enum ProtectionRoad {
     /// The switch's rule, pure: the new road only in a Debug build — the Mac's and the phone's (VX-306 U3, superseding
     /// P-VX306-U1b-1's `debug && mac`).
     static func live(debug: Bool) -> Bool { debug }
+
+    /// Whether a store opens on the new road: the switch AND the dev-store fence (P-VX306-U1b-5 — a Debug build pointed
+    /// at the real store's variant keeps today's road). ONE rule, read by the bootstrap's road and by the readme's Start
+    /// Here passages (VX-306 ladder round 2, m2: they seed only where the road they describe is the store's road).
+    static func opensOnTheNewRoad(devStore: Bool) -> Bool { newRoadIsLive && devStore }
 }

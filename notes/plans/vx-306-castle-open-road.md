@@ -2384,7 +2384,13 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
   "Annoyance 3 / Castle mode" passage — never, it is hers). The pin `ReadmeStartHerePlanTests` reads §7c (5) from the plan
   and asserts the seeded passages byte-equal (the `**` leads dropped, the lines reflowed); her five blocks keep their place
   and count. The furniture fold (17y B-DEDUPE) keeps both copies where a device's seeded readme differs from the new seed —
-  her REAL store's readme is hers (VX-105) and is never re-seeded by a session (her hands, the handoff).
+  her REAL store's readme is hers (VX-105) and is never re-seeded by a session (her hands, the handoff). **THE RELEASE
+  REACH (ladder round 2, m2 — the gate since the round-2 fix leg):** the four passages speak the NEW road's truths (the key
+  file and its copies, the words card at the creation, VX-308's new-words door), so they seed ONLY into a fresh store that
+  opens on the new road (`ReadmeSeeder.paragraphs(onTheNewRoad:)`, handed `ProtectionRoad.opensOnTheNewRoad(devStore:)` —
+  the bootstrap's own rule, the switch AND the dev-store fence); TODAY's road — every Release build, and a Debug build on
+  the real variant — seeds her five blocks alone, byte-for-byte as before the words pass, until VX-329 switches the road
+  (the same rule as the rows below).
 - **Every face this phase ships** was checked sentence by sentence against `CastleRules.md` at the walks (U1b/U2/U3 records);
   the remaining VX-379 rows (the posture box's "only this Mac" sentence W-1, Data Safety's "restoring is a Finder operation"
   F-U3-1, the Protection pane's today's rows, the privacy chapter's `ProtectionCopy` lessons) are TODAY's road's words,
@@ -2720,7 +2726,9 @@ configurations). No stage, no app launch, no dev or real store, no `/Application
   fully verified (the pin red-on-old and green; the core protection set green Debug 323/79 and release 299/75); the
   production leaf's one-line conformance (`SQLCipherLibraryLeaf.slotIsOccupied`) and its two lines in
   `ProtectionFileLeavesTests` PENDING-BUILD (the stage hold).
-- m2 — the Start Here passages seed only where the new road opened the store (app, PENDING-BUILD): NOT-STARTED.
+- m2 — the Start Here passages seed only where the store opens on the new road (app): DONE (this commit) — WRITTEN,
+  PENDING-BUILD (compile + `ReadmeStartHerePlanTests` / `LaunchFurnitureTests` / `TutorialFurnitureFoldTests` /
+  `ProtectionRoadSwitchTests` under the stage); the source pin's logic replicated over the files (green new, red old).
 - NIT 3 — a filed pick tells the standing Restore list (`copiesChanged`, m4's seam) (app, PENDING-BUILD): NOT-STARTED.
 - The close (the record, the Mac suites to run, `git worktree list` clean): NOT-STARTED.
 
@@ -2764,3 +2772,34 @@ configurations). No stage, no app launch, no dev or real store, no `/Application
   ran whole in Debug), so the set ran as its two halves (names 1–40, 41–79): `✔ Test run with 136 tests in 38 suites
   passed after 3.517 seconds.` + `✔ Test run with 163 tests in 37 suites passed after 1.239 seconds.` = 299 in 75 (the
   round-1 leg's 296/74 + 3/1). `swift build -c release` (rule 24) green as part of that run.
+- **m2 — AGREE.** Traced on this tree: `LaunchFurniture.seed` → the Welcome arrangement's `beforeArranging` →
+  `ReadmeSeeder.seedAtBirth(session:)` → `importPost(text: paragraphs.joined("\n"), segmentation: .paragraph)` with
+  `paragraphs` a plain nine-item `static let` — no road read anywhere on the way, while `ProtectionRoad.newRoadIsLive` is
+  compile-time Debug and the bootstrap fences the new road to the dev variant (`newRoad = newRoadIsLive && variant ==
+  .dev`, P-VX306-U1b-5). So every fresh store born on TODAY's road (every Release build; a Debug build on the real
+  variant) was seeded blocks 6–9, whose claims (the key file beside the library and its keychain copy, the words "shown
+  once, when the library was created", the new-words door in Data Safety — VX-308's) are false there until VX-329; the
+  words pass's own rule for every other VX-379 row is the opposite. **The fix:** `ReadmeSeeder` splits into `herBlocks`
+  (her five, every road) and `startHerePassages` (§7c (5)'s four) joined by ONE pure rule, `paragraphs(onTheNewRoad:)`
+  (`newRoad ? herBlocks + startHerePassages : herBlocks`); `seedAtBirth(session:onTheNewRoad:)` seeds that; the launch
+  hands it `ProtectionRoad.opensOnTheNewRoad(devStore: storeVariant == .dev)` — a NEW one-line rule in `ProtectionRoad`
+  (`newRoadIsLive && devStore`) that the bootstrap's own road now reads too (`newRoad = ProtectionRoad.opensOnTheNewRoad(
+  devStore: variant == .dev)`, behaviour-identical), so the passages and the road they describe can never drift apart
+  at VX-329. `paragraphs` stays as "the dev store's seed in this build" (a computed var — the pins' existing reads hold:
+  nine in this Debug build); `seedAtBirth`'s default is the same (the direct callers are pins —
+  `TutorialFurnitureFoldTests`, unchanged). **Gating on the variant as well as the switch** (the brief says "only while
+  `ProtectionRoad.newRoadIsLive`"): a subset of that, chosen because the finding's mechanism names the real-variant Debug
+  store too and the bootstrap's fence is already ruled (P-VX306-U1b-5) — engineering, not a product call, so no
+  PROVISIONAL; the orchestrator's eye. Release behaviour returns to main's: five blocks, byte-for-byte. **The pins
+  (PENDING-BUILD — Mac target):** `LaunchFurnitureTests.aFreshStoreOnTodaysRoadSeedsHerFiveBlocksAlone` — the PRODUCTION
+  composition with `storeVariant: .real` (the marks injected; the variant keys only marks) → the readme holds exactly five
+  blocks and renders her five byte-exact; written against what both trees carry (`ReadmeSeeder.paragraphs.prefix(5)`),
+  so it is RED on the pre-fix tree by construction (nine blocks; the old seeder reads no road) — PENDING the run;
+  `ReadmeStartHerePlanTests` +2: `theFourPassagesSeedOnlyWhereTheStoreOpensOnTheNewRoad` (the pure rule both ways; the
+  dev seed = the rule at the switch; `opensOnTheNewRoad` false for the real variant, the switch for dev) and the SOURCE pin
+  `theFourPassagesSitBehindTheRoadInTheSource` (code lines only: the four leads spelled once and never among her blocks,
+  `startHerePassages` declared once and joined once behind `newRoad ? … : herBlocks`, the launch handing the road's rule
+  for its variant, the bootstrap reading the same rule) — its logic replicated in Python over the files: green on this
+  tree, and on the pre-fix seeder (`git show HEAD:`) the `herBlocks` declaration is absent (its `#require` fails — red);
+  the existing assertions (`paragraphs.count == 9`, `paragraphs[5...]`, `fans.count == paragraphs.count`) unchanged and
+  still true in this Debug build. P-VX306-W-1's QUESTIONS entry and THE WORDS PASS paragraph gain the Release-reach fact.

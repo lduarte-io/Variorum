@@ -3467,5 +3467,10 @@ Cross-refs: born VX-402 (the flushNow in-flight window — Medium, the one Suspe
 
 **P-VX306-W-1 — the Start Here chapter's four passages (§7c (5)) APPENDED to her readme as blocks 6–9** (her five blocks
 untouched; options (b) a new guide chapter, (c) editing her lock passage — never). Record: the plan's §9 THE WORDS PASS.
-Status: PROVISIONAL (a) — her eye at the bundle (and her real store's readme is hers to update or not).
+**Where they reach (ladder round 2, m2):** the passages describe the NEW road (the key file and its copies, the twelve
+words shown once when the library is created, a new-words door in Settings ▸ Data Safety), so they seed only into a fresh
+store that opens on the new road — today, a Debug build's dev store. Every Release build (and a Debug build pointed at
+your real store) still seeds your five blocks alone, exactly as before, until the road switches (VX-329); no existing
+store's readme is ever touched. Status: PROVISIONAL (a) — her eye at the bundle (and her real store's readme is hers to
+update or not).
 

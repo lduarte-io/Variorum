@@ -194,7 +194,7 @@ final class AppBootstrap {
         testStoreURL = nil
         // P-VX306-U1b-5: the new road reaches ONLY the fenced dev store — a Debug build opted into the real
         // store's variant keeps today's road (the phase's one law: "it reaches only the fenced dev store").
-        newRoad = ProtectionRoad.newRoadIsLive && variant == .dev
+        newRoad = ProtectionRoad.opensOnTheNewRoad(devStore: variant == .dev)
         roadInputs = newRoad ? RoadInputs.live(variant: variant) : nil
         reminderLedger = PassphraseReminderLedger()
         lobbyVaultRoad = LobbyVaultRoad.live(scope: variant.rawValue)

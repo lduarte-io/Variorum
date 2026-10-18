@@ -57,4 +57,50 @@ struct ReadmeStartHerePlanTests {
             #expect(!passage.contains("  "))
         }
     }
+
+    // MARK: - Ladder round 2, m2: the passages seed ONLY where the store opens on the new road
+
+    /// The passages speak the new road's truths (the key file and its copies, the words shown once at the creation, a
+    /// new-words door), false on TODAY's road — so today's road (Release, a Debug build on the real store) seeds her
+    /// five blocks alone until VX-329; the dev store's seed in this Debug build is all nine.
+    @Test func theFourPassagesSeedOnlyWhereTheStoreOpensOnTheNewRoad() {
+        #expect(ReadmeSeeder.herBlocks.count == 5 && ReadmeSeeder.startHerePassages.count == 4)
+        #expect(ReadmeSeeder.paragraphs(onTheNewRoad: false) == ReadmeSeeder.herBlocks, "today's road: her five alone")
+        #expect(ReadmeSeeder.paragraphs(onTheNewRoad: true) == ReadmeSeeder.herBlocks + ReadmeSeeder.startHerePassages)
+        #expect(ReadmeSeeder.paragraphs == ReadmeSeeder.paragraphs(onTheNewRoad: ProtectionRoad.newRoadIsLive))
+        // The ONE rule the bootstrap's road and the readme read: the switch AND the dev-store fence (P-VX306-U1b-5).
+        #expect(!ProtectionRoad.opensOnTheNewRoad(devStore: false), "a store of the real variant keeps today's road")
+        #expect(ProtectionRoad.opensOnTheNewRoad(devStore: true) == ProtectionRoad.newRoadIsLive)
+    }
+
+    /// The SOURCE: the four passages live only in `startHerePassages` (never among her blocks), the seed's one join of
+    /// them sits behind the road, the launch hands the seeder the road's own rule for its store variant, and the
+    /// bootstrap reads that same rule — so no later edit can append them to every road unseen.
+    @Test func theFourPassagesSitBehindTheRoadInTheSource() throws {
+        let app = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        func code(_ relative: String) throws -> String {
+            try String(contentsOf: app.appendingPathComponent(relative), encoding: .utf8)
+                .split(separator: "\n", omittingEmptySubsequences: false)
+                .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("//") }
+                .filter { !$0.trimmingCharacters(in: .whitespaces).hasPrefix("///") }
+                .joined(separator: "\n")
+        }
+        let seeder = try code("Variorum/Features/Onboarding/BirthFurnitureSeeders.swift")
+        let herStart = try #require(seeder.range(of: "nonisolated static let herBlocks: [String] = ["))
+        let passagesStart = try #require(seeder.range(of: "nonisolated static let startHerePassages: [String] = ["))
+        let herBody = seeder[herStart.upperBound..<passagesStart.lowerBound]
+        for lead in ["Your work is encrypted", "Write down your twelve words", "Set a passphrase. A passphrase",
+                     "The Apple road is a convenience"] {
+            #expect(!herBody.contains(lead), "a Start Here passage sits among her blocks: \(lead)")
+            #expect(seeder.components(separatedBy: lead).count == 2, "the passage is spelled once: \(lead)")
+        }
+        #expect(seeder.contains("newRoad ? herBlocks + startHerePassages : herBlocks"))
+        #expect(seeder.components(separatedBy: "startHerePassages").count == 3,
+                "startHerePassages is declared once and joined once, behind the road")
+        let launch = try code("Variorum/LaunchFurniture.swift")
+        #expect(launch.contains("onTheNewRoad: ProtectionRoad.opensOnTheNewRoad(devStore: storeVariant == .dev))"))
+        let bootstrap = try code("Shared/AppBootstrap.swift")
+        #expect(bootstrap.contains("newRoad = ProtectionRoad.opensOnTheNewRoad(devStore: variant == .dev)"))
+    }
 }
