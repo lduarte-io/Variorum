@@ -245,72 +245,77 @@ disposition here.
 
 - **Kickoff (2026-10-18):** DONE — worktree seated, in-flight row flipped (`23608d43`), tickets In Progress,
   briefs written, P-VX381-1 ruled. Coordinator announce: PENDING.
-- **U1 (VX-194 · VX-250 · VX-240 · VX-241):** IN-PROGRESS (the U1 implementer, 2026-10-18). **No revert in flight:
-  the app revert below was BUILT into `dd-red` (TEST BUILD SUCCEEDED) and the tree RESTORED clean; the fixed tree is
-  built in `dd-green` (4c26f4a1's sources). Both runs wait for the stage GO.** The revert (from 4c26f4a1, all
-  committed — restore = `git checkout -- <file>`): targeted behavioural reverts in CalmGrammar
-  (isEnabled ignored), CeremonySheetChrome (the old 0.45 opacity back), ShelfViewModel (old receipt tail + mint arm;
-  collectReceipt ignores the archive), MembershipChoice (`collected` ignores the archive), GatheringNoteDoor (`cannot`
-  re-frames), SettingsSceneContent (`nonReadyFace` always stub) — built into the scratch `dd-red` derived data, then
-  restored at once; the red RUN waits for the stage GO. If this line still stands with a dirty tree, the tree is
-  mid-revert: `git checkout --` the six files.
-  - THE MAC BATCH (18 suites, for the READY ping): CalmButtonDisabledFaceTests · VocabularySweepTests ·
-    SettingsLockCloseTests · GatheringCollectReceiptTests · VX209LeavesCastleConfirmTests · BlockTagSheetVoiceTests ·
-    MergeCeremonySheetTests · TakesDivideTests · DivideWCeremonyTests · MembershipChoiceTests · AddToBookMintTests ·
-    ArchivedMarkTests · ShelfModelTests · TimelineAndReadingsTests · ProtectionSurfaceRenderTests · LobbyAutoAskTests
-    · CopyRegisterPinTests · BlocksWorkbenchFaceTests. The red run: the first four only, on `dd-red`.
-  - U1.1 VX-194 (CalmButtonStyle reads `isEnabled`; token-derived disabled face; the sweep): DONE (f20af818) —
-    builds (`build-for-testing` green); pins `CalmButtonDisabledFaceTests` (3 tests) run + red-on-old: PENDING (the
-    Mac batch). Sweep: 17 files (16 app + 1 test); ONE calm-button one-off — `CeremonySheetChrome`'s confirm
-    `.opacity(canConfirm ? 1 : 0.45)` → folded per R-VX381-A2 (the button IS `.disabled(!canConfirm)` already,
-    so the environment carries the face). `GatheringNoteDoor`: R-VX381-A1 (a) — local face kept, comment corrected.
-    Faces that now grey for the first time (were full-strength while disabled): the lobby's unlock/open doors while
-    busy (`StoreLockView`, `LibraryMissingView`), Blocks' bulk merge under 2 picked, Canvas's order door when empty.
-  - U1.2 VX-250 (1) mint receipt + P-VX381-1 `shownByTagging`: DONE (this commit) — her four strings verbatim;
-    pins `VocabularySweepTests.herShorterMintReceiptsLandVerbatim` + two justified edits; run: PENDING (Mac batch).
-  - U1.3 VX-250 (2) greyed hovers: DONE (this commit) — `Blocker.reason` = whole sentences; her three verbatim +
-    her purged-tag fallback; `GatheringNoteDoorCopy.cannot` says the reason as it stands (the "This gathering can't
-    take a new note: …" frame retired); `unmatchedReason` = her unreachable sentence. **PROVISIONAL drafts (for the
-    orchestrator at the unit close):** finished "Finished — reopen it to add notes." · no rule "No rule yet — give it
-    one to add notes." · unreadable "Its rule can't be read — edit it to add notes." · legacy date "Its rule needs an
-    entry date, which a new note doesn't have." · legacy kind "Its rule needs a kind of note, which a new note
-    doesn't have." DONE (9c6d2611). Core `GatheringMint` 20/2 green; RED-ON-OLD VERIFIED (the pre-fix
-    `GatheringMint.swift` restored from 9c6d2611~1: `herShorterHoversLandVerbatim` + `everyReasonIsATerseSentence…`
-    failed, 27 issues; restored → 20/2 green). App pin edit (`VocabularySweepTests` hovers): PENDING (Mac batch).
-    Observation (pre-existing, not changed): a rule naming a LIVE tag of ANOTHER wing reads as dead in the
-    gathering's wing, so it says "…which no longer exists." (the old words said "doesn't exist right now").
-  - U1.4 VX-250 (3) NOT terms at the mint: DONE (6adfd7c6) — a fresh-note evaluator mirroring `ruleSQL` exactly
-    (three-valued for the legacy NULLs; subtree `tagCovers` fed live paths by the query); NOT conjuncts and NOT
-    options in an any-of DEFERRED, then every conjunct checked against the note the plan makes, so a door never shows
-    enabled for a press the belt would refuse; an any-of pick prefers an option keeping the NOTs true
-    (`(#a OR #c) AND NOT #a` takes #c — her "a NOT contradicting a tag it MUST apply greys": an any-of pick is not a
-    must). Still blocked: legacy date/kind terms, an empty any-of, an any-of with a nested group or legacy option.
-    Core `GatheringMint` 26/2 green. RED-ON-OLD VERIFIED by behavioural revert (`.not` → blocked, NOT options out of
-    the aimable set): 5 tests failed, 15 issues — the NOT-plans, any-of-with-NOT, pick-avoids, op-mints-and-shows and
-    store-subtree-steer pins; the contradiction guards (`#a AND NOT #a`, subtree, ★) green on both sides as designed;
-    restored → 26/2 green. **PROVISIONAL P-VX381-U1-1:** an any-of group containing a NOT option is met with NO
-    tag when the fresh note already meets its NOT (`#a OR NOT #b` mints wearing nothing). The alternative, taking #a
-    anyway, applies a tag nothing requires.
-  - U1.5 VX-240 `.opening` face: DONE (this commit) — `SettingsSceneContent.nonReadyFace` (`.opening` → her
-    "Opening your library…" (U+2026) beside a small spinner; every settled closed state keeps the stub). Pins in
-    `SettingsLockCloseTests`: `theOpeningFaceSaysHerWordsAndEverySettledClosedStateKeepsTheStub` (pure) +
-    `aReopenRoadShowsTheOpeningSpinnerMidCeremony` (a real bootstrap's adoption held on a gate in `.opening`; the
-    spinner is an `NSProgressIndicator` subview, measured offscreen first — SwiftUI `Text` is not reachable through
-    accessibility there, so the words ride the pure pin). Build + run + red-on-old: PENDING (Mac batch).
-  - U1.6 VX-241 archived-target receipt: DONE (this commit). Traced: the chip's add picker offers archived gatherings
-    (`MembershipChip.refresh` filters kind + lock only — 13i-e's open explicit adds), the op tags them correctly, and
-    the chip's receipt ("Added by tagging #… — “X” collects by filter.") / the board's ("…shows it now.") claimed a
-    showing the archived gathering's empty assembly denies. Fix: the op reports `SmartCollectResult.gatheringArchived`
-    from INSIDE its transaction (a stale popover snapshot never decides); `BookcaseCopy.collectReceipt` (the board's
-    drop) and `AddToBookCopy.collected` (the chip) speak the archived arm. **PROVISIONAL wording (for the
-    orchestrator):** "Tagged #essays — the gathering shows it once it's unarchived." · already matching: "It already
-    matches — the gathering shows it once it's unarchived." A live gathering keeps each door's words (the chip's
-    shipped "collects by filter" lines are untouched — VX-216's sitting, see the observation below). Pins: core
-    `SmartCollectTests.anArchivedGatheringStillTagsAndReportsItsArchive` (48/6 collect-family suites green) + app
-    `GatheringCollectReceiptTests` (2 tests; run + red-on-old by behavioural revert: PENDING, the Mac batch).
-    **Observations for the orchestrator (not changed):** (1) the chip's live-gathering receipts still say
-    "collected"/"collects by filter" — a third voice for R98's receipt beside P-VX381-1's register (VX-216's menus
-    sitting is the natural home). (2) MOBILE PARITY: the phone's `MobileMembership` lists archived gatherings and
-    speaks the same overclaim — a VM ticket candidate (the phone reads `gatheringArchived` for free now).
+- **U1 (VX-194 · VX-250 · VX-240 · VX-241):** IMPLEMENTER-CLOSED 2026-10-18 (the U1 implementer; awaits the
+  orchestrator's both-voices walk and the run's ladder). **NOT DONE, stated first:** the both-voices WALK (the
+  orchestrator's acceptance act, by the brief — the tree is walkable); VX-194's "fold the gathering foot's one-off into
+  the style" step (NOT APPLICABLE — R-VX381-A1: the door was never a calm button); the chip's LIVE-gathering receipts
+  ("collects by filter") and the PHONE's twin of VX-241 (observations below — not this unit's). No revert in flight;
+  the tree is clean at the record's commit.
+  - **Evidence.** Core (headless): full `swift test` — VariorumCoreTests "2903 tests in 337 suites passed", the
+    6-suite target 40/40; ONE red in the 362-test MCP package, `MCPHarnessTimeLimitTests.aPeerThatNeverAnswers…`
+    (15.96 s against its 15 s wall-clock bound under full parallel load; touches nothing of U1; 3/3 green alone —
+    a load flake, recorded). Mac (one stage window under the coordinator's GO, claim `vx-381-u1-batch`, released):
+    RUN 1 red-on-old on a prebuilt behaviourally reverted tree (CalmGrammar ignoring `isEnabled`, the ceremony's old
+    0.45 opacity back, the old receipt tail + mint arm, both collect deciders ignoring the archive, `cannot` re-framed,
+    `nonReadyFace` always stub) — "Test run with 29 tests in 4 suites failed … with 49 issues", the 9 failures exactly
+    the new/edited pins (the VX-240 spinner pin caught `.opening` and failed on `shown > 0`); the guards green. RUN 2 on
+    the fixed tree (4c26f4a1's sources) — "Test run with 135 tests in 18 suites passed", 0 skipped: CalmButtonDisabled-
+    FaceTests · VocabularySweepTests · SettingsLockCloseTests · GatheringCollectReceiptTests · VX209LeavesCastle-
+    ConfirmTests · BlockTagSheetVoiceTests · MergeCeremonySheetTests · TakesDivideTests · DivideWCeremonyTests ·
+    MembershipChoiceTests · AddToBookMintTests · ArchivedMarkTests · ShelfModelTests · TimelineAndReadingsTests ·
+    ProtectionSurfaceRenderTests · LobbyAutoAskTests · CopyRegisterPinTests · BlocksWorkbenchFaceTests.
+  - U1.1 **VX-194 — FIXED** (f20af818). Traced: `CalmButtonStyle.makeBody` drew ink/border/paper from the role alone
+    and dimmed only on `isPressed`; nothing read `isEnabled`, so a disabled calm button drew pixel-for-pixel live
+    (a scratch replay of the old body: 0 differing pixels of 1,330 inked). Fix: the body reads
+    `@Environment(\.isEnabled)`; disabled = ONE quiet face for every role (`faint` ink, `line` border, `surface`
+    paper, no press dimming; the role's weight kept so labels never reflow). Sweep of the 17 files: ONE calm-button
+    one-off — `CeremonySheetChrome`'s confirm `.opacity(canConfirm ? 1 : 0.45)`, folded per R-VX381-A2 (the button IS
+    `.disabled(!canConfirm)`, so the environment carries the face). Faces that now grey for the first time: the
+    lobby's unlock/open doors while busy (`StoreLockView`, `LibraryMissingView`), Blocks' bulk merge under 2 picked,
+    Canvas's order door when empty. Pins `CalmButtonDisabledFaceTests` (3: every voice × role distinct and quieter; a
+    container's `.disabled` draws the same face; the ceremony confirm dims ONCE) — red on old, green on new.
+  - U1.2 **VX-250 (1) — DONE** (3b69e030): her four mint receipts verbatim; P-VX381-1's `shownByTagging` in the same
+    register. Pin `VocabularySweepTests.herShorterMintReceiptsLandVerbatim` + two justified edits — red/green above.
+  - U1.3 **VX-250 (2) — DONE** (9c6d2611): `Blocker.reason` = whole sentences; her three verbatim + her purged-tag
+    fallback ("Its rule needs a tag that no longer exists."); `GatheringNoteDoorCopy.cannot` says the reason as it
+    stands (the "This gathering can't take a new note: …" frame retired); `unmatchedReason` = her unreachable
+    sentence. Core red-on-old (the pre-fix file restored): 2 tests failed, 27 issues; green 20/2. App hover pins
+    red/green above. **PROVISIONAL drafts (for the orchestrator):** finished "Finished — reopen it to add notes." ·
+    no rule "No rule yet — give it one to add notes." · unreadable "Its rule can't be read — edit it to add notes." ·
+    legacy date "Its rule needs an entry date, which a new note doesn't have." · legacy kind "Its rule needs a kind
+    of note, which a new note doesn't have." Observation (pre-existing): a rule naming a LIVE tag of ANOTHER wing
+    reads as dead in the gathering's wing, so it says "…which no longer exists.".
+  - U1.4 **VX-250 (3) — FIXED** (6adfd7c6). Traced: the planner returned `.blocked(.unreachableTerm)` for every
+    `.not` conjunct and every any-of with a non-atom option, so a rule a fresh note meets as it is greyed the door and
+    refused the op. Fix: a fresh-note evaluator mirroring `ruleSQL` exactly (three-valued for the legacy NULLs;
+    subtree `tagCovers` fed live paths by `Queries.gatheringMintOutcome`); NOT conjuncts and NOT options DEFERRED,
+    then every conjunct checked against the note the plan makes (a door never enabled for a press the belt refuses);
+    an any-of pick prefers an option keeping the NOTs true (`(#a OR #c) AND NOT #a` takes #c — an any-of pick is not
+    a MUST). Still blocked: legacy date/kind terms, an empty any-of, an any-of with a nested group or legacy option.
+    The `matchesRule` belt untouched. Core red-on-old by behavioural revert: 5 tests failed, 15 issues; the
+    contradiction guards (her `#a AND NOT #a`, the subtree form, ★) green on both sides; restored 26/2 green.
+    **PROVISIONAL P-VX381-U1-1:** an any-of with a NOT option the fresh note already meets is met with NO tag
+    (`#a OR NOT #b` mints wearing nothing, receipt "Added to the gathering."); the alternative (take #a anyway)
+    applies a tag nothing requires.
+  - U1.5 **VX-240 — FIXED** (0b47c514 + 4c26f4a1). Traced: the scene's non-ready arm drew the stub for every
+    non-`.ready` state, and the reopen roads keep the window open through `.opening`. Fix: `nonReadyFace` — `.opening`
+    shows her "Opening your library…" (U+2026) beside a small spinner; every settled closed state keeps the stub (the
+    window closes on those, VX-224). Pins (`SettingsLockCloseTests`): the pure face + a real bootstrap's adoption held
+    on a gate in `.opening` (the spinner is an `NSProgressIndicator`, measured offscreen first; SwiftUI `Text` is not
+    reachable through accessibility there, so the words ride the pure pin) — red on old, green on new.
+  - U1.6 **VX-241 — FIXED** (2433b5ca). Traced: the chip's add picker offers archived gatherings
+    (`MembershipChip.refresh` filters kind + lock only — 13i-e's open explicit adds), the op tags correctly, and the
+    receipts claimed a showing the archived gathering's EMPTY assembly denies. Fix: `SmartCollectResult.
+    gatheringArchived`, read INSIDE the op's transaction; `BookcaseCopy.collectReceipt` (the board) and
+    `AddToBookCopy.collected` (the chip) speak the archived arm; a live gathering keeps each door's words. Pins: core
+    `SmartCollectTests.anArchivedGatheringStillTagsAndReportsItsArchive` + app `GatheringCollectReceiptTests` (2) —
+    red on old, green on new. **PROVISIONAL wording (for the orchestrator):** "Tagged #essays — the gathering shows it
+    once it's unarchived." · already matching: "It already matches — the gathering shows it once it's unarchived."
+  - **Observations for the orchestrator (not changed):** (1) the chip's LIVE-gathering receipts still say
+    "collected"/"collects by filter" — a third voice for R98's receipt beside P-VX381-1's register (VX-216's sitting
+    is the natural home). (2) MOBILE PARITY: the phone's `MobileMembership` lists archived gatherings and speaks the
+    same overclaim — a VM ticket candidate (`gatheringArchived` now reaches it for free). (3) The MCP time-limit
+    test's load flake above. (4) U2's VX-249 extends `SmartCollectResult` and `collectPostIntoSmartReading` — the
+    new `gatheringArchived` field rides beside its star report.
 - **U2 (VX-249 · VX-247 · VX-111):** NOT-STARTED — brief above is settled; runs after U1.
 - **Ladder:** NOT-STARTED. **Walk:** NOT-STARTED. **Closeout:** NOT-STARTED.
