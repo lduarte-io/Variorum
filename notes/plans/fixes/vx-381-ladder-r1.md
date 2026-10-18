@@ -277,3 +277,42 @@ repo); nothing in the worktree was edited but this record.
   CollectSetsTheStarTests · CollectPlannerStartingStateTests · GatheringMint (both suites) · SmartCollectTests ·
   StarContextTests · InvariantSweep · RuleWingScoping — "68 tests in 9 suites passed". The Mac batch claims were
   read against the pins' source, not re-run (a Mac run needs a stage GO).
+
+## DISPOSITIONS (the orchestrator, 2026-10-18 — same-model ladder, arbitrated against the spec; written before any fix session reads this file)
+
+- **F-2 BLOCKER — CONFIRMED, FIX.** The materialized path is the ONE deliberate denormalization (AppSpec §7) and
+  the live-unique index keys on it; reviving a subtree under a renamed parent with stale paths breaks tag
+  listings, gatherings (tagCovers walks paths) and syncs the bad row. Fix as the reviewer names: rebuild each
+  revived tag's path from its LIVE parent at revival, collision-check against the REBUILT path; the reviewer's
+  pin shape (delete → rename parent → undo ⇒ `home/goals`, the gathering shows the note, dead after parent
+  delete) red today.
+- **F-1 BLOCKER — CONFIRMED, FIX.** P1 is absolute; `IN (SELECT id FROM container)` LIST-SUBQUERY scans scale
+  with the corpus. Correlated `EXISTS` + a query-plan pin (ReadLayerP1Tests' style), red today. The same
+  pre-existing pattern in `restoreContainer`/`restoreBlock` is NOT this run's membership → Debt ticket minted
+  at this disposition (see below).
+- **F-3 MAJOR — CONFIRMED, FIX.** A raw `Refused: duplicateTagPath(path:)` on the status seam violates the
+  kind-decided-at-the-door contract (§12). One arm in the SHARED refusal table (both platforms), telling her
+  the road: name the colliding path, say rename-then-undo. The implementer drafts the sentence (her register,
+  sentence case); the orchestrator approves at the fix close. Pin as the reviewer shapes it, red today.
+- **F-4 MINOR — TICKET (not this run).** The hide-owned twin is a PRE-EXISTING class (its mechanism predates
+  this diff; this run only inherited the receipt's claim). Broadening `gatheringArchived` into a full
+  "the gathering shows it" fact is real design (hide-owned is per-gathering + a global default + ownedness).
+  VX ticket minted at this disposition; noted for her bundle beside VX-241.
+- **F-5 MINOR — ALREADY COVERED.** VM-21 carries both arms and already wears priority Low (set at mint); the
+  double space joins its body at the next touch. No action this run.
+- **F-6 NIT — RECORD AS P-VX381-U2-6, NO FIX.** For `★ OR #a` the collect stars rather than tags an existing
+  note — the mint's first-satisfiable-option rule (P-VX217-d) applied unchanged to the collect. Consistent by
+  construction; whether tags should be PREFERRED over the star in an any-of is a taste call — her bundle. One
+  line to reorder the preference.
+- **F-7 NIT — FIX (rider):** guard the empty-paths "Tagged  — …" arm to the bare "Added…" form.
+- **F-8 NIT — FIX (rider):** delete the identity `cannot` wrapper; correct `divergeTarget`'s vacuous nil-case doc.
+- **F-9 NIT — ROUTE to VX-216** (the dead-tag sentence pair is the menus/sheets sitting's surface). Handoff lists it.
+- **F-10 NIT — RECORD, NO FIX.** The planner's conservative bound (greys a satisfiable 3-term rule; never
+  enables wrongly) is the ruled conservative arm — a SAT walk is out of proportion for a door grey; the
+  in-transaction belt keeps every press honest. Bundle notes it beside U2-1.
+- **F-11 NIT — RECORD beside P-VX381-U2-5.** The other order shares the exact-stamp discipline; same rationale,
+  same bundle line.
+
+**The fix leg:** F-2, F-1, F-3 + riders F-7, F-8 — a FRESH implementer session; red-on-old pins per confirmed
+finding (F-2's and F-1's and F-3's as shaped above), revert-verified; one Mac/phone batch for any app-side pins
+under a coordinated GO; round 2 re-reviews the fixes.
