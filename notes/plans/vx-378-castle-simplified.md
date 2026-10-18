@@ -2008,7 +2008,41 @@ green now), seed 8 red; stopped there (the tree changes):
 
 Total 898,747 steps over 20,000 sequences, every seed `✔`.
 
-**ATTEMPT 3 — THE GATE SOAK, seeds 1–20, Debug then `-c release`, on the final tree:** RUNNING — the tables land here as the configurations complete. GATE_SOAK3_PENDING
+**ATTEMPT 3 — THE GATE SOAK, seeds 1–20, Debug then `-c release`, on the final tree** (`66f7561e1` for `Sources/` and `Tests/`;
+the worktree's HEAD during the run was the record commit `023ecf947`, `git diff --stat 66f7561e1..HEAD -- Sources Tests` empty):
+
+**Debug — twenty of twenty green** (`PROTECTION_SOAK=1 PROTECTION_SEED=n PROTECTION_SOAK_SEEDS=1 PROTECTION_SOAK_SEQUENCES=1000`,
+1,000 sequences × ≤60 steps per seed; 899,918 steps in all, mean 400 s per seed; `GATE DEBUG DONE fail=0 2026-10-18T08:30:03Z`):
+
+| seed | steps | result | seconds |
+|---|---|---|---|
+| 1 | 45,208 | ✔ | 379 |
+| 2 | 44,648 | ✔ | 362 |
+| 3 | 45,034 | ✔ | 367 |
+| 4 | 45,556 | ✔ | 379 |
+| 5 | 44,247 | ✔ | 358 |
+| 6 | 45,194 | ✔ | 385 |
+| 7 | 45,061 | ✔ | 459 |
+| 8 | 45,006 | ✔ | 433 |
+| 9 | 44,925 | ✔ | 397 |
+| 10 | 44,577 | ✔ | 475 |
+| 11 | 45,292 | ✔ | 379 |
+| 12 | 44,639 | ✔ | 405 |
+| 13 | 45,642 | ✔ | 379 |
+| 14 | 45,341 | ✔ | 391 |
+| 15 | 44,534 | ✔ | 412 |
+| 16 | 44,946 | ✔ | 481 |
+| 17 | 44,948 | ✔ | 363 |
+| 18 | 45,105 | ✔ | 366 |
+| 19 | 45,165 | ✔ | 407 |
+| 20 | 44,850 | ✔ | 420 |
+
+**Release — RE-RUN IN PROGRESS, same tree, same seeds.** The soak script's release leg never ran: the script was zsh, which does
+not word-split an unquoted scalar, so its `-c release` reached `swift test` as ONE argument (`error: Unknown option '-c release'`),
+every release seed exited at once with an empty result line, and the script's own `fail=1` marker recorded exactly that — a script
+fault, not a tree fault (verified by running the release command directly on the same tree: it builds and passes). The Debug
+results above stand (the tree has not changed); the release pass runs now from a release-only script with the flag spelled as
+two words (`soak3-release.sh`, appending to the same log under a `RELEASE RERUN START` marker). GATE_SOAK3_RELEASE_PENDING
 
 
 

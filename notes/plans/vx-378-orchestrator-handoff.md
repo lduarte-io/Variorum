@@ -165,6 +165,11 @@ scratchpad; trust nothing from a transcript.
 
 ## 6. Machinery lessons (this phase)
 
+- **zsh does not word-split an unquoted scalar.** `extra="-c release"; swift test $extra` passes ONE argument under zsh and
+  `swift test` refuses it instantly; the soak script's release leg produced twenty empty lines in a second and a `fail=1` marker.
+  Spell flags as separate words (or an array: `extra=(-c release)`), and treat a run whose per-seed line is EMPTY as a script
+  fault to reproduce by hand before reading it as a red. The Debug leg was unaffected (an empty scalar expands to nothing).
+
 - `swift test` with a wide `--filter` sweeps `MultiTenantSyncAttackerTests` in; under `-c release` it fails on the
   Argon2 production floor — that is VX-380, never a Protection red. A full-suite Debug run once hit a 60-s timeout in
   `StarContextTests` under load (green alone) — timing class, not ours.
