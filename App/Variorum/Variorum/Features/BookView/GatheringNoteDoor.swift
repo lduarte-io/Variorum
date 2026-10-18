@@ -79,8 +79,13 @@ nonisolated enum GatheringNoteDoorCopy {
 /// The door itself — drawn as the book's "+ new note" is (`.borderless`,
 /// the small chrome font, the accent ink), with an HONEST disabled face: the
 /// accent gives way to the faint ink, so the grey is visible whatever the
-/// button style does with `disabled` (her R-VX214-3; VX-194's app-wide
-/// disabled-blind style is not this surface's).
+/// button style does with `disabled` (her R-VX214-3). This door was never a
+/// `CalmButtonStyle` button — it wears the book foot's own `.borderless`
+/// style so the two feet look the same (her VX-217 ruling) — so VX-194's
+/// style fix does not reach it, and its local face STAYS (R-VX381-A1: the
+/// ticket's "fold it into the style" step is not applicable; moving it onto
+/// the calm style would put a bordered button beside the book's borderless
+/// ones).
 struct GatheringNoteDoor: View {
     let tokens: VoiceTokens
     let word: String
