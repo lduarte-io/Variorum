@@ -86,6 +86,19 @@ every commit (`notes/SessionResiliencyProtocol.md`); synchronous foreground wait
 rewrite history; commits name their member and `Part of VX-382`, with NO attribution trailer of any kind. The dev
 store's Castle credentials, if a lock screen appears, are `~/.variorum/dev-castle.env` (never invent, never commit).
 
+## HER OVERNIGHT MANDATE (2026-10-18, mid-U1b — verbatim)
+
+> *"I want you to run ruling provisionally overnight. I'm going to sleep. You can merge to main when you're done -
+> if other sessions finish first that's fine, merge in the order you finish in. if you finish, I want you to leave
+> me with a handoff AND separately a completed block of everything that was done (including if new items were
+> minted during the run) in this sort of format:"* — followed by the VX-382 member checklist in the runway's
+> checkbox format (one `- [ ]` row per member under the part-B heading).
+
+Applied: PROVISIONAL-and-continue through U2, the ladder and the closeout; the PR merges to `main` at the finish
+(closeouts serialize — merge in finish order with the other live efforts); the closeout delivers BOTH the author
+handoff (`notes/handoffs/vx-382-handoff.md`) AND, separately, the completed checkbox block — every member `[x]` with
+its outcome, plus any tickets MINTED during the run listed in the same block.
+
 ## KICKOFF RECORD (2026-10-18, the orchestrator — session `vx-382`)
 
 - **Seating:** branch `vx-382-book-view-doors` cut from `origin/main` at 745884f27, pushed; worktree
