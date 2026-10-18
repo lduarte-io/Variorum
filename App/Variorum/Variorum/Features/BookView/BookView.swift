@@ -2406,6 +2406,8 @@ enum BookOutlineGeometry {
         focusDoorStore.release(owner: owner)
         openDoorStore.release(owner: owner)
         modeDoorStore.release(owner: owner)
+        // VX-291: the Outline's fold controls' frames.
+        BookFoldGeometry.release(owner: owner)
     }
 
     // MARK: - A pin's doors (unconditional — a pin owns nothing)
@@ -2884,9 +2886,12 @@ private struct OutlinePostRow: View {
         HStack(spacing: 6) {
             // 13b 3E (D1): the ONE collapse door — it releases focus too,
             // so collapsing the post you're typing in actually collapses it.
-            Button("▾") { model.collapse(entry.postID) }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                .help("Collapse this note back to its card")
+            // VX-291: the card's ▸ and this ▾ are ONE control (the 22-pt
+            // target, grown outward).
+            BookFoldDisclosure(
+                tokens: tokens, folded: false, help: "Collapse this note back to its card",
+                probeKey: "header-\(entry.postID)"
+            ) { model.collapse(entry.postID) }
             Text(outlineEntryTitle(entry))
                 .font(tokens.heading)
                 .foregroundStyle(tokens.ink)
@@ -2929,17 +2934,15 @@ private struct OutlinePostRow: View {
         } label: {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 6) {
-                    Button {
-                        model.expand(entry.postID)
-                    } label: {
-                        Text("▸")
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.faint)
-                            .padding(.horizontal, 2)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .help("Unfold this note in place — write in it right here")
+                    // VX-291 (her "that one little triangle could stand to
+                    // just be a bit bigger"): a 22-pt target grown OUTWARD —
+                    // the card lays out what it always did, so its learned
+                    // height holds, and a near miss no longer opens the note.
+                    BookFoldDisclosure(
+                        tokens: tokens, folded: true,
+                        help: "Unfold this note in place — write in it right here",
+                        probeKey: "card-\(entry.postID)"
+                    ) { model.expand(entry.postID) }
                     Text(outlineEntryTitle(entry))
                         .font(tokens.body.weight(.semibold))
                         .foregroundStyle(tokens.ink)

@@ -209,6 +209,8 @@ enum BookIndexGeometry {
         contentSpanStore.release(owner: owner)
         takesBadgeStore.release(owner: owner)
         takesSheetStore.release(owner: owner)
+        // VX-291: the chapter rows' fold controls' frames.
+        BookFoldGeometry.release(owner: owner)
     }
 
     // MARK: - A pin's doors (unconditional — a pin owns nothing)
@@ -976,14 +978,18 @@ struct BookIndexView<Masthead: View>: View {
         _ row: BookIndexColumn.Row, title: String, count: Int, folded: Bool
     ) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Button(folded ? "▸" : "▾") {
+            // VX-291 (PROVISIONAL — the ticket's "if she agrees"; the plan
+            // recommends it): the Outline's fold control, the same 22-pt
+            // target grown outward, so a chapter's ▸/▾ is not the 11.5-pt
+            // glyph the Outline's was.
+            BookFoldDisclosure(
+                tokens: tokens, folded: folded,
+                help: folded ? "Unfold this chapter" : "Fold this chapter to its heading",
+                probeKey: row.groupID.map { "chapter-\($0)" }
+            ) {
                 guard let groupID = row.groupID else { return }
                 if folded { collapsed.remove(groupID) } else { collapsed.insert(groupID) }
             }
-            .buttonStyle(.plain)
-            .font(tokens.small)
-            .foregroundStyle(tokens.faint)
-            .help(folded ? "Unfold this chapter" : "Fold this chapter to its heading")
             Text(tokens.chromeLabel(title))
                 .font(tokens.small.weight(.semibold))
                 .foregroundStyle(tokens.accent)

@@ -244,7 +244,7 @@ tickets:
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
 | U1a — VX-303 (the landing road) | VERIFIED 2026-10-18 (`vx-382-u1a` window) — red-on-old A·B·C red as planned, both guard probes red, tree restored clean between each; batch `Test run with 1590 tests in 259 suites` — 4 issues + 5 known: VX-115's standing red (BookCollectingDoorsTests) + `DestructiveUndoWarningTests.redoNeverAsks` (the known VX-167 parallelism flake, signature :141–143); VX-77's standing red did NOT reproduce (passed). 9 skipped (2 disabled suites). §U1a RECORD → batch results. Code tip f0d1b414f |
 | U1b — VX-304 (the box door + Index takes) | VERIFIED 2026-10-18 (windows `vx-382-u1b` + `vx-382-u1b-walk`) — red-on-old B·C·D + both guard probes red as planned; batch 1998 tests / 332 suites: standing reds only (VX-115; VX-167's redoNeverAsks, red alone, same signature) + FINDING D-2, FIXED ab3db8f19 (the departing Outline ate the reveal) — 64-suite family 308/64 green (4 known), its red-on-old red; OutlineRoomTests PASSED; THE U1 WALK: Study 11 rows PASS (W1/W3 not walked — same road, pinned), Terminal 6 face/act rows PASS; posture restored, 0 instances, 0 GiB pruned (nothing superseded). §U1b RECORD |
-| U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | IN-PROGRESS (implementer: opus-implementer, fresh, 2026-10-18) — VX-77's archaeology DONE headless (§U2 RECORD: no main-side fixing commit found; the red's pattern points at the test host's appearance — the window's probe decides); next VX-291 → VX-21 → VX-69 → VX-115; every run PENDING the `vx-382-u2` window |
+| U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | IN-PROGRESS (implementer: opus-implementer, fresh, 2026-10-18) — VX-77 archaeology DONE headless (§U2 RECORD: no fixer; the test host's appearance — the window's probe decides) · VX-291 BUILT (the fold control; `build-for-testing` green) · next VX-21 → VX-69 → VX-115; every run PENDING the `vx-382-u2` window |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
 | Closeout (canon deltas, tickets, PR, handoff) | NOT STARTED |
 
@@ -835,3 +835,31 @@ robustness — `window.appearance = NSAppearance(named: .aqua)` in the three lum
 `mountBook` and `withReadHost`, BookOrderConversionTests' navigator pin) would make the scan's verdict independent of
 the host's posture (the "suites share real UserDefaults" class CLAUDE.md names). A test-only change, red-on-old by the
 same dark probe. Owner if not ruled in: a Tests & tooling ticket.
+
+### VX-291 — the fold control (built; runs PENDING the window)
+
+- **Trace (re-read on the tip):** the Outline card's ▸ (`BookView.collapsedPostCard`) was `Text("▸")` at the voice's
+  11.5-pt small size, faint, 2 pt of padding — measured off the font: 7.1×14 + 4 = **~11×14 pt**, inside the card's
+  own Button, so a near miss opened the note. The expanded header's ▾ (`postHeader`) was a different control (a
+  `VoicedButtonStyle(.quiet)` word, ~17×18). The Index's chapter fold (`BookIndexView.chapterRow`) was the bare
+  11.5-pt glyph in a plain Button.
+- **Built:** ONE control, `Features/BookView/BookFoldDisclosure.swift` — a 13-pt glyph in the quiet ink inside a
+  **22-pt square that is the target** (`.contentShape` after the frame) and wears the voiced hover wash
+  (`tokens.wash`, radius 4 — `VoicedButtonStyle`'s grammar); the square GROWS OUTWARD — negative padding pulls the
+  row's footprint back to 12×13 (≤ the replaced glyph's 14-pt line), so no row grows: the Outline card keeps the
+  height `BookOutlineHeights` learned (the 46-pt chrome constant), and the Index chapter row's baseline math keeps
+  its height to a fraction of a point (computed off the fonts: the 13-pt glyph's baseline sits ~11.1 pt under the
+  footprint's top, the 11.5-pt title's ~11.1–11.3 under its own; the walk eyes it). The
+  overhang (5 pt a side) is under every host's spacing (6 · 6 · 8), so the target never reaches a title. Used by
+  the card's ▸, the header's ▾ and the Index chapter fold.
+- **PROVISIONAL (her bundle):** P-U2-1 — the Index chapter fold takes the same control (the ticket's "if she agrees",
+  the plan's recommended yes). P-U2-2 — both glyphs wear the QUIET ink (the ▾'s, `tokens.muted`) where the ▸ wore
+  `faint`: one control, one ink. P-U2-3 — the expanded header's title sits ~5 pt further left (the ▾'s footprint
+  went from the voiced word's ~17 pt to the control's 12) and the Index chapter title ~5 pt further right (7 → 12);
+  the card's title moves ~1 pt.
+- **Evidence (a taste row — a geometry oracle + the walk, not red-on-old):** DEBUG `BookFoldGeometry` (each control's
+  TARGET and FOOTPRINT rectangles, owned per 18k C4, released with the Outline's and the Index's oracles);
+  `VariorumTests/BookFoldDisclosureTests.swift` — the card's ▸ and the header's ▾: target ≥ 22², grown outward past
+  the footprint on all four sides, footprint ≤ the replaced 11.5-pt glyph's line, ▸ and ▾ the same box; the Index
+  chapter folds the same. On the pre-fix tree nothing reports (red by absence, recorded — no oracle existed). The
+  walk checks the size, the hover wash and a click in the overhang (both voices).
