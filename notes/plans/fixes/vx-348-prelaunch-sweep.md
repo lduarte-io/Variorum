@@ -360,7 +360,8 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   decision; headless replica green, red on the old rule); **PENDING:** the one-suite re-run
   (`VX350ControlsWidthClassTests`, the next window, the final product), the walk (three widths × both voices, light and dark — the list in
   the record), the QUESTIONS bundle (P-VX176-1, P-VX349-1, P-VX350-1…7). The U3 UNIT RECORD carries the rest.
-- **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** NOT-STARTED.
+- **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** IN-PROGRESS — the U4 UNIT RECORD (at the end
+  of this file) carries the live status.
 - Then the ladder (fresh Fable per round, whole diff), closeout, merge. **Her overnight mandate (2026-10-18):**
   rule PROVISIONALLY and continue; merge to main at this run's own finish (finish-order serialization with
   VX-381/VX-382); leave the handoff AND, separately, the completed checklist block in her format. **Release (her
@@ -1866,3 +1867,29 @@ region of the controls row / panel / header per state:
 - **THE PRUNE (the coordinator's disk warning):** u2-red · u2-fixleg-red · u2-fixed · u5-fix · u3-red · u3-fixed and
   their five durable checkouts removed after verification — 24 → 41 GiB free. The combined walk window runs on the
   post-U4 product.
+
+## U4 UNIT RECORD (VX-351 · VX-384 · VX-385 + VX-355 — the stamps and the riders)
+
+*Implementer: `opus-implementer` at xhigh, fresh session, 2026-10-18. Read in its own context before any code: this plan
+(the kickoff sitting R-VX348-1…4 and "VX-351's build shape", the member sections, her overnight mandate, the Environment
+traps, the U3 record — it reworked `LibraryCatalogView`/`LibraryControlsFlow`), `notes/SessionResiliencyProtocol.md`,
+`notes/MCPSpec.md` in full (the grant picker and Settings ▸ MCP are speakers), CLAUDE.md + its canon, the four ticket
+bodies and VX-231's road in the VX-246 record (§"VX-231 — the mechanism/the fix"). Lane: app chrome + pure
+`TimeStampFace` additions only — no `Sync/`, custody, Keychain, `Protection/`, synced schema or TK2 editor-seam line.*
+
+**NOT DONE BY THIS UNIT (first line, by the brief's rule):** no `xcodebuild test` and no walk — the stage is the
+orchestrator's. Headless `swift test` runs here; the Mac pins compile `build-for-testing` from durable checkouts and
+their RUN is PENDING the batch; the walk (every speaker's hover, both voices) is PENDING the run's combined window.
+
+**Machinery note (honesty):** U3's fix leg is live in this SAME worktree (its `e35c034fa` landed while this unit read
+in). Disjoint files by design (the U2/U3 precedent); every U4 commit is path-limited and stages only U4's own hunks
+(the plan file included — checked by `git diff` before each commit).
+
+### LIVE STATUS (per member)
+
+- **VX-351 (the exact edit time past today, as ruled):** IN-PROGRESS — the sweep read; the design below; nothing built.
+- **VX-384 (a row-menu mint not listed until re-entry):** NOT-STARTED — traced (below); the fix rides VX-231's road.
+- **VX-385 + VX-355 (the Pool's quiet-receipt home):** NOT-STARTED — the shape: the shared `QuietReceiptLine` laid out
+  at the Pool's foot.
+- **Products (u4-fixed / u4-red):** NOT-STARTED.
+- **No behavioural revert is in flight in this worktree.**
