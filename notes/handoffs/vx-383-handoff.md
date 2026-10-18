@@ -14,7 +14,7 @@ custody"* (and nothing did).
    Their plans with paste-ready prompts are `notes/plans/fixes/vx-381-gatherings-tags.md` and
    `notes/plans/fixes/vx-382-book-view-doors.md`. Both run without you. **VX-216** (the menus and sheets clarity pass)
    stays yours, after VX-381 merges. No coordinator session is live; each run claims `Tools/stage` directly.
-2. **Once the refreshed build is in /Applications: Help ▸ Restore Tutorial… once.** Four of the field guide's
+2. ~~**Once the refreshed build is in /Applications: Help ▸ Restore Tutorial… once.**~~ DONE — her word 2026-10-18 ("i've also restored my tutorial"). Four of the field guide's
    sentences changed (three say "Duplicate with Tags" where "Duplicate as Version" was; the AI chapter's recipe 6 now
    says the copy lands in the Pool unless you name a book or a book collects its tags). Your seeded guide keeps the
    old words until you restore it.
