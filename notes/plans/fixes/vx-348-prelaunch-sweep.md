@@ -1457,3 +1457,25 @@ products pruned at the coordinator's ask (u1-red/u1-fixed/u5-red/u5-fixed/u5-mob
   ONE commit); make the mount rig actually present the popover unattended (or re-shape the hollow cells to drive
   the leave roads without it); re-prove red-on-old for those cells on the red product; rebuild; new expected reds
   recorded. A fresh READY follows its report. U3 builds concurrently (Features/Library — disjoint files).
+
+## U3 UNIT RECORD (VX-350 · VX-349 · VX-176 — the Library's row and header)
+
+*Implementer: `opus-implementer` at xhigh, fresh session, 2026-10-18. Read in its own context before any code: this plan
+(the three member sections, the U3 line, the Environment traps, the kickoff sitting and her overnight mandate),
+`notes/SessionResiliencyProtocol.md`, the VX-283 record's VX-175 sections (her ruling (C), P-U3-5, U3b's S0–S5 and R-S,
+U3c's T1–T3, P-U3c-1 and R-P, D8), CLAUDE.md + its canon, the three ticket bodies. Lane: app-side Library chrome only — no
+`Sync/`, custody, Keychain, `Protection/`, synced schema or TK2 editor-seam line. U2's fix leg shares this worktree
+(disjoint files): every U3 commit is path-limited.*
+
+**NOT DONE BY THIS UNIT (first line, by the brief's rule):** no `xcodebuild test` and no walk — the stage is the
+orchestrator's. The Mac pins are written, compiled `build-for-testing`, and both legs PREBUILT (paths, commands and the
+expected reds at the end of this record); their RUN is PENDING the batch; the walk (three widths × both voices — the list
+below) is PENDING the orchestrator's window.
+
+### LIVE STATUS (per member)
+
+- **VX-176 (segmented controls in system blue, dark Terminal):** IN-PROGRESS — design settled (below).
+- **VX-349 (the doubled line under the List's first header at rest):** IN-PROGRESS — traced (below); fix + pin next.
+- **VX-350 (the Library at narrow widths):** NOT-STARTED — the settled design below.
+- **Products (u3-fixed / u3-red):** NOT-STARTED.
+- **No behavioural revert is in flight.**
