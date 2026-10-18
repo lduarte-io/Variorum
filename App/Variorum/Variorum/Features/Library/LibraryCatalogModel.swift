@@ -644,6 +644,40 @@ final class LibraryCatalogModel {
             startingOver: true)
     }
 
+    /// **VX-384 (the VX-348 run, U4) — the one-shot listing FOLLOWS the held
+    /// one** (`LibraryViewModel.listingMoves` — VX-231's road, the Bookcase's
+    /// `followHeldMove` one surface over). Her report (VX-383's walk W1): a
+    /// note duplicated from a List row's own menu spoke its receipt and the
+    /// Bookcase's counts moved, but the List kept its rows until she left the
+    /// Library and came back — this listing is a one-shot `search()` answer,
+    /// re-asked only by its own doors, a wing, a mode and the deleted-notes
+    /// signal, and the row menu's mint re-asked none of them. Now any change
+    /// in WHICH notes the wing holds re-asks it in place (`refresh` — her
+    /// scroll and pages kept), from any door.
+    ///
+    /// SINGLE-FLIGHT, never inside the observation's own turn: a move landing
+    /// while a re-read runs asks for exactly one more after it. ∝ the listed
+    /// rows once per membership move, never per keystroke (P1). An act whose
+    /// own door already re-asks (an archive from the row menu) reads twice —
+    /// VX-231's accepted double read, one per act.
+    @ObservationIgnored private var listingFollow: Task<Void, Never>?
+    @ObservationIgnored private var listingFollowAgain = false
+
+    func followListingMove() {
+        guard listingFollow == nil else {
+            listingFollowAgain = true
+            return
+        }
+        listingFollow = Task { [weak self] in
+            guard let self else { return }
+            repeat {
+                listingFollowAgain = false
+                await refresh()
+            } while listingFollowAgain && !Task.isCancelled
+            listingFollow = nil
+        }
+    }
+
     /// **The SAME question, re-asked IN PLACE** after an act on the listing's
     /// own rows (a rename, a tag, an archive, a delete, a wing move, a book's
     /// row menu): every note she has scrolled through is re-read in ONE

@@ -391,6 +391,11 @@ struct LibraryCatalogView: View {
         .onReceive(NotificationCenter.default.publisher(for: .variorumNotesDeleted)) { _ in
             Task { await model.refresh() }
         }
+        // VX-384 (the VX-348 run, U4): …and it FOLLOWS the held listing — a
+        // note minted, duplicated, revived or removed from ANY door moves the
+        // wing's held membership, and this one-shot listing re-asks in place
+        // (VX-231's road: the held observation followed by its one-shot twin).
+        .onChange(of: library.listingMoves) { _, _ in model.followListingMove() }
     }
 
     // MARK: - The search state's faces (13o U2 — Direction C, R-13o-15)
