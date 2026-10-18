@@ -75,20 +75,39 @@ struct GatheringMintPlannerTests {
         #expect(outcome(.tag("a"), finished: true) == .blocked(.finished))
     }
 
-    /// The words are sentence fragments in R98's register (they follow
-    /// "This gathering can't take a new note: ") — no shouting, no caps.
-    @Test func everyReasonIsAQuietFragment() {
+    /// VX-250 (2) — her SHORTER hovers (QUESTIONS #217), byte for byte, and
+    /// her fallback for a dead tag no row remembers. (A JUSTIFIED EDIT: this
+    /// slot pinned the long lowercase fragments that followed "This gathering
+    /// can't take a new note: " — her answer retired both.)
+    @Test func herShorterHoversLandVerbatim() {
+        #expect(GatheringMint.Blocker.archived.reason
+                == "Archived \u{2014} unarchive it to add notes.")
+        #expect(GatheringMint.Blocker.deadTag(path: "essays").reason
+                == "Its rule needs #essays, which no longer exists.")
+        #expect(GatheringMint.Blocker.unreachableTerm.reason == "Its rule can't match a new note.")
+        #expect(GatheringMint.Blocker.deadTag(path: nil).reason
+                == "Its rule needs a tag that no longer exists.")
+        #expect(GatheringMint.unmatchedReason == GatheringMint.Blocker.unreachableTerm.reason,
+                "the belt says what the greyed door would have")
+    }
+
+    /// The rest, drafted into her register: one terse sentence each —
+    /// capitalized, closed with a period, no shouting (no all-caps word).
+    @Test func everyReasonIsATerseSentenceInHerRegister() {
         let all: [GatheringMint.Blocker] = [
             .archived, .finished, .noRule, .malformedRule, .deadTag(path: "x/y"),
             .deadTag(path: nil), .datedRule, .kindRule, .unreachableTerm,
         ]
         for blocker in all {
             let reason = blocker.reason
-            #expect(!reason.isEmpty)
-            #expect(reason.first?.isLowercase == true, "\(blocker): \(reason)")
-            #expect(!reason.contains("NOT"), "\(blocker): \(reason)")
+            #expect(reason.first?.isUppercase == true, "\(blocker): \(reason)")
+            #expect(reason.hasSuffix("."), "\(blocker): \(reason)")
+            #expect(reason.count <= 64, "terse: \(blocker): \(reason)")
+            let shouted = reason.split(whereSeparator: { !$0.isLetter })
+                .filter { $0.count > 1 && $0.allSatisfy(\.isUppercase) }
+            #expect(shouted.isEmpty, "\(blocker): \(reason)")
         }
-        #expect(GatheringMint.Blocker.deadTag(path: "x/y").reason.contains("#x/y"))
+        #expect(Set(all.map(\.reason)).count == all.count, "each says its own thing")
     }
 }
 
@@ -240,7 +259,9 @@ struct GatheringMintOperationTests {
             let a = try ops.createTag(name: "a")
             let reading = try gathering(ops, .and([.tag(a.id), .star]))
             try ops.archiveReading(reading.id)
-            try expectRefusal(ops, db, reading.id, reasonContains: "archived")
+            // (JUSTIFIED EDIT at VX-250 (2): her sentence, "Archived — …".)
+            try expectRefusal(
+                ops, db, reading.id, reasonContains: GatheringMint.Blocker.archived.reason)
         }
     }
 

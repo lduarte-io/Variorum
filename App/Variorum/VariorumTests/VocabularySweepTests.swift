@@ -125,9 +125,15 @@ struct VocabularySweepTests {
             outcome: .plan(.init(tagIDs: ["t"], star: true)), tagPaths: ["poems"])
         #expect(GatheringNoteDoorCopy.help(both)
                 == "A new note tagged #poems and starred, so this gathering shows it")
+        // (JUSTIFIED EDIT at VX-250 (2): her shorter hover is the whole
+        // sentence; the "This gathering can't take a new note: …" frame is
+        // retired.)
         let archived = GatheringMintFace(outcome: .blocked(.archived), tagPaths: [])
-        #expect(GatheringNoteDoorCopy.help(archived)
-                == "This gathering can't take a new note: " + GatheringMint.Blocker.archived.reason + ".")
+        #expect(GatheringNoteDoorCopy.help(archived) == "Archived \u{2014} unarchive it to add notes.")
+        let ghost = GatheringMintFace(outcome: .blocked(.deadTag(path: "essays")), tagPaths: [])
+        #expect(GatheringNoteDoorCopy.help(ghost) == "Its rule needs #essays, which no longer exists.")
+        let unmatchable = GatheringMintFace(outcome: .blocked(.unreachableTerm), tagPaths: [])
+        #expect(GatheringNoteDoorCopy.help(unmatchable) == "Its rule can't match a new note.")
 
         // (A JUSTIFIED EDIT at VX-250: the receipt's words are her SHORTER
         // ones now — pinned verbatim in `herShorterMintReceiptsLandVerbatim`.)

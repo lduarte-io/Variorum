@@ -57,12 +57,15 @@ nonisolated enum GatheringNoteDoorCopy {
     /// The Outline flow's word — the book's twin says "in this book".
     static let flowWord = "+ new note in this gathering"
 
-    /// A refusal, and the greyed door's hover: the op's own reason.
-    static func cannot(_ reason: String) -> String {
-        "This gathering can't take a new note: \(reason)."
-    }
+    /// A refusal, and the greyed door's hover: the op's own reason, as the
+    /// whole sentence. VX-250 (2): her shorter hovers are complete sentences
+    /// ("Archived — unarchive it to add notes."), so the old frame — "This
+    /// gathering can't take a new note: …" — is retired and the reason is
+    /// said as it stands (`GatheringMint.Blocker.reason`, the one home).
+    static func cannot(_ reason: String) -> String { reason }
 
     /// The hover — what a new note here will wear, or why there can't be one.
+    /// The enabled-state hovers stay as drafted (her #217 answer).
     static func help(_ face: GatheringMintFace?) -> String {
         guard let face else { return "A new note made inside this gathering" }
         if let blocker = face.blocker { return cannot(blocker.reason) }

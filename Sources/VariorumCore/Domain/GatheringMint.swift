@@ -59,30 +59,38 @@ public enum GatheringMint {
         /// fresh note can't be made to match by tagging and starring.
         case unreachableTerm
 
-        /// The reason fragment, in R98's descriptive register (lowercase, it
-        /// follows "This gathering can't take a new note: "). ONE home for
-        /// the words: the door's hover and the op's refusal both say this.
+        /// The whole sentence the greyed door's hover says — and the op's
+        /// refusal, word for word. ONE home for the words.
+        ///
+        /// VX-250 (2) — her SHORTER register (QUESTIONS #217, verbatim for
+        /// three of them): "Archived — unarchive it to add notes." · "Its rule
+        /// needs #essays, which no longer exists." · "Its rule can't match a
+        /// new note." — and, when no row knows the dead tag's path (purged, or
+        /// a sync gap), "Its rule needs a tag that no longer exists." The
+        /// rest are drafted into the same register (PROVISIONAL, the run
+        /// record): finished, no rule, an unreadable rule, the legacy
+        /// date/kind terms. The old "This gathering can't take a new note: …"
+        /// frame is retired with the long fragments it carried.
         public var reason: String {
             switch self {
             case .archived:
-                "it's archived, and an archived gathering shows nothing \u{2014} unarchive it first"
+                "Archived \u{2014} unarchive it to add notes."
             case .finished:
-                "it's finished \u{2014} reopen it first"
+                "Finished \u{2014} reopen it to add notes."
             case .noRule:
-                "it has no rule yet \u{2014} give it one first"
+                "No rule yet \u{2014} give it one to add notes."
             case .malformedRule:
-                "its rule can't be read \u{2014} edit the rule first"
-            case .deadTag(let path):
-                "its rule needs " + (path.map { "the tag #\($0)" } ?? "a tag")
-                    + ", which doesn't exist right now \u{2014} recreate it (Settings \u{2192} Tags) "
-                    + "or edit the rule"
+                "Its rule can't be read \u{2014} edit it to add notes."
+            case .deadTag(let path?):
+                "Its rule needs #\(path), which no longer exists."
+            case .deadTag(nil):
+                "Its rule needs a tag that no longer exists."
             case .datedRule:
-                "its rule picks notes by entry date, and a new note has none yet"
+                "Its rule needs an entry date, which a new note doesn't have."
             case .kindRule:
-                "its rule picks one kind of note, and a new note isn't that kind"
+                "Its rule needs a kind of note, which a new note doesn't have."
             case .unreachableTerm:
-                "its rule leaves notes out, or nests its terms, in a way a new note "
-                    + "can't be made to match"
+                "Its rule can't match a new note."
             }
         }
     }
@@ -94,8 +102,10 @@ public enum GatheringMint {
 
     /// The reason the op's belt speaks if a plan ever fails the assembly's
     /// own probe (the probe is the authority on matching; the planner only
-    /// proposes). Unreachable for every shape the planner admits.
-    public static let unmatchedReason = "a new note can't be made to match its rule"
+    /// proposes). Unreachable for every shape the planner admits — and it
+    /// says what the greyed door would have: her "Its rule can't match a new
+    /// note." (VX-250 (2)).
+    public static let unmatchedReason = Blocker.unreachableTerm.reason
 
     /// **THE PLANNER** — pure over the gathering's state, its rule and the
     /// liveness of the tags the rule names.

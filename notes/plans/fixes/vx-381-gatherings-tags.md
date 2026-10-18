@@ -255,7 +255,15 @@ disposition here.
     busy (`StoreLockView`, `LibraryMissingView`), Blocks' bulk merge under 2 picked, Canvas's order door when empty.
   - U1.2 VX-250 (1) mint receipt + P-VX381-1 `shownByTagging`: DONE (this commit) — her four strings verbatim;
     pins `VocabularySweepTests.herShorterMintReceiptsLandVerbatim` + two justified edits; run: PENDING (Mac batch).
-  - U1.3 VX-250 (2) greyed hovers: NOT-STARTED.
+  - U1.3 VX-250 (2) greyed hovers: DONE (this commit) — `Blocker.reason` = whole sentences; her three verbatim +
+    her purged-tag fallback; `GatheringNoteDoorCopy.cannot` says the reason as it stands (the "This gathering can't
+    take a new note: …" frame retired); `unmatchedReason` = her unreachable sentence. **PROVISIONAL drafts (for the
+    orchestrator at the unit close):** finished "Finished — reopen it to add notes." · no rule "No rule yet — give it
+    one to add notes." · unreadable "Its rule can't be read — edit it to add notes." · legacy date "Its rule needs an
+    entry date, which a new note doesn't have." · legacy kind "Its rule needs a kind of note, which a new note
+    doesn't have." Core `GatheringMint` 20/2 green; red-on-old: PENDING (next). App pin edit: PENDING (Mac batch).
+    Observation (pre-existing, not changed): a rule naming a LIVE tag of ANOTHER wing reads as dead in the
+    gathering's wing, so it says "…which no longer exists." (the old words said "doesn't exist right now").
   - U1.4 VX-250 (3) NOT terms at the mint: NOT-STARTED — design: a fresh-note evaluator mirroring `ruleSQL` exactly
     (Kleene logic for the legacy NULLs; subtree `tagCovers`), NOT conjuncts and NOT options in an any-of DEFERRED
     and verified against the final plan, so a door never shows enabled for a press that refuses.
