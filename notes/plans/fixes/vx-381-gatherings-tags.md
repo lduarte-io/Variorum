@@ -350,11 +350,20 @@ disposition here.
     same overclaim — a VM ticket candidate (`gatheringArchived` now reaches it for free). (3) The MCP time-limit
     test's load flake above. (4) U2's VX-249 extends `SmartCollectResult` and `collectPostIntoSmartReading` — the
     new `gatheringArchived` field rides beside its star report.
-- **U2 (VX-249 · VX-247 · VX-111):** IN-PROGRESS 2026-10-18 (the U2 implementer, one session). No revert in flight.
-  Order: core pins first (headless red → fix → green), then the app pins, then ONE stage window (RUN 1 red-on-old on
-  a prebuilt behaviourally reverted tree, RUN 2 green) via the orchestrator's relayed GO.
-  - U2.1 **VX-249 — the collect door sets the star:** IN-PROGRESS — core DONE (171a17d4), receipts DONE
-    (36ade6d6). Traced: `collectPostIntoSmartReading`'s walk knew only tag conjuncts and all-tag any-of groups; a ★
+- **U2 (VX-249 · VX-247 · VX-111):** IMPLEMENTER-CLOSED 2026-10-18 (the U2 implementer, one session; awaits the
+  orchestrator's walk and the run's ladder). **NOT DONE, stated first:** the WALK (the orchestrator's acceptance act —
+  the tree is walkable at the record's commit); the PHONE (R-VX381-A4: untouched — its ★-rule collect now succeeds
+  with a receipt that names no star; VM-21 carries it); the canon deltas (AppSpec §9's undo list + the VX-246 sweep
+  table — the closeout's, U2.2 below). No revert in flight; the tree is clean. Every row dispositioned: **VX-249
+  FIXED · VX-247 FIXED · VX-111 FIXED**, each with its red-on-old pins below. The one stage window (claim
+  `vx-381-u2-batch`, the coordinator's grant relayed, released at once): RUN 1 red-on-old on `dd-red` — "Test run
+  with 18 tests in 4 suites failed … with 22 issues", the 7 failures EXACTLY the new app pins
+  (`onlyBooksCountTowardTheNote` · `aBooklessNoteTwoGatheringsShowSaysNothing` ·
+  `aTwoBookNoteAGatheringShowsCountsOnlyItsBooks` · `aOneBookNoteAGatheringShowsSaysNothing` ·
+  `aStarSetCollectNamesTheStarOnBothDoors` · `anArchivedStarCollectNamesTheStarWithTheHonestTail` ·
+  `theDeleteDoorIsUndoableThroughTheSessionsStack`), every other test in those suites green; RUN 2 on `dd-green`
+  (725ad2db's sources) — "Test run with 132 tests in 17 suites passed", 0 skipped.
+  - U2.1 **VX-249 — the collect door sets the star: FIXED** — core (171a17d4), receipts (36ade6d6). Traced: `collectPostIntoSmartReading`'s walk knew only tag conjuncts and all-tag any-of groups; a ★
     term fell through to the end probe, which fails for an unstarred note, so every ★-rule collect refused
     ("tagging alone can't satisfy its filter"). Fix: `GatheringMint.outcome` gains the note's STARTING state
     (`noteWears` · `noteStarred` · `noteMeetsLegacy` — defaults describe a fresh note, so every mint plan is
@@ -371,14 +380,14 @@ disposition here.
     JUSTIFIED EDIT (its old "★ refuses" control now collects by starring); the guards (the unwind, a nested option,
     a NOT the note breaks) and the 4 pure planner pins green on both; restored green 30/4, and the wider set
     (GatheringMint · RuleWingScoping · Intake · Phase13icOutflow …) 114/10. App pins
-    `GatheringCollectStarReceiptTests` (2): red-on-old PENDING (Mac RUN 1). **PROVISIONAL (P-VX381-U2-1):** R98 now
+    `GatheringCollectStarReceiptTests` (2): red-on-old VERIFIED (RUN 1, the deciders ignoring `starred`), green. **PROVISIONAL (P-VX381-U2-1):** R98 now
     refuses a rule whose any-of is met ONLY by a nested option carrying a NOT (`#x AND (#a OR (#b AND NOT #c))`,
     note wearing b) — the old walk skipped mixed groups and let its probe decide; the planner's `alreadyMet` takes
     positive evidence only, so it keeps the mint's conservative class (fresh-note plans byte-identical). An
     extreme corner (nested NOTs are authorable only in the rule editor). **PROVISIONAL (P-VX381-U2-2):** R98 now
     reads tag liveness in the GATHERING'S wing (the planner's `tagIsLive`), so a rule naming another wing's tag
     refuses by name instead of applying a cross-wing tag (wings isolate; U1's cross-wing hover observation's twin).
-  - U2.2 **VX-247 — undo for tag delete:** core DONE (752fa49d), copy + door pin DONE (58a1ecc8). Traced:
+  - U2.2 **VX-247 — undo for tag delete: FIXED** — core (752fa49d), copy + door pin (58a1ecc8). Traced:
     `deleteTag` tombstoned the subtree and registered nothing, so ⌥⌘Z reached past the act. Fix: the delete
     records its pass (tag rows in path order + the one stamp the cascade trigger gave their applications); the
     inverse revives each still dead on that stamp — parents first; a dead parent or a dead wing leaves it dead
@@ -391,7 +400,7 @@ disposition here.
     "There is no undo for this." DROPPED on both platforms (R-VX381-A3). **Core red-on-old VERIFIED** (the
     registration call removed — the row work is byte-identical to the old op): "8 tests in 1 suite failed with 22
     issues"; restored green 8/8. App pin `TagAndFolderTests.theDeleteDoorIsUndoableThroughTheSessionsStack`:
-    red-on-old PENDING (Mac RUN 1). **PROVISIONAL (P-VX381-U2-3):** the path-collision undo REFUSES (keeps the
+    red-on-old VERIFIED (RUN 1: no registration + the old copy), green. **PROVISIONAL (P-VX381-U2-3):** the path-collision undo REFUSES (keeps the
     entry) rather than reviving beside or skipping quietly. **(P-VX381-U2-4):** the redo takes a child she made
     under a revived tag since the undo (the delete's subtree rule — no live tag left under a dead parent; the
     deleteBlock-cascade precedent: `performDeleteBlock`'s redo takes a take branched since the undo, and an
@@ -406,21 +415,21 @@ disposition here.
     "Excluded: … tags" means applications — `applyTag`/`removeTag` — which stay excluded); the VX-246 record's
     SWEEP TABLE (every registration's quiet-half answer) gains this site's row at the closeout — the inverse is
     quiet when no pass row is still dead on its stamp, the redo when no revived tag still stands.
-  - U2.3 **VX-111 — the notice counts books only:** DONE (725ad2db). Traced: `AppSession.noteMultiBookEdit`
+  - U2.3 **VX-111 — the notice counts books only: FIXED** (725ad2db). Traced: `AppSession.noteMultiBookEdit`
     counted `Queries.readingsContaining` whole — the chip's list: every live book with a member row PLUS every
     gathering whose rule shows the note — so a bookless note two gatherings show said "This note is in 2 books…"
     (the masthead, counting `kind == .book`, said "in no book · 2 gatherings"). Fix: `MultiBookEditNote.memberBooks`
     (books only — archived books stay, membership is a fact), and the trigger counts, words and targets from it.
     Pins: `MultiBookEditNoteRuleTests.onlyBooksCountTowardTheNote` + `MultiBookEditNoteTriggerTests`' three
     (bookless in 2 gatherings → silent; 2 books + a gathering → "2 books"; 1 book + a gathering → silent) —
-    red-on-old PENDING (Mac RUN 1).
-  - U2.4 **The Mac batch:** BOTH RUNS PREBUILT, waiting for the stage GO. **No revert in flight:** the app revert
+    red-on-old VERIFIED (RUN 1: `memberBooks` = identity, the trigger counting `readingsContaining` whole), green.
+  - U2.4 **The Mac batch: DONE** (the results in the U2 line above). The app revert
     (from 725ad2db, every file committed — `ShelfViewModel.swift` collectReceipt/taggedWhileArchived ignoring
     `starred` · `MembershipChoice.swift` `collected` ignoring `starred` · `Operations+Tag.swift` no registration ·
     `TagDeletionCopy.swift` the old "no undo" sentence · `AppSession.swift` the notice counting `readingsContaining`
     whole · `MultiBookEditNote.swift` `memberBooks` = identity) was BUILT into `dd-red` (TEST BUILD SUCCEEDED) and the
-    tree RESTORED clean (`git status` empty, zero revert markers); the fixed tree is built in `dd-green` (725ad2db's
-    sources). RUN 1 (red, `dd-red`) over the 4 pin-bearing suites: GatheringCollectStarReceiptTests ·
+    tree RESTORED clean before the window (`git status` empty, zero revert markers); the fixed tree was built in
+    `dd-green` (725ad2db's sources). RUN 1 (red, `dd-red`) over the 4 pin-bearing suites: GatheringCollectStarReceiptTests ·
     TagAndFolderTests · MultiBookEditNoteRuleTests · MultiBookEditNoteTriggerTests. RUN 2 (green, `dd-green`) over
     the 17: GatheringCollectReceiptTests · GatheringCollectStarReceiptTests · VocabularySweepTests ·
     MembershipChoiceTests · ShelfModelTests · TimelineAndReadingsTests · AddToBookMintTests · TagAndFolderTests ·
@@ -430,4 +439,17 @@ disposition here.
     2903/337 + this unit's 20 tests in 3 suites), the 6-suite target 40/40; the 362-test MCP package's ONE red is
     U1's recorded load flake `MCPHarnessTimeLimitTests.aPeerThatNeverAnswers…` (20.1 s against its 15 s bound under
     full parallel load) — 3/3 green alone.
+  - **For the walk (the orchestrator's):** VX-249 — drop an unstarred note on a ★-rule gathering's Bookcase row and
+    pick one from the chip's add picker (both voices): the note stars, the receipt says "Starred — the gathering
+    shows it now." (or "Tagged #x and starred — …"); an archived ★ gathering says "…once it's unarchived."; the 15-star
+    limit never blocks it. VX-247 — Settings ▸ Tags: delete a tag with a sub-tag (the confirm no longer says "no
+    undo"), then Edit ▸ "Undo Delete Tag" (⌥⌘Z) brings the subtree and the notes' tags back; "Redo Delete Tag" takes
+    them again. VX-111 — a bookless note two gatherings show: first edit says nothing (the seen flag is
+    `variorum.multiBookEditNoteSeen` in the Debug domain — clear it first); a note in two books still speaks once.
+  - **Self-assessment (the implementer's):** the riskiest line is the planner generalisation — fresh-note plans
+    are byte-identical by construction (every new input defaults to "wears nothing", and `alreadyMet` is false for
+    a fresh note in every arm), proven by U1's GatheringMint pins passing untouched; the R98 corner it narrows is
+    P-VX381-U2-1. The undo's exact-stamp reads assume the trigger copies the tag's `deleted_at` string verbatim (it
+    does — `NEW.deleted_at`), and `InvariantSweepTests` (7 seeds × 250 random acts, which undo at random) now
+    exercises the entry against the no-live-row-under-a-dead-parent invariants, green.
 - **Ladder:** NOT-STARTED. **Walk:** NOT-STARTED. **Closeout:** NOT-STARTED.
