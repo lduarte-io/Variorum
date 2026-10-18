@@ -320,7 +320,8 @@ The launch build ships at her explicit word only, after:
 The road is the proven one (memory: Variorum release publishing): bump the version, `Tools/Release/release.sh`
 at a zero-instance window with no commits during it, then DMG first and appcast second on the site.
 
-**Numbering (her word 2026-10-18):** the next release is 0.9.8, and the version does not reach 1.0 until she
+**Numbering (her word 2026-10-18):** the next release is 0.9.8, then 0.9.9, and after that the expected number is
+0.10.0 (so the session cutting the release after 0.9.9 knows what to call it). The version does not reach 1.0 until she
 actually releases to the public. Releases so far: 0.9.0 (4911) · 0.9.1 (4913) · 0.9.2 (5178) · 0.9.3 (6497) ·
 0.9.4 (6518) · 0.9.5 (7055) · 0.9.6 (7517) · 0.9.7 (7933, 2026-10-16). A release happens only at her explicit word;
 she usually releases once the last of a set of runs is done.

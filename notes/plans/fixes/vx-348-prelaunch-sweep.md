@@ -17,7 +17,10 @@ the questions are under VX-351 below, so the kickoff sitting answers them and th
 her. Every other member is already ruled in her words on its ticket.
 
 **The release:** at her explicit word only, never at a closeout (memory: Variorum release publishing); she usually
-releases once the last of a set of runs is done. The next number is 0.9.8; no 1.0 before her public launch.
+releases once the last of a set of runs is done. The next number is 0.9.8, then 0.9.9, then 0.10.0; no 1.0 before her
+public launch. When she calls one: she writes the notes unless she delegates the draft (then one line per bullet,
+presented before the run); the release ends with the /Applications refresh under the full rule card, installing the
+SAME version and build as the site; her Air then takes it through Sparkle.
 
 ## KICKOFF PROMPT (paste into a fresh session on the Pro, in `~/dev/variorum`)
 
