@@ -1161,9 +1161,11 @@ built.
 - **The fix at the shared seam + the hosts:** DONE (`acbe5e5cb`; the classifier narrowed in `36c715ac2`).
 - **The pins (the flipped `cancellingTheFieldFilesNothingAtAll` + the new leave-ways):** DONE (`36c715ac2`) — compiled;
   their run PENDING the batch (red leg first).
-- **The prebuilt Mac products (u2-fixed / u2-red):** IN-PROGRESS (next commit).
-- **No behavioural revert is in flight** (the red product is built from a SCRATCH checkout — this worktree is never
-  reverted; announced in the products section before it starts).
+- **The fold of main `e6874b1d8` (VX-382):** DONE (`fba169abb`, clean; shared files and headless counts below).
+- **The prebuilt Mac products (u2-fixed / u2-red):** DONE — rebuilt from the FOLDED tree (paths + commands below); their
+  RUN is PENDING the batch.
+- **No behavioural revert is in flight** in this worktree (the red product is built from its own durable checkout,
+  `<home>/dev/variorum-vx-348-u2red`, which holds the revert by design until the batch has run).
 - **Machinery note (honesty):** while this unit worked, the U5 fix leg's implementer was live in the SAME checkout
   (`Sources/VariorumMCP/` + its tests — disjoint from every U2 file; it committed `0ebf5c926` / `04d849d8d` and built its
   product from a clean checkout "U2's uncommitted work excluded"). Every U2 commit was staged path-limited; no U2 commit
@@ -1309,16 +1311,58 @@ first card's. **Close window** — ⌘S, close the window by its button: reopene
 up: +1. **Block History rename** — Rename, type, click away: the name unchanged. **The hint** — in both voices at the
 field's width, three lines at most, no truncation. **⎋ on every host** — nothing filed.
 
-### The Mac products (PREBUILT — the batch window runs `test-without-building` only)
+### The fold of main `e6874b1d8` (VX-382) — the orchestrator's instruction, done at the next commit boundary
 
-**ANNOUNCED BEFORE IT STARTS (addendum 2):** both legs build from SCRATCH `git worktree add --detach` checkouts of the
-U2 tip in the session scratchpad — this worktree is never reverted, so it is never mid-revert. The RED checkout restores
-the PRE-FIX content of U2's eleven source files (`git checkout acbe5e5cb^ -- <file>` for `SavepointNameField.swift`,
-`EditorViewModel.swift`, `TakesViewModel.swift`, `CanvasViewModel.swift`, `CompareBoardView.swift`, `CommitBar.swift`,
-`EditorView.swift`, `TakesBottomBar.swift`, `WriteTakesPanel.swift`, `CanvasView.swift`, `HelperView.swift`) and removes
-`VX347SavepointLeaveRuleTests.swift` (new API — the red tree cannot compile it; the project's folders are synchronized,
-so the file's absence is its absence from the build). Every other test file is the U2 tip's. PENDING: the build logs'
-proof that the reverted files compiled, and the two paths.
+`fba169abb` merges main into the branch, CLEANLY (no conflict; message as instructed, no trailer); `swift build` green;
+pushed. **The incoming delta shares TWO files with U2's touched set — `Features/Editor/EditorView.swift` and
+`Features/Editor/EditorViewModel.swift` — in hunks far from U2's** (VX-382's caret-seed placement bracket: the
+`caretSeedIsHers` init parameter, `pendingCaretSeedIsHers`, `applyFocusSeeds` answering whether the seed was hers, the
+`duringCaretPlacement` bracket, `noteFocusedBlock(… remembersOtherNotes:)`). It touches NO file of the commit road:
+not `SavepointNameField.swift`, not `EditorCommands.swift`/`ShellActions.swift`, no `CommandRouter` dispatch change, no
+`CommitBar`/`TakesBottomBar`/`WriteTakesPanel`/Canvas/Compare/`HelperView` line (its `Core/Views` and Registry files are
+`MenuLifeReporter`, `NoteBox`, `SidebarNoteBox`, `CommandRouter` — the box's comments mention `CommitBar`'s cell height
+only). **No U2 suite needs re-running because of the fold beyond the batch already owed** — the U2 Mac suites ride the
+post-fold products below. **Headless on the folded tree** (`swift test` whole, `DerivedData/u2-fold-swifttest.log`):
+VariorumCoreTests **3250 / 419 passed**; the third target **40 / 6 passed**; VariorumMCPTests **383 / 71 with ONE
+failure** — `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (21.1 s against its
+15 s bound at a load average of 17–22), **green alone (3 / 3, 2.2 s)**: VX-353's standing flake, not U2's (U2 has zero
+core lines).
+
+### The Mac products (PREBUILT from the FOLDED tree — the batch window runs `test-without-building` only)
+
+Both legs build from DURABLE detached checkouts of the post-fold tip `fba169abb` beside this worktree (the U5 fix leg's
+`-u5fix` precedent) — this worktree is never reverted, so it is never mid-revert:
+- **FIXED:** `<home>/dev/variorum-vx-348/DerivedData/u2-fixed`
+  (`Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`) — built from
+  `<home>/dev/variorum-vx-348-u2fixed` at `fba169abb`, unmodified (log `DerivedData/u2-fixed-build.log`,
+  TEST BUILD SUCCEEDED).
+- **RED:** `<home>/dev/variorum-vx-348/DerivedData/u2-red` — built from
+  `<home>/dev/variorum-vx-348-u2red` at `fba169abb` with EXACTLY U2's hunks reverse-applied to its eleven
+  app files (`git diff acbe5e5cb^ 36c715ac2 -- <the eleven> | git apply -R`; the patch kept at
+  `DerivedData/u2-red-revert.patch`) — so the nine files the fold did not touch are byte-identical to their pre-fix
+  content (checked), and `EditorView.swift` / `EditorViewModel.swift` are the folded files minus U2's hunks alone
+  (VX-382's lines kept — checked); `VX347SavepointLeaveRuleTests.swift` is removed (new API; the folders are
+  synchronized, so its absence is its absence from the build). All eleven files confirmed compiled from the red checkout
+  in `DerivedData/u2-red-build.log`; the rule-tests file in the fixed log only. TEST BUILD SUCCEEDED.
+- **Clean-up after the batch** (the orchestrator's): `git worktree remove --force <home>/dev/variorum-vx-348-u2red`
+  and `git worktree remove <home>/dev/variorum-vx-348-u2fixed` (the products' xctestrun files name these
+  sources for their source-file mapping, so they stay until the batch has run).
+- **The commands** (under a held stage claim; confirm each "Test run with N tests" line):
+  ```
+  cd <home>/dev/variorum-vx-348/App/Variorum
+  # RED — expect: VX347CommitLeavesMountTests 9 of 12 fail (the three GUARDS pass: escapeAloneFilesNothing ·
+  #   returnFilesExactlyOnce · anUnchangedTakeCommittedTwiceIsTwoCommits); SavepointCommitDoorTests: ONLY
+  #   onlyEscapeLeavesTheFieldWithoutACommit fails (the other four pass); SavepointNameAskTests: ONLY
+  #   theFieldTeachesItsTwoKeys fails; SavepointNameCopyTests: theHelperTeachesTheNameAndTheSkipKey fails
+  xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u2-red test-without-building -only-testing:VariorumTests/VX347CommitLeavesMountTests -only-testing:VariorumTests/SavepointCommitDoorTests -only-testing:VariorumTests/SavepointNameAskTests -only-testing:VariorumTests/SavepointNameCopyTests
+  # FIXED — the pins and every neighbour on the commit road, all green
+  xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u2-fixed test-without-building -only-testing:VariorumTests/VX347CommitLeavesMountTests -only-testing:VariorumTests/VX347LeaveRuleTests -only-testing:VariorumTests/VX347LeavingBoxTests -only-testing:VariorumTests/VX347AskedTakeFilingTests -only-testing:VariorumTests/SavepointNameFaceTests -only-testing:VariorumTests/SavepointNameAskTests -only-testing:VariorumTests/SavepointCommitDoorTests -only-testing:VariorumTests/SavepointTakesDoorTests -only-testing:VariorumTests/SavepointSealedDoorTests -only-testing:VariorumTests/SavepointRenameDoorTests -only-testing:VariorumTests/SavepointNameCopyTests -only-testing:VariorumTests/CommitVocabularyTests -only-testing:VariorumTests/DeadVocabularyTests -only-testing:VariorumTests/HelperCurrencyTests -only-testing:VariorumTests/CommandRouterTests -only-testing:VariorumTests/WriteTakesPanelRoutedCommandTests -only-testing:VariorumTests/CompareViewModelTests -only-testing:VariorumTests/CanvasAndPoolTests -only-testing:VariorumTests/EditorSessionTests -only-testing:VariorumTests/CommitFlowTests -only-testing:VariorumTests/ConfirmationsSettingTests -only-testing:VariorumTests/TakeToBlockDoorTests -only-testing:VariorumTests/CommitBarLayoutTests -only-testing:VariorumTests/BlockHistoryPaneTests -only-testing:VariorumTests/TutorialWherePlacesActsTests -only-testing:VariorumTests/TutorialWritingActsTests -only-testing:VariorumTests/CommentPanelFixLeg2Tests
+  ```
+  The mount cells use VX-179's offscreen popover rig (a borderless window off every display at alpha 0, keys posted only
+  through `deliveryWindow(for:)`); like VX-179's cells they need the test host's own windows NOT to hold the key window
+  (the cell stops by name on that premise rather than type into it). A red in the FIXED leg's mount cells that the rule/
+  box/model cells do not share is a harness-shape question first (say so to the orchestrator) — the decision itself is
+  pinned headlessly in `VX347LeavingBoxTests` and per model in `VX347AskedTakeFilingTests`.
 
 ### For the orchestrator's closeout (not U2's to apply)
 
