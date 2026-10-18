@@ -89,6 +89,7 @@ extension SWorld {
         for device in devices { adoptPending(device) }
         if action == .settle { crashed.removeAll() }
         found += checkPromises(settled: action == .settle)
+        found += judgeCastleEntries(before: before)  // VX-390: promise 1's stamp clause
         found += noSilentChange(action, before: before, crashedBefore: crashedBefore)
         // A tamper step whose relaunch OPENED the library has had its replay's
         // effect land and be judged here, inside this deliberate step (promise

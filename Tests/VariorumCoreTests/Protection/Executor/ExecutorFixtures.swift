@@ -59,6 +59,7 @@ final class EX {
             let own = AppleKeyMaterial.mint()
             ownApple = own
             world.icloud.keys[own.id] = own
+            world.icloud.stamps[own.id] = libraryID  // VX-390: the library it was made for
         }
         var section = DeviceSection(
             deviceID: deviceID, settings: DeviceSettings(gateStyle: self.gate, scheduledExport: scheduledExport))
@@ -91,8 +92,10 @@ final class EX {
         world.live = ExecutorWorld.LibraryFile(fingerprint: PF.fp(key), record: record, generation: 1)
         world.liveKeyFile = file
         switch (mode, self.gate) {
-        case (.standard, _): world.custody[CustodyItemFact(fingerprint: PF.fp(key), itemClass: .silent)] = key
-        case (.castle, .touchID): world.custody[CustodyItemFact(fingerprint: PF.fp(key), itemClass: .touchid)] = key
+        case (.standard, _):
+            world.custody[CustodyItemFact(fingerprint: PF.fp(key), itemClass: .silent, libraryID: libraryID)] = key
+        case (.castle, .touchID):
+            world.custody[CustodyItemFact(fingerprint: PF.fp(key), itemClass: .touchid, libraryID: libraryID)] = key
         case (.castle, _): break
         }
         let memory = DeviceMemory(

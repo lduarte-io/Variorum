@@ -89,7 +89,7 @@ extension ActContext {
             next.ownAppleKeyID = key.id
             plan.parameters = next
             try leaves.plans.writePlan(try plan.sealed(under: library.key))
-            try leaves.apple.addAppleKey(key)
+            try leaves.apple.addAppleKey(key, libraryID: stampLibraryID)
             log("minted a fresh own Apple key")
         }
         // Recorded in this Mac's section — also on a resume after a crash

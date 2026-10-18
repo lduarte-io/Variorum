@@ -437,6 +437,65 @@ extension SWorld {
         return violations
     }
 
+    /// PROMISE 1's STAMP CLAUSE (VX-390, rule 11: "Entering Castle … the Apple
+    /// and on-device keychain items deleted"), judged at the entry once nothing
+    /// is in flight: no SILENT custody item STAMPED with this library's ID, and
+    /// no Apple key this Mac made for it (stamped, a replica here), survives the
+    /// entry — whatever key it holds, whatever the live key file or the
+    /// catalogue remembers. An item carrying NO stamp (a plant) outside the key
+    /// file's keys is rule 25's stated limit and says nothing here; one inside
+    /// them is the clause above's (`onePosture`). The same exits as `onePosture`
+    /// (the account out of Castle, a lagging device — L1, a library from outside
+    /// — L6, a Standard tamper — L3).
+    func entrySurvivors(_ device: SDevice) -> [Violation] {
+        guard let library = device.library, library.section.actInFlight == nil, let record = device.slot?.record,
+              record.mode == .castle else { return [] }
+        if let account = record.account, server.snapshot(account)?.mode == .standard { return [] }
+        if let account = record.account, let current = server.snapshot(account)?.rowKeyID,
+           record.accountRowKeyID != current { return [] }
+        if fromOutside(device) { return [] }
+        var violations: [Violation] = []
+        func fail(_ detail: String) { violations.append(Violation(promise: 1, device: device.name, detail: detail)) }
+        let tampered = truth.tamperedStandard[device.name] ?? []  // L3
+        for name in device.keychain.local.keys.sorted() where name.service == ProtectionNames.custodyService {
+            guard let item = device.keychain.local[name], !item.touchID, item.libraryID == record.libraryID,
+                  let key = item.value.libraryKey, !tampered.contains(PF.fp(key)) else { continue }
+            fail("a silent custody item stamped with this library (\(f8(key))) survived the entry (rule 11)")
+        }
+        for (name, replica) in device.keychain.synced.sorted(by: { $0.key < $1.key }) where name.service == ProtectionNames.appleKeyService {
+            guard let item = replica.item, item.libraryID == record.libraryID,
+                  let id = ProtectionNames.parseAppleKeyAccount(name.account, scope: Self.scope),
+                  truth.appleKeyMintedOn[id] == device.name else { continue }
+            fail("an Apple key this Mac made for this library (\(id.prefix(8))) survived the entry (rule 11)")
+        }
+        return violations
+    }
+
+    /// The entries this step made, judged once nothing is in flight (a crashed
+    /// entry finishes at the next open). Called by `step` after the promises.
+    func judgeCastleEntries(before: [String: Posture]) -> [Violation] {
+        for device in devices {
+            guard let was = before[device.name], was.mode == .standard, !noticedThisStep.contains(device.name) else { continue }
+            let now = posture(device)
+            if now.mode == .castle, now.libraryID == was.libraryID, let id = now.libraryID {
+                truth.castleEntriesToJudge.insert("\(device.name)|\(id)")
+            }
+        }
+        var found: [Violation] = []
+        for entry in truth.castleEntriesToJudge.sorted() {
+            let parts = entry.split(separator: "|").map(String.init)
+            let device = device(parts[0])
+            guard device.slot?.libraryID == parts[1], device.slot?.record?.mode == .castle else {
+                truth.castleEntriesToJudge.remove(entry)  // left again, or another library now
+                continue
+            }
+            guard device.isOpen, device.library?.section.actInFlight == nil else { continue }
+            found += entrySurvivors(device)
+            truth.castleEntriesToJudge.remove(entry)
+        }
+        return found
+    }
+
     /// PROMISE 2 (settled) — STANDARD HANDS EVERYTHING OUT (rules 8, 12): "the
     /// next open uses whatever quiet road still works and quietly makes a fresh
     /// Apple road" (8); leaving Castle comes "with a fresh Apple road and the

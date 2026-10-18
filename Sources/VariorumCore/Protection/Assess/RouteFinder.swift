@@ -17,13 +17,39 @@ import Foundation
 
 /// The custody items this scope holds (enumerated by name, whatever
 /// fingerprint they name).
+///
+/// VX-390 — THE STAMP: each item also carries the ID of the library it was
+/// made for (`libraryID` — a plain attribute beside the item, non-secret: the
+/// key file already says it in the clear), so entering Castle can sweep THIS
+/// library's silent items whatever the live key file or the catalogue still
+/// remembers (rule 11 — the gate's seed 3: a Time Machine rollback put an
+/// older key file back while the keychain kept the rolled-back stretch's
+/// item). nil: an item that carries no stamp (rule 25's stated limit).
+///
+/// THE ITEM'S IDENTITY IS ITS NAME — `<scope>-<fingerprint16>-<class>` — so
+/// equality and hashing read the fingerprint and the class only: a fact built
+/// to ask "is there an item for this key of this class?" finds the item
+/// whatever it is stamped with. The stamp is what the item SAYS, never which
+/// item it is.
 public struct CustodyItemFact: Hashable, Sendable {
     public var fingerprint: String
     public var itemClass: ProtectionNames.CustodyClass
+    /// The library the item was made for (VX-390); nil = unstamped.
+    public var libraryID: String?
 
-    public init(fingerprint: String, itemClass: ProtectionNames.CustodyClass) {
+    public init(fingerprint: String, itemClass: ProtectionNames.CustodyClass, libraryID: String? = nil) {
         self.fingerprint = fingerprint
         self.itemClass = itemClass
+        self.libraryID = libraryID
+    }
+
+    public static func == (a: CustodyItemFact, b: CustodyItemFact) -> Bool {
+        a.fingerprint == b.fingerprint && a.itemClass == b.itemClass
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(fingerprint)
+        hasher.combine(itemClass)
     }
 }
 

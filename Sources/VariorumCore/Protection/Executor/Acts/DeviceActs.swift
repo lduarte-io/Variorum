@@ -28,7 +28,7 @@ struct DeviceSettingsProgram: ActProgram {
             if wanted.gateStyle == .touchID, !has {
                 // Touch ID comes on only from Settings, with the passphrase, at
                 // THIS press (§3.10).
-                try ctx.leaves.custody.writeCustody(ctx.library.key, itemClass: .touchid)
+                try ctx.leaves.custody.writeCustody(ctx.library.key, itemClass: .touchid, libraryID: ctx.stampLibraryID)
             } else if wanted.gateStyle != .touchID, has {
                 try ctx.leaves.custody.deleteCustody(fingerprint: fingerprint, itemClass: .touchid)
             }
@@ -53,7 +53,7 @@ struct TouchIDRearmProgram: ActProgram {
             if try ctx.leaves.custody.custodyItems().contains(CustodyItemFact(fingerprint: fingerprint, itemClass: .touchid)) {
                 try ctx.leaves.custody.deleteCustody(fingerprint: fingerprint, itemClass: .touchid)
             }
-            if yes { try ctx.leaves.custody.writeCustody(ctx.library.key, itemClass: .touchid) }
+            if yes { try ctx.leaves.custody.writeCustody(ctx.library.key, itemClass: .touchid, libraryID: ctx.stampLibraryID) }
         case "settings":
             var settings = ctx.library.section.settings
             settings.gateStyle = yes ? .touchID : .alwaysAsk
@@ -120,8 +120,8 @@ extension ProtectionExecutor {
         let section = DeviceSection(deviceID: deviceID, settings: .noChoiceYet)
             .recordingAppleKey(AppleKeyRecord(id: apple.id))
         record = try record.storing(section, sealedUnder: key)
-        try leaves.custody.writeCustody(key, itemClass: .silent)
-        try leaves.apple.addAppleKey(apple)
+        try leaves.custody.writeCustody(key, itemClass: .silent, libraryID: libraryID)
+        try leaves.apple.addAppleKey(apple, libraryID: libraryID)
         let locks = NewKeyLocks(
             passphrase: try passphrase.map { try freshPassphrase($0) }, words: try WordsKey.derive(words), apple: apple)
         let file = try KeyFile.building(libraryID: libraryID, key: key, epoch: 1, locks: locks)

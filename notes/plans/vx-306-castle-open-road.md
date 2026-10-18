@@ -521,7 +521,30 @@ one this Mac last had open* — with one button, *OK*; shown once, then the libr
   `LocalMachineryRecreation` map entry (the shared value, re-created EMPTY), `MigrationTests.expectedTables` (the
   ritual's justified edit); `ProtectionRecordSchemaTests` (5). The schema-touching suites `✔ 103 tests in 12 suites`
   (Debug; the both-configuration counts PENDING at the close).
-- Piece 3 — VX-390, the library-ID stamp + the fakes + the seed-3 pin (catalogue leaf empty), red-on-old: NOT STARTED.
+- Piece 3 — VX-390, the library-ID stamp + the fakes + the seed-3 pin (catalogue leaf empty), red-on-old: DONE (this
+  commit). **Core:** `CustodyItemFact.libraryID` (the stamp; equality and hashing stay the item's NAME — fingerprint +
+  class — so every `contains(CustodyItemFact(fp, class))` site keeps its meaning); `CustodyLeaf.writeCustody(_:itemClass:
+  libraryID:)`, `AppleKeysLeaf.addAppleKey(_:libraryID:)` + `appleKeyIDs(ofLibrary:)` (attributes only, readable or
+  not); every write passes the library it is FOR (`ActContext.stampLibraryID` — Make this my library's NEW library ID,
+  else the library in hand; the creation, the repairs); Castle entry's shared steps (`CommonSteps.retireOldCustody
+  (sweepForCastle: true)` — every SILENT item stamped with this library goes; `retireOwnAppleKeys` — every Apple key so
+  stamped, under the existing `everyOwnKeyRetiredAtCastle` guard) cover Use Castle, the follow into Castle and the join
+  into Castle; the catalogue sweep stays as the belt; sync-keys items and another library's items untouched. **Fakes
+  stamp first:** `ExecutorWorld` (custody facts carry the stamp; `ICloudKeychain.stamps`), `ExecutorFixtures`, the
+  scenario world (`KItem.libraryID`; `truth.appleKeyMintedOn`); the knob `SWorld.catalogedKeyFilesAnswerEmpty`.
+  **Promise 1's stamp clause** (`Promises.entrySurvivors`, judged at each entry once nothing is in flight —
+  `judgeCastleEntries`, wired into `step`): a stamped silent item or an Apple key THIS Mac made for the library
+  surviving the entry is a violation; an unstamped one outside the key file's keys stays rule 25's stated limit.
+  **Pins:** `U4GatePins.theStampAloneTakesTheRolledBackStretchsItemsAtCastleEntry` (the gate's seed 3 with the
+  catalogue leaf answering empty) — RED on the pre-piece tree (scratch worktree at `d5642b5fa` + the pin file + the
+  knob alone: `✘ Test run with 4 tests in 1 suite failed after 0.137 seconds with 1 issue`, at `U4GatePins.swift:86`,
+  the violations promise 1 on macB "a quiet road reaches an earlier key 412b37b4" / "…b1df64c8" / "a quiet road opens
+  the copy …-412b37b4.sqlite" — seed 3's own), GREEN after; `U4PromiseCheckTests
+  .theStampClauseCatchesAStampedSurvivorAndLeavesAnUnstampedOne` (the clause's oracle) and the DEBUG mutation pin
+  `ScenarioMutationPins.theStampedAppleKeyGoesAtEntry` (the step-level wiring; guard off ⇒ the clause fires). Protection
+  set Debug `✔ Test run with 309 tests in 76 suites passed` (every `@Test` under `Tests/VariorumCoreTests/Protection`);
+  a sample soak, seeds 1–3 × 350 sequences, Debug: `✔ Test run with 1 test in 1 suite passed after 414.916 seconds`
+  (the new clause raised nothing). Rule 25's last sentence stays until her word. Release counts PENDING at the close.
 - Piece 4 — the thirteen production leaves + `CatalogLister` + `ProtectionFactsGatherer` + `ProtectionSystem` under
   `App/Variorum/Shared/Protection/`: NOT STARTED.
 - Piece 5 — the Mac tests under `App/Variorum/VariorumTests/Protection/` + `xcodebuild build-for-testing`: NOT STARTED.

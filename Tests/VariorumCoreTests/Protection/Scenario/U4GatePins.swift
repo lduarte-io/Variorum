@@ -63,6 +63,29 @@ struct U4GatePins {
         expectPromisesKept(world)
     }
 
+    /// VX-390 — THE SAME SEED 3, WITH THE CATALOGUE LEAF ANSWERING EMPTY: the
+    /// rolled-back stretch's silent item and its Apple key must go at Castle
+    /// entry by THIS LIBRARY'S STAMP alone (every custody item and Apple key
+    /// carries the library ID it was made for), whatever the live key file or
+    /// the catalogue remembers. Red on the tree before the stamp (the
+    /// catalogue was the only memory of that key); green after.
+    @Test func theStampAloneTakesTheRolledBackStretchsItemsAtCastleEntry() async throws {
+        let world = SWorld(seed: 3 &* 1_000_003 &+ 310)
+        world.catalogedKeyFilesAnswerEmpty = true
+        let shared = try #require(StartingState.all.firstIndex { $0.name.contains("iCloud Drive") })
+        try await StartingState.all[shared].build(world)
+        for action in [Action.crash(.timeMachineSnapshot("macB"), afterWrites: 12),
+                       .useStandard("macB"),
+                       .timeMachineRollback("macB"),
+                       .useStandard("macB"),
+                       .crash(.useCastle("macB", .touchID, newWords: false), afterWrites: 13),
+                       .changePassphrase("macB")] {
+            await world.step(action)
+        }
+        #expect(world.macB.slot?.record?.mode == .castle)
+        expectPromisesKept(world)
+    }
+
     /// GATE SEED 8 (attempt 2), sequence 473 (promise 1 — rule 10's boundary; a
     /// CHECKER fix): on a synced Castle account with Touch ID, macB's Use Standard
     /// crashed before its swap (the account's flag already flipped to Standard,

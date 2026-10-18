@@ -149,7 +149,7 @@ extension ProtectionExecutor {
             if let wrap = live.apple, readable.contains(wrap.keyID) { return .nothingThere }
             let apple = leaves.ids.mintAppleKey()
             try writeFacts(&library, section: library.section.recordingAppleKey(AppleKeyRecord(id: apple.id)))
-            try leaves.apple.addAppleKey(apple)
+            try leaves.apple.addAppleKey(apple, libraryID: library.record?.libraryID ?? libraryID)
             try writeLiveKeyFile(try live.settingApple(apple, for: library.key), &library)
             try writeMemory(&library)
             return nil
@@ -158,7 +158,7 @@ extension ProtectionExecutor {
             guard library.record?.mode == .standard else { return .wrongMode }
             let item = CustodyItemFact(fingerprint: library.fingerprint, itemClass: .silent)
             guard !(try leaves.custody.custodyItems().contains(item)) else { return .nothingThere }
-            try leaves.custody.writeCustody(library.key, itemClass: .silent)
+            try leaves.custody.writeCustody(library.key, itemClass: .silent, libraryID: library.record?.libraryID ?? libraryID)
             return nil
 
         case .refreshMemory:
@@ -208,7 +208,7 @@ extension ProtectionExecutor {
         case .makeTouchIDItem:
             // No repair ever makes a Touch ID item — only a press (§3.10).
             guard !guards.repairNeverMakesTouchIDItemOn else { return .forbidden }
-            try leaves.custody.writeCustody(library.key, itemClass: .touchid)
+            try leaves.custody.writeCustody(library.key, itemClass: .touchid, libraryID: library.record?.libraryID ?? libraryID)
             return nil
 
         case .deleteTouchIDItem(let fingerprint):
