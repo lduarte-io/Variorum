@@ -1478,6 +1478,11 @@ view) and the source pins over the edited files (`CopyRegisterPinTests` now also
 bootstrap's reminder ledger writes the defaults suite `io.lduarte.Variorum.vx306-reminder-tests`, never the app's
 domain.
 
+**THE MAC SUITES — RUN (the orchestrator, 2026-10-18 09:59 MDT, claim `vx-306-u2-batch`, the tree 87478297e; the predesign
+store sat in the slot for VX-348's reversible swap and its sha256 read identical before and after):** `━ Test run with 199
+tests in 36 suites passed after 37.977 seconds with 3 known issues.` — the three known = `VX310TodayLobbyWitnessTests`' expected
+witnesses; 0 skipped; `** TEST EXECUTE SUCCEEDED **`. The walk (B) PENDING its window.
+
 **THE WALK RECIPE (the orchestrator's, under a held stage claim `vx-306-u2-walk`; DEV STORE ONLY; both appearances
 where a face changed — the lobby's room and its cards speak the leading voice's fallback, the bottom bars are system
 chrome, so a light and a dark capture each):**
