@@ -305,3 +305,28 @@ place must be REMEMBERED. Where it lives is not decided by the plan:
   editor's caret offset otherwise without sampling it at transitions, which races the editor's teardown). No effect
   outside the book; costs an editor-adjacent hook.
 - **(C)** Leave the rider as recorded and fold it into VX-304/VX-300 (the box's own door redesign).
+
+### ORCHESTRATOR RULINGS on U1a (2026-10-18, repo-first before the build proceeds)
+
+- **R-U1a-1 — R-1 is ruled (A), PROVISIONAL.** Grounds: (1) the ticket's own trace names the `noteFocusedBlock`
+  gate as the mechanism and says "fix with the same place" — (A) is that fix; (2) `CurrentBlockMemory`'s doctrine is
+  ONE current block per note, every surface reports — (A) extends the one existing authority, while (B) mints a
+  sibling memory AND needs an editor-adjacent hook (this run's stop line); (3) (C) defers ruled scope the member
+  bullet carries, with (A) cheaply available. The visible side effect (an R-18l-1 re-open this run may restore a
+  place she last had in the book or a Compare/Lenses peer column) is read as consistent with R-18l-1's own words —
+  "restores the page she left" — and goes to her bundle as a PROVISIONAL, options (B)/(C) recorded above.
+  **Two guards required with (A):** (i) mount-time/programmatic selection noise from a non-active surface must not
+  clobber a fresher remembered place — verify what fires reports for non-active notes at mount and guard it (the
+  N14/starved-host class: state computed before first display is garbage); (ii) a pin that a non-active note's
+  report feeds the per-note memory WITHOUT changing the active detail's observed identity (the guard's documented
+  purpose preserved).
+- **R-U1a-2 — every book open door forces WRITE, nothing-live included; PROVISIONAL only in that it amends the
+  brief's letter.** Her recorded ruling is unconditional — "every book open door lands in Write, at her block …
+  never in the note's remembered mode" — and her complaint's screenshot WAS a Lenses-at-top door. The brief's
+  "nothing live = today's plain open" was the planner's fallback sketch and conflicts with the sentence it quotes
+  for the MODE half; the spec outranks the sketch. So: a door with no live place opens the note IN WRITE with the
+  plain open's PLACE behavior (the session's first open at the start per R-18l-1; a re-open's restored page, now
+  shown in Write) — no scroll override is invented, only the mode is forced. If the landing road cannot carry
+  mode-without-block cleanly, the implementer proposes before building. (A door falling back to the REMEMBERED
+  block when nothing is live was considered and deliberately NOT built — first-open-at-start would be violated and
+  the doors' spec says live place; recorded for her bundle beside VX-300.)
