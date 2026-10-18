@@ -1433,3 +1433,23 @@ boundary (its uncommitted `Core/Views/SavepointNameField.swift` is the named col
 keep-both-sides, REBUILD the u2 products from the folded tree, overlap answer in its record); the orchestrator
 rebuilds `u5-fix` incrementally post-fold so the owed door-pin run is post-fold too. Disk note: ~13 GiB of verified
 products pruned at the coordinator's ask (u1-red/u1-fixed/u5-red/u5-fixed/u5-mobile); `u5-fix` kept.
+
+## THE U2 BATCH + U5 DOOR PIN (the orchestrator, 2026-10-18 ~07:08–07:22, claim `vx-348-u2-batch`)
+
+- **U5's door pin: ALL GREEN on the real door** (u5-fix, post-fold: `MCPConnectionEndDoorTests` + three neighbours,
+  19/4) — `theDoorsTwoStopRoadsSayTheirReasonsOnce` passes; **VX-394's stop-road fix is PROVEN end to end** (the
+  code half; her lock question stays "Needs Lillian").
+- **U2's red leg, hollowness-checked:** 12/20 red on the surface — but 7 carried `fieldPopover() → nil` (the
+  offscreen popover rig never presents the field) on the RED tree, and 6 of the fixed leg's 8 reds carry the SAME
+  premise on the FIXED tree: those mount cells are **HOLLOW AS RUN** — the rig, not the behavior, failed on both
+  sides (P-7's red-on-old discipline catching its own harness). The guards and the rule/box/asked-take suites are
+  honest and green.
+- **U2's fixed leg: ONE REAL REGRESSION** — the shipped VX-154 pin
+  `commitAsksForTheTakeTheRingIsInAndFilesIt` shows the panel's routed ⌘S filing TWO identical commits of the
+  ring's take under the new leave rule (SwiftUI modifying-state-during-update warnings nearby; suspect the
+  ask-change "away" report during a view update plus the ⏎ filer both filing — the settle-once box not shared or
+  re-armed on the panel host). 192/200 otherwise across 28 suites.
+- **Routed back to U2's implementer as a fix leg:** trace + fix the double-file (the shipped pin's meaning stands:
+  ONE commit); make the mount rig actually present the popover unattended (or re-shape the hollow cells to drive
+  the leave roads without it); re-prove red-on-old for those cells on the red product; rebuild; new expected reds
+  recorded. A fresh READY follows its report. U3 builds concurrently (Features/Library — disjoint files).
