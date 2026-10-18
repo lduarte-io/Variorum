@@ -363,6 +363,18 @@ extension SWorld {
         // device that hasn't followed out yet holds no Castle promise the account
         // gave up (its quiet follow out is owed).
         if let account = record.account, server.snapshot(account)?.mode == .standard { return [] }
+        // RULE 10's accepted boundary (promise 3's lagging-device limit, applied
+        // here too — the gate's seed 8, VX-378 U4): a device that has NOT
+        // followed the account's current entry into Castle (its record names an
+        // earlier sync key) "can still read what it already has — its own local
+        // copy — through its own quiet road" until it follows; a signed-out
+        // device cannot follow at all. The old master it holds quietly opens its
+        // own key file's master wrap — that is the boundary rule 10 states, not
+        // a breach. (A device that HAS followed is held to every clause below.)
+        if let account = record.account, let current = server.snapshot(account)?.rowKeyID,
+           record.accountRowKeyID != current {
+            return []
+        }
         // L6: a library put back in the live place from outside (an old Castle
         // copy over a later Standard stretch) is in its own day — a later leave
         // handed its keys out (rule 12), and putting the copy back doesn't take

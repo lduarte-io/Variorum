@@ -62,4 +62,29 @@ struct U4GatePins {
         }
         expectPromisesKept(world)
     }
+
+    /// GATE SEED 8 (attempt 2), sequence 473 (promise 1 — rule 10's boundary; a
+    /// CHECKER fix): on a synced Castle account with Touch ID, macB's Use Standard
+    /// crashed before its swap (the account's flag already flipped to Standard,
+    /// its sync keys filed silently as Standard does), macB signed out, the
+    /// settle rolled macB's own library back to Castle while macA followed the
+    /// account out, then macA re-entered Castle with a new master. macB — signed
+    /// out, unable to follow — still holds the OLD master silently, which opens
+    /// its own key file's master wrap: exactly rule 10's "until a device follows,
+    /// it can still read what it already has … through its own quiet road".
+    /// Promise 1 now exempts a device that has not followed the account's current
+    /// entry (its record names an earlier sync key), as promise 3 always did.
+    @Test func aSignedOutDeviceThatLaggedTheReEntryReadsItsOwnCopyByItsOwnRoad() async throws {
+        let world = SWorld(seed: 8 &* 1_000_003 &+ 473)
+        let synced = StartingState.all.firstIndex { $0.name.contains("Castle account with Touch ID") }!
+        try await StartingState.all[synced].build(world)
+        for action in [Action.crash(.useStandard("macB"), afterWrites: 17),
+                       .signOut("macB"),
+                       .settle,
+                       .useCastle("macA", .touchID, newWords: false)] {
+            await world.step(action)
+        }
+        #expect(world.macB.slot?.record?.mode == .castle)
+        expectPromisesKept(world)
+    }
 }
