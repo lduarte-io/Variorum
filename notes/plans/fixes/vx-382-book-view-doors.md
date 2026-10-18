@@ -1205,3 +1205,36 @@ idle clock; acts ≥2.5 s apart cure it — U1's recorded self-trip), not a pers
 found; the quick entry empty, nothing filed, no note text typed; the census closed; the Book Panel left open on "About
 this book" (view state — the Close observation above); voice Study (Settings read back); `appearanceChoice` = `system`
 (read back); the app quit by bundle id; `pgrep -fl 'Variorum.app/Contents/MacOS'` EMPTY. The stage is NOT released.
+
+## THE RATIFY BUNDLE (drafted pre-ladder; lands in QUESTIONS.md as the next number at the MERGE moment, on latest main)
+
+For her ratification — every PROVISIONAL and taste note the run built, each with its options in the named record:
+1. **R-U1a-1** — the book records her caret into the note's ONE memory (option A; the ticket's own trace). Visible
+   side effect: an in-session re-open can restore a place she last had in the book or a Compare/Lenses peer column
+   (read as R-18l-1's "restores the page she left"). Options (B) book-local memory / (C) defer — §U1a RECORD.
+2. **R-U1a-2** — every book open door forces Write, nothing-live included (her sentence over the brief's
+   "plain open" sketch); the place behavior of a plain open kept. The considered-not-built door fallback to the
+   remembered block is noted beside VX-300.
+3. **P-U1b-1…5** — the box door's face ("open ↗", hover sentences), its placement, the "⑂N" badge form, the sheet
+   releasing the live pane (no re-live afterwards), the Takes row's seat — §U1b RECORD.
+4. **P-U2-1…3, P-U2-5** — the Index chapter fold in the same pass; one muted ink for ▸/▾; the ~5-pt title shifts;
+   Esc consumed by the popover with the census float untouched — §U2 RECORD.
+5. **P-U2-4 / R-U2-A2** — the Book Panel's chapter ⠿ manual-only (the ticket's letter, premise-corrected: the
+   panel has ONLY chapter grips; her Journal's bars were chapter ⠿s). Options: (b) ⠿ everywhere (the bars return);
+   (c) make the bars unmistakably the chapters' (hover-only / trailing edge) and align the SIBLINGS (the
+   navigator's and Outline headings' always-on ⠿s — unchanged tonight). Note: the chapter row still drags
+   grip-less and keeps its menu doors everywhere.
+6. **The badge-gap taste note** — on a line running to the column edge the ⑂ badge sits its 6-pt gap after the
+   last character ("amigos.⑂2") — her eye.
+7. **VX-77's dismissal** — the OutlineRoom red was the test host rendering DARK (a walker left the dev domain's
+   appearanceChoice on dark), proven both ways in the window; the three luminance scans now pin `.aqua`
+   (R-U2-B, test-only). No product change.
+8. **For VX-300's body at closeout** — the Takes-board place-memory gap (the spread's Takes form neither feeds
+   nor overwrites the memory); D-2's class note (an eaten reveal arriving in OUTLINE could still miss the
+   note-carry — unverified in use); ⌘⇧T in Index; the W-1 lesson (overlay-hosted buttons: hover follows
+   contentShape, clicks follow the button's own frame).
+9. **Tickets to mint at closeout:** the untraced Book Panel "Close" dead-clicks right after Settings closed
+   (Terminal, once, unreproduced — Low · Bug · Suspected · Books); the VariorumMCPTests
+   `MCPHarnessTimeLimitTests` wall-clock bound red under the full parallel core run, green alone (Low · Bug ·
+   Test-only · Tests & tooling — check for an existing ticket first).
+*(Ladder additions join below before the merge.)*
