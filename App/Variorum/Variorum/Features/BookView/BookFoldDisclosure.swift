@@ -171,9 +171,6 @@ enum BookFoldGeometry {
     }
 
     static func release(owner: UUID) { store.release(owner: owner) }
-
-    /// A pin's door (unconditional — a pin owns nothing).
-    static func forgetAll() { store.forgetAll() }
 }
 
 private struct BookFoldProbe: ViewModifier {

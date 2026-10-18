@@ -244,7 +244,7 @@ tickets:
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
 | U1a — VX-303 (the landing road) | VERIFIED 2026-10-18 (`vx-382-u1a` window) — red-on-old A·B·C red as planned, both guard probes red, tree restored clean between each; batch `Test run with 1590 tests in 259 suites` — 4 issues + 5 known: VX-115's standing red (BookCollectingDoorsTests) + `DestructiveUndoWarningTests.redoNeverAsks` (the known VX-167 parallelism flake, signature :141–143); VX-77's standing red did NOT reproduce (passed). 9 skipped (2 disabled suites). §U1a RECORD → batch results. Code tip f0d1b414f |
 | U1b — VX-304 (the box door + Index takes) | VERIFIED 2026-10-18 (windows `vx-382-u1b` + `vx-382-u1b-walk`) — red-on-old B·C·D + both guard probes red as planned; batch 1998 tests / 332 suites: standing reds only (VX-115; VX-167's redoNeverAsks, red alone, same signature) + FINDING D-2, FIXED ab3db8f19 (the departing Outline ate the reveal) — 64-suite family 308/64 green (4 known), its red-on-old red; OutlineRoomTests PASSED; THE U1 WALK: Study 11 rows PASS (W1/W3 not walked — same road, pinned), Terminal 6 face/act rows PASS; posture restored, 0 instances, 0 GiB pruned (nothing superseded). §U1b RECORD |
-| U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | IN-PROGRESS (implementer: opus-implementer, fresh, 2026-10-18) — VX-77 archaeology DONE headless (§U2 RECORD: no fixer; the test host's appearance — the window's probe decides) · VX-291 BUILT (the fold control; `build-for-testing` green) · next VX-21 → VX-69 → VX-115; every run PENDING the `vx-382-u2` window |
+| U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | BUILT — batch + walk PENDING the `vx-382-u2` window (implementer: opus-implementer, fresh, 2026-10-18). VX-77 archaeology DONE headless (no fixer; the dark test host — rows 0–1 of the window plan confirm) · VX-291 (the fold control) · VX-21 (grips only in manual order) · VX-69 (Esc closes the order popover) · VX-115 (the door pin reads the declaration) — each committed, `build-for-testing` green; red-on-old families 2–4, the 125-suite batch and THE U2 WALK PENDING. §U2 RECORD |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
 | Closeout (canon deltas, tickets, PR, handoff) | NOT STARTED |
 
@@ -863,3 +863,120 @@ same dark probe. Owner if not ruled in: a Tests & tooling ticket.
   the footprint on all four sides, footprint ≤ the replaced 11.5-pt glyph's line, ▸ and ▾ the same box; the Index
   chapter folds the same. On the pre-fix tree nothing reports (red by absence, recorded — no oracle existed). The
   walk checks the size, the hover wash and a click in the overhang (both voices).
+
+### VX-21 — the Book Panel's grips (built; runs PENDING the window)
+
+- **Trace:** the panel's only grip is the chapter row's ⠿ (`BookPanelView.chapterRow`; note rows never wore one — the
+  row drags). `BookPanelBrain.chapterGripDrawn(chapterCount:)` read the count alone (17y B2's lone-chapter rule), so a
+  stamp-ordered book (her Journal, entry date) with ≥2 chapters drew ⠿ on every chapter row while no note there can be
+  placed by hand (a re-place speaks the Manual-order refusal, `dropOutcome`'s `.needsManualOrder`).
+- **Built (the ruling's letter — the plan bullet + VR-127):** `chapterGripDrawn(chapterCount:manualOrder:)` =
+  `manualOrder && chapterCount > 1`; the view passes `snapshot.reading?.sortField == .manual`. Kept, deliberately:
+  every row still drags; the stamp-order re-place still speaks the Manual-order refusal with its road ("non-drag
+  roads" read as the gripless note-row drops, which keep their toast); the row menus keep their doors (Move Up/Down
+  already hide in a stamp order, `noteMove`). DEBUG `BookPanelGripProbe.drawn[sectionID]` (the probe pattern).
+- **PROVISIONAL P-U2-4 (a fact the trace surfaced, for her eye):** a CHAPTER's drag still acts under a stamp order
+  (chapter order is the book's own whatever `sort_field` says — `reorderSection` never consults it), so the hidden ⠿
+  hides a working handle there; the chapter still drags by its row and its menu's Move Chapter Up/Down stand.
+  (a) BUILT — grips only in manual order (the ruling's letter; "a grip" reads as "arrange by hand", the Bookcase's
+  P-17y-B2-1 idiom). (b) keep the chapter grip in every order (it acts) and close VX-21 as about NOTE rows only.
+- **Recorded edge, not built:** the book view's NAVIGATOR draws the same ⠿ on its chapter rows (`BookView` navigator)
+  in every order — the same sibling class if (a) stands; one line, the orchestrator's call (VX-300 or a ticket).
+- **Pins (`BookPanelDragGateTests`):** `aGripDrawsOnlyWhereTheBookIsPlacedByHand` (pure) and
+  `theMountedPanelDrawsNoGripUnderAStampOrderAndBothInManual` (the mounted panel, entry-date order: neither chapter row
+  draws; switched to manual: both do). `aLoneChapterDrawsNoGrip` re-stated in manual order (a justified edit — the
+  signature grew).
+
+### VX-69 — the order popover's Escape (built; runs PENDING the window)
+
+- **Trace:** the Bookcase's order popover (VR-115) is the app's own drawing in the board's overlay, not an `NSMenu`, so
+  AppKit routes no Esc to it; its closes were the board-local click catcher, the board leaving (`.onDisappear`), the
+  window resigning key and the app resigning active (`reportsMenuLifeEnds`) — #188(d)'s "there is no Escape key for it
+  yet".
+- **Built:** `MenuLifeReporter.swift` gains `MenuEscape.closes(keyCode:modifiers:)` (pure: Esc alone; Shift/Caps Lock
+  don't change it; a ⌘/⌥/⌃ chord passes on) and `View.closesOnEscape(while:_:)` — an inert catcher view whose LOCAL
+  keyDown monitor (the `PageTurnKeyMonitor`/`WingSwitcherKeyCatcher` shape) closes the menu on an Esc in ITS window and
+  consumes it, mounted only while open and inside the background (the board's identity never changes with the
+  menu's state). `ShelfView` mounts it beside `reportsMenuLifeEnds`: `.closesOnEscape(while: model.orderOpen) {
+  model.orderMenuLifeEnded() }`. No `ShelfViewModel` edit (VX-381 holds that file's open diff).
+- **PROVISIONAL P-U2-5:** the Esc is CONSUMED (menu semantics — it closes the menu and does nothing else, wherever the
+  keyboard is: the quick entry keeps its text); the № census is a remembered float (#188(b)), never a menu — Esc
+  leaves it.
+- **Pins (`BookcaseMastheadPopoverTests`):** `escAloneIsAMenusCloseKey` (pure, new API) and
+  `escClosesTheOrderPopoverAndLeavesTheCensus` (the mounted board, an Esc keyDown sent through `NSApp.sendEvent` to
+  the board's window — the `PagesArrowKeysHostTests` road).
+
+### VX-115 — the stale door pin (test-only; green PENDING the window)
+
+- `BookCollectingDoorsTests.theSettingsDoorIsOneActOnBothRoads` pinned `BookView.surfaceCapabilities ==
+  [.openBookSettings]`; the declaration is now `[.openBookSettings, .searchThisBook, .newNoteInGathering]` (13o U3's 🔍
+  AND VX-217's "+ new note" — the brief's "add `.searchThisBook`" alone would still be red). **Deviation from the
+  brief's letter, recorded:** the pin now reads `contains(.openBookSettings)` — its claim is that the gear's act is
+  declared; the full declared ⇔ rendered set is `CapabilityRegistryTests`' walk, and `BookSearchTests` pins its own
+  door the same way. No behavior change; no red-on-old owed.
+
+### Commits (U2, all on `vx-382-book-view-doors`, pushed)
+
+ce2316433 (VX-77 archaeology record) · a8e774ea5 (VX-291) · ac24bedbf (VX-21) · ef0405784 (VX-69) · 18e121a08 (VX-115)
+· this record commit (U2 BUILT; `BookFoldGeometry`'s unused pin door dropped).
+
+### Verified headless (no stage)
+
+`xcodebuild build-for-testing` green after every piece (`scratchpad/u2/build-*.log`; no warning on a touched file).
+No core (`Sources/`) line touched — no `swift test` owed. No `EditorTextView`/`BlockRangeIndex`/`PaneSurface`, no
+VX-381 file (`ShelfViewModel` deliberately untouched), no schema, no `Sync/`.
+
+### THE `vx-382-u2` WINDOW — the plan (run IN ORDER, foreground, from `App/Variorum/`; logs to the gitignored `scratchpad/u2/`)
+
+**No revert is in flight now.** Each red-on-old family runs from the committed tree, in place, restored with
+`git checkout -- <file>` and a clean `git diff` before the next (the tree is committed, so the restore is safe).
+
+| # | Family | In-place revert | Run (`test-without-building` after an incremental `build-for-testing`) | Expected |
+|---|---|---|---|---|
+| 0 | VX-77 confirm (no revert) | — (dev domain `appearanceChoice` read first: expect `system`) | `OutlineRoomTests` + `BookOrderConversionTests` alone | GREEN — `bothColumnsChromeStaysInsideThemAtTheirFloors` passes |
+| 1 | VX-77 probe — the dark host | `defaults write io.lduarte.Variorum.debug appearanceChoice dark` (zero app instances first) | the same two suites | RED "ink at 0.0" on (a) the Index panel AND (b) Read's column (2 issues — VM-5's signature) + the navigator pin. Restore `appearanceChoice` to the FOUND value and read it back BEFORE the next row |
+| 2 | VX-21 | `BookPanelModel.chapterGripDrawn`: `manualOrder && chapterCount > 1` → `chapterCount > 1` | `BookPanelDragGateTests` | RED: the pure pin's stamp-order arms (3) and the mounted pin's stamp-order arm; manual arms + `aLoneChapterDrawsNoGrip` green |
+| 3 | VX-69 | `ShelfView`: delete the line `.closesOnEscape(while: model.orderOpen) { model.orderMenuLifeEnded() }` | `BookcaseMastheadPopoverTests` | RED: `escClosesTheOrderPopoverAndLeavesTheCensus`'s first arm (the popover stays open); the census arm and `escAloneIsAMenusCloseKey` green |
+| 4 | VX-291 guard probe (the pin bites) | `BookFoldDisclosure`: delete the two negative `.padding` lines | `BookFoldDisclosureTests` | RED: "grew OUTWARD" and "footprint ≤ the replaced line" on every control (the footprint IS the 22-pt box); the 22² claim green |
+| 5 | **Green batch** | — | `xcodebuild test-without-building -scheme Variorum -destination 'platform=macOS' $(cat scratchpad/u2/only-testing.args)` — **125 suites** (`scratchpad/u2/suites.txt`: every suite whose file names a changed type — the book view / Index / Book Panel / Bookcase board / menu-life family — plus the lints, the registry walk, OutlineRoom, BookOrderConversion, the Bookcase-mounting shell suites and the tours) | GREEN except, possibly, `DestructiveUndoWarningTests.redoNeverAsks` (VX-167's parked load-flake — re-run ALONE before attributing). `BookCollectingDoorsTests` GREEN (VX-115). `OutlineRoomTests` GREEN. Anything else red is a finding |
+
+VX-291 has no red-on-old by construction (a taste row: a NEW oracle — nothing reports on the pre-fix tree).
+
+### THE U2 WALK — the plan (dev store, the batch's Debug product, no posture change; screens `scratchpad/u2/screens/`)
+
+Gate as U1's (§THE U1 WALK step 0–1): the claim line verbatim; `pgrep -fl 'Variorum.app/Contents/MacOS'` — her
+`/Applications` app ABSENT (else stop, never quit hers); grants checked (`guard.sh --author`, an AX probe); launch
+`~/Library/Developer/Xcode/DerivedData/Variorum-dkbmlpshalzxqeftsymzimjxpdhl/Build/Products/Debug/Variorum.app` with
+`open -n`, pid by PATH; dismiss What's New if it shows; a Castle lock screen ⇒ `~/.variorum/dev-castle.env` values
+only. Record the starting posture (voice via Settings ▸ General/Appearance — read; `defaults read
+io.lduarte.Variorum.debug appearanceChoice`). Every key through `Tools/WalkKit/keys.sh <pid> '…'` (Esc = `key code
+53`), every click through `Tools/WalkKit/click.sh <pid> x y`; region captures only (`screencapture -x -R…`); acts ≥2 s
+apart; re-read points from a fresh capture after any voice flip.
+
+**Voice 1 (the starting voice):**
+- **W1 — the Outline ▸ (VX-291):** a chaptered book in Outline (the seeded sherlock — ⌘K → its name → ⏎). Capture a
+  collapsed card's head (the 13-pt ▸). Hover the ▸ → capture the 22-pt wash. Click at a point INSIDE the 22-pt box but
+  OUTSIDE the old glyph (≈ 4 pt left of the glyph's left edge, or ≈ 6 pt below its centre) → the note UNFOLDS in place
+  (never opens in Write) → capture.
+- **W2 — the ▾ (VX-291):** the now-expanded header's ▾: hover → capture the same box; click in its overhang → the note
+  collapses back to its card → capture (the card's height unchanged by eye against W1's).
+- **W3 — the Index chapter fold (VX-291, P-U2-1):** the Index tab; a chapter row's ▾ — hover → capture; click its
+  overhang → the chapter folds → capture; again → unfolds.
+- **W4 — the Book Panel grips (VX-21):** open a sherlock story in Write (⌘K → its title → ⏎); show the Book Panel
+  (the pane's book icon / ⌘K "Book Panel"); capture: ⠿ on the chapter rows (manual order — read the book's order
+  label first; expect manual). In the book's Outline: the navigator's `order · … ▾` → "Entry date ↑" → the menu again
+  → "Save as This Book's Order". Back to the story's Book Panel → capture: NO ⠿ on any chapter row. RESTORE: the
+  navigator's `order ▾` → "Manual order" → "Save as This Book's Order" → its label reads manual again; the panel's ⠿
+  back (capture). (`saveOrder` writes `sort_field`/`sort_dir` only — positions untouched, so the restore is exact.)
+- **W5 — the order popover's Esc (VX-69):** the Bookcase; click `order · … ▾` → the popover open (capture); Esc
+  (`keys.sh … 'key code 53'`) → closed (capture). Then click into the quick entry, type `abc` (keys.sh), open order ▾,
+  Esc → the popover closes AND the quick entry still reads `abc` (capture); clear the field (select-all + delete via
+  keys.sh) — nothing is filed. Then № (the census float) open → Esc → it STAYS (capture) → № again to close it (its
+  found state restored).
+
+**Voice 2 (flip via Settings ▸ Appearance's voice radio, AX):** re-capture the FACES only — W1's ▸ at rest + hover,
+W2's ▾ hover, W3's chapter fold hover, W4's grips (manual) present. Then restore the starting voice and read it back.
+
+**Restore & quit:** sherlock's order back to manual (W4, verified); no note filed, no text typed into a note; voice and
+`appearanceChoice` as found (read back); quit by identity (`tell application id "io.lduarte.Variorum.debug" to quit`);
+`pgrep -fl 'Variorum.app/Contents/MacOS'` EMPTY before reporting. The stage is NOT released by the implementer.
