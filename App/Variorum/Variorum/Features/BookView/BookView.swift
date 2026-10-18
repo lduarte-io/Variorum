@@ -424,6 +424,8 @@ struct BookView: View {
             BookOutlineGeometry.publishFocusDoor(readingID, owner: oracleOwner) { model.focus($0) }
             // VX-303: …and its ONE open door, for the same reason.
             BookOutlineGeometry.publishOpenDoor(readingID, owner: oracleOwner) { openInWrite($0) }
+            // VX-304: …and its mode tabs' one act (the click-over's carry).
+            BookOutlineGeometry.publishModeDoor(readingID, owner: oracleOwner) { switchMode(to: $0) }
 #endif
         }
         .onChange(of: noteBoxReport) { _, _ in
@@ -2228,6 +2230,8 @@ enum BookOutlineGeometry {
     private static var navigatorNoteRowStore = OwnedRegistrations<String, CGRect>()
     private static var focusDoorStore = OwnedRegistrations<String, @MainActor (String?) -> Void>()
     private static var openDoorStore = OwnedRegistrations<String, @MainActor (String) -> Void>()
+    private static var modeDoorStore = OwnedRegistrations<
+        String, @MainActor (BookStructureModel.ViewMode) -> Void>()
 
     static var anchorTops: [String: CGFloat] { anchorTopStore.current }
     /// **13u2 UNIT A2: each anchor row's CURRENT height**, recorded on the
@@ -2274,6 +2278,13 @@ enum BookOutlineGeometry {
     /// the five buttons call this one function with their row's note. Keyed
     /// and owned exactly as the focus door is.
     static var openDoors: [String: @MainActor (String) -> Void] { openDoorStore.current }
+    /// **VX-304 — each mounted book's MODE door** (`BookView.switchMode`, the
+    /// act the masthead's mode tabs perform — the click-over that CARRIES her
+    /// place), published for the focus door's reason: a tab's closure is
+    /// unreachable from a pin. Keyed and owned exactly as the focus door is.
+    static var modeDoors: [String: @MainActor (BookStructureModel.ViewMode) -> Void] {
+        modeDoorStore.current
+    }
 
     // MARK: - The writes (each names its owner)
 
@@ -2306,6 +2317,13 @@ enum BookOutlineGeometry {
         openDoorStore.publish(door, for: readingID, owner: owner)
     }
 
+    static func publishModeDoor(
+        _ readingID: String, owner: UUID,
+        _ door: @escaping @MainActor (BookStructureModel.ViewMode) -> Void
+    ) {
+        modeDoorStore.publish(door, for: readingID, owner: owner)
+    }
+
     /// A `BookView` leaving: its own registrations, every one, and nothing
     /// another window's book still answers for.
     static func release(owner: UUID) {
@@ -2316,6 +2334,7 @@ enum BookOutlineGeometry {
         navigatorNoteRowStore.release(owner: owner)
         focusDoorStore.release(owner: owner)
         openDoorStore.release(owner: owner)
+        modeDoorStore.release(owner: owner)
     }
 
     // MARK: - A pin's doors (unconditional — a pin owns nothing)
@@ -2333,6 +2352,8 @@ enum BookOutlineGeometry {
     static func forgetFocusDoor(_ readingID: String) { focusDoorStore.forget(readingID) }
 
     static func forgetOpenDoor(_ readingID: String) { openDoorStore.forget(readingID) }
+
+    static func forgetModeDoor(_ readingID: String) { modeDoorStore.forget(readingID) }
 }
 #endif
 

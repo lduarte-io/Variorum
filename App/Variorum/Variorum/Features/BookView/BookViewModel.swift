@@ -1137,6 +1137,28 @@ final class BookViewModel {
         indexCaret = (postID, BookOpenDoor.Place(blockID: blockID, offsetInBlock: offsetInBlock))
     }
 
+    // MARK: - VX-304 — the Index's in-place Takes sheet, asked from outside it
+
+    /// **A block whose takes the INDEX was asked to show in place** (the
+    /// sidebar box's "Takes" for the live block). One slot, consumed by the
+    /// Index — `pendingLanding`'s shape beside it, for its reason: the box
+    /// is composed by the shell from the BOOK's doors, and the sheet's host
+    /// is the Index, which owns the one live pane it must release first.
+    /// Set only through `requestIndexTakes`.
+    private(set) var pendingIndexTakes: LandingTarget?
+
+    /// Ask the Index to show `target.blockID`'s takes in place. A target
+    /// with no block names nothing and is not parked.
+    func requestIndexTakes(_ target: LandingTarget) {
+        guard target.blockID != nil else { return }
+        pendingIndexTakes = target
+    }
+
+    /// The Index took the request. Idempotent.
+    func consumeIndexTakes() {
+        pendingIndexTakes = nil
+    }
+
     // MARK: - 18o U4 (R-18k-6) — the note she LEAVES inside the book
 
     /// The note her caret was last in (`BookNoteTrail` holds the rule).
@@ -1180,7 +1202,15 @@ final class BookViewModel {
     /// A place it cannot name leaves both slots alone: a book with nothing
     /// focused and nothing read has no place to carry, and clearing the
     /// standing anchor there would throw away the last one she had.
-    func carryPlace(from mode: BookStructureModel.ViewMode, readForm: BookStructureModel.ReadForm) {
+    ///
+    /// VX-304: `livePostID`/`liveBlockID` — Outline's live note and the block
+    /// her caret stands in, read by the view from the editor under the caret
+    /// at the switch (the model holds no editor). nil ⇒ nothing to carry
+    /// beyond the note.
+    func carryPlace(
+        from mode: BookStructureModel.ViewMode, readForm: BookStructureModel.ReadForm,
+        livePostID: String? = nil, liveBlockID: String? = nil
+    ) {
         guard let post = BookAnchor.currentPost(
             mode: mode, readForm: readForm, place: anchorPlace)
         else { return }

@@ -63,6 +63,35 @@ enum BookIndexGeometry {
     private static var readTierFrameStore = OwnedRegistrations<String, CGRect>()
     private static var anchorTopStore = OwnedRegistrations<String, CGFloat>()
     private static var contentSpanStore = OwnedRegistrations<String, BookIndexContentSpan>()
+    private static var takesBadgeStore = OwnedRegistrations<String, Int>()
+    private static var takesSheetStore = OwnedRegistrations<String, LandingTarget>()
+
+    /// **VX-304 — the takes badge each realized Index block WEARS**: the
+    /// count it says ("⑂N"), keyed by the BLOCK's id (the subject-keyed
+    /// rule). Published while the badge is on screen and withdrawn when it
+    /// leaves, so "the fanned block wears ⑂2 and its neighbour wears none"
+    /// is a claim a pin reads off what was drawn.
+    static var takesBadges: [String: Int] { takesBadgeStore.current }
+    /// **VX-304 — the in-place Takes sheet the Index is SHOWING**, keyed by
+    /// the BOOK's id: the note and block whose takes it holds. Published by
+    /// the sheet's own content while it is up, withdrawn as it goes.
+    static var takesSheets: [String: LandingTarget] { takesSheetStore.current }
+
+    static func recordTakesBadge(_ blockID: String, count: Int, owner: UUID) {
+        takesBadgeStore.publish(count, for: blockID, owner: owner)
+    }
+
+    static func withdrawTakesBadge(_ blockID: String, owner: UUID) {
+        takesBadgeStore.withdraw(blockID, owner: owner)
+    }
+
+    static func recordTakesSheet(_ readingID: String, _ target: LandingTarget, owner: UUID) {
+        takesSheetStore.publish(target, for: readingID, owner: owner)
+    }
+
+    static func withdrawTakesSheet(_ readingID: String, owner: UUID) {
+        takesSheetStore.withdraw(readingID, owner: owner)
+    }
 
     static var chapterCountFrame: CGRect? { chapterCountSlot.value }
     static var noteMenuFrame: CGRect? { noteMenuSlot.value }
@@ -178,6 +207,8 @@ enum BookIndexGeometry {
         readTierFrameStore.release(owner: owner)
         anchorTopStore.release(owner: owner)
         contentSpanStore.release(owner: owner)
+        takesBadgeStore.release(owner: owner)
+        takesSheetStore.release(owner: owner)
     }
 
     // MARK: - A pin's doors (unconditional — a pin owns nothing)
@@ -193,6 +224,8 @@ enum BookIndexGeometry {
         noteHeightStore.forgetAll()
         anchorTopStore.forgetAll()
         contentSpanStore.forgetAll()
+        takesBadgeStore.forgetAll()
+        takesSheetStore.forgetAll()
     }
 
     static func forgetContentSpans() { contentSpanStore.forgetAll() }

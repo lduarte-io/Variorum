@@ -216,7 +216,7 @@ tickets:
 |---|---|
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
 | U1a — VX-303 (the landing road) | VERIFIED 2026-10-18 (`vx-382-u1a` window) — red-on-old A·B·C red as planned, both guard probes red, tree restored clean between each; batch `Test run with 1590 tests in 259 suites` — 4 issues + 5 known: VX-115's standing red (BookCollectingDoorsTests) + `DestructiveUndoWarningTests.redoNeverAsks` (the known VX-167 parallelism flake, signature :141–143); VX-77's standing red did NOT reproduce (passed). 9 skipped (2 disabled suites). §U1a RECORD → batch results. Code tip f0d1b414f |
-| U1b — VX-304 (the box door + Index takes) | NOT STARTED |
+| U1b — VX-304 (the box door + Index takes) | IN-PROGRESS — piece A (seams, behavior-neutral) committed; pins, then B (the box door), C (Index badges + sheet), D (the carry) remain. §U1b RECORD |
 | U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | NOT STARTED |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
 | Closeout (canon deltas, tickets, PR, handoff) | NOT STARTED |
@@ -452,3 +452,73 @@ this check either way.
   mode-without-block cleanly, the implementer proposes before building. (A door falling back to the REMEMBERED
   block when nothing is live was considered and deliberately NOT built — first-open-at-start would be violated and
   the doors' spec says live place; recorded for her bundle beside VX-300.)
+
+## U1b RECORD — VX-304 (implementer: opus-implementer, 2026-10-18)
+
+**Not done in this unit (PENDING the `vx-382-u1b` window):** the red-on-old runs, the green batch and THE U1 WALK —
+the stage is coordinator-held; this session builds headless only.
+
+### The trace, re-verified on the tip (37bb72404)
+
+- The box (`Core/Views/SidebarNoteBox.swift`) had ONE door, "edit here", rendered only in `.selected`; the live state
+  rendered the editor's bar (`CommitBar(axis: .box)`, Outline/spread — its grid carries "Takes") or, in Index (no
+  editor), the facts. No road out to Write from the box in any state: the book's "open ↗" stood only by each note's
+  title in Outline/the spread, which scrolls away in a long note (her report).
+- Index's pane (`BookIndexPaneNote.blockView`) drew no takes mark at all; `TOCRow.hasFan` was loaded and unread
+  there. The Outline's precedent is the read tier's AppKit badge "⑂N" at the prose column's right edge
+  (`ReadBadgeOverlay`), a click opening the block's takes.
+- Index had no takes door of any kind: the live pane is a `PaneSurfaceView` (no editor, no ⑂, no bar), and ⌘⇧T
+  reaches no handler there.
+- **The live pane cannot host a sheet that edits its take** — traced, the reason for P-U1b-4: `PaneSurfaceView` is
+  BUFFER-AUTHORITATIVE while live (`updateNSView`: "never clobber the surface under the caret"), so a take the
+  panel edits never reaches a live Index pane, and her next keystroke there would autosave the pane's pre-sheet text
+  over the panel's edit. And a second concurrent `AutosaveCoordinator.flushNow` returns at once while the first's
+  write is in flight (it takes the batch and clears `pending` before it awaits), so "flush, then present" must own
+  its flush rather than ride `blur()`'s detached one.
+- The click-over (`BookView.switchMode` → `BookViewModel.carryPlace` → `BookAnchor.currentPost`) carries a NOTE id
+  into `pendingReveal` only; Index's `landOrSeed` already consumes a BLOCK landing (`pendingLanding` → `edit
+  .requestLiveBlock`, the Read click's road) and enters the block at the note's remembered caret
+  (`PaneCaretLanding.entering`) — which, since R-U1a-1, holds her Outline caret.
+
+### Pieces
+
+1. **Seams, behavior-neutral** (this commit): `Queries.TOCRow.activeVariantCount` (the same `renderPost` slot as
+   `hasFan`; a hand-built row's default agrees with its flag) + its core pin `BlockTOCTakesCountTests`;
+   `NoteBoxDoor.openInWrite` / `.openTakes` (published nil); `SidebarNoteBox.onOpenInWrite` / `.onOpenTakes`
+   (not rendered yet) and `RootView`'s pass-through; `BookViewModel.pendingIndexTakes` + `requestIndexTakes` /
+   `consumeIndexTakes` (unconsumed); `BookAnchor.Place.livePostID/liveBlockID` + the pure `BookAnchor.landing`
+   (unread); `carryPlace(…, livePostID:, liveBlockID:)` (accepted, unread); DEBUG oracles —
+   `BookOutlineGeometry.modeDoors` (the tabs' one act, `switchMode`), `BookIndexGeometry.takesBadges` /
+   `.takesSheets` (published by C). Builds headless (`build-for-testing` green).
+2. **The pins** — PENDING.
+3. **B — the box door** — PENDING.
+4. **C — Index badges + the in-place sheet** — PENDING.
+5. **D — Outline → Index carries the live block** — PENDING.
+
+### PROVISIONAL choices (her bundle at the merge)
+
+- **P-U1b-1 — the door's face is the book's own words, "open ↗"** (not a bare ↗, not a new "write" word): one act,
+  one face — the box shows exactly the door she could not find by the title, so she recognizes it; hover names where
+  it lands ("Open in Write at this block" while live; "Open this note in Write" while selected — no caret, so the
+  plain open's place, R-U1a-2). Options not built: a bare "↗" glyph (smallest, least discoverable); "write ↗" (names
+  the mode, but a second word for one act).
+- **P-U1b-2 — placement, as the brief places it**: SELECTED — beside "edit here" in the box's door row (the state's two
+  ways in, side by side: edit here, in the book · open ↗, out to Write); LIVE (every mode) — trailing the note's title
+  on the box's identity line, where the book's own "open ↗" stands by its title, at zero height cost (the live box's
+  bar fills the rail's height — the 18d floor the walk measured in Terminal). Option not built: one placement for
+  both states (by the title) — the brief names "beside edit here" for the selected state.
+- **P-U1b-3 — Index badges read "⑂N"**, the Outline badge's own count and face family, hung just outside the block's
+  trailing edge (the Outline's "column right + 6" rule); a click opens the in-place sheet on that block.
+- **P-U1b-4 — opening the sheet RELEASES the Index's live pane first** (synchronously, then her pending text is
+  written before the panel reads the store): a live pane cannot adopt the panel's edits (traced above), so it stands
+  read-cheap under the sheet; the box shows the note selected, and "edit here" returns her to her place (R-U1a-1's
+  memory). Option not built: re-live the block when the sheet closes (the landing road scrolls the block to the
+  pane's top — a visible jump after a sheet; a no-scroll re-live needs a new edit-model road).
+- **P-U1b-5 — the Index-live box's "Takes" sits in the box's door row** (where "edit here" stands while selected), in
+  the bar's own cell grammar; Outline and the spread keep their bar's Takes door (no second one).
+
+### Recorded edges (not built here)
+
+- **The spread → Index click-over carries the note only** — the brief names the Outline arm; the spread mounts the same
+  editor, so extending it is one arm of `BookAnchor.landing` if ruled.
+- **⌘⇧T in Index** (a routed door) is not added — the registry grows only for a routed door (VX-300's remainder).

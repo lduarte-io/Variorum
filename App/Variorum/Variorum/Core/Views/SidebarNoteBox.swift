@@ -75,6 +75,14 @@ struct SidebarNoteBox: View {
     /// rendered as the box's context menu while a note is in it. nil where
     /// the book holds no membership (a gathering).
     var removeDoor: (verb: String, act: () -> Void)?
+    /// **VX-304 — "open ↗": out of the book, into the note's own editor**, in
+    /// Write at her caret's block (the book's one open door, VX-303's road).
+    /// nil ⇒ no door.
+    var onOpenInWrite: (() -> Void)?
+    /// **VX-304 — the Index's "Takes"**: the live block's takes in place, over
+    /// the book. Handed only where the live note has no bar (the Index); a
+    /// bar carries its own Takes door. nil ⇒ no door.
+    var onOpenTakes: (() -> Void)?
     /// The live editor's bar, built by the shell. nil ⇒ no full editor is
     /// live here (the Index's own liveness is a single block's pane, not an
     /// editor — see `BookNoteBox.livePost`).

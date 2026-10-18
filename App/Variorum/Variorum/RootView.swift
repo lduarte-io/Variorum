@@ -884,6 +884,10 @@ struct RootView: View {
             onEditHere: noteBoxDoor?.editHere,
             // 13i-c U4 (§20): the box's book-context remove/release door.
             removeDoor: noteBoxDoor?.removeFromBook.map { (verb: $0.verb, act: $0.act) },
+            // VX-304: the box's "open ↗" (every book mode) and the Index's
+            // in-place "Takes" — the book's own acts, handed up as closures.
+            onOpenInWrite: noteBoxDoor?.openInWrite,
+            onOpenTakes: noteBoxDoor?.openTakes,
             bar: barModel.map { AnyView(CommitBar(model: $0, axis: .box)) }))
     }
 
