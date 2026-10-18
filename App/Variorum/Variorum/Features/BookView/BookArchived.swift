@@ -73,6 +73,13 @@ nonisolated enum ArchivedLineCopy {
         return "archived " + TimeStampFace.relative(date, now: now)
     }
 
+    /// **Its hover — the whole fact** (VX-351 — the VX-348 run, U4; her
+    /// R-VX348-3): *Archived Oct 13, 2026 at 4:02 PM*. nil on the same terms.
+    static func archivedHelp(_ iso: String) -> String? {
+        guard DateFormatter.variorumISO8601.date(from: iso) != nil else { return nil }
+        return TimeStampFace.tooltip(labelled: "Archived", iso: iso)
+    }
+
     /// The expansion's tail past the window — the count is the line's whole
     /// answer, so the listing never pretends to be all.
     static func more(_ hidden: Int) -> String { "and \(hidden) more archived" }
@@ -299,6 +306,7 @@ struct BookArchivedLine: View {
                     .foregroundStyle(tokens.faint)
                     .lineLimit(1)
                     .fixedSize()
+                    .help(ArchivedLineCopy.archivedHelp(member.archivedAt) ?? stamp)  // VX-351
             }
             Button(tokens.chromeLabel(ArchivedLineCopy.unarchiveVerb)) {
                 Task { await model.unarchive(member) }

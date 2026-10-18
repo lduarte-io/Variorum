@@ -198,10 +198,22 @@ nonisolated enum SnippetCardFace {
         var parts: [String] = []
         if activeTakes > 1 { parts.append(SnippetsCopy.takesBadge(activeTakes)) }
         parts.append(SnippetsCopy.words(Queries.wordCount(text ?? "")))
-        if let day = DisplayTitle.day(fromStamp: updatedAt, calendar: calendar) {
-            parts.append(SnippetsCopy.edited(day))
+        if let edited = editedPart(updatedAt: updatedAt, calendar: calendar) {
+            parts.append(edited)
         }
         return parts
+    }
+
+    /// The metadata's edited part exactly as `metadata` says it — the one
+    /// place its words are made, so the card can find it to hover it.
+    static func editedPart(updatedAt: String?, calendar: Calendar = .current) -> String? {
+        DisplayTitle.day(fromStamp: updatedAt, calendar: calendar).map(SnippetsCopy.edited)
+    }
+
+    /// **The edited part's hover — the whole fact** (VX-351 — the VX-348 run,
+    /// U4; her R-VX348-3): *Edited Oct 13, 2026 at 4:02 PM*.
+    static func editedHelp(updatedAt: String?) -> String? {
+        TimeStampFace.tooltip(.edited, iso: updatedAt)
     }
 }
 

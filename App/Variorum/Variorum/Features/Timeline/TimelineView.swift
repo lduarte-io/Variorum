@@ -319,6 +319,9 @@ struct TimelineView: View {
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
                     .lineLimit(1)
+                    // VX-351 (her R-VX348-3): the stated day hovers its whole
+                    // fact too — the List row's beside-the-title day's rule.
+                    .help(TimeStampFace.tooltip(.dated, day: item.entryDate) ?? day)
             }
             Spacer(minLength: 4)
             if let stamp = TimeStampFace.stamp(subject, iso: item.stamp, now: now) {

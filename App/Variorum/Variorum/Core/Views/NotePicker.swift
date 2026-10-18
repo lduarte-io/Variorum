@@ -37,6 +37,10 @@ struct NotePickerRow: Identifiable, Equatable {
     /// Right-side quiet context — the day, where it adds anything.
     var detail: String?
     var annotation: String?
+    /// VX-351 (the VX-348 run, U4 — her R-VX348-3): the day's HOVER — its
+    /// whole fact (the minute of the last edit, or the stated day with its
+    /// year); nil exactly when `detail` is.
+    var detailHelp: String?
 }
 
 // MARK: - The ranking rule (pure — pinned in NotePickerTests)
@@ -59,6 +63,18 @@ enum NotePickerRanking {
     static func detail(title: String, day: String?) -> String? {
         guard let day, day != title else { return nil }
         return day
+    }
+
+    /// **The detail's hover — its whole fact** (VX-351): the stated day
+    /// (`entry_date`, day precision — *Dated Oct 13, 2026*) when the note
+    /// wears one, else the last edit to the minute (*Edited Oct 13, 2026 at
+    /// 4:02 PM*) — the same precedence the detail's own day takes; nil
+    /// whenever the detail is suppressed.
+    static func detailHelp(title: String, entryDate: String?, touchedStamp: String?) -> String? {
+        let day = entryDate ?? DisplayTitle.day(fromStamp: touchedStamp)
+        guard detail(title: title, day: day) != nil else { return nil }
+        if let entryDate { return TimeStampFace.tooltip(.dated, day: entryDate) }
+        return TimeStampFace.tooltip(.edited, iso: touchedStamp)
     }
 }
 
@@ -125,7 +141,9 @@ extension NotePickerSource {
                         title: hit.title,
                         day: hit.entryDate
                             ?? DisplayTitle.day(fromStamp: hit.touchedStamp)),
-                    annotation: peerIDs.contains(hit.id) ? peerAnnotation : nil)
+                    annotation: peerIDs.contains(hit.id) ? peerAnnotation : nil,
+                    detailHelp: NotePickerRanking.detailHelp(
+                        title: hit.title, entryDate: hit.entryDate, touchedStamp: hit.touchedStamp))
             }
             return NotePickerRanking.rank(rows, priorityIDs: peerIDs)
         }
@@ -157,7 +175,10 @@ extension NotePickerSource {
                         detail: NotePickerRanking.detail(
                             title: hit.title,
                             day: hit.entryDate
-                                ?? DisplayTitle.day(fromStamp: hit.touchedStamp)))
+                                ?? DisplayTitle.day(fromStamp: hit.touchedStamp)),
+                        detailHelp: NotePickerRanking.detailHelp(
+                            title: hit.title, entryDate: hit.entryDate,
+                            touchedStamp: hit.touchedStamp))
                 }
         }
     }
@@ -314,6 +335,7 @@ struct NotePickerSheet: View {
                                 .font(tokens.small)
                                 .foregroundStyle(tokens.faint)
                                 .lineLimit(1)
+                                .stampHelp(row.detailHelp)  // VX-351
                         }
                     }
                     if let snippet = row.snippet {

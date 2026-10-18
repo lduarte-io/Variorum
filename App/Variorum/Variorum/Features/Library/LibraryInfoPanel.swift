@@ -329,7 +329,7 @@ struct LibraryInfoPanel: View {
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
                 // VX-351: the whole fact on hover (the List row's own rule).
-                .help(factsHelp ?? "")
+                .stampHelp(factsHelp)
             if multiCount > 1 {
                 CalmCard(tokens: tokens) {
                     // 13n-c UX walk W-UX-3 / T-12: the doors are named by

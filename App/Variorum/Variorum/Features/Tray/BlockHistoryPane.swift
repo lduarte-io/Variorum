@@ -764,6 +764,7 @@ struct BlockHistoryPane: View {
                                 .font(tokens.small)
                                 .foregroundStyle(tokens.faint)
                                 .lineLimit(1)
+                                .stampHelp(DeletedTakeFace.leadHelp(take))  // VX-351
                             if let slot = DeletedTakeFace.clockSlot(take, now: session.now) {
                                 Text(tokens.chromeLabel(slot))
                                     .font(tokens.small)
@@ -806,6 +807,7 @@ struct BlockHistoryPane: View {
                             .font(tokens.small)
                             .foregroundStyle(tokens.faint)
                             .lineLimit(2)
+                            .stampHelp(OriginPeekCopy.lineageHelp(at: row.origin.at))  // VX-351
                         HStack(spacing: 8) {
                             Spacer(minLength: 0)
                             Button(tokens.chromeLabel(BlockHistoryPath.bringBackVerb)) {

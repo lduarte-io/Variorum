@@ -1039,7 +1039,8 @@ final class MCPDoor {
         return rows.map { row in
             MCPGrantPicker.NoteRow(
                 id: row.id, title: row.title, snippet: row.snippet, day: row.detail,
-                fence: facts[row.id]?.fence, wingID: facts[row.id]?.wingID)
+                fence: facts[row.id]?.fence, wingID: facts[row.id]?.wingID,
+                dayHelp: row.detailHelp)
         }
     }
 

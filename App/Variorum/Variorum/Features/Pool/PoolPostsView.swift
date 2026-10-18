@@ -453,6 +453,10 @@ struct PoolPostsView: View {
                                 .font(tokens.small)
                                 .foregroundStyle(tokens.faint)
                                 .lineLimit(1)
+                                // VX-351: the edit's whole fact on hover — the
+                                // picker's own rule (this IS its detail).
+                                .stampHelp(NotePickerRanking.detailHelp(
+                                    title: name.lead.text, entryDate: nil, touchedStamp: item.stamp))
                         }
                     }
                     // Row 87: a titleless card is a wall of bare dates

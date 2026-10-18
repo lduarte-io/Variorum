@@ -103,9 +103,14 @@ nonisolated enum MCPGrantPicker {
                 .filter { !echoed.contains($0) }
                 .joined(separator: PlaceLabels.separator)
         }
+        // VX-351 (her R-VX348-3): the context line's "edited …" hovers its
+        // whole fact — the Bookcase's own derived last edit, to the minute.
+        let edited = places.place(book).lastEdited.map {
+            TimeStampFace.tooltip(.edited, date: $0, calendar: calendar, locale: locale)
+        }
         return SearchPickerOption(
             id: book.id, label: book.name, annotation: distinguisher, searchText: book.name,
-            detail: context.isEmpty ? nil : context, emphasized: distinguisher != nil)
+            detail: context.isEmpty ? nil : context, emphasized: distinguisher != nil, help: edited)
     }
 
     // MARK: - Wings and clients
@@ -145,6 +150,10 @@ nonisolated enum MCPGrantPicker {
         let fence: MCPGrantRule.Fence?
         /// Its wing (a pre-filled note sets the leg's wing to its own).
         var wingID: String? = nil
+        /// VX-351 (the VX-348 run, U4 — her R-VX348-3, the grant picker
+        /// named): the day's whole fact, the note picker's own
+        /// (`NotePickerRow.detailHelp`); nil when the row says no day.
+        var dayHelp: String? = nil
     }
 
     /// The note leg's sections: before typing, the feed's recent-first rows
@@ -165,7 +174,10 @@ nonisolated enum MCPGrantPicker {
                     id: row.id, label: row.title,
                     annotation: row.fence.map(MCPPaneCopy.noteFenceWord)
                         ?? row.day.map { dayWords($0, now: now, calendar: calendar, locale: locale) },
-                    detail: row.snippet, emphasized: row.fence != nil)
+                    detail: row.snippet, emphasized: row.fence != nil,
+                    // VX-351: the day's whole fact — only while the day is
+                    // what the row says (a fence word stands in its place).
+                    help: row.fence == nil ? row.dayHelp : nil)
             })]
     }
 

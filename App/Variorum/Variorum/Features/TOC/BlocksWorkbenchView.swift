@@ -610,6 +610,8 @@ struct BlocksWorkbenchView: View {
                 }
                 if let day = DisplayTitle.day(fromStamp: facts.editedAt) {
                     Text(tokens.chromeLabel("edited \(day)")).foregroundStyle(tokens.faint)
+                        // VX-351 (her R-VX348-3): the whole fact on hover.
+                        .stampHelp(TimeStampFace.tooltip(.edited, iso: facts.editedAt))
                 }
             }
         }
@@ -854,7 +856,7 @@ private struct WorkbenchInfoPanel: View {
                 Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 6) {
                     factRow("words", "\(row.wordCount)")
                     if let day = DisplayTitle.day(fromStamp: row.editedAt) {
-                        factRow("edited", day)
+                        factRow("edited", day, help: TimeStampFace.tooltip(.edited, iso: row.editedAt))
                     }
                     factRow("saved", savepoints == 1 ? "1 commit" : "\(savepoints) commits")
                     if !row.tagPaths.isEmpty {
@@ -990,7 +992,8 @@ private struct WorkbenchInfoPanel: View {
         return parts.joined(separator: " · ")
     }
 
-    private func factRow(_ name: String, _ value: String) -> some View {
+    /// `help` (VX-351): a stamp's whole fact, hovering its value; nil = none.
+    private func factRow(_ name: String, _ value: String, help: String? = nil) -> some View {
         GridRow {
             Text(tokens.chromeLabel(name))
                 .font(tokens.small)
@@ -1000,6 +1003,7 @@ private struct WorkbenchInfoPanel: View {
                 .font(tokens.small)
                 .foregroundStyle(tokens.ink)
                 .lineLimit(2)
+                .stampHelp(help)
         }
     }
 }
