@@ -266,6 +266,25 @@ Debug launch, dismiss a What's New sheet if one shows. Merges serialize with vx-
   exists." for a live tag of ANOTHER wing — wings isolate, so the tag is genuinely unreachable here) →
   recorded for her bundle, no ticket unless she wants the wording split.
 
+## U2 APPROVALS (the orchestrator, 2026-10-18 — each sustained PROVISIONAL rides her bundle)
+
+- **SUSTAINED — P-VX381-U2-1** (the any-of-with-nested-NOT refusal keeps the mint's conservative arm; fresh-note
+  plans byte-identical) · **P-VX381-U2-2** (tag liveness checked in the gathering's WING — wing isolation is
+  canon, R-13ia-1; a cross-wing application would have been a worse wrong) · **P-VX381-U2-3** (an undo meeting a
+  live same-path tag REFUSES naming `duplicateTagPath` and keeps the entry — the live-unique index would be
+  violated; a quiet skip would silently eat her undo; rename-then-undo works) · **P-VX381-U2-5** (an application
+  whose note died after the delete stays dead on undo — the exact-stamp discipline, restoreBlock's rule).
+- **SUSTAINED WITH A FLAG — P-VX381-U2-4** (redo's subtree rule also takes a child tag SHE made under the
+  revived tag since the undo — consistent with the block world's redo-delete taking a take branched since, but
+  it is the one item here that deletes something of hers made between the halves; the quiet alternative — a
+  grown subtree retires the redo — is recorded in the U2 record). FIRST ITEM for her bundle.
+- **APPROVED — the composed wording** "Starred — the gathering shows it once it's unarchived." / "Tagged #x and
+  starred — the gathering shows it once it's unarchived." (mechanical composition of the two approved families).
+- **CLOSEOUT CARRIES (noted now so the ritual can't miss them):** AppSpec §9's structural-undo list gains
+  `deleteTag` ("Excluded: … tags" keeps meaning tag APPLICATIONS); the VX-246 record's sweep table gains the
+  registration's row; the MOBILE PARITY line names VM-21 (the phone's ★-collect now succeeds with a starless
+  receipt — R-VX381-A4).
+
 ## LADDER (after U2 — one ladder over the run's combined diff)
 
 Fresh `opus-reviewer` at xhigh per round, `notes/REVIEW_PROMPT.md` VERBATIM, zero framing, over the combined
