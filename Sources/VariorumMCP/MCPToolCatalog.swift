@@ -112,8 +112,9 @@ enum MCPToolCatalog {
         // VX-336 U5b — VX-255: blocks added to a note (write new at its end,
         // edit anywhere — the call's rung read from its arguments).
         insertBlocks,
-        // VX-336 U6a — VX-311: her Duplicate as Version (read on the note,
-        // write new on its wing — the copy lands bookless there).
+        // VX-336 U6a — VX-311: her Duplicate (read on the note, write new on
+        // its wing — the copy lands bookless there; VX-371: or on a book of
+        // that wing, the copy filed there).
         duplicateNote,
     ]
     static let edit: [MCPToolDeclaration] = [
@@ -992,39 +993,59 @@ enum MCPToolCatalog {
         ]),
         scopes: MCPToolDeclaration.everyScope)
 
-    // MARK: - VX-336 U6a — VX-311 duplicate_note
+    // MARK: - VX-336 U6a — VX-311 duplicate_note (+ VX-383 U2 — VX-371's book road, with_tags)
 
-    /// VX-311 (her Duplicate as Version; P-VX311-1…3): READ on the note and
-    /// WRITE NEW on its wing — the copy lands bookless in that wing's Pool, so
-    /// it acts only under a WING grant (`scopes: [.wing]` — the W-UX-14 truth
-    /// pin's sense: never listed to a client whose write new is a note or a
-    /// book alone, which could never land it).
+    /// VX-311 (her Duplicate; P-VX311-1…3): READ on the note and WRITE NEW on
+    /// where the copy lands. VX-371 (VX-383 U2 — D-C-4): the landing is the
+    /// note's wing (its Pool) OR, with `book_id`, a book of that wing at write
+    /// new — `create_note`'s book road — so it acts under a BOOK grant too
+    /// (`scopes: [.book, .wing]` — the W-UX-14 truth pin's sense: a book-level
+    /// client CAN land a copy now; a note grant never names a landing).
+    /// `with_tags` (default true — her Duplicate with Tags, P-C-3).
     static let duplicateNote = MCPToolDeclaration(
         name: "duplicate_note", rung: .writeNew, title: "Duplicate a note",
         description: """
-            Duplicate a note as it is now — the author's own Duplicate as Version: every block with \
-            every take (the chosen ones chosen), their comments and block names, and the note's \
-            tags, linked to the original block by block and as a version of it. So Variorum's \
-            Compare lines the copy up with the original row for row (a note made with create_note \
-            shares no history, so Compare shows it beside the original unaligned). The copy lands \
-            in no book, in the note's own wing (that wing's Pool). Needs read on the note and \
-            write new on its wing. A note shared with you only per ask can't be duplicated. The \
-            original is never changed. In the copy every take keeps its label — \
-            \(labelNotPrefixed). One undo for the author removes the copy. Returns JSON: \
-            the copy's note_id, its block_ids, and blocks — per block its block_id, the \
-            source_block_id it was copied from, the shown_take_id, and every take in fan order \
-            (take_id, label where it has one, and sha256 — equal to its source take's), as \
-            create_note answers them — and where it landed. \(digestSentence)
+            Duplicate a note as it is now: every block with every take (the chosen ones chosen), \
+            their comments and block names, linked to the original block by block and as a version \
+            of it. So Variorum's Compare lines the copy up with the original row for row (a note \
+            made with create_note shares no history, so Compare shows it beside the original \
+            unaligned). with_tags (default true — the author's Duplicate with Tags) applies the \
+            note's tags to the copy, and books that collect by those tags hear the copy, as when the \
+            author tags, so one may take it in; with_tags: false (Duplicate without Tags) copies no \
+            tags. Needs read on the note and write new on its wing, where the copy lands in that \
+            wing's Pool unless a book collecting its tags takes it in. With book_id (a book in the \
+            note's wing) it needs write new on that book instead, and the copy joins that book at \
+            its end, wearing the book's outflow tags as any note added there does; section_id (with \
+            book_id) files it under one of that book's chapters. A note shared with you only per ask \
+            can't be duplicated. The original is never changed. In the copy every take keeps its \
+            label — \(labelNotPrefixed). One undo for the author removes the copy, from every book it \
+            joined. Returns JSON: the copy's note_id, its block_ids, and blocks — per block its \
+            block_id, the source_block_id it was copied from, the shown_take_id, and every take in \
+            fan order (take_id, label where it has one, and sha256 — equal to its source take's), \
+            as create_note answers them — its tag_ids and tags (their paths: every tag the copy \
+            wears once it lands, a book's outflow included), the book_id and section_id you gave, \
+            and landed: where the copy is. \(digestSentence)
             """,
         inputSchema: .object([
             "type": "object",
             "properties": .object([
                 "note_id": .object(["type": "string", "description": "The note to duplicate."]),
+                "with_tags": .object([
+                    "type": "boolean",
+                    "description": "Apply the note's tags to the copy (default true); false copies none.",
+                ]),
+                "book_id": .object([
+                    "type": "string",
+                    "description": "File the copy into this book (in the note's wing), at its end.",
+                ]),
+                "section_id": .object([
+                    "type": "string", "description": "File it under this chapter of book_id (with book_id only).",
+                ]),
             ]),
             "required": .array(["note_id"]),
             "additionalProperties": false,
         ]),
-        scopes: [.wing])
+        scopes: [.book, .wing])
 
     // MARK: - VX-184 U3 — VX-190 remove_tag
 
