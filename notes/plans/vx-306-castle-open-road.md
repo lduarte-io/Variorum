@@ -2401,3 +2401,15 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
 - **m4 — W-13 confirmed (the Restore list refreshes only per pane appearance): FIX** — the list model refreshes on a landed backup run (the `onRun` seam the hook already uses); pinned at the model level.
 - **NIT 1 (the `"Backups"` literal in `StoreLockView` where `CatalogNames.backupsFolderName` is the one name): FIX. NIT 2 (`repairPasses` swallows a post-unlock gather failure silently): FIX — a log line like every other throwing edge. NIT 3 (`LookInsideModel.close()` without a busy guard; `forget()`'s queue-close + folder-delete on the main actor): FIX if small (a guard + the delete off-main). NIT 4 (the Protection pane's *Set a passphrase…* row renders after a passphrase exists — a permanently refusing sheet, P-2's tension): FIX — the row renders only while `record.passphraseSet` is false (the pane reads the report); the sentence stays for the sheet reached from the reminder.**
 - The reviewer's dispositions on the walk's findings stand (W-13 → m4; P-VX306-U2-6 honest dead arms, her call; W-11 dev-only; W-7/F-U3-2 cosmetic — VX-409).
+
+### ROUND-1 FIX LEG — the Opus implementer, 2026-10-18 (the cross-model flow: agree/dispute per finding goes back to the round-2 reviewer for the final call; the confirmed fixes applied red-on-old)
+
+**Not done in this leg, first:** no Mac or phone suite was RUN (the brief: no `xcodebuild test`, no stage, no app launch) — only built; the Mac-target pins that need the signed test host (the bootstrap-level twins, the source and composition pins) are listed for the orchestrator at the end, PENDING; m3 is VX-411's (a ticket — retention is not built here); the dev store, the real store and `/Applications` were never touched.
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece 0 — this record skeleton: DONE (this commit).
+- m1 — K5's missing face over a record-less store: NOT-STARTED.
+- m2 — the copy doors' automatic quiet probe never presses Touch ID: NOT-STARTED.
+- m4 — the new-road Restore list re-reads on a landed backup pair: NOT-STARTED.
+- NIT 1 · NIT 2 · NIT 3 · NIT 4: NOT-STARTED.
+- The close (Mac + phone `build-for-testing`, the core protection set both configurations, the suite list): NOT-STARTED.
