@@ -255,18 +255,22 @@ at round 1 (0B/0M — the standing precedent) unless a fix uncovers more.
 
 ## FIX LEG RECORD (opus-implementer, fresh, 2026-10-18 — the dispositions above are its warrant, nothing more)
 
-**Not done yet:** every in-window run (the R1-1 decider, the R1-2 red-on-old, the R1-7 probe and the guard batch) —
-the stage is coordinator-held; this leg builds headless and reports READY. **No revert is in flight.**
+**VERIFIED in the `vx-382-ladder` window (2026-10-18 06:17–06:31; §THE WINDOW'S RESULTS below).** Every item is
+dispositioned: R1-1 **DISMISSED AS HOLLOW** (the pin stays as the non-regression line) · R1-2 **FIXED** (red-on-old
+red, the guard probe red) · R1-3 **DONE** (comment) · R1-7 **FIXED** (the probe's edge press red on the pre-fix tree,
+green on 9780c723a) · R1-8 **DONE**. Guard batch **342 tests / 71 suites passed, 4 known issues, 0 skipped**. **No
+revert is in flight; the tree is clean.** *(Was, pre-window: "Not done yet: every in-window run …".)*
 
 | Item | State |
 |---|---|
-| R1-1 — the Index → Outline decider pin | PIN BUILT (see the commit naming it; `build-for-testing` green) — `BookNoteBoxDoorsTests.swift` › `BookIndexToOutlineCarryTests.theOutlineArrivesOnTheCarriedNote` (args: `modeTabs` through the published mode door, `showInOutline` replaying the row menu closure's three statements); a 40-note book, note 25 landed in the Index, then the road → the Outline must put `page-<note 25>` at its top (`BookOutlineGeometry.anchorTops`, ≤ 4 pt). **The verdict is PENDING the window.** If RED: the fix is ONE line atop `BookIndexView.landOrSeed` — `guard structure.mode == .index else { return }` (D-2's mirror) — and its red-on-old is deleting that line. If GREEN: hollow, no code change. The sweep table (plan file §D-2's CLASS SWEEP) gained the Index row (PENDING the verdict) and the Read ▸ Scroll delivery note |
-| R1-2 — her click into an Outline/spread note is her place | **FIX BUILT** (the commit naming it; `build-for-testing` green; runs PENDING the window). Mechanism (traced): `BookViewModel.focus(_:caret:)` knows a click (caret passed) from a bare focus (nil ⇒ 0), but `EditorView` handed the editor a bare `Int`, and `applyFocusSeeds` ran inside `applyProjection`'s placement bracket, so `noteFocusedBlock`'s other-note arm dropped the click's report with the mount's own. Fix: `BookViewModel.caretSeedIsHers` (set by `focus`, cleared with the seed) → `EditorView(caretSeedIsHers:)` → `EditorViewModel.pendingCaretSeedIsHers`; `applyFocusSeeds` answers whether the seed it placed was hers, and the initialRender arm calls `updateCaretContext()` once more AFTER the bracket when it was — the fill's END and a bare focus's 0 stay bracketed; detail/pool editors pass the default `false` (no change). Red-on-old = in place, `if seedWasHers { updateCaretContext() }` → `if false, seedWasHers { updateCaretContext() }` (EditorViewModel, the initialRender arm) — both new pins must go red (memory block 1 + 2 / the Index at the block's start); the mount pin's bare-focus arm stays green either way. PINS (pin-first commit 87fc8fa82): `BookEditHereRiderTests.aClickIntoTheNoteIsHerPlaceForEditHere` (the reviewer's pin — the spread, the note's own editor left her at block 1 + 2, her CLICK at block 3 + 4 with no move after, click out, "edit here" ⇒ block 3 + 4; red on the tip: block 1 + 2) and `BookCarryLiveBlockTests.aClickIntoOutlineThenIndexLandsAtTheClick` (the carry's half — a click at block 2 + 9 in Outline, the mode tabs to Index ⇒ block 2 live at 9; red on the tip: its start). The mount pin's outline/spread arm (`BookOpenDoorMountTests.theLiveNotesDoorCarriesHerBlockAndCaret`) re-worded: guard (i) is now asserted on a BARE focus, her place made by her own caret move |
+| R1-1 — the Index → Outline decider pin | **HOLLOW — VERIFIED GREEN on the tip** (step 1: 2 cases passed, 1.8 s; no code landed). Was: PIN BUILT (see the commit naming it; `build-for-testing` green) — `BookNoteBoxDoorsTests.swift` › `BookIndexToOutlineCarryTests.theOutlineArrivesOnTheCarriedNote` (args: `modeTabs` through the published mode door, `showInOutline` replaying the row menu closure's three statements); a 40-note book, note 25 landed in the Index, then the road → the Outline must put `page-<note 25>` at its top (`BookOutlineGeometry.anchorTops`, ≤ 4 pt). **The verdict is PENDING the window.** If RED: the fix is ONE line atop `BookIndexView.landOrSeed` — `guard structure.mode == .index else { return }` (D-2's mirror) — and its red-on-old is deleting that line. If GREEN: hollow, no code change. The sweep table (plan file §D-2's CLASS SWEEP) gained the Index row (PENDING the verdict) and the Read ▸ Scroll delivery note |
+| R1-2 — her click into an Outline/spread note is her place | **FIXED — VERIFIED** (ab3facd67; step 2 green 10/4, step 3 red-on-old 3 issues as planned, step 4 the guard probe red on both arms). Was: FIX BUILT (the commit naming it; `build-for-testing` green; runs PENDING the window). Mechanism (traced): `BookViewModel.focus(_:caret:)` knows a click (caret passed) from a bare focus (nil ⇒ 0), but `EditorView` handed the editor a bare `Int`, and `applyFocusSeeds` ran inside `applyProjection`'s placement bracket, so `noteFocusedBlock`'s other-note arm dropped the click's report with the mount's own. Fix: `BookViewModel.caretSeedIsHers` (set by `focus`, cleared with the seed) → `EditorView(caretSeedIsHers:)` → `EditorViewModel.pendingCaretSeedIsHers`; `applyFocusSeeds` answers whether the seed it placed was hers, and the initialRender arm calls `updateCaretContext()` once more AFTER the bracket when it was — the fill's END and a bare focus's 0 stay bracketed; detail/pool editors pass the default `false` (no change). Red-on-old = in place, `if seedWasHers { updateCaretContext() }` → `if false, seedWasHers { updateCaretContext() }` (EditorViewModel, the initialRender arm) — both new pins must go red (memory block 1 + 2 / the Index at the block's start); the mount pin's bare-focus arm stays green either way. PINS (pin-first commit 87fc8fa82): `BookEditHereRiderTests.aClickIntoTheNoteIsHerPlaceForEditHere` (the reviewer's pin — the spread, the note's own editor left her at block 1 + 2, her CLICK at block 3 + 4 with no move after, click out, "edit here" ⇒ block 3 + 4; red on the tip: block 1 + 2) and `BookCarryLiveBlockTests.aClickIntoOutlineThenIndexLandsAtTheClick` (the carry's half — a click at block 2 + 9 in Outline, the mode tabs to Index ⇒ block 2 live at 9; red on the tip: its start). The mount pin's outline/spread arm (`BookOpenDoorMountTests.theLiveNotesDoorCarriesHerBlockAndCaret`) re-worded: guard (i) is now asserted on a BARE focus, her place made by her own caret move |
 | R1-3 — the flush comments name the open window | **DONE** (comment-only; the commit naming it) — `BookIndexEditModel.releaseForTakesSheet`'s doc no longer promises every pending text WRITTEN: it names the window (`flushNow` takes its batch and clears `pending` before awaiting, so a write already in flight — the 500-ms debounce, a detached flush — leaves the awaited flush nothing to do while that write lands; the helper's `false` is not consulted), and `BookView.openInWrite`'s "her typing lands first" paragraph names the same window (the clamp lands the caret short). No helper semantics changed; the helper class is ticketed at closeout (Bug · Suspected · Editor, the reviewer's pin sketch in its body) |
-| R1-7 — the box's Index "Takes" cell's click frame | **PROBE BUILT** (the commit naming it; `build-for-testing` green; **verdict PENDING the window**) — `BookNoteBoxDoorsTests.swift` › `SidebarNoteBoxTakesCellClickTests.aPressAnywhereInTheCellOpensTheTakes` (both voices): the Index-live box alone in W-1's click rig (`SharedIconRig` — a real down/up), the cell's rect read off the box's own published frame (no new oracle); a CONTROL press on the word must open the takes (proves the coordinates), then a press 4 pt inside the cell's LEFT border. GREEN ⇒ the whole cell answers — record, no change. RED (control green, edge red) ⇒ only the word answers: apply the PREPARED FIX below in the window, the probe goes green, its red-on-old is restoring today's `takesDoor` body |
+| R1-7 — the box's Index "Takes" cell's click frame | **REAL — FIXED, VERIFIED** (9780c723a, the prepared fix as written below: control green, edge press RED on the pre-fix tree in both voices — presses 1 of 2, cell (7, 361, 216×24) — run twice; GREEN on the fix with its guards 7 tests / 5 suites). Was: PROBE BUILT (the commit naming it; `build-for-testing` green; verdict PENDING the window) — `BookNoteBoxDoorsTests.swift` › `SidebarNoteBoxTakesCellClickTests.aPressAnywhereInTheCellOpensTheTakes` (both voices): the Index-live box alone in W-1's click rig (`SharedIconRig` — a real down/up), the cell's rect read off the box's own published frame (no new oracle); a CONTROL press on the word must open the takes (proves the coordinates), then a press 4 pt inside the cell's LEFT border. GREEN ⇒ the whole cell answers — record, no change. RED (control green, edge red) ⇒ only the word answers: apply the PREPARED FIX below in the window, the probe goes green, its red-on-old is restoring today's `takesDoor` body |
 
 **R1-7's PREPARED FIX (applied ONLY if the probe's edge press is red; `SidebarNoteBox.takesDoor`, W-1's overlay
-idiom applied to the cell).** Today's body is `Button(word).buttonStyle(VoicedButtonStyle(.quiet)).lineLimit(1)
+idiom applied to the cell) — BUILT AS WRITTEN at 9780c723a after the probe's edge press went red.** The pre-fix body
+was `Button(word).buttonStyle(VoicedButtonStyle(.quiet)).lineLimit(1)
 .fixedSize().frame(maxWidth: .infinity).frame(height: 24).background(surface).overlay(stroke).contentShape(...)` — the
 Button's own frame is the word's. The fix lays the CELL out bare and rides the Button in an overlay whose LABEL fills
 the cell, so the button's own frame is the cell:
@@ -291,9 +295,13 @@ let door = Color.clear
 ```
 
 The word, its font, its muted ink and its place are unchanged; the voiced hover wash then covers the whole cell (the
-target — W-1's own grammar, the fold control's wash fills its 22-pt square); recorded for her eye if built.
+target — W-1's own grammar, the fold control's wash fills its 22-pt square) — **built, so recorded for her eye (a
+taste note for the bundle; not walked in this window — the probe is a real click in the mounted box, pins only)**.
 `CommitBar.boxCell` (the bar's cells) shares the inherited shape — NOT touched here (the disposition names the box's
-cell only); a ticket at closeout if the probe is red.
+cell only); **the probe was red, so a ticket at closeout** (the bar's cells — same mechanism, unprobed).
+
+| Item (cont.) | State |
+|---|---|
 | R1-8 — record hygiene in the plan file | **DONE** (the commit naming it) — the U1b and U2 RECORD headers flipped from "Not done yet (PENDING …)" to VERIFIED (the old text kept, named as the pre-window state); the stale "runs PENDING the window" sub-headers flipped (U1a's pins ×2, U1b's pins, D-2's header, VX-77/VX-291/VX-21/VX-69/VX-115); VX-291's "Built" bullet gains the AS-SHIPPED W-1 overlay shape (hidden footprint + the button in an overlay, its own frame the 22-pt square), its Evidence bullet and the window plan's "no red-on-old by construction" line both name W-1's red-on-old click pin `aClickInTheOverhangUnfoldsTheNote` |
 
 ### THE FIX LEG'S WINDOW — the plan (run IN ORDER, foreground, from `App/Variorum/`; logs to the gitignored `scratchpad/ladder/`)
@@ -323,3 +331,42 @@ seed; a mounted detail's duplicate report takes the normal arm harmlessly; (3) n
 false — behavior-neutral outside the book; (4) `applyFocusSeeds`' new return is compiler-checked across its paths
 (build-for-testing green). `EditorTextView`/`BlockRangeIndex`/`PaneSurface` untouched. The window's pins carry the
 empirical half (red-on-old by the `if false` edit; the guard probe re-run on the re-worded arm).
+
+### THE WINDOW'S RESULTS — `vx-382-ladder` (claimed 06:17:49 by `vx-382-ladder`, coordinator GO; logs `scratchpad/ladder/`)
+
+Zero app instances before, between and after. Every in-place revert was made from the committed tree, rebuilt,
+run, and restored with `git checkout --` to a clean `git diff`. The tip at the window's start was 3cb9b5003
+(286ea404e + the orchestrator's record-only line check).
+
+1. **R1-1 decider** (`step1-r11.log`) — `BookIndexToOutlineCarryTests`: `1 test in 1 suite passed` (2 cases, 1.8 s).
+   **GREEN on the tip on both roads ⇒ R1-1 DISMISSED AS HOLLOW**: the departing Index does NOT eat the carried reveal
+   (its `onChange` does not consume on the way out in this host, unlike the departing Outline's in D-2). Not vacuous:
+   on the mode-tabs road nothing is focused, so only the reveal can land the far note, and the pin demands its anchor
+   within 4 pt of the top (it starts ~2,600 pt below the fold; a nil top fails). **No code landed**; the pin stays as
+   the non-regression line.
+2. **R1-2 green** (`step2-r12-green.log`) — `BookEditHereRiderTests` `BookCarryLiveBlockTests`
+   `BookOpenDoorMountTests` `BookPlaceMemoryTests`: `10 tests in 4 suites passed`.
+3. **R1-2 red-on-old** (`step3-red12.log`; `if false, seedWasHers` in place) — `6 tests in 2 suites failed … with 3
+   issues`: `aClickIntoTheNoteIsHerPlaceForEditHere` ×2 (memory = block 1 at offset 2; "edit here" landed block 1 at
+   2) and `aClickIntoOutlineThenIndexLandsAtTheClick` ×1 (the Index pane at `{0, 0}`, not 9). The suites' other pins
+   green. **Red for the traced reason.** Restored clean.
+4. **The guard probe on the re-worded arm** (`step4-probe.log`; `, caretPlacementDepth == 0` deleted) —
+   `BookOpenDoorMountTests`: 2 issues, the outline AND spread arms at :484 (`currentBlock(for: x) == nil` — the bare
+   focus's seed remembered); the index arm green. **The re-worded arm still bites.** Restored clean, rebuilt.
+5. **R1-7 probe** (`step5-r17.log`) — `SidebarNoteBoxTakesCellClickTests`: the CONTROL (the word) green in both voices
+   (presses 1); the EDGE press RED in both voices (`presses 1 — only the word answered; cell (7.0, 361.0, 216.0,
+   24.0)`). **R1-7 is REAL.** (A second run on the same pre-fix tree — an Edit that had not applied — red again, the
+   same signature: two pre-fix reds.) The prepared fix applied → 9780c723a; `SidebarNoteBoxTakesCellClickTests`
+   `SidebarNoteBoxDoorFacesTests` `BookIndexTakesTests` `BookNoteBoxOpenDoorTests` `ChromeLineLimitTests` —
+   `7 tests in 5 suites passed` (`step5-r17fix.log`). Red-on-old = the pre-fix tree's two red runs (the fix commit's
+   parent is exactly that tree).
+6. **The guard batch** (`batch.log`; the tip 9780c723a, the R1-7 fix included) — `Test run with 342 tests in 71
+   suites passed after 253.544 seconds with 4 known issues` — the 4 are `IndexTierMetricsTests`' own
+   `withKnownIssue`s (`theBookIndexsLivePaneIsItsReadTierLineForLine`, `theReadEditLivePaneIsItsReadTierLineForLine`);
+   **0 skipped, 0 unexpected issues**. No red anywhere outside the suites' own known issues.
+
+**Prune:** the revert builds overwrote the shared per-workspace cache in place (no separate revert products); the
+current Build/Products are the tip's (built at 06:24 from 9780c723a's tree). Removed this window's five superseded
+xcresult bundles (steps 1, 2, 5 ×2 and the fix's guard run) from `DerivedData/Variorum-dkbmlpshalzxqeftsymzimjxpdhl/
+Logs/Test`, keeping the batch's: **~0.26 GiB freed** (276,096 KB). Nothing outside this worktree's cache touched.
+Instances left: **0**. The stage is NOT released by this leg.
