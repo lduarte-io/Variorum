@@ -315,7 +315,9 @@ The launch build ships at her explicit word only, after:
 4. The MCP guide page is live (R-VX184-4).
 5. The privacy page is live (VX-294, a canon v1 gate).
 6. A clean install on a Mac with none of her accounts or machine state runs (the canon v1 row's acceptance).
-7. Her release notes are written.
+7. The release notes are written. **Her word 2026-10-18: while the app is pre-release, the notes are DRAFTED FOR HER
+   provisionally every time** ("I haven't been writing the release notes and I'm probably not going to start before
+   release") — the session cutting the release writes them, one line per bullet, and presents them.
 
 The road is the proven one (memory: Variorum release publishing): bump the version, `Tools/Release/release.sh`
 at a zero-instance window with no commits during it, then DMG first and appcast second on the site.
