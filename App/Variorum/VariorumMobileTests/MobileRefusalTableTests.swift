@@ -95,6 +95,16 @@ struct MobileRefusalTableTests {
         #expect(MobileMembershipModel.refusal(gone, bookName: nil) == words)
     }
 
+    /// **VX-381 ladder r1 F-3 — MOBILE PARITY.** The tag-delete undo's
+    /// collision refusal (P-VX381-U2-3) is worded in the SHARED table, so the
+    /// phone's undo door speaks it too. *Red on the old tree:* its fallback,
+    /// the bare `duplicateTagPath(path: "work")`.
+    @Test func theTagUndoCollisionSpeaksTheSharedSentence() {
+        let words = MobileUndoDoor.refusal(OperationError.duplicateTagPath(path: "work"))
+        #expect(words == "A tag named \u{201C}work\u{201D} already exists \u{2014} rename it, then try again.")
+        #expect(!words.contains("duplicateTagPath"), "\(words)")
+    }
+
     /// GUARD: the seal keeps the phone's own door words ("Unlock Note") — the
     /// ONE stem, the platform noun a parameter.
     @Test func theSealStaysInThePhonesOwnDoorWords() {

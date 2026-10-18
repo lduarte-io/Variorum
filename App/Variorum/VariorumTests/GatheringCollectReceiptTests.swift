@@ -164,4 +164,19 @@ struct GatheringCollectStarReceiptTests {
             #expect(AddToBookCopy.collected(tagged, gatheringName: both.name) == line)
         }
     }
+
+    /// **Ladder r1 F-7 (NIT) — RED ON OLD.** The archived arm's head fell back
+    /// to "Tagged " when the act wore nothing, building "Tagged  — the
+    /// gathering shows it once it's unarchived." (a double space, and a tag
+    /// that was never applied), while the live arm's same case says "Added to
+    /// the gathering." Unreachable through the op today (an empty plan that
+    /// isn't already met is a planner/belt disagreement, and the belt throws);
+    /// the family now agrees on the empty case: the bare "Added" head
+    /// (PROVISIONAL wording).
+    @Test func anArchivedCollectThatWoreNothingNeverClaimsATag() {
+        let line = BookcaseCopy.taggedWhileArchived([], starred: false)
+        #expect(line == "Added \u{2014} the gathering shows it once it's unarchived.")
+        #expect(!line.contains("Tagged"), "\(line)")
+        #expect(!line.contains("  "), "no double space: \(line)")
+    }
 }

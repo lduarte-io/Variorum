@@ -500,6 +500,15 @@ disposition here.
     constants holding the shipped SQL verbatim): 6 issues, 3 per statement; green after: 12/12 (the behavioural pins —
     live-target guard, exact rows — unchanged). `restoreContainer`/`restoreBlock`'s pre-existing twin untouched
     (VX-387's).
-  - F-3 (the shared table's `duplicateTagPath` arm): NOT-STARTED.
-  - F-7 (the archived receipt's empty arm) · F-8 (the identity `cannot` wrapper, `divergeTarget`'s doc): NOT-STARTED.
+  - F-3 (the shared table's `duplicateTagPath` arm): IN-PROGRESS — pins written at the RED-TREE commit (below), the
+    arm NOT yet: Mac `TagAndFolderTests.theUndoDoorSaysTheCollidingTagAndTheRoadNeverTheRawCase` (the real ⌥⌘Z door,
+    then the rename road) · phone `MobileRefusalTableTests.theTagUndoCollisionSpeaksTheSharedSentence` (the arm is in
+    `Shared/OpsRefusalTable.swift`, which the phone compiles — the phone pin runs only if the orchestrator adds the
+    phone suite to the batch).
+  - F-7 (the archived receipt's empty arm): IN-PROGRESS — pin `GatheringCollectStarReceiptTests.
+    anArchivedCollectThatWoreNothingNeverClaimsATag` written at the RED-TREE commit; the guard NOT yet.
+  - F-8 (the identity `cannot` wrapper, `divergeTarget`'s doc): NOT-STARTED (a refactor + doc; no pin owed).
+  - **The RED TREE = the commit carrying this line** (pins present, F-3's arm and F-7's guard absent — no revert
+    needed). Plan: build-for-testing it into `App/Variorum/DerivedData/vx381-fix-red` (Mac) + `…-red-ios` (phone), then
+    land the fixes and build `…-green` / `…-green-ios`; the stage window is test-only.
   - The Mac batch (via the orchestrator's relayed GO): NOT-STARTED.
