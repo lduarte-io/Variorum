@@ -367,13 +367,14 @@ window, if the batch allows).
   FIXED with its pins, every new pin verified RED on the pre-fix tree; the headless suites green at the end (one
   load-dependent timing flake, green alone — below). The real-client wire round is PENDING (U3's window, if the batch
   allows). Its section below.
-- **VX-338 (two Macs prune each other's backups):** NOT-STARTED.
-- **VX-339 (Resume Sync clears the banner over a failed marker removal):** NOT-STARTED.
-- **REVERT IN FLIGHT (named before it starts — addendum 2), on committed `cf194996b`:** the Mac red product's two
-  files — `App/Variorum/Shared/StoreBackup.swift` set to its pre-fix content (`git show 231b44d24:…`) and
-  `App/Variorum/Shared/RestoreHoldModel.swift` behaviourally reverted (the seam kept, the old press: the clear's answer
-  ignored); built into `DerivedData/u1-red`, then restored by `git checkout -- <both files>` (safe: committed —
-  addendum 11).
+- **VX-338 (two Macs prune each other's backups):** DONE (`481a69c6c`) — FIXED; its pins compile (`build-for-testing`
+  green) and the red product is PREBUILT; the Mac run of both legs is **PENDING** the orchestrator's batch window (the
+  commands below). Its section below.
+- **VX-339 (Resume Sync clears the banner over a failed marker removal):** DONE (`cf194996b`) — FIXED; pins compile,
+  red product PREBUILT; the Mac run of both legs **PENDING** the batch. Its section below. No walk yet (PENDING: the
+  banner's failure line in both voices needs a held marker on the dev store — the batch window's or U3's call).
+- **No behavioural revert is in flight.** (The Mac red product's reverts ran on committed `cf194996b` and were
+  restored by `git checkout --`; `git diff` clean after. The earlier targeted `editCommentForClient` revert likewise.)
 
 ### VX-357 — U+0000 is stripped in the operations layer; the wire says how many
 
@@ -487,3 +488,127 @@ harness's own timing guard, untouched by this diff.
   them too (an `expected_text` sent with a null would then match).
 - **P-VX357-5** — an `edit_take` whose text differs from the stored text only by nulls answers `changed: false` with
   the count said.
+
+### VX-338 — the far folder's sweep acts only on this Mac's own copies
+
+**The trace (inputs → wrong state; VX-302's code map, re-read here).** The iCloud Drive offer opens its picker at
+iCloud Drive's root (`ICloudDriveOffer.swift:101-106`) and every run copies into `<pick>/Variorum/Backups`
+(`BackupDestination.backupsFolder`), so two Macs on one Apple account that both accept it — her Pro and her Air —
+write into ONE folder. After each copy the far leg swept it: pre-fix `StoreBackup.pruneSecond` (`:433-444`) listed
+EVERY app-named snapshot there (`existingBackups`, `:704-716` — whichever Mac or library wrote it) and deleted what
+`BackupRetention`'s 14+4 rule did not keep. The rule keeps one file per day, the NEWEST (`BackupRetention.keep`,
+`:87-118`), so on a day both Macs wrote, the earlier Mac's copy fell into the remainder and was deleted unless it
+claimed a weekly slot — each Mac's run deleting the other's copies, every day.
+
+**The form chosen — a device-local list of this Mac's own copies (PROVISIONAL P-VX338-1).** The brief names two forms
+(VX-266 design §5's cut line: a per-Mac subfolder, or a filename tag) and asks for the smallest today's code allows.
+Weighed against the code, both reach past the two files the brief fences:
+- **A filename tag** changes the snapshot's NAME, and backup names have readers outside `StoreBackup`:
+  `BackupRestoreCandidates.backupDate` (core — Restore from Backup lists only `-<fp8>` or bare tails) and
+  `LibraryClassifier.backupNameFingerprint` (core — the open road's key-file pairing), plus the Data Safety copy that
+  spells the name format to her (`DataSafetyCopy.swift:178-182`). Unmatched, every new snapshot would vanish from
+  Restore from Backup — a regression this fix cannot ship.
+- **A per-Mac subfolder** hides every new copy from every reader that lists the folder flat — the restore list's
+  caller, the Data Safety face's freshness (`DataSafetyModel.swift:207`) and the Castle switch's pre-switch listing
+  (`PostureSwitch.swift:1950-1957`, VX-378's lane): an Apple-openable copy in a subfolder would escape the Castle offer.
+  The worst of the three.
+- **The list** — `StoreBackup.ownFarSnapshots` (`UserDefaults` key `variorum.backup.ownFarSnapshots`, device-local
+  like the folder's bookmark and the run log; the `pendingLockTimeChecks` precedent) — changes nothing any reader
+  sees: names, folders, the restore list, the classifier, the Castle switch and the face are byte-identical. Only
+  `StoreBackup.swift` and `BackupRetention.swift` changed. Its one trade-off against the tag, said: an OLDER build on
+  the other Mac still sweeps everyone's copies until that Mac updates (a tag would hide new copies from old builds);
+  her two Macs take the same Sparkle release, so the gap is the days between their updates.
+
+**The fix.** `performSecondLeg` records the name of the copy it just wrote (`recordOwnFarSnapshot`, right after its own
+`copyItem`); `pruneSecond(in:policy:defaults:)` sweeps with `BackupRetention.prune(_:policy:ownedBy:)` — the unchanged
+14+4 rule over ONLY the candidates whose names are on the list — and rewrites the list (in a `defer`) to the own copies
+still present. The in-container `Backups/` keeps its flat newest-14 (it is per-Mac by location: this Mac's container,
+this Mac's disk), and so does the lock-time copy.
+
+**THE DELETION-SAFETY ARGUMENT (for the Fable read her word names).**
+1. Retention deletes in the far folder at exactly one line: `pruneSecond` → `removeSnapshotPair(url)` for each
+   `url ∈ doomed`. (The Castle switch's user-confirmed deletions are a separate door, untouched.)
+2. `doomed = BackupRetention.prune(candidates, policy:, ownedBy: own)` = the old rule applied to
+   `candidates.filter { own.contains(name) }`, so `doomed ⊆ { c | name(c) ∈ own }` — a pure property, pinned
+   (`theOwnSweepNeverReturnsACopyThatIsNotOwn`).
+3. A name enters `own` at ONE place: `performSecondLeg`, immediately after THIS Mac's `copyItem` of THIS act's own
+   snapshot into the folder succeeds. Nothing else writes the list; the other Mac's list lives in the other Mac's
+   defaults and is never read here.
+4. So a file is deleted only if this Mac itself wrote a file of that exact name into the folder. Another Mac's file
+   could share the name only if both Macs snapshotted under the same key fingerprint (or both unkeyed) in the SAME
+   UTC second — and then the later copy has already REPLACED the earlier at its own copy (the pre-existing
+   `removeItem`+`copyItem`, `performSecondLeg`), so the folder holds one file that is both Macs' — no other Mac's
+   distinct file is reachable.
+5. Copies written before the fix are on no Mac's list, so they are never deleted — an existing shared folder is never
+   cleaned up by deletion (the ruled shape), pinned (`copiesWrittenBeforeTheFixAreNeverDeleted`).
+6. Every failure mode fails toward KEEPING: a lost list (wiped defaults, a new Mac) is empty → nothing deleted; an
+   unreadable folder throws before the list is touched; an iCloud placeholder not yet downloaded
+   (`.name.sqlite.icloud`) is not an app name → never a candidate, and leaves the list at reconcile → never deleted
+   later; a throw mid-sweep still rewrites the list to exactly the own copies left.
+
+**Consequences, recorded (none silent):**
+- (a) This Mac's OWN pre-fix far copies (≤ 18) are never pruned now either — a one-time leftover on every far folder,
+  single-Mac ones included, until her hand or the rebuild's catalog (VX-302 / VX-309) settles it. **P-VX338-2:**
+  alternative — adopt a pre-fix copy as own when it is byte-identical to a snapshot beside the library (provable) —
+  NOT built: it deletes existing files, which the ruling's last sentence rules out.
+- (b) **Finding for the orchestrator (not retention; unchanged):** the far leg's DUE-check still reads every app-named
+  copy, so another Mac's copy from the last 24 h answers this Mac's hourly far leg "up to date" (no write). For one
+  synced library that copy is as good; for two different libraries sharing one folder, this Mac's far copy waits.
+  The rebuild's per-library catalog settles it (VX-302).
+- (c) The Data Safety face still counts every copy in the folder (both Macs') — unchanged, and true of the folder.
+
+**Pins** (`App/Variorum/VariorumTests/VX338SharedBackupFolderTests.swift`; two Macs = two containers, two defaults
+domains with a bookmark of ONE picked folder, every run the real `performRun`, forced):
+`anotherMacsCopiesAllSurviveThisMacsSweep` (the ticket's pin: the Air's twenty days, then the Pro's run — every Air
+copy survives, the Pro prunes 0) · `eachMacPrunesItsOwnCopiesByItsOwnRuleAndNeverTheOthers` (forty alternate days:
+each Mac's survivors are EXACTLY its own rule's keep over what it wrote — retention still works — and nothing else
+is in the folder) · `copiesWrittenBeforeTheFixAreNeverDeleted` (twenty real pre-fix copies survive thirty runs) ·
+`thisMacsListFollowsTheFolder` (the list = this Mac's copies there; a copy gone by hand leaves it) — each expected RED
+on the red product (the first three by the old sweep, the fourth by absence: no list exists);
+`theOwnSweepNeverReturnsACopyThatIsNotOwn` — the pure rule (a guard, green on both). **All PENDING the batch.**
+
+### VX-339 — Resume Sync clears the banner only once the marker is gone
+
+**The trace.** `RestoreHoldModel.resume()` (pre-fix `:81-89`) called `LibraryRestoreHold.clear(besideStore:)` —
+which ANSWERS whether the marker is gone (`@discardableResult … -> Bool`) — ignored the answer, set `hold = nil` and
+ran `onResume`. When the removal failed (a permissions fault, a locked volume) the banner vanished while the marker
+stood: the gates read the MARKER (13x F3, R3-2 — `markerGate`), so every round stayed held under no banner at all;
+the Sync-now door's refusal ("press Resume Sync in the banner below", `LibraryOpenCopy.syncNowHeldRefusal`) pointed
+at a banner that was gone; and the next launch came up held again with no explanation.
+
+**The fix.** The press checks the answer: a marker that is still there keeps the hold, sets `resumeFailure` to
+`LibraryOpenCopy.resumeMarkerNotRemoved` (PROVISIONAL words, **P-VX339-1**: "Sync is still waiting: Variorum couldn't
+remove the restore marker beside your library. Press Resume Sync to try again."), and resumes nothing (the gates
+would refuse the round anyway); a later press that removes it clears the line, the banner, and catches up once. The
+banner (`RestoreHoldBar`, `LibraryOpenDoor.swift`) renders the line beneath its sentence, line-limited for the
+window's minimum-size probe (the b6dae25 class). The clear is a seam on `RestoreHoldModel.init` (`clearMarker`,
+defaulting to `LibraryRestoreHold.clear`) so the ticket's fake store can stand in; every existing caller is
+byte-unchanged. Today's `RestoreHoldModel` only on the logic side; `LibraryRestoreHold` (core) untouched. VX-317 stays
+open (the rebuild's phase 5).
+
+**Pins** (`App/Variorum/VariorumTests/VX339ResumeHoldTests.swift`): `aClearThatFailsKeepsTheBannerSaysWhyAndResumesNothing`
+(the ticket's fake hold store: banner kept, the line said, nothing resumed, the marker and the gate still held; then a
+clear that works resumes once) · `aMarkerThatCannotBeRemovedKeepsTheBannerOnTheRealRoad` (no seam: a read-only folder
+the marker cannot leave) — both expected RED on the red product. **PENDING the batch.**
+
+### The Mac products (PREBUILT — the batch window runs `test-without-building` only)
+
+Both built `build-for-testing` from `App/Variorum/`, scheme `Variorum`, destination `platform=macOS`, no custom
+configuration (Debug):
+- **FIXED:** `<home>/dev/variorum-vx-348/DerivedData/u1-fixed` (`Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`)
+  — the tree at `cf194996b` (log `DerivedData/u1-fixed-build.log`).
+- **RED:** `<home>/dev/variorum-vx-348/DerivedData/u1-red` — `cf194996b` with `StoreBackup.swift` at
+  its pre-fix content (`git show 231b44d24:App/Variorum/Shared/StoreBackup.swift`) and `RestoreHoldModel.swift`
+  behaviourally reverted (the seam kept; the press ignores the clear's answer, as before) — both files confirmed
+  recompiled in its log (`DerivedData/u1-red-build.log`), the tree restored after. `BackupRetention.swift` stays
+  fixed there (the old `StoreBackup` never calls its new function), so the pure guard compiles.
+- **The commands** (under a held stage claim; confirm each "Test run with N tests" line):
+  ```
+  cd <home>/dev/variorum-vx-348/App/Variorum
+  # RED — expect VX338: 4 of 5 fail (the pure guard passes); VX339: 2 of 2 fail
+  xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u1-red test-without-building -only-testing:VariorumTests/VX338SharedBackupFolderTests -only-testing:VariorumTests/VX339ResumeHoldTests
+  # FIXED — the pins and their neighbours, all green
+  xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u1-fixed test-without-building -only-testing:VariorumTests/VX338SharedBackupFolderTests -only-testing:VariorumTests/VX339ResumeHoldTests -only-testing:VariorumTests/BackupRetentionTests -only-testing:VariorumTests/BackupRunTests -only-testing:VariorumTests/BackupSingleFlightTests -only-testing:VariorumTests/BackupOwnFilesTests -only-testing:VariorumTests/DataSafetyRunbookTests -only-testing:VariorumTests/BackupFutureStampTests -only-testing:VariorumTests/StoreBackupTests -only-testing:VariorumTests/SnapshotPairTests -only-testing:VariorumTests/LibraryPortabilityDoorTests -only-testing:VariorumTests/ChromeMinHeightTests -only-testing:VariorumTests/VX209GuideWarningTests
+  ```
+  A FIXED product built before a later unit's commits is still the U1 tree; the run's whole-batch product is the
+  orchestrator's to rebuild at the end.
