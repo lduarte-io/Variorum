@@ -1187,3 +1187,18 @@ synced schema or TK2-seam line.*
     REVOKED in-window. Server back ON; Debug app QUIT by bundle id; pgrep empty at RELEASE.
   - **Deferred to U3/U4's walk window:** VX-393's live double-share check (pin-proven already), the Terminal-voice
     captures of the new faces, and the VX-339 banner walk.
+
+## U5 FIX-LEG ADJUDICATION (the orchestrator, 2026-10-18)
+
+- **Verified and ACCEPTED:** the trace is concrete (the door drops its host at `stopServer`; the session task's weak
+  self skipped `ended()`, so stop-road lines were never written — and the headless pins passed precisely because the
+  harness held its host strongly: a textbook harness-realism gap); the fix is structural (the session writes its own
+  end line, host-independent); the new pin `aStopThatLetsGoOfItsHostStillSaysEachConnectionsEnd` red-on-old by log,
+  MCP target 383/71 green; the u5-fix product prebuilt from a clean checkout of `0ebf5c926` with U2's uncommitted
+  work excluded. **The door pin's run (expected all green now) rides the next stage window** (folded into U2's
+  batch REQUEST) and the optional live re-check rides U3/U4's walk window.
+- **The two surfaced items are tickets, triaged at mint, neither joins the run:** the stop road's skipped
+  `endMCPConnectionGrants` (no exposure window — the sweep runs first) → **VX-400** (Bug, Confirmed, MCP, Low); the
+  Activity rows' frozen relative stamps (no TimelineView; the LIST refreshes fine — the live round's "stale list"
+  caveat is resolved by this trace, strengthening the gap's confirmation) → **VX-401** (Improvement, Confirmed,
+  MCP, Low).
