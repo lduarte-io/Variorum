@@ -767,7 +767,15 @@ no stray (both scratch worktrees removed).
 **Not done in U1b, first:** (filled at the close — PENDING)
 
 **LIVE STATUS (per piece; PENDING = unverified):**
-- Piece 1 — the Debug switch `ProtectionRoad.newRoadIsLive` + its pins + the Release check: NOT STARTED.
+- Piece 1 — the Debug switch `ProtectionRoad.newRoadIsLive` + its pins + the Release check: DONE (this commit) —
+  `Shared/Protection/ProtectionRoad.swift` (the rule `debug && mac`, compile-time — `isDebugBuild` is the `#if DEBUG` arm
+  alone; P-VX306-U1b-1: the phone keeps today's road this unit); `AppBootstrap.newRoad` (the production instance reads the
+  switch; the test init defaults it OFF — the test override); `ProtectionRoadSwitchTests` (4: the rule's four cells, this
+  Debug Mac build reads it on, the source pin on the compile-time arm and no run-time input, a test bootstrap runs today's
+  road). Release check, this tree: `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Release
+  -derivedDataPath DerivedData/vx306 build` → `** BUILD SUCCEEDED **` (no install, no launch); Debug `build-for-testing` →
+  `** TEST BUILD SUCCEEDED **`. The pins' RUN and the existing route suites' run under the switch forced off: PENDING (the
+  orchestrator, under the stage).
 - Piece 2 — the new road's route in `routeAndOpen` behind the switch (facts → `assess` → the verdict; the quiet roads at once;
   the typed roads with the mirror and the catalogued key files; settle + repairs; the open with the key in hand; the store
   identity; the throwing edges caught): NOT STARTED.

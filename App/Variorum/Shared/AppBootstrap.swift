@@ -150,6 +150,11 @@ final class AppBootstrap {
     /// missing-library act work beside — never the real dev home.
     @ObservationIgnored private let testPresence: StoreFilePresence
     @ObservationIgnored private let testStoreURL: URL?
+    /// VX-306 U1b — whether THIS bootstrap takes the rebuilt protection core's open road: the one switch
+    /// (`ProtectionRoad.newRoadIsLive` — a Debug build on the Mac) for the production instance; OFF by default
+    /// under a test opener, so every existing route suite runs today's road unchanged (the Release check's
+    /// test override). Read at the head of `routeAndOpen`.
+    @ObservationIgnored let newRoad: Bool
 
     init(
         variant: AppDatabase.StoreVariant = StoreLocation.resolve(),
@@ -160,6 +165,7 @@ final class AppBootstrap {
         testOpener = nil
         testPresence = .encryptedOrUnknown
         testStoreURL = nil
+        newRoad = ProtectionRoad.newRoadIsLive
         lobbyVaultRoad = LobbyVaultRoad.live(scope: variant.rawValue)
         protection = ProtectionController(configuration: .init(
             scope: variant.rawValue,
@@ -207,13 +213,16 @@ final class AppBootstrap {
         syncCustodyLeaves: (@Sendable (_ storeID: String) -> E2EECustodyLeaves)? = nil,
         syncCustodySession: SyncCustodySession = .shared,
         // pre-13x 4a: a scripted vault road for the lobby's pins (nil = none).
-        lobbyVaultRoad: LobbyVaultRoad? = nil
+        lobbyVaultRoad: LobbyVaultRoad? = nil,
+        // VX-306 U1b: the one switch's test override — OFF unless a new-road pin turns it on.
+        newRoad: Bool = false
     ) {
         storeVariant = .dev
         self.gate = gate
         self.testOpener = testOpener
         self.testPresence = testPresence
         self.testStoreURL = testStoreURL
+        self.newRoad = newRoad
         self.lobbyVaultRoad = lobbyVaultRoad
         protection = ProtectionController(configuration: .init(
             scope: AppDatabase.StoreVariant.dev.rawValue,
