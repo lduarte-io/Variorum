@@ -492,6 +492,27 @@ disposition here.
     P-VX381-U2-1. The undo's exact-stamp reads assume the trigger copies the tag's `deleted_at` string verbatim (it
     does — `NEW.deleted_at`), and `InvariantSweepTests` (7 seeds × 250 random acts, which undo at random) now
     exercises the entry against the no-live-row-under-a-dead-parent invariants, green.
+- **THE ORCHESTRATOR'S WALK (2026-10-18, the vx-381-walk window — DONE, PASSED):** both voices on the dev
+  store's Debug build (screenshots `.walkshots-vx381/`, gitignored; deleted at the closeout tidy). Seen live,
+  byte-exact where a string was ruled: the mint receipt ("Tagged #quicknote — the gatheri…", the note-box
+  truncation being WA-1's known corner); the star mint SETTING the star (the Starred list grew); the ★-rule
+  collect via the chip speaking "Starred — the gathering shows it now."; the archived collect speaking "Tagged
+  #quicknote — the gathering shows it once it's unarchived." and the promise PROVED at unarchive (o museu
+  appeared in the assembly); the greyed door's hover "Archived — unarchive it to add notes." (Study); the
+  13i-e archive family in BOTH voices (paused-collecting lead, honest State row, the comes-back receipt
+  "Unarchived “quicknotes” — it's back on the Bookcase."); the tag-delete confirm speaking ONLY the
+  consequence in both voices (R-VX381-A3 live); delete → ⌥⌘Z reviving the tag AND its application on screen
+  (the note wears walktest again); a bookless note in TWO gatherings editing with NO notice (VX-111); disabled
+  calm buttons visibly faint in both voices (Tags' "Make a Gathering…"); Release's honest receipt (incidental).
+  **VX-240's .opening face stands on its PIN** (a real AppBootstrap adoption held in `.opening`, spinner found,
+  red-on-old in two batches) — a live capture needs a store-replacing ceremony for a sub-second window on a
+  388 KB store; deliberately not staged. **Walk observations:** W-O1 — the greyed door's tooltip would not
+  present to synthetic hovers in Terminal (3 tries; Study presented; the string is shared and pinned — a walk
+  harness limitation, not chased, no ticket). **Walk finding:** W-F1 — the chip's Add to Book picker does NOT
+  mark an archived gathering "(archived)" (13i-e's add-selector rule; screenshot s15) — PRE-EXISTING, ticketed
+  at this record (see below). Posture: no re-key ran, `dev-castle.env` untouched, keys unchanged; both
+  gatherings live again; voice restored to Study; prefs re-export + diff showed benign view-state keys only;
+  app quit, no instances, stage released with the result line.
 - **Ladder:** round 1 COMPLETE (`notes/plans/fixes/vx-381-ladder-r1.md` — findings + the orchestrator's
   DISPOSITIONS). **Walk:** NOT-STARTED. **Closeout:** NOT-STARTED.
 - **Ladder round-1 FIX LEG (a fresh implementer, 2026-10-18 — scope = the r1 file's §DISPOSITIONS: F-2 · F-1 · F-3 +
