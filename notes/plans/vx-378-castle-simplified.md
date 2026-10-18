@@ -1762,6 +1762,25 @@ amendments. The lifecycle page's stages 9, 10, 14 follow through the fixture.
   **THE GATE SOAK:** RUNNING after the discovery run (the same script; seeds 1–20, Debug then Release).
 - 6 — the closing runs, counts, this record closed: NOT-STARTED.
 
+### HER MORNING SITTING AFTER THE GATE (2026-10-18, during the release soak — the bundle's items worth a real look, by the question tool)
+
+- **P-VX378-O1-1 — RULED (a):** *"Reword rule 5 (Recommended)"*. CastleRules rule 5's quiet-road clause now reads *"through
+  this Mac's quiet roads while they still hold the key the backup's key file is locked under"*; the status line names it. No code.
+- **P-VX378-O2-1 — RULED (a):** *"Roll back, as built (Recommended)"*.
+- **P-VX378-U4-7 — RULED (a):** *"No notice, as built (Recommended)"*.
+- **P-VX378-O2-2 — UNDER DISCUSSION.** Her words: *"don't we support castle is castle by removing the apple wrap from castle?
+  because someone could always have a key stashed somewhere else - isn't our guarantee more that the apple key won't work to
+  get you into castle anymore, rather than 'we got rid of every apple key'? let's discuss this one."* The orchestrator's reading,
+  given in reply: seed 3 is an ON-DEVICE item, not a stash — macB began in Castle, left (a Standard key with a silent item and an
+  Apple key), was rolled back by Time Machine to the Castle moment (file and key file back, keychain NOT), left and re-entered;
+  the forgotten stretch's silent item survived the re-entry's sweep and its backup's key file in the shared folder carries the
+  pre-leave Castle key in its history (rule 4), so a login-password holder on macB opened the pre-leave Castle backups. Rule 11
+  as written promises exactly that these Standard-era locks die at entry ("your Standard-era backups' quiet locks die with it,
+  and they are now Castle-protected"); a key STASHED elsewhere was never inside any promise (an exfiltrated secret can't be
+  revoked; L3). Her narrower framing — Castle protects from entry forward, pre-entry backups keep whatever roads they had — is a
+  rule 11 rewording and a promise-1 loosening, not a code need; the built sweep stays correct under either reading (it deletes
+  what the app can see). Options put to her in the reply; the ruling lands here.
+
 ## 9. The ladder (a fresh Fable reviewer per round, `notes/REVIEW_PROMPT.md` verbatim, zero framing; her cap: up to five rounds while a MAJOR is still found; a round that stalls on a safeguard reruns as Opus at max — none did)
 
 ### Round 1 — 2026-10-17, fresh `fable-reviewer` over the WHOLE phase (`63cf038f1..ce3ee92e7`), read-only on a review worktree; the report committed UNEDITED as `notes/plans/vx-378-ladder-round-1.md` (`868369730`)

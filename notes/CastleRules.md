@@ -6,7 +6,8 @@ U2 ruling (rules 11–12: both secrets at a crossing — P-VX378-U2-2, the plan'
 and 25 — FD-2, FD-3, the plan's §8 note after U3). Amended again at her rulings at the U4 stop (2026-10-17, the plan's §8):
 rules 4, 5 and 12 — the floor (a backup opens with the secrets you had when you made it; your current ones open older
 backups of the same library); rule 17 — Make this my library carries no keys; rule 21 — the fingerprint and the wrapped
-copy, the notice instead of the refusal, and the key-file offer.**
+copy, the notice instead of the refusal, and the key-file offer. Amended at her morning sitting after the gate (2026-10-18,
+the plan's §8): rule 5's quiet-road clause reads as built — P-VX378-O1-1.**
 Where this document and `notes/plans/vx-266-castle-backups-prelaunch.md` differ, this document wins; that design keeps
 its research and its Apple-facts pointers (`notes/plans/vx-266/second-opinion-apple-facts.md`). The walk-through of
 these rules — one person, one library, every stage — is `notes/plans/vx-266/castle-lifecycle.html`, and the corrector
@@ -43,8 +44,8 @@ open it. Everything else is a convenience.**
    made it. Every key change also carries the earlier keys forward, so your current ones open older backups of the same
    library. Only typed secrets reach through the list; a quiet road opens only a key it directly holds.
 5. **A backup is the library plus its key file.** It opens with the passphrase and words you had when you made it, with
-   your current secrets through rule 4, or — while the backup's key is still the live key — through this Mac's quiet
-   roads.
+   your current secrets through rule 4, or through this Mac's quiet roads while they still hold the key the backup's key
+   file is locked under.
 6. **Changing the passphrase or making new words re-locks the current key; it does not change the key.** Older backups
    made under that same key still open with your new secrets; older keys still open through rule 4. The doors say so in
    one sentence.

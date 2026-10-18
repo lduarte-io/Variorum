@@ -2779,7 +2779,9 @@ Options:
 - (b) Replace All Keys in Standard also mints a fresh Apple key and retires the old after verification (rule 22), so
   rule 5 holds literally and older Standard backups open only with typed secrets through the history.
 The one-sentence change to CastleRules rule 5 is yours to accept; the rules are not edited by the phase. Record: the
-plan's §8 ORCHESTRATOR NOTE after U1, adjudication 4. Status: open — your eye at the phase's close.
+plan's §8 ORCHESTRATOR NOTE after U1, adjudication 4. **RULED 2026-10-18 (her morning sitting): (a) — "Reword rule 5";
+rule 5's clause now reads "through this Mac's quiet roads while they still hold the key the backup's key file is locked
+under" (CastleRules amended at her word). Code unchanged.**
 
 ### VX-378 U2 THE ADDITIONS (2026-10-16; the plan's §8 U2 RECORD)
 
@@ -3051,6 +3053,7 @@ key — rules 7, 16), this Mac's settings of that day. Options:
   things", yours to rule.
 - (c) the key changes at every account change (sync setup, a join, a leave), so a copy across one always differs —
   against rules 7 and 16 ("never changes the key"), listed so it isn't proposed.
+**RULED 2026-10-18: (a) — "No notice, as built".**
 The same reading covers a KEY FILE of the same key replayed from an earlier day (its locks of that day: the library then
 opens with that day's secrets — the floor) and a MEMORY ITEM replayed alone (it names this Mac's earlier device ID, so
 the open reads that section — this Mac's settings of that day, its gate among them): what this Mac remembers can't tell
@@ -3069,7 +3072,7 @@ copies paused. Options:
   this my library again when they like. Past the commit point the case cannot arise (the library already opens under
   the act's key).
 - (b) hold the act in flight and ask for the press's pair at the face — the stuck state her stuck-leave ruling removed.
-Record: the plan's §10 (attempt 1's triage). Status: open — your eye; the face is VX-306's.
+Record: the plan's §10 (attempt 1's triage). **RULED 2026-10-18: (a) — "Roll back, as built"; the face is VX-306's.**
 
 **P-VX378-O2-2 — Castle entry's sweep reads the catalogue (the gate's seed 3; rule 11).** A Time Machine rollback put an
 older library file back but not the keychain, so a silent item for a key the rolled-back stretch minted survived; the
@@ -3084,4 +3087,7 @@ Options:
 - (b) sweep every silent item in the scope at Castle entry — breaks Look inside's quiet road for another library's copy
   (rule 17).
 - (c) accept as a stated limit (a Time Machine rollback is outside the promise) — against "Castle is Castle".
-Record: the plan's §10 (attempt 1's triage). Status: open — your eye.
+Record: the plan's §10 (attempt 1's triage). Status: UNDER DISCUSSION at her morning sitting (2026-10-18) — her words: *"don't we
+support castle is castle by removing the apple wrap from castle? because someone could always have a key stashed somewhere
+else - isn't our guarantee more that the apple key won't work to get you into castle anymore, rather than 'we got rid of every
+apple key'? let's discuss this one."* The orchestrator's reading is in the plan's §8 (HER MORNING SITTING).
