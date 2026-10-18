@@ -215,7 +215,7 @@ tickets:
 | Piece | State |
 |---|---|
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
-| U1a — VX-303 (the landing road) | BUILT — batch PENDING the `vx-382-u1a` window (red-on-old per family + the batch; §U1a RECORD's red-on-old plan). Commits 482549002 · 7cbaf633b · 370f79514 · e3d44a189 · 406fb417c · e7cd4fdd9 · 74c632b61; build-for-testing green |
+| U1a — VX-303 (the landing road) | BUILT — batch PENDING the `vx-382-u1a` window (red-on-old per family + the batch; §U1a RECORD's red-on-old plan). Commits 482549002 · 7cbaf633b · 370f79514 · e3d44a189 · 406fb417c · e7cd4fdd9 · 74c632b61 · ed0c887d6 (pin ids); build-for-testing green at ed0c887d6 |
 | U1b — VX-304 (the box door + Index takes) | NOT STARTED |
 | U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | NOT STARTED |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
@@ -333,7 +333,7 @@ plan below). No walk this unit (U1b's covers U1). Every pin count/green claim be
 | Guard (i) probe — the Index filter | in place: `caretReportIsHers` → `return true` first line | `BookPlaceMemoryTests`, `BookOpenDoorMountTests` | The Index placement rule's false arms; mount index arm: the landing's placement remembered |
 
 Restore each with `git checkout -- <file>` (safe: the tree is committed) or `git revert --abort`; `git diff` clean
-against 74c632b61 (or the tip) before the next family.
+against the tip (ed0c887d6 at this writing) before the next family.
 
 ### Recorded edges (not fixed here)
 
