@@ -257,6 +257,14 @@ Debug launch, dismiss a What's New sheet if one shows. Merges serialize with vx-
 > new items were minted during the run) in this sort of format: [her VX-381 checklist block, the run's seven
 > members as unchecked boxes]"
 
+HER WORD RELAYED BY THE COORDINATOR (03:3x MDT, her direct instruction to it): VX-381 · VX-382 · VX-348
+merge to main in finish order; ONLY THE LAST of the three mints ONE release (0.9.8) covering all three —
+first/second mergers do NO release, NO bump, NO /Applications refresh; VX-378 never mints. Duties on this run:
+land this run's own section in `ReleaseNotes-0.9.8.md` ON THIS BRANCH before the merge ask (one-line bullets,
+the 10-16 precedent); the merge ask to the coordinator carries branch · tested tree · tip and the branch must
+contain main `fdce74de3` (merge origin/main in at the closeout seam); the coordinator says explicitly if this
+run is LAST (then: release.sh + the folded refresh under its GO and rule card).
+
 Read as: PROVISIONAL-and-continue through the ladder, the walk and the closeout; the merge to main runs at
 this session's finish, serialized with vx-382 through the coordinator in FINISH ORDER; the deliverables are
 the author handoff (notes/handoffs/vx-381-handoff.md) AND, separately, a completed checklist block in her
