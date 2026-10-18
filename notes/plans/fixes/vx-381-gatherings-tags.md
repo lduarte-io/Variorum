@@ -245,6 +245,17 @@ disposition here.
 
 - **Kickoff (2026-10-18):** DONE — worktree seated, in-flight row flipped (`23608d43`), tickets In Progress,
   briefs written, P-VX381-1 ruled. Coordinator announce: PENDING.
-- **U1 (VX-194 · VX-250 · VX-240 · VX-241):** NOT-STARTED — brief above is settled.
+- **U1 (VX-194 · VX-250 · VX-240 · VX-241):** IN-PROGRESS (the U1 implementer, 2026-10-18). No revert in flight.
+  - U1.1 VX-194 (CalmButtonStyle reads `isEnabled`; token-derived disabled face; the sweep): IN-PROGRESS. Sweep:
+    17 files (16 app + 1 test); ONE calm-button one-off — `CeremonySheetChrome`'s confirm `.opacity(canConfirm ? 1
+    : 0.45)` → folded per R-VX381-A2 (the button IS `.disabled(!canConfirm)` already, CeremonySheetChrome.swift:168,
+    so the environment carries the face). `GatheringNoteDoor`: R-VX381-A1 (a) — local face kept, comment corrected.
+  - U1.2 VX-250 (1) mint receipt + P-VX381-1 `shownByTagging`: NOT-STARTED.
+  - U1.3 VX-250 (2) greyed hovers: NOT-STARTED.
+  - U1.4 VX-250 (3) NOT terms at the mint: NOT-STARTED — design: a fresh-note evaluator mirroring `ruleSQL` exactly
+    (Kleene logic for the legacy NULLs; subtree `tagCovers`), NOT conjuncts and NOT options in an any-of DEFERRED
+    and verified against the final plan, so a door never shows enabled for a press that refuses.
+  - U1.5 VX-240 `.opening` face: NOT-STARTED.
+  - U1.6 VX-241 archived-target receipt: NOT-STARTED.
 - **U2 (VX-249 · VX-247 · VX-111):** NOT-STARTED — brief above is settled; runs after U1.
 - **Ladder:** NOT-STARTED. **Walk:** NOT-STARTED. **Closeout:** NOT-STARTED.
