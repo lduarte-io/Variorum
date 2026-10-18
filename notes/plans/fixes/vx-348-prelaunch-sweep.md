@@ -348,11 +348,12 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   (a connection now writes its own end through its own store; the cause was the door dropping its host before the
   host's sessions ended), headless proof green; the Mac pin's re-run on `DerivedData/u5-fix` rides the orchestrator's
   next stage window (the U5 record's "VX-394 fix leg" section has the command).**
-- **U2 (VX-347 — ⌘S):** BUILT + FIX LEG DONE — FIXED at the one shared seam (`acbe5e5cb` · `36c715ac2`); the batch's
-  two findings fixed (`d702f8643` the double-file — one commit per field via the ask's presentation + the shared ledger;
-  `1da9c3bc1`/`4804d7b1b` the rig re-shaped off the hollow popover lookup + the double-file class pinned on all four
-  models); **PENDING:** the re-batch on the three post-fix-leg products (u2-fixed · u2-red · u2-fixleg-red — commands and
-  expected reds in the U2 record), the walk (both voices, every host), the QUESTIONS bundle (P-VX347-1…5).
+- **U2 (VX-347 — ⌘S):** BUILT + FIX LEG DONE + RE-BATCHED — FIXED at the one shared seam (`acbe5e5cb` · `36c715ac2`), the
+  batch's two findings fixed (`d702f8643` the double-file · `1da9c3bc1`/`4804d7b1b` the rig + the four-model pins); the
+  re-batch: RED 13 behavioural reds as predicted, FIX-LEG RED as predicted, FIXED 205/206 — the one cell
+  (`aLockedTakeStillRefusesWhenTheFieldIsLeft`, a counting bug in the cell on all three trees) fixed `e40e5dcf1`, u2-fixed
+  rebuilt. **PENDING:** that one suite's re-run on u2-fixed (expected 13/13), the walk (both voices, every host), the
+  QUESTIONS bundle (P-VX347-1…5).
 - **U3 (VX-350 · VX-349 · VX-176 — the Library's row and header):** IN-PROGRESS (its implementer, 2026-10-18) — the U3
   UNIT RECORD (at the end of this file) carries the live state.
 - **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** NOT-STARTED.
@@ -1384,7 +1385,8 @@ the popover, so it can fail loudly but never pass hollow. Every mount cell still
 
 All three build from DURABLE detached checkouts beside this worktree; this worktree is never reverted:
 - **FIXED:** `<home>/dev/variorum-vx-348/DerivedData/u2-fixed` — from
-  `<home>/dev/variorum-vx-348-u2fixed` at `4804d7b1b`, unmodified (log `DerivedData/u2-fixed-build.log`).
+  `<home>/dev/variorum-vx-348-u2fixed` at `e40e5dcf1` (the fix-leg tip + the last cell's fix, below),
+  unmodified (log `DerivedData/u2-fixed-build.log`).
 - **RED (the pre-fix code):** `<home>/dev/variorum-vx-348/DerivedData/u2-red` — from
   `<home>/dev/variorum-vx-348-u2red` at `4804d7b1b` with U2's eleven app files at main `e6874b1d8`'s content
   (since main, only U2's commits touch them — checked: the nine VX-382 never touched are byte-identical to `acbe5e5cb^`,
@@ -1417,6 +1419,34 @@ All three build from DURABLE detached checkouts beside this worktree; this workt
   `thePopoversOwnCloseFilesTheCommit` is the one cell with a popover premise: on RED it must fail at the commit count
   (behaviour), on FIXED pass; a failure AT its premise ("the field's popover was caught showing") on either tree means
   the environment still cannot surface the NSPopover — say so; the click-away family no longer depends on it.
+
+### THE RE-BATCH (the orchestrator's window, 2026-10-18 ~07:43) and the last cell
+
+**The verdicts (the orchestrator's):** RED 13 behavioural reds exactly as predicted, zero premise failures (the rig
+re-shape held — `thePopoversOwnCloseFilesTheCommit` included); FIX-LEG RED the five ledger pins + the VX-154 pin red,
+the controls green but one; FIXED 205 / 206 — the double-file fix and the shipped VX-154 pin green.
+
+**The one cell — `aLockedTakeStillRefusesWhenTheFieldIsLeft`, failing on ALL THREE trees** at
+`try Rig.savepoints(h).isEmpty`. The trace: nothing threw (`→ <not evaluated>` is how `#expect` prints a `try`
+sub-expression it does not decompose — one issue, no caught error); the value was FALSE. `lockVariant` on a dirty take
+first appends ONE quiet AUTO commit (the lock insures what it guards — AppSpec §9's quiet occasions), and the fixture's
+never-committed take is dirty (no last commit, non-empty text), so the read always held that row. The cell's premise is
+REAL — Write's door checks the seal, not the take's lock, so ⌘S does open the field on a locked take and ⏎ then refuses
+`lockedVariant` — so the cell is kept and fixed, not dropped: the seal cell already counted MANUAL commits for the same
+reason; this one forgot. **Fixed (`e40e5dcf1`, test-only):** the lock's auto savepoint is the premise
+(`allSatisfy { $0.kind == .auto }`), no MANUAL commit the claim.
+
+**The red legs' proofs stand, this cell re-dispositioned:** on `u2-red` the cell is RED by its BEHAVIOUR expectation
+(`spoke` — the pre-fix leave says nothing) — its savepoint line was the cell's own bug riding alongside; on
+`u2-fixleg-red` it was the one failing CONTROL, for the same counting bug, not the ledger. Neither red product is
+rebuilt (the fixed cell would be red on `u2-red` by `spoke` alone and green on `u2-fixleg-red`).
+
+**What the next window must re-run (one suite, about a minute):**
+```
+cd <home>/dev/variorum-vx-348/App/Variorum
+xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u2-fixed test-without-building -only-testing:VariorumTests/VX347CommitLeavesMountTests
+```
+Expected: 13 / 13 green. With it, U2's fixed leg is 206 / 206.
 
 ### For the orchestrator's closeout (not U2's to apply)
 
