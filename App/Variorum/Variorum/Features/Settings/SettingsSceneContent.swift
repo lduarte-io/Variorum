@@ -49,6 +49,29 @@ struct SettingsSceneContent: View {
         }
     }
 
+    /// **VX-240 — what the window shows when there are no panes.** The
+    /// reopen roads that run FROM this window (Restore from Backup, the
+    /// posture switches) pass through `.opening` with the window kept open,
+    /// and the stub's instruction — "Open the main window first." — was a
+    /// wrong one mid-ceremony. `.opening` now shows her words, "Opening your
+    /// library…", with a spinner (QUESTIONS #217); every settled closed
+    /// state keeps the stub (the window closes on those — VX-224).
+    enum NonReadyFace: Equatable {
+        case opening
+        case stub
+    }
+
+    static func nonReadyFace(_ state: AppBootstrap.State) -> NonReadyFace {
+        if case .opening = state { return .opening }
+        return .stub
+    }
+
+    /// The two faces' words — hers for the opening one, verbatim.
+    enum Copy {
+        static let opening = "Opening your library\u{2026}"
+        static let stub = "Open the main window first."
+    }
+
     var body: some View {
         arms
             .background(WindowKeyReporter(onWindow: { host.window = $0 }, onKey: {}))
@@ -106,8 +129,18 @@ struct SettingsSceneContent: View {
                     }
                 }
         } else {
-            Text("Open the main window first.")
+            switch Self.nonReadyFace(bootstrap.state) {
+            case .opening:
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text(Copy.opening)
+                }
                 .padding(24)
+            case .stub:
+                Text(Copy.stub)
+                    .padding(24)
+            }
         }
     }
 }

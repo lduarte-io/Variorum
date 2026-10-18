@@ -410,6 +410,17 @@ nonisolated enum OpsRefusalCopy {
         // twin.
         case .tagNotFound:
             return "That tag isn't there any more — nothing changed."
+        // **VX-381 ladder r1 F-3** — the Delete Tag undo's collision refusal
+        // (P-VX381-U2-3: a tag she made since holds the path, so the undo
+        // refuses and KEEPS its entry). It reached her as `Undo failed:
+        // Refused: duplicateTagPath(path: "work")` on the Mac and bare on the
+        // phone. The fact in Settings ▸ Tags' own words, then the road. The
+        // road is act-less ("try again", not "undo again") because the
+        // table cannot know its door: the undo doors frame it ("Undo failed:
+        // …"), and the rule editor's make-a-tag door can meet it on a race.
+        // Platform-neutral. (PROVISIONAL wording, for the orchestrator.)
+        case .duplicateTagPath(let path):
+            return "A tag named \u{201C}\(path)\u{201D} already exists \u{2014} rename it, then try again."
         // A deleted block put back while a sync apply left it placed.
         case .blockAlreadyPlaced:
             return "That block is already in a note — nothing changed."

@@ -50,3 +50,10 @@ Finals: the Mac comment set 103/103 across 15 suites at the merged tip; core 2,7
 the FABLE ladder CLOSED at round 1 (0B/0M/2m/3n — F-1 a bundle sentence for her, F-2 accept-as-recorded, F-3/F-4 doc lines, F-5 no change); one stage window: the 382-suite Mac batch, the faces pin red-on-old redone on a rebuilt pre-fix product, the phone suite, the orchestrator's walk W1–W9 in both voices, the real-client live round L1–L7 (L5 half-live)
 
 Finals: core 2,895/337 · workbook 40/6 · VariorumMCPTests 362/68 (VX-353's standing flake green alone) headless; Mac: the tip batch 2,402 tests / 379 suites with only the two standing reds (VX-115, VX-167); the guide + door pins 37/4 after R-C-1; `MobileVersionsTests` 17/1 (iPhone 17 Pro, iOS 26.2).
+
+
+## VX-381
+
+Ladder: round 1 (opus) 2B/1M/2m/6n — F-1/F-2 BLOCKERs + F-3 MAJOR confirmed-fixed, F-7/F-8 riders, F-4 → VX-388, F-5 → VM-21, F-6/F-10/F-11 recorded, F-9 → VX-216; round 2 (fresh opus) CLOSED THE LADDER — all five fixes hold, 0B/0M/1m/2n (N-1 the sweep predicate + witness seed 82, built by the orchestrator, both legs verified first-hand; N-3 → VX-391).
+
+Finals: core full `swift test` 2,927/340 (the one red = VX-353's standing load flake, 3/3 alone); Mac batches — U1 red 29/4 (the 9 new pins exactly) · U1 green 135/18 · U2 red 18/4 (the 7 new pins) · U2 green 132/17 · fix leg red 11/2 + phone red 8/1 (exactly the new pins) · fix leg green 143/18 + phone 23/3; the orchestrator's both-voices walk PASSED (the run record's walk section).

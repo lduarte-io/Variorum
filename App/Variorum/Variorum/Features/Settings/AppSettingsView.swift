@@ -1145,7 +1145,9 @@ struct TagManagerPane: View {
         }
         // VX-221 — the delete act's ONE confirm, for both its doors. The
         // consequence is the phone's sentence, hoisted (`TagDeletion`): the
-        // subtree goes too, every note loses those tags, and nothing undoes it.
+        // subtree goes too, and every note loses those tags. (VX-247: the act
+        // is undoable now — "Undo Delete Tag", ⌥⌘Z — so the confirm no longer
+        // says nothing undoes it; R-VX381-A3.)
         .alert(
             TagDeletion.confirmTitle,
             isPresented: Binding(

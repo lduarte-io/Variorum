@@ -162,6 +162,17 @@ struct MarqueeText: View {
 }
 
 /// The mockup's `.btn`: squarish-rounded, bordered, generous.
+///
+/// **VX-194 — HONEST WHEN DISABLED** (her ruling 2026-10-13, QUESTIONS #217:
+/// "fix it in the style"). The style used to draw from its role alone, so a
+/// `.disabled(true)` calm button rendered pixel-for-pixel as a live one, app-
+/// wide (VX-179's O-U3-2). The body now reads the environment's `isEnabled`
+/// — the one signal `.disabled` sets, on the button or on any container
+/// above it — and a disabled button wears ONE quiet face whatever its role:
+/// the faint ink, the hairline border, the plain paper (the role's accent or
+/// alarm gives way, so a disabled primary never still calls), and no press
+/// response. All tokens, no literal colour. The font weight stays the role's
+/// so the label never reflows as a button enables.
 struct CalmButtonStyle: ButtonStyle {
     enum Role {
         case ordinary
@@ -176,40 +187,57 @@ struct CalmButtonStyle: ButtonStyle {
     var compact = false
 
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(tokens.small)
-            .fontWeight(role == .primary ? .semibold : .regular)
-            .lineLimit(1)
-            .foregroundStyle(ink)
-            .padding(.horizontal, compact ? 10 : 14)
-            .padding(.vertical, compact ? 4 : 7)
-            .background(background, in: RoundedRectangle(cornerRadius: 7))
-            .overlay(RoundedRectangle(cornerRadius: 7).stroke(border, lineWidth: 1))
-            .contentShape(RoundedRectangle(cornerRadius: 7))
-            .opacity(configuration.isPressed ? 0.6 : 1)
+        BodyView(configuration: configuration, tokens: tokens, role: role, compact: compact)
     }
 
-    private var ink: Color {
-        switch role {
-        case .ordinary: tokens.ink
-        case .primary: tokens.accent
-        case .danger: tokens.alarm
+    /// The style's body lives in a View so `isEnabled` is a live environment
+    /// read (`VoicedButtonStyle`'s and `PageDoorLabel`'s pattern).
+    private struct BodyView: View {
+        let configuration: Configuration
+        let tokens: VoiceTokens
+        let role: Role
+        let compact: Bool
+        @Environment(\.isEnabled) private var enabled
+
+        var body: some View {
+            configuration.label
+                .font(tokens.small)
+                .fontWeight(role == .primary ? .semibold : .regular)
+                .lineLimit(1)
+                .foregroundStyle(ink)
+                .padding(.horizontal, compact ? 10 : 14)
+                .padding(.vertical, compact ? 4 : 7)
+                .background(background, in: RoundedRectangle(cornerRadius: 7))
+                .overlay(RoundedRectangle(cornerRadius: 7).stroke(border, lineWidth: 1))
+                .contentShape(RoundedRectangle(cornerRadius: 7))
+                .opacity(enabled && configuration.isPressed ? 0.6 : 1)
         }
-    }
 
-    private var border: Color {
-        switch role {
-        case .ordinary: tokens.takeLine
-        case .primary: tokens.accent.opacity(0.45)
-        case .danger: tokens.alarm.opacity(0.3)
+        private var ink: Color {
+            guard enabled else { return tokens.faint }
+            return switch role {
+            case .ordinary: tokens.ink
+            case .primary: tokens.accent
+            case .danger: tokens.alarm
+            }
         }
-    }
 
-    private var background: AnyShapeStyle {
-        switch role {
-        case .ordinary: AnyShapeStyle(tokens.surface)
-        case .primary: AnyShapeStyle(tokens.accent.opacity(0.09))
-        case .danger: AnyShapeStyle(tokens.surface)
+        private var border: Color {
+            guard enabled else { return tokens.line }
+            return switch role {
+            case .ordinary: tokens.takeLine
+            case .primary: tokens.accent.opacity(0.45)
+            case .danger: tokens.alarm.opacity(0.3)
+            }
+        }
+
+        private var background: AnyShapeStyle {
+            guard enabled else { return AnyShapeStyle(tokens.surface) }
+            return switch role {
+            case .ordinary: AnyShapeStyle(tokens.surface)
+            case .primary: AnyShapeStyle(tokens.accent.opacity(0.09))
+            case .danger: AnyShapeStyle(tokens.surface)
+            }
         }
     }
 }
