@@ -333,9 +333,10 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   sync/custody slot is VX-378's — anything that looks like it needs it is DEFERRED (her kickoff word).
 - **U1 (VX-357 · VX-338 · VX-339 — the core and the headless fixes):** BUILT — all three FIXED with pins (`9c3ec7ac2` ·
   `85640635b` · `4aa81c0a6` VX-357; `481a69c6c` VX-338; `cf194996b` VX-339); VX-357's pins verified RED on the pre-fix
-  tree and the headless suites green; **PENDING:** the Mac batch (VX-338/VX-339's red and fixed legs, both products
-  prebuilt — the U1 UNIT RECORD's last section has the commands), VX-357's real-client wire round (U3's window), and
-  the VX-339 banner walk. The U1 UNIT RECORD (below) carries the rest.
+  tree and the headless suites green; **the Mac batch RAN 2026-10-18 ~04:2x under claim `vx-348-u1-batch`** — RED
+  leg 7/2: VX-338 4 of 5 red + the pure guard green, VX-339 2 of 2 red, exactly as predicted; FIXED leg 78 tests /
+  13 suites ALL GREEN. U1's pins are verified red-on-old whole. **Still PENDING:** VX-357's real-client wire round
+  (a later window) and the VX-339 banner walk. The U1 UNIT RECORD (below) carries the rest.
 - **U5 (VX-392 · VX-393 · VX-394 — the urgent MCP trio, joined 2026-10-18 at her word):** NOT-STARTED — runs NEXT
   after U1 (urgent outranks U2–U4). FOURTEEN members now; rulings R-VX348-5/6 and the report verbatim in §U5.
 - **U2 (VX-347 — ⌘S):** NOT-STARTED.
@@ -371,11 +372,12 @@ window, if the batch allows).
   load-dependent timing flake, green alone — below). The real-client wire round is PENDING (U3's window, if the batch
   allows). Its section below.
 - **VX-338 (two Macs prune each other's backups):** DONE (`481a69c6c`) — FIXED; its pins compile (`build-for-testing`
-  green) and the red product is PREBUILT; the Mac run of both legs is **PENDING** the orchestrator's batch window (the
-  commands below). Its section below.
-- **VX-339 (Resume Sync clears the banner over a failed marker removal):** DONE (`cf194996b`) — FIXED; pins compile,
-  red product PREBUILT; the Mac run of both legs **PENDING** the batch. Its section below. No walk yet (PENDING: the
-  banner's failure line in both voices needs a held marker on the dev store — the batch window's or U3's call).
+  green); **both legs RAN at the orchestrator's batch (04:2x): 4 of 5 RED on the red product (the pure guard green),
+  all green on the fixed** — red-on-old VERIFIED. Its section below.
+- **VX-339 (Resume Sync clears the banner over a failed marker removal):** DONE (`cf194996b`) — FIXED; **both legs
+  RAN at the orchestrator's batch (04:2x): 2 of 2 RED on the red product, green on the fixed** — red-on-old
+  VERIFIED. Its section below. No walk yet (PENDING: the banner's failure line in both voices needs a held marker
+  on the dev store — a later window's call).
 - **No behavioural revert is in flight.** (The Mac red product's reverts ran on committed `cf194996b` and were
   restored by `git checkout --`; `git diff` clean after. The earlier targeted `editCommentForClient` revert likewise.)
 
@@ -568,7 +570,8 @@ each Mac's survivors are EXACTLY its own rule's keep over what it wrote — rete
 is in the folder) · `copiesWrittenBeforeTheFixAreNeverDeleted` (twenty real pre-fix copies survive thirty runs) ·
 `thisMacsListFollowsTheFolder` (the list = this Mac's copies there; a copy gone by hand leaves it) — each expected RED
 on the red product (the first three by the old sweep, the fourth by absence: no list exists);
-`theOwnSweepNeverReturnsACopyThatIsNotOwn` — the pure rule (a guard, green on both). **All PENDING the batch.**
+`theOwnSweepNeverReturnsACopyThatIsNotOwn` — the pure rule (a guard, green on both). **RAN at the batch: exactly as
+expected (4 red + the guard green on u1-red; all green on u1-fixed).**
 
 ### VX-339 — Resume Sync clears the banner only once the marker is gone
 
@@ -592,7 +595,8 @@ open (the rebuild's phase 5).
 **Pins** (`App/Variorum/VariorumTests/VX339ResumeHoldTests.swift`): `aClearThatFailsKeepsTheBannerSaysWhyAndResumesNothing`
 (the ticket's fake hold store: banner kept, the line said, nothing resumed, the marker and the gate still held; then a
 clear that works resumes once) · `aMarkerThatCannotBeRemovedKeepsTheBannerOnTheRealRoad` (no seam: a read-only folder
-the marker cannot leave) — both expected RED on the red product. **PENDING the batch.**
+the marker cannot leave) — both expected RED on the red product. **RAN at the batch: 2 of 2 red on u1-red, green on
+u1-fixed — as expected.**
 
 ### The Mac products (PREBUILT — the batch window runs `test-without-building` only)
 
