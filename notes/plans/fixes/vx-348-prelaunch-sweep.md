@@ -2447,3 +2447,35 @@ lines diffed against the shipped code with no contradiction.
   here as the standing note; no action. DISPOSED-RECORDED.
 - **NIT 3 (P-VX394-6 vs `claimEndLine`'s guard wording):** one clarifying sentence joins the QUESTIONS bundle at
   the merge. DISPOSED-TO-BUNDLE.
+
+## THE 0.9.8 RELEASE — HELD AT THE PERMISSION CLASSIFIER (the orchestrator, 2026-10-18, claim `vx-348-release`)
+
+The window ran under the coordinator's GO (main frozen at the probe `2d4b575cc`; zero instances by both forms;
+`default.profraw` moved out of the tree). **The bump LANDED: `58515fe9c` — MARKETING_VERSION 0.9.7 → 0.9.8 on both
+app configurations, pushed; `git rev-list --count HEAD` read 8502 at the bump.** The ten `1.0` pbxproj lines are
+untouched; `ReleaseNotes-0.9.8.md` (all three runs' sections) was already on main.
+
+**Step 3 never ran: the auto-mode permission classifier DENIED `Tools/Release/release.sh --version 0.9.8` as a
+"[Production Deploy]", and the runner rightly did not retry.** The orchestrator does not re-run a denied command
+from another seat — a permission denial is the permission system's answer, and lifting it is hers. So: nothing
+built, notarized or published; no `~/Library/Developer/Variorum/Releases/0.9.8/`; no R2 object, appcast or site
+change; no A1 taken; `/Applications/Variorum.app` untouched at 0.9.7 (7973); zero instances at close.
+
+**THE RESUME (her morning, three roads):** (a) approve a Bash permission rule covering `Tools/Release/release.sh`
+— and expect the same classifier at Step 4's `npx wrangler r2 object put` + `npm run deploy`, possibly Step 5's
+`/Applications` swap, so the rule should cover those legs too — then a fresh runner resumes at Step 3 with the
+bump already in place (THE RELEASE BRIEF at the end of `notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md`, this
+window's 0.9.8 adaptations above); or (b) run `Tools/Release/release.sh --version 0.9.8` herself and hand the
+session the publish + refresh legs; or (c) a live sitting answering the prompts as they come.
+
+**THE FREEZE IS LIFTED at this records commit** — the stamp reads `git rev-list --count HEAD` at release.sh's own
+run, so the count simply re-reads at the resume (8502 was the bump-time reading, never a contract). The
+coordinator holds the result line.
+
+**ORCHESTRATOR'S PROVISIONAL RULING (the resume's install source):** Step 5 installs from the VERIFIED FEED DMG,
+never a local `xcodebuild` build — a local build would carry a drifted build count and an un-notarized signature
+that the rule card's own `spctl --assess` gate rejects; the run record's line ("the SAME version and build as the
+site"), VX-283's rule card and both prior releases agree. The runner raised the discrepancy honestly; this ruling
+settles it for whoever resumes.
+
+The stage claim `vx-348-release` released at this entry.
