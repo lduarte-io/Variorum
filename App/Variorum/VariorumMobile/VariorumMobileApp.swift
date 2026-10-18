@@ -242,6 +242,10 @@ struct VariorumMobileApp: App {
                 MobileStoreFailureView(error: error, recovery: recovery) {
                     bootstrap.retry()
                 }
+            case .roadLobby, .newLibraryWords:
+                // VX-306 U1b: the new road's faces are the Mac's this unit — the one switch is off on the phone
+                // (P-VX306-U1b-1), so these never arrive here; the phone's faces are U3's.
+                MobileStoreOpeningView()
             }
         }
         .onChange(of: scenePhase) { _, phase in

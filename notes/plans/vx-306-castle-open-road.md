@@ -778,7 +778,17 @@ no stray (both scratch worktrees removed).
   orchestrator, under the stage).
 - Piece 2 — the new road's route in `routeAndOpen` behind the switch (facts → `assess` → the verdict; the quiet roads at once;
   the typed roads with the mirror and the catalogued key files; settle + repairs; the open with the key in hand; the store
-  identity; the throwing edges caught): NOT STARTED.
+  identity; the throwing edges caught): DONE (this commit — COMPILING STATE: Debug `build-for-testing` → `** TEST BUILD
+  SUCCEEDED **`, the phone `** BUILD SUCCEEDED **`; its route test is piece 6's). `Shared/Protection/ProtectionOpenRoad.swift`
+  (the off-main road: `route` · `lobbyFacts` · `create` · `openTyped` · `pressTouchID` · `open` → `unlock(with:alsoInHand:)`
+  → `settle` → `repairPasses`; `heldKeyFiles` = live + the mirror + every catalogued key file; `expand` through every held
+  file's history; the bootstrap's `RoadInputs`/`ComposedRoad`/`ProtectionRoadTestHarness`); `AppBootstrap` — the switch read
+  at the head of `routeAndOpen` (`routeOnNewRoad` → `openOnNewRoad` → today's `openStoreOffMain` with `.inMemory(key)`),
+  `ensureStoreIdentity` (today's mint at a creation; at a later open only when none is there), the states `.roadLobby` /
+  `.newLibraryWords`, today's relanding · ready housekeeping · `lock`/`canLock` OFF on the new road, the missing face's
+  Start a New Library → the core's creation; the arms in `VariorumApp` / `SettingsSceneContent` / `VariorumMobileApp` (the
+  phone's unreachable); today's posture runner NOT wired on the new road (P-VX306-U1b-6). The faces the route lands on
+  (the model, the face, the card — pieces 3/4) ride this commit so it compiles.
 - Piece 3 — the lobby MODEL (pure, Shared) + `StoreLockView`'s road face + VX-310's two pins (red-on-old): NOT STARTED.
 - Piece 4 — the creation card (§7c (1) verbatim, one button) + `createLibrary(passphrase: nil)`: NOT STARTED.
 - Piece 5 — the `StoreBackup.onRun` hook → `takeBackupPair`, honouring `copiesArePaused` (K4): NOT STARTED.

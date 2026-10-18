@@ -45,7 +45,7 @@ struct SettingsSceneContent: View {
     static func libraryClosed(_ state: AppBootstrap.State) -> Bool {
         switch state {
         case .ready, .opening: false
-        case .locked, .waitingForICloudKeychain, .libraryMissing, .failed: true
+        case .locked, .waitingForICloudKeychain, .libraryMissing, .failed, .roadLobby, .newLibraryWords: true
         }
     }
 

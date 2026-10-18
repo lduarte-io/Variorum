@@ -292,7 +292,11 @@ struct VariorumApp: App {
                         // road with the controller's custody and the
                         // services' vault; the services are read LIVE
                         // (the reopen rebuilds them).
-                        if let storeURL = try? AppDatabase.defaultStoreURL(
+                        // VX-306 U1b (P-VX306-U1b-6): NOT on the new road — today's posture switches re-key the
+                        // library under today's key file, which the protection core's key file would no longer
+                        // open; with no runner the choose doors do not render (P-2). Castle's crossings on the
+                        // new road are VX-307's.
+                        if !bootstrap.newRoad, let storeURL = try? AppDatabase.defaultStoreURL(
                             variant: bootstrap.storeVariant) {
                             let runner = PostureSwitchRunner(leaves: .live(
                                 bootstrap: bootstrap,
@@ -451,6 +455,12 @@ struct VariorumApp: App {
                 // unlock road — non-nil when the key custody is empty but
                 // `variorum-keys.json` with wraps sits beside the store.
                 StoreFailureView(error: error, recovery: recovery) { bootstrap.retry() }
+            case .roadLobby(let lobby):
+                // VX-306 U1b (Debug, the one switch): the new road's lobby — roads only, before unlock.
+                RoadLockView(lobby: lobby)
+            case .newLibraryWords(let card):
+                // VX-306 U1b: the once-shown words card of a library just created (rule 2).
+                LibraryWordsCard(model: card)
             }
     }
 
@@ -475,7 +485,7 @@ struct VariorumApp: App {
                 StoreFailureView(error: error) { bootstrap.retry() }
             case (.opening, _):
                 StoreOpeningView()
-            case (.locked, _), (.waitingForICloudKeychain, _):
+            case (.locked, _), (.waitingForICloudKeychain, _), (.roadLobby, _), (.newLibraryWords, _):
                 // 13p: note windows never outlive a lock (the whole
                 // `.ready` tree tears down); a restored one says so.
                 Text("Variorum is locked — unlock it in the main window.")
