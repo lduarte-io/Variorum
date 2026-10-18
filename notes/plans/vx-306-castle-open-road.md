@@ -2685,3 +2685,24 @@ the Protection pane rendered NO *Set a passphrase…* row with the passphrase se
 posture change; the simulator shut down; instances 0; stage released 13:20. The round-2 reviewer (spawned at the fix tip,
 before these three test edits) reads `6c19d57a2`; the orchestrator's line-by-line check covers `76e306925` (test-only).
 
+### Round 2 — 2026-10-18, fresh `fable-reviewer` over the round-1 FIX LEG (`fb41eb9eb..6c19d57a2`), read-only on its own review worktree; the report committed UNEDITED as `notes/plans/vx-306-ladder-round-2.md`
+
+**Tally: 0 BLOCKER / 0 MAJOR / 3 MINOR / 3 NIT; every round-1 fix confirmed as a fix (the reviewer re-ran m2's pin red-on-old by its own
+revert).** No BLOCKER/MAJOR ⇒ no round 3 (CLAUDE.md's ladder); the round-2 fixes get the orchestrator's line-by-line check. The dispositions:
+- **m1 — `ReadmeStartHerePlanTests` fails as committed at 6c19d57a2 (the header's tail and the (6)–(10) blocks pollute the parse): ALREADY FIXED
+  at `76e306925` (only the blockquote lines are the passages) and RUN GREEN under the stage (11/3) with the suite in the batch** — the reviewer read
+  the fix tip before that commit. The reviewer's tighter bound (`**(6)`) is equivalent once only `>` lines are taken. Disposition: done; the
+  one-mutated-word red is the array equality's own (a changed byte in any passage fails `seeded == drafted`).
+- **m2 — the Start Here passages reach TODAY's road (Release / the real variant) where they are false until VX-329: FIX** — blocks 6–9 seed only
+  while `ProtectionRoad.newRoadIsLive` (the same rule every other VX-379 row follows: today's words stay for Release until VX-329); the pins read
+  the switch; P-VX306-W-1 gains the Release-reach fact. (The furniture fold keeps both copies where a Debug- and a Release-seeded readme differ —
+  her dev and real stores never share an account.)
+- **m3 — the core's `createLibrary` writes the silent item, the Apple key and the live key file BEFORE its no-clobber check (unreachable after m1;
+  the reviewer RULES build it): FIX NOW** — a preflight refusing a non-empty slot before the first write, pinned (a non-empty slot → the refusal
+  with zero custody/Apple/key-file writes, the live key file byte-untouched).
+- **NIT 1 (m2's two VX-307 hand-forwards by name — Make this my library's double prompt on a Touch-ID-only copy; a wrong typed secret in Look inside
+  falling through to a Touch ID press, pinned as expected by `theLooksFirstTryNeverPressesTouchIDAndHerOpenMay` — a deliberate flip-target):
+  RECORDED in the handoff and VX-307's plan.** **NIT 2 (same-named doors with opposite defaults — the prompting default on the core layer): VX-307
+  hand-forward** (drop the core default; callers choose). **NIT 3 (a PICKED copy filed into safety copies is absent from the standing Restore list
+  until the pane reopens — m4's class): FIX NOW** — the filing posts `copiesChanged` on m4's seam; pinned as m4's.
+
