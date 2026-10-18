@@ -263,5 +263,35 @@ the stage is coordinator-held; this leg builds headless and reports READY. **No 
 | R1-1 — the Index → Outline decider pin | PIN BUILT (see the commit naming it; `build-for-testing` green) — `BookNoteBoxDoorsTests.swift` › `BookIndexToOutlineCarryTests.theOutlineArrivesOnTheCarriedNote` (args: `modeTabs` through the published mode door, `showInOutline` replaying the row menu closure's three statements); a 40-note book, note 25 landed in the Index, then the road → the Outline must put `page-<note 25>` at its top (`BookOutlineGeometry.anchorTops`, ≤ 4 pt). **The verdict is PENDING the window.** If RED: the fix is ONE line atop `BookIndexView.landOrSeed` — `guard structure.mode == .index else { return }` (D-2's mirror) — and its red-on-old is deleting that line. If GREEN: hollow, no code change. The sweep table (plan file §D-2's CLASS SWEEP) gained the Index row (PENDING the verdict) and the Read ▸ Scroll delivery note |
 | R1-2 — her click into an Outline/spread note is her place | **FIX BUILT** (the commit naming it; `build-for-testing` green; runs PENDING the window). Mechanism (traced): `BookViewModel.focus(_:caret:)` knows a click (caret passed) from a bare focus (nil ⇒ 0), but `EditorView` handed the editor a bare `Int`, and `applyFocusSeeds` ran inside `applyProjection`'s placement bracket, so `noteFocusedBlock`'s other-note arm dropped the click's report with the mount's own. Fix: `BookViewModel.caretSeedIsHers` (set by `focus`, cleared with the seed) → `EditorView(caretSeedIsHers:)` → `EditorViewModel.pendingCaretSeedIsHers`; `applyFocusSeeds` answers whether the seed it placed was hers, and the initialRender arm calls `updateCaretContext()` once more AFTER the bracket when it was — the fill's END and a bare focus's 0 stay bracketed; detail/pool editors pass the default `false` (no change). Red-on-old = in place, `if seedWasHers { updateCaretContext() }` → `if false, seedWasHers { updateCaretContext() }` (EditorViewModel, the initialRender arm) — both new pins must go red (memory block 1 + 2 / the Index at the block's start); the mount pin's bare-focus arm stays green either way. PINS (pin-first commit 87fc8fa82): `BookEditHereRiderTests.aClickIntoTheNoteIsHerPlaceForEditHere` (the reviewer's pin — the spread, the note's own editor left her at block 1 + 2, her CLICK at block 3 + 4 with no move after, click out, "edit here" ⇒ block 3 + 4; red on the tip: block 1 + 2) and `BookCarryLiveBlockTests.aClickIntoOutlineThenIndexLandsAtTheClick` (the carry's half — a click at block 2 + 9 in Outline, the mode tabs to Index ⇒ block 2 live at 9; red on the tip: its start). The mount pin's outline/spread arm (`BookOpenDoorMountTests.theLiveNotesDoorCarriesHerBlockAndCaret`) re-worded: guard (i) is now asserted on a BARE focus, her place made by her own caret move |
 | R1-3 — the flush comments name the open window | **DONE** (comment-only; the commit naming it) — `BookIndexEditModel.releaseForTakesSheet`'s doc no longer promises every pending text WRITTEN: it names the window (`flushNow` takes its batch and clears `pending` before awaiting, so a write already in flight — the 500-ms debounce, a detached flush — leaves the awaited flush nothing to do while that write lands; the helper's `false` is not consulted), and `BookView.openInWrite`'s "her typing lands first" paragraph names the same window (the clamp lands the caret short). No helper semantics changed; the helper class is ticketed at closeout (Bug · Suspected · Editor, the reviewer's pin sketch in its body) |
-| R1-7 — the box's Index "Takes" cell's click frame | NOT STARTED |
+| R1-7 — the box's Index "Takes" cell's click frame | **PROBE BUILT** (the commit naming it; `build-for-testing` green; **verdict PENDING the window**) — `BookNoteBoxDoorsTests.swift` › `SidebarNoteBoxTakesCellClickTests.aPressAnywhereInTheCellOpensTheTakes` (both voices): the Index-live box alone in W-1's click rig (`SharedIconRig` — a real down/up), the cell's rect read off the box's own published frame (no new oracle); a CONTROL press on the word must open the takes (proves the coordinates), then a press 4 pt inside the cell's LEFT border. GREEN ⇒ the whole cell answers — record, no change. RED (control green, edge red) ⇒ only the word answers: apply the PREPARED FIX below in the window, the probe goes green, its red-on-old is restoring today's `takesDoor` body |
+
+**R1-7's PREPARED FIX (applied ONLY if the probe's edge press is red; `SidebarNoteBox.takesDoor`, W-1's overlay
+idiom applied to the cell).** Today's body is `Button(word).buttonStyle(VoicedButtonStyle(.quiet)).lineLimit(1)
+.fixedSize().frame(maxWidth: .infinity).frame(height: 24).background(surface).overlay(stroke).contentShape(...)` — the
+Button's own frame is the word's. The fix lays the CELL out bare and rides the Button in an overlay whose LABEL fills
+the cell, so the button's own frame is the cell:
+
+```swift
+let door = Color.clear
+    .frame(maxWidth: .infinity)
+    .frame(height: Self.takesCellHeight)
+    .background(tokens.surface, in: RoundedRectangle(cornerRadius: 6))
+    .overlay {
+        Button(action: act) {
+            Text(tokens.chromeLabel(NoteBoxCopy.takesDoor))
+                .lineLimit(1)
+                .fixedSize()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+        .help(NoteBoxCopy.takesDoorHelp)
+    }
+    .overlay(
+        RoundedRectangle(cornerRadius: 6).stroke(tokens.line, lineWidth: 1).allowsHitTesting(false))
+```
+
+The word, its font, its muted ink and its place are unchanged; the voiced hover wash then covers the whole cell (the
+target — W-1's own grammar, the fold control's wash fills its 22-pt square); recorded for her eye if built.
+`CommitBar.boxCell` (the bar's cells) shares the inherited shape — NOT touched here (the disposition names the box's
+cell only); a ticket at closeout if the probe is red.
 | R1-8 — record hygiene in the plan file | NOT STARTED |

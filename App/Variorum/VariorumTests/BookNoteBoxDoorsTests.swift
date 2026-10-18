@@ -482,6 +482,87 @@ struct SidebarNoteBoxDoorFacesTests {
     }
 }
 
+// MARK: - The ladder's R1-7 — the Index-live box's Takes CELL takes the click
+
+@Suite("VX-382 ladder R1-7 — the box's Takes cell answers a press anywhere inside its border", .serialized)
+@MainActor
+struct SidebarNoteBoxTakesCellClickTests {
+    /// **The probe (walk finding W-1's idiom — a real click: down, a beat,
+    /// up).** The Index-live box draws "Takes" as a bordered cell the box's
+    /// full width, the word centred in it (`CommitBar.boxCell`'s grammar,
+    /// copied). A press on the word opens the takes — the CONTROL, which also
+    /// proves the click road's coordinates; a press 4 pt inside the cell's
+    /// LEFT border, far from the word, must open them too. If only the word
+    /// answers, the rest of the cell is dead: W-1's class (a macOS button
+    /// counts a press only inside its own bounds, and this Button's own frame
+    /// is the word's).
+    ///
+    /// The cell's rectangle is read off the box's own published frame (the
+    /// cell is the box's last row, outside its scroll, at `takesCellHeight`
+    /// inside the `inset` padding) — no oracle of its own.
+    @Test(arguments: [ThemeVoice.terminal, ThemeVoice.study])
+    func aPressAnywhereInTheCellOpensTheTakes(voice: ThemeVoice) async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 37))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "a note")
+            _ = try session.operations.newBlock(in: post.id, text: "so the box has a note.")
+            let book = try session.operations.createReading(name: "a book", kind: .book)
+            let presses = SharedIconCounter()
+            let tokens = VoiceTokens.resolve(voice: voice, dark: false)
+            let rig = SharedIconRig(
+                SidebarNoteBox(
+                    tokens: tokens,
+                    subjectKey: book.id,
+                    state: .live(post.id),
+                    identity: NoteBoxIdentity(
+                        postID: post.id, title: "a note", chapter: nil, index: 1, total: 3),
+                    facts: NoteBoxFacts(words: 5, blocks: 1, fannedBlocks: 1),
+                    caretLabel: nil,
+                    onOpenInWrite: {},
+                    onOpenTakes: { presses.count += 1 })
+                    .frame(width: 230, height: 360),
+                width: 230, height: 360)
+            defer { rig.close() }
+#if DEBUG
+            defer { SidebarGeometry.forgetBox(subject: book.id) }
+            // SwiftUI's `.global` runs from the WINDOW's top (title bar
+            // included — W-1's measured conversion); AppKit's window points
+            // from its bottom.
+            @MainActor func windowPoint(_ p: CGPoint) -> NSPoint {
+                NSPoint(x: p.x, y: rig.window.frame.height - p.y)
+            }
+            _ = await rig.poll(timeout: 8) {
+                SidebarGeometry.noteBoxFrames[book.id] != nil
+                    && (SidebarGeometry.noteBoxFaces[book.id]?["takes"] ?? 0) == 1
+            }
+            let box = try #require(SidebarGeometry.noteBoxFrames[book.id], "\(voice): the box drew")
+            #expect((SidebarGeometry.noteBoxFaces[book.id]?["takes"] ?? 0) == 1,
+                    "\(voice): the premise — the Index-live box draws its Takes cell")
+            let inset = SidebarNoteBox.inset
+            let cell = CGRect(
+                x: box.minX + inset, y: box.maxY - inset - SidebarNoteBox.takesCellHeight,
+                width: box.width - 2 * inset, height: SidebarNoteBox.takesCellHeight)
+
+            // The control: the word, centred in the cell.
+            await rig.click(at: windowPoint(CGPoint(x: cell.midX, y: cell.midY)))
+            #expect(await rig.poll(timeout: 3) { presses.count == 1 },
+                    "\(voice): the control — a press on the word opens the takes (presses \(presses.count); cell \(cell))")
+            await rig.poll(timeout: 0.4) { false }
+            // The edge: 4 pt inside the cell's left border, far from the word.
+            await rig.click(at: windowPoint(CGPoint(x: cell.minX + 4, y: cell.midY)))
+            #expect(await rig.poll(timeout: 3) { presses.count == 2 },
+                    "R1-7 — \(voice): a press 4 pt inside the cell's left border opens the takes too (presses \(presses.count) — only the word answered; cell \(cell))")
+#endif
+        }
+    }
+}
+
 // MARK: - C — the Index's takes
 
 @Suite("VX-304 — the Index's takes: the ⑂ badge and the in-place sheet", .serialized)
