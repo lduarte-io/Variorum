@@ -322,8 +322,10 @@ at a zero-instance window with no commits during it, then DMG first and appcast 
 
 **NUMBERING (her word 2026-10-18, this section's rule):** the 0.9 line is used up first — **the next release is
 0.9.8, then 0.9.9, then 0.10.0** (her words: *"shouldn't we finish using up 0.9.8 and 0.9.9 and then 0.10.0?"*);
-every pre-launch release after that is a 0.10.x patch bump; **1.0.0 is reserved for the build that flips Castle's
-release switch (VX-329)** — her actual launch, since Castle is her gate. Sparkle orders updates by the build number
+every pre-launch release after that is a 0.10.x patch bump. **1.0.0 is the moment she officially launches to the
+public — at her word, and hers alone; it is tied to no run and is NOT Castle's release switch (VX-329)**, which she
+expects to be a different build (her correction 2026-10-18: "1.0.0 is for the moment when I officially launch to the
+public — which will not be the same build probably as the castle release switch"). Sparkle orders updates by the build number
 (the commit count), so the display version is free to follow this. **The three runs in flight each MINT A RELEASE at
 their merge** (her word 2026-10-18): VX-381, VX-382 and VX-348 take 0.9.8, 0.9.9 and 0.10.0 in whichever order they
 merge; closeouts serialize, so the numbers never race. The notes rule stands (she
