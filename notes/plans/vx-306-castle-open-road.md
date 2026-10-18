@@ -2660,7 +2660,13 @@ MobileProtectionRoadTests` · `MobileProtectionTests` · `MobileProtectionSurfac
 `MobileLobbyVaultRoadTests` · `MobileEmptyStoreTests`, on the iOS 26.2 simulator U3's batch used
 *[removed for publication]*
 
-**Notes:** no machinery deaths; no Sonnet lookup; no subagents. The red-on-old runs: m1 by the pre-fix flag restored on
+**Notes:** no machinery deaths; no Sonnet lookup; no subagents. **A machinery fact, found at the close:** the
+orchestrator's words-pass commit `07249a9a4` (12:16:46 — `BirthFurnitureSeeders.swift`, `ReadmeStartHerePlanTests`,
+QUESTIONS, this plan's THE WORDS PASS section) landed IN THIS WORKTREE while this leg was still reading, before its first
+edit; every piece of the leg was built on top of it (`git diff 07249a9a4 HEAD` on the plan: +263/−0; its other three
+files untouched by the leg), so nothing was lost — said here per the resiliency addendum's two-writers rule. Its
+`ReadmeStartHerePlanTests` is not on the list above (it exercises no file this leg changed); the orchestrator's own. The
+red-on-old runs: m1 by the pre-fix flag restored on
 the committed fix (`git checkout` after), m2 and m4 by their pins against the pre-fix Shared files before the fix was
 written (no revert needed), NIT 2 by a harness-only probe over a `git show HEAD:` extract, NIT 1 by the source pin's own
 logic over the pre-fix file; NIT 3 and NIT 4's composition pin by trace (stated per finding).
