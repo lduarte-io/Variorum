@@ -99,6 +99,20 @@ Applied: PROVISIONAL-and-continue through U2, the ladder and the closeout; the P
 handoff (`notes/handoffs/vx-382-handoff.md`) AND, separately, the completed checkbox block — every member `[x]` with
 its outcome, plus any tickets MINTED during the run listed in the same block.
 
+## THE NIGHT'S MERGE & RELEASE PROTOCOL (her word via the coordinator, 03:3x MDT — recorded at relay)
+
+Her word (the coordinator's relay): the Pro stays fully available overnight; **VX-381, VX-382 and VX-348 merge to
+main in finish order; ONLY THE LAST of the three to merge mints ONE release (0.9.8, the only bump) covering all
+three**; VX-378 never mints (a release may carry it if merged by then). Mechanics, binding this run's closeout:
+merges serialize through the coordinator (the ask carries branch, tested tree, tip; the tree must contain main
+fdce74de3 — so the closeout merges latest main INTO the branch first); first/second merger: merge, close out, remove
+worktree + branch, stop — no release, no bump, no /Applications refresh; the LAST merger mints the release + the
+folded /Applications refresh under a coordinator GO (A1 rail, zero-instance, codesign) — the coordinator says
+explicitly who is last. **Before the merge ask: land this run's own section in `ReleaseNotes-0.9.8.md` on this
+branch** (one-line bullets, the 10-16 precedent) so the last merger's notes cover all three runs. Note beside her
+standing release rule (notes drafted → presented → approved): tonight's explicit overnight word IS the
+authorization; the notes stay strictly factual one-liners and she reads the assembled file in the morning.
+
 ## KICKOFF RECORD (2026-10-18, the orchestrator — session `vx-382`)
 
 - **Seating:** branch `vx-382-book-view-doors` cut from `origin/main` at 745884f27, pushed; worktree
