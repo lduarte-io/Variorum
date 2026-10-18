@@ -343,7 +343,11 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   and HER lock question recorded, not built); every headless pin verified red-on-old; the headless suites green but
   VX-353's flake; the fold of main is in (`460d39785`). **PENDING:** the Mac batch (products prebuilt from the folded
   tree — the U5 record's last sections), VX-392's real-client live round, the QUESTIONS bundle (P-VX392-1…5,
-  P-VX393-1…3, P-VX394-1…6). The U5 UNIT RECORD (at the end of this file) carries the rest.
+  P-VX393-1…3, P-VX394-1…6). The U5 UNIT RECORD (at the end of this file) carries the rest. **The batch ran (see THE
+  U5 BATCH + LIVE ROUND): one red, live-confirmed — the stop roads wrote no end line; the FIX LEG landed `0ebf5c926`
+  (a connection now writes its own end through its own store; the cause was the door dropping its host before the
+  host's sessions ended), headless proof green; the Mac pin's re-run on `DerivedData/u5-fix` rides the orchestrator's
+  next stage window (the U5 record's "VX-394 fix leg" section has the command).**
 - **U2 (VX-347 — ⌘S):** IN-PROGRESS — `opus-implementer` (fresh session, 2026-10-18); the U2 UNIT RECORD (at the end of
   this file) carries the live state.
 - **U3 (VX-350 · VX-349 · VX-176 — the Library's row and header):** NOT-STARTED.
@@ -714,7 +718,9 @@ call (author-only; options recorded), not built.
   sleep · screen lock · ten minutes of time away counted from HER use only — detaches the door and hangs up every
   connection; App Nap, socket idle timeouts, the path and the SDK loop ruled out); whether it was HER night's cause is
   not provable from here. The Activity drop line SHIPPED; its headless pins verified red on a behavioural revert (4 of
-  6, the guards green), 6 of 6 green. **PENDING:** the Mac pins' run (`MCPConnectionEndDoorTests` — prebuilt). The
+  6, the guards green), 6 of 6 green. **The batch's one red (live-confirmed: her switch OFF wrote no line) is FIXED
+  by the fix leg `0ebf5c926`** — its section below; **PENDING:** `theDoorsTwoStopRoadsSayTheirReasonsOnce`'s re-run on
+  the prebuilt `DerivedData/u5-fix` (the rest of the batch was green). The
   ticket's remainder is HER call (does a connected AI's work count as "use" for Castle's lock after time away? — an
   author-only lock relaxation, recorded with options, not built). Its section below.
 - **No behavioural revert is in flight.** The Mac red product's reverts (`MCPPaneCopy.swift`, `MacWillLock.swift`,
@@ -1045,6 +1051,66 @@ addendum):
   disconnected"; lock the dev library: "… was disconnected when the library locked or closed").
 - **AppSpec §7's grants-family line** may want `v1_30` named beside v1_24→v1_29 (a canon delta — the closeout's).
 
+
+### VX-394 fix leg — the stop roads' end line (the batch's red, live-confirmed)
+
+*The same implementer, resumed 2026-10-18 at the orchestrator's word (relayed by the coordinator) after the U5 batch:
+`theDoorsTwoStopRoadsSayTheirReasonsOnce` red on the FIXED product (`ends == []` after her switch OFF), and live on
+the dev store a held, initialized connection died at the pane's switch-off with NO Activity line, while the client's
+own close did write. Only my own files committed (U2's uncommitted work shares the tree).*
+
+**The trace (inputs → wrong state).** Her switch OFF → `MCPDoor.setEnabled(false)` → the snapshot observation →
+`reconcileServer` → `stopServer(ending: .serverOff)`, which calls `host?.stop(ending: .serverOff)` and then `host = nil`
+in the same breath. The door held the host's ONLY strong reference (the accept thread, the grants observation and each
+session's task capture it `[weak self]`), so the host was deallocated right there — while its sessions were still
+finishing their hang-up. Each session's end ran through the host: `serve`'s task did
+`await session.run(); if let self { self.ended(session) } else { session.closeConnection() }` — with the host gone, the
+`else` arm only closed the descriptor, and `ended()` (where the end line was written) never ran. So the reason, marked on
+the session by `stop(ending:)`, was never written. The headless pins passed because the harness holds its host strongly
+for the whole test (`ServerHarness.host` is a `let`); the client's own close wrote live because the host was alive
+then. The lock road was NOT affected in its line (`recordLibraryClosing` writes BEFORE the detach, with the host alive)
+— only the stop roads that let go of the host: her switch, and a detach not preceded by the record (a new session's
+`attach`). (Pre-existing, recorded not fixed: the same `else` arm also skips `endMCPConnectionGrants`, so a door stop
+leaves "until it disconnects" grants to the next server start's sweep — which revokes them before any connection can
+use them.)
+
+**The fix (on the traced mechanism).** The end line no longer depends on the host's lifetime: `MCPSession.writeEndLine()`
+claims the line once and writes it through the session's OWN `database` and `operations` (it always held both), on its
+own task (off main, P2). `ended()` calls it where it used to write, and the `else` arm (host already let go of) calls it
+after `closeConnection()`. Quiet when the store is already gone (the lock road said it first). Nothing else moved: the
+host stays weakly captured, the door unchanged.
+
+**Pins.** NEW headless `MCPConnectionEndServerTests.aStopThatLetsGoOfItsHostStillSaysEachConnectionsEnd` — a host of its
+own, started, a raw keyed client initialized, then the door's two lines (`stop(ending: .serverOff)`; `host = nil`),
+asserting the host IS gone and the line lands: **RED on the pre-fix tree** (`DerivedData/u5-logs/vx394-fix-red.log` —
+the host deallocated, no line), **green after** (`vx394-fix-green.log`; the suite 7 / 7). The whole MCP target after the
+fix: **383 tests / 71 suites, ALL green** (`mcp-after-fixleg.log`, load ~25 — VX-353's flake passed this time). The
+batch's Mac pin is the proof on the real door.
+
+**The Mac product for the re-run (PREBUILT, stage-free):** `<home>/dev/variorum-vx-348/DerivedData/u5-fix`
+(`Build/Products/Variorum_Variorum_macosx27.0-arm64.xctestrun`, log `DerivedData/u5-fix-build.log`, TEST BUILD
+SUCCEEDED) — built from a CLEAN scratch worktree checked out at `0ebf5c926` (detached, removed after), so U2's
+uncommitted files in the shared tree are NOT in it; the fold is in its history; `MCPSession.swift`,
+`MCPServerHost.swift` and `MCPConnectionEndDoorTests.swift` confirmed compiled from that checkout. **The batch window
+runs** (a held stage claim; confirm the "Test run with N tests" line):
+```
+cd <home>/dev/variorum-vx-348/App/Variorum
+xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath <home>/dev/variorum-vx-348/DerivedData/u5-fix test-without-building -only-testing:VariorumTests/MCPConnectionEndDoorTests -only-testing:VariorumTests/MCPPaneTests -only-testing:VariorumTests/MCPHerEditorDoorTests -only-testing:VariorumTests/MacWillLockTests
+```
+Expected: all green — `theDoorsTwoStopRoadsSayTheirReasonsOnce` included (its switch-off arm now writes `serverOff`;
+its lock arm says `libraryClosed` once). The live re-check, if a window allows: hold an initialized connection, switch
+the server OFF in the pane — Activity shows "‹client› was disconnected when the MCP server was turned off".
+
+**The Activity stamps (record-only, the orchestrator's "one cheap look").** A ONE-LINE FACT, not this unit's code:
+`MCPActivityRowView` (`App/Variorum/Variorum/Features/MCP/MCPPane.swift` ~:915, 13n-b U3 `763e3f91a`) builds its stamp
+as `Text(MCPPane.relative(line.at))` — `RelativeDateTimeFormatter` against `Date()` at the moment the body renders, with
+no time dependency. SwiftUI re-renders the row only when the door's snapshot changes, and Settings' scene keeps its view
+across a closed-and-reopened window, so "39 seconds ago" stays until the next activity row lands. Waiting's row already
+ticks (`MCPPane.swift` ~:528 and ~:562 wrap the same call in `TimelineView(.periodic(from: .now, by: 30))`); the fix is
+that wrapper on this row (and on the two other untimed callers, the connection request's first-seen ~:416 and the
+client's last-seen ~:604). **The list itself does live-refresh:** `MCPDoor.read` reads `mcp_activity`, so GRDB re-emits
+the snapshot on every new row; the round's "no new row" was the stop-road gap above, not a refresh failure. A Low
+facelet ticket (Improvement · Confirmed · MCP) or a ladder note; not fixed here.
 
 ## U5 ADJUDICATION (the orchestrator, 2026-10-18 — after spot-verification)
 
