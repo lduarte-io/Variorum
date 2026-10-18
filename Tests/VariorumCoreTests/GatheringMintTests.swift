@@ -11,15 +11,25 @@ import Testing
 
 @Suite("Gathering mint — the planner (VX-217)")
 struct GatheringMintPlannerTests {
+    /// `parent` names each child tag's parent (the tag tree, for subtree
+    /// coverage: a note wearing a child matches its ancestors' terms).
     private func outcome(
         _ term: RuleTerm?, archived: Bool = false, finished: Bool = false,
-        dead: Set<String> = []
+        dead: Set<String> = [], parent: [String: String] = [:]
     ) -> GatheringMint.Outcome {
         GatheringMint.outcome(
             archived: archived, finished: finished,
             rule: term.map { .rule($0) } ?? .none,
             tagIsLive: { !dead.contains($0) },
-            deadTagPath: { "path-of-\($0)" })
+            deadTagPath: { "path-of-\($0)" },
+            tagCovers: { ruleTag, worn in
+                var at: String? = worn
+                while let tag = at {
+                    if tag == ruleTag { return true }
+                    at = parent[tag]
+                }
+                return false
+            })
     }
 
     @Test func aTagRulePlansItsTagsInRuleOrderOnce() {
@@ -50,15 +60,17 @@ struct GatheringMintPlannerTests {
                 == .plan(.init(tagIDs: ["a", "c"], star: true)))
     }
 
-    /// Her ruling's unsatisfiable class: NOT terms, legacy date/profile
+    /// What remains of her ruling's unsatisfiable class: legacy date/profile
     /// terms, no rule / malformed rule, dead tags — plus the shapes a mint
-    /// cannot aim at (an empty or mixed any-of group).
+    /// cannot aim at (an empty any-of group, one with a nested group or a
+    /// legacy term). (A JUSTIFIED EDIT at VX-250 (3): the two NOT shapes this
+    /// slot pinned as blocking — `#a AND NOT #b`, `#a OR NOT ★` — a fresh note
+    /// meets, so they now PLAN; `aNotTermAFreshNoteMeetsNowPlans` pins them.)
     @Test func theUnsatisfiableClassBlocks() {
         #expect(outcome(nil) == .blocked(.noRule))
         #expect(GatheringMint.outcome(
             archived: false, finished: false, rule: .malformed, tagIsLive: { _ in true })
                 == .blocked(.malformedRule))
-        #expect(outcome(.and([.tag("a"), .not(.tag("b"))])) == .blocked(.unreachableTerm))
         #expect(outcome(.legacyEntryDateFrom("2026-01-01")) == .blocked(.datedRule))
         #expect(outcome(.legacyEntryDateTo("2026-01-01")) == .blocked(.datedRule))
         #expect(outcome(.legacyProfile("journal")) == .blocked(.kindRule))
@@ -66,7 +78,71 @@ struct GatheringMintPlannerTests {
         #expect(outcome(.or([.tag("a"), .tag("b")]), dead: ["a", "b"])
                 == .blocked(.deadTag(path: "path-of-a")))
         #expect(outcome(.or([])) == .blocked(.unreachableTerm))
-        #expect(outcome(.or([.tag("a"), .not(.star)])) == .blocked(.unreachableTerm))
+        #expect(outcome(.or([.tag("a"), .and([.tag("b"), .tag("c")])])) == .blocked(.unreachableTerm),
+                "a nested group inside an any-of is still not a mint's to aim at")
+        #expect(outcome(.or([.legacyProfile("journal"), .not(.tag("b"))])) == .blocked(.unreachableTerm))
+    }
+
+    // MARK: - VX-250 (3): NOT terms (her "ALLOW NOT terms", QUESTIONS #217)
+
+    /// RED ON OLD: every one of these blocked as `unreachableTerm`. A fresh
+    /// note wears only what the plan gives it, so it meets a NOT over
+    /// anything the plan doesn't apply.
+    @Test func aNotTermAFreshNoteMeetsNowPlans() {
+        #expect(outcome(.not(.tag("b"))) == .plan(.init(tagIDs: [], star: false)),
+                "a NOT-only rule plans nothing — the new note matches as it is")
+        #expect(outcome(.and([.tag("a"), .not(.tag("b"))])) == .plan(.init(tagIDs: ["a"], star: false)))
+        #expect(outcome(.and([.star, .not(.tag("b"))])) == .plan(.init(tagIDs: [], star: true)))
+        #expect(outcome(.not(.star)) == .plan(.init(tagIDs: [], star: false)))
+        #expect(outcome(.and([.tag("a"), .not(.tag("b"))]), dead: ["b"])
+                == .plan(.init(tagIDs: ["a"], star: false)),
+                "a NOT over a dead tag holds for every note (a dead term matches nothing)")
+        #expect(outcome(.and([.tag("a"), .not(.or([.tag("b"), .tag("c")]))]))
+                == .plan(.init(tagIDs: ["a"], star: false)), "a NOT over a group")
+        #expect(outcome(.and([.tag("a"), .not(.tag("a/b"))]), parent: ["a/b": "a"])
+                == .plan(.init(tagIDs: ["a"], star: false)),
+                "wearing the parent never matches a child's term, so NOT child holds")
+    }
+
+    /// An any-of group with a NOT option: met as planned when the note
+    /// already satisfies the NOT; otherwise it takes its first positive option.
+    @Test func anAnyOfGroupWithANotOptionIsMetOrTakesAPositiveOption() {
+        #expect(outcome(.or([.tag("a"), .not(.star)])) == .plan(.init(tagIDs: [], star: false)),
+                "the note isn't starred, so NOT ★ already meets the group")
+        #expect(outcome(.and([.tag("b"), .or([.not(.tag("b")), .tag("a")])]))
+                == .plan(.init(tagIDs: ["b", "a"], star: false)),
+                "b is planned, so NOT b fails; the group takes #a")
+        #expect(outcome(.and([.star, .or([.not(.star)])])) == .blocked(.unreachableTerm),
+                "no positive option left to take")
+    }
+
+    /// An any-of pick is a choice, never a must: the planner takes the first
+    /// option that keeps the rule's NOTs holding, so a door a new note CAN
+    /// open never greys over the order of the options.
+    @Test func anAnyOfPickAvoidsAnOptionANotForbids() {
+        #expect(outcome(.and([.or([.tag("a"), .tag("c")]), .not(.tag("a"))]))
+                == .plan(.init(tagIDs: ["c"], star: false)))
+        #expect(outcome(.and([.not(.star), .or([.star, .tag("c")])]))
+                == .plan(.init(tagIDs: ["c"], star: false)),
+                "the NOT may come first in the rule")
+        #expect(outcome(.and([.or([.tag("a/b"), .tag("c")]), .not(.tag("a"))]), parent: ["a/b": "a"])
+                == .plan(.init(tagIDs: ["c"], star: false)), "the subtree form")
+    }
+
+    /// A NOT contradicting what the plan MUST apply still greys — her
+    /// `#a AND NOT #a`, and the subtree form (a planned child inside the
+    /// NOT's tag), and the star's twin.
+    @Test func aNotContradictingWhatThePlanAppliesStillBlocks() {
+        #expect(outcome(.and([.tag("a"), .not(.tag("a"))])) == .blocked(.unreachableTerm))
+        #expect(outcome(.and([.tag("a/b"), .not(.tag("a"))]), parent: ["a/b": "a"])
+                == .blocked(.unreachableTerm),
+                "a note wearing #a/b matches #a's subtree, so NOT #a fails")
+        #expect(outcome(.and([.star, .not(.star)])) == .blocked(.unreachableTerm))
+        #expect(outcome(.and([.or([.tag("a"), .tag("b")]), .not(.tag("a")), .not(.tag("b"))]))
+                == .blocked(.unreachableTerm),
+                "every option the group could take contradicts a NOT")
+        #expect(outcome(.not(.legacyProfile("journal"))) == .blocked(.unreachableTerm),
+                "a legacy comparison is UNKNOWN for a fresh note, as in SQL — never a match")
     }
 
     @Test func theGatheringsOwnStateBlocksFirst() {
@@ -243,14 +319,60 @@ struct GatheringMintOperationTests {
         #expect(try db.read { try Queries.starredNoteIDs($0) } == stars)
     }
 
-    @Test func aNotTermRefusesBeforeTheMint() throws {
+    /// VX-250 (3) — RED ON OLD (this slot pinned the refusal; a JUSTIFIED
+    /// EDIT by her "ALLOW NOT terms"): a NOT rule's new note lands, and the
+    /// gathering's own assembly shows it — the belt agrees with the planner.
+    @Test func aNotRuleMintsANoteTheGatheringShows() throws {
         try withOperations { ops, db in
             let a = try ops.createTag(name: "a")
             let b = try ops.createTag(name: "b")
             let reading = try gathering(ops, .and([.tag(a.id), .not(.tag(b.id))]))
+            let result = try ops.newPostInGathering(reading.id)
+            #expect(result.appliedTagPaths == ["a"])
+            #expect(!result.starred)
+            #expect(try shown(db, reading.id) == [result.post.id])
+
+            let notOnly = try gathering(ops, .not(.tag(b.id)))
+            let bare = try ops.newPostInGathering(notOnly.id)
+            #expect(bare.appliedTagPaths.isEmpty && !bare.starred,
+                    "a NOT-only rule's note wears nothing")
+            #expect(try shown(db, notOnly.id).contains(bare.post.id))
+        }
+    }
+
+    /// Her `#a AND NOT #a` still greys — and refuses at the op, leaving
+    /// nothing behind.
+    @Test func aContradictoryNotRefusesBeforeTheMint() throws {
+        try withOperations { ops, db in
+            let a = try ops.createTag(name: "a")
+            let reading = try gathering(ops, .and([.tag(a.id), .not(.tag(a.id))]))
+            let read = try db.read { try Queries.gatheringMintOutcome($0, reading: reading) }
+            #expect(read == .blocked(.unreachableTerm), "the door greys")
             try expectRefusal(
                 ops, db, reading.id,
                 reasonContains: GatheringMint.Blocker.unreachableTerm.reason)
+        }
+    }
+
+    /// The store's tag tree reaches the planner: a planned child inside the
+    /// NOT's subtree greys (not just the belt's refusal), and an any-of
+    /// group steers around it when another option can open the door.
+    @Test func theSubtreeReachesThePlannerFromTheStore() throws {
+        try withOperations { ops, db in
+            let a = try ops.createTag(name: "a")
+            let child = try ops.createTag(parent: a.id, name: "b")
+            let c = try ops.createTag(name: "c")
+            let blocked = try gathering(ops, .and([.tag(child.id), .not(.tag(a.id))]))
+            #expect(try db.read { try Queries.gatheringMintOutcome($0, reading: blocked) }
+                    == .blocked(.unreachableTerm))
+
+            let steered = try gathering(
+                ops, .and([.or([.tag(child.id), .tag(c.id)]), .not(.tag(a.id))]))
+            #expect(try db.read { try Queries.gatheringMintOutcome($0, reading: steered) }
+                    == .plan(.init(tagIDs: [c.id], star: false)))
+            let result = try ops.newPostInGathering(steered.id)
+            #expect(result.appliedTagPaths == ["c"])
+            #expect(try shown(db, steered.id) == [result.post.id])
         }
     }
 
