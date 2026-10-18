@@ -2374,6 +2374,22 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
 - **W-17 (note, P-VX378-U1-1 (a)'s consequence):** each memory-forget or different-library open minted a fresh device ID, so
   the new-layout backups of 818912e0 sit in several `Backups/818912e0/<mac8>/` folders on one Mac.
 
+
+### THE WORDS PASS — VX-379's first pass (the orchestrator, 2026-10-18, after round 1)
+
+- **The Start Here chapter (§7c (5))** is HER readme note (the 13s-b seed: "the readme placeholder carries her Start Here
+  text", `ReadmeSeeder.paragraphs` — her five blocks byte-exact from her reference). Built as her kickoff word says ("draft
+  … build as drafted, PROVISIONAL"): the four passages APPENDED as blocks 6–9 after her five, her text untouched —
+  **P-VX306-W-1** (options: (a) BUILT — appended after her blocks; (b) a new chapter of the field guide; (c) replace her
+  "Annoyance 3 / Castle mode" passage — never, it is hers). The pin `ReadmeStartHerePlanTests` reads §7c (5) from the plan
+  and asserts the seeded passages byte-equal (the `**` leads dropped, the lines reflowed); her five blocks keep their place
+  and count. The furniture fold (17y B-DEDUPE) keeps both copies where a device's seeded readme differs from the new seed —
+  her REAL store's readme is hers (VX-105) and is never re-seeded by a session (her hands, the handoff).
+- **Every face this phase ships** was checked sentence by sentence against `CastleRules.md` at the walks (U1b/U2/U3 records);
+  the remaining VX-379 rows (the posture box's "only this Mac" sentence W-1, Data Safety's "restoring is a Finder operation"
+  F-U3-1, the Protection pane's today's rows, the privacy chapter's `ProtectionCopy` lessons) are TODAY's road's words,
+  still true for Release until VX-329 — rewritten when the road switches (VX-379 stays open, its rows listed in the handoff).
+
 ## 10. THE LADDER (a fresh Fable reviewer per round, `notes/REVIEW_PROMPT.md` verbatim, zero framing; her cap: up to five rounds while a MAJOR is still found; the rider: a round stalled on a safeguard re-runs as Opus)
 
 ### Round 1 — 2026-10-18, fresh `fable-reviewer` over the WHOLE phase (`git diff origin/main...fb41eb9eb`), read-only on its own review worktree; the report committed UNEDITED as `notes/plans/vx-306-ladder-round-1.md`

@@ -119,6 +119,32 @@ enum ReadmeSeeder {
 
         "This book is a full guide to all the features of variorum and how to use them. "
         + "Move through the chapters, which are interactive guides, to discover them all.",
+
+        // VX-306 (2026-10-18, her kickoff word: the Start Here chapter drafted from
+        // `notes/CastleRules.md`, built as drafted, PROVISIONAL — P-VX306-W-1): the four
+        // passages of the plan's §7c (5), byte-pinned to the plan by
+        // `ReadmeStartHerePlanTests`; her five blocks above are untouched.
+        "Your work is encrypted. Every library is locked with its own random key, kept "
+        + "in a small key file beside it. Variorum keeps copies of that key file for you "
+        + "\u{2014} beside the library, inside every backup, and sealed in this Mac's "
+        + "keychain \u{2014} so you never have to think about it.",
+
+        "Write down your twelve words. Every library has twelve words from the moment "
+        + "it is made, and they open it for as long as they are its words. They were "
+        + "shown once, when the library was created. If you didn't write them down then, "
+        + "you can make new ones in Settings \u{25B8} Data Safety \u{2014} and write those "
+        + "down.",
+
+        "Set a passphrase. A passphrase is a convenience over the words: easier to type, "
+        + "and either one can reset the other. Until you set one, Variorum reminds you "
+        + "now and then.",
+
+        "The Apple road is a convenience. In Standard, Variorum also keeps quiet roads to "
+        + "your key \u{2014} through your iCloud Keychain and this Mac's login \u{2014} so "
+        + "most people never type anything, and for most people that simply works "
+        + "forever. If it ever stops, your passphrase or your words open the library, and "
+        + "nothing was ever at risk. Castle is the one promise that there is no quiet road "
+        + "through Apple, ever; it is a choice you can make in Settings.",
     ]
 
     /// The alternates, as REAL takes: block index → the take texts, in fan
