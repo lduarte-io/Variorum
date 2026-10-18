@@ -89,6 +89,27 @@ planted failure; pins per door from planted facts; the words checked against the
 ### U3 — THE ACCOUNT FACES (sync setup, the join, the follow, leave the account; VX-113's sentence)
 Evidence: the convergence suites; the walk if her kickoff call allows a throwaway account; the words.
 
+## 2a. THE MEMBERS BY TICKET (her phase-3 list, reconciled 2026-10-18 — every one is a sub-issue of VX-307 on the board; the plan's units above are the build order, this table is the ledger)
+
+| Ticket | Unit | What closes it here |
+|---|---|---|
+| **VX-107** The follow's double-crash loses its facts | U3 | the core's planned `follow` carries its facts (rule 20); the Done's other-device sentence on the new road's face |
+| **VX-108** Posture doors gate on a stale reading | U2 | every door reads `assess`'s `DoorState`; every act reads the vault it fetched (never the local posture) |
+| **VX-109** A concurrent Use Standard vs a rotation | U1 | rotation is gone; the ONE-ROW CAS write refuses the loser plainly (`Sync/`, Fable's lines) |
+| **VX-113** The wrong-passphrase refusal names the change | U3 | *Your passphrase was changed on [device] on [day]* from the vault's last writer |
+| **VX-233** The posture drill heals | U2 | the crossings' walk and the crash harness over every crossing replace the old drill's job; the old drill's harness rot is fixed or the drill retired WITH today's road (her call at kickoff — the orchestrator's recommendation: retire it at VX-329, since it drives the old crossing code) |
+| **VX-235** A crash between the marker and the key-file write | U2 | the crossings run the core's planned acts (prepare-then-commit, rule 20 — built at VX-378); the crash harness proves every crossing |
+| **VX-313** Sealed plans running the real acts | U1/U2 | the acts run the core's sealed plans on the production leaves; a file or keychain edit cannot steer custody (rule 21) |
+| **VX-301** The Apple keys' lifecycle | U2 | reduced: the core's sweep by the catalogue + VX-390's stamp at entering Castle; this phase's faces SAY it |
+| **VX-310** (second half) The Touch ID re-arm question | U2 | `answerTouchIDRearm` after a press fails on an existing item |
+| **NEW — the `key_vault` lockstep** | U1 | the SQL artifact, the production vault leaf, the fake server's RPCs; the MIRROR DEPLOY AND MARKER 14 WAIT for the release carrying VX-329 (her ruling, §1) |
+| **NEW — the crossings' faces** | U2 | both crossings type the passphrase AND the words (P-VX378-U2-2); the leave screen's sentence; the follow-out's quiet notice; the export-off notice, reversible |
+| **VX-412** The twelve words, her way | U2 | the band card, the tour's end, Copy, warn-before-close, rule 3's reminder folded in (rules 2/3/7 already amended) |
+| **VX-413** Look inside's Copy door | U2 | Copy full text out of the facts sheet (her word: required here) |
+| **VX-414** The dropped split-pair line + her two U2-7 sentences | U2 | wording, pinned byte-equal |
+| **VX-379** (its rows) The guide and the panes to the rules | U2 | the Castle/backups chapters, Data Safety + the protection panes, the tutorial's last card |
+| ~~VX-263~~ The anchor written at the leave | — | SUPERSEDED at her word (one posture; the leave hands everything out) — CANCELED on the board 2026-10-18 |
+
 ## 3a. HER RULINGS OF 2026-10-18 ON THE VX-306 BUNDLE (verbatim where quoted; they bind this phase)
 
 - **The mirror:** "I think it makes sense to wait to bump the mirror until we're ready to release this so that my client doesn't stop syncing." (recorded in §1 — the deploy and marker 14 wait for the release carrying VX-329.)
