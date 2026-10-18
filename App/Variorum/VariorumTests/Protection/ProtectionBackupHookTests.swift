@@ -12,6 +12,12 @@ import Testing
 @testable import Variorum
 import VariorumCore
 
+/// A count the main actor keeps (the m4 pin's ear).
+@MainActor
+final class HeardCount {
+    var count = 0
+}
+
 @Suite("VX-306 U1b — the backup hook: a pair per backup run that wrote (throwaway scope, temp slot)", .serialized)
 @MainActor
 struct ProtectionBackupHookTests {
@@ -41,6 +47,33 @@ struct ProtectionBackupHookTests {
         // The catalogue reads it as this library's backup (the doors' road, U3).
         let catalog = world.system().lister.catalog()
         #expect(catalog.copies(ofLibrary: session.library.record?.libraryID ?? "").contains { $0.kind == .backup })
+    }
+
+    /// THE LADDER'S ROUND-1 m4 at the seam: a pair that LANDED says so — `CopyDoorsListModel.copiesChanged` once, on the
+    /// main actor — and a standing Restore list re-reads; a run that wrote nothing says nothing. (Pre-fix: no word at
+    /// all, so the list kept its old rows until the pane reopened — W-13.)
+    @Test func aLandedPairTellsTheRestoreListAndANothingDueRunSaysNothing() async throws {
+        let world = RoadWorld()
+        defer { world.scope.purge() }
+        let (session, _) = try await world.created()
+        let heard = HeardCount()
+        let observer = CopiesChangedObserver { heard.count += 1 }
+        defer { withExtendedLifetime(observer) {} }
+        let nothingDue = BackupRunRecord(at: Date(), primary: .init(outcome: .upToDate), secondary: .init(outcome: .noDestination))
+        #expect(ProtectionBackupHook.handle(nothingDue, session: session) == nil)
+        let wrote = BackupRunRecord(at: Date(), primary: .init(outcome: .written), secondary: .init(outcome: .noDestination))
+        #expect(await ProtectionBackupHook.handle(wrote, session: session)?.value == .written)
+        #expect(heard.count == 1, "the landed pair is said once, before the run's task ends")
+        // The real list, standing, re-reads to the pair the hook just wrote.
+        let session2 = session
+        var roads = PlantedCopyDoors().roads
+        roads.listing = { await Task.detached { ProtectionCopyDoors.listing(session2) }.value }
+        let list = CopyDoorsListModel(roads: roads)
+        await list.refresh()
+        #expect(list.listing.thisLibrary.count == 1)
+        #expect(await ProtectionBackupHook.handle(wrote, session: session)?.value == .written)
+        for _ in 0..<200 where list.listing.thisLibrary.count < 2 { try await Task.sleep(for: .milliseconds(5)) }
+        #expect(list.listing.thisLibrary.count == 2, "the standing list shows the second pair")
     }
 
     @Test func aRunThatFoundNothingDueWritesNoPair() async throws {

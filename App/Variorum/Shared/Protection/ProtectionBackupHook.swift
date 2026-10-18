@@ -34,12 +34,22 @@ enum ProtectionBackupHook {
         backup.onRun = { record in _ = handle(record, session: session) }
     }
 
-    /// One run's record → the pair, off the main actor, only when the run wrote a snapshot.
+    /// One run's record → the pair, off the main actor, only when the run wrote a snapshot. A pair that LANDED
+    /// (written) says so on the main actor — `CopyDoorsListModel.copiesChanged` — so a standing Restore list re-reads
+    /// (the ladder's round-1 m4, the walk's W-13).
     @MainActor
     @discardableResult
     static func handle(_ record: BackupRunRecord, session: ProtectionRoadSession) -> Task<PairOutcome, Never>? {
         guard record.primary.outcome == .written else { return nil }
-        return Task.detached(priority: .utility) { takePair(session) }
+        return Task.detached(priority: .utility) {
+            let outcome = takePair(session)
+            if outcome == .written {
+                await MainActor.run {
+                    NotificationCenter.default.post(name: CopyDoorsListModel.copiesChanged, object: nil)
+                }
+            }
+            return outcome
+        }
     }
 
     /// The pair: the live library under its key, the live key file frozen beside it (this Mac's device ID names

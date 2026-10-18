@@ -2410,7 +2410,7 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
 - Piece 0 — this record skeleton: DONE (this commit).
 - m1 — K5's missing face over a record-less store: DONE (`0b759f8b8` the fix + both pins; this commit the evidence). The bootstrap twin's run PENDING (the stage).
 - m2 — the copy doors' automatic quiet probe never presses Touch ID: DONE (this commit). The core protection set Debug green here; its release leg at the close.
-- m4 — the new-road Restore list re-reads on a landed backup pair: NOT-STARTED.
+- m4 — the new-road Restore list re-reads on a landed backup pair: DONE (this commit). The hook twin's run PENDING (the stage).
 - NIT 1 · NIT 2 · NIT 3 · NIT 4: NOT-STARTED.
 - The close (Mac + phone `build-for-testing`, the core protection set both configurations, the suite list): NOT-STARTED.
 
@@ -2484,3 +2484,23 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
   prompts for one press (the act takes the copy's secrets, not a key); (ii) the look's typed *Open* with a wrong secret
   falls through to the copy's quiet roads, Touch ID's included — a prompt after a wrong secret. Both unreachable until a
   `.touchid` item exists (VX-307's Castle entry), whose faces decide whether Touch ID gets a door of its own at the copies.
+- **m4 — AGREE (W-13 confirmed by trace):** `DataSafetyPane`'s `.task` is the only caller of `CopyDoorsListModel.refresh()`
+  (once per appearance); the pair a Back Up Now in the same pane (or a scheduled run) lands is written by
+  `ProtectionBackupHook.handle`'s detached `takePair` AFTER the run's record, and nothing told the standing list. **The
+  fix** (this commit), on the seam the hook already owns: once `takePair` answers `.written`, the hook posts
+  `CopyDoorsListModel.copiesChanged` on the main actor; every `CopyDoorsListModel` observes it from its birth for as long
+  as it stands (`CopiesChangedObserver` — the token removed when the list goes) and re-reads. A refinement the pin found
+  worth having: each re-read is numbered and only the NEWEST lands, so an older read finishing late (a scheduled run
+  landing during a pane-open read) never writes over a newer listing. No edit to `StoreBackup.swift` or the pane.
+  **The pins:** `CopyDoorsListRefreshTests` (2, headless, planted roads; the notification named by its string so the file
+  compiles on both sides): `aLandedBackupPairRefreshesTheStandingList` (one backup listed → the planted catalogue now
+  two → the post → the list reads two) and `anOlderReadLandingLateNeverOverwritesANewerOne` (the first read held on a
+  continuation, a second lands, the first released → the newer stays). **RED-ON-OLD** (the pin file against the pre-fix
+  Shared files): `✘ … CopyDoorsListRefreshTests.swift:51 Expectation failed: list.listing == two` (after the bounded
+  1 s wait — nothing re-read) · `:75 list.listing == two` (the older read wrote over the newer) · `✘ Test run with 2 tests
+  in 1 suite failed … with 2 issues`; GREEN after (the harness `✔ Test run with 72 tests in 10 suites passed`). The seam's
+  twin: `ProtectionBackupHookTests.aLandedPairTellsTheRestoreListAndANothingDueRunSaysNothing` (throwaway scope, temp
+  slot — a nothing-due run says nothing; a written pair is said once before its task ends; a REAL standing list over the
+  real listing reads the second pair) — Mac host, PENDING the stage; its red-on-old not run (the hook is outside the
+  harness — it reads `StoreBackup`'s record type), by the trace: the pre-fix `handle` posts nothing. Mac
+  `build-for-testing` (`DerivedData/vx306-u3`) → `** TEST BUILD SUCCEEDED **`.

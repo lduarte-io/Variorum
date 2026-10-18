@@ -341,14 +341,49 @@ final class CopyDoorsModel: Identifiable {
     }
 }
 
-/// The Restore list's brain on the new road: the listing, re-read at each appearance.
+/// The Restore list's brain on the new road: the listing, re-read at each appearance AND whenever this Mac's
+/// catalogued copies change while it stands — a backup pair LANDING (Back Up Now in the same pane, or a scheduled run):
+/// the ladder's round-1 m4, the walk's W-13. The seam is the backup hook's own (`StoreBackup.onRun` →
+/// `ProtectionBackupHook.handle`), which posts `copiesChanged` once the pair is written.
 @MainActor
 @Observable
 final class CopyDoorsListModel {
+    /// Posted on the main actor once this Mac's catalogued copies changed — today: a backup pair landed.
+    nonisolated static let copiesChanged = Notification.Name("io.lduarte.Variorum.protection.copiesChanged")
+
     private(set) var listing: CopyDoorsListing = .empty
     @ObservationIgnored let roads: CopyDoorsRoads
+    /// Each re-read's number: only the newest lands (an older read finishing late never writes over a newer one).
+    @ObservationIgnored private var reads = 0
+    @ObservationIgnored private var observer: CopiesChangedObserver?
 
-    init(roads: CopyDoorsRoads) { self.roads = roads }
+    init(roads: CopyDoorsRoads) {
+        self.roads = roads
+        observer = CopiesChangedObserver { [weak self] in
+            Task { await self?.refresh() }
+        }
+    }
 
-    func refresh() async { listing = await roads.listing() }
+    func refresh() async {
+        reads += 1
+        let read = reads
+        let fresh = await roads.listing()
+        guard read == reads else { return }
+        listing = fresh
+    }
+}
+
+/// `CopyDoorsListModel.copiesChanged`, observed for as long as the list stands (removed when it goes).
+nonisolated final class CopiesChangedObserver: @unchecked Sendable {
+    private let token: any NSObjectProtocol
+
+    init(_ changed: @escaping @MainActor @Sendable () -> Void) {
+        token = NotificationCenter.default.addObserver(
+            forName: CopyDoorsListModel.copiesChanged, object: nil, queue: .main
+        ) { _ in
+            MainActor.assumeIsolated { changed() }
+        }
+    }
+
+    deinit { NotificationCenter.default.removeObserver(token) }
 }
