@@ -1,6 +1,48 @@
 # VX-348 — Run: Pre-launch bug sweep (her running list)
 
-**STATUS: READY FOR KICKOFF — written 2026-10-18 at her word ("I want to kick that sweep off soon / now so I'd like to
+**STATUS: IN PROGRESS — kicked off 2026-10-18 (architect shape; Fable orchestrates at her launch, superseding the
+plan's Opus-orchestrates default for this run). Branch `vx-348-prelaunch-sweep`, worktree `~/dev/variorum-vx-348`,
+in-flight row added. The kickoff sitting ran (below); the rest of the run needs nothing from her.**
+
+## KICKOFF SITTING (2026-10-18) — VX-351's design pass, her rulings verbatim
+
+Her launch message (the frame): *"We can start with a design pass on the question of how to show the time - I'd like
+to get that resolved first. The coordinator will handle your needs wrt stage releases. the sync slot is claimed +
+busy, so if anything looks like it needs that, it'll have to just wait and be deferred."*
+
+The orchestrator's grounding brought to the sitting: `TimeStampFace` (Domain) is the one brain — glances read
+`today 1:33 AM` · `yesterday` · `Sep 9` · `Sep 9, 2025` (time only for today, by design); the whole-fact hover
+(`Edited Oct 13, 2026, 4:02 PM`) and the click-flip (edited↔created) already live on three surfaces (List rows,
+cards, the note masthead). The two gaps: `LibraryInfoPanel.factsLine` prints the RAW DAY KEY (`edited 2026-10-13`,
+via `JournalDay.dayString` — the drift copy) and `NoteBox.stampsLine` is date-only; neither hovers. Other speakers
+(Timeline, search answer sheet, book Arrivals/Archived lines, MCP grant picker) each word time their own way, no
+hover.
+
+- **R-VX348-1 (mechanism):** she picked **"Hover everywhere"** (the recommended option, selected with its preview):
+  glances stay calm (today 1:33 AM · yesterday · Sep 9); every stamp speaker gains the existing whole-fact hover;
+  the two gaps join `TimeStampFace`. No new UI, no setting in this run.
+- **R-VX348-2 (the stamp-form setting):** her words verbatim: *"synced sounds good but we should mint another
+  ticket since the sync stage is currently occupied"* — the setting (simplified · long · short glance forms) is
+  DEFERRED to its own ticket, synced when built. Minted at this sitting as **VX-389** (Parked at her word, Low,
+  Improvement · Confirmed · Library & sidebar).
+  *(Orchestrator's note, recorded for honesty: a new `setting` key is an ordinary synced key-value row — no
+  migration, no `Sources/VariorumCore/Sync/` line, no lockstep — so it would not strictly need the occupied slot;
+  her deferral stands as ruled, and this note rides the ticket so the premise is visible at her next triage.)*
+- **R-VX348-3 (surfaces):** **"All speakers"** — the two gaps move onto `TimeStampFace` with hover, and the
+  Timeline, search answer sheet, book Arrivals/Archived lines and MCP grant picker gain the same hover. One rule
+  everywhere a stamp speaks.
+- **R-VX348-4 (the phone):** **"VM ticket, later"** — minted at this sitting as **VM-22** (Low); the shared Domain
+  brain changes ride free; this Mac sweep touches no mobile face.
+
+**VX-351's build shape under these rulings (lands in U4):** route the info panel's facts line and the note box's
+stamps line through `TimeStampFace` (one wording rule — the raw-day-key drift closes); give every stamp speaker the
+whole-fact hover via `TimeStampFace.tooltip`; no glance-form change, no setting, no click-flip change. Pins:
+red-on-old for the info panel's wording (the raw key is the old behavior) and for each speaker's hover presence
+where a pin can read it; the walk covers the rest.
+
+*(The original pre-kickoff banner follows, kept as written.)*
+
+**STATUS AT WRITING: READY FOR KICKOFF — written 2026-10-18 at her word ("I want to kick that sweep off soon / now so I'd like to
 have it all ready"); the run ticket is VX-348 itself (Todo), its branch and worktree are minted by ITS orchestrator at
 kickoff.** Members (sub-issues of VX-348), nine: **VX-347 · VX-351 · VX-350 · VX-357 · VX-349** (her running list,
 filed 2026-10-14/15) · **VX-338 · VX-339** (the "today's road" pair, folded in 2026-10-18 at her word) · **VX-384 ·
@@ -160,4 +202,16 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
 
 ## LIVE STATUS
 
-*(The orchestrator fills this at kickoff.)*
+- **Kickoff (2026-10-18):** branch `vx-348-prelaunch-sweep` + worktree `~/dev/variorum-vx-348` minted from
+  `origin/main`, pushed; in-flight row added atomically; VX-348 + all nine members In Progress on the board. The
+  kickoff sitting ran (rulings R-VX348-1…4 above); VX-389 and VM-22 minted. Units adopted AS the plan suggests
+  (U1–U4, re-sizing recorded: none needed). Stage via `oct18coordinator` (REQUEST → READY → GO → RELEASE); the
+  sync/custody slot is VX-378's — anything that looks like it needs it is DEFERRED (her kickoff word).
+- **U1 (VX-357 · VX-338 · VX-339 — the core and the headless fixes):** NOT-STARTED.
+- **U2 (VX-347 — ⌘S):** NOT-STARTED.
+- **U3 (VX-350 · VX-349 — the Library's row and header):** NOT-STARTED.
+- **U4 (VX-351 as ruled · VX-384 · VX-385 — stamps and riders):** NOT-STARTED.
+- Then the ladder (fresh Fable per round, whole diff), closeout, merge. A release is her explicit word only.
+- **Known slip, recorded:** the kickoff's in-flight-row commit on main carries a `Co-Authored-By` trailer against
+  CLAUDE.md's no-trailer rule (the harness injected it; pushed history is never rewritten, so it stands; no later
+  commit repeats it).
