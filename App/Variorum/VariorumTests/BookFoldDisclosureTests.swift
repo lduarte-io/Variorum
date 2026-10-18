@@ -188,8 +188,11 @@ struct BookFoldDisclosureTests {
                 width: 1200, height: 800)
             defer { rig.close() }
             #if DEBUG
+            // SwiftUI's `.global` is measured from the WINDOW's top (title bar
+            // included — measured: a centre click lands only with the frame's
+            // height), AppKit's window points from its bottom.
             @MainActor func windowPoint(_ p: CGPoint) -> NSPoint {
-                NSPoint(x: p.x, y: rig.hosting.bounds.height - p.y)
+                NSPoint(x: p.x, y: rig.window.frame.height - p.y)
             }
             _ = await rig.poll(timeout: 8) { BookFoldGeometry.frames["card-\(card)"]?.hit != nil }
             let cardFrames = try #require(BookFoldGeometry.frames["card-\(card)"])
