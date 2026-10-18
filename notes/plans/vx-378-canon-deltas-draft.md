@@ -1,0 +1,18 @@
+# VX-378 canon deltas (applied at the merge, on the branch before the PR; exactly as ruled — contract lines + pointers)
+
+## CLAUDE.md — "Read EXPLICITLY, never auto-loaded" gains one line (after SyncSpec's):
+- `notes/CastleRules.md` — THE CONTRACT for library protection (27 rules + the considered-and-not-pursued ledger). Read in full before touching `Sources/VariorumCore/Protection/`, custody/keychain code, a Castle face, or any sentence the app says about encryption, backups, the twelve words, the passphrase or the Apple road. Where it and the vx-266 design differ, the rules win. The walk is `notes/plans/vx-266/castle-lifecycle.html` (rendered from a fixture a test asserts against — never hand-edit it).
+
+## AppSpec §12 — the LIBRARY PORTABILITY line gains a contract sentence at its end:
+**THE PROTECTION REBUILD (VX-305 → VX-378, 2026-10-14/17; the contract `notes/CastleRules.md`, the walk `notes/plans/vx-266/castle-lifecycle.html`):** the headless core under `Sources/VariorumCore/Protection/` is built and gated to the rules — every library encrypted under its own random key with a key file kept redundant (beside it, in every backup, a sealed copy in the Mac's keychain), twelve words from birth and a passphrase asked, Standard a convenience posture with quiet roads and Castle one promise (no Apple road, ever), one posture at a time (entering takes everything in, leaving hands everything out), the floor "a backup always opens with the passphrase and words you had when you made it", a copy is a copy (Look inside / Make this my library — the latter IS Restore from Backup, a new library with no previous keys), detect-and-say (the notice, never a repair), no migration of pre-design stores (rule 26). **Nothing of it reaches the app yet** — the open road is VX-306's (Debug builds only until VX-329's release switch); the server's `key_vault` shape is VX-307's SyncSpec §12 lockstep. The 13x landing wording above stands until VX-306 replaces it.
+
+## AppSpec §14 — the most-recent entry (slimmed; VX-283's rolls to the archive if the five-entry rule says so):
+**VX-378 (a PHASE under the architect shape, 2026-10-16/17 — `notes/plans/vx-378-castle-simplified.md`; the corrector of VX-305 whose NO-GO and simplification sitting it answers; her kickoff cast word, her ladder cap (five while MAJORs), her overnight mandate; her rulings during the phase verbatim in §8 — both secrets at a crossing, the FACTS DIFF, the FLOOR, no key carry at Make this my library, the notice instead of the refusal; units U1 (the cut) · U2 (the additions) · U3 (the lifecycle proof, fixture-first) · U4 (the world and the soak; stopped at a design find, ruled, resumed); the ladder LADDER_PENDING; the gate GATE_PENDING):** CLAUDE.md's read-explicitly list gains `notes/CastleRules.md`; §12 gains THE PROTECTION REBUILD line. Zero `Sync/`, `App/`, `Server/` or schema lines; marker 13 untouched; zero lockstep. The bundle QUESTIONS #BUNDLE_PENDING; PR #PR_PENDING (merge commit MERGE_PENDING).
+
+## Master plan — the in-flight row RETIRED at the merge (STEP 0 of VX-306's kickoff); the closeout paragraph:
+**→ VX-378 CLOSED 2026-10-17 — CASTLE, SIMPLIFIED (the VX-305 corrector; VX-305 closes with it; the record `notes/plans/vx-378-castle-simplified.md`, the contract `notes/CastleRules.md`, the walk `notes/plans/vx-266/castle-lifecycle.html`).** [paragraph filled from the gate record at the closeout]
+
+## QUESTIONS — the VX-378 heading numbered at the merge (#229 if main's next is free); the status lines as recorded.
+
+## VX-305's plan banner → "SUPERSEDED-AND-CLOSED 2026-10-17 — by VX-378 (…); its gate moved there and passed/failed GATE_PENDING".
+## This plan's banner → "CLOSED 2026-10-17 — GO/NO-GO: GATE_PENDING; PR #…".
