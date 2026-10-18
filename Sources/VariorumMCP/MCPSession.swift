@@ -165,7 +165,8 @@ final class MCPSession: @unchecked Sendable {
         suggest (add takes and comments beside their text, save lenses), \
         write new (new notes, books, chapters, tags, versions; blocks added at a note's end), \
         edit (most of what the author can do at the keyboard: edit, choose and commit takes; \
-        divide, merge, move, delete; rename, archive). Each names a note, a book or a wing, for once, \
+        divide, merge, move, delete; rename, archive). Each names a note, a book or a wing \
+        (list_wings lists yours), for once, \
         until you disconnect, or always; they may also open the whole library to reading (the open \
         book). A once grant is one act: a read grant's first read of a note's text, a higher grant's \
         first write. Until you disconnect lasts while any connection under your client's name stays \
