@@ -1114,3 +1114,15 @@ place from the committed tree (a265d0afc) and restored with `git checkout --` to
 - **Step 1c:** `appearanceChoice` written back to `system`; read back `system`.
 - **VX-77 disposition: DISMISSED AS HOLLOW** — no product regression ever existed; the red was the test host's dark
   posture, now structurally excluded by R-U2-B (8b38c88bb). No product code changed.
+- **Row 2 — VX-21 red-on-old** (`chapterGripDrawn` un-gated in place → `chapterCount > 1`): `BookPanelDragGateTests` —
+  `9 tests in 1 suite failed … with 4 issues`: `aGripDrawsOnlyWhereTheBookIsPlacedByHand` ×3 (2 · 3 · 9 chapters, stamp
+  order, drawn) and `theMountedPanelDrawsNoGripUnderAStampOrderAndBothInManual` ×1 ("entry-date order … drew
+  Optional(true), Optional(true)"); `aLoneChapterDrawsNoGrip`, the refusal pins and the manual arms green. Red for the
+  planned reason; restored, clean diff (`red2.log`).
+- **Row 3 — VX-69 red-on-old** (the `.closesOnEscape` mount line deleted in place): `BookcaseMastheadPopoverTests` —
+  `10 tests in 1 suite failed … with 1 issue`: `escClosesTheOrderPopoverAndLeavesTheCensus` at :402 "Esc closed the
+  order popover" (it stayed open); its census arm and `escAloneIsAMenusCloseKey` green. Restored, clean (`red3.log`).
+- **Row 4 — VX-291 guard probe** (the two negative paddings deleted in place): `BookFoldDisclosureTests` — `2 tests in
+  1 suite failed … with 8 issues`: "grew OUTWARD" and "no row grows for it: 22.0" (vs the replaced line's 14.0) on the
+  card's ▸, the header's ▾ and both Index chapter folds; the 22² target claim green. The pin bites; restored, clean
+  (`red4.log`).
