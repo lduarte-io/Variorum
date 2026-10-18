@@ -2128,6 +2128,26 @@ before these were built):
   row's shape), the Pool's own error first. Alternatives: (b) an overlay at the bottom (Archived's shape — over the
   last card); (c) a permanent bottom bar (new chrome). VX-355 closes with VX-385 on this one fix.
 
+### For the orchestrator's closeout (not U4's to apply)
+
+- **AppSpec §12** may want three contract lines: *every stamp speaker hovers the whole fact (`TimeStampFace.whole` — the
+  year always, the minute whenever the stamp holds one; the glances unchanged; the info panel's facts line and the note
+  box's stamps line speak the one glance rule — R-VX348-1/3, VX-351)*; *the Library's List follows the held listing's
+  membership — a note minted, duplicated or removed from any door is listed or unlisted in place (VX-384, VX-231's
+  road)*; *the Pool hosts the one quiet receipt line at its foot (VX-385 + VX-355)*. **MCPSpec** (Settings ▸ MCP and the
+  grant sheet are its faces): the Activity and Waiting ages and the grant picker's note/book stamps hover their whole
+  fact — a face detail; whether it earns a contract clause is the closeout's call.
+- **The board:** VX-355 closes with VX-385 on the one fix (the record says so); VX-351, VX-384, VX-385 close at the merge.
+- **A follow-up ticket for her triage (P-VX351-4):** the found raw-day-key WORDS (note pickers, Pool rows, Snippets cards,
+  the Blocks workbench, the Archived surface's stated day, ⌘K's note day) — the drift class the info panel's gap was;
+  hover-only here. Suggested: Improvement · Confirmed · Library & sidebar, Low.
+- **Mobile parity:** nothing mobile-visible (three pure additions in `Shared/BlockHistoryFace.swift`, no face); VM-22 owns
+  the phone's stamp faces (R-VX348-4).
+- **An edge shared with the deleted-notes signal, recorded (P-VX384-1's neighbour):** the follow's in-place `refresh()`
+  can supersede a NEW question's `search()` still in flight (the same race `.variorumNotesDeleted` → `refresh()` has
+  always had): the answer is the current question's, landed in place (rows re-read to the same depth) rather than from
+  its first page. Rare (a mint from another door while she is typing a query); not observed.
+
 ### What the walk must show (the run's ONE combined window — the dev store, BOTH voices; captures into `notes/plans/vx348-screens/u4/`, gitignored)
 
 - **VX-351 (hover each, both voices; the glance words unchanged except the two gaps):** the Library info panel's facts
