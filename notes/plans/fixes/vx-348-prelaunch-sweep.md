@@ -707,7 +707,12 @@ the build notes; the Environment traps; the kickoff sitting and her overnight ma
   6, the guards green), 6 of 6 green. **PENDING:** the Mac pins' run (`MCPConnectionEndDoorTests` — prebuilt). The
   ticket's remainder is HER call (does a connected AI's work count as "use" for Castle's lock after time away? — an
   author-only lock relaxation, recorded with options, not built). Its section below.
-- **No behavioural revert is in flight.** (VX-394's red leg ran and was restored: `MCPServerHost.swift` reverted over
+- **A BEHAVIOURAL REVERT IS IN FLIGHT (the Mac red product):** over the committed `0784d8b9a` — `MCPPaneCopy.swift`
+  (the two `list_wings` cases and the `connectionEndPhrase` call removed), `MacWillLock.swift` (the
+  `await endingConnections()` line removed), `MCPServerHost.swift` (the end-line write and `recordConnectionEnds`'s body
+  removed); restore with `git checkout -- App/Variorum/Variorum/Features/MCP/MCPPaneCopy.swift
+  App/Variorum/Variorum/MacWillLock.swift Sources/VariorumMCP/MCPServerHost.swift` (no other uncommitted work in them).
+- (VX-394's headless red leg ran and was restored: `MCPServerHost.swift` reverted over
   the committed `6306a21ff` — the end-line write and `recordConnectionEnds`'s body removed — 4 of 6 pins RED, the two
   guards green, `DerivedData/u5-logs/vx394-red.log`; restored by `git checkout --`, `git diff` clean, 6 of 6 green.)
 - **THE FOLD (the orchestrator's instruction, her word via the coordinator):** IN — `460d39785` merges main
