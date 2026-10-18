@@ -368,3 +368,108 @@ Headless logs: `notes/plans/vx383-screens/u1/logs/`.
 - **Sound:** D-C-1 takes the ONE application road (`insertPostTag`) in the act's own transaction, so intake's whole table (seat, bell, capacity, ownership, finished/archived pauses) is inherited rather than re-stated — and its undo story needed no new machinery: the container trigger and the exact-stamp revival already carry seats and bells, as the four undo/redo pins measure (a dismissal and a seat she judged between both stand). D-C-3 reuses the same helper after the flips. D-C-5's question has a clean answer (no seeded living book exists). D-C-2 follows the `CopyForAI` precedent exactly (one act in `Core/Views`, the bars call it directly, ⌘K through `ShellActions`), so no `RoutedCommand` case and no surface handler were needed — the act needs a note, not an editor.
 - **Weakest points, for the reviewer's eye:** (1) every Mac line is compiled but UNRUN (Tier A first); (2) P-U1-1 changes three shipped faces from silent to a receipt; (3) the receipt's book lookup reuses `Queries.readingsContaining`, which also assembles each living gathering's rule for the ONE copy — author-scale, but it is a read after the act on every press; (4) the `.variorumOpenPost` broadcast for Open › is the chip's and Arrivals' existing road (P-4: a signal, the opening decides nothing) — not the composition road `ShellRouter.pendingSelection`, which `NoteDuplicate` cannot reach from the bars; (5) the plan's MOBILE PARITY line was wrong (the phone's Promote now applies tags) — corrected in piece 3 for the closeout; (6) between U1 and U2 the wire's description overclaims "lands in no book" (same PR; U2 owes it).
 - **Not touched:** `Sources/VariorumCore/Sync/`, custody, the Keychain, any migration or schema, the editor seam (`EditorTextView`, `BlockRangeIndex`, `PaneSurface` — `EditorView`/`EditorViewModel` untouched too), the wire (`Sources/VariorumMCP/`). No trace led to any of them.
+
+## U2 UNIT RECORD — VX-371: `duplicate_note` files into a book; `with_tags`; the answer; the docs (opus-implementer, from 2026-10-17)
+
+**NOT DONE YET (the record's first line, per the contract): everything below is PENDING until its row says DONE.** No
+stage claimed, no app launched, no `xcodebuild test`, no store touched by this session (the Mac batch and the real-client
+live round are the orchestrator's, in a stage window — their exact lists are written at piece 7).
+
+**Read in (in full, this session's own context):** CLAUDE.md + its canon; this file whole (the design D-C-1…5, the U2
+brief, the environment traps, U1's UNIT RECORD and its NOTES FOR U2); `notes/MCPSpec.md` whole;
+`notes/plans/fixes/vx-336-mcp-wire-tools-ai-docs.md` §U6a (the traces, D-311-1…8, PROVISIONALs, FOR VX-234, THE
+ORCHESTRATOR'S RULINGS ON U6a's FORKS and its ONE OPEN DECISION); `notes/QUESTIONS.md` #227 with her answers
+(P-VX311-1…3, P-VX361-1, VX-371's shape); `notes/SessionResiliencyProtocol.md`. Code (every pointer at `5857f3a71`):
+`MCPWriteTools+DuplicateNote.swift` (`performDuplicateNote`, `guardDuplicate`), `MCPWriteTools.swift` (the Job, the
+parse, `create_note`'s `into(.book)`, `noteIntoBook`, `inWing`, `land`, `noteAnswer`, `sectionWithoutBookWords`),
+`MCPWriteTools+WingMove.swift` (`guardWingMove`, `landedWords`, `left_books`' naming rule), `MCPGrantAuthority.swift`,
+`Domain/MCPGrantRule.swift`, `Queries/MCPGrantQueries.swift` (`mcpNoteFacts`, `mcpBookFacts`, the resolved wing),
+`MCPWriteSupport.swift` (`MCPWriteReceipt`, `MCPWireRefusalCopy`), `MCPOwnActivity.swift` (`hidesTarget`),
+`MCPToolCatalog.swift` (`createNote`, `addNoteToBook`, `duplicateNote`), `MCPSession.swift` (the instructions),
+`Operations+MCPDuplicate.swift`, `Operations+Versions.swift` (`duplicateAsVersion(Body)`, `applyLiveTags`, `copyPost`),
+`Operations+MCPWrites.swift` (`mintNoteEntry`'s book road, `mintedNoteTags`), `Operations+Reading.swift`
+(`addPostToReading`, `requireSameWing`), `Operations+Intake.swift` (`insertPostTag`, `applyAutoTag`), the app's
+`MCPPaneCopy.swift` (Activity's phrases, `MCPReceiptCopy`, `MCPActivityFace`), `NoteDuplicate.swift` (U1's landed
+words), the pins `MCPDuplicateNoteServerTests`, `MCPDuplicateNoteActsTests`, `MCPMintedAnswerServerTests`,
+`MCPOwnActivityServerTests`, `MCPAdviceServerTests`, `TutorialMCPChapterTests` (:1048 pins a substring of the
+description), `MCPTakeLabelFormServerTests`.
+
+**Housekeeping:** headless logs in `notes/plans/vx383-screens/u2/logs/` (gitignored — the run's folder).
+
+### The traces (written before code)
+
+- **Why a book-level client can't duplicate today** (the ticket's mechanism): `performDuplicateNote` decides the
+  landing ONLY by `decideWing(standing, wingID: facts.wingID, rung: .writeNew)` (`MCPWriteTools+DuplicateNote.swift`
+  :78–85) — a book grant never reaches `decideWing` (`MCPGrantRule.decideWing` filters `scopeKind == .wing`), so a
+  client whose write new is a BOOK hears the wing's refusal; and the catalog lists the tool only under `scopes: [.wing]`
+  (`MCPToolCatalog.swift:1027`), so such a client never even sees it. `create_note` files into a book through
+  `into(.book)` → `MCPGrantAuthority.decide(standing, book: mcpBookFacts, rung: .writeNew)` (`MCPWriteTools.swift`
+  :680–699) and the core's `mintNoteEntry` (`Operations+MCPWrites.swift` :538–600: the book's gates and the chapter
+  BEFORE the mint, then `addPostToReading(db, …, at: .end)` — the hand-add's one choke point, its capacity and ownership
+  gates and its outflow — then the section stamp, then the header's tags).
+- **Why `with_tags` is owed:** since U1 the wire's body runs `duplicateAsVersionBody(…, tags: .applied)` by default
+  (`Operations+MCPDuplicate.swift` :54–64) with no wire argument to choose `.none`.
+- **Why the answer and the docs overclaim since U1** (U1's NOTES FOR U2): `landed` is always
+  `landedWords(wingTitle:isHome:)` — "the Pool of Home" even when a living book collecting one of the copy's applied
+  tags SEATED it in the same act; the description still says "the author's own Duplicate as Version" (a retired label,
+  P-C-1) and "The copy lands in no book".
+- **The order the plan rules, and why it matters (red-on-old by revert, piece 5):** with the destination a QUIET living
+  book whose rule collects one of the source's tags, applying the tags BEFORE the filing would let intake SEAT the copy
+  first, and the filing's `addPostToReading` would then refuse `alreadyInReading` — so the membership must come first
+  (then this book's own pair is decided and the applications are heard by the OTHER books, `mintNoteEntry`'s order).
+- **A book of another wing:** `addPostToReading`'s `requireSameWing` would refuse `crossWingMembership` — a sentence the
+  wire must never speak for a book it then refuses to name (no oracle); the wire answers such a book exactly as a
+  missing one (the facts read as nil — `MCPGrantAuthority.decide(book: nil)` → the ONE not-shared shape, no ask).
+
+### The design as built (D-C-4 applied; the plan's words where it has them)
+
+- **The parse:** `with_tags` (boolean, default true; anything else "with_tags must be true or false." — the read
+  tools' sentence), `book_id` (optional), `section_id` (optional, with `book_id` only — `create_note`'s parse rule and
+  its sentence, `sectionWithoutBookWords`).
+- **The reach — the snapshot:** the NOTE at READ (+ the fence, byte-for-byte as today: P-VX311-1's sentence, checked
+  before the landing so no landing ask is raised for an act that can never land); then the LANDING: no `book_id` → the
+  WING road exactly as today (`decideWing` at WRITE NEW, its refusal and its ask); with `book_id` → `create_note`'s book
+  decision (`decide(book:)` at WRITE NEW, consuming, its refusal and its ask on the book), the book's facts read as nil
+  when its resolved wing is not the note's (another wing's book = the ONE not-shared shape, byte-identical to an id
+  naming nothing, no ask). ONE ask, the source's first.
+- **The guard** (`guardDuplicate`, inside the act's transaction, FIRST): the note at READ, the fence, then the landing
+  side as the snapshot decides it (the book with the same wing filter, or the wing), on ONE standing read; the once
+  grants of both sides stamped there as ONE union (`guardWingMove`'s shape).
+- **The core:** `Operations.DuplicateFiling` (book, optional chapter) threads through THE ONE BODY
+  (`duplicateAsVersionBody(_:_:tags:filing:)` — her doors pass none, so their rows are byte-unchanged): the book's gates
+  and the chapter BEFORE the copy (`mintNoteEntry`'s order), the family copy, then the membership through
+  `addPostToReading` (capacity, ownership, wing, the outflow), the chapter stamped on that row, THEN the `with_tags`
+  applications. `duplicateNoteForClient(_:tags:filing:undoLabel:guardedBy:) -> MCPDuplicate` adds, inside the same
+  transaction, the tag listing (P-VX361-1's shape: the source's applied tags in application order, then the book's
+  outflow, each listed once — `mintedNoteTags`, now shared) and every live BOOK the copy is a member of (the filing
+  first). ONE entry (`registerMintedContainerEntry`): the container tombstone takes the membership, its applications
+  and any seats on one stamp; the redo revives them on it. The old spelling (`duplicateNoteForClient(_:tags:undoLabel:
+  guardedBy:) -> PostCopyResult`) stays as its one caller-facing wrapper (U1's pins call it).
+- **Refusals** through the ONE chain (`land` → `MCPWireRefusalCopy.spoken`): a finished book `lockedReading` and a full
+  one `readingAtCapacity` in her doors' words (the app's table); a chapter that isn't the book's →
+  `add_note_to_book`'s one chapter sentence; a gathering's id reads as no book's (not-shared, as `create_note`). **An
+  ARCHIVED book is NOT a refusal** — AppSpec §9's 13i-e family: "EXPLICIT adds land (her amendment — no
+  `readingArchived` refusal exists)", and `create_note`'s road lands there too; the brief's list names "archived"
+  among the refusals, the plan's D-C-4 does not — built to the plan + AppSpec, pinned as a landing control.
+- **The answer:** VX-252's records (+ `source_block_id`), `source_note_id`, `block_ids`, **`tag_ids` + `tags`** (both
+  roads), `book_id` and `section_id` echoed when given, **`landed`** in words (PROVISIONAL P-U2-1 below).
+- **The receipt:** act `.duplicate`, target the COPY, `detail` = the book's name when filed; Open › opens the copy
+  (P-VX311-3). **Activity:** the book road's rows are logged on the BOOK (PROVISIONAL P-U2-2 below).
+- **Scopes:** `[.book, .wing]`.
+- **The docs:** the description rewritten (both roads, the default, `with_tags: false`, "books that collect by its
+  tags hear the copy, as when the author tags"; "Duplicate as Version" retired; the substrings two pins read kept).
+  `MCPSession.instructions`' revision sentence names no reach — unchanged. The guide's MCP lesson 3 names no reach —
+  unchanged (recipe 6's "in no book" is recorded under OWED, outside this brief).
+
+### LIVE STATUS — U2's pieces (flipped in the same commit as each piece)
+
+| # | piece | status |
+|---|---|---|
+| 0 | read-in, the traces, the design, this record | DONE (this commit) |
+| 1 | the wire pins, committed AHEAD of the fix, run RED on the pre-fix tree | NOT-STARTED |
+| 2 | the core: `DuplicateFiling` through the one body, the client op's result, the tag listing; core pins | NOT-STARTED |
+| 3 | the wire: parse, the book road, the guard, the answer, the receipt, the catalog; justified edits | NOT-STARTED |
+| 4 | the app's words (Activity, the receipt) + their pins; the Mac `build-for-testing` (no runner) | NOT-STARTED |
+| 5 | revert checks (announced in this record BEFORE any revert starts) | NOT-STARTED |
+| 6 | headless finals (the named suites, then the whole core + MCP packages once) | NOT-STARTED |
+| 7 | the Mac batch list, the LIVE ROUND SCRIPT, PROVISIONALs, the self-assessment | NOT-STARTED |
