@@ -319,7 +319,7 @@ never rewrite history.
 
 Results + counts in the plan file; master plan table + the effort's
 IN-FLIGHT row retired + closeout-log paragraph, the superseded pieces
-and AppSpec §14's outgoing delta rolled into `notes/PhaseCloseoutArchive.md` (the deltas in CLAUDE.md's canon-hygiene shape — a contract line plus one pointer, §14 one line per effort — and `Tools/canon-size` run, its line in the handoff; it REPORTS, a session never slims canon to fit, VX-419)
+rolled into `notes/PhaseCloseoutArchive.md` (the canon deltas in CLAUDE.md's two-file shape — the contract lines changed in place in AppSpec / SurfaceContracts with one pointer each; the effort's dated entry and any changed rule's narrative appended to `notes/AppSpecRecord.md` — and `Tools/canon-size` run, its line in the handoff; it REPORTS, a session never slims canon to fit, VX-419/420)
 / `notes/AppSpecDeltaArchive.md`; canonical-doc deltas applied exactly
 as the author ruled them (never beyond — and as a CONTRACT line plus a
 pointer to the plan's ruling, never a paragraph of history: AppSpec's
