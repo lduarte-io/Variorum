@@ -1,6 +1,6 @@
 # VX-306 — Castle rebuild, phase 2: the open road (the headless core goes live in Debug builds, to the rules)
 
-**Status: LIVE — KICKED OFF 2026-10-18 by the author's `/architect-phase vx-306` with her rulings (§7); the orchestrator's provisional kickoff rulings §7b; the words drafts §7c; the units §2 (U1 as two sessions); the running record §6/§9. (Planned 2026-10-18 at VX-378's close.) Originally: PLANNED — READY TO KICK OFF (VX-378 merged 2026-10-18). Written 2026-10-17 at VX-378's closeout, to `notes/CastleRules.md` (the contract) and VX-306's
+**Status: CLOSED 2026-10-18 — PR #174 (a merge commit after the stage coordinator's word); the handoff `notes/handoffs/vx-306-handoff.md`; the bundle QUESTIONS #234 (renumbered from #233, which VX-348 holds on main); the next phase's plan `notes/plans/vx-307-castle-crossings.md`. Was: LIVE — KICKED OFF 2026-10-18 by the author's `/architect-phase vx-306` with her rulings (§7); the orchestrator's provisional kickoff rulings §7b; the words drafts §7c; the units §2 (U1 as two sessions); the running record §6/§9. (Planned 2026-10-18 at VX-378's close.) Originally: PLANNED — READY TO KICK OFF (VX-378 merged 2026-10-18). Written 2026-10-17 at VX-378's closeout, to `notes/CastleRules.md` (the contract) and VX-306's
 2026-10-16 re-scoping comment (the migration is GONE — rule 26). Kicks off at the author's word with
 `/architect-phase vx-306` (recommended: the phase is face- and design-heavy, and her sittings rule the words).**
 
@@ -427,7 +427,7 @@ store this build has written — coordinators told.
   `~/dev/variorum-vx-306`, branch pushed, the in-flight row on main (`99d49fc4a`, holds the Sync/-or-custody slot),
   VX-306 In Progress, the coordinator (`oct18coordinator`) announced and the slot granted explicitly.
 - U1a — the production leaves (+ VX-386 first, the `protection_record` migration, VX-390): DONE 2026-10-18 — commits
-  `82e4ad038`…`e3d623d3a` (the §9 U1a RECORD); main folded `bfc9f85c4` (VX-381 + VX-382 in; the bundle renumbered #233);
+  `82e4ad038`…`e3d623d3a` (the §9 U1a RECORD); main folded `bfc9f85c4` (VX-381 + VX-382 in; the bundle renumbered #234);
   the six Mac suites run by the orchestrator under `vx-306-u1a-batch` (07:06 MDT): `✔ Test run with 28 tests in 6 suites
   passed after 0.387 seconds.` (0 skipped — the Touch ID listing row ran on the Pro's enrolled finger), `** TEST EXECUTE
   SUCCEEDED **`; the tripwire's own suite proved every real-scope mutation refused from the test process. VX-406 filed
@@ -436,6 +436,7 @@ store this build has written — coordinators told.
 - U2 — the honest faces (+ rule 3's reminder, the set-passphrase sheet, W-2's fix): BUILT 2026-10-18 (Opus implementer) — commits `d35b82290`…the close (the §9 U2 RECORD); `build-for-testing` and the phone build green on the final tree; the new pure and planted suites green HEADLESS (69 in the session harness), the core's protection set green in both configurations (315 / 291); the Mac suites (the record's list) and the walk (stages 2, 14, rule 1's restore, W-2's pair, rule 27 both moments) PENDING — the ORCHESTRATOR's, under the stage.
 - U3 — the two doors; the phone opens: DONE 2026-10-18 — built by the Opus implementer (`eaeed1126`…`e46837f2a`, the §9 U3 RECORD; Look inside ruled (b) and built), the batches under `vx-306-u3` (Mac 290/44, phone 20/5 on the iOS 26.2 sim), the walk (the U3 BATCH + WALK RECORD: Look inside, the AirDropped road, Make this my library → the dev library is now 86a82b4f, the hold standing; the phone's open in the simulator; findings W-11…W-17, W-13 a MINOR).
 - The ladder (Fable — custody code; her cap: up to five rounds while MAJORs are still found): CLOSED 2026-10-18 at round 2 — r1 0B/0M/4m/4N (`notes/plans/vx-306-ladder-round-1.md`; m1/m2/m4 + the NITs fixed red-on-old, m3 → VX-411), r2 0B/0M/3m/3N over the fixes (`-round-2.md`; m2/m3/NIT 3 fixed red-on-old, NITs 1–2 → VX-307's plan); every batch under the stage (§10).
+- CLOSEOUT 2026-10-18: DONE — the canon deltas (AppSpec §12 THE OPEN ROAD, §14's entry with VX-383's rolled to the delta archive), the master plan (the in-flight row retired, the closeout paragraph, VX-378's rolled to the closeout archive), the run-finals ledger, MobileSoul PL-42, QUESTIONS #234's status lead (the bundle renumbered from #233, which VX-348 holds), the handoff `notes/handoffs/vx-306-handoff.md`, VX-307's plan (`17a9cd98f`); PR #174 opened; the merge at the coordinator's word; Linear VX-306 · VX-386 · VX-390 Done at the merge, VX-310 commented, VX-379 open.
 - Closeout: the words checked (VX-379's first pass — the Start Here chapter §7c); canon: AppSpec §12's LIBRARY
   PORTABILITY line (the doors replace 13x's landing wording); the handoff with HER-HANDS items (Look inside on a byte-copy
   of her real store with her credentials; the real store's field-guide re-seed); VX-307's plan written to the rules (the
@@ -479,7 +480,7 @@ orchestrator reads her "no Sync/ line" as "no protocol/engine/server change" and
 Fable-reviewed as every custody line is (P-VX306-K6 — her eye at the bundle; if she reads it strictly, the registration
 moves to a local-only registry outside `Sync/` in one commit).
 
-## 7b. THE ORCHESTRATOR'S KICKOFF READING AND PROVISIONAL RULINGS (2026-10-18, overnight — bundled as QUESTIONS #233)
+## 7b. THE ORCHESTRATOR'S KICKOFF READING AND PROVISIONAL RULINGS (2026-10-18, overnight — bundled as QUESTIONS #234)
 
 - **P-VX306-K1 — how the dev store "converts" (her approval: "the dev store converting to the new system on first open is
   APPROVED").** Rule 26 is explicit: stores from before this design are neither migrated nor handled; everyone with one
@@ -748,7 +749,7 @@ survives the context's externalization is the lookup's one Unknown — the walk 
 - A sample soak at piece 3 (seeds 1–3 × 350 sequences, Debug — the new stamp clause's false-positive check):
   `✔ Test run with 1 test in 1 suite passed after 414.916 seconds.`
 
-**PROVISIONALs (each built as its option (a); bundled under QUESTIONS #233):**
+**PROVISIONALs (each built as its option (a); bundled under QUESTIONS #234):**
 - **P-VX306-U1a-1 — "a library lived here" (`ProtectionFacts.containerMarker`).** Traced as the brief asked: today's
   `.libraryMissing` arm (`StoreLaunchRoute.resolve(gate:presence:)`, `StoreLaunchGate.swift`) fires on a DEMANDED
   effective gate over an absent store — the gate derived from the 13p stored mode, today's envelope beside the store and
@@ -912,7 +913,7 @@ present stay on U1a's `KeychainLeavesTests.aTouchIDItemIsListedByNameAndNeverPre
   `MemberImportVisibility`): `✔ Test run with 27 tests in 3 suites passed after 0.142 seconds.` (15 lobby + 9 planted
   road + 3 walk switch). The mutation runs: piece 3's line.
 
-**PROVISIONALs (each built as its option (a); bundled under QUESTIONS #233):**
+**PROVISIONALs (each built as its option (a); bundled under QUESTIONS #234):**
 - **P-VX306-U1b-1 — the phone keeps today's road this unit** (the switch's rule is `debug && mac`). (a) BUILT — the
   phone's lobby face is U3's; (b) the switch on in the phone's Debug build too (a new-road state with no phone face);
   (c) U3's phone faces now (another unit's surface).
@@ -1561,7 +1562,7 @@ chrome, so a light and a dark capture each):**
    `~/vx306-walk/B` (delete it, or keep it for U3's Look inside) and B's custody/memory items harmless in the dev
    scope; record it for the coordinator and the next walker.
 
-**PROVISIONALs (each built as its option (a); bundled under QUESTIONS #233 in plain words):**
+**PROVISIONALs (each built as its option (a); bundled under QUESTIONS #234 in plain words):**
 - **P-VX306-U2-0** (the orchestrator's, built as ruled) — the set-passphrase sheet on the reset door's Standard road
   (`resetPassphrase(_:authorization: .plainConfirm, new:)`), refused when a passphrase exists; from the reminder and the
   Protection pane's one row.
@@ -1859,7 +1860,7 @@ state — traced on this tree:
   (this commit). **The switch** (`ProtectionRoad`): the rule reads `debug` alone (`live(debug:)`; `newRoadIsLive =
   live(debug: isDebugBuild)` — still compile-time, nothing at run time can flip it); `AppBootstrap`'s production init
   keeps P-VX306-U1b-5 (the dev store's variant only); `ProtectionRoadSwitchTests` follows (its four-cell rule now two
-  cells, the source pin's line) — the ruled supersession, noted under QUESTIONS #233. The phone composes the leaves on
+  cells, the source pin's line) — the ruled supersession, noted under QUESTIONS #234. The phone composes the leaves on
   the main actor already (`RoadInputs.compose()` is `@MainActor`, so `ProtectionSystem`'s `DeviceName.current` reads the
   device there). **The faces** (`VariorumMobile/Features/Protection/MobileRoadFaces.swift`, the phone's layout and DEVICE
   voice, the shared models and words): `MobileRoadLockView` (the typed field at once — the passphrase field with the words
@@ -2121,7 +2122,7 @@ face changed — the sheets are system chrome on the Mac, so a light and a dark 
 8. **Posture after the window:** record the dev library's new ID (C or D), the Previous Libraries folders made, the filed
    B copy, the hold resumed; `dev-castle.env`'s values unchanged (the new libraries carry her current pair).
 
-**PROVISIONALs (each built as its option (a); bundled under QUESTIONS #233 in plain words):**
+**PROVISIONALs (each built as its option (a); bundled under QUESTIONS #234 in plain words):**
 - **P-VX306-U3-0** (the orchestrator's, built as ruled) — a picked pair or library folder is filed first into this Mac's
   `Backups/safety-copies/variorum-adopt-safety-<stamp>/` and the doors act on the catalogued copy. A note: the filed copy
   then stays listed (rule 19) until VX-309's delete — a tension with Look inside's "close it and the app forgets it" when a
@@ -2224,7 +2225,7 @@ have left a mutated, uncommitted file); restored at once and `cmp`-checked. `git
 (no scratch worktree was used — the doors are new code, their pins red by construction on the pre-unit tree, which had none
 of these types).
 
-**ORCHESTRATOR RULING on the Look-inside fork (2026-10-18, at U3's proposal — P-VX306-U3-15, bundled under #233):** **(b), the
+**ORCHESTRATOR RULING on the Look-inside fork (2026-10-18, at U3's proposal — P-VX306-U3-15, bundled under #234):** **(b), the
 read-only facts sheet, as proposed** — rule 17's "opens read-only, writes nothing, closing forgets" at its honest minimum:
 §7c (10)'s line first, the copy's kind and day, its books with note counts, its notes newest first a page at a time, a note's
 text read-only on pick (blocks in order, the chosen take, the default as fallback), *Make this my library…* beside *Close*;
@@ -2293,7 +2294,7 @@ accepted, truth over verbatim. The fold of main at this seam renumbered U1a's mi
   (row 6 — the slot and its sidecars moved aside) now shows *Open Library…* again → pick `~/Downloads/vx306-airdrop` → *Look
   inside…* ALONE (no *Make this my library…* — T-5 is VX-309's) → the look as in (b); put the slot back.
 
-**PROVISIONALs added at piece 7 (bundled under QUESTIONS #233):**
+**PROVISIONALs added at piece 7 (bundled under QUESTIONS #234):**
 - **P-VX306-U3-15 — BUILT as ruled:** Look inside is the read-only facts sheet (the orchestrator's ruling (b)); the missing
   face's and rule 27's *Open Library…* back as "file, then the doors" (Look inside alone there — Make this my library needs a
   library open; P-VX306-U3-7 narrowed).
@@ -2569,7 +2570,7 @@ app road does (`.startFresh` is an empty slot by verdict; both faces set the slo
 core preflight (refuse a non-empty slot before the first write) would make the act honest on its own. Hers/the
 reviewer's to rule — a hand-forward for VX-307 if wanted, not built here.
 
-**PROVISIONALs:** none new — every call in this leg is the dispositions' or engineering (QUESTIONS #233 untouched).
+**PROVISIONALs:** none new — every call in this leg is the dispositions' or engineering (QUESTIONS #234 untouched).
 
 **Counts (the final tree `8ee311d87` + this record):**
 - HEADLESS (this leg's own harness in the session scratchpad — the U1b/U2/U3 records' recipe: every `Shared/Protection/
@@ -2832,7 +2833,7 @@ configurations). No stage, no app launch, no dev or real store, no `/Application
 qualified `Self.` (a computed `paragraphs` and the rule share a base name, as `first` / `first(where:)` do); the NIT 3
 pin's counter class marked `@MainActor` (it is captured by the list observer's `@MainActor @Sendable` closure).
 
-**PROVISIONALs:** none new (QUESTIONS #233 gains only P-VX306-W-1's Release-reach fact). One engineering call for the
+**PROVISIONALs:** none new (QUESTIONS #234 gains only P-VX306-W-1's Release-reach fact). One engineering call for the
 orchestrator's eye: m2's gate reads the variant as well as the switch (`opensOnTheNewRoad(devStore:)`, the bootstrap's own
 ruled fence P-VX306-U1b-5) — a subset of the disposition's "only while `newRoadIsLive`", so the passages follow the road
 exactly; the alternative (the switch alone) leaves a Debug build on the real variant seeding them over today's road.

@@ -82,3 +82,24 @@ Finals: Mac batches — U1a 1,590/259 · U1b 1,998/332 + the D-2 verify 308/64 �
   VX-394's clientClosed line + the serverOff gap confirmed then proven fixed on the real door.
 - The ladder: ONE round, 0B/0M/3m/3n, all dispositioned repo-first; VX-338's deletion-safety argument independently
   re-derived.
+
+## VX-306 — Castle rebuild phase 2: the open road (2026-10-18; PR #174)
+- Units: U1a (the production leaves + VX-386 + the `protection_record` migration + VX-390) · U1b (the lobby on roads +
+  VX-310's lobby half + the words card + the Release check + the dev store's fresh start) · U2 (the honest faces + rule 3's
+  reminder + the set-passphrase sheet) · U3 (Look inside, Make this my library, the picked-folder road, the phone) · the
+  words pass — four units in five implementer sessions plus two fix legs, every fix red-first.
+- Headless finals: the core suite green in Debug and `-c release` (the release-floor reds pre-existing — VX-406); the
+  protection suites green in both; the Release build (`-configuration Release`) green on every tree of the branch.
+- Mac batches under the stage: U1a 28/6 · U1b 212/33 · U2 199/36 · U3 290/44 · the round-1 fix leg 340/54 · the
+  round-2 fix leg 244/47 — each with exactly VX-310's three known witnesses; every red leg red by a one-line revert then
+  restored (the round-2 legs: NIT 3 → `CopyDoorsPickRefreshTests` 2 issues; m2 → the readme's five-blocks pin + the two
+  Start Here pins). Three pin faults found and fixed in the round-1 batch (the readme count, the plan parser, the
+  never-run composition pin).
+- The phone: 20/5 green on the iOS 26.2 iPhone 17 Pro simulator (the implementer's iOS 18 device refused the app).
+- The walks (the orchestrator, the dev store, `OS_ACTIVITY_DT_MODE=YES` stderr): stages 1, 3, 5, 2, 14 a/b/c, rule 1's
+  restore, rule 27's lobby and banner, Look inside, the AirDropped pair, Make this my library (dev library 86a82b4f under
+  the same dev pair; A whole in Previous Libraries; the hold standing), the phone in the simulator; stage 13 not walkable.
+- The ladder: round 1 (Fable, cold) 0B/0M/4m/4N — m1/m2/m4 + the NITs fixed red-on-old, m3 → VX-411; round 2 (Fable,
+  cold) 0B/0M/3m/3N over the fixes — every round-1 fix confirmed; m2/m3/NIT 3 fixed red-on-old, NITs 1–2 → VX-307's plan
+  §3; no round 3; the round-2 fixes line-by-line checked by the orchestrator (`notes/plans/vx-306-ladder-round-1.md`,
+  `-round-2.md`).
