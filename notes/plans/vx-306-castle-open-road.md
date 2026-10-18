@@ -387,7 +387,7 @@ store this build has written — coordinators told.
   passed after 0.387 seconds.` (0 skipped — the Touch ID listing row ran on the Pro's enrolled finger), `** TEST EXECUTE
   SUCCEEDED **`; the tripwire's own suite proved every real-scope mutation refused from the test process. VX-406 filed
   (the release-floor reds, Low). The ladder reads U1a with U1b.
-- U1b — the lobby on roads, Debug-gated (+ VX-310, the creation card, the Release check, the dev store's fresh start): NOT STARTED — NEXT.
+- U1b — the lobby on roads, Debug-gated (+ VX-310, the creation card, the Release check, the dev store's fresh start): IN-PROGRESS (Opus implementer, 2026-10-18) — the §9 U1b RECORD carries each piece's state; the dev store's fresh start and the walk are the ORCHESTRATOR's (the record's walk recipe).
 - U2 — the honest faces: not started.
 - U3 — the two doors; the phone opens: not started.
 - The ladder (Fable — custody code; her cap: up to five rounds while MAJORs are still found): not started.
@@ -762,3 +762,16 @@ VariorumTests/ICloudAppleKeysLeafTests` (1 test; a synchronizable throwaway item
 (4b/4c) · `2e2d56de0` (the keychain facts applied) · `e9bb71007` (the Mac suites) · this record. `git worktree list`:
 no stray (both scratch worktrees removed).
 
+### U1b RECORD — THE LOBBY ON ROADS, DEBUG-GATED (Opus implementer, 2026-10-18; IN-PROGRESS)
+
+**Not done in U1b, first:** (filled at the close — PENDING)
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece 1 — the Debug switch `ProtectionRoad.newRoadIsLive` + its pins + the Release check: NOT STARTED.
+- Piece 2 — the new road's route in `routeAndOpen` behind the switch (facts → `assess` → the verdict; the quiet roads at once;
+  the typed roads with the mirror and the catalogued key files; settle + repairs; the open with the key in hand; the store
+  identity; the throwing edges caught): NOT STARTED.
+- Piece 3 — the lobby MODEL (pure, Shared) + `StoreLockView`'s road face + VX-310's two pins (red-on-old): NOT STARTED.
+- Piece 4 — the creation card (§7c (1) verbatim, one button) + `createLibrary(passphrase: nil)`: NOT STARTED.
+- Piece 5 — the `StoreBackup.onRun` hook → `takeBackupPair`, honouring `copiesArePaused` (K4): NOT STARTED.
+- Piece 6 — the Mac tests + `build-for-testing` + the phone build: NOT STARTED.
