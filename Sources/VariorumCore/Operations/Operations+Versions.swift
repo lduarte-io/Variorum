@@ -257,6 +257,20 @@ extension Operations {
         return result
     }
 
+    /// **Where a duplicate is FILED** (VX-371, VX-383 U2 — D-C-4): a BOOK of
+    /// the source's wing, and optionally a chapter of it. Only the MCP door's
+    /// `duplicate_note` files (`create_note`'s book road, applied to a copy);
+    /// her own doors pass none, so their rows are byte-unchanged.
+    public struct DuplicateFiling: Equatable, Sendable {
+        public let bookID: String
+        public let sectionID: String?
+
+        public init(bookID: String, sectionID: String? = nil) {
+            self.bookID = bookID
+            self.sectionID = sectionID
+        }
+    }
+
     /// **The duplicate's ROWS, inside the caller's transaction** — her door's
     /// body, extracted ONCE (VX-311, VX-336 U6a — D-311-1, the orchestrator's
     /// ruling) so her door and the MCP door's `duplicate_note`
@@ -264,10 +278,47 @@ extension Operations {
     /// can never drift — the tag choice included (VX-372, D-C-1): the copy
     /// machine with the source's own chosen and whole fans, then, with
     /// `.applied`, the note's live tags APPLIED (`applyLiveTags`).
+    ///
+    /// **`filing`** (VX-371 — D-C-4; nil for every door of hers): the copy
+    /// joins that book in this same transaction, in `create_note`'s order
+    /// (`mintNoteEntry`): the book's gates and the chapter are checked BEFORE
+    /// anything is minted (a live book — a gathering refuses
+    /// `wrongReadingKind`, a finished one `lockedReading`; a chapter of THAT
+    /// book — `sectionNotFound` / `sectionNotInReading`); then the family
+    /// copy; then the MEMBERSHIP through the hand-add's one choke point
+    /// (`addPostToReading` — capacity, the wing, ownership, the book's
+    /// OUTFLOW), the chapter stamped on that row; and only THEN the tags. The
+    /// order is load-bearing: the book's own pair is decided before any tag is
+    /// applied, so a destination that collects one of the copy's tags takes it
+    /// ONCE, filed (tags first, intake would seat it and the filing would
+    /// refuse `alreadyInReading`), and the applications are heard by the OTHER
+    /// books — an owned destination's copy then BELLS at a plain collecting
+    /// book (the ownership table). An ARCHIVED book takes the add (explicit
+    /// adds land — AppSpec §9, 13i-e).
     func duplicateAsVersionBody(
-        _ db: Database, _ postID: String, tags: DuplicateTags
+        _ db: Database, _ postID: String, tags: DuplicateTags, filing: DuplicateFiling? = nil
     ) throws -> PostCopyResult {
+        if let filing {
+            let book = try liveReading(db, filing.bookID)
+            guard book.kind == .book else {
+                throw OperationError.wrongReadingKind(id: filing.bookID, expected: .book)
+            }
+            guard !book.locked else { throw OperationError.lockedReading(id: filing.bookID) }
+            if let sectionID = filing.sectionID {
+                let section = try liveSection(db, sectionID)
+                guard section.readingId == filing.bookID else {
+                    throw OperationError.sectionNotInReading(sectionID: sectionID, readingID: filing.bookID)
+                }
+            }
+        }
         let copy = try copyPost(db, sourceID: postID, chosenPicks: nil, carryFans: true)
+        if let filing {
+            var membership = try addPostToReading(db, copy.post.id, to: filing.bookID, at: .end)
+            if let sectionID = filing.sectionID {
+                membership.sectionId = sectionID
+                try membership.update(db)
+            }
+        }
         switch tags {
         case .applied:
             try applyLiveTags(db, from: postID, to: copy.post.id, now: date.now)
@@ -292,7 +343,20 @@ extension Operations {
         guard let target = try Container.fetchOne(db, key: targetID),
               target.deletedAt == nil, target.kind == .post
         else { return }
-        let tagIDs = try String.fetchAll(
+        for tagID in try liveTagIDs(db, of: sourceID, inWing: target.wingId) {
+            guard try liveApplication(db, table: "post_tag", tagID: tagID,
+                                      targetColumn: "post_id", targetID: targetID) == nil
+            else { continue }
+            try insertPostTag(db, tagID: tagID, postID: targetID, now: now)
+        }
+    }
+
+    /// The note's live tags in `wingID` — every live application of a live tag
+    /// of that wing, in application order (`created_at, id`): what
+    /// `applyLiveTags` applies, and (VX-371) the head of `duplicate_note`'s
+    /// answered tag list — one statement, so the two can never disagree.
+    func liveTagIDs(_ db: Database, of postID: String, inWing wingID: String) throws -> [String] {
+        try String.fetchAll(
             db,
             sql: """
                 SELECT pt.tag_id FROM post_tag pt
@@ -300,13 +364,7 @@ extension Operations {
                 WHERE pt.post_id = ? AND pt.deleted_at IS NULL
                 ORDER BY pt.created_at, pt.id
                 """,
-            arguments: [target.wingId, sourceID])
-        for tagID in tagIDs {
-            guard try liveApplication(db, table: "post_tag", tagID: tagID,
-                                      targetColumn: "post_id", targetID: targetID) == nil
-            else { continue }
-            try insertPostTag(db, tagID: tagID, postID: targetID, now: now)
-        }
+            arguments: [wingID, postID])
     }
 
     /// MAKE OUTLINE POST (taste checkpoint, Sitting 9 — R99; her batch-10

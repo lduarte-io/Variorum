@@ -584,7 +584,7 @@ extension Operations {
             }
             let header = try applyDocumentTags(
                 db, named.document.tagPaths, to: minted.post.id, wingId: wing, now: now)
-            let worn = try mintedNoteTags(db, postID: minted.post.id, header: header, outflow: outflow)
+            let worn = try mintedNoteTags(db, postID: minted.post.id, header: header.map(\.id), outflow: outflow)
             return DocumentImport(
                 post: minted.post, blockIDs: minted.blockIDs, alternateCount: minted.alternateCount,
                 tagIDs: worn.map(\.id), tagPaths: worn.map(\.path), blocks: minted.blocks)
@@ -603,8 +603,12 @@ extension Operations {
     /// other by path. Read inside the act's transaction from the note's own
     /// live applications: ∝ what this act applied, never the corpus (P1), and
     /// never a read after the commit (no race — U5b's D1).
-    private func mintedNoteTags(
-        _ db: Database, postID: String, header: [Tag], outflow: [String]
+    ///
+    /// VX-371 (VX-383 U2): shared with `duplicate_note`, whose "header" is the
+    /// tags its copy was APPLIED from the source (application order) — so the
+    /// two answers list a note's tags by ONE rule (P-VX361-1's shape).
+    func mintedNoteTags(
+        _ db: Database, postID: String, header: [String], outflow: [String]
     ) throws -> [(id: String, path: String)] {
         var paths: [String: String] = [:]
         for row in try Row.fetchAll(
@@ -622,7 +626,7 @@ extension Operations {
             guard let path = paths.removeValue(forKey: id) else { return }
             worn.append((id, path))
         }
-        header.forEach { list($0.id) }
+        header.forEach(list)
         outflow.forEach(list)
         paths.sorted { ($0.value, $0.key) < ($1.value, $1.key) }.forEach { worn.append(($0.key, $0.value)) }
         return worn
