@@ -1,7 +1,7 @@
 # VX-378 — Castle, simplified: the phase 1 corrector (the headless core rebuilt to the rules)
 
 **Status: CLOSED 2026-10-18 — GO (§10: the gate on the final tree `66f7561e1`, both configurations, three attempts; the
-ladder closed at four rounds, 0 BLOCKER / 0 MAJOR throughout). PR #PR_PENDING (merge commit at her word). Written 2026-10-16 by
+ladder closed at four rounds, 0 BLOCKER / 0 MAJOR throughout). PR #171 (merge commit at her word). Written 2026-10-16 by
 the VX-305 orchestrator from the simplification sitting; kicked off 2026-10-16 with `/architect-phase vx-378`.** Same branch and worktree as VX-305 (`vx-305-castle-core`,
 `~/dev/variorum-vx-305`); ONE merge to `main` at this phase's GO closes both tickets. The in-flight row for VX-305 gains
 this plan file beside its own and keeps the one Sync/-or-custody slot.
