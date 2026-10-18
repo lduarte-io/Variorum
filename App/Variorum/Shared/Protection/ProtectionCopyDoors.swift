@@ -24,7 +24,8 @@
 //      library — rule 17; the creation's own mint, `AppBootstrap.ensureStoreIdentity(fresh: true)`), so the rest of
 //      the app keeps its footing. Past the swap (the commit point) the copy IS the library: an act that threw there
 //      finishes at the next open's settle, and the door says it was made.
-//    - THE PICK (`pick`) — a picked thing classified and, when it is this design's pair, filed (`PickedCopy`); a copy
+//    - THE PICK (`pick`) — a picked thing classified and, when it is this design's pair, filed (`PickedCopy`) — the
+//      filing said on the copies-changed seam, so a standing Restore list shows it (ladder round 2, NIT 3); a copy
 //      already in this Mac's catalogue is used where it is; the open library itself is refused.
 //    - LOOK INSIDE (`lookInside`, P-VX306-U3-15 — the orchestrator's ruling (b)) — the executor's `lookInside` for the
 //      key, then `ProtectionCopyPeek`'s read-only reader on a private copy; nothing written.
@@ -259,6 +260,12 @@ nonisolated enum ProtectionCopyDoors {
 
     // MARK: - The pick
 
+    /// This Mac's catalogued copies changed — said on the main actor (`CopyDoorsListModel.copiesChanged`, the ladder's
+    /// round-1 m4 seam the backup hook posts on), so every standing Restore list re-reads.
+    static func tellCopiesChanged() {
+        Task { @MainActor in NotificationCenter.default.post(name: CopyDoorsListModel.copiesChanged, object: nil) }
+    }
+
     static func pick(_ url: URL, session: ProtectionRoadSession) -> PickOutcome { pick(url, CopyDoorsContext(session)) }
 
     static func pick(_ url: URL, _ ctx: CopyDoorsContext) -> PickOutcome {
@@ -296,6 +303,9 @@ nonisolated enum ProtectionCopyDoors {
                 ProtectionOpenRoad.log("road: a picked copy could not be filed — \(String(describing: error))")
                 return .refused(ProtectionWords.filingFailed, detail: String(describing: error))
             }
+            // The filing LANDED a copy in this Mac's safety copies (P-VX306-U3-0 — it stays listed): say so on m4's seam,
+            // so a standing Restore list re-reads and shows it now, not at the pane's next opening (ladder r2 NIT 3).
+            tellCopiesChanged()
             let id = PickedCopy.filedCopyID(folder)
             guard let copy = ctx.system.lister.catalog().copies.first(where: { $0.id == id }), copy.library != nil else {
                 return .refused(ProtectionWords.pickedCopyUnreadable, detail: nil)

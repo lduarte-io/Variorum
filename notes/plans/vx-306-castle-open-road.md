@@ -2729,7 +2729,8 @@ configurations). No stage, no app launch, no dev or real store, no `/Application
 - m2 — the Start Here passages seed only where the store opens on the new road (app): DONE (this commit) — WRITTEN,
   PENDING-BUILD (compile + `ReadmeStartHerePlanTests` / `LaunchFurnitureTests` / `TutorialFurnitureFoldTests` /
   `ProtectionRoadSwitchTests` under the stage); the source pin's logic replicated over the files (green new, red old).
-- NIT 3 — a filed pick tells the standing Restore list (`copiesChanged`, m4's seam) (app, PENDING-BUILD): NOT-STARTED.
+- NIT 3 — a filed pick tells the standing Restore list (`copiesChanged`, m4's seam) (app): DONE (this commit) — WRITTEN,
+  PENDING-BUILD (compile + `CopyDoorsPickRefreshTests` and its neighbours under the stage).
 - The close (the record, the Mac suites to run, `git worktree list` clean): NOT-STARTED.
 
 **THE FINDINGS, one by one (AGREE/DISPUTE with the trace; the pin's red-on-old; the commit):**
@@ -2803,3 +2804,23 @@ configurations). No stage, no app launch, no dev or real store, no `/Application
   tree, and on the pre-fix seeder (`git show HEAD:`) the `herBlocks` declaration is absent (its `#require` fails — red);
   the existing assertions (`paragraphs.count == 9`, `paragraphs[5...]`, `fans.count == paragraphs.count`) unchanged and
   still true in this Debug build. P-VX306-W-1's QUESTIONS entry and THE WORDS PASS paragraph gain the Release-reach fact.
+- **NIT 3 — AGREE.** Traced on this tree: `CopyDoorsModel`'s pick → `CopyDoorsRoads.pick` (the bootstrap's two road
+  sets, each a detached `ProtectionCopyDoors.pick`) → `PickedCopy.file` copies the picked pair into
+  `Backups/safety-copies/variorum-adopt-safety-<stamp>/` (P-VX306-U3-0: "the copy then stays listed") and returns `.copy`;
+  nothing posts `CopyDoorsListModel.copiesChanged` there (`grep -c copiesChanged` on the pre-fix `ProtectionCopyDoors.swift`
+  → 0 — only `ProtectionBackupHook.handle` posts it), and the Data Safety pane's `.task` reads the list once per appearance,
+  so after the picked copy's sheet closes the standing Restore list omits the filed copy until the pane reopens — m4's
+  class exactly. **The fix:** `ProtectionCopyDoors.tellCopiesChanged()` (the post on the main actor, m4's seam) right
+  after a filing LANDS — before the catalogue's re-read, so even a filed copy the catalogue then cannot name is said
+  (the list leaves it out by rule 26, so nothing shows); a pick that files nothing (a catalogued copy picked by hand,
+  every refusal) has nothing to say. `copiesChanged`'s doc and the file header name the second poster. **The pin
+  (PENDING-BUILD — Mac target, planted, no keychain; it also suits the headless harness):**
+  `CopyDoorsPickRefreshTests.aFiledPickTellsTheStandingListAndItShowsTheCopy` — her library with one backup, a standing
+  `CopyDoorsListModel` over the REAL listing road (`ProtectionCopyDoors.listing(session)`) reads it; an AirDropped library
+  of theirs is picked → filed → the post is heard through the list's own observer (`CopiesChangedObserver`, m4's) and the
+  standing list shows the filed copy under *Other libraries on this Mac*, her backup unchanged — m4's pin's shape. Every
+  name it uses exists on both sides of the fix, so it is RED on the pre-fix tree by construction (no post: nothing heard,
+  the list still one backup and no other library) — PENDING the run; its red leg wants the suite run ALONE (the only other
+  posters of the same name are m4's two suites, which could otherwise re-read the list for it). A "picks that file
+  nothing say nothing" twin was written and DROPPED: with other suites free to post the same name in parallel, a strict
+  zero cannot be held deterministically.

@@ -348,7 +348,8 @@ final class CopyDoorsModel: Identifiable {
 @MainActor
 @Observable
 final class CopyDoorsListModel {
-    /// Posted on the main actor once this Mac's catalogued copies changed — today: a backup pair landed.
+    /// Posted on the main actor once this Mac's catalogued copies changed — a backup pair landed (the backup hook), or a
+    /// picked copy was filed into this Mac's safety copies (`ProtectionCopyDoors.pick` — ladder round 2, NIT 3).
     nonisolated static let copiesChanged = Notification.Name("io.lduarte.Variorum.protection.copiesChanged")
 
     private(set) var listing: CopyDoorsListing = .empty
