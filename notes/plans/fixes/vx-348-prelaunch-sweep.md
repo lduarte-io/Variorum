@@ -2420,3 +2420,32 @@ my capture band); both ride ONE short window after the fix.
 **THE SWAP-BACK, VERIFIED:** the slot holds exactly the fresh library's six files, each cmp-identical to the
 set-aside copy (`…/variorum-vx348-freshlibrary-2026-10-18-155235/`); the predesign originals untouched in their
 folder; nothing deleted; pgrep empty at release. VX-306's walk is unblocked.
+
+## THE LADDER — ROUND 1 AND ITS CLOSE (the orchestrator, 2026-10-18 ~10:30–11:0x)
+
+A fresh `fable-reviewer` at xhigh over the whole sweep diff, REVIEW_PROMPT verbatim, zero framing; findings at
+`notes/plans/fixes/vx-348-ladder-r1.md` (d0cee9e64). **Counts: 0 BLOCKER · 0 MAJOR · 3 MINOR · 3 NIT — the ladder
+CLOSES at round 1** (no fix leg; dispositions below, each written before anything else read them). The reviewer's
+cold verification: the fence check mechanical over the whole diff (zero `Sync/`/`Protection/`/custody/`Server/`/TK2
+lines, no trailers); VX-338's deletion-safety argument RE-DERIVED independently and found sound; VX-357's GRDB
+premise verified at the dependency line; 64 headless pins re-run green; v1_30 confirmed local-only; MCPSpec's new
+lines diffed against the shipped code with no contradiction.
+
+**Dispositions:**
+- **MINOR 1 (proof legs owed at ladder time):** the VX351BookBoxStampsTests legs RAN at the `vx-348-w21` window
+  BEFORE the ladder (red leg: red at the hover checks all four cases, zero premise failures, on u4-red; fixed leg
+  18/6 green with five neighbours) — the run happened, the RECORD lagged; this entry closes the lag. The walk's
+  AX-discriminator re-check is METHOD-LIMITED (the walk build cannot open the post-conversion store; the known
+  synthetic-hover inconsistency is the 17y record's) and the book-⌘S receipt band re-check is PIN-COVERED
+  (the asked-take mount cells + the one status seam that spoke on Write's host); both noted for her in the handoff
+  as residual walk gaps, not code gaps. DISPOSED.
+- **MINOR 2 (the Index-live receipt gap needs its ticket):** minted DURING the run as **VX-410** (Bug · Confirmed ·
+  Books · Low) — the number now recorded here. DISPOSED.
+- **MINOR 3 (Package.resolved modified):** restored again at this entry; it is the builds' auto-resolve churn
+  (combine-schedulers et al.), never staged, restored at every seam — final check rides the merge ask. DISPOSED.
+- **NIT 1 (three speakers use `.help(x ?? glance)` instead of the `.stampHelp` idiom):** behavior identical;
+  APPENDED to VX-407 (the found-speakers wording pass) so the idiom unifies with the words. DISPOSED-TO-TICKET.
+- **NIT 2 (`MCPNullCharacters.count` counts an always-empty fallbackTitle):** a future-road hazard only — recorded
+  here as the standing note; no action. DISPOSED-RECORDED.
+- **NIT 3 (P-VX394-6 vs `claimEndLine`'s guard wording):** one clarifying sentence joins the QUESTIONS bundle at
+  the merge. DISPOSED-TO-BUNDLE.
