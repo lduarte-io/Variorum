@@ -1213,5 +1213,23 @@ the old store whole in the safety copy; `dev-castle.env`'s Castle values unchang
 - Piece 6 — rule 3's reminder (the model's two moments + the launch-counted schedule, local, beside `CalmAsks`' keys;
   dismissals through `recordPassphraseReminderDismissed`) + the set-passphrase sheet (`resetPassphrase(.plainConfirm)`;
   the ask and the Protection pane's one row): NOT-STARTED.
-- Piece 7 — W-2's fix (`ProtectionLibraryFiles.snapshot` — one self-contained file; red-on-old pin): NOT-STARTED.
+- Piece 7 — W-2's fix (`ProtectionLibraryFiles.snapshot` — one self-contained file; red-on-old pin): DONE (this commit).
+  **THE MECHANISM (traced):** the live library is a WAL-mode file (the app's pool); SQLite's backup API copies its
+  pages, page 1's WAL marks included, so the snapshot came out a WAL-mode file; `snapshot` removed the sidecars and THEN
+  verified the copy with `opens` — a READ-ONLY open (`StoreEncryptionMigration.opens`, `readonly = true`), which on a
+  WAL-mode file makes the WAL index (`-shm`, 32 KiB) and an empty `-wal`, and a read-only connection can never remove
+  them at close. (W-2's "copies with the WAL journal mode live" was half of it: the files are the PROBE's.) **THE FIX:**
+  the copy turned to a rollback-journal file on the backup's own writable connection (`PRAGMA journal_mode = DELETE`,
+  its answer checked) before the probe — so no later reader (the probe, the catalogue's, a restore's) makes anything
+  beside it; `writeSendPair` takes the same road. **THE PINS (red-on-old):** core `ProtectionLibraryFilesTests
+  .aSnapshotOfALiveWALLibraryIsOneSelfContainedFile` (a library held open in WAL mode → the snapshot's folder holds the
+  snapshot ALONE; carried by itself it opens with its key and holds the record and the rows) — RED on the pre-fix tree
+  (`✘ Test run with 6 tests in 1 suite failed … with 1 issue`, beside = the snapshot + `-shm` + `-wal`), GREEN after
+  (`✔ Test run with 6 tests in 1 suite passed`); the app's `ProtectionFileLeavesTests
+  .aBackupPairOfALiveWALLibraryIsExactlyTwoFilesAndTheSnapshotOpensAlone` (`FileBackupsLeaf.takeBackupPair` → the pair
+  folder holds exactly two files; the snapshot alone opens with its key and holds the record) — RED against the pre-fix
+  core (a scratch worktree at `e305daefd` + the session harness pointed at it: `✘ Test run with 10 tests in 1 suite
+  failed … with 1 issue`, the folder `[….keys.json, ….sqlite, ….sqlite-shm, ….sqlite-wal]`; the worktree removed),
+  GREEN on this tree headless (`✔ Test run with 10 tests in 1 suite passed`); its Mac run PENDING under the stage.
+  The core suite's release leg PENDING (the close).
 - Piece 8 — the Mac tests + `build-for-testing` + the phone build + the close (suites, walk recipe): NOT-STARTED.

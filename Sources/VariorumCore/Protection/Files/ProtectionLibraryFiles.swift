@@ -24,7 +24,8 @@ import GRDB
 //     (a library already in the slot is never overwritten); the app's ordinary open then runs every
 //     migration over it.
 //   - `snapshot` — one consistent copy under the SAME key through SQLite's backup API (`AppDatabase
-//     .backup(to:)`'s mechanism — SQLCipher refuses a backup between mismatched keys).
+//     .backup(to:)`'s mechanism — SQLCipher refuses a backup between mismatched keys), turned to ONE
+//     self-contained rollback-journal file (VX-306 U2, W-2: no sidecar ever stands beside a snapshot).
 //   - `privateCopy` — a byte copy of a file and its WAL into a fresh private folder: a picked or catalogued
 //     copy is NEVER written (13x's rule — even a read-only open can write sidecars beside it), so every
 //     probe and every stage of a copy reads the private copy.
@@ -157,6 +158,17 @@ public enum ProtectionLibraryFiles {
             let to = try DatabaseQueue(path: destination.path, configuration: AppDatabase.configuration(key: key))
             defer { try? to.close() }
             try from.backup(to: to)
+            // VX-306 U2 — W-2: a snapshot is ONE self-contained file. The backup API copies the live library's
+            // pages, its header's WAL marks included, so the copy came out a WAL-mode file — and the verification
+            // probe below (a READ-ONLY open) then made a `-wal` and a `-shm` beside it that a read-only connection
+            // can never remove. The copy is turned to a rollback-journal file here, its WAL checkpointed into it,
+            // so no later reader — the probe, the catalogue's, a restore's — leaves anything beside it.
+            let mode = try to.writeWithoutTransaction { db in
+                try String.fetchOne(db, sql: "PRAGMA journal_mode = DELETE")
+            }
+            guard mode?.lowercased() == "delete" else {
+                throw FileError("the copy could not be made one self-contained file (journal mode \(mode ?? "unknown"))")
+            }
         } catch {
             removeWithSidecars(destination)
             throw error

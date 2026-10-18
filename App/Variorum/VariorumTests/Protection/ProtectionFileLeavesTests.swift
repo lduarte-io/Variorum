@@ -210,6 +210,35 @@ struct ProtectionFileLeavesTests {
         #expect(CatalogLister(places: slot.places).catalog().keyFiles.allSatisfy { $0.role == .live || $0.name != FileBackupsLeaf.pairURL(of: url).lastPathComponent })
     }
 
+    /// VX-306 U2 — W-2 (the U1b walk's MINOR, red-on-old): a pair is the snapshot + its key file and NOTHING else.
+    /// From a live library held open in WAL mode (the app's pool), the pair's folder holds exactly two files, and the
+    /// snapshot carried away by itself opens with its key alone.
+    @Test func aBackupPairOfALiveWALLibraryIsExactlyTwoFilesAndTheSnapshotOpensAlone() throws {
+        let slot = TempSlot()
+        let leaf = SQLCipherLibraryLeaf(places: slot.places)
+        let backups = FileBackupsLeaf(places: slot.places)
+        let k0 = StoreKey.mint()
+        let libraryID = UUID().uuidString.lowercased(), deviceID = UUID().uuidString.lowercased()
+        let record = Self.record(k0, libraryID: libraryID)
+        try leaf.createLibrary(with: k0, record: record)
+        // WAL mode, held open — the app's pool (its migrations write, so frames stand in the WAL).
+        let live = try AppDatabase.onDisk(url: slot.places.slot, key: k0)
+        let file = try Self.keyFile(k0, libraryID: libraryID)
+        try backups.takeBackupPair(with: k0, keyFile: file, deviceID: deviceID)
+        let folder = slot.places.backupFolder(libraryID: libraryID, deviceID: deviceID)
+        let names = try FileManager.default.contentsOfDirectory(atPath: folder.path).sorted()
+        #expect(names.count == 2, "the snapshot and its key file — nothing else: \(names)")
+        let snapshot = try #require(names.first { $0.hasSuffix(".sqlite") })
+        #expect(names.contains(FileBackupsLeaf.pairURL(of: folder.appendingPathComponent(snapshot)).lastPathComponent))
+        // The snapshot carried away by itself: it opens with its key alone and holds the library's record.
+        let carried = slot.root.appendingPathComponent("carried/\(CatalogNames.libraryFilename)")
+        try FileManager.default.createDirectory(at: carried.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try FileManager.default.copyItem(at: folder.appendingPathComponent(snapshot), to: carried)
+        #expect(ProtectionLibraryFiles.opens(carried, key: k0))
+        #expect(try ProtectionLibraryFiles.readRecord(at: carried, key: k0) == record)
+        _ = live
+    }
+
     // MARK: The catalogue's listing
 
     @Test func theListerWalksTheCopiesPlacesAndNeverHerExports() throws {

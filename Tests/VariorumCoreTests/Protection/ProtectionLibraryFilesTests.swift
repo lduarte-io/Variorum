@@ -92,6 +92,36 @@ struct ProtectionLibraryFilesTests {
         #expect(before == after, "the probe wrote nothing beside the original")
     }
 
+    /// VX-306 U2 — W-2 (the U1b walk's MINOR): a backup's snapshot is ONE self-contained file. The live library is
+    /// a WAL-mode file the app's pool holds open; the snapshot (SQLite's backup API) copies its pages — the header's
+    /// WAL marks included — so the snapshot's own verification probe, a READ-ONLY open, left a 0-byte `-wal` and a
+    /// 32 KiB `-shm` beside it (a read-only connection makes the WAL index and can never remove it at close). The
+    /// pin: from a library held open in WAL mode, the snapshot's folder holds the snapshot ALONE, and the snapshot
+    /// copied anywhere by itself opens with its key and holds the library's record.
+    @Test func aSnapshotOfALiveWALLibraryIsOneSelfContainedFile() throws {
+        let folder = Folder()
+        let slot = folder.file("variorum.sqlite")
+        let key = StoreKey.mint()
+        let record = Self.record(StoreKeyEnvelope.fingerprint(of: key))
+        try ProtectionLibraryFiles.createLibrary(at: slot, key: key, record: record, date: Date())
+        let live = try AppDatabase.onDisk(url: slot, key: key)  // WAL mode, held open — the app's pool
+        try live.write { db in try db.execute(sql: "CREATE TABLE IF NOT EXISTS w2_probe (x INTEGER)") }
+        let pairFolder = folder.file("Backups/aaaaaaaa/bbbbbbbb")
+        let snapshot = pairFolder.appendingPathComponent("variorum-backup-2026-10-18-120000-01234567.sqlite")
+        try ProtectionLibraryFiles.snapshot(of: slot, key: key, to: snapshot)
+        let beside = try FileManager.default.contentsOfDirectory(atPath: pairFolder.path).sorted()
+        #expect(beside == [snapshot.lastPathComponent], "the snapshot alone — no sidecar beside it: \(beside)")
+        // Carried by itself (a later reader with no sidecars), it opens with its key and loses nothing.
+        let carried = folder.file("elsewhere/variorum.sqlite")
+        try FileManager.default.createDirectory(at: carried.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try FileManager.default.copyItem(at: snapshot, to: carried)
+        #expect(ProtectionLibraryFiles.opens(carried, key: key))
+        #expect(try ProtectionLibraryFiles.readRecord(at: carried, key: key) == record)
+        #expect(try DatabaseQueue(path: carried.path, configuration: AppDatabase.configuration(key: key))
+            .read { try $0.tableExists("w2_probe") })
+        _ = live
+    }
+
     @Test func aNonEmptyWALIsNotDrained() throws {
         let folder = Folder()
         let slot = folder.file("variorum.sqlite")
