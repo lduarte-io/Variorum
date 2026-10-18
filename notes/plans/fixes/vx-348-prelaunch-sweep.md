@@ -2291,3 +2291,23 @@ watched for lobby-shaped failures in the U4 batch.
   GREEN on u4-fixed.**
 - **U4 IS BATCH-VERIFIED WHOLE — all five units now are.** The build-and-batch phase of the run is COMPLETE. What
   remains: the road-(b) swap-and-walk (REQUESTED, ~90 min), the ladder over the whole diff, the closeout.
+
+## THE COMBINED WALK — PART 1, Study/light (the orchestrator, 2026-10-18 ~09:52–10:25, claim `vx-348-walk`; the
+## swap-in verified six-aside/five-in, ASIDE = `…/safety-copies/variorum-vx348-freshlibrary-2026-10-18-155235/`)
+
+All passing, no findings. The evidence crops are in `notes/plans/vx348-screens/` (gitignored):
+- **VX-349:** the Notes header at rest draws ONE thin inset hairline (magnified crop) — the doubled band is gone.
+- **VX-384:** a row-menu Duplicate with Tags listed the copy INSTANTLY (two walk-test rows, the tag riding), no
+  re-entry.
+- **VX-385/355:** the Pool's foot spoke all three — "Duplicated without tags — the copy is in the Pool. Open ›",
+  "Undid: Duplicate without Tags", "Redid: Duplicate without Tags" — and faded.
+- **VX-351 (gap 1):** the info panel's facts line reads the ONE rule ("2 words · 1 block · edited today 9:55 AM" —
+  the raw day key gone, the fact now the last touch) and hovers the whole fact ("Edited Oct 18, 2026 at 9:55 AM").
+- **U3's widths:** 1240 = one line; ~940 = collapsed (🔍 beside scope, mode·sort, when; the panel WHOLE with its
+  Close; no pill); the floor = fully collapsed, the open field on its own line holding the caret through re-flows,
+  the masthead truncating on one line. The 🔍 press opened the field below with the caret; typing held the lines.
+- **VX-347 (Write):** the field's new hint verbatim ("name this moment" / "⏎ or clicking away commits it · ⎋
+  doesn't. An empty name is fine."); click-away FILED ("Committed."); ⎋ filed NOTHING; ⌘S-⌘S filed once with no
+  second field.
+A SEAM at ~10:25 for VX-306's 12-min batch (app quit, pgrep empty, the predesign store left in place per the
+coordinator's confirmed terms); part 2 resumes as `vx-348-walk-2`.
