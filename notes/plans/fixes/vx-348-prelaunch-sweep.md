@@ -2479,3 +2479,23 @@ site"), VX-283's rule card and both prior releases agree. The runner raised the 
 settles it for whoever resumes.
 
 The stage claim `vx-348-release` released at this entry.
+
+**THE RESULT (the same day, ~13:12–13:35 MDT — she came back on remote control and lifted the block in-session):**
+her word "I want to get the release done — what do I have to do?"; the answer was only approvals — the prompts reach
+her in the ORCHESTRATOR'S foreground session, where the overnight runner's auto-mode could never ask. The window
+re-ran under the coordinator's GO `vx-348-release-2`. Attempt 1's archive SUCCEEDED and its export REFUSED honestly
+on VX-306's transient `dsymutil` (the strict zero-instance probe matches "Variorum.app/Contents/MacOS" inside a
+toolchain command line; nothing killed, VX-306 held app builds at my ask for the rest of the window). Attempt 2 ran
+whole: **0.9.8, build 8503, stamped on `d63b27561` at 2026-10-18T19:22:24Z — the freeze lift**; notarized
+(Gatekeeper "Notarized Developer ID"); DMG 30,618,570 bytes, sha256
+`986e2b20c08e598882869dedf7e059c19ad114be0e4bcb2f0d3fa65ea7ed3214`; the appcast all-PASS (8503 strictly highest
+over 7517/7933, the notes embedded verbatim). THE SITE, DMG FIRST: the R2 upload → verify-published dmg PASS
+(byte-identical) → the appcast copied → `variorum.json` 0.9.8 → build + deploy → verify-published appcast PASS →
+the site commit `5f0421a` pushed (that repo's own trailer convention); the MCP page answers 200. THE REFRESH: A1
+`…/Backups/safety-copies/vx348-refresh-20261018T193150Z/` (7 files cmp SAME), the staged app from the VERIFIED
+FEED DMG per the resume ruling above (codesign PASS, spctl "accepted · Notarized Developer ID", 0.9.8/8503), the
+old 0.9.7 app to the Trash, the installed app re-verified, the store cmp SAME against the A1 AFTER the swap, zero
+instances before every act and at the end. The tidy removed the two release DerivedData dirs; dSYMs + records
+retained at `~/Library/Developer/Variorum/Releases/0.9.8/`. The stage claim `vx-348-release-2` released with the
+coordinator's RELEASE line. **0.9.8 is the ONE release for VX-381 + VX-382 + VX-348, carrying the Castle merge —
+her standing rule satisfied; the run is now closed WHOLE.**
