@@ -546,6 +546,15 @@ one this Mac last had open* — with one button, *OK*; shown once, then the libr
   a sample soak, seeds 1–3 × 350 sequences, Debug: `✔ Test run with 1 test in 1 suite passed after 414.916 seconds`
   (the new clause raised nothing). Rule 25's last sentence stays until her word. Release counts PENDING at the close.
 - Piece 4 — the thirteen production leaves + `CatalogLister` + `ProtectionFactsGatherer` + `ProtectionSystem` under
-  `App/Variorum/Shared/Protection/`: NOT STARTED.
+  `App/Variorum/Shared/Protection/`: IN-PROGRESS.
+  - 4a — the library file's mechanics in core, `Sources/VariorumCore/Protection/Files/ProtectionLibraryFiles.swift`
+    (a recorded refinement: every SQLCipher statement the app's `LibraryFileLeaf`/`BackupsLeaf` need sits beside the
+    ONE keying implementation, `AppDatabase.configuration(key:)`, instead of a second keying road in the app — and so
+    runs headless in both configurations): the probe, the record's thin keyed connection (the write drains the WAL),
+    `sqlcipher_export` into a fresh file under a new key (verified by row counts), the no-clobber creation, the
+    same-key snapshot (the backup API), the private byte copy (a catalogued copy is never written), the WAL belt.
+    `ProtectionLibraryFilesTests` (5) Debug green: DONE (this commit).
+  - 4b — the keychain leaves (custody, sync keys, Apple keys, memory) + their shared query family: NOT STARTED.
+  - 4c — the file leaves, the system leaves, `CatalogLister`, `ProtectionFactsGatherer`, `ProtectionSystem`: NOT STARTED.
 - Piece 5 — the Mac tests under `App/Variorum/VariorumTests/Protection/` + `xcodebuild build-for-testing`: NOT STARTED.
 
