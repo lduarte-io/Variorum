@@ -571,7 +571,7 @@ extension Operations {
         try database.write { db in
             let post = try livePost(db, postID)
             try ensureUnlocked(post)
-            let trimmed = lensName.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmed = StoredText.stripped(lensName).trimmingCharacters(in: .whitespacesAndNewlines)  // VX-357
             guard !trimmed.isEmpty else {
                 throw OperationError.invalidLensName(name: lensName)
             }

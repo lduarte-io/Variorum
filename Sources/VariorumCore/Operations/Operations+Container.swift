@@ -355,8 +355,9 @@ extension Operations {
         wingId: String = ""
     ) throws -> Container {
         let now = date.now
+        // VX-357 — the row-level guarantee: a title never stores a U+0000.
         var post = Container(
-            id: newID(), ownerId: currentOwnerID(), kind: .post, title: title,
+            id: newID(), ownerId: currentOwnerID(), kind: .post, title: StoredText.stripped(title),
             profile: profile, entryDate: entryDate, wingId: wingId,
             createdAt: now, updatedAt: now)
         // A journal post defaults to one-block-per-entry (AppSpec §7): the
@@ -372,13 +373,15 @@ extension Operations {
     public func createPool(title: String? = nil) throws -> Container {
         let now = date.now
         let pool = Container(
-            id: newID(), ownerId: currentOwnerID(), kind: .pool, title: title,
+            id: newID(), ownerId: currentOwnerID(), kind: .pool, title: StoredText.stripped(title),
             profile: .pool, createdAt: now, updatedAt: now)
         try database.write { db in try pool.insert(db) }
         return pool
     }
 
+    /// VX-357: any U+0000 in the title is removed before it is stored.
     public func renameContainer(_ id: String, title: String?) throws {
+        let title = StoredText.stripped(title)
         try updateLiveContainer(id) { $0.title = title }
     }
 
@@ -438,7 +441,7 @@ extension Operations {
         try database.write { db in
             var container = try liveContainer(db, id)
             try ensureUnlocked(container)
-            container.floatingNotes = notes
+            container.floatingNotes = StoredText.stripped(notes)  // VX-357
             container.updatedAt = date.now
             try container.update(db)
         }

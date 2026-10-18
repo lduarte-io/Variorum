@@ -62,6 +62,9 @@ extension Operations {
         title: String?, text: String, undoLabel: String = "Import",
         segmentation: Segmentation? = nil, wingId: String = ""
     ) throws -> ImportResult {
+        // VX-357: U+0000 removed before segmenting (`StoredText`), so the
+        // segments, their counts and the empty-import guard see what is stored.
+        let text = StoredText.stripped(text)
         let result: ImportResult = try database.write { db in
             try requireLiveWing(db, wingId)
             let mode = try segmentation ?? globalSegmentation(db)
@@ -84,6 +87,7 @@ extension Operations {
     /// minted blocks (tray-recoverable, like any deleted block).
     @discardableResult
     public func importBlocks(into containerID: String, text: String) throws -> ImportResult {
+        let text = StoredText.stripped(text)  // VX-357 (`importPost`'s reason)
         let result: ImportResult = try database.write { db in
             let container = try liveContainer(db, containerID)
             try ensureUnlocked(container)

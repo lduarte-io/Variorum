@@ -84,7 +84,8 @@ extension Operations {
         _ readingID: String, name: String, undoLabel: String, guardedBy guardian: WriteGuard? = nil,
         namesCountedBy reach: BookNameReach? = nil
     ) throws -> MCPBookRename {
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        // VX-357: U+0000 removed first (`StoredText`), then the trim.
+        let trimmed = StoredText.stripped(name).trimmingCharacters(in: .whitespacesAndNewlines)
         let newName = trimmed.isEmpty ? DisplayTitle.placeholder : trimmed
         let previous: String? = try database.write { db in
             try guardian?(db)

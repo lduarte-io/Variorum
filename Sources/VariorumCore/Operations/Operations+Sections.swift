@@ -40,7 +40,8 @@ extension Operations {
         guard !reading.locked else {
             throw OperationError.lockedReading(id: readingID)
         }
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        // VX-357: U+0000 removed first (`StoredText`), then the trim.
+        let trimmed = StoredText.stripped(name).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             throw OperationError.invalidSectionName(name: name)
         }
@@ -67,7 +68,8 @@ extension Operations {
     @discardableResult
     func renameSectionRow(_ db: Database, _ id: String, name: String) throws -> String? {
         var section = try liveSection(db, id)
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        // VX-357: U+0000 removed first (`StoredText`), then the trim.
+        let trimmed = StoredText.stripped(name).trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             throw OperationError.invalidSectionName(name: name)
         }

@@ -63,6 +63,8 @@ extension Operations {
         in containerID: String, text: String, at insert: InsertPosition = .end,
         registeringUndo: Bool = true
     ) throws -> NewBlockResult {
+        // VX-357: U+0000 removed before the count and the row (`StoredText`).
+        let text = StoredText.stripped(text)
         let result: NewBlockResult = try database.write { db in
             let container = try liveContainer(db, containerID)
             try ensureUnlocked(container)
@@ -99,7 +101,8 @@ extension Operations {
         try database.write { db in
             var block = try liveBlock(db, blockID)
             try ensurePlacementUnlocked(db, blockID: blockID)
-            let trimmed = name?.trimmingCharacters(in: .whitespacesAndNewlines)
+            // VX-357: U+0000 removed first (`StoredText`), then the ends trimmed.
+            let trimmed = StoredText.stripped(name)?.trimmingCharacters(in: .whitespacesAndNewlines)
             let normalized = (trimmed?.isEmpty ?? true) ? nil : trimmed
             guard block.name != normalized else { return }
             block.name = normalized

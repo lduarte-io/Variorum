@@ -246,7 +246,8 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   kickoff sitting ran (rulings R-VX348-1…4 above); VX-389 and VM-22 minted. Units adopted AS the plan suggests
   (U1–U4, re-sizing recorded: none needed). Stage via `oct18coordinator` (REQUEST → READY → GO → RELEASE); the
   sync/custody slot is VX-378's — anything that looks like it needs it is DEFERRED (her kickoff word).
-- **U1 (VX-357 · VX-338 · VX-339 — the core and the headless fixes):** NOT-STARTED.
+- **U1 (VX-357 · VX-338 · VX-339 — the core and the headless fixes):** IN-PROGRESS — the implementer's U1 UNIT RECORD
+  (below) carries the per-member status.
 - **U2 (VX-347 — ⌘S):** NOT-STARTED.
 - **U3 (VX-350 · VX-349 · VX-176 — the Library's row and header):** NOT-STARTED.
 - **U4 (VX-351 as ruled · VX-384 · VX-385 · VX-355 — stamps and riders):** NOT-STARTED.
@@ -275,8 +276,9 @@ window, if the batch allows).
 
 ### LIVE STATUS (per member)
 
-- **VX-357 (U+0000 stored truncated):** IN-PROGRESS — the Domain rule, the op families, the wire answer, MCPSpec's
-  clause and the tool descriptions remain.
+- **VX-357 (U+0000 stored truncated):** IN-PROGRESS — WIP commit: the Domain rule (`StoredText`), its application
+  across the op families, and the wire's count (`MCPNullCharacters`, answered in `land`) compile; the pins, the
+  red-on-old revert, MCPSpec's clause and the tool descriptions remain.
 - **VX-338 (two Macs prune each other's backups):** NOT-STARTED.
 - **VX-339 (Resume Sync clears the banner over a failed marker removal):** NOT-STARTED.
 - **No behavioural revert is in flight.** (A revert starts only after this line names it — addendum 2.)

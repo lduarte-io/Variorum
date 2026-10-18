@@ -33,6 +33,11 @@ extension Operations {
     /// U3 — extracted byte-for-byte so the MCP door's batch lands each of its
     /// comments through the SAME body, beside its authorship record).
     func insertBlockComment(_ db: Database, to blockID: String, text: String) throws -> BlockComment {
+        // VX-357: U+0000 removed before the blank check and the row
+        // (`StoredText`) — every comment road (hers, the wire's one and batch
+        // doors) lands through this body, and the authorship digest reads
+        // the stored text.
+        let text = StoredText.stripped(text)
         _ = try liveBlock(db, blockID)
         try ensurePlacementUnlocked(db, blockID: blockID)
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
@@ -69,6 +74,10 @@ extension Operations {
     /// after her guards and before her no-op (nil on her door — unchanged).
     /// Returns the text it replaced, or nil when nothing was written.
     func rewriteComment(_ db: Database, _ id: String, text: String, expecting: String? = nil) throws -> String? {
+        // VX-357: the new words with U+0000 removed (`insertBlockComment`'s
+        // reason). `expecting` stays as sent — a precondition compares with
+        // what is stored, which never holds a null character.
+        let text = StoredText.stripped(text)
         var comment = try liveComment(db, id)
         _ = try liveBlock(db, comment.blockId)
         try ensurePlacementUnlocked(db, blockID: comment.blockId)

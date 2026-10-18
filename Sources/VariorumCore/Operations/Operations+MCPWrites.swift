@@ -174,10 +174,12 @@ extension Operations {
         _ = try liveBlock(db, blockID)
         try ensurePlacementUnlocked(db, blockID: blockID)
         let now = date.now
-        let trimmed = label?.trimmingCharacters(in: .whitespacesAndNewlines)
+        // VX-357: U+0000 removed from the text and the label (`StoredText`),
+        // so the returned row — what the wire digests — is what is stored.
+        let trimmed = StoredText.stripped(label)?.trimmingCharacters(in: .whitespacesAndNewlines)
         let take = Variant(
             id: newID(), blockId: blockID, parentVariantId: nil,
-            workingText: text, status: .active, locked: false,
+            workingText: StoredText.stripped(text), status: .active, locked: false,
             label: (trimmed?.isEmpty ?? true) ? nil : trimmed,
             fanPosition: try fanPosition(db, blockID: blockID, at: .end),
             createdAt: now, updatedAt: now)
@@ -328,7 +330,7 @@ extension Operations {
     ) throws -> Lens {
         let lens: Lens = try database.write { db in
             _ = try livePost(db, postID)
-            let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmed = StoredText.stripped(name).trimmingCharacters(in: .whitespacesAndNewlines)  // VX-357
             guard !trimmed.isEmpty else { throw OperationError.invalidLensName(name: name) }
             for (blockID, takeID) in picks {
                 _ = try liveBlock(db, blockID)
@@ -435,10 +437,12 @@ extension Operations {
         section: String? = nil, undoLabel: String
     ) throws -> DocumentImport {
         try mintNoteEntry(undoLabel: undoLabel, section: section) { db in
+            // VX-357: U+0000 removed before segmenting and trimming
+            // (`StoredText`) — `importPost`'s reason, paste's road.
             let blocks = SegmentationRules
-                .bulkSegments(text, mode: try Queries.defaultSegmentation(db))
+                .bulkSegments(StoredText.stripped(text), mode: try Queries.defaultSegmentation(db))
                 .map { VariorumDocument.Block(text: $0) }
-            let trimmed = title?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmed = StoredText.stripped(title)?.trimmingCharacters(in: .whitespacesAndNewlines)
             return VariorumDocument.NamedDocument(
                 fallbackTitle: "",
                 document: VariorumDocument.Document(
@@ -487,7 +491,9 @@ extension Operations {
         title: String?, entryDate: String?, blocks: [MCPNoteBlock],
         in destination: MCPNoteDestination, section: String? = nil, undoLabel: String
     ) throws -> DocumentImport {
-        let trimmed = title?.trimmingCharacters(in: .whitespacesAndNewlines)
+        // VX-357: the title's and each block name's U+0000 removed here
+        // (`StoredText`); the takes' texts and labels at the row (`mintFanBlock`).
+        let trimmed = StoredText.stripped(title)?.trimmingCharacters(in: .whitespacesAndNewlines)
         let document = VariorumDocument.NamedDocument(
             fallbackTitle: "",
             document: VariorumDocument.Document(
@@ -497,7 +503,7 @@ extension Operations {
             undoLabel: undoLabel, keepingBlankTakes: true, section: section
         ) { _ in document } destination: { destination } finish: { db, minted in
             for (blockID, block) in zip(minted.blockIDs, blocks) {
-                let name = block.name?.trimmingCharacters(in: .whitespacesAndNewlines)
+                let name = StoredText.stripped(block.name)?.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard let name, !name.isEmpty else { continue }
                 try db.execute(sql: "UPDATE block SET name = ? WHERE id = ?", arguments: [name, blockID])
             }
@@ -807,7 +813,7 @@ extension Operations {
     ) throws -> Reading {
         let reading: Reading = try database.write { db in
             try requireLiveWing(db, wingId)
-            let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmed = StoredText.stripped(name).trimmingCharacters(in: .whitespacesAndNewlines)  // VX-357
             let bookName = trimmed.isEmpty ? DisplayTitle.placeholder : trimmed
             try requireBookNameFree(db, bookName, counting: reach)
             let now = date.now

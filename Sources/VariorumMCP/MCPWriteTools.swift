@@ -749,7 +749,13 @@ struct MCPWriteTools: Sendable {
             // names its DESTINATION, the sweep's coalescing key) logs its own.
             let logged = logsReceiptTitle ? landed.receipt?.targetTitle ?? title : title
             try log(clientName, job.tool, kind, id, logged, allowed: true)
-            return .success(Landed(answer: try encode(landed.answer), receipt: landed.receipt))
+            // VX-357 — THE DOOR SAYS IT, in its one place: a landed write whose
+            // text held U+0000 names how many the store's rule removed
+            // (`MCPNullCharacters`); a write with none answers byte-unchanged.
+            var answer = landed.answer
+            let removed = job.nullCharactersWritten
+            if removed > 0 { answer[MCPNullCharacters.answerKey] = removed }
+            return .success(Landed(answer: try encode(answer), receipt: landed.receipt))
         } catch let refused as Refused {
             try log(clientName, job.tool, kind, id, title, allowed: false)
             return .failure(refused)
@@ -880,7 +886,10 @@ struct MCPWriteTools: Sendable {
     /// before VX-267 keep `‹client› · suggested · ‹label›` (labels are text —
     /// no migration); the lens rule's matcher reads both forms.
     static func aiLabel(client: String, own: String?) -> String {
-        guard let own = own?.trimmingCharacters(in: .whitespacesAndNewlines), !own.isEmpty else { return client }
+        // VX-357: the client's label with U+0000 removed first (the store's
+        // rule, `StoredText`), so a label of nothing else is none.
+        guard let own = StoredText.stripped(own)?.trimmingCharacters(in: .whitespacesAndNewlines), !own.isEmpty
+        else { return client }
         return client + labelSeparator + own
     }
 
