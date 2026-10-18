@@ -346,8 +346,13 @@ store this build has written — coordinators told.
 - KICKOFF 2026-10-18 (her rulings §7; the orchestrator's provisional rulings §7b; the words drafts §7c): DONE — worktree
   `~/dev/variorum-vx-306`, branch pushed, the in-flight row on main (`99d49fc4a`, holds the Sync/-or-custody slot),
   VX-306 In Progress, the coordinator (`oct18coordinator`) announced and the slot granted explicitly.
-- U1a — the production leaves (+ VX-386 first, the `protection_record` migration, VX-390): BUILT (Opus implementer, 2026-10-18; commits `82e4ad038`…`e9bb71007`) — headless counts green both configurations (the release reds are pre-existing, traced in the record); the Mac Protection suites PENDING — the orchestrator runs them under a stage claim (the record names them).
-- U1b — the lobby on roads, Debug-gated (+ VX-310, the creation card, the Release check, the dev store's fresh start): not started.
+- U1a — the production leaves (+ VX-386 first, the `protection_record` migration, VX-390): DONE 2026-10-18 — commits
+  `82e4ad038`…`e3d623d3a` (the §9 U1a RECORD); main folded `bfc9f85c4` (VX-381 + VX-382 in; the bundle renumbered #233);
+  the six Mac suites run by the orchestrator under `vx-306-u1a-batch` (07:06 MDT): `✔ Test run with 28 tests in 6 suites
+  passed after 0.387 seconds.` (0 skipped — the Touch ID listing row ran on the Pro's enrolled finger), `** TEST EXECUTE
+  SUCCEEDED **`; the tripwire's own suite proved every real-scope mutation refused from the test process. VX-406 filed
+  (the release-floor reds, Low). The ladder reads U1a with U1b.
+- U1b — the lobby on roads, Debug-gated (+ VX-310, the creation card, the Release check, the dev store's fresh start): NOT STARTED — NEXT.
 - U2 — the honest faces: not started.
 - U3 — the two doors; the phone opens: not started.
 - The ladder (Fable — custody code; her cap: up to five rounds while MAJORs are still found): not started.
@@ -693,7 +698,7 @@ keeps its meaning; the plan's protocol shapes are as written (no other protocol 
   with them (rule 26).
 
 **The Mac suites the orchestrator runs under the stage (from `App/Variorum/`; `-derivedDataPath DerivedData/vx306`;
-the record ends PENDING on them):**
+the record ended PENDING on them — RUN by the orchestrator 2026-10-18 07:06 MDT under `vx-306-u1a-batch`: `✔ Test run with 28 tests in 6 suites passed after 0.387 seconds.`, 0 skipped, `** TEST EXECUTE SUCCEEDED **` — the tree 22a737d94 after the fold of main):**
 ```
 xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx306 test \
   -only-testing:VariorumTests/ProtectionKeychainFamilyTests \
