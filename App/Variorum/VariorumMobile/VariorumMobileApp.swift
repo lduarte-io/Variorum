@@ -41,6 +41,14 @@ struct VariorumMobileApp: App {
     /// launch flag it carries survives every view rebuild.
     @State private var firstWrite: MobileFirstWriteFurniture?
     @Environment(\.colorScheme) private var scheme
+    /// VX-306 U3: the open whose rule-27 sheet was already said (the standing faces' identity — once per open).
+    @State private var rule27SaidFor: ObjectIdentifier?
+
+    /// VX-306 U3: rule 27 after a quiet open owes its sheet (the new road only; once per open).
+    private var roadRule27Owed: Bool {
+        guard let standing = bootstrap.roadStanding, standing.faces.noKeyFileAnywhere != nil else { return false }
+        return rule27SaidFor != ObjectIdentifier(standing)
+    }
 
     /// The lobby's voice comes from the DEVICE preference, not the store —
     /// the store is exactly what is not open yet.
@@ -62,6 +70,19 @@ struct VariorumMobileApp: App {
                     // presented sheets, so the words are covered wherever
                     // they render.
                     .redacted(reason: SnapshotPrivacy.redactionReasons(for: scenePhase))
+                    // VX-306 U3: rule 27 after a quiet open on the new road — §7c (3)'s sentence, a sheet once per open
+                    // (nil on today's road).
+                    .sheet(isPresented: Binding(
+                        get: { roadRule27Owed },
+                        set: { if !$0, let standing = bootstrap.roadStanding { rule27SaidFor = ObjectIdentifier(standing) } })
+                    ) {
+                        MobileNoKeyFileSheet(
+                            accountRoad: bootstrap.roadStanding?.faces.noKeyFileAnywhere?.accountRoad ?? false,
+                            tokens: lockedTokens,
+                            close: {
+                                if let standing = bootstrap.roadStanding { rule27SaidFor = ObjectIdentifier(standing) }
+                            })
+                    }
                     .task {
                         guard services == nil else { return }
                         let fresh = AppServices(
@@ -242,10 +263,15 @@ struct VariorumMobileApp: App {
                 MobileStoreFailureView(error: error, recovery: recovery) {
                     bootstrap.retry()
                 }
-            case .roadLobby, .newLibraryWords, .roadInterlude:
-                // VX-306 U1b: the new road's faces are the Mac's this unit — the one switch is off on the phone
-                // (P-VX306-U1b-1), so these never arrive here; the phone's faces are U3's.
-                MobileStoreOpeningView()
+            case .roadLobby(let lobby):
+                // VX-306 U3 (the phone's Debug build, the one switch — P-VX306-U1b-1 superseded): the new road's lobby.
+                MobileRoadLockView(lobby: lobby, tokens: lockedTokens)
+            case .newLibraryWords(let card):
+                // VX-306 U3: the once-shown words card of a library just created (rule 2).
+                MobileLibraryWordsCard(model: card, tokens: lockedTokens)
+            case .roadInterlude(let interlude):
+                // VX-306 U3: rule 21's notice, then the key-file offer — once, before the library shows.
+                MobileRoadInterludeCard(model: interlude, tokens: lockedTokens)
             }
         }
         .onChange(of: scenePhase) { _, phase in

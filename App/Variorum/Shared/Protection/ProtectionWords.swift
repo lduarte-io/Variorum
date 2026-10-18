@@ -196,19 +196,26 @@ nonisolated enum ProtectionWords {
 
     // MARK: - Touch ID (VX-310 — the design's §3.10, her words where it has them)
 
-    static let touchIDButton = "Unlock with Touch ID"
+    //
+    // VX-306 U3 (the phone opens): the biometry's name and the device's are the platform's (`ProtectionCopy
+    // .biometryName` / `.deviceName` — "Touch ID" / "Mac" here, "Face ID" / "iPhone" on the phone), so the Mac's lines
+    // read byte-for-byte as before and the phone's say its own (PROVISIONAL P-VX306-U3-8).
+
+    static let touchIDButton = "Unlock with \(ProtectionCopy.biometryName)"
     /// §3.10: "Touch ID isn't set up here, or isn't set up for this library."
-    static let touchIDNotSetUpOnThisMac = "Touch ID isn't set up on this Mac."
-    static let touchIDNotSetUpForThisLibrary = "Touch ID isn't set up for this library."
+    static let touchIDNotSetUpOnThisMac = "\(ProtectionCopy.biometryName) isn't set up on this \(ProtectionCopy.deviceName)."
+    static let touchIDNotSetUpForThisLibrary = "\(ProtectionCopy.biometryName) isn't set up for this library."
     /// §3.10, verbatim.
-    static let touchIDChanged = "Touch ID changed since you set it up — unlock with the passphrase."
+    static let touchIDChanged = "\(ProtectionCopy.biometryName) changed since you set it up — unlock with the passphrase."
     /// §3.10: "Pressing it says why ('Open the lid…') and nothing changes."
     static func touchIDUnusableForNow(_ reason: TransientUnavailability) -> String {
         switch reason {
         case .lidClosed: return "Open the lid to use Touch ID."
         case .keyboardDisconnected: return "Connect your keyboard with Touch ID to use it."
         case .keyboardNotPaired: return "Pair your keyboard with Touch ID to use it."
-        case .lockout: return "Touch ID is locked after too many tries. Enter your passphrase, or lock and unlock your Mac."
+        case .lockout:
+            return "\(ProtectionCopy.biometryName) is locked after too many tries. Enter your passphrase, or lock and "
+                + "unlock your \(ProtectionCopy.deviceName)."
         }
     }
 

@@ -1,7 +1,8 @@
 //
 //  ProtectionRoadSwitchTests.swift
 //  VariorumTests — VX-306 U1b piece 1: THE ONE SWITCH (`notes/plans/vx-306-castle-open-road.md` §2 U1b, the
-//  Release check). The new open road is live only in a DEBUG build on the MAC; the value is a compile-time
+//  Release check). The new open road is live only in a DEBUG build (the Mac's, and since VX-306 U3 — superseding
+//  P-VX306-U1b-1 — the phone's); the value is a compile-time
 //  fact (the `#if DEBUG` arm), never a default or an environment key; and a test bootstrap runs today's road
 //  unless a pin turns the new one on — so the existing route suites are the evidence that the switch forced off
 //  leaves today's road as it was. The third leg of the check is `xcodebuild -configuration Release build`
@@ -14,21 +15,20 @@ import Testing
 @testable import Variorum
 import VariorumCore
 
-@Suite("VX-306 U1b — the one switch: the new road only in a Debug build on the Mac")
+@Suite("VX-306 U1b — the one switch: the new road only in a Debug build (U3: the phone's too)")
 @MainActor
 struct ProtectionRoadSwitchTests {
-    @Test func theRuleIsDebugAndTheMacAndNothingElse() {
-        #expect(ProtectionRoad.live(debug: true, mac: true))
-        #expect(!ProtectionRoad.live(debug: false, mac: true), "a Release Mac build runs today's road")
-        #expect(!ProtectionRoad.live(debug: true, mac: false), "the phone keeps today's road this unit (P-VX306-U1b-1)")
-        #expect(!ProtectionRoad.live(debug: false, mac: false))
+    /// VX-306 U3 supersedes P-VX306-U1b-1 (`debug && mac`): the phone's Debug build takes the new road too.
+    @Test func theRuleIsDebugAndNothingElse() {
+        #expect(ProtectionRoad.live(debug: true))
+        #expect(!ProtectionRoad.live(debug: false), "every Release build runs today's road")
     }
 
-    /// This test bundle is a Debug Mac build: the switch reads its rule over the compile-time facts.
+    /// This test bundle is a Debug Mac build: the switch reads its rule over the compile-time fact.
     @Test func thisDebugMacBuildReadsTheSwitchOn() {
         #expect(ProtectionRoad.isDebugBuild)
         #expect(ProtectionRoad.isMac)
-        #expect(ProtectionRoad.newRoadIsLive == ProtectionRoad.live(debug: ProtectionRoad.isDebugBuild, mac: ProtectionRoad.isMac))
+        #expect(ProtectionRoad.newRoadIsLive == ProtectionRoad.live(debug: ProtectionRoad.isDebugBuild))
         #expect(ProtectionRoad.newRoadIsLive)
     }
 
@@ -42,7 +42,7 @@ struct ProtectionRoadSwitchTests {
             encoding: .utf8)
         #expect(source.contains(
             "static let isDebugBuild: Bool = {\n        #if DEBUG\n        return true\n        #else\n        return false\n        #endif\n    }()"))
-        #expect(source.contains("static let newRoadIsLive: Bool = live(debug: isDebugBuild, mac: isMac)"))
+        #expect(source.contains("static let newRoadIsLive: Bool = live(debug: isDebugBuild)"))
         // CODE lines only — the file's header comment may NAME the inputs it forbids (the orchestrator's fix at the
         // U1b batch, 2026-10-18: the first run matched "environment" inside that comment).
         let code = source.split(separator: "\n", omittingEmptySubsequences: false)

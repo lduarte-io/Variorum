@@ -1834,7 +1834,32 @@ state — traced on this tree:
   - *What it can't do:* show takes beyond the chosen one, comments, chapters or the book's own order (a later polish, if
     she wants them — still raw reads).
 - Piece 5 — THE PHONE: the switch on in the phone's Debug build (P-VX306-U1b-1 superseded); `MobileStoreLockView` renders
-  the lobby model, the creation card, the interlude and rule 27's face; the phone's pins; `build-for-testing`:
-  NOT-STARTED.
+  the lobby model, the creation card, the interlude and rule 27's face; the phone's pins; `build-for-testing`: DONE
+  (this commit). **The switch** (`ProtectionRoad`): the rule reads `debug` alone (`live(debug:)`; `newRoadIsLive =
+  live(debug: isDebugBuild)` — still compile-time, nothing at run time can flip it); `AppBootstrap`'s production init
+  keeps P-VX306-U1b-5 (the dev store's variant only); `ProtectionRoadSwitchTests` follows (its four-cell rule now two
+  cells, the source pin's line) — the ruled supersession, noted under QUESTIONS #233. The phone composes the leaves on
+  the main actor already (`RoadInputs.compose()` is `@MainActor`, so `ProtectionSystem`'s `DeviceName.current` reads the
+  device there). **The faces** (`VariorumMobile/Features/Protection/MobileRoadFaces.swift`, the phone's layout and DEVICE
+  voice, the shared models and words): `MobileRoadLockView` (the typed field at once — the passphrase field with the words
+  behind one quiet door, or the words directly; the biometry button and its one line; the refusal line; rule 27's sentence
+  before unlock with the account sentence when named and *Start a New Library* with its sub-line — the phone keeps no
+  backups and has no Open Library door; the roads re-read when the scene becomes active — VX-310's second bug's twin),
+  `MobileLibraryWordsCard` (§7c (1): the words numbered in two columns, never selectable, privacy-sensitive, ONE button),
+  `MobileRoadInterludeCard` (her notice once with *OK*, then the offer *Not now* · *Use it*), `MobileNoKeyFileSheet` (rule
+  27 after a quiet open — §7c (3)'s sentence as a SHEET over the open library once per open, *OK*, no doors); the phone's
+  root renders them in place of U1b's unreachable arm. The shared biometry lines now name the platform's biometry and
+  device (`ProtectionCopy.biometryName` / `.deviceName` — the Mac's read "Touch ID" / "Mac" byte-for-byte as before, the
+  phone's "Face ID" / "iPhone"; P-VX306-U3-8). The phone's missing face already runs the core's creation on the new road
+  (the bootstrap's `LibraryMissingLobby.newRoadCreate`). **Not on the phone this unit** (the hand-forward): rule 3's
+  reminder bar and the set-passphrase sheet, the receipts (rule 1's restore, the offer's *Use it*) — `RoadStandingModel` is
+  made at the phone's ready too but has no face there. **Pins:** `MobileProtectionRoadTests` (6, the phone's test target —
+  the switch ON in the phone's Debug build; the biometry words the phone's own; the words card's columns and one button;
+  the lobby model with an unlistable keychain — both typed roads, the reason, no biometry claimed, a refusal said; the
+  notice said once; rule 27's after-open condition read from the report). `xcodebuild -scheme VariorumMobile -destination
+  'generic/platform=iOS Simulator' -configuration Debug -derivedDataPath DerivedData/vx306-u3 build-for-testing` → `** TEST
+  BUILD SUCCEEDED **`, no warning in a touched file; the Mac `build-for-testing` (the same DerivedData) → `** TEST BUILD
+  SUCCEEDED **`; the headless planted suites green again (57 in 8 — the Mac's lobby pins read "Touch ID isn't set up on
+  this Mac." byte-for-byte). The phone suites' RUN and the simulator's open are the orchestrator's — PENDING.
 - Piece 6 — the Mac `build-for-testing` + the record's close (the suites, the walk recipe, the PROVISIONALs):
   NOT-STARTED.
