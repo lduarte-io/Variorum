@@ -17,7 +17,7 @@ the questions are under VX-351 below, so the kickoff sitting answers them and th
 her. Every other member is already ruled in her words on its ticket.
 
 **MINTS A RELEASE AT ITS CLOSE (her word 2026-10-18):** this run, VX-381 and VX-382 each publish a release when they
-merge — the next free 0.10.x in merge order (the first to merge is 0.10.0). The numbering rule is in
+merge — the next free number in merge order: 0.9.8, then 0.9.9, then 0.10.0 (her word: finish the 0.9 line first). The numbering rule is in
 `notes/plans/vx-33-release-runway.md` §5. Release notes: the standing rule is SHE writes them (memory: Variorum
 release publishing); if she delegates the draft at kickoff, write them one line per bullet and present them before the
 run. The release is followed by the /Applications refresh under the full rule card, installing the SAME version and
@@ -141,7 +141,7 @@ Then the ladder (Fable, fresh per round, over the whole diff), the closeout, the
 - **VX-234** (her Settings wording pass) may touch pane copy; VX-351's setting, if she wants one, lands in a pane —
   rebase carefully.
 - **Closeouts serialize** (CLAUDE.md): the three runs merge first-ready-first, each rebasing; each mints its release
-  in that order (0.10.0, 0.10.1, 0.10.2).
+  in that order (0.9.8, 0.9.9, 0.10.0).
 
 ## Environment traps (carried verbatim into every brief)
 

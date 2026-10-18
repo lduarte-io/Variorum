@@ -320,12 +320,13 @@ The launch build ships at her explicit word only, after:
 The road is the proven one (memory: Variorum release publishing): bump the version, `Tools/Release/release.sh`
 at a zero-instance window with no commits during it, then DMG first and appcast second on the site.
 
-**NUMBERING (her word 2026-10-18, this section's rule):** 0.9.7 (build 7933, 2026-10-16) was the last 0.9. **The
-next release is 0.10.0**, and every pre-launch release after it is a 0.10.x patch bump; **1.0.0 is reserved for the
-build that flips Castle's release switch (VX-329)** — her actual launch, since Castle is her gate. Sparkle orders
-updates by the build number (the commit count), so the display version is free to follow this. **The three runs in
-flight each MINT A RELEASE at their merge** (her word 2026-10-18): VX-381, VX-382 and VX-348 take 0.10.0, 0.10.1 and
-0.10.2 in whichever order they merge; closeouts serialize, so the numbers never race. The notes rule stands (she
+**NUMBERING (her word 2026-10-18, this section's rule):** the 0.9 line is used up first — **the next release is
+0.9.8, then 0.9.9, then 0.10.0** (her words: *"shouldn't we finish using up 0.9.8 and 0.9.9 and then 0.10.0?"*);
+every pre-launch release after that is a 0.10.x patch bump; **1.0.0 is reserved for the build that flips Castle's
+release switch (VX-329)** — her actual launch, since Castle is her gate. Sparkle orders updates by the build number
+(the commit count), so the display version is free to follow this. **The three runs in flight each MINT A RELEASE at
+their merge** (her word 2026-10-18): VX-381, VX-382 and VX-348 take 0.9.8, 0.9.9 and 0.10.0 in whichever order they
+merge; closeouts serialize, so the numbers never race. The notes rule stands (she
 writes them unless she delegates the draft at a kickoff); each release ends with the /Applications refresh on the
 same build. The eight releases so far: 0.9.0 (4911) · 0.9.1 (4913) · 0.9.2 (5178) · 0.9.3 (6497) · 0.9.4 (6518) ·
 0.9.5 (7055) · 0.9.6 (7517) · 0.9.7 (7933).
