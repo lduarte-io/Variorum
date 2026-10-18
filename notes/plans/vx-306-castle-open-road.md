@@ -2411,7 +2411,7 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
 - m1 — K5's missing face over a record-less store: DONE (`0b759f8b8` the fix + both pins; this commit the evidence). The bootstrap twin's run PENDING (the stage).
 - m2 — the copy doors' automatic quiet probe never presses Touch ID: DONE (this commit). The core protection set Debug green here; its release leg at the close.
 - m4 — the new-road Restore list re-reads on a landed backup pair: DONE (this commit). The hook twin's run PENDING (the stage).
-- NIT 1: DONE (this commit; the source pin's run PENDING the stage). NIT 2 · NIT 3 · NIT 4: NOT-STARTED.
+- NIT 1: DONE (`3e6a6bff0`; the source pin's run PENDING the stage). NIT 2: DONE (this commit). NIT 3 · NIT 4: NOT-STARTED.
 - The close (Mac + phone `build-for-testing`, the core protection set both configurations, the suite list): NOT-STARTED.
 
 **THE FINDINGS, one by one (AGREE/DISPUTE with the trace; the pin's red-on-old; the commit):**
@@ -2513,3 +2513,12 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
   `#filePath`), PENDING the stage; its logic run over the pre-fix file printed `restates literal = True | names
   CatalogNames.backupsFolderName = False` (red), over the fixed one `False | True` (green). Mac `build-for-testing` →
   `** TEST BUILD SUCCEEDED **`.
+- **NIT 2 — AGREE.** `repairPasses`' `guard let facts = try? … else { break }` ended the passes silently on a gather that
+  threw after unlock (no repairs, faults or acts in the report, nothing logged); now the catch logs one line — *road: the
+  open's facts could not be read for its repairs (pass N) — <error>* — and breaks as before (behaviour unchanged: the open
+  goes on, the repairs re-run at the next open). **No committed pin** — the line goes to the unified log, which has no
+  capture seam in a test, and a seam for one line would be new global state. **Observed instead**, by a harness-only
+  probe (never in the worktree: a created planted library, its custody listing then made to throw, `repairPasses` called
+  directly) run with `OS_ACTIVITY_DT_MODE=YES`: the fixed file printed `[protection] road: the open's facts could not be
+  read for its repairs (pass 0) — custodyUnlistable("Unreadable()")`; the pre-fix file (`git show HEAD:` into the harness)
+  printed nothing (`lines: 0`).

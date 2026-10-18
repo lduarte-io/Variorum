@@ -504,7 +504,15 @@ nonisolated enum ProtectionOpenRoad {
         var acts: [OwedAct] = []
         defer { report.acts = acts }
         for pass in 0..<4 {
-            guard let facts = try? ctx.system.facts(session: ctx.session, unlocked: library) else { break }
+            let facts: ProtectionFacts
+            do {
+                facts = try ctx.system.facts(session: ctx.session, unlocked: library)
+            } catch {
+                // Said, like every other throwing edge of the road (the ladder's round-1 NIT 2): the open goes on, the
+                // repairs run again at the next open.
+                log("road: the open's facts could not be read for its repairs (pass \(pass)) — \(String(describing: error))")
+                break
+            }
             let assessment = assess(facts)
             report.faults = assessment.faults
             for act in assessment.acts where !acts.contains(act) { acts.append(act) }
