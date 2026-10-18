@@ -1906,14 +1906,18 @@ them); release `swift build -c release` complete; `✘ 364 tests in 145 suites �
 from the start (gate item 1: both runs on the FINAL tree), started 2026-10-18T01:1xZ; a fresh Fable ROUND 3 reads the two
 fixes in parallel (model changes no round had read — VX-305's precedent).** ATTEMPT2_PENDING
 
-2. **Every fixed scenario green in both configurations** — the protection + lifecycle suites on `4a4af3164`, run by
-   the orchestrator in a clean review worktree: Debug `✔ Test run with 385 tests in 148 suites passed after 10.142
+2. **Every fixed scenario green in both configurations** — on the FINAL tree `c84375010` (after the gate's two fixes), the
+   orchestrator's runs: the protection + lifecycle suites in Debug `✔ Test run with 387 tests in 149 suites passed` (the
+   wider filter; `U4GatePins` among them); `swift build -c release` complete; release `✘ 364 tests in 145 suites … 1
+   issue` — VX-380's Sync test under the wider filter, nothing of Protection's; the full core suite in Debug in a clean
+   review worktree at `c84375010`: `✔ 240 tests in 51 suites` · `✔ 3159 tests in 405 suites` · `✔ 40 tests in 6 suites`,
+   exit 0. *(The same checks on the ladder-close tree `4a4af3164`, before the gate's fixes, for the record:* Debug `✔ Test run with 385 tests in 148 suites passed after 10.142
    seconds.` (the wider filter — every suite under `Tests/VariorumCoreTests/Protection/` plus a few by name; the
    lifecycle's four walks among them); `swift build -c release` `Build complete! (91.11 sec)`; release `✘ 362 tests in
    144 suites … 1 issue` — the one red is `MultiTenantSyncAttackerTests` (VX-380: a SYNC test's DEBUG-only Argon2
    parameters, swept in by the wider filter; nothing of Protection's; the protection set alone is green — the round-2
    reviewer's own run `✔ 274 tests in 70 suites`). The full core suite in Debug on the same tree: `✔ 240 tests in 51
-   suites` · `✔ 3157 tests in 404 suites` · `✔ 40 tests in 6 suites`, exit 0.
+   suites` · `✔ 3157 tests in 404 suites` · `✔ 40 tests in 6 suites`, exit 0.)*
 3. **Every mutation pin red with its guard off, green with it** — the DEBUG mutation suites (`ExecutorGuardTests`,
    `AssessGuardTests`, the world's `mutationPin` helper asserting both sides) ran green inside item 2's Debug set; the
    round-1 reviewer verified all 12 surviving guards carry a red-with-guard-off pin (its clean bill, item 8); the four
