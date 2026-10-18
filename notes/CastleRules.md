@@ -8,7 +8,12 @@ rules 4, 5 and 12 — the floor (a backup opens with the secrets you had when yo
 backups of the same library); rule 17 — Make this my library carries no keys; rule 21 — the fingerprint and the wrapped
 copy, the notice instead of the refusal, and the key-file offer. Amended at her morning sitting after the gate (2026-10-18,
 the plan's §8): rule 5's quiet-road clause reads as built — P-VX378-O1-1; rule 25 states the honest limit of the entry sweep and rule 11 points at it —
-P-VX378-O2-2.**
+P-VX378-O2-2. Amended at her sitting on VX-306's bundle (2026-10-18 afternoon — her words verbatim in
+`notes/plans/vx-307-castle-crossings.md` §3a; built at VX-412): rules 2, 3 and 7 — THE WORDS ARE NEVER SHOWN BEFORE THE
+FIRST SCREEN ("opening the app for the first time [is] a calm moment where the user can just type"; "i dont want the lobby
+at start"), the card above the quick entry is the one home for the words and for rule 3's reminder, the tutorial's last
+card shows the words beside its passphrase ask, and nothing ever stores the words. Until VX-412 lands, the Debug build and
+the lifecycle page's stage 1 still show the creation-time words card; the page follows at that merge.**
 Where this document and `notes/plans/vx-266-castle-backups-prelaunch.md` differ, this document wins; that design keeps
 its research and its Apple-facts pointers (`notes/plans/vx-266/second-opinion-apple-facts.md`). The walk-through of
 these rules — one person, one library, every stage — is `notes/plans/vx-266/castle-lifecycle.html`, and the corrector
@@ -33,13 +38,22 @@ open it. Everything else is a convenience.**
    The key file is as essential as the library itself, so the app keeps copies of it for you without asking: beside the
    library, inside every backup, and a sealed copy in this Mac's keychain. Losing the library means losing every copy of
    both — at which point there was nothing left to open anyway.
-2. **Every library has twelve words from the moment it is created.** They are shown once, with "write these down now".
-   They open the library for as long as they are its words. There is no such thing as a library with no secret.
-3. **Every library is asked for a passphrase.** The tutorial's last card asks. Until a passphrase exists, the app says
-   so now and then ("your library is only secured through iCloud Keychain right now — please add a passphrase and keep
-   your twelve words to ensure continued access"): at the third launch, then weekly twice, then with a "don't show
-   again"; and always right before the first backup and at the first launch after a quiet road has failed. The
-   passphrase is a convenience over the words; either one can reset the other.
+2. **Every library has twelve words from the moment it is created.** They are shown once — and never before the first
+   screen: the first open is the Bookcase and the quick entry with nothing in front of them. They are shown when the
+   user asks for them, from the card the app keeps above the quick entry until it is dismissed (*your library is
+   encrypted — click here to record the twelve words that are its key*; dismissing it says where to find them in
+   Settings) or at the tutorial's last card. Nothing stores the words, so the first look mints the words the user
+   records (rule 6's act — the key unchanged); the card says "write these down now" and warns before it closes that
+   they will not be shown again. Until they are recorded, this Mac's quiet roads (rule 8) are the library's only
+   opener here, which is why the card stays. They open the library for as long as they are its words. There is no
+   such thing as a library with no secret.
+3. **Every library is asked for a passphrase.** The tutorial's last card asks, and shows the twelve words beside the
+   ask (rule 2). Until a passphrase exists, the app says so now and then — in the same card above the quick entry that
+   offers the words, the one home for both asks; never a second bar, never a popup — ("your library is only secured
+   through iCloud Keychain right now — please add a passphrase and keep your twelve words to ensure continued access"):
+   at the third launch, then weekly twice, then with a "don't show again"; and always right before the first backup and
+   at the first launch after a quiet road has failed. The passphrase is a convenience over the words; either one can
+   reset the other.
 4. **The key file carries every earlier key the library has had**, sealed under the current one, and **every key change
    carries that list forward — no exceptions.** A backup always opens with the passphrase and words you had when you
    made it. Every key change also carries the earlier keys forward, so your current ones open older backups of the same
@@ -55,7 +69,8 @@ open it. Everything else is a convenience.**
    account's pair, and is told plainly — *your library's twelve words are now your account's twelve words; here they
    are; the old ones still open backups you made before today*. Joining re-locks the key under the new pair; it never
    changes the key. The key doors change the library's and the account's locks together. Make-this-my-library (rule 17)
-   keeps your current pair. Only creating a library shows fresh words.
+   keeps your current pair. Fresh words appear only at a library's own first look (rule 2) or its new-words door (rule 6);
+   joining shows the account's.
 
 ## Two postures — and only one at a time
 
@@ -182,5 +197,8 @@ and never leaves a hole you chose to close.**
 - **Re-link as a repair act** ("heal the quiet road") — with secrets from birth it is just the lobby's normal path
   (rule 8).
 - **The newest-copy offer on the unlock screen** — dropped at her P-U4-10 ruling, 2026-10-15.
+- **Showing the twelve words at creation, before the first screen** (the VX-306 build) and **keeping the words until
+  they are recorded** (so a snoozed card could re-show them) — *not pursued, 2026-10-18, her ruling.* The first open
+  stays calm; nothing stores the words; a later look mints fresh ones (rule 2).
 - **Castle as a one-way door** (leave only by export) — considered 2026-10-16; rules 12–13 make the leave clean enough
   that it isn't needed.
