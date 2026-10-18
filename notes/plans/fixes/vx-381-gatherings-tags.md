@@ -514,7 +514,13 @@ disposition here.
   gatherings live again; voice restored to Study; prefs re-export + diff showed benign view-state keys only;
   app quit, no instances, stage released with the result line.
 - **Ladder:** round 1 COMPLETE (`notes/plans/fixes/vx-381-ladder-r1.md` — findings + the orchestrator's
-  DISPOSITIONS). **Walk:** NOT-STARTED. **Closeout:** NOT-STARTED.
+  DISPOSITIONS; round 2 CLOSED THE LADDER — `vx-381-ladder-r2.md`: all five fixes HOLD, 0B/0M/1m/2n,
+  N-1 built by the orchestrator with both legs verified first-hand, N-3 → VX-391). **Walk:** DONE 2026-10-18,
+  PASSED — the record above; the prefs re-export + diff left EXACTLY these keys (named for the next walker, the
+  coordinator's ask): added `currentBlock.02456228-3435-40DB-BBD2-AFD44C939894`; changed
+  `IdleCommitSweepMark.Variorum-dev`, `currentBlock.82767444-…`, `currentBlock.EC0E7C0F-…`,
+  `openNotes.remembered.ids`, `openNotes.remembered.recency`, `variorum.backup.log` — all view-state/backup
+  bookkeeping, no theme or credential key. **Closeout:** IN PROGRESS.
 - **Ladder round-1 FIX LEG (a fresh implementer, 2026-10-18 — scope = the r1 file's §DISPOSITIONS: F-2 · F-1 · F-3 +
   riders F-7 · F-8; nothing else):** IMPLEMENTER-CLOSED. **NOT DONE, stated first:** no walk (the orchestrator's, after
   round 2); no sweep predicate for tag→parent path coherence (the reviewer's optional extra in F-2 — not in the
