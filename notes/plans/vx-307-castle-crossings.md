@@ -97,7 +97,7 @@ Evidence: the convergence suites; the walk if her kickoff call allows a throwawa
 | **VX-108** Posture doors gate on a stale reading | U2 | every door reads `assess`'s `DoorState`; every act reads the vault it fetched (never the local posture) |
 | **VX-109** A concurrent Use Standard vs a rotation | U1 | rotation is gone; the ONE-ROW CAS write refuses the loser plainly (`Sync/`, Fable's lines) |
 | **VX-113** The wrong-passphrase refusal names the change | U3 | *Your passphrase was changed on [device] on [day]* from the vault's last writer |
-| **VX-233** The posture drill heals | U2 | the crossings' walk and the crash harness over every crossing replace the old drill's job; the old drill's harness rot is fixed or the drill retired WITH today's road (her call at kickoff — the orchestrator's recommendation: retire it at VX-329, since it drives the old crossing code) |
+| ~~VX-233~~ The posture drill | — | RETIRED at her word (2026-10-18, "I'm down to retire it"): it drives today's crossing code, which VX-329 deletes; the drill file goes with it (parented under VX-329, Canceled). The crossings' proof here is the lifecycle scenario, the crash harness and this phase's walk |
 | **VX-235** A crash between the marker and the key-file write | U2 | the crossings run the core's planned acts (prepare-then-commit, rule 20 — built at VX-378); the crash harness proves every crossing |
 | **VX-313** Sealed plans running the real acts | U1/U2 | the acts run the core's sealed plans on the production leaves; a file or keychain edit cannot steer custody (rule 21) |
 | **VX-301** The Apple keys' lifecycle | U2 | reduced: the core's sweep by the catalogue + VX-390's stamp at entering Castle; this phase's faces SAY it |
