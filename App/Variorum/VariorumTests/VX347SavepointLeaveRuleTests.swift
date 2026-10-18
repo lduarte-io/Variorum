@@ -147,8 +147,11 @@ struct VX347LeavingBoxTests {
         let host = Host()
         host.present(take)
         #expect(host.leave(take, .escape))
+        #expect(host.box.openLeave == .escape, "the field is settled as \u{238B}")
         #expect(!host.leave(take, .away))
+        #expect(host.box.openLeave == .escape, "…and a later report cannot re-decide it")
         host.heardCleared(from: take)
+        #expect(host.box.openLeave == nil, "the host moved on: no field is open")
         #expect(host.filed.isEmpty, "⎋ alone is \u{201C}don't save\u{201D}, whatever reports after it")
         #expect(host.ask == nil, "…and it still closes the field")
     }
