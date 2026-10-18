@@ -161,8 +161,8 @@ Copy rules: sentence case, never shouty caps; her exact strings land byte-for-by
 **Evidence (the unit closes on it):** every pin red-on-old verified by behavioural revert; `swift build` +
 `swift test` (core) green where Domain changed; ONE Mac batch from `App/Variorum/` over every suite exercising
 the changed source files (suite-level `-only-testing` only; confirm the "Test run with N tests" line; grep the
-tests for the changed types when in doubt). A Mac `xcodebuild test` run REQUIRES a held `Tools/stage` claim —
-claim before, release after; if the stage is contended, report to the orchestrator instead of waiting silently.
+tests for the changed types when in doubt). A Mac `xcodebuild test` run REQUIRES a stage GO
+(the coordinated-window protocol below) — never a direct `Tools/stage claim`.
 The both-voices walk is the ORCHESTRATOR'S acceptance act after the unit — leave the tree walkable. Fill your
 unit's LIVE STATUS lines (DONE (hash) / IN-PROGRESS / NOT-STARTED, PENDING for unverified claims) with every
 piece. The environment-traps section above binds verbatim.
@@ -196,8 +196,22 @@ read this file in full + the resiliency protocol + #217, no `Sync/`/custody/sche
    green on new; a true 2-book note still speaks.
 
 **Evidence:** headless pins FIRST (`swift test` on the core package — no stage needed), exact state-transition
-tests for both op changes; then ONE Mac batch over every suite exercising the changed source files (held stage
-claim, as U1). LIVE STATUS flips per piece. The environment traps bind verbatim.
+tests for both op changes; then ONE Mac batch over every suite exercising the changed source files (a stage GO,
+per the protocol below). LIVE STATUS flips per piece. The environment traps bind verbatim.
+
+## THE STAGE THIS WINDOW (oct18coordinator's protocol, 2026-10-18 — binds every session in this run)
+
+The stage is COORDINATED: oct18coordinator HOLDS it between grants, so a direct `Tools/stage claim` is refused
+and a free-looking stage is never an invitation. Headless `swift build`/`swift test`/`xcodebuild build`/
+`build-for-testing` never need it; EVERY `xcodebuild test` does. The flow: the ORCHESTRATOR sends the
+coordinator a REQUEST early (what · minutes · claim name), a READY ping when the session can start NOW, and
+runs only on the coordinator's GO (which carries the exact claim line); RELEASE + one result line after.
+Implementers never talk to the coordinator — they message the orchestrator when ready for their batch (suite
+list + minutes), wait in the foreground, and run only on the orchestrator's relayed GO. Walk windows that set
+dev credentials (the Debug-only re-key) use exactly `~/.variorum/dev-castle.env` and restore the dev store's
+posture (keys, store, Debug prefs re-export + diff) before RELEASE, or report what they left. After every
+Debug launch, dismiss a What's New sheet if one shows. Merges serialize with vx-382 through the coordinator
+(send branch · tested tree · tip; merge commit only, on its GO).
 
 ## LADDER (after U2 — one ladder over the run's combined diff)
 
