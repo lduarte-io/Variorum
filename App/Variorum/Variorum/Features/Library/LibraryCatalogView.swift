@@ -271,6 +271,13 @@ struct LibraryCatalogView: View {
         .libraryGeometryProbe(.root)
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { libraryWidth = $0 }
         .background(tokens.surface)
+        // VX-176: the Library's system controls wear the VOICE's accent — the
+        // scope and mode segmented controls drew the SYSTEM accent (blue) in
+        // dark Terminal while the panes and the MCP sheets tint with the voice
+        // (`AppSettingsView`'s scene, `MCPGrantSheet` — 13n-c W-UX-11). One
+        // line at the catalog's root, as those hosts do it, so every control
+        // the Library hosts (the Timeline's picker included) speaks one accent.
+        .tint(tokens.accent)
         #if DEBUG
         .environment(\.debugOracleOwner, oracleOwner)
         .onDisappear { LibraryPanelOracle.release(owner: oracleOwner) }
