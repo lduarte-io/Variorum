@@ -1903,3 +1903,19 @@ claude-code approval + a fresh tab-key setup, a wing + grant for the VX-393 doub
 Terminal-voice captures, notes for U2's ⌘S hosts, and the VX-339 hold marker (no Castle on the fresh store; the old
 dev-castle.env values belong to the set-aside copy). The walk's Debug build comes from this branch's final tree
 (the Castle merge is in). The leftover u2fixed checkout is removed.
+
+## THE WALK RIDES THE STORE SWAP — road (b) (2026-10-18 ~08:55, the conversion-done notice)
+
+VX-306's conversion is DONE: the fresh dev library (Standard, new road, sample library + starred notes re-seeded) now
+holds the slot, and a Debug build WITHOUT VX-306's wiring cannot open it (the lobby). The predesign store — U5's
+wing/book/notes and the claude-code grant included — is set aside whole and cmp-verified at
+`…/Variorum-dev/Backups/safety-copies/variorum-vx306-predesign-2026-10-18-144152/`. THE CHOICE for this run's
+combined walk, from the coordinator's two pre-authorized roads: **road (b), the reversible store swap** — richer
+fixtures (no re-creation: the wing, grant and client binding are all in the predesign store), no dependency on
+VX-306's merge timing. Terms, verbatim-faithful: zero instances; the fresh library set aside whole into its own
+stamped safety-copy folder (cmp-verified: sqlite + -wal/-shm + variorum-keys-*.json + variorum-library-keys.json +
+the lived-here marker); the predesign files copied into the slot (cmp-verified); the walk under TODAY's road with
+this branch's Debug build (dev-castle.env only if its lock shows); at the end, zero instances, the fresh library's
+files BACK byte-identical (cmp-verified), nothing deleted, both copies' paths in the RELEASE line. The U4 batch note:
+mounted suites run on their own fixtures, but the test host's own launch sits at the lobby on the fresh store —
+watched for lobby-shaped failures in the U4 batch.
