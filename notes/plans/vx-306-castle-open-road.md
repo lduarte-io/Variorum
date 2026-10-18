@@ -2408,8 +2408,41 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton: DONE (this commit).
-- m1 — K5's missing face over a record-less store: IN-PROGRESS — the fix and both pins committed here (`startNewLibraryFromAFace`; the bootstrap's two faces on it); the red-on-old run (the pre-fix flag restored on the committed tree) next.
+- m1 — K5's missing face over a record-less store: DONE (`0b759f8b8` the fix + both pins; this commit the evidence). The bootstrap twin's run PENDING (the stage).
 - m2 — the copy doors' automatic quiet probe never presses Touch ID: NOT-STARTED.
 - m4 — the new-road Restore list re-reads on a landed backup pair: NOT-STARTED.
 - NIT 1 · NIT 2 · NIT 3 · NIT 4: NOT-STARTED.
 - The close (Mac + phone `build-for-testing`, the core protection set both configurations, the suite list): NOT-STARTED.
+
+**THE FINDINGS, one by one (AGREE/DISPUTE with the trace; the pin's red-on-old; the commit):**
+
+- **m1 — AGREE, and the trace is one step worse than the report says.** `makeMissingLobby`'s `newRoadCreate` →
+  `createOnNewRoadFromMissingFace` → `createOnNewRoad(setAsideLiveKeyFile: true, setAsideUnopenableLibrary: false)` →
+  `ProtectionOpenRoad.create`: `setAsideLiveKeyFileFor` guards `!fileExists(slot)` and skips (the record-less store sits in
+  the slot); then the core's `createLibrary` (`DeviceActs.swift`) writes, IN ORDER, the new key's silent item, a fresh own
+  Apple key and THE LIVE KEY FILE (`writeLiveKeyFile` — an atomic replace) before `leaves.library.createLibrary` meets the
+  no-clobber belt (`ProtectionLibraryFiles.createLibrary`: "a library is already in the slot") → `.failed` →
+  *Variorum couldn't create your library.* So the report's "nothing is destroyed (no-clobber held)" holds for the LIBRARY
+  FILE only: the record-less store's own key file was written over by a key file for a library that never came to be
+  (its key then held only by the store's silent item and this Mac's memory mirror), and every press minted one more orphan
+  silent item and Apple key. **The fix** (`0b759f8b8`): both faces' *Start a New Library* take ONE road,
+  `ProtectionOpenRoad.startNewLibraryFromAFace` = rule 27's face's (`setAsideUnopenableLibrary: true`): whatever stands in
+  the slot — the library, its sidecars, its key file — moves WHOLE into `Previous Libraries/<stamp>/` first (moved, never
+  written over or deleted), else (an empty slot) the missing library's key file alone, then the creation and the words
+  card. The bootstrap's `createOnNewRoad(setAsideLiveKeyFile:setAsideUnopenableLibrary:)` and
+  `createOnNewRoadFromMissingFace` collapse into `createOnNewRoadFromAFace`. Today's road (`LibraryMissingLobby`'s own act)
+  is untouched. **The pins:** `ProtectionOpenRoadPlantedTests.startANewLibraryOverARecordLessStoreSetsItAsideWholeAndCreates`
+  (headless — a created library, its slot replaced by a record-less store under the same key: the route → `.libraryMissing`;
+  the face's road → `.created` with twelve words, the new library in the slot under its own key file, ONE folder in
+  Previous Libraries holding the old key file byte-equal and the store that still opens with its own key); its bootstrap
+  twin `ProtectionRoadRouteTests.startANewLibraryOnTheMissingFaceOverARecordLessStoreSetsItAsideAndShowsTheWords` (the
+  reviewer's pin: the route → `.libraryMissing` → `startNewLibrary()` → no sentence, the words card, the store aside — Mac
+  host, keychain; PENDING the stage). **RED-ON-OLD** (the headless harness — this leg's own, the U1b/U2/U3 records' recipe,
+  in the session scratchpad: every `Shared/Protection/*.swift` but `ProtectionBackupHook.swift` + `Shared/LibraryOpenCopy
+  .swift` symlinked, one stub file, the app's concurrency settings, the worktree's core by path): with the fix committed,
+  the face road's flag restored to the pre-fix missing face's `setAsideUnopenableLibrary: false` (the old call, byte-for-
+  byte) → `✘ Test startANewLibraryOverARecordLessStoreSetsItAsideWholeAndCreates() recorded an issue at
+  ProtectionOpenRoadPlantedTests.swift:183` (not `.created`) · `✘ Test run with 11 tests in 2 suites failed … with 1 issue`;
+  a harness-only probe of the same pre-fix call over the same state printed `failed=true liveKeyFileOverwritten=true
+  silent 1->2 apple 1->2 previousLibraries=false` (the trace above, observed); restored by `git checkout` →
+  `✔ Test run with 10 tests in 1 suite passed`. The probe was never in the worktree.
