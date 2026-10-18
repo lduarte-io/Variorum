@@ -1126,3 +1126,13 @@ place from the committed tree (a265d0afc) and restored with `git checkout --` to
   1 suite failed … with 8 issues`: "grew OUTWARD" and "no row grows for it: 22.0" (vs the replaced line's 14.0) on the
   card's ▸, the header's ▾ and both Index chapter folds; the 22² target claim green. The pin bites; restored, clean
   (`red4.log`).
+- **Step 5 — the green batch** (the committed tree rebuilt, `only-testing.args`, 125 suites): `Test run with 649 tests
+  in 125 suites failed after 391.216 seconds with 7 issues (including 4 known issues)` — the 4 known are
+  `IndexTierMetricsTests`' own `withKnownIssue`s; 10 skip lines (the gated capture harnesses and the opt-in List-face
+  rig). The 3 non-known: `DestructiveUndoWarningTests.redoNeverAsks` at :141–143 — **re-run ALONE: red again, the same
+  signature** (`undo-alone.log`) — VX-167's parked flake (VX-184 measured it red alone 2/2; U1b likewise); nothing
+  in U2 touches undo; NOT attributed. Green as owed: `BookCollectingDoorsTests` (**VX-115 green**),
+  `OutlineRoomTests`, `BookFoldDisclosureTests`, `BookPanelDragGateTests`, `BookcaseMastheadPopoverTests`, and every
+  other suite. No finding (`batch.log`).
+- **SEAM** — the walk next, on this window's Debug build (`DerivedData/Variorum-dkbmlpshalzxqeftsymzimjxpdhl`, the
+  committed tree 51b074945's code); the stage is held, not released.
