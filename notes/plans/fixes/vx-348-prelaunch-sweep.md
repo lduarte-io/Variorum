@@ -705,7 +705,9 @@ the build notes; the Environment traps; the kickoff sitting and her overnight ma
   the drop line's core + host half landed with its headless pins (green; their red leg by a behavioural revert is
   NEXT). Still to do: the app side (the door's two stop reasons, the lock road's pre-close record via `macWillLock`,
   the Activity words) + its Mac pins (compile-only), the record section, MCPSpec's line.
-- **No behavioural revert is in flight.**
+- **A BEHAVIOURAL REVERT IS IN FLIGHT (VX-394's red leg):** `Sources/VariorumMCP/MCPServerHost.swift` — `ended()`'s
+  end-line write and `recordConnectionEnds`'s body removed — over the committed `6306a21ff`; restore with
+  `git checkout -- Sources/VariorumMCP/MCPServerHost.swift` (the file holds no other uncommitted work).
 - **THE FOLD (the orchestrator's instruction, her word via the coordinator):** IN — `460d39785` merges main
   `d8bb24488` (VX-381's `d4b104e8a` + Castle's `aeabdd75b` + two notes-only commits) into the branch after
   `98c88a686`, cleanly (no conflict). The incoming delta shares ONE file with this branch's touched set,
