@@ -488,7 +488,18 @@ disposition here.
     source: "11 tests in 1 suite failed with 11 issues" — exactly the three new pins (4 + 3 + 4); the eight shipped
     pins green on both sides. Green after: 11/11; InvariantSweep · TagReferenceOperations · RuleWingScoping ·
     SyncRepair 26/4.
-  - F-1 (correlated EXISTS + the plan pin): NOT-STARTED.
+  - F-1 (correlated EXISTS + the plan pin): FIXED (this commit). Mechanism (re-traced): the two revival UPDATEs
+    guarded their targets with `post_id IN (SELECT id FROM container …)` / `block_id IN (SELECT id FROM block …)` —
+    the measured old plan: `SEARCH post_tag USING INDEX idx_post_tag_tag` · `LIST SUBQUERY 1` · `SCAN container USING
+    INDEX idx_container_touched` · `CREATE BLOOM FILTER` (the block twin: `SCAN block`), a whole-table walk per revived
+    tag. Fix: the statements became constants (`Operations.revivePostTagApplicationsSQL` /
+    `reviveBlockTagApplicationsSQL`, so the pin reads the shipped SQL) and the guards correlated `EXISTS (SELECT 1 FROM
+    container c WHERE c.id = post_tag.post_id AND c.deleted_at IS NULL)` / the block twin — same rows. Pin
+    `TagDeleteUndoTests.theApplicationRevivalsSeekTheirTargetsAndNeverScanACorpusTable` (EXPLAIN QUERY PLAN of both:
+    no `LIST SUBQUERY`, no `SCAN` line, the target seeked by `sqlite_autoindex_<table>_1 (id=?)`). RED ON OLD (the
+    constants holding the shipped SQL verbatim): 6 issues, 3 per statement; green after: 12/12 (the behavioural pins —
+    live-target guard, exact rows — unchanged). `restoreContainer`/`restoreBlock`'s pre-existing twin untouched
+    (VX-387's).
   - F-3 (the shared table's `duplicateTagPath` arm): NOT-STARTED.
   - F-7 (the archived receipt's empty arm) · F-8 (the identity `cannot` wrapper, `divergeTarget`'s doc): NOT-STARTED.
   - The Mac batch (via the orchestrator's relayed GO): NOT-STARTED.

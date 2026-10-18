@@ -341,6 +341,48 @@ struct TagDeleteUndoTests {
         }
     }
 
+    // MARK: - P1 (ladder r1 F-1)
+
+    /// The query plan of a shipped revival statement, exactly as it ships
+    /// (the SQL is a constant precisely so this reads the real thing).
+    private func plan(_ db: AppDatabase, _ sql: String) throws -> String {
+        try db.read { database in
+            try Row.fetchAll(
+                database, sql: "EXPLAIN QUERY PLAN \(sql)",
+                arguments: ["a-tag", "2026-07-01T00:00:00.000Z"])
+                .map { ($0["detail"] as String?) ?? "" }
+                .joined(separator: "\n")
+        }
+    }
+
+    /// **Ladder r1 F-1 (BLOCKER, P1) — RED ON OLD.** The inverse's revivals
+    /// guarded their targets with `post_id IN (SELECT id FROM container …)` /
+    /// `block_id IN (SELECT id FROM block …)`: a non-correlated list subquery
+    /// SQLite MATERIALISES by scanning the whole table, once per revived tag
+    /// that wore anything — an undo whose cost grew with every note (and every
+    /// block) in the store, not with the applications it revives (measured by
+    /// the reviewer: 0.439 s vs 0.0005 s at a million containers). A SHAPE pin,
+    /// like `ReadLayerP1Tests`' — no list subquery, no table scanned: each
+    /// target is SEEKED by its key, the twin by its live-unique index.
+    @Test func theApplicationRevivalsSeekTheirTargetsAndNeverScanACorpusTable() throws {
+        try withOperations { ops, db in
+            _ = try world(ops)  // a store with notes, blocks and applications in it
+            for (sql, target) in [
+                (Operations.revivePostTagApplicationsSQL, "container"),
+                (Operations.reviveBlockTagApplicationsSQL, "block"),
+            ] {
+                let plan = try plan(db, sql)
+                let lines = plan.split(separator: "\n").map(String.init)
+                #expect(!plan.contains("LIST SUBQUERY"),
+                        "the \(target) guard must be correlated, never a materialised list; plan was:\n\(plan)")
+                #expect(!lines.contains { $0.hasPrefix("SCAN") },
+                        "no table may be scanned (the \(target) table least of all); plan was:\n\(plan)")
+                #expect(lines.contains { $0.hasPrefix("SEARCH") && $0.contains("sqlite_autoindex_\(target)_1 (id=?)") },
+                        "the \(target) row is seeked by its key; plan was:\n\(plan)")
+            }
+        }
+    }
+
     /// A child she made under a revived tag goes with it on redo — the
     /// delete's own subtree rule (no live tag is left under a dead parent) —
     /// and the next undo brings it back on that same stamp.

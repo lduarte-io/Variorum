@@ -231,32 +231,47 @@ extension Operations {
                     sql: "UPDATE tag SET deleted_at = NULL, path = ?, updated_at = ? WHERE id = ?",
                     arguments: [path, nowStamp, tag.id])
                 try db.execute(
-                    sql: """
-                        UPDATE post_tag SET deleted_at = NULL
-                        WHERE tag_id = ? AND deleted_at = ?
-                          AND post_id IN (SELECT id FROM container WHERE deleted_at IS NULL)
-                          AND NOT EXISTS (SELECT 1 FROM post_tag twin
-                                           WHERE twin.tag_id = post_tag.tag_id
-                                             AND twin.post_id = post_tag.post_id
-                                             AND twin.deleted_at IS NULL)
-                        """,
-                    arguments: [tag.id, pass.stamp])
+                    sql: Self.revivePostTagApplicationsSQL, arguments: [tag.id, pass.stamp])
                 try db.execute(
-                    sql: """
-                        UPDATE block_tag SET deleted_at = NULL
-                        WHERE tag_id = ? AND deleted_at = ?
-                          AND block_id IN (SELECT id FROM block WHERE deleted_at IS NULL)
-                          AND NOT EXISTS (SELECT 1 FROM block_tag twin
-                                           WHERE twin.tag_id = block_tag.tag_id
-                                             AND twin.block_id = block_tag.block_id
-                                             AND twin.deleted_at IS NULL)
-                        """,
-                    arguments: [tag.id, pass.stamp])
+                    sql: Self.reviveBlockTagApplicationsSQL, arguments: [tag.id, pass.stamp])
                 revived.append(tag.id)
             }
             return revived
         }
     }
+
+    /// The inverse's application revivals — one tag's `post_tag` rows dead on
+    /// the pass's stamp, onto a live note, never beside a live twin. Arguments:
+    /// `[tagID, stamp]`. A constant so the plan pin reads the shipped statement.
+    ///
+    /// **P1 (ladder r1 F-1):** the live-target guard is a CORRELATED `EXISTS`
+    /// that seeks the one note by its key. The first form — `post_id IN (SELECT
+    /// id FROM container WHERE deleted_at IS NULL)` — is a list subquery SQLite
+    /// materialises by scanning the whole table, once per revived tag: an undo
+    /// that cost the size of the store. Same rows either way.
+    static let revivePostTagApplicationsSQL = """
+        UPDATE post_tag SET deleted_at = NULL
+        WHERE tag_id = ? AND deleted_at = ?
+          AND EXISTS (SELECT 1 FROM container c
+                       WHERE c.id = post_tag.post_id AND c.deleted_at IS NULL)
+          AND NOT EXISTS (SELECT 1 FROM post_tag twin
+                           WHERE twin.tag_id = post_tag.tag_id
+                             AND twin.post_id = post_tag.post_id
+                             AND twin.deleted_at IS NULL)
+        """
+
+    /// `revivePostTagApplicationsSQL`'s block twin: onto a live block, seeked
+    /// by its key (the block table is the store's largest but one).
+    static let reviveBlockTagApplicationsSQL = """
+        UPDATE block_tag SET deleted_at = NULL
+        WHERE tag_id = ? AND deleted_at = ?
+          AND EXISTS (SELECT 1 FROM block b
+                       WHERE b.id = block_tag.block_id AND b.deleted_at IS NULL)
+          AND NOT EXISTS (SELECT 1 FROM block_tag twin
+                           WHERE twin.tag_id = block_tag.tag_id
+                             AND twin.block_id = block_tag.block_id
+                             AND twin.deleted_at IS NULL)
+        """
 
     /// **The RE-APPLY** (VX-247): the delete again, over exactly the tags the
     /// undo revived that still stand — each through the delete's own subtree
