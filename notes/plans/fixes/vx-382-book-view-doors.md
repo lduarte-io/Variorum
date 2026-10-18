@@ -216,7 +216,7 @@ tickets:
 |---|---|
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
 | U1a — VX-303 (the landing road) | VERIFIED 2026-10-18 (`vx-382-u1a` window) — red-on-old A·B·C red as planned, both guard probes red, tree restored clean between each; batch `Test run with 1590 tests in 259 suites` — 4 issues + 5 known: VX-115's standing red (BookCollectingDoorsTests) + `DestructiveUndoWarningTests.redoNeverAsks` (the known VX-167 parallelism flake, signature :141–143); VX-77's standing red did NOT reproduce (passed). 9 skipped (2 disabled suites). §U1a RECORD → batch results. Code tip f0d1b414f |
-| U1b — VX-304 (the box door + Index takes) | IN-PROGRESS — piece A (seams) a45d93a6c; the pins committed (compiling, red by design until B/C/D); B (the box door), C (Index badges + sheet) and D (the carry) committed — BUILT, batch + walk PENDING the `vx-382-u1b` window. §U1b RECORD |
+| U1b — VX-304 (the box door + Index takes) | BUILT — batch + walk PENDING the `vx-382-u1b` window. Pieces A · pins · B · C · D committed (§U1b RECORD ▸ Commits; code tip 6ee8a8ec2); headless build green; core suite green (one unrelated MCP timing pin, passes alone); suite list `scratchpad/u1b/only-testing.args` (332 suites); red-on-old plan and THE U1 WALK plan in §U1b RECORD |
 | U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | NOT STARTED |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
 | Closeout (canon deltas, tickets, PR, handoff) | NOT STARTED |
@@ -455,8 +455,8 @@ this check either way.
 
 ## U1b RECORD — VX-304 (implementer: opus-implementer, 2026-10-18)
 
-**Not done in this unit (PENDING the `vx-382-u1b` window):** the red-on-old runs, the green batch and THE U1 WALK —
-the stage is coordinator-held; this session builds headless only.
+**Not done yet (PENDING the `vx-382-u1b` window):** the red-on-old runs, the green Mac batch and THE U1 WALK — the stage
+is coordinator-held; everything to here was built and verified headless.
 
 ### The trace, re-verified on the tip (37bb72404)
 
@@ -556,3 +556,86 @@ the stage is coordinator-held; this session builds headless only.
 - **The spread → Index click-over carries the note only** — the brief names the Outline arm; the spread mounts the same
   editor, so extending it is one arm of `BookAnchor.landing` if ruled.
 - **⌘⇧T in Index** (a routed door) is not added — the registry grows only for a routed door (VX-300's remainder).
+
+### Commits (all on `vx-382-book-view-doors`, pushed)
+
+a45d93a6c (A · seams) · 030e96915 (the pins) · 28fd701f1 (B · the box door) · a0c59c10f (C · Index badges + the
+sheet) · a12df00ce (D · the carry) · 6ee8a8ec2 (P-8's line policy on the two new `fixedSize` sites).
+
+### Verified headless (no stage)
+
+- `xcodebuild build-for-testing` green after every piece (logs `scratchpad/u1b/build-*.log`); no new warning on a
+  touched line.
+- Core `swift test`: VariorumCoreTests **2897 tests / 338 suites passed** (incl. `BlockTOCTakesCountTests`); the app
+  helpers' 40/6 passed; VariorumMCPTests 362/68 with ONE red — `MCPHarnessTimeLimitTests
+  .aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`'s wall-clock bound (`< 15 s`, took 19.4 s under
+  the full parallel run) — re-run ALONE: 3/3 passed in 2.2 s. A load-bound timing pin in a target this unit does
+  not touch (no MCP source reads `TOCRow`/`blockTOC`); recorded, not attributed.
+- `ChromeLineLimitTests`' rule replicated locally over `App/Variorum/Variorum` (0 offenders after 6ee8a8ec2).
+
+### Red-on-old plan (each family by ITSELF, from the committed tree, restored with `git checkout -- <file>` and a clean `git diff` before the next)
+
+In-place edits (the pieces share files with later commits, so `git revert` of B or C does not apply cleanly; D's
+one line is in place too, to keep its record hunk out of it):
+
+| Family | In-place revert | Run | Expected red |
+|---|---|---|---|
+| B — the box door | `BookView.openDoor(_:)`: insert `return nil` as its first line; `SidebarNoteBox`: delete the line `if let onOpenInWrite { rowOpenDoor(onOpenInWrite) }` and make `if state.isLive, let onOpenInWrite {` read `if state.isLive, false, let onOpenInWrite {` | `BookNoteBoxOpenDoorTests`, `SidebarNoteBoxDoorFacesTests` | Door: every `#require(…openInWrite)` fails (selected spread/index; live all three). Faces: "open" 0 and no door frame, both voices, every case |
+| C — the Index's takes | `BookIndexPaneNote.takesBadge`: `if row.hasFan {` → `if false, row.hasFan {`; `BookView.takesDoor(_:)`: `return nil` first; `BookIndexView.takeTakesRequest`: `return` first; `SidebarNoteBox`: `if state.isLive, bar == nil, let onOpenTakes {` → `if state.isLive, false, bar == nil, let onOpenTakes {` | `BookIndexTakesTests`, then `BookNoteBoxOpenDoorTests` (index arm) and `SidebarNoteBoxDoorFacesTests` | Badge nil; the box hands no Takes (`#require`); the request never taken (no sheet); the index arm's `openTakes != nil` line; the Index-live "takes" face 0 |
+| Guard probe — the flush | `BookIndexEditModel.releaseForTakesSheet`: delete the `if let leaving … { await … }` block and the `_ = await session.flushExistingAutosave(…)` line | `BookIndexTakesTests.theBoxsTakesOpensTheLiveBlocksTakesInPlaceHerTypingFirst` | "her typing was written before the sheet read the store" (the 500 ms debounce has not fired at the sheet's appearance); the card likely lacks the letter |
+| Guard probe — the release | same function: delete `authority.blur()` | the same test | "the Index's live pane was released for the sheet" |
+| D — the carry | `BookViewModel.carryPlace`: delete the line `if target.blockID != nil { pendingLanding = target }` | `BookCarryLiveBlockTests` | Model: `pendingLanding` nil; mount: no editable Index pane on block 2 after the click-over |
+
+Not red-on-old by construction (new API, recorded as U1a's rule tests were): `BookCarryLiveBlockTests
+.leavingOutlineNamesHerBlockAndNothingElseDoes` (pure), `BlockTOCTakesCountTests` (core, already green).
+
+### THE U1 WALK — the plan for the `vx-382-u1b` window (U1a's doors + edit-here, U1b's box door, badges, sheet, carry)
+
+Screens to `scratchpad/u1b/screens/` (gitignored). Region captures only (`screencapture -x -R…`), never full-screen.
+Every key through `Tools/WalkKit/keys.sh <devpid> '…'`, every click through `Tools/WalkKit/click.sh <devpid> x y`;
+acts ≥ 2 s apart (the guard's self-trip); re-read every point from a fresh capture after any voice flip; popovers
+driven by CLICKS (cliclick's keyboard never reaches a popover).
+
+0. **Gate.** Run the claim line verbatim. `pgrep -fl 'Variorum.app/Contents/MacOS'` — her `/Applications` app must
+   be ABSENT (`guard.sh` exits 3 otherwise: stop and report, never quit hers). Grants: `guard.sh --author` OK, and a
+   one-line `osascript` AX probe. Build helpers: `swiftc -O -o Tools/WalkKit/wl2 Tools/WalkKit/wl2.swift` (gitignored)
+   and `walk-cap`/`walk-scroll` into `scratchpad/u1b/bin/`.
+1. **Launch** the batch's Debug product (`…/DerivedData/Variorum-dkbmlpshalzxqeftsymzimjxpdhl/Build/Products/Debug/
+   Variorum.app`) with `open -n`; pid by PATH; dismiss What's New if it shows (same MARKETING_VERSION 0.9.7 as main —
+   it should not). If a Castle lock screen shows: `source ~/.variorum/dev-castle.env`, unlock with exactly those
+   values, NOTHING else. Record the starting posture: voice (Settings ▸ Appearance via AX — read, don't click), the
+   appearance default (`defaults read io.lduarte.Variorum.debug appearanceChoice`).
+2. **The book.** On the Bookcase, find the bilingual-style book (the Portuguese-titled import, e.g. "o ladrão de
+   raios", from the capture — ⌘K → its name → ⏎ if the row is not in view). Opens in Outline.
+3. **Voice 1 (the starting voice) — U1a's doors (routing; one voice suffices):**
+   - W1 Outline: unfold a note, click mid-sentence in its 2nd block; press the expanded header's "open ↗" → capture:
+     Write, caret line in that block. ⌥⌘[ back.
+   - W2 Outline: a COLLAPSED card's "open ↗" (nothing live) → capture: Write, at the note's start. Back.
+   - W3 Index: click into a block mid-text (live pane), the column row's ⋯ ▸ "Open in the full editor" → capture:
+     Write at that block. Back.
+   - W4 Book (spread): click into the page's 2nd block; the page header's "open ↗" → capture: Write at that block. Back.
+   - W5 edit-here rider (spread): click into block 3; click out (the spread's empty margin) → the box shows
+     "edit here" + "open ↗" (capture = also U1b's selected face) → "edit here" → capture: the caret back in block 3.
+4. **U1b — the box door, voice 1:**
+   - W6 Outline live: click into a block → the box's title line wears "open ↗" (capture the box) → press it →
+     capture: Write at that block. Back.
+   - W7 Index selected (a column row clicked, nothing live) → the box row [edit here][open ↗] (capture) → "open ↗" →
+     capture: Write (the plain open's place). Back.
+   - W8 Index live: click into a block → the box: title "open ↗" + the "Takes" cell (capture) → title "open ↗" →
+     capture: Write at that block and caret ("open in Write here"). Back.
+5. **U1b — the Index's takes, voice 1:**
+   - W9 badges: Index pane — a block with takes wears "⑂N" right of its first line, one-take blocks nothing (capture;
+     if the book has no fanned block, make one via Outline's bar "Takes" → "＋ new take (branch)", and DELETE it at
+     the end through the same panel's ⋯ ▸ Delete — content restored).
+   - W10 the badge → the in-place sheet over the book (capture) → "Open Takes mode" → the refusal toast (capture) →
+     (the panel dismisses itself, as over the Outline).
+   - W11 the box's "Takes" on a live block → the sheet on THAT block (capture: the header names it) → Close → the box
+     shows the note SELECTED (the live pane released — capture).
+6. **U1b — the carry, voice 1:** W12 Outline: click into a note's 2nd block mid-sentence → the masthead's "Index" tab
+   → capture: Index with that block LIVE (the ring) at her caret.
+7. **Voice 2:** Settings ▸ Appearance ▸ the other voice (AX radio); re-capture the FACES only: W5' (selected row),
+   W6' (Outline live title door), W8' (Index-live box with Takes), W9' (badges), W10' (the sheet). Then restore the
+   starting voice (AX), and re-read it to verify.
+8. **Restore & quit:** no typing was done; delete any take W9 minted; the dev store stays UNLOCKED; appearance
+   default unchanged (verify `defaults read`); quit by identity (`tell application id "io.lduarte.Variorum.debug" to
+   quit`), then `pgrep -fl 'Variorum.app/Contents/MacOS'` EMPTY before reporting. The stage is NOT released by me.
