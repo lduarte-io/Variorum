@@ -280,7 +280,7 @@ struct SettingsLockCloseTests {
                     _ = gate.wait(timeout: .now() + 20)
                 })
             }
-            func opening() -> Bool {
+            @MainActor func opening() -> Bool {
                 if case .opening = bootstrap.state { return true }
                 return false
             }
