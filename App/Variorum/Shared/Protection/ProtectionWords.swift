@@ -78,6 +78,84 @@ nonisolated enum ProtectionWords {
     static let setPassphraseButton = "Set passphrase"
     static let passphraseSetReceipt = "Passphrase set. Your twelve words still open the library too."
 
+    // MARK: - (8) Make this my library's confirm — §7c (8), verbatim (rule 17; VX-306 U3)
+
+    static let makeMineTitle = "Make this my library?"
+    /// The lead as drafted — the library has a passphrase (the posture word is Standard by construction this phase:
+    /// every library the new road opens is Standard until VX-307's crossings).
+    static let makeMineLead = "This copy becomes a new library — in Standard, under your current twelve words and "
+        + "passphrase — with a fresh key of its own. Your current library steps aside whole into Previous Libraries, "
+        + "where you can look inside it or make it your library again. The copy itself is not changed."
+    /// The lead the confirm shows: §7c (8) as drafted when a passphrase is set; with none, the same sentence without
+    /// "and passphrase" (a library with no passphrase is not under one — PROVISIONAL P-VX306-U3-3, her taste call).
+    static func makeMineLeadShown(passphraseSet: Bool) -> String {
+        passphraseSet
+            ? makeMineLead
+            : makeMineLead.replacingOccurrences(of: "twelve words and passphrase", with: "twelve words")
+    }
+    static let makeMineCopySecretField = "The copy's passphrase or twelve words"
+    static let makeMineWordsField = "Your twelve words"
+    static let makeMinePassphraseField = "Your passphrase"
+    static let makeMineButton = "Make this my library"
+
+    // MARK: - (9) The receipt — §7c (9), verbatim
+
+    static let makeMineReceipt = "This is your library now. The previous one is in Previous Libraries."
+
+    // MARK: - (10) Look inside's frame line — §7c (10), verbatim (`<date>` written in by `day`)
+
+    static func lookInsideFrame(_ date: String) -> String {
+        "This is a copy from \(date). Nothing you do here changes it or your library."
+    }
+
+    // MARK: - The doors' names — the plan's U3 addendum ("each row with *Look inside…* and *Make this my library…*")
+
+    static let lookInsideDoor = "Look inside\u{2026}"
+    static let makeMineDoor = "Make this my library\u{2026}"
+
+    // MARK: - U3's lines §7c does not draft — PROVISIONAL P-VX306-U3-2 (from the rules' own words, sentence case)
+
+    /// The Restore list's lead (rule 17: "The app's Restore from Backup is this door").
+    static let restoreListLead = "Look inside a copy to read it without changing anything, or make it your library — "
+        + "your current one steps aside into Previous Libraries."
+    /// The second group: copies of other libraries on this Mac (rule 19: "Copies of other libraries are listed"), the
+    /// library that stepped aside among them (§7c (8): "where you can look inside it or make it your library again").
+    static let otherLibrariesHeading = "Other libraries on this Mac"
+    /// A row's kind.
+    static func copyKind(_ kind: CopyKind) -> String {
+        switch kind {
+        case .backup: return "Backup"
+        case .previousLibrary: return "Previous library"
+        case .adoptionSafetyCopy: return "Opened copy"
+        }
+    }
+    /// The copy field's quiet note (an empty field tries your own pair — rule 4: your current secrets open older
+    /// backups of the same library).
+    static let makeMineCopySecretNote = "Leave it empty if your own passphrase and words open it."
+    static let makeMineCancel = "Cancel"
+    static let makeMineWorking = "Making this copy your library\u{2026}"
+    static let makeMineChecking = "Checking the copy\u{2026}"
+    /// Nothing typed or quiet opens the copy (`ExecutorRefusal.copyDoesNotOpen`).
+    static let copyDoesNotOpen = "That doesn't open this copy. Enter the copy's own passphrase or twelve words."
+    /// The copy left its place between the list and the press.
+    static let copyGone = "That copy isn't there any more."
+    /// Another act on the library is running.
+    static let copyDoorBusy = "Another change to your library is still running. Try again in a moment."
+    /// The act refused before anything moved (or rolled back whole).
+    static let makeMineFailed = "Variorum couldn't make this copy your library just now. Nothing changed."
+    /// A picked plain-text export — its landing (T-8) is VX-309's, never today's adoption on the new road.
+    static let plaintextCopyNotYet = "Opening a plain-text copy isn't ready in this build yet."
+    /// A picked copy the new road can't read (rule 26 — a copy from before this design is not handled; no sentence
+    /// names it): today's honest minimum.
+    static let pickedCopyUnreadable = "This file couldn't be read as a library."
+    static let filingLine = "Reading what you picked\u{2026}"
+    /// The picked thing is the library open now (or its folder) — a copy of it is never filed over it.
+    static let pickedLiveLibrary = "That's the library you have open now."
+    /// The picked pair could not be copied into this Mac's safety copies (the picked thing was only read).
+    static let filingFailed = "Variorum couldn't keep a copy of what you picked. Nothing you picked was changed."
+    /// The picked copy, filed: what it is.
+    static func pickedCopyLine(_ day: String) -> String { "A copy from \(day)." }
+
     // MARK: - The lobby (rule 8: it asks only when no quiet road remains) — PROVISIONAL P-VX306-U1b-4
 
     static let lobbyTitle = "Open your library"

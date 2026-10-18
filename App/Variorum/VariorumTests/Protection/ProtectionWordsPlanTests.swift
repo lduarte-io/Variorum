@@ -65,6 +65,29 @@ struct ProtectionWordsPlanTests {
         #expect(ProtectionWords.offerRestoredFromKeychain.hasPrefix("Key file restored from "))
     }
 
+    /// VX-306 U3 — Make this my library's confirm, its receipt and Look inside's frame line (§7c (8)–(10)), and the
+    /// two doors' names (the plan's U3 addendum: "each row with *Look inside…* and *Make this my library…*").
+    @Test func theTwoDoorsWordsAreSection7cAndTheAddendumVerbatim() throws {
+        let words = try Self.section7c()
+        for string in [
+            ProtectionWords.makeMineTitle, ProtectionWords.makeMineLead, ProtectionWords.makeMineCopySecretField,
+            ProtectionWords.makeMineWordsField, ProtectionWords.makeMinePassphraseField, ProtectionWords.makeMineButton,
+            ProtectionWords.makeMineReceipt, ProtectionWords.lookInsideFrame("<date>"),
+        ] {
+            #expect(words.contains(Self.italic(string)), "§7c drafts *\(string)* — byte-equal")
+        }
+        // The lead the confirm shows is the drafted one whenever a passphrase is set (P-VX306-U3-3: without one, the
+        // passphrase clause alone is left out).
+        #expect(ProtectionWords.makeMineLeadShown(passphraseSet: true) == ProtectionWords.makeMineLead)
+        let without = ProtectionWords.makeMineLeadShown(passphraseSet: false)
+        #expect(!without.contains("passphrase") && without.contains("under your current twelve words — with a fresh key"))
+        let plan = try Self.plan()
+        let addendum = try #require(plan.range(of: "**U3 brief addendum"))
+        let doors = String(plan[addendum.lowerBound...])
+        #expect(doors.contains(Self.italic(ProtectionWords.lookInsideDoor)))
+        #expect(doors.contains(Self.italic(ProtectionWords.makeMineDoor)))
+    }
+
     /// The model's constants — her sentences — are the plan's too (the face reads them, never restates them).
     @Test func theNoticeAndTheOfferSentencesAreTheModelsAndThePlans() throws {
         let words = try Self.section7c()

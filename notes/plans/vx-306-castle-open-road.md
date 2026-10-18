@@ -1689,7 +1689,18 @@ B's five files under `~/vx306-walk/B` (for U3's Look inside); instances 0; stage
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton: DONE (this commit).
 - Piece 1 — the shared `CopyDoorsModel` (pure, testable) over the executor's two doors and the catalogue + the words §7c
-  (8)–(10) in `ProtectionWords.swift` + the plan-byte-equality pin: NOT-STARTED.
+  (8)–(10) in `ProtectionWords.swift` + the plan-byte-equality pin: DONE (this commit) — `Shared/Protection/
+  CopyDoorsModel.swift`: `CopyDoorsListing` (pure — this library's copies newest first, then every other library's on this
+  Mac; a copy no format-3 key file names left out, rule 26 — P-VX306-U3-1), `CopyDoorRefusal` (each worded),
+  `CopyDoorsRoads` (every act injected), `MakeMineModel` (§7c (8): the copy's quiet road tried once at the confirm's open;
+  its secret asked only when that fails, an EMPTY field trying her own pair — rule 4, P-VX306-U3-4; her words always, her
+  passphrase when its lock exists; the words validated before the act; the copy field read as twelve words when they
+  validate, else a passphrase, untrimmed), `CopyDoorsModel` (the picked flow's phases: reading · refused · choosing ·
+  doors · makeMine · done) and `CopyDoorsListModel`. The words: §7c (8) (9) (10) verbatim + the addendum's two door names;
+  the lead without its passphrase clause when none is set (P-VX306-U3-3); U3's undrafted lines (P-VX306-U3-2). Pins:
+  `CopyDoorsModelTests` (9, planted — no keychain, no disk), `ProtectionWordsPlanTests` +1 (§7c (8)–(10) and the
+  addendum's door names byte-equal to the plan). HEADLESS (the session's SwiftPM harness — the record's close says how):
+  green; the Mac run PENDING under the stage.
 - Piece 2 — MAKE THIS MY LIBRARY on a catalogued copy (Settings ▸ Data Safety's Restore list under the new road — the
   catalogue's copies, newest first; the confirm §7c (8); the secrets the executor requires; the act with the pool CLOSED
   through `AppBootstrap`'s adoption seam; the restore HOLD by the core writer; the reopen through the new road with the new
