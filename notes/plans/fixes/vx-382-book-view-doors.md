@@ -244,7 +244,7 @@ tickets:
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
 | U1a — VX-303 (the landing road) | VERIFIED 2026-10-18 (`vx-382-u1a` window) — red-on-old A·B·C red as planned, both guard probes red, tree restored clean between each; batch `Test run with 1590 tests in 259 suites` — 4 issues + 5 known: VX-115's standing red (BookCollectingDoorsTests) + `DestructiveUndoWarningTests.redoNeverAsks` (the known VX-167 parallelism flake, signature :141–143); VX-77's standing red did NOT reproduce (passed). 9 skipped (2 disabled suites). §U1a RECORD → batch results. Code tip f0d1b414f |
 | U1b — VX-304 (the box door + Index takes) | VERIFIED 2026-10-18 (windows `vx-382-u1b` + `vx-382-u1b-walk`) — red-on-old B·C·D + both guard probes red as planned; batch 1998 tests / 332 suites: standing reds only (VX-115; VX-167's redoNeverAsks, red alone, same signature) + FINDING D-2, FIXED ab3db8f19 (the departing Outline ate the reveal) — 64-suite family 308/64 green (4 known), its red-on-old red; OutlineRoomTests PASSED; THE U1 WALK: Study 11 rows PASS (W1/W3 not walked — same road, pinned), Terminal 6 face/act rows PASS; posture restored, 0 instances, 0 GiB pruned (nothing superseded). §U1b RECORD |
-| U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | NOT STARTED |
+| U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | IN-PROGRESS (implementer: opus-implementer, fresh, 2026-10-18) — VX-77's archaeology DONE headless (§U2 RECORD: no main-side fixing commit found; the red's pattern points at the test host's appearance — the window's probe decides); next VX-291 → VX-21 → VX-69 → VX-115; every run PENDING the `vx-382-u2` window |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
 | Closeout (canon deltas, tickets, PR, handoff) | NOT STARTED |
 
@@ -786,3 +786,52 @@ kept), U1a's reverts were in place (no revert-build cache), and Xcode already ke
 GiB freed.** Seen, not touched (not this worktree's): two untagged caches `Variorum-dwsllegayujwheeyiqdaxidevnxh`
 (22 MB) and `Variorum-fpwbhptcstaitjfwausnqrbvbqqe` (88 MB), both 2026-10-17 19:23, no `info.plist` — the
 coordinator's to judge.
+
+## U2 RECORD — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 (implementer: opus-implementer, fresh, 2026-10-18)
+
+**Not done yet (PENDING the `vx-382-u2` window):** every red-on-old run, the green Mac batch, VX-77's two confirming
+runs and THE U2 WALK — the stage is coordinator-held; everything here is built and verified headless.
+
+### VX-77 — the archaeology (headless, 2026-10-18; the window confirms)
+
+**Verdict (headless): no main-side code change restored the floor, because no product regression caused the red —
+the red was the TEST HOST'S APPEARANCE.** The window's two runs decide it (below); until then this is the leading
+hypothesis with a traced mechanism, not a closed finding.
+
+- **The pin reads LUMINANCE, not geometry.** `leftmostInkX` (OutlineRoomTests.swift:43, copied from
+  BookOrderConversionTests) returns the first pixel with luminance < 0.6 in x < 40. "Ink at 0.0 pt" is pixel 0 —
+  which a DARK room is (both voices' dark rooms are black by R51). The test host IS the dev-store app: its
+  `AppearanceController` (VariorumAppDelegate) applies the dev domain's `appearanceChoice` as `NSApp.appearance` at
+  launch, so a dev domain left on `dark` renders every pin window dark (`tokens(for: scheme)` / `.fallback(for:)`).
+- **The dev domain WAS on dark through the red window.** VX-83's walker (2026-10-08 ~00:24, `vx-83-search-followup.md`
+  §WALK EXECUTION) recorded the FOUND posture "`appearanceChoice` dark" and restored it to dark (restore-what-you-found).
+- **The red's dated pattern fits it and fits nothing in the code:** red on 2026-10-07 — VM-5's isolated run on
+  b6113a66 (**2 issues** = (a) the Index panel AND (b) Read's contents column, a different surface, both at 0.0),
+  VX-75's regression (19:42+; 3 issues — these 2 + `BookOrderConversionTests.theNavigatorsChromeStaysInsideItsColumn`,
+  the same scan on a third surface), VX-92's regression (night). Green from 2026-10-09 on — 13n-a's stage run
+  (11:08, BookOrderConversionTests green), the 13n-b closeout's whole target twice (2026-10-10, 4,212/687: only VX-115
+  and VX-149 red), every whole-target run since, and this run's two wide batches (259 and 332 suites). The machine
+  today: system appearance Light (no `AppleInterfaceStyle`, no auto-switch); dev domain `appearanceChoice` = `system`.
+- **The code archaeology found no fixer.** Between VX-92's red (main e80762bb6) and the 13n-b green (b847a3f4b) the
+  Index column's render tree changed only by: `.tourAnchor` on the note rows and mode tabs (13s-b — inert outside a
+  tour), the Index footer's receipt slot predicate (`hostsQuietReceipt:` — opacity only), and `QuietReceiptLine`'s
+  door buttons (drawn only while a receipt speaks; an idle slot is zero-width). `BookFilterBar`, `BookIndexGrouping`,
+  `SideColumn`, `BookArrivals` are untouched since b6113a66; the masthead only GAINED chrome since (13o's 🔍). A
+  product regression would also not explain (b) — Read's contents column shares no chrome with the Index panel.
+- **One puzzle, recorded:** VX-92's record names only OutlineRoomTests red though its runbook expected the navigator
+  pin too; a dark host would redden both. Its log is gone with its worktree; the window's probe answers it.
+
+**What the window must confirm (both runs `OutlineRoomTests` + `BookOrderConversionTests`, alone):**
+1. **On the tip, dev domain `system` (today's posture):** `bothColumnsChromeStaysInsideThemAtTheirFloors` GREEN.
+2. **The probe — the dev domain set to `dark`** (`defaults write io.lduarte.Variorum.debug appearanceChoice dark`,
+   restored to `system` right after and read back): expected RED at "ink at 0.0" on (a) AND (b) — the VM-5
+   signature exactly — and the navigator pin red too. If so, VX-77 is **DISMISSED AS HOLLOW** (no product
+   regression; the pin's verdict depends on the shared dev domain's appearance) — no product code change, the
+   ticket closes as not-a-product-red. If the probe stays green, the hypothesis is falsified and VX-77 reopens on
+   the original path (bisect in a later window — never a guess).
+
+**Not built (the brief's rule: never "fix" a green test) — offered for the orchestrator's ruling:** the pins' own
+robustness — `window.appearance = NSAppearance(named: .aqua)` in the three luminance-scan mounts (OutlineRoomTests'
+`mountBook` and `withReadHost`, BookOrderConversionTests' navigator pin) would make the scan's verdict independent of
+the host's posture (the "suites share real UserDefaults" class CLAUDE.md names). A test-only change, red-on-old by the
+same dark probe. Owner if not ruled in: a Tests & tooling ticket.
