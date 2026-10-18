@@ -377,8 +377,9 @@ struct CanvasView: View {
                 .savepointNameAsk(
                     Binding(get: { model.savepointAsk }, set: { model.savepointAsk = $0 }),
                     tokens: tokens, arrowEdge: .bottom
-                ) { _, name in
-                    Task { await model.fileSavepoint(named: name) }
+                ) { pending, name in
+                    // VX-347: the take ⌘S ASKED about, whichever way the field was left.
+                    Task { await model.fileSavepoint(pending, named: name) }
                 }
         }
         // 13b 1b (AD-14): outcomes speak through the ONE shell toast.

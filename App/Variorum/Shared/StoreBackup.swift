@@ -409,6 +409,9 @@ final class StoreBackup {
                     try FileManager.default.removeItem(at: destination)
                 }
                 try FileManager.default.copyItem(at: source, to: destination)
+                // VX-338: this Mac wrote this copy — on its own list, so its own
+                // retention may one day prune it, and no other Mac's can be.
+                recordOwnFarSnapshot(destination.lastPathComponent, in: defaults)
                 // pre-13x 2a (row 42): the pair travels with its snapshot —
                 // written once beside the far copy, never rewritten.
                 let sourcePair = pairedKeyFile(for: source)
@@ -421,7 +424,7 @@ final class StoreBackup {
                 leg.file = destination.lastPathComponent
                 leg.integrity = integrityCheck(of: destination, using: artifactConfiguration)
                 leg.pruned = try pruneSecond(
-                    in: target, policy: configuration.secondPolicy)
+                    in: target, policy: configuration.secondPolicy, defaults: defaults)
             }
         } catch {
             leg.outcome = .failed
@@ -430,17 +433,64 @@ final class StoreBackup {
         return leg
     }
 
-    /// The 14+4 sweep. The RULE is `BackupRetention` (pure, tested); this is
-    /// only the filesystem half.
+    /// The 14+4 sweep — over THIS MAC'S OWN copies only (VX-338). The RULE
+    /// is `BackupRetention` (pure, tested); this is only the filesystem half.
+    ///
+    /// **VX-338 (her ruling 2026-10-14, VX-266 design §9 call 4 — "yeah we
+    /// can do the small bug fix"): two Macs sharing a picked folder pruned
+    /// each other's backups.** The iCloud Drive offer opens at iCloud Drive's
+    /// root, so her Pro and her Air, both accepting it, write into one
+    /// `<pick>/Variorum/Backups/`; this sweep counted EVERY app-named snapshot
+    /// there, whichever Mac wrote it, and the 14+4 rule (newest per day wins)
+    /// deleted the other Mac's copies on each run. Now a snapshot counts — and
+    /// can be deleted — only when it is on THIS Mac's own list
+    /// (`ownFarSnapshots`: the names this Mac copied into the picked folder,
+    /// device-local). Another Mac's copy is never on it, so it is never
+    /// counted against this Mac's rule and never deleted; nor is any copy
+    /// written before this fix (no Mac's list holds it) — an existing shared
+    /// folder is never cleaned up by deletion. The list is reconciled here:
+    /// a name whose file is gone (deleted by hand, or by an older build on the
+    /// other Mac) leaves it, so it stays bounded by the rule's 18.
     nonisolated static func pruneSecond(
-        in directory: URL, policy: BackupRetention.Policy
+        in directory: URL, policy: BackupRetention.Policy, defaults: UserDefaults
     ) throws -> Int {
         let candidates = try existingBackups(in: directory).compactMap { url in
             date(fromBackupURL: url).map { BackupRetention.Candidate(url: url, date: $0) }
         }
-        let doomed = BackupRetention.prune(candidates, policy: policy)
-        for url in doomed { try removeSnapshotPair(url) }
+        let own = ownFarSnapshots(in: defaults)
+        var stillOwn = own.intersection(candidates.map(\.url.lastPathComponent))
+        // Whatever happens below, the list keeps exactly the own copies left.
+        defer { setOwnFarSnapshots(stillOwn, in: defaults) }
+        let doomed = BackupRetention.prune(candidates, policy: policy, ownedBy: own)
+        for url in doomed {
+            try removeSnapshotPair(url)
+            stillOwn.remove(url.lastPathComponent)
+        }
         return doomed.count
+    }
+
+    // MARK: - This Mac's own copies in the picked folder (VX-338)
+
+    /// The names of the snapshots THIS Mac copied into the picked folder —
+    /// device-local (`UserDefaults`, like the folder's bookmark and the log:
+    /// never synced, never written into the folder), so another Mac sharing
+    /// the folder holds its own list and never this one. Names, not paths:
+    /// a snapshot's name IS its identity (stamp + key fingerprint), and a
+    /// folder she moves keeps its copies' names.
+    nonisolated static let ownFarSnapshotsKey = "variorum.backup.ownFarSnapshots"
+
+    nonisolated static func ownFarSnapshots(in defaults: UserDefaults) -> Set<String> {
+        Set(defaults.stringArray(forKey: ownFarSnapshotsKey) ?? [])
+    }
+
+    nonisolated static func recordOwnFarSnapshot(_ name: String, in defaults: UserDefaults) {
+        var own = ownFarSnapshots(in: defaults)
+        own.insert(name)
+        setOwnFarSnapshots(own, in: defaults)
+    }
+
+    nonisolated private static func setOwnFarSnapshots(_ names: Set<String>, in defaults: UserDefaults) {
+        defaults.set(names.sorted(), forKey: ownFarSnapshotsKey)
     }
 
     /// `PRAGMA integrity_check` on a copy just written, plus the one step

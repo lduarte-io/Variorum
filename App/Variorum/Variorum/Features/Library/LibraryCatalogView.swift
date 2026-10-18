@@ -137,6 +137,9 @@ struct LibraryCatalogView: View {
     /// 13n-c U3: the window's road to the MCP door (nil in harness mounts —
     /// no share door; VX-272 — none without an approved client).
     @Environment(\.mcpShareRoad) private var mcpShareRoad
+    /// VX-350: the search field's keyboard focus — the 🔍 door puts the caret
+    /// in the field it opens.
+    @FocusState private var searchFieldFocused: Bool
     @State private var tagSheetTarget: SidebarView.TagSheetTarget?
     /// 13i-d U5: the move's confirm (the books the note would leave).
     @State private var wingMove: WingsModel.MoveAsk?
@@ -205,7 +208,12 @@ struct LibraryCatalogView: View {
         // slides and fades with the row selection; the subject swap fades
         // inside the panel — nothing teleports.
         HStack(spacing: 0) {
-            VStack(spacing: 0) {
+            // VX-350: LEADING-aligned — every child fills the column, so
+            // nothing moves at a usable width; when one child's minimum
+            // outgrows a narrow column (the search band's chips), the others
+            // keep their leading edge instead of centring on the wider child
+            // (the controls would slide right, under the clip).
+            VStack(alignment: .leading, spacing: 0) {
                 header
                 Divider().overlay(tokens.line)
                 // 13o U2 (Direction C, R-13o-15): the search state's ONE
@@ -238,7 +246,17 @@ struct LibraryCatalogView: View {
                 QuickEntryBar(session: session, onOpen: onOpen)
                     .libraryGeometryProbe(.quickEntry)
             }
-            .frame(maxWidth: .infinity)
+            // VX-350: the LIST yields when the room is short — the panel takes
+            // its width first and the list column takes what is left, down to
+            // nothing; below the narrowest its controls can collapse to, it
+            // keeps its leading edge and clips its trailing one under the
+            // panel's divider, so the PANEL is never pushed off the window
+            // (it was: this column's minimum — its controls row — plus the
+            // panel overflowed the window and the panel's Close went past the
+            // edge). Nothing in the column draws outside it (popovers and
+            // menus are windows of their own).
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+            .clipped()
             if let hit = model.infoHit {
                 // Ladder R1-17: the divider and the panel are ONE transitioning
                 // group, so the line slides in WITH the column. (A `.transition`
@@ -271,6 +289,13 @@ struct LibraryCatalogView: View {
         .libraryGeometryProbe(.root)
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { libraryWidth = $0 }
         .background(tokens.surface)
+        // VX-176: the Library's system controls wear the VOICE's accent — the
+        // scope and mode segmented controls drew the SYSTEM accent (blue) in
+        // dark Terminal while the panes and the MCP sheets tint with the voice
+        // (`AppSettingsView`'s scene, `MCPGrantSheet` — 13n-c W-UX-11). One
+        // line at the catalog's root, as those hosts do it, so every control
+        // the Library hosts (the Timeline's picker included) speaks one accent.
+        .tint(tokens.accent)
         #if DEBUG
         .environment(\.debugOracleOwner, oracleOwner)
         .onDisappear { LibraryPanelOracle.release(owner: oracleOwner) }
@@ -366,6 +391,11 @@ struct LibraryCatalogView: View {
         .onReceive(NotificationCenter.default.publisher(for: .variorumNotesDeleted)) { _ in
             Task { await model.refresh() }
         }
+        // VX-384 (the VX-348 run, U4): …and it FOLLOWS the held listing — a
+        // note minted, duplicated, revived or removed from ANY door moves the
+        // wing's held membership, and this one-shot listing re-asks in place
+        // (VX-231's road: the held observation followed by its one-shot twin).
+        .onChange(of: library.listingMoves) { _, _ in model.followListingMove() }
     }
 
     // MARK: - The search state's faces (13o U2 — Direction C, R-13o-15)
@@ -592,6 +622,9 @@ struct LibraryCatalogView: View {
                 Text(tokens.path(["Library"]))
                     .font(tokens.heading)
                     .foregroundStyle(tokens.accent)
+                    // VX-350: the surface's own name keeps its words before
+                    // the quiet line beside it gives way.
+                    .layoutPriority(1)
                 // 13n-c U4 — round 5, her words: the wing switcher "lives on
                 // the Bookcase only, which is weird". The Library lists ONE
                 // wing, so it says which — "Library · Home ▾" — and cycles
@@ -602,6 +635,11 @@ struct LibraryCatalogView: View {
                 Text(tokens.chromeLabel("everything — sortable, searchable"))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
+                    // VX-350 (PROVISIONAL P-VX350-7): at a narrow width the
+                    // masthead's quiet line gives way first, on ONE line
+                    // (ending in …) — never wrapping the masthead taller.
+                    .lineLimit(1)
+                    .truncationMode(.tail)
                 Spacer()
                 ForEach(Self.mastheadDoors, id: \.self) { door in
                     Button {
@@ -628,7 +666,13 @@ struct LibraryCatalogView: View {
             let stable = LibraryControlsStableWidths.row(
                 tokens: tokens, prompt: Self.searchPrompt,
                 fieldMaxWidth: Self.searchFieldMaxWidth, in: fontContext)
-            LibraryControlsFlow(spacing: 10, lineSpacing: 8) {
+            // VX-350: at a narrow width the row's collapsed class shows the 🔍
+            // door in the field's place, and the field on its own line below
+            // while she has it open (`searchFieldOpened` — HER state, never
+            // the text). The field stays ONE view in every class (its text
+            // and caret survive every re-flow); a control a class does not
+            // show is placed outside the row, never squeezed.
+            LibraryControlsFlow(spacing: 10, lineSpacing: 8, searchOpen: model.searchFieldOpened) {
                 TextField(tokens.chromeLabel(Self.searchPrompt),
                           text: Binding(get: { model.query }, set: { value in
                               model.query = value
@@ -636,9 +680,22 @@ struct LibraryCatalogView: View {
                           }))
                     .textFieldStyle(.roundedBorder)
                     .font(tokens.small)
+                    .focused($searchFieldFocused)
                     .frame(maxWidth: Self.searchFieldMaxWidth)
                     .libraryGeometryProbe(.searchField)
                     .libraryControlsFloor(stable.fieldFloor)
+                    .libraryControlsRole(.field)
+                LibrarySearchToggle(
+                    tokens: tokens, open: model.searchFieldOpened,
+                    asking: model.searchState.asksAnything
+                ) {
+                    switch model.pressSearchToggle() {
+                    case .openAndFocus, .focus: searchFieldFocused = true
+                    case .close: searchFieldFocused = false
+                    }
+                }
+                .libraryGeometryProbe(.searchToggle)
+                .libraryControlsRole(.toggle)
                 // 17y B-WALK W-2 (her ruling): picking All while in Cards
                 // moves the view to List — the model's door decides.
                 Picker("", selection: Binding(get: { model.scope }, set: { model.pickScope($0); Task { await model.search() } })) {
@@ -751,6 +808,11 @@ struct LibraryCatalogView: View {
                 }
             }
             .libraryGeometryProbe(.controls)
+            // VX-350: the field taking the keyboard (a click, a Tab) opens it,
+            // so a narrow row never hides the field she is typing in.
+            .onChange(of: searchFieldFocused) { _, focused in
+                if focused { model.searchFieldOpened = true }
+            }
             // 13n-c UX walk W-UX-3 (T-1): the bulk doors on a ROW OF THEIR
             // OWN under the controls while several notes are picked. In the
             // controls' row they ran out of width at the default window and
@@ -919,6 +981,8 @@ struct LibraryCatalogView: View {
             }
             .padding(.bottom, LibraryListFace.bottomInset)
         }
+        // VX-349: the headers float only once the list has scrolled under them.
+        .libraryListScrollReader()
         .background(tokens.surface)
     }
 

@@ -32,6 +32,9 @@ actor MCPSocketTransport: Transport {
     private let continuation: AsyncThrowingStream<Data, Swift.Error>.Continuation
     /// Lines read before the transport existed, yielded first (VX-168).
     private let replay: [Data]
+    /// VX-394 (VX-348 U5): the read ended on a message past the cap (answered,
+    /// then closed) — the session's end line says so.
+    private(set) var endedOverLimit = false
 
     init(fd: Int32, replay: [Data] = []) {
         self.fd = fd
@@ -94,6 +97,7 @@ actor MCPSocketTransport: Transport {
     /// overrun message's id cannot be read, so it rides `id: null`, in the
     /// door's refusal shape, naming the cap.
     private func answerOverLimit() {
+        endedOverLimit = true
         guard isConnected else { return }
         let sentence = MCPHandshake.overLimitRefusal(limit: Self.lineCap, beforeInitialize: false)
         _ = Self.writeAll(fd, MCPShim.refusalResponse(toFirstLine: Data(), message: sentence))

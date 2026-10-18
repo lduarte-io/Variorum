@@ -27,7 +27,8 @@ extension Operations {
     @discardableResult
     public func createWing(name: String) throws -> Wing {
         try database.write { db in
-            let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            // VX-357: U+0000 removed first (`StoredText`), then the trim.
+            let trimmed = StoredText.stripped(name).trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmed.isEmpty else { throw OperationError.invalidWingName(name: name) }
             let last = try String.fetchOne(
                 db, sql: "SELECT MAX(position) FROM wing WHERE deleted_at IS NULL")
@@ -46,7 +47,7 @@ extension Operations {
     public func renameWing(_ id: String, to name: String) throws {
         try database.write { db in
             var wing = try liveWingRow(db, id)
-            let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmed = StoredText.stripped(name).trimmingCharacters(in: .whitespacesAndNewlines)  // VX-357
             guard !trimmed.isEmpty else { throw OperationError.invalidWingName(name: name) }
             guard wing.name != trimmed else { return }
             wing.name = trimmed

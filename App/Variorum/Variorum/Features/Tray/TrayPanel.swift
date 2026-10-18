@@ -1103,6 +1103,7 @@ struct TrayPanel: View {
                         .font(tokens.small)
                         .foregroundStyle(tokens.faint)
                         .lineLimit(1)
+                        .stampHelp(TrayTakeFace.leadHelp(take))  // VX-351
                     if let slot = TrayTakeFace.clockSlot(take, now: session.now) {
                         Text(tokens.chromeLabel(slot))
                             .font(tokens.small)
@@ -1213,6 +1214,7 @@ struct TrayPanel: View {
                         .font(tokens.small)
                         .foregroundStyle(tokens.faint)
                         .lineLimit(1)
+                        .stampHelp(TrayRowFace.leadHelp(stamp: stamp, when: when))  // VX-351
                     if let slot = TrayRowFace.clockSlot(clock: clock, forever: forever) {
                         Text(tokens.chromeLabel(slot))
                             .font(tokens.small)
@@ -1368,6 +1370,13 @@ nonisolated enum TrayRowFace {
         return pieces
     }
 
+    /// VX-351 (the VX-348 run, U4 — her R-VX348-1/3): the lead's hover — its
+    /// stamp's whole fact (*Deleted Oct 13, 2026 at 4:02 PM*); the glance
+    /// stays date-only (row 63).
+    static func leadHelp(stamp: String?, when: String) -> String? {
+        TrayRowPreview.stampHelp(stamp, verb: when)
+    }
+
     /// The clock, or the promise of no clock — one of the two, never both
     /// and never neither for a clocked/kept row (13j J1 / round 7).
     static func clockSlot(clock: Int?, forever: Bool) -> String? {
@@ -1413,6 +1422,11 @@ nonisolated enum TrayTakeFace {
         guard let stamp = TrayRowPreview.stampTextDateOnly(
             take.deletedAt, verb: "deleted") else { return [] }
         return [stamp]
+    }
+
+    /// VX-351: the lead's hover — *Deleted Oct 13, 2026 at 4:02 PM*.
+    static func leadHelp(_ take: Queries.TrayTake) -> String? {
+        TrayRowPreview.stampHelp(take.deletedAt, verb: "deleted")
     }
 
     static func clockSlot(_ take: Queries.TrayTake, now: Date) -> String? {

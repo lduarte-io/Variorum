@@ -507,6 +507,7 @@ struct BlocksAreaView: View {
                             .buttonStyle(.plain)
                             .help(SnippetsCopy.tagChipHelp)
                         }
+                        let edited = SnippetCardFace.editedPart(updatedAt: item.updatedAt)
                         ForEach(
                             SnippetCardFace.metadata(
                                 activeTakes: item.block.activeVariantCount,
@@ -518,6 +519,9 @@ struct BlocksAreaView: View {
                                 .font(tokens.small)
                                 .foregroundStyle(tokens.faint)
                                 .lineLimit(1)
+                                // VX-351: the edited part hovers its whole fact.
+                                .stampHelp(part == edited
+                                    ? SnippetCardFace.editedHelp(updatedAt: item.updatedAt) : nil)
                         }
                         // The all-groups view says which group each row
                         // lives in — context only where it adds anything.

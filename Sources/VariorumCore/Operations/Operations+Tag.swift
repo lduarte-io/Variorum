@@ -31,6 +31,9 @@ extension Operations {
     func insertTag(
         _ db: Database, parent parentID: String?, name: String, wingID: String?
     ) throws -> Tag {
+        // VX-357 — the row-level guarantee for every tag mint (`createTag`,
+        // `adoptPath`'s chains): U+0000 removed before the guard and the path.
+        let name = StoredText.stripped(name)
         guard !name.isEmpty, !name.contains("/") else {
             throw OperationError.invalidTagName(name: name)
         }
@@ -58,6 +61,7 @@ extension Operations {
     /// live subtree, in one transaction. Bounded by subtree size — fine
     /// locally; under sync it is plain metadata CAS per row (AppSpec §9).
     public func renameTag(_ id: String, newName: String) throws {
+        let newName = StoredText.stripped(newName)  // VX-357
         try database.write { db in
             guard !newName.isEmpty, !newName.contains("/") else {
                 throw OperationError.invalidTagName(name: newName)

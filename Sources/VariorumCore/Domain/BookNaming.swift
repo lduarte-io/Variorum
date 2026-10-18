@@ -36,8 +36,11 @@ import Foundation
 /// (which books are live) is `Operations.assertBookNameIsFree`.
 public enum BookNaming {
     /// The comparison key two names share when they are "the same name".
+    /// VX-357: any U+0000 is removed first (`StoredText.stripped`) — the store
+    /// keeps a name without it, so a typed name collides exactly as it will
+    /// be stored.
     public static func key(_ name: String) -> String {
-        name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        StoredText.stripped(name).trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }
 
     /// Do these two book names collide under the ruled rule?

@@ -256,6 +256,38 @@ final class LibraryCatalogModel {
     /// is the SEARCH STATE (`searchState` — Direction C's answer sheet), and
     /// the shipped title-LIKE narrowing on this road is retired with it.
     var query = ""
+
+    /// **VX-350 — the 🔍 door's field is open** (the narrow class only shows
+    /// the field while this is so — `LibraryControlsFlow.searchOpen`). HER
+    /// state, set by her acts alone — the 🔍 press, or the field taking the
+    /// keyboard — and never by the text, so neither typing nor a search asked
+    /// from elsewhere (a tag chip, the band) adds or removes the field's line.
+    /// Session-only, like the rest of the catalog's view state.
+    var searchFieldOpened = false
+
+    /// What a press of the 🔍 door does (VX-350, PROVISIONAL P-VX350-2).
+    enum SearchTogglePress: Equatable {
+        /// The field opens below the controls, the caret in it.
+        case openAndFocus
+        /// The field is open and holds a question: the caret goes back into
+        /// it (a question is never hidden by a press).
+        case focus
+        /// The field is open and empty: it closes.
+        case close
+    }
+
+    /// The 🔍 door pressed: open → caret; open with a question → caret;
+    /// open and empty → closed.
+    func pressSearchToggle() -> SearchTogglePress {
+        guard searchFieldOpened else {
+            searchFieldOpened = true
+            return .openAndFocus
+        }
+        if !query.isEmpty { return .focus }
+        searchFieldOpened = false
+        return .close
+    }
+
     /// **The search state's own brain** (13o U2, D8 — P-9): the question, the
     /// band's numbers, the Books section, the groups and their expansions.
     /// Owned here the way `bookRowDoors` is; this model routes the field's
@@ -610,6 +642,40 @@ final class LibraryCatalogModel {
         await read(
             noteDepth: Self.pageSize, groupDepth: LibrarySearchModel.groupPageSize,
             startingOver: true)
+    }
+
+    /// **VX-384 (the VX-348 run, U4) — the one-shot listing FOLLOWS the held
+    /// one** (`LibraryViewModel.listingMoves` — VX-231's road, the Bookcase's
+    /// `followHeldMove` one surface over). Her report (VX-383's walk W1): a
+    /// note duplicated from a List row's own menu spoke its receipt and the
+    /// Bookcase's counts moved, but the List kept its rows until she left the
+    /// Library and came back — this listing is a one-shot `search()` answer,
+    /// re-asked only by its own doors, a wing, a mode and the deleted-notes
+    /// signal, and the row menu's mint re-asked none of them. Now any change
+    /// in WHICH notes the wing holds re-asks it in place (`refresh` — her
+    /// scroll and pages kept), from any door.
+    ///
+    /// SINGLE-FLIGHT, never inside the observation's own turn: a move landing
+    /// while a re-read runs asks for exactly one more after it. ∝ the listed
+    /// rows once per membership move, never per keystroke (P1). An act whose
+    /// own door already re-asks (an archive from the row menu) reads twice —
+    /// VX-231's accepted double read, one per act.
+    @ObservationIgnored private var listingFollow: Task<Void, Never>?
+    @ObservationIgnored private var listingFollowAgain = false
+
+    func followListingMove() {
+        guard listingFollow == nil else {
+            listingFollowAgain = true
+            return
+        }
+        listingFollow = Task { [weak self] in
+            guard let self else { return }
+            repeat {
+                listingFollowAgain = false
+                await refresh()
+            } while listingFollowAgain && !Task.isCancelled
+            listingFollow = nil
+        }
     }
 
     /// **The SAME question, re-asked IN PLACE** after an act on the listing's

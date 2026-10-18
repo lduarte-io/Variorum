@@ -57,11 +57,16 @@ extension Operations {
                     db, texts: [block.text] + block.takes.map(\.text), in: noteID, position: position,
                     defaultIndex: 0, chosenIndex: 0, labels: [nil] + block.takes.map(\.label), now: now)
                 // `createStructuredNote`'s finish: a trimmed, non-empty name.
-                if let name = block.name?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty {
+                // VX-357: U+0000 removed from the name first (`StoredText`);
+                // the texts and labels at the row (`mintFanBlock`), and the
+                // churn counts the shown text as stored.
+                if let name = StoredText.stripped(block.name)?.trimmingCharacters(in: .whitespacesAndNewlines),
+                   !name.isEmpty {
                     try db.execute(sql: "UPDATE block SET name = ? WHERE id = ?", arguments: [name, fan.block.id])
                 }
                 try registerTextChange(
-                    db, blockID: fan.block.id, charDelta: block.text.count, forceMajorRevision: false, now: now)
+                    db, blockID: fan.block.id, charDelta: fan.variants[0].workingText.count,
+                    forceMajorRevision: false, now: now)
                 minted.append(fan)
                 at = .after(fan.block.id)
             }

@@ -283,7 +283,9 @@ struct SidebarNoteBox: View {
                 }
                 if let stamps = NoteBoxCopy.stampsLine(
                     edited: facts.editedAt, saved: facts.savedAt, now: now) {
+                    // VX-351: the whole facts on hover (the one stamp rule).
                     factLine(stamps)
+                        .stampHelp(NoteBoxCopy.stampsHelp(edited: facts.editedAt, saved: facts.savedAt))
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

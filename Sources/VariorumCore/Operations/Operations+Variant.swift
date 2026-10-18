@@ -13,7 +13,12 @@ extension Operations {
     /// Continuous autosave: updates the working buffer and accumulates churn
     /// on the owning container. `charDelta` is the editor-reported signed
     /// character delta for this edit.
+    ///
+    /// VX-357: any U+0000 in `text` is removed before it is stored
+    /// (`StoredText.stripped` — the store cannot hold one; a bind stopped at
+    /// it and lost the rest of the take). Quiet: nothing she can see changes.
     public func autosave(_ variantID: String, text: String, charDelta: Int) throws {
+        let text = StoredText.stripped(text)
         try database.write { db in
             var variant = try editableVariant(db, variantID)
             let now = date.now
@@ -461,7 +466,8 @@ extension Operations {
     func setTakeLabelRows(_ db: Database, _ variantID: String, label: String?) throws -> String?? {
         var variant = try liveVariant(db, variantID)
         try ensurePlacementUnlocked(db, blockID: variant.blockId)
-        let trimmed = label?.trimmingCharacters(in: .whitespacesAndNewlines)
+        // VX-357: U+0000 removed first (`StoredText`), then the ends trimmed.
+        let trimmed = StoredText.stripped(label)?.trimmingCharacters(in: .whitespacesAndNewlines)
         let normalized = (trimmed?.isEmpty ?? true) ? nil : trimmed
         guard variant.label != normalized else { return nil }
         let previous = variant.label

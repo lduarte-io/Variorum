@@ -88,12 +88,38 @@ struct LibraryListSeparator: View {
 /// A section header of the List's face — pinned (floating) over the rows on
 /// the header material, as the table's group rows floated (in LIGHT; in dark,
 /// on the voice's own colours — VX-20, below).
+///
+/// **VX-349 (the VX-348 run, U3) — it floats only over CONTENT.** Her report:
+/// under the List's "Notes" header the line read doubled and extra-thick at
+/// rest, one line while scrolling. THE MECHANISM: `pinned` is "the header's
+/// top is at the scroll view's top" (`minY <= 0.5`), and the FIRST header's
+/// natural place IS the top — so at rest, with nothing scrolled under it, it
+/// drew the FLOATING face: in light the material's darker inset hairline
+/// over the resting separator AND the full-width shadow line one point below
+/// the header, lying on the empty 10-pt lead (two adjacent lines — the
+/// doubled, thick rule); a pull past the top (the elastic bounce of a
+/// scroll) moved it below the top, un-pinned it, and left the resting
+/// separator alone (one line). Now the floating face needs content UNDER the
+/// header — the list scrolled (`LibraryListScrollReader`, the host's scroll
+/// view) — so at rest the first header is the resting header, one line, as
+/// every header mid-list is; the floating face is unchanged.
 struct LibraryListHeader: View {
     /// The words, already voiced (`tokens.chromeLabel`).
     let title: String
     @State private var pinned = false
+    /// Whether the list's content has scrolled under its top edge (the host's
+    /// `LibraryListScrollReader`). A host that does not read its scroll keeps
+    /// the shipped face (the default is `true`).
+    @Environment(\.libraryListContentBeneath) private var contentBeneath
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
+
+    /// **VX-349 — the floating face draws only over content:** the header at
+    /// the top (pinned) AND the list scrolled under it. At rest at the top
+    /// there is nothing under a header to float over.
+    static func floats(pinned: Bool, contentBeneath: Bool) -> Bool {
+        pinned && contentBeneath
+    }
 
     /// The system's shadow ink (appearance-adaptive — never a literal).
     private static var shade: Color { Color(nsColor: .shadowColor) }
@@ -128,6 +154,7 @@ struct LibraryListHeader: View {
 
     var body: some View {
         let face = face
+        let floating = Self.floats(pinned: pinned, contentBeneath: contentBeneath)
         return Text(title)
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(.secondary)
@@ -137,7 +164,7 @@ struct LibraryListHeader: View {
                 maxWidth: .infinity, minHeight: LibraryListFace.headerHeight,
                 maxHeight: LibraryListFace.headerHeight, alignment: .leading)
             .background {
-                if pinned {
+                if floating {
                     switch face {
                     case .material:
                         // The floating group row's face (measured): the header
@@ -157,7 +184,7 @@ struct LibraryListHeader: View {
             }
             .overlay(alignment: .bottom) { LibraryListSeparator() }
             .overlay(alignment: .bottom) {
-                if pinned {
+                if floating {
                     switch face {
                     case .material:
                         VStack(spacing: 0) {
@@ -184,6 +211,53 @@ struct LibraryListHeader: View {
                 pinned = $0
             }
             .accessibilityAddTraits(.isHeader)
+    }
+}
+
+private struct LibraryListContentBeneathKey: EnvironmentKey {
+    static let defaultValue = true
+}
+
+extension EnvironmentValues {
+    /// VX-349: whether the List's content has scrolled under its top edge —
+    /// what a pinned header floats OVER. `true` unless a host reads its
+    /// scroll (`libraryListScrollReader()`), so a host that does not keeps the
+    /// shipped face.
+    var libraryListContentBeneath: Bool {
+        get { self[LibraryListContentBeneathKey.self] }
+        set { self[LibraryListContentBeneathKey.self] = newValue }
+    }
+}
+
+extension View {
+    /// VX-349: on the List face's scroll view — tells its headers whether any
+    /// content lies under the top edge (the scroll's offset past its top
+    /// inset), so the first header floats only once the list has scrolled.
+    func libraryListScrollReader() -> some View {
+        modifier(LibraryListScrollReader())
+    }
+}
+
+/// The reading itself (VX-349): one Bool off the scroll geometry, written
+/// only when it changes — a scroll of the list re-renders nothing else.
+struct LibraryListScrollReader: ViewModifier {
+    @State private var contentBeneath = false
+
+    /// Content lies under the top edge once the offset passes the top inset
+    /// by more than half a point (a pull past the top — the elastic bounce —
+    /// reads as nothing under it, as rest does).
+    nonisolated static func contentBeneath(offsetY: CGFloat, topInset: CGFloat) -> Bool {
+        offsetY + topInset > 0.5
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .environment(\.libraryListContentBeneath, contentBeneath)
+            .onScrollGeometryChange(for: Bool.self) {
+                Self.contentBeneath(offsetY: $0.contentOffset.y, topInset: $0.contentInsets.top)
+            } action: { _, now in
+                contentBeneath = now
+            }
     }
 }
 

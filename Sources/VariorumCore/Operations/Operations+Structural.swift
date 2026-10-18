@@ -1246,9 +1246,11 @@ extension Operations {
             createdAt: now, updatedAt: now)
         try block.insert(db)
 
+        // VX-357 — the row-level guarantee: no mint road stores a U+0000
+        // (`StoredText`; a no-op for the structural ops' stored text).
         let variant = Variant(
-            id: newID(), blockId: block.id, workingText: text,
-            label: label,
+            id: newID(), blockId: block.id, workingText: StoredText.stripped(text),
+            label: StoredText.stripped(label),
             fanPosition: FractionalIndex.initial(),
             createdAt: now, updatedAt: now)
         try variant.insert(db)
@@ -1328,10 +1330,11 @@ extension Operations {
                 // the second pass below (the immediate FK would refuse it).
                 if parent.index < i { parentID = parent.id } else { forwardParented.append(i) }
             }
+            // VX-357 — the row-level guarantee (`mintBlock`'s): no U+0000.
             let variant = Variant(
                 id: ids[i], blockId: block.id, parentVariantId: parentID,
-                workingText: text,
-                label: labels.flatMap { i < $0.count ? $0[i] : nil },
+                workingText: StoredText.stripped(text),
+                label: StoredText.stripped(labels.flatMap { i < $0.count ? $0[i] : nil }),
                 fanPosition: fanPosition, createdAt: now, updatedAt: now)
             try variant.insert(db)
             variants.append(variant)

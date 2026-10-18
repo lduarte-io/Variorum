@@ -310,11 +310,22 @@ struct RestoreHoldBar: View {
                 // this bar is non-scrolling window chrome, and without it
                 // the window's near-zero-width minimum-size probe measures
                 // the sentence one character per line.
-                Text(LibraryOpenCopy.holdBanner(
-                    asOfDay: model.asOfDay, hasAccount: hasAccount))
-                    .font(.caption)
-                    .lineLimit(4)
-                    .fixedSize(horizontal: false, vertical: true)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(LibraryOpenCopy.holdBanner(
+                        asOfDay: model.asOfDay, hasAccount: hasAccount))
+                        .font(.caption)
+                        .lineLimit(4)
+                        .fixedSize(horizontal: false, vertical: true)
+                    // VX-339: a Resume that could not remove the marker says
+                    // so here, and the banner stays (the hold still stands).
+                    // Line-limited for the same minimum-size reason.
+                    if let failure = model.resumeFailure {
+                        Text(failure)
+                            .font(.caption.weight(.semibold))
+                            .lineLimit(3)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
                 Spacer()
                 Button(LibraryOpenCopy.resumeSyncDoor) {
                     Task { await model.resume() }

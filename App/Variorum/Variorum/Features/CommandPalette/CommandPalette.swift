@@ -33,6 +33,9 @@ struct PaletteItem: Identifiable, Equatable {
     let kind: Kind
     let title: String
     let detail: String?
+    /// VX-351 (the VX-348 run, U4 — her R-VX348-3): a note row's stated day
+    /// hovers its whole fact (*Dated Oct 13, 2026*); nil on every other row.
+    var detailHelp: String? = nil
     /// Block rows: the home container to open (round 2, MINOR — a block
     /// hit must NAVIGATE; caret-precise landing is Stage C's).
     var homeContainerID: String?
@@ -120,6 +123,7 @@ final class PaletteModel {
                 id: "\(hit.kind)-\(hit.id)",
                 kind: hit.kind == .book ? .book : (hit.kind == .post ? .post : .block),
                 title: hit.title, detail: hit.detail,
+                detailHelp: hit.kind == .post ? TimeStampFace.tooltip(.dated, day: hit.detail) : nil,
                 homeContainerID: hit.homeContainerID, homeIsPool: hit.homeIsPool)
         }
         result += passages.compactMap(Self.passageItem)
@@ -291,6 +295,7 @@ struct CommandPaletteView: View {
                             Text(tokens.chromeLabel(detail))
                                 .font(tokens.small)
                                 .foregroundStyle(tokens.muted)
+                                .stampHelp(item.detailHelp)  // VX-351
                         }
                         Spacer()
                     }

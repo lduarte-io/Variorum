@@ -174,7 +174,11 @@ extension Operations {
                 }
             }
             guard book.noteCount > 0 else { throw OperationError.emptyImport }
-            let trimmedName = book.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            // VX-357: U+0000 removed from the book's and each chapter's name
+            // before the trim and the name guard (`StoredText`); the notes'
+            // titles, texts and labels at the rows (`insertPost`, `mintFanBlock`)
+            // and their tags by the one path rule (`TagPath`).
+            let trimmedName = StoredText.stripped(book.name).trimmingCharacters(in: .whitespacesAndNewlines)
             let name = trimmedName.isEmpty ? DisplayTitle.placeholder : trimmedName
             // E13 — the door guard, inside the act's own transaction: the
             // import names a book, so it refuses a name a live book wears
@@ -205,7 +209,7 @@ extension Operations {
                 postIDs.append(minted.post.id)
             }
             for chapter in book.chapters {
-                let chapterName = chapter.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                let chapterName = StoredText.stripped(chapter.name).trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !chapterName.isEmpty else {
                     throw OperationError.invalidSectionName(name: chapter.name)
                 }
@@ -291,7 +295,10 @@ extension Operations {
         var renderedLength = 0
         var position: String?
         for block in document.blocks {
-            let takes = keepingBlankTakes ? block.alternates : block.alternates.filter { !$0.text.isEmpty }
+            // VX-357: a take of nothing but U+0000 is blank as stored, so the
+            // file doors drop it like any blank take.
+            let takes = keepingBlankTakes
+                ? block.alternates : block.alternates.filter { !StoredText.stripped($0.text).isEmpty }
             let slot = FractionalIndex.between(position, nil)
             position = slot
             // The in-place text is take 0 — chosen AND default; the
@@ -304,7 +311,7 @@ extension Operations {
             blockIDs.append(minted.block.id)
             blocks.append(MintedBlockTakes(minted))
             alternateCount += takes.count
-            renderedLength += block.text.count
+            renderedLength += minted.variants[0].workingText.count  // the stored text (VX-357)
         }
         // Touch, never churn (the structural convention); the note starts
         // clean — baseline = its rendered length (`copyPost`'s precedent).

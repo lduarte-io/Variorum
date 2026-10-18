@@ -32,6 +32,21 @@ final class LibraryViewModel {
     /// the one shape that most needs a sentence.
     private(set) var receipt: String?
 
+    /// **VX-384 (the VX-348 run, U4) — how many times the held listing's
+    /// MEMBERSHIP has moved** since this listing started: a note came into
+    /// the wing's newest window or left it (a mint, a duplicate, a delete, an
+    /// archive, a revival — from any door, any pane, any window, the AI's or
+    /// a sync apply). The Library's catalog — a ONE-SHOT `search()` answer —
+    /// follows it (`LibraryCatalogModel.followListingMove`), which is VX-231's
+    /// road one surface over: the held observation that already moves
+    /// exactly when membership does, followed by its one-shot twin; no new
+    /// signal. Typing never moves it (the same notes, re-ordered), so the
+    /// follow runs at membership rate, never keystroke rate (P1).
+    private(set) var listingMoves = 0
+    /// The ids the last held delivery listed; nil before the first (which is
+    /// the baseline — the catalog's own appearance read covers it).
+    @ObservationIgnored private var heldIDs: Set<String>?
+
     /// Bounded on purpose: a held observation's fetch must be viewport-shaped
     /// (P1) — `observeLibrary` requires a limit for exactly this reason.
     private let listingLimit = 200
@@ -44,6 +59,8 @@ final class LibraryViewModel {
     /// Runs for the view's lifetime (`.task`); fetches happen on GRDB's
     /// reader queues (P2), only the assignment lands back here.
     func start() async {
+        // A (re)started listing — a wing switch — takes its own baseline.
+        heldIDs = nil
         do {
             // 13i-d U5: the CURRENT WING's notes (§9 — a separate library);
             // the shell restarts this task when the wing switches.
@@ -52,12 +69,21 @@ final class LibraryViewModel {
                 wingID: session.wing.currentID
             ) {
                 posts = items
+                adoptHeldMembership(items)
             }
         } catch is CancellationError {
             // View went away; nothing to do.
         } catch {
             lastError = String(describing: error)
         }
+    }
+
+    /// One held delivery's membership, compared with the last (VX-384) — the
+    /// observation's body, and the pins' seam.
+    func adoptHeldMembership(_ items: [Queries.TimelineItem]) {
+        let ids = Set(items.map(\.postID))
+        if LibraryListingFollow.moved(previous: heldIDs, current: ids) { listingMoves += 1 }
+        heldIDs = ids
     }
 
     /// The journal lens: entries by their user-set day, newest first —
@@ -233,5 +259,16 @@ final class LibraryViewModel {
             self.receipt = nil
             lastError = String(describing: error)
         }
+    }
+}
+
+/// **VX-384 — when the held listing's membership MOVED** (pure, pinned): a
+/// delivery after the first whose set of notes differs from the last one's.
+/// Order is not membership — typing re-orders the newest-first window and
+/// moves nothing here.
+nonisolated enum LibraryListingFollow {
+    static func moved(previous: Set<String>?, current: Set<String>) -> Bool {
+        guard let previous else { return false }
+        return previous != current
     }
 }

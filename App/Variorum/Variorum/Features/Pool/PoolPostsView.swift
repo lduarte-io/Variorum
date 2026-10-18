@@ -349,6 +349,25 @@ struct PoolPostsView: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 10)
             }
+            // VX-385 + VX-355 (the VX-348 run, U4): THE POOL'S QUIET-RECEIPT
+            // HOME. A receipt under her default `receipt_style` quiet speaks
+            // only where a surface hosts the one `QuietReceiptLine` (18i), and
+            // the Pool hosted none: a row's Duplicate with/without Tags
+            // (VX-385), an AI's write landing here and her ⌥⌘Z / ⇧⌥⌘Z
+            // "Undid / Redid" (VX-355) all spoke NOWHERE while it was open.
+            // The Library's own shape (its message row): a laid-out foot below
+            // the cards, present only while a receipt speaks and nothing of
+            // the Pool's own (its error) does. VX-121's band rule applies if a
+            // quick-entry band is ever added here.
+            if PoolReceiptFoot.shows(
+                error: model.lastError, quietReceipt: session.status.quietLine != nil)
+            {
+                Divider().overlay(tokens.line)
+                QuietReceiptLine(status: session.status, tokens: tokens)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 6)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
         .background(tokens.surface)
         .task(id: model.session.wing.currentID) { await model.start() }
@@ -453,6 +472,10 @@ struct PoolPostsView: View {
                                 .font(tokens.small)
                                 .foregroundStyle(tokens.faint)
                                 .lineLimit(1)
+                                // VX-351: the edit's whole fact on hover — the
+                                // picker's own rule (this IS its detail).
+                                .stampHelp(NotePickerRanking.detailHelp(
+                                    title: name.lead.text, entryDate: nil, touchedStamp: item.stamp))
                         }
                     }
                     // Row 87: a titleless card is a wall of bare dates
@@ -693,3 +716,13 @@ enum PoolTuckProbe {
     }
 }
 #endif
+
+/// **VX-385 + VX-355 — when the Pool's foot speaks** (pure, pinned): the one
+/// status seam's QUIET line, while one speaks and the Pool's own error does
+/// not (the Library's message-slot order: its own error first — a refusal —
+/// then the seam's quiet receipt; else nothing, no reserved blank line).
+nonisolated enum PoolReceiptFoot {
+    static func shows(error: String?, quietReceipt: Bool) -> Bool {
+        error == nil && quietReceipt
+    }
+}

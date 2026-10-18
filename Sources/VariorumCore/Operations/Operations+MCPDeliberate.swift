@@ -42,7 +42,8 @@ extension Operations {
     /// (`SavepointName`). A blank message leaves the name alone (the wire
     /// requires one; this keeps the rule total).
     public static func mcpCommitMessage(client: String, message: String) -> String {
-        let said = message.trimmingCharacters(in: .whitespacesAndNewlines)
+        // VX-357: U+0000 removed first, so a message of nothing else is blank.
+        let said = StoredText.stripped(message).trimmingCharacters(in: .whitespacesAndNewlines)
         return said.isEmpty ? client : "\(client): \(said)"
     }
 

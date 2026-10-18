@@ -54,10 +54,14 @@ nonisolated struct SearchPickerOption: Identifiable, Equatable, Sendable {
     /// 13n-c U2 — the annotation is the fact that TELLS this row apart (the
     /// collision ladder's distinguisher): drawn in accent ink, not faint.
     var emphasized: Bool = false
+    /// VX-351 (the VX-348 run, U4 — her R-VX348-3): the row's HOVER — the
+    /// whole fact of a stamp the row says in glance words (a note's day, a
+    /// book's "edited …"); nil = no hover, as ever.
+    var help: String?
 
     init(
         id: String, label: String, annotation: String? = nil, searchText: String? = nil,
-        detail: String? = nil, emphasized: Bool = false
+        detail: String? = nil, emphasized: Bool = false, help: String? = nil
     ) {
         self.id = id
         self.label = label
@@ -65,6 +69,7 @@ nonisolated struct SearchPickerOption: Identifiable, Equatable, Sendable {
         self.searchText = searchText
         self.detail = detail
         self.emphasized = emphasized
+        self.help = help
     }
 }
 
@@ -325,7 +330,10 @@ struct SearchPicker: View {
                         }
                     }
                     ForEach(matches) { option in
-                        row(text: option.label, annotation: option.annotation, emphasis: false) {
+                        row(
+                            text: option.label, annotation: option.annotation, emphasis: false,
+                            help: option.help
+                        ) {
                             pick(option.id)
                         }
                     }
@@ -349,7 +357,8 @@ struct SearchPicker: View {
     }
 
     private func row(
-        text: String, annotation: String?, emphasis: Bool, action: @escaping () -> Void
+        text: String, annotation: String?, emphasis: Bool, help: String? = nil,
+        action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -372,6 +381,7 @@ struct SearchPicker: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .stampHelp(help)  // VX-351
     }
 
     private func submit() {
@@ -594,6 +604,7 @@ struct SearchPickerPanel: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .stampHelp(option.help)  // VX-351: the row's stamp, whole
     }
 
     private func submit() {

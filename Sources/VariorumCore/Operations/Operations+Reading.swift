@@ -70,7 +70,7 @@ extension Operations {
                 }
             }
             let reading = Reading(
-                id: id, ownerId: currentOwnerID(), name: name, kind: kind,
+                id: id, ownerId: currentOwnerID(), name: StoredText.stripped(name), kind: kind,  // VX-357
                 profile: profile, sortField: sortField, sortDir: sortDir,
                 groupingTagId: groupingTagId,
                 querySpec: spec,
@@ -186,7 +186,9 @@ extension Operations {
         throw OperationError.wrongReadingKind(id: reading.id, expected: .book)
     }
 
+    /// VX-357: any U+0000 in the name is removed before it is stored.
     public func renameReading(_ id: String, name: String) throws {
+        let name = StoredText.stripped(name)
         try updateLiveReading(id) { $0.name = name }
     }
 
@@ -506,7 +508,7 @@ extension Operations {
             let profile = source.profile == Queries.dailyJournalBookProfile
                 ? Queries.journalTraitProfile : source.profile
             let duplicate = Reading(
-                id: newID(), ownerId: currentOwnerID(), name: name, kind: .book,
+                id: newID(), ownerId: currentOwnerID(), name: StoredText.stripped(name), kind: .book,  // VX-357
                 profile: profile, sortField: source.sortField, sortDir: source.sortDir,
                 groupingTagId: source.groupingTagId, querySpec: source.querySpec,
                 maxPosts: source.maxPosts, wordTarget: source.wordTarget,

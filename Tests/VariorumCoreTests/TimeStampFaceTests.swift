@@ -228,6 +228,41 @@ struct TimeStampFaceTests {
             locale: Locale(identifier: "en_US")) == "Sep 9")
     }
 
+    /// **VX-351 (the VX-348 run, U4 — her R-VX348-1/3): the whole fact for
+    /// EVERY speaker.** The verbless body has the year always and the minute
+    /// whenever the stamp holds one; a speaker's own verb leads it; the three
+    /// subjects' tooltips are the same door, byte for byte; a stored day key
+    /// spells its day and never an invented noon. New API (fixed-only): the
+    /// red-on-old proof of the hover lives at the speakers (the Mac pins).
+    @Test func everySpeakerSaysTheWholeFactInOneRule() {
+        let instant = date("2026-09-09T16:02:00")
+        #expect(TimeStampFace.whole(instant, calendar: calendar, locale: locale)
+                == "Sep 9, 2026 at 4:02\u{202F}PM")
+        #expect(TimeStampFace.whole(instant, dayPrecision: true, calendar: calendar, locale: locale)
+                == "Sep 9, 2026", "a day has no time to spell")
+        #expect(TimeStampFace.whole(date("2026-09-12T01:33:00"), calendar: calendar, locale: locale)
+                == "Sep 12, 2026 at 1:33\u{202F}AM", "TODAY spells its year too — the hover is the whole fact")
+        #expect(TimeStampFace.tooltip(labelled: "Arrived", date: instant, calendar: calendar, locale: locale)
+                == "Arrived Sep 9, 2026 at 4:02\u{202F}PM")
+        for subject in TimeStampFace.Subject.allCases {
+            #expect(TimeStampFace.tooltip(subject, date: instant, calendar: calendar, locale: locale)
+                    == TimeStampFace.tooltip(
+                        labelled: subject.titleCased, date: instant,
+                        dayPrecision: subject == .dated, calendar: calendar, locale: locale),
+                    "\(subject): one door, byte for byte")
+        }
+        // The ISO door: an instant spells its minute; a DAY KEY its day alone.
+        let iso = DateFormatter.variorumISO8601.string(from: instant)
+        #expect(TimeStampFace.tooltip(labelled: "Saved", iso: iso, calendar: calendar, locale: locale)
+                == "Saved Sep 9, 2026 at 4:02\u{202F}PM")
+        #expect(TimeStampFace.tooltip(labelled: "Dated", iso: "2026-09-09", calendar: calendar, locale: locale)
+                == "Dated Sep 9, 2026", "never an invented 12:00 PM")
+        #expect(TimeStampFace.tooltip(labelled: "Saved", iso: nil, calendar: calendar, locale: locale) == nil)
+        #expect(TimeStampFace.tooltip(labelled: "Saved", iso: "", calendar: calendar, locale: locale) == nil)
+        #expect(TimeStampFace.tooltip(labelled: "Saved", iso: "soon", calendar: calendar, locale: locale) == nil,
+                "text that is not a stamp says nothing rather than a lie")
+    }
+
     /// The day form on its own — the shape 18d's facts line already ships
     /// (`NoteBoxCopy.day` forwards here, so the two can never drift).
     @Test func theDayFormIsTheOneTheFactsLineAlreadyShips() {

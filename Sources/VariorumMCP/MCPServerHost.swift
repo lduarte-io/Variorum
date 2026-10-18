@@ -101,7 +101,13 @@ public final class MCPServerHost: @unchecked Sendable {
         }
     }
 
-    public func stop() {
+    /// Stop: close the listener, unlink the socket, hang up every session.
+    /// **VX-394 (VX-348 U5): `reason` is why** — each connection this stop ends
+    /// leaves that end in the activity log (`MCPConnectionEnd`), written as the
+    /// session ends (the store is open on the switch's road); on the library's
+    /// closing road the door has already said it, before the store closed
+    /// (`recordConnectionEnds`), and the line is never said twice.
+    public func stop(ending reason: MCPConnectionEnd = .serverOff) {
         let (fd, wake, done, live, watcher): (Int32, (read: Int32, write: Int32), DispatchSemaphore?, [MCPSession], Task<Void, Never>?) =
             lock.withLock {
                 let snapshot = (listenFD, wakePipe, acceptDone, Array(sessions.values), observation)
@@ -122,7 +128,35 @@ public final class MCPServerHost: @unchecked Sendable {
         if wake.read >= 0 { close(wake.read) }
         if wake.write >= 0 { close(wake.write) }
         MCPSocketRoad.unlink(directory: directory)
-        for session in live { session.hangUp() }
+        for session in live {
+            session.markEnding(reason)
+            session.hangUp()
+        }
+    }
+
+    /// **VX-394 — say every live connection's end NOW, before the store goes**
+    /// (the library locking or closing — `MCPConnectionEnd.libraryClosed`): one
+    /// activity line per connection that named itself, in ONE write, called by
+    /// the app's lock road while the store is still open (the line a session's
+    /// own end would write races the store's close). Each line is said once:
+    /// the hang-up that follows (`stop(ending:)`) writes nothing more for these
+    /// connections. Synchronous — the caller runs it off the main thread (P2).
+    public func recordConnectionEnds(_ reason: MCPConnectionEnd) throws {
+        let live = lock.withLock { Array(sessions.values) }
+        let claimed = live.compactMap { session in session.claimEndLine(reason).map { (session, $0) } }
+        guard !claimed.isEmpty else { return }
+        do {
+            try database.write { db in
+                for (_, line) in claimed {
+                    try operations.recordMCPActivity(
+                        db, clientName: line.clientName, act: line.end.act, targetKind: nil, targetID: nil,
+                        targetTitle: nil, allowed: true)
+                }
+            }
+        } catch {
+            for (session, _) in claimed { session.releaseEndLine() }
+            throw error
+        }
     }
 
     // MARK: - Accept
@@ -181,7 +215,14 @@ public final class MCPServerHost: @unchecked Sendable {
             // VX-279: the host lets go of the session BEFORE its number is
             // freed (`ended` closes it after deregistering), so a stop that
             // snapshots the sessions afterwards never sees it.
-            if let self { self.ended(session) } else { session.closeConnection() }
+            // VX-394's fix leg: a host already let go of (the door's stop drops
+            // it at once) still has its session's end said — by the session.
+            if let self {
+                self.ended(session)
+            } else {
+                session.closeConnection()
+                session.writeEndLine()
+            }
         }
     }
 
@@ -233,6 +274,11 @@ public final class MCPServerHost: @unchecked Sendable {
             return (name, sessions.values.contains { $0.clientName == name && name != nil })
         }
         session.closeConnection()
+        // VX-394 (VX-348 U5): the connection's end, in the activity log, once
+        // — why the host ended it (a stop's reason), else the over-cap answer,
+        // else the client's own close. Quiet when the store is already gone
+        // (the library's closing road said it first, while it was open).
+        session.writeEndLine()
         if let name, !stillConnected,
            let client = try? database.read({ try Queries.mcpClient($0, name: name) }) {
             try? operations.endMCPConnectionGrants(clientID: client.id)

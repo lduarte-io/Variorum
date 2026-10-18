@@ -58,8 +58,23 @@ final class RestoreHoldModel {
     /// resume (no account — P-U2-2: the press still clears the hold).
     @ObservationIgnored var onResume: (@MainActor () async -> Void)?
 
-    init(storeURL: URL?) {
+    /// VX-339: why the last Resume press did NOT resume — the marker beside
+    /// the store could not be removed, so the hold still stands. The banner
+    /// says it (`LibraryOpenCopy.resumeMarkerNotRemoved`) and stays; nil when
+    /// nothing failed. Cleared by the next press that removes the marker.
+    private(set) var resumeFailure: String?
+
+    /// Removes the marker beside the store; true when it is gone after the
+    /// call (`LibraryRestoreHold.clear`'s answer — removed, or never there).
+    /// A seam so a test can stand in a marker whose removal fails.
+    @ObservationIgnored private let clearMarker: @MainActor (URL) -> Bool
+
+    init(
+        storeURL: URL?,
+        clearMarker: @escaping @MainActor (URL) -> Bool = { LibraryRestoreHold.clear(besideStore: $0) }
+    ) {
         self.storeURL = storeURL
+        self.clearMarker = clearMarker
         refresh()
     }
 
@@ -78,13 +93,28 @@ final class RestoreHoldModel {
     }
 
     /// THE ONE PRESS: clear the marker, then catch up.
+    ///
+    /// **VX-339 (her ruling 2026-10-14, VX-266 design §9 call 4 — "yeah we
+    /// can do the small bug fix"; the run record
+    /// `notes/plans/fixes/vx-348-prelaunch-sweep.md`, U1):** the banner clears
+    /// only once the marker is GONE. Before, the press ignored the clear's
+    /// answer and dropped the projection whatever happened, so a removal
+    /// that failed left the marker standing beside the store with no banner
+    /// over it: the gates (which read the marker, R3-2) kept every round held
+    /// while nothing on screen said so — the Sync-now door's refusal even
+    /// pointed at "the banner below" that was gone — and the next launch came
+    /// up held again with no explanation. Now a failed removal keeps the hold
+    /// visible, says why (`resumeFailure`), and resumes nothing (the gates
+    /// would refuse the round anyway); a later press tries again.
     func resume() async {
         guard !resuming, hold != nil else { return }
         resuming = true
         defer { resuming = false }
-        if let storeURL {
-            LibraryRestoreHold.clear(besideStore: storeURL)
+        if let storeURL, !clearMarker(storeURL) {
+            resumeFailure = LibraryOpenCopy.resumeMarkerNotRemoved
+            return
         }
+        resumeFailure = nil
         hold = nil
         await onResume?()
     }

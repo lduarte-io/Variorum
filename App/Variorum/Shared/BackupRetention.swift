@@ -126,6 +126,16 @@ nonisolated enum BackupRetention {
         return candidates.map(\.url).filter { !kept.contains($0) }
     }
 
+    /// **VX-338 — the sweep over THIS Mac's own copies, and nothing else.**
+    /// A candidate whose name is not in `own` (another Mac's copy in a shared
+    /// folder, or any copy written before the fix) is never counted against
+    /// the rule and never returned — so the result is always a subset of the
+    /// own candidates, whatever else the folder holds. The rule itself is
+    /// unchanged: `prune` over the own set.
+    static func prune(_ candidates: [Candidate], policy: Policy, ownedBy own: Set<String>) -> [URL] {
+        prune(candidates.filter { own.contains($0.url.lastPathComponent) }, policy: policy)
+    }
+
     /// How far back the kept set actually reaches — the honest number the
     /// Data Safety face shows, because "14 dailies + 4 weeklies" is a rule
     /// and "your oldest copy is from 5 August" is an answer.

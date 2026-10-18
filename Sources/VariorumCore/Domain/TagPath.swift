@@ -11,7 +11,11 @@ import Foundation
 /// segments drop. A path that yields NO segment (`{#///}`) names no tag.
 public enum TagPath {
     public static func segments(_ raw: String) -> [String] {
-        raw.split(separator: "/")
+        // VX-357: any U+0000 is removed first (`StoredText.stripped` — the
+        // store cannot hold one), so a path applied and a path looked up for
+        // removal name the same tag, and a segment of nothing but null
+        // characters is passed over like an empty one.
+        StoredText.stripped(raw).split(separator: "/")
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
     }

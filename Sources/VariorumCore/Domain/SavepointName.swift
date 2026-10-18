@@ -25,9 +25,11 @@ import Foundation
 /// text.
 public enum SavepointName {
     /// The stored form of a typed name: trimmed, and nil where nothing but
-    /// whitespace is left.
+    /// whitespace is left. VX-357: any U+0000 is removed first
+    /// (`StoredText.stripped` — the store cannot hold one), so a name of
+    /// nothing but null characters is no name.
     public static func normalized(_ raw: String?) -> String? {
-        guard let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines),
+        guard let trimmed = StoredText.stripped(raw)?.trimmingCharacters(in: .whitespacesAndNewlines),
               !trimmed.isEmpty
         else { return nil }
         return trimmed

@@ -74,6 +74,9 @@ extension Operations {
         _ commentID: String, text: String, expectedText: String, undoLabel: String,
         guardedBy guardian: WriteGuard? = nil
     ) throws -> MCPCommentEdit {
+        // VX-357: the stored form, so the entry's halves compare with what
+        // the row holds (`rewriteComment` strips the same way).
+        let text = StoredText.stripped(text)
         let landed: (edit: MCPCommentEdit, previous: String?) = try database.write { db in
             try guardian?(db)
             let previous = try rewriteComment(db, commentID, text: text, expecting: expectedText)
@@ -505,7 +508,8 @@ extension Operations {
     public func renameNoteForClient(
         _ postID: String, title: String?, undoLabel: String, guardedBy guardian: WriteGuard? = nil
     ) throws -> MCPNoteRename {
-        let trimmed = title?.trimmingCharacters(in: .whitespacesAndNewlines)
+        // VX-357: U+0000 removed first (`StoredText`), then her fields' trim.
+        let trimmed = StoredText.stripped(title)?.trimmingCharacters(in: .whitespacesAndNewlines)
         let normalized = (trimmed?.isEmpty ?? true) ? nil : trimmed
         let previous: String?? = try database.write { db in
             try guardian?(db)

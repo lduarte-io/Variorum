@@ -73,8 +73,12 @@ struct LibraryPreviewBrainTests {
             #expect(preview.blocks.map(\.text)
                     == ["First block, four words.", "# A heading\n\nSecond block."])
             #expect(preview.words == 4 + 4)
-            let day = JournalDay.dayString(from: Date(timeIntervalSince1970: 1_782_864_000))
-            #expect(preview.factsLine == "8 words · 2 blocks · edited \(day)")
+            // VX-351 (the VX-348 run, U4), a JUSTIFIED EDIT: the line speaks the
+            // ONE stamp rule — the List row's words — where it printed the raw
+            // day key (`edited 2026-07-01`, a second wording rule).
+            let edited = TimeStampFace.stamp(
+                .edited, date: Date(timeIntervalSince1970: 1_782_864_000), now: Date())
+            #expect(preview.factsLine == "8 words · 2 blocks · \(edited)")
             #expect(!preview.sealed && !preview.archived)
         }
     }
@@ -164,13 +168,18 @@ struct LibraryPreviewBrainTests {
         }
     }
 
-    /// The column's width: the inspector's own numbers (420 ideal, 280
-    /// minimum — the note-side sibling's), a third of the library between.
+    /// The column's width: the inspector's own ideal (420), a third of the
+    /// library between. *(VX-350 — a JUSTIFIED EDIT by the VX-348 run's U3:
+    /// the floor was the note-side sibling's 280, which held the panel at
+    /// 280 while the window narrowed and pushed it off the window's edge — her
+    /// "steadily cut off". The floor is 200 now and the third keeps shrinking
+    /// the panel until it: 700 → 238, was 280. The 0 / 1488 / 900 rows are
+    /// unchanged; `VX350ControlsWidthClassTests` pins the rest.)*
     @Test func thePanelWidthIsTheInspectorsNumbersClampedToTheRoom() {
         #expect(LibraryPanelLayout.width(total: 0) == 420, "unmeasured: the ideal")
         #expect(LibraryPanelLayout.width(total: 1488) == 420)
         #expect(LibraryPanelLayout.width(total: 900) == 306)
-        #expect(LibraryPanelLayout.width(total: 700) == 280)
+        #expect(LibraryPanelLayout.width(total: 700) == 238)
     }
 }
 
