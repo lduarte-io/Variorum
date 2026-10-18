@@ -244,7 +244,7 @@ tickets:
 | Kickoff (seating, in-flight row, Linear In Progress, coordinator announce, briefs) | DONE 2026-10-18 |
 | U1a — VX-303 (the landing road) | VERIFIED 2026-10-18 (`vx-382-u1a` window) — red-on-old A·B·C red as planned, both guard probes red, tree restored clean between each; batch `Test run with 1590 tests in 259 suites` — 4 issues + 5 known: VX-115's standing red (BookCollectingDoorsTests) + `DestructiveUndoWarningTests.redoNeverAsks` (the known VX-167 parallelism flake, signature :141–143); VX-77's standing red did NOT reproduce (passed). 9 skipped (2 disabled suites). §U1a RECORD → batch results. Code tip f0d1b414f |
 | U1b — VX-304 (the box door + Index takes) | VERIFIED 2026-10-18 (windows `vx-382-u1b` + `vx-382-u1b-walk`) — red-on-old B·C·D + both guard probes red as planned; batch 1998 tests / 332 suites: standing reds only (VX-115; VX-167's redoNeverAsks, red alone, same signature) + FINDING D-2, FIXED ab3db8f19 (the departing Outline ate the reveal) — 64-suite family 308/64 green (4 known), its red-on-old red; OutlineRoomTests PASSED; THE U1 WALK: Study 11 rows PASS (W1/W3 not walked — same road, pinned), Terminal 6 face/act rows PASS; posture restored, 0 instances, 0 GiB pruned (nothing superseded). §U1b RECORD |
-| U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | BUILT — batch + walk PENDING the `vx-382-u2` window (implementer: opus-implementer, fresh, 2026-10-18). VX-77 archaeology DONE headless (no fixer; the dark test host — rows 0–1 of the window plan confirm) · VX-291 (the fold control) · VX-21 (grips only in manual order) · VX-69 (Esc closes the order popover) · VX-115 (the door pin reads the declaration) — each committed, `build-for-testing` green; red-on-old families 2–4, the 125-suite batch and THE U2 WALK PENDING. §U2 RECORD |
+| U2 — VX-291 · VX-21 · VX-69 · VX-77 · VX-115 | BUILT except the VX-21 re-cut — **R-U2-A STOPPED at its inventory step** (the Book Panel has ONLY chapter grips, 0.9.2 and now; her Journal bars were chapter ⠿s — §R-U2-A inventory; ac24bedbf stands, awaiting the re-rule). R-U2-B BUILT 8b38c88bb (test-only `.aqua` pinning). VX-291 · VX-69 · VX-115 (accepted) built; `build-for-testing` green. Every run + THE U2 WALK PENDING the `vx-382-u2` window (REVISED sequence in §U2 RECORD; VX-21 rows held). Implementer: opus-implementer, fresh, 2026-10-18 |
 | Review ladder (opus-reviewer, whole diff) | NOT STARTED |
 | Closeout (canon deltas, tickets, PR, handoff) | NOT STARTED |
 
@@ -1010,3 +1010,59 @@ W2's ▾ hover, W3's chapter fold hover, W4's grips (manual) present. Then resto
 - **VX-115's contains-style pin is ACCEPTED** (`contains(.openBookSettings)` — the full door set is the registry
   walk's job; `BookSearchTests`' idiom; the brief's "add the second door" was written before VX-217's third door
   existed).
+
+### R-U2-A — the grip inventory (the ruling's FIRST step): **STOPPED — the panel has ONLY chapter grips** (implementer, 2026-10-18)
+
+Per the ruling's own stop clause, VX-21 is NOT re-cut; ac24bedbf stands untouched until the orchestrator re-rules.
+
+- **Which rows carry grips — today (HEAD) AND as shipped in 0.9.2 (0bdbe70ef, her report's build), read from the
+  source:** the Book Panel draws exactly ONE grip glyph, the ⠿ on CHAPTER rows (`BookPanelView.chapterRow`,
+  `Text("\u{283F}")`, drawn by opacity when ≥2 chapters — `chapterGripDrawn`). NOTE rows draw no grip in either
+  build — they are `.draggable` (gripless; the 17y B2 trace's own words: "Note rows (no grip; the row drags)").
+  Across EVERY book surface the only ⠿ sites are chapter-shaped too: the book navigator's chapter rows
+  (`BookView.swift` ~:736 — unconditional) and the Outline's chapter headings (`chapterHeader` ~:2092 —
+  unconditional). No note row wears a grip anywhere, in 0.9.2 or now.
+- **What ac24bedbf gated:** the Book Panel's chapter ⠿ only (`manualOrder && chapterCount > 1`) — it could gate
+  nothing else, there being nothing else.
+- **Her Journal case, explained (her words, the VR-127 issue verbatim — `notes/source/github-issues-export-2026-10-06
+  .json`):** *"in the journal, you can't reorder the entries since they're date ordered, but you still see the
+  draggable bar which isn't really true. that should be corrected so that you don't see draggable bars when you
+  can't drag."* The bars she saw can only have been CHAPTER ⠿s — her Journal carries chapters (the panel draws them at
+  ≥2; the navigator and the Outline's headings draw them at any count). They sit in the list beside the ENTRIES she
+  tried to reorder, so they read as entry handles; the entries themselves (gripless, still draggable) refuse a
+  re-place under Entry date with the Manual-order toast. The issue's line "the panel's note rows still render grips"
+  was the intake's misreading: the rows DRAG, the grips are the chapters'. And the chapter ⠿s she saw DO act under
+  that sort (`reorderSection` never reads `sort_field`).
+- **So R-U2-A's cut has no note-row grip to hide**, and its "chapter grips in every order" half would put her
+  observed bars back exactly as she reported them. Options for the re-rule (none built):
+  (a) **as built** (ac24bedbf): the panel's chapter ⠿ hides under a stamp order — her words honoured ("no draggable
+  bars" there); costs a visible handle on a drag that still acts (the chapter row still drags and its menu's Move
+  Chapter Up/Down stand). Siblings: the navigator's and the Outline headings' ⠿ would want the same rule for one
+  grammar (not built).
+  (b) **chapter ⠿ everywhere, the NOTE rows' drag made honest instead**: under a stamp order a note row's drag still
+  starts (it must, to file into ANOTHER chapter — the legal half), so "can't drag" holds only for a re-place; no glyph
+  is involved. This leaves her bars on screen.
+  (c) **the bars made unmistakably the chapters'** (a design change — e.g. the ⠿ only on the chapter row's hover, or
+  moved to the heading's trailing edge) in every order — a taste call for her.
+
+### R-U2-B — the `.aqua` pinning (BUILT 8b38c88bb, test-only)
+
+`window.appearance = NSAppearance(named: .aqua)` in the three luminance-scan mounts: `OutlineRoomTests.mountBook`
+(:221 — every OutlineRoom mount), `OutlineRoomTests.withReadHost` (:526), `BookOrderConversionTests
+.theNavigatorsChromeStaysInsideItsColumn` (:337). `build-for-testing` green. Its in-place revert for the window: delete
+those three lines (no later commit touches either file, so `git revert --no-commit 8b38c88bb` is equivalent).
+
+### THE `vx-382-u2` WINDOW — REVISED sequence (supersedes rows 0–1 above; rows 2–5 unchanged except row 2)
+
+Zero app instances before every dev-domain write; read `appearanceChoice` FIRST and restore exactly that value.
+
+| # | Step | Run | Expected |
+|---|---|---|---|
+| 0 | today's posture (`appearanceChoice` as found — `system` at this writing), the tip | `OutlineRoomTests` + `BookOrderConversionTests` alone | GREEN |
+| 1 | `defaults write io.lduarte.Variorum.debug appearanceChoice dark` + R-U2-B reverted in place (the three `.aqua` lines deleted) | the same two suites | RED "ink at 0.0" on (a) the Index panel AND (b) Read's column (VM-5's 2 issues) + the navigator pin — the hypothesis CONFIRMED and R-U2-B's red-on-old. **If NOT red: stop — drop 8b38c88bb (revert commit) and VX-77 returns to bisect** |
+| 1b | R-U2-B restored (`git checkout -- <both files>`, clean diff), dark defaults kept | the same two suites | GREEN — host-independent |
+| 1c | `appearanceChoice` restored to the found value, read back | — | — |
+| 2 | **VX-21 — HELD for the re-rule** (as built, the family stands as written above; a re-cut rewrites it) | `BookPanelDragGateTests` | per the re-rule |
+| 3–5 | VX-69 family · VX-291 guard probe · the 125-suite green batch — as written above | | |
+
+The walk's W4 (the Book Panel grips) likewise waits on the re-rule; W1–W3 and W5 stand as written.
