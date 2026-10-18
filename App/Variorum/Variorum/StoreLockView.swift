@@ -306,9 +306,10 @@ struct RoadLockView: View {
     var appIsActive: () -> Bool = { NSApp.isActive }
 
     /// The app's own Backups folder beside the library — the missing face's rule (`LibraryMissingLobby
-    /// .backupsFolderURL`): nil when there is none.
+    /// .backupsFolderURL`), named by the catalogue's one name for it (the ladder's round-1 NIT 1): nil when there is none.
     static func backupsFolder(besideStore storeURL: URL) -> URL? {
-        let folder = storeURL.deletingLastPathComponent().appendingPathComponent("Backups", isDirectory: true)
+        let folder = storeURL.deletingLastPathComponent()
+            .appendingPathComponent(CatalogNames.backupsFolderName, isDirectory: true)
         return FileManager.default.fileExists(atPath: folder.path) ? folder : nil
     }
 

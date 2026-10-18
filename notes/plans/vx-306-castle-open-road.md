@@ -2411,7 +2411,7 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
 - m1 — K5's missing face over a record-less store: DONE (`0b759f8b8` the fix + both pins; this commit the evidence). The bootstrap twin's run PENDING (the stage).
 - m2 — the copy doors' automatic quiet probe never presses Touch ID: DONE (this commit). The core protection set Debug green here; its release leg at the close.
 - m4 — the new-road Restore list re-reads on a landed backup pair: DONE (this commit). The hook twin's run PENDING (the stage).
-- NIT 1 · NIT 2 · NIT 3 · NIT 4: NOT-STARTED.
+- NIT 1: DONE (this commit; the source pin's run PENDING the stage). NIT 2 · NIT 3 · NIT 4: NOT-STARTED.
 - The close (Mac + phone `build-for-testing`, the core protection set both configurations, the suite list): NOT-STARTED.
 
 **THE FINDINGS, one by one (AGREE/DISPUTE with the trace; the pin's red-on-old; the commit):**
@@ -2504,3 +2504,12 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
   real listing reads the second pair) — Mac host, PENDING the stage; its red-on-old not run (the hook is outside the
   harness — it reads `StoreBackup`'s record type), by the trace: the pre-fix `handle` posts nothing. Mac
   `build-for-testing` (`DerivedData/vx306-u3`) → `** TEST BUILD SUCCEEDED **`.
+- **NIT 1 — AGREE.** `RoadLockView.backupsFolder(besideStore:)` (new-road code) spelled `"Backups"` where the catalogue's
+  one name is `CatalogNames.backupsFolderName`; now it reads that name (the same folder — today's `LibraryMissingLobby
+  .backupsFolderURL` keeps its own literal: today's road, Release, untouched). **The pin:** `RoadLockViewNamesPinTests
+  .theBackupsFolderIsTheCataloguesName` — a SOURCE pin over `RoadLockView`'s code lines (comments excluded): no
+  `"Backups"` literal, `CatalogNames.backupsFolderName` present, and the folder it reveals is the catalogue's (a behaviour
+  pin alone is green on both sides — the value is the same folder; hence the source). Mac host (it reads the source by
+  `#filePath`), PENDING the stage; its logic run over the pre-fix file printed `restates literal = True | names
+  CatalogNames.backupsFolderName = False` (red), over the fixed one `False | True` (green). Mac `build-for-testing` →
+  `** TEST BUILD SUCCEEDED **`.
