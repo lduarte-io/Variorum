@@ -378,6 +378,24 @@ place must be REMEMBERED. Where it lives is not decided by the plan:
   outside the book; costs an editor-adjacent hook.
 - **(C)** Leave the rider as recorded and fold it into VX-304/VX-300 (the box's own door redesign).
 
+### FABLE LINE-CHECK — the two editor-adjacent edits (2026-10-18, the orchestrator, after the U1a build)
+
+The implementer flagged its two `EditorViewModel`/`CommandRouter` edits for a Fable look (neither file is the plan's
+stop trio — `EditorTextView`/`BlockRangeIndex`/`PaneSurface` were NOT reached, so no Fable ladder round is owed and
+nothing goes to her first; the look happened anyway, hunks read in full). VERDICT — sound, four grounds: (1) guard
+(ii) holds STRUCTURALLY: `noteFocusedBlock`'s other-note arm returns before `focusedBlockIdentity`/`focusedOffset`;
+(2) guard (i) is three exclusions (opt-in reporter · `duringCaretPlacement` depth over the initialRender arm's three
+statements, active path untouched · block-less reports named nothing) with pins that BITE — the two guard probes
+delete each exclusion and name the exact pins that must then fail; an async-escaping mount report would land outside
+the bracket and the mount pins would catch it; (3) cost (P1/P8): `currentBlocks` is `@ObservationIgnored` on the
+router and `remember` is a dict write per report with `UserDefaults` only on block/take change — the active path's
+own measured policy (~100 µs per block change, 17o b), so the per-caret-move opt-in wakes nobody; (4) `initialMode`
+writing the remembered mode at mount mirrors the existing jump road's net effect (landing in Write leaves Write
+remembered), closing the gap only because mount's first assignment skips the usual write. Known accepted cost,
+recorded: a click-arrival seed during mount is dropped with the bare-focus seeds; her next caret act records it.
+Ladder note: the final reviewer-cast call is made at ladder time with the whole diff in view; these two hunks carry
+this check either way.
+
 ### ORCHESTRATOR RULINGS on U1a (2026-10-18, repo-first before the build proceeds)
 
 - **R-U1a-1 — R-1 is ruled (A), PROVISIONAL.** Grounds: (1) the ticket's own trace names the `noteFocusedBlock`
