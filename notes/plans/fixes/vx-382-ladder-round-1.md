@@ -370,3 +370,17 @@ current Build/Products are the tip's (built at 06:24 from 9780c723a's tree). Rem
 xcresult bundles (steps 1, 2, 5 ×2 and the fix's guard run) from `DerivedData/Variorum-dkbmlpshalzxqeftsymzimjxpdhl/
 Logs/Test`, keeping the batch's: **~0.26 GiB freed** (276,096 KB). Nothing outside this worktree's cache touched.
 Instances left: **0**. The stage is NOT released by this leg.
+
+## THE LADDER CLOSES AT ROUND 1 (the orchestrator, 2026-10-18 ~06:40)
+
+0 BLOCKER / 0 MAJOR / 3 MINOR / 5 NIT. Every finding dispositioned and discharged: R1-1 HOLLOW by measurement
+(the carry pin green on both roads, kept as a non-regression line; the sweep table's Index row reads SAFE
+(measured)); R1-2 FIXED and proven (green 10/4, red-on-old 3 issues for the traced reason, the guard probe still
+bites on the re-worded arm); R1-3 the comment corrected in-run, the helper class TICKETED at closeout; R1-4/R1-5
+record-only into VX-300's body; R1-6 recorded (rendering is legal; the move ticketed); R1-7 REAL and FIXED
+(the edge press red twice pre-fix in both voices, green with the fix, guards 7/5; the whole-cell hover wash is a
+recorded face change for her bundle; `CommitBar.boxCell`'s same shape ticketed); R1-8 done. The final round's
+fixes carry the orchestrator's line-by-line checks (R1-2 four grounds above; R1-7: the W-1 overlay idiom exact —
+the bare cell, the button's label filling it, the stroke `allowsHitTesting(false)`, ink and DEBUG oracle
+unchanged, P-8's line policy kept). The guard batch: 342 tests / 71 suites, 4 known issues, 0 skipped, nothing
+else red. No new BLOCKER/MAJOR arose; the cap was never near.
