@@ -1552,11 +1552,194 @@ below) is PENDING the orchestrator's window.
 
 ### LIVE STATUS (per member)
 
-- **VX-176 (segmented controls in system blue, dark Terminal):** IN-PROGRESS — design settled (below).
-- **VX-349 (the doubled line under the List's first header at rest):** IN-PROGRESS — traced (below); fix + pin next.
-- **VX-350 (the Library at narrow widths):** NOT-STARTED — the settled design below.
-- **Products (u3-fixed / u3-red):** NOT-STARTED.
-- **No behavioural revert is in flight.**
+- **VX-176 (segmented controls in system blue, dark Terminal):** DONE (`a198c6fd5`) — FIXED; its pin compiled; its RUN is
+  PENDING the batch (red leg first). Its section below.
+- **VX-349 (the doubled line under the List's first header at rest):** DONE (`d16eb1933`) — traced (half: the at-rest
+  doubling is traced and fixed; "one line while scrolling" is consistent with the trace, never reproduced live — see its
+  section), FIXED; pins compiled; RUN PENDING the batch.
+- **VX-350 (the Library at narrow widths):** DONE (`dda6ea9f3` · `8ac266063`) — FIXED; pins compiled; RUN PENDING the
+  batch; the walk PENDING (the list below).
+- **Products (u3-fixed / u3-red):** IN-PROGRESS — both legs build from DURABLE detached checkouts of the tip `8ac266063`
+  beside this worktree (`~/dev/variorum-vx-348-u3fixed`, `~/dev/variorum-vx-348-u3red`); the red checkout carries U3's
+  product hunks REVERSE-APPLIED (`DerivedData/u3-red-revert.patch` = `git diff fe928e53e 8ac266063 --` the seven product
+  files, which no other commit in that range touches — checked) and the three new-API test files removed. THIS worktree
+  is never reverted.
+- **No behavioural revert is in flight in this worktree.**
+
+### VX-176 — the Library's controls wear the voice's accent
+
+**The trace.** SwiftUI hands a segmented `Picker`'s selected-segment colour to AppKit as the `NSSegmentedControl`'s
+`selectedSegmentBezelColor`, FROM THE TINT — measured headless in a scratch offscreen probe (a never-ordered borderless
+window, activation policy prohibited): a segmented picker under `.tint(x)` reads x there; with no tint it reads nil — the
+SYSTEM accent, blue. Nothing on the Library's road sets a tint: Settings' scene (`AppSettingsView` `.tint(tokens.accent)`)
+and the MCP sheets (`MCPGrantSheet`, `MCPAskSheet` — 13n-c W-UX-11) do; the shell does not. So the Library's scope and
+mode controls drew system blue — the ticket's dark Terminal (green accent) shows it most.
+
+**The fix.** `.tint(tokens.accent)` on `LibraryCatalogView`'s root (`LibraryCatalogView.swift`, after `.background`) — the
+panes' own idiom, so every system control the Library hosts speaks the voice's accent (the Timeline mode's picker, the
+panel's system controls and preview links included). **PROVISIONAL P-VX176-1:** the catalog's root (built) vs (b) the
+two pickers only, (c) the shell root (every surface — wider than the ticket).
+
+**Pin** (`VariorumTests/VX176LibraryTintTests.swift`, red on old by behaviour — pre-fix APIs only):
+`theScopeAndModeControlsWearTheVoicesAccent` × (Terminal, Study) × (dark, light): the real catalog mounted, both
+`NSSegmentedControl`s' `selectedSegmentBezelColor` equals the voice's accent (sRGB, 0.02). Expected RED on u3-red: 4 of 4
+(nil — "draws the SYSTEM accent").
+
+### VX-349 — the List's first header draws one line at rest
+
+**The trace (inputs → wrong output; `Features/Library/LibraryListFace.swift`, `LibraryListHeader`).** A header's `pinned`
+is `frame(in: .scrollView).minY <= 0.5` — "its top sits at the scroll view's top". The FIRST header's natural place IS
+the top, so at rest (offset 0, nothing scrolled under it) `pinned` is true and it drew the FLOATING face. In light that
+face is the header material + an inset hairline (shade 0.07) laid over the resting separator at the header's foot AND a
+full-width shadow line (shade 0.09) `.offset(y: 1)` — one point BELOW the header, lying on the empty 10-pt lead
+(`LibraryListLead`): two adjacent lines of two inks, the "doubled, extra-thick line". Measured in a scratch offscreen
+replica of the face (the same modifiers, coloured lines): at rest the foot row carries the inset line and foot + 1 the
+full-width one; `pinned` never flips while the list scrolls (a pinned header's minY stays 0); a pull past the top (the
+elastic bounce) moves it below the top, un-pins it, and leaves the separator alone — one line. That bounce is the one
+road the code offers to her "one line while scrolling" at the top of a list (her Notes header was the List's first —
+the Notes scope, or the capped-books shape her store's many books make, where the notes column starts with it); a list
+scrolled DOWN draws the floating face on both sides of the fix. Not observed live (no stage for this unit) — the walk
+compares rest / bounce / scrolled. In dark, VX-20's voice face already drew ONE full-width hairline at rest.
+
+**The fix.** The floating face needs content UNDER the header: `LibraryListHeader.floats(pinned:contentBeneath:)` =
+pinned AND the list scrolled past its top inset; the List face's two scroll views (`LibraryCatalogView.listColumn`,
+`LibrarySearchSheet`) carry `libraryListScrollReader()` — one Bool off `onScrollGeometryChange`, written only when it
+changes, into the environment (`libraryListContentBeneath`, default `true`, so a host that does not read its scroll keeps
+the shipped face). At rest the first header is the resting header, as every header mid-list is; scrolled, the floating
+face is unchanged. **PROVISIONAL P-VX349-1:** the resting face at the top (built) vs (b) keep the floating band and drop
+only the full-width shadow line at rest. Consequence, said: in dark at rest the header's rule is now the inset resting
+separator, no longer the full-width voice hairline (both one line).
+
+**Pins.** `VariorumTests/VX349ListHeaderRestTests.swift` — red on old by behaviour (pre-fix APIs only: the mounted
+catalog's pixels, `LibraryListFaceTests`' road): `atRestTheFirstHeaderDrawsOneLine` × (Terminal, Study) × (light, dark):
+at rest the header's foot carries its rule (guard), NOTHING one point under it, and the rule is the 16-pt-inset resting
+one (nothing edge to edge); scrolled 120 pt, the floating face's full-width line is still drawn (a guard, light).
+Expected RED on u3-red: 4 of 4 — light ×2 on the second line AND the edge; dark ×2 on the edge only (the full-width
+voice hairline at rest). `VariorumTests/VX349ListHeaderRuleTests.swift` (new API, fixed only): the decision and the
+reader's reading (rest, the elastic pull, a point scrolled, a top inset).
+
+### VX-350 — the Library at narrow widths
+
+**The trace (inputs → wrong state).**
+1. *The empty pill.* VX-175's row has two classes (`LibraryControlsFlowRule.arrange`): one line, else field · scope /
+   mode · sort · when. Its narrowest still needs field · scope with the field at its floor (Terminal 211.5 + 10 + 262 =
+   483.5; Study 175 + 10 + 264 = 449) and mode · sort · when on one line (≈478 / ≈432, the sort slot counted at its
+   widest). Below that the line-1 HStack distribution squeezes the field — the one flexible child — toward its own
+   ≈75-pt sliver: her "blank icon … what search collapses down to when the side pane is open".
+2. *The panel cut off.* The list column (`.frame(maxWidth: .infinity)`) reports its content's minimum — the header's,
+   i.e. the row's wider line + 48 (≈526 / ≈480) — and the panel's width (`LibraryPanelLayout`: a third, floored at the
+   note-side column's 280) is rigid; once column minimum + 1 + panel exceeds the library's width (≈807 pt of library in
+   Terminal at the 280 floor), the catalog's HStack overflows its pane — the pane row is a `GeometryReader`, so the
+   window never grows to fit — and the overflow lands on the right: the panel past the window's edge, its Close with it.
+   Her "steadily cut off".
+3. *The rest of the row.* Below ≈478 the row's second line overflows the column too (clipped by the window).
+
+**The fix (her three asks, on VX-175's base — ONE Layout, never `ViewThatFits`, stable widths only).**
+- **A third width class, COLLAPSED** (`LibraryControlsFlowRule.WidthClass`, `widthClass`, `arrangeRow` —
+  `Features/Library/LibraryControlsFlow.swift`): the class is decided from the counted (stable) widths alone — one line
+  while VX-175's line fits; two lines while field · scope (the field at its floor) AND mode · sort · when each fit a
+  line; else collapsed. Collapsed: the 🔍 door (`LibrarySearchToggle`, a rigid 28 × 22) and scope flow onto as few lines
+  as they fit, then mode · sort · when the same way, each group in its own order (the breaks counted at the stable
+  widths — the sort slot at its widest — so a sort pick never moves a break; every control placed at its natural
+  width), and — while `searchOpen` — the field on its OWN LAST LINE, as wide as the row lets it be up to its 320 cap (her
+  "opening it in the pane below"). The two wide classes are VX-175's `arrange` frame for frame (pinned).
+- **The 🔍 door** — HER state, never the text: `LibraryCatalogModel.searchFieldOpened` (session-only), set by her acts
+  alone — the press (`pressSearchToggle`: closed → open + the caret in the field; open with a question → the caret back,
+  never hiding a question; open and empty → closed) and the field taking the keyboard (a click, a Tab — `@FocusState`
+  `.onChange` in the header). So typing, a search, a question asked from elsewhere (a tag chip, the band) or cleared never
+  add or remove the field's line: P-U3-5's invariant holds in the new class (pinned). The door's glyph wears the voice's
+  accent while a question is asked and the field is closed; the voice's wash behind it while open; its tooltip is the
+  field's own prompt; its spoken name "Search".
+- **One set of views:** the field stays child 0 of the Layout in every class (role-tagged — `LibraryControlsFlow.Role`,
+  `libraryControlsRole`), so its text and caret survive every re-flow (the panel's opening narrows the column under her
+  typing); a control the class does not show is placed OUTSIDE the row at its own size (`unshownOffset`, −100 000 pt),
+  never squeezed — and inside the list column's clip.
+- **The panel stays whole** (`LibraryPanelLayout`, `LibraryInfoPanel.swift`): its floor is 200 pt (was the note-side
+  column's 280; the third keeps shrinking it until then) and it is never wider than the library itself; the list column
+  (`LibraryCatalogView` body) is `.frame(minWidth: 0, maxWidth: .infinity, alignment: .leading).clipped()` in a
+  leading-aligned VStack — the panel takes its width FIRST, the list column takes the rest, and when the window is
+  narrower than both can hold the LIST keeps its leading edge and clips its trailing one under the panel's divider; the
+  panel is never pushed off. The panel's Close keeps its word (`.lineLimit(1)` + `.fixedSize()`; the title gives way).
+- **The masthead's quiet line** ("everything — sortable, searchable") gives way first, on one line ending in …; the
+  surface's name keeps its words (`layoutPriority(1)`).
+- Default window unchanged: at the 1240-pt default (library 1029) the panel is 349 as before; the row one line closed,
+  two open.
+- **Where it lands, by the in-app widths** (U3c's probe numbers): the row collapses below 483.5 pt of row (Terminal) /
+  449 (Study); its floor is its widest control, scope (≈262 / ≈264). With the panel open nothing clips down to a library
+  of ≈560 pt (panel 200 + list 359, the collapsed row ≈300 of a 311-pt room); with it closed down to a library of ≈310.
+  Below those the list's trailing edge goes under the panel (open) or under the window's edge (closed) — the panel and
+  its Close stay whole at every width down to 201 pt of library.
+
+**PROVISIONAL (for the merge's QUESTIONS bundle):**
+- **P-VX350-1** — the collapse order: one line → two (VX-175) → 🔍 · scope / mode · sort · when, each group wrapping in
+  its own order (greedy, the row's order kept — e.g. Study ≈374–432 reads mode · sort / when). Alternatives: (b) mode /
+  sort · when always kept as pairs; (c) collapse scope and mode into menus (more collapsing, more new UI).
+- **P-VX350-2** — the 🔍's press semantics (closed → open + caret; open with a question → caret, never hides; open and
+  empty → close), and "the field taking the keyboard opens it" (so a field she used at a wide width shows open when the
+  window narrows). Alternatives: (b) the field closes by itself when it loses the keyboard empty (then the line count
+  moves on focus loss); (c) the field opens whenever a question is asked (then a search moves the line count —
+  P-U3-5's invariant broken in the narrow class).
+- **P-VX350-3** — a control the class does not show is placed outside the row (and the clip), never removed from the view
+  tree. Consequence, said: with Full Keyboard Access on, Tab can reach the hidden 🔍 (wide classes) or the hidden field
+  (collapsed and closed — and the field taking the keyboard then OPENS it, so it is never typed into unseen).
+  Alternative: (b) the view decides the class too and drops the hidden one (a second, view-side decision — a width
+  read one frame behind the Layout).
+- **P-VX350-4** — the panel's floor 200 pt (was 280) and never wider than the library; the note-side `SideColumn` keeps its
+  280 (the two differ below ≈823 pt of library). Alternatives: (b) 240; (c) the list's floor first (the panel shrinks
+  only after the list reaches its collapsed floor).
+- **P-VX350-5** — below the narrowest both can hold, the LIST yields (its trailing edge clipped under the panel); NO
+  window floor is set (the window's minimum is the sidebar's width — the pane row is a `GeometryReader` — and a floor
+  would bind every surface). Alternatives for her: (b) an app-wide window floor at ≈ sidebar + 560 so nothing ever
+  clips; (c) the panel overlays the list (or replaces it, with Close returning) below that width.
+- **P-VX350-6** — the 🔍's words: tooltip = the field's prompt, spoken name "Search" (her copy pass).
+- **P-VX350-7** — the masthead's quiet line truncates on one line at a narrow width rather than wrapping.
+
+**Pins.**
+- `VariorumTests/LibraryControlsFlowTests.swift` — **`VX350NarrowLibraryTests`** (red on old by behaviour — the U3b/U3c
+  rig, pre-fix APIs only): `atNarrowRoomsTheFieldIsNeverAPillAndTheRowFits` × 2 voices (the panel closed, rooms 300…480
+  by 20, six states — three sorts, a typed word, a question past the prompt, empty again: the row fits its room and keeps
+  the header's 24-pt inset, the field is never a pill — at its prompt or not shown — one line count per room) ·
+  `atNarrowWindowsThePanelStaysWhole` × 2 (the panel open, library 1029 → 560: the catalog never wider than the window,
+  the panel's right edge inside it at ≥ 200 pt, the controls left of its divider). Expected RED on u3-red: 4 of 4
+  (the pill + the row overflowing + the column growing; the panel past the window at ≤ 800 pt).
+- `VariorumTests/VX350ControlsWidthClassTests.swift` (new API, fixed only — pure): one class per width whatever the sort
+  slot shows, never narrowing as the width grows (200…1400 by 0.5, both voices); the wide classes = VX-175's `arrange`
+  frame for frame; the thresholds (483.5 / 449; the default window unchanged); a collapsed row fits its room and never
+  shows the field under its floor, the field on the last line (270…483 by 0.5, open and closed, every sort form);
+  opening adds exactly one line, only when collapsed; the groups' wrap order; the Timeline; the panel's width rule
+  (200 floor, ≤ library − 1, monotone, unchanged above ≈823).
+- `VariorumTests/VX350SearchToggleMountTests.swift` (new API, fixed only — mounted): at a 400-pt room the 🔍 sits in the
+  row and the field is not shown; the press opens it BELOW the controls at its whole prompt, one line more; typing, a
+  longer question and clearing it never move the line count; a press with a question keeps it; empty, the press closes
+  it and the row returns to its lines. (The caret landing in the field is the view's half — the walk.)
+- **Justified edit:** `LibraryPanelTests.thePanelWidthIsTheInspectorsNumbersClampedToTheRoom` — 700 → 238 (was 280),
+  the floor's change; expected RED on u3-red (the old 280).
+
+### The Mac products (PREBUILT — the batch window runs `test-without-building` only)
+
+PENDING — paths, logs, the confirmed recompiles and the exact commands land here when both builds finish.
+
+### What the walk must show (the orchestrator's window — the dev store, BOTH voices, light and dark Terminal)
+
+Captures into the run's screens folder (`notes/plans/vx348-screens/u3/`, gitignored), whole window + a native-resolution
+region of the controls row / panel / header per state:
+- **1240 pt (the default):** Library, List, panel CLOSED — one line, the field whole; click a note row (panel OPENS) —
+  two lines (search · scope / mode · sort · when), the panel whole with Close; type in the field with the panel open —
+  the lines hold, the caret kept. The segmented controls' selected segment in the VOICE's accent (VX-176) — Terminal
+  dark (green, not blue) and Study; the Timeline mode's picker too.
+- **~940 pt:** panel closed (room ≈681) — two lines, both voices; panel open (library ≈729 → panel 247, room ≈433) —
+  COLLAPSED in both voices: 🔍 · scope / mode · sort · when (Study may read mode · sort / when) — the panel whole; press 🔍 — the field opens on its
+  own line below with the caret, type "wing" — the lines hold, the band answers; press 🔍 with the question — the caret
+  back, nothing hides; clear, press 🔍 — closed; the 🔍's accent mark while a question stands and the field is closed.
+- **The window floor** (drag the window as narrow as it goes, sidebar shown; then sidebar hidden ⌃⌘S): the panel open —
+  whole, Close visible, at ≥ 200 pt; the list column's trailing edge goes under the panel's divider below ≈770 pt of
+  window (P-VX350-5, expected); the controls collapsed, wrapping, never a pill; panel closed — the row collapsed and
+  whole down to ≈520 pt of window; note the window's actual minimum width in the record.
+- **VX-349 (both voices, light and dark):** scope Notes (or a store whose books cap the region) — the List at rest: ONE
+  line under the "Notes" header; a pull past the top (the bounce): one line; scrolled down: the floating face (band +
+  its line) as before.
+- **Regressions to glance at:** the bulk row (pick two notes) at the default window; the search band with chips at ~940
+  (the controls keep their left inset); the Bookcase quick entry toast (VX-121) unchanged.
 
 ## THE U2 RE-RUN (the orchestrator, 2026-10-18 ~07:37–07:49, claim `vx-348-u2-rerun`)
 
