@@ -306,6 +306,8 @@ struct ShelfView: View {
         // the app stops being active.
         .onDisappear { model.orderMenuLifeEnded() }
         .reportsMenuLifeEnds { model.orderMenuLifeEnded() }
+        // VX-69 (#188(d), the last gap): …and Esc closes it, as a menu's does.
+        .closesOnEscape(while: model.orderOpen) { model.orderMenuLifeEnded() }
         .task { await model.start() }
         .task { await model.refreshAggregates() }
         // 13n-c U3 (VX-271): the shared icons' held half.
