@@ -348,6 +348,11 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
 
     func readLiveKeyFile() throws -> KeyFile? { liveKeyFile }
 
+    /// The harness's backups and sent pairs, by their key files' own libraryID.
+    func catalogedKeyFiles(ofLibrary libraryID: String) throws -> [KeyFile] {
+        (backups + Array(sent.values)).map(\.keyFile).filter { $0.libraryID == libraryID }
+    }
+
     /// The live key file (format 3 — the only one there is since rule 26).
     var liveFormat3: KeyFile? { liveKeyFile }
 

@@ -1128,6 +1128,13 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
 
     func readLiveKeyFile() throws -> KeyFile? { device.container.files[SPath.liveKeyFile]?.keyFile }
 
+    /// The catalogued key files of this library outside the live place — the
+    /// world's catalog for the device (its container and the far folder it
+    /// shares), filtered by the files' own libraryID (rule 11's sweep).
+    func catalogedKeyFiles(ofLibrary libraryID: String) throws -> [KeyFile] {
+        world.catalog(device).keyFiles.filter { $0.role != .live }.compactMap(\.document).filter { $0.libraryID == libraryID }
+    }
+
     func writeLiveKeyFile(_ file: KeyFile) throws {
         // The live key file REPLACED is a delete of the one it overwrites.
         try world.deleting(device, "keyfile \(f8(file.fingerprint))") {

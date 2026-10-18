@@ -186,15 +186,26 @@ extension ActContext {
             return (try? live.historyKey(fingerprint, currentKey: library.key)) != nil
         }
         // The keys the library has had: the live file's (rule 4 — the family
-        // tree left with VX-378 U1).
+        // tree left with VX-378 U1) — and, entering Castle, the keys every
+        // CATALOGUED key file of this library names (its own libraryID vouches):
+        // a key the live history forgot — a Time Machine rollback put an older
+        // file back while the keychain kept the rolled-back stretch's silent
+        // item — whose backup's own history reaches this library's earlier keys
+        // (the gate's seed 3, VX-378 U4; rule 11: "the Apple and on-device
+        // keychain items deleted").
         let tree = Set(live?.heldFingerprints ?? [])
+        let catalogued: Set<String> = sweepForCastle
+            ? Set(catalogedKeyFilesOfThisLibrary().flatMap(\.heldFingerprints)).subtracting([current])
+            : []
         for item in try leaves.custody.custodyItems() where item.fingerprint != current {
             let outgoing = item.fingerprint == plan.fromFingerprint
+            let vouched = sweepForCastle && item.itemClass == .silent && catalogued.contains(item.fingerprint)
             let sweep = sweepForCastle && item.itemClass == .silent && tree.contains(item.fingerprint)
-            guard outgoing || sweep else { continue }
+            guard outgoing || sweep || vouched else { continue }
             // The outgoing key's Touch ID item goes with its key; a silent
-            // item goes only once the history holds its key.
-            if item.itemClass == .silent, sweepForCastle, !historyHolds(item.fingerprint) { continue }
+            // item goes only once the history holds its key — or a catalogued
+            // key file of this library names it.
+            if item.itemClass == .silent, sweepForCastle, !vouched, !historyHolds(item.fingerprint) { continue }
             try leaves.custody.deleteCustody(fingerprint: item.fingerprint, itemClass: item.itemClass)
         }
         // Entering Castle also takes in a SILENT sync-keys item for an account
@@ -209,6 +220,14 @@ extension ActContext {
                 try leaves.syncKeys.deleteSyncKeys(accountID: item.accountID, itemClass: .silent)
             }
         }
+    }
+
+    /// The catalogued key files whose own libraryID is this library's (a read;
+    /// empty when the leaf cannot read them — the sweep then falls back to the
+    /// live history alone, never guessing).
+    func catalogedKeyFilesOfThisLibrary() -> [KeyFile] {
+        guard let id = library.record?.libraryID else { return [] }
+        return (try? leaves.keyFiles.catalogedKeyFiles(ofLibrary: id)) ?? []
     }
 
     /// Entering Castle turns this device's scheduled Markdown export off, with
@@ -251,8 +270,12 @@ extension ActContext {
         let earlier = (library.record?.verifiedSections(reach: reach) ?? [])
             .filter { $0.deviceID != library.section.deviceID }
             .flatMap(\.ownLibraryAppleKeyIDsToRetire)
+        // …and the Apple key every CATALOGUED key file of this library is
+        // wrapped under — a Standard-era backup's quiet lock whose key the live
+        // history forgot (the gate's seed 3: a Time Machine rollback; rule 11).
+        let catalogued = catalogedKeyFilesOfThisLibrary().compactMap { $0.apple?.keyID }
         let ids = (executor.guards.everyOwnKeyRetiredAtCastleOn
-            ? Array(Set(library.section.ownLibraryAppleKeyIDsToRetire).union(outgoing).union(earlier)).sorted()
+            ? Array(Set(library.section.ownLibraryAppleKeyIDsToRetire).union(outgoing).union(earlier).union(catalogued)).sorted()
             : outgoing).filter { !retired.contains($0) }
         guard !ids.isEmpty else { return }
         var section = library.section

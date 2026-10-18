@@ -119,6 +119,16 @@ public protocol LibraryFileLeaf: AnyObject {
 public protocol KeyFileStoreLeaf: AnyObject {
     func readLiveKeyFile() throws -> KeyFile?
     func writeLiveKeyFile(_ file: KeyFile) throws
+    /// Every catalogued key file OF THIS LIBRARY outside the live place — the
+    /// backups' (this Mac's folders and the shared ones), Previous Libraries'
+    /// — whose own `libraryID` is `libraryID`. A READ. Entering Castle sweeps
+    /// the keys these files name and the Apple keys they are wrapped under
+    /// (rule 11): a key the live file's history has forgotten — a Time Machine
+    /// rollback put an older file back while the keychain kept the rolled-back
+    /// stretch's items — is still this library's by the file's own word, and
+    /// its backup's history reaches the library's earlier keys (the gate's
+    /// seed 3, VX-378 U4).
+    func catalogedKeyFiles(ofLibrary libraryID: String) throws -> [KeyFile]
 }
 
 /// What this Mac remembers — one sealed non-secret item per library ID.
