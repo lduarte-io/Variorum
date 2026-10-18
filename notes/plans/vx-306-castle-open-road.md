@@ -1213,7 +1213,21 @@ the old store whole in the safety copy; `dev-castle.env`'s Castle values unchang
   goes on exactly once. HEADLESS green (the session harness); the Mac run PENDING under the stage.
 - Piece 3 — the offer (`OwedAct.offerKeyFile` → `searchKeyFiles` at the open → the offer card; *Use it* =
   `useOfferedKeyFile` + the receipt; *Not now* writes nothing; the split pair's standing line; `.noKeyFileAnywhere` →
-  rule 27's banner): NOT-STARTED.
+  rule 27's banner): DONE (the WIP commit's code + this commit's pins). `ProtectionOfferFaceTests` (5, planted facts):
+  a stray (another library's format-3 file) beside the library → the silent item opens it, `.offerKeyFile` owed, the
+  search's `.offer(source: .thisMacsKeychain)`, the card's sentence her two strings; *Not now* → the injected
+  `useOffer` never called, no receipt, the open goes on, EVERY container file byte-identical and every planted
+  keychain item (custody, memory, Apple ids) unchanged — and the next open owes the offer again; *Use it* through the
+  real road (`ProtectionOpenRoad.useOffer` → `useOfferedKeyFile`) → the library's own file back beside it, the receipt
+  *Key file restored from this Mac's keychain.*, nothing owed after (this open and the next); this Mac's copy gone too
+  (memory forgotten) with a backup pair taken → `.backup(_, date)` named with its day, the receipt with the same day,
+  *Use it* lands; *Use it* failing → the sentence, both doors stay; the search's other answers (the split pair, rule
+  27, beside-opens-it) read into the standing faces. HEADLESS green; the Mac run PENDING under the stage. **Finding for
+  the ladder (P-VX306-U2-6):** the split pair's line is built and pinned on the derive, but no planted state reaches it
+  through `assess` — the offer is owed only when this Mac's copy or a backup holds the current key's file by name, and
+  then the search's candidate always verifies (its key is the key in hand), so the search answers `.offer`; the
+  replayed-old-file state (a newer key file beside, its history holding the library's key) owes no offer and is said by
+  the older-copy NOTICE instead.
 - Piece 4 — rule 27 (the lobby's face + the missing face's three doors; after a quiet-road open the standing banner,
   no doors): NOT-STARTED.
 - Piece 5 — rule 1's restore receipt (§7c (6) on the status seam): NOT-STARTED.
