@@ -980,3 +980,33 @@ W2's ▾ hover, W3's chapter fold hover, W4's grips (manual) present. Then resto
 **Restore & quit:** sherlock's order back to manual (W4, verified); no note filed, no text typed into a note; voice and
 `appearanceChoice` as found (read back); quit by identity (`tell application id "io.lduarte.Variorum.debug" to quit`);
 `pgrep -fl 'Variorum.app/Contents/MacOS'` EMPTY before reporting. The stage is NOT released by the implementer.
+
+### ORCHESTRATOR RULINGS on U2 (2026-10-18, repo-first before the window)
+
+- **R-U2-A — VX-21's gate is CAPABILITY-SHAPED, PROVISIONAL: a grip renders exactly where the drop would act.**
+  VR-127's own sentence is the rule — *"you shouldn't see draggable bars when you can't drag"* (her words, the
+  librarywalkpolish ledger row; her observed case was her Journal under Entry date, "where no row can be placed by
+  hand"). The row's parenthetical remedy "(grips render only when the book's order is manual)" was the sketch
+  written before U2's trace fact that a CHAPTER's drag still acts under a stamp order (`reorderSection` is
+  order-independent; smart readings have no sections at all). Her principle outranks the sketch where they diverge
+  — the same shape as R-U1a-2. So: NOTE-ROW grips render under manual order only (a note drop cannot land in a
+  derived order — the false offer she named); CHAPTER grips render in every order (their drop acts); the
+  Manual-order toast stays for non-drag roads on notes. The implementer first CONFIRMS the panel's grip inventory
+  (which rows carry grips today, which its ac24bedbf fix gated, and which grips her Journal case actually showed —
+  the record should explain her complaint, not argue with it) and re-cuts to this rule, pins adjusted (red-on-old:
+  a derived-sort panel shows no NOTE grips while chapters keep theirs; old code shows note grips). CONSEQUENCE:
+  the book-view navigator's chapter ⠿ is honest in every order and stays UNCHANGED. If the inventory check shows
+  the panel has ONLY chapter grips (so her Journal case cannot have been note rows), STOP and report before
+  re-cutting — the ruling's premise would be wrong and I re-rule. For her bundle as P-U2-4 (options: the letter —
+  every grip manual-only; this ruling; chapters-everywhere plus note grips too with drop-to-manual conversion).
+- **R-U2-B — the three luminance-scan pins become host-appearance-independent (test-only), built as the LAST
+  commit.** The VX-77 class (a walker leaves the dev domain dark; three geometry pins read black rooms as "ink at
+  0.0" and cry regression) ends structurally: the scan pins pin their windows to `.aqua`. Window order: row 0
+  (today's posture) green → the dark probe WITH the `.aqua` commit reverted in place → RED at "ink at 0.0" (the
+  hypothesis's confirmation AND the pinning's red-on-old) → restore the commit → the same suites under dark
+  defaults → GREEN (host-independent) → restore `appearanceChoice` as found, read back. If the dark probe does NOT
+  go red, the VX-77 hypothesis is wrong: drop the `.aqua` commit entirely and VX-77 returns to the original path
+  (bisect, never guess).
+- **VX-115's contains-style pin is ACCEPTED** (`contains(.openBookSettings)` — the full door set is the registry
+  walk's job; `BookSearchTests`' idiom; the brief's "add the second door" was written before VX-217's third door
+  existed).
