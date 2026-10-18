@@ -1933,7 +1933,33 @@ fixes in parallel (model changes no round had read — VX-305's precedent).**
 
 Total 898,747 steps over 20,000 sequences, every seed `✔` (the step counts equal attempt 1's seed for seed — the generator is deterministic and the fixes changed no path these seeds draw).
 
-**ATTEMPT 2 — THE GATE SOAK, seeds 1–20, Debug then `-c release`, on `c84375010`:** RUNNING — the tables land here as the configurations complete. GATE_SOAK2_PENDING
+**ATTEMPT 2 — THE GATE SOAK on `c84375010` (Debug): NO-GO at seed 8** — seeds 1–7 green (seeds 2 and 3, attempt 1's reds,
+green now), seed 8 red; stopped there (the tree changes):
+
+| seed | steps | exit line |
+|---|---|---|
+| 1 | 45,208 | `✔ Test run with 1 test in 1 suite passed after 372.939 seconds.` |
+| 2 | 44,648 | `✔ Test run with 1 test in 1 suite passed after 358.168 seconds.` |
+| 3 | 45,034 | `✔ Test run with 1 test in 1 suite passed after 359.437 seconds.` |
+| 4 | 45,556 | `✔ Test run with 1 test in 1 suite passed after 370.603 seconds.` |
+| 5 | 44,247 | `✔ Test run with 1 test in 1 suite passed after 348.229 seconds.` |
+| 6 | 45,194 | `✔ Test run with 1 test in 1 suite passed after 372.432 seconds.` |
+| 7 | 45,061 | `✔ Test run with 1 test in 1 suite passed after 356.486 seconds.` |
+| 8 | 4 | `✘ Test run with 1 test in 1 suite failed after 180.682 seconds with 1 issue.` |
+
+- **Seed 8, sequence 473 (promise 1 — rule 10's boundary), minimal 4 steps, start "a synced Castle account with Touch
+  ID on two Macs":** macB's Use Standard crashed before its swap — the account's flag already flipped to Standard and
+  macB's sync keys filed SILENTLY (Standard's custody, right at that moment); macB signed out; the settle rolled macB's own
+  library back to Castle while macA followed the account out; then macA re-entered Castle with a new master. macB —
+  signed out, unable to follow — still holds the OLD master silently, and that master opens its own key file's master
+  wrap: a quiet road to its own current key and its own backup. **That is rule 10's stated boundary, verbatim** ("Until a
+  device follows, it can still read what it already has — its own local copy — through its own quiet road. That is
+  accepted and said plainly"), which promise 3 always exempted and promise 1 never did. **A CHECKER fix (commit
+  `66f7561e1`):** promise 1 exempts a device whose record names an earlier sync key than the account's current one (it
+  has not followed the current entry); a device that HAS followed is held to every clause. No model change. Pin
+  `U4GatePins.aSignedOutDeviceThatLaggedTheReEntryReadsItsOwnCopyByItsOwnRoad` — red on `c84375010` (1 issue), green
+  after. After the fix: the protection set in Debug `✔ 388 tests in 149 suites passed`; release: RELEASE3_PENDING.
+  **The FINAL TREE is `66f7561e1`; ATTEMPT 3 — the discovery run AND the gate soak — runs whole on it.** ATTEMPT3_PENDING
 
 
 2. **Every fixed scenario green in both configurations** — on the FINAL tree `c84375010` (after the gate's two fixes), the
