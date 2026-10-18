@@ -1958,7 +1958,7 @@ green now), seed 8 red; stopped there (the tree changes):
   `66f7561e1`):** promise 1 exempts a device whose record names an earlier sync key than the account's current one (it
   has not followed the current entry); a device that HAS followed is held to every clause. No model change. Pin
   `U4GatePins.aSignedOutDeviceThatLaggedTheReEntryReadsItsOwnCopyByItsOwnRoad` — red on `c84375010` (1 issue), green
-  after. After the fix: the protection set in Debug `✔ 388 tests in 149 suites passed`; release: RELEASE3_PENDING.
+  after. After the fix: the protection set in Debug `✔ 388 tests in 149 suites passed`; release `swift build -c release` complete; `✘ 365 tests in 145 suites … 1 issue` — VX-380's Sync test under the wider filter, nothing of Protection's (the protection set itself green).
   **The FINAL TREE is `66f7561e1`; ATTEMPT 3 — the discovery run AND the gate soak — runs whole on it.** ATTEMPT3_PENDING
 
 
