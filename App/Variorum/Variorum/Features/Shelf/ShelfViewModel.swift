@@ -644,9 +644,10 @@ final class ShelfViewModel {
                 let result = try await session.runner.run { ops in
                     try ops.collectPostIntoSmartReading(postID, into: readingID)
                 }
-                receipt(result.alreadyMatched
-                    ? BookcaseCopy.alreadyShowing
-                    : BookcaseCopy.shownByTagging(result.appliedTagPaths))
+                // VX-241: the op's in-transaction fact decides "shows it
+                // now" (the board lists unarchived books, but the row can be
+                // stale under an archive from another door).
+                receipt(BookcaseCopy.collectReceipt(result))
             } else {
                 // 13i-c U4 (§4 row 17): the one membership road — an
                 // ownership refusal OPENS the choice sheet (P-2).
@@ -746,6 +747,31 @@ nonisolated enum BookcaseCopy {
 
     /// The receipts' shared ending — her words, #217.
     private static let shownNowTail = " \u{2014} the gathering shows it now."
+
+    /// **VX-241 — R98's collect on an ARCHIVED gathering** (PROVISIONAL
+    /// wording, for her bundle). An archived gathering assembles EMPTY
+    /// everywhere (13i-e), so "shows it now" would be false; the tags ARE
+    /// applied (explicit adds stay open). The receipt says both halves:
+    /// what the act did, and when the gathering will show it.
+    static func taggedWhileArchived(_ paths: [String]) -> String {
+        "Tagged " + paths.map { "#\($0)" }.joined(separator: " ") + shownAfterUnarchiveTail
+    }
+    /// …and when the note already matched the rule (nothing was applied).
+    static let alreadyMatchesWhileArchived = "It already matches" + shownAfterUnarchiveTail
+    private static let shownAfterUnarchiveTail =
+        " \u{2014} the gathering shows it once it's unarchived."
+
+    /// The board's collect receipt (a note dropped on a gathering's row):
+    /// the op's own in-transaction fact decides whether "shows it now" is
+    /// true (VX-241).
+    static func collectReceipt(_ result: Operations.SmartCollectResult) -> String {
+        switch (result.gatheringArchived, result.alreadyMatched) {
+        case (false, true): alreadyShowing
+        case (false, false): shownByTagging(result.appliedTagPaths)
+        case (true, true): alreadyMatchesWhileArchived
+        case (true, false): taggedWhileArchived(result.appliedTagPaths)
+        }
+    }
 
     /// VX-217 — a NEW note minted inside a gathering. VX-250 (1): her SHORTER
     /// words, verbatim (QUESTIONS #217): "Tagged #essays — the gathering shows

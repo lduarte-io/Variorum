@@ -23,6 +23,11 @@ extension Operations {
         /// matched the filter).
         public let appliedTagPaths: [String]
         public let alreadyMatched: Bool
+        /// VX-241: whether the gathering was ARCHIVED when the act ran (read
+        /// in its transaction). An archived gathering assembles EMPTY
+        /// everywhere (13i-e), so the receipt must not say it shows the note
+        /// now — the tags still apply (explicit adds stay open, R-13ie-4).
+        public let gatheringArchived: Bool
     }
 
     /// Makes the post satisfy the gathering's rule by applying the tags the
@@ -63,7 +68,9 @@ extension Operations {
             let starred = try stars.ids(db, for: term)
             if try matchesRule(
                 db, postID: postID, term: term, wingID: reading.wingId, starredNoteIDs: starred) {
-                return SmartCollectResult(appliedTagPaths: [], alreadyMatched: true)
+                return SmartCollectResult(
+                    appliedTagPaths: [], alreadyMatched: true,
+                    gatheringArchived: reading.archivedAt != nil)
             }
             // The filters tagging cannot satisfy refuse BEFORE any write,
             // naming themselves (her "before June" example).
@@ -183,7 +190,9 @@ extension Operations {
                     readingID: readingID,
                     reason: "tagging alone can't satisfy its filter")
             }
-            return SmartCollectResult(appliedTagPaths: applied, alreadyMatched: false)
+            return SmartCollectResult(
+                appliedTagPaths: applied, alreadyMatched: false,
+                gatheringArchived: reading.archivedAt != nil)
         }
     }
 

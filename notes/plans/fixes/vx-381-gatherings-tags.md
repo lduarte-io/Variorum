@@ -284,6 +284,20 @@ disposition here.
     `aReopenRoadShowsTheOpeningSpinnerMidCeremony` (a real bootstrap's adoption held on a gate in `.opening`; the
     spinner is an `NSProgressIndicator` subview, measured offscreen first — SwiftUI `Text` is not reachable through
     accessibility there, so the words ride the pure pin). Build + run + red-on-old: PENDING (Mac batch).
-  - U1.6 VX-241 archived-target receipt: NOT-STARTED.
+  - U1.6 VX-241 archived-target receipt: DONE (this commit). Traced: the chip's add picker offers archived gatherings
+    (`MembershipChip.refresh` filters kind + lock only — 13i-e's open explicit adds), the op tags them correctly, and
+    the chip's receipt ("Added by tagging #… — “X” collects by filter.") / the board's ("…shows it now.") claimed a
+    showing the archived gathering's empty assembly denies. Fix: the op reports `SmartCollectResult.gatheringArchived`
+    from INSIDE its transaction (a stale popover snapshot never decides); `BookcaseCopy.collectReceipt` (the board's
+    drop) and `AddToBookCopy.collected` (the chip) speak the archived arm. **PROVISIONAL wording (for the
+    orchestrator):** "Tagged #essays — the gathering shows it once it's unarchived." · already matching: "It already
+    matches — the gathering shows it once it's unarchived." A live gathering keeps each door's words (the chip's
+    shipped "collects by filter" lines are untouched — VX-216's sitting, see the observation below). Pins: core
+    `SmartCollectTests.anArchivedGatheringStillTagsAndReportsItsArchive` (48/6 collect-family suites green) + app
+    `GatheringCollectReceiptTests` (2 tests; run + red-on-old by behavioural revert: PENDING, the Mac batch).
+    **Observations for the orchestrator (not changed):** (1) the chip's live-gathering receipts still say
+    "collected"/"collects by filter" — a third voice for R98's receipt beside P-VX381-1's register (VX-216's menus
+    sitting is the natural home). (2) MOBILE PARITY: the phone's `MobileMembership` lists archived gatherings and
+    speaks the same overclaim — a VM ticket candidate (the phone reads `gatheringArchived` for free now).
 - **U2 (VX-249 · VX-247 · VX-111):** NOT-STARTED — brief above is settled; runs after U1.
 - **Ladder:** NOT-STARTED. **Walk:** NOT-STARTED. **Closeout:** NOT-STARTED.

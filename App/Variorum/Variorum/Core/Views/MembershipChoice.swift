@@ -601,4 +601,21 @@ nonisolated enum AddToBookCopy {
     /// A book's identity for "already exists": its name, as the E13 guard
     /// reads it (case-folded, trimmed).
     static func key(_ text: String) -> String { BookNaming.key(text) }
+
+    /// R98's collect receipt on the chip (a gathering picked "by tagging").
+    /// A live gathering keeps the chip's shipped words; an ARCHIVED one —
+    /// which the picker offers (13i-e: explicit adds stay open) but which
+    /// assembles empty — says the honest thing (VX-241, PROVISIONAL wording:
+    /// the Bookcase's own sentence). The op's in-transaction fact decides.
+    static func collected(_ result: Operations.SmartCollectResult, gatheringName name: String) -> String {
+        if result.gatheringArchived {
+            return result.alreadyMatched
+                ? BookcaseCopy.alreadyMatchesWhileArchived
+                : BookcaseCopy.taggedWhileArchived(result.appliedTagPaths)
+        }
+        return result.alreadyMatched
+            ? "Already collected \u{2014} it matches \u{201C}\(name)\u{201D}'s filter."
+            : "Added by tagging \(result.appliedTagPaths.map { "#\($0)" }.joined(separator: " ")) "
+                + "\u{2014} \u{201C}\(name)\u{201D} collects by filter."
+    }
 }
