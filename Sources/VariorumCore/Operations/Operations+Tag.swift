@@ -100,22 +100,167 @@ extension Operations {
 
     /// Tombstones the tag and its entire live subtree (ops-layer loop; the
     /// per-tag trigger tombstones each tag's applications).
+    ///
+    /// **VX-247 — ONE structural-undo entry, "Delete Tag"** (her ruling
+    /// 2026-10-13, QUESTIONS #217: "adding an undo to the tag delete could be
+    /// a quick ticket before launch… that fits with being able to undo AI
+    /// actions with one command"). AppSpec §9's contract: the inverse revives
+    /// the subtree's tag rows AND their applications dead on the delete's
+    /// EXACT stamp; the redo re-applies exactly what the undo revived and
+    /// records its own stamp for the next undo; a half that finds nothing of
+    /// its partner's result is QUIET and retires the entry (VX-246 U2). The
+    /// registration lives HERE, so every door into the act — Settings ▸ Tags'
+    /// trash and its context row on the Mac, the phone's tag manager — rides
+    /// the one road (the MCP door has no tag-delete tool; one would too).
+    /// The bigger recovery road (the Trash) stays VX-238.
     public func deleteTag(_ id: String) throws {
+        let pass = try database.write { db in
+            try tombstoneTagSubtree(
+                db, try liveTag(db, id),
+                stamp: DateFormatter.variorumISO8601.string(from: date.now))
+        }
+        registerTagDeletionEntry(pass)
+    }
+
+    /// The undo entry's words — "Undo Delete Tag" / "Redo Delete Tag", the
+    /// act's own verb (`.deleteTag`'s "Delete Tag…", without the ellipsis).
+    public static let deleteTagUndoLabel = "Delete Tag"
+
+    /// What ONE tombstone pass over a tag subtree wrote (VX-247): the tag rows
+    /// it tombstoned, parents before children (path order), and the stamp —
+    /// the same stamp the cascade trigger gave each row's applications.
+    struct TagDeletionPass: Equatable, Sendable {
+        let tagIDs: [String]
+        let stamp: String
+    }
+
+    /// The delete's row work: the tag and every LIVE tag under its CURRENT
+    /// path in its own wing (13i-d U5, F-U5-2 — another wing's same-path tags
+    /// are another library's vocabulary), tombstoned on one stamp; each
+    /// row's trigger tombstones its live applications on that stamp.
+    private func tombstoneTagSubtree(
+        _ db: Database, _ tag: Tag, stamp nowStamp: String
+    ) throws -> TagDeletionPass {
+        let prefix = tag.path + "/"
+        let subtree = """
+            deleted_at IS NULL
+              AND (id = ? OR (wing_id = ? AND substr(path, 1, ?) = ?))
+            """
+        let subtreeArguments: StatementArguments = [
+            tag.id, tag.wingId, prefix.unicodeScalars.count, prefix,
+        ]
+        let ids = try String.fetchAll(
+            db, sql: "SELECT id FROM tag WHERE \(subtree) ORDER BY path, id",
+            arguments: subtreeArguments)
+        try db.execute(
+            sql: "UPDATE tag SET deleted_at = ?, updated_at = ? WHERE \(subtree)",
+            arguments: [nowStamp, nowStamp] + subtreeArguments)
+        return TagDeletionPass(tagIDs: ids, stamp: nowStamp)
+    }
+
+    /// ONE entry over the delete (VX-247): each half hands its partner
+    /// exactly what it changed — the inverse the rows it revived, the redo
+    /// the rows it tombstoned and their stamp — so a half never runs over a
+    /// part its partner did not move (VX-246 U2's parts record).
+    private func registerTagDeletionEntry(_ first: TagDeletionPass) {
+        let lastDeletion = LockIsolated(first)
+        let lastRevival = LockIsolated<[String]>([])
+        undoStack?.register(
+            label: Self.deleteTagUndoLabel,
+            inverse: { ops in
+                let revived = try ops.revertTagDeletion(lastDeletion.value)
+                guard !revived.isEmpty else { return false }
+                lastRevival.setValue(revived)
+                return true
+            },
+            redo: { ops in
+                guard let pass = try ops.reapplyTagDeletion(lastRevival.value) else { return false }
+                lastDeletion.setValue(pass)
+                return true
+            })
+    }
+
+    /// **The INVERSE of a tag delete** (VX-247): revives, parents first, each
+    /// tag the pass tombstoned that is STILL dead on the pass's stamp, with
+    /// its applications dead on that same stamp — exact-row flips, never a
+    /// fresh row, and no applying act (an exact-row revival seats nothing;
+    /// the memberships intake seated when she tagged never left). Returns the
+    /// tags it revived, path order; empty is the QUIET answer.
+    ///
+    /// Divergence is left alone quietly (the standing bucket): a tag alive
+    /// again, or dead on another stamp, is not this act's result; one whose
+    /// parent no longer stands, or whose wing is gone, stays dead (there is
+    /// no road to bring those back, so a refusal would wedge the stack) —
+    /// and so does everything under it. **A live tag holding the same path
+    /// in the wing REFUSES** (`duplicateTagPath` — resolvable: rename that
+    /// tag, then undo again): it is hers, made since, and the path is unique.
+    /// An application revives only onto a live note or block, and never
+    /// beside a live twin of itself (`uq_post_tag_live` / `uq_block_tag_live`).
+    func revertTagDeletion(_ pass: TagDeletionPass) throws -> [String] {
         try database.write { db in
-            let tag = try liveTag(db, id)
-            let now = date.now
-            let nowStamp = DateFormatter.variorumISO8601.string(from: now)
-            let prefix = tag.path + "/"
-            // 13i-d U5 (F-U5-2): the subtree is the tag's own wing's.
-            try db.execute(
-                sql: """
-                    UPDATE tag SET deleted_at = ?, updated_at = ?
-                    WHERE deleted_at IS NULL
-                      AND (id = ? OR (wing_id = ? AND substr(path, 1, ?) = ?))
-                    """,
-                arguments: [
-                    nowStamp, nowStamp, id, tag.wingId, prefix.unicodeScalars.count, prefix,
-                ])
+            let nowStamp = DateFormatter.variorumISO8601.string(from: date.now)
+            var revived: [String] = []
+            guard !pass.tagIDs.isEmpty else { return revived }
+            let marks = Array(repeating: "?", count: pass.tagIDs.count).joined(separator: ",")
+            let dead = try Tag.fetchAll(
+                db,
+                sql: "SELECT * FROM tag WHERE id IN (\(marks)) AND deleted_at = ? ORDER BY path, id",
+                arguments: StatementArguments(pass.tagIDs + [pass.stamp]))
+            for tag in dead {
+                if let parentID = tag.parentId {
+                    guard let parent = try Tag.fetchOne(db, key: parentID), parent.deletedAt == nil
+                    else { continue }
+                }
+                let wingStands = try tag.wingId.isEmpty || Queries.wingIsLive(db, id: tag.wingId)
+                guard wingStands else { continue }
+                try ensureNoLiveTagPath(db, tag.path, wingID: tag.wingId, excluding: tag.id)
+                try db.execute(
+                    sql: "UPDATE tag SET deleted_at = NULL, updated_at = ? WHERE id = ?",
+                    arguments: [nowStamp, tag.id])
+                try db.execute(
+                    sql: """
+                        UPDATE post_tag SET deleted_at = NULL
+                        WHERE tag_id = ? AND deleted_at = ?
+                          AND post_id IN (SELECT id FROM container WHERE deleted_at IS NULL)
+                          AND NOT EXISTS (SELECT 1 FROM post_tag twin
+                                           WHERE twin.tag_id = post_tag.tag_id
+                                             AND twin.post_id = post_tag.post_id
+                                             AND twin.deleted_at IS NULL)
+                        """,
+                    arguments: [tag.id, pass.stamp])
+                try db.execute(
+                    sql: """
+                        UPDATE block_tag SET deleted_at = NULL
+                        WHERE tag_id = ? AND deleted_at = ?
+                          AND block_id IN (SELECT id FROM block WHERE deleted_at IS NULL)
+                          AND NOT EXISTS (SELECT 1 FROM block_tag twin
+                                           WHERE twin.tag_id = block_tag.tag_id
+                                             AND twin.block_id = block_tag.block_id
+                                             AND twin.deleted_at IS NULL)
+                        """,
+                    arguments: [tag.id, pass.stamp])
+                revived.append(tag.id)
+            }
+            return revived
+        }
+    }
+
+    /// **The RE-APPLY** (VX-247): the delete again, over exactly the tags the
+    /// undo revived that still stand — each through the delete's own subtree
+    /// rule (so a child she made under a revived tag since goes with it, as a
+    /// take branched since an undo goes with a re-deleted block — the
+    /// cascade's precedent; the next undo brings it back on this stamp), on
+    /// ONE fresh stamp. Returns that pass, or nil when every revived tag is
+    /// already gone (QUIET).
+    func reapplyTagDeletion(_ revivedIDs: [String]) throws -> TagDeletionPass? {
+        try database.write { db in
+            let stamp = DateFormatter.variorumISO8601.string(from: date.now)
+            var tombstoned: [String] = []
+            for id in revivedIDs {
+                guard let tag = try Tag.fetchOne(db, key: id), tag.deletedAt == nil else { continue }
+                tombstoned += try tombstoneTagSubtree(db, tag, stamp: stamp).tagIDs
+            }
+            return tombstoned.isEmpty ? nil : TagDeletionPass(tagIDs: tombstoned, stamp: stamp)
         }
     }
 
