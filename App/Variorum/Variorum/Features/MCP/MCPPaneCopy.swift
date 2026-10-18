@@ -423,8 +423,14 @@ nonisolated enum MCPPaneCopy {
         case "insert_blocks": return "adding blocks to \(at)"
         // VX-336 U6a — VX-311's duplicate (PROVISIONAL words, her copy pass): a
         // TWO-SIDED act (UXR1-1) — the note at read, its wing at write new — so
-        // the line says the side that refused as itself.
-        case "duplicate_note": return kind == "wing" ? "duplicating a note in \(at)" : "duplicating \(at)"
+        // the line says the side that refused as itself. VX-371 (VX-383 U2):
+        // the landing may be a BOOK (write new on it), said as itself too.
+        case "duplicate_note":
+            switch kind {
+            case "wing": return "duplicating a note in \(at)"
+            case "book": return "duplicating a note into \(at)"
+            default: return "duplicating \(at)"
+            }
         // VX-336 U7 — VX-261: a client reading its OWN recent acts (target-less;
         // PROVISIONAL words, her copy pass — VX-234).
         case "list_my_activity": return "checking its recent activity"
@@ -545,7 +551,12 @@ nonisolated enum MCPPaneCopy {
         // receipt counts the blocks).
         case "insert_blocks": return "added blocks to \(at)" + times
         // VX-336 U6a — VX-311: logged on the SOURCE note (the copy wears its title).
-        case "duplicate_note": return "duplicated \(at)" + times
+        // VX-371 (VX-383 U2 — PROVISIONAL P-U2-2): a copy FILED into a book is
+        // logged on that BOOK (the row's one target names where it went — the
+        // act's answer told the client the book), so the line names the book.
+        case "duplicate_note":
+            guard kind == "book" else { return "duplicated \(at)" + times }
+            return n == 1 ? "duplicated a note into \(at)" : "duplicated \(n) notes into \(at)"
         // VX-336 U7 — VX-261: the client read its own recent acts (PROVISIONAL
         // words, her copy pass — VX-234).
         case "list_my_activity": return "checked its recent activity" + times
@@ -1274,6 +1285,13 @@ nonisolated enum MCPReceiptCopy {
             let short = "\(first.clientName) \(wingMovePhrase(first, titled: false))\(tail)"
             if short.count <= budget { return short }
         }
+        // VX-371 (VX-383 U2): ONE filed duplicate keeps WHERE THE COPY WENT —
+        // the book — dropping only the note's title (Open › opens the copy),
+        // the wing move's precedent above.
+        if run.count == 1, first.act == .duplicate, let book = first.detail {
+            let short = "\(first.clientName) duplicated a note into \u{201C}\(book)\u{201D}\(tail)"
+            if short.count <= budget { return short }
+        }
         // VX-184 U5 (found by the faces pin at the stage window, red first): ONE
         // owned book's delete keeps WHERE ITS NOTES WENT — her "Delete Book
         // Only" receipt's point — dropping only the book's name (it is in the
@@ -1379,8 +1397,12 @@ nonisolated enum MCPReceiptCopy {
             let total = receipts.reduce(0) { $0 + $1.count }
             return total == 1 ? "added a block" : "added \(total) blocks"
         // VX-336 U6a — VX-311's duplicate: the run is keyed on the COPY, so it
-        // names the note the copy is of (PROVISIONAL words).
-        case .duplicate: return n == 1 ? "duplicated \(quoted(receipts[0].targetTitle))" : "made \(n) duplicates"
+        // names the note the copy is of (PROVISIONAL words). VX-371 (VX-383
+        // U2): a copy FILED into a book says the book (`detail`).
+        case .duplicate:
+            guard n == 1 else { return "made \(n) duplicates" }
+            let copy = "duplicated \(quoted(receipts[0].targetTitle))"
+            return receipts[0].detail.map { copy + " into \(quoted($0))" } ?? copy
         // VX-188 — the client's own comment, deleted (PROVISIONAL words).
         case .commentDelete: return n == 1 ? "deleted a comment" : "deleted \(n) comments"
         // VX-190 — her un-tag, the client's (PROVISIONAL words).
