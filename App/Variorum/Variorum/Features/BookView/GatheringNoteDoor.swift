@@ -57,15 +57,17 @@ nonisolated enum GatheringNoteDoorCopy {
     /// The Outline flow's word — the book's twin says "in this book".
     static let flowWord = "+ new note in this gathering"
 
-    /// A refusal, and the greyed door's hover: the op's own reason.
-    static func cannot(_ reason: String) -> String {
-        "This gathering can't take a new note: \(reason)."
-    }
-
     /// The hover — what a new note here will wear, or why there can't be one.
+    /// The enabled-state hovers stay as drafted (her #217 answer). A greyed
+    /// door's hover — and the door's refusal (`BookStructureModel.
+    /// newPostInGathering`) — is the op's own reason as the whole sentence
+    /// (`GatheringMint.Blocker.reason`, the one home): VX-250 (2) made her
+    /// shorter hovers complete sentences ("Archived — unarchive it to add
+    /// notes."), retiring the old "This gathering can't take a new note: …"
+    /// frame (and, ladder r1 F-8, the identity wrapper that outlived it).
     static func help(_ face: GatheringMintFace?) -> String {
         guard let face else { return "A new note made inside this gathering" }
-        if let blocker = face.blocker { return cannot(blocker.reason) }
+        if let blocker = face.blocker { return blocker.reason }
         let tags = face.tagPaths.map { "#\($0)" }.joined(separator: " ")
         switch (face.tagPaths.isEmpty, face.star) {
         case (false, false): return "A new note tagged \(tags), so this gathering shows it"
@@ -79,8 +81,13 @@ nonisolated enum GatheringNoteDoorCopy {
 /// The door itself — drawn as the book's "+ new note" is (`.borderless`,
 /// the small chrome font, the accent ink), with an HONEST disabled face: the
 /// accent gives way to the faint ink, so the grey is visible whatever the
-/// button style does with `disabled` (her R-VX214-3; VX-194's app-wide
-/// disabled-blind style is not this surface's).
+/// button style does with `disabled` (her R-VX214-3). This door was never a
+/// `CalmButtonStyle` button — it wears the book foot's own `.borderless`
+/// style so the two feet look the same (her VX-217 ruling) — so VX-194's
+/// style fix does not reach it, and its local face STAYS (R-VX381-A1: the
+/// ticket's "fold it into the style" step is not applicable; moving it onto
+/// the calm style would put a bordered button beside the book's borderless
+/// ones).
 struct GatheringNoteDoor: View {
     let tokens: VoiceTokens
     let word: String

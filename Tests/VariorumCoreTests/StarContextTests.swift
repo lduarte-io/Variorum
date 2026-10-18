@@ -202,15 +202,19 @@ struct StarContextTests {
             let result = try ops.collectPostIntoSmartReading(w.starredOnly.id, into: w.gathering.id)
             #expect(result.alreadyMatched == false)
             #expect(result.appliedTagPaths == ["drafts"])
+            #expect(!result.starred, "already starred — never starred again (VX-249)")
             // starredTagged already matches — the FIRST probe says so.
             let again = try ops.collectPostIntoSmartReading(w.starredTagged.id, into: w.gathering.id)
             #expect(again.alreadyMatched)
-            // The control: tagging alone can never satisfy a ★ — an unstarred
-            // note still hears the standing honest refusal.
-            #expect(throws: OperationError.self) {
-                try ops.collectPostIntoSmartReading(w.taggedOnly.id, into: w.gathering.id)
-            }
-            _ = db
+            // VX-249 (JUSTIFIED EDIT — her answer to the star asymmetry,
+            // QUESTIONS #217): this slot pinned the old control, "tagging
+            // alone can never satisfy a ★ — an unstarred note still hears the
+            // standing honest refusal". The collect door now SETS the star:
+            // the unstarred, tagged note collects by starring alone.
+            let starring = try ops.collectPostIntoSmartReading(w.taggedOnly.id, into: w.gathering.id)
+            #expect(starring.starred)
+            #expect(starring.appliedTagPaths.isEmpty)
+            #expect(try db.read { try Queries.starredNoteIDs($0) }.contains(w.taggedOnly.id))
         }
     }
 

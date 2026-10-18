@@ -12,7 +12,11 @@ import Testing
 /// test fails on it.
 @Suite("Randomized invariant sweep (Phases 2+3)")
 struct InvariantSweepTests {
-    @Test(arguments: [1, 7, 42, 99, 512, 8_191, 20_260_705] as [UInt64])
+    // Seed 82 is a FRAGILE WITNESS (VX-381 ladder r2, N-1): of seeds 1–400 it is
+    // the only one whose sequence trips the tag-path coherence predicate below
+    // when revertTagDeletion's path rebuild is reverted. Keep it, or the
+    // predicate guards nothing the shipped seeds reach.
+    @Test(arguments: [1, 7, 42, 82, 99, 512, 8_191, 20_260_705] as [UInt64])
     func randomOpSequencesPreserveTheInvariants(seed: UInt64) throws {
         try withOperations(seed: seed) { _, db in
             let stack = UndoStack()
@@ -60,6 +64,20 @@ struct InvariantSweepTests {
                     WHERE v.id = b.default_variant_id AND v.block_id = b.id
                       AND v.deleted_at IS NULL AND v.status = 'active'))
             """) == 0, "dangling default_variant_id at step \(step)")
+
+        // Tag-path coherence (VX-381 ladder r2, N-1): the materialized path is
+        // the one deliberate denormalization — a live root's path IS its name;
+        // a live child's parent exists, is live, and prefixes its path exactly.
+        #expect(try db.fetchInt(
+            """
+            SELECT COUNT(*) FROM tag t
+            WHERE t.deleted_at IS NULL AND (
+                (t.parent_id IS NULL AND t.path <> t.name)
+                OR (t.parent_id IS NOT NULL AND NOT EXISTS (
+                    SELECT 1 FROM tag p
+                    WHERE p.id = t.parent_id AND p.deleted_at IS NULL
+                      AND t.path = p.path || '/' || t.name)))
+            """) == 0, "tag path incoherent at step \(step)")
 
         // I2: at most one live placement per block.
         #expect(try db.fetchInt(

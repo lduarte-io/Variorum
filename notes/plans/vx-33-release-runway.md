@@ -32,6 +32,7 @@ units) are scope, not durations.
 | **VX-282** Editor & notes fixes | backspace, the italics flicker, take panel, capture box, comments family | 9 | Opus / **Fable** (editor seam) | now |
 | **VX-283** Sidebar & Library polish | the Open list, Library polish, the red lint (trimmed at her 2026-10-14 triage) | 9 | Opus / Fable | merged 2026-10-16 (PR #167); cut 0.9.7 with VX-336 |
 | **VX-284** Books, gatherings & tags | her VX-214 follow-ups, tag undo, the book view's doors and Index slice, VX-216 last | 17 | Opus / Opus | now |
+| **VX-348** Pre-launch bug sweep | her running list (⌘S commits, the exact edit time, the Library at narrow widths, the NUL strip, the doubled header line) + the today's-road pair VX-338/339 + the riders VX-384/385 — `notes/plans/fixes/vx-348-prelaunch-sweep.md` | 9 | Opus / **Fable** (her word 2026-10-18, VX-338 named) | now (one kickoff sitting: VX-351) |
 
 Plus **her own track** (§4) and **the release itself** (§5).
 
@@ -314,10 +315,18 @@ The launch build ships at her explicit word only, after:
 4. The MCP guide page is live (R-VX184-4).
 5. The privacy page is live (VX-294, a canon v1 gate).
 6. A clean install on a Mac with none of her accounts or machine state runs (the canon v1 row's acceptance).
-7. Her release notes are written.
+7. The release notes are written. **Her word 2026-10-18: while the app is pre-release, the notes are DRAFTED FOR HER
+   provisionally every time** ("I haven't been writing the release notes and I'm probably not going to start before
+   release") — the session cutting the release writes them, one line per bullet, and presents them.
 
 The road is the proven one (memory: Variorum release publishing): bump the version, `Tools/Release/release.sh`
 at a zero-instance window with no commits during it, then DMG first and appcast second on the site.
+
+**Numbering (her word 2026-10-18):** the next release is 0.9.8, then 0.9.9, and after that the expected number is
+0.10.0 (so the session cutting the release after 0.9.9 knows what to call it). The version does not reach 1.0 until she
+actually releases to the public. Releases so far: 0.9.0 (4911) · 0.9.1 (4913) · 0.9.2 (5178) · 0.9.3 (6497) ·
+0.9.4 (6518) · 0.9.5 (7055) · 0.9.6 (7517) · 0.9.7 (7933, 2026-10-16). A release happens only at her explicit word;
+she usually releases once the last of a set of runs is done.
 
 ---
 

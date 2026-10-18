@@ -3035,3 +3035,373 @@ a line to reverse it; the ladder closed at round 1 with nothing blocking.
   it's a one-minute hand check: ⌘L ▸ New Wing, a book there, then ask your client to duplicate into it.
 
 Status: PROVISIONAL — awaiting her ratification.
+
+
+#230 — **THE VX-381 RATIFY BUNDLE (merged 2026-10-18, PR #170; the binding record is `notes/plans/fixes/vx-381-gatherings-tags.md` — your #217 words landed byte-for-byte, the kickoff record, rulings R-VX381-A1…A5, both unit records, the ladder r1/r2 files with every disposition, the walk record, the closeout; built overnight under your mandate).** Each built as stated, a line to reverse: **P-VX381-1** — the shared `shownByTagging` SHORTENED with the mint receipt (the ticket's recommended option; one register) · **R-VX381-A1** — VX-194's "fold the gathering foot into CalmButtonStyle" was NOT APPLICABLE (the door was never a calm button — `.borderless` like the book's foot doors; folding would break your VX-217 look-the-same; the one-off's stale comment corrected instead) · **R-VX381-A3** — the tag-delete confirm DROPS "There is no undo for this." on both platforms (now false; the true line "You can undo this with Undo Delete Tag." is the recorded alternative) · **R-VX381-A4** — the phone untouched; its ★-rule collect now succeeds with a starless receipt → VM-21 (one phone fix covers it and the archived arm) · **R-VX381-A5** — a star-set collect speaks the mint family verbatim; the chip's tags-only live-gathering receipt keeps its OWN old voice ("Added by tagging #x — "X" collects by filter.") — a third voice routed to YOUR VX-216 sitting, beside the dead-tag sentence pair (F-9) · **P-VX381-U1-1** — `#a OR NOT #b` mints BARE (vacuous NOT; receipt "Added to the gathering.") · **THE ONE MOST WANTING YOUR EYE, P-VX381-U2-4** — a tag-delete REDO also takes a child tag YOU made under the revived tag between the halves (consistent with the block world's redo-delete taking a take branched since; the quiet alternative — a grown subtree retires the redo — is recorded) · **P-VX381-U2-1** — an any-of met only by a nested NOT option still greys (the conservative arm) · **P-VX381-U2-2** — the collect checks tag liveness in the gathering's WING (a cross-wing rule refuses by name, never applies across wings) · **P-VX381-U2-3** — an undo meeting a live same-path tag REFUSES ("A tag named "work" already exists — rename it, then try again.") and keeps the entry; N-2's clause: the rule editor's make-a-tag race reaches the same sentence where a plain retry already succeeds, so "rename it" is unneeded there · **P-VX381-U2-5 (+F-11)** — an application whose note died after the delete stays dead on undo, both orders (exact-stamp discipline) · **P-VX381-U2-6 (F-6)** — for `★ OR #a` the collect STARS rather than tags (the mint's first-satisfiable-option rule; one line to prefer tags) · **F-10** — the planner's deliberate conservative bound (greys a satisfiable 3-term rule, never enables wrongly; the in-transaction belt keeps every press honest) · **VX-240** — "Opening your library…" with a spinner, live; its mid-ceremony look stands on the pin (a real adoption held in `.opening`) — the walk record says why no live capture. Cross-refs: VX-216 (the chip's receipt voices + F-9's sentence pair + the empty-gathering "This book has no notes yet."), VM-21 · VX-387 · VX-388 · VX-391 · VX-398 (born, triaged — W-F1 is VX-398: the chip's picker doesn't mark "(archived)"). **HER ANSWERS (2026-10-18, the morning after — the four headline items, her words):** **P-VX381-U2-4** (the redo taking a child tag made between the halves) — "fine" (RATIFIED as built) · **R-VX381-A3's helper line** — "yeah i mean adding that helper text is probably good, mint a ticket for it" → **VX-399** ("You can undo this with Undo Delete Tag.", both platforms) · **P-VX381-U2-6** (`★ OR #a` collects by starring) — "this is fine for now, good to know though" (RATIFIED as built; the one-line tags-first reorder stays the recorded alternative) · **R-VX381-A1** (the fold step not applicable; the gathering foot keeps its local face) — "that's fine" (RATIFIED). Status: the four headline items ANSWERED; the remainder provisional pending her eye.
+
+#231 — **THE VX-378 RATIFY BUNDLE (the binding record is `notes/plans/vx-378-castle-simplified.md` — §8 her rulings verbatim
+(KICKOFF SITTING · HER RULINGS AT THE U4 STOP · HER MORNING SITTING), §9 the ladder, §10 the gate's GO; the contract
+`notes/CastleRules.md`; merged 2026-10-18, PR #171, merge commit aeabdd75b).** The entries below, by status: **stand as built (your eye):**
+P-VX378-U1-1 (a) · U1-2 (a) · U2-1 (a) · U2-3 (a) · U2-4 (a) · U2-5 (a) · U3-1 (a) · U3-2 (a) · U4-4 (a) · U4-5 (a, all
+three) · U4-6 (a, both). **RULED by you:** O1-1 (2026-10-18, rule 5 reworded) · U2-2 (2026-10-16, both secrets) · U4-1
+(2026-10-16, re-ruled 2026-10-17: the floor, no carry) · U4-3 (2026-10-17, the floor) · U4-7 (2026-10-18, no notice) · O2-1
+(2026-10-18, roll back) · O2-2 (2026-10-18 after discussion: the fix stays, rule 25's honest limit, rule 11's pointer; VX-390
+born) · the FACTS DIFF FD-1 accepted, FD-2 into rule 25, FD-3 accepted. **CLOSED:** U4-2 (outside the promise). Your kickoff
+of VX-306 counts as accepting the bundle (your word 2026-10-17).
+
+### VX-378 U1 THE CUT (2026-10-16; the plan's §8 U1 RECORD)
+
+**P-VX378-U1-1 — With nothing remembered, which device section is this Mac's?** Rule 23 gives each library on each
+device a plain random device ID made at creation; rule 21 keeps it in what this Mac remembers. The hardware marker that
+used to find this Mac's own section when the memory item was gone left with the cut (rule 23). The rules don't say what
+an open does when the memory item is missing or fails its seal. Options:
+- **(a) BUILT, PROVISIONAL —** the open takes a NEW plain random device ID with a fresh section (no gate choice yet,
+  no Apple keys listed, adopting nothing). A remembered ID whose section the record lacks keeps that ID with a fresh
+  section. Most defensible: it never guesses (rule 21) and never reads hardware (rule 23). Cost: a deleted or edited
+  memory item mid-act leaves that act to the old ID's section, which nothing here resumes (`aMemoryItemThatFailsItsSeal
+  RemembersNothing`).
+- (b) the open refuses — the file isn't one this Mac remembers — with the facts and rule 17's two doors (U2's
+  detect-and-refuse; needs U2's face).
+- (c) adopt the record's section when it holds exactly one (rejected: a guess, against rule 21).
+Record: `notes/plans/vx-378-castle-simplified.md` §8, the U1 RECORD (piece G). Status: open — U2 decides (b) or keeps
+(a); her eye at the phase's close. **U2 (2026-10-16):** (a) KEPT, per the orchestrator's adjudication 5 (rule 21's
+refusal keys on a disagreement, never on absence); the stranded-act cost is closed — an act in flight resumes in the
+section the plan on disk names, and the fresh device ID is taken once it has settled (the U2 RECORD, piece F).
+
+**P-VX378-U1-2 — Does leaving an account ask for a secret?** Rule 16: leaving changes none of the library's keys or
+secrets — it stops syncing. The leave used to re-key, and asked for both secrets to lock the new key. With nothing
+re-keyed or re-locked, the rules don't say whether the door still asks. Options:
+- **(a) BUILT, PROVISIONAL —** nothing is typed: `leaveAccount(_:_:)` takes no secrets and the three leave doors
+  require `.none` (the face may still confirm the act in words).
+- (b) the passphrase typed as consent, verified against the key file (deleting the account from this Mac is the
+  heaviest of the three).
+Record: the plan's §8 U1 RECORD (piece H). Status: open — her eye at the phase's close (the faces are phase 3/4's).
+
+**P-VX378-O1-1 — Rule 5's quiet-road clause after a Standard "Replace All Keys" (the orchestrator's reading after U1).**
+Rule 5 says a backup opens through this Mac's quiet roads "while the backup's key is still the live key". A Standard
+re-key keeps this Mac's existing own Apple key, so an older backup's key file — locked under that Apple key — still
+opens through the Apple road after the re-key: rule 4's own mechanism (a quiet road opens a key it directly holds).
+Options:
+- **(a) BUILT as found, PROVISIONAL —** reading (b) of the U1 record: rule 5's clause is the common case's wording;
+  the honest sentence is *"through this Mac's quiet roads while they still hold the key the backup's key file is locked
+  under"*. Replacing the Apple key would close no hole (the Apple road reaches the new key the moment it is wrapped) and
+  only cost older backups a convenience. U3's fixture and U4's promises read it this way.
+- (b) Replace All Keys in Standard also mints a fresh Apple key and retires the old after verification (rule 22), so
+  rule 5 holds literally and older Standard backups open only with typed secrets through the history.
+The one-sentence change to CastleRules rule 5 is yours to accept; the rules are not edited by the phase. Record: the
+plan's §8 ORCHESTRATOR NOTE after U1, adjudication 4. **RULED 2026-10-18 (her morning sitting): (a) — "Reword rule 5";
+rule 5's clause now reads "through this Mac's quiet roads while they still hold the key the backup's key file is locked
+under" (CastleRules amended at her word). Code unchanged.**
+
+### VX-378 U2 THE ADDITIONS (2026-10-16; the plan's §8 U2 RECORD)
+
+**P-VX378-U2-1 — What does Replace All Keys do on the account?** Rule 15: "the sync key changes only when the account
+enters Castle." The old Replace All Keys rotated the account's master and class keys with the library key. Options:
+- **(a) BUILT, PROVISIONAL —** the library's key only (re-keyed within its posture, the history carried — rule 4); no
+  vault write. A new master alone would cut nothing off (a device that held the old master also holds the sync key it
+  unwraps), and a new sync key is what rule 15 forbids outside an entry into Castle.
+- (b) a new master as well (the sync keys re-sealed under it, none replaced) — rule 15 allows it, nothing asks for it.
+- (c) a new sync key — refused by rule 15 as written.
+The door stays synced-only as built (its old reason — the account's rotation — is gone; whether a local library gets the
+door is a face question). Record: the plan's §8 U2 RECORD, piece E. Status: open — her eye at the phase's close.
+
+**P-VX378-U2-2 — What the crossings type (rule 11 / rule 12 / the plan's crossings table).** Rules 11 and 12 say
+entering and leaving "type your passphrase"; the plan's §3 crossings table adds, for a local-only crossing, "the
+passphrase (the words wrap is re-made through the passphrase-opened key)". That mechanism doesn't exist: a words lock
+is the key wrapped under the WORDS' key, and nothing in the key file yields the words' key from the library key (the
+design cold read's F14 said the same: "local-only crossings have no master, so they must type both secrets — nothing
+else can make the wraps"). Synced, entering Castle mints a new master that must be locked under the words too (rule 14).
+Options:
+- **(a) BUILT, PROVISIONAL —** Use Castle and Use Standard type the passphrase AND the words, local and synced (the
+  door as built — decision 33 — with the words never made new, rule 7). Rule 2 and rule 14 hold; rule 11's and 12's
+  "types your passphrase" is read as "at least".
+- (b) as (a), but a SYNCED leave types the passphrase alone (the new key file takes the master with its twelve-words
+  copy, so the words open it through the master) — a narrower door, one shape more.
+- (c) a new key-file mechanism that keeps the words' key under the library key so the passphrase alone can re-make the
+  words lock — new machinery to make a sentence hold (rejected by the phase's stop rule; listed so it is not
+  re-proposed).
+Record: the plan's §8 U2 RECORD, piece E. **Status: RULED 2026-10-16 — (a), her pick of the recommended option
+("Both secrets, as built"); rules 11–12 amended to "types your passphrase and your twelve words"; the cross-wrap (c)
+declined — do not re-propose.**
+
+**P-VX378-U2-3 — "Here they are": which words a join can show (rule 7).** Rule 7 tells a joining device "your
+library's twelve words are now your account's twelve words; here they are", and rule 14 lets the join type ONE secret.
+When the secret typed is the passphrase, the device never holds the account's words (they are never stored, and the
+vault keeps only the master under them). Options:
+- **(a) BUILT, PROVISIONAL —** the join reports `ActNotice.wordsReplacedByAccount` (unless the words typed were already
+  the library's); the face shows the words when they were typed and otherwise says the account's words now open the
+  library (the face is phase 3's).
+- (b) a join whose words would be replaced asks for the account's words as well (both typed), so they can be shown.
+- (c) the face sends her to New Words after the join.
+Record: the plan's §8 U2 RECORD, piece E. Status: open — her eye with the faces.
+
+**P-VX378-U2-4 — Make this my library: sync identity and the device's settings (rule 17).** Rule 17 makes the copy "a
+new library — a fresh identity and a fresh key in the posture you are in now, under your current pair"; §3's row 17
+says it "never carries sync identity". The rules don't say whether the new library joins the account the outgoing one
+was bound to, or which of this device's settings it takes. Options:
+- **(a) BUILT, PROVISIONAL —** the new library is LOCAL (no account; a later join is rule 7's — and since it already
+  holds the current pair, which is the account's when the device was synced, no words are replaced); this device's
+  settings (gate style, idle lock, scheduled export) carry into its new section.
+- (b) the new library binds to the outgoing library's account at once (a join folded into the door — the master and
+  its words copy added, the account's sync keys kept).
+- (c) settings start fresh (no choice yet), the gate chosen at the door.
+Record: the plan's §8 U2 RECORD, piece H. Status: open — her eye with the faces (VX-309).
+
+**P-VX378-U2-5 — A key door's one-write window when the vault is out of reach at the relaunch (rule 20).** With the
+named wait gone (the orchestrator's adjudication 1), a resume that can't reach its account's vault rolls back. A synced
+key door writes the vault's new lock first, then the key file. If it crashes in the one write between the vault's
+accepting and the plan marking that step done, and the relaunch finds the vault out of reach, the door rolls back: the
+vault holds the new passphrase (or words) lock, the library's key file the old one. Nothing is lost — the new secret
+opens the library through the vault road (the master lock), the old one through its key file — but the pair is split
+until the next key door. Options:
+- **(a) BUILT, PROVISIONAL —** as above (a stated limit; Use Castle's same window is no residue — the follow picks the
+  landed write up).
+- (b) the key door writes the key file first and the vault last (the mirror restores the key file when the vault can't
+  be reached) — the same window, mirrored.
+- (c) a named wait for key doors only — rejected by adjudication 1 (the qualifier dies whole).
+Record: the plan's §8 U2 RECORD, piece E. Status: open — the orchestrator's eye.
+
+### VX-378 U3 THE LIFECYCLE PROOF (2026-10-16; the plan's §8 U3 RECORD)
+
+**P-VX378-U3-1 — Which door is "you set a passphrase" (the lifecycle's stage 2; rule 3)?** The page's stage 2 has the
+tutorial's last card set the first passphrase on a Standard library that has none. The model has no act named for it:
+Change Passphrase verifies a current passphrase (and refuses with none), Use Castle sets one only as it enters Castle,
+sync setup sets one only as it hands the pair up. Options:
+- **(a) BUILT, PROVISIONAL (no new code — the reading the lifecycle walks) —** the Standard road of the forgotten-
+  passphrase door, `resetPassphrase(.plainConfirm)`: rule 6's re-lock of the current key under a new passphrase on a
+  fresh descriptor, the record's `passphraseSet` stamped at the act's end. The tutorial's card is its face (phase 3).
+- (b) a dedicated set-passphrase act with the same steps, refusing when a passphrase exists — a name for the face, one
+  act more.
+- (c) Change Passphrase accepts no current passphrase when none exists.
+Record: the plan's §8 U3 RECORD. Status: open — her eye with the faces (phase 3).
+
+**P-VX378-U3-2 — "You change your Apple ID" (stage 5): this Mac, or every device of hers?** The page's stage 6 then says
+the Apple deletion "reaches your other Macs too, so backup A's quiet locks die everywhere". Options:
+- **(a) BUILT, PROVISIONAL —** the person's Apple ID changes: every device of hers moves to it (the lifecycle walk's
+  road), so "everywhere" is every device of hers — and the first Apple key, left in the old Apple account, is FD-2.
+- (b) only this Mac moves: her other Macs, still on the old Apple ID, keep reading the library's first Apple key, so
+  "backup A's quiet locks die everywhere" would fail there too (one more diff on that road; no device holds backup A's
+  file but this Mac).
+Record: the plan's §8 U3 RECORD. Status: open — her eye with FD-2.
+
+**The FACTS DIFF of the lifecycle proof (FD-1 · FD-2 · FD-3) — each hers to accept.** The page keeps its words until she
+rules; each stage shows an "under review" note; the scenario asserts what the build does and that the page's line still
+differs. Full text: the plan's §8 U3 RECORD, "FACTS DIFF", and `Lifecycle.factsDiff`.
+- **FD-1 (stage 1's note):** the reminder keys on the passphrase (rule 3), not on whether the words were written down.
+  (a) accept — the note reads "Until you set a passphrase, the app reminds you — …"; (b) keep the page, and the faces
+  decide what "skip writing the words down" means (no model fact can know it).
+- **FD-2 (stage 6, after an Apple ID change):** a key left in the Apple account she left can't be deleted from here;
+  it is unreadable on every device of hers, named at Use Castle's door, and deleted on sight if it returns. (a) accept —
+  the page and rule 25 say so in a sentence; (b) keep rule 11's words as they are (the stage-5 iCloud Keychain reset road
+  holds them).
+- **FD-3 (stage 8):** the new Standard key sits in the on-device road (the silent item), not a Touch ID item — her F13
+  ruling (rule 8's row). (a) accept — the page (and rule 12) read "this Mac's on-device road and its sealed key-file copy
+  now hold the new key"; (b) re-open F13 (a Touch ID-gated item in Standard, prompting at every quiet open — against
+  rule 8's "quiet").
+
+### VX-378 U4 THE WORLD AND THE SOAK (2026-10-16; the plan's §8 U4 RECORD)
+
+**P-VX378-U4-1 — After Make this my library, do today's secrets still open the previous library's backups (U3's
+found-while-proving item 1)?** Rule 17 made the new library's key a fresh key "with no past", and Look inside tries only a
+copy's own key file and the live key file's history, so after Make this my library a backup of the library that stepped
+aside opened only with the secrets of its day. Options put to her:
+- (a) scoped as built: the core sentence ("your current passphrase or words open every copy you have ever made") holds
+  within one library's own lineage; the stepped-aside library's copies open with their day's secrets or through its own
+  set-aside key file in Previous Libraries.
+- (b) Look inside also reads any catalogued key file of the same library ID (the Previous Libraries key file among them),
+  so today's secrets keep opening the old library's backups.
+- **(c) — her ruling — Make this my library CARRIES THE KEY HISTORY FORWARD**, rule 4 applied at the door.
+
+**Status: RULED 2026-10-16 (the author, to the orchestrator), verbatim:** *"let's just keep carrying the key history file
+forward - I see no particular reason to not do it, if you've decided that this is your library from now on, then why
+should it *not* have the old keys to your previous library? we say clearly that your new library always carries keys
+forward."* Earlier in the same sitting, agreeing the posture and the no-setting shape: *"ok yes, I'm happy with this."*
+Built in U4 (the plan's §8 U4 RECORD, piece B2): the new library's key is still a FRESH key (a fresh library ID, a fresh
+device ID, the posture of now, under the current pair); its history holds the copy's key and the copy's key file's
+history, and the previous library's key and its history ("the old keys to your previous library"), each sealed under the
+new key; quiet roads still open only the new key directly; the posture of now always wins at the door, with no setting
+or choice there; the Apple keys this Mac made for the previous library come with its keys into the new section, so
+entering Castle later retires them (rule 11). `notes/CastleRules.md` rule 17 gains "carrying the copy's key history
+forward (rule 4)". **Option (b) is NOT what she chose** — the set-aside key file is left alone; the carried history
+makes it unnecessary. Do not re-propose (a) or (b). The core sentence holds across Make this my library, unscoped.
+
+**Status: RE-RULED 2026-10-17 (the U4 stop sitting — the plan's §8 HER RULINGS AT THE U4 STOP, item 2), verbatim:**
+*"let's remove "Make this my library" carrying keys. Agreed, I didn't really love it when I approved it earlier but it
+made sense but now let's just get rid of it completely for being weird."* The carry (piece B2, `b468a306c`) is REVERTED
+whole in the U4 resumption's piece 1: no `carrying:` builder, no gathering at the door, no Apple-key records moved into
+the new section; rule 17 back to its words before the carry. A new library has a fresh key and no previous keys; the
+previous library's backups are another library's copies (rule 19) and open with the secrets they were made with (the
+floor — rule 4 as reworded at the same sitting). Option (a)'s reading stands in effect (the core sentence scoped to the
+library's own lineage — "older backups of the same library"); (b) and (c) are NOT chosen. Do not re-propose the carry.
+
+**P-VX378-U4-2 — THE ROLLBACK's reach (L4): a replayed library file while what this Mac remembers can't speak.** VX-305's
+stated limit (P-U4-5, her ruling 2026-10-14/15, "accept and state it") covers BOTH homes of this Mac's facts replayed
+together. With the family tree gone (rule 21) and the refusal keyed on a disagreement, never on absence (the
+orchestrator's adjudication 5 after U1), a login-password holder who replays an older library file AND deletes, edits past
+its seal, or replays the memory item gets the same outcome: the app remembers nothing that disagrees and opens the older
+file as it was (its posture with it), through the newer key file's history. The exposure is the replayed file's content,
+login-reachable in its day (P-U4-5's own reasoning). Options:
+- **(a) BUILT, PROVISIONAL —** read as P-U4-5's stated limit: the world's tamper clause (promise 9) counts a library-file
+  replay grouped with any memory tamper as "both homes" (`Promises.swift`, `sealed`).
+- (b) a model change: with nothing remembered, refuse a library file that is not under the key file beside it's current
+  key (the live pair broken), offering rule 17's two doors — a refusal keyed on the live place itself, not on absence.
+- (c) treat it as a stop (a Castle device can be flipped to Standard by two tampers).
+Record: the plan's §8 U4 RECORD, piece E. Status: open — your eye with the next finding.
+
+**Status: CLOSED 2026-10-17 as outside the promise (the U4 stop sitting — the plan's §8 HER RULINGS AT THE U4 STOP, item
+3).** Her words: *"someone with access to your computer can of course delete your library"*. The refusal it leaned on is
+gone (rule 21 is now a notice — the open goes on and says so once); the world's tamper clauses no longer treat a
+replay-plus-memory-tamper as something the app must catch (`Promises.swift` `sealed`, which keeps L4 as a stated limit,
+not a breach). Neither (b) nor (c) is built.
+
+**P-VX378-U4-3 — A device that lagged while BOTH secrets changed and the account entered Castle: today's secrets open
+nothing there. THE UNIT STOPPED HERE (the plan's stop rule).** Found by the discovery run (seed 21, sequence 83; pinned as
+`U4LaggingPairScenarios`, a known issue). Each key door re-locks the acting device's key file and the vault (rule 7); a
+device that didn't open keeps the pair of its last follow, and its key file's master wrap is under the master of that
+day. Entering Castle mints a NEW master (U2's one-row rotation); the vault keeps every earlier SYNC key (rule 15) but not
+earlier masters. So once the passphrase AND the words have both changed elsewhere and a Castle entry has happened since
+the device last followed, none of today's secrets opens its key file — not typed, not through the vault — and on an
+Always-ask device it doesn't open with today's secrets at all; its old secrets still do (nothing is lost — promise 5
+holds). Rule 4's core sentence ("your current passphrase or words open every backup you have ever made") and rule 12's
+"types a secret once to catch up" both fail there. With the master unchanged the vault road opens it (pinned). Options,
+none built:
+- (a) the vault keeps every earlier master too, each sealed under the current master (rule 15's list, applied to masters
+  — her "carry the keys forward" frame); the lobby's vault road and the follow open a lagging key file through it.
+- (b) at a Castle entry, the outgoing master is carried in the new key files only — a lagging device's file still names
+  the old one, so (b) doesn't reach it; listed so it isn't proposed.
+- (c) a stated limit in the rules: a device that lagged through both secrets changing and a new master opens with the
+  secrets of its last follow, once, then follows with today's (rule 10's "it can still read what it already has",
+  extended to typed secrets).
+Record: the plan's §8 U4 RECORD, piece E (the trace and the stop). Status: open — HERS (a rule decision or a mechanism
+to make rules 4 and 12 hold).
+
+**Status: RULED 2026-10-17 (the U4 stop sitting — the plan's §8 HER RULINGS AT THE U4 STOP, item 1): THE FLOOR — options
+(a), (b) and (c) all NOT chosen.** Her words: *"I'm not necessarily opposed to the idea that vault keeps master but I
+have noticed that a new promise is driving complexity an unreasonable amount. this whole thing where you can open past
+libraries with your current keys is a nice convenience but let's shrink our promise to "can always open with the keys
+that were their keys when you made them". and as a niceity we like to carry them forward."* The vault does NOT keep
+earlier masters (not (a)); no rule states a lag exception (not (c)) — the promise itself shrinks. **Rule 4's promise
+sentences, her final wording (relayed 2026-10-17, superseding the first accepted version):** *"A backup always opens
+with the passphrase and words you had when you made it. Every key change also carries the earlier keys forward, so your
+current ones open older backups of the same library."* — her words on it: *"yeah I like that better. of the same library
+makes it clear without making it seem like an exception. i prefer that wording."* Rule 5 drops "of its day" for the same
+words; rule 12's catch-up reads *"types a secret once to catch up, today's or the one it had when it last synced."*
+Built in the U4 resumption's piece 2: promise 4 rewritten to the floor (the copy opens with the pair it was made with;
+on a device that has caught up her current secrets open the library; where they do, they reach every older copy of the
+same library); `U4LaggingPairScenarios` flipped from a known issue to the floor's assertion (the lagged device opens with
+its last-sync secrets, then follows typing one secret and catches up). Do not re-propose (a) or (c).
+
+**P-VX378-U4-4 — Rule 12's catch-up on an ALWAYS-ASK device that lagged through both secrets and a new master: one
+secret, or two moments?** (Found building piece 2 — the floor.) Rule 12 now reads *"types a secret once to catch up,
+today's or the one it had when it last synced."* On such a device today's secrets open nothing (the floor), so she types
+the one it had when it last synced to OPEN it; the follow that catches it up reads the account's vault, which only
+today's secrets open — so a second typed secret (today's) is the follow's. On a device with a quiet road (Touch ID, or
+Standard's silent item) the open is quiet and the catch-up is the follow's one secret, exactly as written. The ruling
+block's own sentence ("the lagged device opens with its last-sync secrets, then follows") describes the two moments.
+Options:
+- **(a) BUILT, PROVISIONAL —** the two moments as the ruling block states them: the open types whichever opens the
+  library (today's, else the pair of its last sync — the world's lobby tries today's first); the follow types ONE secret,
+  today's (`U4LaggingPairScenarios`). The same reading covers a copy made on a synced device whose locks had not yet
+  followed a key door elsewhere: "the passphrase and words you had when you made it" is the pair that device's library
+  opened with then (the floor's write-time record, `CopyTruth.madeWith…`).
+- (b) the follow accepts the last-sync secret — it would need the vault to keep earlier masters, which her ruling
+  declined; listed so it is not proposed.
+- (c) rule 12's wording names the two moments for an Always-ask device ("types the one it had when it last synced to
+  open it, then today's once to catch up") — a rules edit, hers.
+Record: the plan's §8 U4 RESUMPTION RECORD, piece 2. Status: PROVISIONAL (a) — your eye at the bundle.
+
+**P-VX378-U4-5 — Rule 21's notice at its edges: a library NEWER than what this Mac remembers, the date it names, and an
+item the keys in reach can't verify.** (Found building piece 3 — the notice.) Your strings name two cases: *"This is an
+older copy of your library, from <date>"* and *"This is a different library than the one this Mac last had open"*.
+Three edges they don't settle:
+- **A library that moved ON past what this Mac remembers** (the memory item is from an earlier moment — a restored or
+  replayed keychain item; the library's own key file carries the remembered key in its history). Neither sentence is
+  true of it. **(a) BUILT, PROVISIONAL —** no notice; the memory follows it (the memory is this Mac's note, not a posture,
+  account or road — nothing changes silently). (b) say the older-copy sentence anyway; (c) a third sentence, yours.
+- **The date:** the model holds no file-system date, so the older copy's date is the one its record carries — the day
+  its key began (`ProtectionRecord.changedAt`). **(a) BUILT, PROVISIONAL —** that date; the face (VX-306) may read the
+  file's own date instead. (b) a new record field stamped at every record write (a schema-shaped change, not built).
+- **A memory item the keys in reach can't verify** (sealed under a newer key than the library in the live place — the
+  common shape of a hand-restored older copy on an Always-ask Mac): **(a) BUILT, PROVISIONAL —** the notice reads what
+  the item NAMES (its payload) — the notice changes nothing but the memory write that follows, which happens either way;
+  absence (no item) is still never a notice. (b) only a verified item speaks — the tree before this piece opened such a
+  copy SILENTLY on an Always-ask Mac (the red-on-old run of `aBackupPairCopiedInByHandOpensAndSaysItIsAnOlderCopy`),
+  so (b) would leave your hand-copied pair unsaid there.
+Record: the plan's §8 U4 RESUMPTION RECORD, piece 3. Status: PROVISIONAL (a), all three — your eye at the bundle.
+
+**P-VX378-U4-6 — Rule 21's key-file offer at its edges: a key file that reaches the library only through its history,
+and an absent key file a backup holds.** (Found building piece 3 — the offer.) Your ruling: *"The one case that needs a
+hand — the key file beside the library does not open it — is an OFFER"*. Two edges:
+- **The key file beside reaches the library only through its HISTORY** (an older library file put back by hand beside
+  today's key file). It opens — but the pair is split: its own quiet road can't be re-made (the Apple road wraps the key
+  file's own key), and every act that needs the library's own key file refuses at its door, the follow among them.
+  **(a) BUILT, PROVISIONAL —** the offer looks for the library's OWN key file (this Mac's keychain copy, a backup's) and
+  offers it, naming where; with none anywhere, the split pair is said (`.besideOpensItOnlyThroughItsHistory`), never
+  refused and never rule 27 (the library opened). (b) no offer — the beside file "opens it" in your words, so the pair
+  stays split until a Restore from Backup; (c) the app builds a key file for the library's key under today's pair (a
+  repair — against your "no repair").
+- **No key file beside the library, no keychain copy of its key, and a backup holding it:** rule 1 restores ONLY from
+  the sealed keychain copy, automatically. **(a) BUILT, PROVISIONAL —** the backup's key file is OFFERED (your offer's
+  candidates include every backup's key file), never restored without the yes; rule 27 is said only when no home holds
+  it. (b) restore automatically from the backup too (rule 1's "without asking").
+- **(Found in piece 4's census — a consequence, for the face):** a backup's key file carries the locks of its day. After a
+  key door (Change Passphrase, New Words), accepting a backup's key file of the CURRENT key means the library on this Mac
+  opens with the passphrase and words of that backup's day — the floor — not today's (nothing else can verify today's
+  once the key file beside the library and the keychain copy are both gone). Your offer's words don't say so; VX-306's
+  face may want a clause ("it may ask for the passphrase you had on August 3").
+Record: the plan's §8 U4 RESUMPTION RECORD, piece 3. Status: PROVISIONAL (a), both — your eye at the bundle.
+
+**P-VX378-U4-7 — An older copy under the SAME key opens with no notice.** (Found by the census of piece 4.) Rule 21's
+four things name the library by its ID and its key; a key changes only at a key change, so a backup made since the last
+one is, by those four things, "the one this Mac last opened". Copied into the live place (or replayed), it opens SILENTLY
+— its record of that day with it: the account it was bound to then (turning sync on and leaving an account change no
+key — rules 7, 16), this Mac's settings of that day. Options:
+- **(a) BUILT, PROVISIONAL —** as rule 21 reads: what this Mac remembers can't tell it, so nothing is said; the world
+  reads such a replay as outside the promise (P-VX378-U4-2's closure — "someone with access to your computer can of
+  course delete your library"); sync catches the content up at its next round.
+- (b) a fifth remembered thing (the record's date) so a same-key older copy is noticed too — against rule 21's "four
+  things", yours to rule.
+- (c) the key changes at every account change (sync setup, a join, a leave), so a copy across one always differs —
+  against rules 7 and 16 ("never changes the key"), listed so it isn't proposed.
+**RULED 2026-10-18: (a) — "No notice, as built".**
+The same reading covers a KEY FILE of the same key replayed from an earlier day (its locks of that day: the library then
+opens with that day's secrets — the floor) and a MEMORY ITEM replayed alone (it names this Mac's earlier device ID, so
+the open reads that section — this Mac's settings of that day, its gate among them): what this Mac remembers can't tell
+either from its own, so nothing is said (census of piece 4, seeds 23 and 27).
+Record: the plan's §8 U4 RESUMPTION RECORD, piece 4. Status: PROVISIONAL (a) — your eye at the bundle.
+
+
+**P-VX378-O2-1 — A resume whose typed secrets are not the press's (the gate's seed 2; rule 20).** A crashed Make this
+my library had written the new library's key file into the live place beside the old library and staged the copy, a
+keychain wipe took both memory items, and the next open reached the library through a backup's key file with the pair
+of THAT backup's day — so the resume could not open the new key file (today's pair) and left the act in flight with
+copies paused. Options:
+- **(a) BUILT, PROVISIONAL —** before the commit point, a resume whose secrets are not the press's ROLLS BACK from what
+  is on disk (no new key is needed: the staged file discarded, the live key file restored from the plan's copy, the new
+  key's items deleted by fingerprint) and says so — rule 20's "finishes the act or rolls it back"; the person does Make
+  this my library again when they like. Past the commit point the case cannot arise (the library already opens under
+  the act's key).
+- (b) hold the act in flight and ask for the press's pair at the face — the stuck state her stuck-leave ruling removed.
+Record: the plan's §10 (attempt 1's triage). **RULED 2026-10-18: (a) — "Roll back, as built"; the face is VX-306's.**
+
+**P-VX378-O2-2 — Castle entry's sweep reads the catalogue (the gate's seed 3; rule 11).** A Time Machine rollback put an
+older library file back but not the keychain, so a silent item for a key the rolled-back stretch minted survived; the
+live key file's history no longer knew that key and the sweep skipped it, yet that key's backup in the shared iCloud
+folder carried this library's earlier keys in its own history — a login-password holder reached a Castle-era backup.
+Options:
+- **(a) BUILT, PROVISIONAL —** entering Castle also sweeps the keys every CATALOGUED key file OF THIS LIBRARY names
+  (the file's own libraryID vouches; the folders the app writes — backups, Previous Libraries, the shared folder) and
+  retires the Apple keys those files are wrapped under: rule 11's "the Apple and on-device keychain items deleted",
+  read with the catalogue as the memory the rolled-back file lost. A read-only leaf (`catalogedKeyFiles(ofLibrary:)`);
+  VX-306's production leaf implements it over the real folders.
+- (b) sweep every silent item in the scope at Castle entry — breaks Look inside's quiet road for another library's copy
+  (rule 17).
+- (c) accept as a stated limit (a Time Machine rollback is outside the promise) — against "Castle is Castle".
+Record: the plan's §10 (attempt 1's triage). Status: UNDER DISCUSSION at her morning sitting (2026-10-18) — her words: *"don't we
+support castle is castle by removing the apple wrap from castle? because someone could always have a key stashed somewhere
+else - isn't our guarantee more that the apple key won't work to get you into castle anymore, rather than 'we got rid of every
+apple key'? let's discuss this one."* The orchestrator's reading is in the plan's §8 (HER MORNING SITTING). **RULED 2026-10-18,
+after the discussion: (a) — "I want to keep the fix and I think that as long as we record the honest limit, it's okay"; the
+north star is that no previous key file reaches the CURRENT writing; no machinery to close the corner completely ("we can just
+accept the limitations of what we can't control"). The honest limit lands as one sentence in rule 25 (CastleRules amended at
+her word; its wording hers to adjust).**

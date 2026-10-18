@@ -45,6 +45,40 @@ struct SmartCollectTests {
         }
     }
 
+    /// VX-241 — R98 on an ARCHIVED gathering (the chip's picker offers one:
+    /// 13i-e's explicit adds stay open). The tags apply, and the result says
+    /// the gathering was archived when the act ran — it assembles EMPTY, so
+    /// no receipt may claim it "shows it now".
+    @Test func anArchivedGatheringStillTagsAndReportsItsArchive() throws {
+        try withOperations { ops, db in
+            let essays = try ops.createTag(name: "essays")
+            let archived = try ops.createReading(
+                name: "put away", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(essays.id)))
+            try ops.archiveReading(archived.id)
+            let post = try ops.createPost(title: "a piece")
+
+            let result = try ops.collectPostIntoSmartReading(post.id, into: archived.id)
+            #expect(result.appliedTagPaths == ["essays"])
+            #expect(result.alreadyMatched == false)
+            #expect(result.gatheringArchived, "the act knows its target is archived")
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM post_tag WHERE post_id = ? AND tag_id = ? AND deleted_at IS NULL",
+                [post.id, essays.id]) == 1, "the tag is applied all the same")
+            #expect(try assembledPostIDs(db, archived.id).isEmpty,
+                    "an archived gathering shows nothing — 'shows it now' would be false")
+
+            let again = try ops.collectPostIntoSmartReading(post.id, into: archived.id)
+            #expect(again.alreadyMatched && again.gatheringArchived)
+
+            let open = try ops.createReading(
+                name: "open", kind: .gathering, querySpec: try RuleGrammar.encode(.tag(essays.id)))
+            let other = try ops.createPost(title: "another")
+            let live = try ops.collectPostIntoSmartReading(other.id, into: open.id)
+            #expect(!live.gatheringArchived)
+            #expect(try assembledPostIDs(db, open.id).contains(other.id))
+        }
+    }
+
     @Test func appliesEveryMissingTagsAllPath() throws {
         try withOperations { ops, db in
             let tagA = try ops.createTag(name: "book")

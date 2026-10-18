@@ -70,6 +70,80 @@ struct TagAndFolderTests {
         }
     }
 
+    /// VX-247 (Part of VX-381): Settings ▸ Tags' delete door rides the op's
+    /// ONE registration — the session's stack holds "Delete Tag", the Edit
+    /// menu offers "Undo Delete Tag", and the undo brings the subtree back.
+    /// RED ON OLD (the op registered nothing: no top label, nothing undone).
+    /// And the confirm no longer says there is no undo (R-VX381-A3).
+    @Test func theDeleteDoorIsUndoableThroughTheSessionsStack() async throws {
+        try await withWorld { session, db in
+            let model = TagsViewModel(session: session)
+            await model.createTag(parentID: nil, name: "life")
+            let life = try #require(try await db.read { try Queries.allTags($0).first })
+            await model.createTag(parentID: life.id, name: "goals")
+
+            await model.deleteTag(life.id)
+            #expect(try await db.read { try Queries.allTags($0) }.isEmpty)
+            #expect(session.undoStack.topLabel == Operations.deleteTagUndoLabel)
+            #expect(EditorCommands.undoMenuTitle(for: session.undoStack.topLabel) == "Undo Delete Tag")
+
+            let stack = session.undoStack
+            let outcome = try await session.runner.run { ops in try stack.undoReporting(with: ops) }
+            #expect(outcome == UndoStack.Outcome(label: "Delete Tag", changed: true))
+            #expect(try await db.read { try Queries.allTags($0) }.map(\.path) == ["life", "life/goals"])
+
+            for count in [0, 2] {
+                let line = TagDeletion.consequence(name: "life", subtreeCount: count)
+                #expect(!line.lowercased().contains("undo"), "the confirm claims no 'no undo': \(line)")
+                #expect(line.hasSuffix("."), "\(line)")
+            }
+        }
+    }
+
+    /// Bounded async settle (the standing poll rule — never a RunLoop pump).
+    private func settle(_ predicate: () -> Bool) async {
+        for _ in 0..<2000 where !predicate() {
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(1))
+        }
+    }
+
+    /// **Ladder r1 F-3 (MAJOR) — RED ON OLD.** P-VX381-U2-3 makes the undo
+    /// REFUSE when a tag she made since holds the path, and keeps the entry
+    /// because the road is hers: rename that tag, then undo again. No table
+    /// worded `duplicateTagPath`, so the ⌥⌘Z door (`ShellActions.structuralUndo`
+    /// → `StructuralUndoCopy.undoFailed(OpsRefusalCopy.message(for:))`) spoke
+    /// `Undo failed: Refused: duplicateTagPath(path: "work")` — a raw enum, and
+    /// no road. The shared table now words it (both platforms): the fact and
+    /// the road. Driven through the real door, then the road itself.
+    @Test func theUndoDoorSaysTheCollidingTagAndTheRoadNeverTheRawCase() async throws {
+        try await withWorld { session, db in
+            let model = TagsViewModel(session: session)
+            let actions = ShellActions(session: session, shell: ShellRouter())
+            await model.createTag(parentID: nil, name: "work")
+            let work = try #require(try await db.read { try Queries.allTags($0).first })
+            await model.deleteTag(work.id)
+            await model.createTag(parentID: nil, name: "work")
+            let mine = try #require(try await db.read { try Queries.allTags($0).first })
+
+            actions.structuralUndo()
+            await settle { session.status.spoken?.text.hasPrefix("Undo failed") == true }
+            let spoken = try #require(session.status.spoken?.text)
+            #expect(!spoken.contains("Refused:"), "\(spoken)")
+            #expect(!spoken.contains("duplicateTagPath"), "\(spoken)")
+            #expect(spoken == "Undo failed: A tag named \u{201C}work\u{201D} already exists \u{2014} "
+                    + "rename it, then try again.")
+            #expect(session.undoStack.topLabel == Operations.deleteTagUndoLabel, "the entry stays for retry")
+
+            // The road the sentence names: rename hers, press again.
+            await model.renameTag(mine.id, to: "work-new")
+            actions.structuralUndo()
+            await settle { session.status.spoken?.text.hasPrefix("Undid") == true }
+            #expect(session.status.spoken?.text == "Undid: Delete Tag")
+            #expect(try await db.read { try Queries.allTags($0) }.map(\.path).sorted() == ["work", "work-new"])
+        }
+    }
+
     @Test func refusalCopySurfacesForDuplicatePathAndInvalidName() async throws {
         try await withWorld { session, _ in
             let model = TagsViewModel(session: session)

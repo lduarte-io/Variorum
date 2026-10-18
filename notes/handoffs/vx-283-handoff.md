@@ -9,7 +9,7 @@ and your second: *"I'll be sleeping finish everything and send the fresh install
 
 ## Your checklist
 
-1. **Hand-check the Open list's drag (VX-376, High). It's the one thing nothing but your hand can prove.** Synthetic
+1. ~~**Hand-check the Open list's drag (VX-376, High). It's the one thing nothing but your hand can prove.**~~ DONE 2026-10-18 — her word: "it works great"; VX-376 closed. Synthetic
    drags can't reach ANY drop target in the sidebar; main's own drag failed the same test (the run's main-build
    control). So every walk could only check the drag's start, never a landing. The new drag is main's own per-row drop
    road, the one your hands used, plus a line, an end zone and a settle. It is proven by tests and by matching main's
