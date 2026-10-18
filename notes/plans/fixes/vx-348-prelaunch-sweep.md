@@ -331,8 +331,11 @@ of the repo root; main frozen from the version-bump commit until the stamp; one 
   kickoff sitting ran (rulings R-VX348-1…4 above); VX-389 and VM-22 minted. Units adopted AS the plan suggests
   (U1–U4, re-sizing recorded: none needed). Stage via `oct18coordinator` (REQUEST → READY → GO → RELEASE); the
   sync/custody slot is VX-378's — anything that looks like it needs it is DEFERRED (her kickoff word).
-- **U1 (VX-357 · VX-338 · VX-339 — the core and the headless fixes):** IN-PROGRESS — the implementer's U1 UNIT RECORD
-  (below) carries the per-member status.
+- **U1 (VX-357 · VX-338 · VX-339 — the core and the headless fixes):** BUILT — all three FIXED with pins (`9c3ec7ac2` ·
+  `85640635b` · `4aa81c0a6` VX-357; `481a69c6c` VX-338; `cf194996b` VX-339); VX-357's pins verified RED on the pre-fix
+  tree and the headless suites green; **PENDING:** the Mac batch (VX-338/VX-339's red and fixed legs, both products
+  prebuilt — the U1 UNIT RECORD's last section has the commands), VX-357's real-client wire round (U3's window), and
+  the VX-339 banner walk. The U1 UNIT RECORD (below) carries the rest.
 - **U5 (VX-392 · VX-393 · VX-394 — the urgent MCP trio, joined 2026-10-18 at her word):** NOT-STARTED — runs NEXT
   after U1 (urgent outranks U2–U4). FOURTEEN members now; rulings R-VX348-5/6 and the report verbatim in §U5.
 - **U2 (VX-347 — ⌘S):** NOT-STARTED.
@@ -612,3 +615,15 @@ configuration (Debug):
   ```
   A FIXED product built before a later unit's commits is still the U1 tree; the run's whole-batch product is the
   orchestrator's to rebuild at the end.
+- **The phone target** builds with U1's `Shared/` changes (`xcodebuild -scheme VariorumMobile -destination
+  'generic/platform=iOS Simulator' build` — BUILD SUCCEEDED; no simulator booted, no test run).
+
+### For the orchestrator's closeout (not U1's to apply)
+- **AppSpec §9's standing conventions** may want one contract line: the operations layer stores no U+0000 (VX-357) —
+  canon deltas are the closeout's, exactly as ruled.
+- **The editor-seam finding** (VX-357 above): a null pasted into the live editor diverges from the stored take until
+  re-render; the fix is the editor's insert door — a ticket or the editor-seam batch, Fable-reviewed.
+- **The identity finding** (VX-357 above): a `clientInfo.name` (or an id) holding a NUL binds as its prefix on every
+  SQL read and write — a candidate ticket for the MCP door.
+- **The due-check finding** (VX-338 above): another Mac's fresh far copy answers this Mac's far due-check.
+- **The PROVISIONALs for the merge's QUESTIONS bundle:** P-VX357-1…5, P-VX338-1…2, P-VX339-1.
