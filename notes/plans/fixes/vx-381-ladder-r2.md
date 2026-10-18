@@ -233,3 +233,23 @@ halves.
 
 Probe note: every probe ran in a scratch copy of the core package outside the repo (deleted at the end of this
 session); nothing in the worktree was edited but this record.
+
+## ROUND-2 DISPOSITIONS AND THE LADDER CLOSE (the orchestrator, 2026-10-18)
+
+- **All five round-1 fixes HOLD** (the reviewer's verdicts above, corner-probed). No new BLOCKER/MAJOR —
+  **THE LADDER CLOSES AT ROUND 2.** Tallies: r1 2B/1M/2m/6n → confirmed fixes F-1/F-2/F-3 + riders F-7/F-8,
+  tickets VX-387/VX-388, the rest recorded; r2 0B/0M/1m/2n.
+- **N-1 MINOR — BUILT by the orchestrator as the final round's fix** (the architect mandate's small-fix
+  allowance; a test-only standing guard): the tag-path coherence predicate (exact form: a live root's path IS
+  its name; a live child's parent exists, is live, and `child.path = parent.path || '/' || child.name` — at
+  least as strong as the reviewed prefix form) + witness seed 82 with the fragile-witness comment. The
+  orchestrator's line-by-line check ran BOTH legs first-hand: HEAD green, 8/8 seeds; F-2's rebuild reverted
+  (source-only revert, committed-first per the resiliency rule, restored and re-verified green after) → seed 82
+  fails with 2 issues at exactly the new predicate's line. Commit: the "sweep gains the tag-path coherence
+  predicate" commit on this branch.
+- **N-2 NIT — RECORDED for her bundle:** the shared sentence's "rename it, then try again" is also reached by
+  the rule editor's make-a-tag race, where a plain retry succeeds by adopting the existing tag — one clause in
+  the bundle line beside F-3's wording.
+- **N-3 NIT — TICKETED (Low):** the sync-inconsistent tag-subtree class (a child minted under a path another
+  device renamed) — the revival stays fail-closed (same as before the fix); the worse pre-existing half is
+  `deleteTag` leaving such a child live under a dead parent. Ticket minted at this close.
