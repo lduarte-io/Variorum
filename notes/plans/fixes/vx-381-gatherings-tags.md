@@ -471,4 +471,12 @@ disposition here.
     P-VX381-U2-1. The undo's exact-stamp reads assume the trigger copies the tag's `deleted_at` string verbatim (it
     does — `NEW.deleted_at`), and `InvariantSweepTests` (7 seeds × 250 random acts, which undo at random) now
     exercises the entry against the no-live-row-under-a-dead-parent invariants, green.
-- **Ladder:** NOT-STARTED. **Walk:** NOT-STARTED. **Closeout:** NOT-STARTED.
+- **Ladder:** round 1 COMPLETE (`notes/plans/fixes/vx-381-ladder-r1.md` — findings + the orchestrator's
+  DISPOSITIONS). **Walk:** NOT-STARTED. **Closeout:** NOT-STARTED.
+- **Ladder round-1 FIX LEG (a fresh implementer, 2026-10-18 — scope = the r1 file's §DISPOSITIONS: F-2 · F-1 · F-3 +
+  riders F-7 · F-8; nothing else):** IN-PROGRESS. No revert in flight.
+  - F-2 (revived tags rebuild their paths from the live parent): NOT-STARTED.
+  - F-1 (correlated EXISTS + the plan pin): NOT-STARTED.
+  - F-3 (the shared table's `duplicateTagPath` arm): NOT-STARTED.
+  - F-7 (the archived receipt's empty arm) · F-8 (the identity `cannot` wrapper, `divergeTarget`'s doc): NOT-STARTED.
+  - The Mac batch (via the orchestrator's relayed GO): NOT-STARTED.
