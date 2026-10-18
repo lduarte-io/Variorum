@@ -169,6 +169,56 @@ struct BookFoldDisclosureTests {
         }
     }
 
+    /// **FINDING W-1 (the walk): the target must TAKE THE CLICK, not only the
+    /// hover.** A real click (the `SharedIconRig` road — down, a beat, up)
+    /// INSIDE the 22-pt box but OUTSIDE the footprint: on the card's ▸ (left of
+    /// the glyph) it UNFOLDS the note; on the expanded header's ▾ (below the
+    /// glyph) it folds it back. RED on the walk's tree: the Button's own frame
+    /// was the 12×13 footprint (the negative padding sat inside its style), so a
+    /// press there was taken and dropped — the hover answered, the click didn't.
+    @Test func aClickInTheOverhangUnfoldsAndFolds() async throws {
+        try await withBook { book in
+            let card = book.postIDs[0]
+            let open = book.postIDs[1]
+            book.model.expand(open)
+            let rig = SharedIconRig(
+                BookView(
+                    session: book.session, readingID: book.readingID,
+                    model: book.model, structure: book.structure)
+                    .environment(ThemeStore(session: book.session)),
+                width: 1200, height: 800)
+            defer { rig.close() }
+            #if DEBUG
+            @MainActor func windowPoint(_ p: CGPoint) -> NSPoint {
+                NSPoint(x: p.x, y: rig.hosting.bounds.height - p.y)
+            }
+            _ = await rig.poll(timeout: 8) {
+                BookFoldGeometry.frames["card-\(card)"]?.hit != nil
+                    && BookFoldGeometry.frames["header-\(open)"]?.hit != nil
+            }
+            let cardFrames = try #require(BookFoldGeometry.frames["card-\(card)"])
+            let cardHit = try #require(cardFrames.hit), cardLayout = try #require(cardFrames.layout)
+            // Left of the glyph: in the target, clear of the footprint.
+            let left = CGPoint(x: cardHit.minX + 1.5, y: cardHit.midY)
+            #expect(left.x < cardLayout.minX - 2, "the press is in the OVERHANG: \(left) vs \(cardLayout)")
+            #expect(!book.model.isExpanded(card), "the premise: the card is folded")
+            await rig.click(at: windowPoint(left))
+            #expect(await rig.poll(timeout: 3) { book.model.isExpanded(card) },
+                    "a click in the ▸'s overhang unfolds the note in place")
+
+            let headerFrames = try #require(BookFoldGeometry.frames["header-\(open)"])
+            let headerHit = try #require(headerFrames.hit), headerLayout = try #require(headerFrames.layout)
+            // Below the glyph: in the target, clear of the footprint.
+            let below = CGPoint(x: headerHit.midX, y: headerHit.maxY - 1.5)
+            #expect(below.y > headerLayout.maxY + 2, "the press is in the OVERHANG: \(below) vs \(headerLayout)")
+            #expect(book.model.isExpanded(open), "the premise: the note is open")
+            await rig.click(at: windowPoint(below))
+            #expect(await rig.poll(timeout: 3) { !book.model.isExpanded(open) },
+                    "a click in the ▾'s overhang folds the note back to its card")
+            #endif
+        }
+    }
+
     /// **The Index's chapter fold** (PROVISIONAL in the plan — "if she
     /// agrees"; built): the same control in the chapter rows.
     @Test func theIndexsChapterFoldIsTheSameControl() async throws {
