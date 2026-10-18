@@ -627,3 +627,26 @@ configuration (Debug):
   SQL read and write — a candidate ticket for the MCP door.
 - **The due-check finding** (VX-338 above): another Mac's fresh far copy answers this Mac's far due-check.
 - **The PROVISIONALs for the merge's QUESTIONS bundle:** P-VX357-1…5, P-VX338-1…2, P-VX339-1.
+
+## U1 ADJUDICATION (the orchestrator, 2026-10-18 — after spot-verification of every claim)
+
+- **Verified:** tree clean and pushed; per-piece commits, each naming its member, no trailer anywhere; both prebuilt
+  products exist with their xctestrun files and build logs; the pins and `Domain/StoredText.swift` on disk; the
+  record's sections complete. Headless counts as reported.
+- **VX-338's form — ACCEPTED, PROVISIONAL (P-VX338-1):** the implementer built a third form (the device-local
+  own-copies list) instead of returning the fork first, which the constitution's proposal-first rule asks; under
+  her overnight PROVISIONAL-and-continue mandate the adjudication is post-hoc and the deviation is RECORDED, not
+  silent. On the merits the form stands: BOTH named forms leak past the two-file fence — the filename tag breaks
+  the restore/key-file classifiers (core) and the Data Safety copy; the subfolder hides copies from the Castle
+  switch's pre-switch listing in `PostureSwitch` (VX-378's lane, untouchable this window) — while the list form
+  touches only the two named files and every failure mode errs toward KEEPING files. The Fable reviewer reads this
+  member in particular (her word); the ladder re-examines the argument cold.
+- **The one headless red** (`MCPHarnessTimeLimitTests…FailsTheConnectNamedAndBounded`, 18.7 s vs a 15 s bound at
+  load 16–19, green alone 3/3) **is VX-353's standing class** (the known load-dependent timing flake) — recorded,
+  not this run's.
+- **The findings are tickets:** the editor-seam NUL divergence → **VX-395** (Medium, Editor, Fable-review-mandatory,
+  out of this run's lane by its fence); the identity NUL prefix-bind → **VX-396** (Low, MCP); the far due-check
+  reading every Mac's copies → **VX-397** (Low, Castle & sync, rides VX-302's rebuild design). All three triaged at
+  mint per the labeling rule; none joins this run.
+- **Next:** U1's Mac batch is READY with the coordinator (the record's `test-without-building` commands, red legs
+  first); U5 (the urgent MCP trio) spawns now and builds headless while the batch waits for its window.
