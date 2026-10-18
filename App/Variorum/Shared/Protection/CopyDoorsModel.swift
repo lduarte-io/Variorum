@@ -20,8 +20,9 @@
 //    - A PICKED THING (`CopyDoorsModel.begin(picked:)`): classified; a pair or a library folder is FILED FIRST into
 //      this Mac's `Backups/safety-copies/variorum-adopt-safety-<stamp>/` (P-VX306-U3-0 (a), the orchestrator's
 //      ruling) and the doors then act on the catalogued copy; anything else is the honest refusal.
-//    - LOOK INSIDE is PROPOSE-THEN-RULE (the U3 record's piece 4): its door renders only once its face is built
-//      (`CopyDoorsRoads.lookInside` nil until then — P-2: a door that cannot act is not rendered).
+//    - LOOK INSIDE (`LookInsideModel` — the orchestrator's ruling P-VX306-U3-15, (b) the read-only facts sheet): on
+//      every row and every picked copy; MAKE THIS MY LIBRARY only where a library is open (`CopyDoorsRoads.makeMine` nil at
+//      the missing face and rule 27's lobby — T-5 is VX-309's).
 //
 
 import Foundation
@@ -145,10 +146,14 @@ struct CopyDoorsRoads {
     var opensQuietly: @MainActor (CatalogCopy) async -> Bool
     /// Whether the library open now carries a passphrase (the confirm asks for it).
     var passphraseSet: @MainActor () -> Bool
-    /// MAKE THIS MY LIBRARY: the copy's secrets, then her current pair.
-    var makeMine: @MainActor (CopyDoorRow, _ copySecrets: TypedSecrets, _ currentPair: TypedSecrets) async -> CopyDoorOutcome
+    /// MAKE THIS MY LIBRARY: the copy's secrets, then her current pair. nil: no library is open (the missing face,
+    /// rule 27's lobby) — the empty-slot landing (T-5) is VX-309's, so the door is not offered.
+    var makeMine: (@MainActor (CopyDoorRow, _ copySecrets: TypedSecrets, _ currentPair: TypedSecrets) async -> CopyDoorOutcome)?
     /// A picked thing classified and, when it is a pair or a library folder, filed (the picked thing is only read).
     var pick: @MainActor (URL) async -> PickOutcome
+    /// LOOK INSIDE (rule 17; P-VX306-U3-15): the copy opened read-only on a private copy with what she typed (nothing:
+    /// its own quiet road). nil: the door is not offered.
+    var lookInside: (@MainActor (CatalogCopy, TypedSecrets) async -> LookInsideOpening)? = nil
 }
 
 // MARK: - Make this my library's confirm (§7c (8))
@@ -258,6 +263,8 @@ final class CopyDoorsModel: Identifiable {
         case doors(CopyDoorRow)
         /// Make this my library's confirm.
         case makeMine(MakeMineModel)
+        /// Look inside — the copy read-only (P-VX306-U3-15).
+        case lookInside(LookInsideModel)
         /// The act is done (the host closes the sheet).
         case done
     }
@@ -269,6 +276,11 @@ final class CopyDoorsModel: Identifiable {
     init(roads: CopyDoorsRoads) {
         self.roads = roads
     }
+
+    /// The doors a copy is offered here: Look inside always when its road exists; Make this my library only with a
+    /// library open.
+    var offersLookInside: Bool { roads.lookInside != nil }
+    var offersMakeMine: Bool { roads.makeMine != nil }
 
     /// A picked thing (File ▸ Open Library… on the new road): classified, filed when it is a pair, then its doors.
     func begin(picked: URL) async {
@@ -283,13 +295,31 @@ final class CopyDoorsModel: Identifiable {
     /// The chooser's pick.
     func choose(_ store: URL) async { await begin(picked: store) }
 
+    /// Look inside `row` (a list row's press, or the picked copy's door) — the quiet road tried first.
+    func openLookInside(_ row: CopyDoorRow) async {
+        guard let lookInside = roads.lookInside else { return }
+        let model = LookInsideModel(
+            row: row, offersMakeMine: roads.makeMine != nil,
+            open: { typed in await lookInside(row.copy, typed) },
+            finished: { [weak self] exit in
+                guard let self else { return }
+                switch exit {
+                case .closed: self.phase = .done
+                case .makeMine: Task { await self.openMakeMine(row) }
+                }
+            })
+        phase = .lookInside(model)
+        await model.begin()
+    }
+
     /// Make this my library's confirm for `row` (a list row's press, or the picked copy's door).
     func openMakeMine(_ row: CopyDoorRow) async {
+        guard let makeMine = roads.makeMine else { return }
         let roads = roads
         let model = MakeMineModel(
             row: row, passphraseSet: roads.passphraseSet(),
             opensQuietly: { await roads.opensQuietly(row.copy) },
-            act: { copySecrets, currentPair in await roads.makeMine(row, copySecrets, currentPair) },
+            act: { copySecrets, currentPair in await makeMine(row, copySecrets, currentPair) },
             finished: { [weak self] made in
                 guard let self else { return }
                 if made {
@@ -302,8 +332,11 @@ final class CopyDoorsModel: Identifiable {
         await model.begin()
     }
 
-    /// The sheet's way out.
-    func close() { phase = .done }
+    /// The sheet's way out — a look standing is forgotten first.
+    func close() {
+        if case .lookInside(let look) = phase { look.forget() }
+        phase = .done
+    }
 }
 
 /// The Restore list's brain on the new road: the listing, re-read at each appearance.

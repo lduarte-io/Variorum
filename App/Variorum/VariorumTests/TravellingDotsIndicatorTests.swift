@@ -83,6 +83,7 @@ struct TravellingDotsIndicatorTests {
             "Variorum/Features/Protection/SetPassphraseSheet.swift",
             // VX-306 U3: the two doors' sheet; the phone's new-road faces.
             "Variorum/Features/Protection/CopyDoorsSheet.swift",
+            "Variorum/Features/Protection/LookInsideSheet.swift",
             "VariorumMobile/Features/Protection/MobileRoadFaces.swift",
             "VariorumMobile/Features/Protection/MobilePostureSheets.swift",
             "VariorumMobile/Features/Protection/MobileProtectionCeremonies.swift",

@@ -118,7 +118,10 @@ struct SettingsSceneContent: View {
                 // VX-306 U3: the new road's Restore list — Make this my library on a catalogued copy, through
                 // Settings' OWN presenter (nil on today's road).
                 roadDoors: bootstrap.copyDoorsRoads().map { roads in
-                    RoadDoorsHost(roads: roads, makeMine: { row in libraryOpen.beginMakeMine(roads: roads, row: row) })
+                    RoadDoorsHost(
+                        roads: roads,
+                        lookInside: { row in libraryOpen.beginLookInside(roads: roads, row: row) },
+                        makeMine: { row in libraryOpen.beginMakeMine(roads: roads, row: row) })
                 })
                 .sheet(isPresented: Binding(
                     get: { libraryOpen.model != nil },

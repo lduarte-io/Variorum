@@ -5,11 +5,12 @@
 //  VX-306 U3 — THE TWO DOORS, the Mac's faces (rule 17; §7c (8) (9), built exactly as drafted — PROVISIONAL, hers at
 //  the bundle). One sheet over `CopyDoorsModel`: a picked thing being read, its honest refusal, the several-stores
 //  chooser, a picked copy's doors, and MAKE THIS MY LIBRARY's confirm — the title, the lead, the copy's own secret only
-//  when its quiet road doesn't open it, her twelve words, her passphrase when one is set, one button. LOOK INSIDE's
-//  door renders once its face is built (propose-then-rule — the U3 record's piece 4; P-2 until then).
+//  when its quiet road doesn't open it, her twelve words, her passphrase when one is set, one button; and LOOK INSIDE
+//  (`LookInsideSheet` — P-VX306-U3-15, the read-only facts sheet).
 //
 //  And the RESTORE LIST's rows on the new road (`RoadRestoreRows`, Settings ▸ Data Safety): this library's copies newest
-//  first, then the other libraries on this Mac — each row its day, its kind, and *Make this my library…*.
+//  first, then the other libraries on this Mac — each row its day, its kind, *Look inside…* and *Make this my
+//  library…*.
 //
 
 import SwiftUI
@@ -52,18 +53,29 @@ struct CopyDoorsSheet: View {
                 HStack {
                     Button(ProtectionWords.makeMineCancel) { onClose() }.keyboardShortcut(.cancelAction)
                     Spacer()
-                    Button(ProtectionWords.makeMineDoor) { Task { await model.openMakeMine(row) } }
-                        .keyboardShortcut(.defaultAction)
+                    if model.offersLookInside {
+                        Button(ProtectionWords.lookInsideDoor) { Task { await model.openLookInside(row) } }
+                    }
+                    if model.offersMakeMine {
+                        Button(ProtectionWords.makeMineDoor) { Task { await model.openMakeMine(row) } }
+                    }
                 }
             case .makeMine(let confirm):
                 MakeMineConfirm(model: confirm)
+            case .lookInside(let look):
+                LookInsideSheet(model: look)
             case .done:
                 // The act is done (the reopen already routed) or she left; the sheet leaves.
                 Color.clear.frame(height: 1).onAppear { onClose() }
             }
         }
         .padding(22)
-        .frame(width: 460, alignment: .leading)
+        .frame(width: isLooking ? 560 : 460, alignment: .leading)
+    }
+
+    private var isLooking: Bool {
+        if case .lookInside = model.phase { return true }
+        return false
     }
 }
 
@@ -139,6 +151,8 @@ struct MakeMineConfirm: View {
 /// The Restore list's rows on the new road (Settings ▸ Data Safety) — the catalogue's copies, newest first.
 struct RoadRestoreRows: View {
     @Bindable var list: CopyDoorsListModel
+    /// A row's *Look inside…* (the scene's presenter opens the look — P-VX306-U3-15).
+    let lookInside: (CopyDoorRow) -> Void
     /// A row's *Make this my library…* (the scene's presenter opens the confirm).
     let makeMine: (CopyDoorRow) -> Void
 
@@ -170,6 +184,7 @@ struct RoadRestoreRows: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
+            Button(ProtectionWords.lookInsideDoor) { lookInside(row) }
             Button(ProtectionWords.makeMineDoor) { makeMine(row) }
         }
     }
@@ -179,5 +194,6 @@ struct RoadRestoreRows: View {
 /// scene's own presenter.
 struct RoadDoorsHost {
     let roads: CopyDoorsRoads
+    let lookInside: (CopyDoorRow) -> Void
     let makeMine: (CopyDoorRow) -> Void
 }

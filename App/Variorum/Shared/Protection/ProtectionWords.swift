@@ -149,6 +149,21 @@ nonisolated enum ProtectionWords {
     /// names it): today's honest minimum.
     static let pickedCopyUnreadable = "This file couldn't be read as a library."
     static let filingLine = "Reading what you picked\u{2026}"
+    // Look inside's sheet (P-VX306-U3-15 built — its lines §7c does not draft, PROVISIONAL P-VX306-U3-16):
+    /// The sheet's title (the door's name).
+    static let lookInsideTitle = "Look inside"
+    /// The copy doesn't open by a quiet road on this Mac: its own secret is asked.
+    static let lookInsideAsk = "This copy doesn't open by itself on this Mac. Enter its passphrase or twelve words."
+    static let lookInsideOpening = "Opening the copy\u{2026}"
+    static let lookInsideBooks = "Books"
+    static let lookInsideNotes = "Notes"
+    static let lookInsideNoBooks = "No books."
+    static let lookInsideNoNotes = "No notes."
+    static func lookInsideBookCount(_ count: Int) -> String { count == 1 ? "1 note" : "\(count) notes" }
+    static let lookInsideMore = "Show more"
+    static let lookInsideBack = "Back"
+    static let lookInsideUntitled = "Untitled"
+    static let lookInsideClose = "Close"
     /// The picked thing is the library open now (or its folder) — a copy of it is never filed over it.
     static let pickedLiveLibrary = "That's the library you have open now."
     /// The picked pair could not be copied into this Mac's safety copies (the picked thing was only read).

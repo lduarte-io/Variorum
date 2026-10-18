@@ -1080,7 +1080,7 @@ final class AppBootstrap {
     /// The two doors' roads on the new road (nil on today's road, before a library opens, and on a hosted test run's
     /// read-only road). Each road reads the CURRENT session at its call (a reopen replaces it).
     func copyDoorsRoads() -> CopyDoorsRoads? {
-        guard newRoad, let session = roadSession, session.writes else { return nil }
+        guard newRoad, case .ready = state, let session = roadSession, session.writes else { return nil }
         return CopyDoorsRoads(
             listing: { [weak self] in
                 guard let session = self?.roadSession else { return .empty }
@@ -1103,6 +1103,40 @@ final class AppBootstrap {
                 }
                 return await Task.detached(priority: .userInitiated) {
                     ProtectionCopyDoors.pick(url, session: session)
+                }.value
+            },
+            // VX-306 U3 — LOOK INSIDE (P-VX306-U3-15): read-only, writes nothing, closing forgets.
+            lookInside: { [weak self] copy, typed in
+                guard let session = self?.roadSession else { return .refused(.failed) }
+                return await Task.detached(priority: .userInitiated) {
+                    ProtectionCopyDoors.lookInside(CopyDoorsContext(session), copy: copy, typed: typed)
+                }.value
+            })
+    }
+
+    /// VX-306 U3 — the two doors' roads with NO library open (the missing face's and rule 27's *Open Library…*,
+    /// P-VX306-U3-7 narrowed at the ruling): a pick filed, then Look inside; Make this my library is not offered (no
+    /// current pair to verify — the empty-slot landing, T-5, is VX-309's). nil on today's road and on a hosted test run's
+    /// read-only road (the filing writes).
+    func copyDoorsRoadsWithoutALibrary() -> CopyDoorsRoads? {
+        guard newRoad, let road = roadInputs?.compose(), road.writes else { return nil }
+        // The road's context (its sign-in read) is taken off the main actor, inside each detached read.
+        let context: @Sendable () -> CopyDoorsContext = { CopyDoorsContext(road.context()) }
+        return CopyDoorsRoads(
+            listing: {
+                await Task.detached(priority: .userInitiated) { ProtectionCopyDoors.listing(context()) }.value
+            },
+            opensQuietly: { copy in
+                await Task.detached(priority: .userInitiated) { ProtectionCopyDoors.opensQuietly(context(), copy) }.value
+            },
+            passphraseSet: { false },
+            makeMine: nil,
+            pick: { url in
+                await Task.detached(priority: .userInitiated) { ProtectionCopyDoors.pick(url, context()) }.value
+            },
+            lookInside: { copy, typed in
+                await Task.detached(priority: .userInitiated) {
+                    ProtectionCopyDoors.lookInside(context(), copy: copy, typed: typed)
                 }.value
             })
     }

@@ -39,15 +39,24 @@ final class LibraryOpenPresenter {
         // classifies honestly rather than being unpickable.
         panel.allowedContentTypes = [.folder, .data]
         guard panel.runModal() == .OK, let picked = panel.url else { return }
-        // VX-306 U3: on the new road a picked copy is filed first and the two doors act on it (P-VX306-U3-0 (a)).
+        // VX-306 U3: on the new road a picked copy is filed first and the two doors act on it (P-VX306-U3-0 (a)) — with
+        // a library open both doors; with none (the missing face, rule 27's lobby) Look inside alone (P-VX306-U3-7).
         if bootstrap.newRoad {
-            guard let roads = bootstrap.copyDoorsRoads() else { return }
+            guard let roads = bootstrap.copyDoorsRoads() ?? bootstrap.copyDoorsRoadsWithoutALibrary() else { return }
             let fresh = CopyDoorsModel(roads: roads)
             roadDoors = fresh
             Task { await fresh.begin(picked: picked) }
             return
         }
         begin(bootstrap: bootstrap, picked: picked)
+    }
+
+    /// VX-306 U3 — a Restore row's *Look inside…* on the new road (P-VX306-U3-15).
+    func beginLookInside(roads: CopyDoorsRoads, row: CopyDoorRow) {
+        guard model == nil, roadDoors == nil else { return }
+        let fresh = CopyDoorsModel(roads: roads)
+        roadDoors = fresh
+        Task { await fresh.openLookInside(row) }
     }
 
     /// VX-306 U3 — a Restore row's *Make this my library…* on the new road.
@@ -59,6 +68,8 @@ final class LibraryOpenPresenter {
     }
 
     func dismissRoad() {
+        // A look standing is forgotten (its reader closed, its private folder deleted) whatever closed the sheet.
+        roadDoors?.close()
         roadDoors = nil
     }
 

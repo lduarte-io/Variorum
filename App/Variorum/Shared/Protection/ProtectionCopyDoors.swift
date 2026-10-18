@@ -23,25 +23,62 @@
 //      finishes at the next open's settle, and the door says it was made.
 //    - THE PICK (`pick`) — a picked thing classified and, when it is this design's pair, filed (`PickedCopy`); a copy
 //      already in this Mac's catalogue is used where it is; the open library itself is refused.
+//    - LOOK INSIDE (`lookInside`, P-VX306-U3-15 — the orchestrator's ruling (b)) — the executor's `lookInside` for the
+//      key, then `ProtectionCopyPeek`'s read-only reader on a private copy; nothing written.
+//    The reads and the pick stand on a `CopyDoorsContext` — the open library's, or (the missing face, rule 27's lobby) the
+//    road's system with no library open.
 //
 
 import Foundation
 import VariorumCore
 
-nonisolated enum ProtectionCopyDoors {
-    /// An executor for the doors' READS — its own instance (the session's executor stays the acts').
-    static func readExecutor(_ session: ProtectionRoadSession) -> ProtectionExecutor {
-        ProtectionExecutor(
-            leaves: session.system.leaves, configuration: session.executor.configuration, guards: session.executor.guards)
+/// What the doors' READS and the pick stand on: the protection system, an executor configuration, and the library open
+/// now (nil — none: the missing face, rule 27's lobby). Look inside needs no library open; Make this my library does.
+nonisolated struct CopyDoorsContext: Sendable {
+    let system: ProtectionSystem
+    let configuration: ExecutorConfiguration
+    let guards: ProtectionGuards
+    /// The library open now (its copies are "this library's").
+    let libraryID: String?
+
+    /// The open library's (the session's executor stays the acts').
+    init(_ session: ProtectionRoadSession) {
+        system = session.system
+        configuration = session.executor.configuration
+        guards = session.executor.guards
+        libraryID = session.library.record?.libraryID
     }
 
+    /// No library open (VX-306 U3 — the missing face's and rule 27's *Open Library…*): the road's system alone.
+    init(_ road: RoadContext) {
+        system = road.system
+        configuration = road.system.configuration(session: road.session)
+        guards = .all
+        libraryID = nil
+    }
+
+    /// An executor for the doors' READS — its own instance.
+    func readExecutor() -> ProtectionExecutor {
+        ProtectionExecutor(leaves: system.leaves, configuration: configuration, guards: guards)
+    }
+}
+
+/// What a look's opening came to (VX-306 U3 — Look inside, P-VX306-U3-15).
+nonisolated enum LookInsideOpening: Sendable {
+    /// The copy, open read-only on a private copy — the reader is the look; closing it forgets.
+    case opened(ProtectionCopyPeek.Reader)
+    case refused(CopyDoorRefusal)
+}
+
+nonisolated enum ProtectionCopyDoors {
     // MARK: - The list
 
-    static func listing(_ session: ProtectionRoadSession) -> CopyDoorsListing {
-        let places = session.system.places
+    static func listing(_ session: ProtectionRoadSession) -> CopyDoorsListing { listing(CopyDoorsContext(session)) }
+
+    static func listing(_ ctx: CopyDoorsContext) -> CopyDoorsListing {
+        let places = ctx.system.places
         return CopyDoorsListing.make(
-            session.system.lister.catalog(), libraryID: session.library.record?.libraryID,
-            asOf: { asOf($0, places: places) })
+            ctx.system.lister.catalog(), libraryID: ctx.libraryID, asOf: { asOf($0, places: places) })
     }
 
     /// A copy's day: a backup's stamp; the day a previous library stepped aside; an OPENED copy's own day (the filed
@@ -61,9 +98,43 @@ nonisolated enum ProtectionCopyDoors {
     // MARK: - The quiet probe (a READ)
 
     static func opensQuietly(_ session: ProtectionRoadSession, _ copy: CatalogCopy) -> Bool {
-        let catalog = session.system.lister.catalog()
+        opensQuietly(CopyDoorsContext(session), copy)
+    }
+
+    static func opensQuietly(_ ctx: CopyDoorsContext, _ copy: CatalogCopy) -> Bool {
+        let catalog = ctx.system.lister.catalog()
         guard let current = catalog.copies.first(where: { $0.id == copy.id }) else { return false }
-        return (try? readExecutor(session).lookInside(current, in: catalog)) != nil
+        return (try? ctx.readExecutor().lookInside(current, in: catalog)) != nil
+    }
+
+    // MARK: - Look inside (rule 17 — P-VX306-U3-15, the read-only facts sheet)
+
+    /// The look's opening: the executor's `lookInside` (a READ — its own quiet road, or what she typed) hands the key;
+    /// `ProtectionCopyPeek.open` byte-copies the catalogued file into a private folder and opens ONE read-only keyed
+    /// connection on it. The key is not kept past this call (it lives only inside the connection). NOTHING is written:
+    /// no key file, keychain item, record, memory item or defaults key — the private folder is the look's own, deleted
+    /// at its close.
+    static func lookInside(_ ctx: CopyDoorsContext, copy: CatalogCopy, typed: TypedSecrets) -> LookInsideOpening {
+        let catalog = ctx.system.lister.catalog()
+        guard let current = catalog.copies.first(where: { $0.id == copy.id }) else { return .refused(.copyGone) }
+        let looked: LookedInside
+        do {
+            looked = try ctx.readExecutor().lookInside(current, in: catalog, typed: typed)
+        } catch {
+            return .refused(.copyDoesNotOpen)
+        }
+        let scratch = ctx.system.places.scratch
+        do {
+            let reader = try ctx.system.places.withFile(catalogID: current.id) {
+                try ProtectionCopyPeek.open($0, key: looked.key, inside: scratch)
+            }
+            guard let reader else { return .refused(.copyGone) }
+            ProtectionOpenRoad.log("road: a look inside a copy (\(current.kind.rawValue), road \(looked.road)) — read-only, nothing written")
+            return .opened(reader)
+        } catch {
+            ProtectionOpenRoad.log("road: a look inside could not read the copy — \(String(describing: error))")
+            return .refused(.unreadableCopy)
+        }
     }
 
     // MARK: - The preflight (READS only)
@@ -80,7 +151,7 @@ nonisolated enum ProtectionCopyDoors {
         guard let copy = catalog.copies.first(where: { $0.id == row.id }) else { return .refused(.copyGone) }
         let looked: LookedInside
         do {
-            looked = try readExecutor(session).lookInside(copy, in: catalog, typed: copySecrets)
+            looked = try CopyDoorsContext(session).readExecutor().lookInside(copy, in: catalog, typed: copySecrets)
         } catch {
             return .refused(.copyDoesNotOpen)
         }
@@ -179,16 +250,18 @@ nonisolated enum ProtectionCopyDoors {
 
     // MARK: - The pick
 
-    static func pick(_ url: URL, session: ProtectionRoadSession) -> PickOutcome {
-        let places = session.system.places
-        let libraryID = session.library.record?.libraryID
+    static func pick(_ url: URL, session: ProtectionRoadSession) -> PickOutcome { pick(url, CopyDoorsContext(session)) }
+
+    static func pick(_ url: URL, _ ctx: CopyDoorsContext) -> PickOutcome {
+        let places = ctx.system.places
+        let libraryID = ctx.libraryID
         let picked = url.resolvingSymlinksInPath().standardizedFileURL.path
         let container = places.container.resolvingSymlinksInPath().standardizedFileURL.path
         if picked == container || picked == places.slot.resolvingSymlinksInPath().standardizedFileURL.path {
             return .refused(ProtectionWords.pickedLiveLibrary, detail: nil)
         }
         // Already one of this Mac's catalogued copies: used where it is (never filed twice).
-        let catalog = session.system.lister.catalog()
+        let catalog = ctx.system.lister.catalog()
         if picked.hasPrefix(container + "/") {
             let relative = String(picked.dropFirst(container.count + 1))
             let matches = catalog.copies.filter { copy in
@@ -215,7 +288,7 @@ nonisolated enum ProtectionCopyDoors {
                 return .refused(ProtectionWords.filingFailed, detail: String(describing: error))
             }
             let id = PickedCopy.filedCopyID(folder)
-            guard let copy = session.system.lister.catalog().copies.first(where: { $0.id == id }), copy.library != nil else {
+            guard let copy = ctx.system.lister.catalog().copies.first(where: { $0.id == id }), copy.library != nil else {
                 return .refused(ProtectionWords.pickedCopyUnreadable, detail: nil)
             }
             ProtectionOpenRoad.log("road: a picked copy was filed into Backups/safety-copies/\(folder.lastPathComponent)")

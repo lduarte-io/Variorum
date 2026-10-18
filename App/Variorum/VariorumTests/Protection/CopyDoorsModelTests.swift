@@ -135,7 +135,7 @@ struct CopyDoorsModelTests {
         let r = try row()
         let model = MakeMineModel(
             row: r, passphraseSet: false, opensQuietly: { await roads.roads.opensQuietly(r.copy) },
-            act: { await roads.roads.makeMine(r, $0, $1) }, finished: { finished.append($0) })
+            act: { await roads.roads.makeMine?(r, $0, $1) ?? .refused(.failed) }, finished: { finished.append($0) })
         await model.begin()
         #expect(!model.checking && !model.needsCopySecret, "the copy's own quiet road opens it — no copy field")
         #expect(!model.lead.contains("passphrase"), "no passphrase set — the lead names none (P-VX306-U3-3)")
@@ -153,7 +153,7 @@ struct CopyDoorsModelTests {
         let r = try row()
         let model = MakeMineModel(
             row: r, passphraseSet: true, opensQuietly: { false },
-            act: { await roads.roads.makeMine(r, $0, $1) }, finished: { _ in })
+            act: { await roads.roads.makeMine?(r, $0, $1) ?? .refused(.failed) }, finished: { _ in })
         await model.begin()
         #expect(model.needsCopySecret)
         #expect(model.lead == ProtectionWords.makeMineLead, "a passphrase is set — the lead exactly as drafted")
@@ -183,7 +183,7 @@ struct CopyDoorsModelTests {
         let r = try row()
         let model = MakeMineModel(
             row: r, passphraseSet: false, opensQuietly: { false },
-            act: { await roads.roads.makeMine(r, $0, $1) }, finished: { finished.append($0) })
+            act: { await roads.roads.makeMine?(r, $0, $1) ?? .refused(.failed) }, finished: { finished.append($0) })
         await model.begin()
         await model.submit(copySecret: "", words: "one two three", passphrase: "")
         #expect(model.refusal == ProtectionWords.wordsWrongCount(3))
@@ -229,6 +229,36 @@ struct CopyDoorsModelTests {
             Issue.record("made — the sheet closes: \(model.phase)")
             return
         }
+    }
+
+    /// Look inside is offered wherever its road exists; Make this my library only with a library open (the missing
+    /// face's roads carry no `makeMine` — T-5 is VX-309's). A look that can't open quietly asks; Close ends the sheet.
+    @Test func theDoorsOfferLookInsideAndMakeThisMyLibraryOnlyWithALibraryOpen() async throws {
+        let planted = PlantedCopyDoors()
+        var roads = planted.roads
+        roads.lookInside = { _, _ in .refused(.copyDoesNotOpen) }
+        #expect(CopyDoorsModel(roads: roads).offersLookInside && CopyDoorsModel(roads: roads).offersMakeMine)
+        roads.makeMine = nil
+        let lookOnly = CopyDoorsModel(roads: roads)
+        #expect(lookOnly.offersLookInside && !lookOnly.offersMakeMine)
+        let r = try row()
+        await lookOnly.openMakeMine(r)
+        guard case .reading = lookOnly.phase else {
+            Issue.record("no confirm without a library open: \(lookOnly.phase)")
+            return
+        }
+        await lookOnly.openLookInside(r)
+        guard case .lookInside(let look) = lookOnly.phase else {
+            Issue.record("the look: \(lookOnly.phase)")
+            return
+        }
+        #expect(look.phase == .needsSecret && !look.offersMakeMine)
+        look.close()
+        guard case .done = lookOnly.phase else {
+            Issue.record("Close ends the sheet: \(lookOnly.phase)")
+            return
+        }
+        #expect(!CopyDoorsModel(roads: planted.roads).offersLookInside, "no look road — no door")
     }
 
     @Test func aPickThatIsNotAPairSaysWhyAndSeveralStoresAreOffered() async throws {

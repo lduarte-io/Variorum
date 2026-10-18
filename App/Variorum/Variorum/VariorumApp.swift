@@ -472,9 +472,9 @@ struct VariorumApp: App {
                 // pre-13x 1a (§3.7): the three-door face — the lock stays.
                 // 13x U2 row 6: the third door lands (copy §3's "Open an
                 // Existing Library…", shipped unrendered since 1a).
-                // VX-306 U3: on the new road the door retires — Make this my library needs a library open (the
-                // empty-slot landing, T-5, is VX-309's) and Look inside is propose-then-rule (P-VX306-U3-7).
-                LibraryMissingView(lobby: lobby, openDoor: bootstrap.newRoad ? nil : {
+                // VX-306 U3: on the new road the door leads to the picked flow — filed, then Look inside (Make this my
+                // library needs a library open; the empty-slot landing, T-5, is VX-309's) — P-VX306-U3-7 narrowed.
+                LibraryMissingView(lobby: lobby, openDoor: {
                     libraryOpen.openPanel(bootstrap: bootstrap)
                 })
             case .failed(let error, let recovery):
@@ -487,9 +487,8 @@ struct VariorumApp: App {
                 // 27's face carries the missing face's doors (the app's Backups folder, the 13x open door).
                 RoadLockView(
                     lobby: lobby, backupsFolder: bootstrap.liveStoreURL.flatMap(RoadLockView.backupsFolder(besideStore:)),
-                    // VX-306 U3: 13x's adoption door retires on the new road (no library is open to make a copy one's
-                    // own — T-5 is VX-309's); P-VX306-U3-7.
-                    openDoor: nil)
+                    // VX-306 U3: the door leads to the picked flow — filed, then Look inside (P-VX306-U3-7 narrowed).
+                    openDoor: { libraryOpen.openPanel(bootstrap: bootstrap) })
             case .newLibraryWords(let card):
                 // VX-306 U1b: the once-shown words card of a library just created (rule 2).
                 LibraryWordsCard(model: card)

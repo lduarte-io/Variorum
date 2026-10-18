@@ -1907,6 +1907,34 @@ state — traced on this tree:
     sort; a never-opened library reads empty. Debug `✔ Test run with 4 tests in 1 suite passed`; release (`swift test -c
     release`) `✔ Test run with 4 tests in 1 suite passed`.
 
+  - 7b — the look on the app's road + its brain + the Mac's faces + the doors back on the missing face and rule 27's
+    lobby: DONE (this commit). **The road** (`ProtectionCopyDoors.lookInside`): the executor's `lookInside` (a READ — its
+    own quiet road, or what she typed) for the key, then `ProtectionCopyPeek.open` on the catalogued file — the key is not
+    kept past the call; the reads and the pick now stand on a `CopyDoorsContext` (the open library's, or — no library open
+    — the road's system alone). **The brain** (`Shared/Protection/LookInsideModel.swift`): the quiet road tried first; the
+    copy's own secret asked when it fails (*This copy doesn't open by itself on this Mac. Enter its passphrase or twelve
+    words.*, the copy's field — §7c (8)'s label, *Open*), a wrong one refused in the doors' words; open → the books and the
+    first page of notes off the main actor, *Show more* for the next, a note's text on pick and *Back*; *Close* and
+    *Make this my library…* (only with a library open) each FORGET first (the reader closed — its connection and its
+    private folder); the doors' model forgets a standing look when the sheet goes away any way
+    (`CopyDoorsModel.close`, `LibraryOpenPresenter.dismissRoad`). **The faces**: `Features/Protection/LookInsideSheet.swift`
+    (*Look inside* · §7c (10)'s line · the kind · *Books* with *N notes* · *Notes* newest first · *Show more* · a note read
+    as its page reads, never editable · *Close* · *Make this my library…*; the travelling dots, never a spinner — the pin's
+    list gains it); *Look inside…* on every Restore row (`RoadRestoreRows`, `RoadDoorsHost.lookInside`,
+    `LibraryOpenPresenter.beginLookInside`) and on a picked copy's doors. **The doors back (P-VX306-U3-7 narrowed at the
+    ruling)**: the missing face's and rule 27's lobby *Open Library…* render again on the new road and lead to the picked
+    flow — filed, then *Look inside…* alone (`AppBootstrap.copyDoorsRoadsWithoutALibrary()` — no `makeMine`: no current pair
+    to verify, T-5 is VX-309's; nil on a hosted test run's read-only road, since the filing writes); `copyDoorsRoads()` now
+    answers only at `.ready`. The PHONE: no Look inside this unit — no phone door reaches a copy (no Restore list, no Open
+    Library), so a twin sheet would have no entry point; the mobile catch-up's. **Pins:** `LookInsideRoadTests` (4,
+    planted — THE PROOF: across look → read → close every keychain leaf's WRITE LOG unchanged, every item and every
+    container byte unchanged, the private folder gone after close; someone else's filed library: the quiet road fails →
+    its secret asked, a wrong one refused, its words open it, a note read, *Close* forgets; *Make this my library…* from
+    the look forgets first; the look with NO library open), `CopyDoorsModelTests` +1 (Look inside offered wherever its road
+    exists, Make this my library only with a library open; the look's phase; Close ends the sheet). The planted keychain
+    leaves gained write logs (`ProtectionTestSupport`). HEADLESS: `✔ Test run with 62 tests in 9 suites passed`; Mac and
+    phone `build-for-testing` green; the Mac runs PENDING under the stage.
+
 **THE ROAD AS BUILT (for the ladder):** the doors' brain is `Shared/Protection/CopyDoorsModel.swift` (pure; every act an
 injected `CopyDoorsRoads`); their off-main roads are `ProtectionCopyDoors.swift` (listing · quiet probe · preflight · the act
 · the pick) over `PickedCopy.swift` (classify · file); the bootstrap holds the swap's precondition (`AppBootstrap

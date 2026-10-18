@@ -73,14 +73,18 @@ nonisolated final class TempSlot {
 nonisolated final class InMemoryAppleKeysLeaf: AppleKeysLeaf, @unchecked Sendable {
     var keys: [String: AppleKeyMaterial] = [:]
     var stamps: [String: String] = [:]
+    /// VX-306 U3: every write and delete, in order (Look inside's write-nothing proof reads it).
+    private(set) var writes: [String] = []
 
     func readableAppleKeyIDs() throws -> Set<String> { Set(keys.keys) }
     func readAppleKey(id: String) throws -> AppleKeyMaterial? { keys[id] }
     func addAppleKey(_ key: AppleKeyMaterial, libraryID: String) throws {
+        writes.append("add \(key.id)")
         keys[key.id] = key
         stamps[key.id] = libraryID
     }
     func deleteAppleKey(id: String) throws {
+        writes.append("delete \(id)")
         keys[id] = nil
         stamps[id] = nil
     }
@@ -96,6 +100,8 @@ nonisolated final class PlantedCustodyLeaf: CustodyLeaf, @unchecked Sendable {
     var unreadable: Set<String> = []
     var listingFails = false
     private(set) var reads: [ProtectionNames.CustodyClass] = []
+    /// VX-306 U3: every write and delete, in order (Look inside's write-nothing proof reads it).
+    private(set) var writes: [String] = []
 
     struct Unreadable: Error {}
 
@@ -111,12 +117,14 @@ nonisolated final class PlantedCustodyLeaf: CustodyLeaf, @unchecked Sendable {
     }
 
     func writeCustody(_ key: StoreKey, itemClass: ProtectionNames.CustodyClass, libraryID: String) throws {
+        writes.append("write \(itemClass)")
         let fact = CustodyItemFact(fingerprint: StoreKeyEnvelope.fingerprint(of: key), itemClass: itemClass, libraryID: libraryID)
         items.removeValue(forKey: fact)
         items[fact] = key
     }
 
     func deleteCustody(fingerprint: String, itemClass: ProtectionNames.CustodyClass) throws {
+        writes.append("delete \(itemClass)")
         items[CustodyItemFact(fingerprint: fingerprint, itemClass: itemClass)] = nil
     }
 }
@@ -125,6 +133,8 @@ nonisolated final class PlantedCustodyLeaf: CustodyLeaf, @unchecked Sendable {
 nonisolated final class PlantedMemoryLeaf: MemoryStoreLeaf, @unchecked Sendable {
     var items: [String: Sealed<DeviceMemory>] = [:]
     var unreadable: Set<String> = []
+    /// VX-306 U3: every write and delete, in order (Look inside's write-nothing proof reads it).
+    private(set) var writes: [String] = []
 
     struct Unreadable: Error {}
 
@@ -132,9 +142,15 @@ nonisolated final class PlantedMemoryLeaf: MemoryStoreLeaf, @unchecked Sendable 
         if unreadable.contains(libraryID) { throw Unreadable() }
         return items[libraryID]
     }
-    func writeMemory(_ memory: Sealed<DeviceMemory>, libraryID: String) throws { items[libraryID] = memory }
+    func writeMemory(_ memory: Sealed<DeviceMemory>, libraryID: String) throws {
+        writes.append("write \(libraryID)")
+        items[libraryID] = memory
+    }
     func rememberedLibraryIDs() throws -> Set<String> { Set(items.keys) }
-    func deleteMemory(libraryID: String) throws { items[libraryID] = nil }
+    func deleteMemory(libraryID: String) throws {
+        writes.append("delete \(libraryID)")
+        items[libraryID] = nil
+    }
 }
 
 /// Biometry that is whatever the test says.
