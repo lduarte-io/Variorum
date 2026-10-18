@@ -495,8 +495,13 @@ disposition here.
 - **Ladder:** round 1 COMPLETE (`notes/plans/fixes/vx-381-ladder-r1.md` — findings + the orchestrator's
   DISPOSITIONS). **Walk:** NOT-STARTED. **Closeout:** NOT-STARTED.
 - **Ladder round-1 FIX LEG (a fresh implementer, 2026-10-18 — scope = the r1 file's §DISPOSITIONS: F-2 · F-1 · F-3 +
-  riders F-7 · F-8; nothing else):** IN-PROGRESS. No revert in flight.
-  - F-2 (revived tags rebuild their paths from the live parent): FIXED (this commit). Mechanism (the reviewer's,
+  riders F-7 · F-8; nothing else):** IMPLEMENTER-CLOSED. **NOT DONE, stated first:** no walk (the orchestrator's, after
+  round 2); no sweep predicate for tag→parent path coherence (the reviewer's optional extra in F-2 — not in the
+  disposition; offered for round 2's call); `restoreContainer`/`restoreBlock`'s IN-list twin untouched (VX-387); the
+  chip's own live arm ("Added by tagging  — …" on an empty plan, unreachable) untouched — VX-216's chip voices. **Two
+  wordings await the orchestrator's approval** (F-3, F-7 below). No revert in flight; the tree is clean. Every
+  dispositioned finding: **F-2 FIXED · F-1 FIXED · F-3 FIXED · F-7 FIXED · F-8 DONE (refactor, no pin owed).**
+  - F-2 (revived tags rebuild their paths from the live parent): FIXED (26d613bf). Mechanism (the reviewer's,
     re-traced): `renameTag` rewrites only LIVE descendants, so a child dead across its parent's rename kept the stale
     path and `revertTagDeletion` revived it as stored (`life/goals` under `home`); its collision check read that
     stale path too. Fix: each revived tag's path = its LIVE parent's current path + "/" + name (a root: its name),
@@ -509,7 +514,7 @@ disposition here.
     source: "11 tests in 1 suite failed with 11 issues" — exactly the three new pins (4 + 3 + 4); the eight shipped
     pins green on both sides. Green after: 11/11; InvariantSweep · TagReferenceOperations · RuleWingScoping ·
     SyncRepair 26/4.
-  - F-1 (correlated EXISTS + the plan pin): FIXED (this commit). Mechanism (re-traced): the two revival UPDATEs
+  - F-1 (correlated EXISTS + the plan pin): FIXED (6e3ff09e). Mechanism (re-traced): the two revival UPDATEs
     guarded their targets with `post_id IN (SELECT id FROM container …)` / `block_id IN (SELECT id FROM block …)` —
     the measured old plan: `SEARCH post_tag USING INDEX idx_post_tag_tag` · `LIST SUBQUERY 1` · `SCAN container USING
     INDEX idx_container_touched` · `CREATE BLOOM FILTER` (the block twin: `SCAN block`), a whole-table walk per revived
@@ -521,37 +526,49 @@ disposition here.
     constants holding the shipped SQL verbatim): 6 issues, 3 per statement; green after: 12/12 (the behavioural pins —
     live-target guard, exact rows — unchanged). `restoreContainer`/`restoreBlock`'s pre-existing twin untouched
     (VX-387's).
-  - F-3 (the shared table's `duplicateTagPath` arm): LANDED (20894e80) — red/green PENDING the stage window. Sentence
-    (PROVISIONAL, for the orchestrator): "A tag named “work” already exists — rename it, then try again." (act-less:
-    the table can't know its door — the undo doors frame it "Undo failed: …", and the rule editor's make-a-tag door,
-    `RuleEditorModel.createTag`, reaches the same table on a race, where "undo again" would be false). Pins: Mac
-    `TagAndFolderTests.theUndoDoorSaysTheCollidingTagAndTheRoadNeverTheRawCase` (the real ⌥⌘Z door, then the rename
-    road) · phone `MobileRefusalTableTests.theTagUndoCollisionSpeaksTheSharedSentence` (the arm is in
-    `Shared/OpsRefusalTable.swift`, which the phone compiles).
-  - F-7 (the archived receipt's empty arm): LANDED (b1d38659) — "Added — the gathering shows it once it's unarchived."
-    (PROVISIONAL) — red/green PENDING the stage window. Pin `GatheringCollectStarReceiptTests.
-    anArchivedCollectThatWoreNothingNeverClaimsATag`.
-  - F-8: DONE (f2644865) — `GatheringNoteDoorCopy.cannot` deleted, its TWO callers (the hover in `help` and
-    `BookStructureModel.newPostInGathering`'s refusal line) say the reason directly (byte-identical); `divergeTarget`'s
-    doc and its twin in `AppSession.noteMultiBookEdit`'s doc corrected. No behaviour change, no pin owed.
-  - **The RED TREE = dd3ba271** (pins present, F-3's arm and F-7's guard absent — no revert was needed); the GREEN
-    TREE = f2644865. All four test products BUILT ("TEST BUILD SUCCEEDED" each), gitignored under
-    `App/Variorum/DerivedData/`: `vx381-fix-red` · `vx381-fix-green` (Mac) · `vx381-fix-red-ios` · `vx381-fix-green-ios`
-    (phone, `generic/platform=iOS Simulator`). The window is test-only (`test-without-building`), from `App/Variorum/`:
-    - RUN 1 Mac RED (`vx381-fix-red`): TagAndFolderTests · GatheringCollectStarReceiptTests — EXPECTED: exactly the two
-      new pins red.
-    - RUN 2 Mac GREEN (`vx381-fix-green`), 18 suites: TagAndFolderTests · GatheringCollectReceiptTests ·
+  - F-3 (the shared table's `duplicateTagPath` arm): FIXED (20894e80). **Sentence (PROVISIONAL — for the
+    orchestrator's approval):** "A tag named “work” already exists — rename it, then try again." The fact is Settings ▸
+    Tags' own words (`TagsViewModel.message`, the phone's twin); the road is ACT-LESS ("try again", not the brief's
+    example "undo again") because the shared table cannot know its door — the undo doors frame it ("Undo failed: …"),
+    and the rule editor's make-a-tag door (`RuleEditorModel.createTag` → `OpsRefusalCopy.message`) reaches the same
+    arm on a race, where "undo again" would be false (the table's own act-less precedent: `.lockedPost`). One line to
+    switch to "…then undo again." if the orchestrator prefers it. The arm lives in `Shared/OpsRefusalTable.swift`,
+    which the PHONE compiles, so the phone suite joined the batch. The MCP sweep keeps `duplicateTagPath` in its
+    proven-unreachable set (the wire never carries it), so its walked count is unchanged. Pins: Mac
+    `TagAndFolderTests.theUndoDoorSaysTheCollidingTagAndTheRoadNeverTheRawCase` (the real ⌥⌘Z door — the toast reads
+    "Undo failed: A tag named “work” already exists — rename it, then try again.", the entry kept — then the rename
+    road: "Undid: Delete Tag") · phone `MobileRefusalTableTests.theTagUndoCollisionSpeaksTheSharedSentence`. RED ON OLD
+    and green: RUN 1 / RUN 3 below.
+  - F-7 (the archived receipt's empty arm): FIXED (b1d38659). **Wording (PROVISIONAL — for the orchestrator's
+    approval):** "Added — the gathering shows it once it's unarchived." (the family's participle head — "Tagged #a" ·
+    "Starred" · "Added" — beside the live arm's "Added to the gathering."). Pin `GatheringCollectStarReceiptTests.
+    anArchivedCollectThatWoreNothingNeverClaimsATag` — red on old (RUN 1), green (RUN 2).
+  - F-8: DONE (f2644865) — `GatheringNoteDoorCopy.cannot` deleted; it had TWO callers, not the one the finding named
+    (the hover in `help` and `BookStructureModel.newPostInGathering`'s refusal line) — both say the reason directly,
+    byte-identical (VocabularySweepTests' hover pins green in RUN 2); `divergeTarget`'s doc and its twin in
+    `AppSession.noteMultiBookEdit`'s doc corrected. No behaviour change, no pin owed.
+  - **The batch: DONE** — ONE stage window under the coordinator's GO (claim `vx-381-fixes-batch`, 20 min granted,
+    about 6 used, released; the simulator shut down; no booted sim, no instance left). RED TREE = dd3ba271 (pins
+    present, F-3's arm and F-7's guard absent — no revert was needed); GREEN TREE = f2644865. All `test-without-building`
+    from prebuilt products:
+    - RUN 1 Mac RED: "Test run with 11 tests in 2 suites failed … with 6 issues" — the two failures EXACTLY the new
+      pins (`theUndoDoorSaysTheCollidingTagAndTheRoadNeverTheRawCase` 3 issues: "Refused:", "duplicateTagPath", the
+      sentence; `anArchivedCollectThatWoreNothingNeverClaimsATag` 3 issues); the other 9 green.
+    - RUN 2 Mac GREEN: "Test run with 125 tests in 16 suites passed" — TagAndFolderTests · GatheringCollectReceiptTests ·
       GatheringCollectStarReceiptTests · OpsRefusalTableIntegrityTests · MCPWireRefusalSweepTests · VocabularySweepTests ·
       MultiBookEditNoteRuleTests · MultiBookEditNoteTriggerTests · DivergeDoorTests · ShelfModelTests · BindDoorTests ·
-      OutflowChooserTests · RuleEditorTests · SpawnAndBindLimbTests · WingSwitcherTests · CapabilityRegistryTests ·
-      BookArchiveFacesTests · TutorialBooksChapterTests.
-    - RUN 3 phone RED (`vx381-fix-red-ios`, `platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2`):
-      MobileRefusalTableTests — EXPECTED: exactly the new pin red.
-    - RUN 4 phone GREEN (`vx381-fix-green-ios`): MobileRefusalTableTests · MobileTagManagerTests · MobileUndoDoorTests.
+      OutflowChooserTests · RuleEditorTests · SpawnAndBindLimbTests · WingSwitcherTests · CapabilityRegistryTests (two
+      names in the request were FILE names that matched no suite type; their real types ran as RUN 2b) + RUN 2b:
+      BookArchiveDoorActTests · TutorialBooksLessonTests — "Test run with 18 tests in 2 suites passed". Mac green total
+      143 tests in 18 suites, 0 failed.
+    - RUN 3 phone RED (iPhone 17 Pro, iOS 26.2 simulator): "Test run with 8 tests in 1 suite failed … with 2 issues" —
+      the one failure EXACTLY the new pin; the other 7 green.
+    - RUN 4 phone GREEN: "Test run with 23 tests in 3 suites passed" — MobileRefusalTableTests · MobileTagManagerTests
+      · MobileUndoDoorTests.
   - **Core (headless) on the green tree, DONE:** full `swift test` — VariorumCoreTests "2927 tests in 340 suites passed"
     (U2's 2923/340 + this leg's four new pins), the 6-suite target 40/40; the 362-test MCP package's ONE red is U1's
     recorded load flake `MCPHarnessTimeLimitTests.aPeerThatNeverAnswers…` (20.5 s against its 15 s bound under full
     parallel load) — 3/3 green alone. (The coordinator's disk chore: U1/U2's superseded dd-red/dd-green trees and the
-    reviewer's probe tree were removed by the orchestrator; this leg deleted nothing.)
-  - The batch (via the orchestrator's relayed GO): READY, holding — the stage is held by vx-382's window; GO at its
-    seam.
+    reviewer's probe tree were removed by the orchestrator; this leg deleted only its own two RED products after the
+    batch, ~5 GB.) The GREEN products stay under the gitignored `App/Variorum/DerivedData/` (`vx381-fix-green` 2.6 GB ·
+    `vx381-fix-green-ios` 2.4 GB) for a same-tree re-run; the run logs sit beside them.
