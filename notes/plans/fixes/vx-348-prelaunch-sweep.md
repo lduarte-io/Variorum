@@ -694,11 +694,11 @@ the build notes; the Environment traps; the kickoff sitting and her overnight ma
   non-empty wing road and the empty-book-alone road proven by guards (green on both sides — those halves HOLLOW,
   recorded). **PENDING:** the Mac pin's run (`listWingsSpeaksItsOwnWords` — compile at the unit's Mac seam) and the
   real-client live round (its steps in the VX-392 section). Its section below.
-- **VX-393 (duplicate grant rows for one client × target):** IN-PROGRESS — traced (the one mint, `insertMCPGrant`,
-  never looked at the place's existing row; every road but Change… added one); pins written and verified RED on the
-  pre-fix tree (`DerivedData/u5-logs/vx393-red.log`); the SCHEMA landed in its own commit (`v1_30_mcp_one_grant_per_place`:
-  the merge + the partial unique index, LOCAL-ONLY) — at that commit the op pins fail on the index's refusal, by
-  design, until the op replaces. NEXT: `insertMCPGrant` revokes the place's standing row first; the record section.
+- **VX-393 (duplicate grant rows for one client × target):** DONE (`00c754151` the schema · this commit the op) —
+  FIXED: traced (the one mint, `insertMCPGrant`, never looked at the place's existing row; every road but Change…
+  added one); pins verified RED on the pre-fix tree (`DerivedData/u5-logs/vx393-red.log`: 7 of 8, the
+  other-clients guard green), 8 of 8 green after; the whole headless suite green after the op change (MCP 376/70,
+  core 2916/340, the third target 40/6). Its section below.
 - **VX-394 (mid-session disconnect while the pane says running):** NOT-STARTED — investigation first; the Activity
   drop line ships regardless.
 - **No behavioural revert is in flight.**
@@ -801,4 +801,68 @@ fallback said "used list wings").
    wing_id, calls `create_book` — it lands; ⌘L to the wing shows "first book" on its Bookcase.
 5. Captures (into the run's screens folder): the client's transcript of the two calls; Settings ▸ MCP ▸ Activity
    showing "… listed its shared wings" and "… made the book “first book”" in BOTH voices.
+
+### VX-393 — one grant row per client × place (upgrade in place)
+
+**The trace (inputs → wrong state).** Every grant the store holds is minted by ONE private function,
+`Operations.insertMCPGrant` (`Operations+MCPGrants.swift`), which validated the scope and INSERTed — it never read what
+the client already held on that place. The roads that reach it: the grant sheet's confirm
+(`MCPDoor.grant` → `grantMCPAccess(_:_:replacing:)` with `replacing: []` whenever the sheet was opened fresh — the
+pane's Share…, a place-door, ⌘L's wing row), ⌥⌘A (`shareThisNote` → `grantMCPAccess(_:_:)`), an ask's answer
+(`MCPDoor.answer` → `grantMCPAccess(_:_:)`), Allow AI here (a once grant), approve-with-grant
+(`approveMCPClient(_:granting:)`, which "only adds the grant" on an approved client) and the bulk share
+(`grantMCPAccess(_:notes:…)`). Only Change… named rows to replace (`revokeReplacedMCPGrants`). So sharing a place a
+second time from any fresh sheet — her `read · always` on PlanetLillian, then the sheet again at `read, suggest,
+write new and edit · always` — ADDED a second live row; Shared with AI (`Queries.mcpSharedGroups`, one row per live
+grant act) listed both; revoking the edit row left the read row standing, silently. Not re-approval and not separate
+sessions (neither mints a grant): the minting road is the grant sheet's new-grant confirm, which every place-door and
+the pane share.
+
+**The fix (her R-VX348-6, as built).**
+- **At the one mint:** a STANDING spec (while connected · always) first revokes the client's live standing row on the
+  same scope kind × id — on the act's own stamp, in the act's transaction — then inserts. Every road inherits it; no
+  door changed. A once spec revokes nothing (P-VX393-3).
+- **The schema, its own commit ahead of the op (`00c754151`):** `v1_30_mcp_one_grant_per_place` — LOCAL-ONLY, the
+  v1_24–v1_29 road (no `sync_version`, no trigger, nothing pushed, marker 13, the export keeps the family empty):
+  (1) the merge (`MCPGrantSchema.v1_30MergeSQL`) keeps each client × place's first-ranked live standing row — an
+  "always" row before a while-connected one, then the higher rung, then the newer `created_at`, then the larger id —
+  and revokes the rest on one stamp, never deleting; (2) `uq_mcp_grant_standing_place`, a partial unique index on
+  `mcp_grant(client_id, scope_kind, scope_id) WHERE revoked_at IS NULL AND duration IN ('connection','always')` — the
+  store itself refuses a second standing row, so a future road that forgets the replace fails loudly instead of
+  duplicating (DB-backed, the invariant's house style). Once rows and revoked rows stand beside it freely.
+- The faces need no change: the pane draws one row per live grant, and there is now one per place; a receipt's
+  Revoke › names the act's grant ids, which are the place's one row.
+
+**Pins** (`Tests/VariorumCoreTests/MCPOneGrantPerPlaceTests.swift`; RED ON OLD verified on the pre-fix tree —
+`vx393-red.log`; 8 of 8 green after — `vx393-green.log`):
+`aNewGrantOnASharedPlaceReplacesItsRowOnEveryRoad` (each minting road — the plain op, the sheet's
+`replacing: []`, approve-with-grant, the bulk share — on a wing, a book and a note: one live row, the new one; Shared
+with AI shows each place once) · `aLowerOrShorterGrantReplacesTooAsChangeDoes` · 
+`changingAGrantToAnotherPlaceReplacesThatPlacesRowToo` · `revokingThePlacesOneRowLeavesNothingBehind` (before: the
+earlier `read` row stood on) · `aOnceGrantNeitherReplacesNorIsReplaced` · 
+`aStoreWithDuplicateGrantsKeepsEachPlacesStrongestAtTheMigration` (her screenshot's wing pair and the book pair, a
+while-connected row beside an always one, two while-connected rows, a once grant, a revoked row and another client's
+row — each as ruled) · `theFamilyHoldsOneStandingGrantPerPlaceByConstruction` (the index refuses a second live
+standing row; a once and a revoked row stand beside it; local-only) — all RED on old; guard
+`oneRowPerClientAndPlaceNeverAcrossThem` (green on both sides by design). Justified edit (the ritual):
+`MigrationTests`' index lists gain `uq_mcp_grant_standing_place`. No existing pin relied on the additive behaviour
+(the whole headless suite stayed green).
+
+**PROVISIONAL (for the merge's QUESTIONS bundle):**
+- **P-VX393-1** — a new standing grant replaces the place's standing row IN FULL, its duration included — the
+  ruling's letter ("REPLACES the row (the Change… sheet's semantics applied to every grant road)"). The consequence,
+  said so she can rule otherwise: answering an ask "until it disconnects" (or ⌥⌘A's while-connected grant) on a place
+  that held an "always" grant at a lower rung leaves NOTHING there once the client disconnects. Alternatives: (b) when
+  the new grant is shorter-lived than the row it replaces, keep the longer row too (two rows — the duplicate class
+  again, but each saying why); (c) the ask sheet and ⌥⌘A's receipt say "replacing its read · always grant" when they
+  replace a longer one (a face line — her copy pass).
+- **P-VX393-2** — the migration's merge order when durations differ: an "always" row is kept over a while-connected
+  one even at a lower rung (the brief's natural reading — "the stronger rung with its own duration" — would keep
+  `edit · until it disconnects` over `read · always`; but a while-connected row cannot be serving anything when a
+  migration runs — the store opens before the door, and every server start revokes every while-connected row — so
+  that reading would leave her NOTHING on the place after the first start). Among standing rows of one duration the
+  strongest rung wins, then the newest. Alternative: (b) the brief's reading.
+- **P-VX393-3** — once grants are outside the one-row rule (an act-scoped permission, not a standing row): a once
+  grant beside a standing one is shown as its own row ("· once") and spent by its one act. Alternative: (b) a new
+  standing grant also revokes the place's pending once grants.
 
