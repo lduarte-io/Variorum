@@ -434,8 +434,8 @@ store this build has written — coordinators told.
   (the release-floor reds, Low). The ladder reads U1a with U1b.
 - U1b — the lobby on roads, Debug-gated (+ VX-310, the creation card, the Release check, the dev store's fresh start): DONE 2026-10-18 — built by the Opus implementer (`fdda1a67b`…`137281318`, the §9 U1b RECORD), the batch under `vx-306-u1b` 212/33 (3 known = VX-310's witnesses; the pin fix `2b6a866ad`), THE CONVERSION walked (the §9 U1b WALK RECORD; findings W-1…W-6, W-2 fixed in U2).
 - U2 — the honest faces (+ rule 3's reminder, the set-passphrase sheet, W-2's fix): BUILT 2026-10-18 (Opus implementer) — commits `d35b82290`…the close (the §9 U2 RECORD); `build-for-testing` and the phone build green on the final tree; the new pure and planted suites green HEADLESS (69 in the session harness), the core's protection set green in both configurations (315 / 291); the Mac suites (the record's list) and the walk (stages 2, 14, rule 1's restore, W-2's pair, rule 27 both moments) PENDING — the ORCHESTRATOR's, under the stage.
-- U3 — the two doors; the phone opens: BUILT 2026-10-18 (Opus implementer; DerivedData `vx306-u3`) — Make this my library on a catalogued copy and on a picked (filed-first) copy; LOOK INSIDE built to the orchestrator's ruling (P-VX306-U3-15, (b) the read-only facts sheet — pieces 7a/7b) with the missing face's and rule 27's *Open Library…* back as file-then-Look-inside; the phone's faces and its switch; commits `eaeed1126`…the Look-inside close (the §9 U3 RECORD); `build-for-testing` green on both platforms on the final tree; the planted suites green HEADLESS (62 in 9) and the core's `ProtectionCopyPeekTests` green in both configurations; the Mac and phone suites and the walk PENDING — the ORCHESTRATOR's, under the stage.
-- The ladder (Fable — custody code; her cap: up to five rounds while MAJORs are still found): not started.
+- U3 — the two doors; the phone opens: DONE 2026-10-18 — built by the Opus implementer (`eaeed1126`…`e46837f2a`, the §9 U3 RECORD; Look inside ruled (b) and built), the batches under `vx-306-u3` (Mac 290/44, phone 20/5 on the iOS 26.2 sim), the walk (the U3 BATCH + WALK RECORD: Look inside, the AirDropped road, Make this my library → the dev library is now 86a82b4f, the hold standing; the phone's open in the simulator; findings W-11…W-17, W-13 a MINOR).
+- The ladder (Fable — custody code; her cap: up to five rounds while MAJORs are still found): NEXT — round 1 over the whole phase diff (`9eff28e3e..HEAD`, the merges of main excluded by reading the branch's own commits).
 - Closeout: the words checked (VX-379's first pass — the Start Here chapter §7c); canon: AppSpec §12's LIBRARY
   PORTABILITY line (the doors replace 13x's landing wording); the handoff with HER-HANDS items (Look inside on a byte-copy
   of her real store with her credentials; the real store's field-guide re-seed); VX-307's plan written to the rules (the
@@ -2308,3 +2308,68 @@ accepted, truth over verbatim. The fold of main at this seam renumbered U1a's mi
   so a twin sheet would have no entry point; the mobile catch-up's. (b) a phone Open Library door now (a file importer — not
   one sheet).
 
+
+**U3 BATCH + WALK RECORD (the orchestrator, 2026-10-18 11:21–11:40 MDT, claim `vx-306-u3`; tree 15e06bc16 — main at d63b27561
+folded; the product from `DerivedData/vx306-u3`):**
+- **The batches:** Mac → `━ Test run with 290 tests in 44 suites passed after 48.500 seconds with 3 known issues.` (VX-310's
+  *[removed for publication]*
+  *[removed for publication]*
+  tests in 5 suites passed after 6.606 seconds.` (the five Swift Testing suites incl. the new "VX-306 U3 — the phone opens on
+  the new road"; `MobileProtectionTests` contributed no suite line of its own). The Mac test host now OPENS the dev library
+  fully (the predesign lobby is gone), so the slot's sqlite changed during the batch — the ordinary open ran `v1_31`.
+- **The walk, rows passed:** Data Safety's Restore list under the new road (the pairs newest first, *Look inside…* / *Make this
+  my library…* per row); **Look inside** on the stage-3 pair (§7c (10)'s line, *Backup*, "No books." / "No notes." — the
+  pair predates the seeding, honestly empty) and on a fresh pair (sherlock with 13 notes; the notes newest first; *A Scandal
+  in Bohemia* read in full, read-only; `road: a look inside a copy (backup, road quietRoad(thisMac)) — read-only, nothing
+  written`; the private `vx306-probe-*` folder present during the look and GONE at *Close*; the live key file `cmp`-identical
+  after two looks); **Back Up Now** → a pair of EXACTLY two files (`variorum-backup-2026-10-18-172606-88173013.sqlite` +
+  `.keys.json` — W-2 fixed); **the missing face** shows *Open an Existing Library…* again (dark capture); **the AirDropped
+  road:** C's pair (a throwaway library created under this build) copied to `~/Downloads/vx306-airdrop/`, File ▸ Open
+  Library… → `road: a picked copy was filed into Backups/safety-copies/variorum-adopt-safety-2026-10-18-173453` (the picked
+  files' sha256 unchanged), the sheet *Open a Library — A copy from October 18.* with *Cancel · Look inside… · Make this my
+  library…*; **Make this my library** on it: the confirm (§7c (8) verbatim; *Your twelve words* + *Your passphrase*, no copy
+  field — C's quiet road), a wrong attempt refused *“four” isn't one of the words Variorum uses — check its spelling.*, the
+  dev pair typed → `make_mine: begun #1 88173013 → 3f3a561c` · `minted a fresh own Apple key` · `the new library's key file
+  written` · `swapped — this Mac's library is the copy, a new library under 3f3a561c` · `done` · `road: made a copy this
+  Mac's library — library 86a82b4f key 3f3a561c; the previous one in Previous Libraries; held` → the reopen `road: opened —
+  library 86a82b4f … roads [apple,passphrase,words]` with the RESTORE HOLD banner (*This is your library as of October 18,
+  2026. Sync is waiting — Resume…* · *Resume Sync*); on disk: `Previous Libraries/2026-10-18-173517/` holds 818912e0's
+  `variorum.sqlite` + its key file (all three locks), the new live key file has A's pair and an EMPTY history, the marker
+  `variorum-restore-hold.json` {asOf, heldAt} beside the slot, a fresh store-id stub (the old one renamed `.stale-…` by
+  *[removed for publication]*
+  headless and `simctl io` screenshots served): the sim's pre-design store set aside under its own
+  `Backups/safety-copies/variorum-vx306-sim-predesign-<stamp>/`; launch → `road: created — library 23e652ae … Apple keys
+  readable [1c5706a8]` (the Apple key minted into the shared group — F-U3-5's risk did not bite) and THE WORDS CARD on the
+  phone; relaunch → `road: opened` silently → the shell; `SIMCTL_CHILD_VARIORUM_WALK_FORGET=silent,apple` → the lobby:
+  *open your library*, *Enter your twelve words to open your library.*, *Face ID isn't set up on this iPhone.*, the words
+  field, *open with the words*. The simulator shut down after.
+- **Two refusals met on the way, both honest, recorded as findings below:** (W-11) Make this my library on A's OWN pairs and
+  on B's copy refused *This library was written by a newer Variorum than this one. Update Variorum, then open it again.* — the
+  migration renumber: A and B carry the applied name `v1_30_protection_record`, which this build no longer registers, and the
+  newer-schema preflight reads an unregistered applied migration as "newer" (correct for a real newer store; the dev store is
+  the renumber's residue — the ordinary open tolerates it, the adoption preflight does not). The door was proven on C instead.
+  (W-12) a first AirDrop folder holding C's `variorum.sqlite` WITHOUT its `-wal` filed, then refused *This file couldn't be
+  read as a library.* at the confirm — C's content lived in its 1.3 MB WAL (a fresh store's main file is 12 KiB); the honest
+  refusal of an incomplete copy; the filed artifact deleted by hand; the W-9 lesson again (a library moves with its sidecars).
+
+*[removed for publication]*
+SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing (dev sync off; Resume Sync never pressed);
+818912e0 whole in `Previous Libraries/2026-10-18-173517/`; B under `~/vx306-walk/B`, C under `~/vx306-walk/C` and
+`~/Downloads/vx306-airdrop` (deleted at closeout); instances 0; the simulator shut down; stage released 11:40.
+
+**Walk findings (routed):**
+- **W-11 (note + a dev-store fact, her eye):** the renumber residue above — A (now in Previous Libraries) and B read as "newer
+  Variorum" to the adoption preflight. No product fault; a later walker who wants A back as the live library needs a build
+  registering `v1_30_protection_record` or a hand-renamed row — simplest: leave A aside and go on with 86a82b4f.
+- **W-12 (note):** a hand-copied WAL-mode library without its sidecars is an incomplete copy and is refused as such.
+- **W-13 (MINOR, bug-class — the ladder or a fix leg):** the Restore list does not refresh after Back Up Now (the catalogue is
+  read once at the pane's load); the new pair appears only after the pane reopens.
+- **W-14 (taste, her eye):** the phone's chrome LOWERCASES the drafted titles and buttons (*your twelve words*, *i've written
+  them down*, *open your library*, *open with the words*) — the phone's whole chrome is lowercase by design (its labels, its
+  bars), the body sentences keep their case; §7c's drafts are capitalised. Her call which the card and the lobby follow.
+- **W-15 (wording, her eye):** the card's lead says *on this Mac* on the phone too (the shared string; the biometry lines are
+  platform-named — P-VX306-U3-8 — the card is not).
+- **W-16 (note):** today's store-id mint renames the previous stub `variorum-keys-<fp>.stale-<epoch>.json` beside the slot; the
+  catalogue ignores `.stale-*` (rule 26); a cosmetic leftover for VX-309's tidy.
+- **W-17 (note, P-VX378-U1-1 (a)'s consequence):** each memory-forget or different-library open minted a fresh device ID, so
+  the new-layout backups of 818912e0 sit in several `Backups/818912e0/<mac8>/` folders on one Mac.
