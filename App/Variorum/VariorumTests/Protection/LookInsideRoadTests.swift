@@ -133,6 +133,8 @@ struct LookInsideRoadTests {
         #expect(look.shown == nil)
         look.close()
         #expect(exits == [.closed] && !look.isHoldingAReader && look.phase == .closed && look.notes.isEmpty)
+        #expect(look.closing != nil, "the reader closes off the main actor (NIT 3)")
+        await look.closing?.value
         #expect(LookPlant.writeLogs(mine) == logsBefore)
         #expect(try LookPlant.untouched(mine) == before)
         #expect(LookPlant.privateFolders(mine).isEmpty)
@@ -157,6 +159,7 @@ struct LookInsideRoadTests {
         await look.begin()
         #expect(look.phase == .open)
         look.makeMine()
+        await look.closing?.value
         #expect(exits == [.makeMine] && !look.isHoldingAReader && LookPlant.privateFolders(road).isEmpty)
     }
 

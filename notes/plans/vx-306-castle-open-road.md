@@ -2411,7 +2411,7 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
 - m1 — K5's missing face over a record-less store: DONE (`0b759f8b8` the fix + both pins; this commit the evidence). The bootstrap twin's run PENDING (the stage).
 - m2 — the copy doors' automatic quiet probe never presses Touch ID: DONE (this commit). The core protection set Debug green here; its release leg at the close.
 - m4 — the new-road Restore list re-reads on a landed backup pair: DONE (this commit). The hook twin's run PENDING (the stage).
-- NIT 1: DONE (`3e6a6bff0`; the source pin's run PENDING the stage). NIT 2: DONE (this commit). NIT 3 · NIT 4: NOT-STARTED.
+- NIT 1: DONE (`3e6a6bff0`; the source pin's run PENDING the stage). NIT 2: DONE (`a1a19780e`). NIT 3: DONE (this commit). NIT 4: NOT-STARTED.
 - The close (Mac + phone `build-for-testing`, the core protection set both configurations, the suite list): NOT-STARTED.
 
 **THE FINDINGS, one by one (AGREE/DISPUTE with the trace; the pin's red-on-old; the commit):**
@@ -2522,3 +2522,19 @@ SAME dev pair (noted in `~/.variorum/dev-castle.env`), the restore hold standing
   directly) run with `OS_ACTIVITY_DT_MODE=YES`: the fixed file printed `[protection] road: the open's facts could not be
   read for its repairs (pass 0) — custodyUnlistable("Unreadable()")`; the pre-fix file (`git show HEAD:` into the harness)
   printed nothing (`lines: 0`).
+- **NIT 3 — AGREE, built small, in the brain alone (no core line).** Traced: *Close* (and *Make this my library…*, and
+  the sheet going away) → `forget()` → `reader.close()` SYNCHRONOUSLY on the main actor — the GRDB queue's close and
+  the private folder's delete on the main thread — while a page's read could still be running on a detached task over
+  the same reader (the close's `try?` swallowing the queue's refusal; self-healing, as the report says). Worse in one
+  arm the report did not name: a close during the FIRST page's read let `attempt` go on to `phase = .open` after the
+  read returned — a look reading "open" with no reader. **The fix** (this commit, `LookInsideModel`): every read on the
+  reader runs through one helper that keeps it as the read IN FLIGHT; `forget()` drops everything at once (the face is
+  closed at the press) and closes the reader OFF the main actor, AFTER the read in flight finished (`closing` — a test
+  awaits it); a read that finishes after the look was forgotten lands nothing (`load`, `moreNotes`, `show` check the
+  reader is still the look's), and the first page's read forgotten mid-way leaves the look closed. *Close* is never
+  refused while a page loads — the "busy guard" the report offered is this wait, not a press that does nothing (P-2's
+  family). **No new pin — not cheap:** a deterministic close-during-read needs a reader whose read can be held, and the
+  core reader's reads are fixed queries; the hardening is proven by the proof suite re-run with the close awaited
+  (`LookInsideRoadTests` — `aLook…ClosingForgets` reads the reader directly; `theLooksBrainAsks…ForgetsAtClose` and
+  `makeThisMyLibraryFromTheLook…` now `await look.closing` before the private folder is checked, +1 line asserting the
+  close is off the main actor). The harness: `✔ Test run with 73 tests in 10 suites passed`.
