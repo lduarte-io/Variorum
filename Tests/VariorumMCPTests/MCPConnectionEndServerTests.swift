@@ -129,6 +129,52 @@ struct MCPConnectionEndServerTests {
         #expect(logged.map(\.0) == ["big-sender"] && logged.map(\.1) == [MCPConnectionEnd.overLimit.act], "\(logged)")
     }
 
+    // MARK: - The fix leg (the batch's red, live-confirmed): a stop that LETS GO of its host
+
+    /// **RED ON OLD (the U5 batch's finding):** the app's door stops its host
+    /// and drops it in the same breath (`MCPDoor.stopServer` — `host = nil`), so
+    /// the host is gone before its sessions finish ending. A session's end ran
+    /// through the host (`[weak self]` — `if let self { self.ended(session) }`),
+    /// so on her switch OFF no end line was ever written — live: the shim died,
+    /// Activity said nothing. Each connection now writes its own end through
+    /// its own store, host or no host.
+    @Test func aStopThatLetsGoOfItsHostStillSaysEachConnectionsEnd() async throws {
+        let h = try ServerHarness()
+        defer { h.tearDown() }
+        let directory = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+            .appendingPathComponent("vend-\(UUID().uuidString.prefix(8))", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        var host: MCPServerHost? = MCPServerHost(
+            database: h.database, operations: h.operations, directory: directory, version: "test",
+            executor: SeededExecutor(operations: h.writeOperations))
+        weak var released = host
+        try host?.start()
+        guard case .success(let fd) = MCPSocketRoad.connect(directory: directory) else {
+            throw HarnessFailure("could not connect")
+        }
+        defer { close(fd) }
+        var timeout = timeval(tv_sec: 5, tv_usec: 0)
+        _ = setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, socklen_t(MemoryLayout<timeval>.size))
+        var opening = MCPPreamble.line(key: try h.setupKey(for: "claude-code"))
+        opening.append(Data((initialize("claude-code") + "\n").utf8))
+        _ = MCPShim.writeAll(fd, opening)
+        #expect(!MCPShim.readFirstLine(fd, limit: 1 << 20).isEmpty, "initialized — the connection named itself")
+        #expect(host?.connectedClientNames == ["claude-code"])
+
+        // The door's own two lines: stop with the reason, then let go.
+        host?.stop(ending: .serverOff)
+        host = nil
+        #expect(released == nil, "the host is gone before its session finishes ending — the door's road")
+        var logged: [(String, String)] = []
+        for _ in 0..<300 {
+            logged = try ends(h)
+            if !logged.isEmpty { break }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(logged.map(\.0) == ["claude-code"] && logged.map(\.1) == [MCPConnectionEnd.serverOff.act],
+                "the switch's end is said: \(logged)")
+    }
+
     // MARK: - Guards: only a connection that named itself has an end to say
 
     /// A bare shim (no setup key — refused at the door) and a connection that

@@ -215,7 +215,14 @@ public final class MCPServerHost: @unchecked Sendable {
             // VX-279: the host lets go of the session BEFORE its number is
             // freed (`ended` closes it after deregistering), so a stop that
             // snapshots the sessions afterwards never sees it.
-            if let self { self.ended(session) } else { session.closeConnection() }
+            // VX-394's fix leg: a host already let go of (the door's stop drops
+            // it at once) still has its session's end said — by the session.
+            if let self {
+                self.ended(session)
+            } else {
+                session.closeConnection()
+                session.writeEndLine()
+            }
         }
     }
 
@@ -271,13 +278,7 @@ public final class MCPServerHost: @unchecked Sendable {
         // — why the host ended it (a stop's reason), else the over-cap answer,
         // else the client's own close. Quiet when the store is already gone
         // (the library's closing road said it first, while it was open).
-        if let line = session.claimEndLine() {
-            try? database.write { db in
-                try operations.recordMCPActivity(
-                    db, clientName: line.clientName, act: line.end.act, targetKind: nil, targetID: nil,
-                    targetTitle: nil, allowed: true)
-            }
-        }
+        session.writeEndLine()
         if let name, !stillConnected,
            let client = try? database.read({ try Queries.mcpClient($0, name: name) }) {
             try? operations.endMCPConnectionGrants(clientID: client.id)

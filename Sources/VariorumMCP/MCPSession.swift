@@ -90,6 +90,24 @@ final class MCPSession: @unchecked Sendable {
         lock.withLock { endSaid = false }
     }
 
+    /// **Write this connection's own end line** (VX-394's fix leg — the U5
+    /// batch's red, live-confirmed): once (`claimEndLine`), through the
+    /// session's OWN store and operations — so it lands whether or not the
+    /// host that served it is still alive. The app's door stops its host and
+    /// drops it in the same breath (`MCPDoor.stopServer`), and a host holds its
+    /// sessions' ends only weakly, so a line written through the host was lost
+    /// on every stop the door makes (her switch OFF). Quiet when the store is
+    /// already gone (the lock road said it first, while it was open). Runs on
+    /// the session's own task, never the main thread (P2).
+    func writeEndLine() {
+        guard let line = claimEndLine() else { return }
+        try? database.write { db in
+            try operations.recordMCPActivity(
+                db, clientName: line.clientName, act: line.end.act, targetKind: nil, targetID: nil,
+                targetTitle: nil, allowed: true)
+        }
+    }
+
     /// **VX-258 — does this connection still wait for her OK?** True while
     /// its key waits; it flips, once and for good, when the name's bound key
     /// IS this connection's key (her Allow). One indexed read per call.
