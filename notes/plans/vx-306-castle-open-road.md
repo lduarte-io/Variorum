@@ -387,7 +387,7 @@ store this build has written — coordinators told.
   passed after 0.387 seconds.` (0 skipped — the Touch ID listing row ran on the Pro's enrolled finger), `** TEST EXECUTE
   SUCCEEDED **`; the tripwire's own suite proved every real-scope mutation refused from the test process. VX-406 filed
   (the release-floor reds, Low). The ladder reads U1a with U1b.
-- U1b — the lobby on roads, Debug-gated (+ VX-310, the creation card, the Release check, the dev store's fresh start): IN-PROGRESS (Opus implementer, 2026-10-18) — the §9 U1b RECORD carries each piece's state; the dev store's fresh start and the walk are the ORCHESTRATOR's (the record's walk recipe).
+- U1b — the lobby on roads, Debug-gated (+ VX-310, the creation card, the Release check, the dev store's fresh start): BUILT 2026-10-18 (Opus implementer) — commits `fdda1a67b`…`cd00b20cb` + the record (§9 U1b RECORD); Release build green on the final tree, Debug `build-for-testing` and the phone build green, 27 of the new tests green HEADLESS; the Mac suites (the record's list) and the walk (K1's fresh start, stages 1, 3, 5, the lobby, Touch ID) PENDING — the ORCHESTRATOR's, under the stage.
 - U2 — the honest faces: not started.
 - U3 — the two doors; the phone opens: not started.
 - The ladder (Fable — custody code; her cap: up to five rounds while MAJORs are still found): not started.
@@ -762,9 +762,265 @@ VariorumTests/ICloudAppleKeysLeafTests` (1 test; a synchronizable throwaway item
 (4b/4c) · `2e2d56de0` (the keychain facts applied) · `e9bb71007` (the Mac suites) · this record. `git worktree list`:
 no stray (both scratch worktrees removed).
 
-### U1b RECORD — THE LOBBY ON ROADS, DEBUG-GATED (Opus implementer, 2026-10-18; IN-PROGRESS)
+### U1b RECORD — THE LOBBY ON ROADS, DEBUG-GATED (Opus implementer, 2026-10-18; BUILT — the Mac suites and the walk PENDING)
 
-**Not done in U1b, first:** (filled at the close — PENDING)
+**Not done in U1b, first:**
+- **No Mac suite was RUN** (the brief: no `xcodebuild test`, no stage) — only built (`build-for-testing` green). The
+  orchestrator runs the list at this record's end under a stage claim and flips the counts. That includes the RED half
+  of VX-310's red-on-old (`VX310TodayLobbyWitnessTests` — today's road, two known issues) and every real-keychain test.
+  What DID run: 27 of the new tests HEADLESS in a SwiftPM harness over the real `Shared/Protection/` files (below).
+- **The walk was not done** (the orchestrator's: K1's fresh start of the dev store, then stages 1, 3, 5, the lobby and
+  the Touch ID rows — the recipe below). No Debug app was launched; the dev store, the real store and `/Applications`
+  were never touched.
+- **THE WALK'S `security` ROWS CANNOT BE WALKED AS THE PLAN WROTE THEM.** The new road's custody, memory and sync-keys
+  items are DATA-PROTECTION keychain items (`kSecUseDataProtectionKeychain`, `KeychainPartition.dataProtection`); the
+  unit's one Sonnet lookup (external facts, read-only): *"There is no command-line tool access to the data protection
+  keychain"* [DTS — developer.apple.com/forums/thread/807782]; `/usr/bin/security`'s find/delete call the file-based
+  `SecKeychain*` APIs only [Src — apple-oss-distributions/Security, `SecurityTool/macOS/keychain_find.c`,
+  `keychain_delete.c`]; the shared `security item` command (which sets the flag) answers `unknown command "item"` on this
+  macOS 27 Mac (iOS only) [Src, verified locally]; Keychain Access shows the data-protection keychain as "iCloud" /
+  "Local Items" (password items only, TN3137) and its signature carries the `*` access group, so it PROBABLY lists and
+  deletes them — unverified [Doc + Src + Inference]. So: OBSERVATION goes through the open's one Diagnostics line
+  (`ProtectionOpenRoad.logSummary`, below), and the stage-5 deletions through the DEBUG walk switch
+  `VARIORUM_WALK_FORGET` (P-VX306-U1b-9). Built, not walked.
+- **The faces of the notice, the offer, rule 27's doors, rule 1's receipt and the rule-3 reminder are U2's** — the route
+  hands them through (`AppBootstrap.roadSession?.report`: `notice`, `repairsDone`, `faults`, `acts`); until U2 an
+  open's rule-21 notice is carried, not shown (the open's `refreshMemory` has already followed the library — U2 must
+  render the report's notice once at the open, as its brief says). Rule 27 before unlock shows §7c (3)'s sentence with
+  NO doors (U2 adds them).
+- **Today's protection doors in Settings still render on the new road** (Change Passphrase / New Words / the reset door,
+  13x's Open Library / Restore from Backup / Send Library) and act on TODAY's machinery — the today-road key file stub
+  beside the store, not the protection core's key file. Only the posture switches are unwired (P-VX306-U1b-6). U2 (the
+  set-passphrase sheet, the protection pane) and U3 (the two doors) replace them — **the walker presses none of them.**
+- Nothing in `Sources/`, `Sync/`, `Server/`, `StoreBackup.swift`, `BackupRetention.swift` or `RestoreHoldModel.swift`.
+
+**What shipped, per piece (commits):**
+- `fdda1a67b` the record skeleton.
+- `4f411d60a` PIECE 1 — the one switch (`Shared/Protection/ProtectionRoad.swift`: `newRoadIsLive = live(debug:
+  isDebugBuild, mac: isMac)`, `isDebugBuild` the `#if DEBUG` arm alone); `AppBootstrap.newRoad`; `ProtectionRoadSwitchTests`.
+- `454db4417` PIECE 2 — the route (`ProtectionOpenRoad.swift`; `AppBootstrap`'s switch read at the head of
+  `routeAndOpen`, now `async`) + the faces it lands on (compiling state).
+- `ca7de7f68` PIECE 3 (Part of VX-310) — `ProtectionLobbyModelTests` + `VX310TodayLobbyWitnessTests`.
+- `2f9cef7bb` PIECE 4 — `LibraryWordsCardTests`.
+- `5056fd359` PIECE 5 — `ProtectionBackupHook` + `ProtectionBackupHookTests` + the new-road test world + the open's
+  Diagnostics line.
+- `ea99ea24c` PIECE 6 — `ProtectionRoadRouteTests` + `ProtectionOpenRoadPlantedTests`.
+- `cd00b20cb` the DEBUG walk switch (`ProtectionWalkSwitch.swift`, `ProtectionWalkSwitchTests`).
+- this record.
+
+**THE ROAD AS BUILT (for the ladder):** `beginOpening` composes `ProtectionSystem.live(variant: .dev)` ONCE per open on the
+main actor (`RoadInputs.compose`); `routeAndOpen` (off the main actor) reads `newRoad` first → `routeOnNewRoad`: the
+sign-in read (`KeychainAuthStorage`, a read) → `ProtectionOpenRoad.route`: a key handed back by today's adoption doors is
+tried first through the executor; the gatherer's facts (a `GatherError` ⇒ no facts — over an empty slot `.failed`, else
+the lobby with the reason) → `assess` → `.startFresh` ⇒ `createLibrary(passphrase: nil)` ⇒ the card; `.libraryMissing` ⇒
+today's three-door face (its Start a New Library now the core's creation, the missing library's live key file stepped
+aside first — P-VX306-U1b-3); `.lobby` ⇒ THE QUIET ROADS AT ONCE: every silent item's key, then each Apple wrap whose key
+reads here (live first, then the mirror's, then the catalogued files' — P-VX306-U1b-2), the candidates expanded through
+every held key file's history, the first that opens the slot unlocking with the rest in hand; none ⇒ the lobby. After any
+unlock: `settle(&library, typed:)` (failure logged, never blocking), `repairPasses` (up to three runs of `assess(facts with
+unlocked)` → `runRepairs`, a repair failure logged), the Diagnostics line; then `openOnNewRoad`: today's store id
+(`ensureStoreIdentity` — at a creation today's `startNewLibrary` mint: the old envelope aside, `StoreIdentity.establish`
+under the new key, the new id's Auto dials, NEVER today's silent custody; at a later open only when none is there) →
+today's `openStoreOffMain(variant:, custody: .inMemory(initial: key))` → `.ready` with `roadSession` held. The lobby's
+presses (`openTyped`, `pressTouchID`, `lobbyFacts` for refresh) run detached through the same road. THE TYPED ROADS: a
+passphrase derived ONCE per descriptor (the floor checked first) and the words (validated first, BIP-39 refusals in
+words) tried on the live key file, this Mac's sealed mirror(s) (memory payloads read unverified — a key file holds no
+secret; the unlock verifies) and every catalogued key file; `offeredTyped` = `LobbyRoads.typed` ∪ the locks of the
+library's held files. ON THE NEW ROAD, OFF: today's R1-M3 relanding of the silent item, today's ready housekeeping (the
+§11 migration; the reconcile — its Apple arm mints today's shared Apple key), `lock()`/`canLock`, today's posture
+runner (P-VX306-U1b-6/7). A HOSTED TEST RUN takes the road READ-ONLY (P-VX306-U1b-8).
+
+**VX-310 (Part of VX-310) — traced, pinned, red-on-old:** piece 3's line above carries the mechanisms, the cures and the
+evidence; in one line: the old `biometryOffered = demand == .biometric && gatedItemExists()` (no enrolled-finger fact) and
+a `let` fixed from one probe at the lobby's build (never re-read) → the new button `TouchIDAssessment.button`, a press
+moving only the press fact, `refresh()` on her return never removing a button. The re-arm question stays VX-308's
+(rendered as nothing). **The Touch ID ROW's honest scope:** no Touch ID item can exist this phase (no Castle entry), so
+the walk sees only "no item → no button, the quiet line" (*Touch ID isn't set up for this library.* on the Pro's
+enrolled finger; *…on this Mac.* without one); the PRESS and the no-prompt listing with a real `.biometryCurrentSet` item
+present stay on U1a's `KeychainLeavesTests.aTouchIDItemIsListedByNameAndNeverPressed` (enrolled finger only).
+
+**Counts (the tree `cd00b20cb` + this record):**
+- `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Release -derivedDataPath DerivedData/vx306
+  build` → `** BUILD SUCCEEDED **` on piece 1's tree, on `ea99ea24c`, and on the FINAL source tree `cd00b20cb` (no install,
+  no launch); in the Release binary `strings … | grep -c VARIORUM_WALK_FORGET` → `0` (the Debug dylib: `1`) — the walk
+  switch is not in Release.
+- `xcodebuild … -configuration Debug -derivedDataPath DerivedData/vx306 build-for-testing` → `** TEST BUILD SUCCEEDED **`
+  (final tree); zero warnings in the touched files.
+- `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' -derivedDataPath DerivedData/vx306
+  build` → `** BUILD SUCCEEDED **` (final tree). The phone keeps today's road (P-VX306-U1b-1); its unreachable arm is
+  `MobileStoreOpeningView`.
+- HEADLESS (a SwiftPM harness in the session scratchpad — not durable: `Sources/Variorum/` = every
+  `App/Variorum/Shared/Protection/*.swift` but `ProtectionBackupHook.swift`, byte-identical to the worktree's (`diff`ed),
+  plus eight one-line app stubs (`DeviceName`, `BackupDestination`, `KeychainPartition`, `AppleKeyKeychain`,
+  `KeychainTestTripwire`, `AuthTokens`/`KeychainAuthStorage`, `AppleKey`, `EncryptionSession.words`); the test target the
+  worktree's `ProtectionTestSupport.swift`, `ProtectionOpenRoadPlantedTests.swift`, `ProtectionLobbyModelTests.swift`,
+  `ProtectionWalkSwitchTests.swift`; the package depends on the worktree's core by path, with the app's concurrency
+  settings — default `MainActor` isolation, `NonisolatedNonsendingByDefault`, `InferIsolatedConformances`,
+  `MemberImportVisibility`): `✔ Test run with 27 tests in 3 suites passed after 0.142 seconds.` (15 lobby + 9 planted
+  road + 3 walk switch). The mutation runs: piece 3's line.
+
+**PROVISIONALs (each built as its option (a); bundled under QUESTIONS #233):**
+- **P-VX306-U1b-1 — the phone keeps today's road this unit** (the switch's rule is `debug && mac`). (a) BUILT — the
+  phone's lobby face is U3's; (b) the switch on in the phone's Debug build too (a new-road state with no phone face);
+  (c) U3's phone faces now (another unit's surface).
+- **P-VX306-U1b-2 — the quiet roads walked as the scenario world walks them** (`World.walkLobby`): every silent item, then
+  the Apple wrap of each key file this Mac holds whose key reads here (the live file's first, then the mirror's and the
+  catalogued files'), every candidate expanded through every held file's history. (a) BUILT — rule 8's "the next open
+  uses whatever quiet road still works", and the proof's own road; (b) exactly `LobbyRoads`' two (the live file's Apple
+  wrap only) — a Mac whose live key file is gone while its mirror carries a readable Apple wrap would ask for a secret
+  with a quiet road working; (c) history expansion through the live file only. The face's `asksASecretAtOnce` is
+  unchanged (a visible lobby means every quiet road failed).
+- **P-VX306-U1b-3 — Start a New Library on the missing face sets the missing library's live key file aside** into
+  `Previous Libraries/<stamp>/` (moved, never deleted) before the creation writes the new one. (a) BUILT — rule 1: the
+  key file is as essential as the library (the library file is only missing; without its key file it could never open
+  again — rule 27), and today's door set its envelope aside the same way; (b) overwrite it (the core's `createLibrary` as
+  is); (c) refuse Start New while it sits there (a dead end).
+- **P-VX306-U1b-4 — the lobby's words §7c does not draft**, from the rules, sentence case (`ProtectionWords.swift`):
+  *Open your library* · *Enter your passphrase or your twelve words to open your library.* (and its passphrase-only /
+  words-only forms) · *Passphrase* · *Open* · *Use your twelve words instead* · *Your twelve words, separated by spaces* ·
+  *Open with the words* · *Opening your library…* · *That passphrase doesn't open this library.* · *Those twelve words
+  don't open this library.* · *There are twelve words — you entered N.* · *“x” isn't one of the words Variorum uses —
+  check its spelling.* · *One of the twelve words is off. Compare them with what you wrote down.* · *The key file beside
+  your library can't be read, so Variorum can't open the library with it.* · *Variorum couldn't check this Mac's
+  keychain just now. Enter your passphrase or your twelve words.* · Touch ID: *Unlock with Touch ID* · *Touch ID isn't set
+  up on this Mac.* / *…for this library.* (§3.10's) · *Touch ID changed since you set it up — unlock with the passphrase.*
+  (§3.10 verbatim) · *Open the lid to use Touch ID.* · *Connect your keyboard with Touch ID to use it.* · *Pair your
+  keyboard with Touch ID to use it.* · *Touch ID is locked after too many tries. Enter your passphrase, or lock and unlock
+  your Mac.* · the failures *Variorum couldn't create your library.* / *…couldn't check this Mac's keychain, so it didn't
+  create a library. Try again.* (a) BUILT; (b) today's `ProtectionCopy` lobby sentences (they speak today's design —
+  "encryption passphrase", "recovery phrase"); (c) blank until her sitting. Her taste call.
+- **P-VX306-U1b-5 — the new road reaches only the dev store**: a Debug build opted into the real store's variant
+  (`-VariorumRealStore`) keeps today's road. (a) BUILT — the phase's one law ("it reaches only the fenced dev store");
+  (b) the switch alone (a Debug build on the real variant would write real-scope new-road items, its Apple keys into
+  her iCloud Keychain).
+- **P-VX306-U1b-6 — today's posture runner is not wired on the new road** (Use Castle / Use Standard / Replace All Keys
+  / the follows do not render — P-2). (a) BUILT — a press would re-key the library under today's key file, which the
+  protection core's key file would then no longer open; (b) leave them; (c) hide today's whole protection pane on the new
+  road (U2's surface).
+- **P-VX306-U1b-7 — today's ready housekeeping, today's silent-item relanding and Lock / Lock Now do not run on the new
+  road.** (a) BUILT — rule 26 (the new road writes none of today's names; today's reconcile would mint today's shared
+  Apple key and land its wrap, a quiet road Castle entry's sweep never finds — rule 11) and every new-road library is
+  Standard this phase, which never locks (rule 8); (b) run them as today; (c) run only their read-only parts (a split of
+  today's controller). Castle's lock on the new road is VX-307's.
+- **P-VX306-U1b-8 — a hosted test run takes the new road READ-ONLY** (`KeychainTestTripwire.armed`): it may open the dev
+  library, never create, settle, repair, mint the store id or take a pair. (a) BUILT — the tripwire refuses every
+  real-scope mutation in a test process, and a refused trip would land in `KeychainTripwireTests`' exact count; (b)
+  today's road in the test host (it cannot open a converted dev store); (c) full writes (refused mid-repair, partial
+  record writes).
+- **P-VX306-U1b-9 — the DEBUG walk switch `VARIORUM_WALK_FORGET`** (`silent` · `apple` · `silent,apple`): once per launch,
+  before the facts, the dev scope's silent custody items and/or the Apple keys stamped with the live key file's library are
+  forgotten through the production leaves — as a keychain reset would. (a) BUILT — the rule-8 rows are otherwise
+  unwalkable (no CLI reaches the data-protection keychain or iCloud Keychain — the lookup above); DEBUG only, the new road
+  only, never in a hosted test run, never on a test harness (`road.open == nil`); (b) Keychain Access by hand (unverified
+  for these items; a GUI step); (c) leave the rows on the pins (`ProtectionRoadRouteTests` does the deletions on a
+  throwaway scope with the real leaves).
+- **P-VX306-U1b-10 — a keychain that could not be listed shows no Touch ID face** (and both typed roads with the reason).
+  (a) BUILT — nothing listed, nothing claimed; (b) a Touch ID button whenever biometry is usable (a press may find nothing).
+
+**Recorded refinements (not product calls):** a backup run that found nothing due takes no pair (the hourly re-check
+would otherwise mint a pair an hour); today's store id is re-minted at a later open only when none is there (a key change
+later must never change it); the creation runs the repairs' passes but no settle (no plan in an empty slot); every new
+OpenOutcome/State case is reachable only with the switch on (the cases compile in both configurations — rule 24's
+spirit); the lobby re-reads its roads on `NSApplication.didBecomeActiveNotification`.
+
+**Hand-forwards (U2, U3, VX-307):**
+- U2: `AppBootstrap.roadSession?.report` — `notice` (show ONCE, §7c (4)), `repairsDone` (`.restoreKeyFileFromMirror` →
+  §7c (6)'s receipt), `faults` (`.noKeyFileAnywhere` → rule 27's banner), `acts` (`.askPassphrase` → the reminder,
+  `.offerKeyFile` → the offer); `ProtectionLobbyFace.noKeyFileAnywhere` → rule 27's lobby doors; `liveKeyFileUnreadable`
+  → its face. The executor and the `UnlockedLibrary` for an act live on `roadSession` (`executor`, `library`).
+- U3: the phone (`ProtectionRoad.live` widens to the phone's Debug build when its faces land); today's 13x doors still
+  render and act on today's road; `adoptLibrary`/`reopenAfterAdoption` hand a key back that the new road tries first.
+- VX-307: `lock()`/`canLock` and the re-lock monitors on the new road (Castle's), today's posture runner's replacement.
+
+**THE WALK RECIPE (the orchestrator's, under a held stage claim `vx-306-u1b-walk`; DEV STORE ONLY):**
+0. Zero Debug instances (`pgrep -fl 'DerivedData/vx306/Build/Products/Debug/Variorum.app/Contents/MacOS'`; a
+   `/Applications` instance is NEVER touched). Build if needed: `cd App/Variorum && xcodebuild -scheme Variorum -destination
+   'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx306 build`. K1: the dev container is
+   `~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Application Support/Variorum-dev/` — copy
+   `variorum.sqlite` + its `-wal`/`-shm` + today's key file(s) (`variorum-keys*.json`) + anything else beside the slot that
+   is the pre-design store's WHOLE into `Backups/safety-copies/variorum-vx306-predesign-<stamp>/`, then remove them from
+   the slot (leave `Backups/` in place). The dev scope's TODAY-road keychain items stay.
+1. Launch: `open -n App/Variorum/DerivedData/vx306/Build/Products/Debug/Variorum.app` (or the binary
+   `…/Variorum.app/Contents/MacOS/Variorum` directly). EXPECTED: the CREATION CARD — the lobby's room (the glyph rain),
+   a calm card: a key glyph, *Your twelve words*, the lead (§7c (1)), the twelve words in two numbered columns (1–6,
+   7–12, mono), the foot, ONE button *I've written them down* (no Copy, the words not selectable). Capture it (both
+   appearances if the walk flips light/dark — the card speaks the leading voice's fallback tokens; there is no store
+   voice yet). WRITE THE WORDS DOWN for the walk (they are the dev library's; never into a commit or record — her
+   2026-10-13 rule for the dev credentials applies; put them beside `~/.variorum/dev-castle.env` only at her word).
+   Press the button → the library opens; the seeder mints the shipped furniture (with `VARIORUM_SEED_GATE_UNOWNED=1`
+   if the dev scope's session is signed in — the 13s-b diagnosis).
+   OBSERVE (the Diagnostics line): `log show --last 10m --info --predicate 'subsystem == "io.lduarte.Variorum" AND category
+   == "protection"' | grep 'road:'` → `road: created — library <lib8> key <fp8> device <dev8>; custody silent 1 touchid 0;
+   Apple keys readable [<id8>]; memory items 1; live key file roads [apple,words]; notice false; repairs […]; …`. Files
+   beside the slot: `variorum-library-keys.json` (format 3, `"words"` present, no `"passphrase"`),
+   `variorum-library-lived-here`, today's store-id stub `variorum-keys*.json`. **The keychain items (data-protection —
+   NOT visible to `security`):** custody `service io.lduarte.Variorum.library-key / account Variorum-dev-<fp16>-silent`
+   (label = the library ID), memory `io.lduarte.Variorum.memory / Variorum-dev-<libraryID>`, Apple key (iCloud,
+   synchronizable, shared group) `io.lduarte.Variorum.apple-key / Variorum-dev-apple-key-<id>` — read by the line above
+   (Keychain Access's "iCloud"/"Local Items" view may show them — unverified).
+3. Back Up Now (Settings ▸ Data Safety) → `Backups/<lib8>/<mac8>/variorum-backup-<stamp>-<fp8>.sqlite` + `….keys.json`
+   beside today's flat `Backups/variorum-backup-<stamp>.sqlite`; the line `backup pair: written under <fp8> in
+   Backups/<lib8>/<mac8>`.
+5. Quit; relaunch → opens silently (`road: opened …; repairs []`). Quit; relaunch with `VARIORUM_WALK_FORGET=silent`
+   (`open -n --env VARIORUM_WALK_FORGET=silent <app>`, or the binary with the variable set) → opens SILENTLY through the
+   Apple wrap: lines `WALK SWITCH (VARIORUM_WALK_FORGET): forgot 1 silent custody item(s) of scope Variorum-dev` then
+   `road: opened … repairs [remakeOnDeviceItem]; custody silent 1` (rule 8 — the on-device road re-made). Quit; relaunch
+   with `VARIORUM_WALK_FORGET=silent,apple` → THE LOBBY at once: *Open your library*, *Enter your twelve words to open your
+   library.*, the words field, the quiet line *Touch ID isn't set up for this library.* (an enrolled finger) or *…on this
+   Mac.*; a wrong attempt says why; the twelve words typed → opens (`repairs [remakeOnDeviceItem, remakeAppleRoad, …]`).
+   NOTE: the `apple` forgetting deletes a synchronizable dev-scope item, which iCloud carries to her other devices'
+   keychains (dev-scope names only). Touch ID rows: no Touch ID item can exist this phase (record which quiet line shows).
+   **Press none of today's Settings protection doors on the new road** (see "Not done").
+   The dev store is the new system's after step 1: a Debug build without this branch cannot open it — tell the
+   coordinator (K1's broadcast).
+
+**THE MAC SUITES THE ORCHESTRATOR RUNS UNDER THE STAGE (from `App/Variorum/`; PENDING):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx306 test \
+  -only-testing:VariorumTests/ProtectionRoadSwitchTests \
+  -only-testing:VariorumTests/ProtectionLobbyModelTests \
+  -only-testing:VariorumTests/VX310TodayLobbyWitnessTests \
+  -only-testing:VariorumTests/LibraryWordsCardTests \
+  -only-testing:VariorumTests/ProtectionBackupHookTests \
+  -only-testing:VariorumTests/ProtectionRoadRouteTests \
+  -only-testing:VariorumTests/ProtectionOpenRoadPlantedTests \
+  -only-testing:VariorumTests/ProtectionWalkSwitchTests \
+  -only-testing:VariorumTests/ProtectionKeychainFamilyTests \
+  -only-testing:VariorumTests/KeychainTripwireTests \
+  -only-testing:VariorumTests/KeychainLeavesTests \
+  -only-testing:VariorumTests/ProtectionFileLeavesTests \
+  -only-testing:VariorumTests/ProtectionFactsGathererTests \
+  -only-testing:VariorumTests/ProtectionSystemCompositionTests \
+  -only-testing:VariorumTests/StoreLaunchRouteTests \
+  -only-testing:VariorumTests/Phase13pLobbyTests \
+  -only-testing:VariorumTests/AppBootstrapOffMainTests \
+  -only-testing:VariorumTests/Phase13pKeyedDrillTests \
+  -only-testing:VariorumTests/LobbyVaultRoadTests \
+  -only-testing:VariorumTests/LibraryPortabilityDoorTests \
+  -only-testing:VariorumTests/VX202ReopenRaceTests \
+  -only-testing:VariorumTests/VX206ProtectionLandingTests \
+  -only-testing:VariorumTests/SettingsLockCloseTests \
+  -only-testing:VariorumTests/VX110SignedOutCastleTests \
+  -only-testing:VariorumTests/VX209WayBackRoundTripTests \
+  -only-testing:VariorumTests/VX80CastleFollowRecoveryTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests \
+  -only-testing:VariorumTests/TravellingDotsIndicatorTests \
+  -only-testing:VariorumTests/ICloudDriveOfferTests \
+  -only-testing:VariorumTests/MCPAsksWaitTests \
+  -only-testing:VariorumTests/VX209LeavesCastleConfirmTests \
+  -only-testing:VariorumTests/Phase9cAuthWiringTests
+```
+The first eight are U1b's new suites (4 + 15 + 2 + 3 + 5 + 7 + 9 + 3 = 48 tests; `VX310TodayLobbyWitnessTests` reports
+its 2 tests with KNOWN ISSUES — that is the red-on-old, expected, and a pass of either known issue is a FAILURE); then
+U1a's six (the test host now runs the new road read-only — the tripwire's exact count must hold); then the existing route
+suites (the switch forced off — the Release check's second leg) and the source pins over the edited files. Run it after
+K1 or before — the test host's own launch takes the new road read-only either way (before K1 it sits at the rule-27
+lobby over the pre-design dev store; nothing in the suites reads the host's store). Read the `skipped:` lines.
+
+**Notes:** no machinery deaths; one Sonnet lookup (the data-protection keychain's CLI reach — above); `git worktree list`
+shows no scratch worktree (the red-on-old ran through today's road in the tree and the headless harness, never a scratch
+worktree).
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 1 — the Debug switch `ProtectionRoad.newRoadIsLive` + its pins + the Release check: DONE (this commit) —
