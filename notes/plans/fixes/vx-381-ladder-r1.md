@@ -316,3 +316,17 @@ repo); nothing in the worktree was edited but this record.
 **The fix leg:** F-2, F-1, F-3 + riders F-7, F-8 — a FRESH implementer session; red-on-old pins per confirmed
 finding (F-2's and F-1's and F-3's as shaped above), revert-verified; one Mac/phone batch for any app-side pins
 under a coordinated GO; round 2 re-reviews the fixes.
+
+## FIX-LEG APPROVALS (the orchestrator, 2026-10-18)
+
+- **APPROVED — F-3's sentence as drafted:** "A tag named “work” already exists — rename it, then try again."
+  The implementer's reasoning sustained: the shared table cannot know which door refused (the rule editor's
+  create-tag race reaches the same arm, where "undo again" would be false) — the `.lockedPost` act-less
+  precedent. PROVISIONAL for her bundle; "then undo again" is the recorded one-line alternative.
+- **APPROVED — F-7's wording as drafted:** "Added — the gathering shows it once it's unarchived." (the family's
+  pattern, beside "Added to the gathering.").
+- **ROUND 2 DECIDES:** the reviewer's optional sweep predicate (every live tag's path extends its live parent's)
+  — in scope for round 2 to order as a finding or decline; not pre-ruled.
+- Fix-leg tree verified by the orchestrator: commits 26d613bf · 6e3ff09e · 20894e80 · b1d38659 · f2644865 (+ the
+  red-tree pin commit dd3ba271), clean, pushed; batch counts as reported (Mac 143/18 green, phone 23/3 green,
+  reds exactly the new pins; core 2927/340).
