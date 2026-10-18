@@ -1169,6 +1169,10 @@ built.
   panel's routed ⌘S (`WriteTakesPanelRoutedCommandTests.commitAsksForTheTakeTheRingIsInAndFilesIt`): TRACED (the
   FIX LEG section below), the fix next; (2) the hollow mount cells (`fieldPopover() → nil` on both trees): the rig is
   re-shaped next, then the red re-proof and the rebuilt products.
+- **FIX-LEG RED LEG ANNOUNCED BEFORE IT STARTS (addendum 2):** a third durable checkout,
+  `<home>/dev/variorum-vx-348-u2fixlegred` at `4804d7b1b`, with ONE behavioural revert —
+  `SavepointAskLedger.claimFiling` answers `true` always (the first pass's "every report files") — built into
+  `DerivedData/u2-fixleg-red`. This worktree is untouched by it.
 - **No behavioural revert is in flight** in this worktree (the red product is built from its own durable checkout,
   `<home>/dev/variorum-vx-348-u2red`, which holds the revert by design until the batch has run).
 - **Machinery note (honesty):** while this unit worked, the U5 fix leg's implementer was live in the SAME checkout
