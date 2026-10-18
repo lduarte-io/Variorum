@@ -351,6 +351,51 @@ store opened by Look inside behind the A1 rail (her credentials typed by HER —
 
 ---
 
+**U3 brief addendum (the orchestrator, 2026-10-18, after U1b's walk — read with the U3 paragraph above):**
+- **The doors' home:** the Mac's `Features/Protection/` module (U2's) gains the two doors' faces; the ONE brain stays a
+  shared model (`App/Variorum/Shared/Protection/CopyDoorsModel.swift`, pure and testable) over the executor's `lookInside`
+  / `makeThisMyLibrary` (`Executor/Acts/Copies.swift`) and the catalogue (`CatalogLister`). 13x's `LibraryOpenModel` keeps
+  its CLASSIFIER for a picked thing (`LibraryClassifier`) and its sheet frames; under the new road its adoption step is
+  RETIRED behind Make this my library (today's road keeps it byte-unchanged for Release).
+- **What a door takes:** a `CatalogCopy`. The Data Safety pane's Restore list under the new road lists the CATALOGUE's copies
+  of this library (the new-layout pairs, Previous Libraries) newest first, each row with *Look inside…* and *Make this my
+  library…*; today's flat copies are not catalogued (rule 26) and do not appear. **A picked folder that is NOT catalogued**
+  (File ▸ Open Library… / the Bookcase drop: an AirDropped pair or library folder) is FILED FIRST — **P-VX306-U3-0 (the
+  orchestrator's provisional ruling):** the picked pair is copied whole into the container's
+  `Backups/safety-copies/variorum-adopt-safety-<stamp>/` (the catalogue's `adoptionSafetyCopy` kind — this Mac's by place,
+  the one existing name shape for "a copy filed by an adoption"; a new kind would be a core names change) and the door then
+  acts on the catalogued copy; a picked plaintext export keeps today's road (T-8 stays VX-309's); the empty-slot landing
+  (T-5) stays VX-309's. Options recorded: (b) a new `CopyKind.imported` under `Backups/<library8>/imported-<stamp>/` (a
+  `CatalogNames` change); (c) act on the picked path directly (the executor takes a catalogue id — a leaf change).
+- **Look inside (rule 17):** read-only, writes nothing, closing forgets. **The implementer PROPOSES before building this
+  half** (the architect rules — write the proposal into the U3 record, commit, and continue with Make this my library
+  meanwhile): (a) a read-only WINDOW over the copy — the executor's `LookedInside` key opens the PRIVATE BYTE COPY (never the
+  catalogued file) as a second read-only `AppDatabase` and renders the Library/Book read tier (P3's read-only surface) — if
+  a second session can exist beside the live one without global state; (b) a read-only SHEET of the copy's facts (the
+  library's name and ID, the copy's date and kind, its books and note titles, a note's text rendered read-only on
+  selection) — the honest minimum; the sheet says it is a copy. The orchestrator's lean: (b) unless (a) is cheap and
+  isolated; never a write, never a keychain item, the private copy deleted at close.
+- **Make this my library (rule 17):** one confirmed door; the confirm reads §7c (8); the copy's own secrets or its quiet
+  road, AND the current pair verified (the words always; the passphrase when `record.passphraseSet`) — the door asks what the
+  executor requires; then `makeThisMyLibrary` on its plan. **THE SWAP'S PRECONDITION (U1a's hand-forward):** the app's pool
+  on the slot is CLOSED and writes quiesced from the stage to the swap — reuse today's `AppBootstrap.adoptLibrary(reopeningWith:
+  work:)` / `suspendLobbyForAdoption` seam shape (the pool closed, the work run, the reopen through the NEW road with the
+  new key in hand); `swapStaged` refuses `walNotDrained` otherwise. **THE RESTORE HOLD stays:** the hold marker is written
+  beside the landed library exactly as 13x's `LibraryAdoption.execute(holding:)` does (core `Persistence/LibraryRestoreHold`
+  — the writer; `RestoreHoldModel.swift` is READ ONLY and untouched — VX-348 owns it), so no sync round runs until the one
+  Resume Sync press; the new library binds no account (P-VX378-U2-4). The receipt after: §7c (9).
+- **The phone:** the switch turns ON for iOS Debug (`ProtectionRoad.live` → `debug` alone; P-VX306-U1b-1 superseded here);
+  `MobileStoreLockView` renders the lobby model (the words field, the Face ID/Touch ID button and line, the quiet line) and
+  the creation card (§7c (1), the same words); the leaves compose on the main actor (`deviceName`); the SIMULATOR opens its
+  fenced store under the stage (the walk's row); a DEVICE install is HER hands (the handoff — optional, the 13y road).
+- **Evidence (the orchestrator's walk, `vx-306-u3-walk`, the dev store):** Look inside on the stage-3 pair → read-only, the
+  key file beside the live library byte-unchanged, no new keychain item (the Diagnostics line), the private copy gone at
+  close; Make this my library on that pair → the confirm, the pair typed, the new library in Standard with a FRESH identity
+  and key, the outgoing library + its key file whole in `Previous Libraries/<stamp>/`, the hold banner with Resume Sync, the
+  reopen silent; an "AirDropped" copy = the pair copied to a folder under `~/Downloads/` and picked through File ▸ Open
+  Library… → filed, then Look inside; the simulator's open. HER HANDS (the handoff): Look inside on a byte-copy of her real
+  store with her credentials typed by her.
+
 ## 3. Standing acceptance: the words (VX-379)
 
 Every face this phase ships is checked sentence by sentence against `CastleRules.md`; the field guide's **Start Here
@@ -387,7 +432,7 @@ store this build has written — coordinators told.
   passed after 0.387 seconds.` (0 skipped — the Touch ID listing row ran on the Pro's enrolled finger), `** TEST EXECUTE
   SUCCEEDED **`; the tripwire's own suite proved every real-scope mutation refused from the test process. VX-406 filed
   (the release-floor reds, Low). The ladder reads U1a with U1b.
-- U1b — the lobby on roads, Debug-gated (+ VX-310, the creation card, the Release check, the dev store's fresh start): BUILT 2026-10-18 (Opus implementer) — commits `fdda1a67b`…`cd00b20cb` + the record (§9 U1b RECORD); Release build green on the final tree, Debug `build-for-testing` and the phone build green, 27 of the new tests green HEADLESS; the Mac suites (the record's list) and the walk (K1's fresh start, stages 1, 3, 5, the lobby, Touch ID) PENDING — the ORCHESTRATOR's, under the stage.
+- U1b — the lobby on roads, Debug-gated (+ VX-310, the creation card, the Release check, the dev store's fresh start): DONE 2026-10-18 — built by the Opus implementer (`fdda1a67b`…`137281318`, the §9 U1b RECORD), the batch under `vx-306-u1b` 212/33 (3 known = VX-310's witnesses; the pin fix `2b6a866ad`), THE CONVERSION walked (the §9 U1b WALK RECORD; findings W-1…W-6, W-2 fixed in U2).
 - U2 — the honest faces (+ rule 3's reminder, the set-passphrase sheet, W-2's fix): BUILT 2026-10-18 (Opus implementer) — commits `d35b82290`…the close (the §9 U2 RECORD); `build-for-testing` and the phone build green on the final tree; the new pure and planted suites green HEADLESS (69 in the session harness), the core's protection set green in both configurations (315 / 291); the Mac suites (the record's list) and the walk (stages 2, 14, rule 1's restore, W-2's pair, rule 27 both moments) PENDING — the ORCHESTRATOR's, under the stage.
 - U3 — the two doors; the phone opens: not started.
 - The ladder (Fable — custody code; her cap: up to five rounds while MAJORs are still found): not started.
@@ -538,6 +583,14 @@ access.* Doors: *Set a passphrase…* · *Not now* (and, at the third return, *D
 sheet:** title *Set a passphrase*; lead *A passphrase is a convenience over your twelve words — easier to type, and either
 one can reset the other.*; two fields (*Passphrase* / *Again*); one button *Set passphrase*; the receipt *Passphrase
 set. Your twelve words still open the library too.*
+
+**(8) Make this my library's confirm:** title *Make this my library?*; lead *This copy becomes a new
+library — in Standard, under your current twelve words and passphrase — with a fresh key of its own. Your current library
+steps aside whole into Previous Libraries, where you can look inside it or make it your library again. The copy itself is
+not changed.* Fields: the copy's own secret when its quiet road doesn't open it (*The copy's passphrase or twelve words*),
+then *Your twelve words* (and *Your passphrase* when one is set). One button *Make this my library*. **(9) The receipt:**
+*This is your library now. The previous one is in Previous Libraries.* **(10) Look inside's frame line:** *This is a copy
+from <date>. Nothing you do here changes it or your library.*
 
 ## 8. ENVIRONMENT TRAPS AND THE BATCH PROTOCOL (carried verbatim into every brief)
 
