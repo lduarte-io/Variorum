@@ -283,6 +283,11 @@ final class RoadStandingModel {
     /// Safety's Castle warning reads it on the new road (today's controller's posture is today's road's). nil: not
     /// known (a test's hand-made faces).
     let posture: ProtectionMode?
+    /// VX-309 U1a (VX-397): Settings ▸ Data Safety's counts on the new road — THIS Mac's pairs of THIS library per place,
+    /// read from the catalogue off the main actor (`ProtectionCopyCounts`). nil (a test's hand-made faces): the pane keeps
+    /// today's counts. Settings re-builds its panes at every reopen (its `.opening` arm), so a road never outlives the
+    /// library it reads.
+    @ObservationIgnored let copyCounts: (() async -> RoadCopyCounts)?
 
     /// VX-308 U3 — VX-447: the look the no-key-file banner's door opened (the banner's ONE look, made through the band so
     /// one look holds words at a time), and whether a mint has since written the fresh key file (the banner then retires
@@ -320,8 +325,10 @@ final class RoadStandingModel {
         posture: ProtectionMode? = nil,
         lookAsksPassphrase: (() -> Bool)? = nil,
         keyFileStands: @escaping () -> Bool = { false },
-        takeBackupPair: @escaping () async -> Bool = { false }
+        takeBackupPair: @escaping () async -> Bool = { false },
+        copyCounts: (() async -> RoadCopyCounts)? = nil
     ) {
+        self.copyCounts = copyCounts
         self.faces = faces
         self.reminder = reminder
         self.setPassphrase = setPassphrase
@@ -407,6 +414,9 @@ final class RoadStandingModel {
             },
             takeBackupPair: {
                 await Task.detached(priority: .utility) { ProtectionBackupHook.takePair(session) == .written }.value
+            },
+            copyCounts: {
+                await Task.detached(priority: .utility) { ProtectionCopyCounts.read(session) }.value
             })
         standing.model = model
         return model

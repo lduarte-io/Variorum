@@ -55,6 +55,10 @@ final class DataSafetyModel {
     private let sync: SyncSession?
     private let signedIn: () -> Bool
     private let database: AppDatabase?
+    /// VX-309 U1a (VX-397): the NEW road's counts — this Mac's backup pairs of the open library, per place, from the
+    /// catalogue (`RoadStandingModel.copyCounts`, handed down by the pane — nil on TODAY's road, whose counts stay the
+    /// folder reads below, byte-unchanged).
+    private let roadCounts: (() async -> RoadCopyCounts)?
 
     private(set) var primary: FolderSummary?
     private(set) var destination: Destination = .unset
@@ -85,13 +89,15 @@ final class DataSafetyModel {
         defaults: @escaping @Sendable () -> UserDefaults = { .standard },
         sync: SyncSession? = nil,
         database: AppDatabase? = nil,
-        signedIn: @escaping () -> Bool = { false }
+        signedIn: @escaping () -> Bool = { false },
+        roadCounts: (() async -> RoadCopyCounts)? = nil
     ) {
         self.backup = backup
         self.defaults = defaults
         self.sync = sync
         self.database = database
         self.signedIn = signedIn
+        self.roadCounts = roadCounts
     }
 
     /// True when this app can back up at all — false only when the store
@@ -119,8 +125,11 @@ final class DataSafetyModel {
                     candidates: BackupRestoreCandidates.gather(
                         in: directory, liveKeyFingerprint: liveFingerprint))
         }.value
-        primary = read.primary
-        destination = read.secondary
+        // VX-309 U1a (VX-397): on the new road the two rows count THIS Mac's pairs of THIS library in their place (the
+        // catalogue, per library per Mac) — their paths and the folder's set/unset/unreachable states stay as read.
+        let counts = await roadCounts?()
+        primary = counts.map { Self.counted(read.primary, $0.container) } ?? read.primary
+        destination = counts.map { Self.counted(read.secondary, $0.far) } ?? read.secondary
         exports = read.exports
         log = read.log
         insuranceEnabled = read.insurance
@@ -195,6 +204,20 @@ final class DataSafetyModel {
         return FolderSummary(
             displayPath: display, exists: true, count: dated.count,
             newest: trusted.max(), oldest: trusted.min())
+    }
+
+    /// VX-309 U1a (VX-397) — a row's summary with its count, newest and oldest taken from this Mac's pairs of this library
+    /// in its place (`OwnCopies.Summary` — trusted stamps only); its path and whether its folder exists stay as read.
+    nonisolated static func counted(_ summary: FolderSummary, _ own: OwnCopies.Summary) -> FolderSummary {
+        FolderSummary(
+            displayPath: summary.displayPath, exists: summary.exists, count: own.count, newest: own.newest,
+            oldest: own.oldest)
+    }
+
+    /// The picked folder's row, counted the same way — only when it is set (unset and unreachable say so as ever).
+    nonisolated static func counted(_ destination: Destination, _ own: OwnCopies.Summary) -> Destination {
+        guard case .set(let displayPath, let summary) = destination else { return destination }
+        return .set(displayPath: displayPath, summary: counted(summary, own))
     }
 
     nonisolated static func summarizeSecondDestination(

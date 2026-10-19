@@ -82,7 +82,9 @@ struct DataSafetyPane: View {
             database: services?.session.database,
             // A closure rather than a captured value: the pane can outlive a
             // sign-in, and the facts are re-read on every refresh.
-            signedIn: { services?.account.variorum != nil }))
+            signedIn: { services?.account.variorum != nil },
+            // VX-309 U1a (VX-397): the new road counts this Mac's pairs of this library per place; nil on today's road.
+            roadCounts: roadStanding?.copyCounts))
     }
 
     var body: some View {
