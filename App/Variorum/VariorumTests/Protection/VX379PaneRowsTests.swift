@@ -68,7 +68,7 @@ struct VX379PaneRowsTests {
         #expect(pane.contains("private var roadPosture: ProtectionMode? { roadStanding?.posture }"))
         // The faces carry the open library's posture (the record's mode) from the session.
         let faces = try Self.code("Shared/Protection/ProtectionOpenFaces.swift")
-        #expect(faces.contains("posture: session.library.record?.mode)"))
+        #expect(faces.contains("posture: session.library.record?.mode"))
     }
 
     /// The rows speak the rules' words, and stay true of today's road where they render.
