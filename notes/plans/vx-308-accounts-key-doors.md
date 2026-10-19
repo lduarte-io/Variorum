@@ -434,10 +434,22 @@ same ruling):**
   `PlantedSyncKeysLeaf`; `PlantedAccount`); `PlantedRoad` gains `vault`/`syncKeys`/`session` (nil/signed-out — every earlier
   suite unchanged). Pins `RoadAccountFacesTests` (10) + `FollowingSessionProviderTests` (1). HEADLESS, the whole harness:
   `✔ Test run with 176 tests in 28 suites passed`.
-- Piece 4 — THE ACCOUNT ACTS ON THE SESSION: NOT-STARTED. Set-up (`setUpSync`) and the leaves (`leaveAccount`) on the open
-  session (no swap, so no reopen — the set-passphrase road's precedent), each door re-read at the press (VX-108); sign-out and
-  sign-in through injected roads. Pins `ProtectionAccountRoadTests` (the planted road + a planted vault with ExecutorVault's
-  semantics + planted sync keys — no network).
+- Piece 4 — THE ACCOUNT ACTS ON THE SESSION: DONE (this commit). `ProtectionAccountRoad.press` (one act at a time; the door
+  RE-READ through the one read — closed → refused, changed → re-shown, nothing written; VX-108) → `act` (the CURRENT
+  sign-in adopted into the executor's configuration UNDER the act's lock — R-2; then `setUpSync` or `leaveAccount` on the
+  OPEN session — no swap, so no reopen; a refusal said per `RoadAccountFaces.actRefusalSentence`, and an act stopped
+  mid-plan says it finishes at the next open, never "nothing changed"). P-VX308-U1-F1's hook `accountDeleted(_:accountID:
+  signIn:)` — the protection half (the third local leave) when THIS library names the deleted account; else nothing; when it
+  cannot run, the signed-out screens catch it at the next read. Sign-out and sign-in are the composition's roads (piece 6 —
+  the app's Account sheet and `AppServices`). Pins `ProtectionAccountRoadTests` (7, one parameterized over the three
+  leaves): set-up hands the pair up (the vault opens with the typed passphrase AND the library's own words — never new
+  ones), binds the record to the account and its sync key, holds the sync keys the Standard way, key unchanged, and the
+  next read reads in sync — on a session composed SIGNED OUT (the sign-in adopted); a wrong word writes nothing (no vault,
+  no binding, nothing in flight); the door re-read (another device turned sync on → refused; signed out → the sign-in
+  line); a changed door re-shown (a passphrase set meanwhile); each LOCAL leave unbinds and forgets the sync keys while the
+  key, the key file and the server's vault stay byte-equal (no vault write); the deletion's hook for this library's
+  account only; a press during another act refuses. HEADLESS, the whole harness: `✔ Test run with 183 tests in 29 suites
+  passed`.
 - Piece 5 — THE MODELS: NOT-STARTED. `RoadAccountModel` (the bootstrap's, beside the crossings) + its confirm. Pins
   `RoadAccountModelTests`.
 - Piece 6 — THE MAC FACES + THE BOOTSTRAP'S ROADS + THE SIGNED-OUT ROAD: NOT-STARTED. `RoadAccountSection` /
