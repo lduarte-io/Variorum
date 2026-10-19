@@ -425,4 +425,6 @@ fetch, no network.
   under the old passphrase: F-U1a-1 below. Re-run with `TypedSecrets.none`, as `NewWordsResumeTests` spells it.) The fix:
   NEXT.
 - Piece 5 — the close (counts, the Mac-suite list, PROVISIONALs, findings): NOT-STARTED.
-- No revert is in flight.
+- MUTATIONS IN FLIGHT on the committed tree above (`Acts/KeyDoors.swift` only; restore = `git checkout --`, then `cmp`
+  against `u1a-prerevert/KeyDoors.swift`): M-450a the Change/Reset arm dropped, M-450b the key-file arm narrowed to the
+  words act, M-450c the `resuming` guard dropped (M1-c's — a press too).
