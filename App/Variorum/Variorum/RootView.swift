@@ -598,7 +598,11 @@ struct RootView: View {
         let tokens = theme.tokens(for: scheme)
         return AnyView(
             VStack(alignment: .leading, spacing: 0) {
-                if let protection {
+                // VX-307 U2c (VX-379's row — the VX-306 walk's W-1): the posture box reads TODAY's tier, so it renders on
+                // today's road only — on the new road its exposed line ("only this Mac can open your work") would be
+                // false (rule 8: the Apple road reaches her other Macs), and the card above the quick entry carries
+                // rule 3's ask there (U2b).
+                if let protection, protectionFaces == nil {
                     ProtectionStatusRow(controller: protection, tokens: tokens)
                 }
                 // VX-218: the family's words sit on the column's own content

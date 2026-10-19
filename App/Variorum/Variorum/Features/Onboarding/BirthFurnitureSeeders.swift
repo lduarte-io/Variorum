@@ -102,7 +102,7 @@ enum ReadmeSeeder {
 
     /// The blocks a fresh store's readme is born with: her five ALWAYS, then — only where the store opened on the
     /// NEW road — the four Start Here passages (VX-306 ladder round 2, m2: they speak the new road's truths — the key
-    /// file and its copies, the twelve words shown once at the creation, a new-words door in Data Safety — which are
+    /// file and its copies, the twelve words shown when she asks, the new-words door in Settings ▸ Protection — which are
     /// false on TODAY's road, so Release and a Debug build pointed at the real store seed her five alone until the
     /// road switches, VX-329; the same rule every other VX-379 row follows).
     nonisolated static func paragraphs(onTheNewRoad newRoad: Bool) -> [String] {
@@ -137,20 +137,25 @@ enum ReadmeSeeder {
     ]
 
     /// VX-306 (2026-10-18, her kickoff word: the Start Here chapter drafted from `notes/CastleRules.md`, built as
-    /// drafted, PROVISIONAL — P-VX306-W-1): the four passages of the plan's §7c (5), byte-pinned to the plan by
-    /// `ReadmeStartHerePlanTests`, appended after her five blocks (untouched) — and ONLY on the new road
-    /// (`paragraphs(onTheNewRoad:)`, ladder round 2 m2).
+    /// drafted, PROVISIONAL — P-VX306-W-1): the four passages of the plan's §7c (5), appended after her five blocks
+    /// (untouched) — and ONLY on the new road (`paragraphs(onTheNewRoad:)`, ladder round 2 m2). VX-307 U2c (F-U2b-1):
+    /// the second passage follows the amended rules 2, 3 and 7; all four are byte-pinned by `ReadmeStartHerePlanTests`
+    /// to the VX-307 plan's U2c words block (the re-anchored source).
     nonisolated static let startHerePassages: [String] = [
         "Your work is encrypted. Every library is locked with its own random key, kept "
         + "in a small key file beside it. Variorum keeps copies of that key file for you "
         + "\u{2014} beside the library, inside every backup, and sealed in this Mac's "
         + "keychain \u{2014} so you never have to think about it.",
 
+        // VX-307 U2c (F-U2b-1): the amended rules 2, 3 and 7 — the words shown only when she asks (the card above
+        // the quick entry, the tour's end, Settings ▸ Protection), each look minting new ones, the key unchanged;
+        // byte-pinned to the VX-307 plan's U2c words block (PROVISIONAL P-VX307-U2c-5).
         "Write down your twelve words. Every library has twelve words from the moment "
-        + "it is made, and they open it for as long as they are its words. They were "
-        + "shown once, when the library was created. If you didn't write them down then, "
-        + "you can make new ones in Settings \u{25B8} Data Safety \u{2014} and write those "
-        + "down.",
+        + "it is made, and they open it for as long as they are its words. Variorum never "
+        + "keeps them, so it shows them only when you ask \u{2014} from the card above the "
+        + "quick entry, at the end of the tour, or any time in Settings \u{25B8} Protection "
+        + "\u{2014} and each look makes new ones for you to write down. Your library's key "
+        + "doesn't change.",
 
         "Set a passphrase. A passphrase is a convenience over the words: easier to type, "
         + "and either one can reset the other. Until you set one, Variorum reminds you "

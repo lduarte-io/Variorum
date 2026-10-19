@@ -406,7 +406,7 @@ struct AppSettingsView: View {
             // 13x U2: + the Restore from Backup rows (QB's second door).
             DataSafetyPane(
                 services: services, protection: protection, restoreDoor: restoreDoor,
-                handOffDoor: handOffDoor, roadDoors: roadDoors)
+                handOffDoor: handOffDoor, roadDoors: roadDoors, roadStanding: roadStanding)
         case .diagnostics:
             // 13r U3-B (R-13r-5; the architect's Option A): the crash-report
             // opt-in at the head, the received reports verbatim under it.

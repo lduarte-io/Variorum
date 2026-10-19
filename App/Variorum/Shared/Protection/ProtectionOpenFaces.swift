@@ -248,6 +248,11 @@ final class RoadStandingModel {
     /// VX-307 U2b — THE CARD ABOVE THE QUICK ENTRY (rules 2 and 3 as amended): the words' offer and rule 3's reminder,
     /// one card (`WordsBandModel`). nil where no factory built one (a test's hand-made faces).
     let band: WordsBandModel?
+    /// VX-307 U2c (VX-379's pane rows, U2a's F-6): the OPEN library's posture — the record's mode, read when this
+    /// open's faces were made (a crossing reopens, and the reopened library gets faces of its own). Settings ▸ Data
+    /// Safety's Castle warning reads it on the new road (today's controller's posture is today's road's). nil: not
+    /// known (a test's hand-made faces).
+    let posture: ProtectionMode?
 
     @ObservationIgnored private let setPassphrase: (String) async -> SetPassphraseOutcome
     @ObservationIgnored private let passphraseExists: () -> Bool
@@ -270,7 +275,8 @@ final class RoadStandingModel {
         receiptsOwed: @escaping () -> [String],
         band: WordsBandModel? = nil,
         mintWords: ((String?) async -> WordsMintOutcome)? = nil,
-        copyWords: @escaping ([String]) -> Void = { _ in }
+        copyWords: @escaping ([String]) -> Void = { _ in },
+        posture: ProtectionMode? = nil
     ) {
         self.faces = faces
         self.reminder = reminder
@@ -278,6 +284,7 @@ final class RoadStandingModel {
         self.passphraseExists = passphraseExists
         self.receiptsOwed = receiptsOwed
         self.band = band
+        self.posture = posture
         self.mintWords = mintWords
         self.copyWords = copyWords
         offersSetPassphrase = !passphraseExists()
@@ -327,7 +334,8 @@ final class RoadStandingModel {
             },
             passphraseExists: passphraseExists,
             receiptsOwed: { session.takeReceipts() },
-            band: band, mintWords: mint, copyWords: copyWords)
+            band: band, mintWords: mint, copyWords: copyWords,
+            posture: session.library.record?.mode)
     }
 
     /// VX-307 U2b — a look for another home (the tour's last card, Settings ▸ Protection): the band's roads; recording

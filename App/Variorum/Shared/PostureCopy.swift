@@ -92,9 +92,11 @@ nonisolated extension ProtectionCopy {
                  + "Without sync, your Apple account holds a key but not your writing — "
                  + "you need a copy of your library that survived the \(deviceName) "
                  + "(your backup folder in iCloud Drive, or Time Machine)."),
+                // VX-307 U2c (VX-379's row): her no-shouty-caps rule — "and", never
+                // "AND" (PROVISIONAL P-VX307-U2c-7; the runbook's §8 composes it).
                 ("The floor",
                  "you lose your writing only if you lose every Apple device, every way "
-                 + "Apple offers to recover your account, AND your passphrase and twelve "
+                 + "Apple offers to recover your account, and your passphrase and twelve "
                  + "words. Keep the words: they are your way back if your Apple account "
                  + "is ever gone."),
             ]
@@ -122,7 +124,7 @@ nonisolated extension ProtectionCopy {
                  "with sync on, sign in and type your passphrase. Without sync, a "
                  + "surviving backup plus your passphrase or twelve words."),
                 ("The floor",
-                 "lose every enrolled device AND both your passphrase and your twelve "
+                 "lose every enrolled device and both your passphrase and your twelve "
                  + "words, and your writing is gone. Nobody can help — not Apple, not "
                  + "us. That is the point of Castle, and it's why we ask you to write "
                  + "the words down."),

@@ -1244,8 +1244,58 @@ Commits: `edbd86c14` (record) · `95bde6ea3` (1) · `a1a948c73` (2) · `6a0b5a05
   checkout --`, `git status` clean): the variant's arm disabled → `✘ … with 1 issue` (the sentence); the report's
   `besideIsEmpty` line removed → `✘ … with 3 issues`. The harness `✔ Test run with 144 tests in 23 suites passed`; Mac
   `build-for-testing` → `** TEST BUILD SUCCEEDED **`; the phone `build` → `** BUILD SUCCEEDED **`.
-- Piece 3 — VX-379's pane rows to the rules, today's rows on TODAY's road only (the U2a-4 ruling) + F-U2b-1 (the
-  readme's Start Here words passage, its byte-pin re-anchored): NOT-STARTED.
+- Piece 3 — VX-379's pane rows to the rules, today's rows on TODAY's road only (the U2a-4 ruling) + F-U2b-1: DONE (this
+  commit). THE PRINCIPLE (recorded so the ladder can judge it): a today's row renders on today's road only, and where it
+  renders its words move to the rules' language ONLY where the result stays TRUE OF TODAY'S ROAD (Release runs it until
+  VX-329); rows whose today's-road FACTS differ from the rules keep their words (listed below — they retire with today's
+  road). **(3a) THE POSTURE BOX (the VX-306 walk's W-1):** `ProtectionStatusRow` reads today's tier, and on the new road
+  said *Right now, only this Mac can open your work.* — false under rule 8. `RootView.statusRows` composes it only
+  with no new-road faces (`if let protection, protectionFaces == nil`); on today's road its words stay (true there: the
+  exposed tier IS no Apple key landed, no passphrase, no words — this Mac's keychain the only holder); on the new road
+  the card above the quick entry carries rule 3's ask (U2b). **(3b) DATA SAFETY'S TODAY'S ROWS (F-U3-1 + today's
+  posture's backup lines):** the *Restoring a copy* lead — *Restoring is a Finder operation, not a button: …* — was
+  false on today's road too since 13x's Restore from Backup door; now `DataSafetyCopy.restoringByTheDoor`, rule 17's
+  language and true of today's road (*To restore a copy, use Restore from Backup above, or File ▸ Open Library… for a
+  copy kept anywhere else: the copy becomes your library, and your current library steps aside whole into Previous
+  Libraries. If Variorum won't open, the step-by-step for restoring by hand is in "RESTORE.md", which sits in every
+  backup folder above.*), rendered on today's road only (`roadStanding == nil` — the new road's Restore list says it in
+  its own lead); `BackupsPostureLines` (what opens a backup, by TODAY's posture — on the new road a Castle library read
+  "Standard" there and was told its backups open through its Apple account, false under rule 11) on today's road only.
+  Her mandated deletion sentences (the synced/local warnings, the both-sided truth) stay on both roads. `DataSafetyPane`
+  takes `roadStanding` (Settings hands it, as the Protection pane's). **(3c) THE CASTLE WARNING (U2a's F-6):**
+  `ProtectionCopy.plaintextExportUnderLockedDown` in rule 11's words — *You're in Castle — and a scheduled plain-text
+  copy on disk would undo Castle's promise: every note, readable, on a timer, in the folder you picked. It's your
+  call.* (true on both roads); shown by the pure `DataSafetyPane.castleWarningShows(todaysPosture:roadPosture:)` — on
+  the new road by the OPEN library's posture (`RoadStandingModel.posture`, new: the record's mode, read when the open's
+  faces are made — a crossing reopens and gets faces of its own), on today's road by today's controller as ever.
+  **(3d) THE PROTECTION PANE'S TODAY'S ROWS (today's road only since U2a — reworded where they render):** the
+  checklist (`ProtectionCopy.checklistRows`, the Mac pane its only renderer) — *Recovery phrase* → *Twelve words* (note
+  *the passphrase's twin, on paper*), *iCloud key* → *Your Apple account* (notes *verified this launch — your Apple
+  account opens the key file's copy* / *not landing — no copy verifiably opens through your Apple account* / in Castle
+  *no road through Apple in Castle* — rule 8's and 9's words), the passphrase's note *opens any copy, and …* → *opens
+  this library, and lets a new device into sync* (a copy opens with the passphrase it was made under — rules 4–5, and
+  today's runbook §2 says the same); the two posture cards' floors *AND* → *and* (her no-shouty-caps rule), with
+  `notes/DataSafetyRunbook.md` re-synced (the runbook's §8 composes the floors; `DataSafetyTests`' byte pin's own
+  road). KEPT on today's road (true there, contradicting the new design's facts — they retire with today's road at
+  VX-329, VX-379's remainder): the current-state lines (*Your Apple account holds a key.* / *Only you hold the keys.*),
+  the keystones, the posture cards' other rows, Castle's switches, *Encryption passphrase* (today's road's one label on
+  every field — a pane-only rename would split it), the re-link door (today's Apple-held vault copy — superseded by
+  rule 14 on the new road), today's ceremonies and follow notices. All reworded lines PROVISIONAL P-VX307-U2c-7. **(3e)
+  F-U2b-1 — THE README'S START HERE PASSAGE:** passage 2 (*They were shown once, when the library was created … in
+  Settings ▸ Data Safety*) → the amended rules 2/3/7 (the words block below — PROVISIONAL P-VX307-U2c-5); the byte-pin
+  RE-ANCHORED HONESTLY: `ReadmeStartHerePlanTests` now reads THIS plan's U2c words block (all four passages — 1, 3, 4
+  byte-identical to VX-306's §7c (5), which keeps its drafts as history), its suite name and header saying so; the
+  seeder's passage spelled once, its lead unchanged (the source pin's leads hold). **Pins:** `VX379PaneRowsTests` (4,
+  Mac target: the posture box's gate by source; Data Safety's today's rows behind `roadStanding == nil` and Settings
+  handing it; the warning's pure rule both ways + its wiring by source; the rows' words — rule 11's clause, rule 17's
+  road, the checklist's names and notes, no *AND*) — its SOURCE PINS' logic replicated in Python over the files: green
+  on this tree, RED on the pre-piece tree (`git show HEAD:` — all seven checks false); `Phase13pCopySweepTests
+  .thePlainTextEscapeWarnsUnderLockedDown` follows the new words (a justified edit: *re-opens the door* → *would undo
+  Castle's promise*); `ReadmeStartHerePlanTests` re-anchored — its parse replicated in Python: the four passages
+  byte-equal to the seeder (passage 2 would be red against the old seeder). The Mac RUN of these suites PENDING under
+  the stage. Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **`; the phone `build` → `** BUILD SUCCEEDED **`; the
+  harness `✔ Test run with 144 tests in 23 suites passed`; no new warning in a touched file (the one
+  `AppSettingsView.swift:1247` warning pre-exists, a line this batch didn't touch).
 - Piece 4 — the three VX-306 copy-door hand-forwards: DONE (`7f521bcbb`; red-on-old by revert below).
   **(i) ONE PRESS at Make this my library (round-2 NIT 1 (i)).** TRACED: the door's preflight
   (`ProtectionCopyDoors.preflight`) runs a look at her press (`lookInside(… .includingTouchID)`) and the act
@@ -1296,6 +1346,28 @@ Commits: `edbd86c14` (record) · `95bde6ea3` (1) · `a1a948c73` (2) · `6a0b5a05
   that opens it.* (then her offer sentence's remainder — built as her sentence's question, *Use it?*: P-VX307-U2c-4).
   And U2-6, her "sure we can drop the sentence": the split-pair line *The key file beside your library is an older
   one. …* is gone.
+- **F-U2b-1 — the readme's Start Here passages, as amended** (the pin `ReadmeStartHerePlanTests` reads THIS block since
+  U2c — re-anchored from VX-306's plan §7c (5), whose drafts stay there as history; passage 2 reworded to the amended
+  rules 2, 3 and 7 — the words shown only when she asks, from the card above the quick entry, at the tour's end, or in
+  Settings ▸ Protection, each look making new ones, the key unchanged; passages 1, 3 and 4 byte-identical to §7c (5);
+  PROVISIONAL P-VX307-U2c-5 — hers at the bundle, the readme being hers):
+
+> **Your work is encrypted.** Every library is locked with its own random key, kept in a small key file beside it.
+> Variorum keeps copies of that key file for you — beside the library, inside every backup, and sealed in this Mac's
+> keychain — so you never have to think about it.
+>
+> **Write down your twelve words.** Every library has twelve words from the moment it is made, and they open it for as
+> long as they are its words. Variorum never keeps them, so it shows them only when you ask — from the card above the
+> quick entry, at the end of the tour, or any time in Settings ▸ Protection — and each look makes new ones for you to
+> write down. Your library's key doesn't change.
+>
+> **Set a passphrase.** A passphrase is a convenience over the words: easier to type, and either one can reset the
+> other. Until you set one, Variorum reminds you now and then.
+>
+> **The Apple road is a convenience.** In Standard, Variorum also keeps quiet roads to your key — through your iCloud
+> Keychain and this Mac's login — so most people never type anything, and for most people that simply works forever.
+> If it ever stops, your passphrase or your words open the library, and nothing was ever at risk. Castle is the one
+> promise that there is no quiet road through Apple, ever; it is a choice you can make in Settings.
 - No revert is in flight (piece 4's R1–R3 ran and were restored by `git checkout --`; `git status` clean).
 
 ## 7. LIVE STATUS

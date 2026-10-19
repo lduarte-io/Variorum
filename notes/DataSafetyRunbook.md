@@ -282,8 +282,8 @@ on your mode:
 And the floors — the app's own sentences, the same ones the
 Protection pane's cards show:
 
-- **Standard** — the floor: you lose your writing only if you lose every Apple device, every way Apple offers to recover your account, AND your passphrase and twelve words. Keep the words: they are your way back if your Apple account is ever gone.
-- **Castle** — the floor: lose every enrolled device AND both your passphrase and your twelve words, and your writing is gone. Nobody can help — not Apple, not us. That is the point of Castle, and it's why we ask you to write the words down.
+- **Standard** — the floor: you lose your writing only if you lose every Apple device, every way Apple offers to recover your account, and your passphrase and twelve words. Keep the words: they are your way back if your Apple account is ever gone.
+- **Castle** — the floor: lose every enrolled device and both your passphrase and your twelve words, and your writing is gone. Nobody can help — not Apple, not us. That is the point of Castle, and it's why we ask you to write the words down.
 
 Losing your writing means losing EVERY way back in at once — any
 single one of them still standing gets you back in.
