@@ -608,9 +608,10 @@ nonisolated enum ProtectionWords {
     /// The join's fields (rule 14: ONE of the account's secrets).
     static let joinPassphraseField = "Your account's passphrase"
     static let joinWordsField = "Or your account's twelve words"
-    /// The join's receipt (the posture said when it changed).
+    /// The join's receipt (the posture said when it changed). Move's head names "the signed-in account" — one "now" per
+    /// receipt (the ladder's round-1 NIT-2: "…the account signed in now. … twelve words now." said it twice).
     static func joinedReceipt(_ plan: JoinPlan, moved: Bool) -> String {
-        let head = moved ? "This library syncs with the account signed in now" : "Sync is on"
+        let head = moved ? "This library syncs with the signed-in account" : "Sync is on"
         switch plan {
         case .entersCastle: return head + ", and you're in Castle now, like your account."
         case .leavesCastle: return head + ", and you're in Standard now, like your account."

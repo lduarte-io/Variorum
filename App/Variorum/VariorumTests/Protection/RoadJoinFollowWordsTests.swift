@@ -77,9 +77,18 @@ struct RoadJoinFollowWordsTests {
         #expect(ProtectionWords.joinPlanLine(.setsUpInLibrarysMode, library: .standard) == nil, "set-up is U1's confirm")
         #expect(ProtectionWords.joinedReceipt(.entersCastle, moved: false)
             == "Sync is on, and you're in Castle now, like your account.")
+        // The ladder's round-1 NIT-2 — FLIPPED DELIBERATELY: Move's receipt says "now" once (it said it twice).
         #expect(ProtectionWords.joinedReceipt(.sameMode, moved: true)
-            == "This library syncs with the account signed in now. Your library uses your account's passphrase and twelve "
+            == "This library syncs with the signed-in account. Your library uses your account's passphrase and twelve "
             + "words now.")
+        #expect(ProtectionWords.joinedReceipt(.entersCastle, moved: true)
+            == "This library syncs with the signed-in account, and you're in Castle now, like your account.")
+        for plan in [JoinPlan.entersCastle, .leavesCastle, .sameMode] {
+            for moved in [false, true] {
+                let receipt = ProtectionWords.joinedReceipt(plan, moved: moved)
+                #expect(receipt.components(separatedBy: " now").count == 2, "one \"now\": \(receipt)")
+            }
+        }
         #expect(ProtectionWords.joinWordsNotShown.hasPrefix("Your library's twelve words are now your account's twelve words"))
         #expect(!ProtectionWords.joinWordsNotShown.contains("here they are"), "the passphrase-typed moment shows nothing")
         #expect(ProtectionWords.moveDoor("y@example.test") == "Move this library to y@example.test\u{2026}")
