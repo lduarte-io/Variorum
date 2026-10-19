@@ -455,11 +455,18 @@ dev/real store or `/Applications` touch: the brief's limits.)
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton: DONE (this commit).
-- Piece 1 — THE WORDS + THE PURE FACES: NOT-STARTED. `ProtectionWords` gains the crossings' sentences (rule 12's leave
-  sentence verbatim from `CastleRules.md`, pinned by reading the file; everything else PROVISIONAL P-VX307-U2a-n);
-  `RoadCrossingFaces.derive` reads `assess`'s `DoorState` for Use Castle / Use Standard / Replace All Keys into faces
-  (open with its spec's asks and words; refused with its sentence; not rendered where the refusal is "not this posture's
-  door" — P-2), the gate choice by this Mac's biometry, the gate-style row in Castle. Pure pins over planted assessments.
+- Piece 1 — THE WORDS + THE PURE FACES: DONE (this commit). `ProtectionWords` gains the crossings' section: rule 12's
+  leave sentence and rule 9's promise VERBATIM (hers — pinned by reading `notes/CastleRules.md`); every other line
+  PROVISIONAL P-VX307-U2a-1. `RoadCrossingFaces.derive(facts, assess(facts), copyName:)` (new
+  `Shared/Protection/RoadCrossingFaces.swift`) reads each crossing's `DoorState` into a face: OPEN → the ask
+  (`SecretRequirement` read exactly — both typed at the crossings), a NEW passphrase (typed twice) when the library has
+  none (rule 3), the door's lead + the spec's `Words` said (rule 12's sentence on Use Standard; Use Castle's floor,
+  export-first, rule 25's copies NAMED, the export turning off), Use Castle's gate choice by this Mac's biometry and
+  earlier choice; REFUSED → its sentence in place, except `.wrongMode`/`.notSynced`/`.nothingToDo`/`.locked` which
+  render nothing (P-2 — PROVISIONAL P-VX307-U2a-2); the gate-style row in Castle. Pins: `RoadCrossingFacesTests` (8,
+  planted facts of a real library on the planted road, mutated per state) + `RoadCrossingWordsTests` (3 — rule 12 and
+  rule 9 byte-equal to the rules file; no shouting caps). HEADLESS (this session's SwiftPM harness — the close says how):
+  `✔ Test run with 11 tests in 2 suites passed`; the Mac run PENDING under the stage.
 - Piece 2 — THE CROSSING ACTS ON THE SESSION: NOT-STARTED. The doors read (assess over the open library's facts, the
   weekly plain-text copy's switch as this Mac's scheduled-export fact); the press re-reads the door (VX-108) and checks
   the typed pair against the live key file BEFORE anything closes (a typo never tears the window down); the act through
