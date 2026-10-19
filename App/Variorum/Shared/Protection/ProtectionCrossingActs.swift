@@ -177,15 +177,11 @@ nonisolated enum ProtectionCrossings {
         let executor = session.executor
         var acted: ActOutcome?
         // MAJOR-1: the notice is owed BEFORE anything moves (a crash anywhere after this still finds the mark).
-        let markedHere = door == .useCastle && exportSwitch.isOn() && !exportSwitch.noticeOwed()
-        if markedHere { exportSwitch.setNoticeOwed(true) }
+        let markedHere = door == .useCastle ? markCastleEntry(exportSwitch) : false
         do {
             if door == .useCastle {
                 // P-VX307-U2a-3: the switch into this Mac's sealed settings first, so the act's own step turns it off.
-                let switchOn = exportSwitch.isOn()
-                if library.section.settings.scheduledExport != switchOn {
-                    var settings = library.section.settings
-                    settings.scheduledExport = switchOn
+                if let settings = mirroredExportSettings(library, exportSwitch: exportSwitch) {
                     _ = try await executor.changeSettings(&library, to: settings)
                 }
             }
@@ -217,6 +213,26 @@ nonisolated enum ProtectionCrossings {
                 + "\(library.record?.mode.rawValue ?? "?") under \(StoreKeyEnvelope.shortFingerprint(library.fingerprint)); "
                 + "the export notice owed \(exportTurnedOff)")
         return CrossingResult(outcome: .made(door, exportTurnedOff: exportTurnedOff), reopenKey: reopenKey)
+    }
+
+    /// RULE 11 BEFORE AN ACT THAT ENTERS CASTLE (Use Castle; VX-308 U2 — a join into a Castle account, the follow into
+    /// Castle): the notice owed DURABLY before anything moves (MAJOR-1) whenever the weekly switch is on and no notice is
+    /// owed yet. True when the mark was written HERE (an act refused before anything swapped clears it).
+    static func markCastleEntry(_ exportSwitch: ScheduledExportSwitch) -> Bool {
+        guard exportSwitch.isOn(), !exportSwitch.noticeOwed() else { return false }
+        exportSwitch.setNoticeOwed(true)
+        return true
+    }
+
+    /// P-VX307-U2a-3 — the weekly switch mirrored into this Mac's SEALED setting before an act that enters Castle, so the
+    /// core's own `exportOff` step decides and owes rule 11's notice: the settings to write (`changeSettings`), nil when
+    /// they already agree.
+    static func mirroredExportSettings(_ library: UnlockedLibrary, exportSwitch: ScheduledExportSwitch) -> DeviceSettings? {
+        let switchOn = exportSwitch.isOn()
+        guard library.section.settings.scheduledExport != switchOn else { return nil }
+        var settings = library.section.settings
+        settings.scheduledExport = switchOn
+        return settings
     }
 
     /// The switch FOLLOWS the core's step (rule 11: the scheduled export turned off at the entry).

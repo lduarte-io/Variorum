@@ -37,24 +37,49 @@ nonisolated struct RoadAccountRequest: Sendable {
     /// The door as the confirm showed it — the road compares the door it re-reads with this (VX-108).
     let shown: RoadAccountDoorOpen
     let typed: TypedSecrets
+    /// VX-308 U2 — into Castle (a join that enters it, the follow into it): her gate choice; nil elsewhere (the core's
+    /// own default — this Mac's section).
+    var gate: GateStyle? = nil
 }
 
 /// What an account press came to.
 nonisolated enum RoadAccountPress: Equatable, Sendable {
-    /// The act landed — its receipt.
-    case made(receipt: String)
+    /// The act landed — its receipt (nil: owed to the reopen a re-keying act makes — said there, once); `wordsReplaced`:
+    /// a join's `ActNotice.wordsReplacedByAccount` (rule 7 — the words moment is owed).
+    case made(receipt: String?, wordsReplaced: Bool = false)
     case refused(String)
     /// The door is open but says something new (VX-108) — re-shown.
     case changed(RoadAccountDoorOpen)
 }
 
+/// What an account act came to on the session (VX-308 U2 — the re-keying acts reopen with `reopenKey`).
+nonisolated struct AccountActResult: Sendable {
+    var press: RoadAccountPress
+    /// The key that opens the slot now — the new one once a re-keying act's swap landed, else the old one.
+    var reopenKey: StoreKey
+    /// The act ran to its end in this process. false with `.made`: it stopped past its swap — the next open's settle
+    /// finishes it and says its Done there (VX-107's road), so nothing here says it.
+    var landedWhole: Bool
+}
+
+/// What a re-keying account press's preflight found (VX-308 U2 — every read before the app's pool closes).
+nonisolated enum AccountPreflight: Equatable, Sendable {
+    case ready
+    case refused(String)
+    case changed(RoadAccountDoorOpen)
+}
+
 nonisolated enum ProtectionAccountRoad {
-    /// **The press** — every check first (all reads), then the act; one act at a time on the session.
+    /// **The press on the OPEN session** — every check first (all reads), then the act; one act at a time on the session.
+    /// For the acts that change no key (turning sync on, a join in the same posture, Move in the same posture, the three
+    /// leaves); a re-keying act (a join that crosses postures, every follow) is the bootstrap's crossing seam's —
+    /// `preflight`, the pool closed, `perform`, the reopen — and is refused here (never re-keyed under an open pool).
     static func press(
         _ session: ProtectionRoadSession, request: RoadAccountRequest, signIn: SessionFact,
         exportSwitch: ScheduledExportSwitch?
     ) async -> RoadAccountPress {
         guard session.writes else { return .refused(ProtectionWords.crossingFailed) }
+        guard !request.shown.rekeys else { return .refused(ProtectionWords.crossingFailed) }
         guard session.beginAct() else { return .refused(ProtectionWords.copyDoorBusy) }
         defer { session.endAct() }
         // VX-108: the door as it stands NOW, read the way the shown one was.
@@ -68,36 +93,157 @@ nonisolated enum ProtectionAccountRoad {
         case .open(let now):
             guard now == request.shown else { return .changed(now) }
         }
-        return await act(session, door: request.door, typed: request.typed, signIn: signIn)
+        return await perform(session, request: request, signIn: signIn, exportSwitch: exportSwitch).press
     }
 
-    /// The core's act on the open session (the caller holds the session's one-act lock).
+    /// **A RE-KEYING ACCOUNT PRESS's PREFLIGHT** (VX-308 U2, R-U2-3 — READS only, before the bootstrap closes anything):
+    /// the door RE-READ through the pane's one read (VX-108 — closed refuses, changed re-shows, nothing written), then the
+    /// typed secret against the vault that read fetched — the same derivation and the same refusals the core's `join` and
+    /// `follow` make before their plans begin (VX-113's `passphraseChangedElsewhere` among them), so a typo never tears
+    /// the window down.
+    static func preflight(
+        _ session: ProtectionRoadSession, request: RoadAccountRequest, signIn: SessionFact,
+        exportSwitch: ScheduledExportSwitch?
+    ) async -> AccountPreflight {
+        let read = await ProtectionPaneRead.read(session, signIn: signIn, exportSwitch: exportSwitch)
+        guard let read, let faces = ProtectionPaneRead.accountFaces(read, session: session) else {
+            return .refused(ProtectionWords.crossingFailed)
+        }
+        switch faces.face(request.door) {
+        case .hidden, .notYet: return .refused(ProtectionWords.crossingDoorClosed)
+        case .refused(let sentence): return .refused(sentence)
+        case .open(let now):
+            guard now == request.shown else { return .changed(now) }
+        }
+        guard request.shown.ask == .oneSecret else { return .ready }
+        if let refusal = accountSecretRefusal(
+            request, snapshot: read.snapshot, library: session.library, floor: session.system.floor) {
+            return .refused(refusal)
+        }
+        return .ready
+    }
+
+    /// The typed secret against the account's vault (a READ): what the core's own checks would refuse, said in the act's
+    /// words — a join types one of the account's secrets, either or both, each that is typed opening the vault (rule 14);
+    /// the follow types one — the passphrase when it is typed, else the words — and an old passphrase whose lock is not
+    /// the vault's any more names the change (VX-113). nil: it opens.
+    static func accountSecretRefusal(
+        _ request: RoadAccountRequest, snapshot: VaultSnapshot?, library: UnlockedLibrary, floor: PassphraseKDF.Floor
+    ) -> String? {
+        guard let snapshot else { return ProtectionWords.doorRefusedNeedsVault }
+        let vault = snapshot.vault
+        let follows = request.door == .follow
+        func said(_ refusal: ExecutorRefusal) -> String { RoadAccountFaces.actRefusalSentence(refusal, unfinished: false) }
+        let typed = request.typed
+        guard typed.passphrase != nil || typed.words != nil else { return said(.secretMissing) }
+        if let text = typed.passphrase {
+            guard (try? vault.kdf.validateFloor(floor)) != nil, let key = try? PassphraseKey.derive(text, kdf: vault.kdf)
+            else { return ProtectionWords.crossingFailed }
+            if VaultModel.master(of: vault, passphrase: key, words: nil) == nil {
+                if follows, let known = library.keyFile?.passphrase?.kdf, known != vault.kdf {
+                    return said(.passphraseChangedElsewhere(device: vault.updatedByDevice, day: snapshot.updatedAt))
+                }
+                return said(.passphraseDoesNotOpen)
+            }
+            // The follow uses the passphrase alone once it is typed (`Follow.swift`); a join checks the words too.
+            if follows { return nil }
+        }
+        if let words = typed.words {
+            guard let key = try? WordsKey.derive(words), VaultModel.master(of: vault, passphrase: nil, words: key) != nil
+            else { return said(.wordsDoNotOpen) }
+        }
+        return nil
+    }
+
+    /// The core's act on the open session (U1's road for the doors that change no key — the caller holds the session's
+    /// one-act lock).
     static func act(
         _ session: ProtectionRoadSession, door: RoadAccountDoor, typed: TypedSecrets, signIn: SessionFact
     ) async -> RoadAccountPress {
+        let shown = RoadAccountDoorOpen(door: door, ask: .nothing, newPassphrase: false, sentences: [], spec: DoorSpec(requires: .none))
+        return await perform(
+            session, request: RoadAccountRequest(door: door, shown: shown, typed: typed), signIn: signIn,
+            exportSwitch: nil).press
+    }
+
+    /// **THE ACCOUNT ACT** (the caller holds the session's one-act lock; for a re-keying act the app's pool is CLOSED —
+    /// the bootstrap's seam): the CURRENT sign-in adopted (R-2); into Castle, rule 11 first (the notice owed durably, the
+    /// weekly switch mirrored into this Mac's sealed setting — U2a's MAJOR-1 machinery, the one home); then the core's act:
+    /// turning sync on (`setUpSync` — rule 7's hand-up — or, the account already syncing, `enroll`: the join), Move
+    /// (`move`), the follow (`follow` — its kind the owed act's), a leave (`leaveAccount` — rule 16). Before a swap a
+    /// refusal leaves the library under its old key (rolled back — rule 20 — or, an act stopped mid-plan, finished by the
+    /// next open); past the swap the act LANDED and the next open's settle finishes it (VX-107: its Done said there).
+    static func perform(
+        _ session: ProtectionRoadSession, request: RoadAccountRequest, signIn: SessionFact,
+        exportSwitch: ScheduledExportSwitch?
+    ) async -> AccountActResult {
         // R-2: the sign-in NOW — never the open's.
         session.executor.configuration.session = signIn
+        let door = request.door
+        let shown = request.shown
+        let slot = session.system.places.slot
+        let oldKey = session.key
+        let executor = session.executor
         var library = session.library
+        let entersCastle = shown.follow == .intoCastle || shown.spec.join == .entersCastle
+        let markedHere = entersCastle ? exportSwitch.map(ProtectionCrossings.markCastleEntry) ?? false : false
+        var acted: ActOutcome?
         do {
-            if let leave = door.leave {
-                _ = try await session.executor.leaveAccount(leave, &library)
-            } else {
-                _ = try await session.executor.setUpSync(&library, typed: typed)
+            if entersCastle, let exportSwitch,
+               let settings = ProtectionCrossings.mirroredExportSettings(library, exportSwitch: exportSwitch) {
+                _ = try await executor.changeSettings(&library, to: settings)
+            }
+            switch door {
+            case .turnOnSync:
+                if let join = shown.spec.join, join != .setsUpInLibrarysMode {
+                    acted = try await executor.enroll(&library, typed: request.typed, gate: request.gate)
+                } else {
+                    acted = try await executor.setUpSync(&library, typed: request.typed)
+                }
+            case .moveToSignedInAccount:
+                acted = try await executor.move(&library, typed: request.typed, gate: request.gate)
+            case .follow:
+                guard let kind = shown.follow else { throw ExecutorRefusal.nothingToDo }
+                acted = try await executor.follow(&library, kind: kind, typed: request.typed, gate: request.gate)
+            case .stopSyncingHere, .deleteAccountHere, .thisMacOnly:
+                guard let leave = door.leave else { throw ExecutorRefusal.nothingToDo }
+                acted = try await executor.leaveAccount(leave, &library)
             }
         } catch {
             session.library = library
-            let unfinished = library.section.actInFlight != nil
+            if ProtectionLibraryFiles.opens(slot, key: oldKey) {
+                // Nothing swapped — the library stands under its old key (rolled back, or an act stopped mid-plan that
+                // the next open settles — rule 20); no export notice.
+                if markedHere { exportSwitch?.setNoticeOwed(false) }
+                let unfinished = library.section.actInFlight != nil
+                ProtectionOpenRoad.log(
+                    "road: \(door.rawValue) did not land\(unfinished ? " — its act stays in flight; the next open settles it" : "")"
+                        + " — \(String(describing: error))")
+                return AccountActResult(
+                    press: .refused(RoadAccountFaces.actRefusalSentence(error, unfinished: unfinished)), reopenKey: oldKey,
+                    landedWhole: false)
+            }
+            // Past the swap (the commit point): the act LANDED; its last steps finish at the next open's settle.
             ProtectionOpenRoad.log(
-                "road: \(door.rawValue) did not land\(unfinished ? " — its act stays in flight; the next open settles it" : "")"
-                    + " — \(String(describing: error))")
-            return .refused(RoadAccountFaces.actRefusalSentence(error, unfinished: unfinished))
+                "road: \(door.rawValue) swapped, then stopped — the next open finishes it (\(String(describing: error)))")
         }
         session.library = library
+        // Rule 11's notice, the core's own (the entry's `exportOff` step): the switch the app runs follows it here. An entry
+        // that stopped past its swap before that step is the ready's reconcile's (MAJOR-1 — the mark says so).
+        if acted?.notices.contains(.scheduledExportTurnedOff) == true, let exportSwitch {
+            ProtectionCrossings.followExportSwitch(exportSwitch)
+        }
+        let reopenKey = ProtectionLibraryFiles.opens(slot, key: library.key) ? library.key : oldKey
         ProtectionOpenRoad.log(
             "road: \(door.rawValue) — library \(String((library.record?.libraryID ?? "none").prefix(8))) now names "
-                + "\(library.record?.account.map { "account \(String($0.prefix(8)))" } ?? "no account"); its key unchanged "
-                + "(\(StoreKeyEnvelope.shortFingerprint(library.fingerprint)))")
-        return .made(receipt: door.receipt)
+                + "\(library.record?.account.map { "account \(String($0.prefix(8)))" } ?? "no account"), "
+                + "\(library.record?.mode.rawValue ?? "?") under \(StoreKeyEnvelope.shortFingerprint(library.fingerprint))"
+                + (acted == nil ? " — its last steps at the next open" : ""))
+        return AccountActResult(
+            press: .made(
+                receipt: acted == nil ? nil : shown.receipt,
+                wordsReplaced: acted?.notices.contains(.wordsReplacedByAccount) ?? false),
+            reopenKey: reopenKey, landedWhole: acted != nil)
     }
 
     /// **The signed-out road's *Continue*** (Use Castle while signed out — VX-264, R-1 as amended): This Mac Only, its
@@ -139,6 +285,9 @@ nonisolated enum ProtectionAccountRoad {
 nonisolated struct ProtectionPaneFacts: Sendable {
     var facts: ProtectionFacts
     var vault: VaultReadState
+    /// VX-308 U2 — the vault row as the read fetched it (non-secret on its own: every key in it is wrapped) — a
+    /// re-keying account press's preflight checks the typed secret against it (R-U2-3). nil: none read, or none there.
+    var snapshot: VaultSnapshot? = nil
 }
 
 nonisolated enum ProtectionPaneRead {
@@ -160,7 +309,7 @@ nonisolated enum ProtectionPaneRead {
         do {
             let snapshot = try await session.system.leaves.vault.fetchVault(accountID: account)
             facts.vault = snapshot?.reading
-            return ProtectionPaneFacts(facts: facts, vault: .read(exists: snapshot != nil))
+            return ProtectionPaneFacts(facts: facts, vault: .read(exists: snapshot != nil), snapshot: snapshot)
         } catch {
             ProtectionOpenRoad.log("road: the account's vault could not be read — \(String(describing: error))")
             return ProtectionPaneFacts(facts: facts, vault: .unreachable)

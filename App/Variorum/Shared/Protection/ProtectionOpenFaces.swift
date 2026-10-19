@@ -206,7 +206,8 @@ nonisolated struct RoadStandingFaces: Equatable, Sendable {
     var noKeyFileAnywhere: NoKeyFileAnywhere?
     /// RULE 3: the model's moment owed at this open (`.beforeFirstBackup` / `.quietRoadFailed`), nil none.
     var passphraseMoment: PassphraseAsk?
-    /// The receipts this open owes the status seam: rule 1's restore (§7c (6)).
+    /// The receipts this open owes the status seam: rule 1's restore (§7c (6)); VX-308 U2 — a follow its settle finished
+    /// (VX-107: the follow's Done).
     var receipts: [String]
 
     static let none = RoadStandingFaces(noKeyFileAnywhere: nil, passphraseMoment: nil, receipts: [])
@@ -222,10 +223,10 @@ nonisolated struct RoadStandingFaces: Equatable, Sendable {
             if case .askPassphrase(let ask) = act, moment == nil { moment = ask }
         }
         // (`.besideOpensItOnlyThroughItsHistory` says nothing: its line is dropped — no state reaches it, VX-414.)
-        return RoadStandingFaces(
-            noKeyFileAnywhere: nothing,
-            passphraseMoment: moment,
-            receipts: report.repairsDone.contains(.restoreKeyFileFromMirror) ? [ProtectionWords.restoredFromMirror] : [])
+        var receipts = report.repairsDone.contains(.restoreKeyFileFromMirror) ? [ProtectionWords.restoredFromMirror] : []
+        // VX-308 U2 — VX-107: a follow this open's settle finished says its Done, the other-device sentence with it.
+        if let followed = report.settledFollow { receipts.append(ProtectionWords.followDone(followed)) }
+        return RoadStandingFaces(noKeyFileAnywhere: nothing, passphraseMoment: moment, receipts: receipts)
     }
 }
 

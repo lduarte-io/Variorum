@@ -263,7 +263,7 @@ final class RoadAccountModel {
             finished: { [weak self] press in
                 if let id { presenter.dismiss(id) }
                 guard let self else { return }
-                if case .made(let receipt)? = press { roads.receipt(receipt) }
+                if case .made(let receipt?, _)? = press { roads.receipt(receipt) }
                 Task {
                     await self.refresh()
                     if press != nil { await roads.landed() }

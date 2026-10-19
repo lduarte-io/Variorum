@@ -66,6 +66,33 @@ nonisolated struct RoadOpenReport: Sendable {
     var besideIsEmpty = false
     /// What the settle did (a word for Diagnostics), or why it could not.
     var settle: String?
+    /// VX-308 U2 — VX-107: a FOLLOW the settle finished (resumed from its plan, or finished from the record) — its kind
+    /// read from durable facts only (`RoadSettledFollow.kind`), so the open says the follow's Done with its other-device
+    /// sentence however many crashes came between the press and this open. nil: no follow settled here.
+    var settledFollow: FollowKind?
+}
+
+/// VX-308 U2 — VX-107: THE FOLLOW A SETTLE FINISHED, by kind, from DURABLE facts — the act in flight as the unlock read it
+/// from the record (sealed in the library: its act and the library's mode when it began), the settle's outcome (its act),
+/// and the record's mode after — exactly the reading the core's own plan-less finish makes (`FollowProgram
+/// .finishingSteps`: `fromKind` against the record's mode). Never the outcome's notices (a resume's outcome carries only
+/// the notices of the steps THAT run ran — `.followedOutOfCastle` lives in the `memory` step, so a crash after it loses
+/// it: VX-107's class) and never this process's memory.
+nonisolated enum RoadSettledFollow {
+    static func kind(_ settle: SettleOutcome, inFlight: ActInFlight?, modeAfter: ProtectionMode?) -> FollowKind? {
+        let outcome: ActOutcome
+        switch settle {
+        case .resumed(let finished), .finishedFromRecord(let finished): outcome = finished
+        case .nothingInFlight, .rolledBack: return nil
+        }
+        guard outcome.act == .follow, let inFlight, inFlight.act == .follow, let from = inFlight.fromKind,
+              let to = modeAfter else { return nil }
+        switch (from, to) {
+        case (.standard, .castle): return .intoCastle
+        case (.castle, .standard): return .intoStandard
+        default: return .keysReplaced
+        }
+    }
 }
 
 /// The library open on the new road — what the app's open, the backup hook and U2's faces hold. Used from the
@@ -468,11 +495,16 @@ nonisolated enum ProtectionOpenRoad {
         do {
             var unlocked = try executor.unlock(with: opener, alsoInHand: expanded.filter { $0 != opener })
             var report = RoadOpenReport(notice: unlocked.notice)
+            // VX-107: the act in flight as the record names it, read BEFORE the settle ends it.
+            let inFlight = unlocked.section.actInFlight
             if ctx.writes {
                 // RULE 20: an act in flight resumes or rolls back; neither failing blocks the open (the world's
                 // own reading — the lobby opens the library all the same, the act stays owed).
                 do {
-                    report.settle = String(describing: try await executor.settle(&unlocked, typed: typed))
+                    let settled = try await executor.settle(&unlocked, typed: typed)
+                    report.settle = String(describing: settled)
+                    report.settledFollow = RoadSettledFollow.kind(
+                        settled, inFlight: inFlight, modeAfter: unlocked.record?.mode)
                 } catch {
                     report.settle = "could not settle: \(String(describing: error))"
                     log("road: the act in flight could not settle now — \(String(describing: error))")
