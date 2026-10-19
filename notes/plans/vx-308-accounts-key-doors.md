@@ -1682,6 +1682,14 @@ Commits: `cfc0ebed8` (0) · `8e465f7ea` (1, pins first) · `577bd53dc` (1) · `4
 - **P-VX308-U3-1 (Castle unsynced not widened) and P-VX308-U3-3 (one words door): APPROVED as built** — both are the
   narrow arms; the bundle carries them.
 
+**THE U3 MAC BATCH (the orchestrator, 2026-10-19 08:12–08:35 MDT, stage claim `vx-308-u3-mac`, the coordinator's GO;
+logs `vx308-u3-mac-run.log` + `-refix.log`, deleted at closeout):** 200 tests / 42 suites — the 3 expected VX-310
+witnesses; ONE real red, a SOURCE PIN: `VX379PaneRowsTests.theCastleWarningReadsTheOpenLibrarysPosture`'s needle
+pinned the faces' `posture:` line WITH its closing paren, and U3's `mintFreshWords` argument growth turned that paren
+into a comma — the pinned BEHAVIOR (the faces carry the record's mode) stands untouched; the needle re-anchored
+without the paren, the suite re-run `✔ 4/1`. 0 instances at release; no stray HID input (the coordinator's morning
+term). **U3 IS CLOSED but for the walk and the ladder.**
+
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
   `~/dev/variorum-vx-308`, branch pushed, in-flight row (holds the Sync/-custody slot) `969acce55` on main, Linear
@@ -1707,3 +1715,8 @@ Commits: `cfc0ebed8` (0) · `8e465f7ea` (1, pins first) · `577bd53dc` (1) · `4
   the join (the plan said at the consent, one secret, the words moment both arms), the follow in/into/out with
   VX-107's once-said Done and VX-113's ruled sentence, the one reopening seam shared with the crossings; 324/48
   under the stage, the one host-crash traced to U1's test fakes and fixed. NEXT: U3 (the key doors + VX-447/VX-448).
+- 2026-10-19 ~08:35 MDT — **U3 CLOSED but for the walk and the ladder** (the §6 U3 RECORD + arbitration + batch
+  paragraph): the key doors through the one presenter, VX-447's banner-becomes-the-door with the one core custody arm
+  (KeyDoors.swift alone, red-on-old), VX-448's concealed clear-at-lock/quit clipboard, F-U2-3's say-before-mint line;
+  200/42 under the stage with one source pin re-anchored. NEXT: U4 (the lock + the hold's gate), the last implementer
+  batch; then the ladder, then the walk.
