@@ -271,10 +271,21 @@ final class ServerFake {
         return snapshot(accountID)!
     }
 
-    func update(_ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey) throws -> VaultSnapshot {
+    func update(
+        _ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey,
+        successorMaster: SymmetricKey?
+    ) throws -> VaultSnapshot {
         guard var account = accounts[accountID] else { throw VaultRefusal.vaultAbsent }
         guard account.revision == expectedRevision else { throw VaultRefusal.revisionConflict }
-        guard KeyProof.hash(master: proofMaster) == account.vault.keyProofHash else { throw VaultRefusal.keyProofRefused }
+        guard KeyProof.verifies(master: proofMaster, storedHash: account.vault.keyProofHash) else {
+            throw VaultRefusal.keyProofRefused
+        }
+        // VX-307 U1 — hash and secret land together (the wire's rule).
+        if vault.keyProofHash != account.vault.keyProofHash {
+            guard let successorMaster, KeyProof.macHash(master: successorMaster) == vault.keyProofHash else {
+                throw VaultRefusal.keyProofRefused
+            }
+        }
         clock += 60
         account.vault = vault
         account.revision += 1

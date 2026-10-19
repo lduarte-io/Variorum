@@ -1033,12 +1033,15 @@ final class DeviceLeaves: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, L
     }
 
     func updateVault(
-        _ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey, device name: String
+        _ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey,
+        successorMaster: SymmetricKey?, device name: String
     ) async throws -> VaultSnapshot {
         try reach(accountID)
         var named = vault
         named.updatedByDevice = name
-        let snapshot = try world.server.update(named, accountID: accountID, expectedRevision: expectedRevision, proofMaster: proofMaster)
+        let snapshot = try world.server.update(
+            named, accountID: accountID, expectedRevision: expectedRevision, proofMaster: proofMaster,
+            successorMaster: successorMaster)
         try wrote("vault \(ServerFake.describe(snapshot.vault))")
         return snapshot
     }

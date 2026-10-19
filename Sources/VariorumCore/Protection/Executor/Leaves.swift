@@ -79,8 +79,15 @@ public protocol VaultLeaf: AnyObject {
     /// Create the account's vault (sync setup, the first device).
     func createVault(_ vault: AccountVault, accountID: String, device: String) async throws -> VaultSnapshot
     /// One CAS write under the CURRENT master's proof (decision 12).
+    /// `successorMaster` — VX-307 U1, the 13y hash-and-secret-together rule
+    /// on the wire: a write that installs a NEW `keyProofHash` (the master
+    /// changed — entering Castle) carries the NEW master, from which the
+    /// wire derives kp2′ (`key_proof_mac`) so the server lands the hash and
+    /// the proof secret together; nil on every write that keeps the master
+    /// (the mode flip, the key doors' re-wraps).
     func updateVault(
-        _ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey, device: String
+        _ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey,
+        successorMaster: SymmetricKey?, device: String
     ) async throws -> VaultSnapshot
 }
 

@@ -59,7 +59,7 @@ struct KeyDoorProgram: ActProgram {
             }
             let written = try await ctx.leaves.vault.updateVault(
                 vault, accountID: snapshot.accountID, expectedRevision: snapshot.revision,
-                proofMaster: held.masterKey, device: ctx.deviceName)
+                proofMaster: held.masterKey, successorMaster: nil, device: ctx.deviceName)
             ctx.executor.noteFresh(written)
         case "keyFile":
             guard var file = ctx.library.keyFile, file.fingerprint == ctx.library.fingerprint else {

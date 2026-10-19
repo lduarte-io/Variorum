@@ -110,11 +110,24 @@ final class ExecutorVault {
         return snapshot(accountID)!
     }
 
-    func update(_ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey) throws -> VaultSnapshot {
+    func update(
+        _ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey,
+        successorMaster: SymmetricKey?
+    ) throws -> VaultSnapshot {
         guard reachable else { throw VaultRefusal.unreachable }
         guard var account = accounts[accountID] else { throw VaultRefusal.vaultAbsent }
         guard account.revision == expectedRevision else { throw VaultRefusal.revisionConflict }
-        guard KeyProof.hash(master: proofMaster) == account.vault.keyProofHash else { throw VaultRefusal.keyProofRefused }
+        guard KeyProof.verifies(master: proofMaster, storedHash: account.vault.keyProofHash) else {
+            throw VaultRefusal.keyProofRefused
+        }
+        // VX-307 U1 — the wire's hash-and-secret-together rule: a payload
+        // installing a NEW hash carries the successor master, whose kp2
+        // hashes to it; a hash that moved without its secret is refused.
+        if vault.keyProofHash != account.vault.keyProofHash {
+            guard let successorMaster, KeyProof.macHash(master: successorMaster) == vault.keyProofHash else {
+                throw VaultRefusal.keyProofRefused
+            }
+        }
         clock += 60
         account.vault = vault
         account.revision += 1
@@ -284,11 +297,14 @@ final class ExecutorWorld: CustodyLeaf, SyncKeysLeaf, AppleKeysLeaf, VaultLeaf, 
     }
 
     func updateVault(
-        _ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey, device: String
+        _ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey,
+        successorMaster: SymmetricKey?, device: String
     ) async throws -> VaultSnapshot {
         var named = vault
         named.updatedByDevice = device
-        let snapshot = try server.update(named, accountID: accountID, expectedRevision: expectedRevision, proofMaster: proofMaster)
+        let snapshot = try server.update(
+            named, accountID: accountID, expectedRevision: expectedRevision, proofMaster: proofMaster,
+            successorMaster: successorMaster)
         try wrote(.vaultUpdate(ExecutorVault.describe(snapshot.vault)))
         return snapshot
     }

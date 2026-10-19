@@ -221,8 +221,17 @@ claim PENDING. The Mac batch is the orchestrator's under the stage.
 - Piece 1 — the SQL artifact `Server/supabase/17_phase_vx307_vault.sql` + the deploy checklist
   `notes/plans/vx307-deploy-checklist.md` (PENDING-until-live rows; NOT deployed — her ruling, §1): NOT STARTED.
 - Piece 2 — the fake server's new vault shape (CAS order, proof before CAS, typed refusals): NOT STARTED.
-- Piece 3 — the production vault leaf (core adapter, additive beside today's client; swapped in at
-  `ProtectionSystem.live` on the new road): NOT STARTED.
+- Piece 3a — the core protocol + proof forms (VX-307 U1's model groundwork): DONE (this commit) —
+  `VaultLeaf.updateVault` gains `successorMaster: SymmetricKey?` (the 13y hash-and-secret-together rule on the wire: a
+  write installing a NEW `keyProofHash` carries the new master, from which the wire derives kp2′/`key_proof_mac`; nil on
+  mode flips and re-wraps); `KeyProof.verifies(master:storedHash:)` accepts the v1 (creation/enroll-comparand) form OR
+  the kp2 form (`macHash`); `AccountVault.isMaster` reads it; `VaultModel.enteringCastle` installs the kp2 form directly
+  (a master change is self-enrollment — kp2′ rides the same write). Call sites: `enterCastleWrite` (the new master),
+  `leaveCastleWrite`/the key doors (nil). The fakes (`ExecutorVault`, the scenario `ServerFake`) enforce both the
+  both-forms proof and the together-rule. Executor+scenario families headless Debug: `✔ Test run with 239 tests in 73
+  suites passed after 4.215 seconds.`
+- Piece 3b — the production vault leaf (core wire client, additive beside today's `KeyVaultClient`; the app leaf swapped
+  in at `ProtectionSystem` on the new road): NOT STARTED.
 - Piece 4 — the engine's sync-key custody on the new road (`KeychainSyncKeysLeaf`; today's road byte-unchanged):
   NOT STARTED.
 - Piece 5 — the two-client convergence suites (sync setup · join · follow in/out · lagging device · VX-109's CAS pin ·
