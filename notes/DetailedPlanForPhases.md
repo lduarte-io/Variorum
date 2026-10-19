@@ -13,6 +13,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
+| **VX-307 — Castle rebuild, phase 3: the crossings' faces + the `key_vault` lockstep** (`/architect-phase`, kicked off 2026-10-18; plan `notes/plans/vx-307-castle-crossings.md`). **HOLDS the one Sync/-or-custody slot** (the vault leaf over the RPCs, the sync keys' custody). | VX-307 · `vx-307-castle-crossings` | `~/dev/variorum-vx-307` · the Pro | In progress. |
 
 ### Latest closeout
 
