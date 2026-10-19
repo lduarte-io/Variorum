@@ -109,6 +109,21 @@ struct ProtectionPaneWaveTests {
         #expect(world.crossings.faces != nil && world.account.faces != nil && world.keyDoors.faces != nil)
     }
 
+    /// THE WAVE'S ORDER: a section's own read that starts WHILE the one read is in flight (its confirm closed, another
+    /// section's act landed) and lands first is never overwritten by the wave's older faces — the wave took each section's
+    /// number before its read started. (Red with the numbers taken after the read.)
+    @Test func aSectionsOwnReadDuringTheWaveIsNeverOverwrittenByIt() async throws {
+        let world = try await world()
+        await ProtectionPaneRefresh.wave(crossings: world.crossings, account: world.account, keyDoors: world.keyDoors) {
+            await world.crossings.refresh()
+            await world.account.refresh()
+            await world.keyDoors.refresh()
+            return ProtectionPaneWave()
+        }
+        #expect(world.crossings.faces != nil && world.account.faces != nil && world.keyDoors.faces != nil,
+                "each section keeps its newer read")
+    }
+
     /// THE LANDING RULE ACROSS A WAVE: each section's number is taken BEFORE the one read starts, so a section's own read
     /// that started later and landed first is never overwritten by the wave's older faces.
     @Test func aWavesOlderFacesNeverLandOverASectionsNewerRead() async throws {
