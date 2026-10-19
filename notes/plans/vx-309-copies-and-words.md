@@ -395,7 +395,11 @@ fetch, no network.
   over the planted world with today's road's rows 3 and 2 beside them; the maps; the two restatements equal to
   `StoreBackup`'s — `farInterval` = `Configuration().interval`, `stampIsTrusted` at five offsets; the composition by
   source). Its RED-ON-OLD is the orchestrator's behavioural revert (the recipe in the close).
-- Piece 3 — RETENTION WIRED (VX-302, VX-411): NOT-STARTED — R-U1a-5.
+- Piece 3 — RETENTION WIRED (VX-302, VX-411): IN-PROGRESS. PINS FIRST (this commit): `ProtectionPairRetentionTests` (4,
+  headless over `PlantedRoad`) RED ON THE PRE-WIRING TREE (`25abab3ed` + the pins): `✘ Test run with 4 tests in 1 suite
+  failed … with 21 issues` — beside the library 21 pairs stay (VX-411's accumulation), the picked folder 41, the foreign
+  world's prune counts, the failing-delete arm; the foreign world's SURVIVAL half green on both trees by design (nothing
+  is pruned on the old one — the DEBUG guard-off mutation pin lands with the wiring). The wiring: NEXT.
 - Piece 4 — VX-450 (Change/Reset roll back on a resume that cannot finish): NOT-STARTED — R-U1a-6.
 - Piece 5 — the close (counts, the Mac-suite list, PROVISIONALs, findings): NOT-STARTED.
 - No revert is in flight.
