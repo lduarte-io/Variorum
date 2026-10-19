@@ -435,9 +435,12 @@ nonisolated enum ProtectionWords {
     /// RULE 6's one sentence (with rules 4 and 5), said when she recorded words here before (never on the first look).
     static let wordsLookRuleSix = "Your library's key doesn't change: every backup opens with these words, and still "
         + "with the words you had when you made it."
-    /// VX-412's Copy door and its caption (decision 23's clipboard rule — cleared after 60 seconds).
+    /// VX-412's Copy door and its caption. VX-308 U3 — VX-448 (her ruling, QUESTIONS #235: the 60-second timer and the
+    /// restore go; a concealed type, cleared at lock and at quit): the caption says the new road's rule (PROVISIONAL
+    /// P-VX308-U3-2 — today's road keeps its own sentence, `ProtectionCopy.wordsCopied`, with its own rule).
     static let wordsLookCopy = "Copy"
-    static let wordsLookCopied = "Copied. Your clipboard clears in 60 seconds."
+    static let wordsLookCopied = "Copied. Your clipboard keeps them until you copy something else, your library locks or "
+        + "Variorum quits."
     static let wordsLookWrittenDown = "I've written them down"
     /// HER words — the warning before the look closes.
     static let wordsLookWarning = "These words won't be shown again."
@@ -669,6 +672,74 @@ nonisolated enum ProtectionWords {
         case .keysReplaced:
             return "Your account's keys changed on another device, and this \(ProtectionCopy.deviceName) caught up."
         }
+    }
+
+    // MARK: - VX-308 U3 — THE KEY DOORS, VX-447, F-U2-3 (rules 2, 3, 6, 7, 27; the plan's §5c)
+    //
+    // VX-263's ONE line is the plan's (§2's ledger and §5c: *your current secrets open everything you've made of this
+    // library* — rule 6's "the doors say so in one sentence"), the first letter capitalized and the period added;
+    // `RoadKeyDoorWordsTests` reads the plan file and pins it as drafted. Her U2-7 (1) first sentence is reused, never
+    // restated (the prefix of `noKeyFileAfterAQuietOpen`, pinned). Every other line here is PROVISIONAL P-VX308-U3-2 —
+    // drafted from the rules' own words, sentence case, hers at the bundle.
+
+    /// VX-263's one line — every key door says it (rule 6: "the doors say so in one sentence").
+    static let keyDoorsLine = "Your current secrets open everything you've made of this library."
+    /// Synced, the key doors change the account's lock with the library's (rule 7: "the key doors change the library's
+    /// and the account's locks together") — the face says so; the act does it.
+    static let keyDoorsSyncedPassphraseLine = "This library syncs with your account, so your account's passphrase changes "
+        + "with it, on every device."
+
+    /// The passphrase's section on the open library (the doors where a passphrase exists; *Set a passphrase…* where none).
+    static let passphraseSectionTitle = "Your passphrase"
+    /// Change passphrase (the current one verified; a new one typed twice).
+    static let changePassphraseDoor = "Change passphrase\u{2026}"
+    static let changePassphraseTitle = "Change passphrase"
+    static let changePassphraseCurrentField = "Current passphrase"
+    static let changePassphraseButton = "Change passphrase"
+    static let changePassphraseReceipt = "Your passphrase is changed."
+    /// Reset a forgotten passphrase (the forgot road — Standard: a plain confirm; Castle: the words or Touch ID).
+    static let resetPassphraseDoor = "Reset forgotten passphrase\u{2026}"
+    static let resetPassphraseTitle = "Reset forgotten passphrase"
+    /// Standard — this Mac holds the key (rule 8), so nothing else is asked.
+    static let resetPassphraseStandardLead = "This \(ProtectionCopy.deviceName) holds your library's key, so you can "
+        + "choose a new passphrase without the old one."
+    /// Castle — the words, or Touch ID where this Mac has its item for the key.
+    static let resetPassphraseCastleLead = "Confirm it's you with your twelve words, then choose a new passphrase."
+    static let resetPassphraseCastleTouchIDLead = "Confirm it's you with your twelve words or "
+        + "\(ProtectionCopy.biometryName), then choose a new passphrase."
+    static let resetPassphraseWordsField = "Your twelve words"
+    static let resetPassphraseButton = "Reset passphrase"
+    static let resetPassphraseWithTouchID = "Reset with \(ProtectionCopy.biometryName)"
+    static let resetPassphraseTouchIDNotConfirmed = "\(ProtectionCopy.biometryName) didn't confirm it's you. Nothing changed."
+    static let resetPassphraseReceipt = "Your passphrase is reset."
+    /// A key door's new passphrase fields (the crossings' own names).
+    static let keyDoorNewPassphraseField = crossingNewPassphraseField
+    static let keyDoorNewPassphraseAgain = crossingNewPassphraseAgain
+    static let keyDoorCancel = "Cancel"
+    static let keyDoorWorking = "Working\u{2026}"
+
+    /// F-U2-3 (the architect's ruling): on a SYNCED library a look says this BEFORE minting — new words replace the
+    /// account's words everywhere (rule 7: the key doors change both locks together); her *Show my twelve words* is the yes.
+    static let wordsLookReplacesAccountWords = "This library syncs with your account, so new words also replace your "
+        + "account's twelve words, on every device."
+
+    /// VX-447 — THE BANNER BECOMES THE DOOR (her ruling): her U2-7 (1) first sentence, reused (the prefix of
+    /// `noKeyFileAfterAQuietOpen` — pinned) …
+    static let noKeyFileOpenedLead = noKeyFileAfterAQuietOpen.components(separatedBy: ". ").first.map { $0 + "." }
+        ?? noKeyFileAfterAQuietOpen
+    /// … then the door: record the words → a fresh key file → the backup follows (the whole line is the door — rule 2's
+    /// card idiom, her "click here").
+    static let noKeyFileDoor = "Click here to record your twelve words \u{2014} Variorum makes a new key file with them, "
+        + "then a backup."
+    /// F-U2c-5 folded (her ruling: "the synced flavor gains the open-library variant of the account sentence") — said
+    /// over the library that just opened, in place of the lobby's *Sign in … to bring your writing back*.
+    static let noKeyFileAccountRoadOpen = "This library syncs with your account, so your writing is kept there too "
+        + "\u{2014} your passphrase or twelve words bring it back on any device."
+    /// The receipt once the look minted the fresh file (and the pair followed, or not).
+    static func keyFileRemadeReceipt(backedUp: Bool) -> String {
+        backedUp
+            ? "Your library has a key file again, and a backup holds a copy."
+            : "Your library has a key file again."
     }
 
     // MARK: - The route's failures (the failure face, with Try Again)
