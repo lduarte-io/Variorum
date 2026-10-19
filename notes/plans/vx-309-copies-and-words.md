@@ -83,7 +83,23 @@ and settings copy agree with the rules as built").
 (the entry's own words); recorded here at kickoff, the QUESTIONS edit itself deferred to the merge moment per the
 shared-ledger rule.
 
-**HER KICKOFF RULINGS (the sitting record — appended when ruled):** *(pending the kickoff sitting below)*
+**HER KICKOFF RULINGS (the sitting, 2026-10-19 — verbatim-faithful):**
+- **Riders:** she picked the faces set (VX-451 + VX-453 + VX-454) and delegated the rest: *"which of these do you
+  think are most important to release ? VX-450 seems important enough to join along with the top 3, but I'm not sure
+  if anything else should be included"*. **The orchestrator's delegated call (the reasoning in the ledger below):
+  VX-450 joins** (her instinct — a crash mid-key-door wedges every later act; Confirmed, Medium, release-worthy);
+  **VX-444 joins** (the words-recorded ledger across Make this my library — the card re-offers a pair she already
+  recorded, a user-visible confusion sitting in this phase's OWN surface: T-5 and the VX-305 hand-off build exactly
+  that door); **VX-449, VX-452, VX-101, VX-100 stay out** (VX-449: the press already refuses honestly — post-release
+  polish; VX-452: Suspected, a narrow crash-timing edge, not release-gating; VX-101/VX-100: v1-readiness
+  improvements for a later sweep, not this phase's seams). Riders therefore: **VX-450 · VX-451 · VX-453 · VX-454 ·
+  VX-444**, plus the standing **VX-456 · VX-457**.
+- **Cast:** the standing default confirmed (Fable orchestrates + cold-reviews — custody diff; fresh Opus
+  implementers at xhigh, one per batch, one subagent at a time).
+- **The unit cut:** *"U1 copies → U2 words"* confirmed — copies first so the words are written against the faces
+  as built (VX-379's acceptance reads "the rules as built").
+- **VX-211:** *"Floor + quiet hint"* — the 12-character floor stays the only refusal; the set/change fields gain
+  one honest, calm strength line (an estimator's verdict as advice), never a block, never a meter bar.
 
 ## 1. The members (the ticket's list, restated; the kickoff session cuts the units)
 
@@ -134,6 +150,38 @@ shared-ledger rule.
 
 **Superseded and gone (never build):** the family tree, the Castle offer's old-shared-key sheet, the key-map
 acceptance table (the walk page replaced it).
+
+## 1b. THE UNITS AND THE ORDER (the kickoff session's cut, under her ruled U1→U2 order; one acceptance unit per
+implementer session, sized per `notes/PhaseSizingGuidance.md` — the phase's two themes, three implementer batches)
+
+- **U1a — THE COPIES' MACHINERY (core custody; a fresh Opus implementer, headless + build-for-testing only):**
+  the pair leg landing in the PICKED backup folder (P-VX306-U1a-4's deferral comes due); the far due-check and
+  Data Safety's count reading the catalogue PER LIBRARY PER MAC (VX-397 closes by construction); retention of this
+  Mac's own pairs of this library on the new road (VX-302, VX-411 folded); **rider VX-450** — a key-door act that
+  cannot resume for want of secrets ROLLS BACK (rule 20's "the old state") instead of wedging. Evidence: exact
+  state-transition pins red-on-old, revert-verified; the protection set green Debug + Release.
+- **U1b — THE COPIES' DOORS AND FACES (a fresh Opus implementer, headless + build-for-testing only):** T-5 (Make
+  this my library from the MISSING face, no library open — the empty-slot landing); VX-305's second hand-off
+  (reopening this Mac's own set-aside copy, Previous Libraries, through the doors); T-8 (a plaintext export brought
+  in as a NEW library through the import road — bulk entry, never reconciled truth); VX-265 (the separate delete
+  choice for other libraries' copies, rule 19 — never silently, never bundled); VX-210 (the honest line about
+  copies in folders Variorum doesn't manage); **riders VX-444** (the words-recorded ledger carries across Make this
+  my library), **VX-451** (the pane's Lock Now row + idle dial through `changeSettings` — F-U4-1's first option)
+  and **VX-454** (the Set-a-passphrase row re-reads after an act sets one). Evidence: pins red-on-old; Mac suites
+  under the stage; the walk rows.
+- **U2 — THE WORDS (a fresh Opus implementer, headless + build-for-testing only):** VX-211's quiet strength hint
+  (her ruling above; the estimator a pure Domain rule); VX-213's remainder (pg_temp AT HER GO only, the record
+  corrections, the privacy text); VX-264's items 5 + 7 (the set-aside sentences, the concrete per-library-shape
+  confirm line); VX-263's route-finder sentence as reworded; VX-209's remainder (the synced confirm's sentence);
+  the JOIN MOMENT reword to her email-naming draft + **VX-456** (the core same-words line; the middle clause drops
+  with it); **VX-457** (the follow's Done as a durable pane notice until OK — the export-notice idiom);
+  `ProtectionWords.moveNotYet` reworded to name the two-press road (VX-455 stays post-release); the field guide's
+  Castle/backups chapters + Data Safety's words against the rules AS BUILT (VX-379's acceptance; F-U2c-4's "what
+  opens a backup" line; the Start Here leads; the truth-check and the real store's re-seed ride VX-329);
+  **rider VX-453** (Settings search surfaces the account section). Evidence: words pins against the plan's drafted
+  lines; the guide's seeded-content checks; Mac suites under the stage; both-voices captures at the walk.
+- **Then:** the ladder (fresh `fable-reviewer` per round over the whole diff — custody ⇒ Fable), the WALK + the
+  restore drill as the acceptance spine (stages 9, 10, 13, 14 asserted against the faces as built), the closeout.
 
 ## 2. Evidence (the acceptance spine)
 Walks in BOTH VOICES (Terminal and Study) over the new faces; the restore drill through Look inside and Make this my
