@@ -355,6 +355,114 @@ struct FixedSessions: UserSessionProviding {
             _ = try await client.fetchVault(accountID: Self.account)
         }
     }
+
+    // Ladder r1 MINOR-1 (red-on-old): the single-flight is PER ACCOUNT — a
+    // caller asking for ANOTHER account while a fetch is in flight gets the
+    // typed refusal, never the in-flight account's snapshot. The gate holds
+    // the first fetch INSIDE its load, so the interleave is deterministic.
+    @Test func aPiggybackedFetchForAnotherAccountRefusesNotSignedIn() async throws {
+        let server = FakeVaultHTTPServer()
+        let (vault, _, _, _) = try Self.mintVault()
+        server.seed(vault, userID: Self.account)
+        let gate = WireFetchGate()
+        let client = AccountVaultClient(
+            configuration: AccountVaultClient.Configuration(
+                projectURL: URL(string: "https://fake.supabase.co")!, apiKey: "k", deviceName: "Mac A",
+                floor: .relaxedForTests),
+            sessionProvider: FixedSessions(userID: Self.account),
+            load: { request in
+                if request.httpMethod == "GET" { await gate.arrivedNow(); await gate.waitOpen() }
+                return try await server.load(request)
+            })
+        let first = Task { try await client.fetchVault(accountID: Self.account) }
+        await gate.firstArrived()
+        // The second call must refuse WITHOUT waiting on the in-flight fetch:
+        // collect its outcome in a task, give it a moment, then open the gate —
+        // so the OLD piggyback (which would await the gate) fails the success
+        // arm cleanly instead of deadlocking the test.
+        let second = Task { () -> Result<VaultSnapshot?, Error> in
+            do { return .success(try await client.fetchVault(accountID: "00000000-0000-4000-8000-00000000beef")) }
+            catch { return .failure(error) }
+        }
+        try await Task.sleep(for: .milliseconds(200))
+        await gate.open()
+        switch await second.value {
+        case .failure(let error): #expect(error as? VaultRefusal == .notSignedIn)
+        case .success: Issue.record("the piggybacked fetch answered another account's snapshot")
+        }
+        let snapshot = try await first.value
+        #expect(snapshot?.vault == vault)
+    }
+
+    // Ladder r1 MINOR-2 (red-on-old): a stale first nonce meeting an
+    // un-enrolled account lands through one retry + one enroll, whatever
+    // order the server's refusals arrive in — no private error escapes the
+    // leaf's typed contract. The script forces STALE then ENROLL, the order
+    // the fake's own knobs cannot produce.
+    @Test func aStaleChallengeThenAnEnrollDemandStillLandsTyped() async throws {
+        let server = FakeVaultHTTPServer()
+        let (vault, keys, _, _) = try Self.mintVault()
+        server.seed(vault, userID: Self.account)
+        let counter = WireCallCounter()
+        let client = AccountVaultClient(
+            configuration: AccountVaultClient.Configuration(
+                projectURL: URL(string: "https://fake.supabase.co")!, apiKey: "k", deviceName: "Mac A",
+                floor: .relaxedForTests),
+            sessionProvider: FixedSessions(userID: Self.account),
+            load: { request in
+                if request.url!.path.hasSuffix("rpc/key_vault_update") {
+                    let n = await counter.next()
+                    func canned(_ marker: String) throws -> (Data, URLResponse) {
+                        let data = try JSONSerialization.data(withJSONObject: ["message": marker])
+                        return (data, HTTPURLResponse(
+                            url: request.url!, statusCode: 400, httpVersion: nil, headerFields: nil)!)
+                    }
+                    if n == 1 { return try canned("VARIORUM_KEY_PROOF_STALE_CHALLENGE") }
+                    if n == 2 { return try canned("VARIORUM_KEY_PROOF_ENROLL: enroll the proof secret first") }
+                }
+                return try await server.load(request)
+            })
+        let written = try await client.updateVault(
+            vault, accountID: Self.account, expectedRevision: 1, proofMaster: keys.masterKey,
+            successorMaster: nil, device: "Mac A")
+        #expect(written.revision == 2)
+        #expect(server.enrolls == 1)
+    }
+}
+
+/// MINOR-1's deterministic interleave: holds the first fetch inside its load
+/// until the test has issued the piggybacking call.
+actor WireFetchGate {
+    private var arrived = false
+    private var opened = false
+    private var arrivalWaiters: [CheckedContinuation<Void, Never>] = []
+    private var openWaiters: [CheckedContinuation<Void, Never>] = []
+    func arrivedNow() {
+        arrived = true
+        arrivalWaiters.forEach { $0.resume() }
+        arrivalWaiters = []
+    }
+    func firstArrived() async {
+        if arrived { return }
+        await withCheckedContinuation { arrivalWaiters.append($0) }
+    }
+    func waitOpen() async {
+        if opened { return }
+        await withCheckedContinuation { openWaiters.append($0) }
+    }
+    func open() {
+        opened = true
+        openWaiters.forEach { $0.resume() }
+        openWaiters = []
+    }
+}
+
+actor WireCallCounter {
+    private var n = 0
+    func next() -> Int {
+        n += 1
+        return n
+    }
 }
 
 /// Fresh random IDs for the wire tests (no seeding needed — nothing replays).

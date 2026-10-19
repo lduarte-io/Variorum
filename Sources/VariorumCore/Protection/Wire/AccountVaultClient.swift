@@ -203,7 +203,10 @@ public actor AccountVaultClient {
     public let configuration: Configuration
     let sessionProvider: any UserSessionProviding
     private let load: @Sendable (URLRequest) async throws -> (Data, URLResponse)
-    private var fetchTask: Task<VaultSnapshot?, Error>?
+    /// Single-flight PER ACCOUNT (ladder r1 MINOR-1): a piggybacked caller must
+    /// never receive another account's snapshot, so the in-flight task carries
+    /// the account it is for and only a same-account caller shares it.
+    private var fetchTask: (accountID: String, token: UUID, task: Task<VaultSnapshot?, Error>)?
 
     public init(
         configuration: Configuration, sessionProvider: any UserSessionProviding,
@@ -232,10 +235,11 @@ public actor AccountVaultClient {
     /// when `accountID` is not the session's user (`notSignedIn` — the
     /// executor's own `requireSignedIn` is the belt above this).
     public func fetchVault(accountID: String) async throws -> VaultSnapshot? {
-        if let inFlight = fetchTask { return try await inFlight.value }
+        if let inFlight = fetchTask, inFlight.accountID == accountID { return try await inFlight.task.value }
+        let token = UUID()
         let task = Task { try await self.performFetch(accountID: accountID) }
-        fetchTask = task
-        defer { fetchTask = nil }
+        fetchTask = (accountID, token, task)
+        defer { if fetchTask?.token == token { fetchTask = nil } }
         return try await task.value
     }
 
@@ -301,25 +305,38 @@ public actor AccountVaultClient {
         row.updatedByDevice = device
         row.keyProofMac = successorMaster.map { KeyProofMaterial(master: $0).macKeyWire }
         let material = KeyProofMaterial(master: proofMaster)
-        do {
-            return try await sendUpdate(row, vault: vault, expectedRevision: expectedRevision, material: material)
-        } catch AccountVaultWireError.challengeStale {
-            return try await sendUpdate(row, vault: vault, expectedRevision: expectedRevision, material: material)
-        } catch WireEnrollRequired.required {
-            // The enroll fence's comparand is the CURRENT row's corpus key id
-            // — read, never guessed from the payload (a Castle entry's
-            // payload carries the NEW id).
-            guard let current = try await performFetch(accountID: accountID) else { throw VaultRefusal.vaultAbsent }
-            try await enroll(material, activeKeyID: current.rowKeyID)
-            // Enrollment moved the stored hash to SHA-256(kp2): a payload
-            // whose hash is the SAME master's pre-enroll (v1) form follows it
-            // — and ONLY that case: any other differing hash is a master
-            // change that must carry its secret (`successorMaster`), and
-            // overwriting it here would mask the server's together-rule.
-            if successorMaster == nil, row.keyProofHash == KeyProof.hash(master: proofMaster) {
-                row.keyProofHash = KeyProof.macHash(master: proofMaster)
+        // One bounded attempt loop (ladder r1 MINOR-2): at most one enroll and
+        // one fresh-challenge retry, in ANY order — Swift catch clauses do not
+        // cover their siblings' bodies, so the old retry-inside-catch shape let
+        // the private `WireEnrollRequired.required` escape untyped when a stale
+        // first nonce met an un-enrolled account. Every exit here is typed.
+        var enrolled = false
+        var retriedStale = false
+        while true {
+            do {
+                return try await sendUpdate(row, vault: vault, expectedRevision: expectedRevision, material: material)
+            } catch AccountVaultWireError.challengeStale where !retriedStale {
+                retriedStale = true
+            } catch WireEnrollRequired.required where !enrolled {
+                enrolled = true
+                // The enroll fence's comparand is the CURRENT row's corpus key id
+                // — read, never guessed from the payload (a Castle entry's
+                // payload carries the NEW id).
+                guard let current = try await performFetch(accountID: accountID) else { throw VaultRefusal.vaultAbsent }
+                try await enroll(material, activeKeyID: current.rowKeyID)
+                // Enrollment moved the stored hash to SHA-256(kp2): a payload
+                // whose hash is the SAME master's pre-enroll (v1) form follows it
+                // — and ONLY that case: any other differing hash is a master
+                // change that must carry its secret (`successorMaster`), and
+                // overwriting it here would mask the server's together-rule.
+                if successorMaster == nil, row.keyProofHash == KeyProof.hash(master: proofMaster) {
+                    row.keyProofHash = KeyProof.macHash(master: proofMaster)
+                }
+            } catch WireEnrollRequired.required {
+                // A second enroll demand after enrolling: the proof is refused,
+                // said in the leaf's own type — the private token never escapes.
+                throw VaultRefusal.keyProofRefused
             }
-            return try await sendUpdate(row, vault: vault, expectedRevision: expectedRevision, material: material)
         }
     }
 
