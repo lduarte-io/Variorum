@@ -191,7 +191,7 @@ struct NoKeyFileDoorTests {
     /// every key-file copy gone.
     static func castleOpenedWithNoKeyFileAnywhere(_ road: PlantedRoad) async throws -> ProtectionRoadSession {
         let live = try #require(try road.system().leaves.keyFiles.readLiveKeyFile())
-        let key = try #require(try live.open(passphrase: .passphrase(Crossing.passphrase), floor: .relaxedForTests))
+        let key = try live.open(passphrase: .passphrase(Crossing.passphrase), floor: .relaxedForTests)
         try FileManager.default.removeItem(at: road.slot.places.liveKeyFile)
         road.memory.items = [:]
         if FileManager.default.fileExists(atPath: road.slot.places.backups.path) {
