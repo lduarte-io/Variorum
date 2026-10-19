@@ -824,6 +824,70 @@ fixed, the rebuild green); the phone `** BUILD SUCCEEDED **`.
 The SyncStatusViews face pins (`PostureSwitchTests` · `SyncStalledRowTests` · `EncryptionFlowTests` ·
 `TierAndOnboardingTests`) ride the NEXT stage batch's list.
 
+### U2 RECORD — THE JOIN AND THE FOLLOW FACES (Opus implementer, 2026-10-19; VX-418's second half + VX-107 + VX-113 — IN PROGRESS)
+
+**Not done in U2, first:** (filled at the close — PENDING)
+
+**Preflight (complete, not delegated):** CLAUDE.md + its canon; the resiliency protocol; CastleRules WHOLE; SyncSpec WHOLE;
+SurfaceContracts (the app + Doors/protection); this plan whole (§1–§5d, the §6 U1 RECORD + its arbitration + Mac batch, the
+VX-314 RECORD, §7); VX-307 §5a–§5e + §6 (the U1 wire record, the U2a record + fix leg, the U2b record — `WordsLookPanel`'s
+idiom — the U2c record, THE WALK RECORD); the lifecycle page (stage 12 and the rest); QUESTIONS #205 (her ruling (ii)),
+#235's HER RULINGS block, P-VX378-U2-3 (QUESTIONS + the VX-378 plan's adjudication 2); the core (`Follow.swift`,
+`CommonSteps.swift`, `AccountActs.swift`, `Assess.swift`, `Assessment.swift`, `Facts.swift`, `Executor.swift`,
+`PlanRunner.swift`, `EnterCastle.swift`, `VaultModel.swift`, `DeviceSection.swift`, `AccountVaultClient.day`); the shared
+faces (`RoadAccountFaces`, `RoadAccountModel`, `ProtectionAccountActs`, `ProtectionSheetPresenter`, `RoadCrossingFaces`,
+`RoadCrossingsModel`, `ProtectionCrossingActs`, `ProtectionOpenRoad`, `ProtectionOpenFaces`, `ProtectionWords`,
+`ProtectionSystem`, `ProtectionFactsGatherer`, `WordsBand`), the Mac faces (`RoadAccountSheet`, `RoadCrossingSheet`,
+`WordsBandCard`), `AppBootstrap`'s new-road arms (`finish`, `crossOnNewRoad`, `crossingRoads`, `accountRoads`), today's
+follow (`PostureFollowModel`, the controller's `FollowNotice`, `PostureCopy`'s follow lines — the VX-107 precedent), and the
+U1 suites + support the extension rides (`PlantedRoad`, `PlantedVaultLeaf`, `PlantedSyncKeysLeaf`, the account and
+crossing road suites). HARNESS BASELINE (this session's scratchpad package `u1-harness`, U1's recipe pointed at this
+worktree, the tree at `d6595ba6d`): `✔ Test run with 192 tests in 30 suites passed`.
+
+**MY READINGS (each the brief's letter as I read it — building on them):**
+- **R-U2-1 — THE FOLLOW'S PLACEMENT: THE PLAN'S IDIOM FITS — THE PANE.** `assess` owes `OwedAct.follow` only over facts
+  carrying a FRESH vault reading (`Assess.acts`: `if let vault, let reading`); the open's facts carry none (`ProtectionFacts
+  Gatherer`: `vault: nil`, P-VX306-K3), so the interlude can never see a follow — the ONE place the owed act is read is the
+  pane's one read (U1's R-2, `ProtectionPaneRead.read`). So the follow surfaces there, in U2a's idiom exactly: the account
+  section renders `assess`'s `followNow` door (its notice in its place, the door's press a confirm through the one presenter
+  asking exactly `spec.requires` — one secret into Castle and on a replaced key, with the gate choice into Castle; nothing
+  out of Castle), and the act runs through the bootstrap's crossing seam (every follow re-keys — `FollowProgram` always runs
+  `LibraryRekey`, so the app's pool closes and reopens around it, as a crossing's does). No second arm is built.
+- **R-U2-2 — THE JOIN'S RE-KEYING ARMS RIDE THE SAME SEAM.** `join` re-keys exactly when it crosses postures
+  (`rekeys = join != .sameMode` — `entersCastle`/`leavesCastle`); those run through the crossing seam (pool closed, reopen);
+  a `sameMode` join changes no key (`joinKeyFile` + `bindAccount`) and runs on the open session like U1's set-up
+  (P-VX308-U1-6's precedent). The seam is ONE (extracted from `crossOnNewRoad`, its order of operations unchanged), never a
+  sibling.
+- **R-U2-3 — A TYPO NEVER TEARS THE WINDOW DOWN, synced too.** U2a's preflight checks the typed pair against the live key
+  file before the teardown, but leaves a synced crossing's pair to the act. The join's and the follow's typed secret is the
+  ACCOUNT's, so their preflight checks it against the vault the pane's one read fetched (a READ — the same derivation and
+  the same refusals the core's `join`/`follow` make before `perform`, VX-113's `passphraseChangedElsewhere` among them),
+  before anything closes.
+- **R-U2-4 — VX-107 ON THE NEW ROAD: the Done is re-said from durable facts.** A follow that stops past its swap is
+  finished by an open's settle (`SettleOutcome.resumed`/`.finishedFromRecord`, `act == .follow`), whose `ActOutcome` carries
+  only the notices of the steps THAT run ran (`.followedOutOfCastle` is appended at `memory` — lost when a crash came after
+  it: VX-107's class exactly). The face reads the follow's kind the way the core's own plan-less finish does
+  (`FollowProgram.finishingSteps`: the act in flight's `fromKind` against the record's mode) — the act in flight as the
+  unlock read it from the record (sealed in the library), the mode after the settle — never this process's memory and never
+  the outcome's notices alone.
+- **R-U2-5 — THE WORDS MOMENT (rule 7; P-VX378-U2-3 (a) stands):** after a join whose outcome says
+  `.wordsReplacedByAccount`, the confirm turns into the moment: words TYPED → rule 7's sentence (hers, verbatim) over the
+  one look idiom (`WordsLookPanel` — the typed words, numbered, never selectable, privacy-sensitive, its Copy through the
+  existing `copyWords` road — no new clipboard road; VX-448 is U3's), closed behind her warning; the PASSPHRASE typed → the
+  notice that the words were replaced, WITHOUT showing them (a PROVISIONAL sentence — the "here they are" edge flagged for
+  her bundle). The typed words live only in the confirm's model and go with it.
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece 0 — this record skeleton + the readings: DONE (this commit).
+- Piece 1 — THE WORDS (`ProtectionWords`' VX-308 U2 section; pins): NOT-STARTED.
+- Piece 2 — THE FACES (pure: the join's three plans, Move, the follow's three kinds, VX-113's refusal): NOT-STARTED.
+- Piece 3 — THE ACTS (the preflight against the vault, the acts, rule 11 around every entry into Castle, VX-107's
+  settle-derived Done): NOT-STARTED.
+- Piece 4 — THE MODELS (one secret, the gate, the words moment): NOT-STARTED.
+- Piece 5 — THE MAC FACES + THE BOOTSTRAP'S SEAM: NOT-STARTED.
+- Piece 6 — THE CLOSE (counts, the Mac-suite list, PROVISIONALs, findings): NOT-STARTED.
+- No revert is in flight.
+
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
   `~/dev/variorum-vx-308`, branch pushed, in-flight row (holds the Sync/-custody slot) `969acce55` on main, Linear
