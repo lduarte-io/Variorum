@@ -141,13 +141,17 @@ struct RoadKeyDoorSurfaceTests {
         let keyDoors = try #require(rest.range(of: "RoadKeyDoorsSection(model: keyDoors)"))
         let words = try #require(rest.range(of: "WordsLookSection(standing: roadStanding, keyDoors: roadStanding.keyDoors)"))
         #expect(setRow.lowerBound < keyDoors.lowerBound && keyDoors.lowerBound < words.lowerBound)
-        #expect(rest.contains(".task { await roadStanding?.keyDoors?.refresh() }"))
+        // VX-308 ladder round 1 (MINOR-2) — FLIPPED DELIBERATELY: the three sections re-read from ONE read per appearance,
+        // and the bootstrap hands each open library's faces that one read.
+        #expect(rest.contains(".task { await roadStanding?.refreshPane() }"))
+        #expect(!rest.contains(".task { await roadStanding?.keyDoors?.refresh() }"), "no second read of its own")
         #expect(rest.components(separatedBy: ".protectionSheets(").count == 2, "still one host on the pane")
         let host = try Self.code("Variorum/Features/Protection/RoadAccountSheet.swift")
         #expect(host.contains("case .keyDoor(let model):") && host.contains("RoadKeyDoorSheet(model: model)"))
         let bootstrap = try Self.code("Shared/AppBootstrap.swift")
         #expect(bootstrap.contains("roadKeyDoors = RoadKeyDoorsModel(roads: keyDoorRoads(), presenter: sheets)"))
         #expect(bootstrap.contains("roadStanding?.keyDoors = roadKeyDoors"))
+        #expect(bootstrap.contains("roadStanding?.paneWave = { [weak self] in await self?.paneWave() ?? ProtectionPaneWave() }"))
         let bar = try Self.code("Variorum/Features/Protection/ProtectionRoadBar.swift")
         #expect(bar.contains("Text(ProtectionWords.noKeyFileDoor)") && bar.contains("await model.openNoKeyFileLook()"))
         #expect(bar.contains("WordsLookPanel(look: look, tokens: tokens)"))

@@ -199,9 +199,19 @@ final class RoadCrossingsModel {
     }
 
     func refresh() async {
+        let read = beginRead()
+        await land(await roads.read(), read: read)
+    }
+
+    /// VX-308 ladder round 1 (MINOR-2): a read's number, taken BEFORE the read starts — the pane's one read for its three
+    /// sections (`ProtectionPaneRefresh`) takes one here and lands its faces through `land`, by the same rule.
+    func beginRead() -> Int {
         reads += 1
-        let read = reads
-        let fresh = await roads.read()
+        return reads
+    }
+
+    /// Read `read`'s faces land (rule 11's notice re-read beside them).
+    func land(_ fresh: RoadCrossingFaces?, read: Int) async {
         let owed = await roads.exportNoticeOwed()
         // A read LANDS unless a NEWER read has already landed: an older slow read never writes over a newer one, and an
         // awaited refresh always leaves the model at least as fresh as its own read. (The rule was "only the newest

@@ -76,7 +76,9 @@ struct RoadAccountSurfaceTests {
         let account = try #require(rest.range(of: "if let account = roadStanding?.account {"))
         let todayGate = try #require(rest.range(of: "if roadStanding == nil {"))
         #expect(crossings.lowerBound < account.lowerBound && account.lowerBound < todayGate.lowerBound)
-        #expect(rest.contains(".task { await roadStanding?.account?.refresh() }"))
+        // VX-308 ladder round 1 (MINOR-2) — FLIPPED DELIBERATELY: the three sections re-read from ONE read per appearance.
+        #expect(rest.contains(".task { await roadStanding?.refreshPane() }"))
+        #expect(!rest.contains(".task { await roadStanding?.account?.refresh() }"), "no second read of its own")
         #expect(rest.components(separatedBy: ".protectionSheets(").count == 2, "one host on the pane")
     }
 }

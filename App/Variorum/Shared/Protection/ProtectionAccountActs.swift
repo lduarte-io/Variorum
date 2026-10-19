@@ -330,4 +330,26 @@ nonisolated enum ProtectionPaneRead {
     static func accountFaces(_ read: ProtectionPaneFacts, session: ProtectionRoadSession) -> RoadAccountFaces? {
         accountFaces(read, copyName: ProtectionCrossings.copyName(session, catalog: read.facts.catalog))
     }
+
+    /// **VX-308 ladder round 1, MINOR-2 — ONE READ, THREE SECTIONS** (R-2's letter: the sections derive from ONE
+    /// assessment): the pane's one read taken ONCE — one facts gather, one vault fetch — and the crossings', the account
+    /// section's and the key doors' faces each derived from it exactly as each section's own read derives them, so an
+    /// appearance's three sections agree with one another and cost one wire read. A read that fails gives no faces (each
+    /// section's own read gives none the same way).
+    static func wave(
+        _ session: ProtectionRoadSession, signIn: SessionFact, exportSwitch: ScheduledExportSwitch
+    ) async -> ProtectionPaneWave {
+        guard let read = await read(session, signIn: signIn, exportSwitch: exportSwitch) else { return ProtectionPaneWave() }
+        return ProtectionPaneWave(
+            crossings: ProtectionCrossings.readCrossings(session, exportSwitch: exportSwitch, read: read),
+            account: accountFaces(read, session: session),
+            keyDoors: ProtectionKeyDoorRoad.faces(read))
+    }
+}
+
+/// VX-308 ladder round 1 (MINOR-2) — one pane read's faces for the three sections (nil: that section has none to show).
+nonisolated struct ProtectionPaneWave: Sendable {
+    var crossings: RoadCrossingFaces?
+    var account: RoadAccountFaces?
+    var keyDoors: RoadKeyDoorFaces?
 }

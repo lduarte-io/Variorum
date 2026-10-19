@@ -260,6 +260,21 @@ final class RoadStandingModel {
     /// VX-308 U3 — the key doors (the BOOTSTRAP's model, beside the crossings and the account section; it presents through
     /// the one presenter): Change passphrase…, Reset forgotten passphrase…, and New Words' face for the words section.
     var keyDoors: RoadKeyDoorsModel?
+    /// VX-308 ladder round 1 (MINOR-2) — the pane's ONE read for its three sections (the bootstrap's —
+    /// `ProtectionPaneRead.wave` off the main actor); nil (a test's hand-made faces): each section reads on its own.
+    @ObservationIgnored var paneWave: (@MainActor () async -> ProtectionPaneWave)?
+
+    /// The Protection pane's appearance: the three sections re-read from ONE read (`ProtectionPaneRefresh.wave`) — or,
+    /// with no wave road, each on its own, as before.
+    func refreshPane() async {
+        guard let paneWave else {
+            await crossings?.refresh()
+            await account?.refresh()
+            await keyDoors?.refresh()
+            return
+        }
+        await ProtectionPaneRefresh.wave(crossings: crossings, account: account, keyDoors: keyDoors, read: paneWave)
+    }
     /// VX-307 U2b — THE CARD ABOVE THE QUICK ENTRY (rules 2 and 3 as amended): the words' offer and rule 3's reminder,
     /// one card (`WordsBandModel`). nil where no factory built one (a test's hand-made faces).
     let band: WordsBandModel?
@@ -478,5 +493,26 @@ final class RoadStandingModel {
             self.reminder.passphraseWasSet()
             self.speak?(ProtectionWords.passphraseSetReceipt)
         }
+    }
+}
+
+/// **VX-308 ladder round 1, MINOR-2 — THE PANE'S ONE READ, ONCE PER APPEARANCE** (U1's R-2: the crossings, the account
+/// section and the key doors derive from ONE assessment). Each section's number is taken BEFORE the one read starts, then
+/// its faces land by its own landing rule — so a section's own later read (its confirm's close, another section's landing)
+/// is never overwritten by this older one, and an awaited wave leaves every section at least as fresh as the wave. Every
+/// other refresh trigger keeps its own fresh read (a press always re-reads — VX-108).
+@MainActor
+enum ProtectionPaneRefresh {
+    static func wave(
+        crossings: RoadCrossingsModel?, account: RoadAccountModel?, keyDoors: RoadKeyDoorsModel?,
+        read: @MainActor () async -> ProtectionPaneWave
+    ) async {
+        let crossingsRead = crossings?.beginRead()
+        let accountRead = account?.beginRead()
+        let keyDoorsRead = keyDoors?.beginRead()
+        let wave = await read()
+        if let crossings, let crossingsRead { await crossings.land(wave.crossings, read: crossingsRead) }
+        if let account, let accountRead { account.land(wave.account, read: accountRead) }
+        if let keyDoors, let keyDoorsRead { keyDoors.land(wave.keyDoors, read: keyDoorsRead) }
     }
 }

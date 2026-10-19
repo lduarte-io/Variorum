@@ -167,9 +167,19 @@ final class RoadKeyDoorsModel {
 
     /// Re-read — the crossings' landing rule: a read lands unless a NEWER one already landed.
     func refresh() async {
+        let read = beginRead()
+        land(await roads.read(), read: read)
+    }
+
+    /// VX-308 ladder round 1 (MINOR-2): a read's number, taken BEFORE the read starts (the pane's one read for its three
+    /// sections lands here through `land`, by the same rule).
+    func beginRead() -> Int {
         reads += 1
-        let read = reads
-        let fresh = await roads.read()
+        return reads
+    }
+
+    /// Read `read`'s faces land unless a NEWER read already landed.
+    func land(_ fresh: RoadKeyDoorFaces?, read: Int) {
         guard read > landedRead else { return }
         landedRead = read
         faces = fresh

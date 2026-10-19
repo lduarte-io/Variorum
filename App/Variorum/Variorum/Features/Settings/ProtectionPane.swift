@@ -227,12 +227,10 @@ struct ProtectionPane: View {
         }
         .formStyle(.grouped)
         .task { await services?.encryption.refresh() }
-        // VX-307 U2a: the crossings' doors re-read at each appearance (a crossing's reopen rebuilds this pane).
-        .task { await roadStanding?.crossings?.refresh() }
-        // VX-308 U1: and the account section's.
-        .task { await roadStanding?.account?.refresh() }
-        // VX-308 U3: and the key doors'.
-        .task { await roadStanding?.keyDoors?.refresh() }
+        // VX-307 U2a: the crossings' doors re-read at each appearance (a crossing's reopen rebuilds this pane); VX-308 U1
+        // and U3: the account section's and the key doors' with them — ONE read for the three (the ladder's round-1
+        // MINOR-2: R-2's one assessment, one vault fetch per appearance).
+        .task { await roadStanding?.refreshPane() }
         // VX-308 U1 (VX-239 + VX-243): every new-road protection sheet — the crossings' confirm, the account's, the
         // signed-out screen, sign in and out — through THE ONE PRESENTER (the bootstrap's, so a crossing's confirm
         // survives the reopen under it), presented here, its host, alone.

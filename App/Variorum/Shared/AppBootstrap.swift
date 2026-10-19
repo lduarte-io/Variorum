@@ -685,6 +685,8 @@ final class AppBootstrap {
             roadStanding?.account = roadAccount
             roadStanding?.sheets = protectionSheets
             roadStanding?.keyDoors = roadKeyDoors
+            // VX-308 ladder round 1 (MINOR-2): the pane's appearance reads ONCE for its three sections.
+            if newRoad { roadStanding?.paneWave = { [weak self] in await self?.paneWave() ?? ProtectionPaneWave() } }
             let view: AppDatabase
             if let binding {
                 // The re-open after a lock: the SAME ambient view adopts
@@ -1360,6 +1362,19 @@ final class AppBootstrap {
                 if refused == nil { await self.roadAccount?.refresh() }
                 return refused
             })
+    }
+
+    /// VX-308 ladder round 1 (MINOR-2) — the Protection pane's appearance: the pane's ONE read taken ONCE for the
+    /// crossings, the account section and the key doors (`ProtectionPaneRead.wave` — one facts gather, one vault fetch, the
+    /// three faces derived as each section's own road derives them), off the main actor. Nothing open on the new road: no
+    /// faces (each section's own road answers nil the same way).
+    func paneWave() async -> ProtectionPaneWave {
+        guard newRoad, case .ready = state, let session = roadSession else { return ProtectionPaneWave() }
+        let exports = exportSwitch
+        let signInNow = signInNow
+        return await Task.detached(priority: .userInitiated) {
+            await ProtectionPaneRead.wave(session, signIn: signInNow(), exportSwitch: exports)
+        }.value
     }
 
     /// VX-308 U1 (R-2) — who is signed in NOW (the scope's stored session — a read, taken off the main actor by every
