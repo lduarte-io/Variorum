@@ -1312,12 +1312,16 @@ kept" precedent), the test support (`PlantedRoad`, `ProtectionAccountSupport` �
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton + the readings: DONE (this commit).
-- Piece 1 — THE VX-447 CORE ARM (`KeyDoors.swift`, R-U3-1) + core pins red-on-old: IN-PROGRESS — pins committed first
-  and RED ON THE PRE-FIX TREE (`swift test --filter FileLessWordsTests`: `✘ … 6 tests in 1 suite failed … with 3 issues` —
-  Standard `Caught error: .secretMissing`, synced ×2 `.noLiveKeyFile`; the four guard pins green on both trees, their
-  mutation legs below); the arm built, `FileLessWordsTests` + `FirstLookWordsTests` + `ExecutorKeyDoorTests` `✔ 15 tests
-  in 3 suites`. **MUTATIONS IN FLIGHT** (each on this commit's tree, restored by `git checkout -- Sources/VariorumCore/
-  Protection/Executor/Acts/KeyDoors.swift`, `git diff` clean before the next).
+- Piece 1 — THE VX-447 CORE ARM (`KeyDoors.swift`, R-U3-1) + core pins red-on-old: DONE (`577bd53dc`; the pins-first commit
+  `8e465f7ea`). Pins `FileLessWordsTests` (6; 7 cases) committed FIRST and RED ON THE PRE-FIX TREE (`✘ … 6 tests in
+  1 suite failed … with 3 issues` — Standard `Caught error: .secretMissing`, synced Standard and Castle `.noLiveKeyFile`);
+  the arm built → `FileLessWordsTests` + `FirstLookWordsTests` + `ExecutorKeyDoorTests` `✔ 15 tests in 3 suites`. The
+  four guard pins are green on both trees by design; MUTATIONS (each on `577bd53dc`, restored by `git checkout --`,
+  `cmp`-identical to a pre-mutation copy): M1 the live-place guard dropped → `✘ anyCopyOfTheKeyFileStandingMeansNoMint`
+  (2 issues — the stray written over, :171/:174); M2 both mirror guards dropped → the same test red at the mirror arm
+  (:147/:150); M3 the catalogue guard dropped → red at the backup arm (:158/:161); M4 the Standard-only guard on the
+  file-less nil arm dropped → `✘ castleUnsyncedFileLessStillRefuses` (2 issues); M5 the synced mint without the master
+  lock → `✘ aSyncedLibrary…` both postures (4 issues). No revert in flight.
 - Piece 2 — THE WORDS (`ProtectionWords`' VX-308 U3 section, PROVISIONAL; VX-263's line pinned as drafted): NOT-STARTED.
 - Piece 3 — VX-448 (`WordsClipboard`'s new-road rule; the clear at the lock and at quit; the caption): NOT-STARTED.
 - Piece 4 — THE LOOK (R-U3-4, R-U3-7) + THE BANNER'S BRAIN (R-U3-2, R-U3-3 — `RoadStandingModel`): NOT-STARTED.
