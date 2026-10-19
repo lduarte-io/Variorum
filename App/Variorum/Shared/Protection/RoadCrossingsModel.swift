@@ -175,8 +175,9 @@ final class RoadCrossingsModel {
     private(set) var gateRefusal: String?
 
     @ObservationIgnored let roads: RoadCrossingRoads
-    /// Each re-read's number: only the newest lands.
+    /// Each re-read's number, and the newest that LANDED (an older read never lands over a newer one).
     @ObservationIgnored private var reads = 0
+    @ObservationIgnored private var landed = 0
 
     init(roads: RoadCrossingRoads) {
         self.roads = roads
@@ -187,7 +188,12 @@ final class RoadCrossingsModel {
         let read = reads
         let fresh = await roads.read()
         let owed = await roads.exportNoticeOwed()
-        guard read == reads else { return }
+        // A read LANDS unless a NEWER read has already landed: an older slow read never writes over a newer one, and an
+        // awaited refresh always leaves the model at least as fresh as its own read. (The rule was "only the newest
+        // STARTED read lands": a caller awaiting `refresh()` while the confirm's own refresh — started later — was still
+        // in flight got back a model still on its pre-crossing faces and notice; the fix leg's Mac red.)
+        guard read > landed else { return }
+        landed = read
         faces = fresh
         exportNotice = owed
         if !owed { exportNoticeMessage = nil }

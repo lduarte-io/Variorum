@@ -71,6 +71,33 @@ final class PlantedCrossingRoads {
     }
 }
 
+/// Reads gated by hand (the refresh race's order forced): each `wait()` is one read, numbered in call order, that
+/// returns its number once `release(_:)` lets it go.
+@MainActor
+final class ReadGates {
+    private(set) var calls = 0
+    private var waiting: [Int: CheckedContinuation<Void, Never>] = [:]
+    private var released: Set<Int> = []
+
+    func wait() async -> Int {
+        calls += 1
+        let index = calls
+        if !released.contains(index) {
+            await withCheckedContinuation { waiting[index] = $0 }
+        }
+        return index
+    }
+
+    func release(_ index: Int) {
+        released.insert(index)
+        waiting.removeValue(forKey: index)?.resume()
+    }
+
+    func waitForCalls(_ count: Int) async {
+        while calls < count { await Task.yield() }
+    }
+}
+
 @Suite("VX-307 U2a — the crossings' brain over planted roads")
 @MainActor
 struct RoadCrossingModelTests {
@@ -224,6 +251,58 @@ struct RoadCrossingModelTests {
         model.exportNoticeOK()
         await model.refresh()
         #expect(!model.exportNotice && planted.dismissCalls == 1)
+    }
+
+    /// THE FIX LEG'S MAC RED (MAJOR-1's bootstrap pin, its first run): AN AWAITED REFRESH MUST LAND even while a NEWER
+    /// refresh is still in flight. The confirm's `finished` starts a refresh of its own (an unstructured task); a caller
+    /// that then awaits `refresh()` took the OLDER read number — and the old rule ("only the newest-STARTED read lands")
+    /// dropped the caller's read when it finished first, so `await refresh()` returned with the model still on its
+    /// pre-crossing faces and notice. The rule now: a read lands unless a NEWER read has already LANDED — an older slow
+    /// read still never writes over a newer one (the rule's purpose), and an awaited refresh always leaves the model at
+    /// least as fresh as its own read. Reads gated by hand to force the race's order.
+    @Test func anAwaitedRefreshLandsWhileANewerOneIsStillInFlight() async throws {
+        let gates = ReadGates()
+        let first = PlantedCrossingRoads.faces()
+        let castle = PlantedCrossingRoads.faces(nil, gate: RoadGateRow(current: .alwaysAsk, touchIDAvailable: false))
+        var owed = false
+        let roads = RoadCrossingRoads(
+            read: { await gates.wait() == 1 ? first : castle },
+            cross: { _ in .refused("x") }, changeGate: { _, _ in .changed }, turnExportBackOn: { true },
+            exportNoticeOwed: { owed }, dismissExportNotice: {})
+        let model = RoadCrossingsModel(roads: roads)
+        let warm = Task { await model.refresh() }
+        await gates.waitForCalls(1)
+        gates.release(1)
+        await warm.value
+        #expect(model.faces == first && !model.exportNotice)
+        // The crossing landed: the notice is now owed; two refreshes race — the AWAITED one started first (older
+        // number) and finishes first; the other (newer) is still in flight.
+        owed = true
+        let awaited = Task { await model.refresh() }
+        await gates.waitForCalls(2)
+        let newer = Task { await model.refresh() }
+        await gates.waitForCalls(3)
+        gates.release(2)
+        await awaited.value
+        #expect(model.faces == castle, "the awaited refresh landed its fresh read")
+        #expect(model.exportNotice, "and the owed notice")
+        // The newer read lands after it (newer than what landed).
+        gates.release(3)
+        await newer.value
+        #expect(model.faces == castle && model.exportNotice)
+        // An OLDER read finishing after a newer one landed never writes over it.
+        let slow = Task { await model.refresh() }
+        await gates.waitForCalls(4)
+        let fast = Task { await model.refresh() }
+        await gates.waitForCalls(5)
+        owed = false
+        gates.release(5)
+        await fast.value
+        #expect(!model.exportNotice, "the newer read landed")
+        owed = true
+        gates.release(4)
+        await slow.value
+        #expect(!model.exportNotice, "the older read is dropped")
     }
 
     /// THE GATE-STYLE ROW: Always ask at once; Touch ID only after the passphrase is asked — a refusal said, a change

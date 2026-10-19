@@ -913,6 +913,33 @@ AGREED and fixed with one refinement (the reconcile keys on a durable mark, not 
 choice must not be undone); MINOR-3 the gap agreed, the instance-split mechanism DISPUTED by trace (the auto-ask spends
 the plant); NIT-3 DISPUTED as hollow; MINOR-4 agreed and done; NIT-1/NIT-2 recorded.
 
+**THE FIX LEG'S MAC RUN (the orchestrator, 2026-10-19): 171 / 33, ONE real red — MY MAJOR-1 BOOTSTRAP PIN FAILED ITS
+FIRST RUN** (`ProtectionCrossingRouteTests.major1_anEntryStoppingPastItsSwapHasItsSwitchFollowedAtTheReopensReady`, :148 —
+`crossings.exportNotice` false, the model's faces a STANDARD library with Use Castle open, gate preselected Always ask,
+Touch ID unavailable), while the same run's log showed the reconcile ran and followed the switch. **TRACED — neither the
+mark nor the reconcile (both behaved; the switch-off expectations before :148 passed), but the crossings model's refresh
+rule:** the confirm's `finished` starts a refresh of its own (`Task { await self.refresh() }`), and the pin then awaits
+`crossings.refresh()`. The awaited call took the OLDER read number (it reached `reads += 1` first, before the unstructured
+task ran); its read finished first; the old rule — "only the newest STARTED read lands" (`guard read == reads`) — DROPPED
+it, so `await refresh()` returned with the model still on its pre-crossing read (exactly the dumped state: the fresh
+library's Standard faces from the pin's first refresh, the notice un-owed). The newer read would have landed a moment
+later — the app would only flicker stale — but an awaited refresh that leaves the model stale is the defect (U2a's
+`useCastleClosesThePoolCrosses…` escaped it only because an `await turnExportBackOn()` let the unstructured refresh
+finish first). **On the coordinator's candidates:** (a) the mark is written in this scenario — the entry runs through
+`cross` (`crossOnNewRoad`), which writes it before anything moves; a resume always follows a `cross` that began it (the
+only new-road door into these acts this phase), so the reconcile need not owe the notice itself; (b) right in effect —
+the model was showing a stale read, not another session. **THE FIX (the model's landing rule):** a read lands unless a
+NEWER read has already LANDED (`landed` beside `reads`): an older slow read still never writes over a newer one (the
+rule's purpose), and an awaited refresh always leaves the model at least as fresh as its own read. **The headless twin,
+red-on-old:** `RoadCrossingModelTests.anAwaitedRefreshLandsWhileANewerOneIsStillInFlight` (reads gated by hand —
+`ReadGates` — to force the race's order: the awaited, older read finishes first while a newer one is in flight; then
+an older read finishing after a newer one landed) — on the pre-fix rule `✘ Expectation failed: model.faces == castle`
+and `✘ … model.exportNotice` (2 issues — the Mac red's state, reproduced); GREEN with the fix. HEADLESS `✔ Test run with
+93 tests in 12 suites passed`. **Not re-run here:** the Mac pin itself (the stage's) and `build-for-testing` — the
+orchestrator was mid-walk on this worktree's Debug product, so no `xcodebuild` ran into its DerivedData; the two changed
+files (the model and its test) compiled in the harness under the app's concurrency settings. PENDING: the next batch's
+`build-for-testing` and the pin's re-run.
+
 ### U2b RECORD — THE TWELVE WORDS, HER WAY (Opus implementer, 2026-10-18; ticket VX-412 — BUILT; the Mac suites and the walk PENDING)
 
 **Not done in U2b, first:**
