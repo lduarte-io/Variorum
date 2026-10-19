@@ -510,9 +510,21 @@ dev/real store or `/Applications` touch: the brief's limits.)
   the new road in Castle under a new key, the receipt owed once, Settings asked back, rule 11's notice and its reversal;
   then Use Standard back with its receipt; a wrong word never tears the window down) — BUILT, its RUN PENDING under the
   stage. `xcodebuild … build-for-testing` → `** TEST BUILD SUCCEEDED **`, no warning in a touched file.
-- Piece 5 — THE MAC FACES: NOT-STARTED. Settings ▸ Protection's new-road section (the posture line, the doors, the
-  gate-style row, the export-off notice), the confirm sheet; today's rows that read today's posture or act through
-  today's machinery retire behind the switch on the new road (Release byte-unchanged).
+- Piece 5 — THE MAC FACES: DONE (this commit). `Features/Protection/RoadCrossingSheet.swift`: `RoadCrossingSheet` (the
+  title, the door's sentences — rule 12's in the primary ink — rule 25's copies bulleted under their line, Use Castle's
+  gate choice as a radio pair with its rule-9 line, or Always ask alone with *Touch ID isn't set up on this Mac.*;
+  exactly the ask's fields; the refusal; *Cancel* · the door's title; not dismissable while the act runs) and
+  `RoadCrossingsSection` (Settings ▸ Protection: the posture line, each door as `assess` says it — open = its button,
+  refused = its sentence in place, hidden = nothing; rule 11's notice with *Turn it back on* · *OK*; in Castle the
+  gate-style row — *Use Always ask* at once, *Use Touch ID…* asking the passphrase first, the quiet line where Touch ID
+  can't work here). `ProtectionPane`: the section from `roadStanding?.crossings`, its confirm sheet bound to the
+  bootstrap's model (it survives the reopen), the doors re-read at each appearance; TODAY'S ROWS (the current-state
+  line, the checklist, the posture cards and today's choose doors, the re-link door, Castle's switches, today's
+  passphrase doors, the reminder) render only with NO road model — on the new road they retire behind the switch
+  (PROVISIONAL P-VX307-U2a-4); today's road renders them exactly as before (the VX-306 row's source pin still holds).
+  Mac suite `RoadCrossingSurfaceTests` (3: the pane hosts the section in both postures; the confirm hosts in each shape;
+  the pane's gate source-pinned) — BUILT, RUN PENDING under the stage. `build-for-testing` → `** TEST BUILD SUCCEEDED
+  **`, no warning in a touched file.
 - Piece 6 — THE TOUCH ID RE-ARM (VX-310's second half): NOT-STARTED. The interlude's re-arm card when the open owes
   `.touchIDRearmQuestion`; `answerTouchIDRearm` through the session; the Mac and phone cards; a DEBUG walk switch that
   plants one failed press for stage 11's walk (PROVISIONAL, P-VX306-U1b-9's fences).
