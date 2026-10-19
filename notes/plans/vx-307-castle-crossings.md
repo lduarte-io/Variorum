@@ -815,9 +815,27 @@ ledger is the merging session's):**
 - **The walk precondition is satisfied:** the dev library's words are `VARIORUM_DEV_NEWROAD_WORDS` in
   `~/.variorum/dev-castle.env` (the coordinator's dev-store facts; values never committed). No fresh dev library needed.
 
-### U2b RECORD — THE TWELVE WORDS, HER WAY (Opus implementer, 2026-10-18; ticket VX-412 — IN PROGRESS)
+### U2b RECORD — THE TWELVE WORDS, HER WAY (Opus implementer, 2026-10-18; ticket VX-412 — BUILT; the Mac suites and the walk PENDING)
 
-**Not done in U2b, first:** (filled at the close; until then this record is IN PROGRESS and every count PENDING.)
+**Not done in U2b, first:**
+- **A CORE CUSTODY LINE WAS WRITTEN (piece 1, P-VX307-U2b-1 — ARBITRATE FIRST):** the amended rules cannot be built on
+  the core as it stood — the new-words act asked a passphrase always, and the card offers the words while no passphrase
+  exists. `regenerateWords` now takes `passphrase: String?`; nil is asked nothing ONLY in Standard, unsynced, with no
+  passphrase lock (the reset door's Standard plain confirm, twinned). No new act; no `Sync/` line. If the arbitration
+  rules the other way, the fallback is option (b) below (a passphrase chosen before the first look — no core line).
+- **No Mac suite was RUN** (the brief: no stage, no `xcodebuild test`) — only BUILT (`build-for-testing` green on the
+  final tree). The list below is the orchestrator's. What DID run: the core (full Debug suite; the protection set in both
+  configurations) and this session's headless harness over the real `Shared/Protection/` files (101 / 14 — the recipe
+  below).
+- **The walk was not done** (the orchestrator's — the recipe below: the calm first open, the card's click, the toast,
+  the snooze, the tour's last card, the Settings door). No Debug app launched; the dev store, the real store and
+  `/Applications` untouched.
+- **The phone is untouched in behaviour** (P-VX307-U2b-0): its creation card stands; its shared brains compile (the band
+  model is built there and rendered nowhere). The phone's calm first open is a VM ticket at closeout (the MOBILE PARITY
+  line).
+- **Not touched here (hand-forwards below):** the readme's Start Here words passage (byte-pinned to VX-306 §7c (5) — now
+  contradicts the amended rule 2), the canon lines (SurfaceContracts' "the once-shown words card at creation";
+  CastleRules' status note "Until VX-412 lands…"), the card's ledger across Make this my library.
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton: DONE (this commit).
@@ -935,8 +953,208 @@ ledger is the merging session's):**
   walk — no look at the tour's end, the words "shown" at the creation — against the new fixture, restored by `git
   checkout --`): `✘` on every argument pair, stage 2's *the words lock is the same* · *the old words still open it* · *the
   door handed back no words*.
-- Piece 7 — the close (suites both configurations, builds, the record): NOT-STARTED.
-- No revert is in flight.
+- Piece 6b — ONE LOOK AT A TIME (found while closing): DONE (`d723b0eda`). Two homes open at once (the card and
+  Settings, say) would each mint — the second's words REPLACE the first's, which would stay on screen no longer opening
+  the library (she could write down stale words). `WordsBandModel` keeps every look it made (weakly) and a look's mint
+  REFUSES while another holds words (*Your twelve words are already on screen — finish with them there first.*,
+  PROVISIONAL P-VX307-U2b-6). Pin `WordsBandTests.oneLookHoldsWordsAtATime` — MUTATION (the guard off) → `✘ … with 2
+  issues`, restored. `WordsBandModel.refresh()` dropped as dead (`020d6ab8e`).
+- Piece 7 — the close: DONE (this commit) — the counts, the Mac suite list, the walk recipe, the PROVISIONALs and the
+  findings below.
+- No revert is in flight (every mutation restored by `git checkout --`, `git status` clean; no scratch worktree).
+
+**THE FACES AS BUILT (for the ladder):** the bootstrap's `.roadCreated` on the Mac goes straight to the open (the
+creation's `OnceShownWords` dropped unseen); at `.ready` `RoadStandingModel.make(session, ledger:, copyWords:)` builds
+the faces and, new, the BAND (`WordsBandModel` over the session: its ledger in the reminder ledger's defaults, the snooze
+this process's, the mint `ProtectionOpenRoad.mintFreshWords` off the main actor — one act at a time on the session,
+`ids.mintWords()`, `regenerateWords` on the session's executor, the session's library updated — and `copyWords` the
+Mac's `WordsClipboard.copy`). `VariorumApp` hands `bootstrap.roadStanding` to `RootView` (`protectionFaces`), which
+builds `WordsBandCard` for the Bookcase's new `wordsBand` slot (after the listing's `ScrollView`, before `entryBar`) and
+a `TourEndLibraryModel` factory for the tour's layer (`TourOverlay` makes ONE when the end card first shows;
+`TourEndCard` renders `TourEndLibraryBlock` above its doors and holds the doors while words show). The ✕'s toast is
+`session.status.direct` (always shown — a direction, not a receipt `receipt_style` could hide). Settings ▸ Protection
+(new road) gains `WordsLookSection` (a fresh look per press over `standing.makeWordsLook()`). `ProtectionRoadBar` keeps
+rule 27's banner, the split pair's line and the became-active re-read of the reminder; the reminder's row renders in the
+card. Every look records through the band (the ledger's `recorded`), so the card's offer retires wherever she looked.
+Today's road: `protectionFaces` nil → no card, the end card exactly as it was, the pane's new section absent; the
+`.newLibraryWords` arm unreachable on the Mac. ZERO `Sync/`, `Server/`, schema or dependency lines; ONE core line set
+(`KeyDoors.swift` — the nil arm).
+
+**COUNTS (the final tree):**
+- Core, Debug, the full suite (`swift test`): VariorumCoreTests `✔ Test run with 3304 tests in 429 suites passed after
+  203.589 seconds.`; the third target `✔ Test run with 40 tests in 6 suites passed`; VariorumMCPTests `✘ Test run with 383
+  tests in 71 suites failed … with 1 issue` — the ONE known wall-clock flake
+  (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, 19.6 s vs 15 s under the full
+  parallel run; alone `✔ … passed after 1.055 seconds`; no MCP line in this diff — U1's recorded flake).
+- Core, the protection set (every `@Suite` under `Tests/VariorumCoreTests/Protection`, 82 now — +`FirstLookWordsTests`):
+  Debug `✔ Test run with 331 tests in 82 suites passed after 6.944 seconds.`; Release (`swift test -c release`, the same
+  filter) `✔ Test run with 307 tests in 78 suites passed after 3.902 seconds.`
+- HEADLESS HARNESS (this session's — not durable; U2a's recipe exactly: a scratch SwiftPM package, tools 6.2, macOS 26,
+  `.defaultIsolation(MainActor.self)` + `NonisolatedNonsendingByDefault` + `InferIsolatedConformances` +
+  `MemberImportVisibility`, the worktree's core by path + swift-dependencies; its `Variorum` target SYMLINKS every
+  `Shared/Protection/*.swift` but `ProtectionBackupHook.swift` and `WireVaultLeaf.swift` (`WordsBand.swift` among them),
+  plus `Shared/LibraryOpenCopy.swift`, plus one stub file (`ProtectionCopy`'s three names, `KeychainTestTripwire`,
+  `KeychainPartition`, `AppleKeyKeychain`, `AppleKey`, `DeviceName`, `BackupDestination`, a nil `WireVaultLeaf.live`,
+  `AuthTokens`/`KeychainAuthStorage`, `EncryptionSession.words`); its tests symlink `ProtectionTestSupport`,
+  `ProtectionFacesSupport`, `ProtectionOpenRoadPlantedTests`, `ProtectionWordsPlanTests`, `ProtectionLobbyModelTests`,
+  `PassphraseReminderTests`, `ProtectionNoticeFaceTests`, `ProtectionOfferFaceTests`, `ProtectionWalkSwitchTests`,
+  `RoadCrossingFacesTests`, `ProtectionCrossingRoadTests`, `RoadCrossingModelTests`, `RoadRearmTests` (U2a's 88) and this
+  batch's `RoadCreationFaceTests` + `WordsBandTests` (+ a one-line `RoadWorld.RoadWorldError` stub; a test reading a repo
+  file resolves its symlinked `#filePath`)): **`✔ Test run with 101 tests in 14 suites passed after 0.626 seconds.`**
+- MUTATIONS (each restored, `git status` clean): the core's nil arm answering the old `.passphraseDoesNotOpen` → 4 red;
+  the narrowing dropped → 6 red; the creation rule `true` everywhere → 2 red; the warning bypassed → 3 red; the snooze
+  persisted → 1 red; the one-look guard off → 2 red; the OLD lifecycle walk (no look at the tour's end) against the new
+  fixture → red on every argument pair at stage 2.
+- `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx307
+  build-for-testing` → `** TEST BUILD SUCCEEDED **` (no new warning; the three `Text +` deprecations in `ShelfView.swift`
+  and the `try` note at `ProtectionRoadRouteTests.swift:260` pre-exist); the phone `-scheme VariorumMobile -destination
+  'generic/platform=iOS Simulator' -configuration Debug … build` → `** BUILD SUCCEEDED **`; **the Release check
+  `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Release -derivedDataPath DerivedData/vx307
+  build` → `** BUILD SUCCEEDED **`.**
+- Release behaviour: unchanged by construction — every new face sits behind `protectionFaces`/`roadStanding` (nil on
+  today's road) or `ProtectionRoad.showsWordsAtCreation` on a state only the new road reaches; the core's act with a
+  `String` passphrase behaves exactly as before, and nothing on today's road calls it. The binary is not byte-identical
+  (the new types compile in both configurations — rule 24, U1b's precedent).
+
+**THE MAC SUITES THE ORCHESTRATOR RUNS UNDER THE STAGE (from `App/Variorum/`; PENDING):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx307 test \
+  -only-testing:VariorumTests/WordsBandTests \
+  -only-testing:VariorumTests/WordsBandSurfaceTests \
+  -only-testing:VariorumTests/RoadCreationFaceTests \
+  -only-testing:VariorumTests/ProtectionRoadRouteTests \
+  -only-testing:VariorumTests/ProtectionFacesRouteTests \
+  -only-testing:VariorumTests/LibraryWordsCardTests \
+  -only-testing:VariorumTests/PassphraseReminderTests \
+  -only-testing:VariorumTests/ProtectionReminderRoadTests \
+  -only-testing:VariorumTests/ProtectionRestoreReceiptTests \
+  -only-testing:VariorumTests/ProtectionPaneRoadRowTests \
+  -only-testing:VariorumTests/RoadCrossingSurfaceTests \
+  -only-testing:VariorumTests/ProtectionOpenRoadPlantedTests \
+  -only-testing:VariorumTests/ProtectionNoticeFaceTests \
+  -only-testing:VariorumTests/ProtectionOfferFaceTests \
+  -only-testing:VariorumTests/ProtectionCrossingRoadTests \
+  -only-testing:VariorumTests/ProtectionCrossingRouteTests \
+  -only-testing:VariorumTests/MakeMineRouteTests \
+  -only-testing:VariorumTests/ProtectionRule27FaceTests \
+  -only-testing:VariorumTests/ProtectionSurfaceRenderTests \
+  -only-testing:VariorumTests/TravellingDotsIndicatorTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/StatusSeamVocabularyTests \
+  -only-testing:VariorumTests/WordsCopyDoorTests \
+  -only-testing:VariorumTests/TourTests \
+  -only-testing:VariorumTests/TourOfferLineTests \
+  -only-testing:VariorumTests/BookcaseQuickEntryPlacementTests \
+  -only-testing:VariorumTests/QuickEntryLaunchFocusTests \
+  -only-testing:VariorumTests/StatusToastPlacementTests \
+  -only-testing:VariorumTests/ShellChromeTests \
+  -only-testing:VariorumTests/VX310TodayLobbyWitnessTests
+```
+The first three are U2b's new suites (12 + 8 + 1 = **21 tests**); `ProtectionRoadRouteTests` and
+`ProtectionFacesRouteTests` carry the four FLIPPED route pins (the signed host — a throwaway keychain scope, a temp slot;
+red on the pre-VX-412 tree by construction: their state there was `.newLibraryWords` — the orchestrator may confirm by
+reverting `a1a948c73`'s `AppBootstrap` arm on a scratch tree, optional); then the suites over every file this batch
+touched (the faces model and its factory, the road acts, the pane, `ProtectionRoadBar`, the Bookcase, the shell, the tour
+overlay and end card) and the source pins over edited files. `VX310TodayLobbyWitnessTests` still reports its KNOWN ISSUES
+(a pass of either is a FAILURE); read the `skipped:` lines.
+
+**THE WALK RECIPE (the orchestrator's, under a held stage claim; the DEV STORE only; light and dark — the card speaks
+the Bookcase's voice, the tour's card its own):**
+0. Zero Debug instances (by PATH; a `/Applications` instance is NEVER touched). Build and launch as U2a's recipe row 0.
+   `source ~/.variorum/dev-castle.env`. **WARNING — the card mints:** the dev library's words are recorded
+   (`VARIORUM_DEV_NEWROAD_WORDS`) but this Mac's card ledger has no record of a look, so the card OFFERS the words on the
+   dev library; a look there REPLACES its words — update `VARIORUM_DEV_NEWROAD_WORDS` in `dev-castle.env` in the same
+   window (CLAUDE.md: when one must change, update the file), or walk the look on a throwaway library only (row 1).
+1. **The calm first open + the card (a throwaway library B).** Quit. Library A aside exactly as VX-306's U2 walk row 5
+   (`mkdir -p ~/vx307-walk/A && mv DC/variorum.sqlite DC/variorum-library-keys.json DC/variorum-keys-*.json
+   ~/vx307-walk/A/`). Launch → the missing face → *Start a New Library* → **B opens straight onto the Bookcase: NO words
+   card, no lobby in front** (log `road: created — the first open goes straight on (the words wait for her look)`); the
+   card sits between the shelf listing and the quick-entry line, the column's width: *Your library is encrypted — click
+   here to record the twelve words that are its key.* · *Later* · ✕ — and, the first backup's always-moment, rule 3's
+   reminder row in the same card. Capture (light, dark).
+2. **The snooze.** *Later* → the words row goes (the reminder row stays while owed); quit → relaunch → the card offers the
+   words again (log `road: the words card snoozed to the next launch`). Capture.
+3. **The click.** Click the sentence → (B has no passphrase) the words at once: *Write these down now…*, the twelve words
+   in two columns (not selectable), *Copy* → *Copied. Your clipboard clears in 60 seconds.* (paste once to a scratch
+   field, then 60 s → the clipboard is empty), *I've written them down* → *These words won't be shown again.* · *Go back*
+   · *Close* → *Close* → the words row gone for good (log `rule 2's look closed`). Capture each (light, dark). B's live key
+   file: `grep -c` for any of the words → 0. Quit → relaunch → no words row.
+4. **The ✕ and the toast.** Make a second throwaway C the same way (or reset the ledger key
+   `variorum.calmAsks.words.<B's id>.recorded` with `defaults delete` on the dev domain) → ✕ → the toast *You can record
+   your twelve words any time in Settings ▸ Protection.* (always shown, whatever `receipt_style`). Capture. Settings ▸
+   Protection → *Your twelve words* · *Record your twelve words…* → the look there (B/C has no passphrase → minted at
+   once; with the dev passphrase set, the field first).
+5. **The tour's last card.** Help ▸ Take the Tour → walk to the end card → above the three doors: the passphrase ask
+   (§7c (7)'s lead, two fields, *Set passphrase*) and the sentence door; set a passphrase → *Passphrase set.*; click the
+   sentence → the words at once (not asked again); the three doors are greyed until *Close*. Capture (light, dark).
+6. **Posture after the window:** B (and C) aside into `~/vx307-walk/B…`, A back (`mv ~/vx307-walk/A/* DC/`) → A opens with
+   the different-library notice once (VX-306's row 5) → OK. The dev library A is as before, its words unchanged (never
+   looked at in this recipe). `rm -r ~/vx307-walk` when done; record the posture for the coordinator.
+
+**PROVISIONALs (each built as its option (a); for the orchestrator to bundle under QUESTIONS at the closeout):**
+- **P-VX307-U2b-0 — the phone keeps its creation card this phase.** (a) BUILT — `wordsCardAtCreation(mac:)` true on the
+  phone; the phone's calm first open (the card in its own band) is a VM ticket — the MOBILE PARITY line; (b) retire it
+  on the phone too, with no phone band (the words then never shown on the phone — rule 2 broken there); (c) build the
+  phone's band now (out of this batch's surface).
+- **P-VX307-U2b-1 — the first look on a library with no passphrase (A CORE LINE).** (a) BUILT — `regenerateWords(passphrase:
+  nil)` asks nothing in Standard, unsynced, with no passphrase lock (the reset door's Standard plain confirm twinned —
+  this Mac holds the key; rule 3: "the passphrase is a convenience over the words"; rule 2: shown "when the user asks";
+  rule 3: the tour's card shows the words "beside the ask"); (b) no core line — the look on a passphraseless library asks
+  her to CHOOSE a passphrase first (rule 6's door "asking the passphrase" kept literally; but the words then depend on a
+  passphrase she may not want, and "beside the ask" becomes "after it"); (c) the core's new-words door plain-confirm in
+  Standard always (asks nothing even where a passphrase exists — a wider change than the rules need).
+- **P-VX307-U2b-2 — the undrafted words** (`ProtectionWords`' U2b section): *Later*; *Dismiss*; the toast *You can record
+  your twelve words any time in Settings ▸ Protection.*; the ask *Enter your passphrase to see your twelve words.*; *Your
+  passphrase*; *Show my twelve words*; *Cancel*; *Making your twelve words…*; the lead *Write these down now. They open
+  your library — on this Mac and on any copy of it — for as long as they are its words.*; rule 6's sentence *Your
+  library's key doesn't change: every backup opens with these words, and still with the words you had when you made
+  it.*; *Copy* and its caption; *I've written them down*; *Go back* · *Close*; *Variorum couldn't make your twelve words
+  just now. Nothing changed.*; the Settings section (*Your twelve words*, its line, *Record your twelve words…*); *Passphrase
+  set.*; the one-look refusal. HERS verbatim (pinned): rule 2's card sentence; the warning *These words won't be shown
+  again.* (b) blank until her sitting; (c) other words.
+- **P-VX307-U2b-3 — the lifecycle page's stages 1–2 prose** (the page is hers; drafted from the amended rules): stage 1
+  *Nothing is shown: the first open is the Bookcase and the quick entry with nothing in front of them, and the card above
+  the quick entry offers the words until you record them or dismiss it.*; stage 2's title and *What happens*; the
+  three-roads table's *shown once when you ask*.
+- **P-VX307-U2b-4 — where and when the card speaks.** (a) BUILT — the card lives on the Bookcase only (her drawing), so
+  rule 3's reminder — now IN the card — is seen on the Bookcase; its showings still count when owed (at the open), not
+  when seen; the first launch's card carries both rows (the words' offer and rule 3's first-backup always-moment —
+  P-VX306-U2-9's timing kept); (b) the card on the Library too (the shared `QuickEntryBar`'s other host); (c) hold the
+  reminder row back while the words row stands at the first launch.
+- **P-VX307-U2b-5 — the tour's last card holds its doors while words show** (leaving would put the once-shown words away
+  without her warning). (a) BUILT — the three doors disabled until *Close*; (b) a door pressed mid-look warns first; (c)
+  the doors free (the words lost unwarned).
+- **P-VX307-U2b-6 — one look at a time.** (a) BUILT — a second home's look refuses to mint while another holds words;
+  (b) a second look mints and the first is closed with a line saying its words were replaced; (c) nothing (two homes
+  could show different words, one set stale).
+- **P-VX307-U2b-7 — after a look is recorded the card's words row retires for good** (rule 2: the card stays "until they
+  are recorded"; *I've written them down* past the warning is the record); Settings ▸ Protection keeps the door (rule 7's
+  new-words door). (b) the card stays until the ✕ even after a look (her "present until the user clicks the dismissing x
+  button" read literally); (c) the card returns weekly like the reminder.
+
+**FINDINGS AND HAND-FORWARDS (routed, not fixed here):**
+- **F-U2b-1 (the readme's Start Here, a contradiction this batch creates):** the seeded words passage
+  (`BirthFurnitureSeeders.startHerePassages[1]`, byte-pinned to VX-306 §7c (5) by `ReadmeStartHerePlanTests`) says *They
+  were shown once, when the library was created … you can make new ones in Settings ▸ Data Safety* — on the new road both
+  clauses are now false (shown when she asks; the door is Settings ▸ Protection). VX-379's rows (U2c) or the closeout's
+  — the plan's §7c (5) text and the passage together.
+- **F-U2b-2 (canon, the closeout's):** SurfaceContracts' "Library protection" line names *the once-shown words card at
+  creation, rule 3's reminder* — now the card above the quick entry (both asks), the tour's last card and Settings ▸
+  Protection's words door; CastleRules' status note *Until VX-412 lands, the Debug build and the lifecycle page's stage 1
+  still show the creation-time words card; the page follows at that merge.* retires at the merge (the page has followed).
+- **F-U2b-3 (Make this my library and the card's ledger):** the ledger is per library ID; Make this my library makes a
+  NEW library (a fresh identity) under the CURRENT pair, so its card offers the words again although she knows them — a
+  look would replace a pair she holds (harmless, confusing). Options: carry `recorded`/`dismissed` across the act in the
+  bootstrap's `makeThisMyLibrary`; or accept. Not a walk blocker.
+- **F-U2b-4 (the phone):** P-VX307-U2b-0's VM ticket — the calm first open, the band, the look and the tour's equivalent
+  on the phone (its pasteboard arm is the mobile row's).
+- **F-U2b-5 (the dev store, the walk):** the dev library's card offers the words (row 0's warning) — a look there changes
+  `VARIORUM_DEV_NEWROAD_WORDS`.
+
+**Notes:** no machinery deaths; no Sonnet lookup; no scratch worktree; every mutation restored and `git status`-checked.
+Commits: `edbd86c14` (record) · `95bde6ea3` (1) · `a1a948c73` (2) · `6a0b5a05a` (3) · `e70797315` (record) · `67c32e85b`
+(4–5) · `aadcf2e9c` (6 fixture) · `9c833dce5` (6 page) · `d723b0eda` (6b) · `020d6ab8e` (cleanup) · the close commit.
 
 ## 7. LIVE STATUS
 - 2026-10-18 ~18:45 — KICKED OFF. Preflight complete (the orchestrator): CastleRules + SyncSpec whole, the lifecycle
@@ -968,4 +1186,12 @@ ledger is the merging session's):**
   card, the Touch ID walk switch); headless 87/12 + the core's protection set both configurations green; Mac
   `build-for-testing`, the phone build and the Release build check green. The Mac suites (38 new tests + the touched
   suites — the record's list) and the walk (stages 6/7/8/11) PENDING — the orchestrator's, under the stage.
-- U2b (VX-412): IN PROGRESS (the §6 U2b RECORD — the Opus implementer, 2026-10-18 night).
+- U2b (VX-412): BUILT (the §6 U2b RECORD — the Opus implementer, 2026-10-18 night): the creation-time words card retired
+  on the Mac; the card above the quick entry (the words' offer, *Later*, the ✕ and its Settings toast, rule 3's reminder
+  folded in); the look (asked only where a passphrase exists, minted at the click through rule 6's act — the key
+  unchanged, nothing stored — shown once with Copy, her warning before close); the tour's last card (the passphrase ask
+  beside the words); Settings ▸ Protection's words door; the lifecycle page's stages 1–2 regenerated from the fixture.
+  ONE CORE CUSTODY LINE (P-VX307-U2b-1: the new-words act asks nothing of a passphraseless Standard library) — arbitrate
+  first. Core full Debug + the protection set both configurations green; the harness 101/14; Mac `build-for-testing`,
+  the phone build and the Release build check green. The Mac suites (21 new tests + the touched suites — the record's
+  list) and the walk PENDING — the orchestrator's, under the stage.
