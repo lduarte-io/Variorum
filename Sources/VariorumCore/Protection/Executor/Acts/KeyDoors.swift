@@ -279,15 +279,23 @@ extension ProtectionExecutor {
     /// current key in what this Mac remembers (rule 1's restore is that one's road — every remembered item read as
     /// stated, so even an unverified copy refuses the mint), and no catalogued key file of this library carrying the
     /// current key (rule 21's offer is that one's road). A copy anywhere means its history is not lost: no fresh file.
+    /// A throwing READ refuses. A remembered item whose payload this build cannot DECODE (a newer build's format, or
+    /// damaged bytes) is SKIPPED, deliberately and logged (VX-308 ladder round 1, MINOR-1): it is read as no copy, exactly
+    /// as the rest of the road reads it — the unlock reads this library's such item as nothing remembered, so the open's
+    /// own repair (`refreshMemory`, rule 21's one-library rule) has already rewritten it and removed every other library's
+    /// item before any door is reachable, and every act's begin rewrites it again; refusing here would protect no payload.
     func keyFileGoneEverywhere(_ library: UnlockedLibrary) throws -> Bool {
         guard library.keyFile == nil, try leaves.keyFiles.readLiveKeyFile() == nil,
               let libraryID = library.record?.libraryID else { return false }
         let current = library.fingerprint
         if library.memory?.keyFileMirror?.fingerprint == current { return false }
         for remembered in try leaves.memory.rememberedLibraryIDs() {
-            guard let sealed = try leaves.memory.readMemory(libraryID: remembered),
-                  let named = try? ProtectionCoding.decoder().decode(DeviceMemory.self, from: sealed.payload)
-            else { continue }
+            guard let sealed = try leaves.memory.readMemory(libraryID: remembered) else { continue }
+            guard let named = try? ProtectionCoding.decoder().decode(DeviceMemory.self, from: sealed.payload) else {
+                log("keyFileGoneEverywhere: a remembered item (\(remembered.prefix(8))) this build can't read — skipped, "
+                    + "read as no copy")
+                continue
+            }
             if named.keyFileMirror?.fingerprint == current { return false }
         }
         return try !leaves.keyFiles.catalogedKeyFiles(ofLibrary: libraryID).contains { $0.fingerprint == current }

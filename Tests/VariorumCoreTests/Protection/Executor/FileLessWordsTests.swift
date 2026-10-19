@@ -174,6 +174,32 @@ struct FileLessWordsTests {
         #expect(strayed.world.liveFormat3 == stray && strayed.world.writes.isEmpty, "(c) the stray untouched")
     }
 
+    /// VX-308 ladder round 1, MINOR-1 — THE DECODE-SKIP, DELIBERATE AND SAID: a remembered item whose payload this build
+    /// cannot decode (a newer build's format, sealed under the right key) is read as NO copy — this library's own (which the
+    /// unlock already reads as nothing remembered, and which the act's begin rewrites) and another library's alike — so the
+    /// mint proceeds, and the skip is logged by id, never silent. (The mint is green on the old tree too; the log is red
+    /// there — the guess was unstated.)
+    @Test func anItemThisBuildCannotReadIsSkippedAndSaidNeverSilently() async throws {
+        let fixture = try EX(.standard)
+        var (executor, library) = try fileLess(fixture)
+        let unreadable = Data(#"{"format":"a newer build's"}"#.utf8)
+        let other = "another-library-0000"
+        for id in [fixture.libraryID, other] {
+            fixture.world.memories[id] = Sealed<DeviceMemory>(
+                payload: unreadable,
+                seal: ProtectionSeal.seal(unreadable, libraryKey: library.key, libraryID: id, purpose: .memory))
+        }
+        let fresh = try PF.words()
+        _ = try await executor.regenerateWords(&library, passphrase: nil, newWords: fresh)
+        #expect(try #require(fixture.world.liveFormat3).open(words: fresh) == library.key, "the mint proceeded")
+        for id in [fixture.libraryID, other] {
+            #expect(fixture.world.logLines.contains { $0.contains("a remembered item (\(id.prefix(8))) this build can't read") },
+                    "the skip of \(id.prefix(8)) is said")
+        }
+        #expect(fixture.memoryValue(library.key)?.keyFileMirror == fixture.world.liveFormat3,
+                "this library's item rewritten by the act (as any act's begin rewrites it)")
+    }
+
     /// The everyday arms are byte-unchanged: a library WITH its key file mints nothing new — the look re-locks the file
     /// it has (its history and every other lock kept), and a library with a passphrase lock is still asked it.
     @Test func aLibraryWithItsKeyFileIsUntouchedByTheArm() async throws {
