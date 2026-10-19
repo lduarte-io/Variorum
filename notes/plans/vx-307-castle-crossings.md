@@ -488,8 +488,15 @@ dev/real store or `/Applications` touch: the brief's limits.)
   passphrase, Always ask deletes the item). HEADLESS `✔ Test run with 19 tests in 3 suites passed` (with piece 1's).
   MUTATIONS (restored, `cmp`-identical): the VX-108 `changed` guard removed → `vx108_theDoorIsReReadAtThePress` RED; the
   export mirror disabled → `theScheduledExportTurnsOffWithTheNoticeAndBackOn` RED (2 issues). The Mac run PENDING.
-- Piece 3 — THE MODELS: NOT-STARTED. The confirm (`RoadCrossingConfirmModel`) and the bootstrap-owned crossings model
-  (outlives the reopen a crossing makes). Pins over planted roads.
+- Piece 3 — THE MODELS: DONE (this commit). `Shared/Protection/RoadCrossingsModel.swift`: `RoadCrossingRoads` (read ·
+  cross · changeGate · turnExportBackOn — injected); `RoadCrossingConfirmModel` (exactly the ask's fields; a new
+  passphrase typed twice; the words' shape checked — `RecoveryPhrase.validate` — and the two passphrases compared BEFORE
+  the road is asked anything; the typed secrets composed exactly, untrimmed; a `.changed` door RE-SHOWN with *Something
+  changed since this opened. Read it again before you go on.* — PROVISIONAL, VX-108); `RoadCrossingsModel` (OWNED BY THE
+  BOOTSTRAP — it outlives the reopen: the doors as last read (newest read wins), the one confirm, rule 11's notice
+  standing until OK or reversed, the gate-style row's presses — Touch ID only after the passphrase is asked). Pins
+  `RoadCrossingModelTests` (8, planted roads, pure). HEADLESS `✔ Test run with 8 tests in 1 suite passed`; the Mac run
+  PENDING.
 - Piece 4 — THE BOOTSTRAP'S CROSSING ROAD: NOT-STARTED. Make this my library's seam shape (teardown, the pool closed
   through the binding, the act off-main, the reopen through the new road with the key that opens the slot, the receipt
   owed to the reopened session, the Protection pane asked back). Mac route suite PENDING (the stage).

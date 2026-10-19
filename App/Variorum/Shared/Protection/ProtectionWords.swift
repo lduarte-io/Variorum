@@ -332,6 +332,8 @@ nonisolated enum ProtectionWords {
     static let crossingSecretsMissing = "Enter your passphrase and your twelve words."
     /// The door changed between the confirm and the press (VX-108: the press re-reads it).
     static let crossingDoorClosed = "This door isn't open any more. Nothing changed."
+    /// The door is still open but says something new — re-shown, nothing done.
+    static let crossingDoorChanged = "Something changed since this opened. Read it again before you go on."
     /// Anything else, with the library still under its old key (nothing swapped, or the act rolled back whole).
     static let crossingFailed = "Variorum couldn't make this change just now. Nothing changed."
     /// VX-113 — the passphrase changed elsewhere, named (the plan's §1 sentence).
