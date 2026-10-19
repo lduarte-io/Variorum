@@ -411,6 +411,18 @@ fetch, no network.
   id in ONE delete call → `✘ aDeleteThatFailsNeverFailsThePairOrStopsThePrune` (2 — the first failure stopped the rest).
   M-RT3 (the lock removed) was named and NOT RUN: no deterministic pin can observe the race the lock closes (the leaf's
   check-then-act free-name pick, sub-second, between two detached runs) — the lock rests on inspection, recorded.
-- Piece 4 — VX-450 (Change/Reset roll back on a resume that cannot finish): NOT-STARTED — R-U1a-6.
+- Piece 4 — VX-450 (Change/Reset roll back on a resume that cannot finish): IN-PROGRESS. PINS FIRST (this commit):
+  `KeyDoorResumeTests` (core, `Tests/VariorumCoreTests/Protection/Executor/`; 5 tests — the per-act per-stop loop over 11
+  shapes: Change in Standard and Castle (Touch ID / Always ask typing the words), synced and not; Reset by the plain
+  confirm, by the words, by Touch ID — a crash after EVERY write of the clean run, the next open settling without a
+  throw, exactly one of the two passphrases opening the live key file, the door landing again; the plain Change and Reset
+  stopped after their begin; the synced Change stopped after its landed vault write; a resume HOLDING the new passphrase
+  still finishing, both doors) RED ON THE PRE-FIX TREE (`972dea6a4` + the pins): `✘ Test run with 5 tests in 1 suite
+  failed … with 35 issues` — the settle threw `secretsRequired(changePassphrase / resetPassphrase)` at every stop between
+  the begin and the key-file step's plan record in every shape, and in the three explicit pins; the resume-holding pin
+  green by design. (Machinery honesty: the first run of the explicit pins passed `.none` to `relaunchAndSettle`'s
+  `TypedSecrets?` parameter, which Swift reads as `Optional.none` — the fixture's own secrets were typed, the act RESUMED
+  under the old passphrase: F-U1a-1 below. Re-run with `TypedSecrets.none`, as `NewWordsResumeTests` spells it.) The fix:
+  NEXT.
 - Piece 5 — the close (counts, the Mac-suite list, PROVISIONALs, findings): NOT-STARTED.
 - No revert is in flight.
