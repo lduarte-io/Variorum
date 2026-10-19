@@ -832,6 +832,10 @@ ledger is the merging session's):**
   after line-by-line review and amendment. The Mac batch (`vx-307-u1-mac`) is next, then U2a.
 - 2026-10-18 20:18 — U1's Mac batch GREEN under `vx-307-u1-mac` (101/6, 0 skipped; the record's counts flipped).
   **U1 is CLOSED but for the ladder.** VX-416 → In Review at the ladder; Done rides the PR.
+- 2026-10-18 21:32 — U2a's Mac batch GREEN on the re-run under `vx-307-u2a-mac-rerun`: ✔ 165 tests in 33 suites
+  passed (only the 3 expected VX-310 known-issue witnesses), 0 instances, throwaway scope and domain absent. The first
+  run's one red was the route test's late key read — traced, fixed test-side (64ac751f5) with a headless twin, the
+  record's batch paragraph carries it. **U2a is CLOSED but for the walk and the ladder.**
 - U2 (VX-417, split §5b into U2a/U2b/U2c): U2a BUILT (the §6 U2a RECORD — 8 commits, headless + builds green; the
   orchestrator's structural verification: zero `Sources/`/`Server/` lines, all pushed; the findings arbitrated — the §6
   U2a ARBITRATION). The U2a Mac batch runs next under the stage (`vx-307-u2a-mac`); U2b spawns after it (tree quiet
