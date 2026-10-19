@@ -322,7 +322,8 @@ nothing else about the sheet changes (read-only, nothing written, closing forget
 dropped (U2-6 — the state is unreachable; the derive pin retires with it) and her two U2-7 sentences in her accepted
 wording, pinned byte-equal to the ticket's text. 3. **VX-379's pane rows:** the posture box's sentence, the Data Safety
 restoring paragraph, the protection pane's today's rows — to CastleRules' language (the field-guide CHAPTERS stay
-VX-379's own, not this batch). 4. **The copy-door hand-forwards** (§5b U2c's three — the double Touch ID prompt, the
+VX-379's own, not this batch). U2a's F-6 rides here: Data Safety's Castle warning reads today's posture — reword to the
+rules; today's rows render on TODAY's road only (the U2a-4 ruling above: never un-hide them on the new road). 4. **The copy-door hand-forwards** (§5b U2c's three — the double Touch ID prompt, the
 LookInside fall-through flip-target, `openCopy`'s core default dropped), each with its pin flipped or added red-on-old.
 
 **Hard limits:** §5a's + VX-306 §8 verbatim; `Part of VX-413` / `VX-414` / `VX-379` per piece; her sentences byte-equal
@@ -774,6 +775,28 @@ ledger is the merging session's):**
 `6db1518a8` (record) · `8203417f8` (1) · `cd5d99009` (2) · `a9dc3bace` (3) · `1e776c19e` (4) · `443a16c5f` (5) ·
 `d7dd30979` (6) · the close commit.
 
+**U2a ARBITRATION (the orchestrator, the same evening — each finding's disposition, repo-first before U2b spawns):**
+- **F-1** (a press on an item whose key opens nothing shows the changed line but owes no re-arm — `lastPress` stays nil;
+  the real biometry-change case works; unpinnable without a finger): RECORDED — a ticket at closeout (Bug, Suspected,
+  Castle & sync, Low).
+- **F-2** (a crash after the swap, before the export step, leaves the app's weekly-copy switch on while the sealed
+  setting turns off at resume): HELD FOR THE LADDER — a traced crash-window corner on U2a-3's mirror; round 1's reviewer
+  judges severity; the fix leg takes it if confirmed.
+- **F-3** (no lock on the new road — Castle's idle lock and Lock Now unwired; `canLock` false): a NAMED HAND-FORWARD to
+  VX-308's plan (a ticket at closeout if VX-308's scope doesn't carry it). Not a walk blocker: the Always-ask lobby is
+  reached by relaunch.
+- **F-4** (the restore hold's gate on synced crossings): VX-308's by construction (§5a already says the account arms are
+  VX-308's).
+- **F-5** (today's store-id envelope beside the slot keeps the pre-crossing key — unread on the new road, dead weight at
+  VX-329): a ticket at closeout (Debt, Low).
+- **F-6** (Data Safety's Castle warning reads today's posture): U2c's — §5e piece 3 amended to name it.
+- **F-7** (SurfaceContracts' Library-protection line gains the crossings' faces): the closeout's canon delta list.
+- **F-8** (the phone has the re-arm card, no crossing faces): the closeout's MOBILE PARITY row.
+- **U2a-4's overlap question, RULED:** no conflict — U2a hides TODAY's rows on the NEW road; U2c rewords those rows as
+  they render on TODAY's road (Release); U2c must NOT un-hide them on the new road.
+- **The walk precondition is satisfied:** the dev library's words are `VARIORUM_DEV_NEWROAD_WORDS` in
+  `~/.variorum/dev-castle.env` (the coordinator's dev-store facts; values never committed). No fresh dev library needed.
+
 ## 7. LIVE STATUS
 - 2026-10-18 ~18:45 — KICKED OFF. Preflight complete (the orchestrator): CastleRules + SyncSpec whole, the lifecycle
   stages, SurfaceContracts, VX-306 §8/§9 records + handoff, QUESTIONS #234 (ACCEPTED by this kickoff, her entry's own
@@ -791,7 +814,10 @@ ledger is the merging session's):**
   after line-by-line review and amendment. The Mac batch (`vx-307-u1-mac`) is next, then U2a.
 - 2026-10-18 20:18 — U1's Mac batch GREEN under `vx-307-u1-mac` (101/6, 0 skipped; the record's counts flipped).
   **U1 is CLOSED but for the ladder.** VX-416 → In Review at the ladder; Done rides the PR.
-- U2 (VX-417, split §5b into U2a/U2b/U2c): U2a SPAWNING (Opus, briefed §5c).
+- U2 (VX-417, split §5b into U2a/U2b/U2c): U2a BUILT (the §6 U2a RECORD — 8 commits, headless + builds green; the
+  orchestrator's structural verification: zero `Sources/`/`Server/` lines, all pushed; the findings arbitrated — the §6
+  U2a ARBITRATION). The U2a Mac batch runs next under the stage (`vx-307-u2a-mac`); U2b spawns after it (tree quiet
+  during the xcodebuild run).
 - U2a (VX-417): BUILT (the §6 U2a RECORD) — the crossings' faces on the new road (Use Castle / Use Standard / Replace
   All Keys read from `assess`, the gate choice and the gate-style row, rule 11's notice and its reversal, VX-310's re-arm
   card, the Touch ID walk switch); headless 87/12 + the core's protection set both configurations green; Mac
