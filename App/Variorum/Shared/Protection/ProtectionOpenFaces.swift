@@ -188,6 +188,10 @@ final class RoadStandingModel {
     /// would refuse at once otherwise, forever (P-2: a door that cannot act is not rendered; the ladder's round-1 NIT 4).
     /// Re-read from the library each time a set-passphrase sheet closes.
     private(set) var offersSetPassphrase: Bool
+    /// VX-307 U2a — the crossings (Use Castle, Use Standard, Replace All Keys, the gate-style row, rule 11's notice):
+    /// the BOOTSTRAP's model, handed to each open library's faces so the Protection pane finds it (it outlives the
+    /// reopen a crossing makes; this model does not).
+    var crossings: RoadCrossingsModel?
 
     @ObservationIgnored private let setPassphrase: (String) async -> SetPassphraseOutcome
     @ObservationIgnored private let passphraseExists: () -> Bool

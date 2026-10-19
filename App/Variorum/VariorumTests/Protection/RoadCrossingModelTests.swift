@@ -189,11 +189,11 @@ struct RoadCrossingModelTests {
         try #require(model.confirm).cancel()
         #expect(model.confirm == nil && planted.requests.isEmpty)
         model.open(.useCastle)
-        await try #require(model.confirm).submit(passphrase: "p", again: "p", words: Self.wordsText)
+        try await #require(model.confirm).submit(passphrase: "p", again: "p", words: Self.wordsText)
         #expect(!model.exportNotice)
         planted.press = .made(exportTurnedOff: true)
         model.open(.useCastle)
-        await try #require(model.confirm).submit(passphrase: "p", again: "p", words: Self.wordsText)
+        try await #require(model.confirm).submit(passphrase: "p", again: "p", words: Self.wordsText)
         model.exportNoticeOK()
         #expect(!model.exportNotice && planted.exportCalls == 0, "OK reverses nothing")
     }

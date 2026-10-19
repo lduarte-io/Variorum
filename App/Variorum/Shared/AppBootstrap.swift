@@ -186,6 +186,13 @@ final class AppBootstrap {
     /// VX-306 U3 — receipts the NEXT open on the new road owes the status seam (Make this my library's §7c (9)):
     /// handed to the session the reopen makes, then spoken by the ready composition like every owed receipt.
     @ObservationIgnored private var receiptsForNextRoadOpen: [String] = []
+    /// VX-307 U2a — the crossings on the new road (nil on today's road, and before the first open): OWNED HERE because a
+    /// crossing reopens the library — the `.ready` tree, the Settings pane and its `@State` go down and come back, and the
+    /// confirm in flight, its refusal and rule 11's notice must survive that. Made at the first ready on the new road.
+    private(set) var roadCrossings: RoadCrossingsModel?
+    /// VX-307 U2a — this Mac's scheduled plain-text export (the weekly copy's switch, `MarkdownInsurance`): the
+    /// production instance's standard defaults; a test bootstrap's own suite, never the app's domain.
+    @ObservationIgnored private let exportSwitch: ScheduledExportSwitch
 
     init(
         variant: AppDatabase.StoreVariant = StoreLocation.resolve(),
@@ -201,6 +208,7 @@ final class AppBootstrap {
         newRoad = ProtectionRoad.opensOnTheNewRoad(devStore: variant == .dev)
         roadInputs = newRoad ? RoadInputs.live(variant: variant) : nil
         reminderLedger = PassphraseReminderLedger()
+        exportSwitch = Self.markdownInsuranceSwitch(suiteName: nil)
         lobbyVaultRoad = LobbyVaultRoad.live(scope: variant.rawValue)
         protection = ProtectionController(configuration: .init(
             scope: variant.rawValue,
@@ -262,6 +270,7 @@ final class AppBootstrap {
         roadInputs = protectionRoad.map(RoadInputs.test)
         reminderLedger = PassphraseReminderLedger(
             defaults: UserDefaults(suiteName: PassphraseReminderLedger.testSuiteName) ?? .standard)
+        exportSwitch = Self.markdownInsuranceSwitch(suiteName: Self.crossingTestExportSuiteName)
         self.lobbyVaultRoad = lobbyVaultRoad
         protection = ProtectionController(configuration: .init(
             scope: AppDatabase.StoreVariant.dev.rawValue,
@@ -624,6 +633,9 @@ final class AppBootstrap {
             }
             // VX-306 U2: its protection faces (rule 27's banner, the split pair, rule 3's reminder, the receipts).
             roadStanding = road.map { RoadStandingModel.make($0, ledger: reminderLedger) }
+            // VX-307 U2a: the crossings — made once, kept across every reopen; the faces carry them to the pane.
+            if newRoad, road != nil, roadCrossings == nil { roadCrossings = RoadCrossingsModel(roads: crossingRoads()) }
+            roadStanding?.crossings = roadCrossings
             let view: AppDatabase
             if let binding {
                 // The re-open after a lock: the SAME ambient view adopts
@@ -1189,6 +1201,104 @@ final class AppBootstrap {
         await awaitOpen()
         return result.outcome
     }
+
+    // MARK: - VX-307 U2a: THE CROSSINGS (the new road only — rules 11, 12; Replace All Keys)
+
+    /// The crossings' roads on the new road. Each reads the CURRENT session at its call (a reopen replaces it); nil
+    /// sessions, today's road and a hosted test run's read-only road answer with nothing done.
+    func crossingRoads() -> RoadCrossingRoads {
+        let exports = exportSwitch
+        return RoadCrossingRoads(
+            read: { [weak self] in
+                guard let self, self.newRoad, case .ready = self.state, let session = self.roadSession else { return nil }
+                return await Task.detached(priority: .userInitiated) {
+                    ProtectionCrossings.readCrossings(session, exportSwitch: exports)
+                }.value
+            },
+            cross: { [weak self] request in
+                guard let self else { return .refused(ProtectionWords.crossingFailed) }
+                return await self.crossOnNewRoad(request)
+            },
+            changeGate: { [weak self] gate, passphrase in
+                guard let session = self?.roadSession, session.writes else { return .refused(ProtectionWords.gateRowFailed) }
+                return await Task.detached(priority: .userInitiated) {
+                    await ProtectionCrossings.changeGate(session, to: gate, passphrase: passphrase)
+                }.value
+            },
+            turnExportBackOn: { [weak self] in
+                guard let session = self?.roadSession, session.writes else { return false }
+                return await Task.detached(priority: .userInitiated) {
+                    await ProtectionCrossings.turnExportBackOn(session, exportSwitch: exports)
+                }.value
+            })
+    }
+
+    /// **A CROSSING** (Use Castle · Use Standard · Replace All Keys) — Make this my library's seam shape: every check
+    /// first, all reads (`ProtectionCrossings.preflight` — the door RE-READ, VX-108; the typed pair against the live key
+    /// file — a typo never tears the window down); then the composition root's teardown (`onWillLock` — flush,
+    /// savepoint, stop), the `.ready` tree down, the app's pool CLOSED through the binding (the swap's precondition), and
+    /// the core's act off the main actor on its sealed plan (rule 20); then the reopen THROUGH THE NEW ROAD with the key
+    /// that opens the slot now (the new one; the old one when nothing swapped), the act's receipt owed to the reopened
+    /// session, and Settings asked back to Protection, where she acted (VX-206's road). One act at a time on the session.
+    func crossOnNewRoad(_ request: RoadCrossingRequest) async -> RoadCrossingPress {
+        guard newRoad, case .ready = state, let binding, let session = roadSession, session.writes else {
+            return .refused(ProtectionWords.crossingFailed)
+        }
+        guard session.beginAct() else { return .refused(ProtectionWords.copyDoorBusy) }
+        let exports = exportSwitch
+        let preflight = await Task.detached(priority: .userInitiated) {
+            ProtectionCrossings.preflight(
+                session, door: request.door, shown: request.shown, typed: request.typed, exportSwitch: exports)
+        }.value
+        switch preflight {
+        case .ready:
+            break
+        case .refused(let sentence):
+            session.endAct()
+            return .refused(sentence)
+        case .changed(let fresh):
+            session.endAct()
+            return .changed(fresh)
+        }
+        await onWillLock?()
+        state = .opening
+        protection.dropResident()
+        protection.resetPerOpenDeferrals()
+        protection.syncCustodySession.drop()
+        let result = await Task.detached(priority: .userInitiated) {
+            binding.lock()
+            return await ProtectionCrossings.cross(
+                session, door: request.door, typed: request.typed, gate: request.gate, exportSwitch: exports)
+        }.value
+        session.endAct()
+        if case .made(let door, _) = result.outcome { receiptsForNextRoadOpen.append(door.receipt) }
+        beginOpening(unlockedKey: result.reopenKey)
+        await awaitOpen()
+        protection.requestProtectionPaneForRoadCrossing()
+        switch result.outcome {
+        case .made(_, let exportTurnedOff): return .made(exportTurnedOff: exportTurnedOff)
+        case .refused(let sentence): return .refused(sentence)
+        }
+    }
+
+    /// The weekly plain-text copy's switch (`MarkdownInsurance`) over a defaults domain — nil: this Mac's standard
+    /// defaults (production); a test bootstrap names its own suite.
+    nonisolated static func markdownInsuranceSwitch(suiteName: String?) -> ScheduledExportSwitch {
+        guard let suiteName else {
+            return ScheduledExportSwitch(
+                isOn: { MarkdownInsurance.isEnabled(in: .standard) },
+                set: { MarkdownInsurance.setEnabled($0, in: .standard) })
+        }
+        // A named suite only — never falls back to the app's domain (a suite that can't be made reads off, writes nothing).
+        return ScheduledExportSwitch(
+            isOn: { UserDefaults(suiteName: suiteName).map { MarkdownInsurance.isEnabled(in: $0) } ?? false },
+            set: { value in
+                if let suite = UserDefaults(suiteName: suiteName) { MarkdownInsurance.setEnabled(value, in: suite) }
+            })
+    }
+
+    /// A test bootstrap's scheduled-export domain — never the app's.
+    nonisolated static let crossingTestExportSuiteName = "io.lduarte.Variorum.vx307-crossing-tests"
 
     // MARK: - pre-13x 2b: THE RE-KEY ROAD (§4 step 4 — "the pool closed
     // first; off-main")

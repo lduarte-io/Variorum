@@ -497,9 +497,19 @@ dev/real store or `/Applications` touch: the brief's limits.)
   standing until OK or reversed, the gate-style row's presses — Touch ID only after the passphrase is asked). Pins
   `RoadCrossingModelTests` (8, planted roads, pure). HEADLESS `✔ Test run with 8 tests in 1 suite passed`; the Mac run
   PENDING.
-- Piece 4 — THE BOOTSTRAP'S CROSSING ROAD: NOT-STARTED. Make this my library's seam shape (teardown, the pool closed
-  through the binding, the act off-main, the reopen through the new road with the key that opens the slot, the receipt
-  owed to the reopened session, the Protection pane asked back). Mac route suite PENDING (the stage).
+- Piece 4 — THE BOOTSTRAP'S CROSSING ROAD: DONE (this commit). `AppBootstrap.crossOnNewRoad` — Make this my library's
+  seam shape: the preflight (all reads) BEFORE anything closes; then `onWillLock`, `.opening`, the pool closed through
+  the binding, `ProtectionCrossings.cross` off the main actor; the reopen through the new road with the key that opens
+  the slot; the door's receipt owed to the reopened session (`receiptsForNextRoadOpen`); Settings asked back to
+  Protection (`ProtectionController.requestProtectionPaneForRoadCrossing` — a new, unconditional twin of the ceremony's
+  request, never called on today's road). `crossingRoads()` (each road reads the CURRENT session at its call).
+  `roadCrossings` is made at the first ready on the new road and handed to every open library's faces
+  (`RoadStandingModel.crossings` — the pane's reach). The scheduled-export switch: production `MarkdownInsurance` over
+  `.standard`; the test bootstrap's own suite (`crossingTestExportSuiteName`), which never falls back to the app's
+  domain. Mac suite `ProtectionCrossingRouteTests` (2: Use Castle through the bootstrap — the pool closed, the reopen on
+  the new road in Castle under a new key, the receipt owed once, Settings asked back, rule 11's notice and its reversal;
+  then Use Standard back with its receipt; a wrong word never tears the window down) — BUILT, its RUN PENDING under the
+  stage. `xcodebuild … build-for-testing` → `** TEST BUILD SUCCEEDED **`, no warning in a touched file.
 - Piece 5 — THE MAC FACES: NOT-STARTED. Settings ▸ Protection's new-road section (the posture line, the doors, the
   gate-style row, the export-off notice), the confirm sheet; today's rows that read today's posture or act through
   today's machinery retire behind the switch on the new road (Release byte-unchanged).
