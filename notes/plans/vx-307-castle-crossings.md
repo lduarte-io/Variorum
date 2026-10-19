@@ -214,7 +214,21 @@ claim PENDING. The Mac batch is the orchestrator's under the stage.
 
 ## 6. RECORDS (each unit appends; the VX-306 §9 form)
 
-*(none yet)*
+### U1 RECORD — THE VAULT'S NEW SHAPE ON THE WIRE (the Fable fork, 2026-10-18; ticket VX-416)
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece 0 — this record skeleton: DONE (this commit).
+- Piece 1 — the SQL artifact `Server/supabase/17_phase_vx307_vault.sql` + the deploy checklist
+  `notes/plans/vx307-deploy-checklist.md` (PENDING-until-live rows; NOT deployed — her ruling, §1): NOT STARTED.
+- Piece 2 — the fake server's new vault shape (CAS order, proof before CAS, typed refusals): NOT STARTED.
+- Piece 3 — the production vault leaf (core adapter, additive beside today's client; swapped in at
+  `ProtectionSystem.live` on the new road): NOT STARTED.
+- Piece 4 — the engine's sync-key custody on the new road (`KeychainSyncKeysLeaf`; today's road byte-unchanged):
+  NOT STARTED.
+- Piece 5 — the two-client convergence suites (sync setup · join · follow in/out · lagging device · VX-109's CAS pin ·
+  VX-313's sealed-plan wire half): NOT STARTED.
+- Piece 6 — riders VX-380/VX-406 only if one-line in a touched suite: NOT STARTED.
+- No revert is in flight.
 
 ## 7. LIVE STATUS
 - 2026-10-18 ~18:45 — KICKED OFF. Preflight complete (the orchestrator): CastleRules + SyncSpec whole, the lifecycle
