@@ -821,7 +821,36 @@ round-2 reviewer makes the final call; agreed fixes applied red-on-old; `notes/p
 **LIVE STATUS (per finding; PENDING = unverified):**
 - MINOR-4 (the VariorumApp bottom-stack comment names the dropped split-pair line): AGREE — DONE (this commit): the
   comment now names rule 27's banner only and says U2c dropped the split pair's line (clarity class, no pin).
-- MAJOR-1 (F-2 — a Use Castle stopping past its swap leaves the weekly switch ON and the notice unspoken): NOT-STARTED.
+- MAJOR-1 (F-2 — a Use Castle stopping past its swap leaves the weekly switch ON and the notice unspoken): **AGREE** —
+  the mechanism is exactly the reviewer's (traced again: `cross`'s tail follows the switch only from the act's own
+  notice; a step failing past the swap leaves `acted == nil`; the next open's settle resumes and runs `exportOff` on the
+  SEALED setting; nothing on the new road reads the resumed notices). DONE (this commit). **RED ON THE PRE-FIX TREE** (a
+  harness probe, pre-fix APIs only — the planted crossing stopping at `retireOldCustody`, reopened through the road): `✘
+  Expectation failed: !exports.value` (the Castle mode and the sealed-off expectations passed: the settle ran the step,
+  the switch stayed ON). **THE FIX (the reviewer's shape, with one refinement):** rule 11's notice is a DURABLE MARK
+  (`ScheduledExportSwitch.noticeOwed` — this Mac's defaults `variorum.protection.exportOffNoticeOwed`, a boolean beside the
+  weekly copy's switch) written by `cross` BEFORE anything moves whenever a Use Castle starts with the switch on (cleared
+  there if nothing swapped); `ProtectionCrossings.reconcileExport` runs at EVERY ready on the new road
+  (`AppBootstrap.finish(.ready)`, a writing road): not in Castle → the mark clears; Castle with the sealed export still on
+  (an act that could not settle) → nothing yet; Castle with the sealed export off → the switch follows it off, and when it
+  did so HERE (the crash corner) the notice is also said once on the status seam (`road.addReceipt`). The notice in the
+  pane is re-read from the mark at each refresh (`RoadCrossingRoads.exportNoticeOwed`), cleared only by *OK*
+  (`dismissExportNotice`) or *Turn it back on* — so a quit before *OK* loses nothing. **The refinement:** the reconcile
+  keys on the MARK, not on "Castle + sealed off + switch on" alone — that state is also her own later choice (turning the
+  weekly copy back on from Data Safety while in Castle, which writes no sealed setting), which the bare rule would undo at
+  every launch. **Pins:** headless `ProtectionCrossingRoadTests.major1_anEntryStoppingPastItsSwapIsReconciledAtTheNextReady`
+  (the probe's scenario + the ready's reconcile: OFF, owed, once) and `major1_theNoticeIsDurableUntilAnsweredAndOwedOnlyWhileItApplies`
+  (a refused entry leaves no mark; the mark survives the tail; OK / Turn it back on / a ready out of Castle clear it);
+  `RoadCrossingModelTests.major1_theNoticeIsReReadFromTheDurableMark` (+ OK clears the mark); `PlantedCustodyLeaf` gains
+  `failingDeletes` (the crash-window idiom). MUTATION: the reconcile's follow neutered → `✘
+  major1_anEntryStoppingPastItsSwapIsReconciledAtTheNextReady` (2 issues), restored `cmp`-identical. HEADLESS `✔ Test run
+  with 91 tests in 12 suites passed`. **The true red-on-old through the bootstrap (Mac, the orchestrator's to run and
+  revert):** `ProtectionCrossingRouteTests.major1_anEntryStoppingPastItsSwapHasItsSwitchFollowedAtTheReopensReady` (a
+  planted failing custody leaf in the RoadWorld; asserts the switch OFF after the reopen, the pane's notice owed, the
+  notice said once) — it uses only pre-fix entry points for its act, so on the pre-fix tree it is RED at the switch
+  (PENDING the stage). `build-for-testing` → `** TEST BUILD SUCCEEDED **`. PROVISIONAL P-VX307-U2a-9: the crash corner's
+  one status-seam line is the notice's own sentence (a receipt — `receipt_style` governs it; the pane's notice is the
+  durable home).
 - MINOR-3 (the walk switch's armed-vs-pressed question; the typed road after a FAILED press; recipe row 5): NOT-STARTED.
 - NIT-3 (`newRoadSyncKeys.attach(nil)` at the teardown): NOT-STARTED.
 - NIT-1 / NIT-2: record-only (the reviewer's own dispositions).

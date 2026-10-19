@@ -123,7 +123,17 @@ nonisolated final class PlantedCustodyLeaf: CustodyLeaf, @unchecked Sendable {
         items[fact] = key
     }
 
+    /// VX-307 ladder r1 (MAJOR-1): the next N deletes FAIL (nothing deleted, nothing recorded) — an act stopping at a
+    /// step after its swap (the crash-window idiom on a planted road).
+    var failingDeletes = 0
+
+    struct DeleteFailed: Error {}
+
     func deleteCustody(fingerprint: String, itemClass: ProtectionNames.CustodyClass) throws {
+        if failingDeletes > 0 {
+            failingDeletes -= 1
+            throw DeleteFailed()
+        }
         writes.append("delete \(itemClass)")
         items[CustodyItemFact(fingerprint: fingerprint, itemClass: itemClass)] = nil
     }

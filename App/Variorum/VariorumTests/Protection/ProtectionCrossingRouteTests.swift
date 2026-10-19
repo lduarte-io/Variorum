@@ -107,6 +107,51 @@ struct ProtectionCrossingRouteTests {
         }
     }
 
+    /// LADDER ROUND 1, MAJOR-1 — through the bootstrap: a Use Castle whose act STOPS PAST ITS SWAP (a step after the swap
+    /// fails — a planted custody leaf in place of the keychain's), the reopen's settle finishes it — and THE READY follows
+    /// the weekly switch off, owes rule 11's notice durably (the pane re-reads it) and says it once on the status seam.
+    /// RED on the pre-fix tree (the switch stayed on; no notice); GREEN after.
+    @Test func major1_anEntryStoppingPastItsSwapHasItsSwitchFollowedAtTheReopensReady() async throws {
+        try await withRoadDependencies {
+            let world = RoadWorld()
+            let custody = PlantedCustodyLeaf()
+            world.custody = custody
+            Self.clearExports()
+            defer {
+                world.scope.purge()
+                Self.clearExports()
+            }
+            let (created, words) = try await world.created()
+            let bootstrap = world.bootstrap()
+            await bootstrap.awaitOpen()
+            guard case .ready = bootstrap.state else {
+                Issue.record("the library opens: \(bootstrap.state)")
+                return
+            }
+            let crossings = try #require(bootstrap.roadCrossings)
+            Self.exports.set(true)
+            await crossings.refresh()
+            crossings.open(.useCastle)
+            let confirm = try #require(crossings.confirm)
+            confirm.gate = .alwaysAsk
+            custody.failingDeletes = 1  // `retireOldCustody` — past the swap, before `exportOff`
+            await confirm.submit(passphrase: Self.passphrase, again: Self.passphrase, words: words.joined(separator: " "))
+            #expect(crossings.confirm == nil, "landed: \(confirm.refusal ?? "-")")
+            guard case .ready = bootstrap.state, let reopened = bootstrap.roadSession else {
+                Issue.record("the reopen lands ready: \(bootstrap.state)")
+                return
+            }
+            #expect(reopened.library.record?.mode == .castle && reopened.key != created.key)
+            #expect(reopened.library.section.settings.scheduledExport == false, "the settle's resume ran the export step")
+            #expect(!Self.exports.isOn(), "rule 11: the weekly export is off in Castle (the ready followed it)")
+            await crossings.refresh()
+            #expect(crossings.exportNotice, "rule 11's notice owed — durably")
+            var spoken: [String] = []
+            bootstrap.roadStanding?.speak = { spoken.append($0) }
+            #expect(spoken.filter { $0 == ProtectionWords.exportTurnedOffNotice }.count == 1, "\(spoken)")
+        }
+    }
+
     /// THE TOUCH ID WALK SWITCH (P-VX307-U2a-6) arms the PRODUCTION custody leaf — once per process, on a writing road
     /// only (the press it plants is the walk's: no test can press Touch ID).
     @Test func theTouchIDWalkSwitchArmsTheProductionLeafOncePerProcess() async throws {

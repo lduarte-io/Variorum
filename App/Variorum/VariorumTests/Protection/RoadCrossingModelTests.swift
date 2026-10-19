@@ -24,6 +24,9 @@ final class PlantedCrossingRoads {
     private(set) var requests: [RoadCrossingRequest] = []
     private(set) var gateCalls: [(GateStyle, String?)] = []
     private(set) var exportCalls = 0
+    /// Rule 11's notice owed — the road's durable mark (MAJOR-1).
+    var noticeOwed = false
+    private(set) var dismissCalls = 0
 
     var roads: RoadCrossingRoads {
         RoadCrossingRoads(
@@ -33,6 +36,8 @@ final class PlantedCrossingRoads {
             },
             cross: { [self] request in
                 requests.append(request)
+                // The production road writes rule 11's durable mark before the act (MAJOR-1).
+                if press == .made(exportTurnedOff: true) { noticeOwed = true }
                 return press
             },
             changeGate: { [self] gate, passphrase in
@@ -41,7 +46,13 @@ final class PlantedCrossingRoads {
             },
             turnExportBackOn: { [self] in
                 exportCalls += 1
+                if exportBackOn { noticeOwed = false }
                 return exportBackOn
+            },
+            exportNoticeOwed: { [self] in noticeOwed },
+            dismissExportNotice: { [self] in
+                dismissCalls += 1
+                noticeOwed = false
             })
     }
 
@@ -196,6 +207,23 @@ struct RoadCrossingModelTests {
         try await #require(model.confirm).submit(passphrase: "p", again: "p", words: Self.wordsText)
         model.exportNoticeOK()
         #expect(!model.exportNotice && planted.exportCalls == 0, "OK reverses nothing")
+        #expect(planted.dismissCalls == 1 && !planted.noticeOwed, "OK clears the durable mark")
+    }
+
+    /// LADDER ROUND 1, MAJOR-1 — the notice is the road's DURABLE mark, re-read at every refresh: a model made fresh (a
+    /// relaunch after a quit before OK, or an entry finished by a later open's settle) shows it with no crossing in this
+    /// process; OK clears it for good.
+    @Test func major1_theNoticeIsReReadFromTheDurableMark() async {
+        let planted = PlantedCrossingRoads()
+        planted.faces = PlantedCrossingRoads.faces()
+        planted.noticeOwed = true
+        let model = RoadCrossingsModel(roads: planted.roads)
+        #expect(!model.exportNotice)
+        await model.refresh()
+        #expect(model.exportNotice, "owed with no crossing in this process")
+        model.exportNoticeOK()
+        await model.refresh()
+        #expect(!model.exportNotice && planted.dismissCalls == 1)
     }
 
     /// THE GATE-STYLE ROW: Always ask at once; Touch ID only after the passphrase is asked — a refusal said, a change

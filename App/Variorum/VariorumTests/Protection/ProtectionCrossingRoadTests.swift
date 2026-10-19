@@ -19,19 +19,26 @@ import VariorumCore
 nonisolated final class PlantedExportSwitch: @unchecked Sendable {
     private let lock = NSLock()
     private var on: Bool
+    private var owed = false
     private(set) var writes: [Bool] = []
 
     init(_ on: Bool = false) { self.on = on }
 
     var value: Bool { lock.withLock { on } }
+    /// Rule 11's notice owed — the durable mark (MAJOR-1).
+    var noticeOwed: Bool { lock.withLock { owed } }
 
     var road: ScheduledExportSwitch {
-        ScheduledExportSwitch(isOn: { self.value }, set: { value in
-            self.lock.withLock {
-                self.on = value
-                self.writes.append(value)
-            }
-        })
+        ScheduledExportSwitch(
+            isOn: { self.value },
+            set: { value in
+                self.lock.withLock {
+                    self.on = value
+                    self.writes.append(value)
+                }
+            },
+            noticeOwed: { self.noticeOwed },
+            setNoticeOwed: { value in self.lock.withLock { self.owed = value } })
     }
 }
 
@@ -276,6 +283,72 @@ struct ProtectionCrossingRoadTests {
             session, door: .useStandard, typed: typed, gate: .alwaysAsk, exportSwitch: PlantedExportSwitch().road)
         #expect(standard.outcome == .refused(ProtectionWords.crossingDoorClosed))
         #expect(session.library.record?.mode == .standard && session.key == key)
+    }
+
+    /// LADDER ROUND 1, MAJOR-1 — A USE CASTLE THAT STOPS PAST ITS SWAP, BEFORE ITS EXPORT STEP (a step after the swap
+    /// fails — the crash-window idiom): the in-process tail never follows the switch; the next open's settle resumes the
+    /// act and turns this Mac's SEALED export off — and before the fix the weekly switch STAYED ON in Castle, with the
+    /// notice unspoken (red on the pre-fix tree: the harness probe's `!exports.value`). The fix: rule 11's notice is a
+    /// durable mark written before the act, and every ready on the new road reconciles — the switch follows the core's
+    /// step, the notice stays owed until *OK* or *Turn it back on*.
+    @Test func major1_anEntryStoppingPastItsSwapIsReconciledAtTheNextReady() async throws {
+        let road = PlantedRoad()
+        let (session, words) = try await road.created()
+        let exports = PlantedExportSwitch(true)
+        road.custody.failingDeletes = 1  // `retireOldCustody` — after the swap, before `exportOff`
+        let result = try await Crossing.press(
+            session, .useCastle, typed: TypedSecrets(words: words, newPassphrase: Crossing.passphrase), exports: exports)
+        #expect(result.outcome == .made(.useCastle, exportTurnedOff: false), "landed past the swap, its tail never ran")
+        #expect(exports.value && exports.noticeOwed, "the switch untouched in-process; the notice owed — durably")
+        // The next open, through the road: its settle resumes the act and runs the export step.
+        guard case .opened(let reopened) = await ProtectionOpenRoad.route(road.context(), keyInHand: result.reopenKey) else {
+            Issue.record("the reopen opens the crossed library")
+            return
+        }
+        #expect(reopened.library.record?.mode == .castle)
+        #expect(!reopened.library.section.settings.scheduledExport, "the settle's resume turned the sealed export off")
+        #expect(exports.value, "the hole as the pre-fix tree left it: the switch still on")
+        // The ready's reconcile (the bootstrap runs it at every open on the new road).
+        #expect(ProtectionCrossings.reconcileExport(reopened.library, exportSwitch: exports.road), "followed HERE")
+        #expect(!exports.value, "rule 11: the weekly export is off in Castle")
+        #expect(exports.noticeOwed, "the notice stays owed until OK or Turn it back on")
+        #expect(!ProtectionCrossings.reconcileExport(reopened.library, exportSwitch: exports.road), "once")
+    }
+
+    /// MAJOR-1's second corner — the notice is DURABLE (a quit before *OK* loses nothing) and owed only while it applies:
+    /// *OK* clears it; *Turn it back on* clears it; a ready that finds the library out of Castle clears it; an entry that
+    /// refused before anything moved never leaves it; with the switch off nothing is ever owed.
+    @Test func major1_theNoticeIsDurableUntilAnsweredAndOwedOnlyWhileItApplies() async throws {
+        let road = PlantedRoad()
+        let (session, words) = try await road.created()
+        let exports = PlantedExportSwitch(true)
+        // A refusal before anything moves (the act's own: a wrong passphrase on a library with one) leaves no mark.
+        #expect(await ProtectionOpenRoad.setFirstPassphrase(session: session, new: Crossing.passphrase) == .set)
+        let refused = await ProtectionCrossings.cross(
+            session, door: .useCastle, typed: TypedSecrets(passphrase: "not it", words: words), gate: .alwaysAsk,
+            exportSwitch: exports.road)
+        #expect(refused.outcome == .refused(ProtectionWords.passphraseDoesNotOpen))
+        #expect(!exports.noticeOwed && exports.value)
+        // The entry: the in-process tail follows the switch; the mark stands past this process's memory.
+        let entered = await ProtectionCrossings.cross(
+            session, door: .useCastle, typed: TypedSecrets(passphrase: Crossing.passphrase, words: words),
+            gate: .alwaysAsk, exportSwitch: exports.road)
+        #expect(entered.outcome == .made(.useCastle, exportTurnedOff: true))
+        #expect(!exports.value && exports.noticeOwed)
+        #expect(!ProtectionCrossings.reconcileExport(session.library, exportSwitch: exports.road), "already followed")
+        #expect(exports.noticeOwed, "a relaunch's ready still owes the notice")
+        ProtectionCrossings.dismissExportNotice(exportSwitch: exports.road)
+        #expect(!exports.noticeOwed)
+        // *Turn it back on* answers it too.
+        exports.road.setNoticeOwed(true)
+        #expect(await ProtectionCrossings.turnExportBackOn(session, exportSwitch: exports.road))
+        #expect(exports.value && !exports.noticeOwed)
+        // A ready that finds the library out of Castle owes nothing (and never touches the switch).
+        exports.road.setNoticeOwed(true)
+        _ = try await Crossing.press(
+            session, .useStandard, typed: TypedSecrets(passphrase: Crossing.passphrase, words: words), exports: exports)
+        #expect(!ProtectionCrossings.reconcileExport(session.library, exportSwitch: exports.road))
+        #expect(!exports.noticeOwed && exports.value)
     }
 
     /// THE GATE-STYLE ROW (Castle): Touch ID comes on only with the passphrase (a wrong one makes no item); Always ask

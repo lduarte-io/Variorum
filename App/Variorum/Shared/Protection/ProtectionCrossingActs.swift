@@ -28,6 +28,10 @@
 //      open's settle finishes the act — the door says it landed.
 //    - THE NOTICE'S REVERSAL (`turnExportBackOn`) — rule 11's "one notice you may reverse": the sealed setting and the
 //      switch, back on.
+//    - THE READY'S RECONCILE (`reconcileExport` — ladder round 1, MAJOR-1): the notice is a DURABLE mark written before
+//      a Use Castle's act; every open on the new road follows the switch off once the core's step has run — so an entry
+//      that stopped past its swap (finished by the next open's settle) and a quit before *OK* lose neither the switch-off
+//      nor the notice.
 //    - THE GATE-STYLE ROW (`changeGate`) — `changeSettings`: Touch ID on only with the passphrase where the hardware and
 //      a finger are here; Always ask deletes the item.
 //
@@ -40,6 +44,13 @@ import VariorumCore
 nonisolated struct ScheduledExportSwitch: Sendable {
     var isOn: @Sendable () -> Bool
     var set: @Sendable (Bool) -> Void
+    /// RULE 11's one notice, OWED (ladder round 1, MAJOR-1): a DURABLE mark beside the switch (this Mac's defaults in
+    /// production) — written before a Use Castle's act whenever the switch is on, cleared only by *OK*, *Turn it back
+    /// on*, or a ready that finds the library not in Castle. So neither a crash past the swap nor a quit before *OK* can
+    /// lose the notice, and the ready's reconcile (`ProtectionCrossings.reconcileExport`) knows an entry is owed its
+    /// follow — never inferring it from "Castle + the switch on", which is also her own later choice.
+    var noticeOwed: @Sendable () -> Bool
+    var setNoticeOwed: @Sendable (Bool) -> Void
 }
 
 /// What the press's preflight found.
@@ -152,6 +163,9 @@ nonisolated enum ProtectionCrossings {
         var library = session.library
         let executor = session.executor
         var acted: ActOutcome?
+        // MAJOR-1: the notice is owed BEFORE anything moves (a crash anywhere after this still finds the mark).
+        let markedHere = door == .useCastle && exportSwitch.isOn() && !exportSwitch.noticeOwed()
+        if markedHere { exportSwitch.setNoticeOwed(true) }
         do {
             if door == .useCastle {
                 // P-VX307-U2a-3: the switch into this Mac's sealed settings first, so the act's own step turns it off.
@@ -170,7 +184,8 @@ nonisolated enum ProtectionCrossings {
         } catch {
             session.library = library
             if ProtectionLibraryFiles.opens(slot, key: oldKey) {
-                // Nothing swapped — the library stands as it was (the core rolled the act back, rule 20).
+                // Nothing swapped — the library stands as it was (the core rolled the act back, rule 20); no notice.
+                if markedHere { exportSwitch.setNoticeOwed(false) }
                 ProtectionOpenRoad.log("road: \(door.rawValue) did nothing — \(String(describing: error))")
                 return CrossingResult(outcome: .refused(RoadCrossingFaces.actRefusalSentence(error)), reopenKey: oldKey)
             }
@@ -179,8 +194,8 @@ nonisolated enum ProtectionCrossings {
         }
         session.library = library
         // The act's own notice (rule 11) — the core's step turned this Mac's scheduled export off; the switch the app
-        // runs follows it. (An entry that stopped past its swap BEFORE that step finishes it at the next open's settle,
-        // which this road does not see: the switch is not followed there — a recorded hand-forward, never a silent claim.)
+        // runs follows it here. An entry that stopped past its swap BEFORE that step finishes it at the next open's
+        // settle; the ready after it follows the switch (`reconcileExport`, MAJOR-1) — the owed mark says so.
         let exportTurnedOff = acted?.notices.contains(.scheduledExportTurnedOff) ?? false
         if exportTurnedOff { followExportSwitch(exportSwitch) }
         let reopenKey = ProtectionLibraryFiles.opens(slot, key: library.key) ? library.key : oldKey
@@ -196,6 +211,34 @@ nonisolated enum ProtectionCrossings {
         guard exportSwitch.isOn() else { return }
         exportSwitch.set(false)
         ProtectionOpenRoad.log("road: the scheduled plain-text export turned off (rule 11)")
+    }
+
+    /// **THE READY'S RECONCILE** (ladder round 1, MAJOR-1 — run at every open on the new road, `AppBootstrap`'s ready):
+    /// rule 11's switch-off re-derived from DURABLE facts, never from one process's memory. Only while the notice is
+    /// owed (the mark a Use Castle wrote before its act):
+    ///   - the library is NOT in Castle → nothing is owed (the entry rolled back, or she has since left) — the mark clears;
+    ///   - in Castle with this Mac's sealed export still ON → the entry has not finished (an act in flight that could
+    ///     not settle) — nothing yet, the mark stands;
+    ///   - in Castle with the sealed export OFF → the core's step ran (in-process, or at a settle's resume after a crash)
+    ///     — the switch follows it off; the notice stays owed until *OK* or *Turn it back on*.
+    /// True when it turned the switch off HERE (the crash corner: the in-process tail never ran).
+    @discardableResult
+    static func reconcileExport(_ library: UnlockedLibrary, exportSwitch: ScheduledExportSwitch) -> Bool {
+        guard exportSwitch.noticeOwed() else { return false }
+        guard library.record?.mode == .castle else {
+            exportSwitch.setNoticeOwed(false)
+            ProtectionOpenRoad.log("road: rule 11's notice no longer owed (the library is not in Castle)")
+            return false
+        }
+        guard !library.section.settings.scheduledExport, exportSwitch.isOn() else { return false }
+        exportSwitch.set(false)
+        ProtectionOpenRoad.log("road: the scheduled plain-text export turned off at the ready (rule 11 — an entry finished by its settle)")
+        return true
+    }
+
+    /// *OK* on rule 11's notice — the mark clears (nothing else changes).
+    static func dismissExportNotice(exportSwitch: ScheduledExportSwitch) {
+        exportSwitch.setNoticeOwed(false)
     }
 
     // MARK: - Rule 11's notice, reversed
@@ -216,6 +259,7 @@ nonisolated enum ProtectionCrossings {
         }
         session.library = library
         exportSwitch.set(true)
+        exportSwitch.setNoticeOwed(false)
         ProtectionOpenRoad.log("road: the scheduled plain-text export turned back on (her call)")
         return true
     }

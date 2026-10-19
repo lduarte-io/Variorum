@@ -49,6 +49,11 @@ struct RoadCrossingRoads {
     var changeGate: @MainActor (GateStyle, String?) async -> GateChangeOutcome
     /// Rule 11's reversal.
     var turnExportBackOn: @MainActor () async -> Bool
+    /// Rule 11's notice owed — the DURABLE mark (ladder round 1, MAJOR-1): re-read at each refresh, so a quit before *OK*
+    /// or an entry finished by a later open's settle never loses it.
+    var exportNoticeOwed: @MainActor () async -> Bool
+    /// *OK* — the mark clears.
+    var dismissExportNotice: @MainActor () -> Void
 }
 
 // MARK: - One door's confirm
@@ -159,7 +164,8 @@ final class RoadCrossingsModel {
     private(set) var faces: RoadCrossingFaces?
     /// The one confirm in flight.
     private(set) var confirm: RoadCrossingConfirmModel?
-    /// RULE 11's one notice — owed after an entry turned the scheduled export off; standing until OK or reversed.
+    /// RULE 11's one notice — owed after an entry turned the scheduled export off; standing until OK or reversed. Its
+    /// truth is the road's durable mark (re-read at each refresh — MAJOR-1), never this process's memory alone.
     private(set) var exportNotice = false
     /// The reversal failed — said under the notice.
     private(set) var exportNoticeMessage: String?
@@ -180,8 +186,11 @@ final class RoadCrossingsModel {
         reads += 1
         let read = reads
         let fresh = await roads.read()
+        let owed = await roads.exportNoticeOwed()
         guard read == reads else { return }
         faces = fresh
+        exportNotice = owed
+        if !owed { exportNoticeMessage = nil }
     }
 
     /// A door's press on the pane: its confirm, from the door as last read.
@@ -209,6 +218,7 @@ final class RoadCrossingsModel {
     // MARK: - Rule 11's notice
 
     func exportNoticeOK() {
+        roads.dismissExportNotice()
         exportNotice = false
         exportNoticeMessage = nil
     }

@@ -636,6 +636,11 @@ final class AppBootstrap {
                 for receipt in receiptsForNextRoadOpen { road.addReceipt(receipt) }
                 receiptsForNextRoadOpen = []
             }
+            // VX-307 ladder round 1 (MAJOR-1): rule 11's switch-off reconciled at every ready on the new road — an entry
+            // finished by this open's settle (it stopped past its swap) has its switch followed here, and says so once.
+            if let road, road.writes, ProtectionCrossings.reconcileExport(road.library, exportSwitch: exportSwitch) {
+                road.addReceipt(ProtectionWords.exportTurnedOffNotice)
+            }
             // VX-306 U2: its protection faces (rule 27's banner, the split pair, rule 3's reminder, the receipts).
             // VX-307 U2b: …and the card above the quick entry (the words' look copies through the platform's one rule).
             roadStanding = road.map { RoadStandingModel.make($0, ledger: reminderLedger, copyWords: { Self.copyWords($0) }) }
@@ -1277,7 +1282,10 @@ final class AppBootstrap {
                 return await Task.detached(priority: .userInitiated) {
                     await ProtectionCrossings.turnExportBackOn(session, exportSwitch: exports)
                 }.value
-            })
+            },
+            // MAJOR-1: rule 11's notice is the durable mark's, re-read at each refresh; *OK* clears it.
+            exportNoticeOwed: { exports.noticeOwed() },
+            dismissExportNotice: { ProtectionCrossings.dismissExportNotice(exportSwitch: exports) })
     }
 
     /// **A CROSSING** (Use Castle · Use Standard · Replace All Keys) — Make this my library's seam shape: every check
@@ -1331,18 +1339,32 @@ final class AppBootstrap {
     /// The weekly plain-text copy's switch (`MarkdownInsurance`) over a defaults domain — nil: this Mac's standard
     /// defaults (production); a test bootstrap names its own suite.
     nonisolated static func markdownInsuranceSwitch(suiteName: String?) -> ScheduledExportSwitch {
+        let owedKey = exportNoticeOwedKey
         guard let suiteName else {
             return ScheduledExportSwitch(
                 isOn: { MarkdownInsurance.isEnabled(in: .standard) },
-                set: { MarkdownInsurance.setEnabled($0, in: .standard) })
+                set: { MarkdownInsurance.setEnabled($0, in: .standard) },
+                noticeOwed: { UserDefaults.standard.bool(forKey: owedKey) },
+                setNoticeOwed: { owed in
+                    if owed { UserDefaults.standard.set(true, forKey: owedKey) } else { UserDefaults.standard.removeObject(forKey: owedKey) }
+                })
         }
         // A named suite only — never falls back to the app's domain (a suite that can't be made reads off, writes nothing).
         return ScheduledExportSwitch(
             isOn: { UserDefaults(suiteName: suiteName).map { MarkdownInsurance.isEnabled(in: $0) } ?? false },
             set: { value in
                 if let suite = UserDefaults(suiteName: suiteName) { MarkdownInsurance.setEnabled(value, in: suite) }
+            },
+            noticeOwed: { UserDefaults(suiteName: suiteName)?.bool(forKey: owedKey) ?? false },
+            setNoticeOwed: { owed in
+                guard let suite = UserDefaults(suiteName: suiteName) else { return }
+                if owed { suite.set(true, forKey: owedKey) } else { suite.removeObject(forKey: owedKey) }
             })
     }
+
+    /// VX-307 ladder round 1 (MAJOR-1) — rule 11's notice owed, beside the weekly copy's switch (this Mac's defaults; a
+    /// boolean, never a secret).
+    nonisolated static let exportNoticeOwedKey = "variorum.protection.exportOffNoticeOwed"
 
     /// A test bootstrap's scheduled-export domain — never the app's.
     nonisolated static let crossingTestExportSuiteName = "io.lduarte.Variorum.vx307-crossing-tests"
