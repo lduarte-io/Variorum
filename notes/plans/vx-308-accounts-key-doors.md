@@ -783,6 +783,45 @@ the sheet surviving the unlock — the pre-U1 behavior in effect); restored by `
 the suite `✔ 2/2` after. 0 instances at release; the stage released with the result line. **U1 IS CLOSED but for the
 walk and the ladder.**
 
+### VX-314 RECORD — THE ACCOUNT-BINDING GATE (the orchestrator's own hands, 2026-10-19 ~05:45 MDT; her ruling "ok include it")
+
+**The traced mechanism:** the server stamps and fences every pushed row by the signed-in session's identity, and
+nothing client-side refused a round when that session was not the library's bound account — so a library bound to X,
+with Y signed in, pushes new writing into Y's partition (possibly sealed under X's corpus key: wrong on both axes,
+silently). The protection layer's doors enforce the binding (`assess`'s `otherAccount` situation); the engine's mouth
+did not.
+
+**Built (one gate, the `keyProvider` pattern):**
+- `SyncError.accountMismatch(bound:signedIn:)` (`SyncSchema.swift`) — the §12 refusal grammar; the description names
+  the pair for logs and pins.
+- `SyncAccountBinding` (two nil-tolerant async closures) + `SyncEngine.accountBinding` (default nil = INERT) +
+  `refuseIfAccountMismatched()` in the round-entry cascade: push() after the re-key check and BEFORE keys (the bound
+  account's keys may sit in custody — "keys unavailable" would name the wrong fix), and in `pullIgnoringMarker()` so
+  `pull()` and `pullToHead()` are both gated. Refuses ONLY when both facts answer and disagree (an unbound library or
+  a signed-out session is some other state's business).
+- The wiring: `NewRoadSyncKeyProvider.boundAccount` (the SAME truth `currentKeys` reads — the record's account);
+  `SyncSession.configure(accountBinding:)`; `AppServices` takes `boundAccountRead` and builds the binding with the
+  signed-in side from its own auth session; `VariorumApp` passes the read on the NEW ROAD ONLY — today's road passes
+  nothing, so the gate is inert there and Release is byte-unchanged until VX-329 (the phase's one law; the phone's
+  composition passes nothing either — the gate arrives there with mobile's new-road wiring, the parity line).
+- The face: `SyncRowFace.Kind.accountMismatch` + the EXACT-match detector (`isAccountMismatchError`, the
+  `isKeysLockedError` exactness rule), the row arm (paused, warning-styled, the engine's sentence on hover, one door
+  "Account…"), the label *Sync paused — this library belongs to a different account* (PROVISIONAL P-VX308-314-1 with
+  the engine sentence P-VX308-314-2).
+
+**Pins (`Tests/VariorumCoreTests/AccountBindingGateTests.swift`, 2; + the harness gains `SyncClient.accountBinding`,
+nil default — every existing suite byte-untouched):** a mismatched sign-in refuses BOTH halves and `pullToHead`, the
+outbox byte-intact, the cursor unmoved, nothing pushed past the refusal, and the SAME client heals with no state
+surgery when the sign-in matches; nil-anywhere leaves the gate inert (all three arms). **MUTATION (red-on-old in
+effect):** the gate neutered -> `✘ … 6 issues` (the second note reached the server, the cursor moved — VX-314's bug
+live); restored `cmp`-identical; the suite + the lockstep neighbors `✔ 5 tests in 2 suites`.
+
+**Counts:** full core Debug `✔ 3311 tests in 430 suites` + the third target `✔ 40/6`; the ONE red is the recorded
+VX-353 wall-clock flake (`MCPHarnessTimeLimitTests…`, 19.1 s vs 15 s under the full parallel run; no MCP line in this
+diff). PENDING: `swift build -c release`, Mac `build-for-testing`, the Release app build, the phone build (running).
+The SyncStatusViews face pins (`PostureSwitchTests` · `SyncStalledRowTests` · `EncryptionFlowTests` ·
+`TierAndOnboardingTests`) ride the NEXT stage batch's list.
+
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
   `~/dev/variorum-vx-308`, branch pushed, in-flight row (holds the Sync/-custody slot) `969acce55` on main, Linear
