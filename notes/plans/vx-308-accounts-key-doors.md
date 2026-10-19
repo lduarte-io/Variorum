@@ -1748,7 +1748,15 @@ HARNESS: U1's scratchpad package `u1-harness` (the recipe in the U1 RECORD's COU
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton + the readings: DONE (this commit).
-- Piece 1 — F-4 (the hold's gate): NOT-STARTED — R-U4-5; the pin first, red on the pre-fix tree.
+- Piece 1 — F-4 (the hold's gate): DONE (`0a35a906b`; the pins-first commit `1a0c0d8ba`). `RoadRestoreHoldGateTests`
+  committed FIRST and RED ON THE PRE-FIX TREE (`✘ … 2 tests in 1 suite failed … with 4 issues` — a synced library's Use
+  Castle and Replace All Keys open with the marker beside the store; both presses' re-reads `.ready`; the local arm green
+  by design). The gate (R-U4-5): `ProtectionCrossings.readCrossings` reads `LibraryRestoreHold.isHeld(besideStore:)` and
+  `RoadCrossingFaces.heldForRestore()` turns an OPEN, SYNCED Use Castle / Replace All Keys into
+  `ProtectionWords.restoreHoldRefusal(title)` in place (PROVISIONAL P-VX308-U4-1); the preflight refuses with it, nothing
+  written; Resume's clear lifts it. Pins now 4 (+ the pure hold-back, + the sentence as drafted): with the crossing suites
+  headless `✔ Test run with 27 tests in 4 suites passed`. MUTATION M-F4-1 (the `synced` guard dropped — every open door
+  held) → `✘ aLocalLibrarysUseCastleStaysOpenUnderTheHold` (1 issue); restored by `git checkout --`, `cmp`-identical.
 - Piece 2 — NIT-R2-1 (the mark by library): NOT-STARTED — R-U4-4; red by behavioural revert (the key ignoring the id).
 - Piece 3 — VX-445 (the lock): NOT-STARTED — R-U4-1..3; the pure policy + the session's drop headless, the bootstrap's
   lock and the controller's hook through Mac route pins (BUILT; the RUN the orchestrator's).
