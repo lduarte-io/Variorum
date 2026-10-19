@@ -768,6 +768,21 @@ of her words land here verbatim):**
   refusal's grammar) when the signed-in account is not the library's bound account, on both roads' reads of the
   binding.
 
+**THE U1 MAC BATCH (the orchestrator, 2026-10-19 05:03–05:14 MDT, stage claim `vx-308-u1-mac`, the coordinator's GO;
+logs `vx308-u1-mac-run.log` · `-refix.log` · `-revert.log` · `-restore.log` in the worktree root, deleted at
+closeout):** `✘ Test run with 223 tests in 42 suites failed … with 4 issues (including 3 known issues)` — the 3 are
+`VX310TodayLobbyWitnessTests`' expected witnesses (a pass of either would be the failure); **ONE real red, fixed:**
+`StatusSeamVocabularyTests.noStatusDoorIsNamedForItsPlacementInsteadOfItsClass` flagged U1's new
+`RoadAccountRoads.speak` dot-call (`RoadAccountModel.swift:266`) — the member renamed to its class (`receipt`) at its
+three sites (the struct, the call, the bootstrap wiring) plus the test's construction label; the pre-existing
+`RoadStandingModel.speak` is untouched and unflagged (an assignment, not the retired call token — a ladder NIT
+candidate at most). Re-run `✔ 14 tests in 3 suites` (StatusSeamVocabulary + RoadAccountModel + AppBootstrapOffMain).
+**The bootstrap red-on-old VERIFIED BY BEHAVIORAL REVERT:** the one `libraryClosed()` line in `AppBootstrap.finish`
+reverted → `ProtectionAccountRouteTests.aSheetStandingWhenTheLibraryClosesNeverReturnsAfterTheUnlock` RED (2 issues,
+the sheet surviving the unlock — the pre-U1 behavior in effect); restored by `git checkout --`, `git diff` clean,
+the suite `✔ 2/2` after. 0 instances at release; the stage released with the result line. **U1 IS CLOSED but for the
+walk and the ladder.**
+
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
   `~/dev/variorum-vx-308`, branch pushed, in-flight row (holds the Sync/-custody slot) `969acce55` on main, Linear
@@ -783,3 +798,9 @@ of her words land here verbatim):**
   (fresh-chain overlay order — recorded) and R-2 (the sweep's sync_reencrypt row now marker-aware — fixed in repo,
   pins green 83/2). The throwaway speaks marker 14, ready for the account-arm walk. NEXT: U1 (the account section's
   faces — a fresh Opus implementer on §5a).
+
+- 2026-10-19 ~05:15 MDT — **U1 CLOSED but for the walk and the ladder** (the §6 U1 RECORD + arbitration + Mac-batch
+  paragraph): the account section's faces on the new road (the one presenter, the doors from assess, sync setup, the
+  three local leaves, the signed-out road, the walk's project switch), 223/42 under the stage with one fixed
+  vocabulary red, the bootstrap pin red-on-old by behavioral revert. VX-239/VX-243/VX-264 land with VX-418's trunk.
+  NEXT: VX-314's engine-mouth gate (the orchestrator, headless), then U2 (the join + follow faces).
