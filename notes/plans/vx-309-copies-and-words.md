@@ -380,4 +380,6 @@ fetch, no network.
 - Piece 3 — RETENTION WIRED (VX-302, VX-411): NOT-STARTED — R-U1a-5.
 - Piece 4 — VX-450 (Change/Reset roll back on a resume that cannot finish): NOT-STARTED — R-U1a-6.
 - Piece 5 — the close (counts, the Mac-suite list, PROVISIONALs, findings): NOT-STARTED.
-- No revert is in flight.
+- MUTATIONS IN FLIGHT on the committed `2c3175cda` (`ProtectionCopyCounts.swift`; restore = `git checkout --`, then `cmp`
+  against `u1a-prerevert/`): M-DS1 the counts in VX-397's wrong shape (every backup copy in the place, any Mac, any library),
+  M-DS2 the picked folder's count read from the container.
