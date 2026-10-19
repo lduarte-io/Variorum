@@ -327,9 +327,12 @@ final class RoadStandingModel {
     /// set-passphrase sheet's road through the session's executor. VX-307 U2b: the card above the quick entry — the
     /// words' look minting through rule 6's act on the session (`mintFreshWords`), `copyWords` the platform's one
     /// clipboard rule (the Mac's `WordsClipboard.copyConcealed` — VX-448), its local ledger in the reminder ledger's defaults.
+    /// VX-308 U3: `signInNow` — who is signed in now (the bootstrap's read), adopted by every look's mint (R-2); nil keeps
+    /// the executor's.
     static func make(
         _ session: ProtectionRoadSession, ledger: PassphraseReminderLedger,
-        snoozes: WordsCardSnoozes = .process, copyWords: @escaping ([String]) -> Void = { _ in }
+        snoozes: WordsCardSnoozes = .process, copyWords: @escaping ([String]) -> Void = { _ in },
+        signInNow: (@Sendable () -> SessionFact)? = nil
     ) -> RoadStandingModel {
         let faces = RoadStandingFaces.derive(session.report)
         let libraryID = session.library.record?.libraryID ?? ""
@@ -358,7 +361,7 @@ final class RoadStandingModel {
         let standing = StandingBox()
         let mint: (String?) async -> WordsMintOutcome = { passphrase in
             let outcome = await Task.detached(priority: .userInitiated) {
-                await ProtectionOpenRoad.mintFreshWords(session: session, passphrase: passphrase)
+                await ProtectionOpenRoad.mintFreshWords(session: session, passphrase: passphrase, signIn: signInNow?())
             }.value
             if case .minted = outcome { standing.model?.mintLanded() }
             return outcome

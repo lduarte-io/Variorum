@@ -122,10 +122,16 @@ nonisolated extension ProtectionOpenRoad {
     /// VX-307 U2b (VX-412) — RULE 2's LOOK: fresh words (this system's minting, `ids.mintWords`) locked on the key
     /// file through rule 6's act (`regenerateWords` — the key unchanged; a library with a passphrase is asked it, one
     /// with none is asked nothing, PROVISIONAL P-VX307-U2b-1), handed back to be shown ONCE and never stored or logged.
-    static func mintFreshWords(session: ProtectionRoadSession, passphrase: String?) async -> WordsMintOutcome {
+    /// VX-308 U3 (R-U3-5 — the look is the New Words key door): `signIn` — the sign-in NOW, adopted into the executor under
+    /// the act's one-act lock (U1's R-2: a synced library's look after a sign-in made since the open acts as whoever is
+    /// signed in now); nil keeps the executor's (every earlier caller).
+    static func mintFreshWords(
+        session: ProtectionRoadSession, passphrase: String?, signIn: SessionFact? = nil
+    ) async -> WordsMintOutcome {
         guard session.writes else { return .refused(ProtectionWords.wordsLookFailed) }
         guard session.beginAct() else { return .refused(ProtectionWords.copyDoorBusy) }
         defer { session.endAct() }
+        if let signIn { session.executor.configuration.session = signIn }
         let fresh = session.system.leaves.ids.mintWords()
         guard fresh.count == 12 else {
             log("road: rule 2's look — the words could not be minted")

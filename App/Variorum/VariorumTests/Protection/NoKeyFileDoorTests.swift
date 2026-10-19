@@ -31,10 +31,13 @@ struct NoKeyFileDoorTests {
         return session
     }
 
-    /// The standing faces over `session`, their receipts collected.
-    static func standing(_ session: ProtectionRoadSession, _ store: ThrowawayDefaults) -> (RoadStandingModel, Receipts) {
+    /// The standing faces over `session`, their receipts collected (`signInNow`: the bootstrap's read of who is signed in).
+    static func standing(
+        _ session: ProtectionRoadSession, _ store: ThrowawayDefaults, signInNow: (@Sendable () -> SessionFact)? = nil
+    ) -> (RoadStandingModel, Receipts) {
         let model = RoadStandingModel.make(
-            session, ledger: PassphraseReminderLedger(defaults: store.defaults), snoozes: WordsCardSnoozes())
+            session, ledger: PassphraseReminderLedger(defaults: store.defaults), snoozes: WordsCardSnoozes(),
+            signInNow: signInNow)
         let receipts = Receipts()
         model.speak = { receipts.lines.append($0) }
         return (model, receipts)
@@ -179,7 +182,11 @@ struct NoKeyFileDoorTests {
             signIn: PlantedAccount.signedIn, exportSwitch: nil)
         let store = ThrowawayDefaults()
         defer { store.purge() }
-        let (standing, _) = Self.standing(session, store)
+        // R-2 (R-U3-5): the executor carries a stale sign-in (an open made signed out); the look's mint adopts the
+        // sign-in NOW from the bootstrap's read.
+        session.executor.configuration.session = .signedOut
+        let signedIn = PlantedAccount.signedIn
+        let (standing, _) = Self.standing(session, store, signInNow: { signedIn })
         let band = try #require(standing.band)
         await band.look.open()
         #expect(band.look.phase == .asking && band.look.saysAccountWords)

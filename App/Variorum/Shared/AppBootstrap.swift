@@ -659,7 +659,9 @@ final class AppBootstrap {
             }
             // VX-306 U2: its protection faces (rule 27's banner, the split pair, rule 3's reminder, the receipts).
             // VX-307 U2b: …and the card above the quick entry (the words' look copies through the platform's one rule).
-            roadStanding = road.map { RoadStandingModel.make($0, ledger: reminderLedger, copyWords: { Self.copyWords($0) }) }
+            roadStanding = road.map {
+                RoadStandingModel.make($0, ledger: reminderLedger, copyWords: { Self.copyWords($0) }, signInNow: signInNow)
+            }
             // VX-307 U2a: the crossings — made once, kept across every reopen; the faces carry them to the pane.
             // VX-308 U1: the one presenter and the account section beside them, made once the same way; the crossings
             // present through the presenter (VX-239 + VX-243).
