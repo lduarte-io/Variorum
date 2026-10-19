@@ -1772,9 +1772,29 @@ HARNESS: U1's scratchpad package `u1-harness` (the recipe in the U1 RECORD's COU
   mark per domain, the pre-fix behaviour) → `✘ anotherLibrarysReadyNeverClearsANoticeItDidNotWrite` (B's ready and B's *OK*
   cleared A's notice) + the migration and key pins red; R2 — the migration skipped → `✘
   anEarlierBuildsUnkeyedMarkMigratesOntoTheFirstLibraryConsulted` (5 issues).
-- Piece 3 — VX-445 (the lock): NOT-STARTED — R-U4-1..3; the pure policy + the session's drop headless, the bootstrap's
-  lock and the controller's hook through Mac route pins (BUILT; the RUN the orchestrator's).
-- Piece 4 — the close: NOT-STARTED.
+- Piece 3 — VX-445 (the lock): DONE (`094aaf693`). `Shared/Protection/ProtectionRoadLock.swift` (harness-visible):
+  `RoadRelockPolicy.of(library)` (Castle → this Mac's sealed `idleLockMinutes`; Standard → nil), `ProtectionRoadLock
+  .dropSessionMemory` (the bound account's sync keys out of session memory) and `.lobby(ctx)` (the open road's own
+  `lobbyFacts`). `AppBootstrap`: `roadRelockPolicy` (ready, bound, a road session in Castle); `canLock` on the new road =
+  that policy; `lock()` on the new road → `lockOnNewRoad` (R-U4-2: `awaitTheLockSeam` — the session's one-act lock held, an
+  act or an open in flight waited out; a road composed BEFORE the teardown, or nothing closes; `onWillLock`; `.opening`;
+  the resident key, per-open deferrals and custody session dropped; `dropSessionMemory`; `roadStanding`/`roadSession`
+  nil, the engine's key seam detached; `binding.lock()` and the lobby's facts off-main; `finish(.roadLobby)` — the
+  presenter's `libraryClosed` and VX-448's `clearWordsAtLock` by construction, F-U3-3). No lock-time byte copy on the new
+  road (P-VX308-U4-3). Both inits wire `protection.roadRelock` on the new road only. `ProtectionController`: `roadRelock`
+  (nil on today's road) — `relockIfPolicySays` (sleep/screen lock) and `relockIfIdle(now:)` (the 30-s tick, `IdleLockClock`
+  over the policy's minutes) take the new road's arm when the hook is set, today's arms unchanged in effect (internal now
+  for the route pins; `now` injectable, default `Date()`). Pins: `RoadLockTests` (4, headless — the policy Castle/Standard and
+  the sealed minutes 10 → 30 → never; the lobby under Always ask, no quiet road TAKEN even over a stale silent item the
+  route would open through; under Touch ID the one auto-ask's press opens it; the session drop) — `✔ Test run with 4 tests in
+  1 suite passed`. MUTATIONS (each on `094aaf693`, restored by `git checkout --`, `cmp`-identical): MK-L1 Standard locks too →
+  `✘ theRelockPolicyIsCastles…` (1); MK-L2 the default instead of the sealed setting → the same (2); MK-L3 nothing dropped →
+  `✘ theLockDropsTheAccountsSyncKeysFromSessionMemory` (1). MAC PINS (BUILT — `build-for-testing` `** TEST BUILD SUCCEEDED
+  **`, no warning in a touched file; the RUN PENDING the stage): `RoadLockRouteTests` (4) + `WordsClipboardLockRouteTests
+  .lockNowOnACastleLibraryEmptiesTheWordsALookCopied` (the lock road's twin, F-U3-3) — their red-on-old by behavioural
+  revert is the orchestrator's (the recipe in the close).
+- Piece 4 — the close: IN-PROGRESS — the whole harness, the core protection set both configurations, the phone, the
+  Release check, then the record's close sections.
 - No revert is in flight.
 
 ## 7. LIVE STATUS
