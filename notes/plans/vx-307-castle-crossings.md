@@ -1221,12 +1221,47 @@ Commits: `edbd86c14` (record) · `95bde6ea3` (1) · `a1a948c73` (2) · `6a0b5a05
 - Piece 2 — VX-414, the split-pair line dropped + her two U2-7 sentences: NOT-STARTED.
 - Piece 3 — VX-379's pane rows to the rules, today's rows on TODAY's road only (the U2a-4 ruling) + F-U2b-1 (the
   readme's Start Here words passage, its byte-pin re-anchored): NOT-STARTED.
-- Piece 4 — the three VX-306 copy-door hand-forwards ((i) one Touch ID press at Make this my library; (ii) the
-  Look inside flip-target flipped; (iii) the core `lookInside`'s prompting default dropped): NOT-STARTED.
+- Piece 4 — the three VX-306 copy-door hand-forwards: DONE (`7f521bcbb`; red-on-old by revert below).
+  **(i) ONE PRESS at Make this my library (round-2 NIT 1 (i)).** TRACED: the door's preflight
+  (`ProtectionCopyDoors.preflight`) runs a look at her press (`lookInside(… .includingTouchID)`) and the act
+  (`ProtectionExecutor.makeThisMyLibrary(copySecrets:)`) opened the copy AGAIN through `openCopy(… .includingTouchID)` —
+  so a copy whose own secret was mistyped (or that only this Mac's Touch ID item holds) read the Touch ID item twice:
+  two prompts for one press. FIX: the core gains `makeThisMyLibrary(_:opened:copy:in:currentPair:)` — the act takes the
+  key the look OPENED and re-verifies it against the copy's own file (`copyKeyOpens` — its fingerprint among the copy's,
+  and `copyOpens` on the copy's file: a read that never prompts; `openCopy`'s own check, factored out) instead of
+  opening it again; a key that no longer opens the copy refuses `copyDoesNotOpen` with nothing written. One private body
+  serves both forms (the secrets form stays for the lifecycle walk and the scenario world, which never hand a key).
+  `LookedInside` becomes `Sendable`. The app: `Preflight.ready` carries the look (`.ready(copy, catalog, opened)`);
+  `ProtectionCopyDoors.makeMine` takes `opened:` (no `copySecrets` any more); `AppBootstrap.makeThisMyLibrary` hands
+  the preflight's look to the act. No `Sync/` line; the custody stays the executor's (VX-313: a handed key steers
+  nothing — it must open the copy's own file). **(ii) THE FLIP-TARGET FLIPPED (round-2 NIT 1 (ii)).**
+  `LookInsideModel.submit` hands `.withoutAPress`: her typed *Open* tries what she typed and the quiet roads that never
+  prompt — a wrong secret refuses in words (`copyDoesNotOpen`) and never falls through to a Touch ID press
+  (PROVISIONAL P-VX307-U2c-3 — the look then has no Touch ID road of its own). The pinned test RENAMED
+  `theLooksFirstTryNeverPressesTouchIDAndHerOpenMay` → `theLookNeverPressesTouchIDAndAWrongSecretRefusesInWords`: the
+  wrong secret → `[.withoutAPress, .withoutAPress]` handed, zero Touch ID reads, `.needsSecret` with the refusal; her
+  words then open it by its own secrets, still zero reads. **(iii) THE CORE DEFAULT DROPPED (round-2 NIT 2).**
+  `ProtectionExecutor.lookInside`'s `quietRoads: CopyQuietRoads = .includingTouchID` → `quietRoads: CopyQuietRoads` (no
+  default): every core caller chooses — the app's three already did; the core tests' and the scenario world's/lifecycle
+  walk's eleven calls now say `.includingTouchID` explicitly (behaviour byte-identical: the model's own door, rule 17's
+  "its own quiet road on this Mac"). The app's twin `ProtectionCopyDoors.lookInside` keeps its non-prompting
+  `.withoutAPress` default (the brief). **Pins:** core `U2MakeMineTests.anOpenedCopyIsMadeMineWithOnePressNotTwo`
+  (Castle + Touch ID, the copy only the Touch ID item opens, the copy field wrong: the look 1 press, the opened act 0
+  more; the secrets form presses again at the act — the bug, documented; a key the copy doesn't open refuses with no
+  write) + `U2LookInsideTests.theCoreCopyDoorCarriesNoPromptingDefault` (SOURCE: the declaration names `quietRoads:
+  CopyQuietRoads` with no `=`) — core Debug `✔ Test run with 12 tests in 2 suites passed`; app headless
+  `MakeMineRoadTests.oneConfirmedPressReadsATouchIDItemOnce` (the planted road: the preflight's one read, the act made
+  with none more) + the flipped `LookInsideRoadTests` pin; `MakeMineRoadTests`/`PickedCopyRoadTests` follow the new
+  shapes (the refusal-inside-the-act test hands a look opened with `.withoutAPress`). **RED-ON-OLD BY REVERT** (each on
+  the committed tree `7f521bcbb`, restored by `git checkout --`, `git status` clean after): R1 `submit` back to
+  `.includingTouchID` → `✘ theLookNeverPressesTouchIDAndAWrongSecretRefusesInWords … with 4 issues` (handed, the read,
+  the refusal, the open); R2 the core default back → `✘ theCoreCopyDoorCarriesNoPromptingDefault … with 2 issues`; R3
+  the opened act re-opening the copy through the quiet roads (the pre-fix second open) → core `✘
+  anOpenedCopyIsMadeMineWithOnePressNotTwo … with 3 issues` and app `✘ oneConfirmedPressReadsATouchIDItemOnce … with 1
+  issue` (`touchIDReads == before + 1` — it read twice). Green again after: core 12/2, the harness `✔ Test run with 140
+  tests in 22 suites passed`. Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **`.
 - Piece 5 — the close (counts both configurations, the Mac suite list, PROVISIONALs, findings): NOT-STARTED.
-- REVERTS IN FLIGHT (red-on-old for piece 4, on the COMMITTED tree `7f521bcbb` — restore = `git checkout --` of the one
-  file each touches): R1 `LookInsideModel.submit` back to `.includingTouchID`; R2 `Copies.swift`'s `lookInside` default
-  back; R3 the core's `makeThisMyLibrary(opened:)` re-opening the copy through the quiet roads (the pre-fix second open).
+- No revert is in flight (piece 4's R1–R3 ran and were restored by `git checkout --`; `git status` clean).
 
 ## 7. LIVE STATUS
 - 2026-10-18 ~18:45 — KICKED OFF. Preflight complete (the orchestrator): CastleRules + SyncSpec whole, the lifecycle
