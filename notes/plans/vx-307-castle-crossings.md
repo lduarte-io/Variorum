@@ -1218,7 +1218,32 @@ Commits: `edbd86c14` (record) · `95bde6ea3` (1) · `a1a948c73` (2) · `6a0b5a05
   sheet's door by source, the text never selectable, no raw pasteboard in the face) — BUILT, its RUN PENDING under the
   stage. New feature: no red side (the API is new). Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **`, no warning
   in a touched file.
-- Piece 2 — VX-414, the split-pair line dropped + her two U2-7 sentences: NOT-STARTED.
+- Piece 2 — VX-414, the split-pair line dropped + her two U2-7 sentences: DONE (`0eba2d245`). **U2-6 (her "sure we can
+  drop the sentence"):** `ProtectionWords.offerSplitPair`, `RoadStandingFaces.splitPair`, `ProtectionRoadBar`'s
+  `splitPairLine` — gone; the core's `KeyFileSearch.besideOpensItOnlyThroughItsHistory` stays (the model's answer; the
+  faces now say nothing for it); its DERIVE PIN RETIRES with the line (`ProtectionOfferFaceTests
+  .theSearchsOtherAnswersAreTheStandingFaces` now asserts the split pair says nothing — `.none`, no card) and
+  `ProtectionWordsPlanTests` drops the line from §7c (2)'s list (the VX-306 plan keeps the draft as history). **U2-7
+  (her "I agree with your suggested wording") — byte-equal to the ticket's text (the words block below):** (1)
+  `ProtectionWords.noKeyFileAfterAQuietOpen` — the STANDING BANNER after a quiet open with no key file anywhere: the
+  Mac's `ProtectionRoadBar` and the phone's `MobileNoKeyFileSheet` say it (the account-road sentence still follows when
+  the library names an account — not ruled to change); both LOBBIES (nothing opened — `StoreLockView`,
+  `MobileRoadLockView`) keep §7c (3)'s refusal. (2) `ProtectionWords.offerBesideEmptyFromABackup` + her sentence's
+  question (`offerUseItQuestion` = *Use it?*, pinned the suffix of her `KeyFileOffer.backupHoldsOne`) — the interlude's
+  offer when the place beside the library is EMPTY and a BACKUP holds the right file: the open's report gains
+  `besideIsEmpty` (the library's `keyFile` nil when the search ran — set at the open and after *Use it*'s re-search),
+  the card `.offer(offer, besideEmpty:)` (default false — every existing construction unchanged); a stray beside keeps
+  her sentence; this Mac's keychain copy over an empty place (unreached — rule 1's quiet restore puts it back first)
+  keeps her keychain sentence. The composition is PROVISIONAL P-VX307-U2c-4. **Pins:** `ProtectionWordsVX307Tests` (4,
+  headless: her two sentences byte-equal to the plan's words block + the question her own sentence ends with + the
+  split pair gone from the words and both faces by source; the banner's words on the Mac bar and the phone sheet with
+  both lobbies keeping §7c (3), by source; THROUGH THE ROAD — the beside key file removed and this Mac's memory
+  cleared, a backup holding the file: `besideIsEmpty`, the card, the sentence *There is no key file beside your library.
+  A backup holds one that opens it. Use it?*, the receipt naming the backup's day, *Use it* putting the file back; a
+  stray beside keeps her sentence; the keychain offer keeps hers). MUTATIONS on the committed tree (restored by `git
+  checkout --`, `git status` clean): the variant's arm disabled → `✘ … with 1 issue` (the sentence); the report's
+  `besideIsEmpty` line removed → `✘ … with 3 issues`. The harness `✔ Test run with 144 tests in 23 suites passed`; Mac
+  `build-for-testing` → `** TEST BUILD SUCCEEDED **`; the phone `build` → `** BUILD SUCCEEDED **`.
 - Piece 3 — VX-379's pane rows to the rules, today's rows on TODAY's road only (the U2a-4 ruling) + F-U2b-1 (the
   readme's Start Here words passage, its byte-pin re-anchored): NOT-STARTED.
 - Piece 4 — the three VX-306 copy-door hand-forwards: DONE (`7f521bcbb`; red-on-old by revert below).
