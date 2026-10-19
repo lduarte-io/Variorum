@@ -303,6 +303,107 @@ evidence: §5a's verbatim.
 - No secrets in any record or echo; every apply carried the in-command ref guard. Scratch responses live in the
   session scratchpad only.
 
+### U1 RECORD — THE ACCOUNT SECTION'S FACES (Opus implementer, 2026-10-19; VX-418's trunk + VX-264 + VX-239/VX-243 — IN PROGRESS)
+
+**Not done in U1, first (standing until the close rewrites it):** STOPPED AT ONE DESIGN FORK BEFORE ANY CODE (F-FORK-1
+below — the architect rules, then the continuation builds). Nothing is built yet; the tree carries this record only; no
+revert is in flight. Preflight complete and not delegated: CLAUDE.md + canon, the resiliency protocol, CastleRules whole,
+SurfaceContracts (the app + Doors/protection), SyncSpec whole, this plan whole, VX-307 §5a + §5b–§5e + §6 (U1 RECORD, U2a
+RECORD + its fix leg, THE WALK RECORD) + §7, QUESTIONS #216 (the shipped copy AND her sitting's block), the core
+(`Assessment`, `Assess`, `AccountActs`, `KeyDoors`, `Executor`, `Facts`, `VaultModel`'s snapshot, `AccountVaultClient`),
+`Shared/Protection/` (`RoadCrossingsModel`, `RoadCrossingFaces`, `ProtectionCrossingActs`, `ProtectionWords`,
+`ProtectionOpenRoad`, `ProtectionOpenFaces`, `ProtectionRoadActs`, `ProtectionSystem`, `ProtectionFactsGatherer`,
+`WireVaultLeaf`, `ProtectionWalkSwitch`, `ProtectionRoad`), `RoadCrossingSheet`, `ProtectionPane`, `SettingsSceneContent`,
+`AppBootstrap`'s new-road arms, `AppServices`' account doors, `AuthSession`, `AuthViews`, `ProjectConfig`, the lifecycle
+page's stage 12, and the U2a harness recipe (the U2c harness's package + stubs, read from the VX-307 session's scratchpad).
+
+**F-FORK-1 (THE ONE FORK — `deleteAccountHere`'s server half; the architect's ruling needed).** `assess` opens
+`Door.deleteAccountHere` only while signed in to the library's account; the core's act (`leaveAccount(.deleteAccountHere)`)
+is the PROTECTION HALF only — the record stops naming the account, this Mac forgets its sync keys (rule 16). The VX-305 U3
+record says so outright: *"delete the account from this Mac (the server's deletion is the account lifecycle's — phase 4)"*.
+The U1 brief lists the door among the three leaves ("the face still confirms") and is silent on the server's deletion. Today
+the one deletion door is the Account sheet's *Delete Account…* (`AccountView` → `AppServices.deleteAccount`: her ruled
+friction — copy §4's body, the subscription advisory, the account password re-authenticated, the typed *DELETE MY ACCOUNT* —
+then the server purge and the sign-out, custody kept); on the new road it would purge the account and leave the record naming
+it (the section then reads `.signedOut`, and This Mac Only closes it). Options:
+- **(a) RECOMMENDED — the section's door is the deletion's new-road home.** *Delete your account…* (rendered only where
+  `assess` opens `deleteAccountHere`) through the one presenter: one confirm carrying the SHIPPED deletion friction
+  byte-reused (`ProtectionCopy.deleteAccountTitle`/`Body`, the advisory, the password, the typed phrase); the act = the
+  existing lifecycle road (`AppServices.deleteAccount`, injected by the composition root — no new server act) THEN the
+  protection half; a leave that fails after a landed deletion is said, and the signed-out road's This Mac Only finishes it.
+  The Account sheet's own door stays as it is (today's road byte-unchanged; on the new road its rarer use leaves the record
+  for This Mac Only). Why: the door exists in `assess` for exactly this moment and the brief binds every account door to the
+  section and its one presenter.
+- **(b)** The Account sheet stays the ONE deletion door everywhere; on the new road its success also runs the protection half
+  through an injected after-deletion hook (nil on today's road); the section renders no delete door (`deleteAccountHere` read
+  and hidden).
+- **(c)** U1 composes no deletion: `deleteAccountHere` hidden; the composition becomes its own ticket.
+
+**MY READINGS (each the brief's or her ruling's letter as I read it — building on them unless the architect overrules in the
+same ruling):**
+- **R-1 — VX-264's signed-out screen is her RULED one, not the shipped two doors.** The brief says #216's rulings are "STILL
+  PENDING"; #216's HER SITTING block (2026-10-13) RULED it: *"One road, plain"* — the familiar Continue / Cancel, her approved
+  mockup (*"You're signed out of sync."* / *"Castle will apply to this Mac only, and this Mac will stop using your old sync
+  account. Its copy on the server stays as it is."* / *"To put your whole account in Castle instead, cancel, sign in, and
+  choose Use Castle again."*), superseding VX-110's two doors and P-U2-1; plus *"Add it"* (the born-Castle Done sentence) and
+  *"Drop the devices clause"*. VX-264 is that ruling's build. On the new road: while signed out `assess` refuses Use Castle
+  `.signedOutUseThisMacOnly` ("the one plain road (This Mac Only) stands in its place") — so Use Castle renders its door, the
+  press shows HER screen (her three sentences byte-equal, pinned), *Continue* runs the This-Mac-Only leave (rule 16 — nothing
+  typed, no key changes) and then opens Use Castle's own confirm on the now-local library (both secrets, the gate choice — the
+  crossings' road unchanged), *Cancel* writes nothing; her born-Castle sentence (*"Set up sync again later with a new account
+  and it starts in Castle."* — true here: set-up hands the account the library's posture) ends that road's receipt. Use
+  Standard and Replace All Keys while signed out keep U2a's sentences (her ruling is Castle entry's). The section's own
+  signed-out state offers the same one road (This Mac Only — Continue / Cancel) and *Sign in…*; Stop syncing here (the same
+  act) is not rendered beside it — one road, plain.
+- **R-2 — ONE READ for the pane.** `assess` over the open library's facts with the CURRENT sign-in (read now — the open's is
+  stale once she signs in or out) and a FRESH vault read for the signed-in account (decision 35: a synced door without it
+  refuses `.needsFreshVault`; a local library needs it to tell set-up from a join). The crossings' faces and the account faces
+  derive from that one assessment, and the crossings' press-time re-read (VX-108) reads the same way, so a shown door and its
+  re-read compare like with like. Each act adopts the current sign-in into the executor's configuration under the session's
+  one-act lock (reads never touch the executor). A local library with nobody signed in reads exactly as before (no fetch).
+- **R-3 — the vault leaf follows the current sign-in.** `WireVaultLeaf.live` composes its own `AuthSession` per open, which
+  caches the scope's stored session at first use — after a sign-out and a sign-in to ANOTHER account (the §5 row-7 walk's own
+  sequence) the leaf answers `notSignedIn` until the next open. Its session provider re-reads the stored session per call and
+  re-composes when the signed-in user changed (new road only; today's `KeyVaultClient` untouched). Routed beside it, not fixed:
+  F-U1-1 — two `AuthSession` instances over one keychain item each refresh on their own (Supabase rotates refresh tokens) — a
+  reuse-detection hazard VX-307 U1's leaf already carries; VX-329's live road decides it.
+- **R-4 — the join arms are U2's (§5b).** `turnOnSync` with an account vault (`entersCastle`/`leavesCastle`/`sameMode`) and
+  *Move it to …* are read into the model; U1 renders the honest not-yet line (the `plaintextCopyNotYet` precedent), which U2's
+  join face replaces. U1's `turnOnSync` face is the set-up arm (`setsUpInLibrarysMode`).
+- **R-5 — *Sign in…*** in the signed-out states opens the app's one sign-in surface (the Account sheet, `AccountView`) through
+  the presenter; the section re-reads when it closes.
+- **R-6 — the one presenter (VX-239 + VX-243's rule on the new road):** one protection sheet at a time; presented only by its
+  HOST SCENE (Settings ▸ Protection — never two windows); kept across its own act's reopen (U2a's confirm survives it); DROPPED
+  at any settled closed state (a lobby, the interlude, missing, failed — so it never re-presents after an unlock; U4's lock
+  lands in the lobby and inherits the rule). The crossings' confirm moves onto it, its contents byte-unchanged. Today's road's
+  two bugs close by its retirement at VX-329 (today's road untouched here).
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece −1 — this record skeleton + the fork: DONE (this commit).
+- Piece 0 — THE WALK'S DOOR: NOT-STARTED. `ProtectionWalkSwitch.projectOverride(environment:)` (DEBUG, pure: both
+  `VARIORUM_WALK_PROJECT_URL` and `VARIORUM_WALK_ANON_KEY` set and the URL an https URL → the pair; else nil);
+  `ProjectConfig.variorumProjectURL`/`variorumPublishableKey` read it under `#if DEBUG` only, logged ONCE (never the values);
+  Release byte-unchanged. Pin `ProtectionWalkProjectTests` (the pure rule's four arms + a source pin of the DEBUG fence).
+- Piece 1 — THE WORDS: NOT-STARTED. `ProtectionWords`' VX-308 account section: rule 16's sentence and rule 7's (*A device holds
+  one pair of secrets at a time.* + the join sentence for U2) BYTE-EQUAL to `notes/CastleRules.md`, her #216 mockup's three
+  sentences and the born-Castle sentence BYTE-EQUAL to QUESTIONS #216, the shipped sign-out and deletion copy byte-reused;
+  every other line PROVISIONAL P-VX308-U1-1. Pins `RoadAccountWordsTests`.
+- Piece 2 — THE ONE PRESENTER: NOT-STARTED (R-6). `ProtectionSheetPresenter` (shared, the bootstrap's); `RoadCrossingsModel`'s
+  `confirm` read from it. Pins `ProtectionSheetPresenterTests` (headless).
+- Piece 3 — THE ONE READ + THE LEAF'S SIGN-IN + THE ACCOUNT FACES: NOT-STARTED (R-2, R-3, R-4). Pins `RoadAccountFacesTests`
+  (planted facts per situation) + the read over a planted vault.
+- Piece 4 — THE ACCOUNT ACTS ON THE SESSION: NOT-STARTED. Set-up (`setUpSync`) and the leaves (`leaveAccount`) on the open
+  session (no swap, so no reopen — the set-passphrase road's precedent), each door re-read at the press (VX-108); sign-out and
+  sign-in through injected roads. Pins `ProtectionAccountRoadTests` (the planted road + a planted vault with ExecutorVault's
+  semantics + planted sync keys — no network).
+- Piece 5 — THE MODELS: NOT-STARTED. `RoadAccountModel` (the bootstrap's, beside the crossings) + its confirm. Pins
+  `RoadAccountModelTests`.
+- Piece 6 — THE MAC FACES + THE BOOTSTRAP'S ROADS + THE SIGNED-OUT ROAD: NOT-STARTED. `RoadAccountSection` /
+  `RoadAccountSheet` / her signed-out screen; the pane hosts them; the presenter's sheet; `finish` drops it at closed states.
+  Mac suites BUILT, RUN PENDING (the orchestrator's).
+- Piece 7 — THE CLOSE: NOT-STARTED.
+- No revert is in flight.
+
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
   `~/dev/variorum-vx-308`, branch pushed, in-flight row (holds the Sync/-custody slot) `969acce55` on main, Linear
