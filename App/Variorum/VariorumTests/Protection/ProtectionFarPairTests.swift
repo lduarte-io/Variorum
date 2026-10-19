@@ -165,6 +165,46 @@ struct ProtectionFarPairTests {
         session.system.backups.resumeCopies()
     }
 
+    /// THE LEAF: a far copy that does not verify (here a "snapshot" the library's key does not open) is removed WHOLE —
+    /// no orphan snapshot, no stray key file — and the leaf throws; the container's files are only read.
+    @Test func aFarCopyThatDoesNotVerifyIsRemovedWhole() async throws {
+        let road = PlantedRoad(farFolder: true)
+        let (session, _) = try await road.created()
+        let keyFile = try #require(try road.system().leaves.keyFiles.readLiveKeyFile())
+        let container = FarPlant.ownContainer(road, session)
+        try FileManager.default.createDirectory(at: container, withIntermediateDirectories: true)
+        let name = CatalogNames.backupPrefix + CatalogNames.stampString(Date()) + "-"
+            + StoreKeyEnvelope.shortFingerprint(keyFile.fingerprint) + ".sqlite"
+        let fake = container.appendingPathComponent(name)
+        try Data("not a library".utf8).write(to: fake)
+        try keyFile.encoded().write(to: FileBackupsLeaf.pairURL(of: fake))
+        #expect(throws: FileBackupsLeaf.BackupsLeafError.farPairDidNotVerify) {
+            _ = try session.system.backups.landFarPair(
+                copying: fake, key: session.key, keyFile: keyFile, deviceID: FarPlant.deviceID(session))
+        }
+        #expect(FarPlant.names(FarPlant.ownFar(road, session)).isEmpty, "nothing half-landed")
+        #expect(FarPlant.names(container).count == 2, "the container's files only read")
+    }
+
+    /// THE LEAF: a pair is written once — a name already in the far folder is refused, its bytes untouched.
+    @Test func aNameAlreadyInThePickedFolderIsNeverOverwritten() async throws {
+        let road = PlantedRoad(farFolder: true)
+        let (session, _) = try await road.created()
+        let keyFile = try #require(try road.system().leaves.keyFiles.readLiveKeyFile())
+        let snapshot = try session.system.backups.writeContainerPair(
+            with: session.key, keyFile: keyFile, deviceID: FarPlant.deviceID(session))
+        let far = FarPlant.ownFar(road, session)
+        try FileManager.default.createDirectory(at: far, withIntermediateDirectories: true)
+        let planted = Data("hers".utf8)
+        try planted.write(to: far.appendingPathComponent(snapshot.lastPathComponent))
+        #expect(throws: FileBackupsLeaf.BackupsLeafError.farPairExists) {
+            _ = try session.system.backups.landFarPair(
+                copying: snapshot, key: session.key, keyFile: keyFile, deviceID: FarPlant.deviceID(session))
+        }
+        #expect(try Data(contentsOf: far.appendingPathComponent(snapshot.lastPathComponent)) == planted)
+        #expect(FarPlant.names(far) == [snapshot.lastPathComponent], "no key file beside a file it isn't the pair of")
+    }
+
     /// A far failure (here: the far `Backups` is a file, so no folder can be made under it) is logged, never raised —
     /// the container pair stands, and nothing half-landed is left in the picked folder.
     @Test func aFarFailureNeverFailsThePair() async throws {
