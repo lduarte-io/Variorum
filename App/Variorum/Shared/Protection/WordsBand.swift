@@ -226,6 +226,14 @@ final class WordsBandModel {
     @ObservationIgnored private let writes: Bool
     @ObservationIgnored private let ledger: WordsCardLedger
     @ObservationIgnored private let snoozes: WordsCardSnoozes
+    /// Every look made over this library's roads (the card's, the tour's, Settings') — weakly: a look whose host went
+    /// away is gone. ONE look may hold words at a time: a second look's mint would replace the words the first still
+    /// shows, which would then no longer open the library (P-VX307-U2b-6).
+    @ObservationIgnored private var looks: [WeakLook] = []
+
+    private struct WeakLook {
+        weak var look: WordsLookModel?
+    }
 
     init(
         libraryID: String, writes: Bool, ledger: WordsCardLedger, snoozes: WordsCardSnoozes = .process,
@@ -242,10 +250,23 @@ final class WordsBandModel {
         offersWords = Self.offers(libraryID, writes: writes, ledger: ledger, snoozes: snoozes)
         // The first look on a library whose words were never recorded here says nothing of earlier words.
         var recordedHook: () -> Void = {}
+        var mintHook: (String?) async -> WordsMintOutcome = mint
         look = WordsLookModel(
             saysRuleSix: !libraryID.isEmpty && ledger.recorded(libraryID),
-            passphraseExists: passphraseExists, mint: mint, copy: copy, recorded: { recordedHook() })
+            passphraseExists: passphraseExists, mint: { await mintHook($0) }, copy: copy, recorded: { recordedHook() })
         recordedHook = { [weak self] in self?.wordsRecorded() }
+        mintHook = guarded(mint)
+        looks.append(WeakLook(look: look))
+    }
+
+    /// A look's mint, refused while ANOTHER look already holds words (the caller itself is minting, so it counts one).
+    private func guarded(_ mint: @escaping (String?) async -> WordsMintOutcome) -> (String?) async -> WordsMintOutcome {
+        { [weak self] passphrase in
+            if let self, self.looks.filter({ $0.look?.holdsWords == true }).count > 1 {
+                return .refused(ProtectionWords.wordsLookElsewhere)
+            }
+            return await mint(passphrase)
+        }
     }
 
     private static func offers(
@@ -303,10 +324,12 @@ final class WordsBandModel {
         mint: @escaping (String?) async -> WordsMintOutcome,
         copy: @escaping ([String]) -> Void
     ) -> WordsLookModel {
-        WordsLookModel(
+        let look = WordsLookModel(
             saysRuleSix: !libraryID.isEmpty && ledger.recorded(libraryID),
-            passphraseExists: passphraseExists, mint: mint, copy: copy,
+            passphraseExists: passphraseExists, mint: guarded(mint), copy: copy,
             recorded: { [weak self] in self?.wordsRecorded() })
+        looks = looks.filter { $0.look != nil } + [WeakLook(look: look)]
+        return look
     }
 }
 

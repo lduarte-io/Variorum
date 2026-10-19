@@ -186,6 +186,28 @@ struct WordsBandTests {
         #expect(world.mints == ["not it", "chosen"])
     }
 
+    /// ONE look holds words at a time (P-VX307-U2b-6): while the card's words are on screen, another home's look (the
+    /// tour's last card, Settings) refuses to mint — a second mint would replace the words still shown, which would then
+    /// no longer open the library. Closed, the next look mints.
+    @Test func oneLookHoldsWordsAtATime() async {
+        let world = PlantedBand()
+        let band = world.band()
+        await band.look.open()
+        #expect(band.look.phase == .shown)
+        let elsewhere = band.makeLook(
+            passphraseExists: { false }, mint: { [weak world] typed in
+                world?.mints.append(typed)
+                return .minted((1...12).map { "other\($0)" })
+            }, copy: { _ in })
+        await elsewhere.open()
+        #expect(elsewhere.phase == .closed && elsewhere.message == ProtectionWords.wordsLookElsewhere)
+        #expect(world.mints == [nil], "nothing minted over the words on screen")
+        band.look.writtenDown()
+        band.look.close()
+        await elsewhere.open()
+        #expect(elsewhere.phase == .shown && world.mints == [nil, nil], "the card's look closed: the next one mints")
+    }
+
     /// Rule 3's reminder folds into the same card: with the words done, the card stands for the reminder alone; with
     /// neither, it is gone.
     @Test func theReminderFoldsIntoTheSameCard() async {

@@ -75,15 +75,12 @@ struct WordsBandSurfaceTests {
     }
 
     /// The ✕ speaks its toast through the host's direction door (always shown — her "toast … look in Settings,
-    /// Protection").
-    @Test func theCrossSpeaksTheToastThroughTheDirectionDoor() async {
-        let world = PlantedBand()
-        let band = world.band()
-        var said: [String] = []
-        let card = WordsBandCard(standing: standing(world, band: band), band: band, direct: { said.append($0) })
-        // The ✕'s action, as the face runs it.
-        if let toast = band.dismiss() { card.direct(toast) }
-        #expect(said == [ProtectionWords.wordsCardDismissedToast])
+    /// Protection"), and the shell's door is the status seam's `direct`, never a receipt (which `receipt_style` may hide).
+    @Test func theCrossSpeaksTheToastThroughTheDirectionDoor() throws {
+        let card = try Self.code("Variorum/Features/Protection/WordsBandCard.swift")
+        #expect(card.contains("if let toast = band.dismiss() { direct(toast) }"))
+        let root = try Self.code("Variorum/RootView.swift")
+        #expect(root.contains("direct: { session.status.direct($0) }"))
     }
 
     /// The tour's last card: with the two asks (the new road) and without (today's road) — both host; the doors wait

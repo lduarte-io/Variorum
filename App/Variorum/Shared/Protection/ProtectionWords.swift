@@ -425,6 +425,8 @@ nonisolated enum ProtectionWords {
     static let wordsLookClose = "Close"
     /// The act failed, nothing changed.
     static let wordsLookFailed = "Variorum couldn't make your twelve words just now. Nothing changed."
+    /// Another look already holds words on screen (one look at a time — a second would replace the words still shown).
+    static let wordsLookElsewhere = "Your twelve words are already on screen \u{2014} finish with them there first."
     /// Settings ▸ Protection — the door the dismiss toast names (rule 7: "fresh words appear only at a library's own
     /// first look or its new-words door").
     static let wordsSectionTitle = "Your twelve words"
