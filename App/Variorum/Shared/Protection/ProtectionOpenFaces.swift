@@ -299,7 +299,7 @@ final class RoadStandingModel {
     /// report, rule 3's reminder (its launch counted once per process on a writing road, then evaluated), and the
     /// set-passphrase sheet's road through the session's executor. VX-307 U2b: the card above the quick entry — the
     /// words' look minting through rule 6's act on the session (`mintFreshWords`), `copyWords` the platform's one
-    /// clipboard rule (the Mac's `WordsClipboard`), its local ledger in the reminder ledger's defaults.
+    /// clipboard rule (the Mac's `WordsClipboard.copyConcealed` — VX-448), its local ledger in the reminder ledger's defaults.
     static func make(
         _ session: ProtectionRoadSession, ledger: PassphraseReminderLedger,
         snoozes: WordsCardSnoozes = .process, copyWords: @escaping ([String]) -> Void = { _ in }

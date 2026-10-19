@@ -10,7 +10,7 @@
 //    - THE LOOK (`WordsLookModel`) — the words are NEVER shown before she asks; nothing stores them, so a look MINTS
 //      the words she records through rule 6's act (`regenerateWords` — the key unchanged; a library with a passphrase
 //      is asked it, one with none is asked nothing — PROVISIONAL P-VX307-U2b-1), then shows them ONCE with a Copy door
-//      (the one clipboard rule, `WordsClipboard` — 60 s) and "write these down now", and WARNS before it closes that
+//      (the one clipboard rule, `WordsClipboard` — VX-448: concealed, cleared at lock and at quit) and "write these down now", and WARNS before it closes that
 //      they won't be shown again (her words). Closing forgets them. Three homes compose it: the band card, the tour's
 //      last card (beside the passphrase ask — rule 3), and Settings ▸ Protection (the door the dismiss toast names).
 //    - THE BAND CARD (`WordsBandModel`) — the card above the quick entry, between the shelf listing and it (her
@@ -164,7 +164,7 @@ final class WordsLookModel {
         message = nil
     }
 
-    /// VX-412's Copy door: the words to the clipboard by the host's one rule (cleared after 60 s).
+    /// VX-412's Copy door: the words to the clipboard by the host's one rule (VX-448: concealed; cleared at lock and quit).
     func copy() {
         guard phase == .shown || phase == .warning, !words.isEmpty else { return }
         copyRoad(words)

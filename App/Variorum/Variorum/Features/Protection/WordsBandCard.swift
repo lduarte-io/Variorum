@@ -13,7 +13,7 @@
 //      (the one home for both asks; the bottom bar no longer carries it).
 //    - `WordsLookPanel` — the LOOK, wherever it is composed (the card, the tour's last card, Settings ▸ Protection):
 //      the passphrase asked only where one exists; the twelve words numbered in two columns, never selectable,
-//      privacy-sensitive; *Copy* through the one clipboard rule (cleared after 60 s — the host's `copyWords`);
+//      privacy-sensitive; *Copy* through the one clipboard rule (VX-448: concealed, cleared at lock and quit — the host's `copyWords`);
 //      "write these down now"; *I've written them down* → her warning, *Go back* · *Close*. No Return shortcut puts the
 //      words away (a stray Return must never).
 //    - `TourEndLibraryBlock` — the tour's last card's two asks side by side (rule 3): the passphrase and the words.

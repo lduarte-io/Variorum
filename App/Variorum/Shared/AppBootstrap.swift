@@ -633,7 +633,11 @@ final class AppBootstrap {
         // VX-308 U1 (VX-239's rule on the new road): an open that settles anywhere but ready — the lobby, the interlude,
         // the missing face, a failure, a creation — drops the protection sheet standing, so it never re-presents after an
         // unlock. (A crossing's own reopen settles ready, so its confirm survives it.)
-        if case .ready = outcome {} else { protectionSheets?.libraryClosed() }
+        if case .ready = outcome {} else {
+            protectionSheets?.libraryClosed()
+            // VX-308 U3 — VX-448: and the words a look copied leave the clipboard (the lock's clear; the new road only).
+            if newRoad { Self.clearWordsAtLock() }
+        }
         switch outcome {
         case .ready(let database, let unlockedKey, let road):
             // VX-306 U1b: the library open on the new road (nil on today's road).
@@ -802,11 +806,26 @@ final class AppBootstrap {
         }
     }
 
-    /// VX-307 U2b — the words' Copy door: the Mac's one clipboard rule (`WordsClipboard` — cleared after 60 s, only if
-    /// nothing else has written since); the phone renders no look this phase (its pasteboard arm is the mobile row's).
+    /// VX-307 U2b — the words' Copy door: the Mac's one clipboard rule; the phone renders no look this phase (its
+    /// pasteboard arm is the mobile row's). VX-308 U3 — VX-448 (her ruling): the new road's rule, `WordsClipboard
+    /// .copyConcealed` — the concealed type, no timer, nothing restored; cleared at the lock and at quit (`clearWordsAtLock`
+    /// below; the app delegate's `applicationWillTerminate`). Only the new road reaches this (every caller is a new-road
+    /// face).
     private static func copyWords(_ words: [String]) {
         #if os(macOS)
-        WordsClipboard.copy(words)
+        WordsClipboard.copyConcealed(words)
+        #endif
+    }
+
+    /// VX-308 U3 — VX-448's clear AT THE LOCK: the words a new-road look copied leave the clipboard when the library closes
+    /// behind the lobby (an open settled anywhere but ready — `finish`'s non-ready arm, beside the presenter's
+    /// `libraryClosed`, VX-239's rule; U4's lock lands there), only if the board still holds that copy. Nothing on today's
+    /// road (it never makes the concealed copy — its own 60-second rule is untouched).
+    static func clearWordsAtLock() {
+        #if os(macOS)
+        if WordsClipboard.clearHeld() {
+            ProtectionOpenRoad.log("road: the library closed — the twelve words left the clipboard (VX-448)")
+        }
         #endif
     }
 
