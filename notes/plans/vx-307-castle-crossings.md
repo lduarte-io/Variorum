@@ -1185,6 +1185,27 @@ Commits: `edbd86c14` (record) · `95bde6ea3` (1) · `a1a948c73` (2) · `6a0b5a05
   RENDERED but never clicked through the look (a look would replace the dev pair). If any row ever forces a dev-library
   look, `~/.variorum/dev-castle.env` is updated in the same window (the standing rule).
 
+### U2c RECORD — LOOK INSIDE'S COPY, THE WORDING, THE PANES, THE COPY-DOOR HAND-FORWARDS (Opus implementer, 2026-10-18 night; tickets VX-413 · VX-414 · VX-379's pane rows — IN PROGRESS)
+
+**Not done in U2c, first:** (filled at the close — PENDING)
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece 0 — this record skeleton: DONE (this commit).
+- Piece 1 — VX-413, Copy full text from Look inside's note page: NOT-STARTED. Settled design: the core read
+  `ProtectionCopyPeek.Reader.fullText(id:)` runs THE export's own projection (`Queries.variorumDocumentText` — the
+  format's one home `Domain/VariorumDocument`, consumed, never forked) over the look's private read-only connection;
+  `LookInsideModel.copyFullText()` reads it off the main actor and hands the text to an injected clipboard road (the
+  Mac's general pasteboard — Copy full text's own board, no expiry), the receipt *Copied full text.* (CopyForAI's
+  sentence, pinned equal) said IN the sheet under the door; the door's name the live note's (`CapabilityRegistry`'s
+  `.copyForAI` verb, pinned equal); nothing else about the sheet changes (read-only, nothing written, closing forgets).
+- Piece 2 — VX-414, the split-pair line dropped + her two U2-7 sentences: NOT-STARTED.
+- Piece 3 — VX-379's pane rows to the rules, today's rows on TODAY's road only (the U2a-4 ruling) + F-U2b-1 (the
+  readme's Start Here words passage, its byte-pin re-anchored): NOT-STARTED.
+- Piece 4 — the three VX-306 copy-door hand-forwards ((i) one Touch ID press at Make this my library; (ii) the
+  Look inside flip-target flipped; (iii) the core `lookInside`'s prompting default dropped): NOT-STARTED.
+- Piece 5 — the close (counts both configurations, the Mac suite list, PROVISIONALs, findings): NOT-STARTED.
+- No revert is in flight.
+
 ## 7. LIVE STATUS
 - 2026-10-18 ~18:45 — KICKED OFF. Preflight complete (the orchestrator): CastleRules + SyncSpec whole, the lifecycle
   stages, SurfaceContracts, VX-306 §8/§9 records + handoff, QUESTIONS #234 (ACCEPTED by this kickoff, her entry's own
@@ -1225,3 +1246,5 @@ Commits: `edbd86c14` (record) · `95bde6ea3` (1) · `a1a948c73` (2) · `6a0b5a05
   first. Core full Debug + the protection set both configurations green; the harness 101/14; Mac `build-for-testing`,
   the phone build and the Release build check green. The Mac suites (21 new tests + the touched suites — the record's
   list) and the walk PENDING — the orchestrator's, under the stage.
+- U2c (VX-413 · VX-414 · VX-379's pane rows · the VX-306 copy-door hand-forwards): IN PROGRESS (the Opus implementer,
+  2026-10-18 night — the §6 U2c RECORD).
