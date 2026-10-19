@@ -2016,6 +2016,39 @@ error), that run DISCARDED AS INVALID and the revert redone with exact text (the
 RED at exactly the wait pin. The restored suites `✔ 6/2`; 0 instances at release. **U4 IS CLOSED but for the walk and
 the ladder — the implementer era of the phase is done.**
 
+### ROUND-1 FIX LEG (Opus implementer, 2026-10-19; the cross-model ladder's round-1 fixes over `notes/plans/vx-308-ladder-round-1.md` — IN PROGRESS)
+
+**Not done in this leg, first:** no Mac suite RUN, no walk, no stage, no Debug launch, no store touch (the brief:
+headless + `build-for-testing` only — the Mac-suite delta below is the orchestrator's). PENDING on every unverified claim.
+
+**Preflight (complete, not delegated):** CLAUDE.md + its canon; the resiliency protocol; CastleRules WHOLE (rules 20 and 27
+the heart of MAJOR-1); the round-1 findings file whole; this plan's §1–§5d and the §6 U1, U2, U3 and U4 records with their
+arbitrations and Mac batches; the core's `PlanRunner.swift` and `Acts/KeyDoors.swift` whole, `Plan.swift`'s
+`pastCommitPoint`, `Executor.swift`'s unlock / `writeFacts` / `writeMemory` / `memoryValue`, `CommonSteps`' `freshRead` /
+`material` / `rememberNewKey`, `Assess.swift`'s memory and rule-27 arms, `ExecutorRepairs`' `refreshMemory`; the executor's
+test world (`ExecutorWorld`, `EX`, `CrashHarness`, `U2CrashHarnessTests`, `FileLessWordsTests`) and the scenario world's
+settle + promise 6; the pane (`ProtectionPane`), the three section models' refresh rules, `AppBootstrap`'s three pane
+roads, `ProtectionPaneRead`, `ProtectionKeyDoorRoad.read`, `ProtectionCrossings.readCrossings`; the `.signIn` host arm
+and `ProtectionWords.joinedReceipt` with their pins. HARNESS: U1's scratchpad package `u1-harness` (this session's
+scratchpad, pointed at this worktree).
+
+**LIVE STATUS (per finding; PENDING = unverified):**
+- **MAJOR-1** (the resumed new-words act wedges the recovery door) — AGREE (self-traced: below). NOT-STARTED — the settled
+  design: in `KeyDoors.swift` only, a RESUMED `regenerateWords` whose `vault` or `keyFile` step cannot finish — no words in
+  hand (a plan never holds one) or no live key file of the key to lock (a resume never mints) — throws `ActRollback`
+  BEFORE anything is written, so `drive`'s one rollback runs (the act cleared, the plan deleted, copies resumed) and the
+  settle answers `.rolledBack(.regenerateWords)`; a landed vault write stands as any landed CAS write does. Change and
+  Reset untouched (the F-U3-2 ticket's design call). Pin first, red on this tree.
+- **MINOR-1** (`keyFileGoneEverywhere`'s decode-skip vs the record's "never a guess") — AGREE the record overclaims;
+  disposition (b): keep the skip, log it, amend the U3 record's sentence with the trace (below). NOT-STARTED.
+- **MINOR-2** (the pane's one read runs three times per appearance) — AGREE (the U1 record's R-2 intended ONE assessment
+  for the pane). NOT-STARTED — the settled design: one read per appearance wave, fanned to the three section models
+  through their landing rule; every other refresh trigger keeps its own fresh read.
+- **NIT-1** (the `.signIn` services-nil fallback's untrue sentence) — AGREE. NOT-STARTED.
+- **NIT-2** ("now … now" in Move's and the join's moved receipts) — AGREE. NOT-STARTED — a reword in `ProtectionWords`'
+  VX-308 U2 section, sentence case, PROVISIONAL with the bundle row.
+- No revert is in flight.
+
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
   `~/dev/variorum-vx-308`, branch pushed, in-flight row (holds the Sync/-custody slot) `969acce55` on main, Linear
