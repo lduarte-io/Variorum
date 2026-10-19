@@ -40,7 +40,7 @@
 <h2>The three kinds of road</h2>
 <table>
   <tr><th>Road</th><th>What it is</th><th>Standard</th><th>Castle</th></tr>
-  <tr><td class="key">Twelve words</td><td>Made with the library, shown once, written down by you [2]</td><td>always</td><td>always</td></tr>
+  <tr><td class="key">Twelve words</td><td>Made with the library, shown once when you ask, written down by you [2]</td><td>always</td><td>always</td></tr>
   <tr><td class="key">Passphrase</td><td>Asked at the tutorial's end; reminded until set [3]</td><td>when you set one</td><td>required to enter</td></tr>
   <tr><td class="key">Apple road</td><td>Your iCloud Keychain, through your Apple account — a convenience the app doesn't answer for [8, 25]</td><td>yes</td><td><b>never</b> [9]</td></tr>
   <tr><td class="key">On-device road</td><td>This Mac's login keychain: your login password or Touch ID [8]</td><td>yes</td><td>Touch ID only, if you choose it; "Always ask" = none</td></tr>
@@ -51,14 +51,14 @@
 
 <div class="stage std"><h3>1 · You create a library <small>Standard</small></h3>
 <dl>
-<dt>What happens</dt><dd>A random key is made. The key file is written beside the library, with the key locked under your <b>twelve words</b> and under this Mac's quiet roads. The words are shown once: "write these down now". A sealed copy of the key file goes into this Mac's keychain. A plain random device ID is written [1, 2, 23].</dd>
+<dt>What happens</dt><dd>A random key is made. The key file is written beside the library, with the key locked under its <b>twelve words</b> and under this Mac's quiet roads. Nothing is shown: the first open is the Bookcase and the quick entry with nothing in front of them, and the card above the quick entry offers the words until you record them or dismiss it. A sealed copy of the key file goes into this Mac's keychain. A plain random device ID is written [1, 2, 23].</dd>
 <dt>Opens the library</dt><dd class="roads"><span class="s">twelve words</span><span class="q">Apple road</span><span class="q">on-device road</span></dd>
 <dt>Backups so far</dt><dd>none</dd>
-</dl><p class="note">Until you set a passphrase, the app reminds you — at the third launch, weekly twice, then with "don't show again", and always before your first backup [3].</p></div>
+</dl><p class="note">Until you set a passphrase, the card above the quick entry reminds you — at the third launch, weekly twice, then with "don't show again", and always before your first backup [3].</p></div>
 
-<div class="stage std"><h3>2 · The tutorial ends: you set a passphrase <small>Standard</small></h3>
+<div class="stage std"><h3>2 · The tutorial ends: you set a passphrase and record your twelve words <small>Standard</small></h3>
 <dl>
-<dt>What happens</dt><dd>The key file gains a passphrase lock. Nothing else changes [3, 6].</dd>
+<dt>What happens</dt><dd>The tutorial's last card asks for a passphrase and shows your twelve words beside the ask. Nothing keeps the words, so they are made when you look: the key file gains a passphrase lock, and its words lock is re-made under the words you write down. The key itself does not change, and nothing else changes [2, 3, 6].</dd>
 <dt>Opens the library</dt><dd class="roads"><span class="s">passphrase</span><span class="s">twelve words</span><span class="q">Apple road</span><span class="q">on-device road</span></dd>
 </dl><p class="note">Either secret can reset the other. If you never set a passphrase, every later stage simply has one fewer road; nothing below depends on it except entering Castle.</p></div>
 

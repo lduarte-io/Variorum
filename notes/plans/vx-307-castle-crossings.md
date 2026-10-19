@@ -913,7 +913,28 @@ ledger is the merging session's):**
   DOORS WAIT (`.disabled`) while words are on screen — leaving would put them away without her warning (PROVISIONAL
   P-VX307-U2b-5). Today's road: `library` nil — the end card byte-identical in what it draws. Pins: the headless
   `WordsBandTests` tour pair (piece 3's record) + the hosted `WordsBandSurfaceTests` pair above.
-- Piece 6 — the lifecycle page's stages 1–2 from the fixture: NOT-STARTED.
+- Piece 6 — the lifecycle page's stages 1–2 from the FIXTURE: DONE (`aadcf2e9c` the fixture + this commit — the page).
+  `LifecycleFixture` stage 1: *Nothing is shown: the first open is the Bookcase and the quick entry with nothing in
+  front of them, and the card above the quick entry offers the words until you record them or dismiss it.*; its note's
+  reminder now *the card above the quick entry reminds you*; its facts — `.wordsShownOnce` RETIRED there for the new
+  `.wordsStoredNowhere` (the creation's words, handed back by the door and shown to no one, open the key file and are
+  stored nowhere) + a `.notAModelFact` line for the face (the first open's calm is `RoadCreationFaceTests` and the route
+  suites'). Stage 2: *The tutorial ends: you set a passphrase and record your twelve words* — *The tutorial's last card
+  asks for a passphrase and shows your twelve words beside the ask. Nothing keeps the words, so they are made when you
+  look: the key file gains a passphrase lock, and its words lock is re-made under the words you write down. The key
+  itself does not change, and nothing else changes [2, 3, 6].*; facts `.keyUnchanged`, the locks, `.lockRelocked(.words)`
+  (new), `.wordsShownOnce` (now the LOOK's words — `LStageContext.shownWords`), `.nothingElseChanges(except: [.passphrase,
+  .words])` (the case now takes a list). `LifecycleWalk.stage2`: `resetPassphrase(.plainConfirm)`, then
+  `regenerateWords(passphrase: <the one just set>, newWords:)` — the tour card's passphrase-first order.
+  `LifecycleChecks`: the two words facts share one check (the look's words vs the creation's). `LifecycleProse`: the
+  three-roads table's words row reads *shown once when you ask*. All page prose here is PROVISIONAL P-VX307-U2b-3 (the
+  page is hers; the rules are amended and the page "follows at that merge"). **The page REGENERATED** (never
+  hand-edited): `CASTLE_LIFECYCLE_PAGE_OUT=<scratch> swift test --filter LifecyclePageTests` → `cp` over
+  `notes/plans/vx-266/castle-lifecycle.html` — the diff is exactly stages 1–2 and the table row (5 lines). Debug
+  `LifecyclePageTests` + `LifecycleScenarioTests` `✔ Test run with 6 tests in 2 suites passed`. **RED-ON-OLD** (the old
+  walk — no look at the tour's end, the words "shown" at the creation — against the new fixture, restored by `git
+  checkout --`): `✘` on every argument pair, stage 2's *the words lock is the same* · *the old words still open it* · *the
+  door handed back no words*.
 - Piece 7 — the close (suites both configurations, builds, the record): NOT-STARTED.
 - No revert is in flight.
 
