@@ -1601,6 +1601,12 @@ record) · `0eba2d245` (2) · `d50b4dc72` (2 record) · `824cad782` (3) · the c
   green by the orchestrator. ALL THREE U2 BATCHES ARE BUILT — what remains: the combined Mac batch + THE WALK under
   one stage window, the LADDER, closeout.
 
+**THE COMBINED U2 MAC BATCH (the orchestrator, 2026-10-18 23:43–23:45 MDT, stage claim `vx-307-u2-mac`):**
+`✔ Test run with 392 tests in 75 suites passed after 129.191 seconds` — the three U2 batches' suite lists deduplicated
+plus U1's six (the widened-run rule), only the 3 expected VX-310 known-issue witnesses, 0 failures, exit 0, 0 instances
+after, the stage released. U2a/U2b/U2c's Mac-suite PENDING lines are discharged by this run (each record's list is a
+subset of the 75). What remains before the ladder: THE WALK (its own claim, the coordinator's eight terms accepted).
+
 ## 7. LIVE STATUS
 - 2026-10-18 ~18:45 — KICKED OFF. Preflight complete (the orchestrator): CastleRules + SyncSpec whole, the lifecycle
   stages, SurfaceContracts, VX-306 §8/§9 records + handoff, QUESTIONS #234 (ACCEPTED by this kickoff, her entry's own
