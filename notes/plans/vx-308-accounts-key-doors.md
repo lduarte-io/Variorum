@@ -1987,6 +1987,24 @@ ran on a committed tree and was restored by `git checkout --` (`cmp` against a p
 scratchpad). Commits: `9787475dc` (0) · `1a0c0d8ba` (1, the pin first) · `0a35a906b` (1) · `2fae754d7` (record) ·
 `c7025e8fc` (2) · `e0753fa9c` (record) · `094aaf693` (3) · `345325dbb` (record) · the close commit.
 
+**U4 ARBITRATION (the orchestrator, 2026-10-19 ~09:40 MDT — repo-first before the ladder):**
+- **F-U4-1** (the new road's pane has no Lock Now row and no idle dial; the menu's ⌃⌘L is the lock's one door): a
+  TICKET at closeout (Improvement, Confirmed, Castle & sync, Low) — the capability exists and is walkable; the face
+  rows are a small later piece (or VX-329's polish).
+- **F-U4-2** (the hold's per-slot marker now gates the dev slot's synced crossings — the walk recipes' interplay):
+  ACCEPTED — the walk takes the record's aside-the-marker option for the follow rows and NEVER presses Resume; folded
+  into the walk plan below.
+- **F-U4-3** (F-4 gates exactly the ruled pair — account acts and key doors that write the vault are NOT gated): for
+  HER BUNDLE (the ruled letter is the pair; whether the hold should fence every vault write is her call — one
+  sentence in the morning read).
+- **F-U4-4** (the phone's relock reads today's facts): the MOBILE PARITY line at closeout.
+- **F-U4-5**: the closeout's canon delta list (with U3's F-U3-8).
+- **F-U4-6** (the lock's 100 ms wait poll — no endAct callback): record-only; a callback seam is a nicety the ladder
+  may weigh.
+- **P-VX308-U4-1..5: each stands as built** pending her bundle (the hold refusal's sentence, the migration arm — the
+  mark adopted by the first reader because the state cannot be re-derived, the no-keyless-copy lock, the rest as the
+  record states them).
+
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
   `~/dev/variorum-vx-308`, branch pushed, in-flight row (holds the Sync/-custody slot) `969acce55` on main, Linear
