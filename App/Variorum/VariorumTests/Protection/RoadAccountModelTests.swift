@@ -36,7 +36,7 @@ final class PlantedAccountRoads {
                 return press
             },
             landed: { [self] in landings += 1 },
-            speak: { [self] in spoken.append($0) })
+            receipt: { [self] in spoken.append($0) })
     }
 
     static func setUp(newPassphrase: Bool = true) -> RoadAccountDoorOpen {
