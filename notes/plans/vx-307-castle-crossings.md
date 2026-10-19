@@ -896,7 +896,22 @@ round-2 reviewer makes the final call; agreed fixes applied red-on-old; `notes/p
 - NIT-2: record-only — NOTED: `WordsBand`'s `guarded` count can refuse two simultaneous looks (the safe direction, nothing
   minted or replaced, a retry works); left as is — a future reader must not "fix" it to `>= 1` or remove it.
 - MINOR-1 / MINOR-2: the orchestrator's (`df65cab20`) — not this leg's.
-- No revert is in flight.
+- No revert is in flight (every mutation and the pre-fix probe restored / removed; `cmp`-checked; no scratch worktree).
+
+**THE LEG'S CLOSE (2026-10-19):** commits `abb3dd20a` (record + MINOR-4) · `40b2020d3` (MAJOR-1) · `3bd5bfa57` (MINOR-3) ·
+`bc76d9eee` (NIT-3 / NIT-1 / NIT-2) · this close. HEADLESS (the session harness — every `Shared/Protection` file now incl.
+`WordsBand.swift`; the U2a suites + VX-306's planted ones): `✔ Test run with 92 tests in 12 suites passed`. Mac
+`build-for-testing` → `** TEST BUILD SUCCEEDED **`; the phone `build` → `** BUILD SUCCEEDED **`; the Release check
+`-configuration Release build` → `** BUILD SUCCEEDED **` (the new lines are new-road or `#if DEBUG`; the bootstrap's
+reconcile runs only with a new-road session). No core file touched (the core's protection set unchanged since the U2a
+close). **THE MAC SUITES FOR THE STAGE (PENDING):** the U2a list above, now with `ProtectionCrossingRouteTests` +2
+(`major1_anEntryStoppingPastItsSwapHasItsSwitchFollowedAtTheReopensReady` — the bootstrap red-on-old pin, RED on the
+pre-fix tree by construction: revert `ProtectionCrossingActs.swift`'s mark/reconcile and `AppBootstrap.swift`'s ready
+reconcile to watch it; `minor3_thePlantedFailedPressOwesTheReArmThroughTheTypedOpen` — finger-gated), `ProtectionCrossing
+RoadTests` +2, `RoadCrossingModelTests` +1, `RoadRearmTests` +1 (U2a's new-suite count 39 → 45). For round 2: MAJOR-1
+AGREED and fixed with one refinement (the reconcile keys on a durable mark, not on "Castle + switch on" — her later
+choice must not be undone); MINOR-3 the gap agreed, the instance-split mechanism DISPUTED by trace (the auto-ask spends
+the plant); NIT-3 DISPUTED as hollow; MINOR-4 agreed and done; NIT-1/NIT-2 recorded.
 
 ### U2b RECORD — THE TWELVE WORDS, HER WAY (Opus implementer, 2026-10-18; ticket VX-412 — BUILT; the Mac suites and the walk PENDING)
 
