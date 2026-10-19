@@ -410,8 +410,10 @@ green; the Mac batch and any walk rows the orchestrator's.
 - Mac app: Debug `build` `** BUILD SUCCEEDED **`; Debug `build-for-testing` `** TEST BUILD SUCCEEDED **`; **Release
   `build` `** BUILD SUCCEEDED **`** (the Debug-only law: Release carries no new behaviour — WireVaultLeaf only swaps in
   under `newRoad`, which is Debug-on-Mac). VariorumMobile `build` `** BUILD SUCCEEDED **`.
-- **PENDING (the orchestrator's, under a stage claim):** the Mac-target protection suites. The Mac test-build compiled
-  every Mac test file over the changed `VaultLeaf` signature; the RUN is owed. Command (from `App/Variorum/`):
+- **RUN by the orchestrator 2026-10-18 20:13–20:18 MDT under the stage claim `vx-307-u1-mac` (the coordinator's GO):**
+  `✔ Test run with 101 tests in 6 suites passed after 287.375 seconds.`, 0 skipped, exit 0, no non-known reds (the
+  sqlcipher hmac lines are the suites' own wrong-key probes); 0 instances after; the stage released. The command
+  (from `App/Variorum/`):
   ```
   xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx307 test \
     -only-testing:VariorumTests/PostureSwitchTests -only-testing:VariorumTests/EncryptionFlowTests \
@@ -461,4 +463,6 @@ recipient's role explicitly; the fork's "two writers" alarm was the protocol wor
   empty — today's road behavior-unchanged; the provider swaps only under `newRoad`); the six new/changed suites re-run
   headless by the orchestrator: `✔ Test run with 32 tests in 6 suites passed`. The fork's uncommitted §5b/§5c adopted
   after line-by-line review and amendment. The Mac batch (`vx-307-u1-mac`) is next, then U2a.
-- U2 (VX-417, split §5b into U2a/U2b/U2c): NOT STARTED — U2a spawns after U1's Mac suites run green.
+- 2026-10-18 20:18 — U1's Mac batch GREEN under `vx-307-u1-mac` (101/6, 0 skipped; the record's counts flipped).
+  **U1 is CLOSED but for the ladder.** VX-416 → In Review at the ladder; Done rides the PR.
+- U2 (VX-417, split §5b into U2a/U2b/U2c): U2a SPAWNING (Opus, briefed §5c).
