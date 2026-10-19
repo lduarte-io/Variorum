@@ -1690,6 +1690,71 @@ into a comma — the pinned BEHAVIOR (the faces carry the record's mode) stands 
 without the paren, the suite re-run `✔ 4/1`. 0 instances at release; no stray HID input (the coordinator's morning
 term). **U3 IS CLOSED but for the walk and the ladder.**
 
+### U4 RECORD — THE LOCK ON THE NEW ROAD + THE HOLD'S GATE (Opus implementer, 2026-10-19; VX-445 + NIT-R2-1 + F-4 — IN PROGRESS)
+
+**Not done in U4, first:** PENDING — written at the close (the brief: headless + `build-for-testing` only — no Mac suite
+is RUN here and no walk is made; the Mac-suite list and the walk rows land below for the orchestrator).
+
+**Preflight (complete, not delegated):** CLAUDE.md + its canon; the resiliency protocol; CastleRules WHOLE; SyncSpec WHOLE
+(the hold gates sync rounds; no `Sync/` line here); SurfaceContracts (the app + Doors — portability's restore hold and
+Library protection); this plan whole (§1–§5d, the §6 rehearsal, U1, VX-314, U2 and U3 records with their arbitrations and
+Mac batches, §7); VX-307 §5a–§5e, the §6 U2a RECORD (THE FACES AS BUILT, F-3/F-4, the arbitration) and its FIX LEG
+(MAJOR-1's durable mark); `notes/plans/vx-307-ladder-round-2.md` (NIT-R2-1, the dispute calls); the VX-445 ticket (Linear,
+read-only); the vx-266 design's §3.2/§3.10/§3.15 lines on the idle lock's home; the code — `AppBootstrap` whole (the open
+road, `finish`, the seams, `lock`/`canLock`, the export switch), `ProtectionController` (the dials, `performLock`, the
+relock monitors), `StoreProtection`'s `ProtectionDials`/`IdleLockClock`, `MacWillLock`, `VariorumApp`'s ready composition
+(`onWillLock`, `lockTimeCopy`, the hold's `wireGates`), `EditorCommands`' Lock Library Now, `SettingsSceneContent`'s close
+at a settled closed state, `ProtectionOpenRoad` (the route, the session, the lobby, `RoadInputs`), `ProtectionLobbyModel`,
+`ProtectionCrossingActs`, `ProtectionAccountActs`' rule-11 arms, `RoadCrossingFaces`, `RoadCrossingsModel`,
+`NewRoadSyncKeyProvider`, `DeviceSection`, the core's `Leaves` (session memory "gone at a relock"), `LibraryRestoreHold`,
+`RestoreHoldModel`, today's gate (`PostureSwitchModel.start`, `ProtectionCopy.resumeSyncFirst`), `LibraryOpenCopy`'s hold
+sentences; the test support (`PlantedRoad`, `ProtectionAccountSupport`, `ProtectionTestSupport`, `ProtectionRoadTestSupport`,
+`PlantedExportSwitch`, `WordsClipboardLockRouteTests`, `ProtectionCrossingRouteTests`, `SettingsLockCloseTests`).
+HARNESS: U1's scratchpad package `u1-harness` (the recipe in the U1 RECORD's COUNTS), pointed at this worktree.
+
+**MY READINGS (each the brief's letter as I read it — building on them):**
+- **R-U4-1 — THE LOCK IS CASTLE'S.** "Castle's idle lock and Lock Now … `canLock` true where the road session stands":
+  `canLock` and `lock()` act on the new road exactly where the open library's RECORD is in Castle (Touch ID, Always ask,
+  or no choice yet). Standard never locks — its quiet roads would open it again at once (rule 8), today's Auto refusal
+  (R13p-14: no theater ships), the VX-306 `canLock` comment's own reason.
+- **R-U4-2 — THE LOCK'S TEARDOWN IS THE CROSSINGS' SEAM'S FIRST HALF, THEN THE LOBBY.** One act at a time: the lock takes
+  the session's one-act lock (an act running, or an open in flight, is waited out — never torn under); the composition
+  root's `onWillLock` (the Mac's `macWillLock` — flush, savepoint, stop); `.opening`; today's controller's resident key,
+  per-open deferrals and custody session dropped (as every seam does); the account's sync keys in SESSION memory dropped
+  (the leaf's contract: "gone at a relock"); the road session, its standing faces and the engine's key seam let go (no
+  reference keeps the key); the app's pool CLOSED through the binding off the main actor; then THE LOBBY — the open road's
+  own (`ProtectionOpenRoad.lobbyFacts` over a freshly composed road) landed through `finish(.roadLobby)`, so the one
+  presenter drops its sheet and VX-448's clear runs (F-U3-3, by construction). The quiet roads are NOT tried at a lock (a
+  lock is never theater — today's lock lands in its lobby the same way). Always ask types; Touch ID auto-asks: the
+  lobby's existing behaviour, untouched.
+- **R-U4-3 — THE IDLE SETTING HONORED IS THIS MAC'S SEALED ONE.** On the new road the setting that could weaken
+  protection lives sealed in this Mac's facts, never UserDefaults (the design's §3.2 and §3.15 — "Castle settings in
+  UserDefaults" die at the switch): `DeviceSettings.idleLockMinutes` (default 10, decision 18's, kept). The EXISTING timer —
+  the controller's monitors (sleep and screen lock, always on in Castle; the 30-second tick over Variorum's own activity
+  clock) — consults the new road's policy through ONE injected hook (nil on today's road: today's effective gate and
+  dials decide, unchanged).
+- **R-U4-4 — NIT-R2-1: THE MARK BY LIBRARY.** `variorum.calmAsks.exportOffNotice.<libraryID>.owed` (the brief's idiom);
+  every reader and writer names the library (the switch's two closures take its id). The legacy one-per-domain mark
+  (`variorum.protection.exportOffNoticeOwed`) MIGRATES: the first library whose mark is consulted adopts it (the first
+  ready's reconcile — round 2's ordering: the library standing at the first ready after an entry is the one that entered)
+  and the legacy key is removed. Notice-visibility only; the switch-off never depended on it.
+- **R-U4-5 — F-4's SEAM: THE CROSSINGS' READ.** `ProtectionCrossings.readCrossings` — the pane's crossings read AND the
+  press's re-read (the preflight calls it: VX-108, shown and re-read alike) — reads the hold marker beside the slot (the
+  gates' one source, 13x R3-2) and turns a SYNCED Use Castle and Replace All Keys into their refusal sentence in place
+  (P-VX307-U2a-2's idiom); the preflight then refuses with it, before anything closes. New-road-only code: today's road
+  (its own gate in `PostureSwitchModel`) is byte-unchanged. Not `assess` (core): the hold is the app's landing-state
+  marker beside the store, never a protection fact. Use Standard stays open (today's rule's own exemption — it drives no
+  round), and a LOCAL Use Castle stays open (the hold is about sync — and the dev store's local walks stay walkable).
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece 0 — this record skeleton + the readings: DONE (this commit).
+- Piece 1 — F-4 (the hold's gate): NOT-STARTED — R-U4-5; the pin first, red on the pre-fix tree.
+- Piece 2 — NIT-R2-1 (the mark by library): NOT-STARTED — R-U4-4; red by behavioural revert (the key ignoring the id).
+- Piece 3 — VX-445 (the lock): NOT-STARTED — R-U4-1..3; the pure policy + the session's drop headless, the bootstrap's
+  lock and the controller's hook through Mac route pins (BUILT; the RUN the orchestrator's).
+- Piece 4 — the close: NOT-STARTED.
+- No revert is in flight.
+
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
   `~/dev/variorum-vx-308`, branch pushed, in-flight row (holds the Sync/-custody slot) `969acce55` on main, Linear
