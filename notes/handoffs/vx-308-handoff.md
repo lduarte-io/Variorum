@@ -25,10 +25,12 @@ new road is Debug-only; the set's one release comes with Castle, your standing r
 2. **The throwaway project stays up at your word** ("i'll delete the throwaway when this is all merged to main &
    released") — `variorum-vault-throwaway`, ~1¢/hr, holding only test users and a test vault. VX-329's release window
    can reuse it for the deploy rehearsal's final pass; delete it after.
-3. **The dev Debug app ends SIGNED OUT.** The walk found it signed into a session whose refresh had already failed
-   (the stale-session note in THE WALK RECORD); it ends signed out — sign back in if you want it. The dev store is
-   restored: Standard, quiet open proven, the restore hold's marker byte-identical, the banner standing, no stray
-   keychain item (the coordinator's guard d passed).
+3. **The dev Debug app ends SIGNED OUT — its correct resting posture.** The walk found it signed into a stale
+   session whose refresh had already failed (the stale-session note in THE WALK RECORD) and ended it. The Debug app
+   never signs into your real account (that would cross the dev-store fence on the account plane); any future
+   phase's sign-in is a test account against a test project, per-launch, the walk's way. The dev store is restored:
+   Standard, quiet open proven, the restore hold's marker byte-identical, the banner standing, no stray keychain
+   item (the coordinator's guard d passed).
 4. **Kick off VX-309 when ready** — the plan is `notes/plans/vx-309-copies-and-words.md` with the paste-ready
    kickoff at its top. Your kickoff (or your walk of this build) counts as accepting the rest of #236.
 
