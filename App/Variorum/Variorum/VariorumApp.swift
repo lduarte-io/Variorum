@@ -223,6 +223,13 @@ struct VariorumApp: App {
                             // 13l Act 4 (row 13): the Mac's own restore
                             // recipe, dropped into every backup folder.
                             backupRunbookText: DataSafetyCopy.runbook,
+                            // VX-307 U1: on the new road the engine's keys come
+                            // from the protection core's custody (rule 15),
+                            // never today's SyncCustodyRecord; today's road
+                            // keeps its default provider, byte-unchanged.
+                            makeSyncKeyProvider: bootstrap.newRoad
+                                ? { [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in newRoadSyncKeys }
+                                : nil,
                             // 17y B-DEDUPE: the Mac's furniture-fold facts =
                             // the shared half + the GUIDE's (the engine's
                             // pairwise fold; the phone wires the shared half

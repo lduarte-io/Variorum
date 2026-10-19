@@ -173,6 +173,10 @@ final class AppBootstrap {
     /// backup hook's key, key file and device ID; U2's faces read its report (the notice, the repairs, the
     /// faults, the acts owed).
     @ObservationIgnored private(set) var roadSession: ProtectionRoadSession?
+    /// VX-307 U1 — the engine's key seam on the new road: attached to the road session at each ready; the
+    /// composition site hands it to `AppServices` as the sync key provider when `newRoad` (today's road keeps
+    /// `DeviceKeySyncProvider`, byte-unchanged).
+    @ObservationIgnored let newRoadSyncKeys = NewRoadSyncKeyProvider()
     /// VX-306 U2 — the open library's protection faces on the new road (nil on today's road): rule 27's banner,
     /// the split pair's line, rule 3's reminder and its set-passphrase sheet, the receipts the open owes.
     private(set) var roadStanding: RoadStandingModel?
@@ -611,6 +615,8 @@ final class AppBootstrap {
         case .ready(let database, let unlockedKey, let road):
             // VX-306 U1b: the library open on the new road (nil on today's road).
             roadSession = road
+            // VX-307 U1: the engine's key seam follows the open (nil detaches).
+            newRoadSyncKeys.attach(road)
             // VX-306 U3: a receipt an act owed this reopen (Make this my library) joins the open's own.
             if let road {
                 for receipt in receiptsForNextRoadOpen { road.addReceipt(receipt) }

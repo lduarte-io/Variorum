@@ -42,15 +42,21 @@ public struct SyncEncryptionKeys: Sendable {
     /// outside a rotation; one optional so "both or neither" holds by
     /// construction. Batch 2's driver fills it from the vault.
     public let rotation: RotationInProgress?
+    /// VX-307 U1 (CastleRules rule 15): the account's EARLIER row keys, by
+    /// id — rows written before a key change stay under their day's key and
+    /// open by the key their own id names. Empty everywhere but the new
+    /// road's provider, so today's call sites are byte-unchanged.
+    public let earlierKeys: [String: SymmetricKey]
 
     public init(
         corpusKey: SymmetricKey, corpusKeyID: String, keyProof: KeyProofMaterial,
-        rotation: RotationInProgress? = nil
+        rotation: RotationInProgress? = nil, earlierKeys: [String: SymmetricKey] = [:]
     ) {
         self.corpusKey = corpusKey
         self.corpusKeyID = corpusKeyID
         self.keyProof = keyProof
         self.rotation = rotation
+        self.earlierKeys = earlierKeys
     }
 }
 
@@ -189,7 +195,20 @@ struct SyncPayloadCrypto: Sendable {
     /// version failures refuse the same way (nothing unauthenticated is
     /// ever applied).
     func decryptFromWire(_ row: SyncRow) throws -> SyncRow {
-        try decryptFromWire(row, key: keys.corpusKey, keyID: keys.corpusKeyID)
+        do {
+            return try decryptFromWire(row, key: keys.corpusKey, keyID: keys.corpusKeyID)
+        } catch let primary as SyncError {
+            // VX-307 U1 (rule 15): a reject's `current` row may be an
+            // earlier-key write (its last edit predates a key change) — the
+            // same deterministic fallback as the pull path; dead while
+            // `earlierKeys` is empty.
+            guard case .payloadCryptoFailure = primary, !keys.earlierKeys.isEmpty else { throw primary }
+            for id in keys.earlierKeys.keys.sorted() {
+                guard let key = keys.earlierKeys[id] else { continue }
+                if let opened = try? decryptFromWire(row, key: key, keyID: id) { return opened }
+            }
+            throw primary
+        }
     }
 
     /// THE SEQ RULE (pre-13x decision 31): a row whose `server_seq` is
@@ -241,9 +260,25 @@ struct SyncPayloadCrypto: Sendable {
 
     func decryptFromWire(_ pulled: SyncPulledRow) throws -> SyncPulledRow {
         let material = keyMaterial(forServerSeq: pulled.serverSeq)
-        return SyncPulledRow(
-            row: try decryptFromWire(pulled.row, key: material.key, keyID: material.keyID),
-            serverSeq: pulled.serverSeq)
+        do {
+            return SyncPulledRow(
+                row: try decryptFromWire(pulled.row, key: material.key, keyID: material.keyID),
+                serverSeq: pulled.serverSeq)
+        } catch let primary as SyncError {
+            // VX-307 U1 (rule 15): a row from before a key change is under
+            // an earlier key — the AAD binds the key id, so exactly one
+            // (key, id) pair opens it; the tries are deterministic (sorted
+            // ids) and this arm is dead while `earlierKeys` is empty
+            // (today's road, byte-unchanged).
+            guard case .payloadCryptoFailure = primary, !keys.earlierKeys.isEmpty else { throw primary }
+            for id in keys.earlierKeys.keys.sorted() {
+                guard let key = keys.earlierKeys[id] else { continue }
+                if let opened = try? decryptFromWire(pulled.row, key: key, keyID: id) {
+                    return SyncPulledRow(row: opened, serverSeq: pulled.serverSeq)
+                }
+            }
+            throw primary
+        }
     }
 
     private func binding(_ row: SyncRow, column: String) -> PayloadCipher.Binding {

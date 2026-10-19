@@ -256,17 +256,73 @@ claim PENDING. The Mac batch is the orchestrator's under the stage.
   round-trip, the enroll road, the Castle-entry together-rule both ways, CAS, wrong master, stale challenge,
   notSignedIn, unreachable, vaultExists, preLockstepRow) headless Debug: `✔ Test run with 11 tests in 1 suite passed`.
   Mac app Debug `xcodebuild … build` → `** BUILD SUCCEEDED **`.
-- Piece 4 — the engine's sync-key custody on the new road (`KeychainSyncKeysLeaf`; today's road byte-unchanged):
-  NOT STARTED.
-- Piece 5 — the two-client convergence suites (sync setup · join · follow in/out · lagging device · VX-109's CAS pin ·
-  VX-313's sealed-plan wire half): NOT STARTED.
-- Piece 6 — riders VX-380/VX-406 only if one-line in a touched suite: NOT STARTED.
+- Piece 4 — the engine's sync-key custody on the new road: DONE (this commit) — `NewRoadSyncKeyProvider`
+  (`App/Variorum/Shared/Protection/`) reads the bound account's `AccountKeys` from `KeychainSyncKeysLeaf` (session
+  memory first, then the silent item; NEVER the Touch ID item — no press per round, P-VX307-U1-3) and maps them into the
+  engine's `SyncEncryptionKeys`, carrying rule 15's earlier keys; attached to the road session at each `finish(.ready)`
+  (nil detaches). The engine's seam (`SyncEncryption.swift`) gains `earlierKeys` and a DETERMINISTIC earlier-key
+  fallback on both the pull and reject-`current` paths (dead while the map is empty — today's road byte-unchanged).
+  `AppServices` takes `makeSyncKeyProvider` on the new road only (today's `DeviceKeySyncProvider` otherwise). Today's
+  `SyncCustodyRecord` road untouched; P-VX306-K3's coexistence ends on the new road. `EarlierRowKeysOpenTests` (5) +
+  the Mac Debug app build green.
+- Piece 5 — the convergence and race suites: DONE (this commit). The TWO-DEVICE convergence over the real
+  `VaultModel`/leaf shapes — sync setup (`createVault`), join (`AccountMoveProgram`), the follow into Castle (one
+  secret, the history grows, the kp2 self-enrollment via `successorMaster`), the quiet follow out, the lagging device
+  (rule 15) — is the EXISTING `FollowTests`/`ReplaceAllKeysTests`/`AccountActTests`, which now exercise the
+  `successorMaster` path and the both-forms proof (green, piece 3a). NEW this phase: `AccountVaultWireTests` (11, the
+  HTTP-level fake server); `VaultRaceTests` — VX-109's CAS pin (`VaultCASRaceTests`, 2: an interleaved concurrent Use
+  Castle, the loser's one-row CAS write REFUSES — surfaced, never silent — the vault stays the winner's whole, the
+  in-flight entry rolls back on the next open and the loser follows) and VX-313's wire half (`CustodyCannotSteerTests`,
+  2: a planted bogus sync-keys custody value is ignored — the act derives the true master from the typed secret and the
+  server's proof stands apart from custody; a stranger's master cannot write the vault). `EarlierRowKeysOpenTests` (5).
+- Piece 6 — riders VX-380/VX-406: NOT TAKEN — neither fix was one line in a suite this unit touched (VX-380 is the
+  MultiTenantSyncAttacker release-floor red, VX-406 the wider `.belowFloor` class; both stay on the board, untouched by
+  this diff). Recorded, not forced.
 - No revert is in flight.
+
+**COUNTS (the tree at this record; headless, both configurations):**
+- The new suites, Debug (`swift test --filter VX307VaultArtifactTests|AccountVaultWireTests|EarlierRowKeysOpenTests|VaultCASRaceTests|CustodyCannotSteerTests`): all green (6 + 11 + 5 + 2 + 2). With the DDL + completeness suites: `SerializerCompletenessTests` updated (the two new columns classified — `mode` bookkeeping, `earlier_row_keys` wrappedKey; 27 vault columns) `✔ 6/1`; `AuthRLSDDLTests` `✔` (the held artifact is deliberately out of `lockstepFiles`).
+- Full core suite, Debug (`swift test`): `✔ 3300 tests in 428 suites` save the ONE known MCP wall-clock flake
+  (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswers…` — 20 s vs 15 s under the full parallel run; `✔` alone in 1 s; no
+  MCP line in this diff) — the VX-306-recorded pre-existing flake.
+- The new suites, Release (`swift test -c release --filter …`): `✔ 41 tests in 8 suites`.
+- `swift build -c release` (rule 24): `Build complete!`.
+- Mac app: Debug `build` `** BUILD SUCCEEDED **`; Debug `build-for-testing` `** TEST BUILD SUCCEEDED **`; **Release
+  `build` `** BUILD SUCCEEDED **`** (the Debug-only law: Release carries no new behaviour — WireVaultLeaf only swaps in
+  under `newRoad`, which is Debug-on-Mac). VariorumMobile `build` `** BUILD SUCCEEDED **`.
+- **PENDING (the orchestrator's, under a stage claim):** the Mac-target protection suites. The Mac test-build compiled
+  every Mac test file over the changed `VaultLeaf` signature; the RUN is owed. Command (from `App/Variorum/`):
+  ```
+  xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx307 test \
+    -only-testing:VariorumTests/PostureSwitchTests -only-testing:VariorumTests/EncryptionFlowTests \
+    -only-testing:VariorumTests/SyncEnrollmentTests -only-testing:VariorumTests/KeyDoorTests \
+    -only-testing:VariorumTests/EnrollDirectionsTests -only-testing:VariorumTests/VX110SignedOutCastleTests
+  ```
+
+**PROVISIONALs (bundled under QUESTIONS #234's successor; each built as its spec-defensible arm):**
+- **P-VX307-U1-1** — the artifact relaxes the journal-bridge columns' NOT NULL (the bridge is retired; a marker-14
+  vault mints no bridge key). Options: (a) BUILT — relax, existing rows keep their values unread; (b) keep NOT NULL and
+  mint a dummy bridge key (a lie); (c) drop the columns (SQLite can't without a table rebuild).
+- **P-VX307-U1-2** — the artifact's `mode` backfill restates TODAY's posture encoding (`master_wrapped_by_apple_held`
+  present ⇒ Standard — `PostureSwitch`'s own live reading), so it is truth, not a guess; a preflight probe confirms her
+  row before the window. Options: (a) BUILT; (b) default every row to Standard (wrong for a Castle account); (c) refuse
+  and require a hand value.
+- **P-VX307-U1-3** — `NewRoadSyncKeyProvider` reads session memory then the silent item, NEVER the Touch ID item (a
+  press per round is nobody's wish; under Always-ask Castle a round runs only while an act/unlock has loaded session
+  memory). Options: (a) BUILT; (b) a press per round (rejected); (c) refuse the round under Always-ask Castle until an
+  act primes memory (the same effect as (a), louder).
+- **P-VX307-U1-4** — `AccountVaultClient`'s post-enroll hash refresh is GUARDED to the same master's pre-enroll v1 form
+  (`row.keyProofHash == KeyProof.hash(master:)`), so the client can never mask the server's hash-and-secret-together
+  rule by overwriting a successor hash. Options: (a) BUILT; (b) always refresh (would hide a real together-rule
+  violation); (c) never refresh (a same-master re-wrap after enrollment would refuse once).
 
 ## 7. LIVE STATUS
 - 2026-10-18 ~18:45 — KICKED OFF. Preflight complete (the orchestrator): CastleRules + SyncSpec whole, the lifecycle
   stages, SurfaceContracts, VX-306 §8/§9 records + handoff, QUESTIONS #234 (ACCEPTED by this kickoff, her entry's own
   sentence — the status flip rides the closeout merge), the board, the core acts/VaultModel/Assessment/leaves, today's
   `key_vault` DDL + RPCs, `KeyVaultClient`. Her kickoff rulings in §5. The custody slot held; coordinator announced.
-- U1 (VX-416): BRIEFED (§5a) — the Fable fork spawning next. NOT STARTED.
-- U2 (VX-417): NOT STARTED — briefed after U1's record closes.
+- U1 (VX-416): BUILT (the §6 U1 RECORD) — the held lockstep artifact + checklist, the fake server, the production vault
+  wire (`AccountVaultClient` + `WireVaultLeaf`), the new-road sync-key provider + the engine's earlier-keys seam, the
+  convergence/race/wire suites (both configurations green headless; Mac + mobile builds + Release build green). The
+  Mac-target protection suites are PENDING under a stage claim (the orchestrator's). Riders not taken (recorded).
+- U2 (VX-417): NOT STARTED — briefed after U1's Mac suites run green.
