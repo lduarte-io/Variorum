@@ -2049,9 +2049,13 @@ scratchpad, pointed at this worktree).
   amended in place; pin `FileLessWordsTests.anItemThisBuildCannotReadIsSkippedAndSaidNeverSilently` (`✔ 13 tests in 2
   suites` with `NewWordsResumeTests`) — RED BY BEHAVIOURAL REVERT (the log line removed — the unstated guess) → `✘ … 2
   issues`, restored `cmp`-identical. The trace: THE DISPOSITIONS below.
-- **MINOR-2** (the pane's one read runs three times per appearance) — AGREE (the U1 record's R-2 intended ONE assessment
-  for the pane). NOT-STARTED — the settled design: one read per appearance wave, fanned to the three section models
-  through their landing rule; every other refresh trigger keeps its own fresh read.
+- **MINOR-2** (the pane's one read runs three times per appearance) — AGREE, FIXED (`48b92904e` + the order pin
+  `dab9ab480`). Pin `ProtectionPaneWaveTests` (4, headless — the harness `✔ 270 tests in 43 suites` at the fix commit, the
+  suite `✔ 4 tests in 1 suite` after the order pin) — RED BY BEHAVIOURAL REVERT (the wave calling each section's own
+  refresh — the pre-fix appearance) → `✘ … 3 issues` (three fetches, not one); MUTATION (the read numbers taken AFTER the
+  read) → `✘ aSectionsOwnReadDuringTheWaveIsNeverOverwrittenByIt`; each restored `cmp`-identical. Two Mac source pins
+  FLIPPED deliberately (`RoadAccountSurfaceTests` / `RoadKeyDoorSurfaceTests` — the pane's one `.task`; the bootstrap's
+  wiring). `build-for-testing` green, no warning in a touched file. The trace: THE DISPOSITIONS below.
 - **NIT-1** (the `.signIn` services-nil fallback's untrue sentence) — AGREE. NOT-STARTED.
 - **NIT-2** ("now … now" in Move's and the join's moved receipts) — AGREE. NOT-STARTED — a reword in `ProtectionWords`'
   VX-308 U2 section, sentence case, PROVISIONAL with the bundle row.
@@ -2102,6 +2106,21 @@ door's moment an undecodable item can exist only if another process wrote it aft
 payload the next open rewrites anyway, at the cost of refusing rule 27's recovery road. The skip is now logged by id (eight
 characters — never key material) and the doc comment states it; the U3 record's sentence amended in place. No behaviour
 changed (the pin's mint is green on both trees; its log assertions are the red).
+
+**MINOR-2 — AGREE, FIXED.** *My trace:* the pane's three `.task`s each awaited a section's `refresh()` → its bootstrap
+road's `read` → `ProtectionPaneRead.read` (a `session.system.facts` gather — keychain enumerations, key-file and catalogue
+reads — and, signed in, one `fetchVault` over the wire), concurrently and independently: three gathers and three GETs per
+appearance, each section derived from its own snapshot. U1's R-2 ("the crossings' faces and the account faces derive from
+that one assessment") meant ONE. Not a wrong act (every press re-reads — VX-108), so no correctness pin; the evidence is
+the fetch count. *The fix:* `ProtectionPaneRead.wave` takes the one read ONCE and derives the three faces through the SAME
+functions each section's road uses (`ProtectionCrossings.readCrossings(…, read:)`, `ProtectionPaneRead.accountFaces(_:
+session:)`, `ProtectionKeyDoorRoad.faces`); `ProtectionPaneRefresh.wave` takes each section's read number BEFORE the read
+and lands by each section's own landing rule (the models' `refresh` split into `beginRead` + `land`, behaviour unchanged),
+so a section's own newer read is never overwritten (pinned); `RoadStandingModel.refreshPane` takes the bootstrap's wave
+road (`AppBootstrap.paneWave`, off-main, wired at each new-road ready) and falls back to the three own reads when none is
+given (hand-made faces). Kept as they were, deliberately: every OTHER refresh trigger (a confirm's close, an act's
+`landed` chain, a sign-in sheet's close, the signed-out road's Continue) re-reads only its own section with its own fresh
+read — those are single-section events; and F-U1-4's `services?.encryption.refresh()` task (today's road) is untouched.
 
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
