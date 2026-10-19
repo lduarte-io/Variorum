@@ -99,6 +99,18 @@ struct ProtectionCrossingRouteTests {
         }
     }
 
+    /// THE TOUCH ID WALK SWITCH (P-VX307-U2a-6) arms the PRODUCTION custody leaf — once per process, on a writing road
+    /// only (the press it plants is the walk's: no test can press Touch ID).
+    @Test func theTouchIDWalkSwitchArmsTheProductionLeafOncePerProcess() async throws {
+        let world = RoadWorld()
+        defer { world.scope.purge() }
+        let env = [ProtectionWalkSwitch.touchIDKey: "fail"]
+        #expect(!ProtectionWalkSwitch.failTouchIDOnceIfAsked(world.context(writes: false), environment: env))
+        #expect(world.context().system.custody is KeychainCustodyLeaf)
+        #expect(ProtectionWalkSwitch.failTouchIDOnceIfAsked(world.context(), environment: env))
+        #expect(!ProtectionWalkSwitch.failTouchIDOnceIfAsked(world.context(), environment: env), "once per process")
+    }
+
     /// A wrong word is refused BEFORE anything closes: the library stays open on the same session, nothing crossed.
     @Test func aWrongWordNeverTearsTheWindowDown() async throws {
         try await withRoadDependencies {

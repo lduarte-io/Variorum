@@ -35,14 +35,22 @@ nonisolated enum RoadInterlude {
         case notice(LibraryNotice)
         /// Rule 21's offer — her sentence (`KeyFileOffer`), *Not now* · *Use it*.
         case offer(KeyFileOffer)
+        /// VX-307 U2a — VX-310's RE-ARM question (the design's §3.10): owed by `assess` ONLY after a Touch ID press failed
+        /// on an item that exists and a typed secret then opened the library (`OwedAct.touchIDRearmQuestion`). *Always
+        /// ask instead* · *Set it up again* — `answerTouchIDRearm` (a new item only on yes, at this press; a no records
+        /// Always ask). Asked here, in the lobby's room after the unlock, before the library shows (PROVISIONAL
+        /// P-VX307-U2a-5 — the interlude's idiom, P-VX306-U2-1).
+        case rearm
     }
 
     /// The cards an open owes before the library shows, in order: the notice (the unlock said it), then the offer
-    /// (the search found one). Empty: nothing to say — the open goes straight on.
+    /// (the search found one), then the re-arm question (a press failed on an item that exists). Empty: nothing to say
+    /// — the open goes straight on.
     static func cards(_ report: RoadOpenReport) -> [Card] {
         var cards: [Card] = []
         if let notice = report.notice { cards.append(.notice(notice)) }
         if case .offer(let offer)? = report.keyFileSearch { cards.append(.offer(offer)) }
+        if report.acts.contains(.touchIDRearmQuestion) { cards.append(.rearm) }
         return cards
     }
 
@@ -57,6 +65,8 @@ nonisolated enum RoadInterlude {
                 return offer.words.replacingOccurrences(of: "<date>", with: ProtectionWords.offerUnknownDay)
             }
             return offer.sentence(date: day)
+        case .rearm:
+            return ProtectionWords.rearmQuestion
         }
     }
 
@@ -77,11 +87,16 @@ nonisolated enum RoadInterlude {
 final class RoadInterludeModel {
     private(set) var cards: [RoadInterlude.Card]
     private(set) var busy = false
-    /// *Use it* failed — said under the buttons; both doors stay.
+    /// *Use it* failed — said under the buttons; both doors stay. (The re-arm's answer failing — said, with *OK*.)
     private(set) var message: String?
+    /// VX-307 U2a — the re-arm's answer could not be written: the card offers *OK* and the open goes on with nothing
+    /// decided (the question is asked again after the next failed press) — never a dead end in the lobby's room.
+    private(set) var rearmFailed = false
 
     @ObservationIgnored private let day: (Date) -> String
     @ObservationIgnored private let useOffer: (KeyFileOffer) async -> UseOfferOutcome
+    /// VX-307 U2a — the re-arm's answer (`answerTouchIDRearm`): true when it was written.
+    @ObservationIgnored private let answerRearm: (Bool) async -> Bool
     @ObservationIgnored private let receipt: (String) -> Void
     @ObservationIgnored private let finished: () -> Void
     @ObservationIgnored private var finishedOnce = false
@@ -90,12 +105,14 @@ final class RoadInterludeModel {
         cards: [RoadInterlude.Card],
         day: @escaping (Date) -> String = { ProtectionWords.day($0) },
         useOffer: @escaping (KeyFileOffer) async -> UseOfferOutcome,
+        answerRearm: @escaping (Bool) async -> Bool = { _ in false },
         receipt: @escaping (String) -> Void,
         finished: @escaping () -> Void
     ) {
         self.cards = cards
         self.day = day
         self.useOffer = useOffer
+        self.answerRearm = answerRearm
         self.receipt = receipt
         self.finished = finished
     }
@@ -104,10 +121,35 @@ final class RoadInterludeModel {
 
     var sentence: String? { current.map { RoadInterlude.sentence($0, day: day) } }
 
-    /// The notice's one button.
+    /// The notice's one button — and, once the re-arm's answer could not be written, the re-arm card's way on.
     func ok() {
-        guard case .notice? = current, !busy else { return }
-        advance()
+        guard !busy else { return }
+        switch current {
+        case .notice?:
+            advance()
+        case .rearm? where rearmFailed:
+            rearmFailed = false
+            message = nil
+            ProtectionOpenRoad.log("road: the Touch ID re-arm left unanswered (its answer could not be written)")
+            advance()
+        default:
+            return
+        }
+    }
+
+    /// VX-310's re-arm, answered: yes makes a new item at this press; no records Always ask (`answerTouchIDRearm`).
+    func rearm(yes: Bool) async {
+        guard case .rearm? = current, !busy, !rearmFailed else { return }
+        busy = true
+        message = nil
+        let written = await answerRearm(yes)
+        busy = false
+        if written {
+            advance()
+        } else {
+            rearmFailed = true
+            message = ProtectionWords.rearmFailed
+        }
     }
 
     /// The offer put off — NOTHING is written (rule 21: "nothing is written before your yes").

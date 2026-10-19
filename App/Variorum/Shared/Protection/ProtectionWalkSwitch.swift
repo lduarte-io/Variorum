@@ -61,6 +61,40 @@ nonisolated enum ProtectionWalkSwitch {
         forget(roads, ctx.system)
     }
 
+    // MARK: - VX-307 U2a — a planted failed Touch ID press (stage 11's re-arm)
+
+    /// `VARIORUM_WALK_TOUCHID=fail`: the launch's first Touch ID press on an item that exists answers as one a biometry
+    /// change invalidated (`KeychainCustodyLeaf.walkFailNextTouchIDPress` — nothing read; the press recorded
+    /// `.failedOnExistingItem`), so the lobby shows the changed line and the typed open owes the re-arm question.
+    /// PROVISIONAL P-VX307-U2a-6, the same four fences as the forgetting (DEBUG, the new road, a writing road, once per
+    /// process).
+    static let touchIDKey = "VARIORUM_WALK_TOUCHID"
+
+    /// `fail` (case and spaces free) and nothing else.
+    static func parseTouchID(_ value: String?) -> Bool {
+        (value ?? "").trimmingCharacters(in: .whitespaces).lowercased() == "fail"
+    }
+
+    nonisolated(unsafe) private static var touchIDSpent = false
+
+    /// The launch's one planted failure, armed on the road's custody leaf before the lobby presses. A second call does
+    /// nothing; true when it armed one.
+    @discardableResult
+    static func failTouchIDOnceIfAsked(
+        _ ctx: RoadContext, environment: [String: String] = ProcessInfo.processInfo.environment
+    ) -> Bool {
+        guard parseTouchID(environment[touchIDKey]), ctx.writes,
+              let custody = ctx.system.custody as? KeychainCustodyLeaf else { return false }
+        lock.lock()
+        let first = !touchIDSpent
+        touchIDSpent = true
+        lock.unlock()
+        guard first else { return false }
+        custody.walkFailNextTouchIDPress()
+        ProtectionOpenRoad.log("WALK SWITCH (\(touchIDKey)): the next Touch ID press fails on its item (stage 11's re-arm)")
+        return true
+    }
+
     /// Forget `roads` through the production leaves — the dev scope's silent items; this library's Apple keys.
     static func forget(_ roads: Set<Road>, _ system: ProtectionSystem) {
         if roads.contains(.silent) {

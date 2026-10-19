@@ -280,6 +280,22 @@ struct MobileRoadInterludeCard: View {
                         MobileRoadButton(title: ProtectionWords.offerUseIt, tokens: tokens) { Task { await model.useIt() } }
                             .disabled(model.busy)
                     }
+                case .rearm?:
+                    // VX-307 U2a — the shared re-arm card (the Mac's twin; reachable only once the phone enters Castle).
+                    if model.rearmFailed {
+                        MobileRoadButton(title: ProtectionWords.noticeOK, tokens: tokens) { model.ok() }
+                    } else {
+                        HStack(spacing: 16) {
+                            MobileRoadButton(title: ProtectionWords.rearmNo, tokens: tokens) {
+                                Task { await model.rearm(yes: false) }
+                            }
+                            .disabled(model.busy)
+                            MobileRoadButton(title: ProtectionWords.rearmYes, tokens: tokens) {
+                                Task { await model.rearm(yes: true) }
+                            }
+                            .disabled(model.busy)
+                        }
+                    }
                 case nil:
                     EmptyView()
                 }

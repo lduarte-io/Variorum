@@ -66,6 +66,28 @@ nonisolated final class KeychainCustodyLeaf: CustodyLeaf, @unchecked Sendable {
         lock.unlock()
     }
 
+    #if DEBUG
+    /// WALK MACHINERY (VX-307 U2a — `ProtectionWalkSwitch`'s `VARIORUM_WALK_TOUCHID=fail`, P-VX306-U1b-9's fences): the
+    /// next Touch ID press on an item that EXISTS answers as one a biometry change invalidated — nothing read, the press
+    /// recorded `.failedOnExistingItem` — ONCE, so lifecycle stage 11's re-arm is walked on a planted failure. Never set
+    /// outside a walk launch.
+    private var walkFailsNextPress = false
+
+    func walkFailNextTouchIDPress() {
+        lock.lock()
+        walkFailsNextPress = true
+        lock.unlock()
+    }
+
+    private func takeWalkFailure() -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        let fails = walkFailsNextPress
+        walkFailsNextPress = false
+        return fails
+    }
+    #endif
+
     func account(_ fingerprint: String, _ itemClass: ProtectionNames.CustodyClass) -> String {
         ProtectionNames.custodyAccount(scope: scope, fingerprint: fingerprint, class: itemClass)
     }
@@ -102,6 +124,12 @@ nonisolated final class KeychainCustodyLeaf: CustodyLeaf, @unchecked Sendable {
                 setLastPress(.transient(transient))
                 return nil
             }
+            #if DEBUG
+            if takeWalkFailure() {
+                setLastPress(.failedOnExistingItem)
+                return nil
+            }
+            #endif
             let context = LAContext()
             context.localizedReason = Self.pressReason
             context.localizedFallbackTitle = ""  // the fallback is the passphrase road, never a system credential

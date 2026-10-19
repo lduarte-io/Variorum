@@ -220,6 +220,26 @@ nonisolated enum ProtectionCrossings {
         return true
     }
 
+    // MARK: - VX-310's re-arm (the interlude's card)
+
+    /// The re-arm question answered (`answerTouchIDRearm` — guarded in the core on the item's existence): yes makes a
+    /// new Touch ID item at this press, no records Always ask; the stale item goes either way. True when written.
+    static func answerRearm(_ session: ProtectionRoadSession, yes: Bool) async -> Bool {
+        guard session.writes, session.beginAct() else { return false }
+        defer { session.endAct() }
+        var library = session.library
+        do {
+            _ = try await session.executor.answerTouchIDRearm(&library, yes: yes)
+        } catch {
+            session.library = library
+            ProtectionOpenRoad.log("road: the Touch ID re-arm could not be answered — \(String(describing: error))")
+            return false
+        }
+        session.library = library
+        ProtectionOpenRoad.log("road: the Touch ID re-arm answered \(yes ? "yes — a new item at this press" : "no — Always ask")")
+        return true
+    }
+
     // MARK: - The gate-style row
 
     /// This Mac's gate: Touch ID (with the passphrase, where it works here) or Always ask (the item deleted).

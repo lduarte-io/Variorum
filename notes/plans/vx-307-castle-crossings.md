@@ -525,9 +525,26 @@ dev/real store or `/Applications` touch: the brief's limits.)
   Mac suite `RoadCrossingSurfaceTests` (3: the pane hosts the section in both postures; the confirm hosts in each shape;
   the pane's gate source-pinned) — BUILT, RUN PENDING under the stage. `build-for-testing` → `** TEST BUILD SUCCEEDED
   **`, no warning in a touched file.
-- Piece 6 — THE TOUCH ID RE-ARM (VX-310's second half): NOT-STARTED. The interlude's re-arm card when the open owes
-  `.touchIDRearmQuestion`; `answerTouchIDRearm` through the session; the Mac and phone cards; a DEBUG walk switch that
-  plants one failed press for stage 11's walk (PROVISIONAL, P-VX306-U1b-9's fences).
+- Piece 6 — THE TOUCH ID RE-ARM (VX-310's second half): DONE (this commit). `RoadInterlude.Card.rearm` — owed exactly
+  when the open's report owes `assess`'s `.touchIDRearmQuestion` (a press failed on an item that exists, then a typed
+  secret opened the library), after rule 21's notice and offer, once per open, in the lobby's room before the library
+  shows (PROVISIONAL P-VX307-U2a-5); its sentence the design's §3.10 words (*Touch ID can't open Variorum on this Mac any
+  more. Set it up again? Every finger enrolled on this Mac will open it.* — the third sentence the Mac's only);
+  `RoadInterludeModel.rearm(yes:)` → the bootstrap's `answerRearm` road → `ProtectionCrossings.answerRearm` →
+  `answerTouchIDRearm` (the stale item goes either way; yes makes a new one at this press; no records Always ask); an
+  answer that could not be written says so and offers *OK* — the open goes on with nothing decided, never a dead end.
+  The Mac (`RoadInterludeCard`) and phone (`MobileRoadInterludeCard` — the shared card, reachable only once the phone
+  enters Castle) render it. THE WALK SWITCH `VARIORUM_WALK_TOUCHID=fail` (DEBUG; the new road; a writing road; once per
+  process — P-VX306-U1b-9's fences; PROVISIONAL P-VX307-U2a-6): the launch's first Touch ID press on an item that EXISTS
+  answers `.failedOnExistingItem` with nothing read (`KeychainCustodyLeaf.walkFailNextTouchIDPress`), so stage 11's
+  re-arm is walkable on a planted failure. Pins `RoadRearmTests` (4, headless: the card owed only by the question;
+  the answers reach the road and an unwritten one never strands her; `answerTouchIDRearm` through a planted Castle
+  session — delete + write on yes, gone + Always ask on no, nothing written with no item; the switch's word and fences)
+  — MUTATION: the card's line removed → RED (3 issues), restored `cmp`-identical; `ProtectionCrossingRouteTests` gains
+  the switch arming the PRODUCTION leaf once per process (Mac, PENDING). HEADLESS (the harness, all symlinked suites)
+  `✔ Test run with 86 tests in 12 suites passed`. `build-for-testing` → `** TEST BUILD SUCCEEDED **`; the phone
+  `-scheme VariorumMobile -destination 'generic/platform=iOS Simulator' build` → `** BUILD SUCCEEDED **`; no warning in a
+  touched file.
 - Piece 7 — THE CLOSE: NOT-STARTED. Headless harness run, the core's protection set both configurations,
   `build-for-testing` (Mac + phone), the Release build check, the Mac suite list for the orchestrator, the PROVISIONALs.
 - No revert is in flight.

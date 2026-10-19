@@ -507,8 +507,12 @@ final class AppBootstrap {
         }
         let ctx = road.context()
         #if DEBUG
-        // Walk machinery (P-VX306-U1b-9): a launch asked to forget a quiet road does so once, before the facts.
-        if road.open == nil { ProtectionWalkSwitch.forgetOnceIfAsked(ctx) }
+        // Walk machinery (P-VX306-U1b-9): a launch asked to forget a quiet road does so once, before the facts; and
+        // (VX-307 U2a, P-VX307-U2a-6) one asked to fail its first Touch ID press arms that on the road's custody leaf.
+        if road.open == nil {
+            ProtectionWalkSwitch.forgetOnceIfAsked(ctx)
+            ProtectionWalkSwitch.failTouchIDOnceIfAsked(ctx)
+        }
         #endif
         switch await ProtectionOpenRoad.route(ctx, keyInHand: unlockedKey) {
         case .opened(let session):
@@ -765,12 +769,18 @@ final class AppBootstrap {
 
     /// VX-306 U2 — the interlude (rule 21): the notice, then the offer; *Use it* runs off the main actor through
     /// the road; when the last card is answered the open goes on with the same session (shown once per open).
+    /// VX-307 U2a — then VX-310's re-arm question, answered through the session's executor (`answerTouchIDRearm`).
     private func makeInterlude(_ session: ProtectionRoadSession, _ ctx: RoadContext) -> RoadInterludeModel {
         RoadInterludeModel(
             cards: RoadInterlude.cards(session.report),
             useOffer: { offer in
                 await Task.detached(priority: .userInitiated) {
                     await ProtectionOpenRoad.useOffer(ctx, session: session, offer: offer)
+                }.value
+            },
+            answerRearm: { yes in
+                await Task.detached(priority: .userInitiated) {
+                    await ProtectionCrossings.answerRearm(session, yes: yes)
                 }.value
             },
             receipt: { session.addReceipt($0) },
