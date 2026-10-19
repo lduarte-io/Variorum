@@ -1208,6 +1208,17 @@ tree and was restored by `git checkout --` (`cmp` against a pre-mutation copy). 
 `99c4f7a15` (2) · `bbe2d699c` (record) · `ed7beb995` (3) · `3f5b8479d` (record) · `18cd0123e` (4) · `eea4b5892` (5) · the
 close commit.
 
+**THE U2 MAC BATCH (the orchestrator, 2026-10-19 06:45–07:10 MDT, stage claim `vx-308-u2-mac`, the coordinator's GO;
+log `vx308-u2-mac-run.log` + `-refix.log`, deleted at closeout):** 324 tests / 48 suites — ZERO expectation failures
+beyond the 3 expected `VX310TodayLobbyWitnessTests` witnesses; the VX-314 status-face four ran green in the batch.
+The batch's ONE failure was the TEST HOST CRASHING (SIGSEGV, the retired `.ips`'s triggered thread) inside
+`PlantedVaultLeaf.fetchVault`'s bare `calls.append` — U1's planted account fakes carried unsynchronized mutable
+state, and U2's seam makes the pane's read and an act's read CONCURRENT by design, so the fake corrupted its own
+heap mid-`theFollowRunsThroughTheReopeningSeam`. FIXED test-side (`451fdcccb`): both planted fakes' bodies hold one
+NSLock (the provider's idiom); the crash itself is the red-on-old in effect; the crashed family re-run `✔ 10 tests
+in 3 suites`. 0 instances at release; the stage released with the result line. **U2 IS CLOSED but for the walk and
+the ladder.**
+
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
   `~/dev/variorum-vx-308`, branch pushed, in-flight row (holds the Sync/-custody slot) `969acce55` on main, Linear
@@ -1229,3 +1240,7 @@ close commit.
   three local leaves, the signed-out road, the walk's project switch), 223/42 under the stage with one fixed
   vocabulary red, the bootstrap pin red-on-old by behavioral revert. VX-239/VX-243/VX-264 land with VX-418's trunk.
   NEXT: VX-314's engine-mouth gate (the orchestrator, headless), then U2 (the join + follow faces).
+- 2026-10-19 ~07:10 MDT — **U2 CLOSED but for the walk and the ladder** (the §6 U2 RECORD + Mac-batch paragraph):
+  the join (the plan said at the consent, one secret, the words moment both arms), the follow in/into/out with
+  VX-107's once-said Done and VX-113's ruled sentence, the one reopening seam shared with the crossings; 324/48
+  under the stage, the one host-crash traced to U1's test fakes and fixed. NEXT: U3 (the key doors + VX-447/VX-448).
