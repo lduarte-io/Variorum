@@ -2243,6 +2243,61 @@ Credentials: dev-castle.env + dev-vault-throwaway.env, never echoed (term 4). Wi
 Light + dark where a face is new (the account section, the join sheet + words moment, the signed-out screen, the
 otherAccount screen, the key-door sheets, the banner door, the lock lobby, F-4's refusal).
 
+### THE WALK RECORD (the orchestrator, 2026-10-19 10:53–13:50 MDT window with two term-8 holds — the claim expiries were the DRIVER's scheduling gaps, not app stalls; stage claims `vx-308-walk`; captures/logs `~/vx308-walk/`, deleted at closeout; the safety copy `Backups/safety-copies/variorum-vx308-walk-2026-10-19T165332Z/`, 8/8 files cmp-OK after the coordinator caught the extension-filtered first pass missing the extensionless lived-here marker)
+
+**On the dev library A (86a82b4f):** no lock door in Standard (the File menu read by AX, 21 items) → a LOCAL Use Castle
+under Always ask (the confirm's rules-true sentences captured; F-4 never gates a local crossing, proven with the hold
+standing) → the Lock door appears → **VX-445's Lock Now → the lobby** (typed roads only, the honest Touch ID line) →
+the typed reopen under the same Castle key → the export notice's *Turn it back on* (the switch read 1 after) → Use
+Standard back (rule 12's sentence in the primary ink, both secrets) → quiet open. A ends STANDARD, the dev pair
+intact and never looked at, the hold marker cmp-identical on both moves, the banner standing, Resume never pressed.
+
+**On throwaway B:** the calm first open (an empty unmarked slot reads `startFresh` — created straight onto the
+Bookcase, both card rows) → the look minted B's words → **VX-448's whole arc: Copy carries
+`org.nspasteboard.ConcealedType` beside the text (read from the raw pasteboard types), the new caption speaks (the
+60-second line gone), the CROSSING'S REOPEN KEEPS the copy (12 words after Use Castle — P-VX308-U3-8), and ⌃⌘L CLEARS
+it (0 bytes; both VX-445 and VX-448 log lines named)** → B's passphrase reopens the lobby.
+
+**On throwaway C against the THROWAWAY PROJECT (the account sequence — the rehearsal's account arms):** the walk
+switch's one log line (never the values; the ref guard in every launch); the stale pre-walk session signed out (found
+at start, its refresh already failing; the end is signed-out — her list); sign-in as user A (the Account sheet
+through the presenter) → **turn on sync = the LIVE setUpSync: the vault CREATED on the throwaway through the
+production wire** (the confirm's rule-7 sentences captured; server row verified: format 1, standard, the proof hash
+present, revision 1) → the SIGNED-OUT faces (the in-place refusal under Use Castle; the one-road sentence; This Mac
+Only's confirm with rule 16 byte-equal + "Signing back in is a join.") → sign back in → **the SYNCED key door:
+Change passphrase (VX-263's line + rule 7's synced line captured) — the vault's revision moved 1→2 on the server,
+the first live `key_vault_update` under the challenge protocol** → Stop syncing here (rule 16's confirm) → **the
+JOIN (the vault existing): the confirm's U2 sentences captured; typed the account's words — NO words moment, and
+rightly: the typed words were the library's own, nothing replaced (the same-words arm proven live; the replaced arms
+stand on their headless pins)** → the otherAccount faces as user B (every door's honest refusal; **Move's arm is a
+deliberate not-ready line this build — re-check its U2 disposition at closeout, and her bundle carries it**) → back
+as A → **F-4 LIVE: the hold marker planted beside the synced C put the refusal in place of BOTH gated doors, naming
+Resume Sync; nothing else gated; unplanted clean** → **the third leave's confirm exactly as F-FORK-1 ruled (the local
+lead, rule 16 byte-equal, the pointer line to the Account sheet's real deletion)** → run; C names no account, the key
+unchanged → sign out (guard d verified at the end: no auth item under the app's auth service).
+
+**On throwaway D:** **VX-447's banner-door act END TO END** — the key file aside + `VARIORUM_WALK_FORGET=memory` →
+the quiet open lands in rule 27's first-arm state → THE BANNER IS THE DOOR (her U2-7 sentence + the door line,
+captured in the window buffer) → the look (the Settings door — the same act) mints → close → the log's own words:
+*regenerate_words done; the key unchanged; "VX-447 — the fresh key file stands; the backup follows"; backup pair
+written*. The live key file back and the pair on disk.
+
+**WALK FINDINGS (tickets/bundle at closeout):**
+- **W-VX308-1** — the settings search doesn't surface the account section ("account" answers nothing; the search
+  self-describes as covering the app's own words). Improvement, Settings & onboarding.
+- **W-VX308-2** — "Set a passphrase…" (the reminder's row) still renders above Change/Reset after turn-on-sync set a
+  passphrase (the ledger not re-read); self-heals at the next launch (unverified) — Bug, Suspected, Castle & sync.
+- **W-VX308-3 (observation, her bundle)** — the weekly-copy switch is ONE app-level key, so a THROWAWAY library's
+  Castle crossing turns it off for every library in the slot's domain; NIT-R2-1 fixed the NOTICE by library, the
+  switch itself is per-domain (restored TRUE at the end-diff).
+- **The unplanned live proof:** the wire's refuse-by-version fence fired against the rehearsal's planted
+  `format_version: 2` fixture rows (the pane said so honestly); the fixtures were then retired server-side so the
+  account arms ran on real vaults — the §5R record's planted rows no longer exist on the throwaway.
+- **Machinery:** two stage-claim expiries were the orchestrator session's own scheduling gaps (no tool turn for ~80
+  and ~45 min); the coordinator's term-8 holds carried both; renew-by-row adopted mid-walk. One sequencing slip
+  (a quit that had not landed before a file move) was caught by the instance count, reversed same-inode with nothing
+  lost, and the aside redone at zero instances — the honesty line.
+
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
   `~/dev/variorum-vx-308`, branch pushed, in-flight row (holds the Sync/-custody slot) `969acce55` on main, Linear
@@ -2276,3 +2331,7 @@ otherAccount screen, the key-door sheets, the banner door, the lock lobby, F-4's
 - 2026-10-19 ~09:55 MDT — **U4 CLOSED but for the walk and the ladder**; the implementer era done (U1–U4 + VX-314
   all built, batched under the stage, arbitrated). NEXT: THE LADDER round 1 — a fresh fable-reviewer over the phase's
   whole diff (custody + the one Sync/ gate ⇒ Fable), notes/REVIEW_PROMPT.md verbatim, headless.
+- 2026-10-19 ~13:50 MDT — **THE WALK DONE** (the §6 WALK RECORD): VX-445 + VX-448 + VX-447 + F-4 + the account
+  sequence all walked live against the throwaway project; the dev store restored (Standard, quiet open, the hold
+  standing, cmp-identical marker; the defaults end-diff reconciled; no auth item). Three walk findings + one live
+  fence proof recorded. NEXT: THE CLOSEOUT.
