@@ -1208,6 +1208,23 @@ tree and was restored by `git checkout --` (`cmp` against a pre-mutation copy). 
 `99c4f7a15` (2) · `bbe2d699c` (record) · `ed7beb995` (3) · `3f5b8479d` (record) · `18cd0123e` (4) · `eea4b5892` (5) · the
 close commit.
 
+**U2 ARBITRATION (the orchestrator, 2026-10-19 ~07:15 MDT — repo-first; the dispositions of U2's findings):**
+- **F-U2-1** (the words-replaced notice fires on every passphrase-typed join, even one whose library words already
+  were the account's — the core cannot verify untyped words): RECORD-ONLY for her bundle — the sentence stays TRUE in
+  that case ("your library's twelve words are now your account's twelve words" — they already were); no change.
+- **F-U2-2** (a join stopping past its swap is finished by the next open with no receipt and no words moment): a
+  TICKET at closeout (Bug, Suspected, Castle & sync, Low) — the moment is a face nicety on a crash corner the core
+  already heals; not this phase's.
+- **F-U2-3** (after a join, the words card still offers a look; on a SYNCED library a look mints new words and
+  re-wraps the ACCOUNT's words everywhere — rule 7 working as designed, but a quiet trap right after she typed the
+  account's words): RULED, BUILT IN U3 — every door into the look on a synced library says plainly before minting
+  that new words replace the account's words everywhere, one confirm line on the look's ask (PROVISIONAL, her
+  bundle); the door is never blocked. The unsynced look is unchanged.
+- **F-U2-4..8**: as routed in the U2 record (walk cautions and accepted consequences; nothing to build).
+- **P-VX308-U2-1..8**: each built as its stated arm; bundled for her eye with the records' reasoning. P-VX308-U2-7
+  (the follow's Done is a receipt, hidden under receipt_style off) is FLAGGED to her beside VX-107 — the other-device
+  sentence is the point of the Done; if she wants it always-shown, it becomes a direction, one line.
+
 **THE U2 MAC BATCH (the orchestrator, 2026-10-19 06:45–07:10 MDT, stage claim `vx-308-u2-mac`, the coordinator's GO;
 log `vx308-u2-mac-run.log` + `-refix.log`, deleted at closeout):** 324 tests / 48 suites — ZERO expectation failures
 beyond the 3 expected `VX310TodayLobbyWitnessTests` witnesses; the VX-314 status-face four ran green in the batch.
