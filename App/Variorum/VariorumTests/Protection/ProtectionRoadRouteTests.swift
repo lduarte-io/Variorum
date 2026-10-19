@@ -2,7 +2,8 @@
 //  ProtectionRoadRouteTests.swift
 //  VariorumTests — VX-306 U1b piece 6: THE NEW ROAD'S ROUTE, end to end through `AppBootstrap` (the one switch
 //  turned on by a test harness) on a temp slot and a THROWAWAY keychain scope: the lifecycle's stage 1 (a fresh
-//  slot → the creation → the words card → its button → the library open, the four remembered things written,
+//  slot → the creation → the library open with nothing in front — VX-307 U2b retired the creation-time words card on
+//  the Mac — the four remembered things written,
 //  today's store id minted beside it), the quiet relaunch, stage 5's on-device half (the silent item gone → the
 //  Apple wrap opens silently and the item is re-made — rule 8), both quiet roads gone → the lobby's typed field →
 //  the words open it, and the throwing edges: K5's `recordMissing` → the missing face with no sentence; a file in
@@ -21,34 +22,28 @@ import VariorumCore
 @Suite("VX-306 U1b — the new road's route through AppBootstrap (throwaway scope, temp slot)", .serialized)
 @MainActor
 struct ProtectionRoadRouteTests {
-    /// Stage 1, then a relaunch: the card, the open, rule 21's four things, the store id — and a silent reopen.
-    @Test func aFreshSlotCreatesShowsTheWordsOnceOpensAndReopensQuietly() async throws {
+    /// Stage 1, then a relaunch: the open with NOTHING in front of it (VX-307 U2b — rules 2–3 as amended: the words are
+    /// never shown before the first screen), rule 21's four things, the store id — and a silent reopen. Before VX-412
+    /// this arm landed on `.newLibraryWords` (the creation-time card) — the flip's red-on-old.
+    @Test func aFreshSlotCreatesAndOpensWithNothingInFrontThenReopensQuietly() async throws {
         try await withRoadDependencies {
             let world = RoadWorld()
             defer { world.scope.purge() }
             let bootstrap = world.bootstrap()
             #expect(bootstrap.newRoad)
+            #expect(!ProtectionRoad.showsWordsAtCreation, "the Mac's first open has no words card")
             await bootstrap.awaitOpen()
-            guard case .newLibraryWords(let card) = bootstrap.state else {
-                Issue.record("a fresh slot shows the words card first: \(bootstrap.state)")
+            if case .opening = bootstrap.state { await bootstrap.awaitOpen() }
+            guard case .ready(let session) = bootstrap.state else {
+                Issue.record("a fresh slot opens straight on — no words card, no lobby: \(bootstrap.state)")
                 return
             }
-            let words = card.words
-            #expect(words.count == 12)
-            // The library exists before the card's button (the creation minted the words).
+            // The library has its twelve words from birth (rule 2) — a words lock on its key file — but no face held them.
             let system = world.system()
             let live = try #require(try system.leaves.keyFiles.readLiveKeyFile())
-            #expect(ProtectionLibraryFiles.opens(world.slotURL, key: try live.open(words: words)),
-                    "the words shown are the library's — they open the key file beside it, whose key opens the slot")
+            #expect(live.opensWithTheWords, "rule 2: twelve words from the moment it is created")
             #expect(live.passphrase == nil, "rule 3: the passphrase is asked later")
             #expect(FileManager.default.fileExists(atPath: world.slot.places.livedHereMarker.path))
-            card.iveWrittenThemDown()
-            #expect(card.words.isEmpty)
-            await bootstrap.awaitOpen()
-            guard case .ready(let session) = bootstrap.state else {
-                Issue.record("the card's button opens the library: \(bootstrap.state)")
-                return
-            }
             let road = try #require(bootstrap.roadSession)
             #expect(road.isFresh)
             // The app's store opened over the core's library: today's tables beside the protection record.
@@ -208,11 +203,12 @@ struct ProtectionRoadRouteTests {
             }
             await missing.startNewLibrary()
             #expect(missing.lastError == nil)
-            guard case .newLibraryWords(let card) = bootstrap.state else {
-                Issue.record("the creation's words card: \(bootstrap.state)")
+            // VX-307 U2b: the creation opens straight on — no words card (rules 2–3 as amended).
+            await bootstrap.awaitOpen()
+            guard case .ready = bootstrap.state else {
+                Issue.record("the creation opens with nothing in front: \(bootstrap.state)")
                 return
             }
-            #expect(card.words.count == 12)
             let aside = try FileManager.default.contentsOfDirectory(atPath: world.slot.places.previousLibraries.path)
             let folder = try #require(aside.first)
             let moved = try Data(contentsOf: world.slot.places.previousLibraries
@@ -225,7 +221,7 @@ struct ProtectionRoadRouteTests {
     /// key opens a RECORD-LESS store → the route → the missing face (K5) → *Start a New Library* → the store aside WHOLE
     /// in `Previous Libraries/<stamp>/` (its key file with it, never written over) and the words card. Before the fix
     /// the face's one act met the creation's no-clobber belt and said *Variorum couldn't create your library.* forever.
-    @Test func startANewLibraryOnTheMissingFaceOverARecordLessStoreSetsItAsideAndShowsTheWords() async throws {
+    @Test func startANewLibraryOnTheMissingFaceOverARecordLessStoreSetsItAsideAndOpens() async throws {
         try await withRoadDependencies {
             let world = RoadWorld()
             defer { world.scope.purge() }
@@ -243,11 +239,12 @@ struct ProtectionRoadRouteTests {
             }
             await missing.startNewLibrary()
             #expect(missing.lastError == nil, "the face's one act succeeds: \(missing.lastError ?? "")")
-            guard case .newLibraryWords(let card) = bootstrap.state else {
-                Issue.record("the creation's words card: \(bootstrap.state)")
+            // VX-307 U2b: the creation opens straight on — no words card (rules 2–3 as amended).
+            await bootstrap.awaitOpen()
+            guard case .ready = bootstrap.state else {
+                Issue.record("the creation opens with nothing in front: \(bootstrap.state)")
                 return
             }
-            #expect(card.words.count == 12)
             let aside = try FileManager.default.contentsOfDirectory(atPath: world.slot.places.previousLibraries.path)
             let folder = world.slot.places.previousLibraries.appendingPathComponent(try #require(aside.first), isDirectory: true)
             #expect(aside.count == 1)

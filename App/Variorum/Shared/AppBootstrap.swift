@@ -83,7 +83,8 @@ final class AppBootstrap {
         /// roads were already tried at once (`ProtectionOpenRoad.route`).
         case roadLobby(ProtectionLobbyModel)
         /// VX-306 U1b — the once-shown words card of a library just created on the new road (rule 2); its
-        /// one button opens the library.
+        /// one button opens the library. VX-307 U2b: the PHONE's only — the Mac's first open has nothing in front
+        /// (`ProtectionRoad.showsWordsAtCreation`; the words wait for her look, from the card above the quick entry).
         case newLibraryWords(LibraryWordsCardModel)
         /// VX-306 U2 — the open's INTERLUDE on the new road, in the lobby's room between the unlock and the
         /// library's open (PROVISIONAL P-VX306-U2-1): rule 21's notice (once), then the key-file offer; the last
@@ -759,9 +760,18 @@ final class AppBootstrap {
         case .roadLobby(let facts, let ctx):
             state = .roadLobby(makeRoadLobby(facts, ctx))
         case .roadCreated(let session, let words):
-            state = .newLibraryWords(LibraryWordsCardModel(words: words.words) { [weak self] in
-                self?.beginOpening(roadOpened: session)
-            })
+            if ProtectionRoad.showsWordsAtCreation {
+                // The phone (P-VX307-U2b-0): its creation card stands this phase.
+                state = .newLibraryWords(LibraryWordsCardModel(words: words.words) { [weak self] in
+                    self?.beginOpening(roadOpened: session)
+                })
+            } else {
+                // VX-307 U2b (VX-412, rules 2–3 as amended): the Mac's first open is the Bookcase and the quick entry
+                // with NOTHING in front of them — no card, no lobby. The creation's words are dropped here unseen
+                // (nothing stores the words); the card above the quick entry offers fresh ones when she asks.
+                ProtectionOpenRoad.log("road: created — the first open goes straight on (the words wait for her look)")
+                beginOpening(roadOpened: session)
+            }
         case .roadInterlude(let session, let ctx):
             state = .roadInterlude(makeInterlude(session, ctx))
         }
