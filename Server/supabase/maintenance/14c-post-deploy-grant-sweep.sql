@@ -89,6 +89,14 @@
 --   sync_meta (05)                   anon ✗  authenticated ✗  RLS on, 0 policies
 
 with expected_functions (signature, exp_anon, exp_authenticated, exp_service_role) as (
+  -- VX-308 REHEARSAL (2026-10-19, finding R-2 — artifact 17's dress rehearsal
+  -- on the throwaway): marker-aware rows. Artifact 17 DROPS sync_reencrypt
+  -- (rule 15's kept list replaces the rotation walk), so on a marker-14
+  -- mirror its expectation row RETIRES; a marker-13 mirror — production
+  -- until VX-329's window — still demands it. Without this, the release
+  -- window's sweep would report MISSING on a deliberately dropped function.
+  select v.signature, v.exp_anon, v.exp_authenticated, v.exp_service_role
+  from (
   values
     -- 13y UNIT B (12): every gated RPC's signature gained the defaultless
     -- `challenge`; ALL 11-era overloads are DROPPED by 12 — any
@@ -136,6 +144,9 @@ with expected_functions (signature, exp_anon, exp_authenticated, exp_service_rol
     -- protective. RETURNS event_trigger, so it is uncallable via RPC by
     -- Postgres rule; its broad EXECUTE acl is moot. INFO by design.
     ('rls_auto_enable()',                                              null,  null,  null)
+  ) as v(signature, exp_anon, exp_authenticated, exp_service_role)
+  where v.signature <> 'sync_reencrypt(jsonb,text,text,text)'
+     or coalesce((select value::int from sync_meta where key = 'lockstep_version'), 1) < 14
 ),
 observed_functions as (
   select

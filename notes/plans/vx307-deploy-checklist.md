@@ -8,6 +8,21 @@ IN THE RELEASE WINDOW THAT CARRIES VX-329's SWITCH, at her explicit go. Nothing 
 Every row below is PENDING-UNTIL-LIVE. The 13i-e/13n-b window shape: mirror first, then BOTH installs in the same
 window behind the A1 rail, then her first rounds.
 
+**REHEARSED 2026-10-19 (VX-308 §5R — the dress rehearsal on `variorum-vault-throwaway`, her option (b); the record
+is the VX-308 plan's §6 REHEARSAL RECORD).** The full chain 01→16 (+ the two 14c gate scripts between 09 and 10)
+reconstructed a faithful marker-13 mirror from scratch — every artifact `[]` on its FIRST run; the grant sweep read
+production's exact 13n-b shape (63 OK · 4 INFO · 0 fail). Two pre-event `key_vault` rows were planted (one
+Standard-shaped, one Castle-shaped, rotation columns null) and the preflight probe row rehearsed against them.
+**Artifact 17 then ran `[]` on its FIRST run on real Postgres**; all four verification queries below came back
+exactly as written — the `mode` backfill RIGHT ON BOTH ARMS (apple-held wrap present → standard; absent → castle),
+`earlier_row_keys` jsonb YES, the journal-bridge NOT NULLs relaxed, rotation columns clear, `sync_reencrypt` gone,
+marker 14. **Two findings, both fixed in repo at the rehearsal:** R-1 — a fresh-chain order rule (the
+`pre13x-ladder-rotation-clearing-guard` overlay is SUPERSEDED by 12's fold-in: applied after 12 it re-introduces a
+retired signature the sweep then flags; on a fresh mirror it is NOT applied — 12 carries its body); R-2 — the grant
+sweep's `sync_reencrypt` expectation row is now MARKER-AWARE (demanded below 14, retired at 14), so THIS WINDOW's
+post-deploy sweep expects **62 OK · 4 INFO · 0 fail**, not the 13n-b counts (the sweep row below reads with that
+correction). The rows stay PENDING-UNTIL-LIVE — the rehearsal is additive evidence, never the window.
+
 ## Preflight (read-only probes, before the window)
 
 - [ ] PENDING — `select user_id, master_wrapped_by_apple_held is not null as apple_held, corpus_key_id,

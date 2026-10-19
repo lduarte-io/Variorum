@@ -271,7 +271,37 @@ evidence: §5a's verbatim.
 
 ## 6. RECORDS (each unit appends; the VX-306 §9 form)
 
-*(appended per batch)*
+### THE REHEARSAL RECORD (the orchestrator, 2026-10-19 ~04:15–04:45 MDT; §5R run whole; no stage — network only, the coordinator's no-objection + ref guard on every apply)
+
+- **The chain:** 01→09 `[]` each · the two 14c gate scripts `[]` · 10→16 `[]` each — EVERY numbered artifact landed
+  on its FIRST run, in repo order, on a fresh hosted project. The two pre-13x maintenance pieces re-verified their own
+  grants; `beta-signup-auto-entitle` `[]`. The grant sweep then read **63 OK · 4 INFO · 0 fail — byte-identical to
+  production's 13n-b shape**: the throwaway is a faithful marker-13 mirror, and a FRESH-MIRROR RUNBOOK now exists
+  proven (the §5R order with R-1's correction; named for 18b-class work).
+- **R-1 (found by the sweep, fixed in §5R's own order):** `maintenance/pre13x-ladder-rotation-clearing-guard.sql` is
+  an OVERLAY superseded by 12's fold-in — applied after 12 it re-creates the retired pre-challenge signature, which
+  the sweep flagged as the exact lingering-overload class it exists to catch (one UNEXPECTED FUNCTION row). Dropped
+  on the throwaway (production never had it — its sweep history is clean); the fresh-chain rule recorded: on a fresh
+  mirror that overlay is NOT applied.
+- **The planted preflight:** two auth users (ids in `~/.variorum/dev-vault-throwaway.env`, values nowhere else) and
+  two pre-event `key_vault` rows — A Standard-shaped (apple-held wrap present, revision 3), B Castle-shaped (absent,
+  revision 5), rotation columns null, proof hashes set (the insert trigger demands them — held). The checklist's
+  preflight probe rehearsed: `apple_held` true/false as planted, `rotation_started_seq` null, marker 13.
+- **ARTIFACT 17: `[]` ON ITS FIRST RUN on real Postgres** (16,600 bytes, one execution). The verify tail exact:
+  marker **14**; `mode` text YES + `earlier_row_keys` jsonb YES + `journal_bridge_key_id` relaxed to YES
+  (P-VX307-U1-1 held); **the mode backfill RIGHT ON BOTH ARMS** (A → `standard`, B → `castle` — P-VX307-U1-2's
+  semantic, proven on rows, not just read); rotation columns cleared; `sync_reencrypt` zero rows.
+- **R-2 (found by the post-17 sweep, FIXED IN REPO):** the sweep's expectation table still demanded
+  `sync_reencrypt(jsonb,text,text,text)` — post-17 it reported MISSING, which the VX-329 window would have hit live.
+  The sweep's function CTE is now MARKER-AWARE (the row demanded below marker 14, retired at it; one filtered
+  `values` wrap, commented). Re-run on the marker-14 throwaway: **62 OK · 4 INFO · 0 fail**. On a marker-13 mirror the
+  filter leaves every row standing (the logic is a plain `or marker < 14`); `AuthRLSDDLTests` +
+  `VX307VaultArtifactTests` headless `✔ 83 tests in 2 suites` over the amended file. The checklist's sweep-row
+  expectation corrected in its REHEARSED note.
+- **The checklist** stays HELD, every row PENDING-UNTIL-LIVE; the REHEARSED banner carries the rehearsal's facts and
+  the two findings. The throwaway now speaks marker 14 — exactly what the account-arm walk (§5 row 7) needs.
+- No secrets in any record or echo; every apply carried the in-command ref guard. Scratch responses live in the
+  session scratchpad only.
 
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
@@ -283,3 +313,8 @@ evidence: §5a's verbatim.
   RECORD) + §7, PhaseSizingGuidance, the VX-308 ticket + comments (the 2026-10-16 re-scope governs), the core
   (`AccountActs` · `Follow` · `KeyDoors` · `Assessment` · `AccountVaultClient` · `ProjectConfig`). THE WALK CALL:
   option (b) — the throwaway project live and fidelity-checked (§4). Next: the rehearsal (§5R), then U1.
+- 2026-10-19 ~04:45 MDT — **THE REHEARSAL DONE (§6 REHEARSAL RECORD):** the fresh chain whole and sweep-identical to
+  production; artifact 17 `[]` first run, verify tail exact, the backfill right on both planted arms; findings R-1
+  (fresh-chain overlay order — recorded) and R-2 (the sweep's sync_reencrypt row now marker-aware — fixed in repo,
+  pins green 83/2). The throwaway speaks marker 14, ready for the account-arm walk. NEXT: U1 (the account section's
+  faces — a fresh Opus implementer on §5a).
