@@ -603,3 +603,29 @@ Her ruling: *"if the previous app spec format is useful to have as a file that e
 **§12 (the protection surface):** the crossings' faces, the band card (the words' one home with rule 3's reminder folded in), Look inside's Copy full text, the re-arm question, and the held `key_vault` wire land as SurfaceContracts' protection-line deltas this same closeout; CastleRules' header note ("Until VX-412 lands…") closed. The walked evidence and every word's source are the plan §6's WALK RECORD and the words blocks.
 
 **Born tickets (triaged at filing):** VX-442 (Bug·Suspected·Low) · VX-443 (Debt·Low) · VX-444 (Improvement·Low) · VX-445 (Debt·Medium; NIT-R2-1 rides) · VM-23 (Improvement·Medium). Closed at the merge: VX-307, VX-416, VX-417, VX-412, VX-413, VX-414, VX-310, VX-108, VX-109, VX-235, VX-313, VX-301. The bundle: QUESTIONS #235; #234 ACCEPTED at this phase's kickoff.
+
+
+## 2026-10-19 — VX-308 (Castle rebuild, phase 4: accounts and the key doors; PR #179, merge 5dc67ff3a)
+
+**The effort (one overnight-and-morning run under her mandate; the full record is
+`notes/plans/vx-308-accounts-key-doors.md` — the kickoff record §4, her mid-run rulings in the U1 arbitration, the
+unit records and arbitrations, the §5R rehearsal runbook and record, the ladder rounds, THE WALK RECORD).** Her words
+at the kickoff sitting's tail, verbatim where quoted: the walk call resolved to option (b) on the throwaway project
+she created by hand ("we can make a new project… we can do it"); VX-314 ruled IN after her design questions ("ok
+include it. you can use a subagents to build it you want, up to you."); the 10-13 #216 block ruled stale ("10-13 is
+probably old and superseded by now"); the throwaway's lifetime hers ("i'll delete the throwaway when this is all
+merged to main & released.").
+
+**§12 (SurfaceContracts, the protection line) — what changed and why:** the account faces (the sign-in/out doors, the
+hand-up/join, the follow family, rule 16's three local leaves with the F-FORK-1-ruled pointer to the Account sheet's
+real deletion and its protection hook), the one presenter (VX-239/VX-243's class ended structurally), the key doors
+with VX-263's one line, VX-447's banner-as-the-door (her #235 ruling, the one core custody arm in `KeyDoors.swift`),
+VX-448's concealed clipboard (her #235 ruling — the 60-second clear and restore-prior-contents retired), VX-445's
+lock + NIT-R2-1's by-library mark, F-4's hold gate, VX-314's engine-mouth account gate. The rehearsal sentence was
+added to the held-artifact line (17 has now run green on a real mirror; the grant sweep is marker-aware — R-2's fix).
+
+**The cast:** Fable orchestrated and cold-reviewed (two fresh reviewers), Opus implemented (U1–U4 + the fix leg, one
+fresh session each); the orchestrator's own hands: the rehearsal, VX-314, the Mac batches, the four U4 reverts, the
+walk. The ladder: round 1 0B/1M/2m/2N, five-for-five agreed fixes, round 2 confirmed all five, zero new. Born tickets
+and the bundle: the VX-308 handoff + QUESTIONS #236. Mobile parity: the phone builds throughout; its account faces
+and relock are the catch-up's (F-U4-4; the VM comment).
