@@ -1583,6 +1583,24 @@ VX-414's wording was read from the board (read-only) — its body is quoted in t
 Commits: `4d14e4047` (record) · `2cf931f0e` (1) · `7f521bcbb` (4) · `4df309746` (the reverts named) · `03606cfa8` (4
 record) · `0eba2d245` (2) · `d50b4dc72` (2 record) · `824cad782` (3) · the close commit.
 
+**U2c ARBITRATION (the orchestrator, the same night — repo-first):**
+- **F-U2c-1 → HER BUNDLE** (a wording-vs-mechanism tension, hers): her accepted banner sentence *Make a backup now, so
+  a copy exists.* shows in exactly the state where the new road cannot take a backup pair (no key file of the current
+  key — `ProtectionBackupHook.takePair` answers `.noKeyFileOfTheKey`). Built byte-equal as ruled; the bundle asks
+  whether the sentence bends or the hook gains a road.
+- **Piece 3's scope ACCEPTED:** the rows kept unchanged (true of today's road) stay; VX-379 remains OPEN after this
+  phase with the guide chapters, the kept rows and F-U2c-4's rule-5 line as its remainder — recorded on the ticket at
+  closeout, never silently absorbed.
+- **The piece-4 core overload** (the opened-key Make-mine road) and **P-VX307-U2b-1's core line**: both flagged to the
+  ladder by name (every line here is custody — the ladder is Fable's regardless).
+- **F-U2c-3** (SurfaceContracts' Look inside line gains Copy full text) joins the closeout canon list with U2a's F-7
+  and U2b's F-U2b-2. **F-U2c-4** → VX-379's remainder. **F-U2c-5** (the account-road sentence over an open library) →
+  her bundle beside F-U2c-1. **F-U2c-6** → the MOBILE PARITY row (no Look inside on the phone — P-VX306-U3-18 stands).
+- Orchestrator spot-check: zero `Sync/`/`Server/` lines; core touches are the two hand-forward files
+  (`Copies.swift`, `ProtectionCopyPeek.swift`); `ProtectionWordsVX307Tests` + `FirstLookWordsTests` re-run headless
+  green by the orchestrator. ALL THREE U2 BATCHES ARE BUILT — what remains: the combined Mac batch + THE WALK under
+  one stage window, the LADDER, closeout.
+
 ## 7. LIVE STATUS
 - 2026-10-18 ~18:45 — KICKED OFF. Preflight complete (the orchestrator): CastleRules + SyncSpec whole, the lifecycle
   stages, SurfaceContracts, VX-306 §8/§9 records + handoff, QUESTIONS #234 (ACCEPTED by this kickoff, her entry's own
