@@ -34,7 +34,7 @@ struct RoadAccountRoads {
     /// An act landed: the rest of the pane re-reads (the crossings — the library's account changed under them).
     var landed: @MainActor () async -> Void = {}
     /// The status seam's receipt line (`receipt_style` governs it).
-    var speak: @MainActor (String) -> Void = { _ in }
+    var receipt: @MainActor (String) -> Void = { _ in }
 }
 
 // MARK: - One door's confirm
@@ -263,7 +263,7 @@ final class RoadAccountModel {
             finished: { [weak self] press in
                 if let id { presenter.dismiss(id) }
                 guard let self else { return }
-                if case .made(let receipt)? = press { roads.speak(receipt) }
+                if case .made(let receipt)? = press { roads.receipt(receipt) }
                 Task {
                     await self.refresh()
                     if press != nil { await roads.landed() }

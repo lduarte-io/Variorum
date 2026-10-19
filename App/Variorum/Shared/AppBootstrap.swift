@@ -1352,7 +1352,7 @@ final class AppBootstrap {
                 }.value
             },
             landed: { [weak self] in await self?.roadCrossings?.refresh() },
-            speak: { [weak self] text in self?.roadStanding?.speak?(text) })
+            receipt: { [weak self] text in self?.roadStanding?.speak?(text) })
     }
 
     /// **P-VX308-U1-F1's hook** (the U1 ARBITRATION's refined (b)) — the Account sheet's Delete Account landed for
