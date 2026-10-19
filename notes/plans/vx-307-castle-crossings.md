@@ -1798,3 +1798,15 @@ subset of the 75). What remains before the ladder: THE WALK (its own claim, the 
   suites — the record's list) and the walk rows PENDING — the orchestrator's, under the stage. PROVISIONALs
   P-VX307-U2c-1..7; findings F-U2c-1..6 (F-U2c-1 for her eye).
 - 2026-10-19 ~00:25 — THE WALK DONE (the §6 WALK RECORD): U2b's card rows on a throwaway, the crossings' round-trip twice (Always ask and Touch ID), stages 6/7/8/9 + VX-413's Copy door + VX-379's W-1 + VX-310's standing button; the dev store restored to Standard and verified quiet-opening; ONE finding (W-VX307-1 — the fail-plant cannot bypass the system prompt; stage 11's re-arm GUI row joins HER CHECKLIST; the re-arm stands on its pins). NEXT: THE LADDER (round 1, fresh fable-reviewer, headless).
+- 2026-10-19 ~01:29 — THE ROUND-1 FIX LEG CLOSED GREEN: the orchestrator's U1 pair (MINOR-1/2, df65cab20 — both pins
+  red-on-old by scratch worktree, the wire suite 13/1); the implementer's U2a leg (MAJOR-1 the durable export mark +
+  ready reconcile, MINOR-3's corrected trace with instrumentation, MINOR-4, NIT dispositions; then the MAJOR-1 Mac
+  pin's first-run red traced to the crossings model dropping an awaited refresh — fixed 7ad658677, twin red-on-old);
+  the fix-leg Mac batch 171/33 (the one red being that pin pre-fix) and the pin's re-run 15/2 green. **THE STAGE-11
+  RE-ARM ROW WALKED END-TO-END** in the same window (the plant spent silently by the auto-ask on activation — "no
+  prompt" logged on the instrumented leaf; the changed line; the re-arm card; Set it up again → `touch_id_rearm: done
+  #9`, a new item at the press; then Use Standard restored, quiet open proven, the weekly switch restored to its
+  pre-window TRUE). W-VX307-1's her-finger row RETIRES — the walk record's correction stands; her checklist keeps only
+  the REAL-finger Touch ID unlock row (a nicety, not an owed proof). NEXT: ROUND 2 (a fresh fable-reviewer over the
+  fix legs cbe35638d..7ad658677, making the final calls on the disputes: MAJOR-1's mark-keyed refinement, MINOR-3's
+  cause, NIT-3's hollow).
