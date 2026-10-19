@@ -272,3 +272,87 @@ store's restore hold and banner stand; never press Resume.
   (record-only); P-U2-7 → VX-457 (a rider here); F-U4-3 keep as built (record-only); VX-455 post-release, its
   not-yet line reworded here. The rest of the bundle rides her kickoff as acceptance.
 - VX-211's shape — the strength ask is design-flavored; bring options to a sitting rather than invent.
+
+## 6. RECORDS (each unit appends; the VX-308 §6 form)
+
+### U1a RECORD — THE COPIES' MACHINERY (Opus implementer, 2026-10-19; the far pair leg + VX-397 + VX-302/411 + VX-450 — IN PROGRESS)
+
+**Not done in U1a, first:** PENDING — written at the close (the brief's hard limits: no `xcodebuild test`, no stage, no
+Debug launch, no store touch, no live network call, no Linear write, no subagents — every Mac-only pin is BUILT, its run
+the orchestrator's under the stage).
+
+**Preflight (complete, not delegated):** CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md` whole;
+`notes/CastleRules.md` WHOLE (rules 1, 4, 5, 17–21, 25, 27 + the considered-and-not-pursued ledger); `notes/SyncSpec.md`
+WHOLE (no `Sync/` line here); `notes/SurfaceContracts.md` whole (Doors — portability + Library protection); this plan
+whole (§0–§3, §5a); `notes/plans/vx-308-accounts-key-doors.md` §6 — the U1 RECORD's COUNTS (the harness recipe), the U3
+RECORD (the pair road, THE CORE LINE, the mutation discipline, F-U3-2), the U4 RECORD, the ROUND-1 FIX LEG (MAJOR-1's
+trace, fix and residue) and the ladder's close; `notes/plans/vx-306-castle-open-road.md` §9 U1a RECORD (the catalogue's
+birth, P-VX306-U1a-1..5 — P-VX306-U1a-4 is piece 1) and U1b RECORD (the hook's birth); the core —
+`Assess/Catalog.swift` · `CatalogNames.swift` · `Retention.swift` · `Assessment.swift` · `Executor/Leaves.swift`
+(`BackupsLeaf`) · `Executor/Acts/KeyDoors.swift` · `PlanRunner.swift` (`perform`, `drive`, `settleAct`, `resume`,
+`rollBack`) · `Acts/CommonSteps.swift` · `ProtectionGuards.swift` · `Model/Names.swift` · `Files/ProtectionLibraryFiles
+.swift`; the app — `Shared/Protection/ProtectionBackupPair.swift` · `ProtectionBackupHook.swift` · `FileBackupsLeaf.swift`
+· `CatalogLister.swift` · `ProtectionPlaces.swift` · `ProtectionSystem.swift` · `ProtectionOpenFaces.swift`
+(`RoadStandingModel`) · `ProtectionOpenRoad.swift` (the open's settle) · `ProtectionCopyDoors.swift`/`CopyDoorsModel.swift`
+(the listing) · `Shared/StoreBackup.swift` (READ ONLY — the far leg's due-check, `newestTrustedBackup`/`stampIsTrusted`,
+`recordOwnFarSnapshot`, `pruneSecond`) · `BackupDestination.swift` · `BackupRetention.swift` · `BackupLog.swift`
+(`BackupRunRecord`) · `AppServices.swift` (the backup's construction) · `AppBootstrap.swift` (the ready's road wiring,
+`copyDoorsRoads`) · `Features/Settings/DataSafetyModel.swift` + `DataSafetyPane.swift` + `SettingsSceneContent.swift`;
+the test worlds — `ExecutorWorld`, `EX`, `CrashHarness`, `NewWordsResumeTests`, `U2CrashHarnessTests`, `RetentionTests`,
+`CatalogTests`'s `CF`, `ProtectionBackupHookTests`, `PlantedRoad`, `ProtectionTestSupport`, `DataSafetyTests`,
+`VX379PaneRowsTests`, the scenario world's backup service (`Alphabet.backupService`, `World.writePair`). HARNESS: U1's
+recipe rebuilt in this session's scratchpad (`u1-harness`, swift-tools 6.2, macOS 26, the app's concurrency settings,
+this worktree's core by path; the same 51 source + 45 test symlinks the VX-308 fix leg's harness held, re-pointed here):
+the BASELINE on `0965d68bd` — `✔ Test run with 272 tests in 43 suites passed` (the fix leg's final count, exactly).
+Machinery: the worktree's `.build` seeded by APFS clone from the main checkout's (`checkouts`, `repositories`,
+`artifacts`, `workspace-state.json` re-pointed), and every `swift build`/`swift test` run `--skip-update` — no package
+fetch, no network.
+
+**MY READINGS (each the brief's letter as I read it — building on them):**
+- **R-U1a-1 — THE FAR PAIR IS THE CONTAINER PAIR, COPIED.** One backup in two places, not two backups (StoreBackup's own
+  far-leg reasoning; 18k C7's hand-through rule — the act's own snapshot handed to the far leg, never re-discovered by
+  listing; the scenario world's `writePair` writes ONE name in both places). The pair road hands the container pair it
+  just wrote to the far leg, which copies both files under the SAME name into `<picked>/Variorum/Backups/<library8>/
+  <mac8>/` (`ProtectionNames.backupsSubpath`), written once (an existing name refuses — never overwritten), verified (the
+  key file reads back as the live key file; the snapshot opens with the library's key), and a half-landed far pair is
+  removed (an orphan snapshot no key file names would sit outside every count and every prune for good).
+- **R-U1a-2 — THE FAR LEG RIDES THE PAIR ROAD, ONLY AFTER A WRITTEN CONTAINER PAIR.** Rule 5's one road
+  (`ProtectionBackupHook.takePair`) — so the hook's written runs and VX-447's "the backup follows" both reach the picked
+  folder. Its own gates are the container's (copies paused ⇒ nothing; the live key file not the key's ⇒ nothing),
+  re-checked for the pause at the far copy; no far folder picked, its bookmark unresolved, or the picked folder gone ⇒
+  nothing (the leg never re-creates a vanished picked folder — today's flat leg's `withIntermediateDirectories` would);
+  every failure logged, never raised. The executor's own `freshBackup` steps (a crossing's pair inside its plan) stay
+  container-only: an act's step is never widened to a folder that may be unreachable, and the next written run reaches
+  the far folder anyway. Today's flat far leg runs untouched beside it.
+- **R-U1a-3 — THE FAR DUE-CHECK IS THE CATALOGUE'S, PER LIBRARY PER MAC (VX-397 by construction).** Due iff the catalogue
+  (a FRESH read) holds no backup pair in the far place whose key file names THIS library, filed under THIS library's
+  `<library8>` and THIS Mac's `<mac8>`, stamped no later than now (StoreBackup's `stampIsTrusted`, restated byte-equal in
+  core) and younger than the backup interval (StoreBackup.Configuration's default 24 h, restated as the pair road's
+  constant — both restatements pinned equal to StoreBackup's by a Mac pin). Another Mac's fresh pair, another library's,
+  a pair whose key file doesn't read, today's flat files and a future-stamped pair never satisfy it.
+- **R-U1a-4 — DATA SAFETY'S COUNTS ON THE NEW ROAD.** The same two rows (*Beside your library*; the picked folder), their
+  paths and the folder's set/unset/unreachable states exactly as today; only the row's count, newest and oldest come from
+  THIS Mac's pairs of THIS library in that place (newest/oldest over trusted stamps — 18o U1's rule; the count every
+  pair, as today's count is every dated file). The gate is `roadStanding` (VX-379's precedent — nil on today's road, so
+  today's counts are byte-unchanged): the open library's faces carry a `copyCounts` road built from the open's session
+  (Settings re-builds its panes at every reopen — the `.opening` arm — so a road never outlives its library).
+- **R-U1a-5 — RETENTION AFTER EVERY WRITTEN PAIR.** Over a FRESH catalogue read once the far leg is done, core's
+  `Retention.plan(… policy: .standard)` for the pair's library and this Mac; exactly the plan's `prune` ids removed through
+  `FileBackupsLeaf.deleteCopies`, ONE id per call (one failing delete never stops the rest), each logged by catalogue id
+  (names and eight-character fingerprints only — never key material); off the main actor (the pair road runs detached).
+  Today's flat files, `Previous Libraries/`, safety copies, foreign names, another Mac's and another library's pairs are
+  never candidates (the pure rule's fence — the wiring adds no filter of its own, so the guard's mutation reaches it).
+- **R-U1a-6 — VX-450: CHANGE AND RESET JOIN MAJOR-1's ROLLBACK.** `KeyDoorProgram.resumeCannotFinish` covers the three key
+  doors: a RESUMED act lacking its own secret (the words act: its new words; Change and Reset: the NEW passphrase, the
+  plan's fresh descriptor's — a resume typing only the words, or nothing, holds none) or a live key file of the key
+  throws `ActRollback` at the vault or key-file step BEFORE writing; a press never reaches it (`resuming` false — M1-c's
+  guard kept and pinned). MAJOR-1's residue (1) is recorded for Change and Reset, not built.
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece 0 — this record skeleton + the readings + the harness baseline: DONE (this commit).
+- Piece 1 — THE FAR PAIR LEG (+ the core `OwnCopies` rule it reads): NOT-STARTED — the settled design: R-U1a-1..3.
+- Piece 2 — VX-397: the far due-check (piece 1's) + Data Safety's counts on the new road: NOT-STARTED — R-U1a-3, R-U1a-4.
+- Piece 3 — RETENTION WIRED (VX-302, VX-411): NOT-STARTED — R-U1a-5.
+- Piece 4 — VX-450 (Change/Reset roll back on a resume that cannot finish): NOT-STARTED — R-U1a-6.
+- Piece 5 — the close (counts, the Mac-suite list, PROVISIONALs, findings): NOT-STARTED.
+- No revert is in flight.
