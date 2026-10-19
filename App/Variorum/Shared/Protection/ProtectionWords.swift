@@ -502,9 +502,12 @@ nonisolated enum ProtectionWords {
     static let thisMacOnlyDoor = "Use this \(ProtectionCopy.deviceName) only\u{2026}"
     static let accountSignOutDoor = "Sign out\u{2026}"
     static let accountSignInDoor = "Sign in\u{2026}"
-    /// The join arms are U2's (§5b) — the honest not-yet line until its face lands (the `plaintextCopyNotYet` precedent).
-    static let joinNotYet = "Joining an account that already syncs isn't ready in this build yet."
+    /// VX-308 U2 — Move's one arm with no face yet: the signed-in account has NO vault (moving there would be a leave and
+    /// a set-up, two acts — the core's `move` joins an account that already syncs). The honest not-yet line (the
+    /// `plaintextCopyNotYet` precedent; PROVISIONAL P-VX308-U2-6).
     static let moveNotYet = "Moving this library to that account isn't ready in this build yet."
+    /// U1's join not-yet line — retired when U2's join face lands (piece 2).
+    static let joinNotYet = "Joining an account that already syncs isn't ready in this build yet."
 
     /// Turn on sync — the first device hands its pair up (rule 7); the account takes the library's posture.
     static let turnOnSyncTitle = "Turn on sync"
@@ -570,6 +573,105 @@ nonisolated enum ProtectionWords {
     /// The receipt's last sentence when Use Castle followed that road (true here: turning sync on hands the account the
     /// library's posture).
     static let bornCastleNote = "Set up sync again later with a new account and it starts in Castle."
+
+    // MARK: - VX-308 U2 — THE JOIN AND THE FOLLOW (rules 7, 10, 12, 14, 16; P-VX378-U2-3; VX-107; VX-113)
+    //
+    // HER words, already pinned byte-equal to `notes/CastleRules.md` where they live above: rule 7's join sentence
+    // (`joinWordsSentence` — the words moment says it) and its first (`onePairAtATime`), rule 12's leave sentence
+    // (`leaveSentence` — the join that leaves Castle and the follow out say it: `Words.ruleFive`), rule 9's promise
+    // (`castlePromise`), rule 16's (`ruleSixteen` — Move says it). VX-113's sentence is her #205 ruling (ii)'s
+    // (`passphraseChangedElsewhere`, above). Every other line here is PROVISIONAL P-VX308-U2-1 — drafted from the rules' and
+    // the lifecycle page's own words (stage 12), sentence case, hers at the bundle.
+
+    /// THE JOIN's lead (the lifecycle page's stage 12, "Joining from another device": one of the account's secrets typed
+    /// once; the library's own pair replaced by the account's — rules 7, 14).
+    static let joinLead = "Your account already syncs. Type its passphrase or its twelve words once \u{2014} your "
+        + "library's own passphrase and twelve words are replaced by your account's."
+    /// What the join does to the library's posture (`JoinPlan`) — the consent says which (one posture at a time).
+    static func joinPlanLine(_ plan: JoinPlan, library: ProtectionMode) -> String? {
+        switch plan {
+        case .entersCastle: return "Your account is in Castle, so this library goes into Castle too."
+        case .leavesCastle: return "Your account is in Standard, so this library leaves Castle."
+        case .sameMode:
+            switch library {
+            case .castle: return "Your account is in Castle, like this library."
+            case .standard: return "Your account is in Standard, like this library."
+            }
+        case .setsUpInLibrarysMode: return nil
+        }
+    }
+    /// The join's fields (rule 14: ONE of the account's secrets).
+    static let joinPassphraseField = "Your account's passphrase"
+    static let joinWordsField = "Or your account's twelve words"
+    /// The join's receipt (the posture said when it changed).
+    static func joinedReceipt(_ plan: JoinPlan, moved: Bool) -> String {
+        let head = moved ? "This library syncs with the account signed in now" : "Sync is on"
+        switch plan {
+        case .entersCastle: return head + ", and you're in Castle now, like your account."
+        case .leavesCastle: return head + ", and you're in Standard now, like your account."
+        case .sameMode, .setsUpInLibrarysMode:
+            return head + ". Your library uses your account's passphrase and twelve words now."
+        }
+    }
+    /// THE WORDS MOMENT when the PASSPHRASE was the secret typed (P-VX378-U2-3 (a) — "the face shows them when typed";
+    /// otherwise it says the account's words now open the library): the words were replaced, and nothing here can show
+    /// them. Her eye at the bundle — rule 7's "here they are" edge.
+    static let joinWordsNotShown = "Your library's twelve words are now your account's twelve words \u{2014} the ones you "
+        + "keep for your account. You joined with your passphrase, and Variorum never keeps the words, so they aren't shown "
+        + "here. The old ones still open backups you made before today."
+    static let joinWordsMomentOK = "OK"
+
+    /// MOVE — leave the account the library syncs with (rule 16: no key or secret changes for that) and join the one
+    /// signed in (rule 7). The door names the account signed in.
+    static func moveDoor(_ email: String?) -> String {
+        email.map { "Move this library to \($0)\u{2026}" } ?? "Move this library to this account\u{2026}"
+    }
+    static let moveTitle = "Move to this account"
+    static let moveLead = "This library stops syncing with the account it syncs with now, and joins the account signed in "
+        + "on this \(ProtectionCopy.deviceName)."
+    static let moveButton = "Move"
+
+    /// THE FOLLOW (rules 10, 12, 15) — the account changed on another device and this one follows.
+    static let followDoor = "Follow your account\u{2026}"
+    static let followTitle = "Follow your account"
+    static let followButton = "Follow"
+    /// The follow's notice in the account section, by kind — the vault's last writer and its day where the read has them
+    /// (decision 34's names; VX-113's form).
+    static func followNotice(_ kind: FollowKind, device: String?, day: String?) -> String {
+        let at = "on \(device ?? "another device")" + (day.map { " on \($0)" } ?? "")
+        switch kind {
+        case .intoCastle: return "Your account entered Castle \(at)."
+        case .intoStandard: return "Your account left Castle \(at)."
+        case .keysReplaced: return "Your account's keys changed \(at)."
+        }
+    }
+    /// What following asks — rule 10's "each typing a secret once" (and rule 15's catch-up); rule 12's "quietly" out.
+    static func followAsk(_ kind: FollowKind) -> String {
+        switch kind {
+        case .intoCastle: return "Type your passphrase or your twelve words once to follow it here."
+        case .keysReplaced: return "Type your passphrase or your twelve words once to catch up."
+        case .intoStandard: return "This \(ProtectionCopy.deviceName) follows it out without asking you for anything."
+        }
+    }
+    /// Rule 10's "accepted and said plainly": until a device follows into Castle, it reads what it already has.
+    static let followUntilThen = "Until this \(ProtectionCopy.deviceName) follows, it can still read what it already has "
+        + "\u{2014} its own copy of your library \u{2014} through its own quiet road."
+    /// The follow's fields (one secret — the library's account's, which this library's pair already is: rule 7).
+    static let followPassphraseField = "Your passphrase"
+    static let followWordsField = "Or your twelve words"
+    /// VX-107 — THE FOLLOW'S DONE, its other-device sentence, by kind: said once the follow has landed — at the press, or
+    /// by the open whose settle finished it after a crash (re-said from the act in flight the record names, never from
+    /// this process's memory).
+    static func followDone(_ kind: FollowKind) -> String {
+        switch kind {
+        case .intoCastle:
+            return "Your account entered Castle on another device, and this \(ProtectionCopy.deviceName) followed it."
+        case .intoStandard:
+            return "Your account left Castle on another device, and this \(ProtectionCopy.deviceName) followed it out."
+        case .keysReplaced:
+            return "Your account's keys changed on another device, and this \(ProtectionCopy.deviceName) caught up."
+        }
+    }
 
     // MARK: - The route's failures (the failure face, with Try Again)
 
