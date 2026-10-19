@@ -2033,8 +2033,12 @@ and `ProtectionWords.joinedReceipt` with their pins. HARNESS: U1's scratchpad pa
 scratchpad, pointed at this worktree).
 
 **LIVE STATUS (per finding; PENDING = unverified):**
-- **MAJOR-1** (the resumed new-words act wedges the recovery door) — AGREE (self-traced: below). NOT-STARTED — the settled
-  design: in `KeyDoors.swift` only, a RESUMED `regenerateWords` whose `vault` or `keyFile` step cannot finish — no words in
+- **MAJOR-1** (the resumed new-words act wedges the recovery door) — AGREE (self-traced: below). IN-PROGRESS — the pin
+  `NewWordsResumeTests` (5 tests / 9 cases) committed FIRST and RED ON THE PRE-FIX TREE: `✘ Test run with 5 tests in 1
+  suite failed … with 14 issues` (the settle throwing `noLiveKeyFile` / `secretsRequired(regenerateWords)` at every stop
+  between the begin and the key-file step's plan record — Standard unsynced writes 3–4, synced writes 3–6 — the
+  finding's own sequence both postures, the unsynced twin, and the everyday new-words act; `aResumeHoldingTheWordsStill
+  Finishes` green by design — the guard). The fix next. The settled design: in `KeyDoors.swift` only, a RESUMED `regenerateWords` whose `vault` or `keyFile` step cannot finish — no words in
   hand (a plan never holds one) or no live key file of the key to lock (a resume never mints) — throws `ActRollback`
   BEFORE anything is written, so `drive`'s one rollback runs (the act cleared, the plan deleted, copies resumed) and the
   settle answers `.rolledBack(.regenerateWords)`; a landed vault write stands as any landed CAS write does. Change and
