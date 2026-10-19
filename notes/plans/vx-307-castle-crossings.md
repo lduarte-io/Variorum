@@ -1043,11 +1043,18 @@ xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -
   -only-testing:VariorumTests/NoLiteralColourTests \
   -only-testing:VariorumTests/StatusSeamVocabularyTests \
   -only-testing:VariorumTests/WordsCopyDoorTests \
-  -only-testing:VariorumTests/TourTests \
+  -only-testing:VariorumTests/TourScriptTests \
+  -only-testing:VariorumTests/TourSpotlightTests \
+  -only-testing:VariorumTests/TourEngineTests \
+  -only-testing:VariorumTests/TourPoolTuckTests \
+  -only-testing:VariorumTests/TourEntryTests \
+  -only-testing:VariorumTests/TourEndCardTests \
+  -only-testing:VariorumTests/TourEndCardAsideGateTests \
   -only-testing:VariorumTests/TourOfferLineTests \
   -only-testing:VariorumTests/BookcaseQuickEntryPlacementTests \
   -only-testing:VariorumTests/QuickEntryLaunchFocusTests \
-  -only-testing:VariorumTests/StatusToastPlacementTests \
+  -only-testing:VariorumTests/StatusToastPlacementRuleTests \
+  -only-testing:VariorumTests/StatusToastPlacementShellTests \
   -only-testing:VariorumTests/ShellChromeTests \
   -only-testing:VariorumTests/VX310TodayLobbyWitnessTests
 ```
@@ -1177,7 +1184,8 @@ Commits: `edbd86c14` (record) · `95bde6ea3` (1) · `a1a948c73` (2) · `6a0b5a05
   passed (only the 3 expected VX-310 known-issue witnesses), 0 instances, throwaway scope and domain absent. The first
   run's one red was the route test's late key read — traced, fixed test-side (64ac751f5) with a headless twin, the
   record's batch paragraph carries it. **U2a is CLOSED but for the walk and the ladder.**
-- U2 (VX-417, split §5b into U2a/U2b/U2c): U2a BUILT (the §6 U2a RECORD — 8 commits, headless + builds green; the
+- U2 (VX-417, split §5b into U2a/U2b/U2c): U2b (VX-412) BUILT 2026-10-18 night (the §6 U2b RECORD; one core custody
+  line to arbitrate — P-VX307-U2b-1; its Mac suites and walk PENDING); U2c next. U2a BUILT (the §6 U2a RECORD — 8 commits, headless + builds green; the
   orchestrator's structural verification: zero `Sources/`/`Server/` lines, all pushed; the findings arbitrated — the §6
   U2a ARBITRATION). The U2a Mac batch runs next under the stage (`vx-307-u2a-mac`); U2b spawns after it (tree quiet
   during the xcodebuild run).
