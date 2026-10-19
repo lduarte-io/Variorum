@@ -742,6 +742,18 @@ nonisolated enum ProtectionWords {
             : "Your library has a key file again."
     }
 
+    // MARK: - VX-308 U4 — THE HOLD'S GATE (F-4: the 13x F1 R1-M1 rule on the new road's synced crossings)
+    //
+    // PROVISIONAL P-VX308-U4-1 — drafted in the shipped hold copy's idiom (`LibraryOpenCopy.syncNowHeldRefusal`'s
+    // *Sync is waiting since the restore — press Resume Sync …*, and `confirmLeavesCastle`'s *press Resume Sync, then choose
+    // Use Castle again*), sentence case, hers at the bundle.
+
+    /// A synced Use Castle or Replace All Keys while the restore hold stands — said in place of the door, and by the press.
+    static func restoreHoldRefusal(_ doorTitle: String) -> String {
+        "Sync is waiting since the restore \u{2014} press Resume Sync in the main window's banner, then choose "
+            + "\(doorTitle) again."
+    }
+
     // MARK: - The route's failures (the failure face, with Try Again)
 
     static let couldNotCreate = "Variorum couldn't create your library."

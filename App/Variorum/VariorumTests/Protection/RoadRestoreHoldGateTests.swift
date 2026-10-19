@@ -73,6 +73,7 @@ struct RoadRestoreHoldGateTests {
                 continue
             }
             #expect(sentence.contains("Resume Sync"), "the refusal names Resume Sync: \(sentence)")
+            #expect(sentence == ProtectionWords.restoreHoldRefusal(door.title))
         }
         #expect(held.useStandard == before.useStandard, "Use Standard is not the gate's (no round — today's own exemption)")
 
@@ -110,5 +111,32 @@ struct RoadRestoreHoldGateTests {
         let typed = TypedSecrets(words: words, newPassphrase: Crossing.passphrase)
         #expect(ProtectionCrossings.preflight(
             session, door: .useCastle, shown: castle, typed: typed, exportSwitch: PlantedExportSwitch().road) == .ready)
+    }
+
+    /// The pure hold-back: only an OPEN, SYNCED Use Castle or Replace All Keys turns into the sentence; a refused door keeps
+    /// its own sentence, a hidden one stays hidden, and Use Standard and the gate row are untouched.
+    @Test func theHoldBackTouchesOnlyTheOpenSyncedAccountWideDoors() async throws {
+        let world = try await Self.synced()
+        let faces = try await Self.faces(world.session)
+        let held = faces.heldForRestore()
+        #expect(held.useCastle == .refused(ProtectionWords.restoreHoldRefusal(ProtectionWords.useCastleTitle)))
+        #expect(held.replaceAllKeys == .refused(ProtectionWords.restoreHoldRefusal(ProtectionWords.replaceAllKeysTitle)))
+        #expect(held.useStandard == faces.useStandard && held.gateRow == faces.gateRow && held.mode == faces.mode)
+        // Signed out: Use Castle is the signed-out road and Replace All Keys its own refusal — neither is the gate's.
+        let out = try await Self.faces(world.session, .signedOut)
+        #expect(out.heldForRestore() == out)
+    }
+
+    /// P-VX308-U4-1, as drafted: the shipped hold copy's idiom — the wait said, Resume Sync named, the door named for the
+    /// way back; sentence case, no word shouted.
+    @Test func theRefusalIsTheDraftedSentence() {
+        #expect(ProtectionWords.restoreHoldRefusal(ProtectionWords.useCastleTitle)
+            == "Sync is waiting since the restore \u{2014} press Resume Sync in the main window's banner, then choose "
+            + "Use Castle again.")
+        #expect(ProtectionWords.restoreHoldRefusal(ProtectionWords.replaceAllKeysTitle)
+            .hasSuffix("then choose Replace All Keys again."))
+        let words = ProtectionWords.restoreHoldRefusal(ProtectionWords.useCastleTitle)
+            .split(whereSeparator: { !$0.isLetter }).map(String.init)
+        #expect(!words.contains { $0.count > 1 && $0 == $0.uppercased() }, "no word shouts")
     }
 }

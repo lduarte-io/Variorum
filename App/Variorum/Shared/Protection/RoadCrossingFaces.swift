@@ -175,6 +175,20 @@ nonisolated struct RoadCrossingFaces: Equatable, Sendable {
         }
     }
 
+    /// VX-308 U4 — F-4 (the 13x F1 R1-M1 rule, carried onto the new road): while the RESTORE HOLD stands beside the store,
+    /// the SYNCED account-wide crossings — Use Castle and Replace All Keys — say their refusal in place (P-VX307-U2a-2's
+    /// idiom; the sentence names Resume Sync). Use Standard is not the gate's (today's rule's own exemption — it drives no
+    /// round); a LOCAL Use Castle is not either (the hold is about sync: a local crossing writes no vault and runs no round).
+    func heldForRestore() -> RoadCrossingFaces {
+        func held(_ face: RoadDoorFace) -> RoadDoorFace {
+            guard let open = face.openDoor, open.synced else { return face }
+            return .refused(ProtectionWords.restoreHoldRefusal(open.door.title))
+        }
+        return RoadCrossingFaces(
+            mode: mode, useCastle: held(useCastle), useStandard: useStandard, replaceAllKeys: held(replaceAllKeys),
+            gateRow: gateRow)
+    }
+
     /// The faces for the open library: `facts` as gathered (unlocked), `assessment` = `assess(facts)`; `copyName` names a
     /// catalogued copy (rule 25's list) — nil when it is no longer catalogued.
     static func derive(

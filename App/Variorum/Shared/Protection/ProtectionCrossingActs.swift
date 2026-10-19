@@ -14,6 +14,9 @@
 //      Use Castle's door says it turns off exactly when it is on (PROVISIONAL P-VX307-U2a-3 — the sealed setting the core
 //      reads and the switch the app runs are two places on the new road until the Data Safety toggle writes the sealed
 //      one).
+//      VX-308 U4 — F-4: the read also carries the RESTORE HOLD's gate (the 13x F1 R1-M1 rule on the new road): while the
+//      hold's marker stands beside the store, a SYNCED Use Castle and Replace All Keys say their refusal in place — and,
+//      the preflight re-reading through here, the press refuses with it before anything closes.
 //    - THE PREFLIGHT (`preflight`) — every check before anything closes, all READS: the door RE-READ at the press
 //      (VX-108 — a door that closed or changed since the confirm opened refuses, nothing written); the typed pair against
 //      the live key file (the words always; the passphrase where its lock exists — else the one typed is the new one,
@@ -105,7 +108,12 @@ nonisolated enum ProtectionCrossings {
         // P-VX307-U2a-3: this Mac's scheduled export IS the weekly copy's switch.
         facts.unlocked?.thisMac.settings.scheduledExport = exportSwitch.isOn()
         let assessment = assess(facts)
-        return RoadCrossingFaces.derive(facts, assessment, copyName: copyName(session, catalog: facts.catalog))
+        let faces = RoadCrossingFaces.derive(facts, assessment, copyName: copyName(session, catalog: facts.catalog))
+        // VX-308 U4 — F-4: the restore hold's gate, read HERE — the one read both the pane's doors and the press's re-read
+        // take (the preflight below calls this), so a shown door and its press agree; the hold's MARKER beside the store
+        // is the gates' one source (13x R3-2), never a projection.
+        guard LibraryRestoreHold.isHeld(besideStore: session.system.places.slot) else { return faces }
+        return faces?.heldForRestore()
     }
 
     /// Rule 25's list: a catalogued copy named by its kind and day (nil when it is no longer catalogued) — Use Castle's door
