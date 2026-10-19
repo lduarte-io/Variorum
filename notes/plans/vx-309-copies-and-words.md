@@ -46,6 +46,8 @@ and discipline, `~/.variorum/dev-vault-throwaway.env`, values never echoed or co
 - **VX-210** — the honest line about copies in folders Variorum doesn't manage.
 - **VX-209's remainder** — the synced confirm's sentence only (the mechanism closed by rule 17, built at VX-306).
 - **T-5** — the empty-slot landing: Make this my library from the missing face, with no library open.
+- **VX-305's second hand-off** — reopening this Mac's own set-aside copy (Previous Libraries) through the doors
+  (her tracker carries it beside T-5).
 - **T-8** — a plaintext export brought in as a NEW library (bulk entry through the import road; never reconciled truth).
 
 **U2 — THE WORDS:**
@@ -56,8 +58,10 @@ and discipline, `~/.variorum/dev-vault-throwaway.env`, values never echoed or co
 - **VX-263's route-finder sentence** as reworded: *your current passphrase or words; on this Mac, its quiet road if
   it still holds that key.*
 - **The field guide's Castle/backups chapters and Data Safety's words** against the rules as built (VX-379's
-  standing acceptance; her #235 ruling: written HERE, the truth-check at VX-329's release). The guide is the seeded
-  field-guide book — the seeder and VX-379's ticket say where its chapters live.
+  standing acceptance + the Start Here chapter leads; her #235 ruling: written HERE; the truth-check AND the real
+  store's re-seed ride VX-329's release window). **F-U2c-4 rides:** the new road's Data Safety gains its "what
+  opens a backup" line (rule 5). The guide is the seeded field-guide book — the seeder and VX-379's ticket say
+  where its chapters live.
 
 **Superseded and gone (never build):** the family tree, the Castle offer's old-shared-key sheet, the key-map
 acceptance table (the walk page replaced it).
