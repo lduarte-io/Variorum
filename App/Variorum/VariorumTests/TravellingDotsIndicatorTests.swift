@@ -86,6 +86,8 @@ struct TravellingDotsIndicatorTests {
             "Variorum/Features/Protection/LookInsideSheet.swift",
             // VX-307 U2a: the crossings' confirm and the Protection pane's new-road section.
             "Variorum/Features/Protection/RoadCrossingSheet.swift",
+            // VX-307 U2b: the card above the quick entry, the look, the tour's two asks, the Settings section.
+            "Variorum/Features/Protection/WordsBandCard.swift",
             "VariorumMobile/Features/Protection/MobileRoadFaces.swift",
             "VariorumMobile/Features/Protection/MobilePostureSheets.swift",
             "VariorumMobile/Features/Protection/MobileProtectionCeremonies.swift",

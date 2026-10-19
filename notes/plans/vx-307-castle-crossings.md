@@ -876,9 +876,43 @@ ledger is the merging session's):**
   it, not asked twice, the doors held; the words first — minted with nothing asked; a second visit asks the
   passphrase). The harness `✔ Test run with 100 tests in 14 suites passed`. MUTATIONS (restored, `git status` clean):
   the warning bypassed → `✘ … with 3 issues`; the snooze persisted as a dismissal → `✘ … with 1 issue`.
-- Piece 4 — the Mac band card between the shelf listing and the quick entry + Settings ▸ Protection's words door + the
-  bottom-bar reminder retired on the new road: NOT-STARTED.
-- Piece 5 — the tour's end card (the passphrase ask and the words): NOT-STARTED.
+- Piece 4 — the Mac faces: DONE (this commit). `Features/Protection/WordsBandCard.swift`: `WordsBandCard` (the card
+  above the quick entry — her drawing's band, between the shelf listing and the quick-entry line, the board's own
+  28-pt gutter, the main column's full width; never a popup, never the lobby: the words row is rule 2's sentence
+  [hers] as the whole door in the accent ink, *Later*, the ✕ [its toast through the status seam's `direct` — always
+  shown]; RULE 3's REMINDER folded in, its line and doors and its own set-passphrase sheet), `WordsLookPanel` (the
+  look wherever composed: the passphrase asked only where one exists, the words numbered in two columns in the mono
+  face, never selectable, privacy-sensitive, *Copy* through the model's road + its caption, "write these down now",
+  rule 6's sentence on a later look, *I've written them down* → her warning with *Go back* · *Close*, no Return
+  shortcut anywhere), `TourEndLibraryBlock` (piece 5), `WordsLookSection` (Settings ▸ Protection — the door the ✕'s
+  toast names; a fresh look per press). `ShelfView` gains `wordsBand: AnyView?` rendered after the listing and before
+  `entryBar` (the offer line's road — the Bookcase never holds the model); `RootView` gains `protectionFaces`
+  (`bootstrap.roadStanding`, nil on today's road) and builds the card; `VariorumApp` passes it; `AppBootstrap` passes
+  the Mac's one clipboard rule as `copyWords` (`WordsClipboard.copy` — 60 s, decision 23). **RULE 3's BOTTOM BAR
+  RETIRED on the new road:** `ProtectionRoadBar` keeps rule 27's banner and the split pair's line, and still re-reads
+  the reminder's schedule when the app becomes active (for the card). **The Mac's creation card face is DELETED**
+  (`LibraryWordsCard.swift`); `VariorumApp`'s `.newLibraryWords` arm — unreachable on the Mac — renders the opening
+  face and lets the open go straight on (the words forgotten unseen); `LibraryWordsCardTests` loses its face source
+  pin (the model and §7c (1)'s words stay pinned — the phone's card). Settings ▸ Protection on the new road gains the
+  words section. **Pins** (Mac suite — BUILT, the RUN PENDING under the stage): `WordsBandSurfaceTests` (8: the card
+  hosted in every state — the offer + the reminder, the words, the warning, nothing, the ask; the ✕'s toast through
+  the direction door; the tour's last card hosted with and without the two asks and holding its doors while words
+  show; the Settings section hosted; BY SOURCE — the listing, then the card, then the quick entry; the reminder gone
+  from the bottom bar and carried by the card; the faces name no raw pasteboard, no `.textSelection(.enabled)`, no
+  `keyboardShortcut`, no `.popover`/`.alert`/`.confirmationDialog`, the bootstrap's one clipboard rule; the Mac's
+  creation face deleted); `TravellingDotsIndicatorTests`' surface list gains `WordsBandCard.swift`.
+  `xcodebuild … -configuration Debug -derivedDataPath DerivedData/vx307 build-for-testing` → `** TEST BUILD SUCCEEDED
+  **` (no warning in a file this batch touched but three pre-existing `Text +` deprecations in `ShelfView.swift` and a
+  pre-existing `try` note in `ProtectionRoadRouteTests.swift:260`); the phone `-scheme VariorumMobile -destination
+  'generic/platform=iOS Simulator' build` → `** BUILD SUCCEEDED **`; the headless harness `✔ 100 tests in 14 suites`.
+- Piece 5 — the tour's last card: DONE (this commit — the same diff as piece 4: the faces share one file).
+  `TourOverlay` takes `endLibrary` (the composition root's factory; nil on today's road) and makes ONE
+  `TourEndLibraryModel` when the end card first shows; `TourEndCard` gains `library` — on the new road
+  `TourEndLibraryBlock` between the aside and the three doors: the passphrase ask (§7c (7)'s lead and fields, only while
+  the library has none; *Passphrase set.* after) and the words door (rule 2's sentence) → the look in place; THE THREE
+  DOORS WAIT (`.disabled`) while words are on screen — leaving would put them away without her warning (PROVISIONAL
+  P-VX307-U2b-5). Today's road: `library` nil — the end card byte-identical in what it draws. Pins: the headless
+  `WordsBandTests` tour pair (piece 3's record) + the hosted `WordsBandSurfaceTests` pair above.
 - Piece 6 — the lifecycle page's stages 1–2 from the fixture: NOT-STARTED.
 - Piece 7 — the close (suites both configurations, builds, the record): NOT-STARTED.
 - No revert is in flight.

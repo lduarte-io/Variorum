@@ -637,7 +637,8 @@ final class AppBootstrap {
                 receiptsForNextRoadOpen = []
             }
             // VX-306 U2: its protection faces (rule 27's banner, the split pair, rule 3's reminder, the receipts).
-            roadStanding = road.map { RoadStandingModel.make($0, ledger: reminderLedger) }
+            // VX-307 U2b: …and the card above the quick entry (the words' look copies through the platform's one rule).
+            roadStanding = road.map { RoadStandingModel.make($0, ledger: reminderLedger, copyWords: { Self.copyWords($0) }) }
             // VX-307 U2a: the crossings — made once, kept across every reopen; the faces carry them to the pane.
             if newRoad, road != nil, roadCrossings == nil { roadCrossings = RoadCrossingsModel(roads: crossingRoads()) }
             roadStanding?.crossings = roadCrossings
@@ -775,6 +776,14 @@ final class AppBootstrap {
         case .roadInterlude(let session, let ctx):
             state = .roadInterlude(makeInterlude(session, ctx))
         }
+    }
+
+    /// VX-307 U2b — the words' Copy door: the Mac's one clipboard rule (`WordsClipboard` — cleared after 60 s, only if
+    /// nothing else has written since); the phone renders no look this phase (its pasteboard arm is the mobile row's).
+    private static func copyWords(_ words: [String]) {
+        #if os(macOS)
+        WordsClipboard.copy(words)
+        #endif
     }
 
     /// VX-306 U2 — the interlude (rule 21): the notice, then the offer; *Use it* runs off the main actor through

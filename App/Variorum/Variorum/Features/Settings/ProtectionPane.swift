@@ -184,6 +184,11 @@ struct ProtectionPane: View {
             if let roadStanding, roadStanding.offersSetPassphrase {
                 roadPassphraseSection(roadStanding)
             }
+            // VX-307 U2b (rules 2 and 7 as amended): the twelve words' door — the one the card's ✕ names ("look in
+            // Settings, Protection"). A look mints fresh words through rule 6's act; nothing keeps them.
+            if let roadStanding, roadStanding.band != nil {
+                WordsLookSection(standing: roadStanding)
+            }
             // VX-307 U2a: the new road's crossings — the posture, Use Castle / Use Standard / Replace All Keys as
             // `assess` says them, rule 11's notice, the gate-style row (nil on today's road).
             if let crossings = roadStanding?.crossings {
