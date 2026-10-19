@@ -55,6 +55,11 @@ nonisolated struct SyncRowFace: Equatable {
     enum Kind: Equatable {
         case devStore, signedOut, syncOff, syncing, offline
         case keysLocked, keysReplaced, rekeyIncomplete, notEntitled, error, idle
+        /// VX-314: the signed-in account is not this library's — the engine
+        /// refuses rounds (outbox intact, cursor unmoved). Calm paused
+        /// voice; the door reaches the Account tab, where sign-in and the
+        /// Move road live.
+        case accountMismatch
         /// R-13r-13 (13r U3-A): the §12 refusal with the SERVER ahead —
         /// this app is older than the account's sync format. Calm, never
         /// the error red; its door (where an updater can act) is
@@ -151,6 +156,14 @@ nonisolated struct SyncRowFace: Equatable {
                     Door(label: Self.rekeyIncompleteDoorLabel(for: rekeyAct), act: .openAccount(.encryption)),
                 ])
             }
+            if Self.isAccountMismatchError(error) {
+                // VX-314: the library belongs to another account than the
+                // one signed in — a paused state naming its fix (sign into
+                // the library's account, or Move it); never a generic error.
+                return SyncRowFace(kind: .accountMismatch, doors: [
+                    Door(label: "Account…", act: .openAccount(.account)),
+                ])
+            }
             if EncryptionSession.isPayloadCryptoError(error)
                 || EncryptionSession.isKeysReplacedError(error)
                 || EncryptionSession.isKeyProofRefusedError(error) {
@@ -223,6 +236,20 @@ nonisolated struct SyncRowFace: Equatable {
     static func isAppBehindServerError(_ text: String) -> Bool {
         guard let markers = lockstepMarkers(in: text) else { return false }
         return markers.server > markers.client
+    }
+
+    /// VX-314: the EXACT account-mismatch refusal (the `isKeysLockedError`
+    /// exactness rule — the two ids are read back out and the WHOLE string
+    /// must equal the engine's own rendering of that pair; a substring match
+    /// would swallow unrelated errors into this face).
+    static func isAccountMismatchError(_ text: String) -> Bool {
+        guard let open = text.range(of: "(library "),
+              let comma = text.range(of: ", signed in ", range: open.upperBound..<text.endIndex),
+              let close = text.range(of: ")", range: comma.upperBound..<text.endIndex)
+        else { return false }
+        let bound = String(text[open.upperBound..<comma.lowerBound])
+        let signedIn = String(text[comma.upperBound..<close.lowerBound])
+        return String(describing: SyncError.accountMismatch(bound: bound, signedIn: signedIn)) == text
     }
 
     /// The (client, server) pair of an EXACT lockstep refusal, or nil.
@@ -450,6 +477,12 @@ struct SyncStatusRow: View {
             Text(Self.rekeyIncompleteLabel(for: rekeyAct))
                 .pageCaptionWarning(pageStyle)
                 .help(sync.status.lastError ?? "")
+        case .accountMismatch:
+            // VX-314 (PROVISIONAL words): paused, naming the fix; the
+            // engine's full sentence rides the hover.
+            Text(Self.accountMismatchLabel)
+                .pageCaptionWarning(pageStyle)
+                .help(sync.status.lastError ?? "")
         case .notEntitled:
             // Phase 14c (L7): SECONDARY styling, deliberately — the same
             // quiet voice as signed-out/offline, never the error red or
@@ -523,6 +556,11 @@ struct SyncStatusRow: View {
     /// copy; the door beside it opens the Encryption tab, whose headline
     /// IS the ruled sentence).
     static let keysReplacedLabel = "Sync paused — this account's encryption keys were replaced"
+
+    /// VX-314's row line (PROVISIONAL words): the library belongs to a
+    /// different account than the signed-in one; the door beside it opens
+    /// the Account tab (sign in, or the Move road).
+    static let accountMismatchLabel = "Sync paused — this library belongs to a different account"
 
     /// Ladder R1-1's row line: an unfinished re-key on THIS device (the
     /// persisted marker) — the door beside it opens the Encryption tab,

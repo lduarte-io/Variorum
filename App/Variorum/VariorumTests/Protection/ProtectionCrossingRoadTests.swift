@@ -19,14 +19,17 @@ import VariorumCore
 nonisolated final class PlantedExportSwitch: @unchecked Sendable {
     private let lock = NSLock()
     private var on: Bool
-    private var owed = false
+    /// VX-308 U4 (NIT-R2-1): the libraries whose notice is owed — the mark is by library.
+    private var owed: Set<String> = []
     private(set) var writes: [Bool] = []
 
     init(_ on: Bool = false) { self.on = on }
 
     var value: Bool { lock.withLock { on } }
-    /// Rule 11's notice owed — the durable mark (MAJOR-1).
-    var noticeOwed: Bool { lock.withLock { owed } }
+    /// Rule 11's notice owed — the durable mark (MAJOR-1) — for ANY library (the one-library suites' reading).
+    var noticeOwed: Bool { lock.withLock { !owed.isEmpty } }
+    /// …for `libraryID` (NIT-R2-1).
+    func noticeOwed(_ libraryID: String) -> Bool { lock.withLock { owed.contains(libraryID) } }
 
     var road: ScheduledExportSwitch {
         ScheduledExportSwitch(
@@ -37,8 +40,12 @@ nonisolated final class PlantedExportSwitch: @unchecked Sendable {
                     self.writes.append(value)
                 }
             },
-            noticeOwed: { self.noticeOwed },
-            setNoticeOwed: { value in self.lock.withLock { self.owed = value } })
+            noticeOwed: { self.noticeOwed($0) },
+            setNoticeOwed: { libraryID, value in
+                self.lock.withLock {
+                    if value { self.owed.insert(libraryID) } else { self.owed.remove(libraryID) }
+                }
+            })
     }
 }
 
@@ -337,14 +344,17 @@ struct ProtectionCrossingRoadTests {
         #expect(!exports.value && exports.noticeOwed)
         #expect(!ProtectionCrossings.reconcileExport(session.library, exportSwitch: exports.road), "already followed")
         #expect(exports.noticeOwed, "a relaunch's ready still owes the notice")
-        ProtectionCrossings.dismissExportNotice(exportSwitch: exports.road)
+        // VX-308 U4 (NIT-R2-1): the mark is this library's.
+        let libraryID = try #require(session.library.record?.libraryID)
+        #expect(exports.noticeOwed(libraryID))
+        ProtectionCrossings.dismissExportNotice(exportSwitch: exports.road, libraryID: libraryID)
         #expect(!exports.noticeOwed)
         // *Turn it back on* answers it too.
-        exports.road.setNoticeOwed(true)
+        exports.road.setNoticeOwed(libraryID, true)
         #expect(await ProtectionCrossings.turnExportBackOn(session, exportSwitch: exports.road))
         #expect(exports.value && !exports.noticeOwed)
         // A ready that finds the library out of Castle owes nothing (and never touches the switch).
-        exports.road.setNoticeOwed(true)
+        exports.road.setNoticeOwed(libraryID, true)
         _ = try await Crossing.press(
             session, .useStandard, typed: TypedSecrets(passphrase: Crossing.passphrase, words: words), exports: exports)
         #expect(!ProtectionCrossings.reconcileExport(session.library, exportSwitch: exports.road))

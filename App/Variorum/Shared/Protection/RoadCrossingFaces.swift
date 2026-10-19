@@ -138,6 +138,11 @@ nonisolated enum RoadDoorFace: Equatable, Sendable {
     /// The door can't act now — its sentence in its place.
     case refused(String)
     case open(RoadDoorOpen)
+    /// VX-308 U1 (VX-264, R-1 as amended): Use Castle while SIGNED OUT of the library's account — `assess` refuses it
+    /// `.signedOutUseThisMacOnly` ("the one plain road (This Mac Only) stands in its place"), so the door renders and its
+    /// press shows the signed-out screen (drafted to the current rules): *Continue* runs This Mac Only, then Use Castle's
+    /// own confirm; *Cancel* writes nothing.
+    case signedOutRoad
 
     var openDoor: RoadDoorOpen? {
         if case .open(let open) = self { return open }
@@ -170,6 +175,20 @@ nonisolated struct RoadCrossingFaces: Equatable, Sendable {
         }
     }
 
+    /// VX-308 U4 — F-4 (the 13x F1 R1-M1 rule, carried onto the new road): while the RESTORE HOLD stands beside the store,
+    /// the SYNCED account-wide crossings — Use Castle and Replace All Keys — say their refusal in place (P-VX307-U2a-2's
+    /// idiom; the sentence names Resume Sync). Use Standard is not the gate's (today's rule's own exemption — it drives no
+    /// round); a LOCAL Use Castle is not either (the hold is about sync: a local crossing writes no vault and runs no round).
+    func heldForRestore() -> RoadCrossingFaces {
+        func held(_ face: RoadDoorFace) -> RoadDoorFace {
+            guard let open = face.openDoor, open.synced else { return face }
+            return .refused(ProtectionWords.restoreHoldRefusal(open.door.title))
+        }
+        return RoadCrossingFaces(
+            mode: mode, useCastle: held(useCastle), useStandard: useStandard, replaceAllKeys: held(replaceAllKeys),
+            gateRow: gateRow)
+    }
+
     /// The faces for the open library: `facts` as gathered (unlocked), `assessment` = `assess(facts)`; `copyName` names a
     /// catalogued copy (rule 25's list) — nil when it is no longer catalogued.
     static func derive(
@@ -182,6 +201,9 @@ nonisolated struct RoadCrossingFaces: Equatable, Sendable {
         let earlierGate = unlocked.thisMac.settings.gateStyle
         func face(_ door: RoadCrossingDoor) -> RoadDoorFace {
             switch assessment.doors[door.door] ?? .refused(.nothingToDo) {
+            case .refused(.signedOutUseThisMacOnly) where door == .useCastle:
+                // VX-308 U1: the signed-out road (Use Standard and Replace All Keys keep their sentence in place).
+                return .signedOutRoad
             case .refused(let refusal):
                 return refusalSentence(refusal).map(RoadDoorFace.refused) ?? .hidden
             case .open(let spec):

@@ -101,6 +101,44 @@ nonisolated enum ProtectionWalkSwitch {
         return true
     }
 
+    // MARK: - VX-308 U1 piece 0 — the walk's project coordinates (the account arms' walk against a throwaway project)
+
+    /// `VARIORUM_WALK_PROJECT_URL` + `VARIORUM_WALK_ANON_KEY`: a DEBUG launch with BOTH set points `ProjectConfig`'s
+    /// project coordinates — the sign-in, the vault client, every transport — at that project for THIS launch (the plan's
+    /// §5 row 7: the account-sequence walk runs against a throwaway project carrying the held marker-14 artifact, never
+    /// the production mirror). Read once per process at `ProjectConfig`'s first use, under `#if DEBUG` only; logged once
+    /// (never the values). One of the two alone, a blank value, or a URL that is not https names nothing — the
+    /// production coordinates stand. PROVISIONAL P-VX308-U1-0 (the fences' idiom: DEBUG, per-launch, logged once).
+    static let projectURLKey = "VARIORUM_WALK_PROJECT_URL"
+    static let projectKeyKey = "VARIORUM_WALK_ANON_KEY"
+
+    struct WalkProject: Equatable, Sendable {
+        let url: URL
+        let apiKey: String
+    }
+
+    /// The override's rule, pure: both set (trimmed, non-empty) and the URL an https URL with a host → the pair.
+    static func projectOverride(environment: [String: String]) -> WalkProject? {
+        let rawURL = (environment[projectURLKey] ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let key = (environment[projectKeyKey] ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !rawURL.isEmpty, !key.isEmpty, let url = URL(string: rawURL), url.scheme?.lowercased() == "https",
+              let host = url.host, !host.isEmpty
+        else { return nil }
+        return WalkProject(url: url, apiKey: key)
+    }
+
+    /// The launch's override, read once (`ProjectConfig`'s static lets call it at first use): the rule over this
+    /// process's environment, said once in the protection log — that the coordinates are overridden, and whether they
+    /// name the production mirror's own host — never the URL or the key.
+    static func projectOverrideForThisLaunch(productionHost: String?) -> WalkProject? {
+        guard let project = projectOverride(environment: ProcessInfo.processInfo.environment) else { return nil }
+        let isProduction = project.url.host == productionHost
+        ProtectionOpenRoad.log(
+            "WALK SWITCH (\(projectURLKey) + \(projectKeyKey)): this launch's project coordinates are overridden — "
+                + (isProduction ? "they name the production mirror's own host" : "a walk project's, not the production mirror"))
+        return project
+    }
+
     /// Forget `roads` through the production leaves — the dev scope's silent items; this library's Apple keys.
     static func forget(_ roads: Set<Road>, _ system: ProtectionSystem) {
         if roads.contains(.silent) {

@@ -113,6 +113,9 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
     /// unlinked and every connection hung up before the process exits.
     func applicationWillTerminate(_ notification: Notification) {
         mcp.detach()
+        // VX-308 U3 — VX-448 (her ruling): the twelve words a new-road look copied leave the clipboard at quit (only while
+        // the board still holds that copy). Today's road never makes that copy — a no-op there.
+        WordsClipboard.clearHeld()
     }
 
     func applicationDidBecomeActive(_ notification: Notification) {

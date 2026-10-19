@@ -184,15 +184,26 @@ struct ProtectionPane: View {
             if let roadStanding, roadStanding.offersSetPassphrase {
                 roadPassphraseSection(roadStanding)
             }
+            // VX-308 U3: the key doors where a passphrase exists — Change passphrase…, Reset forgotten passphrase… (as
+            // `assess` says them over the pane's one read; *Set a passphrase…* above stands in their place otherwise).
+            if let keyDoors = roadStanding?.keyDoors {
+                RoadKeyDoorsSection(model: keyDoors)
+            }
             // VX-307 U2b (rules 2 and 7 as amended): the twelve words' door — the one the card's ✕ names ("look in
-            // Settings, Protection"). A look mints fresh words through rule 6's act; nothing keeps them.
+            // Settings, Protection"). A look mints fresh words through rule 6's act; nothing keeps them. VX-308 U3: this
+            // door is the key doors' New Words (its face read from `assess`, its refusal in its place).
             if let roadStanding, roadStanding.band != nil {
-                WordsLookSection(standing: roadStanding)
+                WordsLookSection(standing: roadStanding, keyDoors: roadStanding.keyDoors)
             }
             // VX-307 U2a: the new road's crossings — the posture, Use Castle / Use Standard / Replace All Keys as
             // `assess` says them, rule 11's notice, the gate-style row (nil on today's road).
             if let crossings = roadStanding?.crossings {
                 RoadCrossingsSection(model: crossings)
+            }
+            // VX-308 U1: the new road's account section — the situation and its doors as `assess` says them (turning
+            // sync on, the three local leaves, sign in and out); nil on today's road.
+            if let account = roadStanding?.account {
+                RoadAccountSection(model: account)
             }
             // Today's rows read today's posture and act through today's machinery: on the new road they retire behind
             // the switch (PROVISIONAL P-VX307-U2a-4); Release — today's road — renders them exactly as before.
@@ -216,15 +227,14 @@ struct ProtectionPane: View {
         }
         .formStyle(.grouped)
         .task { await services?.encryption.refresh() }
-        // VX-307 U2a: the crossings' doors re-read at each appearance (a crossing's reopen rebuilds this pane).
-        .task { await roadStanding?.crossings?.refresh() }
-        // VX-307 U2a: the crossing's confirm — held by the bootstrap's model, so it survives the reopen under it.
-        .sheet(item: Binding(
-            get: { roadStanding?.crossings?.confirm },
-            set: { if $0 == nil { roadStanding?.crossings?.dismissConfirm() } })
-        ) { confirm in
-            RoadCrossingSheet(model: confirm)
-        }
+        // VX-307 U2a: the crossings' doors re-read at each appearance (a crossing's reopen rebuilds this pane); VX-308 U1
+        // and U3: the account section's and the key doors' with them — ONE read for the three (the ladder's round-1
+        // MINOR-2: R-2's one assessment, one vault fetch per appearance).
+        .task { await roadStanding?.refreshPane() }
+        // VX-308 U1 (VX-239 + VX-243): every new-road protection sheet — the crossings' confirm, the account's, the
+        // signed-out screen, sign in and out — through THE ONE PRESENTER (the bootstrap's, so a crossing's confirm
+        // survives the reopen under it), presented here, its host, alone.
+        .protectionSheets(roadStanding?.sheets, services: services)
         // RUN A batch A2, row 11: this pane is ONE of the ceremony's two
         // presenters now, so it says when it is on screen — the host is
         // decided at `openSwitch` from this count.

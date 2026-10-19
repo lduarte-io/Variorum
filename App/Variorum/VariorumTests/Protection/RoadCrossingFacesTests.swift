@@ -178,7 +178,9 @@ struct RoadCrossingFacesTests {
         #expect(other.useCastle == .refused(ProtectionWords.doorRefusedOtherAccount))
 
         let out = try CrossingPlant.faces(road, session) { synced(&$0, session: .signedOut, vault: nil) }
-        #expect(out.useCastle == .refused(ProtectionWords.doorRefusedSignedOut))
+        // VX-308 U1 (VX-264, R-1 as amended) — the deliberate flip: Use Castle while signed out renders its door, whose
+        // press shows the signed-out screen (This Mac Only, then Use Castle); Replace All Keys keeps its sentence.
+        #expect(out.useCastle == .signedOutRoad)
         #expect(out.replaceAllKeys == .refused(ProtectionWords.doorRefusedSignedOut))
     }
 

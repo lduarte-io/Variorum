@@ -14,6 +14,27 @@ import GRDB
 /// triggers are muted and therefore enqueue their outbox rows **explicitly**
 /// (SyncSpec §7) — without that, repairs apply locally but never push and
 /// the devices silently diverge.
+
+/// VX-314's injected facts (the `keyProvider` pattern): who the library
+/// belongs to, and who is signed in — both app-side truths this module
+/// cannot see. Each closure answers nil freely (unbound, signed out, or
+/// simply unknown); only a double answer that DISAGREES refuses a round.
+public struct SyncAccountBinding: Sendable {
+    /// The library's bound account (the protection record's; today's road
+    /// never wires this — Release behavior byte-unchanged until VX-329).
+    public var boundAccount: @Sendable () async -> String?
+    /// The signed-in account (the auth session's user).
+    public var signedInAccount: @Sendable () async -> String?
+
+    public init(
+        boundAccount: @escaping @Sendable () async -> String?,
+        signedInAccount: @escaping @Sendable () async -> String?
+    ) {
+        self.boundAccount = boundAccount
+        self.signedInAccount = signedInAccount
+    }
+}
+
 public struct SyncEngine: Sendable {
     @Dependency(\.database) var database
     @Dependency(\.date) var date
@@ -49,12 +70,22 @@ public struct SyncEngine: Sendable {
     /// the guide, the three gatherings, the quicknote/twin, the scraps pool
     /// (`SeededFurnitureDedupe.swift`). Nil = INERT, the standing pattern.
     public let furnitureFacts: SeededFurnitureDedupeFacts?
+    /// VX-314 (the `keyProvider` pattern — nil = INERT): the account-binding
+    /// facts the engine cannot see for itself. New writing belongs to the
+    /// LIBRARY's account (the protection record's — "the record names the
+    /// account; signing in or out never changes it"), not whoever is signed
+    /// in, so a round under a mismatched sign-in refuses before any network
+    /// contact. The gate refuses ONLY when both facts answer and disagree
+    /// (an unbound library or a signed-out session is some other state's
+    /// business, never this gate's).
+    public let accountBinding: SyncAccountBinding?
 
     public init(
         transport: any SyncTransport, batchSize: Int = 200, maxPushIterations: Int = 5,
         keyProvider: any SyncKeyProviding = UnenrolledKeyProvider(),
         sampleLibraryFacts: [SampleLibraryDedupeFacts] = [],
-        furnitureFacts: SeededFurnitureDedupeFacts? = nil
+        furnitureFacts: SeededFurnitureDedupeFacts? = nil,
+        accountBinding: SyncAccountBinding? = nil
     ) {
         self.transport = transport
         self.batchSize = batchSize
@@ -62,6 +93,20 @@ public struct SyncEngine: Sendable {
         self.keyProvider = keyProvider
         self.sampleLibraryFacts = sampleLibraryFacts
         self.furnitureFacts = furnitureFacts
+        self.accountBinding = accountBinding
+    }
+
+    /// VX-314's gate, in the round-entry refusal cascade (after the re-key
+    /// check, before keys): the signed-in account against the library's
+    /// bound account. A mismatch refuses `SyncError.accountMismatch` —
+    /// outbox intact, cursor unmoved, before any network contact.
+    private func refuseIfAccountMismatched() async throws {
+        guard let binding = accountBinding else { return }
+        guard let bound = await binding.boundAccount(),
+              let signedIn = await binding.signedInAccount(),
+              bound != signedIn
+        else { return }
+        throw SyncError.accountMismatch(bound: bound, signedIn: signedIn)
     }
 
     /// Ladder R1-1, re-based on pre-13x 2b's PER-STEP marker: the posture
@@ -150,6 +195,11 @@ public struct SyncEngine: Sendable {
         // lockstep because its prescription (re-run the re-key door)
         // subsumes both; before any network contact by construction.
         try await refuseIfRekeyIncomplete()
+        // The library's account, not whoever is signed in (VX-314): a
+        // mismatched sign-in refuses before keys say anything — the bound
+        // account's keys may well be in custody, and "keys unavailable"
+        // would name the wrong fix.
+        try await refuseIfAccountMismatched()
         // Keys first (Phase 14b): absent/locked keys refuse the round
         // before any network contact — outbox intact, cursor unmoved.
         let crypto = try roundCrypto()
@@ -428,6 +478,10 @@ public struct SyncEngine: Sendable {
     /// The pull's body — everything but the marker guard (pre-13x 2b:
     /// `pullToHead` runs it with the marker set).
     private func pullIgnoringMarker() async throws -> PullReport {
+        // VX-314: the push half's twin — here rather than `pull()` so
+        // `pullToHead` is gated too (the binding is nil on every
+        // deliberate-act engine, so only the live session's rounds feel it).
+        try await refuseIfAccountMismatched()
         // Keys first (Phase 14b): absent/locked keys refuse the round
         // before any network contact — outbox intact, cursor unmoved.
         let crypto = try roundCrypto()

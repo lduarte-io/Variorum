@@ -13,7 +13,7 @@
 //      (the one home for both asks; the bottom bar no longer carries it).
 //    - `WordsLookPanel` — the LOOK, wherever it is composed (the card, the tour's last card, Settings ▸ Protection):
 //      the passphrase asked only where one exists; the twelve words numbered in two columns, never selectable,
-//      privacy-sensitive; *Copy* through the one clipboard rule (cleared after 60 s — the host's `copyWords`);
+//      privacy-sensitive; *Copy* through the one clipboard rule (VX-448: concealed, cleared at lock and quit — the host's `copyWords`);
 //      "write these down now"; *I've written them down* → her warning, *Go back* · *Close*. No Return shortcut puts the
 //      words away (a stray Return must never).
 //    - `TourEndLibraryBlock` — the tour's last card's two asks side by side (rule 3): the passphrase and the words.
@@ -177,9 +177,16 @@ struct WordsLookPanel: View {
         }
     }
 
-    /// Rule 6: new words ask the passphrase where one exists.
+    /// Rule 6: new words ask the passphrase where one exists. VX-308 U3 (F-U2-3): a synced library's look says, before
+    /// anything is minted, that new words replace the account's words everywhere — her *Show my twelve words* is the yes.
     private var asking: some View {
         VStack(alignment: .leading, spacing: 8) {
+            if look.saysAccountWords {
+                Text(ProtectionWords.wordsLookReplacesAccountWords)
+                    .font(tokens.body)
+                    .foregroundStyle(tokens.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Text(ProtectionWords.wordsLookAsk)
                 .font(tokens.body)
                 .foregroundStyle(tokens.ink)
@@ -366,6 +373,10 @@ struct TourEndLibraryBlock: View {
 
 struct WordsLookSection: View {
     let standing: RoadStandingModel
+    /// VX-308 U3 (R-U3-5): this door IS the key doors' New Words — its face read from `assess` over the pane's one read
+    /// (its refusal said in its place — a follow owed, the vault out of reach, another account); nil: the door as U2b
+    /// built it (no read yet, or a test's hand-made faces).
+    var keyDoors: RoadKeyDoorsModel? = nil
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -383,7 +394,12 @@ struct WordsLookSection: View {
                 .fixedSize(horizontal: false, vertical: true)
             if let look, look.phase != .closed {
                 WordsLookPanel(look: look, tokens: tokens)
-            } else {
+            } else if case .refused(let sentence)? = keyDoors?.faces?.newWords {
+                Text(sentence)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if keyDoors?.faces?.newWords != .hidden {
                 HStack {
                     Button(ProtectionWords.wordsSectionDoor) {
                         // A fresh look per press (it reads, at its making, whether words were recorded before).
@@ -393,6 +409,11 @@ struct WordsLookSection: View {
                     }
                     Spacer()
                 }
+                // VX-263's one line — the key door says it (rule 6: "the doors say so in one sentence").
+                Text(ProtectionWords.keyDoorsLine)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
                 if let message = look?.message {
                     Text(message)
                         .font(.callout)

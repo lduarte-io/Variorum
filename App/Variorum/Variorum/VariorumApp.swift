@@ -232,6 +232,16 @@ struct VariorumApp: App {
                             makeSyncKeyProvider: bootstrap.newRoad
                                 ? { [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in newRoadSyncKeys }
                                 : nil,
+                            // VX-314: the engine's account-binding gate — the
+                            // bound account from the SAME truth the key
+                            // provider reads (the protection record's); today's
+                            // road passes nothing (the gate inert, Release
+                            // byte-unchanged until VX-329).
+                            boundAccountRead: bootstrap.newRoad
+                                ? { @Sendable [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in
+                                    newRoadSyncKeys.boundAccount
+                                }
+                                : nil,
                             // 17y B-DEDUPE: the Mac's furniture-fold facts =
                             // the shared half + the GUIDE's (the engine's
                             // pairwise fold; the phone wires the shared half
@@ -244,6 +254,16 @@ struct VariorumApp: App {
                             // seam (pre-13x 1a); production names the real one.
                             legacyCleanup: { LegacyPasteInCleanup.clear() })
                         services = fresh
+                        // VX-308 U1 (P-VX308-U1-F1): on the new road the Account sheet's Delete Account also runs
+                        // the protection half (the open library stops naming the deleted account — rule 16's local
+                        // leave); and the account section's *Sign out…* signs out through this one session. Nothing
+                        // on today's road (no hook, no section).
+                        if bootstrap.newRoad {
+                            fresh.afterAccountDeleted = { account in
+                                await bootstrap.accountDeletedOnNewRoad(account)
+                            }
+                            bootstrap.roadAccount?.signOutRoad = { [weak fresh] in await fresh?.signOutVariorum() }
+                        }
                         // VX-306 U1b (P-VX306-K4): on the new road every backup run that wrote a snapshot also
                         // lands rule 5's pair (the library + its key file) — today's runs untouched; nothing on
                         // today's road (no session).

@@ -435,9 +435,12 @@ nonisolated enum ProtectionWords {
     /// RULE 6's one sentence (with rules 4 and 5), said when she recorded words here before (never on the first look).
     static let wordsLookRuleSix = "Your library's key doesn't change: every backup opens with these words, and still "
         + "with the words you had when you made it."
-    /// VX-412's Copy door and its caption (decision 23's clipboard rule — cleared after 60 seconds).
+    /// VX-412's Copy door and its caption. VX-308 U3 — VX-448 (her ruling, QUESTIONS #235: the 60-second timer and the
+    /// restore go; a concealed type, cleared at lock and at quit): the caption says the new road's rule (PROVISIONAL
+    /// P-VX308-U3-2 — today's road keeps its own sentence, `ProtectionCopy.wordsCopied`, with its own rule).
     static let wordsLookCopy = "Copy"
-    static let wordsLookCopied = "Copied. Your clipboard clears in 60 seconds."
+    static let wordsLookCopied = "Copied. Your clipboard keeps them until you copy something else, your library locks or "
+        + "Variorum quits."
     static let wordsLookWrittenDown = "I've written them down"
     /// HER words — the warning before the look closes.
     static let wordsLookWarning = "These words won't be shown again."
@@ -455,6 +458,306 @@ nonisolated enum ProtectionWords {
     static let wordsSectionDoor = "Record your twelve words\u{2026}"
     /// The tour's last card (rule 3: "asks, and shows the twelve words beside the ask"): the passphrase set there.
     static let tourEndPassphraseSet = "Passphrase set."
+
+    // MARK: - VX-308 U1 — THE ACCOUNT SECTION (rules 7, 14, 16; the plan's U1 ARBITRATION)
+    //
+    // RULE 16's two sentences and RULE 7's are HER words, verbatim from `notes/CastleRules.md` (the first letter
+    // capitalized, rule 16's own "(rule 7)" pointer dropped; `RoadAccountWordsTests` reads the rules file and pins them
+    // byte-equal). The sign-out confirm byte-reuses today's shipped copy (`ProtectionCopy`, pinned equal). The signed-out
+    // screens are drafted to the CURRENT rules — her word (2026-10-19): "10-13 is probably old and superseded by now" — so
+    // the whole screen is PROVISIONAL and the bundle names what diverged from QUESTIONS #216's 10-13 block. Every other line
+    // here is PROVISIONAL P-VX308-U1-1 — drafted from the rules' and the lifecycle page's own words, sentence case.
+
+    /// RULE 16 — her first sentence, verbatim (every leave's confirm says it).
+    static let ruleSixteen = "Leaving an account changes none of your library's keys or secrets \u{2014} it stops syncing, "
+        + "and the server keeps what you pushed (removing it is the account-deletion road)."
+    /// RULE 16 — her second sentence, verbatim (its "(rule 7)" pointer dropped).
+    static let signingBackInIsAJoin = "Signing back in is a join."
+    /// RULE 7 — her first sentence, verbatim (turning sync on).
+    static let onePairAtATime = "A device holds one pair of secrets at a time."
+    /// RULE 7 — her join sentence, verbatim (U2's words moment says it; kept here beside its rule).
+    static let joinWordsSentence = "Your library's twelve words are now your account's twelve words; here they are; the "
+        + "old ones still open backups you made before today."
+
+    /// The section (Settings ▸ Protection on the new road).
+    static let accountSectionTitle = "Sync"
+    /// The situations (`AccountSituation`).
+    static let accountLocalOnly = "This library doesn't sync."
+    static let accountInSync = "This library syncs with your account."
+    static func accountSignedInAs(_ email: String) -> String { "Signed in as \(email)." }
+    /// Signed out: the library still names its account (the record names it; signing out never changes it).
+    static let accountSignedOut = "You're signed out of sync."
+    static let accountSignedOutLine = "This library still syncs with an account, but no one is signed in on this "
+        + "\(ProtectionCopy.deviceName), so nothing syncs. Sign in to sync again, or use this library on this "
+        + "\(ProtectionCopy.deviceName) only \u{2014} the account's copy on the server stays as it is."
+    static let accountOtherAccount = "Another account is signed in on this \(ProtectionCopy.deviceName)."
+    static let accountOtherAccountLine = "This library syncs with a different account. Sign out, or move this library to "
+        + "the account that's signed in."
+    /// `Words.sameEmailDifferentAccount`.
+    static let accountSameEmailDifferentAccount = "The account signed in uses the same email, but it is a different "
+        + "account."
+    static let accountSignInToTurnOnSync = "Sign in to turn on sync."
+
+    /// The doors (an ellipsis: a confirm or a sheet follows).
+    static let turnOnSyncDoor = "Turn on sync\u{2026}"
+    static let stopSyncingHereDoor = "Stop syncing here\u{2026}"
+    static let deleteAccountHereDoor = "Delete the account from this \(ProtectionCopy.deviceName)\u{2026}"
+    static let thisMacOnlyDoor = "Use this \(ProtectionCopy.deviceName) only\u{2026}"
+    static let accountSignOutDoor = "Sign out\u{2026}"
+    static let accountSignInDoor = "Sign in\u{2026}"
+    /// VX-308 U2 — Move's one arm with no face yet: the signed-in account has NO vault (moving there would be a leave and
+    /// a set-up, two acts — the core's `move` joins an account that already syncs). The honest not-yet line (the
+    /// `plaintextCopyNotYet` precedent; PROVISIONAL P-VX308-U2-6).
+    static let moveNotYet = "Moving this library to that account isn't ready in this build yet."
+
+    /// Turn on sync — the first device hands its pair up (rule 7); the account takes the library's posture.
+    static let turnOnSyncTitle = "Turn on sync"
+    /// The lifecycle page's stage 12, verbatim ("Turning sync on first").
+    static let turnOnSyncLead = "Your library's passphrase and twelve words become the account's. Nothing is replaced."
+    static func turnOnSyncPosture(_ mode: ProtectionMode) -> String {
+        switch mode {
+        case .standard: return "Your account starts in Standard, like this library."
+        case .castle: return "Your account starts in Castle, like this library."
+        }
+    }
+    /// No passphrase yet (rule 14: the account's keys are wrapped by the passphrase and the twelve words only).
+    static let turnOnSyncNewPassphraseLead = "This library has no passphrase yet. Choose one \u{2014} your account is "
+        + "locked under your passphrase and your twelve words."
+    static let turnOnSyncButton = "Turn on sync"
+    static let turnOnSyncReceipt = "Sync is on. Your passphrase and twelve words are your account's now."
+
+    /// Stop syncing here (rule 16 — the library's keys and secrets unchanged).
+    static let stopSyncingTitle = "Stop syncing here"
+    static let stopSyncingLead = "This \(ProtectionCopy.deviceName) stops syncing this library and forgets your account's "
+        + "sync keys. Your other devices keep syncing."
+    static let stopSyncingButton = "Stop syncing"
+    static let stopSyncingReceipt = "This library doesn't sync on this \(ProtectionCopy.deviceName) any more."
+
+    /// Delete the account from this Mac — the LOCAL leave (P-VX308-U1-F1, the U1 ARBITRATION's refined (b)), with ONE
+    /// pointer to where the real deletion lives (the Account sheet's door, her ruled friction, unduplicated).
+    static let deleteHereTitle = "Delete the account from this \(ProtectionCopy.deviceName)"
+    static let deleteHereLead = "This \(ProtectionCopy.deviceName) forgets the account and its sync keys. The account "
+        + "itself isn't deleted."
+    static let deleteHerePointer = "To delete the account itself, and everything it keeps on the server, choose "
+        + "Account\u{2026} in the sidebar's sync row, then Delete Account."
+    static let deleteHereButton = "Delete from this \(ProtectionCopy.deviceName)"
+    static let deleteHereReceipt = "This \(ProtectionCopy.deviceName) doesn't use that account any more."
+
+    /// This Mac only — signed out, the one road (the 10-13 shape: Continue / Cancel, still true under rule 16).
+    static let thisMacOnlyTitle = "Use this \(ProtectionCopy.deviceName) only"
+    static let thisMacOnlyLead = "This \(ProtectionCopy.deviceName) stops using your sync account and forgets its sync "
+        + "keys."
+    static let accountContinue = "Continue"
+    static let thisMacOnlyReceipt = "This library is on this \(ProtectionCopy.deviceName) only now."
+
+    /// The sign-out confirm — today's shipped copy, byte-reused (decision 20's §4).
+    static let accountSignOutTitle = ProtectionCopy.signOutTitle
+    static let accountSignOutBody = ProtectionCopy.signOutBody
+    static let accountSignOutButton = ProtectionCopy.signOutDoor
+
+    static let accountCancel = "Cancel"
+    static let accountWorking = "Working\u{2026}"
+    /// An account act stopped mid-plan (its act stays in flight; the next open settles it — rule 20).
+    static let accountActUnfinished = "Variorum couldn't finish this just now. It finishes the next time your library "
+        + "opens."
+    /// The sign-in sheet asked for where this window has no app services to sign in through — a composition hole the
+    /// shipped composition never leaves (the ladder's round-1 NIT-1: said plainly, never another state's sentence).
+    static let signInUnavailable = "Signing in isn't available in this window."
+    static let signInUnavailableClose = "Close"
+
+    /// USE CASTLE WHILE SIGNED OUT — the signed-out screen, drafted to the CURRENT rules (`assess`: the one plain road,
+    /// This Mac Only, stands in Use Castle's place; rule 16: that leave changes no key or secret; P-VX378-U2-2: Use Castle's
+    /// own confirm types both secrets). *Continue* runs the leave, then Use Castle's confirm; *Cancel* writes nothing.
+    static let signedOutCastleTitle = accountSignedOut
+    static let signedOutCastleLead = "Castle will apply to this library on this \(ProtectionCopy.deviceName) only. "
+        + "First, this \(ProtectionCopy.deviceName) stops using your sync account \u{2014} none of your keys or secrets "
+        + "change, and the account's copy on the server stays as it is. Then Use Castle asks for your passphrase and your "
+        + "twelve words, as always."
+    static let signedOutCastleWholeAccount = "To put your whole account in Castle instead, cancel, sign in, and choose Use "
+        + "Castle again."
+    /// The receipt's last sentence when Use Castle followed that road (true here: turning sync on hands the account the
+    /// library's posture).
+    static let bornCastleNote = "Set up sync again later with a new account and it starts in Castle."
+
+    // MARK: - VX-308 U2 — THE JOIN AND THE FOLLOW (rules 7, 10, 12, 14, 16; P-VX378-U2-3; VX-107; VX-113)
+    //
+    // HER words, already pinned byte-equal to `notes/CastleRules.md` where they live above: rule 7's join sentence
+    // (`joinWordsSentence` — the words moment says it) and its first (`onePairAtATime`), rule 12's leave sentence
+    // (`leaveSentence` — the join that leaves Castle and the follow out say it: `Words.ruleFive`), rule 9's promise
+    // (`castlePromise`), rule 16's (`ruleSixteen` — Move says it). VX-113's sentence is her #205 ruling (ii)'s
+    // (`passphraseChangedElsewhere`, above). Every other line here is PROVISIONAL P-VX308-U2-1 — drafted from the rules' and
+    // the lifecycle page's own words (stage 12), sentence case, hers at the bundle.
+
+    /// THE JOIN's lead (the lifecycle page's stage 12, "Joining from another device": one of the account's secrets typed
+    /// once; the library's own pair replaced by the account's — rules 7, 14).
+    static let joinLead = "Your account already syncs. Type its passphrase or its twelve words once \u{2014} your "
+        + "library's own passphrase and twelve words are replaced by your account's."
+    /// What the join does to the library's posture (`JoinPlan`) — the consent says which (one posture at a time).
+    static func joinPlanLine(_ plan: JoinPlan, library: ProtectionMode) -> String? {
+        switch plan {
+        case .entersCastle: return "Your account is in Castle, so this library goes into Castle too."
+        case .leavesCastle: return "Your account is in Standard, so this library leaves Castle."
+        case .sameMode:
+            switch library {
+            case .castle: return "Your account is in Castle, like this library."
+            case .standard: return "Your account is in Standard, like this library."
+            }
+        case .setsUpInLibrarysMode: return nil
+        }
+    }
+    /// The join's fields (rule 14: ONE of the account's secrets).
+    static let joinPassphraseField = "Your account's passphrase"
+    static let joinWordsField = "Or your account's twelve words"
+    /// The join's receipt (the posture said when it changed). Move's head names "the signed-in account" — one "now" per
+    /// receipt (the ladder's round-1 NIT-2: "…the account signed in now. … twelve words now." said it twice).
+    static func joinedReceipt(_ plan: JoinPlan, moved: Bool) -> String {
+        let head = moved ? "This library syncs with the signed-in account" : "Sync is on"
+        switch plan {
+        case .entersCastle: return head + ", and you're in Castle now, like your account."
+        case .leavesCastle: return head + ", and you're in Standard now, like your account."
+        case .sameMode, .setsUpInLibrarysMode:
+            return head + ". Your library uses your account's passphrase and twelve words now."
+        }
+    }
+    /// THE WORDS MOMENT when the PASSPHRASE was the secret typed (P-VX378-U2-3 (a) — "the face shows them when typed";
+    /// otherwise it says the account's words now open the library): the words were replaced, and nothing here can show
+    /// them. Her eye at the bundle — rule 7's "here they are" edge.
+    static let joinWordsNotShown = "Your library's twelve words are now your account's twelve words \u{2014} the ones you "
+        + "keep for your account. You joined with your passphrase, and Variorum never keeps the words, so they aren't shown "
+        + "here. The old ones still open backups you made before today."
+    static let joinWordsMomentOK = "OK"
+
+    /// MOVE — leave the account the library syncs with (rule 16: no key or secret changes for that) and join the one
+    /// signed in (rule 7). The door names the account signed in.
+    static func moveDoor(_ email: String?) -> String {
+        email.map { "Move this library to \($0)\u{2026}" } ?? "Move this library to this account\u{2026}"
+    }
+    static let moveTitle = "Move to this account"
+    static let moveLead = "This library stops syncing with the account it syncs with now, and joins the account signed in "
+        + "on this \(ProtectionCopy.deviceName)."
+    static let moveButton = "Move"
+
+    /// THE FOLLOW (rules 10, 12, 15) — the account changed on another device and this one follows.
+    static let followDoor = "Follow your account\u{2026}"
+    static let followTitle = "Follow your account"
+    static let followButton = "Follow"
+    /// The follow's notice in the account section, by kind — the vault's last writer and its day where the read has them
+    /// (decision 34's names; VX-113's form).
+    static func followNotice(_ kind: FollowKind, device: String?, day: String?) -> String {
+        let at = "on \(device ?? "another device")" + (day.map { " on \($0)" } ?? "")
+        switch kind {
+        case .intoCastle: return "Your account entered Castle \(at)."
+        case .intoStandard: return "Your account left Castle \(at)."
+        case .keysReplaced: return "Your account's keys changed \(at)."
+        }
+    }
+    /// What following asks — rule 10's "each typing a secret once" (and rule 15's catch-up); rule 12's "quietly" out.
+    static func followAsk(_ kind: FollowKind) -> String {
+        switch kind {
+        case .intoCastle: return "Type your passphrase or your twelve words once to follow it here."
+        case .keysReplaced: return "Type your passphrase or your twelve words once to catch up."
+        case .intoStandard: return "This \(ProtectionCopy.deviceName) follows it out without asking you for anything."
+        }
+    }
+    /// Rule 10's "accepted and said plainly": until a device follows into Castle, it reads what it already has.
+    static let followUntilThen = "Until this \(ProtectionCopy.deviceName) follows, it can still read what it already has "
+        + "\u{2014} its own copy of your library \u{2014} through its own quiet road."
+    /// The follow's fields (one secret — the library's account's, which this library's pair already is: rule 7).
+    static let followPassphraseField = "Your passphrase"
+    static let followWordsField = "Or your twelve words"
+    /// VX-107 — THE FOLLOW'S DONE, its other-device sentence, by kind: said once the follow has landed — at the press, or
+    /// by the open whose settle finished it after a crash (re-said from the act in flight the record names, never from
+    /// this process's memory).
+    static func followDone(_ kind: FollowKind) -> String {
+        switch kind {
+        case .intoCastle:
+            return "Your account entered Castle on another device, and this \(ProtectionCopy.deviceName) followed it."
+        case .intoStandard:
+            return "Your account left Castle on another device, and this \(ProtectionCopy.deviceName) followed it out."
+        case .keysReplaced:
+            return "Your account's keys changed on another device, and this \(ProtectionCopy.deviceName) caught up."
+        }
+    }
+
+    // MARK: - VX-308 U3 — THE KEY DOORS, VX-447, F-U2-3 (rules 2, 3, 6, 7, 27; the plan's §5c)
+    //
+    // VX-263's ONE line is the plan's (§2's ledger and §5c: *your current secrets open everything you've made of this
+    // library* — rule 6's "the doors say so in one sentence"), the first letter capitalized and the period added;
+    // `RoadKeyDoorWordsTests` reads the plan file and pins it as drafted. Her U2-7 (1) first sentence is reused, never
+    // restated (the prefix of `noKeyFileAfterAQuietOpen`, pinned). Every other line here is PROVISIONAL P-VX308-U3-2 —
+    // drafted from the rules' own words, sentence case, hers at the bundle.
+
+    /// VX-263's one line — every key door says it (rule 6: "the doors say so in one sentence").
+    static let keyDoorsLine = "Your current secrets open everything you've made of this library."
+    /// Synced, the key doors change the account's lock with the library's (rule 7: "the key doors change the library's
+    /// and the account's locks together") — the face says so; the act does it.
+    static let keyDoorsSyncedPassphraseLine = "This library syncs with your account, so your account's passphrase changes "
+        + "with it, on every device."
+
+    /// The passphrase's section on the open library (the doors where a passphrase exists; *Set a passphrase…* where none).
+    static let passphraseSectionTitle = "Your passphrase"
+    /// Change passphrase (the current one verified; a new one typed twice).
+    static let changePassphraseDoor = "Change passphrase\u{2026}"
+    static let changePassphraseTitle = "Change passphrase"
+    static let changePassphraseCurrentField = "Current passphrase"
+    static let changePassphraseButton = "Change passphrase"
+    static let changePassphraseReceipt = "Your passphrase is changed."
+    /// Reset a forgotten passphrase (the forgot road — Standard: a plain confirm; Castle: the words or Touch ID).
+    static let resetPassphraseDoor = "Reset forgotten passphrase\u{2026}"
+    static let resetPassphraseTitle = "Reset forgotten passphrase"
+    /// Standard — this Mac holds the key (rule 8), so nothing else is asked.
+    static let resetPassphraseStandardLead = "This \(ProtectionCopy.deviceName) holds your library's key, so you can "
+        + "choose a new passphrase without the old one."
+    /// Castle — the words, or Touch ID where this Mac has its item for the key.
+    static let resetPassphraseCastleLead = "Confirm it's you with your twelve words, then choose a new passphrase."
+    static let resetPassphraseCastleTouchIDLead = "Confirm it's you with your twelve words or "
+        + "\(ProtectionCopy.biometryName), then choose a new passphrase."
+    static let resetPassphraseWordsField = "Your twelve words"
+    static let resetPassphraseButton = "Reset passphrase"
+    static let resetPassphraseWithTouchID = "Reset with \(ProtectionCopy.biometryName)"
+    static let resetPassphraseTouchIDNotConfirmed = "\(ProtectionCopy.biometryName) didn't confirm it's you. Nothing changed."
+    static let resetPassphraseReceipt = "Your passphrase is reset."
+    /// A key door's new passphrase fields (the crossings' own names).
+    static let keyDoorNewPassphraseField = crossingNewPassphraseField
+    static let keyDoorNewPassphraseAgain = crossingNewPassphraseAgain
+    static let keyDoorCancel = "Cancel"
+    static let keyDoorWorking = "Working\u{2026}"
+
+    /// F-U2-3 (the architect's ruling): on a SYNCED library a look says this BEFORE minting — new words replace the
+    /// account's words everywhere (rule 7: the key doors change both locks together); her *Show my twelve words* is the yes.
+    static let wordsLookReplacesAccountWords = "This library syncs with your account, so new words also replace your "
+        + "account's twelve words, on every device."
+
+    /// VX-447 — THE BANNER BECOMES THE DOOR (her ruling): her U2-7 (1) first sentence, reused (the prefix of
+    /// `noKeyFileAfterAQuietOpen` — pinned) …
+    static let noKeyFileOpenedLead = noKeyFileAfterAQuietOpen.components(separatedBy: ". ").first.map { $0 + "." }
+        ?? noKeyFileAfterAQuietOpen
+    /// … then the door: record the words → a fresh key file → the backup follows (the whole line is the door — rule 2's
+    /// card idiom, her "click here").
+    static let noKeyFileDoor = "Click here to record your twelve words \u{2014} Variorum makes a new key file with them, "
+        + "then a backup."
+    /// F-U2c-5 folded (her ruling: "the synced flavor gains the open-library variant of the account sentence") — said
+    /// over the library that just opened, in place of the lobby's *Sign in … to bring your writing back*.
+    static let noKeyFileAccountRoadOpen = "This library syncs with your account, so your writing is kept there too "
+        + "\u{2014} your passphrase or twelve words bring it back on any device."
+    /// The receipt once the look minted the fresh file (and the pair followed, or not).
+    static func keyFileRemadeReceipt(backedUp: Bool) -> String {
+        backedUp
+            ? "Your library has a key file again, and a backup holds a copy."
+            : "Your library has a key file again."
+    }
+
+    // MARK: - VX-308 U4 — THE HOLD'S GATE (F-4: the 13x F1 R1-M1 rule on the new road's synced crossings)
+    //
+    // PROVISIONAL P-VX308-U4-1 — drafted in the shipped hold copy's idiom (`LibraryOpenCopy.syncNowHeldRefusal`'s
+    // *Sync is waiting since the restore — press Resume Sync …*, and `confirmLeavesCastle`'s *press Resume Sync, then choose
+    // Use Castle again*), sentence case, hers at the bundle.
+
+    /// A synced Use Castle or Replace All Keys while the restore hold stands — said in place of the door, and by the press.
+    static func restoreHoldRefusal(_ doorTitle: String) -> String {
+        "Sync is waiting since the restore \u{2014} press Resume Sync in the main window's banner, then choose "
+            + "\(doorTitle) again."
+    }
 
     // MARK: - The route's failures (the failure face, with Try Again)
 

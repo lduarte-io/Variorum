@@ -23,16 +23,22 @@ final class PlantedRoad {
     let apple = InMemoryAppleKeysLeaf()
     /// This Mac's biometry for the systems made from here on (VX-307 U2a: the crossings' Touch ID arms).
     var biometry = BiometryFacts.none
+    /// VX-308 U1: the account suites' planted vault and sync keys (nil — every earlier suite — keeps the empty sync keys
+    /// and the system's own vault leaf, untouched).
+    var vault: (any VaultLeaf)?
+    var syncKeys: (any SyncKeysLeaf)?
+    /// VX-308 U1: the sign-in the road's contexts carry (signed out — every earlier suite).
+    var session = SessionFact.signedOut
 
     func system() -> ProtectionSystem {
         ProtectionSystem(
             scope: "vx306-planted", places: slot.places, deviceName: "Test Mac", floor: .relaxedForTests,
-            custody: custody, syncKeys: EmptySyncKeysLeaf(), apple: apple, memory: memory,
+            custody: custody, syncKeys: syncKeys ?? EmptySyncKeysLeaf(), apple: apple, vault: vault, memory: memory,
             biometry: FixedBiometryLeaf(biometry), ids: FastIDsLeaf())
     }
 
     func context(writes: Bool = true) -> RoadContext {
-        RoadContext(system: system(), session: .signedOut, writes: writes)
+        RoadContext(system: system(), session: session, writes: writes)
     }
 
     func created() async throws -> (session: ProtectionRoadSession, words: [String]) {

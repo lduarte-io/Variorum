@@ -73,7 +73,7 @@ struct ProtectionRoadRouteTests {
             }
             #expect(again.roadSession?.library.record?.libraryID == libraryID)
             #expect(again.roadSession?.isFresh == false)
-            #expect(!again.canLock, "no lock on the new road this phase (Standard)")
+            #expect(!again.canLock, "Standard never locks (VX-308 U4 — VX-445: the new road's lock is Castle's)")
         }
     }
 
@@ -257,7 +257,7 @@ struct ProtectionRoadRouteTests {
 
     /// A hosted test run (the test host IS the dev-store app) runs the road read-only: it never creates.
     @Test func aReadOnlyRoadNeverCreates() async throws {
-        try await withRoadDependencies {
+        await withRoadDependencies {
             let world = RoadWorld()
             defer { world.scope.purge() }
             let bootstrap = world.bootstrap(writes: false)

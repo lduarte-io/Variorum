@@ -191,6 +191,14 @@ final class AppBootstrap {
     /// crossing reopens the library — the `.ready` tree, the Settings pane and its `@State` go down and come back, and the
     /// confirm in flight, its refusal and rule 11's notice must survive that. Made at the first ready on the new road.
     private(set) var roadCrossings: RoadCrossingsModel?
+    /// VX-308 U1 — THE ONE PRESENTER for the new road's protection sheets (VX-239 + VX-243) and the account section's
+    /// model: owned here beside the crossings for the same reason (a crossing's reopen rebuilds every view). Made at the
+    /// first ready on the new road; the presenter drops its sheet at every settled closed state (`finish`).
+    private(set) var protectionSheets: ProtectionSheetPresenter?
+    private(set) var roadAccount: RoadAccountModel?
+    /// VX-308 U3 — the key doors (Change passphrase…, Reset forgotten passphrase…, New Words' face), made once beside the
+    /// crossings and the account section for the same reason, presenting through the one presenter.
+    private(set) var roadKeyDoors: RoadKeyDoorsModel?
     /// VX-307 U2a — this Mac's scheduled plain-text export (the weekly copy's switch, `MarkdownInsurance`): the
     /// production instance's standard defaults; a test bootstrap's own suite, never the app's domain.
     @ObservationIgnored private let exportSwitch: ScheduledExportSwitch
@@ -217,6 +225,9 @@ final class AppBootstrap {
             gate: gate,
             isRealVariant: variant == .real))
         protection.performLock = { [weak self] in await self?.lock() }
+        // VX-308 U4 — VX-445: on the new road the relock monitors read the OPEN library's policy (Castle; this Mac's sealed
+        // idle minutes); today's road leaves the hook nil (its effective gate and dials decide, unchanged).
+        if newRoad { protection.roadRelock = { [weak self] in self?.roadRelockPolicy } }
         // pre-13x 2a (§11): the production migration leaves — the Keychain,
         // the defaults, the store — per store id, built at ready. NEVER in
         // the TEST HOST: the tripwire refuses every real-scope Keychain
@@ -281,6 +292,8 @@ final class AppBootstrap {
             syncCustodyLeaves: syncCustodyLeaves,
             syncCustodySession: syncCustodySession))
         protection.performLock = { [weak self] in await self?.lock() }
+        // VX-308 U4 — VX-445: the production init's wiring, the same on a new-road test bootstrap.
+        if newRoad { protection.roadRelock = { [weak self] in self?.roadRelockPolicy } }
         beginOpening()
     }
 
@@ -625,6 +638,14 @@ final class AppBootstrap {
 
     private func finish(_ outcome: OpenOutcome) {
         opening = nil
+        // VX-308 U1 (VX-239's rule on the new road): an open that settles anywhere but ready — the lobby, the interlude,
+        // the missing face, a failure, a creation — drops the protection sheet standing, so it never re-presents after an
+        // unlock. (A crossing's own reopen settles ready, so its confirm survives it.)
+        if case .ready = outcome {} else {
+            protectionSheets?.libraryClosed()
+            // VX-308 U3 — VX-448: and the words a look copied leave the clipboard (the lock's clear; the new road only).
+            if newRoad { Self.clearWordsAtLock() }
+        }
         switch outcome {
         case .ready(let database, let unlockedKey, let road):
             // VX-306 U1b: the library open on the new road (nil on today's road).
@@ -643,10 +664,29 @@ final class AppBootstrap {
             }
             // VX-306 U2: its protection faces (rule 27's banner, the split pair, rule 3's reminder, the receipts).
             // VX-307 U2b: …and the card above the quick entry (the words' look copies through the platform's one rule).
-            roadStanding = road.map { RoadStandingModel.make($0, ledger: reminderLedger, copyWords: { Self.copyWords($0) }) }
+            roadStanding = road.map {
+                RoadStandingModel.make($0, ledger: reminderLedger, copyWords: { Self.copyWords($0) }, signInNow: signInNow)
+            }
             // VX-307 U2a: the crossings — made once, kept across every reopen; the faces carry them to the pane.
-            if newRoad, road != nil, roadCrossings == nil { roadCrossings = RoadCrossingsModel(roads: crossingRoads()) }
+            // VX-308 U1: the one presenter and the account section beside them, made once the same way; the crossings
+            // present through the presenter (VX-239 + VX-243).
+            if newRoad, road != nil, protectionSheets == nil { protectionSheets = ProtectionSheetPresenter() }
+            if newRoad, road != nil, roadCrossings == nil, let sheets = protectionSheets {
+                roadCrossings = RoadCrossingsModel(roads: crossingRoads(), presenter: sheets)
+            }
+            if newRoad, road != nil, roadAccount == nil, let sheets = protectionSheets {
+                roadAccount = RoadAccountModel(roads: accountRoads(), presenter: sheets)
+            }
+            // VX-308 U3: the key doors, made once the same way.
+            if newRoad, road != nil, roadKeyDoors == nil, let sheets = protectionSheets {
+                roadKeyDoors = RoadKeyDoorsModel(roads: keyDoorRoads(), presenter: sheets)
+            }
             roadStanding?.crossings = roadCrossings
+            roadStanding?.account = roadAccount
+            roadStanding?.sheets = protectionSheets
+            roadStanding?.keyDoors = roadKeyDoors
+            // VX-308 ladder round 1 (MINOR-2): the pane's appearance reads ONCE for its three sections.
+            if newRoad { roadStanding?.paneWave = { [weak self] in await self?.paneWave() ?? ProtectionPaneWave() } }
             let view: AppDatabase
             if let binding {
                 // The re-open after a lock: the SAME ambient view adopts
@@ -783,11 +823,26 @@ final class AppBootstrap {
         }
     }
 
-    /// VX-307 U2b — the words' Copy door: the Mac's one clipboard rule (`WordsClipboard` — cleared after 60 s, only if
-    /// nothing else has written since); the phone renders no look this phase (its pasteboard arm is the mobile row's).
+    /// VX-307 U2b — the words' Copy door: the Mac's one clipboard rule; the phone renders no look this phase (its
+    /// pasteboard arm is the mobile row's). VX-308 U3 — VX-448 (her ruling): the new road's rule, `WordsClipboard
+    /// .copyConcealed` — the concealed type, no timer, nothing restored; cleared at the lock and at quit (`clearWordsAtLock`
+    /// below; the app delegate's `applicationWillTerminate`). Only the new road reaches this (every caller is a new-road
+    /// face).
     private static func copyWords(_ words: [String]) {
         #if os(macOS)
-        WordsClipboard.copy(words)
+        WordsClipboard.copyConcealed(words)
+        #endif
+    }
+
+    /// VX-308 U3 — VX-448's clear AT THE LOCK: the words a new-road look copied leave the clipboard when the library closes
+    /// behind the lobby (an open settled anywhere but ready — `finish`'s non-ready arm, beside the presenter's
+    /// `libraryClosed`, VX-239's rule; U4's lock lands there), only if the board still holds that copy. Nothing on today's
+    /// road (it never makes the concealed copy — its own 60-second rule is untouched).
+    static func clearWordsAtLock() {
+        #if os(macOS)
+        if WordsClipboard.clearHeld() {
+            ProtectionOpenRoad.log("road: the library closed — the twelve words left the clipboard (VX-448)")
+        }
         #endif
     }
 
@@ -1260,11 +1315,14 @@ final class AppBootstrap {
     /// sessions, today's road and a hosted test run's read-only road answer with nothing done.
     func crossingRoads() -> RoadCrossingRoads {
         let exports = exportSwitch
+        let signInNow = signInNow
         return RoadCrossingRoads(
             read: { [weak self] in
                 guard let self, self.newRoad, case .ready = self.state, let session = self.roadSession else { return nil }
+                // VX-308 U1 (R-2): the pane's ONE read — the sign-in now and a fresh vault read.
                 return await Task.detached(priority: .userInitiated) {
-                    ProtectionCrossings.readCrossings(session, exportSwitch: exports)
+                    let read = await ProtectionPaneRead.read(session, signIn: signInNow(), exportSwitch: exports)
+                    return read.flatMap { ProtectionCrossings.readCrossings(session, exportSwitch: exports, read: $0) }
                 }.value
             },
             cross: { [weak self] request in
@@ -1283,9 +1341,128 @@ final class AppBootstrap {
                     await ProtectionCrossings.turnExportBackOn(session, exportSwitch: exports)
                 }.value
             },
-            // MAJOR-1: rule 11's notice is the durable mark's, re-read at each refresh; *OK* clears it.
-            exportNoticeOwed: { exports.noticeOwed() },
-            dismissExportNotice: { ProtectionCrossings.dismissExportNotice(exportSwitch: exports) })
+            // MAJOR-1: rule 11's notice is the durable mark's, re-read at each refresh; *OK* clears it. VX-308 U4
+            // (NIT-R2-1): the OPEN library's mark — another library's unanswered notice is never this pane's, nor cleared here.
+            exportNoticeOwed: { [weak self] in
+                guard let libraryID = self?.roadSession?.library.record?.libraryID else { return false }
+                return exports.noticeOwed(libraryID)
+            },
+            dismissExportNotice: { [weak self] in
+                ProtectionCrossings.dismissExportNotice(
+                    exportSwitch: exports, libraryID: self?.roadSession?.library.record?.libraryID)
+            },
+            // VX-308 U1 (VX-264, R-1 as amended): the signed-out road's Continue — This Mac Only, re-read at the press.
+            leaveForThisMacOnly: { [weak self] in
+                guard let self, self.newRoad, case .ready = self.state, let session = self.roadSession else {
+                    return ProtectionWords.crossingFailed
+                }
+                let refused = await Task.detached(priority: .userInitiated) {
+                    await ProtectionAccountRoad.leaveForUseCastle(session, signIn: signInNow(), exportSwitch: exports)
+                }.value
+                if refused == nil { await self.roadAccount?.refresh() }
+                return refused
+            })
+    }
+
+    /// VX-308 ladder round 1 (MINOR-2) — the Protection pane's appearance: the pane's ONE read taken ONCE for the
+    /// crossings, the account section and the key doors (`ProtectionPaneRead.wave` — one facts gather, one vault fetch, the
+    /// three faces derived as each section's own road derives them), off the main actor. Nothing open on the new road: no
+    /// faces (each section's own road answers nil the same way).
+    func paneWave() async -> ProtectionPaneWave {
+        guard newRoad, case .ready = state, let session = roadSession else { return ProtectionPaneWave() }
+        let exports = exportSwitch
+        let signInNow = signInNow
+        return await Task.detached(priority: .userInitiated) {
+            await ProtectionPaneRead.wave(session, signIn: signInNow(), exportSwitch: exports)
+        }.value
+    }
+
+    /// VX-308 U1 (R-2) — who is signed in NOW (the scope's stored session — a read, taken off the main actor by every
+    /// caller); signed out on today's road.
+    private var signInNow: @Sendable () -> SessionFact {
+        if let sessionFact = roadInputs?.sessionFact { return sessionFact }
+        return { SessionFact.signedOut }
+    }
+
+    /// VX-308 U1 — the account section's roads on the new road. Each reads the CURRENT session at its call (a reopen
+    /// replaces it); the press runs on the open session (no reopen — none of U1's acts swaps the key; VX-308 U2's re-keying
+    /// acts take the reopening seam); a landed act re-reads the crossings (the library's account changed under them) and
+    /// speaks on the status seam.
+    func accountRoads() -> RoadAccountRoads {
+        let exports = exportSwitch
+        let signInNow = signInNow
+        return RoadAccountRoads(
+            read: { [weak self] in
+                guard let self, self.newRoad, case .ready = self.state, let session = self.roadSession else { return nil }
+                return await Task.detached(priority: .userInitiated) {
+                    let read = await ProtectionPaneRead.read(session, signIn: signInNow(), exportSwitch: exports)
+                    return read.flatMap({ ProtectionPaneRead.accountFaces($0, session: session) })
+                }.value
+            },
+            press: { [weak self] request in
+                guard let self, self.newRoad, case .ready = self.state, let session = self.roadSession else {
+                    return .refused(ProtectionWords.crossingFailed)
+                }
+                // VX-308 U2 (R-U2-2): an act that re-keys (a join across postures, every follow) runs through the one
+                // reopening seam; the rest on the open session.
+                if request.shown.rekeys { return await self.accountActOnNewRoad(request) }
+                return await Task.detached(priority: .userInitiated) {
+                    await ProtectionAccountRoad.press(
+                        session, request: request, signIn: signInNow(), exportSwitch: exports)
+                }.value
+            },
+            landed: { [weak self] in await self?.roadCrossings?.refresh() },
+            receipt: { [weak self] text in self?.roadStanding?.speak?(text) },
+            // VX-308 U2 — the words moment's Copy: the Mac's one words clipboard rule (the card's own road).
+            copyWords: { Self.copyWords($0) })
+    }
+
+    /// VX-308 U3 — the key doors' roads on the new road. Each reads the CURRENT session at its call (a reopen replaces it);
+    /// the press runs on the OPEN session (the key doors re-lock the current key and never swap it — no reopening seam);
+    /// a landed act speaks its receipt on the status seam and re-reads the account section (a synced passphrase change is
+    /// the account's too).
+    func keyDoorRoads() -> RoadKeyDoorRoads {
+        let exports = exportSwitch
+        let signInNow = signInNow
+        return RoadKeyDoorRoads(
+            read: { [weak self] in
+                guard let self, self.newRoad, case .ready = self.state, let session = self.roadSession else { return nil }
+                return await Task.detached(priority: .userInitiated) {
+                    await ProtectionKeyDoorRoad.read(session, signIn: signInNow(), exportSwitch: exports)
+                }.value
+            },
+            press: { [weak self] request in
+                guard let self, self.newRoad, case .ready = self.state, let session = self.roadSession else {
+                    return .refused(ProtectionWords.crossingFailed)
+                }
+                return await Task.detached(priority: .userInitiated) {
+                    await ProtectionKeyDoorRoad.press(session, request: request, signIn: signInNow(), exportSwitch: exports)
+                }.value
+            },
+            receipt: { [weak self] text in self?.roadStanding?.speak?(text) },
+            landed: { [weak self] in await self?.roadAccount?.refresh() })
+    }
+
+    /// **P-VX308-U1-F1's hook** (the U1 ARBITRATION's refined (b)) — the Account sheet's Delete Account landed for
+    /// `accountID` (the composition root wires `AppServices.afterAccountDeleted` to this on the new road): the protection
+    /// half runs when the open library names that account — the record stops naming it, this Mac forgets its sync keys
+    /// (rule 16's local leave). When it cannot run (no library open on the new road, another act running, a failure), the
+    /// record keeps naming the deleted account; the next read finds no one signed in and the signed-out screens' *Use this
+    /// Mac only…* closes it.
+    func accountDeletedOnNewRoad(_ accountID: String) async {
+        guard newRoad, case .ready = state, let session = roadSession, session.writes else { return }
+        guard session.library.record?.account == accountID else { return }
+        guard session.beginAct() else {
+            ProtectionOpenRoad.log("road: the account was deleted while another act ran — the signed-out screens close it")
+            return
+        }
+        let signIn = signInNow
+        _ = await Task.detached(priority: .userInitiated) {
+            await ProtectionAccountRoad.accountDeleted(session, accountID: accountID, signIn: signIn())
+        }.value
+        session.endAct()
+        await roadAccount?.refresh()
+        await roadCrossings?.refresh()
     }
 
     /// **A CROSSING** (Use Castle · Use Standard · Replace All Keys) — Make this my library's seam shape: every check
@@ -1301,9 +1478,16 @@ final class AppBootstrap {
         }
         guard session.beginAct() else { return .refused(ProtectionWords.copyDoorBusy) }
         let exports = exportSwitch
+        let signInNow = signInNow
         let preflight = await Task.detached(priority: .userInitiated) {
-            ProtectionCrossings.preflight(
-                session, door: request.door, shown: request.shown, typed: request.typed, exportSwitch: exports)
+            // VX-308 U1 (R-2): the door re-read the way the shown one was (the pane's one read), and the sign-in now
+            // adopted into the executor under the act — a synced crossing acts as whoever is signed in now.
+            let signIn = signInNow()
+            let read = await ProtectionPaneRead.read(session, signIn: signIn, exportSwitch: exports)
+            session.executor.configuration.session = signIn
+            return ProtectionCrossings.preflight(
+                session, door: request.door, shown: request.shown, typed: request.typed, exportSwitch: exports,
+                read: read)
         }.value
         switch preflight {
         case .ready:
@@ -1315,39 +1499,101 @@ final class AppBootstrap {
             session.endAct()
             return .changed(fresh)
         }
-        await onWillLock?()
-        state = .opening
-        protection.dropResident()
-        protection.resetPerOpenDeferrals()
-        protection.syncCustodySession.drop()
-        let result = await Task.detached(priority: .userInitiated) {
-            binding.lock()
-            return await ProtectionCrossings.cross(
+        let result = await reopenAround(session, binding: binding) {
+            let result = await ProtectionCrossings.cross(
                 session, door: request.door, typed: request.typed, gate: request.gate, exportSwitch: exports)
-        }.value
-        session.endAct()
-        if case .made(let door, _) = result.outcome { receiptsForNextRoadOpen.append(door.receipt) }
-        beginOpening(unlockedKey: result.reopenKey)
-        await awaitOpen()
-        protection.requestProtectionPaneForRoadCrossing()
+            var owed: [String] = []
+            if case .made(let door, _) = result.outcome {
+                // VX-308 U1: the signed-out road's crossing ends its receipt with the born-Castle sentence.
+                owed.append(request.receiptNote.map { door.receipt + " " + $0 } ?? door.receipt)
+            }
+            return (result, result.reopenKey, owed)
+        }
         switch result.outcome {
         case .made(_, let exportTurnedOff): return .made(exportTurnedOff: exportTurnedOff)
         case .refused(let sentence): return .refused(sentence)
         }
     }
 
+    /// **THE REOPENING SEAM** — ONE for every act that re-keys the open library on the new road (VX-307 U2a's crossings;
+    /// VX-308 U2's join across postures and every follow — R-U2-2), Make this my library's seam shape, its order exactly
+    /// the crossing's: the composition root's teardown (`onWillLock` — flush, savepoint, stop), the `.ready` tree down,
+    /// the app's pool CLOSED through the binding (the swap's precondition), `act` off the main actor on the session the
+    /// caller holds (its one-act lock, released here), the receipts it owes handed to the reopened session, then the
+    /// reopen THROUGH THE NEW ROAD with the key that opens the slot now and Settings asked back to Protection, where she
+    /// acted (VX-206's road). The caller ran every check first (all reads) and holds `session.beginAct()`.
+    private func reopenAround<Result: Sendable>(
+        _ session: ProtectionRoadSession, binding: StoreBinding,
+        act: @escaping @Sendable () async -> (result: Result, reopenKey: StoreKey, owed: [String])
+    ) async -> Result {
+        await onWillLock?()
+        state = .opening
+        protection.dropResident()
+        protection.resetPerOpenDeferrals()
+        protection.syncCustodySession.drop()
+        let done = await Task.detached(priority: .userInitiated) {
+            binding.lock()
+            return await act()
+        }.value
+        session.endAct()
+        receiptsForNextRoadOpen += done.owed
+        beginOpening(unlockedKey: done.reopenKey)
+        await awaitOpen()
+        protection.requestProtectionPaneForRoadCrossing()
+        return done.result
+    }
+
+    /// **A RE-KEYING ACCOUNT ACT** (VX-308 U2, R-U2-2 — a join that crosses postures, every follow): every check first, all
+    /// reads (`ProtectionAccountRoad.preflight` — the door RE-READ through the pane's one read, VX-108; the typed secret
+    /// against the vault that read fetched, R-U2-3 — a typo never tears the window down), the sign-in now adopted under the
+    /// act (R-2); then THE REOPENING SEAM around `ProtectionAccountRoad.perform`. The act's receipt is owed to the reopened
+    /// session when the act landed WHOLE; one that stopped past its swap is finished by that reopen's settle, which says its
+    /// Done (VX-107 — never said twice). The press answers with no receipt of its own (the reopen speaks it).
+    func accountActOnNewRoad(_ request: RoadAccountRequest) async -> RoadAccountPress {
+        guard newRoad, case .ready = state, let binding, let session = roadSession, session.writes else {
+            return .refused(ProtectionWords.crossingFailed)
+        }
+        guard session.beginAct() else { return .refused(ProtectionWords.copyDoorBusy) }
+        let exports = exportSwitch
+        let signInNow = signInNow
+        let preflight = await Task.detached(priority: .userInitiated) {
+            await ProtectionAccountRoad.preflight(session, request: request, signIn: signInNow(), exportSwitch: exports)
+        }.value
+        switch preflight {
+        case .ready:
+            break
+        case .refused(let sentence):
+            session.endAct()
+            return .refused(sentence)
+        case .changed(let fresh):
+            session.endAct()
+            return .changed(fresh)
+        }
+        return await reopenAround(session, binding: binding) {
+            let done = await ProtectionAccountRoad.perform(
+                session, request: request, signIn: signInNow(), exportSwitch: exports)
+            switch done.press {
+            case .made(let receipt, let wordsReplaced):
+                return (.made(receipt: nil, wordsReplaced: wordsReplaced), done.reopenKey,
+                        done.landedWhole ? [receipt].compactMap { $0 } : [])
+            case .refused, .changed:
+                return (done.press, done.reopenKey, [])
+            }
+        }
+    }
+
     /// The weekly plain-text copy's switch (`MarkdownInsurance`) over a defaults domain — nil: this Mac's standard
     /// defaults (production); a test bootstrap names its own suite.
+    /// VX-307 ladder round 1 (MAJOR-1) — rule 11's notice owed, beside the weekly copy's switch (this Mac's defaults; a
+    /// boolean, never a secret). VX-308 U4 (NIT-R2-1): ONE PER LIBRARY (`ExportNoticeMark` — the key carries the library's
+    /// id; an earlier build's unkeyed mark migrates at its first consult).
     nonisolated static func markdownInsuranceSwitch(suiteName: String?) -> ScheduledExportSwitch {
-        let owedKey = exportNoticeOwedKey
         guard let suiteName else {
             return ScheduledExportSwitch(
                 isOn: { MarkdownInsurance.isEnabled(in: .standard) },
                 set: { MarkdownInsurance.setEnabled($0, in: .standard) },
-                noticeOwed: { UserDefaults.standard.bool(forKey: owedKey) },
-                setNoticeOwed: { owed in
-                    if owed { UserDefaults.standard.set(true, forKey: owedKey) } else { UserDefaults.standard.removeObject(forKey: owedKey) }
-                })
+                noticeOwed: { ExportNoticeMark.owed($0, in: .standard) },
+                setNoticeOwed: { libraryID, owed in ExportNoticeMark.set(libraryID, owed: owed, in: .standard) })
         }
         // A named suite only — never falls back to the app's domain (a suite that can't be made reads off, writes nothing).
         return ScheduledExportSwitch(
@@ -1355,16 +1601,14 @@ final class AppBootstrap {
             set: { value in
                 if let suite = UserDefaults(suiteName: suiteName) { MarkdownInsurance.setEnabled(value, in: suite) }
             },
-            noticeOwed: { UserDefaults(suiteName: suiteName)?.bool(forKey: owedKey) ?? false },
-            setNoticeOwed: { owed in
+            noticeOwed: { libraryID in
+                UserDefaults(suiteName: suiteName).map { ExportNoticeMark.owed(libraryID, in: $0) } ?? false
+            },
+            setNoticeOwed: { libraryID, owed in
                 guard let suite = UserDefaults(suiteName: suiteName) else { return }
-                if owed { suite.set(true, forKey: owedKey) } else { suite.removeObject(forKey: owedKey) }
+                ExportNoticeMark.set(libraryID, owed: owed, in: suite)
             })
     }
-
-    /// VX-307 ladder round 1 (MAJOR-1) — rule 11's notice owed, beside the weekly copy's switch (this Mac's defaults; a
-    /// boolean, never a secret).
-    nonisolated static let exportNoticeOwedKey = "variorum.protection.exportOffNoticeOwed"
 
     /// A test bootstrap's scheduled-export domain — never the app's.
     nonisolated static let crossingTestExportSuiteName = "io.lduarte.Variorum.vx307-crossing-tests"
@@ -1443,11 +1687,20 @@ final class AppBootstrap {
     /// projection is current; `lock()` keeps consulting the persisted gate
     /// as the ACTING authority.
     var canLock: Bool {
-        // VX-306 U1b: no lock on the new road this phase — every library it opens is Standard (no Castle entry
-        // exists before VX-307), and Standard never locks (rule 8's quiet roads; today's Auto refusal).
-        guard !newRoad else { return false }
+        // VX-308 U4 — VX-445 (R-U4-1): on the new road Lock Now acts where the open library is in CASTLE (its record's
+        // mode — VX-307's crossings made Castle real there); Standard never locks (rule 8's quiet roads would open it again
+        // at once — today's Auto refusal, R13p-14). Each reopen changes `state`, so the observed read follows the posture.
+        if newRoad { return roadRelockPolicy != nil }
         guard case .ready = state, binding != nil else { return false }
         return protection.effectiveGate.isDemanded
+    }
+
+    /// VX-308 U4 — VX-445: the OPEN library's relock policy on the new road (`RoadRelockPolicy` — Castle, with this Mac's
+    /// sealed idle minutes): ready, bound, a road session in Castle; nil otherwise (Standard, nothing open, today's road).
+    /// Lock Now's door, the relock monitors (through `ProtectionController.roadRelock`) and the lock itself read it.
+    var roadRelockPolicy: RoadRelockPolicy? {
+        guard newRoad, case .ready = state, binding != nil, let session = roadSession else { return nil }
+        return RoadRelockPolicy.of(session.library)
     }
 
     /// The teardown, in the ruled order: flush/savepoint/stop (the
@@ -1458,7 +1711,7 @@ final class AppBootstrap {
     /// refuses silently: a lock whose key auto-releases at the next open
     /// is theater, and no theater ships (R13p-14).
     func lock() async {
-        guard !newRoad else { return }  // VX-306 U1b: see `canLock`
+        if newRoad { return await lockOnNewRoad() }  // VX-308 U4 — VX-445: see `canLock`
         guard case .ready = state, let binding else { return }
         let scope = storeVariant.rawValue
         // pre-13x 2a: the derived effective gate is the acting authority.
@@ -1500,6 +1753,62 @@ final class AppBootstrap {
             // here). Quiet on failure; the next unlock's run retries.
             lockTimeCopy?()
         }.value
+    }
+
+    // MARK: - VX-308 U4 — VX-445: THE LOCK ON THE NEW ROAD (the record's R-U4-1..3)
+
+    /// **THE LOCK ON THE NEW ROAD** — Castle only (`roadRelockPolicy`; Standard's quiet roads would open it again at once).
+    /// One act at a time: an act running on the session, or an open in flight, is waited out first — a teardown never
+    /// lands under an act (`awaitTheLockSeam`, PROVISIONAL P-VX308-U4-2). Then the crossings' seam's first half: the
+    /// composition root's teardown (`onWillLock` — flush, savepoint, stop), the `.ready` tree down, the per-open state
+    /// dropped, the account's sync keys in session memory dropped (the leaf's "gone at a relock"), the road session, its
+    /// standing faces and the engine's key seam let go (nothing keeps the key), the app's pool CLOSED through the binding off
+    /// the main actor; then THE LOBBY — the open road's own, over a freshly composed road (the quiet roads are not tried: a
+    /// lock is never theater), landed through `finish`, so the one presenter drops its sheet and VX-448's words leave the
+    /// clipboard (F-U3-3). Always ask types; Touch ID auto-asks — the lobby's existing behaviour. No lock-time byte copy on
+    /// the new road (PROVISIONAL P-VX308-U4-3 — rule 5: a backup is the library and its key file, the new road's pair).
+    private func lockOnNewRoad() async {
+        guard let session = await awaitTheLockSeam() else { return }
+        guard let binding, let road = roadInputs?.compose() else {
+            session.endAct()
+            ProtectionOpenRoad.log("road: the lock found no road to land in — the library stays open")
+            return
+        }
+        await onWillLock?()
+        state = .opening
+        protection.dropResident()
+        protection.resetPerOpenDeferrals()
+        protection.syncCustodySession.drop()
+        ProtectionRoadLock.dropSessionMemory(session)
+        roadStanding = nil
+        roadSession = nil
+        newRoadSyncKeys.attach(nil)
+        let lobby = await Task.detached(priority: .userInitiated) { () -> (facts: RoadLobbyFacts, ctx: RoadContext) in
+            binding.lock()
+            // The context off the main actor: it reads the sign-in (a Keychain read).
+            let ctx = road.context()
+            return (ProtectionRoadLock.lobby(ctx), ctx)
+        }.value
+        session.endAct()
+        ProtectionOpenRoad.log("road: locked — the library closed behind the lobby (VX-445)")
+        finish(.roadLobby(lobby.facts, lobby.ctx))
+    }
+
+    /// One act at a time (R-U4-2): the session to lock, its one-act lock HELD — an act running on it (a key door's press,
+    /// a crossing's preflight) or an open in flight (a crossing's reopen) is waited out first, so a sleep or screen lock
+    /// arriving mid-act still locks once the act lands; nil when nothing (any more) locks — Standard, the library closed,
+    /// today's road.
+    private func awaitTheLockSeam() async -> ProtectionRoadSession? {
+        while !Task.isCancelled {
+            if case .opening = state {
+                // An open in flight: lock what it opens (or nothing, when it settles closed).
+            } else {
+                guard roadRelockPolicy != nil, let session = roadSession else { return nil }
+                if session.beginAct() { return session }
+            }
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+        return nil
     }
 }
 

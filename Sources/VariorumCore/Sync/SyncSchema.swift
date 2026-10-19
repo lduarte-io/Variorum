@@ -627,6 +627,15 @@ public enum SyncError: Error, Equatable, Sendable {
     /// BEFORE any network contact — outbox intact, cursor unmoved — in the
     /// §12 refusal grammar. Post-14b there is NO plaintext mode.
     case encryptionKeysUnavailable
+    /// VX-314 (Castle rebuild phase 4): the signed-in account is not the
+    /// library's bound account (the protection record's — "the record names
+    /// the account; signing in or out never changes it"). New writing
+    /// belongs to the library's account, so the round refuses BEFORE any
+    /// network contact — outbox intact, cursor unmoved, the §12 refusal
+    /// grammar — until she signs into the library's account or moves the
+    /// library to this one (the Move door, one of the account's secrets
+    /// typed).
+    case accountMismatch(bound: String, signedIn: String)
     /// Phase 14b policy: a value arrived WITHOUT the `e1:` ciphertext
     /// format in an encrypted-classified column. Wipe-and-repush (R-2)
     /// guarantees this never fires in practice — firing signals a real
@@ -732,6 +741,13 @@ extension SyncError: CustomStringConvertible {
         case .encryptionKeysUnavailable:
             return "Sync paused: this device's encryption keys are locked or not enrolled. "
                 + "Enter your encryption passphrase to unlock sync; nothing is lost while paused."
+        case .accountMismatch(let bound, let signedIn):
+            // VX-314: the two ids are internal (the status face says the
+            // sentence in account words); carried here so a log line or a
+            // pin can tell the pair apart.
+            return "Sync paused: this library belongs to a different account than the one "
+                + "signed in (library \(bound), signed in \(signedIn)). Sign in to the "
+                + "library's account, or move the library to this one; nothing is lost while paused."
         case .unencryptedValueInEncryptedColumn(let table, let rowID, let column):
             return "Sync refused: '\(table)' row '\(rowID)' arrived with an unencrypted value "
                 + "in encrypted column '\(column)'. End-to-end encryption is mandatory — the "

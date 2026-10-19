@@ -28,12 +28,16 @@ nonisolated final class WireVaultLeaf: VaultLeaf, @unchecked Sendable {
     /// The production leaf for a store scope — nil when the project is unconfigured (the vault stays
     /// unreachable and an act that needs it rolls back, exactly as before). The auth session is the
     /// scope's own (the pre-13x corner 47 posture: a dev-store build never adopts the installed build's
-    /// session).
+    /// session). VX-308 U1 (R-3): the session FOLLOWS the current sign-in — who is signed in is read per call, and a
+    /// sign-out then a sign-in to another account is served as that account (`FollowingSessionProvider`), never the
+    /// session this leaf first read.
     static func live(scope: String, deviceName: String) -> WireVaultLeaf? {
         guard ProjectConfig.variorumConfigured else { return nil }
-        let auth = AuthSession(
-            configuration: ProjectConfig.variorumAuth,
-            store: .keychain(scope: scope))
+        let auth = FollowingSessionProvider(
+            signedInUser: {
+                KeychainAuthStorage.load(service: KeychainAuthStorage.variorumService, scope: scope)?.userID
+            },
+            make: { AuthSession(configuration: ProjectConfig.variorumAuth, store: .keychain(scope: scope)) })
         return WireVaultLeaf(client: AccountVaultClient(
             configuration: AccountVaultClient.Configuration(
                 projectURL: ProjectConfig.variorumProjectURL,

@@ -148,7 +148,8 @@ struct WordsBandSurfaceTests {
     }
 
     /// The look's face: the words never selectable and privacy-sensitive; the clipboard only through the model's road
-    /// (the bootstrap's `WordsClipboard` — 60 s); never a popup; no Return shortcut puts the words away.
+    /// (the bootstrap's `WordsClipboard` — VX-308 U3, VX-448: the concealed rule, FLIPPED DELIBERATELY from the 60-second
+    /// `copy`); never a popup; no Return shortcut puts the words away.
     @Test func theLookFaceHasOneCopyRoadNoPopupAndNoReturnShortcut() throws {
         let card = try Self.code("Variorum/Features/Protection/WordsBandCard.swift")
         #expect(card.contains(".textSelection(.disabled)") && card.contains(".privacySensitive()"))
@@ -158,7 +159,7 @@ struct WordsBandSurfaceTests {
         }
         #expect(card.contains("look.copy()"), "Copy runs the model's road")
         let bootstrap = try Self.code("Shared/AppBootstrap.swift")
-        #expect(bootstrap.contains("WordsClipboard.copy(words)"), "the one clipboard rule (decision 23)")
+        #expect(bootstrap.contains("WordsClipboard.copyConcealed(words)"), "the one clipboard rule (VX-448)")
     }
 
     /// The retired creation card: the Mac's face is gone, and the Mac never lands on its state.

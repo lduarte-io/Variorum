@@ -107,15 +107,31 @@ nonisolated extension ProtectionOpenRoad {
         library.record?.passphraseSet == true || library.keyFile?.passphrase != nil
     }
 
+    /// VX-308 U3 (R-U3-4) — whether a LOOK asks the passphrase: rule 3's fact as the core states it NOW
+    /// (`ProtectionRecord.passphraseExists` — a passphrase lock on the live key file of the library's key, or the
+    /// account's). The record's stamp is that same fact as of its last write, so the two agree everywhere but VX-447's
+    /// state: with every key file gone, the stamp still says "a passphrase" while no lock is left to verify one — the look
+    /// would ask what nothing can check, and the act (rightly) refuses it.
+    static func lookAsksPassphrase(_ library: UnlockedLibrary) -> Bool {
+        let live = library.keyFile.flatMap { $0.fingerprint == library.fingerprint ? $0 : nil }
+        return ProtectionRecord.passphraseExists(keyFile: live, account: library.record?.account)
+    }
+
     // MARK: - Rule 2: the look (VX-307 U2b)
 
     /// VX-307 U2b (VX-412) — RULE 2's LOOK: fresh words (this system's minting, `ids.mintWords`) locked on the key
     /// file through rule 6's act (`regenerateWords` — the key unchanged; a library with a passphrase is asked it, one
     /// with none is asked nothing, PROVISIONAL P-VX307-U2b-1), handed back to be shown ONCE and never stored or logged.
-    static func mintFreshWords(session: ProtectionRoadSession, passphrase: String?) async -> WordsMintOutcome {
+    /// VX-308 U3 (R-U3-5 — the look is the New Words key door): `signIn` — the sign-in NOW, adopted into the executor under
+    /// the act's one-act lock (U1's R-2: a synced library's look after a sign-in made since the open acts as whoever is
+    /// signed in now); nil keeps the executor's (every earlier caller).
+    static func mintFreshWords(
+        session: ProtectionRoadSession, passphrase: String?, signIn: SessionFact? = nil
+    ) async -> WordsMintOutcome {
         guard session.writes else { return .refused(ProtectionWords.wordsLookFailed) }
         guard session.beginAct() else { return .refused(ProtectionWords.copyDoorBusy) }
         defer { session.endAct() }
+        if let signIn { session.executor.configuration.session = signIn }
         let fresh = session.system.leaves.ids.mintWords()
         guard fresh.count == 12 else {
             log("road: rule 2's look — the words could not be minted")
@@ -134,7 +150,22 @@ nonisolated extension ProtectionOpenRoad {
         } catch {
             log("road: rule 2's look failed — \(String(describing: error))")
             session.library = library
-            return .refused(ProtectionWords.wordsLookFailed)
+            return .refused(lookRefusal(error))
+        }
+    }
+
+    /// VX-308 U3 — a look's refusal in the pane's idiom (the New Words door is a key door — R-U3-5): a synced library's
+    /// own refusals said as the crossings and the account say them (`RoadCrossingFaces.actRefusalSentence` — signed out,
+    /// another account, the vault out of reach, the account moved, an act running, the passphrase changed elsewhere);
+    /// anything else U2b's sentence, as before.
+    static func lookRefusal(_ error: any Error) -> String {
+        if error is VaultRefusal { return ProtectionWords.doorRefusedNeedsVault }
+        switch error as? ExecutorRefusal {
+        case .signedOutUseThisMacOnly?, .otherAccountSignedIn?, .noAccountSignedIn?, .needsFreshVault?, .vaultOutOfReach?,
+             .accountMoved?, .actInFlight?, .passphraseChangedElsewhere?:
+            return RoadCrossingFaces.actRefusalSentence(error)
+        default:
+            return ProtectionWords.wordsLookFailed
         }
     }
 

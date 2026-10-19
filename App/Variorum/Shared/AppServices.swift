@@ -130,6 +130,11 @@ final class AppServices {
     /// inject fixed/locked providers so wiring pins never touch the real
     /// Keychain.
     private let makeSyncKeyProvider: () -> any SyncKeyProviding
+    /// VX-314: the library's bound account, read live per round (the new
+    /// road wires the protection record's truth through the key provider's
+    /// own accessor; today's road passes nothing — Release byte-unchanged
+    /// until VX-329, and the engine's gate is inert on nil).
+    private let boundAccountRead: (@Sendable () async -> String?)?
     /// Phase 14c: the account lifecycle doors' server seam (the re-key's
     /// truncate, the deletion's purge, the entitlement read). Tests inject
     /// recording fakes; production composes the real client over the same
@@ -147,12 +152,14 @@ final class AppServices {
         encryption: EncryptionSession? = nil,
         makeSyncTransport: ((any UserSessionProviding) -> any SyncTransport)? = nil,
         makeSyncKeyProvider: (() -> any SyncKeyProviding)? = nil,
+        boundAccountRead: (@Sendable () async -> String?)? = nil,
         keyVault: KeyVaultClient? = nil,
         makeAccountLifecycle: ((any UserSessionProviding) -> any AccountLifecycleProviding)? = nil,
         furnitureFacts: SeededFurnitureDedupeFacts? = nil,
         legacyCleanup: @escaping @Sendable () -> Void
     ) {
         self.session = session
+        self.boundAccountRead = boundAccountRead
         self.legacyCleanup = legacyCleanup
         self.furnitureFacts = furnitureFacts ?? SampleLibrarySeeder.furnitureDedupeFacts()
         self.makeAccountLifecycle = makeAccountLifecycle ?? { provider in
@@ -419,9 +426,20 @@ final class AppServices {
     private func connectSyncIfAllowed() async {
         guard sync.allowsSync else { return }
         guard await runOwnerAdoption() else { return }
+        // VX-314: the account-binding gate — wired only where a bound-account
+        // read exists (the new road's composition); nil leaves the engine's
+        // gate inert, so today's road is byte-unchanged.
+        let binding = boundAccountRead.map { read in
+            SyncAccountBinding(
+                boundAccount: read,
+                signedInAccount: { [weak auth] in
+                    guard let auth else { return nil }
+                    return await auth.currentUserID
+                })
+        }
         await sync.configure(
             transport: makeSyncTransport(auth), keyProvider: makeSyncKeyProvider(),
-            furnitureFacts: furnitureFacts)
+            furnitureFacts: furnitureFacts, accountBinding: binding)
         sync.triggerSync()
     }
 
@@ -543,6 +561,13 @@ final class AppServices {
     /// *every library stays, and still opens exactly as it does today* —
     /// the keys sit dead server-side; A stays in iCloud; a later account
     /// adopts the library at setup). The local STORE is untouched.
+    /// VX-308 U1 (P-VX308-U1-F1, the U1 ARBITRATION's refined (b)) — the new
+    /// road's after-deletion hook: the deleted account's id, once the server's
+    /// deletion landed (before the sign-out). The composition root wires it
+    /// on the new road only (`AppBootstrap.accountDeletedOnNewRoad`); nil —
+    /// today's road — runs nothing.
+    var afterAccountDeleted: (@MainActor (String) async -> Void)?
+
     func deleteAccount(accountPassword: String) async {
         guard keyVault != nil else {
             account.lastError = "Project keys not configured (ProjectConfig.swift)"
@@ -559,12 +584,19 @@ final class AppServices {
                 await connectSyncIfAllowed()
                 return
             }
+            let deletedAccount = await auth.currentUserID
             let deletion = AccountDeletion(lifecycle: makeAccountLifecycle(auth))
             _ = try await deletion.run()
             // Ladder R1-1: a purged account owes no re-key completion —
             // clear the persisted marker so a future sign-in on this
             // store isn't refused for a road that no longer exists.
             try? await session.database.write { try RotationMarker.clear($0) }
+            // VX-308 U1 (P-VX308-U1-F1): on the new road, the protection
+            // half — the open library stops naming the deleted account and
+            // this Mac forgets its sync keys (rule 16's local leave). nil on
+            // today's road (nothing composes it), so today's deletion is
+            // byte-unchanged.
+            if let deletedAccount, let afterAccountDeleted { await afterAccountDeleted(deletedAccount) }
             // The server side is gone; custody STAYS (decision 16 / copy §4);
             // the session goes (sign-out tears the sync chain down through
             // the ordinary onChange road).
