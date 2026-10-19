@@ -436,9 +436,14 @@ of her words land here verbatim):**
 - **Her throwaway word (just now, verbatim): "i'll delete the throwaway when this is all merged to main &
   released."** The §4 morning item RESOLVES: the project stays up through the merge and release; nothing for the
   bundle but the reminder.
-- **VX-314 HELD pending her answer** (her question just now: "why are you doing VX-314?"): it stays §5's row 5 on
-  paper — it is the plan's §2 member and the VX-308 ticket lists it — but the orchestrator builds nothing on it until
-  she confirms or drops it; zero cost either way (not started).
+- **VX-314 CONFIRMED IN — her ruling at the kickoff sitting's tail (2026-10-19, verbatim): "ok include it. you can
+  use a subagents to build it you want, up to you."** After her design questions were answered (how the binding
+  lives on the record; the Move door as the only re-binding road; the gate's worth as one engine-mouth refusal), she
+  ruled it in and went to sleep — the overnight mandate fully live from here. The orchestrator builds it INLINE
+  (Fable work by the standing cast — the gate is at the engine's mouth) at the clean seam after U1's close, with
+  fake-server pins red-on-old; the shape: a round refuses visibly (outbox intact, cursor unmoved — the lockstep
+  refusal's grammar) when the signed-in account is not the library's bound account, on both roads' reads of the
+  binding.
 
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
