@@ -1690,10 +1690,25 @@ into a comma — the pinned BEHAVIOR (the faces carry the record's mode) stands 
 without the paren, the suite re-run `✔ 4/1`. 0 instances at release; no stray HID input (the coordinator's morning
 term). **U3 IS CLOSED but for the walk and the ladder.**
 
-### U4 RECORD — THE LOCK ON THE NEW ROAD + THE HOLD'S GATE (Opus implementer, 2026-10-19; VX-445 + NIT-R2-1 + F-4 — IN PROGRESS)
+### U4 RECORD — THE LOCK ON THE NEW ROAD + THE HOLD'S GATE (Opus implementer, 2026-10-19; VX-445 + NIT-R2-1 + F-4 — BUILT; the Mac suites and the walk PENDING)
 
-**Not done in U4, first:** PENDING — written at the close (the brief: headless + `build-for-testing` only — no Mac suite
-is RUN here and no walk is made; the Mac-suite list and the walk rows land below for the orchestrator).
+**Not done in U4, first:**
+- **No Mac suite was RUN and no walk was made** (the brief: headless + `build-for-testing` only — no `xcodebuild test`, no
+  stage, no Debug launch, no store touch). Two Mac-only pins are BUILT — `RoadLockRouteTests` (4) and
+  `WordsClipboardLockRouteTests`' lock-road twin (1) — their run AND their red-on-old by behavioural revert are the
+  orchestrator's (the recipe below). Every other new suite ran HEADLESS. No live network call anywhere; the dev store, the
+  real store and `/Applications` untouched.
+- **No face for the idle dial or Lock Now in the new road's pane** (F-U4-1 — routed, not built: a second face, not this
+  unit's): today's Castle section (*Lock after time away*, *Lock Now*) retires behind the switch on the new road
+  (P-VX307-U2a-4); the new road's Lock Now is the File menu's *Lock Library Now* (⌃⌘L — `canLock` now true in Castle), and
+  the idle lock runs on this Mac's sealed setting at its default 10 with no face to change it.
+- **F-4 gates exactly the ruled pair** (a synced Use Castle and Replace All Keys); no account act and no key door is gated
+  (F-U4-3 — her eye). **The walk interplay** (F-U4-2 — the orchestrator's): the hold's marker is per SLOT, so U1's and
+  U2's walk rows that show or press a SYNCED Use Castle on the dev store now meet F-4's refusal.
+- **The phone**: its relock coordinator still reads today's facts (no Castle is reachable on the phone's new road this
+  phase — F-U4-4, MOBILE PARITY). **Today's road is byte-unchanged in behaviour** (every new arm sits behind `newRoad`, the
+  nil `roadRelock` hook, or new-road-only code). The canon delta (F-U4-5) and the QUESTIONS rows are the closeout's.
+- Zero `Sources/`, `Sync/`, `Server/`, schema, migration or dependency lines; `SyncSchema.lockstepVersion` 13.
 
 **Preflight (complete, not delegated):** CLAUDE.md + its canon; the resiliency protocol; CastleRules WHOLE; SyncSpec WHOLE
 (the hold gates sync rounds; no `Sync/` line here); SurfaceContracts (the app + Doors — portability's restore hold and
@@ -1793,9 +1808,184 @@ HARNESS: U1's scratchpad package `u1-harness` (the recipe in the U1 RECORD's COU
   **`, no warning in a touched file; the RUN PENDING the stage): `RoadLockRouteTests` (4) + `WordsClipboardLockRouteTests
   .lockNowOnACastleLibraryEmptiesTheWordsALookCopied` (the lock road's twin, F-U3-3) — their red-on-old by behavioural
   revert is the orchestrator's (the recipe in the close).
-- Piece 4 — the close: IN-PROGRESS — the whole harness, the core protection set both configurations, the phone, the
-  Release check, then the record's close sections.
-- No revert is in flight.
+- Piece 4 — the close: DONE (this commit) — the counts, the Mac-suite list with the red-on-old recipe, the walk rows, the
+  PROVISIONALs and the findings below; `ProtectionRoadRouteTests`' `!again.canLock` message re-worded (its assertion
+  unchanged and still true: Standard never locks), and that touched file's one PRE-EXISTING warning (a needless `try` on
+  `aReadOnlyRoadNeverCreates`' non-throwing body, VX-306's) dropped — the final `build-for-testing` green with no warning in
+  a touched file.
+- No revert is in flight (every mutation and behavioural revert ran on a committed tree, restored by `git checkout --` and
+  `cmp`-checked against a pre-mutation copy in this session's scratchpad; no scratch worktree).
+
+**THE FACES AS BUILT (for the ladder):** THE LOCK — `AppBootstrap.canLock` / `lock()` on the new road read
+`roadRelockPolicy` (ready, bound, a road session whose record is in Castle → `RoadRelockPolicy` with this Mac's sealed
+`idleLockMinutes`). `lockOnNewRoad`: `awaitTheLockSeam` (polls 100 ms: an open in flight or an act holding the session is
+waited out; the session's one-act lock is then HELD through the teardown; nil on any settled non-Castle or closed state) →
+the lobby's road composed FIRST (nothing closes without a place to land) → `onWillLock` → `.opening` → the controller's
+resident key, per-open deferrals and custody session dropped → `ProtectionRoadLock.dropSessionMemory` → `roadStanding`,
+`roadSession` nil, `newRoadSyncKeys.attach(nil)` → off-main `binding.lock()` + `ProtectionRoadLock.lobby(ctx)` (the open
+road's `lobbyFacts` — never `route`, so no quiet road is TAKEN) → `endAct` → `finish(.roadLobby)` (the presenter's
+`libraryClosed`, VX-448's `clearWordsAtLock`; the Settings window closes at the settled lobby — VX-224). The unlock is the
+lobby's own road (`beginOpening(roadOpened:)` → a fresh session, the binding adopting the fresh pool). THE MONITORS —
+`ProtectionController.roadRelock` (set by both inits on the new road only): `relockIfPolicySays` (sleep, screen lock) and
+`relockIfIdle(now:)` (`IdleLockClock` over the policy's minutes, Variorum's own activity clock) → `performLock` → `lock()`.
+NIT-R2-1 — `ScheduledExportSwitch`'s mark closures by library id; `ExportNoticeMark` the one home; the legacy mark adopted
+at the first consult. F-4 — `ProtectionCrossings.readCrossings` → `RoadCrossingFaces.heldForRestore()` while
+`LibraryRestoreHold.isHeld(besideStore: slot)`; the preflight re-reads through it.
+
+**COUNTS (the final tree — this close commit):**
+- HEADLESS HARNESS (U1's scratchpad package `u1-harness`, pointed at this worktree; it now also symlinks
+  `Shared/Protection/ProtectionRoadLock.swift` and this unit's three headless suites): **`✔ Test run with 267 tests in 42
+  suites passed after 2.610 seconds.`** (U3's 256/39 + 11/3: `RoadRestoreHoldGateTests` 4, `ExportNoticeByLibraryTests` 3,
+  `RoadLockTests` 4).
+- MUTATIONS / BEHAVIOURAL REVERTS (each on a committed tree, restored `cmp`-identical — the pieces' lines above): F-4's
+  pre-fix tree (4 issues) + M-F4-1 (1); NIT-R2-1's R1 (one key per domain — the pre-fix behaviour) and R2 (no migration,
+  5); VX-445's MK-L1 (1), MK-L2 (2), MK-L3 (1). Every one red.
+- CORE: the protection set (the 83 `@Suite` types under `Tests/VariorumCoreTests/Protection`; no core file changed) Debug
+  **`✔ Test run with 340 tests in 83 suites passed after 5.438 seconds.`**; Release (`swift test -c release`, the same
+  filter) **`✔ Test run with 316 tests in 79 suites passed after 3.911 seconds.`**
+- `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx308
+  build-for-testing` → **`** TEST BUILD SUCCEEDED **`** (no warning in a touched file); the phone `-scheme VariorumMobile
+  -destination 'generic/platform=iOS Simulator' -configuration Debug … build` → **`** BUILD SUCCEEDED **`**; **the Release
+  check `-configuration Release build` → `** BUILD SUCCEEDED **`**.
+- Release behaviour: unchanged by construction — `newRoad` is false there (`canLock`/`lock()` take today's arms), the
+  controller's `roadRelock` stays nil (today's monitor arms; `relockIfIdle`'s `now` defaults to `Date()`), and the export
+  mark, the hold's gate and the lock's parts are reached only from new-road code. The binary is not byte-identical (rule
+  24's precedent).
+
+**THE MAC SUITES THE ORCHESTRATOR RUNS UNDER THE STAGE (from `App/Variorum/`; PENDING):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx308 test \
+  -only-testing:VariorumTests/RoadLockRouteTests \
+  -only-testing:VariorumTests/WordsClipboardLockRouteTests \
+  -only-testing:VariorumTests/RoadLockTests \
+  -only-testing:VariorumTests/ExportNoticeByLibraryTests \
+  -only-testing:VariorumTests/RoadRestoreHoldGateTests \
+  -only-testing:VariorumTests/ProtectionCrossingRoadTests \
+  -only-testing:VariorumTests/ProtectionCrossingRouteTests \
+  -only-testing:VariorumTests/RoadCrossingFacesTests \
+  -only-testing:VariorumTests/RoadCrossingWordsTests \
+  -only-testing:VariorumTests/RoadCrossingModelTests \
+  -only-testing:VariorumTests/RoadCrossingSurfaceTests \
+  -only-testing:VariorumTests/ProtectionJoinFollowRoadTests \
+  -only-testing:VariorumTests/RoadJoinFollowSurfaceTests \
+  -only-testing:VariorumTests/ProtectionAccountRoadTests \
+  -only-testing:VariorumTests/ProtectionAccountRouteTests \
+  -only-testing:VariorumTests/RoadKeyDoorSurfaceTests \
+  -only-testing:VariorumTests/WordsConcealedClipboardTests \
+  -only-testing:VariorumTests/WordsBandSurfaceTests \
+  -only-testing:VariorumTests/ProtectionRoadRouteTests \
+  -only-testing:VariorumTests/ProtectionOpenRoadPlantedTests \
+  -only-testing:VariorumTests/ProtectionLobbyModelTests \
+  -only-testing:VariorumTests/Phase13pLobbyTests \
+  -only-testing:VariorumTests/StoreLaunchRouteTests \
+  -only-testing:VariorumTests/ProtectionDialsTests \
+  -only-testing:VariorumTests/VX202ReopenRaceTests \
+  -only-testing:VariorumTests/SettingsLockCloseTests \
+  -only-testing:VariorumTests/AppBootstrapOffMainTests \
+  -only-testing:VariorumTests/VX206ProtectionLandingTests \
+  -only-testing:VariorumTests/VX310TodayLobbyWitnessTests \
+  -only-testing:VariorumTests/StatusSeamVocabularyTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests
+```
+The first two are U4's Mac-only pins (4 + 1 — plus `WordsClipboardLockRouteTests`' U3 pin = 6 tests); the next three are
+U4's headless suites (11, also green in the harness); then the suites over the files this unit touched — the crossings'
+read, faces and acts (the gate; the mark's new signatures — `ProtectionCrossingRouteTests` runs the PRODUCTION switch
+builder through the bootstrap), the account acts' rule-11 mark, the bootstrap (`finish`, the roads, the lock — today's lock
+suites `Phase13pLobbyTests` / `SettingsLockCloseTests` / `VX202ReopenRaceTests` must hold unchanged), the controller's
+monitors (`ProtectionDialsTests` carries `IdleLockClock`), the open road and its lobby, and the source pins over the edited
+files. `VX310TodayLobbyWitnessTests` still reports its KNOWN ISSUES (a pass of either is a FAILURE); read the `skipped:`
+lines.
+
+**THE RED-ON-OLD BY BEHAVIOURAL REVERT (the orchestrator's, each from a committed tree, restored by `git checkout --`):**
+- **(R-a) the pre-VX-445 bootstrap:** `AppBootstrap.lock()`'s first line back to `guard !newRoad else { return }` AND
+  `canLock`'s new-road line back to `guard !newRoad else { return false }` → `RoadLockRouteTests` (all four) and
+  `WordsClipboardLockRouteTests.lockNowOnACastleLibraryEmptiesTheWordsALookCopied` RED (no door, no lock, the copy kept).
+- **(R-b) the pre-VX-445 monitors:** the two `if let roadRelock { … }` arms removed from `ProtectionController
+  .relockIfPolicySays` / `relockIfIdle(now:)` → `theMonitorsLockACastleLibraryOnItsSealedIdleMinutesAndAtSleep` RED (today's
+  effective gate is never demanded on the new road).
+- **(R-c) a lock that routes:** in `lockOnNewRoad`, the lobby landing replaced by `beginOpening()` → `lockNowCloses…` RED at
+  its stale-silent-item step (the route opens through it at once — theater).
+- **(R-d) no wait:** `awaitTheLockSeam` returning nil when `beginAct()` fails → `aLockAskedWhileAnActRunsWaits…` RED (the
+  lock gives up; the library stays open after the act).
+
+**THE WALK ROWS (the orchestrator's walk, under a held stage claim; the DEV STORE only; light and dark where a face is
+captured):**
+0. U1's recipe row 0 (zero Debug instances by path; build; launch the binary with stderr captured). `source
+   ~/.variorum/dev-castle.env` and `export` (never echoed). Expected start: the dev library local, Standard, the dev
+   passphrase set, the restore hold standing (never press Resume).
+1. **No door in Standard:** the File menu shows NO *Lock Library Now*. Capture.
+2. **Into Castle (local — F-4 never gates a local crossing; the hold stands):** Settings ▸ Protection ▸ *Use Castle…* —
+   the dev pair, *Always ask* → the reopen in Castle (U2a's walk row 1's machinery). The File menu now shows *Lock Library
+   Now* ⌃⌘L. Capture.
+3. **VX-448 at the lock — on a THROWAWAY library B only** (U3's walk row 4's machinery — never a look on the dev library,
+   F-U2b-5): B fresh → the card's look → *Copy* (the concealed copy) → B: *Use Castle…* (a new passphrase twice; B's words
+   pasted) → reopen in Castle (the copy still on the board — a crossing's reopen is not a lock, P-VX308-U3-8) → ⌃⌘L → THE
+   LOBBY → `pbpaste | wc -c` → 0. Log: `road: locked — the library closed behind the lobby (VX-445)`, `road: the library
+   closed — the twelve words left the clipboard (VX-448)`. B's passphrase opens it. B aside afterwards.
+4. **The relock lobby, Always ask (the dev library A in Castle):** ⌃⌘L → the lobby asks a secret at once (no Touch ID
+   button); any Settings window closes (VX-224). Capture (light, dark). A wrong passphrase → refused in place; the dev
+   passphrase → the library opens; ⌃⌘L is back.
+5. **Touch ID:** the gate-style row *Use Touch ID…* (the dev passphrase) → ⌃⌘L → the lobby AUTO-ASKS (the system prompt —
+   her finger, or cancel and type). Capture. Then *Use Always ask* back.
+6. **(Optional) the monitors:** the screen lock (⌃⌘Q) → unlock the Mac → Variorum stands at the lobby (log line as row 3);
+   time away ≥ 10 minutes with no input → the lobby.
+7. **F-4 (with U1/U2's account rows, the throwaway project — F-U4-2):** the dev library IN SYNC with the hold standing →
+   Settings ▸ Protection: in *Use Castle…*'s place *Sync is waiting since the restore — press Resume Sync in the main
+   window's banner, then choose Use Castle again.*, and Replace All Keys' twin. Capture (light, dark).
+8. **Posture after the window:** *Use Standard…* on the dev library (both secrets — the dev pair unchanged), Always ask's
+   gate row gone with Castle; B aside under `~/vx308-walk/`; the hold's marker standing as found; signed out.
+
+**PROVISIONALs (each built as its option (a); for the orchestrator to bundle under QUESTIONS at the closeout — the shared
+ledger is the merging session's):**
+- **P-VX308-U4-1 — the hold's refusal** (*Sync is waiting since the restore — press Resume Sync in the main window's banner,
+  then choose Use Castle again.* / *… Replace All Keys again.*): (a) BUILT — the shipped hold copy's idiom; (b) today's
+  `ProtectionCopy.resumeSyncFirst` verbatim (*Resume sync first — this library was just restored from a copy, and sync is
+  waiting for your go.*); (c) other words.
+- **P-VX308-U4-2 — a lock asked while an act runs WAITS for it** (an act holding the session, or an open in flight, then the
+  lock): (a) BUILT; (b) refuse (the idle tick retries in 30 s; a sleep's or screen lock's lock is then the idle clock's);
+  (c) lock anyway (a teardown under a running act — unsafe).
+- **P-VX308-U4-3 — no lock-time keyless byte copy on the new road:** (a) BUILT — rule 5: a backup is the library and its
+  key file (the new road's backups are the pair); (b) today's keyless flat copy at the lock; (c) rule 5's pair taken at the
+  lock (a backup act inside the teardown).
+- **P-VX308-U4-4 — F-4's refusal IN PLACE of the door** (P-VX307-U2a-2's idiom): (a) BUILT; (b) today's shape — the door
+  renders and its press refuses; (c) the doors hidden while held.
+- **P-VX308-U4-5 — the legacy export mark MIGRATES** onto the first library consulted (the record's R-U4-4): (a) BUILT;
+  (b) dropped (a standing notice lost once — notice-visibility only); (c) read as every library's (the NIT kept).
+
+**FINDINGS AND HAND-FORWARDS (routed, not fixed here):**
+- **F-U4-1 (a ticket at closeout — Improvement, Confirmed, Castle & sync; a VX-329 parity gap):** the new road's Protection
+  pane carries no *Lock Now* and no idle dial (today's Castle section retires behind the switch, P-VX307-U2a-4); the menu's
+  *Lock Library Now* is the new road's Lock Now, and the idle lock runs on the sealed default (10) with no face to change it.
+  Options: the gate-style row grows the idle picker and a Lock Now door (through `changeSettings` — no core line); or
+  VX-329's list.
+- **F-U4-2 (THE WALK — for the orchestrator):** the restore hold's marker sits beside the SLOT, not the library — every
+  library in the dev slot is held. U1's walk row 2 (the dev library in sync: "the crossings: Use Castle now SYNCED") now
+  shows F-4's refusal in Use Castle's place (walk it as F-4's row — row 7 above), and U2's walk row 2 (throwaway library B,
+  joined to account A, then a SYNCED *Use Castle…* to put the account in Castle for the follow) is REFUSED by the gate.
+  Options for that row: move the marker aside with library A for the follow rows (`variorum-restore-hold.json` beside the
+  slot → `~/vx308-walk/`, back with A at the posture restore — the dev store's hold as found after), or walk the follow
+  with the coordinator's word on the marker; never press Resume on the dev store (the coordinator's term).
+- **F-U4-3 (her eye — F-4's reach):** the ruled gate covers the two synced account-wide CROSSINGS exactly (13x R1-M1's
+  pair); the account section's acts that write the vault — turning sync on, a join (including into a Castle account), Move,
+  the follow — and the synced key doors (which re-wrap the account's vault) are not gated, and none runs a sync round.
+  Recorded, not built (no invention); the bundle asks whether the hold should refuse every vault write until Resume.
+- **F-U4-4 (MOBILE PARITY):** the phone's relock coordinator (`MobileRelock`) still reads today's effective gate and dials
+  on the new road; a phone new-road library cannot enter Castle this phase (no crossing faces there), so nothing locks that
+  should — the phone's new-road relock is the mobile row's.
+- **F-U4-5 (canon, the closeout's):** SurfaceContracts' "Library protection" line gains, in place, one pointer to this
+  plan: on the new road a Castle library LOCKS — *Lock Library Now* (⌃⌘L), sleep and screen lock, and after this Mac's
+  sealed idle minutes — into the open road's own lobby (Always ask types; Touch ID auto-asks), the lock clearing the words
+  clipboard; a standing restore hold refuses the SYNCED Use Castle and Replace All Keys in place (naming Resume Sync); rule
+  11's export notice is marked by library. The portability line's restore-hold sentence carries the new road's gate too.
+- **F-U4-6 (a note for the ladder):** `awaitTheLockSeam` POLLS (100 ms) — `endAct` has no callback to the bootstrap; the
+  poll exits on any settled non-Castle or closed state and on cancellation. A signalled wait would need a new seam on the
+  session (not built — the poll is bounded by the act's own life).
+
+**Notes:** no machinery deaths; no Sonnet lookup; no subagents; no scratch worktree; every mutation and behavioural revert
+ran on a committed tree and was restored by `git checkout --` (`cmp` against a pre-mutation copy in this session's
+scratchpad). Commits: `9787475dc` (0) · `1a0c0d8ba` (1, the pin first) · `0a35a906b` (1) · `2fae754d7` (record) ·
+`c7025e8fc` (2) · `e0753fa9c` (record) · `094aaf693` (3) · `345325dbb` (record) · the close commit.
 
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
