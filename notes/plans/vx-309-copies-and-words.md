@@ -57,6 +57,14 @@ and discipline, `~/.variorum/dev-vault-throwaway.env`, values never echoed or co
   (VX-264 itself closed at VX-308; THESE TWO ITEMS live here by its body's own pointer — the reconciliation note).
 - **VX-263's route-finder sentence** as reworded: *your current passphrase or words; on this Mac, its quiet road if
   it still holds that key.*
+- **The join moment's reword + VX-456** (her ruling 2026-10-19, the handoff sitting): the moment reads in the
+  library-adopts-account direction — her draft, verbatim: *"your 12 words are now your account's 12 words. If you no
+  longer have those written down, regenerate them at any time."* ("library's" dropped — the shipped phrasing read as
+  if the ACCOUNT's words had been replaced by the library's, the wrong direction); keep an old-backups clause (the
+  floor's promise); the notice firing on every passphrase join is fine by her ("it can still be true and just be
+  clearer"). **VX-456** rides this unit — the core same-words line (the library's words lock compared to the vault's
+  recovery wrap) so a same-words re-join's moment stays quiet; her word: "it's nice polish… if it naturally slides
+  into phase 5 we can do it there" (it does — this unit owns the sentences and the phase holds the custody slot).
 - **The field guide's Castle/backups chapters and Data Safety's words** against the rules as built (VX-379's
   standing acceptance + the Start Here chapter leads; her #235 ruling: written HERE; the truth-check AND the real
   store's re-seed ride VX-329's release window). **F-U2c-4 rides:** the new road's Data Safety gains its "what
