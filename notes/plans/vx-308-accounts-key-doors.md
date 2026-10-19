@@ -1462,7 +1462,10 @@ kept" precedent), the test support (`PlantedRoad`, `ProtectionAccountSupport` �
    a mint would write over it, rule 21); no sealed mirror of the current key (the in-hand memory AND every remembered item
    read AS STATED — even an unverified copy refuses the mint: rule 1's restore is its road); no catalogued key file of this
    library carrying the current key (rule 21's offer is its road). A throwing read refuses (never a guess). Any copy
-   anywhere means the history it carries is not lost — no fresh file over it.
+   anywhere means the history it carries is not lost — no fresh file over it. *(Amended at the ladder's round-1 fix
+   leg, MINOR-1: "never a guess" holds for the READ; a remembered payload this build cannot DECODE is SKIPPED — read as no
+   copy — deliberately and now logged, exactly as the unlock and the open's `refreshMemory` already read it; the trace is
+   the ROUND-1 FIX LEG's MINOR-1 disposition.)*
 Pins: `FileLessWordsTests` (6 / 7 cases) red on the pre-arm tree (3 issues) and green after; every guard red under its own
 mutation (M1–M5, piece 1). The whole core suite green (below).
 
@@ -2042,7 +2045,10 @@ scratchpad, pointed at this worktree).
   arms (`noLiveKeyFile`); M1-c the `resuming` guard dropped (a press too) → `✘ … 11 issues` (the door's own mint refuses —
   the guard is load-bearing). The trace, the fix and the residue: THE DISPOSITIONS below.
 - **MINOR-1** (`keyFileGoneEverywhere`'s decode-skip vs the record's "never a guess") — AGREE the record overclaims;
-  disposition (b): keep the skip, log it, amend the U3 record's sentence with the trace (below). NOT-STARTED.
+  disposition (b), DONE (`023d81d83`): the skip kept, made deliberate and logged by id; the U3 record's CORE LINE item 7
+  amended in place; pin `FileLessWordsTests.anItemThisBuildCannotReadIsSkippedAndSaidNeverSilently` (`✔ 13 tests in 2
+  suites` with `NewWordsResumeTests`) — RED BY BEHAVIOURAL REVERT (the log line removed — the unstated guess) → `✘ … 2
+  issues`, restored `cmp`-identical. The trace: THE DISPOSITIONS below.
 - **MINOR-2** (the pane's one read runs three times per appearance) — AGREE (the U1 record's R-2 intended ONE assessment
   for the pane). NOT-STARTED — the settled design: one read per appearance wave, fanned to the three section models
   through their landing rule; every other refresh trigger keeps its own fresh read.
@@ -2084,6 +2090,18 @@ race (a file or mirror appearing between the press and the key-file step) still 
 (the press path is byte-unchanged); the next open's resume now rolls it back. **For the closeout (the orchestrator's):** the
 F-U3-2 ticket's body names this arm as FIXED here (`regenerateWords`, both arms, VX-447's door un-wedged) and keeps
 Change/Reset and residue (1); its Medium priority was set on U3's "no worse" premise, now moot for the words act.
+
+**MINOR-1 — AGREE (the record overclaimed), disposition (b): the skip kept, deliberate and said.** *My trace:* the finding is
+right that `try? decode … else { continue }` reads an undecodable remembered payload as "no mirror" while U3's record said
+"never a guess". Option (a)'s premise — refusing keeps the payload for a later build that reads it — does not hold on this
+road: the unlock reads THIS library's undecodable item as nothing remembered (`DeviceMemory.opening` → nil), so the open's
+repair pass finds the memory not following (`Assess.memoryFollows` false) and runs `refreshMemory`, which REWRITES this
+library's item and DELETES every other library's (rule 21's one-library rule, `ExecutorRepairs`) — before the banner, the
+card or Settings is reachable. Every act's begin (`perform` → `writeFacts` → `writeMemory`) rewrites it again. So at the
+door's moment an undecodable item can exist only if another process wrote it after the open; refusing then would protect a
+payload the next open rewrites anyway, at the cost of refusing rule 27's recovery road. The skip is now logged by id (eight
+characters — never key material) and the doc comment states it; the U3 record's sentence amended in place. No behaviour
+changed (the pin's mint is green on both trees; its log assertions are the red).
 
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
