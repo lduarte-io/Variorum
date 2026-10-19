@@ -1668,6 +1668,20 @@ Commits: `cfc0ebed8` (0) · `8e465f7ea` (1, pins first) · `577bd53dc` (1) · `4
 `1b6a7403e` (3) · `bdfcf2caa` (record) · `773940c38` (4) · `07e668e62` (5) · `5399f87d7` (6) · `15e2979a8` (6b) ·
 `052250050` (6c) · `cee78df07` (a warning) · the close commit.
 
+**U3 ARBITRATION (the orchestrator, 2026-10-19 ~08:30 MDT — repo-first before U4 spawns):**
+- **F-U3-1** (`assess` opens the key doors on a synced library while signed out; the act refuses honestly at the
+  press): a TICKET at closeout (Improvement, Confirmed, Castle & sync, Low) — the press-time re-read keeps her safe
+  and says why; P-2's letter is bent transiently, and the fix is a core-assess line the ladder can weigh but this
+  phase doesn't owe.
+- **F-U3-2** (a key-door act interrupted mid-plan cannot be finished by the next open — no secrets in hand; the act
+  stays in flight and later acts refuse): a TICKET at closeout (Bug, Confirmed, Castle & sync, Medium) — an existing
+  class, pre-dating this phase; the honest fix is a design call (roll back instead of resume, or ask at the open).
+- **F-U3-3** (U4's lock must clear the words clipboard — the non-ready arm, or `clearWordsAtLock()`): FOLDED INTO
+  U4's brief at its spawn.
+- **F-U3-8** (SurfaceContracts' 60-second clipboard sentence is now false): the closeout's canon delta list.
+- **P-VX308-U3-1 (Castle unsynced not widened) and P-VX308-U3-3 (one words door): APPROVED as built** — both are the
+  narrow arms; the bundle carries them.
+
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
   `~/dev/variorum-vx-308`, branch pushed, in-flight row (holds the Sync/-custody slot) `969acce55` on main, Linear
