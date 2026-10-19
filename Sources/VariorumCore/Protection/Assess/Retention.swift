@@ -14,7 +14,8 @@ import Foundation
 // (App/Variorum/Shared/BackupRetention.swift — her 13l ruling), restated
 // here byte for byte in its decisions so the core owns the one rule; the
 // container's is today's newest-14 (`StoreBackup.prune`). Pure: the catalog
-// in, the copies to prune out; the executor removes each with its pair.
+// in, the copies to prune out; the caller removes each with its pair (VX-309 U1a: the app's pair road runs it after
+// every pair it lands — `ProtectionBackupHook.takePair` — through the backups leaf; the predicate lives in `OwnCopies`).
 
 public enum Retention {
     public struct Policy: Equatable, Sendable {
@@ -49,14 +50,10 @@ public enum Retention {
         catalog: Catalog, libraryID: String, thisMac deviceID: String,
         policy: Policy = .standard, guards: ProtectionGuards = .all
     ) -> Outcome {
-        let mine = ProtectionNames.mac8(deviceID).lowercased()
-        let library8 = ProtectionNames.library8(libraryID).lowercased()
+        // VX-309 U1a: the one predicate, shared with every new-road read of the copies (`OwnCopies` — the far
+        // folder's due-check, Data Safety's counts), moved there verbatim.
         func isThisMacsCopyOfThisLibrary(_ copy: CatalogCopy) -> Bool {
-            guard copy.kind == .backup, copy.mac == .mac8(mine), copy.library == libraryID else { return false }
-            // The subfolder must be this library's too (a pair whose key file
-            // names this library, filed under another's folder, is not filed
-            // as this library's copy).
-            return copy.folders.count >= 2 && copy.folders[1].lowercased() == library8
+            OwnCopies.isThisMacsCopyOfThisLibrary(copy, libraryID: libraryID, thisMac: deviceID)
         }
         var prune: [String] = []
         var keep: [String] = []
