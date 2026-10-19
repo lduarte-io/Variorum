@@ -350,22 +350,34 @@ fetch, no network.
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton + the readings + the harness baseline: DONE (this commit).
-- Piece 1 — THE FAR PAIR LEG (+ the core `OwnCopies` rule it reads): IN-PROGRESS. CORE DONE (`8e027494a`):
-  `Assess/OwnCopies.swift` — retention's one predicate moved there verbatim (`Retention.plan` reads it; `RetentionTests`
-  green unchanged), `of` / `summary` / `farPairIsDue`, `stampIsTrusted` restated byte-equal; pins `OwnCopiesTests` (5) —
-  with the retention + catalogue suites `✔ 18 tests in 5 suites`. MUTATIONS on `8e027494a` (each restored by `git
-  checkout --`, `cmp`-identical to `u1a-prerevert/OwnCopies.swift`): M-OC1 the `<mac8>` check dropped → `✘ … 80 issues`
-  (`RetentionTests.overASharedFolderNothingForeignIsPruned` 29 among them); M-OC2 the trusted-stamp check dropped from
-  the due-check → `✘ theFarPairIsDueUnless…` (the hour-ahead arm, 1 issue); M-OC3 the place filter dropped → `✘` the
-  container arm + the summary + the per-place counts (4 issues). APP PINS FIRST (this commit): `ProtectionFarPairTests` (8,
-  headless over `PlantedRoad(farFolder: true)` — `PlantedRoad` gains the far-folder init, every earlier suite's default
-  unchanged) RED ON THE PRE-FIX TREE: `✘ Test run with 8 tests in 1 suite failed … with 9 issues` (the four landing pins —
-  byte-for-byte, the second-pair due-ness, another Mac's fresh copy, own-fresh/stale/future; the four guard pins green by
-  design). The leg itself: NEXT.
+- Piece 1 — THE FAR PAIR LEG (+ the core `OwnCopies` rule it reads): DONE (`8e027494a` core · `2c2b7d412` pins first ·
+  `c09b93ed8` the leg). CORE: `Assess/OwnCopies.swift` — retention's one predicate moved there verbatim (`Retention.plan`
+  reads it; `RetentionTests` green unchanged), `of` / `summary` / `farPairIsDue`, `stampIsTrusted` restated byte-equal;
+  pins `OwnCopiesTests` (5) — with the retention + catalogue suites `✔ 18 tests in 5 suites`. MUTATIONS on `8e027494a`
+  (each restored by `git checkout --`, `cmp`-identical to `u1a-prerevert/OwnCopies.swift`): M-OC1 the `<mac8>` check
+  dropped → `✘ … 80 issues` (`RetentionTests.overASharedFolderNothingForeignIsPruned` 29 among them); M-OC2 the
+  trusted-stamp check dropped from the due-check → `✘ theFarPairIsDueUnless…` (the hour-ahead arm, 1 issue); M-OC3 the
+  place filter dropped → `✘` the container arm + the summary + the per-place counts (4 issues). APP: `FileBackupsLeaf` —
+  `takeBackupPair`'s body extracted verbatim as `writeContainerPair` (returns the snapshot it wrote; the protocol method
+  calls it) + `landFarPair(copying:key:keyFile:deviceID:)` (the files' mechanics: under the picked folder's scope, the
+  picked folder must exist — never re-made; the same two names copied; an existing name refused; verified — the key
+  file reads back, the snapshot opens with the key; a failed copy removed whole; returns the far catalogue id, nil with
+  no far folder); `ProtectionBackupHook` (the pair road, `ProtectionBackupPair.swift`) — after a written container pair,
+  `landFarPair(session, snapshot:…, now:)`: no far folder ⇒ nothing; a FRESH catalogue read; `OwnCopies.farPairIsDue`
+  over `farInterval` (24 h — StoreBackup's default restated) ⇒ the leaf's copy; logged, never raised; the pair's
+  outcome stays the container's. `PlantedRoad` gains `init(farFolder:)`. Pins `ProtectionFarPairTests` (10, headless):
+  RED ON THE PRE-FIX TREE (`2c2b7d412`): `✘ Test run with 8 tests in 1 suite failed … with 9 issues` (the four landing
+  pins; the four guard pins green by design) → with the leg `✔ Test run with 10 tests in 1 suite passed` (+ the two leaf
+  pins: a copy that doesn't verify removed whole; an existing name never overwritten). MUTATIONS on `c09b93ed8` (each
+  restored by `git checkout --`, `cmp`-identical to `u1a-prerevert/`): M-FP1 the road's due-check in VX-397's WRONG
+  SHAPE (any fresh far copy, any Mac, any library) → `✘ anotherMacsFreshFarPairNeverSatisfiesThisMacsDueCheck` +
+  `onlyThisMacsOwn…` (2 issues); M-FP2 the picked-folder guard removed → `✘ aVanishedPickedFolderIsNeverRecreated` (1)
+  (a first M-FP2 edit that short-circuited the guard into always refusing was DISCARDED as not the mutation and redone
+  as the exact removal — machinery honesty); M-FP3 the half-landed cleanup removed → `✘ aFarCopyThatDoesNotVerify…` (1);
+  M-FP4 the existing-name guard removed → `✘ aNameAlreadyInThePickedFolderIsNeverOverwritten` (2 — the planted file
+  REMOVED by the failed copy's cleanup: the guard is what keeps her file).
 - Piece 2 — VX-397: the far due-check (piece 1's) + Data Safety's counts on the new road: NOT-STARTED — R-U1a-3, R-U1a-4.
 - Piece 3 — RETENTION WIRED (VX-302, VX-411): NOT-STARTED — R-U1a-5.
 - Piece 4 — VX-450 (Change/Reset roll back on a resume that cannot finish): NOT-STARTED — R-U1a-6.
 - Piece 5 — the close (counts, the Mac-suite list, PROVISIONALs, findings): NOT-STARTED.
-- MUTATIONS IN FLIGHT on the committed `c09b93ed8` (`ProtectionBackupPair.swift` / `FileBackupsLeaf.swift`; restore =
-  `git checkout --`, then `cmp` against `u1a-prerevert/`): M-FP1 the road's due-check in VX-397's wrong shape (any fresh far
-  copy), M-FP2 the picked-folder guard dropped, M-FP3 the half-landed cleanup dropped, M-FP4 the existing-name guard dropped.
+- No revert is in flight.
