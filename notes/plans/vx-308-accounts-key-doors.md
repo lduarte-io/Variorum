@@ -303,11 +303,27 @@ evidence: §5a's verbatim.
 - No secrets in any record or echo; every apply carried the in-command ref guard. Scratch responses live in the
   session scratchpad only.
 
-### U1 RECORD — THE ACCOUNT SECTION'S FACES (Opus implementer, 2026-10-19; VX-418's trunk + VX-264 + VX-239/VX-243 — IN PROGRESS)
+### U1 RECORD — THE ACCOUNT SECTION'S FACES (Opus implementer, 2026-10-19; VX-418's trunk + VX-264 + VX-239/VX-243 — BUILT; the Mac suites and the walk PENDING)
 
-**Not done in U1, first (standing until the close rewrites it):** STOPPED AT ONE DESIGN FORK BEFORE ANY CODE (F-FORK-1
-below — the architect rules, then the continuation builds). Nothing is built yet; the tree carries this record only; no
-revert is in flight. Preflight complete and not delegated: CLAUDE.md + canon, the resiliency protocol, CastleRules whole,
+**Not done in U1, first:**
+- **No Mac suite was RUN** (the brief: no `xcodebuild test`, no stage) — only BUILT (`build-for-testing` green on the final
+  tree). The list below is the orchestrator's under a stage claim. What DID run: the planted and pure suites HEADLESS in
+  this session's SwiftPM harness over the real `Shared/Protection/` files (192 / 30, the recipe below), and the core's
+  protection set in both configurations (no core file changed). **The bootstrap-level red-on-old (VX-239 through
+  `AppBootstrap` — `ProtectionAccountRouteTests.aSheetStandingWhenTheLibraryClosesNeverReturnsAfterTheUnlock`) is PENDING
+  the stage: run it, then revert `finish`'s one `libraryClosed()` line to watch it red, then restore.**
+- **The walk was not done** (the orchestrator's — §5 row 7; the recipe below). No Debug app was launched; the dev store, the
+  real store and `/Applications` were never touched; no live network call was made anywhere.
+- **U2's and U3's rows are untouched:** the join (turning sync on into an account that has its vault, Move) shows the honest
+  not-yet line (R-4); the follow, VX-107, VX-113 (U2); the key doors (U3). The phone has no account section (the brains are
+  shared; only the deletion's hook is wired there).
+- **Today's road is untouched** — its VX-239/VX-243 close by its retirement at VX-329 (the new road's presenter is the fix
+  there). **F-U1-2 (the passphrase floor) is routed, not fixed** (below).
+- The canon delta (SurfaceContracts' "Library protection" line gains the account section, the one presenter, the signed-out
+  road) and the QUESTIONS bundle rows are the closeout's (the shared-ledger rule); the PROVISIONALs are listed below.
+
+**The build's history (kept):** STOPPED AT ONE DESIGN FORK BEFORE ANY CODE (F-FORK-1 below), ruled at the U1 ARBITRATION, then
+built pieces 0–7. Preflight complete and not delegated: CLAUDE.md + canon, the resiliency protocol, CastleRules whole,
 SurfaceContracts (the app + Doors/protection), SyncSpec whole, this plan whole, VX-307 §5a + §5b–§5e + §6 (U1 RECORD, U2a
 RECORD + its fix leg, THE WALK RECORD) + §7, QUESTIONS #216 (the shipped copy AND her sitting's block), the core
 (`Assessment`, `Assess`, `AccountActs`, `KeyDoors`, `Executor`, `Facts`, `VaultModel`'s snapshot, `AccountVaultClient`),
@@ -492,9 +508,224 @@ same ruling):**
   unlock, RED-ON-OLD BY REVERT of `finish`'s `libraryClosed()` line; turning sync on through the section then the deletion's
   hook end to end, planted vault) — BUILT, their RUN PENDING under the stage. `build-for-testing` → `** TEST BUILD SUCCEEDED
   **` (one compiler crash on a `??`-with-closure in `signInNow` rewritten plainly first); the two capture warnings in
-  touched files cleared after that build (the re-build PENDING in the close).
-- Piece 7 — THE CLOSE: NOT-STARTED.
-- No revert is in flight.
+  touched files cleared after that build — the close's re-build green with none.
+- Piece 7 — THE CLOSE: DONE (the close commit) — the counts, the Mac suite list, the walk recipe, the PROVISIONALs and the
+  findings below.
+- No revert is in flight (every mutation run restored from git and `cmp`-checked; no scratch worktree was made).
+
+**COUNTS (the final tree — the close commit):**
+- HEADLESS (this session's SwiftPM harness — not durable; the U2a recipe pointed at this worktree: a package in the
+  scratchpad, swift-tools 6.2, macOS 26, the app's concurrency settings, depending on this worktree's core by path; its
+  `Variorum` target SYMLINKS every `App/Variorum/Shared/Protection/*.swift` but `ProtectionBackupHook.swift` and
+  `WireVaultLeaf.swift`, plus `Shared/LibraryOpenCopy.swift`, plus the U2c stub file + `ProtectionCopy`'s three sign-out
+  strings; its test target symlinks the U2c set — `CopyDoorsListRefreshTests`, `CopyDoorsModelTests`,
+  `CopyDoorsPickRefreshTests`, `CopyDoorsQuietProbeTests`, `LookInsideRoadTests`, `MakeMineRoadTests`,
+  `PassphraseReminderTests`, `PickedCopyRoadTests`, `ProtectionCrossingRoadTests`, `ProtectionFacesSupport`,
+  `ProtectionFileLeavesTests`, `ProtectionLobbyModelTests`, `ProtectionNoticeFaceTests`, `ProtectionOfferFaceTests`,
+  `ProtectionOpenRoadPlantedTests`, `ProtectionTestSupport`, `ProtectionWalkSwitchTests`, `ProtectionWordsPlanTests`,
+  `ProtectionWordsVX307Tests`, `RoadCreationFaceTests`, `RoadCrossingFacesTests`, `RoadCrossingModelTests`,
+  `RoadRearmTests`, `WordsBandTests` (the BASELINE on the pre-U1 tree: `✔ Test run with 149 tests in 23 suites passed`) —
+  and this unit's `ProtectionWalkProjectTests`, `RoadAccountWordsTests`, `ProtectionSheetPresenterTests`,
+  `ProtectionAccountSupport`, `RoadAccountFacesTests` (+ `FollowingSessionProviderTests`), `ProtectionAccountRoadTests`,
+  `RoadAccountModelTests`): **`✔ Test run with 192 tests in 30 suites passed after 2.135 seconds.`**
+- MUTATIONS (each run on the COMMITTED tree, restored with `git checkout --` and `cmp`-identical to HEAD): piece 0 — the https
+  arm removed → `✘ oneAloneBlankOrNotHTTPSNamesNothing` (1 issue); piece 1 — rule 16's "or secrets" dropped → `✘
+  rule16sTwoSentencesAreHersVerbatim` (2 issues); piece 2 — `libraryClosed()` not clearing → `✘
+  theLibraryClosingDropsTheSheet…` (3) + `✘ theAccountSheetsCloseIsHeardByItsFace` (1); piece 3 — the read's unreachable arm
+  guessed as "no vault" → `✘ anUnreadableVaultIsSaidNeverGuessed` (2) + `✘ inSyncAnUnreadableVaultIsSaidOnce` (1), the
+  provider never re-made → `✘ itServesWhoeverIsSignedInNow…` (2); piece 4 — the sign-in adoption removed (the open's stale
+  signed-out session — R-2's mechanism, red-on-old in effect) → `✘ turningSyncOnHandsThePairUp…` (2) + `✘
+  aWrongWordWritesNothing` (1) + `✘ theDeletionsHook…` (2); piece 5 — the signed-out arm removed (the pre-U1 face) → U2a's
+  flipped `✘ aSyncedLibrarysDoorsSayTheirRefusalsInPlace` (1).
+- The core's protection set (the 82 `@Suite` types under `Tests/VariorumCoreTests/Protection`; no core file changed — zero
+  `Sources/`/`Server/` lines in this unit, `SyncSchema.lockstepVersion` = 13): Debug `✔ Test run with 334 tests in 82 suites
+  passed after 5.214 seconds.`; Release (`swift test -c release`, the same filter) `✔ Test run with 310 tests in 78 suites
+  passed after 4.641 seconds.`
+- `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx308
+  build-for-testing` → `** TEST BUILD SUCCEEDED **` (the final tree); the phone `-scheme VariorumMobile -destination
+  'generic/platform=iOS Simulator' -configuration Debug -derivedDataPath DerivedData/vx308 build` → `** BUILD SUCCEEDED **`;
+  **the Release check `-configuration Release build` → `** BUILD SUCCEEDED **`**; no warning in a touched file.
+- Release behaviour: unchanged by construction — every new line is a new file, sits behind `newRoad`/`roadStanding` (nil on
+  today's road), under `#if DEBUG` (the walk's door), or is a nil hook (`afterAccountDeleted`, set only on the new road); the
+  crossings' `readCrossings`/`preflight` gain defaulted parameters only. The binary is not byte-identical (rule 24's
+  precedent).
+
+**THE MAC SUITES THE ORCHESTRATOR RUNS UNDER THE STAGE (from `App/Variorum/`; PENDING):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx308 test \
+  -only-testing:VariorumTests/ProtectionWalkProjectTests \
+  -only-testing:VariorumTests/RoadAccountWordsTests \
+  -only-testing:VariorumTests/ProtectionSheetPresenterTests \
+  -only-testing:VariorumTests/RoadAccountFacesTests \
+  -only-testing:VariorumTests/FollowingSessionProviderTests \
+  -only-testing:VariorumTests/ProtectionAccountRoadTests \
+  -only-testing:VariorumTests/RoadAccountModelTests \
+  -only-testing:VariorumTests/RoadAccountSurfaceTests \
+  -only-testing:VariorumTests/ProtectionAccountRouteTests \
+  -only-testing:VariorumTests/RoadCrossingFacesTests \
+  -only-testing:VariorumTests/RoadCrossingWordsTests \
+  -only-testing:VariorumTests/RoadCrossingModelTests \
+  -only-testing:VariorumTests/ProtectionCrossingRoadTests \
+  -only-testing:VariorumTests/ProtectionCrossingRouteTests \
+  -only-testing:VariorumTests/RoadCrossingSurfaceTests \
+  -only-testing:VariorumTests/RoadRearmTests \
+  -only-testing:VariorumTests/ProtectionOpenRoadPlantedTests \
+  -only-testing:VariorumTests/ProtectionWalkSwitchTests \
+  -only-testing:VariorumTests/ProtectionWordsPlanTests \
+  -only-testing:VariorumTests/ProtectionWordsVX307Tests \
+  -only-testing:VariorumTests/WordsBandTests \
+  -only-testing:VariorumTests/WordsBandSurfaceTests \
+  -only-testing:VariorumTests/PassphraseReminderTests \
+  -only-testing:VariorumTests/ProtectionRoadRouteTests \
+  -only-testing:VariorumTests/ProtectionFacesRouteTests \
+  -only-testing:VariorumTests/MakeMineRouteTests \
+  -only-testing:VariorumTests/ProtectionSystemCompositionTests \
+  -only-testing:VariorumTests/ProtectionPaneRoadRowTests \
+  -only-testing:VariorumTests/VX379PaneRowsTests \
+  -only-testing:VariorumTests/ProtectionSurfaceRenderTests \
+  -only-testing:VariorumTests/ProtectionTierFaceTests \
+  -only-testing:VariorumTests/EncryptionFlowTests \
+  -only-testing:VariorumTests/LobbyVaultRoadTests \
+  -only-testing:VariorumTests/VX310TodayLobbyWitnessTests \
+  -only-testing:VariorumTests/StoreLaunchRouteTests \
+  -only-testing:VariorumTests/AppBootstrapOffMainTests \
+  -only-testing:VariorumTests/SettingsLockCloseTests \
+  -only-testing:VariorumTests/VX206ProtectionLandingTests \
+  -only-testing:VariorumTests/TravellingDotsIndicatorTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/StatusSeamVocabularyTests
+```
+The first nine are U1's (3 + 7 + 6 + 10 + 1 + 8 + 8 + 3 + 2 = **48 tests**; the two route pins need the signed test host —
+a planted road, no keychain, the planted vault; `aSheetStandingWhenTheLibraryClosesNeverReturnsAfterTheUnlock` is the
+bootstrap red-on-old: revert `AppBootstrap.finish`'s one `libraryClosed()` line → red, restore); then the suites over the
+files this unit touched (the crossings' model/faces/acts/sheet and their flipped and moved pins, the planted road, the
+words, the bootstrap, `AppServices`' deletion, `ProjectConfig`, `WireVaultLeaf`, the pane) and the source pins over the
+edited files. `VX310TodayLobbyWitnessTests` still reports its KNOWN ISSUES (expected — a pass of either is a FAILURE); read
+the `skipped:` lines.
+
+**THE WALK RECIPE (§5 row 7 — the orchestrator's, under a held stage claim, the DEV STORE only, against the THROWAWAY
+project; the coordinator's ref guard on every live call; never the production mirror):**
+0. Zero Debug instances (by PATH; `/Applications` never touched). Build: `cd App/Variorum && xcodebuild -scheme Variorum
+   -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx308 build`. Launch as the BINARY with
+   the walk's door set from `~/.variorum/dev-vault-throwaway.env` (never echoed): `VARIORUM_WALK_PROJECT_URL=…
+   VARIORUM_WALK_ANON_KEY=… OS_ACTIVITY_DT_MODE=YES App/Variorum/DerivedData/vx308/Build/Products/Debug/Variorum.app/
+   Contents/MacOS/Variorum 2> ~/vx308-walk/run-N.log &`; the protection log says once `WALK SWITCH (VARIORUM_WALK_PROJECT_URL
+   + VARIORUM_WALK_ANON_KEY): this launch's project coordinates are overridden — a walk project's, not the production mirror`
+   (if it says "the production mirror's own host", STOP). **EVERY launch that signs in carries the override** (F-U1-5).
+   Expected start: the dev library local (no account), Standard, the dev passphrase set. **Precondition — the dev pair in
+   hand:** turning sync on types the passphrase AND the words (rule 7's hand-up): `source ~/.variorum/dev-castle.env`, then
+   `export` (the file has no exports — VX-307's machinery note) — the passphrase and `VARIORUM_DEV_NEWROAD_WORDS`; never
+   echoed. The throwaway account's vault is then locked under the dev pair (the throwaway's, hers to delete).
+1. Settings ▸ Protection → beneath the crossings, **Sync**: *This library doesn't sync.*, *Sign in to turn on sync.*, *Sign
+   in…*. Capture (light, dark). *Sign in…* → the Account sheet (the throwaway's account A) → Close → the section re-reads:
+   *Turn on sync…*, *Sign out…*.
+2. *Turn on sync…* → the confirm: the lifecycle lead, rule 7's *A device holds one pair of secrets at a time.*, *Your account
+   starts in Standard, like this library.*, *Your passphrase*, *Your twelve words*. Capture. A WRONG word → refused in
+   words, nothing written. The right pair → the receipt *Sync is on. Your passphrase and twelve words are your account's
+   now.*; the section: *This library syncs with your account.* + *Signed in as …*, *Stop syncing here…*, *Delete the account
+   from this Mac…*, *Sign out…*; the crossings: Use Castle now SYNCED (account-wide). Log: `set_up_sync: done`, `road:
+   turnOnSync — … now names account …`. (The throwaway's `key_vault` gains A's marker-14 row — a read-only REST check.)
+3. *Sign out…* → today's shipped confirm → *Sign Out* → the section: *You're signed out of sync.* + its line, *Use this Mac
+   only…*, *Sign in…*; the crossings: *Use Castle…* still rendered (the signed-out road). Capture.
+4. **The signed-out road:** *Use Castle…* → the signed-out screen (*You're signed out of sync.* / the current rules' lead /
+   *To put your whole account in Castle instead, cancel, sign in, and choose Use Castle again.* / Cancel · Continue).
+   Capture. Cancel → nothing. Again → *Continue* → the leave lands, the floor passes to Use Castle's own confirm (both
+   secrets, the gate choice) → **Cancel there** (the walk keeps the dev store in Standard; a full entry is stage 6's, walked
+   at VX-307) — the library is now LOCAL (*This library doesn't sync.*). Log: `this_mac_only: done`.
+5. **The join line, then another account:** sign in as A again → *Turn on sync…* now reads the JOIN (A has its vault):
+   *Joining an account that already syncs isn't ready in this build yet.* (U2's). Sign out; sign in as a FRESH throwaway
+   account C (no vault) → *Turn on sync…* → set up (bound to C). Sign out; sign in as B → *Another account is signed in on
+   this Mac.* + its line, *Moving this library to that account isn't ready in this build yet.*, *Sign out…*; the leaves render
+   nothing. Capture (light, dark).
+6. **The deletion's hook (P-VX308-U1-F1):** sign out; sign in as C (in sync) → the Account sheet ▸ Delete Account… (her ruled
+   friction) → the section: *This library doesn't sync.* (log `road: the account was deleted — this library no longer names
+   it`). ONLY ever on an account the walk made on the throwaway.
+7. **Posture after the window:** the dev library LOCAL (no account), Standard, the dev passphrase unchanged (no crossing
+   committed); **SIGNED OUT before the last quit** (F-U1-5 — the dev scope's stored session must not carry a throwaway
+   token into a production launch); the throwaway accounts are hers to keep or delete with the project.
+
+**PROVISIONALs (each built as its option (a); for the orchestrator to bundle under QUESTIONS at the closeout — the shared
+ledger is the merging session's):**
+- **P-VX308-U1-0 — the walk's door** (`VARIORUM_WALK_PROJECT_URL` + `VARIORUM_WALK_ANON_KEY`, DEBUG, both or neither, https,
+  logged once): (a) BUILT; (b) a DEBUG settings toggle; (c) a launch argument.
+- **P-VX308-U1-1 — the account section's undrafted words** (`ProtectionWords`' VX-308 section): the section's title
+  (*Sync*), the situation lines, the doors' names, the not-yet lines, the turning-on confirm's posture line / new-passphrase
+  lead / button / receipt, the leaves' leads / buttons / receipts, the third leave's pointer sentence, *Working…*, the
+  unfinished-act sentence. HER sentences verbatim (pinned): rule 16 ×2, rule 7 ×2; the lifecycle page's stage-12 lead; today's
+  shipped sign-out copy. (b) blank until her sitting; (c) other words.
+- **P-VX308-U1-2 — one road per situation:** in sync → Stop syncing here + Delete the account from this Mac; signed out →
+  Use this Mac only (Continue / Cancel); another account → Move (U2's) + Sign out, the leaves' "another account" refusals
+  rendering nothing (the situation's line says it once). `assess` also opens the same act under the other names in those
+  situations. (a) BUILT; (b) every door `assess` opens rendered (two doors for one act); (c) the leaves behind one disclosure.
+- **P-VX308-U1-F1 — the arbitration's refined (b)** (built as ruled): the third door is the LOCAL leave with ONE pointer to the
+  Account sheet's Delete Account; the deletion's success runs the protection half through `AppServices.afterAccountDeleted`
+  (wired on the Mac AND the phone — the stranded-record gap is the phone's too); a hook that cannot run is caught by the
+  signed-out screens at the next read. Her eye: the third door's wording, and whether she wants a deletion door in the
+  section at all. Alternative recorded: (a) one deletion home in the section.
+- **P-VX308-U1-3 — THE SIGNED-OUT SCREENS (VX-264, R-1 as amended by her word: "10-13 is probably old and superseded by
+  now") — the whole copy PROVISIONAL. WHAT DIVERGED FROM QUESTIONS #216's 10-13 BLOCK, AND WHY:**
+  - KEPT, true under the current rules: the title *You're signed out of sync.*; the one-road shape, *Continue* / *Cancel*;
+    *To put your whole account in Castle instead, cancel, sign in, and choose Use Castle again.* (verbatim — rule 10: signed
+    in, Use Castle is account-wide); the born-Castle sentence *Set up sync again later with a new account and it starts in
+    Castle.* (verbatim — true: turning sync on hands the account the library's posture) — now ending the crossing's RECEIPT,
+    since the new road has no Done screen (P-VX307-U2a-7).
+  - REDRAFTED: the mockup's *Castle will apply to this Mac only, and this Mac will stop using your old sync account. Its copy
+    on the server stays as it is.* → *Castle will apply to this library on this Mac only. First, this Mac stops using your
+    sync account — none of your keys or secrets change, and the account's copy on the server stays as it is. Then Use Castle
+    asks for your passphrase and your twelve words, as always.* — because on the new road *Continue* does not enter Castle by
+    itself: it runs This Mac Only (rule 16 — no key, lock or secret changes; the server keeps what was pushed), and the
+    crossing that follows types BOTH secrets in its own confirm (P-VX378-U2-2); "old sync account" became "sync account"
+    (the record still names it — it is not old until the leave).
+  - NOT CARRIED (the shipped VX-110 two-doors copy her 10-13 ruling had already superseded, and the known suspects): *This
+    library still holds the sync keys for your account…* (the sync-keys-holding framing — the new road's signed-out state is
+    the RECORD naming the account; its sync keys are custody, said nowhere); the Sign In… door's "Sign in, then choose Use
+    Castle again" screen (her 10-13 ruling retired it); the This-Mac-Only Screen 1's re-key promise *Your library on this Mac
+    gets a new key…* (true of the crossing, said by Use Castle's own confirm, never by the leave); her "drop the devices
+    clause" is moot (no devices clause exists on the new road's receipts).
+  - NEW, drafted to the rules: the section's own signed-out state (*You're signed out of sync.* + *This library still syncs
+    with an account, but no one is signed in on this Mac, so nothing syncs. Sign in to sync again, or use this library on this
+    Mac only — the account's copy on the server stays as it is.* + *Use this Mac only…* (Continue / Cancel) + *Sign in…*).
+  Options: (a) BUILT; (b) the 10-13 mockup's words verbatim (its middle sentence would promise a Castle entry the leave does
+  not make); (c) her redraft at the bundle.
+- **P-VX308-U1-4 — a vault the read cannot read is ONE sentence** (*Variorum couldn't reach your account just now. Try again
+  in a moment.* — U2a's): offline, a refused session, and a row this build can't read (`preLockstepRow` — the production
+  mirror at marker 13) alike. (a) BUILT; (b) a distinct sentence for a row this build can't read; (c) hide the doors.
+- **P-VX308-U1-5 — the signed-out road's receipt** = *You're in Castle now.* + the born-Castle sentence (one receipt). (a)
+  BUILT; (b) no note; (c) the note as its own receipt.
+- **P-VX308-U1-6 — the account acts run on the OPEN session** (no reopen — none swaps the key; the set-passphrase road's
+  precedent): (a) BUILT; (b) the crossings' close-and-reopen seam for these too (no swap needs it).
+
+**FINDINGS AND HAND-FORWARDS (routed, not fixed here):**
+- **F-U1-1 → VX-423's family (the arbitration's routing; a closeout comment, no new ticket):** the vault leaf's provider
+  (`FollowingSessionProvider` → its `AuthSession`) and the app's own `AuthSession` each refresh the scope's one rotating
+  refresh token on their own — a reuse-detection hazard VX-307 U1's leaf already carried.
+- **F-U1-2 (a ticket at closeout — Bug, Confirmed, Castle & sync; her 17n ruling):** the 12-character passphrase floor
+  (`ProtectionCopy.passphraseFloor` — "it binds where a passphrase is SET") is enforced by NONE of the new road's setters —
+  the set-passphrase sheet (VX-306), the crossings' new-passphrase field (VX-307), and now *Turn on sync…*'s; the core sets
+  any length. Not fixed here: two of the three faces are not this unit's, and the floor belongs in one shared check.
+- **F-U1-3 (the walk's caution, recorded):** a Debug launch WITHOUT the walk's door, signed in on the dev store, has the pane's
+  read fetch the PRODUCTION mirror's vault row (read-only — today's road's `EncryptionSession.refresh` already reads it); a
+  marker-13 row answers `preLockstepRow` (the pane says it couldn't reach the account); a set-up there on an account with
+  NO row would POST marker-14 columns that PostgREST refuses (unknown column — fails closed, nothing written).
+- **F-U1-4:** `ProtectionPane`'s `.task { await services?.encryption.refresh() }` (today's `KeyVaultClient`) still runs on the
+  new road; under the walk's door it reads the throwaway's marker-14 row with today's format (read-only; today's rows are
+  retired there) — VX-329's retirement of today's road ends it.
+- **F-U1-5 (the walk's posture rule, recorded in the recipe):** a sign-in made under the walk's door leaves the dev scope's
+  stored session holding the THROWAWAY's tokens; a later launch without the door presents them to production (a 401 →
+  signed out). The walk signs out before its last quit.
+- **F-U1-6 (the presenter's accepted consequence):** a crossing's confirm whose reopen lands anywhere but ready (the
+  interlude, the lobby) is dropped by VX-239's rule — a refusal said after such a reopen is lost with it; a landed
+  crossing's receipt still rides to the next ready.
+- **F-U1-7 (canon, the closeout's):** SurfaceContracts' "Library protection" line gains the account section (the situation
+  and its doors from `assess`, one road per situation, the three local leaves, Sign in / Sign out), the one presenter, and
+  the signed-out road, in place, one pointer to this plan.
+- **F-U1-8 (MOBILE PARITY line):** the phone has no account section; only the deletion's hook is wired there.
+
+**Notes:** no machinery deaths; no Sonnet lookup; no scratch worktree; the orchestrator's arbitration commits landed on this
+branch mid-build (record-only, its own block) and were pulled at each push. Commits: `372f92703` (record + the fork) ·
+`dd299f704` (0) · `71088dc21` (1) · `ff6ecf3bd` (2) · `c4e13b42f` (3) · `9133be4c6` (4) · `f5a75807d` (5) · `931b9a816` (6) ·
+the close commit.
 
 **U1 ARBITRATION (the orchestrator, 2026-10-19 ~05:30 MDT — repo-first before the build resumes; she is AWAKE and two
 of her words land here verbatim):**
