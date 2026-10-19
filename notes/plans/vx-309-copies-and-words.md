@@ -366,4 +366,6 @@ fetch, no network.
 - Piece 3 — RETENTION WIRED (VX-302, VX-411): NOT-STARTED — R-U1a-5.
 - Piece 4 — VX-450 (Change/Reset roll back on a resume that cannot finish): NOT-STARTED — R-U1a-6.
 - Piece 5 — the close (counts, the Mac-suite list, PROVISIONALs, findings): NOT-STARTED.
-- No revert is in flight.
+- MUTATIONS IN FLIGHT on the committed `c09b93ed8` (`ProtectionBackupPair.swift` / `FileBackupsLeaf.swift`; restore =
+  `git checkout --`, then `cmp` against `u1a-prerevert/`): M-FP1 the road's due-check in VX-397's wrong shape (any fresh far
+  copy), M-FP2 the picked-folder guard dropped, M-FP3 the half-landed cleanup dropped, M-FP4 the existing-name guard dropped.
