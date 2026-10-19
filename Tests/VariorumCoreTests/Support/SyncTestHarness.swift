@@ -40,6 +40,10 @@ final class SyncClient {
     /// device (`LockedSyncKeyProvider`) mid-life; the next engine call
     /// binds it.
     var keyProvider: any SyncKeyProviding = FixedSyncKeyProvider()
+    /// VX-314: the account-binding gate's injected facts — nil by default,
+    /// exactly like production's today-road (the gate inert). Mutable so a
+    /// scenario models a mismatched sign-in; the next engine call binds it.
+    var accountBinding: SyncAccountBinding?
     /// pre-13x 1a: THIS DEVICE'S IDENTITY — the custody item's in
     /// production, the client's own here, riding whatever key world the
     /// client holds (`engine()` wraps it). Mutable so a scenario can model
@@ -145,7 +149,8 @@ final class SyncClient {
             transport: transport, batchSize: batchSize, maxPushIterations: maxPushIterations,
             keyProvider: ClientIdentityKeyProvider(inner: keyProvider, deviceID: deviceID),
             sampleLibraryFacts: (sampleLibraryFacts.map { [$0] } ?? []) + additionalSampleLibraryFacts,
-            furnitureFacts: furnitureFacts)
+            furnitureFacts: furnitureFacts,
+            accountBinding: accountBinding)
     }
 
     @discardableResult

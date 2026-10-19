@@ -57,4 +57,12 @@ nonisolated final class NewRoadSyncKeyProvider: SyncKeyProviding, @unchecked Sen
         guard let session = current, session.writes else { throw SyncKeyProviderError.notEnrolled }
         return session.library.section.deviceID
     }
+
+    /// VX-314: the library's bound account — the ONE truth `currentKeys`
+    /// already reads (the protection record's), exposed for the engine's
+    /// account-binding gate. nil: no session attached, or the library is
+    /// unbound (the gate is inert on nil by design).
+    var boundAccount: String? {
+        current?.library.record?.account
+    }
 }

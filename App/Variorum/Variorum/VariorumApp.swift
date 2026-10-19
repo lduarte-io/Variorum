@@ -232,6 +232,14 @@ struct VariorumApp: App {
                             makeSyncKeyProvider: bootstrap.newRoad
                                 ? { [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in newRoadSyncKeys }
                                 : nil,
+                            // VX-314: the engine's account-binding gate — the
+                            // bound account from the SAME truth the key
+                            // provider reads (the protection record's); today's
+                            // road passes nothing (the gate inert, Release
+                            // byte-unchanged until VX-329).
+                            boundAccountRead: bootstrap.newRoad
+                                ? { [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in newRoadSyncKeys.boundAccount }
+                                : nil,
                             // 17y B-DEDUPE: the Mac's furniture-fold facts =
                             // the shared half + the GUIDE's (the engine's
                             // pairwise fold; the phone wires the shared half

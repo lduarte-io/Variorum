@@ -130,6 +130,11 @@ final class AppServices {
     /// inject fixed/locked providers so wiring pins never touch the real
     /// Keychain.
     private let makeSyncKeyProvider: () -> any SyncKeyProviding
+    /// VX-314: the library's bound account, read live per round (the new
+    /// road wires the protection record's truth through the key provider's
+    /// own accessor; today's road passes nothing — Release byte-unchanged
+    /// until VX-329, and the engine's gate is inert on nil).
+    private let boundAccountRead: (@Sendable () async -> String?)?
     /// Phase 14c: the account lifecycle doors' server seam (the re-key's
     /// truncate, the deletion's purge, the entitlement read). Tests inject
     /// recording fakes; production composes the real client over the same
@@ -147,12 +152,14 @@ final class AppServices {
         encryption: EncryptionSession? = nil,
         makeSyncTransport: ((any UserSessionProviding) -> any SyncTransport)? = nil,
         makeSyncKeyProvider: (() -> any SyncKeyProviding)? = nil,
+        boundAccountRead: (@Sendable () async -> String?)? = nil,
         keyVault: KeyVaultClient? = nil,
         makeAccountLifecycle: ((any UserSessionProviding) -> any AccountLifecycleProviding)? = nil,
         furnitureFacts: SeededFurnitureDedupeFacts? = nil,
         legacyCleanup: @escaping @Sendable () -> Void
     ) {
         self.session = session
+        self.boundAccountRead = boundAccountRead
         self.legacyCleanup = legacyCleanup
         self.furnitureFacts = furnitureFacts ?? SampleLibrarySeeder.furnitureDedupeFacts()
         self.makeAccountLifecycle = makeAccountLifecycle ?? { provider in
@@ -419,9 +426,20 @@ final class AppServices {
     private func connectSyncIfAllowed() async {
         guard sync.allowsSync else { return }
         guard await runOwnerAdoption() else { return }
+        // VX-314: the account-binding gate — wired only where a bound-account
+        // read exists (the new road's composition); nil leaves the engine's
+        // gate inert, so today's road is byte-unchanged.
+        let binding = boundAccountRead.map { read in
+            SyncAccountBinding(
+                boundAccount: read,
+                signedInAccount: { [weak auth] in
+                    guard let auth else { return nil }
+                    return await auth.currentUserID
+                })
+        }
         await sync.configure(
             transport: makeSyncTransport(auth), keyProvider: makeSyncKeyProvider(),
-            furnitureFacts: furnitureFacts)
+            furnitureFacts: furnitureFacts, accountBinding: binding)
         sync.triggerSync()
     }
 

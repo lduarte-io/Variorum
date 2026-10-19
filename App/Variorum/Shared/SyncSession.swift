@@ -93,7 +93,8 @@ final class SyncSession {
     /// state, never a wiring accident.
     func configure(
         transport: any SyncTransport, keyProvider: any SyncKeyProviding,
-        furnitureFacts: SeededFurnitureDedupeFacts? = nil
+        furnitureFacts: SeededFurnitureDedupeFacts? = nil,
+        accountBinding: SyncAccountBinding? = nil
     ) async {
         guard allowsSync else { return }
         let old = scheduler
@@ -126,7 +127,8 @@ final class SyncSession {
         let engine = SyncEngine(
             transport: transport, keyProvider: keyProvider,
             sampleLibraryFacts: SampleLibrarySeeder.allDedupeFacts(),
-            furnitureFacts: furnitureFacts ?? SampleLibrarySeeder.furnitureDedupeFacts())
+            furnitureFacts: furnitureFacts ?? SampleLibrarySeeder.furnitureDedupeFacts(),
+            accountBinding: accountBinding)
         let janitor = (transport as? any SyncTransport & SyncPurgeTransport)
             .map { PurgeJanitor(transport: $0, keyProvider: keyProvider) }
         let scheduler = SyncScheduler(engine: engine, janitor: janitor)
