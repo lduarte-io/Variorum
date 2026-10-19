@@ -395,13 +395,22 @@ fetch, no network.
   over the planted world with today's road's rows 3 and 2 beside them; the maps; the two restatements equal to
   `StoreBackup`'s — `farInterval` = `Configuration().interval`, `stampIsTrusted` at five offsets; the composition by
   source). Its RED-ON-OLD is the orchestrator's behavioural revert (the recipe in the close).
-- Piece 3 — RETENTION WIRED (VX-302, VX-411): IN-PROGRESS. PINS FIRST (this commit): `ProtectionPairRetentionTests` (4,
-  headless over `PlantedRoad`) RED ON THE PRE-WIRING TREE (`25abab3ed` + the pins): `✘ Test run with 4 tests in 1 suite
-  failed … with 21 issues` — beside the library 21 pairs stay (VX-411's accumulation), the picked folder 41, the foreign
-  world's prune counts, the failing-delete arm; the foreign world's SURVIVAL half green on both trees by design (nothing
-  is pruned on the old one — the DEBUG guard-off mutation pin lands with the wiring). The wiring: NEXT.
+- Piece 3 — RETENTION WIRED (VX-302, VX-411): DONE (`2d18617c8` pins first · `635a6a8e6` the wiring). The pair road
+  (`ProtectionBackupHook.takePair`, now `takePair(_:now:guards:)` — `guards` `.all` in production) runs `prune(session,
+  libraryID:deviceID:guards:)` after the far leg: core's `Retention.plan(… policy: .standard, guards:)` over a FRESH
+  catalogue read for the pair's library and this Mac, EXACTLY its `prune` ids through `FileBackupsLeaf.deleteCopies`, ONE
+  id per call (a failing delete logged, the rest still go), each id logged only when its file is gone after (a far
+  folder out of reach since the read removes nothing and is not claimed); never raises. ONE PAIR ROAD AT A TIME (an
+  `NSLock` around the whole road — R-U1a-5). Pins `ProtectionPairRetentionTests` (4, headless) RED ON THE PRE-WIRING
+  TREE: `✘ Test run with 4 tests in 1 suite failed … with 21 issues` → GREEN with the wiring, + the DEBUG pin
+  `ProtectionPairRetentionGuardMutationTests` (1 — the core guard off THROUGH the pair road: another Mac's copies pruned,
+  VX-302's shape): `✔ Test run with 5 tests in 2 suites passed`; the whole harness `✔ Test run with 289 tests in 46 suites
+  passed` before the DEBUG pin (290/47 with it — the close's count). MUTATIONS on `635a6a8e6` (each restored by `git
+  checkout --`, `cmp`-identical to `u1a-prerevert/`): M-RT1 the road's prune with the guard off hard-coded → `✘
+  anotherMacsAndAnotherLibrarysCopiesSurviveEveryPrune` (4 issues — the survival pin is not hollow); M-RT2 every doomed
+  id in ONE delete call → `✘ aDeleteThatFailsNeverFailsThePairOrStopsThePrune` (2 — the first failure stopped the rest).
+  M-RT3 (the lock removed) was named and NOT RUN: no deterministic pin can observe the race the lock closes (the leaf's
+  check-then-act free-name pick, sub-second, between two detached runs) — the lock rests on inspection, recorded.
 - Piece 4 — VX-450 (Change/Reset roll back on a resume that cannot finish): NOT-STARTED — R-U1a-6.
 - Piece 5 — the close (counts, the Mac-suite list, PROVISIONALs, findings): NOT-STARTED.
-- MUTATIONS IN FLIGHT on the committed tree above (`ProtectionBackupPair.swift`; restore = `git checkout --`, then `cmp`
-  against `u1a-prerevert/`): M-RT1 the pair road's prune with the core guard off hard-coded, M-RT2 every doomed id in one
-  delete call, M-RT3 the one-at-a-time lock removed (a no-red-expected probe of the lock's pins — recorded either way).
+- No revert is in flight.
