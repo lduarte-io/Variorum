@@ -818,7 +818,9 @@ live); restored `cmp`-identical; the suite + the lockstep neighbors `✔ 5 tests
 
 **Counts:** full core Debug `✔ 3311 tests in 430 suites` + the third target `✔ 40/6`; the ONE red is the recorded
 VX-353 wall-clock flake (`MCPHarnessTimeLimitTests…`, 19.1 s vs 15 s under the full parallel run; no MCP line in this
-diff). PENDING: `swift build -c release`, Mac `build-for-testing`, the Release app build, the phone build (running).
+diff). The builds, DONE: `swift build -c release` `Build complete!`; Mac `build-for-testing` `** TEST BUILD SUCCEEDED **`
+and the Release app build `** BUILD SUCCEEDED **` (one Sendable annotation owed on the composition-root closure —
+fixed, the rebuild green); the phone `** BUILD SUCCEEDED **`.
 The SyncStatusViews face pins (`PostureSwitchTests` · `SyncStalledRowTests` · `EncryptionFlowTests` ·
 `TierAndOnboardingTests`) ride the NEXT stage batch's list.
 

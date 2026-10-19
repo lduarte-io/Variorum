@@ -238,7 +238,9 @@ struct VariorumApp: App {
                             // road passes nothing (the gate inert, Release
                             // byte-unchanged until VX-329).
                             boundAccountRead: bootstrap.newRoad
-                                ? { [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in newRoadSyncKeys.boundAccount }
+                                ? { @Sendable [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in
+                                    newRoadSyncKeys.boundAccount
+                                }
                                 : nil,
                             // 17y B-DEDUPE: the Mac's furniture-fold facts =
                             // the shared half + the GUIDE's (the engine's
