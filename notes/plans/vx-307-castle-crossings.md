@@ -815,6 +815,27 @@ ledger is the merging session's):**
 - **The walk precondition is satisfied:** the dev library's words are `VARIORUM_DEV_NEWROAD_WORDS` in
   `~/.variorum/dev-castle.env` (the coordinator's dev-store facts; values never committed). No fresh dev library needed.
 
+### U2b RECORD — THE TWELVE WORDS, HER WAY (Opus implementer, 2026-10-18; ticket VX-412 — IN PROGRESS)
+
+**Not done in U2b, first:** (filled at the close; until then this record is IN PROGRESS and every count PENDING.)
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece 0 — this record skeleton: DONE (this commit).
+- Piece 1 — the core's new-words act on a library with NO passphrase (rule 2's first look on a Standard library that
+  has none — the act as built refused it, `verifiedPassphrase` → `.passphraseDoesNotOpen`): NOT-STARTED — the settled
+  design: `regenerateWords(_:passphrase: String?, newWords:)`; nil is accepted ONLY in Standard, unsynced, with no
+  passphrase lock on the live key file (the reset door's Standard plain-confirm twin — this Mac holds the key); a library
+  with a passphrase is still asked it; Castle refuses nil. PROVISIONAL P-VX307-U2b-1 — the first item to arbitrate.
+- Piece 2 — retire the creation-time words card (Mac): NOT-STARTED.
+- Piece 3 — the shared brains (the look, the band card's states, the ledger, the mint road, the reminder folded):
+  NOT-STARTED.
+- Piece 4 — the Mac band card between the shelf listing and the quick entry + Settings ▸ Protection's words door + the
+  bottom-bar reminder retired on the new road: NOT-STARTED.
+- Piece 5 — the tour's end card (the passphrase ask and the words): NOT-STARTED.
+- Piece 6 — the lifecycle page's stages 1–2 from the fixture: NOT-STARTED.
+- Piece 7 — the close (suites both configurations, builds, the record): NOT-STARTED.
+- No revert is in flight.
+
 ## 7. LIVE STATUS
 - 2026-10-18 ~18:45 — KICKED OFF. Preflight complete (the orchestrator): CastleRules + SyncSpec whole, the lifecycle
   stages, SurfaceContracts, VX-306 §8/§9 records + handoff, QUESTIONS #234 (ACCEPTED by this kickoff, her entry's own
@@ -845,3 +866,4 @@ ledger is the merging session's):**
   card, the Touch ID walk switch); headless 87/12 + the core's protection set both configurations green; Mac
   `build-for-testing`, the phone build and the Release build check green. The Mac suites (38 new tests + the touched
   suites — the record's list) and the walk (stages 6/7/8/11) PENDING — the orchestrator's, under the stage.
+- U2b (VX-412): IN PROGRESS (the §6 U2b RECORD — the Opus implementer, 2026-10-18 night).
