@@ -448,8 +448,8 @@ struct VariorumApp: App {
                             }
                             ProtectionNoticeBar(
                                 controller: bootstrap.protection, services: services)
-                            // VX-306 U2 (the new road only — nil on today's): rule 27's banner and the split pair's
-                            // line. (VX-307 U2b: rule 3's reminder moved into the card above the quick entry.)
+                            // VX-306 U2 (the new road only — nil on today's): rule 27's banner. (VX-307 U2c dropped the
+                            // split pair's line; U2b moved rule 3's reminder into the card above the quick entry.)
                             ProtectionRoadBar(model: bootstrap.roadStanding)
                         }
                     }

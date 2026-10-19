@@ -815,6 +815,19 @@ ledger is the merging session's):**
 - **The walk precondition is satisfied:** the dev library's words are `VARIORUM_DEV_NEWROAD_WORDS` in
   `~/.variorum/dev-castle.env` (the coordinator's dev-store facts; values never committed). No fresh dev library needed.
 
+### U2a FIX LEG — LADDER ROUND 1 (Opus implementer, 2026-10-19; the cross-model flow: agree/dispute per finding, the
+round-2 reviewer makes the final call; agreed fixes applied red-on-old; `notes/plans/vx-307-ladder-round-1.md`)
+
+**LIVE STATUS (per finding; PENDING = unverified):**
+- MINOR-4 (the VariorumApp bottom-stack comment names the dropped split-pair line): AGREE — DONE (this commit): the
+  comment now names rule 27's banner only and says U2c dropped the split pair's line (clarity class, no pin).
+- MAJOR-1 (F-2 — a Use Castle stopping past its swap leaves the weekly switch ON and the notice unspoken): NOT-STARTED.
+- MINOR-3 (the walk switch's armed-vs-pressed question; the typed road after a FAILED press; recipe row 5): NOT-STARTED.
+- NIT-3 (`newRoadSyncKeys.attach(nil)` at the teardown): NOT-STARTED.
+- NIT-1 / NIT-2: record-only (the reviewer's own dispositions).
+- MINOR-1 / MINOR-2: the orchestrator's (`df65cab20`) — not this leg's.
+- No revert is in flight.
+
 ### U2b RECORD — THE TWELVE WORDS, HER WAY (Opus implementer, 2026-10-18; ticket VX-412 — BUILT; the Mac suites and the walk PENDING)
 
 **Not done in U2b, first:**
