@@ -2056,10 +2056,22 @@ scratchpad, pointed at this worktree).
   read) → `✘ aSectionsOwnReadDuringTheWaveIsNeverOverwrittenByIt`; each restored `cmp`-identical. Two Mac source pins
   FLIPPED deliberately (`RoadAccountSurfaceTests` / `RoadKeyDoorSurfaceTests` — the pane's one `.task`; the bootstrap's
   wiring). `build-for-testing` green, no warning in a touched file. The trace: THE DISPOSITIONS below.
-- **NIT-1** (the `.signIn` services-nil fallback's untrue sentence) — AGREE. NOT-STARTED.
-- **NIT-2** ("now … now" in Move's and the join's moved receipts) — AGREE. NOT-STARTED — a reword in `ProtectionWords`'
-  VX-308 U2 section, sentence case, PROVISIONAL with the bundle row.
-- No revert is in flight (MAJOR-1's three mutations ran on `653d236c2` and were restored `cmp`-identical).
+- **NIT-1** (the `.signIn` services-nil fallback's untrue sentence) — AGREE, FIXED (`d838b913d`): the hole says
+  *Signing in isn't available in this window.* (PROVISIONAL — `ProtectionWords`' U1 section; the P-VX308-U1-1 bundle row)
+  with one *Close* through the host's dismissal, logged once on appear. Pins: `RoadAccountWordsTests.theSignInHoleSaysWhat
+  IsTrueOfIt` + the no-shouting list (headless); the Mac source pin `RoadAccountSurfaceTests.theSignInSheetsServicesHole
+  SaysWhatIsTrue` BUILT (its run PENDING the stage) — RED-ON-OLD BY PRE-FIX PROBE: its three needles over the pre-fix host's
+  arm (`git show` of the old file) all fail (the old arm said `doorRefusedNeedsVault`).
+- **NIT-2** ("now … now" in Move's receipts) — AGREE, FIXED (`21d9cf1fc`): the moved head *This library syncs with the
+  signed-in account* — one "now" per receipt, every plan, moved or not (PROVISIONAL P-VX308-U2-1 — the reviewer suggested
+  the bundle row; the reword is the cheap, honest draft for her to judge there, kept in `ProtectionWords`' VX-308 U2
+  section, sentence case). The as-drafted pin FLIPPED deliberately and widened (`RoadJoinFollowWordsTests.theJoinReadsAs
+  Drafted` — every receipt one "now") — RED BY BEHAVIOURAL REVERT (the old head back) → `✘ … 5 issues`, restored
+  `cmp`-identical.
+- No revert is in flight (every mutation and behavioural revert of this leg ran on a committed tree and was restored
+  `cmp`-identical against a copy in this session's scratchpad `fl-prerevert/`).
+- FINAL VERIFICATION — PENDING: the harness whole; the core protection set both configurations; the full core Debug
+  suite; `build-for-testing` (green after the NITs — `fl-bft-2`), the phone, the Release check.
 
 **THE DISPOSITIONS (per finding; for round 2's fresh reviewer):**
 
