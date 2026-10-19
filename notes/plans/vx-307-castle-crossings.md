@@ -885,8 +885,16 @@ round-2 reviewer makes the final call; agreed fixes applied red-on-old; `notes/p
   `.touchIDRearmQuestion` and the `[.rearm]` card — PENDING the stage. Recipe row 5 corrected in place (type, never
   press again; the leaf ids to read). HEADLESS `✔ Test run with 92 tests in 12 suites passed`; `build-for-testing` → `**
   TEST BUILD SUCCEEDED **`.
-- NIT-3 (`newRoadSyncKeys.attach(nil)` at the teardown): NOT-STARTED.
-- NIT-1 / NIT-2: record-only (the reviewer's own dispositions).
+- NIT-3 (`newRoadSyncKeys.attach(nil)` at the teardown): **DISPUTE — hollow, not applied** (the contract's rule: a row
+  no pin can turn red is recorded, not fixed). Traced: between a crossing's (or Make this my library's) teardown and the
+  next ready nothing can ask the provider — `onWillLock` (the composition root's `macWillLock`) STOPS the services and
+  drops them (`services?.stop(); services = nil`) before `state = .opening`, so no sync engine exists to call
+  `currentKeys()`; the next `finish(.ready)` re-attaches (`newRoadSyncKeys.attach(road)`) before the window's `.task`
+  composes fresh services. The reviewer labels it the same (not a bug today). Routed as a note for VX-329's live-road
+  wiring (when sync runs on the new road, the attach/detach around a reopen belongs with the account faces — VX-308).
+- NIT-1: record-only — FOLDED into P-VX307-U2b-3's bundle note (the U2b record, above) at the reviewer's disposition.
+- NIT-2: record-only — NOTED: `WordsBand`'s `guarded` count can refuse two simultaneous looks (the safe direction, nothing
+  minted or replaced, a retry works); left as is — a future reader must not "fix" it to `>= 1` or remove it.
 - MINOR-1 / MINOR-2: the orchestrator's (`df65cab20`) — not this leg's.
 - No revert is in flight.
 
@@ -1198,7 +1206,9 @@ the Bookcase's voice, the tour's card its own):**
 - **P-VX307-U2b-3 — the lifecycle page's stages 1–2 prose** (the page is hers; drafted from the amended rules): stage 1
   *Nothing is shown: the first open is the Bookcase and the quick entry with nothing in front of them, and the card above
   the quick entry offers the words until you record them or dismiss it.*; stage 2's title and *What happens*; the
-  three-roads table's *shown once when you ask*.
+  three-roads table's *shown once when you ask*. (Ladder round 1, NIT-1, folded here at the reviewer's disposition: stage
+  1's *Opens the library* chips still list typed *twelve words* — true of the model (the words lock exists), but under
+  amended rule 2 nobody holds them until a look; whether the chip should say so is part of this page-prose call — hers.)
 - **P-VX307-U2b-4 — where and when the card speaks.** (a) BUILT — the card lives on the Bookcase only (her drawing), so
   rule 3's reminder — now IN the card — is seen on the Bookcase; its showings still count when owed (at the open), not
   when seen; the first launch's card carries both rows (the words' offer and rule 3's first-backup always-moment —
