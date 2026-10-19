@@ -334,7 +334,11 @@ final class RoadStandingModel {
         snoozes: WordsCardSnoozes = .process, copyWords: @escaping ([String]) -> Void = { _ in },
         signInNow: (@Sendable () -> SessionFact)? = nil
     ) -> RoadStandingModel {
-        let faces = RoadStandingFaces.derive(session.report)
+        var faces = RoadStandingFaces.derive(session.report)
+        // VX-447 (P-2 — a door that cannot act is not rendered): the core's file-less arm accepts Standard unsynced and
+        // any synced library; Castle unsynced still refuses (no lock left to verify a secret, no plain confirm in Castle —
+        // PROVISIONAL P-VX308-U3-1), so there the banner keeps her U2-7 words with no door.
+        if session.library.record?.mode == .castle, session.library.record?.account == nil { faces.noKeyFileDoor = false }
         let libraryID = session.library.record?.libraryID ?? ""
         if session.writes, !libraryID.isEmpty { ledger.noteLaunchOncePerProcess(libraryID) }
         let reminder = PassphraseReminderModel(

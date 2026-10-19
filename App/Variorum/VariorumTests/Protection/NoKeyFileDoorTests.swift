@@ -168,6 +168,41 @@ struct NoKeyFileDoorTests {
         #expect(try road.system().leaves.keyFiles.readLiveKeyFile() == stray, "the stray untouched")
     }
 
+    /// P-2: Castle UNSYNCED — the core's arm refuses there (no lock left to verify a secret, no plain confirm in Castle), so
+    /// the banner keeps her U2-7 words with no door (and a look from another home refuses, nothing written).
+    @Test func castleUnsyncedKeepsHerBannerWithNoDoor() async throws {
+        let road = PlantedRoad()
+        _ = try await Crossing.inCastle(road)
+        let session = try await Self.castleOpenedWithNoKeyFileAnywhere(road)
+        let store = ThrowawayDefaults()
+        defer { store.purge() }
+        let (standing, _) = Self.standing(session, store)
+        #expect(standing.faces.noKeyFileAnywhere != nil && !standing.faces.noKeyFileDoor && !standing.offersNoKeyFileDoor)
+        #expect(standing.showsNoKeyFileBanner)
+        await standing.openNoKeyFileLook()
+        #expect(standing.noKeyFileLook == nil)
+        let band = try #require(standing.band)
+        await band.look.open()
+        #expect(band.look.phase == .closed && band.look.message == ProtectionWords.wordsLookFailed)
+        #expect(try road.system().leaves.keyFiles.readLiveKeyFile() == nil, "nothing written")
+    }
+
+    /// A Castle library (Always ask — no item on this Mac) opened with its key in hand (as a press's road hands it) and
+    /// every key-file copy gone.
+    static func castleOpenedWithNoKeyFileAnywhere(_ road: PlantedRoad) async throws -> ProtectionRoadSession {
+        let live = try #require(try road.system().leaves.keyFiles.readLiveKeyFile())
+        let key = try #require(try live.open(passphrase: .passphrase(Crossing.passphrase), floor: .relaxedForTests))
+        try FileManager.default.removeItem(at: road.slot.places.liveKeyFile)
+        road.memory.items = [:]
+        if FileManager.default.fileExists(atPath: road.slot.places.backups.path) {
+            try FileManager.default.removeItem(at: road.slot.places.backups)
+        }
+        guard case .opened(let session) = await ProtectionOpenRoad.route(road.context(), keyInHand: key) else {
+            throw RoadWorld.RoadWorldError.notCreated
+        }
+        return session
+    }
+
     /// F-U2-3 through the real road on an everyday SYNCED library (its key file standing): the card's look asks the
     /// account's passphrase and says the account line BEFORE minting; *Show my twelve words* is the yes; the account's
     /// words change with the library's (rule 7). Unsynced, the look is unchanged (no line).
