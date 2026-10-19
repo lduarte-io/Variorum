@@ -1191,13 +1191,33 @@ Commits: `edbd86c14` (record) · `95bde6ea3` (1) · `a1a948c73` (2) · `6a0b5a05
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton: DONE (this commit).
-- Piece 1 — VX-413, Copy full text from Look inside's note page: NOT-STARTED. Settled design: the core read
+- Piece 1 — VX-413, Copy full text from Look inside's note page: DONE (this commit). THE CORE READ
   `ProtectionCopyPeek.Reader.fullText(id:)` runs THE export's own projection (`Queries.variorumDocumentText` — the
-  format's one home `Domain/VariorumDocument`, consumed, never forked) over the look's private read-only connection;
-  `LookInsideModel.copyFullText()` reads it off the main actor and hands the text to an injected clipboard road (the
-  Mac's general pasteboard — Copy full text's own board, no expiry), the receipt *Copied full text.* (CopyForAI's
-  sentence, pinned equal) said IN the sheet under the door; the door's name the live note's (`CapabilityRegistry`'s
-  `.copyForAI` verb, pinned equal); nothing else about the sheet changes (read-only, nothing written, closing forgets).
+  format's one home `Domain/VariorumDocument`, consumed, never forked: the title, every live take with its label, the
+  tags) over the look's private READ-ONLY connection (the peek's one non-raw-SQL read, said in its header); nil for a
+  note that isn't a living post. THE BRAIN `LookInsideModel.copyFullText()` reads it off the main actor (the read in
+  flight, so a close waits for it), hands the text to an injected clipboard road (`copyText`, from
+  `CopyDoorsRoads.copyFullText` — the bootstrap's `AppBootstrap.copyFullTextRoad`: on the Mac `CopyForAI.put`, the ONE
+  clipboard rule a live note's Copy full text now also calls — the general pasteboard, cleared then set, no expiry; nil
+  on the phone, which has no look) and says `copyLine` in the sheet under the door: *Copied full text.* (CopyForAI's
+  receipt), *Nothing to copy — this note has no text yet.* (CopyForAI's refusal, an untitled empty note), or the one
+  added line *Variorum couldn't read this note's full text from the copy just now.* (PROVISIONAL P-VX307-U2c-2); the
+  line clears on *Back*, on another note, on close. THE FACE: `LookInsideSheet`'s note page — *Back* · *Copy full text*
+  (the live note's door name) only where the model offers it; the text stays read-only, never selectable. Nothing else
+  about the sheet changes (read-only, nothing written, closing forgets). **Pins:** core `ProtectionCopyPeekTests
+  .aLookHandsANotesFullTextInTheDocumentFormatAndWritesNothing` (the plant gains a labeled take and a tag: the look's
+  full text BYTE-EQUAL to `Queries.variorumDocumentText` over the live library, its header `{t:"…"} {#trip}`, the
+  Alternates section with `take: "first"`, parsed back whole; a deleted note nil; the catalogued folder byte-identical;
+  a closed look refuses) — Debug `✔ Test run with 5 tests in 1 suite passed`; headless app `LookInsideRoadTests
+  .theNotePagesCopyFullTextCarriesTheDocumentFormatAndWritesNothing` (the clipboard road handed exactly
+  `{t:"A note in the backup"}\n\nOne.\n\nTwo.`, parsed whole; the receipt; the look still open and read-only; the empty
+  note's refusal with nothing copied; every keychain write log and container byte unchanged; closing forgets; no road →
+  no door) + `CopyDoorsModelTests.theDoorsHandTheLookItsCopyFullTextRoad` — the harness `✔ Test run with 17 tests in 2
+  suites passed`; the Mac suite `LookInsideCopyDoorTests` (3: the door's name and sentences ARE the live note's —
+  the registry's verb, CopyForAI's receipt and refusal; the Mac's road writes a named board by `CopyForAI.put`; the
+  sheet's door by source, the text never selectable, no raw pasteboard in the face) — BUILT, its RUN PENDING under the
+  stage. New feature: no red side (the API is new). Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **`, no warning
+  in a touched file.
 - Piece 2 — VX-414, the split-pair line dropped + her two U2-7 sentences: NOT-STARTED.
 - Piece 3 — VX-379's pane rows to the rules, today's rows on TODAY's road only (the U2a-4 ruling) + F-U2b-1 (the
   readme's Start Here words passage, its byte-pin re-anchored): NOT-STARTED.

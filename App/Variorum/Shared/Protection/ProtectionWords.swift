@@ -164,6 +164,13 @@ nonisolated enum ProtectionWords {
     static let lookInsideBack = "Back"
     static let lookInsideUntitled = "Untitled"
     static let lookInsideClose = "Close"
+    // VX-307 U2c — VX-413, the note page's Copy door (her ruling: the Copy full text format): the door's name and its two
+    // sentences are a live note's Copy full text's own (`CapabilityRegistry`'s `.copyForAI` verb, `CopyForAI`'s receipt
+    // and refusal — pinned equal on the Mac); the one line it adds is PROVISIONAL P-VX307-U2c-2.
+    static let lookInsideCopyFullText = "Copy full text"
+    static let lookInsideCopied = "Copied full text."
+    static let lookInsideNothingToCopy = "Nothing to copy \u{2014} this note has no text yet."
+    static let lookInsideCopyFailed = "Variorum couldn't read this note's full text from the copy just now."
     /// The picked thing is the library open now (or its folder) — a copy of it is never filed over it.
     static let pickedLiveLibrary = "That's the library you have open now."
     /// The picked pair could not be copied into this Mac's safety copies (the picked thing was only read).

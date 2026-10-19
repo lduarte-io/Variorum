@@ -32,6 +32,10 @@ struct ProtectionCopyPeekTests {
         var older: String
         var archived: String
         var takeText: String
+        /// VX-307 U2c (VX-413): the deleted note's id, and the newest note's text as Copy full text writes it for the
+        /// LIVE library (`Queries.variorumDocumentText` over the open database, before the pool closed).
+        var deleted: String
+        var newestDocument: String
     }
 
     /// A keyed library through the ordinary ops: two living notes (the newer one with two blocks, its second block's
@@ -67,15 +71,20 @@ struct ProtectionCopyPeekTests {
             let take = try ops.branchVariant(second.block.id, from: second.variant.id)
             try ops.autosave(take.id, text: "The second take, chosen.", charDelta: 10)
             try ops.chooseVariant(second.block.id, variantID: take.id)
+            // VX-307 U2c (VX-413): a labeled take beside the chosen one and a tag — what the full text carries.
+            try ops.setTakeLabel(second.variant.id, label: "first")
+            let trip = try ops.createTag(name: "trip")
+            _ = try ops.applyTag(trip.id, toPost: newest.id)
             let book = try ops.createReading(name: "A book", kind: .book)
             try ops.addPostToReading(older.id, to: book.id)
             try ops.addPostToReading(newest.id, to: book.id)
             _ = try ops.createReading(name: "A gathering", kind: .gathering, querySpec: try RuleGrammar.encode(.star))
+            let document = try database.read { try Queries.variorumDocumentText($0, postID: newest.id) }
             let (_, binding) = database.asRebindable()
             binding.lock()  // the pool closed, the WAL drained — the library as a closed app leaves it
             return Planted(
                 store: store, key: key, newest: newest.id, older: older.id, archived: archived.id,
-                takeText: "The second take, chosen.")
+                takeText: "The second take, chosen.", deleted: deleted.id, newestDocument: document)
         }
     }
 
@@ -121,6 +130,31 @@ struct ProtectionCopyPeekTests {
         }
         let left = (try? FileManager.default.contentsOfDirectory(atPath: scratch.path)) ?? []
         #expect(left.isEmpty, "\(left)")
+    }
+
+    /// VX-307 U2c — VX-413 (her word: "copy full text is a good idea"): a look hands a note's FULL TEXT in the
+    /// Variorum document format — byte-equal to what Copy full text writes for the same note in the live library (the
+    /// title, every live take with its label, the tags), so File ▸ Import re-imports it whole — and the catalogued file is
+    /// still only read. A deleted note has no full text; a closed look refuses.
+    @Test func aLookHandsANotesFullTextInTheDocumentFormatAndWritesNothing() throws {
+        let folder = Folder()
+        let planted = try Self.plant(folder)
+        let catalogued = planted.store.deletingLastPathComponent()
+        let before = try Self.bytes(catalogued)
+        let reader = try ProtectionCopyPeek.open(planted.store, key: planted.key, inside: folder.file("scratch"))
+        let text = try #require(try reader.fullText(id: planted.newest))
+        #expect(text == planted.newestDocument, "the clipboard carries exactly Copy full text's document")
+        #expect(text.hasPrefix("{t:\"The newest note\"} {#trip}\n\nFirst block."), "\(text)")
+        #expect(text.contains(VariorumDocument.alternatesHeader) && text.contains("take: \"first\"\n\nThe first take."))
+        let parsed = try VariorumDocument.parse(text)
+        #expect(parsed.title == "The newest note" && parsed.tagPaths == ["trip"])
+        #expect(parsed.blocks.map(\.text) == ["First block.", planted.takeText])
+        #expect(parsed.blocks.last?.alternates == [VariorumDocument.Take(label: "first", text: "The first take.")])
+        #expect(try reader.fullText(id: planted.deleted) == nil, "a deleted note has no full text")
+        #expect(try reader.fullText(id: "no-such-note") == nil)
+        reader.close()
+        #expect(try Self.bytes(catalogued) == before, "the catalogued file is only read")
+        #expect(throws: (any Error).self) { _ = try reader.fullText(id: planted.newest) }
     }
 
     /// P1: the notes page walks `idx_container_touched` backward — no temp sort over the corpus.

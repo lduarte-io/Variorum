@@ -14,6 +14,9 @@
 //  sheet going away, or *Make this my library…* — closes the reader: the connection closed, the private folder deleted —
 //  OFF the main actor and only after the read in flight (if any) finished, and a read that finishes after the look was
 //  forgotten lands nothing (the ladder's round-1 NIT 3).
+//  VX-307 U2c — VX-413 (her ruling, 2026-10-18: "copy full text is a good idea"): the note page's *Copy full text* puts
+//  the note shown on the clipboard in the Variorum document format (Copy full text's own projection, read from the
+//  private copy) — the one thing the look hands out; nothing else about the look changes.
 //
 
 import Foundation
@@ -55,6 +58,28 @@ final class LookInsideModel: Identifiable {
     private(set) var hasMoreNotes = false
     /// The note shown read-only (nil: the lists).
     private(set) var shown: ProtectionCopyPeek.NoteText?
+    /// VX-307 U2c — VX-413: what the note page's *Copy full text* said — the receipt, or why nothing was copied — in
+    /// the sheet under the door (the sheet is where she is; a status seam may sit behind it, or — no library open — not
+    /// exist; PROVISIONAL P-VX307-U2c-1). nil: nothing said yet for the note shown.
+    private(set) var copyLine: CopyLine?
+
+    /// What the Copy door said.
+    enum CopyLine: Equatable {
+        /// The receipt — Copy full text's own sentence.
+        case copied
+        /// The note has no text and no name (Copy full text's own refusal).
+        case nothingToCopy
+        /// The note's full text could not be read from the copy.
+        case failed
+
+        var sentence: String {
+            switch self {
+            case .copied: return ProtectionWords.lookInsideCopied
+            case .nothingToCopy: return ProtectionWords.lookInsideNothingToCopy
+            case .failed: return ProtectionWords.lookInsideCopyFailed
+            }
+        }
+    }
 
     @ObservationIgnored private var reader: ProtectionCopyPeek.Reader?
     /// The read running on the reader now (one at a time — `busy`): a close waits for it before the reader closes.
@@ -64,19 +89,27 @@ final class LookInsideModel: Identifiable {
     @ObservationIgnored private let open: (TypedSecrets, CopyQuietRoads) async -> LookInsideOpening
     @ObservationIgnored private let finished: (Exit) -> Void
     @ObservationIgnored private let day: (Date) -> String
+    /// VX-307 U2c — VX-413: the platform's clipboard road for *Copy full text* (the Mac's general pasteboard, exactly as
+    /// a live note's Copy full text writes it). nil: the door is not offered (P-2).
+    @ObservationIgnored private let copyText: (@MainActor (String) -> Void)?
 
     init(
         row: CopyDoorRow, offersMakeMine: Bool,
         open: @escaping (TypedSecrets, CopyQuietRoads) async -> LookInsideOpening,
         finished: @escaping (Exit) -> Void,
-        day: @escaping (Date) -> String = { ProtectionWords.day($0) }
+        day: @escaping (Date) -> String = { ProtectionWords.day($0) },
+        copyText: (@MainActor (String) -> Void)? = nil
     ) {
         self.row = row
         self.offersMakeMine = offersMakeMine
         self.open = open
         self.finished = finished
         self.day = day
+        self.copyText = copyText
     }
+
+    /// VX-307 U2c — VX-413: the note page carries *Copy full text* wherever a clipboard road exists.
+    var offersCopyFullText: Bool { copyText != nil }
 
     /// §7c (10)'s line — the copy's day written in.
     var frameLine: String { ProtectionWords.lookInsideFrame(row.asOf.map(day) ?? ProtectionWords.offerUnknownDay) }
@@ -172,10 +205,53 @@ final class LookInsideModel: Identifiable {
         busy = false
         guard self.reader === reader else { return }
         shown = text
+        copyLine = nil
     }
 
     /// Back to the lists.
-    func back() { shown = nil }
+    func back() {
+        shown = nil
+        copyLine = nil
+    }
+
+    /// What a full-text read came to (off the main actor).
+    private enum FullTextRead: Sendable {
+        case text(String)
+        case noNote
+        case failed
+    }
+
+    /// VX-307 U2c — VX-413 (her word, 2026-10-18: "copy full text is a good idea"): the note shown, onto the clipboard
+    /// in the Variorum document format — Copy full text's own projection, read from the look's private copy off the main
+    /// actor (`ProtectionCopyPeek.Reader.fullText(id:)`): the title, every live take, the tags, re-importable whole by
+    /// File ▸ Import. Writes NOTHING to the copy or the library — only the clipboard; the look stays as it was (read-only,
+    /// and closing forgets). Speaks Copy full text's own receipt, or its refusal for a note with nothing to copy.
+    func copyFullText() async {
+        guard let reader, let copyText, let note = shown, !busy else { return }
+        busy = true
+        copyLine = nil
+        let id = note.id
+        let read = await read(reader) { reader -> FullTextRead in
+            do {
+                guard let text = try reader.fullText(id: id) else { return .noNote }
+                return .text(text)
+            } catch {
+                return .failed
+            }
+        }
+        busy = false
+        // Forgotten, or another note shown, while it read: nothing lands.
+        guard self.reader === reader, shown?.id == id else { return }
+        switch read {
+        case .text(let text) where !text.isEmpty:
+            copyText(text)
+            copyLine = .copied
+        case .text:
+            copyLine = .nothingToCopy
+        case .noNote, .failed:
+            copyLine = .failed
+        }
+    }
 
     /// *Close* — the look forgotten.
     func close() {
@@ -201,6 +277,7 @@ final class LookInsideModel: Identifiable {
         books = []
         notes = []
         shown = nil
+        copyLine = nil
         hasMoreNotes = false
         phase = .closed
         guard let outgoing else { return }

@@ -1151,7 +1151,9 @@ final class AppBootstrap {
                 return await Task.detached(priority: .userInitiated) {
                     ProtectionCopyDoors.lookInside(CopyDoorsContext(session), copy: copy, typed: typed, quietRoads: quietRoads)
                 }.value
-            })
+            },
+            // VX-307 U2c — VX-413: the note page's Copy full text (the platform's clipboard rule).
+            copyFullText: Self.copyFullTextRoad)
     }
 
     /// VX-306 U3 — the two doors' roads with NO library open (the missing face's and rule 27's *Open Library…*,
@@ -1178,7 +1180,20 @@ final class AppBootstrap {
                 await Task.detached(priority: .userInitiated) {
                     ProtectionCopyDoors.lookInside(context(), copy: copy, typed: typed, quietRoads: quietRoads)
                 }.value
-            })
+            },
+            // VX-307 U2c — VX-413: the note page's Copy full text (the platform's clipboard rule).
+            copyFullText: Self.copyFullTextRoad)
+    }
+
+    /// VX-307 U2c — VX-413 (her ruling: "copy full text is a good idea"): Look inside's *Copy full text* writes the
+    /// Mac's general pasteboard exactly as a live note's Copy full text does (`CopyForAI.put` — the one clipboard rule,
+    /// no expiry: the note is her writing, not a secret). The phone has no Look inside (P-VX306-U3-18): no road there.
+    static var copyFullTextRoad: (@MainActor (String) -> Void)? {
+        #if os(macOS)
+        return { CopyForAI.put($0) }
+        #else
+        return nil
+        #endif
     }
 
     /// **MAKE THIS MY LIBRARY** (rule 17; the plan's U3 addendum) — one confirmed door, on the new road at ready. Every

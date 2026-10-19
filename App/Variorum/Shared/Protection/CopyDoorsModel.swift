@@ -155,6 +155,9 @@ struct CopyDoorsRoads {
     /// its own quiet road), trying the quiet roads it is given (the look's automatic first try never presses Touch ID —
     /// m2). nil: the door is not offered.
     var lookInside: (@MainActor (CatalogCopy, TypedSecrets, CopyQuietRoads) async -> LookInsideOpening)? = nil
+    /// VX-307 U2c — VX-413: the platform's clipboard road for Look inside's *Copy full text* (the Mac's general
+    /// pasteboard, written exactly as a live note's Copy full text writes it). nil: the door is not offered.
+    var copyFullText: (@MainActor (String) -> Void)? = nil
 }
 
 // MARK: - Make this my library's confirm (§7c (8))
@@ -309,7 +312,8 @@ final class CopyDoorsModel: Identifiable {
                 case .closed: self.phase = .done
                 case .makeMine: Task { await self.openMakeMine(row) }
                 }
-            })
+            },
+            copyText: roads.copyFullText)
         phase = .lookInside(model)
         await model.begin()
     }

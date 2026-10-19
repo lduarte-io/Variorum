@@ -14,7 +14,9 @@ import GRDB
 //     configuration; `close()` closes the connection (the key goes with it) and deletes the private folder — closing
 //     forgets. A reader dropped without `close()` closes in `deinit` the same way.
 //   - RAW SQL over the library's own columns — NEVER the migrator (a copy is read as it is), never `Operations`, never the
-//     ambient database: no write can reach any library by construction (the connection is read-only too).
+//     ambient database: no write can reach any library by construction (the connection is read-only too). The one
+//     exception is VX-307 U2c's `fullText(id:)` (VX-413): Copy full text's own READ projection (`Queries
+//     .variorumDocumentText`) over this same read-only connection — the format's one home, never a second implementation.
 //   - P1: a page of notes at a time, newest first, walking `idx_container_touched` (`(last_touched_at, id) WHERE
 //     deleted_at IS NULL`) backward — no temp sort, the cost the pages she has looked at; a note's text is one note's
 //     blocks; a book's count is its own memberships.
@@ -140,6 +142,22 @@ public enum ProtectionCopyPeek {
                     arguments: [id]) else { return nil }
                 let blocks = try String.fetchAll(db, sql: ProtectionCopyPeek.noteTextSQL, arguments: [id])
                 return NoteText(id: row["id"], title: row["title"], blocks: blocks)
+            }
+        }
+
+        /// VX-307 U2c (VX-413 — her word: "copy full text is a good idea"): one note's FULL TEXT in the Variorum
+        /// document format — Copy full text's own projection (`Queries.variorumDocumentText`: the title, every live
+        /// take, the tags — the format's one home `VariorumDocument`, through the export's one road, never a second
+        /// implementation), read over THIS look's private read-only connection: nothing written, no row anywhere. The
+        /// one read here that is not raw SQL — deliberately: the clipboard must carry exactly what Copy full text puts
+        /// there for a live note, so File ▸ Import re-imports it whole; a copy whose schema that projection cannot read
+        /// throws, and the door says so (the look itself stays open). nil: no such living note.
+        public func fullText(id: String) throws -> String? {
+            try read { db in
+                guard try db.tableExists("container"), try Row.fetchOne(
+                    db, sql: "SELECT id FROM container WHERE id = ? AND kind = 'post' AND deleted_at IS NULL",
+                    arguments: [id]) != nil else { return nil }
+                return try Queries.variorumDocumentText(db, postID: id)
             }
         }
 
