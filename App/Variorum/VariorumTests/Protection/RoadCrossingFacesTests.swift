@@ -232,6 +232,17 @@ struct RoadCrossingWordsTests {
         #expect(try Self.rules().contains("**\(ProtectionWords.castlePromise)**"))
     }
 
+    /// The doors carry the canon's names (an ellipsis on the door — a confirm follows), the confirm's title is the act,
+    /// and each crossing speaks its own receipt.
+    @Test func eachDoorCarriesItsNameTitleAndReceipt() {
+        #expect(RoadCrossingDoor.allCases.map(\.doorLabel) == ["Use Castle\u{2026}", "Use Standard\u{2026}", "Replace All Keys\u{2026}"])
+        #expect(RoadCrossingDoor.allCases.map(\.title) == ["Use Castle", "Use Standard", "Replace All Keys"])
+        #expect(RoadCrossingDoor.allCases.map(\.receipt) == [
+            ProtectionWords.enteredCastleReceipt, ProtectionWords.leftCastleReceipt, ProtectionWords.replacedKeysReceipt,
+        ])
+        #expect(RoadCrossingDoor.allCases.map(\.door) == [.useCastle, .useStandard, .replaceAllKeys])
+    }
+
     /// Her no-shouty-caps rule: no word in a crossing's line is set in capitals for emphasis (the doors' canon names and
     /// "OK"/"ID" are the only capitals beyond a sentence's first letter and the proper names).
     @Test func noCrossingLineShouts() {

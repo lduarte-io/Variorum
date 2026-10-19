@@ -84,6 +84,8 @@ struct TravellingDotsIndicatorTests {
             // VX-306 U3: the two doors' sheet; the phone's new-road faces.
             "Variorum/Features/Protection/CopyDoorsSheet.swift",
             "Variorum/Features/Protection/LookInsideSheet.swift",
+            // VX-307 U2a: the crossings' confirm and the Protection pane's new-road section.
+            "Variorum/Features/Protection/RoadCrossingSheet.swift",
             "VariorumMobile/Features/Protection/MobileRoadFaces.swift",
             "VariorumMobile/Features/Protection/MobilePostureSheets.swift",
             "VariorumMobile/Features/Protection/MobileProtectionCeremonies.swift",

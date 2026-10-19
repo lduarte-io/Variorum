@@ -448,10 +448,24 @@ record's claims by spot-check (the §7 verification line). Lesson for future cas
 state its NAME and role in one line it can re-read, and the orchestrator's stand-down messages should name the
 recipient's role explicitly; the fork's "two writers" alarm was the protocol working on a false premise.
 
-### U2a RECORD — THE CROSSINGS' FACES (Opus implementer, 2026-10-18; ticket VX-417 — IN PROGRESS)
+### U2a RECORD — THE CROSSINGS' FACES (Opus implementer, 2026-10-18; ticket VX-417 — BUILT; the Mac suites and the walk PENDING)
 
-**Not done in U2a, first:** (filled at the close; until then — no Mac suite RUN, no walk, no Debug launch, no stage, no
-dev/real store or `/Applications` touch: the brief's limits.)
+**Not done in U2a, first:**
+- **No Mac suite was RUN** (the brief: no `xcodebuild test`, no stage) — only BUILT (`build-for-testing` green on the final
+  tree). The list below is the orchestrator's to run under a stage claim. What DID run: the planted and pure suites
+  HEADLESS in this session's SwiftPM harness over the real `Shared/Protection/` files (87 / 12, the recipe below), and
+  the core's protection set in both configurations (this batch changes no core file).
+- **The walk was not done** (the orchestrator's — the recipe below: stages 6 (Touch ID and Always ask), 7's Castle
+  backup, 8, 11's re-arm on a planted failure). No Debug app was launched; the dev store, the real store and
+  `/Applications` were never touched.
+- **Replace All Keys is not walkable this phase**: it needs an account (`.notSynced` on a local library — rendered as
+  nothing, P-2), and no new-road library names one until VX-308's account faces. Pinned over planted facts only.
+- **The account faces, the follow and the synced arms are VX-308's** (her ruling, §2 U3): the crossings' synced refusal
+  sentences are built and pinned on planted facts but unreachable on the new road this phase (the facts gatherer reads no
+  vault — P-VX306-K3's `vault: nil`).
+- **Not built here (hand-forwards below):** no lock on the new road (Castle's idle lock / Lock Now — `canLock` stays false
+  on the new road); the phone's crossing faces (the shared brains are ready; only the re-arm card renders there); the
+  canon delta for SurfaceContracts' "Library protection" line (the closeout's).
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton: DONE (this commit).
@@ -545,9 +559,220 @@ dev/real store or `/Applications` touch: the brief's limits.)
   `✔ Test run with 86 tests in 12 suites passed`. `build-for-testing` → `** TEST BUILD SUCCEEDED **`; the phone
   `-scheme VariorumMobile -destination 'generic/platform=iOS Simulator' build` → `** BUILD SUCCEEDED **`; no warning in a
   touched file.
-- Piece 7 — THE CLOSE: NOT-STARTED. Headless harness run, the core's protection set both configurations,
-  `build-for-testing` (Mac + phone), the Release build check, the Mac suite list for the orchestrator, the PROVISIONALs.
-- No revert is in flight.
+- Piece 7 — THE CLOSE: DONE (the close commit) — the counts, the Mac suite list, the walk recipe, the PROVISIONALs and
+  the findings below; `TravellingDotsIndicatorTests`' surface list gains `RoadCrossingSheet.swift` (no system spinner on
+  the new face); `RoadCrossingWordsTests` gains the doors' names/titles/receipts (4 there now).
+- No revert is in flight (every mutation run restored and `cmp`-checked; no scratch worktree was made).
+
+**THE FACES AS BUILT (for the ladder):** the pane on the new road reads `roadStanding.crossings` — the BOOTSTRAP's
+`RoadCrossingsModel` (made at the first ready on the new road, kept across every reopen) — whose `read` road runs `assess`
+over the open library's facts (`ProtectionCrossings.readCrossings`, with the weekly plain-text copy's switch as this Mac's
+scheduled-export fact) and `RoadCrossingFaces.derive` reads each door. A press: the confirm checks the words' shape and
+the new passphrase twice (pure), then `AppBootstrap.crossOnNewRoad` — `session.beginAct`, the PREFLIGHT off-main (the door
+re-read: closed → refused, changed → re-shown; the typed pair against the live key file), and only then the teardown
+(`onWillLock`, `.opening`, the pool closed through the binding), `ProtectionCrossings.cross` off-main (Use Castle mirrors the
+switch into the sealed settings via `changeSettings`, then the core's act on its sealed plan; the switch follows the act's
+`.scheduledExportTurnedOff`), the reopen through the new road with the key that opens the slot, the receipt owed to the
+reopened session, `requestProtectionPaneForRoadCrossing`. The confirm closes on `.made` (rule 11's notice then stands in
+the pane until *OK* or *Turn it back on*); a refusal after the reopen re-presents it with its sentence. The gate-style row
+and the reversal run `changeSettings` on the open session (no reopen — the pool stays open, as the set-passphrase road's
+record write does). The re-arm: `RoadInterlude.cards` appends `.rearm` when the open's report owes
+`.touchIDRearmQuestion`; its answers run `answerTouchIDRearm` on the session before the library opens. ZERO `Sources/`,
+`Sync/`, `Server/`, schema or dependency lines; no new core act.
+
+**COUNTS (the final tree — the close commit):**
+- HEADLESS (this session's SwiftPM harness — not durable; the VX-306 U1b/U2/U3 recipe: a package in the scratchpad,
+  swift-tools 6.2, macOS 26, the app's concurrency settings — default `MainActor` isolation,
+  `NonisolatedNonsendingByDefault`, `InferIsolatedConformances`, `MemberImportVisibility` — depending on the worktree's core
+  by path; its `Variorum` target SYMLINKS every `App/Variorum/Shared/Protection/*.swift` but `ProtectionBackupHook.swift`
+  and `WireVaultLeaf.swift`, plus `Shared/LibraryOpenCopy.swift`, plus one stub file of one-line stand-ins (`DeviceName`,
+  `BackupDestination`, `KeychainTestTripwire`, `KeychainPartition`, `AppleKeyKeychain`, `AppleKey`, `AuthTokens`/
+  `KeychainAuthStorage`, `EncryptionSession.words`, `ProtectionCopy`'s three names, a nil `WireVaultLeaf.live`); its test
+  target symlinks `ProtectionTestSupport`, `ProtectionFacesSupport`, `ProtectionOpenRoadPlantedTests`,
+  `ProtectionWordsPlanTests`, `ProtectionLobbyModelTests`, `PassphraseReminderTests`, `ProtectionNoticeFaceTests`,
+  `ProtectionOfferFaceTests`, `ProtectionWalkSwitchTests` (the baseline: `✔ 55 tests in 7 suites`) and this batch's
+  `RoadCrossingFacesTests`, `ProtectionCrossingRoadTests`, `RoadCrossingModelTests`, `RoadRearmTests`, + a one-line
+  `RoadWorld.RoadWorldError` stub): **`✔ Test run with 87 tests in 12 suites passed after 0.595 seconds.`**
+- MUTATIONS (each restored from a pre-mutation copy and `cmp`-identical): the preflight's VX-108 `changed` guard removed →
+  `✘ vx108_theDoorIsReReadAtThePress` (1 issue); Use Castle's export mirror disabled → `✘
+  theScheduledExportTurnsOffWithTheNoticeAndBackOn` (2 issues); the interlude's `.rearm` line removed → `✘
+  theCardIsOwedOnlyWhenTheOpenOwesTheQuestion` (3 issues) — the last is VX-310's second half red-on-old in effect (before
+  this batch the open's interlude had no card for the question: VX-306 rendered it as nothing).
+- The core's protection set (the 81 `@Suite` types under `Tests/VariorumCoreTests/Protection`): Debug `✔ Test run with 327
+  tests in 81 suites passed after 5.337 seconds.`; Release (`swift test -c release`, the same filter) `✔ Test run with 303
+  tests in 77 suites passed after 4.059 seconds.` (no core file changed in this batch).
+- `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx307
+  build-for-testing` → `** TEST BUILD SUCCEEDED **` (the final tree); the phone `-scheme VariorumMobile -destination
+  'generic/platform=iOS Simulator' -configuration Debug -derivedDataPath DerivedData/vx307 build` → `** BUILD SUCCEEDED
+  **`; **the Release check `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Release
+  -derivedDataPath DerivedData/vx307 build` → `** BUILD SUCCEEDED **`**; no warning in a touched file.
+- Release behaviour: unchanged by construction — every new line is a new file, sits behind `roadStanding`/`roadCrossings`
+  (nil on today's road), behind `newRoad`, or under `#if DEBUG` (the walk switch); the pane's today's rows render only with
+  no road model, which is today's road exactly; the controller's new request method is never called there. The binary is
+  not byte-identical (the new types compile in both configurations — rule 24, U1b's precedent).
+
+**THE MAC SUITES THE ORCHESTRATOR RUNS UNDER THE STAGE (from `App/Variorum/`; PENDING):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx307 test \
+  -only-testing:VariorumTests/RoadCrossingFacesTests \
+  -only-testing:VariorumTests/RoadCrossingWordsTests \
+  -only-testing:VariorumTests/ProtectionCrossingRoadTests \
+  -only-testing:VariorumTests/RoadCrossingModelTests \
+  -only-testing:VariorumTests/RoadRearmTests \
+  -only-testing:VariorumTests/ProtectionCrossingRouteTests \
+  -only-testing:VariorumTests/RoadCrossingSurfaceTests \
+  -only-testing:VariorumTests/ProtectionOpenRoadPlantedTests \
+  -only-testing:VariorumTests/ProtectionNoticeFaceTests \
+  -only-testing:VariorumTests/ProtectionOfferFaceTests \
+  -only-testing:VariorumTests/ProtectionPaneRoadRowTests \
+  -only-testing:VariorumTests/ProtectionWalkSwitchTests \
+  -only-testing:VariorumTests/ProtectionWordsPlanTests \
+  -only-testing:VariorumTests/ProtectionLobbyModelTests \
+  -only-testing:VariorumTests/PassphraseReminderTests \
+  -only-testing:VariorumTests/ProtectionFacesRouteTests \
+  -only-testing:VariorumTests/ProtectionRoadRouteTests \
+  -only-testing:VariorumTests/MakeMineRouteTests \
+  -only-testing:VariorumTests/KeychainLeavesTests \
+  -only-testing:VariorumTests/ProtectionKeychainFamilyTests \
+  -only-testing:VariorumTests/KeychainTripwireTests \
+  -only-testing:VariorumTests/ProtectionSystemCompositionTests \
+  -only-testing:VariorumTests/VX310TodayLobbyWitnessTests \
+  -only-testing:VariorumTests/StoreLaunchRouteTests \
+  -only-testing:VariorumTests/AppBootstrapOffMainTests \
+  -only-testing:VariorumTests/SettingsLockCloseTests \
+  -only-testing:VariorumTests/VX206ProtectionLandingTests \
+  -only-testing:VariorumTests/ProtectionSurfaceRenderTests \
+  -only-testing:VariorumTests/ProtectionTierFaceTests \
+  -only-testing:VariorumTests/TravellingDotsIndicatorTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/StatusSeamVocabularyTests
+```
+The first seven are U2a's new suites (8 + 4 + 8 + 8 + 4 + 3 + 3 = **38 tests**; `ProtectionCrossingRouteTests` needs the
+signed test host — a throwaway keychain scope, the real custody leaf, a test bootstrap whose scheduled-export switch is its
+own suite `io.lduarte.Variorum.vx307-crossing-tests`, never the app's domain); then the suites whose files this batch
+touched (the planted road's `biometry`, the interlude model's init, the pane, the walk switch, the custody leaf, the
+bootstrap's ready, the controller's request) and the source pins over the edited files. `VX310TodayLobbyWitnessTests`
+still reports its KNOWN ISSUES (expected — a pass of either is a FAILURE); read the `skipped:` lines.
+
+**THE WALK RECIPE (the orchestrator's, under a held stage claim; the DEV STORE only; light and dark where a face changed —
+Settings' pane and sheet are system chrome, the interlude card speaks the leading voice's fallback):**
+0. Zero Debug instances (discriminate by PATH; a `/Applications` instance is NEVER touched). Build: `cd App/Variorum &&
+   xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx307
+   build`. Launch as the BINARY with stderr captured (`OS_ACTIVITY_DT_MODE=YES [VARIORUM_WALK_TOUCHID=fail] App/Variorum/
+   DerivedData/vx307/Build/Products/Debug/Variorum.app/Contents/MacOS/Variorum 2> ~/vx307-walk/run-N.log &`), quit with ⌘Q,
+   read the `road:` lines. `source ~/.variorum/dev-castle.env`. **PRECONDITION — the dev library's twelve words in hand:**
+   both crossings type the passphrase AND the words (P-VX378-U2-2). If the current dev library's words were never
+   recorded (a new-road library's words are shown once at creation), the walker makes a fresh dev library through the
+   missing face's *Start a New Library* (the old one aside, never deleted) and records its words — and the dev passphrase,
+   set through *Set a passphrase…* — in `dev-castle.env` in the same window (CLAUDE.md: never invent; update the file when
+   one must change). Expected start: Standard, the dev passphrase set.
+1. **Stage 6 under Always ask.** (Optional — rule 11's export notice: before the launch, `defaults write ~/Library/
+   Containers/io.lduarte.Variorum.debug/Data/Library/Preferences/io.lduarte.Variorum.debug.plist
+   variorum.backup.markdownInsurance.enabled -bool true` — the weekly copy's switch.) Settings ▸ Protection → *You're in
+   Standard.* and *Use Castle…* (no Use Standard, no Replace All Keys — P-2). The confirm: *Use Castle*, rule 9's promise
+   (hers), the lead, the floor, the export-first line, (*Your scheduled plain-text export turns off …* when the switch is
+   on), *On this Mac* with *Touch ID* / *Always ask* and its line, *Your passphrase*, *Your twelve words*, *Cancel* · *Use
+   Castle*. Capture (light, dark). Type a WRONG word first → *Those twelve words don't open this library.*, the window never
+   closes. Then the right pair with *Always ask* → the window shows *Opening your library…* → Settings returns ON
+   PROTECTION: *You're in Castle.*, *Use Standard…*, (the export notice with *Turn it back on* · *OK* when it was on —
+   capture; press *Turn it back on* → `defaults read …markdownInsurance.enabled` → 1) and *On this Mac* — *Always ask: no
+   copy of the key stays on this Mac, and you type every time.* · *Use Touch ID…*. The main window's quiet line: *You're in
+   Castle now.* Log: `enter_castle: done #N under …`, `road: useCastle — library … now castle under …`. The live key file
+   has no `"apple"`; quit → relaunch → THE LOBBY asks a secret at once (no Touch ID button; *Touch ID isn't set up for this
+   library.*); the passphrase opens.
+2. **The gate-style row.** Settings ▸ Protection ▸ *Use Touch ID…* → a wrong passphrase → *That passphrase doesn't open this
+   library.*; the right one → *Touch ID opens your library on this Mac.* (log `road: this Mac's gate is touch_id now`);
+   quit → relaunch → the Touch ID prompt (auto-ask) opens it. *Use Always ask* → the row flips; relaunch → typed.
+3. **Stage 7's backup in Castle.** Data Safety ▸ Back Up Now → the new pair's `….keys.json` carries no `"apple"` (`grep -c`).
+4. **Stage 8 — Use Standard.** *Use Standard…* → the confirm: *Use Standard*, the lead, rule 12's sentence (hers, primary
+   ink), *Your passphrase* (once), *Your twelve words*. Capture. Both typed → reopen → *You're in Standard.*, *Use Castle…*,
+   no gate row; the quiet line *You're in Standard now.*; the live key file has an `"apple"` wrap again; quit → relaunch →
+   opens quietly.
+5. **Stage 6 under Touch ID, then STAGE 11's RE-ARM on a planted failure.** *Use Castle…* with *Touch ID* → reopen; quit →
+   relaunch → the Touch ID prompt opens it. Quit → launch with `VARIORUM_WALK_TOUCHID=fail` → log `WALK SWITCH
+   (VARIORUM_WALK_TOUCHID): the next Touch ID press fails on its item` → the auto-ask answers at once with NO prompt → the
+   lobby's line *Touch ID changed since you set it up — unlock with the passphrase*; type the passphrase → THE CARD in the
+   lobby's room: *Touch ID can't open Variorum on this Mac any more. Set it up again? Every finger enrolled on this Mac will
+   open it.* · *Always ask instead* · *Set it up again*. Capture (light, dark). *Set it up again* → the library opens (log
+   `road: the Touch ID re-arm answered yes — a new item at this press`); quit → relaunch (no switch) → the Touch ID prompt
+   opens it. Repeat with the switch → *Always ask instead* → opens; relaunch → no Touch ID button, the quiet line; the gate
+   row reads Always ask.
+6. **Posture after the window:** *Use Standard…* back (rule 12) — the dev store in Standard with the dev passphrase, quiet
+   roads re-made; `defaults delete … variorum.backup.markdownInsurance.enabled` if row 1 set it; record the posture for the
+   coordinator (the Castle walk restores Standard before release — her standing rule).
+
+**PROVISIONALs (each built as its option (a); for the orchestrator to bundle under QUESTIONS at the closeout — the shared
+ledger is the merging session's):**
+- **P-VX307-U2a-1 — the crossings' undrafted words** (`ProtectionWords`' VX-307 section): the doors' names (the canon's)
+  and titles; the posture line (*You're in Standard.* / *You're in Castle.* — today's current-state line's first
+  sentence); Use Castle's lead; the floor (*From now on your passphrase, your twelve words, or Touch ID on this Mac open
+  your library. Lose all three and it is gone.* — the design's §3.1 (2)); the export-first line; rule 25's sentence at the
+  door and the copy's name (*Backup from August 3*); the export turning off (rule 11's parenthetical) and its notice, *Turn
+  it back on* · *OK*; the gate choice's heading and two lines (rule 9 + stage 6); Use Standard's lead; Replace All Keys'
+  lead; the fields; *This library has no passphrase yet. Choose one — Castle needs it.*; the refusals (door closed, door
+  changed, failed, secrets missing, VX-113's changed-elsewhere sentence after the plan's §1, the five door refusals); the
+  three receipts; the gate row's lines and doors; the re-arm's two doors and its failure line (its question is the
+  design's §3.10 sentence). HER sentences verbatim (pinned): rule 12's leave sentence; rule 9's promise. (b) blank until
+  her sitting; (c) other words.
+- **P-VX307-U2a-2 — which refusals render.** (a) BUILT — `.wrongMode`, `.notSynced`, `.nothingToDo` (and `.locked`) render
+  NOTHING (P-2: the door is not this posture's, or has no subject here — so Replace All Keys is absent on a library with no
+  account); every other refusal says its sentence IN PLACE of the door; (b) every refused door rendered disabled with its
+  reason; (c) refused doors never rendered.
+- **P-VX307-U2a-3 — the scheduled export's two places.** The app's only scheduled export is the weekly plain-text copy
+  (`MarkdownInsurance`, this Mac's defaults); the core's rule-11 step reads this Mac's SEALED `DeviceSettings
+  .scheduledExport`, which nothing on the new road set. (a) BUILT — the read takes the switch as this Mac's
+  scheduled-export fact (the door says it turns off exactly when it is on); the Use Castle press mirrors the switch into
+  the sealed settings (`changeSettings`) so the CORE's step decides and owes the notice; the switch follows the act's
+  notice; *Turn it back on* flips both. (b) the Data Safety toggle writes the sealed setting on the new road (a pane
+  change — U2c/VX-379's); (c) the core reads the defaults key (a core change).
+- **P-VX307-U2a-4 — today's Protection rows on the new road.** (a) BUILT — they retire behind the switch there (the
+  current-state line, the checklist, the posture cards with today's checkmark and choose doors, the re-link door, Castle's
+  switches, today's passphrase doors, the reminder): each reads today's posture or acts through today's machinery, which
+  on the new road would contradict the record (a Castle library shown as Standard) or write today's key file; the
+  keystone sentence stays; (b) keep the cards with the new road's checkmark (their words are U2c's/VX-379's to bring to
+  the rules); (c) keep everything (VX-306's posture — the contradiction visible).
+- **P-VX307-U2a-5 — where the re-arm is asked.** (a) BUILT — a card in the interlude (the lobby's room, after the unlock,
+  before the library shows, once per open — P-VX306-U2-1's idiom); an answer that could not be written says so and offers
+  *OK* (nothing decided; the question returns after the next failed press); (b) a calm bar on the open library; (c) a
+  sheet over the window.
+- **P-VX307-U2a-6 — the Touch ID walk switch** `VARIORUM_WALK_TOUCHID=fail` (DEBUG, the new road, a writing road, once per
+  process — P-VX306-U1b-9's fences): the launch's first Touch ID press on an item that exists answers
+  `.failedOnExistingItem` with nothing read. (a) BUILT; (b) a real enrollment change (her hands); (c) no walk of stage 11.
+- **P-VX307-U2a-7 — how a crossing ends.** (a) BUILT — Make this my library's precedent: the confirm closes on success
+  and the act's receipt is spoken once on the reopened window's status seam (`receipt_style` governs it); the leave's
+  `ActOutcome.done` (`[.ruleFive]`) is read as already said at the door (rule 12: "the leave screen says so"); Settings
+  returns on Protection; (b) a Done screen in the sheet (today's ceremony's); (c) both.
+- **P-VX307-U2a-8 — a library with no passphrase at Use Castle.** (a) BUILT — the door asks a NEW passphrase typed twice
+  and the executor sets it (its existing road — rule 3, the lifecycle's stage 2: "nothing below depends on it except
+  entering Castle"); (b) refuse until the set-passphrase sheet ran; (c) one field.
+
+**FINDINGS AND HAND-FORWARDS (routed, not fixed here):**
+- **F-1 (the re-arm, a narrower gap — for the ladder):** `ProtectionOpenRoad.pressTouchID`'s arm for an item whose key
+  OPENS NOTHING here (`.noneOpens`) returns `.failedOnExistingItem` to the lobby (the changed line shows) but leaves
+  `KeychainCustodyLeaf.lastPress` nil (the read succeeded), so the typed open's facts carry no failed press and `assess`
+  owes no re-arm. The real biometry-change case (`errSecAuthFailed` / a not-found read on an existing item) sets
+  `lastPress` and IS served. Not fixed: no pin can press Touch ID (headless or hosted), and it is not this batch's row.
+- **F-2:** an entry that stops past its swap BEFORE its export step finishes at the next open's settle, whose notices the
+  new road does not surface — the weekly copy's switch is not followed there (the core's crash harness covers the act).
+- **F-3:** no lock on the new road (`canLock` false — VX-306 U1b's "every library it opens is Standard") — Castle's idle
+  lock and Lock Now are VX-308/VX-329's now that Castle exists on the new road.
+- **F-4:** the restore hold's ceremony gate (13x F1 R1-M1: Use Castle / Replace All Keys refuse while held) is not carried
+  onto the new road — unreachable for a SYNCED crossing this phase; VX-308's with the account faces.
+- **F-5:** today's store-id envelope beside the library (`variorum-keys-<storeID>.json`) stays under the pre-crossing key
+  (`ensureStoreIdentity` never re-mints an existing id; nothing on the new road opens with it; today's backups still copy
+  it) — VX-329's retirement of today's road.
+- **F-6:** Data Safety's weekly-copy toggle and its Castle warning read today's posture on the new road (the warning won't
+  show in a new-road Castle) — U2c/VX-379's rows.
+- **F-7 (canon, the closeout's):** SurfaceContracts' "Library protection" line gains the crossings' faces (the doors from
+  `assess`, the gate choice and row, rule 11's notice, the re-arm card) in place, one pointer to this plan.
+- **F-8 (the phone):** no crossing faces on the phone this batch (the shared brains — `RoadCrossingsModel`,
+  `RoadCrossingFaces` — are ready); the re-arm card renders there (the shared interlude). MOBILE PARITY line for the
+  closeout.
+
+**Notes:** no machinery deaths; no Sonnet lookup; no scratch worktree; every mutation restored and `cmp`-checked. Commits:
+`6db1518a8` (record) · `8203417f8` (1) · `cd5d99009` (2) · `a9dc3bace` (3) · `1e776c19e` (4) · `443a16c5f` (5) ·
+`d7dd30979` (6) · the close commit.
 
 ## 7. LIVE STATUS
 - 2026-10-18 ~18:45 — KICKED OFF. Preflight complete (the orchestrator): CastleRules + SyncSpec whole, the lifecycle
@@ -567,4 +792,8 @@ dev/real store or `/Applications` touch: the brief's limits.)
 - 2026-10-18 20:18 — U1's Mac batch GREEN under `vx-307-u1-mac` (101/6, 0 skipped; the record's counts flipped).
   **U1 is CLOSED but for the ladder.** VX-416 → In Review at the ladder; Done rides the PR.
 - U2 (VX-417, split §5b into U2a/U2b/U2c): U2a SPAWNING (Opus, briefed §5c).
-- U2a (VX-417): IN PROGRESS — the §6 U2a RECORD is the live status.
+- U2a (VX-417): BUILT (the §6 U2a RECORD) — the crossings' faces on the new road (Use Castle / Use Standard / Replace
+  All Keys read from `assess`, the gate choice and the gate-style row, rule 11's notice and its reversal, VX-310's re-arm
+  card, the Touch ID walk switch); headless 87/12 + the core's protection set both configurations green; Mac
+  `build-for-testing`, the phone build and the Release build check green. The Mac suites (38 new tests + the touched
+  suites — the record's list) and the walk (stages 6/7/8/11) PENDING — the orchestrator's, under the stage.
