@@ -2051,7 +2051,8 @@ scratchpad, pointed at this worktree).
 - **NIT-1** (the `.signIn` services-nil fallback's untrue sentence) — AGREE. NOT-STARTED.
 - **NIT-2** ("now … now" in Move's and the join's moved receipts) — AGREE. NOT-STARTED — a reword in `ProtectionWords`'
   VX-308 U2 section, sentence case, PROVISIONAL with the bundle row.
-- No revert is in flight.
+- MUTATIONS IN FLIGHT on the committed `653d236c2` (KeyDoors.swift only; each restored by `git checkout --` and `cmp`
+  against a pre-mutation copy in this session's scratchpad `fl-prerevert/`).
 
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
