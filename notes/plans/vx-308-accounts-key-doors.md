@@ -1345,9 +1345,62 @@ kept" precedent), the test support (`PlantedRoad`, `ProtectionAccountSupport` �
   types) `✔ 9 tests in 2 suites` with the words suite. RED-ON-OLD BY BEHAVIOURAL REVERT (the pre-VX-448 wiring: the
   road back to `WordsClipboard.copy`, no clear in `finish` or the delegate) → `✘ everyNewRoadLookRidesIt…` (4 issues),
   restored `cmp`-identical.
-- Piece 4 — THE LOOK (R-U3-4, R-U3-7) + THE BANNER'S BRAIN (R-U3-2, R-U3-3 — `RoadStandingModel`): NOT-STARTED.
-- Piece 5 — THE KEY DOORS' FACES, ACTS AND MODELS (R-U3-5): NOT-STARTED.
-- Piece 6 — THE MAC FACES + THE BOOTSTRAP'S WIRING (the pane, the bar, the sheets, `AppBootstrap`): NOT-STARTED.
+- Piece 4 — THE LOOK + THE BANNER'S BRAIN: DONE (`773940c38`). `WordsLookModel` gains `replacesAccountWords` (read at each
+  open) and `saysAccountWords`: a SYNCED library's look always asks first and says F-U2-3's line before anything is minted
+  (her *Show my twelve words* the yes; Cancel clears it); the band passes it to EVERY look it makes (the card, the tour,
+  Settings, the banner); U2's join moment builds its own look and never says it. Every look asks by the core's own fact
+  (`ProtectionOpenRoad.lookAsksPassphrase` — `ProtectionRecord.passphraseExists` over the live key file of the key, R-U3-4).
+  A look's refusals in the pane's idiom (`lookRefusal` — signed out, another account, the vault out of reach, the account
+  moved, an act running, the passphrase changed elsewhere; else U2b's sentence). `RoadStandingFaces.noKeyFileDoor` (the
+  fault AND `report.besideIsEmpty`); `RoadStandingModel`: the banner's ONE look (`openNoKeyFileLook` — through the band, so
+  one look holds words at a time and recording retires the card's offer), `mintLanded` (any home's mint: when the open
+  found no key file anywhere and the key's live file now stands — `keyFileRemade`, the set row re-read, THE BACKUP
+  FOLLOWS: rule 5's pair off the main actor through its one road, then ONE receipt), `showsNoKeyFileBanner` (until the
+  remade file's look closes — the words never vanish from under her). The pair road (`PairOutcome` + `takePair`) MOVED
+  VERBATIM to `ProtectionBackupPair.swift` (diffed byte-equal; the hook's file keeps its `StoreBackup` attachment) so it is
+  harness-visible. Pins `NoKeyFileDoorTests` (7 — the Standard door end to end: nothing asked over a stale stamp, the fresh
+  file, the banner standing while words show, the pair carrying the fresh file, the receipt, the banner retiring, the next
+  open fault-free; the SYNCED door: asked first with the account line, the fresh file with the account's passphrase lock
+  and master copy, the vault's words changed; the stray arm — no door, the stray untouched; F-U2-3 on an everyday synced
+  library through the real road and unsynced unchanged; the look's pure rule; R-U3-4's fact; the refusal idiom) —
+  headless `✔ 23 tests in 3 suites` with `WordsBandTests` + `ProtectionWordsVX307Tests` (U2b's look unchanged). RED-ON-OLD
+  BY BEHAVIOURAL REVERT (`KeyDoors.swift` back to `8e465f7ea`, the pre-arm core) → `✘ … 4 issues` (both doors: the look
+  refused, nothing written); restored `cmp`-identical. MUTATIONS (restored `cmp`-identical): MF1 the look asks by the
+  record's stamp → `✘ theBannersDoorMints…` (2); MF2 the account line never said → 3 tests red (4 issues).
+- Piece 5 — THE KEY DOORS: DONE (`07e668e62`). `RoadKeyDoorFaces` (pure — `assess`'s three doors over the pane's one read:
+  Change and Reset only where a passphrase exists by the core's fact AND the key's live file stands — *Set a passphrase…*
+  in their place otherwise, only New Words in rule 27's state; each says VX-263's line, synced the rule-7 line; Standard's
+  forgot road `.plainConfirm`, Castle's `.wordsOrTouchID(touchID:)` — Touch ID where this Mac has its item for the current
+  key and a finger; refusals via `RoadCrossingFaces.refusalSentence`). `ProtectionKeyDoorRoad` (the read; the press ON THE
+  OPEN SESSION — one act at a time, the door RE-READ (VX-108), the sign-in now adopted (R-2), Castle's Touch ID PRESSED as a
+  read of this Mac's item, then `changePassphrase` / `resetPassphrase`; an act stopped mid-plan says the next open finishes
+  it). `RoadKeyDoorsModel` (bootstrap-owned; refresh with the crossings' landing rule; `open` presents `.keyDoor` through
+  THE ONE PRESENTER — New Words never) + `RoadKeyDoorConfirmModel` (exactly the door's fields; the words' shape first; a
+  mismatch refused before the road; a changed door re-shown; the receipt once; the doors re-read). The presenter gains
+  `.keyDoor`. The Mac's `RoadKeyDoorSheet` + `RoadKeyDoorsSection` and the host's case landed in the same commit (every
+  commit compiles). Pins `RoadKeyDoorRoadTests` (11) + `RoadKeyDoorsModelTests` (3) — headless `✔ 14 tests in 2 suites`
+  (one TEST bug fixed before the commit: a discarded `PlantedRoad` freed its temp slot under the read). MUTATIONS
+  (restored `cmp`-identical): MK1 the passphrase gate dropped → `✘ thePassphraseDoorsStandOnly…` (1); MK2 the Touch ID
+  press skipped → `✘ castlesResetByTouchIDPressesTheItemFirst` (3); MK3 the VX-108 re-read skipped → `✘ vx108_…` (1); MK4
+  the sign-in now not adopted (R-2) → `✘ syncedChange…` (4); MK5 the synced rule-7 line never said → `✘ syncedDoorsSay…`
+  (1).
+- Piece 6 — THE MAC FACES + THE BOOTSTRAP'S WIRING: DONE (this commit). `AppBootstrap`: `roadKeyDoors` made once at the
+  first new-road ready beside the account section (the one presenter), `keyDoorRoads()` (read · press on the open session
+  off-main · receipt → the status seam · landed → the account section re-read), handed to each open's faces
+  (`roadStanding.keyDoors`). `ProtectionPane`: the set row, then `RoadKeyDoorsSection`, then the words section handed the
+  key doors (New Words' face — its refusal in place, VX-263's line beside the door), the key doors re-read at each
+  appearance. `WordsLookPanel`'s ask says F-U2-3's line above the passphrase field. `ProtectionRoadBar`: THE BANNER IS THE
+  DOOR where the place beside is empty — her U2-7 first sentence, the door line as the whole door (rule 2's idiom), the
+  look inline in the bar (`WordsLookPanel`), the refusal under it; the stray arm keeps her U2-7 words (`Text(ProtectionWords
+  .noKeyFileAfterAQuietOpen)` — `ProtectionWordsVX307Tests`' source pin holds); the account sentence in its open-library
+  variant (F-U2c-5). `TravellingDotsIndicatorTests`' surface list gains `RoadKeyDoorSheet.swift`. Mac suites (BUILT, the RUN
+  PENDING under the stage): `RoadKeyDoorSurfaceTests` (5 — the section in every shape, each confirm's shape, the words
+  section with New Words' face and the synced ask, the banner as the door / with the look / as her words over a stray, the
+  composition by source) + `WordsClipboardLockRouteTests` (1 — VX-448's clear AT THE LOCK through `AppBootstrap` over the
+  planted road: a private board's concealed copy emptied when the reopen lands in the lobby; red on old by construction —
+  the pre-VX-448 bootstrap cleared nothing at the lock). `xcodebuild … build-for-testing` → `** TEST BUILD SUCCEEDED **`
+  (one needless `try` in the new route pin dropped after it; no other warning in a touched file). THE WHOLE HARNESS:
+  `✔ Test run with 255 tests in 39 suites passed` (the 225/34 baseline + 30/5 new).
 - Piece 7 — THE CLOSE (counts, builds, the Mac-suite list, the walk recipe, PROVISIONALs, findings): NOT-STARTED.
 - No revert is in flight.
 

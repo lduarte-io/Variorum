@@ -184,10 +184,16 @@ struct ProtectionPane: View {
             if let roadStanding, roadStanding.offersSetPassphrase {
                 roadPassphraseSection(roadStanding)
             }
+            // VX-308 U3: the key doors where a passphrase exists — Change passphrase…, Reset forgotten passphrase… (as
+            // `assess` says them over the pane's one read; *Set a passphrase…* above stands in their place otherwise).
+            if let keyDoors = roadStanding?.keyDoors {
+                RoadKeyDoorsSection(model: keyDoors)
+            }
             // VX-307 U2b (rules 2 and 7 as amended): the twelve words' door — the one the card's ✕ names ("look in
-            // Settings, Protection"). A look mints fresh words through rule 6's act; nothing keeps them.
+            // Settings, Protection"). A look mints fresh words through rule 6's act; nothing keeps them. VX-308 U3: this
+            // door is the key doors' New Words (its face read from `assess`, its refusal in its place).
             if let roadStanding, roadStanding.band != nil {
-                WordsLookSection(standing: roadStanding)
+                WordsLookSection(standing: roadStanding, keyDoors: roadStanding.keyDoors)
             }
             // VX-307 U2a: the new road's crossings — the posture, Use Castle / Use Standard / Replace All Keys as
             // `assess` says them, rule 11's notice, the gate-style row (nil on today's road).
@@ -225,6 +231,8 @@ struct ProtectionPane: View {
         .task { await roadStanding?.crossings?.refresh() }
         // VX-308 U1: and the account section's.
         .task { await roadStanding?.account?.refresh() }
+        // VX-308 U3: and the key doors'.
+        .task { await roadStanding?.keyDoors?.refresh() }
         // VX-308 U1 (VX-239 + VX-243): every new-road protection sheet — the crossings' confirm, the account's, the
         // signed-out screen, sign in and out — through THE ONE PRESENTER (the bootstrap's, so a crossing's confirm
         // survives the reopen under it), presented here, its host, alone.

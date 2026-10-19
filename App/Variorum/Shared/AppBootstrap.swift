@@ -196,6 +196,9 @@ final class AppBootstrap {
     /// first ready on the new road; the presenter drops its sheet at every settled closed state (`finish`).
     private(set) var protectionSheets: ProtectionSheetPresenter?
     private(set) var roadAccount: RoadAccountModel?
+    /// VX-308 U3 — the key doors (Change passphrase…, Reset forgotten passphrase…, New Words' face), made once beside the
+    /// crossings and the account section for the same reason, presenting through the one presenter.
+    private(set) var roadKeyDoors: RoadKeyDoorsModel?
     /// VX-307 U2a — this Mac's scheduled plain-text export (the weekly copy's switch, `MarkdownInsurance`): the
     /// production instance's standard defaults; a test bootstrap's own suite, never the app's domain.
     @ObservationIgnored private let exportSwitch: ScheduledExportSwitch
@@ -667,9 +670,14 @@ final class AppBootstrap {
             if newRoad, road != nil, roadAccount == nil, let sheets = protectionSheets {
                 roadAccount = RoadAccountModel(roads: accountRoads(), presenter: sheets)
             }
+            // VX-308 U3: the key doors, made once the same way.
+            if newRoad, road != nil, roadKeyDoors == nil, let sheets = protectionSheets {
+                roadKeyDoors = RoadKeyDoorsModel(roads: keyDoorRoads(), presenter: sheets)
+            }
             roadStanding?.crossings = roadCrossings
             roadStanding?.account = roadAccount
             roadStanding?.sheets = protectionSheets
+            roadStanding?.keyDoors = roadKeyDoors
             let view: AppDatabase
             if let binding {
                 // The re-open after a lock: the SAME ambient view adopts
@@ -1378,6 +1386,32 @@ final class AppBootstrap {
             receipt: { [weak self] text in self?.roadStanding?.speak?(text) },
             // VX-308 U2 — the words moment's Copy: the Mac's one words clipboard rule (the card's own road).
             copyWords: { Self.copyWords($0) })
+    }
+
+    /// VX-308 U3 — the key doors' roads on the new road. Each reads the CURRENT session at its call (a reopen replaces it);
+    /// the press runs on the OPEN session (the key doors re-lock the current key and never swap it — no reopening seam);
+    /// a landed act speaks its receipt on the status seam and re-reads the account section (a synced passphrase change is
+    /// the account's too).
+    func keyDoorRoads() -> RoadKeyDoorRoads {
+        let exports = exportSwitch
+        let signInNow = signInNow
+        return RoadKeyDoorRoads(
+            read: { [weak self] in
+                guard let self, self.newRoad, case .ready = self.state, let session = self.roadSession else { return nil }
+                return await Task.detached(priority: .userInitiated) {
+                    await ProtectionKeyDoorRoad.read(session, signIn: signInNow(), exportSwitch: exports)
+                }.value
+            },
+            press: { [weak self] request in
+                guard let self, self.newRoad, case .ready = self.state, let session = self.roadSession else {
+                    return .refused(ProtectionWords.crossingFailed)
+                }
+                return await Task.detached(priority: .userInitiated) {
+                    await ProtectionKeyDoorRoad.press(session, request: request, signIn: signInNow(), exportSwitch: exports)
+                }.value
+            },
+            receipt: { [weak self] text in self?.roadStanding?.speak?(text) },
+            landed: { [weak self] in await self?.roadAccount?.refresh() })
     }
 
     /// **P-VX308-U1-F1's hook** (the U1 ARBITRATION's refined (b)) — the Account sheet's Delete Account landed for
