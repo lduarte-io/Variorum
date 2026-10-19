@@ -376,10 +376,26 @@ fetch, no network.
   as the exact removal — machinery honesty); M-FP3 the half-landed cleanup removed → `✘ aFarCopyThatDoesNotVerify…` (1);
   M-FP4 the existing-name guard removed → `✘ aNameAlreadyInThePickedFolderIsNeverOverwritten` (2 — the planted file
   REMOVED by the failed copy's cleanup: the guard is what keeps her file).
-- Piece 2 — VX-397: the far due-check (piece 1's) + Data Safety's counts on the new road: NOT-STARTED — R-U1a-3, R-U1a-4.
+- Piece 2 — VX-397: the far due-check (piece 1's, DONE there) + Data Safety's counts on the new road: DONE (`2c3175cda`).
+  `Shared/Protection/ProtectionCopyCounts.swift` (harness-visible): `RoadCopyCounts` + `ProtectionCopyCounts.read(session)`
+  — a FRESH catalogue read, `OwnCopies.summary` per place for the open library and this Mac. `RoadStandingModel` gains
+  `copyCounts` (nil on a hand-made face; `make` builds it from the open's session, off the main actor). `DataSafetyModel`
+  gains `roadCounts` (nil by default — today's road) and two pure maps `counted(_:_:)` (a row's count/newest/oldest from
+  the pairs; its path and its folder's state as read); `refresh` takes the road's counts BEFORE assigning, so the face
+  never flashes today's flat counts on the new road; `DataSafetyPane` hands `roadStanding?.copyCounts` to the model (the
+  VX-379 gate: nil on today's road ⇒ `primary = read.primary`, `destination = read.secondary`, byte-unchanged). Pins:
+  `ProtectionCopyCountsTests` (3, headless — the planted world: today's flat files in both places, another Mac's fresh
+  pair in the shared folder AND beside the library, another library's pair, an orphan snapshot, a pair stamped ahead —
+  counts 2 and 2, newest the trusted one; none for a library with no pairs; the pair road's own pairs counted in both
+  places) `✔ 3 tests in 1 suite`; the whole harness `✔ Test run with 285 tests in 45 suites passed`. MUTATIONS on
+  `2c3175cda` (each restored by `git checkout --`, `cmp`-identical): M-DS1 the counts in VX-397's WRONG SHAPE (every
+  backup copy in the place, any Mac, any library) → `✘ theCountsAreThisMacsPairs…` (2 issues); M-DS2 the picked folder's
+  count read from the container → `✘` the same (1). MAC PINS (BUILT — `build-for-testing` `** TEST BUILD SUCCEEDED **`, no
+  warning in a touched file; the RUN PENDING the stage): `DataSafetyRoadCountsTests` (4 — the new road's rows 2 and 1
+  over the planted world with today's road's rows 3 and 2 beside them; the maps; the two restatements equal to
+  `StoreBackup`'s — `farInterval` = `Configuration().interval`, `stampIsTrusted` at five offsets; the composition by
+  source). Its RED-ON-OLD is the orchestrator's behavioural revert (the recipe in the close).
 - Piece 3 — RETENTION WIRED (VX-302, VX-411): NOT-STARTED — R-U1a-5.
 - Piece 4 — VX-450 (Change/Reset roll back on a resume that cannot finish): NOT-STARTED — R-U1a-6.
 - Piece 5 — the close (counts, the Mac-suite list, PROVISIONALs, findings): NOT-STARTED.
-- MUTATIONS IN FLIGHT on the committed `2c3175cda` (`ProtectionCopyCounts.swift`; restore = `git checkout --`, then `cmp`
-  against `u1a-prerevert/`): M-DS1 the counts in VX-397's wrong shape (every backup copy in the place, any Mac, any library),
-  M-DS2 the picked folder's count read from the container.
+- No revert is in flight.
