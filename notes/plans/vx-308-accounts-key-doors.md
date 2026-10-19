@@ -824,9 +824,20 @@ fixed, the rebuild green); the phone `** BUILD SUCCEEDED **`.
 The SyncStatusViews face pins (`PostureSwitchTests` · `SyncStalledRowTests` · `EncryptionFlowTests` ·
 `TierAndOnboardingTests`) ride the NEXT stage batch's list.
 
-### U2 RECORD — THE JOIN AND THE FOLLOW FACES (Opus implementer, 2026-10-19; VX-418's second half + VX-107 + VX-113 — IN PROGRESS)
+### U2 RECORD — THE JOIN AND THE FOLLOW FACES (Opus implementer, 2026-10-19; VX-418's second half + VX-107 + VX-113 — BUILT; the Mac suites and the walk PENDING)
 
-**Not done in U2, first:** (filled at the close — PENDING)
+**Not done in U2, first:**
+- **No Mac suite was RUN and no walk was made** (the brief: headless + `build-for-testing` only — no `xcodebuild test`, no
+  stage, no Debug launch, no store touch). The Mac suites were BUILT (`build-for-testing` green); the list and the walk
+  recipe below are the orchestrator's. What DID run: every new suite but the Mac-only one HEADLESS in this session's
+  SwiftPM harness over the real `Shared/Protection/` files (225 / 34), and the core's protection set in both
+  configurations (no core file changed — zero `Sources/`, `Server/` or `Sync/` lines). No live network call anywhere.
+- **The key doors are U3's** (VX-113's "changed elsewhere" therefore has no in-app road to MAKE the change this phase —
+  it is pinned over the planted vault, and its walk waits for U3's Change Passphrase door). **The phone** has no account
+  section (the brains are shared; MOBILE PARITY below). **Today's road** is untouched.
+- **A join that stops past its swap** is finished by the next open's settle with no receipt and no words moment (F-U2-2 —
+  routed, not built: VX-107's class for the join, outside this unit's rows).
+- The canon delta and the QUESTIONS bundle rows are the closeout's (the shared-ledger rule); the PROVISIONALs are below.
 
 **Preflight (complete, not delegated):** CLAUDE.md + its canon; the resiliency protocol; CastleRules WHOLE; SyncSpec WHOLE;
 SurfaceContracts (the app + Doors/protection); this plan whole (§1–§5d, the §6 U1 RECORD + its arbitration + Mac batch, the
@@ -942,10 +953,260 @@ worktree, the tree at `d6595ba6d`): `✔ Test run with 192 tests in 30 suites pa
   around the follow into Castle → `✘ … with 1 issue`. **VX-107's red-on-old, in effect:** B is the pre-fix behaviour
   (the settle's follow said nothing — the Done lost whole); A is today's road's failure shape on the new road (a face that
   reads what the resume happened to say loses it at the second crash).
-- Piece 4 — THE MODELS (one secret, the gate, the words moment): NOT-STARTED.
-- Piece 5 — THE MAC FACES + THE BOOTSTRAP'S SEAM: NOT-STARTED.
-- Piece 6 — THE CLOSE (counts, the Mac-suite list, PROVISIONALs, findings): NOT-STARTED.
-- No revert is in flight.
+- Piece 4 — THE MODELS: DONE (`18cd0123e`). `RoadAccountConfirmModel`: ONE secret where the door asks it (rule 14 — the
+  passphrase, the words, or both, as typed; the words' shape checked before the road is asked; never a new secret); the
+  gate choice into Castle carried to the road (`RoadAccountRequest.gate`; a re-shown door with no Touch ID falls back to
+  Always ask); THE WORDS MOMENT (R-U2-5): a join whose outcome says `wordsReplacedByAccount` keeps its sheet — the act's
+  `landed` (its receipt, the pane's re-read) runs at once, then `moment` = `.shown(WordsLookModel)` (the typed words via a
+  mint that hands them back — nothing minted, nothing stored, `saysRuleSix` false, Copy through the injected words road)
+  closed behind the look's own warning, or `.notShown` (the passphrase typed) closed by OK; a window closing under it
+  closes it (the act had landed — never a "nothing written" cancel); rule 7's hand-up (set-up) and a join whose words
+  were already the library's show nothing. `RoadAccountModel.open` speaks a landed act's receipt ONCE (at the landing, or
+  at the close when no moment stands). `RoadAccountRoads.copyWords` (new; default nothing). Pins `RoadJoinFollowModelTests`
+  (6). HEADLESS, the whole harness: `✔ Test run with 225 tests in 34 suites passed`. MUTATIONS (restored `cmp`-identical):
+  the moment never opened → `✘ … with 4 issues`; one secret's words dropped when a passphrase is typed → `✘ … with 1 issue`.
+- Piece 5 — THE MAC FACES + THE ONE REOPENING SEAM: DONE (`eea4b5892`). `AppBootstrap`: `crossOnNewRoad`'s seam
+  EXTRACTED into `reopenAround` (its order exactly the crossing's: `onWillLock`, `.opening`, the resident and per-open state
+  dropped, the pool closed through the binding, the act off-main, `endAct`, the owed receipts handed to the reopen, the
+  reopen through the new road with the key that opens the slot, Settings asked back) — `crossOnNewRoad` now calls it
+  (behaviour unchanged) and so does the new `accountActOnNewRoad` (a join across postures and every follow — R-U2-2): the
+  preflight first (R-U2-3), then `ProtectionAccountRoad.perform` inside the seam, its receipt owed to the reopen only when
+  it landed WHOLE (else the reopen's settle says the follow's Done — VX-107, never twice), the press answering with no
+  receipt of its own. `accountRoads()` routes a re-keying door there and hands the words moment the Mac's ONE words
+  clipboard rule (`Self.copyWords` → `WordsClipboard.copy` — the card's own road; U3's VX-448 changes it for every look at
+  once). `RoadAccountSheet.swift`: the section renders the follow FIRST with its notice beside its door, the join and
+  Move as doors (Move's not-yet arm in its own row; U1's separate not-yet row retired); the confirm asks one secret (the
+  account's fields for a join/Move, this library's for the follow), the gate choice (the crossings' own), rule 25's copies
+  bulleted, her sentences (rules 16, 12, 9) in the primary ink, and rule 7's moment (`WordsLookPanel` under her sentence
+  in the primary ink, or the notice alone with OK; `interactiveDismissDisabled` while it stands). Mac suite
+  `RoadJoinFollowSurfaceTests` (5: the section's new shapes hosted; each new sheet shape hosted — one secret with and
+  without Touch ID, the follow out, both moments; the moment's one-look idiom by source, no raw pasteboard; THE FOLLOW
+  THROUGH THE SEAM via `AppBootstrap` over the planted road — a same-posture join on the open session with its notice-only
+  moment, the account's other device entering Castle, the follow's press closing the pool and reopening in Castle under a
+  new key, the reopened window's status seam saying the Done ONCE; VX-107 THROUGH THE SEAM — the follow stopped past its
+  swap, the reopen's settle finishing it and saying the Done once, by the settle, never the press) — BUILT, the RUN
+  PENDING under the stage. `build-for-testing` → `** TEST BUILD SUCCEEDED **`, no warning in a touched file.
+- Piece 6 — THE CLOSE: DONE (this commit) — the counts, the Mac-suite list, the walk recipe, the PROVISIONALs and the
+  findings below.
+- No revert is in flight (every mutation ran on a committed tree and was restored by `git checkout --`, `cmp`-checked
+  against a pre-mutation copy; no scratch worktree).
+
+**THE FACES AS BUILT (for the ladder):** the pane's one read (U1's — the sign-in now, a fresh vault read; it now also
+keeps the vault row it fetched, `ProtectionPaneFacts.snapshot`) feeds `RoadAccountFaces.derive`: turning sync on into an
+account that already syncs is the JOIN door (`joinDoor` — the plan said at the consent, one secret, the gate into
+Castle), another account signed in gives MOVE (the same door shape behind rule 16's leave; no vault there → not yet),
+and in sync with the account moved elsewhere the FOLLOW door (`followDoor` — its notice, rule 10's or rule 12's
+sentence, its ask, the gate into Castle). A press: the confirm composes exactly the ask (one secret) and the gate; a door
+that changes no key (set-up, a same-posture join or Move, the leaves) runs `ProtectionAccountRoad.press` on the open
+session (re-read, then `perform`); a re-keying door (`spec.rekeys` — a join across postures, every follow) runs
+`AppBootstrap.accountActOnNewRoad`: `ProtectionAccountRoad.preflight` (the door re-read, the typed secret against the
+vault row — the core's own refusals, VX-113's among them; all reads), then `reopenAround` (the crossing's one seam) around
+`perform` (rule 11 first when it enters Castle; the core's `enroll`/`move`/`follow`), the receipt owed to the reopen. A
+join whose words were replaced keeps its sheet for rule 7's moment. VX-107: every open on the new road reads the act in
+flight before its settle, and a settle that finished a follow (`RoadSettledFollow.kind` — `fromKind` against the mode
+after) owes `followDone(kind)` among the open's receipts. ZERO `Sources/`, `Sync/`, `Server/`, schema or dependency lines;
+no new core act.
+
+**COUNTS (the final tree — `eea4b5892` + this record):**
+- HEADLESS HARNESS (this session's scratchpad package `u1-harness` — U1's recipe pointed at this worktree: tools 6.2, macOS
+  26, the app's concurrency settings, the worktree's core by path; its `Variorum` target symlinks every
+  `Shared/Protection/*.swift` but `ProtectionBackupHook.swift` and `WireVaultLeaf.swift`, plus `Shared/LibraryOpenCopy
+  .swift`, plus the U2c stub file + `ProtectionCopy`'s three sign-out strings; its test target symlinks U1's set (the
+  baseline `✔ 192 tests in 30 suites` on `d6595ba6d`) plus this unit's `RoadJoinFollowWordsTests`,
+  `RoadJoinFollowFacesTests`, `ProtectionJoinFollowRoadTests`, `RoadJoinFollowModelTests`): **`✔ Test run with 225 tests in
+  34 suites passed`** (192 + 6 + 9 + 12 + 6; U1's two flipped pins inside the 192).
+- MUTATIONS (each on a committed tree, restored `cmp`-identical — the pieces' lines above): piece 1 (1), piece 2 (2),
+  piece 3 (5 — VX-107's two behavioural reverts among them), piece 4 (2). Every one red.
+- The core's protection set (the 82 `@Suite` types under `Tests/VariorumCoreTests/Protection` — U1's filter; no core file
+  changed): Debug `✔ Test run with 334 tests in 82 suites passed after 6.104 seconds.`; Release (`swift test -c release`,
+  the same filter) `✔ Test run with 310 tests in 78 suites passed after 4.535 seconds.`
+- `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx308
+  build-for-testing` → `** TEST BUILD SUCCEEDED **` (no warning in a touched file); the phone `-scheme VariorumMobile
+  -destination 'generic/platform=iOS Simulator' -configuration Debug -derivedDataPath DerivedData/vx308 build` → `** BUILD
+  SUCCEEDED **`; **the Release check `-configuration Release build` → `** BUILD SUCCEEDED **`**.
+- Release behaviour: unchanged by construction — every new line sits behind `roadStanding`/`roadAccount`/`newRoad` (nil
+  or false on today's road), or in the new road's open (`ProtectionOpenRoad`, reached only behind the switch); the
+  extraction of `reopenAround` serves only new-road acts. The binary is not byte-identical (rule 24's precedent).
+
+**THE MAC SUITES THE ORCHESTRATOR RUNS UNDER THE STAGE (from `App/Variorum/`; PENDING):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx308 test \
+  -only-testing:VariorumTests/RoadJoinFollowSurfaceTests \
+  -only-testing:VariorumTests/RoadJoinFollowWordsTests \
+  -only-testing:VariorumTests/RoadJoinFollowFacesTests \
+  -only-testing:VariorumTests/ProtectionJoinFollowRoadTests \
+  -only-testing:VariorumTests/RoadJoinFollowModelTests \
+  -only-testing:VariorumTests/RoadAccountWordsTests \
+  -only-testing:VariorumTests/RoadAccountFacesTests \
+  -only-testing:VariorumTests/ProtectionAccountRoadTests \
+  -only-testing:VariorumTests/RoadAccountModelTests \
+  -only-testing:VariorumTests/RoadAccountSurfaceTests \
+  -only-testing:VariorumTests/ProtectionAccountRouteTests \
+  -only-testing:VariorumTests/ProtectionSheetPresenterTests \
+  -only-testing:VariorumTests/FollowingSessionProviderTests \
+  -only-testing:VariorumTests/RoadCrossingFacesTests \
+  -only-testing:VariorumTests/RoadCrossingWordsTests \
+  -only-testing:VariorumTests/RoadCrossingModelTests \
+  -only-testing:VariorumTests/ProtectionCrossingRoadTests \
+  -only-testing:VariorumTests/ProtectionCrossingRouteTests \
+  -only-testing:VariorumTests/RoadCrossingSurfaceTests \
+  -only-testing:VariorumTests/ProtectionOpenRoadPlantedTests \
+  -only-testing:VariorumTests/ProtectionOfferFaceTests \
+  -only-testing:VariorumTests/ProtectionNoticeFaceTests \
+  -only-testing:VariorumTests/ProtectionRestoreReceiptTests \
+  -only-testing:VariorumTests/ProtectionRule27FaceTests \
+  -only-testing:VariorumTests/ProtectionWordsVX307Tests \
+  -only-testing:VariorumTests/ProtectionFacesRouteTests \
+  -only-testing:VariorumTests/ProtectionRoadRouteTests \
+  -only-testing:VariorumTests/MakeMineRouteTests \
+  -only-testing:VariorumTests/RoadRearmTests \
+  -only-testing:VariorumTests/WordsBandTests \
+  -only-testing:VariorumTests/WordsBandSurfaceTests \
+  -only-testing:VariorumTests/ProtectionPaneRoadRowTests \
+  -only-testing:VariorumTests/VX379PaneRowsTests \
+  -only-testing:VariorumTests/ProtectionSurfaceRenderTests \
+  -only-testing:VariorumTests/ProtectionTierFaceTests \
+  -only-testing:VariorumTests/AppBootstrapOffMainTests \
+  -only-testing:VariorumTests/StoreLaunchRouteTests \
+  -only-testing:VariorumTests/SettingsLockCloseTests \
+  -only-testing:VariorumTests/VX206ProtectionLandingTests \
+  -only-testing:VariorumTests/VX310TodayLobbyWitnessTests \
+  -only-testing:VariorumTests/TravellingDotsIndicatorTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/StatusSeamVocabularyTests \
+  -only-testing:VariorumTests/PostureSwitchTests \
+  -only-testing:VariorumTests/SyncStalledRowTests \
+  -only-testing:VariorumTests/EncryptionFlowTests \
+  -only-testing:VariorumTests/TierAndOnboardingTests
+```
+The first five are U2's (5 + 6 + 9 + 12 + 6 = **38 tests**; `RoadJoinFollowSurfaceTests`' two seam pins need the signed
+test host — a planted road, no keychain, the planted vault; the four headless ones also ran green in the harness). Then
+U1's suites this unit touched (two pins flipped deliberately, one shape line, the retired line's list) and their
+neighbours; U2a's crossing suites (the seam's extraction and the two rule-11 helpers `cross` now shares —
+`ProtectionCrossingRouteTests` exercises the seam through the bootstrap); the open road's suites (its report and standing
+faces gained the settled follow); the words band (the look the moment rides); the pane and bootstrap neighbours; the
+source pins over edited files; and **the orchestrator's VX-314 status-face change riding this batch: `PostureSwitchTests`
+· `SyncStalledRowTests` · `EncryptionFlowTests` · `TierAndOnboardingTests`**. `VX310TodayLobbyWitnessTests` still reports
+its KNOWN ISSUES (a pass of either is a FAILURE); read the `skipped:` lines. **The optional red legs:** VX-107 through the
+bootstrap — in `ProtectionOpenRoad.open` replace the `report.settledFollow = RoadSettledFollow.kind(…)` assignment with
+nothing (the pre-U2 open) → `RoadJoinFollowSurfaceTests.vx107_aFollowStoppedPastItsSwapIsSaidOnceByTheReopensSettle`
+red (nothing said), restore by `git checkout --`.
+
+**THE WALK RECIPE (the orchestrator's, under a held stage claim; the DEV STORE only; against the THROWAWAY project with
+U1's walk door — `VARIORUM_WALK_PROJECT_URL` + `VARIORUM_WALK_ANON_KEY` from `~/.variorum/dev-vault-throwaway.env`, never
+echoed; light and dark where a face changed; never the production mirror):**
+0. U1's recipe rows 0–2 (zero Debug instances by path; build; launch the binary with the walk's door; `source` the dev
+   pair and `export`; sign in as throwaway account A; *Turn on sync…* — the set-up with the dev pair — so A's vault holds
+   the dev pair). **Caveat for every row below:** two libraries on ONE Mac share the dev scope's sync-keys items (keyed by
+   account) — a library set aside does not take its sync keys with it; the core reads them by account. Expected and
+   harmless here (the libraries are the same account's devices).
+1. **The join, the passphrase typed (the notice-only moment).** U1's rows 3–4 (sign out; the signed-out road's *Use this
+   Mac only…* → the library local again). Sign in as A → Settings ▸ Protection ▸ Sync: *Turn on sync…* now opens THE JOIN
+   — *Your account already syncs. Type its passphrase or its twelve words once — …*, *A device holds one pair of secrets
+   at a time.*, *Your account is in Standard, like this library.*, the two fields *Your account's passphrase* / *Or your
+   account's twelve words*. Capture (light, dark). A WRONG passphrase → refused in place, the window never closes. The dev
+   PASSPHRASE → the sheet turns into the moment: *Your library's twelve words are now your account's twelve words — the
+   ones you keep for your account. You joined with your passphrase, …* · *OK* (capture); the status line *Sync is on. Your
+   library uses your account's passphrase and twelve words now.*; the section: in sync. (The dev words still open it —
+   they ARE the account's; the edge F-U2-1 names.)
+2. **The follow into Castle, then out (one Mac, two libraries — the account's "other device" is a throwaway library B).**
+   Quit. Library A aside whole (U2b's walk row 1 — `mkdir -p ~/vx308-walk/A && mv` the slot, its sidecars and key files);
+   launch → *Start a New Library* → B; Settings ▸ Protection ▸ Sync → signed in as A → *Turn on sync…* = the join → the
+   dev passphrase → B joins A (the notice-only moment → OK). B: *Use Castle…* (synced — account-wide; both secrets: the dev
+   pair; Always ask) → B in Castle; the account in Castle. Quit; B aside (`~/vx308-walk/B`), A back (rule 21's
+   different-library notice once → OK). A's Settings ▸ Protection: the crossings say *Your account changed on another
+   device. Follow it first.*; Sync says *Your account entered Castle on <this Mac's name> on <today>.*, *Until this Mac
+   follows, it can still read what it already has — …*, *Follow your account…*. Capture (light, dark). Press → the
+   confirm: the notice lines, *Type your passphrase or your twelve words once to follow it here.*, the gate choice, *Your
+   passphrase* / *Or your twelve words*. A WRONG passphrase → refused in place. The dev passphrase (*Always ask*) → the
+   window reopens → the status line *Your account entered Castle on another device, and this Mac followed it.*; Settings
+   on Protection: *You're in Castle.*; Sync: in sync, no follow. Capture. Log: `follow: done #N under …`, `road: follow —
+   library … now names account …, castle under …`. Then the follow OUT: quit; A aside, B back → B: *Use Standard…* (both
+   secrets) → quit; B aside, A back → Sync: *Your account left Castle on <…> on <…>.*, rule 12's sentence *Your library and
+   all your backups will open through your Apple account and this Mac again; if you want Castle-era writing to stay
+   Castle-protected, don't leave.*, *This Mac follows it out without asking you for anything.*, *Follow your account…* →
+   the confirm with NO fields → *Follow* → the reopen → *Your account left Castle on another device, and this Mac followed
+   it out.*; *You're in Standard.*; the live key file has an `"apple"` wrap again. Capture each.
+3. **(Optional) the shown moment — on THROWAWAY words only, never the dev pair on screen:** a throwaway account C set up by
+   a throwaway library (words minted by its card's look and kept nowhere but the walker's head for the minute), then a
+   second throwaway library joining C typing those WORDS → the moment shows them in two columns under rule 7's sentence
+   (her words), *Copy* (the existing 60-second rule — U3 changes it), *I've written them down* → her warning → *Close*.
+   Capture. Both throwaway libraries aside afterwards.
+4. **Posture after the window:** A back in place, LOCAL (Settings ▸ Sync ▸ *Stop syncing here…* — rule 16, no key or secret
+   change) in Standard, the dev pair unchanged (no key door ran; the passphrase-typed join adopted the account's pair,
+   which IS the dev pair), **SIGNED OUT before the last quit** (F-U1-5); B (and any throwaway library) aside under
+   `~/vx308-walk/`, removed at closeout; the throwaway accounts hers with the project. VX-113's walk waits for U3's
+   Change Passphrase door (pinned over the planted vault here).
+
+**PROVISIONALs (each built as its option (a); for the orchestrator to bundle under QUESTIONS at the closeout — the shared
+ledger is the merging session's):**
+- **P-VX308-U2-1 — the join's and the follow's undrafted words** (`ProtectionWords`' VX-308 U2 section): the join's lead,
+  its plan lines, its fields, its receipts; the passphrase-typed moment's sentence and *OK*; Move's door/title/lead/button;
+  the follow's door/title/button, its notice, its ask, rule 10's line, its fields, its Done by kind. HER sentences verbatim
+  (pinned): rule 7 ×2, rule 12's leave sentence, rule 9's promise, rule 16; VX-113's form her #205 (ii). (b) blank until her
+  sitting; (c) other words.
+- **P-VX308-U2-2 — where the follow surfaces: the pane** (R-U2-1 — the one read that sees it; the account section, the
+  follow first with its notice). (a) BUILT; (b) also a calm bar on the open library pointing at the pane (an owed follow is
+  otherwise seen only when she opens Settings ▸ Protection — F-U2-4); (c) the interlude at the open (needs a vault read at
+  every open — P-VX306-K3 lifted).
+- **P-VX308-U2-3 — the quiet follow out is a PRESS with nothing typed** (rule 12's "quietly" read as "typing nothing": the
+  door, a confirm with no field saying rule 12's sentence, one button). (a) BUILT; (b) run at once when the pane's read
+  finds it (an act on a read — R-2 forbids; and the window reopens under her on opening Settings); (c) run at the next open
+  (a vault read at the open — (c) of P-VX308-U2-2).
+- **P-VX308-U2-4 — the words moment's shape** (R-U2-5): (a) BUILT — in the confirm sheet, the typed words over
+  `WordsLookPanel` under rule 7's sentence with the look's own Copy (the existing words road) and warning, the passphrase
+  typed → the notice + *OK*; (b) no Copy on the moment (she just typed them); (c) the moment as a receipt only (no words
+  shown — rule 7's "here they are" unmet).
+- **P-VX308-U2-5 — one secret = two fields, either or both** (a join: each typed secret must open the account, both locks
+  then the account's; the follow: the passphrase when typed, else the words). (a) BUILT; (b) a choice first (*Enter
+  Passphrase…* / *Use Twelve Words…* — today's follow's two doors); (c) the passphrase with a *use your twelve words
+  instead* door (the lobby's idiom).
+- **P-VX308-U2-6 — Move to an account with NO vault yet: the honest not-yet line** (the core's `move` joins an account that
+  already syncs; a leave plus a set-up is two acts and a design of its own). (a) BUILT; (b) compose This-Mac-Only-then-set-up
+  as one face; (c) hide the door.
+- **P-VX308-U2-7 — the follow's Done is a RECEIPT** on the status seam (`receipt_style` governs it), said at the press when
+  the act landed whole and by the open whose settle finished it otherwise (VX-107). (a) BUILT; (b) a durable notice in the
+  pane until *OK* (U2a's export-notice idiom — survives `receipt_style` off and a quit); (c) both.
+- **P-VX308-U2-8 — the follow's notice names the vault's LAST writer and its day** (decision 34's
+  `updated_by_device`/`updated_at` — which may be a later key door's device, not the one that entered Castle). (a) BUILT;
+  (b) no device or day; (c) the device only.
+
+**FINDINGS AND HAND-FORWARDS (routed, not fixed here):**
+- **F-U2-1 (her bundle — P-VX378-U2-3's "here they are" edge, with one more corner):** a join typing the PASSPHRASE can never
+  show the words (nothing holds them) — the moment says they were replaced without showing them. And the core reports
+  `wordsReplacedByAccount` for EVERY passphrase-typed join (`sameWords` is false when no words were typed), so a library
+  whose own words already WERE the account's (signed out and back in — rule 16's "signing back in is a join") hears
+  "your library's twelve words are now your account's" over the same words. Options for her: keep; have the core compare
+  the library's words lock with the vault's recovery wrap (a core line, Fable's); or word the notice to cover both.
+- **F-U2-2 (a ticket at closeout — Bug, Confirmed by trace, Castle & sync, Low):** a JOIN that stops past its swap (enroll
+  or Move across postures) is finished by the next open's settle with no receipt and no words moment — the typed words died
+  with the process (never stored), and `wordsReplacedByAccount` lives in the `memory` step (VX-107's class, for the join).
+  Options: the open says a join's receipt from durable facts (the act in flight `enroll`/`move`, the record now naming the
+  account) without the words; or accept.
+- **F-U2-3 (for U3 — the words card on a synced library):** after a join, the card above the quick entry may still OFFER
+  "record the twelve words" (its ledger is per library and the moment does not mark it); a look there mints NEW words,
+  and on a synced library the new-words act re-wraps the ACCOUNT too (rule 7's together-change) — replacing the account's
+  words she just typed, on every device. U3 owns the synced key doors and the look's road; options: the moment marks the
+  card's ledger recorded; the card on a synced library sends her to U3's New Words door.
+- **F-U2-4:** an owed follow is discovered only when the pane reads the vault (no vault read at the open — P-VX306-K3); the
+  crossings and key doors say "Follow it first" there too. VX-329's live road (rule 15 — a device that has not followed
+  cannot sync) is where it becomes urgent; P-VX308-U2-2 (b) is the cheap bridge.
+- **F-U2-5 (the walk):** the follow needs another device of the account; the recipe uses two libraries on one Mac (they
+  share the dev scope's sync-keys items by account — harmless, said in the recipe).
+- **F-U2-6 (MOBILE PARITY):** the phone has no account section — no join, Move or follow face (the brains are shared).
+- **F-U2-7 (canon, the closeout's):** SurfaceContracts' "Library protection" line gains, in place, with one pointer to this
+  plan: the join (its plan said at the consent, one of the account's secrets, rule 7's words moment — the typed words shown
+  once, the passphrase-typed notice), Move, and the follow in the account section (its notice, one secret into Castle and
+  on a replaced key, nothing out of it, its Done re-said by the open that finishes it — VX-107), VX-113's sentence, and the
+  one reopening seam the re-keying account acts share with the crossings.
+- **F-U2-8 (for the ladder — a note):** `RoadAccountDoor.receipt`'s `.follow`/`.moveToSignedInAccount` arms are fallbacks
+  no face path reaches (their receipts are the open door's — `RoadAccountDoorOpen.receipt`); kept so the enum stays total.
+
+**Notes:** no machinery deaths; no Sonnet lookup; no subagents; no scratch worktree; every mutation ran on a committed
+tree and was restored by `git checkout --` (`cmp` against a pre-mutation copy). Commits: `a033de8e1` (0) · `af7df2220` (1) ·
+`99c4f7a15` (2) · `bbe2d699c` (record) · `ed7beb995` (3) · `3f5b8479d` (record) · `18cd0123e` (4) · `eea4b5892` (5) · the
+close commit.
 
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
