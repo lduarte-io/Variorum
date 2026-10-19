@@ -17,16 +17,9 @@
 import Foundation
 import VariorumCore
 
-enum ProtectionBackupHook {
-    /// What one pair attempt did.
-    nonisolated enum PairOutcome: Equatable, Sendable {
-        case written
-        case paused
-        /// No live key file of the current key to freeze beside the snapshot.
-        case noKeyFileOfTheKey
-        case failed(String)
-    }
-
+// VX-308 U3: the pair itself — `PairOutcome` and `takePair` — lives in `ProtectionBackupPair.swift` (moved verbatim, its
+// one home now harness-visible); this file keeps the hook's attachment to the app's `StoreBackup`.
+extension ProtectionBackupHook {
     /// Attach the pair to `backup`'s runs — the new road's session only (nil / read-only ⇒ nothing attached).
     @MainActor
     static func attach(to backup: StoreBackup?, session: ProtectionRoadSession?) {
@@ -49,32 +42,6 @@ enum ProtectionBackupHook {
                 }
             }
             return outcome
-        }
-    }
-
-    /// The pair: the live library under its key, the live key file frozen beside it (this Mac's device ID names
-    /// the folder).
-    nonisolated static func takePair(_ session: ProtectionRoadSession) -> PairOutcome {
-        let backups = session.system.backups
-        guard !backups.copiesArePaused else {
-            ProtectionOpenRoad.log("backup pair: copies are paused — none taken")
-            return .paused
-        }
-        let key = session.key
-        guard let keyFile = (try? session.system.leaves.keyFiles.readLiveKeyFile()) ?? nil,
-              keyFile.fingerprint == StoreKeyEnvelope.fingerprint(of: key) else {
-            ProtectionOpenRoad.log("backup pair: no live key file of the current key — none taken")
-            return .noKeyFileOfTheKey
-        }
-        do {
-            try backups.takeBackupPair(with: key, keyFile: keyFile, deviceID: session.library.section.deviceID)
-            ProtectionOpenRoad.log(
-                "backup pair: written under \(StoreKeyEnvelope.shortFingerprint(keyFile.fingerprint)) in "
-                    + ProtectionNames.backupsSubpath(libraryID: keyFile.libraryID, deviceID: session.library.section.deviceID))
-            return .written
-        } catch {
-            ProtectionOpenRoad.log("backup pair: failed — \(String(describing: error))")
-            return .failed(String(describing: error))
         }
     }
 }

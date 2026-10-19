@@ -113,8 +113,14 @@ final class WordsLookModel {
     /// Rule 6's one sentence (the key doesn't change; earlier backups open with the earlier words) — said when she
     /// has recorded words before, never on the first look (there were no words she knew).
     let saysRuleSix: Bool
+    /// VX-308 U3 — F-U2-3 (the architect's ruling): the look's ask says, BEFORE anything is minted, that new words replace
+    /// the ACCOUNT's words everywhere (a synced library — rule 7: the key doors change both locks together). Her *Show my
+    /// twelve words* is the yes; the door is never blocked.
+    private(set) var saysAccountWords = false
 
     @ObservationIgnored private let passphraseExists: () -> Bool
+    /// Whether the library syncs NOW (read at each open — a library may turn sync on while the app runs).
+    @ObservationIgnored private let replacesAccountWords: () -> Bool
     @ObservationIgnored private let mint: (String?) async -> WordsMintOutcome
     @ObservationIgnored private let copyRoad: ([String]) -> Void
     @ObservationIgnored private let recorded: () -> Void
@@ -122,12 +128,14 @@ final class WordsLookModel {
     init(
         saysRuleSix: Bool,
         passphraseExists: @escaping () -> Bool,
+        replacesAccountWords: @escaping () -> Bool = { false },
         mint: @escaping (String?) async -> WordsMintOutcome,
         copy: @escaping ([String]) -> Void,
         recorded: @escaping () -> Void
     ) {
         self.saysRuleSix = saysRuleSix
         self.passphraseExists = passphraseExists
+        self.replacesAccountWords = replacesAccountWords
         self.mint = mint
         copyRoad = copy
         self.recorded = recorded
@@ -137,11 +145,15 @@ final class WordsLookModel {
 
     /// Her click. `passphrase`: one she typed a moment ago at the same card (the tour's last card — rule 3's ask
     /// answered beside the words), so she is never asked it twice; otherwise a library with a passphrase is asked it
-    /// and one with none mints at once.
+    /// and one with none mints at once. VX-308 U3 (F-U2-3): a SYNCED library always asks first and says that new words
+    /// replace the account's words everywhere — before anything is minted.
     func open(passphrase known: String? = nil) async {
         guard phase == .closed else { return }
         message = nil
-        if let known {
+        saysAccountWords = replacesAccountWords()
+        if saysAccountWords {
+            phase = .asking
+        } else if let known {
             await run(known, returningTo: .closed)
         } else if passphraseExists() {
             phase = .asking
@@ -162,6 +174,7 @@ final class WordsLookModel {
         guard phase == .asking else { return }
         phase = .closed
         message = nil
+        saysAccountWords = false
     }
 
     /// VX-412's Copy door: the words to the clipboard by the host's one rule (VX-448: concealed; cleared at lock and quit).
@@ -188,6 +201,7 @@ final class WordsLookModel {
         guard phase == .warning else { return }
         words = []
         copied = false
+        saysAccountWords = false
         phase = .closed
         recorded()
     }
@@ -226,6 +240,8 @@ final class WordsBandModel {
     @ObservationIgnored private let writes: Bool
     @ObservationIgnored private let ledger: WordsCardLedger
     @ObservationIgnored private let snoozes: WordsCardSnoozes
+    /// VX-308 U3 (F-U2-3): every look this band makes says the account line first on a synced library.
+    @ObservationIgnored private let replacesAccountWords: () -> Bool
     /// Every look made over this library's roads (the card's, the tour's, Settings') — weakly: a look whose host went
     /// away is gone. ONE look may hold words at a time: a second look's mint would replace the words the first still
     /// shows, which would then no longer open the library (P-VX307-U2b-6).
@@ -239,10 +255,12 @@ final class WordsBandModel {
         libraryID: String, writes: Bool, ledger: WordsCardLedger, snoozes: WordsCardSnoozes = .process,
         reminder: PassphraseReminderModel,
         passphraseExists: @escaping () -> Bool,
+        replacesAccountWords: @escaping () -> Bool = { false },
         mint: @escaping (String?) async -> WordsMintOutcome,
         copy: @escaping ([String]) -> Void
     ) {
         self.libraryID = libraryID
+        self.replacesAccountWords = replacesAccountWords
         self.writes = writes
         self.ledger = ledger
         self.snoozes = snoozes
@@ -253,7 +271,8 @@ final class WordsBandModel {
         var mintHook: (String?) async -> WordsMintOutcome = mint
         look = WordsLookModel(
             saysRuleSix: !libraryID.isEmpty && ledger.recorded(libraryID),
-            passphraseExists: passphraseExists, mint: { await mintHook($0) }, copy: copy, recorded: { recordedHook() })
+            passphraseExists: passphraseExists, replacesAccountWords: replacesAccountWords, mint: { await mintHook($0) },
+            copy: copy, recorded: { recordedHook() })
         recordedHook = { [weak self] in self?.wordsRecorded() }
         mintHook = guarded(mint)
         looks.append(WeakLook(look: look))
@@ -320,7 +339,7 @@ final class WordsBandModel {
     ) -> WordsLookModel {
         let look = WordsLookModel(
             saysRuleSix: !libraryID.isEmpty && ledger.recorded(libraryID),
-            passphraseExists: passphraseExists, mint: guarded(mint), copy: copy,
+            passphraseExists: passphraseExists, replacesAccountWords: replacesAccountWords, mint: guarded(mint), copy: copy,
             recorded: { [weak self] in self?.wordsRecorded() })
         looks = looks.filter { $0.look != nil } + [WeakLook(look: look)]
         return look

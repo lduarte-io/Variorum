@@ -204,6 +204,11 @@ final class RoadInterludeModel {
 nonisolated struct RoadStandingFaces: Equatable, Sendable {
     /// RULE 27 after a quiet-road open: no key file anywhere — the banner (her U2-7 words, VX-414), no doors.
     var noKeyFileAnywhere: NoKeyFileAnywhere?
+    /// VX-308 U3 — VX-447 (her ruling: the banner BECOMES THE DOOR): the place beside the library held NOTHING when the
+    /// open's search ran (`RoadOpenReport.besideIsEmpty`) — the state the core's new-words act mints a key file in
+    /// (`keyFileGoneEverywhere`). A STRAY there (another key's file — the fault's second arm) keeps her U2-7 banner with no
+    /// door: a mint would write over it (rule 21).
+    var noKeyFileDoor = false
     /// RULE 3: the model's moment owed at this open (`.beforeFirstBackup` / `.quietRoadFailed`), nil none.
     var passphraseMoment: PassphraseAsk?
     /// The receipts this open owes the status seam: rule 1's restore (§7c (6)); VX-308 U2 — a follow its settle finished
@@ -226,7 +231,9 @@ nonisolated struct RoadStandingFaces: Equatable, Sendable {
         var receipts = report.repairsDone.contains(.restoreKeyFileFromMirror) ? [ProtectionWords.restoredFromMirror] : []
         // VX-308 U2 — VX-107: a follow this open's settle finished says its Done, the other-device sentence with it.
         if let followed = report.settledFollow { receipts.append(ProtectionWords.followDone(followed)) }
-        return RoadStandingFaces(noKeyFileAnywhere: nothing, passphraseMoment: moment, receipts: receipts)
+        var faces = RoadStandingFaces(noKeyFileAnywhere: nothing, passphraseMoment: moment, receipts: receipts)
+        faces.noKeyFileDoor = nothing != nil && report.besideIsEmpty
+        return faces
     }
 }
 
@@ -259,8 +266,19 @@ final class RoadStandingModel {
     /// known (a test's hand-made faces).
     let posture: ProtectionMode?
 
+    /// VX-308 U3 — VX-447: the look the no-key-file banner's door opened (the banner's ONE look, made through the band so
+    /// one look holds words at a time), and whether a mint has since written the fresh key file (the banner then retires
+    /// once that look closes).
+    private(set) var noKeyFileLook: WordsLookModel?
+    private(set) var keyFileRemade = false
+
     @ObservationIgnored private let setPassphrase: (String) async -> SetPassphraseOutcome
     @ObservationIgnored private let passphraseExists: () -> Bool
+    /// VX-308 U3 (R-U3-4): whether a look asks the passphrase — the core's fact now (`lookAsksPassphrase`).
+    @ObservationIgnored private let lookAsksPassphrase: () -> Bool
+    /// VX-308 U3 — VX-447: the live key file of the library's key stands now; rule 5's pair taken (true: written).
+    @ObservationIgnored private let keyFileStands: () -> Bool
+    @ObservationIgnored private let takeBackupPair: () async -> Bool
     @ObservationIgnored private let receiptsOwed: () -> [String]
     /// The status seam's receipt door — set by the composition that holds it (the Mac's ready window); the
     /// receipts owed wait for it.
@@ -281,12 +299,18 @@ final class RoadStandingModel {
         band: WordsBandModel? = nil,
         mintWords: ((String?) async -> WordsMintOutcome)? = nil,
         copyWords: @escaping ([String]) -> Void = { _ in },
-        posture: ProtectionMode? = nil
+        posture: ProtectionMode? = nil,
+        lookAsksPassphrase: (() -> Bool)? = nil,
+        keyFileStands: @escaping () -> Bool = { false },
+        takeBackupPair: @escaping () async -> Bool = { false }
     ) {
         self.faces = faces
         self.reminder = reminder
         self.setPassphrase = setPassphrase
         self.passphraseExists = passphraseExists
+        self.lookAsksPassphrase = lookAsksPassphrase ?? passphraseExists
+        self.keyFileStands = keyFileStands
+        self.takeBackupPair = takeBackupPair
         self.receiptsOwed = receiptsOwed
         self.band = band
         self.posture = posture
@@ -322,15 +346,25 @@ final class RoadStandingModel {
             })
         reminder.evaluate()
         let passphraseExists: () -> Bool = { ProtectionOpenRoad.passphraseExists(session.library) }
+        // VX-308 U3 (R-U3-4): a look asks by the core's own fact NOW; (F-U2-3) a synced library's look says the account
+        // line before minting.
+        let lookAsks: () -> Bool = { ProtectionOpenRoad.lookAsksPassphrase(session.library) }
+        let synced: () -> Bool = { session.library.record?.account != nil }
+        // VX-447: a mint that wrote the FRESH key file is heard by the model this make returns (the banner retires and the
+        // backup follows).
+        let standing = StandingBox()
         let mint: (String?) async -> WordsMintOutcome = { passphrase in
-            await Task.detached(priority: .userInitiated) {
+            let outcome = await Task.detached(priority: .userInitiated) {
                 await ProtectionOpenRoad.mintFreshWords(session: session, passphrase: passphrase)
             }.value
+            if case .minted = outcome { standing.model?.mintLanded() }
+            return outcome
         }
         let band = WordsBandModel(
             libraryID: libraryID, writes: session.writes, ledger: WordsCardLedger(defaults: ledger.defaults),
-            snoozes: snoozes, reminder: reminder, passphraseExists: passphraseExists, mint: mint, copy: copyWords)
-        return RoadStandingModel(
+            snoozes: snoozes, reminder: reminder, passphraseExists: lookAsks, replacesAccountWords: synced, mint: mint,
+            copy: copyWords)
+        let model = RoadStandingModel(
             faces: faces, reminder: reminder,
             setPassphrase: { passphrase in
                 await Task.detached(priority: .userInitiated) {
@@ -340,18 +374,70 @@ final class RoadStandingModel {
             passphraseExists: passphraseExists,
             receiptsOwed: { session.takeReceipts() },
             band: band, mintWords: mint, copyWords: copyWords,
-            posture: session.library.record?.mode)
+            posture: session.library.record?.mode,
+            lookAsksPassphrase: lookAsks,
+            keyFileStands: {
+                let library = session.library
+                return library.keyFile?.fingerprint == library.fingerprint
+            },
+            takeBackupPair: {
+                await Task.detached(priority: .utility) { ProtectionBackupHook.takePair(session) == .written }.value
+            })
+        standing.model = model
+        return model
+    }
+
+    /// The model a `make` returns, for the mint's closure built before it.
+    private final class StandingBox {
+        weak var model: RoadStandingModel?
     }
 
     /// VX-307 U2b — a look for another home (the tour's last card, Settings ▸ Protection): the band's roads; recording
     /// there retires the card's offer too. With no band (a test's hand-made faces), a look that refuses at once.
     func makeWordsLook() -> WordsLookModel {
         if let band, let mintWords {
-            return band.makeLook(passphraseExists: passphraseExists, mint: mintWords, copy: copyWords)
+            return band.makeLook(passphraseExists: lookAsksPassphrase, mint: mintWords, copy: copyWords)
         }
         return WordsLookModel(
             saysRuleSix: false, passphraseExists: passphraseExists,
             mint: { _ in .refused(ProtectionWords.wordsLookFailed) }, copy: copyWords, recorded: {})
+    }
+
+    // MARK: VX-308 U3 — VX-447: THE NO-KEY-FILE BANNER BECOMES THE DOOR (her ruling, QUESTIONS #235)
+
+    /// The banner stands: the open found no key file anywhere — until a mint has written the fresh one AND the look that
+    /// shows its words has closed (the words never vanish from under her: they are shown in the banner).
+    var showsNoKeyFileBanner: Bool {
+        guard faces.noKeyFileAnywhere != nil else { return false }
+        return !keyFileRemade || (noKeyFileLook.map { $0.phase != .closed } ?? false)
+    }
+
+    /// The banner carries the act (the live place empty — `RoadStandingFaces.noKeyFileDoor`), until the fresh file stands.
+    var offersNoKeyFileDoor: Bool { faces.noKeyFileDoor && !keyFileRemade }
+
+    /// The banner's door: its look (made once, through the band — one look at a time; recording there retires the card's
+    /// offer too), opened: on an unsynced Standard library the words are minted at once (nothing can verify a passphrase:
+    /// no lock survived — R-U3-4); synced, the account's passphrase is asked first and the account line said (F-U2-3).
+    func openNoKeyFileLook() async {
+        guard offersNoKeyFileDoor else { return }
+        let look = noKeyFileLook ?? makeWordsLook()
+        noKeyFileLook = look
+        await look.open()
+    }
+
+    /// A look's mint landed (any home): when the open found no key file anywhere and the live key file of the key now
+    /// stands, the FRESH FILE was written (the core's VX-447 arm) — the banner's act is done but for THE BACKUP, which
+    /// follows: rule 5's pair through its one road, off the main actor, then one receipt saying what stands now.
+    func mintLanded() {
+        guard faces.noKeyFileAnywhere != nil, !keyFileRemade, keyFileStands() else { return }
+        keyFileRemade = true
+        offersSetPassphrase = !passphraseExists()
+        ProtectionOpenRoad.log("road: VX-447 — the fresh key file stands; the backup follows")
+        let takeBackupPair = takeBackupPair
+        Task { [weak self] in
+            let backedUp = await takeBackupPair()
+            self?.speak?(ProtectionWords.keyFileRemadeReceipt(backedUp: backedUp))
+        }
     }
 
     /// The receipts the open owes, spoken once (each `receiptsOwed` call takes them).

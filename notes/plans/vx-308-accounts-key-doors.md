@@ -1331,7 +1331,7 @@ kept" precedent), the test support (`PlantedRoad`, `ProtectionAccountSupport` �
   untouched). All new lines PROVISIONAL P-VX308-U3-2. Pins `RoadKeyDoorWordsTests` (5) — headless with U1's words suite
   and `WordsBandTests` `✔ 24 tests in 3 suites`. MUTATION (VX-263's line reworded) → `✘ vx263sOneLineIsThePlansAsDrafted`
   (2 issues), restored `cmp`-identical.
-- Piece 3 — VX-448: DONE (this commit's parent). `WordsClipboard` (the one home, `Shared/WordsCopyDoor.swift`) gains the
+- Piece 3 — VX-448: DONE (`1b6a7403e`). `WordsClipboard` (the one home, `Shared/WordsCopyDoor.swift`) gains the
   new road's rule: `copyConcealed` (the words as one line + `org.nspasteboard.ConcealedType` with empty data; NO timer;
   nothing restored; the one copy HELD — board + `changeCount`) and `clearHeld` (empties the board only while it still
   holds that copy; lets go either way). `AppBootstrap.copyWords` — the ONE road every new-road look rides (the card, the
