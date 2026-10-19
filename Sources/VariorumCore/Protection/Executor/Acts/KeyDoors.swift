@@ -59,7 +59,7 @@ struct KeyDoorProgram: ActProgram {
             }
             let written = try await ctx.leaves.vault.updateVault(
                 vault, accountID: snapshot.accountID, expectedRevision: snapshot.revision,
-                proofMaster: held.masterKey, device: ctx.deviceName)
+                proofMaster: held.masterKey, successorMaster: nil, device: ctx.deviceName)
             ctx.executor.noteFresh(written)
         case "keyFile":
             guard var file = ctx.library.keyFile, file.fingerprint == ctx.library.fingerprint else {
@@ -167,8 +167,25 @@ extension ProtectionExecutor {
     }
 
     /// **New words** — asking the passphrase.
-    public func regenerateWords(_ library: inout UnlockedLibrary, passphrase: String, newWords: [String]) async throws -> ActOutcome {
+    ///
+    /// VX-307 U2b (VX-412; PROVISIONAL P-VX307-U2b-1): a library with NO passphrase is asked nothing — `passphrase:
+    /// nil` — only while it is STANDARD, UNSYNCED and its live key file carries no passphrase lock: the reset door's
+    /// Standard plain confirm, twinned (this Mac holds the key; the library is open). Rule 2's first look mints the
+    /// words the user records ("rule 6's act — the key unchanged"), and the card above the quick entry offers them
+    /// while no passphrase exists yet (rule 3: "the passphrase is a convenience over the words"), so the look cannot
+    /// wait on a passphrase. A library WITH a passphrase is asked it, exactly as before; Castle always is (nil
+    /// refuses `secretMissing`), and so is a synced library (its vault's lock is re-made under the account's master).
+    public func regenerateWords(_ library: inout UnlockedLibrary, passphrase: String?, newWords: [String]) async throws -> ActOutcome {
         var parameters = try await keyDoorParameters(library)
+        guard let passphrase else {
+            guard library.record?.mode == .standard, parameters.accountID == nil,
+                  let file = library.keyFile, file.fingerprint == library.fingerprint, file.passphrase == nil
+            else { throw ExecutorRefusal.secretMissing }
+            parameters.wordsAreNew = true
+            return try await perform(
+                KeyDoorProgram(act: .regenerateWords), parameters: parameters,
+                secrets: ActSecrets(passphrase: nil, words: try WordsKey.derive(newWords)), library: &library)
+        }
         let current: PassphraseKey
         if let account = parameters.accountID, let vault = freshVaults[account] {
             try vault.vault.kdf.validateFloor(configuration.floor)

@@ -90,6 +90,12 @@ struct ShelfView: View {
     /// feature's model — it draws the view it is handed (the sidebar note
     /// box's road). nil (harness mounts, a retired offer at launch): no row.
     var offerLine: AnyView? = nil
+    /// VX-307 U2b (VX-412 — `notes/CastleRules.md` rules 2 and 3 as amended; her drawing
+    /// `notes/plans/vx-307/her-cards-area-2026-10-18.png`): **the card above the quick entry** — the twelve words'
+    /// offer and rule 3's reminder, between the shelf listing and the quick-entry line, the main column's full width.
+    /// Built by the composition root (the protection faces are the bootstrap's) and RENDERED here, the offer line's
+    /// road. nil (today's road, harness mounts): no card — the first open stays calm either way.
+    var wordsBand: AnyView? = nil
     /// VX-326 — the shell's opening ask for the quick entry's caret, handed
     /// down by the shell that owns it (`RootView`); the bar claims it once.
     /// nil (harness mounts): the bar's mount raise as it always was.
@@ -234,6 +240,10 @@ struct ShelfView: View {
                         .padding(6)
                         .allowsHitTesting(false)
                 }
+            }
+            // VX-307 U2b: the card above the quick entry (her drawing) — between the listing and the entry line.
+            if let wordsBand {
+                wordsBand
             }
             entryBar
                 #if DEBUG

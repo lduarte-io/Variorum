@@ -113,7 +113,7 @@ struct LifecycleChecks {
         guard let entry = catalog.copies.first(where: { $0.id == copy.id }) else { return (false, true) }
         let before = LSnapshot(target.device)
         let executor = world.newExecutor(target.device, libraryID: target.device.slot?.libraryID ?? "")
-        let opened = (try? executor.lookInside(entry, in: catalog, typed: typed)) != nil
+        let opened = (try? executor.lookInside(entry, in: catalog, typed: typed, quietRoads: .includingTouchID)) != nil
         return (opened, LSnapshot(target.device) == before)
     }
 
@@ -296,13 +296,15 @@ struct LifecycleChecks {
             }
         case .nothingElseChanges(let except):
             var before = ctx.startKeyFile, after = live
-            switch except {
-            case .passphrase: before?.passphrase = nil; after?.passphrase = nil
-            case .words: before?.words = nil; after?.words = nil
-            case .apple: before?.apple = nil; after?.apple = nil
-            case .master: before?.master = nil; after?.master = nil
+            for lock in except {
+                switch lock {
+                case .passphrase: before?.passphrase = nil; after?.passphrase = nil
+                case .words: before?.words = nil; after?.words = nil
+                case .apple: before?.apple = nil; after?.apple = nil
+                case .master: before?.master = nil; after?.master = nil
+                }
             }
-            expect(before == after, "the key file changed beyond its \(except.rawValue) lock")
+            expect(before == after, "the key file changed beyond its \(except.map(\.rawValue)) lock(s)")
             let custodyNow = (try? DeviceLeaves(world: world, device: mac).custodyItems()) ?? []
             expect(Set(custodyNow.map { "\($0)" }) == Set(ctx.startCustody.map { "\($0)" }), "this Mac's items changed")
             expect(Set(world.readableAppleKeys(mac).keys) == ctx.startAppleReadable, "the Apple keys changed")
@@ -355,8 +357,12 @@ struct LifecycleChecks {
             expect(id.map { UUID(uuidString: $0) != nil } ?? false, "the device ID isn't a plain random value")
             expect(id.map { !ctx.startDeviceIDsSeen.contains($0) } ?? false, "the device ID isn't new")
             expect(library?.memory?.deviceID == id, "this Mac remembers another device ID")
-        case .wordsShownOnce:
-            guard let words = ctx.created?.words else { failures.append("the door handed back no words"); break }
+        case .wordsShownOnce, .wordsStoredNowhere:
+            // VX-307 U2b: shown once = the LOOK's words (the stage's, `shownWords`); stored nowhere at the creation =
+            // the creation's (handed back by the door, shown to no one).
+            let handedBack: [String]?
+            if case .wordsShownOnce = fact { handedBack = ctx.shownWords } else { handedBack = ctx.created?.words }
+            guard let words = handedBack else { failures.append("the door handed back no words"); break }
             expect(words.count == 12, "the door handed back \(words.count) words")
             expect(secretOpensLive(.words(words)), "the words don't open the key file")
             let text = Data(words.joined(separator: " ").utf8)

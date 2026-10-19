@@ -17,8 +17,9 @@
 //      button.
 //    - THE INTERLUDE (`MobileRoadInterludeCard`, rule 21): her notice once with *OK*, then the key-file offer with *Not
 //      now* · *Use it*.
-//    - RULE 27 AFTER A QUIET OPEN (`MobileNoKeyFileSheet`): §7c (3)'s sentence as a sheet over the open library, once
-//      per open, no doors (nothing rebuilds a key file from the key).
+//    - RULE 27 AFTER A QUIET OPEN (`MobileNoKeyFileSheet`): her U2-7 sentence (VX-414 — *Variorum opened your library,
+//      but found no key file for it anywhere. …*) as a sheet over the open library, once per open, no doors (nothing
+//      rebuilds a key file from the key). The lobby's moment keeps §7c (3)'s refusal.
 //  Rule 3's reminder and the receipts have no phone face this unit (the record's hand-forward).
 //
 
@@ -280,6 +281,22 @@ struct MobileRoadInterludeCard: View {
                         MobileRoadButton(title: ProtectionWords.offerUseIt, tokens: tokens) { Task { await model.useIt() } }
                             .disabled(model.busy)
                     }
+                case .rearm?:
+                    // VX-307 U2a — the shared re-arm card (the Mac's twin; reachable only once the phone enters Castle).
+                    if model.rearmFailed {
+                        MobileRoadButton(title: ProtectionWords.noticeOK, tokens: tokens) { model.ok() }
+                    } else {
+                        HStack(spacing: 16) {
+                            MobileRoadButton(title: ProtectionWords.rearmNo, tokens: tokens) {
+                                Task { await model.rearm(yes: false) }
+                            }
+                            .disabled(model.busy)
+                            MobileRoadButton(title: ProtectionWords.rearmYes, tokens: tokens) {
+                                Task { await model.rearm(yes: true) }
+                            }
+                            .disabled(model.busy)
+                        }
+                    }
                 case nil:
                     EmptyView()
                 }
@@ -317,7 +334,7 @@ struct MobileNoKeyFileSheet: View {
             Image(systemName: "exclamationmark.triangle")
                 .font(.system(size: 28, weight: .light))
                 .foregroundStyle(tokens.muted)
-            Text(ProtectionWords.noKeyFileAnywhere)
+            Text(ProtectionWords.noKeyFileAfterAQuietOpen)
                 .font(tokens.body)
                 .foregroundStyle(tokens.ink)
                 .multilineTextAlignment(.center)

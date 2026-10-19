@@ -49,12 +49,12 @@ struct U2LookInsideTests {
         _ = try await executor.useCastle(&library, typed: fixture.typed, gate: .alwaysAsk)
         let (copy, catalog) = try plantCopy(fixture, libraryID: fixture.libraryID, key: k0, keyFile: backupFile, record: nil)
         #expect(throws: ExecutorRefusal.copyDoesNotOpen, "a Castle library's old backup opened by a quiet road") {
-            _ = try fixture.executor().lookInside(copy, in: catalog)
+            _ = try fixture.executor().lookInside(copy, in: catalog, quietRoads: .includingTouchID)
         }
         let before = (fixture.world.custody, fixture.world.memories, fixture.world.liveKeyFile)
         fixture.world.writes = []
         fixture.world.crashAfterWrites = 1
-        let looked = try fixture.executor().lookInside(copy, in: catalog, typed: TypedSecrets(words: fixture.words))
+        let looked = try fixture.executor().lookInside(copy, in: catalog, typed: TypedSecrets(words: fixture.words), quietRoads: .includingTouchID)
         #expect(looked.key == k0)
         #expect(fixture.world.writes.isEmpty)
         #expect(fixture.world.custody == before.0 && fixture.world.memories == before.1 && fixture.world.liveKeyFile == before.2)
@@ -69,19 +69,20 @@ struct U2LookInsideTests {
             record: theirs.liveRecord)
         mine.world.writes = []
         mine.world.crashAfterWrites = 1
-        let looked = try mine.executor().lookInside(copy, in: catalog, typed: theirs.typed)
+        let looked = try mine.executor().lookInside(copy, in: catalog, typed: theirs.typed, quietRoads: .includingTouchID)
         #expect(looked.key == theirs.key && looked.road == .itsOwnSecrets)
         #expect(mine.world.writes.isEmpty)
         // (Every fixture types the same passphrase; the words are each its own.)
         #expect(throws: ExecutorRefusal.copyDoesNotOpen) {
-            _ = try mine.executor().lookInside(copy, in: catalog, typed: TypedSecrets(words: mine.words))
+            _ = try mine.executor().lookInside(copy, in: catalog, typed: TypedSecrets(words: mine.words), quietRoads: .includingTouchID)
         }
     }
 
     /// VX-306 ladder round 1, m2: a face's AUTOMATIC probe (`.withoutAPress`)
     /// never reads a Touch ID item — a copy only Touch ID holds on this Mac
-    /// refuses it with no press; the deliberate press (the default — the model's
-    /// own door, rule 17's "its own quiet road on this Mac") opens it by that road.
+    /// refuses it with no press; the deliberate press (`.includingTouchID` — the
+    /// model's own door, rule 17's "its own quiet road on this Mac"; chosen
+    /// explicitly since VX-307 U2c dropped the default) opens it by that road.
     @Test func theAutomaticProbeNeverPressesTouchIDAndAPressDoes() throws {
         let fixture = try EX(.castle, gate: .touchID)
         let (copy, catalog) = try plantCopy(
@@ -92,9 +93,29 @@ struct U2LookInsideTests {
             _ = try fixture.executor().lookInside(copy, in: catalog, quietRoads: .withoutAPress)
         }
         #expect(fixture.world.touchIDPresses == 0, "the automatic probe pressed Touch ID")
-        let pressed = try fixture.executor().lookInside(copy, in: catalog)
+        let pressed = try fixture.executor().lookInside(copy, in: catalog, quietRoads: .includingTouchID)
         #expect(pressed.road == .quietRoad(.touchID) && pressed.key == fixture.key)
         #expect(fixture.world.touchIDPresses == 1)
+    }
+
+    /// VX-307 U2c — the VX-306 ladder's round-2 NIT 2: the core's copy door
+    /// carries NO prompting default — a caller that says nothing about the
+    /// quiet roads does not compile, so the road that may raise a Touch ID
+    /// prompt is never the one a caller gets by omission (the app's twin
+    /// defaults to `.withoutAPress`; every core caller chooses). BY SOURCE: the
+    /// declaration names `quietRoads: CopyQuietRoads` with nothing after it.
+    @Test func theCoreCopyDoorCarriesNoPromptingDefault() throws {
+        let url = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Sources/VariorumCore/Protection/Executor/Acts/Copies.swift")
+        let source = try String(contentsOf: url, encoding: .utf8)
+        let start = try #require(source.range(of: "public func lookInside("))
+        let end = try #require(source.range(of: ") throws -> LookedInside", range: start.upperBound..<source.endIndex))
+        let signature = String(source[start.upperBound..<end.lowerBound])
+        #expect(signature.contains("quietRoads: CopyQuietRoads"), "\(signature)")
+        #expect(!signature.contains("quietRoads: CopyQuietRoads ="), "the core door defaults to a prompting road: \(signature)")
+        #expect(!signature.contains(".includingTouchID"), "\(signature)")
     }
 
     /// Its own quiet road on this Mac: a backup under the current Standard key
@@ -105,7 +126,7 @@ struct U2LookInsideTests {
             fixture, libraryID: fixture.libraryID, key: fixture.key, keyFile: try #require(fixture.world.liveKeyFile),
             record: fixture.liveRecord)
         fixture.world.writes = []
-        let looked = try fixture.executor().lookInside(copy, in: catalog)
+        let looked = try fixture.executor().lookInside(copy, in: catalog, quietRoads: .includingTouchID)
         #expect(looked.road == .quietRoad(.thisMac) && fixture.world.writes.isEmpty)
     }
 }
@@ -140,6 +161,63 @@ struct U2MakeMineTests {
         // This Mac remembers ONE library — the new one.
         #expect(Set(mine.world.memories.keys) == [record.libraryID])
         expectSettled(mine, library)
+    }
+
+    /// VX-307 U2c — the VX-306 ladder's round-2 NIT 1 (i): Make this my library
+    /// on a copy only THIS MAC'S TOUCH ID ITEM opens — her one confirmed press
+    /// reads that item ONCE. The door's preflight is a look at her press (here
+    /// the copy field held a wrong secret, so the copy opened by its own quiet
+    /// road — the press); the act takes the key that look opened and re-verifies
+    /// it against the copy's file (no keychain read), never opening the copy a
+    /// second time. The secrets form, by contrast, opens it again at the act —
+    /// a second prompt for the same press (the hand-forward's bug, kept for the
+    /// lifecycle walk and the scenario world, which never hand a key). A key
+    /// that doesn't open the copy refuses with nothing written.
+    @Test func anOpenedCopyIsMadeMineWithOnePressNotTwo() async throws {
+        let wrong = TypedSecrets(passphrase: "not this copy's passphrase")
+        func plantOwnBackup(_ fixture: EX) throws -> (CatalogCopy, Catalog) {
+            let planted = try plantCopy(
+                fixture, libraryID: fixture.libraryID, key: fixture.key,
+                keyFile: try #require(fixture.world.liveKeyFile), record: fixture.liveRecord)
+            #expect(fixture.custody(.touchid, fixture.key) && !fixture.custody(.silent, fixture.key), "only Touch ID holds it")
+            return planted
+        }
+        // The opened form: one press.
+        let mine = try EX(.castle, gate: .touchID)
+        let oldID = mine.libraryID
+        let (copy, catalog) = try plantOwnBackup(mine)
+        let executor = mine.executor()
+        let opened = try executor.lookInside(copy, in: catalog, typed: wrong, quietRoads: .includingTouchID)
+        #expect(opened.road == .quietRoad(.touchID) && mine.world.touchIDPresses == 1, "her press — the preflight's look")
+        var library = try mine.unlocked(executor)
+        let pressesBeforeTheAct = mine.world.touchIDPresses
+        _ = try await executor.makeThisMyLibrary(
+            &library, opened: opened, copy: copy, in: catalog, currentPair: mine.typed)
+        #expect(mine.world.touchIDPresses == pressesBeforeTheAct, "the act re-verified the opened key — no second press")
+        #expect(mine.liveRecord.map { $0.libraryID != oldID } == true, "made — a new library")
+        expectSettled(mine, library)
+        // The secrets form re-opens the copy at the act: a second read of the same item.
+        let twice = try EX(.castle, gate: .touchID)
+        let (copy2, catalog2) = try plantOwnBackup(twice)
+        let executor2 = twice.executor()
+        _ = try executor2.lookInside(copy2, in: catalog2, typed: wrong, quietRoads: .includingTouchID)
+        var library2 = try twice.unlocked(executor2)
+        let before2 = twice.world.touchIDPresses
+        _ = try await executor2.makeThisMyLibrary(
+            &library2, copy: copy2, in: catalog2, copySecrets: wrong, currentPair: twice.typed)
+        #expect(twice.world.touchIDPresses == before2 + 1, "the secrets form presses again at the act")
+        // A key the copy doesn't open (stale, or another copy's) refuses — nothing written.
+        let stale = try EX(.castle, gate: .touchID)
+        let (copy3, catalog3) = try plantOwnBackup(stale)
+        let executor3 = stale.executor()
+        var library3 = try stale.unlocked(executor3)
+        stale.world.writes = []
+        await #expect(throws: ExecutorRefusal.copyDoesNotOpen) {
+            _ = try await executor3.makeThisMyLibrary(
+                &library3, opened: LookedInside(copyID: copy3.id, key: StoreKey.mint(), road: .itsOwnSecrets),
+                copy: copy3, in: catalog3, currentPair: stale.typed)
+        }
+        #expect(stale.world.writes.isEmpty && stale.world.touchIDPresses == 0)
     }
 
     /// "You never leave Castle by opening something": a Standard copy made
@@ -233,9 +311,9 @@ struct U2MakeMineTests {
         // ones.
         mine.world.custody[CustodyItemFact(fingerprint: PF.fp(k0), itemClass: .silent)] = nil
         if let apple = backupFile.apple { mine.world.icloud.keys[apple.keyID] = nil }
-        #expect((try? executor.lookInside(old, in: after, typed: TypedSecrets(passphrase: today))) == nil,
+        #expect((try? executor.lookInside(old, in: after, typed: TypedSecrets(passphrase: today), quietRoads: .includingTouchID)) == nil,
                 "today's passphrase reached the previous library's backup")
-        let looked = try executor.lookInside(old, in: after, typed: TypedSecrets(passphrase: mine.passphrase))
+        let looked = try executor.lookInside(old, in: after, typed: TypedSecrets(passphrase: mine.passphrase), quietRoads: .includingTouchID)
         #expect(looked.key == k0 && looked.road == .itsOwnSecrets)
     }
 

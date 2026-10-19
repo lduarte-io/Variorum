@@ -2,9 +2,10 @@
 //  LibraryWordsCardTests.swift
 //  VariorumTests — VX-306 U1b piece 4: THE ONCE-SHOWN WORDS CARD (rule 2; `notes/plans/vx-306-castle-open-road.md`
 //  §7c (1), built exactly as drafted; P-VX306-K7 — one button, no Copy, no "later"). The card's model holds the
-//  twelve words only until its one button; the face's words are §7c's verbatim; the face carries no copy road.
-//  (The creation itself — `createLibrary(passphrase: nil)` on the new road, the card, then the open — is
-//  `ProtectionRoadRouteTests`'.)
+//  twelve words only until its one button; the face's words are §7c's verbatim. VX-307 U2b (VX-412): the card is the
+//  PHONE's only now (P-VX307-U2b-0 — the Mac's first open has nothing in front of it, rules 2–3 as amended); the Mac's
+//  face (`LibraryWordsCard.swift`) is retired, and with it its source pin (no copy road, no later door); the phone's
+//  face stands unchanged (its model and words pinned here). The Mac's words show only at her look (`WordsBandTests`).
 //
 
 import Foundation
@@ -41,24 +42,5 @@ struct LibraryWordsCardTests {
         #expect(ProtectionWords.wordsCardFoot == "You can add a passphrase later, as a convenience over the words. "
             + "Either one can reset the other.")
         #expect(ProtectionWords.wordsCardButton == "I've written them down")
-    }
-
-    /// K7: no Copy door, no "later", and the words are never selectable — the clipboard never holds them.
-    @Test func theFaceHasNoCopyRoadAndNoLaterDoor() throws {
-        let source = try String(
-            contentsOf: URL(fileURLWithPath: #filePath)
-                .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-                .appendingPathComponent("Variorum/Features/Protection/LibraryWordsCard.swift"),
-            encoding: .utf8)
-        let code = source.split(separator: "\n").filter {
-            let line = $0.trimmingCharacters(in: .whitespaces)
-            return !line.hasPrefix("//") && !line.hasPrefix("///")
-        }.joined(separator: "\n")
-        for road in ["NSPasteboard", "UIPasteboard", "Copy", ".textSelection(.enabled)", "Later", "later"] {
-            #expect(!code.contains(road), "no copy road and no later door (\(road))")
-        }
-        #expect(code.contains(".textSelection(.disabled)"))
-        #expect(!code.contains("keyboardShortcut"), "no stray Return puts the once-shown words away")
-        #expect(code.components(separatedBy: "Button(").count == 2, "exactly one button")
     }
 }

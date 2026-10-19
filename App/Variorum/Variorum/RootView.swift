@@ -70,6 +70,11 @@ struct RootView: View {
     /// delegate's ONE model (one per process, every window's Bookcase reads
     /// it); nil in harness mounts, which then draw no offer.
     let tourOffer: TourOfferModel?
+    /// VX-307 U2b — the open library's protection faces on the NEW road (the bootstrap's `roadStanding`; nil on
+    /// today's road and in harness mounts): the card above the quick entry (the twelve words and rule 3's reminder)
+    /// and the tour's last card's two asks. The shell renders their views and never holds a sibling's model beyond
+    /// handing it down (composition's road).
+    let protectionFaces: RoadStandingModel?
     /// 13n-c U3 — the app's ONE MCP door (the app delegate's; nil in harness
     /// mounts, which then draw no share face). This window composes its
     /// `MCPShareRoad` from the door's two narrow gates and presents THE grant
@@ -177,7 +182,8 @@ struct RootView: View {
         whatsNew: WhatsNewLedger? = nil,
         calmAsks: CalmAskScheduler? = nil,
         tourOffer: TourOfferModel? = nil,
-        mcp: MCPDoor? = nil
+        mcp: MCPDoor? = nil,
+        protectionFaces: RoadStandingModel? = nil
     ) {
         self.session = session
         self.services = services
@@ -188,6 +194,7 @@ struct RootView: View {
         self.calmAsks = calmAsks
         self.tourOffer = tourOffer
         self.mcp = mcp
+        self.protectionFaces = protectionFaces
         _router = State(initialValue: router)
         _library = State(initialValue: LibraryViewModel(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
@@ -296,7 +303,7 @@ struct RootView: View {
         // 13s-b U2 — the tour's cards over the whole window (never a dim —
         // R-13s-12) and its spotlight in every door's environment (nil, and
         // so inert, whenever no tour runs).
-        .tourLayer(tourSlot.engine, sources: tourSources)
+        .tourLayer(tourSlot.engine, sources: tourSources, endLibrary: tourEndLibrary)
         .environment(theme)
         // 13i-d U6 (k): the shared wings model reaches the note ▾ menus (both
         // bars render the cross-wing doors) without threading it through
@@ -591,7 +598,11 @@ struct RootView: View {
         let tokens = theme.tokens(for: scheme)
         return AnyView(
             VStack(alignment: .leading, spacing: 0) {
-                if let protection {
+                // VX-307 U2c (VX-379's row — the VX-306 walk's W-1): the posture box reads TODAY's tier, so it renders on
+                // today's road only — on the new road its exposed line ("only this Mac can open your work") would be
+                // false (rule 8: the Apple road reaches her other Macs), and the card above the quick entry carries
+                // rule 3's ask there (U2b).
+                if let protection, protectionFaces == nil {
                     ProtectionStatusRow(controller: protection, tokens: tokens)
                 }
                 // VX-218: the family's words sit on the column's own content
@@ -991,6 +1002,21 @@ struct RootView: View {
         return AnyView(TourOfferLine(model: tourOffer, onTakeTour: startTour))
     }
 
+    /// VX-307 U2b — the card above the quick entry for the Bookcase's band (the new road only): the card renders
+    /// itself only while it has something to say; its ✕'s toast is a direction on this window's status seam.
+    private var wordsBand: AnyView? {
+        guard let standing = protectionFaces, let band = standing.band else { return nil }
+        let session = session
+        return AnyView(WordsBandCard(standing: standing, band: band, direct: { session.status.direct($0) }))
+    }
+
+    /// VX-307 U2b — the tour's last card's two asks (rule 3: the passphrase and the words, side by side): a fresh
+    /// model each time the end card shows (the new road only; nil — today's road — leaves the end card as it was).
+    private var tourEndLibrary: (@MainActor () -> TourEndLibraryModel)? {
+        guard let standing = protectionFaces else { return nil }
+        return { TourEndLibraryModel(standing: standing) }
+    }
+
     /// **THE TOUR'S ONE ENTRY** — the offer line's "yes" and Help ▸ Take the
     /// Tour (U1a piece 5, through `router.tourRequested`). 13s-b U2 fills it:
     /// a start is ALWAYS step 1 (Q12 — a tour already running starts over; no
@@ -1173,6 +1199,7 @@ struct RootView: View {
                 // 13s-b U1a: the tour offer's row — built HERE (composition)
                 // and rendered by the Bookcase alone ("Bookcase only").
                 offerLine: tourOfferLine,
+                wordsBand: wordsBand,
                 openingFocus: bookcaseOpeningFocus)
                 // 13i-d U5: a new wing is a new board (its tasks restart).
                 .id("bookcase-\(shelf.wingID)")
@@ -1494,10 +1521,13 @@ private extension View {
     /// confirm's reason below (the body's expression is at the type
     /// checker's budget). With no tour, the spotlight is nil — every
     /// `.tourAnchor` in the app is inert — and there is no overlay at all.
-    func tourLayer(_ tour: TourEngine?, sources: TourFactSources) -> some View {
+    func tourLayer(
+        _ tour: TourEngine?, sources: TourFactSources,
+        endLibrary: (@MainActor () -> TourEndLibraryModel)? = nil
+    ) -> some View {
         overlay {
             if let tour {
-                TourOverlay(engine: tour, sources: sources)
+                TourOverlay(engine: tour, sources: sources, endLibrary: endLibrary)
                     // A restarted tour is a NEW overlay: its first facts are
                     // delivered on appear (`onChange(initial:)`), never left
                     // waiting for the window to change.

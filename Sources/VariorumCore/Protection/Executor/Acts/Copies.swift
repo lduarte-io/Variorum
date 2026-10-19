@@ -18,8 +18,10 @@ import Foundation
 //     copies of it only, never another Mac's (rule 19).
 
 /// What Look inside opened (rule 17) — a copy, read-only. The key is held for
-/// the look and never stored; closing the copy forgets it.
-public struct LookedInside: CustomStringConvertible {
+/// the look and never stored; closing the copy forgets it. (VX-307 U2c:
+/// Sendable — Make this my library's preflight hands it to the act, so her one
+/// press opens the copy once.)
+public struct LookedInside: CustomStringConvertible, Sendable {
     /// The copy's catalog id.
     public let copyID: String
     /// The key that opens it.
@@ -251,9 +253,12 @@ extension ProtectionExecutor {
     /// tries only the quiet roads). `quietRoads`: which of this Mac's quiet roads
     /// may be tried — a face's automatic probe passes `.withoutAPress`, so it never
     /// raises a Touch ID prompt nobody asked for (VX-306 ladder round 1, m2).
+    /// VX-307 U2c (the VX-306 ladder's round-2 NIT 2): NO DEFAULT — the prompting
+    /// road is never the one a caller gets by saying nothing; every caller
+    /// chooses (`.includingTouchID` only at a deliberate press).
     public func lookInside(
         _ copy: CatalogCopy, in catalog: Catalog, typed: TypedSecrets = .none,
-        quietRoads: CopyQuietRoads = .includingTouchID
+        quietRoads: CopyQuietRoads
     ) throws -> LookedInside {
         let (key, road) = try openCopy(copy, in: catalog, typed: typed, quietRoads: quietRoads)
         return LookedInside(copyID: copy.id, key: key, road: road)
@@ -268,8 +273,7 @@ extension ProtectionExecutor {
         let files = catalog.servingKeyFiles(of: copy).compactMap(\.document)
         let candidates = Set(copy.fingerprint.map { [$0] } ?? copy.candidateFingerprints)
         func opens(_ key: StoreKey?) -> StoreKey? {
-            guard let key, candidates.isEmpty || candidates.contains(Self.fp(key)),
-                  (try? leaves.library.copyOpens(copyID: copy.id, with: key)) == true else { return nil }
+            guard let key, copyKeyOpens(key, copy: copy) else { return nil }
             return key
         }
         var secrets: [ProtectionSecret] = []
@@ -317,6 +321,15 @@ extension ProtectionExecutor {
         throw ExecutorRefusal.copyDoesNotOpen
     }
 
+    /// Whether `key` is the copy's key: one of the fingerprints its key file
+    /// names (when it names any) AND it opens the copy's own file — a READ that
+    /// never prompts (no keychain item is touched).
+    func copyKeyOpens(_ key: StoreKey, copy: CatalogCopy) -> Bool {
+        let candidates = Set(copy.fingerprint.map { [$0] } ?? copy.candidateFingerprints)
+        guard candidates.isEmpty || candidates.contains(Self.fp(key)) else { return false }
+        return (try? leaves.library.copyOpens(copyID: copy.id, with: key)) == true
+    }
+
     /// **Make this my library** (rule 17) — one confirmed door. `copySecrets`:
     /// what opens the copy at its door (or nothing, for its quiet road);
     /// `currentPair`: this device's current passphrase (when it has one) and its
@@ -328,6 +341,41 @@ extension ProtectionExecutor {
         _ library: inout UnlockedLibrary, copy: CatalogCopy, in catalog: Catalog, copySecrets: TypedSecrets = .none,
         currentPair: TypedSecrets
     ) async throws -> ActOutcome {
+        try await makeThisMyLibrary(&library, copy: copy, currentPair: currentPair) {
+            // Her confirmed press — the copy's own quiet roads, Touch ID's included (m2).
+            try self.openCopy(copy, in: catalog, typed: copySecrets, quietRoads: .includingTouchID).0
+        }
+    }
+
+    /// **Make this my library on a copy her press already OPENED** (VX-307 U2c
+    /// — the VX-306 ladder's round-2 NIT 1 (i)): the door's preflight is a look
+    /// at her press (`lookInside` — the copy's own secrets, the history, or its
+    /// own quiet road, Touch ID's included: ONE press), and the act takes the key
+    /// that look opened instead of opening the copy a second time — re-verified
+    /// against the copy's own file (`copyKeyOpens`, a read that never prompts).
+    /// So her one confirmed press reads a Touch ID item at most once. A key that
+    /// no longer opens the copy (it changed between) refuses `copyDoesNotOpen`;
+    /// nothing else differs from the secrets form.
+    public func makeThisMyLibrary(
+        _ library: inout UnlockedLibrary, opened: LookedInside, copy: CatalogCopy, in catalog: Catalog,
+        currentPair: TypedSecrets
+    ) async throws -> ActOutcome {
+        try await makeThisMyLibrary(&library, copy: copy, currentPair: currentPair) {
+            guard opened.copyID == copy.id, self.copyKeyOpens(opened.key, copy: copy) else {
+                throw ExecutorRefusal.copyDoesNotOpen
+            }
+            return opened.key
+        }
+    }
+
+    /// The act's one body — `copyKey` answers the copy's key (the secrets
+    /// form opens it; the opened form re-verifies the look's), read where the
+    /// secrets form always read it: after the record, in-flight and vault
+    /// guards, before the current pair is verified.
+    private func makeThisMyLibrary(
+        _ library: inout UnlockedLibrary, copy: CatalogCopy, currentPair: TypedSecrets,
+        copyKey readCopyKey: () throws -> StoreKey
+    ) async throws -> ActOutcome {
         guard let record = library.record else { throw ExecutorRefusal.recordMissing }
         if let inFlight = library.section.actInFlight { throw ExecutorRefusal.actInFlight(inFlight.act) }
         // Decision 35: a Standard library bound to an account mints nothing
@@ -336,8 +384,7 @@ extension ProtectionExecutor {
            !readThisSession(account) {
             throw ExecutorRefusal.needsFreshVault
         }
-        // Her confirmed press — the copy's own quiet roads, Touch ID's included (m2).
-        let (copyKey, _) = try openCopy(copy, in: catalog, typed: copySecrets, quietRoads: .includingTouchID)
+        let copyKey = try readCopyKey()
         guard !currentPair.wordsAreNew else { throw ExecutorRefusal.wordsMustBeTyped }
         var secrets = ActSecrets()
         if library.keyFile?.passphrase != nil {

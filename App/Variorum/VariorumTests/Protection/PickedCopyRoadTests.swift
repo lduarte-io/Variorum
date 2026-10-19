@@ -47,13 +47,14 @@ struct PickedCopyRoadTests {
             Issue.record("their copy needs their secrets")
             return
         }
-        guard case .ready(let copy, let catalog) = ProtectionCopyDoors.preflight(
+        guard case .ready(let copy, let catalog, let opened) = ProtectionCopyDoors.preflight(
             session, row: row, copySecrets: TypedSecrets(words: theirWords), currentPair: TypedSecrets(words: myWords)) else {
             Issue.record("their words open their copy; her words verify her library")
             return
         }
+        #expect(opened.road == .itsOwnSecrets, "their words opened their copy at her press")
         let result = await ProtectionCopyDoors.makeMine(
-            session, copy: copy, catalog: catalog, row: row, copySecrets: TypedSecrets(words: theirWords),
+            session, copy: copy, catalog: catalog, row: row, opened: opened,
             currentPair: TypedSecrets(words: myWords), mintStoreIdentity: { _ in })
         #expect(result.outcome == .made)
         let record = try #require(try ProtectionLibraryFiles.readRecord(at: mine.slot.places.slot, key: result.reopenKey))

@@ -266,6 +266,29 @@ struct CopyDoorsModelTests {
         #expect(!CopyDoorsModel(roads: planted.roads).offersLookInside, "no look road — no door")
     }
 
+    /// VX-307 U2c — VX-413: the doors' model hands the look the platform's clipboard road — the note page's *Copy full
+    /// text* is offered exactly where one exists (the Mac's bootstrap gives one; the phone has no look and no road).
+    @Test func theDoorsHandTheLookItsCopyFullTextRoad() async throws {
+        var roads = PlantedCopyDoors().roads
+        roads.lookInside = { _, _, _ in .refused(.copyDoesNotOpen) }
+        let r = try row()
+        let without = CopyDoorsModel(roads: roads)
+        await without.openLookInside(r)
+        guard case .lookInside(let bare) = without.phase else {
+            Issue.record("the look: \(without.phase)")
+            return
+        }
+        #expect(!bare.offersCopyFullText, "no clipboard road — no door (P-2)")
+        roads.copyFullText = { _ in }
+        let with = CopyDoorsModel(roads: roads)
+        await with.openLookInside(r)
+        guard case .lookInside(let look) = with.phase else {
+            Issue.record("the look: \(with.phase)")
+            return
+        }
+        #expect(look.offersCopyFullText)
+    }
+
     @Test func aPickThatIsNotAPairSaysWhyAndSeveralStoresAreOffered() async throws {
         let roads = PlantedCopyDoors()
         roads.pickAnswer = .refused(ProtectionWords.plaintextCopyNotYet, detail: nil)

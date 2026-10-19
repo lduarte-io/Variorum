@@ -9,6 +9,9 @@
 //  *Close* where a library is open. Nothing here is editable and nothing here writes: every word is read from a private
 //  copy through `LookInsideModel`, and closing forgets. When the copy's own quiet road doesn't open it, its passphrase or
 //  twelve words are asked first (the copy's field, §7c (8)'s label).
+//  VX-307 U2c — VX-413: the note page carries *Copy full text* beside *Back* (the note onto the clipboard in the Variorum
+//  document format — the same door and name a live note has), its receipt said under it; the text itself stays as it
+//  was — read-only, never selectable into an edit road.
 //
 
 import SwiftUI
@@ -118,7 +121,22 @@ struct LookInsideSheet: View {
 
     private func noteView(_ note: ProtectionCopyPeek.NoteText) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Button(ProtectionWords.lookInsideBack) { model.back() }
+            HStack {
+                Button(ProtectionWords.lookInsideBack) { model.back() }
+                Spacer()
+                // VX-307 U2c — VX-413: the note onto the clipboard in the Copy full text format (the same door and name
+                // a live note has); nothing written to the copy or the library.
+                if model.offersCopyFullText {
+                    Button(ProtectionWords.lookInsideCopyFullText) { Task { await model.copyFullText() } }
+                        .disabled(model.busy)
+                }
+            }
+            if let line = model.copyLine {
+                Text(line.sentence)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Text(title(note.title)).font(.callout.weight(.semibold))
             ScrollView {
                 // Read-only, never selectable into an edit road: the page as it reads.

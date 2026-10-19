@@ -1,29 +1,31 @@
 //
 //  ReadmeStartHerePlanTests.swift
-//  VariorumTests — VX-306: the readme's Start Here passages are the plan's §7c (5), byte for byte
+//  VariorumTests — VX-306: the readme's Start Here passages are the plan's, byte for byte. VX-307 U2c (F-U2b-1): the
+//  source RE-ANCHORED — the passages are VX-307's plan's U2c words block now (its passage 2 reworded to the amended
+//  rules 2, 3 and 7; passages 1, 3, 4 byte-identical to VX-306's §7c (5), which keeps its drafts as history).
 //
 
 import Foundation
 import Testing
 @testable import Variorum
 
-@Suite("VX-306 — the Start Here passages seeded into the readme are the plan's §7c (5)")
+@Suite("VX-306/VX-307 — the Start Here passages seeded into the readme are the plan's (VX-307 U2c's words block)")
 struct ReadmeStartHerePlanTests {
-    /// The plan file, read from the repo beside the test target.
+    /// The plan file, read from the repo beside the test target — VX-307's since U2c (F-U2b-1, the re-anchor).
     private func planText() throws -> String {
-        let url = URL(fileURLWithPath: #filePath)
+        let url = URL(fileURLWithPath: #filePath).resolvingSymlinksInPath()
             .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
             .deletingLastPathComponent().deletingLastPathComponent()
-            .appendingPathComponent("notes/plans/vx-306-castle-open-road.md")
+            .appendingPathComponent("notes/plans/vx-307-castle-crossings.md")
         return try String(contentsOf: url, encoding: .utf8)
     }
 
-    /// §7c (5)'s four passages: each blockquote paragraph, its `**` lead markers dropped and its
+    /// The U2c words block's four passages: each blockquote paragraph, its `**` lead markers dropped and its
     /// line breaks reflowed to single spaces — exactly the seeded block.
     private func planPassages() throws -> [String] {
         let text = try planText()
-        guard let start = text.range(of: "**(5) The Start Here chapter**"),
-              let end = text.range(of: "## 8. ENVIRONMENT TRAPS", range: start.upperBound..<text.endIndex)
+        guard let start = text.range(of: "**F-U2b-1 — the readme's Start Here passages, as amended**"),
+              let end = text.range(of: "## 7. LIVE STATUS", range: start.upperBound..<text.endIndex)
         else { return [] }
         let section = text[start.upperBound..<end.lowerBound]
         // Only the blockquote lines are the passages (the header's tail and the later (6)/(7) blocks are not);
@@ -47,7 +49,7 @@ struct ReadmeStartHerePlanTests {
         #expect(ReadmeSeeder.paragraphs[0].hasPrefix("Welcome to Variorum!"))
         let seeded = Array(ReadmeSeeder.paragraphs[5...])
         let drafted = try planPassages()
-        #expect(drafted.count == 4, "the plan's §7c (5) carries four passages")
+        #expect(drafted.count == 4, "the plan's U2c words block carries four passages")
         #expect(seeded == drafted, "the seeded passages are the plan's, byte for byte")
     }
 

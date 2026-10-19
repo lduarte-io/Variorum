@@ -165,8 +165,9 @@ struct PassphraseSetSheet: View {
 struct ProtectionPane: View {
     @Bindable var controller: ProtectionController
     let services: AppServices?
-    /// VX-306 U2 — the new road's open library faces (nil on today's road): the pane's ONE new row, *Set a
-    /// passphrase…*, opens the set-passphrase sheet (P-VX306-U2-0 (a)). The pane's other doors stay today's.
+    /// VX-306 U2 — the new road's open library faces (nil on today's road): the pane's *Set a passphrase…* row opens the
+    /// set-passphrase sheet (P-VX306-U2-0 (a)). VX-307 U2a: its `crossings` carry the new road's doors, and today's rows
+    /// retire behind the switch there.
     var roadStanding: RoadStandingModel? = nil
     @State private var roadSheet: SetPassphraseModel?
 
@@ -183,24 +184,47 @@ struct ProtectionPane: View {
             if let roadStanding, roadStanding.offersSetPassphrase {
                 roadPassphraseSection(roadStanding)
             }
-            leadSection
-            checklistSection
-            postureSection
-            if appleAccountDoorRenders {
-                appleAccountSection
+            // VX-307 U2b (rules 2 and 7 as amended): the twelve words' door — the one the card's ✕ names ("look in
+            // Settings, Protection"). A look mints fresh words through rule 6's act; nothing keeps them.
+            if let roadStanding, roadStanding.band != nil {
+                WordsLookSection(standing: roadStanding)
             }
-            if controller.posture == .castle {
-                castleSwitchesSection
+            // VX-307 U2a: the new road's crossings — the posture, Use Castle / Use Standard / Replace All Keys as
+            // `assess` says them, rule 11's notice, the gate-style row (nil on today's road).
+            if let crossings = roadStanding?.crossings {
+                RoadCrossingsSection(model: crossings)
             }
-            passphraseSection
-            if controller.posture == .castle,
-               controller.hasPassphraseWrap || controller.hasRecoveryWrap {
-                reminderSection
+            // Today's rows read today's posture and act through today's machinery: on the new road they retire behind
+            // the switch (PROVISIONAL P-VX307-U2a-4); Release — today's road — renders them exactly as before.
+            if roadStanding == nil {
+                leadSection
+                checklistSection
+                postureSection
+                if appleAccountDoorRenders {
+                    appleAccountSection
+                }
+                if controller.posture == .castle {
+                    castleSwitchesSection
+                }
+                passphraseSection
+                if controller.posture == .castle,
+                   controller.hasPassphraseWrap || controller.hasRecoveryWrap {
+                    reminderSection
+                }
             }
             keystoneSection
         }
         .formStyle(.grouped)
         .task { await services?.encryption.refresh() }
+        // VX-307 U2a: the crossings' doors re-read at each appearance (a crossing's reopen rebuilds this pane).
+        .task { await roadStanding?.crossings?.refresh() }
+        // VX-307 U2a: the crossing's confirm — held by the bootstrap's model, so it survives the reopen under it.
+        .sheet(item: Binding(
+            get: { roadStanding?.crossings?.confirm },
+            set: { if $0 == nil { roadStanding?.crossings?.dismissConfirm() } })
+        ) { confirm in
+            RoadCrossingSheet(model: confirm)
+        }
         // RUN A batch A2, row 11: this pane is ONE of the ceremony's two
         // presenters now, so it says when it is on screen — the host is
         // decided at `openSwitch` from this count.

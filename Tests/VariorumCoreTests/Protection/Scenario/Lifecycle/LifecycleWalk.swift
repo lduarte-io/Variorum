@@ -119,6 +119,8 @@ final class LStageContext {
     var startDeviceIDsSeen: Set<String> = []
     // What the stage's acts handed back.
     var created: CreatedLibrary?
+    /// VX-307 U2b: the words a look showed at this stage (rule 2's look — minted, shown once, never stored).
+    var shownWords: [String]?
     var outcome: ActOutcome?
     var noticeOutcome: ActOutcome?
     var observed: Set<LObs> = []
@@ -392,6 +394,9 @@ final class LifecycleWalk {
         rememberSecrets(on: mac, passphrase: nil, words: created.words)
     }
 
+    /// VX-307 U2b (rules 2–3 as amended): the tour's last card — the passphrase set (Standard's plain confirm), then
+    /// the look: nothing kept the creation's words, so rule 6's act locks the words she records (handed the passphrase
+    /// she just chose — the card never asks it twice), the key unchanged.
     func stage2(_ ctx: LStageContext) async throws {
         let fresh = world.newPassphrase()
         ctx.outcome = try await act(mac) { executor, library in
@@ -399,6 +404,13 @@ final class LifecycleWalk {
         }
         passphrase = fresh
         rememberSecrets(on: mac, passphrase: fresh, words: words)
+        let looked = world.newWords()
+        _ = try await act(mac) { executor, library in
+            try await executor.regenerateWords(&library, passphrase: fresh, newWords: looked)
+        }
+        ctx.shownWords = looked
+        words = looked
+        rememberSecrets(on: mac, passphrase: fresh, words: looked)
     }
 
     func stage3(_ ctx: LStageContext) async throws {
@@ -491,7 +503,7 @@ final class LifecycleWalk {
             let catalog = world.catalog(device)
             guard let entry = catalog.copies.first(where: { $0.id == copy.id }), let executor = device.executor else { continue }
             let before = LSnapshot(device)
-            let opened = (try? executor.lookInside(entry, in: catalog, typed: secrets(typed, copy: copy))) != nil
+            let opened = (try? executor.lookInside(entry, in: catalog, typed: secrets(typed, copy: copy), quietRoads: .includingTouchID)) != nil
             results.append(LLookResult(typed: typed, opened: opened, wroteNothing: LSnapshot(device) == before))
         }
         ctx.looks[subject.rawValue] = results

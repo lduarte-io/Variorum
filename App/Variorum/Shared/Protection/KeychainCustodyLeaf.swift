@@ -66,6 +66,32 @@ nonisolated final class KeychainCustodyLeaf: CustodyLeaf, @unchecked Sendable {
         lock.unlock()
     }
 
+    #if DEBUG
+    /// WALK MACHINERY (VX-307 U2a — `ProtectionWalkSwitch`'s `VARIORUM_WALK_TOUCHID=fail`, P-VX306-U1b-9's fences): the
+    /// next Touch ID press on an item that EXISTS answers as one a biometry change invalidated — nothing read, the press
+    /// recorded `.failedOnExistingItem` — ONCE, so lifecycle stage 11's re-arm is walked on a planted failure. Never set
+    /// outside a walk launch.
+    private var walkFailsNextPress = false
+
+    func walkFailNextTouchIDPress() {
+        lock.lock()
+        walkFailsNextPress = true
+        lock.unlock()
+    }
+
+    /// This leaf instance's name in the walk's log lines (ladder round 1, MINOR-3: the armed and the pressed instance
+    /// named, so a walk can tell them apart — never key material).
+    var walkInstanceName: String { String(UInt(bitPattern: ObjectIdentifier(self).hashValue), radix: 16) }
+
+    private func takeWalkFailure() -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        let fails = walkFailsNextPress
+        walkFailsNextPress = false
+        return fails
+    }
+    #endif
+
     func account(_ fingerprint: String, _ itemClass: ProtectionNames.CustodyClass) -> String {
         ProtectionNames.custodyAccount(scope: scope, fingerprint: fingerprint, class: itemClass)
     }
@@ -102,6 +128,15 @@ nonisolated final class KeychainCustodyLeaf: CustodyLeaf, @unchecked Sendable {
                 setLastPress(.transient(transient))
                 return nil
             }
+            #if DEBUG
+            if takeWalkFailure() {
+                setLastPress(.failedOnExistingItem)
+                ProtectionOpenRoad.log("WALK SWITCH: the planted failure answered this press — no prompt (leaf \(walkInstanceName))")
+                return nil
+            }
+            // MINOR-3's one look: every real press names its leaf, beside the arm's line.
+            ProtectionOpenRoad.log("road: a Touch ID press — the system prompt (leaf \(walkInstanceName))")
+            #endif
             let context = LAContext()
             context.localizedReason = Self.pressReason
             context.localizedFallbackTitle = ""  // the fallback is the passphrase road, never a system credential

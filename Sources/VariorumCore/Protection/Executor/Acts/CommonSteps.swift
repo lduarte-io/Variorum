@@ -423,9 +423,12 @@ extension ActContext {
         plan.parameters = stamped
         try leaves.plans.writePlan(try plan.sealed(under: library.key))
         let revision = resuming ? snapshot.revision : (parameters.doorRevision ?? snapshot.revision)
+        // The master changes here, so the NEW master rides (VX-307 U1: the
+        // wire lands the new hash and kp2′ together, authorized by the old
+        // proof).
         let written = try await leaves.vault.updateVault(
             vault, accountID: snapshot.accountID, expectedRevision: revision, proofMaster: current.masterKey,
-            device: deviceName)
+            successorMaster: fresh.masterKey, device: deviceName)
         executor.noteFresh(written)
         log("the account entered Castle (sync key \(Self.fp8(fresh.rowKeyID)))")
         try holdSyncKeys(fresh, castleWay: true)
@@ -445,7 +448,7 @@ extension ActContext {
         let revision = resuming ? snapshot.revision : (parameters.doorRevision ?? snapshot.revision)
         let written = try await leaves.vault.updateVault(
             VaultModel.leavingCastle(snapshot.vault, device: deviceName), accountID: snapshot.accountID,
-            expectedRevision: revision, proofMaster: held.masterKey, device: deviceName)
+            expectedRevision: revision, proofMaster: held.masterKey, successorMaster: nil, device: deviceName)
         executor.noteFresh(written)
         log("the account left Castle (its mode flag flipped; no key changed)")
         try holdSyncKeys(held, castleWay: false)

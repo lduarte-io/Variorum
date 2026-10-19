@@ -654,10 +654,14 @@ nonisolated enum ProtectionCopy {
     /// The Apple-key LEG's own three-value truth (T2 applied per leg —
     /// pre-13x 2a, re-based onto the iCloud key A): a verified copy, a copy
     /// that is verifiably not landing, a copy this launch hasn't checked.
+    /// VX-307 U2c (VX-379's rows — the Protection pane's checklist in the
+    /// rules' words, `notes/CastleRules.md` rule 8's "an Apple road (your
+    /// iCloud Keychain, through your Apple account)"; the facts unchanged —
+    /// PROVISIONAL P-VX307-U2c-7).
     static func appleKeyLegSentence(_ verified: Bool?) -> String {
         switch verified {
-        case true: return "verified this launch — the iCloud key opens the key file's copy"
-        case false: return "not landing — no copy verifiably opens with the iCloud key"
+        case true: return "verified this launch — your Apple account opens the key file's copy"
+        case false: return "not landing — no copy verifiably opens through your Apple account"
         case nil: return "not checked yet this launch"
         }
     }
@@ -695,23 +699,29 @@ nonisolated enum ProtectionCopy {
                     + "this mode's point"))
         }
         guard !legs.factsUnknown else { return rows }
+        // VX-307 U2c (VX-379's rows — the rules' words, the facts unchanged;
+        // PROVISIONAL P-VX307-U2c-7): "twelve words" for the recovery phrase
+        // (the pane's own section already says it), "your Apple account" for
+        // the iCloud key (rule 8's Apple road), and the passphrase's note no
+        // longer claims "any copy" — a copy opens with the passphrase it was
+        // made under (rules 4–5; today's runbook §2 says the same).
         rows.append(ChecklistRow(
             name: "Encryption passphrase", present: legs.hasPassphraseWrap,
             note: legs.hasPassphraseWrap
-                ? "opens any copy, and lets a new device into sync"
+                ? "opens this library, and lets a new device into sync"
                 : "not set"))
         rows.append(ChecklistRow(
-            name: "Recovery phrase", present: legs.hasRecoveryWrap,
+            name: "Twelve words", present: legs.hasRecoveryWrap,
             note: legs.hasRecoveryWrap
-                ? "the twelve words — the passphrase's twin, on paper"
+                ? "the passphrase's twin, on paper"
                 : "not saved"))
         if mode.isDemanded {
             rows.append(ChecklistRow(
-                name: "iCloud key", present: false,
-                note: "no copy opens with it in Castle"))
+                name: "Your Apple account", present: false,
+                note: "no road through Apple in Castle"))
         } else {
             rows.append(ChecklistRow(
-                name: "iCloud key",
+                name: "Your Apple account",
                 present: legs.appleKeyVerified,
                 note: appleKeyLegSentence(legs.appleKeyVerified)))
         }
@@ -748,11 +758,15 @@ nonisolated enum ProtectionCopy {
     /// re-opens the door the encryption closed.
     /// pre-13x 2b: the CASTLE warning (§8's Backups tab — a scheduled
     /// plaintext export re-enabled under Castle shows it; the switch turns
-    /// the export OFF with copy §2b's notice).
+    /// the export OFF with copy §2b's notice). VX-307 U2c (VX-379's row; U2a's
+    /// F-6): in RULE 11's language — "a plain copy on disk would undo the
+    /// promise; it is your call" (`notes/CastleRules.md`; U2a's notice says
+    /// the same) — true on both roads; on the new road Data Safety shows it by
+    /// the OPEN library's posture. PROVISIONAL P-VX307-U2c-7.
     static let plaintextExportUnderLockedDown =
-        "You're in Castle — and a scheduled plain-text export re-opens the door "
-        + "Castle closed: every note, readable, on a timer, in the folder you "
-        + "picked. Turn it on only if that trade is one you mean."
+        "You're in Castle — and a scheduled plain-text copy on disk would undo "
+        + "Castle's promise: every note, readable, on a timer, in the folder you "
+        + "picked. It's your call."
 
     // The EXPOSED tier's copy — pre-13x 2a: copy §5's nudge, VERBATIM
     // (re-based on the Apple key: "Standard, no Apple key landed, no

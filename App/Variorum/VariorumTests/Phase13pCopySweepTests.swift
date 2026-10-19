@@ -117,7 +117,9 @@ struct Phase13pCopySweepTests {
     }
 
     @Test func thePlainTextEscapeWarnsUnderLockedDown() {
+        // VX-307 U2c (VX-379's row — a justified edit: the warning speaks rule 11's words now, "a plain copy on disk
+        // would undo the promise; it is your call"; the warning itself stands).
         #expect(ProtectionCopy.plaintextExportUnderLockedDown
-            .contains("re-opens the door"))
+            .contains("would undo Castle's promise"))
     }
 }

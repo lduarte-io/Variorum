@@ -36,6 +36,7 @@ nonisolated final class ProtectionSystem: @unchecked Sendable {
         scope: String, places: ProtectionPlaces, deviceName: String = DeviceName.current,
         floor: PassphraseKDF.Floor = PassphraseKDF.floor,
         custody: (any CustodyLeaf)? = nil, syncKeys: (any SyncKeysLeaf)? = nil, apple: (any AppleKeysLeaf)? = nil,
+        vault: (any VaultLeaf)? = nil,
         memory: (any MemoryStoreLeaf)? = nil, biometry: (any BiometryLeaf)? = nil, clock: (any ClockLeaf)? = nil,
         ids: (any IDsLeaf)? = nil
     ) {
@@ -55,7 +56,12 @@ nonisolated final class ProtectionSystem: @unchecked Sendable {
         lister = CatalogLister(places: places)
         leaves = ExecutorLeaves(
             custody: custody, syncKeys: syncKeys ?? KeychainSyncKeysLeaf(scope: scope),
-            apple: apple ?? ICloudAppleKeysLeaf(scope: scope), vault: UnreachableVaultLeaf(),
+            apple: apple ?? ICloudAppleKeysLeaf(scope: scope),
+            // VX-307 U1: the production wire leaf (the marker-14 shape) when
+            // the project is configured; else the vault stays unreachable and
+            // an act that needs it rolls back, exactly as before. Tests
+            // inject their own.
+            vault: vault ?? WireVaultLeaf.live(scope: scope, deviceName: deviceName) ?? UnreachableVaultLeaf(),
             library: SQLCipherLibraryLeaf(places: places), keyFiles: FileKeyFileStoreLeaf(places: places),
             memory: memory, plans: FilePlanStoreLeaf(places: places),
             backups: backups, clock: clock ?? SystemClockLeaf(), ids: ids ?? SystemIDsLeaf(), biometry: biometry,

@@ -131,12 +131,14 @@ struct ProtectionOfferFaceTests {
         #expect(finished == 1 && model.message == nil)
     }
 
-    /// The search's other answers, read into the standing faces: the split pair's line; rule 27 (P-VX378-U4-6).
+    /// The search's other answers, read into the standing faces: rule 27 (P-VX378-U4-6). VX-307 U2c — VX-414: the
+    /// split pair's line is DROPPED (her ruling on P-VX306-U2-6, "sure we can drop the sentence" — no state reaches
+    /// it), so its derive pin retires with it: the split pair now says nothing — no standing line, no card.
     @Test func theSearchsOtherAnswersAreTheStandingFaces() {
         var report = RoadOpenReport()
         report.keyFileSearch = .besideOpensItOnlyThroughItsHistory
-        #expect(RoadStandingFaces.derive(report).splitPair)
-        #expect(RoadInterlude.cards(report).isEmpty, "the split pair is a standing line, never a card")
+        #expect(RoadStandingFaces.derive(report) == .none, "the split pair says nothing (VX-414)")
+        #expect(RoadInterlude.cards(report).isEmpty, "never a card")
         report.keyFileSearch = .noKeyFileAnywhere(NoKeyFileAnywhere(accountRoad: true))
         #expect(RoadStandingFaces.derive(report).noKeyFileAnywhere == NoKeyFileAnywhere(accountRoad: true))
         report.keyFileSearch = .besideOpensIt

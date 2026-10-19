@@ -22,6 +22,10 @@ import VariorumCore
 struct TourOverlay: View {
     let engine: TourEngine
     let sources: TourFactSources
+    /// VX-307 U2b (rule 3 as amended: "the tutorial's last card asks, and shows the twelve words beside the ask") —
+    /// the end card's two asks, on the NEW road only (the composition root's factory; nil on today's road, whose end
+    /// card is exactly as it was). Made once, when the end card first shows.
+    var endLibrary: (@MainActor () -> TourEndLibraryModel)? = nil
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -34,6 +38,8 @@ struct TourOverlay: View {
     @State private var probe = TourWindowProbe.Handle()
     /// Write's ⑂ badge, when this step points at it — overlay-local.
     @State private var badgeFrame: CGRect?
+    /// VX-307 U2b — the end card's two asks, made when the end card first shows (the new road only).
+    @State private var library: TourEndLibraryModel?
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -81,6 +87,10 @@ struct TourOverlay: View {
         }
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { origin = $0 }
         .onChange(of: facts, initial: true) { _, now in engine.observe(now) }
+        // VX-307 U2b: the end card's two asks, made once when it first shows (the new road only).
+        .onChange(of: engine.state.step, initial: true) { _, step in
+            if step == .endCard, library == nil { library = endLibrary?() }
+        }
         // A3: while Write's takes panel is up at steps 5–6, the card moves
         // INTO the panel (its slot draws it above the sheet's scrim).
         .onChange(of: panelCardKey, initial: true) { _, _ in
@@ -110,7 +120,8 @@ struct TourOverlay: View {
         if step == .endCard {
             TourEndCard(
                 tokens: tokens, scheme: scheme,
-                readmeExists: engine.readmeNoteExists
+                readmeExists: engine.readmeNoteExists,
+                library: library
             ) { engine.choose($0) }
                 .fixedSize(horizontal: false, vertical: true)
                 .modifier(MeasuredCard(size: $cardSize))
@@ -335,6 +346,9 @@ struct TourEndCard: View {
     let scheme: ColorScheme
     /// The readme honesty gate (extra-pass MINOR-1).
     let readmeExists: Bool
+    /// VX-307 U2b (rule 3 as amended): the passphrase ask and the twelve words, side by side, above the doors — the
+    /// NEW road only; nil (today's road) draws the card exactly as it was.
+    var library: TourEndLibraryModel? = nil
     let onChoose: (Tour.EndChoice) -> Void
 
     /// The aside's one choice, pure so the pin can hold it: the full
@@ -366,12 +380,19 @@ struct TourEndCard: View {
                 .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 8)
+            if let library {
+                TourEndLibraryBlock(model: library, tokens: tokens)
+                    .padding(.top, 14)
+            }
             VStack(alignment: .leading, spacing: 9) {
                 ForEach(Self.choices(tokens), id: \.key) { door in
                     choice(door)
                 }
             }
             .padding(.top, 16)
+            // VX-307 U2b: while the words are on screen the doors wait — leaving would put the once-shown words away
+            // without her warning.
+            .disabled(library?.holdsTheDoors == true)
         }
         .padding(.horizontal, 30)
         .padding(.vertical, 26)

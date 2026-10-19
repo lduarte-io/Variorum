@@ -990,6 +990,13 @@ final class ProtectionController {
         settingsRequest += 1
     }
 
+    /// VX-307 U2a — the NEW road's crossing ends on Protection too (`AppBootstrap.crossOnNewRoad`: its reopen rebuilt
+    /// Settings at General). Unconditional: the crossings' doors live only in Settings ▸ Protection. Never called on
+    /// today's road.
+    func requestProtectionPaneForRoadCrossing() {
+        settingsRequest += 1
+    }
+
     /// The biometric confirmation (leaving Castle's Touch ID road) —
     /// PROMPTS in production; scripted in tests.
     func confirmPresence(_ reason: String) async -> Bool {

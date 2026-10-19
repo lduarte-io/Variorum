@@ -34,7 +34,7 @@ struct ProtectionFacesRouteTests {
                 Issue.record("the offer is said before the library shows: \(bootstrap.state)")
                 return
             }
-            guard case .offer(let offer)? = interlude.current else {
+            guard case .offer(let offer, _)? = interlude.current else {
                 Issue.record("the offer card")
                 return
             }
@@ -129,7 +129,8 @@ struct ProtectionFacesRouteTests {
         }
     }
 
-    /// Rule 27 before unlock through the bootstrap: the lobby's face, and its *Start a New Library* → the words card.
+    /// Rule 27 before unlock through the bootstrap: the lobby's face, and its *Start a New Library* → the new library open
+    /// (VX-307 U2b: no words card in front of it).
     @Test func rule27sLobbyStartsANewLibraryThroughTheBootstrap() async throws {
         try await withRoadDependencies {
             let world = RoadWorld()
@@ -147,8 +148,10 @@ struct ProtectionFacesRouteTests {
             #expect(lobby.face.noKeyFileAnywhere != nil)
             #expect(lobby.offersStartNew)
             await lobby.startNewLibrary()
-            guard case .newLibraryWords = bootstrap.state else {
-                Issue.record("a new library's words card: \(bootstrap.state)")
+            // VX-307 U2b: the creation opens straight on — no words card (rules 2–3 as amended).
+            await bootstrap.awaitOpen()
+            guard case .ready = bootstrap.state else {
+                Issue.record("a new library opens with nothing in front: \(bootstrap.state)")
                 return
             }
             #expect(!(try FileManager.default.contentsOfDirectory(atPath: world.slot.places.previousLibraries.path)).isEmpty,

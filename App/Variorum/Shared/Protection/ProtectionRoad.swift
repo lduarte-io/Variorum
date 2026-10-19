@@ -53,4 +53,15 @@ nonisolated enum ProtectionRoad {
     /// at the real store's variant keeps today's road). ONE rule, read by the bootstrap's road and by the readme's Start
     /// Here passages (VX-306 ladder round 2, m2: they seed only where the road they describe is the store's road).
     static func opensOnTheNewRoad(devStore: Bool) -> Bool { newRoadIsLive && devStore }
+
+    /// VX-307 U2b (VX-412 — `notes/CastleRules.md` rules 2 and 3 as amended at her sitting on VX-306's bundle): whether
+    /// a library just created shows its words card BEFORE the first screen. On the Mac it never does — "the words are
+    /// never shown before the first screen: the first open is the Bookcase and the quick entry with nothing in front of
+    /// them"; the creation's words are dropped unseen (nothing stores the words — rule 2) and the card above the quick
+    /// entry offers fresh ones when she asks. The PHONE keeps its creation card this phase (PROVISIONAL P-VX307-U2b-0:
+    /// the phone's calm first open is a VM ticket — the mobile-parity line).
+    static func wordsCardAtCreation(mac: Bool) -> Bool { !mac }
+
+    /// The rule read for this build (the bootstrap's `.roadCreated` arm).
+    static let showsWordsAtCreation: Bool = wordsCardAtCreation(mac: isMac)
 }

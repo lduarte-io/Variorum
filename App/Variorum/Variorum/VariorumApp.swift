@@ -176,7 +176,9 @@ struct VariorumApp: App {
                     // 13s-b U1a: the first-open tour offer's one model.
                     tourOffer: appDelegate.tourOffer,
                     // 13n-c U3: the share faces' road is built from the door.
-                    mcp: appDelegate.mcp)
+                    mcp: appDelegate.mcp,
+                    // VX-307 U2b: the new road's card above the quick entry and the tour's last card (nil today).
+                    protectionFaces: bootstrap.roadStanding)
                     .onAppear {
                         appDelegate.session = session
                         #if DEBUG
@@ -223,6 +225,13 @@ struct VariorumApp: App {
                             // 13l Act 4 (row 13): the Mac's own restore
                             // recipe, dropped into every backup folder.
                             backupRunbookText: DataSafetyCopy.runbook,
+                            // VX-307 U1: on the new road the engine's keys come
+                            // from the protection core's custody (rule 15),
+                            // never today's SyncCustodyRecord; today's road
+                            // keeps its default provider, byte-unchanged.
+                            makeSyncKeyProvider: bootstrap.newRoad
+                                ? { [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in newRoadSyncKeys }
+                                : nil,
                             // 17y B-DEDUPE: the Mac's furniture-fold facts =
                             // the shared half + the GUIDE's (the engine's
                             // pairwise fold; the phone wires the shared half
@@ -439,8 +448,8 @@ struct VariorumApp: App {
                             }
                             ProtectionNoticeBar(
                                 controller: bootstrap.protection, services: services)
-                            // VX-306 U2 (the new road only — nil on today's): rule 27's banner, the split pair's
-                            // line, rule 3's reminder and its set-passphrase sheet.
+                            // VX-306 U2 (the new road only — nil on today's): rule 27's banner. (VX-307 U2c dropped the
+                            // split pair's line; U2b moved rule 3's reminder into the card above the quick entry.)
                             ProtectionRoadBar(model: bootstrap.roadStanding)
                         }
                     }
@@ -490,8 +499,13 @@ struct VariorumApp: App {
                     // VX-306 U3: the door leads to the picked flow — filed, then Look inside (P-VX306-U3-7 narrowed).
                     openDoor: { libraryOpen.openPanel(bootstrap: bootstrap) })
             case .newLibraryWords(let card):
-                // VX-306 U1b: the once-shown words card of a library just created (rule 2).
-                LibraryWordsCard(model: card)
+                // VX-307 U2b (VX-412): the creation-time words card RETIRED on the Mac — the first open has nothing in
+                // front of it (`ProtectionRoad.showsWordsAtCreation` is false here, so the bootstrap never lands on this
+                // state on the Mac; the phone keeps its card, P-VX307-U2b-0). Should it ever arrive, the open goes
+                // straight on: the words forgotten unseen (nothing stores them) — the card above the quick entry offers
+                // fresh ones when she asks.
+                StoreOpeningView()
+                    .onAppear { card.iveWrittenThemDown() }
             case .roadInterlude(let interlude):
                 // VX-306 U2: rule 21's notice, then the key-file offer — once, before the library shows.
                 RoadInterludeCard(model: interlude)

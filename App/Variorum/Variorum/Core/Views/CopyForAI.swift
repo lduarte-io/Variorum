@@ -35,12 +35,19 @@ enum CopyForAI {
                 session.status.refuse(copyForAIEmpty)
                 return
             }
-            pasteboard.clearContents()
-            pasteboard.setString(text, forType: .string)
+            put(text, on: pasteboard)
             session.status.receipt(copiedForAI)
         } catch {
             session.status.refuse(OpsRefusalCopy.message(for: error))
         }
+    }
+
+    /// The ONE clipboard rule for a note's full text: the board cleared, the text set as a string — this door's and
+    /// Look inside's *Copy full text* (VX-307 U2c, VX-413 — the same door and name a live note has). `pasteboard` is
+    /// the tests' seam.
+    static func put(_ text: String, on pasteboard: NSPasteboard = .general) {
+        pasteboard.clearContents()
+        pasteboard.setString(text, forType: .string)
     }
 
     // MARK: - What it says (sentence case — her standing rule)

@@ -58,18 +58,24 @@ struct DataSafetyPane: View {
     /// library…* in place of today's rows (13x's adoption step retired behind the door there).
     let roadDoors: RoadDoorsHost?
     @State private var roadList: CopyDoorsListModel?
+    /// VX-307 U2c (VX-379's pane rows; U2a's F-6): the new road's open-library faces (nil on TODAY's road). Today's rows
+    /// — they read today's posture or describe today's road — render only without it (the U2a-4 ruling: today's rows
+    /// retire behind the switch on the new road); the Castle warning reads ITS posture there.
+    let roadStanding: RoadStandingModel?
 
     init(
         services: AppServices?, protection: ProtectionController? = nil,
         restoreDoor: ((URL) -> Void)? = nil,
         handOffDoor: (() -> Void)? = nil,
-        roadDoors: RoadDoorsHost? = nil
+        roadDoors: RoadDoorsHost? = nil,
+        roadStanding: RoadStandingModel? = nil
     ) {
         self.services = services
         self.protection = protection
         self.restoreDoor = restoreDoor
         self.handOffDoor = handOffDoor
         self.roadDoors = roadDoors
+        self.roadStanding = roadStanding
         _model = State(initialValue: DataSafetyModel(
             backup: services?.backup,
             sync: services?.sync,
@@ -142,8 +148,11 @@ struct DataSafetyPane: View {
             // pre-13x 5a (design §8 — the Backups tab: §6's sentence per
             // posture, copy §6 verbatim): what opens a backup. pre-13x 5b
             // (ledger 68): + the lock-time copy line under Castle — a named
-            // sub-view so a pin can host it alone.
-            if let protection {
+            // sub-view so a pin can host it alone. VX-307 U2c: TODAY's
+            // posture and today's road's facts — rendered on today's road only
+            // (on the new road a Castle library would read "Standard" here and
+            // be told its backups open through its Apple account — rule 11).
+            if let protection, roadStanding == nil {
                 BackupsPostureLines(posture: protection.posture)
             }
             if let note = model.note {
@@ -289,9 +298,12 @@ struct DataSafetyPane: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            if protection?.posture == .castle {
+            if Self.castleWarningShows(todaysPosture: protection?.posture, roadPosture: roadPosture) {
                 // R13p-8's rider: under a locked-down posture the warning
                 // speaks whether she is about to turn it on or already has.
+                // VX-307 U2c (U2a's F-6): in rule 11's words, and on the new
+                // road it reads the OPEN library's posture — today's controller
+                // reads today's road, so a new-road Castle went unwarned.
                 Text(ProtectionCopy.plaintextExportUnderLockedDown)
                     .font(.caption)
                     .alarmVoice()
@@ -538,11 +550,17 @@ struct DataSafetyPane: View {
             // interpolated `Text` is not a `LocalizedStringKey`, so `**…**`
             // renders as literal asterisks. Caught in the drill's own
             // screenshot of this pane.
-            Text("Restoring is a Finder operation, not a button: quit Variorum, move "
-                 + "the current library file aside, put the copy in its place, open "
-                 + "Variorum. The step-by-step is in “\(StoreBackup.runbookFilename)”, "
-                 + "which sits in every backup folder above.")
-                .font(.callout)
+            // VX-307 U2c (VX-379's row — the VX-306 walk's F-U3-1): the old
+            // "Restoring is a Finder operation, not a button" had been false
+            // since 13x's Restore from Backup door; now rule 17's language
+            // ("The app's Restore from Backup is this door"; the previous
+            // library steps aside whole into Previous Libraries), true of
+            // today's road. TODAY's road only: on the new road the Restore
+            // list above says it in its own lead (`restoreListLead`).
+            if roadStanding == nil {
+                Text(DataSafetyCopy.restoringByTheDoor)
+                    .font(.callout)
+            }
             Text(syncing
                  ? DataSafetyCopy.syncedRestoreWarning
                  : DataSafetyCopy.localRestoreWarning)
@@ -556,6 +574,17 @@ struct DataSafetyPane: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+    }
+
+    /// VX-307 U2c — the open library's posture on the new road (nil on today's road).
+    private var roadPosture: ProtectionMode? { roadStanding?.posture }
+
+    /// VX-307 U2c (U2a's F-6): whether the Castle warning shows — on the NEW road
+    /// by the open library's posture (`roadPosture` non-nil there), on today's
+    /// road by today's controller's posture, as ever. Pure — pinned both ways.
+    static func castleWarningShows(todaysPosture: Posture?, roadPosture: ProtectionMode?) -> Bool {
+        if let roadPosture { return roadPosture == .castle }
+        return todaysPosture == .castle
     }
 
     /// Which warning leads. Both are always shown — she may sign in later,

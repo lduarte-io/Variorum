@@ -22,7 +22,8 @@ nonisolated final class UnreachableVaultLeaf: VaultLeaf, @unchecked Sendable {
     }
 
     func updateVault(
-        _ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey, device: String
+        _ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey,
+        successorMaster: SymmetricKey?, device: String
     ) async throws -> VaultSnapshot {
         throw VaultRefusal.unreachable
     }

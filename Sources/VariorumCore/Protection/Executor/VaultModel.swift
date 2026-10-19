@@ -92,8 +92,13 @@ public struct AccountVault: Codable, Equatable, Sendable {
         return nil
     }
 
-    /// Does `master` hold this vault (its proof)?
-    public func isMaster(_ master: SymmetricKey) -> Bool { KeyProof.hash(master: master) == keyProofHash }
+    /// Does `master` hold this vault (its proof)? The stored hash is the v1
+    /// (creation/enroll-comparand) form at birth and the kp2 form
+    /// (`KeyProof.macHash`) after enrollment or a master change — VX-307 U1:
+    /// a row fetched from the wire may carry either, so both verify.
+    public func isMaster(_ master: SymmetricKey) -> Bool {
+        KeyProof.verifies(master: master, storedHash: keyProofHash)
+    }
 
     /// Every sync key, opened with the master: the current one and every
     /// earlier one (rule 15).
@@ -186,6 +191,10 @@ public enum VaultRefusal: Error, Equatable, Sendable {
     /// The session isn't signed into this account (row-level security):
     /// nothing was read or written.
     case notSignedIn
+    /// VX-307 U1: the fetched row predates the marker-14 vault shape (no
+    /// `mode`) — the mirror has not run the 17 lockstep event; never read a
+    /// pre-event row as a vault (refuse, don't guess).
+    case preLockstepRow
 }
 
 public enum VaultModel {
@@ -232,7 +241,11 @@ public enum VaultModel {
         next.mode = .castle
         next.rowKey = VaultKey(keyID: rowKeyID, wrappedByMaster: try Lock.wrap(bytes(rowKey), under: master))
         next.earlierRowKeys = try earlier.mapValues { try Lock.wrap($0, under: master) }
-        next.keyProofHash = KeyProof.hash(master: master)
+        // VX-307 U1: a master change installs the kp2 form directly (the
+        // wire's hash-and-secret-together rule — kp2′ rides the same write,
+        // so the account is enrolled under the new master by construction;
+        // `isMaster` accepts both forms).
+        next.keyProofHash = KeyProof.macHash(master: master)
         next.updatedByDevice = device
         return (next, AccountKeys(master: bytes(master), rowKeyID: rowKeyID, rowKey: bytes(rowKey), earlierRowKeys: earlier))
     }

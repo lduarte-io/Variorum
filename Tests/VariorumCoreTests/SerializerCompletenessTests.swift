@@ -287,6 +287,14 @@ struct SerializerCompletenessTests {
         // NAME. Plain by nature (never prose the user wrote; a device name);
         // the disclosure envelope gains one device name per account.
         "updated_by_device": .bookkeeping,
+        // VX-307 (the HELD marker-14 shape, 17_phase_vx307_vault.sql): the
+        // MODE flag — a posture enum, disclosed structure (which posture the
+        // account is in), never a secret (`bookkeeping`); and the EARLIER
+        // sync keys, each wrapped under the current master (rule 15) —
+        // wrapped key material (`wrappedKey`). The disclosure envelope gains
+        // the posture and the COUNT of kept keys (≈ Castle entries), no key.
+        "mode": .bookkeeping,
+        "earlier_row_keys": .wrappedKey,
     ]
 
     @Test func theVaultsColumnsAreClassifiedExactly() throws {
@@ -298,13 +306,17 @@ struct SerializerCompletenessTests {
         #expect(declared.subtracting(vault).isEmpty,
                 "the classification names vault column(s) the DDL lacks: \(declared.subtracting(vault).sorted())")
         // The seven postures columns are all present — the additive event
-        // reached the walk; 25 vault columns in all.
+        // reached the walk; VX-307's two join them (the held marker-14
+        // shape). 27 vault columns in all.
         for column in ["master_wrapped_by_apple_held", "apple_key_id", "key_proof_hash",
                        "corpus_previous_key_id", "corpus_previous_wrapped_by_master",
                        "rotation_started_seq", "updated_by_device"] {
             #expect(vault.contains(column), "11 must add \(column)")
         }
-        #expect(vault.count == 25)
+        for column in ["mode", "earlier_row_keys"] {
+            #expect(vault.contains(column), "17 must add \(column)")
+        }
+        #expect(vault.count == 27)
         // And no class is prose: the enum has no such case — stated so the
         // reader sees the disclosure list's promise where it is kept.
         #expect(Set(Self.keyVaultColumnClasses.values.map(\.rawValue))

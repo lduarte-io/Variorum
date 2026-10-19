@@ -8,7 +8,8 @@
 //  NOTICE (her sentence, the model's: `LibraryNotice.sentence(date:)`) with one *OK*; then the KEY-FILE OFFER (her
 //  sentence, the model's: `KeyFileOffer.sentence(date:)`) with *Not now* · *Use it*. Nothing is written before
 //  *Use it*. When the last card is answered the library opens. No session exists yet, so the face speaks the leading
-//  voice's fallback tokens, as the lobby does.
+//  voice's fallback tokens, as the lobby does. VX-307 U2a: then VX-310's RE-ARM question (the design's §3.10 sentence)
+//  with *Always ask instead* · *Set it up again* — or *OK* when the answer could not be written (nothing decided).
 //
 
 import SwiftUI
@@ -70,6 +71,7 @@ struct RoadInterludeCard: View {
 
     private var glyph: String {
         if case .offer? = model.current { return "key" }
+        if case .rearm? = model.current { return "touchid" }
         return "info.circle"
     }
 
@@ -89,6 +91,22 @@ struct RoadInterludeCard: View {
                 Button(ProtectionWords.offerUseIt) { Task { await model.useIt() } }
                     .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
                     .disabled(model.busy)
+            }
+        case .rearm?:
+            // VX-307 U2a — VX-310's re-arm: a no records Always ask; a yes makes a new item at this press.
+            if model.rearmFailed {
+                Button(ProtectionWords.noticeOK) { model.ok() }
+                    .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
+                    .keyboardShortcut(.defaultAction)
+            } else {
+                HStack(spacing: 12) {
+                    Button(ProtectionWords.rearmNo) { Task { await model.rearm(yes: false) } }
+                        .buttonStyle(CalmButtonStyle(tokens: tokens))
+                        .disabled(model.busy)
+                    Button(ProtectionWords.rearmYes) { Task { await model.rearm(yes: true) } }
+                        .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
+                        .disabled(model.busy)
+                }
             }
         case nil:
             EmptyView()

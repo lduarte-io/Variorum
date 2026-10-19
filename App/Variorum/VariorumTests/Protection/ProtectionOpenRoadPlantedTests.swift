@@ -21,12 +21,14 @@ final class PlantedRoad {
     let custody = PlantedCustodyLeaf()
     let memory = PlantedMemoryLeaf()
     let apple = InMemoryAppleKeysLeaf()
+    /// This Mac's biometry for the systems made from here on (VX-307 U2a: the crossings' Touch ID arms).
+    var biometry = BiometryFacts.none
 
     func system() -> ProtectionSystem {
         ProtectionSystem(
             scope: "vx306-planted", places: slot.places, deviceName: "Test Mac", floor: .relaxedForTests,
             custody: custody, syncKeys: EmptySyncKeysLeaf(), apple: apple, memory: memory,
-            biometry: FixedBiometryLeaf(.none), ids: FastIDsLeaf())
+            biometry: FixedBiometryLeaf(biometry), ids: FastIDsLeaf())
     }
 
     func context(writes: Bool = true) -> RoadContext {

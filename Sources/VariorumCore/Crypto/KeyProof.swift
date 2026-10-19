@@ -85,6 +85,15 @@ public enum KeyProof {
         guard let raw = Data(base64Encoded: wire) else { return nil }
         return hash(ofToken: raw)
     }
+
+    /// VX-307 U1 — does `master` verify against a stored proof hash? The
+    /// stored form is the v1 (creation) hash at birth and `macHash` (the
+    /// kp2 form) after enrollment or a master change; a holder of M
+    /// verifies against either. Client-side and fake-server use only — the
+    /// production server verifies challenges against the Vault-held kp2.
+    public static func verifies(master: SymmetricKey, storedHash: String) -> Bool {
+        hash(master: master) == storedHash || macHash(master: master) == storedHash
+    }
 }
 
 /// 13y UNIT B (the ruled memo §3; the orchestrator's adjudication approved
