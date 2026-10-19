@@ -143,6 +143,33 @@ struct NewWordsResumeTests {
         #expect(try #require(fixture.world.liveFormat3).open(words: fresh) == again.key)
     }
 
+    /// A resume that HOLDS words (typed at a lobby) but finds NO live key file of the key — the file-less mint stopped before
+    /// its file, a resume never minting — rolls back too, before any write (synced: the vault untouched by the resume), and
+    /// the door mints again. (Red with the no-live-file arm dropped — the pre-fix behaviour on this road: `noLiveKeyFile`
+    /// out of the settle.)
+    @Test(arguments: [false, true])
+    func aStoppedMintResumedHoldingWordsButNoKeyFileRollsBackToo(_ synced: Bool) async throws {
+        let fixture = try EX(.standard, synced: synced)
+        var (executor, library) = try fileLess(fixture)
+        let key = library.key
+        fixture.world.crashAfterWrites = 3
+        await #expect(throws: SimulatedCrash.self) { try await mint(fixture, executor, &library, try PF.words()) }
+        let vaultBefore = synced ? fixture.world.server.snapshot(try #require(fixture.account))?.revision : nil
+        let (outcome, settled, relaunched) = try await fixture.relaunchAndSettle(
+            TypedSecrets(passphrase: fixture.passphrase, words: fixture.words))
+        #expect(outcome == .rolledBack(.regenerateWords))
+        expectNothingHalfDone(fixture, settled, "after the settle:")
+        #expect(fixture.world.liveFormat3 == nil)
+        if synced {
+            #expect(fixture.world.server.snapshot(try #require(fixture.account))?.revision == vaultBefore,
+                    "the resume wrote nothing to the vault")
+        }
+        var again = settled
+        let fresh = try PF.words()
+        try await mint(fixture, relaunched, &again, fresh)
+        #expect(try #require(fixture.world.liveFormat3).open(words: fresh) == key)
+    }
+
     /// A resume HOLDING the act's words (typed at the lobby — the scenario world's model of her) still FINISHES, exactly
     /// as before: the rollback is only for a resume that cannot finish. (Green on both trees — the arm's guard.)
     @Test func aResumeHoldingTheWordsStillFinishes() async throws {

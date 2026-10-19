@@ -29,6 +29,10 @@ struct KeyDoorProgram: ActProgram {
     func finishingSteps(_ library: UnlockedLibrary) -> [String] { ["memory"] }
 
     func run(_ step: String, _ ctx: ActContext) async throws {
+        if step == "vault" || step == "keyFile", let refusal = resumeCannotFinish(ctx) {
+            ctx.log("resumes without what it needs to finish (\(refusal)) — rolls back, nothing written (rule 20)")
+            throw ActRollback(refusal: refusal)
+        }
         switch step {
         case "vault":
             let snapshot = try await ctx.freshRead()
@@ -96,6 +100,24 @@ struct KeyDoorProgram: ActProgram {
             try ctx.rememberNewKey()
         default: throw ExecutorRefusal.nothingToDo
         }
+    }
+
+    /// **VX-308 ladder round 1, MAJOR-1 — a RESUMED new-words act that cannot finish ROLLS BACK** (rule 20: "the next open
+    /// finishes the act or rolls it back from what is on disk"; F-U3-2's option (a), scoped to `regenerateWords` — Change
+    /// and Reset stay that ticket's design call). Its vault and key-file steps need the act's NEW words, which a plan never
+    /// holds and nobody was shown (they died with the process), and a resume never mints a key file (the registry builds
+    /// the program without `mintsKeyFile`). Either missing — no words in hand, or no live key file of the key to lock — and
+    /// the act cannot reach its new state, so it returns to its old one BEFORE writing anything, through `drive`'s one
+    /// rollback (the act cleared, the plan deleted, copies resumed). A vault write that already landed stands, as any
+    /// landed CAS write does: the next new words re-wrap it with words she is shown. (Before this the resume threw out of
+    /// the settle and the act stayed in flight for good — every later act refused, VX-447's banner door, rule 27's
+    /// recovery road, included.) A resume HOLDING words — typed at a lobby — runs exactly as before; a press never
+    /// reaches here (`resuming` is false and its words are always in hand).
+    func resumeCannotFinish(_ ctx: ActContext) -> ExecutorRefusal? {
+        guard act == .regenerateWords, ctx.resuming else { return nil }
+        if ctx.secrets.words == nil { return .secretsRequired(act) }
+        if ctx.library.keyFile?.fingerprint != ctx.library.fingerprint { return .noLiveKeyFile }
+        return nil
     }
 
     /// VX-447 — THE FILE THE ACT LOCKS, MINTED (rule 27's state, the library open): the current key under the locks this
