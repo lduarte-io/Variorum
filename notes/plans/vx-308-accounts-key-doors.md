@@ -908,8 +908,40 @@ worktree, the tree at `d6595ba6d`): `✔ Test run with 192 tests in 30 suites pa
   `RoadAccountSurfaceTests`' shape list and U1's words list follow the retired line. Pins `RoadJoinFollowFacesTests` (9).
   HEADLESS, the whole harness: `✔ Test run with 207 tests in 32 suites passed`. MUTATIONS (restored `cmp`-identical): the
   follow's face withheld (the pre-U2 face) → `✘ … with 3 issues`; VX-113's arm removed from the map → `✘ … with 2 issues`.
-- Piece 3 — THE ACTS (the preflight against the vault, the acts, rule 11 around every entry into Castle, VX-107's
-  settle-derived Done): NOT-STARTED.
+- Piece 3 — THE ACTS: DONE (`ed7beb995`). `ProtectionAccountRoad.perform` (the caller holds the one-act lock; for a
+  re-keying act the app's pool is closed — piece 5's seam): the sign-in NOW adopted (R-2); into Castle (a join entering it,
+  the follow into it) rule 11 FIRST through U2a's one home — the durable notice mark (`ProtectionCrossings
+  .markCastleEntry`) and the weekly switch mirrored into the sealed setting (`mirroredExportSettings`; both extracted from
+  `cross`, its order unchanged, Use Castle's pins green) — then the core's act: `setUpSync` or, the account already
+  syncing, `enroll` (the join); `move`; `follow` (its kind the shown door's); `leaveAccount`; before a swap a refusal leaves
+  the library under its old key (the mark cleared); PAST the swap the act LANDED (`AccountActResult.landedWhole` false —
+  its Done owed to the next open's settle, VX-107's road), the switch following the act's own notice. U1's `act` is now a
+  thin wrapper over it; `press` (the open session) refuses a re-keying door — never re-keyed under an open pool. THE
+  PREFLIGHT (`preflight`, R-U2-3 — READS only): the door re-read through the pane's one read (VX-108), then the typed
+  secret against the vault that read fetched (`ProtectionPaneFacts.snapshot`, new): the same derivation and refusals the
+  core's `join`/`follow` make before their plans (a join's each typed secret must open it; the follow's passphrase when
+  typed, else its words; an old passphrase whose lock is no longer the vault's names the change — VX-113), said through
+  the act's own refusal map. VX-107: the open captures the act in flight BEFORE its settle; `RoadSettledFollow.kind`
+  reads a finished follow's kind from durable facts (`fromKind` against the record's mode after — `FollowProgram
+  .finishingSteps`' own reading; never the outcome's notices, never memory) into `RoadOpenReport.settledFollow`, and
+  `RoadStandingFaces` owes `followDone(kind)` among the open's receipts. `RoadAccountPress.made` gains `receipt: String?`
+  (nil — owed to the reopen) and `wordsReplaced` (rule 7's moment owed). Pins `ProtectionJoinFollowRoadTests` (12: the
+  same-posture join adopting the account's pair, words typed and passphrase typed; a wrong secret writing nothing; the join
+  INTO a Castle account entering Castle — the preflight refusing three typos with nothing written, the new key with the
+  old in its history, no silent item, the Apple key retired, rule 11's export off + notice owed; the join OUT of Castle; Move
+  — the old account's keys forgotten, the key kept; the follow into Castle — one secret, the gate, the new sync key followed,
+  rule 11 for the follower, nothing owed after; the quiet follow out; the lagged library catching up; VX-113 — the old
+  passphrase names "Studio Mac" and the day, the preflight's sentence IS the core act's own (`passphraseChangedElsewhere`
+  with the same facts, nothing written), the new passphrase follows; VX-107 — the double crash into and out of Castle (the
+  act stops past its swap in process, the first relaunch's settle stops again and says nothing, the second finishes and
+  says the Done ONCE with its other-device sentence); `RoadSettledFollow`'s durable reading, pure). HEADLESS, the whole
+  harness: `✔ Test run with 219 tests in 33 suites passed`. MUTATIONS (each on the committed tree, restored `cmp`-identical):
+  A — the Done read from the outcome's NOTICES (the fragile face — VX-107's class) → `✘ … with 7 issues` (both double-crash
+  arms + the pure reading); B — the pre-U2 open (no settled follow) → `✘ … with 4 issues`; C — VX-113's arm off the
+  preflight → `✘ … with 1 issue`; D — the preflight's secret check skipped → `✘ … with 3 issues`; E — rule 11 not run
+  around the follow into Castle → `✘ … with 1 issue`. **VX-107's red-on-old, in effect:** B is the pre-fix behaviour
+  (the settle's follow said nothing — the Done lost whole); A is today's road's failure shape on the new road (a face that
+  reads what the resume happened to say loses it at the second crash).
 - Piece 4 — THE MODELS (one secret, the gate, the words moment): NOT-STARTED.
 - Piece 5 — THE MAC FACES + THE BOOTSTRAP'S SEAM: NOT-STARTED.
 - Piece 6 — THE CLOSE (counts, the Mac-suite list, PROVISIONALs, findings): NOT-STARTED.
