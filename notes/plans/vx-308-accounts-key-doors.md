@@ -879,8 +879,35 @@ worktree, the tree at `d6595ba6d`): `✔ Test run with 192 tests in 30 suites pa
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton + the readings: DONE (this commit).
-- Piece 1 — THE WORDS (`ProtectionWords`' VX-308 U2 section; pins): NOT-STARTED.
-- Piece 2 — THE FACES (pure: the join's three plans, Move, the follow's three kinds, VX-113's refusal): NOT-STARTED.
+- Piece 1 — THE WORDS: DONE (`af7df2220`). `ProtectionWords`' VX-308 U2 section: the join's lead (the lifecycle page's
+  stage 12), its plan lines (`JoinPlan` — the consent says which) and receipts (the posture said where it changed), the
+  passphrase-typed words moment (`joinWordsNotShown` — the words replaced, NOT shown: P-VX378-U2-3 (a), her eye flagged),
+  Move's door/title/lead/button, the follow's door/title/button, its notice by kind (the vault's last writer and day),
+  its ask (rule 10's once; rule 12's quietly), rule 10's "said plainly", its fields, and VX-107's Done by kind (the
+  other-device sentence). Her sentences the faces say are the ones already in the file (rule 7 ×2, rule 12's leave sentence,
+  rule 9's promise, rule 16) and VX-113's is U2a's `passphraseChangedElsewhere` (her #205 (ii) form). All new lines
+  PROVISIONAL P-VX308-U2-1. Pins `RoadJoinFollowWordsTests` (6: her sentences re-read against the rules file; VX-113's three
+  forms; VX-107's Done names the other device for every kind; the notice and the join as drafted; no line shouts) —
+  HEADLESS `✔ 13 tests in 2 suites` (with U1's words suite). MUTATION (the out-follow's Done stripped of its other-device
+  sentence) → `✘ … with 2 issues`, restored `cmp`-identical.
+- Piece 2 — THE FACES: DONE (`99c4f7a15`). `RoadAccountFaces` (pure, from `assess` over the pane's one read): turning sync
+  on into an account that ALREADY syncs is THE JOIN (`joinDoor`: Move's leave first where it is Move — rule 16 — then the
+  join's lead and rule 7's first sentence, the plan line; into Castle Use Castle's own words — rule 9's promise, what entering
+  does, the spec's floor / export-first / rule 25's copies / export-off — and the gate choice; out of Castle rule 12's
+  sentence via the spec's `ruleFive`; ONE secret, rule 14); MOVE (`.moveToSignedInAccount` — the door names the account
+  signed in; that account's vault unreadable → said; no vault there → the honest not-yet line, P-VX308-U2-6); THE FOLLOW
+  (`.follow` — the door `assess` opens, its kind the owed act's: the notice, rule 10's line into Castle, rule 12's out of
+  it, what it asks, rule 11's export line into Castle when this Mac's export is on; one secret into Castle and on a replaced
+  key with the gate into Castle, nothing out of it). `RoadAccountDoorOpen` gains `gate` / `follow` / `notice` / `label` /
+  `undeletableCopies` (defaulted — every U1 construction unchanged) and `rekeys` + `receipt` (the follow's Done — VX-107 —,
+  a join's, else the door's). VX-113: `actRefusalSentence` names `passphraseChangedElsewhere(device:day:)` (her #205 (ii);
+  the day the wire's `updated_at`) and `signedOutUseThisMacOnly`. Rule 25's copy names moved into one helper
+  (`ProtectionCrossings.copyName`, Use Castle's and the join's). U1's join not-yet line RETIRED; two U1 pins FLIPPED
+  DELIBERATELY (`RoadAccountFacesTests.signedInWithAVaultTurningSyncOnIsTheJoin` — U1's target pin; `ProtectionAccountRoad
+  Tests.theDoorIsReReadAtThePress` — set-up → join now RE-SHOWS the changed door, VX-108, where U1 refused it closed);
+  `RoadAccountSurfaceTests`' shape list and U1's words list follow the retired line. Pins `RoadJoinFollowFacesTests` (9).
+  HEADLESS, the whole harness: `✔ Test run with 207 tests in 32 suites passed`. MUTATIONS (restored `cmp`-identical): the
+  follow's face withheld (the pre-U2 face) → `✘ … with 3 issues`; VX-113's arm removed from the map → `✘ … with 2 issues`.
 - Piece 3 — THE ACTS (the preflight against the vault, the acts, rule 11 around every entry into Castle, VX-107's
   settle-derived Done): NOT-STARTED.
 - Piece 4 — THE MODELS (one secret, the gate, the words moment): NOT-STARTED.
