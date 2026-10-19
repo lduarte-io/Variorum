@@ -219,7 +219,16 @@ claim PENDING. The Mac batch is the orchestrator's under the stage.
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton: DONE (this commit).
 - Piece 1 — the SQL artifact `Server/supabase/17_phase_vx307_vault.sql` + the deploy checklist
-  `notes/plans/vx307-deploy-checklist.md` (PENDING-until-live rows; NOT deployed — her ruling, §1): NOT STARTED.
+  `notes/plans/vx307-deploy-checklist.md`: DONE (this commit) — the held lockstep event (marker 13→14): `mode text` +
+  `earlier_row_keys jsonb` arrive; the journal-bridge NOT NULLs relax (P-VX307-U1-1); the backfill restates TODAY'S
+  posture encoding (the Apple-held wrap's presence — `PostureSwitch`'s own reading, so truth not guess — P-VX307-U1-2)
+  and nulls the rotation columns once (the guard refuses mid-rotation); `sync_reencrypt` DROPPED; `key_vault_update`
+  redefined (the rotation arms gone; the 13y challenge proof, CAS and hash-and-secret-together rule KEPT byte-faithful;
+  a pre-VX307 payload refuses `VARIORUM_PRE_VX307_PAYLOAD`). Deliberately NOT in `AuthRLSDDLTests.lockstepFiles` (the
+  drift pin binds the DEPLOYED marker to the client's 13); the held shape is pinned by the new
+  `VX307VaultArtifactTests` (6 pins), and **VX-329's release registers 17 in the array AND bumps
+  `SyncSchema.lockstepVersion` to 14 in one commit** (a named hand-forward). `VX307VaultArtifactTests` +
+  `AuthRLSDDLTests` headless Debug: `✔ Test run with 83 tests in 2 suites passed`.
 - Piece 2 — the fake server's new vault shape (CAS order, proof before CAS, typed refusals): NOT STARTED.
 - Piece 3a — the core protocol + proof forms (VX-307 U1's model groundwork): DONE (this commit) —
   `VaultLeaf.updateVault` gains `successorMaster: SymmetricKey?` (the 13y hash-and-secret-together rule on the wire: a
