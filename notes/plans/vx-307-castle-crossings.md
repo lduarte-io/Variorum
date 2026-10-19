@@ -1224,7 +1224,9 @@ Commits: `edbd86c14` (record) · `95bde6ea3` (1) · `a1a948c73` (2) · `6a0b5a05
 - Piece 4 — the three VX-306 copy-door hand-forwards ((i) one Touch ID press at Make this my library; (ii) the
   Look inside flip-target flipped; (iii) the core `lookInside`'s prompting default dropped): NOT-STARTED.
 - Piece 5 — the close (counts both configurations, the Mac suite list, PROVISIONALs, findings): NOT-STARTED.
-- No revert is in flight.
+- REVERTS IN FLIGHT (red-on-old for piece 4, on the COMMITTED tree `7f521bcbb` — restore = `git checkout --` of the one
+  file each touches): R1 `LookInsideModel.submit` back to `.includingTouchID`; R2 `Copies.swift`'s `lookInside` default
+  back; R3 the core's `makeThisMyLibrary(opened:)` re-opening the copy through the quiet roads (the pre-fix second open).
 
 ## 7. LIVE STATUS
 - 2026-10-18 ~18:45 — KICKED OFF. Preflight complete (the orchestrator): CastleRules + SyncSpec whole, the lifecycle
