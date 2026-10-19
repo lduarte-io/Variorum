@@ -167,3 +167,26 @@ struct ProtectionPairRetentionTests {
         #expect(left.count == 15)
     }
 }
+
+#if DEBUG
+/// The core guard reaches THROUGH the pair road: switched off (DEBUG only), the pair road's prune is today's VX-302 shape —
+/// another Mac's copies in the shared folder pruned by stamp — so the survival pin above is not hollow.
+@Suite("VX-309 U1a — retention's guard, switched off, lets VX-302's cross-Mac prune through the pair road (DEBUG mutation pin)")
+@MainActor
+struct ProtectionPairRetentionGuardMutationTests {
+    @Test func theGuardOffPrunesAnotherMacsCopiesThroughThePairRoad() async throws {
+        let road = PlantedRoad(farFolder: true)
+        let (session, _) = try await road.created()
+        try ProtectionPairRetentionTests.plantForeignWorld(road, session, now: Date())
+        let before = ProtectionPairRetentionTests.files(FarPlant.farRoot(road))
+        var off = ProtectionGuards()
+        off.pruneOwnCopiesOnly = false
+        #expect(ProtectionBackupHook.takePair(session, guards: off) == .written)
+        let gone = before.subtracting(ProtectionPairRetentionTests.files(FarPlant.farRoot(road)))
+        let library8 = ProtectionNames.library8(FarPlant.libraryID(session))
+        let mac8 = ProtectionNames.mac8(FarPlant.deviceID(session))
+        #expect(gone.contains { $0.hasPrefix("Backups/\(library8)/") && !$0.hasPrefix("Backups/\(library8)/\(mac8)/") },
+                "red with the guard off: another Mac's copies pruned — \(gone.count) gone")
+    }
+}
+#endif

@@ -45,9 +45,19 @@ enum ProtectionBackupHook {
     /// the two equal.
     nonisolated static let farInterval: TimeInterval = 24 * 60 * 60
 
+    /// VX-309 U1a — ONE PAIR ROAD AT A TIME: a pair, its far copy and the prune after them run whole before another
+    /// run's begins, so two runs never race for one free name, one far copy or one prune (the hook's runs and VX-447's
+    /// "the backup follows" each reach here from their own detached task).
+    nonisolated private static let oneAtATime = NSLock()
+
     /// The pair: the live library under its key, the live key file frozen beside it (this Mac's device ID names
-    /// the folder) — then, VX-309 U1a, the far leg (`now` the due-check's clock).
-    nonisolated static func takePair(_ session: ProtectionRoadSession, now: Date = Date()) -> PairOutcome {
+    /// the folder) — then, VX-309 U1a, the far leg (`now` the due-check's clock) and RETENTION (`guards` — every guard
+    /// on in production; a DEBUG mutation pin turns one off).
+    nonisolated static func takePair(
+        _ session: ProtectionRoadSession, now: Date = Date(), guards: ProtectionGuards = .all
+    ) -> PairOutcome {
+        oneAtATime.lock()
+        defer { oneAtATime.unlock() }
         let backups = session.system.backups
         guard !backups.copiesArePaused else {
             ProtectionOpenRoad.log("backup pair: copies are paused — none taken")
@@ -71,7 +81,44 @@ enum ProtectionBackupHook {
             return .failed(String(describing: error))
         }
         _ = landFarPair(session, snapshot: snapshot, keyFile: keyFile, deviceID: deviceID, now: now)
+        _ = prune(session, libraryID: keyFile.libraryID, deviceID: deviceID, guards: guards)
         return .written
+    }
+
+    /// **RETENTION** (VX-309 U1a — VX-302; VX-411 folded: this Mac's pairs accumulated on the new road with none): after a
+    /// pair lands, core's `Retention.plan` (`.standard` — the newest 14 beside the library; 14 dailies + 4 weeklies in the
+    /// picked folder) over a FRESH catalogue read, for the pair's library and this Mac, and EXACTLY its `prune` ids removed
+    /// through the backups leaf — each snapshot with its own pair, a far id under the picked folder's scope — one id per
+    /// call, so a delete that fails is logged and never stops the rest. The rule is the fence (only this Mac's backup pairs
+    /// of this library; undated copies, `Previous Libraries/`, safety copies, other Macs' and other libraries' copies and
+    /// foreign names are never candidates); nothing here adds or removes a candidate. Returns the ids removed. Never raises.
+    @discardableResult
+    nonisolated static func prune(
+        _ session: ProtectionRoadSession, libraryID: String, deviceID: String, guards: ProtectionGuards = .all
+    ) -> [String] {
+        let plan = Retention.plan(
+            catalog: session.system.lister.catalog(), libraryID: libraryID, thisMac: deviceID, policy: .standard,
+            guards: guards)
+        let places = session.system.places
+        var removed: [String] = []
+        for id in plan.prune {
+            do {
+                try session.system.backups.deleteCopies(ids: [id])
+            } catch {
+                ProtectionOpenRoad.log("backup pair: retention could not remove \(id) — \(String(describing: error))")
+                continue
+            }
+            // Said only of a copy that is gone now (a far folder out of reach since the read removes nothing).
+            if places.withFile(catalogID: id, { !FileManager.default.fileExists(atPath: $0.path) }) == true {
+                removed.append(id)
+            }
+        }
+        if !removed.isEmpty {
+            ProtectionOpenRoad.log(
+                "backup pair: retention removed \(removed.count) of this Mac's pairs of this library — "
+                    + removed.joined(separator: ", "))
+        }
+        return removed
     }
 
     /// **THE FAR LEG** (VX-309 U1a): the container pair just written (`snapshot` — this act's own, handed through) copied
