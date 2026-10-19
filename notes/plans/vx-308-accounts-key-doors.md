@@ -404,6 +404,42 @@ same ruling):**
 - Piece 7 — THE CLOSE: NOT-STARTED.
 - No revert is in flight.
 
+**U1 ARBITRATION (the orchestrator, 2026-10-19 ~05:30 MDT — repo-first before the build resumes; she is AWAKE and two
+of her words land here verbatim):**
+- **F-FORK-1 RULED: a refined (b) — rule 16's word "here" is load-bearing.** The section's three doors are rule 16's
+  three LOCAL leaves exactly as the core act family defines them (`leaveAccount(.thisMacOnly/.stopSyncingHere/
+  .deleteAccountHere)`): none touches the server's data, and each confirm says rule 16's sentence (the server keeps
+  what you pushed; signing back in is a join). The third door renders as "delete the account from this Mac" — the
+  local leave — with ONE pointer sentence naming where the real deletion lives (the Account sheet's door, her ruled
+  friction, unchanged and unduplicated). THE GAP the fork found is closed on the OTHER side: on the new road the
+  Account sheet's Delete Account… success also runs the protection half through an injected hook (the record stops
+  naming the dead account; this Mac forgets its sync keys), so no stranded record; if the hook cannot run, the
+  signed-out screens catch it at the next open — say so in the record. Option (a) stays recorded as the alternative
+  (one deletion home in the section); PROVISIONAL P-VX308-U1-F1, her eye in the bundle (the third door's wording and
+  whether she wants a deletion door in the section at all).
+- **R-1 AMENDED BY HER WORD, just now, verbatim: "10-13 is probably old and superseded by now."** The #216 sitting
+  block (2026-10-13) predates the 2026-10-16 simplification and everything since, so it is NOT treated as binding
+  copy. U1 builds the signed-out screens TO THE CURRENT RULES (CastleRules as amended; `assess`'s situations; rule
+  16's leave semantics), keeps the 10-13 mockup's SHAPE (one road, plain, Continue / Cancel) only where it still says
+  something true under the current rules, drops or redrafts any sentence the current rules contradict (the old
+  sync-keys-holding framing and any re-key promise are the known suspects), and the WHOLE screen's copy lands
+  PROVISIONAL with a bundle note naming exactly what diverged from the 10-13 block and why. Her morning eye decides;
+  the byte-equal pins piece 1 planned against #216's mockup sentences are REDIRECTED to pin the drafted text as
+  drafted (provisional), never the superseded block.
+- **R-2 (one read: sign-in fresh + vault fresh; re-check at the press), R-4 (join arms are U2's; honest not-ready
+  line), R-5 (Sign in… opens the existing Account sheet through the presenter), R-6 (the presenter's semantics):
+  APPROVED as stated.**
+- **R-3 APPROVED** (the leaf re-reads the stored session per call); **F-U1-1 ROUTED, not fixed: it is VX-423's
+  mechanism family** (the board's "refresh_token_already_used and sync stops until re-login" — Confirmed,
+  Pre-launch). A comment lands on VX-423 at closeout naming the two-instances-one-rotating-token trace; no new
+  ticket.
+- **Her throwaway word (just now, verbatim): "i'll delete the throwaway when this is all merged to main &
+  released."** The §4 morning item RESOLVES: the project stays up through the merge and release; nothing for the
+  bundle but the reminder.
+- **VX-314 HELD pending her answer** (her question just now: "why are you doing VX-314?"): it stays §5's row 5 on
+  paper — it is the plan's §2 member and the VX-308 ticket lists it — but the orchestrator builds nothing on it until
+  she confirms or drops it; zero cost either way (not started).
+
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
   `~/dev/variorum-vx-308`, branch pushed, in-flight row (holds the Sync/-custody slot) `969acce55` on main, Linear
