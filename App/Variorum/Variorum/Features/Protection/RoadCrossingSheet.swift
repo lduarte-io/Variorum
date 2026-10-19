@@ -166,7 +166,14 @@ struct RoadCrossingsSection: View {
         case .open:
             HStack {
                 Button(door.doorLabel) { model.open(door) }
-                    .disabled(model.confirm != nil)
+                    .disabled(model.presenter.sheet != nil)
+                Spacer()
+            }
+        case .signedOutRoad:
+            // VX-308 U1 (VX-264, R-1 as amended): Use Castle while signed out — the signed-out screen first.
+            HStack {
+                Button(door.doorLabel) { model.openSignedOutRoad() }
+                    .disabled(model.presenter.sheet != nil)
                 Spacer()
             }
         }

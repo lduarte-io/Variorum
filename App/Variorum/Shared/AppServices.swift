@@ -543,6 +543,13 @@ final class AppServices {
     /// *every library stays, and still opens exactly as it does today* —
     /// the keys sit dead server-side; A stays in iCloud; a later account
     /// adopts the library at setup). The local STORE is untouched.
+    /// VX-308 U1 (P-VX308-U1-F1, the U1 ARBITRATION's refined (b)) — the new
+    /// road's after-deletion hook: the deleted account's id, once the server's
+    /// deletion landed (before the sign-out). The composition root wires it
+    /// on the new road only (`AppBootstrap.accountDeletedOnNewRoad`); nil —
+    /// today's road — runs nothing.
+    var afterAccountDeleted: (@MainActor (String) async -> Void)?
+
     func deleteAccount(accountPassword: String) async {
         guard keyVault != nil else {
             account.lastError = "Project keys not configured (ProjectConfig.swift)"
@@ -559,12 +566,19 @@ final class AppServices {
                 await connectSyncIfAllowed()
                 return
             }
+            let deletedAccount = await auth.currentUserID
             let deletion = AccountDeletion(lifecycle: makeAccountLifecycle(auth))
             _ = try await deletion.run()
             // Ladder R1-1: a purged account owes no re-key completion —
             // clear the persisted marker so a future sign-in on this
             // store isn't refused for a road that no longer exists.
             try? await session.database.write { try RotationMarker.clear($0) }
+            // VX-308 U1 (P-VX308-U1-F1): on the new road, the protection
+            // half — the open library stops naming the deleted account and
+            // this Mac forgets its sync keys (rule 16's local leave). nil on
+            // today's road (nothing composes it), so today's deletion is
+            // byte-unchanged.
+            if let deletedAccount, let afterAccountDeleted { await afterAccountDeleted(deletedAccount) }
             // The server side is gone; custody STAYS (decision 16 / copy §4);
             // the session goes (sign-out tears the sync chain down through
             // the ordinary onChange road).

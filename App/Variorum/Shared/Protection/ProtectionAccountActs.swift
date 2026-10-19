@@ -100,6 +100,25 @@ nonisolated enum ProtectionAccountRoad {
         return .made(receipt: door.receipt)
     }
 
+    /// **The signed-out road's *Continue*** (Use Castle while signed out — VX-264, R-1 as amended): This Mac Only, its
+    /// door re-read at the press (VX-108 — signed in meanwhile, it is no longer open: refused, nothing written). nil: the
+    /// leave landed; else its refusal. One act at a time on the session.
+    static func leaveForUseCastle(
+        _ session: ProtectionRoadSession, signIn: SessionFact, exportSwitch: ScheduledExportSwitch?
+    ) async -> String? {
+        guard session.writes else { return ProtectionWords.crossingFailed }
+        guard session.beginAct() else { return ProtectionWords.copyDoorBusy }
+        defer { session.endAct() }
+        let read = await ProtectionPaneRead.read(session, signIn: signIn, exportSwitch: exportSwitch)
+        guard let faces = read.flatMap(ProtectionPaneRead.accountFaces) else { return ProtectionWords.crossingFailed }
+        guard faces.thisMacOnly.openDoor != nil else { return ProtectionWords.crossingDoorClosed }
+        switch await act(session, door: .thisMacOnly, typed: .none, signIn: signIn) {
+        case .made: return nil
+        case .refused(let sentence): return sentence
+        case .changed: return ProtectionWords.crossingDoorChanged
+        }
+    }
+
     /// **P-VX308-U1-F1's hook** — the Account sheet's Delete Account landed for `accountID`: when this library names it,
     /// the protection half runs (the third local leave). True when it ran. The caller holds the session's one-act lock.
     static func accountDeleted(_ session: ProtectionRoadSession, accountID: String, signIn: SessionFact) async -> Bool {

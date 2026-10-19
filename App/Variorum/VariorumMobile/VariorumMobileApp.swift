@@ -93,6 +93,14 @@ struct VariorumMobileApp: App {
                             // seam (pre-13x 1a); production names the real one.
                             legacyCleanup: { LegacyPasteInCleanup.clear() })
                         services = fresh
+                        // VX-308 U1 (P-VX308-U1-F1): on the new road the Account sheet's Delete Account also runs the
+                        // protection half (the open library stops naming the deleted account — rule 16's local leave);
+                        // nothing on today's road.
+                        if bootstrap.newRoad {
+                            fresh.afterAccountDeleted = { account in
+                                await bootstrap.accountDeletedOnNewRoad(account)
+                            }
+                        }
                         // Phase 13p ladder R1-M2: the phone's lock road
                         // used to skip the ruled teardown entirely —
                         // `onWillLock` was wired ONLY on the Mac, so Lock

@@ -111,6 +111,8 @@ struct RoadCrossingSurfaceTests {
         let keystone = try #require(rest.range(of: "keystoneSection\n"))
         #expect(crossings.lowerBound < todayGate.lowerBound && todayGate.lowerBound < lead.lowerBound)
         #expect(lead.lowerBound < keystone.lowerBound)
-        #expect(rest.contains("get: { roadStanding?.crossings?.confirm }"))
+        // VX-308 U1 (VX-239 + VX-243): the confirm is held by the bootstrap's ONE PRESENTER and presented through it.
+        #expect(rest.contains(".protectionSheets(roadStanding?.sheets, services: services)"))
+        #expect(!rest.contains("roadStanding?.crossings?.confirm"), "no second presenter of the crossings' confirm")
     }
 }

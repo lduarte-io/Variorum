@@ -64,6 +64,14 @@ final class PlantedAccountRoads {
     }
 }
 
+/// The signed-out road's planted leave (its answer and its calls).
+@MainActor
+final class LeaveRoad {
+    var answer: String?
+    var calls = 0
+    init(answer: String?) { self.answer = answer }
+}
+
 @Suite("VX-308 U1 — the account section's brain over planted roads")
 @MainActor
 struct RoadAccountModelTests {
@@ -211,13 +219,12 @@ struct RoadAccountModelTests {
             mode: .standard, useCastle: .signedOutRoad, useStandard: .hidden,
             replaceAllKeys: .refused(ProtectionWords.doorRefusedSignedOut), gateRow: nil)
         planted.faces = signedOut
-        var leaves = 0
-        var leaveAnswer: String? = ProtectionWords.copyDoorBusy
+        let leave = LeaveRoad(answer: ProtectionWords.copyDoorBusy)
         var roads = planted.roads
         roads.leaveForThisMacOnly = {
-            leaves += 1
-            if leaveAnswer == nil { planted.faces = PlantedCrossingRoads.faces() }
-            return leaveAnswer
+            leave.calls += 1
+            if leave.answer == nil { planted.faces = PlantedCrossingRoads.faces() }
+            return leave.answer
         }
         let presenter = ProtectionSheetPresenter()
         let crossings = RoadCrossingsModel(roads: roads, presenter: presenter)
@@ -232,8 +239,8 @@ struct RoadAccountModelTests {
         #expect(screen.title == ProtectionWords.signedOutCastleTitle)
         #expect(screen.sentences == [ProtectionWords.signedOutCastleLead, ProtectionWords.signedOutCastleWholeAccount])
         await screen.proceed()
-        #expect(screen.refusal == ProtectionWords.copyDoorBusy && leaves == 1, "a refused leave is said in the screen")
-        leaveAnswer = nil
+        #expect(screen.refusal == ProtectionWords.copyDoorBusy && leave.calls == 1, "a refused leave is said in the screen")
+        leave.answer = nil
         await screen.proceed()
         for _ in 0..<10_000 where crossings.confirm == nil { await Task.yield() }
         let confirm = try #require(crossings.confirm)
@@ -249,6 +256,6 @@ struct RoadAccountModelTests {
             return
         }
         second.cancel()
-        #expect(presenter.sheet == nil && leaves == 2)
+        #expect(presenter.sheet == nil && leave.calls == 2)
     }
 }

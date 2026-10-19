@@ -245,6 +245,10 @@ final class RoadStandingModel {
     /// the BOOTSTRAP's model, handed to each open library's faces so the Protection pane finds it (it outlives the
     /// reopen a crossing makes; this model does not).
     var crossings: RoadCrossingsModel?
+    /// VX-308 U1 — the account section (the BOOTSTRAP's model, beside the crossings) and THE ONE PRESENTER every protection
+    /// sheet of the new road presents through (VX-239 + VX-243): handed to each open library's faces like the crossings.
+    var account: RoadAccountModel?
+    var sheets: ProtectionSheetPresenter?
     /// VX-307 U2b — THE CARD ABOVE THE QUICK ENTRY (rules 2 and 3 as amended): the words' offer and rule 3's reminder,
     /// one card (`WordsBandModel`). nil where no factory built one (a test's hand-made faces).
     let band: WordsBandModel?

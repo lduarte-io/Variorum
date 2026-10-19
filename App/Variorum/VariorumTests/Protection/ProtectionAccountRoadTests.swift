@@ -165,6 +165,28 @@ struct ProtectionAccountRoadTests {
         #expect(world.session.library.keyFile == keyFile)
     }
 
+    /// THE SIGNED-OUT ROAD's Continue (VX-264 as amended): signed out of the library's account, This Mac Only runs and
+    /// the crossings then read Use Castle OPEN on the now-local library; signed in meanwhile, it refuses — nothing written.
+    @Test func theSignedOutRoadsLeaveRunsThisMacOnlyThenUseCastleIsOpen() async throws {
+        let world = try await world()
+        _ = try await press(
+            world, .turnOnSync, Account.signedIn,
+            typed: TypedSecrets(words: world.words, newPassphrase: Account.passphrase))
+        let exports = PlantedExportSwitch().road
+        let signedOut = try await Account.read(world.session, .signedOut)
+        let before = try #require(ProtectionCrossings.readCrossings(world.session, exportSwitch: exports, read: signedOut))
+        #expect(before.useCastle == .signedOutRoad)
+        let stillSignedIn = await ProtectionAccountRoad.leaveForUseCastle(
+            world.session, signIn: Account.signedIn, exportSwitch: exports)
+        #expect(stillSignedIn == ProtectionWords.crossingDoorClosed && world.session.library.record?.account == Account.account)
+        let left = await ProtectionAccountRoad.leaveForUseCastle(world.session, signIn: .signedOut, exportSwitch: exports)
+        #expect(left == nil && world.session.library.record?.account == nil && world.keys.accountsHeld.isEmpty)
+        let after = try #require(ProtectionCrossings.readCrossings(
+            world.session, exportSwitch: exports, read: try await Account.read(world.session, .signedOut)))
+        let open = try #require(after.useCastle.openDoor)
+        #expect(!open.synced && open.ask == .passphraseAndWords, "Use Castle on this library on this Mac only")
+    }
+
     /// One act at a time: a press while another act holds the session refuses, nothing written.
     @Test func aPressWhileAnotherActRunsRefuses() async throws {
         let world = try await world()

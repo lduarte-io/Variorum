@@ -466,9 +466,33 @@ same ruling):**
   `RoadCrossingFacesTests.aSyncedLibrarysDoorsSayTheirRefusalsInPlace` pin FLIPPED deliberately at its signed-out line (`.signedOutRoad`
   — the old sentence was this unit's target; Replace All Keys' line kept). Pins `RoadAccountModelTests` (8). HEADLESS, the
   whole harness: `✔ Test run with 191 tests in 30 suites passed`.
-- Piece 6 — THE MAC FACES + THE BOOTSTRAP'S ROADS + THE SIGNED-OUT ROAD: NOT-STARTED. `RoadAccountSection` /
-  `RoadAccountSheet` / her signed-out screen; the pane hosts them; the presenter's sheet; `finish` drops it at closed states.
-  Mac suites BUILT, RUN PENDING (the orchestrator's).
+- Piece 6 — THE MAC FACES + THE BOOTSTRAP'S ROADS + THE DELETION'S HOOK: DONE (this commit). `AppBootstrap`: the one
+  presenter (`protectionSheets`) and the account section's model (`roadAccount`) made once at the first new-road ready beside
+  the crossings (which present through it) and handed to each open library's faces (`RoadStandingModel.account`/`.sheets`);
+  `finish` calls `libraryClosed()` at EVERY non-ready settled outcome (VX-239); `crossingRoads().read` reads through the pane's
+  one read, `crossOnNewRoad`'s preflight re-reads the same way and ADOPTS the sign-in now under the act (R-2), its receipt
+  carrying the request's note (the signed-out road's born-Castle sentence); `leaveForThisMacOnly` (the signed-out road's
+  Continue — `ProtectionAccountRoad.leaveForUseCastle`, re-read at the press, pinned headless +1); `accountRoads()` (read ·
+  press · landed → the crossings re-read · speak → the standing faces' status seam); `signInNow` (the stored session now —
+  `RoadInputs.sessionFact`); `accountDeletedOnNewRoad` (P-VX308-U1-F1 — only when the open library names the deleted account,
+  under the one-act lock; else the signed-out screens close it). `AppServices.afterAccountDeleted` (nil → today's deletion
+  byte-unchanged in effect; the deleted account's id read before the purge; called after it lands, before the sign-out),
+  wired on the new road in `VariorumApp` AND `VariorumMobileApp` (the gap is the phone's too), with the account section's
+  `signOutRoad` (the Mac — `AppServices.signOutVariorum`). Mac faces `Features/Protection/RoadAccountSheet.swift`:
+  `RoadAccountSection` (the situation in words, each door, the not-yet lines, Sign in / Sign out), `RoadAccountConfirmSheet`,
+  `RoadSignOutSheet`, `RoadSignedOutCastleSheet`, and `ProtectionSheetsHost` (`.protectionSheets(_:services:)` — the
+  presenter's standing sheet on its host alone; the host's dismissal its Cancel; *Sign in…* composes `AccountView`).
+  `RoadCrossingsSection` renders `.signedOutRoad` as Use Castle's door → `openSignedOutRoad()`; its doors grey while ANY
+  protection sheet stands. `ProtectionPane`: the account section beneath the crossings; the crossings' own sheet binding
+  REPLACED by `.protectionSheets(roadStanding?.sheets, services:)`; the account re-read at each appearance. U2a's
+  `RoadCrossingSurfaceTests` source pin moved to the presenter's host (and pins no second presenter);
+  `TravellingDotsIndicatorTests`' surface list gains the new file. Mac suites `RoadAccountSurfaceTests` (3 — the section
+  hosted in every situation, every sheet shape, the pane's composition pinned) + `ProtectionAccountRouteTests` (2 — VX-239
+  through the bootstrap: a confirm standing when a reopen lands in the lobby is dropped and NOT re-presented after the words
+  unlock, RED-ON-OLD BY REVERT of `finish`'s `libraryClosed()` line; turning sync on through the section then the deletion's
+  hook end to end, planted vault) — BUILT, their RUN PENDING under the stage. `build-for-testing` → `** TEST BUILD SUCCEEDED
+  **` (one compiler crash on a `??`-with-closure in `signInNow` rewritten plainly first); the two capture warnings in
+  touched files cleared after that build (the re-build PENDING in the close).
 - Piece 7 — THE CLOSE: NOT-STARTED.
 - No revert is in flight.
 
