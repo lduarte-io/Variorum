@@ -2019,10 +2019,13 @@ error), that run DISCARDED AS INVALID and the revert redone with exact text (the
 RED at exactly the wait pin. The restored suites `✔ 6/2`; 0 instances at release. **U4 IS CLOSED but for the walk and
 the ladder — the implementer era of the phase is done.**
 
-### ROUND-1 FIX LEG (Opus implementer, 2026-10-19; the cross-model ladder's round-1 fixes over `notes/plans/vx-308-ladder-round-1.md` — IN PROGRESS)
+### ROUND-1 FIX LEG (Opus implementer, 2026-10-19; the cross-model ladder's round-1 fixes over `notes/plans/vx-308-ladder-round-1.md` — DONE; the Mac-suite delta PENDING the stage)
 
-**Not done in this leg, first:** no Mac suite RUN, no walk, no stage, no Debug launch, no store touch (the brief:
-headless + `build-for-testing` only — the Mac-suite delta below is the orchestrator's). PENDING on every unverified claim.
+**Not done in this leg, first:** no Mac suite RUN (the delta below is the orchestrator's, under the stage — PENDING), no walk,
+no stage, no Debug launch, no store touch, no live network call; no Linear write (the F-U3-2 ticket's body note is the
+closeout's — MAJOR-1's disposition). Five findings, five AGREED, five FIXED (MINOR-1 by its option (b) — the skip kept,
+made deliberate and logged); zero disputes. Zero `Sync/`, `Server/`, schema, migration or dependency lines;
+`SyncSchema.lockstepVersion` 13; the one core file is `Acts/KeyDoors.swift`.
 
 **Preflight (complete, not delegated):** CLAUDE.md + its canon; the resiliency protocol; CastleRules WHOLE (rules 20 and 27
 the heart of MAJOR-1); the round-1 findings file whole; this plan's §1–§5d and the §6 U1, U2, U3 and U4 records with their
@@ -2070,8 +2073,59 @@ scratchpad, pointed at this worktree).
   `cmp`-identical.
 - No revert is in flight (every mutation and behavioural revert of this leg ran on a committed tree and was restored
   `cmp`-identical against a copy in this session's scratchpad `fl-prerevert/`).
-- FINAL VERIFICATION — PENDING: the harness whole; the core protection set both configurations; the full core Debug
-  suite; `build-for-testing` (green after the NITs — `fl-bft-2`), the phone, the Release check.
+- FINAL VERIFICATION — DONE (the tree at `8db0b5f59`, no source change after): the HEADLESS HARNESS (U1's `u1-harness`,
+  now also symlinking `ProtectionPaneWaveTests`) `✔ Test run with 272 tests in 43 suites passed` (U4's 267/42 + 5/1); the
+  CORE PROTECTION SET (U3's 83-suite filter + `NewWordsResumeTests`) Debug `✔ Test run with 347 tests in 84 suites passed`
+  (340/83 + 7/1), Release (`swift test -c release`, the same filter) `✔ Test run with 323 tests in 80 suites passed`
+  (316/79 + 7/1); THE FULL CORE SUITE, Debug (`swift test`): VariorumCoreTests `✔ Test run with 3324 tests in 432 suites
+  passed after 196.866 seconds`, the third target `✔ 40 tests in 6 suites`, VariorumMCPTests `✘ 383 tests in 71 suites …
+  with 1 issue` — the ONE recorded VX-353 wall-clock flake (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitialize
+  FailsTheConnectNamedAndBounded`, 19.3 s vs 15 s under the full parallel run; alone `✔ 3 tests in 1 suite`; no MCP line in
+  this leg); `xcodebuild … -configuration Debug … build-for-testing` → `** TEST BUILD SUCCEEDED **` (after the NITs; no
+  warning in a touched file); the phone (`VariorumMobile`, generic iOS Simulator) → `** BUILD SUCCEEDED **`; the Release
+  check (`-configuration Release build`) → `** BUILD SUCCEEDED **`.
+
+**THE MAC-SUITE DELTA THE ORCHESTRATOR RUNS UNDER THE STAGE (from `App/Variorum/`; PENDING):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx308 test \
+  -only-testing:VariorumTests/ProtectionPaneWaveTests \
+  -only-testing:VariorumTests/RoadAccountSurfaceTests \
+  -only-testing:VariorumTests/RoadKeyDoorSurfaceTests \
+  -only-testing:VariorumTests/RoadAccountWordsTests \
+  -only-testing:VariorumTests/RoadJoinFollowWordsTests \
+  -only-testing:VariorumTests/RoadCrossingModelTests \
+  -only-testing:VariorumTests/RoadAccountModelTests \
+  -only-testing:VariorumTests/RoadKeyDoorsModelTests \
+  -only-testing:VariorumTests/RoadJoinFollowModelTests \
+  -only-testing:VariorumTests/RoadJoinFollowFacesTests \
+  -only-testing:VariorumTests/ProtectionJoinFollowRoadTests \
+  -only-testing:VariorumTests/RoadJoinFollowSurfaceTests \
+  -only-testing:VariorumTests/ProtectionAccountRoadTests \
+  -only-testing:VariorumTests/ProtectionAccountRouteTests \
+  -only-testing:VariorumTests/ProtectionCrossingRouteTests \
+  -only-testing:VariorumTests/RoadCrossingSurfaceTests \
+  -only-testing:VariorumTests/ProtectionSheetPresenterTests \
+  -only-testing:VariorumTests/NoKeyFileDoorTests \
+  -only-testing:VariorumTests/RoadKeyDoorRoadTests \
+  -only-testing:VariorumTests/ProtectionPaneRoadRowTests \
+  -only-testing:VariorumTests/VX379PaneRowsTests \
+  -only-testing:VariorumTests/PassphraseReminderTests \
+  -only-testing:VariorumTests/AppBootstrapOffMainTests \
+  -only-testing:VariorumTests/StoreLaunchRouteTests \
+  -only-testing:VariorumTests/TravellingDotsIndicatorTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/StatusSeamVocabularyTests
+```
+The first five carry this leg's new or flipped pins (`ProtectionPaneWaveTests` 4 — headless-green too;
+`RoadAccountSurfaceTests` — the pane's one `.task` FLIPPED + NIT-1's source pin, NEW; `RoadKeyDoorSurfaceTests` — the
+composition pin FLIPPED + the bootstrap's wave wiring; the two words suites — headless-green). Then the models whose
+`refresh` split into `beginRead` + `land` (behaviour unchanged) and their route/surface neighbours (`AppBootstrap`'s ready
+arm gained the wave wiring; `ProtectionAccountRouteTests` and `RoadJoinFollowSurfaceTests` drive the bootstrap), the host's
+`.signIn` arm (the presenter's suite), the pane's other source pins, and the vocabulary/colour/dots/register scans over the
+edited files. **No route pin exercises the wave through the bootstrap** (the pane's `.task` is not hosted by a route
+suite) — the optional red leg: in `RoadStandingModel.refreshPane` drop the `paneWave` arm (always the three own reads) →
+`ProtectionPaneWaveTests.thePanesAppearanceTakesTheWaveRoadWhenTheBootstrapGivesOne` red; restore by `git checkout --`.
 
 **THE DISPOSITIONS (per finding; for round 2's fresh reviewer):**
 
