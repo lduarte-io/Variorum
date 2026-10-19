@@ -106,6 +106,37 @@ nonisolated extension ProtectionOpenRoad {
         library.record?.passphraseSet == true || library.keyFile?.passphrase != nil
     }
 
+    // MARK: - Rule 2: the look (VX-307 U2b)
+
+    /// VX-307 U2b (VX-412) — RULE 2's LOOK: fresh words (this system's minting, `ids.mintWords`) locked on the key
+    /// file through rule 6's act (`regenerateWords` — the key unchanged; a library with a passphrase is asked it, one
+    /// with none is asked nothing, PROVISIONAL P-VX307-U2b-1), handed back to be shown ONCE and never stored or logged.
+    static func mintFreshWords(session: ProtectionRoadSession, passphrase: String?) async -> WordsMintOutcome {
+        guard session.writes else { return .refused(ProtectionWords.wordsLookFailed) }
+        guard session.beginAct() else { return .refused(ProtectionWords.copyDoorBusy) }
+        defer { session.endAct() }
+        let fresh = session.system.leaves.ids.mintWords()
+        guard fresh.count == 12 else {
+            log("road: rule 2's look — the words could not be minted")
+            return .refused(ProtectionWords.wordsLookFailed)
+        }
+        var library = session.library
+        do {
+            _ = try await session.executor.regenerateWords(&library, passphrase: passphrase, newWords: fresh)
+            session.library = library
+            log("road: rule 2's look — fresh words lock the key file; the key unchanged "
+                + "(\(StoreKeyEnvelope.shortFingerprint(library.fingerprint)))")
+            return .minted(fresh)
+        } catch ExecutorRefusal.passphraseDoesNotOpen {
+            session.library = library
+            return .refused(ProtectionWords.passphraseDoesNotOpen)
+        } catch {
+            log("road: rule 2's look failed — \(String(describing: error))")
+            session.library = library
+            return .refused(ProtectionWords.wordsLookFailed)
+        }
+    }
+
     // MARK: - Rule 3: a dismissal, recorded
 
     /// The returning reminder's *Not now* / *Don't show again* — one record write (the schedule is the face's).

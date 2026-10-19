@@ -387,6 +387,53 @@ nonisolated enum ProtectionWords {
     static let rearmNo = "Always ask instead"
     static let rearmFailed = "Variorum couldn't set up \(ProtectionCopy.biometryName) just now."
 
+    // MARK: - VX-307 U2b — THE TWELVE WORDS, HER WAY (rules 2, 3 and 6 as amended; her words in the plan's §3a)
+    //
+    // RULE 2's card sentence is HER words, verbatim from `notes/CastleRules.md` (the first letter capitalized, the
+    // period added; `WordsBandTests` reads the rules file and pins it byte-equal), and so is the close's warning ("these
+    // words won't be shown again"). Every other line here is PROVISIONAL P-VX307-U2b-2 — drafted from the rules' own
+    // words, sentence case, hers at the bundle.
+
+    /// RULE 2 — the card above the quick entry; the whole line is the door (her "click here").
+    static let wordsCardLine = "Your library is encrypted \u{2014} click here to record the twelve words that are its key."
+    /// The snooze (her "a snoozed card showing on next launch is fine").
+    static let wordsCardLater = "Later"
+    /// The ✕'s spoken name.
+    static let wordsCardDismiss = "Dismiss"
+    /// The ✕'s toast (her "look in settings, protection for this information"; rule 2: "dismissing it says where to
+    /// find them in Settings").
+    static let wordsCardDismissedToast = "You can record your twelve words any time in Settings \u{25B8} Protection."
+    /// The look's ask where a passphrase exists (rule 6: new words ask the passphrase).
+    static let wordsLookAsk = "Enter your passphrase to see your twelve words."
+    static let wordsLookPassphraseField = "Your passphrase"
+    static let wordsLookShow = "Show my twelve words"
+    static let wordsLookCancel = "Cancel"
+    static let wordsLookMinting = "Making your twelve words\u{2026}"
+    /// The words on screen (rule 2: "the card says 'write these down now'").
+    static let wordsLookLead = "Write these down now. They open your library \u{2014} on this "
+        + "\(ProtectionCopy.deviceName) and on any copy of it \u{2014} for as long as they are its words."
+    /// RULE 6's one sentence (with rules 4 and 5), said when she recorded words here before (never on the first look).
+    static let wordsLookRuleSix = "Your library's key doesn't change: every backup opens with these words, and still "
+        + "with the words you had when you made it."
+    /// VX-412's Copy door and its caption (decision 23's clipboard rule — cleared after 60 seconds).
+    static let wordsLookCopy = "Copy"
+    static let wordsLookCopied = "Copied. Your clipboard clears in 60 seconds."
+    static let wordsLookWrittenDown = "I've written them down"
+    /// HER words — the warning before the look closes.
+    static let wordsLookWarning = "These words won't be shown again."
+    static let wordsLookGoBack = "Go back"
+    static let wordsLookClose = "Close"
+    /// The act failed, nothing changed.
+    static let wordsLookFailed = "Variorum couldn't make your twelve words just now. Nothing changed."
+    /// Settings ▸ Protection — the door the dismiss toast names (rule 7: "fresh words appear only at a library's own
+    /// first look or its new-words door").
+    static let wordsSectionTitle = "Your twelve words"
+    static let wordsSectionLine = "Variorum doesn't keep your twelve words, so looking makes new ones for you to write "
+        + "down. Your library's key doesn't change."
+    static let wordsSectionDoor = "Record your twelve words\u{2026}"
+    /// The tour's last card (rule 3: "asks, and shows the twelve words beside the ask"): the passphrase set there.
+    static let tourEndPassphraseSet = "Passphrase set."
+
     // MARK: - The route's failures (the failure face, with Try Again)
 
     static let couldNotCreate = "Variorum couldn't create your library."

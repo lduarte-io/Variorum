@@ -234,6 +234,9 @@ final class RoadStandingModel {
     /// the BOOTSTRAP's model, handed to each open library's faces so the Protection pane finds it (it outlives the
     /// reopen a crossing makes; this model does not).
     var crossings: RoadCrossingsModel?
+    /// VX-307 U2b — THE CARD ABOVE THE QUICK ENTRY (rules 2 and 3 as amended): the words' offer and rule 3's reminder,
+    /// one card (`WordsBandModel`). nil where no factory built one (a test's hand-made faces).
+    let band: WordsBandModel?
 
     @ObservationIgnored private let setPassphrase: (String) async -> SetPassphraseOutcome
     @ObservationIgnored private let passphraseExists: () -> Bool
@@ -244,25 +247,40 @@ final class RoadStandingModel {
         didSet { speakOwedReceipts() }
     }
 
+    /// VX-307 U2b — the look's roads for the other homes (`makeWordsLook`): the mint and the clipboard.
+    @ObservationIgnored private let mintWords: ((String?) async -> WordsMintOutcome)?
+    @ObservationIgnored private let copyWords: ([String]) -> Void
+
     init(
         faces: RoadStandingFaces,
         reminder: PassphraseReminderModel,
         setPassphrase: @escaping (String) async -> SetPassphraseOutcome,
         passphraseExists: @escaping () -> Bool,
-        receiptsOwed: @escaping () -> [String]
+        receiptsOwed: @escaping () -> [String],
+        band: WordsBandModel? = nil,
+        mintWords: ((String?) async -> WordsMintOutcome)? = nil,
+        copyWords: @escaping ([String]) -> Void = { _ in }
     ) {
         self.faces = faces
         self.reminder = reminder
         self.setPassphrase = setPassphrase
         self.passphraseExists = passphraseExists
         self.receiptsOwed = receiptsOwed
+        self.band = band
+        self.mintWords = mintWords
+        self.copyWords = copyWords
         offersSetPassphrase = !passphraseExists()
     }
 
     /// The open library's protection faces, from its session (the bootstrap's `.ready` on the new road): the standing faces read from the open's
     /// report, rule 3's reminder (its launch counted once per process on a writing road, then evaluated), and the
-    /// set-passphrase sheet's road through the session's executor.
-    static func make(_ session: ProtectionRoadSession, ledger: PassphraseReminderLedger) -> RoadStandingModel {
+    /// set-passphrase sheet's road through the session's executor. VX-307 U2b: the card above the quick entry — the
+    /// words' look minting through rule 6's act on the session (`mintFreshWords`), `copyWords` the platform's one
+    /// clipboard rule (the Mac's `WordsClipboard`), its local ledger in the reminder ledger's defaults.
+    static func make(
+        _ session: ProtectionRoadSession, ledger: PassphraseReminderLedger,
+        snoozes: WordsCardSnoozes = .process, copyWords: @escaping ([String]) -> Void = { _ in }
+    ) -> RoadStandingModel {
         let faces = RoadStandingFaces.derive(session.report)
         let libraryID = session.library.record?.libraryID ?? ""
         if session.writes, !libraryID.isEmpty { ledger.noteLaunchOncePerProcess(libraryID) }
@@ -280,6 +298,15 @@ final class RoadStandingModel {
                 }.value
             })
         reminder.evaluate()
+        let passphraseExists: () -> Bool = { ProtectionOpenRoad.passphraseExists(session.library) }
+        let mint: (String?) async -> WordsMintOutcome = { passphrase in
+            await Task.detached(priority: .userInitiated) {
+                await ProtectionOpenRoad.mintFreshWords(session: session, passphrase: passphrase)
+            }.value
+        }
+        let band = WordsBandModel(
+            libraryID: libraryID, writes: session.writes, ledger: WordsCardLedger(defaults: ledger.defaults),
+            snoozes: snoozes, reminder: reminder, passphraseExists: passphraseExists, mint: mint, copy: copyWords)
         return RoadStandingModel(
             faces: faces, reminder: reminder,
             setPassphrase: { passphrase in
@@ -287,8 +314,20 @@ final class RoadStandingModel {
                     await ProtectionOpenRoad.setFirstPassphrase(session: session, new: passphrase)
                 }.value
             },
-            passphraseExists: { ProtectionOpenRoad.passphraseExists(session.library) },
-            receiptsOwed: { session.takeReceipts() })
+            passphraseExists: passphraseExists,
+            receiptsOwed: { session.takeReceipts() },
+            band: band, mintWords: mint, copyWords: copyWords)
+    }
+
+    /// VX-307 U2b — a look for another home (the tour's last card, Settings ▸ Protection): the band's roads; recording
+    /// there retires the card's offer too. With no band (a test's hand-made faces), a look that refuses at once.
+    func makeWordsLook() -> WordsLookModel {
+        if let band, let mintWords {
+            return band.makeLook(passphraseExists: passphraseExists, mint: mintWords, copy: copyWords)
+        }
+        return WordsLookModel(
+            saysRuleSix: false, passphraseExists: passphraseExists,
+            mint: { _ in .refused(ProtectionWords.wordsLookFailed) }, copy: copyWords, recorded: {})
     }
 
     /// The receipts the open owes, spoken once (each `receiptsOwed` call takes them).
@@ -300,8 +339,18 @@ final class RoadStandingModel {
     /// A set-passphrase sheet (P-VX306-U2-0 (a)) for a host to present (the reminder's bar, the Protection pane —
     /// each holds its own, so two windows never show one sheet); it refuses at once when a passphrase exists.
     /// `close` dismisses the host's sheet; a passphrase set retires the reminder and speaks §7c (7)'s receipt.
-    func makeSetPassphraseSheet(close: @escaping () -> Void) -> SetPassphraseModel {
-        SetPassphraseModel(alreadySet: passphraseExists(), setRoad: setPassphrase) { [weak self] wasSet in
+    /// VX-307 U2b: `onSet` hears the passphrase she just set (the tour's last card hands it to the words' look beside
+    /// it, so she is never asked it twice; held in memory only, for that card).
+    func makeSetPassphraseSheet(
+        close: @escaping () -> Void, onSet: ((String) -> Void)? = nil
+    ) -> SetPassphraseModel {
+        let setPassphrase = setPassphrase
+        let road: (String) async -> SetPassphraseOutcome = { passphrase in
+            let outcome = await setPassphrase(passphrase)
+            if outcome == .set { onSet?(passphrase) }
+            return outcome
+        }
+        return SetPassphraseModel(alreadySet: passphraseExists(), setRoad: road) { [weak self] wasSet in
             close()
             guard let self else { return }
             self.offersSetPassphrase = !self.passphraseExists()
