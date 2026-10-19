@@ -467,11 +467,27 @@ dev/real store or `/Applications` touch: the brief's limits.)
   planted facts of a real library on the planted road, mutated per state) + `RoadCrossingWordsTests` (3 — rule 12 and
   rule 9 byte-equal to the rules file; no shouting caps). HEADLESS (this session's SwiftPM harness — the close says how):
   `✔ Test run with 11 tests in 2 suites passed`; the Mac run PENDING under the stage.
-- Piece 2 — THE CROSSING ACTS ON THE SESSION: NOT-STARTED. The doors read (assess over the open library's facts, the
-  weekly plain-text copy's switch as this Mac's scheduled-export fact); the press re-reads the door (VX-108) and checks
-  the typed pair against the live key file BEFORE anything closes (a typo never tears the window down); the act through
-  the session's executor (`useCastle` / `useStandard` / `replaceAllKeys`); the reopen key; the export-off notice and its
-  reversal (`changeSettings` + the switch); the gate-style row (`changeSettings`). Planted pins (no keychain).
+- Piece 2 — THE CROSSING ACTS ON THE SESSION: DONE (this commit). `Shared/Protection/ProtectionCrossingActs.swift`
+  (`ProtectionCrossings`): THE READ (`readCrossings` — `assess` over the open library's facts, the weekly plain-text
+  copy's switch read as this Mac's scheduled-export fact, rule 25's copies named by kind and day — PROVISIONAL
+  P-VX307-U2a-3); THE PREFLIGHT (READS only: the door RE-READ at the press — closed → *This door isn't open any more.
+  Nothing changed.*, changed → `.changed(newDoor)` re-shown, VX-108; the typed pair against the live key file — the
+  words always, the passphrase where its lock exists, else the typed one is the new one; a synced library's pair left
+  to the act's own vault read); THE ACT (`cross` — Use Castle mirrors the switch into this Mac's sealed settings via
+  `changeSettings` so the CORE's `turnExportOff` decides and owes rule 11's notice, then `useCastle`/`useStandard`/
+  `replaceAllKeys` on the session's executor; the switch FOLLOWS the act's notice; nothing swapped → the refusal said and
+  the old key reopens; past the swap → landed); `turnExportBackOn` (rule 11's reversal — sealed + switch);
+  `changeGate` (the gate-style row's `changeSettings`). `PlantedRoad` gains `biometry` (default `.none` — every existing
+  suite unchanged). Pins `ProtectionCrossingRoadTests` (8): Use Castle under Always ask takes everything in (new key with
+  the old in its history, silent items + this Mac's Apple key gone, no Touch ID item, the live file no Apple wrap and
+  opening with both secrets, a fresh backup, the doors after); under Touch ID the item made at THIS press; Use Standard
+  hands everything out (the on-device road + a fresh own Apple key back, the Castle key carried); a typo writes nothing
+  (the container's bytes, the custody writes); VX-108's re-read (changed → re-shown; closed → refused, nothing written);
+  the export off with the notice and back on, and never written when it was off; Replace All Keys with no account
+  (hidden, refused at the press, the act's own refusal reopens the old key); the gate row (Touch ID only with the
+  passphrase, Always ask deletes the item). HEADLESS `✔ Test run with 19 tests in 3 suites passed` (with piece 1's).
+  MUTATIONS (restored, `cmp`-identical): the VX-108 `changed` guard removed → `vx108_theDoorIsReReadAtThePress` RED; the
+  export mirror disabled → `theScheduledExportTurnsOffWithTheNoticeAndBackOn` RED (2 issues). The Mac run PENDING.
 - Piece 3 — THE MODELS: NOT-STARTED. The confirm (`RoadCrossingConfirmModel`) and the bootstrap-owned crossings model
   (outlives the reopen a crossing makes). Pins over planted roads.
 - Piece 4 — THE BOOTSTRAP'S CROSSING ROAD: NOT-STARTED. Make this my library's seam shape (teardown, the pool closed
