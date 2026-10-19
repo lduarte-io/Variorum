@@ -16,6 +16,11 @@ import Foundation
 
 struct KeyDoorProgram: ActProgram {
     let act: ProtectionAct
+    /// VX-447 (VX-308 U3): new words on a library whose key file is gone everywhere (`keyFileGoneEverywhere`) — the act
+    /// MINTS the file it locks, so it begins without one. Only `regenerateWords` sets it, only after that read.
+    var mintsKeyFile = false
+
+    var needsLiveKeyFile: Bool { !mintsKeyFile }
 
     func steps(_ parameters: ActParameters, guards: ProtectionGuards) -> [String] {
         (parameters.synced == true ? ["vault"] : []) + ["keyFile", "memory"]
@@ -62,6 +67,10 @@ struct KeyDoorProgram: ActProgram {
                 proofMaster: held.masterKey, successorMaster: nil, device: ctx.deviceName)
             ctx.executor.noteFresh(written)
         case "keyFile":
+            if mintsKeyFile, act == .regenerateWords, try ctx.executor.keyFileGoneEverywhere(ctx.library) {
+                try mintKeyFile(ctx)
+                return
+            }
             guard var file = ctx.library.keyFile, file.fingerprint == ctx.library.fingerprint else {
                 throw ExecutorRefusal.noLiveKeyFile
             }
@@ -87,6 +96,30 @@ struct KeyDoorProgram: ActProgram {
             try ctx.rememberNewKey()
         default: throw ExecutorRefusal.nothingToDo
         }
+    }
+
+    /// VX-447 — THE FILE THE ACT LOCKS, MINTED (rule 27's state, the library open): the current key under the locks this
+    /// act can vouch for — the new words (rule 2: never a file the words would not open), and, synced, the account's
+    /// passphrase the door verified against the vault plus the master with its twelve-words copy as the vault holds them
+    /// after this act's own words write (§3.5a — so a synced file is what setting up sync made it). No Apple lock (the
+    /// key doors re-lock nothing else — the open's quiet-road repairs re-make it, rule 8) and NO HISTORY: every copy
+    /// that carried rule 4's list is gone, which is the state itself. The record's epoch; never a new key (rule 6).
+    func mintKeyFile(_ ctx: ActContext) throws {
+        let record = try ctx.requireRecord()
+        guard let words = ctx.secrets.words else { throw ExecutorRefusal.secretsRequired(act) }
+        var locks = NewKeyLocks(passphrase: ctx.secrets.passphrase, words: words)
+        if let account = ctx.accountID {
+            guard let vault = ctx.executor.freshVaults[account],
+                  let master = VaultModel.master(of: vault.vault, passphrase: nil, words: words)
+            else { throw ExecutorRefusal.needsFreshVault }
+            locks.master = master
+            locks.masterWordsCopy = vault.vault.masterByWords
+        }
+        let file = try KeyFile.building(
+            libraryID: record.libraryID, key: ctx.library.key, epoch: record.keyEpoch, locks: locks)
+        try ctx.executor.writeLiveKeyFile(file, &ctx.library)
+        ctx.log("no key file anywhere — a fresh one minted for the current key (\(ActContext.fp8(file.fingerprint)), "
+            + "no history: no copy carried it)")
     }
 }
 
@@ -175,15 +208,27 @@ extension ProtectionExecutor {
     /// while no passphrase exists yet (rule 3: "the passphrase is a convenience over the words"), so the look cannot
     /// wait on a passphrase. A library WITH a passphrase is asked it, exactly as before; Castle always is (nil
     /// refuses `secretMissing`), and so is a synced library (its vault's lock is re-made under the account's master).
+    ///
+    /// VX-308 U3 — VX-447 (her ruling, QUESTIONS #235: the no-key-file banner becomes the door, "the act can proceed";
+    /// PROVISIONAL P-VX308-U3-1): with the library OPEN and NO key file of its key anywhere this Mac keeps one
+    /// (`keyFileGoneEverywhere` — rule 27's after-open state), the act MINTS the file it then locks. Asked exactly what
+    /// the state can still check, each a twin of an authorization the core already has: Standard + unsynced, nothing
+    /// (no lock survives to verify; the reset door's plain confirm); synced, the account's passphrase against the vault
+    /// (the synced arm below, unchanged). Castle + unsynced still refuses (no lock, no plain confirm in Castle).
     public func regenerateWords(_ library: inout UnlockedLibrary, passphrase: String?, newWords: [String]) async throws -> ActOutcome {
         var parameters = try await keyDoorParameters(library)
+        let mints = try keyFileGoneEverywhere(library)
         guard let passphrase else {
-            guard library.record?.mode == .standard, parameters.accountID == nil,
-                  let file = library.keyFile, file.fingerprint == library.fingerprint, file.passphrase == nil
-            else { throw ExecutorRefusal.secretMissing }
+            if mints {
+                guard library.record?.mode == .standard, parameters.accountID == nil else { throw ExecutorRefusal.secretMissing }
+            } else {
+                guard library.record?.mode == .standard, parameters.accountID == nil,
+                      let file = library.keyFile, file.fingerprint == library.fingerprint, file.passphrase == nil
+                else { throw ExecutorRefusal.secretMissing }
+            }
             parameters.wordsAreNew = true
             return try await perform(
-                KeyDoorProgram(act: .regenerateWords), parameters: parameters,
+                KeyDoorProgram(act: .regenerateWords, mintsKeyFile: mints), parameters: parameters,
                 secrets: ActSecrets(passphrase: nil, words: try WordsKey.derive(newWords)), library: &library)
         }
         let current: PassphraseKey
@@ -198,9 +243,32 @@ extension ProtectionExecutor {
         }
         parameters.passphraseKDF = current.kdf
         parameters.wordsAreNew = true
+        // VX-447: only a SYNCED file-less library reaches here minting (unsynced, `verifiedPassphrase` found no lock to
+        // open and refused above).
         return try await perform(
-            KeyDoorProgram(act: .regenerateWords), parameters: parameters,
+            KeyDoorProgram(act: .regenerateWords, mintsKeyFile: mints && parameters.accountID != nil),
+            parameters: parameters,
             secrets: ActSecrets(passphrase: current, words: try WordsKey.derive(newWords)), library: &library)
+    }
+
+    /// **VX-447 — the key file is gone EVERYWHERE this Mac keeps one** (rule 27's after-open state — `Assess.repairs`'
+    /// first `Fault.noKeyFileAnywhere` arm, read by the act itself; READS only): nothing at all in the live place (a
+    /// stray — another key's file — is not this state: a mint would write over it, rule 21), no sealed mirror of the
+    /// current key in what this Mac remembers (rule 1's restore is that one's road — every remembered item read as
+    /// stated, so even an unverified copy refuses the mint), and no catalogued key file of this library carrying the
+    /// current key (rule 21's offer is that one's road). A copy anywhere means its history is not lost: no fresh file.
+    func keyFileGoneEverywhere(_ library: UnlockedLibrary) throws -> Bool {
+        guard library.keyFile == nil, try leaves.keyFiles.readLiveKeyFile() == nil,
+              let libraryID = library.record?.libraryID else { return false }
+        let current = library.fingerprint
+        if library.memory?.keyFileMirror?.fingerprint == current { return false }
+        for remembered in try leaves.memory.rememberedLibraryIDs() {
+            guard let sealed = try leaves.memory.readMemory(libraryID: remembered),
+                  let named = try? ProtectionCoding.decoder().decode(DeviceMemory.self, from: sealed.payload)
+            else { continue }
+            if named.keyFileMirror?.fingerprint == current { return false }
+        }
+        return try !leaves.keyFiles.catalogedKeyFiles(ofLibrary: libraryID).contains { $0.fingerprint == current }
     }
 
     /// The account's sync key moved past the one this library follows
