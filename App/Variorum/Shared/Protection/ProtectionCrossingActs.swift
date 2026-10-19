@@ -85,15 +85,22 @@ nonisolated enum ProtectionCrossings {
     // MARK: - The read
 
     /// The crossings on the open library now (a READ). nil: the facts could not be read (logged) — the section shows
-    /// no door rather than a guess.
-    static func readCrossings(_ session: ProtectionRoadSession, exportSwitch: ScheduledExportSwitch) -> RoadCrossingFaces? {
+    /// no door rather than a guess. VX-308 U1 (R-2): `read` is the pane's ONE read (the current sign-in, the fresh vault
+    /// reading — `ProtectionPaneRead`); nil keeps this function's own read (the open's session, no vault).
+    static func readCrossings(
+        _ session: ProtectionRoadSession, exportSwitch: ScheduledExportSwitch, read: ProtectionPaneFacts? = nil
+    ) -> RoadCrossingFaces? {
         let library = session.library
         var facts: ProtectionFacts
-        do {
-            facts = try session.system.facts(session: session.executor.configuration.session, unlocked: library)
-        } catch {
-            ProtectionOpenRoad.log("road: the crossings' facts could not be read — \(String(describing: error))")
-            return nil
+        if let read {
+            facts = read.facts
+        } else {
+            do {
+                facts = try session.system.facts(session: session.executor.configuration.session, unlocked: library)
+            } catch {
+                ProtectionOpenRoad.log("road: the crossings' facts could not be read — \(String(describing: error))")
+                return nil
+            }
         }
         // P-VX307-U2a-3: this Mac's scheduled export IS the weekly copy's switch.
         facts.unlocked?.thisMac.settings.scheduledExport = exportSwitch.isOn()
@@ -110,12 +117,13 @@ nonisolated enum ProtectionCrossings {
 
     // MARK: - The preflight (READS only)
 
+    /// VX-308 U1 (R-2): `read` — the press's own fresh read, taken the same way the shown door was (the pane's one read).
     static func preflight(
         _ session: ProtectionRoadSession, door: RoadCrossingDoor, shown: RoadDoorOpen, typed: TypedSecrets,
-        exportSwitch: ScheduledExportSwitch
+        exportSwitch: ScheduledExportSwitch, read: ProtectionPaneFacts? = nil
     ) -> CrossingPreflight {
         // VX-108: the door as it stands NOW — never the one read when the confirm opened.
-        guard let faces = readCrossings(session, exportSwitch: exportSwitch) else {
+        guard let faces = readCrossings(session, exportSwitch: exportSwitch, read: read) else {
             return .refused(ProtectionWords.crossingFailed)
         }
         let now: RoadDoorOpen

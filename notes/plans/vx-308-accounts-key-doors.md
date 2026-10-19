@@ -416,8 +416,24 @@ same ruling):**
   HEADLESS, the whole harness (U2a's crossing suites unchanged and green through the presenter): `✔ Test run with 165 tests
   in 26 suites passed`. The pane's sheet binding moves at piece 6 (U2a's `RoadCrossingSurfaceTests` source pin of the old
   binding moves with it).
-- Piece 3 — THE ONE READ + THE LEAF'S SIGN-IN + THE ACCOUNT FACES: NOT-STARTED (R-2, R-3, R-4). Pins `RoadAccountFacesTests`
-  (planted facts per situation) + the read over a planted vault.
+- Piece 3 — THE ONE READ + THE LEAF'S SIGN-IN + THE ACCOUNT FACES: DONE (this commit; R-2, R-3, R-4).
+  `ProtectionAccountActs.swift`'s `ProtectionPaneRead.read` (the open library's facts with the sign-in NOW and a FRESH vault
+  read through the leaf — `VaultReadState` `.notAsked` / `.read(exists:)` / `.unreachable`, never guessed; the executor's
+  cache stays the acts'); `ProtectionCrossings.readCrossings`/`preflight` gain `read:` (nil keeps their own read — U2a's
+  planted pins unchanged), so the crossings and the account read the same way, shown and re-read alike.
+  `RoadAccountFaces.swift` (pure): the situation, `turnOnSync` (signed out → *Sign in to turn on sync.* + Sign in; no vault →
+  the set-up confirm — both typed, a NEW passphrase twice where none exists, the lifecycle lead + rule 7 + the posture the
+  account takes; a vault → U2's join, the not-yet line; unreadable → the needs-vault sentence), the three LOCAL leaves ONE
+  ROAD PER SITUATION (in sync: Stop syncing here + Delete the account from this Mac; signed out: This Mac Only — Continue;
+  each confirm rule 16's two sentences, the third leave's one pointer last), Move U2's (not yet), Sign out / Sign in, the
+  in-sync unreadable-vault line, and the account acts' refusal sentences (an act stopped mid-plan never says "nothing
+  changed"). PROVISIONAL P-VX308-U1-2 (one road per situation). R-3: `FollowingSessionProvider` (an actor: who is signed in
+  is read per call; a changed user gets a provider made for them; no one → `notSignedIn` before anything composes) — wired
+  into `WireVaultLeaf.live` over the scope's stored session (app-only; its Mac build PENDING — piece 6). Test support
+  `ProtectionAccountSupport.swift` (`PlantedVaultLeaf` — the core `ExecutorVault`'s semantics restated, no network;
+  `PlantedSyncKeysLeaf`; `PlantedAccount`); `PlantedRoad` gains `vault`/`syncKeys`/`session` (nil/signed-out — every earlier
+  suite unchanged). Pins `RoadAccountFacesTests` (10) + `FollowingSessionProviderTests` (1). HEADLESS, the whole harness:
+  `✔ Test run with 176 tests in 28 suites passed`.
 - Piece 4 — THE ACCOUNT ACTS ON THE SESSION: NOT-STARTED. Set-up (`setUpSync`) and the leaves (`leaveAccount`) on the open
   session (no swap, so no reopen — the set-passphrase road's precedent), each door re-read at the press (VX-108); sign-out and
   sign-in through injected roads. Pins `ProtectionAccountRoadTests` (the planted road + a planted vault with ExecutorVault's
