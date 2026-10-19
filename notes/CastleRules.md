@@ -12,8 +12,8 @@ P-VX378-O2-2. Amended at her sitting on VX-306's bundle (2026-10-18 afternoon �
 `notes/plans/vx-307-castle-crossings.md` §3a; built at VX-412): rules 2, 3 and 7 — THE WORDS ARE NEVER SHOWN BEFORE THE
 FIRST SCREEN ("opening the app for the first time [is] a calm moment where the user can just type"; "i dont want the lobby
 at start"), the card above the quick entry is the one home for the words and for rule 3's reminder, the tutorial's last
-card shows the words beside its passphrase ask, and nothing ever stores the words. Until VX-412 lands, the Debug build and
-the lifecycle page's stage 1 still show the creation-time words card; the page follows at that merge.**
+card shows the words beside its passphrase ask, and nothing ever stores the words. (Built at VX-412, with VX-307;
+the lifecycle page regenerates from its fixture.)**
 Where this document and `notes/plans/vx-266-castle-backups-prelaunch.md` differ, this document wins; that design keeps
 its research and its Apple-facts pointers (`notes/plans/vx-266/second-opinion-apple-facts.md`). The walk-through of
 these rules — one person, one library, every stage — is `notes/plans/vx-266/castle-lifecycle.html`, and the corrector

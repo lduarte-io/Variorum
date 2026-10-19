@@ -65,4 +65,4 @@ withdrawn; NIT-3 hollow with every path verified); NIT-R2-1/2 routed/recorded. N
 - Cleanup owed after the merge: ~/vx307-walk, DerivedData/vx307, the two safety copies' pruning per her rule,
   B's three named keychain orphans (no CLI reach — note for VX-309's copies tooling), the worktree + branch.
 
-**Canon-size at the closeout:** PENDING(canon-size line — filled at the merge-side commit).
+**Canon-size at the closeout:** 124,272 total (harness limit 150,000, headroom 25,728) — the loaded set grew by this phase's SurfaceContracts protection-line deltas only; no crossing, nothing removed.
