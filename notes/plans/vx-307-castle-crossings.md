@@ -448,6 +448,38 @@ record's claims by spot-check (the §7 verification line). Lesson for future cas
 state its NAME and role in one line it can re-read, and the orchestrator's stand-down messages should name the
 recipient's role explicitly; the fork's "two writers" alarm was the protocol working on a false premise.
 
+### U2a RECORD — THE CROSSINGS' FACES (Opus implementer, 2026-10-18; ticket VX-417 — IN PROGRESS)
+
+**Not done in U2a, first:** (filled at the close; until then — no Mac suite RUN, no walk, no Debug launch, no stage, no
+dev/real store or `/Applications` touch: the brief's limits.)
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece 0 — this record skeleton: DONE (this commit).
+- Piece 1 — THE WORDS + THE PURE FACES: NOT-STARTED. `ProtectionWords` gains the crossings' sentences (rule 12's leave
+  sentence verbatim from `CastleRules.md`, pinned by reading the file; everything else PROVISIONAL P-VX307-U2a-n);
+  `RoadCrossingFaces.derive` reads `assess`'s `DoorState` for Use Castle / Use Standard / Replace All Keys into faces
+  (open with its spec's asks and words; refused with its sentence; not rendered where the refusal is "not this posture's
+  door" — P-2), the gate choice by this Mac's biometry, the gate-style row in Castle. Pure pins over planted assessments.
+- Piece 2 — THE CROSSING ACTS ON THE SESSION: NOT-STARTED. The doors read (assess over the open library's facts, the
+  weekly plain-text copy's switch as this Mac's scheduled-export fact); the press re-reads the door (VX-108) and checks
+  the typed pair against the live key file BEFORE anything closes (a typo never tears the window down); the act through
+  the session's executor (`useCastle` / `useStandard` / `replaceAllKeys`); the reopen key; the export-off notice and its
+  reversal (`changeSettings` + the switch); the gate-style row (`changeSettings`). Planted pins (no keychain).
+- Piece 3 — THE MODELS: NOT-STARTED. The confirm (`RoadCrossingConfirmModel`) and the bootstrap-owned crossings model
+  (outlives the reopen a crossing makes). Pins over planted roads.
+- Piece 4 — THE BOOTSTRAP'S CROSSING ROAD: NOT-STARTED. Make this my library's seam shape (teardown, the pool closed
+  through the binding, the act off-main, the reopen through the new road with the key that opens the slot, the receipt
+  owed to the reopened session, the Protection pane asked back). Mac route suite PENDING (the stage).
+- Piece 5 — THE MAC FACES: NOT-STARTED. Settings ▸ Protection's new-road section (the posture line, the doors, the
+  gate-style row, the export-off notice), the confirm sheet; today's rows that read today's posture or act through
+  today's machinery retire behind the switch on the new road (Release byte-unchanged).
+- Piece 6 — THE TOUCH ID RE-ARM (VX-310's second half): NOT-STARTED. The interlude's re-arm card when the open owes
+  `.touchIDRearmQuestion`; `answerTouchIDRearm` through the session; the Mac and phone cards; a DEBUG walk switch that
+  plants one failed press for stage 11's walk (PROVISIONAL, P-VX306-U1b-9's fences).
+- Piece 7 — THE CLOSE: NOT-STARTED. Headless harness run, the core's protection set both configurations,
+  `build-for-testing` (Mac + phone), the Release build check, the Mac suite list for the orchestrator, the PROVISIONALs.
+- No revert is in flight.
+
 ## 7. LIVE STATUS
 - 2026-10-18 ~18:45 — KICKED OFF. Preflight complete (the orchestrator): CastleRules + SyncSpec whole, the lifecycle
   stages, SurfaceContracts, VX-306 §8/§9 records + handoff, QUESTIONS #234 (ACCEPTED by this kickoff, her entry's own
@@ -466,3 +498,4 @@ recipient's role explicitly; the fork's "two writers" alarm was the protocol wor
 - 2026-10-18 20:18 — U1's Mac batch GREEN under `vx-307-u1-mac` (101/6, 0 skipped; the record's counts flipped).
   **U1 is CLOSED but for the ladder.** VX-416 → In Review at the ladder; Done rides the PR.
 - U2 (VX-417, split §5b into U2a/U2b/U2c): U2a SPAWNING (Opus, briefed §5c).
+- U2a (VX-417): IN PROGRESS — the §6 U2a RECORD is the live status.
