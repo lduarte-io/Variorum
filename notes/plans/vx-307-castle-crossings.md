@@ -1,6 +1,8 @@
 # VX-307 — Castle rebuild, phase 3: the crossings' faces and the account's new shape (the `key_vault` lockstep)
 
-**Status: OPEN — kicked off 2026-10-18 ~18:45 MDT (`/architect-phase vx-307`, the author; worktree
+**Status: CLOSED 2026-10-19 (the overnight mandate — built, walked, laddered and merged in one night; the closeout
+paragraph is the master plan's, the dated entry `notes/AppSpecRecord.md`'s, the author handoff
+`notes/handoffs/vx-307-handoff.md`). Was: OPEN — kicked off 2026-10-18 ~18:45 MDT (`/architect-phase vx-307`, the author; worktree
 `~/dev/variorum-vx-307`, branch `vx-307-castle-crossings`; the in-flight row HOLDS the one Sync/-custody slot; the stage
 coordinator is `1018coordinator`, the slot granted 18:44 — stage protocol REQUEST/READY/GO/RELEASE, dev store 86a82b4f
 Standard on the new road, dark, restore hold standing). Originally written 2026-10-18 at VX-306's closeout, to
@@ -1810,3 +1812,15 @@ subset of the 75). What remains before the ladder: THE WALK (its own claim, the 
   the REAL-finger Touch ID unlock row (a nicety, not an owed proof). NEXT: ROUND 2 (a fresh fable-reviewer over the
   fix legs cbe35638d..7ad658677, making the final calls on the disputes: MAJOR-1's mark-keyed refinement, MINOR-3's
   cause, NIT-3's hollow).
+- 2026-10-19 ~01:45 — ROUND 2 CLOSED THE LADDER: 0 BLOCKER / 0 MAJOR / 0 MINOR / 2 NIT (`notes/plans/vx-307-ladder-round-2.md`,
+  committed unedited): the three dispute calls made (MAJOR-1's mark-keyed reconcile ACCEPTED AS REQUIRED — the bare rule
+  would undo her own Data-Safety re-enable; MINOR-3's implementer trace UPHELD, the round-1 candidate withdrawn; NIT-3
+  UPHELD as hollow with every .opening path verified); NIT-R2-1 routed (VX-445/VX-308 — the mark keyed by library when
+  Release stands multiple libraries), NIT-R2-2 record-only (the landing rule's snapshot-order note); every round-1 fix
+  re-checked and CLOSED. No round 3 earned. THE LADDER IS DONE.
+- BORN TICKETS (each labeled at filing): VX-442 (Bug·Suspected·Low — F-1's re-arm edge) · VX-443 (Debt·Low — F-5's
+  store-id envelope) · VX-444 (Improvement·Low — F-U2b-3's ledger across Make this my library) · VX-445 (Debt·Medium —
+  F-3's lock on the new road, NIT-R2-1 riding) · VM-23 (the phone's calm first open). Comments: VX-308 (F-4 +
+  NIT-R2-1 + the wire's consumption pointer), VX-379 (the remainder, named).
+- CLOSEOUT: the banner CLOSED; the canon deltas, the master plan row/paragraph, QUESTIONS #234's flip + #235's bundle
+  land ON MAIN at the merge (the shared-ledger rule); the handoff `notes/handoffs/vx-307-handoff.md`.
