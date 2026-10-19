@@ -396,10 +396,15 @@ same ruling):**
   blank / http / no host → nil; the source pin of the DEBUG fence — one `#if DEBUG`, the Release arm reads no environment).
   HEADLESS (+ `ProtectionWalkSwitchTests`): `✔ Test run with 7 tests in 2 suites passed`. The Mac build of `ProjectConfig`
   (app-only, outside the harness) PENDING — piece 6's `build-for-testing` covers it.
-- Piece 1 — THE WORDS: NOT-STARTED. `ProtectionWords`' VX-308 account section: rule 16's sentence and rule 7's (*A device holds
-  one pair of secrets at a time.* + the join sentence for U2) BYTE-EQUAL to `notes/CastleRules.md`, her #216 mockup's three
-  sentences and the born-Castle sentence BYTE-EQUAL to QUESTIONS #216, the shipped sign-out and deletion copy byte-reused;
-  every other line PROVISIONAL P-VX308-U1-1. Pins `RoadAccountWordsTests`.
+- Piece 1 — THE WORDS: DONE (this commit; re-cut to the arbitration). `ProtectionWords`' VX-308 account section: RULE 16's
+  two sentences (its "(rule 7)" pointer dropped) and RULE 7's two (*A device holds one pair of secrets at a time.* + the
+  join sentence, kept beside its rule for U2) BYTE-EQUAL to `notes/CastleRules.md`; the turning-on lead byte-equal to the
+  lifecycle page's stage 12; the sign-out confirm today's shipped copy byte-reused (`ProtectionCopy.signOut*`); the
+  signed-out screens drafted to the CURRENT rules and pinned AS DRAFTED (never the superseded 10-13 block — the arbitration's
+  redirect); the third leave LOCAL with ONE pointer to the Account sheet's Delete Account (P-VX308-U1-F1). Every other line
+  PROVISIONAL P-VX308-U1-1. Pins `RoadAccountWordsTests` (7: rule 16 ×2 and rule 7 ×2 against the rules file; the lead against
+  the page; the sign-out copy; the signed-out screens as drafted; the third leave's pointer said once; no line shouts).
+  HEADLESS `✔ Test run with 7 tests in 1 suite passed` (the harness stub gains `ProtectionCopy`'s three sign-out strings).
 - Piece 2 — THE ONE PRESENTER: NOT-STARTED (R-6). `ProtectionSheetPresenter` (shared, the bootstrap's); `RoadCrossingsModel`'s
   `confirm` read from it. Pins `ProtectionSheetPresenterTests` (headless).
 - Piece 3 — THE ONE READ + THE LEAF'S SIGN-IN + THE ACCOUNT FACES: NOT-STARTED (R-2, R-3, R-4). Pins `RoadAccountFacesTests`

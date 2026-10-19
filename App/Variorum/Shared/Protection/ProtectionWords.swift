@@ -456,6 +456,121 @@ nonisolated enum ProtectionWords {
     /// The tour's last card (rule 3: "asks, and shows the twelve words beside the ask"): the passphrase set there.
     static let tourEndPassphraseSet = "Passphrase set."
 
+    // MARK: - VX-308 U1 — THE ACCOUNT SECTION (rules 7, 14, 16; the plan's U1 ARBITRATION)
+    //
+    // RULE 16's two sentences and RULE 7's are HER words, verbatim from `notes/CastleRules.md` (the first letter
+    // capitalized, rule 16's own "(rule 7)" pointer dropped; `RoadAccountWordsTests` reads the rules file and pins them
+    // byte-equal). The sign-out confirm byte-reuses today's shipped copy (`ProtectionCopy`, pinned equal). The signed-out
+    // screens are drafted to the CURRENT rules — her word (2026-10-19): "10-13 is probably old and superseded by now" — so
+    // the whole screen is PROVISIONAL and the bundle names what diverged from QUESTIONS #216's 10-13 block. Every other line
+    // here is PROVISIONAL P-VX308-U1-1 — drafted from the rules' and the lifecycle page's own words, sentence case.
+
+    /// RULE 16 — her first sentence, verbatim (every leave's confirm says it).
+    static let ruleSixteen = "Leaving an account changes none of your library's keys or secrets \u{2014} it stops syncing, "
+        + "and the server keeps what you pushed (removing it is the account-deletion road)."
+    /// RULE 16 — her second sentence, verbatim (its "(rule 7)" pointer dropped).
+    static let signingBackInIsAJoin = "Signing back in is a join."
+    /// RULE 7 — her first sentence, verbatim (turning sync on).
+    static let onePairAtATime = "A device holds one pair of secrets at a time."
+    /// RULE 7 — her join sentence, verbatim (U2's words moment says it; kept here beside its rule).
+    static let joinWordsSentence = "Your library's twelve words are now your account's twelve words; here they are; the "
+        + "old ones still open backups you made before today."
+
+    /// The section (Settings ▸ Protection on the new road).
+    static let accountSectionTitle = "Sync"
+    /// The situations (`AccountSituation`).
+    static let accountLocalOnly = "This library doesn't sync."
+    static let accountInSync = "This library syncs with your account."
+    static func accountSignedInAs(_ email: String) -> String { "Signed in as \(email)." }
+    /// Signed out: the library still names its account (the record names it; signing out never changes it).
+    static let accountSignedOut = "You're signed out of sync."
+    static let accountSignedOutLine = "This library still syncs with an account, but no one is signed in on this "
+        + "\(ProtectionCopy.deviceName), so nothing syncs. Sign in to sync again, or use this library on this "
+        + "\(ProtectionCopy.deviceName) only \u{2014} the account's copy on the server stays as it is."
+    static let accountOtherAccount = "Another account is signed in on this \(ProtectionCopy.deviceName)."
+    static let accountOtherAccountLine = "This library syncs with a different account. Sign out, or move this library to "
+        + "the account that's signed in."
+    /// `Words.sameEmailDifferentAccount`.
+    static let accountSameEmailDifferentAccount = "The account signed in uses the same email, but it is a different "
+        + "account."
+    static let accountSignInToTurnOnSync = "Sign in to turn on sync."
+
+    /// The doors (an ellipsis: a confirm or a sheet follows).
+    static let turnOnSyncDoor = "Turn on sync\u{2026}"
+    static let stopSyncingHereDoor = "Stop syncing here\u{2026}"
+    static let deleteAccountHereDoor = "Delete the account from this \(ProtectionCopy.deviceName)\u{2026}"
+    static let thisMacOnlyDoor = "Use this \(ProtectionCopy.deviceName) only\u{2026}"
+    static let accountSignOutDoor = "Sign out\u{2026}"
+    static let accountSignInDoor = "Sign in\u{2026}"
+    /// The join arms are U2's (§5b) — the honest not-yet line until its face lands (the `plaintextCopyNotYet` precedent).
+    static let joinNotYet = "Joining an account that already syncs isn't ready in this build yet."
+    static let moveNotYet = "Moving this library to that account isn't ready in this build yet."
+
+    /// Turn on sync — the first device hands its pair up (rule 7); the account takes the library's posture.
+    static let turnOnSyncTitle = "Turn on sync"
+    /// The lifecycle page's stage 12, verbatim ("Turning sync on first").
+    static let turnOnSyncLead = "Your library's passphrase and twelve words become the account's. Nothing is replaced."
+    static func turnOnSyncPosture(_ mode: ProtectionMode) -> String {
+        switch mode {
+        case .standard: return "Your account starts in Standard, like this library."
+        case .castle: return "Your account starts in Castle, like this library."
+        }
+    }
+    /// No passphrase yet (rule 14: the account's keys are wrapped by the passphrase and the twelve words only).
+    static let turnOnSyncNewPassphraseLead = "This library has no passphrase yet. Choose one \u{2014} your account is "
+        + "locked under your passphrase and your twelve words."
+    static let turnOnSyncButton = "Turn on sync"
+    static let turnOnSyncReceipt = "Sync is on. Your passphrase and twelve words are your account's now."
+
+    /// Stop syncing here (rule 16 — the library's keys and secrets unchanged).
+    static let stopSyncingTitle = "Stop syncing here"
+    static let stopSyncingLead = "This \(ProtectionCopy.deviceName) stops syncing this library and forgets your account's "
+        + "sync keys. Your other devices keep syncing."
+    static let stopSyncingButton = "Stop syncing"
+    static let stopSyncingReceipt = "This library doesn't sync on this \(ProtectionCopy.deviceName) any more."
+
+    /// Delete the account from this Mac — the LOCAL leave (P-VX308-U1-F1, the U1 ARBITRATION's refined (b)), with ONE
+    /// pointer to where the real deletion lives (the Account sheet's door, her ruled friction, unduplicated).
+    static let deleteHereTitle = "Delete the account from this \(ProtectionCopy.deviceName)"
+    static let deleteHereLead = "This \(ProtectionCopy.deviceName) forgets the account and its sync keys. The account "
+        + "itself isn't deleted."
+    static let deleteHerePointer = "To delete the account itself, and everything it keeps on the server, choose "
+        + "Account\u{2026} in the sidebar's sync row, then Delete Account."
+    static let deleteHereButton = "Delete from this \(ProtectionCopy.deviceName)"
+    static let deleteHereReceipt = "This \(ProtectionCopy.deviceName) doesn't use that account any more."
+
+    /// This Mac only — signed out, the one road (the 10-13 shape: Continue / Cancel, still true under rule 16).
+    static let thisMacOnlyTitle = "Use this \(ProtectionCopy.deviceName) only"
+    static let thisMacOnlyLead = "This \(ProtectionCopy.deviceName) stops using your sync account and forgets its sync "
+        + "keys."
+    static let accountContinue = "Continue"
+    static let thisMacOnlyReceipt = "This library is on this \(ProtectionCopy.deviceName) only now."
+
+    /// The sign-out confirm — today's shipped copy, byte-reused (decision 20's §4).
+    static let accountSignOutTitle = ProtectionCopy.signOutTitle
+    static let accountSignOutBody = ProtectionCopy.signOutBody
+    static let accountSignOutButton = ProtectionCopy.signOutDoor
+
+    static let accountCancel = "Cancel"
+    static let accountWorking = "Working\u{2026}"
+    /// An account act stopped mid-plan (its act stays in flight; the next open settles it — rule 20).
+    static let accountActUnfinished = "Variorum couldn't finish this just now. It finishes the next time your library "
+        + "opens."
+
+    /// USE CASTLE WHILE SIGNED OUT — the signed-out screen, drafted to the CURRENT rules (`assess`: the one plain road,
+    /// This Mac Only, stands in Use Castle's place; rule 16: that leave changes no key or secret; P-VX378-U2-2: Use Castle's
+    /// own confirm types both secrets). *Continue* runs the leave, then Use Castle's confirm; *Cancel* writes nothing.
+    static let signedOutCastleTitle = accountSignedOut
+    static let signedOutCastleLead = "Castle will apply to this library on this \(ProtectionCopy.deviceName) only. "
+        + "First, this \(ProtectionCopy.deviceName) stops using your sync account \u{2014} none of your keys or secrets "
+        + "change, and the account's copy on the server stays as it is. Then Use Castle asks for your passphrase and your "
+        + "twelve words, as always."
+    static let signedOutCastleWholeAccount = "To put your whole account in Castle instead, cancel, sign in, and choose Use "
+        + "Castle again."
+    /// The receipt's last sentence when Use Castle followed that road (true here: turning sync on hands the account the
+    /// library's posture).
+    static let bornCastleNote = "Set up sync again later with a new account and it starts in Castle."
+
     // MARK: - The route's failures (the failure face, with Try Again)
 
     static let couldNotCreate = "Variorum couldn't create your library."
