@@ -1322,8 +1322,29 @@ kept" precedent), the test support (`PlantedRoad`, `ProtectionAccountSupport` �
   (:147/:150); M3 the catalogue guard dropped → red at the backup arm (:158/:161); M4 the Standard-only guard on the
   file-less nil arm dropped → `✘ castleUnsyncedFileLessStillRefuses` (2 issues); M5 the synced mint without the master
   lock → `✘ aSyncedLibrary…` both postures (4 issues). No revert in flight.
-- Piece 2 — THE WORDS (`ProtectionWords`' VX-308 U3 section, PROVISIONAL; VX-263's line pinned as drafted): NOT-STARTED.
-- Piece 3 — VX-448 (`WordsClipboard`'s new-road rule; the clear at the lock and at quit; the caption): NOT-STARTED.
+- Piece 2 — THE WORDS: DONE (`5314bb7a6`). `ProtectionWords`' VX-308 U3 section: VX-263's one line (*Your current
+  secrets open everything you've made of this library.* — the plan's §2/§5c line as drafted, pinned against the plan
+  file); the key doors' names, leads (Standard's plain confirm; Castle's words, or Touch ID where its item stands), fields,
+  buttons, receipts; the synced key doors' rule-7 line; F-U2-3's say-before-mint line; VX-447's banner door — her U2-7 (1)
+  FIRST SENTENCE REUSED (the prefix of her pinned constant, never restated), the door line, the open-library account
+  sentence (F-U2c-5 folded), the remade receipt; VX-448's new-road Copy caption (today's `ProtectionCopy.wordsCopied`
+  untouched). All new lines PROVISIONAL P-VX308-U3-2. Pins `RoadKeyDoorWordsTests` (5) — headless with U1's words suite
+  and `WordsBandTests` `✔ 24 tests in 3 suites`. MUTATION (VX-263's line reworded) → `✘ vx263sOneLineIsThePlansAsDrafted`
+  (2 issues), restored `cmp`-identical.
+- Piece 3 — VX-448: DONE (this commit's parent). `WordsClipboard` (the one home, `Shared/WordsCopyDoor.swift`) gains the
+  new road's rule: `copyConcealed` (the words as one line + `org.nspasteboard.ConcealedType` with empty data; NO timer;
+  nothing restored; the one copy HELD — board + `changeCount`) and `clearHeld` (empties the board only while it still
+  holds that copy; lets go either way). `AppBootstrap.copyWords` — the ONE road every new-road look rides (the card, the
+  Settings door, the tour, U2's join moment, U3's banner) — is `copyConcealed`; the LOCK's clear (`clearWordsAtLock`) sits
+  in `finish`'s non-ready arm beside the presenter's `libraryClosed` (VX-239's rule — a library closed behind the lobby;
+  U4's lock lands there — `if newRoad`); the QUIT's in `VariorumAppDelegate.applicationWillTerminate`. Today's
+  `WordsClipboard.copy` (60 s) and its screens UNTOUCHED (R-U3-6). `WordsBandSurfaceTests`' bootstrap source pin FLIPPED
+  DELIBERATELY (`copy(words)` → `copyConcealed(words)`). Pins `WordsConcealedClipboardTests` (4 — private named boards:
+  one line + the concealed type; no timer and nothing restored; the clear empties only its own copy; the three wirings by
+  source) — headless (the harness gains `WordsCopyDoor.swift` with two one-line stand-ins for its SwiftUI door's app
+  types) `✔ 9 tests in 2 suites` with the words suite. RED-ON-OLD BY BEHAVIOURAL REVERT (the pre-VX-448 wiring: the
+  road back to `WordsClipboard.copy`, no clear in `finish` or the delegate) → `✘ everyNewRoadLookRidesIt…` (4 issues),
+  restored `cmp`-identical.
 - Piece 4 — THE LOOK (R-U3-4, R-U3-7) + THE BANNER'S BRAIN (R-U3-2, R-U3-3 — `RoadStandingModel`): NOT-STARTED.
 - Piece 5 — THE KEY DOORS' FACES, ACTS AND MODELS (R-U3-5): NOT-STARTED.
 - Piece 6 — THE MAC FACES + THE BOOTSTRAP'S WIRING (the pane, the bar, the sheets, `AppBootstrap`): NOT-STARTED.
