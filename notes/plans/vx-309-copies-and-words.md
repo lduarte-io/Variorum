@@ -30,9 +30,9 @@ and discipline, `~/.variorum/dev-vault-throwaway.env`, values never echoed or co
 > acceptance spine. Riders: the kickoff checks the open Low/Medium tickets in Castle & sync and Settings &
 > onboarding and offers them to her — the standing candidates from VX-308's close are VX-450 (Medium — the stuck-act
 > class's remainder: Change/Reset share it), VX-449, VX-451 (the pane's Lock Now row + idle dial — a natural U1/U2
-> rider), VX-452, VX-453 (Settings search misses the account section), VX-454; VX-455 (Move's two-act compose) is
-> HERS — phase 5 or VX-329 (#236 carries it). W-VX308-3 (the weekly-copy switch is ONE app-level key) sits in #236;
-> if she rules it per-library it is copies work and belongs here.
+> rider), VX-452, VX-453 (Settings search misses the account section), VX-454. Already RIDING at her word: VX-456
+> and VX-457 (words-unit members below). VX-455's compose is POST-RELEASE at her word (2026-10-19) — only its
+> not-yet line rewords here. W-VX308-3 is RULED keep-app-level (record-only, nothing to build).
 
 ## 1. The members (the ticket's list, restated; the kickoff session cuts the units)
 
@@ -70,6 +70,11 @@ and discipline, `~/.variorum/dev-vault-throwaway.env`, values never echoed or co
   into phase 5 we can do it there" (it does — this unit owns the sentences and the phase holds the custody slot).
 - **VX-457 rides as a rider** (her ruling 2026-10-19: "I agree with B" on P-VX308-U2-7): the follow's Done becomes a
   durable pane notice until OK (the export-notice idiom — survives `receipt_style` off and a quit).
+- **Move's not-yet line names the road** (her ruling 2026-10-19: "reword that line to name the road & then leave
+  VX-455 for post release"): `ProtectionWords.moveNotYet` stops saying "isn't ready in this build yet" and says the
+  two-press road — leave this account (This Mac Only), then turn on sync while signed in as the other account; this
+  library's pair becomes that account's. The one-door compose (VX-455) is post-release; the ticket's comment carries
+  the ruling.
 - **The field guide's Castle/backups chapters and Data Safety's words** against the rules as built (VX-379's
   standing acceptance + the Start Here chapter leads; her #235 ruling: written HERE; the truth-check AND the real
   store's re-seed ride VX-329's release window). **F-U2c-4 rides:** the new road's Data Safety gains its "what
@@ -86,8 +91,8 @@ implementers; the orchestrator runs Mac suites and walks under a held stage clai
 store's restore hold and banner stand; never press Resume.
 
 ## 3. Open questions riding into kickoff
-- Her #236 acceptance (the VX-308 bundle) — any ruling there that reshapes a member lands in this plan before the
-  first spawn.
-- VX-455's home (here or VX-329) — hers.
-- W-VX308-3 (the app-level weekly-copy switch) — hers; if per-library, a U1 member.
+- #236's HEADLINE ITEMS ARE ALL RULED at the 2026-10-19 handoff sitting (the entry carries her words verbatim): the
+  join moment rewords to her email-naming draft (a words-unit member, with VX-456); W-VX308-3 keep app-level
+  (record-only); P-U2-7 → VX-457 (a rider here); F-U4-3 keep as built (record-only); VX-455 post-release, its
+  not-yet line reworded here. The rest of the bundle rides her kickoff as acceptance.
 - VX-211's shape — the strength ask is design-flavored; bring options to a sitting rather than invent.
