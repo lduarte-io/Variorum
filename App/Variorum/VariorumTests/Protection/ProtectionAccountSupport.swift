@@ -16,6 +16,14 @@ import VariorumCore
 
 /// The server's vault, planted (the core's `ExecutorVault`, restated): CAS on the revision and the key proof.
 nonisolated final class PlantedVaultLeaf: VaultLeaf, @unchecked Sendable {
+    /// VX-308 (the U2 Mac batch's one crash, traced): the pane's read and an
+    /// act's read are CONCURRENT by design since U2's seam, and this fake's
+    /// bare arrays corrupted under the race (`calls.append` vs a sibling
+    /// call — SIGSEGV in the test host). Every method body now holds the
+    /// one lock (the `NewRoadSyncKeyProvider` idiom); direct property reads
+    /// in test bodies stay legal (single-threaded, after their awaits).
+    private let lock = NSLock()
+
     struct Account {
         var revision: Int
         var vault: AccountVault
@@ -33,12 +41,15 @@ nonisolated final class PlantedVaultLeaf: VaultLeaf, @unchecked Sendable {
     }
 
     func fetchVault(accountID: String) async throws -> VaultSnapshot? {
-        calls.append("fetch \(accountID)")
-        guard reachable else { throw VaultRefusal.unreachable }
-        return snapshot(accountID)
+        try lock.withLock {
+            calls.append("fetch \(accountID)")
+            guard reachable else { throw VaultRefusal.unreachable }
+            return snapshot(accountID)
+        }
     }
 
     func createVault(_ vault: AccountVault, accountID: String, device: String) async throws -> VaultSnapshot {
+        try lock.withLock {
         calls.append("create \(accountID)")
         guard reachable else { throw VaultRefusal.unreachable }
         guard accounts[accountID] == nil else { throw VaultRefusal.vaultExists }
@@ -47,12 +58,14 @@ nonisolated final class PlantedVaultLeaf: VaultLeaf, @unchecked Sendable {
         clock += 60
         accounts[accountID] = Account(revision: 1, vault: named, updatedAt: clock)
         return snapshot(accountID)!
+        }
     }
 
     func updateVault(
         _ vault: AccountVault, accountID: String, expectedRevision: Int, proofMaster: SymmetricKey,
         successorMaster: SymmetricKey?, device: String
     ) async throws -> VaultSnapshot {
+        try lock.withLock {
         calls.append("update \(accountID)")
         guard reachable else { throw VaultRefusal.unreachable }
         guard var account = accounts[accountID] else { throw VaultRefusal.vaultAbsent }
@@ -73,6 +86,7 @@ nonisolated final class PlantedVaultLeaf: VaultLeaf, @unchecked Sendable {
         account.updatedAt = clock
         accounts[accountID] = account
         return snapshot(accountID)!
+        }
     }
 
     /// A vault for `accountID` made elsewhere (another device turned sync on first) under `passphrase` and `words`.
@@ -82,28 +96,30 @@ nonisolated final class PlantedVaultLeaf: VaultLeaf, @unchecked Sendable {
         let (vault, keys) = try VaultModel.creating(
             passphrase: try PassphraseKey.derive(passphrase, kdf: kdf), words: try WordsKey.derive(words), mode: mode,
             device: "Another Mac", ids: FastIDsLeaf())
-        accounts[accountID] = Account(revision: 1, vault: vault, updatedAt: clock)
+        lock.withLock { accounts[accountID] = Account(revision: 1, vault: vault, updatedAt: clock) }
         return keys
     }
 }
 
 /// Sync keys in memory, with session memory (the gatherer's facts read the items).
 nonisolated final class PlantedSyncKeysLeaf: SyncKeysLeaf, @unchecked Sendable {
+    /// The same race class as the vault fake's: locked bodies.
+    private let lock = NSLock()
     var items: [SyncKeysItemFact: AccountKeys] = [:]
     var session: [String: AccountKeys] = [:]
 
-    func syncKeyItems() throws -> [SyncKeysItemFact] { Array(items.keys) }
+    func syncKeyItems() throws -> [SyncKeysItemFact] { lock.withLock { Array(items.keys) } }
     func readSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws -> AccountKeys? {
-        items[SyncKeysItemFact(accountID: accountID, itemClass: itemClass)]
+        lock.withLock { items[SyncKeysItemFact(accountID: accountID, itemClass: itemClass)] }
     }
     func writeSyncKeys(_ keys: AccountKeys, accountID: String, itemClass: ProtectionNames.CustodyClass) throws {
-        items[SyncKeysItemFact(accountID: accountID, itemClass: itemClass)] = keys
+        lock.withLock { items[SyncKeysItemFact(accountID: accountID, itemClass: itemClass)] = keys }
     }
     func deleteSyncKeys(accountID: String, itemClass: ProtectionNames.CustodyClass) throws {
-        items[SyncKeysItemFact(accountID: accountID, itemClass: itemClass)] = nil
+        lock.withLock { items[SyncKeysItemFact(accountID: accountID, itemClass: itemClass)] = nil }
     }
-    func holdInSession(_ keys: AccountKeys?, accountID: String) { session[accountID] = keys }
-    func sessionSyncKeys(accountID: String) -> AccountKeys? { session[accountID] }
+    func holdInSession(_ keys: AccountKeys?, accountID: String) { lock.withLock { session[accountID] = keys } }
+    func sessionSyncKeys(accountID: String) -> AccountKeys? { lock.withLock { session[accountID] } }
 
     /// Every account any item or session memory names.
     var accountsHeld: Set<String> { Set(items.keys.map(\.accountID)).union(session.keys) }
