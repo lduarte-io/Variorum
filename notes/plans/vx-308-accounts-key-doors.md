@@ -1236,6 +1236,91 @@ NSLock (the provider's idiom); the crash itself is the red-on-old in effect; the
 in 3 suites`. 0 instances at release; the stage released with the result line. **U2 IS CLOSED but for the walk and
 the ladder.**
 
+### U3 RECORD — THE KEY DOORS' FACES + VX-447 + VX-448 (Opus implementer, 2026-10-19; VX-418's key doors + VX-447 + VX-448 + the F-U2-3 guard — IN PROGRESS)
+
+**Not done in U3, first:** (filled at the close — PENDING) No Mac suite RUN, no walk, no Debug launch, no store touch
+(the brief: headless + `build-for-testing` only — the Mac batch and the walk are the orchestrator's). Today's road
+untouched (its key doors and its 60-second clipboard rule retire with it at VX-329 — R-U3-6).
+
+**Preflight (complete, not delegated):** CLAUDE.md + its canon; the resiliency protocol; CastleRules WHOLE; SyncSpec WHOLE
+(the arm writes a custody file and, synced, rides the key door's one vault write — no `Sync/` line); SurfaceContracts (the
+app + Doors/protection); this plan whole (§1–§5d, the §6 U1 RECORD + arbitration + Mac batch, the VX-314 RECORD, the U2
+RECORD + its arbitration + Mac batch, §7); VX-307 §3a, §5a (the hard limits), §5d, the §6 U2b RECORD + its arbitration
+(`WordsLookPanel`, `WordsClipboard`, P-VX307-U2b-1's shape), the U2c record's F-U2c-1 / F-U2c-5 and THE WALK RECORD's
+clipboard observation; QUESTIONS #235 (her rulings block — VX-447 / VX-448 verbatim); `phase-13u-feel-and-polish.md`'s
+13u2 Copy-all design note (the concealed type's origin); the core (`KeyDoors.swift`, `PlanRunner.swift`, `Executor.swift`,
+`CommonSteps.swift`, `AccountActs.swift`, `KeyFile.swift`, `KeyFileCrossings.swift`, `ProtectionRecord.swift`,
+`Assessment.swift` — `NoKeyFileAnywhere`, `Fault.noKeyFileAnywhere` — and `Assess.swift`'s two fault arms, the key doors'
+gates, `passphraseAsks`); the shared faces (`WordsBand`, `SetPassphraseModel`, `ProtectionWords`, `ProtectionOpenFaces`,
+`ProtectionRoadActs`, `ProtectionOpenRoad`, `ProtectionAccountActs`, `RoadAccountFaces`, `RoadAccountModel`,
+`RoadCrossingFaces`, `RoadCrossingsModel`, `ProtectionCrossingActs`, `ProtectionSheetPresenter`, `ProtectionSystem`,
+`ProtectionBackupHook`, `FileBackupsLeaf`); the Mac faces (`ProtectionRoadBar`, `WordsBandCard`, `RoadAccountSheet`,
+`RoadCrossingSheet`, `ProtectionPane`), `AppBootstrap`'s new-road arms (`finish`, `copyWords`, `crossingRoads`,
+`accountRoads`, `reopenAround`, `lock`, `canLock`), `VariorumApp`'s ready composition, `VariorumAppDelegate`,
+`WordsCopyDoor.swift` (`WordsClipboard`), today's `KeyDoorModel` (the forgot road's presence confirm — the "today's road,
+kept" precedent), the test support (`PlantedRoad`, `ProtectionAccountSupport` — the lock rule for new fakes —
+`ProtectionFacesSupport`, `ExecutorWorld`, `EX`, `FirstLookWordsTests`, `U2PinsRule27Tests`, `ProtectionRule27FaceTests`,
+`ProtectionWordsVX307Tests`, `WordsCopyDoorTests`, `WordsBandSurfaceTests`). HARNESS: U1's scratchpad package `u1-harness`
+(this session's scratchpad, pointed at this worktree — the recipe in the U1 RECORD's COUNTS).
+
+**MY READINGS (each the brief's or her ruling's letter as I read it — building on them):**
+- **R-U3-1 — THE VX-447 CORE ARM, AS NARROW AS THE STATE.** "The no-live-key-file state with the library open" is rule
+  27's after-open fault's FIRST arm (`Assess.repairs`: nothing in the live place, no sealed mirror of the current key, no
+  catalogued key file OF the current key, nothing in flight) — read by the act itself (`keyFileGoneEverywhere`, reads
+  only; a remembered item's mirror read as stated counts too — conservative), never a guess. In exactly that state
+  `regenerateWords` MINTS the key file it then locks (`KeyFile.building` — the current key, the record's epoch; the
+  history cannot be carried: every copy that held it is gone, which is what the fault says). Authorization by the one
+  secret the state can still check, each arm a TWIN of an existing core authorization: Standard + unsynced → nothing
+  asked (the reset door's plain confirm — P-VX307-U2b-1's own twin; no passphrase lock survives anywhere to verify, so
+  rule 3's fact reads none); SYNCED (either posture) → the account's passphrase, verified against the vault exactly as the
+  synced arm already does, and the fresh file carries the passphrase lock, the new words lock and the master with its
+  twelve-words copy (the file as a synced library's is), the vault's words re-wrapped by the act's one CAS write (rule
+  7); Castle + unsynced → REFUSED `secretMissing` as today (no lock can verify a passphrase and Castle has no plain
+  confirm — PROVISIONAL, options in the record). The SECOND fault arm (another key's file in the live place) is NOT
+  widened: minting would write over a stray (rule 21 — never repair by guessing). Every other path byte-unchanged.
+- **R-U3-2 — "THE BACKUP FOLLOWS" IS THE FACE'S, AFTER THE MINT.** The core arm writes the key file only; the face, once
+  the act returns the words, takes rule 5's PAIR through the one pair road (`takePair` — the backup hook's, moved to a
+  harness-visible file, behaviour unchanged). A backup is never a plan step that could fail the mint and lose the words
+  before they are shown.
+- **R-U3-3 — THE BANNER BECOMES THE DOOR (Mac):** after a quiet open with no key file anywhere and the live place EMPTY,
+  `ProtectionRoadBar` says her first U2-7 sentence and the door sentence (the whole line the door — rule 2's "click here"
+  idiom), the look (`WordsLookPanel`, one look at a time through the band) inline in the bar; the mint → the fresh key
+  file → the pair → a receipt; the banner retires once the look closes over a remade file. The synced flavor adds the
+  open-library variant of the account sentence (F-U2c-5). The stray arm keeps her U2-7 words with no door.
+- **R-U3-4 — THE LOOK ASKS BY THE CORE'S OWN PASSPHRASE FACT.** `ProtectionRecord.passphraseExists` (a lock on the live
+  key file, or the account's) — the record's stamp can be stale in the file-less state (stamped while the file stood), so
+  the look would ask a passphrase nothing can verify. In every other state the two agree (the stamp IS that fact).
+- **R-U3-5 — THE KEY DOORS (the pane):** `assess`'s three doors over THE PANE'S ONE READ (U1's R-2), presented through THE
+  ONE PRESENTER, run on the OPEN session (no swap — the set-passphrase road's precedent; no reopening seam). Change
+  passphrase… (current, new twice) and Reset forgotten passphrase… (Standard: the plain confirm; Castle: the words, or
+  Touch ID where its item for the current key exists — the press is a READ of that item, today's road's presence confirm
+  kept) render only where a passphrase exists (*Set a passphrase…* stands in their place otherwise) and not in rule 27's
+  state (they need a key file). NEW WORDS is the Settings words section's door (U2b built it as rule 7's new-words door —
+  one door, never two for one act), now reading `.newWords` (its refusal in place). Each door says VX-263's ONE line.
+  Synced refusals (`followOwed` / `accountMoved`, `needsFreshVault`) in the pane's idiom (`RoadCrossingFaces`' maps).
+- **R-U3-6 — VX-448 ON THE NEW ROAD; TODAY'S ROAD BYTE-UNCHANGED.** `WordsClipboard` (the one home) gains the new road's
+  rule — the words as one line PLUS the concealed marker type (`org.nspasteboard.ConcealedType`), no timer, nothing
+  restored; held until the library closes behind the lobby (the lock — `AppBootstrap.finish`'s non-ready arm, beside the
+  presenter's `libraryClosed`) or the app quits (`applicationWillTerminate`), and cleared then ONLY if the board still
+  holds this copy (`changeCount` — her later copy is never erased). Every new-road look rides it (the bootstrap's one
+  `copyWords`: the band, the doors' look, U2's join moment). Today's `WordsClipboard.copy` (60 s) stays for today's
+  screens, which retire with today's road at VX-329. (The walk's "restore" was never this code's — `clearContents()`
+  empties; with the timer gone nothing clears at 60 s at all.)
+- **R-U3-7 — F-U2-3 (the architect's ruling):** on a synced library every look (the card, Settings, the tour, the banner)
+  asks first and says one line BEFORE minting — new words replace the account's words everywhere; her *Show my twelve
+  words* is the yes. U2's join moment (typed words, nothing minted) never says it.
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece 0 — this record skeleton + the readings: DONE (this commit).
+- Piece 1 — THE VX-447 CORE ARM (`KeyDoors.swift`, R-U3-1) + core pins red-on-old: NOT-STARTED.
+- Piece 2 — THE WORDS (`ProtectionWords`' VX-308 U3 section, PROVISIONAL; VX-263's line pinned as drafted): NOT-STARTED.
+- Piece 3 — VX-448 (`WordsClipboard`'s new-road rule; the clear at the lock and at quit; the caption): NOT-STARTED.
+- Piece 4 — THE LOOK (R-U3-4, R-U3-7) + THE BANNER'S BRAIN (R-U3-2, R-U3-3 — `RoadStandingModel`): NOT-STARTED.
+- Piece 5 — THE KEY DOORS' FACES, ACTS AND MODELS (R-U3-5): NOT-STARTED.
+- Piece 6 — THE MAC FACES + THE BOOTSTRAP'S WIRING (the pane, the bar, the sheets, `AppBootstrap`): NOT-STARTED.
+- Piece 7 — THE CLOSE (counts, builds, the Mac-suite list, the walk recipe, PROVISIONALs, findings): NOT-STARTED.
+- No revert is in flight.
+
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
   `~/dev/variorum-vx-308`, branch pushed, in-flight row (holds the Sync/-custody slot) `969acce55` on main, Linear
