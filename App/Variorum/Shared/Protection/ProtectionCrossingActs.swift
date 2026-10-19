@@ -128,7 +128,7 @@ nonisolated enum ProtectionCrossings {
         }
         let now: RoadDoorOpen
         switch faces.face(door) {
-        case .hidden: return .refused(ProtectionWords.crossingDoorClosed)
+        case .hidden, .signedOutRoad: return .refused(ProtectionWords.crossingDoorClosed)
         case .refused(let sentence): return .refused(sentence)
         case .open(let open): now = open
         }

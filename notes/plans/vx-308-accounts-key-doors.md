@@ -450,8 +450,22 @@ same ruling):**
   key, the key file and the server's vault stay byte-equal (no vault write); the deletion's hook for this library's
   account only; a press during another act refuses. HEADLESS, the whole harness: `✔ Test run with 183 tests in 29 suites
   passed`.
-- Piece 5 — THE MODELS: NOT-STARTED. `RoadAccountModel` (the bootstrap's, beside the crossings) + its confirm. Pins
-  `RoadAccountModelTests`.
+- Piece 5 — THE MODELS + THE SIGNED-OUT ROAD'S BRAIN: DONE (this commit). `Shared/Protection/RoadAccountModel.swift`:
+  `RoadAccountRoads` (read · press · landed · speak — injected); `RoadAccountConfirmModel` (exactly the ask's fields — set-up
+  both typed, a NEW passphrase twice; a leave nothing, rule 16 — shaped before the road; untrimmed; a changed door re-shown,
+  VX-108); `RoadSignOutModel` (today's shipped confirm); `RoadSignedOutCastleModel` (the signed-out screen — Continue / Cancel,
+  the current rules' words); `RoadAccountModel` (OWNED BY THE BOOTSTRAP: the faces with the crossings' landing rule; each
+  sheet through THE ONE PRESENTER — one at a time with the crossings'; a landed act's receipt spoken ONCE and the pane re-read,
+  this section and the crossings via `landed`; *Sign in…* the Account sheet whose close re-reads; *Sign out…* only with the
+  composition root's `signOutRoad`, P-2). The presenter gains the `.signedOutCastle` / `.account` / `.signOut` sheets. THE
+  SIGNED-OUT ROAD (VX-264, R-1 as amended): `RoadDoorFace.signedOutRoad` — Use Castle refused `.signedOutUseThisMacOnly`
+  renders its door (Use Standard / Replace All Keys keep their sentence); `RoadCrossingsModel.openSignedOutRoad` — Continue
+  runs `RoadCrossingRoads.leaveForThisMacOnly` (default: refused — every earlier planted road unchanged), re-reads, and
+  hands the floor (`presenter.replace`) to Use Castle's own confirm carrying `receiptNote: bornCastleNote` into its request
+  (`RoadCrossingRequest.receiptNote`, additive); the preflight treats the face as closed. U2a's
+  `RoadCrossingFacesTests.aSyncedLibrarysDoorsSayTheirRefusalsInPlace` pin FLIPPED deliberately at its signed-out line (`.signedOutRoad`
+  — the old sentence was this unit's target; Replace All Keys' line kept). Pins `RoadAccountModelTests` (8). HEADLESS, the
+  whole harness: `✔ Test run with 191 tests in 30 suites passed`.
 - Piece 6 — THE MAC FACES + THE BOOTSTRAP'S ROADS + THE SIGNED-OUT ROAD: NOT-STARTED. `RoadAccountSection` /
   `RoadAccountSheet` / her signed-out screen; the pane hosts them; the presenter's sheet; `finish` drops it at closed states.
   Mac suites BUILT, RUN PENDING (the orchestrator's).

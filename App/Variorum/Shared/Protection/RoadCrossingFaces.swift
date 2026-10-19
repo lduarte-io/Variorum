@@ -138,6 +138,11 @@ nonisolated enum RoadDoorFace: Equatable, Sendable {
     /// The door can't act now — its sentence in its place.
     case refused(String)
     case open(RoadDoorOpen)
+    /// VX-308 U1 (VX-264, R-1 as amended): Use Castle while SIGNED OUT of the library's account — `assess` refuses it
+    /// `.signedOutUseThisMacOnly` ("the one plain road (This Mac Only) stands in its place"), so the door renders and its
+    /// press shows the signed-out screen (drafted to the current rules): *Continue* runs This Mac Only, then Use Castle's
+    /// own confirm; *Cancel* writes nothing.
+    case signedOutRoad
 
     var openDoor: RoadDoorOpen? {
         if case .open(let open) = self { return open }
@@ -182,6 +187,9 @@ nonisolated struct RoadCrossingFaces: Equatable, Sendable {
         let earlierGate = unlocked.thisMac.settings.gateStyle
         func face(_ door: RoadCrossingDoor) -> RoadDoorFace {
             switch assessment.doors[door.door] ?? .refused(.nothingToDo) {
+            case .refused(.signedOutUseThisMacOnly) where door == .useCastle:
+                // VX-308 U1: the signed-out road (Use Standard and Replace All Keys keep their sentence in place).
+                return .signedOutRoad
             case .refused(let refusal):
                 return refusalSentence(refusal).map(RoadDoorFace.refused) ?? .hidden
             case .open(let spec):

@@ -54,12 +54,21 @@ final class ProtectionSheetPresenter {
     enum Sheet: Identifiable {
         /// A crossing's confirm (Use Castle, Use Standard, Replace All Keys — VX-307 U2a).
         case crossing(RoadCrossingConfirmModel)
+        /// Use Castle while signed out — the signed-out screen (Continue: This Mac Only, then Use Castle's confirm).
+        case signedOutCastle(RoadSignedOutCastleModel)
+        /// An account door's confirm (turning sync on, the three local leaves).
+        case account(RoadAccountConfirmModel)
+        /// Sign out — today's shipped confirm.
+        case signOut(RoadSignOutModel)
         /// The Account sheet (sign in).
         case signIn(ProtectionSignInRequest)
 
         var id: UUID {
             switch self {
             case .crossing(let model): return model.id
+            case .signedOutCastle(let model): return model.id
+            case .account(let model): return model.id
+            case .signOut(let model): return model.id
             case .signIn(let request): return request.id
             }
         }
@@ -68,6 +77,9 @@ final class ProtectionSheetPresenter {
         func cancel() {
             switch self {
             case .crossing(let model): model.cancel()
+            case .signedOutCastle(let model): model.cancel()
+            case .account(let model): model.cancel()
+            case .signOut(let model): model.cancel()
             case .signIn: break
             }
         }

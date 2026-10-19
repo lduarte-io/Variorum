@@ -28,6 +28,9 @@ nonisolated struct RoadCrossingRequest: Sendable {
     let typed: TypedSecrets
     /// Use Castle's choice (Always ask where it is not asked).
     let gate: GateStyle
+    /// VX-308 U1: a sentence the crossing's receipt ends with (the signed-out road's — `ProtectionWords.bornCastleNote`);
+    /// nil: the door's receipt alone.
+    var receiptNote: String? = nil
 }
 
 /// What a press came to.
@@ -54,6 +57,9 @@ struct RoadCrossingRoads {
     var exportNoticeOwed: @MainActor () async -> Bool
     /// *OK* — the mark clears.
     var dismissExportNotice: @MainActor () -> Void
+    /// VX-308 U1 — the signed-out road's *Continue*: This Mac Only (rule 16's local leave), re-read at the press. nil: it
+    /// landed; else its refusal. (A test's roads that never reach the signed-out road keep this default refusal.)
+    var leaveForThisMacOnly: @MainActor () async -> String? = { ProtectionWords.crossingFailed }
 }
 
 // MARK: - One door's confirm
@@ -69,6 +75,8 @@ final class RoadCrossingConfirmModel: Identifiable {
     private(set) var busy = false
     /// Why the press did nothing (nil: nothing to say).
     private(set) var refusal: String?
+    /// VX-308 U1: the sentence the crossing's receipt ends with (the signed-out road's); nil: none.
+    @ObservationIgnored var receiptNote: String?
 
     @ObservationIgnored private let act: (RoadCrossingRequest) async -> RoadCrossingPress
     /// `.made` → the crossing landed (the export notice's flag); nil → she left (nothing written).
@@ -131,7 +139,7 @@ final class RoadCrossingConfirmModel: Identifiable {
             ? TypedSecrets(words: typedWords, newPassphrase: typedPassphrase)
             : TypedSecrets(passphrase: typedPassphrase, words: typedWords)
         let request = RoadCrossingRequest(
-            door: door.door, shown: door, typed: typed, gate: door.gate == nil ? .alwaysAsk : gate)
+            door: door.door, shown: door, typed: typed, gate: door.gate == nil ? .alwaysAsk : gate, receiptNote: receiptNote)
         busy = true
         refusal = nil
         let press = await act(request)
@@ -210,6 +218,12 @@ final class RoadCrossingsModel {
     /// (nothing while another protection sheet stands).
     func open(_ door: RoadCrossingDoor, on host: ProtectionSheetHost = .settings) {
         guard presenter.sheet == nil, let open = faces?.face(door).openDoor else { return }
+        presenter.present(.crossing(makeConfirm(open)), on: host)
+    }
+
+    /// A door's confirm (the one shape — VX-307 U2a's, unchanged): its close frees the presenter; a landed crossing owes
+    /// rule 11's notice when the export turned off; the doors are re-read.
+    private func makeConfirm(_ open: RoadDoorOpen, receiptNote: String? = nil) -> RoadCrossingConfirmModel {
         let roads = roads
         let presenter = presenter
         var id: UUID?
@@ -224,8 +238,38 @@ final class RoadCrossingsModel {
                 }
                 Task { await self.refresh() }
             })
+        confirm.receiptNote = receiptNote
         id = confirm.id
-        presenter.present(.crossing(confirm), on: host)
+        return confirm
+    }
+
+    /// VX-308 U1 (VX-264, R-1 as amended) — USE CASTLE WHILE SIGNED OUT: the signed-out screen on `host`. *Continue* runs
+    /// This Mac Only (the leave), re-reads the doors, and hands the floor to Use Castle's own confirm on the now-local
+    /// library (its receipt ending with `bornCastleNote`); a leave refused says so in the screen; *Cancel* writes nothing.
+    func openSignedOutRoad(on host: ProtectionSheetHost = .settings) {
+        guard presenter.sheet == nil, faces?.useCastle == .signedOutRoad else { return }
+        let roads = roads
+        let presenter = presenter
+        var id: UUID?
+        let screen = RoadSignedOutCastleModel(leave: { await roads.leaveForThisMacOnly() }) { [weak self] left in
+            guard let id else { return }
+            guard left, let self else {
+                presenter.dismiss(id)
+                return
+            }
+            Task {
+                await self.refresh()
+                guard let open = self.faces?.useCastle.openDoor else {
+                    // The library is no longer where Use Castle opens (it changed again meanwhile): the screen goes; the
+                    // pane shows the doors as they stand.
+                    presenter.dismiss(id)
+                    return
+                }
+                presenter.replace(id, with: .crossing(self.makeConfirm(open, receiptNote: ProtectionWords.bornCastleNote)))
+            }
+        }
+        id = screen.id
+        presenter.present(.signedOutCastle(screen), on: host)
     }
 
     /// The sheet's dismissal (a window closed under it) — the same as Cancel; a running press keeps its confirm.
