@@ -2005,6 +2005,17 @@ scratchpad). Commits: `9787475dc` (0) · `1a0c0d8ba` (1, the pin first) · `0a35
   mark adopted by the first reader because the state cannot be re-derived, the no-keyless-copy lock, the rest as the
   record states them).
 
+**THE U4 MAC BATCH + THE FOUR REVERTS (the orchestrator, 2026-10-19 09:08–09:55 MDT, stage claim `vx-308-u4-mac`,
+the coordinator's GO; logs `vx308-u4-*.log`, deleted at closeout):** 201 tests / 32 suites, ZERO real reds first run
+(the 3 expected witnesses). The red-on-old reverts, each applied by exact text, run, and restored `git checkout`-clean:
+**R-a** (the pre-VX-445 bootstrap lines) → RED across `RoadLockRouteTests` (all four) + the clipboard lock pin;
+**R-b** (the monitors' new-road arms removed) → RED at exactly `theMonitorsLockACastleLibraryOnItsSealedIdleMinutes
+AndAtSleep` — the orchestrator's FIRST R-b edit broke the file syntactically (a regex ate nested braces; compile
+error), that run DISCARDED AS INVALID and the revert redone with exact text (the machinery honesty line);
+**R-c** (the lock routing instead of the lobby) → RED at the four route pins; **R-d** (no wait on a running act) →
+RED at exactly the wait pin. The restored suites `✔ 6/2`; 0 instances at release. **U4 IS CLOSED but for the walk and
+the ladder — the implementer era of the phase is done.**
+
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
   `~/dev/variorum-vx-308`, branch pushed, in-flight row (holds the Sync/-custody slot) `969acce55` on main, Linear
@@ -2035,3 +2046,6 @@ scratchpad). Commits: `9787475dc` (0) · `1a0c0d8ba` (1, the pin first) · `0a35
   (KeyDoors.swift alone, red-on-old), VX-448's concealed clear-at-lock/quit clipboard, F-U2-3's say-before-mint line;
   200/42 under the stage with one source pin re-anchored. NEXT: U4 (the lock + the hold's gate), the last implementer
   batch; then the ladder, then the walk.
+- 2026-10-19 ~09:55 MDT — **U4 CLOSED but for the walk and the ladder**; the implementer era done (U1–U4 + VX-314
+  all built, batched under the stage, arbitrated). NEXT: THE LADDER round 1 — a fresh fable-reviewer over the phase's
+  whole diff (custody + the one Sync/ gate ⇒ Fable), notes/REVIEW_PROMPT.md verbatim, headless.
