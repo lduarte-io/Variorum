@@ -1,8 +1,10 @@
 # VX-307 — Castle rebuild, phase 3: the crossings' faces and the account's new shape (the `key_vault` lockstep)
 
-**Status: PLANNED — written 2026-10-18 at VX-306's closeout, to `notes/CastleRules.md` (the contract) and the lifecycle page.
-Kicks off at the author's word with `/architect-phase vx-307` (the crossings are face- and sitting-heavy, and the lockstep
-is hers to deploy).** The VX-307 TICKET'S BODY IS THE OLD DESIGN (the anchor, the rotation, VX-107/VX-109's lines) and is
+**Status: OPEN — kicked off 2026-10-18 ~18:45 MDT (`/architect-phase vx-307`, the author; worktree
+`~/dev/variorum-vx-307`, branch `vx-307-castle-crossings`; the in-flight row HOLDS the one Sync/-custody slot; the stage
+coordinator is `1018coordinator`, the slot granted 18:44 — stage protocol REQUEST/READY/GO/RELEASE, dev store 86a82b4f
+Standard on the new road, dark, restore hold standing). Originally written 2026-10-18 at VX-306's closeout, to
+`notes/CastleRules.md` (the contract) and the lifecycle page.** The VX-307 TICKET'S BODY IS THE OLD DESIGN (the anchor, the rotation, VX-107/VX-109's lines) and is
 SUPERSEDED by this plan where they differ — the core already holds every act to the rules (VX-378): `useCastle`,
 `useStandard`, `replaceAllKeys`, `follow`, `setUpSync`/`enroll`/`move`/`leaveAccount`, and the vault's new shape
 (`VaultModel`: the master under the passphrase and the words only, the MODE flag, the current sync key, the earlier sync
@@ -128,5 +130,96 @@ The lockstep with a Release client still on today's road (above — her call); t
 under a Castle entry (deletion reaching the Apple account — the simulator and the Pro share no Apple account for the dev
 scope: the walk sees one device); the one-write vault CAS under a real network.
 
-## 5. LIVE STATUS
-- not started.
+## 5. HER KICKOFF RULINGS (2026-10-18, the sitting at kickoff — question tool, her picks verbatim-faithful)
+
+- **The cast:** "Fable fork builds U1 (Recommended)" — a Fable FORK of the orchestrator (inherits the full preflight
+  context, runs as its own implementer session under the checkpoint protocol) implements U1; Opus implements U2 fresh as
+  ever; a fresh `fable-reviewer` per ladder round (every line here is custody or `Sync/`). The orchestrator keeps its own
+  context for walks, arbitration, the ladder and closeout.
+- **Riders:** "Plan's two only" — VX-380 and VX-406 ride only if their fix is one line in a touched suite; VX-152
+  (AppBootstrap.lock() reentrancy) was offered and stays on the board.
+- **Run shape:** "Overnight mandate" — U1 → U2 → walks → ladder → closeout continuously, PROVISIONAL-and-continue on
+  anything short of an author-only stop, everything bundled for her morning read (the #234 pattern). She may interject.
+- Standing from §1/§3a (already ruled, restated for the fork): the mirror deploy and the marker-13→14 bump WAIT for the
+  release carrying VX-329; the account faces are VX-308's (this phase is U1 + U2 + riders); VX-413 is REQUIRED here;
+  VX-412 builds the amended rules 2/3/7 (the words never shown before a click; a look mints fresh words; no lobby at
+  start).
+
+## 5a. U1 BRIEF — THE VAULT'S NEW SHAPE ON THE WIRE (the Fable fork; read with §1's lockstep paragraph and §2 U1)
+
+**The goal.** The core's `VaultModel`/`AccountVault` (rules 7, 11, 12, 14, 15 — the master under P and W only, the MODE
+flag, the current sync key, the earlier sync keys each under the current master, the key proof's hash, the last writer)
+gets its WIRE: the lockstep artifact written (NOT deployed), the fake server speaking the new shape, the production
+`VaultLeaf` replacing `UnreachableVaultLeaf` on the new road, the engine's sync-key custody reading
+`KeychainSyncKeysLeaf` on the new road, and the two-client convergence suites proving sync setup, the join, the follow
+into/out of Castle and the lagging device (rule 15). Tickets: VX-416 (the unit), VX-109 and VX-313's wire halves.
+
+**Hard limits (every one binding):**
+- `SyncEngine.lockstepVersion` (the client's marker) is UNTOUCHED — it stays 13. Her Release client keeps syncing; the
+  bump rides VX-329's release (her ruling, §1). The ARTIFACT bumps the mirror's marker to 14 when it eventually runs.
+- NO live network call lands anywhere in this unit's tests — the fake server only. The production leaf is wired on the
+  NEW ROAD only (Debug; the dev store binds no account, so no act reaches it live).
+- Today's road stays BYTE-UNCHANGED: `KeyVaultClient`'s existing methods, `KeyVaultFormat`, `CorpusRotation`'s
+  call sites, today's `SyncCustodyRecord`/`DeviceKeySyncProvider` custody — Release behavior identical by construction
+  (new files or new-road-gated lines only). The Release build check (`xcodebuild -configuration Release build`) runs
+  before the record closes.
+- Nothing from CastleRules' considered-and-not-pursued list: no rotation, no anchor, no re-seal of the account, no
+  Apple wrap in the vault. The sync key changes ONLY at a Castle entry, in ONE CAS write.
+- Keychain tests under throwaway scopes only (`KeychainTestTripwire`); no stage, no `xcodebuild test`, no Debug launch,
+  no dev-store touch — headless `swift build`/`swift test` + `xcodebuild build-for-testing` only; the Mac suites are the
+  orchestrator's to run under a stage claim after the record ends PENDING.
+- VX-306's §8 environment traps bind verbatim (checkpoint commits per piece, push after each, LIVE STATUS flips in the
+  same commit, PENDING on every unverified claim, foreground waits only, no subagents, `Part of VX-416` in messages).
+
+**The pieces (suggested order; the fork may re-cut at a clean seam, recording why):**
+1. **The SQL artifact `Server/supabase/17_phase_vx307_vault.sql`** (the 13y/13i-e shape: re-run guard keyed on marker 14
+   / a new column; additive where it can be). ARRIVES: `mode text` (nullable) and `earlier_row_keys` (nullable —
+   key-id → base64 wrap map, each under the CURRENT master). RETIRES-AS-UNREAD (left in place): `corpus_previous_key_id`,
+   `corpus_previous_wrapped_by_master`, `rotation_started_seq`, `master_wrapped_by_apple_held`, `apple_key_id`.
+   DROPPED: `sync_reencrypt` (the rotation's walk — rule 15's kept list replaces it). `key_vault_update` REDEFINED: the
+   rotation arms go (`VARIORUM_ROTATION_IN_PROGRESS`, `rotation_started_seq` assignment, `VARIORUM_ROTATION_ROWS_REMAIN`);
+   it stays the ONE CAS write under the challenge-verified proof (13y's protocol byte-unchanged, `key_proof_mac` arm for
+   a new hash included). The journal-bridge columns' NOT NULL relaxes (the bridge is retired; a new vault mints no bridge
+   key) — PROVISIONAL, record it. The mode backfill for pre-VX307 rows is decided by a PRE-WINDOW PROBE row in the
+   checklist (today's posture encoding: the Apple-held wrap present ⇒ Standard), never guessed in the artifact silently —
+   PROVISIONAL, record the chosen arm. Marker 13→14 at the artifact's end. The deploy checklist
+   `notes/plans/vx307-deploy-checklist.md` (the 13i-e shape) with every live-only row PENDING-until-live and the
+   choreography stated: the mirror runs ONLY in the VX-329 release window at her go; the client bump rides that release.
+2. **The fake server** (`Tests/.../ScriptedVaultServer` / the two-client harness's vault): the new row shape, CAS order
+   (proof before CAS — the pre-13x gate's order), `createVault` insert-with-proof, `updateVault` whole-row CAS, typed
+   refusals matching `VaultRefusal`.
+3. **The production vault leaf** — a core adapter (headless in both configurations, the `ProtectionLibraryFiles`
+   precedent) translating `AccountVault` ↔ the wire row over the PostgREST/RPC transport patterns (`KeyVaultClient`'s
+   auth posture: signed-out refuses before composing; one 401 refresh-retry; typed refusals; single-flight fetch), new
+   methods/types ADDITIVE beside today's (today's road untouched). A row without `mode` (pre-VX307) answers a typed
+   refusal, never a guess. `VaultRefusal` mapping total: conflict/proof/absent/exists/unreachable/notSignedIn.
+   The app's compose site (`ProtectionSystem.live`) swaps `UnreachableVaultLeaf` → the real leaf on the new road.
+4. **The sync keys' custody on the new road:** the engine's key provider reads `AccountKeys` from
+   `KeychainSyncKeysLeaf`/session memory for the bound account on the new road (today's `SyncCustodyRecord` road retires
+   THERE ONLY — P-VX306-K3's coexistence ends); `touchIDCandidates` wired from the record's bound account. Today's road
+   byte-unchanged.
+5. **The convergence suites** (two clients against the fake server, the engine's own harness): sync setup hands the pair
+   up (rule 7); the join adopts the account's pair + `wordsReplacedByAccount`; the follow into Castle (one secret, the
+   history grows, no quiet road survives); the quiet follow out (no secret, `followedOutOfCastle`); the lagging device
+   catching up on a replaced sync key (rule 15 — a row sealed under an earlier key still reads); VX-109's pin — a
+   concurrent Use Standard vs. Use Castle: the ONE-ROW CAS refuses the loser plainly (`revisionConflict`), nothing
+   silent; VX-313's wire half — the acts run sealed plans on the production leaf shapes (a tampered plan/keychain value
+   cannot steer custody; the core's seal checks pinned at the leaf seam).
+6. **Riders if one-line in a touched suite only:** VX-380, VX-406.
+
+**Evidence closing the unit:** the new suites green in BOTH configurations headless; the protection set green both
+configurations; `xcodebuild build-for-testing` green (Mac) and the mobile target builds; the Release build check green;
+the artifact + checklist committed with PENDING rows; the record's counts in §9-style form below (§6), every unverified
+claim PENDING. The Mac batch is the orchestrator's under the stage.
+
+## 6. RECORDS (each unit appends; the VX-306 §9 form)
+
+*(none yet)*
+
+## 7. LIVE STATUS
+- 2026-10-18 ~18:45 — KICKED OFF. Preflight complete (the orchestrator): CastleRules + SyncSpec whole, the lifecycle
+  stages, SurfaceContracts, VX-306 §8/§9 records + handoff, QUESTIONS #234 (ACCEPTED by this kickoff, her entry's own
+  sentence — the status flip rides the closeout merge), the board, the core acts/VaultModel/Assessment/leaves, today's
+  `key_vault` DDL + RPCs, `KeyVaultClient`. Her kickoff rulings in §5. The custody slot held; coordinator announced.
+- U1 (VX-416): BRIEFED (§5a) — the Fable fork spawning next. NOT STARTED.
+- U2 (VX-417): NOT STARTED — briefed after U1's record closes.
