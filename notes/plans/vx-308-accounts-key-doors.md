@@ -405,8 +405,17 @@ same ruling):**
   PROVISIONAL P-VX308-U1-1. Pins `RoadAccountWordsTests` (7: rule 16 ×2 and rule 7 ×2 against the rules file; the lead against
   the page; the sign-out copy; the signed-out screens as drafted; the third leave's pointer said once; no line shouts).
   HEADLESS `✔ Test run with 7 tests in 1 suite passed` (the harness stub gains `ProtectionCopy`'s three sign-out strings).
-- Piece 2 — THE ONE PRESENTER: NOT-STARTED (R-6). `ProtectionSheetPresenter` (shared, the bootstrap's); `RoadCrossingsModel`'s
-  `confirm` read from it. Pins `ProtectionSheetPresenterTests` (headless).
+- Piece 2 — THE ONE PRESENTER: DONE (this commit; R-6). `Shared/Protection/ProtectionSheetPresenter.swift`: one protection
+  sheet at a time (`present` refuses while one stands; `replace` hands the floor in place); presented ON a host scene
+  (`ProtectionSheetHost.settings`) and answered to that host alone (`sheet(for:)` — VX-243: never two windows); a sheet goes
+  only by its own id; the host's dismissal is the sheet's Cancel (a running act keeps its sheet); `libraryClosed()` drops the
+  standing sheet (VX-239 — the bootstrap calls it at every settled closed state, piece 6), and an act still running under it
+  finishes on its own road with no sheet. The Account sheet's request (`ProtectionSignInRequest`, R-5) hears its close.
+  `RoadCrossingsModel`: the confirm is presented THROUGH the presenter (`init(roads:presenter:)`, a pin's own presenter by
+  default; `confirm` read from it; `open(_:on:)`), its contents byte-unchanged. Pins `ProtectionSheetPresenterTests` (6).
+  HEADLESS, the whole harness (U2a's crossing suites unchanged and green through the presenter): `✔ Test run with 165 tests
+  in 26 suites passed`. The pane's sheet binding moves at piece 6 (U2a's `RoadCrossingSurfaceTests` source pin of the old
+  binding moves with it).
 - Piece 3 — THE ONE READ + THE LEAF'S SIGN-IN + THE ACCOUNT FACES: NOT-STARTED (R-2, R-3, R-4). Pins `RoadAccountFacesTests`
   (planted facts per situation) + the read over a planted vault.
 - Piece 4 — THE ACCOUNT ACTS ON THE SESSION: NOT-STARTED. Set-up (`setUpSync`) and the leaves (`leaveAccount`) on the open

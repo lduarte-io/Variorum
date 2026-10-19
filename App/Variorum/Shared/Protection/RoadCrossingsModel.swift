@@ -162,8 +162,12 @@ final class RoadCrossingConfirmModel: Identifiable {
 final class RoadCrossingsModel {
     /// The doors as `assess` last said them (nil until read, or with no library open on the new road).
     private(set) var faces: RoadCrossingFaces?
-    /// The one confirm in flight.
-    private(set) var confirm: RoadCrossingConfirmModel?
+    /// The one confirm in flight — VX-308 U1 (VX-239/VX-243): held by THE ONE PRESENTER (the bootstrap's, shared with the
+    /// account's doors), never here; read through it so a crossing's confirm and an account sheet can never both stand.
+    var confirm: RoadCrossingConfirmModel? {
+        if case .crossing(let model)? = presenter.sheet { return model }
+        return nil
+    }
     /// RULE 11's one notice — owed after an entry turned the scheduled export off; standing until OK or reversed. Its
     /// truth is the road's durable mark (re-read at each refresh — MAJOR-1), never this process's memory alone.
     private(set) var exportNotice = false
@@ -175,12 +179,15 @@ final class RoadCrossingsModel {
     private(set) var gateRefusal: String?
 
     @ObservationIgnored let roads: RoadCrossingRoads
+    /// VX-308 U1 — the one presenter the confirm is presented through (the bootstrap's; a pin's own when none is given).
+    @ObservationIgnored let presenter: ProtectionSheetPresenter
     /// Each re-read's number, and the newest that LANDED (an older read never lands over a newer one).
     @ObservationIgnored private var reads = 0
     @ObservationIgnored private var landed = 0
 
-    init(roads: RoadCrossingRoads) {
+    init(roads: RoadCrossingRoads, presenter: ProtectionSheetPresenter = ProtectionSheetPresenter()) {
         self.roads = roads
+        self.presenter = presenter
     }
 
     func refresh() async {
@@ -199,21 +206,26 @@ final class RoadCrossingsModel {
         if !owed { exportNoticeMessage = nil }
     }
 
-    /// A door's press on the pane: its confirm, from the door as last read.
-    func open(_ door: RoadCrossingDoor) {
-        guard confirm == nil, let open = faces?.face(door).openDoor else { return }
+    /// A door's press on the pane: its confirm, from the door as last read, presented on `host` through the one presenter
+    /// (nothing while another protection sheet stands).
+    func open(_ door: RoadCrossingDoor, on host: ProtectionSheetHost = .settings) {
+        guard presenter.sheet == nil, let open = faces?.face(door).openDoor else { return }
         let roads = roads
-        confirm = RoadCrossingConfirmModel(
+        let presenter = presenter
+        var id: UUID?
+        let confirm = RoadCrossingConfirmModel(
             door: open, act: { request in await roads.cross(request) },
             finished: { [weak self] press in
+                if let id { presenter.dismiss(id) }
                 guard let self else { return }
-                self.confirm = nil
                 if case .made(let exportTurnedOff)? = press, exportTurnedOff {
                     self.exportNotice = true
                     self.exportNoticeMessage = nil
                 }
                 Task { await self.refresh() }
             })
+        id = confirm.id
+        presenter.present(.crossing(confirm), on: host)
     }
 
     /// The sheet's dismissal (a window closed under it) — the same as Cancel; a running press keeps its confirm.
