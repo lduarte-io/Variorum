@@ -62,6 +62,8 @@ final class ProtectionSheetPresenter {
         case signOut(RoadSignOutModel)
         /// The Account sheet (sign in).
         case signIn(ProtectionSignInRequest)
+        /// VX-308 U3 — a key door's confirm (Change passphrase, Reset forgotten passphrase).
+        case keyDoor(RoadKeyDoorConfirmModel)
 
         var id: UUID {
             switch self {
@@ -70,6 +72,7 @@ final class ProtectionSheetPresenter {
             case .account(let model): return model.id
             case .signOut(let model): return model.id
             case .signIn(let request): return request.id
+            case .keyDoor(let model): return model.id
             }
         }
 
@@ -81,6 +84,7 @@ final class ProtectionSheetPresenter {
             case .account(let model): model.cancel()
             case .signOut(let model): model.cancel()
             case .signIn: break
+            case .keyDoor(let model): model.cancel()
             }
         }
     }

@@ -257,6 +257,9 @@ final class RoadStandingModel {
     /// sheet of the new road presents through (VX-239 + VX-243): handed to each open library's faces like the crossings.
     var account: RoadAccountModel?
     var sheets: ProtectionSheetPresenter?
+    /// VX-308 U3 — the key doors (the BOOTSTRAP's model, beside the crossings and the account section; it presents through
+    /// the one presenter): Change passphrase…, Reset forgotten passphrase…, and New Words' face for the words section.
+    var keyDoors: RoadKeyDoorsModel?
     /// VX-307 U2b — THE CARD ABOVE THE QUICK ENTRY (rules 2 and 3 as amended): the words' offer and rule 3's reminder,
     /// one card (`WordsBandModel`). nil where no factory built one (a test's hand-made faces).
     let band: WordsBandModel?

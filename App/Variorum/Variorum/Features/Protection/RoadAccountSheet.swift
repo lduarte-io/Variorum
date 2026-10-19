@@ -374,6 +374,9 @@ struct ProtectionSheetsHost: ViewModifier {
                 RoadAccountConfirmSheet(model: model)
             case .signOut(let model):
                 RoadSignOutSheet(model: model)
+            case .keyDoor(let model):
+                // VX-308 U3 — a key door's confirm (Change passphrase, Reset forgotten passphrase).
+                RoadKeyDoorSheet(model: model)
             case .signIn:
                 if let services {
                     AccountView(services: services, initialTab: .account)
