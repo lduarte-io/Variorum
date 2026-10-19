@@ -350,11 +350,20 @@ fetch, no network.
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton + the readings + the harness baseline: DONE (this commit).
-- Piece 1 — THE FAR PAIR LEG (+ the core `OwnCopies` rule it reads): NOT-STARTED — the settled design: R-U1a-1..3.
+- Piece 1 — THE FAR PAIR LEG (+ the core `OwnCopies` rule it reads): IN-PROGRESS. CORE DONE (`8e027494a`):
+  `Assess/OwnCopies.swift` — retention's one predicate moved there verbatim (`Retention.plan` reads it; `RetentionTests`
+  green unchanged), `of` / `summary` / `farPairIsDue`, `stampIsTrusted` restated byte-equal; pins `OwnCopiesTests` (5) —
+  with the retention + catalogue suites `✔ 18 tests in 5 suites`. MUTATIONS on `8e027494a` (each restored by `git
+  checkout --`, `cmp`-identical to `u1a-prerevert/OwnCopies.swift`): M-OC1 the `<mac8>` check dropped → `✘ … 80 issues`
+  (`RetentionTests.overASharedFolderNothingForeignIsPruned` 29 among them); M-OC2 the trusted-stamp check dropped from
+  the due-check → `✘ theFarPairIsDueUnless…` (the hour-ahead arm, 1 issue); M-OC3 the place filter dropped → `✘` the
+  container arm + the summary + the per-place counts (4 issues). APP PINS FIRST (this commit): `ProtectionFarPairTests` (8,
+  headless over `PlantedRoad(farFolder: true)` — `PlantedRoad` gains the far-folder init, every earlier suite's default
+  unchanged) RED ON THE PRE-FIX TREE: `✘ Test run with 8 tests in 1 suite failed … with 9 issues` (the four landing pins —
+  byte-for-byte, the second-pair due-ness, another Mac's fresh copy, own-fresh/stale/future; the four guard pins green by
+  design). The leg itself: NEXT.
 - Piece 2 — VX-397: the far due-check (piece 1's) + Data Safety's counts on the new road: NOT-STARTED — R-U1a-3, R-U1a-4.
 - Piece 3 — RETENTION WIRED (VX-302, VX-411): NOT-STARTED — R-U1a-5.
 - Piece 4 — VX-450 (Change/Reset roll back on a resume that cannot finish): NOT-STARTED — R-U1a-6.
 - Piece 5 — the close (counts, the Mac-suite list, PROVISIONALs, findings): NOT-STARTED.
-- MUTATIONS IN FLIGHT on the committed `8e027494a` (`Assess/OwnCopies.swift` only; restore = `git checkout --`, then `cmp`
-  against `u1a-prerevert/OwnCopies.swift` in this session's scratchpad): M-OC1 (the `<mac8>` check dropped), M-OC2 (the
-  trusted-stamp check dropped from the due-check), M-OC3 (the place filter dropped).
+- No revert is in flight.
