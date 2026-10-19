@@ -22,7 +22,20 @@ the WIRE are BUILT (VX-378 + VX-307 U1) — this phase is their FACES, the key d
 > refuses a mode-less row (`preLockstepRow`) BY DESIGN — so a live throwaway-account walk CANNOT run against the
 > production mirror. Her kickoff call is therefore: (a) the account arms stand on the two-client fake-server suites
 > alone (the VX-307 precedent), or (b) a SEPARATE throwaway Supabase project with the held artifact applied THERE
-> (her accounts and hands; the production mirror untouched). Hard limits otherwise as §5a's: no not-pursued items,
+> (her accounts and hands; the production mirror untouched). **THE ORCHESTRATOR'S RECOMMENDATION, HER STANDING
+> ACCEPTANCE AT THE VX-307 SETTLING SITTING PENDING HER KICKOFF WORD: (b), framed as the ARTIFACT'S DRESS REHEARSAL
+> first and the walk second** — three consecutive lockstep deploys (13j's 42702 parameter shadow, 13y's run-1 grant
+> refusal, 13i-a's missing definer DML grant) had LIVE-ONLY PL/pgSQL and grant findings the fake server cannot reach,
+> and artifact 17 has never run on real Postgres; a throwaway project catches that class now, cheaply, instead of at
+> VX-329's release window with her live client waiting. **The overnight-safe convention:** the kickoff session checks
+> `~/.variorum/dev-vault-throwaway.env` (expected keys: `VARIORUM_THROWAWAY_PROJECT_URL`,
+> `VARIORUM_THROWAWAY_ANON_KEY`, `VARIORUM_THROWAWAY_PAT`; values never committed or echoed — the dev-castle.env
+> discipline, and note the file's lines need `export` or the session exports explicitly). File PRESENT → run the
+> rehearsal (the artifact applied to the throwaway, every checklist row exercised, findings amended into the artifact)
+> and the account-arm walk against it, Debug-only, the vault client alone pointed there (the row-sync engine stays
+> off; the dev store's restore hold stands). File ABSENT → fake-server-only (option a), and the rehearsal lands as a
+> bundled morning item with the five-minute setup note. Either way the phase closes; the rehearsal is additive
+> evidence, never a gate she has to be awake for. Hard limits otherwise as §5a's: no not-pursued items,
 > both secrets where the rules say, keychain tests under throwaway scopes, headless + build-for-testing for
 > implementers, the orchestrator runs Mac suites and walks under the stage.
 
