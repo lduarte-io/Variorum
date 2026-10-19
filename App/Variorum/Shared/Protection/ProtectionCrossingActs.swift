@@ -105,9 +105,14 @@ nonisolated enum ProtectionCrossings {
         // P-VX307-U2a-3: this Mac's scheduled export IS the weekly copy's switch.
         facts.unlocked?.thisMac.settings.scheduledExport = exportSwitch.isOn()
         let assessment = assess(facts)
+        return RoadCrossingFaces.derive(facts, assessment, copyName: copyName(session, catalog: facts.catalog))
+    }
+
+    /// Rule 25's list: a catalogued copy named by its kind and day (nil when it is no longer catalogued) — Use Castle's door
+    /// and (VX-308 U2) a join into Castle name the same copies the same way.
+    static func copyName(_ session: ProtectionRoadSession, catalog: Catalog) -> (String) -> String? {
         let places = session.system.places
-        let catalog = facts.catalog
-        return RoadCrossingFaces.derive(facts, assessment) { id in
+        return { id in
             guard let copy = catalog.copies.first(where: { $0.id == id }) else { return nil }
             let day = ProtectionCopyDoors.asOf(copy, places: places).map { ProtectionWords.day($0) }
                 ?? ProtectionWords.offerUnknownDay

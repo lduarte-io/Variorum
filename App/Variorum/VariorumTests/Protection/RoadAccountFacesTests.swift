@@ -67,13 +67,15 @@ struct RoadAccountFacesTests {
         #expect(faces.signOut && !faces.signIn)
     }
 
-    /// The account already has its vault: turning sync on is a JOIN — U2's face; the honest not-yet line (R-4).
-    @Test func signedInWithAVaultTheJoinIsU2s() async throws {
+    /// The account already has its vault: turning sync on is a JOIN. FLIPPED DELIBERATELY at VX-308 U2 (U1's honest
+    /// not-yet line — R-4 — was U2's target): the join's own confirm now, ONE of the account's secrets (rule 14).
+    @Test func signedInWithAVaultTurningSyncOnIsTheJoin() async throws {
         let (_, vault, session) = try await library()
         try vault.plant(accountID: Account.account, passphrase: Account.passphrase,
                         words: try RecoveryPhrase.generate(), mode: .castle)
         let faces = try faces(try await Account.read(session, Account.signedIn))
-        #expect(faces.turnOnSync == .notYet(ProtectionWords.joinNotYet))
+        let join = try #require(faces.turnOnSync.openDoor)
+        #expect(join.door == .turnOnSync && join.ask == .oneSecret && join.spec.join == .entersCastle && join.rekeys)
     }
 
     /// The vault could not be read: said, never guessed as "no vault yet" (decision 35).

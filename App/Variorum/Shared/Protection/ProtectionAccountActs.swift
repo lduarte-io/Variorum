@@ -59,7 +59,7 @@ nonisolated enum ProtectionAccountRoad {
         defer { session.endAct() }
         // VX-108: the door as it stands NOW, read the way the shown one was.
         let read = await ProtectionPaneRead.read(session, signIn: signIn, exportSwitch: exportSwitch)
-        guard let faces = read.flatMap(ProtectionPaneRead.accountFaces) else {
+        guard let faces = read.flatMap({ ProtectionPaneRead.accountFaces($0, session: session) }) else {
             return .refused(ProtectionWords.crossingFailed)
         }
         switch faces.face(request.door) {
@@ -110,7 +110,7 @@ nonisolated enum ProtectionAccountRoad {
         guard session.beginAct() else { return ProtectionWords.copyDoorBusy }
         defer { session.endAct() }
         let read = await ProtectionPaneRead.read(session, signIn: signIn, exportSwitch: exportSwitch)
-        guard let faces = read.flatMap(ProtectionPaneRead.accountFaces) else { return ProtectionWords.crossingFailed }
+        guard let faces = read.flatMap({ ProtectionPaneRead.accountFaces($0, session: session) }) else { return ProtectionWords.crossingFailed }
         guard faces.thisMacOnly.openDoor != nil else { return ProtectionWords.crossingDoorClosed }
         switch await act(session, door: .thisMacOnly, typed: .none, signIn: signIn) {
         case .made: return nil
@@ -167,8 +167,15 @@ nonisolated enum ProtectionPaneRead {
         }
     }
 
-    /// The account section's faces from one read.
-    static func accountFaces(_ read: ProtectionPaneFacts) -> RoadAccountFaces? {
-        RoadAccountFaces.derive(read.facts, assess(read.facts), vault: read.vault)
+    /// The account section's faces from one read (`copyName`: rule 25's list at a join into Castle).
+    static func accountFaces(
+        _ read: ProtectionPaneFacts, copyName: (String) -> String? = { _ in nil }
+    ) -> RoadAccountFaces? {
+        RoadAccountFaces.derive(read.facts, assess(read.facts), vault: read.vault, copyName: copyName)
+    }
+
+    /// The account section's faces from one read over `session` (rule 25's copies named by the session's places).
+    static func accountFaces(_ read: ProtectionPaneFacts, session: ProtectionRoadSession) -> RoadAccountFaces? {
+        accountFaces(read, copyName: ProtectionCrossings.copyName(session, catalog: read.facts.catalog))
     }
 }

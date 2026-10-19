@@ -101,7 +101,7 @@ struct RoadAccountWordsTests {
             ProtectionWords.accountSameEmailDifferentAccount, ProtectionWords.accountSignInToTurnOnSync,
             ProtectionWords.turnOnSyncDoor, ProtectionWords.stopSyncingHereDoor, ProtectionWords.deleteAccountHereDoor,
             ProtectionWords.thisMacOnlyDoor, ProtectionWords.accountSignOutDoor, ProtectionWords.accountSignInDoor,
-            ProtectionWords.joinNotYet, ProtectionWords.moveNotYet, ProtectionWords.turnOnSyncTitle,
+            ProtectionWords.moveNotYet, ProtectionWords.turnOnSyncTitle,
             ProtectionWords.turnOnSyncLead, ProtectionWords.turnOnSyncPosture(.standard),
             ProtectionWords.turnOnSyncPosture(.castle), ProtectionWords.turnOnSyncNewPassphraseLead,
             ProtectionWords.turnOnSyncButton, ProtectionWords.turnOnSyncReceipt, ProtectionWords.stopSyncingTitle,

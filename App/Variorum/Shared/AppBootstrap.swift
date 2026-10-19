@@ -1339,7 +1339,7 @@ final class AppBootstrap {
                 guard let self, self.newRoad, case .ready = self.state, let session = self.roadSession else { return nil }
                 return await Task.detached(priority: .userInitiated) {
                     let read = await ProtectionPaneRead.read(session, signIn: signInNow(), exportSwitch: exports)
-                    return read.flatMap(ProtectionPaneRead.accountFaces)
+                    return read.flatMap({ ProtectionPaneRead.accountFaces($0, session: session) })
                 }.value
             },
             press: { [weak self] request in

@@ -92,15 +92,20 @@ struct ProtectionAccountRoadTests {
     }
 
     /// VX-108 — the door re-read at the press: another device turned sync on for the account meanwhile, so turning it on
-    /// here is now a join (U2's) — the press refuses, nothing written; with no one signed in it refuses too.
+    /// here is now a JOIN — the press re-shows the changed door, nothing written (FLIPPED DELIBERATELY at VX-308 U2: the
+    /// join's face exists now; U1 refused here, its door closed while the join was not yet built); with no one signed in
+    /// it refuses.
     @Test func theDoorIsReReadAtThePress() async throws {
         let world = try await world()
         let shown = try await shown(world, .turnOnSync, Account.signedIn)
         try world.vault.plant(accountID: Account.account, passphrase: "another device's", words: try RecoveryPhrase.generate(),
                               mode: .standard)
         let typed = TypedSecrets(words: world.words, newPassphrase: Account.passphrase)
-        #expect(try await press(world, .turnOnSync, Account.signedIn, typed: typed, shown: shown)
-            == .refused(ProtectionWords.crossingDoorClosed))
+        guard case .changed(let join) = try await press(world, .turnOnSync, Account.signedIn, typed: typed, shown: shown) else {
+            Issue.record("the door changed into the join — re-shown")
+            return
+        }
+        #expect(join.spec.join == .sameMode && join.ask == .oneSecret)
         #expect(try await press(world, .turnOnSync, .signedOut, typed: typed, shown: shown)
             == .refused(ProtectionWords.accountSignInToTurnOnSync))
         #expect(world.session.library.record?.account == nil && world.vault.accounts.count == 1)

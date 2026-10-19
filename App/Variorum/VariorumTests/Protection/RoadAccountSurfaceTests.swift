@@ -23,7 +23,7 @@ struct RoadAccountSurfaceTests {
             PlantedAccountRoads.faces(turnOnSync: .refused(ProtectionWords.accountSignInToTurnOnSync), signOut: false,
                                       signIn: true),
             PlantedAccountRoads.faces(),
-            PlantedAccountRoads.faces(turnOnSync: .notYet(ProtectionWords.joinNotYet)),
+            PlantedAccountRoads.faces(turnOnSync: .notYet(ProtectionWords.moveNotYet)),
             PlantedAccountRoads.faces(situation: .inSync(email: PlantedAccount.email), turnOnSync: .hidden,
                                       stopSyncing: .open(PlantedAccountRoads.leave(.stopSyncingHere))),
             PlantedAccountRoads.faces(situation: .signedOut, turnOnSync: .hidden,

@@ -506,8 +506,6 @@ nonisolated enum ProtectionWords {
     /// a set-up, two acts — the core's `move` joins an account that already syncs). The honest not-yet line (the
     /// `plaintextCopyNotYet` precedent; PROVISIONAL P-VX308-U2-6).
     static let moveNotYet = "Moving this library to that account isn't ready in this build yet."
-    /// U1's join not-yet line — retired when U2's join face lands (piece 2).
-    static let joinNotYet = "Joining an account that already syncs isn't ready in this build yet."
 
     /// Turn on sync — the first device hands its pair up (rule 7); the account takes the library's posture.
     static let turnOnSyncTitle = "Turn on sync"
