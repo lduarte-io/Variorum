@@ -1185,9 +1185,23 @@ Commits: `edbd86c14` (record) · `95bde6ea3` (1) · `a1a948c73` (2) · `6a0b5a05
   RENDERED but never clicked through the look (a look would replace the dev pair). If any row ever forces a dev-library
   look, `~/.variorum/dev-castle.env` is updated in the same window (the standing rule).
 
-### U2c RECORD — LOOK INSIDE'S COPY, THE WORDING, THE PANES, THE COPY-DOOR HAND-FORWARDS (Opus implementer, 2026-10-18 night; tickets VX-413 · VX-414 · VX-379's pane rows — IN PROGRESS)
+### U2c RECORD — LOOK INSIDE'S COPY, THE WORDING, THE PANES, THE COPY-DOOR HAND-FORWARDS (Opus implementer, 2026-10-18 night; tickets VX-413 · VX-414 · VX-379's pane rows — BUILT; the Mac suites and the walk PENDING)
 
-**Not done in U2c, first:** (filled at the close — PENDING)
+**Not done in U2c, first:**
+- **No Mac suite was RUN** (the brief: no stage, no `xcodebuild test`) — only BUILT (`build-for-testing` green on the
+  final tree). The list below is the orchestrator's. What DID run: the core (full Debug suite; the protection set in
+  both configurations) and this session's headless harness over the real `Shared/Protection/` files (144 / 23); the
+  Mac-only source pins' logic replicated in Python (green new, red old — piece 3).
+- **The walk was not done** (the orchestrator's — the rows below). No Debug app launched; the dev store, the real store
+  and `/Applications` untouched (the Release build check built into `DerivedData/vx307` only).
+- **VX-379 is NOT closed by this batch:** the field guide's Castle/backups chapters stay VX-379's own (the brief); the
+  pane rows were brought to the rules only where the words stay true of today's road (piece 3's principle) — the rows
+  KEPT are listed in piece 3 and retire with today's road at VX-329; the new road's own "what opens a backup" line
+  (rule 5) has no Data Safety face now that today's posture lines retire there (F-U2c-4).
+- **Look inside has no Touch ID road of its own** after the flip (P-VX307-U2c-3) — a Touch-ID-only copy opens at the
+  look by its secret (her pair opens her own copies — rules 4–5); a *Use Touch ID* door at the look is option (b).
+- **The phone has no Look inside** (P-VX306-U3-18 stands) — its road carries no copy door (`copyFullTextRoad` nil there).
+- **The canon deltas are the closeout's** (F-U2c-3).
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton: DONE (this commit).
@@ -1335,7 +1349,8 @@ Commits: `edbd86c14` (record) · `95bde6ea3` (1) · `a1a948c73` (2) · `6a0b5a05
   anOpenedCopyIsMadeMineWithOnePressNotTwo … with 3 issues` and app `✘ oneConfirmedPressReadsATouchIDItemOnce … with 1
   issue` (`touchIDReads == before + 1` — it read twice). Green again after: core 12/2, the harness `✔ Test run with 140
   tests in 22 suites passed`. Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **`.
-- Piece 5 — the close (counts both configurations, the Mac suite list, PROVISIONALs, findings): NOT-STARTED.
+- Piece 5 — the close: DONE (this commit) — the counts, the Mac suite list, the walk rows, the PROVISIONALs and the
+  findings below.
 
 **THE WORDS THIS BATCH LANDS (the pins read this block — `ProtectionWordsVX307Tests`; hers verbatim where ruled):**
 - **VX-414 — her two U2-7 sentences, VERBATIM from the ticket's body** (VX-414 read from the board 2026-10-18 — her
@@ -1369,6 +1384,204 @@ Commits: `edbd86c14` (record) · `95bde6ea3` (1) · `a1a948c73` (2) · `6a0b5a05
 > If it ever stops, your passphrase or your words open the library, and nothing was ever at risk. Castle is the one
 > promise that there is no quiet road through Apple, ever; it is a choice you can make in Settings.
 - No revert is in flight (piece 4's R1–R3 ran and were restored by `git checkout --`; `git status` clean).
+
+
+**THE BATCH AS BUILT (for the ladder):** VX-413 — the note page of Look inside's facts sheet carries *Copy full text*:
+`ProtectionCopyPeek.Reader.fullText(id:)` (core) runs Copy full text's own projection `Queries.variorumDocumentText` over
+the look's private READ-ONLY connection; `LookInsideModel.copyFullText()` reads it off the main actor and hands it to
+`CopyDoorsRoads.copyFullText` (the bootstrap's `AppBootstrap.copyFullTextRoad` — on the Mac `CopyForAI.put`, the ONE
+clipboard rule the live note's Copy full text now calls too; nil on the phone); the receipt in the sheet. The hand-forwards
+— the core's `makeThisMyLibrary(_:opened:copy:in:currentPair:)` (the act takes the preflight's opened key, re-verified
+by `copyKeyOpens`, never opening the copy twice), `Preflight.ready` carrying the look, `ProtectionCopyDoors.makeMine(opened:)`;
+`LookInsideModel.submit` handing `.withoutAPress`; the core `lookInside` with no `quietRoads` default. VX-414 — the
+split pair's face gone; `ProtectionWords.noKeyFileAfterAQuietOpen` on the Mac bar and the phone sheet; the report's
+`besideIsEmpty` and the card's `besideEmpty` choosing `offerBesideEmptyFromABackup` + *Use it?* for a backup offer over an
+empty place. VX-379's rows — `RootView`'s posture box gated to today's road; `DataSafetyPane(roadStanding:)` gating today's
+posture's backup lines and the new `DataSafetyCopy.restoringByTheDoor` lead, the Castle warning by
+`castleWarningShows(todaysPosture:roadPosture:)` over `RoadStandingModel.posture` (new); the checklist, the floors, the
+warning's words; the runbook doc re-synced; the readme's passage 2 and its re-anchored pin. ONE core file of acts changed
+(`Copies.swift` — the opened form + `copyKeyOpens` + the dropped default) and one core read (`ProtectionCopyPeek.swift`);
+ZERO `Sync/`, `Server/`, schema or dependency lines.
+
+**COUNTS (the final tree — `824cad782` + this record):**
+- Core, Debug, the full suite (`swift test`): VariorumCoreTests `✔ Test run with 3307 tests in 429 suites passed after
+  202.121 seconds.`; the third target `✔ Test run with 40 tests in 6 suites passed`; VariorumMCPTests (run alone with
+  `--filter VariorumMCPTests`) `✘ Test run with 383 tests in 71 suites failed … with 1 issue` — the ONE known wall-clock
+  flake `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (18.8 s vs 15 s);
+  `MCPHarnessTimeLimitTests` alone `✔ Test run with 3 tests in 1 suite passed after 2.171 seconds.`; no MCP line in this
+  diff (U1's and U2b's recorded flake).
+- Core, the protection set (every `@Suite` under `Tests/VariorumCoreTests/Protection` — 82 types): Debug `✔ Test run with
+  334 tests in 82 suites passed after 5.294 seconds.` (U2b's 331 + the peek's full text, the opened act, the dropped
+  default's source pin); Release (`swift test -c release`, the set as two halves — the long filter's release quirk) `✔
+  Test run with 139 tests in 39 suites passed` + `✔ Test run with 171 tests in 39 suites passed` = 310 in 78 (U2b's 307 +
+  3). `swift build -c release` (rule 24) green in that run.
+- HEADLESS HARNESS (this session's — not durable; U2a/U2b's recipe exactly: a scratch SwiftPM package, tools 6.2, macOS
+  26, `.defaultIsolation(MainActor.self)` + `NonisolatedNonsendingByDefault` + `InferIsolatedConformances` +
+  `MemberImportVisibility`, the worktree's core by path + swift-dependencies; its `Variorum` target SYMLINKS every
+  `Shared/Protection/*.swift` but `ProtectionBackupHook.swift` and `WireVaultLeaf.swift`, plus `Shared/LibraryOpenCopy
+  .swift`, plus one stub file (`ProtectionCopy`'s names, `DeviceName`, `BackupDestination`, `KeychainTestTripwire`,
+  `KeychainPartition`, `AppleKeyKeychain`, `AppleKey`, `AuthTokens` (with `email`)/`KeychainAuthStorage`,
+  `EncryptionSession.words`, a nil `WireVaultLeaf.live`); its tests symlink `ProtectionTestSupport`,
+  `ProtectionFacesSupport`, `ProtectionOpenRoadPlantedTests`, `ProtectionWordsPlanTests`, `ProtectionLobbyModelTests`,
+  `PassphraseReminderTests`, `ProtectionNoticeFaceTests`, `ProtectionOfferFaceTests`, `ProtectionWalkSwitchTests`,
+  `RoadCrossingFacesTests`, `ProtectionCrossingRoadTests`, `RoadCrossingModelTests`, `RoadRearmTests`,
+  `RoadCreationFaceTests`, `WordsBandTests`, `LookInsideRoadTests`, `CopyDoorsQuietProbeTests`, `MakeMineRoadTests`,
+  `CopyDoorsModelTests`, `PickedCopyRoadTests`, `CopyDoorsListRefreshTests`, `CopyDoorsPickRefreshTests`,
+  `ProtectionFileLeavesTests` (the baseline before this batch: `✔ Test run with 137 tests in 22 suites passed`) and this
+  batch's `ProtectionWordsVX307Tests` (+ a one-line `RoadWorld.RoadWorldError` stub)): **`✔ Test run with 144 tests in 23
+  suites passed after 2.072 seconds.`**
+- RED-ON-OLD / MUTATIONS (each on a committed tree, restored by `git checkout --`, `git status` clean): piece 4's R1 (4
+  issues), R2 (2), R3 (3 core + 1 app) — the record's piece 4; piece 2's variant arm off (1) and `besideIsEmpty` off (3);
+  piece 3's source pins' logic in Python — all seven checks red on the pre-piece tree.
+- `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx307
+  build-for-testing` → `** TEST BUILD SUCCEEDED **` (the final code tree; no new warning in a touched file — the one
+  `AppSettingsView.swift:1247` warning pre-exists, a line this batch didn't touch); the phone `-scheme VariorumMobile
+  -destination 'generic/platform=iOS Simulator' -configuration Debug -derivedDataPath DerivedData/vx307 build` → `**
+  BUILD SUCCEEDED **`; **the Release check `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration
+  Release -derivedDataPath DerivedData/vx307 build` → `** BUILD SUCCEEDED **`.**
+- Release behaviour: the new-road surfaces (Look inside's Copy, the one-press act, the flipped look, VX-414's faces) sit
+  behind the new road (`copyDoorsRoads()` and the interlude/bar/sheet are new-road only); `RootView`'s gate and Data
+  Safety's gates read `protectionFaces`/`roadStanding`, nil on today's road, so today's road renders every row it did.
+  TODAY's road's TEXT changes, by the brief ("legal and render in Release — they are text, not behavior"): the
+  restoring lead, the Castle warning's words, the checklist's names and notes, the floors' *and* (the RESTORE.md runbook
+  written into backup folders carries the floors — re-synced), and nothing else. The core's `lookInside` change is
+  compile-time (every caller passes the value it had); the secrets form of `makeThisMyLibrary` is unchanged.
+
+**THE MAC SUITES THE ORCHESTRATOR RUNS UNDER THE STAGE (from `App/Variorum/`; PENDING):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx307 test \
+  -only-testing:VariorumTests/LookInsideCopyDoorTests \
+  -only-testing:VariorumTests/ProtectionWordsVX307Tests \
+  -only-testing:VariorumTests/VX379PaneRowsTests \
+  -only-testing:VariorumTests/LookInsideRoadTests \
+  -only-testing:VariorumTests/CopyDoorsModelTests \
+  -only-testing:VariorumTests/MakeMineRoadTests \
+  -only-testing:VariorumTests/MakeMineRouteTests \
+  -only-testing:VariorumTests/PickedCopyRoadTests \
+  -only-testing:VariorumTests/CopyDoorsQuietProbeTests \
+  -only-testing:VariorumTests/CopyDoorsListRefreshTests \
+  -only-testing:VariorumTests/CopyDoorsPickRefreshTests \
+  -only-testing:VariorumTests/ProtectionOfferFaceTests \
+  -only-testing:VariorumTests/ProtectionNoticeFaceTests \
+  -only-testing:VariorumTests/ProtectionRule27FaceTests \
+  -only-testing:VariorumTests/ProtectionRestoreReceiptTests \
+  -only-testing:VariorumTests/ProtectionFacesRouteTests \
+  -only-testing:VariorumTests/ProtectionRoadRouteTests \
+  -only-testing:VariorumTests/ProtectionOpenRoadPlantedTests \
+  -only-testing:VariorumTests/ProtectionWordsPlanTests \
+  -only-testing:VariorumTests/ReadmeStartHerePlanTests \
+  -only-testing:VariorumTests/LaunchFurnitureTests \
+  -only-testing:VariorumTests/TutorialFurnitureFoldTests \
+  -only-testing:VariorumTests/RoadRearmTests \
+  -only-testing:VariorumTests/PassphraseReminderTests \
+  -only-testing:VariorumTests/ProtectionReminderRoadTests \
+  -only-testing:VariorumTests/ProtectionPaneRoadRowTests \
+  -only-testing:VariorumTests/RoadCrossingSurfaceTests \
+  -only-testing:VariorumTests/WordsBandSurfaceTests \
+  -only-testing:VariorumTests/ProtectionSurfaceRenderTests \
+  -only-testing:VariorumTests/ProtectionTierFaceTests \
+  -only-testing:VariorumTests/Phase13pCopySweepTests \
+  -only-testing:VariorumTests/DataSafetyRunbookTests \
+  -only-testing:VariorumTests/DocumentImportDoorTests \
+  -only-testing:VariorumTests/ICloudDriveOfferTests \
+  -only-testing:VariorumTests/VX209GuideWarningTests \
+  -only-testing:VariorumTests/LibraryPortabilityDoorTests \
+  -only-testing:VariorumTests/ShellChromeTests \
+  -only-testing:VariorumTests/TravellingDotsIndicatorTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/StatusSeamVocabularyTests \
+  -only-testing:VariorumTests/CapabilityRegistryTests \
+  -only-testing:VariorumTests/DeadVocabularyTests \
+  -only-testing:VariorumTests/KeychainTripwireTests \
+  -only-testing:VariorumTests/VX310TodayLobbyWitnessTests
+```
+The first three are U2c's NEW suites (3 + 4 + 4 = **11 tests**; `ProtectionWordsVX307Tests` also runs headless — 4
+green); then the suites a piece grew or adapted (`LookInsideRoadTests` +1 and its flipped pin, `CopyDoorsModelTests`
++1, `MakeMineRoadTests` +1 and two adapted, `PickedCopyRoadTests` adapted, `ProtectionOfferFaceTests`' retired derive
+pin, `ProtectionWordsPlanTests`' list, `ProtectionFacesRouteTests`' pattern, `ReadmeStartHerePlanTests` re-anchored,
+`Phase13pCopySweepTests`' warning words, `DataSafetyRunbookTests` over the re-synced runbook doc, `DocumentImportDoorTests`
+over `CopyForAI.put`); then every suite over a file this batch touched (the bootstrap's make-mine road — `MakeMineRouteTests`
+needs the signed host; the faces model, the interlude, the bar, the pane, Data Safety, `RootView`, the readme seeder) and
+the source pins over edited files. `VX310TodayLobbyWitnessTests` still reports its KNOWN ISSUES (a pass of either is a
+FAILURE); read the `skipped:` lines. **The optional red leg** for the posture box (a Mac-only source pin): `RootView`'s gate
+back to `if let protection {` → `VX379PaneRowsTests.thePostureBoxRendersOnTodaysRoadOnly` red — one line, restored by `git
+checkout`.
+
+**THE WALK ROWS (the orchestrator's, under a held stage claim; the DEV STORE only; light and dark where a face changed):**
+0. U2a's recipe row 0 (zero Debug instances by PATH; build; launch the binary with stderr captured; `source
+   ~/.variorum/dev-castle.env`).
+1. **VX-413.** Settings ▸ Data Safety ▸ the Restore list → a backup row's *Look inside…* (or File ▸ Open Library… on a
+   throwaway's folder) → the look → a note → the note page reads *Back* · *Copy full text* → press it → *Copied full
+   text.* under the door; paste into a scratch note's quick entry or TextEdit → the document format (`{t:"…"}` header,
+   the blocks, any Alternates section); the look still open, read-only; *Close* → the private folder gone (the `road: a
+   look inside a copy … read-only, nothing written` log line). Capture (light, dark). Optional: File ▸ Import… the pasted
+   text saved as a `.md` → the note comes back whole.
+2. **The hand-forwards (on a planted Touch-ID-only copy — optional; the pins carry them):** after U2a's stage 6 under
+   Touch ID, a look at a Castle-era backup with a WRONG secret typed → the refusal line, NO Touch ID prompt; Make this
+   my library with the copy's field wrong → ONE Touch ID prompt for the press (the act raises none).
+3. **VX-379's rows.** The sidebar on the new road: NO posture box (*Standard — Right now, only this Mac…* gone). Settings
+   ▸ Data Safety on the new road: no *Restoring is a Finder operation…* lead and no today's backup-posture lines; the
+   deletion sentences stand. In a new-road CASTLE library (U2a's stage 6) with the weekly copy switched on: the warning
+   *You're in Castle — and a scheduled plain-text copy on disk would undo Castle's promise: …* shows. (Today's road's
+   text — the restoring lead, the checklist, the floors — is the Release build's; her eye at the bundle.)
+4. **VX-414 (optional — needs the walk switch):** rule 27 after a quiet open and the empty-beside offer are planted-fact
+   states (`VARIORUM_WALK_FORGET=memory` + the live key file moved aside, a backup present → the interlude reads *There is
+   no key file beside your library. A backup holds one that opens it. Use it?*; *Use it* puts it back). Restore the dev
+   store's posture after (her standing rule).
+
+**PROVISIONALs (each built as its option (a); for the orchestrator to bundle under QUESTIONS at the closeout):**
+- **P-VX307-U2c-1 — where Look inside's Copy receipt is said.** (a) BUILT — in the sheet, under the door (the sheet is where
+  she is; a window's status seam may sit behind it, and with no library open — the missing face, rule 27's lobby — none
+  exists); (b) the status seam's receipt (`receipt_style` governing) where one exists; (c) both.
+- **P-VX307-U2c-2 — the Copy door's one added line** *Variorum couldn't read this note's full text from the copy just
+  now.* (the door's name and its other two sentences are a live note's Copy full text's own). (b) blank until her
+  sitting; (c) other words.
+- **P-VX307-U2c-3 — Look inside has no Touch ID road after the flip.** (a) BUILT — the typed *Open* hands `.withoutAPress`;
+  a copy only this Mac's Touch ID item opens is opened at the look by its own secret (her pair opens her own copies,
+  rules 4–5); Touch ID is pressed only at Make this my library's confirmed press, once; (b) a *Use Touch ID* door in the
+  look's ask, shown only where this Mac holds a Touch ID item for the copy's key (rule 17's "its own quiet road on this
+  Mac" kept whole); (c) the typed *Open* with an EMPTY field presses Touch ID.
+- **P-VX307-U2c-4 — U2-7 (2)'s composition.** (a) BUILT — the ticket's two sentences, then her sentence's question: *There is
+  no key file beside your library. A backup holds one that opens it. Use it?* (the backup's day said in the receipt
+  *Key file restored from the backup from <date>.*); (b) the second sentence carrying the day (*The backup from <date>
+  holds one that opens it.*) — rule 21's "saying where"; (c) the ticket's two sentences then her whole backup sentence.
+- **P-VX307-U2c-5 — the readme's Start Here passage 2** (the readme is hers): *Write down your twelve words. Every library
+  has twelve words from the moment it is made, and they open it for as long as they are its words. Variorum never keeps
+  them, so it shows them only when you ask — from the card above the quick entry, at the end of the tour, or any time in
+  Settings ▸ Protection — and each look makes new ones for you to write down. Your library's key doesn't change.* (b)
+  blank until her sitting; (c) other words.
+- **P-VX307-U2c-6 — the Castle warning on the new road reads the OPEN library's posture** (U2a's F-6). (a) BUILT —
+  `castleWarningShows`: the new road's record mode there, today's posture on today's road; (b) the warning on today's road
+  only (a new-road Castle library unwarned at the weekly copy's switch); (c) (a) plus the switch writing the sealed
+  setting on the new road (U2a's P-VX307-U2a-3 (b)).
+- **P-VX307-U2c-7 — piece 3's reworded today's-road lines** (each in the rules' words, each true of today's road): the
+  restoring lead; the Castle warning; the checklist's *Twelve words* / *Your Apple account* names and their notes, the
+  passphrase's *opens this library, …*; the floors' *and*. (b) today's words kept until VX-329 (the VX-306 words pass's
+  position); (c) a wider pass (the current-state lines, the cards, *Encryption passphrase* everywhere) — VX-379's.
+
+**FINDINGS AND HAND-FORWARDS (routed, not fixed here):**
+- **F-U2c-1 (her U2-7 (1), for her eye — built byte-equal as ruled):** the banner after a quiet open with no key file
+  anywhere advises *Make a backup now, so a copy exists.* — in exactly that state the new road's backup PAIR cannot be
+  taken (`ProtectionBackupHook.takePair` needs a live key file of the current key → `.noKeyFileOfTheKey`, logged *none
+  taken*); today's flat backup still copies the library file, which no key file opens. Options for her: keep (the
+  sentence is hers), or a variant once the new road can re-make a key file from the key in hand (rule 1's redundancy — a
+  design question, not this batch's).
+- **F-U2c-2 (P-VX307-U2c-4's fact):** U2-7 (2)'s sentence no longer names WHICH backup holds the file; the receipt does.
+- **F-U2c-3 (canon, the closeout's):** SurfaceContracts' "Library protection" line — Look inside's facts sheet gains
+  *Copy full text* on a note's page (the Copy full text format, nothing written); "Doors to the outside"'s Import and
+  Copy full text bullet may name Look inside's door too. AppSpec untouched.
+- **F-U2c-4 (VX-379's remainder):** on the new road Data Safety has no "what opens a backup" sentence now that today's
+  posture lines retire there — rule 5's sentence is the natural one (unruled words; the field-guide pass's).
+- **F-U2c-5 (her §7c (3) words, for her eye):** the account-road sentence after the after-open banner (*… to bring your
+  writing back.*) reads oddly over a library that just opened too — her words, not ruled to change.
+- **F-U2c-6 (the phone):** no Look inside, so no Copy door there (P-VX306-U3-18) — the MOBILE PARITY line.
+
+**Notes:** no machinery deaths; no Sonnet lookup; no subagents; no scratch worktree (`git worktree list`: main, mobile,
+this worktree). Every revert and mutation ran on a committed tree and was restored by `git checkout --`. The ticket
+VX-414's wording was read from the board (read-only) — its body is quoted in the words block above, the pins' source.
+Commits: `4d14e4047` (record) · `2cf931f0e` (1) · `7f521bcbb` (4) · `4df309746` (the reverts named) · `03606cfa8` (4
+record) · `0eba2d245` (2) · `d50b4dc72` (2 record) · `824cad782` (3) · the close commit.
 
 ## 7. LIVE STATUS
 - 2026-10-18 ~18:45 — KICKED OFF. Preflight complete (the orchestrator): CastleRules + SyncSpec whole, the lifecycle
@@ -1410,5 +1623,14 @@ Commits: `edbd86c14` (record) · `95bde6ea3` (1) · `a1a948c73` (2) · `6a0b5a05
   first. Core full Debug + the protection set both configurations green; the harness 101/14; Mac `build-for-testing`,
   the phone build and the Release build check green. The Mac suites (21 new tests + the touched suites — the record's
   list) and the walk PENDING — the orchestrator's, under the stage.
-- U2c (VX-413 · VX-414 · VX-379's pane rows · the VX-306 copy-door hand-forwards): IN PROGRESS (the Opus implementer,
-  2026-10-18 night — the §6 U2c RECORD).
+- U2c (VX-413 · VX-414 · VX-379's pane rows · the VX-306 copy-door hand-forwards): BUILT (the §6 U2c RECORD — the Opus
+  implementer, 2026-10-18 night): Look inside's note page copies the note's full text (Copy full text's own projection,
+  nothing written); Make this my library presses Touch ID once (the act takes the preflight's opened key — a core
+  overload); the look's typed Open never falls through to Touch ID (the flip-target flipped); the core `lookInside`
+  carries no prompting default; VX-414's split pair dropped and her two U2-7 sentences byte-equal; VX-379's pane rows on
+  today's road only, in the rules' words where true there (the posture box, Data Safety's lead and backup lines, the
+  Castle warning reading the open library's posture, the checklist and floors); the readme's passage 2 and its pin
+  re-anchored. Core full Debug + the protection set both configurations green; the harness 144/23; Mac
+  `build-for-testing`, the phone build and the Release build check green. The Mac suites (11 new tests + the touched
+  suites — the record's list) and the walk rows PENDING — the orchestrator's, under the stage. PROVISIONALs
+  P-VX307-U2c-1..7; findings F-U2c-1..6 (F-U2c-1 for her eye).
