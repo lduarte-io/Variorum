@@ -1334,9 +1334,16 @@ final class AppBootstrap {
                     await ProtectionCrossings.turnExportBackOn(session, exportSwitch: exports)
                 }.value
             },
-            // MAJOR-1: rule 11's notice is the durable mark's, re-read at each refresh; *OK* clears it.
-            exportNoticeOwed: { exports.noticeOwed() },
-            dismissExportNotice: { ProtectionCrossings.dismissExportNotice(exportSwitch: exports) },
+            // MAJOR-1: rule 11's notice is the durable mark's, re-read at each refresh; *OK* clears it. VX-308 U4
+            // (NIT-R2-1): the OPEN library's mark — another library's unanswered notice is never this pane's, nor cleared here.
+            exportNoticeOwed: { [weak self] in
+                guard let libraryID = self?.roadSession?.library.record?.libraryID else { return false }
+                return exports.noticeOwed(libraryID)
+            },
+            dismissExportNotice: { [weak self] in
+                ProtectionCrossings.dismissExportNotice(
+                    exportSwitch: exports, libraryID: self?.roadSession?.library.record?.libraryID)
+            },
             // VX-308 U1 (VX-264, R-1 as amended): the signed-out road's Continue — This Mac Only, re-read at the press.
             leaveForThisMacOnly: { [weak self] in
                 guard let self, self.newRoad, case .ready = self.state, let session = self.roadSession else {
@@ -1557,16 +1564,16 @@ final class AppBootstrap {
 
     /// The weekly plain-text copy's switch (`MarkdownInsurance`) over a defaults domain — nil: this Mac's standard
     /// defaults (production); a test bootstrap names its own suite.
+    /// VX-307 ladder round 1 (MAJOR-1) — rule 11's notice owed, beside the weekly copy's switch (this Mac's defaults; a
+    /// boolean, never a secret). VX-308 U4 (NIT-R2-1): ONE PER LIBRARY (`ExportNoticeMark` — the key carries the library's
+    /// id; an earlier build's unkeyed mark migrates at its first consult).
     nonisolated static func markdownInsuranceSwitch(suiteName: String?) -> ScheduledExportSwitch {
-        let owedKey = exportNoticeOwedKey
         guard let suiteName else {
             return ScheduledExportSwitch(
                 isOn: { MarkdownInsurance.isEnabled(in: .standard) },
                 set: { MarkdownInsurance.setEnabled($0, in: .standard) },
-                noticeOwed: { UserDefaults.standard.bool(forKey: owedKey) },
-                setNoticeOwed: { owed in
-                    if owed { UserDefaults.standard.set(true, forKey: owedKey) } else { UserDefaults.standard.removeObject(forKey: owedKey) }
-                })
+                noticeOwed: { ExportNoticeMark.owed($0, in: .standard) },
+                setNoticeOwed: { libraryID, owed in ExportNoticeMark.set(libraryID, owed: owed, in: .standard) })
         }
         // A named suite only — never falls back to the app's domain (a suite that can't be made reads off, writes nothing).
         return ScheduledExportSwitch(
@@ -1574,16 +1581,14 @@ final class AppBootstrap {
             set: { value in
                 if let suite = UserDefaults(suiteName: suiteName) { MarkdownInsurance.setEnabled(value, in: suite) }
             },
-            noticeOwed: { UserDefaults(suiteName: suiteName)?.bool(forKey: owedKey) ?? false },
-            setNoticeOwed: { owed in
+            noticeOwed: { libraryID in
+                UserDefaults(suiteName: suiteName).map { ExportNoticeMark.owed(libraryID, in: $0) } ?? false
+            },
+            setNoticeOwed: { libraryID, owed in
                 guard let suite = UserDefaults(suiteName: suiteName) else { return }
-                if owed { suite.set(true, forKey: owedKey) } else { suite.removeObject(forKey: owedKey) }
+                ExportNoticeMark.set(libraryID, owed: owed, in: suite)
             })
     }
-
-    /// VX-307 ladder round 1 (MAJOR-1) — rule 11's notice owed, beside the weekly copy's switch (this Mac's defaults; a
-    /// boolean, never a secret).
-    nonisolated static let exportNoticeOwedKey = "variorum.protection.exportOffNoticeOwed"
 
     /// A test bootstrap's scheduled-export domain — never the app's.
     nonisolated static let crossingTestExportSuiteName = "io.lduarte.Variorum.vx307-crossing-tests"

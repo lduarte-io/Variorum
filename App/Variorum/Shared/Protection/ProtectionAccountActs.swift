@@ -186,7 +186,10 @@ nonisolated enum ProtectionAccountRoad {
         let executor = session.executor
         var library = session.library
         let entersCastle = shown.follow == .intoCastle || shown.spec.join == .entersCastle
-        let markedHere = entersCastle ? exportSwitch.map(ProtectionCrossings.markCastleEntry) ?? false : false
+        // VX-308 U4 (NIT-R2-1): rule 11's mark is THIS library's (an account act never changes the library's id).
+        let libraryID = library.record?.libraryID
+        let markedHere = entersCastle
+            ? exportSwitch.map { ProtectionCrossings.markCastleEntry($0, libraryID: libraryID) } ?? false : false
         var acted: ActOutcome?
         do {
             if entersCastle, let exportSwitch,
@@ -214,7 +217,7 @@ nonisolated enum ProtectionAccountRoad {
             if ProtectionLibraryFiles.opens(slot, key: oldKey) {
                 // Nothing swapped — the library stands under its old key (rolled back, or an act stopped mid-plan that
                 // the next open settles — rule 20); no export notice.
-                if markedHere { exportSwitch?.setNoticeOwed(false) }
+                if markedHere, let libraryID { exportSwitch?.setNoticeOwed(libraryID, false) }
                 let unfinished = library.section.actInFlight != nil
                 ProtectionOpenRoad.log(
                     "road: \(door.rawValue) did not land\(unfinished ? " — its act stays in flight; the next open settles it" : "")"

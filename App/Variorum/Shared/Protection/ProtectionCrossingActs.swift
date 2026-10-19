@@ -52,8 +52,45 @@ nonisolated struct ScheduledExportSwitch: Sendable {
     /// on*, or a ready that finds the library not in Castle. So neither a crash past the swap nor a quit before *OK* can
     /// lose the notice, and the ready's reconcile (`ProtectionCrossings.reconcileExport`) knows an entry is owed its
     /// follow — never inferring it from "Castle + the switch on", which is also her own later choice.
-    var noticeOwed: @Sendable () -> Bool
-    var setNoticeOwed: @Sendable (Bool) -> Void
+    /// VX-308 U4 (NIT-R2-1): the mark is BY LIBRARY — `libraryID` names the library the entry was made in (the record's),
+    /// so a ready of ANOTHER library standing in the slot (Make this my library; a library moved in by hand) never clears
+    /// a notice she has not answered; the not-in-Castle clear fires only for the library that wrote it.
+    var noticeOwed: @Sendable (_ libraryID: String) -> Bool
+    var setNoticeOwed: @Sendable (_ libraryID: String, _ owed: Bool) -> Void
+}
+
+/// VX-308 U4 (NIT-R2-1) — RULE 11's durable mark in this Mac's defaults, ONE PER LIBRARY (the per-library ledger idiom,
+/// `variorum.calmAsks.<topic>.<libraryID>.*` — `PassphraseReminderLedger`, `WordsCardLedger`): a boolean, never a secret.
+/// The production switch reads and writes it here (`AppBootstrap.markdownInsuranceSwitch`); a test's suite rides it too.
+nonisolated enum ExportNoticeMark {
+    /// The library's own key.
+    static func key(_ libraryID: String) -> String { "variorum.calmAsks.exportOffNotice.\(libraryID).owed" }
+    /// The one-per-defaults-domain mark VX-307's MAJOR-1 wrote (before the mark was by library) — MIGRATED, never read as
+    /// anyone's after the first consult.
+    static let legacyKey = "variorum.protection.exportOffNoticeOwed"
+
+    /// The notice owed for `libraryID` (the legacy mark adopted first — `adoptLegacy`).
+    static func owed(_ libraryID: String, in defaults: UserDefaults) -> Bool {
+        adoptLegacy(libraryID, in: defaults)
+        return defaults.bool(forKey: key(libraryID))
+    }
+
+    /// The mark written or cleared for `libraryID` (the legacy mark adopted first).
+    static func set(_ libraryID: String, owed: Bool, in defaults: UserDefaults) {
+        adoptLegacy(libraryID, in: defaults)
+        if owed { defaults.set(true, forKey: key(libraryID)) } else { defaults.removeObject(forKey: key(libraryID)) }
+    }
+
+    /// THE MIGRATION (the record's R-U4-4): an unkeyed mark left by an earlier build is adopted by the FIRST library whose
+    /// mark is consulted — the reconcile at the first ready on the new road, before any pane or press reads it; and the
+    /// library standing at the first ready after an entry is the one that entered (the round-2 ordering: the switch-off
+    /// always lands before any other library can stand at ready) — then the legacy key is gone. Notice-visibility only:
+    /// the switch-off never depended on the mark's key.
+    static func adoptLegacy(_ libraryID: String, in defaults: UserDefaults) {
+        guard defaults.object(forKey: legacyKey) != nil else { return }
+        if defaults.bool(forKey: legacyKey) { defaults.set(true, forKey: key(libraryID)) }
+        defaults.removeObject(forKey: legacyKey)
+    }
 }
 
 /// What the press's preflight found.
@@ -184,8 +221,10 @@ nonisolated enum ProtectionCrossings {
         var library = session.library
         let executor = session.executor
         var acted: ActOutcome?
-        // MAJOR-1: the notice is owed BEFORE anything moves (a crash anywhere after this still finds the mark).
-        let markedHere = door == .useCastle ? markCastleEntry(exportSwitch) : false
+        // MAJOR-1: the notice is owed BEFORE anything moves (a crash anywhere after this still finds the mark) — VX-308 U4
+        // (NIT-R2-1): THIS library's mark (a crossing never changes the library's id).
+        let libraryID = library.record?.libraryID
+        let markedHere = door == .useCastle ? markCastleEntry(exportSwitch, libraryID: libraryID) : false
         do {
             if door == .useCastle {
                 // P-VX307-U2a-3: the switch into this Mac's sealed settings first, so the act's own step turns it off.
@@ -202,7 +241,7 @@ nonisolated enum ProtectionCrossings {
             session.library = library
             if ProtectionLibraryFiles.opens(slot, key: oldKey) {
                 // Nothing swapped — the library stands as it was (the core rolled the act back, rule 20); no notice.
-                if markedHere { exportSwitch.setNoticeOwed(false) }
+                if markedHere, let libraryID { exportSwitch.setNoticeOwed(libraryID, false) }
                 ProtectionOpenRoad.log("road: \(door.rawValue) did nothing — \(String(describing: error))")
                 return CrossingResult(outcome: .refused(RoadCrossingFaces.actRefusalSentence(error)), reopenKey: oldKey)
             }
@@ -225,10 +264,11 @@ nonisolated enum ProtectionCrossings {
 
     /// RULE 11 BEFORE AN ACT THAT ENTERS CASTLE (Use Castle; VX-308 U2 — a join into a Castle account, the follow into
     /// Castle): the notice owed DURABLY before anything moves (MAJOR-1) whenever the weekly switch is on and no notice is
-    /// owed yet. True when the mark was written HERE (an act refused before anything swapped clears it).
-    static func markCastleEntry(_ exportSwitch: ScheduledExportSwitch) -> Bool {
-        guard exportSwitch.isOn(), !exportSwitch.noticeOwed() else { return false }
-        exportSwitch.setNoticeOwed(true)
+    /// owed yet. True when the mark was written HERE (an act refused before anything swapped clears it). VX-308 U4
+    /// (NIT-R2-1): the mark is the entering library's (`libraryID` — the record's; none, no mark).
+    static func markCastleEntry(_ exportSwitch: ScheduledExportSwitch, libraryID: String?) -> Bool {
+        guard let libraryID, exportSwitch.isOn(), !exportSwitch.noticeOwed(libraryID) else { return false }
+        exportSwitch.setNoticeOwed(libraryID, true)
         return true
     }
 
@@ -259,11 +299,13 @@ nonisolated enum ProtectionCrossings {
     ///   - in Castle with the sealed export OFF → the core's step ran (in-process, or at a settle's resume after a crash)
     ///     — the switch follows it off; the notice stays owed until *OK* or *Turn it back on*.
     /// True when it turned the switch off HERE (the crash corner: the in-process tail never ran).
+    /// VX-308 U4 (NIT-R2-1): only THIS library's mark is read and cleared — a ready of another library standing in the slot
+    /// leaves a notice the entering library still owes her (the not-in-Castle clear fires only for the library that wrote it).
     @discardableResult
     static func reconcileExport(_ library: UnlockedLibrary, exportSwitch: ScheduledExportSwitch) -> Bool {
-        guard exportSwitch.noticeOwed() else { return false }
+        guard let libraryID = library.record?.libraryID, exportSwitch.noticeOwed(libraryID) else { return false }
         guard library.record?.mode == .castle else {
-            exportSwitch.setNoticeOwed(false)
+            exportSwitch.setNoticeOwed(libraryID, false)
             ProtectionOpenRoad.log("road: rule 11's notice no longer owed (the library is not in Castle)")
             return false
         }
@@ -273,9 +315,11 @@ nonisolated enum ProtectionCrossings {
         return true
     }
 
-    /// *OK* on rule 11's notice — the mark clears (nothing else changes).
-    static func dismissExportNotice(exportSwitch: ScheduledExportSwitch) {
-        exportSwitch.setNoticeOwed(false)
+    /// *OK* on rule 11's notice — the open library's mark clears (nothing else changes). VX-308 U4 (NIT-R2-1): `libraryID`
+    /// is the open library's (none — nothing to clear).
+    static func dismissExportNotice(exportSwitch: ScheduledExportSwitch, libraryID: String?) {
+        guard let libraryID else { return }
+        exportSwitch.setNoticeOwed(libraryID, false)
     }
 
     // MARK: - Rule 11's notice, reversed
@@ -296,7 +340,7 @@ nonisolated enum ProtectionCrossings {
         }
         session.library = library
         exportSwitch.set(true)
-        exportSwitch.setNoticeOwed(false)
+        if let libraryID = library.record?.libraryID { exportSwitch.setNoticeOwed(libraryID, false) }
         ProtectionOpenRoad.log("road: the scheduled plain-text export turned back on (her call)")
         return true
     }
