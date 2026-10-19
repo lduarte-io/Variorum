@@ -198,8 +198,9 @@ indirect enum LFact: Sendable {
     /// One lock re-made under a new secret; the key the same.
     case lockRelocked(LLock)
     /// Nothing else changes: every other lock, this Mac's items and the Apple
-    /// keys exactly as before the stage.
-    case nothingElseChanges(except: LLock)
+    /// keys exactly as before the stage. (VX-307 U2b: a list — the tour's end
+    /// re-makes the passphrase lock AND the words lock.)
+    case nothingElseChanges(except: [LLock])
     /// The live key file's history holds these named keys (rule 4).
     case historyCarries([String])
     // This Mac's keychain.
@@ -225,9 +226,13 @@ indirect enum LFact: Sendable {
     case sealedKeyFileCopy
     /// This Mac's device ID for the library: a plain random value made now.
     case newPlainRandomDeviceID
-    /// The twelve words: shown once (handed back by the door), opening the key
-    /// file, and stored nowhere.
+    /// The twelve words: shown once (the look's — handed back by the door at
+    /// the stage), opening the key file, and stored nowhere.
     case wordsShownOnce
+    /// VX-307 U2b (rules 2–3 as amended): the creation's twelve words — handed
+    /// back by the door, shown to no one (the first open has nothing in front of
+    /// it) — open the key file and are stored nowhere.
+    case wordsStoredNowhere
     // Copies.
     /// No backup exists yet.
     case noBackups
@@ -455,9 +460,9 @@ enum Lifecycle {
         // MARK: 1
         LStage(
             number: 1, title: #"You create a library"#, posture: .standard, postureLabel: #"Standard"#,
-            road: "createLibrary with no passphrase (rule 2: twelve words always)",
+            road: "createLibrary with no passphrase (rule 2: twelve words always — never shown before the first screen)",
             rows: [
-                LRow(term: #"What happens"#, content: .text(#"A random key is made. The key file is written beside the library, with the key locked under your <b>twelve words</b> and under this Mac's quiet roads. The words are shown once: "write these down now". A sealed copy of the key file goes into this Mac's keychain. A plain random device ID is written [1, 2, 23]."#)),
+                LRow(term: #"What happens"#, content: .text(#"A random key is made. The key file is written beside the library, with the key locked under its <b>twelve words</b> and under this Mac's quiet roads. Nothing is shown: the first open is the Bookcase and the quick entry with nothing in front of them, and the card above the quick entry offers the words until you record them or dismiss it. A sealed copy of the key file goes into this Mac's keychain. A plain random device ID is written [1, 2, 23]."#)),
                 LRow(term: #"Opens the library"#, content: .chips(.library, [
                     LChip(road: .typed(.words, .today), state: .opens, label: #"twelve words"#),
                     LChip(road: .apple(.itsOwnLock), state: .opens, label: #"Apple road"#),
@@ -465,17 +470,22 @@ enum Lifecycle {
                 ])),
                 LRow(term: #"Backups so far"#, content: .text(#"none"#)),
             ],
-            note: #"Until you set a passphrase, the app reminds you — at the third launch, weekly twice, then with "don't show again", and always before your first backup [3]."#,
+            note: #"Until you set a passphrase, the card above the quick entry reminds you — at the third launch, weekly twice, then with "don't show again", and always before your first backup [3]."#,
             facts: [
                 LFactEntry(fact: .newKey(name: "K1", kind: .standard), quote: "A random key is made.", rules: [1]),
                 LFactEntry(
                     fact: .keyFileLocks(has: [.words, .apple], lacks: [.passphrase, .master]),
-                    quote: "The key file is written beside the library, with the key locked under your twelve words and under this Mac's quiet roads.",
+                    quote: "The key file is written beside the library, with the key locked under its twelve words and under this Mac's quiet roads.",
                     rules: [1, 2]),
                 LFactEntry(
                     fact: .custody(has: [.onDevice], lacks: [.touchID]),
                     quote: "…and under this Mac's quiet roads.", rules: [8]),
-                LFactEntry(fact: .wordsShownOnce, quote: #"The words are shown once: "write these down now"."#, rules: [2]),
+                LFactEntry(fact: .wordsStoredNowhere, quote: "…locked under its twelve words. Nothing is shown", rules: [2]),
+                LFactEntry(
+                    fact: .notTypedHere,
+                    quote: "the first open is the Bookcase and the quick entry with nothing in front of them, and the card above the quick entry offers the words until you record them or dismiss it",
+                    rules: [2, 3],
+                    status: .notAModelFact("the faces — VX-412: the Mac's first open has no card (`RoadCreationFaceTests`, the route suites); the card's states and its look are `WordsBandTests`'")),
                 LFactEntry(fact: .sealedKeyFileCopy, quote: "A sealed copy of the key file goes into this Mac's keychain.", rules: [1, 21]),
                 LFactEntry(fact: .newPlainRandomDeviceID, quote: "A plain random device ID is written [1, 2, 23].", rules: [23]),
                 LFactEntry(fact: .noBackups, quote: "Backups so far: none", rules: [5]),
@@ -490,10 +500,10 @@ enum Lifecycle {
 
         // MARK: 2
         LStage(
-            number: 2, title: #"The tutorial ends: you set a passphrase"#, posture: .standard, postureLabel: #"Standard"#,
-            road: "the passphrase set — Standard's plain-confirm passphrase door (resetPassphrase .plainConfirm)",
+            number: 2, title: #"The tutorial ends: you set a passphrase and record your twelve words"#, posture: .standard, postureLabel: #"Standard"#,
+            road: "the passphrase set — Standard's plain-confirm passphrase door (resetPassphrase .plainConfirm); then the look — rule 6's new-words act with that passphrase (regenerateWords), the words she records",
             rows: [
-                LRow(term: #"What happens"#, content: .text(#"The key file gains a passphrase lock. Nothing else changes [3, 6]."#)),
+                LRow(term: #"What happens"#, content: .text(#"The tutorial's last card asks for a passphrase and shows your twelve words beside the ask. Nothing keeps the words, so they are made when you look: the key file gains a passphrase lock, and its words lock is re-made under the words you write down. The key itself does not change, and nothing else changes [2, 3, 6]."#)),
                 LRow(term: #"Opens the library"#, content: .chips(.library, [
                     LChip(road: .typed(.passphrase, .today), state: .opens, label: #"passphrase"#),
                     LChip(road: .typed(.words, .today), state: .opens, label: #"twelve words"#),
@@ -503,9 +513,11 @@ enum Lifecycle {
             ],
             note: #"Either secret can reset the other. If you never set a passphrase, every later stage simply has one fewer road; nothing below depends on it except entering Castle."#,
             facts: [
-                LFactEntry(fact: .keyUnchanged, quote: "The key file gains a passphrase lock.", rules: [6]),
-                LFactEntry(fact: .keyFileLocks(has: [.passphrase, .words, .apple], lacks: [.master]), quote: "The key file gains a passphrase lock.", rules: [3]),
-                LFactEntry(fact: .nothingElseChanges(except: .passphrase), quote: "Nothing else changes [3, 6].", rules: [3, 6]),
+                LFactEntry(fact: .keyUnchanged, quote: "The key itself does not change", rules: [6]),
+                LFactEntry(fact: .keyFileLocks(has: [.passphrase, .words, .apple], lacks: [.master]), quote: "the key file gains a passphrase lock", rules: [3]),
+                LFactEntry(fact: .lockRelocked(.words), quote: "its words lock is re-made under the words you write down", rules: [2, 6]),
+                LFactEntry(fact: .wordsShownOnce, quote: "shows your twelve words beside the ask. Nothing keeps the words, so they are made when you look", rules: [2, 3]),
+                LFactEntry(fact: .nothingElseChanges(except: [.passphrase, .words]), quote: "and nothing else changes [2, 3, 6].", rules: [3, 6]),
                 LFactEntry(
                     fact: .notTypedHere, quote: "Either secret can reset the other.", rules: [3],
                     status: .branch("the key doors — `KeyDoorTests`/`DoorAndDeviceActTests` (reset by the words; new words by the passphrase)")),

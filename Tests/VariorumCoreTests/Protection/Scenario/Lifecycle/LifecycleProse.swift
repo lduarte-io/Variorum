@@ -12,7 +12,10 @@
 //  target's own lead and footer and no review notes reproduces the target page
 //  byte for byte, `cmp`-checked at U3 piece D): the lead's last sentence and
 //  the footer now say the page is rendered from the fixture; one style line
-//  for the "under review" note a FACTS DIFF puts on its stage.
+//  for the "under review" note a FACTS DIFF puts on its stage. VX-307 U2b
+//  (VX-412, rules 2–3 as amended): the three-roads table's twelve-words row
+//  reads "shown once when you ask" (the words are never shown before the
+//  first screen).
 //
 
 enum LifecycleProse {
@@ -65,7 +68,7 @@ enum LifecycleProse {
 <h2>The three kinds of road</h2>
 <table>
   <tr><th>Road</th><th>What it is</th><th>Standard</th><th>Castle</th></tr>
-  <tr><td class="key">Twelve words</td><td>Made with the library, shown once, written down by you [2]</td><td>always</td><td>always</td></tr>
+  <tr><td class="key">Twelve words</td><td>Made with the library, shown once when you ask, written down by you [2]</td><td>always</td><td>always</td></tr>
   <tr><td class="key">Passphrase</td><td>Asked at the tutorial's end; reminded until set [3]</td><td>when you set one</td><td>required to enter</td></tr>
   <tr><td class="key">Apple road</td><td>Your iCloud Keychain, through your Apple account — a convenience the app doesn't answer for [8, 25]</td><td>yes</td><td><b>never</b> [9]</td></tr>
   <tr><td class="key">On-device road</td><td>This Mac's login keychain: your login password or Touch ID [8]</td><td>yes</td><td>Touch ID only, if you choose it; "Always ask" = none</td></tr>
