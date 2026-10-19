@@ -2195,6 +2195,54 @@ leg: the `paneWave` arm dropped from `refreshPane` → `ProtectionPaneWaveTests`
 0 instances at release. **ROUND 1 IS CLOSED: five findings, five agreed fixes, zero disputes. NEXT: round 2 — a
 fresh fable-reviewer re-checks the fixes (the cross-model rule: it makes the final call on each).**
 
+**THE LADDER CLOSED AT ROUND 2 (2026-10-19 ~11:20 MDT):** round 1 0B/1M/2m/2N; the fix leg five-for-five agreed and
+fixed; round 2 ALL FIVE CONFIRMED CLOSED, zero reopened, zero new (`notes/plans/vx-308-ladder-round-2.md`,
+6f422af02) — MAJOR-1's red re-verified by the reviewer's own scratch-worktree run. One residue line recorded for the
+F-U3-2 ticket body (the synced new-words resume under the old typed words — pre-existing, byte-identical pre-fix).
+No round 3.
+
+### THE WALK PLAN (the orchestrator's, one stage window; the §5 row-7 act — drafted at the ladder's close)
+
+One window, one claim (`vx-308-walk`, ~90 min + renewals), the coordinator's eight terms echoed at READY.
+Dev store only + throwaway libraries; the THROWAWAY Supabase project for every signed-in arm
+(`VARIORUM_WALK_PROJECT_URL`/`VARIORUM_WALK_ANON_KEY` per launch — U1 piece 0's switch; per-launch env only, term 5).
+Credentials: dev-castle.env + dev-vault-throwaway.env, never echoed (term 4). Window-scoped captures only (term 7).
+
+## Posture rails
+- A1-shaped safety copy of every slot file first, cmp-verified (term 1); path in the first status.
+- The restore hold's marker is PER SLOT (F-U4-2): for rows needing a synced crossing on a throwaway library, the
+  marker moves aside WITH library A (the dev library) and returns with it; NEVER press Resume (the standing rule).
+- Pre-export the debug defaults domain; end-diff + restore (term 3).
+- Throwaway keychain items listed at the end (term 6's result line); B/C libraries aside or removed (term 2).
+- Every launch that signs in carries the walk switch; the walk signs out before its last quit (F-U1-5).
+
+## The rows (order)
+0. Build + binary launch with stderr log (U1 recipe row 0); dev library A local Standard start; hold standing.
+1. U4 rows 1–2: no Lock door in Standard (capture); a LOCAL Use Castle on A (F-4 never gates local; capture the
+   Lock door appearing).
+2. U4 row 3 on throwaway B: VX-448 — the concealed copy, the crossing's reopen keeps it, ⌃⌘L → lobby → pbpaste
+   empty; B's passphrase reopens. (Also walks VX-445's Lock Now + relock lobby.)
+3. U4's remaining lock rows: idle/sleep monitors (planted short idle via the sealed setting if walkable), Touch ID
+   relock auto-ask (real item — the gate row), Always-ask types.
+4. THE ACCOUNT-SEQUENCE WALK on throwaway C against the THROWAWAY PROJECT (the ticket's evidence row; the hold moved
+   aside with A): sign in as user A (env creds typed via cliclick) → turn on sync (the words moment: words typed →
+   shown; capture) → signed out screens (sign out; Use Castle while signed out → her one-road screen; capture) →
+   sign back in → the key doors in sync (change passphrase + VX-113's changed-elsewhere refusal needs a second
+   account/device emulation — the fake-server pins carry VX-113; the walk does the happy change) → leave (This Mac
+   Only) → sign into user B → otherAccount screen (Move door shown; capture) → Move (type B's secret) → the join's
+   words moment (passphrase-typed arm: the notice without words; capture) → delete-account-here door (local leave;
+   the pointer line; capture) → sign out; C aside.
+5. F-4's refusal IN SYNC: with C bound + hold marker planted beside C's slot → Use Castle shows the refusal naming
+   Resume Sync (capture); marker cleaned.
+6. VX-447 on throwaway D: `VARIORUM_WALK_FORGET=memory`-style aside of the key file + Backups (U3's recipe row) →
+   the banner becomes the door → the look → fresh key file + the backup follows (capture); D aside.
+7. End posture: A back with its marker, Standard, dev pair intact, quiet open proven, defaults end-diff reconciled,
+   0 instances; the result line per term 6.
+
+## Captures
+Light + dark where a face is new (the account section, the join sheet + words moment, the signed-out screen, the
+otherAccount screen, the key-door sheets, the banner door, the lock lobby, F-4's refusal).
+
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
   `~/dev/variorum-vx-308`, branch pushed, in-flight row (holds the Sync/-custody slot) `969acce55` on main, Linear
