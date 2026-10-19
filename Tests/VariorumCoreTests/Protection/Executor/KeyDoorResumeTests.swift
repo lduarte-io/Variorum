@@ -215,6 +215,36 @@ struct KeyDoorResumeTests {
         #expect(Self.fileOpens(fixture, "together again") && Self.vaultOpens(fixture, "together again"))
     }
 
+    /// A resume HOLDING the new passphrase but finding NO live key file of the key (the file gone since the stop — rule 27's
+    /// state reached mid-act) rolls back too, before any write — never `noLiveKeyFile` out of the settle — and the next act
+    /// is judged on the library as it stands (Change: nothing to verify the passphrase against; Reset: no key file to
+    /// re-lock — never `actInFlight`). (Red with the
+    /// shared key-file arm narrowed to the words act — the pre-fix behaviour for these doors.)
+    @Test(arguments: [Door.change, .resetPlain])
+    func aResumeHoldingTheNewPassphraseButNoKeyFileRollsBackToo(_ door: Door) async throws {
+        let shape = Shape(door: door, mode: .standard, synced: false)
+        let fixture = try EX(.standard)
+        let executor = fixture.executor()
+        var library = try fixture.unlocked(executor)
+        fixture.world.crashAfterWrites = 3
+        await #expect(throws: SimulatedCrash.self) {
+            try await Self.press(shape, fixture, executor, &library, current: fixture.passphrase, new: "typed at the lobby")
+        }
+        fixture.world.liveKeyFile = nil
+        let (outcome, settled, relaunched) = try await fixture.relaunchAndSettle(
+            TypedSecrets(passphrase: fixture.passphrase, newPassphrase: "typed at the lobby"))
+        #expect(outcome == .rolledBack(door.act))
+        Self.expectNothingHalfDone(fixture, settled, "after the settle:")
+        #expect(fixture.world.liveFormat3 == nil, "nothing written")
+        var again = settled
+        do {
+            try await Self.press(shape, fixture, relaunched, &again, current: fixture.passphrase, new: "x")
+            Issue.record("a key door with no key file to re-lock should refuse")
+        } catch let refusal as ExecutorRefusal {
+            #expect(refusal != .actInFlight(door.act), "the door is judged on the library, never wedged — \(refusal)")
+        }
+    }
+
     /// A resume HOLDING the act's new passphrase (typed at a lobby — the scenario world's model of her, and the crash
     /// harness's) still FINISHES, exactly as before: the rollback is only for a resume that cannot finish. (Green on both
     /// trees — the arm's guard.)

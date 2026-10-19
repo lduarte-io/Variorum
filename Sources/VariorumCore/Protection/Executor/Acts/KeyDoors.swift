@@ -113,9 +113,25 @@ struct KeyDoorProgram: ActProgram {
     /// the settle and the act stayed in flight for good — every later act refused, VX-447's banner door, rule 27's
     /// recovery road, included.) A resume HOLDING words — typed at a lobby — runs exactly as before; a press never
     /// reaches here (`resuming` is false and its words are always in hand).
+    ///
+    /// **VX-309 U1a — VX-450: CHANGE and RESET join it** (the stuck-act class's remainder — F-U3-2's option (a) for the
+    /// other two key doors). Their vault and key-file steps need the act's NEW passphrase — derived at a resume only from
+    /// one typed there (`derive`, under the plan's fresh descriptor); a quiet open types nothing and a lobby that took the
+    /// words types none — and a live key file of the key to re-lock. Either missing, the act cannot reach its new state:
+    /// it rolls back BEFORE writing anything, as the words act does (a landed vault write stands, as any landed CAS write
+    /// does — the account then opens with the passphrase she typed at the press, and the next Change re-locks both). A
+    /// resume holding a typed passphrase runs exactly as before (the plan-level check in `resume` and the vault's own
+    /// refusals still judge it).
     func resumeCannotFinish(_ ctx: ActContext) -> ExecutorRefusal? {
-        guard act == .regenerateWords, ctx.resuming else { return nil }
-        if ctx.secrets.words == nil { return .secretsRequired(act) }
+        guard ctx.resuming else { return nil }
+        switch act {
+        case .regenerateWords:
+            if ctx.secrets.words == nil { return .secretsRequired(act) }
+        case .changePassphrase, .resetPassphrase:
+            if ctx.secrets.passphrase == nil { return .secretsRequired(act) }
+        default:
+            return nil
+        }
         if ctx.library.keyFile?.fingerprint != ctx.library.fingerprint { return .noLiveKeyFile }
         return nil
     }
