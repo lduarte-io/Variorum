@@ -1261,6 +1261,16 @@ Commits: `edbd86c14` (record) · `95bde6ea3` (1) · `a1a948c73` (2) · `6a0b5a05
   issue` (`touchIDReads == before + 1` — it read twice). Green again after: core 12/2, the harness `✔ Test run with 140
   tests in 22 suites passed`. Mac `build-for-testing` → `** TEST BUILD SUCCEEDED **`.
 - Piece 5 — the close (counts both configurations, the Mac suite list, PROVISIONALs, findings): NOT-STARTED.
+
+**THE WORDS THIS BATCH LANDS (the pins read this block — `ProtectionWordsVX307Tests`; hers verbatim where ruled):**
+- **VX-414 — her two U2-7 sentences, VERBATIM from the ticket's body** (VX-414 read from the board 2026-10-18 — her
+  ruling "I agree with your suggested wording"): (1) the standing banner after a quiet open with no key file found
+  anywhere reads *Variorum opened your library, but found no key file for it anywhere. Make a backup now, so a copy
+  exists.* (replacing rule 27's refusal words in that one state); (2) the key-file offer when the place beside the
+  library is EMPTY and a backup holds the right file opens *There is no key file beside your library. A backup holds one
+  that opens it.* (then her offer sentence's remainder — built as her sentence's question, *Use it?*: P-VX307-U2c-4).
+  And U2-6, her "sure we can drop the sentence": the split-pair line *The key file beside your library is an older
+  one. …* is gone.
 - No revert is in flight (piece 4's R1–R3 ran and were restored by `git checkout --`; `git status` clean).
 
 ## 7. LIVE STATUS

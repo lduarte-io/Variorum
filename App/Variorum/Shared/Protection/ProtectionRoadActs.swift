@@ -74,6 +74,7 @@ nonisolated extension ProtectionOpenRoad {
         var report = session.report
         repairPasses(ctx, session.executor, &library, &report)
         report.keyFileSearch = searchIfOwed(ctx, session.executor, library, report)
+        report.besideIsEmpty = library.keyFile == nil
         session.library = library
         session.report = report
         log("road: the offered key file is beside the library (\(StoreKeyEnvelope.shortFingerprint(offer.keyFile.fingerprint)))")

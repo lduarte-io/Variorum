@@ -61,6 +61,9 @@ nonisolated struct RoadOpenReport: Sendable {
     /// `ProtectionExecutor.searchKeyFiles`): the offer, the split pair, or rule 27. nil = not owed, or the search
     /// could not read (logged).
     var keyFileSearch: KeyFileSearch?
+    /// VX-307 U2c — VX-414: the place beside the library held NO key file when the search ran (the library's own
+    /// `keyFile` nil after the repairs) — the offer then opens with her U2-7 variant, not *… doesn't open it.*
+    var besideIsEmpty = false
     /// What the settle did (a word for Diagnostics), or why it could not.
     var settle: String?
 }
@@ -479,6 +482,7 @@ nonisolated enum ProtectionOpenRoad {
             }
             repairPasses(ctx, executor, &unlocked, &report)
             report.keyFileSearch = searchIfOwed(ctx, executor, unlocked, report)
+            report.besideIsEmpty = unlocked.keyFile == nil
             logSummary(ctx, unlocked, report, how: "opened")
             let session = ProtectionRoadSession(
                 system: ctx.system, executor: executor, library: unlocked, report: report, isFresh: false,

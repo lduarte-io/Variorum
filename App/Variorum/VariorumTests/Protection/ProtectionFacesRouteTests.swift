@@ -34,7 +34,7 @@ struct ProtectionFacesRouteTests {
                 Issue.record("the offer is said before the library shows: \(bootstrap.state)")
                 return
             }
-            guard case .offer(let offer)? = interlude.current else {
+            guard case .offer(let offer, _)? = interlude.current else {
                 Issue.record("the offer card")
                 return
             }

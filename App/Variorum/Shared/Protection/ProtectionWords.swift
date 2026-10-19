@@ -38,16 +38,29 @@ nonisolated enum ProtectionWords {
     static func offerRestoredFromBackup(_ date: String) -> String {
         "Key file restored from the backup from \(date)."
     }
-    /// The history-only split pair (`KeyFileSearch.besideOpensItOnlyThroughItsHistory`, P-VX378-U4-6 (a)) — a standing
-    /// line on the open library.
-    static let offerSplitPair = "The key file beside your library is an older one. It opens the library, but the quiet "
-        + "roads can't be re-made from it — Restore from Backup puts the right one back."
+    // (The history-only split pair's line — `KeyFileSearch.besideOpensItOnlyThroughItsHistory` — is DROPPED: no state
+    // reaches it, her ruling 2026-10-18 on P-VX306-U2-6: "sure we can drop the sentence" — VX-414.)
+
+    /// VX-414 — HER U2-7 variant (2), verbatim from the ticket (her ruling 2026-10-18: "I agree with your suggested
+    /// wording"): the offer's opening when the place beside the library is EMPTY and a backup holds the right key file
+    /// (her offer sentence there began by saying the key file beside the library doesn't open it — over no key file at
+    /// all; `KeyFileOffer`'s sentences are the model's and are never restated here).
+    static let offerBesideEmptyFromABackup = "There is no key file beside your library. A backup holds one that opens it."
+    /// Her offer sentence's remainder after its "where" sentences (`KeyFileOffer.backupHoldsOne`'s last sentence —
+    /// pinned to it): the question.
+    static let offerUseItQuestion = "Use it?"
 
     // MARK: - (3) Rule 27's refusal — §7c (3), verbatim (the lobby's moment + its doors; after a quiet-road open, the
     // standing banner in the same words, no doors)
 
     static let noKeyFileAnywhere = "No key file opens this library. Variorum looked beside the library, inside every "
         + "backup, and in this Mac's keychain, and found none that opens it. Without one, there is nothing left to open."
+    /// VX-414 — HER U2-7 variant (1), verbatim from the ticket (her ruling 2026-10-18: "I agree with your suggested
+    /// wording"): the STANDING BANNER after a quiet open with no key file found anywhere — replacing rule 27's refusal
+    /// words in that one state (they ended *Without one, there is nothing left to open.* over a library that had just
+    /// opened). The lobby's moment (nothing opened) keeps §7c (3)'s words above.
+    static let noKeyFileAfterAQuietOpen = "Variorum opened your library, but found no key file for it anywhere. Make a "
+        + "backup now, so a copy exists."
     static let noKeyFileAnywhereAccountRoad = "This library syncs with your account. Sign in and enter your passphrase "
         + "or twelve words to bring your writing back."
     static let noKeyFileRestoreDoor = "Restore from Backup\u{2026}"

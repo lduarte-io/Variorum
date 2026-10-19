@@ -14,8 +14,10 @@
 //      *Not now* writes nothing. Then the library opens either way — the open does not wait on her answer to the
 //      offer (rule 21: "it never decides for you"), and an offer she put off is owed again at the next open.
 //    - THE STANDING FACES (`RoadStandingFaces`) — on the open library: RULE 27's banner after a quiet-road open
-//      (`Fault.noKeyFileAnywhere`, or the search's `.noKeyFileAnywhere`) in §7c (3)'s words, no doors; the split
-//      pair's line (`.besideOpensItOnlyThroughItsHistory`); rule 1's restore RECEIPT (`restoreKeyFileFromMirror`
+//      (`Fault.noKeyFileAnywhere`, or the search's `.noKeyFileAnywhere`) in her U2-7 words (VX-414 — *Variorum opened
+//      your library, but found no key file for it anywhere. …*), no doors; (the split pair's line —
+//      `.besideOpensItOnlyThroughItsHistory` — is dropped: no state reaches it, VX-414); rule 1's restore RECEIPT
+//      (`restoreKeyFileFromMirror`
 //      among the open's repairs — §7c (6), on the status seam, `receipt_style` governing it as every receipt); and
 //      rule 3's model moment (`.askPassphrase`), which the reminder reads.
 //    - `RoadStandingModel` — the open library's faces model: the standing faces, rule 3's reminder, the
@@ -33,8 +35,9 @@ nonisolated enum RoadInterlude {
     enum Card: Equatable, Sendable {
         /// Rule 21's notice — her sentence (`LibraryNotice`), one *OK*.
         case notice(LibraryNotice)
-        /// Rule 21's offer — her sentence (`KeyFileOffer`), *Not now* · *Use it*.
-        case offer(KeyFileOffer)
+        /// Rule 21's offer — her sentence (`KeyFileOffer`), *Not now* · *Use it*. `besideEmpty` (VX-414): the place
+        /// beside the library held no key file — the sentence opens with her U2-7 variant instead.
+        case offer(KeyFileOffer, besideEmpty: Bool = false)
         /// VX-307 U2a — VX-310's RE-ARM question (the design's §3.10): owed by `assess` ONLY after a Touch ID press failed
         /// on an item that exists and a typed secret then opened the library (`OwedAct.touchIDRearmQuestion`). *Always
         /// ask instead* · *Set it up again* — `answerTouchIDRearm` (a new item only on yes, at this press; a no records
@@ -49,7 +52,9 @@ nonisolated enum RoadInterlude {
     static func cards(_ report: RoadOpenReport) -> [Card] {
         var cards: [Card] = []
         if let notice = report.notice { cards.append(.notice(notice)) }
-        if case .offer(let offer)? = report.keyFileSearch { cards.append(.offer(offer)) }
+        if case .offer(let offer)? = report.keyFileSearch {
+            cards.append(.offer(offer, besideEmpty: report.besideIsEmpty))
+        }
         if report.acts.contains(.touchIDRearmQuestion) { cards.append(.rearm) }
         return cards
     }
@@ -60,7 +65,15 @@ nonisolated enum RoadInterlude {
         switch card {
         case .notice(let notice):
             return notice.sentence(date: day)
-        case .offer(let offer):
+        case .offer(let offer, let besideEmpty):
+            // VX-414 — her U2-7 variant (2): with NO key file beside the library and a backup holding the right one,
+            // the offer opens *There is no key file beside your library. A backup holds one that opens it.* and asks her
+            // sentence's question (her first sentence, that the key file beside doesn't open it, assumed one stood there).
+            // This Mac's keychain copy never meets an empty place here — rule 1's quiet restore puts it back first —
+            // so its sentence stays hers, as is.
+            if besideEmpty, case .backup = offer.source {
+                return ProtectionWords.offerBesideEmptyFromABackup + " " + ProtectionWords.offerUseItQuestion
+            }
             if case .backup(_, nil) = offer.source {
                 return offer.words.replacingOccurrences(of: "<date>", with: ProtectionWords.offerUnknownDay)
             }
@@ -162,7 +175,7 @@ final class RoadInterludeModel {
 
     /// The offer accepted: `useOfferedKeyFile`, then the receipt naming where it came from.
     func useIt() async {
-        guard case .offer(let offer)? = current, !busy else { return }
+        guard case .offer(let offer, _)? = current, !busy else { return }
         busy = true
         message = nil
         let outcome = await useOffer(offer)
@@ -189,16 +202,14 @@ final class RoadInterludeModel {
 // MARK: - The standing faces (on the open library)
 
 nonisolated struct RoadStandingFaces: Equatable, Sendable {
-    /// RULE 27 after a quiet-road open: no key file anywhere — the banner, §7c (3)'s words, no doors.
+    /// RULE 27 after a quiet-road open: no key file anywhere — the banner (her U2-7 words, VX-414), no doors.
     var noKeyFileAnywhere: NoKeyFileAnywhere?
-    /// The key file beside reaches the library only through its history (P-VX378-U4-6 (a)) — §7c (2)'s last line.
-    var splitPair: Bool
     /// RULE 3: the model's moment owed at this open (`.beforeFirstBackup` / `.quietRoadFailed`), nil none.
     var passphraseMoment: PassphraseAsk?
     /// The receipts this open owes the status seam: rule 1's restore (§7c (6)).
     var receipts: [String]
 
-    static let none = RoadStandingFaces(noKeyFileAnywhere: nil, splitPair: false, passphraseMoment: nil, receipts: [])
+    static let none = RoadStandingFaces(noKeyFileAnywhere: nil, passphraseMoment: nil, receipts: [])
 
     static func derive(_ report: RoadOpenReport) -> RoadStandingFaces {
         var nothing: NoKeyFileAnywhere?
@@ -210,9 +221,9 @@ nonisolated struct RoadStandingFaces: Equatable, Sendable {
         for act in report.acts {
             if case .askPassphrase(let ask) = act, moment == nil { moment = ask }
         }
+        // (`.besideOpensItOnlyThroughItsHistory` says nothing: its line is dropped — no state reaches it, VX-414.)
         return RoadStandingFaces(
             noKeyFileAnywhere: nothing,
-            splitPair: report.keyFileSearch == .besideOpensItOnlyThroughItsHistory,
             passphraseMoment: moment,
             receipts: report.repairsDone.contains(.restoreKeyFileFromMirror) ? [ProtectionWords.restoredFromMirror] : [])
     }

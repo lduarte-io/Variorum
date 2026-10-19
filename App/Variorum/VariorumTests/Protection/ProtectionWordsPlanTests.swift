@@ -42,7 +42,7 @@ struct ProtectionWordsPlanTests {
         let drafted: [String] = [
             // (2) the offer
             ProtectionWords.offerUseIt, ProtectionWords.offerNotNow, ProtectionWords.offerRestoredFromKeychain,
-            ProtectionWords.offerSplitPair,
+            // (VX-414: §7c (2)'s split-pair line is dropped — no state reaches it; the plan keeps its draft as history.)
             // (3) rule 27 + its doors
             ProtectionWords.noKeyFileAnywhere, ProtectionWords.noKeyFileAnywhereAccountRoad,
             ProtectionWords.noKeyFileRestoreDoor, ProtectionWords.noKeyFileOpenDoor, ProtectionWords.noKeyFileStartDoor,
