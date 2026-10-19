@@ -2033,16 +2033,14 @@ and `ProtectionWords.joinedReceipt` with their pins. HARNESS: U1's scratchpad pa
 scratchpad, pointed at this worktree).
 
 **LIVE STATUS (per finding; PENDING = unverified):**
-- **MAJOR-1** (the resumed new-words act wedges the recovery door) — AGREE (self-traced: below). IN-PROGRESS — the pin
-  `NewWordsResumeTests` (5 tests / 9 cases) committed FIRST and RED ON THE PRE-FIX TREE: `✘ Test run with 5 tests in 1
-  suite failed … with 14 issues` (the settle throwing `noLiveKeyFile` / `secretsRequired(regenerateWords)` at every stop
-  between the begin and the key-file step's plan record — Standard unsynced writes 3–4, synced writes 3–6 — the
-  finding's own sequence both postures, the unsynced twin, and the everyday new-words act; `aResumeHoldingTheWordsStill
-  Finishes` green by design — the guard). The fix next. The settled design: in `KeyDoors.swift` only, a RESUMED `regenerateWords` whose `vault` or `keyFile` step cannot finish — no words in
-  hand (a plan never holds one) or no live key file of the key to lock (a resume never mints) — throws `ActRollback`
-  BEFORE anything is written, so `drive`'s one rollback runs (the act cleared, the plan deleted, copies resumed) and the
-  settle answers `.rolledBack(.regenerateWords)`; a landed vault write stands as any landed CAS write does. Change and
-  Reset untouched (the F-U3-2 ticket's design call). Pin first, red on this tree.
+- **MAJOR-1** (the resumed new-words act wedges the recovery door) — AGREE, DONE (`653d236c2`; the pins-first commit
+  `07add5577`). Pin `NewWordsResumeTests` RED ON THE PRE-FIX TREE (`✘ … 5 tests in 1 suite failed … with 14 issues`),
+  green after with its sixth test (`✔ 6 tests in 1 suite`; with `FileLessWordsTests`, `FirstLookWordsTests`,
+  `ExecutorKeyDoorTests`, `U2CrashHarnessTests` `✔ 24 tests in 5 suites`). MUTATIONS on `653d236c2`, each restored by `git
+  checkout --` and `cmp`-identical: M1-a the no-words arm dropped → `✘ … 4 issues` (the everyday act's settle throws
+  `secretsRequired`); M1-b the no-live-file arm dropped → `✘ aStoppedMintResumedHoldingWordsButNoKeyFileRollsBackToo` both
+  arms (`noLiveKeyFile`); M1-c the `resuming` guard dropped (a press too) → `✘ … 11 issues` (the door's own mint refuses —
+  the guard is load-bearing). The trace, the fix and the residue: THE DISPOSITIONS below.
 - **MINOR-1** (`keyFileGoneEverywhere`'s decode-skip vs the record's "never a guess") — AGREE the record overclaims;
   disposition (b): keep the skip, log it, amend the U3 record's sentence with the trace (below). NOT-STARTED.
 - **MINOR-2** (the pane's one read runs three times per appearance) — AGREE (the U1 record's R-2 intended ONE assessment
@@ -2051,8 +2049,41 @@ scratchpad, pointed at this worktree).
 - **NIT-1** (the `.signIn` services-nil fallback's untrue sentence) — AGREE. NOT-STARTED.
 - **NIT-2** ("now … now" in Move's and the join's moved receipts) — AGREE. NOT-STARTED — a reword in `ProtectionWords`'
   VX-308 U2 section, sentence case, PROVISIONAL with the bundle row.
-- MUTATIONS IN FLIGHT on the committed `653d236c2` (KeyDoors.swift only; each restored by `git checkout --` and `cmp`
-  against a pre-mutation copy in this session's scratchpad `fl-prerevert/`).
+- No revert is in flight (MAJOR-1's three mutations ran on `653d236c2` and were restored `cmp`-identical).
+
+**THE DISPOSITIONS (per finding; for round 2's fresh reviewer):**
+
+**MAJOR-1 — AGREE, FIXED.** *My trace (self-made, line by line; the finding's mechanism confirmed and widened):* the door's
+act (`regenerateWords`, `KeyDoorProgram(act:, mintsKeyFile: true)`) begins — the act in flight written to the record and
+this Mac's memory item, then the sealed plan (`["vault","keyFile","memory"]` synced, `["keyFile","memory"]` unsynced;
+`toFingerprint` nil). The words exist only in the process (`ActSecrets`); a plan never holds a secret. The process dies.
+The next quiet open (rule 27's state is reached by the silent item; the open passes `TypedSecrets.none`) settles:
+`settleAct` finds the plan sealed under the library's key and named by the section → `resume`. `derive(.none)` → no
+words; a key door's `pastCommitPoint` is TRUE (`toFingerprint` nil), so neither resume-level rollback fires; the
+registry's `KeyDoorProgram(act:)` has `mintsKeyFile` false. At the `vault` step: `guard let words … else { throw
+secretsRequired }`; at the `keyFile` step: the mint arm skipped → `noLiveKeyFile` (file-less) or `secretsRequired` (a file
+standing). Neither is an `ActRollback` → out of `drive`, `resume`, `settle`; the open road logs "could not settle" and opens
+anyway — the act stays in flight, so `Assess`' rule-27 arm (it requires nothing in flight) no longer even raises the banner,
+and every act refuses `actInFlight`, the door's own mint included. The pin found it at EVERY stop between the begin and the
+key-file step's plan record (Standard unsynced writes 3–4; synced 3–6), and in the everyday new-words act too (F-U3-2's
+"above all" case) — so the fix covers `regenerateWords` in both arms, which the finding's "at least the minting act" allows.
+*The fix (`KeyDoors.swift` only):* `KeyDoorProgram.resumeCannotFinish` — on a RESUMED `regenerateWords` the `vault` and
+`keyFile` steps first check for what they need: the act's words in hand, and a live key file of the key to lock (a resume
+never mints); either missing → `ActRollback` BEFORE anything is written → `drive`'s one existing rollback → `.rolledBack(.
+regenerateWords)`. A landed vault write stands as any landed CAS write does (the account's words are then values nobody saw
+until the next New Words re-wraps them — the finding's accepted consequence; the account still opens by its passphrase).
+Untouched: every press (`resuming` false — pinned load-bearing by M1-c), a resume holding words with its key file (the
+scenario world's model — pinned), Change and Reset (the F-U3-2 ticket's design call), the plan-less finish (`["memory"]`).
+*Residue, recorded honestly (not built — each is F-U3-2's general design question, for its ticket):* (1) the post-write
+window — a stop AFTER the key-file step wrote but before the plan recorded it rolls back with the live file keeping the
+act's unseen words lock (`rollBack` restores a file only across a key change; restoring the mirror's older lock would be a
+repair by guessing, rule 21) — the library opens by its quiet road or passphrase and New Words re-mints at once (pinned by
+the loop's stop after that write); Change/Reset carry the same window. (2) Rule 20's "says which": the new road's open
+records a rollback in Diagnostics only (`report.settle`) — pre-existing for every act, not this finding's. (3) A press-time
+race (a file or mirror appearing between the press and the key-file step) still leaves the act in flight for the session
+(the press path is byte-unchanged); the next open's resume now rolls it back. **For the closeout (the orchestrator's):** the
+F-U3-2 ticket's body names this arm as FIXED here (`regenerateWords`, both arms, VX-447's door un-wedged) and keeps
+Change/Reset and residue (1); its Medium priority was set on U3's "no worse" premise, now moot for the words act.
 
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
