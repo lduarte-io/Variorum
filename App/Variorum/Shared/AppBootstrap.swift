@@ -225,6 +225,9 @@ final class AppBootstrap {
             gate: gate,
             isRealVariant: variant == .real))
         protection.performLock = { [weak self] in await self?.lock() }
+        // VX-308 U4 — VX-445: on the new road the relock monitors read the OPEN library's policy (Castle; this Mac's sealed
+        // idle minutes); today's road leaves the hook nil (its effective gate and dials decide, unchanged).
+        if newRoad { protection.roadRelock = { [weak self] in self?.roadRelockPolicy } }
         // pre-13x 2a (§11): the production migration leaves — the Keychain,
         // the defaults, the store — per store id, built at ready. NEVER in
         // the TEST HOST: the tripwire refuses every real-scope Keychain
@@ -289,6 +292,8 @@ final class AppBootstrap {
             syncCustodyLeaves: syncCustodyLeaves,
             syncCustodySession: syncCustodySession))
         protection.performLock = { [weak self] in await self?.lock() }
+        // VX-308 U4 — VX-445: the production init's wiring, the same on a new-road test bootstrap.
+        if newRoad { protection.roadRelock = { [weak self] in self?.roadRelockPolicy } }
         beginOpening()
     }
 
@@ -1667,11 +1672,20 @@ final class AppBootstrap {
     /// projection is current; `lock()` keeps consulting the persisted gate
     /// as the ACTING authority.
     var canLock: Bool {
-        // VX-306 U1b: no lock on the new road this phase — every library it opens is Standard (no Castle entry
-        // exists before VX-307), and Standard never locks (rule 8's quiet roads; today's Auto refusal).
-        guard !newRoad else { return false }
+        // VX-308 U4 — VX-445 (R-U4-1): on the new road Lock Now acts where the open library is in CASTLE (its record's
+        // mode — VX-307's crossings made Castle real there); Standard never locks (rule 8's quiet roads would open it again
+        // at once — today's Auto refusal, R13p-14). Each reopen changes `state`, so the observed read follows the posture.
+        if newRoad { return roadRelockPolicy != nil }
         guard case .ready = state, binding != nil else { return false }
         return protection.effectiveGate.isDemanded
+    }
+
+    /// VX-308 U4 — VX-445: the OPEN library's relock policy on the new road (`RoadRelockPolicy` — Castle, with this Mac's
+    /// sealed idle minutes): ready, bound, a road session in Castle; nil otherwise (Standard, nothing open, today's road).
+    /// Lock Now's door, the relock monitors (through `ProtectionController.roadRelock`) and the lock itself read it.
+    var roadRelockPolicy: RoadRelockPolicy? {
+        guard newRoad, case .ready = state, binding != nil, let session = roadSession else { return nil }
+        return RoadRelockPolicy.of(session.library)
     }
 
     /// The teardown, in the ruled order: flush/savepoint/stop (the
@@ -1682,7 +1696,7 @@ final class AppBootstrap {
     /// refuses silently: a lock whose key auto-releases at the next open
     /// is theater, and no theater ships (R13p-14).
     func lock() async {
-        guard !newRoad else { return }  // VX-306 U1b: see `canLock`
+        if newRoad { return await lockOnNewRoad() }  // VX-308 U4 — VX-445: see `canLock`
         guard case .ready = state, let binding else { return }
         let scope = storeVariant.rawValue
         // pre-13x 2a: the derived effective gate is the acting authority.
@@ -1724,6 +1738,62 @@ final class AppBootstrap {
             // here). Quiet on failure; the next unlock's run retries.
             lockTimeCopy?()
         }.value
+    }
+
+    // MARK: - VX-308 U4 — VX-445: THE LOCK ON THE NEW ROAD (the record's R-U4-1..3)
+
+    /// **THE LOCK ON THE NEW ROAD** — Castle only (`roadRelockPolicy`; Standard's quiet roads would open it again at once).
+    /// One act at a time: an act running on the session, or an open in flight, is waited out first — a teardown never
+    /// lands under an act (`awaitTheLockSeam`, PROVISIONAL P-VX308-U4-2). Then the crossings' seam's first half: the
+    /// composition root's teardown (`onWillLock` — flush, savepoint, stop), the `.ready` tree down, the per-open state
+    /// dropped, the account's sync keys in session memory dropped (the leaf's "gone at a relock"), the road session, its
+    /// standing faces and the engine's key seam let go (nothing keeps the key), the app's pool CLOSED through the binding off
+    /// the main actor; then THE LOBBY — the open road's own, over a freshly composed road (the quiet roads are not tried: a
+    /// lock is never theater), landed through `finish`, so the one presenter drops its sheet and VX-448's words leave the
+    /// clipboard (F-U3-3). Always ask types; Touch ID auto-asks — the lobby's existing behaviour. No lock-time byte copy on
+    /// the new road (PROVISIONAL P-VX308-U4-3 — rule 5: a backup is the library and its key file, the new road's pair).
+    private func lockOnNewRoad() async {
+        guard let session = await awaitTheLockSeam() else { return }
+        guard let binding, let road = roadInputs?.compose() else {
+            session.endAct()
+            ProtectionOpenRoad.log("road: the lock found no road to land in — the library stays open")
+            return
+        }
+        await onWillLock?()
+        state = .opening
+        protection.dropResident()
+        protection.resetPerOpenDeferrals()
+        protection.syncCustodySession.drop()
+        ProtectionRoadLock.dropSessionMemory(session)
+        roadStanding = nil
+        roadSession = nil
+        newRoadSyncKeys.attach(nil)
+        let lobby = await Task.detached(priority: .userInitiated) { () -> (facts: RoadLobbyFacts, ctx: RoadContext) in
+            binding.lock()
+            // The context off the main actor: it reads the sign-in (a Keychain read).
+            let ctx = road.context()
+            return (ProtectionRoadLock.lobby(ctx), ctx)
+        }.value
+        session.endAct()
+        ProtectionOpenRoad.log("road: locked — the library closed behind the lobby (VX-445)")
+        finish(.roadLobby(lobby.facts, lobby.ctx))
+    }
+
+    /// One act at a time (R-U4-2): the session to lock, its one-act lock HELD — an act running on it (a key door's press,
+    /// a crossing's preflight) or an open in flight (a crossing's reopen) is waited out first, so a sleep or screen lock
+    /// arriving mid-act still locks once the act lands; nil when nothing (any more) locks — Standard, the library closed,
+    /// today's road.
+    private func awaitTheLockSeam() async -> ProtectionRoadSession? {
+        while !Task.isCancelled {
+            if case .opening = state {
+                // An open in flight: lock what it opens (or nothing, when it settles closed).
+            } else {
+                guard roadRelockPolicy != nil, let session = roadSession else { return nil }
+                if session.beginAct() { return session }
+            }
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+        return nil
     }
 }
 

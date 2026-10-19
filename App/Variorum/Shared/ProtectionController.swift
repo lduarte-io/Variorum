@@ -341,6 +341,12 @@ final class ProtectionController {
     /// Wired by AppBootstrap: the lock act (Castle only; the callee
     /// re-checks).
     @ObservationIgnored var performLock: (@MainActor () async -> Void)?
+    /// VX-308 U4 — VX-445: THE NEW ROAD's relock policy, wired by
+    /// AppBootstrap on the new road ONLY (`roadRelockPolicy` — the open
+    /// library's: Castle, with this Mac's sealed idle minutes; nil when
+    /// nothing open locks). A nil HOOK — today's road — leaves the monitors
+    /// on the effective gate and today's dials, unchanged.
+    @ObservationIgnored var roadRelock: (@MainActor () -> RoadRelockPolicy?)?
     /// pre-13x 2a: the vault's posture reading (AppServices wires the
     /// fetch: signed in + a vault row ⇒ the reading; else nil). Consulted
     /// by the reconcile — the READ half of "an enrolled library's key file
@@ -2027,15 +2033,31 @@ final class ProtectionController {
         idleTask = nil
     }
 
-    private func relockIfPolicySays() async {
+    /// Sleep and screen lock (internal for VX-308 U4's route pins).
+    func relockIfPolicySays() async {
+        // VX-308 U4 — VX-445: on the new road the OPEN library's policy decides (Castle locks — always on, decision 18).
+        if let roadRelock {
+            guard roadRelock() != nil else { return }
+            await performLock?()
+            return
+        }
         guard effectiveGate.isDemanded else { return }
         await performLock?()
     }
 
-    private func relockIfIdle() async {
+    /// The idle tick (internal, `now` injectable, for VX-308 U4's route pins).
+    func relockIfIdle(now: Date = Date()) async {
+        // VX-308 U4 — VX-445 (R-U4-3): on the new road, the same clock over THIS MAC'S SEALED idle minutes.
+        if let roadRelock {
+            guard let policy = roadRelock(),
+                  IdleLockClock.isDue(now: now, lastUsedAt: lastUsedAt, minutes: policy.idleMinutes)
+            else { return }
+            await performLock?()
+            return
+        }
         guard effectiveGate.isDemanded else { return }
         guard IdleLockClock.isDue(
-            now: Date(), lastUsedAt: lastUsedAt, minutes: dials.relockAfterIdleMinutes)
+            now: now, lastUsedAt: lastUsedAt, minutes: dials.relockAfterIdleMinutes)
         else { return }
         await performLock?()
     }

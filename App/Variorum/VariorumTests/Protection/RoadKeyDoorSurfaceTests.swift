@@ -202,4 +202,24 @@ struct WordsClipboardLockRouteTests {
             #expect(!WordsClipboard.holdsACopy)
         }
     }
+
+    /// VX-308 U4 — THE LOCK ROAD'S TWIN (F-U3-3): Lock Now on a Castle library (VX-445 — the lock lands through `finish`'s
+    /// non-ready arm) empties the words a look copied. RED ON OLD: before VX-445 the new road's `lock()` did nothing, so
+    /// the concealed copy stayed on the board with the library open.
+    @Test func lockNowOnACastleLibraryEmptiesTheWordsALookCopied() async throws {
+        try await withRoadDependencies {
+            let road = PlantedRoad()
+            let (bootstrap, _) = try await LockWorld.readyInCastle(road)
+            WordsClipboard.clearHeld()
+            let board = WordsConcealedClipboardTests.privateBoard()
+            defer { board.releaseGlobally() }
+            WordsClipboard.copyConcealed(WordsConcealedClipboardTests.words, to: board)
+            #expect(board.string(forType: .string) != nil && WordsClipboard.holdsACopy)
+            #expect(bootstrap.canLock)
+            await bootstrap.lock()
+            _ = try LockWorld.lobby(bootstrap)
+            #expect(board.string(forType: .string) == nil, "the words left the clipboard at the lock")
+            #expect(!WordsClipboard.holdsACopy)
+        }
+    }
 }
