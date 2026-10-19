@@ -355,4 +355,6 @@ fetch, no network.
 - Piece 3 — RETENTION WIRED (VX-302, VX-411): NOT-STARTED — R-U1a-5.
 - Piece 4 — VX-450 (Change/Reset roll back on a resume that cannot finish): NOT-STARTED — R-U1a-6.
 - Piece 5 — the close (counts, the Mac-suite list, PROVISIONALs, findings): NOT-STARTED.
-- No revert is in flight.
+- MUTATIONS IN FLIGHT on the committed `8e027494a` (`Assess/OwnCopies.swift` only; restore = `git checkout --`, then `cmp`
+  against `u1a-prerevert/OwnCopies.swift` in this session's scratchpad): M-OC1 (the `<mac8>` check dropped), M-OC2 (the
+  trusted-stamp check dropped from the due-check), M-OC3 (the place filter dropped).
