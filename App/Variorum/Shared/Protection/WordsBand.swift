@@ -311,12 +311,6 @@ final class WordsBandModel {
         ProtectionOpenRoad.log("road: rule 2's look closed — the words card's offer retires")
     }
 
-    /// Re-read the ledger and the snooze (a host shows the card again).
-    func refresh() {
-        guard look.phase == .closed else { return }
-        offersWords = Self.offers(libraryID, writes: writes, ledger: ledger, snoozes: snoozes)
-    }
-
     /// A look for another home (the tour's last card, Settings ▸ Protection) over the same roads: recording there
     /// retires this card's offer too.
     func makeLook(
