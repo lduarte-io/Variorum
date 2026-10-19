@@ -7,11 +7,14 @@
 //
 //    - `RoadAccountSection` (Settings ▸ Protection, beneath the crossings): the situation in words, each door `assess`
 //      opens (a refused one says why in its place; one with no act here renders nothing — P-2; one road per situation),
-//      the join arms' honest not-yet line (U2's), *Sign in…* where no one is signed in, *Sign out…* where someone is.
+//      VX-308 U2's follow first (its notice beside its door — R-U2-1) and the join and Move as their own doors (Move's
+//      no-vault arm its not-yet line), *Sign in…* where no one is signed in, *Sign out…* where someone is.
 //    - The sheets, all presented through THE ONE PRESENTER (`ProtectionSheetsHost` — VX-239 + VX-243): an account door's
-//      confirm (turning sync on asks exactly its fields; a leave asks nothing and says rule 16), today's sign-out confirm,
-//      the signed-out screen for Use Castle (drafted to the current rules), the crossings' confirm (VX-307 U2a's sheet,
-//      unchanged), and the app's Account sheet for *Sign in…* (R-5).
+//      confirm (turning sync on asks exactly its fields; a leave asks nothing and says rule 16; VX-308 U2 — a join, Move and
+//      the follow ask ONE secret, into Castle with the gate choice, rule 25's copies named; after a join whose words were
+//      replaced, rule 7's WORDS MOMENT — the typed words over `WordsLookPanel`, or the notice alone), today's sign-out
+//      confirm, the signed-out screen for Use Castle (drafted to the current rules), the crossings' confirm (VX-307 U2a's
+//      sheet, unchanged), and the app's Account sheet for *Sign in…* (R-5).
 //
 
 import SwiftUI
@@ -27,10 +30,11 @@ struct RoadAccountSection: View {
         if let faces = model.faces {
             Section(ProtectionWords.accountSectionTitle) {
                 situation(faces)
-                ForEach(RoadAccountDoor.allCases) { door in
+                // VX-308 U2 (R-U2-1): the follow first — the account moved on another device; its notice beside its door.
+                doorRow(.follow, faces.follow)
+                ForEach(RoadAccountDoor.allCases.filter { $0 != .follow }) { door in
                     doorRow(door, faces.face(door))
                 }
-                notYetRow(faces.move)
                 if faces.signIn {
                     HStack {
                         Button(ProtectionWords.accountSignInDoor) { model.openSignIn() }
@@ -80,18 +84,18 @@ struct RoadAccountSection: View {
             EmptyView()
         case .refused(let sentence), .notYet(let sentence):
             caption(sentence)
-        case .open:
+        case .open(let open):
+            if let notice = open.notice {
+                Text(notice)
+                    .font(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             HStack {
-                Button(door.doorLabel) { model.open(door) }
+                Button(open.doorLabel) { model.open(door) }
                     .disabled(model.presenter.sheet != nil)
                 Spacer()
             }
         }
-    }
-
-    @ViewBuilder
-    private func notYetRow(_ face: RoadAccountDoorFace) -> some View {
-        if case .notYet(let sentence) = face { caption(sentence) }
     }
 
     private func caption(_ text: String) -> some View {
@@ -107,51 +111,146 @@ struct RoadAccountSection: View {
 struct RoadAccountConfirmSheet: View {
     @Bindable var model: RoadAccountConfirmModel
 
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
     @State private var passphrase = ""
     @State private var again = ""
     @State private var words = ""
+
+    /// Her sentences these confirms say — the primary ink (rule 16's, rule 12's leave sentence, rule 9's promise).
+    private static let hers: Set<String> = [
+        ProtectionWords.ruleSixteen, ProtectionWords.leaveSentence, ProtectionWords.castlePromise,
+    ]
+
+    private var tokens: VoiceTokens {
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(model.title)
                 .font(.title3.weight(.semibold))
-            ForEach(Array(model.door.sentences.enumerated()), id: \.offset) { _, sentence in
-                Text(sentence)
-                    .font(.callout)
-                    // Rule 16's sentences are hers — the primary ink, as rule 12's are on Use Standard.
-                    .foregroundStyle(sentence == ProtectionWords.ruleSixteen ? .primary : .secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            fields
-            if let refusal = model.refusal {
-                Text(refusal)
-                    .font(.callout)
-                    .alarmVoice()
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            HStack {
-                Button(ProtectionWords.accountCancel) { model.cancel() }
-                    .keyboardShortcut(.cancelAction)
-                    .disabled(model.busy)
-                Spacer()
-                if model.busy {
-                    TravellingDotsIndicator(ink: .secondary)
-                    Text(ProtectionWords.accountWorking).font(.caption).foregroundStyle(.secondary)
-                }
-                Button(model.button) { submit() }
-                    .keyboardShortcut(.defaultAction)
-                    .disabled(!model.canSubmit(passphrase: passphrase, again: again, words: words))
+            if let moment = model.moment {
+                wordsMoment(moment)
+            } else {
+                confirm
             }
         }
         .padding(22)
         .frame(width: 460, alignment: .leading)
-        .interactiveDismissDisabled(model.busy)
+        // VX-308 U2: the words moment closes only past her warning (or its OK) — a stray dismissal never puts them away.
+        .interactiveDismissDisabled(model.busy || model.moment != nil)
     }
 
-    /// Exactly the fields the door's ask names (turning sync on: both; a leave: none).
+    @ViewBuilder
+    private var confirm: some View {
+        ForEach(Array(model.door.sentences.enumerated()), id: \.offset) { _, sentence in
+            Text(sentence)
+                .font(.callout)
+                // Her sentences — the primary ink, as rule 12's are on Use Standard.
+                .foregroundStyle(Self.hers.contains(sentence) ? .primary : .secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            if sentence == ProtectionWords.copiesUnderAKeyThisMacCantDelete {
+                ForEach(model.door.undeletableCopies, id: \.self) { copy in
+                    Text("\u{2022} \(copy)")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        if let gate = model.door.gate { gateChoice(gate) }
+        fields
+        if let refusal = model.refusal {
+            Text(refusal)
+                .font(.callout)
+                .alarmVoice()
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        HStack {
+            Button(ProtectionWords.accountCancel) { model.cancel() }
+                .keyboardShortcut(.cancelAction)
+                .disabled(model.busy)
+            Spacer()
+            if model.busy {
+                TravellingDotsIndicator(ink: .secondary)
+                Text(ProtectionWords.accountWorking).font(.caption).foregroundStyle(.secondary)
+            }
+            Button(model.button) { submit() }
+                .keyboardShortcut(.defaultAction)
+                .disabled(!model.canSubmit(passphrase: passphrase, again: again, words: words))
+        }
+    }
+
+    /// RULE 7's WORDS MOMENT (VX-308 U2, R-U2-5): the words she typed, shown once over the one look idiom under her
+    /// sentence; the passphrase typed — the notice that they were replaced, nothing shown (P-VX378-U2-3 (a)).
+    @ViewBuilder
+    private func wordsMoment(_ moment: RoadJoinWordsMoment) -> some View {
+        switch moment {
+        case .shown(let look):
+            Text(ProtectionWords.joinWordsSentence)
+                .font(.callout)
+                .foregroundStyle(.primary)
+                .fixedSize(horizontal: false, vertical: true)
+            WordsLookPanel(look: look, tokens: tokens)
+        case .notShown:
+            Text(ProtectionWords.joinWordsNotShown)
+                .font(.callout)
+                .foregroundStyle(.primary)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack {
+                Spacer()
+                Button(ProtectionWords.joinWordsMomentOK) { model.closeMoment() }
+            }
+        }
+    }
+
+    /// Into Castle (a join that enters it, the follow into it): Touch ID or Always ask — the crossings' own choice.
+    private func gateChoice(_ gate: RoadGateChoice) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(ProtectionWords.gateHeading)
+                .font(.callout.weight(.semibold))
+            if gate.touchIDAvailable {
+                Picker(ProtectionWords.gateHeading, selection: $model.gate) {
+                    Text(ProtectionWords.gateTouchID).tag(GateStyle.touchID)
+                    Text(ProtectionWords.gateAlwaysAsk).tag(GateStyle.alwaysAsk)
+                }
+                .pickerStyle(.radioGroup)
+                .labelsHidden()
+                .disabled(model.busy)
+            } else {
+                Text(ProtectionWords.gateAlwaysAsk)
+                    .font(.callout)
+                Text(ProtectionWords.touchIDNotSetUpOnThisMac)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Text(model.gate == .touchID && gate.touchIDAvailable
+                 ? ProtectionWords.gateTouchIDLine : ProtectionWords.gateAlwaysAskLine)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    /// Exactly the fields the door's ask names (turning sync on: both; a leave and the follow out: none; a join, Move and
+    /// the follow: ONE secret — rule 14 — either field).
     @ViewBuilder
     private var fields: some View {
         let ask = model.door.ask
+        if ask == .oneSecret {
+            let follows = model.door.door == .follow
+            PeekableSecretField(
+                label: follows ? ProtectionWords.followPassphraseField : ProtectionWords.joinPassphraseField,
+                text: $passphrase)
+                .textFieldStyle(.roundedBorder)
+            TextField(follows ? ProtectionWords.followWordsField : ProtectionWords.joinWordsField, text: $words,
+                      axis: .vertical)
+                .lineLimit(2, reservesSpace: true)
+                .autocorrectionDisabled()
+                .privacySensitive()
+                .textFieldStyle(.roundedBorder)
+                .onSubmit(submit)
+        }
         if ask.asksPassphrase {
             if model.asksNewPassphrase {
                 Text(ProtectionWords.turnOnSyncNewPassphraseLead)

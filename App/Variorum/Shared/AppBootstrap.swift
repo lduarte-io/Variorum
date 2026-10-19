@@ -1329,8 +1329,9 @@ final class AppBootstrap {
     }
 
     /// VX-308 U1 — the account section's roads on the new road. Each reads the CURRENT session at its call (a reopen
-    /// replaces it); the press runs on the open session (no reopen — none of these acts swaps the key); a landed act
-    /// re-reads the crossings (the library's account changed under them) and speaks on the status seam.
+    /// replaces it); the press runs on the open session (no reopen — none of U1's acts swaps the key; VX-308 U2's re-keying
+    /// acts take the reopening seam); a landed act re-reads the crossings (the library's account changed under them) and
+    /// speaks on the status seam.
     func accountRoads() -> RoadAccountRoads {
         let exports = exportSwitch
         let signInNow = signInNow
@@ -1346,13 +1347,18 @@ final class AppBootstrap {
                 guard let self, self.newRoad, case .ready = self.state, let session = self.roadSession else {
                     return .refused(ProtectionWords.crossingFailed)
                 }
+                // VX-308 U2 (R-U2-2): an act that re-keys (a join across postures, every follow) runs through the one
+                // reopening seam; the rest on the open session.
+                if request.shown.rekeys { return await self.accountActOnNewRoad(request) }
                 return await Task.detached(priority: .userInitiated) {
                     await ProtectionAccountRoad.press(
                         session, request: request, signIn: signInNow(), exportSwitch: exports)
                 }.value
             },
             landed: { [weak self] in await self?.roadCrossings?.refresh() },
-            receipt: { [weak self] text in self?.roadStanding?.speak?(text) })
+            receipt: { [weak self] text in self?.roadStanding?.speak?(text) },
+            // VX-308 U2 — the words moment's Copy: the Mac's one words clipboard rule (the card's own road).
+            copyWords: { Self.copyWords($0) })
     }
 
     /// **P-VX308-U1-F1's hook** (the U1 ARBITRATION's refined (b)) — the Account sheet's Delete Account landed for
@@ -1411,27 +1417,86 @@ final class AppBootstrap {
             session.endAct()
             return .changed(fresh)
         }
+        let result = await reopenAround(session, binding: binding) {
+            let result = await ProtectionCrossings.cross(
+                session, door: request.door, typed: request.typed, gate: request.gate, exportSwitch: exports)
+            var owed: [String] = []
+            if case .made(let door, _) = result.outcome {
+                // VX-308 U1: the signed-out road's crossing ends its receipt with the born-Castle sentence.
+                owed.append(request.receiptNote.map { door.receipt + " " + $0 } ?? door.receipt)
+            }
+            return (result, result.reopenKey, owed)
+        }
+        switch result.outcome {
+        case .made(_, let exportTurnedOff): return .made(exportTurnedOff: exportTurnedOff)
+        case .refused(let sentence): return .refused(sentence)
+        }
+    }
+
+    /// **THE REOPENING SEAM** — ONE for every act that re-keys the open library on the new road (VX-307 U2a's crossings;
+    /// VX-308 U2's join across postures and every follow — R-U2-2), Make this my library's seam shape, its order exactly
+    /// the crossing's: the composition root's teardown (`onWillLock` — flush, savepoint, stop), the `.ready` tree down,
+    /// the app's pool CLOSED through the binding (the swap's precondition), `act` off the main actor on the session the
+    /// caller holds (its one-act lock, released here), the receipts it owes handed to the reopened session, then the
+    /// reopen THROUGH THE NEW ROAD with the key that opens the slot now and Settings asked back to Protection, where she
+    /// acted (VX-206's road). The caller ran every check first (all reads) and holds `session.beginAct()`.
+    private func reopenAround<Result: Sendable>(
+        _ session: ProtectionRoadSession, binding: StoreBinding,
+        act: @escaping @Sendable () async -> (result: Result, reopenKey: StoreKey, owed: [String])
+    ) async -> Result {
         await onWillLock?()
         state = .opening
         protection.dropResident()
         protection.resetPerOpenDeferrals()
         protection.syncCustodySession.drop()
-        let result = await Task.detached(priority: .userInitiated) {
+        let done = await Task.detached(priority: .userInitiated) {
             binding.lock()
-            return await ProtectionCrossings.cross(
-                session, door: request.door, typed: request.typed, gate: request.gate, exportSwitch: exports)
+            return await act()
         }.value
         session.endAct()
-        if case .made(let door, _) = result.outcome {
-            // VX-308 U1: the signed-out road's crossing ends its receipt with the born-Castle sentence.
-            receiptsForNextRoadOpen.append(request.receiptNote.map { door.receipt + " " + $0 } ?? door.receipt)
-        }
-        beginOpening(unlockedKey: result.reopenKey)
+        receiptsForNextRoadOpen += done.owed
+        beginOpening(unlockedKey: done.reopenKey)
         await awaitOpen()
         protection.requestProtectionPaneForRoadCrossing()
-        switch result.outcome {
-        case .made(_, let exportTurnedOff): return .made(exportTurnedOff: exportTurnedOff)
-        case .refused(let sentence): return .refused(sentence)
+        return done.result
+    }
+
+    /// **A RE-KEYING ACCOUNT ACT** (VX-308 U2, R-U2-2 — a join that crosses postures, every follow): every check first, all
+    /// reads (`ProtectionAccountRoad.preflight` — the door RE-READ through the pane's one read, VX-108; the typed secret
+    /// against the vault that read fetched, R-U2-3 — a typo never tears the window down), the sign-in now adopted under the
+    /// act (R-2); then THE REOPENING SEAM around `ProtectionAccountRoad.perform`. The act's receipt is owed to the reopened
+    /// session when the act landed WHOLE; one that stopped past its swap is finished by that reopen's settle, which says its
+    /// Done (VX-107 — never said twice). The press answers with no receipt of its own (the reopen speaks it).
+    func accountActOnNewRoad(_ request: RoadAccountRequest) async -> RoadAccountPress {
+        guard newRoad, case .ready = state, let binding, let session = roadSession, session.writes else {
+            return .refused(ProtectionWords.crossingFailed)
+        }
+        guard session.beginAct() else { return .refused(ProtectionWords.copyDoorBusy) }
+        let exports = exportSwitch
+        let signInNow = signInNow
+        let preflight = await Task.detached(priority: .userInitiated) {
+            await ProtectionAccountRoad.preflight(session, request: request, signIn: signInNow(), exportSwitch: exports)
+        }.value
+        switch preflight {
+        case .ready:
+            break
+        case .refused(let sentence):
+            session.endAct()
+            return .refused(sentence)
+        case .changed(let fresh):
+            session.endAct()
+            return .changed(fresh)
+        }
+        return await reopenAround(session, binding: binding) {
+            let done = await ProtectionAccountRoad.perform(
+                session, request: request, signIn: signInNow(), exportSwitch: exports)
+            switch done.press {
+            case .made(let receipt, let wordsReplaced):
+                return (.made(receipt: nil, wordsReplaced: wordsReplaced), done.reopenKey,
+                        done.landedWhole ? [receipt].compactMap { $0 } : [])
+            case .refused, .changed:
+                return (done.press, done.reopenKey, [])
+            }
         }
     }
 
