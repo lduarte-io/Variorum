@@ -14,6 +14,11 @@
 //    - `RoadAccountConfirmModel` — one door's confirm: turning sync on asks exactly the door's fields (the passphrase — a
 //      NEW one typed twice where none exists — and the twelve words, checked for shape before the road is asked anything);
 //      a leave asks nothing (rule 16 — the face still confirms). A door the road found CHANGED is re-shown (VX-108).
+//      VX-308 U2: a join, Move and the follow ask ONE secret (rule 14 — the passphrase, the words, or both), into Castle
+//      with the gate choice; a join whose words were replaced turns into THE WORDS MOMENT (rule 7; R-U2-5): the words she
+//      TYPED shown over the one look idiom (`WordsLookModel` — numbered, never stored, closed behind her warning) under rule
+//      7's sentence, or — the passphrase typed — the notice that they were replaced, WITHOUT showing them (P-VX378-U2-3
+//      (a)); the sheet goes when the moment closes.
 //    - `RoadSignOutModel` — the sign-out confirm.
 //    - `RoadSignedOutCastleModel` — USE CASTLE WHILE SIGNED OUT (the signed-out screen, drafted to the current rules — her
 //      word: the 10-13 block is superseded): *Continue* runs This Mac Only (the leave — nothing typed, no key changes) and
@@ -35,6 +40,19 @@ struct RoadAccountRoads {
     var landed: @MainActor () async -> Void = {}
     /// The status seam's receipt line (`receipt_style` governs it).
     var receipt: @MainActor (String) -> Void = { _ in }
+    /// VX-308 U2 — the words moment's Copy door: the platform's ONE words clipboard rule (the bootstrap's `copyWords` —
+    /// the same road the card above the quick entry rides; no new clipboard road).
+    var copyWords: @MainActor ([String]) -> Void = { _ in }
+}
+
+/// VX-308 U2 — THE WORDS MOMENT after a join (rule 7: "your library's twelve words are now your account's twelve words;
+/// here they are; the old ones still open backups you made before today").
+@MainActor
+enum RoadJoinWordsMoment {
+    /// The words were typed at the join: shown once, over the one look idiom, under rule 7's sentence.
+    case shown(WordsLookModel)
+    /// The passphrase was typed: the words were replaced and nothing here holds them (P-VX378-U2-3 (a)).
+    case notShown
 }
 
 // MARK: - One door's confirm
@@ -48,17 +66,30 @@ final class RoadAccountConfirmModel: Identifiable {
     private(set) var busy = false
     /// Why the press did nothing (nil: nothing to say).
     private(set) var refusal: String?
+    /// VX-308 U2 — into Castle: Touch ID or Always ask (the door's preselection — the follow's own default).
+    var gate: GateStyle
+    /// VX-308 U2 — the words moment standing after a join (nil: none).
+    private(set) var moment: RoadJoinWordsMoment?
 
     @ObservationIgnored private let act: (RoadAccountRequest) async -> RoadAccountPress
-    /// `.made` → the act landed; nil → she left (nothing written).
+    /// VX-308 U2 — the act LANDED while the sheet stays for the words moment (its receipt, the pane's re-read).
+    @ObservationIgnored private let landed: ((RoadAccountPress) -> Void)?
+    /// `.made` → the act landed (and any moment is closed); nil → she left (nothing written).
     @ObservationIgnored private let finished: (RoadAccountPress?) -> Void
+    @ObservationIgnored private let copyWords: ([String]) -> Void
+    @ObservationIgnored private var landedPress: RoadAccountPress?
 
     init(
         door: RoadAccountDoorOpen, act: @escaping (RoadAccountRequest) async -> RoadAccountPress,
+        copyWords: @escaping ([String]) -> Void = { _ in },
+        landed: ((RoadAccountPress) -> Void)? = nil,
         finished: @escaping (RoadAccountPress?) -> Void
     ) {
         self.door = door
+        gate = door.gate?.preselected ?? .alwaysAsk
         self.act = act
+        self.copyWords = copyWords
+        self.landed = landed
         self.finished = finished
     }
 
@@ -84,9 +115,11 @@ final class RoadAccountConfirmModel: Identifiable {
     }
 
     func submit(passphrase: String = "", again: String = "", words wordsText: String = "") async {
-        guard canSubmit(passphrase: passphrase, again: again, words: wordsText) else { return }
+        guard moment == nil, canSubmit(passphrase: passphrase, again: again, words: wordsText) else { return }
         var typedWords: [String]?
-        if door.ask.asksWords {
+        // VX-308 U2: one secret (rule 14) — the words, when typed, checked for shape like any.
+        let oneSecretWords = door.ask == .oneSecret && !EncryptionSession.words(from: wordsText).isEmpty
+        if door.ask.asksWords || oneSecretWords {
             let words = EncryptionSession.words(from: wordsText)
             do {
                 try RecoveryPhrase.validate(words)
@@ -104,7 +137,10 @@ final class RoadAccountConfirmModel: Identifiable {
             return
         }
         var typed = TypedSecrets.none
-        if door.ask.asksPassphrase || door.ask.asksWords {
+        if door.ask == .oneSecret {
+            // Untrimmed on purpose (a passphrase may begin or end with a space); either, or both.
+            typed = TypedSecrets(passphrase: passphrase.isEmpty ? nil : passphrase, words: typedWords)
+        } else if door.ask.asksPassphrase || door.ask.asksWords {
             // Untrimmed on purpose (a passphrase may begin or end with a space).
             let typedPassphrase = door.ask.asksPassphrase ? passphrase : nil
             typed = door.newPassphrase
@@ -113,22 +149,57 @@ final class RoadAccountConfirmModel: Identifiable {
         }
         busy = true
         refusal = nil
-        let press = await act(RoadAccountRequest(door: door.door, shown: door, typed: typed))
+        let press = await act(RoadAccountRequest(
+            door: door.door, shown: door, typed: typed, gate: door.gate == nil ? nil : gate))
         busy = false
         switch press {
-        case .made:
-            finished(press)
+        case .made(_, let wordsReplaced):
+            guard wordsReplaced, door.spec.join != nil, door.spec.join != .setsUpInLibrarysMode else {
+                finished(press)
+                return
+            }
+            // RULE 7's moment (R-U2-5): the act landed — its receipt and the pane's re-read now; the sheet stays.
+            landedPress = press
+            landed?(press)
+            await openMoment(typedWords: typed.words)
         case .refused(let sentence):
             refusal = sentence
         case .changed(let fresh):
             door = fresh
+            if fresh.gate?.touchIDAvailable == false { gate = .alwaysAsk }
             refusal = ProtectionWords.crossingDoorChanged
         }
     }
 
-    /// The confirm's way out — nothing written.
+    /// THE WORDS MOMENT: the typed words shown over the one look idiom (they are the account's words now — and the
+    /// library's), held only by the look while shown; the passphrase typed, the notice alone.
+    private func openMoment(typedWords: [String]?) async {
+        guard let words = typedWords else {
+            moment = .notShown
+            return
+        }
+        let look = WordsLookModel(
+            saysRuleSix: false, passphraseExists: { false }, mint: { _ in .minted(words) }, copy: copyWords,
+            recorded: { [weak self] in self?.closeMoment() })
+        moment = .shown(look)
+        await look.open()
+    }
+
+    /// The moment closed (past the look's warning, or the notice's OK): the words forgotten with the look; the sheet goes.
+    func closeMoment() {
+        guard moment != nil else { return }
+        moment = nil
+        finished(landedPress)
+    }
+
+    /// The confirm's way out — nothing written. (With the moment standing the act already landed: its way out is the
+    /// moment's close — a window closing under it closes it.)
     func cancel() {
         guard !busy else { return }
+        if moment != nil {
+            closeMoment()
+            return
+        }
         finished(nil)
     }
 }
@@ -258,15 +329,25 @@ final class RoadAccountModel {
         let roads = roads
         let presenter = presenter
         var id: UUID?
+        // A landed act's receipt is spoken ONCE and the pane re-read — at the landing, or (no words moment) at the close.
+        var landedOnce = false
+        let land: (RoadAccountPress) -> Void = { [weak self] press in
+            guard !landedOnce else { return }
+            landedOnce = true
+            if case .made(let receipt?, _) = press { roads.receipt(receipt) }
+            Task {
+                await self?.refresh()
+                await roads.landed()
+            }
+        }
         let confirm = RoadAccountConfirmModel(
-            door: open, act: { request in await roads.press(request) },
+            door: open, act: { request in await roads.press(request) }, copyWords: roads.copyWords, landed: land,
             finished: { [weak self] press in
                 if let id { presenter.dismiss(id) }
-                guard let self else { return }
-                if case .made(let receipt?, _)? = press { roads.receipt(receipt) }
-                Task {
-                    await self.refresh()
-                    if press != nil { await roads.landed() }
+                if let press {
+                    land(press)
+                } else {
+                    Task { await self?.refresh() }
                 }
             })
         id = confirm.id
