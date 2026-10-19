@@ -111,6 +111,7 @@ struct RoadAccountWordsTests {
             ProtectionWords.thisMacOnlyLead, ProtectionWords.thisMacOnlyReceipt, ProtectionWords.accountWorking,
             ProtectionWords.accountActUnfinished, ProtectionWords.signedOutCastleLead,
             ProtectionWords.signedOutCastleWholeAccount, ProtectionWords.bornCastleNote,
+            ProtectionWords.signInUnavailable, ProtectionWords.signInUnavailableClose,
         ]
         for line in lines {
             let shouting = line.split(whereSeparator: { !$0.isLetter }).filter { word in
@@ -118,5 +119,13 @@ struct RoadAccountWordsTests {
             }
             #expect(shouting.isEmpty, "\(line) — \(shouting)")
         }
+    }
+
+    /// The ladder's round-1 NIT-1: the sign-in sheet with no app services to sign in through says what is TRUE of that
+    /// hole (PROVISIONAL, as drafted) — never the vault-unreachable sentence, which describes another state.
+    @Test func theSignInHoleSaysWhatIsTrueOfIt() {
+        #expect(ProtectionWords.signInUnavailable == "Signing in isn't available in this window.")
+        #expect(ProtectionWords.signInUnavailable != ProtectionWords.doorRefusedNeedsVault)
+        #expect(ProtectionWords.signInUnavailableClose == "Close")
     }
 }

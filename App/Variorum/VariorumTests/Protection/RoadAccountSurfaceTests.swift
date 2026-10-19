@@ -81,6 +81,23 @@ struct RoadAccountSurfaceTests {
         #expect(!rest.contains(".task { await roadStanding?.account?.refresh() }"), "no second read of its own")
         #expect(rest.components(separatedBy: ".protectionSheets(").count == 2, "one host on the pane")
     }
+
+    /// The ladder's round-1 NIT-1 (source pin — the host's sheet arms are not reachable before hosting): the sign-in sheet
+    /// asked for with NO app services says what is true of that hole, closes through the host's dismissal, and never says
+    /// the vault-unreachable sentence (another state's). Red on the pre-fix host by construction (its arm said that).
+    @Test func theSignInSheetsServicesHoleSaysWhatIsTrue() throws {
+        let source = try String(
+            contentsOf: URL(fileURLWithPath: #filePath)
+                .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+                .appendingPathComponent("Variorum/Features/Protection/RoadAccountSheet.swift"),
+            encoding: .utf8)
+        let arm = try #require(source.range(of: "case .signIn:"))
+        let end = try #require(source.range(of: "extension View {", range: arm.upperBound..<source.endIndex))
+        let signIn = String(source[arm.upperBound..<end.lowerBound])
+        #expect(signIn.contains("Text(ProtectionWords.signInUnavailable)"))
+        #expect(signIn.contains("Button(ProtectionWords.signInUnavailableClose) { presenter?.hostDismissed(host) }"))
+        #expect(!signIn.contains("doorRefusedNeedsVault"), "never another state's sentence")
+    }
 }
 
 /// The bootstrap's composition of the one presenter and the account roads (a new-road bootstrap over the PLANTED road —

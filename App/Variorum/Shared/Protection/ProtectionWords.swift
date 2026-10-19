@@ -560,6 +560,10 @@ nonisolated enum ProtectionWords {
     /// An account act stopped mid-plan (its act stays in flight; the next open settles it — rule 20).
     static let accountActUnfinished = "Variorum couldn't finish this just now. It finishes the next time your library "
         + "opens."
+    /// The sign-in sheet asked for where this window has no app services to sign in through — a composition hole the
+    /// shipped composition never leaves (the ladder's round-1 NIT-1: said plainly, never another state's sentence).
+    static let signInUnavailable = "Signing in isn't available in this window."
+    static let signInUnavailableClose = "Close"
 
     /// USE CASTLE WHILE SIGNED OUT — the signed-out screen, drafted to the CURRENT rules (`assess`: the one plain road,
     /// This Mac Only, stands in Use Castle's place; rule 16: that leave changes no key or secret; P-VX378-U2-2: Use Castle's

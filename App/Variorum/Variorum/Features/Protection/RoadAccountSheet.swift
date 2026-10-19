@@ -381,8 +381,22 @@ struct ProtectionSheetsHost: ViewModifier {
                 if let services {
                     AccountView(services: services, initialTab: .account)
                 } else {
-                    Text(ProtectionWords.doorRefusedNeedsVault)
-                        .padding(22)
+                    // The ladder's round-1 NIT-1: a composition hole (the shipped composition always passes the services)
+                    // says what is true of it — never another state's sentence — and Close is the host's dismissal.
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text(ProtectionWords.signInUnavailable)
+                            .fixedSize(horizontal: false, vertical: true)
+                        HStack {
+                            Spacer()
+                            Button(ProtectionWords.signInUnavailableClose) { presenter?.hostDismissed(host) }
+                                .keyboardShortcut(.defaultAction)
+                        }
+                    }
+                    .padding(22)
+                    .frame(width: 360, alignment: .leading)
+                    .onAppear {
+                        ProtectionOpenRoad.log("road: the sign-in sheet was asked for with no app services — a composition hole")
+                    }
                 }
             }
         }
