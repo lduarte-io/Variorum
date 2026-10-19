@@ -1757,7 +1757,21 @@ HARNESS: U1's scratchpad package `u1-harness` (the recipe in the U1 RECORD's COU
   written; Resume's clear lifts it. Pins now 4 (+ the pure hold-back, + the sentence as drafted): with the crossing suites
   headless `✔ Test run with 27 tests in 4 suites passed`. MUTATION M-F4-1 (the `synced` guard dropped — every open door
   held) → `✘ aLocalLibrarysUseCastleStaysOpenUnderTheHold` (1 issue); restored by `git checkout --`, `cmp`-identical.
-- Piece 2 — NIT-R2-1 (the mark by library): NOT-STARTED — R-U4-4; red by behavioural revert (the key ignoring the id).
+- Piece 2 — NIT-R2-1 (the mark by library): DONE (`c7025e8fc`). R-U4-4 built: `ScheduledExportSwitch`'s mark closures take
+  the library's id; `ExportNoticeMark` (`ProtectionCrossingActs.swift` — `variorum.calmAsks.exportOffNotice.<libraryID>.owed`)
+  is the one home the production switch runs (`AppBootstrap.markdownInsuranceSwitch`, both domains;
+  `AppBootstrap.exportNoticeOwedKey` retired into `ExportNoticeMark.legacyKey`); every reader and writer names the library
+  (Use Castle's and the account acts' mark — the id captured before the act, a crossing never changes it — the refusal's
+  clear, the ready's reconcile, *OK*, *Turn it back on*, and the pane's read/dismiss through the OPEN library's id). THE
+  EXISTING MARK MIGRATES (not re-derived — the mark exists precisely because the state cannot be re-derived: her later
+  choice): the first library whose mark is consulted adopts an earlier build's unkeyed mark and the legacy key is
+  removed. The in-memory test switch (`PlantedExportSwitch`) is keyed, its any-library reading kept for the one-library
+  suites (two call sites in `ProtectionCrossingRoadTests` name the id). Pins `ExportNoticeByLibraryTests` (3) — with the
+  crossing, join/follow, crossing-model and F-4 suites headless `✔ Test run with 40 tests in 5 suites passed`. RED BY
+  BEHAVIOURAL REVERT (each on `c7025e8fc`, restored by `git checkout --`, `cmp`-identical): R1 — the key ignoring the id (one
+  mark per domain, the pre-fix behaviour) → `✘ anotherLibrarysReadyNeverClearsANoticeItDidNotWrite` (B's ready and B's *OK*
+  cleared A's notice) + the migration and key pins red; R2 — the migration skipped → `✘
+  anEarlierBuildsUnkeyedMarkMigratesOntoTheFirstLibraryConsulted` (5 issues).
 - Piece 3 — VX-445 (the lock): NOT-STARTED — R-U4-1..3; the pure policy + the session's drop headless, the bootstrap's
   lock and the controller's hook through Mac route pins (BUILT; the RUN the orchestrator's).
 - Piece 4 — the close: NOT-STARTED.
