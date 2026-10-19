@@ -1236,11 +1236,23 @@ NSLock (the provider's idiom); the crash itself is the red-on-old in effect; the
 in 3 suites`. 0 instances at release; the stage released with the result line. **U2 IS CLOSED but for the walk and
 the ladder.**
 
-### U3 RECORD — THE KEY DOORS' FACES + VX-447 + VX-448 (Opus implementer, 2026-10-19; VX-418's key doors + VX-447 + VX-448 + the F-U2-3 guard — IN PROGRESS)
+### U3 RECORD — THE KEY DOORS' FACES + VX-447 + VX-448 (Opus implementer, 2026-10-19; VX-418's key doors + VX-447 + VX-448 + the F-U2-3 guard — BUILT; the Mac suites and the walk PENDING)
 
-**Not done in U3, first:** (filled at the close — PENDING) No Mac suite RUN, no walk, no Debug launch, no store touch
-(the brief: headless + `build-for-testing` only — the Mac batch and the walk are the orchestrator's). Today's road
-untouched (its key doors and its 60-second clipboard rule retire with it at VX-329 — R-U3-6).
+**Not done in U3, first:**
+- **No Mac suite was RUN and no walk was made** (the brief: headless + `build-for-testing` only — no `xcodebuild test`, no
+  stage, no Debug launch, no store touch). Two Mac-only suites are BUILT (`RoadKeyDoorSurfaceTests`,
+  `WordsClipboardLockRouteTests`); every other new suite ran HEADLESS. The list and the walk recipe below are the
+  orchestrator's. No live network call anywhere; the dev store, the real store and `/Applications` untouched.
+- **A CORE CUSTODY LINE WAS WRITTEN (piece 1 — VX-447's arm, PROVISIONAL P-VX308-U3-1 — the Fable ladder reads it):**
+  `KeyDoors.swift` only (the reasoning line by line under THE CORE LINE below); zero `Sync/`, `Server/`, schema or
+  dependency lines; `lockstepVersion` 13.
+- **VX-448's clear AT THE LOCK walks with U4** — the new road has no lock yet (`canLock` false); the clear sits where U4's
+  lock lands (`finish`'s non-ready arm — F-U3-3) and is pinned through `AppBootstrap` (a reopen landing in the lobby).
+- **Castle unsynced in rule 27's state is NOT widened** (P-VX308-U3-1 (b) is the alternative): the banner keeps her U2-7
+  words there with no door.
+- **Today's road is untouched**: its key doors (`KeyDoorView`) and its 60-second `WordsClipboard.copy` retire with it at
+  VX-329 (R-U3-6). **The phone** has no key doors, no banner door and no concealed clipboard (F-U3-7 — MOBILE PARITY).
+- The canon delta (SurfaceContracts' protection line — F-U3-8) and the QUESTIONS bundle rows are the closeout's.
 
 **Preflight (complete, not delegated):** CLAUDE.md + its canon; the resiliency protocol; CastleRules WHOLE; SyncSpec WHOLE
 (the arm writes a custody file and, synced, rides the key door's one vault write — no `Sync/` line); SurfaceContracts (the
@@ -1401,8 +1413,260 @@ kept" precedent), the test support (`PlantedRoad`, `ProtectionAccountSupport` �
   the pre-VX-448 bootstrap cleared nothing at the lock). `xcodebuild … build-for-testing` → `** TEST BUILD SUCCEEDED **`
   (one needless `try` in the new route pin dropped after it; no other warning in a touched file). THE WHOLE HARNESS:
   `✔ Test run with 255 tests in 39 suites passed` (the 225/34 baseline + 30/5 new).
-- Piece 7 — THE CLOSE (counts, builds, the Mac-suite list, the walk recipe, PROVISIONALs, findings): NOT-STARTED.
+- Piece 6b — THE LOOK ADOPTS THE SIGN-IN NOW: DONE (`15e2979a8`). Self-review found the New Words door's look (U2b's
+  `mintFreshWords`) never adopted the sign-in NOW (U1's R-2) — a synced look after a sign-in made since the open would
+  refuse "signed out". `mintFreshWords(session:passphrase:signIn:)` adopts it under its one-act lock (nil — every earlier
+  caller — keeps the executor's); `RoadStandingModel.make` takes the bootstrap's `signInNow`, every look's mint reading it
+  off the main actor. Pinned in `NoKeyFileDoorTests.aSyncedLibrarysLookSaysTheAccountLineBeforeMinting` (an executor
+  carrying a stale signed-out sign-in); MUTATION (the adoption removed) → `✘ … 2 issues`, restored `cmp`-identical.
+- Piece 6c — P-2 FOR THE BANNER'S DOOR: DONE (`052250050`). Castle unsynced (where the core's arm still refuses) keeps
+  her U2-7 banner with NO door (`RoadStandingModel.make` clears `noKeyFileDoor` there). Pin
+  `NoKeyFileDoorTests.castleUnsyncedKeepsHerBannerWithNoDoor` (no door; a look from another home refuses; nothing
+  written); MUTATION (the gate removed) → `✘ … 2 issues`, restored `cmp`-identical. (`cee78df07`: one redundant `#require`
+  — the final build's one warning in a touched file — dropped.)
+- Piece 7 — THE CLOSE: DONE (this commit) — the core line, the counts, the Mac-suite list, the walk recipe, the
+  PROVISIONALs and the findings below.
 - No revert is in flight.
+
+**THE CORE LINE, LINE BY LINE (`Sources/VariorumCore/Protection/Executor/Acts/KeyDoors.swift`, the unit's ONLY core file —
+`git diff 8e465f7ea 577bd53dc -- Sources/`; for the Fable ladder):**
+1. `KeyDoorProgram.mintsKeyFile` (default false) + `needsLiveKeyFile { !mintsKeyFile }`: the runner's up-front
+   `noLiveKeyFile` refusal (`PlanRunner.perform`) is lifted ONLY for an act `regenerateWords` constructed with it — and it
+   constructs it only after `keyFileGoneEverywhere` read true. Change and Reset construct none → their precheck is
+   byte-unchanged (`true`, the protocol default's own value for those acts). The registry's `program(for:)` builds the
+   program WITHOUT it, so a RESUME never mints (see F-U3-2: a words act cannot resume past its begin anyway — no words at a
+   settle).
+2. The `"keyFile"` step mints ONLY when `mintsKeyFile` AND the act is `.regenerateWords` AND `keyFileGoneEverywhere` reads
+   true AT THE STEP (re-read, not trusted from the press — a file written back meanwhile, a mirror restored, means the
+   ordinary arm). Otherwise it falls through to the unchanged guard (a stray in the live place → `noLiveKeyFile`, as before).
+3. `mintKeyFile`: `KeyFile.building` (the creation's own builder — a NEW file for a key with no past) over the record's
+   `libraryID`, the CURRENT key (`ctx.library.key` — never a new key, rule 6) and the record's `keyEpoch`; locks = the new
+   words (always — `building` refuses a file the words would not open, rule 2), the passphrase only where the door verified
+   one (synced: the vault's descriptor — one descriptor names one passphrase), and synced the master with the vault's
+   twelve-words copy AFTER this act's own vault write (`freshVaults` — `noteFresh(written)`; a vault the new words don't
+   open refuses `needsFreshVault` rather than writing a file the master can't open). No Apple lock (the key doors re-lock
+   nothing else; the next open's `landAppleWrap` / `remakeAppleRoad` re-makes it in Standard — rule 8) and no history
+   (every copy that carried rule 4's list is gone — the state itself). Written through the executor's one key-file write;
+   the `"memory"` step then makes it this Mac's sealed mirror (rule 1's second home back).
+4. `regenerateWords` computes `mints` AFTER `keyDoorParameters` (the synced gates — signed in as the account, a fresh
+   vault, the account not moved — run first, unchanged) and BEFORE the secret: the everyday path short-circuits at
+   `library.keyFile == nil` (false) with NO extra read.
+5. The nil-passphrase arm, minting: Standard AND unsynced only (the reset door's plain confirm, twinned — P-VX307-U2b-1's
+   exact twin: this Mac holds the key, the library is open, and no lock survives anywhere to verify a passphrase); Castle
+   unsynced and every synced library refuse `secretMissing` exactly as before. Not minting: the U2b guard byte-unchanged.
+6. The passphrase arm: synced, verified against the vault exactly as before (`passphraseDoesNotOpen` on a wrong one), then
+   `mintsKeyFile: mints && synced`; unsynced, `verifiedPassphrase(against: nil)` refuses `passphraseDoesNotOpen` before any
+   write (unchanged — nothing can verify a passphrase there).
+7. `keyFileGoneEverywhere` (READS only) — `Assess.repairs`' first `Fault.noKeyFileAnywhere` arm restated over the leaves:
+   NOTHING in the live place (the in-hand copy AND a fresh disk read — a stray is the fault's second arm, never widened:
+   a mint would write over it, rule 21); no sealed mirror of the current key (the in-hand memory AND every remembered item
+   read AS STATED — even an unverified copy refuses the mint: rule 1's restore is its road); no catalogued key file of this
+   library carrying the current key (rule 21's offer is its road). A throwing read refuses (never a guess). Any copy
+   anywhere means the history it carries is not lost — no fresh file over it.
+Pins: `FileLessWordsTests` (6 / 7 cases) red on the pre-arm tree (3 issues) and green after; every guard red under its own
+mutation (M1–M5, piece 1). The whole core suite green (below).
+
+**THE FACES AS BUILT (for the ladder):** the pane's one read (U1's `ProtectionPaneRead.read`) feeds `RoadKeyDoorFaces.derive`
+(`ProtectionKeyDoorRoad.read`); `RoadKeyDoorsModel` (bootstrap-owned beside the account section; `AppBootstrap
+.keyDoorRoads`) presents `.keyDoor(RoadKeyDoorConfirmModel)` through the ONE presenter; the press (`ProtectionKeyDoorRoad
+.press`, off-main) runs the core's act on the OPEN session — no swap, so no reopening seam. NEW WORDS is the Settings
+words section's door (`WordsLookSection`, handed the key doors' model) over U2b's look; every look (card · Settings · tour
+· banner) asks by the core's fact (`lookAsksPassphrase`), says F-U2-3's line first when synced, adopts the sign-in now
+(`mintFreshWords(…, signIn:)`) and reports its refusals in the pane's idiom (`lookRefusal`). VX-447's banner
+(`ProtectionRoadBar`) reads `RoadStandingModel` (`showsNoKeyFileBanner` / `offersNoKeyFileDoor` / `openNoKeyFileLook` /
+`mintLanded` — the backup pair through `ProtectionBackupHook.takePair`, moved verbatim to `ProtectionBackupPair.swift`).
+VX-448: `WordsClipboard.copyConcealed` / `clearHeld` — the bootstrap's one `copyWords`, `finish`'s non-ready arm, the
+delegate's `applicationWillTerminate`. Today's road: every new line sits behind `newRoad` / `roadStanding` / the new road's
+models (nil on today's road), or is a no-op there (`clearHeld` holds nothing today's road ever copies).
+
+**COUNTS (the final tree — `cee78df07` + this record):**
+- HEADLESS HARNESS (U1's scratchpad package `u1-harness` pointed at this worktree; it now also symlinks
+  `Shared/WordsCopyDoor.swift` with two one-line stand-ins for its SwiftUI door's app types and `ProtectionCopy
+  .wordsCopied`/`.wordsCopyAll`, and this unit's new `Shared/Protection` files + suites): **`✔ Test run with 256 tests in 39
+  suites passed`** (the 225/34 baseline + 31/5 new: `RoadKeyDoorWordsTests` 5, `WordsConcealedClipboardTests` 4,
+  `NoKeyFileDoorTests` 8, `RoadKeyDoorRoadTests` 11, `RoadKeyDoorsModelTests` 3).
+- CORE: the protection set (U1's 82-suite filter + `FileLessWordsTests`) Debug **`✔ Test run with 340 tests in 83 suites
+  passed`**; Release (`swift test -c release`) **`✔ Test run with 316 tests in 79 suites passed`**; THE FULL CORE SUITE,
+  Debug (`swift test`): VariorumCoreTests **`✔ Test run with 3317 tests in 431 suites passed after 204.551 seconds`**, the
+  third target `✔ 40 tests in 6 suites`, VariorumMCPTests `✘ 383 tests in 71 suites … with 1 issue` — the ONE recorded
+  VX-353 wall-clock flake (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, 18.7 s
+  vs 15 s under the full parallel run); alone `✔ 3 tests in 1 suite`; no MCP line in this diff.
+- MUTATIONS (each on a committed tree, restored by `git checkout --`, `cmp`-identical to a pre-mutation copy): piece 1 M1–M5
+  (the arm's five guards) · piece 2 (VX-263's line) · piece 3 (the pre-VX-448 wiring, behavioural) · piece 4 (the pre-arm
+  core, behavioural; MF1 the stale-stamp ask; MF2 the account line) · piece 5 MK1–MK5 · 6b (the adoption) · 6c (the
+  gate). Every one red.
+- `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx308
+  build-for-testing` → `** TEST BUILD SUCCEEDED **` (no warning in a touched file after `cee78df07`); the phone `-scheme
+  VariorumMobile -destination 'generic/platform=iOS Simulator' … build` → `** BUILD SUCCEEDED **`; **the Release check
+  `-configuration Release build` → `** BUILD SUCCEEDED **`**.
+- `SyncSchema.lockstepVersion` 13; zero `Sync/`, `Server/`, schema, migration or dependency lines.
+
+**THE MAC SUITES THE ORCHESTRATOR RUNS UNDER THE STAGE (from `App/Variorum/`; PENDING):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx308 test \
+  -only-testing:VariorumTests/RoadKeyDoorSurfaceTests \
+  -only-testing:VariorumTests/WordsClipboardLockRouteTests \
+  -only-testing:VariorumTests/RoadKeyDoorWordsTests \
+  -only-testing:VariorumTests/WordsConcealedClipboardTests \
+  -only-testing:VariorumTests/NoKeyFileDoorTests \
+  -only-testing:VariorumTests/RoadKeyDoorRoadTests \
+  -only-testing:VariorumTests/RoadKeyDoorsModelTests \
+  -only-testing:VariorumTests/WordsBandSurfaceTests \
+  -only-testing:VariorumTests/WordsBandTests \
+  -only-testing:VariorumTests/WordsCopyDoorTests \
+  -only-testing:VariorumTests/ProtectionWordsVX307Tests \
+  -only-testing:VariorumTests/ProtectionWordsPlanTests \
+  -only-testing:VariorumTests/RoadAccountWordsTests \
+  -only-testing:VariorumTests/ProtectionBackupHookTests \
+  -only-testing:VariorumTests/MakeMineRouteTests \
+  -only-testing:VariorumTests/ProtectionSheetPresenterTests \
+  -only-testing:VariorumTests/RoadAccountSurfaceTests \
+  -only-testing:VariorumTests/ProtectionAccountRouteTests \
+  -only-testing:VariorumTests/RoadJoinFollowSurfaceTests \
+  -only-testing:VariorumTests/RoadJoinFollowModelTests \
+  -only-testing:VariorumTests/RoadCrossingSurfaceTests \
+  -only-testing:VariorumTests/ProtectionRule27FaceTests \
+  -only-testing:VariorumTests/ProtectionOpenRoadPlantedTests \
+  -only-testing:VariorumTests/ProtectionReminderRoadTests \
+  -only-testing:VariorumTests/PassphraseReminderTests \
+  -only-testing:VariorumTests/ProtectionRoadRouteTests \
+  -only-testing:VariorumTests/ProtectionFacesRouteTests \
+  -only-testing:VariorumTests/ProtectionPaneRoadRowTests \
+  -only-testing:VariorumTests/VX379PaneRowsTests \
+  -only-testing:VariorumTests/ProtectionSurfaceRenderTests \
+  -only-testing:VariorumTests/LibraryWordsCardTests \
+  -only-testing:VariorumTests/TourEndCardTests \
+  -only-testing:VariorumTests/AppBootstrapOffMainTests \
+  -only-testing:VariorumTests/StoreLaunchRouteTests \
+  -only-testing:VariorumTests/SettingsLockCloseTests \
+  -only-testing:VariorumTests/VX206ProtectionLandingTests \
+  -only-testing:VariorumTests/VX310TodayLobbyWitnessTests \
+  -only-testing:VariorumTests/QuitDoorTests \
+  -only-testing:VariorumTests/TravellingDotsIndicatorTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/StatusSeamVocabularyTests
+```
+The first seven are U3's (5 + 1 + 5 + 4 + 8 + 11 + 3 = **37 tests**; `WordsClipboardLockRouteTests` drives a planted
+new-road bootstrap — no keychain — and is VX-448's lock clear red on old by construction; `WordsConcealedClipboardTests`
+and `RoadKeyDoorSurfaceTests` use PRIVATE named pasteboards only). Then the suites over the files this unit touched — the
+words band and its look (the flipped bootstrap source pin in `WordsBandSurfaceTests`), today's `WordsClipboard.copy` (its
+pins untouched), the bar's words pins, the moved pair road, the presenter's new case, the account section's host and
+bootstrap route (`finish` touched), U2's join moment (the look's init grew a default), the pane's composition pins, the open
+road and the reminder, the bootstrap neighbours, the delegate (`QuitDoorTests`), the source pins over edited files.
+`VX310TodayLobbyWitnessTests` still reports its KNOWN ISSUES (a pass of either is a FAILURE); read the `skipped:` lines.
+
+**THE WALK RECIPE (the orchestrator's, under a held stage claim; the DEV STORE only; light and dark where a face changed;
+no account needed — the synced arms stand on the planted vault):**
+0. Zero Debug instances (by PATH; `/Applications` never touched). Build + launch as U1's recipe row 0 (the walk's project
+   door is NOT needed). `source ~/.variorum/dev-castle.env` and `export` the passphrase (never echoed). Expected: the dev
+   library local, Standard, the dev passphrase set.
+1. **The key doors on the dev library.** Settings ▸ Protection: *Your passphrase* — *Change passphrase…* · *Reset forgotten
+   passphrase…*; *Your twelve words* — *Record your twelve words…* with *Your current secrets open everything you've made
+   of this library.* beneath (DO NOT press the words door on the dev library — F-U2b-5). Capture (light, dark).
+2. *Change passphrase…* → the sheet: VX-263's line in the primary ink, *Current passphrase*, *New passphrase*, *Again*. A
+   WRONG current → *That passphrase doesn't open this library.* in place, the sheet stays. The dev passphrase as current, a
+   TEMP new one twice → the status line *Your passphrase is changed.* Then *Change passphrase…* again: current = the TEMP,
+   new = the dev passphrase twice (the dev value restored — `dev-castle.env` stays true). Capture each. Log: `road:
+   changePassphrase — the current key re-locked (…)`.
+3. *Reset forgotten passphrase…* (Standard): the line + *This Mac holds your library's key, so you can choose a new
+   passphrase without the old one.*; new = the dev passphrase twice → *Your passphrase is reset.* Capture.
+4. **VX-448 on a THROWAWAY library B** (U2b's walk row 1 machinery — A aside whole into `~/vx308-walk/A`): launch → *Start a
+   New Library* → B. The card's sentence → the words shown → *Copy* → the caption *Copied. Your clipboard keeps them until
+   you copy something else, your library locks or Variorum quits.* (capture). Read the board's types WITHOUT printing the
+   words: `osascript -l JavaScript -e 'ObjC.import("AppKit"); ObjC.deepUnwrap($.NSPasteboard.generalPasteboard.types)'` →
+   includes `org.nspasteboard.ConcealedType`. Wait 70 s → `pbpaste | wc -w` → 12 (no timer). *I've written them down* →
+   *Close*. QUIT (⌘Q) → `pbpaste | wc -c` → 0 (cleared at quit). (The lock's clear walks with U4's lock — F-U3-3.)
+5. **VX-447 on B** (B has no passphrase): quit; move B's live key file (`variorum-library-keys.json`) AND B's backup folder
+   (`Backups/<B's library8>/`) aside into `~/vx308-walk/B-keys/`; launch with `VARIORUM_WALK_FORGET=memory` (forgets this
+   Mac's memory item ONCE before the route — U2a's walk switch) → B opens by its silent item → the bottom bar: *Variorum
+   opened your library, but found no key file for it anywhere.* + *Click here to record your twelve words — Variorum makes
+   a new key file with them, then a backup.* Capture (light, dark). Click → the words in the bar AT ONCE (nothing asked) →
+   *I've written them down* → *Close* → the bar gone; the status line *Your library has a key file again, and a backup holds
+   a copy.* Log: `regenerateWords: no key file anywhere — a fresh one minted …`, `road: VX-447 — the fresh key file stands;
+   the backup follows`, `backup pair: written under …`. Beside B a fresh `variorum-library-keys.json` (`grep -c` for any
+   word → 0) and a new pair under `Backups/<B8>/<mac8>/`. Quit → relaunch (no switch) → no banner. Capture.
+6. **Posture after the window:** B (and `~/vx308-walk/B-keys`) aside, A back (rule 21's different-library notice once →
+   OK); the dev pair unchanged (changed and changed back, reset to the same value); the general pasteboard empty;
+   `rm -r ~/vx308-walk` at closeout.
+
+**PROVISIONALs (each built as its option (a); for the orchestrator to bundle under QUESTIONS at the closeout — the shared
+ledger is the merging session's):**
+- **P-VX308-U3-1 — VX-447's core arm (A CORE LINE):** (a) BUILT — `regenerateWords` mints the key file it locks exactly in
+  rule 27's FIRST-ARM state, asking what the state can still check (Standard unsynced: nothing — the plain-confirm twin;
+  synced: the account's passphrase against the vault), the fresh file carrying no history and no Apple lock; Castle
+  unsynced refuses (the banner keeps her U2-7 words with no door); a stray or any copy anywhere means no mint; (b) Castle
+  unsynced by `ResetAuthorization.touchID`'s twin (its item for the current key exists — the press that opened it) — it
+  would leave a Castle library with no passphrase lock whose *Set a passphrase…* row refuses in Castle (its road: Reset by
+  Touch ID or the words); (c) no core line — the banner door says the act cannot proceed (her ruling against).
+- **P-VX308-U3-2 — the undrafted words** (`ProtectionWords`' VX-308 U3 section): the key doors' names, titles, fields,
+  buttons, receipts and leads (*This Mac holds your library's key, so you can choose a new passphrase without the old
+  one.*; *Confirm it's you with your twelve words [or Touch ID], then choose a new passphrase.*); the synced rule-7 line;
+  *Your passphrase* (the section); F-U2-3's line; the banner door line, the open-library account sentence (F-U2c-5), the
+  remade receipt (both forms); the new Copy caption. As drafted (pinned): VX-263's one line (the plan's own drafting —
+  hers to keep or redraft); her U2-7 first sentence reused byte for byte. (b) blank until her sitting; (c) other words.
+- **P-VX308-U3-3 — ONE new-words door (R-U3-5):** (a) BUILT — the Settings words section's door IS rule 7's new-words
+  door, now reading `.newWords` (its refusal in place), its label kept *Record your twelve words…* (the ✕'s toast names
+  it), VX-263's line beneath; (b) a second *New words…* door in the passphrase section (two doors for one act); (c) relabel
+  the words door *New words…*.
+- **P-VX308-U3-4 — the passphrase doors' gating and home:** (a) BUILT — a *Your passphrase* section with Change and Reset
+  only where a passphrase exists (the core's fact) AND the key's live file stands; VX-306's *Set a passphrase…* row in
+  their place otherwise; (b) both always rendered (a refusal line when none); (c) the doors inside the crossings' section.
+- **P-VX308-U3-5 — Castle's forgot road by Touch ID is a PRESS at the door** (a read of this Mac's Touch ID item — it
+  prompts; today's road's presence confirm kept, design §3.9): (a) BUILT; (b) no press — the core's `.touchID` reads the
+  open as the press (a Touch ID button that never prompts).
+- **P-VX308-U3-6 — where VX-263's line is said:** (a) BUILT — each passphrase door's confirm (first, the primary ink) and
+  beneath the New Words door; (b) once for the section; (c) in the receipts.
+- **P-VX308-U3-7 — VX-447's door and its backup:** (a) BUILT — her U2-7 first sentence then the door line, the look INLINE
+  in the bottom bar; "the backup follows" = rule 5's PAIR through its one road right after the mint (the face's — never a
+  plan step that could fail the mint and lose the words before they show), one receipt; the banner retires at the look's
+  close; (b) the door opens Settings ▸ Protection's words section; (c) the backup as the app's Back Up Now (today's flat
+  snapshot to both destinations + the hook's pair).
+- **P-VX308-U3-8 — VX-448's "lock"** = the library closing behind the lobby (`finish`'s non-ready arm — where U4's lock
+  lands): (a) BUILT; (b) also the Mac's screen lock; (c) also every teardown (a crossing's reopen).
+- **P-VX308-U3-9 — the new Copy caption** (*Copied. Your clipboard keeps them until you copy something else, your library
+  locks or Variorum quits.* — in Standard the library never locks, so quit is its clear): (a) BUILT; (b) *Copied.* alone;
+  (c) no caption.
+- **P-VX308-U3-10 — F-U2-3's line on the look's ask:** (a) BUILT — a synced look ALWAYS asks (the account's passphrase — the
+  core asks it anyway) with the line above the field, her *Show my twelve words* the yes; (b) a separate confirm step
+  before the ask; (c) the line on the card's offer itself, before the click.
+
+**FINDINGS AND HAND-FORWARDS (routed, not fixed here):**
+- **F-U3-1 (an `assess` gap — for the architect / the ladder; a core line, Fable's):** on a SYNCED library while SIGNED OUT,
+  `assess` OPENS the three key doors (their gate refuses another account, a follow owed and a missing fresh vault IN SYNC —
+  not signed out); the act refuses `signedOutUseThisMacOnly`, said in the pane's idiom at the press (*You're signed out of
+  this library's account. Sign in first.*). Options: `assess` refuses `.signedOutUseThisMacOnly` for the key doors (the
+  crossings' precedent); or accept (the press says it).
+- **F-U3-2 (a ticket at closeout — Bug, Suspected, Castle & sync; PRE-EXISTING, every key door):** a key-door act
+  (`regenerateWords` above all) whose process dies after its begin and before its key-file step cannot be finished by the
+  next open's settle — a settle has no typed secrets (`secretsRequired` throws out of `resume`, not an `ActRollback`), so
+  the act stays in flight and every later act refuses `actInFlight`. The file-less arm inherits it (no worse). Options:
+  a key door's resume that lacks its secrets ROLLS BACK (no key changed — rule 20's "the old state"); or accept.
+- **F-U3-3 (U4 hand-forward):** VX-448's lock clear sits in `AppBootstrap.finish`'s non-ready arm (`clearWordsAtLock`, the
+  new road only). U4's new-road lock must land there — or call `AppBootstrap.clearWordsAtLock()` itself;
+  `WordsClipboardLockRouteTests` guards the lobby landing.
+- **F-U3-4 (F-U1-2's list):** the key doors' new passphrase joins F-U1-2's unenforced 12-character floor (no shared check
+  yet — the ticket's one check should cover Change and Reset too).
+- **F-U3-5 (her eye — the stale stamp):** in rule 27's state the record's `passphraseSet` stamp says "a passphrase" until
+  the next facts write; VX-306's *Set a passphrase…* row reads that stamp (`offersSetPassphrase`), so it stays back until
+  the banner's act remakes the file (then it re-reads and is offered — pinned). Only the looks moved to the core's fact
+  (R-U3-4).
+- **F-U3-6 (the stray arm, for her eye):** the fault's SECOND arm (another key's file beside, nothing holding the library's
+  own) keeps her U2-7 banner with no door — *Make a backup now, so a copy exists.* is still advice nothing can follow there
+  (F-U2c-1's tension, narrowed to this arm).
+- **F-U3-7 (MOBILE PARITY):** the phone has no key doors, no banner door (`MobileNoKeyFileSheet` keeps her U2-7 words and
+  the lobby's account sentence), no concealed clipboard (its pasteboard arm is the mobile row's).
+- **F-U3-8 (canon, the closeout's):** SurfaceContracts' "Library protection" line — *Copy (the clipboard clears after 60
+  seconds by restoring its prior contents)* becomes the concealed type cleared at lock and at quit; the key doors (Change ·
+  Reset · New Words, VX-263's line, synced together-change); the no-key-file banner as the door (record → fresh key file →
+  the pair) with the open-library account sentence; F-U2-3's line on a synced look. AppSpec untouched.
+
+**Notes:** no machinery deaths; no Sonnet lookup; no subagents; no scratch worktree; every mutation and behavioural revert
+ran on a committed tree and was restored by `git checkout --` (`cmp` against a pre-mutation copy in this session's
+scratchpad). One TEST bug of mine fixed before its commit (a discarded `PlantedRoad` freed its temp slot under the read).
+Commits: `cfc0ebed8` (0) · `8e465f7ea` (1, pins first) · `577bd53dc` (1) · `40b365d16` (record) · `5314bb7a6` (2) ·
+`1b6a7403e` (3) · `bdfcf2caa` (record) · `773940c38` (4) · `07e668e62` (5) · `5399f87d7` (6) · `15e2979a8` (6b) ·
+`052250050` (6c) · `cee78df07` (a warning) · the close commit.
 
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
