@@ -183,6 +183,83 @@ implementer session, sized per `notes/PhaseSizingGuidance.md` — the phase's tw
 - **Then:** the ladder (fresh `fable-reviewer` per round over the whole diff — custody ⇒ Fable), the WALK + the
   restore drill as the acceptance spine (stages 9, 10, 13, 14 asserted against the faces as built), the closeout.
 
+## 5a. U1a BRIEF — THE COPIES' MACHINERY (a fresh Opus implementer; headless + build-for-testing ONLY)
+
+**You are the U1a implementer for VX-309 (Castle rebuild, phase 5). Work from `~/dev/variorum-vx-309` on branch
+`vx-309-copies-and-words` — never the main checkout. HARD LIMITS: no `xcodebuild test`, no stage claim, no Debug app
+launch, no store touch, no live network call, no Linear write, no subagents; headless `swift build`/`swift test` and
+`xcodebuild build-for-testing`/`build` are your whole surface. Today's road stays BYTE-UNCHANGED in behaviour
+(Release parity — every new line sits behind the new road's session/hook or new-road-only code; `StoreBackup.swift`'s
+own legs keep running as they are). Zero `Sync/`, `Server/`, schema, migration or dependency lines;
+`SyncSchema.lockstepVersion` stays 13. The resiliency protocol binds: commit per piece, push after every commit, LIVE
+STATUS in your record from the first commit, PENDING on every unverified claim, synchronous foreground waits only.**
+
+**Read first, in full, never delegated:** CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md`;
+`notes/CastleRules.md` WHOLE (rules 1, 4, 5, 17–19, 20–21, 25 and 27 are this unit's law; the
+considered-and-not-pursued ledger binds); `notes/SyncSpec.md` WHOLE (the custody slot's price; you write no `Sync/`
+line); `notes/SurfaceContracts.md` (Doors — portability + Library protection); this plan WHOLE (§0–§3); the VX-308
+record `notes/plans/vx-308-accounts-key-doors.md` §6 — the U3 RECORD (the pair road, THE CORE LINE, the mutation
+discipline), the U4 RECORD and the ROUND-1 FIX LEG (MAJOR-1's trace, fix and residue — your VX-450 piece extends
+exactly it); the VX-306 record `notes/plans/vx-306-castle-open-road.md` §6 U1a RECORD (the catalogue's birth,
+P-VX306-U1a-1..5) and its U1b RECORD (the hook's birth); the code — `Sources/VariorumCore/Protection/` `Assess/
+Catalog.swift` · `CatalogNames.swift` · `Retention.swift` (pure, UNWIRED — your piece 3 wires it) · `Assessment.swift`
+· `Executor/Leaves.swift` (`BackupsLeaf`) · `Executor/Acts/KeyDoors.swift` (`resumeCannotFinish` — guards
+`.regenerateWords` only today) · `PlanRunner.swift` (`resume`, `settleAct`, the rollback) · `Acts/CommonSteps.swift`;
+the app side — `App/Variorum/Shared/Protection/ProtectionBackupPair.swift` (rule 5's one road) ·
+`ProtectionBackupHook.swift` (the `StoreBackup.onRun` attachment) · `FileBackupsLeaf.swift` · `CatalogLister.swift` ·
+`ProtectionPlaces.swift` (`farFolder()`, `withFile(catalogID:)`) · `StoreBackup.swift` (READ ONLY — the far leg's
+due-check and `newestTrustedBackup`/`stampIsTrusted`, `BackupDestination`, `recordOwnFarSnapshot`) ·
+`App/Variorum/Variorum/Features/Settings/DataSafetyModel.swift` (the counts; VX-379's road gating pattern,
+`VX379PaneRowsTests`); the test worlds (`ExecutorWorld`, `EX`, `PlantedRoad`, the scenario world, `NewWordsResumeTests`,
+`FileLessWordsTests`, `ProtectionBackupHookTests`, the retention suite under `Tests/VariorumCoreTests/Protection`).
+The headless HARNESS recipe is VX-308's §6 U1 RECORD COUNTS paragraph (the scratchpad package `u1-harness` pointed at
+this worktree — rebuild it per the recipe in YOUR session's scratchpad).
+
+**The pieces (each a commit or a small series, pins first where a pin can be red-on-old):**
+1. **THE FAR PAIR LEG (P-VX306-U1a-4's deferral comes due — rule 5 reaches the picked folder).** On the new road,
+   a backup run that wrote a snapshot also lands rule 5's pair in the PICKED far folder, in the catalogue's shape
+   `<picked>/Variorum/Backups/<library8>/<mac8>/` (`CatalogNames`' names; the snapshot + its frozen `.keys.json`
+   beside it, written once, never rewritten), under the far folder's own due-ness: due when the catalogue holds NO
+   trusted-stamped far pair OF THIS LIBRARY BY THIS MAC newer than the backup interval (`StoreBackup.stampIsTrusted`
+   is the one freshness rule — reuse it or restate it byte-equal in core; a future stamp is not freshness). Copies
+   paused ⇒ nothing; the live key file not the key's ⇒ nothing; no far folder picked or unreachable ⇒ nothing (the
+   honest line about that is U2's words, not yours); failures logged, never raised; security-scoped access through
+   `places.farFolder()!.withAccess`. Today's flat far leg keeps running untouched beside it.
+2. **VX-397 CLOSES BY CONSTRUCTION — the new road's reads are PER LIBRARY PER MAC.** The far due-check of piece 1
+   reads the catalogue (this library, this Mac, `.farFolder`, trusted stamps) — never the folder's newest flat file.
+   Data Safety's counts on the NEW ROAD read the catalogue the same way (this Mac's pairs of this library per place),
+   through the existing road-gating pattern in `DataSafetyModel` (VX-379's precedent); today's road's counts are
+   byte-unchanged. Pin the wrong-shape red: another Mac's fresh copy (a planted `<library8>/<othermac8>/` pair) must
+   NOT satisfy this Mac's due-check and must NOT count as this Mac's copy.
+3. **RETENTION WIRED (VX-302; VX-411 folded).** After a pair lands (container or far), the new road prunes by core's
+   `Retention.plan` (policy `.standard`: container newest-14; far 14 dailies + 4 weeklies) over a FRESH catalogue
+   read, removing exactly the plan's `prune` ids through `FileBackupsLeaf.deleteCopies` (each snapshot with its own
+   pair; far ids under `withAccess`). The pure rule already fences: only `.backup` kind, only this Mac's `mac8`
+   subfolder of this library's `library8`, undated copies never pruned, `Previous Libraries/` and safety copies
+   never candidates, foreign names never touched (rule 19's other-libraries listing is U1b's DOOR — nothing here
+   deletes another library's copies). Off the main actor, logged (what was pruned, by id), failures logged never
+   raised. Pin red-on-old: pairs past the policy accumulate before the wiring, are pruned after; another Mac's and
+   another library's planted pairs SURVIVE every prune (the mutation pin: the guard off reproduces today's VX-302
+   shape).
+4. **VX-450 — the stuck-act class's remainder.** Extend MAJOR-1's rollback (`KeyDoorProgram.resumeCannotFinish`,
+   `Acts/KeyDoors.swift`) to `changePassphrase` and `resetPassphrase`: a RESUMED key-door act that cannot finish for
+   want of its secrets (or of a live key file of the key where the step needs one) throws `ActRollback` BEFORE
+   anything is written — rule 20's "the old state" — instead of wedging every later act behind `actInFlight`. The
+   press path stays byte-unchanged (`resuming` false — M1-c's guard is load-bearing, keep its pin green). Pins
+   red-on-old per act and per stop point (the `NewWordsResumeTests` loop pattern; the pre-fix tree must wedge).
+   MAJOR-1's residue (1) — the post-write window where a landed write keeps an unseen lock — stays RECORDED for
+   these acts exactly as the fix leg recorded it for the words act (one honest paragraph in your record; not built).
+
+**Evidence at the close (the record's COUNTS):** every new pin red-on-old verified by revert or mutation, restored
+`cmp`-identical from a committed tree; the protection set green Debug AND Release (`swift test -c release`); the full
+core suite Debug (the known VX-353 MCP flake is recorded, not yours); `xcodebuild … build-for-testing` green with no
+warning in a touched file; the phone build green; the Release build check green. Your record lands IN THIS FILE as
+"U1a RECORD" on the VX-308 §6 form (Not-done-first · preflight · readings R-U1a-N · LIVE STATUS per piece ·
+THE FACES/LINES AS BUILT for the ladder · COUNTS · the Mac-suite list the orchestrator runs under the stage ·
+PROVISIONALs as P-VX309-U1a-N with options · findings as F-U1a-N routed never fixed · machinery notes). Ambiguity
+that doesn't gate: build the spec-defensible arm, mark PROVISIONAL, log the options in your record (the orchestrator
+bundles QUESTIONS rows at closeout). Ambiguity that gates the core: stop and report in your record.
+
 ## 2. Evidence (the acceptance spine)
 Walks in BOTH VOICES (Terminal and Study) over the new faces; the restore drill through Look inside and Make this my
 library; the lifecycle page's stages 9, 10, 13 and 14 against the faces as built. Headless + build-for-testing for
