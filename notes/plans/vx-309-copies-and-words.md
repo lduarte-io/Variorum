@@ -411,20 +411,32 @@ fetch, no network.
   id in ONE delete call → `✘ aDeleteThatFailsNeverFailsThePairOrStopsThePrune` (2 — the first failure stopped the rest).
   M-RT3 (the lock removed) was named and NOT RUN: no deterministic pin can observe the race the lock closes (the leaf's
   check-then-act free-name pick, sub-second, between two detached runs) — the lock rests on inspection, recorded.
-- Piece 4 — VX-450 (Change/Reset roll back on a resume that cannot finish): IN-PROGRESS. PINS FIRST (this commit):
-  `KeyDoorResumeTests` (core, `Tests/VariorumCoreTests/Protection/Executor/`; 5 tests — the per-act per-stop loop over 11
-  shapes: Change in Standard and Castle (Touch ID / Always ask typing the words), synced and not; Reset by the plain
-  confirm, by the words, by Touch ID — a crash after EVERY write of the clean run, the next open settling without a
-  throw, exactly one of the two passphrases opening the live key file, the door landing again; the plain Change and Reset
-  stopped after their begin; the synced Change stopped after its landed vault write; a resume HOLDING the new passphrase
-  still finishing, both doors) RED ON THE PRE-FIX TREE (`972dea6a4` + the pins): `✘ Test run with 5 tests in 1 suite
-  failed … with 35 issues` — the settle threw `secretsRequired(changePassphrase / resetPassphrase)` at every stop between
-  the begin and the key-file step's plan record in every shape, and in the three explicit pins; the resume-holding pin
-  green by design. (Machinery honesty: the first run of the explicit pins passed `.none` to `relaunchAndSettle`'s
-  `TypedSecrets?` parameter, which Swift reads as `Optional.none` — the fixture's own secrets were typed, the act RESUMED
-  under the old passphrase: F-U1a-1 below. Re-run with `TypedSecrets.none`, as `NewWordsResumeTests` spells it.) The fix:
-  NEXT.
+- Piece 4 — VX-450 (Change/Reset roll back on a resume that cannot finish): DONE (`e6bd14584` pins first · `7b9e5793f` the
+  fix). `KeyDoorProgram.resumeCannotFinish` (`Acts/KeyDoors.swift`, the unit's ONE core custody file): on a RESUME
+  (`ctx.resuming` — M1-c's guard kept first), the words act unchanged (its new words), Change and Reset their NEW
+  passphrase (`ctx.secrets.passphrase` — derived at a resume only from one typed there), then for all three a live key
+  file of the key; either missing at the vault or key-file step ⇒ `ActRollback` BEFORE anything is written, through
+  `drive`'s one rollback. Pins `KeyDoorResumeTests` (core; 6 tests — the per-stop loop over 11 shapes, the plain Change
+  and Reset after their begin, the synced Change after its landed vault write, a resume holding the new passphrase but no
+  key file (both doors), a resume holding the new passphrase still finishing (both doors)): RED ON THE PRE-FIX TREE `✘
+  Test run with 5 tests in 1 suite failed … with 35 issues` → GREEN `✔`, and with MAJOR-1's own suites `✔ Test run with 12
+  tests in 2 suites passed`; the key-door neighbours (`FileLessWordsTests`, `FirstLookWordsTests`, `ExecutorKeyDoorTests`,
+  `U2CrashHarnessTests` — its synced key door's typed resume still FINISHES —, `ExactWritesTests`,
+  `ExecutorDeviceActTests`) `✔ Test run with 38 tests in 8 suites passed` (before the no-key-file arm joined). MUTATIONS
+  on `7b9e5793f` (each restored by `git checkout --`, `cmp`-identical to `u1a-prerevert/KeyDoors.swift`): M-450a the
+  Change/Reset arm dropped → `✘ … 37 issues` (the loop + the three explicit pins); M-450b the key-file arm narrowed to the
+  words act → `✘ aResumeHoldingTheNewPassphraseButNoKeyFileRollsBackToo` both doors (`noLiveKeyFile` out of the settle);
+  M-450c the `resuming` guard dropped (a press too) → `✘ … 12 issues` (the words door's own mint refuses — M1-c's pins:
+  `FileLessWordsTests`, `NewWordsResumeTests` — the guard stays load-bearing). MAJOR-1's RESIDUE (1), carried — recorded,
+  not built: a Change or Reset stopped AFTER its key-file write and BEFORE the plan records it resumes into the
+  rollback with the live key file keeping the NEW passphrase lock (the one she typed at the press — seen, unlike the words
+  act's unseen words); `rollBack` restores a file only across a key change, and putting the mirror's older lock back
+  would be a repair by guessing (rule 21). The library opens by its quiet road or by the new passphrase, and the next
+  Change re-locks from there — the loop pins exactly this as the second legal state (the old passphrase XOR the new
+  opens the file, never both or neither). The synced twin: a landed vault write stands with the file rolled back (the
+  account opens with the press's passphrase, the library with the old one) until the next Change, which re-locks both
+  (pinned: `aSyncedChangeStoppedAfterItsVaultWriteRollsBackAndTheLandedWriteStands`). Residue (2) — rule 20's "says
+  which" lives in Diagnostics only on the new road — is pre-existing for every act, unchanged. F-U1a-1 (below) is the
+  adjacent class this fix does not reach.
 - Piece 5 — the close (counts, the Mac-suite list, PROVISIONALs, findings): NOT-STARTED.
-- MUTATIONS IN FLIGHT on the committed tree above (`Acts/KeyDoors.swift` only; restore = `git checkout --`, then `cmp`
-  against `u1a-prerevert/KeyDoors.swift`): M-450a the Change/Reset arm dropped, M-450b the key-file arm narrowed to the
-  words act, M-450c the `resuming` guard dropped (M1-c's — a press too).
+- No revert is in flight.
