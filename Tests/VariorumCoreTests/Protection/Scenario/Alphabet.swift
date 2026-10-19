@@ -890,7 +890,7 @@ extension SWorld {
         guard let copy = copyPick(catalog, pick) else { throw ExecutorRefusal.nothingToDo }
         let typed = copySecrets(device, copy, typing)
         let before = everythingOn(device)
-        let opened = (try? executor.lookInside(copy, in: catalog, typed: typed)) != nil
+        let opened = (try? executor.lookInside(copy, in: catalog, typed: typed, quietRoads: .includingTouchID)) != nil
         if everythingOn(device) != before {
             truth.lookInsideWrites.append((device.name, "Look inside \(copy.id) wrote something"))
         }

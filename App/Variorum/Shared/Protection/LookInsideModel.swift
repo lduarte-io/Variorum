@@ -8,7 +8,9 @@
 //  bootstrap's, through the executor's `lookInside` and `ProtectionCopyPeek` off the main actor; a test's, planted): it
 //  tries the copy's own quiet road first — AUTOMATICALLY, as the sheet opens, so that first try never presses Touch ID
 //  (`CopyQuietRoads.withoutAPress`: the silent item and the Apple wrap — the ladder's round-1 m2) — then what she types
-//  in the copy's field (her press of *Open*, which may). The look holds ONE reader — a
+//  in the copy's field (her press of *Open* — which never presses Touch ID either since VX-307 U2c: a wrong secret
+//  refuses in words and never falls through to a Touch ID prompt; the VX-306 ladder's round-2 NIT 1 (ii), PROVISIONAL
+//  P-VX307-U2c-3). The look holds ONE reader — a
 //  read-only connection on a private copy — and NOTHING ELSE of the copy's: no key (it lives only inside the
 //  connection), nothing written. Every read runs off the main actor, a page of notes at a time. Closing — *Close*, the
 //  sheet going away, or *Make this my library…* — closes the reader: the connection closed, the private folder deleted —
@@ -124,10 +126,12 @@ final class LookInsideModel: Identifiable {
     func begin() async { await attempt(.none, quietRoads: .withoutAPress, quietly: true) }
 
     /// What she typed in the copy's field — twelve valid words are the words, anything else a passphrase.
+    /// VX-307 U2c (the VX-306 ladder's round-2 NIT 1 (ii) — the flip-target flipped): her *Open* tries what she TYPED,
+    /// and the quiet roads that never prompt; it never falls through to a Touch ID press — a wrong secret refuses in
+    /// words (`copyDoesNotOpen`), not with a fingerprint prompt she didn't ask for after typing something else.
     func submit(secret: String) async {
         guard !secret.isEmpty, !busy else { return }
-        // Her press of *Open* — the copy's own quiet roads, Touch ID's included.
-        await attempt(MakeMineModel.copySecrets(secret, currentPair: .none), quietRoads: .includingTouchID, quietly: false)
+        await attempt(MakeMineModel.copySecrets(secret, currentPair: .none), quietRoads: .withoutAPress, quietly: false)
     }
 
     private func attempt(_ typed: TypedSecrets, quietRoads: CopyQuietRoads, quietly: Bool) async {

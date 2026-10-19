@@ -73,14 +73,14 @@ struct MakeMineRoadTests {
         let oldID = try #require(session.library.record?.libraryID)
         let oldFile = try #require(try road.system().leaves.keyFiles.readLiveKeyFile())
         let pair = TypedSecrets(words: words)
-        guard case .ready(let copy, let catalog) = ProtectionCopyDoors.preflight(
+        guard case .ready(let copy, let catalog, let opened) = ProtectionCopyDoors.preflight(
             session, row: row, copySecrets: pair, currentPair: pair) else {
             Issue.record("the preflight passes for her own backup and her own words")
             return
         }
         let minted = KeyBox()
         let result = await ProtectionCopyDoors.makeMine(
-            session, copy: copy, catalog: catalog, row: row, copySecrets: pair, currentPair: pair,
+            session, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: pair,
             mintStoreIdentity: { minted.append($0) })
         #expect(result.outcome == .made)
         let slot = road.slot.places.slot
@@ -135,6 +135,33 @@ struct MakeMineRoadTests {
         #expect(!LibraryRestoreHold.isHeld(besideStore: road.slot.places.slot))
     }
 
+    /// VX-307 U2c — the VX-306 ladder's round-2 NIT 1 (i): Make this my library on a copy only THIS MAC'S TOUCH ID ITEM
+    /// opens (her copy field held a wrong secret — so the copy opened by its own quiet road, the press) — ONE press for
+    /// her one confirmed door: the preflight's look reads the Touch ID item once and hands what it opened to the act,
+    /// which takes that key (re-verified against the copy's file — no keychain read) and never opens the copy again.
+    /// Before the fix the act opened the copy a second time with the same secrets: a second prompt for the same press.
+    @Test func oneConfirmedPressReadsATouchIDItemOnce() async throws {
+        let road = PlantedRoad()
+        let (session, words, row) = try await CopyDoorsPlant.libraryWithABackup(road)
+        road.custody.items = [CustodyItemFact(fingerprint: session.library.fingerprint, itemClass: .touchid): session.key]
+        road.apple.keys = [:]
+        let before = QuietProbePlant.touchIDReads(road)
+        let wrongCopySecret = TypedSecrets(passphrase: "not this copy's passphrase")
+        let pair = TypedSecrets(words: words)
+        guard case .ready(let copy, let catalog, let opened) = ProtectionCopyDoors.preflight(
+            session, row: row, copySecrets: wrongCopySecret, currentPair: pair) else {
+            Issue.record("the copy opens by this Mac's Touch ID item at her press")
+            return
+        }
+        #expect(opened.road == .quietRoad(.touchID))
+        #expect(QuietProbePlant.touchIDReads(road) == before + 1, "her press — the preflight's one read")
+        let result = await ProtectionCopyDoors.makeMine(
+            session, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: pair,
+            mintStoreIdentity: { _ in })
+        #expect(result.outcome == .made)
+        #expect(QuietProbePlant.touchIDReads(road) == before + 1, "ONE press for one door — the act never re-opened the copy")
+    }
+
     /// A refusal INSIDE the act (the preflight bypassed): nothing swapped, so the hold goes back as it stood — none.
     @Test func aRefusalInsideTheActPutsTheHoldBackAsItStood() async throws {
         let road = PlantedRoad()
@@ -142,8 +169,11 @@ struct MakeMineRoadTests {
         let catalog = session.system.lister.catalog()
         let copy = try #require(catalog.copies.first { $0.id == row.id })
         let wrong = TypedSecrets(words: try RecoveryPhrase.generate())
+        // The copy as a look opened it (the preflight bypassed — her pair is wrong, so the act refuses inside).
+        let opened = try CopyDoorsContext(session).readExecutor().lookInside(
+            copy, in: catalog, typed: TypedSecrets(words: words), quietRoads: .withoutAPress)
         let result = await ProtectionCopyDoors.makeMine(
-            session, copy: copy, catalog: catalog, row: row, copySecrets: TypedSecrets(words: words), currentPair: wrong,
+            session, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: wrong,
             mintStoreIdentity: { _ in Issue.record("no store id for a library never made") })
         #expect(result.outcome == .refused(.wordsDoNotOpen) && result.reopenKey == session.key)
         #expect(!LibraryRestoreHold.isHeld(besideStore: road.slot.places.slot), "no hold stood — none stands")
@@ -152,7 +182,7 @@ struct MakeMineRoadTests {
         let marker = LibraryRestoreHold.markerURL(besideStore: road.slot.places.slot)
         let standing = try Data(contentsOf: marker)
         _ = await ProtectionCopyDoors.makeMine(
-            session, copy: copy, catalog: catalog, row: row, copySecrets: TypedSecrets(words: words), currentPair: wrong,
+            session, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: wrong,
             mintStoreIdentity: { _ in })
         #expect(try Data(contentsOf: marker) == standing)
     }

@@ -1216,13 +1216,16 @@ final class AppBootstrap {
         }.value
         let copy: CatalogCopy
         let catalog: Catalog
+        let opened: LookedInside
         switch preflight {
         case .refused(let why):
             session.endAct()
             return .refused(why)
-        case .ready(let ready, let listed):
+        case .ready(let ready, let listed, let look):
             copy = ready
             catalog = listed
+            // VX-307 U2c: the copy as her press opened it — the act takes its key, so one press opens it once.
+            opened = look
         }
         await onWillLock?()
         state = .opening
@@ -1234,7 +1237,7 @@ final class AppBootstrap {
         let result = await Task.detached(priority: .userInitiated) {
             binding.lock()
             return await ProtectionCopyDoors.makeMine(
-                session, copy: copy, catalog: catalog, row: row, copySecrets: copySecrets, currentPair: currentPair,
+                session, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: currentPair,
                 mintStoreIdentity: { key in
                     Self.ensureStoreIdentity(slot: session.system.places.slot, key: key, fresh: true, gate: gate, scope: scope)
                 })

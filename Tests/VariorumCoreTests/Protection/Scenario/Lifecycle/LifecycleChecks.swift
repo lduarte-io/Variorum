@@ -113,7 +113,7 @@ struct LifecycleChecks {
         guard let entry = catalog.copies.first(where: { $0.id == copy.id }) else { return (false, true) }
         let before = LSnapshot(target.device)
         let executor = world.newExecutor(target.device, libraryID: target.device.slot?.libraryID ?? "")
-        let opened = (try? executor.lookInside(entry, in: catalog, typed: typed)) != nil
+        let opened = (try? executor.lookInside(entry, in: catalog, typed: typed, quietRoads: .includingTouchID)) != nil
         return (opened, LSnapshot(target.device) == before)
     }
 

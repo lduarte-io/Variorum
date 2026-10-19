@@ -10,8 +10,10 @@
 //    - THE QUIET PROBE (`opensQuietly`) — `lookInside` with nothing typed: the copy's own quiet road on this Mac, a
 //      READ (rule 17: Look inside writes nothing). AUTOMATIC — it runs as the confirm opens — so it reads only what
 //      never prompts: the silent item and the Apple wrap (`CopyQuietRoads.withoutAPress`; the ladder's round-1 m2 — a
-//      Touch ID item's read IS the system prompt). Touch ID only at her deliberate press (the preflight, the act, the
-//      look's typed *Open*).
+//      Touch ID item's read IS the system prompt). Touch ID only at her deliberate press of *Make this my library*,
+//      and ONCE (VX-307 U2c, the VX-306 ladder's round-2 NIT 1 (i)): the preflight's look may read it; the act takes
+//      the key that look opened (`makeThisMyLibrary(opened:)`) and never opens the copy again. The look's typed *Open*
+//      never presses (round-2 NIT 1 (ii) — a wrong secret refuses in words).
 //    - THE PREFLIGHT (`preflight`) — every check before anything closes, all READS: the copy still catalogued; it
 //      opens with what she typed (`lookInside`); its schema is one this build can open (`LibraryClassifier
 //      .schemaVerdict`, on a private copy — a newer Variorum's copy is never landed); her current pair opens the library
@@ -148,7 +150,9 @@ nonisolated enum ProtectionCopyDoors {
     // MARK: - The preflight (READS only)
 
     enum Preflight {
-        case ready(CatalogCopy, Catalog)
+        /// Every check passed: the copy, the catalogue read, and the look that OPENED it at her press — handed to the
+        /// act, so her one press opens the copy once (VX-307 U2c — never a second Touch ID prompt).
+        case ready(CatalogCopy, Catalog, LookedInside)
         case refused(CopyDoorRefusal)
     }
 
@@ -186,7 +190,7 @@ nonisolated enum ProtectionCopyDoors {
         guard let words = currentPair.words, (try? file.open(.words(words), floor: floor)) == library.key else {
             return .refused(.wordsDoNotOpen)
         }
-        return .ready(copy, catalog)
+        return .ready(copy, catalog, looked)
     }
 
     // MARK: - The act (the pool CLOSED — `AppBootstrap.makeThisMyLibrary`)
@@ -197,9 +201,11 @@ nonisolated enum ProtectionCopyDoors {
         var reopenKey: StoreKey
     }
 
+    /// `opened`: the preflight's look at her press — the act takes ITS key (re-verified against the copy's file, a read
+    /// that never prompts) instead of opening the copy a second time (VX-307 U2c — one Touch ID press, never two).
     static func makeMine(
         _ session: ProtectionRoadSession, copy: CatalogCopy, catalog: Catalog, row: CopyDoorRow,
-        copySecrets: TypedSecrets, currentPair: TypedSecrets, mintStoreIdentity: @Sendable (StoreKey) -> Void
+        opened: LookedInside, currentPair: TypedSecrets, mintStoreIdentity: @Sendable (StoreKey) -> Void
     ) async -> MakeMineResult {
         let slot = session.system.places.slot
         let oldKey = session.key
@@ -215,7 +221,7 @@ nonisolated enum ProtectionCopyDoors {
         var library = session.library
         do {
             _ = try await session.executor.makeThisMyLibrary(
-                &library, copy: copy, in: catalog, copySecrets: copySecrets, currentPair: currentPair)
+                &library, opened: opened, copy: copy, in: catalog, currentPair: currentPair)
         } catch {
             session.library = library
             if ProtectionLibraryFiles.opens(slot, key: oldKey) {

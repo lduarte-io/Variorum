@@ -503,7 +503,7 @@ final class LifecycleWalk {
             let catalog = world.catalog(device)
             guard let entry = catalog.copies.first(where: { $0.id == copy.id }), let executor = device.executor else { continue }
             let before = LSnapshot(device)
-            let opened = (try? executor.lookInside(entry, in: catalog, typed: secrets(typed, copy: copy))) != nil
+            let opened = (try? executor.lookInside(entry, in: catalog, typed: secrets(typed, copy: copy), quietRoads: .includingTouchID)) != nil
             results.append(LLookResult(typed: typed, opened: opened, wroteNothing: LSnapshot(device) == before))
         }
         ctx.looks[subject.rawValue] = results

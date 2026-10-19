@@ -164,11 +164,16 @@ struct LookInsideRoadTests {
     }
 
     /// THE LADDER'S ROUND-1 m2 at the look's brain: its first try, as the sheet opens, is AUTOMATIC — the road it hands
-    /// is `.withoutAPress` (no Touch ID item read; the copy's own secret is asked); her typed *Open* is a press — the road
-    /// it hands may read Touch ID, and a copy only Touch ID holds on this Mac opens at that press by that road.
-    @Test func theLooksFirstTryNeverPressesTouchIDAndHerOpenMay() async throws {
+    /// is `.withoutAPress` (no Touch ID item read; the copy's own secret is asked). VX-307 U2c — the VX-306 ladder's
+    /// round-2 NIT 1 (ii), THE FLIP-TARGET FLIPPED (this test was `theLooksFirstTryNeverPressesTouchIDAndHerOpenMay`, which
+    /// pinned the fall-through as expected): her typed *Open* hands `.withoutAPress` too — a WRONG secret refuses in words
+    /// and never falls through to a Touch ID press; the right secret (her words — a copy of her own library) opens it by
+    /// its own secrets, still with no press.
+    @Test func theLookNeverPressesTouchIDAndAWrongSecretRefusesInWords() async throws {
         let road = PlantedRoad()
-        let (session, row) = try await QuietProbePlant.backupOnlyTouchIDOpens(road)
+        let (session, words, row) = try await CopyDoorsPlant.libraryWithABackup(road)
+        road.custody.items = [CustodyItemFact(fingerprint: session.library.fingerprint, itemClass: .touchid): session.key]
+        road.apple.keys = [:]
         let ctx = CopyDoorsContext(session)
         var handed: [CopyQuietRoads] = []
         let look = LookInsideModel(
@@ -185,9 +190,11 @@ struct LookInsideRoadTests {
         #expect(handed == [.withoutAPress] && QuietProbePlant.touchIDReads(road) == before, "the opening pressed Touch ID")
         #expect(look.phase == .needsSecret && look.refusal == nil)
         await look.submit(secret: "not this copy's passphrase")
-        #expect(handed == [.withoutAPress, .includingTouchID])
-        #expect(QuietProbePlant.touchIDReads(road) == before + 1, "her press of Open reads the Touch ID item — the press")
-        #expect(look.phase == .open, "the copy's own quiet road on this Mac (rule 17), at her press")
+        #expect(handed == [.withoutAPress, .withoutAPress], "her Open hands no prompting road")
+        #expect(QuietProbePlant.touchIDReads(road) == before, "a wrong secret never falls through to a Touch ID press")
+        #expect(look.phase == .needsSecret && look.refusal == ProtectionWords.copyDoesNotOpen, "it refuses in words")
+        await look.submit(secret: words.joined(separator: " "))
+        #expect(look.phase == .open && QuietProbePlant.touchIDReads(road) == before, "her words open it — no press")
         look.close()
     }
 
