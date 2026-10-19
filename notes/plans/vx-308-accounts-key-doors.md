@@ -2188,6 +2188,13 @@ given (hand-made faces). Kept as they were, deliberately: every OTHER refresh tr
 `landed` chain, a sign-in sheet's close, the signed-out road's Continue) re-reads only its own section with its own fresh
 read — those are single-section events; and F-U1-4's `services?.encryption.refresh()` task (today's road) is untouched.
 
+**THE FIX-LEG MAC DELTA + THE RED LEG (the orchestrator, 2026-10-19 10:34–10:55 MDT, stage claim
+`vx-308-fixleg-mac`; logs `vx308-fixleg-*.log`, deleted at closeout):** 166 tests / 28 suites, ZERO issues. The red
+leg: the `paneWave` arm dropped from `refreshPane` → `ProtectionPaneWaveTests` RED at exactly
+`thePanesAppearanceTakesTheWaveRoadWhenTheBootstrapGivesOne`; restored `git checkout`-clean; the suite `✔ 4/1`.
+0 instances at release. **ROUND 1 IS CLOSED: five findings, five agreed fixes, zero disputes. NEXT: round 2 — a
+fresh fable-reviewer re-checks the fixes (the cross-model rule: it makes the final call on each).**
+
 ## 7. LIVE STATUS
 - 2026-10-19 ~03:30 MDT — KICKED OFF (session `vx-308`). STEP 0 done: bout ritual, worktree
   `~/dev/variorum-vx-308`, branch pushed, in-flight row (holds the Sync/-custody slot) `969acce55` on main, Linear
