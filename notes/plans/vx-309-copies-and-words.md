@@ -1,6 +1,7 @@
 # VX-309 — Castle rebuild, phase 5: copies and words
 
-**Status: PLANNED (written at VX-308's closeout, 2026-10-19). Kickoff at her word.**
+**Status: OPEN — KICKED OFF 2026-10-19 (session `vx-309`, `/architect-phase`; the orchestrator is Fable at xhigh).**
+`Ticket: VX-309 · Project: Castle & backups before launch · Branch: vx-309-copies-and-words · Worktree: ~/dev/variorum-vx-309 (Pro)`
 The copies' machinery and the words' truth, built to `notes/CastleRules.md` rules 17–19, 21 and 27 — the old VX-266
 design is superseded wherever they differ. The one law carries forward: the new road stays DEBUG-ONLY behind
 `ProtectionRoad.newRoadIsLive`; `SyncSchema.lockstepVersion` STAYS 13; the mirror artifact
@@ -33,6 +34,56 @@ and discipline, `~/.variorum/dev-vault-throwaway.env`, values never echoed or co
 > rider), VX-452, VX-453 (Settings search misses the account section), VX-454. Already RIDING at her word: VX-456
 > and VX-457 (words-unit members below). VX-455's compose is POST-RELEASE at her word (2026-10-19) — only its
 > not-yet line rewords here. W-VX308-3 is RULED keep-app-level (record-only, nothing to build).
+
+## 0. THE KICKOFF RECORD (2026-10-19, the orchestrator — session `vx-309`)
+
+**STEP 0 done:** bout ritual (both repos pulled; `Tools/vx sync` → 245 open, snapshot pushed as "board snapshot");
+worktree `~/dev/variorum-vx-309` cut from `origin/main` (`d3bb6a791`), branch pushed; the in-flight row on main
+(`d41aff958` — HOLDS the Sync/-custody slot); Linear VX-309 In Progress (the branch-link automation); the stage
+coordinator (`1018coordinator`) announced.
+
+**THE COORDINATOR'S GRANT AND TERMS (received 2026-10-19, recorded verbatim-faithful):** the custody slot is
+GRANTED as of 16:57 MDT (VX-308 freed it at 13:53; nothing else in flight; the slot frees at this phase's hard-stop
+"nothing further owed"). THE STAGE IS NEVER SELF-CLAIMED: REQUEST it (what, minutes, claim name) and send READY only
+when able to start NOW; the coordinator answers with a GO carrying the exact claim line; a free stage is never an
+invitation; headless `swift build`/`test` and `xcodebuild build`/`build-for-testing` need no stage, EVERY
+`xcodebuild test` does. THE MERGE runs only on the coordinator's GO-MERGE after a MERGE ASK at the ladder's close
+(merge commit, never squash; origin/main in the branch; nothing outside notes/ changed since the tested tree).
+**Dev-store facts at VX-308's close:** library `86a82b4f`, Standard (new road), the dev pair intact
+(`~/.variorum/dev-castle.env`, words = `VARIORUM_DEV_NEWROAD_WORDS`); quiet open on main's Debug build; the
+restore-hold marker beside the slot (63 B) so the Resume Sync banner shows — NEVER press Resume; the Debug app
+SIGNED OUT; `appearanceChoice` dark; `variorum.backup.markdownInsurance.enabled = 1`; newest safety copy
+`Backups/safety-copies/variorum-vx308-walk-2026-10-19T165332Z`; any synced arm uses the THROWAWAY project through
+VX-308's walk switch (`~/.variorum/dev-vault-throwaway.env`), never production — every launch asserts the ref is
+*[removed for publication]*
+instances, then a cmp-verified safety copy of EVERY slot file, listed without an extension filter (the lived-here
+marker is extensionless); (2) throwaway libraries outside the slot, removed or listed; (3) pre-export
+`io.lduarte.Variorum.debug` and an end-diff against it — `defaults import` merges, so delete added keys and restore
+found values; (4) credentials from the env files only, never looked at, never in any record, commit or message;
+(5) planted env per-launch only; (6) the result line names end posture, library ID, restore hold and banner,
+Keychain adds, and 0 instances; (7) window-scoped captures only; stop and tell the coordinator on any interference;
+(8) renew after EACH ROW, not by the clock — a silent lapse past expiry is held by the coordinator until the dev
+store's state is reported.
+
+**Preflight COMPLETE (the orchestrator, nothing delegated):** CLAUDE.md + its auto-loaded canon; the master plan
+(in-flight + latest closeout); the workflow-transition record; `notes/TICKETS.md` (2026-10-19 16:54 snapshot);
+QUESTIONS #235 + #236 (every headline item ruled at her 2026-10-19 sittings; this kickoff is the bundle's
+acceptance of the rest — the QUESTIONS status flip is the merge moment's); this plan; the resiliency protocol
+whole; `notes/CastleRules.md` WHOLE (rules 17–19, 21, 27 + the considered-and-not-pursued ledger); `notes/SyncSpec.md`
+WHOLE; `notes/SurfaceContracts.md` whole (the protection and doors sections this phase touches, plus the app's
+words rules); `notes/plans/vx-308-accounts-key-doors.md` §6 — the U3 RECORD (the pair road `ProtectionBackupPair.swift`,
+rule 5's one road; VX-447's core arm; the key doors), the U4 RECORD (the by-library export mark `ExportNoticeMark`;
+the lock; F-4's hold gate) and THE WALK RECORD (machinery: renew-by-row, the walk switch's ref guard, the
+`VARIORUM_WALK_FORGET=memory` switch, the aside-whole pattern, F-U2b-5 — never a words look on the dev library);
+the lifecycle page stages 9, 10, 13, 14 (the walk asserts against them; never hand-edited); the VX-309 ticket body
+(the member list); the VX-379 ticket (the guide's standing acceptance: every Castle face phase carries "the guide
+and settings copy agree with the rules as built").
+
+**#236 ACCEPTANCE NOTED:** her kickoff of VX-309 counts as accepting the VX-308 bundle's remaining PROVISIONALs
+(the entry's own words); recorded here at kickoff, the QUESTIONS edit itself deferred to the merge moment per the
+shared-ledger rule.
+
+**HER KICKOFF RULINGS (the sitting record — appended when ruled):** *(pending the kickoff sitting below)*
 
 ## 1. The members (the ticket's list, restated; the kickoff session cuts the units)
 
