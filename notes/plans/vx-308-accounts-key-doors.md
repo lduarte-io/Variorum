@@ -1,8 +1,13 @@
 # VX-308 — Castle rebuild, phase 4: accounts and the key doors
 
-**Status: PLANNED — written 2026-10-19 at VX-307's settling sitting (her rulings of that sitting are QUESTIONS #235's
-HER RULINGS block and this plan's §1). Kicks off at her word with `/architect-phase vx-308` in a fresh session; holds
-the one Sync/-or-custody slot.** The VX-308 TICKET'S BODY and its comment carry the hand-forwards; the core acts and
+**Status: CLOSED 2026-10-19 — one overnight-and-morning run, kickoff to merge, under her mandate (the kickoff record
+§4; the unit records, arbitrations, ladder, rehearsal and walk records §6; the closeout and the morning bundle in
+`notes/handoffs/vx-308-handoff.md`).** Built: the account section's faces through the one presenter (VX-418 · VX-264 ·
+VX-239/VX-243), the join and the follow with VX-107's once-said Done and VX-113's ruled sentence, the key doors +
+VX-447's banner-becomes-the-door (one core custody arm) + VX-448's concealed clipboard, VX-445's lock on the new road
++ NIT-R2-1's by-library mark + F-4's hold gate, VX-314's account-binding gate at the engine's mouth, and artifact 17's
+DRESS REHEARSAL on the throwaway project (two findings fixed in repo) with the account arms walked live against it.
+The ladder closed at round 2 (five findings, five fixes, zero reopened). The VX-308 TICKET'S BODY and its comment carry the hand-forwards; the core acts and
 the WIRE are BUILT (VX-378 + VX-307 U1) — this phase is their FACES, the key doors, and the riders.
 
 > **KICKOFF MESSAGE (paste-ready).** STEP 0: the bout ritual (pull both repos, `Tools/vx sync`), then from
