@@ -191,6 +191,10 @@ public enum VaultRefusal: Error, Equatable, Sendable {
     /// The session isn't signed into this account (row-level security):
     /// nothing was read or written.
     case notSignedIn
+    /// VX-307 U1: the fetched row predates the marker-14 vault shape (no
+    /// `mode`) — the mirror has not run the 17 lockstep event; never read a
+    /// pre-event row as a vault (refuse, don't guess).
+    case preLockstepRow
 }
 
 public enum VaultModel {

@@ -229,7 +229,12 @@ claim PENDING. The Mac batch is the orchestrator's under the stage.
   `VX307VaultArtifactTests` (6 pins), and **VX-329's release registers 17 in the array AND bumps
   `SyncSchema.lockstepVersion` to 14 in one commit** (a named hand-forward). `VX307VaultArtifactTests` +
   `AuthRLSDDLTests` headless Debug: `✔ Test run with 83 tests in 2 suites passed`.
-- Piece 2 — the fake server's new vault shape (CAS order, proof before CAS, typed refusals): NOT STARTED.
+- Piece 2 — the fake server's new vault shape: DONE (this commit) — `FakeVaultHTTPServer`
+  (`Tests/.../Protection/Wire/AccountVaultWireTests.swift`): the marker-14 RPC semantics at the HTTP seam the
+  production client injects — single-use nonces (`sync_challenge`), the enroll road (SHA-256(kp1) fence, the kp2
+  secret, ALREADY_ENROLLED-as-success), the challenge-MAC proof check in 13y's order (proof before CAS), the revision
+  CAS, the hash-and-secret-together rule, the pre-VX307-payload refusal, a pre-lockstep-row knob. The executor-level
+  fakes (`ExecutorVault`, `ServerFake`) carry the same together-rule (piece 3a).
 - Piece 3a — the core protocol + proof forms (VX-307 U1's model groundwork): DONE (this commit) —
   `VaultLeaf.updateVault` gains `successorMaster: SymmetricKey?` (the 13y hash-and-secret-together rule on the wire: a
   write installing a NEW `keyProofHash` carries the new master, from which the wire derives kp2′/`key_proof_mac`; nil on
@@ -239,8 +244,18 @@ claim PENDING. The Mac batch is the orchestrator's under the stage.
   `leaveCastleWrite`/the key doors (nil). The fakes (`ExecutorVault`, the scenario `ServerFake`) enforce both the
   both-forms proof and the together-rule. Executor+scenario families headless Debug: `✔ Test run with 239 tests in 73
   suites passed after 4.215 seconds.`
-- Piece 3b — the production vault leaf (core wire client, additive beside today's `KeyVaultClient`; the app leaf swapped
-  in at `ProtectionSystem` on the new road): NOT STARTED.
+- Piece 3b — the production vault leaf: DONE (this commit) — the core wire client
+  `Sources/VariorumCore/Protection/Wire/AccountVaultClient.swift` (the marker-14 row ↔ `AccountVault`, refuse-by-version,
+  `preLockstepRow` on a mode-less row — `VaultRefusal` gains the case; the 13y challenge dance byte-faithful to today's
+  client: one nonce per call, the enroll road once with the ALREADY_ENROLLED race swallowed, ONE stale-challenge retry,
+  the kp2′ `key_proof_mac` arm riding `successorMaster`, the post-enroll hash refresh GUARDED to the same master's v1
+  form so the client can never mask the together-rule; signed-out refuses before composing, one 401 refresh-retry, a
+  `URLError` reads `unreachable`, the proof in the body only); the app leaf `App/Variorum/Shared/Protection/
+  WireVaultLeaf.swift` (the scope's own `AuthSession`, nil when the project is unconfigured) swapped in at
+  `ProtectionSystem` (`vault:` injection parameter; tests inject their own). `AccountVaultWireTests` (11 — the
+  round-trip, the enroll road, the Castle-entry together-rule both ways, CAS, wrong master, stale challenge,
+  notSignedIn, unreachable, vaultExists, preLockstepRow) headless Debug: `✔ Test run with 11 tests in 1 suite passed`.
+  Mac app Debug `xcodebuild … build` → `** BUILD SUCCEEDED **`.
 - Piece 4 — the engine's sync-key custody on the new road (`KeychainSyncKeysLeaf`; today's road byte-unchanged):
   NOT STARTED.
 - Piece 5 — the two-client convergence suites (sync setup · join · follow in/out · lagging device · VX-109's CAS pin ·
