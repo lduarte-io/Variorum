@@ -322,7 +322,7 @@ nothing else about the sheet changes (read-only, nothing written, closing forget
 dropped (U2-6 — the state is unreachable; the derive pin retires with it) and her two U2-7 sentences in her accepted
 wording, pinned byte-equal to the ticket's text. 3. **VX-379's pane rows:** the posture box's sentence, the Data Safety
 restoring paragraph, the protection pane's today's rows — to CastleRules' language (the field-guide CHAPTERS stay
-VX-379's own, not this batch). U2a's F-6 rides here: Data Safety's Castle warning reads today's posture — reword to the
+VX-379's own, not this batch). U2b's F-U2b-1 rides here too: the readme's Start Here words passage (byte-pinned at VX-306) says creation-time words and points at Data Safety — reword to the amended rules 2/3 and re-anchor the pin honestly. U2a's F-6 rides here: Data Safety's Castle warning reads today's posture — reword to the
 rules; today's rows render on TODAY's road only (the U2a-4 ruling above: never un-hide them on the new road). 4. **The copy-door hand-forwards** (§5b U2c's three — the double Touch ID prompt, the
 LookInside fall-through flip-target, `openCopy`'s core default dropped), each with its pin flipped or added red-on-old.
 
@@ -1162,6 +1162,28 @@ the Bookcase's voice, the tour's card its own):**
 **Notes:** no machinery deaths; no Sonnet lookup; no scratch worktree; every mutation restored and `git status`-checked.
 Commits: `edbd86c14` (record) · `95bde6ea3` (1) · `a1a948c73` (2) · `6a0b5a05a` (3) · `e70797315` (record) · `67c32e85b`
 (4–5) · `aadcf2e9c` (6 fixture) · `9c833dce5` (6 page) · `d723b0eda` (6b) · `020d6ab8e` (cleanup) · the close commit.
+
+**U2b ARBITRATION (the orchestrator, the same night — repo-first before U2c spawns):**
+- **P-VX307-U2b-1 ACCEPTED AS BUILT** (the orchestrator's ruling; the Fable ladder cold-reads the line regardless).
+  The diff read line-by-line: 18 lines in `KeyDoors.swift`, zero `Sync/` lines; the nil-passphrase arm is guarded to
+  STANDARD + UNSYNCED + the live key file current + NO passphrase lock, else `secretMissing`; every other path
+  byte-unchanged. Why it is right, not merely acceptable: the amended rule 2 requires the words to be mintable BEFORE
+  any passphrase exists (the card exists exactly for the no-passphrase era, and the tour's last card shows the words
+  BESIDE the first passphrase ask — option (b) would contradict her ruled sequence); and the narrowing sits inside the
+  posture's own trust model (that same library's reset door is a plain confirm — strictly more powerful — and its key
+  opens by this Mac's quiet roads).
+- **F-U2b-1** (the readme's Start Here words passage says creation-time words and points at Data Safety — both now
+  wrong on the new road): U2c's — §5e amended below; the VX-306 byte-pin re-anchors HONESTLY (new text, the pin reads
+  the new ruled source), never deleted to make the change fit.
+- **F-U2b-2** (canon at closeout): the SurfaceContracts protection line gains the band card + the crossings' faces
+  (with U2a's F-7); CastleRules' header sentence "Until VX-412 lands…" RETIRES at the merge (it lands here).
+- **F-U2b-3** (the ledger doesn't carry across Make this my library — the card re-offers words for the pair she
+  already knows, and a look would MINT AWAY from that pair): a ticket at closeout (Improvement, Low — carry the
+  recorded flag with the pair; her eye in the bundle).
+- **F-U2b-4**: the VM ticket at closeout (P-VX307-U2b-0; the MOBILE PARITY row).
+- **F-U2b-5** (the walk): the card-state rows walk on a THROWAWAY library only; the dev library's card is verified
+  RENDERED but never clicked through the look (a look would replace the dev pair). If any row ever forces a dev-library
+  look, `~/.variorum/dev-castle.env` is updated in the same window (the standing rule).
 
 ## 7. LIVE STATUS
 - 2026-10-18 ~18:45 — KICKED OFF. Preflight complete (the orchestrator): CastleRules + SyncSpec whole, the lifecycle
