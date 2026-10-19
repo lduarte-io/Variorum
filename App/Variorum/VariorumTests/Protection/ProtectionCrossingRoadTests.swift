@@ -151,6 +151,24 @@ struct ProtectionCrossingRoadTests {
         #expect(faces.mode == .standard && faces.gateRow == nil && faces.useStandard == .hidden)
     }
 
+    /// THE SESSION IS THE OPEN LIBRARY'S ONE HOLDER (the headless twin of the batch run's route-test red): a crossing run
+    /// on a session writes the act's library into it, so the session's `key` — computed from what it holds — answers the
+    /// key AFTER the act; a key read before it must be captured as a value. Two crossings on one session: three distinct
+    /// keys, each the reopen key of its act.
+    @Test func aSessionsKeyIsTheOpenLibrarysNow() async throws {
+        let road = PlantedRoad()
+        let (session, words) = try await road.created()
+        let created = session.key
+        let enter = try await Crossing.press(
+            session, .useCastle, typed: TypedSecrets(words: words, newPassphrase: Crossing.passphrase))
+        let castle = session.key
+        #expect(castle != created && enter.reopenKey == castle)
+        let leave = try await Crossing.press(
+            session, .useStandard, typed: TypedSecrets(passphrase: Crossing.passphrase, words: words))
+        #expect(session.key == leave.reopenKey, "the live read answers the latest act's key")
+        #expect(session.key != castle && session.key != created, "three distinct keys — the captured values stand")
+    }
+
     /// A typo is refused at the preflight — NOTHING written: the container's bytes, the keychain and the Apple keys as
     /// they were.
     @Test func aTypoIsRefusedAndWritesNothing() async throws {

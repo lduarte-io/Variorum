@@ -66,6 +66,12 @@ struct ProtectionCrossingRouteTests {
             #expect(reopened !== session, "a fresh open's session")
             #expect(reopened.library.record?.mode == .castle)
             #expect(reopened.key != created.key)
+            // The Castle key, captured NOW: a session is the open library's one holder — the NEXT crossing runs on this
+            // same session and writes the act's library into it (`ProtectionCrossings.cross`: `session.library =
+            // library`), so a later read of `reopened.key` (computed from its held library) answers the key after THAT
+            // act. (The ladder's batch run: comparing `back.key` with a late `reopened.key` read the same Standard key
+            // twice — a test-side read, not a product aliasing.)
+            let castleKey = reopened.key
             #expect(bootstrap.protection.settingsRequest == requestsBefore + 1, "Settings asked back to Protection")
             #expect(bootstrap.roadStanding?.crossings === crossings, "the same crossings across the reopen")
             let standing = try #require(bootstrap.roadStanding)
@@ -92,7 +98,9 @@ struct ProtectionCrossingRouteTests {
                 return
             }
             #expect(back.library.record?.mode == .standard)
-            #expect(back.key != reopened.key)
+            #expect(back.key != castleKey, "a new Standard key — the Castle one is carried in its history (rule 12)")
+            #expect(back.key != created.key)
+            #expect(back !== reopened, "a fresh open's session")
             var said: [String] = []
             bootstrap.roadStanding?.speak = { said.append($0) }
             #expect(said == [ProtectionWords.leftCastleReceipt])

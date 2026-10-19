@@ -649,12 +649,30 @@ xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -
   -only-testing:VariorumTests/NoLiteralColourTests \
   -only-testing:VariorumTests/StatusSeamVocabularyTests
 ```
-The first seven are U2a's new suites (8 + 4 + 8 + 8 + 4 + 3 + 3 = **38 tests**; `ProtectionCrossingRouteTests` needs the
+The first seven are U2a's new suites (8 + 4 + 9 + 8 + 4 + 3 + 3 = **39 tests** after the fix commit's twin; `ProtectionCrossingRouteTests` needs the
 signed test host — a throwaway keychain scope, the real custody leaf, a test bootstrap whose scheduled-export switch is its
 own suite `io.lduarte.Variorum.vx307-crossing-tests`, never the app's domain); then the suites whose files this batch
 touched (the planted road's `biometry`, the interlude model's init, the pane, the walk switch, the custody leaf, the
 bootstrap's ready, the controller's request) and the source pins over the edited files. `VX310TodayLobbyWitnessTests`
 still reports its KNOWN ISSUES (expected — a pass of either is a FAILURE); read the `skipped:` lines.
+
+**THE MAC BATCH — RUN by the orchestrator under the stage (2026-10-18): 164 tests / 33 suites; ONE real red, a TEST-SIDE
+read — FIXED (the fix commit, `Part of VX-417`):** `ProtectionCrossingRouteTests.useCastleClosesThePoolCrossesAndReopensOn
+TheNewRoadThenUseStandardHandsItBack` at `#expect(back.key != reopened.key)` — BYTE-IDENTICAL keys, while the same run's
+protection log showed three distinct keys (created `dbfc3710` → Use Castle `fe325f9b` → Use Standard `66fd95de`; the export
+notice owed true, then false). **The traced mechanism:** the second press (`crossOnNewRoad`) runs on `roadSession` — which
+IS `reopened` (the session the first crossing's reopen made); `ProtectionCrossings.cross` writes the act's library into
+that session (`session.library = library`, after `useStandard`); `ProtectionRoadSession.key` is COMPUTED from the held
+library (`library.key`), so the late read `reopened.key` answered the post-Use-Standard key — the very key `back` opened
+with (`reopenKey = library.key`). Not a product aliasing: the session is the open library's ONE holder by design (Make this
+my library writes it the same way — `ProtectionCopyDoors.makeMine`), and the bootstrap retires it at the reopen (`back` is
+a fresh session). **The fix (test-side):** the Castle key captured as a value right after the first crossing (`let
+castleKey = reopened.key`), then `back.key != castleKey`, `back.key != created.key`, `back !== reopened`. **The headless
+twin:** `ProtectionCrossingRoadTests.aSessionsKeyIsTheOpenLibrarysNow` (two crossings on ONE planted session: the live
+`session.key` equals each act's reopen key; the captured values stand — three distinct keys) — the harness `✔ Test run with
+88 tests in 12 suites passed`; `build-for-testing` → `** TEST BUILD SUCCEEDED **`. The suite's re-run is the
+orchestrator's (the signed host). Everything else in the batch green; the 3 `VX310TodayLobbyWitnessTests` known issues as
+expected; the throwaway scopes cleaned up.
 
 **THE WALK RECIPE (the orchestrator's, under a held stage claim; the DEV STORE only; light and dark where a face changed —
 Settings' pane and sheet are system chrome, the interlude card speaks the leading voice's fallback):**
