@@ -66,6 +66,10 @@ nonisolated enum ProtectionWalkSwitch {
     /// `VARIORUM_WALK_TOUCHID=fail`: the launch's first Touch ID press on an item that exists answers as one a biometry
     /// change invalidated (`KeychainCustodyLeaf.walkFailNextTouchIDPress` — nothing read; the press recorded
     /// `.failedOnExistingItem`), so the lobby shows the changed line and the typed open owes the re-arm question.
+    /// THE FIRST PRESS IS USUALLY THE LOBBY'S AUTO-ASK (`RoadLockView`'s `.task` and its became-active hook): it spends
+    /// the plant SILENTLY — the changed line, no prompt — and every later press is a REAL one (the system prompt; its
+    /// cancel overwrites the failed press, so the re-arm is no longer owed). The walk TYPES the passphrase right after the
+    /// changed line (ladder round 1, MINOR-3 — the armed and the pressed leaf are one instance within a composed road).
     /// PROVISIONAL P-VX307-U2a-6, the same four fences as the forgetting (DEBUG, the new road, a writing road, once per
     /// process).
     static let touchIDKey = "VARIORUM_WALK_TOUCHID"
@@ -91,7 +95,9 @@ nonisolated enum ProtectionWalkSwitch {
         lock.unlock()
         guard first else { return false }
         custody.walkFailNextTouchIDPress()
-        ProtectionOpenRoad.log("WALK SWITCH (\(touchIDKey)): the next Touch ID press fails on its item (stage 11's re-arm)")
+        ProtectionOpenRoad.log(
+            "WALK SWITCH (\(touchIDKey)): the next Touch ID press fails on its item (stage 11's re-arm) — armed on leaf "
+                + custody.walkInstanceName)
         return true
     }
 

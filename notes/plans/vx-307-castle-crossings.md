@@ -711,7 +711,13 @@ Settings' pane and sheet are system chrome, the interlude card speaks the leadin
 5. **Stage 6 under Touch ID, then STAGE 11's RE-ARM on a planted failure.** *Use Castle…* with *Touch ID* → reopen; quit →
    relaunch → the Touch ID prompt opens it. Quit → launch with `VARIORUM_WALK_TOUCHID=fail` → log `WALK SWITCH
    (VARIORUM_WALK_TOUCHID): the next Touch ID press fails on its item` → the auto-ask answers at once with NO prompt → the
-   lobby's line *Touch ID changed since you set it up — unlock with the passphrase*; type the passphrase → THE CARD in the
+   lobby's line *Touch ID changed since you set it up — unlock with the passphrase* (log `WALK SWITCH: the planted failure
+   answered this press — no prompt (leaf <id>)`, the SAME `<id>` as the arm's line). **Then do NOT press *Unlock with Touch
+   ID*** (ladder round 1, MINOR-3 — the correction to this row after W-VX307-1): the auto-ask SPENT the plant silently, so
+   a second press is REAL — the system prompt (log `road: a Touch ID press — the system prompt (leaf <id>)`) — and its
+   cancel replaces the failed press, after which the card is no longer owed (W-VX307-1's observed prompt is this). If the
+   app was not active at launch, the first click of the button is the first press and spends the plant the same silent
+   way. Type the passphrase → THE CARD in the
    lobby's room: *Touch ID can't open Variorum on this Mac any more. Set it up again? Every finger enrolled on this Mac will
    open it.* · *Always ask instead* · *Set it up again*. Capture (light, dark). *Set it up again* → the library opens (log
    `road: the Touch ID re-arm answered yes — a new item at this press`); quit → relaunch (no switch) → the Touch ID prompt
@@ -851,7 +857,34 @@ round-2 reviewer makes the final call; agreed fixes applied red-on-old; `notes/p
   (PENDING the stage). `build-for-testing` → `** TEST BUILD SUCCEEDED **`. PROVISIONAL P-VX307-U2a-9: the crash corner's
   one status-seam line is the notice's own sentence (a receipt — `receipt_style` governs it; the pane's notice is the
   durable home).
-- MINOR-3 (the walk switch's armed-vs-pressed question; the typed road after a FAILED press; recipe row 5): NOT-STARTED.
+- MINOR-3 (the walk switch's armed-vs-pressed question; the typed road after a FAILED press; recipe row 5): **AGREE on
+  the gap, DISPUTE the candidate mechanism** (the reviewer's "fresh compose per press" — traced and ruled out). DONE (this
+  commit). **THE TRACE (static, file:line):** `beginOpening` composes ONE road (`roadInputs?.compose()` →
+  `RoadInputs.live`'s `makeSystem` → one `ProtectionSystem` → one `KeychainCustodyLeaf`); `routeOnNewRoad` takes ONE
+  `ctx = road.context()`, arms `ctx.system.custody` (`failTouchIDOnceIfAsked(ctx)`), routes with the same `ctx` and
+  returns `.roadLobby(facts, ctx)`; `makeRoadLobby(facts, ctx)`'s `touchIDRoad` presses `ProtectionOpenRoad.pressTouchID
+  (ctx, …)` → `ctx.system.custody` — the SAME instance; the lobby's refresh reads the same `ctx`; no compose happens
+  between the arm and the first press (a new compose needs an open, a retry, a crossing or a lock). **What the walk saw:**
+  `RoadLockView` auto-asks (its `.task` and its became-active hook — `StoreLockView.swift`), so the FIRST press is the
+  auto-ask's: it spends the plant SILENTLY (no prompt — `takeWalkFailure` answers before the `LAContext` read) and shows
+  the changed line, with the button standing (VX-310); the walker's later click was a REAL press — the system prompt — and
+  its cancel replaced the failed press (`setLastPress(.cancelled)` and the lobby's own press fact), so the typed open owed
+  no re-arm. So W-VX307-1's explanation ("consumed only when a real press runs") is corrected; the re-arm IS walkable
+  without a finger by TYPING right after the changed line — and the her-finger GUI row stays on the closeout checklist
+  regardless (the coordinator's word). **The one look, built:** DEBUG log lines name the leaf instance at the arm (`…
+  armed on leaf <id>`), at the plant's answer (`…the planted failure answered this press — no prompt (leaf <id>)`) and
+  at every real press (`road: a Touch ID press — the system prompt (leaf <id>)`) — the next walk confirms by reading
+  them. **Pins:** headless `RoadRearmTests.minor3_afterAFailedPressTheTypedRoadIsOpenAndNoSecondPressComesByItself` (the
+  walk record's ask: after a FAILED press the changed line, the button standing, the passphrase field offered, nothing
+  busy, a typed secret reaching its road at once; the auto-ask spent — no second press by itself; a later CANCELLED press
+  erasing the changed line; a cancelled first press leaving the typed road equally open) — GREEN on both trees (a
+  behaviour pin closing the question; nothing to fix in the lobby: the "stranded lobby" was the prompt in flight, as the
+  walk record found); Mac `ProtectionCrossingRouteTests.minor3_thePlantedFailedPressOwesTheReArmThroughTheTypedOpen`
+  (enabled where a finger is enrolled — a Touch ID item's write needs one): Use Castle under Touch ID, the next launch's
+  ONE context armed, the lobby's press answered by the plant on the same leaf (`lastPress` too), the typed open owing
+  `.touchIDRearmQuestion` and the `[.rearm]` card — PENDING the stage. Recipe row 5 corrected in place (type, never
+  press again; the leaf ids to read). HEADLESS `✔ Test run with 92 tests in 12 suites passed`; `build-for-testing` → `**
+  TEST BUILD SUCCEEDED **`.
 - NIT-3 (`newRoadSyncKeys.attach(nil)` at the teardown): NOT-STARTED.
 - NIT-1 / NIT-2: record-only (the reviewer's own dispositions).
 - MINOR-1 / MINOR-2: the orchestrator's (`df65cab20`) — not this leg's.

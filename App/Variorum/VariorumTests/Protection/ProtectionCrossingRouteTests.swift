@@ -152,6 +152,48 @@ struct ProtectionCrossingRouteTests {
         }
     }
 
+    /// LADDER ROUND 1, MINOR-3 — THE ARMED AND THE PRESSED LEAF ARE ONE INSTANCE within a composed road, and the planted
+    /// failure answers the FIRST press with no prompt: a library in Castle under Touch ID (the item made at the press —
+    /// a write never prompts); the next launch's ONE context arms its production custody leaf; the lobby's press (the
+    /// auto-ask's road) is answered by the plant (`.failedOnExistingItem`, the leaf's `lastPress` too); the typed open on
+    /// the same context carries that press to `assess`, which owes the re-arm — the interlude's card. Enabled where a
+    /// finger is enrolled (a `.biometryCurrentSet` item needs one — `KeychainLeavesTests`' gate).
+    @Test(.enabled(if: LAEnvironmentBiometryLeaf().biometry().enrolled, "needs a Touch ID finger enrolled on this Mac"))
+    func minor3_thePlantedFailedPressOwesTheReArmThroughTheTypedOpen() async throws {
+        let world = RoadWorld()
+        world.biometry = FixedBiometryLeaf(.ready)
+        defer { world.scope.purge() }
+        let (session, words) = try await world.created()
+        let exports = PlantedExportSwitch().road
+        let shown = try #require(ProtectionCrossings.readCrossings(session, exportSwitch: exports)?.useCastle.openDoor)
+        let typed = TypedSecrets(words: words, newPassphrase: Self.passphrase)
+        #expect(ProtectionCrossings.preflight(session, door: .useCastle, shown: shown, typed: typed, exportSwitch: exports)
+            == .ready)
+        let crossed = await ProtectionCrossings.cross(
+            session, door: .useCastle, typed: typed, gate: .touchID, exportSwitch: exports)
+        #expect(crossed.outcome == .made(.useCastle, exportTurnedOff: false))
+        // The next launch's one composed road: the plant armed on ITS custody leaf.
+        let ctx = world.context()
+        let leaf = try #require(ctx.system.custody as? KeychainCustodyLeaf)
+        leaf.walkFailNextTouchIDPress()
+        guard case .lobby(let lobby) = await ProtectionOpenRoad.route(ctx) else {
+            Issue.record("Castle, no quiet road — the lobby")
+            return
+        }
+        guard case .touchIDNotOpened(let press, _, let gone) = await ProtectionOpenRoad.pressTouchID(ctx, facts: lobby.facts)
+        else {
+            Issue.record("the plant answers the first press")
+            return
+        }
+        #expect(press == .failedOnExistingItem && !gone && leaf.lastPress == .failedOnExistingItem)
+        guard case .opened(let opened) = await ProtectionOpenRoad.openTyped(ctx, secret: .passphrase(Self.passphrase)) else {
+            Issue.record("the passphrase opens the library")
+            return
+        }
+        #expect(opened.report.acts.contains(.touchIDRearmQuestion), "\(opened.report.acts)")
+        #expect(RoadInterlude.cards(opened.report) == [.rearm])
+    }
+
     /// THE TOUCH ID WALK SWITCH (P-VX307-U2a-6) arms the PRODUCTION custody leaf — once per process, on a writing road
     /// only (the press it plants is the walk's: no test can press Touch ID).
     @Test func theTouchIDWalkSwitchArmsTheProductionLeafOncePerProcess() async throws {

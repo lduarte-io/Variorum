@@ -93,6 +93,41 @@ struct RoadRearmTests {
         #expect(road.custody.writes.count == writesAfter)
     }
 
+    /// LADDER ROUND 1, MINOR-3 (the walk record's ask) — AFTER A FAILED PRESS (not a cancelled one) THE TYPED ROAD IS
+    /// OPEN: the changed line shows, the button stays (VX-310), the passphrase field is offered and a typed secret reaches
+    /// its road at once; the automatic ask is SPENT (no second press comes by itself — every later press is hers, and
+    /// real). And why the walk's second press lost the question: a later press that is CANCELLED replaces the press fact
+    /// — the changed line goes (so does the leaf's, and with it the re-arm `assess` would owe the typed open). So the
+    /// walk types the passphrase right after the changed line.
+    @Test func minor3_afterAFailedPressTheTypedRoadIsOpenAndNoSecondPressComesByItself() async throws {
+        let roads = PlantedRoads()
+        roads.pressAnswer = .touchIDNotOpened(press: .failedOnExistingItem, biometry: .ready, itemGone: false)
+        roads.typedAnswer = .refused(ProtectionWords.passphraseDoesNotOpen)
+        let file = try LobbyFixture.liveKeyFile(passphrase: true)
+        let model = roads.model(LobbyFixture.standing(try LobbyFixture.facts(file: file, touchIDItem: true, biometry: .ready)))
+        await model.autoAskIfDue(appIsActive: true)
+        #expect(roads.presses == 1, "the auto-ask is the first press — it spends a planted failure")
+        #expect(model.face.touchIDLine == .changed)
+        #expect(model.face.touchIDLineWords == ProtectionWords.touchIDChanged)
+        #expect(model.face.touchIDButton, "the button stays (VX-310)")
+        #expect(model.face.passphraseField && !model.busy && model.message == nil, "the typed road is open")
+        await model.autoAskIfDue(appIsActive: true)
+        #expect(roads.presses == 1, "no second press comes by itself")
+        await model.unlock(passphrase: "sesame")
+        #expect(roads.typed == 1, "a typed secret reaches its road at once after the failed press")
+        // A later REAL press she cancels replaces the press fact: the changed line goes.
+        roads.pressAnswer = .touchIDNotOpened(press: .cancelled, biometry: .ready, itemGone: false)
+        await model.pressTouchID()
+        #expect(roads.presses == 2 && model.face.touchIDLine == nil && model.face.touchIDButton)
+        // A CANCELLED first press leaves the typed road just as open, with no changed line.
+        let cancelled = PlantedRoads()
+        let other = cancelled.model(LobbyFixture.standing(try LobbyFixture.facts(file: file, touchIDItem: true, biometry: .ready)))
+        await other.autoAskIfDue(appIsActive: true)
+        #expect(other.face.touchIDLine == nil && other.face.passphraseField && !other.busy)
+        await other.unlock(passphrase: "sesame")
+        #expect(cancelled.typed == 1)
+    }
+
     /// THE WALK SWITCH (DEBUG walk machinery, P-VX306-U1b-9's fences): it parses only its word, and never arms on a
     /// read-only road or a custody leaf that is not the production one.
     @Test func theTouchIDWalkSwitchParsesItsWordAndKeepsItsFences() async throws {
