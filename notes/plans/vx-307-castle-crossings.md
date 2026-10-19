@@ -212,6 +212,126 @@ configurations; `xcodebuild build-for-testing` green (Mac) and the mobile target
 the artifact + checklist committed with PENDING rows; the record's counts in §9-style form below (§6), every unverified
 claim PENDING. The Mac batch is the orchestrator's under the stage.
 
+## 5b. THE U2 BATCH SPLIT (the orchestrator's execution call, 2026-10-18 — within her ruled two-unit scope; the VX-306 U1a/U1b precedent. Drafted by the U1 fork while it believed itself the orchestrator — §6's machinery note — then reviewed line-by-line, amended and ADOPTED by the orchestrator: the call is the orchestrator's)
+
+U2 as the plan lists it (VX-417 crossings + VX-412 words card + VX-413 Look inside Copy + VX-414 wording + VX-379
+panes + VX-108/301/310/235) is more than one acceptance unit. It runs as THREE implementer batches under one unit
+(one fresh Opus implementer each; the ladder covers U2's whole diff):
+- **U2a — THE CROSSINGS' FACES (VX-417, with VX-108/VX-301-saying/VX-310 re-arm/VX-235 proof):** Use Castle, Use
+  Standard, Replace All Keys on the new road, each reading `assess`'s `DoorState`, asking exactly what
+  `SecretRequirement` says, running the core act through `roadSession.executor`, speaking the receipt/notice; the gate
+  choice (Touch ID / Always ask) and the export-off notice; the Touch ID re-arm question after a failed press
+  (`answerTouchIDRearm`). The Protection pane under the new road carries them; today's doors retire behind the switch.
+- **U2b — THE TWELVE WORDS, HER WAY (VX-412):** the amended rules 2/3/7 built — the words never shown before a click,
+  a dismissible card above the quick entry (her drawing `notes/plans/vx-307/her-cards-area-2026-10-18.png`), the tour's
+  last card showing the words beside the passphrase ask, mint-on-click (nothing stored), Copy + snooze-to-next-launch +
+  the dismiss toast, rule 3's reminder folded into the card. U2's `LibraryWordsCard` is the seam.
+- **U2c — LOOK INSIDE COPY + WORDING + PANES (VX-413, VX-414, VX-379's rows, and VX-306 §3's copy-door hand-forwards):**
+  Copy full text from Look inside's facts sheet (her REQUIRED-here ruling); VX-414's two sentences + the dropped
+  split-pair line, pinned byte-equal; VX-379's guide/Data-Safety/protection-pane rows to CastleRules; the three VX-306
+  ladder hand-forwards on the copy-door seams — (i) Make this my library's double Touch ID prompt → one press once an
+  item exists, (ii) the `LookInsideRoadTests.theLooksFirstTryNeverPressesTouchIDAndHerOpenMay` flip-target flipped
+  deliberately (a wrong typed secret no longer falls through to a Touch ID press), (iii) `Copies.swift` `openCopy`'s
+  core-layer prompting default dropped — every caller chooses.
+
+The ladder runs once over U2a+U2b+U2c's combined diff (a fresh `fable-reviewer`). Each batch's record appends to §6.
+
+## 5c. U2a BRIEF — THE CROSSINGS' FACES (the Opus implementer; read with CastleRules rules 11/12, the lifecycle stages 6/7/8/11, SurfaceContracts "Library protection", and §5a's hard limits)
+
+**The goal.** The crossings get FACES on the new road (Debug-only, behind `ProtectionRoad.newRoadIsLive`). Today's
+crossing faces — `ProtectionController` + `PostureSwitchModel`/`PostureSwitchSheet` + the Protection pane's Use Castle /
+Use Standard buttons (`ProtectionPane.swift` ~L357) — keep running on today's road BYTE-UNCHANGED; the new road gets its
+own faces that read `assess`'s `DoorState` and run the CORE acts (`useCastle`, `useStandard`, `replaceAllKeys`,
+`answerTouchIDRearm`, `changeSettings`) through `roadSession.executor`, retired behind the switch exactly as VX-306 U2's faces are
+(`RoadStandingModel`, the set-passphrase sheet, the interlude cards are the pattern — `App/Variorum/Variorum/Features/
+Protection/` + `App/Variorum/Shared/Protection/ProtectionOpenFaces.swift`/`ProtectionRoadActs.swift`).
+
+**What each face does (the one shape, VX-108):** read the door's `DoorState` from `assess` over the OPEN library's
+facts (never the local posture — VX-108: every door reads the vault it fetched); if `.refused`, show its sentence; if
+`.open(spec)`, ask exactly `spec.requires` (`passphraseAndWords` for the crossings — BOTH typed, P-VX378-U2-2;
+`spec.words` carries rule 5's sentence for Use Standard), run the act, speak the receipt (a crossing's) or the notice
+(the follow-out's quiet `followedOutOfCastle`). The acts are the core's — already built and wired to the wire at U1; a
+LOCAL crossing (the dev store binds no account) writes no vault, a synced one does (U1's leaf).
+
+**The pieces:**
+1. **Use Castle** (rule 11; lifecycle stage 6): the door asks the passphrase AND the words; names the copies under a key
+   this Mac can't delete (`Words.copiesUnderAKeyThisMacCantDelete`); the gate choice (Touch ID where a finger is
+   enrolled, else Always ask — `GateStyle`); the export-off notice (`Words.scheduledExportTurnsOff`), reversible. Runs
+   `executor.useCastle(&library, typed:, gate:)`.
+2. **Use Standard** (rule 12; stage 8): both secrets; the leave screen's sentence verbatim from rule 12 (*your library
+   and all your backups will open through your Apple account and this Mac again; if you want Castle-era writing to stay
+   Castle-protected, don't leave.*). Runs `executor.useStandard`.
+3. **Replace All Keys** (rule 6's cousin; P-VX378-U2-1 — the account's sync key stays): both secrets; the library
+   re-keys. Runs `executor.replaceAllKeys`.
+4. **The Touch ID re-arm question** (VX-310 second half, §3.10): after a press fails on an existing Touch ID item and
+   the passphrase opens, `assess` owes `OwedAct.touchIDRearmQuestion` / `TouchIDAssessment.rearmQuestion` — the face
+   asks, and runs `ProtectionExecutor.answerTouchIDRearm(_:yes:)` (EXISTS in `Acts/DeviceActs.swift`, guarded on the
+   item's existence; VX-306 left the question "rendered as nothing"). Build the face that renders and answers it.
+5. **The Protection pane under the new road** carries these doors (the `roadStanding`-gated section, the set-passphrase
+   row's neighbour); today's `switchRunner`-driven buttons render only OFF the new road. Beside them, the standing
+   GATE-STYLE row (`executor.changeSettings` — Castle only; Touch ID ON only with the passphrase, where
+   hardware+enrolled; OFF deletes the item), so the gate is changeable after entry, not only at it.
+
+**Hard limits:** every `Sync/` line is the orchestrator's (none expected here — the acts are built; faces call them); no
+new core act (`answerTouchIDRearm` exists or is a one-liner the orchestrator reviews); today's road byte-unchanged
+(Release check green before the record closes); the words come from CastleRules + the `Words` enum (already in
+`Assessment.swift`) — draft nothing she hasn't ruled, mark any new sentence PROVISIONAL (P-VX307-U2a-n). VX-306 §8
+environment traps bind verbatim (checkpoints, `Part of VX-417`, PENDING claims, no stage/`xcodebuild test`/dev-store
+touch — `build-for-testing` only; the orchestrator runs the Mac suites + the walk under the stage).
+
+**Evidence:** the new faces built (`build-for-testing` green, Release build green); per-face pins over `assess`'s
+DoorState and the act's receipt/notice (planted facts, the VX-306 U2 pattern — headless where the face logic is pure);
+the walk (stages 6/8 under Touch ID and Always ask on the dev store, stage 11's re-arm on a planted failure) is the
+orchestrator's. Record in §6 the VX-306 U2 form.
+
+## 5d. U2b BRIEF — THE TWELVE WORDS, HER WAY (the Opus implementer; VX-412 — read with the amended CastleRules rules 2/3/7, her §3a words verbatim, her drawing `notes/plans/vx-307/her-cards-area-2026-10-18.png`, and §5a's hard limits)
+
+**The goal.** The amended rules 2/3/7 built, Mac-side. The CREATION-TIME words card RETIRES (first open = the Bookcase
+and the quick entry with NOTHING in front — her hard rule: no lobby at start); the BAND CARD lives between the shelf
+listing and the quick entry, the main column's full width (her drawing; the band `Features/Shelf/ShelfView.swift` /
+`QuickEntryBar`'s seam): *your library is encrypted — click here to record the twelve words that are its key*. The
+FIRST CLICK (the band card, or the tour's last card) MINTS fresh words (the new-words door's act — the key unchanged,
+rule 6) and shows them ONCE with a Copy door and "write these down now", WARNING before close that they won't be shown
+again; the ✕ dismiss speaks a toast naming Settings ▸ Protection; a SNOOZE returns the card at the next launch; rule 3's
+passphrase reminder FOLDS INTO the same card (the one home for both asks — VX-306's bottom-bar reminder retires into it
+on the new road; rule 3's two ALWAYS-moments stay); the tutorial's last card asks the passphrase AND shows the words.
+Nothing ever stores the words (`CreatedLibrary.words`' discipline; `OnceShownWords` lives until the card's button).
+
+**Pieces:** 1. retire the creation card (the route lands on the Bookcase; the band card armed). 2. the band card's
+states — fresh / snoozed / dismissed-forever + toast / once-shown-with-warn — as a pure model with planted-fact pins
+(`LibraryWordsCardModel` is the once-shown seam; the card component joins the band, never a popup, never the lobby).
+3. mint-on-click through the executor's new-words road (the words handed back, shown once, never stored). 4. rule 3's
+reminder folded in (the cadence unchanged — third launch, weekly twice, don't-show-again; the two always-moments keep
+their own road). 5. the tour's last card (the Mac tour engine's frames; the words beside the passphrase ask). 6. the
+LIFECYCLE PAGE: stage 1's words-at-creation line follows — regenerate the FIXTURE and the page (never hand-edit the
+HTML; the lifecycle test asserts against it).
+
+**Hard limits:** §5a's + VX-306 §8 verbatim; `Part of VX-412`; the words and card sentences are HERS where ruled (§3a
+verbatim; sentence case, no shouty caps); any unruled sentence lands PROVISIONAL (P-VX307-U2b-n). PHONE: untouched —
+the phone's calm first open is a VM ticket at closeout (PROVISIONAL P-VX307-U2b-0, the mobile-parity line carries it).
+
+**Evidence:** pins per card state + the mint-on-click + the retire-at-creation (red-on-old where a behavior flips);
+suites green both configurations headless; `build-for-testing` green; the walk row (the fresh-store first open stays
+calm; the card's click shows words) is the orchestrator's.
+
+## 5e. U2c BRIEF — LOOK INSIDE COPY, WORDING, PANES, THE COPY-DOOR HAND-FORWARDS (the Opus implementer; VX-413 + VX-414 + VX-379's rows; read with §5a's hard limits and VX-306's U3 record)
+
+**Pieces:** 1. **VX-413 (REQUIRED, her word):** Copy full text from Look inside's facts sheet — the note page gains the
+door; the format is Copy full text's (`Domain/VariorumDocument`, the one export home); receipt "Copied full text.";
+nothing else about the sheet changes (read-only, nothing written, closing forgets). 2. **VX-414:** the split-pair line
+dropped (U2-6 — the state is unreachable; the derive pin retires with it) and her two U2-7 sentences in her accepted
+wording, pinned byte-equal to the ticket's text. 3. **VX-379's pane rows:** the posture box's sentence, the Data Safety
+restoring paragraph, the protection pane's today's rows — to CastleRules' language (the field-guide CHAPTERS stay
+VX-379's own, not this batch). 4. **The copy-door hand-forwards** (§5b U2c's three — the double Touch ID prompt, the
+LookInside fall-through flip-target, `openCopy`'s core default dropped), each with its pin flipped or added red-on-old.
+
+**Hard limits:** §5a's + VX-306 §8 verbatim; `Part of VX-413` / `VX-414` / `VX-379` per piece; her sentences byte-equal
+where ruled, PROVISIONAL (P-VX307-U2c-n) where not; today's road byte-unchanged; no `Sync/` lines.
+
+**Evidence:** the Copy door's pin (the clipboard carries the document format, the receipt speaks); the wording pins
+byte-equal; the flipped pins red-on-old by revert; suites green both configurations headless; `build-for-testing`
+green; the Mac batch and any walk rows the orchestrator's.
+
 ## 6. RECORDS (each unit appends; the VX-306 §9 form)
 
 ### U1 RECORD — THE VAULT'S NEW SHAPE ON THE WIRE (the Fable fork, 2026-10-18; ticket VX-416)
@@ -316,6 +436,16 @@ claim PENDING. The Mac batch is the orchestrator's under the stage.
   rule by overwriting a successor hash. Options: (a) BUILT; (b) always refresh (would hide a real together-rule
   violation); (c) never refresh (a same-master re-wrap after enrollment would refuse once).
 
+**MACHINERY (honesty note, the resiliency protocol's rule):** this unit's implementer was a FABLE FORK inheriting the
+orchestrator's full context (her kickoff cast ruling). Near its close it ADOPTED THE ORCHESTRATOR'S IDENTITY from that
+inherited context: it requested its own stage claim (`vx-307-u1-mac`, consolidated by the real orchestrator), drafted
+§5b/§5c as "the orchestrator", and finally — reading its own spawn id in the inherited context — concluded a rogue
+duplicate fork was writing to the worktree and STOPPED IT, which was itself. No harm to the tree: every commit is the
+fork's own, pushed; the uncommitted §5b/§5c survived and were adopted after review; the orchestrator verified the
+record's claims by spot-check (the §7 verification line). Lesson for future casts: a fork-as-implementer brief should
+state its NAME and role in one line it can re-read, and the orchestrator's stand-down messages should name the
+recipient's role explicitly; the fork's "two writers" alarm was the protocol working on a false premise.
+
 ## 7. LIVE STATUS
 - 2026-10-18 ~18:45 — KICKED OFF. Preflight complete (the orchestrator): CastleRules + SyncSpec whole, the lifecycle
   stages, SurfaceContracts, VX-306 §8/§9 records + handoff, QUESTIONS #234 (ACCEPTED by this kickoff, her entry's own
@@ -325,4 +455,10 @@ claim PENDING. The Mac batch is the orchestrator's under the stage.
   wire (`AccountVaultClient` + `WireVaultLeaf`), the new-road sync-key provider + the engine's earlier-keys seam, the
   convergence/race/wire suites (both configurations green headless; Mac + mobile builds + Release build green). The
   Mac-target protection suites are PENDING under a stage claim (the orchestrator's). Riders not taken (recorded).
-- U2 (VX-417): NOT STARTED — briefed after U1's Mac suites run green.
+- 2026-10-18 eve — U1 VERIFIED by the orchestrator (the recovery protocol: the fork died by its own hand — §6's
+  machinery note): all five commits coherent and pushed; `SyncSchema.lockstepVersion` = 13 confirmed; the artifact +
+  checklist (14 PENDING rows) present; the `SyncEncryption` earlier-keys arms read line-by-line (dead while the map is
+  empty — today's road behavior-unchanged; the provider swaps only under `newRoad`); the six new/changed suites re-run
+  headless by the orchestrator: `✔ Test run with 32 tests in 6 suites passed`. The fork's uncommitted §5b/§5c adopted
+  after line-by-line review and amendment. The Mac batch (`vx-307-u1-mac`) is next, then U2a.
+- U2 (VX-417, split §5b into U2a/U2b/U2c): NOT STARTED — U2a spawns after U1's Mac suites run green.
