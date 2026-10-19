@@ -379,11 +379,23 @@ same ruling):**
   two bugs close by its retirement at VX-329 (today's road untouched here).
 
 **LIVE STATUS (per piece; PENDING = unverified):**
-- Piece −1 — this record skeleton + the fork: DONE (this commit).
-- Piece 0 — THE WALK'S DOOR: NOT-STARTED. `ProtectionWalkSwitch.projectOverride(environment:)` (DEBUG, pure: both
-  `VARIORUM_WALK_PROJECT_URL` and `VARIORUM_WALK_ANON_KEY` set and the URL an https URL → the pair; else nil);
-  `ProjectConfig.variorumProjectURL`/`variorumPublishableKey` read it under `#if DEBUG` only, logged ONCE (never the values);
-  Release byte-unchanged. Pin `ProtectionWalkProjectTests` (the pure rule's four arms + a source pin of the DEBUG fence).
+- Piece −1 — this record skeleton + the fork: DONE (`372f92703`).
+- **BUILD RESUMED at the U1 ARBITRATION (below)** — F-FORK-1 ruled a refined (b); R-1 amended by her word (the 10-13 block
+  superseded — the signed-out screens to the CURRENT rules, every line PROVISIONAL, divergences bundled); R-2/R-3/R-4/R-5/R-6
+  approved; F-U1-1 routed to VX-423. Pieces 1, 3, 4 and 6 below are re-cut to the ruling as they land. HARNESS BASELINE (this
+  session's scratchpad package — the U2c recipe pointed at this worktree; the pre-U1 tree): `✔ Test run with 149 tests in 23
+  suites passed`.
+- Piece 0 — THE WALK'S DOOR: DONE (this commit). `ProtectionWalkSwitch.projectOverride(environment:)` (DEBUG, pure: both
+  `VARIORUM_WALK_PROJECT_URL` and `VARIORUM_WALK_ANON_KEY` set, trimmed, the URL https with a host → the pair; else nil) +
+  `projectOverrideForThisLaunch` (the process environment, logged ONCE — that the coordinates are overridden and whether they
+  name the production mirror's own host; never the URL or the key). `ProjectConfig`: the production coordinates named
+  (`productionProjectURL`/`productionPublishableKey`); `variorumProjectURL`/`variorumPublishableKey` read the override inside
+  `#if DEBUG` only, the Release arm the production pair alone (behaviour identical; the binary not byte-identical — rule 24's
+  precedent). Every `ProjectConfig` reader follows in a Debug launch (the auth, the vault client, today's transports — the dev
+  store never syncs, the A4 fence). PROVISIONAL P-VX308-U1-0. Pin `ProtectionWalkProjectTests` (3: both → the pair; one alone /
+  blank / http / no host → nil; the source pin of the DEBUG fence — one `#if DEBUG`, the Release arm reads no environment).
+  HEADLESS (+ `ProtectionWalkSwitchTests`): `✔ Test run with 7 tests in 2 suites passed`. The Mac build of `ProjectConfig`
+  (app-only, outside the harness) PENDING — piece 6's `build-for-testing` covers it.
 - Piece 1 — THE WORDS: NOT-STARTED. `ProtectionWords`' VX-308 account section: rule 16's sentence and rule 7's (*A device holds
   one pair of secrets at a time.* + the join sentence for U2) BYTE-EQUAL to `notes/CastleRules.md`, her #216 mockup's three
   sentences and the born-Castle sentence BYTE-EQUAL to QUESTIONS #216, the shipped sign-out and deletion copy byte-reused;

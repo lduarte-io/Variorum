@@ -37,10 +37,26 @@ import VariorumCore
 nonisolated enum ProjectConfig {
     // MARK: Variorum (the mirror + the sign-in — the suite account home)
 
-    static let variorumProjectURL = URL(string: "https://qpzmroxogeufzizcuunl.supabase.co")!
+    /// The production project's coordinates (the mirror + the sign-in).
+    static let productionProjectURL = URL(string: "https://qpzmroxogeufzizcuunl.supabase.co")!
     /// The Variorum project's PUBLISHABLE API key — author-filled at the
     /// 9c Step 6 gate; empty = the sign-in surface stays dormant.
-    static let variorumPublishableKey = "sb_publishable_X-TQvz2RDj4cnCABZao4ww_WWGdSTwp"
+    static let productionPublishableKey = "sb_publishable_X-TQvz2RDj4cnCABZao4ww_WWGdSTwp"
+
+    #if DEBUG
+    /// VX-308 U1 piece 0 — a DEBUG launch with BOTH `VARIORUM_WALK_PROJECT_URL`
+    /// and `VARIORUM_WALK_ANON_KEY` set reads THOSE coordinates for this
+    /// launch (the account arms' walk against a throwaway project —
+    /// `ProtectionWalkSwitch.projectOverride`, read once, logged once);
+    /// otherwise — and always in Release — the production ones.
+    private static let walkProject = ProtectionWalkSwitch.projectOverrideForThisLaunch(
+        productionHost: productionProjectURL.host)
+    static let variorumProjectURL = walkProject?.url ?? productionProjectURL
+    static let variorumPublishableKey = walkProject?.apiKey ?? productionPublishableKey
+    #else
+    static let variorumProjectURL = productionProjectURL
+    static let variorumPublishableKey = productionPublishableKey
+    #endif
 
     static var variorumConfigured: Bool { !variorumPublishableKey.isEmpty }
 
