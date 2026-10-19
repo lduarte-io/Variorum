@@ -13,6 +13,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
+| **VX-308 — Castle rebuild, phase 4: accounts and the key doors** (flagship; plan `notes/plans/vx-308-accounts-key-doors.md`; **HOLDS the Sync/-custody slot**) | VX-308 · `vx-308-accounts-key-doors` | `~/dev/variorum-vx-308` · Pro | kicked off 2026-10-19, `/architect-phase` overnight at her mandate; walk call resolved (b) — the throwaway project live, `~/.variorum/dev-vault-throwaway.env` written |
 
 ### Latest closeout
 
