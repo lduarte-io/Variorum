@@ -821,14 +821,61 @@ ledger is the merging session's):**
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece 0 — this record skeleton: DONE (this commit).
-- Piece 1 — the core's new-words act on a library with NO passphrase (rule 2's first look on a Standard library that
-  has none — the act as built refused it, `verifiedPassphrase` → `.passphraseDoesNotOpen`): NOT-STARTED — the settled
-  design: `regenerateWords(_:passphrase: String?, newWords:)`; nil is accepted ONLY in Standard, unsynced, with no
-  passphrase lock on the live key file (the reset door's Standard plain-confirm twin — this Mac holds the key); a library
-  with a passphrase is still asked it; Castle refuses nil. PROVISIONAL P-VX307-U2b-1 — the first item to arbitrate.
-- Piece 2 — retire the creation-time words card (Mac): NOT-STARTED.
-- Piece 3 — the shared brains (the look, the band card's states, the ledger, the mint road, the reminder folded):
-  NOT-STARTED.
+- Piece 1 — the core's new-words act on a library with NO passphrase: DONE (`95bde6ea3`). **THE GAP (traced):** the
+  amended rules 2–3 show the words only when she asks — from the card, which offers them WHILE NO PASSPHRASE EXISTS
+  (rule 3), or at the tour's last card BESIDE the passphrase ask — and a look mints the words through rule 6's act; the
+  act as built (`regenerateWords(_:passphrase: String, newWords:)`, design §3.9 "new words (asking the passphrase)")
+  verified the passphrase against the live key file always (`verifiedPassphrase` → `.passphraseDoesNotOpen` on a key
+  file with no passphrase lock), so the look could not run on the very library the card is for. **BUILT:**
+  `regenerateWords(passphrase: String?)` — nil is asked nothing ONLY in Standard, unsynced, with no passphrase lock on
+  the live key file (the reset door's Standard plain confirm, twinned: this Mac holds the key, the library is open);
+  a library WITH a passphrase is asked it exactly as before; Castle and a synced library refuse nil
+  (`secretMissing`). The key is unchanged (rule 6); the vault step is unreached (unsynced only). Every existing call
+  site passes a `String` (unchanged). **Pins** `FirstLookWordsTests` (4, core, headless): the look on a fresh Standard
+  library (fresh words open the live key file, the creation's no longer do, the key and every other lock and this
+  Mac's items unchanged, the mirror follows, the words stored nowhere — the key file's canonical bytes and every memory
+  item scanned); a library with a passphrase still asked (nil refuses, a wrong one refuses, the right one mints);
+  Castle refuses nil; synced refuses nil. Debug `✔ Test run with 12 tests in 3 suites passed` (with the key-door and
+  device-act suites). **MUTATIONS** (each restored by `git checkout --`, `git diff` clean): the nil arm answering the
+  old act's `.passphraseDoesNotOpen` → `✘ Test run with 4 tests in 1 suite failed … with 4 issues` (the behaviour flip,
+  red-on-old in effect); the narrowing dropped (nil asked nothing anywhere) → `✘ … with 6 issues` (Castle, synced and
+  with-a-passphrase all red). PROVISIONAL P-VX307-U2b-1 — THE FIRST ITEM TO ARBITRATE (a core custody line).
+- Piece 2 — the creation-time words card retires on the Mac: DONE (`a1a948c73`).
+  `ProtectionRoad.wordsCardAtCreation(mac:)` (pure: false on the Mac; TRUE on the phone — P-VX307-U2b-0, its card
+  stands this phase) read as `showsWordsAtCreation`; `AppBootstrap.finish(.roadCreated)` on the Mac opens straight on
+  (`beginOpening(roadOpened:)` — the creation's words dropped unseen; nothing stores the words; a log line says so).
+  The Mac route suites FLIPPED (`ProtectionRoadRouteTests.aFreshSlotCreatesAndOpensWithNothingInFrontThenReopensQuietly`,
+  the missing face's two `startANewLibrary…`, `ProtectionFacesRouteTests.rule27sLobbyStartsANewLibraryThroughTheBootstrap`
+  — `.newLibraryWords` → `.ready`; red on the pre-VX-412 tree by construction, whose state there was the card; their RUN
+  is the orchestrator's under the stage — PENDING). Pin `RoadCreationFaceTests` (1, headless): the Mac never, the
+  phone yes, this build its platform's. MUTATION (the rule `true` everywhere) → `✘ … with 2 issues`, restored.
+- Piece 3 — the shared brains: DONE (`6a0b5a05a`). `Shared/Protection/WordsBand.swift`: `WordsCardRules` (the offer:
+  a writing road, not dismissed, not recorded, not snoozed; the two columns) · `WordsCardLedger` (LOCAL, per library,
+  this Mac's defaults beside the reminder's keys — `variorum.calmAsks.words.<libraryID>.{dismissed,recorded}`; never
+  the words) · `WordsCardSnoozes` (this process's only — the next launch shows the card again) · `WordsLookModel`
+  (closed → asking [only where a passphrase exists — rule 6] → minting → shown [Copy; `copied`] → warning [her "these
+  words won't be shown again"; *Go back*] → closed, the words forgotten, `recorded`) · `WordsBandModel` (the words'
+  offer; *Later*; the ✕ → dismissed for good + the toast's sentence handed back; recorded at ANY home retires the
+  offer; RULE 3's REMINDER FOLDED — `showsReminder`, `visible` = the offer, a look in progress, or the reminder) ·
+  `TourEndLibraryModel` (the passphrase ask beside the words; a passphrase chosen there handed to the look, never asked
+  twice; the card's doors held while words are on screen). `ProtectionOpenRoad.mintFreshWords` (`ProtectionRoadActs`:
+  one act at a time on the session; fresh words from the system's `ids.mintWords`, `regenerateWords` on the session's
+  executor, the session's library updated, a log line with the fingerprint only — never the words). `RoadStandingModel`
+  gains `band` (built in `make` — its ledger in the reminder ledger's defaults, `copyWords` the platform's clipboard
+  rule injected), `makeWordsLook()` (the other homes' looks over the same roads), and `makeSetPassphraseSheet(close:
+  onSet:)`. `ProtectionWords` gains the U2b lines (rule 2's card sentence and the warning HERS; the rest PROVISIONAL
+  P-VX307-U2b-2). **Pins** `WordsBandTests` (11, headless): rule 2's sentence byte-equal to the rules file (wrapped
+  whitespace collapsed) + no shouting caps; the snooze (gone this launch, back at the next); the ✕ (dismissed for good,
+  the toast names Settings ▸ Protection); a read-only road offers nothing; the look with no passphrase (minted at the
+  click, Copy, the warning, *Go back*, the close forgets and records, a later look says rule 6 and mints FRESH words);
+  with a passphrase (asked first; empty asks nothing; wrong says why; right mints; Cancel mints nothing); the reminder
+  folded (both asks one card; the reminder alone keeps it); THROUGH THE REAL ROAD on a planted session (fresh words open
+  the live key file, the creation's don't, the key unchanged, every other lock stays, and the words stored NOWHERE —
+  every file under the temp slot, every memory item, the card's defaults domain scanned); a passphrase asked through
+  the real road (wrong writes nothing); the tour's last card both orders (the passphrase first — the look mints with
+  it, not asked twice, the doors held; the words first — minted with nothing asked; a second visit asks the
+  passphrase). The harness `✔ Test run with 100 tests in 14 suites passed`. MUTATIONS (restored, `git status` clean):
+  the warning bypassed → `✘ … with 3 issues`; the snooze persisted as a dismissal → `✘ … with 1 issue`.
 - Piece 4 — the Mac band card between the shelf listing and the quick entry + Settings ▸ Protection's words door + the
   bottom-bar reminder retired on the new road: NOT-STARTED.
 - Piece 5 — the tour's end card (the passphrase ask and the words): NOT-STARTED.
