@@ -580,6 +580,55 @@ Make-mine (a recorded finding, not a walk failure).
    throwaways cleared, the defaults end-diff reconciled, signed out, 0 instances.
 9. **Stages 13/14:** pins only (the crash loops) + rule 27's face spot-check rode row 3/4; said in the record.
 
+## 8. THE WALK RECORD (the orchestrator, 2026-10-20 02:34 MDT →, stage claim `vx-309-walk`, the coordinator's GO;
+captures `/tmp/vx309-walk-caps/`, deleted at closeout; renew-per-row; THE DEV-LIBRARY HALF — checkpoint 1)
+
+**Row 0:** 8/8 slot files cmp-verified into `Backups/safety-copies/variorum-vx309-walk-2026-10-20T083513Z` (no
+extension filter); defaults pre-exported; Previous Libraries baseline two pre-existing entries; 0 instances; the
+Debug app built from the merged tree.
+**Row 1 (the backups + counts):** first Back Up Now → rule 5's pair in the container AND the picked folder
+(`~/Documents/Variorum` — the dev store's standing destination), the same name, BOTH FILES BYTE-IDENTICAL (`cmp`);
+second press → a second pair beside the library ONLY (the far one-a-day truth, P-VX309-U1a-2 live); the pane's
+counts/newest/oldest read THIS device era's pairs; the far caption's one-a-day line and rule 5's F-U2c-4 sentence
+render; VX-210's line renders WITH F-R1's can't-vouch clause (AX-read, byte-faithful). Light + dark captured.
+**W-VX309-1 (finding):** the pair landed under a THIRD `<mac8>` (`a39ae6d7`) — the dev library's DEVICE ID changed
+between VX-308's walk (`c31a4daf` era, 10-19 ~11:00 MDT) and this walk with NO identity-minting door pressed; the
+zero "beside your library" count before the press was honest BY ITS RULE (the new device era owned no pairs), and
+the earlier eras' pairs still LIST under the library while not COUNTING as this Mac's — the per-identity meaning of
+"this Mac's copies" is part of the finding. DOES NOT touch the dev pair; the quiet open stayed quiet throughout.
+Trace owed at closeout (suspect class: a test-host open on the real slot minting a device row).
+**Row 2+3's drill (the restore list + Look inside + Make this my library):** the restore list groups THIS library's
+rows first (the fresh pairs at the head), the older-libraries group after the way-back separator sentence (her item-5
+words live); Look inside on the Oct-18 Previous Library opened READ-ONLY by its own quiet road, nothing asked,
+the facts sheet's ruled sentence shown; the aside's bytes UNTOUCHED after the look (sha256 diff). **W-VX309-2
+(finding):** Make this my library on that Oct-18 aside REFUSED "written by a newer Variorum" — the aside carries the
+branch-era migration id (`v1_30_protection_record`, renumbered `v1_31` at the fold of main), so the schema gate
+reads an unknown identifier as NEWER; honest by its rule, wrong in this dev-only case (migration-id renames break
+the newer-refusal's honesty; release stores can't hit it). The drill re-ran on TODAY'S fresh pair: the confirm's
+ITEM-7 CONCRETE LEAD (the Standard/unsynced arm, §7c's words with the way-back clause) captured pre-type; the
+landing: a NEW library `e11e5233` (fresh key), the outgoing `86a82b4f` aside WHOLE (sqlite + key file) at
+`Previous Libraries/2026-10-20-085330`, the old memory mirror staled beside a fresh one, the hold marker FRESH with
+the COPY'S as-of (08:41Z), the banner's as-of updated, and the receipt said once: *This is your library now. The
+previous one is in Previous Libraries.* The words card re-offers on the new id (the outgoing ledger held no
+recorded mark — carry-of-nothing, consistent). **WALK SLIPS, said honestly (the coordinator told, term 7):** the
+Make-mine words FIELD renders typed words in CLEAR TEXT (the passphrase field is concealed) — two post-type
+captures held the dev words and were DELETED unCommitted; a words-field/passphrase-field concealment-consistency
+row joins her bundle; the walk discipline became captures-before-typing only. One mis-click typed the passphrase
+into the words field (cancelled; nothing landed); the dev pair never changed and `dev-castle.env` stays true; the
+coordinator recommends NO rotation (hers to decide).
+**Row 5 (+ VX-263's line) — the Castle round trip on the dev library:** the Protection pane's key doors render with
+VX-263's REWORDED line (AX-read byte-faithful); Use Castle's confirm speaks rules 9/11 verbatim + the export-off
+call line (captured pre-type); the crossing landed a NEW CASTLE KEY (`7b4159d4`) with NO Apple lock in the key
+file, identity kept; the gate chose ALWAYS ASK; the pane then showed the export-off DURABLE notice, the gate row's
+Always-ask sentence, VX-451's DIAL (picked 5, read back "5 minutes", RESTORED 10) and the Lock row's ⌃⌘L sentence;
+the File menu gained Lock Library Now; **⌃⌘L → the library closed behind the LOBBY** (typed roads only, the honest
+"Touch ID isn't set up for this library." line, the Settings window closed — VX-224), captured; the passphrase
+reopened the SAME key (no re-key at a lock). **Use Standard's confirm speaks rule 12's leave sentence verbatim**
+(captured pre-type); the leave landed a NEW STANDARD KEY (`77f4a14d`) with the APPLE LOCK BACK in the key file,
+identity kept; Lock Library Now GONE from the File menu in Standard. The hold marker rode every crossing unchanged
+(heldAt 08:53Z standing). *(The dev-library half ends: Standard, `e11e5233`, the dev pair intact and valid, held +
+banner. The throwaway block follows — checkpoint 2 appends.)*
+
 ## 2. Evidence (the acceptance spine)
 Walks in BOTH VOICES (Terminal and Study) over the new faces; the restore drill through Look inside and Make this my
 library; the lifecycle page's stages 9, 10, 13 and 14 against the faces as built. Headless + build-for-testing for
