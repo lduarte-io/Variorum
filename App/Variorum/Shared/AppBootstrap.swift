@@ -1559,7 +1559,14 @@ final class AppBootstrap {
                         session, request: request, signIn: signInNow(), exportSwitch: exports)
                 }.value
             },
-            landed: { [weak self] in await self?.roadCrossings?.refresh() },
+            // VX-309 U1c — VX-454: an account act can set a passphrase on the OPEN session (turning sync on with a new one,
+            // a join adopting the account's pair) — the set row and rule 3's reminder re-read, and the key doors with them
+            // (Change and Reset stand where the set row retires).
+            landed: { [weak self] in
+                await self?.roadCrossings?.refresh()
+                self?.roadStanding?.rereadPassphrase()
+                await self?.roadKeyDoors?.refresh()
+            },
             receipt: { [weak self] text in self?.roadStanding?.speak?(text) },
             // VX-308 U2 — the words moment's Copy: the Mac's one words clipboard rule (the card's own road).
             copyWords: { Self.copyWords($0) })

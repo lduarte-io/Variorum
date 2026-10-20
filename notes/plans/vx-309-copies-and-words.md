@@ -1529,6 +1529,14 @@ suites passed after 4.986 seconds.` (U1b's close count, exactly).
   doors and today's one verb constant. Its chord is NOT the declaration's `shortcutLabel`: the discoverability guard
   (`everyDeclaredShortcutIsFindableInTheHelper`) would then demand a ⌘/ helper row, which RELEASE renders — and the hard limit is
   today's road byte-unchanged (P-VX309-U1c-4 carries the arm that declares it).
+- **R-U1c-8 — VX-454: THE PROBE'S SHAPE, AND WHY THE LANDING CHAIN MISSED IT.** `offersSetPassphrase` is a STORED flag re-read
+  only when a set-passphrase sheet closes or VX-447's mint lands; the faces are made per open, and turning sync on (setUpSync
+  — a first device's hand-up with a NEW passphrase) and a same-posture join run on the OPEN session with no reopen to make
+  fresh faces. The account section's `landed` re-read the crossings only; the pane's appearance (`refreshPane`) re-read the
+  three sections' faces but never the row — which is why W-VX308-2 saw Change/Reset (the key doors re-read at the pane's
+  next appearance) with "Set a passphrase…" still above them. The probe drives exactly that: turn on sync on the planted
+  road, then the appearance. Rule 3's reminder on the card has the same stored state (`showing`) and the same miss; it
+  retires in the same re-read ("Never shown once a passphrase exists") — one act's two faces, not a second unit.
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton + the harness baseline: DONE (this commit).
@@ -1598,7 +1606,20 @@ suites passed after 4.986 seconds.` (U1b's close count, exactly).
   write refuses; the model's dial and Lock Now over planted roads) `✔`; Mac only, BUILT: `RoadIdleDialRouteTests` (2 — through
   `AppBootstrap`: Standard no row; Castle the dial → the bootstrap's relock policy 30 at once, the pane's Lock Now → the lobby,
   the unlock reads 30 back; and the one declaration by source). `build-for-testing` green, no warning in a touched file.
+  MUTATIONS on `61afe294e` (each restored `cmp`-identical to `u1c-prerevert/`): M-4a the row never reads the sealed minutes →
+  `✘` (4 issues, two tests); M-4b the Castle guard dropped → `✘ standardHasNoRowAndTheDialRefuses` (2); M-4c nothing sealed
+  (the `changeSettings` call skipped) → `✘ theCastleRowCarries…` (5).
+- Piece 5 — VX-454 (probe first): CONFIRMED AND FIXED (`6aa235a67` the probe pin · this commit the fix). R-U1c-8. THE PROBE
+  `SetPassphraseRowRereadTests.turningSyncOnWithANewPassphraseRetiresTheSetRowAndTheReminder` (headless; the planted vault)
+  RED ON THE PRE-FIX TREE `✘ Test run with 1 test in 1 suite failed … with 2 issues` — the ticket is REAL, not hollow (the
+  set row AND rule 3's reminder both stood after turn-on-sync set a passphrase, through the pane's appearance). THE FIX:
+  `RoadStandingModel.rereadPassphrase()` (only ever retires: a passphrase exists ⇒ `offersSetPassphrase = false` and
+  `reminder.passphraseWasSet()`), called FIRST by `refreshPane()` (the pane's appearance — the observed arm) and at an account
+  act's LANDING (`AppBootstrap.accountRoads`' `landed`: the crossings' re-read as before, then the set row, then the key
+  doors — Change/Reset stand where the set row retires). The probe green; the harness `✔ Test run with 318 tests in 54 suites
+  passed`. Mac only, BUILT: `SetPassphraseRowRereadRouteTests` (1 — the landing arm through `AppBootstrap`, the pane never
+  re-appearing: the set row and the reminder retire and Change passphrase… opens; RED ON OLD by construction of the old
+  landing — the orchestrator's behavioural revert R-e below). `build-for-testing` green, no warning in a touched file.
   Mutations: PENDING.
-- Piece 5 — VX-454 (probe first): NOT-STARTED.
 - Piece 6 — the close: NOT-STARTED.
 - No revert is in flight.

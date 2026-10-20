@@ -265,8 +265,10 @@ final class RoadStandingModel {
     @ObservationIgnored var paneWave: (@MainActor () async -> ProtectionPaneWave)?
 
     /// The Protection pane's appearance: the three sections re-read from ONE read (`ProtectionPaneRefresh.wave`) — or,
-    /// with no wave road, each on its own, as before.
+    /// with no wave road, each on its own, as before. VX-309 U1c — VX-454: the set row and rule 3's reminder first
+    /// (`rereadPassphrase` — an act on the open session may have set one since this open's faces were made).
     func refreshPane() async {
+        rereadPassphrase()
         guard let paneWave else {
             await crossings?.refresh()
             await account?.refresh()
@@ -473,6 +475,18 @@ final class RoadStandingModel {
             let backedUp = await takeBackupPair()
             self?.speak?(ProtectionWords.keyFileRemadeReceipt(backedUp: backedUp))
         }
+    }
+
+    /// **VX-309 U1c — VX-454 (W-VX308-2):** the rows that stand only while the library has NO passphrase, re-read from the
+    /// library now — the Protection pane's *Set a passphrase…* (`offersSetPassphrase`) and rule 3's reminder on the card
+    /// ("Never shown once a passphrase exists"). An act on the OPEN session can set one with no reopen to make fresh faces —
+    /// turning sync on (a new passphrase, typed twice), a join adopting the account's pair — so the pane's appearance and an
+    /// account act's landing call this. Only ever retires: a passphrase never goes away under an open library.
+    func rereadPassphrase() {
+        guard passphraseExists() else { return }
+        if offersSetPassphrase { ProtectionOpenRoad.log("road: a passphrase exists now — the set row and rule 3's reminder retire") }
+        offersSetPassphrase = false
+        reminder.passphraseWasSet()
     }
 
     /// The receipts the open owes, spoken once (each `receiptsOwed` call takes them).
