@@ -134,9 +134,10 @@ nonisolated struct CopyDoorsListing: Equatable, Sendable {
     /// VX-210: how many copies the catalogue sees that Variorum leaves as they are — a library-shaped file (`.sqlite`) in a
     /// place no build of this design writes (`Catalog.foreign`: today's flat backups, the A1 rail's copies, a folder she
     /// made), a copy no format-3 key file names (rule 26 — never listed), a far copy outside any Mac's subfolder
-    /// (`unattributed` — no Mac here claims it). Pure.
+    /// (`unattributed` — no Mac here claims it). Pure. A library-shaped file is library-shaped whatever the case of its
+    /// suffix (VX-309 ladder round 1, F-R6).
     static func unmanagedCopies(in catalog: Catalog) -> Int {
-        catalog.foreign.filter { $0.name.hasSuffix(".sqlite") }.count
+        catalog.foreign.filter { $0.name.lowercased().hasSuffix(".sqlite") }.count
             + catalog.copies.filter { $0.library == nil || ($0.place == .farFolder && $0.mac == .unattributed) }.count
     }
 
