@@ -629,3 +629,35 @@ fresh session each); the orchestrator's own hands: the rehearsal, VX-314, the Ma
 walk. The ladder: round 1 0B/1M/2m/2N, five-for-five agreed fixes, round 2 confirmed all five, zero new. Born tickets
 and the bundle: the VX-308 handoff + QUESTIONS #236. Mobile parity: the phone builds throughout; its account faces
 and relock are the catch-up's (F-U4-4; the VM comment).
+
+## 2026-10-20 — VX-309 (Castle rebuild, phase 5: copies and words; PR #182)
+
+**The effort (kicked off 2026-10-19, closed 2026-10-20; the full record is `notes/plans/vx-309-copies-and-words.md`
+— the kickoff record §0, her sitting rulings, the cut §1b, the briefs §5a–§5d, the T-8 mapping ruling §5b-R, the
+unit records and arbitrations §6, the ladder §6-L, THE WALK RECORD §8, the closeout §9).** Her kickoff rulings,
+verbatim where quoted: riders the faces set (VX-451 + VX-453 + VX-454) with the rest delegated — "which of these do
+you think are most important to release? VX-450 seems important enough to join along with the top 3, but I'm not
+sure if anything else should be included" (the orchestrator added VX-450 and VX-444; VX-449/452/101/100 stayed out);
+the standing cast; U1 copies → U2 words; VX-211 = "Floor + quiet hint" (the 12-character floor the only refusal, one
+calm line, never a meter). Her kickoff accepted the rest of #236. Mid-walk her Fable credits ran out; her word on the
+model: "I'm happy with Opus, let's just keep going" — Opus finished the walk and the closeout; on the dev words seen
+during the walk: "it's fine to not rotate the dev words - it's not an issue."
+
+**§12 (SurfaceContracts, the protection line) — what changed and why:** the copies' machinery (rule 5's pair in the
+picked folder when due per library per Mac, one a day there; retention per library per Mac with future-dated copies
+never claiming a slot — a Mac-batch red, MB-1, fixed in core and pinned; Data Safety's counts per library per Mac);
+the doors' listings with rule 19's delete (by place; never the open library's; none over rule 27's library) and
+VX-210's line; T-5 (Make this my library into the empty slot) and Previous Libraries reopening; T-8 (a plaintext
+export in as a NEW library, the §5b-R mapping); VX-444's ledger carry; VX-450's interrupted key-door acts; VX-451's
+dial and Lock Library Now in Castle's section; VX-211's floor + hint on every new-road setter; the join moment's
+reword with VX-456's quiet arm (the set-up arm left speaking — VX-462) and VX-457's durable Done; the guide's
+new-road chapter.
+
+**The cast:** Fable orchestrated (the cut, the arbitrations, the Mac batches, the ladder, the walk's dev-library
+half) and two fresh Fable reviewers ran the ladder; Opus implemented (U1a, U1b, U1c, U2 and the fix leg, one fresh
+session each) and, from the walk's throwaway block, orchestrated. The ladder: round 1 0B/0M/2m/4N, six-for-six
+agreed fixes, round 2 confirmed all six, zero new. The walk found what the suites could not: the pane's export door
+writes an empty file (VX-461), VX-456's set-up arm (VX-462 — pinned headless as known issues), a dev device-ID drift
+(VX-465), and five smaller findings; walk slips said in §8. Born tickets VX-461..VX-475 and the bundle QUESTIONS
+#237; the handoff `notes/handoffs/vx-309-handoff.md`. Mobile parity: nothing mobile-visible; the phone's guide
+chapter and passphrase faces are the VM-8 comment. Next: VX-329, its plan written at this closeout.

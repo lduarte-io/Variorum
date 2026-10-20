@@ -1,7 +1,6 @@
 # VX-309 — Author handoff, 2026-10-20
 
-**Phase 5 of the Castle rebuild (copies and words) is built, laddered and walked. It closes when the coordinator
-gives GO-MERGE.** PR: _(filled at the merge)_ · merge commit: _(filled at the merge)_. The run record is
+**Phase 5 of the Castle rebuild (copies and words) is CLOSED: built, laddered, walked and merged.** PR: https://github.com/lduarte-io/Variorum/pull/182 (merged by merge commit at the coordinator's GO-MERGE). The run record is
 `notes/plans/vx-309-copies-and-words.md`: §1b the cut, §5 the briefs, §6 the unit records and arbitrations, §6-L
 the ladder, §8 the walk, §9 the closeout. The new road is still Debug-only, `lockstepVersion` stays 13 and artifact
 17 is still held. No release and no `/Applications` refresh came with this close: nothing changed on the Release road.

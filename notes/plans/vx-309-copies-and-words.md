@@ -1,6 +1,6 @@
 # VX-309 — Castle rebuild, phase 5: copies and words
 
-**Status: BUILT, LADDERED, WALKED — CLOSING 2026-10-20 (session `vx-309`, `/architect-phase`). Fable orchestrated
+**Status: CLOSED 2026-10-20 — BUILT, LADDERED, WALKED, MERGED (PR #182) (session `vx-309`, `/architect-phase`). Fable orchestrated
 through the walk's dev-library half; Opus orchestrated from the throwaway block to the merge (her Fable credits ran out
 — her word: "I'm happy with Opus, let's just keep going"). The results: §6 (units), §6-L (the ladder), §8 (the walk);
 the handoff `notes/handoffs/vx-309-handoff.md`; her bundle QUESTIONS #237; born tickets VX-461..VX-475.**
