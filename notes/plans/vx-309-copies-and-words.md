@@ -275,11 +275,25 @@ store's restore hold and banner stand; never press Resume.
 
 ## 6. RECORDS (each unit appends; the VX-308 §6 form)
 
-### U1a RECORD — THE COPIES' MACHINERY (Opus implementer, 2026-10-19; the far pair leg + VX-397 + VX-302/411 + VX-450 — IN PROGRESS)
+### U1a RECORD — THE COPIES' MACHINERY (Opus implementer, 2026-10-19; the far pair leg + VX-397 + VX-302/411 + VX-450 — BUILT; the Mac suite and the walk PENDING)
 
-**Not done in U1a, first:** PENDING — written at the close (the brief's hard limits: no `xcodebuild test`, no stage, no
-Debug launch, no store touch, no live network call, no Linear write, no subagents — every Mac-only pin is BUILT, its run
-the orchestrator's under the stage).
+**Not done in U1a, first:**
+- **No Mac suite was RUN and no walk was made** (the brief: headless + `build-for-testing` only — no `xcodebuild test`, no
+  stage, no Debug launch, no store touch). ONE Mac-only suite is BUILT — `DataSafetyRoadCountsTests` (4: the Data Safety
+  seam and the two restatements of `StoreBackup`'s rules); its run AND its red-on-old by behavioural revert are the
+  orchestrator's (the recipe below). Every other new pin ran HEADLESS (the harness) or in core, red-on-old verified.
+- **No face and no words changed.** The honest line about an unreachable picked folder, and anything Data Safety SAYS
+  about the new road's copies, are U2's (the brief); the rows only count differently (R-U1a-4). Rule 19's other-libraries
+  listing and its delete choice are U1b's door — nothing here deletes another library's copy (pinned).
+- **F-U1a-1** (a resumed Change typing the OLD passphrase "finishes" under it and says resumed — pre-existing, adjacent to
+  VX-450) is ROUTED, not built. **MAJOR-1's residue (1)** for Change and Reset is RECORDED, not built (the brief).
+- **Two existing core files changed** besides the new pure rule `Assess/OwnCopies.swift`: `Assess/Retention.swift` (its
+  predicate moved to `OwnCopies`, behaviour identical) and `Executor/Acts/KeyDoors.swift` (VX-450 — the custody line, THE
+  CORE LINES below, for the Fable ladder). Zero `Sync/`, `Server/`, schema, migration, project or dependency lines;
+  `StoreBackup.swift` untouched; `SyncSchema.lockstepVersion` 13. No live network call (SwiftPM and xcodebuild ran from
+  APFS-cloned caches with `--skip-update` / `-skipPackageUpdates`); the dev store, the real store and `/Applications`
+  untouched; no Linear write; no subagent.
+- The canon delta (F-U1a-4) and the QUESTIONS rows for the PROVISIONALs are the closeout's.
 
 **Preflight (complete, not delegated):** CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md` whole;
 `notes/CastleRules.md` WHOLE (rules 1, 4, 5, 17–21, 25, 27 + the considered-and-not-pursued ledger); `notes/SyncSpec.md`
@@ -438,5 +452,202 @@ fetch, no network.
   (pinned: `aSyncedChangeStoppedAfterItsVaultWriteRollsBackAndTheLandedWriteStands`). Residue (2) — rule 20's "says
   which" lives in Diagnostics only on the new road — is pre-existing for every act, unchanged. F-U1a-1 (below) is the
   adjacent class this fix does not reach.
-- Piece 5 — the close (counts, the Mac-suite list, PROVISIONALs, findings): NOT-STARTED.
-- No revert is in flight.
+- Piece 5 — the close: DONE (this commit) — the core and app lines as built, the counts, the Mac-suite list with its
+  red-on-old recipe, the PROVISIONALs, the findings and the machinery notes below. (`f587b6382`: the backup hook's header
+  comment names the far leg and retention — comment only.)
+- No revert is in flight (every mutation and behavioural revert of this unit ran on a committed tree and was restored by
+  `git checkout --`, `cmp`-identical to a copy in this session's scratchpad `u1a-prerevert/`; no scratch worktree; the
+  tree is clean at the close).
+
+**THE CORE LINES, LINE BY LINE (for the Fable ladder — `git diff 0965d68bd -- Sources/`):**
+1. `Assess/OwnCopies.swift` (NEW, pure): `isThisMacsCopyOfThisLibrary(_:libraryID:thisMac:)` — retention's closure moved
+   VERBATIM (kind `.backup`; `mac == .mac8(<this Mac's mac8>)`; `library == libraryID` from the pair's own key file;
+   `folders[1]` the library's own `<library8>`); `of(_:libraryID:thisMac:in:)` — that predicate in one place;
+   `stampIsTrusted` — `stamp <= now`, StoreBackup's 18o U1 rule restated byte-equal (a Mac pin holds them equal);
+   `Summary` / `summary` — the count every own pair (as today's face counts every dated file), newest and oldest over
+   trusted stamps; `farPairIsDue(_:libraryID:thisMac:now:interval:)` — due unless an own FAR pair has a trusted stamp
+   younger than `interval` (today's far leg's question, asked of this Mac's own pairs of this library).
+2. `Assess/Retention.swift`: the inner predicate calls `OwnCopies.isThisMacsCopyOfThisLibrary` — identical behaviour
+   (`RetentionTests` + its DEBUG guard pin green unchanged); the guard-off arm untouched; the header names the caller.
+3. `Executor/Acts/KeyDoors.swift` — `KeyDoorProgram.resumeCannotFinish` (VX-450): `guard ctx.resuming` FIRST (M1-c's, so
+   a press never reaches the arm — pinned load-bearing by M-450c); then by act — the words act: its words in hand (as
+   MAJOR-1 built it); Change and Reset: `ctx.secrets.passphrase` (at a resume derived ONLY from a passphrase typed there,
+   under the plan's fresh descriptor — `derive`, `passphraseIsNew` true for these acts); any other act: nil; then for all
+   three the live key file of the key. Same call site (the vault and key-file steps only), before any write →
+   `ActRollback` → `drive`'s one rollback → `.rolledBack(act)`. Untouched: every press; a resume HOLDING a typed
+   passphrase (the plan-level check in `resume` and the vault's refusals judge it — F-U1a-1 is the gap there); the memory
+   step (no secret); the plan-less finish (`["memory"]`).
+
+**THE APP LINES AS BUILT (for the ladder):** THE PAIR ROAD — `ProtectionBackupHook.takePair(_:now:guards:)`
+(`ProtectionBackupPair.swift`): one road at a time (`oneAtATime`, an `NSLock` held for the whole road); the gates
+unchanged (copies paused; the live key file of the key); `FileBackupsLeaf.writeContainerPair` (the old
+`takeBackupPair` body, returning the snapshot it wrote — the protocol method calls it); then `landFarPair(session,
+snapshot:keyFile:deviceID:now:)` — no far folder ⇒ `.noFarFolder`; a FRESH catalogue read → `OwnCopies.farPairIsDue(…,
+interval: farInterval)` (24 h) ⇒ `.notDue`, or the leaf's `landFarPair(copying:key:keyFile:deviceID:)` (the picked
+folder's scope claimed; the picked folder must exist — never re-made; the same two names under `Variorum/Backups/
+<library8>/<mac8>/`; an existing name refused; verified — the key file reads back, the snapshot opens with the key; a
+failed copy removed whole; the far catalogue id returned) ⇒ `.written(id)` or `.failed` — logged, never raised; then
+`prune(session, libraryID:deviceID:guards:)` — a FRESH catalogue read → `Retention.plan(… .standard, guards:)` → one
+`deleteCopies(ids: [id])` per prune id, a failure logged and skipped, each id logged once its file is gone. The pair's
+outcome stays the container's, so every caller is unchanged (the hook's `copiesChanged`, VX-447's backed-up receipt).
+DATA SAFETY — `ProtectionCopyCounts.read(session)` → `RoadCopyCounts` (container + far `OwnCopies.Summary`, a fresh
+catalogue read); `RoadStandingModel.copyCounts` (built in `make` from the open's session, off the main actor; nil on a
+hand-made face); `DataSafetyModel(roadCounts:)` — `refresh` takes the counts BEFORE assigning, then `counted(_:_:)` over
+the rows as read (paths, `exists`, unset/unreachable kept); `DataSafetyPane` hands `roadStanding?.copyCounts` (nil on
+today's road ⇒ `primary = read.primary`, `destination = read.secondary`, byte-unchanged).
+
+**COUNTS (the final tree — `f587b6382` + this record):**
+- HEADLESS HARNESS (U1's recipe rebuilt in this session's scratchpad `u1-harness`, re-pointed at this worktree; it now
+  also symlinks `Shared/Protection/ProtectionCopyCounts.swift` and this unit's three headless suites): **`✔ Test run with
+  290 tests in 47 suites passed after 3.359 seconds.`** (the 272/43 baseline + 18/4: `ProtectionFarPairTests` 10,
+  `ProtectionCopyCountsTests` 3, `ProtectionPairRetentionTests` 4, `ProtectionPairRetentionGuardMutationTests` 1).
+- CORE: the protection set (every `@Suite` type under `Tests/VariorumCoreTests/Protection` — 86 now, the filter re-derived
+  from the files) Debug **`✔ Test run with 358 tests in 86 suites passed after 6.034 seconds.`** (347/84 + 11/2:
+  `OwnCopiesTests` 5, `KeyDoorResumeTests` 6); Release (`swift test -c release`, the same filter) **`✔ Test run with 334
+  tests in 82 suites passed after 4.822 seconds.`** (323/80 + 11/2). THE FULL CORE SUITE, Debug (`swift test`):
+  VariorumCoreTests `✘ 3335 tests in 434 suites … with 1 issue` — `PerfBenchmarkTests
+  .timelinePageIsFlatOrUnderBudgetInCorpusSize`, the P1 wall-clock RATIO bound under the full parallel run (small 3.25 ms
+  vs big 10.24 ms, 3.15× against 3×, load average ~7.5 — the class VX-305's record names); ALONE `✔ Test run with 6 tests
+  in 1 suite passed` (0.55 vs 0.92 ms, 1.66×); the third target `✔ 40 tests in 6 suites`; VariorumMCPTests `✘ 383 tests in
+  71 suites … with 1 issue` — the ONE recorded VX-353 flake (`MCPHarnessTimeLimitTests
+  .aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, 19.2 s vs 15 s); ALONE `✔ 3 tests in 1 suite`. No
+  Queries, Operations or MCP line in this diff.
+- RED ON THE PRE-FIX TREES (each unit of pins committed first): piece 1 `✘ 8 tests … 9 issues`; piece 3 `✘ 4 tests … 21
+  issues`; piece 4 `✘ 5 tests … 35 issues`. MUTATIONS (each on a committed tree, restored `cmp`-identical): M-OC1..3,
+  M-FP1..4, M-DS1..2, M-RT1..2, M-450a..c — every one red at its own pins (the pieces' lines); M-RT3 named, not run.
+- `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx309
+  -skipPackageUpdates -onlyUsePackageVersionsFromResolvedFile build-for-testing` → **`** TEST BUILD SUCCEEDED **`** (no
+  warning in a touched file); the phone `-scheme VariorumMobile -destination 'generic/platform=iOS Simulator'
+  -configuration Debug … build` → **`** BUILD SUCCEEDED **`**; **the Release check `-configuration Release build` → `**
+  BUILD SUCCEEDED **`**.
+- Release behaviour: unchanged by construction — the pair road (and so the far leg and retention) is reached only from a
+  new-road session (the hook attaches only for one; VX-447's banner is new-road); `roadStanding` is nil on today's road,
+  so `DataSafetyModel.roadCounts` is nil and `refresh` assigns exactly as before; the core lines are the new road's
+  executor's. The binary is not byte-identical (rule 24's precedent).
+
+**THE MAC SUITES THE ORCHESTRATOR RUNS UNDER THE STAGE (from `App/Variorum/`; PENDING):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx309 test \
+  -only-testing:VariorumTests/DataSafetyRoadCountsTests \
+  -only-testing:VariorumTests/ProtectionFarPairTests \
+  -only-testing:VariorumTests/ProtectionCopyCountsTests \
+  -only-testing:VariorumTests/ProtectionPairRetentionTests \
+  -only-testing:VariorumTests/ProtectionPairRetentionGuardMutationTests \
+  -only-testing:VariorumTests/ProtectionBackupHookTests \
+  -only-testing:VariorumTests/NoKeyFileDoorTests \
+  -only-testing:VariorumTests/ProtectionFileLeavesTests \
+  -only-testing:VariorumTests/MakeMineRouteTests \
+  -only-testing:VariorumTests/ProtectionOpenRoadPlantedTests \
+  -only-testing:VariorumTests/ProtectionReminderRoadTests \
+  -only-testing:VariorumTests/PassphraseReminderTests \
+  -only-testing:VariorumTests/ProtectionPaneWaveTests \
+  -only-testing:VariorumTests/ProtectionPaneRoadRowTests \
+  -only-testing:VariorumTests/RoadKeyDoorSurfaceTests \
+  -only-testing:VariorumTests/RoadCrossingSurfaceTests \
+  -only-testing:VariorumTests/WordsBandSurfaceTests \
+  -only-testing:VariorumTests/VX379PaneRowsTests \
+  -only-testing:VariorumTests/BackupRunTests \
+  -only-testing:VariorumTests/BackupOwnFilesTests \
+  -only-testing:VariorumTests/BackupRetentionTests \
+  -only-testing:VariorumTests/BackupSingleFlightTests \
+  -only-testing:VariorumTests/DataSafetyRunbookTests \
+  -only-testing:VariorumTests/BackupFutureStampTests \
+  -only-testing:VariorumTests/MarkdownInsuranceTests \
+  -only-testing:VariorumTests/SyncSafetyFaceTests \
+  -only-testing:VariorumTests/LibraryPortabilityDoorTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests \
+  -only-testing:VariorumTests/StatusSeamVocabularyTests \
+  -only-testing:VariorumTests/TravellingDotsIndicatorTests
+```
+The first five are U1a's (4 + 10 + 3 + 4 + 1 = **22 tests**; only `DataSafetyRoadCountsTests` is Mac-only — the other four
+are headless-green too; `DataSafetyRoadCountsTests` bookmarks a temp folder into a SCRATCH defaults suite, never
+`.standard`). Then the suites over the files this unit touched: the pair road's callers (the hook, VX-447's banner door,
+Make this my library's route), the file leaves, `PlantedRoad`'s users (`init(farFolder:)` — default unchanged),
+`RoadStandingModel`'s hosts (its init grew a defaulted parameter), Data Safety's model and pane (`DataSafetyTests`' five
+suites, the future-stamp, insurance and sync faces, the portability door that composes the pane), and the source scans
+over the edited files. **THE RED-ON-OLD BY BEHAVIOURAL REVERT (the orchestrator's, from a committed tree, restored by
+`git checkout --`):** (R-a) in `DataSafetyModel.refresh`, the road's three lines back to `primary = read.primary` /
+`destination = read.secondary` (the `let counts` line dropped) → `DataSafetyRoadCountsTests
+.theNewRoadsRowsCountThisMacsPairsOfThisLibraryAndTodaysRoadIsUnchanged` RED (the new road's rows read today's flat
+counts, 3 and 2); (R-b) `ProtectionBackupHook.farInterval` → `12 * 60 * 60` → `theRestatedRulesAreStoreBackups` RED.
+
+**WALK NOTES FOR THE ACCEPTANCE SPINE (the orchestrator's walk — the dev store, a throwaway picked folder, under a held
+claim):** with a picked folder set, Back Up Now on the dev library → `Backups/<lib8>/<mac8>/` beside the library AND
+`<picked>/Variorum/Backups/<lib8>/<mac8>/` hold the same new pair (`cmp` the two files); log lines `backup pair: written
+under …`, `backup pair: copied to the picked folder — farFolder:Backups/<lib8>/<mac8>/variorum-backup-<stamp>-<fp8>
+.sqlite`; a second Back Up Now → a second pair beside the library only (`… the picked folder holds this Mac's fresh pair
+of this library — none copied there`); Data Safety's two rows count PAIRS (today's flat files beside them are not
+counted on the new road); retention removes only past 14 beside the library / 14 + 4 in the picked folder (`backup pair:
+retention removed …`). The dev store's own picked-folder setting is to be read (and restored) under term 3 — never left
+pointing at the throwaway.
+
+**PROVISIONALs (each built as its option (a); for the orchestrator to bundle under QUESTIONS at the closeout — the shared
+ledger is the merging session's):**
+- **P-VX309-U1a-1 — the far pair rides only a run that WROTE a container pair** (the brief's letter; the hook fires on a
+  written run): (a) BUILT — a drive that returns after the day's run waits for the next written run (≤ the interval);
+  (b) every run (an up-to-date one too) asks the far folder's due-ness and copies this Mac's newest container pair of
+  this library (today's flat leg's own cadence — the hook would act on every hourly tick's record); (c) the far leg its
+  own clock.
+- **P-VX309-U1a-2 — no "force" for the far pair:** (a) BUILT — due-ness only, so a second Back Up Now within 24 h lands a
+  second pair beside the library and none in the picked folder (today's flat leg copies on every forced run); (b) a
+  forced run lands the far pair whatever its due-ness (the run's force would have to reach the hook — `BackupRunRecord`
+  carries none, a `StoreBackup` line, READ ONLY here); (c) Back Up Now's own door calls the pair road with a force.
+- **P-VX309-U1a-3 — the far pair is the container pair COPIED** (one backup in two places, one name — R-U1a-1): (a) BUILT;
+  (b) a second snapshot taken straight into the picked folder (two instants; its check proves nothing of a transfer).
+- **P-VX309-U1a-4 — a vanished picked folder is never re-made by the pair road** (today's flat leg's
+  `createDirectory(withIntermediateDirectories:)` re-makes it — the leg writes into a folder nobody picked any more):
+  (a) BUILT; (b) today's shape.
+- **P-VX309-U1a-5 — Data Safety's rows on the new road keep their two paths and count this Mac's pairs of this library
+  inside them** (R-U1a-4): (a) BUILT; (b) each row names the `<library8>/<mac8>` subfolder; (c) a row per Mac and per
+  library (U1b's other-libraries listing is the place for the rest).
+- **P-VX309-U1a-6 — retention runs after a pair the PAIR ROAD wrote** (the hook's written runs, VX-447's follow), not after
+  an act's own `freshBackup` step (a crossing's pair — pruned at the next written run, the rule counting it among the
+  14): (a) BUILT — the leaves stay dumb and no act's plan gains a delete step; (b) an executor step after each act's pair
+  (a plan step that deletes copies); (c) a retention pass among each open's repairs.
+
+**FINDINGS AND HAND-FORWARDS (routed, not fixed here):**
+- **F-U1a-1 (Bug, Confirmed by probe, Castle & sync — PRE-EXISTING, adjacent to VX-450; a ticket at closeout, the ladder
+  may weigh it):** a Change (or Reset) stopped after its begin whose next open TYPES THE OLD PASSPHRASE — Castle under
+  Always ask, where before the key-file step lands only the old passphrase opens the live key file, or any lobby —
+  RESUMES and "finishes": `derive` reads the lobby's `typed.passphrase` under the plan's FRESH descriptor; `resume`'s
+  press-secret check finds no lock under that descriptor yet and passes; the key-file step (synced, the vault step too)
+  re-locks the library under the OLD passphrase on a new salt; the settle returns `.resumed(changePassphrase)` — the
+  passphrase chosen at the press is never set, and nothing says so (Diagnostics only — residue (2)'s class). Not a wedge;
+  the old passphrase keeps opening. A TRANSIENT probe on the fixed tree (written, run, removed — never committed):
+  Standard and Castle/Always ask both `outcome=resumed(changePassphrase) … fileChanged=true kdfChanged=true oldOpens=true
+  newOpens=false`. (Found by a test of mine passing `.none` into `relaunchAndSettle`'s `TypedSecrets?` — Swift's
+  `Optional.none` — so the fixture's own secrets were typed.) Options: (a) a resume whose only typed passphrase opens
+  the lock the act is REPLACING (no lock under the plan's descriptor yet) rolls back — it is not the act's secret (one
+  more condition in VX-450's arm); (b) the lobby asks for the passphrase chosen at the press while a Change is in flight
+  (a face); (c) accept, and say it as rolled back in Diagnostics.
+- **F-U1a-2 (Debt, Test-only, Tests & tooling, Low):** `EX.relaunchAndSettle(_ typed: TypedSecrets? = nil, …)` — a test
+  writing `.none` gets `Optional.none`, i.e. the fixture's OWN secrets typed, the opposite of what it reads as
+  (`NewWordsResumeTests` spells `TypedSecrets.none`; mine first did not). Options: a non-optional parameter with an
+  explicit `.fixturesOwn` case, or a distinct label.
+- **F-U1a-3 (for U2's words):** the far leg speaks only in the log; on the new road Data Safety's picked-folder row's
+  caption (*Kept there: the 14 most recent days that have a copy, plus one copy from each of the 4 weeks before those.*)
+  is now TRUE of this Mac's pairs of this library, and nothing says the counts are this Mac's and this library's, nor
+  why a second Back Up Now in a day adds none there (P-VX309-U1a-2) — U2's sentences, if any.
+- **F-U1a-4 (canon, the closeout's):** SurfaceContracts' "Library protection" line gains, in place, one pointer to this
+  plan: on the new road a backup run lands rule 5's pair beside the library and, when due per library per Mac, the same
+  pair in the picked folder; retention (newest 14 beside the library; 14 + 4 in the picked folder) prunes only this
+  Mac's pairs of this library; Data Safety's counts there are this Mac's pairs of the open library. P-VX306-U1a-4's
+  bundle row is superseded (its option (c) built, per library per Mac).
+- **F-U1a-5 (Tests & tooling — record only):** the full core suite's two wall-clock reds under the parallel run (the
+  VX-353 MCP bound; the P1 timeline-page ratio at load ~7.5), both green alone — existing classes, no line of this diff.
+- **F-U1a-6 (MOBILE PARITY):** nothing mobile-visible — the phone runs no `StoreBackup` and no pair road (its store is
+  re-derivable from the mirror, A1's own note); the shared files compile for iOS (the phone build green).
+
+**Notes:** no machinery deaths; no Sonnet lookup; no subagents; no scratch worktree. The harness was rebuilt in this
+session's scratchpad from U1's recipe (the VX-308 harness's `Package.swift`, stubs and symlink list re-pointed); the
+core's `.build`, the harness's `.build` and `App/Variorum/DerivedData/vx309/SourcePackages` were seeded by APFS clone from
+existing caches (the main checkout's, the VX-308 harness's, the main checkout's Xcode DerivedData) with their absolute
+paths re-pointed — no package fetch. One TRANSIENT probe file (`ZZProbeU1aF1.swift`, F-U1a-1) was created, run and
+removed in the same command, never committed. One mutation edit (M-FP2's first) was malformed — it short-circuited the
+guard into always refusing — and was DISCARDED and redone as the exact removal. Every pin set committed before its fix
+(`2c2b7d412`, `2d18617c8`, `e6bd14584`); every mutation named in the record and committed before it ran. Commits:
+`95659b477` (0) · `8e027494a` (1 core) · `9e0e4a13c` (record) · `2c2b7d412` (1 pins first) · `c09b93ed8` (1) ·
+`09b087bde` (record) · `4b402d8e0` (record) · `2c3175cda` (2) · `7ee076ce8` (record) · `25abab3ed` (record) · `2d18617c8`
+(3 pins first) · `635a6a8e6` (3) · `dd770eab1` (record) · `972dea6a4` (record) · `e6bd14584` (4 pins first) ·
+`7b9e5793f` (4) · `63c326d4e` (record) · `1ed9866cf` (record) · `f587b6382` (comment) · the close commit.
