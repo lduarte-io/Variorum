@@ -593,15 +593,21 @@ extension ProtectionExecutor {
             secrets: ActSecrets(), library: &library)
     }
 
-    /// **The offer's delete with NO library open** (VX-309 U1c — VX-265 at the empty-slot listing: the missing face, rule
-    /// 27's lobby). The same fence (`OwnCopies.isThisMacsCopy`), and never a copy of a library this Mac REMEMBERS (rule 21
-    /// — the library missing from the slot, or the one rule 27's lobby cannot open: its copies are the ones the empty-slot
-    /// landing lands from — PROVISIONAL P-VX309-U1c-2). No plan: deleting copies changes no key (rule 20 is about acts that
-    /// change keys) and no library holds the act — a delete that stops part of the way has deleted fewer copies, and the
-    /// next press deletes the rest (each id's delete is idempotent). Returns the ids deleted; nothing deletable refuses
-    /// `nothingToDo` with nothing written.
+    /// **The offer's delete with NO library open** (VX-309 U1c — VX-265 at the EMPTY-SLOT listing: the missing face). The
+    /// same fence (`OwnCopies.isThisMacsCopy`), and never a copy of a library this Mac REMEMBERS (rule 21 — the library
+    /// missing from the slot: its copies are the ones the empty-slot landing lands from — PROVISIONAL P-VX309-U1c-2). The
+    /// slot must be EMPTY: over rule 27's unopenable library the act refuses `libraryAlreadyInSlot` before anything is
+    /// deleted — its ID is inside the file no key opens, so with this Mac's memory of it gone any listed library could be it,
+    /// and its older backups are its last road back (rule 4). No plan: deleting copies changes no key (rule 20 is about
+    /// acts that change keys) and no library holds the act — a delete that stops part of the way has deleted fewer copies,
+    /// and the next press deletes the rest (each id's delete is idempotent). Returns the ids deleted; nothing deletable
+    /// refuses `nothingToDo` with nothing written.
     @discardableResult
     public func offerDeleteWithNoLibraryOpen(copies: [CatalogCopy], catalog: Catalog) throws -> [String] {
+        guard try !leaves.library.slotIsOccupied() else {
+            log("offer delete (no library open): refused — a library stands in the slot (nothing deleted)")
+            throw ExecutorRefusal.libraryAlreadyInSlot
+        }
         let remembered = try leaves.memory.rememberedLibraryIDs()
         let deletable = Set(copies.filter { copy in
             guard let library = copy.library, !remembered.contains(library) else { return false }

@@ -103,14 +103,15 @@ nonisolated enum ProtectionCopyDoors {
     }
 
     /// VX-309 U1c — the libraries rule 19's delete is never offered for (beyond the open library, which is never another's):
-    /// with NO library open, every library this Mac remembers (the library missing from the slot, rule 27's unopenable one —
-    /// its copies are what the empty-slot landing lands from; the core act's own exclusion, P-VX309-U1c-2). A memory read
-    /// that fails offers no delete at all (never a guess).
+    /// with NO library open, every library this Mac remembers (the library missing from the slot — its copies are what the
+    /// empty-slot landing lands from; the core act's own exclusion, P-VX309-U1c-2); and, while a library STANDS in the slot
+    /// (rule 27's lobby — its ID inside the file no key opens), every library: any of them could be it (the core act refuses
+    /// there too). A read that fails offers no delete at all (never a guess).
     static func protectedFromDelete(_ ctx: CopyDoorsContext) -> Set<String> {
         if let open = ctx.libraryID { return [open] }
-        guard let remembered = try? ctx.system.leaves.memory.rememberedLibraryIDs() else {
-            return Set(ctx.system.lister.catalog().copies.compactMap(\.library))
-        }
+        let everyLibrary = Set(ctx.system.lister.catalog().copies.compactMap(\.library))
+        guard (try? ctx.system.leaves.library.slotIsOccupied()) == false,
+              let remembered = try? ctx.system.leaves.memory.rememberedLibraryIDs() else { return everyLibrary }
         return remembered
     }
 
