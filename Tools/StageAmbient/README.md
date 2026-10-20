@@ -88,6 +88,33 @@ veins and an irregular rim, and some carry a flower. They ride a slow current, t
 koi brushing underneath. Every minute or two a leaf falls with a flutter and lands with a ripple. A
 curious koi comes to nibble it, then it floats and finally sinks. Nothing loops.
 
+## Ideas for more scenes (not built; hers to pick, 7 to 10 to try)
+
+All are pure 1-bit, driven by code rather than loops, and fit the protocol as-is.
+
+1. **Code bonsai** (hers). A bonsai grown from characters. The trunk and branches are runs of `/ \ | _ ~`,
+   and the bark is lines of real source code (this repo's own Swift, scrolling up the trunk like sap).
+   Leaves are clusters of `& * @ %`. It grows over minutes. Now and then an unseen pair of shears prunes
+   a branch, the glyphs fall and scatter on the soil, and it regrows into a different shape.
+2. **A year in a valley** (hers). Hills, a lone tree and a pond, all in characters. A year passes in
+   about 20 minutes: spring blossom petals, summer heat shimmer, autumn leaves drifting off the tree, and
+   winter snow settling into drifts that melt in spring. Day and night show as dither density.
+3. **Rain on a window.** Drops bead up, merge and run down in streaks that leave fading trails. A blurred
+   treeline sits behind, and a heavier burst comes now and then.
+4. **Night sky over a hill.** Stars wheel slowly around the pole star. The moon crosses and changes
+   phase, a meteor goes by now and then, and a small observatory dome sits on the ridge.
+5. **Murmuration.** A few hundred starlings (boids) fold and swirl over a dusk horizon, settle on a
+   wire, and lift again.
+6. **Zen sand garden.** An unseen rake draws rings around three stones and straight lines between them,
+   then slowly smooths them away and draws again. A leaf lands and the rake goes around it.
+7. **Lighthouse.** Swells roll in toward a rocky point while the beam sweeps. A ship's light crosses the
+   horizon, and gulls wheel overhead.
+8. **Firefly meadow.** Tall grass bends as gusts pass through it in waves. Fireflies blink, and their
+   rhythm slowly falls into step across the field.
+9. **Jellyfish.** Translucent jellies pulse upward with trailing tentacles while marine snow drifts down.
+10. **Life garden.** Conway's Life seeded as a garden of gliders and oscillators. When it stagnates it
+    re-seeds with a dissolve.
+
 ## Dev aids (no window, no stage needed)
 
 ```
