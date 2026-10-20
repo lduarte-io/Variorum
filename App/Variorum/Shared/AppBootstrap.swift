@@ -1500,7 +1500,16 @@ final class AppBootstrap {
                 }.value
                 if refused == nil { await self.roadAccount?.refresh() }
                 return refused
-            })
+            },
+            // VX-309 U1c — VX-451: the idle dial (this Mac's sealed minutes, `changeSettings` on the open session).
+            changeIdleLock: { [weak self] minutes in
+                guard let session = self?.roadSession, session.writes else { return .refused(ProtectionWords.gateRowFailed) }
+                return await Task.detached(priority: .userInitiated) {
+                    await ProtectionCrossings.changeIdleLock(session, minutes: minutes)
+                }.value
+            },
+            // VX-309 U1c — VX-451: Lock Library Now from the pane — the one lock (`lock()`, VX-445's road).
+            lockNow: { [weak self] in await self?.lock() })
     }
 
     /// VX-308 ladder round 1 (MINOR-2) — the Protection pane's appearance: the pane's ONE read taken ONCE for the

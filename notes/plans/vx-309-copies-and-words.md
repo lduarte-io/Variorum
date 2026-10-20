@@ -1520,6 +1520,15 @@ suites passed after 4.986 seconds.` (U1b's close count, exactly).
   passphrase the words are minted and dropped unseen (rule 2 — the first look mints), so nothing is marked; T-8 likewise. The
   alternative read — "she typed her current words at the standing act's confirm, so mark recorded whatever the outgoing
   library had" — is P-VX309-U1c-3's option (b), not built (the brief says inherits).
+- **R-U1c-7 — VX-451: THE CASTLE SECTION GROWS THE DIAL AND LOCK NOW; ONE DECLARATION, NO NEW RELEASE LINE.** "Where
+  `RoadRelockPolicy` stands" = Castle, which is exactly where the crossings' gate-style row stands (`RoadCrossingFaces.gateRow` is
+  Castle-only from the same record mode) — so both join that section (P-2 by construction). The dial writes THIS MAC'S sealed
+  setting through `changeSettings` (the design's §3.2/§3.15 law — never UserDefaults); the monitors already read
+  `RoadRelockPolicy.of(session.library)` per tick, so the value counts at once. Lock Now is the bootstrap's `lock()` (VX-445).
+  "One capability, the registry's declaration carries both doors": `.lockLibraryNow` declared with the menu's and the pane's
+  doors and today's one verb constant. Its chord is NOT the declaration's `shortcutLabel`: the discoverability guard
+  (`everyDeclaredShortcutIsFindableInTheHelper`) would then demand a ⌘/ helper row, which RELEASE renders — and the hard limit is
+  today's road byte-unchanged (P-VX309-U1c-4 carries the arm that declares it).
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton + the harness baseline: DONE (this commit).
@@ -1568,8 +1577,28 @@ suites passed after 4.986 seconds.` (U1b's close count, exactly).
   `WordsLedgerCarryRoadTests` (5 — the carry with and without a mark (2 cases), the ✕'s mark, T-5 by typed words, T-5 by its
   passphrase, T-8's guard) headless `✔ 5 tests`; Mac only, BUILT: `WordsLedgerCarryRouteTests` (2 — through `AppBootstrap`,
   the band's `offersWords` after the standing act and after T-5 — RED ON OLD in the true sense: they compile on the pre-unit
-  tree and read only its faces). `build-for-testing` green, no warning in a touched file. Mutations: PENDING.
-- Piece 4 — VX-451 (the pane's Lock Now row + idle dial): NOT-STARTED.
+  tree and read only its faces). `build-for-testing` green, no warning in a touched file. MUTATIONS on `c9fd33d92` (each
+  restored `cmp`-identical to `u1c-prerevert/ProtectionCopyDoors.swift`): M-3a no carry → `✘ makeThisMyLibraryCarries…`
+  (recorded → true: 2 issues); M-3b every T-5 landing marked recorded → `✘ theEmptySlotLandingByItsPassphrase…` (2); M-3c
+  typed words never recorded → `✘ theEmptySlotLandingByTypedWords…` (2).
+- Piece 4 — VX-451 (the pane's Lock Now row + idle dial): BUILT (this commit). R-U1c-7. SHARED: `RoadGateRow.idleMinutes`
+  (THIS MAC'S sealed `DeviceSettings.idleLockMinutes`, read in `RoadCrossingFaces.derive`) + `RoadGateRow.idleChoices` (5 · 10
+  · 30 · never — `DeviceSettings`' own offered set); `ProtectionCrossings.changeIdleLock(session, minutes:)` (the core's
+  `changeSettings` on the open session, one act at a time; Castle only — Standard never locks, its write refuses);
+  `RoadCrossingRoads.changeIdleLock` + `.lockNow` (defaulted — every existing test road unchanged); `RoadCrossingsModel
+  .setIdleMinutes` (a same-value pick runs nothing; refusal in place; re-read after) + `.lockNow` (only where the Castle row
+  stands). APP: `AppBootstrap.crossingRoads` wires both (`lockNow` IS `lock()` — VX-445's road); the REGISTRY declares
+  `.lockLibraryNow` ONCE (verb `ProtectionCopy.lockNowLabel` — the one constant; doors `.menuBar` + `.surface`; NO
+  `shortcutLabel` — P-VX309-U1c-4); `EditorCommands.menuRendered` gains it and the File menu's item renders `verb(.lockLibraryNow)`
+  (the same words; the ⌃⌘L wiring unchanged at its call site); `RoadCrossingsSection` (the Castle-only "On this Mac" section)
+  renders the dial (`ProtectionCopy`'s today's idle words — true on the new road: sleep and screen lock always lock in
+  Castle) and Lock Library Now from the declaration, its `surfaceCapabilities` declared and joined to the registry walk's
+  surface union (`CapabilityRegistryTests` — a JUSTIFIED one-line edit). Pins: `RoadIdleDialTests` (3, headless — the row's
+  sealed minutes and the dial sealing 30 then never, read back by the row, the policy and a fresh unlock; Standard: no row, the
+  write refuses; the model's dial and Lock Now over planted roads) `✔`; Mac only, BUILT: `RoadIdleDialRouteTests` (2 — through
+  `AppBootstrap`: Standard no row; Castle the dial → the bootstrap's relock policy 30 at once, the pane's Lock Now → the lobby,
+  the unlock reads 30 back; and the one declaration by source). `build-for-testing` green, no warning in a touched file.
+  Mutations: PENDING.
 - Piece 5 — VX-454 (probe first): NOT-STARTED.
 - Piece 6 — the close: NOT-STARTED.
 - No revert is in flight.
