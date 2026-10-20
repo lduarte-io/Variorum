@@ -660,6 +660,50 @@ present as expected (recorded, not a walk failure). **Honest gaps:** the wrong-s
 instead (below); VX-444's typed-words NO-re-offer arm (a RECORDED mark carried) stays pin-covered, not walked — the
 dev half walked the carry-of-nothing re-offer, this row the passphrase arm's offer. **The 0.9.8 what's-new card
 greeted the adopted library's first open** — the calm-first-open rule's edge, a bundle row for her.
+**Row 3's refusal ladder (on the FULL face, T-old's row):** the full-face Make-mine sheet asks for the CURRENT
+library's secrets — BOTH fields, words clear-text + passphrase concealed (the concealment row again) — and the lead's
+"under your current twelve words and passphrase" is RIGHT even on another library's row (the quiet road holds the
+copy's key; the typed secrets prove custody of the current library, which steps aside). Three rungs walked, each
+calm and specific, nothing moved at any rung (hold marker, Previous Libraries and the stale key file unchanged):
+vocabulary — *"candle" isn't one of the words Variorum uses — check its spelling.*; checksum — *One of the twelve
+words is off. Compare them with what you wrote down.*; wrong key — *That passphrase doesn't open this library.*
+**Row 4 — VX-265 on T-old (the stepped-aside throwaway):** the open library's own 3:23 row carries NO Delete; the
+"Other libraries on this Mac" header + her way-back sentence lead the other rows, every one with Delete…; the
+confirm (captured light AND dark): *Delete this library's copies? / This deletes this Mac's copies of the library
+last copied October 20. That's 2 backups. They can't be brought back. Your library isn't touched.* — the count is
+the 091226 pair (one backup, two places, ONE row — both places die together, the one-name rule) plus the flat root
+copy; T's mirror-only Previous-Libraries entry (no library file — the slip's shape) is honestly NOT counted, NOT
+listed, NOT deleted — a deliberate deviation from the note's "N backups and a previous library" expectation, right
+by its rule (the entry isn't a restorable copy). *Delete copies* → the quiet receipt *Deleted 2 copies of another
+library from this Mac.*; the rows gone on the re-read; container + far pairs gone (their now-EMPTY `<mac8>` device
+folders remain — cosmetic residue, cleanup's); the open library's pairs untouched. The `road:` log line is not
+externally readable (the diagnostics leaf has no file/os_log sink; Diagnostics is crash-reports-only) — pin-covered,
+said honestly. The lobby carries NO copy rows and no Delete (the dev half's lobby capture — row 4's "none" clause).
+**Backup wrinkle resolved:** the adoption's first-open pair landed container-only; the next Back Up Now landed
+container + far (due → written) — the far leg works for the adopted library; the flat leg's once-a-day app-level
+gate had already run (T's 09:12 press), which also explains both "1 old copy retired" receipts (the flat leg's own
+folder-wide retention retiring 09-26/09-27-era dev flat copies — pre-existing behavior, untouched by this phase).
+**Row 6's guide + voices:** Help ▸ Restore Tutorial on the throwaway → "keeping it private" seeds the THREE lessons
+(*Your key and your twelve words* leading with the readme's four passages; *Standard and Castle*; *Copies, backups
+and your way back* with the pair rule + one-a-day + picked folder); Data Safety's full text captured in Study
+light + dark AND Terminal (the second-folder section renders with per-library counts + the 14-days/4-weeks sentence
++ the one-a-day caption; the Restoring-a-copy trio; the dev fence "Sync is off in this build (development store).").
+**VX-453:** search "account" → the Sync row (Protection) first and alone; "sync" → the Sync row first, then the
+synced-flagged rows; the click lands on the Protection pane (at its top — the section is below; observed, not a
+finding).
+**Row 7, the A-leg (the walk switch planted, ref guard OK):** signed in as the throwaway's user A; the account
+sheet's signed-in face (hosted-sync active, Sign out / Sign Out Everywhere / Delete Account); Turn on sync opens the
+JOIN-EXISTING sheet (A's vault lives from VX-308's walk, its passphrase changed there and rightly never recorded —
+the replaced-words MOMENT is therefore walked on B's vault after T-8, where every typed secret is known); the sheet's
+rule-7 sentences captured ("A device holds one pair of secrets at a time." / "Your account is in Standard, like this
+library."); the HOLD BANNER'S SYNCED FORM appeared once signed in ("Sync is waiting — Resume to catch up with your
+account. Notes you deleted since will leave again; edits made since will come back."); the wrong-account-passphrase
+refusal fired — **W-VX309-3 (words observation, her bundle):** the shared refusal *That passphrase doesn't open this
+library.* mis-aims its referent on this arm (the typed secret is the ACCOUNT's); honest on the make-mine face, wrong
+target here. Cancel left nothing; Sign out's confirm speaks VX-264's ruled words; signed out clean. **WALK SLIP 3,
+said honestly:** one Tab-focus miss typed the account password visibly into the email field — the capture was
+DELETED at once, the field cleared and refilled; the throwaway project's test password only (disposable; the dev
+pair untouched); the discipline became direct field clicks, secrets via env-read keystrokes only.
 
 ## 2. Evidence (the acceptance spine)
 Walks in BOTH VOICES (Terminal and Study) over the new faces; the restore drill through Look inside and Make this my
