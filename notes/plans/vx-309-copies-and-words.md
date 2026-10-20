@@ -1448,10 +1448,30 @@ ruling) · `3180d56c7` (0 pins first) · `22856d3dd` (0) · `41a380500` (record)
 core) · `10d9bb6d5` (3 app) · `74f3f4132` (record) · `9c7785a34` (3 log line) · `b923eabf6` (F-U1b-7 pin first) ·
 `6d24bd2f5` (F-U1b-7 read-only arm) · the close commit.
 
-### U1c RECORD — THE LISTING'S FACES AND THE RIDERS (Opus implementer, 2026-10-19; VX-265 · VX-210 · VX-444 (+F-U1b-5) · VX-451 · VX-454 — IN PROGRESS)
+### U1c RECORD — THE LISTING'S FACES AND THE RIDERS (Opus implementer, 2026-10-19; VX-265 · VX-210 · VX-444 (+F-U1b-5) · VX-451 · VX-454 — BUILT; the Mac suite and the walk PENDING)
 
-**Not done in U1c, first:** (PENDING — this list is rewritten at the close.)
-- No Mac suite RUN, no walk, no stage, no Debug launch, no store touch, no network, no Linear, no subagent (the brief).
+**Not done in U1c, first:**
+- NO MAC SUITE RUN, NO WALK, no stage, no Debug launch, no store touch, no network, no Linear, no subagent (the brief). FIVE
+  new suites are Mac-only (they drive `AppBootstrap`, or read the Mac target's sources) and were BUILT, never run —
+  `OtherLibrariesDeleteRouteTests` (2), `CopyListingFacesSurfaceTests` (2), `WordsLedgerCarryRouteTests` (2),
+  `RoadIdleDialRouteTests` (2), `SetPassphraseRowRereadRouteTests` (1): the orchestrator's, under the stage (the list and the
+  red-on-old recipes below). Every other new pin ran HEADLESS, red-on-old verified or red by construction, and every guard
+  mutation-checked.
+- TWO CORE CUSTODY LINES were written that the brief did not name (the Fable ladder reads them — THE CORE LINES below): the
+  VX-265 act's own fence was WRONG (F-U1c-1 — `offerDelete` could never delete another library's backups; fixed and pinned
+  red-on-old), and the no-library delete the brief asks for ("the empty-slot listing … carries it") had no core road
+  (`offerDeleteWithNoLibraryOpen`, new). Zero `Sync/`, `Server/`, schema, migration or dependency lines; `SyncSchema
+  .lockstepVersion` 13.
+- EVERY NEW SENTENCE IS UNDRAFTED against her words (P-VX309-U1c-1 — U2's pass): the delete door, its confirm's title, lead,
+  button, working line, receipt and failure; VX-210's line. VX-451's dial and Lock Now reuse TODAY's `ProtectionCopy` words
+  (no new sentence there).
+- Lock Library Now's ⌃⌘L is NOT in the registry declaration (P-VX309-U1c-4): declaring it would put a ⌘/ helper row in
+  Release, and today's road stays byte-unchanged. Release changes nothing visible: the File menu's item reads the same words
+  from the declaration.
+- ROUTED, NOT BUILT: F-U1c-3 (a delete whose file removal fails mid-step leaves the open library's `offerDelete` act in flight —
+  traced, no failure seam to pin); F-U1c-4 (another library's quiet roads outlive the delete of its copies — F-U1b-1's
+  territory, her call).
+- No canon line, no QUESTIONS row, no ticket — the merging session's (the PROVISIONALs and findings below carry them).
 
 **Preflight (complete, not delegated):** CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md` whole;
 `notes/CastleRules.md` WHOLE (rules 17–19, 21, 23, 25, 27 + the considered-and-not-pursued ledger); `notes/SyncSpec.md`
@@ -1618,8 +1638,291 @@ suites passed after 4.986 seconds.` (U1b's close count, exactly).
   act's LANDING (`AppBootstrap.accountRoads`' `landed`: the crossings' re-read as before, then the set row, then the key
   doors — Change/Reset stand where the set row retires). The probe green; the harness `✔ Test run with 318 tests in 54 suites
   passed`. Mac only, BUILT: `SetPassphraseRowRereadRouteTests` (1 — the landing arm through `AppBootstrap`, the pane never
-  re-appearing: the set row and the reminder retire and Change passphrase… opens; RED ON OLD by construction of the old
-  landing — the orchestrator's behavioural revert R-e below). `build-for-testing` green, no warning in a touched file.
-  Mutations: PENDING.
-- Piece 6 — the close: NOT-STARTED.
-- No revert is in flight.
+  re-appearing: the set row and the reminder retire and Change passphrase… opens; RED ON OLD — the pin compiles on the
+  pre-unit tree; the orchestrator's behavioural revert R-d below). `build-for-testing` green, no warning in a touched file.
+  MUTATIONS on `5aa955b4f` (restored `cmp`-identical to `u1c-prerevert/ProtectionOpenFaces.swift`): M-5a the appearance never
+  re-reads → `✘` (2 issues — the pre-fix red set exactly); M-5b the reminder never retired → `✘` (1). VX-454's TICKET: closes
+  as FIXED (the brief's "red ⇒ the fix proceeds") — the pin is the evidence.
+- Piece 1b — F-U1c-2 (self-review — rule 27's lobby is not the empty slot): FIXED (`71cc006c5` pins first · `df2bffa83` the
+  fix). At rule 27's lobby (no library open, but a library no key file opens STANDS in the slot) its ID is inside the file no
+  key opens; with this Mac's memory of it gone, ANY listed library could be it — and its older backups are its last road back
+  (rule 4). The pins RED on `5aa955b4f`: core `withALibraryStandingInTheSlotTheNoLibraryDeleteRefuses` `✘ … 2 issues` (the
+  no-library delete deleted over an occupied slot); app `withALibraryStandingInTheSlotNoDeleteIsOffered` `✘ … 3 issues` (the
+  listing offered the other libraries a delete). THE FIX: the core's no-library act refuses `libraryAlreadyInSlot` before
+  anything is deleted over an occupied slot; the listing's protected set is every library while the slot is occupied (or
+  unreadable). Green; the harness `✔ Test run with 319 tests in 54 suites passed`. MUTATIONS on `df2bffa83` (restored
+  `cmp`-identical): M-1i the core guard off → `✘` (2); M-1j the listing ignoring the occupied slot → `✘` (1).
+- Piece 6 — the close: DONE (this commit) — the core and app lines, the counts, the Mac-suite list with its red-on-old
+  recipes, the walk notes, the PROVISIONALs, the findings and the machinery notes below.
+- No revert is in flight (every mutation of this unit ran on a committed tree and was restored by `git checkout --`,
+  `cmp`-identical to a copy in this session's scratchpad `u1c-prerevert/`; no scratch worktree; the tree is clean at the
+  close).
+
+**THE CORE LINES, LINE BY LINE (for the Fable ladder — `git diff ae5aca849 -- Sources/`; custody ⇒ Fable):**
+1. `Assess/OwnCopies.swift` (pure, NEW functions): `isThisMacsCopy(_:in:)` — false for a copy no key file attributes to a
+   library; TRUE for every `.container` copy (this Mac's container is per Mac and per login — `MacAttribution
+   .thisMacsContainer`'s own reason, extended to the container's `<mac8>` subfolders, whose `<mac8>` is a library's OWN
+   device ID on this Mac — rule 23); for a `.farFolder` copy, true only when it is a BACKUP pair (`.mac8`) whose
+   `Backups/<library8>/<mac8>` subfolder (lowercased) equals that of a CONTAINER backup of the SAME library (the pair road
+   copies the container pair under the same subfolder — R-U1a-1); false otherwise (another Mac's `<mac8>`, `.unattributed`,
+   a far copy with no container twin). `thisMacsCopies(ofLibrary:in:)` = the library's copies filtered by it.
+   `backupSubfolder` (private) — a backup's first three folders, lowercased, or nil.
+2. `Executor/Acts/Copies.swift` — `offerDelete`: the fence `copy.mac.isMac(library.section.mac8)` REPLACED by
+   `OwnCopies.isThisMacsCopy(copy, in: catalog)` (with `library != nil` and `library != this library` kept); the planned act,
+   its one step and everything else unchanged. NEW `offerDeleteWithNoLibraryOpen(copies:catalog:)` (public, throws, returns the
+   ids): refuses `libraryAlreadyInSlot` when the slot is occupied (before anything); reads `rememberedLibraryIDs()`; the
+   deletable set = copies with a library not remembered and `isThisMacsCopy`; empty ⇒ `nothingToDo` (nothing written); else ONE
+   `deleteCopies(ids:)`, one log line (a count — no names, no keys). No plan, no record write.
+3. Tests: `OtherLibrarysCopiesDeleteTests` (4, NEW) + `CopyActTests.theOfferDeletesOnlyThisMacsCopiesOfAnotherLibrary` FLIPPED
+   DELIBERATELY (its "another Mac's" copy moved to the shared far folder — the only place another Mac's copy can be).
+
+**THE APP LINES AS BUILT (for the ladder):** VX-265 — the pure listing: `CopyDeleteChoice` (library, this Mac's copy ids by the
+core's one fence, counts by kind, the library's newest listed day, the listed copies that stay); `CopyDoorsListing
+.deleteChoices` (per OTHER library, none for a `protected` one or one with nothing to delete) + `deleteChoice(for:)` + `make(…,
+protected:)`; `ProtectionCopyDoors.protectedFromDelete` (library open: it; none open: the remembered libraries — or EVERY
+library while the slot is occupied or a read fails). The roads: `CopyDoorsRoads.deleteCopies` (library ID → `CopyDeleteOutcome`);
+`ProtectionCopyDoors.deleteCopies(session, libraryID:)` (the open session's one-act lock; a fresh catalogue; this Mac's copies of
+it NOW; the core's planned `offerDelete`; the copies-changed seam said; `.deleted(n)` / `copyGone` / `busy` / `deleteFailed`;
+never the open library) and `deleteCopies(ctx, libraryID:)` (the core's no-library road); `AppBootstrap.copyDoorsRoads` (off-main;
+the receipt on the status seam — `roadStanding?.speak`) and `copyDoorsRoadsWithoutALibrary` (`deleteCopiesWithNoLibraryOpen` —
+never at `.ready`, one at a time beside T-5/T-8's landings: `copyLandingRunning`). The brain: `CopyDeleteModel` (the confirm —
+lead, press, cancel, refusal in place) + `CopyDoorsModel.Phase.deleteCopies` / `openDeleteCopies` (from the listing: back to it,
+re-read, `listingReceipt` above; from Data Safety's row: `.done`). The faces: `CopyDoorsSheet` (the listing rows' *Delete…* where a
+choice exists; `DeleteCopiesConfirm`, its button `.destructive`), `RoadRestoreRows` (the other-library rows' *Delete…*),
+`RoadDoorsHost.deleteCopies`, `LibraryOpenPresenter.beginDeleteCopies`, `SettingsSceneContent` + `DataSafetyPane` wiring. THE LEAF:
+`FileBackupsLeaf.deleteCopies` — a `variorum.sqlite` inside an aside folder (`isAsideFolder`: `Previous Libraries/<stamp>/` or
+`Backups/safety-copies/variorum-adopt-safety-<stamp>/`, read back by `CatalogNames.parseFolder`) also removes the folder's key
+file(s) (any name `parseFile` calls a key file), the restore hold it carried and `.DS_Store`, then the folder when empty; a file of
+hers keeps it. VX-210 — `CopyDoorsListing.unmanagedCopies(in:)` (foreign `.sqlite` + copies no key file names + unattributed
+far copies) and `ProtectionWords.copiesElsewhereLine` in both listings, only above zero. VX-444 — `WordsCardLedger.carry(from:to:)`;
+`ProtectionCopyDoors.makeMine(…, wordsLedger:)` (the outgoing id captured before the act, the carry once the copy is the library);
+`makeMineInTheEmptySlot(…, wordsLedger:)` (typed words ⇒ recorded); the bootstrap passes `WordsCardLedger(defaults:
+reminderLedger.defaults)`. VX-451 — `RoadGateRow.idleMinutes` + `.idleChoices`; `ProtectionCrossings.changeIdleLock`;
+`RoadCrossingRoads.changeIdleLock` / `.lockNow` (defaulted); `RoadCrossingsModel.setIdleMinutes` / `.lockNow` / `idleBusy` /
+`idleRefusal`; `AppBootstrap.crossingRoads` wiring; `CapabilityID.lockLibraryNow` + its one `Capability` (verb
+`ProtectionCopy.lockNowLabel`, doors `.menuBar` + `.surface`, no `shortcutLabel`); `EditorCommands.menuRendered` + `Button(verb
+(.lockLibraryNow))` (the chord unchanged at its call site); `RoadCrossingsSection.surfaceCapabilities` + the dial and the button in
+the gate section; `CapabilityRegistryTests`' surface union (one line). VX-454 — `RoadStandingModel.rereadPassphrase()` (first in
+`refreshPane()`) and `AppBootstrap.accountRoads`' `landed` (crossings, then the row, then the key doors).
+
+**COUNTS (the final code tree — `df2bffa83`; this close commit changes only this file):**
+- HEADLESS HARNESS (U1a's scratchpad `u1-harness`, re-pointed at this worktree; it now also symlinks U1c's five headless suites):
+  **`✔ Test run with 319 tests in 54 suites passed after 5.719 seconds.`** (U1b's 304/50 + 15/4: `OtherLibrariesDeleteRoadTests`
+  5, `WordsLedgerCarryRoadTests` 5, `RoadIdleDialTests` 3, `SetPassphraseRowRereadTests` 1, and `ProtectionFileLeavesTests` +1).
+- CORE: the protection set (every `@Suite` type under `Tests/VariorumCoreTests/Protection` — 89 now, the filter re-derived from
+  the files) Debug **`✔ Test run with 373 tests in 89 suites passed after 5.744 seconds.`** (369/88 + 4/1 —
+  `OtherLibrarysCopiesDeleteTests`); Release (`swift test -c release`, the same filter) **`✔ Test run with 349 tests in 85 suites
+  passed after 3.990 seconds.`** (345/84 + 4/1). THE FULL CORE SUITE, Debug (`swift test`): VariorumCoreTests **`✔ Test run with
+  3353 tests in 438 suites passed after 207.432 seconds.`** (3349/437 + 4/1); the third target `✔ 40 tests in 6 suites`;
+  VariorumMCPTests `✘ 383 tests in 71 suites … with 1 issue` — the ONE recorded VX-353 flake
+  (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, 19.1 s vs 15 s under the parallel
+  run); ALONE `✔ Test run with 3 tests in 1 suite passed`. No MCP, Queries or Operations line in this diff.
+- RED ON THE PRE-FIX TREES (pins committed first): the core fence `✘ … 2 issues` (`6ce2ebafd`); the leaf `✘ … 4 issues`
+  (`fe90ec572`); VX-454's probe `✘ … 2 issues` (`6aa235a67`); F-U1c-2's two `✘ … 2 issues` + `✘ … 3 issues` (`71cc006c5`); every
+  other new suite is NEW API — red by construction. MUTATIONS (each on a committed tree, restored `cmp`-identical): M-1b, M-1c,
+  M-1e, M-1f, M-1g, M-1h, M-1i, M-1j, M-2a, M-3a..c, M-4a..c, M-5a..b — every one red at its own pins (the pieces' lines above).
+- `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx309
+  -skipPackageUpdates -onlyUsePackageVersionsFromResolvedFile build-for-testing` → **`** TEST BUILD SUCCEEDED **`** (no warning in a
+  file this unit touched — checked after every piece's build); the phone `-scheme VariorumMobile -destination 'generic/platform=iOS
+  Simulator' -configuration Debug … build` → **`** BUILD SUCCEEDED **`**; **the Release check `-configuration Release build` →
+  `** BUILD SUCCEEDED **`**. All three on `df2bffa83`.
+- Release behaviour: unchanged by construction — the delete roads, the line, the ledger carry, the dial, the pane's Lock Now and
+  the re-read are reached only from the new road (`copyDoorsRoads*`, `crossingRoads`, `accountRoads`, `RoadStandingModel` exist
+  only there; `DataSafetyPane.roadDoors` is nil on today's road); the core lines are the new road's executor's; the registry's new
+  declaration renders the File menu's item with today's own constant (`ProtectionCopy.lockNowLabel` — the same string, the same
+  chord, the same `canLock` gate) and adds no palette, helper or bar row. The binary is not byte-identical (rule 24's precedent).
+
+**THE MAC SUITES THE ORCHESTRATOR RUNS UNDER THE STAGE (from `App/Variorum/`; PENDING):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx309 test \
+  -only-testing:VariorumTests/OtherLibrariesDeleteRouteTests \
+  -only-testing:VariorumTests/CopyListingFacesSurfaceTests \
+  -only-testing:VariorumTests/WordsLedgerCarryRouteTests \
+  -only-testing:VariorumTests/RoadIdleDialRouteTests \
+  -only-testing:VariorumTests/SetPassphraseRowRereadRouteTests \
+  -only-testing:VariorumTests/OtherLibrariesDeleteRoadTests \
+  -only-testing:VariorumTests/WordsLedgerCarryRoadTests \
+  -only-testing:VariorumTests/RoadIdleDialTests \
+  -only-testing:VariorumTests/SetPassphraseRowRereadTests \
+  -only-testing:VariorumTests/ProtectionFileLeavesTests \
+  -only-testing:VariorumTests/CapabilityRegistryTests \
+  -only-testing:VariorumTests/HelperCurrencyTests \
+  -only-testing:VariorumTests/WingSwitcherChordTests \
+  -only-testing:VariorumTests/CommandRouterTests \
+  -only-testing:VariorumTests/CopyDoorsModelTests \
+  -only-testing:VariorumTests/CopyDoorsListRefreshTests \
+  -only-testing:VariorumTests/CopyDoorsPickRefreshTests \
+  -only-testing:VariorumTests/CopyDoorsQuietProbeTests \
+  -only-testing:VariorumTests/LookInsideCopyDoorTests \
+  -only-testing:VariorumTests/LookInsideRoadTests \
+  -only-testing:VariorumTests/MakeMineRoadTests \
+  -only-testing:VariorumTests/MakeMineRouteTests \
+  -only-testing:VariorumTests/EmptySlotLandingRoadTests \
+  -only-testing:VariorumTests/EmptySlotMakeMineRouteTests \
+  -only-testing:VariorumTests/EmptySlotDoorsSurfaceTests \
+  -only-testing:VariorumTests/PreviousLibrariesArcTests \
+  -only-testing:VariorumTests/PlaintextExportBringInRoadTests \
+  -only-testing:VariorumTests/PlaintextExportBringInRouteTests \
+  -only-testing:VariorumTests/PickedCopyRoadTests \
+  -only-testing:VariorumTests/ProtectionBackupHookTests \
+  -only-testing:VariorumTests/ProtectionPairRetentionTests \
+  -only-testing:VariorumTests/ProtectionPairRetentionGuardMutationTests \
+  -only-testing:VariorumTests/DataSafetyRoadCountsTests \
+  -only-testing:VariorumTests/DataSafetyRunbookTests \
+  -only-testing:VariorumTests/BackupRunTests \
+  -only-testing:VariorumTests/SyncSafetyFaceTests \
+  -only-testing:VariorumTests/LibraryPortabilityDoorTests \
+  -only-testing:VariorumTests/RoadCrossingFacesTests \
+  -only-testing:VariorumTests/RoadCrossingModelTests \
+  -only-testing:VariorumTests/RoadCrossingSurfaceTests \
+  -only-testing:VariorumTests/ProtectionCrossingRoadTests \
+  -only-testing:VariorumTests/ProtectionCrossingRouteTests \
+  -only-testing:VariorumTests/RoadLockTests \
+  -only-testing:VariorumTests/RoadLockRouteTests \
+  -only-testing:VariorumTests/WordsClipboardLockRouteTests \
+  -only-testing:VariorumTests/SettingsLockCloseTests \
+  -only-testing:VariorumTests/Phase13pLobbyTests \
+  -only-testing:VariorumTests/ProtectionPaneWaveTests \
+  -only-testing:VariorumTests/ProtectionPaneRoadRowTests \
+  -only-testing:VariorumTests/ProtectionReminderRoadTests \
+  -only-testing:VariorumTests/PassphraseReminderTests \
+  -only-testing:VariorumTests/WordsBandTests \
+  -only-testing:VariorumTests/WordsBandSurfaceTests \
+  -only-testing:VariorumTests/NoKeyFileDoorTests \
+  -only-testing:VariorumTests/ProtectionAccountRoadTests \
+  -only-testing:VariorumTests/ProtectionAccountRouteTests \
+  -only-testing:VariorumTests/RoadAccountModelTests \
+  -only-testing:VariorumTests/RoadKeyDoorRoadTests \
+  -only-testing:VariorumTests/RoadKeyDoorsModelTests \
+  -only-testing:VariorumTests/RoadKeyDoorSurfaceTests \
+  -only-testing:VariorumTests/VX379PaneRowsTests \
+  -only-testing:VariorumTests/ProtectionRoadRouteTests \
+  -only-testing:VariorumTests/ProtectionWordsPlanTests \
+  -only-testing:VariorumTests/ProtectionWordsVX307Tests \
+  -only-testing:VariorumTests/TravellingDotsIndicatorTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests \
+  -only-testing:VariorumTests/StatusSeamVocabularyTests
+```
+The first five are U1c's Mac-only suites (2 + 2 + 2 + 2 + 1 = **9 tests**; the route suites drive a new-road `AppBootstrap` over
+the PLANTED road — no keychain, a temp slot; `WordsLedgerCarryRouteTests` writes only its own library ids' keys into the test
+bootstrap's reminder suite and removes them); the next five are U1c's headless suites (15 tests + the leaf pin, also green in the
+harness). Then the suites over the files this unit touched: the registry and the menu (`EditorCommands`, the registry walk, the
+helper, the ⌃⌘L chord's own pin), the doors' brain, listing and leaves (`CopyDoorsModel`, `ProtectionCopyDoors`,
+`FileBackupsLeaf` — retention's prune calls it), Data Safety's pane and its hosts, the crossings' faces, model and acts, the lock,
+the pane's wave and rows, the reminder and the band, the account and key-door roads (the landing chain), the words, and the
+source scans over edited files.
+
+**THE RED-ON-OLD BY BEHAVIOURAL REVERT for the Mac-only suites (the orchestrator's, each from a committed tree, restored by `git
+checkout --`):**
+- **(R-a)** in `AppBootstrap.copyDoorsRoads`, the `deleteCopies:` argument dropped → `OtherLibrariesDeleteRouteTests
+  .withTheLibraryOpenTheDeleteRunsOnTheOpenSession…` RED (`#require(roads.deleteCopies)`); in `copyDoorsRoadsWithoutALibrary`, the
+  same → `…withNoLibraryOpenTheRoadsDelete…` RED.
+- **(R-b)** in `ProtectionCopyDoors.makeMine`, the `wordsLedger?.carry(…)` line dropped → `WordsLedgerCarryRouteTests
+  .afterMakeThisMyLibraryTheCardNeverReOffersRecordedWords` RED (the card offers); in `makeMineInTheEmptySlot`, the
+  `wordsLedger?.record(…)` line dropped → `…afterTheEmptySlotLandingByTypedWords…` RED. (These two compile on the PRE-UNIT tree
+  too: run them on `ae5aca849` with only the test file added — RED there, the truest red-on-old.)
+- **(R-c)** in `AppBootstrap.crossingRoads`, the `changeIdleLock:` and `lockNow:` arguments dropped → `RoadIdleDialRouteTests
+  .theDialSealsThisMacsMinutesAndThePanesLockNowLocks` RED (the row stays 10; no lobby).
+- **(R-d)** in `AppBootstrap.accountRoads`, `landed:` back to `{ [weak self] in await self?.roadCrossings?.refresh() }` →
+  `SetPassphraseRowRereadRouteTests.turningSyncOnRetiresTheSetRowAtTheLanding` RED (the set row stands at the landing). (It too
+  compiles on `ae5aca849` — RED there.)
+- `CopyListingFacesSurfaceTests` and `RoadIdleDialRouteTests.lockLibraryNowIsOneDeclaration…` read sources and new API — red by
+  construction.
+
+**WALK NOTES FOR THE ACCEPTANCE SPINE (the orchestrator's ONE phase walk — the DEV store only, under a held claim, both voices
+wherever a face renders; `road:` log lines as U1b's walk notes name them):**
+- **VX-265 with the library open — ON A THROWAWAY ONLY.** The dev store's `Previous Libraries/` holds earlier walks' libraries
+  that are NOT this unit's to delete: walk the delete on a THROWAWAY library seated in the slot (T-8's coordinator shape: A aside
+  whole first, cmp-verified, restored whole after), with a second throwaway made to step aside (Make this my library on the
+  throwaway's own backup). Data Safety ▸ Restore from Backup: the stepped-aside throwaway's rows carry *Delete…*, the open
+  library's rows do not; the confirm — *Delete this library's copies?*, the lead naming the library by its day and counting
+  "N backups and a previous library", "Your library isn't touched." — capture (light, dark); *Delete copies* → the quiet receipt
+  *Deleted N copies of another library from this Mac.*; the rows gone; `Previous Libraries/<stamp>/` of it GONE whole (`ls`), its
+  `Backups/<lib8>/<mac8>/` pairs gone; the open throwaway's own pairs untouched. Log: `road: deleted N of another library's copies
+  on this Mac — library <8>`.
+- **VX-265 at the missing face and rule 27's lobby.** Move the throwaway's library out of the slot (U1b's T-5 walk move) → the
+  missing face → *Restore from a Backup…*: a non-remembered library's rows carry *Delete…* and it works (the listing re-reads with
+  the receipt above it); the REMEMBERED library's rows carry none. At rule 27's lobby (U2's recipe) NO row carries *Delete…*.
+- **VX-210.** The line *Copies outside the folders Variorum keeps — older backups, or a folder you made — are left as they are:
+  they're yours to manage in the Finder.* in both listings — EXPECTED VISIBLE on the dev store (today's flat backups beside the
+  library and the A1 rail's safety copies are such copies); on a throwaway slot with none, absent (P-2). Capture both.
+- **VX-444.** After Make this my library on a throwaway whose card was recorded (its look closed past the warning), the card
+  above the quick entry does NOT offer the words; after T-5 by the copy's typed words, not either; after T-5 by its passphrase,
+  it does (fresh words). Never a words look on the dev library (F-U2b-5).
+- **VX-451.** On a library in Castle (the dev library's LOCAL Use Castle, VX-308's walk machinery; Standard back at posture
+  restore): Settings ▸ Protection ▸ *On this Mac*: the gate row, then *Lock after time away* (10) with *5 minutes · 10 minutes ·
+  30 minutes · never*, the sentence, *Lock Library Now* and its line — capture (light, dark). Pick 5 → log `road: this Mac locks
+  after 5 minutes away now`; *Lock Library Now* → the lobby, the Settings window closes (VX-224); the passphrase reopens. The File
+  menu's *Lock Library Now* ⌃⌘L unchanged. In Standard none of the row. POSTURE: set the dial back to 10 before Use Standard (the
+  sealed setting rides the dev library's record — term 3's spirit), then Use Standard.
+- **VX-454.** A THROWAWAY library with no passphrase, the throwaway project (VX-308's walk switch): Settings ▸ Protection ▸ Turn
+  on sync with a new passphrase → at once, with the pane still open: *Set a passphrase…* GONE, *Change passphrase…* / *Reset
+  forgotten passphrase…* shown, the card's reminder gone. Capture. Signed out at the end.
+
+**PROVISIONALs (each built as its option (a); for the orchestrator to bundle under QUESTIONS at the closeout — the shared ledger is
+the merging session's):**
+- **P-VX309-U1c-1 — every new sentence** (the delete door *Delete…*, its title, lead, button *Delete copies*, working line, receipt,
+  failure; VX-210's line): (a) BUILT as drafted in `ProtectionWords`' U1c section; U2's words pass rewrites against her words.
+- **P-VX309-U1c-2 — with no library open the delete is the EMPTY slot's, and never a remembered library's:** (a) BUILT — at the
+  missing face every listed library this Mac does not remember is offered; the remembered one (the slot's missing library) never;
+  at rule 27's lobby (a library stands in the slot, its ID unknowable) none; the core act refuses the same; (b) every listed library
+  offered with no library open (they are all "other libraries" there); (c) no delete at all without a library open.
+- **P-VX309-U1c-3 — VX-444's carry:** (a) BUILT — the outgoing library's `recorded` and `dismissed` marks carry onto the new id;
+  (b) the standing act marks the new id recorded unconditionally (she typed her current words at its confirm); (c) carry
+  `recorded` only.
+- **P-VX309-U1c-4 — Lock Library Now's chord is not in its declaration:** (a) BUILT — the declaration carries both doors and today's
+  verb; the chord stays wired at the menu's call site; Release shows nothing new; (b) declare `shortcutLabel: "⌃⌘L"` and add the ⌘/
+  helper row the discoverability guard then demands (a Release-visible line — true on both roads); (c) no declaration (two literal
+  doors).
+- **P-VX309-U1c-5 — this Mac's FAR copies of another library** are those filed under a `<library8>/<mac8>` its container files the
+  same library under: (a) BUILT; (b) container copies only (the far folder's never deleted by the door); (c) every far copy of the
+  library under any `<mac8>` (another Mac's — refused by rule 19's own fence, never an option in truth).
+- **P-VX309-U1c-6 — deleting an aside copy takes its folder** (its key file, the hold it carried, the folder when nothing of hers is
+  in it): (a) BUILT; (b) the library file and sidecars alone (the leaf as it was — a key file orphaned in a folder no list shows).
+- **P-VX309-U1c-7 — the door on EVERY row of the other library** (the brief's "each such row"; the confirm counts the library's
+  copies, not the row's): (a) BUILT; (b) one *Delete…* per library, the listing grouping other libraries' rows by library.
+- **P-VX309-U1c-8 — VX-454's re-read also retires rule 3's reminder and re-reads the key doors at the landing:** (a) BUILT (one
+  act's faces — the reminder's own rule: never shown once a passphrase exists); (b) the set row only.
+- **P-VX309-U1c-9 — VX-451's dial in the Castle section, refused outside Castle, today's words reused:** (a) BUILT; (b) the dial in
+  both postures (a Standard library never locks — rule 8's honest limit says so already); (c) new words for the new road.
+
+**FINDINGS AND HAND-FORWARDS (routed, not fixed here unless said):**
+- **F-U1c-1 (Bug, Confirmed by pin — FIXED in piece 1, R-U1c-1):** `offerDelete`'s fence compared every copy's `<mac8>` with the
+  OPEN library's device ID; a library's device ID is its own on each Mac (rule 23), so the core act could never delete another
+  library's backups — only its Previous Library. Pin `OtherLibrarysCopiesDeleteTests.anotherLibrarysCopiesThisMacMadeGo…`.
+- **F-U1c-2 (Bug, self-review — FIXED in piece 1b):** rule 27's lobby offered (and the no-library act ran) a delete while a library
+  no key opens stands in the slot — whose own older backups could be the copies deleted.
+- **F-U1c-3 (Bug, Suspected, Castle & sync, Medium — a ticket at closeout; VX-450's class):** with a library open, the delete runs
+  the core's PLANNED `offerDelete`; a file removal that throws inside its one step (`deleteCopies` — permissions, a far folder gone
+  mid-act) is not an `ActRollback`, so the act stays IN FLIGHT on the open library and every later act refuses `actInFlight` until
+  the next open's settle re-runs the step (idempotent); a persistent failure wedges. Traced, not probed: the planted leaves carry no
+  failure seam (the hallucination guard — no build). Options: (a) as is; (b) the program maps a leaf failure to `ActRollback`
+  (a delete has no old state to restore — the ids already gone are gone; the refusal says how many went); (c) the door runs the
+  plan-less road with a library open too.
+- **F-U1c-4 (Castle & sync — her bundle, beside F-U1b-1):** deleting another library's copies leaves its quiet roads on this Mac —
+  its silent custody item and Apple key, stamped with its library ID — though nothing they open remains. F-U1b-1's option (a) reads
+  "its quiet roads go when she deletes it (rule 19)": that is NOT what is built (rule 19's delete takes copies only — the core
+  act's own scope since VX-378 U1); the bundle row should say so. No build (CastleRules territory).
+- **F-U1c-5 (MOBILE PARITY):** nothing mobile-visible — the phone has no doors' listing, no Data Safety, no Protection pane Castle
+  section, no band ledger carry (no Make this my library); the shared files compile for iOS (the phone build green). The phone's
+  relock still reads today's facts (F-U4-4).
+- **F-U1c-6 (canon, the closeout's):** SurfaceContracts' "Library protection" line gains, in place, one pointer to this plan: the
+  doors' listings carry rule 19's delete (this Mac's copies of ONE other library, by place; never the open library's; with no
+  library open never a remembered one, none over rule 27's library; an aside copy goes with its folder) and VX-210's one line; the
+  band ledger carries across Make this my library; on the new road Castle's "On this Mac" section carries the idle dial and Lock
+  Library Now (one capability with the File menu's). With F-U1a-4 and U1b's lines.
+- **F-U1c-7 (record only):** VX-454's "self-heals at the next launch" holds (a fresh `RoadStandingModel` per open reads
+  `offersSetPassphrase` anew); the probe confirmed the in-session staleness, so the ticket closes FIXED, not unreproducible.
+- **F-U1c-8 (record only):** the full core suite's one wall-clock red under the parallel run (VX-353's MCP bound), green alone — an
+  existing class, no line of this diff. F-U1b-4's stale `Copies.swift` header line is untouched (the ladder's NIT).
+
+**Notes:** no machinery deaths; no Sonnet lookup; no subagents; no scratch worktree. The harness is U1a's (this session's
+scratchpad `u1-harness` — it survived; U1c's five headless suites symlinked in). One record edit (a Python replace) failed its own
+uniqueness assert (an anchor shared by three records) AFTER its code commit had been made in the same command; the record was
+re-applied with unique anchors in the next commit (`ff6d7b52d`) — nothing lost, the order honest here. Every pin set committed
+before its fix (`6ce2ebafd`, `fe90ec572`, `6aa235a67`, `71cc006c5`) or red by construction (new API); every mutation run on a
+committed tree and restored `cmp`-identical from `u1c-prerevert/`. Commits: `441d4a1b9` (record) · `6ce2ebafd` (1 core pin first)
+· `8d4e028fb` (1 core) · `fe90ec572` (1 leaf pin first) · `b1c25a7f8` (1 leaf) · `645ce1784` (1+2 app) · `c9fd33d92` (3) ·
+`ff6d7b52d` (record) · `61afe294e` (4) · `6aa235a67` (5 probe pin first) · `5aa955b4f` (5) · `71cc006c5` (1b pins first) ·
+`df2bffa83` (1b) · the close commit.
