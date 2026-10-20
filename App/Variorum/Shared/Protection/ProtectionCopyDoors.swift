@@ -314,10 +314,16 @@ nonisolated enum ProtectionCopyDoors {
             return EmptySlotResult(outcome: .refused(.copyDoesNotOpen), key: nil)
         }
         if case .quietRoad = looked.road { return EmptySlotResult(outcome: .refused(.copyDoesNotOpen), key: nil) }
-        switch places.withFile(catalogID: copy.id, { LibraryClassifier.schemaVerdict(at: $0, key: looked.key) }) {
+        let verdict = places.withFile(catalogID: copy.id, { LibraryClassifier.schemaVerdict(at: $0, key: looked.key) })
+        switch verdict {
         case .current?, .behindThisBuild?: break
         case .newer?: return EmptySlotResult(outcome: .refused(.newerCopy), key: nil)
-        default: return EmptySlotResult(outcome: .refused(.unreadableCopy), key: nil)
+        default:
+            // Said, never swallowed — the refusal's sentence stays one honest line; the reason is the log's.
+            ProtectionOpenRoad.log(
+                "road: Make this my library (empty slot) refused — the copy's schema could not be read "
+                    + "(\(verdict.map { String(describing: $0) } ?? "the copy's file could not be resolved"))")
+            return EmptySlotResult(outcome: .refused(.unreadableCopy), key: nil)
         }
         let marker = LibraryRestoreHold.markerURL(besideStore: places.slot)
         let standing = try? Data(contentsOf: marker)

@@ -22,6 +22,10 @@ struct EmptySlotMakeMineRouteTests {
     /// file (and sidecars) gone from the slot — its key file still in the live place.
     static func missingFace(_ world: RoadWorld) async throws -> (oldID: String, oldKey: StoreKey, words: [String]) {
         let (created, words) = try await world.created()
+        // Migrate the store before the pair, as every real open does (the `.ready` arm runs the migrator before any
+        // backup run can fire) — a pair of a never-migrated store exists only in a fixture, and the preflight's
+        // schema read rightly refuses it (this suite's first Mac run caught exactly that).
+        _ = try AppDatabase.onDisk(url: world.slotURL, key: created.key)
         #expect(ProtectionBackupHook.takePair(created) == .written)
         ProtectionLibraryFiles.removeWithSidecars(world.slotURL)
         return (try #require(created.library.record?.libraryID), created.key, words)
