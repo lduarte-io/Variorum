@@ -894,7 +894,14 @@ door `DocumentImporter.swift` + `ImportModel.swift`; the test worlds — `Execut
   lock chosen at the press (MAJOR-1's residue (1), seen at the press) — pinned as the one legal state there. A same-text
   re-choice before the key file lands rolls back (indistinguishable from the replaced one — legal: the old state carries the
   same passphrase); after it lands, it finishes (pinned).
-- Piece 1 — T-5, the empty-slot landing: NOT-STARTED.
+- Piece 1 — T-5, the empty-slot landing: IN-PROGRESS — core DONE (`59e04579e`: `makeThisMyLibraryInTheEmptySlot` +
+  `EmptySlotMakeMineProgram`; pins `EmptySlotMakeMineTests` 5 green, new API so red by construction; the protection set
+  `✔ 369 tests in 88 suites`). MUTATIONS NAMED, running next on `59e04579e` (copies in `u1b-prerevert/`): M-1a the typed-road
+  requirement off (a quiet road's key accepted) → expect `aQuietRoadAloneNeverLandsACopy…` red; M-1b the empty-slot guard
+  dropped → expect `anOccupiedSlotOrAStandingKeyFile…` red; M-1d `forgetOtherLibraries` dropped from the act's steps → expect
+  the one-library expectations red. M-1c (the swap's `setAside: false` → `true`) is NAMED AND NOT RUN: unobservable — both the
+  SQLCipher leaf and the world set nothing aside over an empty slot; the line is the brief's "skipped, not emptied", by
+  reading. Then the app road (the doors at the missing face and rule 27's lobby). PENDING.
 - Piece 2 — VX-305's second hand-off (Previous Libraries through the doors): NOT-STARTED.
 - Piece 3 — T-8: NOT-STARTED — WAITING on the mapping ruling (proposal sent).
 - Piece 4 — the close: NOT-STARTED.
