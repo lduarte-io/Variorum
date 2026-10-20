@@ -314,6 +314,20 @@ enum TutorialSeeder {
         (mcpChapter, mcpLessons),
     ]
 
+    /// **VX-309 U2 — the plan ON THE NEW ROAD** (VX-379's acceptance; QUESTIONS #235: the guide's protection chapter is
+    /// written against the rules as built, and — the readme's own gate, VX-306 ladder r2 m2 — seeded only where the store
+    /// opens on the new road): the same book with "keeping it private" re-seeded as three lessons (`ProtectionWords`' guide
+    /// section). `plan` above stays today's road's, Release included, until VX-329.
+    nonisolated static func plan(onTheNewRoad: Bool) -> [(chapter: String, lessons: [String])] {
+        guard onTheNewRoad else { return plan }
+        return plan.map { entry in
+            entry.chapter == "keeping it private"
+                ? (entry.chapter, [ProtectionWords.guideKeyLessonTitle, ProtectionWords.guidePosturesLessonTitle,
+                                   ProtectionWords.guideCopiesLessonTitle])
+                : entry
+        }
+    }
+
     /// **13n-c U5 — the MCP chapter's name and lessons**, in one place (the
     /// plan, the seed and `TutorialMCPChapterTests` mean the same words).
     /// PROVISIONAL P-13nc-U5-2 (the name — "AI" and "MCP" both in it, the two
@@ -430,7 +444,11 @@ enum TutorialSeeder {
             // turn, NO undo stack.
             let quiet = Operations(undoStack: nil)
             cleanup(ops: quiet, existing: existing)
-            return try seed(ops: quiet, existingTagID: existing.tagID)
+            // VX-309 U2: the new road's protection chapter only where this store opens on the new road (the readme's rule
+            // for its variant — `LaunchFurniture`); today's road, Release included, seeds copy §7's.
+            return try seed(
+                ops: quiet, existingTagID: existing.tagID,
+                onTheNewRoad: ProtectionRoad.opensOnTheNewRoad(devStore: session.storeVariant == .dev))
         }
     }
 
@@ -527,7 +545,7 @@ enum TutorialSeeder {
 
     /// Mints the whole book and returns its id. `existingTagID` reuses a
     /// live `tutorial` tag (createTag refuses duplicate live paths).
-    nonisolated static func seed(ops: Operations, existingTagID: String?) throws -> String {
+    nonisolated static func seed(ops: Operations, existingTagID: String?, onTheNewRoad: Bool = false) throws -> String {
         let tagID: String
         if let existingTagID {
             tagID = existingTagID
@@ -2164,14 +2182,19 @@ enum TutorialSeeder {
             // Variorum KEEPS — the same promise, "it's all yours", from the
             // other side; the Mac-only seeder, so the phone (which has no
             // picked-folder road) is never told about a door it lacks.
-            "Backups happen on their own. Once a day while Variorum is open, it "
+            // VX-309 U2: on the new road a backup is a PAIR and the second folder takes one a day (`ProtectionWords`'
+            // guide section); today's road keeps these two as they were.
+            onTheNewRoad ? ProtectionWords.guideBackupsHappen
+            : "Backups happen on their own. Once a day while Variorum is open, it "
             + "copies your whole library into a backups folder right beside the "
             + "library, on this Mac. No button, nothing to remember. Those copies "
             + "survive a mistake; they don\u{2019}t survive losing the Mac.",
 
-            "So you can add a second folder of your own choosing (iCloud Drive, "
+            (onTheNewRoad ? ProtectionWords.guideSecondFolderLead + " "
+            : "So you can add a second folder of your own choosing (iCloud Drive, "
             + "an external drive, any folder your cloud service syncs) and every "
-            + "backup lands there too: Settings \u{25B8} "
+            + "backup lands there too: ")
+            + "Settings \u{25B8} "
             + "\(SettingsPane.dataSafety.title), under "
             + "\u{201C}\(DataSafetyCopy.secondFolderSection)\u{201D}, its "
             + "\(CapabilityRegistry.capability(.chooseBackupFolder).verb) button. "
@@ -2478,14 +2501,28 @@ enum TutorialSeeder {
         // 13s-b triage landing: minted LAST (the chapter moved last; a
         // membership's position is its mint order), the text untouched.
 
-        _ = try lesson(privacy, ProtectionCopy.privacyLessonOneTitle,
-                       ProtectionCopy.privacyLessonOneParagraphs)
-        // VX-209 (PROVISIONAL, #215): the Mac's lesson 2 closes on the
-        // older-copy warning — opening and restoring copies are Mac doors
-        // (the phone's edition renders the shared paragraphs alone).
-        _ = try lesson(privacy, ProtectionCopy.privacyLessonTwoTitle,
-                       ProtectionCopy.privacyLessonTwoParagraphs
-                       + [ProtectionCopy.privacyOlderCopyParagraph])
+        if onTheNewRoad {
+            // VX-309 U2 — THE NEW ROAD'S CHAPTER (VX-379; #235): the rules as built. Lesson 1 LEADS with the readme's four
+            // Start Here passages, verbatim (one text, two homes), then what sync seals (VX-204's approved sentences) and
+            // what open means; lesson 2 the postures; lesson 3 the copies as VX-309 built them. (VX-209's older-copy
+            // warning retires on this road: a copy lands in the posture of now — rule 17.)
+            let keyLesson = ReadmeSeeder.startHerePassages + [
+                ProtectionWords.guideSyncSentence + " " + ProtectionCopy.privacyServerSeesShapeSentence,
+                ProtectionCopy.keystoneAccountPassword, ProtectionWords.guideOpenMeansReadable,
+            ]
+            _ = try lesson(privacy, ProtectionWords.guideKeyLessonTitle, keyLesson)
+            _ = try lesson(privacy, ProtectionWords.guidePosturesLessonTitle, ProtectionWords.guidePosturesLesson)
+            _ = try lesson(privacy, ProtectionWords.guideCopiesLessonTitle, ProtectionWords.guideCopiesLesson)
+        } else {
+            _ = try lesson(privacy, ProtectionCopy.privacyLessonOneTitle,
+                           ProtectionCopy.privacyLessonOneParagraphs)
+            // VX-209 (PROVISIONAL, #215): the Mac's lesson 2 closes on the
+            // older-copy warning — opening and restoring copies are Mac doors
+            // (the phone's edition renders the shared paragraphs alone).
+            _ = try lesson(privacy, ProtectionCopy.privacyLessonTwoTitle,
+                           ProtectionCopy.privacyLessonTwoParagraphs
+                           + [ProtectionCopy.privacyOlderCopyParagraph])
+        }
 
         // ————————————————————————— AI & the MCP door ——————————————————————
         //

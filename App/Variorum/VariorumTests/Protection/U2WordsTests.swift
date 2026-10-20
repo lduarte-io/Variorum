@@ -168,4 +168,86 @@ struct U2WordsTests {
         let (standard, _) = try await fresh.created()
         #expect(OpenLibraryShape.of(standard.library) == OpenLibraryShape(posture: .standard, synced: false))
     }
+
+    // MARK: - Piece 7 — the field guide's protection chapter on the new road + Data Safety's truths (VX-379; #235)
+
+    /// The two-register rule — `CopyRegisterPinTests.forbidden`'s pattern restated, since that suite is Mac-only and this one
+    /// also runs headless: no key-family internal in user copy.
+    static var forbidden: Regex<Substring> {
+        /\b(?:box|boxes|vault|vaults|escrow|escrowed|kdf|token|tokens|session|sessions|rls)\b/
+            .ignoresCase().wordBoundaryKind(.simple)
+    }
+
+    /// The words no rule as built says any more.
+    static let retired = ["escrow", "recovery key", "recovery phrase", "set-aside", "set aside copy", "anchor", " box"]
+
+    /// Every paragraph of the chapter and the export lesson's two, read for the rules AS BUILT: her sentences verbatim where
+    /// they exist; the numbers as built (the floor, retention's 14 · 14 + 4); the doors by their own names; nothing retired;
+    /// nothing shouted; no device named by a literal.
+    @Test func theGuidesNewRoadChapterSaysTheRulesAsBuilt() throws {
+        let postures = ProtectionWords.guidePosturesLesson.joined(separator: "\n")
+        let copies = ProtectionWords.guideCopiesLesson.joined(separator: "\n")
+        #expect(postures.contains(ProtectionWords.castlePromise), "rule 9's promise, hers")
+        #expect(postures.contains(ProtectionWords.leaveSentence), "rule 12's leave sentence, hers")
+        #expect(postures.contains("at least 12 characters"), "the floor, as built (VX-211)")
+        #expect(postures.contains("one at a time") && postures.contains("twelve words"))
+        #expect(copies.contains(ProtectionWords.neverLeaveCastle), "rule 17's sentence, hers")
+        #expect(copies.contains(ProtectionWords.dataSafetyWhatOpensABackup), "rule 5's sentence — one text with the pane")
+        #expect(copies.contains(ProtectionWords.copiesElsewhereLine), "VX-210's line — one text with the listings")
+        #expect(copies.contains("the newest 14") && copies.contains("the 14 most recent days")
+            && copies.contains("4 weeks"), "retention's honest numbers (VX-302)")
+        #expect(copies.contains("older library Variorum kept when you opened or restored a different one"), "her item-5 words")
+        for door in [ProtectionWords.lookInsideDoor, ProtectionWords.makeMineDoor] {
+            #expect(copies.contains(Self.named(door)), "\(door) by its own name")
+        }
+        #expect(copies.contains(LibraryOpenCopy.restoreSectionTitle) && copies.contains("Previous Libraries"))
+        let all = ProtectionWords.guidePosturesLesson + ProtectionWords.guideCopiesLesson + [
+            ProtectionWords.guideSyncSentence, ProtectionWords.guideOpenMeansReadable, ProtectionWords.guideBackupsHappen,
+            ProtectionWords.guideSecondFolderLead, ProtectionWords.guideKeyLessonTitle,
+            ProtectionWords.guidePosturesLessonTitle, ProtectionWords.guideCopiesLessonTitle,
+        ]
+        for paragraph in all {
+            #expect(Self.shouts(paragraph).filter { $0 != "ID" }.isEmpty, "\(paragraph)")
+            #expect(!paragraph.contains(Self.forbidden), "the two-register rule: \(paragraph)")
+            for word in Self.retired { #expect(!paragraph.lowercased().contains(word), "\(word) in \(paragraph)") }
+            #expect(paragraph.firstMatch(of: /\bMac\b/) == nil || ProtectionCopy.deviceName == "Mac",
+                    "shared copy names the device through ProtectionCopy")
+        }
+        #expect(ProtectionWords.guideBackupsHappen.contains("a pair") && ProtectionWords.guideSecondFolderLead.contains("once a day"))
+        #expect(ProtectionWords.guideOpenMeansReadable.contains("Lock Library Now"), "the lock's door by its name (VX-451)")
+    }
+
+    /// Data Safety on the new road: rule 5's sentence (F-U2c-4), what the counts are (F-U1a-3 / VX-397), and why a second
+    /// same-day Back Up Now adds nothing to the picked folder (P-VX309-U1a-2).
+    @Test func dataSafetysNewRoadLinesSayTheCopiesAsBuilt() {
+        let opens = ProtectionWords.dataSafetyWhatOpensABackup
+        #expect(opens.hasPrefix("A backup is your library plus its key file."), "rule 5's first sentence")
+        #expect(opens.contains("the passphrase and twelve words you had when you made it") && opens.contains("current ones"))
+        #expect(opens.contains("quiet road while it still holds that backup's key"), "VX-263's clause")
+        #expect(ProtectionWords.dataSafetyTheCountsAreThisMacs.contains("this \(ProtectionCopy.deviceName)'s copies of this library"))
+        let kept = ProtectionWords.dataSafetySecondFolderKept
+        #expect(kept.hasPrefix("Kept there: the 14 most recent days that have a copy, plus one copy from each of the 4 weeks "
+            + "before those."), "today's caption, unchanged, leads")
+        #expect(kept.contains("a second Back Up Now on the same day adds one beside your library only"))
+        for line in [opens, ProtectionWords.dataSafetyTheCountsAreThisMacs, kept] {
+            #expect(Self.shouts(line).isEmpty && !line.contains(Self.forbidden))
+        }
+    }
+
+    /// The faces (by source): Data Safety renders the new road's lines behind its road gate and keeps today's caption on
+    /// today's road; the guide's seed gates its new chapter by the road's own rule.
+    @Test func theNewRoadsLinesAreRenderedOnlyThere() throws {
+        let app = URL(fileURLWithPath: #filePath).resolvingSymlinksInPath()
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        let pane = try String(contentsOf: app.appendingPathComponent("Variorum/Features/Settings/DataSafetyPane.swift"),
+                              encoding: .utf8)
+        let gate = try #require(pane.components(separatedBy: "if roadStanding != nil {").dropFirst().first)
+        #expect(gate.prefix(500).contains("ProtectionWords.dataSafetyTheCountsAreThisMacs")
+            && gate.prefix(500).contains("ProtectionWords.dataSafetyWhatOpensABackup"))
+        #expect(pane.contains("roadStanding != nil\n                     ? ProtectionWords.dataSafetySecondFolderKept"))
+        let seeder = try String(contentsOf: app.appendingPathComponent("Variorum/Features/Tutorial/TutorialSeeder.swift"),
+                                encoding: .utf8)
+        #expect(seeder.contains("onTheNewRoad: ProtectionRoad.opensOnTheNewRoad(devStore: session.storeVariant == .dev)"))
+        #expect(seeder.contains("onTheNewRoad: Bool = false"), "a direct seed is today's edition unless asked")
+    }
 }

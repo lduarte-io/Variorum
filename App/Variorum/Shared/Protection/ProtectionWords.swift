@@ -931,6 +931,99 @@ nonisolated enum ProtectionWords {
             + "\(doorTitle) again."
     }
 
+    // MARK: - VX-309 U2 — THE FIELD GUIDE'S PROTECTION CHAPTER ON THE NEW ROAD (VX-379's acceptance; #235: "written here")
+    //
+    // Seeded ONLY where the store opens on the new road (`TutorialSeeder.seed(… onTheNewRoad:)` — the readme's own gate,
+    // VX-306 ladder r2 m2); today's road, Release included, seeds copy §7's chapter until the switch (VX-329). Lesson 1 LEADS
+    // with the readme's four Start Here passages, verbatim (`ReadmeSeeder.startHerePassages` — one text, two homes; the
+    // seeder prepends them). Every paragraph here is drafted from `notes/CastleRules.md` and the lifecycle page as built —
+    // her sentences verbatim where they exist (rule 9's promise, rule 12's leave sentence, rule 17's), PROVISIONAL
+    // P-VX309-U2-8 the rest. The truth-check and the real store's re-seed ride VX-329's release.
+
+    /// Lesson 1 (after the Start Here passages): what sync seals and what it can't (VX-204's approved sentences — the
+    /// seeder adds `ProtectionCopy.privacyServerSeesShapeSentence` and `keystoneAccountPassword`, her approved words), and
+    /// what an open library is.
+    static let guideKeyLessonTitle = "Your key and your twelve words"
+    static let guideSyncSentence = "Sync is end-to-end encrypted: your writing and everything you name \u{2014} titles, "
+        + "tags, books \u{2014} are encrypted on your device before they leave, and the Variorum server can never read them."
+    static let guideOpenMeansReadable = "And one thing no setting changes: while Variorum is open, everything in it is "
+        + "readable \u{2014} that is what open means. In Castle, locking it \u{2014} Lock Library Now, or time away "
+        + "\u{2014} is how you end that."
+
+    /// Lesson 2 — one posture at a time (rules 8–13).
+    static let guidePosturesLessonTitle = "Standard and Castle"
+    static let guidePosturesLesson: [String] = [
+        "Your library is in one of two postures, and only one at a time. Standard is the convenience: besides your "
+            + "passphrase and your twelve words, Variorum keeps quiet roads to your key \u{2014} through your iCloud "
+            + "Keychain and this \(ProtectionCopy.deviceName)'s login \u{2014} so most days you type nothing. If one stops "
+            + "working, the next open uses whichever still works and quietly makes a fresh one; it asks for your passphrase "
+            + "or words only when none is left.",
+        castlePromise + " \(ProtectionCopy.biometryName) on this \(ProtectionCopy.deviceName) is optional; with Always "
+            + "ask, no copy of the key stays here and you type every time.",
+        "Entering Castle asks for your passphrase and your twelve words, gives your library a new key, and deletes its "
+            + "Apple and on-device keychain items \u{2014} so your backups come into Castle with it. Leaving asks for both "
+            + "again and hands everything back to Standard, and the leave screen says it plainly: " + leaveSentence,
+        "With sync on, Castle is your whole account's: when one device enters, each of your other devices follows by "
+            + "typing your passphrase or your twelve words once.",
+        "What you must keep: your twelve words and your passphrase. Either one opens your library and every backup of "
+            + "it, and either one can reset the other. In Standard the quiet roads mean you rarely type them \u{2014} keep "
+            + "them anyway; in Castle they, and \(ProtectionCopy.biometryName) on this \(ProtectionCopy.deviceName) if you "
+            + "chose it, are the only way in. A library whose every key file and every backup are gone is gone; a synced "
+            + "library comes back from your account with your twelve words.",
+        "Wherever you set a passphrase, it must be at least \(ProtectionCopy.passphraseFloor) characters \u{2014} it is "
+            + "the one secret a stolen copy of the server could be guessed against \u{2014} and a quiet line beside the "
+            + "field says when a longer phrase would be stronger. A passphrase you already have keeps working whatever its "
+            + "length.",
+    ]
+
+    /// Lesson 3 — the copies as this phase built them (rules 5, 17–19; VX-309 U1a–U1c).
+    static let guideCopiesLessonTitle = "Copies, backups and your way back"
+    static let guideCopiesLesson: [String] = [
+        "A backup is your library plus its key file \u{2014} a pair, written together and never rewritten. Once a day "
+            + "while Variorum is open, a pair lands beside your library; if you picked a second folder in Settings "
+            + "\u{25B8} Data Safety, a pair lands there too, once a day. Each place keeps this \(ProtectionCopy.deviceName)'s "
+            + "pairs of this library: beside it, the newest 14; in your folder, the 14 most recent days that have one, "
+            + "plus one from each of the 4 weeks before those.",
+        dataSafetyWhatOpensABackup,
+        "Settings \u{25B8} Data Safety \u{25B8} Restore from Backup lists the copies on this "
+            + "\(ProtectionCopy.deviceName). Look inside opens one read-only: nothing is written, and closing it forgets "
+            + "it. Make this my library turns a copy into a new library, with a fresh key of its own, in the posture "
+            + "you're in now and under your current passphrase and twelve words \u{2014} and your current library steps "
+            + "aside whole into Previous Libraries, where you can look inside it or bring it back the same way. "
+            + neverLeaveCastle + " A library made this way doesn't sync until you turn on sync for it.",
+        "Copies of other libraries on this \(ProtectionCopy.deviceName) are listed too \u{2014} an older library Variorum "
+            + "kept when you opened or restored a different one, or a copy you opened here \u{2014} and each library's "
+            + "copies can be deleted, one library at a time. " + copiesElsewhereLine,
+        "Your writing can always leave as plain text: File \u{25B8} Export Library\u{2026} writes every note as Markdown, "
+            + "and Settings \u{25B8} Data Safety can write an unencrypted copy of the whole library. An unencrypted copy "
+            + "comes back in through File \u{25B8} Open Library\u{2026} as a new library \u{2014} its notes, books, "
+            + "chapters, snippets and tags written fresh; its book settings, stars and shelves stay behind.",
+    ]
+
+    /// The export lesson's two backup paragraphs on the new road (the seeder interpolates the pane's own names after the
+    /// second's lead, exactly as today's do): a backup is a PAIR, and the second folder takes one a day (P-VX309-U1a-2).
+    static let guideBackupsHappen = "Backups happen on their own. Once a day while Variorum is open, it writes a pair "
+        + "\u{2014} your library and its key file \u{2014} into a backups folder right beside the library, on this "
+        + "\(ProtectionCopy.deviceName). No button, nothing to remember. Those copies survive a mistake; they don\u{2019}t "
+        + "survive losing the \(ProtectionCopy.deviceName)."
+    static let guideSecondFolderLead = "So you can add a second folder of your own choosing (iCloud Drive, an external "
+        + "drive, any folder your cloud service syncs) and a pair lands there too, once a day:"
+
+    // MARK: - VX-309 U2 — DATA SAFETY ON THE NEW ROAD (F-U2c-4; F-U1a-3) — PROVISIONAL P-VX309-U2-9
+
+    /// F-U2c-4 — RULE 5's sentence for the pane (the copies section; today's road keeps its posture lines): what opens a
+    /// backup, with VX-263's quiet-road clause.
+    static let dataSafetyWhatOpensABackup = "A backup is your library plus its key file. It opens with the passphrase and "
+        + "twelve words you had when you made it, with your current ones too, or \u{2014} on this "
+        + "\(ProtectionCopy.deviceName) \u{2014} by its quiet road while it still holds that backup's key."
+    /// F-U1a-3 — what the counts are on the new road (VX-397: this Mac's pairs of this library).
+    static let dataSafetyTheCountsAreThisMacs = "The counts are this \(ProtectionCopy.deviceName)'s copies of this "
+        + "library, each a pair: the library and its key file."
+    /// F-U1a-3 — the picked folder's caption on the new road (P-VX309-U1a-2: one pair a day there).
+    static let dataSafetySecondFolderKept = "Kept there: the 14 most recent days that have a copy, plus one copy from "
+        + "each of the 4 weeks before those. One copy a day goes there \u{2014} a second Back Up Now on the same day adds "
+        + "one beside your library only."
+
     // MARK: - The route's failures (the failure face, with Try Again)
 
     static let couldNotCreate = "Variorum couldn't create your library."
