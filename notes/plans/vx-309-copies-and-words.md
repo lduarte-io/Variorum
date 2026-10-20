@@ -868,11 +868,32 @@ door `DocumentImporter.swift` + `ImportModel.swift`; the test worlds — `Execut
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton + the readings + the harness baseline: DONE (this commit).
-- Piece 0 — F-U1a-1's fix (VX-450's second arm): BUILT (`3180d56c7` pins first · `22856d3dd` the fix); MUTATIONS NAMED, running
-  next on `22856d3dd` (pre-revert copies in this session's scratchpad `u1b-prerevert/`; each restored by `git checkout --`,
-  `cmp`-checked): M-0a the helper's replaced-lock arm off (always false) → expect the pre-fix red set; M-0b the
-  plan-descriptor guard dropped → expect `aPassphraseReChosenAsItWasIsTheActsOwnSecret` red; M-0c the call site's files
-  without the sealed mirror → expect shape C (`aKeyDoorWhoseKeyFileLanded…`) red. PENDING.
+- Piece 0 — F-U1a-1's fix (VX-450's second arm): DONE (`3180d56c7` pins first · `22856d3dd` the fix). CORE (the custody
+  line — THE CORE LINES below): `KeyDoorProgram.typedPassphraseOpensOnlyTheReplacedLock` (`Acts/KeyDoors.swift`, reads only)
+  + its one call in `PlanRunner.resume` (the typed text is in hand only there): at a resume of Change or Reset, the passphrase
+  the open typed is DROPPED from the act's secrets when it opens no passphrase lock under the plan's fresh descriptor (the live
+  key file, this Mac's sealed mirror) and does open one under an older descriptor — so U1a's VX-450 arm rolls the act back
+  before any write. Pins `KeyDoorOldPassphraseResumeTests` (core, 5): RED ON THE PRE-FIX TREE `✘ Test run with 4 tests in 1
+  suite failed after 0.027 seconds with 15 issues.` — the probe's two postures, both doors, unsynced and synced, `.resumed`
+  with the key file (and the synced vault) re-locked under the OLD passphrase on a new salt; shape B (synced, the vault write
+  landed) and shape C (the key-file write landed, the old passphrase opening through the mirror) `the settle threw
+  .passphraseDoesNotOpen` ×4 — the act in flight for good (my trace confirmed: R-U1b-0's B and C were real wedges, the same
+  class as VX-450); the two guards (a resume typing the NEW passphrase after the key file landed; a passphrase re-chosen as it
+  was) green on both trees. With the fix `✔ Test run with 5 tests in 1 suite passed`; with the key-door neighbours
+  (`KeyDoorResumeTests`, `NewWordsResumeTests`, `FileLessWordsTests`, `FirstLookWordsTests`, `ExecutorKeyDoorTests`,
+  `U2CrashHarnessTests`, `ExactWritesTests`, `ExecutorDeviceActTests`) `✔ Test run with 43 tests in 9 suites passed` (before
+  the re-chosen guard joined); the core protection set (88 `@Suite` types re-derived from the files) Debug `✔ Test run with
+  364 tests in 87 suites passed after 5.332 seconds.` MUTATIONS on `22856d3dd` (each restored by `git checkout --`,
+  `cmp`-identical to `u1b-prerevert/`): M-0a the replaced-lock arm off → `✘ … 15 issues` (the pre-fix red set exactly);
+  M-0b the plan-descriptor guard dropped → `✘ aPassphraseReChosenAsItWasIsTheActsOwnSecret` (1 issue); M-0c the call site
+  without the sealed mirror → `✘ aKeyDoorWhoseKeyFileLanded…` (2 issues — shape C's old passphrase opens only the mirror).
+  THE SYNCED TWIN, honestly: before its vault write a resumed synced Change typing the old passphrase rolls back with the
+  vault untouched; after the vault write landed it rolls back with the landed write standing (the account then opens with the
+  passphrase chosen at the press, the library with the old one) until the next Change re-locks both (pinned) — U1a's MAJOR-1
+  consequence, now reached by the typed road too, where before it wedged. Shape C rolls back with the live file keeping the
+  lock chosen at the press (MAJOR-1's residue (1), seen at the press) — pinned as the one legal state there. A same-text
+  re-choice before the key file lands rolls back (indistinguishable from the replaced one — legal: the old state carries the
+  same passphrase); after it lands, it finishes (pinned).
 - Piece 1 — T-5, the empty-slot landing: NOT-STARTED.
 - Piece 2 — VX-305's second hand-off (Previous Libraries through the doors): NOT-STARTED.
 - Piece 3 — T-8: NOT-STARTED — WAITING on the mapping ruling (proposal sent).
