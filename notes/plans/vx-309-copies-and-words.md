@@ -2109,6 +2109,11 @@ seconds.` (U1c's close count, exactly).
   in the app; "wherever the route finder speaks" is VX-263's one line's hosts — the three key doors and the New Words door
   (the VX-308 plan named `keyDoorsLine` "VX-263's one line"). The rules reduce the route finder to that one sentence, so the
   reword IS the line now: U3's plan-pinned test flipped, said here.
+- **R-U2-6 — "THE FLOOR STAYS THE ONLY REFUSAL" NEEDS THE FLOOR ON THE NEW ROAD.** Her kickoff ruling presumes a standing
+  12-character refusal; on the new road none of the four setters enforced it (VX-308's F-U1-2 / F-U3-4 — routed, and not in
+  VX-308's filed list: VX-211, "12-character length floor but no strength check", is where it lives). Same fields, same
+  sentence, her 17n rule — so the floor is built here as VX-211's first half, pinned red-on-old, with today's road's own
+  constants (never a second number or sentence). The hint is advice only: a 12-character phrase that earns it is SET.
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton + the harness baseline: DONE (`fe2344041`).
@@ -2174,5 +2179,23 @@ seconds.` (U1c's close count, exactly).
   PROVISIONAL P-VX309-U2-6. U3's plan-pinned test FLIPPED DELIBERATELY to read `notes/CastleRules.md`
   (`RoadKeyDoorWordsTests.vx263sOneLineIsTheRulesRouteFinderSentence`) — RED ON OLD `✘ … 4 issues`; the key-door suites
   `✔ Test run with 39 tests in 5 suites passed`.
-- Pieces 6–10 — NOT-STARTED.
+- Piece 6 — VX-211, "FLOOR + QUIET HINT": DONE (`385017df2` floor pins first · `f60eab50d`). R-U2-6 below. THE FLOOR
+  (`NewPassphraseRule.floorRefusal`, `SetPassphraseModel.swift` — today's road's one number and sentence, `ProtectionCopy
+  .passphraseFloor` / `.passphraseTooShort`; today's order: the floor, then the match) on the new road's four setters:
+  `SetPassphraseModel` (the sheet and the tour's last card), `RoadCrossingConfirmModel`'s new passphrase,
+  `RoadAccountConfirmModel`'s new passphrase, `RoadKeyDoorConfirmModel` (both presses; Change's CURRENT field never floored).
+  THE QUIET HINT: the pure Domain estimator `PassphraseStrength.advice` (CORE, `Domain/PassphraseStrength.swift` — repetitive:
+  fewer than 6 different characters, case folded, spaces aside; short: fewer than 20 characters; else nothing; an empty field
+  nothing) and its one calm line (`ProtectionWords.passphraseHint` — the brief's example for the short shape, PROVISIONAL
+  P-VX309-U2-7) under every field that SETS a passphrase (`PassphraseHintLine` in the set sheet, the key doors, a crossing's and
+  turning sync on's new passphrase; the tour's last card in its own voice). Never a block, never a meter, no colour. Pins
+  `PassphraseFloorRoadTests` (6): the floor RED ON OLD `✘ Test run with 4 tests in 1 suite failed … with 10 issues` (each of the
+  four took 11 characters to its road); the hint is advice, never a block; the five homes by source. `PassphraseStrengthTests`
+  (core, 4, exact). JUSTIFIED EDITS: nine suites' new-passphrase fixtures lifted above the floor (1-character passphrases now
+  meet it — one, `ProtectionSheetPresenterTests`' act-gate wait, SPUN FOREVER on the refused press until lifted: a whole-harness
+  run hung for 30 minutes under my own process, found by `sample`, the process killed, the fixture lifted). The whole harness
+  `✔ Test run with 338 tests in 57 suites passed after 6.241 seconds.`; `build-for-testing` green. MUTATIONS on `f60eab50d`
+  (restored `cmp`-identical): M-6a no floor → `✘ … 10 issues`; M-6b the Touch ID press unfloored → `✘ … 2`; M-6c the repetition
+  arm dropped (core) → `✘ repetitionOutranksLength` (4); M-6d no hint → `✘ theQuietHintIsAdviceNeverABlock` (2).
+- Pieces 7–10 — NOT-STARTED.
 - No revert is in flight.
