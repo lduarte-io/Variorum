@@ -1,0 +1,179 @@
+#!/bin/bash
+# ambient — the stage ambient (VX-458): a full-screen 1-bit scene (a koi pond first) on the Pro's
+# built-in screen while the stage coordinator holds the stage. A coordinator tool, never part of the
+# Variorum app. Source, rails and scene system: Tools/StageAmbient/README.md.
+#
+# Usage:
+#   ambient on [--scene NAME] [--stay]   start it; idempotent. Returns once the window is verified up.
+#                                        Refuses (exit 1, one line) while any stage claim exists whose
+#                                        reason doesn't start with exactly "HOLD:".
+#   ambient off                          stop it, synchronously: exit 0 once gone (or if it wasn't
+#                                        running), nonzero only if it could not be stopped.
+#   ambient status                       RUNNING scene=… pid=… since=…  |  OFF       (always exit 0)
+#   ambient next                         dissolve to the next weighted pick now
+#   ambient list                         the scenes and their weights
+#   ambient log                          the last lines of ~/.variorum/ambient.log (why it came and went)
+#   ambient build                        (re)build the app bundle
+#
+# It also quits ITSELF within ~0.3 s of a non-HOLD claim, and at once on real input (mouse, trackpad,
+# key). Its process is "StageAmbient" — never "Variorum", so the coordinator's instance checks never
+# see it. It writes ~/.variorum/ambient.log and ~/.variorum/ambient.state; never stage.log.
+
+set -uo pipefail
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+PKG="$HERE/StageAmbient"
+APP="$PKG/.build/StageAmbient.app"
+CONFIG="$PKG/ambient.json"
+NAME=StageAmbient
+STATE="$HOME/.variorum/ambient.state"
+LOG="$HOME/.variorum/ambient.log"
+LOCK="$HOME/.variorum/stage.d"
+
+usage() { sed -n '2,23p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+ms() { perl -MTime::HiRes=time -e 'printf "%d", time * 1000'; }
+pid_of() { pgrep -x "$NAME" 2>/dev/null | head -1; }
+
+# The claim exactly as Tools/stage reads it (it sources the same file). Prints why and returns 0 when
+# the ambient must stay off.
+claim_blocks() { # $1 = a claimant allowed for an evidence window (optional)
+  [ -d "$LOCK" ] || return 1
+  if [ ! -f "$LOCK/claim" ]; then echo "a claim is being written (lock without a claim file)"; return 0; fi
+  local who reason
+  who=$(WHO=""; . "$LOCK/claim" 2>/dev/null; printf %s "$WHO")
+  reason=$(REASON=""; . "$LOCK/claim" 2>/dev/null; printf %s "$REASON")
+  case "$reason" in HOLD:*) return 1 ;; esac
+  if [ -n "${1:-}" ] && [ "$who" = "$1" ]; then return 1; fi
+  echo "held by '$who': $reason"
+  return 0
+}
+
+build() {
+  local out bin
+  if ! out=$(swift build -c release --package-path "$PKG" 2>&1); then
+    echo "$out" | tail -20 >&2
+    return 1
+  fi
+  bin="$(swift build -c release --package-path "$PKG" --show-bin-path 2>/dev/null)/$NAME"
+  [ -x "$bin" ] || { echo "no binary at $bin" >&2; return 1; }
+  if [ -x "$APP/Contents/MacOS/$NAME" ] && cmp -s "$bin" "$APP/Contents/MacOS/$NAME"; then return 0; fi
+  rm -rf "$APP"
+  mkdir -p "$APP/Contents/MacOS"
+  cp "$bin" "$APP/Contents/MacOS/$NAME"
+  cat > "$APP/Contents/Info.plist" <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleIdentifier</key><string>io.lduarte.StageAmbient</string>
+  <key>CFBundleName</key><string>StageAmbient</string>
+  <key>CFBundleExecutable</key><string>StageAmbient</string>
+  <key>CFBundlePackageType</key><string>APPL</string>
+  <key>CFBundleShortVersionString</key><string>1.0</string>
+  <key>CFBundleVersion</key><string>1</string>
+  <key>LSMinimumSystemVersion</key><string>26.0</string>
+  <key>LSUIElement</key><true/>
+  <key>NSHighResolutionCapable</key><true/>
+</dict>
+</plist>
+PLIST
+  codesign --force --sign - "$APP" >/dev/null 2>&1
+}
+
+status_line() {
+  local pid scene since
+  pid=$(pid_of)
+  if [ -z "$pid" ]; then echo "OFF"; return; fi
+  scene=$(sed -n 's/^SCENE=//p' "$STATE" 2>/dev/null)
+  since=$(sed -n 's/^SINCE=//p' "$STATE" 2>/dev/null)
+  echo "RUNNING scene=${scene:-?} pid=$pid since=${since:-?}"
+}
+
+cmd="${1:-status}"; shift || true
+
+case "$cmd" in
+  on)
+    pass=(); allow=""
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        --scene) pass+=(--scene "${2:?--scene needs a name}"); shift 2 ;;
+        --stay) pass+=(--stay); shift ;;
+        --seed) pass+=(--seed "${2:?--seed needs a number}"); shift 2 ;;
+        --allow-claimant) allow="${2:?--allow-claimant needs a name}"; pass+=(--allow-claimant "$allow"); shift 2 ;;
+        *) echo "ambient on: unknown argument '$1'"; usage ;;
+      esac
+    done
+    pid=$(pid_of)
+    if [ -n "$pid" ]; then echo "AMBIENT ALREADY ON — $(status_line)"; exit 0; fi
+    if why=$(claim_blocks "$allow"); then echo "AMBIENT REFUSED — stage $why"; exit 1; fi
+    build || { echo "AMBIENT REFUSED — the build failed (above)"; exit 1; }
+    # Re-check: a build takes a moment, and a claim may have landed meanwhile.
+    if why=$(claim_blocks "$allow"); then echo "AMBIENT REFUSED — stage $why"; exit 1; fi
+    front=$(lsappinfo info -only pid "$(lsappinfo front)" 2>/dev/null | grep -oE '(pid = |"pid"=)[0-9]+' | grep -oE '[0-9]+' | head -1)
+    rm -f "$STATE"
+    # LaunchServices, so the app outlives the calling shell.
+    open "$APP" --args --config "$CONFIG" ${front:+--return-pid "$front"} ${pass[@]+"${pass[@]}"}
+    t0=$(ms)
+    while [ $(( $(ms) - t0 )) -lt 10000 ]; do
+      pid=$(pid_of)
+      if [ -n "$pid" ] && [ -f "$STATE" ] && grep -q "^PID=$pid$" "$STATE" 2>/dev/null \
+         && ! grep -q '^WINDOW=0$' "$STATE"; then
+        echo "AMBIENT ON — $(status_line)"
+        exit 0
+      fi
+      if [ $(( $(ms) - t0 )) -gt 2000 ] && [ -z "$pid" ]; then break; fi
+      sleep 0.1
+    done
+    pid=$(pid_of)
+    last=$(tail -1 "$LOG" 2>/dev/null)
+    if [ -n "$pid" ]; then
+      echo "AMBIENT UNVERIFIED — pid $pid is up but never reported its window; last log: $last"
+    else
+      echo "AMBIENT REFUSED — it did not stay up; last log: $last"
+    fi
+    exit 1
+    ;;
+
+  off)
+    pid=$(pid_of)
+    if [ -z "$pid" ]; then rm -f "$STATE"; echo "AMBIENT OFF (wasn't running)"; exit 0; fi
+    t0=$(ms); forced=""
+    kill -TERM "$pid" 2>/dev/null
+    while [ -n "$(pid_of)" ] && [ $(( $(ms) - t0 )) -lt 3000 ]; do sleep 0.05; done
+    if [ -n "$(pid_of)" ]; then
+      forced=", needed SIGKILL"
+      pkill -KILL -x "$NAME" 2>/dev/null
+      while [ -n "$(pid_of)" ] && [ $(( $(ms) - t0 )) -lt 5000 ]; do sleep 0.05; done
+    fi
+    if [ -n "$(pid_of)" ]; then echo "AMBIENT STILL RUNNING (pid $(pid_of)) — could not stop it"; exit 1; fi
+    rm -f "$STATE"
+    echo "AMBIENT OFF (stopped pid $pid in $(( $(ms) - t0 )) ms$forced)"
+    ;;
+
+  status)
+    status_line
+    exit 0
+    ;;
+
+  next)
+    pid=$(pid_of)
+    if [ -z "$pid" ]; then echo "AMBIENT OFF — nothing to advance"; exit 0; fi
+    kill -USR1 "$pid" && echo "AMBIENT NEXT — dissolving (pid $pid)"
+    ;;
+
+  list)
+    build >/dev/null || exit 1
+    "$APP/Contents/MacOS/$NAME" --list --config "$CONFIG"
+    ;;
+
+  log)
+    tail -20 "$LOG" 2>/dev/null || echo "(no ambient log yet)"
+    ;;
+
+  build)
+    build && echo "built $APP"
+    ;;
+
+  -h|--help|help) usage ;;
+  *) echo "ambient: unknown command '$cmd'"; usage ;;
+esac
