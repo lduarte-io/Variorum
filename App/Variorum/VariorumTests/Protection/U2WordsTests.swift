@@ -285,7 +285,7 @@ struct U2WordsTests {
 
     /// T-8: the lead says the ruling in ONE line (content rides, configuration doesn't) and, with a library open, §7c (8)'s
     /// own step-aside clause; the refusals name what happened and that nothing moved; the receipt is §7c (9)'s shape.
-    @Test func theBringInLinesSayTheRulingAndSection7csShape() {
+    @Test func theBringInLinesSayTheRulingAndSection7csShape() throws {
         let aside = ProtectionWords.bringInLead(stepsALibraryAside: true)
         let empty = ProtectionWords.bringInLead(stepsALibraryAside: false)
         let clause = "steps aside whole into Previous Libraries, where you can look inside it or make it your library again."
@@ -294,10 +294,18 @@ struct U2WordsTests {
         for lead in [aside, empty] {
             #expect(lead.hasPrefix("This plain-text copy becomes a new library \u{2014} in Standard, with a fresh key of "
                 + "its own; its new twelve words are offered once it opens."))
+            // VX-309 ladder round 1, F-R2 — FLIPPED DELIBERATELY: the one line names the two losses it left unsaid —
+            // gatherings (configuration — ruling item 6) and every note's entry date (the format carries none: a brought-in
+            // note is minted with no entry date).
             #expect(lead.contains("Its notes and their takes, books, chapters, snippets and tags come in, written fresh; its "
-                + "commits, comments, note versions, book settings, stars and shelves don't."), "the ruling's one line")
+                + "gatherings, entry dates, commits, comments, note versions, book settings, stars and shelves don't."),
+                    "the ruling's one line")
             #expect(lead.hasSuffix(" The copy itself is not changed."))
         }
+        // The guide's plain-text paragraph follows the lead's list (one list, two hosts — never drifting).
+        let guide = try #require(ProtectionWords.guideCopiesLesson.last)
+        #expect(guide.contains("its gatherings, entry dates, commits, comments, note versions, book settings, stars and "
+            + "shelves stay behind."), "\(guide)")
         #expect(ProtectionWords.exportFromAnEarlierBuild
             == "This plain-text copy was written by an earlier Variorum than this one, which can't bring it in.")
         #expect(LibraryOpenCopy.newerSchemaRefusal.hasPrefix("This library was written by a newer Variorum than this one."),
