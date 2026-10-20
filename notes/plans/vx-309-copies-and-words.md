@@ -2099,6 +2099,16 @@ seconds.` (U1c's close count, exactly).
   section at every landing — the export notice's "reconciled at every ready" is the section's re-read here (there is no state
   to reconcile against: the Done is a historical fact until she reads it). A follow stopped past its swap marks nothing at the
   press: the settle that finishes it marks (never twice — the mark is a value, not a count).
+- **R-U2-4 — ITEM 7's "WHAT THE COPY IS" IS WHAT IT BECOMES.** The confirm can know the OPEN library's shape for certain (its
+  record: posture and account), and rule 17 makes the copy a new library in exactly that posture, under that pair, with no
+  sync identity — so "said plainly, per library shape" is the posture it lands in (in Castle: rule 17's own sentence), and,
+  synced, that the new library doesn't sync until she turns sync on for it (VX-209's synced arm). The COPY's own former
+  posture is not claimed: only its key file speaks of it, and an Apple lock there is not a reliable posture fact (a Standard
+  key file can lack one for a while — VX-447's mint, a failed Apple write). Recorded as P-VX309-U2-5's option (b).
+- **R-U2-5 — VX-263's REWORD SUPERSEDES U3's LINE IN ITS HOSTS.** The route finder (`RouteFinder.opensWith`) speaks nowhere
+  in the app; "wherever the route finder speaks" is VX-263's one line's hosts — the three key doors and the New Words door
+  (the VX-308 plan named `keyDoorsLine` "VX-263's one line"). The rules reduce the route finder to that one sentence, so the
+  reword IS the line now: U3's plan-pinned test flipped, said here.
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton + the harness baseline: DONE (`fe2344041`).
@@ -2140,5 +2150,29 @@ seconds.` (U1c's close count, exactly).
   signed out: `assess` refuses it `.otherAccountSignedIn`), PROVISIONAL P-VX309-U2-4. Pin `U2WordsTests.moveNotYetNamesTheRoad`
   RED ON OLD `✘ … 5 issues` (the old line held, the edit set aside in the gitignored `App/Variorum/DerivedData/u2-hold/` and
   restored `cmp`-identical), green after; the account words and faces suites `✔ 35 tests in 6 suites`.
-- Pieces 4–10 — NOT-STARTED.
+- Piece 4 — VX-264 ITEMS 5 + 7 (+ VX-209's synced arm): DONE (`7b9384d83` + `9ef087ab2` pins first — the first of the two
+  committed a test with three bare-`String` `Comment` arguments that did not compile; the second fixed them, machinery
+  honesty · `f9b01dc6f`). R-U2-4 below. ITEM 5 — her #216 sentences where another library's copies are counted and deleted:
+  `deleteCopiesCounts` (*That's 27 backups, plus 2 older libraries Variorum kept when you opened or restored a different
+  one.* — fitted: the singular, the copies she opened here) and `deleteCopiesWayBack` (her way-back sentence; the singular
+  fitted) in VX-265's confirm lead; `olderLibrariesLine` under the other libraries in BOTH listings, only where one is listed
+  (`CopyDoorsListing.listsAnOlderLibrary`, P-2). ITEM 7 — the confirm's lead computed per the OPEN library's shape
+  (`OpenLibraryShape` — posture + synced — through `CopyDoorsRoads.libraryShape`, the bootstrap's from the session):
+  `makeMineLead(posture:passphraseSet:synced:)` — §7c's draft byte for byte is its Standard/unsynced arm; in Castle the
+  posture said (*in Castle*) + rule 17's own sentence, hers (*You never leave Castle by opening something.* — pinned to the
+  rules file); synced, VX-209's arm (`makeMineSyncedLine` — the new library carries no sync identity, P-VX378-U2-4).
+  PROVISIONAL P-VX309-U2-5. Pins `U2WordsTests` (item 5's two RED ON OLD — `✘ Test run with 8 tests in 2 suites failed …
+  with 10 issues`, with `OtherLibrariesDeleteRoadTests`' count pin FLIPPED DELIBERATELY; item 7's three new API, red by
+  construction — no pin compiling on the old tree can feed a posture to a confirm that never read one: the old lead said
+  *in Standard* for every library, a Castle one too); the harness's piece-4 suites `✔ Test run with 36 tests in 7 suites
+  passed`. MUTATIONS on `f9b01dc6f` (each restored `cmp`-identical): M-4a the way-back sentence never said → `✘` (2); M-4b
+  the posture ignored → `✘ theMakeMineLeadIsConcretePerShape` (3); M-4c `openMakeMine` drops the shape → `✘
+  theConfirmReadsTheOpenLibrarysShape` (1); M-4d the older-libraries line on any listing → `✘ theListingSays…` (1).
+- Piece 5 — VX-263's route-finder sentence: DONE (`c902c263c` pin first · `e7a182661`). R-U2-5 below. `keyDoorsLine` (the key
+  doors' one line, and beneath New Words' door) is the rules' ledger sentence fitted: *Every copy of this library opens with
+  your current passphrase or words; on this Mac, its quiet road opens it too, if it still holds that copy's key.*
+  PROVISIONAL P-VX309-U2-6. U3's plan-pinned test FLIPPED DELIBERATELY to read `notes/CastleRules.md`
+  (`RoadKeyDoorWordsTests.vx263sOneLineIsTheRulesRouteFinderSentence`) — RED ON OLD `✘ … 4 issues`; the key-door suites
+  `✔ Test run with 39 tests in 5 suites passed`.
+- Pieces 6–10 — NOT-STARTED.
 - No revert is in flight.
