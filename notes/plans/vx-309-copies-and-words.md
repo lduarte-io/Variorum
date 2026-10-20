@@ -2092,6 +2092,13 @@ seconds.` (U1c's close count, exactly).
   the sign-in's email. The words-typed moment shows the typed words under rule 7's own sentence (`joinWordsSentence`, pinned
   byte-equal to `notes/CastleRules.md`) — canon, untouched here; whether her direction also reads onto rule 7's phrase is
   P-VX309-U2-3. The middle clause drops as §5d rules (F-U2-1 below records §1's other reading of her note).
+- **R-U2-3 — VX-457's MARK IS WRITTEN WHERE THE DONE WAS OWED, NOWHERE ELSE.** The Done was a receipt owed at exactly two
+  places (the press that landed whole; the open whose settle finished the follow — VX-107's once-said rule); the mark is
+  written at exactly those two, by the open library's ID (a follow re-keys but never changes the library's ID), in the
+  calm-asks ledger's defaults (the bootstrap's `reminderLedger` — a test bootstrap's own suite), and read by the account
+  section at every landing — the export notice's "reconciled at every ready" is the section's re-read here (there is no state
+  to reconcile against: the Done is a historical fact until she reads it). A follow stopped past its swap marks nothing at the
+  press: the settle that finishes it marks (never twice — the mark is a value, not a count).
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton + the harness baseline: DONE (`fe2344041`).
@@ -2111,5 +2118,27 @@ seconds.` (U1c's close count, exactly).
   ruled wrong). Pin `ProtectionJoinFollowRoadTests.vx456_aRejoinWhoseWordsAreAlreadyTheAccountsOwesNoMoment` (the planted
   road; the door carries her email) — RED ON OLD by behavioural revert (the core line back to `9ed104688`) `✘ … 1 issue`,
   restored `cmp`-identical; the harness's join suites `✔ Test run with 69 tests in 9 suites passed`.
-- Pieces 2–10 — NOT-STARTED.
+- Piece 2 — VX-457 (the follow's Done, a durable pane notice until OK): DONE (`009135343` pin first · `58b3a3ef6`). R-U2-3
+  below. `FollowDoneMark` (`ProtectionAccountActs.swift` — `variorum.calmAsks.followDone.<libraryID>.kind`, the export
+  notice's idiom: by library, a kind name) written where the Done was owed — the press that landed whole (`ProtectionAccountRoad
+  .owed(after:request:)`, the bootstrap's seam marks instead of owing a receipt) and the open whose settle finished the follow
+  (`RoadStandingModel.make` from `report.settledFollow` — VX-107's durable reading); `RoadAccountModel.followDone` re-read at
+  every landing, `followDoneOK()` the one clear; the section renders VX-107's sentence + *OK* (`ProtectionWords.followDoneOK`).
+  The one-shot receipt RETIRES (`RoadStandingFaces.derive` owes it no more). Pins `FollowDoneNoticeTests` (6, headless): the
+  receipt-retired arm RED ON OLD `✘ … 3 issues` (one per kind); the mark by library; the press arm's owed rule; the section's
+  read and OK across a fresh model (the relaunch); the words; NEVER ON TODAY'S ROAD (by source — only new-road files name the
+  mark; the press arm behind `guard newRoad`). FLIPPED DELIBERATELY: `ProtectionJoinFollowRoadTests.vx107_aDoubleCrashedFollow
+  StillSaysItsDone` (no receipt; marked by the settling open, standing at a later open, cleared by OK) and the two Mac route
+  pins in `RoadJoinFollowSurfaceTests` (no receipt; `account.followDone` after the reopen; OK clears — BUILT, their run the
+  orchestrator's). Harness `✔ Test run with 46 tests in 6 suites passed`; `build-for-testing` `** TEST BUILD SUCCEEDED **`.
+  MUTATIONS on `58b3a3ef6` (each restored `cmp`-identical to `u2-prerevert/`): M-457a the settle arm's mark dropped → `✘ vx107_…`
+  (4 issues, both kinds); M-457b the section never re-reads → `✘ theSectionReadsTheDone…` (3); M-457c the press arm owes a
+  follow's receipt again → `✘ aFollowThatLandedWhole…` (1).
+- Piece 3 — `moveNotYet` names the road: DONE (`89d85e24c` pin first · `4737d6c56`). The line: *To move this library to that
+  account, sign out, choose Use this Mac only, then sign back in to that account and turn on sync. This library's passphrase
+  and twelve words become that account's.* — the brief's two presses fitted to the faces (This Mac Only renders only while
+  signed out: `assess` refuses it `.otherAccountSignedIn`), PROVISIONAL P-VX309-U2-4. Pin `U2WordsTests.moveNotYetNamesTheRoad`
+  RED ON OLD `✘ … 5 issues` (the old line held, the edit set aside in the gitignored `App/Variorum/DerivedData/u2-hold/` and
+  restored `cmp`-identical), green after; the account words and faces suites `✔ 35 tests in 6 suites`.
+- Pieces 4–10 — NOT-STARTED.
 - No revert is in flight.
