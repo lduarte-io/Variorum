@@ -2022,7 +2022,21 @@ the merging session's):**
 - **P-VX309-U1c-1..9 otherwise: each stands as built** pending her bundle. VX-454's ticket closes as FIXED at the
   merge (the probe red-on-old is the evidence; F-U1c-7 records the self-heal claim as verified).
 
-**THE U1c MAC BATCH (the orchestrator, under the stage; result appended when run):** *(pending the coordinator's GO)*
+**THE U1c MAC BATCH (the orchestrator, 2026-10-19 22:25–23:05 MDT, stage claim `vx-309-u1c-mac`, the coordinator's
+GO after a short human-at-the-Mac hold; logs `/tmp/vx309-u1c-*.log`, deleted at closeout):** `✔ Test run with 379
+tests in 68 suites passed` — ZERO real reds on the first run (the first unit batch of the phase with none). THE
+REVERTS, each from the committed tree, restored `cmp`-identical, `git status` clean: **R-a** (both `deleteCopies:`
+roads nil) → `OtherLibrariesDeleteRouteTests` RED both tests; **R-b** (both ledger lines dropped) →
+`WordsLedgerCarryRouteTests` RED both tests; **R-c** (the dial and Lock Now args dropped) → `RoadIdleDialRouteTests`
+RED (the sealed minutes stay 10, no lobby); **R-d** (the `landed` chain back to crossings-only) →
+`SetPassphraseRowRereadRouteTests` RED at the landing. **THE PRE-UNIT RED-ON-OLD (the truest form):** a throwaway
+detached checkout of `ae5aca849` at `/tmp/vx309-preunit` with ONLY the two test files added ran
+`WordsLedgerCarryRouteTests` + `SetPassphraseRowRereadRouteTests` → `✘ 3 tests in 2 suites failed … 5 issues` (every
+test red — the card re-offers recorded words; the set row, the reminder and the key doors all stale at the landing);
+the checkout REMOVED and pruned, the worktree back at the branch tip, status clean. The confirming re-run (the five
+Mac-only suites) `✔ Test run with 9 tests in 5 suites passed`; no `calmAsks.words` key in the debug defaults domain
+(the route suite's keys live in its own test suite and are removed by it); 0 instances; the stage released with the
+coordinator's result line. **THE U1c MAC LEG IS CLOSED — the implementer era's U1 theme is done whole.**
 
 **Notes:** no machinery deaths; no Sonnet lookup; no subagents; no scratch worktree. The harness is U1a's (this session's
 scratchpad `u1-harness` — it survived; U1c's five headless suites symlinked in). One record edit (a Python replace) failed its own
