@@ -40,13 +40,14 @@ finding touches sync, custody or a schema (the one core file touched is a commen
   behaviour red exactly); M-R1b the open/protected exclusion dropped → `✘ … 2 issues` (the protected guard + the open
   library's far copy counted); M-R1c the fence check dropped → `✘ … 1 issue` (the twinned pair counted). The words'
   red-on-old is the pre-fix run above (the old strings, 4 issues).
-- Piece 5 — F-R2 (gatherings and entry dates named in T-8's confirm + the guide's twin sentence): FIX COMMITTED (this
-  commit); pins first (the commit before) RED ON THE PRE-FIX TREE `✘ Test run with 13 tests in 1 suite failed after 0.049
-  seconds with 3 issues.` (the lead's flip ×2 arms + the guide's new pin) → with the words `✔ Test run with 25 tests in 3
-  suites passed` (U2WordsTests · OtherLibrariesDeleteRoadTests · PlaintextExportBringInRoadTests). MUTATION M-R2a (the
-  guide's paragraph back alone — the two hosts drifting) STARTING on this committed tree — PENDING.
+- Piece 5 — F-R2 (gatherings and entry dates named in T-8's confirm + the guide's twin sentence): DONE (pins first
+  `92bb95a55` · fix `23a76bc6f`). Pins RED ON THE PRE-FIX TREE `✘ Test run with 13 tests in 1 suite failed after
+  0.049 seconds with 3 issues.` (the lead's flip ×2 arms + the guide's new pin) → with the words `✔ Test run with 25 tests in
+  3 suites passed` (U2WordsTests · OtherLibrariesDeleteRoadTests · PlaintextExportBringInRoadTests). MUTATION on `23a76bc6f`
+  (restored `cmp`-identical to `scratchpad/r1fix-prerevert/ProtectionWords.swift`): M-R2a the guide's paragraph back alone
+  (the two hosts drifting) → `✘ Test run with 13 tests in 1 suite failed … with 1 issue.`
 - Piece 6 — the close: evidence (the touched suites headless; the core protection set Debug + Release;
-  `build-for-testing`; the phone; the Release build): NOT-STARTED.
+  `build-for-testing`; the phone; the Release build): IN-PROGRESS — the runs on the final code tree `23a76bc6f`, PENDING.
 
 ## THE DISPOSITIONS (each my own trace; AGREE ⇒ fixed below, DISPUTE ⇒ back to the reviewer unfixed)
 
