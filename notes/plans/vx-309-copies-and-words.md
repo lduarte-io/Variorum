@@ -818,12 +818,21 @@ guard into always refusing — and was DISCARDED and redone as the exact removal
 (3 pins first) · `635a6a8e6` (3) · `dd770eab1` (record) · `972dea6a4` (record) · `e6bd14584` (4 pins first) ·
 `7b9e5793f` (4) · `63c326d4e` (record) · `1ed9866cf` (record) · `f587b6382` (comment) · the close commit.
 
-### U1b RECORD — THE COPY DOORS (Opus implementer, 2026-10-19; piece 0 F-U1a-1 · T-5 · VX-305's second hand-off · T-8 — IN PROGRESS)
+### U1b RECORD — THE COPY DOORS (Opus implementer, 2026-10-19; piece 0 F-U1a-1 · T-5 · VX-305's second hand-off · T-8 — BUILT; the Mac suite and the walk PENDING)
 
-**Not done in U1b, first:** (PENDING — this list is rewritten at the close.)
-- No Mac suite RUN, no walk, no stage, no Debug launch, no store touch, no network, no Linear, no subagent (the brief).
-- T-8's mapping waits on the orchestrator's ruling (the proposal gate — sent by SendMessage 2026-10-19; the proposal's text
-  is restated under piece 3 below once ruled).
+**Not done in U1b, first:**
+- NO MAC SUITE RUN, NO WALK, no stage, no Debug launch, no store touch, no network, no Linear, no subagent (the brief).
+  Three new suites are Mac-only (the keychain or the app's source files) and were BUILT, never run:
+  `EmptySlotMakeMineRouteTests`, `EmptySlotDoorsSurfaceTests`, `PlaintextExportBringInRouteTests` — the orchestrator's,
+  under the stage (the list and the red-on-old recipes below). The planted suites ran headless only.
+- EVERY NEW SENTENCE IS UNDRAFTED against her words (P-VX309-U1b-3 — U2's words pass): T-5's lead and receipt, the
+  restore list's lead and its empty line, T-8's lead, button, working line, refusals and receipt.
+- ROUTED, NOT BUILT (the findings below): F-U1b-1 (entering Castle leaves a Previous Library's quiet roads standing — a
+  rule question); F-U1b-7's writing-road arm (a creation that refuses after T-8's step-aside leaves the slot empty —
+  only the read-only arm is fixed); F-U1b-8 (T-8 from an open Castle library lands a Standard library — the ruled road,
+  read against rule 17's last sentence); F-U1b-3 / F-U1b-4 (a test-tooling lift; a stale comment).
+- T-8 brings in only THIS build's export (P-VX309-U1b-7): an earlier or a later build's refuses with words; no migration.
+- No canon line, no QUESTIONS row, no ticket — the merging session's (the PROVISIONALs and findings below carry them).
 
 **Preflight (complete, not delegated):** CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md` whole;
 `notes/CastleRules.md` WHOLE (rules 2, 14, 17–19, 20–21, 26–27 + the considered-and-not-pursued ledger); `notes/SyncSpec.md`
@@ -1008,5 +1017,319 @@ door `DocumentImporter.swift` + `ImportModel.swift`; the test worlds — `Execut
   → `✘ atTheMissingFace…` (1 — the creation wrote over it); M-3j the pick refusing the export → `✘ thePicksRefusals…` (1).
   HARNESS NOTE: the scratch harness's test target now names the author's GRDB fork directly (resolved OFFLINE from the
   existing pin and checkout, `--skip-update`) so the app pins can `import GRDB` as the Xcode target does — no repo change.
-- Piece 4 — the close: NOT-STARTED.
-- No revert is in flight.
+  AT THE CLOSE (self-assessment, two more commits on the same surface): `9c7785a34` — the landing LOGS WHAT THE EXPORT
+  HOLDS BEFORE THE IMPORT (`road: bringing in a plaintext export — it holds N books · M notes · K snippet groups · W
+  wings`), so a crash part of the way leaves that line without the end's and what landed reads against what was to land
+  (the ruling's requirement on the crash window, made checkable from the log alone; a log line, no behaviour, unpinnable —
+  `os_log`). `b923eabf6` pin first → `6d24bd2f5` fix (F-U1b-7's read-only arm): `landPlaintextExport` set what stood in the
+  slot aside BEFORE the creation, and the creation refuses on a read-only road (`testRunNeverCreates`) — so on that road it
+  left the slot EMPTY for nothing (the bootstrap's own `road.writes` guard kept the app's door off this path; the function
+  did not guard itself). Now it refuses first. Pin `PlaintextExportBringInRoadTests.aReadOnlyRoadMovesNothing` RED on
+  `b923eabf6` `✘ … 2 issues` (the container's tree changed; the library no longer opened in the slot), green on
+  `6d24bd2f5`; the harness `✔ Test run with 304 tests in 50 suites passed`. The writing road's twin is ROUTED (F-U1b-7).
+- Piece 4 — the close: DONE (this commit) — the core and app lines as built, the counts, the Mac-suite list with its
+  red-on-old recipes, the walk notes, the PROVISIONALs, the findings and the machinery notes below.
+- No revert is in flight (every mutation and behavioural revert of this unit ran on a committed tree and was restored by
+  `git checkout --`, `cmp`-identical to a copy in this session's scratchpad `u1b-prerevert/`; no scratch worktree; the
+  tree is clean at the close).
+
+**THE CORE LINES, LINE BY LINE (for the Fable ladder — `git diff cd22a9b44 -- Sources/`; custody ⇒ Fable):**
+1. `Executor/Acts/KeyDoors.swift` — `KeyDoorProgram.typedPassphraseOpensOnlyTheReplacedLock(_:act:planKDF:files:floor:)`
+   (NEW, reads only): false unless the act is Change or Reset AND the plan names a descriptor; false when the typed text
+   opens a passphrase lock UNDER THE PLAN'S DESCRIPTOR in any of `files` (the act's own secret — the same text re-chosen
+   included); true when it opens a passphrase lock under an OLDER descriptor there (the lock the act replaces); false when
+   it opens neither (the checks judge it as before). The floor is validated per descriptor; a derive or open failure
+   counts as "does not open".
+2. `Executor/PlanRunner.swift` — `resume`: `secrets` becomes `var`; ONE new `if` after `derive`: when the plan's
+   `passphraseIsNew`, a passphrase was derived, and the typed text (`typed.newPassphrase ?? typed.passphrase`) answers true
+   over `[library.keyFile, library.memory?.keyFileMirror]` (the live key file and this Mac's sealed mirror — M-0c pinned
+   the mirror load-bearing), `secrets.passphrase = nil` and one log line; everything after it unchanged — so U1a's
+   `resumeCannotFinish` throws `ActRollback` at the vault or key-file step before any write (`drive`'s one rollback), and
+   a resume whose only remaining step is `memory` still finishes (the new lock landed). Untouched: every press; a resume
+   typing the NEW passphrase; the plan-level and vault checks themselves.
+3. `Executor/Acts/Copies.swift` — `ActContext.makeMineSwap(setAside: Bool = true)`: the default keeps the standing act
+   byte-for-byte (the outgoing key file computed and passed exactly as before); `false` calls `swapStaged(setAside:
+   false, asideKeyFile: nil)` — the step-aside half SKIPPED. NEW `EmptySlotMakeMineProgram` (T-5): steps `stage,
+   recordIntoStaged, custodyItem, appleKey, keyFile, newMemory, swap` + `MakeMineProgram.afterCommit`
+   (`forgetOtherLibraries, backup`); its `run` calls Make this my library's own step bodies (`makeMineStage`,
+   `makeMineRecord(kind: .standard)`, `newCustodyItem(kind: .standard)`, `makeMineMemory`, `forgetOtherLibraries`,
+   `freshBackup`), plus `appleKey` (this Mac's fresh Apple key, idempotent by id) and `keyFile`. NEW
+   `ActContext.emptySlotKeyFile(apple:)` — idempotent (a live file of the new key stands ⇒ adopted); else `KeyFile
+   .building(epoch: 1)` under `newLocks(passphrase: secrets.passphrase != nil, words: true, master: false, apple:)`. NEW
+   `public struct LandedCopy` (library, `mintedWords` — redacted from `description`, outcome). NEW `public func
+   ProtectionExecutor.makeThisMyLibraryInTheEmptySlot(copy:in:typed:)`: refuses `libraryAlreadyInSlot` when the slot is
+   occupied OR a live key file stands (before anything is minted); opens the copy by each TYPED road on its own
+   (`.withoutAPress`; `.quietRoad` ⇒ not counted) — words first, then passphrase; neither ⇒ `copyDoesNotOpen`; typed
+   words ⇒ `secrets.words`; typed passphrase ⇒ `freshPassphrase` (a fresh descriptor) + twelve words minted (`mintedWords`);
+   mints key, library ID, device ID, Apple key; `ActParameters(newKind: .standard, copyID:)` with `passphraseIsNew` when
+   a passphrase, the new IDs and the Apple key id; ONE plan sealed under the new key, its act `.makeMine` begun in the
+   new section; `drive`. No catch-and-clean: a failure before the swap leaves what a crash there leaves (P-VX309-U1b-4);
+   after it the registry's `MakeMineProgram` finishes from the plan (the same step names).
+4. `Operations/Operations+PlaintextExportImport.swift` (NEW; not custody — the import road): `PlaintextExportReading
+   .read(exportAt:)` on `LibraryClassifier.withStagedRead` (key nil); `plan(_:)` refuses `notAnExport` without
+   `grdb_migrations`/`container`, `schemaNotCurrent(newer:)` unless the applied migration set EQUALS this build's; notes
+   `kind='post'`, live, NOT a version (`archived_at = created_at`), `(created_at, id)` order, each through
+   `Queries.variorumDocumentText` → `VariorumDocument.parse` (`.empty` ⇒ the stub; any other parse failure ⇒
+   `unreadableNote(title:line:)`), titled by `DisplayTitle.note` as fallback; books `kind IN ('book','curated')`, live,
+   chapters and members `(position, id)` (members `status='member'` when the column exists, live posts only), a–z by
+   `VariorumDocumentFolder.orderedBefore`; pools via `Queries.exportBlocks(includeVariants: false)` (blank scraps dropped);
+   wings live by `(position, id)`. `Operations.importPlaintextExport(_:landed:)`: wings that hold content (a note, or a
+   book WITH members) minted by name (`createWing`); notes `importDocument(_:wingId:)`; books archived-first then live, an
+   empty one (no member note landed) named in `emptyBooks` and skipped, else `createReading(…, kind: .book, wingId:)` +
+   `createSection` per chapter + per member `addPostToReading` then `assignPostToSection` when its chapter landed — a
+   member op's refusal COUNTED (`membershipsLeftOut`), never thrown; `archiveReading` for an archived book; archived notes
+   `archiveContainer` after every membership; pools `createPool` + `importBlocks` per scrap (+ `archiveContainer`).
+   The first other refusal throws (what landed stands — the caller counts it). `landed:` reports the count even on a throw
+   (`defer`). No `Sync/`, schema, migration or dependency line anywhere in this diff; `lockstepVersion` stays 13.
+
+**THE APP LINES AS BUILT (for the ladder):** T-5 — `CopyDoorsRoads.landsInTheEmptySlot` (default false) + `makeMine` on
+`AppBootstrap.copyDoorsRoadsWithoutALibrary()` → `makeThisMyLibraryInTheEmptySlot(_:copySecrets:)` (only at
+`.libraryMissing` or a rule-27 `.roadLobby`; one landing at a time — `copyLandingRunning`; off the main actor:
+`ProtectionCopyDoors.makeMineInTheEmptySlot` — the preflight's reads (the copy catalogued; opens by what she TYPED, a
+quiet road refused; its schema current or behind), the restore hold set, `setAsideUnopenableLibraryFor` +
+`setAsideLiveKeyFileFor`, the core act, `ensureStoreIdentity(fresh: true)`; a refusal before the swap puts the hold
+back; past the swap `.made` with no key (the reopen finds it by its silent item)); then `beginOpening(unlockedKey:)` and
+the receipt once. `MakeMineModel(intoTheEmptySlot:)` asks only the copy's secret (no current pair, no quiet probe);
+`CopyDoorsSheet.MakeMineConfirm`'s T-5 arm. THE AVAILABILITY ARM (F-U1b-2) — `CopyDoorsModel.Phase.listing` +
+`beginListing()`; `LibraryOpenPresenter.openRestoreList(bootstrap:)` (new road only, no doors already up);
+`LibraryMissingView(restoreDoor:)` — `VariorumApp` passes it ONLY when `bootstrap.newRoad` (today's road: nil ⇒ the
+Finder reveal byte for byte); `RoadLockView(restoreDoor:copiesHome:)` (the new road's face); each renders the door only
+where `Backups/` or `Previous Libraries/` stands beside the store (P-2). T-8 — `PickedCopy.Verdict.plaintextExport`
+(`todaysWords`' `.plaintextExport` arm; `.plaintextLibrary` keeps `plaintextCopyNotYet`); `ProtectionCopyDoors.pick` →
+`PickOutcome.plaintextExport` (never filed); `CopyDoorsModel` — `.plaintextExport(URL)` phase where
+`roads.bringInPlaintextExport` exists (else the old refusal), `bringIn(_:)` (made ⇒ `.done`; refused ⇒ the sentence under
+the door), `bringInStepsALibraryAside`; `AppBootstrap.bringInPlaintextExport(_:)` (`.ready` with a writing session, the
+missing face, rule 27's lobby; the preflight `readPlaintextExport` BEFORE any teardown; with a library open
+`beginAct`, then the reopening seam's first half — `onWillLock`, `.opening`, the resident and per-open deferrals and the
+custody session dropped, the pool closed off the main actor; `landPlaintextExport` — the read-only refusal FIRST, then
+`setAsideLibraryWholeFor(carryingHold: true)` + `setAsideLiveKeyFileFor`, `LibraryRestoreHold.clear`, `ProtectionOpenRoad
+.create(setAsideLiveKeyFile: false)`, the "it holds …" log line, the headless import under `withDependencies`
+(`AppDatabase.onDisk` with the new key; database, uuid, date, RNG), the binding locked, the end's log line; nothing
+created ⇒ the old key's reopen; created ⇒ the receipt queued and `finish(.roadCreated(session, words))`).
+`ProtectionOpenRoad.setAsideLibraryWholeFor(_:carryingHold:)` is the old `setAsideUnopenableLibraryFor` body returning its
+folder and, with `carryingHold`, moving the hold marker into it; `setAsideUnopenableLibraryFor` calls it with `false` and
+logs the same line on the same condition (behaviour unchanged — `ProtectionOpenRoadPlantedTests`' rule-27 creation pins
+green in the harness).
+
+**COUNTS (the final tree — `6d24bd2f5` + this record):**
+- HEADLESS HARNESS (U1a's scratchpad `u1-harness`, re-pointed at this worktree; it symlinks U1b's three new planted suites too):
+  **`✔ Test run with 304 tests in 50 suites passed after 5.048 seconds.`** (U1a's 290/47 + 14/3: `EmptySlotLandingRoadTests`
+  4, `PreviousLibrariesArcTests` 5, `PlaintextExportBringInRoadTests` 5; `PickedCopyRoadTests` flipped in place).
+- CORE: the protection set (every `@Suite` type under `Tests/VariorumCoreTests/Protection` — 88 now, the filter re-derived
+  from the files) Debug **`✔ Test run with 369 tests in 88 suites passed after 5.300 seconds.`** (U1a's 358/86 + MB-1's 1
+  + 10/2: `KeyDoorOldPassphraseResumeTests` 5, `EmptySlotMakeMineTests` 5); Release (`swift test -c release`, the same
+  filter) **`✔ Test run with 345 tests in 84 suites passed after 3.919 seconds.`** (334/82 + 1 + 10/2); T-8's core suite
+  Release `✔ Test run with 3 tests in 1 suite passed`. THE FULL CORE SUITE, Debug (`swift test`): VariorumCoreTests
+  **`✔ Test run with 3349 tests in 437 suites passed after 203.879 seconds.`** (3336/434 + 13/3); the third target `✔ 40
+  tests in 6 suites`; VariorumMCPTests `✘ 383 tests in 71 suites … with 1 issue` — the ONE recorded VX-353 flake
+  (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, 19.4 s vs 15 s under the
+  parallel run); ALONE `✔ Test run with 3 tests in 1 suite passed`. No MCP or Queries line in this diff.
+- RED ON THE PRE-FIX TREES: piece 0 `✘ 4 tests … 15 issues` (`3180d56c7`); F-U1b-7's read-only arm `✘ … 2 issues`
+  (`b923eabf6`); every other new suite is NEW API or a NEW road — red by construction. MUTATIONS (each on a committed
+  tree, restored `cmp`-identical): M-0a..c, M-1a/b/d/e/f/g, M-2a, M-3a/d/e/f/g/i/j — every one red at its own pins (the
+  pieces' lines above); M-1c named, not run (unobservable over an empty slot).
+- `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx309
+  -skipPackageUpdates -onlyUsePackageVersionsFromResolvedFile build-for-testing` → **`** TEST BUILD SUCCEEDED **`** (no
+  warning in a line this unit wrote; the one warning in a touched file — `KeyDoors.swift:357`, `var parameters` never
+  mutated — is `9217cfb84`'s, 2026-10-14, untouched); the phone `-scheme VariorumMobile -destination 'generic/platform=iOS
+  Simulator' -configuration Debug … build` → **`** BUILD SUCCEEDED **`**; **the Release check `-configuration Release
+  build` → `** BUILD SUCCEEDED **`**. All three on the final code tree (`6d24bd2f5`).
+- Release behaviour: unchanged by construction — every door here is reached only from the new road (the copy doors'
+  roads exist only there; `copyDoorsRoadsWithoutALibrary`, `bringInPlaintextExport` and `makeThisMyLibraryInTheEmptySlot`
+  guard `newRoad`; `LibraryMissingView`'s `restoreDoor` is nil on today's road; `RoadLockView` is the new road's face);
+  the core lines are the new road's executor's and a new import function nothing on today's road calls. The binary is not
+  byte-identical (rule 24's precedent).
+
+**THE MAC SUITES THE ORCHESTRATOR RUNS UNDER THE STAGE (from `App/Variorum/`; PENDING):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx309 test \
+  -only-testing:VariorumTests/EmptySlotMakeMineRouteTests \
+  -only-testing:VariorumTests/EmptySlotDoorsSurfaceTests \
+  -only-testing:VariorumTests/PlaintextExportBringInRouteTests \
+  -only-testing:VariorumTests/EmptySlotLandingRoadTests \
+  -only-testing:VariorumTests/PreviousLibrariesArcTests \
+  -only-testing:VariorumTests/PlaintextExportBringInRoadTests \
+  -only-testing:VariorumTests/PickedCopyRoadTests \
+  -only-testing:VariorumTests/CopyDoorsModelTests \
+  -only-testing:VariorumTests/CopyDoorsQuietProbeTests \
+  -only-testing:VariorumTests/CopyDoorsPickRefreshTests \
+  -only-testing:VariorumTests/LookInsideCopyDoorTests \
+  -only-testing:VariorumTests/LookInsideRoadTests \
+  -only-testing:VariorumTests/MakeMineRoadTests \
+  -only-testing:VariorumTests/MakeMineRouteTests \
+  -only-testing:VariorumTests/ProtectionBackupHookTests \
+  -only-testing:VariorumTests/ProtectionOpenRoadPlantedTests \
+  -only-testing:VariorumTests/ProtectionRule27FaceTests \
+  -only-testing:VariorumTests/NoKeyFileDoorTests \
+  -only-testing:VariorumTests/RoadLockViewNamesPinTests \
+  -only-testing:VariorumTests/RoadLockRouteTests \
+  -only-testing:VariorumTests/ProtectionRoadRouteTests \
+  -only-testing:VariorumTests/Phase13pLobbyTests \
+  -only-testing:VariorumTests/ProtectionFacesRouteTests \
+  -only-testing:VariorumTests/ProtectionWordsPlanTests \
+  -only-testing:VariorumTests/ProtectionWordsVX307Tests \
+  -only-testing:VariorumTests/RoadRestoreHoldGateTests \
+  -only-testing:VariorumTests/ProtectionRestoreReceiptTests \
+  -only-testing:VariorumTests/SettingsLockCloseTests \
+  -only-testing:VariorumTests/WordsBandTests \
+  -only-testing:VariorumTests/LibraryPortabilityDoorTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests \
+  -only-testing:VariorumTests/TravellingDotsIndicatorTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/StatusSeamVocabularyTests
+```
+The first seven are U1b's (2 + 2 + 2 + 4 + 5 + 5 + 3 = **23 tests**; the first three Mac-only — the two route suites run
+`AppBootstrap` on a THROWAWAY keychain scope and a temp slot, `RoadWorld`'s, purged at the end; the surface pins read the
+app's source files; the other four were headless-green). Then the suites over the files this unit touched: the doors'
+brain and its pick (`CopyDoorsModel` — its phases grew; `PickedCopy`), Look inside and Make this my library on both
+roads, the backup hook (`ProtectionCopyDoors`' other caller), `PlantedRoad`'s home suite (rule 27's creation calls the
+refactored set-aside), rule 27's face and its no-key-file doors, `RoadLockView`'s and the missing face's hosts, the lobby
+and the route, the words plans, the restore hold's gate and receipt, the presenter's host, the band (the creation's
+words idiom T-8 lands on), the portability door, and the source scans over the edited files. **THE RED-ON-OLD BY
+BEHAVIOURAL REVERT for the three Mac-only suites (the orchestrator's, from a committed tree, restored by `git checkout
+--`):** (R-a) in `AppBootstrap.copyDoorsRoadsWithoutALibrary`, `makeMine:` back to `nil` → `EmptySlotMakeMineRouteTests
+.theMissingFaceLandsACopyAsANewLibraryAndOpensReadyHeld` RED (`#require(roads.makeMine)`); (R-b) in `VariorumApp`,
+`LibraryMissingView`'s `restoreDoor:` argument dropped → `EmptySlotDoorsSurfaceTests
+.theFacesWithNoLibraryOpenTakeTheDoorsRestoreOnTheNewRoadOnly` RED; (R-c) in `AppBootstrap.bringInPlaintextExport`,
+the `receiptsForNextRoadOpen.append(…)` line dropped → `PlaintextExportBringInRouteTests
+.fromAnOpenLibraryTheExportLandsAsANewLibraryReadyNeverHeld` RED (the receipt said 0 times).
+
+**WALK NOTES FOR THE ACCEPTANCE SPINE (the orchestrator's walk — the DEV store only, under a held claim, both voices
+wherever a face renders; the log is `log show --predicate 'subsystem == "io.lduarte.Variorum" AND category == "protection"'`'s `road:` lines):**
+- STAGE 9 + THE RESTORE DRILL (the walk's heart — Look inside and Make this my library, VX-306's door, unchanged here):
+  with a backup pair beside the library, Data Safety's Restore from Backup rows → a row's *Look inside…* (its own words
+  or its quiet road) → read-only, nothing written (the container's `ls -lR` before/after; no new keychain item) →
+  *Make this my library…* (the current pair) → a NEW library, held (the banner — never press Resume), the old one whole in
+  `Previous Libraries/<stamp>/`. PIECE 2's arc on top: the old library LISTED as *Previous library* dated today (rule
+  19), *Look inside…* opening it by its own quiet road, nothing written.
+- STAGE 9's EMPTY-SLOT ARM (T-5 — new): quit; MOVE (never delete) the slot's `Variorum.sqlite` and its sidecars into a
+  scratch folder outside the container; relaunch → the missing face → *Restore from a Backup…* opens the doors' LISTING
+  (lead "These are the copies of a library on this Mac. …") → a backup row → *Make this my library…* → T-5's confirm
+  asks only the copy's secret (its twelve words — the dev library's own, `~/.variorum/dev-castle.env`, sourced, never
+  written down) → lands: the log's `road: a copy landed in the empty slot — library <8> key <fp8>; nothing stepped
+  aside; held`, the missing library's key file in `Previous Libraries/<stamp>/`, the hold banner, the receipt "This copy
+  is your library now." once. A wrong word refuses with nothing moved. With the copy's PASSPHRASE instead, the card above
+  the quick entry offers fresh words at the first look (the passphrase stays the dev file's; the WORDS change — update
+  `dev-castle.env` in the same window if that arm runs). POSTURE AFTER: the typed-words arm keeps the dev file's values
+  valid (a new library ID under the same words; Standard) — the moved-aside original file goes back to the trash only
+  at the walker's call.
+- STAGE 10 (someone's library): pick a THROWAWAY library's pair through *Open Library…* → filed → *Look inside…* with ITS
+  secrets → *Make this my library…* (the standing act — the current posture, the current pair; "you never leave Castle
+  by opening something"). Unchanged by this unit except the listing's availability with no library open.
+- STAGE 13 (a crash): PINS ONLY — not walkable by timing; `EmptySlotMakeMineTests`' crash loop (every write of T-5, the
+  slot empty or the new library, never a third state) and `KeyDoorOldPassphraseResumeTests` (F-U1a-1's three shapes roll
+  back) carry it.
+- STAGE 14 (wrong on disk — rule 27's face): from rule 27's face (VX-306 U2's walk recipe), *Restore from Backup…* is now
+  the doors' listing (where `Backups/` or `Previous Libraries/` stands) — its row's *Make this my library…* lands T-5
+  with the unopenable library moved WHOLE into `Previous Libraries/` first, still opening under its own key there.
+- T-8 (a plaintext export in): the export to pick — Data Safety's *Export an unencrypted copy of your library.* where it
+  renders on the new road (`DataSafetyPane.plaintextExportSection` needs today's `ProtectionController`; the executor's
+  own `plaintextExport` act has no app door — if the section does not render, a throwaway export made headless as
+  `ExportPlant.export` makes the pins'), saved OUTSIDE the container → *Open Library…* picks the `.sqlite` → the doors
+  NAME it (lead "Bring this plain-text copy in as a new library? …", with a library open "Your current library steps aside
+  whole into Previous Libraries.") → *Bring it in* → the log's `road: bringing in a plaintext export — it holds …` then
+  `road: a plaintext export brought in as a new library — …` → a new library opens Standard, NOT held (no banner), the
+  receipt "A new library holds the plain-text copy's writing: N books · M notes · K snippet groups." (the quiet receipt
+  line), the band's card offering fresh words. CHECK against the source library: every book a–z with its chapters and its
+  member order; a note in two books membered in both; archived books under Archived, archived notes archived; versions
+  absent; snippet groups with their scraps; a non-Home wing minted by name with its own tags; an empty book named in the
+  receipt; book settings, stars, shelves, commits and comments NOT there (the lead says so). The old library whole in
+  `Previous Libraries/<stamp>/` WITH its hold marker. POSTURE AFTER — T-8 CHANGES THE DEV LIBRARY'S IDENTITY AND ITS
+  WORDS (the creation's, dropped unseen): run it LAST; the walker restores the dev store before releasing the claim (the
+  walk-restores-posture rule) — UNVERIFIED road, the walker's call: quit, move `Previous Libraries/<stamp>/`'s library,
+  sidecars and key file back into the slot and live place (the new library's into a scratch folder), relaunch → the
+  original opens by its own silent item with stage 14's "a different library" notice once — or update `dev-castle.env`
+  to the new library's words in the same window.
+
+**PROVISIONALs (each built as its option (a); for the orchestrator to bundle under QUESTIONS at the closeout — the shared
+ledger is the merging session's):**
+- **P-VX309-U1b-0 — F-U1a-1's arm** (the U1a arbitration's ruled shape): (a) BUILT — at a resume of Change or Reset, a
+  typed passphrase that opens only the lock being replaced is dropped, so the act rolls back before any write; (b) the
+  lobby asks for the passphrase chosen at the press while a Change is in flight (a face); (c) accept, and say it as rolled
+  back in Diagnostics.
+- **P-VX309-U1b-1 — at T-5 what stands in the slot steps aside whole first** (rule 27's library no key file opens; a
+  missing library's key file still in the live place): (a) BUILT — exactly the faces' *Start a New Library* pre-steps,
+  never written over; (b) refuse T-5 while anything stands (Start a New Library first); (c) the core act's own
+  step-aside half run over what stands.
+- **P-VX309-U1b-2 — T-5's posture is STANDARD** (an empty slot has no posture "now"): (a) BUILT — Castle is entered
+  deliberately after; (b) the copy's own posture (a Castle copy lands in Castle — both its secrets typed); (c) ask at
+  the door.
+- **P-VX309-U1b-3 — every new sentence** (T-5's lead and receipt; the listing's lead and empty line; T-8's lead,
+  button, working line, the two refusals, the receipt): (a) BUILT as drafted in `ProtectionWords`; U2's words pass
+  rewrites against her words.
+- **P-VX309-U1b-4 — T-5's pre-swap debris:** a landing that refuses or crashes before the swap leaves its own writes (the
+  plan, the staged file, the new key's silent item, Apple key and memory item — each naming a library that never landed;
+  what stepped aside stays aside): (a) BUILT — a refusal leaves exactly what a crash there leaves (the hold put back);
+  (b) a refusal cleans its own writes (a refusal and a crash then differ); (c) the next open's repairs sweep them.
+- **P-VX309-U1b-5 — the availability arm (F-U1b-2):** on the new road the missing face's and rule 27's *Restore from
+  Backup…* open the doors' listing (rule 17: "The app's Restore from Backup is this door"): (a) BUILT; (b) keep the
+  Finder reveal and add a separate *Copies on this Mac…* door; (c) the listing only when a Previous Library exists.
+- **P-VX309-U1b-6 — T-8's wings:** (a) BUILT — the ruling's arm (b): each export wing holding content minted by name, its
+  notes and books landing in it, tags adopting per wing (the import ops' own `wingId` parameters ARE the seam); (b) the
+  ruling's fallback — everything into Home, the flattening said in the confirm.
+- **P-VX309-U1b-7 — T-8 reads only THIS build's export:** (a) BUILT — an earlier or a later build's export refuses with
+  words, nothing written; (b) migrate a staged copy first (needs 13x's reconciliation step — the export's outbox triggers
+  name the dropped local-only tables); (c) a version-tolerant projection reading older schemas as they are.
+- **P-VX309-U1b-8 — T-8's crash window** (ruled PROVISIONAL): a crash between the creation and the import's end leaves a
+  new library holding part of the export (the export untouched, re-importable); (a) BUILT — the log says what the export
+  holds before the import and what landed at its end, the receipt names what landed and says when it stopped part of the
+  way; (b) import into a staged store and swap it in only when whole; (c) a resumable import plan.
+- **P-VX309-U1b-9 — T-8 clears any restore hold still standing** (an open library's goes aside WITH it; a missing
+  library's stray marker is removed): (a) BUILT — the ruling's "no hold"; (b) leave a missing library's stray marker (the
+  new library would open held).
+- **P-VX309-U1b-10 — a plain-text FULL library** (a store from before 13p's encryption) keeps its pick refusal: (a) BUILT
+  — rule 26 (a copy from before this design is not handled); (b) bring it in as T-8 does an export (it would meet the same
+  schema gate).
+
+**FINDINGS AND HAND-FORWARDS (routed, not fixed here unless said):**
+- **F-U1b-1 (Castle & sync — a RULE question, Confirmed by probe; the orchestrator's to arbitrate, likely her call):**
+  VX-305 U4's deferral (1) at its heart. A library (B) made from library A's backup while A stepped aside: when B ENTERS
+  CASTLE, rule 11 deletes B's own Apple and on-device items — A's (a Previous Library on this Mac, holding her older
+  writing) survive, and A opens QUIETLY through Look inside. A TRANSIENT probe (written, run, removed in one command —
+  never committed): `aSilentItemSurvives=true aAppleKeySurvives=true aPreviousLibraryQuietLook=opened`. Rule 17 makes A
+  another library (its quiet roads its own); rule 25's exceptions name two older locks, not a previous library's roads.
+  Options: (a) as today — a previous library is another library; its quiet roads go when she deletes it (rule 19);
+  (b) entering Castle also sweeps every Previous Library's quiet roads on this Mac (they hold her writing; they then open
+  only by their own typed secrets); (c) the Castle confirm says it (a rule-25-style line).
+- **F-U1b-2 (the availability gap — FIXED in piece 2, P-VX309-U1b-5):** with no library open nothing listed this Mac's
+  copies; the faces' Restore from Backup now open the listing.
+- **F-U1b-3 (Tests & tooling, Low — a ticket at closeout):** the scenario world's generator still skips moves that reopen a
+  Previous Library (no road existed); T-5 and the arc now give it one — the skip can be lifted and the generator taught
+  the empty-slot landing.
+- **F-U1b-4 (Debt, Low — the ruling's routed finding):** `Executor/Acts/Copies.swift` line 16's header — "A PLAINTEXT EXPORT
+  carries its library ID." — is stale: `StorePlaintextExport` drops the local-only family, `protection_record` with it, so
+  the export carries no library ID. A comment fix (the ladder's or a ticket).
+- **F-U1b-5 (VX-444 hand-forward — U1c's rider):** T-5 with the copy's own TYPED WORDS lands a library whose words she
+  just typed — the words-recorded ledger (`variorum.calmAsks.words.<libraryID>.*`) should count them recorded for the new
+  library's id, or the card re-offers words she knows (VX-444's class exactly). With the copy's passphrase (fresh words,
+  dropped unseen) and at T-8 (the creation's words), the card offering fresh words is right as it stands.
+- **F-U1b-6 (MOBILE PARITY):** nothing mobile-visible — the phone has no copy doors, no missing face and no T-8; the shared
+  files compile for iOS (the phone build green).
+- **F-U1b-7 (Bug, Castle & sync / data safety — the READ-ONLY ARM FIXED here, the WRITING-ROAD ARM routed):** T-8 sets
+  what stands in the slot aside BEFORE the creation. Fixed: on a read-only road the creation refuses, so the function now
+  refuses first (pin above). Routed (Suspected — traced, not probed: the planted leaves carry no write-failure seam): on a
+  WRITING road a creation that refuses after the step-aside (a keychain or key-file write failing) leaves the slot EMPTY
+  with the library that was open whole in `Previous Libraries/`; the bootstrap's reopen with the old key then lands on the
+  missing face, whose Restore list shows it — but returning it there is Make this my library, a NEW library (rule 17), not
+  the same one (a synced library would lose its account linkage that way). A crash in that window leaves the same shape.
+  Options: (a) as built; (b) a refused creation puts the set-aside folder back (the library, its sidecars, its key file,
+  its hold) before returning; (c) the step-aside and the creation as one planned executor act (rule 20 for the crash too).
+- **F-U1b-8 (Castle & sync — a reading against rule 17, for the orchestrator):** T-8 from an open CASTLE library lands the
+  ruled road's STANDARD library (the creation) with the Castle library aside — while rule 17's last sentence reads "You
+  never leave Castle by opening something" (and stage 10: "you never leave Castle by opening something"). The lead says
+  "a new library in Standard" plainly. Options: (a) as ruled, the confirm naming it (U2's words); (b) T-8 refuses while
+  the open library is in Castle; (c) the new library lands in the current posture (Castle — the current pair typed at the
+  door, as Make this my library asks it).
+- **F-U1b-9 (Tests & tooling — record only):** the full core suite's one wall-clock red under the parallel run (VX-353's
+  MCP bound), green alone — an existing class, no line of this diff.
+
+**Notes:** no machinery deaths; no Sonnet lookup; no subagents; no scratch worktree. The harness is U1a's (this session's
+scratchpad `u1-harness`), its test target given the author's GRDB fork as a direct dependency (resolved offline from the
+existing pin and checkout; `Package.swift.u1a` keeps the pre-edit manifest) — scratch only, no repo change. One TRANSIENT
+probe (F-U1b-1) was created, run and removed in one command, never committed. One scripted CODE edit (Python) ate a
+closing quote in `ProtectionWords.swift` — caught by the build before its commit and fixed by hand. Every pin set committed before its fix (`3180d56c7`, `b923eabf6`) or red by construction (new API, new
+roads); every mutation named in the record before it ran. Commits: `17920a573` (record) · `2d247bacf` (the orchestrator's
+ruling) · `3180d56c7` (0 pins first) · `22856d3dd` (0) · `41a380500` (record) · `ee7510b66` (record) · `59e04579e` (1 core) ·
+`216fda519` (record) · `f18824efc` (1 app) · `68253bdc2` (record) · `53674fe03` (2) · `f28e44da4` (record) · `1e9f4abb2` (3
+core) · `10d9bb6d5` (3 app) · `74f3f4132` (record) · `9c7785a34` (3 log line) · `b923eabf6` (F-U1b-7 pin first) ·
+`6d24bd2f5` (F-U1b-7 read-only arm) · the close commit.
