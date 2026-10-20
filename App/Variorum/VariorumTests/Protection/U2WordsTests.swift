@@ -78,14 +78,14 @@ struct U2WordsTests {
     /// Her way-back sentence, said where an older library is among what goes — and never where none is.
     @Test func theDeleteConfirmSaysHerWayBackSentenceOnlyOverAnOlderLibrary() {
         let two = ProtectionWords.deleteCopiesLead(Self.choice(backups: 1, previous: 2, staying: 1), libraryOpen: true)
-        #expect(two.contains(Self.herWayBack), two)
+        #expect(two.contains(Self.herWayBack), "\(two)")
         #expect(two.contains("One copy another Mac made stays.") && two.hasSuffix("Your library isn't touched."))
         let one = ProtectionWords.deleteCopiesLead(Self.choice(backups: 0, previous: 1), libraryOpen: false)
         #expect(one.contains("That older library is your way back to what you had before \u{2014} delete it only if you "
-            + "won't want it back."), one)
+            + "won't want it back."), "\(one)")
         #expect(!one.contains("Your library"))
         let none = ProtectionWords.deleteCopiesLead(Self.choice(backups: 4, previous: 0), libraryOpen: true)
-        #expect(!none.contains("way back"), none)
+        #expect(!none.contains("way back"), "\(none)")
         for lead in [two, one, none] { #expect(Self.shouts(lead).isEmpty && !lead.lowercased().contains("set-aside")) }
     }
 }
