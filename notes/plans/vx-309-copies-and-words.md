@@ -522,6 +522,22 @@ The crash window (a new library holding part of the export; the export untouched
 PROVISIONAL, not engineered around — with one requirement: the import's END writes a receipt/log line naming what
 landed (N books · M notes · K snippets), so a partial landing is visible against it.
 
+## 6-L. THE LADDER (closed 2026-10-20 ~03:00 MDT — the records `notes/plans/vx-309-ladder-round-1.md` ·
+`-round-1-fixes.md` · `-round-2.md`)
+
+**Round 1** (a fresh `fable-reviewer`, REVIEW_PROMPT verbatim, the whole phase diff, custody ⇒ Fable): **0 BLOCKER ·
+0 MAJOR · 2 MINOR · 4 NIT**, with a sixteen-point clean bill over the phase's riskiest lines and the reviewer's own
+red-on-old reproduction of VX-456's core pin. **The fix leg** (a fresh Opus implementer, the cross-model flow): six
+agreed, zero disputed; F-R1 built as the honest-words arm with the delete fence UNWIDENED (the option question is her
+bundle's), F-R2's clause lands with the guide's paragraph following the lead's list, F-R3/F-R4/F-R6 fixed, F-R5
+record-only; every pin red-on-old or flipped deliberately, every mutation red and restored. **The fix-leg Mac delta**
+(the orchestrator, stage claim `vx-309-fixleg-mac`): 97/16 green, F-R4's revert red-then-restored. **Round 2** (a
+fresh `fable-reviewer`): **ALL SIX CONFIRMED CLOSED, 0 reopened, 0 new** — the reviewer reproduced the fix leg's
+red-on-old itself in a scratch harness copy (10 issues, the claimed pins exactly); one routed words observation
+(OBS-R2-1 — `copiesElsewhereLine`'s clauses don't describe a container copy whose key file doesn't read; the
+P-VX309-R1-1 bundle sitting's). **No round 3 earned.** Main's VX-458 (Tools/notes only) merged in after round 2
+(`cb806dae0`, the coordinator's no-re-test note); headless build green on the merged tree.
+
 ## 7. THE WALK PLAN (the orchestrator's, ONE stage window after the ladder closes; drafted at the U2 close from the
 four unit records' walk notes — the §6 notes carry each row's detail; this is the ORDER and the posture rails)
 
