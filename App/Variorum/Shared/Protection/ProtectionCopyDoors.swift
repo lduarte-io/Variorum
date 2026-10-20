@@ -402,6 +402,11 @@ nonisolated enum ProtectionCopyDoors {
     static func landPlaintextExport(_ ctx: RoadContext, plan: PlaintextExportPlan) async -> PlaintextLanding {
         let places = ctx.system.places
         var result = PlaintextLanding()
+        // A read-only road (a hosted test run's) never creates — so nothing steps aside for a creation that cannot land.
+        guard ctx.writes else {
+            result.refusal = .failed
+            return result
+        }
         do {
             try ProtectionOpenRoad.setAsideLibraryWholeFor(places, carryingHold: true)
             try ProtectionOpenRoad.setAsideLiveKeyFileFor(places)
