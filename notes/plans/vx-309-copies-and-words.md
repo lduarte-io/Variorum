@@ -1406,8 +1406,11 @@ ledger is the merging session's):**
 - **P-VX309-U1b-0..10: each stands as built** pending her bundle. Two flagged beside their rows: U1b-4 (pre-swap
   keychain debris for a library that never landed accumulates across failed presses — the ladder may weigh a sweep
   arm) and U1b-2 (T-5's Standard posture sits beside F-U1b-8's posture question — one bundle row should carry both).
-- **The walk:** ONE phase walk at the end (after U1c and U2), the VX-308 shape; U1b's walk notes fold into it — T-8's
-  dev-identity-changing row runs LAST with the posture-restore road agreed with the coordinator in that window.
+- **The walk:** ONE phase walk at the end (after U1c and U2), the VX-308 shape; U1b's walk notes fold into it — and
+  T-8's row runs THE COORDINATOR'S WAY (its 20:38 MDT heads-up, adopted): on a THROWAWAY library seated in the dev
+  slot, with A set aside whole first (cmp-verified, the hold marker with it) and restored whole afterwards — A's
+  identity and words NEVER change, `dev-castle.env` stays true, term 4 untouched. The implementer's
+  restore-from-Previous-Libraries road is superseded for the walk.
 
 **THE U1b MAC BATCH (the orchestrator, under the stage; result appended when run):** *(pending the coordinator's GO)*
 
