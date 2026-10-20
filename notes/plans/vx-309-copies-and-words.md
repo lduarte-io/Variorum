@@ -1323,6 +1323,31 @@ ledger is the merging session's):**
 - **F-U1b-9 (Tests & tooling — record only):** the full core suite's one wall-clock red under the parallel run (VX-353's
   MCP bound), green alone — an existing class, no line of this diff.
 
+**U1b ARBITRATION (the orchestrator, 2026-10-19 — repo-first before the Mac batch and U1c):**
+- **F-U1b-1** (Castle entry leaves a Previous Library's quiet roads standing — her older writing still opens quietly
+  through Look inside): **HER BUNDLE, a HEADLINE item** — any arm is a CastleRules amendment (rule 9's promise vs rule
+  17's "another library"), author-only. Recorded with the probe's facts; option (b) (the entry also sweeps Previous
+  Libraries' quiet roads on this Mac — the library-ID stamps make it precise) is the spirit-of-rule-9 arm, (a) is the
+  letter-of-rule-17 arm, (c) the honest-line arm; NO BUILD this phase without her word. A ticket at closeout carries
+  it (Improvement, Confirmed, Castle & sync, Needs Lillian).
+- **F-U1b-7's writing-road arm** (a creation refusing after T-8's step-aside leaves the slot empty, the old library
+  whole in Previous Libraries): a TICKET at closeout (Bug, Suspected, Castle & sync, Medium) naming option (b) (a
+  refused creation puts the set-aside back) as the likely fix — no pin can go red today (the planted leaves carry no
+  write-failure seam), so building it would break the hallucination guard; the read-only arm is FIXED and pinned here.
+- **F-U1b-8** (T-8 from an open Castle library lands a Standard library — read against rule 17's last sentence):
+  **HER BUNDLE, a HEADLINE item** beside F-U1b-1 — stands as ruled meanwhile ((a): the lead says "a new library in
+  Standard" plainly); (b) refuse-in-Castle and (c) land-in-Castle-with-the-pair-typed recorded as her options.
+- **F-U1b-3** → a ticket (Debt, Test-only, Tests & tooling, Low). **F-U1b-4** → the ladder's NIT or the closeout's
+  comment fix. **F-U1b-5** → FOLDED into U1c's brief (the VX-444 rider: T-5 with typed words counts them recorded for
+  the new library's id). **F-U1b-9** → record only.
+- **P-VX309-U1b-0..10: each stands as built** pending her bundle. Two flagged beside their rows: U1b-4 (pre-swap
+  keychain debris for a library that never landed accumulates across failed presses — the ladder may weigh a sweep
+  arm) and U1b-2 (T-5's Standard posture sits beside F-U1b-8's posture question — one bundle row should carry both).
+- **The walk:** ONE phase walk at the end (after U1c and U2), the VX-308 shape; U1b's walk notes fold into it — T-8's
+  dev-identity-changing row runs LAST with the posture-restore road agreed with the coordinator in that window.
+
+**THE U1b MAC BATCH (the orchestrator, under the stage; result appended when run):** *(pending the coordinator's GO)*
+
 **Notes:** no machinery deaths; no Sonnet lookup; no subagents; no scratch worktree. The harness is U1a's (this session's
 scratchpad `u1-harness`), its test target given the author's GRDB fork as a direct dependency (resolved offline from the
 existing pin and checkout; `Package.swift.u1a` keeps the pre-edit manifest) — scratch only, no repo change. One TRANSIENT
