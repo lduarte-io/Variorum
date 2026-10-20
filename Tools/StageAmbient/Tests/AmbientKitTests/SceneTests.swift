@@ -214,3 +214,25 @@ import Testing
         #expect(worst < 0.5, "a pixel was lit in \(Int(worst * 100))% of samples")
     }
 }
+
+@Suite struct WaterTests {
+    /// The caustic web is the edges of a cell pattern, found by searching the 3×3 cells around each pixel.
+    /// That search must find the true two nearest points however far the lattice has drifted (a search
+    /// that looked at the wrong cells lit whole blocks after a minute or two).
+    @Test(arguments: [0.0, 40, 120, 600, 3600])
+    func theCellSearchFindsTheTrueNearestPoints(at t: Double) {
+        let unit = 373.0 / 280
+        let hw = 289, hh = 188
+        let points = CellPoints(width: hw, height: hh, time: t, unit: unit, seed: 7)
+        var misses = 0, total = 0
+        for y in stride(from: 0, to: hh, by: 3) {
+            for x in stride(from: 0, to: hw, by: 3) {
+                let a = points.nearestTwo(Double(x), Double(y))
+                let b = points.nearestTwoExhaustive(Double(x), Double(y))
+                total += 1
+                if abs(a.0 - b.0) > 1e-9 || abs(a.1 - b.1) > 1e-9 { misses += 1 }
+            }
+        }
+        #expect(misses == 0, "\(misses) of \(total) pixels found the wrong nearest points at \(t) s")
+    }
+}

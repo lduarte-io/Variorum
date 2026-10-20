@@ -134,7 +134,7 @@ public final class KoiPond: AmbientScene {
             }
         case .dart, .pause: break
         case .cruise, .drift:
-            k.targetDepth = 0.08 + 0.62 * pow(Noise.smooth(time * 0.035 + k.noiseOffset, seed: k.seed &+ 9), 1.3)
+            k.targetDepth = 0.05 + 0.62 * pow(Noise.smooth(time * 0.035 + k.noiseOffset, seed: k.seed &+ 9), 1.6)
         }
         if k.interestLeaf != nil { k.targetDepth = 0.04 }
         k.depth += (k.targetDepth - k.depth) * approach(dt, k.mode == .rise ? 1.6 : 3.0)
@@ -155,7 +155,7 @@ public final class KoiPond: AmbientScene {
             }
         }
         let look = head + fwd * (0.7 * L + k.speed * 0.8)
-        let margin = 0.55 * L
+        let margin = 0.42 * L
         var edge = Vec2.zero
         if look.x < margin { edge.x += (margin - look.x) / margin }
         if look.x > bounds.x - margin { edge.x -= (look.x - (bounds.x - margin)) / margin }

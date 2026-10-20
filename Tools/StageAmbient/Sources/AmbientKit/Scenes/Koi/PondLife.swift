@@ -64,40 +64,15 @@ final class Water {
         fieldTime = t
         let hw = (w + 1) / 2 + 1, hh = (h + 1) / 2 + 1
         if half.count != hw * hh { half = [Float](repeating: 0, count: hw * hh) }
-        let cell = 13 * unit // half-res pixels per cell (≈ 26 design pixels)
-        let drift = Vec2(t * 0.35 * unit, t * 0.12 * unit)
-        let cols = Int(Double(hw) / cell) + 3, rows = Int(Double(hh) / cell) + 3
-        let baseX = Int((drift.x / cell).rounded(.down)), baseY = Int((drift.y / cell).rounded(.down))
-        // Feature points for every cell in view (plus a margin), each circling slowly on its own phase.
-        var px = [Double](repeating: 0, count: cols * rows), py = px
-        for r in 0..<rows {
-            for c in 0..<cols {
-                let gx = c - 1 - baseX, gy = r - 1 - baseY
-                let h1 = Noise.hash(gx, gy, seed), h2 = Noise.hash(gx, gy, seed &+ 1)
-                let h3 = Noise.hash(gx, gy, seed &+ 2)
-                let wob = 0.3
-                let jx = 0.5 + 0.22 * (h1 * 2 - 1) + wob * sin(t * (0.12 + 0.12 * h3) + h1 * 6.28)
-                let jy = 0.5 + 0.22 * (h2 * 2 - 1) + wob * cos(t * (0.1 + 0.12 * h1) + h2 * 6.28)
-                px[r * cols + c] = (Double(gx) + jx) * cell - drift.x
-                py[r * cols + c] = (Double(gy) + jy) * cell - drift.y
-            }
-        }
+        let points = CellPoints(width: hw, height: hh, time: t, unit: unit, seed: seed)
+        let cell = points.cell
         let kp = 0.06 / unit
         let op = Vec2(t * 0.2, -t * 0.12)
         for y in 0..<hh {
             let fy = Double(y)
-            let r0 = Int(((fy + drift.y) / cell).rounded(.down)) + 1 - baseY
             for x in 0..<hw {
                 let fx = Double(x)
-                let c0 = Int(((fx + drift.x) / cell).rounded(.down)) + 1 - baseX
-                var f1 = Double.greatestFiniteMagnitude, f2 = f1
-                for r in max(0, r0 - 1)...min(rows - 1, r0 + 1) {
-                    for c in max(0, c0 - 1)...min(cols - 1, c0 + 1) {
-                        let dx = px[r * cols + c] - fx, dy = py[r * cols + c] - fy
-                        let d = dx * dx + dy * dy
-                        if d < f1 { f2 = f1; f1 = d } else if d < f2 { f2 = d }
-                    }
-                }
+                let (f1, f2) = points.nearestTwo(fx, fy)
                 let edge = f2.squareRoot() - f1.squareRoot()
                 let e = 1 - edge / (0.16 * cell)
                 var v: Float = 0
@@ -119,6 +94,69 @@ final class Water {
                 field[y * w + x] = top + (bottom - top) * ty
             }
         }
+    }
+}
+
+/// The caustics' feature points: one per cell, jittered and slowly circling, the whole lattice drifting.
+/// A point never leaves its own cell, so the two nearest points to any pixel lie in the 3×3 cells around
+/// it.
+struct CellPoints {
+    let cell: Double
+    let cols: Int
+    let rows: Int
+    let baseX: Int
+    let baseY: Int
+    let drift: Vec2
+    private(set) var px: [Double]
+    private(set) var py: [Double]
+
+    init(width hw: Int, height hh: Int, time t: Double, unit: Double, seed: UInt64) {
+        cell = 13 * unit // half-res pixels per cell (≈ 26 design pixels)
+        drift = Vec2(t * 0.35 * unit, t * 0.12 * unit)
+        cols = Int(Double(hw) / cell) + 3
+        rows = Int(Double(hh) / cell) + 3
+        baseX = Int((drift.x / cell).rounded(.down))
+        baseY = Int((drift.y / cell).rounded(.down))
+        px = [Double](repeating: 0, count: cols * rows)
+        py = px
+        for r in 0..<rows {
+            for c in 0..<cols {
+                let gx = c - 1 + baseX, gy = r - 1 + baseY
+                let h1 = Noise.hash(gx, gy, seed), h2 = Noise.hash(gx, gy, seed &+ 1)
+                let h3 = Noise.hash(gx, gy, seed &+ 2)
+                // Jitter + wobble stay inside [0.07, 0.93] of the cell.
+                let jx = 0.5 + 0.18 * (h1 * 2 - 1) + 0.25 * sin(t * (0.12 + 0.12 * h3) + h1 * 6.28)
+                let jy = 0.5 + 0.18 * (h2 * 2 - 1) + 0.25 * cos(t * (0.1 + 0.12 * h1) + h2 * 6.28)
+                px[r * cols + c] = (Double(gx) + jx) * cell - drift.x
+                py[r * cols + c] = (Double(gy) + jy) * cell - drift.y
+            }
+        }
+    }
+
+    /// The two smallest squared distances from a half-res pixel to the points of the 3×3 cells around it.
+    func nearestTwo(_ fx: Double, _ fy: Double) -> (Double, Double) {
+        let r0 = Int(((fy + drift.y) / cell).rounded(.down)) + 1 - baseY
+        let c0 = Int(((fx + drift.x) / cell).rounded(.down)) + 1 - baseX
+        var f1 = Double.greatestFiniteMagnitude, f2 = f1
+        for r in max(0, r0 - 1)...min(rows - 1, max(0, r0 + 1)) {
+            for c in max(0, c0 - 1)...min(cols - 1, max(0, c0 + 1)) {
+                let dx = px[r * cols + c] - fx, dy = py[r * cols + c] - fy
+                let d = dx * dx + dy * dy
+                if d < f1 { f2 = f1; f1 = d } else if d < f2 { f2 = d }
+            }
+        }
+        return (f1, f2)
+    }
+
+    /// The same, over every point — the reference the search must match.
+    func nearestTwoExhaustive(_ fx: Double, _ fy: Double) -> (Double, Double) {
+        var f1 = Double.greatestFiniteMagnitude, f2 = f1
+        for i in px.indices {
+            let dx = px[i] - fx, dy = py[i] - fy
+            let d = dx * dx + dy * dy
+            if d < f1 { f2 = f1; f1 = d } else if d < f2 { f2 = d }
+        }
+        return (f1, f2)
     }
 }
 

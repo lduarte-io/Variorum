@@ -98,8 +98,10 @@ $B --bench --seconds 60                       # ms per frame and the implied CPU
 $B --gallery koi.png                          # every koi variety, still
 ```
 
-For an evidence window only: `--allow-claimant WHO` lets the named claimant's claim stand (nobody else's).
-`--stage-dir DIR` watches a different lock. `Tools/ambient on --allow-claimant WHO` passes the first through.
+Self-test options, never on the coordinator's road: `--allow-claimant WHO` lets exactly one named
+claimant's claim stand, for the session proving the ambient in its own stage window. Any other claim
+still ends the ambient, including the coordinator's `coord-for-*` bridges. `--stage-dir DIR` watches a
+different lock. `Tools/ambient on --allow-claimant WHO` passes the first one through.
 
 Tests: `cd Tools/StageAmbient && swift test`. They are headless and include the real-`Tools/stage`
 claim probes.

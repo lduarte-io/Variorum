@@ -216,7 +216,7 @@ final class Koi {
             tangents[i] = t.length > 0 ? t : tangents[i]
         }
 
-        let depthFactor = 1 - 0.52 * depth
+        let depthFactor = 1 - 0.5 * depth
         let widthScale = (1 - 0.12 * depth) * girth
         let df = Float(depthFactor)
 
@@ -286,7 +286,7 @@ final class Koi {
             while a <= hw {
                 let un = a / hw
                 let p = pattern.value(s: s, u: un)
-                let v: Float = hw - abs(a) < 0.9 ? max(p, 0.85) : p * Float(0.86 + 0.14 * (1 - un * un))
+                let v: Float = hw - abs(a) < 0.9 ? max(p, 0.85) : p * Float(0.93 + 0.07 * (1 - un * un))
                 canvas.plot(c + nrm * a, v * df, .set)
                 a += step
             }
