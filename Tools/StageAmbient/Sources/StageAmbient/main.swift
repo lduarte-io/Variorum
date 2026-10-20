@@ -382,13 +382,13 @@ final class Host: NSObject, NSApplicationDelegate {
                 host.finish(String(format: "input (HID idle %.2f s)", idle))
             }
         }
-        // Rail 2: the stage. A lock directory with no claim file is a claim being written; give it
-        // half a second, then treat it as someone else's.
+        // Rail 2: the stage. A lock directory with no claim file, or a claim file without its fields, is
+        // most likely a claim mid-write; give it half a second, then treat it as someone else's.
         repeating(0.25) { host in
             let v = StageClaim.read(lockDirectory: host.options.stageDir, allowedClaimant: host.options.allowClaimant)
             switch v {
             case .foreign: host.finish("stage \(host.describe(v))")
-            case .pending:
+            case .pending, .unreadable:
                 let now = CACurrentMediaTime()
                 if let since = host.pendingSince {
                     if now - since >= 0.5 { host.finish("stage \(host.describe(v))") }
@@ -450,6 +450,7 @@ final class Host: NSObject, NSApplicationDelegate {
         case .allowed(let who): "allowed who=\(who)"
         case .foreign(let who, let reason): "claim who=\(who) reason=\(reason)"
         case .pending: "claim being written (lock without a claim file)"
+        case .unreadable: "claim file unreadable"
         }
     }
 

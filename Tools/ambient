@@ -44,6 +44,7 @@ claim_blocks() { # $1 = a claimant allowed for an evidence window (optional)
   local who reason
   who=$(WHO=""; . "$LOCK/claim" 2>/dev/null; printf %s "$WHO")
   reason=$(REASON=""; . "$LOCK/claim" 2>/dev/null; printf %s "$REASON")
+  if [ -z "$who" ]; then echo "claim file unreadable (refusing to be sure)"; return 0; fi
   case "$reason" in HOLD:*) return 1 ;; esac
   if [ -n "${1:-}" ] && [ "$who" = "$1" ]; then return 1; fi
   echo "held by '$who': $reason"
