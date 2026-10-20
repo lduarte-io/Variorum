@@ -102,9 +102,11 @@ struct OtherLibrariesDeleteRoadTests {
         let choice = CopyDeleteChoice(
             libraryID: "lib-a", copyIDs: ["c:1", "c:2", "c:3"], backups: 2, previousLibraries: 1, openedCopies: 0,
             newest: PlantCatalog.day(2), staying: 1)
-        #expect(ProtectionWords.deleteCopiesCounts(choice) == "2 backups and a previous library")
+        // VX-309 U2 — VX-264 item 5, FLIPPED DELIBERATELY: the count is her "older libraries" sentence now (#216).
+        let counted = "That's 2 backups, plus 1 older library Variorum kept when you opened or restored a different one."
+        #expect(ProtectionWords.deleteCopiesCounts(choice) == counted)
         let lead = ProtectionWords.deleteCopiesLead(choice, libraryOpen: true)
-        #expect(lead.contains(ProtectionWords.day(PlantCatalog.day(2))) && lead.contains("2 backups and a previous library"))
+        #expect(lead.contains(ProtectionWords.day(PlantCatalog.day(2))) && lead.contains(counted))
         #expect(lead.contains("One copy another Mac made stays.") && lead.hasSuffix("Your library isn't touched."))
         #expect(!ProtectionWords.deleteCopiesLead(choice, libraryOpen: false).contains("Your library"))
 
