@@ -602,10 +602,16 @@ nonisolated enum ProtectionWords {
     static let thisMacOnlyDoor = "Use this \(ProtectionCopy.deviceName) only\u{2026}"
     static let accountSignOutDoor = "Sign out\u{2026}"
     static let accountSignInDoor = "Sign in\u{2026}"
-    /// VX-308 U2 — Move's one arm with no face yet: the signed-in account has NO vault (moving there would be a leave and
-    /// a set-up, two acts — the core's `move` joins an account that already syncs). The honest not-yet line (the
-    /// `plaintextCopyNotYet` precedent; PROVISIONAL P-VX308-U2-6).
-    static let moveNotYet = "Moving this library to that account isn't ready in this build yet."
+    /// VX-308 U2 — Move's one arm with no one-door face: the signed-in account has NO vault (moving there is a leave and a
+    /// set-up, two acts — the core's `move` joins an account that already syncs; the one-door compose is VX-455, post-release
+    /// at her word). VX-309 U2 — HER RULING (2026-10-19, "reword that line to name the road"): the line names the road, as
+    /// the faces stand — This Mac Only renders only while signed out (`assess` refuses it with another account signed in),
+    /// so the road is Sign out, Use this Mac only, sign back in to that account, Turn on sync (rule 16's leave, then rule
+    /// 7's hand-up: the library's pair becomes that account's). PROVISIONAL P-VX309-U2-4 (the brief's two presses fitted to
+    /// the sign-out the faces need).
+    static let moveNotYet = "To move this library to that account, sign out, choose Use this "
+        + "\(ProtectionCopy.deviceName) only, then sign back in to that account and turn on sync. This library's "
+        + "passphrase and twelve words become that account's."
 
     /// Turn on sync — the first device hands its pair up (rule 7); the account takes the library's posture.
     static let turnOnSyncTitle = "Turn on sync"
