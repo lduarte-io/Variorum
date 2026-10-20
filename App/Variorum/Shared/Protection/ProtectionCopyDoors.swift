@@ -281,12 +281,16 @@ nonisolated enum ProtectionCopyDoors {
 
     /// `opened`: the preflight's look at her press — the act takes ITS key (re-verified against the copy's file, a read
     /// that never prompts) instead of opening the copy a second time (VX-307 U2c — one Touch ID press, never two).
+    /// VX-309 U1c — VX-444: `wordsLedger` (the band card's ledger — the bootstrap's; nil: none) carries the outgoing
+    /// library's words marks onto the new library's id once the copy IS the library (rule 17: under the current pair).
     static func makeMine(
         _ session: ProtectionRoadSession, copy: CatalogCopy, catalog: Catalog, row: CopyDoorRow,
-        opened: LookedInside, currentPair: TypedSecrets, mintStoreIdentity: @Sendable (StoreKey) -> Void
+        opened: LookedInside, currentPair: TypedSecrets, mintStoreIdentity: @Sendable (StoreKey) -> Void,
+        wordsLedger: WordsCardLedger? = nil
     ) async -> MakeMineResult {
         let slot = session.system.places.slot
         let oldKey = session.key
+        let outgoingID = session.library.record?.libraryID
         let marker = LibraryRestoreHold.markerURL(besideStore: slot)
         let standing = try? Data(contentsOf: marker)
         // THE RESTORE HOLD, before anything moves (13x F1 R1-M2's order — a failed write refuses with nothing moved).
@@ -316,6 +320,10 @@ nonisolated enum ProtectionCopyDoors {
         if ProtectionLibraryFiles.opens(slot, key: library.key) {
             // Today's store id, minted fresh for the NEW library (the creation's mint — rule 17: a fresh identity).
             mintStoreIdentity(library.key)
+        }
+        // VX-444: the pair carried, so do its words marks (the card never re-offers words she already recorded).
+        if let outgoingID, let landedID = library.record?.libraryID, landedID != outgoingID {
+            wordsLedger?.carry(from: outgoingID, to: landedID)
         }
         ProtectionOpenRoad.log(
             "road: made a copy this Mac's library — library \(String((library.record?.libraryID ?? "none").prefix(8))) "
@@ -362,9 +370,12 @@ nonisolated enum ProtectionCopyDoors {
     /// FRESH for it (P-VX306-U3-9's twin). Nothing landed ⇒ the hold put back as it stood (what stepped aside stays aside, in
     /// Previous Libraries). The twelve words minted for a passphrase-opened copy are DROPPED here, never logged — the card
     /// above the quick entry offers fresh ones at the first look (rule 2; the Mac's creation idiom).
+    /// VX-309 U1c — F-U1b-5 (VX-444's second half): `wordsLedger` marks the new library's words RECORDED when the copy's own
+    /// TYPED WORDS became its words lock (she just typed them); with its passphrase the words are minted fresh and dropped
+    /// unseen, so nothing is marked and the card offers them.
     static func makeMineInTheEmptySlot(
         _ ctx: CopyDoorsContext, row: CopyDoorRow, copySecrets: TypedSecrets,
-        mintStoreIdentity: @Sendable (StoreKey) -> Void
+        mintStoreIdentity: @Sendable (StoreKey) -> Void, wordsLedger: WordsCardLedger? = nil
     ) async -> EmptySlotResult {
         let places = ctx.system.places
         let catalog = ctx.system.lister.catalog()
@@ -420,6 +431,8 @@ nonisolated enum ProtectionCopyDoors {
             return EmptySlotResult(outcome: .refused(refusal(for: error)), key: nil)
         }
         mintStoreIdentity(landed.library.key)
+        // F-U1b-5: her typed words ARE the new library's words — recorded (the card never offers words she just typed).
+        if landed.mintedWords == nil, let landedID = landed.library.record?.libraryID { wordsLedger?.record(landedID) }
         ProtectionOpenRoad.log(
             "road: a copy landed in the empty slot — library \(String((landed.library.record?.libraryID ?? "none").prefix(8))) "
                 + "key \(StoreKeyEnvelope.shortFingerprint(landed.library.fingerprint)); nothing stepped aside; held"

@@ -1362,6 +1362,8 @@ final class AppBootstrap {
         defer { copyLandingRunning = false }
         let gate = gate
         let scope = storeVariant.rawValue
+        // VX-309 U1c — F-U1b-5: the band card's ledger (her typed words become the new library's — recorded).
+        let wordsLedger = WordsCardLedger(defaults: reminderLedger.defaults)
         let result = await Task.detached(priority: .userInitiated) {
             // The context off the main actor: it reads the sign-in (a Keychain read).
             let ctx = CopyDoorsContext(road.context())
@@ -1369,7 +1371,8 @@ final class AppBootstrap {
                 ctx, row: row, copySecrets: copySecrets,
                 mintStoreIdentity: { key in
                     Self.ensureStoreIdentity(slot: ctx.system.places.slot, key: key, fresh: true, gate: gate, scope: scope)
-                })
+                },
+                wordsLedger: wordsLedger)
         }.value
         guard result.outcome == .made else { return result.outcome }
         receiptsForNextRoadOpen.append(ProtectionWords.makeMineEmptySlotReceipt)
@@ -1427,13 +1430,16 @@ final class AppBootstrap {
         protection.syncCustodySession.drop()
         let gate = gate
         let scope = storeVariant.rawValue
+        // VX-309 U1c — VX-444: the band card's ledger (the outgoing library's words marks carry with the pair).
+        let wordsLedger = WordsCardLedger(defaults: reminderLedger.defaults)
         let result = await Task.detached(priority: .userInitiated) {
             binding.lock()
             return await ProtectionCopyDoors.makeMine(
                 session, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: currentPair,
                 mintStoreIdentity: { key in
                     Self.ensureStoreIdentity(slot: session.system.places.slot, key: key, fresh: true, gate: gate, scope: scope)
-                })
+                },
+                wordsLedger: wordsLedger)
         }.value
         session.endAct()
         if result.outcome == .made { receiptsForNextRoadOpen.append(ProtectionWords.makeMineReceipt) }
