@@ -416,6 +416,11 @@ nonisolated enum ProtectionCopyDoors {
             return result
         }
         result.created = (session, words)
+        // What the export holds, said BEFORE the import — a crash part of the way leaves this line without the end's, so
+        // what landed reads against what was to land (the ruling's requirement on the crash window).
+        ProtectionOpenRoad.log(
+            "road: bringing in a plaintext export — it holds \(plan.books.count) books · \(plan.notes.count) notes · "
+                + "\(plan.pools.count) snippet groups · \(plan.wings.count) wings")
         final class Box: @unchecked Sendable { var landing = PlaintextExportLanding() }
         let box = Box()
         do {
