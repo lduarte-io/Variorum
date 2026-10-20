@@ -43,6 +43,12 @@ struct RoadAccountRoads {
     /// VX-308 U2 — the words moment's Copy door: the platform's ONE words clipboard rule (the bootstrap's `copyWords` —
     /// the same road the card above the quick entry rides; no new clipboard road).
     var copyWords: @MainActor ([String]) -> Void = { _ in }
+    /// VX-309 U2 — VX-457: the follow's Done owed for the OPEN library — the durable mark (`FollowDoneMark`), re-read at
+    /// every landing of the section, so `receipt_style` off and a quit lose nothing. (A test's roads that never follow keep
+    /// the default: none.)
+    var followDoneOwed: @MainActor () -> FollowKind? = { nil }
+    /// VX-309 U2 — VX-457: the notice's *OK* — the open library's mark clears (nothing else changes).
+    var dismissFollowDone: @MainActor () -> Void = {}
 }
 
 /// VX-308 U2 — THE WORDS MOMENT after a join (rule 7: "your library's twelve words are now your account's twelve words;
@@ -284,6 +290,9 @@ final class RoadSignedOutCastleModel: Identifiable {
 final class RoadAccountModel {
     /// The faces as `assess` last said them (nil until read, or with no library open on the new road).
     private(set) var faces: RoadAccountFaces?
+    /// VX-309 U2 — VX-457: the follow's Done standing in the section until her OK (its truth is the durable mark, re-read at
+    /// every landing — never this process's memory alone).
+    private(set) var followDone: FollowKind?
 
     @ObservationIgnored let roads: RoadAccountRoads
     @ObservationIgnored let presenter: ProtectionSheetPresenter
@@ -326,11 +335,18 @@ final class RoadAccountModel {
         return reads
     }
 
-    /// Read `read`'s faces land unless a NEWER read already landed.
+    /// Read `read`'s faces land unless a NEWER read already landed (VX-457: the follow's Done re-read beside them).
     func land(_ fresh: RoadAccountFaces?, read: Int) {
         guard read > landedRead else { return }
         landedRead = read
         faces = fresh
+        followDone = roads.followDoneOwed()
+    }
+
+    /// VX-309 U2 — VX-457: the follow's Done's *OK* — the mark clears; the notice goes.
+    func followDoneOK() {
+        roads.dismissFollowDone()
+        followDone = nil
     }
 
     /// A door's press on the pane: its confirm, from the door as last read, on `host`.

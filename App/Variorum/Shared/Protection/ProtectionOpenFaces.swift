@@ -211,8 +211,8 @@ nonisolated struct RoadStandingFaces: Equatable, Sendable {
     var noKeyFileDoor = false
     /// RULE 3: the model's moment owed at this open (`.beforeFirstBackup` / `.quietRoadFailed`), nil none.
     var passphraseMoment: PassphraseAsk?
-    /// The receipts this open owes the status seam: rule 1's restore (§7c (6)); VX-308 U2 — a follow its settle finished
-    /// (VX-107: the follow's Done).
+    /// The receipts this open owes the status seam: rule 1's restore (§7c (6)). (VX-309 U2 — VX-457: a follow its settle
+    /// finished owes its Done DURABLY — `FollowDoneMark`, written by `RoadStandingModel.make` — never a receipt here.)
     var receipts: [String]
 
     static let none = RoadStandingFaces(noKeyFileAnywhere: nil, passphraseMoment: nil, receipts: [])
@@ -228,9 +228,9 @@ nonisolated struct RoadStandingFaces: Equatable, Sendable {
             if case .askPassphrase(let ask) = act, moment == nil { moment = ask }
         }
         // (`.besideOpensItOnlyThroughItsHistory` says nothing: its line is dropped — no state reaches it, VX-414.)
-        var receipts = report.repairsDone.contains(.restoreKeyFileFromMirror) ? [ProtectionWords.restoredFromMirror] : []
-        // VX-308 U2 — VX-107: a follow this open's settle finished says its Done, the other-device sentence with it.
-        if let followed = report.settledFollow { receipts.append(ProtectionWords.followDone(followed)) }
+        let receipts = report.repairsDone.contains(.restoreKeyFileFromMirror) ? [ProtectionWords.restoredFromMirror] : []
+        // (VX-308 U2 — VX-107: a follow this open's settle finished said its Done here as a receipt. VX-309 U2 — VX-457:
+        // it is the account section's DURABLE notice now — `RoadStandingModel.make` marks it from `report.settledFollow`.)
         var faces = RoadStandingFaces(noKeyFileAnywhere: nothing, passphraseMoment: moment, receipts: receipts)
         faces.noKeyFileDoor = nothing != nil && report.besideIsEmpty
         return faces
@@ -365,6 +365,12 @@ final class RoadStandingModel {
         if session.library.record?.mode == .castle, session.library.record?.account == nil { faces.noKeyFileDoor = false }
         let libraryID = session.library.record?.libraryID ?? ""
         if session.writes, !libraryID.isEmpty { ledger.noteLaunchOncePerProcess(libraryID) }
+        // VX-309 U2 — VX-457: a follow this open's settle finished (VX-107's durable reading) owes its Done as the account
+        // section's DURABLE notice — marked here, by library, until her OK (a later open finds it standing).
+        if let followed = session.report.settledFollow, !libraryID.isEmpty {
+            FollowDoneMark.set(libraryID, followed, in: ledger.defaults)
+            ProtectionOpenRoad.log("road: the follow's Done owed as the account section's notice (VX-457)")
+        }
         let reminder = PassphraseReminderModel(
             libraryID: libraryID, moment: session.writes ? faces.passphraseMoment : nil, ledger: ledger,
             facts: {

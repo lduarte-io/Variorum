@@ -779,6 +779,9 @@ nonisolated enum ProtectionWords {
             return "Your account's keys changed on another device, and this \(ProtectionCopy.deviceName) caught up."
         }
     }
+    /// VX-309 U2 — VX-457 (her "I agree with B"): the Done above stands in the account section as a durable notice until
+    /// this one button (the export notice's idiom — `exportNoticeOK`).
+    static let followDoneOK = "OK"
 
     // MARK: - VX-308 U3 — THE KEY DOORS, VX-447, F-U2-3 (rules 2, 3, 6, 7, 27; the plan's §5c)
     //

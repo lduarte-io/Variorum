@@ -379,7 +379,25 @@ struct ProtectionJoinFollowRoadTests {
         #expect(second.library.section.actInFlight == nil)
         #expect(second.library.record?.mode == (kind == .intoCastle ? .castle : .standard))
         #expect(second.report.settledFollow == kind)
-        #expect(second.takeReceipts() == [ProtectionWords.followDone(kind)], "said once, with its other-device sentence")
+        // VX-309 U2 — VX-457, FLIPPED DELIBERATELY: the Done is no one-shot receipt any more (`receipt_style` off hid it, a
+        // quit lost it) — the open whose settle finished the follow MARKS it, by library, as the account section's durable
+        // notice: standing at a later open (a fresh faces build), cleared only by its OK.
+        #expect(!second.takeReceipts().contains(ProtectionWords.followDone(kind)), "no receipt")
+        let defaults = try FollowDoneNoticeTests.scratch("vx107-\(kind)")
+        let ledger = PassphraseReminderLedger(defaults: defaults)
+        let libraryID = try #require(second.library.record?.libraryID)
+        _ = RoadStandingModel.make(second, ledger: ledger)
+        #expect(FollowDoneMark.owed(libraryID, in: defaults) == kind, "marked by the open that settled it")
+        guard case .opened(let third) = await ProtectionOpenRoad.route(world.road.context(), keyInHand: second.key) else {
+            Issue.record("the third relaunch opens")
+            return
+        }
+        #expect(third.report.settledFollow == nil)
+        _ = RoadStandingModel.make(third, ledger: ledger)
+        #expect(FollowDoneMark.owed(libraryID, in: defaults) == kind, "still standing at a later open — never re-said, never lost")
+        FollowDoneMark.set(libraryID, nil, in: defaults)  // her OK (the section's road)
+        _ = RoadStandingModel.make(third, ledger: ledger)
+        #expect(FollowDoneMark.owed(libraryID, in: defaults) == nil, "OK clears it for good")
     }
 
     /// The durable reading itself (pure): a settle that finished a follow names its kind from the act in flight's

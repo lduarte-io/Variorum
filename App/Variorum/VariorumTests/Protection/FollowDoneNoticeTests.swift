@@ -28,4 +28,119 @@ struct FollowDoneNoticeTests {
                     "\(kind): the Done rides the durable notice, never a one-shot receipt")
         }
     }
+
+    /// A scratch defaults suite (never the app's domain), emptied.
+    static func scratch(_ name: String) throws -> UserDefaults {
+        let suite = "io.lduarte.Variorum.vx309-u2-\(name)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defaults.removePersistentDomain(forName: suite)
+        return defaults
+    }
+
+    /// THE MARK — by library (another library standing in the slot later reads only its own), every kind round-trips, a
+    /// later follow's kind replaces an unread one, and it clears only when cleared (the OK). Its key is the calm-asks
+    /// ledger's idiom.
+    @Test func theMarkIsByLibraryAndClearsOnlyWhenCleared() throws {
+        let defaults = try Self.scratch("mark")
+        #expect(FollowDoneMark.key("lib-a") == "variorum.calmAsks.followDone.lib-a.kind")
+        for kind in [FollowKind.intoCastle, .intoStandard, .keysReplaced] {
+            FollowDoneMark.set("lib-a", kind, in: defaults)
+            #expect(FollowDoneMark.owed("lib-a", in: defaults) == kind)
+        }
+        #expect(FollowDoneMark.owed("lib-b", in: defaults) == nil, "another library reads only its own mark")
+        FollowDoneMark.set("lib-b", .intoCastle, in: defaults)
+        FollowDoneMark.set("lib-a", nil, in: defaults)
+        #expect(FollowDoneMark.owed("lib-a", in: defaults) == nil && FollowDoneMark.owed("lib-b", in: defaults) == .intoCastle)
+        defaults.set("aNameFromALaterBuild", forKey: FollowDoneMark.key("lib-c"))
+        #expect(FollowDoneMark.owed("lib-c", in: defaults) == nil, "a name this build doesn't know reads as none")
+    }
+
+    /// THE PRESS ARM (the bootstrap's seam reads it): a follow that landed whole owes its Done DURABLY and no receipt; any
+    /// other act that landed whole owes its receipt, as before; an act stopped past its swap owes nothing here (the next
+    /// open's settle marks it — VX-107's road); a refusal owes nothing.
+    @Test func aFollowThatLandedWholeOwesItsDoneDurablyNeverAReceipt() throws {
+        let follow = PlantedJoin.follow(.intoCastle)
+        let join = PlantedJoin.join()
+        let key = StoreKey.mint()
+        func result(_ press: RoadAccountPress, whole: Bool) -> AccountActResult {
+            AccountActResult(press: press, reopenKey: key, landedWhole: whole)
+        }
+        let followed = ProtectionAccountRoad.owed(
+            after: result(.made(receipt: ProtectionWords.followDone(.intoCastle)), whole: true),
+            request: RoadAccountRequest(door: .follow, shown: follow, typed: .none))
+        #expect(followed.receipts.isEmpty && followed.followDone == .intoCastle)
+        let joined = ProtectionAccountRoad.owed(
+            after: result(.made(receipt: "joined", wordsReplaced: true), whole: true),
+            request: RoadAccountRequest(door: .turnOnSync, shown: join, typed: .none))
+        #expect(joined.receipts == ["joined"] && joined.followDone == nil)
+        let pastItsSwap = ProtectionAccountRoad.owed(
+            after: result(.made(receipt: ProtectionWords.followDone(.intoCastle)), whole: false),
+            request: RoadAccountRequest(door: .follow, shown: follow, typed: .none))
+        #expect(pastItsSwap.receipts.isEmpty && pastItsSwap.followDone == nil, "the settle that finishes it marks it")
+        let refused = ProtectionAccountRoad.owed(
+            after: result(.refused("no"), whole: false),
+            request: RoadAccountRequest(door: .follow, shown: follow, typed: .none))
+        #expect(refused.receipts.isEmpty && refused.followDone == nil)
+    }
+
+    /// THE NOTICE: the section reads the mark at every landing (a fresh model — the relaunch's — finds it standing), and
+    /// only its OK clears it.
+    @Test func theSectionReadsTheDoneAtEveryLandingAndOnlyOKClearsIt() async throws {
+        let defaults = try Self.scratch("section")
+        func model() -> RoadAccountModel {
+            RoadAccountModel(roads: RoadAccountRoads(
+                read: { nil }, press: { _ in .refused("no") },
+                followDoneOwed: { FollowDoneMark.owed("lib-a", in: defaults) },
+                dismissFollowDone: { FollowDoneMark.set("lib-a", nil, in: defaults) }))
+        }
+        let first = model()
+        await first.refresh()
+        #expect(first.followDone == nil, "nothing owed yet")
+        FollowDoneMark.set("lib-a", .intoStandard, in: defaults)
+        await first.refresh()
+        #expect(first.followDone == .intoStandard)
+        await first.refresh()
+        #expect(first.followDone == .intoStandard, "a re-read never clears it")
+        let relaunched = model()
+        await relaunched.refresh()
+        #expect(relaunched.followDone == .intoStandard, "standing after a relaunch")
+        relaunched.followDoneOK()
+        #expect(relaunched.followDone == nil && FollowDoneMark.owed("lib-a", in: defaults) == nil, "OK clears the mark")
+        await relaunched.refresh()
+        #expect(relaunched.followDone == nil)
+    }
+
+    /// NEVER ON TODAY'S ROAD (by source): only the new road's files name the mark — the shared account acts (its home and the
+    /// press arm's rule), the open's faces (`RoadStandingModel.make`, the settle arm), the account section's model, and
+    /// the bootstrap's new-road arms (`accountActOnNewRoad`, `accountRoads`) — never today's follow (`PostureFollowModel`,
+    /// `ProtectionController`).
+    @Test func onlyTheNewRoadNamesTheMark() throws {
+        let app = URL(fileURLWithPath: #filePath).resolvingSymlinksInPath()
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        var naming: Set<String> = []
+        for folder in ["Shared", "Variorum"] {
+            let root = app.appendingPathComponent(folder)
+            let files = FileManager.default.enumerator(at: root, includingPropertiesForKeys: nil)?
+                .compactMap { $0 as? URL }.filter { $0.pathExtension == "swift" } ?? []
+            for file in files where try String(contentsOf: file, encoding: .utf8).contains("FollowDoneMark") {
+                naming.insert(file.lastPathComponent)
+            }
+        }
+        #expect(naming == ["ProtectionAccountActs.swift", "ProtectionOpenFaces.swift", "RoadAccountModel.swift",
+                          "AppBootstrap.swift"], "\(naming)")
+        let bootstrap = try String(contentsOf: app.appendingPathComponent("Shared/AppBootstrap.swift"), encoding: .utf8)
+        for line in bootstrap.components(separatedBy: "\n") where line.contains("FollowDoneMark.") {
+            #expect(line.contains("FollowDoneMark.set(libraryID") || line.contains("FollowDoneMark.owed(libraryID"), "\(line)")
+        }
+        let accountActs = bootstrap.components(separatedBy: "func accountActOnNewRoad(").last ?? ""
+        #expect(accountActs.prefix(400).contains("guard newRoad"), "the press arm sits behind the new road's guard")
+    }
+
+    /// The notice's words: VX-107's other-device sentence (unchanged) and one button.
+    @Test func theNoticeSaysTheDoneWithOneButton() {
+        #expect(ProtectionWords.followDoneOK == "OK")
+        for kind in [FollowKind.intoCastle, .intoStandard, .keysReplaced] {
+            #expect(ProtectionWords.followDone(kind).contains("on another device"))
+        }
+    }
 }

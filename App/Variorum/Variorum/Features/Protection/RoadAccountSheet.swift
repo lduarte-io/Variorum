@@ -30,6 +30,17 @@ struct RoadAccountSection: View {
         if let faces = model.faces {
             Section(ProtectionWords.accountSectionTitle) {
                 situation(faces)
+                // VX-309 U2 — VX-457: the follow's Done (VX-107's other-device sentence), a durable notice until her OK —
+                // `receipt_style` off and a quit no longer lose it.
+                if let followed = model.followDone {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(ProtectionWords.followDone(followed))
+                            .font(.callout)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer()
+                        Button(ProtectionWords.followDoneOK) { model.followDoneOK() }
+                    }
+                }
                 // VX-308 U2 (R-U2-1): the follow first — the account moved on another device; its notice beside its door.
                 doorRow(.follow, faces.follow)
                 ForEach(RoadAccountDoor.allCases.filter { $0 != .follow }) { door in

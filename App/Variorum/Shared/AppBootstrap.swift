@@ -1569,7 +1569,17 @@ final class AppBootstrap {
             },
             receipt: { [weak self] text in self?.roadStanding?.speak?(text) },
             // VX-308 U2 — the words moment's Copy: the Mac's one words clipboard rule (the card's own road).
-            copyWords: { Self.copyWords($0) })
+            copyWords: { Self.copyWords($0) },
+            // VX-309 U2 — VX-457: the follow's Done as the section's durable notice — the OPEN library's mark, in the
+            // calm-asks ledger's defaults (a test bootstrap's own suite), read at every landing and cleared at its OK.
+            followDoneOwed: { [weak self] in
+                guard let self, let libraryID = self.roadSession?.library.record?.libraryID else { return nil }
+                return FollowDoneMark.owed(libraryID, in: self.reminderLedger.defaults)
+            },
+            dismissFollowDone: { [weak self] in
+                guard let self, let libraryID = self.roadSession?.library.record?.libraryID else { return }
+                FollowDoneMark.set(libraryID, nil, in: self.reminderLedger.defaults)
+            })
     }
 
     /// VX-308 U3 — the key doors' roads on the new road. Each reads the CURRENT session at its call (a reopen replaces it);
@@ -1724,13 +1734,20 @@ final class AppBootstrap {
             session.endAct()
             return .changed(fresh)
         }
+        // (The ledger, not its defaults: it is Sendable — the seam's act runs off the main actor.)
+        let followDoneLedger = reminderLedger
         return await reopenAround(session, binding: binding) {
             let done = await ProtectionAccountRoad.perform(
                 session, request: request, signIn: signInNow(), exportSwitch: exports)
             switch done.press {
-            case .made(let receipt, let wordsReplaced):
-                return (.made(receipt: nil, wordsReplaced: wordsReplaced), done.reopenKey,
-                        done.landedWhole ? [receipt].compactMap { $0 } : [])
+            case .made(_, let wordsReplaced):
+                // VX-309 U2 — VX-457: a follow that landed whole owes its Done DURABLY (the account section's notice
+                // until her OK — `FollowDoneMark`), never a receipt; any other act's receipt rides to the reopen as before.
+                let owed = ProtectionAccountRoad.owed(after: done, request: request)
+                if let kind = owed.followDone, let libraryID = session.library.record?.libraryID {
+                    FollowDoneMark.set(libraryID, kind, in: followDoneLedger.defaults)
+                }
+                return (.made(receipt: nil, wordsReplaced: wordsReplaced), done.reopenKey, owed.receipts)
             case .refused, .changed:
                 return (done.press, done.reopenKey, [])
             }

@@ -69,7 +69,53 @@ nonisolated enum AccountPreflight: Equatable, Sendable {
     case changed(RoadAccountDoorOpen)
 }
 
+/// **VX-309 U2 — VX-457: THE FOLLOW'S DONE, A DURABLE MARK BY LIBRARY** (her ruling 2026-10-19 on P-VX308-U2-7, "I agree
+/// with B"; rule 11's export-notice idiom — `ExportNoticeMark`, the per-library calm-asks ledger
+/// `variorum.calmAsks.<topic>.<libraryID>.*`): the follow's kind, written in this Mac's defaults where the Done was owed —
+/// the press that landed whole (`ProtectionAccountRoad.owed`), the open whose settle finished it (`RoadStandingModel.make`,
+/// VX-107's durable reading) — read at every refresh of the account section, cleared ONLY by the notice's OK. So
+/// `receipt_style` off and a quit before she looks lose nothing; a library standing in the slot later reads its own mark
+/// only. A kind name, never a secret. Only new-road code writes it (today's road has no account section).
+nonisolated enum FollowDoneMark {
+    static func key(_ libraryID: String) -> String { "variorum.calmAsks.followDone.\(libraryID).kind" }
+
+    /// The kind as stored (a plain name — `FollowKind` carries no raw value in the core).
+    static func name(_ kind: FollowKind) -> String {
+        switch kind {
+        case .intoCastle: return "intoCastle"
+        case .intoStandard: return "intoStandard"
+        case .keysReplaced: return "keysReplaced"
+        }
+    }
+
+    /// The Done owed for `libraryID` (nil: none, or a name this build doesn't know — read as none).
+    static func owed(_ libraryID: String, in defaults: UserDefaults) -> FollowKind? {
+        switch defaults.string(forKey: key(libraryID)) {
+        case "intoCastle": return .intoCastle
+        case "intoStandard": return .intoStandard
+        case "keysReplaced": return .keysReplaced
+        default: return nil
+        }
+    }
+
+    /// The mark written (a later follow's kind replaces an earlier one still unread — the newest Done is the true one)
+    /// or, nil, cleared.
+    static func set(_ libraryID: String, _ kind: FollowKind?, in defaults: UserDefaults) {
+        if let kind { defaults.set(name(kind), forKey: key(libraryID)) } else { defaults.removeObject(forKey: key(libraryID)) }
+    }
+}
+
 nonisolated enum ProtectionAccountRoad {
+    /// **VX-309 U2 — VX-457: what a re-keying account act OWES after it ran** (the bootstrap's seam reads it): a follow
+    /// that landed WHOLE owes its Done DURABLY (`followDone` — the pane's notice until OK), never a receipt; any other act
+    /// that landed whole owes its receipt to the reopen, as before; an act that stopped past its swap owes nothing here
+    /// (the next open's settle finishes it and the open marks the Done — VX-107's road).
+    static func owed(after result: AccountActResult, request: RoadAccountRequest) -> (receipts: [String], followDone: FollowKind?) {
+        guard case .made(let receipt, _) = result.press, result.landedWhole else { return ([], nil) }
+        if let kind = request.shown.follow { return ([], kind) }
+        return ([receipt].compactMap { $0 }, nil)
+    }
+
     /// **The press on the OPEN session** — every check first (all reads), then the act; one act at a time on the session.
     /// For the acts that change no key (turning sync on, a join in the same posture, Move in the same posture, the three
     /// leaves); a re-keying act (a join that crosses postures, every follow) is the bootstrap's crossing seam's —
