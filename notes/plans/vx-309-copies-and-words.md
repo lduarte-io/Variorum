@@ -783,3 +783,61 @@ guard into always refusing — and was DISCARDED and redone as the exact removal
 `09b087bde` (record) · `4b402d8e0` (record) · `2c3175cda` (2) · `7ee076ce8` (record) · `25abab3ed` (record) · `2d18617c8`
 (3 pins first) · `635a6a8e6` (3) · `dd770eab1` (record) · `972dea6a4` (record) · `e6bd14584` (4 pins first) ·
 `7b9e5793f` (4) · `63c326d4e` (record) · `1ed9866cf` (record) · `f587b6382` (comment) · the close commit.
+
+### U1b RECORD — THE COPY DOORS (Opus implementer, 2026-10-19; piece 0 F-U1a-1 · T-5 · VX-305's second hand-off · T-8 — IN PROGRESS)
+
+**Not done in U1b, first:** (PENDING — this list is rewritten at the close.)
+- No Mac suite RUN, no walk, no stage, no Debug launch, no store touch, no network, no Linear, no subagent (the brief).
+- T-8's mapping waits on the orchestrator's ruling (the proposal gate — sent by SendMessage 2026-10-19; the proposal's text
+  is restated under piece 3 below once ruled).
+
+**Preflight (complete, not delegated):** CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md` whole;
+`notes/CastleRules.md` WHOLE (rules 2, 14, 17–19, 20–21, 26–27 + the considered-and-not-pursued ledger); `notes/SyncSpec.md`
+WHOLE (no `Sync/` line here); `notes/SurfaceContracts.md` whole (Doors — portability's restore hold + Library protection;
+The app's words rules); this plan WHOLE (§0–§3, §5a, §5b, the §6 U1a RECORD with its ARBITRATION and MAC BATCH — MB-1's
+`Retention.plan(now:)`); the lifecycle page's stages 9, 10, 13, 14 (read as text, never edited); `notes/plans/vx-306-castle-open-road.md`
+§2 U3 + its addendum and the §9 U3 RECORD whole (P-VX306-U3-0..18, LOOK INSIDE AS BUILT, the U3 BATCH + WALK RECORD);
+`notes/plans/vx-308-accounts-key-doors.md` §6 ROUND-1 FIX LEG (MAJOR-1's trace, fix, residue) + the U3 RECORD; the core —
+`Executor/Acts/Copies.swift` WHOLE, `Acts/DeviceActs.swift` (`createLibrary` — the brief's "Creation.swift"), `Acts/KeyDoors.swift`,
+`Acts/CommonSteps.swift`, `PlanRunner.swift`, `Executor.swift`, `Leaves.swift`, `Assess/Assess.swift`, `Assess/Catalog.swift`,
+`Assess/CatalogNames.swift`, `Model/KeyFile.swift`, `Model/Plan.swift`, `Files/ProtectionLibraryFiles.swift`,
+`Files/ProtectionCopyPeek.swift`, `Persistence/LibraryRestoreHold.swift`, `Persistence/StorePlaintextExport.swift`,
+`Persistence/LibraryClassifier.swift`, `Domain/VariorumDocument.swift`, `Domain/VariorumDocumentFolder.swift`,
+`Operations+DocumentImport.swift`, `Queries/Export.swift` (the bulk manifest); the app — `CopyDoorsModel.swift` WHOLE,
+`LookInsideModel.swift`, `PickedCopy.swift`, `ProtectionCopyDoors.swift`, `ProtectionOpenRoad.swift`, `ProtectionLobbyFace.swift`,
+`ProtectionOpenFaces.swift`, `ProtectionRoadActs.swift`, `ProtectionPlaces.swift`, `ProtectionSystem.swift`,
+`SQLCipherLibraryLeaf.swift`, `FileKeyFileStoreLeaf.swift`, `CatalogLister.swift`, `WordsBand.swift`, `AppBootstrap.swift`
+(the new-road arms, `copyDoorsRoads`/`copyDoorsRoadsWithoutALibrary`, `makeThisMyLibrary`, `makeMissingLobby`,
+`LibraryMissingLobby`), `MarkdownInsurance.swift`, `ExportWriter.swift`, `LaunchFurniture.swift` + the seeder's marks, the Mac
+faces `CopyDoorsSheet.swift`, `LibraryOpenDoor.swift`, `LibraryMissingView.swift`, `VariorumApp.swift`'s state arms, the import
+door `DocumentImporter.swift` + `ImportModel.swift`; the test worlds — `ExecutorWorld`, `EX` (`ExecutorFixtures`), `CrashHarness`,
+`KeyDoorResumeTests`, `U2CopyDoorTests` (`plantCopy`), `PlantedRoad` (`ProtectionOpenRoadPlantedTests`), `ProtectionTestSupport`,
+`MakeMineRoadTests`, `MakeMineRouteTests`, `PickedCopyRoadTests`, `LookInsideRoadTests`. HARNESS: U1a's scratchpad package
+`u1-harness` (this session's scratchpad — it survived; pointed at this worktree, `--skip-update`): the BASELINE on `cd22a9b44`
+`✔ Test run with 290 tests in 47 suites passed after 3.589 seconds.` (U1a's close count, exactly).
+
+**MY READINGS (each the brief's letter as I read it — building on them):**
+- **R-U1b-0 — F-U1a-1's ARM LIVES IN `resume`, AND IT DROPS THE SECRET (VX-450's arm then rolls back).** At a RESUME of Change
+  or Reset (`passphraseIsNew`), the passphrase a lobby typed is derived under the plan's FRESH descriptor. It is NOT the act's
+  secret when it opens no lock under that descriptor (the live key file, the sealed mirror) AND it opens a passphrase lock under
+  an OLDER descriptor among them — the lock the act is replacing. Then `resume` drops it from the act's secrets before the
+  plan-level and vault checks, and `KeyDoorProgram.resumeCannotFinish` (U1a's VX-450 arm) throws `ActRollback` at the vault or
+  key-file step BEFORE any write; a resume whose only remaining step is `memory` (the new lock already landed and recorded)
+  still finishes — honestly, the new passphrase IS set. The check is in `resume` because only there is the TYPED TEXT in hand
+  (the act holds only the derived key). PENDING the probes: the three shapes this covers — (A) nothing landed (F-U1a-1's
+  "finish under the old passphrase on a new salt"); (B) synced, the vault write landed, the key file not (the resume's vault
+  check throws `passphraseDoesNotOpen` out of the settle — a wedge, by my trace); (C) the key-file write landed but not recorded,
+  the old passphrase opening the library through the mirror (`passphraseDoesNotOpen` out of the settle — a wedge, by my trace).
+- **R-U1b-1 — T-5 IS A NEW CORE ACT, NO LIBRARY IN HAND.** (PENDING — written with piece 1.)
+- **R-U1b-2 — PREVIOUS LIBRARIES THROUGH THE DOORS.** (PENDING — written with piece 2.)
+- **R-U1b-3 — T-8.** (PENDING — the orchestrator's ruling on the mapping.)
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece R — this record skeleton + the readings + the harness baseline: DONE (this commit).
+- Piece 0 — F-U1a-1's fix (VX-450's second arm): NOT-STARTED — the settled design is R-U1b-0; pins first (the probe's two
+  postures + shapes B and C), red on the pre-fix tree, then the fix.
+- Piece 1 — T-5, the empty-slot landing: NOT-STARTED.
+- Piece 2 — VX-305's second hand-off (Previous Libraries through the doors): NOT-STARTED.
+- Piece 3 — T-8: NOT-STARTED — WAITING on the mapping ruling (proposal sent).
+- Piece 4 — the close: NOT-STARTED.
+- No revert is in flight.
