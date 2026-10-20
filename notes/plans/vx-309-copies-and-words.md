@@ -862,7 +862,19 @@ door `DocumentImporter.swift` + `ImportModel.swift`; the test worlds — `Execut
   "finish under the old passphrase on a new salt"); (B) synced, the vault write landed, the key file not (the resume's vault
   check throws `passphraseDoesNotOpen` out of the settle — a wedge, by my trace); (C) the key-file write landed but not recorded,
   the old passphrase opening the library through the mirror (`passphraseDoesNotOpen` out of the settle — a wedge, by my trace).
-- **R-U1b-1 — T-5 IS A NEW CORE ACT, NO LIBRARY IN HAND.** (PENDING — written with piece 1.)
+- **R-U1b-1 — T-5 IS A NEW CORE ACT ON MAKE-MINE'S OWN STEPS, NO LIBRARY IN HAND.** `perform` cannot begin an act with no
+  record to name it in, so the empty-slot landing begins itself (createLibrary's no-library pattern): the slot AND the live
+  place must be empty (`libraryAlreadyInSlot` otherwise, before anything is minted); the copy must open by the TYPED secret
+  alone (each typed road tried on its own, `.withoutAPress`; a quiet road's key never counts — rule 14's precedent: it carries
+  no pair); then ONE plan sealed under the new key, its act `.makeMine` named by the new record's section — Make this my
+  library's own steps, reordered so the keychain and the live place are written only once the copy is staged — and `drive`
+  runs it. A crash before the swap leaves the slot empty (the old state) beside the press's own writes (each names a library
+  that never landed — none of hers is touched); after it, the next open finds the new library by its silent item and the
+  registry's `MakeMineProgram` finishes `forgetOtherLibraries` and `backup` from the plan. The words: the copy's own typed words
+  ARE the new library's words lock; with its passphrase, a passphrase lock on a fresh descriptor and twelve words minted fresh
+  (rule 2) — handed back, dropped unseen on the Mac, the card above the quick entry offering fresh ones at the first look (the
+  creation's idiom). The APP's faces set aside what stands in the slot first — exactly *Start a New Library*'s pre-steps (a
+  library no key file opens moves WHOLE; else a missing library's key file alone) — and hold the copy as every adoption does.
 - **R-U1b-2 — PREVIOUS LIBRARIES THROUGH THE DOORS.** (PENDING — written with piece 2.)
 - **R-U1b-3 — T-8.** (PENDING — the orchestrator's ruling on the mapping.)
 
@@ -894,14 +906,32 @@ door `DocumentImporter.swift` + `ImportModel.swift`; the test worlds — `Execut
   lock chosen at the press (MAJOR-1's residue (1), seen at the press) — pinned as the one legal state there. A same-text
   re-choice before the key file lands rolls back (indistinguishable from the replaced one — legal: the old state carries the
   same passphrase); after it lands, it finishes (pinned).
-- Piece 1 — T-5, the empty-slot landing: IN-PROGRESS — core DONE (`59e04579e`: `makeThisMyLibraryInTheEmptySlot` +
-  `EmptySlotMakeMineProgram`; pins `EmptySlotMakeMineTests` 5 green, new API so red by construction; the protection set
-  `✔ 369 tests in 88 suites`). MUTATIONS NAMED, running next on `59e04579e` (copies in `u1b-prerevert/`): M-1a the typed-road
-  requirement off (a quiet road's key accepted) → expect `aQuietRoadAloneNeverLandsACopy…` red; M-1b the empty-slot guard
-  dropped → expect `anOccupiedSlotOrAStandingKeyFile…` red; M-1d `forgetOtherLibraries` dropped from the act's steps → expect
-  the one-library expectations red. M-1c (the swap's `setAside: false` → `true`) is NAMED AND NOT RUN: unobservable — both the
-  SQLCipher leaf and the world set nothing aside over an empty slot; the line is the brief's "skipped, not emptied", by
-  reading. Then the app road (the doors at the missing face and rule 27's lobby). PENDING.
+- Piece 1 — T-5, the empty-slot landing: DONE (`59e04579e` core · `f18824efc` the app's doors). CORE (THE CORE LINES below):
+  `ProtectionExecutor.makeThisMyLibraryInTheEmptySlot(copy:in:typed:)` + `EmptySlotMakeMineProgram` + `LandedCopy` (`Acts/
+  Copies.swift`) and `makeMineSwap(setAside:)` (default true — the standing act byte-unchanged). Pins `EmptySlotMakeMineTests`
+  (core, 5 — the copy's words land it, nothing aside, one library, a pair; its passphrase lands it with fresh words never
+  logged; a quiet road alone / a wrong secret refuses with nothing written; an occupied slot or a standing key file refuses;
+  a crash after EVERY write leaves the empty slot or the new library, never a third state — a second press then lands it)
+  `✔ 5 tests`; new API, so red by construction on the pre-unit tree. The protection set `✔ Test run with 369 tests in 88
+  suites passed`. MUTATIONS on `59e04579e` (restored `cmp`-identical to `u1b-prerevert/`): M-1a the typed-road requirement off
+  → `✘ aQuietRoadAlone…` (3 issues); M-1b the empty-slot guard dropped → `✘ anOccupiedSlot…` (4); M-1d `forgetOtherLibraries`
+  dropped → `✘` the words test + the crash loop (22); M-1c (the swap's `setAside: false` → `true`) NAMED AND NOT RUN —
+  unobservable (both leaves set nothing aside over an empty slot; the line is the brief's "skipped, not emptied", by reading).
+  APP: `CopyDoorsRoads.landsInTheEmptySlot`; `MakeMineModel(intoTheEmptySlot:)` (no quiet probe; the copy's secret always asked;
+  `canSubmitIntoTheEmptySlot` / `submitIntoTheEmptySlot` — the copy's secrets, NO current pair); `ProtectionCopyDoors
+  .makeMineInTheEmptySlot` (preflight reads → the hold → `setAsideUnopenableLibraryFor` + `setAsideLiveKeyFileFor` — the faces'
+  Start a New Library pre-steps → the core act → today's store id minted fresh; a refusal puts the hold back; past the swap
+  made); `CopyDoorsContext.actExecutor()`; `AppBootstrap.makeThisMyLibraryInTheEmptySlot` (only at `.libraryMissing` or a
+  rule-27 `.roadLobby`; one at a time; the reopen with the new key; T-5's receipt owed) and `copyDoorsRoadsWithoutALibrary()`'s
+  `makeMine`; the Mac confirm's T-5 arm (`CopyDoorsSheet.MakeMineConfirm`); T-5's lead and receipt in `ProtectionWords`
+  (PROVISIONAL P-VX309-U1b-3). Pins `EmptySlotLandingRoadTests` (4, planted — the missing face's backup lands, the missing
+  library's key file aside byte-equal, held, a store id, one library, its note there; rule 27's library aside WHOLE and still
+  opening under its own key; a wrong secret / a quiet road alone writes nothing; the confirm's brain) — the harness `✔ Test run
+  with 294 tests in 48 suites passed`; `EmptySlotMakeMineRouteTests` (2, Mac only — through `AppBootstrap` on a throwaway scope;
+  BUILT, the run the orchestrator's). `build-for-testing` → `** TEST BUILD SUCCEEDED **`. MUTATIONS on `f18824efc` (restored
+  `cmp`-identical): M-1e the preflight's quiet-road refusal dropped → `✘ aWrongSecretOrAQuietRoadAlone…` (the hold restored but
+  the missing key file moved — the typed check guards every write); M-1f the set-aside pre-steps dropped → `✘` both landing
+  pins (3 — the core's belt refuses a standing key file / library); M-1g the store-id mint dropped → `✘ theMissingFaces…` (1).
 - Piece 2 — VX-305's second hand-off (Previous Libraries through the doors): NOT-STARTED.
 - Piece 3 — T-8: NOT-STARTED — WAITING on the mapping ruling (proposal sent).
 - Piece 4 — the close: NOT-STARTED.
