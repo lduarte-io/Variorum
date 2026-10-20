@@ -2119,6 +2119,12 @@ seconds.` (U1c's close count, exactly).
   the VX-191 record is the audit that FOUND them (its §V tidy-up row; auditor A's file the current reading). So the dated
   correction notes go in place under the S1 record's own verdicts, and the VX-191 record's row gains a dated note that
   they landed — both in place, nothing rewritten, nothing silent.
+- **R-U2-8 — VX-453's ROW JOINS ONLY WHERE ITS SECTION RENDERS.** The account section is the new road's alone
+  (`ProtectionPane`: `roadStanding?.account`; today's road has no such section in Settings), and the catalog's own rule is
+  declared ⇔ rendered (a search that names a row the pane doesn't show is the defect class the catalog exists against). So the
+  row is road-gated twice: by the build (Release keeps today's catalog byte for byte — the brief's parity line) and, at
+  runtime, by the window (the results pane asks with the section's presence — a Debug build over the real store's variant,
+  today's road, never names it).
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton + the harness baseline: DONE (`fe2344041`).
@@ -2268,5 +2274,26 @@ seconds.` (U1c's close count, exactly).
   → `false` reds the open arm). The harness `✔ Test run with 32 tests in 5 suites passed` (U2WordsTests ·
   PlaintextExportBringInRoadTests · OtherLibrariesDeleteRoadTests · EmptySlotLandingRoadTests · PreviousLibrariesArcTests);
   `build-for-testing` `** TEST BUILD SUCCEEDED **`.
-- Piece 10 — NOT-STARTED.
+- Piece 10 — RIDER VX-453 (Settings search surfaces the account section): DONE (`fd99e5c22` pins first · `88a18be02`).
+  R-U2-8 below. The new road's Settings ▸ Protection ▸ Sync section joins the search through the existing seam: ONE catalog
+  row (`SettingsCatalog.accountRow` — id `account`, pane Protection, title `ProtectionWords.accountSectionTitle`, the
+  section's own title; "account" leads its keywords, with the doors' words — sign in/out, log in, email, turn on sync, stop
+  syncing, other device, follow, move; blurb + keywords PROVISIONAL P-VX309-U2-11) declared beside the pane's own row and
+  rendered there. The catalog, the rendered map and the index each take the road — `SettingsCatalog.rows(newRoad:)`,
+  `AppSettingsView.rowIDsRendered(newRoad:)`, `SettingsSearch.settingsEntries(newRoad:)` / `wholeIndex(newRoad:)` — and the
+  build's statics read `ProtectionRoad.newRoadIsLive`, so Release keeps `everyRoadsRows` / `everyRoadsRowIDs` byte for byte;
+  the results pane asks with the window's road (`newRoad: roadStanding?.account != nil`). Pins: `SettingsAccountSearchTests`
+  (2, old API, pinned FIRST) — RED ON THE PRE-FIX TREE in a scratch settings harness (`scratchpad/settings-harness`:
+  `SettingsShape.swift` symlinked, the copy titles stubbed at their real values, the ⌘/ helper's two lists EMPTY — the Mac
+  run reads the real ones; grep shows neither list says account, sign in, email or sync) `✘ Test run with 2 tests in 1 suite
+  failed after 0.008 seconds with 11 issues.` ("account" and every door word found nothing; "sync" led with a row that only
+  mentions syncing; the nothing-lost-or-reordered bound green on both sides), green after `✔ Test run with 2 tests in 1 suite
+  passed`; `SettingsAccountSurfaceTests` (3, Mac, new API — BUILT, the run the orchestrator's: today's road keeps its catalog,
+  the new road adds ONE row beside Protection's; declared ⇔ rendered on both roads; the results pane asks for the window's road,
+  by source). One honest limit: "sign in" ALSO matches the Theme row's own search words ("design voice" holds "sign",
+  "terminal" holds "in") at the same rank, which the catalog's order breaks — so the door words are pinned as FOUND, "account"
+  as FIRST. `build-for-testing` `** TEST BUILD SUCCEEDED **`. MUTATIONS on `88a18be02` (restored `cmp`-identical to
+  `u2-prerevert/p10/`): M-10a the row never joins → `✘ … 11 issues`; M-10b "account" dropped from the keywords → GREEN (the
+  blurb says "your account" too — the row is found either way; recorded, not a hollow pin: the pin's claim is the finding,
+  which two texts carry).
 - No revert is in flight.
