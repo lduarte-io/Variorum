@@ -1512,6 +1512,14 @@ suites passed after 4.986 seconds.` (U1b's close count, exactly).
   no format-3 key file names (rule 26 — never listed), a far copy outside any Mac's subfolder (`unattributed`); the line renders
   in both listings only when that count is above zero (P-2). Worded so it is true of all three ("left as they are … yours to
   manage in the Finder" — never "not listed", which an unattributed far copy is) — a draft for U2's pass (P-VX309-U1c-1).
+- **R-U1c-6 — VX-444: THE MARKS RIDE THE PAIR; F-U1b-5: TYPED WORDS ARE RECORDED; A MINT IS NOT.** The ledger is per library
+  ID and Make this my library mints a fresh one under the CURRENT pair, so the brief's "(i) inherits" carries the outgoing
+  library's `recorded` AND `dismissed` (the ✕ declined the same pair's offer). The write lands where the new id is first known
+  — `ProtectionCopyDoors.makeMine`, beside the act's landing — through the band's own ledger (the bootstrap's
+  `reminderLedger.defaults`). T-5 with the copy's typed words marks RECORDED (she just typed the words that lock it); with its
+  passphrase the words are minted and dropped unseen (rule 2 — the first look mints), so nothing is marked; T-8 likewise. The
+  alternative read — "she typed her current words at the standing act's confirm, so mark recorded whatever the outgoing
+  library had" — is P-VX309-U1c-3's option (b), not built (the brief says inherits).
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton + the harness baseline: DONE (this commit).
@@ -1541,13 +1549,26 @@ suites passed after 4.986 seconds.` (U1b's close count, exactly).
   empty-slot road with the remembered library never offered, the confirm's brain, VX-210's count) `✔ 4 tests`; the harness
   `✔ Test run with 309 tests in 51 suites passed`; Mac only, BUILT (the run the orchestrator's): `OtherLibrariesDeleteRouteTests`
   (2 — through `AppBootstrap` over the planted road) and `CopyListingFacesSurfaceTests` (2, by source); `build-for-testing` `**
-  TEST BUILD SUCCEEDED **`, no warning in a touched file. App mutations: PENDING (next commit's record).
+  TEST BUILD SUCCEEDED **`, no warning in a touched file. App MUTATIONS on `645ce1784` (each restored `cmp`-identical to
+  `u1c-prerevert/CopyDoorsModel.swift`): M-1g no choices computed → `✘ … 2 issues` (both roads' `deleteChoices[A]`); M-1h the
+  protected set ignored → `✘ withNoLibraryOpenARememberedLibraryIsNeverOffered…` (1 — the remembered library offered).
 - Piece 2 — VX-210 (the honest line): BUILT with piece 1's app commit (they share the listing): `CopyDoorsListing
   .unmanagedCopies(in:)` (R-U1c-5), `ProtectionWords.copiesElsewhereLine` (PROVISIONAL P-VX309-U1c-1), the line in the
   empty-slot sheet's listing and Data Safety's Restore list (`RoadRestoreRows`), each only above zero. Pins:
   `OtherLibrariesDeleteRoadTests.theLineCountsTheCopiesVariorumLeavesAsTheyAre` (headless) +
-  `CopyListingFacesSurfaceTests.bothListingsSayTheOneLineOnlyWhenItIsTrue` (Mac, by source). Mutation: PENDING.
-- Piece 3 — VX-444 + F-U1b-5 (the words-recorded ledger carries): NOT-STARTED.
+  `CopyListingFacesSurfaceTests.bothListingsSayTheOneLineOnlyWhenItIsTrue` (Mac, by source). MUTATION M-2a (the foreign arm
+  off) → `✘ theLineCountsTheCopiesVariorumLeavesAsTheyAre` (2 issues), restored `cmp`-identical.
+- Piece 3 — VX-444 + F-U1b-5 (the words-recorded ledger carries): BUILT (`c9fd33d92`). R-U1c-6. `WordsCardLedger
+  .carry(from:to:)` (only a mark that stands is carried; the outgoing library keeps its own); `ProtectionCopyDoors.makeMine(…,
+  wordsLedger:)` carries the outgoing library's `recorded`/`dismissed` onto the new id once the copy IS the library (the swap
+  landed — including "swapped, then stopped": the record read after the act); `makeMineInTheEmptySlot(…, wordsLedger:)` marks
+  the new id RECORDED when the copy's own typed words became its words lock (`LandedCopy.mintedWords == nil`); a passphrase
+  landing and T-8 mark nothing (T-8's road takes no ledger); `AppBootstrap.makeThisMyLibrary` / `…InTheEmptySlot` pass the
+  band's own ledger (`WordsCardLedger(defaults: reminderLedger.defaults)` — the one `RoadStandingModel.make` reads). Pins:
+  `WordsLedgerCarryRoadTests` (5 — the carry with and without a mark (2 cases), the ✕'s mark, T-5 by typed words, T-5 by its
+  passphrase, T-8's guard) headless `✔ 5 tests`; Mac only, BUILT: `WordsLedgerCarryRouteTests` (2 — through `AppBootstrap`,
+  the band's `offersWords` after the standing act and after T-5 — RED ON OLD in the true sense: they compile on the pre-unit
+  tree and read only its faces). `build-for-testing` green, no warning in a touched file. Mutations: PENDING.
 - Piece 4 — VX-451 (the pane's Lock Now row + idle dial): NOT-STARTED.
 - Piece 5 — VX-454 (probe first): NOT-STARTED.
 - Piece 6 — the close: NOT-STARTED.
