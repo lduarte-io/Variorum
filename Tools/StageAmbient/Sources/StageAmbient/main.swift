@@ -44,6 +44,9 @@ struct Options {
     var size: PixelSize?
     var gifScale = 2
     var gallery: URL?
+    /// Hiding the cursor needs the app active (macOS shows it again for any app that isn't), so the
+    /// ambient takes activation while up and hands it back on every exit. --no-activate opts out.
+    var activate = true
 
     static func parse(_ args: [String]) -> Options {
         var o = Options()
@@ -68,6 +71,7 @@ struct Options {
             case "--frames": o.framesDir = URL(fileURLWithPath: value(), isDirectory: true)
             case "--bench": o.bench = true
             case "--list": o.list = true
+            case "--no-activate": o.activate = false
             case "--gallery": o.gallery = URL(fileURLWithPath: value())
             case "--seconds": o.seconds = Double(value()) ?? o.seconds
             case "--skip": o.skip = Double(value()) ?? 0
@@ -140,7 +144,7 @@ func grayImage(_ frame: UnsafeMutableBufferPointer<UInt8>, size: PixelSize, scal
     data.withUnsafeMutableBytes { (dst: UnsafeMutableRawBufferPointer) in
         let d = dst.bindMemory(to: UInt8.self)
         if scale == 1 {
-            for i in 0..<size.count { d[i] = frame[i] }
+            d.baseAddress!.update(from: frame.baseAddress!, count: size.count)
         } else {
             for y in 0..<h {
                 let sy = y / scale
@@ -266,6 +270,9 @@ final class Host: NSObject, NSApplicationDelegate {
     var shownScene = ""
     var finished = false
     var layerOrigin = CGPoint.zero
+    /// Three frame buffers the layer's images point into, reused in turn (no allocation per frame).
+    var imageBuffers: [UnsafeMutableRawPointer] = []
+    var nextBuffer = 0
 
     init(options: Options, config: AmbientConfig, journal: Journal) {
         self.options = options
@@ -327,7 +334,8 @@ final class Host: NSObject, NSApplicationDelegate {
         renderFrame(dt: 0)
         w.makeKeyAndOrderFront(nil)
         w.makeFirstResponder(view)
-        NSApp.activate()
+        if options.activate { NSApp.activate(ignoringOtherApps: true) }
+        hideCursor()
 
         installWatchers()
         _ = repeating(1 / config.fps) { $0.tick() }
@@ -336,12 +344,15 @@ final class Host: NSObject, NSApplicationDelegate {
         writeState()
     }
 
+    func hideCursor() {
+        guard !cursorHidden else { return }
+        CGDisplayHideCursor(CGMainDisplayID())
+        cursorHidden = true
+    }
+
     func applicationDidBecomeActive(_ note: Notification) {
         becameActive = true
-        if !cursorHidden {
-            NSCursor.hide()
-            cursorHidden = true
-        }
+        hideCursor()
     }
 
     func applicationDidResignActive(_ note: Notification) {
@@ -454,7 +465,7 @@ final class Host: NSObject, NSApplicationDelegate {
     func renderFrame(dt: Double) {
         guard let director else { return }
         director.step(dt: dt)
-        guard let img = grayImage(director.frame, size: sceneSize) else { return }
+        guard let img = reusableImage(director.frame) else { return }
         // Rail 8: a slow orbit of up to ~2.5 points, in whole device pixels.
         let t = CACurrentMediaTime() - launched
         let ox = (sin(t * 2 * .pi / 420) * 2.5 * 2).rounded() / 2
@@ -469,6 +480,25 @@ final class Host: NSObject, NSApplicationDelegate {
             shownScene = director.currentName
             if window != nil { writeState() }
         }
+    }
+
+    /// The frame as a 32-bit image already in the screen's colour space, written into one of three
+    /// reused buffers: Core Animation can take it as it is instead of re-rendering a gray image every frame.
+    func reusableImage(_ frame: UnsafeMutableBufferPointer<UInt8>) -> CGImage? {
+        let count = sceneSize.count
+        if imageBuffers.isEmpty {
+            imageBuffers = (0..<3).map { _ in UnsafeMutableRawPointer.allocate(byteCount: count * 4, alignment: 64) }
+        }
+        let buf = imageBuffers[nextBuffer]
+        nextBuffer = (nextBuffer + 1) % imageBuffers.count
+        let px = buf.bindMemory(to: UInt32.self, capacity: count)
+        for i in 0..<count { px[i] = frame[i] == 0 ? 0xFF00_0000 : 0xFFFF_FFFF }
+        guard let provider = CGDataProvider(dataInfo: nil, data: buf, size: count * 4, releaseData: { _, _, _ in }) else { return nil }
+        let space = window?.screen?.colorSpace?.cgColorSpace ?? CGColorSpaceCreateDeviceRGB()
+        return CGImage(width: sceneSize.width, height: sceneSize.height, bitsPerComponent: 8, bitsPerPixel: 32,
+                       bytesPerRow: sceneSize.width * 4, space: space,
+                       bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue),
+                       provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
     }
 
     func writeState() {
@@ -492,7 +522,7 @@ final class Host: NSObject, NSApplicationDelegate {
         finished = true
         timers.forEach { $0.invalidate() }
         signals.forEach { $0.cancel() }
-        if cursorHidden { NSCursor.unhide(); cursorHidden = false }
+        if cursorHidden { CGDisplayShowCursor(CGMainDisplayID()); cursorHidden = false }
         window?.orderOut(nil)
         if restoreFocus, let prev = previousApp, !prev.isTerminated, NSApp.isActive {
             NSApp.yieldActivation(to: prev)

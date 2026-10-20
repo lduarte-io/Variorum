@@ -46,15 +46,22 @@ scene, since, window number; removed on exit). Never `stage.log`, which is `Tool
    after a 0.75 s launch grace quits it. The window also swallows the waking click or keystroke, so it
    never lands in a hidden app.
 6. **Light.** The scene is 576 × 373 pixels at the Pro's 3-point pixel scale, scaled up
-   nearest-neighbour by one Core Animation layer. The frame cap is 12 fps, and the expensive part of the
-   water is cached between frames. Drawing pauses while the display sleeps or the screen is locked.
+   nearest-neighbour by one Core Animation layer. The frame cap is 12 fps. Frames are handed over as
+   32-bit images already in the screen's colour space, written into three reused buffers, so Core
+   Animation never re-renders them. The caustic web is computed at quarter resolution once a second, and
+   lilypads are cached sprites. Drawing pauses while the display sleeps or the screen is locked.
    Measured CPU: see "Measured" below.
-7. **The cursor.** It hides while the ambient is up and comes back on every exit it controls (input,
-   claim, TERM/INT/HUP, losing focus). If the process dies outright, the window server restores it.
-   Activation is handed back to the app that was frontmost when it started.
+7. **The cursor.** macOS only lets the *active* app hide the cursor. A LaunchServices launch plus
+   `NSApp.activate()` did not activate this agent app (measured), so it calls
+   `activate(ignoringOtherApps: true)`, then hides the cursor at the display level. While it's up it is
+   the frontmost app, which also means it swallows the waking keystroke. On every exit it controls (input,
+   claim, TERM/INT/HUP, losing focus) it shows the cursor again and hands activation back to the app that
+   was frontmost when `on` ran. If the process dies outright, the window server restores the cursor and
+   the next app comes forward (measured with `kill -9`). `--no-activate` opts out, but then the cursor
+   stays visible.
 8. **Burn-in safe.** Everything in the scene moves: koi, water, ripples, and lilypads on a slow
    circulating current. The whole picture also orbits by up to 2.5 points. `nothingBrightStaysStill`
-   samples the scene every 5 s for 20 minutes. Its worst pixel was lit in 35% of samples, before the
+   samples the scene every 5 s for 20 minutes. Its worst pixel was lit in 37% of samples, before the
    orbit.
 
 ## The scene system
@@ -133,6 +140,17 @@ different lock. `Tools/ambient on --allow-claimant WHO` passes the first one thr
 Tests: `cd Tools/StageAmbient && swift test`. They are headless and include the real-`Tools/stage`
 claim probes.
 
-## Measured
+## Measured (the Pro, 2026-10-20, built-in display, 576 × 373 at 12 fps)
 
-(Filled in from the evidence window: CPU, quit latencies, cursor and focus.)
+| What | Result |
+|---|---|
+| StageAmbient CPU (on screen, 90 s) | **3.8% of one core**; RSS 50 MB. The first build measured 12.5%, before the 32-bit hand-off, quarter-res caustics and pad sprites. |
+| WindowServer CPU | 14.4% with it up vs 13.3% baseline with it off (about +1 point) |
+| Scene cost offscreen (`--bench`) | 0.40 ms per frame; on screen it runs on efficiency cores at low clock, so about 5× that in wall-clock share |
+| Quit on a non-HOLD claim (real lock, the probe swap) | gone 375 ms after the claim; logged `OFF stage claim who=vx-458-probe reason=VX-458 quit probe` |
+| Quit on a mouse nudge (one `cliclick m:+1,+0`) | gone 248 ms later; logged `OFF input (HID idle 0.06 s)` |
+| `Tools/ambient off` | 213–253 ms, four times |
+| `kill -9` | gone 23 ms later; the window server restored the cursor |
+| Cursor and focus after every exit above | `CGCursorIsVisible` = 1, and the front app was back to the terminal that was frontmost before `on` |
+| While up | the front app is StageAmbient and `CGCursorIsVisible` = 0 |
+| Burn-in (`nothingBrightStaysStill`) | the worst scene pixel was lit in 35% of samples over 20 minutes, before the orbit |

@@ -100,6 +100,7 @@ case "$cmd" in
       case "$1" in
         --scene) pass+=(--scene "${2:?--scene needs a name}"); shift 2 ;;
         --stay) pass+=(--stay); shift ;;
+        --no-activate) pass+=(--no-activate); shift ;;
         --seed) pass+=(--seed "${2:?--seed needs a number}"); shift 2 ;;
         --allow-claimant) allow="${2:?--allow-claimant needs a name}"; pass+=(--allow-claimant "$allow"); shift 2 ;;
         --min-idle) min_idle="${2:?--min-idle needs seconds}"; shift 2 ;;

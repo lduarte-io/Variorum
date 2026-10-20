@@ -7,6 +7,8 @@ import Foundation
 /// middle, a faint, sparse web of light (caustics) shows. Plus a few slow surface glints. Mostly black,
 /// never still. The web changes slowly, so it is recomputed only every few frames and cached.
 final class Water {
+    /// The web is computed at 1/reduction resolution and bilinearly upsampled.
+    static let reduction = 4
     let a: TileNoise
     let b: TileNoise
     let patches: TileNoise
@@ -47,7 +49,8 @@ final class Water {
 
     func draw(into canvas: Canvas, time t: Double, unit: Double) {
         let w = canvas.width, h = canvas.height
-        if field.count != w * h || t - fieldTime >= 0.16 || t < fieldTime {
+        // The web drifts about a pixel a second, so once a second is plenty.
+        if field.count != w * h || t - fieldTime >= 1.0 || t < fieldTime {
             computeField(width: w, height: h, time: t, unit: unit)
         }
         for i in 0..<(w * h) { canvas.pixels[i] = field[i] }
@@ -58,15 +61,16 @@ final class Water {
     }
 
     /// Caustics as the bright edges of a slowly wobbling cell pattern (where the two nearest cell
-    /// points are nearly equidistant), computed at half resolution and upsampled.
+    /// points are nearly equidistant), computed at reduced resolution and upsampled.
     private func computeField(width w: Int, height h: Int, time t: Double, unit: Double) {
         if field.count != w * h { field = [Float](repeating: 0, count: w * h) }
         fieldTime = t
-        let hw = (w + 1) / 2 + 1, hh = (h + 1) / 2 + 1
+        let r = Water.reduction
+        let hw = (w + r - 1) / r + 1, hh = (h + r - 1) / r + 1
         if half.count != hw * hh { half = [Float](repeating: 0, count: hw * hh) }
         let points = CellPoints(width: hw, height: hh, time: t, unit: unit, seed: seed)
         let cell = points.cell
-        let kp = 0.06 / unit
+        let kp = 0.03 * Double(r) / unit
         let op = Vec2(t * 0.2, -t * 0.12)
         for y in 0..<hh {
             let fy = Double(y)
@@ -85,9 +89,9 @@ final class Water {
         }
         // Bilinear upsample to full resolution.
         for y in 0..<h {
-            let sy = Double(y) * 0.5, y0 = Int(sy), ty = Float(sy - Double(y0))
+            let sy = Double(y) / Double(r), y0 = Int(sy), ty = Float(sy - Double(y0))
             for x in 0..<w {
-                let sx = Double(x) * 0.5, x0 = Int(sx), tx = Float(sx - Double(x0))
+                let sx = Double(x) / Double(r), x0 = Int(sx), tx = Float(sx - Double(x0))
                 let a = half[y0 * hw + x0], b = half[y0 * hw + x0 + 1]
                 let c = half[(y0 + 1) * hw + x0], d = half[(y0 + 1) * hw + x0 + 1]
                 let top = a + (b - a) * tx, bottom = c + (d - c) * tx
@@ -111,8 +115,9 @@ struct CellPoints {
     private(set) var py: [Double]
 
     init(width hw: Int, height hh: Int, time t: Double, unit: Double, seed: UInt64) {
-        cell = 13 * unit // half-res pixels per cell (≈ 26 design pixels)
-        drift = Vec2(t * 0.35 * unit, t * 0.12 * unit)
+        let r = Double(Water.reduction)
+        cell = 26 / r * unit // reduced pixels per cell (≈ 26 design pixels)
+        drift = Vec2(t * 0.7 / r * unit, t * 0.24 / r * unit)
         cols = Int(Double(hw) / cell) + 3
         rows = Int(Double(hh) / cell) + 3
         baseX = Int((drift.x / cell).rounded(.down))
@@ -288,6 +293,45 @@ struct Lilypad {
                     }
                 }
                 canvas.plot(x, y, 0.1)
+            }
+        }
+    }
+}
+
+/// A lilypad (and its flower) rendered into a small private canvas, blitted opaquely each frame.
+struct PadSprite {
+    struct Key: Equatable { let x: Int, y: Int, a: Int }
+    let key: Key
+    let originX: Int
+    let originY: Int
+    let canvas: Canvas
+
+    static func key(for pad: Lilypad) -> Key {
+        Key(x: Int((pad.position.x * 2).rounded()), y: Int((pad.position.y * 2).rounded()),
+            a: Int((pad.angle * 40).rounded()))
+    }
+
+    init(pad: Lilypad, key: Key) {
+        self.key = key
+        let r = pad.radius * 1.06 + 2
+        originX = Int((pad.position.x - r).rounded(.down))
+        originY = Int((pad.position.y - r).rounded(.down))
+        let side = Int((2 * r).rounded(.up)) + 2
+        canvas = Canvas(size: PixelSize(width: side, height: side))
+        canvas.clear(-1) // transparent
+        var local = pad
+        local.position = pad.position - Vec2(Double(originX), Double(originY))
+        local.draw(into: canvas)
+    }
+
+    func blit(into target: Canvas) {
+        let w = canvas.width
+        for y in 0..<canvas.height {
+            let ty = originY + y
+            guard ty >= 0, ty < target.height else { continue }
+            for x in 0..<w {
+                let v = canvas.pixels[y * w + x]
+                if v >= 0 { target.plot(originX + x, ty, v) }
             }
         }
     }

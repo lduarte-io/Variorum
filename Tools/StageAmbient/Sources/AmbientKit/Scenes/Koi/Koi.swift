@@ -229,7 +229,7 @@ final class Koi {
             return (c, tan, tan.perpendicular)
         }
 
-        let step = 0.45
+        let step = 0.55
         let alongSteps = Int(length / step)
 
         // Tail fin: translucent, forked, swishing with the wave.

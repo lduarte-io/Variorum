@@ -222,7 +222,7 @@ import Testing
     @Test(arguments: [0.0, 40, 120, 600, 3600])
     func theCellSearchFindsTheTrueNearestPoints(at t: Double) {
         let unit = 373.0 / 280
-        let hw = 289, hh = 188
+        let hw = 145, hh = 95
         let points = CellPoints(width: hw, height: hh, time: t, unit: unit, seed: 7)
         var misses = 0, total = 0
         for y in stride(from: 0, to: hh, by: 3) {
