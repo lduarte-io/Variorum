@@ -13,7 +13,9 @@ import Foundation
 //     outgoing library steps aside whole, with its own key file, into Previous
 //     Libraries. You never leave Castle by opening something.
 //   - SEND LIBRARY writes the pair — a copy (rule 18), with no sharing note.
-//   - A PLAINTEXT EXPORT carries its library ID.
+//   - A PLAINTEXT EXPORT carries no library ID: `protection_record` is
+//     local-only and `StorePlaintextExport` drops it. Brought in, it is a NEW
+//     library (VX-309 T-8 — the import road, never this file's acts).
 //   - THE OFFER deletes another library's copies at her press — this Mac's
 //     copies of it only, never another Mac's (rule 19).
 
