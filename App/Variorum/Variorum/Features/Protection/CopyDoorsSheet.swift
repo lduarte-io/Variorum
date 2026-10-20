@@ -60,6 +60,30 @@ struct CopyDoorsSheet: View {
                         Button(ProtectionWords.makeMineDoor) { Task { await model.openMakeMine(row) } }
                     }
                 }
+            case .plaintextExport(let store):
+                // VX-309 U1b — T-8: a plain-text copy, brought in as a new library through the import road.
+                Text(LibraryOpenCopy.sheetTitle).font(.title3.weight(.semibold))
+                Text(ProtectionWords.bringInLead(stepsALibraryAside: model.bringInStepsALibraryAside))
+                    .fixedSize(horizontal: false, vertical: true)
+                if let refusal = model.bringInRefusal {
+                    Text(refusal)
+                        .font(.callout)
+                        .alarmVoice()
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                HStack {
+                    Button(ProtectionWords.makeMineCancel) { onClose() }
+                        .keyboardShortcut(.cancelAction)
+                        .disabled(model.bringingIn)
+                    Spacer()
+                    if model.bringingIn {
+                        TravellingDotsIndicator(ink: .secondary)
+                        Text(ProtectionWords.bringInWorking).font(.caption).foregroundStyle(.secondary)
+                    }
+                    Button(ProtectionWords.bringInButton) { Task { await model.bringIn(store) } }
+                        .keyboardShortcut(.defaultAction)
+                        .disabled(model.bringingIn)
+                }
             case .listing(let listing):
                 // VX-309 U1b: this Mac's copies with no library open — rule 17's Restore from Backup at the empty slot.
                 Text(LibraryOpenCopy.restoreSectionTitle).font(.title3.weight(.semibold))

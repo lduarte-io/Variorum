@@ -1213,7 +1213,9 @@ final class AppBootstrap {
                 }.value
             },
             // VX-307 U2c — VX-413: the note page's Copy full text (the platform's clipboard rule).
-            copyFullText: Self.copyFullTextRoad)
+            copyFullText: Self.copyFullTextRoad,
+            // VX-309 U1b — T-8: a plaintext export brought in as a new library (this one steps aside whole).
+            bringInPlaintextExport: { [weak self] url in await self?.bringInPlaintextExport(url) ?? .refused(.failed) })
     }
 
     /// VX-306 U3 — the two doors' roads with NO library open (the missing face's and rule 27's *Open Library…*,
@@ -1246,11 +1248,72 @@ final class AppBootstrap {
             },
             // VX-307 U2c — VX-413: the note page's Copy full text (the platform's clipboard rule).
             copyFullText: Self.copyFullTextRoad,
-            landsInTheEmptySlot: true)
+            landsInTheEmptySlot: true,
+            // VX-309 U1b — T-8: a plaintext export brought in as a new library.
+            bringInPlaintextExport: { [weak self] url in await self?.bringInPlaintextExport(url) ?? .refused(.failed) })
     }
 
-    /// One empty-slot landing at a time (a second press while one runs refuses busy).
-    @ObservationIgnored private var landingInTheEmptySlot = false
+    /// **A PLAINTEXT EXPORT BROUGHT IN AS A NEW LIBRARY** (VX-309 U1b — T-8; the mapping ruled at the plan's §5b-R). From an
+    /// open library (`.ready`) or none (the missing face, rule 27's lobby). THE PREFLIGHT first, all reads (the export
+    /// planned on a private staged copy — a refusal never tears the window down); then, with a library open, the reopening
+    /// seam's first half (the composition root's teardown, the `.ready` tree down, the app's pool CLOSED); then the act off
+    /// the main actor (`ProtectionCopyDoors.landPlaintextExport` — what stands steps aside whole, the creation's road, the
+    /// content minted headless into the new store); then the new library opens exactly as a creation does (`.roadCreated`:
+    /// its words dropped unseen — the band card offers fresh ones), the receipt naming what landed owed to that open. Nothing
+    /// made ⇒ the open finds what still stands (the library, under its own key, when it never moved).
+    func bringInPlaintextExport(_ url: URL) async -> CopyDoorOutcome {
+        guard newRoad, let road = roadInputs?.compose(), road.writes else { return .refused(.failed) }
+        var open: ProtectionRoadSession?
+        switch state {
+        case .ready:
+            guard let session = roadSession, session.writes, binding != nil else { return .refused(.failed) }
+            open = session
+        case .libraryMissing: break
+        case .roadLobby(let lobby) where lobby.face.noKeyFileAnywhere != nil: break
+        default: return .refused(.failed)
+        }
+        guard !copyLandingRunning else { return .refused(.busy) }
+        if let open, !open.beginAct() { return .refused(.busy) }
+        copyLandingRunning = true
+        defer { copyLandingRunning = false }
+        let read = await Task.detached(priority: .userInitiated) { ProtectionCopyDoors.readPlaintextExport(url) }.value
+        guard case .plan(let plan) = read else {
+            open?.endAct()
+            if case .refused(let why) = read { return .refused(why) }
+            return .refused(.failed)
+        }
+        let oldKey = open?.key
+        let binding = binding
+        if open != nil {
+            await onWillLock?()
+            state = .opening
+            protection.dropResident()
+            protection.resetPerOpenDeferrals()
+            protection.syncCustodySession.drop()
+        }
+        let closesThePool = open != nil
+        let result = await Task.detached(priority: .userInitiated) {
+            if closesThePool { binding?.lock() }
+            // The context off the main actor: it reads the sign-in (a Keychain read).
+            return await ProtectionCopyDoors.landPlaintextExport(road.context(), plan: plan)
+        }.value
+        open?.endAct()
+        guard let created = result.created else {
+            if open != nil {
+                beginOpening(unlockedKey: oldKey)
+                await awaitOpen()
+            }
+            return .refused(result.refusal ?? .failed)
+        }
+        receiptsForNextRoadOpen.append(ProtectionWords.bringInReceipt(result.landing, stoppedEarly: result.stoppedEarly))
+        finish(.roadCreated(created.session, created.words))
+        await awaitOpen()
+        return .made
+    }
+
+    /// One landing at a time with no library in hand — T-5's empty-slot landing, T-8's bring-in (a second press while one
+    /// runs refuses busy).
+    @ObservationIgnored private var copyLandingRunning = false
 
     /// **MAKE THIS MY LIBRARY INTO THE EMPTY SLOT** (VX-309 U1b — T-5; rule 17 with no library open). Offered only where
     /// no library is open: the missing face, and rule 27's lobby (its *Open Library…* renders only in that state). No pool
@@ -1265,9 +1328,9 @@ final class AppBootstrap {
         case .roadLobby(let lobby) where lobby.face.noKeyFileAnywhere != nil: break
         default: return .refused(.failed)
         }
-        guard !landingInTheEmptySlot else { return .refused(.busy) }
-        landingInTheEmptySlot = true
-        defer { landingInTheEmptySlot = false }
+        guard !copyLandingRunning else { return .refused(.busy) }
+        copyLandingRunning = true
+        defer { copyLandingRunning = false }
         let gate = gate
         let scope = storeVariant.rawValue
         let result = await Task.detached(priority: .userInitiated) {

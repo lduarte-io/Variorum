@@ -106,6 +106,9 @@ nonisolated enum CopyDoorRefusal: Equatable, Sendable {
     case busy
     /// Anything else — nothing moved, or the act rolled back whole.
     case failed
+    /// VX-309 U1b — T-8: a plaintext export that cannot be brought in, said in its own words (the export's schema, a note
+    /// the format cannot read back — named).
+    case exportRefused(String)
 
     var sentence: String {
         switch self {
@@ -118,6 +121,7 @@ nonisolated enum CopyDoorRefusal: Equatable, Sendable {
         case .unreadableCopy: return LibraryOpenCopy.unreadableRefusal
         case .busy: return ProtectionWords.copyDoorBusy
         case .failed: return ProtectionWords.makeMineFailed
+        case .exportRefused(let sentence): return sentence
         }
     }
 }
@@ -135,6 +139,8 @@ nonisolated enum PickOutcome: Equatable, Sendable {
     case several([URL])
     /// The honest refusal (its detail quiet).
     case refused(String, detail: String?)
+    /// VX-309 U1b — T-8: a plaintext export, offered to be brought in as a new library (never filed).
+    case plaintextExport(URL)
 }
 
 // MARK: - The roads
@@ -163,6 +169,9 @@ struct CopyDoorsRoads {
     /// VX-309 U1b — T-5: no library is open (the missing face, rule 27's lobby) — Make this my library lands the copy in
     /// the empty slot under the secret typed for it, and its confirm asks exactly that (no current pair exists).
     var landsInTheEmptySlot = false
+    /// VX-309 U1b — T-8: a plaintext export brought in as a NEW library through the import road (the library open now, if
+    /// any, steps aside whole first). nil: the door is not offered (the export keeps its refusal).
+    var bringInPlaintextExport: (@MainActor (URL) async -> CopyDoorOutcome)? = nil
 }
 
 // MARK: - Make this my library's confirm (§7c (8))
@@ -305,6 +314,8 @@ final class CopyDoorsModel: Identifiable {
         /// VX-309 U1b — this Mac's catalogued copies with NO library open (the missing face's and rule 27's *Restore from
         /// Backup…* on the new road — rule 17: "The app's Restore from Backup is this door"): each row its doors.
         case listing(CopyDoorsListing)
+        /// VX-309 U1b — T-8: a picked plaintext export, its one door (bring it in as a new library).
+        case plaintextExport(URL)
         /// Make this my library's confirm.
         case makeMine(MakeMineModel)
         /// Look inside — the copy read-only (P-VX306-U3-15).
@@ -315,6 +326,9 @@ final class CopyDoorsModel: Identifiable {
 
     let id = UUID()
     private(set) var phase: Phase = .reading
+    /// VX-309 U1b — T-8: the export is being brought in (the door's working line), or why it was not.
+    private(set) var bringingIn = false
+    private(set) var bringInRefusal: String?
     @ObservationIgnored private let roads: CopyDoorsRoads
 
     init(roads: CopyDoorsRoads) {
@@ -333,6 +347,27 @@ final class CopyDoorsModel: Identifiable {
         case .copy(let row): phase = .doors(row)
         case .several(let stores): phase = .choosing(stores)
         case .refused(let message, let detail): phase = .refused(message, detail: detail)
+        case .plaintextExport(let store):
+            // The door exists only where its road does (P-2); else the export keeps its honest refusal.
+            phase = roads.bringInPlaintextExport == nil
+                ? .refused(ProtectionWords.plaintextCopyNotYet, detail: nil) : .plaintextExport(store)
+        }
+    }
+
+    /// VX-309 U1b — T-8: whether a library is open now (its confirm says the library steps aside).
+    var bringInStepsALibraryAside: Bool { !roads.landsInTheEmptySlot }
+
+    /// VX-309 U1b — T-8's press: the export brought in as a new library; made ⇒ the sheet leaves (the open is already
+    /// routing), refused ⇒ the sentence under the door.
+    func bringIn(_ store: URL) async {
+        guard let bring = roads.bringInPlaintextExport, !bringingIn else { return }
+        bringingIn = true
+        bringInRefusal = nil
+        let outcome = await bring(store)
+        bringingIn = false
+        switch outcome {
+        case .made: phase = .done
+        case .refused(let why): bringInRefusal = why.sentence
         }
     }
 

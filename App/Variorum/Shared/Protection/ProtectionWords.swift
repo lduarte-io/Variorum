@@ -205,6 +205,42 @@ nonisolated enum ProtectionWords {
         + "without changing anything, or make it your library."
     static let noCopiesOnThisMac = "There are no copies of a library on this Mac."
 
+    // MARK: - VX-309 U1b — T-8, a plain-text copy brought in as a new library (PROVISIONAL P-VX309-U1b-3 — U2's words)
+
+    /// The picked plain-text copy's door: what comes in, what does not (the ruling's one line — §5b-R item 8), and — with a
+    /// library open — that it steps aside.
+    static func bringInLead(stepsALibraryAside: Bool) -> String {
+        "Bring this plain-text copy in as a new library? Its notes, books, chapters, snippets and tags come in, written "
+            + "fresh — a new library in Standard, with new twelve words offered once it opens. Commits, comments, book "
+            + "settings, stars and shelves don't come in."
+            + (stepsALibraryAside ? " Your current library steps aside whole into Previous Libraries." : "")
+            + " The copy itself is not changed."
+    }
+    static let bringInButton = "Bring it in"
+    static let bringInWorking = "Bringing the copy in\u{2026}"
+    /// The export's schema is an earlier build's (this build reads its own only — PROVISIONAL P-VX309-U1b-7).
+    static let exportFromAnEarlierBuild = "This plain-text copy was made by an earlier Variorum, and this one can't bring "
+        + "it in."
+    /// A note the document format could not read back (never expected — the export's own projection), named.
+    static func exportNoteUnreadable(_ title: String, line: Int?) -> String {
+        "The note \u{201C}\(title)\u{201D} couldn't be read from this copy" + (line.map { " (line \($0))" } ?? "") + "."
+    }
+    /// What landed (the ruling's requirement: a partial landing is visible against it).
+    static func bringInReceipt(_ landing: PlaintextExportLanding, stoppedEarly: Bool) -> String {
+        func count(_ n: Int, _ one: String, _ many: String) -> String { "\(n) \(n == 1 ? one : many)" }
+        var parts = [count(landing.books, "book", "books"), count(landing.notes, "note", "notes"),
+                     count(landing.snippets, "snippet group", "snippet groups")]
+        if landing.wings > 0 { parts.append(count(landing.wings, "wing", "wings")) }
+        var text = "A new library holds the plain-text copy's writing: " + parts.joined(separator: " \u{00B7} ") + "."
+        if !landing.emptyBooks.isEmpty {
+            text += " Left out as empty: " + landing.emptyBooks.joined(separator: ", ") + "."
+        }
+        if stoppedEarly {
+            text += " It stopped part of the way \u{2014} the copy is unchanged and can be brought in again."
+        }
+        return text
+    }
+
     // MARK: - The lobby (rule 8: it asks only when no quiet road remains) — PROVISIONAL P-VX306-U1b-4
 
     static let lobbyTitle = "Open your library"

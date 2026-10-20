@@ -31,6 +31,10 @@
 //      already in this Mac's catalogue is used where it is; the open library itself is refused.
 //    - LOOK INSIDE (`lookInside`, P-VX306-U3-15 — the orchestrator's ruling (b)) — the executor's `lookInside` for the
 //      key, then `ProtectionCopyPeek`'s read-only reader on a private copy; nothing written.
+//    - VX-309 U1b — A PLAINTEXT EXPORT IN, AS A NEW LIBRARY (T-8 — the mapping ruled at the plan's §5b-R): the pick names it
+//      (never filed); `readPlaintextExport` plans it (reads only, a private staged copy); `landPlaintextExport` sets what
+//      stands aside whole, runs the creation's road and mints the export's content into the new store headless, before its
+//      first open, through the import road (no restore hold — a fresh mint never synced).
 //    - VX-309 U1b — THE EMPTY-SLOT LANDING (`makeMineInTheEmptySlot`, T-5): with no library open, the preflight's reads (the
 //      copy opens with what she TYPED — a quiet road alone is refused, rule 14's precedent), the hold, what stands in the
 //      slot set aside (never written over), the core's act, today's store id minted fresh.
@@ -38,6 +42,7 @@
 //    road's system with no library open.
 //
 
+import Dependencies
 import Foundation
 import VariorumCore
 
@@ -352,6 +357,97 @@ nonisolated enum ProtectionCopyDoors {
         return EmptySlotResult(outcome: .made, key: landed.library.key)
     }
 
+    // MARK: - VX-309 U1b — T-8: a plaintext export brought in as a NEW library
+
+    enum PlaintextExportRead: Sendable {
+        case plan(PlaintextExportPlan)
+        case refused(CopyDoorRefusal)
+    }
+
+    /// THE PREFLIGHT, reads only (before anything moves — with a library open, before the window comes down): the picked
+    /// thing is a plaintext export, and its content plans on a private staged copy (this build's schema only — P-VX309-U1b-7).
+    static func readPlaintextExport(_ url: URL) -> PlaintextExportRead {
+        guard case .plaintextExport(let store) = LibraryClassifier.classify(at: url) else {
+            return .refused(.unreadableCopy)
+        }
+        do {
+            return .plan(try PlaintextExportReading.read(exportAt: store))
+        } catch PlaintextExportReading.Failure.schemaNotCurrent(let newer) {
+            return .refused(.exportRefused(newer ? LibraryOpenCopy.newerSchemaRefusal : ProtectionWords.exportFromAnEarlierBuild))
+        } catch PlaintextExportReading.Failure.unreadableNote(let title, let line) {
+            return .refused(.exportRefused(ProtectionWords.exportNoteUnreadable(title, line: line)))
+        } catch {
+            ProtectionOpenRoad.log("road: a plaintext export could not be read — \(String(describing: error))")
+            return .refused(.unreadableCopy)
+        }
+    }
+
+    /// What the bring-in came to: the new library's session and its once-shown words (the creation's — the band offers
+    /// them), what landed, and whether the import stopped part of the way; or why nothing was made.
+    struct PlaintextLanding: Sendable {
+        var created: (session: ProtectionRoadSession, words: OnceShownWords)?
+        var landing = PlaintextExportLanding()
+        var stoppedEarly = false
+        var refusal: CopyDoorRefusal?
+    }
+
+    /// THE ACT (writes; with a library open, its pool already CLOSED by the bootstrap): what stands in the slot steps aside
+    /// WHOLE into Previous Libraries — the library, its sidecars, its key file and its restore hold (the hold is THAT
+    /// library's) — else a missing library's key file alone; any hold still standing goes (T-8's new library is never held
+    /// — a fresh mint never synced, the ruling); the creation's road (`ProtectionOpenRoad.create` — fresh identity, key and
+    /// device ID, Standard, its words for the band); then the export's content minted into the NEW store HEADLESS, before
+    /// its first open, through the import road (`Operations.importPlaintextExport` — no undo stack: a library's birth); the
+    /// store's pool closed. The end says what landed (the log line here; the receipt the caller owes) — a partial landing
+    /// is visible against it (the ruling's one requirement on the crash window, PROVISIONAL P-VX309-U1b-8).
+    static func landPlaintextExport(_ ctx: RoadContext, plan: PlaintextExportPlan) async -> PlaintextLanding {
+        let places = ctx.system.places
+        var result = PlaintextLanding()
+        do {
+            try ProtectionOpenRoad.setAsideLibraryWholeFor(places, carryingHold: true)
+            try ProtectionOpenRoad.setAsideLiveKeyFileFor(places)
+        } catch {
+            ProtectionOpenRoad.log("road: a plaintext export was not brought in — what stood in the slot could not step aside (\(String(describing: error)))")
+            result.refusal = .failed
+            return result
+        }
+        LibraryRestoreHold.clear(besideStore: places.slot)
+        guard case .created(let session, let words) = await ProtectionOpenRoad.create(ctx, setAsideLiveKeyFile: false) else {
+            result.refusal = .failed
+            return result
+        }
+        result.created = (session, words)
+        final class Box: @unchecked Sendable { var landing = PlaintextExportLanding() }
+        let box = Box()
+        do {
+            let database = try AppDatabase.onDisk(url: places.slot, key: session.key)
+            do {
+                _ = try withDependencies {
+                    $0.database = database
+                    $0.uuid = .init { UUID() }
+                    $0.date = .init { Date() }
+                    $0.withRandomNumberGenerator = WithRandomNumberGenerator(SystemRandomNumberGenerator())
+                } operation: {
+                    try Operations().importPlaintextExport(plan, landed: { box.landing = $0 })
+                }
+            } catch {
+                result.stoppedEarly = true
+                ProtectionOpenRoad.log("road: the plaintext export's import stopped — \(String(describing: error))")
+            }
+            let (_, binding) = database.asRebindable()
+            binding.lock()
+        } catch {
+            result.stoppedEarly = true
+            ProtectionOpenRoad.log("road: the new library's store could not be opened for the import — \(String(describing: error))")
+        }
+        result.landing = box.landing
+        let landed = box.landing
+        ProtectionOpenRoad.log(
+            "road: a plaintext export brought in as a new library — \(landed.books) books · \(landed.notes) notes · "
+                + "\(landed.snippets) snippet groups · \(landed.wings) wings; empty books left out \(landed.emptyBooks.count); "
+                + "memberships left out \(landed.membershipsLeftOut)\(result.stoppedEarly ? "; STOPPED part of the way" : "")")
+        return result
+    }
+
     // MARK: - The pick
 
     /// This Mac's catalogued copies changed — said on the main actor (`CopyDoorsListModel.copiesChanged`, the ladder's
@@ -385,6 +481,9 @@ nonisolated enum ProtectionCopyDoors {
             }
         }
         switch PickedCopy.classify(url) {
+        case .plaintextExport(let store):
+            // VX-309 U1b — T-8: a plaintext export is brought in through the import road, never filed or adopted.
+            return .plaintextExport(store)
         case .refused(let message, let detail):
             return .refused(message, detail: detail)
         case .several(let stores):
