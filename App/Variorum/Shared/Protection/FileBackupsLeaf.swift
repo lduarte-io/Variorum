@@ -142,12 +142,44 @@ nonisolated final class FileBackupsLeaf: BackupsLeaf, @unchecked Sendable {
                 let manager = FileManager.default
                 if manager.fileExists(atPath: url.path) { try manager.removeItem(at: url) }
                 for suffix in ProtectionLibraryFiles.sidecarSuffixes { try? manager.removeItem(atPath: url.path + suffix) }
-                if case .snapshot? = CatalogNames.parseFile(url.lastPathComponent) {
+                switch CatalogNames.parseFile(url.lastPathComponent) {
+                case .snapshot?:
                     let pair = Self.pairURL(of: url)
                     if manager.fileExists(atPath: pair.path) { try manager.removeItem(at: pair) }
+                case .library? where Self.isAsideFolder(url.deletingLastPathComponent()):
+                    // VX-309 U1c (VX-265): an aside copy IS its folder (it stepped aside whole, with ITS key file).
+                    try Self.removeAsideFolder(url.deletingLastPathComponent())
+                default:
+                    break
                 }
             }
         }
+    }
+
+    /// VX-309 U1c — an ASIDE copy's folder: `Previous Libraries/<stamp>/` or `Backups/safety-copies/variorum-adopt-safety-
+    /// <stamp>/`, its name read back by the catalogue's own parser (never the slot's folder, never a folder of hers).
+    static func isAsideFolder(_ folder: URL) -> Bool {
+        switch folder.deletingLastPathComponent().lastPathComponent {
+        case CatalogNames.previousLibrariesFolderName:
+            return CatalogNames.parseFolder(folder.lastPathComponent, under: .previousLibraries) != nil
+        case CatalogNames.safetyCopiesFolderName:
+            return CatalogNames.parseFolder(folder.lastPathComponent, under: .safetyCopies) != nil
+        default:
+            return false
+        }
+    }
+
+    /// What the app put beside an aside copy — its key file (any name the catalogue reads as one) and the restore hold it
+    /// carried (T-8's set-aside) — then the folder itself once nothing else is in it: a file of hers keeps the folder,
+    /// untouched (rule 19: the copy goes, never anything else).
+    static func removeAsideFolder(_ folder: URL) throws {
+        let manager = FileManager.default
+        for name in (try? manager.contentsOfDirectory(atPath: folder.path)) ?? [] {
+            let ours = CatalogNames.parseFile(name)?.isKeyFile == true || name == LibraryRestoreHold.filename
+                || name == ".DS_Store"
+            if ours { try manager.removeItem(at: folder.appendingPathComponent(name)) }
+        }
+        if (try? manager.contentsOfDirectory(atPath: folder.path))?.isEmpty == true { try manager.removeItem(at: folder) }
     }
 
     /// `<snapshot stem>.keys.json`.
