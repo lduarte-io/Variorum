@@ -882,7 +882,16 @@ door `DocumentImporter.swift` + `ImportModel.swift`; the test worlds — `Execut
   no identity-preserving road is built (the considered-and-not-pursued ledger: "an identity-preserving restore"). The arc
   is the doors' (listing · Look inside · Make this my library from an open library and from the empty slot); what it shows
   missing is closed in this unit when it is a door's, and routed when it is a rule's (F-U1b-1).
-- **R-U1b-3 — T-8.** (PENDING — the orchestrator's ruling on the mapping.)
+- **R-U1b-3 — T-8 IS THE CREATION'S ROAD PLUS THE IMPORT ROAD, HEADLESS, BEFORE THE FIRST OPEN** (the ruling §5b-R: reading
+  (a) — the unencrypted `.sqlite`; "content and its placement ride — including its kept-out-of-view-ness; configuration
+  does not"). The new library is exactly a creation (`ProtectionOpenRoad.create` — fresh identity, key, device ID, Standard,
+  its words for the band), so it opens as a creation does (`.roadCreated`); before that open its store is opened once
+  headless and the export's content minted into it through the ordinary operations (no undo stack — a library's birth).
+  What stands in the slot steps aside WHOLE first — an open library (its pool closed by the bootstrap's seam) with its key
+  file AND its restore hold (the hold is that library's), a missing library's key file, rule 27's unopenable library — and
+  any hold still standing is cleared (the ruling: no restore hold). The export's schema must be this build's: the projection
+  decodes current rows, and migrating a plaintext export would meet its outbox triggers naming dropped tables (13x's
+  recorded reconciliation step) — P-VX309-U1b-7.
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton + the readings + the harness baseline: DONE (this commit).
@@ -959,6 +968,45 @@ door `DocumentImporter.swift` + `ImportModel.swift`; the test worlds — `Execut
   `build-for-testing` green. MUTATION on `53674fe03` (restored `cmp`-identical): M-2a `beginListing` lands an empty listing →
   `✘ withNoLibraryOpenTheRestoreListOffers…` (1). FOUND BY PROBE, ROUTED (F-U1b-1): VX-305 U4's deferral (1) at its heart —
   see the findings.
-- Piece 3 — T-8: NOT-STARTED — WAITING on the mapping ruling (proposal sent).
+- Piece 3 — T-8: DONE to the ruling (§5b-R) — `1e9f4abb2` core · `10d9bb6d5` the app's door. CORE
+  (`Operations+PlaintextExportImport.swift`, NEW): `PlaintextExportReading.read(exportAt:)` (the plan on a private staged
+  copy — `LibraryClassifier.withStagedRead`; this build's schema only, `schemaNotCurrent(newer:)` otherwise; each living note
+  through Copy full text's own projection parsed by `VariorumDocument.parse`, a blank one the format's stub, an untitled one
+  named by its day; versions — `archived_at == created_at` — never; books a–z with chapters and members in the export's
+  `(position, id)` order; snippet groups; wings) + `Operations.importPlaintextExport(_:landed:)` (content wings minted by
+  name; every note once — `importDocument`; each book — ARCHIVED ones first, archived as they land — with its chapters and
+  every member ADDED in order: once, membered in each; an empty book left out and named; archived notes and snippet groups
+  archived after their memberships; snippet groups with their scraps — `createPool` + `importBlocks`; no undo entry) +
+  `PlaintextExportLanding` (books · notes · snippet groups · wings · empty books · memberships left out). Pins
+  `PlaintextExportImportTests` (3: the read plans exactly the content; the apply mints it fresh as ruled, row by row; an
+  older or a newer build's export refuses) `✔ 3 tests` — new API, red by construction. MUTATIONS on `1e9f4abb2` (restored
+  `cmp`-identical): M-3a versions not fenced → `✘` both content pins (4); M-3d archived notes not archived → `✘` the apply
+  (1); M-3e the empty-book skip dropped → `✘` the apply (3); M-3f archived books not archived → `✘` the apply (1). WING
+  ITEM 7 — BUILT AS (b): the import ops' own `wingId` parameters ARE an existing wing-context seam (`importDocument(_:
+  wingId:)`, `createReading(…wingId:)`, tags adopting by path in the destination wing — R-13ia-1), so each export wing
+  holding content is minted by name (`createWing`) and its notes and books land in it — no flattening, no merged
+  vocabularies (pinned: Beta and its `studio/sketch` tag in the minted "studio" wing); a wing the export no longer has reads
+  as Home. APP: `PickedCopy.Verdict.plaintextExport` (a plain-text FULL library keeps its refusal); `PickOutcome
+  .plaintextExport` (never filed); `CopyDoorsModel.Phase.plaintextExport` + `bringIn(_:)` + `bringInStepsALibraryAside`;
+  `CopyDoorRefusal.exportRefused(String)`; `CopyDoorsRoads.bringInPlaintextExport` (both roads); `ProtectionCopyDoors
+  .readPlaintextExport` (preflight, reads) + `landPlaintextExport` (what stands steps aside WHOLE with its hold — `ProtectionOpenRoad
+  .setAsideLibraryWholeFor(_:carryingHold:)`, which Start a New Library's own set-aside now calls, its behaviour unchanged;
+  else the missing library's key file; any hold still standing cleared — the new library is never held; the creation's
+  road; the content minted HEADLESS into the new store; the pool closed; the END'S LOG LINE naming what landed — the
+  ruling's requirement); `AppBootstrap.bringInPlaintextExport` (`.ready`, the missing face, rule 27's lobby; the preflight
+  before any teardown; with a library open the reopening seam's first half; nothing made ⇒ the open finds what stands, under
+  the old key; made ⇒ `.roadCreated` — the creation's words dropped unseen, the band offers fresh ones — and the receipt
+  `bringInReceipt` owed); the sheet's export phase; T-8's words (`bringInLead`, `bringInButton`, `bringInWorking`,
+  `exportFromAnEarlierBuild`, `exportNoteUnreadable`, `bringInReceipt`) PROVISIONAL P-VX309-U1b-3. Pins
+  `PlaintextExportBringInRoadTests` (4, planted: from an open library — a new library by the creation's road, the open one
+  aside WHOLE with its key file and its hold, never held, the content there, the export only read, one library remembered,
+  the receipt's words; from the missing face; the preflight's refusals write nothing; the doors' brain names the export and
+  offers its door) + the FLIPPED `PickedCopyRoadTests.thePicksRefusalsAndTheChooser` (the export is NAMED, never filed — a
+  JUSTIFIED EDIT); the harness `✔ Test run with 303 tests in 50 suites passed`; `PlaintextExportBringInRouteTests` (2, Mac
+  only — through `AppBootstrap`, BUILT, the run the orchestrator's). `build-for-testing` green. MUTATIONS on `10d9bb6d5`
+  (restored `cmp`-identical): M-3g the hold not carried → `✘ anExportComesIn…` (1); M-3i the missing key file not set aside
+  → `✘ atTheMissingFace…` (1 — the creation wrote over it); M-3j the pick refusing the export → `✘ thePicksRefusals…` (1).
+  HARNESS NOTE: the scratch harness's test target now names the author's GRDB fork directly (resolved OFFLINE from the
+  existing pin and checkout, `--skip-update`) so the app pins can `import GRDB` as the Xcode target does — no repo change.
 - Piece 4 — the close: NOT-STARTED.
 - No revert is in flight.
