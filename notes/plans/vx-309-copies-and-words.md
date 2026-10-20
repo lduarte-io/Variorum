@@ -629,6 +629,38 @@ identity kept; Lock Library Now GONE from the File menu in Standard. The hold ma
 (heldAt 08:53Z standing). *(The dev-library half ends: Standard, `e11e5233`, the dev pair intact and valid, held +
 banner. The throwaway block follows — checkpoint 2 appends.)*
 
+**CHECKPOINT 2 — the throwaway block (T = `a6b6213c`, fp `8c892a9f`, created by the create door, EMPTY by design).**
+**T's backup (row 1's shape on T):** Back Up Now on T → the pair in the container (`Backups/a6b6213c/458dbc52/`,
+09:12:26Z) AND the picked folder, BYTE-IDENTICAL (`cmp` both files); the pane's count/newest truthful ("1 copy"); the
+receipt's tail "Copied to your folder too, 1 old copy retired" is the FLAT legacy leg speaking (today's `StoreBackup`
+runs untouched beside the new road — its root copy of T landed in `~/Documents/Variorum/` and its folder-wide
+retention retired one old flat copy; grounded against the folder listing). Three earlier presses landed NOTHING —
+the Settings window had moved and the clicks hit desktop; the pane's zero stayed honest throughout.
+**WALK SLIP 2, said honestly (term 7):** while carving T-5's missing face, the orchestrator launched a STALE Sep-12
+Debug build (the standard DerivedData path — the walk's build lives at `App/Variorum/DerivedData/vx309`); in ~8 s on
+the OLD road it minted a fresh store + key (`dd6e8928`), STALED T's key file and dropped its key beside the container
+and picked-folder backups. Recovered whole: the minted store/key/droppings removed, T's key file un-staled and
+`cmp`-IDENTICAL to its T1 aside copy, the mirror untouched (`cmp` T1), the missing face re-carved. T's own files and
+pair were never at risk (aside cmp-verified first). The defaults carry the stale build's writes (end-diff will show
+them; reconciled there). The CONTRAST is itself evidence: the old road silently minted over a missing library; the
+merged build on the same face stopped and asked.
+**Row 3 — T-5, the empty-slot landing (the PASSPHRASE arm):** the missing face renders (lock glyph, "Your library
+file is missing." / "Variorum's library isn't where it was. Your lock hasn't changed.", three doors); Restore from a
+Backup lists T's two 09:12 pairs FIRST (this library's rows lead) with NO delete on them, the dev-era copies after
+WITH Delete… (VX-265's fence on the no-library face), the header carrying F-R1's can't-vouch clause; Make this my
+library's EMPTY-SLOT confirm captured PRE-TYPE (the T-5 lead: fresh key, both-secrets arms, "The copy itself is not
+changed.", NO steps-aside sentence — correct, nothing steps aside; ONE combined secret field, CONCEALED with a reveal
+eye — a fact for the concealment-consistency bundle row); typed T's passphrase → LANDED: new library `d3c486ea`
+(fresh key `a7242f40`, Standard with the Apple wrap, epoch 1), the copy's passphrase became the library's (its wrap
+present), HELD (`asOf 09:12:26Z` = the copy's own moment, `heldAt 09:22:59Z`), T's mirror set aside whole in
+`Previous Libraries/2026-10-20-092259/`, T's key file staled in place never overwritten, the quiet receipt "This is
+your library now." (the empty-slot short form, no Previous-Libraries tail), and the FRESH-WORDS CARD OFFERED (the
+passphrase arm's promise — "new twelve words offered once the library opens" — live). F-U2-2's banner sentence
+present as expected (recorded, not a walk failure). **Honest gaps:** the wrong-secret refusal ran on the FULL face
+instead (below); VX-444's typed-words NO-re-offer arm (a RECORDED mark carried) stays pin-covered, not walked — the
+dev half walked the carry-of-nothing re-offer, this row the passphrase arm's offer. **The 0.9.8 what's-new card
+greeted the adopted library's first open** — the calm-first-open rule's edge, a bundle row for her.
+
 ## 2. Evidence (the acceptance spine)
 Walks in BOTH VOICES (Terminal and Study) over the new faces; the restore drill through Look inside and Make this my
 library; the lifecycle page's stages 9, 10, 13 and 14 against the faces as built. Headless + build-for-testing for
