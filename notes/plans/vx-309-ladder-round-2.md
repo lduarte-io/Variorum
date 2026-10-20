@@ -85,7 +85,9 @@ map to it; its only call sites are the File menu's direct `bootstrap.lock()` beh
 declarations asserting non-empty notes (the non-empty assertions are per-capability-set — formatting, trash,
 comments…; none touches `.lockLibraryNow`), so the orchestrator's pending Mac run cannot trip on the "". The added
 assertion `capability.unavailableNote.isEmpty` (`RoadIdleDialRouteTests:54`) is red-on-old by construction (the old
-literal was non-empty) — honest, and the run is correctly listed as the orchestrator's under the stage.
+literal was non-empty) — honest, and the run is correctly listed as the orchestrator's under the stage. **While this
+round ran, the orchestrator's Mac delta landed (`8db8bfec3`): the 16-suite batch green (97/16) and F-R4's
+red-by-revert verified on the Mac host — read after it landed; it confirms, and changes, nothing above.**
 
 ### F-R5 (NIT — the ⌃⌘L third spelling) — **RECORD-ONLY DISPOSITION SOUND**
 
