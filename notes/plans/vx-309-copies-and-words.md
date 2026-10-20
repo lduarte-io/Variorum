@@ -337,6 +337,40 @@ road — T-5 follows its pattern), `Acts/KeyDoors.swift` (`resumeCannotFinish` �
    with red-on-old recipes, PROVISIONALs P-VX309-U1b-N, findings F-U1b-N, walk notes for the acceptance spine
    (stages 9, 10, 13, 14 and the restore drill — Look inside and Make this my library are THE walk's heart).
 
+## 5b-R. THE T-8 MAPPING RULING (the orchestrator, 2026-10-19 — the U1b proposal gate; repo-first before piece 3
+builds)
+
+**The reading: (a) CONFIRMED** — "the plaintext export" is the unencrypted `.sqlite` (`StorePlaintextExport`,
+`LibraryClassifier.plaintextExport`), the exact shape P-VX306-U3-5 refuses today; T-8 is that deferral come due. The
+Markdown folder is a projection, not this door's source. The stale `Copies.swift` header line (the export no longer
+carries its library ID — `protection_record` is local-only and dropped) is a FINDING, routed.
+
+**The boundary that decides the items:** T-8 is a RESCUE door, not the variorum edition (R-13n-8 — full fidelity
+lives at 13m). **Content and its placement ride — including its kept-out-of-view-ness; configuration does not.**
+What the document format can say (books, chapters, memberships, notes, takes, tags, titles) plus the content-state
+facts the catalog of containers gives (archived, pools) crosses; saved queries, stars, shelves, owned/sealed/
+finished, outflow and the rest of item 8's list do not, and the confirm says so in one line (U2's words).
+
+**Per item:** 1 — (a) for live books; ARCHIVED BOOKS take **(c)**, imported then `archiveReading` (the same doctrine
+as item 4: archive is kept-out-of-view, not gone — surfacing everything she put away would be as wrong as losing
+it); empty books skipped and named in the receipt. 2 — **(a)** (once, membered in each; the model's many-readings
+default; each book's member order = the export's `(position, id)` order). 3 — **(a)**. 4 — **(a)**; versions never
+ride. 5 — **(a)**. 6 — **(a)** (gatherings are configuration; the tags ride, so a hand-remade rule assembles the
+same notes). 7 — **CONDITIONAL**: **(b)** when the import can ride an existing wing-context seam cheaply (each
+non-empty wing minted by name, its content landing in it, tags adopting per wing — flattening would MERGE per-wing
+tag vocabularies, R-13ia-1's legal twins, a real semantic change); otherwise **(a)** with the flattening said
+plainly in the confirm, a PROVISIONAL row and a finding so the bundle carries the wing arm. Report which was built
+and why in the record. 8 — agreed. 9 — agreed (the export is only read; a mid-way refusal stops the act and the
+receipt says how far it got).
+
+**The act: (a) CONFIRMED** — the creation's road (`createLibrary(passphrase: nil)`, Standard, fresh identity/key/
+device ID, the words offered at the first look by the band card, no restore hold — a fresh mint never synced); with
+a library open the current one steps aside WHOLE into Previous Libraries first; at the missing face it lands in the
+empty slot. The import runs HEADLESS into the new store before its first open, no undo entry (a library's birth).
+The crash window (a new library holding part of the export; the export untouched and re-importable) is RECORDED as
+PROVISIONAL, not engineered around — with one requirement: the import's END writes a receipt/log line naming what
+landed (N books · M notes · K snippets), so a partial landing is visible against it.
+
 ## 2. Evidence (the acceptance spine)
 Walks in BOTH VOICES (Terminal and Study) over the new faces; the restore drill through Look inside and Make this my
 library; the lifecycle page's stages 9, 10, 13 and 14 against the faces as built. Headless + build-for-testing for
