@@ -1412,7 +1412,30 @@ ledger is the merging session's):**
   identity and words NEVER change, `dev-castle.env` stays true, term 4 untouched. The implementer's
   restore-from-Previous-Libraries road is superseded for the walk.
 
-**THE U1b MAC BATCH (the orchestrator, under the stage; result appended when run):** *(pending the coordinator's GO)*
+**THE U1b MAC BATCH (the orchestrator, 2026-10-19 20:38–21:05 MDT, stage claim `vx-309-u1b-mac`, the coordinator's
+GO; logs `/tmp/vx309-u1b-mac-*.log`, deleted at closeout):** 165 tests / 34 suites, ONE real red — a FIXTURE lie the
+first Mac run exposed, plus one honest log line:
+
+- **MB-2 (a test-world fix, the orchestrator's — commit above):** `EmptySlotMakeMineRouteTests
+  .theMissingFaceLandsACopyAsANewLibraryAndOpensReadyHeld` red with `.refused(.unreadableCopy)` — the fixture took
+  rule 5's pair STRAIGHT AFTER `world.created()`, before any open ran the migrator, so the snapshot held a store with
+  no `grdb_migrations` table and the empty-slot preflight's schema read refused it. NO PRODUCTION PAIR CAN PRECEDE
+  MIGRATION (the `.ready` arm migrates before any backup run, VX-447's door and every act's `freshBackup` run on an
+  open library), so the preflight's refusal is CORRECT and the fixture was the lie: it now migrates the store once
+  (`AppDatabase.onDisk`) before the pair, as every real open does. The suite's passing twin (`MakeMineRouteTests`)
+  takes its pair at `.ready`, which is why it never saw this. The headless twin (`EmptySlotLandingRoadTests`, planted
+  leaves) was structurally blind to it — the real `LibraryClassifier` runs only under the Mac host. ALSO KEPT: the
+  preflight's unreadable arm now LOGS its verdict (`road: … the copy's schema could not be read (…)`) instead of
+  swallowing it — the diagnosis took one log line that should always have been there. Re-run: the suite `✔ 2/1`;
+  the harness after both edits `✔ Test run with 304 tests in 50 suites passed`.
+- Every other suite green on the first run; the known `VariorumTests` warnings-not-failures only.
+- **THE R-a / R-b / R-c BEHAVIOURAL REVERTS (the record's recipes, each from a committed tree):** R-a (`makeMine:`
+  nil at `copyDoorsRoadsWithoutALibrary`) → `EmptySlotMakeMineRouteTests` RED (both tests — the `#require` and the
+  wrong-word road gone); R-b (`VariorumApp`'s `restoreDoor:` dropped) → `EmptySlotDoorsSurfaceTests` RED at its
+  needle; R-c (the `bringInReceipt` append dropped) → `PlaintextExportBringInRouteTests` RED at the receipt count.
+  Each restored `cmp`-identical, `git status` clean. The confirming re-run (the three Mac-only suites) `✔ Test run
+  with 6 tests in 3 suites passed`; 0 instances; the stage released with the coordinator's result line.
+  **THE U1b MAC LEG IS CLOSED.**
 
 **Notes:** no machinery deaths; no Sonnet lookup; no subagents; no scratch worktree. The harness is U1a's (this session's
 scratchpad `u1-harness`), its test target given the author's GRDB fork as a direct dependency (resolved offline from the
