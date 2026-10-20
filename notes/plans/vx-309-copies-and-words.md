@@ -337,6 +337,69 @@ road — T-5 follows its pattern), `Acts/KeyDoors.swift` (`resumeCannotFinish` �
    with red-on-old recipes, PROVISIONALs P-VX309-U1b-N, findings F-U1b-N, walk notes for the acceptance spine
    (stages 9, 10, 13, 14 and the restore drill — Look inside and Make this my library are THE walk's heart).
 
+## 5c. U1c BRIEF — THE LISTING'S FACES AND THE RIDERS (a fresh Opus implementer; headless + build-for-testing ONLY)
+
+**You are the U1c implementer for VX-309. Work from `~/dev/variorum-vx-309` on branch `vx-309-copies-and-words`.
+HARD LIMITS: identical to §5a's first paragraph (headless + `build-for-testing` only; no stage, no store touch, no
+network, no Linear, no subagents; today's road byte-unchanged; zero `Sync/`, `Server/`, schema, migration or
+dependency lines; `lockstepVersion` 13; the resiliency protocol binds — commit per piece, push per commit, LIVE
+STATUS from the first commit).**
+
+**Read first, in full, never delegated:** CLAUDE.md + canon; the resiliency protocol; `notes/CastleRules.md` WHOLE
+(rules 17–19, 21, 25 are this unit's law); `notes/SyncSpec.md` WHOLE; `notes/SurfaceContracts.md` (The app ·
+Doors — portability + Library protection); this plan WHOLE (§0–§3, §5a–§5b-R, the §6 U1a and U1b RECORDS with their
+ARBITRATIONS and Mac batches — F-U1b-5 is your VX-444 arm's second half; MB-1 changed `Retention.plan(now:)`);
+`notes/plans/vx-308-accounts-key-doors.md` §6 U4 RECORD (F-U4-1 — your VX-451 piece builds its option (a); the
+export-mark-by-library pattern; `changeSettings`' road) + the U3 RECORD (the pane's sections, the one presenter);
+the code — the core `Executor/Acts/Copies.swift` (`offerDelete` — VX-265's act EXISTS, you build its door),
+`Executor/Acts/DeviceActs.swift` (`changeSettings`), `Model/DeviceSection.swift` (`DeviceSettings.idleLockMinutes`),
+`Assess/Catalog.swift` (`foreign`, `MacAttribution.unattributed`); the app — `CopyDoorsModel.swift` WHOLE (the
+listing's rows, `CopyDoorsListing`), `ProtectionCopyDoors.swift`, `CopyDoorsSheet.swift`, `ProtectionPane.swift`
+(the sections' order; the gate-style row), `RoadCrossingsModel`/`RoadCrossingFaces` (the gate row's home),
+`ProtectionRoadLock.swift` (`RoadRelockPolicy`), `AppBootstrap.swift` (`canLock`/`lock`, `keyDoorRoads`, the pane
+roads), `WordsBand.swift` (the ledger `variorum.calmAsks.words.<libraryID>.*` — VX-444's one home),
+`ProtectionOpenFaces.swift` (`RoadStandingModel`), `SetPassphraseModel.swift` + the reminder's row
+(`offersSetPassphrase` — VX-454's seam), `ProtectionWords.swift`; the test worlds (`PlantedRoad`,
+`ProtectionFacesSupport`, `RoadLockTests`, `RoadKeyDoorSurfaceTests`, `WordsBandTests`, `CopyDoorsModelTests`).
+HARNESS: the scratchpad `u1-harness` recipe (the U1a/U1b records' machinery notes).
+
+**The pieces (pins first wherever a pin can be red-on-old):**
+1. **VX-265 — THE DELETE DOOR FOR OTHER LIBRARIES' COPIES (rule 19: listed, deletable — never silently, never
+   bundled).** The doors' listing already shows other libraries' copies (Previous Libraries included); each such
+   row gains *Delete…* — ONE library's copies at a time, the confirm naming the library (its date and what it holds,
+   as the listing knows it) and counting what goes (this Mac's copies of IT only — the core `offerDelete`'s own
+   fence; another Mac's copies in a shared folder are never touched), confirmed each time, never part of any other
+   act's confirm. The empty-slot listing and the open-library listing both carry it. Deleting never touches a copy
+   of the OPEN library (the restore list's own rows — rule 19 is about OTHER libraries; the open library's copies
+   are retention's). Refusals honest; a receipt names what went.
+2. **VX-210 — THE HONEST LINE about copies in folders Variorum doesn't manage.** The catalogue's `foreign` entries
+   and `unattributed` far copies are facts the listing can say ONE line about (rule 25's honest-limit idiom): copies
+   in folders the app doesn't manage (today's flat files, a hand-made folder) are not listed here and are hers to
+   manage in the Finder. ONE quiet line on the listing (and Data Safety's restore list where it already composes),
+   rendered only when such entries exist (P-2: a line that can never be true is not rendered). The wording is a
+   draft for U2's pass (PROVISIONAL).
+3. **VX-444 (+ F-U1b-5) — THE WORDS-RECORDED LEDGER CARRIES.** (i) Make this my library (the standing act, an open
+   library): the new library's id inherits the OUTGOING library's `recorded`/`dismissed` marks (the pair carries —
+   rule 17's "under your current pair" — so words she recorded are still the words she knows); (ii) T-5 with the
+   copy's own TYPED WORDS: the marks read RECORDED for the new id (she just typed them — F-U1b-5); T-5 with a
+   PASSPHRASE (fresh words minted, dropped unseen) and T-8 (the creation's words): the card's fresh offer stays —
+   carry NOTHING there. The ledger write lands where the new library's id is known, beside the act's landing; pins
+   over a planted ledger, red-on-old (the card re-offers today).
+4. **VX-451 — THE PANE'S LOCK NOW ROW + IDLE DIAL (F-U4-1's option (a); no core line).** In the pane's Castle
+   section on the new road (where `RoadRelockPolicy` stands): a *Lock Now* door (the menu's ⌃⌘L twin — one
+   capability, the registry's declaration carries both doors) and the idle-minutes picker (10 default · a small
+   honest set · never) writing THIS MAC'S SEALED setting through the core's `changeSettings` road (never
+   UserDefaults — the design's §3.2/§3.15 law U4's record states). Both render only where Castle stands (P-2);
+   today's road byte-unchanged.
+5. **VX-454 — PROBE FIRST (Suspected):** W-VX308-2's trace — "Set a passphrase…" still renders above the key doors
+   after turn-on-sync set one (the ledger not re-read; self-heals at the next launch, unverified). Build the pin
+   FIRST as the confirm (the planted road: turn-on-sync lands a passphrase → the pane's read): RED confirms and the
+   fix proceeds (the re-read at the act's landing — the account section's `landed` chain already re-reads, find why
+   the reminder's row doesn't); GREEN means record-only (close the ticket as unreproducible with the pin as the
+   evidence). Either way the pin stays.
+6. **The record** (U1c RECORD in this file, the §6 form): readings, LIVE STATUS, the lines for the ladder, COUNTS,
+   the Mac-suite list with red-on-old recipes, PROVISIONALs P-VX309-U1c-N, findings F-U1c-N, walk notes.
+
 ## 5b-R. THE T-8 MAPPING RULING (the orchestrator, 2026-10-19 — the U1b proposal gate; repo-first before piece 3
 builds)
 
