@@ -163,6 +163,16 @@ for the active app. That is resolved below, within her brief's "leave focus wher
   40–3600 s) and is green after.
 - A first attempt pinned the lit share of the water instead. It was green on both sides (hollow) and was
   replaced.
+- **The coordinator's integration test** (1018coordinator, after the window, from its own seat) found a
+  real bug before passing. Under its standard hold, "HOLD: coordinator queue — ask 1018coordinator",
+  `on` refused with "lock without a claim file". Mechanism: under a UTF-8 locale bash 3.2's `%q` writes
+  the em dash's lead byte raw (0xE2) and the continuation bytes as `\200\224`, so the claim file is not
+  valid UTF-8, the text read returned nil, and that read as a missing file. The first suite ran
+  `Tools/stage` with no `LANG` (C locale: all-octal, valid ASCII). Fixed at 70f095a9c: the claim is
+  read and unquoted as bytes, and a file without WHO/REASON is its own `.unreadable` verdict, still
+  refused. Pins, red on the old reader and green after: every real-`Tools/stage` probe under both
+  `en_US.UTF-8` and `C`, the exact bytes of its hold, and the unreadable case. It passed under an ASCII
+  hold with the old build: `on` exited 0 and logged `stage=hold`.
 
 ## Proposed, not applied (hers to rule)
 
