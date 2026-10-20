@@ -107,7 +107,10 @@ struct OtherLibrariesDeleteRoadTests {
         #expect(ProtectionWords.deleteCopiesCounts(choice) == counted)
         let lead = ProtectionWords.deleteCopiesLead(choice, libraryOpen: true)
         #expect(lead.contains(ProtectionWords.day(PlantCatalog.day(2))) && lead.contains(counted))
-        #expect(lead.contains("One copy another Mac made stays.") && lead.hasSuffix("Your library isn't touched."))
+        // VX-309 ladder round 1, F-R1 — FLIPPED DELIBERATELY: a copy that stays may be an unattributed far copy, whose
+        // maker is not knowable — the staying sentence says so (PROVISIONAL P-VX309-R1-1).
+        #expect(lead.contains("One copy another Mac made, or that this \(ProtectionCopy.deviceName) can't vouch for, stays.")
+            && lead.hasSuffix("Your library isn't touched."))
         #expect(!ProtectionWords.deleteCopiesLead(choice, libraryOpen: false).contains("Your library"))
 
         final class Asked { var libraries: [String] = []; var answer: CopyDeleteOutcome = .refused(.busy) }
@@ -201,5 +204,50 @@ struct OtherLibrariesDeleteRoadTests {
         let catalog = Catalog.build(shouted)
         #expect(catalog.foreign.count == 3, "all three foreign to the catalogue")
         #expect(CopyDoorsListing.unmanagedCopies(in: catalog) == 2, "the two library-shaped files; never the sidecar")
+    }
+
+    /// `entries` as the lister lists them in the picked second folder (`<picked>/Variorum/…`).
+    static func far(_ entries: [CatalogEntry]) -> [CatalogEntry] {
+        entries.map {
+            CatalogEntry(place: .farFolder, folders: $0.folders, name: $0.name, bytes: $0.bytes, modifiedAt: $0.modifiedAt)
+        }
+    }
+
+    /// VX-309 ladder round 1, F-R1 — A FAR PAIR OF ANOTHER LIBRARY THAT NO CONTAINER TWIN VOUCHES FOR (its container copies
+    /// deleted while the second folder was unplugged; or another Mac's own library in a shared second folder): rule 19's
+    /// fence cannot claim it — the `<mac8>` it is filed under may be another Mac's (rule 23) — so it is NEVER offered a
+    /// delete (never delete what might be another Mac's); and the one honest line now COUNTS it, so its row is never
+    /// silently door-less (PROVISIONAL P-VX309-R1-1 — the option question is her bundle's). Its twin standing, the pair is
+    /// this Mac's: deletable, never counted. The open library's far copies and a protected library's are never counted
+    /// (their rows are the restore list's and the empty-slot landing's, never rule 19's). RED ON OLD: the line's count was
+    /// 0 — the row visible, door-less, unsaid.
+    @Test func aFarPairNoContainerTwinVouchesForIsSaidAndNeverDeleted() throws {
+        let open = PlantCatalog.id(), x = PlantCatalog.id()
+        let thisMac = PlantCatalog.id(), xMac = PlantCatalog.id(), otherMac = PlantCatalog.id()
+        let openFile = try PlantCatalog.keyFile(libraryID: open)
+        let xFile = try PlantCatalog.keyFile(libraryID: x)
+        let openOwn = try PlantCatalog.backup(openFile, mac: thisMac, at: PlantCatalog.day(1))
+        let xFar = Self.far(try PlantCatalog.backup(xFile, mac: xMac, at: PlantCatalog.day(2)))
+        let catalog = Catalog.build(openOwn + xFar)
+
+        let listing = CopyDoorsListing.make(catalog, libraryID: open, protected: [open])
+        let xRow = try #require(listing.otherLibraries.first { $0.copy.library == x }, "listed (rule 19)")
+        #expect(listing.deleteChoice(for: xRow) == nil, "never delete what might be another Mac's — the fence unwidened")
+        #expect(listing.unmanagedCopies == 1, "the one honest line says it — never silently door-less")
+        // With no library open (the missing face), not remembered: the same; remembered (protected): the landing's, not counted.
+        #expect(CopyDoorsListing.make(catalog, libraryID: nil, protected: []).unmanagedCopies == 1)
+        #expect(CopyDoorsListing.make(catalog, libraryID: nil, protected: [x]).unmanagedCopies == 0)
+
+        // Its container twin standing: this Mac's copies of X — the delete offered, nothing counted.
+        let xTwin = try PlantCatalog.backup(xFile, mac: xMac, at: PlantCatalog.day(3))
+        let twinned = Catalog.build(openOwn + xFar + xTwin)
+        let withTwin = CopyDoorsListing.make(twinned, libraryID: open, protected: [open])
+        #expect(withTwin.deleteChoices[x]?.count == 2 && withTwin.deleteChoices[x]?.staying == 0)
+        #expect(withTwin.unmanagedCopies == 0)
+
+        // The open library's far pair under another Mac's subfolder (a synced library's other device): its restore row.
+        let openFar = Self.far(try PlantCatalog.backup(openFile, mac: otherMac, at: PlantCatalog.day(4)))
+        let openListing = CopyDoorsListing.make(Catalog.build(openOwn + openFar), libraryID: open, protected: [open])
+        #expect(openListing.thisLibrary.count == 2 && openListing.unmanagedCopies == 0)
     }
 }

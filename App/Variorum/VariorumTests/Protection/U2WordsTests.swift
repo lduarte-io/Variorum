@@ -80,7 +80,13 @@ struct U2WordsTests {
     @Test func theDeleteConfirmSaysHerWayBackSentenceOnlyOverAnOlderLibrary() {
         let two = ProtectionWords.deleteCopiesLead(Self.choice(backups: 1, previous: 2, staying: 1), libraryOpen: true)
         #expect(two.contains(Self.herWayBack), "\(two)")
-        #expect(two.contains("One copy another Mac made stays.") && two.hasSuffix("Your library isn't touched."))
+        // VX-309 ladder round 1, F-R1 — FLIPPED DELIBERATELY: what stays may be a copy no Mac can be named for (an
+        // unattributed far copy) — the reviewer's "can't vouch for" clause (PROVISIONAL P-VX309-R1-1).
+        #expect(two.contains("One copy another Mac made, or that this \(ProtectionCopy.deviceName) can't vouch for, stays.")
+            && two.hasSuffix("Your library isn't touched."))
+        let three = ProtectionWords.deleteCopiesLead(Self.choice(backups: 1, previous: 0, staying: 3), libraryOpen: true)
+        #expect(three.contains(" 3 copies another Mac made, or that this \(ProtectionCopy.deviceName) can't vouch for, stay."),
+                "\(three)")
         let one = ProtectionWords.deleteCopiesLead(Self.choice(backups: 0, previous: 1), libraryOpen: false)
         #expect(one.contains("That older library is your way back to what you had before \u{2014} delete it only if you "
             + "won't want it back."), "\(one)")
@@ -321,8 +327,12 @@ struct U2WordsTests {
         #expect(ProtectionWords.deleteCopiesReceipt(1) == "Deleted 1 copy of another library from this \(ProtectionCopy.deviceName).")
         #expect(ProtectionWords.deleteCopiesReceipt(4)
             == "Deleted 4 copies of another library from this \(ProtectionCopy.deviceName).")
+        // VX-309 ladder round 1, F-R1 — FLIPPED DELIBERATELY: the line now also counts a far copy no container twin vouches
+        // for — inside a folder Variorum writes — so it gains the clause that keeps it true of that copy (PROVISIONAL
+        // P-VX309-R1-1).
         #expect(ProtectionWords.copiesElsewhereLine == "Copies outside the folders Variorum keeps \u{2014} older backups, or "
-            + "a folder you made \u{2014} are left as they are. They're yours to manage in the Finder.")
+            + "a folder you made \u{2014} are left as they are, and so are copies in your second folder that this "
+            + "\(ProtectionCopy.deviceName) can't vouch for as its own. They're yours to manage in the Finder.")
         #expect([ProtectionWords.deleteCopiesDoor, ProtectionWords.deleteCopiesTitle, ProtectionWords.deleteCopiesButton,
                  ProtectionWords.deleteCopiesWorking, ProtectionWords.deleteCopiesFailed]
             == ["Delete\u{2026}", "Delete this library's copies?", "Delete copies", "Deleting the copies\u{2026}",
