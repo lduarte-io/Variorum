@@ -60,6 +60,19 @@ struct CopyDoorsSheet: View {
                         Button(ProtectionWords.makeMineDoor) { Task { await model.openMakeMine(row) } }
                     }
                 }
+            case .listing(let listing):
+                // VX-309 U1b: this Mac's copies with no library open — rule 17's Restore from Backup at the empty slot.
+                Text(LibraryOpenCopy.restoreSectionTitle).font(.title3.weight(.semibold))
+                Text(listing.isEmpty ? ProtectionWords.noCopiesOnThisMac : ProtectionWords.emptySlotRestoreListLead)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 10) {
+                        ForEach(listing.all) { row in listingRow(row) }
+                    }
+                }
+                .frame(maxHeight: 320)
+                HStack { Spacer(); Button(ProtectionWords.makeMineCancel) { onClose() }.keyboardShortcut(.cancelAction) }
             case .makeMine(let confirm):
                 MakeMineConfirm(model: confirm)
             case .lookInside(let look):
@@ -76,6 +89,26 @@ struct CopyDoorsSheet: View {
     private var isLooking: Bool {
         if case .lookInside = model.phase { return true }
         return false
+    }
+
+    /// One copy of the listing: its day and kind, and its doors.
+    private func listingRow(_ row: CopyDoorRow) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(row.asOf.map { $0.formatted(date: .abbreviated, time: .shortened) } ?? ProtectionWords.offerUnknownDay)
+                    .font(.callout)
+                Text(ProtectionWords.copyKind(row.kind))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            if model.offersLookInside {
+                Button(ProtectionWords.lookInsideDoor) { Task { await model.openLookInside(row) } }
+            }
+            if model.offersMakeMine {
+                Button(ProtectionWords.makeMineDoor) { Task { await model.openMakeMine(row) } }
+            }
+        }
     }
 }
 

@@ -503,9 +503,10 @@ struct VariorumApp: App {
                 // Existing Library…", shipped unrendered since 1a).
                 // VX-306 U3: on the new road the door leads to the picked flow — filed, then Look inside (Make this my
                 // library needs a library open; the empty-slot landing, T-5, is VX-309's) — P-VX306-U3-7 narrowed.
-                LibraryMissingView(lobby: lobby, openDoor: {
-                    libraryOpen.openPanel(bootstrap: bootstrap)
-                })
+                LibraryMissingView(
+                    lobby: lobby, openDoor: { libraryOpen.openPanel(bootstrap: bootstrap) },
+                    // VX-309 U1b: on the new road, Restore from a Backup… is the doors over this Mac's copies (rule 17).
+                    restoreDoor: bootstrap.newRoad ? { libraryOpen.openRestoreList(bootstrap: bootstrap) } : nil)
             case .failed(let error, let recovery):
                 // 13p ladder R1-M3: `recovery` is the sidecar-present
                 // unlock road — non-nil when the key custody is empty but
@@ -517,7 +518,10 @@ struct VariorumApp: App {
                 RoadLockView(
                     lobby: lobby, backupsFolder: bootstrap.liveStoreURL.flatMap(RoadLockView.backupsFolder(besideStore:)),
                     // VX-306 U3: the door leads to the picked flow — filed, then Look inside (P-VX306-U3-7 narrowed).
-                    openDoor: { libraryOpen.openPanel(bootstrap: bootstrap) })
+                    openDoor: { libraryOpen.openPanel(bootstrap: bootstrap) },
+                    // VX-309 U1b: Restore from Backup… is the doors over this Mac's copies (rule 17), not the reveal.
+                    restoreDoor: { libraryOpen.openRestoreList(bootstrap: bootstrap) },
+                    copiesHome: bootstrap.liveStoreURL.map(RoadLockView.copiesHome(besideStore:)) ?? false)
             case .newLibraryWords(let card):
                 // VX-307 U2b (VX-412): the creation-time words card RETIRED on the Mac — the first open has nothing in
                 // front of it (`ProtectionRoad.showsWordsAtCreation` is false here, so the bootstrap never lands on this

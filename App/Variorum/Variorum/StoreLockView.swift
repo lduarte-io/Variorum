@@ -302,11 +302,23 @@ struct RoadLockView: View {
     var backupsFolder: URL? = nil
     /// VX-306 U2 — rule 27's face's *Open Library…* (13x's open door, the missing face's); nil: not rendered.
     var openDoor: (() -> Void)? = nil
+    /// VX-309 U1b — rule 27's face's *Restore from Backup…* as the doors over this Mac's catalogued copies (rule 17: "The
+    /// app's Restore from Backup is this door"), shown where a home of copies stands (`copiesHome`); nil keeps the reveal.
+    var restoreDoor: (() -> Void)? = nil
+    var copiesHome = false
     /// VX-140: whether Variorum is the active app RIGHT NOW — the automatic ask's one input beyond the lobby.
     var appIsActive: () -> Bool = { NSApp.isActive }
 
     /// The app's own Backups folder beside the library — the missing face's rule (`LibraryMissingLobby
     /// .backupsFolderURL`), named by the catalogue's one name for it (the ladder's round-1 NIT 1): nil when there is none.
+    /// VX-309 U1b — a home of this Mac's copies beside the library (`Backups/` or `Previous Libraries/`).
+    static func copiesHome(besideStore storeURL: URL) -> Bool {
+        let container = storeURL.deletingLastPathComponent()
+        return [CatalogNames.backupsFolderName, CatalogNames.previousLibrariesFolderName].contains {
+            FileManager.default.fileExists(atPath: container.appendingPathComponent($0, isDirectory: true).path)
+        }
+    }
+
     static func backupsFolder(besideStore storeURL: URL) -> URL? {
         let folder = storeURL.deletingLastPathComponent()
             .appendingPathComponent(CatalogNames.backupsFolderName, isDirectory: true)
@@ -408,7 +420,11 @@ struct RoadLockView: View {
     /// Rule 27's doors — the missing face's three, §7c (3)'s words; each renders only where it can act (P-2).
     @ViewBuilder
     private var noKeyFileDoors: some View {
-        if let backupsFolder {
+        if let restoreDoor, copiesHome {
+            Button(ProtectionWords.noKeyFileRestoreDoor) { restoreDoor() }
+                .buttonStyle(CalmButtonStyle(tokens: tokens))
+                .disabled(lobby.busy)
+        } else if restoreDoor == nil, let backupsFolder {
             Button(ProtectionWords.noKeyFileRestoreDoor) {
                 NSWorkspace.shared.activateFileViewerSelecting([backupsFolder])
             }

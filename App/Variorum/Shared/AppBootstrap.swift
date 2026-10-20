@@ -1976,6 +1976,16 @@ final class LibraryMissingLobby {
         self.newRoadCreate = newRoadCreate
     }
 
+    /// VX-309 U1b — a home of this Mac's copies stands beside the (absent) store (`Backups/` or `Previous Libraries/`):
+    /// the new road's *Restore from a Backup…* lists them (P-2: no home, no door).
+    var copiesHomeExists: Bool {
+        guard let storeURL else { return false }
+        let container = storeURL.deletingLastPathComponent()
+        return [CatalogNames.backupsFolderName, CatalogNames.previousLibrariesFolderName].contains {
+            FileManager.default.fileExists(atPath: container.appendingPathComponent($0, isDirectory: true).path)
+        }
+    }
+
     /// The app's own Backups folder beside the (absent) store — the Mac's
     /// "Restore from a Backup…" reveals it; nil when there is none to show.
     var backupsFolderURL: URL? {

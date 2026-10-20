@@ -302,6 +302,9 @@ final class CopyDoorsModel: Identifiable {
         case choosing([URL])
         /// A picked copy, catalogued: its doors.
         case doors(CopyDoorRow)
+        /// VX-309 U1b — this Mac's catalogued copies with NO library open (the missing face's and rule 27's *Restore from
+        /// Backup…* on the new road — rule 17: "The app's Restore from Backup is this door"): each row its doors.
+        case listing(CopyDoorsListing)
         /// Make this my library's confirm.
         case makeMine(MakeMineModel)
         /// Look inside — the copy read-only (P-VX306-U3-15).
@@ -335,6 +338,13 @@ final class CopyDoorsModel: Identifiable {
 
     /// The chooser's pick.
     func choose(_ store: URL) async { await begin(picked: store) }
+
+    /// VX-309 U1b — the catalogue's copies on this Mac, read now, each row's doors offered (the faces with no library open:
+    /// the missing face, rule 27's lobby).
+    func beginListing() async {
+        phase = .reading
+        phase = .listing(await roads.listing())
+    }
 
     /// Look inside `row` (a list row's press, or the picked copy's door) — the quiet road tried first.
     func openLookInside(_ row: CopyDoorRow) async {

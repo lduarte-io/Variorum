@@ -200,6 +200,10 @@ nonisolated enum ProtectionWords {
         + "new twelve words, offered once it opens. The copy itself is not changed."
     /// The receipt after the landing (no library stepped aside — there was none).
     static let makeMineEmptySlotReceipt = "This copy is your library now."
+    /// The copies list with no library open (the missing face's and rule 27's *Restore from Backup…* on the new road).
+    static let emptySlotRestoreListLead = "These are the copies of a library on this Mac. Look inside one to read it "
+        + "without changing anything, or make it your library."
+    static let noCopiesOnThisMac = "There are no copies of a library on this Mac."
 
     // MARK: - The lobby (rule 8: it asks only when no quiet road remains) — PROVISIONAL P-VX306-U1b-4
 
