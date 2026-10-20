@@ -235,3 +235,20 @@ The coordinator treats an `on` refused for "display asleep" as expected overnigh
 | R1-9 NIT | The record's pin figures came from an earlier version of the test. | FIXED (Pins, above). |
 | R1-10 NIT SPECULATIVE | The reused frame buffers are rewritten while older CGImages may still reference them. | RECORDED, no change. Core Animation copies at commit (the sampled commit path shows a send, not a re-read), and three buffers keep a margin. The code comment says never cut it to one. |
 | R1-11 NIT | A quit Apple Event skipped `finish`: no OFF line, no focus hand-back. | FIXED: `applicationShouldTerminate` routes through `finish` ("quit request"). |
+
+### Round 2 — 0 BLOCKER · 0 MAJOR · 2 MINOR · 6 NIT; all agreed. No new BLOCKER or MAJOR, so the ladder closes (no round 3)
+
+These are the final round's fixes, so per the ladder the orchestrator checked each one line by line
+against its finding. The two host findings also get a stage probe (below).
+
+| # | Finding | Disposition |
+|---|---|---|
+| R2-1 MINOR | The R1-11 fix answered a quit Apple Event with `.terminateCancel`, which by AppKit's contract aborts a logout/restart/shutdown (Apple: "To abort the termination sequence … return NSTerminateCancel"). | FIXED. `applicationShouldTerminate` runs the synchronous wrap-up (cursor, window, focus hand-back, state, log) and returns `.terminateNow`. `finish` is split into `wrapUp` + the exit beat. Probe: `osascript -e 'quit app "StageAmbient"'` should exit 0 with `OFF quit request` logged (the stage window below). |
+| R2-2 MINOR | "Up" was declared before activation was confirmed (activation is a request), so a declined activation would say ON with the cursor visible and the waking keystroke landing in the hidden front app. And the exit-8 refusal didn't hand focus back. | FIXED. `declareUp()` runs only once the app is active (`applicationDidBecomeActive`, or already active). It writes the state file, so `on` says ON only then. With no activation in 2 s it refuses (exit 9, "activation was declined"). `refuse` now restores the screen and hands focus back like `finish`. Probe: after `on`, the front pid equals the ambient pid. |
+| R2-3 NIT | The second gate read idle before `since` was stamped, leaving a gap of tens of ms. | FIXED: `since` is stamped first, so the two overlap. No shell harness. |
+| R2-4 NIT | `usage()` printed a stray `set -uo pipefail`. | FIXED: it prints the header comment block and stops at the first code line (checked: `ambient help`). |
+| R2-5 NIT | The host header said "a device pixel or two" (it's up to 2.5 points), and README rail 7 said "losing focus" hands activation back (it deliberately doesn't). | FIXED: both reworded. |
+| R2-6 NIT | `build()` compared only the binary, could swap the bundle under a live ambient, and hid codesign's errors. | FIXED: the Info.plist is compared too; no swap while the ambient runs (it says so and refreshes at the next `on`); codesign errors are shown. |
+| R2-7 NIT | The idle gate failed open on an unreadable idle or a non-numeric `--min-idle`. | FIXED: `--min-idle` must be whole seconds (exit 2), and an unreadable idle refuses. |
+| R2-8 NIT | The `HOLD FOR <who>` spelling lived only in the skill's new ambient section, not where an expired claim's hold is written. | FIXED on the stacked skill branch: the "An expired claim" section says it too. |
+

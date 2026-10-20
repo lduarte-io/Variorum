@@ -31,7 +31,7 @@ STATE="$HOME/.variorum/ambient.state"
 LOG="$HOME/.variorum/ambient.log"
 LOCK="$HOME/.variorum/stage.d"
 
-usage() { sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+usage() { awk 'NR == 1 { next } /^#/ { sub(/^# ?/, ""); print; next } { exit }' "$0"; exit 2; }
 ms() { perl -MTime::HiRes=time -e 'printf "%d", time * 1000'; }
 epoch() { perl -MTime::HiRes=time -e 'printf "%.3f", time'; }
 pid_of() { pgrep -x "$NAME" 2>/dev/null | head -1; }
@@ -60,11 +60,24 @@ build() {
   fi
   bin="$(swift build -c release --package-path "$PKG" --show-bin-path 2>/dev/null)/$NAME"
   [ -x "$bin" ] || { echo "no binary at $bin" >&2; return 1; }
-  if [ -x "$APP/Contents/MacOS/$NAME" ] && cmp -s "$bin" "$APP/Contents/MacOS/$NAME"; then return 0; fi
+  local plist; plist=$(mktemp -t ambient-plist)
+  info_plist > "$plist"
+  if [ -x "$APP/Contents/MacOS/$NAME" ] && cmp -s "$bin" "$APP/Contents/MacOS/$NAME" \
+     && cmp -s "$plist" "$APP/Contents/Info.plist"; then rm -f "$plist"; return 0; fi
+  if [ -n "$(pid_of)" ]; then
+    rm -f "$plist"
+    echo "(the bundle is in use by the running ambient; it will be refreshed at the next on)" >&2
+    return 0
+  fi
   rm -rf "$APP"
   mkdir -p "$APP/Contents/MacOS"
   cp "$bin" "$APP/Contents/MacOS/$NAME"
-  cat > "$APP/Contents/Info.plist" <<'PLIST'
+  mv "$plist" "$APP/Contents/Info.plist"
+  codesign --force --sign - "$APP" >/dev/null || { echo "codesign failed for $APP" >&2; return 1; }
+}
+
+info_plist() {
+  cat <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -81,7 +94,6 @@ build() {
 </dict>
 </plist>
 PLIST
-  codesign --force --sign - "$APP" >/dev/null 2>&1
 }
 
 status_line() {
@@ -109,13 +121,15 @@ case "$cmd" in
         *) echo "ambient on: unknown argument '$1'"; usage ;;
       esac
     done
+    case "$min_idle" in (''|*[!0-9]*) echo "ambient on: --min-idle wants whole seconds"; exit 2 ;; esac
     pid=$(pid_of)
     if [ -n "$pid" ]; then echo "AMBIENT ALREADY ON — $(status_line)"; exit 0; fi
     gate() { # the stage and the idle gate; prints why and returns 0 when it must stay off
       local why idle
       if why=$(claim_blocks "$allow"); then echo "stage $why"; return 0; fi
       idle=$(hid_idle)
-      if [ -n "$idle" ] && [ "$idle" -lt "$min_idle" ]; then
+      case "$idle" in (''|*[!0-9]*) echo "the HID idle time could not be read (refusing to be sure)"; return 0 ;; esac
+      if [ "$idle" -lt "$min_idle" ]; then
         echo "someone is using the Mac (HID idle ${idle} s < ${min_idle} s)"; return 0
       fi
       return 1
@@ -124,8 +138,8 @@ case "$cmd" in
     build || { echo "AMBIENT REFUSED — the build failed (above)"; exit 1; }
     # Again after the build (it takes a moment): a claim may have landed, or she may have sat down. The
     # app then counts any input after THIS moment (--input-since), so a touch during the launch ends it too.
+    since=$(epoch) # first, so this gate's idle reading and the app's watch overlap with no gap
     if why=$(gate); then echo "AMBIENT REFUSED — $why"; exit 1; fi
-    since=$(epoch)
     front=$(lsappinfo info -only pid "$(lsappinfo front)" 2>/dev/null | grep -oE '(pid = |"pid"=)[0-9]+' | grep -oE '[0-9]+' | head -1)
     rm -f "$STATE"
     logsize=$(stat -f %z "$LOG" 2>/dev/null || echo 0)
