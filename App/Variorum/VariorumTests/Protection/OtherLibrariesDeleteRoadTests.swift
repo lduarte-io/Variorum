@@ -188,4 +188,18 @@ struct OtherLibrariesDeleteRoadTests {
         #expect(CopyDoorsListing.unmanagedCopies(in: catalog) == 6)
         #expect(CopyDoorsListing.make(catalog, libraryID: library).unmanagedCopies == 6)
     }
+
+    /// VX-309 ladder round 1, F-R6 — a library-shaped file is library-shaped whatever the case of its suffix: an `.SQLITE`
+    /// (a hand-renamed file, a case-preserving volume) counts toward the one honest line like an `.sqlite`; its sidecar
+    /// never does. RED ON OLD: the foreign arm's suffix test was case-sensitive (0, not 2).
+    @Test func theLineCountsALibraryShapedFileWhateverTheCaseOfItsSuffix() {
+        let shouted = [
+            CatalogEntry(place: .container, folders: ["Backups"], name: "VARIORUM-BACKUP-2026-10-19-120000.SQLITE"),
+            CatalogEntry(place: .container, folders: ["Backups"], name: "VARIORUM-BACKUP-2026-10-19-120000.SQLITE-wal"),
+            CatalogEntry(place: .farFolder, folders: [], name: "Old Library.Sqlite"),
+        ]
+        let catalog = Catalog.build(shouted)
+        #expect(catalog.foreign.count == 3, "all three foreign to the catalogue")
+        #expect(CopyDoorsListing.unmanagedCopies(in: catalog) == 2, "the two library-shaped files; never the sidecar")
+    }
 }
