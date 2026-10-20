@@ -1,5 +1,12 @@
 # VX-309 — LADDER ROUND 1: THE FIX LEG (Opus implementer, 2026-10-20)
 
+**NOT DONE in this leg, first:** NO Mac suite RUN, no walk, no stage, no store, no network, no Linear, no subagent (the
+brief) — the Mac-only assertion F-R4 added (`RoadIdleDialRouteTests`) and the Mac runs of the flipped suites are the
+orchestrator's under the stage (the list below). F-R1's DELETE fence is NOT widened and no door is added to a twin-less
+row (her option question). F-R2's date question (does an entry date ride T-8?) is NOT built — her QUESTIONS row. F-R5 is
+record-only. No canon line, no QUESTIONS row, no ticket — the merging session's. Zero DISPUTES (nothing goes back to the
+reviewer).
+
 **Cast:** the round-1 fix leg under the cross-model flow (Fable reviewed, Opus implements): each finding of
 `notes/plans/vx-309-ladder-round-1.md` gets an AGREE or a DISPUTE with my own traced reasoning; an AGREED finding is
 fixed with its discipline (red-on-old pins where behaviour changes; deliberate pin flips where words change, each
@@ -21,7 +28,7 @@ Lock Library Now call site, `RoadCrossingSheet.swift`'s section) and their pins 
 finding touches sync, custody or a schema (the one core file touched is a comment line).
 
 ## LIVE STATUS (per piece; PENDING = unverified)
-- Piece 0 — this file: the dispositions below, written before any code: DONE (this commit).
+- Piece 0 — this file: the dispositions below, written before any code: DONE (`d508136ff`).
 - Piece 1 — F-R3 (the stale header line): DONE (`3963de6c6`) — comment only; `swift build` green.
 - Piece 2 — F-R4 (the dead `unavailableNote`): DONE (`c2909d98a`) — `unavailableNote: ""` + the comment; the Mac pin
   `RoadIdleDialRouteTests.lockLibraryNowIsOneDeclarationTheMenuAndThePaneRender` gains `unavailableNote.isEmpty` (BUILT;
@@ -33,7 +40,7 @@ finding touches sync, custody or a schema (the one core file touched is a commen
   RED ON THE PRE-FIX TREE `✘ Test run with 20 tests in 2 suites failed after 0.533 seconds with 6 issues.` — the behaviour
   pin `OtherLibrariesDeleteRoadTests.aFarPairNoContainerTwinVouchesForIsSaidAndNeverDeleted`'s 2 (`unmanagedCopies == 1`
   with the library open, and with none open — the reviewer's red, reproduced) + the 4 deliberate word flips (the staying
-  sentence ×3 hosts in two suites, VX-210's line); the pin's four guards (no delete offered; the twin standing ⇒ deletable,
+  sentence's singular in both suites and its plural, new; VX-210's line); the pin's four guards (no delete offered; the twin standing ⇒ deletable,
   uncounted; the open library's far copy uncounted; a protected library's uncounted) green on both trees. With the fix
   `✔ Test run with 20 tests in 2 suites passed`. MUTATIONS on `789240c32` (each restored by `git checkout --`, `cmp`-identical
   to `scratchpad/r1fix-prerevert/CopyDoorsModel.swift`): M-R1a the twin-less arm dropped → `✘ … 2 issues` (the pre-fix
@@ -46,8 +53,84 @@ finding touches sync, custody or a schema (the one core file touched is a commen
   3 suites passed` (U2WordsTests · OtherLibrariesDeleteRoadTests · PlaintextExportBringInRoadTests). MUTATION on `23a76bc6f`
   (restored `cmp`-identical to `scratchpad/r1fix-prerevert/ProtectionWords.swift`): M-R2a the guide's paragraph back alone
   (the two hosts drifting) → `✘ Test run with 13 tests in 1 suite failed … with 1 issue.`
-- Piece 6 — the close: evidence (the touched suites headless; the core protection set Debug + Release;
-  `build-for-testing`; the phone; the Release build): IN-PROGRESS — the runs on the final code tree `23a76bc6f`, PENDING.
+- Piece 6 — the close: DONE (this commit; it changes only this file). Every run on the final code tree `23a76bc6f`:
+  - HEADLESS HARNESS (the scratchpad `u1-harness`, pointed at this worktree, `--skip-update`): **`✔ Test run with 347 tests
+    in 57 suites passed after 6.242 seconds.`** (the U2 close's 345/57 + 2: F-R6's and F-R1's new pins; the flips edit
+    existing tests).
+  - CORE: the protection set (the 90 `@Suite` types under `Tests/VariorumCoreTests/Protection`, re-derived by
+    `protection-filter.py`, + `PassphraseStrengthTests` — U2's filter) Debug **`✔ Test run with 385 tests in 91 suites
+    passed after 6.002 seconds.`**; Release (`swift test -c release`, the same filter) **`✔ Test run with 361 tests in 87
+    suites passed after 4.211 seconds.`** — both the U2 close's counts exactly (the one core line here is a comment).
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx309
+    -skipPackageUpdates -onlyUsePackageVersionsFromResolvedFile build-for-testing` → **`** TEST BUILD SUCCEEDED **`** (no
+    warning in a touched file); the phone (`-scheme VariorumMobile -destination "generic/platform=iOS Simulator"
+    -derivedDataPath DerivedData/vx309-mobile … build`, U2's command) → **`** BUILD SUCCEEDED **`**; the Release check
+    (`-configuration Release -derivedDataPath DerivedData/vx309-release … build`) → **`** BUILD SUCCEEDED **`**.
+  - The leg's diff (`git diff 99bf2c260 --stat`): 8 files — `CopyDoorsModel.swift`, `ProtectionWords.swift`,
+    `CapabilityRegistry.swift`, `Executor/Acts/Copies.swift` (comment), three test files, this record. Zero `Sync/`,
+    `Server/`, schema, migration or dependency lines; `SyncSchema.lockstepVersion` 13.
+- No revert is in flight (every mutation ran on a committed tree and was restored by `git checkout --`, `cmp`-identical to
+  `scratchpad/r1fix-prerevert/`; `git status` clean at the close).
+
+## THE LINES AS BUILT (for round 2 — every one PROVISIONAL P-VX309-R1-1 / the P-VX309-U2-10 class)
+- `CopyDoorsListing.unmanagedCopies(in:libraryID:protected:)` (`CopyDoorsModel.swift`; `make` passes the open library and
+  the protected set): foreign `.sqlite` case-folded (F-R6) + every copy no key file names + every `.unattributed` far copy
+  (unchanged) + (F-R1) a `.mac8` far copy of a library that is neither `libraryID` nor `protected` that
+  `OwnCopies.isThisMacsCopy` does not claim. `OwnCopies` UNTOUCHED — the delete fence is exactly as it was.
+- VX-210's line (`ProtectionWords.copiesElsewhereLine` — both listings and the guide's lesson 3): *Copies outside the folders
+  Variorum keeps — older backups, or a folder you made — are left as they are, and so are copies in your second folder that
+  this Mac can't vouch for as its own. They're yours to manage in the Finder.* ("second folder" — Data Safety's own name for
+  the picked folder; the device through `ProtectionCopy.deviceName`.)
+- The delete confirm's staying sentence (`deleteCopiesLead`): *One copy another Mac made, or that this Mac can't vouch for,
+  stays.* / *N copies another Mac made, or that this Mac can't vouch for, stay.*
+- T-8's one line (`bringInLead`): *… come in, written fresh; its gatherings, entry dates, commits, comments, note versions,
+  book settings, stars and shelves don't.* — and the guide's plain-text paragraph: *… written fresh; its gatherings, entry
+  dates, commits, comments, note versions, book settings, stars and shelves stay behind.*
+- `.lockLibraryNow`: `unavailableNote: ""` (+ the comment); `Copies.swift`'s header: *A PLAINTEXT EXPORT carries no library
+  ID: `protection_record` is local-only and `StorePlaintextExport` drops it. Brought in, it is a NEW library (VX-309 T-8 —
+  the import road, never this file's acts).*
+- Release / today's road: unchanged in behaviour — the listing, its line, the delete confirm, T-8's door and the guide's
+  new-road chapter render only on the new road; `.lockLibraryNow`'s note was never spoken on either road.
+
+## THE MAC SUITES FOR THE ORCHESTRATOR (under the stage; from `App/Variorum/`; PENDING)
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx309 test \
+  -only-testing:VariorumTests/RoadIdleDialRouteTests \
+  -only-testing:VariorumTests/OtherLibrariesDeleteRoadTests \
+  -only-testing:VariorumTests/U2WordsTests \
+  -only-testing:VariorumTests/OtherLibrariesDeleteRouteTests \
+  -only-testing:VariorumTests/CopyListingFacesSurfaceTests \
+  -only-testing:VariorumTests/CopyDoorsModelTests \
+  -only-testing:VariorumTests/PlaintextExportBringInRoadTests \
+  -only-testing:VariorumTests/PlaintextExportBringInRouteTests \
+  -only-testing:VariorumTests/TutorialNewRoadChapterTests \
+  -only-testing:VariorumTests/TutorialPrivacyChapterTests \
+  -only-testing:VariorumTests/CapabilityRegistryTests \
+  -only-testing:VariorumTests/HelperCurrencyTests \
+  -only-testing:VariorumTests/CommandRouterTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests \
+  -only-testing:VariorumTests/DeadVocabularyTests \
+  -only-testing:VariorumTests/StatusSeamVocabularyTests
+```
+The suite TYPES were checked against the files before this list was written (the U2 batch's lesson — no phantom names).
+The first is the one Mac-only assertion this leg added (F-R4); the next two are this leg's headless suites (green in the
+harness); then the suites over the touched files — the listing's faces and roads, the doors' brain, T-8's road and route
+(the lead's hosts), the guide's new-road chapter (lesson 3 carries VX-210's line, lesson 3's last paragraph the T-8 list),
+the registry walks and the router (the note), and the copy scans over `ProtectionWords`. **RED-ON-OLD for F-R4's assertion
+(the orchestrator's, from a committed tree, restored by `git checkout --`):** (R-R4) in `CapabilityRegistry.swift`,
+`.lockLibraryNow`'s `unavailableNote: ""` back to the old literal → `RoadIdleDialRouteTests
+.lockLibraryNowIsOneDeclarationTheMenuAndThePaneRender` RED (1 issue).
+
+## MOBILE PARITY
+NOTHING MOBILE-VISIBLE: no phone face reads `copiesElsewhereLine`, `deleteCopiesLead`, `bringInLead`, `guideCopiesLesson` or
+`unmanagedCopies` (grep over `VariorumMobile/` empty); the phone's guide edition (`MobileTutorialSeeder`) is its own; the
+shared files compile for iOS (the phone build green).
+
+## TALLY
+**6 findings: 6 AGREED, 0 DISPUTED. FIXED: F-R1 (honest-words arm, PROVISIONAL — the fence unwidened), F-R2, F-R3, F-R4,
+F-R6. RECORD-ONLY: F-R5.** Pins: 2 new (F-R1, F-R6) + 1 extended (F-R2's guide arm) + 1 Mac assertion (F-R4); 6 deliberate
+word flips (F-R1 ×4, F-R2 ×2). Mutations: M-R1a..c, M-R2a — all red, all restored identical. PENDING: the Mac run above (the
+orchestrator's, under the stage).
 
 ## THE DISPOSITIONS (each my own trace; AGREE ⇒ fixed below, DISPUTE ⇒ back to the reviewer unfixed)
 
