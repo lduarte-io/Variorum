@@ -1559,9 +1559,9 @@ suites passed after 4.986 seconds.` (U1b's close count, exactly).
   retires in the same re-read ("Never shown once a passphrase exists") — one act's two faces, not a second unit.
 
 **LIVE STATUS (per piece; PENDING = unverified):**
-- Piece R — this record skeleton + the harness baseline: DONE (this commit).
+- Piece R — this record skeleton + the harness baseline: DONE (`441d4a1b9`).
 - Piece 1 — VX-265 (the delete door for other libraries' copies): BUILT (`6ce2ebafd` core pin first · `8d4e028fb` core ·
-  `fe90ec572` leaf pin first · `b1c25a7f8` leaf · the app commit carrying this line). CORE (R-U1c-1, R-U1c-3): the pin
+  `fe90ec572` leaf pin first · `b1c25a7f8` leaf · `645ce1784` the app). CORE (R-U1c-1, R-U1c-3): the pin
   `OtherLibrarysCopiesDeleteTests.anotherLibrarysCopiesThisMacMadeGoWhateverMac8TheyCarry` RED ON THE PRE-FIX TREE `✘ Test
   run with 1 test in 1 suite failed … with 2 issues` (X's backup beside the library and in the picked folder never went) →
   with `OwnCopies.isThisMacsCopy` / `thisMacsCopies` + `offerDelete`'s fence reading it + NEW `offerDeleteWithNoLibraryOpen`
@@ -1609,7 +1609,7 @@ suites passed after 4.986 seconds.` (U1b's close count, exactly).
   restored `cmp`-identical to `u1c-prerevert/ProtectionCopyDoors.swift`): M-3a no carry → `✘ makeThisMyLibraryCarries…`
   (recorded → true: 2 issues); M-3b every T-5 landing marked recorded → `✘ theEmptySlotLandingByItsPassphrase…` (2); M-3c
   typed words never recorded → `✘ theEmptySlotLandingByTypedWords…` (2).
-- Piece 4 — VX-451 (the pane's Lock Now row + idle dial): BUILT (this commit). R-U1c-7. SHARED: `RoadGateRow.idleMinutes`
+- Piece 4 — VX-451 (the pane's Lock Now row + idle dial): BUILT (`61afe294e`). R-U1c-7. SHARED: `RoadGateRow.idleMinutes`
   (THIS MAC'S sealed `DeviceSettings.idleLockMinutes`, read in `RoadCrossingFaces.derive`) + `RoadGateRow.idleChoices` (5 · 10
   · 30 · never — `DeviceSettings`' own offered set); `ProtectionCrossings.changeIdleLock(session, minutes:)` (the core's
   `changeSettings` on the open session, one act at a time; Castle only — Standard never locks, its write refuses);
@@ -1629,7 +1629,7 @@ suites passed after 4.986 seconds.` (U1b's close count, exactly).
   MUTATIONS on `61afe294e` (each restored `cmp`-identical to `u1c-prerevert/`): M-4a the row never reads the sealed minutes →
   `✘` (4 issues, two tests); M-4b the Castle guard dropped → `✘ standardHasNoRowAndTheDialRefuses` (2); M-4c nothing sealed
   (the `changeSettings` call skipped) → `✘ theCastleRowCarries…` (5).
-- Piece 5 — VX-454 (probe first): CONFIRMED AND FIXED (`6aa235a67` the probe pin · this commit the fix). R-U1c-8. THE PROBE
+- Piece 5 — VX-454 (probe first): CONFIRMED AND FIXED (`6aa235a67` the probe pin · `5aa955b4f` the fix). R-U1c-8. THE PROBE
   `SetPassphraseRowRereadTests.turningSyncOnWithANewPassphraseRetiresTheSetRowAndTheReminder` (headless; the planted vault)
   RED ON THE PRE-FIX TREE `✘ Test run with 1 test in 1 suite failed … with 2 issues` — the ticket is REAL, not hollow (the
   set row AND rule 3's reminder both stood after turn-on-sync set a passphrase, through the pane's appearance). THE FIX:
@@ -1652,7 +1652,7 @@ suites passed after 4.986 seconds.` (U1b's close count, exactly).
   anything is deleted over an occupied slot; the listing's protected set is every library while the slot is occupied (or
   unreadable). Green; the harness `✔ Test run with 319 tests in 54 suites passed`. MUTATIONS on `df2bffa83` (restored
   `cmp`-identical): M-1i the core guard off → `✘` (2); M-1j the listing ignoring the occupied slot → `✘` (1).
-- Piece 6 — the close: DONE (this commit) — the core and app lines, the counts, the Mac-suite list with its red-on-old
+- Piece 6 — the close: DONE (`571d34c37` + this tidy) — the core and app lines, the counts, the Mac-suite list with its red-on-old
   recipes, the walk notes, the PROVISIONALs, the findings and the machinery notes below.
 - No revert is in flight (every mutation of this unit ran on a committed tree and was restored by `git checkout --`,
   `cmp`-identical to a copy in this session's scratchpad `u1c-prerevert/`; no scratch worktree; the tree is clean at the
