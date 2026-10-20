@@ -71,7 +71,8 @@ nonisolated struct CopyDoorsListing: Equatable, Sendable {
     var deleteChoices: [String: CopyDeleteChoice] = [:]
     /// VX-309 U1c — VX-210: the copies Variorum leaves as they are — a library-shaped file in a place no build of this
     /// design writes (today's flat backups, a folder she made), a copy no key file names (rule 26), a far copy outside any
-    /// Mac's subfolder. The listing's one honest line renders only when this is above zero.
+    /// Mac's subfolder, and (VX-309 ladder round 1, F-R1) another library's far copy no container twin vouches for. The
+    /// listing's one honest line renders only when this is above zero.
     var unmanagedCopies = 0
 
     static let empty = CopyDoorsListing(thisLibrary: [], otherLibraries: [])
@@ -105,7 +106,7 @@ nonisolated struct CopyDoorsListing: Equatable, Sendable {
         }
         var listing = CopyDoorsListing(thisLibrary: newestFirst(mine), otherLibraries: newestFirst(others))
         listing.deleteChoices = deleteChoices(catalog, rows: listing.otherLibraries, protected: protected)
-        listing.unmanagedCopies = unmanagedCopies(in: catalog)
+        listing.unmanagedCopies = unmanagedCopies(in: catalog, libraryID: libraryID, protected: protected)
         return listing
     }
 
@@ -136,9 +137,21 @@ nonisolated struct CopyDoorsListing: Equatable, Sendable {
     /// made), a copy no format-3 key file names (rule 26 — never listed), a far copy outside any Mac's subfolder
     /// (`unattributed` — no Mac here claims it). Pure. A library-shaped file is library-shaped whatever the case of its
     /// suffix (VX-309 ladder round 1, F-R6).
-    static func unmanagedCopies(in catalog: Catalog) -> Int {
+    ///
+    /// VX-309 ladder round 1, F-R1 (PROVISIONAL P-VX309-R1-1 — the option question is her bundle's): a far copy of a
+    /// library whose delete question is live (neither `libraryID`, the open library, nor a `protected` one — their rows
+    /// are the restore list's and the empty-slot landing's, never rule 19's) that rule 19's fence does not claim
+    /// (`OwnCopies.isThisMacsCopy` — no container twin under its `Backups/<library8>/<mac8>` subfolder: its container copies
+    /// went while the second folder was away, or another Mac sharing the folder made it) counts too. It is never offered a
+    /// delete — the `<mac8>` may be another Mac's (rule 23) — so the line is what says why its row stays.
+    static func unmanagedCopies(in catalog: Catalog, libraryID: String? = nil, protected: Set<String> = []) -> Int {
         catalog.foreign.filter { $0.name.lowercased().hasSuffix(".sqlite") }.count
-            + catalog.copies.filter { $0.library == nil || ($0.place == .farFolder && $0.mac == .unattributed) }.count
+            + catalog.copies.filter { copy in
+                guard let library = copy.library else { return true }
+                guard copy.place == .farFolder else { return false }
+                if copy.mac == .unattributed { return true }
+                return library != libraryID && !protected.contains(library) && !OwnCopies.isThisMacsCopy(copy, in: catalog)
+            }.count
     }
 
     /// Newest first; an undated copy last; ties by id (a stable order).

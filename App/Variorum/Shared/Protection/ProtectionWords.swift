@@ -345,9 +345,13 @@ nonisolated enum ProtectionWords {
         var text = "This deletes this \(ProtectionCopy.deviceName)'s copies of the library last copied \(day). "
             + deleteCopiesCounts(choice) + " They can't be brought back."
         if let wayBack = deleteCopiesWayBack(choice.previousLibraries) { text += " " + wayBack }
+        // VX-309 ladder round 1, F-R1 (PROVISIONAL P-VX309-R1-1): what stays may be a far copy outside any Mac's subfolder,
+        // whose maker is not knowable — the reviewer's "can't vouch for" clause keeps the sentence true of it.
         if choice.staying > 0 {
+            let unvouched = "or that this \(ProtectionCopy.deviceName) can't vouch for"
             text += choice.staying == 1
-                ? " One copy another Mac made stays." : " \(choice.staying) copies another Mac made stay."
+                ? " One copy another Mac made, \(unvouched), stays."
+                : " \(choice.staying) copies another Mac made, \(unvouched), stay."
         }
         text += libraryOpen ? " Your library isn't touched." : ""
         return text
@@ -359,9 +363,13 @@ nonisolated enum ProtectionWords {
     }
     static let deleteCopiesFailed = "Variorum couldn't delete those copies just now. Nothing more was deleted."
     /// VX-210 — her words: "if we have a line about 'this doesn't handle backups elsewhere', I don't think we need to do
-    /// more." The listing's ONE honest line (rule 25's idiom), rendered only when such copies exist (P-2).
+    /// more." The listing's ONE honest line (rule 25's idiom), rendered only when such copies exist (P-2). VX-309 ladder
+    /// round 1, F-R1 (PROVISIONAL P-VX309-R1-1): the line also counts another library's far copy no container twin
+    /// vouches for — which sits INSIDE a folder Variorum writes — so its second clause keeps the line true of it (and of a
+    /// far copy outside any Mac's subfolder, the count's older arm).
     static let copiesElsewhereLine = "Copies outside the folders Variorum keeps \u{2014} older backups, or a folder you "
-        + "made \u{2014} are left as they are. They're yours to manage in the Finder."
+        + "made \u{2014} are left as they are, and so are copies in your second folder that this "
+        + "\(ProtectionCopy.deviceName) can't vouch for as its own. They're yours to manage in the Finder."
 
     // MARK: - The lobby (rule 8: it asks only when no quiet road remains) — PROVISIONAL P-VX306-U1b-4
 

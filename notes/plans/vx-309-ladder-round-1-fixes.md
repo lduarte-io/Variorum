@@ -22,10 +22,19 @@ finding touches sync, custody or a schema (the one core file touched is a commen
 
 ## LIVE STATUS (per piece; PENDING = unverified)
 - Piece 0 — this file: the dispositions below, written before any code: DONE (this commit).
-- Piece 1 — F-R3 (the stale header line): NOT-STARTED.
-- Piece 2 — F-R4 (the dead `unavailableNote`): NOT-STARTED.
-- Piece 3 — F-R6 (the case-sensitive `.sqlite` suffix): NOT-STARTED — pin first.
-- Piece 4 — F-R1 (the twin-less far copy: never deleted, now SAID): NOT-STARTED — pins first.
+- Piece 1 — F-R3 (the stale header line): DONE (`3963de6c6`) — comment only; `swift build` green.
+- Piece 2 — F-R4 (the dead `unavailableNote`): DONE (`c2909d98a`) — `unavailableNote: ""` + the comment; the Mac pin
+  `RoadIdleDialRouteTests.lockLibraryNowIsOneDeclarationTheMenuAndThePaneRender` gains `unavailableNote.isEmpty` (BUILT;
+  its run the orchestrator's under the stage — red on the old tree by construction: the literal was non-empty).
+- Piece 3 — F-R6 (the case-sensitive `.sqlite` suffix): DONE (pin first `fb33935f8` · fix `c388a0619`). Pin `OtherLibrariesDeleteRoadTests.theLineCountsALibraryShapedFileWhateverTheCaseOfItsSuffix`
+  RED ON THE PRE-FIX TREE `✘ Test run with 6 tests in 1 suite failed … with 1 issue.` (`0 ≠ 2`) → green `✔ Test run with 6
+  tests in 1 suite passed`.
+- Piece 4 — F-R1 (the twin-less far copy: never deleted, now SAID): FIX COMMITTED (this commit); pins first (the commit
+  before) RED ON THE PRE-FIX TREE `✘ Test run with 20 tests in 2 suites failed after 0.533 seconds with 6 issues.` — the
+  behaviour pin's 2 (`listing.unmanagedCopies == 1` with the library open, and with none open — the reviewer's red,
+  reproduced) + the 4 deliberate word flips; its four guards green on both trees; with the fix `✔ Test run with 20 tests in
+  2 suites passed`. MUTATIONS STARTING on this committed tree (restored by `git checkout --`, `cmp` against the commit):
+  M-R1a the twin-less arm dropped · M-R1b the open/protected exclusion dropped · M-R1c the fence check dropped — PENDING.
 - Piece 5 — F-R2 (gatherings and entry dates named in T-8's confirm + the guide's twin sentence): NOT-STARTED — pins first.
 - Piece 6 — the close: evidence (the touched suites headless; the core protection set Debug + Release;
   `build-for-testing`; the phone; the Release build): NOT-STARTED.
