@@ -2587,4 +2587,21 @@ The harnesses are scratchpad-only (`u1-harness` — U1a's; `settings-harness` �
 - **P-VX309-U2-1..11: each stands as built** pending her bundle; M-10b's green mutation is honestly recorded (the
   finding's claim lives in two texts — not a hollow pin).
 
-**THE U2 MAC BATCH (the orchestrator, under the stage; result appended when run):** *(pending the coordinator's GO)*
+**THE U2 MAC BATCH (the orchestrator, 2026-10-20 01:12–01:55 MDT, stage claim `vx-309-u2-mac`, the coordinator's GO;
+logs `/tmp/vx309-u2-*.log`, deleted at closeout):** the record's list ran as `✔ Test run with 313 tests in 54 suites
+passed` — FOUR of its 58 names were PHANTOMS (`DataSafetyTests`, `DataSafetyFacesTests`, `TutorialBooksChapterTests`,
+`TutorialWalkTests` — suites that don't exist under those names; xcodebuild silently ignores an unmatched
+`-only-testing`, so the first count's 54 was the tell). THE SUPPLEMENTARY BATCH with the REAL names — the whole
+executable tutorial family (`Tutorial*ActsTests`, the chapter suites, `TutorialPrivacyChapterTests` — exactly the
+chapter piece 7 re-seeds — the fold, door, shape and matrix suites) and Data Safety's real family
+(`DataSafetyRunbookTests`, `SyncSafetyFaceTests`, `MarkdownInsuranceTests`, `BackupFutureStampTests`,
+`BackupRunTests`): `✔ Test run with 146 tests in 20 suites passed`. ZERO real reds across both runs. THE REVERTS,
+each from the committed tree, restored `cmp`-identical: R-U2-7-gate RED (11 issues), R-U2-7-seed RED (11),
+R-U2-7-fence RED (the real-store arm, 18), R-U2-9-aside RED both arms (1 each), R-U2-10-window RED (3 pins, 5
+issues), the two follow-receipt flips RED (6 issues); R-U2-10-old ran HEADLESS in the scratch settings harness over
+the pre-fix `SettingsShape.swift` (one file swapped from `fd99e5c22~1` and restored `cmp`-identical — no separate
+checkout, no xcodebuild) → `✘ … 11 issues`, the pre-fix red reproduced. The confirming re-run (the eight
+Mac-only/flipped suites) `✔ Test run with 27 tests in 8 suites passed`; tree clean at the branch tip; 0 instances;
+the stage released with the coordinator's result line. A LESSON for the record: a unit's Mac-suite list is verified
+against the suite TYPES before the run from now on (the phantom names cost one supplementary batch).
+**THE U2 MAC LEG IS CLOSED — the implementer era of the phase is done. NEXT: THE LADDER.**
