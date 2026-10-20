@@ -875,7 +875,13 @@ door `DocumentImporter.swift` + `ImportModel.swift`; the test worlds — `Execut
   (rule 2) — handed back, dropped unseen on the Mac, the card above the quick entry offering fresh ones at the first look (the
   creation's idiom). The APP's faces set aside what stands in the slot first — exactly *Start a New Library*'s pre-steps (a
   library no key file opens moves WHOLE; else a missing library's key file alone) — and hold the copy as every adoption does.
-- **R-U1b-2 — PREVIOUS LIBRARIES THROUGH THE DOORS.** (PENDING — written with piece 2.)
+- **R-U1b-2 — PREVIOUS LIBRARIES THROUGH THE DOORS: VERIFY, PIN, CLOSE WHAT THE ARC SHOWS.** VX-305 U4's deferral (1)
+  read §3.7's "a copy of a library this Mac remembers … is re-encrypted under that library's current key"; her rule 17
+  (2026-10-16/17) superseded it — Make this my library makes ANY copy a NEW library (a fresh identity and key, under the
+  current pair) — so "returns as the library" means returns as a NEW library holding its writing, exactly the doors' road;
+  no identity-preserving road is built (the considered-and-not-pursued ledger: "an identity-preserving restore"). The arc
+  is the doors' (listing · Look inside · Make this my library from an open library and from the empty slot); what it shows
+  missing is closed in this unit when it is a door's, and routed when it is a rule's (F-U1b-1).
 - **R-U1b-3 — T-8.** (PENDING — the orchestrator's ruling on the mapping.)
 
 **LIVE STATUS (per piece; PENDING = unverified):**
@@ -932,7 +938,27 @@ door `DocumentImporter.swift` + `ImportModel.swift`; the test worlds — `Execut
   `cmp`-identical): M-1e the preflight's quiet-road refusal dropped → `✘ aWrongSecretOrAQuietRoadAlone…` (the hold restored but
   the missing key file moved — the typed check guards every write); M-1f the set-aside pre-steps dropped → `✘` both landing
   pins (3 — the core's belt refuses a standing key file / library); M-1g the store-id mint dropped → `✘ theMissingFaces…` (1).
-- Piece 2 — VX-305's second hand-off (Previous Libraries through the doors): NOT-STARTED.
+- Piece 2 — VX-305's second hand-off (Previous Libraries through the doors): DONE (`53674fe03`). VERIFIED END TO END and
+  pinned — `PreviousLibrariesArcTests` (5, planted, harness-visible): a library that stepped aside WHOLE (Make this my
+  library's own step-aside) is LISTED among the other libraries on this Mac as a *Previous library* dated the day it stepped
+  aside (rule 19); it opens READ-ONLY by its own quiet road and — that road gone — by its own words, nothing written (the
+  planted write logs and the container's bytes unchanged); it RETURNS through Make this my library from an OPEN library (a
+  new library, A's writing in it; B steps aside whole in its turn; A's own folder untouched) and from the EMPTY SLOT (T-5,
+  under A's own words); a Previous Library picked by hand (its store or its folder) is the catalogue's copy, used where it is.
+  The serving key file of a folder-shaped copy and the list's rows needed nothing (pinned as they stand). THE GAP the arc
+  showed, CLOSED (F-U1b-2): with no library open nothing listed this Mac's copies — a Previous Library was reachable only by
+  picking a folder inside the app's container — so on the new road the missing face's and rule 27's *Restore from Backup…*
+  open the doors' listing (rule 17: "The app's Restore from Backup is this door"): `CopyDoorsModel.Phase.listing` +
+  `beginListing()`, `LibraryOpenPresenter.openRestoreList(bootstrap:)`, the sheet's listing rows (each its Look inside… /
+  Make this my library… — into the empty slot), `LibraryMissingView(restoreDoor:)` (gated on a home of copies —
+  `LibraryMissingLobby.copiesHomeExists`; today's road keeps the Finder reveal byte for byte) and `RoadLockView(restoreDoor:
+  copiesHome:)`; two lines (`emptySlotRestoreListLead`, `noCopiesOnThisMac`) PROVISIONAL P-VX309-U1b-3 — the availability arm
+  itself PROVISIONAL P-VX309-U1b-5. Pins: the arc's `withNoLibraryOpenTheRestoreListOffers…` (the listing → the row's Make
+  this my library → A's writing landed), `EmptySlotDoorsSurfaceTests` (2, Mac, by source — the needles verified against the
+  files by the same comment-stripping read; red by construction). Harness `✔ Test run with 299 tests in 49 suites passed`;
+  `build-for-testing` green. MUTATION on `53674fe03` (restored `cmp`-identical): M-2a `beginListing` lands an empty listing →
+  `✘ withNoLibraryOpenTheRestoreListOffers…` (1). FOUND BY PROBE, ROUTED (F-U1b-1): VX-305 U4's deferral (1) at its heart —
+  see the findings.
 - Piece 3 — T-8: NOT-STARTED — WAITING on the mapping ruling (proposal sent).
 - Piece 4 — the close: NOT-STARTED.
 - No revert is in flight.
