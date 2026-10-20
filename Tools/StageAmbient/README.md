@@ -153,4 +153,4 @@ claim probes.
 | `kill -9` | gone 23 ms later; the window server restored the cursor |
 | Cursor and focus after every exit above | `CGCursorIsVisible` = 1, and the front app was back to the terminal that was frontmost before `on` |
 | While up | the front app is StageAmbient and `CGCursorIsVisible` = 0 |
-| Burn-in (`nothingBrightStaysStill`) | the worst scene pixel was lit in 35% of samples over 20 minutes, before the orbit |
+| Burn-in (`nothingBrightStaysStill`) | the worst scene pixel was lit in 37% of samples over 20 minutes, before the orbit |
