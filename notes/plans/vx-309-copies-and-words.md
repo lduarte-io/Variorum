@@ -733,6 +733,79 @@ place. A leftover queued export save-panel sheet and the stuck ⌘K palette stac
 kp:esc never reaches a palette — System Events key code 53 does; machinery note). Deeper member-order checks are
 the pins'; the fixture carries book/chapter/membership/tag/pool/bookless shapes — archived/wings/versions-absent
 shapes ride the pins only (the pane door's break kept the richer hand-built source out; said honestly).
+**W-VX309-4 traced (orchestrator, headless, no store):** `StorePlaintextExport.export` ATTACHes the user-picked file
+on the app's open keyed connection; under the sandbox the save panel's grant covers that one file's path. A
+`sandbox-exec` probe granting exactly one literal path let `sqlite3` ATTACH and write that path with default journal
+AND under a forced-journal transaction — so the simple "the journal sidecar is denied" story is NOT proven; the
+mechanism stays Suspected (candidates: the grant not reaching the detached task's connection; SQLCipher's ATTACH
+opening the path through a different file API). Two facts that matter for the release: (1) the bug is on BOTH roads
+(the pane's export door is today's code — `DataSafetyPane` → `StorePlaintextExport`, untouched by this phase), so
+it is not a regression and not new-road-only; (2) rule 26's "everyone exports their writing … before the switch"
+must NOT lean on this door until it's fixed — the switch's own export instruction names Copy full text / the
+markdown road or sync. Ticket: Bug · Suspected · Import & export, Pre-launch her call, flagged as a VX-329 gate
+input. Fixing it touches no custody code (a file-access fix in the pane's door); it rides any run.
+**Row 7, the B-leg (the walk switch, ref guard OK) — on T-8's library `71a5a70d`:** the words look minted the
+throwaway's words (captured — the throwaway's own, disposable); signed in as B; **Turn on sync = SET-UP** (B had no
+vault): the sheet's rule-7 set-up sentences (*"Your library's passphrase and twelve words become the account's.
+Nothing is replaced."* · one pair · *"Your account starts in Standard, like this library."* · *"This library has no
+passphrase yet. Choose one — your account is locked under your passphrase and your twelve words."*), and **VX-211's
+quiet hint live on THIS sheet** (*Short passphrases are easier to guess — a longer phrase is stronger.* under a
+15-character phrase; the set landed). **VX-454 CONFIRMED live:** the instant the set-up landed — pane still open —
+*Set a passphrase…* GONE, *Your passphrase: Change passphrase… · Reset forgotten passphrase…* shown, and the band's
+passphrase-reminder card gone (no relaunch). Replace All Keys… appeared with sync. **Stop syncing here** (rule 16's
+confirm byte-faithful: *"…Leaving an account changes none of your library's keys or secrets — it stops syncing, and
+the server keeps what you pushed (removing it is the account-deletion road). Signing back in is a join."*) → **the
+re-join by the SAME passphrase → THE MOMENT SPOKE**, her draft byte-faithful WITH the backups sentence: *"Your twelve
+words are vx308b@example.com's twelve words. Your previous twelve words still open backups you made before today. If
+you don't have your account's words written down, you can make new ones at any time."* (the join-moment reword
+CONFIRMED live). **W-VX309-5 (finding — VX-456's uncovered arm):** VX-456's pins cover JOIN → leave → re-join
+(quiet, pinned red-on-old); the SET-UP → leave → re-join arm walked here still speaks. The key file after set-up has
+NO words lock of its own and a master + twelve-words copy (fields read, never values) — the predicate's first
+clause holds — so a later clause (`masterWordsCopy == vault.masterByWords`, or the master lock opening under the
+vault's master) fails on the set-up-built vault; mechanism unproven, a headless red pin owed as the ticket's
+confirm (closeout). Harm: none beyond an extra message — every clause is TRUE here (the "previous" words are the same
+words); the moment over-speaks, never misleads. Ticket: Improvement · Confirmed · Castle & sync, Low/Medium.
+**The other-account faces (signed out of B, in as A):** the signed-out synced face (*You're signed out of sync.* +
+the still-syncs sentence + Use this Mac only… / Sign in…; the Protection key doors' *"You're signed out of this
+library's account. Sign in first."*); as A: *Another account is signed in on this Mac.* + *Signed in as …* + *This
+library syncs with a different account. Sign out, or move this library to the account that's signed in.* + every
+gated door's *"Another account is signed in on this Mac. Sign in to this library's account first."* + **Move this
+library to vx308a@…** OPEN (A HAS a vault) → its confirm captured (the move sentence, rule 16's leave sentence, the
+join-existing sentences) → cancelled. **moveNotYet NOT walked** — its face appears only when the signed-in account
+has NO vault (`RoadAccountFaces`: `.read(exists: false)`), which needs a third account; pin-covered, said honestly.
+**VX-457 (the follow's durable Done) NOT walked** — a follow needs a second device acting on the account; the
+throwaway has one Mac; pin-covered (`RoadJoinFollowSurfaceTests` flips), said honestly. Signed out at the end (the
+face + no auth item under the app's auth service).
+**THE RESTORE (A WHOLE):** quit (0 instances) → T-8's eight slot files aside (cmp, then removed) → A's NINE files
+back from `~/vx309-walk/A/` (**9/9 cmp-identical**: sqlite + sidecars, the mirror, the live key file, the two old
+stale key files, the lived-here marker, **the hold marker**) → relaunch WITHOUT the walk switch → **`e11e5233` opened
+QUIETLY by its own silent road** (key `77f4a14d`, Standard), stage 14's *"This is a different library than the one
+this Mac last had open"* ONCE (in the dev library's own Terminal voice — the notice renders before the voice
+settles; observed), the **hold banner standing** (*This is your library as of October 20, 2026. Sync is waiting
+until you press Resume …*), the content intact (VX-308's walk stone note), **Resume NEVER pressed**. The dev pair
+and `dev-castle.env` unchanged (her word 2026-10-20: no rotation).
+**THROWAWAYS CLEARED (each target read before removal):** in the slot — `Backups/{71a5a70d,a6b6213c,d3c486ea}/`, the
+flat copies `…091226-8c892a9f.*` + `…093554-a7242f40.*`, the throwaway key droppings (82de9376 · 8c892a9f ·
+a7242f40), `Previous Libraries/2026-10-20-092259` (T's mirror) + `…-100355` (d3c486ea whole); in the picked folder —
+`Backups/{a6b6213c,d3c486ea}/`, the `…093554-a7242f40.*` flat copy, the three key droppings; outside — `~/vx309-walk/
+{T1,T2,T8-slot,export}`. KEPT (the dev library's own): `Previous Libraries/2026-10-20-085330` (86a82b4f — the dev
+half's Make-mine), `Backups/{86a82b4f,e11e5233}/`, the 0841 md-exports, A's key droppings (1787a29e).
+`~/vx309-walk/A/` (A's aside, now a duplicate) stays until the closeout tidy. **Correction to beat 2:** the
+"1 old copy retired" receipts are the FLAT leg's retention, and the flat leg DID run at 09:35 too (its copy sat in
+`<picked>/Variorum/Backups/`, which I had misread as absent); the adopted library's FIRST pair (09:23, the landing's
+own) went container-only while the 09:35 press landed far — the landing's pair road not reaching the far leg is an
+observation for the U1a ticket batch (W-VX309-6, Suspected).
+**DEFAULTS END-DIFF RECONCILED:** restored `appearanceChoice` dark (the walk set light) and
+`variorum.backup.markdownInsurance.enabled` true (row 5's Use Castle turned the plain-text copies off — by design —
+and the leave doesn't turn them back on); removed the throwaways' and the stale build's per-store keys (calmAsks ×4,
+protection `alwaysAsk`/`relockIdleMinutes` ×4 stores, the stale build's `migrated2a`), the guide's
+`SampleLibrarySeeded…encryption-explained` (set by the throwaway's Restore Tutorial) and the walk book's outline size.
+Remaining differences are runtime history only (backup log, far snapshot list — every entry exists — window frames,
+the idle sweep mark, launch counters) plus the dev library's own per-store keys (`dabba893`: Standard, relock 10).
+**KEYCHAIN ADDS (dev scope only, listed — no CLI reaches the data-protection items):** custody + memory items and
+iCloud Apple keys for the three throwaway libraries (`a6b6213c`, `d3c486ea`, `71a5a70d`) and the stale build's
+`dd6e8928`; the throwaway project's accounts A and B hold their walk vaults (the project stays until VX-329, hers to
+delete). **END POSTURE: Standard · `e11e5233` · held + banner · signed out · 0 instances · the dev pair unchanged.**
 
 ## 2. Evidence (the acceptance spine)
 Walks in BOTH VOICES (Terminal and Study) over the new faces; the restore drill through Look inside and Make this my
