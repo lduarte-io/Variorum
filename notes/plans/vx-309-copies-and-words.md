@@ -2077,7 +2077,39 @@ precedent). HARNESS: U1a's scratchpad package `u1-harness` (it survived in this 
 worktree, `--skip-update`): the BASELINE on `4a3c867cd` `✔ Test run with 319 tests in 54 suites passed after 5.800
 seconds.` (U1c's close count, exactly).
 
+**MY READINGS (each the brief's letter as I read it — building on them):**
+- **R-U2-1 — VX-456 IS DECIDABLE FROM THE FILES ONLY WHERE THE LIBRARY HAS NO WORDS LOCK OF ITS OWN.** `Lock` is RFC 3394
+  (deterministic), and a synced key file's twelve-words copy of the master is the vault's recovery wrap copied byte for
+  byte (§3.5a), so "the library's words ARE the account's" is provable without words exactly when the key file carries no
+  own words lock, its copy equals the vault's `masterByWords`, and its master lock opens under the master the typed secret
+  reached. A file WITH its own words lock beside a matching copy proves nothing: a New Words made while the library is
+  local (after a leave) re-makes the own lock and leaves the copy as it was — quiet there would hide a real replacement.
+  So the first device of an account (it handed its own pair up — its own lock stands) still hears the moment once on a
+  passphrase re-join (true either way); every passphrase-typed join drops the own lock, so a later re-join is quiet. Built
+  as the narrow arm; PROVISIONAL P-VX309-U2-1.
+- **R-U2-2 — HER DRAFT IS THE PASSPHRASE-TYPED MOMENT; THE TYPED-WORDS MOMENT KEEPS RULE 7'S SENTENCE.** #236's "here they
+  are" edge is P-VX378-U2-3's passphrase-typed notice (`joinWordsNotShown`) — her draft replaces it, the account named by
+  the sign-in's email. The words-typed moment shows the typed words under rule 7's own sentence (`joinWordsSentence`, pinned
+  byte-equal to `notes/CastleRules.md`) — canon, untouched here; whether her direction also reads onto rule 7's phrase is
+  P-VX309-U2-3. The middle clause drops as §5d rules (F-U2-1 below records §1's other reading of her note).
+
 **LIVE STATUS (per piece; PENDING = unverified):**
-- Piece R — this record skeleton + the harness baseline: DONE (this commit).
-- Pieces 1–10 — NOT-STARTED (the readings land in the next record commit).
+- Piece R — this record skeleton + the harness baseline: DONE (`fe2344041`).
+- Piece 1 — THE JOIN MOMENT + VX-456: DONE (`9ed104688` pins first · `b11fc21f2` the core line · `ffce73716` the words and
+  the face). CORE (`Acts/AccountActs.swift` — the unit's custody line, THE CORE LINES below): `ProtectionExecutor
+  .wordsAreTheAccountsAlready(_:vault:master:)` (reads only) ORed into `join`'s `sameWords`. Pins `JoinWordsMomentTests`
+  (core, 8): RED ON THE PRE-FIX TREE `✘ Test run with 7 tests in 1 suite failed after 0.019 seconds with 2 issues.` (a
+  passphrase-joined library, left and back by the passphrase — or by the words — heard its words replaced); the five
+  guards green on both trees; with the fix + the pure rule's pin `✔ Test run with 8 tests in 1 suite passed`; the
+  account-act neighbours (`AccountJoinTests`, `LeaveAccountTests`, `U2PinsAccount*`, `U2CrashHarness*`, the follow and
+  lifecycle suites) `✔ Test run with 45 tests in 10 suites passed`. MUTATIONS on `b11fc21f2` (each restored `cmp`-identical
+  to `u2-prerevert/AccountActs.swift`): M-456a the own-lock guard dropped → `✘ … 3 issues` (the first device's arm, the
+  new-words-after-a-leave arm, the pure rule); M-456b the byte identity dropped → `✘ theAccountsWordsChangedElsewhere…` (1);
+  M-456c the master-lock check dropped → `✘ thePureRuleReadsTheFilesAlone` (1). APP: `ProtectionWords.joinWordsNotShown(_
+  email:)` — her draft; `RoadAccountDoorOpen.accountEmail` (the join's and Move's doors, from the sign-in); the sheet's
+  `.notShown` arm reads it. `RoadJoinFollowWordsTests`' two moment pins FLIPPED DELIBERATELY (they pinned the direction she
+  ruled wrong). Pin `ProtectionJoinFollowRoadTests.vx456_aRejoinWhoseWordsAreAlreadyTheAccountsOwesNoMoment` (the planted
+  road; the door carries her email) — RED ON OLD by behavioural revert (the core line back to `9ed104688`) `✘ … 1 issue`,
+  restored `cmp`-identical; the harness's join suites `✔ Test run with 69 tests in 9 suites passed`.
+- Pieces 2–10 — NOT-STARTED.
 - No revert is in flight.
