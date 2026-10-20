@@ -146,6 +146,15 @@ something current is still reachable the old way — plus one copy overstatement
 | 11 | VX-109 / VX-108 / VX-107 — confirmed, no exposure (VX-109 only overwrites TOWARD Castle) | MINOR/NIT | A | stay on the board |
 | — | the acting device's leftover Standard-era key file (opens nothing current); `pg_temp` in definer search_path; Q1/Q2/Q6 record corrections | NIT | O.4, B6c, C3, A | tidy-ups |
 
+> **Correction note (2026-10-20, VX-213 — VX-309 U2, `notes/plans/vx-309-copies-and-words.md` §6 U2 RECORD):** the
+> last row's *Q1/Q2/Q6 record corrections* have LANDED — the S1 record (`notes/plans/run-b-stress-pass.md`) now carries a
+> dated correction note under each of Q1 (kp2 sits in Supabase Vault, so "retains only `SHA-256(kp)`" is no longer
+> true), Q2 (the delivered arm-10 pin reads file 12 while file 13 is deployed — the pin's own fix is routed from the U2
+> record, not made there) and Q6 (the heal DOES fire after a reset with three devices; an Apple-ID switch on two devices
+> re-homes the vault copy), plus one line under its verdict summary; its original text is kept as written. C3's
+> account-deletion fact (Supabase's own auth audit log outlives a deleted account) is in
+> `notes/stargazing-castle-rebuild-delta-brief.md` for VX-329. `pg_temp` is NOT done: held for her go, in VX-329's window.
+
 ### V.1 How SHE can verify a Castle switch on a real device (instead of the Passwords app)
 
 The Passwords app is the wrong instrument: the iCloud key is SUPPOSED to stay in iCloud Keychain after Castle
