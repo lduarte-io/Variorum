@@ -2048,11 +2048,25 @@ committed tree and restored `cmp`-identical from `u1c-prerevert/`. Commits: `441
 `ff6d7b52d` (record) · `61afe294e` (4) · `6aa235a67` (5 probe pin first) · `5aa955b4f` (5) · `71cc006c5` (1b pins first) ·
 `df2bffa83` (1b) · the close commit.
 
-### U2 RECORD — THE WORDS (Opus implementer, 2026-10-19; the join moment + VX-456 · VX-457 · moveNotYet · VX-264 items 5+7 · VX-263 · VX-211 · the guide + Data Safety · VX-213's share · U1's undrafted words · VX-453 — IN PROGRESS)
+### U2 RECORD — THE WORDS (Opus implementer, 2026-10-19/20; the join moment + VX-456 · VX-457 · moveNotYet · VX-264 items 5+7 · VX-263 · VX-211 · the guide + Data Safety · VX-213's share · U1's undrafted words · VX-453 — BUILT; the Mac suite and the walk PENDING)
 
-**Not done in U2, first:** PENDING — written at the close. (Standing from the brief: no `xcodebuild test`, no stage, no
-Debug launch, no store touch, no network, no Linear, no subagents; NO `Server/` line and NO SQL — VX-213's `pg_temp` is
-held for her go; today's road byte-unchanged; zero `Sync/`, schema, migration or dependency lines; `lockstepVersion` 13.)
+**Not done in U2, first:**
+- NO MAC SUITE RUN, NO WALK, no stage, no Debug launch, no store touch, no network, no Linear, no subagent (the brief). Mac-only
+  suites this unit added or flipped were BUILT, never run — `TutorialNewRoadChapterTests` (3, new), `SettingsAccountSurfaceTests`
+  (3, new), `SettingsAccountSearchTests` (2, new — ALSO run headless, red-on-old, in a scratch harness), and the deliberate flips
+  in `RoadJoinFollowSurfaceTests` (2 pins), `PlaintextExportBringInRouteTests` (both arms), plus the passphrase-fixture lifts in
+  `RoadCrossingSurfaceTests`, `RoadKeyDoorSurfaceTests`, `RoadAccountSurfaceTests` — the orchestrator's, under the stage (the
+  list and the red-on-old recipes below). Every other new pin ran HEADLESS, red-on-old verified or red by construction.
+- `pg_temp` (VX-213's held half) NOT DONE — held for her go, VX-329's window. No `Server/` line, no SQL anywhere in the unit.
+- THE ARM-10 PIN'S SCOPE FIX (VX-191 auditor A's Q2) is NOT made — a test line in a sync-adjacent core suite, outside the brief's
+  record-correction share; routed (F-U2-6). The S1 record carries the dated correction saying so.
+- THE GUIDE: the seeder only. No store was re-seeded (dev or real); the truth-check and the real store's re-seed ride VX-329.
+  The phone's guide edition (`MobileTutorialSeeder`) is untouched (MOBILE PARITY below).
+- ONE CORE CUSTODY LINE (piece 1, `Acts/AccountActs.swift` — reads only) and ONE pure Domain file (`PassphraseStrength.swift`)
+  are the unit's core lines (THE CORE LINES below — the custody line is Fable's to read). Zero `Sync/`, `Server/`, schema,
+  migration, project or dependency lines; `SyncSchema.lockstepVersion` 13.
+- Today's road byte-unchanged in behaviour: every new face, line and seam is reached only from the new road (Release parity
+  below); the binary is not byte-identical (rule 24's precedent).
 
 **Preflight (complete, not delegated):** CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md` whole;
 `notes/CastleRules.md` WHOLE; `notes/SyncSpec.md` WHOLE; `notes/SurfaceContracts.md` WHOLE; this plan WHOLE (§0–§5d,
@@ -2296,4 +2310,259 @@ seconds.` (U1c's close count, exactly).
   `u2-prerevert/p10/`): M-10a the row never joins → `✘ … 11 issues`; M-10b "account" dropped from the keywords → GREEN (the
   blurb says "your account" too — the row is found either way; recorded, not a hollow pin: the pin's claim is the finding,
   which two texts carry).
-- No revert is in flight.
+- Piece 11 — THE RECORD: DONE (this close commit; it changes only this file).
+- No revert is in flight (every mutation and behavioural revert of this unit ran on a committed tree and was restored
+  `cmp`-identical from `scratchpad/u2-prerevert/` — the in-worktree hold dir `App/Variorum/DerivedData/u2-hold/` used once at
+  piece 3 and removed).
+
+**THE CORE LINES, LINE BY LINE (for the Fable ladder — `git diff 4a3c867cd -- Sources/`; custody ⇒ Fable):**
+- `Sources/VariorumCore/Protection/Executor/Acts/AccountActs.swift` (+33/−3, piece 1 — VX-456; READS only). In `join`:
+  `sameWords` was "the typed WORDS open the library's own words lock"; it is now that OR
+  `ProtectionExecutor.wordsAreTheAccountsAlready(liveFile, vault:, master:)` — `liveFile` is the library's key file only when its
+  fingerprint is the library's key's (`library.keyFile?.fingerprint == library.fingerprint`); `master` is
+  `VaultModel.master(of:passphrase:words:)` — what the typed secret reached in the vault (nil ⇒ false). The rule (static, pure over
+  values): the file carries NO words lock of its own (`file.words == nil`), its `masterWordsCopy` equals the vault's
+  `masterByWords` byte for byte (RFC 3394 deterministic; the copy is the vault's recovery wrap, copied — §3.5a), and its master
+  lock opens under `master`. Effect: `parameters.wordsReplaced = !sameWords` — the moment (rule 7's sentence / her email draft)
+  stays quiet on a join whose words already are the account's. It writes nothing, changes no act's steps, no lock, no secret;
+  only `wordsReplaced` (a report flag the faces read). The arm it cannot prove (an own words lock beside a matching copy — the
+  account's first device) answers false and the moment speaks (true either way) — P-VX309-U2-1. Pins `JoinWordsMomentTests` (8).
+- `Sources/VariorumCore/Domain/PassphraseStrength.swift` (+37, NEW, piece 6 — VX-211's estimator): `PassphraseAdvice {none,
+  short, repetitive}`; `advice(_:)` — empty → none; fewer than 6 different characters (case folded, spaces aside) → repetitive;
+  fewer than 20 characters → short; else none. Pure; `PassphraseStrengthTests` (4, exact). No refusal reads it (the floor is
+  the app's `NewPassphraseRule`, today's constants).
+
+**THE APP LINES AS BUILT (for the ladder — `git diff 4a3c867cd -- App/`):** piece 1 — `ProtectionWords.joinWordsNotShown(_:)`
+(her draft; nil email → "your account's"), `RoadAccountDoorOpen.accountEmail` (join + Move, from the sign-in), the sheet's
+`.notShown` arm. Piece 2 — `FollowDoneMark` + `ProtectionAccountRoad.owed(after:request:)` (`ProtectionAccountActs.swift`),
+`RoadStandingFaces.derive` no longer owes the follow's receipt, `RoadStandingModel.make` marks from `report.settledFollow`,
+`RoadAccountModel.followDone` / `followDoneOK()`, the bootstrap's press arm (`accountActOnNewRoad`) and roads, the section's
+notice + OK. Piece 3 — `moveNotYet`. Piece 4 — `deleteCopiesCounts` / `deleteCopiesWayBack` / `olderLibrariesLine`,
+`CopyDoorsListing.listsAnOlderLibrary`, `OpenLibraryShape` + `CopyDoorsRoads.libraryShape` (the bootstrap's from the session),
+`MakeMineModel.shape`, `makeMineLead(posture:passphraseSet:synced:)`, `neverLeaveCastle`, `makeMineSyncedLine`. Piece 5 —
+`keyDoorsLine`. Piece 6 — `NewPassphraseRule` (`SetPassphraseModel.swift`) read by `SetPassphraseModel`,
+`RoadCrossingConfirmModel`, `RoadAccountConfirmModel`, `RoadKeyDoorConfirmModel` (both presses); `passphraseHint`;
+`PassphraseHintLine` (the set sheet) in the four sheets + the band card. Piece 7 — the guide's section + Data Safety's three
+lines in `ProtectionWords`; `TutorialSeeder.plan(onTheNewRoad:)` / `seed(… onTheNewRoad:)` / `restore`'s gate; `DataSafetyPane`
+behind `roadStanding != nil`. Piece 9 — U1's lines re-drafted; `bringInReceipt(_:stoppedEarly:steppedAside:)` + the bootstrap's
+`steppedAside: open != nil`. Piece 10 — `SettingsCatalog.rows(newRoad:)` / `accountRow` / `everyRoadsRows`,
+`AppSettingsView.rowIDsRendered(newRoad:)` / `everyRoadsRowIDs`, `SettingsSearch.settingsEntries(newRoad:)` /
+`wholeIndex(newRoad:)`, the results pane's `newRoad:`.
+
+**COUNTS (the final code tree — `0a5277c92`; this close commit changes only this file):**
+- HEADLESS HARNESS (U1a's scratchpad `u1-harness`, re-pointed at this worktree; it now also symlinks U2's three headless suites
+  `FollowDoneNoticeTests`, `U2WordsTests`, `PassphraseFloorRoadTests`): **`✔ Test run with 345 tests in 57 suites passed after
+  5.985 seconds.`** (the baseline 319/54 + 26/3: `U2WordsTests` 13, `FollowDoneNoticeTests` 6, `PassphraseFloorRoadTests` 6,
+  `ProtectionJoinFollowRoadTests` +1).
+- SCRATCH SETTINGS HARNESS (`scratchpad/settings-harness`, piece 10 only — `SettingsShape.swift` + `SettingsAccountSearchTests`
+  symlinked; the copy titles stubbed at their real values; the helper's lists empty): **`✔ Test run with 2 tests in 1 suite
+  passed`**; on the pre-fix tree `✘ … 11 issues`.
+- CORE: the protection set (every `@Suite` type under `Tests/VariorumCoreTests/Protection` — 90 — plus `PassphraseStrengthTests`;
+  the filter re-derived from the files) Debug **`✔ Test run with 385 tests in 91 suites passed after 6.836 seconds.`** (U1c's
+  373/89 + `JoinWordsMomentTests` 8 + `PassphraseStrengthTests` 4); Release (`swift test -c release`, the same filter) **`✔ Test
+  run with 361 tests in 87 suites passed after 4.159 seconds.`** (349/85 + 12/2). THE FULL CORE SUITE, Debug (`swift test`):
+  VariorumCoreTests **`✔ Test run with 3365 tests in 440 suites passed after 201.898 seconds.`** (3353/438 + 12/2); the third
+  target `✔ 40 tests in 6 suites`; VariorumMCPTests `✘ 383 tests in 71 suites … with 1 issue` — the recorded VX-353 flake
+  (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, 19.2 s vs 15 s under the parallel
+  run); ALONE `✔ Test run with 3 tests in 1 suite passed after 2.185 seconds.` No MCP line in this diff.
+- RED ON THE PRE-FIX TREES (pins committed first): piece 1's core `✘ … 2 issues` (`9ed104688`) and the planted road's
+  behavioural revert `✘ … 1 issue`; piece 2 `✘ … 3 issues`; piece 3 `✘ … 5 issues`; piece 4 `✘ … 10 issues`; piece 5 `✘ … 4
+  issues`; piece 6 `✘ … 10 issues`; piece 9 (the as-drafted words under the new seam) `✘ … 14 issues`; piece 10 `✘ … 11 issues`;
+  every other new pin is NEW API — red by construction. MUTATIONS (each on a committed tree, restored `cmp`-identical): M-456a..c,
+  M-457a..c, M-4a..d, M-6a..d, M-7a..c, M-10a — every one red at its own pins; M-10b GREEN, recorded (piece 10's line).
+- `xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx309
+  -skipPackageUpdates -onlyUsePackageVersionsFromResolvedFile build-for-testing` → **`** TEST BUILD SUCCEEDED **`** (after every
+  piece; the one warning in a touched file — `AppSettingsView.swift:1268`, `spec(paths:joinAll:)` — is 2026-07-18's, not this
+  unit's); the phone `-scheme VariorumMobile -destination 'generic/platform=iOS Simulator' … build` → **`** BUILD SUCCEEDED **`**;
+  **the Release check `-configuration Release build` → `** BUILD SUCCEEDED **`** (into `DerivedData/vx309-release` —
+  `/Applications` untouched). All three on `0a5277c92`.
+- Release behaviour: unchanged by construction — every new face and line is reached only from the new road: the join moment, the
+  follow's Done, Move, the make-mine confirm, the key doors, the crossings, the account section and the set-passphrase sheet are
+  the new road's faces (`RoadStandingModel`, `copyDoorsRoads*`, `accountRoads` exist only there); the floor and hint read in the
+  new road's models only (today's road keeps its own floor, `ProtectionCopy.passphraseFloor`, untouched); the guide's new chapter
+  seeds only where `opensOnTheNewRoad` (false in Release); Data Safety's lines behind `roadStanding != nil`; the Settings row
+  behind `ProtectionRoad.newRoadIsLive` (false in Release) and the window's road.
+
+**THE MAC SUITES THE ORCHESTRATOR RUNS UNDER THE STAGE (from `App/Variorum/`; PENDING):**
+```
+xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx309 test \
+  -only-testing:VariorumTests/TutorialNewRoadChapterTests \
+  -only-testing:VariorumTests/SettingsAccountSurfaceTests \
+  -only-testing:VariorumTests/SettingsAccountSearchTests \
+  -only-testing:VariorumTests/RoadJoinFollowSurfaceTests \
+  -only-testing:VariorumTests/PlaintextExportBringInRouteTests \
+  -only-testing:VariorumTests/RoadCrossingSurfaceTests \
+  -only-testing:VariorumTests/RoadKeyDoorSurfaceTests \
+  -only-testing:VariorumTests/RoadAccountSurfaceTests \
+  -only-testing:VariorumTests/U2WordsTests \
+  -only-testing:VariorumTests/FollowDoneNoticeTests \
+  -only-testing:VariorumTests/PassphraseFloorRoadTests \
+  -only-testing:VariorumTests/ProtectionJoinFollowRoadTests \
+  -only-testing:VariorumTests/RoadJoinFollowWordsTests \
+  -only-testing:VariorumTests/RoadJoinFollowModelTests \
+  -only-testing:VariorumTests/RoadJoinFollowFacesTests \
+  -only-testing:VariorumTests/RoadKeyDoorWordsTests \
+  -only-testing:VariorumTests/OtherLibrariesDeleteRoadTests \
+  -only-testing:VariorumTests/OtherLibrariesDeleteRouteTests \
+  -only-testing:VariorumTests/PlaintextExportBringInRoadTests \
+  -only-testing:VariorumTests/EmptySlotLandingRoadTests \
+  -only-testing:VariorumTests/EmptySlotMakeMineRouteTests \
+  -only-testing:VariorumTests/EmptySlotDoorsSurfaceTests \
+  -only-testing:VariorumTests/CopyListingFacesSurfaceTests \
+  -only-testing:VariorumTests/PreviousLibrariesArcTests \
+  -only-testing:VariorumTests/MakeMineRoadTests \
+  -only-testing:VariorumTests/MakeMineRouteTests \
+  -only-testing:VariorumTests/CopyDoorsModelTests \
+  -only-testing:VariorumTests/RoadCrossingModelTests \
+  -only-testing:VariorumTests/RoadAccountModelTests \
+  -only-testing:VariorumTests/RoadKeyDoorsModelTests \
+  -only-testing:VariorumTests/PassphraseReminderTests \
+  -only-testing:VariorumTests/ProtectionSheetPresenterTests \
+  -only-testing:VariorumTests/ProtectionAccountRoadTests \
+  -only-testing:VariorumTests/RoadAccountWordsTests \
+  -only-testing:VariorumTests/RoadAccountFacesTests \
+  -only-testing:VariorumTests/WordsBandTests \
+  -only-testing:VariorumTests/WordsBandSurfaceTests \
+  -only-testing:VariorumTests/DataSafetyRoadCountsTests \
+  -only-testing:VariorumTests/DataSafetyTests \
+  -only-testing:VariorumTests/DataSafetyFacesTests \
+  -only-testing:VariorumTests/VX379PaneRowsTests \
+  -only-testing:VariorumTests/SettingsShapeTests \
+  -only-testing:VariorumTests/CommitVocabularyTests \
+  -only-testing:VariorumTests/DeadVocabularyTests \
+  -only-testing:VariorumTests/TutorialWalkTests \
+  -only-testing:VariorumTests/TutorialBooksChapterTests \
+  -only-testing:VariorumTests/TutorialMCPChapterTests \
+  -only-testing:VariorumTests/TutorialCurrencyTests \
+  -only-testing:VariorumTests/TutorialBuildFlavorTests \
+  -only-testing:VariorumTests/VX209GuideWarningTests \
+  -only-testing:VariorumTests/LaunchFurnitureTests \
+  -only-testing:VariorumTests/ReadmeStartHerePlanTests \
+  -only-testing:VariorumTests/ProtectionWordsPlanTests \
+  -only-testing:VariorumTests/ProtectionWordsVX307Tests \
+  -only-testing:VariorumTests/TravellingDotsIndicatorTests \
+  -only-testing:VariorumTests/NoLiteralColourTests \
+  -only-testing:VariorumTests/CopyRegisterPinTests \
+  -only-testing:VariorumTests/StatusSeamVocabularyTests
+```
+The first eight are U2's Mac-only suites (3 + 3 + 2 new; the flips and fixture lifts in the next five); then U2's headless suites
+(green in the harness) and the suites over the files this unit touched — the join/follow and account roads, the copy doors and
+their listing, the make-mine confirm, the key doors and crossings (the floor), the reminder and the band (the hint), Data Safety,
+the Settings catalog and search, the guide's seed (every tutorial suite — they read today's `plan`; a `.real` session seeds
+today's edition, so they are unchanged), the readme's gate, the words plan pins and the source scans. A source-needle check over
+every Mac source-reading pin naming a touched file found every needle in place (`scratchpad` script; the only unmatched needles
+are runtime-string checks over constants this unit did not touch).
+
+**THE RED-ON-OLD BY BEHAVIOURAL REVERT for the Mac-only suites (the orchestrator's, each from a committed tree, restored by `git
+checkout --`):**
+- **(R-U2-7-gate)** in `TutorialSeeder.restore(session:existing:)`, `onTheNewRoad: ProtectionRoad.opensOnTheNewRoad(…)` →
+  `onTheNewRoad: false` → `TutorialNewRoadChapterTests.theDevStoresGuideSeedsTheNewRoadsChapter` RED.
+- **(R-U2-7-seed)** in `TutorialSeeder.seed`, `if onTheNewRoad {` → `if false {` → the same pin RED (the plan pin stays green —
+  it reads `plan(onTheNewRoad:)`).
+- **(R-U2-7-fence)** `ProtectionRoad.opensOnTheNewRoad(devStore: session.storeVariant == .dev)` →
+  `ProtectionRoad.newRoadIsLive` → `theRealStoresGuideKeepsTodaysChapter` RED.
+- **(R-U2-9-aside)** in `AppBootstrap.bringInPlaintextExport`, `steppedAside: open != nil` → `steppedAside: false` →
+  `PlaintextExportBringInRouteTests.fromAnOpenLibraryTheExportLandsAsANewLibraryReadyNeverHeld` RED; `→ true` →
+  `fromTheMissingFaceTheExportLandsAsANewLibrary` RED.
+- **(R-U2-10-window)** in `AppSettingsView`'s results pane call, `newRoad: roadStanding?.account != nil` → `newRoad: true` →
+  `SettingsAccountSurfaceTests.theResultsPaneAsksForTheWindowsRoad` RED (by source); `SettingsCatalog.rows(newRoad:)`'s guard →
+  always adds → `todaysRoadKeepsTodaysCatalogAndTheNewRoadAddsOneRow` and `theRowIsRenderedWhereItIsDeclared` RED.
+- **(R-U2-10-old)** `SettingsAccountSearchTests` compiles on `fd99e5c22`'s parent tree — run it there: RED (11 issues headless).
+- The two `RoadJoinFollowSurfaceTests` flips (piece 2): revert `RoadStandingFaces.derive` to owe the follow's receipt and drop
+  `RoadStandingModel.make`'s mark → both RED (they read `account.followDone` after the reopen, and no receipt).
+
+**WALK NOTES FOR THE ACCEPTANCE SPINE (the orchestrator's ONE phase walk — the DEV store only, under a held claim, both voices
+wherever a face renders):**
+- **The join moment (piece 1) + VX-456.** On the throwaway project (VX-308's walk switch), a library joining an account by its
+  PASSPHRASE: the moment says *Your twelve words are <the email>'s twelve words. If you don't have your account's words written
+  down, you can make new ones at any time.* — capture (light, dark). Then This Mac Only and a re-join by the same passphrase: NO
+  moment (VX-456: the file proves the words are the account's). Signed out at the end; the Debug app never signs into her real
+  account.
+- **VX-457.** A follow that lands (the throwaway's second device is the walk machinery's): the account section shows VX-107's
+  sentence with *OK*, through a quit and relaunch, and with Settings ▸ General ▸ Confirmations set to off; *OK* clears it.
+- **moveNotYet (piece 3).** Signed in as another account than the library's: Move's line names the road (*sign out, choose Use
+  this Mac only, then sign back in to that account and turn on sync …*).
+- **Item 5 + item 7 (piece 4).** Data Safety ▸ Restore from Backup with a Previous Library listed: her older-libraries line under
+  the listing; *Delete…* on a stepped-aside throwaway: the confirm counts *…, plus 1 older library Variorum kept when you opened
+  or restored a different one.* and her way-back sentence. Make this my library on a copy while in Castle (the dev library's LOCAL
+  Use Castle, VX-308's machinery; Standard restored after): the lead says *in Castle* and *You never leave Castle by opening
+  something.* — capture. Synced (the throwaway): the lead ends with the synced line.
+- **VX-263 (piece 5).** The key doors' line and beneath New Words: *Every copy of this library opens with your current
+  passphrase or words; on this Mac, its quiet road opens it too, if it still holds that copy's key.*
+- **VX-211 (piece 6).** On a throwaway with no passphrase: Set a passphrase… with 11 characters → *Your passphrase needs at least
+  12 characters.* (today's sentence); 12–19 characters → the quiet line *Short passphrases are easier to guess — a longer phrase
+  is stronger.* and the set LANDS; "aaaaaaaaaaaaaaaaaaaa" → the repetition line; a 20+ character varied phrase → no line. The
+  same on Change passphrase…'s new field and turning sync on with a new passphrase. No colour, no meter.
+- **The guide (piece 7).** ONLY on a throwaway slot (never the dev library's own guide — the brief's no-store-touch for this unit
+  becomes the walk's choice): Help ▸ Restore Tutorial… → "keeping it private" holds *Your key and your twelve words* (the
+  Start Here passages first), *Standard and Castle*, *Copies, backups and your way back*. Data Safety on the new road: the counts
+  line, rule 5's sentence, and with a picked folder the one-a-day caption — capture both voices.
+- **Piece 9.** T-5 (U1b's walk recipe): the confirm's new lead, the receipt *This is your library now.*; the empty-slot listing's
+  lead and (on an empty throwaway home) *Variorum isn't keeping any copies on this Mac.*; T-8 from an open throwaway: the new lead
+  and the receipt ending *The previous one is in Previous Libraries.*; the delete confirm's opening *This deletes this Mac's copies
+  of …*; VX-210's line in its two sentences.
+- **VX-453 (piece 10).** Settings search: "account" → the Sync row (Protection) first; click → the Protection pane with the Sync
+  section; "sync" → the Sync row first, then what it found before.
+
+**PROVISIONALs (each built as its option (a); for the orchestrator to bundle under QUESTIONS at the closeout — the shared ledger is
+the merging session's):**
+- **P-VX309-U2-1 — VX-456's provable arm:** (a) BUILT — quiet only when the key file has no own words lock and its words copy is
+  the vault's recovery wrap byte for byte with the master lock opening under the account's master; the account's first device
+  (its own lock stands beside a matching copy) hears the moment once on a passphrase re-join; (b) compare the own lock's wrap too
+  (it is salted per lock — no identity to compare; would need a stored marker); (c) record "words handed up" in the key file
+  (a format change — not this unit's).
+- **P-VX309-U2-2 — the join moment with no email at hand:** (a) BUILT — *your account's twelve words*; (b) say nothing.
+- **P-VX309-U2-3 — the words-typed moment keeps rule 7's own sentence** (canon, pinned to the rules file): (a) BUILT — her
+  draft replaces only the passphrase-typed notice; (b) her email direction also rewords rule 7's phrase (a rules change — hers).
+- **P-VX309-U2-4 — moveNotYet's two presses fitted to the faces** (This Mac Only renders only signed out): (a) BUILT.
+- **P-VX309-U2-5 — item 7's concrete lead says the posture the copy LANDS in** (rule 17), never the copy's own former posture
+  (only its key file speaks of that, and an Apple lock there is no reliable posture fact): (a) BUILT; (b) also say the copy's
+  own posture when its key file proves it.
+- **P-VX309-U2-6 — VX-263's sentence fitted** (*… on this Mac, its quiet road opens it too, if it still holds that copy's key.*)
+  superseding U3's line in its hosts: (a) BUILT.
+- **P-VX309-U2-7 — the hint's words and thresholds** (short < 20 characters; repetitive < 6 different characters): (a) BUILT.
+- **P-VX309-U2-8 — the guide's new-road chapter** (three lessons; VX-209's older-copy warning retired on that road): (a) BUILT.
+- **P-VX309-U2-9 — Data Safety's three new-road lines:** (a) BUILT.
+- **P-VX309-U2-10 — U1a–U1c's words re-drafted in §7c's voice** (T-5, the empty-slot listing, T-8, the delete door's lead and
+  receipt, VX-210's line): (a) BUILT; the door, title, button, working line and failure kept as drafted.
+- **P-VX309-U2-11 — VX-453's row** (its blurb and keywords; road-gated by the build AND the window): (a) BUILT; (b) gate by the
+  build only (a Debug build over the real store's variant would name a section its pane doesn't show).
+
+**FINDINGS AND HAND-FORWARDS (routed, not fixed here unless said):**
+- **F-U2-1 (her bundle — the middle clause):** §1 reads her note as allowing either arm; §5d rules the clause dropped because
+  VX-456 lands in the same piece. Built §5d's. Her draft's middle clause (*If this is your first time signing in, your previous
+  twelve words still open backups you made before today*) is true only on a real replacement — which is now exactly when the
+  moment fires; if she wants it back, it is one line in `joinWordsNotShown`.
+- **F-U2-2 (Bug, Suspected, Castle & sync, Low — a face):** the restore-hold banner's `hasAccount` reads whether this Mac is
+  SIGNED IN, not whether the library is BOUND; after Make this my library while signed in (the new library carries no sync
+  identity — P-VX378-U2-4) the banner says *Resume to catch up with your account* over a library that does not sync, and Resume
+  only clears the hold (the VX-314 gate refuses a sync there). Fix shape: on the new road, `hasAccount` = the open library's
+  record names an account. Not this unit's surface.
+- **F-U2-3 (Wording, Settings & onboarding, Low):** the Settings catalog's Protection row blurb says *The passphrase, when the
+  library locks, escrow and the recovery key.* — retired words on BOTH roads ("escrow" is in the two-register rule's forbidden
+  list; "recovery key" is today's road's old name). Not changed (today's road's row — Release parity); a one-line reword.
+- **F-U2-4 (VX-329 — the delta brief predates the rules):** `notes/stargazing-castle-rebuild-delta-brief.md` (2026-10-14) still
+  states facts CastleRules superseded — the Castle anchor (Tier 2; the ledger: superseded by rules 4 and 12), a salted hash of
+  the hardware (Tier 2 + the restore FAQ; rule 23: no hardware fingerprinting), the key history / each copy's *Opens with* line
+  (rules 17 and 21; the route finder reduced to one sentence), Re-link's library arm. Its header already has VX-329 re-check
+  every fact; the finding is that several need RE-WRITING against the rules, not re-checking. This unit added one fact only.
+- **F-U2-5 (VX-353, known):** the full core run's one red is the recorded wall-clock flake; alone green.
+- **F-U2-6 (Debt, Test-only, Castle & sync, Low — VX-213's tidy-up):** `MultiTenantSyncAttackerTests`' arm-10 text pin reads file
+  12's `sync_reencrypt` body while file 13 is deployed (re-read 2026-10-20: 13's body carries the gate at :509; no later file
+  redefines it). Fix shape: read the final body (`AuthRLSDDLTests.finalBody(of:)`). A test line — rides `pg_temp`'s window or
+  any Sync-adjacent run.
+- **F-U2-7 (VM — mobile parity):** the phone's guide (`MobileTutorialSeeder`) has no new-road protection chapter, and the phone
+  has no new-road passphrase setter yet (so no floor or hint face) — its own epic's items when it gets the new road's faces.
+
+**MOBILE PARITY:** NOTHING MOBILE-VISIBLE. The phone renders only these `ProtectionWords` lines — the lobby's (`lobbyTitle`,
+`passphraseLabel`, `wordsPlaceholder`, `wordsButton`, `wordsDoor`, `touchIDButton`, `openButton`, `opening`, `rearmYes/No`), the
+words card's (`wordsCardTitle/Lead/Foot/Button`), the offer's (`offerUseIt`, `offerNotNow`), the notice's `noticeOK`, and the
+no-key-file / keychain lines (`noKeyFileAnywhere`, `noKeyFileAfterAQuietOpen`, `noKeyFileAnywhereAccountRoad`,
+`noKeyFileStartDoor`, `keychainUnreadable`, `liveKeyFileUnreadable`) — NONE changed by this unit. The shared brains this unit
+changed (`NewPassphraseRule`, `FollowDoneMark`, `OpenLibraryShape`, the `AppBootstrap` seams, `bringInReceipt`'s signature)
+compile into the phone (its build green) and no phone face reads them; the phone's guide edition is its own, untouched
+(F-U2-7 for the VM board).
+
+**Notes:** no machinery deaths after the compaction; the one hang (piece 6 — a refused press spinning a test's wait, 30 minutes
+under my own process) was found by `sample`, killed, and its fixture lifted; no Sonnet lookup; no subagents; no scratch worktree.
+The harnesses are scratchpad-only (`u1-harness` — U1a's; `settings-harness` — piece 10's), never committed.
