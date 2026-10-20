@@ -799,13 +799,15 @@ nonisolated enum ProtectionWords {
     }
     /// THE WORDS MOMENT when the PASSPHRASE was the secret typed (P-VX378-U2-3 (a) — the words were replaced, and nothing
     /// here can show them). VX-309 U2 — HER REFINED DRAFT (the VX-308 handoff sitting, QUESTIONS #236), verbatim-faithful:
-    /// the library ADOPTS the account's words, the account NAMED BY ITS EMAIL; the middle clause (*If this is your first
-    /// time signing in, your previous twelve words still open backups you made before today.*) DROPPED as the plan's §5d
-    /// rules — VX-456 lands with it, so the moment speaks only on a real replacement (the core's `wordsAreTheAccountsAlready`).
-    /// `email`: the account signed in at the join (nil, not known — "your account's", PROVISIONAL P-VX309-U2-2).
+    /// the library ADOPTS the account's words, the account NAMED BY ITS EMAIL. The middle clause keeps its SENTENCE and
+    /// drops only its conditional lead-in ("If this is your first time signing in, …") — her note's own reading (the
+    /// F-U2-1 arbitration): with VX-456 the moment fires only on a real replacement, so the previous-words fact "applies
+    /// unconditionally" — it is said plainly, un-hedged, exactly when it is true. PROVISIONAL (her bundle carries both
+    /// texts beside her note). `email`: the account signed in at the join (nil, not known — "your account's", P-VX309-U2-2).
     static func joinWordsNotShown(_ email: String?) -> String {
-        "Your twelve words are \(email.map { "\($0)'s" } ?? "your account's") twelve words. If you don't have your "
-            + "account's words written down, you can make new ones at any time."
+        "Your twelve words are \(email.map { "\($0)'s" } ?? "your account's") twelve words. Your previous twelve words "
+            + "still open backups you made before today. If you don't have your account's words written down, you can "
+            + "make new ones at any time."
     }
     static let joinWordsMomentOK = "OK"
 
