@@ -211,6 +211,15 @@ verbatim with VX-458 substituted. The only addition is one logistics line: where
 out, and not to run `Tools/ambient` or the window, because the coordinator's live instance runs from
 this worktree.
 
+**Integration re-run on the round-1 build (8b67312f5), from the coordinator's seat under its em-dash
+HOLD:**
+- `off` stopped the old pid in 316 ms;
+- `on` came up "AMBIENT ON — RUNNING scene=koi pid=61216";
+- `status` exited 0;
+- the log line reads `ON … stage=hold who=1018coordinator return-to=Ghostty`.
+
+The coordinator treats an `on` refused for "display asleep" as expected overnight.
+
 ### Round 1 — 0 BLOCKER · 0 MAJOR · 5 MINOR · 6 NIT; all agreed except one SPECULATIVE (recorded)
 
 | # | Finding | Disposition |
