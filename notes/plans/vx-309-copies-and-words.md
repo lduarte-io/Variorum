@@ -704,6 +704,35 @@ target here. Cancel left nothing; Sign out's confirm speaks VX-264's ruled words
 said honestly:** one Tab-focus miss typed the account password visibly into the email field — the capture was
 DELETED at once, the field cleared and refilled; the throwaway project's test password only (disposable; the dev
 pair untouched); the discipline became direct field clicks, secrets via env-read keystrokes only.
+**T-8 prep + W-VX309-4 (finding — Bug, the walk's biggest):** two walk books were minted in the source (aa empty
+walk · zz walk book; the add-note-to-second-book gesture has no Library context-menu or palette door — the drag
+didn't take; the two-book-membership shape stays pin-covered, said honestly). THE PANE'S EXPORT DOOR FAILS: *Export
+an unencrypted copy of your library* ▸ Choose Where… ▸ Save landed a 0-BYTE file and the pane's honest error line
+**"SQLite error 1: unable to open database file - while executing `SELECT sqlcipher_export('plain')`"** — at BOTH
+`~/vx309-walk/export/` and `~/Downloads/` (two distinct user-picked folders; suspected mechanism: the save panel's
+security-scoped grant isn't held around the export's ATTACH). The deliberate backups-folder refusal arm WORKS and
+speaks its ruled sentence (*Not into Variorum's backups folder — an unencrypted copy beside the sealed ones would
+be the one anything in that folder could read. Choose somewhere else.*, captured). The door is T-8's own source
+door — ticket at closeout (Bug · Suspected · Castle & sync, with the capture); the 0-byte residue removed. The
+export was made by the U1b walk note's SANCTIONED FALLBACK instead: `ExportPlant.export`'s fixture rebuilt verbatim
+in a scratchpad SwiftPM tool against this worktree's core (`~/vx309-walk/export/export.sqlite`, 553 KB — book
+Travels/chapter Part one/two members, First tagged #trip and sectioned, Loose bookless, pool Ideas with a scrap).
+**Row 8 — T-8 (the bring-in):** File ▸ Open Library… picked the export → the doors NAMED it (the T-8 confirm
+captured pre-press: *"Open a Library — This plain-text copy becomes a new library — in Standard, with a fresh key
+of its own; its new twelve words are offered once it opens. Its notes and their takes, books, chapters, snippets
+and tags come in, written fresh; its gatherings, entry dates, commits, comments, note versions, book settings,
+stars and shelves don't. Your current library steps aside whole into Previous Libraries, where you can look inside
+it or make it your library again. The copy itself is not changed."* — F-R2's words-offered clause and the full
+§5b-R ride/don't-ride lists live) → Bring it in → LANDED: new library `71a5a70d` (key `82de9376`, Standard, Apple
+wrap, NO passphrase wrap), **NOT held** (no banner, no hold marker in the slot), the quiet receipt *"This is your
+library now, made from the plain-text copy: 1 book · 3 notes · 1 snippet group. T[he previous one is in Previous
+Libraries.]"* with true counts, the fresh-words card AND the passphrase reminder card both offered (honest — no
+passphrase); Travels under Unshelved with #trip · 2 notes · 1 ch; the outgoing `d3c486ea` aside WHOLE in
+`Previous Libraries/2026-10-20-100355/` — sqlite + mirror + **its hold marker with it**, its key file staled in
+place. A leftover queued export save-panel sheet and the stuck ⌘K palette stacked over the confirm (cliclick's
+kp:esc never reaches a palette — System Events key code 53 does; machinery note). Deeper member-order checks are
+the pins'; the fixture carries book/chapter/membership/tag/pool/bookless shapes — archived/wings/versions-absent
+shapes ride the pins only (the pane door's break kept the richer hand-built source out; said honestly).
 
 ## 2. Evidence (the acceptance spine)
 Walks in BOTH VOICES (Terminal and Study) over the new faces; the restore drill through Look inside and Make this my
