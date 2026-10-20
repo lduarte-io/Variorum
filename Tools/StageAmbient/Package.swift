@@ -14,7 +14,10 @@ let package = Package(
         // stage-claim rule and the scenes themselves.
         .target(name: "AmbientKit"),
         // The AppKit host: the window, the frame clock, the input and claim watchers, the exit paths.
+        // Window mode only — so a process named "StageAmbient" is always the ambient on screen.
         .executableTarget(name: "StageAmbient", dependencies: ["AmbientKit"]),
+        // The offscreen dev aids (GIFs, stills, bench, list, gallery), under their own name.
+        .executableTarget(name: "AmbientRender", dependencies: ["AmbientKit"]),
         .testTarget(name: "AmbientKitTests", dependencies: ["AmbientKit"]),
     ]
 )

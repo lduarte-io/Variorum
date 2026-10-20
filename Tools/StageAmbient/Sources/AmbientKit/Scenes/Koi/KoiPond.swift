@@ -25,6 +25,9 @@ public final class KoiPond: AmbientScene {
     var nextLeaf: Double
     var nextInsect: Double
     var leafIDs = 0
+    /// Each pad rendered once and reused until it has moved half a pixel or turned a little: pads drift
+    /// about a pixel a second, so this redraws them a few times a second instead of every frame.
+    var padSprites: [PadSprite?] = []
 
     public init(size: PixelSize, seed: UInt64) {
         self.size = size
@@ -320,7 +323,12 @@ public final class KoiPond: AmbientScene {
         water.draw(into: canvas, time: time, unit: unit)
         for k in koi.sorted(by: { $0.depth > $1.depth }) { k.draw(into: canvas) }
         for r in ripples { r.draw(into: canvas) }
-        for p in pads { p.draw(into: canvas) }
+        if padSprites.count != pads.count { padSprites = Array(repeating: nil, count: pads.count) }
+        for i in pads.indices {
+            let key = PadSprite.key(for: pads[i])
+            if padSprites[i]?.key != key { padSprites[i] = PadSprite(pad: pads[i], key: key) }
+            padSprites[i]?.blit(into: canvas)
+        }
         for l in leaves where l.phase != .falling { l.draw(into: canvas) }
         for l in leaves where l.phase == .falling { l.draw(into: canvas) }
     }

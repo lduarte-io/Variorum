@@ -17,11 +17,26 @@ public enum StageVerdict: Equatable, Sendable {
     case foreign(who: String, reason: String)
     /// The lock directory exists but its claim file doesn't yet (a claim mid-write, or a stale lock).
     case pending
+    /// A claim file is there but carries no WHO or REASON: someone's claim, mid-write or broken. Refused
+    /// like any other claim (fail closed), with its own words.
+    case unreadable
+
+    /// One line for logs and refusals.
+    public var summary: String {
+        switch self {
+        case .free: "free"
+        case .hold(let who): "hold who=\(who)"
+        case .allowed(let who): "allowed who=\(who)"
+        case .foreign(let who, let reason): "claim who=\(who) reason=\(reason)"
+        case .pending: "claim being written (lock without a claim file)"
+        case .unreadable: "claim file unreadable"
+        }
+    }
 
     public var permitsAmbient: Bool {
         switch self {
         case .free, .hold, .allowed: true
-        case .foreign, .pending: false
+        case .foreign, .pending, .unreadable: false
         }
     }
 }
@@ -40,37 +55,45 @@ public enum StageClaim {
         guard FileManager.default.fileExists(atPath: lockDirectory.path, isDirectory: &isDir), isDir.boolValue else {
             return .free
         }
-        let meta = try? String(contentsOf: lockDirectory.appendingPathComponent("claim"), encoding: .utf8)
-        return verdict(meta: meta, allowedClaimant: allowedClaimant)
+        // Bytes, never text: under a UTF-8 locale bash 3.2's %q writes a non-ASCII character's lead byte
+        // raw and the rest as octal escapes, so a claim with an em dash is not valid UTF-8 as a file.
+        let meta = try? Data(contentsOf: lockDirectory.appendingPathComponent("claim"))
+        return verdict(meta: meta.map { Array($0) }, allowedClaimant: allowedClaimant)
     }
 
-    /// The decision for a lock directory that exists, given its claim file's contents (nil = no file).
-    public static func verdict(meta: String?, allowedClaimant: String?) -> StageVerdict {
+    /// The decision for a lock directory that exists, given its claim file's bytes (nil = no file).
+    public static func verdict(meta: [UInt8]?, allowedClaimant: String?) -> StageVerdict {
         guard let meta else { return .pending }
         let fields = parse(meta)
-        guard let who = fields["WHO"] else { return .pending }
-        let reason = fields["REASON"] ?? ""
+        guard let who = fields["WHO"], let reason = fields["REASON"] else { return .unreadable }
         if reason.hasPrefix(holdPrefix) { return .hold(who: who) }
         if let allowedClaimant, !allowedClaimant.isEmpty, who == allowedClaimant { return .allowed(who: who) }
         return .foreign(who: who, reason: reason)
     }
 
     /// `KEY=value` lines, values unquoted.
-    public static func parse(_ meta: String) -> [String: String] {
+    public static func parse(_ meta: [UInt8]) -> [String: String] {
         var out: [String: String] = [:]
-        for line in meta.split(whereSeparator: \.isNewline) {
-            guard let eq = line.firstIndex(of: "=") else { continue }
-            let key = String(line[..<eq])
-            out[key] = unquote(String(line[line.index(after: eq)...]))
+        for line in meta.split(separator: UInt8(ascii: "\n")) {
+            guard let eq = line.firstIndex(of: UInt8(ascii: "=")) else { continue }
+            let key = String(decoding: line[line.startIndex..<eq], as: UTF8.self)
+            out[key] = String(decoding: unquoteBytes(Array(line[(eq + 1)...])), as: UTF8.self)
         }
         return out
     }
 
+    public static func parse(_ meta: String) -> [String: String] { parse(Array(meta.utf8)) }
+
     /// Reverses bash's `printf %q`: `$'…'` (ANSI-C escapes, octal bytes for non-ASCII), `'…'`, and
     /// backslash-escaped bare words.
     public static func unquote(_ s: String) -> String {
+        String(decoding: unquoteBytes(Array(s.utf8)), as: UTF8.self)
+    }
+
+    /// The byte-level reversal: raw bytes pass through and escapes become bytes, so a raw lead byte and
+    /// its octal-escaped continuation bytes reassemble into the character.
+    public static func unquoteBytes(_ u: [UInt8]) -> [UInt8] {
         var bytes: [UInt8] = []
-        let u = Array(s.utf8)
         var i = 0
         while i < u.count {
             let c = u[i]
@@ -116,7 +139,7 @@ public enum StageClaim {
                 bytes.append(c); i += 1
             }
         }
-        return String(decoding: bytes, as: UTF8.self)
+        return bytes
     }
 
     private static func hexDigit(_ c: UInt8) -> Int? {
@@ -126,18 +149,5 @@ public enum StageClaim {
         case UInt8(ascii: "A")...UInt8(ascii: "F"): Int(c - UInt8(ascii: "A")) + 10
         default: nil
         }
-    }
-}
-
-/// Rail 5: real input quits the ambient. The host reads the HID system's idle time (what the
-/// coordinator reads too — nothing is posted, nothing is asserted); input that arrived after the
-/// short launch grace means someone is at the machine.
-public enum InputRule {
-    public static let launchGrace = 0.75
-
-    /// `uptime` = seconds since the ambient came up; `idle` = seconds since the last HID event.
-    public static func inputArrived(uptime: Double, idle: Double, grace: Double = launchGrace) -> Bool {
-        guard uptime.isFinite, idle.isFinite else { return false }
-        return uptime - idle > grace
     }
 }
