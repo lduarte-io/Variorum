@@ -2241,5 +2241,32 @@ seconds.` (U1c's close count, exactly).
   Supabase's own sign-in audit log (email, IP) outlives a deleted account — with what the repo shows (`account_purge`
   deletes the `auth.users` row; no `Server/` line names the audit log) and what VX-329 confirms (the log's contents and
   retention, outside the repo; no live lookup in this unit), plus one caution line.
-- Pieces 9–10 — NOT-STARTED.
+- Piece 9 — U1a–U1c's UNDRAFTED WORDS, ONE PASS: DONE (`1b188af99`). The voice is §7c's (her drafted confirm and receipt,
+  `makeMineLead` / `makeMineReceipt`): each new line takes §7c's own sentence where one fits and its shape where none does.
+  T-5 — the lead (*This copy becomes your library — a new library, in Standard, with a fresh key of its own. Enter the copy's
+  twelve words and they become your library's words, and you can set a passphrase after; or enter its passphrase and it
+  becomes your library's, with new twelve words offered once the library opens. The copy itself is not changed.* — the pair
+  the landing keeps AS BUILT: `EmptySlotMakeMineProgram` keeps no passphrase beside typed words); the receipt is §7c (9)'s first
+  sentence, *This is your library now.* The empty-slot listing — the lead is `restoreListLead`'s sentence minus its step-aside
+  clause; the empty line *Variorum isn't keeping any copies on this Mac.* (scoped to Variorum's own folders, so VX-210's line
+  beneath never contradicts it). T-8 — the lead in §7c (8)'s shape with the ruling in ONE line (*Its notes and their takes,
+  books, chapters, snippets and tags come in, written fresh; its commits, comments, note versions, book settings, stars and
+  shelves don't.* — the document format carries no commits or comments, versions never ride) and §7c (8)'s own step-aside
+  clause when a library is open; the earlier-build refusal in `LibraryOpenCopy.newerSchemaRefusal`'s shape; the unreadable-note
+  refusal says *so nothing was brought in* (it refuses at the preflight); the receipt in §7c (9)'s shape (*This is your
+  library now, made from the plain-text copy: …* + the empty books + *The previous one is in Previous Libraries.* when one
+  stepped aside — `bringInReceipt(_:stoppedEarly:steppedAside:)`, the bootstrap passing `open != nil`, the lead's own test).
+  The delete door — the door, title, button, working line and failure READ AND KEPT; the lead's opening and the receipt name
+  the device through `ProtectionCopy` (*this Mac's copies of the library last copied …*); VX-210's line one plain line (the
+  colon split into two sentences). `bringInButton` / `bringInWorking` kept. The guide's plain-text paragraph follows the
+  lead's list. All PROVISIONAL P-VX309-U2-10. Pins `U2WordsTests` +4 (each line as re-drafted, §7c's sentences by constant,
+  the register over every line of the pass) — RED ON THE AS-DRAFTED WORDS (the old strings under the new seam, `u2-prerevert/p9/`,
+  restored `cmp`-identical) `✘ Test run with 18 tests in 2 suites failed after 0.675 seconds with 14 issues.`; red by
+  construction on the pre-piece tree (`steppedAside:`). FLIPPED DELIBERATELY: `PlaintextExportBringInRoadTests`' receipt pin
+  (headless) and `PlaintextExportBringInRouteTests`' (Mac — both arms now: the open library's receipt names Previous Libraries,
+  the missing face's never; BUILT, its run the orchestrator's; recipe R-U2-9-aside: the bootstrap's `steppedAside: open != nil`
+  → `false` reds the open arm). The harness `✔ Test run with 32 tests in 5 suites passed` (U2WordsTests ·
+  PlaintextExportBringInRoadTests · OtherLibrariesDeleteRoadTests · EmptySlotLandingRoadTests · PreviousLibrariesArcTests);
+  `build-for-testing` `** TEST BUILD SUCCEEDED **`.
+- Piece 10 — NOT-STARTED.
 - No revert is in flight.
