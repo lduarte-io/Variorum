@@ -60,7 +60,7 @@ struct RetentionTests {
 
     @Test func overASharedFolderNothingForeignIsPruned() throws {
         let catalog = try Self.sharedWorld()
-        let outcome = Retention.plan(catalog: catalog, libraryID: CF.lib1, thisMac: CF.macA)
+        let outcome = Retention.plan(catalog: catalog, libraryID: CF.lib1, thisMac: CF.macA, now: CF.stamp(1_000))
         let mine = RF.ids(catalog) { $0.kind == .backup && $0.mac == .mac8(Self.mac8A) && $0.library == CF.lib1 }
         #expect(!outcome.prune.isEmpty)
         #expect(Set(outcome.prune).isSubset(of: mine), "only this Mac's copies of this library")
@@ -73,7 +73,7 @@ struct RetentionTests {
 
     @Test func theContainerKeepsItsNewestFourteen() throws {
         let catalog = try Self.sharedWorld()
-        let outcome = Retention.plan(catalog: catalog, libraryID: CF.lib1, thisMac: CF.macA)
+        let outcome = Retention.plan(catalog: catalog, libraryID: CF.lib1, thisMac: CF.macA, now: CF.stamp(1_000))
         let containerKept = catalog.copies.filter { $0.place == .container && outcome.keep.contains($0.id) }
         #expect(containerKept.count == 14)
         #expect(containerKept.compactMap(\.stamp).min() == CF.stamp(6), "days 6–19 kept, 0–5 pruned")
@@ -82,7 +82,7 @@ struct RetentionTests {
 
     @Test func theFarFolderKeepsFourteenDailiesAndFourWeeklies() throws {
         let catalog = try Self.sharedWorld()
-        let outcome = Retention.plan(catalog: catalog, libraryID: CF.lib1, thisMac: CF.macA)
+        let outcome = Retention.plan(catalog: catalog, libraryID: CF.lib1, thisMac: CF.macA, now: CF.stamp(1_000))
         let farKept = catalog.copies.filter { $0.place == .farFolder && outcome.keep.contains($0.id) }
         #expect(farKept.count == 18, "14 dailies + 4 weeklies")
         let days = Set(farKept.compactMap(\.stamp).map(Retention.dayIndex))
@@ -117,9 +117,41 @@ struct RetentionTests {
                 "the twin never claims a weekly slot for a week the dailies cover")
     }
 
+    /// VX-309 U1a Mac batch, finding MB-1: a copy stamped AHEAD of the clock (a clock that once ran fast) claims NO
+    /// slot — kept like an undated copy, never counted among the container's 14 or the far dailies, never pruned —
+    /// so the fresh pair a due-check just wrote (the due-check rightly distrusts the future stamp) is never pruned
+    /// in the future copy's favour. On the pre-fix rule the future copy claimed the newest slot and the fresh
+    /// trusted pair was pruned the moment it landed (write-then-delete churn; the batch caught it live at a UTC
+    /// hour the headless run's luck had missed).
+    @Test func aFutureStampedCopyClaimsNoSlotAndIsNeverPruned() throws {
+        var entries: [CatalogEntry] = []
+        // The container: 15 trusted dailies (days 0–14) and one copy stamped six days ahead.
+        entries += try RF.copies(.container, library: CF.lib1, mac: CF.macA, days: (0..<15).map(Double.init))
+        entries += try RF.copies(.container, library: CF.lib1, mac: CF.macA, days: [20])
+        // The far folder: today's trusted pair, and a pair an hour ahead of the clock on the same UTC day.
+        entries += try RF.copies(.farFolder, library: CF.lib1, mac: CF.macA, days: [14])
+        entries += try RF.copies(.farFolder, library: CF.lib1, mac: CF.macA, days: [14], seconds: 3_600)
+        let catalog = Catalog.build(entries)
+        let now = CF.stamp(14, 60)  // just past today's far pair; day 20 and the +3600 s pair sit ahead of the clock
+        let outcome = Retention.plan(catalog: catalog, libraryID: CF.lib1, thisMac: CF.macA, now: now)
+        // Container: the 15 trusted dailies compete for 14 slots — exactly the oldest goes; the future copy is kept
+        // and claims no slot (the pre-fix rule kept the future copy IN a slot and pruned days 0 AND 1).
+        let container = RF.ids(catalog) { $0.place == .container }
+        let futureContainer = RF.ids(catalog) { $0.place == .container && $0.stamp == CF.stamp(20) }
+        let oldestTrusted = RF.ids(catalog) { $0.place == .container && $0.stamp == CF.stamp(0) }
+        #expect(Set(outcome.prune).intersection(container) == oldestTrusted, "only the oldest trusted daily goes")
+        #expect(futureContainer.isSubset(of: Set(outcome.keep)), "the future copy is kept, slot-less")
+        // Far: the future pair claims no daily slot, so today's trusted pair keeps its day — nothing is pruned
+        // (the pre-fix rule gave the day to the future pair and pruned the trusted one as a covered-week twin).
+        let far = RF.ids(catalog) { $0.place == .farFolder }
+        #expect(Set(outcome.prune).intersection(far).isEmpty, "nothing in the far folder is pruned")
+        let futureFar = RF.ids(catalog) { $0.place == .farFolder && $0.stamp == CF.stamp(14, 3_600) }
+        #expect(futureFar.isSubset(of: Set(outcome.keep)), "the future far pair is kept, slot-less")
+    }
+
     @Test func anotherLibraryOnThisMacIsKeptAsToday() throws {
         let catalog = try Self.sharedWorld()
-        let outcome = Retention.plan(catalog: catalog, libraryID: CF.lib1, thisMac: CF.macA)
+        let outcome = Retention.plan(catalog: catalog, libraryID: CF.lib1, thisMac: CF.macA, now: CF.stamp(1_000))
         #expect(catalog.copies.filter { $0.library == CF.lib2 }.allSatisfy { !outcome.prune.contains($0.id) })
         #expect(catalog.copies.filter { $0.library == CF.lib2 }.count == 40)
     }
@@ -131,11 +163,11 @@ struct RetentionGuardMutationTests {
     @Test func pruneOwnCopiesOnly() throws {
         let catalog = try RetentionTests.sharedWorld()
         let otherMacs = RF.ids(catalog) { $0.mac == .mac8(ProtectionNames.mac8(CF.macB)) }
-        let on = Retention.plan(catalog: catalog, libraryID: CF.lib1, thisMac: CF.macA)
+        let on = Retention.plan(catalog: catalog, libraryID: CF.lib1, thisMac: CF.macA, now: CF.stamp(1_000))
         #expect(otherMacs.isDisjoint(with: on.prune))
         var off = ProtectionGuards()
         off.pruneOwnCopiesOnly = false
-        let broken = Retention.plan(catalog: catalog, libraryID: CF.lib1, thisMac: CF.macA, guards: off)
+        let broken = Retention.plan(catalog: catalog, libraryID: CF.lib1, thisMac: CF.macA, now: CF.stamp(1_000), guards: off)
         #expect(!otherMacs.isDisjoint(with: broken.prune), "red with the guard off: another Mac's copies pruned")
     }
 }

@@ -48,7 +48,7 @@ struct OwnCopiesTests {
             #expect(copy.kind == .backup && copy.mac == .mac8(mac8A) && copy.library == CF.lib1, "\(copy.id)")
         }
         // The one predicate retention prunes by: its keep ∪ prune is exactly these.
-        let plan = Retention.plan(catalog: catalog, libraryID: CF.lib1, thisMac: CF.macA)
+        let plan = Retention.plan(catalog: catalog, libraryID: CF.lib1, thisMac: CF.macA, now: CF.stamp(1_000))
         #expect(Set(plan.keep).union(plan.prune) == Set((container + far).map(\.id)))
     }
 

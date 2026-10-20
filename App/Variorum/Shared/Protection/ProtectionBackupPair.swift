@@ -81,7 +81,7 @@ enum ProtectionBackupHook {
             return .failed(String(describing: error))
         }
         _ = landFarPair(session, snapshot: snapshot, keyFile: keyFile, deviceID: deviceID, now: now)
-        _ = prune(session, libraryID: keyFile.libraryID, deviceID: deviceID, guards: guards)
+        _ = prune(session, libraryID: keyFile.libraryID, deviceID: deviceID, now: now, guards: guards)
         return .written
     }
 
@@ -94,11 +94,12 @@ enum ProtectionBackupHook {
     /// foreign names are never candidates); nothing here adds or removes a candidate. Returns the ids removed. Never raises.
     @discardableResult
     nonisolated static func prune(
-        _ session: ProtectionRoadSession, libraryID: String, deviceID: String, guards: ProtectionGuards = .all
+        _ session: ProtectionRoadSession, libraryID: String, deviceID: String, now: Date = Date(),
+        guards: ProtectionGuards = .all
     ) -> [String] {
         let plan = Retention.plan(
             catalog: session.system.lister.catalog(), libraryID: libraryID, thisMac: deviceID, policy: .standard,
-            guards: guards)
+            now: now, guards: guards)
         let places = session.system.places
         var removed: [String] = []
         for id in plan.prune {
