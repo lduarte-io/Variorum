@@ -1,6 +1,9 @@
 # VX-309 — Castle rebuild, phase 5: copies and words
 
-**Status: OPEN — KICKED OFF 2026-10-19 (session `vx-309`, `/architect-phase`; the orchestrator is Fable at xhigh).**
+**Status: BUILT, LADDERED, WALKED — CLOSING 2026-10-20 (session `vx-309`, `/architect-phase`). Fable orchestrated
+through the walk's dev-library half; Opus orchestrated from the throwaway block to the merge (her Fable credits ran out
+— her word: "I'm happy with Opus, let's just keep going"). The results: §6 (units), §6-L (the ladder), §8 (the walk);
+the handoff `notes/handoffs/vx-309-handoff.md`; her bundle QUESTIONS #237; born tickets VX-461..VX-475.**
 `Ticket: VX-309 · Project: Castle & backups before launch · Branch: vx-309-copies-and-words · Worktree: ~/dev/variorum-vx-309 (Pro)`
 The copies' machinery and the words' truth, built to `notes/CastleRules.md` rules 17–19, 21 and 27 — the old VX-266
 design is superseded wherever they differ. The one law carries forward: the new road stays DEBUG-ONLY behind
@@ -806,6 +809,43 @@ the idle sweep mark, launch counters) plus the dev library's own per-store keys 
 iCloud Apple keys for the three throwaway libraries (`a6b6213c`, `d3c486ea`, `71a5a70d`) and the stale build's
 `dd6e8928`; the throwaway project's accounts A and B hold their walk vaults (the project stays until VX-329, hers to
 delete). **END POSTURE: Standard · `e11e5233` · held + banner · signed out · 0 instances · the dev pair unchanged.**
+
+## 9. CLOSEOUT (the orchestrator — Opus from here, her word; 2026-10-20)
+
+**The acceptance:** every member landed and was walked except where §8 says pin-covered (moveNotYet's no-vault arm,
+VX-457's follow, the two-book membership and archived/wing shapes at T-8, VX-211's floor press). The ladder closed
+clean at round 2. The walk found five things the suites could not (W-VX309-1..6 minus 4's sibling), each ticketed.
+
+**THE RULINGS RECONCILED (re-read against what shipped):**
+- *Riders VX-450/451/453/454/444 (+ standing VX-456/457):* all landed. VX-456 landed for join → leave → re-join; its
+  set-up arm still speaks (W-VX309-5, a consequence of P-VX309-U2-1, known-issue pins) → VX-462.
+- *U1 copies → U2 words:* the order held (U1 re-cut into U1a/U1b/U1c after U1a — recorded at §1b).
+- *VX-211 "floor + quiet hint":* the floor stays the only refusal and the hint is one calm line on EVERY new-road
+  setter (the four sheets, the band card, the set-up sheet — walked live on the set-up sheet). Today's road's setters
+  are untouched (Release parity; they retire at VX-329) — not a remainder, the switch's.
+- *#236's headline rulings:* the join moment's email-naming reword — built, walked live byte-faithful (with F-U2-1's
+  correction); W-VX308-3 and F-U4-3 — record-only as ruled; P-U2-7 → VX-457 — built (pin-covered, not walked);
+  VX-455 post-release with its not-yet line reworded — the line built (pin-covered; its face needs an account with no
+  vault). #236's remaining bundle: ACCEPTED by her kickoff (the QUESTIONS edit at the merge).
+- *T-8's mapping ruling (§5b-R):* built and walked (content + placement ride, configuration doesn't, wings by name).
+
+**BORN TICKETS (VX-461..VX-475) by priority:** High — VX-461 (the pane's export door writes an empty file; a VX-329
+input), VX-469 (F-U1b-1 + F-U1c-4, Needs Lillian), VX-470 (F-U1b-8, Needs Lillian). Medium — VX-463 (words fields in
+clear text, Needs Lillian), VX-465 (device ID drift), VX-471 (F-U1b-7's writing arm), VX-472 (F-U1c-3). Low — VX-462
+(VX-456's set-up arm), VX-464 (the join refusal's referent), VX-466 (renamed migration ids), VX-467 (the landing's
+first pair container-only), VX-468 (what's-new after a restore, Needs Lillian), VX-473 (F-U2-2 — seen live), VX-474
+(F-U1a-2 + F-U1b-3), VX-475 (F-U2-6). Comments: VX-329 (seven switch inputs), VX-234 (F-U2-3), VX-264 (items 5+7
+landed), VX-456, VX-379 (remainder rides VX-329), VX-213 (pg_temp still held), VM-8 (F-U2-7).
+**CLOSED AT THE MERGE:** VX-309 · VX-397 · VX-302 (VX-411 already its duplicate) · VX-450 · VX-444 · VX-451 · VX-453 ·
+VX-454 · VX-456 · VX-457 · VX-265 · VX-210 · VX-211 · VX-209 · VX-263. **STAY OPEN:** VX-379 (→ Todo, VX-329's
+window), VX-213 (pg_temp), VX-455 (post-release), VX-212, VX-329.
+
+**MOBILE PARITY:** nothing mobile-visible (every unit's line; the shared brains compile for iOS); the phone's own
+new-road guide chapter and passphrase faces are the VM-8 comment (F-U2-7).
+
+**CANON:** SurfaceContracts' Library protection line, in place, one pointer (the copies and their words as built).
+`Tools/canon-size`: 124,272 / 150,000 (headroom 25,728). The dated entry and narrative land in
+`notes/AppSpecRecord.md` at the merge moment; her bundle is QUESTIONS #237.
 
 ## 2. Evidence (the acceptance spine)
 Walks in BOTH VOICES (Terminal and Study) over the new faces; the restore drill through Look inside and Make this my
