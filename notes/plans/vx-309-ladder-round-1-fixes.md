@@ -92,6 +92,12 @@ finding touches sync, custody or a schema (the one core file touched is a commen
 - Release / today's road: unchanged in behaviour — the listing, its line, the delete confirm, T-8's door and the guide's
   new-road chapter render only on the new road; `.lockLibraryNow`'s note was never spoken on either road.
 
+## THE FIX-LEG MAC DELTA — RUN (the orchestrator, 2026-10-20 02:20–02:40 MDT, stage claim `vx-309-fixleg-mac`,
+the coordinator's GO; log `/tmp/vx309-fixleg-mac.log`, deleted at closeout): suite types verified first (no
+phantoms); `✔ Test run with 97 tests in 16 suites passed` — zero reds. F-R4's revert (the old literal back on
+`.lockLibraryNow`) → `RoadIdleDialRouteTests.lockLibraryNowIsOneDeclaration…` RED (1 issue), restored
+`cmp`-identical, status clean; the confirming re-run `✔ 2 tests in 1 suite`. 0 instances; the stage released.
+
 ## THE MAC SUITES FOR THE ORCHESTRATOR (under the stage; from `App/Variorum/`; PENDING)
 ```
 xcodebuild -scheme Variorum -destination 'platform=macOS' -configuration Debug -derivedDataPath DerivedData/vx309 test \
