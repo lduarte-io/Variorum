@@ -2047,3 +2047,37 @@ committed tree and restored `cmp`-identical from `u1c-prerevert/`. Commits: `441
 · `8d4e028fb` (1 core) · `fe90ec572` (1 leaf pin first) · `b1c25a7f8` (1 leaf) · `645ce1784` (1+2 app) · `c9fd33d92` (3) ·
 `ff6d7b52d` (record) · `61afe294e` (4) · `6aa235a67` (5 probe pin first) · `5aa955b4f` (5) · `71cc006c5` (1b pins first) ·
 `df2bffa83` (1b) · the close commit.
+
+### U2 RECORD — THE WORDS (Opus implementer, 2026-10-19; the join moment + VX-456 · VX-457 · moveNotYet · VX-264 items 5+7 · VX-263 · VX-211 · the guide + Data Safety · VX-213's share · U1's undrafted words · VX-453 — IN PROGRESS)
+
+**Not done in U2, first:** PENDING — written at the close. (Standing from the brief: no `xcodebuild test`, no stage, no
+Debug launch, no store touch, no network, no Linear, no subagents; NO `Server/` line and NO SQL — VX-213's `pg_temp` is
+held for her go; today's road byte-unchanged; zero `Sync/`, schema, migration or dependency lines; `lockstepVersion` 13.)
+
+**Preflight (complete, not delegated):** CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md` whole;
+`notes/CastleRules.md` WHOLE; `notes/SyncSpec.md` WHOLE; `notes/SurfaceContracts.md` WHOLE; this plan WHOLE (§0–§5d,
+§5b-R, the §6 U1a/U1b/U1c RECORDS with their ARBITRATIONS and MAC BATCHES); `notes/QUESTIONS.md` #216 (her VX-264 /
+VX-203 / VX-209 sitting words), #235, #236 (her drafts verbatim); `notes/plans/vx-308-accounts-key-doors.md` §6 U2 RECORD
+(the join moment as built, the follow's Done), U3 RECORD (the key doors' words, VX-263's line, F-U3-4), U4 RECORD (the
+export-notice durable mark, F-U4-1), U1 RECORD's F-U1-2 (the new road's unenforced floor) and THE WALK RECORD; the VX-308
+handoff; the vx-266 design's §3.11 (VX-264's rulings as ruled at #216); `notes/TICKETS.md` (VX-211/213/263/264/379/453/
+455/456/457 one-liners — the bodies are not readable without Linear; their remainders are §1's and #216's); the lifecycle
+page (rendered as text, never edited); `notes/plans/fixes/vx-191-encryption-audit.md` whole + its auditor A file
+(`vx-191-audit/A-ten-questions.md` — Q1/Q2/Q6) + auditor C's account-deletion line; `notes/plans/run-b-stress-pass.md`
+(the S1 record those corrections are against); `notes/stargazing-castle-rebuild-delta-brief.md`; the code —
+`ProtectionWords.swift` WHOLE, `ProtectionCopy` (`StoreProtection.swift`, `PostureCopy.swift` — the floor and copy §7),
+`LibraryOpenCopy.swift`, `RoadAccountFaces.swift`, `RoadAccountModel.swift`, `RoadAccountSheet.swift`, `ProtectionOpenFaces
+.swift`, `RoadCrossingsModel.swift` + `ProtectionCrossingActs.swift` (`ExportNoticeMark` — VX-457's idiom), the core
+`AccountActs.swift` (the join's `sameWords`), `KeyFile.swift`, `KeyDoors.swift`, `CommonSteps.swift` (`newLocks`),
+`VaultModel.swift`, `Secrets.swift` (`Lock` is RFC 3394 — deterministic), `RouteFinder.swift`, `AccountVaultClient.swift`;
+`SetPassphraseModel.swift`; `Domain/` (the estimator's home); `SettingsShape.swift` + `AppSettingsView.swift` (VX-453's
+seam); `DataSafetyCopy.swift`, `DataSafetyModel.swift`, `DataSafetyPane.swift`; `TutorialSeeder.swift` (the guide's
+chapters), `LaunchFurniture.swift`, `BirthFurnitureSeeders.swift` (the readme's Start Here passages — the new-road gate
+precedent). HARNESS: U1a's scratchpad package `u1-harness` (it survived in this session's scratchpad, pointed at this
+worktree, `--skip-update`): the BASELINE on `4a3c867cd` `✔ Test run with 319 tests in 54 suites passed after 5.800
+seconds.` (U1c's close count, exactly).
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece R — this record skeleton + the harness baseline: DONE (this commit).
+- Pieces 1–10 — NOT-STARTED (the readings land in the next record commit).
+- No revert is in flight.
