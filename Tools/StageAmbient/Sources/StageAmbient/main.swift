@@ -17,7 +17,7 @@ import QuartzCore
 //  6. One small layer update per frame at ~12 fps; the scene is a few hundred pixels across.
 //  7. The cursor hides while up and is shown again on every exit path we control; the window server
 //     restores it if the process dies outright. Activation goes back to the app that was frontmost.
-//  8. Everything in the scene moves, and the whole picture orbits by a device pixel or two.
+//  8. Everything in the scene moves, and the whole picture orbits by up to 2.5 points.
 
 struct Options {
     var config: URL?
@@ -157,6 +157,7 @@ final class Host: NSObject, NSApplicationDelegate {
     var cursorHidden = false
     var becameActive = false
     var isUp = false
+    var launchVerdict: StageVerdict?
     var stageWatch = StageWatch()
     var paused: Set<String> = []
     var shownScene = ""
@@ -230,16 +231,33 @@ final class Host: NSObject, NSApplicationDelegate {
         renderFrame(dt: 0)
         w.makeKeyAndOrderFront(nil)
         w.makeFirstResponder(view)
-        if options.activate { NSApp.activate(ignoringOtherApps: true) }
-        hideCursor()
         guard w.isVisible else { return refuse("the window did not come up", code: 8) }
-
+        launchVerdict = verdict
         installWatchers()
         repeating(1 / config.fps) { $0.tick() }
-        // Only now is it up: `on` waits for this state file before it says so.
+        if options.activate {
+            // Activation is a request the system may decline. The ambient is up only once it is active
+            // (that is what lets it hide the cursor and swallow the waking keystroke):
+            // applicationDidBecomeActive declares it; if that never comes, it refuses.
+            NSApp.activate(ignoringOtherApps: true)
+            if NSApp.isActive { declareUp() }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+                guard let self, !self.isUp, !self.finished else { return }
+                self.refuse("activation was declined (the cursor could not be hidden)", code: 9)
+            }
+        } else {
+            declareUp()
+        }
+    }
+
+    /// The moment the ambient is really up: visible, active, cursor hidden. Only now does the state file
+    /// appear, and `on` waits for it before it says ON.
+    func declareUp() {
+        guard !isUp, !finished, let director, window?.isVisible == true else { return }
+        hideCursor()
         isUp = true
         startedAt = Date()
-        journal.line("ON      pid=\(me.processIdentifier) scene=\(director.currentName) size=\(sceneSize.width)x\(sceneSize.height) fps=\(Int(config.fps)) stage=\(verdict.summary) return-to=\(previousApp?.localizedName ?? "none")")
+        journal.line("ON      pid=\(NSRunningApplication.current.processIdentifier) scene=\(director.currentName) size=\(sceneSize.width)x\(sceneSize.height) fps=\(Int(config.fps)) stage=\(launchVerdict?.summary ?? "?") return-to=\(previousApp?.localizedName ?? "none")")
         writeState()
     }
 
@@ -251,7 +269,7 @@ final class Host: NSObject, NSApplicationDelegate {
 
     func applicationDidBecomeActive(_ note: Notification) {
         becameActive = true
-        hideCursor()
+        if window != nil { declareUp() }
     }
 
     func applicationDidResignActive(_ note: Notification) {
@@ -260,10 +278,11 @@ final class Host: NSObject, NSApplicationDelegate {
         finish("lost focus to \(front)", restoreFocus: false)
     }
 
-    /// A quit Apple Event (osascript, logout) goes through the same exit as everything else.
+    /// A quit Apple Event (osascript, a logout or restart) tidies up like every other exit and then lets
+    /// the termination proceed. Never .terminateCancel: that would abort a logout or restart.
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        finish("quit request")
-        return .terminateCancel
+        wrapUp("quit request")
+        return .terminateNow
     }
 
     // MARK: Watchers
@@ -397,31 +416,45 @@ final class Host: NSObject, NSApplicationDelegate {
     // MARK: Exits
 
     func refuse(_ why: String, code: Int32) {
-        if cursorHidden { CGDisplayShowCursor(hiddenOn); cursorHidden = false }
-        window?.orderOut(nil)
+        finished = true
+        timers.forEach { $0.invalidate() }
+        restoreScreen(handBackFocus: true)
+        journal.clearState()
         journal.line("REFUSED \(why)")
         FileHandle.standardError.write(Data("StageAmbient: refused — \(why)\n".utf8))
-        exit(code)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { exit(code) }
     }
 
-    /// The one exit path: stop drawing, put the cursor back, hide the window, hand activation back to
-    /// whatever was frontmost, log why, and go.
-    func finish(_ why: String, restoreFocus: Bool = true) {
+    /// Cursor back, window away, and (unless someone else just took it) activation handed back to the app
+    /// that was frontmost when `on` ran.
+    func restoreScreen(handBackFocus: Bool) {
+        if cursorHidden { CGDisplayShowCursor(hiddenOn); cursorHidden = false }
+        window?.orderOut(nil)
+        if handBackFocus, let prev = previousApp, !prev.isTerminated, NSApp.isActive {
+            NSApp.yieldActivation(to: prev)
+            prev.activate(from: .current, options: [])
+        }
+    }
+
+    /// Everything an exit does before the process goes, once: stop drawing, restore the screen and
+    /// focus, clear the state file, and log why.
+    func wrapUp(_ why: String, restoreFocus: Bool = true) {
         guard !finished else { return }
         finished = true
         timers.forEach { $0.invalidate() }
         signals.forEach { $0.cancel() }
-        if cursorHidden { CGDisplayShowCursor(hiddenOn); cursorHidden = false }
-        window?.orderOut(nil)
-        if restoreFocus, let prev = previousApp, !prev.isTerminated, NSApp.isActive {
-            NSApp.yieldActivation(to: prev)
-            prev.activate(from: .current, options: [])
-        }
+        restoreScreen(handBackFocus: restoreFocus)
         journal.clearState()
         let up = CACurrentMediaTime() - launched
         journal.line(String(format: "OFF     %@ (up %.1f s, return-to=%@)", why, up,
                             restoreFocus ? (previousApp?.localizedName ?? "none") : "-"))
-        // A beat for the activation hand-back to land before the process goes.
+    }
+
+    /// The exit for everything but a quit request: wrap up, then go after a beat for the activation
+    /// hand-back to land.
+    func finish(_ why: String, restoreFocus: Bool = true) {
+        guard !finished else { return }
+        wrapUp(why, restoreFocus: restoreFocus)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) { exit(0) }
     }
 }

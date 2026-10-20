@@ -64,12 +64,16 @@ scene, since, window number; removed on exit). Never `stage.log`, which is `Tool
    "Measured" below.
 7. **The cursor.** macOS only lets the *active* app hide the cursor. A LaunchServices launch plus
    `NSApp.activate()` did not activate this agent app (measured), so it calls
-   `activate(ignoringOtherApps: true)`, then hides the cursor at the display level. While it's up it is
-   the frontmost app, which also means it swallows the waking keystroke. On every exit it controls (input,
-   claim, TERM/INT/HUP, a quit request, losing focus) it shows the cursor again and hands activation back to the app that
-   was frontmost when `on` ran. If the process dies outright, the window server restores the cursor and
-   the next app comes forward (measured with `kill -9`). `--no-activate` opts out, but then the cursor
-   stays visible.
+   `activate(ignoringOtherApps: true)` and hides the cursor at the display level once active. Activation
+   is a request the system may decline, so the ambient counts as up, writes its state file and lets `on`
+   say ON only after it is actually active. If that hasn't happened within 2 s, it refuses (exit 9). While
+   it's up it is the frontmost app, which also means it swallows the waking keystroke. On the exits it
+   controls (input, claim, TERM/INT/HUP, a quit request, a refusal after the window opened) it shows the
+   cursor again and hands activation back to the app that was frontmost when `on` ran. When another app
+   takes focus, it just shows the cursor and goes, leaving focus with that app. A quit request (osascript,
+   a logout or restart) lets the termination proceed and never cancels it. If the process dies outright,
+   the window server restores the cursor and the next app comes forward (measured with `kill -9`).
+   `--no-activate` opts out, but then the cursor stays visible.
 8. **Burn-in safe.** Everything in the scene moves: koi, water, ripples, and lilypads on a slow
    circulating current. The whole picture also orbits by up to 2.5 points. `nothingBrightStaysStill`
    samples the scene every 5 s for 20 minutes. Its worst pixel was lit in 37% of samples, before the

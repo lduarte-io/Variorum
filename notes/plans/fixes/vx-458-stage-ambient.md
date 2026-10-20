@@ -211,6 +211,15 @@ verbatim with VX-458 substituted. The only addition is one logistics line: where
 out, and not to run `Tools/ambient` or the window, because the coordinator's live instance runs from
 this worktree.
 
+**Integration re-run on the round-1 build (8b67312f5), from the coordinator's seat under its em-dash
+HOLD:**
+- `off` stopped the old pid in 316 ms;
+- `on` came up "AMBIENT ON — RUNNING scene=koi pid=61216";
+- `status` exited 0;
+- the log line reads `ON … stage=hold who=1018coordinator return-to=Ghostty`.
+
+The coordinator treats an `on` refused for "display asleep" as expected overnight.
+
 ### Round 1 — 0 BLOCKER · 0 MAJOR · 5 MINOR · 6 NIT; all agreed except one SPECULATIVE (recorded)
 
 | # | Finding | Disposition |
@@ -220,9 +229,26 @@ this worktree.
 | R1-3 MINOR | Process-name identity collided with the offscreen dev aids (same binary name): `on` said already-on, `off`/`next` killed a render, and the pre-GO pgrep and the proposed hook saw it. | FIXED structurally. The offscreen aids moved to their own executable, `AmbientRender`, so the window app is the only process named `StageAmbient`, and `list` runs AmbientRender. Not pinnable headlessly (the identity is in the build products); recorded as structural. |
 | R1-4 MINOR | The rail-2 mid-write debounce (what survives the coordinator's own renews) lived untested in the host. | FIXED: moved into `StageWatch` (AmbientKit) and pinned three ways (renew mid-write stays up; unsettled for 0.5 s or more ends it; foreign ends it at once). All three go red with the grace removed (R-b). The host only feeds it. |
 | R1-5 MINOR | The proposed `Tools/stage` hook could make a successful claim exit 1 under `set -e`. | FIXED in the proposal text above (`\|\| true`). Still a proposal, hers. |
-| R1-6 NIT | The skill never spells out that `HOLD:` is the coordinator's idle hold only. | FIXED on the stacked skill branch: one line ("a hold on someone else's behalf never starts with `HOLD:`"). The branch was rebased onto the tip. |
+| R1-6 NIT | The skill never spells out that `HOLD:` is the coordinator's idle hold only. | FIXED on the stacked skill branch: one line ("a hold on someone else's behalf never starts with `HOLD:`"). The tip was merged into the branch, not rebased, because pushed history is never rewritten. |
 | R1-7 NIT | The caustic lattice was one column/row short at the far edges, and the pin's reference shared the short lattice. | FIXED: `+ 4`, and the reference became an exhaustive search over a wider lattice. Red on `+ 3` (10 of 13775 at 3600 s, 5 at 7211 s), green after. |
 | R1-8 NIT | `on`'s "verified up" could fire before the window was ordered front; UNVERIFIED left the process running; the quoted log line could be stale. | FIXED. State is written only after order-front, activation and the cursor hide (`isUp`), and a window that isn't visible refuses (exit 8). UNVERIFIED now takes the process down, so exit 1 always means "not up". The log line is quoted only if this launch wrote it. |
 | R1-9 NIT | The record's pin figures came from an earlier version of the test. | FIXED (Pins, above). |
 | R1-10 NIT SPECULATIVE | The reused frame buffers are rewritten while older CGImages may still reference them. | RECORDED, no change. Core Animation copies at commit (the sampled commit path shows a send, not a re-read), and three buffers keep a margin. The code comment says never cut it to one. |
 | R1-11 NIT | A quit Apple Event skipped `finish`: no OFF line, no focus hand-back. | FIXED: `applicationShouldTerminate` routes through `finish` ("quit request"). |
+
+### Round 2 — 0 BLOCKER · 0 MAJOR · 2 MINOR · 6 NIT; all agreed. No new BLOCKER or MAJOR, so the ladder closes (no round 3)
+
+These are the final round's fixes, so per the ladder the orchestrator checked each one line by line
+against its finding. The two host findings also get a stage probe (below).
+
+| # | Finding | Disposition |
+|---|---|---|
+| R2-1 MINOR | The R1-11 fix answered a quit Apple Event with `.terminateCancel`, which by AppKit's contract aborts a logout/restart/shutdown (Apple: "To abort the termination sequence … return NSTerminateCancel"). | FIXED. `applicationShouldTerminate` runs the synchronous wrap-up (cursor, window, focus hand-back, state, log) and returns `.terminateNow`. `finish` is split into `wrapUp` + the exit beat. Probe: `osascript -e 'quit app "StageAmbient"'` should exit 0 with `OFF quit request` logged (the stage window below). |
+| R2-2 MINOR | "Up" was declared before activation was confirmed (activation is a request), so a declined activation would say ON with the cursor visible and the waking keystroke landing in the hidden front app. And the exit-8 refusal didn't hand focus back. | FIXED. `declareUp()` runs only once the app is active (`applicationDidBecomeActive`, or already active). It writes the state file, so `on` says ON only then. With no activation in 2 s it refuses (exit 9, "activation was declined"). `refuse` now restores the screen and hands focus back like `finish`. Probe: after `on`, the front pid equals the ambient pid. |
+| R2-3 NIT | The second gate read idle before `since` was stamped, leaving a gap of tens of ms. | FIXED: `since` is stamped first, so the two overlap. No shell harness. |
+| R2-4 NIT | `usage()` printed a stray `set -uo pipefail`. | FIXED: it prints the header comment block and stops at the first code line (checked: `ambient help`). |
+| R2-5 NIT | The host header said "a device pixel or two" (it's up to 2.5 points), and README rail 7 said "losing focus" hands activation back (it deliberately doesn't). | FIXED: both reworded. |
+| R2-6 NIT | `build()` compared only the binary, could swap the bundle under a live ambient, and hid codesign's errors. | FIXED: the Info.plist is compared too; no swap while the ambient runs (it says so and refreshes at the next `on`); codesign errors are shown. |
+| R2-7 NIT | The idle gate failed open on an unreadable idle or a non-numeric `--min-idle`. | FIXED: `--min-idle` must be whole seconds (exit 2), and an unreadable idle refuses. |
+| R2-8 NIT | The `HOLD FOR <who>` spelling lived only in the skill's new ambient section, not where an expired claim's hold is written. | FIXED on the stacked skill branch: the "An expired claim" section says it too. |
+
