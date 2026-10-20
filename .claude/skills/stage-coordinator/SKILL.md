@@ -161,6 +161,9 @@ It is yours alone; sessions never touch it.
   assuming it's up. `Tools/ambient log` (`~/.variorum/ambient.log`) says why it went.
 - Its process is `StageAmbient`, never `Variorum`. It posts no input and takes no assertion, so HID
   idle still means her. `--allow-claimant` is a self-test flag and is never used on your road.
+- It stays up under any claim whose reason starts with exactly `HOLD:`. So `HOLD:` is your idle hold
+  ONLY; a hold on someone else's behalf (an expired walk, a session's paused window) never starts with
+  `HOLD:`. Spell it `HOLD FOR <who> …`.
 
 ## Closing
 When every session is silent: `Tools/ambient off`, release your hold, delete any heartbeat, and write
