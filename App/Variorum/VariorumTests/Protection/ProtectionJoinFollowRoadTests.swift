@@ -160,6 +160,26 @@ struct ProtectionJoinFollowRoadTests {
         #expect((try? live.open(.words(world.words), floor: .relaxedForTests)) == nil)
     }
 
+    /// VX-309 U2 — VX-456 OVER THE PLANTED ROAD (red on old): joined by the passphrase, Stop syncing here (rule 16 — no key,
+    /// lock or secret changes), then signing back in is a join by the passphrase again — the library's words already ARE the
+    /// account's (no own words lock; its master's copy is the vault's recovery wrap), so no moment is owed. And the join's
+    /// door carries the account's email for her draft's sentence.
+    @Test func vx456_aRejoinWhoseWordsAreAlreadyTheAccountsOwesNoMoment() async throws {
+        let world = try await world(account: .standard)
+        let door = try await shown(world, .turnOnSync)
+        #expect(door.accountEmail == PlantedAccount.email, "her draft names the account by its email")
+        let first = try await press(world, .turnOnSync, typed: TypedSecrets(passphrase: Account.passphrase))
+        #expect(first.press == .made(receipt: ProtectionWords.joinedReceipt(.sameMode, moved: false), wordsReplaced: true),
+                "the library's own words were replaced — said")
+        let left = try await press(world, .stopSyncingHere, typed: .none)
+        #expect(left.press == .made(receipt: ProtectionWords.stopSyncingReceipt, wordsReplaced: false))
+        #expect(world.session.library.record?.account == nil)
+        let again = try await press(world, .turnOnSync, typed: TypedSecrets(passphrase: Account.passphrase))
+        #expect(again.press == .made(receipt: ProtectionWords.joinedReceipt(.sameMode, moved: false), wordsReplaced: false),
+                "the words were the account's already — no moment")
+        #expect(world.session.library.record?.account == Account.account)
+    }
+
     /// A wrong secret is refused in the act's own words, nothing written (the same posture, the open session).
     @Test func aWrongSecretWritesNothing() async throws {
         let world = try await world(account: .standard)

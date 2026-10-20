@@ -716,12 +716,16 @@ nonisolated enum ProtectionWords {
             return head + ". Your library uses your account's passphrase and twelve words now."
         }
     }
-    /// THE WORDS MOMENT when the PASSPHRASE was the secret typed (P-VX378-U2-3 (a) — "the face shows them when typed";
-    /// otherwise it says the account's words now open the library): the words were replaced, and nothing here can show
-    /// them. Her eye at the bundle — rule 7's "here they are" edge.
-    static let joinWordsNotShown = "Your library's twelve words are now your account's twelve words \u{2014} the ones you "
-        + "keep for your account. You joined with your passphrase, and Variorum never keeps the words, so they aren't shown "
-        + "here. The old ones still open backups you made before today."
+    /// THE WORDS MOMENT when the PASSPHRASE was the secret typed (P-VX378-U2-3 (a) — the words were replaced, and nothing
+    /// here can show them). VX-309 U2 — HER REFINED DRAFT (the VX-308 handoff sitting, QUESTIONS #236), verbatim-faithful:
+    /// the library ADOPTS the account's words, the account NAMED BY ITS EMAIL; the middle clause (*If this is your first
+    /// time signing in, your previous twelve words still open backups you made before today.*) DROPPED as the plan's §5d
+    /// rules — VX-456 lands with it, so the moment speaks only on a real replacement (the core's `wordsAreTheAccountsAlready`).
+    /// `email`: the account signed in at the join (nil, not known — "your account's", PROVISIONAL P-VX309-U2-2).
+    static func joinWordsNotShown(_ email: String?) -> String {
+        "Your twelve words are \(email.map { "\($0)'s" } ?? "your account's") twelve words. If you don't have your "
+            + "account's words written down, you can make new ones at any time."
+    }
     static let joinWordsMomentOK = "OK"
 
     /// MOVE — leave the account the library syncs with (rule 16: no key or secret changes for that) and join the one

@@ -193,7 +193,8 @@ struct RoadAccountConfirmSheet: View {
                 .fixedSize(horizontal: false, vertical: true)
             WordsLookPanel(look: look, tokens: tokens)
         case .notShown:
-            Text(ProtectionWords.joinWordsNotShown)
+            // VX-309 U2: her draft — the library adopts the account's words, the account named by its email.
+            Text(ProtectionWords.joinWordsNotShown(model.door.accountEmail))
                 .font(.callout)
                 .foregroundStyle(.primary)
                 .fixedSize(horizontal: false, vertical: true)
