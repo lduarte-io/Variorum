@@ -400,6 +400,94 @@ HARNESS: the scratchpad `u1-harness` recipe (the U1a/U1b records' machinery note
 6. **The record** (U1c RECORD in this file, the §6 form): readings, LIVE STATUS, the lines for the ladder, COUNTS,
    the Mac-suite list with red-on-old recipes, PROVISIONALs P-VX309-U1c-N, findings F-U1c-N, walk notes.
 
+## 5d. U2 BRIEF — THE WORDS (a fresh Opus implementer; headless + build-for-testing ONLY)
+
+**You are the U2 implementer for VX-309 — the words unit. Work from `~/dev/variorum-vx-309` on branch
+`vx-309-copies-and-words`. HARD LIMITS: identical to §5a's first paragraph, PLUS: no `Server/` line and no SQL run
+anywhere (VX-213's `pg_temp` item is NOT yours — it runs only at her explicit go, held to VX-329's window; your share
+of VX-213 is the record corrections and the privacy text below). Words rules that BIND every sentence you write:
+sentence case, never a capitalized word for emphasis (her standing rule); the app's voice is calm and plain; refusals
+honest; her drafted lines land VERBATIM-FAITHFUL (an obvious typo in a draft is corrected silently — e.g. "wrods" —
+never a word substituted); every line you draft yourself is PROVISIONAL for her pass.**
+
+**Read first, in full, never delegated:** CLAUDE.md + canon; the resiliency protocol; `notes/CastleRules.md` WHOLE
+(the words must say the rules as built); `notes/SyncSpec.md` WHOLE; `notes/SurfaceContracts.md` WHOLE (The app's
+words rules; the Library protection line); this plan WHOLE (§0–§5c, §5b-R, the §6 RECORDS with their ARBITRATIONS
+and MAC BATCHES — F-U1a-3, P-VX309-U1b-3, P-VX309-U1c-1 name the undrafted words you now draft); `notes/QUESTIONS.md`
+#235 + #236 (HER DRAFTS verbatim — the join moment's email-naming draft and its middle-clause note); the VX-308
+record §6 U2 RECORD (the join moment as built, the follow's Done, `ProtectionWords`' sections) + the U3/U4 records'
+words; the VX-213 and VX-264 ticket bodies (their remainders are quoted in the kickoff record and §1); the lifecycle
+page (the chapters must agree with it); the field guide's seeded text (`TutorialSeeder.swift` / `LaunchFurniture
+.swift` — where the Castle/backups chapters live) and `notes/plans/fixes/vx-191-encryption-audit.md` (the S1 record
+corrections' targets); `notes/stargazing-castle-rebuild-delta-brief.md`; the code — `ProtectionWords.swift` WHOLE ·
+`ProtectionCopy.swift` · `LibraryOpenCopy.swift` · `RoadAccountFaces`/`RoadJoinFollow*` (the join moment's seam,
+VX-107's durable-fact pattern) · `RoadCrossingFaces` (the export-notice DURABLE MARK idiom — VX-457 reuses it) ·
+`Model/KeyFile.swift` + `Wire/AccountVaultClient.swift` (VX-456's same-words compare — the words lock vs the vault's
+recovery wrap; a CORE line, the ladder reads it) · `SetPassphraseModel.swift` (VX-211's fields) · `Domain/` (the
+estimator's home) · the Settings search index (`AppSettingsView.swift` / the pane search seam — VX-453's) ·
+`DataSafetyCopy.swift` + `DataSafetyModel.swift` (F-U2c-4's line; F-U1a-3's captions). HARNESS: the scratchpad
+`u1-harness` (the records' machinery notes).
+
+**The pieces (words pins as-drafted; core pins red-on-old where behaviour changes):**
+1. **THE JOIN MOMENT REWORD + VX-456 (one piece — the clause rule depends on both).** The moment rewords to the
+   library-adopts-account direction, naming the account by email — her refined draft verbatim (#236; "wrods"
+   corrected): *"Your twelve words are <email>'s twelve words. If you don't have your account's words written down,
+   you can make new ones at any time."* — the middle clause (*"If this is your first time signing in, your previous
+   twelve words still open backups you made before today"*) DROPS because VX-456 lands in this same piece (her note:
+   with VX-456 the moment fires only on a real replacement, so the previous-words clause would be unconditional
+   noise; she allowed either, the cleaner arm is ruled here). **VX-456**: the moment stays QUIET when the typed words
+   already are the account's — the core compare (the library's words lock against the vault's recovery wrap, by
+   fingerprint/wrap identity, never by deriving or storing words) decides it; the walk's same-words join already
+   showed no moment by accident of the typed road — make the rule explicit and pinned both arms (same words quiet;
+   replaced words speak, red-on-old where the old build spoke on same-words or said the wrong direction).
+2. **VX-457 — the follow's Done as a DURABLE pane notice until OK** (her "I agree with B"): the export-notice idiom
+   (a durable mark keyed by library, reconciled at every ready, cleared only by OK), surviving `receipt_style` off
+   and a quit; the one-shot receipt retires for this Done. Pins: the mark set at the follow's landing, standing
+   after a simulated relaunch (a fresh faces build), cleared at OK, never set on today's road.
+3. **`ProtectionWords.moveNotYet` REWORD** (her ruling): the line names the two-press road — leave this account
+   with This Mac Only, then turn on sync while signed in as the other account; this library's pair becomes that
+   account's. (VX-455's one-door compose stays post-release; no behaviour change — the words pin flips.)
+4. **VX-264 ITEM 5 + ITEM 7 (+ VX-209's remainder — one piece).** Item 5's set-aside sentences land where set-aside
+   copies are counted and deleted (the listings' other-library rows and VX-265's delete confirm): *"…plus N older
+   libraries Variorum kept when you opened or restored a different one."* and *"Those older libraries are your way
+   back to what you had before — delete them only if you won't want them back."* (her ruled words, fitted to the
+   rows' grammar, PROVISIONAL where fitting changed a word). Item 7: the restore/make-mine confirm's posture line
+   made CONCRETE, computed per library shape (what the copy IS — its posture and account facts — said plainly;
+   VX-209's synced-confirm sentence is this line's synced arm; the mechanism is rule 17's, closed at VX-306).
+5. **VX-263's ROUTE-FINDER SENTENCE as reworded:** *your current passphrase or words; on this Mac, its quiet road if
+   it still holds that key* — wherever the route finder speaks (rule 4's one sentence; align the standing VX-263
+   line's hosts without re-opening U3's pinned line unless the reword supersedes it — if it does, flip the pin
+   deliberately and say so).
+6. **VX-211 — THE QUIET STRENGTH HINT (her kickoff ruling).** The 12-character floor stays the ONLY refusal; the
+   set/change passphrase fields gain ONE calm line of honest advice from a pure Domain estimator (word-count/length/
+   variety class — e.g. a short common-shape passphrase earns *"short passphrases are easier to guess — a longer
+   phrase is stronger"*; a long phrase earns nothing). NEVER a block, NEVER a meter bar, no colors. The estimator is
+   a pure function with exact pins; the line's wording PROVISIONAL.
+7. **THE FIELD GUIDE'S CASTLE/BACKUPS CHAPTERS + DATA SAFETY'S WORDS (VX-379's acceptance; #235's "written here").**
+   Rewrite the guide's protection chapters against the rules AS BUILT (the Start Here chapter leads: your work is
+   encrypted; write down your twelve words; set a passphrase; the Apple road is a convenience that works for most
+   people forever) and the copies as this phase built them (pairs beside the library and in the picked folder,
+   retention's honest numbers, the restore drill through Look inside / Make this my library, the delete door, the
+   plaintext export in/out). Data Safety gains F-U2c-4's "what opens a backup" line (rule 5's sentence) and
+   F-U1a-3's truths (the counts are this Mac's pairs of this library; why a second same-day Back Up Now adds no far
+   pair). The SEEDED guide text changes in the seeder only — the truth-check and the REAL store's re-seed ride
+   VX-329 (do not touch any store). The lifecycle page is never hand-edited; if a chapter sentence and the page
+   disagree, the fixture-tested page wins and your sentence follows it.
+8. **VX-213's REMAINDER (your share):** the S1 record corrections (Q1 kp2 in Supabase Vault, Q2 the pin reads file
+   12, Q6 heal — correct the `notes/plans/fixes/vx-191-encryption-audit.md` record IN PLACE with a dated correction
+   note, never silently); the privacy text — `notes/stargazing-castle-rebuild-delta-brief.md` gains the
+   auth-audit-logs-outlive-a-deleted-account fact in plain words (the site agent reads it at VX-329). `pg_temp` is
+   NOT YOURS (held for her go).
+9. **THE UNDRAFTED WORDS OF U1a–U1c (F-U1a-3 · P-VX309-U1b-3 · P-VX309-U1c-1):** T-5's lead and receipt; the
+   listing's lead and empty line; T-8's lead, button, working line, refusals and receipt; the delete door's words;
+   VX-210's line — one pass, one voice, every line PROVISIONAL, the as-drafted pins flipped deliberately where a
+   line changes.
+10. **RIDER VX-453 — Settings search surfaces the account section** ("account" answers nothing today; the search
+    self-describes as covering the app's own words): the account section's rows join the pane-search index through
+    the existing seam; pin red-on-old ("account" finds the section; "sync" still finds what it found).
+11. **The record** (U2 RECORD in this file, the §6 form) — including the MOBILE PARITY line (the phone shares
+    `ProtectionWords`' shared strings: say exactly which changed lines the phone renders).
+
 ## 5b-R. THE T-8 MAPPING RULING (the orchestrator, 2026-10-19 — the U1b proposal gate; repo-first before piece 3
 builds)
 
