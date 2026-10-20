@@ -160,15 +160,22 @@ implementer session, sized per `notes/PhaseSizingGuidance.md` — the phase's tw
   Mac's own pairs of this library on the new road (VX-302, VX-411 folded); **rider VX-450** — a key-door act that
   cannot resume for want of secrets ROLLS BACK (rule 20's "the old state") instead of wedging. Evidence: exact
   state-transition pins red-on-old, revert-verified; the protection set green Debug + Release.
-- **U1b — THE COPIES' DOORS AND FACES (a fresh Opus implementer, headless + build-for-testing only):** T-5 (Make
-  this my library from the MISSING face, no library open — the empty-slot landing); VX-305's second hand-off
-  (reopening this Mac's own set-aside copy, Previous Libraries, through the doors); T-8 (a plaintext export brought
-  in as a NEW library through the import road — bulk entry, never reconciled truth); VX-265 (the separate delete
-  choice for other libraries' copies, rule 19 — never silently, never bundled); VX-210 (the honest line about
-  copies in folders Variorum doesn't manage); **riders VX-444** (the words-recorded ledger carries across Make this
-  my library), **VX-451** (the pane's Lock Now row + idle dial through `changeSettings` — F-U4-1's first option)
-  and **VX-454** (the Set-a-passphrase row re-reads after an act sets one). Evidence: pins red-on-old; Mac suites
-  under the stage; the walk rows.
+- **U1b — THE COPY DOORS (a fresh Opus implementer, headless + build-for-testing only):** piece 0 — F-U1a-1's fix
+  (the U1a arbitration's option (a): a resumed Change/Reset whose only typed passphrase opens the lock being
+  REPLACED rolls back — VX-450's second arm); T-5 (Make this my library from the MISSING face and rule 27's lobby,
+  no library open — the empty-slot landing, nothing steps aside); VX-305's second hand-off (reopening this Mac's own
+  set-aside copy, Previous Libraries, through the doors — verify the arc end to end, close its gaps, pin it); T-8
+  (a plaintext export brought in as a NEW library through the import road — bulk entry, never reconciled truth).
+  Evidence: pins red-on-old; Mac suites under the stage; the walk rows.
+  *(Re-cut 2026-10-19 after U1a's survey: the original U1b carried nine pieces — the doors and the listing's faces
+  split so each session holds one acceptance unit; the riders move to U1c.)*
+- **U1c — THE LISTING'S FACES AND THE RIDERS (a fresh Opus implementer, headless + build-for-testing only):**
+  VX-265 (the separate delete choice for other libraries' copies — core `offerDelete` exists, the DOOR is built:
+  rule 19, never silently, never bundled); VX-210 (the honest line about copies in folders Variorum doesn't manage);
+  **riders VX-444** (the words-recorded ledger — `variorum.calmAsks.words.<libraryID>.*` — carries across Make this
+  my library onto the new library's id), **VX-451** (the pane's Lock Now row + idle dial through `changeSettings` —
+  F-U4-1's first option) and **VX-454** (the Set-a-passphrase row re-reads after an act sets one — probe first,
+  Suspected). Evidence: pins red-on-old; Mac suites under the stage; the walk rows.
 - **U2 — THE WORDS (a fresh Opus implementer, headless + build-for-testing only):** VX-211's quiet strength hint
   (her ruling above; the estimator a pure Domain rule); VX-213's remainder (pg_temp AT HER GO only, the record
   corrections, the privacy text); VX-264's items 5 + 7 (the set-aside sentences, the concrete per-library-shape
@@ -259,6 +266,76 @@ THE FACES/LINES AS BUILT for the ladder · COUNTS · the Mac-suite list the orch
 PROVISIONALs as P-VX309-U1a-N with options · findings as F-U1a-N routed never fixed · machinery notes). Ambiguity
 that doesn't gate: build the spec-defensible arm, mark PROVISIONAL, log the options in your record (the orchestrator
 bundles QUESTIONS rows at closeout). Ambiguity that gates the core: stop and report in your record.
+
+## 5b. U1b BRIEF — THE COPY DOORS (a fresh Opus implementer; headless + build-for-testing ONLY)
+
+**You are the U1b implementer for VX-309. Work from `~/dev/variorum-vx-309` on branch `vx-309-copies-and-words`.
+HARD LIMITS: identical to §5a's first paragraph (headless + `build-for-testing` only; no stage, no store touch, no
+network, no Linear, no subagents; today's road byte-unchanged; zero `Sync/`, `Server/`, schema, migration or
+dependency lines; `lockstepVersion` 13; the resiliency protocol binds — commit per piece, push per commit, LIVE
+STATUS from the first commit).**
+
+**Read first, in full, never delegated:** CLAUDE.md + canon; the resiliency protocol; `notes/CastleRules.md` WHOLE
+(rules 2, 14, 17–19, 20–21, 26–27 are this unit's law); `notes/SyncSpec.md` WHOLE; `notes/SurfaceContracts.md`
+(Doors — portability's restore hold + Library protection; The app's words rules); this plan WHOLE (§0–§3, §5a, the
+§6 U1a RECORD + its ARBITRATION — piece 0's shape is ruled there); the lifecycle page stages 9, 10, 13, 14
+(`notes/plans/vx-266/castle-lifecycle.html` — never hand-edit it; the fixture is
+`Tests/VariorumCoreTests/Protection/Scenario/Lifecycle/`); `notes/plans/vx-306-castle-open-road.md` §2 U3 + the §6/§9
+U3 RECORD (the doors' birth, P-VX306-U3-*); `notes/plans/vx-308-accounts-key-doors.md` §6 ROUND-1 FIX LEG (MAJOR-1)
++ the U3 RECORD; the core — `Executor/Acts/Copies.swift` WHOLE (`makeThisMyLibrary` both forms, `lookInside`,
+`openCopy`, `offerDelete`, `plaintextExport`, `MakeMineProgram`), `Acts/Creation.swift` (the no-library executor
+road — T-5 follows its pattern), `Acts/KeyDoors.swift` (`resumeCannotFinish` — piece 0 extends it),
+`PlanRunner.swift` (`derive`, `resume`, the press-secret check — F-U1a-1's trace in the U1a record is your map),
+`Assess/Assess.swift` (the missing-slot and rule-27 facts), `Model/KeyFile.swift` (`building`); the app —
+`CopyDoorsModel.swift` WHOLE · `LookInsideModel.swift` · `PickedCopy.swift` · `ProtectionCopyDoors.swift` ·
+`ProtectionOpenRoad.swift` (`.startFresh` → `createLibrary`; the lobby's roads; `lobbyFacts`) ·
+`ProtectionLobbyFace.swift` · `ProtectionOpenFaces.swift` (`RoadStandingModel`) · `ProtectionRoadActs.swift` ·
+`AppBootstrap.swift` (the missing face's composition, `copyDoorsRoads`) · `LibraryRestoreHold` + `RestoreHoldModel`
+(an ADOPTED copy lands held — keep that invariant on every new door) · the import road (`Domain/VariorumDocument`,
+`DocumentImporter`, `Operations.importDocument`/`importBook`) · the export shapes (`MarkdownInsurance`,
+`Acts/Copies.swift`'s `PlaintextExportProgram` — "a plaintext export carries its library ID") · `WordsBand.swift`
+(the card's mint-at-first-look idiom); the test worlds (`ExecutorWorld`, `EX`, the scenario world, `CrashHarness`,
+`KeyDoorResumeTests`, `MakeMineRouteTests`, `ProtectionOpenRoadPlantedTests`, `PlantedRoad`). HARNESS: rebuild U1a's
+(its record's machinery notes — the APFS-clone, `--skip-update` road).
+
+**The pieces (pins first wherever a pin can be red-on-old):**
+0. **F-U1a-1's FIX (the U1a arbitration's option (a) — VX-450's second arm; core custody, `KeyDoors.swift` +
+   wherever the trace leads in `PlanRunner.derive`/`resume`):** at a RESUME of Change or Reset, a typed passphrase
+   that opens only the lock the act is REPLACING (no lock under the plan's fresh descriptor stands yet, and the
+   typed one verifies against the OLD descriptor) is NOT the act's secret ⇒ `ActRollback` before any write — never
+   a "finish" under the old passphrase on a new salt. The probe's two postures (Standard; Castle/Always ask) become
+   pins RED ON THE PRE-FIX TREE; a resume holding the NEW passphrase still finishes (keep U1a's pins green); M1-c's
+   press guard stays load-bearing. Record the synced twin's behaviour honestly.
+1. **T-5 — THE EMPTY-SLOT LANDING.** From the MISSING face (no library in the slot) and rule 27's lobby, Make this
+   my library lands a catalogued (or picked-and-filed) copy into the EMPTY slot as a NEW library — fresh identity,
+   fresh key, fresh device ID, NOTHING steps aside (there is nothing to step aside; the act's step-aside half is
+   skipped, not emptied). The door REQUIRES a typed secret of the copy's (rule 14's precedent — a quiet-road-only
+   open does not carry a pair to lock the new library under): typed WORDS become the new library's words lock;
+   a typed PASSPHRASE becomes its passphrase lock, and the new library's words are minted fresh and shown once
+   through the band's one idiom (rule 2 — nothing stores words; the card says they will not be shown again).
+   Posture: STANDARD (an empty slot has no posture; Castle is entered deliberately — PROVISIONAL, the options
+   recorded). The adopted copy lands under the RESTORE HOLD exactly as every adoption does. `CopyDoorsRoads.makeMine`
+   stops being nil at the missing face and the lobby; Look inside there is unchanged. Follow `createLibrary`'s
+   executor pattern for the no-library road; one act, one plan, crash-safe (rule 20).
+2. **VX-305's SECOND HAND-OFF — Previous Libraries through the doors.** Verify END TO END and pin: a library that
+   stepped aside whole into `Previous Libraries/<stamp>/` is listed (rule 19's listing), opens read-only through
+   Look inside with its own secrets or its own quiet road, and returns as the library through Make this my library —
+   from an open library (the standing act: the current one steps aside) AND from the empty slot (piece 1's arm).
+   Close the gaps the arc shows (a folder-shaped copy's serving key files, the list's rows, the doors' availability)
+   and record each gap as its own finding with its pin.
+3. **T-8 — A PLAINTEXT EXPORT IN, AS A NEW LIBRARY.** The picked-thing classifier (`CopyDoorsModel.begin(picked:)`
+   and the open door's classifying faces) learns the plaintext export's shape; the door mints a NEW library (the
+   creation's road — fresh identity, fresh key, the first-look words idiom; NO restore hold — a fresh mint never
+   synced) and brings the export's content in THROUGH THE IMPORT ROAD as bulk entry (`importDocument`/`importBook`
+   semantics — rows are minted fresh; "no export path ever writes a row" stays true: this is an import). **Before
+   building this piece's mapping (what in the export's folder becomes books, chapters, pool notes), SEND YOUR
+   PROPOSED MAPPING to the orchestrator via SendMessage (to: "main") and WAIT for the ruling — build pieces 0–2
+   meanwhile.** Refusals name folder, file and line (the import road's idiom); a keyless or foreign pick keeps
+   today's honest refusal.
+4. **The record** (U1b RECORD in this file, the §6 form): readings, LIVE STATUS, the core lines for the ladder,
+   COUNTS (headless + protection set Debug/Release + build-for-testing + phone + Release check), the Mac-suite list
+   with red-on-old recipes, PROVISIONALs P-VX309-U1b-N, findings F-U1b-N, walk notes for the acceptance spine
+   (stages 9, 10, 13, 14 and the restore drill — Look inside and Make this my library are THE walk's heart).
 
 ## 2. Evidence (the acceptance spine)
 Walks in BOTH VOICES (Terminal and Study) over the new faces; the restore drill through Look inside and Make this my
