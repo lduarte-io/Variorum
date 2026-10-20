@@ -2566,3 +2566,25 @@ compile into the phone (its build green) and no phone face reads them; the phone
 **Notes:** no machinery deaths after the compaction; the one hang (piece 6 — a refused press spinning a test's wait, 30 minutes
 under my own process) was found by `sample`, killed, and its fixture lifted; no Sonnet lookup; no subagents; no scratch worktree.
 The harnesses are scratchpad-only (`u1-harness` — U1a's; `settings-harness` — piece 10's), never committed.
+
+**U2 ARBITRATION (the orchestrator, 2026-10-20 — repo-first before the Mac batch and the ladder):**
+- **F-U2-1 — FIXED AT ADJUDICATION (the commit above):** her note's own reading is that with VX-456 the previous-words
+  CLAUSE "applies unconditionally" — the sentence STAYS, its conditional lead-in goes. §5d's whole-sentence drop was the
+  ORCHESTRATOR'S misreading (recorded as such); the moment now reads *"Your twelve words are <email>'s twelve words.
+  Your previous twelve words still open backups you made before today. If you don't have your account's words written
+  down, you can make new ones at any time."* PROVISIONAL; her bundle carries both texts beside her note verbatim.
+- **F-U2-2** (the hold banner's catch-up sentence over a library that doesn't sync): a TICKET at closeout (Bug,
+  Suspected, Castle & sync, Low) with the fix shape named (`hasAccount` = the open library's record names an account,
+  new road). It predates this phase (the banner is 13x's); the WALK expects the odd sentence after T-5/Make-mine and
+  does not count it a walk failure.
+- **F-U2-3** (the Protection row's blurb says "escrow and the recovery key" on both roads): NOT this phase's to change
+  (a Release-visible wording line) — a COMMENT on VX-234 (her settings wording pass) at closeout.
+- **F-U2-4** (the delta brief predates the rules — several facts need REWRITING, not re-checking): a COMMENT on VX-329
+  at closeout.
+- **F-U2-6** (the arm-10 pin reads file 12's body): a TICKET at closeout (Debt, Test-only, Castle & sync, Low), riding
+  `pg_temp`'s window or any Sync-adjacent run.
+- **F-U2-7**: the VM comment at closeout (the phone's guide chapter + passphrase faces when it gets the new road).
+- **P-VX309-U2-1..11: each stands as built** pending her bundle; M-10b's green mutation is honestly recorded (the
+  finding's claim lives in two texts — not a hollow pin).
+
+**THE U2 MAC BATCH (the orchestrator, under the stage; result appended when run):** *(pending the coordinator's GO)*
