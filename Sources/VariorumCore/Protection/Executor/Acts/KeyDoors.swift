@@ -136,6 +136,35 @@ struct KeyDoorProgram: ActProgram {
         return nil
     }
 
+    /// **VX-309 U1b — F-U1a-1 (the U1a arbitration's option (a), VX-450's second arm): a passphrase typed at a resume that
+    /// opens only the lock the act is REPLACING is not the act's secret.** Change and Reset take a NEW passphrase on a fresh
+    /// descriptor; a resume derives what the open typed under that descriptor. Where it opens NO passphrase lock under the
+    /// plan's descriptor among `files` (the live key file and this Mac's sealed mirror) but DOES open one under an older
+    /// descriptor — the lock the act re-locks over — it is the passphrase being replaced: used, the key-file step (synced, the
+    /// vault step too) would re-lock under the OLD passphrase on a new salt and say resumed (the press's passphrase never
+    /// set); and where the act's new lock already landed it failed the plan-level or vault check, thrown out of the settle —
+    /// the act in flight for good. Answered true, `resume` drops it from the act's secrets, so `resumeCannotFinish` rolls the
+    /// act back before any write (the old state; or, where the new lock already landed, MAJOR-1's residue (1)). A passphrase
+    /// that opens a lock under the plan's descriptor IS the act's (the same text re-chosen included); one that opens neither
+    /// is judged by the checks as before. Reads only; every other act answers false.
+    static func typedPassphraseOpensOnlyTheReplacedLock(
+        _ typed: String, act: ProtectionAct, planKDF: PassphraseKDF.Descriptor?, files: [KeyFile],
+        floor: PassphraseKDF.Floor
+    ) -> Bool {
+        guard act == .changePassphrase || act == .resetPassphrase, let planKDF else { return false }
+        func opens(_ file: KeyFile, under kdf: PassphraseKDF.Descriptor) -> Bool {
+            guard (try? kdf.validateFloor(floor)) != nil, let key = try? PassphraseKey.derive(typed, kdf: kdf) else {
+                return false
+            }
+            return (try? file.open(passphrase: .passphraseKey(key), floor: floor)) != nil
+        }
+        if files.contains(where: { $0.passphrase?.kdf == planKDF && opens($0, under: planKDF) }) { return false }
+        return files.contains { file in
+            guard let kdf = file.passphrase?.kdf, kdf != planKDF else { return false }
+            return opens(file, under: kdf)
+        }
+    }
+
     /// VX-447 — THE FILE THE ACT LOCKS, MINTED (rule 27's state, the library open): the current key under the locks this
     /// act can vouch for — the new words (rule 2: never a file the words would not open), and, synced, the account's
     /// passphrase the door verified against the vault plus the master with its twelve-words copy as the vault holds them

@@ -195,6 +195,36 @@ struct KeyDoorOldPassphraseResumeTests {
         #expect(KeyDoorResumeTests.fileOpens(fixture, "set at last"))
     }
 
+    /// The guard's other arm (green on both trees): a Change to the SAME passphrase, re-chosen as it was, stopped after its
+    /// key-file write — the typed passphrase opens the NEW lock (under the plan's descriptor) as well as the mirror's old one,
+    /// so it IS the act's own secret and the resume FINISHES (a passphrase opening a lock under the plan's descriptor is never
+    /// read as the replaced one).
+    @Test func aPassphraseReChosenAsItWasIsTheActsOwnSecret() async throws {
+        let shape = Shape(door: .change, mode: .castle, synced: false, gate: .alwaysAsk)
+        let clean = try Self.fixture(shape)
+        let cleanExecutor = clean.executor()
+        var cleanLibrary = try clean.unlocked(cleanExecutor)
+        _ = try await cleanExecutor.changePassphrase(&cleanLibrary, current: clean.passphrase, new: clean.passphrase)
+        let keyFileWrite = try #require(clean.world.writes.firstIndex { if case .keyFile = $0 { true } else { false } })
+
+        let fixture = try Self.fixture(shape)
+        let executor = fixture.executor()
+        var library = try fixture.unlocked(executor)
+        let kdfBefore = try #require(fixture.world.liveFormat3?.passphrase?.kdf)
+        fixture.world.crashAfterWrites = keyFileWrite + 1
+        await #expect(throws: SimulatedCrash.self) {
+            _ = try await executor.changePassphrase(&library, current: fixture.passphrase, new: fixture.passphrase)
+        }
+        let (outcome, settled, _) = try await fixture.relaunchAndSettle(Self.typedAtTheLobby(fixture.passphrase))
+        guard case .resumed = outcome else {
+            Issue.record("a passphrase opening the lock under the plan's descriptor is the act's own — \(outcome)")
+            return
+        }
+        expectSettled(fixture, settled, "after the settle:")
+        #expect(KeyDoorResumeTests.fileOpens(fixture, fixture.passphrase))
+        #expect(fixture.world.liveFormat3?.passphrase?.kdf != kdfBefore, "the act's fresh descriptor stands")
+    }
+
     /// The guard (green on both trees): the key-file write landed, and the open typed the NEW passphrase (it opens the live
     /// key file now) — the resume holds the act's own secret and FINISHES.
     @Test func aResumeTypingTheNewPassphraseAfterTheKeyFileLandedStillFinishes() async throws {
