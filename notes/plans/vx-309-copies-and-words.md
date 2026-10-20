@@ -868,8 +868,11 @@ door `DocumentImporter.swift` + `ImportModel.swift`; the test worlds — `Execut
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton + the readings + the harness baseline: DONE (this commit).
-- Piece 0 — F-U1a-1's fix (VX-450's second arm): NOT-STARTED — the settled design is R-U1b-0; pins first (the probe's two
-  postures + shapes B and C), red on the pre-fix tree, then the fix.
+- Piece 0 — F-U1a-1's fix (VX-450's second arm): BUILT (`3180d56c7` pins first · `22856d3dd` the fix); MUTATIONS NAMED, running
+  next on `22856d3dd` (pre-revert copies in this session's scratchpad `u1b-prerevert/`; each restored by `git checkout --`,
+  `cmp`-checked): M-0a the helper's replaced-lock arm off (always false) → expect the pre-fix red set; M-0b the
+  plan-descriptor guard dropped → expect `aPassphraseReChosenAsItWasIsTheActsOwnSecret` red; M-0c the call site's files
+  without the sealed mirror → expect shape C (`aKeyDoorWhoseKeyFileLanded…`) red. PENDING.
 - Piece 1 — T-5, the empty-slot landing: NOT-STARTED.
 - Piece 2 — VX-305's second hand-off (Previous Libraries through the doors): NOT-STARTED.
 - Piece 3 — T-8: NOT-STARTED — WAITING on the mapping ruling (proposal sent).
