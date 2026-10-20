@@ -1447,3 +1447,46 @@ ruling) · `3180d56c7` (0 pins first) · `22856d3dd` (0) · `41a380500` (record)
 `216fda519` (record) · `f18824efc` (1 app) · `68253bdc2` (record) · `53674fe03` (2) · `f28e44da4` (record) · `1e9f4abb2` (3
 core) · `10d9bb6d5` (3 app) · `74f3f4132` (record) · `9c7785a34` (3 log line) · `b923eabf6` (F-U1b-7 pin first) ·
 `6d24bd2f5` (F-U1b-7 read-only arm) · the close commit.
+
+### U1c RECORD — THE LISTING'S FACES AND THE RIDERS (Opus implementer, 2026-10-19; VX-265 · VX-210 · VX-444 (+F-U1b-5) · VX-451 · VX-454 — IN PROGRESS)
+
+**Not done in U1c, first:** (PENDING — this list is rewritten at the close.)
+- No Mac suite RUN, no walk, no stage, no Debug launch, no store touch, no network, no Linear, no subagent (the brief).
+
+**Preflight (complete, not delegated):** CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md` whole;
+`notes/CastleRules.md` WHOLE (rules 17–19, 21, 23, 25, 27 + the considered-and-not-pursued ledger); `notes/SyncSpec.md`
+WHOLE (no `Sync/` line here); `notes/SurfaceContracts.md` whole (The app · Doors — portability + Library protection); this
+plan WHOLE (§0–§3, §5a–§5c, §5b-R, the §6 U1a and U1b RECORDS with their ARBITRATIONS and MAC BATCHES — MB-1's
+`Retention.plan(now:)`, MB-2's migrated fixture and the said-not-swallowed verdict line, F-U1b-5); `notes/plans/vx-308-
+accounts-key-doors.md` §6 U4 RECORD (F-U4-1, the export-mark-by-library pattern, `changeSettings`' road) + the U3 RECORD
+(the pane's sections, the one presenter) + THE WALK RECORD (W-VX308-2); the VX-307 plan's F-U2b-3 + its arbitration
+(VX-444's origin); the vx-266 design's §3.7 (the offer's other-libraries group — superseded where the rules differ); the
+core — `Executor/Acts/Copies.swift` (`offerDelete`), `Executor/Acts/DeviceActs.swift` (`changeSettings`),
+`Model/DeviceSection.swift` (`DeviceSettings.idleLockMinutes`), `Assess/Catalog.swift` (`foreign`, `MacAttribution
+.unattributed`), `Assess/CatalogNames.swift`, `Assess/OwnCopies.swift`, `Executor/PlanRunner.swift` (`perform`, the
+`needsLiveKeyFile` defaults), `Executor/Leaves.swift`; the app — `CopyDoorsModel.swift` WHOLE, `ProtectionCopyDoors.swift`,
+`CopyDoorsSheet.swift`, `LibraryOpenDoor.swift` (the presenter), `DataSafetyPane.swift`, `SettingsSceneContent.swift`,
+`ProtectionPane.swift` (the sections' order; today's Castle section), `RoadCrossingsModel`/`RoadCrossingFaces` +
+`RoadCrossingSheet.swift` (the gate row's home), `ProtectionCrossingActs.swift` (`changeGate`), `ProtectionRoadLock.swift`
+(`RoadRelockPolicy`), `AppBootstrap.swift` (`canLock`/`lock`, `copyDoorsRoads*`, `makeThisMyLibrary*`, `accountRoads`,
+`keyDoorRoads`, `finish`), `WordsBand.swift` (the ledger), `ProtectionOpenFaces.swift` (`RoadStandingModel`,
+`refreshPane`), `SetPassphraseModel.swift` + `PassphraseReminder.swift`, `RoadAccountModel.swift` (the landing chain),
+`FileBackupsLeaf.swift`, `ProtectionRoadActs.swift` (the set-aside helpers), `CatalogLister.swift`, `ProtectionWords.swift`,
+`EditorCommands.swift` (Lock Library Now, `menuRendered`, `keyEquivalent`), `Registry/Capability*.swift`, `HelperView.swift`;
+the test worlds — `PlantedRoad`, `ProtectionFacesSupport`, `ProtectionAccountSupport`, `RoadLockTests`, `RoadLockRouteTests`,
+`RoadKeyDoorSurfaceTests`, `WordsBandTests`, `CopyDoorsModelTests`, `MakeMineRoadTests`, `ProtectionAccountRouteTests`,
+`CapabilityRegistryTests`, core `CopyActTests`. HARNESS: U1a's scratchpad package `u1-harness` (this session's scratchpad —
+it survived, re-pointed at this worktree, `--skip-update`): the BASELINE on `ae5aca849` `✔ Test run with 304 tests in 50
+suites passed after 4.986 seconds.` (U1b's close count, exactly).
+
+**MY READINGS:** (PENDING — written as each piece opens.)
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece R — this record skeleton + the harness baseline: DONE (this commit).
+- Piece 1 — VX-265 (the delete door for other libraries' copies): NOT-STARTED.
+- Piece 2 — VX-210 (the honest line): NOT-STARTED.
+- Piece 3 — VX-444 + F-U1b-5 (the words-recorded ledger carries): NOT-STARTED.
+- Piece 4 — VX-451 (the pane's Lock Now row + idle dial): NOT-STARTED.
+- Piece 5 — VX-454 (probe first): NOT-STARTED.
+- Piece 6 — the close: NOT-STARTED.
+- No revert is in flight.
