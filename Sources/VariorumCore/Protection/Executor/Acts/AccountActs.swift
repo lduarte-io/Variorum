@@ -324,13 +324,40 @@ extension ProtectionExecutor {
         guard !secrets.isEmpty else { throw ExecutorRefusal.secretMissing }
         parameters.passphraseKDF = secrets.passphrase?.kdf
         parameters.typedSecret = secrets.passphrase != nil ? "passphrase" : "words"
-        // Rule 7's sentence: said unless the words typed here already open the
-        // library's own words lock (they were the library's words all along).
-        let sameWords = typed.words.map { words in (try? library.keyFile?.open(words: words)) != nil } ?? false
+        // Rule 7's sentence: said unless the library's words already ARE the
+        // account's — the words typed here open the library's own words lock
+        // (they were its words all along), or (VX-309 U2 — VX-456) its key
+        // file proves it by wrap identity (`wordsAreTheAccountsAlready`).
+        let ownLockOpens = typed.words.map { words in (try? library.keyFile?.open(words: words)) != nil } ?? false
+        let liveFile = library.keyFile?.fingerprint == library.fingerprint ? library.keyFile : nil
+        let sameWords = ownLockOpens || Self.wordsAreTheAccountsAlready(
+            liveFile, vault: vault.vault,
+            master: VaultModel.master(of: vault.vault, passphrase: secrets.passphrase, words: secrets.words))
         parameters.wordsReplaced = !sameWords
         return try await perform(
             AccountMoveProgram(act: act), parameters: parameters, secrets: secrets,
             typed: typed, toKey: rekeys ? leaves.ids.mintLibraryKey() : nil, library: &library)
+    }
+
+    /// **VX-309 U2 — VX-456: the library's twelve words ARE the account's
+    /// already**, proven from the files alone — by wrap identity, never by
+    /// deriving or storing words (READS only): the key file of the library's
+    /// key carries NO words lock of its own, its master's twelve-words copy IS
+    /// the account's recovery wrap byte for byte (RFC 3394 is deterministic:
+    /// the same words over the same master make the same bytes, and the copy
+    /// is the vault's, copied — §3.5a), and the master lock beside it opens
+    /// under the account's master (`master` — what the typed secret reached in
+    /// the vault). Then the only words that open the library are the
+    /// account's, and a join replaces nothing (rule 7's moment stays quiet). A
+    /// file WITH a words lock of its own beside a matching copy proves
+    /// nothing — a New Words made while the library was local re-makes the own
+    /// lock and leaves the copy as it was — so it answers false and the moment
+    /// speaks (a true sentence either way; PROVISIONAL P-VX309-U2-1).
+    static func wordsAreTheAccountsAlready(_ file: KeyFile?, vault: AccountVault, master: SymmetricKey?) -> Bool {
+        guard let file, file.words == nil, let copy = file.masterWordsCopy, copy == vault.masterByWords,
+              let master, (try? file.open(master: master)) != nil
+        else { return false }
+        return true
     }
 
     /// **The leaves** — This Mac Only, Stop syncing here, delete the account

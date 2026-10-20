@@ -137,4 +137,32 @@ struct JoinWordsMomentTests {
         let rejoined = try await executor.enroll(&library, typed: TypedSecrets(passphrase: mac.passphrase))
         #expect(replaced(rejoined), "the copy the library carries is the account's OLD wrap — the words were replaced")
     }
+
+    /// THE PURE RULE (`ProtectionExecutor.wordsAreTheAccountsAlready`), arm by arm, over files built by hand: true only with
+    /// no own words lock, the copy byte-identical to the vault's recovery wrap, and a master lock the account's master opens.
+    @Test func thePureRuleReadsTheFilesAlone() throws {
+        let world = ExecutorWorld()
+        let words = try PF.words()
+        let (vault, keys) = try VaultModel.creating(
+            passphrase: try PF.passphraseKey("an account passphrase"), words: try PF.wordsKey(words), mode: .standard,
+            device: "Mac A", ids: world)
+        let (otherVault, otherKeys) = try VaultModel.creating(
+            passphrase: try PF.passphraseKey("another passphrase"), words: try PF.wordsKey(words), mode: .standard,
+            device: "Mac B", ids: world)
+        let key = StoreKey.mint()
+        let bare = KeyFile(libraryID: PF.id(), key: key, epoch: 1)
+        let accounts = try bare.settingMaster(keys.masterKey, wordsCopy: vault.masterByWords, for: key)
+        let rule = ProtectionExecutor.wordsAreTheAccountsAlready
+        #expect(rule(accounts, vault, keys.masterKey), "no own lock, the copy the vault's, the master lock the account's")
+        #expect(!rule(nil, vault, keys.masterKey), "no key file")
+        #expect(!rule(accounts, vault, nil), "no master reached")
+        #expect(!rule(bare, vault, keys.masterKey), "no copy at all")
+        #expect(!rule(try accounts.settingWords(try PF.wordsKey(words), for: key), vault, keys.masterKey),
+                "an own words lock beside the copy proves nothing")
+        // The SAME words over ANOTHER master make other bytes (the copy is the account's, not merely the same words').
+        #expect(!rule(accounts, otherVault, otherKeys.masterKey), "another account's recovery wrap")
+        // A matching copy beside a master lock the account's master does NOT open (a stray assembled by hand).
+        let mismatched = try bare.settingMaster(otherKeys.masterKey, wordsCopy: vault.masterByWords, for: key)
+        #expect(!rule(mismatched, vault, keys.masterKey), "the master lock is another master's")
+    }
 }
