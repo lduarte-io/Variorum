@@ -843,8 +843,13 @@ nonisolated enum ProtectionWords {
     // restated (the prefix of `noKeyFileAfterAQuietOpen`, pinned). Every other line here is PROVISIONAL P-VX308-U3-2 —
     // drafted from the rules' own words, sentence case, hers at the bundle.
 
-    /// VX-263's one line — every key door says it (rule 6: "the doors say so in one sentence").
-    static let keyDoorsLine = "Your current secrets open everything you've made of this library."
+    /// VX-263's one line — every key door says it (rule 6: "the doors say so in one sentence"). VX-309 U2: the route
+    /// finder's ONE sentence as `notes/CastleRules.md` rewords it (the considered-and-not-pursued ledger — *your current
+    /// passphrase or words; on this Mac, its quiet road if it still holds that key*), fitted to a sentence the key doors and
+    /// the words section say (PROVISIONAL P-VX309-U2-6); it supersedes the VX-308 plan's draft (*your current secrets open
+    /// everything you've made of this library*).
+    static let keyDoorsLine = "Every copy of this library opens with your current passphrase or words; on this "
+        + "\(ProtectionCopy.deviceName), its quiet road opens it too, if it still holds that copy's key."
     /// Synced, the key doors change the account's lock with the library's (rule 7: "the key doors change the library's
     /// and the account's locks together") — the face says so; the act does it.
     static let keyDoorsSyncedPassphraseLine = "This library syncs with your account, so your account's passphrase changes "
