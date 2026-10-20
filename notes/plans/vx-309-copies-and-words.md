@@ -1917,6 +1917,25 @@ the merging session's):**
 - **F-U1c-8 (record only):** the full core suite's one wall-clock red under the parallel run (VX-353's MCP bound), green alone — an
   existing class, no line of this diff. F-U1b-4's stale `Copies.swift` header line is untouched (the ladder's NIT).
 
+**U1c ARBITRATION (the orchestrator, 2026-10-19 — repo-first before the Mac batch and U2):**
+- **F-U1c-1** (the fence bug — `offerDelete` compared copies' `<mac8>` against the OPEN library's device ID, so rule
+  19's delete could never reach another library's backups): the in-unit FIX APPROVED — the trace is sound (rule 23:
+  a device ID is per library), the pin was red-on-old, and the `CopyActTests` flip is a justified edit (another
+  Mac's copy can only exist in the shared far folder under the place-told rule). The ladder reads the core lines.
+- **F-U1c-2** (rule 27's lobby is not the empty slot): the self-review FIX APPROVED — pins first, both arms.
+- **F-U1c-3** (a planned delete whose file removal fails mid-step wedges the open library's acts): a TICKET at
+  closeout (Bug, Suspected, Castle & sync, Medium — the VX-450/F-U1b-7 class), option (b) named as the likely fix
+  (a delete has no old state to restore, so a leaf failure maps to `ActRollback` honestly).
+- **F-U1c-4** (deleting a library's copies leaves its quiet roads): HER BUNDLE, FOLDED INTO F-U1b-1's row — and that
+  row's option (a) wording is CORRECTED as this finding says (what is built deletes copies only, never roads).
+- **P-VX309-U1c-4** (the ⌃⌘L chord left out of the declaration): ACCEPTED as built — Release parity is the hard law;
+  the (b) arm (declare the chord + the helper row) is the natural VX-329 follow-up when the new road ships Release,
+  and the bundle row says so.
+- **P-VX309-U1c-1..9 otherwise: each stands as built** pending her bundle. VX-454's ticket closes as FIXED at the
+  merge (the probe red-on-old is the evidence; F-U1c-7 records the self-heal claim as verified).
+
+**THE U1c MAC BATCH (the orchestrator, under the stage; result appended when run):** *(pending the coordinator's GO)*
+
 **Notes:** no machinery deaths; no Sonnet lookup; no subagents; no scratch worktree. The harness is U1a's (this session's
 scratchpad `u1-harness` — it survived; U1c's five headless suites symlinked in). One record edit (a Python replace) failed its own
 uniqueness assert (an anchor shared by three records) AFTER its code commit had been made in the same command; the record was
