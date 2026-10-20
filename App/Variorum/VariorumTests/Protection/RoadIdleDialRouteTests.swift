@@ -50,6 +50,8 @@ struct RoadIdleDialRouteTests {
         let capability = CapabilityRegistry.capability(.lockLibraryNow)
         #expect(capability.verb == ProtectionCopy.lockNowLabel)
         #expect(capability.doors == [.menuBar, .surface])
+        // VX-309 ladder round 1, F-R4: `always`, reached by no router dispatch — no dead note (the registry's idiom).
+        #expect(capability.unavailableNote.isEmpty)
         #expect(EditorCommands.menuRendered.contains(.lockLibraryNow))
         #expect(RoadCrossingsSection.surfaceCapabilities == [.lockLibraryNow])
         let menu = try CopyListingFacesSurfaceTests.code("Variorum/EditorCommands.swift")
