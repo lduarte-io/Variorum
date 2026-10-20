@@ -2197,5 +2197,32 @@ seconds.` (U1c's close count, exactly).
   `✔ Test run with 338 tests in 57 suites passed after 6.241 seconds.`; `build-for-testing` green. MUTATIONS on `f60eab50d`
   (restored `cmp`-identical): M-6a no floor → `✘ … 10 issues`; M-6b the Touch ID press unfloored → `✘ … 2`; M-6c the repetition
   arm dropped (core) → `✘ repetitionOutranksLength` (4); M-6d no hint → `✘ theQuietHintIsAdviceNeverABlock` (2).
-- Pieces 7–10 — NOT-STARTED.
+- Piece 7 — THE FIELD GUIDE'S PROTECTION CHAPTER + DATA SAFETY'S WORDS ON THE NEW ROAD: DONE (`7da5ad2fc`). THE GUIDE: "keeping
+  it private" re-seeds as three lessons on the new road only — *Your key and your twelve words* (LEADS with the readme's four
+  Start Here passages verbatim, `ReadmeSeeder.startHerePassages` — one text, two homes; then VX-204's approved sync sentence +
+  `privacyServerSeesShapeSentence`, `keystoneAccountPassword`, and what open means with the lock's door by its name), *Standard
+  and Castle* (one posture at a time; rule 9's promise and rule 12's leave sentence, hers, verbatim; the follow; what you must
+  keep; the floor as built), *Copies, backups and your way back* (rule 5's sentence — one text with the pane; retention's
+  numbers as built, 14 · 14 + 4; Look inside / Make this my library by their own names; rule 17's sentence, hers; her item-5
+  older-library words; VX-210's line; the plain-text roads out and back). The export lesson's two backup paragraphs say a
+  PAIR and one-a-day in the picked folder (P-VX309-U1a-2). VX-209's older-copy warning retires on this road (a copy lands in
+  the posture of now — rule 17). The gate is the readme's own: `TutorialSeeder.plan(onTheNewRoad:)` / `seed(… onTheNewRoad:
+  = false)`, `restore` reading `ProtectionRoad.opensOnTheNewRoad(devStore: session.storeVariant == .dev)` (the birth seed and
+  Help's restore both go through `restore`; in production the session's variant IS the bootstrap's, the one `LaunchFurniture`
+  hands the readme). Today's road, Release included, seeds copy §7's chapter byte-unchanged. SEEDER ONLY — no store touched; the
+  truth-check and the real store's re-seed ride VX-329. DATA SAFETY (behind `roadStanding != nil`; today's road unchanged): the
+  counts are this Mac's pairs of this library (F-U1a-3 / VX-397), rule 5's sentence with VX-263's quiet-road clause (F-U2c-4),
+  and the picked folder's caption gains *One copy a day goes there — a second Back Up Now on the same day adds one beside your
+  library only.* PROVISIONAL P-VX309-U2-8 (the chapter) · P-VX309-U2-9 (the pane's lines). Pins `U2WordsTests` +3 (headless):
+  the chapter says the rules as built (her sentences by constant, the numbers, the doors by name, nothing retired, nothing
+  shouted, the two-register pattern — restated locally since `CopyRegisterPinTests` is Mac-only); the pane's lines; the faces by
+  source (the pane's gate, the seeder's gate) — new API, red by construction on the old tree. Mac pin `TutorialNewRoadChapterTests`
+  (3 — BUILT, its run the orchestrator's on the stage): the plan swaps only the privacy chapter; the DEV variant's restore seeds
+  exactly `plan(onTheNewRoad: true)` with every paragraph, the export lesson's new words and none of today's; the REAL variant's
+  keeps today's plan, VX-209's warning and none of the new road's words. Harness `✔ Test run with 9 tests in 1 suite passed`
+  (U2WordsTests); `build-for-testing` `** TEST BUILD SUCCEEDED **`. MUTATIONS on `7da5ad2fc` (each restored `cmp`-identical to
+  `u2-prerevert/p7/`): M-7a the pane's gate dropped → `✘ theNewRoadsLinesAreRenderedOnlyThere` (1); M-7b `restore` hard-wired to
+  today's road → `✘ theNewRoadsLinesAreRenderedOnlyThere` (1 — the Mac pin's dev arm reds on the same revert, by its recipe
+  R-U2-7-gate); M-7c rule 9's promise dropped from the postures → `✘ theGuidesNewRoadChapterSaysTheRulesAsBuilt` (1).
+- Pieces 8–10 — NOT-STARTED.
 - No revert is in flight.
