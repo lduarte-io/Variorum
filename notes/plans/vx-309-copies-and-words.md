@@ -756,12 +756,20 @@ and it was a REAL FIND, not a pin anchor:
   `RetentionTests.aFutureStampedCopyClaimsNoSlotAndIsNeverPruned` (deterministic, fixed clock, both places);
   red-on-old = the batch's own observed red PLUS the behavioural revert (`trusted = dated`, the pre-fix slot rule) →
   the pin red with 2 issues, restored `cmp`-identical against `/tmp/vx309-mb1-premutation.swift`. Headless:
-  `RetentionTests` + `RetentionGuardMutationTests` + `OwnCopiesTests` `✔ 12 tests in 3 suites`. The full core suite
-  and the five-suite Mac re-run: PENDING (in flight). For the ladder: the one core file is `Assess/Retention.swift`;
-  the call-site edits are mechanical (`now:` threaded).
+  `RetentionTests` + `RetentionGuardMutationTests` + `OwnCopiesTests` `✔ 12 tests in 3 suites`. **THE FULL CORE
+  SUITE after the fix:** VariorumCoreTests `✔ Test run with 3336 tests in 434 suites passed` (U1a's 3335 + the MB-1
+  pin; the PerfBenchmark ratio red of the implementer's run did not recur), the third target `✔ 40/6`,
+  VariorumMCPTests `✘ 383/71 with 1 issue` — exactly the recorded VX-353 wall-clock flake (21.1 s vs 15 s under the
+  parallel run). **THE FIVE-SUITE MAC RE-RUN after the fix: `✔ Test run with 22 tests in 5 suites passed`.** For the
+  ladder: the one core file is `Assess/Retention.swift`; the call-site edits are mechanical (`now:` threaded).
 - Every other suite green on the first run (the known skip-shaped lines were build-tool noise, no VX-310 witnesses in
   this batch's list); 0 instances at the run's end.
-- **The R-a / R-b behavioural reverts (`DataSafetyRoadCountsTests`) and the confirming re-run: PENDING below.**
+- **THE R-a / R-b BEHAVIOURAL REVERTS (run 2026-10-19 ~18:50 MDT, the same claim):** (R-a) `DataSafetyModel.refresh`'s
+  road lines dropped → `theNewRoadsRowsCountThisMacsPairsOfThisLibraryAndTodaysRoadIsUnchanged` RED (2 issues — the
+  new road's rows read today's flat counts), restored `cmp`-identical; (R-b) `farInterval` → 12 h →
+  `theRestatedRulesAreStoreBackups` RED (1 issue), restored `cmp`-identical. The confirming re-run
+  (`DataSafetyRoadCountsTests` + `ProtectionFarPairTests`) `✔ Test run with 14 tests in 2 suites passed`; tree clean;
+  0 instances; the stage released with the coordinator's result line. **THE U1a MAC LEG IS CLOSED.**
 
 **Notes:** no machinery deaths; no Sonnet lookup; no subagents; no scratch worktree. The harness was rebuilt in this
 session's scratchpad from U1's recipe (the VX-308 harness's `Package.swift`, stubs and symlink list re-pointed); the
