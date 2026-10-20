@@ -124,4 +124,22 @@ struct OtherLibrarysCopiesDeleteTests {
         #expect(fixture.world.copies[otherCopy.id] == nil && fixture.world.copies[rememberedCopy.id] != nil)
         #expect(fixture.world.plan == nil, "no plan — no library holds the act")
     }
+
+    /// RULE 27's LOBBY is not the empty slot: a library no key file opens stands there, and its ID is inside the file no
+    /// key opens — with this Mac's memory of it gone, ANY listed library could be it (its older backups are its last road
+    /// back, rule 4). The no-library delete refuses over an occupied slot, nothing deleted.
+    @Test func withALibraryStandingInTheSlotTheNoLibraryDeleteRefuses() throws {
+        let fixture = try EX(.standard)
+        let other = "cccc3333-0000-4000-8000-000000000003"
+        let copy = Self.copy(
+            "c:other", place: .container, folders: ["Backups", ProtectionNames.library8(other), "dddd4444"], library: other,
+            mac: .mac8("dddd4444"))
+        fixture.world.copies[copy.id] = fixture.world.live
+        fixture.world.memories = [:]  // this Mac remembers nothing of the library in the slot
+        let executor = fixture.executor()
+        #expect(throws: ExecutorRefusal.libraryAlreadyInSlot) {
+            try executor.offerDeleteWithNoLibraryOpen(copies: [copy], catalog: Catalog(copies: [copy]))
+        }
+        #expect(fixture.world.copies[copy.id] != nil, "nothing deleted")
+    }
 }

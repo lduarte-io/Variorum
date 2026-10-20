@@ -76,6 +76,25 @@ struct OtherLibrariesDeleteRoadTests {
         #expect(!FileManager.default.fileExists(atPath: road.slot.places.slot.path), "the slot stays empty — a delete lands nothing")
     }
 
+    /// RULE 27's LOBBY (a library no key file opens stands in the slot — no library open, the slot NOT empty): its ID is
+    /// inside the file no key opens, so any listed library could be it (its older backups are its last road back) — no row
+    /// is offered a delete there, and the act refuses (P-VX309-U1c-2).
+    @Test func withALibraryStandingInTheSlotNoDeleteIsOffered() async throws {
+        let road = PlantedRoad()
+        let stepped = try await ArcPlant.aSteppedAside(road)
+        // B stands in the slot, every road to it gone (rule 27's state): its key file, its silent item, its memory.
+        try FileManager.default.removeItem(at: road.slot.places.liveKeyFile)
+        road.custody.items = [:]
+        road.memory.items = [:]
+        road.apple.keys = [:]
+        let ctx = CopyDoorsContext(road.context())
+        let listing = ProtectionCopyDoors.listing(ctx)
+        #expect(listing.all.contains { $0.copy.library == stepped.aID }, "A is still listed")
+        #expect(listing.deleteChoices.isEmpty, "no delete with a library standing in the slot")
+        #expect(ProtectionCopyDoors.deleteCopies(ctx, libraryID: stepped.aID) == .refused(.deleteFailed))
+        #expect(ProtectionCopyDoors.listing(ctx).all.contains { $0.copy.library == stepped.aID }, "nothing deleted")
+    }
+
     /// THE CONFIRM'S BRAIN (planted roads): the lead names the library by its day, counts what goes and says what stays;
     /// nothing runs before the press; *Cancel* writes nothing; from the listing the press re-reads the listing with the
     /// receipt above it, from a row elsewhere the sheet leaves.
