@@ -250,4 +250,103 @@ struct U2WordsTests {
         #expect(seeder.contains("onTheNewRoad: ProtectionRoad.opensOnTheNewRoad(devStore: session.storeVariant == .dev)"))
         #expect(seeder.contains("onTheNewRoad: Bool = false"), "a direct seed is today's edition unless asked")
     }
+
+    // MARK: - Piece 9 — U1a–U1c's undrafted words, one pass in §7c's voice (P-VX309-U1b-3, P-VX309-U1c-1 → P-VX309-U2-10)
+
+    /// T-5 and the empty-slot listing say §7c's own sentences where one fits: the receipt is §7c (9)'s first sentence (no
+    /// library stepped aside), the listing's lead is `restoreListLead`'s sentence without its step-aside clause, and the
+    /// lead says the pair the landing keeps AS BUILT (the copy's words → the library's words, no passphrase rides; its
+    /// passphrase → the library's, beside new words the card offers).
+    @Test func theEmptySlotLinesSpeakInSection7csVoice() {
+        #expect(ProtectionWords.makeMineEmptySlotReceipt == "This is your library now.")
+        #expect(ProtectionWords.makeMineReceipt.hasPrefix(ProtectionWords.makeMineEmptySlotReceipt + " "),
+                "§7c (9)'s own first sentence")
+        #expect(ProtectionWords.emptySlotRestoreListLead
+            == "Look inside a copy to read it without changing anything, or make it your library.")
+        #expect(ProtectionWords.restoreListLead.hasPrefix(String(ProtectionWords.emptySlotRestoreListLead.dropLast()) + " "),
+                "the open listing's lead, minus the step-aside clause")
+        let lead = ProtectionWords.makeMineEmptySlotLead
+        #expect(lead.hasPrefix("This copy becomes your library \u{2014} a new library, in Standard, with a fresh key of its "
+            + "own."), "§7c (8)'s shape; Standard as built (P-VX309-U1b-2)")
+        #expect(lead.contains("Enter the copy's twelve words and they become your library's words, and you can set a "
+            + "passphrase after"))
+        #expect(lead.contains("or enter its passphrase and it becomes your library's, with new twelve words offered once "
+            + "the library opens."))
+        #expect(lead.hasSuffix("The copy itself is not changed."))
+        #expect(ProtectionWords.noCopiesOnThisMac
+            == "Variorum isn't keeping any copies on this \(ProtectionCopy.deviceName).")
+    }
+
+    /// T-8: the lead says the ruling in ONE line (content rides, configuration doesn't) and, with a library open, §7c (8)'s
+    /// own step-aside clause; the refusals name what happened and that nothing moved; the receipt is §7c (9)'s shape.
+    @Test func theBringInLinesSayTheRulingAndSection7csShape() {
+        let aside = ProtectionWords.bringInLead(stepsALibraryAside: true)
+        let empty = ProtectionWords.bringInLead(stepsALibraryAside: false)
+        let clause = "steps aside whole into Previous Libraries, where you can look inside it or make it your library again."
+        #expect(ProtectionWords.makeMineLead.contains(clause), "§7c (8)'s own clause")
+        #expect(aside.contains("Your current library " + clause) && !empty.contains("Previous Libraries"))
+        for lead in [aside, empty] {
+            #expect(lead.hasPrefix("This plain-text copy becomes a new library \u{2014} in Standard, with a fresh key of "
+                + "its own; its new twelve words are offered once it opens."))
+            #expect(lead.contains("Its notes and their takes, books, chapters, snippets and tags come in, written fresh; its "
+                + "commits, comments, note versions, book settings, stars and shelves don't."), "the ruling's one line")
+            #expect(lead.hasSuffix(" The copy itself is not changed."))
+        }
+        #expect(ProtectionWords.exportFromAnEarlierBuild
+            == "This plain-text copy was written by an earlier Variorum than this one, which can't bring it in.")
+        #expect(LibraryOpenCopy.newerSchemaRefusal.hasPrefix("This library was written by a newer Variorum than this one."),
+                "the sibling refusal's shape it mirrors")
+        #expect(ProtectionWords.exportNoteUnreadable("Spring", line: 12)
+            == "The note \u{201C}Spring\u{201D} couldn't be read from this copy (line 12), so nothing was brought in.")
+        #expect(ProtectionWords.exportNoteUnreadable("Spring", line: nil)
+            == "The note \u{201C}Spring\u{201D} couldn't be read from this copy, so nothing was brought in.")
+        var landing = PlaintextExportLanding()
+        landing.books = 2; landing.notes = 1; landing.snippets = 0
+        #expect(ProtectionWords.bringInReceipt(landing, stoppedEarly: false, steppedAside: false)
+            == "This is your library now, made from the plain-text copy: 2 books \u{00B7} 1 note \u{00B7} 0 snippet groups.")
+        landing.wings = 1; landing.emptyBooks = ["Drafts", "Later"]
+        #expect(ProtectionWords.bringInReceipt(landing, stoppedEarly: true, steppedAside: true)
+            == "This is your library now, made from the plain-text copy: 2 books \u{00B7} 1 note \u{00B7} 0 snippet groups "
+            + "\u{00B7} 1 wing. Empty books were left out: Drafts, Later. The previous one is in Previous Libraries. It "
+            + "stopped part of the way \u{2014} the copy is unchanged and can be brought in again.")
+        #expect(ProtectionWords.bringInReceipt(landing, stoppedEarly: false, steppedAside: true)
+            .hasPrefix(String(ProtectionWords.makeMineReceipt.prefix(24))), "§7c (9)'s opening")
+    }
+
+    /// The delete door's lines: the door, title, button, working line and failure stand as drafted; the lead's opening and
+    /// the receipt name the device through `ProtectionCopy` (shared copy); VX-210's line is one plain line.
+    @Test func theDeleteLinesAndVX210sLineAfterThePass() {
+        let lead = ProtectionWords.deleteCopiesLead(Self.choice(backups: 2, previous: 0), libraryOpen: true)
+        #expect(lead.hasPrefix("This deletes this \(ProtectionCopy.deviceName)'s copies of the library last copied "), "\(lead)")
+        #expect(ProtectionWords.deleteCopiesReceipt(1) == "Deleted 1 copy of another library from this \(ProtectionCopy.deviceName).")
+        #expect(ProtectionWords.deleteCopiesReceipt(4)
+            == "Deleted 4 copies of another library from this \(ProtectionCopy.deviceName).")
+        #expect(ProtectionWords.copiesElsewhereLine == "Copies outside the folders Variorum keeps \u{2014} older backups, or "
+            + "a folder you made \u{2014} are left as they are. They're yours to manage in the Finder.")
+        #expect([ProtectionWords.deleteCopiesDoor, ProtectionWords.deleteCopiesTitle, ProtectionWords.deleteCopiesButton,
+                 ProtectionWords.deleteCopiesWorking, ProtectionWords.deleteCopiesFailed]
+            == ["Delete\u{2026}", "Delete this library's copies?", "Delete copies", "Deleting the copies\u{2026}",
+                "Variorum couldn't delete those copies just now. Nothing more was deleted."], "as drafted, read and kept")
+    }
+
+    /// Every line of the pass keeps the register: nothing shouted, no key-family internal, no retired word.
+    @Test func everyLineOfThePassKeepsTheRegister() {
+        var landing = PlaintextExportLanding()
+        landing.books = 1; landing.notes = 1; landing.snippets = 1; landing.emptyBooks = ["Drafts"]
+        let lines = [
+            ProtectionWords.makeMineEmptySlotLead, ProtectionWords.makeMineEmptySlotReceipt,
+            ProtectionWords.emptySlotRestoreListLead, ProtectionWords.noCopiesOnThisMac,
+            ProtectionWords.bringInLead(stepsALibraryAside: true), ProtectionWords.bringInLead(stepsALibraryAside: false),
+            ProtectionWords.bringInButton, ProtectionWords.bringInWorking, ProtectionWords.exportFromAnEarlierBuild,
+            ProtectionWords.exportNoteUnreadable("A note", line: 3),
+            ProtectionWords.bringInReceipt(landing, stoppedEarly: true, steppedAside: true),
+            ProtectionWords.deleteCopiesLead(Self.choice(backups: 1, previous: 1, opened: 1, staying: 2), libraryOpen: true),
+            ProtectionWords.deleteCopiesReceipt(2), ProtectionWords.copiesElsewhereLine,
+        ]
+        for line in lines {
+            #expect(Self.shouts(line).isEmpty, "\(line)")
+            #expect(!line.contains(Self.forbidden), "the two-register rule: \(line)")
+            for word in Self.retired { #expect(!line.lowercased().contains(word), "\(word) in \(line)") }
+        }
+    }
 }

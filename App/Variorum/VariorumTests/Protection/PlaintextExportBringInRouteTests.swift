@@ -51,7 +51,11 @@ struct PlaintextExportBringInRouteTests {
             let standing = try #require(bootstrap.roadStanding)
             var spoken: [String] = []
             standing.speak = { spoken.append($0) }
-            #expect(spoken.filter { $0.hasPrefix("A new library holds the plain-text copy's writing") }.count == 1, "\(spoken)")
+            // VX-309 U2 piece 9, FLIPPED DELIBERATELY (the as-drafted receipt re-drafted in §7c (9)'s shape): said once, and —
+            // a library was open — where the previous one went.
+            let receipt = spoken.filter { $0.hasPrefix("This is your library now, made from the plain-text copy") }
+            #expect(receipt.count == 1 && receipt.first?.contains("The previous one is in Previous Libraries.") == true,
+                    "\(spoken)")
         }
     }
 
@@ -77,6 +81,12 @@ struct PlaintextExportBringInRouteTests {
             }
             #expect(try Self.titles(world.slotURL, key: session.key, scratch: world.slot.places.scratch)
                 .contains("Loose"))
+            // VX-309 U2 piece 9: no library was open, so the receipt names no previous one.
+            let standing = try #require(bootstrap.roadStanding)
+            var spoken: [String] = []
+            standing.speak = { spoken.append($0) }
+            let receipt = spoken.filter { $0.hasPrefix("This is your library now, made from the plain-text copy") }
+            #expect(receipt.count == 1 && receipt.first?.contains("Previous Libraries") == false, "\(spoken)")
         }
     }
 }

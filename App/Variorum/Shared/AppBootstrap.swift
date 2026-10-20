@@ -1336,7 +1336,9 @@ final class AppBootstrap {
             }
             return .refused(result.refusal ?? .failed)
         }
-        receiptsForNextRoadOpen.append(ProtectionWords.bringInReceipt(result.landing, stoppedEarly: result.stoppedEarly))
+        // VX-309 U2: the receipt says where the previous library went when one was open (the lead said it would).
+        receiptsForNextRoadOpen.append(ProtectionWords.bringInReceipt(
+            result.landing, stoppedEarly: result.stoppedEarly, steppedAside: open != nil))
         finish(.roadCreated(created.session, created.words))
         await awaitOpen()
         return .made

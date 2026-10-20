@@ -103,9 +103,11 @@ struct PlaintextExportBringInRoadTests {
         #expect(result.landing.notes == 3 && result.landing.books == 1 && result.landing.snippets == 1)
         #expect(try Data(contentsOf: export) == exportBytes, "the export is only read")
         #expect(road.memory.items.keys.sorted() == [record.libraryID], "this Mac remembers ONE library")
-        // The receipt says what landed.
-        #expect(ProtectionWords.bringInReceipt(result.landing, stoppedEarly: false)
-            == "A new library holds the plain-text copy's writing: 1 book \u{00B7} 3 notes \u{00B7} 1 snippet group.")
+        // The receipt says what landed — VX-309 U2 piece 9, FLIPPED DELIBERATELY (the as-drafted receipt re-drafted in
+        // §7c (9)'s shape: this is your library now, what it was made of, where the previous one went).
+        #expect(ProtectionWords.bringInReceipt(result.landing, stoppedEarly: false, steppedAside: true)
+            == "This is your library now, made from the plain-text copy: 1 book \u{00B7} 3 notes \u{00B7} 1 snippet "
+            + "group. The previous one is in Previous Libraries.")
     }
 
     /// FROM THE MISSING FACE: no library in the slot — the missing library's key file steps aside (never written over) and

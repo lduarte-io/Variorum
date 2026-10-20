@@ -226,57 +226,75 @@ nonisolated enum ProtectionWords {
     /// The picked copy, filed: what it is.
     static func pickedCopyLine(_ day: String) -> String { "A copy from \(day)." }
 
-    // MARK: - VX-309 U1b — T-5, Make this my library into the empty slot (PROVISIONAL P-VX309-U1b-3 — U2's words pass)
+    // MARK: - VX-309 U1b — T-5, Make this my library into the empty slot (P-VX309-U1b-3's lines, re-drafted at VX-309 U2's
+    // words pass in §7c's voice — PROVISIONAL P-VX309-U2-10)
 
     /// The confirm's lead with no library open: the copy becomes the library under the secret typed for it (rule 14's
-    /// precedent — a typed secret, never a quiet road alone); with its passphrase, its words are new and the card offers them.
-    static let makeMineEmptySlotLead = "This copy becomes your library — a new library of its own, in Standard, with a "
-        + "fresh key. Type the copy's twelve words to keep them, or its passphrase; with the passphrase, your library gets "
-        + "new twelve words, offered once it opens. The copy itself is not changed."
-    /// The receipt after the landing (no library stepped aside — there was none).
-    static let makeMineEmptySlotReceipt = "This copy is your library now."
-    /// The copies list with no library open (the missing face's and rule 27's *Restore from Backup…* on the new road).
-    static let emptySlotRestoreListLead = "These are the copies of a library on this Mac. Look inside one to read it "
-        + "without changing anything, or make it your library."
-    static let noCopiesOnThisMac = "There are no copies of a library on this Mac."
+    /// precedent — a typed secret, never a quiet road alone). As built (`EmptySlotMakeMineProgram`): the copy's words typed
+    /// become the library's words (no passphrase rides — rule 3's reminder asks for one); its passphrase typed becomes the
+    /// library's passphrase beside twelve words made fresh, which the card above the quick entry offers. §7c (8)'s shape.
+    static let makeMineEmptySlotLead = "This copy becomes your library \u{2014} a new library, in Standard, with a fresh "
+        + "key of its own. Enter the copy's twelve words and they become your library's words, and you can set a "
+        + "passphrase after; or enter its passphrase and it becomes your library's, with new twelve words offered once the "
+        + "library opens. The copy itself is not changed."
+    /// The receipt after the landing: §7c (9)'s own first sentence — nothing stepped aside, so nothing more to say.
+    static let makeMineEmptySlotReceipt = "This is your library now."
+    /// The copies list with no library open (the missing face's and rule 27's *Restore from Backup…* on the new road):
+    /// `restoreListLead`'s own sentence without its step-aside clause (no library is open to step aside).
+    static let emptySlotRestoreListLead = "Look inside a copy to read it without changing anything, or make it your library."
+    /// Nothing in Variorum's own folders on this device (VX-210's line, beneath when copies stand elsewhere, says the rest).
+    static let noCopiesOnThisMac = "Variorum isn't keeping any copies on this \(ProtectionCopy.deviceName)."
 
-    // MARK: - VX-309 U1b — T-8, a plain-text copy brought in as a new library (PROVISIONAL P-VX309-U1b-3 — U2's words)
+    // MARK: - VX-309 U1b — T-8, a plain-text copy brought in as a new library (P-VX309-U1b-3's lines, re-drafted at VX-309
+    // U2's words pass in §7c's voice — PROVISIONAL P-VX309-U2-10)
 
-    /// The picked plain-text copy's door: what comes in, what does not (the ruling's one line — §5b-R item 8), and — with a
-    /// library open — that it steps aside.
+    /// The picked plain-text copy's door — §7c (8)'s shape: what it becomes; what comes in and what does not, in ONE line
+    /// (the ruling, §5b-R: content and its placement ride, configuration does not — and the document format carries no
+    /// commits or comments, versions never ride); with a library open, where that one goes (§7c (8)'s own clause).
     static func bringInLead(stepsALibraryAside: Bool) -> String {
-        "Bring this plain-text copy in as a new library? Its notes, books, chapters, snippets and tags come in, written "
-            + "fresh — a new library in Standard, with new twelve words offered once it opens. Commits, comments, book "
-            + "settings, stars and shelves don't come in."
-            + (stepsALibraryAside ? " Your current library steps aside whole into Previous Libraries." : "")
+        "This plain-text copy becomes a new library \u{2014} in Standard, with a fresh key of its own; its new twelve "
+            + "words are offered once it opens. Its notes and their takes, books, chapters, snippets and tags come in, "
+            + "written fresh; "
+            + "its commits, comments, note versions, book settings, stars and shelves don't."
+            + (stepsALibraryAside
+                ? " Your current library steps aside whole into Previous Libraries, where you can look inside it or make "
+                    + "it your library again."
+                : "")
             + " The copy itself is not changed."
     }
     static let bringInButton = "Bring it in"
     static let bringInWorking = "Bringing the copy in\u{2026}"
-    /// The export's schema is an earlier build's (this build reads its own only — PROVISIONAL P-VX309-U1b-7).
-    static let exportFromAnEarlierBuild = "This plain-text copy was made by an earlier Variorum, and this one can't bring "
-        + "it in."
-    /// A note the document format could not read back (never expected — the export's own projection), named.
+    /// The export's schema is an earlier build's (this build reads its own only — PROVISIONAL P-VX309-U1b-7) — said in the
+    /// newer build's refusal's own shape (`LibraryOpenCopy.newerSchemaRefusal`).
+    static let exportFromAnEarlierBuild = "This plain-text copy was written by an earlier Variorum than this one, which "
+        + "can't bring it in."
+    /// A note the document format could not read back (never expected — the export's own projection), named. It refuses
+    /// at the preflight, before anything moves.
     static func exportNoteUnreadable(_ title: String, line: Int?) -> String {
-        "The note \u{201C}\(title)\u{201D} couldn't be read from this copy" + (line.map { " (line \($0))" } ?? "") + "."
+        "The note \u{201C}\(title)\u{201D} couldn't be read from this copy" + (line.map { " (line \($0))" } ?? "")
+            + ", so nothing was brought in."
     }
-    /// What landed (the ruling's requirement: a partial landing is visible against it).
-    static func bringInReceipt(_ landing: PlaintextExportLanding, stoppedEarly: Bool) -> String {
+    /// What landed (the ruling's requirement: a partial landing is visible against it) — §7c (9)'s receipt in its own
+    /// shape: this is your library now, what it was made of, and — when one stepped aside — where the previous one is.
+    static func bringInReceipt(_ landing: PlaintextExportLanding, stoppedEarly: Bool, steppedAside: Bool) -> String {
         func count(_ n: Int, _ one: String, _ many: String) -> String { "\(n) \(n == 1 ? one : many)" }
         var parts = [count(landing.books, "book", "books"), count(landing.notes, "note", "notes"),
                      count(landing.snippets, "snippet group", "snippet groups")]
         if landing.wings > 0 { parts.append(count(landing.wings, "wing", "wings")) }
-        var text = "A new library holds the plain-text copy's writing: " + parts.joined(separator: " \u{00B7} ") + "."
+        var text = "This is your library now, made from the plain-text copy: " + parts.joined(separator: " \u{00B7} ") + "."
         if !landing.emptyBooks.isEmpty {
-            text += " Left out as empty: " + landing.emptyBooks.joined(separator: ", ") + "."
+            text += " Empty books were left out: " + landing.emptyBooks.joined(separator: ", ") + "."
         }
+        if steppedAside { text += " The previous one is in Previous Libraries." }
         if stoppedEarly {
             text += " It stopped part of the way \u{2014} the copy is unchanged and can be brought in again."
         }
         return text
     }
 
-    // MARK: - VX-309 U1c — VX-265's delete and VX-210's line (PROVISIONAL P-VX309-U1c-1 — U2's words pass)
+    // MARK: - VX-309 U1c — VX-265's delete and VX-210's line (P-VX309-U1c-1's lines, read at VX-309 U2's words pass:
+    // the door, title, button, working line and failure stand as drafted; the lead's opening, the receipt and VX-210's line
+    // re-drafted — PROVISIONAL P-VX309-U2-10)
 
     /// A row's door (the brief's *Delete…*): one other library's copies.
     static let deleteCopiesDoor = "Delete\u{2026}"
@@ -324,7 +342,7 @@ nonisolated enum ProtectionWords {
     /// that nothing else is touched.
     static func deleteCopiesLead(_ choice: CopyDeleteChoice, libraryOpen: Bool) -> String {
         let day = choice.newest.map { ProtectionWords.day($0) } ?? offerUnknownDay
-        var text = "This deletes the copies this Mac made of the library last copied \(day). "
+        var text = "This deletes this \(ProtectionCopy.deviceName)'s copies of the library last copied \(day). "
             + deleteCopiesCounts(choice) + " They can't be brought back."
         if let wayBack = deleteCopiesWayBack(choice.previousLibraries) { text += " " + wayBack }
         if choice.staying > 0 {
@@ -336,14 +354,14 @@ nonisolated enum ProtectionWords {
     }
     /// The receipt naming what went.
     static func deleteCopiesReceipt(_ count: Int) -> String {
-        count == 1 ? "Deleted 1 copy of another library from this Mac."
-            : "Deleted \(count) copies of another library from this Mac."
+        count == 1 ? "Deleted 1 copy of another library from this \(ProtectionCopy.deviceName)."
+            : "Deleted \(count) copies of another library from this \(ProtectionCopy.deviceName)."
     }
     static let deleteCopiesFailed = "Variorum couldn't delete those copies just now. Nothing more was deleted."
     /// VX-210 — her words: "if we have a line about 'this doesn't handle backups elsewhere', I don't think we need to do
     /// more." The listing's ONE honest line (rule 25's idiom), rendered only when such copies exist (P-2).
     static let copiesElsewhereLine = "Copies outside the folders Variorum keeps \u{2014} older backups, or a folder you "
-        + "made \u{2014} are left as they are: they're yours to manage in the Finder."
+        + "made \u{2014} are left as they are. They're yours to manage in the Finder."
 
     // MARK: - The lobby (rule 8: it asks only when no quiet road remains) — PROVISIONAL P-VX306-U1b-4
 
@@ -996,8 +1014,9 @@ nonisolated enum ProtectionWords {
             + "copies can be deleted, one library at a time. " + copiesElsewhereLine,
         "Your writing can always leave as plain text: File \u{25B8} Export Library\u{2026} writes every note as Markdown, "
             + "and Settings \u{25B8} Data Safety can write an unencrypted copy of the whole library. An unencrypted copy "
-            + "comes back in through File \u{25B8} Open Library\u{2026} as a new library \u{2014} its notes, books, "
-            + "chapters, snippets and tags written fresh; its book settings, stars and shelves stay behind.",
+            + "comes back in through File \u{25B8} Open Library\u{2026} as a new library \u{2014} its notes and their "
+            + "takes, books, chapters, snippets and tags written fresh; its commits, comments, note versions, book "
+            + "settings, stars and shelves stay behind.",
     ]
 
     /// The export lesson's two backup paragraphs on the new road (the seeder interpolates the pane's own names after the
