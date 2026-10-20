@@ -389,4 +389,28 @@ nonisolated enum ProtectionCrossings {
         ProtectionOpenRoad.log("road: this Mac's gate is \(gate.rawValue) now")
         return .changed
     }
+
+    /// VX-309 U1c — VX-451: THE IDLE DIAL — this Mac's sealed `idleLockMinutes` (nil = never) through the core's one road,
+    /// `changeSettings` (never UserDefaults — the design's §3.2/§3.15; F-U4-1's option (a), no core line). In Castle only:
+    /// Standard never locks (`RoadRelockPolicy` — rule 8), so the dial is not rendered there and its write refuses. The
+    /// relock monitors read the policy from the session's library at each tick, so the new minutes count at once.
+    static func changeIdleLock(_ session: ProtectionRoadSession, minutes: Int?) async -> GateChangeOutcome {
+        guard session.writes, session.library.record?.mode == .castle else { return .refused(ProtectionWords.gateRowFailed) }
+        guard session.beginAct() else { return .refused(ProtectionWords.copyDoorBusy) }
+        defer { session.endAct() }
+        var library = session.library
+        var settings = library.section.settings
+        guard settings.idleLockMinutes != minutes else { return .changed }
+        settings.idleLockMinutes = minutes
+        do {
+            _ = try await session.executor.changeSettings(&library, to: settings)
+        } catch {
+            session.library = library
+            ProtectionOpenRoad.log("road: the idle lock could not change — \(String(describing: error))")
+            return .refused(ProtectionWords.gateRowFailed)
+        }
+        session.library = library
+        ProtectionOpenRoad.log("road: this Mac locks after \(minutes.map { "\($0) minutes" } ?? "never") away now")
+        return .changed
+    }
 }

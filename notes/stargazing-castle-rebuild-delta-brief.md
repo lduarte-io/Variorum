@@ -104,7 +104,19 @@ two ways:
 - **Tier 3, what the operator sees.** The account's key record shows one of three states: a wrapped copy under the
   account's Apple key (Standard); none (Castle); or, while a device is moving the account out of Castle, an Apple key
   named with no copy yet. The operator still opens none of them.
+- **Deleting the account: what outlives it** *(added 2026-10-20 for VX-213, from the VX-191 audit's account-deletion
+  check, C3)*. Not a Castle change: it is true today and stays true, and the current brief's account-password section
+  says deleting the account deletes "the server copy, the account's key record and the login" without it. Deleting the
+  account deletes everything Variorum keeps for it on the server: the library's encrypted copy, the account's key
+  record, its sync bookkeeping, and the login itself. What it can't delete is the sign-in service's own log. Variorum's
+  sign-in runs on Supabase, which keeps an audit log of sign-in events, recording the account's email address and the
+  IP address each sign-in came from. Those entries stay after the account is deleted, kept under Supabase's retention,
+  not Variorum's. So the policy should say that deleting the account doesn't erase the sign-in service's records of past
+  sign-ins. (Checked in the repo: the deletion removes the login row and nothing touches that log. Not checked: the
+  log's exact contents and how long Supabase keeps it, which the audit left open as outside the repo. VX-329 confirms
+  both against Supabase's own documentation before the site gives a period.)
 - **Cautions, added.**
   - Don't say backups made in Standard stay openable through the Apple account after entering Castle. They don't,
     apart from the stated exceptions.
   - Don't say a library sent to another Mac shares its keys. It doesn't, apart from one sent before this change.
+  - Don't say deleting the account erases every record of it. The sign-in service's own log of past sign-ins stays.

@@ -471,6 +471,8 @@ struct CapabilityRegistryTests {
             // is the same class and is recorded as an unclosed gap rather
             // than swept in silently by this act.
             .union(DataSafetyPane.surfaceCapabilities)
+            // VX-309 U1c — VX-451: Lock Library Now's pane twin (the new road's Castle section).
+            .union(RoadCrossingsSection.surfaceCapabilities)
             // The post-13l polish round, batch 3 (A JUSTIFIED EDIT, the
             // E2/E8/batch-3/6b class — and the most consequential one of
             // them, because it changes WHERE A PURGE DOOR MAY LIVE):

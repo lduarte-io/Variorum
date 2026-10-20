@@ -89,6 +89,17 @@ nonisolated enum ProtectionWords {
     static let setPassphraseField = "Passphrase"
     static let setPassphraseAgain = "Again"
     static let setPassphraseButton = "Set passphrase"
+    /// VX-309 U2 — VX-211 (her kickoff ruling, "Floor + quiet hint"): the ONE calm line beside a new passphrase field — the
+    /// Domain estimator's advice (`PassphraseStrength`), never a block, never a meter, no colour; nothing at all for a long,
+    /// varied phrase or an empty field. The short line is the brief's own example, sentence-cased (PROVISIONAL P-VX309-U2-7).
+    static func passphraseHint(_ advice: PassphraseAdvice) -> String? {
+        switch advice {
+        case .none: return nil
+        case .short: return "Short passphrases are easier to guess \u{2014} a longer phrase is stronger."
+        case .repetitive:
+            return "Repeated characters are easy to guess \u{2014} a phrase of a few different words is stronger."
+        }
+    }
     static let passphraseSetReceipt = "Passphrase set. Your twelve words still open the library too."
 
     // MARK: - (8) Make this my library's confirm — §7c (8), verbatim (rule 17; VX-306 U3)
@@ -106,6 +117,26 @@ nonisolated enum ProtectionWords {
             ? makeMineLead
             : makeMineLead.replacingOccurrences(of: "twelve words and passphrase", with: "twelve words")
     }
+    /// VX-309 U2 — VX-264 ITEM 7 (her #216 VX-209 ruling, "A: concrete" — "why would we not make it concrete? why are we
+    /// telling the user to check? do we not know what happened?"): the lead COMPUTED per the open library's shape. The
+    /// posture the copy lands in, said concretely (rule 17: "in the posture you are in now"; §7c's draft is the Standard,
+    /// unsynced arm, byte for byte); in Castle, rule 17's own sentence, hers (`neverLeaveCastle`); synced, VX-209's synced
+    /// arm — the new library carries no sync identity (P-VX378-U2-4), so it doesn't sync until she turns sync on for it
+    /// (PROVISIONAL P-VX309-U2-5).
+    static func makeMineLead(posture: ProtectionMode, passphraseSet: Bool, synced: Bool) -> String {
+        var lead = makeMineLeadShown(passphraseSet: passphraseSet)
+        if posture == .castle {
+            lead = lead.replacingOccurrences(of: "a new library \u{2014} in Standard,", with: "a new library \u{2014} in Castle,")
+                + " " + neverLeaveCastle
+        }
+        if synced { lead += " " + makeMineSyncedLine }
+        return lead
+    }
+    /// RULE 17 — her sentence, verbatim (`notes/CastleRules.md`): Make this my library in Castle.
+    static let neverLeaveCastle = "You never leave Castle by opening something."
+    /// VX-209's synced arm (PROVISIONAL P-VX309-U2-5): the copy becomes a library of this Mac's until she turns sync on.
+    static let makeMineSyncedLine = "The new library doesn't sync with your account until you turn on sync for it in "
+        + "Settings \u{25B8} Protection."
     static let makeMineCopySecretField = "The copy's passphrase or twelve words"
     static let makeMineWordsField = "Your twelve words"
     static let makeMinePassphraseField = "Your passphrase"
@@ -134,6 +165,10 @@ nonisolated enum ProtectionWords {
     /// The second group: copies of other libraries on this Mac (rule 19: "Copies of other libraries are listed"), the
     /// library that stepped aside among them (§7c (8): "where you can look inside it or make it your library again").
     static let otherLibrariesHeading = "Other libraries on this Mac"
+    /// VX-309 U2 — VX-264 ITEM 5 in the listings: her "older libraries" words (#216), fitted to the rows' kind label
+    /// (*Previous library* — rule 17's Previous Libraries), said where one is listed (PROVISIONAL — the fitting).
+    static let olderLibrariesLine = "A previous library is an older library Variorum kept when you opened or restored a "
+        + "different one \u{2014} your way back to what you had before."
     /// A row's kind.
     static func copyKind(_ kind: CopyKind) -> String {
         switch kind {
@@ -190,6 +225,153 @@ nonisolated enum ProtectionWords {
     static let filingFailed = "Variorum couldn't keep a copy of what you picked. Nothing you picked was changed."
     /// The picked copy, filed: what it is.
     static func pickedCopyLine(_ day: String) -> String { "A copy from \(day)." }
+
+    // MARK: - VX-309 U1b — T-5, Make this my library into the empty slot (P-VX309-U1b-3's lines, re-drafted at VX-309 U2's
+    // words pass in §7c's voice — PROVISIONAL P-VX309-U2-10)
+
+    /// The confirm's lead with no library open: the copy becomes the library under the secret typed for it (rule 14's
+    /// precedent — a typed secret, never a quiet road alone). As built (`EmptySlotMakeMineProgram`): the copy's words typed
+    /// become the library's words (no passphrase rides — rule 3's reminder asks for one); its passphrase typed becomes the
+    /// library's passphrase beside twelve words made fresh, which the card above the quick entry offers. §7c (8)'s shape.
+    static let makeMineEmptySlotLead = "This copy becomes your library \u{2014} a new library, in Standard, with a fresh "
+        + "key of its own. Enter the copy's twelve words and they become your library's words, and you can set a "
+        + "passphrase after; or enter its passphrase and it becomes your library's, with new twelve words offered once the "
+        + "library opens. The copy itself is not changed."
+    /// The receipt after the landing: §7c (9)'s own first sentence — nothing stepped aside, so nothing more to say.
+    static let makeMineEmptySlotReceipt = "This is your library now."
+    /// The copies list with no library open (the missing face's and rule 27's *Restore from Backup…* on the new road):
+    /// `restoreListLead`'s own sentence without its step-aside clause (no library is open to step aside).
+    static let emptySlotRestoreListLead = "Look inside a copy to read it without changing anything, or make it your library."
+    /// Nothing in Variorum's own folders on this device (VX-210's line, beneath when copies stand elsewhere, says the rest).
+    static let noCopiesOnThisMac = "Variorum isn't keeping any copies on this \(ProtectionCopy.deviceName)."
+
+    // MARK: - VX-309 U1b — T-8, a plain-text copy brought in as a new library (P-VX309-U1b-3's lines, re-drafted at VX-309
+    // U2's words pass in §7c's voice — PROVISIONAL P-VX309-U2-10)
+
+    /// The picked plain-text copy's door — §7c (8)'s shape: what it becomes; what comes in and what does not, in ONE line
+    /// (the ruling, §5b-R: content and its placement ride, configuration does not — and the document format carries no
+    /// commits or comments, versions never ride); with a library open, where that one goes (§7c (8)'s own clause). VX-309
+    /// ladder round 1, F-R2: the line names gatherings (configuration — ruling item 6) and entry dates (the format carries
+    /// no date: a brought-in note is minted with none) among what doesn't come in.
+    static func bringInLead(stepsALibraryAside: Bool) -> String {
+        "This plain-text copy becomes a new library \u{2014} in Standard, with a fresh key of its own; its new twelve "
+            + "words are offered once it opens. Its notes and their takes, books, chapters, snippets and tags come in, "
+            + "written fresh; "
+            + "its gatherings, entry dates, commits, comments, note versions, book settings, stars and shelves don't."
+            + (stepsALibraryAside
+                ? " Your current library steps aside whole into Previous Libraries, where you can look inside it or make "
+                    + "it your library again."
+                : "")
+            + " The copy itself is not changed."
+    }
+    static let bringInButton = "Bring it in"
+    static let bringInWorking = "Bringing the copy in\u{2026}"
+    /// The export's schema is an earlier build's (this build reads its own only — PROVISIONAL P-VX309-U1b-7) — said in the
+    /// newer build's refusal's own shape (`LibraryOpenCopy.newerSchemaRefusal`).
+    static let exportFromAnEarlierBuild = "This plain-text copy was written by an earlier Variorum than this one, which "
+        + "can't bring it in."
+    /// A note the document format could not read back (never expected — the export's own projection), named. It refuses
+    /// at the preflight, before anything moves.
+    static func exportNoteUnreadable(_ title: String, line: Int?) -> String {
+        "The note \u{201C}\(title)\u{201D} couldn't be read from this copy" + (line.map { " (line \($0))" } ?? "")
+            + ", so nothing was brought in."
+    }
+    /// What landed (the ruling's requirement: a partial landing is visible against it) — §7c (9)'s receipt in its own
+    /// shape: this is your library now, what it was made of, and — when one stepped aside — where the previous one is.
+    static func bringInReceipt(_ landing: PlaintextExportLanding, stoppedEarly: Bool, steppedAside: Bool) -> String {
+        func count(_ n: Int, _ one: String, _ many: String) -> String { "\(n) \(n == 1 ? one : many)" }
+        var parts = [count(landing.books, "book", "books"), count(landing.notes, "note", "notes"),
+                     count(landing.snippets, "snippet group", "snippet groups")]
+        if landing.wings > 0 { parts.append(count(landing.wings, "wing", "wings")) }
+        var text = "This is your library now, made from the plain-text copy: " + parts.joined(separator: " \u{00B7} ") + "."
+        if !landing.emptyBooks.isEmpty {
+            text += " Empty books were left out: " + landing.emptyBooks.joined(separator: ", ") + "."
+        }
+        if steppedAside { text += " The previous one is in Previous Libraries." }
+        if stoppedEarly {
+            text += " It stopped part of the way \u{2014} the copy is unchanged and can be brought in again."
+        }
+        return text
+    }
+
+    // MARK: - VX-309 U1c — VX-265's delete and VX-210's line (P-VX309-U1c-1's lines, read at VX-309 U2's words pass:
+    // the door, title, button, working line and failure stand as drafted; the lead's opening, the receipt and VX-210's line
+    // re-drafted — PROVISIONAL P-VX309-U2-10)
+
+    /// A row's door (the brief's *Delete…*): one other library's copies.
+    static let deleteCopiesDoor = "Delete\u{2026}"
+    static let deleteCopiesTitle = "Delete this library's copies?"
+    static let deleteCopiesButton = "Delete copies"
+    static let deleteCopiesWorking = "Deleting the copies\u{2026}"
+    /// What goes, counted — VX-309 U2 — VX-264 ITEM 5: HER WORDS (QUESTIONS #216, VX-203's ruled wording, verbatim:
+    /// *"That's 27 backups, plus 2 older libraries Variorum kept when you opened or restored a different one."* — "set-aside"
+    /// leaves every user-facing sentence), fitted to ONE library's copies: the backups, the copies she picked and opened here
+    /// (the doors' filed copies), then her clause for the libraries that stepped aside (PROVISIONAL where fitting changed a
+    /// word — the singular, the opened copies' phrase).
+    static func deleteCopiesCounts(_ choice: CopyDeleteChoice) -> String {
+        func count(_ n: Int, _ one: String, _ many: String) -> String? {
+            n == 0 ? nil : "\(n) \(n == 1 ? one : many)"
+        }
+        let plain = [
+            count(choice.backups, "backup", "backups"),
+            count(choice.openedCopies, "copy you opened here", "copies you opened here"),
+        ].compactMap { $0 }
+        let older = count(
+            choice.previousLibraries, "older library Variorum kept when you opened or restored a different one",
+            "older libraries Variorum kept when you opened or restored a different one")
+        switch (plain.count, older) {
+        case (0, nil): return "That's nothing."
+        case (0, let older?): return "That's \(older)."
+        case (1, nil): return "That's \(plain[0])."
+        case (_, nil): return "That's " + plain.dropLast().joined(separator: ", ") + " and \(plain[plain.count - 1])."
+        case (_, let older?): return "That's " + plain.joined(separator: ", ") + ", plus \(older)."
+        }
+    }
+    /// HER WAY-BACK SENTENCE (#216, verbatim: *"Those older libraries are your way back to what you had before — delete
+    /// them only if you won't want them back."*), said where an older library is among what goes (the singular fitted —
+    /// PROVISIONAL).
+    static func deleteCopiesWayBack(_ olderLibraries: Int) -> String? {
+        switch olderLibraries {
+        case 0: return nil
+        case 1: return "That older library is your way back to what you had before \u{2014} delete it only if you won't "
+            + "want it back."
+        default: return "Those older libraries are your way back to what you had before \u{2014} delete them only if "
+            + "you won't want them back."
+        }
+    }
+    /// The confirm's lead (rule 19: one library's copies, never silently): the library named by its day as the listing
+    /// knows it, what goes counted in her words (item 5), her way-back sentence over an older library, what stays said, and
+    /// that nothing else is touched.
+    static func deleteCopiesLead(_ choice: CopyDeleteChoice, libraryOpen: Bool) -> String {
+        let day = choice.newest.map { ProtectionWords.day($0) } ?? offerUnknownDay
+        var text = "This deletes this \(ProtectionCopy.deviceName)'s copies of the library last copied \(day). "
+            + deleteCopiesCounts(choice) + " They can't be brought back."
+        if let wayBack = deleteCopiesWayBack(choice.previousLibraries) { text += " " + wayBack }
+        // VX-309 ladder round 1, F-R1 (PROVISIONAL P-VX309-R1-1): what stays may be a far copy outside any Mac's subfolder,
+        // whose maker is not knowable — the reviewer's "can't vouch for" clause keeps the sentence true of it.
+        if choice.staying > 0 {
+            let unvouched = "or that this \(ProtectionCopy.deviceName) can't vouch for"
+            text += choice.staying == 1
+                ? " One copy another Mac made, \(unvouched), stays."
+                : " \(choice.staying) copies another Mac made, \(unvouched), stay."
+        }
+        text += libraryOpen ? " Your library isn't touched." : ""
+        return text
+    }
+    /// The receipt naming what went.
+    static func deleteCopiesReceipt(_ count: Int) -> String {
+        count == 1 ? "Deleted 1 copy of another library from this \(ProtectionCopy.deviceName)."
+            : "Deleted \(count) copies of another library from this \(ProtectionCopy.deviceName)."
+    }
+    static let deleteCopiesFailed = "Variorum couldn't delete those copies just now. Nothing more was deleted."
+    /// VX-210 — her words: "if we have a line about 'this doesn't handle backups elsewhere', I don't think we need to do
+    /// more." The listing's ONE honest line (rule 25's idiom), rendered only when such copies exist (P-2). VX-309 ladder
+    /// round 1, F-R1 (PROVISIONAL P-VX309-R1-1): the line also counts another library's far copy no container twin
+    /// vouches for — which sits INSIDE a folder Variorum writes — so its second clause keeps the line true of it (and of a
+    /// far copy outside any Mac's subfolder, the count's older arm).
+    static let copiesElsewhereLine = "Copies outside the folders Variorum keeps \u{2014} older backups, or a folder you "
+        + "made \u{2014} are left as they are, and so are copies in your second folder that this "
+        + "\(ProtectionCopy.deviceName) can't vouch for as its own. They're yours to manage in the Finder."
 
     // MARK: - The lobby (rule 8: it asks only when no quiet road remains) — PROVISIONAL P-VX306-U1b-4
 
@@ -505,10 +687,16 @@ nonisolated enum ProtectionWords {
     static let thisMacOnlyDoor = "Use this \(ProtectionCopy.deviceName) only\u{2026}"
     static let accountSignOutDoor = "Sign out\u{2026}"
     static let accountSignInDoor = "Sign in\u{2026}"
-    /// VX-308 U2 — Move's one arm with no face yet: the signed-in account has NO vault (moving there would be a leave and
-    /// a set-up, two acts — the core's `move` joins an account that already syncs). The honest not-yet line (the
-    /// `plaintextCopyNotYet` precedent; PROVISIONAL P-VX308-U2-6).
-    static let moveNotYet = "Moving this library to that account isn't ready in this build yet."
+    /// VX-308 U2 — Move's one arm with no one-door face: the signed-in account has NO vault (moving there is a leave and a
+    /// set-up, two acts — the core's `move` joins an account that already syncs; the one-door compose is VX-455, post-release
+    /// at her word). VX-309 U2 — HER RULING (2026-10-19, "reword that line to name the road"): the line names the road, as
+    /// the faces stand — This Mac Only renders only while signed out (`assess` refuses it with another account signed in),
+    /// so the road is Sign out, Use this Mac only, sign back in to that account, Turn on sync (rule 16's leave, then rule
+    /// 7's hand-up: the library's pair becomes that account's). PROVISIONAL P-VX309-U2-4 (the brief's two presses fitted to
+    /// the sign-out the faces need).
+    static let moveNotYet = "To move this library to that account, sign out, choose Use this "
+        + "\(ProtectionCopy.deviceName) only, then sign back in to that account and turn on sync. This library's "
+        + "passphrase and twelve words become that account's."
 
     /// Turn on sync — the first device hands its pair up (rule 7); the account takes the library's posture.
     static let turnOnSyncTitle = "Turn on sync"
@@ -619,12 +807,18 @@ nonisolated enum ProtectionWords {
             return head + ". Your library uses your account's passphrase and twelve words now."
         }
     }
-    /// THE WORDS MOMENT when the PASSPHRASE was the secret typed (P-VX378-U2-3 (a) — "the face shows them when typed";
-    /// otherwise it says the account's words now open the library): the words were replaced, and nothing here can show
-    /// them. Her eye at the bundle — rule 7's "here they are" edge.
-    static let joinWordsNotShown = "Your library's twelve words are now your account's twelve words \u{2014} the ones you "
-        + "keep for your account. You joined with your passphrase, and Variorum never keeps the words, so they aren't shown "
-        + "here. The old ones still open backups you made before today."
+    /// THE WORDS MOMENT when the PASSPHRASE was the secret typed (P-VX378-U2-3 (a) — the words were replaced, and nothing
+    /// here can show them). VX-309 U2 — HER REFINED DRAFT (the VX-308 handoff sitting, QUESTIONS #236), verbatim-faithful:
+    /// the library ADOPTS the account's words, the account NAMED BY ITS EMAIL. The middle clause keeps its SENTENCE and
+    /// drops only its conditional lead-in ("If this is your first time signing in, …") — her note's own reading (the
+    /// F-U2-1 arbitration): with VX-456 the moment fires only on a real replacement, so the previous-words fact "applies
+    /// unconditionally" — it is said plainly, un-hedged, exactly when it is true. PROVISIONAL (her bundle carries both
+    /// texts beside her note). `email`: the account signed in at the join (nil, not known — "your account's", P-VX309-U2-2).
+    static func joinWordsNotShown(_ email: String?) -> String {
+        "Your twelve words are \(email.map { "\($0)'s" } ?? "your account's") twelve words. Your previous twelve words "
+            + "still open backups you made before today. If you don't have your account's words written down, you can "
+            + "make new ones at any time."
+    }
     static let joinWordsMomentOK = "OK"
 
     /// MOVE — leave the account the library syncs with (rule 16: no key or secret changes for that) and join the one
@@ -678,6 +872,9 @@ nonisolated enum ProtectionWords {
             return "Your account's keys changed on another device, and this \(ProtectionCopy.deviceName) caught up."
         }
     }
+    /// VX-309 U2 — VX-457 (her "I agree with B"): the Done above stands in the account section as a durable notice until
+    /// this one button (the export notice's idiom — `exportNoticeOK`).
+    static let followDoneOK = "OK"
 
     // MARK: - VX-308 U3 — THE KEY DOORS, VX-447, F-U2-3 (rules 2, 3, 6, 7, 27; the plan's §5c)
     //
@@ -687,8 +884,13 @@ nonisolated enum ProtectionWords {
     // restated (the prefix of `noKeyFileAfterAQuietOpen`, pinned). Every other line here is PROVISIONAL P-VX308-U3-2 —
     // drafted from the rules' own words, sentence case, hers at the bundle.
 
-    /// VX-263's one line — every key door says it (rule 6: "the doors say so in one sentence").
-    static let keyDoorsLine = "Your current secrets open everything you've made of this library."
+    /// VX-263's one line — every key door says it (rule 6: "the doors say so in one sentence"). VX-309 U2: the route
+    /// finder's ONE sentence as `notes/CastleRules.md` rewords it (the considered-and-not-pursued ledger — *your current
+    /// passphrase or words; on this Mac, its quiet road if it still holds that key*), fitted to a sentence the key doors and
+    /// the words section say (PROVISIONAL P-VX309-U2-6); it supersedes the VX-308 plan's draft (*your current secrets open
+    /// everything you've made of this library*).
+    static let keyDoorsLine = "Every copy of this library opens with your current passphrase or words; on this "
+        + "\(ProtectionCopy.deviceName), its quiet road opens it too, if it still holds that copy's key."
     /// Synced, the key doors change the account's lock with the library's (rule 7: "the key doors change the library's
     /// and the account's locks together") — the face says so; the act does it.
     static let keyDoorsSyncedPassphraseLine = "This library syncs with your account, so your account's passphrase changes "
@@ -758,6 +960,100 @@ nonisolated enum ProtectionWords {
         "Sync is waiting since the restore \u{2014} press Resume Sync in the main window's banner, then choose "
             + "\(doorTitle) again."
     }
+
+    // MARK: - VX-309 U2 — THE FIELD GUIDE'S PROTECTION CHAPTER ON THE NEW ROAD (VX-379's acceptance; #235: "written here")
+    //
+    // Seeded ONLY where the store opens on the new road (`TutorialSeeder.seed(… onTheNewRoad:)` — the readme's own gate,
+    // VX-306 ladder r2 m2); today's road, Release included, seeds copy §7's chapter until the switch (VX-329). Lesson 1 LEADS
+    // with the readme's four Start Here passages, verbatim (`ReadmeSeeder.startHerePassages` — one text, two homes; the
+    // seeder prepends them). Every paragraph here is drafted from `notes/CastleRules.md` and the lifecycle page as built —
+    // her sentences verbatim where they exist (rule 9's promise, rule 12's leave sentence, rule 17's), PROVISIONAL
+    // P-VX309-U2-8 the rest. The truth-check and the real store's re-seed ride VX-329's release.
+
+    /// Lesson 1 (after the Start Here passages): what sync seals and what it can't (VX-204's approved sentences — the
+    /// seeder adds `ProtectionCopy.privacyServerSeesShapeSentence` and `keystoneAccountPassword`, her approved words), and
+    /// what an open library is.
+    static let guideKeyLessonTitle = "Your key and your twelve words"
+    static let guideSyncSentence = "Sync is end-to-end encrypted: your writing and everything you name \u{2014} titles, "
+        + "tags, books \u{2014} are encrypted on your device before they leave, and the Variorum server can never read them."
+    static let guideOpenMeansReadable = "And one thing no setting changes: while Variorum is open, everything in it is "
+        + "readable \u{2014} that is what open means. In Castle, locking it \u{2014} Lock Library Now, or time away "
+        + "\u{2014} is how you end that."
+
+    /// Lesson 2 — one posture at a time (rules 8–13).
+    static let guidePosturesLessonTitle = "Standard and Castle"
+    static let guidePosturesLesson: [String] = [
+        "Your library is in one of two postures, and only one at a time. Standard is the convenience: besides your "
+            + "passphrase and your twelve words, Variorum keeps quiet roads to your key \u{2014} through your iCloud "
+            + "Keychain and this \(ProtectionCopy.deviceName)'s login \u{2014} so most days you type nothing. If one stops "
+            + "working, the next open uses whichever still works and quietly makes a fresh one; it asks for your passphrase "
+            + "or words only when none is left.",
+        castlePromise + " \(ProtectionCopy.biometryName) on this \(ProtectionCopy.deviceName) is optional; with Always "
+            + "ask, no copy of the key stays here and you type every time.",
+        "Entering Castle asks for your passphrase and your twelve words, gives your library a new key, and deletes its "
+            + "Apple and on-device keychain items \u{2014} so your backups come into Castle with it. Leaving asks for both "
+            + "again and hands everything back to Standard, and the leave screen says it plainly: " + leaveSentence,
+        "With sync on, Castle is your whole account's: when one device enters, each of your other devices follows by "
+            + "typing your passphrase or your twelve words once.",
+        "What you must keep: your twelve words and your passphrase. Either one opens your library and every backup of "
+            + "it, and either one can reset the other. In Standard the quiet roads mean you rarely type them \u{2014} keep "
+            + "them anyway; in Castle they, and \(ProtectionCopy.biometryName) on this \(ProtectionCopy.deviceName) if you "
+            + "chose it, are the only way in. A library whose every key file and every backup are gone is gone; a synced "
+            + "library comes back from your account with your twelve words.",
+        "Wherever you set a passphrase, it must be at least \(ProtectionCopy.passphraseFloor) characters \u{2014} it is "
+            + "the one secret a stolen copy of the server could be guessed against \u{2014} and a quiet line beside the "
+            + "field says when a longer phrase would be stronger. A passphrase you already have keeps working whatever its "
+            + "length.",
+    ]
+
+    /// Lesson 3 — the copies as this phase built them (rules 5, 17–19; VX-309 U1a–U1c).
+    static let guideCopiesLessonTitle = "Copies, backups and your way back"
+    static let guideCopiesLesson: [String] = [
+        "A backup is your library plus its key file \u{2014} a pair, written together and never rewritten. Once a day "
+            + "while Variorum is open, a pair lands beside your library; if you picked a second folder in Settings "
+            + "\u{25B8} Data Safety, a pair lands there too, once a day. Each place keeps this \(ProtectionCopy.deviceName)'s "
+            + "pairs of this library: beside it, the newest 14; in your folder, the 14 most recent days that have one, "
+            + "plus one from each of the 4 weeks before those.",
+        dataSafetyWhatOpensABackup,
+        "Settings \u{25B8} Data Safety \u{25B8} Restore from Backup lists the copies on this "
+            + "\(ProtectionCopy.deviceName). Look inside opens one read-only: nothing is written, and closing it forgets "
+            + "it. Make this my library turns a copy into a new library, with a fresh key of its own, in the posture "
+            + "you're in now and under your current passphrase and twelve words \u{2014} and your current library steps "
+            + "aside whole into Previous Libraries, where you can look inside it or bring it back the same way. "
+            + neverLeaveCastle + " A library made this way doesn't sync until you turn on sync for it.",
+        "Copies of other libraries on this \(ProtectionCopy.deviceName) are listed too \u{2014} an older library Variorum "
+            + "kept when you opened or restored a different one, or a copy you opened here \u{2014} and each library's "
+            + "copies can be deleted, one library at a time. " + copiesElsewhereLine,
+        "Your writing can always leave as plain text: File \u{25B8} Export Library\u{2026} writes every note as Markdown, "
+            + "and Settings \u{25B8} Data Safety can write an unencrypted copy of the whole library. An unencrypted copy "
+            + "comes back in through File \u{25B8} Open Library\u{2026} as a new library \u{2014} its notes and their "
+            + "takes, books, chapters, snippets and tags written fresh; its gatherings, entry dates, commits, comments, "
+            + "note versions, book settings, stars and shelves stay behind.",
+    ]
+
+    /// The export lesson's two backup paragraphs on the new road (the seeder interpolates the pane's own names after the
+    /// second's lead, exactly as today's do): a backup is a PAIR, and the second folder takes one a day (P-VX309-U1a-2).
+    static let guideBackupsHappen = "Backups happen on their own. Once a day while Variorum is open, it writes a pair "
+        + "\u{2014} your library and its key file \u{2014} into a backups folder right beside the library, on this "
+        + "\(ProtectionCopy.deviceName). No button, nothing to remember. Those copies survive a mistake; they don\u{2019}t "
+        + "survive losing the \(ProtectionCopy.deviceName)."
+    static let guideSecondFolderLead = "So you can add a second folder of your own choosing (iCloud Drive, an external "
+        + "drive, any folder your cloud service syncs) and a pair lands there too, once a day:"
+
+    // MARK: - VX-309 U2 — DATA SAFETY ON THE NEW ROAD (F-U2c-4; F-U1a-3) — PROVISIONAL P-VX309-U2-9
+
+    /// F-U2c-4 — RULE 5's sentence for the pane (the copies section; today's road keeps its posture lines): what opens a
+    /// backup, with VX-263's quiet-road clause.
+    static let dataSafetyWhatOpensABackup = "A backup is your library plus its key file. It opens with the passphrase and "
+        + "twelve words you had when you made it, with your current ones too, or \u{2014} on this "
+        + "\(ProtectionCopy.deviceName) \u{2014} by its quiet road while it still holds that backup's key."
+    /// F-U1a-3 — what the counts are on the new road (VX-397: this Mac's pairs of this library).
+    static let dataSafetyTheCountsAreThisMacs = "The counts are this \(ProtectionCopy.deviceName)'s copies of this "
+        + "library, each a pair: the library and its key file."
+    /// F-U1a-3 — the picked folder's caption on the new road (P-VX309-U1a-2: one pair a day there).
+    static let dataSafetySecondFolderKept = "Kept there: the 14 most recent days that have a copy, plus one copy from "
+        + "each of the 4 weeks before those. One copy a day goes there \u{2014} a second Back Up Now on the same day adds "
+        + "one beside your library only."
 
     // MARK: - The route's failures (the failure face, with Try Again)
 

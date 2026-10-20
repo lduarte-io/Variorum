@@ -17,7 +17,10 @@ import VariorumCore
 
 @MainActor
 final class PlantedRoad {
-    let slot = TempSlot()
+    let slot: TempSlot
+    /// VX-309 U1a: a road whose slot has a picked far folder (`TempSlot(withFarFolder:)`); every earlier suite: none.
+    init(farFolder: Bool = false) { slot = TempSlot(withFarFolder: farFolder) }
+
     let custody = PlantedCustodyLeaf()
     let memory = PlantedMemoryLeaf()
     let apple = InMemoryAppleKeysLeaf()

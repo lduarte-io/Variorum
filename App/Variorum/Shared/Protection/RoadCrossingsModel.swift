@@ -60,6 +60,11 @@ struct RoadCrossingRoads {
     /// VX-308 U1 — the signed-out road's *Continue*: This Mac Only (rule 16's local leave), re-read at the press. nil: it
     /// landed; else its refusal. (A test's roads that never reach the signed-out road keep this default refusal.)
     var leaveForThisMacOnly: @MainActor () async -> String? = { ProtectionWords.crossingFailed }
+    /// VX-309 U1c — VX-451: the idle dial — THIS MAC'S sealed `idleLockMinutes` through the core's `changeSettings` (nil =
+    /// never). (A test's roads that never reach the dial keep this default refusal.)
+    var changeIdleLock: @MainActor (Int?) async -> GateChangeOutcome = { _ in .refused(ProtectionWords.gateRowFailed) }
+    /// VX-309 U1c — VX-451: *Lock Library Now* (the File menu's ⌃⌘L twin — one capability): the bootstrap's lock.
+    var lockNow: @MainActor () async -> Void = {}
 }
 
 // MARK: - One door's confirm
@@ -129,6 +134,11 @@ final class RoadCrossingConfirmModel: Identifiable {
             }
             typedWords = words
         }
+        // VX-309 U2 — VX-211: a passphrase being SET meets the floor first (today's order: the floor, then the match).
+        if door.ask.asksPassphrase, door.newPassphrase, let floor = NewPassphraseRule.floorRefusal(passphrase) {
+            refusal = floor
+            return
+        }
         if door.ask.asksPassphrase, door.newPassphrase, passphrase != again {
             refusal = ProtectionWords.setPassphraseMismatch
             return
@@ -185,6 +195,9 @@ final class RoadCrossingsModel {
     private(set) var gateAsksPassphrase = false
     private(set) var gateBusy = false
     private(set) var gateRefusal: String?
+    /// VX-309 U1c — VX-451: the idle dial's press running, or why it did nothing.
+    private(set) var idleBusy = false
+    private(set) var idleRefusal: String?
 
     @ObservationIgnored let roads: RoadCrossingRoads
     /// VX-308 U1 — the one presenter the confirm is presented through (the bootstrap's; a pin's own when none is given).
@@ -329,6 +342,30 @@ final class RoadCrossingsModel {
     func useTouchID(passphrase: String) async {
         guard gateAsksPassphrase, !gateBusy, !passphrase.isEmpty else { return }
         await changeGate(.touchID, passphrase: passphrase)
+    }
+
+    // MARK: - VX-309 U1c — VX-451: the idle dial and Lock Now (Castle only — where the gate-style row stands)
+
+    /// The dial: this Mac's sealed minutes (nil = never) — a write through `changeSettings`, then the doors re-read (the row
+    /// says the value now sealed). Weakening is hers to choose here (the design's §3.2: a device setting, sealed — never
+    /// asked twice).
+    func setIdleMinutes(_ minutes: Int?) async {
+        guard !idleBusy, faces?.gateRow != nil, faces?.gateRow?.idleMinutes != minutes else { return }
+        idleBusy = true
+        idleRefusal = nil
+        let outcome = await roads.changeIdleLock(minutes)
+        idleBusy = false
+        switch outcome {
+        case .changed: await refresh()
+        case .refused(let sentence): idleRefusal = sentence
+        }
+    }
+
+    /// *Lock Library Now* — the one lock (the bootstrap's; it lands in the open road's own lobby, the Settings window
+    /// closing as the library closes — VX-224).
+    func lockNow() async {
+        guard faces?.gateRow != nil else { return }
+        await roads.lockNow()
     }
 
     private func changeGate(_ gate: GateStyle, passphrase: String?) async {

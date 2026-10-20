@@ -22,6 +22,9 @@ struct LibraryMissingView: View {
     /// Library…", shipped unrendered since 1a): nil hosts (pins, a
     /// preview) simply don't render it (P-2).
     var openDoor: (() -> Void)? = nil
+    /// VX-309 U1b — on the new road, *Restore from a Backup…* opens this Mac's catalogued copies with their doors (rule 17:
+    /// "The app's Restore from Backup is this door"); nil (today's road) keeps the Finder reveal.
+    var restoreDoor: (() -> Void)? = nil
     @Environment(\.colorScheme) private var scheme
 
     /// No session exists yet, so the face speaks the leading voice.
@@ -55,7 +58,11 @@ struct LibraryMissingView: View {
                 .lineLimit(4)
                 .fixedSize(horizontal: false, vertical: true)
 
-            if let folder = lobby.backupsFolderURL {
+            if let restoreDoor, lobby.copiesHomeExists {
+                Button(ProtectionCopy.libraryMissingRestoreDoor) { restoreDoor() }
+                    .buttonStyle(CalmButtonStyle(tokens: tokens))
+                    .disabled(lobby.busy)
+            } else if restoreDoor == nil, let folder = lobby.backupsFolderURL {
                 Button(ProtectionCopy.libraryMissingRestoreDoor) {
                     NSWorkspace.shared.activateFileViewerSelecting([folder])
                 }

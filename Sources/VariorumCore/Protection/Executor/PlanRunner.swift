@@ -381,7 +381,20 @@ extension ProtectionExecutor {
         // with copies on, and one that then waited left them on (her ruling:
         // while it waits, copies stay paused — VX-305 U4).
         if let to = plan.toFingerprint, library.fingerprint != to { leaves.backups.pauseCopies() }
-        let secrets = try derive(typed, under: plan.parameters?.passphraseKDF, newPassphrase: plan.parameters?.passphraseIsNew == true)
+        var secrets = try derive(typed, under: plan.parameters?.passphraseKDF, newPassphrase: plan.parameters?.passphraseIsNew == true)
+        // VX-309 U1b — F-U1a-1: a Change or Reset resumed with the passphrase it is REPLACING (it opens the outgoing lock,
+        // none under the plan's descriptor) holds no secret of its own — dropped here, where the typed text is in hand, so
+        // the act rolls back before any write (`KeyDoorProgram.resumeCannotFinish`) instead of re-locking under it or
+        // failing the checks below out of the settle.
+        if plan.parameters?.passphraseIsNew == true, secrets.passphrase != nil,
+           let text = typed.newPassphrase ?? typed.passphrase,
+           KeyDoorProgram.typedPassphraseOpensOnlyTheReplacedLock(
+               text, act: plan.act, planKDF: plan.parameters?.passphraseKDF,
+               files: [library.keyFile, library.memory?.keyFileMirror].compactMap { $0 }, floor: configuration.floor) {
+            secrets.passphrase = nil
+            log("\(plan.act.rawValue): resume — the passphrase typed opens only the lock this act replaces; "
+                + "not the act's secret (rolls back, nothing written)")
+        }
         // The passphrase typed at a resume must be the press's: every lock
         // under the plan's descriptor that this Mac holds opens with it. One
         // descriptor names one passphrase (the route finder's `.current` rests

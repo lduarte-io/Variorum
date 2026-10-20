@@ -18,7 +18,8 @@ import Foundation
 import VariorumCore
 
 // VX-308 U3: the pair itself — `PairOutcome` and `takePair` — lives in `ProtectionBackupPair.swift` (moved verbatim, its
-// one home now harness-visible); this file keeps the hook's attachment to the app's `StoreBackup`.
+// one home now harness-visible); this file keeps the hook's attachment to the app's `StoreBackup`. (VX-309 U1a: that road
+// now also lands the pair in the picked folder when it is due there, and prunes this Mac's pairs of this library after.)
 extension ProtectionBackupHook {
     /// Attach the pair to `backup`'s runs — the new road's session only (nil / read-only ⇒ nothing attached).
     @MainActor

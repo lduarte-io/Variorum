@@ -160,6 +160,26 @@ struct ProtectionJoinFollowRoadTests {
         #expect((try? live.open(.words(world.words), floor: .relaxedForTests)) == nil)
     }
 
+    /// VX-309 U2 — VX-456 OVER THE PLANTED ROAD (red on old): joined by the passphrase, Stop syncing here (rule 16 — no key,
+    /// lock or secret changes), then signing back in is a join by the passphrase again — the library's words already ARE the
+    /// account's (no own words lock; its master's copy is the vault's recovery wrap), so no moment is owed. And the join's
+    /// door carries the account's email for her draft's sentence.
+    @Test func vx456_aRejoinWhoseWordsAreAlreadyTheAccountsOwesNoMoment() async throws {
+        let world = try await world(account: .standard)
+        let door = try await shown(world, .turnOnSync)
+        #expect(door.accountEmail == PlantedAccount.email, "her draft names the account by its email")
+        let first = try await press(world, .turnOnSync, typed: TypedSecrets(passphrase: Account.passphrase))
+        #expect(first.press == .made(receipt: ProtectionWords.joinedReceipt(.sameMode, moved: false), wordsReplaced: true),
+                "the library's own words were replaced — said")
+        let left = try await press(world, .stopSyncingHere, typed: .none)
+        #expect(left.press == .made(receipt: ProtectionWords.stopSyncingReceipt, wordsReplaced: false))
+        #expect(world.session.library.record?.account == nil)
+        let again = try await press(world, .turnOnSync, typed: TypedSecrets(passphrase: Account.passphrase))
+        #expect(again.press == .made(receipt: ProtectionWords.joinedReceipt(.sameMode, moved: false), wordsReplaced: false),
+                "the words were the account's already — no moment")
+        #expect(world.session.library.record?.account == Account.account)
+    }
+
     /// A wrong secret is refused in the act's own words, nothing written (the same posture, the open session).
     @Test func aWrongSecretWritesNothing() async throws {
         let world = try await world(account: .standard)
@@ -359,7 +379,25 @@ struct ProtectionJoinFollowRoadTests {
         #expect(second.library.section.actInFlight == nil)
         #expect(second.library.record?.mode == (kind == .intoCastle ? .castle : .standard))
         #expect(second.report.settledFollow == kind)
-        #expect(second.takeReceipts() == [ProtectionWords.followDone(kind)], "said once, with its other-device sentence")
+        // VX-309 U2 — VX-457, FLIPPED DELIBERATELY: the Done is no one-shot receipt any more (`receipt_style` off hid it, a
+        // quit lost it) — the open whose settle finished the follow MARKS it, by library, as the account section's durable
+        // notice: standing at a later open (a fresh faces build), cleared only by its OK.
+        #expect(!second.takeReceipts().contains(ProtectionWords.followDone(kind)), "no receipt")
+        let defaults = try FollowDoneNoticeTests.scratch("vx107-\(kind)")
+        let ledger = PassphraseReminderLedger(defaults: defaults)
+        let libraryID = try #require(second.library.record?.libraryID)
+        _ = RoadStandingModel.make(second, ledger: ledger)
+        #expect(FollowDoneMark.owed(libraryID, in: defaults) == kind, "marked by the open that settled it")
+        guard case .opened(let third) = await ProtectionOpenRoad.route(world.road.context(), keyInHand: second.key) else {
+            Issue.record("the third relaunch opens")
+            return
+        }
+        #expect(third.report.settledFollow == nil)
+        _ = RoadStandingModel.make(third, ledger: ledger)
+        #expect(FollowDoneMark.owed(libraryID, in: defaults) == kind, "still standing at a later open — never re-said, never lost")
+        FollowDoneMark.set(libraryID, nil, in: defaults)  // her OK (the section's road)
+        _ = RoadStandingModel.make(third, ledger: ledger)
+        #expect(FollowDoneMark.owed(libraryID, in: defaults) == nil, "OK clears it for good")
     }
 
     /// The durable reading itself (pure): a settle that finished a follow names its kind from the act in flight's

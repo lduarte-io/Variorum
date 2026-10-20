@@ -164,7 +164,44 @@ nonisolated enum SettingsCatalog {
     /// result that names a row the pane does not show is the same defect
     /// class as her item 7 one menu over — a face and its description
     /// drifting because nothing tied them together.
-    static let rows: [SettingsRow] = [
+    ///
+    /// VX-309 U2 — VX-453: the BUILD's catalog. On the new road (a Debug
+    /// build — `ProtectionRoad.newRoadIsLive`) the account section's row
+    /// joins beside the Protection pane's; Release — today's road — keeps
+    /// `everyRoadsRows` byte for byte.
+    static let rows: [SettingsRow] = rows(newRoad: ProtectionRoad.newRoadIsLive)
+
+    /// The catalog for a road: the rows every road renders, plus — on the
+    /// new road — the account section's (after the Protection pane's own
+    /// row, so it reads beside it).
+    static func rows(newRoad: Bool) -> [SettingsRow] {
+        guard newRoad, let protection = everyRoadsRows.firstIndex(where: { $0.id == "protection" }) else {
+            return everyRoadsRows
+        }
+        var rows = everyRoadsRows
+        rows.insert(accountRow, at: protection + 1)
+        return rows
+    }
+
+    /// **VX-309 U2 — RIDER VX-453 — the new road's Settings ▸ Protection ▸
+    /// Sync section** (`RoadAccountSection`: the library's sync situation,
+    /// who's signed in, and its doors — turn on sync, sign in or out, stop
+    /// syncing here, use this Mac only, move or follow). Its title IS the
+    /// section's (`ProtectionWords.accountSectionTitle` — one text, the
+    /// face's and the search's); "account" — the word the search answered
+    /// nothing to — leads its keywords. The blurb and the keywords are
+    /// PROVISIONAL P-VX309-U2-11.
+    static let accountRow = SettingsRow(
+        id: "account", pane: .protection, title: ProtectionWords.accountSectionTitle,
+        blurb: "Whether this library syncs with your account and who's signed in \u{2014} with "
+            + "the doors to turn on sync, sign in or out, stop syncing here, or use this "
+            + "library on this \(ProtectionCopy.deviceName) only.",
+        keywords: ["account", "sign in", "sign out", "signed in", "log in", "login", "log out",
+                   "email", "turn on sync", "stop syncing", "other device", "iphone", "follow",
+                   "move", "server", "cloud"])
+
+    /// The rows every road renders.
+    static let everyRoadsRows: [SettingsRow] = [
         // MARK: General
         SettingsRow(
             // Her ruling 2026-10-13: "Design voice" reads "Theme". The old
@@ -467,8 +504,12 @@ nonisolated enum SettingsSearch {
 
     /// The settings half of the index — pure, so a pin can build it without
     /// the helper's `@MainActor` lists.
-    static var settingsEntries: [Entry] {
-        SettingsCatalog.rows.map { row in
+    static var settingsEntries: [Entry] { settingsEntries(newRoad: ProtectionRoad.newRoadIsLive) }
+
+    /// VX-309 U2 — VX-453: the settings half for a road (the account
+    /// section's row only where the section renders).
+    static func settingsEntries(newRoad: Bool) -> [Entry] {
+        SettingsCatalog.rows(newRoad: newRoad).map { row in
             Entry(
                 finding: SettingsFinding(
                     kind: .setting, pane: row.pane, lead: row.title, detail: row.blurb),
@@ -492,8 +533,13 @@ extension SettingsSearch {
     /// setting, so a catalog-only search could never answer it. It is a
     /// chord (⌥⌘C) and a word (the dictionary's entry naming Block ▸
     /// Callout), and both are here.
-    @MainActor static var wholeIndex: [Entry] {
-        settingsEntries + shortcutEntries + dictionaryEntries
+    @MainActor static var wholeIndex: [Entry] { wholeIndex(newRoad: ProtectionRoad.newRoadIsLive) }
+
+    /// VX-309 U2 — VX-453: the whole index for the road the window is on —
+    /// the results pane asks with the account section's presence, so a
+    /// search never names the section where the pane does not render it.
+    @MainActor static func wholeIndex(newRoad: Bool) -> [Entry] {
+        settingsEntries(newRoad: newRoad) + shortcutEntries + dictionaryEntries
     }
 
     @MainActor static var shortcutEntries: [Entry] {

@@ -134,6 +134,9 @@ nonisolated struct RoadAccountDoorOpen: Equatable, Sendable {
     var label: String? = nil
     /// VX-308 U2 — rule 25's copies under a key this Mac can't delete, named (a join into Castle — Use Castle's line).
     var undeletableCopies: [String] = []
+    /// VX-309 U2 — the account a join or Move adopts, by its email as the sign-in names it (her draft names it in the
+    /// words moment); nil: not known, or not a join.
+    var accountEmail: String? = nil
 
     /// The door's name as rendered.
     var doorLabel: String { label ?? door.doorLabel }
@@ -282,7 +285,9 @@ nonisolated struct RoadAccountFaces: Equatable, Sendable {
                         spec: spec))
                 } else {
                     // VX-308 U2 — the account already has its vault: THE JOIN (enter / leave Castle, or the same posture).
-                    turnOnSync = .open(joinDoor(.turnOnSync, spec, library: mode, gate: gateChoice, copyName: copyName))
+                    var join = joinDoor(.turnOnSync, spec, library: mode, gate: gateChoice, copyName: copyName)
+                    join.accountEmail = email
+                    turnOnSync = .open(join)
                 }
             }
         case .inSync:
@@ -308,6 +313,7 @@ nonisolated struct RoadAccountFaces: Equatable, Sendable {
                 case .read(exists: true):
                     var open = joinDoor(.moveToSignedInAccount, spec, library: mode, gate: gateChoice, copyName: copyName)
                     open.label = ProtectionWords.moveDoor(email)
+                    open.accountEmail = email
                     move = .open(open)
                 case .unreachable:
                     move = .refused(ProtectionWords.doorRefusedNeedsVault)

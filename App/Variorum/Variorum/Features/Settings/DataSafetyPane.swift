@@ -82,7 +82,9 @@ struct DataSafetyPane: View {
             database: services?.session.database,
             // A closure rather than a captured value: the pane can outlive a
             // sign-in, and the facts are re-read on every refresh.
-            signedIn: { services?.account.variorum != nil }))
+            signedIn: { services?.account.variorum != nil },
+            // VX-309 U1a (VX-397): the new road counts this Mac's pairs of this library per place; nil on today's road.
+            roadCounts: roadStanding?.copyCounts))
     }
 
     var body: some View {
@@ -91,7 +93,9 @@ struct DataSafetyPane: View {
                 copiesSection
                 if let roadDoors {
                     if let roadList {
-                        RoadRestoreRows(list: roadList, lookInside: roadDoors.lookInside, makeMine: roadDoors.makeMine)
+                        RoadRestoreRows(
+                            list: roadList, lookInside: roadDoors.lookInside, makeMine: roadDoors.makeMine,
+                            deleteCopies: roadDoors.deleteCopies)
                     }
                 } else {
                     restoreFromBackupSection
@@ -154,6 +158,18 @@ struct DataSafetyPane: View {
             // be told its backups open through its Apple account — rule 11).
             if let protection, roadStanding == nil {
                 BackupsPostureLines(posture: protection.posture)
+            }
+            // VX-309 U2 (F-U2c-4, F-U1a-3 — PROVISIONAL P-VX309-U2-9): the new road's truths — what the counts are (this
+            // Mac's pairs of this library — VX-397) and what opens a backup (rule 5's sentence). Today's road is unchanged.
+            if roadStanding != nil {
+                Text(ProtectionWords.dataSafetyTheCountsAreThisMacs)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(ProtectionWords.dataSafetyWhatOpensABackup)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             if let note = model.note {
                 Text(note).font(.caption).foregroundStyle(.secondary)
@@ -248,7 +264,11 @@ struct DataSafetyPane: View {
                     .foregroundStyle(.orange)
             case .set(let displayPath, let summary):
                 folderRow(title: displayPath, path: summary.displayPath, summary: summary)
-                Text("Kept there: the 14 most recent days that have a copy, plus one "
+                // VX-309 U2 (F-U1a-3): on the new road, one pair a day goes there (P-VX309-U1a-2) — said beside the
+                // retention line; today's road keeps its own caption byte for byte.
+                Text(roadStanding != nil
+                     ? ProtectionWords.dataSafetySecondFolderKept
+                     : "Kept there: the 14 most recent days that have a copy, plus one "
                      + "copy from each of the 4 weeks before those.")
                     .font(.caption)
                     .foregroundStyle(.secondary)

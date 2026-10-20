@@ -124,6 +124,7 @@ struct RoadKeyDoorSheet: View {
         }
         PeekableSecretField(label: ProtectionWords.keyDoorNewPassphraseField, text: $new)
             .textFieldStyle(.roundedBorder)
+        PassphraseHintLine(passphrase: new)
         PeekableSecretField(label: ProtectionWords.keyDoorNewPassphraseAgain, text: $again, onSubmit: submit)
             .textFieldStyle(.roundedBorder)
     }

@@ -336,6 +336,13 @@ struct TourEndLibraryBlock: View {
                     .fixedSize(horizontal: false, vertical: true)
                 PeekableSecretField(label: ProtectionWords.setPassphraseField, text: $passphrase)
                     .textFieldStyle(.roundedBorder)
+                // VX-309 U2 — VX-211: the quiet line, in the card's own voice.
+                if let hint = NewPassphraseRule.hint(passphrase) {
+                    Text(hint)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 PeekableSecretField(label: ProtectionWords.setPassphraseAgain, text: $again, onSubmit: submit)
                     .textFieldStyle(.roundedBorder)
                 HStack(spacing: 10) {

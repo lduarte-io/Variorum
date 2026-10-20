@@ -38,6 +38,13 @@ struct SmallCopyActTests {
     /// The offer deletes this Mac's copies of another library — copies only
     /// (rule 19; the last copy's own key file and Apple key, the move's gift,
     /// left with VX-378 U1).
+    /// VX-309 U1c (VX-265) — FLIPPED DELIBERATELY: "another Mac's" copy is now
+    /// planted where another Mac's copy CAN be — the shared far folder, under a
+    /// `<mac8>` this Mac's container files no copy of the library under. In
+    /// this Mac's own container a copy is this Mac's by place, whatever `<mac8>`
+    /// it carries (a library's device ID is its own on each Mac — rule 23 — so
+    /// the copies of a library that stepped aside carry ITS `<mac8>`, never the
+    /// open library's): `OtherLibrarysCopiesDeleteTests` pins that arm.
     @Test func theOfferDeletesOnlyThisMacsCopiesOfAnotherLibrary() async throws {
         let fixture = try EX(.castle)
         let other = "cccc3333-0000-4000-8000-000000000003"
@@ -46,6 +53,8 @@ struct SmallCopyActTests {
             servingKeyFiles: [], fingerprint: nil, candidateFingerprints: [], library: other, mac: .thisMacsContainer)
         var anotherMacs = mine
         anotherMacs.id = "f:theirs"
+        anotherMacs.place = .farFolder
+        anotherMacs.folders = ["Backups", "cccc3333", "ffffffff"]
         anotherMacs.mac = .mac8("ffffffff")
         var thisLibrarys = mine
         thisLibrarys.id = "c:ours"

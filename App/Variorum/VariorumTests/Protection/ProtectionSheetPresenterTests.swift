@@ -70,7 +70,7 @@ struct ProtectionSheetPresenterTests {
             finished: { _ in if let id { presenter.dismiss(id) } })
         id = model.id
         presenter.present(.crossing(model), on: .settings)
-        let press = Task { await model.submit(passphrase: "p", again: "p", words: Self.wordsText) }
+        let press = Task { await model.submit(passphrase: "a new passphrase", again: "a new passphrase", words: Self.wordsText) }
         await gates.waitForCalls(1)
         #expect(model.busy)
         presenter.libraryClosed()

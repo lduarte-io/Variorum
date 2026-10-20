@@ -155,6 +155,13 @@ nonisolated struct RoadGateRow: Equatable, Sendable {
     /// This Mac's choice now (no choice yet reads as Always ask — no item exists without a press).
     let current: GateStyle
     let touchIDAvailable: Bool
+    /// VX-309 U1c — VX-451: lock after time away, in minutes — THIS MAC'S SEALED setting (`DeviceSettings.idleLockMinutes`,
+    /// never UserDefaults — the design's §3.2/§3.15); nil = never. The relock policy reads the same value
+    /// (`RoadRelockPolicy`).
+    var idleMinutes: Int? = DeviceSettings.defaultIdleLockMinutes
+
+    /// The dial's honest set — 5 · 10 · 30 · never (`DeviceSettings`' own "Offered 5 · 10 · 30 · never"; 10 by default).
+    static let idleChoices: [Int?] = [5, 10, 30, nil]
 }
 
 /// The crossings on the open library, read from one assessment.
@@ -213,7 +220,8 @@ nonisolated struct RoadCrossingFaces: Equatable, Sendable {
         }
         let gateRow = mode == .castle
             ? RoadGateRow(current: earlierGate ?? .alwaysAsk,
-                          touchIDAvailable: facts.biometry.hardware && facts.biometry.enrolled)
+                          touchIDAvailable: facts.biometry.hardware && facts.biometry.enrolled,
+                          idleMinutes: unlocked.thisMac.settings.idleLockMinutes)
             : nil
         return RoadCrossingFaces(
             mode: mode, useCastle: face(.useCastle), useStandard: face(.useStandard),

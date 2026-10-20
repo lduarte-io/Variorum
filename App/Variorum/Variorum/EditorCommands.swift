@@ -156,6 +156,10 @@ struct EditorCommands: Commands {
         // The Act 10 correction round, batch A (row 2): the sidebar toggle,
         // ours now that the split view is.
         .toggleSidebar,
+        // VX-309 U1c (VX-451): Lock Library Now, declared — the File menu's
+        // item renders the registry's verb (the pane's Castle section is its
+        // `.surface` twin).
+        .lockLibraryNow,
     ]
 
     /// The SwiftUI key wiring per shortcut-labeled capability — the walk
@@ -555,7 +559,7 @@ struct EditorCommands: Commands {
             // own Lock Screen) is untouched.
             if bootstrap.canLock {
                 Divider()
-                Button("Lock Library Now") {
+                Button(verb(.lockLibraryNow)) {
                     Task { await bootstrap.lock() }
                 }
                 .keyboardShortcut("l", modifiers: [.command, .control])

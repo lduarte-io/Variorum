@@ -9,11 +9,13 @@
 //  `Backups/<library8>/<mac8>/variorum-backup-<stamp>-<fp8>.sqlite` (+ `.keys.json`) in the container.
 //  Today's flat `Backups/variorum-backup-<stamp>.sqlite` writer keeps running beside it (Release parity).
 //
-//  The far folder is not written here (P-VX306-U1a-4: the container pair is the catalogue's and the
-//  doors' road this phase; today's second leg still copies its own flat files there). `pauseCopies` /
-//  `resumeCopies` are an in-process flag (§3.7: copies pause from an act's prepare to its swap) that the
-//  U1b hook on `StoreBackup.onRun` honours. Send Library's pair (VX-309's door) is minimal: the snapshot
-//  and the live key file into the folder she picked.
+//  VX-309 U1a — THE FAR PAIR (P-VX306-U1a-4's deferral comes due): `landFarPair` copies a container pair
+//  this leaf just wrote, both files under their own names, into the picked folder's `Variorum/Backups/
+//  <library8>/<mac8>/` — one backup in two places, the files' mechanics only (whether the far folder is DUE is
+//  the pair road's decision, `ProtectionBackupHook.takePair`; today's second leg still copies its own flat
+//  files there, untouched). `pauseCopies` / `resumeCopies` are an in-process flag (§3.7: copies pause from an
+//  act's prepare to its swap) that the U1b hook on `StoreBackup.onRun` honours. Send Library's pair (VX-309's
+//  door) is minimal: the snapshot and the live key file into the folder she picked.
 //
 
 import Foundation
@@ -27,6 +29,12 @@ nonisolated final class FileBackupsLeaf: BackupsLeaf, @unchecked Sendable {
         case keyFileIsAnotherKeys
         case pairDidNotReadBack
         case noStampFree
+        /// VX-309 U1a: the picked folder is not there now (deleted, a drive's mount point gone) — never re-made.
+        case pickedFolderGone
+        /// A pair of that name is already in the far folder — a pair is written once, never rewritten.
+        case farPairExists
+        /// The far copy did not read back as the pair it copies.
+        case farPairDidNotVerify
     }
 
     let places: ProtectionPlaces
@@ -55,6 +63,12 @@ nonisolated final class FileBackupsLeaf: BackupsLeaf, @unchecked Sendable {
     }
 
     func takeBackupPair(with key: StoreKey, keyFile: KeyFile, deviceID: String) throws {
+        _ = try writeContainerPair(with: key, keyFile: keyFile, deviceID: deviceID)
+    }
+
+    /// The container pair — `takeBackupPair`'s body, unchanged, now returning the snapshot it wrote (VX-309 U1a: the pair
+    /// road hands THIS pair to the far leg, never one re-discovered by listing — 18k C7's rule).
+    func writeContainerPair(with key: StoreKey, keyFile: KeyFile, deviceID: String) throws -> URL {
         guard !copiesArePaused else { throw BackupsLeafError.paused }
         let fingerprint = StoreKeyEnvelope.fingerprint(of: key)
         guard keyFile.fingerprint == fingerprint else { throw BackupsLeafError.keyFileIsAnotherKeys }
@@ -66,6 +80,51 @@ nonisolated final class FileBackupsLeaf: BackupsLeaf, @unchecked Sendable {
         let bytes = try keyFile.encoded()
         try bytes.write(to: pair, options: .atomic)
         guard (try? KeyFile.decode(Data(contentsOf: pair))) == keyFile else { throw BackupsLeafError.pairDidNotReadBack }
+        return snapshot
+    }
+
+    /// **VX-309 U1a — THE FAR PAIR**: the container pair at `snapshot` (this leaf's own, just written) copied, both files
+    /// under their own names, into the picked folder's `Variorum/Backups/<library8>/<mac8>/` with its security scope
+    /// claimed — written once (a name already there is refused, never overwritten) and verified (the key file reads back
+    /// as `keyFile`; the snapshot opens with `key`); a copy that fails part-way is removed, so no orphan snapshot is left
+    /// outside every count and every prune. Returns the far snapshot's catalogue id; nil when no far folder is picked or
+    /// its bookmark does not resolve now. Throws: copies paused, another key's file, the picked folder gone (never
+    /// re-made), a pair of that name there, a copy that does not verify.
+    func landFarPair(copying snapshot: URL, key: StoreKey, keyFile: KeyFile, deviceID: String) throws -> String? {
+        guard !copiesArePaused else { throw BackupsLeafError.paused }
+        guard keyFile.fingerprint == StoreKeyEnvelope.fingerprint(of: key) else { throw BackupsLeafError.keyFileIsAnotherKeys }
+        guard let far = places.farFolder() else { return nil }
+        let subpath = ProtectionNames.backupsSubpath(libraryID: keyFile.libraryID, deviceID: deviceID)
+        return try far.withAccess { root in
+            let manager = FileManager.default
+            var isFolder: ObjCBool = false
+            guard manager.fileExists(atPath: far.picked.path, isDirectory: &isFolder), isFolder.boolValue else {
+                throw BackupsLeafError.pickedFolderGone
+            }
+            let folder = root.appendingPathComponent(subpath, isDirectory: true)
+            try manager.createDirectory(at: folder, withIntermediateDirectories: true)
+            let destination = folder.appendingPathComponent(snapshot.lastPathComponent)
+            let pair = Self.pairURL(of: destination)
+            guard !manager.fileExists(atPath: destination.path), !manager.fileExists(atPath: pair.path) else {
+                throw BackupsLeafError.farPairExists
+            }
+            do {
+                try manager.copyItem(at: snapshot, to: destination)
+                try manager.copyItem(at: Self.pairURL(of: snapshot), to: pair)
+                guard (try? KeyFile.decode(Data(contentsOf: pair))) == keyFile,
+                      ProtectionLibraryFiles.opens(destination, key: key) else {
+                    throw BackupsLeafError.farPairDidNotVerify
+                }
+            } catch {
+                ProtectionLibraryFiles.removeWithSidecars(destination)
+                try? manager.removeItem(at: pair)
+                throw error
+            }
+            return CatalogEntry(
+                place: .farFolder, folders: subpath.split(separator: "/").map(String.init),
+                name: destination.lastPathComponent
+            ).id
+        }
     }
 
     func writeSendPair(with key: StoreKey, keyFile: KeyFile, to destination: String) throws {
@@ -83,12 +142,44 @@ nonisolated final class FileBackupsLeaf: BackupsLeaf, @unchecked Sendable {
                 let manager = FileManager.default
                 if manager.fileExists(atPath: url.path) { try manager.removeItem(at: url) }
                 for suffix in ProtectionLibraryFiles.sidecarSuffixes { try? manager.removeItem(atPath: url.path + suffix) }
-                if case .snapshot? = CatalogNames.parseFile(url.lastPathComponent) {
+                switch CatalogNames.parseFile(url.lastPathComponent) {
+                case .snapshot?:
                     let pair = Self.pairURL(of: url)
                     if manager.fileExists(atPath: pair.path) { try manager.removeItem(at: pair) }
+                case .library? where Self.isAsideFolder(url.deletingLastPathComponent()):
+                    // VX-309 U1c (VX-265): an aside copy IS its folder (it stepped aside whole, with ITS key file).
+                    try Self.removeAsideFolder(url.deletingLastPathComponent())
+                default:
+                    break
                 }
             }
         }
+    }
+
+    /// VX-309 U1c — an ASIDE copy's folder: `Previous Libraries/<stamp>/` or `Backups/safety-copies/variorum-adopt-safety-
+    /// <stamp>/`, its name read back by the catalogue's own parser (never the slot's folder, never a folder of hers).
+    static func isAsideFolder(_ folder: URL) -> Bool {
+        switch folder.deletingLastPathComponent().lastPathComponent {
+        case CatalogNames.previousLibrariesFolderName:
+            return CatalogNames.parseFolder(folder.lastPathComponent, under: .previousLibraries) != nil
+        case CatalogNames.safetyCopiesFolderName:
+            return CatalogNames.parseFolder(folder.lastPathComponent, under: .safetyCopies) != nil
+        default:
+            return false
+        }
+    }
+
+    /// What the app put beside an aside copy — its key file (any name the catalogue reads as one) and the restore hold it
+    /// carried (T-8's set-aside) — then the folder itself once nothing else is in it: a file of hers keeps the folder,
+    /// untouched (rule 19: the copy goes, never anything else).
+    static func removeAsideFolder(_ folder: URL) throws {
+        let manager = FileManager.default
+        for name in (try? manager.contentsOfDirectory(atPath: folder.path)) ?? [] {
+            let ours = CatalogNames.parseFile(name)?.isKeyFile == true || name == LibraryRestoreHold.filename
+                || name == ".DS_Store"
+            if ours { try manager.removeItem(at: folder.appendingPathComponent(name)) }
+        }
+        if (try? manager.contentsOfDirectory(atPath: folder.path))?.isEmpty == true { try manager.removeItem(at: folder) }
     }
 
     /// `<snapshot stem>.keys.json`.

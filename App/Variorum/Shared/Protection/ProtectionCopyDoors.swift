@@ -31,10 +31,18 @@
 //      already in this Mac's catalogue is used where it is; the open library itself is refused.
 //    - LOOK INSIDE (`lookInside`, P-VX306-U3-15 — the orchestrator's ruling (b)) — the executor's `lookInside` for the
 //      key, then `ProtectionCopyPeek`'s read-only reader on a private copy; nothing written.
+//    - VX-309 U1b — A PLAINTEXT EXPORT IN, AS A NEW LIBRARY (T-8 — the mapping ruled at the plan's §5b-R): the pick names it
+//      (never filed); `readPlaintextExport` plans it (reads only, a private staged copy); `landPlaintextExport` sets what
+//      stands aside whole, runs the creation's road and mints the export's content into the new store headless, before its
+//      first open, through the import road (no restore hold — a fresh mint never synced).
+//    - VX-309 U1b — THE EMPTY-SLOT LANDING (`makeMineInTheEmptySlot`, T-5): with no library open, the preflight's reads (the
+//      copy opens with what she TYPED — a quiet road alone is refused, rule 14's precedent), the hold, what stands in the
+//      slot set aside (never written over), the core's act, today's store id minted fresh.
 //    The reads and the pick stand on a `CopyDoorsContext` — the open library's, or (the missing face, rule 27's lobby) the
 //    road's system with no library open.
 //
 
+import Dependencies
 import Foundation
 import VariorumCore
 
@@ -67,6 +75,12 @@ nonisolated struct CopyDoorsContext: Sendable {
     func readExecutor() -> ProtectionExecutor {
         ProtectionExecutor(leaves: system.leaves, configuration: configuration, guards: guards)
     }
+
+    /// VX-309 U1b — an executor for an act with NO library open (T-5's empty-slot landing): its own instance over the
+    /// road's leaves (the act names its new library itself).
+    func actExecutor() -> ProtectionExecutor {
+        ProtectionExecutor(leaves: system.leaves, configuration: configuration, guards: guards)
+    }
 }
 
 /// What a look's opening came to (VX-306 U3 — Look inside, P-VX306-U3-15).
@@ -84,7 +98,72 @@ nonisolated enum ProtectionCopyDoors {
     static func listing(_ ctx: CopyDoorsContext) -> CopyDoorsListing {
         let places = ctx.system.places
         return CopyDoorsListing.make(
-            ctx.system.lister.catalog(), libraryID: ctx.libraryID, asOf: { asOf($0, places: places) })
+            ctx.system.lister.catalog(), libraryID: ctx.libraryID, protected: protectedFromDelete(ctx),
+            asOf: { asOf($0, places: places) })
+    }
+
+    /// VX-309 U1c — the libraries rule 19's delete is never offered for (beyond the open library, which is never another's):
+    /// with NO library open, every library this Mac remembers (the library missing from the slot — its copies are what the
+    /// empty-slot landing lands from; the core act's own exclusion, P-VX309-U1c-2); and, while a library STANDS in the slot
+    /// (rule 27's lobby — its ID inside the file no key opens), every library: any of them could be it (the core act refuses
+    /// there too). A read that fails offers no delete at all (never a guess).
+    static func protectedFromDelete(_ ctx: CopyDoorsContext) -> Set<String> {
+        if let open = ctx.libraryID { return [open] }
+        let everyLibrary = Set(ctx.system.lister.catalog().copies.compactMap(\.library))
+        guard (try? ctx.system.leaves.library.slotIsOccupied()) == false,
+              let remembered = try? ctx.system.leaves.memory.rememberedLibraryIDs() else { return everyLibrary }
+        return remembered
+    }
+
+    // MARK: - VX-309 U1c — VX-265: rule 19's delete (one other library's copies, at her confirmed press)
+
+    /// **With a library open** (Data Safety's Restore list): the core's planned act on the OPEN session (`offerDelete` —
+    /// one act at a time), over a FRESH catalogue read at the press: what goes is THIS Mac's copies of `libraryID` now
+    /// (`OwnCopies.thisMacsCopies` — the act's own fence re-applies it). Never the open library. The copies-changed seam is
+    /// said, so every standing list re-reads.
+    static func deleteCopies(_ session: ProtectionRoadSession, libraryID: String) async -> CopyDeleteOutcome {
+        guard session.writes, libraryID != session.library.record?.libraryID else { return .refused(.deleteFailed) }
+        guard session.beginAct() else { return .refused(.busy) }
+        defer { session.endAct() }
+        let catalog = session.system.lister.catalog()
+        let mine = OwnCopies.thisMacsCopies(ofLibrary: libraryID, in: catalog)
+        guard !mine.isEmpty else { return .refused(.copyGone) }
+        var library = session.library
+        do {
+            _ = try await session.executor.offerDelete(&library, copies: mine, catalog: catalog)
+        } catch {
+            session.library = library
+            ProtectionOpenRoad.log("road: another library's copies were not deleted — \(String(describing: error))")
+            tellCopiesChanged()
+            return .refused(refusal(for: error) == .busy ? .busy : .deleteFailed)
+        }
+        session.library = library
+        tellCopiesChanged()
+        ProtectionOpenRoad.log(
+            "road: deleted \(mine.count) of another library's copies on this Mac — library \(ProtectionNames.library8(libraryID))")
+        return .deleted(mine.count)
+    }
+
+    /// **With NO library open** (the empty-slot listing — the missing face, rule 27's lobby): the core's no-library road
+    /// (`offerDeleteWithNoLibraryOpen` — the same fence, never a library this Mac remembers), over a fresh catalogue read.
+    static func deleteCopies(_ ctx: CopyDoorsContext, libraryID: String) -> CopyDeleteOutcome {
+        let catalog = ctx.system.lister.catalog()
+        let deleted: [String]
+        do {
+            deleted = try ctx.actExecutor().offerDeleteWithNoLibraryOpen(
+                copies: catalog.copies(ofLibrary: libraryID), catalog: catalog)
+        } catch ExecutorRefusal.nothingToDo {
+            return .refused(.copyGone)
+        } catch {
+            ProtectionOpenRoad.log("road: another library's copies were not deleted (no library open) — \(String(describing: error))")
+            tellCopiesChanged()
+            return .refused(.deleteFailed)
+        }
+        tellCopiesChanged()
+        ProtectionOpenRoad.log(
+            "road: deleted \(deleted.count) of another library's copies on this Mac (no library open) — library "
+                + ProtectionNames.library8(libraryID))
+        return .deleted(deleted.count)
     }
 
     /// A copy's day: a backup's stamp; the day a previous library stepped aside; an OPENED copy's own day (the filed
@@ -203,12 +282,16 @@ nonisolated enum ProtectionCopyDoors {
 
     /// `opened`: the preflight's look at her press — the act takes ITS key (re-verified against the copy's file, a read
     /// that never prompts) instead of opening the copy a second time (VX-307 U2c — one Touch ID press, never two).
+    /// VX-309 U1c — VX-444: `wordsLedger` (the band card's ledger — the bootstrap's; nil: none) carries the outgoing
+    /// library's words marks onto the new library's id once the copy IS the library (rule 17: under the current pair).
     static func makeMine(
         _ session: ProtectionRoadSession, copy: CatalogCopy, catalog: Catalog, row: CopyDoorRow,
-        opened: LookedInside, currentPair: TypedSecrets, mintStoreIdentity: @Sendable (StoreKey) -> Void
+        opened: LookedInside, currentPair: TypedSecrets, mintStoreIdentity: @Sendable (StoreKey) -> Void,
+        wordsLedger: WordsCardLedger? = nil
     ) async -> MakeMineResult {
         let slot = session.system.places.slot
         let oldKey = session.key
+        let outgoingID = session.library.record?.libraryID
         let marker = LibraryRestoreHold.markerURL(besideStore: slot)
         let standing = try? Data(contentsOf: marker)
         // THE RESTORE HOLD, before anything moves (13x F1 R1-M2's order — a failed write refuses with nothing moved).
@@ -239,6 +322,10 @@ nonisolated enum ProtectionCopyDoors {
             // Today's store id, minted fresh for the NEW library (the creation's mint — rule 17: a fresh identity).
             mintStoreIdentity(library.key)
         }
+        // VX-444: the pair carried, so do its words marks (the card never re-offers words she already recorded).
+        if let outgoingID, let landedID = library.record?.libraryID, landedID != outgoingID {
+            wordsLedger?.carry(from: outgoingID, to: landedID)
+        }
         ProtectionOpenRoad.log(
             "road: made a copy this Mac's library — library \(String((library.record?.libraryID ?? "none").prefix(8))) "
                 + "key \(StoreKeyEnvelope.shortFingerprint(library.fingerprint)); the previous one in Previous Libraries; held")
@@ -262,6 +349,197 @@ nonisolated enum ProtectionCopyDoors {
         case .actInFlight?: return .busy
         default: return .failed
         }
+    }
+
+    // MARK: - VX-309 U1b — T-5: Make this my library into the EMPTY slot (no library open)
+
+    /// What the empty-slot landing came to: the outcome, and the new library's key when one landed (nil: nothing did — or
+    /// the act stopped past its swap, and the reopen finds the new library by its silent item).
+    struct EmptySlotResult: Sendable {
+        var outcome: CopyDoorOutcome
+        var key: StoreKey?
+    }
+
+    /// **The landing with NO library open** (the missing face, rule 27's lobby — run by `AppBootstrap
+    /// .makeThisMyLibraryInTheEmptySlot`; no pool is open on the slot). THE PREFLIGHT, all reads, before anything moves: the
+    /// copy still catalogued; it opens with WHAT SHE TYPED (rule 14's precedent — a quiet road alone carries no pair, so it
+    /// is refused like a wrong secret); its schema one this build opens. Then, in 13x's order: THE RESTORE HOLD first (the
+    /// core writer — nothing lands un-held); WHAT STANDS IN THE SLOT steps aside, never written over — exactly the faces'
+    /// *Start a New Library* pre-steps (rule 27's library no key file opens moves WHOLE, P-VX306-U2-5; else a missing
+    /// library's key file still in the live place moves alone, P-VX306-U1b-3); then the core's act
+    /// (`makeThisMyLibraryInTheEmptySlot` — a NEW library, nothing of the slot's to step aside); then today's store id minted
+    /// FRESH for it (P-VX306-U3-9's twin). Nothing landed ⇒ the hold put back as it stood (what stepped aside stays aside, in
+    /// Previous Libraries). The twelve words minted for a passphrase-opened copy are DROPPED here, never logged — the card
+    /// above the quick entry offers fresh ones at the first look (rule 2; the Mac's creation idiom).
+    /// VX-309 U1c — F-U1b-5 (VX-444's second half): `wordsLedger` marks the new library's words RECORDED when the copy's own
+    /// TYPED WORDS became its words lock (she just typed them); with its passphrase the words are minted fresh and dropped
+    /// unseen, so nothing is marked and the card offers them.
+    static func makeMineInTheEmptySlot(
+        _ ctx: CopyDoorsContext, row: CopyDoorRow, copySecrets: TypedSecrets,
+        mintStoreIdentity: @Sendable (StoreKey) -> Void, wordsLedger: WordsCardLedger? = nil
+    ) async -> EmptySlotResult {
+        let places = ctx.system.places
+        let catalog = ctx.system.lister.catalog()
+        guard let copy = catalog.copies.first(where: { $0.id == row.id }) else {
+            return EmptySlotResult(outcome: .refused(.copyGone), key: nil)
+        }
+        let looked: LookedInside
+        do {
+            looked = try ctx.readExecutor().lookInside(copy, in: catalog, typed: copySecrets, quietRoads: .withoutAPress)
+        } catch {
+            return EmptySlotResult(outcome: .refused(.copyDoesNotOpen), key: nil)
+        }
+        if case .quietRoad = looked.road { return EmptySlotResult(outcome: .refused(.copyDoesNotOpen), key: nil) }
+        let verdict = places.withFile(catalogID: copy.id, { LibraryClassifier.schemaVerdict(at: $0, key: looked.key) })
+        switch verdict {
+        case .current?, .behindThisBuild?: break
+        case .newer?: return EmptySlotResult(outcome: .refused(.newerCopy), key: nil)
+        default:
+            // Said, never swallowed — the refusal's sentence stays one honest line; the reason is the log's.
+            ProtectionOpenRoad.log(
+                "road: Make this my library (empty slot) refused — the copy's schema could not be read "
+                    + "(\(verdict.map { String(describing: $0) } ?? "the copy's file could not be resolved"))")
+            return EmptySlotResult(outcome: .refused(.unreadableCopy), key: nil)
+        }
+        let marker = LibraryRestoreHold.markerURL(besideStore: places.slot)
+        let standing = try? Data(contentsOf: marker)
+        do {
+            try LibraryRestoreHold.set(besideStore: places.slot, asOf: row.asOf, now: Date())
+        } catch {
+            ProtectionOpenRoad.log("road: Make this my library (empty slot) refused — the restore hold could not be written (\(String(describing: error)))")
+            return EmptySlotResult(outcome: .refused(.failed), key: nil)
+        }
+        do {
+            try ProtectionOpenRoad.setAsideUnopenableLibraryFor(places)
+            try ProtectionOpenRoad.setAsideLiveKeyFileFor(places)
+        } catch {
+            restoreHold(standing, at: marker)
+            ProtectionOpenRoad.log("road: Make this my library (empty slot) refused — what stood in the slot could not step aside (\(String(describing: error)))")
+            return EmptySlotResult(outcome: .refused(.failed), key: nil)
+        }
+        let landed: LandedCopy
+        do {
+            landed = try await ctx.actExecutor().makeThisMyLibraryInTheEmptySlot(copy: copy, in: catalog, typed: copySecrets)
+        } catch {
+            if (try? ctx.system.leaves.library.slotIsOccupied()) == true {
+                // Past the swap (the commit point): the copy IS the library; its plan finishes at the next open, which
+                // finds it by its silent item. The hold stays.
+                ProtectionOpenRoad.log("road: Make this my library (empty slot) swapped, then stopped — the next open finishes it (\(String(describing: error)))")
+                return EmptySlotResult(outcome: .made, key: nil)
+            }
+            restoreHold(standing, at: marker)
+            ProtectionOpenRoad.log("road: Make this my library (empty slot) did nothing — \(String(describing: error))")
+            return EmptySlotResult(outcome: .refused(refusal(for: error)), key: nil)
+        }
+        mintStoreIdentity(landed.library.key)
+        // F-U1b-5: her typed words ARE the new library's words — recorded (the card never offers words she just typed).
+        if landed.mintedWords == nil, let landedID = landed.library.record?.libraryID { wordsLedger?.record(landedID) }
+        ProtectionOpenRoad.log(
+            "road: a copy landed in the empty slot — library \(String((landed.library.record?.libraryID ?? "none").prefix(8))) "
+                + "key \(StoreKeyEnvelope.shortFingerprint(landed.library.fingerprint)); nothing stepped aside; held"
+                + (landed.mintedWords == nil ? "" : "; its words wait for her look"))
+        return EmptySlotResult(outcome: .made, key: landed.library.key)
+    }
+
+    // MARK: - VX-309 U1b — T-8: a plaintext export brought in as a NEW library
+
+    enum PlaintextExportRead: Sendable {
+        case plan(PlaintextExportPlan)
+        case refused(CopyDoorRefusal)
+    }
+
+    /// THE PREFLIGHT, reads only (before anything moves — with a library open, before the window comes down): the picked
+    /// thing is a plaintext export, and its content plans on a private staged copy (this build's schema only — P-VX309-U1b-7).
+    static func readPlaintextExport(_ url: URL) -> PlaintextExportRead {
+        guard case .plaintextExport(let store) = LibraryClassifier.classify(at: url) else {
+            return .refused(.unreadableCopy)
+        }
+        do {
+            return .plan(try PlaintextExportReading.read(exportAt: store))
+        } catch PlaintextExportReading.Failure.schemaNotCurrent(let newer) {
+            return .refused(.exportRefused(newer ? LibraryOpenCopy.newerSchemaRefusal : ProtectionWords.exportFromAnEarlierBuild))
+        } catch PlaintextExportReading.Failure.unreadableNote(let title, let line) {
+            return .refused(.exportRefused(ProtectionWords.exportNoteUnreadable(title, line: line)))
+        } catch {
+            ProtectionOpenRoad.log("road: a plaintext export could not be read — \(String(describing: error))")
+            return .refused(.unreadableCopy)
+        }
+    }
+
+    /// What the bring-in came to: the new library's session and its once-shown words (the creation's — the band offers
+    /// them), what landed, and whether the import stopped part of the way; or why nothing was made.
+    struct PlaintextLanding: Sendable {
+        var created: (session: ProtectionRoadSession, words: OnceShownWords)?
+        var landing = PlaintextExportLanding()
+        var stoppedEarly = false
+        var refusal: CopyDoorRefusal?
+    }
+
+    /// THE ACT (writes; with a library open, its pool already CLOSED by the bootstrap): what stands in the slot steps aside
+    /// WHOLE into Previous Libraries — the library, its sidecars, its key file and its restore hold (the hold is THAT
+    /// library's) — else a missing library's key file alone; any hold still standing goes (T-8's new library is never held
+    /// — a fresh mint never synced, the ruling); the creation's road (`ProtectionOpenRoad.create` — fresh identity, key and
+    /// device ID, Standard, its words for the band); then the export's content minted into the NEW store HEADLESS, before
+    /// its first open, through the import road (`Operations.importPlaintextExport` — no undo stack: a library's birth); the
+    /// store's pool closed. The end says what landed (the log line here; the receipt the caller owes) — a partial landing
+    /// is visible against it (the ruling's one requirement on the crash window, PROVISIONAL P-VX309-U1b-8).
+    static func landPlaintextExport(_ ctx: RoadContext, plan: PlaintextExportPlan) async -> PlaintextLanding {
+        let places = ctx.system.places
+        var result = PlaintextLanding()
+        // A read-only road (a hosted test run's) never creates — so nothing steps aside for a creation that cannot land.
+        guard ctx.writes else {
+            result.refusal = .failed
+            return result
+        }
+        do {
+            try ProtectionOpenRoad.setAsideLibraryWholeFor(places, carryingHold: true)
+            try ProtectionOpenRoad.setAsideLiveKeyFileFor(places)
+        } catch {
+            ProtectionOpenRoad.log("road: a plaintext export was not brought in — what stood in the slot could not step aside (\(String(describing: error)))")
+            result.refusal = .failed
+            return result
+        }
+        LibraryRestoreHold.clear(besideStore: places.slot)
+        guard case .created(let session, let words) = await ProtectionOpenRoad.create(ctx, setAsideLiveKeyFile: false) else {
+            result.refusal = .failed
+            return result
+        }
+        result.created = (session, words)
+        // What the export holds, said BEFORE the import — a crash part of the way leaves this line without the end's, so
+        // what landed reads against what was to land (the ruling's requirement on the crash window).
+        ProtectionOpenRoad.log(
+            "road: bringing in a plaintext export — it holds \(plan.books.count) books · \(plan.notes.count) notes · "
+                + "\(plan.pools.count) snippet groups · \(plan.wings.count) wings")
+        final class Box: @unchecked Sendable { var landing = PlaintextExportLanding() }
+        let box = Box()
+        do {
+            let database = try AppDatabase.onDisk(url: places.slot, key: session.key)
+            do {
+                _ = try withDependencies {
+                    $0.database = database
+                    $0.uuid = .init { UUID() }
+                    $0.date = .init { Date() }
+                    $0.withRandomNumberGenerator = WithRandomNumberGenerator(SystemRandomNumberGenerator())
+                } operation: {
+                    try Operations().importPlaintextExport(plan, landed: { box.landing = $0 })
+                }
+            } catch {
+                result.stoppedEarly = true
+                ProtectionOpenRoad.log("road: the plaintext export's import stopped — \(String(describing: error))")
+            }
+            let (_, binding) = database.asRebindable()
+            binding.lock()
+        } catch {
+            result.stoppedEarly = true
+            ProtectionOpenRoad.log("road: the new library's store could not be opened for the import — \(String(describing: error))")
+        }
+        result.landing = box.landing
+        let landed = box.landing
+        ProtectionOpenRoad.log(
+            "road: a plaintext export brought in as a new library — \(landed.books) books · \(landed.notes) notes · "
+                + "\(landed.snippets) snippet groups · \(landed.wings) wings; empty books left out \(landed.emptyBooks.count); "
+                + "memberships left out \(landed.membershipsLeftOut)\(result.stoppedEarly ? "; STOPPED part of the way" : "")")
+        return result
     }
 
     // MARK: - The pick
@@ -297,6 +575,9 @@ nonisolated enum ProtectionCopyDoors {
             }
         }
         switch PickedCopy.classify(url) {
+        case .plaintextExport(let store):
+            // VX-309 U1b — T-8: a plaintext export is brought in through the import road, never filed or adopted.
+            return .plaintextExport(store)
         case .refused(let message, let detail):
             return .refused(message, detail: detail)
         case .several(let stores):

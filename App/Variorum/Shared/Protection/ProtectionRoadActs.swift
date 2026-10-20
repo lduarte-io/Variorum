@@ -193,8 +193,19 @@ nonisolated extension ProtectionOpenRoad {
     /// `Previous Libraries/<stamp>/` (never deleted), so the creation lands in an empty slot (PROVISIONAL
     /// P-VX306-U2-5).
     static func setAsideUnopenableLibraryFor(_ places: ProtectionPlaces) throws {
+        if let folder = try setAsideLibraryWholeFor(places, carryingHold: false) {
+            log("road: the library no key file opens was set aside whole into Previous Libraries/\(folder.lastPathComponent)")
+        }
+    }
+
+    /// VX-309 U1b — the slot's library moved WHOLE into `Previous Libraries/<stamp>/` (never deleted): the file, its
+    /// sidecars first (a creation never meets a stray WAL beside the slot; they go back if the file cannot move), the key
+    /// file in the live place, and — `carryingHold` — the restore-hold marker beside it (the hold describes THAT library;
+    /// T-8's new library is never held). The folder, or nil when nothing stood in the slot.
+    @discardableResult
+    static func setAsideLibraryWholeFor(_ places: ProtectionPlaces, carryingHold: Bool) throws -> URL? {
         let manager = FileManager.default
-        guard manager.fileExists(atPath: places.slot.path) else { return }
+        guard manager.fileExists(atPath: places.slot.path) else { return nil }
         var date = Date()
         for _ in 0..<120 {
             let folder = places.previousLibraries.appendingPathComponent(CatalogNames.stampString(date), isDirectory: true)
@@ -224,10 +235,14 @@ nonisolated extension ProtectionOpenRoad {
                 if manager.fileExists(atPath: places.liveKeyFile.path) {
                     try manager.moveItem(at: places.liveKeyFile, to: folder.appendingPathComponent(ProtectionNames.keyFilename))
                 }
-                log("road: the library no key file opens was set aside whole into Previous Libraries/\(folder.lastPathComponent)")
-                return
+                let hold = LibraryRestoreHold.markerURL(besideStore: places.slot)
+                if carryingHold, manager.fileExists(atPath: hold.path) {
+                    try manager.moveItem(at: hold, to: folder.appendingPathComponent(LibraryRestoreHold.filename))
+                }
+                return folder
             }
             date += 1
         }
+        return nil
     }
 }
