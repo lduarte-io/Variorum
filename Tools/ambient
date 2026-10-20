@@ -6,7 +6,8 @@
 # Usage:
 #   ambient on [--scene NAME] [--stay]   start it; idempotent. Returns once the window is verified up.
 #                                        Refuses (exit 1, one line) while any stage claim exists whose
-#                                        reason doesn't start with exactly "HOLD:".
+#                                        reason doesn't start with exactly "HOLD:", or while someone is
+#                                        using the Mac (HID idle under --min-idle, default 120 s).
 #   ambient off                          stop it, synchronously: exit 0 once gone (or if it wasn't
 #                                        running), nonzero only if it could not be stopped.
 #   ambient status                       RUNNING scene=… pid=… since=…  |  OFF       (always exit 0)
@@ -30,9 +31,10 @@ STATE="$HOME/.variorum/ambient.state"
 LOG="$HOME/.variorum/ambient.log"
 LOCK="$HOME/.variorum/stage.d"
 
-usage() { sed -n '2,23p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+usage() { sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 ms() { perl -MTime::HiRes=time -e 'printf "%d", time * 1000'; }
 pid_of() { pgrep -x "$NAME" 2>/dev/null | head -1; }
+hid_idle() { ioreg -c IOHIDSystem | awk '/HIDIdleTime/ { printf "%d", $NF / 1000000000; exit }'; }
 
 # The claim exactly as Tools/stage reads it (it sources the same file). Prints why and returns 0 when
 # the ambient must stay off.
@@ -93,19 +95,24 @@ cmd="${1:-status}"; shift || true
 
 case "$cmd" in
   on)
-    pass=(); allow=""
+    pass=(); allow=""; min_idle=120
     while [ $# -gt 0 ]; do
       case "$1" in
         --scene) pass+=(--scene "${2:?--scene needs a name}"); shift 2 ;;
         --stay) pass+=(--stay); shift ;;
         --seed) pass+=(--seed "${2:?--seed needs a number}"); shift 2 ;;
         --allow-claimant) allow="${2:?--allow-claimant needs a name}"; pass+=(--allow-claimant "$allow"); shift 2 ;;
+        --min-idle) min_idle="${2:?--min-idle needs seconds}"; shift 2 ;;
         *) echo "ambient on: unknown argument '$1'"; usage ;;
       esac
     done
     pid=$(pid_of)
     if [ -n "$pid" ]; then echo "AMBIENT ALREADY ON — $(status_line)"; exit 0; fi
     if why=$(claim_blocks "$allow"); then echo "AMBIENT REFUSED — stage $why"; exit 1; fi
+    idle=$(hid_idle)
+    if [ -n "$idle" ] && [ "$idle" -lt "$min_idle" ]; then
+      echo "AMBIENT REFUSED — someone is using the Mac (HID idle ${idle} s < ${min_idle} s)"; exit 1
+    fi
     build || { echo "AMBIENT REFUSED — the build failed (above)"; exit 1; }
     # Re-check: a build takes a moment, and a claim may have landed meanwhile.
     if why=$(claim_blocks "$allow"); then echo "AMBIENT REFUSED — stage $why"; exit 1; fi
