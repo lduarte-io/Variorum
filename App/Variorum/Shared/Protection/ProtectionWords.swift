@@ -250,12 +250,14 @@ nonisolated enum ProtectionWords {
 
     /// The picked plain-text copy's door — §7c (8)'s shape: what it becomes; what comes in and what does not, in ONE line
     /// (the ruling, §5b-R: content and its placement ride, configuration does not — and the document format carries no
-    /// commits or comments, versions never ride); with a library open, where that one goes (§7c (8)'s own clause).
+    /// commits or comments, versions never ride); with a library open, where that one goes (§7c (8)'s own clause). VX-309
+    /// ladder round 1, F-R2: the line names gatherings (configuration — ruling item 6) and entry dates (the format carries
+    /// no date: a brought-in note is minted with none) among what doesn't come in.
     static func bringInLead(stepsALibraryAside: Bool) -> String {
         "This plain-text copy becomes a new library \u{2014} in Standard, with a fresh key of its own; its new twelve "
             + "words are offered once it opens. Its notes and their takes, books, chapters, snippets and tags come in, "
             + "written fresh; "
-            + "its commits, comments, note versions, book settings, stars and shelves don't."
+            + "its gatherings, entry dates, commits, comments, note versions, book settings, stars and shelves don't."
             + (stepsALibraryAside
                 ? " Your current library steps aside whole into Previous Libraries, where you can look inside it or make "
                     + "it your library again."
@@ -1025,8 +1027,8 @@ nonisolated enum ProtectionWords {
         "Your writing can always leave as plain text: File \u{25B8} Export Library\u{2026} writes every note as Markdown, "
             + "and Settings \u{25B8} Data Safety can write an unencrypted copy of the whole library. An unencrypted copy "
             + "comes back in through File \u{25B8} Open Library\u{2026} as a new library \u{2014} its notes and their "
-            + "takes, books, chapters, snippets and tags written fresh; its commits, comments, note versions, book "
-            + "settings, stars and shelves stay behind.",
+            + "takes, books, chapters, snippets and tags written fresh; its gatherings, entry dates, commits, comments, "
+            + "note versions, book settings, stars and shelves stay behind.",
     ]
 
     /// The export lesson's two backup paragraphs on the new road (the seeder interpolates the pane's own names after the

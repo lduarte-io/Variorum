@@ -29,13 +29,22 @@ finding touches sync, custody or a schema (the one core file touched is a commen
 - Piece 3 — F-R6 (the case-sensitive `.sqlite` suffix): DONE (pin first `fb33935f8` · fix `c388a0619`). Pin `OtherLibrariesDeleteRoadTests.theLineCountsALibraryShapedFileWhateverTheCaseOfItsSuffix`
   RED ON THE PRE-FIX TREE `✘ Test run with 6 tests in 1 suite failed … with 1 issue.` (`0 ≠ 2`) → green `✔ Test run with 6
   tests in 1 suite passed`.
-- Piece 4 — F-R1 (the twin-less far copy: never deleted, now SAID): FIX COMMITTED (this commit); pins first (the commit
-  before) RED ON THE PRE-FIX TREE `✘ Test run with 20 tests in 2 suites failed after 0.533 seconds with 6 issues.` — the
-  behaviour pin's 2 (`listing.unmanagedCopies == 1` with the library open, and with none open — the reviewer's red,
-  reproduced) + the 4 deliberate word flips; its four guards green on both trees; with the fix `✔ Test run with 20 tests in
-  2 suites passed`. MUTATIONS STARTING on this committed tree (restored by `git checkout --`, `cmp` against the commit):
-  M-R1a the twin-less arm dropped · M-R1b the open/protected exclusion dropped · M-R1c the fence check dropped — PENDING.
-- Piece 5 — F-R2 (gatherings and entry dates named in T-8's confirm + the guide's twin sentence): NOT-STARTED — pins first.
+- Piece 4 — F-R1 (the twin-less far copy: never deleted, now SAID): DONE (pins first `fce59feae` · fix `789240c32`). Pins
+  RED ON THE PRE-FIX TREE `✘ Test run with 20 tests in 2 suites failed after 0.533 seconds with 6 issues.` — the behaviour
+  pin `OtherLibrariesDeleteRoadTests.aFarPairNoContainerTwinVouchesForIsSaidAndNeverDeleted`'s 2 (`unmanagedCopies == 1`
+  with the library open, and with none open — the reviewer's red, reproduced) + the 4 deliberate word flips (the staying
+  sentence ×3 hosts in two suites, VX-210's line); the pin's four guards (no delete offered; the twin standing ⇒ deletable,
+  uncounted; the open library's far copy uncounted; a protected library's uncounted) green on both trees. With the fix
+  `✔ Test run with 20 tests in 2 suites passed`. MUTATIONS on `789240c32` (each restored by `git checkout --`, `cmp`-identical
+  to `scratchpad/r1fix-prerevert/CopyDoorsModel.swift`): M-R1a the twin-less arm dropped → `✘ … 2 issues` (the pre-fix
+  behaviour red exactly); M-R1b the open/protected exclusion dropped → `✘ … 2 issues` (the protected guard + the open
+  library's far copy counted); M-R1c the fence check dropped → `✘ … 1 issue` (the twinned pair counted). The words'
+  red-on-old is the pre-fix run above (the old strings, 4 issues).
+- Piece 5 — F-R2 (gatherings and entry dates named in T-8's confirm + the guide's twin sentence): FIX COMMITTED (this
+  commit); pins first (the commit before) RED ON THE PRE-FIX TREE `✘ Test run with 13 tests in 1 suite failed after 0.049
+  seconds with 3 issues.` (the lead's flip ×2 arms + the guide's new pin) → with the words `✔ Test run with 25 tests in 3
+  suites passed` (U2WordsTests · OtherLibrariesDeleteRoadTests · PlaintextExportBringInRoadTests). MUTATION M-R2a (the
+  guide's paragraph back alone — the two hosts drifting) STARTING on this committed tree — PENDING.
 - Piece 6 — the close: evidence (the touched suites headless; the core protection set Debug + Release;
   `build-for-testing`; the phone; the Release build): NOT-STARTED.
 
