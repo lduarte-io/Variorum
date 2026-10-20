@@ -735,7 +735,33 @@ ledger is the merging session's):**
   rules' letter; U1a-2's visible consequence (a second same-day Back Up Now adds no far pair, unlike today's flat
   leg) is flagged to U2's words and the bundle row says it plainly.
 
-**THE U1a MAC BATCH (the orchestrator, under the stage; result appended when run):** *(pending the coordinator's GO)*
+**THE U1a MAC BATCH (the orchestrator, 2026-10-19 18:30–18:33 MDT first run, stage claim `vx-309-u1a-mac`, the
+coordinator's GO; log `/tmp/vx309-u1a-mac-run.log`, deleted at closeout):** 183 tests / 31 suites, ONE real red —
+and it was a REAL FIND, not a pin anchor:
+
+- **MB-1 (Bug, Confirmed live — the orchestrator's own fix at adjudication, the commit above):**
+  `ProtectionFarPairTests.onlyThisMacsOwnTrustedFreshFarPairMakesItNotDue`'s future-stamp arm red under the Mac
+  host: the far due-check rightly distrusted the planted future-stamped pair and wrote the due pair — and RETENTION
+  THEN PRUNED THE FRESH PAIR, because a future-stamped copy claimed the UTC day's slot (`keepDailiesAndWeeklies`
+  newest-first) and the real pair fell to a covered-week remainder. Write-then-delete churn: under a clock-glitch
+  copy, every written run's far pair would be deleted on landing until the wall clock passed the stamp; the same
+  shape could crowd the container's newest-14. The implementer's headless green was UTC-MIDNIGHT LUCK (its run sat
+  in the one hour where `now+1h` crossed the UTC day, so the two stamps took different day slots). THE FIX (core,
+  new-road-only; today's `BackupRetention.keep` byte-unchanged — it retires with today's road): `Retention.plan`
+  gains an explicit `now` (no default; every call site passes its clock — the pair road its own `now`, the scenario
+  world its `clock`, the test fixtures `CF.stamp(1_000)`), and a copy whose stamp `OwnCopies.stampIsTrusted` rejects
+  claims NO slot — kept exactly like an undated copy, never counted among the container's 14 or the far dailies and
+  weeklies, never pruned (18o U1's rule extended from freshness-reads to slot-claims; "a real snapshot with a wrong
+  date is never this rule's to delete" now also means it never gets a real one deleted). PIN
+  `RetentionTests.aFutureStampedCopyClaimsNoSlotAndIsNeverPruned` (deterministic, fixed clock, both places);
+  red-on-old = the batch's own observed red PLUS the behavioural revert (`trusted = dated`, the pre-fix slot rule) →
+  the pin red with 2 issues, restored `cmp`-identical against `/tmp/vx309-mb1-premutation.swift`. Headless:
+  `RetentionTests` + `RetentionGuardMutationTests` + `OwnCopiesTests` `✔ 12 tests in 3 suites`. The full core suite
+  and the five-suite Mac re-run: PENDING (in flight). For the ladder: the one core file is `Assess/Retention.swift`;
+  the call-site edits are mechanical (`now:` threaded).
+- Every other suite green on the first run (the known skip-shaped lines were build-tool noise, no VX-310 witnesses in
+  this batch's list); 0 instances at the run's end.
+- **The R-a / R-b behavioural reverts (`DataSafetyRoadCountsTests`) and the confirming re-run: PENDING below.**
 
 **Notes:** no machinery deaths; no Sonnet lookup; no subagents; no scratch worktree. The harness was rebuilt in this
 session's scratchpad from U1's recipe (the VX-308 harness's `Package.swift`, stubs and symlink list re-pointed); the
