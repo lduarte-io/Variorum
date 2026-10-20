@@ -1479,12 +1479,74 @@ the test worlds — `PlantedRoad`, `ProtectionFacesSupport`, `ProtectionAccountS
 it survived, re-pointed at this worktree, `--skip-update`): the BASELINE on `ae5aca849` `✔ Test run with 304 tests in 50
 suites passed after 4.986 seconds.` (U1b's close count, exactly).
 
-**MY READINGS:** (PENDING — written as each piece opens.)
+**MY READINGS (each the brief's letter as I read it — building on them):**
+- **R-U1c-1 — RULE 19'S "THIS MAC'S" IS TOLD BY PLACE, AND THE CORE'S FENCE TOLD IT WRONG (a traced bug in VX-265's own act).**
+  `offerDelete` fenced every copy with `copy.mac.isMac(library.section.mac8)` — the OPEN library's device ID. But a library's
+  device ID is its own on each Mac (rule 23): Make this my library mints a fresh one (`parameters.newDeviceID`), so the
+  library that stepped aside filed its backups under ITS `<mac8>` (`writeContainerPair(… deviceID: session.library.section
+  .deviceID)`), and the fence never matched them — only `.thisMacsContainer` copies (its Previous Library) would ever go, its
+  backups listed forever. The door cannot meet "counting what goes (this Mac's copies of IT)" over that fence, so the fence is
+  fixed inside this unit (the same act, VX-265's own): every copy in this Mac's CONTAINER is this Mac's (per Mac and per
+  login — `MacAttribution.thisMacsContainer`'s own reason); a FAR copy is this Mac's only under the `Backups/<library8>/
+  <mac8>` subfolder this Mac's container files the same library under (the pair road copies the container pair there under
+  that subfolder — R-U1a-1); another Mac's, an unattributed far copy and a copy no key file names are never claimed. One pure
+  core rule (`OwnCopies.isThisMacsCopy` / `thisMacsCopies`) the act and the listing both read.
+- **R-U1c-2 — ONE LIBRARY AT A TIME, ON EACH OF ITS ROWS.** The brief's "each such row gains *Delete…*": every other-library
+  row whose library this Mac holds a copy of carries the door (P-2 — none where nothing would go); the press opens the
+  library's own confirm (never part of another act's): the library named by its newest listed copy's day, what goes counted by
+  kind (this Mac's copies — the act's fence read for the confirm), what stays said (another Mac's copies, an unattributed far
+  copy), and — with a library open — that the library isn't touched. The act re-reads at the press (a fresh catalogue — what
+  goes is what this Mac holds NOW) and the receipt names how many went. The open library's copies are never offered
+  (retention's).
+- **R-U1c-3 — WITH NO LIBRARY OPEN, THE REMEMBERED LIBRARY IS NEVER OFFERED.** At the empty-slot listing (the missing face,
+  rule 27's lobby) every copy is "another library's" to the listing, including the library the slot is missing — whose copies
+  are exactly what T-5 lands from. "Deleting never touches a copy of the OPEN library" has its twin there: a library this Mac
+  REMEMBERS (rule 21) is never offered and the core act refuses it; a memory read that fails offers no delete at all
+  (PROVISIONAL P-VX309-U1c-2). The no-library act is plan-less (no library holds it; deleting copies changes no key).
+- **R-U1c-4 — AN ASIDE COPY IS ITS FOLDER.** A Previous Library stepped aside "whole, with its own key file" (rule 17); the
+  leaf deleted only its `variorum.sqlite` and sidecars, leaving the key file (and T-8's carried hold marker) and the folder.
+  Deleting it now takes the folder: the library, its sidecars, its key file(s), the hold — and never a file of hers (the folder
+  then stays, holding only it). Backup pairs and retention's prune are unchanged.
+- **R-U1c-5 — VX-210'S LINE IS ONE LINE OVER CATALOGUE FACTS.** The count behind it: a library-shaped (`.sqlite`) FOREIGN entry
+  (today's flat backups beside the library and in the picked folder, the A1 rail's copies, a folder she made), a catalogued copy
+  no format-3 key file names (rule 26 — never listed), a far copy outside any Mac's subfolder (`unattributed`); the line renders
+  in both listings only when that count is above zero (P-2). Worded so it is true of all three ("left as they are … yours to
+  manage in the Finder" — never "not listed", which an unattributed far copy is) — a draft for U2's pass (P-VX309-U1c-1).
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton + the harness baseline: DONE (this commit).
-- Piece 1 — VX-265 (the delete door for other libraries' copies): NOT-STARTED.
-- Piece 2 — VX-210 (the honest line): NOT-STARTED.
+- Piece 1 — VX-265 (the delete door for other libraries' copies): BUILT (`6ce2ebafd` core pin first · `8d4e028fb` core ·
+  `fe90ec572` leaf pin first · `b1c25a7f8` leaf · the app commit carrying this line). CORE (R-U1c-1, R-U1c-3): the pin
+  `OtherLibrarysCopiesDeleteTests.anotherLibrarysCopiesThisMacMadeGoWhateverMac8TheyCarry` RED ON THE PRE-FIX TREE `✘ Test
+  run with 1 test in 1 suite failed … with 2 issues` (X's backup beside the library and in the picked folder never went) →
+  with `OwnCopies.isThisMacsCopy` / `thisMacsCopies` + `offerDelete`'s fence reading it + NEW `offerDeleteWithNoLibraryOpen`
+  green; the suite 3 tests (+ the pure rule, + the no-library road); `CopyActTests.theOfferDeletesOnlyThisMacsCopiesOfAnother
+  Library` FLIPPED DELIBERATELY (its "another Mac's" copy now planted in the shared far folder — a container copy is this Mac's
+  by place); the core protection set Debug `✔ Test run with 372 tests in 89 suites passed`. MUTATIONS on `8d4e028fb`
+  (restored `cmp`-identical to `u1c-prerevert/`): M-1a the pre-fix fence = the pre-fix tree's red above; M-1b the far arm
+  claiming any `<mac8>` → `✘ … 4 issues` (another Mac's copy deleted; the pure rule's two arms); M-1c the remembered exclusion
+  dropped → `✘ … 4 issues`. LEAF (R-U1c-4): `ProtectionFileLeavesTests.deletingAnAsideCopyTakesItsFolderWholeAndNeverAFileOfHers`
+  RED ON THE PRE-FIX TREE `✘ … 4 issues` → green with `FileBackupsLeaf.isAsideFolder` + `removeAsideFolder`; MUTATIONS on
+  `b1c25a7f8`: M-1e the aside files kept → `✘ … 4 issues`; M-1f every file in the folder deleted → `✘` (her folder gone). APP
+  (R-U1c-2): `CopyDeleteChoice` + `CopyDoorsListing.deleteChoices` / `deleteChoice(for:)` (`make` gains `protected:`);
+  `CopyDeleteOutcome`; `CopyDoorRefusal.deleteFailed`; `CopyDoorsRoads.deleteCopies`; `CopyDeleteModel` (the confirm's brain);
+  `CopyDoorsModel.Phase.deleteCopies` + `openDeleteCopies` (from the listing: back to it, re-read, the receipt above; from a row
+  elsewhere: done) + `listingReceipt`; `ProtectionCopyDoors.protectedFromDelete` + `deleteCopies(session, libraryID:)` (the
+  core's planned act on the OPEN session, one act at a time) + `deleteCopies(ctx, libraryID:)` (the no-library road);
+  `AppBootstrap.copyDoorsRoads` (the receipt on the status seam) and `copyDoorsRoadsWithoutALibrary` (`deleteCopiesWithNoLibrary
+  Open` — never at ready, one beside the landings); the Mac faces — `CopyDoorsSheet` (the listing rows' *Delete…*,
+  `DeleteCopiesConfirm`), `RoadRestoreRows` (Data Safety's rows), `RoadDoorsHost.deleteCopies`, `LibraryOpenPresenter
+  .beginDeleteCopies`, `SettingsSceneContent` + `DataSafetyPane` wiring; the words (`ProtectionWords` U1c section — PROVISIONAL
+  P-VX309-U1c-1). Pins: `OtherLibrariesDeleteRoadTests` (4, planted, headless — the open-library road end to end, the
+  empty-slot road with the remembered library never offered, the confirm's brain, VX-210's count) `✔ 4 tests`; the harness
+  `✔ Test run with 309 tests in 51 suites passed`; Mac only, BUILT (the run the orchestrator's): `OtherLibrariesDeleteRouteTests`
+  (2 — through `AppBootstrap` over the planted road) and `CopyListingFacesSurfaceTests` (2, by source); `build-for-testing` `**
+  TEST BUILD SUCCEEDED **`, no warning in a touched file. App mutations: PENDING (next commit's record).
+- Piece 2 — VX-210 (the honest line): BUILT with piece 1's app commit (they share the listing): `CopyDoorsListing
+  .unmanagedCopies(in:)` (R-U1c-5), `ProtectionWords.copiesElsewhereLine` (PROVISIONAL P-VX309-U1c-1), the line in the
+  empty-slot sheet's listing and Data Safety's Restore list (`RoadRestoreRows`), each only above zero. Pins:
+  `OtherLibrariesDeleteRoadTests.theLineCountsTheCopiesVariorumLeavesAsTheyAre` (headless) +
+  `CopyListingFacesSurfaceTests.bothListingsSayTheOneLineOnlyWhenItIsTrue` (Mac, by source). Mutation: PENDING.
 - Piece 3 — VX-444 + F-U1b-5 (the words-recorded ledger carries): NOT-STARTED.
 - Piece 4 — VX-451 (the pane's Lock Now row + idle dial): NOT-STARTED.
 - Piece 5 — VX-454 (probe first): NOT-STARTED.

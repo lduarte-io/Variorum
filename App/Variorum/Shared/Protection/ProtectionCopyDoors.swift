@@ -98,7 +98,71 @@ nonisolated enum ProtectionCopyDoors {
     static func listing(_ ctx: CopyDoorsContext) -> CopyDoorsListing {
         let places = ctx.system.places
         return CopyDoorsListing.make(
-            ctx.system.lister.catalog(), libraryID: ctx.libraryID, asOf: { asOf($0, places: places) })
+            ctx.system.lister.catalog(), libraryID: ctx.libraryID, protected: protectedFromDelete(ctx),
+            asOf: { asOf($0, places: places) })
+    }
+
+    /// VX-309 U1c — the libraries rule 19's delete is never offered for (beyond the open library, which is never another's):
+    /// with NO library open, every library this Mac remembers (the library missing from the slot, rule 27's unopenable one —
+    /// its copies are what the empty-slot landing lands from; the core act's own exclusion, P-VX309-U1c-2). A memory read
+    /// that fails offers no delete at all (never a guess).
+    static func protectedFromDelete(_ ctx: CopyDoorsContext) -> Set<String> {
+        if let open = ctx.libraryID { return [open] }
+        guard let remembered = try? ctx.system.leaves.memory.rememberedLibraryIDs() else {
+            return Set(ctx.system.lister.catalog().copies.compactMap(\.library))
+        }
+        return remembered
+    }
+
+    // MARK: - VX-309 U1c — VX-265: rule 19's delete (one other library's copies, at her confirmed press)
+
+    /// **With a library open** (Data Safety's Restore list): the core's planned act on the OPEN session (`offerDelete` —
+    /// one act at a time), over a FRESH catalogue read at the press: what goes is THIS Mac's copies of `libraryID` now
+    /// (`OwnCopies.thisMacsCopies` — the act's own fence re-applies it). Never the open library. The copies-changed seam is
+    /// said, so every standing list re-reads.
+    static func deleteCopies(_ session: ProtectionRoadSession, libraryID: String) async -> CopyDeleteOutcome {
+        guard session.writes, libraryID != session.library.record?.libraryID else { return .refused(.deleteFailed) }
+        guard session.beginAct() else { return .refused(.busy) }
+        defer { session.endAct() }
+        let catalog = session.system.lister.catalog()
+        let mine = OwnCopies.thisMacsCopies(ofLibrary: libraryID, in: catalog)
+        guard !mine.isEmpty else { return .refused(.copyGone) }
+        var library = session.library
+        do {
+            _ = try await session.executor.offerDelete(&library, copies: mine, catalog: catalog)
+        } catch {
+            session.library = library
+            ProtectionOpenRoad.log("road: another library's copies were not deleted — \(String(describing: error))")
+            tellCopiesChanged()
+            return .refused(refusal(for: error) == .busy ? .busy : .deleteFailed)
+        }
+        session.library = library
+        tellCopiesChanged()
+        ProtectionOpenRoad.log(
+            "road: deleted \(mine.count) of another library's copies on this Mac — library \(ProtectionNames.library8(libraryID))")
+        return .deleted(mine.count)
+    }
+
+    /// **With NO library open** (the empty-slot listing — the missing face, rule 27's lobby): the core's no-library road
+    /// (`offerDeleteWithNoLibraryOpen` — the same fence, never a library this Mac remembers), over a fresh catalogue read.
+    static func deleteCopies(_ ctx: CopyDoorsContext, libraryID: String) -> CopyDeleteOutcome {
+        let catalog = ctx.system.lister.catalog()
+        let deleted: [String]
+        do {
+            deleted = try ctx.actExecutor().offerDeleteWithNoLibraryOpen(
+                copies: catalog.copies(ofLibrary: libraryID), catalog: catalog)
+        } catch ExecutorRefusal.nothingToDo {
+            return .refused(.copyGone)
+        } catch {
+            ProtectionOpenRoad.log("road: another library's copies were not deleted (no library open) — \(String(describing: error))")
+            tellCopiesChanged()
+            return .refused(.deleteFailed)
+        }
+        tellCopiesChanged()
+        ProtectionOpenRoad.log(
+            "road: deleted \(deleted.count) of another library's copies on this Mac (no library open) — library "
+                + ProtectionNames.library8(libraryID))
+        return .deleted(deleted.count)
     }
 
     /// A copy's day: a backup's stamp; the day a previous library stepped aside; an OPENED copy's own day (the filed

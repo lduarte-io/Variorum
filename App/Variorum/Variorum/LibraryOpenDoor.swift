@@ -78,6 +78,15 @@ final class LibraryOpenPresenter {
         Task { await fresh.openMakeMine(row) }
     }
 
+    /// VX-309 U1c — VX-265: a Restore row's *Delete…* on the new road (rule 19's confirm; the list re-reads on the
+    /// copies-changed seam once the copies went).
+    func beginDeleteCopies(roads: CopyDoorsRoads, choice: CopyDeleteChoice) {
+        guard model == nil, roadDoors == nil else { return }
+        let fresh = CopyDoorsModel(roads: roads)
+        roadDoors = fresh
+        fresh.openDeleteCopies(choice)
+    }
+
     func dismissRoad() {
         // A look standing is forgotten (its reader closed, its private folder deleted) whatever closed the sheet.
         roadDoors?.close()

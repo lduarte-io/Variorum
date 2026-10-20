@@ -90,9 +90,20 @@ struct CopyDoorsSheet: View {
                 Text(listing.isEmpty ? ProtectionWords.noCopiesOnThisMac : ProtectionWords.emptySlotRestoreListLead)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+                // VX-309 U1c — VX-210: the one honest line, only when such copies exist (P-2).
+                if listing.unmanagedCopies > 0 {
+                    Text(ProtectionWords.copiesElsewhereLine)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                // VX-309 U1c — VX-265: what a delete here took (the listing re-read beneath it).
+                if let receipt = model.listingReceipt {
+                    Text(receipt).font(.callout).fixedSize(horizontal: false, vertical: true)
+                }
                 ScrollView {
                     VStack(alignment: .leading, spacing: 10) {
-                        ForEach(listing.all) { row in listingRow(row) }
+                        ForEach(listing.all) { row in listingRow(row, delete: listing.deleteChoice(for: row)) }
                     }
                 }
                 .frame(maxHeight: 320)
@@ -101,6 +112,8 @@ struct CopyDoorsSheet: View {
                 MakeMineConfirm(model: confirm)
             case .lookInside(let look):
                 LookInsideSheet(model: look)
+            case .deleteCopies(let confirm):
+                DeleteCopiesConfirm(model: confirm)
             case .done:
                 // The act is done (the reopen already routed) or she left; the sheet leaves.
                 Color.clear.frame(height: 1).onAppear { onClose() }
@@ -115,8 +128,9 @@ struct CopyDoorsSheet: View {
         return false
     }
 
-    /// One copy of the listing: its day and kind, and its doors.
-    private func listingRow(_ row: CopyDoorRow) -> some View {
+    /// One copy of the listing: its day and kind, and its doors — VX-309 U1c: *Delete…* where its library has a delete
+    /// choice (another library this Mac holds copies of — rule 19).
+    private func listingRow(_ row: CopyDoorRow, delete: CopyDeleteChoice?) -> some View {
         HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(row.asOf.map { $0.formatted(date: .abbreviated, time: .shortened) } ?? ProtectionWords.offerUnknownDay)
@@ -131,6 +145,41 @@ struct CopyDoorsSheet: View {
             }
             if model.offersMakeMine {
                 Button(ProtectionWords.makeMineDoor) { Task { await model.openMakeMine(row) } }
+            }
+            if model.offersDelete, let delete {
+                Button(ProtectionWords.deleteCopiesDoor) { model.openDeleteCopies(delete) }
+            }
+        }
+    }
+}
+
+/// VX-309 U1c — VX-265: rule 19's delete's confirm (one other library's copies; never silently, never bundled).
+struct DeleteCopiesConfirm: View {
+    @Bindable var model: CopyDeleteModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(ProtectionWords.deleteCopiesTitle).font(.title3.weight(.semibold))
+            Text(model.lead)
+                .font(.callout)
+                .fixedSize(horizontal: false, vertical: true)
+            if let refusal = model.refusal {
+                Text(refusal)
+                    .font(.callout)
+                    .alarmVoice()
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            HStack {
+                Button(ProtectionWords.makeMineCancel) { model.cancel() }
+                    .keyboardShortcut(.cancelAction)
+                    .disabled(model.busy)
+                Spacer()
+                if model.busy {
+                    TravellingDotsIndicator(ink: .secondary)
+                    Text(ProtectionWords.deleteCopiesWorking).font(.caption).foregroundStyle(.secondary)
+                }
+                Button(ProtectionWords.deleteCopiesButton, role: .destructive) { Task { await model.delete() } }
+                    .disabled(model.busy)
             }
         }
     }
@@ -222,6 +271,8 @@ struct RoadRestoreRows: View {
     let lookInside: (CopyDoorRow) -> Void
     /// A row's *Make this my library…* (the scene's presenter opens the confirm).
     let makeMine: (CopyDoorRow) -> Void
+    /// VX-309 U1c — VX-265: an other library's row's *Delete…* (the scene's presenter opens the confirm); nil: no door.
+    var deleteCopies: ((CopyDeleteChoice) -> Void)? = nil
 
     var body: some View {
         if !list.listing.isEmpty {
@@ -230,6 +281,13 @@ struct RoadRestoreRows: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+                // VX-309 U1c — VX-210: the one honest line, only when such copies exist (P-2).
+                if list.listing.unmanagedCopies > 0 {
+                    Text(ProtectionWords.copiesElsewhereLine)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 ForEach(list.listing.thisLibrary) { row in rowView(row) }
                 if !list.listing.otherLibraries.isEmpty {
                     Text(ProtectionWords.otherLibrariesHeading)
@@ -253,6 +311,9 @@ struct RoadRestoreRows: View {
             Spacer()
             Button(ProtectionWords.lookInsideDoor) { lookInside(row) }
             Button(ProtectionWords.makeMineDoor) { makeMine(row) }
+            if let deleteCopies, let choice = list.listing.deleteChoice(for: row) {
+                Button(ProtectionWords.deleteCopiesDoor) { deleteCopies(choice) }
+            }
         }
     }
 }
@@ -263,4 +324,6 @@ struct RoadDoorsHost {
     let roads: CopyDoorsRoads
     let lookInside: (CopyDoorRow) -> Void
     let makeMine: (CopyDoorRow) -> Void
+    /// VX-309 U1c — VX-265: an other library's row's *Delete…* (nil: none).
+    var deleteCopies: ((CopyDeleteChoice) -> Void)? = nil
 }

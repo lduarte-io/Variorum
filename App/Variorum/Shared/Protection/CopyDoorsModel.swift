@@ -45,20 +45,51 @@ nonisolated struct CopyDoorRow: Equatable, Sendable, Identifiable {
     var kind: CopyKind { copy.kind }
 }
 
+/// VX-309 U1c — VX-265: ONE other library's delete choice, as the listing knows it (rule 19: "Copies of other libraries are
+/// listed and can be deleted" — one library's copies at a time, never bundled with any other act).
+nonisolated struct CopyDeleteChoice: Equatable, Sendable {
+    let libraryID: String
+    /// What goes: THIS Mac's copies of it (`OwnCopies.thisMacsCopies` — the act's own fence, read here for the confirm).
+    let copyIDs: [String]
+    let backups: Int
+    let previousLibraries: Int
+    let openedCopies: Int
+    /// The library's day as the listing knows it — its newest listed copy's.
+    let newest: Date?
+    /// Its listed copies that stay: another Mac's in a shared folder, or a far copy outside any Mac's subfolder.
+    let staying: Int
+
+    var count: Int { copyIDs.count }
+}
+
 /// The Restore list — the catalogue's copies, grouped and ordered. Pure.
 nonisolated struct CopyDoorsListing: Equatable, Sendable {
     var thisLibrary: [CopyDoorRow]
     var otherLibraries: [CopyDoorRow]
+    /// VX-309 U1c — VX-265: each OTHER library's delete choice, by library ID — present only where this Mac holds a copy
+    /// of it to delete (P-2: a door that cannot act is not rendered), never for a protected library.
+    var deleteChoices: [String: CopyDeleteChoice] = [:]
+    /// VX-309 U1c — VX-210: the copies Variorum leaves as they are — a library-shaped file in a place no build of this
+    /// design writes (today's flat backups, a folder she made), a copy no key file names (rule 26), a far copy outside any
+    /// Mac's subfolder. The listing's one honest line renders only when this is above zero.
+    var unmanagedCopies = 0
 
     static let empty = CopyDoorsListing(thisLibrary: [], otherLibraries: [])
 
     var isEmpty: Bool { thisLibrary.isEmpty && otherLibraries.isEmpty }
     var all: [CopyDoorRow] { thisLibrary + otherLibraries }
 
+    /// A row's delete choice (its library's; nil: no *Delete…* on this row).
+    func deleteChoice(for row: CopyDoorRow) -> CopyDeleteChoice? {
+        guard !row.isThisLibrary, let library = row.copy.library else { return nil }
+        return deleteChoices[library]
+    }
+
     /// The listing of `catalog` for the library `libraryID` (nil: none open — every copy is another library's).
-    /// `asOf`: a copy's day (the road reads an opened copy's own day from its file).
+    /// `asOf`: a copy's day (the road reads an opened copy's own day from its file). `protected`: libraries never offered
+    /// a delete (VX-309 U1c — with no library open, the ones this Mac remembers; the open library never is).
     static func make(
-        _ catalog: Catalog, libraryID: String?, asOf: (CatalogCopy) -> Date? = { $0.stamp }
+        _ catalog: Catalog, libraryID: String?, protected: Set<String> = [], asOf: (CatalogCopy) -> Date? = { $0.stamp }
     ) -> CopyDoorsListing {
         var mine: [CopyDoorRow] = []
         var others: [CopyDoorRow] = []
@@ -69,7 +100,41 @@ nonisolated struct CopyDoorsListing: Equatable, Sendable {
             let row = CopyDoorRow(copy: copy, isThisLibrary: library == libraryID, asOf: asOf(copy))
             if row.isThisLibrary { mine.append(row) } else { others.append(row) }
         }
-        return CopyDoorsListing(thisLibrary: newestFirst(mine), otherLibraries: newestFirst(others))
+        var listing = CopyDoorsListing(thisLibrary: newestFirst(mine), otherLibraries: newestFirst(others))
+        listing.deleteChoices = deleteChoices(catalog, rows: listing.otherLibraries, protected: protected)
+        listing.unmanagedCopies = unmanagedCopies(in: catalog)
+        return listing
+    }
+
+    /// VX-265: each other library's choice — this Mac's copies of it (the core's one fence), counted by kind; none for a
+    /// protected library or one this Mac holds no copy of.
+    static func deleteChoices(
+        _ catalog: Catalog, rows: [CopyDoorRow], protected: Set<String>
+    ) -> [String: CopyDeleteChoice] {
+        var choices: [String: CopyDeleteChoice] = [:]
+        for library in Set(rows.compactMap(\.copy.library)) where !protected.contains(library) {
+            let mine = OwnCopies.thisMacsCopies(ofLibrary: library, in: catalog)
+            guard !mine.isEmpty else { continue }
+            let listed = rows.filter { $0.copy.library == library }
+            let ids = Set(mine.map(\.id))
+            choices[library] = CopyDeleteChoice(
+                libraryID: library, copyIDs: ids.sorted(),
+                backups: mine.filter { $0.kind == .backup }.count,
+                previousLibraries: mine.filter { $0.kind == .previousLibrary }.count,
+                openedCopies: mine.filter { $0.kind == .adoptionSafetyCopy }.count,
+                newest: listed.compactMap(\.asOf).max(),
+                staying: listed.filter { !ids.contains($0.id) }.count)
+        }
+        return choices
+    }
+
+    /// VX-210: how many copies the catalogue sees that Variorum leaves as they are — a library-shaped file (`.sqlite`) in a
+    /// place no build of this design writes (`Catalog.foreign`: today's flat backups, the A1 rail's copies, a folder she
+    /// made), a copy no format-3 key file names (rule 26 — never listed), a far copy outside any Mac's subfolder
+    /// (`unattributed` — no Mac here claims it). Pure.
+    static func unmanagedCopies(in catalog: Catalog) -> Int {
+        catalog.foreign.filter { $0.name.hasSuffix(".sqlite") }.count
+            + catalog.copies.filter { $0.library == nil || ($0.place == .farFolder && $0.mac == .unattributed) }.count
     }
 
     /// Newest first; an undated copy last; ties by id (a stable order).
@@ -109,6 +174,8 @@ nonisolated enum CopyDoorRefusal: Equatable, Sendable {
     /// VX-309 U1b — T-8: a plaintext export that cannot be brought in, said in its own words (the export's schema, a note
     /// the format cannot read back — named).
     case exportRefused(String)
+    /// VX-309 U1c — rule 19's delete could not finish (a file that would not go; the act refused).
+    case deleteFailed
 
     var sentence: String {
         switch self {
@@ -122,12 +189,19 @@ nonisolated enum CopyDoorRefusal: Equatable, Sendable {
         case .busy: return ProtectionWords.copyDoorBusy
         case .failed: return ProtectionWords.makeMineFailed
         case .exportRefused(let sentence): return sentence
+        case .deleteFailed: return ProtectionWords.deleteCopiesFailed
         }
     }
 }
 
 nonisolated enum CopyDoorOutcome: Equatable, Sendable {
     case made
+    case refused(CopyDoorRefusal)
+}
+
+/// VX-309 U1c — what rule 19's delete came to: how many copies went, or why none did.
+nonisolated enum CopyDeleteOutcome: Equatable, Sendable {
+    case deleted(Int)
     case refused(CopyDoorRefusal)
 }
 
@@ -172,6 +246,59 @@ struct CopyDoorsRoads {
     /// VX-309 U1b — T-8: a plaintext export brought in as a NEW library through the import road (the library open now, if
     /// any, steps aside whole first). nil: the door is not offered (the export keeps its refusal).
     var bringInPlaintextExport: (@MainActor (URL) async -> CopyDoorOutcome)? = nil
+    /// VX-309 U1c — VX-265: rule 19's delete — THIS Mac's copies of ONE other library (by its ID), re-read at the press.
+    /// nil: the door is not offered.
+    var deleteCopies: (@MainActor (String) async -> CopyDeleteOutcome)? = nil
+}
+
+// MARK: - VX-309 U1c — VX-265: the delete's confirm (rule 19 — one library's copies at a time, confirmed each time)
+
+@MainActor
+@Observable
+final class CopyDeleteModel: Identifiable {
+    let id = UUID()
+    let choice: CopyDeleteChoice
+    /// A library is open now (the lead says it is not touched).
+    let libraryOpen: Bool
+    private(set) var busy = false
+    /// Why the press did nothing (nil: nothing to say).
+    private(set) var refusal: String?
+
+    @ObservationIgnored private let act: (String) async -> CopyDeleteOutcome
+    /// The count deleted, or nil: she left (nothing written).
+    @ObservationIgnored private let finished: (Int?) -> Void
+
+    init(
+        choice: CopyDeleteChoice, libraryOpen: Bool, act: @escaping (String) async -> CopyDeleteOutcome,
+        finished: @escaping (Int?) -> Void
+    ) {
+        self.choice = choice
+        self.libraryOpen = libraryOpen
+        self.act = act
+        self.finished = finished
+    }
+
+    /// The confirm's lead: the library named by its day, what goes counted, what stays said.
+    var lead: String { ProtectionWords.deleteCopiesLead(choice, libraryOpen: libraryOpen) }
+
+    /// Her press — the copies go (re-read at the press: what goes is what this Mac holds of that library NOW).
+    func delete() async {
+        guard !busy else { return }
+        busy = true
+        refusal = nil
+        let outcome = await act(choice.libraryID)
+        busy = false
+        switch outcome {
+        case .deleted(let count): finished(count)
+        case .refused(let why): refusal = why.sentence
+        }
+    }
+
+    /// The confirm's way out — nothing written.
+    func cancel() {
+        guard !busy else { return }
+        finished(nil)
+    }
 }
 
 // MARK: - Make this my library's confirm (§7c (8))
@@ -320,6 +447,8 @@ final class CopyDoorsModel: Identifiable {
         case makeMine(MakeMineModel)
         /// Look inside — the copy read-only (P-VX306-U3-15).
         case lookInside(LookInsideModel)
+        /// VX-309 U1c — VX-265: rule 19's delete's confirm (one other library's copies).
+        case deleteCopies(CopyDeleteModel)
         /// The act is done (the host closes the sheet).
         case done
     }
@@ -329,6 +458,8 @@ final class CopyDoorsModel: Identifiable {
     /// VX-309 U1b — T-8: the export is being brought in (the door's working line), or why it was not.
     private(set) var bringingIn = false
     private(set) var bringInRefusal: String?
+    /// VX-309 U1c — the listing's receipt after a delete there (the listing re-read beneath it; nil: none).
+    private(set) var listingReceipt: String?
     @ObservationIgnored private let roads: CopyDoorsRoads
 
     init(roads: CopyDoorsRoads) {
@@ -417,6 +548,33 @@ final class CopyDoorsModel: Identifiable {
             })
         phase = .makeMine(model)
         await model.begin()
+    }
+
+    /// VX-309 U1c — VX-265: whether a row offers *Delete…* here (its library's choice in the listing, and the road).
+    var offersDelete: Bool { roads.deleteCopies != nil }
+
+    /// VX-309 U1c — rule 19's delete's confirm for `choice` (a listing row's press, or Data Safety's row). Confirmed, the
+    /// copies go and — from the listing — the listing is read again with the receipt above it; from a row elsewhere the
+    /// sheet leaves (the host's list re-reads on the copies-changed seam). Left, nothing is written.
+    func openDeleteCopies(_ choice: CopyDeleteChoice) {
+        guard let deleteCopies = roads.deleteCopies else { return }
+        let fromListing: Bool
+        if case .listing = phase { fromListing = true } else { fromListing = false }
+        listingReceipt = nil
+        let model = CopyDeleteModel(
+            choice: choice, libraryOpen: !roads.landsInTheEmptySlot, act: { await deleteCopies($0) },
+            finished: { [weak self] count in
+                guard let self else { return }
+                guard fromListing else {
+                    self.phase = .done
+                    return
+                }
+                Task {
+                    await self.beginListing()
+                    if let count { self.listingReceipt = ProtectionWords.deleteCopiesReceipt(count) }
+                }
+            })
+        phase = .deleteCopies(model)
     }
 
     /// The sheet's way out — a look standing is forgotten first.

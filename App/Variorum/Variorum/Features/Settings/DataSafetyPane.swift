@@ -93,7 +93,9 @@ struct DataSafetyPane: View {
                 copiesSection
                 if let roadDoors {
                     if let roadList {
-                        RoadRestoreRows(list: roadList, lookInside: roadDoors.lookInside, makeMine: roadDoors.makeMine)
+                        RoadRestoreRows(
+                            list: roadList, lookInside: roadDoors.lookInside, makeMine: roadDoors.makeMine,
+                            deleteCopies: roadDoors.deleteCopies)
                     }
                 } else {
                     restoreFromBackupSection

@@ -241,6 +241,53 @@ nonisolated enum ProtectionWords {
         return text
     }
 
+    // MARK: - VX-309 U1c — VX-265's delete and VX-210's line (PROVISIONAL P-VX309-U1c-1 — U2's words pass)
+
+    /// A row's door (the brief's *Delete…*): one other library's copies.
+    static let deleteCopiesDoor = "Delete\u{2026}"
+    static let deleteCopiesTitle = "Delete this library's copies?"
+    static let deleteCopiesButton = "Delete copies"
+    static let deleteCopiesWorking = "Deleting the copies\u{2026}"
+    /// What goes, counted by kind ("2 backups and a previous library").
+    static func deleteCopiesCounts(_ choice: CopyDeleteChoice) -> String {
+        func count(_ n: Int, _ one: String, _ many: String) -> String? {
+            n == 0 ? nil : (n == 1 ? one : "\(n) \(many)")
+        }
+        let parts = [
+            count(choice.backups, "a backup", "backups"),
+            count(choice.previousLibraries, "a previous library", "previous libraries"),
+            count(choice.openedCopies, "an opened copy", "opened copies"),
+        ].compactMap { $0 }
+        switch parts.count {
+        case 0: return "nothing"
+        case 1: return parts[0]
+        default: return parts.dropLast().joined(separator: ", ") + " and " + parts[parts.count - 1]
+        }
+    }
+    /// The confirm's lead (rule 19: one library's copies, never silently): the library named by its day as the listing
+    /// knows it, what goes counted, what stays said, and that nothing else is touched.
+    static func deleteCopiesLead(_ choice: CopyDeleteChoice, libraryOpen: Bool) -> String {
+        let day = choice.newest.map { ProtectionWords.day($0) } ?? offerUnknownDay
+        var text = "This deletes the copies this Mac made of the library last copied \(day): "
+            + deleteCopiesCounts(choice) + ". They can't be brought back."
+        if choice.staying > 0 {
+            text += choice.staying == 1
+                ? " One copy another Mac made stays." : " \(choice.staying) copies another Mac made stay."
+        }
+        text += libraryOpen ? " Your library isn't touched." : ""
+        return text
+    }
+    /// The receipt naming what went.
+    static func deleteCopiesReceipt(_ count: Int) -> String {
+        count == 1 ? "Deleted 1 copy of another library from this Mac."
+            : "Deleted \(count) copies of another library from this Mac."
+    }
+    static let deleteCopiesFailed = "Variorum couldn't delete those copies just now. Nothing more was deleted."
+    /// VX-210 — her words: "if we have a line about 'this doesn't handle backups elsewhere', I don't think we need to do
+    /// more." The listing's ONE honest line (rule 25's idiom), rendered only when such copies exist (P-2).
+    static let copiesElsewhereLine = "Copies outside the folders Variorum keeps \u{2014} older backups, or a folder you "
+        + "made \u{2014} are left as they are: they're yours to manage in the Finder."
+
     // MARK: - The lobby (rule 8: it asks only when no quiet road remains) — PROVISIONAL P-VX306-U1b-4
 
     static let lobbyTitle = "Open your library"

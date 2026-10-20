@@ -1215,7 +1215,16 @@ final class AppBootstrap {
             // VX-307 U2c — VX-413: the note page's Copy full text (the platform's clipboard rule).
             copyFullText: Self.copyFullTextRoad,
             // VX-309 U1b — T-8: a plaintext export brought in as a new library (this one steps aside whole).
-            bringInPlaintextExport: { [weak self] url in await self?.bringInPlaintextExport(url) ?? .refused(.failed) })
+            bringInPlaintextExport: { [weak self] url in await self?.bringInPlaintextExport(url) ?? .refused(.failed) },
+            // VX-309 U1c — VX-265: rule 19's delete on the open session (one act at a time); the receipt on the status seam.
+            deleteCopies: { [weak self] libraryID in
+                guard let session = self?.roadSession else { return .refused(.deleteFailed) }
+                let outcome = await Task.detached(priority: .userInitiated) {
+                    await ProtectionCopyDoors.deleteCopies(session, libraryID: libraryID)
+                }.value
+                if case .deleted(let count) = outcome { self?.roadStanding?.speak?(ProtectionWords.deleteCopiesReceipt(count)) }
+                return outcome
+            })
     }
 
     /// VX-306 U3 — the two doors' roads with NO library open (the missing face's and rule 27's *Open Library…*,
@@ -1250,7 +1259,27 @@ final class AppBootstrap {
             copyFullText: Self.copyFullTextRoad,
             landsInTheEmptySlot: true,
             // VX-309 U1b — T-8: a plaintext export brought in as a new library.
-            bringInPlaintextExport: { [weak self] url in await self?.bringInPlaintextExport(url) ?? .refused(.failed) })
+            bringInPlaintextExport: { [weak self] url in await self?.bringInPlaintextExport(url) ?? .refused(.failed) },
+            // VX-309 U1c — VX-265: rule 19's delete with no library open (never a library this Mac remembers); one
+            // landing or delete at a time (a delete never runs under a landing that may be reading the copy).
+            deleteCopies: { [weak self] libraryID in
+                guard let self else { return .refused(.deleteFailed) }
+                return await self.deleteCopiesWithNoLibraryOpen(libraryID, context: context)
+            })
+    }
+
+    /// VX-309 U1c — rule 19's delete with NO library open (the empty-slot listing): only where no library is open, one at a
+    /// time beside the landings, off the main actor; the listing's own receipt line says what went.
+    private func deleteCopiesWithNoLibraryOpen(
+        _ libraryID: String, context: @escaping @Sendable () -> CopyDoorsContext
+    ) async -> CopyDeleteOutcome {
+        if case .ready = state { return .refused(.deleteFailed) }
+        guard !copyLandingRunning else { return .refused(.busy) }
+        copyLandingRunning = true
+        defer { copyLandingRunning = false }
+        return await Task.detached(priority: .userInitiated) {
+            ProtectionCopyDoors.deleteCopies(context(), libraryID: libraryID)
+        }.value
     }
 
     /// **A PLAINTEXT EXPORT BROUGHT IN AS A NEW LIBRARY** (VX-309 U1b — T-8; the mapping ruled at the plan's §5b-R). From an
