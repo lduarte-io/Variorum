@@ -156,6 +156,24 @@ struct PlaintextExportBringInRoadTests {
         #expect(try CopyDoorsPlant.tree(road.slot.places.container) == before, "nothing written")
     }
 
+    /// A READ-ONLY ROAD (a hosted test run's) never brings an export in — and never moves what stands in the slot first
+    /// (the creation itself refuses there, so a step-aside before it would leave the slot empty for nothing).
+    @Test func aReadOnlyRoadMovesNothing() async throws {
+        let road = PlantedRoad()
+        let (session, _) = try await road.created()
+        try CopyDoorsPlant.migrate(road, key: session.key)
+        let export = try ExportPlant.export(into: road.slot.root.appendingPathComponent("Downloads/vx309-export"))
+        guard case .plan(let plan) = ProtectionCopyDoors.readPlaintextExport(export) else {
+            Issue.record("the export plans")
+            return
+        }
+        let before = try CopyDoorsPlant.tree(road.slot.places.container)
+        let result = await ProtectionCopyDoors.landPlaintextExport(road.context(writes: false), plan: plan)
+        #expect(result.created == nil && result.refusal != nil)
+        #expect(try CopyDoorsPlant.tree(road.slot.places.container) == before, "nothing moved")
+        #expect(ProtectionLibraryFiles.opens(road.slot.places.slot, key: session.key))
+    }
+
     /// THE DOORS' BRAIN: a picked export is NAMED (never filed) and its one door offered where the road exists; without
     /// the road it keeps its honest refusal; the door's press made ⇒ the sheet leaves; refused ⇒ the sentence under it.
     @Test func theDoorsNameTheExportAndOfferItsOneDoor() async throws {
