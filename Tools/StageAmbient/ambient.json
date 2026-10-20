@@ -1,0 +1,9 @@
+{
+  "fps": 12,
+  "pixelScale": 3,
+  "rotateMinutes": 10,
+  "dissolveSeconds": 3,
+  "scenes": [
+    { "name": "koi", "weight": 1 }
+  ]
+}
