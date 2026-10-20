@@ -118,12 +118,12 @@ struct RoadAccountModelTests {
         let setUp = RoadAccountConfirmModel(door: PlantedAccountRoads.setUp(), act: planted.roads.press) { _ in }
         await setUp.submit(passphrase: "p", again: "p", words: "one two three")
         #expect(setUp.refusal == ProtectionWords.wordsWrongCount(3))
-        await setUp.submit(passphrase: "p", again: "q", words: Self.wordsText)
+        await setUp.submit(passphrase: "a new passphrase", again: "a new passphrase!", words: Self.wordsText)
         #expect(setUp.refusal == ProtectionWords.setPassphraseMismatch && planted.requests.isEmpty)
-        await setUp.submit(passphrase: " spaced ", again: " spaced ", words: "  " + Self.wordsText + "\n")
+        await setUp.submit(passphrase: " spaced passphrase ", again: " spaced passphrase ", words: "  " + Self.wordsText + "\n")
         let sent = try #require(planted.requests.last)
         #expect(sent.door == .turnOnSync && sent.shown == PlantedAccountRoads.setUp())
-        #expect(sent.typed.newPassphrase == " spaced " && sent.typed.passphrase == nil && sent.typed.words == Self.words)
+        #expect(sent.typed.newPassphrase == " spaced passphrase " && sent.typed.passphrase == nil && sent.typed.words == Self.words)
         #expect(!sent.typed.wordsAreNew, "rule 7: the words are typed, never made new")
         #expect(setUp.refusal == "no")
         let leave = RoadAccountConfirmModel(door: PlantedAccountRoads.leave(.thisMacOnly), act: planted.roads.press) { _ in }
@@ -140,7 +140,7 @@ struct RoadAccountModelTests {
         planted.press = .changed(changed)
         var finished: [RoadAccountPress?] = []
         let confirm = RoadAccountConfirmModel(door: PlantedAccountRoads.setUp(), act: planted.roads.press) { finished.append($0) }
-        await confirm.submit(passphrase: "p", again: "p", words: Self.wordsText)
+        await confirm.submit(passphrase: "a new passphrase", again: "a new passphrase", words: Self.wordsText)
         #expect(confirm.door == changed && confirm.refusal == ProtectionWords.crossingDoorChanged && finished.isEmpty)
         planted.press = .made(receipt: "done")
         await confirm.submit(passphrase: "p", again: "", words: Self.wordsText)
@@ -245,7 +245,7 @@ struct RoadAccountModelTests {
         for _ in 0..<10_000 where crossings.confirm == nil { await Task.yield() }
         let confirm = try #require(crossings.confirm)
         #expect(confirm.door == PlantedCrossingRoads.useCastle() && confirm.receiptNote == ProtectionWords.bornCastleNote)
-        await confirm.submit(passphrase: "p", again: "p", words: Self.wordsText)
+        await confirm.submit(passphrase: "a new passphrase", again: "a new passphrase", words: Self.wordsText)
         #expect(planted.requests.last?.receiptNote == ProtectionWords.bornCastleNote)
         // Cancel on a fresh screen writes nothing.
         planted.faces = signedOut

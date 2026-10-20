@@ -271,6 +271,7 @@ struct RoadAccountConfirmSheet: View {
                     .fixedSize(horizontal: false, vertical: true)
                 PeekableSecretField(label: ProtectionWords.crossingNewPassphraseField, text: $passphrase)
                     .textFieldStyle(.roundedBorder)
+                PassphraseHintLine(passphrase: passphrase)
                 PeekableSecretField(label: ProtectionWords.crossingNewPassphraseAgain, text: $again)
                     .textFieldStyle(.roundedBorder)
             } else {

@@ -89,6 +89,17 @@ nonisolated enum ProtectionWords {
     static let setPassphraseField = "Passphrase"
     static let setPassphraseAgain = "Again"
     static let setPassphraseButton = "Set passphrase"
+    /// VX-309 U2 — VX-211 (her kickoff ruling, "Floor + quiet hint"): the ONE calm line beside a new passphrase field — the
+    /// Domain estimator's advice (`PassphraseStrength`), never a block, never a meter, no colour; nothing at all for a long,
+    /// varied phrase or an empty field. The short line is the brief's own example, sentence-cased (PROVISIONAL P-VX309-U2-7).
+    static func passphraseHint(_ advice: PassphraseAdvice) -> String? {
+        switch advice {
+        case .none: return nil
+        case .short: return "Short passphrases are easier to guess \u{2014} a longer phrase is stronger."
+        case .repetitive:
+            return "Repeated characters are easy to guess \u{2014} a phrase of a few different words is stronger."
+        }
+    }
     static let passphraseSetReceipt = "Passphrase set. Your twelve words still open the library too."
 
     // MARK: - (8) Make this my library's confirm — §7c (8), verbatim (rule 17; VX-306 U3)

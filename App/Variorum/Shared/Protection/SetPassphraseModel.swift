@@ -13,6 +13,25 @@
 
 import Foundation
 import Observation
+import VariorumCore
+
+/// **VX-309 U2 — VX-211: THE FLOOR, ON THE NEW ROAD** (her kickoff ruling, "Floor + quiet hint"; her 17n ruling: the floor
+/// "binds where a passphrase is SET and nowhere else"). ONE check every new-road setter reads — the Set a passphrase sheet, a
+/// crossing's new passphrase, turning sync on with a new one, the key doors' new passphrase — with today's road's one number
+/// and one sentence (`ProtectionCopy.passphraseFloor` / `.passphraseTooShort`). The ONLY refusal: the strength line beside
+/// the field is advice (`hint`), never a block.
+nonisolated enum NewPassphraseRule {
+    /// The refusal for a passphrase being SET under the floor (nil: it may be set).
+    static func floorRefusal(_ passphrase: String) -> String? {
+        passphrase.count < ProtectionCopy.passphraseFloor ? ProtectionCopy.passphraseTooShort : nil
+    }
+
+    /// VX-211's quiet line beside a new passphrase field — the Domain estimator's advice in words (nil: nothing said; an
+    /// empty field says nothing).
+    static func hint(_ passphrase: String) -> String? {
+        ProtectionWords.passphraseHint(PassphraseStrength.advice(passphrase))
+    }
+}
 
 @MainActor
 @Observable
@@ -50,6 +69,11 @@ final class SetPassphraseModel: Identifiable {
             return
         }
         guard canSubmit(passphrase: passphrase, again: again) else { return }
+        // VX-309 U2 — VX-211: the floor, today's order (the floor, then the match).
+        if let floor = NewPassphraseRule.floorRefusal(passphrase) {
+            refusal = floor
+            return
+        }
         guard passphrase == again else {
             refusal = ProtectionWords.setPassphraseMismatch
             return

@@ -49,7 +49,7 @@ struct RoadAccountSurfaceTests {
         let setUp = RoadAccountConfirmModel(
             door: PlantedAccountRoads.setUp(), act: { _ in .refused(ProtectionWords.wordsDoNotOpen) }) { _ in }
         await SurfaceComposition.host(RoadAccountConfirmSheet(model: setUp), size: NSSize(width: 480, height: 640))
-        await setUp.submit(passphrase: "p", again: "p", words: try RecoveryPhrase.generate().joined(separator: " "))
+        await setUp.submit(passphrase: "a new passphrase", again: "a new passphrase", words: try RecoveryPhrase.generate().joined(separator: " "))
         #expect(setUp.refusal == ProtectionWords.wordsDoNotOpen)
         await SurfaceComposition.host(RoadAccountConfirmSheet(model: setUp), size: NSSize(width: 480, height: 640))
         let delete = RoadAccountConfirmModel(

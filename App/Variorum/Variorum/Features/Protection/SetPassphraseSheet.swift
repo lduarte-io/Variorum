@@ -28,6 +28,7 @@ struct SetPassphraseSheet: View {
             if !model.alreadySet {
                 PeekableSecretField(label: ProtectionWords.setPassphraseField, text: $passphrase)
                     .textFieldStyle(.roundedBorder)
+                PassphraseHintLine(passphrase: passphrase)
                 PeekableSecretField(label: ProtectionWords.setPassphraseAgain, text: $again, onSubmit: submit)
                     .textFieldStyle(.roundedBorder)
             }
@@ -56,5 +57,22 @@ struct SetPassphraseSheet: View {
         let typed = passphrase
         let twice = again
         Task { await model.submit(passphrase: typed, again: twice) }
+    }
+}
+
+/// VX-309 U2 — VX-211 (her "Floor + quiet hint"): the ONE calm line beneath a NEW passphrase field, as she types — the
+/// estimator's advice (`NewPassphraseRule.hint`), never a block, never a meter, no colour; nothing for a long, varied phrase.
+/// Every new-road field that SETS a passphrase renders it (the set sheet, the tour's last card, a crossing's and turning
+/// sync on's new passphrase, the key doors' new passphrase).
+struct PassphraseHintLine: View {
+    let passphrase: String
+
+    var body: some View {
+        if let hint = NewPassphraseRule.hint(passphrase) {
+            Text(hint)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }

@@ -179,10 +179,10 @@ struct PassphraseReminderTests {
         let sheet = SetPassphraseModel(alreadySet: false, setRoad: { typed.append($0); return .set }) { finished.append($0) }
         #expect(sheet.refusal == nil)
         #expect(!sheet.canSubmit(passphrase: "a", again: ""))
-        await sheet.submit(passphrase: "one", again: "two")
+        await sheet.submit(passphrase: "passphrase one", again: "passphrase two")
         #expect(sheet.refusal == ProtectionWords.setPassphraseMismatch && typed.isEmpty)
-        await sheet.submit(passphrase: " one ", again: " one ")
-        #expect(typed == [" one "], "never trimmed")
+        await sheet.submit(passphrase: " passphrase one ", again: " passphrase one ")
+        #expect(typed == [" passphrase one "], "never trimmed")
         #expect(finished == [true])
     }
 
@@ -194,10 +194,10 @@ struct PassphraseReminderTests {
         await refused.submit(passphrase: "x", again: "x")
         #expect(calls == 0)
         let failing = SetPassphraseModel(alreadySet: false, setRoad: { _ in .failed }) { _ in }
-        await failing.submit(passphrase: "x", again: "x")
+        await failing.submit(passphrase: "a new passphrase", again: "a new passphrase")
         #expect(failing.refusal == ProtectionWords.setPassphraseFailed)
         let lateRefusal = SetPassphraseModel(alreadySet: false, setRoad: { _ in .alreadySet }) { _ in }
-        await lateRefusal.submit(passphrase: "x", again: "x")
+        await lateRefusal.submit(passphrase: "a new passphrase", again: "a new passphrase")
         #expect(lateRefusal.refusal == ProtectionWords.setPassphraseAlreadySet)
         var left: [Bool] = []
         let cancelled = SetPassphraseModel(alreadySet: false, setRoad: { _ in .set }) { left.append($0) }
@@ -223,7 +223,7 @@ struct PassphraseReminderTests {
         #expect(standing.offersSetPassphrase, "no passphrase yet — the pane's row renders")
         let sheet = standing.makeSetPassphraseSheet { closed += 1 }
         #expect(!sheet.alreadySet)
-        await sheet.submit(passphrase: "p", again: "p")
+        await sheet.submit(passphrase: "a new passphrase", again: "a new passphrase")
         #expect(closed == 1 && reminder.showing == nil)
         #expect(spoken == ["Passphrase set. Your twelve words still open the library too."])
         #expect(!standing.offersSetPassphrase, "a passphrase now — the pane's row goes (NIT 4)")

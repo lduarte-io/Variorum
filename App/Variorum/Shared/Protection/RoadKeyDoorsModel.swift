@@ -99,6 +99,11 @@ final class RoadKeyDoorConfirmModel: Identifiable {
             }
             typedWords = words
         }
+        // VX-309 U2 — VX-211: the NEW passphrase meets the floor (the current one never — it already opens the library).
+        if let floor = NewPassphraseRule.floorRefusal(new) {
+            refusal = floor
+            return
+        }
         guard new == again else {
             refusal = ProtectionWords.setPassphraseMismatch
             return
@@ -111,6 +116,10 @@ final class RoadKeyDoorConfirmModel: Identifiable {
     /// Castle's forgot road by Touch ID (the press is the road's — a read of this Mac's item, which prompts).
     func submitWithTouchID(new: String, again: String) async {
         guard canSubmitWithTouchID(new: new, again: again) else { return }
+        if let floor = NewPassphraseRule.floorRefusal(new) {
+            refusal = floor
+            return
+        }
         guard new == again else {
             refusal = ProtectionWords.setPassphraseMismatch
             return

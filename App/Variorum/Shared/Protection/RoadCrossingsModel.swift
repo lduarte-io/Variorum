@@ -134,6 +134,11 @@ final class RoadCrossingConfirmModel: Identifiable {
             }
             typedWords = words
         }
+        // VX-309 U2 — VX-211: a passphrase being SET meets the floor first (today's order: the floor, then the match).
+        if door.ask.asksPassphrase, door.newPassphrase, let floor = NewPassphraseRule.floorRefusal(passphrase) {
+            refusal = floor
+            return
+        }
         if door.ask.asksPassphrase, door.newPassphrase, passphrase != again {
             refusal = ProtectionWords.setPassphraseMismatch
             return

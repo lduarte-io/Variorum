@@ -22,6 +22,45 @@ struct PassphraseFloorRoadTests {
     static let floor = "twelve chars"           // 12 — the floor itself passes
     static let words = (try? RecoveryPhrase.generate()) ?? []
 
+    /// THE QUIET HINT (the estimator's advice in words — PROVISIONAL): nothing for an empty field or a long, varied phrase;
+    /// the short and the repetitive lines otherwise; NEVER a refusal (a 12-character passphrase that earns the hint is SET).
+    @Test func theQuietHintIsAdviceNeverABlock() async {
+        #expect(NewPassphraseRule.hint("") == nil)
+        #expect(NewPassphraseRule.hint("the lamp by the north window") == nil)
+        #expect(NewPassphraseRule.hint(Self.floor)
+            == "Short passphrases are easier to guess \u{2014} a longer phrase is stronger.")
+        #expect(NewPassphraseRule.hint("aaaaaaaaaaaaaaaaaaaaaaaa")
+            == "Repeated characters are easy to guess \u{2014} a phrase of a few different words is stronger.")
+        for advice in [PassphraseAdvice.short, .repetitive] {
+            let line = ProtectionWords.passphraseHint(advice) ?? ""
+            #expect(U2WordsTests.shouts(line).isEmpty && !line.isEmpty)
+        }
+        var asked: [String] = []
+        let model = SetPassphraseModel(alreadySet: false, setRoad: { asked.append($0); return .set }) { _ in }
+        await model.submit(passphrase: Self.floor, again: Self.floor)
+        #expect(asked == [Self.floor] && model.refusal == nil, "the hint never blocks")
+    }
+
+    /// The hint's homes (by source): every new-road field that SETS a passphrase renders it, right under the field.
+    @Test func everyNewPassphraseFieldRendersTheHint() throws {
+        let protection = URL(fileURLWithPath: #filePath).resolvingSymlinksInPath()
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Variorum/Features/Protection")
+        for (file, field, text) in [
+            ("SetPassphraseSheet.swift", "ProtectionWords.setPassphraseField", "passphrase"),
+            ("RoadKeyDoorSheet.swift", "ProtectionWords.keyDoorNewPassphraseField", "new"),
+            ("RoadCrossingSheet.swift", "ProtectionWords.crossingNewPassphraseField", "passphrase"),
+            ("RoadAccountSheet.swift", "ProtectionWords.crossingNewPassphraseField", "passphrase"),
+        ] {
+            let source = try String(contentsOf: protection.appendingPathComponent(file), encoding: .utf8)
+            let after = try #require(source.components(separatedBy: "PeekableSecretField(label: \(field)").dropFirst().first,
+                                     "\(file) sets a passphrase")
+            #expect(after.prefix(220).contains("PassphraseHintLine(passphrase: \(text))"), "\(file): the hint under the field")
+        }
+        let band = try String(contentsOf: protection.appendingPathComponent("WordsBandCard.swift"), encoding: .utf8)
+        #expect(band.contains("NewPassphraseRule.hint(passphrase)"), "the tour's last card, in the card's voice")
+    }
+
     /// THE SET-A-PASSPHRASE SHEET (rule 3's): under the floor refused with its one sentence, the road never asked.
     @Test func theSetPassphraseSheetRefusesUnderTheFloor() async {
         var asked: [String] = []
