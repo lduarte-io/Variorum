@@ -1217,9 +1217,9 @@ final class AppBootstrap {
     }
 
     /// VX-306 U3 — the two doors' roads with NO library open (the missing face's and rule 27's *Open Library…*,
-    /// P-VX306-U3-7 narrowed at the ruling): a pick filed, then Look inside; Make this my library is not offered (no
-    /// current pair to verify — the empty-slot landing, T-5, is VX-309's). nil on today's road and on a hosted test run's
-    /// read-only road (the filing writes).
+    /// P-VX306-U3-7 narrowed at the ruling): a pick filed, then Look inside; and — VX-309 U1b, T-5 — Make this my library
+    /// INTO THE EMPTY SLOT (`makeThisMyLibraryInTheEmptySlot`: no current pair exists, so the copy's own typed secret is the
+    /// one thing asked). nil on today's road and on a hosted test run's read-only road (the filing writes).
     func copyDoorsRoadsWithoutALibrary() -> CopyDoorsRoads? {
         guard newRoad, let road = roadInputs?.compose(), road.writes else { return nil }
         // The road's context (its sign-in read) is taken off the main actor, inside each detached read.
@@ -1232,7 +1232,10 @@ final class AppBootstrap {
                 await Task.detached(priority: .userInitiated) { ProtectionCopyDoors.opensQuietly(context(), copy) }.value
             },
             passphraseSet: { false },
-            makeMine: nil,
+            makeMine: { [weak self] row, copySecrets, _ in
+                guard let self else { return .refused(.failed) }
+                return await self.makeThisMyLibraryInTheEmptySlot(row, copySecrets: copySecrets)
+            },
             pick: { url in
                 await Task.detached(priority: .userInitiated) { ProtectionCopyDoors.pick(url, context()) }.value
             },
@@ -1242,7 +1245,45 @@ final class AppBootstrap {
                 }.value
             },
             // VX-307 U2c — VX-413: the note page's Copy full text (the platform's clipboard rule).
-            copyFullText: Self.copyFullTextRoad)
+            copyFullText: Self.copyFullTextRoad,
+            landsInTheEmptySlot: true)
+    }
+
+    /// One empty-slot landing at a time (a second press while one runs refuses busy).
+    @ObservationIgnored private var landingInTheEmptySlot = false
+
+    /// **MAKE THIS MY LIBRARY INTO THE EMPTY SLOT** (VX-309 U1b — T-5; rule 17 with no library open). Offered only where
+    /// no library is open: the missing face, and rule 27's lobby (its *Open Library…* renders only in that state). No pool
+    /// is open on the slot, so nothing closes: the act runs off the main actor (`ProtectionCopyDoors.makeMineInTheEmptySlot`
+    /// — the preflight's reads, the restore hold, what stands in the slot set aside whole, the core's act, today's store id
+    /// minted fresh), then the open goes THROUGH THE NEW ROAD with the new key in hand (or, if the act stopped past its
+    /// swap, by the new library's own quiet road), the receipt owed to that open's status seam.
+    func makeThisMyLibraryInTheEmptySlot(_ row: CopyDoorRow, copySecrets: TypedSecrets) async -> CopyDoorOutcome {
+        guard newRoad, let road = roadInputs?.compose(), road.writes else { return .refused(.failed) }
+        switch state {
+        case .libraryMissing: break
+        case .roadLobby(let lobby) where lobby.face.noKeyFileAnywhere != nil: break
+        default: return .refused(.failed)
+        }
+        guard !landingInTheEmptySlot else { return .refused(.busy) }
+        landingInTheEmptySlot = true
+        defer { landingInTheEmptySlot = false }
+        let gate = gate
+        let scope = storeVariant.rawValue
+        let result = await Task.detached(priority: .userInitiated) {
+            // The context off the main actor: it reads the sign-in (a Keychain read).
+            let ctx = CopyDoorsContext(road.context())
+            return await ProtectionCopyDoors.makeMineInTheEmptySlot(
+                ctx, row: row, copySecrets: copySecrets,
+                mintStoreIdentity: { key in
+                    Self.ensureStoreIdentity(slot: ctx.system.places.slot, key: key, fresh: true, gate: gate, scope: scope)
+                })
+        }.value
+        guard result.outcome == .made else { return result.outcome }
+        receiptsForNextRoadOpen.append(ProtectionWords.makeMineEmptySlotReceipt)
+        beginOpening(unlockedKey: result.key)
+        await awaitOpen()
+        return .made
     }
 
     /// VX-307 U2c — VX-413 (her ruling: "copy full text is a good idea"): Look inside's *Copy full text* writes the

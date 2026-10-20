@@ -191,6 +191,16 @@ nonisolated enum ProtectionWords {
     /// The picked copy, filed: what it is.
     static func pickedCopyLine(_ day: String) -> String { "A copy from \(day)." }
 
+    // MARK: - VX-309 U1b — T-5, Make this my library into the empty slot (PROVISIONAL P-VX309-U1b-3 — U2's words pass)
+
+    /// The confirm's lead with no library open: the copy becomes the library under the secret typed for it (rule 14's
+    /// precedent — a typed secret, never a quiet road alone); with its passphrase, its words are new and the card offers them.
+    static let makeMineEmptySlotLead = "This copy becomes your library — a new library of its own, in Standard, with a "
+        + "fresh key. Type the copy's twelve words to keep them, or its passphrase; with the passphrase, your library gets "
+        + "new twelve words, offered once it opens. The copy itself is not changed."
+    /// The receipt after the landing (no library stepped aside — there was none).
+    static let makeMineEmptySlotReceipt = "This copy is your library now."
+
     // MARK: - The lobby (rule 8: it asks only when no quiet road remains) — PROVISIONAL P-VX306-U1b-4
 
     static let lobbyTitle = "Open your library"

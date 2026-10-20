@@ -21,8 +21,10 @@
 //      this Mac's `Backups/safety-copies/variorum-adopt-safety-<stamp>/` (P-VX306-U3-0 (a), the orchestrator's
 //      ruling) and the doors then act on the catalogued copy; anything else is the honest refusal.
 //    - LOOK INSIDE (`LookInsideModel` — the orchestrator's ruling P-VX306-U3-15, (b) the read-only facts sheet): on
-//      every row and every picked copy; MAKE THIS MY LIBRARY only where a library is open (`CopyDoorsRoads.makeMine` nil at
-//      the missing face and rule 27's lobby — T-5 is VX-309's).
+//      every row and every picked copy. MAKE THIS MY LIBRARY with a library open (her current pair) AND — VX-309 U1b, T-5
+//      — with none (the missing face, rule 27's lobby: `CopyDoorsRoads.landsInTheEmptySlot`): there the copy lands in the
+//      empty slot as a new library under the secret typed FOR IT — its own passphrase or twelve words, always asked
+//      (rule 14's precedent: a quiet road alone carries no pair to lock it under).
 //
 
 import Foundation
@@ -146,8 +148,8 @@ struct CopyDoorsRoads {
     var opensQuietly: @MainActor (CatalogCopy) async -> Bool
     /// Whether the library open now carries a passphrase (the confirm asks for it).
     var passphraseSet: @MainActor () -> Bool
-    /// MAKE THIS MY LIBRARY: the copy's secrets, then her current pair. nil: no library is open (the missing face,
-    /// rule 27's lobby) — the empty-slot landing (T-5) is VX-309's, so the door is not offered.
+    /// MAKE THIS MY LIBRARY: the copy's secrets, then her current pair (ignored where `landsInTheEmptySlot`). nil: the
+    /// door is not offered.
     var makeMine: (@MainActor (CopyDoorRow, _ copySecrets: TypedSecrets, _ currentPair: TypedSecrets) async -> CopyDoorOutcome)?
     /// A picked thing classified and, when it is a pair or a library folder, filed (the picked thing is only read).
     var pick: @MainActor (URL) async -> PickOutcome
@@ -158,6 +160,9 @@ struct CopyDoorsRoads {
     /// VX-307 U2c — VX-413: the platform's clipboard road for Look inside's *Copy full text* (the Mac's general
     /// pasteboard, written exactly as a live note's Copy full text writes it). nil: the door is not offered.
     var copyFullText: (@MainActor (String) -> Void)? = nil
+    /// VX-309 U1b — T-5: no library is open (the missing face, rule 27's lobby) — Make this my library lands the copy in
+    /// the empty slot under the secret typed for it, and its confirm asks exactly that (no current pair exists).
+    var landsInTheEmptySlot = false
 }
 
 // MARK: - Make this my library's confirm (§7c (8))
@@ -169,6 +174,9 @@ final class MakeMineModel: Identifiable {
     let row: CopyDoorRow
     /// The library open now carries a passphrase — the confirm asks for it beside the words.
     let passphraseSet: Bool
+    /// VX-309 U1b — T-5: no library is open; the copy's own secret is the one thing asked (always — rule 14's precedent),
+    /// and it becomes the new library's lock.
+    let intoTheEmptySlot: Bool
     /// The copy's own quiet road is being tried (a READ).
     private(set) var checking = true
     /// No quiet road opens the copy — its own secret is asked (an empty field tries her own pair).
@@ -183,27 +191,55 @@ final class MakeMineModel: Identifiable {
     @ObservationIgnored private let finished: (Bool) -> Void
 
     init(
-        row: CopyDoorRow, passphraseSet: Bool,
+        row: CopyDoorRow, passphraseSet: Bool, intoTheEmptySlot: Bool = false,
         opensQuietly: @escaping () async -> Bool,
         act: @escaping (TypedSecrets, TypedSecrets) async -> CopyDoorOutcome,
         finished: @escaping (Bool) -> Void
     ) {
         self.row = row
         self.passphraseSet = passphraseSet
+        self.intoTheEmptySlot = intoTheEmptySlot
         self.opensQuietly = opensQuietly
         self.act = act
         self.finished = finished
     }
 
-    /// The lead — §7c (8) (the passphrase clause only when one is set — P-VX306-U3-3).
-    var lead: String { ProtectionWords.makeMineLeadShown(passphraseSet: passphraseSet) }
+    /// The lead — §7c (8) (the passphrase clause only when one is set — P-VX306-U3-3); T-5's own when no library is open.
+    var lead: String {
+        intoTheEmptySlot ? ProtectionWords.makeMineEmptySlotLead : ProtectionWords.makeMineLeadShown(passphraseSet: passphraseSet)
+    }
 
     /// The quiet road tried once, at the confirm's open — AUTOMATIC, so the road it is given never presses Touch ID
-    /// (`ProtectionCopyDoors.opensQuietly` — m2).
+    /// (`ProtectionCopyDoors.opensQuietly` — m2). Into the empty slot no quiet road counts: the copy's secret is asked at once.
     func begin() async {
+        if intoTheEmptySlot {
+            needsCopySecret = true
+            checking = false
+            return
+        }
         checking = true
         needsCopySecret = !(await opensQuietly())
         checking = false
+    }
+
+    /// VX-309 U1b — T-5's button: the copy's own secret typed, nothing running.
+    func canSubmitIntoTheEmptySlot(copySecret: String) -> Bool {
+        intoTheEmptySlot && !checking && !busy && !copySecret.isEmpty
+    }
+
+    /// VX-309 U1b — T-5's press: the copy's own secret (twelve valid words are the words, anything else a passphrase —
+    /// untrimmed), and no current pair (none exists).
+    func submitIntoTheEmptySlot(copySecret: String) async {
+        guard canSubmitIntoTheEmptySlot(copySecret: copySecret) else { return }
+        let copySecrets = Self.copySecrets(copySecret, currentPair: .none)
+        busy = true
+        refusal = nil
+        let outcome = await act(copySecrets, .none)
+        busy = false
+        switch outcome {
+        case .made: finished(true)
+        case .refused(let why): refusal = why.sentence
+        }
     }
 
     /// The button: her words typed, her passphrase typed when one is set, nothing running.
@@ -323,7 +359,7 @@ final class CopyDoorsModel: Identifiable {
         guard let makeMine = roads.makeMine else { return }
         let roads = roads
         let model = MakeMineModel(
-            row: row, passphraseSet: roads.passphraseSet(),
+            row: row, passphraseSet: roads.passphraseSet(), intoTheEmptySlot: roads.landsInTheEmptySlot,
             opensQuietly: { await roads.opensQuietly(row.copy) },
             act: { copySecrets, currentPair in await makeMine(row, copySecrets, currentPair) },
             finished: { [weak self] made in

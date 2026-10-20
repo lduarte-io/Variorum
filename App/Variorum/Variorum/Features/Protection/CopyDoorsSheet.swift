@@ -99,6 +99,10 @@ struct MakeMineConfirm: View {
                     TravellingDotsIndicator(ink: .secondary)
                     Text(ProtectionWords.makeMineChecking).font(.caption).foregroundStyle(.secondary)
                 }
+            } else if model.intoTheEmptySlot {
+                // VX-309 U1b — T-5: no library is open — the copy's own secret is the one thing asked, and its lock.
+                PeekableSecretField(label: ProtectionWords.makeMineCopySecretField, text: $copySecret, onSubmit: submit)
+                    .textFieldStyle(.roundedBorder)
             } else {
                 if model.needsCopySecret {
                     PeekableSecretField(label: ProtectionWords.makeMineCopySecretField, text: $copySecret)
@@ -135,13 +139,19 @@ struct MakeMineConfirm: View {
                 }
                 Button(ProtectionWords.makeMineButton) { submit() }
                     .keyboardShortcut(.defaultAction)
-                    .disabled(!model.canSubmit(words: words, passphrase: passphrase))
+                    .disabled(model.intoTheEmptySlot
+                              ? !model.canSubmitIntoTheEmptySlot(copySecret: copySecret)
+                              : !model.canSubmit(words: words, passphrase: passphrase))
             }
         }
     }
 
     private func submit() {
         let secret = copySecret
+        if model.intoTheEmptySlot {
+            Task { await model.submitIntoTheEmptySlot(copySecret: secret) }
+            return
+        }
         let typedWords = words
         let typedPassphrase = passphrase
         Task { await model.submit(copySecret: secret, words: typedWords, passphrase: typedPassphrase) }
