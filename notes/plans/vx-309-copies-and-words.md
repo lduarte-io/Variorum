@@ -2114,6 +2114,11 @@ seconds.` (U1c's close count, exactly).
   VX-308's filed list: VX-211, "12-character length floor but no strength check", is where it lives). Same fields, same
   sentence, her 17n rule — so the floor is built here as VX-211's first half, pinned red-on-old, with today's road's own
   constants (never a second number or sentence). The hint is advice only: a 12-character phrase that earns it is SET.
+- **R-U2-7 — "CORRECT THE VX-191 RECORD" LANDS IN THE S1 RECORD THE CORRECTIONS ARE ABOUT.** The three sentences that are
+  false (Q1's, Q6's) or whose pin is mis-aimed (Q2's) live in the 09-21 S1 record (`notes/plans/run-b-stress-pass.md`);
+  the VX-191 record is the audit that FOUND them (its §V tidy-up row; auditor A's file the current reading). So the dated
+  correction notes go in place under the S1 record's own verdicts, and the VX-191 record's row gains a dated note that
+  they landed — both in place, nothing rewritten, nothing silent.
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton + the harness baseline: DONE (`fe2344041`).
@@ -2224,5 +2229,17 @@ seconds.` (U1c's close count, exactly).
   `u2-prerevert/p7/`): M-7a the pane's gate dropped → `✘ theNewRoadsLinesAreRenderedOnlyThere` (1); M-7b `restore` hard-wired to
   today's road → `✘ theNewRoadsLinesAreRenderedOnlyThere` (1 — the Mac pin's dev arm reds on the same revert, by its recipe
   R-U2-7-gate); M-7c rule 9's promise dropped from the postures → `✘ theGuidesNewRoadChapterSaysTheRulesAsBuilt` (1).
-- Pieces 8–10 — NOT-STARTED.
+- Piece 8 — VX-213's SHARE: DONE (`e4d840c8b`; records only — no `Server/` line, no SQL, no test). R-U2-7 below. The S1
+  record (`notes/plans/run-b-stress-pass.md`) gains a dated in-place correction note under Q1 (kp2 sits in Supabase Vault
+  since 13y — `12_phase13y_tenant_seq.sql:626/:683`, `17_phase_vx307_vault.sql:238`, re-read today: "retains only
+  `SHA-256(kp)`" is no longer true; the class — integrity/availability, never confidentiality — unchanged), Q2 (the
+  delivered arm-10 pin reads file 12's body while `13_phase13i_wings.sql:479` redefines `sync_reencrypt`; 13's body carries
+  the gate at :509 and no later file redefines it — re-read today; the pin's fix ROUTED, F-U2-6) and Q6 (the heal DOES fire
+  after a reset with three devices; an Apple-ID switch on two devices re-homes the vault copy silently), plus one line under
+  its verdict summary; every original sentence kept as written. The VX-191 record's §V tidy-up row gains a dated note
+  pointing at them (and saying `pg_temp` is held). The delta brief gains the account-deletion fact in plain words —
+  Supabase's own sign-in audit log (email, IP) outlives a deleted account — with what the repo shows (`account_purge`
+  deletes the `auth.users` row; no `Server/` line names the audit log) and what VX-329 confirms (the log's contents and
+  retention, outside the repo; no live lookup in this unit), plus one caution line.
+- Pieces 9–10 — NOT-STARTED.
 - No revert is in flight.
