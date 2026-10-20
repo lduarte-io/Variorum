@@ -31,31 +31,42 @@ scene, since, window number; removed on exit). Never `stage.log`, which is `Tool
 ## The rails, and how each is held
 
 1. **Never "Variorum".** The process and app are `StageAmbient`, so `pgrep -lx Variorum` and
-   `pgrep -lf "MacOS/Variorum$"` never see it. The pre-GO check is `pgrep -x StageAmbient` (empty).
+   `pgrep -lf "MacOS/Variorum$"` never see it. The window app is the only executable with that name.
+   The offscreen dev aids are a separate executable, `AmbientRender`, so the pre-GO check
+   `pgrep -x StageAmbient` (it must be empty) and the wrapper's `off` only ever find the ambient on
+   screen.
 2. **Off whenever anyone else holds the stage.** The coordinator runs `Tools/ambient off` before every GO,
    and the app also polls `~/.variorum/stage.d/claim` four times a second and quits itself on any claim
    whose reason does not start with exactly `HOLD:` (so the coordinator's `GO pending:` bridge ends it, and
-   so does a `HOLD FOR <walk>` hold). A lock directory without its claim file counts as a claim after
-   0.5 s. `on` refuses with one line while such a claim exists. The values are read exactly as
-   `Tools/stage` writes them (bash `printf %q`), pinned against the real tool in `StageClaimTests`.
+   so does a `HOLD FOR <walk>` hold). A lock directory without its claim file, or a claim file without
+   its fields, gets 0.5 s of grace and then counts as a claim. `Tools/stage` rewrites the file on every
+   renew, so this is what keeps the coordinator's own renewals from ending it (`StageWatch`, pinned).
+   `on` refuses with one line while such a claim exists. The claim is read as bytes and unquoted exactly
+   as `Tools/stage` writes it (bash `printf %q`). Under a UTF-8 locale that writes an em dash as a raw
+   lead byte plus octal escapes, which is not valid text, so a text read fails. `StageClaimTests` pins
+   this against the real tool under both locales.
 3. **No screensaver machinery.** It is an ordinary app window (borderless, screen-saver level), so no
    password-on-wake can lock the screen.
 4. **No faked activity.** It posts no events and takes no power or user-activity assertion. It detects
    input by *reading* the HID system's idle time, the same number the coordinator reads.
-5. **Real input ends it.** The idle time is polled ten times a second; any mouse, trackpad or key input
-   after a 0.75 s launch grace quits it. The window also swallows the waking click or keystroke, so it
-   never lands in a hidden app.
+5. **Real input ends it.** The idle time is polled ten times a second. Any mouse, trackpad or key input
+   after `on`'s idle gate quits it, including a touch while it is still launching: the gate is re-read
+   after the build and passed in as `--input-since`. Started without a gate, it counts from launch plus
+   0.75 s, so a hand-typed command's own key-up doesn't end it. The window also swallows the waking
+   click or keystroke, so it never lands in a hidden app. `on` refuses while HID idle is under 120 s
+   (`--min-idle`).
 6. **Light.** The scene is 576 × 373 pixels at the Pro's 3-point pixel scale, scaled up
    nearest-neighbour by one Core Animation layer. The frame cap is 12 fps. Frames are handed over as
    32-bit images already in the screen's colour space, written into three reused buffers, so Core
    Animation never re-renders them. The caustic web is computed at quarter resolution once a second, and
-   lilypads are cached sprites. Drawing pauses while the display sleeps or the screen is locked.
-   Measured CPU: see "Measured" below.
+   lilypads are cached sprites. It refuses to start on a display that is already asleep (nobody would
+   see it), and pauses drawing while the display sleeps or the screen is locked. Measured CPU: see
+   "Measured" below.
 7. **The cursor.** macOS only lets the *active* app hide the cursor. A LaunchServices launch plus
    `NSApp.activate()` did not activate this agent app (measured), so it calls
    `activate(ignoringOtherApps: true)`, then hides the cursor at the display level. While it's up it is
    the frontmost app, which also means it swallows the waking keystroke. On every exit it controls (input,
-   claim, TERM/INT/HUP, losing focus) it shows the cursor again and hands activation back to the app that
+   claim, TERM/INT/HUP, a quit request, losing focus) it shows the cursor again and hands activation back to the app that
    was frontmost when `on` ran. If the process dies outright, the window server restores the cursor and
    the next app comes forward (measured with `kill -9`). `--no-activate` opts out, but then the cursor
    stays visible.
@@ -125,17 +136,17 @@ All are pure 1-bit, driven by code rather than loops, and fit the protocol as-is
 ## Dev aids (no window, no stage needed)
 
 ```
-B=$(swift build -c release --package-path Tools/StageAmbient --show-bin-path)/StageAmbient
-$B --render-gif out.gif --seconds 20 [--skip 30] [--seed N] [--size 576x373] [--gif-scale 2]
+B=$(swift build -c release --package-path Tools/StageAmbient --show-bin-path)/AmbientRender
+$B --render-gif out.gif --seconds 20 [--skip 30] [--seed N] [--size 576x373] [--scale 2]
 $B --frames dir/ --seconds 10 --every 12      # PNG snapshots
 $B --bench --seconds 60                       # ms per frame and the implied CPU at the frame cap
 $B --gallery koi.png                          # every koi variety, still
 ```
 
-Self-test options, never on the coordinator's road: `--allow-claimant WHO` lets exactly one named
-claimant's claim stand, for the session proving the ambient in its own stage window. Any other claim
-still ends the ambient, including the coordinator's `coord-for-*` bridges. `--stage-dir DIR` watches a
-different lock. `Tools/ambient on --allow-claimant WHO` passes the first one through.
+Self-test options on the window app, never on the coordinator's road: `--allow-claimant WHO` lets
+exactly one named claimant's claim stand, for the session proving the ambient in its own stage window.
+Any other claim still ends the ambient, including the coordinator's `coord-for-*` bridges. `--stage-dir
+DIR` watches a different lock. `Tools/ambient on --allow-claimant WHO` passes the first one through.
 
 Tests: `cd Tools/StageAmbient && swift test`. They are headless and include the real-`Tools/stage`
 claim probes.

@@ -159,8 +159,10 @@ for the active app. That is resolved below, within her brief's "leave focus wher
 
 - `WaterTests.theCellSearchFindsTheTrueNearestPoints`. The caustic lattice was filled from the wrong
   drift base, so after a minute or two the 3×3 cell search compared the wrong points and whole blocks lit
-  (seen in an offscreen still at 120 s). It was red on the old fill (5725–6086 of 6111 pixels wrong at
-  40–3600 s) and is green after.
+  (seen in an offscreen still at 120 s). It was red on the old fill and is green after. The figures
+  at the time were 5725–6086 of 6111 pixels wrong at 40–3600 s, on the then half-res every-pixel test;
+  the round-1 reviewer re-verified on the quarter-res test: 1463–1559 of 1568. Round 1 then widened
+  its reference (below).
 - A first attempt pinned the lit share of the water instead. It was green on both sides (hollow) and was
   replaced.
 - **The coordinator's integration test** (1018coordinator, after the window, from its own seat) found a
@@ -183,16 +185,17 @@ for the active app. That is resolved below, within her brief's "leave focus wher
   ```diff
   +# VX-458: a claim that isn't the coordinator's HOLD takes the screen back from the stage ambient at
   +# once (the ambient also quits itself within ~0.3 s of seeing such a claim).
+  +# (|| true throughout: Tools/stage runs under set -e, and a claim that succeeded must never exit 1.)
   +ambient_off() {
   +  pgrep -x StageAmbient >/dev/null 2>&1 || return 0
-  +  if [ -x "$(dirname "$0")/ambient" ]; then "$(dirname "$0")/ambient" off >/dev/null 2>&1
-  +  else pkill -TERM -x StageAmbient; fi
+  +  if [ -x "$(dirname "$0")/ambient" ]; then "$(dirname "$0")/ambient" off >/dev/null 2>&1 || true
+  +  else pkill -TERM -x StageAmbient || true; fi
   +}
   ...
        if mkdir "$LOCK" 2>/dev/null; then
          write_meta "$WHO_ARG" "$REASON_ARG" "$MINUTES"
          logline "CLAIMED   who=$WHO_ARG reason=$REASON_ARG minutes=$MINUTES"
-  +      case "$REASON_ARG" in HOLD:*) ;; *) ambient_off ;; esac
+  +      case "$REASON_ARG" in HOLD:*) ;; *) ambient_off || true ;; esac
   ```
 
   The same line goes after the holder's renew-by-reclaim, since a renew can change the reason.
@@ -202,4 +205,24 @@ for the active app. That is resolved below, within her brief's "leave focus wher
 
 ## Review ladder
 
-(Appended per round.)
+Same-model (Opus implemented, an Opus reviewer cold): the orchestrator, the implementing session itself,
+arbitrates against her brief. Every round's reviewer is fresh, and the prompt is `notes/REVIEW_PROMPT.md`
+verbatim with VX-458 substituted. The only addition is one logistics line: where the branch is checked
+out, and not to run `Tools/ambient` or the window, because the coordinator's live instance runs from
+this worktree.
+
+### Round 1 — 0 BLOCKER · 0 MAJOR · 5 MINOR · 6 NIT; all agreed except one SPECULATIVE (recorded)
+
+| # | Finding | Disposition |
+|---|---|---|
+| R1-1 MINOR | The idle gate went stale before launch: idle was read before the build, and the app counted input only from its own launch, so a touch during the build was ignored and the ambient came up over her. | FIXED. `on` re-reads the claim AND the idle after the build, then passes that moment as `--input-since`. The app counts any HID event after the gate (`InputRule.watching(uptime:gateAge:)`); with no gate it counts from launch + 0.75 s (documented). Pin `aTouchBetweenTheGateAndLaunchEndsIt`: red with the gate ignored (revert R-a), green after. The wrapper half has no shell harness and is not pinnable headlessly. |
+| R1-2 MINOR | An already-asleep display drew at full rate unseen; the README's "pauses while the display sleeps" held only for a sleep after launch. | FIXED: refuse at launch (`LaunchRule`, exit 7 "display asleep"), via `CGDisplayIsAsleep` on the built-in display. Pin `anAsleepDisplayRefuses`: red with the clause removed (R-c), green after. |
+| R1-3 MINOR | Process-name identity collided with the offscreen dev aids (same binary name): `on` said already-on, `off`/`next` killed a render, and the pre-GO pgrep and the proposed hook saw it. | FIXED structurally. The offscreen aids moved to their own executable, `AmbientRender`, so the window app is the only process named `StageAmbient`, and `list` runs AmbientRender. Not pinnable headlessly (the identity is in the build products); recorded as structural. |
+| R1-4 MINOR | The rail-2 mid-write debounce (what survives the coordinator's own renews) lived untested in the host. | FIXED: moved into `StageWatch` (AmbientKit) and pinned three ways (renew mid-write stays up; unsettled for 0.5 s or more ends it; foreign ends it at once). All three go red with the grace removed (R-b). The host only feeds it. |
+| R1-5 MINOR | The proposed `Tools/stage` hook could make a successful claim exit 1 under `set -e`. | FIXED in the proposal text above (`\|\| true`). Still a proposal, hers. |
+| R1-6 NIT | The skill never spells out that `HOLD:` is the coordinator's idle hold only. | FIXED on the stacked skill branch: one line ("a hold on someone else's behalf never starts with `HOLD:`"). The branch was rebased onto the tip. |
+| R1-7 NIT | The caustic lattice was one column/row short at the far edges, and the pin's reference shared the short lattice. | FIXED: `+ 4`, and the reference became an exhaustive search over a wider lattice. Red on `+ 3` (10 of 13775 at 3600 s, 5 at 7211 s), green after. |
+| R1-8 NIT | `on`'s "verified up" could fire before the window was ordered front; UNVERIFIED left the process running; the quoted log line could be stale. | FIXED. State is written only after order-front, activation and the cursor hide (`isUp`), and a window that isn't visible refuses (exit 8). UNVERIFIED now takes the process down, so exit 1 always means "not up". The log line is quoted only if this launch wrote it. |
+| R1-9 NIT | The record's pin figures came from an earlier version of the test. | FIXED (Pins, above). |
+| R1-10 NIT SPECULATIVE | The reused frame buffers are rewritten while older CGImages may still reference them. | RECORDED, no change. Core Animation copies at commit (the sampled commit path shows a send, not a re-read), and three buffers keep a margin. The code comment says never cut it to one. |
+| R1-11 NIT | A quit Apple Event skipped `finish`: no OFF line, no focus hand-back. | FIXED: `applicationShouldTerminate` routes through `finish` ("quit request"). |

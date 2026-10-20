@@ -118,8 +118,10 @@ struct CellPoints {
         let r = Double(Water.reduction)
         cell = 26 / r * unit // reduced pixels per cell (≈ 26 design pixels)
         drift = Vec2(t * 0.7 / r * unit, t * 0.24 / r * unit)
-        cols = Int(Double(hw) / cell) + 3
-        rows = Int(Double(hh) / cell) + 3
+        // A pixel's own cell can be up to ceil((hw - 1) / cell) past the base, and its search reaches one
+        // more on each side: + 4 covers both margins.
+        cols = Int(Double(hw) / cell) + 4
+        rows = Int(Double(hh) / cell) + 4
         baseX = Int((drift.x / cell).rounded(.down))
         baseY = Int((drift.y / cell).rounded(.down))
         px = [Double](repeating: 0, count: cols * rows)

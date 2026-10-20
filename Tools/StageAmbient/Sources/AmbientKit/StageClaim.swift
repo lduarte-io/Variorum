@@ -21,6 +21,18 @@ public enum StageVerdict: Equatable, Sendable {
     /// like any other claim (fail closed), with its own words.
     case unreadable
 
+    /// One line for logs and refusals.
+    public var summary: String {
+        switch self {
+        case .free: "free"
+        case .hold(let who): "hold who=\(who)"
+        case .allowed(let who): "allowed who=\(who)"
+        case .foreign(let who, let reason): "claim who=\(who) reason=\(reason)"
+        case .pending: "claim being written (lock without a claim file)"
+        case .unreadable: "claim file unreadable"
+        }
+    }
+
     public var permitsAmbient: Bool {
         switch self {
         case .free, .hold, .allowed: true
@@ -137,18 +149,5 @@ public enum StageClaim {
         case UInt8(ascii: "A")...UInt8(ascii: "F"): Int(c - UInt8(ascii: "A")) + 10
         default: nil
         }
-    }
-}
-
-/// Rail 5: real input quits the ambient. The host reads the HID system's idle time (what the
-/// coordinator reads too — nothing is posted, nothing is asserted); input that arrived after the
-/// short launch grace means someone is at the machine.
-public enum InputRule {
-    public static let launchGrace = 0.75
-
-    /// `uptime` = seconds since the ambient came up; `idle` = seconds since the last HID event.
-    public static func inputArrived(uptime: Double, idle: Double, grace: Double = launchGrace) -> Bool {
-        guard uptime.isFinite, idle.isFinite else { return false }
-        return uptime - idle > grace
     }
 }

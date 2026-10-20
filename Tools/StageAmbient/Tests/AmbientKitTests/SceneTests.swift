@@ -217,18 +217,21 @@ import Testing
 
 @Suite struct WaterTests {
     /// The caustic web is the edges of a cell pattern, found by searching the 3×3 cells around each pixel.
-    /// That search must find the true two nearest points however far the lattice has drifted (a search
-    /// that looked at the wrong cells lit whole blocks after a minute or two).
-    @Test(arguments: [0.0, 40, 120, 600, 3600])
+    /// That search must find the true two nearest points however far the lattice has drifted, out to the
+    /// far edges. The reference is an exhaustive search over a WIDER lattice (same cells, same drift), so
+    /// a lattice one column or row short at the right or bottom shows up too.
+    @Test(arguments: [0.0, 7, 40, 120, 600, 3600, 7211])
     func theCellSearchFindsTheTrueNearestPoints(at t: Double) {
         let unit = 373.0 / 280
-        let hw = 145, hh = 95
+        let r = Water.reduction
+        let hw = (576 + r - 1) / r + 1, hh = (373 + r - 1) / r + 1
         let points = CellPoints(width: hw, height: hh, time: t, unit: unit, seed: 7)
+        let reference = CellPoints(width: hw + 40, height: hh + 40, time: t, unit: unit, seed: 7)
         var misses = 0, total = 0
-        for y in stride(from: 0, to: hh, by: 3) {
-            for x in stride(from: 0, to: hw, by: 3) {
+        for y in 0..<hh {
+            for x in 0..<hw {
                 let a = points.nearestTwo(Double(x), Double(y))
-                let b = points.nearestTwoExhaustive(Double(x), Double(y))
+                let b = reference.nearestTwoExhaustive(Double(x), Double(y))
                 total += 1
                 if abs(a.0 - b.0) > 1e-9 || abs(a.1 - b.1) > 1e-9 { misses += 1 }
             }

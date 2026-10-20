@@ -1,27 +1,23 @@
 import AmbientKit
 import AppKit
-import ImageIO
 import QuartzCore
-import UniformTypeIdentifiers
 
-// StageAmbient — the host. Window mode (what `Tools/ambient on` launches through LaunchServices) puts
-// one borderless black window over the built-in display at screen-saver level and shows the Director's
-// 1-bit frames, scaled up nearest-neighbour, at the configured frame cap. Offscreen modes
-// (--render-gif / --frames / --bench) run the same Director with no window at all.
+// StageAmbient — the window app `Tools/ambient on` launches through LaunchServices. It puts one
+// borderless black window over the built-in display at screen-saver level and shows the Director's 1-bit
+// frames, scaled up nearest-neighbour, at the configured frame cap. Window mode only: the offscreen aids
+// are AmbientRender, so a process named "StageAmbient" is always the ambient on screen.
 //
-// The rails (README.md), each enforced here:
+// The rails (README.md), each held here; the decisions themselves are AmbientKit's pure rules (Rails.swift):
 //  1. The process is "StageAmbient" — never "Variorum".
 //  2. A stage claim whose reason doesn't start with "HOLD:" ends it within ~0.3 s (polled 4×/s).
 //  3. No screensaver machinery: an ordinary app window.
 //  4. Nothing is posted and no power or user-activity assertion is taken: input is detected by READING
 //     the HID system's idle time, the same number the coordinator reads.
-//  5. Real input ends it (polled 10×/s).
+//  5. Real input ends it (polled 10×/s), counting from `on`'s idle gate.
 //  6. One small layer update per frame at ~12 fps; the scene is a few hundred pixels across.
 //  7. The cursor hides while up and is shown again on every exit path we control; the window server
 //     restores it if the process dies outright. Activation goes back to the app that was frontmost.
 //  8. Everything in the scene moves, and the whole picture orbits by a device pixel or two.
-
-// MARK: Arguments
 
 struct Options {
     var config: URL?
@@ -31,59 +27,35 @@ struct Options {
     var allowClaimant: String?
     var stageDir = StageClaim.defaultLockDirectory
     var returnPID: pid_t?
-    var log = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".variorum/ambient.log")
-    var state = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".variorum/ambient.state")
-    // Offscreen.
-    var renderGIF: URL?
-    var framesDir: URL?
-    var bench = false
-    var list = false
-    var seconds = 20.0
-    var skip = 0.0
-    var every = 1
-    var size: PixelSize?
-    var gifScale = 2
-    var gallery: URL?
+    /// `Tools/ambient on`'s idle gate (seconds since 1970): input after it counts.
+    var inputSince: Double?
     /// Hiding the cursor needs the app active (macOS shows it again for any app that isn't), so the
     /// ambient takes activation while up and hands it back on every exit. --no-activate opts out.
     var activate = true
+    var log = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".variorum/ambient.log")
+    var state = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".variorum/ambient.state")
 
     static func parse(_ args: [String]) -> Options {
         var o = Options()
         var i = 1
-        func value() -> String {
+        func value() -> String? {
             i += 1
-            guard i < args.count else { fail("\(args[i - 1]) needs a value") }
-            return args[i]
+            return i < args.count ? args[i] : nil
         }
         while i < args.count {
             switch args[i] {
-            case "--config": o.config = URL(fileURLWithPath: value())
+            case "--config": o.config = value().map { URL(fileURLWithPath: $0) }
             case "--scene": o.scene = value()
             case "--stay": o.stay = true
-            case "--seed": o.seed = UInt64(value())
+            case "--seed": o.seed = value().flatMap { UInt64($0) }
             case "--allow-claimant": o.allowClaimant = value()
-            case "--stage-dir": o.stageDir = URL(fileURLWithPath: value(), isDirectory: true)
-            case "--return-pid": o.returnPID = pid_t(value())
-            case "--log": o.log = URL(fileURLWithPath: value())
-            case "--state": o.state = URL(fileURLWithPath: value())
-            case "--render-gif": o.renderGIF = URL(fileURLWithPath: value())
-            case "--frames": o.framesDir = URL(fileURLWithPath: value(), isDirectory: true)
-            case "--bench": o.bench = true
-            case "--list": o.list = true
+            case "--stage-dir": if let v = value() { o.stageDir = URL(fileURLWithPath: v, isDirectory: true) }
+            case "--return-pid": o.returnPID = value().flatMap { pid_t($0) }
+            case "--input-since": o.inputSince = value().flatMap { Double($0) }
             case "--no-activate": o.activate = false
-            case "--gallery": o.gallery = URL(fileURLWithPath: value())
-            case "--seconds": o.seconds = Double(value()) ?? o.seconds
-            case "--skip": o.skip = Double(value()) ?? 0
-            case "--every": o.every = max(1, Int(value()) ?? 1)
-            case "--gif-scale": o.gifScale = max(1, Int(value()) ?? 2)
-            case "--size":
-                let p = value().split(separator: "x").compactMap { Int($0) }
-                guard p.count == 2 else { fail("--size wants WxH") }
-                o.size = PixelSize(width: p[0], height: p[1])
-            default:
-                // LaunchServices may add its own arguments (e.g. -psn_…); ignore anything unknown.
-                break
+            case "--log": if let v = value() { o.log = URL(fileURLWithPath: v) }
+            case "--state": if let v = value() { o.state = URL(fileURLWithPath: v) }
+            default: break // LaunchServices may add arguments of its own; ignore anything unknown.
             }
             i += 1
         }
@@ -91,14 +63,9 @@ struct Options {
     }
 }
 
-func fail(_ message: String) -> Never {
-    FileHandle.standardError.write(Data("StageAmbient: \(message)\n".utf8))
-    exit(2)
-}
-
 // MARK: Log and state (the coordinator reads both; stage.log is Tools/stage's alone)
 
-final class Journal: @unchecked Sendable {
+final class Journal {
     let log: URL
     let state: URL
     private let stamp: DateFormatter = {
@@ -128,34 +95,11 @@ final class Journal: @unchecked Sendable {
     func writeState(pid: pid_t, scene: String, since: Date, window: Int) {
         let f = ISO8601DateFormatter()
         f.timeZone = .current
-        let iso = f.string(from: since)
-        let text = "PID=\(pid)\nSCENE=\(scene)\nSINCE=\(iso)\nWINDOW=\(window)\n"
+        let text = "PID=\(pid)\nSCENE=\(scene)\nSINCE=\(f.string(from: since))\nWINDOW=\(window)\n"
         try? Data(text.utf8).write(to: state, options: .atomic)
     }
 
     func clearState() { try? FileManager.default.removeItem(at: state) }
-}
-
-// MARK: Frames → images
-
-func grayImage(_ frame: UnsafeMutableBufferPointer<UInt8>, size: PixelSize, scale: Int = 1) -> CGImage? {
-    let w = size.width * scale, h = size.height * scale
-    var data = Data(count: w * h)
-    data.withUnsafeMutableBytes { (dst: UnsafeMutableRawBufferPointer) in
-        let d = dst.bindMemory(to: UInt8.self)
-        if scale == 1 {
-            d.baseAddress!.update(from: frame.baseAddress!, count: size.count)
-        } else {
-            for y in 0..<h {
-                let sy = y / scale
-                for x in 0..<w { d[y * w + x] = frame[sy * size.width + x / scale] }
-            }
-        }
-    }
-    guard let provider = CGDataProvider(data: data as CFData) else { return nil }
-    return CGImage(width: w, height: h, bitsPerComponent: 8, bitsPerPixel: 8, bytesPerRow: w,
-                   space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGBitmapInfo(rawValue: 0),
-                   provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
 }
 
 @MainActor
@@ -168,66 +112,11 @@ func builtInScreen() -> NSScreen? {
 }
 
 @MainActor
-func defaultSceneSize(_ config: AmbientConfig) -> PixelSize {
-    let screen = builtInScreen()?.frame.size ?? CGSize(width: 1728, height: 1117)
-    return PixelSize(width: Int((screen.width / config.pixelScale).rounded(.up)),
-                     height: Int((screen.height / config.pixelScale).rounded(.up)))
+func displayID(_ screen: NSScreen) -> CGDirectDisplayID {
+    (screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber)?.uint32Value ?? CGMainDisplayID()
 }
 
-// MARK: Offscreen modes
-
-@MainActor
-func runOffscreen(_ o: Options, config: AmbientConfig) -> Never {
-    let size = o.size ?? defaultSceneSize(config)
-    let seed = o.seed ?? 1
-    let director = Director(size: size, config: config, seed: seed, start: o.scene, stay: o.stay)
-    let dt = 1 / config.fps
-    var skipped = 0.0
-    while skipped < o.skip {
-        let h = min(0.25, o.skip - skipped)
-        director.step(dt: h)
-        skipped += h
-    }
-    let frames = Int(o.seconds * config.fps)
-
-    if o.bench {
-        let t0 = CACurrentMediaTime()
-        for _ in 0..<frames { director.step(dt: dt) }
-        let per = (CACurrentMediaTime() - t0) / Double(max(1, frames))
-        print(String(format: "bench: scene=%@ size=%dx%d frames=%d  %.3f ms/frame  ≈ %.2f%% of one core at %.0f fps",
-                     director.currentName, size.width, size.height, frames, per * 1000, per * config.fps * 100, config.fps))
-        exit(0)
-    }
-
-    var gif: CGImageDestination?
-    if let url = o.renderGIF {
-        gif = CGImageDestinationCreateWithURL(url as CFURL, UTType.gif.identifier as CFString, (frames + o.every - 1) / o.every, nil)
-        if let gif {
-            CGImageDestinationSetProperties(gif, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: 0]] as CFDictionary)
-        }
-    }
-    if let dir = o.framesDir { try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true) }
-    let delay = Double(o.every) / config.fps
-    for f in 0..<frames {
-        director.step(dt: dt)
-        guard f % o.every == 0, let img = grayImage(director.frame, size: size, scale: o.gifScale) else { continue }
-        if let gif {
-            CGImageDestinationAddImage(gif, img, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: delay]] as CFDictionary)
-        }
-        if let dir = o.framesDir {
-            let url = dir.appendingPathComponent(String(format: "frame-%05d.png", f))
-            if let d = CGImageDestinationCreateWithURL(url as CFURL, UTType.png.identifier as CFString, 1, nil) {
-                CGImageDestinationAddImage(d, img, nil)
-                CGImageDestinationFinalize(d)
-            }
-        }
-    }
-    if let gif, !CGImageDestinationFinalize(gif) { fail("could not write the GIF") }
-    print("rendered scene=\(director.currentName) size=\(size.width)x\(size.height) frames=\((frames + o.every - 1) / o.every) seed=\(seed)")
-    exit(0)
-}
-
-// MARK: Window mode
+// MARK: Window
 
 final class AmbientWindow: NSWindow {
     override var canBecomeKey: Bool { true }
@@ -260,17 +149,22 @@ final class Host: NSObject, NSApplicationDelegate {
     var timers: [Timer] = []
     var signals: [DispatchSourceSignal] = []
     let launched = CACurrentMediaTime()
+    /// Seconds between `on`'s idle gate and launch, when the wrapper passed one.
+    let gateAgeAtLaunch: Double?
     var lastFrame = CACurrentMediaTime()
     var startedAt = Date()
     var previousApp: NSRunningApplication?
     var cursorHidden = false
     var becameActive = false
-    var pendingSince: Double?
+    var isUp = false
+    var stageWatch = StageWatch()
     var paused: Set<String> = []
     var shownScene = ""
     var finished = false
     var layerOrigin = CGPoint.zero
+    var hiddenOn = CGMainDisplayID()
     /// Three frame buffers the layer's images point into, reused in turn (no allocation per frame).
+    /// Core Animation copies an image's bits at commit; three keeps a margin — never cut this to one.
     var imageBuffers: [UnsafeMutableRawPointer] = []
     var nextBuffer = 0
 
@@ -278,21 +172,22 @@ final class Host: NSObject, NSApplicationDelegate {
         self.options = options
         self.config = config
         self.journal = journal
+        gateAgeAtLaunch = options.inputSince.map { Date().timeIntervalSince1970 - $0 }
     }
 
     func applicationDidFinishLaunching(_ note: Notification) {
-        let verdict = StageClaim.read(lockDirectory: options.stageDir, allowedClaimant: options.allowClaimant)
-        guard verdict.permitsAmbient else { return refuse("stage \(describe(verdict))", code: 3) }
-        if let session = CGSessionCopyCurrentDictionary() as? [String: Any],
-           (session["CGSSessionScreenIsLocked"] as? Bool) == true {
-            return refuse("screen locked", code: 4)
-        }
         let me = NSRunningApplication.current
         if let id = me.bundleIdentifier,
            NSRunningApplication.runningApplications(withBundleIdentifier: id).contains(where: { $0.processIdentifier != me.processIdentifier }) {
             return refuse("already running", code: 5)
         }
         guard let screen = builtInScreen() else { return refuse("no screen", code: 6) }
+        let verdict = StageClaim.read(lockDirectory: options.stageDir, allowedClaimant: options.allowClaimant)
+        let locked = (CGSessionCopyCurrentDictionary() as? [String: Any])?["CGSSessionScreenIsLocked"] as? Bool ?? false
+        if let no = LaunchRule.refusal(stage: verdict, screenLocked: locked,
+                                       displayAsleep: CGDisplayIsAsleep(displayID(screen)) != 0) {
+            return refuse(no.reason, code: no.exitCode)
+        }
 
         if let pid = options.returnPID, pid != me.processIdentifier, let app = NSRunningApplication(processIdentifier: pid) {
             previousApp = app
@@ -330,23 +225,27 @@ final class Host: NSObject, NSApplicationDelegate {
         view.layer?.addSublayer(imageLayer)
         w.contentView = view
         window = w
+        hiddenOn = displayID(screen)
 
         renderFrame(dt: 0)
         w.makeKeyAndOrderFront(nil)
         w.makeFirstResponder(view)
         if options.activate { NSApp.activate(ignoringOtherApps: true) }
         hideCursor()
+        guard w.isVisible else { return refuse("the window did not come up", code: 8) }
 
         installWatchers()
-        _ = repeating(1 / config.fps) { $0.tick() }
+        repeating(1 / config.fps) { $0.tick() }
+        // Only now is it up: `on` waits for this state file before it says so.
+        isUp = true
         startedAt = Date()
-        journal.line("ON      pid=\(me.processIdentifier) scene=\(director.currentName) size=\(sceneSize.width)x\(sceneSize.height) fps=\(Int(config.fps)) stage=\(describe(verdict)) return-to=\(previousApp?.localizedName ?? "none")")
+        journal.line("ON      pid=\(me.processIdentifier) scene=\(director.currentName) size=\(sceneSize.width)x\(sceneSize.height) fps=\(Int(config.fps)) stage=\(verdict.summary) return-to=\(previousApp?.localizedName ?? "none")")
         writeState()
     }
 
     func hideCursor() {
         guard !cursorHidden else { return }
-        CGDisplayHideCursor(CGMainDisplayID())
+        CGDisplayHideCursor(hiddenOn)
         cursorHidden = true
     }
 
@@ -359,6 +258,12 @@ final class Host: NSObject, NSApplicationDelegate {
         guard becameActive else { return }
         let front = NSWorkspace.shared.frontmostApplication?.localizedName ?? "another app"
         finish("lost focus to \(front)", restoreFocus: false)
+    }
+
+    /// A quit Apple Event (osascript, logout) goes through the same exit as everything else.
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        finish("quit request")
+        return .terminateCancel
     }
 
     // MARK: Watchers
@@ -375,28 +280,20 @@ final class Host: NSObject, NSApplicationDelegate {
     }
 
     func installWatchers() {
-        // Rail 5: real input. Reading the idle time posts nothing and asserts nothing.
+        // Rail 5: real input since `on`'s idle gate (else since launch, after a short grace). Reading the
+        // idle time posts nothing and asserts nothing.
         repeating(0.1) { host in
+            let uptime = CACurrentMediaTime() - host.launched
             let idle = CGEventSource.secondsSinceLastEventType(.hidSystemState, eventType: CGEventType(rawValue: ~0)!)
-            if InputRule.inputArrived(uptime: CACurrentMediaTime() - host.launched, idle: idle) {
+            let watching = InputRule.watching(uptime: uptime, gateAge: host.gateAgeAtLaunch.map { $0 + uptime })
+            if InputRule.inputArrived(watching: watching, idle: idle) {
                 host.finish(String(format: "input (HID idle %.2f s)", idle))
             }
         }
-        // Rail 2: the stage. A lock directory with no claim file, or a claim file without its fields, is
-        // most likely a claim mid-write; give it half a second, then treat it as someone else's.
+        // Rail 2: the stage, with the mid-write grace (StageWatch).
         repeating(0.25) { host in
             let v = StageClaim.read(lockDirectory: host.options.stageDir, allowedClaimant: host.options.allowClaimant)
-            switch v {
-            case .foreign: host.finish("stage \(host.describe(v))")
-            case .pending, .unreadable:
-                let now = CACurrentMediaTime()
-                if let since = host.pendingSince {
-                    if now - since >= 0.5 { host.finish("stage \(host.describe(v))") }
-                } else {
-                    host.pendingSince = now
-                }
-            case .free, .hold, .allowed: host.pendingSince = nil
-            }
+            if host.stageWatch.mustGo(after: v, at: CACurrentMediaTime()) { host.finish("stage \(v.summary)") }
         }
         // Signals: off (TERM/INT/HUP) and next (USR1).
         for sig in [SIGTERM, SIGINT, SIGHUP, SIGUSR1] {
@@ -443,17 +340,6 @@ final class Host: NSObject, NSApplicationDelegate {
         }
     }
 
-    func describe(_ v: StageVerdict) -> String {
-        switch v {
-        case .free: "free"
-        case .hold(let who): "hold who=\(who)"
-        case .allowed(let who): "allowed who=\(who)"
-        case .foreign(let who, let reason): "claim who=\(who) reason=\(reason)"
-        case .pending: "claim being written (lock without a claim file)"
-        case .unreadable: "claim file unreadable"
-        }
-    }
-
     // MARK: Frames
 
     func tick() {
@@ -479,7 +365,7 @@ final class Host: NSObject, NSApplicationDelegate {
         if director.currentName != shownScene {
             if !shownScene.isEmpty { journal.line("SCENE   \(director.currentName)") }
             shownScene = director.currentName
-            if window != nil { writeState() }
+            if isUp { writeState() }
         }
     }
 
@@ -511,6 +397,8 @@ final class Host: NSObject, NSApplicationDelegate {
     // MARK: Exits
 
     func refuse(_ why: String, code: Int32) {
+        if cursorHidden { CGDisplayShowCursor(hiddenOn); cursorHidden = false }
+        window?.orderOut(nil)
         journal.line("REFUSED \(why)")
         FileHandle.standardError.write(Data("StageAmbient: refused — \(why)\n".utf8))
         exit(code)
@@ -523,7 +411,7 @@ final class Host: NSObject, NSApplicationDelegate {
         finished = true
         timers.forEach { $0.invalidate() }
         signals.forEach { $0.cancel() }
-        if cursorHidden { CGDisplayShowCursor(CGMainDisplayID()); cursorHidden = false }
+        if cursorHidden { CGDisplayShowCursor(hiddenOn); cursorHidden = false }
         window?.orderOut(nil)
         if restoreFocus, let prev = previousApp, !prev.isTerminated, NSApp.isActive {
             NSApp.yieldActivation(to: prev)
@@ -542,35 +430,11 @@ final class Host: NSObject, NSApplicationDelegate {
 
 let options = Options.parse(CommandLine.arguments)
 let (config, configProblem) = AmbientConfig.load(options.config)
-if let configProblem { FileHandle.standardError.write(Data("StageAmbient: \(configProblem)\n".utf8)) }
-
-if options.list {
-    for type in SceneRegistry.all {
-        let w = config.scenes.first { $0.name == type.name }?.weight ?? 0
-        print("\(type.name)\tweight \(w)\t\(type.summary)")
-    }
-    exit(0)
-}
-if let url = options.gallery {
-    // Tuning aid: every koi variety, still, on black.
-    let size = options.size ?? PixelSize(width: 432, height: 280)
-    let canvas = Canvas(size: size)
-    KoiPond.gallery(into: canvas)
-    let frame = UnsafeMutableBufferPointer<UInt8>.allocate(capacity: size.count)
-    canvas.dither(into: frame)
-    if let img = grayImage(frame, size: size, scale: options.gifScale),
-       let d = CGImageDestinationCreateWithURL(url as CFURL, UTType.png.identifier as CFString, 1, nil) {
-        CGImageDestinationAddImage(d, img, nil)
-        CGImageDestinationFinalize(d)
-    }
-    exit(0)
-}
-if options.renderGIF != nil || options.framesDir != nil || options.bench {
-    runOffscreen(options, config: config)
-}
+let journal = Journal(log: options.log, state: options.state)
+if let configProblem { journal.line("CONFIG  \(configProblem)") }
 
 let app = NSApplication.shared
 app.setActivationPolicy(.accessory)
-let host = Host(options: options, config: config, journal: Journal(log: options.log, state: options.state))
+let host = Host(options: options, config: config, journal: journal)
 app.delegate = host
 app.run()
