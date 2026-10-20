@@ -639,6 +639,27 @@ ledger is the merging session's):**
 - **F-U1a-6 (MOBILE PARITY):** nothing mobile-visible — the phone runs no `StoreBackup` and no pair road (its store is
   re-derivable from the mirror, A1's own note); the shared files compile for iOS (the phone build green).
 
+**U1a ARBITRATION (the orchestrator, 2026-10-19 — repo-first before U1b spawns):**
+- **F-U1a-1** (a resumed Change/Reset typing the OLD passphrase "finishes" under it — the chosen passphrase never set,
+  the outcome says resumed; Confirmed by probe, pre-existing): **FIX IN-PHASE, option (a), as U1b's piece 0** — it is
+  VX-450's own class (a key-door act interrupted mid-plan ending in a state that is neither rule 20's old nor new,
+  with nothing said), the arm is one more condition in the same core file this phase already holds open, and the
+  ladder reviews it cold. The shape: at a RESUME of Change or Reset, a typed passphrase that opens only the lock the
+  act is REPLACING (no lock under the plan's fresh descriptor stands yet) is not the act's secret ⇒ `ActRollback`
+  before any write. Pins red-on-old per the probe's two postures (Standard; Castle/Always ask). PROVISIONAL
+  P-VX309-U1b-0 — options (b) a face asking for the press's passphrase and (c) accept-and-say stay in the bundle for
+  her. VX-450's ticket closes at the merge naming BOTH arms (piece 4 + this).
+- **F-U1a-2** (the `TypedSecrets?` test trap): a TICKET at closeout (Debt, Test-only, Tests & tooling, Low).
+- **F-U1a-3**: FOLDED into U2's brief (the far leg's and the counts' sentences, if any — her words pass).
+- **F-U1a-4**: the closeout's canon delta list (supersedes P-VX306-U1a-4's bundle row).
+- **F-U1a-5**: record-only (two known wall-clock classes, both green alone, no line of this diff).
+- **F-U1a-6**: the MOBILE PARITY line at closeout ("nothing mobile-visible").
+- **P-VX309-U1a-1..6: each stands as built** pending her bundle — the narrow arms, every one consistent with the
+  rules' letter; U1a-2's visible consequence (a second same-day Back Up Now adds no far pair, unlike today's flat
+  leg) is flagged to U2's words and the bundle row says it plainly.
+
+**THE U1a MAC BATCH (the orchestrator, under the stage; result appended when run):** *(pending the coordinator's GO)*
+
 **Notes:** no machinery deaths; no Sonnet lookup; no subagents; no scratch worktree. The harness was rebuilt in this
 session's scratchpad from U1's recipe (the VX-308 harness's `Package.swift`, stubs and symlink list re-pointed); the
 core's `.build`, the harness's `.build` and `App/Variorum/DerivedData/vx309/SourcePackages` were seeded by APFS clone from
