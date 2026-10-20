@@ -101,7 +101,7 @@ and GO the next READY. When nobody is READY, run `Tools/ambient on` (the stage a
 
 ## An expired claim
 Silence after expiry means the queue moves on. But if the holder was mid-live-round
-or mid-walk, HOLD the stage for it and ask whether the dev store was touched and
+or mid-walk, HOLD the stage for it (spell that hold `HOLD FOR <who> …`, never `HOLD:` — the stage ambient stays up under `HOLD:`) and ask whether the dev store was touched and
 restored before anyone else walks it.
 
 ## The Sync/-custody slot
