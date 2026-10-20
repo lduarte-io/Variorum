@@ -522,6 +522,48 @@ The crash window (a new library holding part of the export; the export untouched
 PROVISIONAL, not engineered around — with one requirement: the import's END writes a receipt/log line naming what
 landed (N books · M notes · K snippets), so a partial landing is visible against it.
 
+## 7. THE WALK PLAN (the orchestrator's, ONE stage window after the ladder closes; drafted at the U2 close from the
+four unit records' walk notes — the §6 notes carry each row's detail; this is the ORDER and the posture rails)
+
+**Rails (the coordinator's eight terms + the walk guards, every row):** the DEV store only; claim per the GO; renew
+after EACH ROW; zero instances before any slot move; a cmp-verified safety copy of EVERY slot file first (no extension
+filter — the lived-here marker); throwaways outside the slot removed or listed; the defaults domain pre-exported and
+end-diffed; credentials from the env files only, never echoed; synced arms on the THROWAWAY project through VX-308's
+walk switch (every launch asserts the ref ≠ production); never press Resume on the dev store; never a words look on
+the dev library (F-U2b-5); window-scoped captures, light AND dark wherever a face renders; the result line names end
+posture · library ID · hold+banner · keychain adds · 0 instances. Expect F-U2-2's odd banner sentence after T-5/
+Make-mine (a recorded finding, not a walk failure).
+
+**The rows, in order (detail in the §6 walk notes of U1a · U1b · U1c · U2):**
+1. **The backups + counts row (U1a):** picked folder set → Back Up Now → the pair in BOTH places, same bytes; a second
+   press → container only, the one-a-day caption's truth; Data Safety's rows count pairs; retention's log line.
+2. **The restore drill (stage 9; U1b):** Look inside (read-only, nothing written) → Make this my library (held; the
+   old library whole in Previous Libraries; item 7's concrete lead — capture in Standard, then the LOCAL Castle arm
+   with rule 17's sentence, Standard restored after); the Previous Libraries arc (listed, dated, Look inside by its
+   own road).
+3. **T-5, the empty-slot landing (stage 9's empty arm; U1b):** the slot emptied (files MOVED aside) → the missing
+   face → Restore from a Backup → the listing (lead; VX-210's line visible on the dev store) → the confirm (the new
+   T-5 lead) → typed words → landed, held, the receipt; a wrong word refuses with nothing moved. The words card does
+   NOT re-offer (VX-444 — the typed-words arm).
+4. **VX-265 + item 5 (U1c, on THROWAWAYS seated in the slot only):** the delete door on a stepped-aside throwaway's
+   rows — the confirm with her older-libraries sentences and the way-back line — the folder gone whole; the open
+   library's rows carry no delete; at rule 27's lobby none.
+5. **VX-451 + VX-448/445 spot-check (U1c):** the LOCAL Castle arm — the On this Mac section's dial (5 → the log line →
+   back to 10) and Lock Library Now → the lobby; Standard restored (both secrets, the dev pair unchanged).
+6. **The words rows (U2):** VX-263's line on the key doors; VX-211's floor + hint arcs on a throwaway (11 → refusal;
+   12–19 → the quiet line, the set LANDS; repetition; 20+ varied → nothing); the guide's three lessons via Help ▸
+   Restore Tutorial on a THROWAWAY slot; Data Safety's new lines (both voices).
+7. **The account rows (U2, the THROWAWAY project):** the join by passphrase → her email-named moment (with the
+   backups sentence); This Mac Only → re-join same passphrase → NO moment (VX-456); a follow's Done as the durable
+   notice through a relaunch → OK clears (VX-457); Move's moveNotYet line. Signed out at the end (the account fence).
+8. **T-8 (LAST — the coordinator's shape):** a THROWAWAY library seated in the dev slot (A aside whole first,
+   cmp-verified, the hold marker with it); the export picked → the doors name it (the new lead) → Bring it in → the
+   new library Standard, NOT held, the receipt with counts and the Previous Libraries tail; the content checked
+   against the source (books a–z, chapters, memberships, archived things archived, versions absent, wings minted,
+   the empty book named); then A RESTORED WHOLE (cmp-verified; the hold marker back; the banner standing), the
+   throwaways cleared, the defaults end-diff reconciled, signed out, 0 instances.
+9. **Stages 13/14:** pins only (the crash loops) + rule 27's face spot-check rode row 3/4; said in the record.
+
 ## 2. Evidence (the acceptance spine)
 Walks in BOTH VOICES (Terminal and Study) over the new faces; the restore drill through Look inside and Make this my
 library; the lifecycle page's stages 9, 10, 13 and 14 against the faces as built. Headless + build-for-testing for
