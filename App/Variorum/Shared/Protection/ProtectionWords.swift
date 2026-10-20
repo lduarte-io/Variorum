@@ -106,6 +106,26 @@ nonisolated enum ProtectionWords {
             ? makeMineLead
             : makeMineLead.replacingOccurrences(of: "twelve words and passphrase", with: "twelve words")
     }
+    /// VX-309 U2 — VX-264 ITEM 7 (her #216 VX-209 ruling, "A: concrete" — "why would we not make it concrete? why are we
+    /// telling the user to check? do we not know what happened?"): the lead COMPUTED per the open library's shape. The
+    /// posture the copy lands in, said concretely (rule 17: "in the posture you are in now"; §7c's draft is the Standard,
+    /// unsynced arm, byte for byte); in Castle, rule 17's own sentence, hers (`neverLeaveCastle`); synced, VX-209's synced
+    /// arm — the new library carries no sync identity (P-VX378-U2-4), so it doesn't sync until she turns sync on for it
+    /// (PROVISIONAL P-VX309-U2-5).
+    static func makeMineLead(posture: ProtectionMode, passphraseSet: Bool, synced: Bool) -> String {
+        var lead = makeMineLeadShown(passphraseSet: passphraseSet)
+        if posture == .castle {
+            lead = lead.replacingOccurrences(of: "a new library \u{2014} in Standard,", with: "a new library \u{2014} in Castle,")
+                + " " + neverLeaveCastle
+        }
+        if synced { lead += " " + makeMineSyncedLine }
+        return lead
+    }
+    /// RULE 17 — her sentence, verbatim (`notes/CastleRules.md`): Make this my library in Castle.
+    static let neverLeaveCastle = "You never leave Castle by opening something."
+    /// VX-209's synced arm (PROVISIONAL P-VX309-U2-5): the copy becomes a library of this Mac's until she turns sync on.
+    static let makeMineSyncedLine = "The new library doesn't sync with your account until you turn on sync for it in "
+        + "Settings \u{25B8} Protection."
     static let makeMineCopySecretField = "The copy's passphrase or twelve words"
     static let makeMineWordsField = "Your twelve words"
     static let makeMinePassphraseField = "Your passphrase"
@@ -134,6 +154,10 @@ nonisolated enum ProtectionWords {
     /// The second group: copies of other libraries on this Mac (rule 19: "Copies of other libraries are listed"), the
     /// library that stepped aside among them (§7c (8): "where you can look inside it or make it your library again").
     static let otherLibrariesHeading = "Other libraries on this Mac"
+    /// VX-309 U2 — VX-264 ITEM 5 in the listings: her "older libraries" words (#216), fitted to the rows' kind label
+    /// (*Previous library* — rule 17's Previous Libraries), said where one is listed (PROVISIONAL — the fitting).
+    static let olderLibrariesLine = "A previous library is an older library Variorum kept when you opened or restored a "
+        + "different one \u{2014} your way back to what you had before."
     /// A row's kind.
     static func copyKind(_ kind: CopyKind) -> String {
         switch kind {
@@ -248,28 +272,50 @@ nonisolated enum ProtectionWords {
     static let deleteCopiesTitle = "Delete this library's copies?"
     static let deleteCopiesButton = "Delete copies"
     static let deleteCopiesWorking = "Deleting the copies\u{2026}"
-    /// What goes, counted by kind ("2 backups and a previous library").
+    /// What goes, counted — VX-309 U2 — VX-264 ITEM 5: HER WORDS (QUESTIONS #216, VX-203's ruled wording, verbatim:
+    /// *"That's 27 backups, plus 2 older libraries Variorum kept when you opened or restored a different one."* — "set-aside"
+    /// leaves every user-facing sentence), fitted to ONE library's copies: the backups, the copies she picked and opened here
+    /// (the doors' filed copies), then her clause for the libraries that stepped aside (PROVISIONAL where fitting changed a
+    /// word — the singular, the opened copies' phrase).
     static func deleteCopiesCounts(_ choice: CopyDeleteChoice) -> String {
         func count(_ n: Int, _ one: String, _ many: String) -> String? {
-            n == 0 ? nil : (n == 1 ? one : "\(n) \(many)")
+            n == 0 ? nil : "\(n) \(n == 1 ? one : many)"
         }
-        let parts = [
-            count(choice.backups, "a backup", "backups"),
-            count(choice.previousLibraries, "a previous library", "previous libraries"),
-            count(choice.openedCopies, "an opened copy", "opened copies"),
+        let plain = [
+            count(choice.backups, "backup", "backups"),
+            count(choice.openedCopies, "copy you opened here", "copies you opened here"),
         ].compactMap { $0 }
-        switch parts.count {
-        case 0: return "nothing"
-        case 1: return parts[0]
-        default: return parts.dropLast().joined(separator: ", ") + " and " + parts[parts.count - 1]
+        let older = count(
+            choice.previousLibraries, "older library Variorum kept when you opened or restored a different one",
+            "older libraries Variorum kept when you opened or restored a different one")
+        switch (plain.count, older) {
+        case (0, nil): return "That's nothing."
+        case (0, let older?): return "That's \(older)."
+        case (1, nil): return "That's \(plain[0])."
+        case (_, nil): return "That's " + plain.dropLast().joined(separator: ", ") + " and \(plain[plain.count - 1])."
+        case (_, let older?): return "That's " + plain.joined(separator: ", ") + ", plus \(older)."
+        }
+    }
+    /// HER WAY-BACK SENTENCE (#216, verbatim: *"Those older libraries are your way back to what you had before — delete
+    /// them only if you won't want them back."*), said where an older library is among what goes (the singular fitted —
+    /// PROVISIONAL).
+    static func deleteCopiesWayBack(_ olderLibraries: Int) -> String? {
+        switch olderLibraries {
+        case 0: return nil
+        case 1: return "That older library is your way back to what you had before \u{2014} delete it only if you won't "
+            + "want it back."
+        default: return "Those older libraries are your way back to what you had before \u{2014} delete them only if "
+            + "you won't want them back."
         }
     }
     /// The confirm's lead (rule 19: one library's copies, never silently): the library named by its day as the listing
-    /// knows it, what goes counted, what stays said, and that nothing else is touched.
+    /// knows it, what goes counted in her words (item 5), her way-back sentence over an older library, what stays said, and
+    /// that nothing else is touched.
     static func deleteCopiesLead(_ choice: CopyDeleteChoice, libraryOpen: Bool) -> String {
         let day = choice.newest.map { ProtectionWords.day($0) } ?? offerUnknownDay
-        var text = "This deletes the copies this Mac made of the library last copied \(day): "
-            + deleteCopiesCounts(choice) + ". They can't be brought back."
+        var text = "This deletes the copies this Mac made of the library last copied \(day). "
+            + deleteCopiesCounts(choice) + " They can't be brought back."
+        if let wayBack = deleteCopiesWayBack(choice.previousLibraries) { text += " " + wayBack }
         if choice.staying > 0 {
             text += choice.staying == 1
                 ? " One copy another Mac made stays." : " \(choice.staying) copies another Mac made stay."

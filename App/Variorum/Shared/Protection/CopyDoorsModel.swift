@@ -79,6 +79,9 @@ nonisolated struct CopyDoorsListing: Equatable, Sendable {
     var isEmpty: Bool { thisLibrary.isEmpty && otherLibraries.isEmpty }
     var all: [CopyDoorRow] { thisLibrary + otherLibraries }
 
+    /// VX-309 U2 — VX-264 item 5: a library that stepped aside is listed — her "older libraries" line renders (P-2).
+    var listsAnOlderLibrary: Bool { all.contains { $0.kind == .previousLibrary } }
+
     /// A row's delete choice (its library's; nil: no *Delete…* on this row).
     func deleteChoice(for row: CopyDoorRow) -> CopyDeleteChoice? {
         guard !row.isThisLibrary, let library = row.copy.library else { return nil }
@@ -219,6 +222,19 @@ nonisolated enum PickOutcome: Equatable, Sendable {
 
 // MARK: - The roads
 
+/// VX-309 U2 — VX-264 item 7: the OPEN library's shape, as Make this my library's confirm says it concretely — the posture
+/// the copy lands in (rule 17: "in the posture you are in now") and whether the library open now syncs (the new library
+/// carries no sync identity — P-VX378-U2-4 — so it doesn't sync until she turns sync on for it).
+nonisolated struct OpenLibraryShape: Equatable, Sendable {
+    let posture: ProtectionMode
+    let synced: Bool
+
+    /// The open library's shape, from its record (nil: no record).
+    static func of(_ library: UnlockedLibrary) -> OpenLibraryShape? {
+        library.record.map { OpenLibraryShape(posture: $0.mode, synced: $0.account != nil) }
+    }
+}
+
 /// Every act the doors take, injected (the bootstrap's on the new road; a test's, planted). Main-actor closures that
 /// hop off it for their reads and writes.
 struct CopyDoorsRoads {
@@ -228,6 +244,9 @@ struct CopyDoorsRoads {
     var opensQuietly: @MainActor (CatalogCopy) async -> Bool
     /// Whether the library open now carries a passphrase (the confirm asks for it).
     var passphraseSet: @MainActor () -> Bool
+    /// VX-309 U2 — VX-264 item 7: the library open now — its posture and whether it syncs (Make this my library's lead says
+    /// what the copy becomes, concretely). nil: none open, or not known (the lead as §7c drafted it).
+    var libraryShape: @MainActor () -> OpenLibraryShape? = { nil }
     /// MAKE THIS MY LIBRARY: the copy's secrets, then her current pair (ignored where `landsInTheEmptySlot`). nil: the
     /// door is not offered.
     var makeMine: (@MainActor (CopyDoorRow, _ copySecrets: TypedSecrets, _ currentPair: TypedSecrets) async -> CopyDoorOutcome)?
@@ -313,6 +332,8 @@ final class MakeMineModel: Identifiable {
     /// VX-309 U1b — T-5: no library is open; the copy's own secret is the one thing asked (always — rule 14's precedent),
     /// and it becomes the new library's lock.
     let intoTheEmptySlot: Bool
+    /// VX-309 U2 — VX-264 item 7: the open library's shape (the lead says what the copy becomes, concretely); nil: §7c's lead.
+    let shape: OpenLibraryShape?
     /// The copy's own quiet road is being tried (a READ).
     private(set) var checking = true
     /// No quiet road opens the copy — its own secret is asked (an empty field tries her own pair).
@@ -327,7 +348,7 @@ final class MakeMineModel: Identifiable {
     @ObservationIgnored private let finished: (Bool) -> Void
 
     init(
-        row: CopyDoorRow, passphraseSet: Bool, intoTheEmptySlot: Bool = false,
+        row: CopyDoorRow, passphraseSet: Bool, intoTheEmptySlot: Bool = false, shape: OpenLibraryShape? = nil,
         opensQuietly: @escaping () async -> Bool,
         act: @escaping (TypedSecrets, TypedSecrets) async -> CopyDoorOutcome,
         finished: @escaping (Bool) -> Void
@@ -335,14 +356,19 @@ final class MakeMineModel: Identifiable {
         self.row = row
         self.passphraseSet = passphraseSet
         self.intoTheEmptySlot = intoTheEmptySlot
+        self.shape = shape
         self.opensQuietly = opensQuietly
         self.act = act
         self.finished = finished
     }
 
-    /// The lead — §7c (8) (the passphrase clause only when one is set — P-VX306-U3-3); T-5's own when no library is open.
+    /// The lead — §7c (8) (the passphrase clause only when one is set — P-VX306-U3-3), VX-309 U2 — VX-264 item 7: computed
+    /// per the open library's shape (its posture said concretely; synced, VX-209's sentence); T-5's own when no library is
+    /// open.
     var lead: String {
-        intoTheEmptySlot ? ProtectionWords.makeMineEmptySlotLead : ProtectionWords.makeMineLeadShown(passphraseSet: passphraseSet)
+        if intoTheEmptySlot { return ProtectionWords.makeMineEmptySlotLead }
+        guard let shape else { return ProtectionWords.makeMineLeadShown(passphraseSet: passphraseSet) }
+        return ProtectionWords.makeMineLead(posture: shape.posture, passphraseSet: passphraseSet, synced: shape.synced)
     }
 
     /// The quiet road tried once, at the confirm's open — AUTOMATIC, so the road it is given never presses Touch ID
@@ -536,6 +562,7 @@ final class CopyDoorsModel: Identifiable {
         let roads = roads
         let model = MakeMineModel(
             row: row, passphraseSet: roads.passphraseSet(), intoTheEmptySlot: roads.landsInTheEmptySlot,
+            shape: roads.libraryShape(),
             opensQuietly: { await roads.opensQuietly(row.copy) },
             act: { copySecrets, currentPair in await makeMine(row, copySecrets, currentPair) },
             finished: { [weak self] made in

@@ -1193,6 +1193,8 @@ final class AppBootstrap {
                 }.value
             },
             passphraseSet: { [weak self] in self?.roadSession?.library.keyFile?.passphrase != nil },
+            // VX-309 U2 — VX-264 item 7: the open library's posture and sync, for the confirm's concrete lead.
+            libraryShape: { [weak self] in self?.roadSession.flatMap { OpenLibraryShape.of($0.library) } },
             makeMine: { [weak self] row, copySecrets, currentPair in
                 guard let self else { return .refused(.failed) }
                 return await self.makeThisMyLibrary(row, copySecrets: copySecrets, currentPair: currentPair)

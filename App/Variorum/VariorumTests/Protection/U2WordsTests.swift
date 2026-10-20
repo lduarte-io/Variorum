@@ -12,6 +12,7 @@ import Testing
 import VariorumCore
 
 @Suite("VX-309 U2 — the words unit's lines, as drafted")
+@MainActor
 struct U2WordsTests {
     /// A label as a sentence names it (the door's trailing ellipsis dropped).
     static func named(_ door: String) -> String {
@@ -87,5 +88,84 @@ struct U2WordsTests {
         let none = ProtectionWords.deleteCopiesLead(Self.choice(backups: 4, previous: 0), libraryOpen: true)
         #expect(!none.contains("way back"), "\(none)")
         for lead in [two, one, none] { #expect(Self.shouts(lead).isEmpty && !lead.lowercased().contains("set-aside")) }
+    }
+
+    /// Her words in the listing, said only where an older library is listed (P-2).
+    @Test func theListingSaysHerOlderLibrariesLineOnlyWhereOneIsListed() throws {
+        #expect(ProtectionWords.olderLibrariesLine.contains("older library Variorum kept when you opened or restored a "
+            + "different one"))
+        #expect(ProtectionWords.olderLibrariesLine.contains("your way back to what you had before"))
+        #expect(ProtectionWords.olderLibrariesLine.hasPrefix("A " + ProtectionWords.copyKind(.previousLibrary).lowercased()),
+                "it names the rows' own kind")
+        let library = PlantCatalog.id(), other = PlantCatalog.id(), mac = PlantCatalog.id()
+        let mine = try PlantCatalog.keyFile(libraryID: library)
+        let theirs = try PlantCatalog.keyFile(libraryID: other)
+        let backups = try PlantCatalog.backup(mine, mac: mac, at: PlantCatalog.day(1))
+            + PlantCatalog.backup(theirs, mac: mac, at: PlantCatalog.day(2))
+        #expect(!CopyDoorsListing.make(Catalog.build(backups), libraryID: library).listsAnOlderLibrary)
+        let withAside = try backups + PlantCatalog.previous(theirs, at: PlantCatalog.day(3))
+        #expect(CopyDoorsListing.make(Catalog.build(withAside), libraryID: library).listsAnOlderLibrary)
+    }
+
+    // MARK: - Piece 4 — VX-264 item 7: the confirm said concretely, per the open library's shape (+ VX-209's synced arm)
+
+    /// §7c's lead IS the Standard, unsynced arm, byte for byte; in Castle the posture is said and rule 17's sentence (hers)
+    /// follows; synced, VX-209's arm says the new library doesn't sync until she turns sync on for it; without a passphrase
+    /// the passphrase clause goes in every posture.
+    @Test func theMakeMineLeadIsConcretePerShape() throws {
+        #expect(ProtectionWords.makeMineLead(posture: .standard, passphraseSet: true, synced: false)
+            == ProtectionWords.makeMineLead, "§7c's draft is the Standard, unsynced arm")
+        let castle = ProtectionWords.makeMineLead(posture: .castle, passphraseSet: true, synced: false)
+        #expect(castle.hasPrefix("This copy becomes a new library \u{2014} in Castle, under your current twelve words and "
+            + "passphrase \u{2014} with a fresh key of its own."), "\(castle)")
+        #expect(!castle.contains("Standard") && castle.hasSuffix(" You never leave Castle by opening something."))
+        let synced = ProtectionWords.makeMineLead(posture: .castle, passphraseSet: false, synced: true)
+        #expect(synced.hasSuffix("You never leave Castle by opening something. The new library doesn't sync with your "
+            + "account until you turn on sync for it in Settings \u{25B8} Protection."), "\(synced)")
+        #expect(!synced.contains("passphrase"), "no passphrase set — the clause goes")
+        #expect(ProtectionWords.makeMineLead(posture: .standard, passphraseSet: true, synced: true)
+            == ProtectionWords.makeMineLead + " " + ProtectionWords.makeMineSyncedLine)
+        for posture in [ProtectionMode.standard, .castle] {
+            for passphrase in [true, false] {
+                for synced in [true, false] {
+                    let lead = ProtectionWords.makeMineLead(posture: posture, passphraseSet: passphrase, synced: synced)
+                    #expect(Self.shouts(lead).isEmpty && !lead.contains("check"), "concrete — no 'check' (#216): \(lead)")
+                }
+            }
+        }
+        // Rule 17's sentence is hers, from the rules file.
+        let rules = try RoadAccountWordsTests.rules()
+        #expect(rules.contains(ProtectionWords.neverLeaveCastle), "rule 17, verbatim")
+    }
+
+    /// The confirm reads the open library's shape from its road (nil — a test's roads — keeps §7c's lead); the shape of a
+    /// planted Castle library is Castle, local.
+    @Test func theConfirmReadsTheOpenLibrarysShape() async throws {
+        let entries = try PlantCatalog.previous(try PlantCatalog.keyFile(libraryID: "lib"), at: PlantCatalog.day(1))
+        let row = CopyDoorRow(copy: try #require(Catalog.build(entries).copies.first), isThisLibrary: true, asOf: nil)
+        func confirm(_ shape: OpenLibraryShape?) -> MakeMineModel {
+            MakeMineModel(row: row, passphraseSet: true, shape: shape, opensQuietly: { true }, act: { _, _ in .made }) { _ in }
+        }
+        #expect(confirm(nil).lead == ProtectionWords.makeMineLead)
+        #expect(confirm(OpenLibraryShape(posture: .castle, synced: true)).lead
+            == ProtectionWords.makeMineLead(posture: .castle, passphraseSet: true, synced: true))
+        // Through the doors' brain: a row's Make this my library… opens the confirm with the road's shape.
+        let planted = PlantedCopyDoors()
+        var roads = planted.roads
+        roads.passphraseSet = { false }
+        roads.libraryShape = { OpenLibraryShape(posture: .castle, synced: false) }
+        let doors = CopyDoorsModel(roads: roads)
+        await doors.openMakeMine(row)
+        guard case .makeMine(let opened) = doors.phase else {
+            Issue.record("the confirm stands: \(doors.phase)")
+            return
+        }
+        #expect(opened.lead == ProtectionWords.makeMineLead(posture: .castle, passphraseSet: false, synced: false))
+        let road = PlantedRoad()
+        let (castle, _) = try await Crossing.inCastle(road)
+        #expect(OpenLibraryShape.of(castle.library) == OpenLibraryShape(posture: .castle, synced: false))
+        let fresh = PlantedRoad()
+        let (standard, _) = try await fresh.created()
+        #expect(OpenLibraryShape.of(standard.library) == OpenLibraryShape(posture: .standard, synced: false))
     }
 }

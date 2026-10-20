@@ -97,6 +97,13 @@ struct CopyDoorsSheet: View {
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                // VX-309 U2 — VX-264 item 5: her "older libraries" words, only where one is listed (P-2).
+                if listing.listsAnOlderLibrary {
+                    Text(ProtectionWords.olderLibrariesLine)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 // VX-309 U1c — VX-265: what a delete here took (the listing re-read beneath it).
                 if let receipt = model.listingReceipt {
                     Text(receipt).font(.callout).fixedSize(horizontal: false, vertical: true)
@@ -293,6 +300,13 @@ struct RoadRestoreRows: View {
                     Text(ProtectionWords.otherLibrariesHeading)
                         .font(.callout.weight(.semibold))
                         .padding(.top, 4)
+                    // VX-309 U2 — VX-264 item 5: her "older libraries" words, only where one is listed (P-2).
+                    if list.listing.listsAnOlderLibrary {
+                        Text(ProtectionWords.olderLibrariesLine)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                     ForEach(list.listing.otherLibraries) { row in rowView(row) }
                 }
             }
