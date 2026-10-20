@@ -252,3 +252,18 @@ against its finding. The two host findings also get a stage probe (below).
 | R2-7 NIT | The idle gate failed open on an unreadable idle or a non-numeric `--min-idle`. | FIXED: `--min-idle` must be whole seconds (exit 2), and an unreadable idle refuses. |
 | R2-8 NIT | The `HOLD FOR <who>` spelling lived only in the skill's new ambient section, not where an expired claim's hold is written. | FIXED on the stacked skill branch: the "An expired claim" section says it too. |
 
+**Round-2 stage probe** (vx-458-probe2, 02:26:11–02:26:31 MDT; GO from 1018coordinator; no input posted):
+- R2-2: `on` printed ON with the front app = StageAmbient (pid 67630, the ambient's own) and the cursor
+  hidden.
+- R2-1: `osascript -e 'quit app "StageAmbient"'` exited **0** (not cancelled). The app was gone in 136
+  ms, logged `OFF quit request (up 6.3 s, return-to=Ghostty)`, the cursor came back, the terminal was
+  frontmost again, and the state file was cleared.
+- On/off round trip: ON with StageAmbient frontmost; `off` 221 ms.
+- End: stage free, 0 StageAmbient, 0 Variorum.
+- One cosmetic leak found and fixed: codesign's routine "replacing existing signature" reached `on`'s
+  output after R2-6. It is now shown only on failure.
+
+**The ladder is closed.** Round 1: 0 BLOCKER, 0 MAJOR, 5 MINOR, 6 NIT. Round 2: 0 BLOCKER, 0 MAJOR,
+2 MINOR, 6 NIT. Every finding fixed or recorded, the coordinator's integration test passed twice, and
+the final round's host fixes were proven on the screen.
+
