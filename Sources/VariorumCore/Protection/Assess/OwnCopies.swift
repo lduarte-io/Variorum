@@ -57,6 +57,41 @@ public enum OwnCopies {
         return Summary(count: own.count, newest: trusted.max(), oldest: trusted.min())
     }
 
+    // MARK: - VX-309 U1c — VX-265: this Mac's copies of ANOTHER library (rule 19's delete)
+
+    /// **Whether `copy` is THIS Mac's** — rule 19's delete ("Copies of other libraries are listed and can be deleted"), and
+    /// never another Mac's. A library's device ID is its own on each Mac (rule 23): Make this my library mints a fresh one,
+    /// so the `<mac8>` the OPEN library's section names says nothing about another library's copies — the library that
+    /// stepped aside filed its backups under ITS device ID's `<mac8>`. What does say it is the place: every copy in this
+    /// Mac's own CONTAINER is this Mac's (the container is per Mac and per login — `MacAttribution.thisMacsContainer`'s own
+    /// reason), whatever subfolder it sits in; a FAR copy is this Mac's only when this Mac's container files the SAME
+    /// library's copies under the same `Backups/<library8>/<mac8>` subfolder (the pair road copies the container pair there
+    /// under its own subfolder — VX-309 U1a, R-U1a-1). A far copy under any other `<mac8>` (another Mac sharing the folder)
+    /// or under none (`unattributed`), and a copy no key file attributes to a library, are never claimed.
+    public static func isThisMacsCopy(_ copy: CatalogCopy, in catalog: Catalog) -> Bool {
+        guard let library = copy.library else { return false }
+        switch copy.place {
+        case .container:
+            return true
+        case .farFolder:
+            guard case .mac8 = copy.mac, let subfolder = backupSubfolder(copy) else { return false }
+            return catalog.copies.contains {
+                $0.place == .container && $0.library == library && backupSubfolder($0) == subfolder
+            }
+        }
+    }
+
+    /// This Mac's copies of `libraryID` — what rule 19's delete counts, and only that.
+    public static func thisMacsCopies(ofLibrary libraryID: String, in catalog: Catalog) -> [CatalogCopy] {
+        catalog.copies.filter { $0.library == libraryID && isThisMacsCopy($0, in: catalog) }
+    }
+
+    /// A backup pair's `Backups/<library8>/<mac8>` subfolder, lowercased (nil for a copy filed anywhere else).
+    private static func backupSubfolder(_ copy: CatalogCopy) -> [String]? {
+        guard copy.kind == .backup, copy.folders.count >= 3 else { return nil }
+        return copy.folders.prefix(3).map { $0.lowercased() }
+    }
+
     /// **The far folder's own due-ness (P-VX306-U1a-4's deferral, VX-309 U1a piece 1)**: due when the catalog holds NO
     /// pair of this library by this Mac in the far folder whose stamp is trusted and younger than `interval` — the
     /// question today's flat far leg asks of the folder's newest file (`StoreBackup.performSecondLeg`), asked of this

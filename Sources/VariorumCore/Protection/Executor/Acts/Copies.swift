@@ -579,12 +579,37 @@ extension ProtectionExecutor {
 
     /// **The offer's delete** — another library's copies, at her press: this
     /// Mac's copies of it only (never another Mac's, never this library's).
+    /// VX-309 U1c (VX-265): "this Mac's" is `OwnCopies.isThisMacsCopy` — told by
+    /// PLACE, never by comparing a copy's `<mac8>` with the OPEN library's
+    /// section: a library's device ID is its own on each Mac (rule 23), so the
+    /// library that stepped aside filed its backups under its OWN `<mac8>`.
     public func offerDelete(_ library: inout UnlockedLibrary, copies: [CatalogCopy], catalog: Catalog) async throws -> ActOutcome {
         let thisLibrary = library.record?.libraryID
-        let mine = library.section.mac8
-        let deletable = copies.filter { $0.library != nil && $0.library != thisLibrary && $0.mac.isMac(mine) }
+        let deletable = copies.filter {
+            $0.library != nil && $0.library != thisLibrary && OwnCopies.isThisMacsCopy($0, in: catalog)
+        }
         return try await perform(
             OfferDeleteProgram(), parameters: ActParameters(copyIDs: Set(deletable.map(\.id)).sorted()),
             secrets: ActSecrets(), library: &library)
+    }
+
+    /// **The offer's delete with NO library open** (VX-309 U1c — VX-265 at the empty-slot listing: the missing face, rule
+    /// 27's lobby). The same fence (`OwnCopies.isThisMacsCopy`), and never a copy of a library this Mac REMEMBERS (rule 21
+    /// — the library missing from the slot, or the one rule 27's lobby cannot open: its copies are the ones the empty-slot
+    /// landing lands from — PROVISIONAL P-VX309-U1c-2). No plan: deleting copies changes no key (rule 20 is about acts that
+    /// change keys) and no library holds the act — a delete that stops part of the way has deleted fewer copies, and the
+    /// next press deletes the rest (each id's delete is idempotent). Returns the ids deleted; nothing deletable refuses
+    /// `nothingToDo` with nothing written.
+    @discardableResult
+    public func offerDeleteWithNoLibraryOpen(copies: [CatalogCopy], catalog: Catalog) throws -> [String] {
+        let remembered = try leaves.memory.rememberedLibraryIDs()
+        let deletable = Set(copies.filter { copy in
+            guard let library = copy.library, !remembered.contains(library) else { return false }
+            return OwnCopies.isThisMacsCopy(copy, in: catalog)
+        }.map(\.id)).sorted()
+        guard !deletable.isEmpty else { throw ExecutorRefusal.nothingToDo }
+        try leaves.backups.deleteCopies(ids: deletable)
+        log("offer delete (no library open): \(deletable.count) of another library's copies on this Mac")
+        return deletable
     }
 }
