@@ -60,6 +60,21 @@ clear_if_dead() {
 
 mins_left() { read_meta; echo $(( (EXPIRES_EPOCH - $(now) + 59) / 60 )); }
 
+# VX-459: a claim that isn't the coordinator's own idle hold ("HOLD:") takes the screen back from the
+# stage ambient (Tools/ambient) before the claim returns. The ambient also quits itself within ~0.3 s of
+# seeing such a claim; this makes the handoff synchronous. It acts only on THIS home's ambient (its state
+# file), so a Tools/stage run under a throwaway HOME (the ambient's own tests) never touches the real one.
+# It never fails a claim: this script runs under set -e.
+ambient_off() { # $1 = the claim's reason
+  case "$1" in HOLD:*) return 0 ;; esac
+  [ -f "$DIR/ambient.state" ] || return 0
+  pgrep -x StageAmbient >/dev/null 2>&1 || return 0
+  local amb; amb="$(cd "$(dirname "$0")" && pwd)/ambient"
+  if [ -x "$amb" ]; then "$amb" off >/dev/null 2>&1 || true
+  else pkill -TERM -x StageAmbient 2>/dev/null || true; fi
+  return 0
+}
+
 write_meta() { # $1=who $2=reason $3=minutes
   {
     printf "WHO=%q\n" "$1"
@@ -103,6 +118,7 @@ case "$cmd" in
       if [ "$WHO" = "$WHO_ARG" ]; then  # re-claim by the holder = renew
         write_meta "$WHO_ARG" "$REASON_ARG" "$MINUTES"
         logline "RENEWED   who=$WHO_ARG reason=$REASON_ARG minutes=$MINUTES"
+        ambient_off "$REASON_ARG" || true
         echo "STAGE RENEWED for '$WHO_ARG' — $MINUTES min"
         exit 0
       fi
@@ -118,6 +134,7 @@ case "$cmd" in
     if mkdir "$LOCK" 2>/dev/null; then
       write_meta "$WHO_ARG" "$REASON_ARG" "$MINUTES"
       logline "CLAIMED   who=$WHO_ARG reason=$REASON_ARG minutes=$MINUTES"
+      ambient_off "$REASON_ARG" || true
       echo "STAGE CLAIMED by '$WHO_ARG' for $MINUTES min — release when done: Tools/stage release --who $WHO_ARG"
     else
       echo "STAGE REFUSED — lost the claim race; re-run 'stage status'."

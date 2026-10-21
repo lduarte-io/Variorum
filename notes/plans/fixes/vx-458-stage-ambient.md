@@ -176,11 +176,26 @@ for the active app. That is resolved below, within her brief's "leave focus wher
   `en_US.UTF-8` and `C`, the exact bytes of its hold, and the unreadable case. It passed under an ASCII
   hold with the old build: `on` exited 0 and logged `stage=hold`.
 
-## Proposed, not applied (hers to rule)
+## The proposals, and what became of them
 
-- **The `Tools/stage` hook** (her rail 2: "propose — don't make unasked"). On a claim whose reason isn't
-  `HOLD:`, take the ambient down synchronously. The ambient already goes within about 0.3 s by itself;
-  this makes the handoff instant.
+Her word, 2026-10-20 evening: "ok you can merge that draft PR. and I think that doing the small Tools /
+stage hook before you do would be a good idea - I'm about to start a new coordinator so it would be fun
+to try it out." Both landed together as **VX-459** (PR #181).
+
+- **The `Tools/stage` hook**, now APPLIED. Rail 2 had said "propose — don't make unasked", and she has
+  now asked. On a claim or re-claim whose reason isn't `HOLD:`, it takes the ambient down before the
+  claim returns. Beyond the proposal below, it acts only when `$HOME/.variorum/ambient.state` exists.
+  That keeps sandboxed `Tools/stage` runs (the ambient's own `StageClaimTests` use a throwaway HOME) from
+  ever killing the real ambient. It always returns 0, so a successful claim never exits 1 under `set -e`.
+  Proven with fakes only (a copy of `Tools/stage`, a fake `ambient`, fake `pgrep`/`pkill`):
+  - a non-HOLD claim calls `ambient off`;
+  - `HOLD:` doesn't;
+  - a holder's re-claim to `HOLD FOR …` does;
+  - `ambient off` failing still gives `STAGE CLAIMED`, exit 0;
+  - with no state file it does nothing;
+  - with no wrapper it falls back to `pkill`.
+
+  The live trial is her new coordinator. The proposal as first written:
 
   ```diff
   +# VX-458: a claim that isn't the coordinator's HOLD takes the screen back from the stage ambient at
@@ -199,7 +214,7 @@ for the active app. That is resolved below, within her brief's "leave focus wher
   ```
 
   The same line goes after the holder's renew-by-reclaim, since a renew can change the reason.
-- **The coordinator-skill diff:** branch `vx-458-coordinator-skill`. It turns the ambient on after a
+- **The coordinator-skill diff**, MERGED at her word with the hook (PR #181): branch `vx-458-coordinator-skill`. It turns the ambient on after a
   verified RELEASE and re-hold when nobody is READY, off before every GO ("ambient not running" joins the
   pre-GO checks) and at window close, and adds a short section on the ambient.
 

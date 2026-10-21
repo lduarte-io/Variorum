@@ -70,7 +70,8 @@ The history behind every rule: `notes/handoffs/coordinator-2026-10-07-handoff.md
   pause; forecasts drift).
 - `Tools/ambient off`, which is synchronous: it prints `AMBIENT OFF …` once the stage ambient is gone,
   and exits 0 when it wasn't running. Then `pgrep -x StageAmbient` must print nothing: ambient not
-  running. The ambient also quits itself on your `coord-for-*` bridge claim, but the GO waits for `off`.
+  running. Your `coord-for-*` bridge claim also takes it down (`Tools/stage claim` stops the ambient for
+  any non-`HOLD:` reason), but the GO still waits for `off`'s confirmation.
 - `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` for app instances. The looser
   `pgrep -fl "Variorum.app/Contents/MacOS"` also matches off-stage builds' link and
   codesign steps, and even headless `xcodebuild` command lines, so pass the strict forms
@@ -156,7 +157,8 @@ It is yours alone; sessions never touch it.
 - `on` refuses with one line while any claim's reason doesn't start with exactly `HOLD:`, or while
   someone is using the Mac (HID idle under 2 minutes). It returns once the window is up, and running it
   again while it's up is harmless.
-- It goes away by itself on any non-HOLD claim (within about 0.3 s) and on her first touch of the mouse,
+- It goes away on any non-HOLD claim: `Tools/stage claim` stops it before the claim returns, and the
+  app also quits itself within about 0.3 s. It also goes on her first touch of the mouse,
   trackpad or keyboard. So read `Tools/ambient status` (always exit 0: `RUNNING …` or `OFF`) rather than
   assuming it's up. `Tools/ambient log` (`~/.variorum/ambient.log`) says why it went.
 - Its process is `StageAmbient`, never `Variorum`. It posts no input and takes no assertion, so HID
