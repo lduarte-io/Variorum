@@ -68,6 +68,10 @@ The history behind every rule: `notes/handoffs/coordinator-2026-10-07-handoff.md
 ## Before every GO (mechanical, every time)
 - `Tools/stage status` (FREE or your own hold) and `date` (re-check the clock after any
   pause; forecasts drift).
+- `Tools/ambient off`, which is synchronous: it prints `AMBIENT OFF …` once the stage ambient is gone,
+  and exits 0 when it wasn't running. Then `pgrep -x StageAmbient` must print nothing: ambient not
+  running. Your `coord-for-*` bridge claim also takes it down (`Tools/stage claim` stops the ambient for
+  any non-`HOLD:` reason), but the GO still waits for `off`'s confirmation.
 - `pgrep -lx Variorum` and `pgrep -lf "MacOS/Variorum$"` for app instances. The looser
   `pgrep -fl "Variorum.app/Contents/MacOS"` also matches off-stage builds' link and
   codesign steps, and even headless `xcodebuild` command lines, so pass the strict forms
@@ -94,11 +98,11 @@ The history behind every rule: `notes/handoffs/coordinator-2026-10-07-handoff.md
 Verify it yourself: stage FREE, no instances, no booted simulators. For a refresh, also
 read the installed build (`defaults read /Applications/Variorum.app/Contents/Info
 CFBundleVersion`) and run `codesign --verify --deep --strict`. Then re-hold the stage
-and GO the next READY.
+and GO the next READY. When nobody is READY, run `Tools/ambient on` (the stage ambient below).
 
 ## An expired claim
 Silence after expiry means the queue moves on. But if the holder was mid-live-round
-or mid-walk, HOLD the stage for it and ask whether the dev store was touched and
+or mid-walk, HOLD the stage for it (spell that hold `HOLD FOR <who> …`, never `HOLD:` — the stage ambient stays up under `HOLD:`) and ask whether the dev store was touched and
 restored before anyone else walks it.
 
 ## The Sync/-custody slot
@@ -146,8 +150,25 @@ hard-stopped), make sure it cleaned up, and finish what it missed:
 - Close only what you KNOW closed. Live or exploratory worktrees stay untouched, even
   when idle. When unsure, list it in the handoff for her.
 
+## The stage ambient (VX-458)
+`Tools/ambient on|off|status|next|log` puts a 1-bit scene (a koi pond first) on the built-in screen
+while you hold the stage and nobody is READY. The source and rails are in `Tools/StageAmbient/README.md`.
+It is yours alone; sessions never touch it.
+- `on` refuses with one line while any claim's reason doesn't start with exactly `HOLD:`, or while
+  someone is using the Mac (HID idle under 2 minutes). It returns once the window is up, and running it
+  again while it's up is harmless.
+- It goes away on any non-HOLD claim: `Tools/stage claim` stops it before the claim returns, and the
+  app also quits itself within about 0.3 s. It also goes on her first touch of the mouse,
+  trackpad or keyboard. So read `Tools/ambient status` (always exit 0: `RUNNING …` or `OFF`) rather than
+  assuming it's up. `Tools/ambient log` (`~/.variorum/ambient.log`) says why it went.
+- Its process is `StageAmbient`, never `Variorum`. It posts no input and takes no assertion, so HID
+  idle still means her. `--allow-claimant` is a self-test flag and is never used on your road.
+- It stays up under any claim whose reason starts with exactly `HOLD:`. So `HOLD:` is your idle hold
+  ONLY; a hold on someone else's behalf (an expired walk, a session's paused window) never starts with
+  `HOLD:`. Spell it `HOLD FOR <who> …`.
+
 ## Closing
-When every session is silent: release your hold, delete any heartbeat, and write
+When every session is silent: `Tools/ambient off`, release your hold, delete any heartbeat, and write
 `notes/handoffs/coordinator-<date>-handoff.md`:
 1. Her checklist at the top: the real-store state (installed build and A1 path),
    what's held for her hands, tickets born, leftovers.

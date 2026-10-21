@@ -16,8 +16,8 @@
 #   ambient log                          the last lines of ~/.variorum/ambient.log (why it came and went)
 #   ambient build                        (re)build the app bundle
 #
-# It also quits ITSELF within ~0.3 s of a non-HOLD claim, and at once on real input (mouse, trackpad,
-# key). Its process is "StageAmbient" — never "Variorum", so the coordinator's instance checks never
+# It also quits ITSELF within ~0.3 s of a non-HOLD claim (and Tools/stage claim stops it synchronously
+# for any non-HOLD reason), and at once on real input (mouse, trackpad, key). Its process is "StageAmbient" — never "Variorum", so the coordinator's instance checks never
 # see it. It writes ~/.variorum/ambient.log and ~/.variorum/ambient.state; never stage.log.
 
 set -uo pipefail

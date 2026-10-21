@@ -41,7 +41,10 @@ scene, since, window number; removed on exit). Never `stage.log`, which is `Tool
    so does a `HOLD FOR <walk>` hold). A lock directory without its claim file, or a claim file without
    its fields, gets 0.5 s of grace and then counts as a claim. `Tools/stage` rewrites the file on every
    renew, so this is what keeps the coordinator's own renewals from ending it (`StageWatch`, pinned).
-   `on` refuses with one line while such a claim exists. The claim is read as bytes and unquoted exactly
+   `Tools/stage claim` also stops the ambient before it returns, for any reason that isn't `HOLD:`
+   (VX-459), so the handoff is synchronous. The hook acts only on its own home's ambient (the state
+   file), so a sandboxed `Tools/stage` run never touches the real one. `on` refuses with one line while
+   such a claim exists. The claim is read as bytes and unquoted exactly
    as `Tools/stage` writes it (bash `printf %q`). Under a UTF-8 locale that writes an em dash as a raw
    lead byte plus octal escapes, which is not valid text, so a text read fails. `StageClaimTests` pins
    this against the real tool under both locales.
