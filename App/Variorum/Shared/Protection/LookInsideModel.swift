@@ -50,7 +50,8 @@ final class LookInsideModel: Identifiable {
 
     let id = UUID()
     let row: CopyDoorRow
-    /// Make this my library is offered beside *Close* (a library is open — T-5's empty-slot landing is VX-309's).
+    /// Make this my library is offered beside *Close* (wherever its road exists — with a library open, and since VX-309 U1b
+    /// (T-5) with none: into the empty slot).
     let offersMakeMine: Bool
     private(set) var phase: Phase = .opening
     private(set) var busy = false

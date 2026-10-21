@@ -90,6 +90,19 @@ one precision this pass adds is the verified fact that the durable data plane ho
 hash, so backups/WAL/replicas are NOT part of the retention surface — only transit-layer
 logging is.
 
+> **Correction (2026-10-20, VX-213 — VX-309 U2; found by the VX-191 audit, auditor A's Q1 —
+> `notes/plans/fixes/vx-191-audit/A-ten-questions.md`):** the two sentences above that say the durable data plane
+> "retains only `SHA-256(kp)`" and that "backups/WAL/replicas are NOT part of the retention surface" are **no longer
+> true** — they were true of the 09-21 code and were overtaken by 13y (closed 2026-09-24). The server now checks a
+> per-request HMAC under `kp2` and keeps `kp2` ITSELF in Supabase Vault (`vault.create_secret(kp2, 'kp:' || caller)`,
+> `Server/supabase/12_phase13y_tenant_seq.sql:626`, again at :1493 and in `17_phase_vx307_vault.sql:238` for a
+> rotation's successor; read back as plaintext through `vault.decrypted_secrets`, `12…sql:683`). Supabase Vault
+> encrypts at rest under a server-managed key, so a database operator — or anyone holding a backup plus that key — can
+> read `kp2`. What that gives them is unchanged from this question's own class: `kp2` is an AUTHENTICATION key, an HMAC
+> output of M that unwraps nothing and yields nothing about M, so a holder (with a session) has integrity/availability
+> reach, never confidentiality; the per-request challenge closed the captured-body replay this verdict routed to 13y
+> (auditor A's Q1, item 1: DELIVERED). The text above is kept as written; auditor A's Q1 is the current reading.
+
 ## Q2 — her attacker scenario: the nine arms, and a tenth
 
 *An attacker holds a Standard-era snapshot pair, the Apple-held key, the account password and the
@@ -166,6 +179,16 @@ on the shared-gate argument rather than a dedicated pin. **Owner candidate: a on
 addition** (a `sync_reencrypt` call under the old proof asserting `keyProofRefused`, beside arm
 6) — naturally a B2 test-add or RECORDED for the run's harness-realism deliverable (B4). Severity
 NIT: the mechanism holds; only the explicit coverage is absent.
+
+> **Correction (2026-10-20, VX-213 — VX-309 U2; found by the VX-191 audit, auditor A's Q2):** this NIT was
+> **delivered** — arm 10 (`sync_reencrypt` under an old key proof) is a real arm in
+> `Tests/VariorumCoreTests/MultiTenantSyncAttackerTests.swift` — but its TEXT pin reads the wrong file: it checks the
+> gate inside `12_phase13y_tenant_seq.sql`'s body (`sql12.components(separatedBy: "create or replace function
+> sync_reencrypt")`, :602–606), while `13_phase13i_wings.sql:479` REDEFINES `sync_reencrypt` and is the deployed body.
+> Nothing is open today (13's body carries the gate — `perform sync_key_gate(active_key_id, key_proof, challenge,
+> 'sync_reencrypt')`, :509, re-read 2026-10-20; no later file redefines the function), but the pin would not notice a
+> later file dropping it. The fix shape is auditor A's (read the final body, as `AuthRLSDDLTests.finalBody(of:)` already
+> does for `key_vault_update`); it is a test line, not a record line, and is routed from the VX-309 U2 record (F-U2-6).
 
 ## Q3 — the pre-rotation straggler vs the horizon and the completion guard
 
@@ -423,6 +446,21 @@ fire only on a genuine read proving a same-account duplicate, never on a nil-rea
 devices needs the vault's copy re-landed via a deliberate act), whose owner is **17m** (the
 Re-link door) with its product shape at **QUESTIONS #90** — not a new finding.
 
+> **Correction (2026-10-20, VX-213 — VX-309 U2; found by the VX-191 audit, auditor A's Q6):** the trace above is
+> **wrong where it says the heal cannot fire after a reset** ("the exact scenario an iCloud Keychain reset does NOT
+> create"). With three devices it does: device 1 reads nil and MINTS `A′` into the shared synchronizable item; iCloud
+> Keychain syncs `A′` to devices 2 and 3; at their next ready `appleKeys.read()` returns `A′` as a READ (not minted),
+> their key files still record the vault's original id, and `apple.id != vaultAppleKeyID` — so the heal arm fires and
+> re-lands the VAULT's Apple-held copy under `A′` with no prompt (auditor A cites today's road at the audit's HEAD,
+> `f337f19e`: `AppleKeyCustody.swift:141–146, 174–178`, `ProtectionController.swift:1535–1547, 1594–1599`). The VERDICT
+> still HOLDS: only the same Apple account could have put `A′` in that item, Standard's consented trust root already is
+> that account, the heal never writes on a Castle account, and its vault write needs the current proof. Two things
+> change in what this record can be relied on for: the orphaned vault copy heals ITSELF once a second device sees the
+> new key (17m's Re-link door, DELIVERED, is the road when it doesn't), and the same mechanism means an Apple-ID SWITCH
+> on two devices (both moved to Apple ID B) re-homes the vault's copy under B silently — MINOR-N1's original worry,
+> reachable by two devices instead of one; benign if B is hers. Nothing should rely on "the heal never fires on a reset".
+> The text above is kept as written; auditor A's Q6 is the current reading.
+
 ## Q7 — the fresh library on a Castle Mac cannot sync without a typed secret
 
 *Move the library file aside on a Castle Mac while signed in. Prove the fresh library cannot sync
@@ -646,3 +684,8 @@ refinement for Q10's owner 17n (a 12-character LENGTH floor is not an ENTROPY fl
 human-chosen 12-char passphrase can still be brute-forceable; pair it with a strength check or
 lean on the twelve-words guarantee). Everything else is a HOLDS with its disclosed, already-owned
 residual (13y · Phase 12 · 17m/#90 · 13x · 17n · her ratify bundle).
+
+> **Corrections (2026-10-20, VX-213 — VX-309 U2):** Q1's "retains only `SHA-256(kp)`" and Q6's "the heal never fires on
+> a reset" are no longer true, and Q2's tenth-arm pin (delivered) reads file 12 while file 13 is deployed — each carries
+> a dated correction note under its verdict above. Every verdict still HOLDS. The VX-191 audit
+> (`notes/plans/fixes/vx-191-encryption-audit.md` §V, `vx-191-audit/A-ten-questions.md`) is the current reading.

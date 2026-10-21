@@ -13,7 +13,9 @@ import Foundation
 //     outgoing library steps aside whole, with its own key file, into Previous
 //     Libraries. You never leave Castle by opening something.
 //   - SEND LIBRARY writes the pair — a copy (rule 18), with no sharing note.
-//   - A PLAINTEXT EXPORT carries its library ID.
+//   - A PLAINTEXT EXPORT carries no library ID: `protection_record` is
+//     local-only and `StorePlaintextExport` drops it. Brought in, it is a NEW
+//     library (VX-309 T-8 — the import road, never this file's acts).
 //   - THE OFFER deletes another library's copies at her press — this Mac's
 //     copies of it only, never another Mac's (rule 19).
 
@@ -177,8 +179,10 @@ extension ActContext {
 
     /// THE SWAP — the commit point: the plan re-sealed for the new library
     /// first, then the staged copy into the live place with the outgoing library
-    /// and ITS key file set aside whole.
-    func makeMineSwap() throws {
+    /// and ITS key file set aside whole. `setAside` false (VX-309 U1b — T-5, the
+    /// empty-slot landing): nothing is in the slot, so the step-aside half is
+    /// SKIPPED, never run over nothing.
+    func makeMineSwap(setAside: Bool = true) throws {
         let key = try requireToKey()
         let (_, deviceID) = try makeMineIdentity()
         if !(try libraryOpens(key)) {
@@ -186,8 +190,12 @@ extension ActContext {
             plan.steps[plan.steps.firstIndex { $0.name == "swap" }!].done = true
             try leaves.plans.writePlan(try plan.sealed(under: key))
             if try leaves.library.stagedFingerprint() != Self.fp(key) { throw ActRollback(refusal: .secretsRequired(act)) }
-            let outgoing = parameters.outgoingKeyFile ?? library.memory?.keyFileMirror
-            try leaves.library.swapStaged(setAside: true, asideKeyFile: outgoing)
+            if setAside {
+                let outgoing = parameters.outgoingKeyFile ?? library.memory?.keyFileMirror
+                try leaves.library.swapStaged(setAside: true, asideKeyFile: outgoing)
+            } else {
+                try leaves.library.swapStaged(setAside: false, asideKeyFile: nil)
+            }
         }
         library.key = key
         guard let record = try leaves.library.readRecord(with: key) else { throw ExecutorRefusal.recordMissing }
@@ -212,6 +220,82 @@ extension ActContext {
         }
         try executor.writeMemory(&library)
     }
+}
+
+/// **MAKE THIS MY LIBRARY INTO THE EMPTY SLOT** (VX-309 U1b — T-5; rule 17 with no library open: the missing face, rule
+/// 27's lobby once its unopenable library stepped aside). The copy lands as a NEW library — a fresh identity, key and
+/// device ID, Standard — and NOTHING steps aside: there is nothing in the slot, so the act's step-aside half is skipped
+/// (`makeMineSwap(setAside: false)`), never run over nothing. The steps are Make this my library's own, reordered so the
+/// keychain and the live place are written only once the copy is staged (a copy that cannot be staged writes nothing but
+/// the plan, which the next library's settle ignores and deletes): the copy re-encrypted under the new key into the staged
+/// file; the new record
+/// into it (its section naming this act in flight); the new key's silent item; this Mac's own fresh Apple key for it; the
+/// new key file in the live place; the new library's memory item; THE SWAP (the commit point — the empty slot takes the
+/// staged file); every other library's memory item forgotten (rule 21: one library); a fresh pair (rule 5). ONE plan,
+/// sealed under the NEW key and named by the new record's section — so a crash after the swap resumes at the next open
+/// (its library opens by the silent item), and a crash before it leaves the slot empty (the old state) beside the act's
+/// own debris, which names a library that never landed. A resume after the swap is the registry's `MakeMineProgram` (the
+/// same step names, the same `makeMine` act); before it nothing can resume — no library holds the act.
+struct EmptySlotMakeMineProgram: ActProgram {
+    let act = ProtectionAct.makeMine
+    /// This Mac's own Apple key for the new library, minted at the press (its id rides the plan and the new section).
+    let apple: AppleKeyMaterial
+
+    func steps(_ parameters: ActParameters, guards: ProtectionGuards) -> [String] {
+        ["stage", "recordIntoStaged", "custodyItem", "appleKey", "keyFile", "newMemory", "swap"]
+            + MakeMineProgram.afterCommit
+    }
+
+    func finishingSteps(_ library: UnlockedLibrary) -> [String] { MakeMineProgram.afterCommit }
+
+    func run(_ step: String, _ ctx: ActContext) async throws {
+        switch step {
+        case "stage": try ctx.makeMineStage()
+        case "recordIntoStaged": try ctx.makeMineRecord(kind: .standard)
+        case "custodyItem": try ctx.newCustodyItem(kind: .standard)
+        case "appleKey":
+            if try ctx.leaves.apple.readAppleKey(id: apple.id) == nil {
+                try ctx.leaves.apple.addAppleKey(apple, libraryID: ctx.stampLibraryID)
+                ctx.log("minted a fresh own Apple key for the landed copy")
+            }
+        case "keyFile": try ctx.emptySlotKeyFile(apple: apple)
+        case "newMemory": try ctx.makeMineMemory()
+        case "swap": try ctx.makeMineSwap(setAside: false)
+        case "forgetOtherLibraries": try ctx.forgetOtherLibraries()
+        case "backup": try ctx.freshBackup()
+        default: throw ExecutorRefusal.nothingToDo
+        }
+    }
+}
+
+extension ActContext {
+    /// The landed library's key file: a fresh key with no past, under the secret typed at the door — the copy's own
+    /// words as its words lock, or the copy's own passphrase as its passphrase lock beside words minted fresh — and this
+    /// Mac's own Apple key (Standard). Idempotent: a file of the new key already standing is left as it is.
+    func emptySlotKeyFile(apple: AppleKeyMaterial) throws {
+        let key = try requireToKey()
+        if let live = try executor.liveFormat3(), live.fingerprint == Self.fp(key) {
+            library.keyFile = live
+            return
+        }
+        let (libraryID, _) = try makeMineIdentity()
+        let locks = try newLocks(passphrase: secrets.passphrase != nil, words: true, master: false, apple: apple)
+        let file = try KeyFile.building(libraryID: libraryID, key: key, epoch: 1, locks: locks)
+        try executor.writeLiveKeyFile(file, &library)
+        log("the landed library's key file written (\(Self.fp8(file.fingerprint)))")
+    }
+}
+
+/// **A copy landed into the empty slot** (T-5): the new library, and — when the copy opened by its PASSPHRASE — the twelve
+/// words minted fresh for it (rule 2: every library has words from its first moment; handed back like a creation's, never
+/// stored — the Mac drops them unseen and the card above the quick entry offers fresh ones at the first look). nil when the
+/// copy's own words, typed at the door, became the new library's words.
+public struct LandedCopy: CustomStringConvertible {
+    public var library: UnlockedLibrary
+    public let mintedWords: [String]?
+    public var outcome: ActOutcome
+
+    public var description: String { "LandedCopy(\(outcome.act), words \(mintedWords == nil ? "typed" : "minted, redacted"))" }
 }
 
 struct SendLibraryProgram: ActProgram {
@@ -402,6 +486,83 @@ extension ProtectionExecutor {
                                  copyKey: copyKey, library: &library)
     }
 
+    /// **Make this my library into the EMPTY SLOT** (VX-309 U1b — T-5; rule 17 with no library open). `typed`: what she
+    /// typed at the door — the copy's own twelve words, or its own passphrase. THE DOOR REQUIRES A TYPED SECRET OF THE
+    /// COPY'S (rule 14's precedent): with no library open there is no current pair to lock the new library under, and a
+    /// quiet-road-only open carries none — so the copy must open by what was typed (its own key file, or through a
+    /// history that reaches it); a quiet road that would open it does not count (`copyDoesNotOpen`). The typed WORDS become
+    /// the new library's words lock (no passphrase — rule 3 asks later); a typed PASSPHRASE becomes its passphrase lock (on
+    /// a fresh descriptor) and the new library's twelve words are minted fresh (`LandedCopy.mintedWords` — shown through the
+    /// band's one idiom, never stored). STANDARD (an empty slot has no posture; Castle is entered deliberately —
+    /// PROVISIONAL P-VX309-U1b-2). The slot must be EMPTY and the live place too — a library or a key file standing there
+    /// refuses `libraryAlreadyInSlot` before anything is minted (the app's doors set a missing library's key file, or rule
+    /// 27's unopenable library, aside first — never written over). One act on one plan (`EmptySlotMakeMineProgram`). It
+    /// carries no sync identity and binds no account (P-VX378-U2-4). The restore hold is the app's, as for every adoption.
+    public func makeThisMyLibraryInTheEmptySlot(
+        copy: CatalogCopy, in catalog: Catalog, typed: TypedSecrets
+    ) async throws -> LandedCopy {
+        guard try !leaves.library.slotIsOccupied(), try leaves.keyFiles.readLiveKeyFile() == nil else {
+            log("make mine (empty slot): refused — something stands in the slot or the live place (nothing written)")
+            throw ExecutorRefusal.libraryAlreadyInSlot
+        }
+        // The copy's own secret, typed — each typed road tried on its own, so the lock the new library gets is the
+        // secret that OPENED the copy (never a quiet road's: those carry no pair to lock it under).
+        func openedByTyped(_ secret: TypedSecrets) -> StoreKey? {
+            guard let (key, road) = try? openCopy(copy, in: catalog, typed: secret, quietRoads: .withoutAPress) else {
+                return nil
+            }
+            switch road {
+            case .itsOwnSecrets, .currentSecretsThroughTheHistory: return key
+            case .quietRoad: return nil
+            }
+        }
+        var secrets = ActSecrets()
+        var minted: [String]?
+        let copyKey: StoreKey
+        if let words = typed.words, let key = openedByTyped(TypedSecrets(words: words)) {
+            copyKey = key
+            secrets.words = try WordsKey.derive(words)
+        } else if let passphrase = typed.passphrase, let key = openedByTyped(TypedSecrets(passphrase: passphrase)) {
+            copyKey = key
+            secrets.passphrase = try freshPassphrase(passphrase)
+            let fresh = leaves.ids.mintWords()
+            secrets.words = try WordsKey.derive(fresh)
+            minted = fresh
+        } else {
+            throw ExecutorRefusal.copyDoesNotOpen
+        }
+        let toKey = leaves.ids.mintLibraryKey()
+        let libraryID = leaves.ids.mintID()
+        let deviceID = leaves.ids.mintID()
+        let apple = leaves.ids.mintAppleKey()
+        let at = now()
+        configuration.libraryID = libraryID
+        var parameters = ActParameters(passphraseKDF: secrets.passphrase?.kdf, newKind: .standard, copyID: copy.id)
+        parameters.passphraseIsNew = secrets.passphrase != nil
+        parameters.newLibraryID = libraryID
+        parameters.newDeviceID = deviceID
+        parameters.ownAppleKeyID = apple.id
+        let (section, sequence) = DeviceSection(deviceID: deviceID, settings: .noChoiceYet)
+            .beginningAct(.makeMine, from: nil, to: Self.fp(toKey), fromKind: nil, at: at)
+        let program = EmptySlotMakeMineProgram(apple: apple)
+        let plan = ProtectionPlan(
+            libraryID: libraryID, deviceID: deviceID, sequence: sequence, act: .makeMine, fromFingerprint: nil,
+            toFingerprint: Self.fp(toKey), steps: program.steps(parameters, guards: guards).map { PlanStep(name: $0) },
+            createdAt: at, parameters: parameters)
+        try leaves.plans.writePlan(try plan.sealed(under: toKey))
+        log("make mine (empty slot): begun #\(sequence) → \(Self.fp8(Self.fp(toKey))) — a new library, nothing steps aside")
+        let ctx = ActContext(
+            executor: self, library: UnlockedLibrary(key: toKey, record: nil, section: section, memory: nil, keyFile: nil),
+            plan: plan, secrets: secrets, typed: nil, toKey: toKey, resuming: false)
+        ctx.copyKey = copyKey
+        // Before the swap a failure leaves what a crash there leaves — the slot EMPTY (the old state) beside this press's
+        // own writes, every one of them a library that never landed (none of hers is touched): a later landing or
+        // creation writes over or forgets them (the plan, the staged file, the memory item), and the doors set a live key
+        // file aside before landing. Past the swap the copy IS the library: the next open finishes from its plan (rule 20).
+        try await drive(program, ctx)
+        return LandedCopy(library: ctx.library, mintedWords: minted, outcome: ctx.outcome)
+    }
+
     /// **Send Library**: the pair, written to the folder she picked — no
     /// sharing note (the other Mac lands it under a key of its own).
     public func sendLibrary(_ library: inout UnlockedLibrary, to destination: String) async throws -> ActOutcome {
@@ -420,12 +581,43 @@ extension ProtectionExecutor {
 
     /// **The offer's delete** — another library's copies, at her press: this
     /// Mac's copies of it only (never another Mac's, never this library's).
+    /// VX-309 U1c (VX-265): "this Mac's" is `OwnCopies.isThisMacsCopy` — told by
+    /// PLACE, never by comparing a copy's `<mac8>` with the OPEN library's
+    /// section: a library's device ID is its own on each Mac (rule 23), so the
+    /// library that stepped aside filed its backups under its OWN `<mac8>`.
     public func offerDelete(_ library: inout UnlockedLibrary, copies: [CatalogCopy], catalog: Catalog) async throws -> ActOutcome {
         let thisLibrary = library.record?.libraryID
-        let mine = library.section.mac8
-        let deletable = copies.filter { $0.library != nil && $0.library != thisLibrary && $0.mac.isMac(mine) }
+        let deletable = copies.filter {
+            $0.library != nil && $0.library != thisLibrary && OwnCopies.isThisMacsCopy($0, in: catalog)
+        }
         return try await perform(
             OfferDeleteProgram(), parameters: ActParameters(copyIDs: Set(deletable.map(\.id)).sorted()),
             secrets: ActSecrets(), library: &library)
+    }
+
+    /// **The offer's delete with NO library open** (VX-309 U1c — VX-265 at the EMPTY-SLOT listing: the missing face). The
+    /// same fence (`OwnCopies.isThisMacsCopy`), and never a copy of a library this Mac REMEMBERS (rule 21 — the library
+    /// missing from the slot: its copies are the ones the empty-slot landing lands from — PROVISIONAL P-VX309-U1c-2). The
+    /// slot must be EMPTY: over rule 27's unopenable library the act refuses `libraryAlreadyInSlot` before anything is
+    /// deleted — its ID is inside the file no key opens, so with this Mac's memory of it gone any listed library could be it,
+    /// and its older backups are its last road back (rule 4). No plan: deleting copies changes no key (rule 20 is about
+    /// acts that change keys) and no library holds the act — a delete that stops part of the way has deleted fewer copies,
+    /// and the next press deletes the rest (each id's delete is idempotent). Returns the ids deleted; nothing deletable
+    /// refuses `nothingToDo` with nothing written.
+    @discardableResult
+    public func offerDeleteWithNoLibraryOpen(copies: [CatalogCopy], catalog: Catalog) throws -> [String] {
+        guard try !leaves.library.slotIsOccupied() else {
+            log("offer delete (no library open): refused — a library stands in the slot (nothing deleted)")
+            throw ExecutorRefusal.libraryAlreadyInSlot
+        }
+        let remembered = try leaves.memory.rememberedLibraryIDs()
+        let deletable = Set(copies.filter { copy in
+            guard let library = copy.library, !remembered.contains(library) else { return false }
+            return OwnCopies.isThisMacsCopy(copy, in: catalog)
+        }.map(\.id)).sorted()
+        guard !deletable.isEmpty else { throw ExecutorRefusal.nothingToDo }
+        try leaves.backups.deleteCopies(ids: deletable)
+        log("offer delete (no library open): \(deletable.count) of another library's copies on this Mac")
+        return deletable
     }
 }

@@ -83,7 +83,7 @@ struct RoadCrossingSurfaceTests {
         #expect(castle.undeletableCopies == ["Backup from August 3"])
         let enter = RoadCrossingConfirmModel(door: castle, act: { _ in .refused(ProtectionWords.wordsDoNotOpen) }) { _ in }
         await SurfaceComposition.host(RoadCrossingSheet(model: enter), size: NSSize(width: 480, height: 760))
-        await enter.submit(passphrase: "p", again: "p", words: (try RecoveryPhrase.generate()).joined(separator: " "))
+        await enter.submit(passphrase: "a new passphrase", again: "a new passphrase", words: (try RecoveryPhrase.generate()).joined(separator: " "))
         #expect(enter.refusal == ProtectionWords.wordsDoNotOpen)
         await SurfaceComposition.host(RoadCrossingSheet(model: enter), size: NSSize(width: 480, height: 760))
         let leaveSpec = DoorSpec(requires: .passphraseAndWords(wordsMayBeNew: false), rekeys: true, words: [.ruleFive])

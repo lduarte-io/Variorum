@@ -60,10 +60,67 @@ struct CopyDoorsSheet: View {
                         Button(ProtectionWords.makeMineDoor) { Task { await model.openMakeMine(row) } }
                     }
                 }
+            case .plaintextExport(let store):
+                // VX-309 U1b — T-8: a plain-text copy, brought in as a new library through the import road.
+                Text(LibraryOpenCopy.sheetTitle).font(.title3.weight(.semibold))
+                Text(ProtectionWords.bringInLead(stepsALibraryAside: model.bringInStepsALibraryAside))
+                    .fixedSize(horizontal: false, vertical: true)
+                if let refusal = model.bringInRefusal {
+                    Text(refusal)
+                        .font(.callout)
+                        .alarmVoice()
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                HStack {
+                    Button(ProtectionWords.makeMineCancel) { onClose() }
+                        .keyboardShortcut(.cancelAction)
+                        .disabled(model.bringingIn)
+                    Spacer()
+                    if model.bringingIn {
+                        TravellingDotsIndicator(ink: .secondary)
+                        Text(ProtectionWords.bringInWorking).font(.caption).foregroundStyle(.secondary)
+                    }
+                    Button(ProtectionWords.bringInButton) { Task { await model.bringIn(store) } }
+                        .keyboardShortcut(.defaultAction)
+                        .disabled(model.bringingIn)
+                }
+            case .listing(let listing):
+                // VX-309 U1b: this Mac's copies with no library open — rule 17's Restore from Backup at the empty slot.
+                Text(LibraryOpenCopy.restoreSectionTitle).font(.title3.weight(.semibold))
+                Text(listing.isEmpty ? ProtectionWords.noCopiesOnThisMac : ProtectionWords.emptySlotRestoreListLead)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                // VX-309 U1c — VX-210: the one honest line, only when such copies exist (P-2).
+                if listing.unmanagedCopies > 0 {
+                    Text(ProtectionWords.copiesElsewhereLine)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                // VX-309 U2 — VX-264 item 5: her "older libraries" words, only where one is listed (P-2).
+                if listing.listsAnOlderLibrary {
+                    Text(ProtectionWords.olderLibrariesLine)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                // VX-309 U1c — VX-265: what a delete here took (the listing re-read beneath it).
+                if let receipt = model.listingReceipt {
+                    Text(receipt).font(.callout).fixedSize(horizontal: false, vertical: true)
+                }
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 10) {
+                        ForEach(listing.all) { row in listingRow(row, delete: listing.deleteChoice(for: row)) }
+                    }
+                }
+                .frame(maxHeight: 320)
+                HStack { Spacer(); Button(ProtectionWords.makeMineCancel) { onClose() }.keyboardShortcut(.cancelAction) }
             case .makeMine(let confirm):
                 MakeMineConfirm(model: confirm)
             case .lookInside(let look):
                 LookInsideSheet(model: look)
+            case .deleteCopies(let confirm):
+                DeleteCopiesConfirm(model: confirm)
             case .done:
                 // The act is done (the reopen already routed) or she left; the sheet leaves.
                 Color.clear.frame(height: 1).onAppear { onClose() }
@@ -76,6 +133,62 @@ struct CopyDoorsSheet: View {
     private var isLooking: Bool {
         if case .lookInside = model.phase { return true }
         return false
+    }
+
+    /// One copy of the listing: its day and kind, and its doors — VX-309 U1c: *Delete…* where its library has a delete
+    /// choice (another library this Mac holds copies of — rule 19).
+    private func listingRow(_ row: CopyDoorRow, delete: CopyDeleteChoice?) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(row.asOf.map { $0.formatted(date: .abbreviated, time: .shortened) } ?? ProtectionWords.offerUnknownDay)
+                    .font(.callout)
+                Text(ProtectionWords.copyKind(row.kind))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            if model.offersLookInside {
+                Button(ProtectionWords.lookInsideDoor) { Task { await model.openLookInside(row) } }
+            }
+            if model.offersMakeMine {
+                Button(ProtectionWords.makeMineDoor) { Task { await model.openMakeMine(row) } }
+            }
+            if model.offersDelete, let delete {
+                Button(ProtectionWords.deleteCopiesDoor) { model.openDeleteCopies(delete) }
+            }
+        }
+    }
+}
+
+/// VX-309 U1c — VX-265: rule 19's delete's confirm (one other library's copies; never silently, never bundled).
+struct DeleteCopiesConfirm: View {
+    @Bindable var model: CopyDeleteModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(ProtectionWords.deleteCopiesTitle).font(.title3.weight(.semibold))
+            Text(model.lead)
+                .font(.callout)
+                .fixedSize(horizontal: false, vertical: true)
+            if let refusal = model.refusal {
+                Text(refusal)
+                    .font(.callout)
+                    .alarmVoice()
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            HStack {
+                Button(ProtectionWords.makeMineCancel) { model.cancel() }
+                    .keyboardShortcut(.cancelAction)
+                    .disabled(model.busy)
+                Spacer()
+                if model.busy {
+                    TravellingDotsIndicator(ink: .secondary)
+                    Text(ProtectionWords.deleteCopiesWorking).font(.caption).foregroundStyle(.secondary)
+                }
+                Button(ProtectionWords.deleteCopiesButton, role: .destructive) { Task { await model.delete() } }
+                    .disabled(model.busy)
+            }
+        }
     }
 }
 
@@ -99,6 +212,10 @@ struct MakeMineConfirm: View {
                     TravellingDotsIndicator(ink: .secondary)
                     Text(ProtectionWords.makeMineChecking).font(.caption).foregroundStyle(.secondary)
                 }
+            } else if model.intoTheEmptySlot {
+                // VX-309 U1b — T-5: no library is open — the copy's own secret is the one thing asked, and its lock.
+                PeekableSecretField(label: ProtectionWords.makeMineCopySecretField, text: $copySecret, onSubmit: submit)
+                    .textFieldStyle(.roundedBorder)
             } else {
                 if model.needsCopySecret {
                     PeekableSecretField(label: ProtectionWords.makeMineCopySecretField, text: $copySecret)
@@ -135,13 +252,19 @@ struct MakeMineConfirm: View {
                 }
                 Button(ProtectionWords.makeMineButton) { submit() }
                     .keyboardShortcut(.defaultAction)
-                    .disabled(!model.canSubmit(words: words, passphrase: passphrase))
+                    .disabled(model.intoTheEmptySlot
+                              ? !model.canSubmitIntoTheEmptySlot(copySecret: copySecret)
+                              : !model.canSubmit(words: words, passphrase: passphrase))
             }
         }
     }
 
     private func submit() {
         let secret = copySecret
+        if model.intoTheEmptySlot {
+            Task { await model.submitIntoTheEmptySlot(copySecret: secret) }
+            return
+        }
         let typedWords = words
         let typedPassphrase = passphrase
         Task { await model.submit(copySecret: secret, words: typedWords, passphrase: typedPassphrase) }
@@ -155,6 +278,8 @@ struct RoadRestoreRows: View {
     let lookInside: (CopyDoorRow) -> Void
     /// A row's *Make this my library…* (the scene's presenter opens the confirm).
     let makeMine: (CopyDoorRow) -> Void
+    /// VX-309 U1c — VX-265: an other library's row's *Delete…* (the scene's presenter opens the confirm); nil: no door.
+    var deleteCopies: ((CopyDeleteChoice) -> Void)? = nil
 
     var body: some View {
         if !list.listing.isEmpty {
@@ -163,11 +288,25 @@ struct RoadRestoreRows: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+                // VX-309 U1c — VX-210: the one honest line, only when such copies exist (P-2).
+                if list.listing.unmanagedCopies > 0 {
+                    Text(ProtectionWords.copiesElsewhereLine)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 ForEach(list.listing.thisLibrary) { row in rowView(row) }
                 if !list.listing.otherLibraries.isEmpty {
                     Text(ProtectionWords.otherLibrariesHeading)
                         .font(.callout.weight(.semibold))
                         .padding(.top, 4)
+                    // VX-309 U2 — VX-264 item 5: her "older libraries" words, only where one is listed (P-2).
+                    if list.listing.listsAnOlderLibrary {
+                        Text(ProtectionWords.olderLibrariesLine)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                     ForEach(list.listing.otherLibraries) { row in rowView(row) }
                 }
             }
@@ -186,6 +325,9 @@ struct RoadRestoreRows: View {
             Spacer()
             Button(ProtectionWords.lookInsideDoor) { lookInside(row) }
             Button(ProtectionWords.makeMineDoor) { makeMine(row) }
+            if let deleteCopies, let choice = list.listing.deleteChoice(for: row) {
+                Button(ProtectionWords.deleteCopiesDoor) { deleteCopies(choice) }
+            }
         }
     }
 }
@@ -196,4 +338,6 @@ struct RoadDoorsHost {
     let roads: CopyDoorsRoads
     let lookInside: (CopyDoorRow) -> Void
     let makeMine: (CopyDoorRow) -> Void
+    /// VX-309 U1c — VX-265: an other library's row's *Delete…* (nil: none).
+    var deleteCopies: ((CopyDeleteChoice) -> Void)? = nil
 }

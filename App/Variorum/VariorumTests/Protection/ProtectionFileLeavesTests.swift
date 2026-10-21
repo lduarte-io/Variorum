@@ -182,6 +182,43 @@ struct ProtectionFileLeavesTests {
         try leaf.discardStaged()
     }
 
+    // MARK: VX-309 U1c — rule 19's delete of an ASIDE copy (a Previous Library, an opened copy's safety folder)
+
+    /// A library that stepped aside is its folder: the library, its sidecars, ITS key file and — T-8's — the restore hold
+    /// it carried. Deleting the copy (rule 19's door) removes all of it and the folder; a file of hers in that folder is
+    /// never touched (the folder then stays, holding only it). RED ON THE PRE-FIX TREE: only the library file and its
+    /// sidecars went — the aside folder's key file (and the hold) stayed behind, the folder with them, out of every list.
+    @Test func deletingAnAsideCopyTakesItsFolderWholeAndNeverAFileOfHers() throws {
+        let slot = TempSlot()
+        let backups = FileBackupsLeaf(places: slot.places)
+        let manager = FileManager.default
+        func aside(_ folders: String, hers: Bool) throws -> URL {
+            let folder = slot.url(folders)
+            let key = StoreKey.mint()
+            let libraryID = UUID().uuidString.lowercased()
+            let store = folder.appendingPathComponent(CatalogNames.libraryFilename)
+            try ProtectionLibraryFiles.createLibrary(at: store, key: key, record: Self.record(key, libraryID: libraryID), date: Date())
+            try Data("wal".utf8).write(to: URL(fileURLWithPath: store.path + "-wal"))
+            try Self.keyFile(key, libraryID: libraryID).encoded()
+                .write(to: folder.appendingPathComponent(ProtectionNames.keyFilename))
+            try Data("{}".utf8).write(to: folder.appendingPathComponent(LibraryRestoreHold.filename))
+            if hers { try Data("mine".utf8).write(to: folder.appendingPathComponent("my notes.txt")) }
+            return folder
+        }
+        let previous = try aside("Previous Libraries/2026-10-19-120000", hers: false)
+        let opened = try aside("Backups/safety-copies/variorum-adopt-safety-2026-10-19-120001", hers: false)
+        let withHers = try aside("Previous Libraries/2026-10-19-120002", hers: true)
+        let catalog = CatalogLister(places: slot.places).catalog()
+        #expect(catalog.copies.count == 3)
+        try backups.deleteCopies(ids: catalog.copies.map(\.id))
+        #expect(!manager.fileExists(atPath: previous.path), "the Previous Library's folder, whole")
+        #expect(!manager.fileExists(atPath: opened.path), "the opened copy's safety folder, whole")
+        #expect(try manager.contentsOfDirectory(atPath: withHers.path) == ["my notes.txt"], "her file — never touched")
+        let after = CatalogLister(places: slot.places).catalog()
+        #expect(after.copies.isEmpty && after.keyFiles.isEmpty, "no key file of a deleted copy left behind")
+        #expect(manager.fileExists(atPath: slot.places.previousLibraries.path), "the home itself stays")
+    }
+
     // MARK: Backups
 
     @Test func aBackupPairLandsInThisMacsFolderUnderItsKeyWithItsFrozenKeyFile() throws {

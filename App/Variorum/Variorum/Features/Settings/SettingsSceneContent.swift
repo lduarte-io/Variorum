@@ -121,7 +121,9 @@ struct SettingsSceneContent: View {
                     RoadDoorsHost(
                         roads: roads,
                         lookInside: { row in libraryOpen.beginLookInside(roads: roads, row: row) },
-                        makeMine: { row in libraryOpen.beginMakeMine(roads: roads, row: row) })
+                        makeMine: { row in libraryOpen.beginMakeMine(roads: roads, row: row) },
+                        // VX-309 U1c — VX-265: rule 19's delete, an other library's row's door.
+                        deleteCopies: { choice in libraryOpen.beginDeleteCopies(roads: roads, choice: choice) })
                 })
                 .sheet(isPresented: Binding(
                     get: { libraryOpen.model != nil },

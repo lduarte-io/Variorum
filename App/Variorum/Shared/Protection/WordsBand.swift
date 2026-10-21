@@ -62,6 +62,16 @@ nonisolated struct WordsCardLedger: @unchecked Sendable {
     func recorded(_ libraryID: String) -> Bool { defaults.bool(forKey: Key.recorded(libraryID)) }
     func dismiss(_ libraryID: String) { defaults.set(true, forKey: Key.dismissed(libraryID)) }
     func record(_ libraryID: String) { defaults.set(true, forKey: Key.recorded(libraryID)) }
+
+    /// VX-309 U1c — VX-444: Make this my library keeps the current pair (rule 17: "under your current pair"), so the words
+    /// she recorded — or chose to stop being offered — for the outgoing library are still the new library's: its marks
+    /// carry onto the new library's id. Only a mark that stands is carried (never one cleared); the outgoing library's own
+    /// marks stay (it lives on in Previous Libraries, where the doors may make it a library again).
+    func carry(from outgoing: String, to landed: String) {
+        guard !outgoing.isEmpty, !landed.isEmpty, outgoing != landed else { return }
+        if recorded(outgoing) { record(landed) }
+        if dismissed(outgoing) { dismiss(landed) }
+    }
 }
 
 /// The snooze — THIS PROCESS's only, so the next launch shows the card again (her "showing on next launch").

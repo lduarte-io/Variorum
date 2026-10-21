@@ -211,8 +211,8 @@ nonisolated struct RoadStandingFaces: Equatable, Sendable {
     var noKeyFileDoor = false
     /// RULE 3: the model's moment owed at this open (`.beforeFirstBackup` / `.quietRoadFailed`), nil none.
     var passphraseMoment: PassphraseAsk?
-    /// The receipts this open owes the status seam: rule 1's restore (§7c (6)); VX-308 U2 — a follow its settle finished
-    /// (VX-107: the follow's Done).
+    /// The receipts this open owes the status seam: rule 1's restore (§7c (6)). (VX-309 U2 — VX-457: a follow its settle
+    /// finished owes its Done DURABLY — `FollowDoneMark`, written by `RoadStandingModel.make` — never a receipt here.)
     var receipts: [String]
 
     static let none = RoadStandingFaces(noKeyFileAnywhere: nil, passphraseMoment: nil, receipts: [])
@@ -228,9 +228,9 @@ nonisolated struct RoadStandingFaces: Equatable, Sendable {
             if case .askPassphrase(let ask) = act, moment == nil { moment = ask }
         }
         // (`.besideOpensItOnlyThroughItsHistory` says nothing: its line is dropped — no state reaches it, VX-414.)
-        var receipts = report.repairsDone.contains(.restoreKeyFileFromMirror) ? [ProtectionWords.restoredFromMirror] : []
-        // VX-308 U2 — VX-107: a follow this open's settle finished says its Done, the other-device sentence with it.
-        if let followed = report.settledFollow { receipts.append(ProtectionWords.followDone(followed)) }
+        let receipts = report.repairsDone.contains(.restoreKeyFileFromMirror) ? [ProtectionWords.restoredFromMirror] : []
+        // (VX-308 U2 — VX-107: a follow this open's settle finished said its Done here as a receipt. VX-309 U2 — VX-457:
+        // it is the account section's DURABLE notice now — `RoadStandingModel.make` marks it from `report.settledFollow`.)
         var faces = RoadStandingFaces(noKeyFileAnywhere: nothing, passphraseMoment: moment, receipts: receipts)
         faces.noKeyFileDoor = nothing != nil && report.besideIsEmpty
         return faces
@@ -265,8 +265,10 @@ final class RoadStandingModel {
     @ObservationIgnored var paneWave: (@MainActor () async -> ProtectionPaneWave)?
 
     /// The Protection pane's appearance: the three sections re-read from ONE read (`ProtectionPaneRefresh.wave`) — or,
-    /// with no wave road, each on its own, as before.
+    /// with no wave road, each on its own, as before. VX-309 U1c — VX-454: the set row and rule 3's reminder first
+    /// (`rereadPassphrase` — an act on the open session may have set one since this open's faces were made).
     func refreshPane() async {
+        rereadPassphrase()
         guard let paneWave else {
             await crossings?.refresh()
             await account?.refresh()
@@ -283,6 +285,11 @@ final class RoadStandingModel {
     /// Safety's Castle warning reads it on the new road (today's controller's posture is today's road's). nil: not
     /// known (a test's hand-made faces).
     let posture: ProtectionMode?
+    /// VX-309 U1a (VX-397): Settings ▸ Data Safety's counts on the new road — THIS Mac's pairs of THIS library per place,
+    /// read from the catalogue off the main actor (`ProtectionCopyCounts`). nil (a test's hand-made faces): the pane keeps
+    /// today's counts. Settings re-builds its panes at every reopen (its `.opening` arm), so a road never outlives the
+    /// library it reads.
+    @ObservationIgnored let copyCounts: (() async -> RoadCopyCounts)?
 
     /// VX-308 U3 — VX-447: the look the no-key-file banner's door opened (the banner's ONE look, made through the band so
     /// one look holds words at a time), and whether a mint has since written the fresh key file (the banner then retires
@@ -320,8 +327,10 @@ final class RoadStandingModel {
         posture: ProtectionMode? = nil,
         lookAsksPassphrase: (() -> Bool)? = nil,
         keyFileStands: @escaping () -> Bool = { false },
-        takeBackupPair: @escaping () async -> Bool = { false }
+        takeBackupPair: @escaping () async -> Bool = { false },
+        copyCounts: (() async -> RoadCopyCounts)? = nil
     ) {
+        self.copyCounts = copyCounts
         self.faces = faces
         self.reminder = reminder
         self.setPassphrase = setPassphrase
@@ -356,6 +365,12 @@ final class RoadStandingModel {
         if session.library.record?.mode == .castle, session.library.record?.account == nil { faces.noKeyFileDoor = false }
         let libraryID = session.library.record?.libraryID ?? ""
         if session.writes, !libraryID.isEmpty { ledger.noteLaunchOncePerProcess(libraryID) }
+        // VX-309 U2 — VX-457: a follow this open's settle finished (VX-107's durable reading) owes its Done as the account
+        // section's DURABLE notice — marked here, by library, until her OK (a later open finds it standing).
+        if let followed = session.report.settledFollow, !libraryID.isEmpty {
+            FollowDoneMark.set(libraryID, followed, in: ledger.defaults)
+            ProtectionOpenRoad.log("road: the follow's Done owed as the account section's notice (VX-457)")
+        }
         let reminder = PassphraseReminderModel(
             libraryID: libraryID, moment: session.writes ? faces.passphraseMoment : nil, ledger: ledger,
             facts: {
@@ -407,6 +422,9 @@ final class RoadStandingModel {
             },
             takeBackupPair: {
                 await Task.detached(priority: .utility) { ProtectionBackupHook.takePair(session) == .written }.value
+            },
+            copyCounts: {
+                await Task.detached(priority: .utility) { ProtectionCopyCounts.read(session) }.value
             })
         standing.model = model
         return model
@@ -463,6 +481,18 @@ final class RoadStandingModel {
             let backedUp = await takeBackupPair()
             self?.speak?(ProtectionWords.keyFileRemadeReceipt(backedUp: backedUp))
         }
+    }
+
+    /// **VX-309 U1c — VX-454 (W-VX308-2):** the rows that stand only while the library has NO passphrase, re-read from the
+    /// library now — the Protection pane's *Set a passphrase…* (`offersSetPassphrase`) and rule 3's reminder on the card
+    /// ("Never shown once a passphrase exists"). An act on the OPEN session can set one with no reopen to make fresh faces —
+    /// turning sync on (a new passphrase, typed twice), a join adopting the account's pair — so the pane's appearance and an
+    /// account act's landing call this. Only ever retires: a passphrase never goes away under an open library.
+    func rereadPassphrase() {
+        guard passphraseExists() else { return }
+        if offersSetPassphrase { ProtectionOpenRoad.log("road: a passphrase exists now — the set row and rule 3's reminder retire") }
+        offersSetPassphrase = false
+        reminder.passphraseWasSet()
     }
 
     /// The receipts the open owes, spoken once (each `receiptsOwed` call takes them).

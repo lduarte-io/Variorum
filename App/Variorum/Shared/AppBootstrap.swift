@@ -1193,6 +1193,8 @@ final class AppBootstrap {
                 }.value
             },
             passphraseSet: { [weak self] in self?.roadSession?.library.keyFile?.passphrase != nil },
+            // VX-309 U2 — VX-264 item 7: the open library's posture and sync, for the confirm's concrete lead.
+            libraryShape: { [weak self] in self?.roadSession.flatMap { OpenLibraryShape.of($0.library) } },
             makeMine: { [weak self] row, copySecrets, currentPair in
                 guard let self else { return .refused(.failed) }
                 return await self.makeThisMyLibrary(row, copySecrets: copySecrets, currentPair: currentPair)
@@ -1213,13 +1215,24 @@ final class AppBootstrap {
                 }.value
             },
             // VX-307 U2c — VX-413: the note page's Copy full text (the platform's clipboard rule).
-            copyFullText: Self.copyFullTextRoad)
+            copyFullText: Self.copyFullTextRoad,
+            // VX-309 U1b — T-8: a plaintext export brought in as a new library (this one steps aside whole).
+            bringInPlaintextExport: { [weak self] url in await self?.bringInPlaintextExport(url) ?? .refused(.failed) },
+            // VX-309 U1c — VX-265: rule 19's delete on the open session (one act at a time); the receipt on the status seam.
+            deleteCopies: { [weak self] libraryID in
+                guard let session = self?.roadSession else { return .refused(.deleteFailed) }
+                let outcome = await Task.detached(priority: .userInitiated) {
+                    await ProtectionCopyDoors.deleteCopies(session, libraryID: libraryID)
+                }.value
+                if case .deleted(let count) = outcome { self?.roadStanding?.speak?(ProtectionWords.deleteCopiesReceipt(count)) }
+                return outcome
+            })
     }
 
     /// VX-306 U3 — the two doors' roads with NO library open (the missing face's and rule 27's *Open Library…*,
-    /// P-VX306-U3-7 narrowed at the ruling): a pick filed, then Look inside; Make this my library is not offered (no
-    /// current pair to verify — the empty-slot landing, T-5, is VX-309's). nil on today's road and on a hosted test run's
-    /// read-only road (the filing writes).
+    /// P-VX306-U3-7 narrowed at the ruling): a pick filed, then Look inside; and — VX-309 U1b, T-5 — Make this my library
+    /// INTO THE EMPTY SLOT (`makeThisMyLibraryInTheEmptySlot`: no current pair exists, so the copy's own typed secret is the
+    /// one thing asked). nil on today's road and on a hosted test run's read-only road (the filing writes).
     func copyDoorsRoadsWithoutALibrary() -> CopyDoorsRoads? {
         guard newRoad, let road = roadInputs?.compose(), road.writes else { return nil }
         // The road's context (its sign-in read) is taken off the main actor, inside each detached read.
@@ -1232,7 +1245,10 @@ final class AppBootstrap {
                 await Task.detached(priority: .userInitiated) { ProtectionCopyDoors.opensQuietly(context(), copy) }.value
             },
             passphraseSet: { false },
-            makeMine: nil,
+            makeMine: { [weak self] row, copySecrets, _ in
+                guard let self else { return .refused(.failed) }
+                return await self.makeThisMyLibraryInTheEmptySlot(row, copySecrets: copySecrets)
+            },
             pick: { url in
                 await Task.detached(priority: .userInitiated) { ProtectionCopyDoors.pick(url, context()) }.value
             },
@@ -1242,7 +1258,131 @@ final class AppBootstrap {
                 }.value
             },
             // VX-307 U2c — VX-413: the note page's Copy full text (the platform's clipboard rule).
-            copyFullText: Self.copyFullTextRoad)
+            copyFullText: Self.copyFullTextRoad,
+            landsInTheEmptySlot: true,
+            // VX-309 U1b — T-8: a plaintext export brought in as a new library.
+            bringInPlaintextExport: { [weak self] url in await self?.bringInPlaintextExport(url) ?? .refused(.failed) },
+            // VX-309 U1c — VX-265: rule 19's delete with no library open (never a library this Mac remembers); one
+            // landing or delete at a time (a delete never runs under a landing that may be reading the copy).
+            deleteCopies: { [weak self] libraryID in
+                guard let self else { return .refused(.deleteFailed) }
+                return await self.deleteCopiesWithNoLibraryOpen(libraryID, context: context)
+            })
+    }
+
+    /// VX-309 U1c — rule 19's delete with NO library open (the empty-slot listing): only where no library is open, one at a
+    /// time beside the landings, off the main actor; the listing's own receipt line says what went.
+    private func deleteCopiesWithNoLibraryOpen(
+        _ libraryID: String, context: @escaping @Sendable () -> CopyDoorsContext
+    ) async -> CopyDeleteOutcome {
+        if case .ready = state { return .refused(.deleteFailed) }
+        guard !copyLandingRunning else { return .refused(.busy) }
+        copyLandingRunning = true
+        defer { copyLandingRunning = false }
+        return await Task.detached(priority: .userInitiated) {
+            ProtectionCopyDoors.deleteCopies(context(), libraryID: libraryID)
+        }.value
+    }
+
+    /// **A PLAINTEXT EXPORT BROUGHT IN AS A NEW LIBRARY** (VX-309 U1b — T-8; the mapping ruled at the plan's §5b-R). From an
+    /// open library (`.ready`) or none (the missing face, rule 27's lobby). THE PREFLIGHT first, all reads (the export
+    /// planned on a private staged copy — a refusal never tears the window down); then, with a library open, the reopening
+    /// seam's first half (the composition root's teardown, the `.ready` tree down, the app's pool CLOSED); then the act off
+    /// the main actor (`ProtectionCopyDoors.landPlaintextExport` — what stands steps aside whole, the creation's road, the
+    /// content minted headless into the new store); then the new library opens exactly as a creation does (`.roadCreated`:
+    /// its words dropped unseen — the band card offers fresh ones), the receipt naming what landed owed to that open. Nothing
+    /// made ⇒ the open finds what still stands (the library, under its own key, when it never moved).
+    func bringInPlaintextExport(_ url: URL) async -> CopyDoorOutcome {
+        guard newRoad, let road = roadInputs?.compose(), road.writes else { return .refused(.failed) }
+        var open: ProtectionRoadSession?
+        switch state {
+        case .ready:
+            guard let session = roadSession, session.writes, binding != nil else { return .refused(.failed) }
+            open = session
+        case .libraryMissing: break
+        case .roadLobby(let lobby) where lobby.face.noKeyFileAnywhere != nil: break
+        default: return .refused(.failed)
+        }
+        guard !copyLandingRunning else { return .refused(.busy) }
+        if let open, !open.beginAct() { return .refused(.busy) }
+        copyLandingRunning = true
+        defer { copyLandingRunning = false }
+        let read = await Task.detached(priority: .userInitiated) { ProtectionCopyDoors.readPlaintextExport(url) }.value
+        guard case .plan(let plan) = read else {
+            open?.endAct()
+            if case .refused(let why) = read { return .refused(why) }
+            return .refused(.failed)
+        }
+        let oldKey = open?.key
+        let binding = binding
+        if open != nil {
+            await onWillLock?()
+            state = .opening
+            protection.dropResident()
+            protection.resetPerOpenDeferrals()
+            protection.syncCustodySession.drop()
+        }
+        let closesThePool = open != nil
+        let result = await Task.detached(priority: .userInitiated) {
+            if closesThePool { binding?.lock() }
+            // The context off the main actor: it reads the sign-in (a Keychain read).
+            return await ProtectionCopyDoors.landPlaintextExport(road.context(), plan: plan)
+        }.value
+        open?.endAct()
+        guard let created = result.created else {
+            if open != nil {
+                beginOpening(unlockedKey: oldKey)
+                await awaitOpen()
+            }
+            return .refused(result.refusal ?? .failed)
+        }
+        // VX-309 U2: the receipt says where the previous library went when one was open (the lead said it would).
+        receiptsForNextRoadOpen.append(ProtectionWords.bringInReceipt(
+            result.landing, stoppedEarly: result.stoppedEarly, steppedAside: open != nil))
+        finish(.roadCreated(created.session, created.words))
+        await awaitOpen()
+        return .made
+    }
+
+    /// One landing at a time with no library in hand — T-5's empty-slot landing, T-8's bring-in (a second press while one
+    /// runs refuses busy).
+    @ObservationIgnored private var copyLandingRunning = false
+
+    /// **MAKE THIS MY LIBRARY INTO THE EMPTY SLOT** (VX-309 U1b — T-5; rule 17 with no library open). Offered only where
+    /// no library is open: the missing face, and rule 27's lobby (its *Open Library…* renders only in that state). No pool
+    /// is open on the slot, so nothing closes: the act runs off the main actor (`ProtectionCopyDoors.makeMineInTheEmptySlot`
+    /// — the preflight's reads, the restore hold, what stands in the slot set aside whole, the core's act, today's store id
+    /// minted fresh), then the open goes THROUGH THE NEW ROAD with the new key in hand (or, if the act stopped past its
+    /// swap, by the new library's own quiet road), the receipt owed to that open's status seam.
+    func makeThisMyLibraryInTheEmptySlot(_ row: CopyDoorRow, copySecrets: TypedSecrets) async -> CopyDoorOutcome {
+        guard newRoad, let road = roadInputs?.compose(), road.writes else { return .refused(.failed) }
+        switch state {
+        case .libraryMissing: break
+        case .roadLobby(let lobby) where lobby.face.noKeyFileAnywhere != nil: break
+        default: return .refused(.failed)
+        }
+        guard !copyLandingRunning else { return .refused(.busy) }
+        copyLandingRunning = true
+        defer { copyLandingRunning = false }
+        let gate = gate
+        let scope = storeVariant.rawValue
+        // VX-309 U1c — F-U1b-5: the band card's ledger (her typed words become the new library's — recorded).
+        let wordsLedger = WordsCardLedger(defaults: reminderLedger.defaults)
+        let result = await Task.detached(priority: .userInitiated) {
+            // The context off the main actor: it reads the sign-in (a Keychain read).
+            let ctx = CopyDoorsContext(road.context())
+            return await ProtectionCopyDoors.makeMineInTheEmptySlot(
+                ctx, row: row, copySecrets: copySecrets,
+                mintStoreIdentity: { key in
+                    Self.ensureStoreIdentity(slot: ctx.system.places.slot, key: key, fresh: true, gate: gate, scope: scope)
+                },
+                wordsLedger: wordsLedger)
+        }.value
+        guard result.outcome == .made else { return result.outcome }
+        receiptsForNextRoadOpen.append(ProtectionWords.makeMineEmptySlotReceipt)
+        beginOpening(unlockedKey: result.key)
+        await awaitOpen()
+        return .made
     }
 
     /// VX-307 U2c — VX-413 (her ruling: "copy full text is a good idea"): Look inside's *Copy full text* writes the
@@ -1294,13 +1434,16 @@ final class AppBootstrap {
         protection.syncCustodySession.drop()
         let gate = gate
         let scope = storeVariant.rawValue
+        // VX-309 U1c — VX-444: the band card's ledger (the outgoing library's words marks carry with the pair).
+        let wordsLedger = WordsCardLedger(defaults: reminderLedger.defaults)
         let result = await Task.detached(priority: .userInitiated) {
             binding.lock()
             return await ProtectionCopyDoors.makeMine(
                 session, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: currentPair,
                 mintStoreIdentity: { key in
                     Self.ensureStoreIdentity(slot: session.system.places.slot, key: key, fresh: true, gate: gate, scope: scope)
-                })
+                },
+                wordsLedger: wordsLedger)
         }.value
         session.endAct()
         if result.outcome == .made { receiptsForNextRoadOpen.append(ProtectionWords.makeMineReceipt) }
@@ -1361,7 +1504,16 @@ final class AppBootstrap {
                 }.value
                 if refused == nil { await self.roadAccount?.refresh() }
                 return refused
-            })
+            },
+            // VX-309 U1c — VX-451: the idle dial (this Mac's sealed minutes, `changeSettings` on the open session).
+            changeIdleLock: { [weak self] minutes in
+                guard let session = self?.roadSession, session.writes else { return .refused(ProtectionWords.gateRowFailed) }
+                return await Task.detached(priority: .userInitiated) {
+                    await ProtectionCrossings.changeIdleLock(session, minutes: minutes)
+                }.value
+            },
+            // VX-309 U1c — VX-451: Lock Library Now from the pane — the one lock (`lock()`, VX-445's road).
+            lockNow: { [weak self] in await self?.lock() })
     }
 
     /// VX-308 ladder round 1 (MINOR-2) — the Protection pane's appearance: the pane's ONE read taken ONCE for the
@@ -1411,10 +1563,27 @@ final class AppBootstrap {
                         session, request: request, signIn: signInNow(), exportSwitch: exports)
                 }.value
             },
-            landed: { [weak self] in await self?.roadCrossings?.refresh() },
+            // VX-309 U1c — VX-454: an account act can set a passphrase on the OPEN session (turning sync on with a new one,
+            // a join adopting the account's pair) — the set row and rule 3's reminder re-read, and the key doors with them
+            // (Change and Reset stand where the set row retires).
+            landed: { [weak self] in
+                await self?.roadCrossings?.refresh()
+                self?.roadStanding?.rereadPassphrase()
+                await self?.roadKeyDoors?.refresh()
+            },
             receipt: { [weak self] text in self?.roadStanding?.speak?(text) },
             // VX-308 U2 — the words moment's Copy: the Mac's one words clipboard rule (the card's own road).
-            copyWords: { Self.copyWords($0) })
+            copyWords: { Self.copyWords($0) },
+            // VX-309 U2 — VX-457: the follow's Done as the section's durable notice — the OPEN library's mark, in the
+            // calm-asks ledger's defaults (a test bootstrap's own suite), read at every landing and cleared at its OK.
+            followDoneOwed: { [weak self] in
+                guard let self, let libraryID = self.roadSession?.library.record?.libraryID else { return nil }
+                return FollowDoneMark.owed(libraryID, in: self.reminderLedger.defaults)
+            },
+            dismissFollowDone: { [weak self] in
+                guard let self, let libraryID = self.roadSession?.library.record?.libraryID else { return }
+                FollowDoneMark.set(libraryID, nil, in: self.reminderLedger.defaults)
+            })
     }
 
     /// VX-308 U3 — the key doors' roads on the new road. Each reads the CURRENT session at its call (a reopen replaces it);
@@ -1569,13 +1738,20 @@ final class AppBootstrap {
             session.endAct()
             return .changed(fresh)
         }
+        // (The ledger, not its defaults: it is Sendable — the seam's act runs off the main actor.)
+        let followDoneLedger = reminderLedger
         return await reopenAround(session, binding: binding) {
             let done = await ProtectionAccountRoad.perform(
                 session, request: request, signIn: signInNow(), exportSwitch: exports)
             switch done.press {
-            case .made(let receipt, let wordsReplaced):
-                return (.made(receipt: nil, wordsReplaced: wordsReplaced), done.reopenKey,
-                        done.landedWhole ? [receipt].compactMap { $0 } : [])
+            case .made(_, let wordsReplaced):
+                // VX-309 U2 — VX-457: a follow that landed whole owes its Done DURABLY (the account section's notice
+                // until her OK — `FollowDoneMark`), never a receipt; any other act's receipt rides to the reopen as before.
+                let owed = ProtectionAccountRoad.owed(after: done, request: request)
+                if let kind = owed.followDone, let libraryID = session.library.record?.libraryID {
+                    FollowDoneMark.set(libraryID, kind, in: followDoneLedger.defaults)
+                }
+                return (.made(receipt: nil, wordsReplaced: wordsReplaced), done.reopenKey, owed.receipts)
             case .refused, .changed:
                 return (done.press, done.reopenKey, [])
             }
@@ -1933,6 +2109,16 @@ final class LibraryMissingLobby {
         self.scope = scope
         self.begin = begin
         self.newRoadCreate = newRoadCreate
+    }
+
+    /// VX-309 U1b — a home of this Mac's copies stands beside the (absent) store (`Backups/` or `Previous Libraries/`):
+    /// the new road's *Restore from a Backup…* lists them (P-2: no home, no door).
+    var copiesHomeExists: Bool {
+        guard let storeURL else { return false }
+        let container = storeURL.deletingLastPathComponent()
+        return [CatalogNames.backupsFolderName, CatalogNames.previousLibrariesFolderName].contains {
+            FileManager.default.fileExists(atPath: container.appendingPathComponent($0, isDirectory: true).path)
+        }
     }
 
     /// The app's own Backups folder beside the (absent) store — the Mac's

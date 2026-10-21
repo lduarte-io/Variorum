@@ -21,13 +21,20 @@ struct RoadKeyDoorWordsTests {
             .split(whereSeparator: { $0 == " " || $0 == "\n" || $0 == "\t" }).joined(separator: " ")
     }
 
-    /// VX-263's one line, as the plan words it (italic, lower-case, no period) — pinned as drafted.
-    @Test func vx263sOneLineIsThePlansAsDrafted() throws {
-        let plan = try Self.plan()
+    /// VX-263's one line — VX-309 U2, FLIPPED DELIBERATELY: the line is the route finder's ONE sentence as `notes/CastleRules.md`
+    /// rewords it (the considered-and-not-pursued ledger: *your current passphrase or words; on this Mac, its quiet road if it
+    /// still holds that key*), fitted to the key doors' sentence (PROVISIONAL P-VX309-U2-6). It superseded the VX-308 plan's
+    /// draft (*your current secrets open everything you've made of this library*), which this pin read until now.
+    @Test func vx263sOneLineIsTheRulesRouteFinderSentence() throws {
+        let rules = try RoadAccountWordsTests.rules()
+        #expect(rules.contains("*your current passphrase or words; on this Mac, its quiet road if it still holds that key.*"),
+                "the rules' ledger sentence stands")
         let line = ProtectionWords.keyDoorsLine
-        #expect(line == "Your current secrets open everything you've made of this library.")
-        #expect(plan.contains("*\(RoadAccountWordsTests.lowercasingFirst(String(line.dropLast())))*"),
-                "the plan's §2 / §5c line")
+        #expect(line == "Every copy of this library opens with your current passphrase or words; on this "
+            + "\(ProtectionCopy.deviceName), its quiet road opens it too, if it still holds that copy's key.")
+        for words in ["your current passphrase or words", "its quiet road", "if it still holds that"] {
+            #expect(line.contains(words), "the rules' words: \(words)")
+        }
     }
 
     /// VX-447: the banner door reuses her U2-7 (1) first sentence byte for byte (the prefix of her pinned constant —

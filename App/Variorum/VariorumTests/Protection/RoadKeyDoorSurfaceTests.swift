@@ -71,7 +71,7 @@ struct RoadKeyDoorSurfaceTests {
         }
         let refusing = RoadKeyDoorConfirmModel(
             door: RoadKeyDoorsModelTests.open(.changePassphrase), act: { _ in .refused(ProtectionWords.passphraseDoesNotOpen) }) { _ in }
-        await refusing.submit(current: "c", new: "n", again: "n")
+        await refusing.submit(current: "c", new: "a new passphrase", again: "a new passphrase")
         #expect(refusing.refusal == ProtectionWords.passphraseDoesNotOpen)
         await SurfaceComposition.host(RoadKeyDoorSheet(model: refusing), size: NSSize(width: 480, height: 560))
     }

@@ -73,7 +73,8 @@ build() {
   mkdir -p "$APP/Contents/MacOS"
   cp "$bin" "$APP/Contents/MacOS/$NAME"
   mv "$plist" "$APP/Contents/Info.plist"
-  codesign --force --sign - "$APP" >/dev/null || { echo "codesign failed for $APP" >&2; return 1; }
+  local signed
+  signed=$(codesign --force --sign - "$APP" 2>&1) || { echo "codesign failed for $APP: $signed" >&2; return 1; }
 }
 
 info_plist() {

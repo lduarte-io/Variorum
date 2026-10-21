@@ -51,6 +51,17 @@ final class LibraryOpenPresenter {
         begin(bootstrap: bootstrap, picked: picked)
     }
 
+    /// VX-309 U1b — the faces with NO library open (the missing face, rule 27's lobby) on the new road: their *Restore from
+    /// Backup…* opens this Mac's catalogued copies with each row's doors (rule 17: "The app's Restore from Backup is this
+    /// door") — Look inside, and Make this my library into the empty slot (T-5).
+    func openRestoreList(bootstrap: AppBootstrap) {
+        guard model == nil, roadDoors == nil, bootstrap.newRoad,
+              let roads = bootstrap.copyDoorsRoadsWithoutALibrary() else { return }
+        let fresh = CopyDoorsModel(roads: roads)
+        roadDoors = fresh
+        Task { await fresh.beginListing() }
+    }
+
     /// VX-306 U3 — a Restore row's *Look inside…* on the new road (P-VX306-U3-15).
     func beginLookInside(roads: CopyDoorsRoads, row: CopyDoorRow) {
         guard model == nil, roadDoors == nil else { return }
@@ -65,6 +76,15 @@ final class LibraryOpenPresenter {
         let fresh = CopyDoorsModel(roads: roads)
         roadDoors = fresh
         Task { await fresh.openMakeMine(row) }
+    }
+
+    /// VX-309 U1c — VX-265: a Restore row's *Delete…* on the new road (rule 19's confirm; the list re-reads on the
+    /// copies-changed seam once the copies went).
+    func beginDeleteCopies(roads: CopyDoorsRoads, choice: CopyDeleteChoice) {
+        guard model == nil, roadDoors == nil else { return }
+        let fresh = CopyDoorsModel(roads: roads)
+        roadDoors = fresh
+        fresh.openDeleteCopies(choice)
     }
 
     func dismissRoad() {

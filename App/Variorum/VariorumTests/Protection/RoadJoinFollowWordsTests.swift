@@ -89,8 +89,19 @@ struct RoadJoinFollowWordsTests {
                 #expect(receipt.components(separatedBy: " now").count == 2, "one \"now\": \(receipt)")
             }
         }
-        #expect(ProtectionWords.joinWordsNotShown.hasPrefix("Your library's twelve words are now your account's twelve words"))
-        #expect(!ProtectionWords.joinWordsNotShown.contains("here they are"), "the passphrase-typed moment shows nothing")
+        // VX-309 U2 — FLIPPED DELIBERATELY: the passphrase-typed moment is HER refined draft now (#236 — the library adopts
+        // the ACCOUNT's words, named by email; the shipped "your library's twelve words are now your account's" read the
+        // wrong way round). The middle clause keeps its sentence and drops only its conditional lead-in (the F-U2-1
+        // arbitration: with VX-456 the moment fires only on a real replacement, so the previous-words fact is said
+        // plainly, un-hedged, exactly when it is true).
+        #expect(ProtectionWords.joinWordsNotShown("lillian@example.test")
+            == "Your twelve words are lillian@example.test's twelve words. Your previous twelve words still open backups "
+            + "you made before today. If you don't have your account's words written down, you can make new ones at any time.")
+        #expect(ProtectionWords.joinWordsNotShown(nil)
+            == "Your twelve words are your account's twelve words. Your previous twelve words still open backups you made "
+            + "before today. If you don't have your account's words written down, you can make new ones at any time.")
+        #expect(!ProtectionWords.joinWordsNotShown(nil).contains("here they are"), "the passphrase-typed moment shows nothing")
+        #expect(!ProtectionWords.joinWordsNotShown(nil).contains("first time signing in"), "the conditional lead-in dropped")
         #expect(ProtectionWords.moveDoor("y@example.test") == "Move this library to y@example.test\u{2026}")
     }
 
@@ -98,7 +109,7 @@ struct RoadJoinFollowWordsTests {
     @Test func noJoinOrFollowLineShouts() {
         var lines = [
             ProtectionWords.joinLead, ProtectionWords.joinPassphraseField, ProtectionWords.joinWordsField,
-            ProtectionWords.joinWordsNotShown, ProtectionWords.joinWordsMomentOK, ProtectionWords.moveDoor(nil),
+            ProtectionWords.joinWordsNotShown(nil), ProtectionWords.joinWordsMomentOK, ProtectionWords.moveDoor(nil),
             ProtectionWords.moveTitle, ProtectionWords.moveLead, ProtectionWords.moveButton, ProtectionWords.moveNotYet,
             ProtectionWords.followDoor, ProtectionWords.followTitle, ProtectionWords.followButton,
             ProtectionWords.followUntilThen, ProtectionWords.followPassphraseField, ProtectionWords.followWordsField,

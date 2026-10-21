@@ -160,7 +160,7 @@ struct RoadJoinFollowModelTests {
         #expect(kept.moment == nil && finished.count == 1)
         planted.press = .made(receipt: ProtectionWords.turnOnSyncReceipt, wordsReplaced: true)
         let setUp = RoadAccountConfirmModel(door: PlantedAccountRoads.setUp(), act: planted.roads.press) { finished.append($0) }
-        await setUp.submit(passphrase: "p", again: "p", words: Self.wordsText)
+        await setUp.submit(passphrase: "a new passphrase", again: "a new passphrase", words: Self.wordsText)
         #expect(setUp.moment == nil && finished.count == 2, "rule 7's hand-up shows nothing")
         planted.press = .made(receipt: "joined", wordsReplaced: true)
         let closing = RoadAccountConfirmModel(door: PlantedJoin.join(), act: planted.roads.press) { finished.append($0) }

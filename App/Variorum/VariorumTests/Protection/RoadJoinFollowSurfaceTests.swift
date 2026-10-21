@@ -175,7 +175,14 @@ struct RoadJoinFollowSurfaceTests {
             #expect(account.confirm == nil && session.key != before && session.library.record?.mode == .castle)
             var spoken: [String] = []
             bootstrap.roadStanding?.speak = { spoken.append($0) }
-            #expect(spoken == [ProtectionWords.followDone(.intoCastle)], "the Done, once, on the reopened window")
+            // VX-309 U2 — VX-457, FLIPPED DELIBERATELY: the Done is the account section's DURABLE notice until her OK,
+            // never a receipt (`receipt_style` off hid it; a quit lost it).
+            #expect(!spoken.contains(ProtectionWords.followDone(.intoCastle)), "no receipt")
+            await account.refresh()
+            #expect(account.followDone == .intoCastle, "the Done stands in the section")
+            account.followDoneOK()
+            await account.refresh()
+            #expect(account.followDone == nil, "OK clears it")
         }
     }
 
@@ -201,7 +208,11 @@ struct RoadJoinFollowSurfaceTests {
                     "the reopen's settle finished it")
             var spoken: [String] = []
             bootstrap.roadStanding?.speak = { spoken.append($0) }
-            #expect(spoken == [ProtectionWords.followDone(.intoCastle)], "said once — by the settle, not the press")
+            // VX-309 U2 — VX-457, FLIPPED DELIBERATELY: owed by the settle (never the press), as the section's durable
+            // notice — not a receipt.
+            #expect(!spoken.contains(ProtectionWords.followDone(.intoCastle)), "no receipt")
+            await account.refresh()
+            #expect(account.followDone == .intoCastle, "the settle's Done stands in the section")
         }
     }
 }

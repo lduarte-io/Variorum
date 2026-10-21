@@ -79,8 +79,9 @@ struct PickedCopyRoadTests {
         #expect(!FileManager.default.fileExists(atPath: safety.path), "nothing filed")
     }
 
-    /// The pick's honest refusals: the open library itself; a plain-text export (T-8 is VX-309's — never today's
-    /// adoption on the new road); a store with no key file; and several pairs offered, never guessed.
+    /// The pick's honest refusals: the open library itself; a store with no key file; and several pairs offered, never
+    /// guessed. (VX-309 U1b — T-8, a JUSTIFIED EDIT: a plain-text export is no longer refused — the pick NAMES it, never
+    /// filing it, and the doors bring it in as a new library; `PlaintextExportBringInRoadTests` carries the rest.)
     @Test func thePicksRefusalsAndTheChooser() async throws {
         let road = PlantedRoad()
         let (session, _, _) = try await CopyDoorsPlant.libraryWithABackup(road)
@@ -94,10 +95,12 @@ struct PickedCopyRoadTests {
         let source = try AppDatabase.onDisk(url: elsewhere.appendingPathComponent("source.sqlite"), key: StoreKey.mint())
         let export = elsewhere.appendingPathComponent("export.sqlite")
         try StorePlaintextExport.export(from: source, to: export)
-        guard case .refused(let plaintext, _) = ProtectionCopyDoors.pick(export, session: session) else {
-            Issue.record("a plain-text export is refused on the new road"); return
+        guard case .plaintextExport(let named) = ProtectionCopyDoors.pick(export, session: session) else {
+            Issue.record("a plain-text export is named on the new road (T-8)"); return
         }
-        #expect(plaintext == ProtectionWords.plaintextCopyNotYet)
+        #expect(named.standardizedFileURL.path == export.standardizedFileURL.path)
+        #expect(!FileManager.default.fileExists(atPath: road.slot.places.backups
+            .appendingPathComponent(CatalogNames.safetyCopiesFolderName).path), "never filed")
         // A store with no key file beside it.
         let bare = elsewhere.appendingPathComponent("bare", isDirectory: true)
         try FileManager.default.createDirectory(at: bare, withIntermediateDirectories: true)

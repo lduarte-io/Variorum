@@ -635,7 +635,7 @@ extension SWorld {
         }
         writePair(device, image: slot, keyFile: live, deviceID: library.section.deviceID)
         let outcome = Retention.plan(
-            catalog: catalog(device), libraryID: slot.libraryID, thisMac: library.section.deviceID, guards: guards)
+            catalog: catalog(device), libraryID: slot.libraryID, thisMac: library.section.deviceID, now: clock, guards: guards)
         let catalog = catalog(device)
         for id in outcome.prune {
             if let copy = catalog.copies.first(where: { $0.id == id }) {

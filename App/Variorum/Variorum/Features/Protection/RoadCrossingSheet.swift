@@ -108,6 +108,7 @@ struct RoadCrossingSheet: View {
                     .fixedSize(horizontal: false, vertical: true)
                 PeekableSecretField(label: ProtectionWords.crossingNewPassphraseField, text: $passphrase)
                     .textFieldStyle(.roundedBorder)
+                PassphraseHintLine(passphrase: passphrase)
                 PeekableSecretField(label: ProtectionWords.crossingNewPassphraseAgain, text: $again)
                     .textFieldStyle(.roundedBorder)
             } else {
@@ -136,6 +137,9 @@ struct RoadCrossingSheet: View {
 /// Settings ▸ Protection on the new road: the posture, the crossings' doors, rule 11's notice, the gate-style row.
 struct RoadCrossingsSection: View {
     @Bindable var model: RoadCrossingsModel
+
+    /// P-1: the registry acts this section renders (VX-309 U1c — VX-451: Lock Library Now, the File menu's twin).
+    static let surfaceCapabilities: [CapabilityID] = [.lockLibraryNow]
 
     @State private var gatePassphrase = ""
 
@@ -242,6 +246,34 @@ struct RoadCrossingsSection: View {
                     .font(.caption)
                     .alarmVoice()
             }
+            // VX-309 U1c — VX-451 (F-U4-1's option (a)): the idle dial — this Mac's SEALED minutes (`changeSettings`) — and
+            // Lock Library Now, here where Castle stands (P-2: this section exists only in Castle); today's road untouched.
+            Picker(ProtectionCopy.idleLabel, selection: Binding(
+                get: { row.idleMinutes ?? 0 },
+                set: { minutes in Task { await model.setIdleMinutes(minutes == 0 ? nil : minutes) } })
+            ) {
+                ForEach(RoadGateRow.idleChoices, id: \.self) { minutes in
+                    Text(ProtectionCopy.idleChoiceLabel(minutes)).tag(minutes ?? 0)
+                }
+            }
+            .disabled(model.idleBusy)
+            Text(ProtectionCopy.idleSentence + " " + ProtectionCopy.idleSubline)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            if let refusal = model.idleRefusal {
+                Text(refusal)
+                    .font(.caption)
+                    .alarmVoice()
+            }
+            HStack {
+                Button(CapabilityRegistry.capability(.lockLibraryNow).verb) { Task { await model.lockNow() } }
+                Spacer()
+            }
+            Text(ProtectionCopy.lockNowSentence + " \u{2303}\u{2318}L does the same from anywhere.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 

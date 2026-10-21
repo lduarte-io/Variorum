@@ -16,9 +16,11 @@
 //  holding one such store is that pair; several are offered, never guessed.
 //
 //  EVERYTHING ELSE keeps today's classifier for its honest words (`LibraryClassifier`), with two new-road readings:
-//    - a plain-text export or library — its landing (T-8) is VX-309's; today's adoption road would land a library the
-//      new road cannot open and leave the live key file behind (rule 1 — traced in the U3 record), so the new road
-//      says it isn't ready yet (PROVISIONAL P-VX306-U3-5);
+//    - a PLAIN-TEXT EXPORT (`.plaintextExport` — the unencrypted `.sqlite`) is its own verdict since VX-309 U1b (T-8): it
+//      is brought in as a NEW library through the import road (`ProtectionCopyDoors.readPlaintextExport` /
+//      `landPlaintextExport`) — never filed, never adopted (today's adoption road would land a library the new road
+//      cannot open, P-VX306-U3-5's trace); a plain-text FULL library (a store from before 13p's encryption — rule 26)
+//      keeps the refusal;
 //    - an encrypted copy whose key file is TODAY's format — rule 26: a copy from before this design is not handled
 //      (no sentence names it), so the honest minimum: today's "couldn't be read as a library" (P-VX306-U3-6).
 //
@@ -36,6 +38,9 @@ nonisolated enum PickedCopy {
 
     enum Verdict: Equatable, Sendable {
         case pair(Pair)
+        /// VX-309 U1b — T-8: a plaintext export (the store itself — a folder holding one is read as it), brought in as a
+        /// new library, never filed.
+        case plaintextExport(URL)
         /// A folder holding several stores with key files of this design.
         case several([URL])
         case refused(String, detail: String?)
@@ -120,7 +125,9 @@ nonisolated enum PickedCopy {
     /// Today's classifier, for the honest words of a thing that is not this design's pair.
     static func todaysWords(_ url: URL) -> Verdict {
         switch LibraryClassifier.classify(at: url) {
-        case .plaintextExport, .plaintextLibrary:
+        case .plaintextExport(let store):
+            return .plaintextExport(store)
+        case .plaintextLibrary:
             return .refused(ProtectionWords.plaintextCopyNotYet, detail: nil)
         case .encryptedLibrary, .snapshotPair, .folderHoldingPair, .folderHoldingStores:
             return .refused(ProtectionWords.pickedCopyUnreadable, detail: nil)

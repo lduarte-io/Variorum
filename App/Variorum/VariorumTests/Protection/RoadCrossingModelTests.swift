@@ -141,7 +141,7 @@ struct RoadCrossingModelTests {
         let confirm = RoadCrossingConfirmModel(door: PlantedCrossingRoads.useCastle(), act: planted.roads.cross) { _ in }
         await confirm.submit(passphrase: "p", again: "p", words: "one two three")
         #expect(confirm.refusal == ProtectionWords.wordsWrongCount(3))
-        await confirm.submit(passphrase: "p", again: "q", words: Self.wordsText)
+        await confirm.submit(passphrase: "a new passphrase", again: "a new passphrase!", words: Self.wordsText)
         #expect(confirm.refusal == ProtectionWords.setPassphraseMismatch)
         #expect(planted.requests.isEmpty)
     }
@@ -153,10 +153,10 @@ struct RoadCrossingModelTests {
         planted.press = .refused("no")
         let new = RoadCrossingConfirmModel(door: PlantedCrossingRoads.useCastle(), act: planted.roads.cross) { _ in }
         new.gate = .alwaysAsk
-        await new.submit(passphrase: " spaced ", again: " spaced ", words: "  " + Self.wordsText + "\n")
+        await new.submit(passphrase: " spaced passphrase ", again: " spaced passphrase ", words: "  " + Self.wordsText + "\n")
         let first = try #require(planted.requests.last)
         #expect(first.door == .useCastle && first.gate == .alwaysAsk)
-        #expect(first.typed.newPassphrase == " spaced " && first.typed.passphrase == nil)
+        #expect(first.typed.newPassphrase == " spaced passphrase " && first.typed.passphrase == nil)
         #expect(first.typed.words == Self.words)
         #expect(new.refusal == "no")
         let current = RoadCrossingConfirmModel(
@@ -184,11 +184,11 @@ struct RoadCrossingModelTests {
         planted.press = .changed(changed)
         var finished: [RoadCrossingPress?] = []
         let confirm = RoadCrossingConfirmModel(door: shown, act: planted.roads.cross) { finished.append($0) }
-        await confirm.submit(passphrase: "p", again: "p", words: Self.wordsText)
+        await confirm.submit(passphrase: "a new passphrase", again: "a new passphrase", words: Self.wordsText)
         #expect(confirm.door == changed && confirm.refusal == ProtectionWords.crossingDoorChanged)
         #expect(finished.isEmpty)
         planted.press = .made(exportTurnedOff: true)
-        await confirm.submit(passphrase: "p", again: "p", words: Self.wordsText)
+        await confirm.submit(passphrase: "a new passphrase", again: "a new passphrase", words: Self.wordsText)
         #expect(planted.requests.last?.shown == changed)
         #expect(finished == [.made(exportTurnedOff: true)])
     }
@@ -203,7 +203,7 @@ struct RoadCrossingModelTests {
         model.open(.useCastle)
         let confirm = try #require(model.confirm)
         let readsBefore = planted.reads
-        await confirm.submit(passphrase: "p", again: "p", words: Self.wordsText)
+        await confirm.submit(passphrase: "a new passphrase", again: "a new passphrase", words: Self.wordsText)
         #expect(model.confirm == nil)
         #expect(model.exportNotice)
         await model.refresh()
@@ -227,11 +227,11 @@ struct RoadCrossingModelTests {
         try #require(model.confirm).cancel()
         #expect(model.confirm == nil && planted.requests.isEmpty)
         model.open(.useCastle)
-        try await #require(model.confirm).submit(passphrase: "p", again: "p", words: Self.wordsText)
+        try await #require(model.confirm).submit(passphrase: "a new passphrase", again: "a new passphrase", words: Self.wordsText)
         #expect(!model.exportNotice)
         planted.press = .made(exportTurnedOff: true)
         model.open(.useCastle)
-        try await #require(model.confirm).submit(passphrase: "p", again: "p", words: Self.wordsText)
+        try await #require(model.confirm).submit(passphrase: "a new passphrase", again: "a new passphrase", words: Self.wordsText)
         model.exportNoticeOK()
         #expect(!model.exportNotice && planted.exportCalls == 0, "OK reverses nothing")
         #expect(planted.dismissCalls == 1 && !planted.noticeOwed, "OK clears the durable mark")
