@@ -291,3 +291,22 @@ rules or bundles for her.
 the record; the release floor honest — VX-406's reds GONE with their suites); `xcodebuild build-for-testing` green
 for the Mac app; the iOS app target builds; the record (§5, the VX-309 §6 form) with counts, the Mac-suite list for
 the orchestrator's stage batch, PROVISIONALs bundled, findings routed, LIVE STATUS flipped per piece.
+
+### L0 RECORD — THE LOCKSTEP COMMIT (the orchestrator, Fable, 2026-10-22; commit `0d1820336` — DONE)
+
+`SyncSchema.lockstepVersion` 13 → 14 and `17_phase_vx307_vault.sql` registered in `AuthRLSDDLTests.lockstepFiles`,
+ONE commit (the vx307 checklist's preflight pairing row now reads true on this branch). The chain's resolution moved
+with it: the deployed `key_vault_update` is now 17's mode-shaped body, so the rotation-era DDL pins were made
+marker-aware (the R-2 class) — `theVaultUpdateDoorLocksForUpdateCASesAndRecordsTheRotationSeq` and
+`theCompletionGuardLivesInTheCanonicalTwelveBody` read the last PRE-17 definition from `13_phase13i_wings.sql`'s own
+file (13i-a re-carried 12's fold-in with the wing/shelf ciphertext registry — found when the 12-file read failed the
+registry-exactness arm), the clearing-guard overlay test asserts the guard's history (11 never · 12/13 carried ·
+17 retires), `everyMintSite…` reads M3 in 12's text and asserts the deployed door mints nothing, and ONE NEW pin
+(`theMarker14VaultDoorRetiresRotationAndLandsTheModeShape`) holds the deployed truth: 17's body byte-equal as the
+chain's final resolution, the FOR UPDATE/proof/CAS clauses kept, `VARIORUM_PRE_VX307_PAYLOAD` live, rotation absent
+whole. The five "a local-only migration never moves the marker" pins read 14. **Red-on-old:** the drift pin verified
+red with the constant reverted to 13 (the pairing is enforced), restored green. **Suites:** the four affected suites
+106/106; the FULL core suite green — 3368 tests, 2 known issues (standing `withKnownIssue` wrappers), one UNRELATED
+load flake (`MCPHarnessTimeLimitTests` — a 15-second wall-clock bound read 18.6 s under the parallel full-suite run;
+green in isolation at 2.2 s; no product line near it). **Consequence standing:** this branch speaks marker 14 — live
+sync only against the throwaway until the production deploy at her morning go; NO `/Applications` refresh until then.
