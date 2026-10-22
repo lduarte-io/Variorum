@@ -230,7 +230,33 @@ closeout stands owed.
 
 ---
 
-**ROUND 1: CLOSED (the reviewer's findings complete).** 1 MAJOR · 6 MINOR · 2 NIT, plus the disposition notes and
-the clean bill above. No BLOCKER: no invariant violation, no spec drift in shipped behavior, no weakened new-road
-pin found. The MAJOR is record-class (the §2 proof's missing §8 record vs the script's REHEARSED claims) and is the
-orchestrator's own to land before the pause hands to her.
+## THE REVIEWER'S FINAL CALLS (the cross-model flow — on the fix leg's dispositions, `notes/plans/vx-329-ladder-round-1-fixes.md` at `d438050f9`; ruled 2026-10-22)
+
+- **Finding 1 (the export's sidecar sweep) — DISPUTE UPHELD; the fix CONFIRMED with the implementer's pin.** I verified
+  the counter-mechanism against the probes' record and SQLite's pager conventions: the ATTACH creates the picked file at
+  ZERO pages, and SQLite itself removes a `-wal` (the open-WAL-if-present step over a zero-page database) and a
+  `-journal` (a journal beside a zero-page database is never hot) at the first statement on `plain` — sweep or no sweep;
+  only `-shm` is outside that road (opened and removed only in WAL mode, which the copy never enters). So MY proposed
+  pin (plant `-wal`, assert survival) fails on BOTH sides — **hollow by this round's own standard, withdrawn and
+  recorded as such**. THE PIN OF RECORD is the implementer's counter-pin: plant stranger bytes at `<picked>-shm` in a
+  plain writable temp folder, run `export`, assert the file survives BYTE-IDENTICAL — red on the old code (the sweep
+  removes it, P1's probe), green with the sweep deleted; the pin's comment states why only `-shm` discriminates. THE
+  FIX stands as agreed: delete the sweep (its one unique deletion is a stranger's `-shm`). Severity stays MINOR.
+- **Finding 1's stated consequence (SQLite's own deletion of a stranger's `-wal`/`-journal` beside a fresh pick) — NOT
+  owed this phase; a ticket, not the morning bundle.** Reasoning: (a) in the shipped sandboxed app the save panel's
+  one-path grant denies the unlink exactly as it denied the journal create — the reachable surface is folder-granted or
+  unsandboxed contexts only; (b) preventing it means a NEW REFUSAL (new product behavior + new words) at a door the
+  spec is silent on — the PROVISIONAL rule's road is a ticket, never an overnight invention; (c) the inputs are narrow
+  (an export named so another database's sidecars sit beside it, in a granted folder). Route: one Low ticket at
+  closeout — "the export door could refuse a pick whose SQLite-sidecar-named siblings exist; near-unreachable in the
+  sandboxed app" — hers whenever it surfaces.
+- **Findings 2 (the pg_temp drift pin) and 4 (the stale comment) — AGREED undisputed; apply as planned.**
+- **Finding 3 (`Crypto/VaultBootstrap.swift`) — the orchestrator's ruling recorded: the implementer deletes the file +
+  its suite; the orchestrator carves the now-orphaned `StaticSyncKeyProvider` in its own Sync/ commit (Fable work, the
+  fence honored); `VaultEnrollment` stays as live test-world infrastructure with the keep recorded.** Consistent with
+  my finding's "delete or record the keep" — confirmed.
+
+**ROUND 1: CLOSED (the reviewer's findings complete; the final calls above are the rulings of record).** 1 MAJOR ·
+6 MINOR · 2 NIT, plus the disposition notes and the clean bill above. No BLOCKER: no invariant violation, no spec
+drift in shipped behavior, no weakened new-road pin found. The MAJOR is record-class (the §2 proof's missing §8
+record vs the script's REHEARSED claims) and is the orchestrator's own to land before the pause hands to her.
