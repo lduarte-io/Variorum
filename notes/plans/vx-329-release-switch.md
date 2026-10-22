@@ -551,7 +551,12 @@ switch-day script, the release notes) — every U3 commit is pathspec-limited, r
   <the authority's store>.load()?.userID }, make: { <a second AuthSession over the same store, endpoint and clock> })`
   — exactly the pre-fix `signedInUser` (the stored session's user) and `make` (another instance over the same item),
   the store and endpoint being the pin world's instead of the scope's Keychain item and the production project (no
-  network); two REVERT-ONLY accessors on `AuthSession` expose its store and mint that sibling.
+  network); two REVERT-ONLY accessors on `AuthSession` expose its store and mint that sibling. **Revert run 1** (restored
+  clean, `git diff --exit-code`): the burn reproduced (presented `[rt-1, rt-1, rt-2]`, refused `[rt-1, rt-2]`, the
+  services' next refresh refused `refresh_token_already_used`) — and it EXPOSED a vacuous expectation in my own pin: the
+  leaf-read checks were `(try? r.get()) == .some(nil)`, which `try?`'s flattening makes TRUE for a refusal too, so the
+  leaf's own refusal did not register. Fixed in the pin (this commit: `answeredNoVault` matches `.success(.none)` by
+  case); green again on the fixed tree (8/8). Revert run 2 follows on this commit.
 - Piece 4 — evidence: the harness (P1–P3 + the app's protection/auth suites it carries), core auth/account + protection
   sets debug AND release, `build-for-testing` both targets: NOT-STARTED.
 

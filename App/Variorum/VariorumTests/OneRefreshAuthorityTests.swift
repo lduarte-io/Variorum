@@ -173,6 +173,13 @@ func attempt<T>(_ body: () async throws -> T) async -> Result<T, any Error> {
     do { return .success(try await body()) } catch { return .failure(error) }
 }
 
+/// The vault read ANSWERED (no vault yet) rather than refusing. Matched on the case — never `try? … == nil`, which
+/// `try?`'s flattening makes true for a refusal too (the revert run caught exactly that).
+func answeredNoVault(_ read: Result<VaultSnapshot?, any Error>) -> Bool {
+    if case .success(.none) = read { return true }
+    return false
+}
+
 /// ONE stored token, the process's one authority over it (what the composition root hands `AppServices` — its sync
 /// transport and account doors ride exactly this), and the vault leaf AS PRODUCTION COMPOSES IT, handed that authority
 /// (`WireVaultLeaf.live`, the vault endpoint scripted).
@@ -214,14 +221,14 @@ struct OneRefreshAuthorityRaceTests {
     @Test func aRotationByTheServicesNeverLeavesTheVaultLeafASpentToken() async throws {
         let world = try RaceWorld()
         let first = await attempt { try await world.leaf.fetchVault(accountID: RaceWorld.user) }
-        #expect((try? first.get()) == .some(nil), "the leaf reads with the fresh access token — \(first)")
+        #expect(answeredNoVault(first), "the leaf reads with the fresh access token — \(first)")
 
         world.clock.advance(3700)
         let rotated = await attempt { try await world.auth.currentSession() }
         #expect((try? rotated.get())?.accessToken == "at-2", "the services' round rotates rt-1 → rt-2 — \(rotated)")
 
         let second = await attempt { try await world.leaf.fetchVault(accountID: RaceWorld.user) }
-        #expect((try? second.get()) == .some(nil), "the leaf reads on, riding the rotation — \(second)")
+        #expect(answeredNoVault(second), "the leaf reads on, riding the rotation — \(second)")
 
         world.clock.advance(3700)
         let next = await attempt { try await world.auth.currentSession() }
@@ -246,7 +253,7 @@ struct OneRefreshAuthorityRaceTests {
         let (round, read) = await (services, pane)
 
         #expect((try? round.get())?.accessToken == "at-2", "\(round)")
-        #expect((try? read.get()) == .some(nil), "\(read)")
+        #expect(answeredNoVault(read), "\(read)")
         #expect(world.gotrue.presented == ["rt-1"], "ONE refresh request for both consumers")
         #expect(world.gotrue.refused.isEmpty && !world.gotrue.revoked)
     }
