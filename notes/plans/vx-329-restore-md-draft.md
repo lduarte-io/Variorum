@@ -38,26 +38,27 @@ moment the library was created, and your passphrase and words each can reset the
    twelve words, and — in Standard — one under your Apple account's key. The key file is not secret; holding it
    opens nothing. It also carries every earlier key the library has had, sealed under the current one — which is
    why your current passphrase and words open your older backups too.
-2. **Backups — frozen copies of that file.** Each backup is a PAIR: the library's copy and its own key file,
+2. **Backups — frozen copies of that file.** Each backup is a **pair**: the library's copy and its own key file,
    written together and never rewritten. Two destinations: beside the store, and in a folder you pick (the first
    time Variorum backs up, it offers to use iCloud Drive for that folder — a copy there survives the Mac). They are
    frozen, which is the whole point: they do not follow a mistake. A backup opens with the passphrase and twelve
    words you had the day it was made, with your current ones (the key file's carried list), or through this Mac's
    quiet road while it still holds that backup's key.
-3. **Plain-text copies.** Every note as Markdown, into the folder you picked — **off unless you turn it on**, now
-   that the library is encrypted (a scheduled plain-text copy re-opens the door the encryption closed, so it is an
-   opt-in), and turned off again, with a notice, when you enter Castle. When on, these are not a restore road —
-   they carry the words and not the takes, the history or the books — but they are the one copy that stays readable
-   if the library file itself is the problem, and they need no Variorum to open.
-4. **The mirror (sync).** A PEER, not a backup. It converges — which means it replicates a deletion or a bad edit
-   at sync speed. It protects you from losing a DEVICE, not from losing writing. It holds ciphertext under keys
+3. **Plain-text copies.** Every note as Markdown, into the folder you picked — **off unless you turn it on**: your
+   library is encrypted, and a scheduled plain-text copy re-opens the door the encryption closed, so it is an
+   opt-in. It is turned off again, with a notice, when you enter Castle. When on, these are not a restore road —
+   each note rides with its takes (the "Alternates" sections) and its tags, plus one file per book, but not the
+   saved-moment history, comments or book settings — and they are the one copy that stays readable if the library
+   file itself is the problem, and they need no Variorum to open.
+4. **The mirror (sync).** A **peer**, not a backup. It converges — which means it replicates a deletion or a bad
+   edit at sync speed. It protects you from losing a **device**, not from losing writing. It holds ciphertext under keys
    only your devices hold; the server never has a key, and an account that signs in without the keys can neither
    read nor write it.
 5. **The platform's own backups.** The sync provider keeps 7 days of server backups. They hold ciphertext; without
    your passphrase or twelve words they are unreadable, including by them. This is the net under everything and it
    is meant to die unused.
 
-The one sentence worth keeping: **backups protect against LOSS; the Trash protects against REGRET; sync protects
+The one sentence worth keeping: **backups protect against loss; the Trash protects against regret; sync protects
 against losing a device.** Reaching for the wrong one is how people lose things.
 
 ## 2. Where the backups are
@@ -93,7 +94,7 @@ promise.
 ## 3. Restoring a backup
 
 **Read §4 first if anything has been deleted since the copy was made.** Then use the app's own door — nothing is
-moved by hand any more:
+moved by hand:
 
 1. **Settings ▸ Data Safety ▸ Restore from Backup** lists your copies, newest first, and each row says what opens
    it. (A copy somewhere else — AirDropped, on a drive — goes through **File ▸ Open Library…** instead; same
@@ -102,7 +103,7 @@ moved by hand any more:
    the app writes nothing, and closing it forgets it (see §6).
 3. **Make this my library** is the restore. The copy becomes a **new library** — a fresh identity and a fresh key,
    in the mode you are in now, under your current passphrase and words — and your current library steps aside
-   WHOLE into `Previous Libraries/`, beside your backups, where you can look inside it or make it your library
+   **whole** into `Previous Libraries/`, beside your backups, where you can look inside it or make it your library
    again. Nothing is deleted by restoring, and the copy itself is never changed.
 4. **With sync on**, the restored library lands held: no sync runs until you press **Resume Sync** in the banner,
    so you can look around first. Resuming catches up with your account — notes you deleted since the copy will
@@ -127,6 +128,9 @@ days — and anything you deleted permanently stays permanently deleted.
 
 If this Mac is not syncing, restoring is time travel: anything deleted after this copy was made comes back —
 including things deleted permanently.
+
+Either way, the deleted writing is still inside the backups themselves — that is what they are for. To bring a
+piece back out, don't restore the copy or let it sync: **Look inside and copy it out (§6).**
 
 ## 5. What deletion means
 
@@ -186,12 +190,16 @@ cannot be removed again by a rule that was about the old one.
   phrase, and a fresh sign-in) and set sync up again under a new one: every library on your devices stays and
   uploads to the new account.
 
-The rule behind all four, once: a passphrase or twelve words merely SEEN — change or make new ones (your devices
-keep syncing; the old secret stops working on each once you have used the new one there); a leaked account
-password — Sign Out Everywhere, then change it; someone who may HOLD your keys — Replace All Keys; in Standard,
-someone inside your Apple account — Apple's tools, or Castle; the account itself — delete it and set sync up again.
+The rule behind all four, once:
 
-Neither of these is a backup story. If what you lost is *writing*, the answer is §3 or §6, not the mirror.
+- a passphrase or twelve words merely **seen**: change or make new ones. Your devices keep syncing, and the old
+  secret stops working on each once you have used the new one there.
+- a leaked account password: Sign Out Everywhere, then change it.
+- someone who may **hold** your keys: Replace All Keys.
+- in Standard, someone inside your Apple account: Apple's tools, or Castle.
+- the account itself: delete it and set sync up again.
+
+None of this is a backup story. If what you lost is *writing*, the answer is §3 or §6, not the mirror.
 
 ## 8. If you forget the passphrase
 
@@ -207,4 +215,4 @@ you when this Mac's own keychain cannot. What forgetting costs depends on your m
 
 And the floor, the same one the app's own pages state: **your passphrase or your twelve words — together with any
 copy of your library — always open it.** A library whose every key-file copy and every backup are gone is gone;
-synced libraries are the exception — the twelve words recover them from the account.
+synced libraries are the exception — your account's passphrase or twelve words recover them from the account.
