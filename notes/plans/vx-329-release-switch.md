@@ -702,7 +702,8 @@ drops the marker suffix (no pin consumed it); the AuthRLSDDL cross-pin's client 
 retirement note (the served constant and the inline-literal ban remain the non-vacuous arms). **Residue check:** zero
 product references to the deleted names outside the two honest history comments. **Evidence:** debug core suite
 3296 green (+MCP 383 with the recurring harness timing flake — unrelated, ticketed at closeout; StringsWorkbook 32);
-**the release leg PENDING** (running in background at this record's commit; the flip lands below).
+**the release leg GREEN** (3267 in 425 suites + StringsWorkbook 32; the one red is the same MCP harness
+timing flake — its fourth sighting tonight, both configurations, always green in isolation — ticketed at closeout).
 **Canon note for the closeout:** SyncSpec §3's `sync_state` key list still names `rekey_in_progress` — the key is
 dead with the marker; the canon delta lands at the merge moment per the two-file rule.
 
