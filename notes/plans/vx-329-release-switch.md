@@ -1511,6 +1511,33 @@ None of the three machineries this tree holds does that:
   on a Mac that remembers a library of this design it refuses. The proposal: both landings set a pre-design slot aside
   through the same whole act, and the gates admit her face by its own fact.
 
+**THE RULING (the orchestrator, Fable, 2026-10-22 — P-VX329-U4-5 ruled under the mandate, repo-first before the build
+resumes): (a), AND (D) WITH IT.**
+- **(a) is the act** — link, one atomic rename, unlink, resumed from the disk's own identity (device + inode, never a
+  byte). Rule 20's SUBSTANCE is crash-safety and resumability: any interruption leaves the old state whole or the new
+  state finishable, never a split, never a second aside, never a byte of the old store read — (a)'s crash table delivers
+  exactly that. Its "planned" letter cannot be met honestly here: a plan is sealed under a key (`Plan.swift:194`) and
+  the slot holds no key this build can hold, so a key-less plan would be pretense; (b) buys a WEAKER guarantee (its swap
+  step keeps an inner window) at the cost of a new program, a new leaf-swap variant and a change to the recorded "no
+  plan in an empty slot" refinement. The §6d brief's "reuse the planned-act/set-aside machinery" was written on the
+  assumption the machinery fit; the trace above shows it does not — the deviation is recorded here with its reason (the
+  constitution's rule: recorded, never silent). Her ruled face and words are untouched, and her confirm's promise
+  ("set aside whole … nothing is deleted") is exactly what (a) delivers. Binding details: the staging folder is made on
+  the slot's own volume and ANY failed link refuses the act whole with the staging folder removed (nothing moved); a
+  `rename(2)` refused by an existing `<stamp>/` takes a fresh stamp, never overwrites; the resume and the stale-staging
+  sweep run at the press AND on the creation road, as proposed; the bootstrap wires the act so the door appears
+  (`offersStartFresh` = the fact AND a wired act — P-2 stands).
+- **(D) is the same promise on the face's other door:** BOTH Open Library… landings set a pre-design slot aside through
+  the SAME whole act — today's bare road would strand the pre-design key files in the slot, and the aside would lack
+  the very files the old build needs to open it (an unsynced tester's writing effectively lost behind a "whole" aside);
+  and the gates admit her face by its own fact (the remembered-library refusal stays for every other occupied shape).
+  One act, one crash-safety story, every door out of her face.
+- **Pins as proposed**, plus (D)'s: the two landings' set-aside-whole arms and the gate's fact arm (the gate arm
+  red-on-old on the remembering-Mac shape). **F-U4-1 is ACCEPTED as flagged** (requiring the lived-here marker's
+  absence would wedge the real hand-swap case — the marker survives a hand-swap into a slot where 0.10 once ran, which
+  is exactly the tester U4 exists for; the Debug-era residue is the narrower cost). P-VX329-U4-1..4 stand as built,
+  bundled at the closeout.
+
 **FLAGS (for the orchestrator; none built):**
 - **F-U4-1 — the names-only fact over a Debug-era library that LOST its format-3 file.** A library of this design opened
   by a Debug build before the switch carries today's stub envelope (`variorum-keys-<fp16>.json`, written by the deleted
@@ -1542,7 +1569,8 @@ None of the three machineries this tree holds does that:
 - **P-VX329-U4-3 — a PLAINTEXT store wearing an older name is pre-design too** (any store in the slot): (a) BUILT; (b)
   encrypted only (a plaintext slot with older names would keep the lobby).
 - **P-VX329-U4-4 — the busy line under her face is the dots alone** (no "Opening your library…" where nothing opens).
-- **P-VX329-U4-5 — Start fresh's act: THE FORK above** (until ruled, the door is not offered).
+- **P-VX329-U4-5 — Start fresh's act: RULED (a) + (D)** (THE RULING above, 2026-10-22; the door appears when the act
+  lands wired).
 
 ## 6. THE KICKOFF RECORD (2026-10-22, the orchestrator — session `vx-329`, Fable, overnight mandate)
 
@@ -2026,6 +2054,15 @@ every typed secret the throwaway's own, disposable by design)
   retyped by direct field clicks; disposable credential); the fixture tool's three findings on itself (the CASE
   uuid/void mix → a DO block; the shell-eaten dollar-quote tag; the missing journal-bridge key caught by the
   client's strict decode) each fixed in the scratchpad tool, never in product.
+
+- **The staging row (round 2's NIT, carried here):** the real-store byte copy for her morning rehearsal was staged
+  2026-10-22 at a zero-instance window — the live slot's 7 top-level files whole, no extension filter
+  (`variorum.sqlite` + `-wal` + `-shm`, `variorum-keys.json`, the two `variorum-keys-<fp16>.json`, the 0-byte
+  `store.sqlite` stray), copied to `/Users/Shared/vx329-rehearsal/` and `cmp`-verified per file, 7/7 identical at the
+  staging moment (the folder's A1 twin `Backups/safety-copies/variorum-vx329-stage-20261022T115834Z/` taken in the
+  same window; `README-for-Lillian.md` written beside the copy afterwards). Point-in-time by nature: her live store
+  has moved since, so the cmp result is the staging window's, not re-verifiable later — which is why the copy is a
+  REHEARSAL fixture (the refusal face, Look inside), never a restore source.
 
 **What this record proves for the switch-day script:** §2's answer ("by the join") is REHEARSED — the markers in
 `notes/plans/vx-329-switch-day.md` flip in this commit. What stays HERS: the byte-copy rehearsal (the staged copy
