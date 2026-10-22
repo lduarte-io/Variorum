@@ -2,8 +2,9 @@ import Foundation
 @testable import VariorumCore
 
 /// A scripted PostgREST responder for `key_vault` (Phase 14b batch 3): the
-/// no-network test double the vault client, the enrollment flows, and the
-/// vault-bootstrap runner all script against. Models exactly what the
+/// no-network test double the vault client and the enrollment flows script
+/// against (the vault-bootstrap runner did too, until its deletion at VX-329's
+/// ladder round 1). Models exactly what the
 /// deployed table does — one row per user, PK refusal on duplicate insert
 /// — plus the auth arms (401 on a wrong bearer, for the refresh-and-retry
 /// pin). Never a network socket.

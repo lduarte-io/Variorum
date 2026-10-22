@@ -73,8 +73,8 @@ let package = Package(
         // (Phase 14b L10's `vault-bootstrap` CLI shell — the headless
         // wipe-and-repush executor — was deleted at VX-329 U1: it unlocked a
         // store only through TODAY's key file. Its brain,
-        // Crypto/VaultBootstrap.swift, is untouched and still tested in
-        // VariorumCoreTests; the U1 record flags it.)
+        // Crypto/VaultBootstrap.swift, followed with its suite at VX-329's
+        // ladder round 1: with the shell gone it had no caller.)
         // BRANCH-ONLY (`tools/strings-workbook`, never merges — issue #7's
         // branch rule; issue #5): the App Strings workbook generator. The
         // parser, the tier plan and the ops-driven mint live in ONE library

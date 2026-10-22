@@ -32,8 +32,22 @@ the stage batch record); the findings file `notes/plans/vx-329-ladder-round-1.md
   this pin). **REVERT CHECK (on `da778d459`, the tree clean first):** the sweep's three lines restored alone → the pin RED
   for its stated reason (the same 2 issues); restored by `git checkout --`, `git diff --exit-code` clean.
 - Finding 2 (MINOR, the pg_temp belt's drift pin): NOT-STARTED — the plan below.
-- Finding 3 (MINOR, `Crypto/VaultBootstrap.swift`): NOT-STARTED — option (a): delete the runner + its suite, the
-  comments outside Sync/ made true, `VaultEnrollment` KEPT.
+- Finding 3 (MINOR, `Crypto/VaultBootstrap.swift`): **DONE** (this commit) — option (a), the orchestrator's ruling
+  confirmed by the reviewer. DELETED: `Sources/VariorumCore/Crypto/VaultBootstrap.swift` (`VaultBootstrap`,
+  `VaultBootstrapError`, its private `isTransientTransport`) and `Tests/VariorumCoreTests/VaultBootstrapTests.swift`.
+  Comments OUTSIDE Sync/ that named the runner made true: `Package.swift:73–77`; `Crypto/VaultEnrollment.swift` (the
+  `DeviceKeyMaterial` doc and the `VaultEnrollment` doc — both also claimed app callers that left with today's road at
+  U1); `Support/ScriptedVaultServer.swift:6`; `Support/FakeSyncServer.swift` (the auto-adopt latitude's two notes, which
+  named it "the bootstrap-runner latitude" — the latitude itself unchanged). **THE KEEP, recorded: `VaultEnrollment`
+  (`VaultEnrollment`, `VaultEnrollmentError`, `DeviceKeyMaterial`) STAYS** — no product caller after this deletion, but
+  live test-world infrastructure: `AccountLifecycleTests`' world composes it, `ScriptedVaultServer`'s `VaultTestWorld`
+  and `VaultEnrollmentTests` drive it; its doc now says exactly that. **The fence:** `git diff --stat HEAD --
+  Sources/VariorumCore/Sync` EMPTY — `StaticSyncKeyProvider` (`Sync/SyncEncryption.swift:114–128`, now caller-less, its
+  doc at :116 still naming the runner) is the orchestrator's own carve right after this lands. **Evidence:** `swift
+  build --build-tests` green; residue (`rg --word-regexp 'VaultBootstrap|VaultBootstrapError|VaultBootstrapTests'` +
+  `rg vault-bootstrap` over `Sources App Tools Tests Package.swift`): history comments only, plus the one Sync/ line
+  above; the vault-world suites `VaultEnrollmentTests|AccountLifecycleTests|KeyVaultClientTests|KeyProofGateTests` `✔
+  Test run with 53 tests in 4 suites passed`. No pin (dead code — a compile fact).
 - Finding 4 (NIT, the stale collision-sweep comment): **DONE** (this commit) — `EditorCommands.swift:562–564` now says
   the other `l` chords are ⌘L (Switch Wing) and ⌘⇧L (Save Choices as Lens), ⌃⌘Q untouched; re-swept true (the key table's
   `l` rows are exactly `.switchWing` ⌘L, `.saveChoicesAsLens` ⌘⇧L, `.lockLibraryNow` ⌃⌘L, and the three

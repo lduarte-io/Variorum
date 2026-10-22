@@ -2,11 +2,12 @@ import CryptoKit
 import Foundation
 
 /// The unwrapped key material one enrolled device holds (Phase 14b —
-/// rulings R-6/R-8). Custody is the CALLER's: the app persists this to the
-/// device Keychain (enrollment-only cadence — the one-time unwrap, then
-/// day-to-day sync stays invisible); the `vault-bootstrap` runner holds it
-/// in memory only, dying with the process. Codable so the Keychain item is
-/// one JSON blob, exactly the `AuthTokens` custody pattern.
+/// rulings R-6/R-8). Custody is the CALLER's — 14b's app persisted this to the
+/// device Keychain (that custody left with today's road at VX-329 U1) and the
+/// `vault-bootstrap` runner (deleted at VX-329's ladder round 1) held it in
+/// memory only; today's callers are the core's test worlds, which hold it in
+/// memory. Codable so a Keychain item could be one JSON blob, exactly the
+/// `AuthTokens` custody pattern.
 public struct DeviceKeyMaterial: Codable, Equatable, Sendable {
     /// The master key — held so the recovery-phrase generation and
     /// passphrase changes work without re-entering the passphrase (Round
@@ -97,11 +98,13 @@ public enum VaultAuthorization: Sendable {
 }
 
 /// The enrollment/setup/change flows' ONE brain (Phase 14b batch 3, ledger
-/// L9): pure orchestration over `KeyVaultClient` + the `Crypto/` substrate,
-/// shared verbatim by the Mac app, the phone (PL-6 — identical flows both
-/// form factors through the app's shared seam), and the `vault-bootstrap`
-/// runner. Custody is deliberately NOT here (the caller's — Keychain in the
-/// app, process memory in the runner).
+/// L9): pure orchestration over `KeyVaultClient` + the `Crypto/` substrate.
+/// It was shared verbatim by the Mac app, the phone (PL-6) and the
+/// `vault-bootstrap` runner; the apps' flows left with today's road at VX-329
+/// U1 and the runner at VX-329's ladder round 1, so it is KEPT as the core
+/// test worlds' vault-setup brain (`AccountLifecycleTests`' world,
+/// `ScriptedVaultServer`'s `VaultTestWorld`, `VaultEnrollmentTests`).
+/// Custody is deliberately NOT here (the caller's).
 ///
 /// The KDF call is the heavy step (~64 MiB transient, tenths of a second,
 /// R-7): it runs in these nonisolated async functions — OFF the main actor
