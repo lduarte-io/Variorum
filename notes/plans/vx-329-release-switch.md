@@ -641,11 +641,18 @@ provider suite removed), `AppBootstrapOffMainTests`, `SettingsLockCloseTests` an
 `ProtectionFactsGathererTests` (`ProtectionSystem.init`'s defaulted `session:`); U1's whole `VariorumTests/Protection/`
 folder covers the rest. Phone: `MobileProtectionTests` (the phone root's composition changed — the sanity run).
 
-### R1 RECORD — THE RIDERS (Opus implementer, 2026-10-22; IN PROGRESS)
+### R1 RECORD — THE RIDERS (Opus implementer, 2026-10-22; DONE — the Mac and phone suite RUNS and the walk rows are the orchestrator's stage batch)
 
-**Not done in R1, first:** (filled at the close — PENDING.) Standing limits from the brief: no stage, no app launch, no
-`xcodebuild test`, no walk, no dev-store or real-store touch, no network, no subagent; zero `Sources/VariorumCore/Sync/`
-lines; VX-470 is not this unit's (it leads the next run).
+**Not done in R1, first:** NO Mac or phone suite was RUN through `xcodebuild test` and NO walk ran (no stage — the brief's
+limit): every app pin of this unit ran in the HEADLESS HARNESS (all green, red-on-old verified there), and the Mac-only and
+phone suites over what changed are COMPILED (`build-for-testing` green, both targets) and UNRUN — the stage batch's list
+below; every claim about them is PENDING until it runs. The ruled design and wording rows (VX-463, VX-469 (c), VX-464's
+sentence) have no walk capture yet — they close on the stage batch's captures, not on these pins. VX-461's fix is proven
+under a sandbox PROFILE, not yet in the sandboxed app — its live proof is the walk's first row. NOT built (each a finding
+below): a failed export's cleanup of its half-made file (F-R1-2), the same own-lock rule on the re-keying roads (F-R1-4),
+VX-469's line on the follow (P-VX329-R1-2 (c)). VX-470 is not this unit's (it leads the next run). Zero
+`Sources/VariorumCore/Sync/` lines (`git diff f5afb1d76^..HEAD -- Sources/VariorumCore/Sync` empty); no schema change; no
+dev-store, real-store or network touch; no subagent.
 
 **Preflight (complete, not delegated):** CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md` whole;
 this plan §1–§6 (the CUT, the environment traps, §6c — this brief), the U1 RECORD (its F-flags) and the U3 RECORD (the
@@ -875,8 +882,113 @@ a behavioral revert re-checks it):**
   tests in 1 suite failed … with 9 issues` (eight sites + the sweep). **GREEN after:** `✔ Test run with 2 tests in 1 suite
   passed`; `build-for-testing` Mac **and** iOS (`App/Variorum/DerivedData/vx329-r1-ios`, cloned from U3's) **`** TEST
   BUILD SUCCEEDED **`**, no warning in a touched face. Her eyes: the stage batch's walk captures (each field concealed,
-  then revealed by the eye — captures-before-typing with a disposable words string, never the dev pair).
-- Piece 8 — the evidence (core debug + release, the harness, build-for-testing both targets): NOT-STARTED.
+  then revealed by the eye — captures-before-typing with a disposable words string, never the dev pair). **REVERT CHECK
+  (on `471b57fc4`, the tree clean first):** the six face files checked out from `471b57fc4~1` (the pre-fix faces) → `✘ …
+  failed … with 9 issues` (the same nine); restored by `git checkout HEAD --`, `git diff HEAD --exit-code` and `git status`
+  clean. (A first attempt passed the six paths in one unsplit zsh variable — both checkouts refused, nothing changed;
+  re-run with the paths spelled.) **VX-463: DONE (`471b57fc4`).**
+- Piece 8 — the evidence: DONE (this commit; the tree `471b57fc4` — nothing but this record changed after it) — each run
+  foreground (the release run outlived the 10-minute call cap and was waited on by polling its log).
+  - `swift test` (debug, the whole package): **VariorumCoreTests 3298 tests in 430 suites — ONE red,
+    `StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar` ("Time limit was exceeded: 60.000 seconds", after
+    167 s under the full parallel run) — re-run ALONE GREEN (`StarContextTests` 11/11, 0.7 s)**; no known issue left (the
+    two VX-462 wrappers dropped — the suite reported "2 known issues" at U1/U3); VariorumMCPTests 383 tests, ONE red — the
+    recurring `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (19.1 s against
+    its 15 s bound) — re-run ALONE GREEN (3/3, 2.2 s); StringsWorkbook 32/32. Neither red is near a line of this unit (no
+    Queries, observation or MCP code touched).
+  - `swift test -c release` (the whole package): **VariorumCoreTests `✔ Test run with 3269 tests in 425 suites passed`**
+    (no known issue — U1's 3267 with 2 known issues, + this unit's two new core pins, the wrappers gone); StringsWorkbook
+    32/32; VariorumMCPTests 383 tests, TWO reds — the same time-limit flake and `MCPSizeCapTests
+    .aMessageOneByteOverTheSessionCapIsAnsweredThenClosed` (`socket.isHungUp()` at 0.9 s) — both re-run ALONE under
+    `-c release` GREEN (`✔ Test run with 10 tests in 2 suites passed`). The MCP target is untouched by this unit.
+  - THE HARNESS (debug — the app test targets' only configuration; under `-c release` it does not build, as U3 recorded:
+    the app's protection suites name DEBUG-only walk machinery, exactly as the Xcode test targets build in Debug only;
+    this session's scratchpad `u3-harness`, re-used, plus symlinks for this unit's three new test files and
+    `WhatsNewLedger.swift`): **`✔ Test run with 386 tests in 65 suites passed`**, 0 skipped (U3's 375/60 + this unit's 11
+    tests in 5 new suites: HoldBanner 3, WhatsNewWaits 3, WordsFieldsConceal 2, the Move pin, the follow guard, the
+    VX-469 pin).
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx329-r1
+    build-for-testing`: **`** TEST BUILD SUCCEEDED **`**; `-scheme VariorumMobile -destination 'generic/platform=iOS
+    Simulator' -derivedDataPath …/vx329-r1-ios build-for-testing`: **`** TEST BUILD SUCCEEDED **`** — both after the last
+    code edit (piece 7's faces), no warning in a file this unit touched.
+
+**THE DISPOSITIONS (every member):**
+- **VX-461 — FIXED** (`3470c6905`): the mechanism proven under a one-path sandbox profile; pin `StorePlaintextExportTests
+  .theCopyLandsInThePickedFileAloneWhereNoSiblingCanBeMade`, red on old, revert-checked. Live proof: the walk.
+- **VX-462 — FIXED** (`ab4e2cbe3`): `JoinWordsMomentSetUpArmTests`' two `withKnownIssue` wrappers DROPPED (the red-on-old)
+  + the words-join arm; two old-shape pins flipped (recorded); revert-checked. The re-keying roads' same shape → F-R1-4.
+- **VX-464 — FIXED** (`181774e60`): the join's two pins flipped, Move's pin, the follow's guard; red on old (8 issues),
+  revert-checked. Words PROVISIONAL P-VX329-R1-1.
+- **VX-469 (c) — BUILT as ruled** (`557558321`): the line on both entering confirms; red before the wiring, revert-checked.
+  Words PROVISIONAL P-VX329-R1-2; her eyes at the walk capture.
+- **VX-473 — FIXED** (`cf9efc580`): the fact + the root's composition (red on the old root), revert-checked.
+- **VX-468 — FIXED** (`82285d1d3`): the ledger's wait (red on the old claim) + the composition, revert-checked. Reach
+  PROVISIONAL P-VX329-R1-3.
+- **VX-463 — BUILT as ruled** (`471b57fc4`): eight sites on the shared concealing field; the structural pin red on the old
+  faces (9 issues), revert-checked; the design row's evidence is the walk capture. Shape PROVISIONAL P-VX329-R1-4.
+- No member dismissed as hollow; none deferred.
+
+**PROVISIONALs (each built as its option (a); for the orchestrator to bundle):**
+- **P-VX329-R1-1 — VX-464's two sentences:** (a) BUILT *"That passphrase doesn't open this account."* / *"Those twelve
+  words don't open this account."* (the plan's ruled direction); (b) name the account by its email where the sign-in has
+  one (*"…doesn't open vx@example.com's account."*).
+- **P-VX329-R1-2 — VX-469 (c)'s line and its homes:** (a) BUILT *"The libraries in Previous Libraries keep their own
+  quiet roads on this Mac — Castle protects the library you have open."*, unconditional, on Use Castle and the join into a
+  Castle account (the confirms that say what entering does and the backups warning); (b) said only when this Mac holds a
+  Previous Library (a new catalogue fact into the door's words); (c) on the follow into Castle too.
+- **P-VX329-R1-3 — VX-468's reach:** (a) BUILT — the three copy doors (Make this my library, the empty slot's landing, a
+  plain-text copy brought in); (b) also a creation (Start a New Library from rule 27's lobby — a fresh library's first open).
+- **P-VX329-R1-4 — VX-463's field shape:** (a) BUILT — the shared field as it is: single-line in both states, the lobbies'
+  words fields still submit by their button only (Return does nothing there, as before); (b) a multi-line reveal for the
+  words (a second shape of the shared field); (c) Return submits the lobby's words too.
+
+**FINDINGS AND HAND-FORWARDS (routed, not fixed here):**
+- **F-R1-1 (VX-461 — the ladder's):** the copy's sidecar sweep after the export (`-wal`/`-shm`/`-journal` beside the
+  picked file) is a no-op by construction now (the journal never touches the disk); kept, its one risk being a stranger's
+  file of those names beside a NEW pick. Delete or keep.
+- **F-R1-2 (VX-461 — a ticket or not):** a copy that fails for any OTHER reason still leaves the picked file the ATTACH
+  created (0 bytes or partial). Not built: after the fix no failure seam reaches that arm, so no pin could go red (the
+  hallucination guard). Option: remove the picked file on a refused copy (the guard proves it was the export's own).
+- **F-R1-3 (VX-461 — for §8's record):** W-VX309-4's one-literal-path probe (the system `sqlite3`, which passed) was not
+  this grant's shape: under a profile that denies writes in the folder and allows the one literal path, the system
+  `sqlite3` fails at the first write exactly as the export does (piece 1, run D).
+- **F-R1-4 (VX-462 — the orchestrator's, likely a ticket):** the own-words-lock-beside-the-copy shape is also made by the
+  RE-KEYING roads (traced by reading, not pinned): a join that crosses postures typed with the words (`AccountMoveProgram`'s
+  `keyFile` step → `KeyFileCrossings`'s `building` with `locks.words` and the copy), a synced crossing (both secrets typed),
+  a synced key door re-wrapping the copy. After a leave, their passphrase re-join still speaks (true — it over-speaks, the
+  P-VX309-U2-1 class). The same rule (no own words lock where the copy is written) would sit in the re-key's key-file
+  builder — every re-key's, so not this rider's.
+- **F-R1-5 (Tests & tooling — new sighting):** `StarContextTests.aHeldObservationOfAStarGatheringHearsTheUnstar` exceeded
+  its 60 s time limit under the full parallel debug run; green alone. A load-starved observation, no line of this unit.
+- **F-R1-6 (Tests & tooling — known):** the `MCPHarnessTimeLimitTests` wall-clock flake, sighted again (debug and release);
+  and in release `MCPSizeCapTests.aMessageOneByteOverTheSessionCapIsAnsweredThenClosed` (`socket.isHungUp()` at 0.9 s
+  under the full load) — both green alone under `-c release`. A ticket's, the orchestrator's (the MCP target untouched).
+- **F-R1-7 (VX-464 — note only):** a one-secret door's `secretMissing` refusal says *"Enter your passphrase and your
+  twelve words."* (`crossingSecretsMissing`) though the join asks ONE; the sheet's button is disabled until a secret is
+  typed, so the line looks unreachable from the face — recorded, not touched.
+
+**MAC-SUITE LIST (the orchestrator's stage batch — compiled, the Mac-only ones unrun here):** Mac
+(`-only-testing:VariorumTests/<Suite>`): this unit's NEW suites — `HoldBannerAccountFactTests`,
+`HoldBannerAccountCompositionTests`, `WhatsNewWaitsAfterAdoptionTests`, `WhatsNewWaitsCompositionTests`,
+`WordsFieldsConcealTests` (all harness-green); the suites over what changed — `WhatsNewTests` (the ledger relocated, the
+claim's new parameter), `ProtectionJoinFollowRoadTests`, `ProtectionAccountRoadTests`, `RoadAccountFacesTests`,
+`RoadAccountSurfaceTests`, `RoadJoinFollowFacesTests`, `RoadJoinFollowSurfaceTests`, `RoadCrossingFacesTests`,
+`RoadCrossingSurfaceTests`, `ProtectionCrossingRoadTests`, `ProtectionCrossingRouteTests`, `SetPassphraseRowRereadTests`,
+`ProtectionPaneWaveTests`, `RoadKeyDoorSurfaceTests`, `PassphraseFloorRoadTests`, `EmptySlotDoorsSurfaceTests`,
+`ProtectionWordsVX307Tests`, `CopyRegisterPinTests` (the two-register rule over the new lines),
+`TravellingDotsIndicatorTests`, `PlaintextExportDoorTests`, `PickedCopyRoadTests`, `PlaintextExportBringInRoadTests`,
+`LibraryPortabilityDoorTests` (the banner's two texts), `ChromeMinHeightTests` (the hold bar); U1's whole
+`VariorumTests/Protection/` folder covers the rest. Phone (`VariorumMobileTests`, simulator): `MobileProtectionTests`
+(the lobby's words field), `MobileSnapshotPrivacyTests`, `MobileStructuralTests`.
+**THE WALK ROWS THIS UNIT OWES (the stage batch's — use, not pins):** VX-461 THE LIVE PROOF — Settings ▸ Data Safety ▸
+*Export an unencrypted copy* into a user-picked folder (`~/Downloads` and one other) writes a WHOLE file (open it; count
+its notes) and nothing beside it; the backups-folder refusal still speaks. VX-463 — each words field concealed, then
+revealed by its eye (both voices; a disposable words string, captured before typing). VX-469 — Use Castle's confirm with
+the line (both voices). VX-464 — the join's wrong-passphrase refusal names the account. VX-473 — Make this my library
+while signed in: the hold banner without the catch-up clause. VX-468 — needs a recorded older marketing version in the
+dev domain to make the card due, then a launch on the missing face and T-5: no card at that open, the card at the next
+launch (the orchestrator's to stage or leave pin-covered). VX-462 — set up sync, Stop syncing here, re-join by the
+passphrase: no words moment (the throwaway).
 
 ## 6. THE KICKOFF RECORD (2026-10-22, the orchestrator — session `vx-329`, Fable, overnight mandate)
 
