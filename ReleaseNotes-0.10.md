@@ -28,5 +28,6 @@
 
 - The server's vault speaks the new shape (one schema step); your devices update together and the phone follows
   with its next build.
-- Libraries from versions before 0.10 aren't opened by 0.10 — sign into sync or export first, then start fresh;
-  your old library stays readable by the old version.
+- Libraries from versions before 0.10 aren't opened by 0.10 — the app says so itself ("This library is from an
+  older version of Variorum.") and offers Start fresh, which sets the old library aside whole in Previous
+  Libraries; sign into sync or copy out first and your writing comes back.

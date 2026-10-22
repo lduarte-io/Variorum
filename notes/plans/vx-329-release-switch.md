@@ -1,9 +1,9 @@
 # VX-329 — Castle rebuild: the release switch
 
-**Status: OPEN — IN FLIGHT (kicked off 2026-10-22 under her overnight mandate; the kickoff record is §6; the run
-pauses at U2's staging point — the real-store byte-copy rehearsal, the production deploy and the release are her
-morning's). Plan written at VX-309's closeout, 2026-10-20; her kickoff calls ANSWERED at the 2026-10-22 sitting —
-the kickoff block below carries them, QUESTIONS #237's answer block is the record.**
+**Status: CLOSED 2026-10-22 — kickoff to closeout in one day under her overnight mandate; the ladder's round 3
+PASSED (her fourth-round latitude unused); the closeout is §9 at the file's end. THE DEPLOY, THE INSTALLS AND THE
+RELEASE ARE HERS AT HER WINDOW — the handoff `notes/handoffs/vx-329-handoff.md` carries her checklist; NO
+/Applications refresh until the marker-14 production deploy lands.**
 `Ticket: VX-329 · Project: Castle & backups before launch · Branch: vx-329-release-switch · Worktree:
 ~/dev/variorum-vx-329 (Pro)`. Holds the Sync/-custody slot.
 
@@ -2279,3 +2279,67 @@ the orchestrator's judgment, not mandated. The orchestrator's stated use of the 
 round 3 confirms a new BLOCKER/MAJOR whose fix leg is substantial enough that a fresh cold re-read beats the
 orchestrator's line-by-line check; otherwise round 3 closes the ladder as planned, its fixes under the
 line-by-line check.
+
+## 9. CLOSEOUT (the orchestrator, Fable, 2026-10-22 — the records above are the proof; this is the summary of record)
+
+**What shipped (one day, kickoff to closeout):** the Castle rebuild's LAST STEP — `ProtectionRoad.live` true for
+every build and today's whole protection road DELETED (~8,200 lines + its suites; the sweep table in the U1
+record), nothing kept read-only; L0 the lockstep commit (marker 13→14 + artifact 17 registered in the drift pin,
+red-on-old); L1/L1b the Sync/ carve (CorpusRotation, the rekey guards, `accountRekeyIncomplete`,
+`StaticSyncKeyProvider` — Fable's own hands); U3 = VX-423 one refresh authority per process (the two-refreshers
+race pinned red-on-old by behavioral revert; `FollowingSessionProvider` deleted); R1 the seven riders each
+red-on-old (VX-461 the in-memory-journal export fix · 462 · 463 · 464 · 468 · 469(c) · 473; VX-470 sized out,
+leads the next run); the Mac and phone fix legs (six stale/lifetime reds + the @MainActor host crash; the
+no-redirect sweep's 28 offenders dispositioned); U4 the pre-design face — her words byte-faithful, the FACT
+(names-only, precedes every road), THE WHOLE SET-ASIDE (link → one RENAME_EXCL commit → unlink, resumed from the
+files' identity; the fork ruled (a)+(D) under the mandate), both landings and the gates on the same act; ⌃⌘L
+declared; RESTORE.md rewritten to the rules at her approval; rule 27 amended at her word; the pg_temp belt authored,
+rehearsed green and drift-pinned; the §8 rehearsal answered §2 YES end-to-end on real Postgres; the switch-day
+script with her approved testers' message; the delta brief rewritten; ReleaseNotes-0.10 drafted for her rewrite.
+
+**Evidence floors at the tip:** core debug 3303/431 · release 3274/426 + MCP 383/71 + StringsWorkbook 32/4 (round
+3's own runs, exit 0); the CLOSING FULL MAC RUN 5097 tests in 892 suites (ONE red — the runbook literal's missing
+final newline, fixed `190bf985e`, the suite re-run 5/5; 14 known issues the standing wrappers; no host crash); the
+CLOSING FULL PHONE RUN 808/126 exit 0 clean; the gate arm's red-on-old by behavioral revert on the stage; THE WALK
+WINDOW (her face + Start fresh's whole act live on her real store's byte copy, VX-461's three live arms, the
+VX-463/469 captures both voices, VX-464's account-naming refusal, VX-473's clean banner; the dev slot restored
+whole).
+
+**The ladder:** round 1 — 1 MAJOR (record-class: the §2 proof claimed ahead of its record — the lesson now in the
+switch-day script's own header) + 6 MINOR + 2 NIT, no BLOCKER; the export-pin dispute UPHELD for the implementer
+(the `-shm` counter-pin is the pin of record; the reviewer's own pin withdrawn as hollow). Round 2 — every r1 fix
+CONFIRMED; 1 new MAJOR (five stale runbook pins, fixed test-side as justified edits) + 2 MINOR (her word
+corrections, approved and landed) + 2 NIT. Round 3 (FINAL) — PASS: no BLOCKER, no MAJOR; 1 MINOR + 2 NIT, all
+wording/record-class, fixed by the orchestrator under the line-by-line rule; U4 confirmed whole including the
+set-aside's crash story; her in-session fourth-round latitude UNUSED as stated. The round-1 lesson stands named:
+the record is the proof, never the plan.
+
+**Rulings reconciled (the every/all re-read against what shipped):** "nothing is kept read-only" — the U1 sweep
+table, zero legacy symbols live. VX-463 "every typed-words field" — eight sites on the one concealing field,
+structural pin + walk captures. VX-469 (c) — on BOTH entering confirms; the follow-into-Castle arm deliberately not
+(P-VX329-R1-2, bundled in #238). Rule 27's amendment — CastleRules in place + both quoting comments + the runbook +
+the delta brief; the lifecycle page's never-list exception clause is the one remainder, ticketed at her call.
+Her U4 words — byte-pinned against §6d. "Both Macs in one window" — hers at the window; the phone's refusal until
+VM-8 accepted at her word. VX-470 ruled but unsized — leads the next run (the sizing record in §6). The r2 word
+corrections — her approval recorded in the AppSpecRecord entry (round 3's ask).
+
+**Canon deltas (the two-file rule, as ruled):** AppSpec §7's `sync_state` comment drops `rekey_in_progress`;
+AppSpec §12's portability + protection bullet rewritten to the live road; SyncSpec §3's `sync_state` line sheds
+`device_id`; SyncSpec §12 gains the marker-14 entry HELD at the merge (the vx307 checklist stays the record until
+her window closes); SurfaceContracts' portability bullet rewritten to the road's doors and the protection bullet
+made true in place (the switch flipped, the deploy set, VX-456/462's quiet set-up arm, VX-469's confirm line, the
+PRE-DESIGN FACE joining the contract). The dated narrative + her words: `notes/AppSpecRecord.md`'s VX-329 entry;
+the run row: `notes/plans/run-finals-ledger.md`; MOBILE PARITY: `notes/MobileSoul.md` PL-51.
+
+**PROVISIONALs** → QUESTIONS #238 (P-VX329-U1-1..7 · R1-1..4 · PH-1 · U4-1..4, U4-6; U4-5 RULED in-phase).
+**Tickets** — closed at the merge: VX-329 · VX-423 · VX-461 · VX-462 · VX-463 · VX-464 · VX-468 · VX-469 · VX-473
+· VX-406 · VX-380 · VX-213 · VX-465 · VX-114 (VX-233 already Canceled); comments: VX-379 · VX-234 · VM-8 · VX-212
+· VX-470; minted (triaged): the MCP load-flake family · the export stranger-sidecar refusal (Low) · F-FL-2 ·
+F-R1-4 · F-U3-2 · F-U3-3 · walks-never-run-rounds · the VX-465 counts-wording row · the lifecycle never-list NIT
+— the handoff lists them by priority with their labels.
+
+**HERS AT THE WINDOW (nothing pre-authorized):** the vx307 deploy checklist verbatim (preflight probes → artifact
+17 → the pg_temp belt → verify marker 14 → the grant sweep 62 OK · 4 INFO · 0 fail) → BOTH Macs' installs behind
+A1 at zero instances → her first rounds → her byte-copy look on the new face (the staged copy stays at
+`/Users/Shared/vx329-rehearsal/`) → the release at her word (0.10; the notes hers to rewrite) → the delta brief to
+the site agent → the throwaway's deletion after the flip. The phone follows VM-8.
