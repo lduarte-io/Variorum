@@ -310,3 +310,28 @@ red with the constant reverted to 13 (the pairing is enforced), restored green. 
 load flake (`MCPHarnessTimeLimitTests` — a 15-second wall-clock bound read 18.6 s under the parallel full-suite run;
 green in isolation at 2.2 s; no product line near it). **Consequence standing:** this branch speaks marker 14 — live
 sync only against the throwaway until the production deploy at her morning go; NO `/Applications` refresh until then.
+
+### VX-465 RECORD — THE DEVICE-ID DRIFT TRACED (the orchestrator, Fable, 2026-10-22; read-only, no fix — a design
+consequence, her call bundled for the morning)
+
+**The mechanism, code-traced:** the device ID lives ONLY in the per-library memory item (rule 21's four facts —
+`DeviceMemory.deviceID`), and the app deliberately remembers ONE library: every act that lands or creates a library
+ends with the forget loop (`DeviceActs.createLibrary` :144, `Copies` make-mine :218, `PlanRunner` :578,
+`ExecutorRepairs` :170 — "Rule 21: this Mac remembers ONE library"). With the memory item gone, the next open of the
+forgotten library cannot recognise which record section is this Mac's (rule 23 — no hardware fingerprinting;
+`DeviceFacts.thisMacsSection`'s own comment: "never a section guessed from the record") so it MINTS a fresh device
+ID and writes fresh memory — stable from then on. **The dev drift, fully accounted:** VX-308's walk ran the dev
+library A first (the c31a4daf-era pairs, 10-19 ~11:00), THEN created throwaways B, C and D in the same slot domain —
+each creation deleted A's memory item; VX-309's walk row 1 was A's next open: fresh era `a39ae6d7`, the honest zero
+count, consistent pairs thereafter. No identity door on the DEV library was pressed; a CREATION door on other
+libraries was — the designed trigger. The ticket's suspect (a test-host open minting a device row) is superseded.
+**Release consequence, bounded:** in ordinary single-library life the ID never drifts. It re-mints only when another
+library is created or adopted on the Mac and the earlier one later returns to the live place (the hand-restore of
+rule 21; slot swapping is a walk pattern). Then the earlier eras' pairs LIST under the library but never COUNT as
+this Mac's, and retention never prunes them — conservative both ways (nothing deleted wrongly), honest by its rule,
+surprising to read. Switch day is untouched (her old stores retire; a fresh library mints fresh identity by design).
+**Her options (the morning bundle):** (a) accept as designed — the ticket closes traced-by-design, with one wording
+row if the counts' per-era meaning should say itself; (b) remember more than one library (bends rule 21's one-library
+line; each memory item holds a sealed key-file copy, so N memories = N standing sealed copies — adjacent to her
+VX-469 (c) stance that kept Previous Libraries' roads standing); (c) does not exist by design (ID continuity without
+fingerprinting). No code changed; the pin question is moot until she rules.
