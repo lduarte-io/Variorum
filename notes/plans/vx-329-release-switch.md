@@ -2272,3 +2272,10 @@ after the r2 fixes, her word corrections, the phone leg's ProtectionWords change
     onSubmit or the notice dialog's default button (System Events `key code 36` does; typing via `t:` lands
     fine) — the walk-lessons class; the export door's "Choose Where…" arms an inline Export/Cancel pair before
     the panel, and the panel's Go To overlay needs `key code 36` too.
+
+**HER IN-SESSION RULING (2026-10-22, with round 3 in flight, verbatim): "you can run a fourth round if you think
+it's necessary."** The three-round hard cap is relaxed at her word for this phase — a fourth round is PERMITTED at
+the orchestrator's judgment, not mandated. The orchestrator's stated use of the latitude: round 4 runs only if
+round 3 confirms a new BLOCKER/MAJOR whose fix leg is substantial enough that a fresh cold re-read beats the
+orchestrator's line-by-line check; otherwise round 3 closes the ladder as planned, its fixes under the
+line-by-line check.
