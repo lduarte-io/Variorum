@@ -221,6 +221,16 @@ missing, move the rest; the glob must match — it will on a 0.9.8 store"), or s
     untouched; I1–I10 untouched; rule 24 honored (release floor recorded green twice; debug floor re-run by me —
     see below).
 
-**Full core debug suite at the review tip (my run):** see the appended result line below.
+**Full core debug suite at the review tip (my run, 2026-10-22):** VariorumCoreTests **3298 tests in 430 suites
+PASSED** (the R1-recorded floor exactly); StringsWorkbook 32/4 PASSED; VariorumMCPTests 383/71 with ONE red — the
+recorded `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` wall-clock flake
+(18.6 s against its 15 s bound under the parallel full run; **re-run ALONE by me: 3/3 green in 2.2 s**) — its fifth
+sighting, matching F-R1-6/the L0 record byte for byte; the MCP target is untouched by this phase. The ticket at
+closeout stands owed.
 
-*(Findings file complete pending the full-suite line; the final message to the coordinator summarizes this file.)*
+---
+
+**ROUND 1: CLOSED (the reviewer's findings complete).** 1 MAJOR · 6 MINOR · 2 NIT, plus the disposition notes and
+the clean bill above. No BLOCKER: no invariant violation, no spec drift in shipped behavior, no weakened new-road
+pin found. The MAJOR is record-class (the §2 proof's missing §8 record vs the script's REHEARSED claims) and is the
+orchestrator's own to land before the pause hands to her.
