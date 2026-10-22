@@ -1395,8 +1395,30 @@ swap and T-5's empty-slot program), `Executor/Acts/DeviceActs.swift` (the plan-l
   says). After the fix: **7/7 green** (the seventh, `theSlotsFactAndThePickedCopyClassifierReadOneRule`, added after
   the red run — it names the new function); neighbours green (`AssessModeTests`, `U2PinsRule27Tests`, `CatalogTests`,
   `LibraryClassifierTests` — 42 tests in 6 suites).
-- Piece 2 — THE FACE (Mac): NOT-STARTED — her words byte-faithful (`ProtectionWords`), the lobby face's fact, the two
-  doors, Start fresh's confirm.
+- Piece 2 — THE FACE (Mac): DONE but for its first door's act (this commit; `build-for-testing` GREEN on both targets —
+  the Mac pins COMPILED, their RUN is the orchestrator's closing batch: PENDING). Her five strings in `ProtectionWords`
+  §(3b), byte-faithful (`preDesignLead`, `preDesignBody`, `preDesignStartFreshDoor`, `preDesignOpenDoor` = the standing
+  `noKeyFileOpenDoor`, `preDesignStartFreshConfirm`) + the confirm's act button `preDesignStartFreshButton` ("Start
+  fresh" — her door's words without its ellipsis, P-VX329-U4-2). `ProtectionLobbyFace.preDesignStore` (= `AssessRules
+  .launch(facts) == .preDesignStore`); the road fields keep their derivation (the phone renders them until VM-8 —
+  F-U4-3). `ProtectionLobbyModel`: the `startFresh:` road, `offersStartFresh` (the fact AND a wired act — P-2),
+  `startFresh()` (after her confirm; the act's sentence said on a refusal); the automatic Touch ID ask stands down over a
+  pre-design store (no key here opens it — both platforms share the model, F-U4-3). `RoadLockView`: on the fact, HER
+  face only — the lock glyph, her lead as the card's heading (no lobby title — P-VX329-U4-1), her body, *Start fresh…*
+  (primary; opens the `.alert` with her confirm line, *Start fresh* / *Cancel*, the act on the yes) and *Open Library…*
+  (the standing door); the busy line shows the dots alone (no "Opening your library…" over a face where nothing opens).
+  Every other slot renders exactly as before (`standingLobby` — the old two arms moved whole). The facts gatherer reads
+  no keychain item and tries no key against a pre-design store (`custodyOpensLibrary` nil — not read;
+  `AssessRules.preDesignStore(storeFile:catalog:)` lets it know the fact first). **The bootstrap passes `startFresh:
+  nil` — the act is piece 3, STOPPED at its fork below; until it lands the face shows her lead, her body and Open
+  Library… only.** PINS (Mac, compiled): `PreDesignStoreRefusalTests` rewritten to U4 (the live slot → her face, the
+  slot's listing unchanged, nothing minted or written; THE ADDENDUM'S SHAPE — a remembered library of this design with a
+  memory item, a silent and a Touch ID item, biometry ready → her face, `custody.reads` EMPTY, no automatic press; the
+  keyless arm → rule 27 unchanged; a library of this design with today's names beside it → opens; the picked-copy pin
+  unchanged); NEW `PreDesignFaceTests` (her five strings byte-equal to this plan's §6d read from the file; the door
+  offered only on the fact with its act, the act's sentence said, nothing run off the fact; the view's composition —
+  her lead/body/doors in the branch, no lobby title, road or rule 27 there, the confirm before the act). Red-on-old for
+  the Mac pins is by construction (they name `preDesignStore`/`offersStartFresh`, absent on old) — their RUN is PENDING.
 - Piece 3 — Start fresh's ACT (the crash-safe set-aside, then the calm creation): NOT-STARTED.
 - Piece 4 — closing evidence (headless both configurations, `build-for-testing` both targets): NOT-STARTED.
 

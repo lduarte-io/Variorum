@@ -48,6 +48,10 @@ final class ProtectionLobbyModel {
     /// VX-306 U2 — rule 27's face's *Start a New Library* (nil: not offered): the library no key file opens steps
     /// aside whole, then the creation. Answers the sentence to show, nil when it went on.
     @ObservationIgnored private let startNewRoad: (() async -> String?)?
+    /// VX-329 U4 — her pre-design face's *Start fresh…* (nil: not offered — P-2): her confirmed act, the store from before
+    /// this design set aside whole into Previous Libraries, then the calm first open. Answers the sentence to show, nil
+    /// when it went on.
+    @ObservationIgnored private let startFreshRoad: (() async -> String?)?
 
     init(
         standing: RoadLobbyFacts,
@@ -56,7 +60,8 @@ final class ProtectionLobbyModel {
         refreshRoad: @escaping () async -> RoadLobbyFacts,
         opened: @escaping (ProtectionRoadSession) -> Void,
         recordMissing: @escaping () -> Void,
-        startNew: (() async -> String?)? = nil
+        startNew: (() async -> String?)? = nil,
+        startFresh: (() async -> String?)? = nil
     ) {
         self.standing = standing
         self.typedRoad = typedRoad
@@ -65,7 +70,23 @@ final class ProtectionLobbyModel {
         self.opened = opened
         self.recordMissing = recordMissing
         startNewRoad = startNew
+        startFreshRoad = startFresh
         face = ProtectionLobbyFace.derive(standing)
+    }
+
+    // MARK: - The pre-design face's door (VX-329 U4)
+
+    /// *Start fresh…* is offered (her pre-design face, with its act wired).
+    var offersStartFresh: Bool { face.preDesignStore && startFreshRoad != nil }
+
+    /// *Start fresh…*, AFTER her confirm (the face asks it — her line, the plan's §6d).
+    func startFresh() async {
+        guard offersStartFresh, let startFreshRoad, !busy else { return }
+        busy = true
+        message = nil
+        let sentence = await startFreshRoad()
+        busy = false
+        if let sentence { message = sentence }
     }
 
     // MARK: - Rule 27's doors (VX-306 U2)
@@ -85,9 +106,10 @@ final class ProtectionLobbyModel {
 
     // MARK: - Touch ID (VX-310)
 
-    /// The one automatic ask at open — only while Variorum is the active app (VX-140), only once.
+    /// The one automatic ask at open — only while Variorum is the active app (VX-140), only once. Never over a store from
+    /// before this design (VX-329 U4 — rule 26: no key this Mac holds opens it, so no prompt is raised for one).
     func autoAskIfDue(appIsActive: Bool) async {
-        guard face.autoAsk, face.touchIDButton, !autoAskSpent, !busy, appIsActive else { return }
+        guard face.autoAsk, face.touchIDButton, !face.preDesignStore, !autoAskSpent, !busy, appIsActive else { return }
         await pressTouchID()
     }
 

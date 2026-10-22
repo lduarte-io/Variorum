@@ -513,7 +513,12 @@ final class AppBootstrap {
             startNew: { [weak self] in
                 guard let self else { return nil }
                 return await self.createOnNewRoadFromAFace()
-            })
+            },
+            // VX-329 U4 — her pre-design face's *Start fresh…*: its act (the store from before this design set aside
+            // WHOLE and crash-safe into Previous Libraries, then the calm creation) is the unit's piece 3, STOPPED at its
+            // fork (the plan's U4 record — the set-aside machinery resists reuse); until it lands the door is not
+            // offered (P-2: doors act).
+            startFresh: nil)
     }
 
     /// VX-306 — a face's *Start a New Library* on the new road (the missing face — K5's record-less store among the

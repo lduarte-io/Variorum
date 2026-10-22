@@ -22,10 +22,13 @@ import VariorumCore
 /// files carry one, the words behind one quiet door beside it (or the words field directly when there is no
 /// passphrase); VX-310's Touch ID button and its one line (design §3.10); rule 27's sentence when no road
 /// exists at all (its doors are U2's face). It re-reads the roads when Variorum becomes active again (VX-310's
-/// second bug — never a relaunch to bring a road back).
+/// second bug — never a relaunch to bring a road back). VX-329 U4: over a store from before this design (rule 26 — an
+/// older Variorum's key file beside it by name, none of this design's) it shows HER pre-design face instead — her lead,
+/// her body, *Start fresh…* (her confirm first) and *Open Library…* — and no road at all.
 struct RoadLockView: View {
     @Bindable var lobby: ProtectionLobbyModel
-    /// VX-306 U2 — rule 27's face's *Open Library…* (13x's open door, the missing face's); nil: not rendered.
+    /// VX-306 U2 — rule 27's face's *Open Library…* (13x's open door, the missing face's); nil: not rendered. VX-329 U4:
+    /// her pre-design face's second door, the same standing door.
     var openDoor: (() -> Void)? = nil
     /// VX-309 U1b — rule 27's face's *Restore from Backup…* as the doors over this Mac's catalogued copies (rule 17: "The
     /// app's Restore from Backup is this door"), shown where a home of copies stands (`copiesHome`); nil: not rendered.
@@ -46,6 +49,8 @@ struct RoadLockView: View {
     @State private var passphrase = ""
     @State private var wordsText = ""
     @State private var showsWords = false
+    /// VX-329 U4 — *Start fresh…* asks her confirm first (her line, the plan's §6d).
+    @State private var confirmsStartFresh = false
     @Environment(\.colorScheme) private var scheme
 
     private var tokens: VoiceTokens { .fallback(for: scheme) }
@@ -78,19 +83,23 @@ struct RoadLockView: View {
             Image(systemName: "lock.fill")
                 .font(.system(size: 30, weight: .light))
                 .foregroundStyle(tokens.muted)
-            Text(ProtectionWords.lobbyTitle)
-                .font(tokens.heading)
-                .foregroundStyle(tokens.ink)
-                .lineLimit(1)
-            if let nothing = face.noKeyFileAnywhere {
-                // RULE 27 before unlock — §7c (3), the account sentence only when the account road is named, and
-                // the missing face's three doors beneath (VX-306 U2).
-                sentence(ProtectionWords.noKeyFileAnywhere)
-                if nothing.accountRoad { sentence(ProtectionWords.noKeyFileAnywhereAccountRoad) }
-                noKeyFileDoors
+            if face.preDesignStore {
+                // VX-329 U4 — RULE 26 before unlock: a store from before this design (its key files' names alone say so).
+                // HER face, her words only (the plan's §6d): the lead, the body, her two doors — no road, no lobby title.
+                Text(ProtectionWords.preDesignLead)
+                    .font(tokens.heading)
+                    .foregroundStyle(tokens.ink)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                sentence(ProtectionWords.preDesignBody)
+                preDesignDoors
             } else {
-                sentence(face.keychainUnreadable ? ProtectionWords.keychainUnreadable : face.lead)
-                roads
+                Text(ProtectionWords.lobbyTitle)
+                    .font(tokens.heading)
+                    .foregroundStyle(tokens.ink)
+                    .lineLimit(1)
+                standingLobby
             }
             if face.liveKeyFileUnreadable {
                 Text(ProtectionWords.liveKeyFileUnreadable)
@@ -111,10 +120,14 @@ struct RoadLockView: View {
             if lobby.busy {
                 HStack(spacing: 6) {
                     TravellingDotsIndicator(ink: tokens.muted)
-                    Text(ProtectionWords.opening)
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .lineLimit(1)
+                    // Under her pre-design face nothing is opening (Start fresh… is running): the dots alone, no words
+                    // beyond hers.
+                    if !face.preDesignStore {
+                        Text(ProtectionWords.opening)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .lineLimit(1)
+                    }
                 }
             }
         }
@@ -124,6 +137,45 @@ struct RoadLockView: View {
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(tokens.line, lineWidth: 1))
         .shadow(color: .black.opacity(scheme == .dark ? 0.5 : 0.10), radius: 22, y: 8)
         .padding(.horizontal, 32)
+        // VX-329 U4 — *Start fresh…*'s confirm: her line (the plan's §6d); the act runs only on its yes.
+        .alert(ProtectionWords.preDesignStartFreshConfirm, isPresented: $confirmsStartFresh) {
+            Button(ProtectionWords.preDesignStartFreshButton) {
+                Task { await lobby.startFresh() }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+    }
+
+    /// The lobby as it stands for every slot but a pre-design one: rule 27's refusal and its doors when no road exists
+    /// at all, else the roads.
+    @ViewBuilder
+    private var standingLobby: some View {
+        if let nothing = face.noKeyFileAnywhere {
+            // RULE 27 before unlock — §7c (3), the account sentence only when the account road is named, and
+            // the missing face's three doors beneath (VX-306 U2).
+            sentence(ProtectionWords.noKeyFileAnywhere)
+            if nothing.accountRoad { sentence(ProtectionWords.noKeyFileAnywhereAccountRoad) }
+            noKeyFileDoors
+        } else {
+            sentence(face.keychainUnreadable ? ProtectionWords.keychainUnreadable : face.lead)
+            roads
+        }
+    }
+
+    /// VX-329 U4 — her pre-design face's two doors (the plan's §6d), each rendered only where it can act (P-2):
+    /// *Start fresh…* asks her confirm first; *Open Library…* is the standing door.
+    @ViewBuilder
+    private var preDesignDoors: some View {
+        if lobby.offersStartFresh {
+            Button(ProtectionWords.preDesignStartFreshDoor) { confirmsStartFresh = true }
+                .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
+                .disabled(lobby.busy)
+        }
+        if let openDoor {
+            Button(ProtectionWords.preDesignOpenDoor) { openDoor() }
+                .buttonStyle(CalmButtonStyle(tokens: tokens))
+                .disabled(lobby.busy)
+        }
     }
 
     private func sentence(_ text: String) -> some View {

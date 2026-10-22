@@ -71,6 +71,23 @@ nonisolated enum ProtectionWords {
     static let noKeyFileOpenDoor = "Open Library\u{2026}"
     static let noKeyFileStartDoor = "Start a New Library"
 
+    // MARK: - (3b) The pre-design face — HER WORDS (VX-329 U4; approved at her 2026-10-22 morning sitting, the plan's
+    // §6d, byte-faithful — `PreDesignFaceTests` pins each byte-equal to the plan file). Rule 26: a store from before this
+    // design is detected by its key files' names and said; set aside whole at her word, never read.
+
+    static let preDesignLead = "This library is from an older version of Variorum."
+    static let preDesignBody = "This version can't open it. Open the previous version to copy anything out \u{2014} or if "
+        + "it synced, your writing comes back when you sign in. Starting fresh sets this library aside, whole, in "
+        + "Previous Libraries."
+    static let preDesignStartFreshDoor = "Start fresh\u{2026}"
+    /// Her second door is the standing one, by its own name (rule 27's face's — the same words).
+    static var preDesignOpenDoor: String { noKeyFileOpenDoor }
+    static let preDesignStartFreshConfirm = "Your old library will be set aside whole in Previous Libraries \u{2014} "
+        + "nothing is deleted."
+    /// The confirm's act button: her door's own words without its ellipsis (the macOS idiom — the ellipsis says a door
+    /// asks more; the button that answers the ask does not). PROVISIONAL P-VX329-U4-2.
+    static let preDesignStartFreshButton = "Start fresh"
+
     // MARK: - (4) The notice — §7c (4) (rule 21): her two sentences are the MODEL's (`LibraryNotice.sentence(date:)`),
     // never restated; the face's one button.
 

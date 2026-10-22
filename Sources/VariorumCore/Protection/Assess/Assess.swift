@@ -101,8 +101,16 @@ public enum AssessRules {
     /// item stood beside it). A slot with no key-file name at all stays rule
     /// 27's.
     public static func preDesignStore(_ facts: ProtectionFacts) -> Bool {
-        guard facts.storeFile != .absent, facts.catalog.liveKeyFile == nil else { return false }
-        return facts.catalog.foreign.contains {
+        preDesignStore(storeFile: facts.storeFile, catalog: facts.catalog)
+    }
+
+    /// The same fact over the two values it reads — the slot's presence and the
+    /// catalogue's listing — so a gatherer can know it before reading any
+    /// keychain item (the silent items are never tried against a store from
+    /// before this design).
+    public static func preDesignStore(storeFile: StoreFileFact, catalog: Catalog) -> Bool {
+        guard storeFile != .absent, catalog.liveKeyFile == nil else { return false }
+        return catalog.foreign.contains {
             $0.place == .container && $0.folders.isEmpty && CatalogNames.isPreDesignKeyFileName($0.name)
         }
     }

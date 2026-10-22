@@ -12,6 +12,8 @@
 //      could-not-read is never verified-fails (the VX-378 ladder's round-2 NIT — a transient keychain error
 //      must never surface rule 27's refusal while a working quiet road exists). An item gone since the
 //      listing, or whose key verifiably opens nothing, is left out.
+//      VX-329 U4: over a store from before this design (rule 26's fact, from the catalogue's names alone) no item is
+//      read and no key is tried against the store — `custodyOpensLibrary` is nil (not read).
 //    - A Touch ID item is counted by the listing (attributes only) and NEVER pressed here.
 //    - `rememberedKeyFileCopies` — the key-file copies the memory items carry, read from their payloads
 //      WITHOUT verifying (a key file holds no secret); a payload that cannot be read makes the whole fact
@@ -53,8 +55,12 @@ nonisolated struct ProtectionFactsGatherer {
         } catch {
             throw GatherError.custodyUnlistable(String(describing: error))
         }
+        // VX-329 U4 — RULE 26: over a store from before this design (the catalogue's names alone say so —
+        // `AssessRules.preDesignStore`), no silent item is read and no key is tried against the store: the verdict
+        // precedes every road, so the probe has nothing to decide (`custodyOpensLibrary` nil — not read).
+        let preDesign = AssessRules.preDesignStore(storeFile: storeFile, catalog: catalog)
         var opens: Set<String> = []
-        for item in custody where item.itemClass == .silent {
+        for item in custody where item.itemClass == .silent && !preDesign {
             do {
                 guard let key = try leaves.custody.readCustody(fingerprint: item.fingerprint, itemClass: .silent) else {
                     continue  // gone since the listing
@@ -97,7 +103,7 @@ nonisolated struct ProtectionFactsGatherer {
             containerMarker: FileManager.default.fileExists(atPath: places.livedHereMarker.path),
             unlocked: unlockedFacts, slotFingerprintHint: catalog.liveKeyFile?.fingerprint,
             rememberedLibraryIDs: remembered, rememberedKeyFileCopies: copies, custody: custody,
-            custodyOpensLibrary: opens,
+            custodyOpensLibrary: preDesign ? nil : opens,
             syncKeys: (try? leaves.syncKeys.syncKeyItems()) ?? [],
             appleKeys: AppleKeyFacts(readable: (try? leaves.apple.readableAppleKeyIDs()) ?? []),
             biometry: leaves.biometry.biometry(), touchIDPress: touchIDPress, session: session,
