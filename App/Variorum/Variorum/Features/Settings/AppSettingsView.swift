@@ -48,8 +48,8 @@ struct AppSettingsView: View {
     /// Settings scene can open before the main window's composition has run,
     /// and the pane says so honestly rather than rendering dashes.
     let services: AppServices?
-    /// 13p Batch 2: the protection brain (the bootstrap's — dials, modes,
-    /// escrow, the passphrase doors). Optional like `services`.
+    /// The bootstrap's protection controller — VX-329 U1: its road arms only (the Settings pane request a crossing's
+    /// reopen adopts; the Protection pane renders where one exists). Optional like `services`.
     let protection: ProtectionController?
     /// 18j (her R-Q12): the app's ONE appearance owner (`NSApp.appearance`
     /// at the root — `AppearanceChoice.swift`). Optional like `services`
@@ -78,9 +78,6 @@ struct AppSettingsView: View {
     @State private var query = ""
     @Environment(\.colorScheme) private var scheme
 
-    /// 13x U2 row 6: the Restore surface's per-row door (Settings' own
-    /// adoption presenter behind it). nil hosts render no Open… rows.
-    let restoreDoor: ((URL) -> Void)?
     /// 13x F1 (R1-MAJOR): Data Safety's hand-off twin (Settings' own
     /// presenter behind it). nil hosts render no door.
     let handOffDoor: (() -> Void)?
@@ -97,7 +94,6 @@ struct AppSettingsView: View {
         updates: UpdateChannel? = nil,
         crashReports: CrashReporting? = nil,
         mcp: MCPDoor? = nil,
-        restoreDoor: ((URL) -> Void)? = nil,
         handOffDoor: (() -> Void)? = nil,
         roadStanding: RoadStandingModel? = nil,
         roadDoors: RoadDoorsHost? = nil
@@ -109,7 +105,6 @@ struct AppSettingsView: View {
         self.updates = updates
         self.crashReports = crashReports
         self.mcp = mcp
-        self.restoreDoor = restoreDoor
         self.handOffDoor = handOffDoor
         self.roadStanding = roadStanding
         self.roadDoors = roadDoors
@@ -408,18 +403,16 @@ struct AppSettingsView: View {
         case .tags:
             TagManagerPane(session: session, tags: tags)
         case .protection:
-            if let protection {
-                // 13p Batch 2: the at-open modes, presets, escrow, and the
-                // passphrase/recovery doors (R13p-5/6/7/9).
-                ProtectionPane(controller: protection, services: services, roadStanding: roadStanding)
+            if protection != nil {
+                // The protection road's sections (`ProtectionPane`).
+                ProtectionPane(services: services, roadStanding: roadStanding)
             }
         case .dataSafety:
             // 13l Act 4 (ledger row 12): backups, their freshness, and what
             // restoring one does — including to things that were deleted.
             // 13x U2: + the Restore from Backup rows (QB's second door).
             DataSafetyPane(
-                services: services, protection: protection, restoreDoor: restoreDoor,
-                handOffDoor: handOffDoor, roadDoors: roadDoors, roadStanding: roadStanding)
+                services: services, handOffDoor: handOffDoor, roadDoors: roadDoors, roadStanding: roadStanding)
         case .diagnostics:
             // 13r U3-B (R-13r-5; the architect's Option A): the crash-report
             // opt-in at the head, the received reports verbatim under it.

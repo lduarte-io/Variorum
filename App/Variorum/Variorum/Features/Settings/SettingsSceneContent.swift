@@ -15,10 +15,10 @@
 //  nothing closed the window. Now the window closes itself — the AppKit
 //  close its own ✕ performs — the moment the library SETTLES closed
 //  (`libraryClosed`). Never on `.opening`: the reopen roads that run FROM
-//  this window (Data Safety's Restore from Backup → `adoptLibrary`; the
-//  Protection pane's posture switches → `rekeyLibrary`) pass through it
-//  with their sheets on this window. No reopen-on-unlock (none was free);
-//  ⌘, after the unlock opens it fresh.
+//  this window (Data Safety's Restore list → Make this my library; the
+//  Protection pane's crossings — the bootstrap's reopening seam) pass
+//  through it with their sheets on this window. No reopen-on-unlock (none
+//  was free); ⌘, after the unlock opens it fresh.
 //
 
 import AppKit
@@ -32,7 +32,7 @@ struct SettingsSceneContent: View {
     let updates: UpdateChannel?
     let crashReports: CrashReporting?
     let mcp: MCPDoor?
-    /// 13x U2 row 6 / F1: Settings' OWN adoption and hand-off presenters
+    /// 13x U2 row 6 / F1: Settings' OWN copy-door and hand-off presenters
     /// (the main scene's sheet and this one can never both fire).
     let libraryOpen: LibraryOpenPresenter
     let handOff: LibraryHandOffPresenter
@@ -45,8 +45,7 @@ struct SettingsSceneContent: View {
     static func libraryClosed(_ state: AppBootstrap.State) -> Bool {
         switch state {
         case .ready, .opening: false
-        case .locked, .waitingForICloudKeychain, .libraryMissing, .failed, .roadLobby, .newLibraryWords,
-             .roadInterlude: true
+        case .libraryMissing, .failed, .roadLobby, .newLibraryWords, .roadInterlude: true
         }
     }
 
@@ -102,21 +101,15 @@ struct SettingsSceneContent: View {
                 crashReports: crashReports,
                 // 13n-b U1: Settings ▸ MCP — the ONE MCP door owner.
                 mcp: mcp,
-                // 13x U2 row 6: the Restore surface's per-row door —
-                // Settings' OWN presenter (the main scene's sheet and
-                // this one can never both fire).
-                restoreDoor: { picked in
-                    libraryOpen.begin(bootstrap: bootstrap, picked: picked)
-                },
                 // 13x F1 (R1-MAJOR): Data Safety's hand-off twin —
                 // Settings' OWN presenter, the restore door's pattern.
                 handOffDoor: {
                     handOff.openPanel(session: session, bootstrap: bootstrap)
                 },
-                // VX-306 U2: the new road's *Set a passphrase…* row (nil on today's road).
+                // VX-306 U2: the open library's protection faces.
                 roadStanding: bootstrap.roadStanding,
-                // VX-306 U3: the new road's Restore list — Make this my library on a catalogued copy, through
-                // Settings' OWN presenter (nil on today's road).
+                // VX-306 U3: the Restore list — Make this my library on a catalogued copy, through Settings' OWN
+                // presenter.
                 roadDoors: bootstrap.copyDoorsRoads().map { roads in
                     RoadDoorsHost(
                         roads: roads,
@@ -125,15 +118,7 @@ struct SettingsSceneContent: View {
                         // VX-309 U1c — VX-265: rule 19's delete, an other library's row's door.
                         deleteCopies: { choice in libraryOpen.beginDeleteCopies(roads: roads, choice: choice) })
                 })
-                .sheet(isPresented: Binding(
-                    get: { libraryOpen.model != nil },
-                    set: { if !$0 { libraryOpen.dismiss() } })
-                ) {
-                    if let model = libraryOpen.model {
-                        LibraryOpenSheet(model: model) { libraryOpen.dismiss() }
-                    }
-                }
-                // VX-306 U3: the two doors' sheet (the new road only).
+                // VX-306 U3: the two doors' sheet.
                 .sheet(isPresented: Binding(
                     get: { libraryOpen.roadDoors != nil },
                     set: { if !$0 { libraryOpen.dismissRoad() } })

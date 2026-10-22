@@ -12,7 +12,8 @@
 //  DUE — the catalogue holding no trusted-stamped far pair of THIS library by THIS Mac younger than the backup interval
 //  (`OwnCopies.farPairIsDue`, read fresh — never the folder's newest file, so another Mac's copy in a shared folder never
 //  satisfies it). No far folder, an unresolved bookmark, a vanished picked folder: nothing; a failure is logged, never
-//  raised — the container pair stands either way, and today's flat far leg (`StoreBackup`) runs untouched beside it.
+//  raised — the container pair stands either way. VX-329 U1: this road is THE backup writer — today's flat legs left with
+//  today's road, and the backup clock's run (`StoreBackup`) records this road's legs (`ProtectionBackupHook.runPair`).
 //
 
 import Foundation
@@ -56,18 +57,35 @@ enum ProtectionBackupHook {
     nonisolated static func takePair(
         _ session: ProtectionRoadSession, now: Date = Date(), guards: ProtectionGuards = .all
     ) -> PairOutcome {
+        takePairReporting(session, now: now, guards: guards).pair
+    }
+
+    /// What one pair road did — the container pair, its snapshot's name, the far leg (nil when no container pair was
+    /// written, so none was copied), and how many of this Mac's pairs retention removed.
+    nonisolated struct PairReport: Equatable, Sendable {
+        var pair: PairOutcome
+        var snapshotName: String?
+        var far: FarOutcome?
+        var pruned: Int = 0
+    }
+
+    /// `takePair`, reporting every leg (VX-329 U1: the backup run's record is the pair road's own — `ProtectionBackupHook
+    /// .runPair`).
+    nonisolated static func takePairReporting(
+        _ session: ProtectionRoadSession, now: Date = Date(), guards: ProtectionGuards = .all
+    ) -> PairReport {
         oneAtATime.lock()
         defer { oneAtATime.unlock() }
         let backups = session.system.backups
         guard !backups.copiesArePaused else {
             ProtectionOpenRoad.log("backup pair: copies are paused — none taken")
-            return .paused
+            return PairReport(pair: .paused)
         }
         let key = session.key
         guard let keyFile = (try? session.system.leaves.keyFiles.readLiveKeyFile()) ?? nil,
               keyFile.fingerprint == KeyFingerprint.of(key) else {
             ProtectionOpenRoad.log("backup pair: no live key file of the current key — none taken")
-            return .noKeyFileOfTheKey
+            return PairReport(pair: .noKeyFileOfTheKey)
         }
         let deviceID = session.library.section.deviceID
         let snapshot: URL
@@ -78,11 +96,11 @@ enum ProtectionBackupHook {
                     + ProtectionNames.backupsSubpath(libraryID: keyFile.libraryID, deviceID: deviceID))
         } catch {
             ProtectionOpenRoad.log("backup pair: failed — \(String(describing: error))")
-            return .failed(String(describing: error))
+            return PairReport(pair: .failed(String(describing: error)))
         }
-        _ = landFarPair(session, snapshot: snapshot, keyFile: keyFile, deviceID: deviceID, now: now)
-        _ = prune(session, libraryID: keyFile.libraryID, deviceID: deviceID, now: now, guards: guards)
-        return .written
+        let far = landFarPair(session, snapshot: snapshot, keyFile: keyFile, deviceID: deviceID, now: now)
+        let removed = prune(session, libraryID: keyFile.libraryID, deviceID: deviceID, now: now, guards: guards)
+        return PairReport(pair: .written, snapshotName: snapshot.lastPathComponent, far: far, pruned: removed.count)
     }
 
     /// **RETENTION** (VX-309 U1a — VX-302; VX-411 folded: this Mac's pairs accumulated on the new road with none): after a

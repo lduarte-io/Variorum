@@ -3,13 +3,12 @@
 //  Variorum
 //
 //  pre-13x batch 1a — THE ABSENT-STORE FACE (the postures design §3.7;
-//  copy §3 "Library file missing", rendered verbatim). A demanded at-open
-//  mode over a store that is not where it was: the lock STAYS, nothing
-//  opens, nothing is persisted. Three doors in the copy; per P-2 only the
-//  ones that can act render here — Start a New Library (built), Restore
-//  from a Backup… (reveals the app's own Backups folder, when one exists;
-//  the 13l restore is a manual road), and NOT Open an Existing Library…
-//  (13x's door, unbuilt).
+//  copy §3 "Library file missing", rendered verbatim): no library in the
+//  slot — nothing opens, nothing is persisted. Three doors in the copy,
+//  each rendered only where it can act (P-2): Start a New Library (the
+//  protection road's creation), Restore from a Backup… (this Mac's copies
+//  with their doors — rule 17, VX-309 U1b) and Open an Existing Library…
+//  (the copy doors over a picked copy).
 //
 
 import AppKit
@@ -22,8 +21,8 @@ struct LibraryMissingView: View {
     /// Library…", shipped unrendered since 1a): nil hosts (pins, a
     /// preview) simply don't render it (P-2).
     var openDoor: (() -> Void)? = nil
-    /// VX-309 U1b — on the new road, *Restore from a Backup…* opens this Mac's catalogued copies with their doors (rule 17:
-    /// "The app's Restore from Backup is this door"); nil (today's road) keeps the Finder reveal.
+    /// VX-309 U1b — *Restore from a Backup…* opens this Mac's catalogued copies with their doors (rule 17: "The app's
+    /// Restore from Backup is this door"); nil: not rendered (VX-329 U1: today's Finder reveal left with today's road).
     var restoreDoor: (() -> Void)? = nil
     @Environment(\.colorScheme) private var scheme
 
@@ -62,12 +61,6 @@ struct LibraryMissingView: View {
                 Button(ProtectionCopy.libraryMissingRestoreDoor) { restoreDoor() }
                     .buttonStyle(CalmButtonStyle(tokens: tokens))
                     .disabled(lobby.busy)
-            } else if restoreDoor == nil, let folder = lobby.backupsFolderURL {
-                Button(ProtectionCopy.libraryMissingRestoreDoor) {
-                    NSWorkspace.shared.activateFileViewerSelecting([folder])
-                }
-                .buttonStyle(CalmButtonStyle(tokens: tokens))
-                .disabled(lobby.busy)
             }
             if let openDoor {
                 Button(ProtectionCopy.libraryMissingOpenDoor) { openDoor() }

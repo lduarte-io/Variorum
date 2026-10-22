@@ -16,10 +16,12 @@
 //  answer "is anything I have written still only on this Mac".
 //
 //  This pane is also the app's RESTORE FACE — the place where restoring is
-//  discussed — because restoring itself is a Finder operation, not a button
-//  (§3 of the runbook: quit, swap the file, open). So the warning pair her
-//  post-sitting ruling requires ("we need to tell the user it clearly either
-//  way") lives here, beside the copies it is about.
+//  discussed, beside the Restore list (rule 17's doors over this Mac's
+//  copies). So the warning pair her post-sitting ruling requires ("we need
+//  to tell the user it clearly either way") lives here, beside the copies it
+//  is about. VX-329 U1: today's rows (the flat-backup Restore list, the
+//  posture lines read from today's controller) left with today's road; the
+//  decrypted export authorizes against the open library's key file.
 //
 
 import AppKit
@@ -28,10 +30,6 @@ import VariorumCore
 
 struct DataSafetyPane: View {
     let services: AppServices?
-    /// 13p Batch 2: the protection dials — the plain-text opt-in's
-    /// Locked-down warning reads them (R13p-8's rider). Optional like
-    /// `services`; nil renders no warning (never a guessed one).
-    let protection: ProtectionController?
     @State private var model: DataSafetyModel
 
     /// P-1: the five acts this surface renders, declared once and walked
@@ -47,32 +45,23 @@ struct DataSafetyPane: View {
     @State private var plaintextExport: PlaintextExportModel?
     @State private var exportPassphrase = ""
 
-    /// 13x U2 row 6 (QB's second framed door): the per-row Open… behind
-    /// *Restore from Backup* — Settings' own adoption presenter acts; nil
-    /// hosts list the copies with no doors (evidence stays honest).
-    let restoreDoor: ((URL) -> Void)?
     /// 13x F1 (R1-MAJOR): the hand-off act's Data Safety twin — Settings'
     /// own presenter acts; nil hosts render no door (P-2).
     let handOffDoor: (() -> Void)?
-    /// VX-306 U3 — the new road's Restore list (nil on today's road): the catalogue's copies with *Make this my
-    /// library…* in place of today's rows (13x's adoption step retired behind the door there).
+    /// VX-306 U3 — the Restore list: the catalogue's copies with their doors (nil hosts: no list).
     let roadDoors: RoadDoorsHost?
     @State private var roadList: CopyDoorsListModel?
-    /// VX-307 U2c (VX-379's pane rows; U2a's F-6): the new road's open-library faces (nil on TODAY's road). Today's rows
-    /// — they read today's posture or describe today's road — render only without it (the U2a-4 ruling: today's rows
-    /// retire behind the switch on the new road); the Castle warning reads ITS posture there.
+    /// VX-307 U2c (VX-379's pane rows; U2a's F-6): the open library's protection faces — the Castle warning reads ITS
+    /// posture, the decrypted export its key file (nil hosts: neither).
     let roadStanding: RoadStandingModel?
 
     init(
-        services: AppServices?, protection: ProtectionController? = nil,
-        restoreDoor: ((URL) -> Void)? = nil,
+        services: AppServices?,
         handOffDoor: (() -> Void)? = nil,
         roadDoors: RoadDoorsHost? = nil,
         roadStanding: RoadStandingModel? = nil
     ) {
         self.services = services
-        self.protection = protection
-        self.restoreDoor = restoreDoor
         self.handOffDoor = handOffDoor
         self.roadDoors = roadDoors
         self.roadStanding = roadStanding
@@ -83,7 +72,7 @@ struct DataSafetyPane: View {
             // A closure rather than a captured value: the pane can outlive a
             // sign-in, and the facts are re-read on every refresh.
             signedIn: { services?.account.variorum != nil },
-            // VX-309 U1a (VX-397): the new road counts this Mac's pairs of this library per place; nil on today's road.
+            // VX-309 U1a (VX-397): this Mac's pairs of this library per place.
             roadCounts: roadStanding?.copyCounts))
     }
 
@@ -91,14 +80,10 @@ struct DataSafetyPane: View {
         Form {
             if model.isWired {
                 copiesSection
-                if let roadDoors {
-                    if let roadList {
-                        RoadRestoreRows(
-                            list: roadList, lookInside: roadDoors.lookInside, makeMine: roadDoors.makeMine,
-                            deleteCopies: roadDoors.deleteCopies)
-                    }
-                } else {
-                    restoreFromBackupSection
+                if let roadList, let roadDoors {
+                    RoadRestoreRows(
+                        list: roadList, lookInside: roadDoors.lookInside, makeMine: roadDoors.makeMine,
+                        deleteCopies: roadDoors.deleteCopies)
                 }
                 handOffSection
                 folderSection
@@ -118,7 +103,7 @@ struct DataSafetyPane: View {
         .formStyle(.grouped)
         .task {
             await model.refresh()
-            // VX-306 U3: the new road's list, re-read at each appearance (a reopen rebuilds the pane).
+            // VX-306 U3: the list, re-read at each appearance (a reopen rebuilds the pane).
             if let roadDoors {
                 let list = roadList ?? CopyDoorsListModel(roads: roadDoors.roads)
                 roadList = list
@@ -149,18 +134,8 @@ struct DataSafetyPane: View {
                  + "matter more than the schedule does.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            // pre-13x 5a (design §8 — the Backups tab: §6's sentence per
-            // posture, copy §6 verbatim): what opens a backup. pre-13x 5b
-            // (ledger 68): + the lock-time copy line under Castle — a named
-            // sub-view so a pin can host it alone. VX-307 U2c: TODAY's
-            // posture and today's road's facts — rendered on today's road only
-            // (on the new road a Castle library would read "Standard" here and
-            // be told its backups open through its Apple account — rule 11).
-            if let protection, roadStanding == nil {
-                BackupsPostureLines(posture: protection.posture)
-            }
-            // VX-309 U2 (F-U2c-4, F-U1a-3 — PROVISIONAL P-VX309-U2-9): the new road's truths — what the counts are (this
-            // Mac's pairs of this library — VX-397) and what opens a backup (rule 5's sentence). Today's road is unchanged.
+            // VX-309 U2 (F-U2c-4, F-U1a-3 — PROVISIONAL P-VX309-U2-9): what the counts are (this Mac's pairs of this
+            // library — VX-397) and what opens a backup (rule 5's sentence).
             if roadStanding != nil {
                 Text(ProtectionWords.dataSafetyTheCountsAreThisMacs)
                     .font(.caption)
@@ -173,50 +148,6 @@ struct DataSafetyPane: View {
             }
             if let note = model.note {
                 Text(note).font(.caption).foregroundStyle(.secondary)
-            }
-        }
-    }
-
-    // MARK: - Restore from Backup (13x U2 row 6 — QB's second framed door)
-
-    /// The app's own snapshot pairs, newest first, each saying WHICH
-    /// CREDENTIAL OPENS IT (decision 11 rendered; the same-fingerprint
-    /// second look leads where it lights). The row's Open… drives the one
-    /// adoption flow — classify, the lobby's roads, the confirm, the
-    /// hold. PROVISIONAL (recorded): the in-container folder's copies
-    /// only; the second folder's listing waits on the walk's verdict
-    /// (its candidates open through File ▸ Open Library… meanwhile).
-    @ViewBuilder
-    private var restoreFromBackupSection: some View {
-        if !model.restoreCandidates.isEmpty {
-            Section(LibraryOpenCopy.restoreSectionTitle) {
-                Text(LibraryOpenCopy.restoreSectionBody)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                ForEach(model.restoreCandidates, id: \.snapshot) { candidate in
-                    HStack(alignment: .firstTextBaseline) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(candidate.date.formatted(
-                                date: .abbreviated, time: .shortened))
-                                .font(.callout)
-                            Text(candidate.credentials.map {
-                                LibraryOpenCopy.credentialLine(
-                                    $0, secondLook: candidate.opensWithLiveCustody)
-                            } ?? LibraryOpenCopy.bareCandidateLine)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        Spacer()
-                        if let restoreDoor, candidate.keyFile != nil {
-                            Button(LibraryOpenCopy.openCandidateDoor) {
-                                restoreDoor(candidate.snapshot)
-                            }
-                            .disabled(model.busy)
-                        }
-                    }
-                }
             }
         }
     }
@@ -264,12 +195,8 @@ struct DataSafetyPane: View {
                     .foregroundStyle(.orange)
             case .set(let displayPath, let summary):
                 folderRow(title: displayPath, path: summary.displayPath, summary: summary)
-                // VX-309 U2 (F-U1a-3): on the new road, one pair a day goes there (P-VX309-U1a-2) — said beside the
-                // retention line; today's road keeps its own caption byte for byte.
-                Text(roadStanding != nil
-                     ? ProtectionWords.dataSafetySecondFolderKept
-                     : "Kept there: the 14 most recent days that have a copy, plus one "
-                     + "copy from each of the 4 weeks before those.")
+                // VX-309 U2 (F-U1a-3): one pair a day goes there (P-VX309-U1a-2) — said beside the retention line.
+                Text(ProtectionWords.dataSafetySecondFolderKept)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -318,12 +245,11 @@ struct DataSafetyPane: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            if Self.castleWarningShows(todaysPosture: protection?.posture, roadPosture: roadPosture) {
+            if Self.castleWarningShows(roadPosture: roadPosture) {
                 // R13p-8's rider: under a locked-down posture the warning
                 // speaks whether she is about to turn it on or already has.
-                // VX-307 U2c (U2a's F-6): in rule 11's words, and on the new
-                // road it reads the OPEN library's posture — today's controller
-                // reads today's road, so a new-road Castle went unwarned.
+                // VX-307 U2c (U2a's F-6): in rule 11's words, over the OPEN
+                // library's posture.
                 Text(ProtectionCopy.plaintextExportUnderLockedDown)
                     .font(.caption)
                     .alarmVoice()
@@ -370,14 +296,14 @@ struct DataSafetyPane: View {
     // MARK: - The decrypted export (pre-13x 3b — decision 15; copy §4)
 
     /// Copy §4's *Export an unencrypted copy of your library.* — the
-    /// authorization by posture (Castle: the passphrase, vault-verified when
-    /// enrolled, else the key file's; Standard: the passphrase if set, else
-    /// *Export* directly), a chosen destination (never the backups folder),
-    /// the export off the main actor. Rendered only when the controller and
-    /// the store are composed (P-2).
+    /// authorization by posture (Castle: the passphrase; Standard: the
+    /// passphrase if set, else *Export* directly — checked against the open
+    /// library's key file), a chosen destination (never the backups folder),
+    /// the export off the main actor. Rendered only when the open library's
+    /// faces and the store are composed (P-2).
     @ViewBuilder
     private var plaintextExportSection: some View {
-        if let protection, let services {
+        if let roadStanding, let services {
             Section(ProtectionCopy.exportPlaintextTitle) {
                 Text(ProtectionCopy.exportPlaintextBody)
                     .font(.callout)
@@ -434,7 +360,7 @@ struct DataSafetyPane: View {
                     }
                 } else {
                     Button(CapabilityRegistry.capability(.exportPlaintextLibrary).verb) {
-                        plaintextExport = PlaintextExportModel(facts: exportFacts(protection: protection, services: services))
+                        plaintextExport = PlaintextExportModel(facts: exportFacts(standing: roadStanding, services: services))
                     }
                     .disabled(model.busy)
                 }
@@ -442,26 +368,19 @@ struct DataSafetyPane: View {
         }
     }
 
-    /// The facts the export composes: the posture and passphrase from the
-    /// controller; the verification through the VAULT when enrolled (the
-    /// tie's read-only check), else the key file's own copy; the refused
-    /// folders (the app's own backups, beside the library and in the picked
-    /// second folder); the export over the session's database, off-main.
-    private func exportFacts(protection: ProtectionController, services: AppServices) -> PlaintextExportModel.Facts {
-        let tie = VaultTie.make(services: services)
-        let enrolled: Bool = {
-            if case .enrolled = services.encryption.state { return true }
-            return false
-        }()
+    /// The facts the export composes (VX-329 U1 — PROVISIONAL P-VX329-U1-2): the open library's posture and whether
+    /// its key file carries a passphrase lock; the typed passphrase checked against that key file (rule 7 — a synced
+    /// library's pair IS the account's); the refused folders (the app's own backups, beside the library and in the
+    /// picked second folder); the export over the session's database, off-main.
+    private func exportFacts(standing: RoadStandingModel, services: AppServices) -> PlaintextExportModel.Facts {
         let database = services.session.database
         return PlaintextExportModel.Facts(
-            posture: { protection.posture },
-            hasPassphrase: { protection.hasPassphraseWrap },
+            isCastle: { standing.posture == .castle },
+            hasPassphrase: { standing.passphraseIsSet },
             verifyPassphrase: { typed in
-                if enrolled, let tie { return await tie.verifyPassphrase(typed) }
-                switch await protection.verifyPassphraseAgainstStore(typed) {
+                switch await standing.checkPassphrase(typed) {
                 case true?: return .match
-                case false?: return .mismatch(ProtectionCopy.message(for: StoreKeyEnvelopeError.wrongPassphrase))
+                case false?: return .mismatch(ProtectionCopy.wrongPassphraseRefusal)
                 case nil: return .couldNotCheck("no passphrase is set on this library")
                 }
             },
@@ -570,17 +489,7 @@ struct DataSafetyPane: View {
             // interpolated `Text` is not a `LocalizedStringKey`, so `**…**`
             // renders as literal asterisks. Caught in the drill's own
             // screenshot of this pane.
-            // VX-307 U2c (VX-379's row — the VX-306 walk's F-U3-1): the old
-            // "Restoring is a Finder operation, not a button" had been false
-            // since 13x's Restore from Backup door; now rule 17's language
-            // ("The app's Restore from Backup is this door"; the previous
-            // library steps aside whole into Previous Libraries), true of
-            // today's road. TODAY's road only: on the new road the Restore
-            // list above says it in its own lead (`restoreListLead`).
-            if roadStanding == nil {
-                Text(DataSafetyCopy.restoringByTheDoor)
-                    .font(.callout)
-            }
+            // (The Restore list above says what restoring is in its own lead — `restoreListLead`, rule 17.)
             Text(syncing
                  ? DataSafetyCopy.syncedRestoreWarning
                  : DataSafetyCopy.localRestoreWarning)
@@ -596,15 +505,12 @@ struct DataSafetyPane: View {
         }
     }
 
-    /// VX-307 U2c — the open library's posture on the new road (nil on today's road).
+    /// VX-307 U2c — the open library's posture (nil: no library's faces composed).
     private var roadPosture: ProtectionMode? { roadStanding?.posture }
 
-    /// VX-307 U2c (U2a's F-6): whether the Castle warning shows — on the NEW road
-    /// by the open library's posture (`roadPosture` non-nil there), on today's
-    /// road by today's controller's posture, as ever. Pure — pinned both ways.
-    static func castleWarningShows(todaysPosture: Posture?, roadPosture: ProtectionMode?) -> Bool {
-        if let roadPosture { return roadPosture == .castle }
-        return todaysPosture == .castle
+    /// VX-307 U2c (U2a's F-6): whether the Castle warning shows — by the open library's posture. Pure — pinned.
+    static func castleWarningShows(roadPosture: ProtectionMode?) -> Bool {
+        roadPosture == .castle
     }
 
     /// Which warning leads. Both are always shown — she may sign in later,
@@ -650,30 +556,6 @@ struct DataSafetyPane: View {
             parts.append("back to \(oldest.formatted(date: .abbreviated, time: .omitted))")
         }
         return parts.joined(separator: " · ")
-    }
-}
-
-/// pre-13x 5a/5b — copy §6 on the Backups tab: the per-posture sentence
-/// (what opens a backup) and, under Castle, the lock-time copy line (ledger
-/// 68 — row 7's keyless byte-copy at lock, BUILT at 2a and unrendered until
-/// 5b). A view of its own so `DataSafetyFacesTests` hosts it directly (the
-/// pane's copies section composes only with a wired backup).
-struct BackupsPostureLines: View {
-    let posture: Posture
-
-    var body: some View {
-        Text(posture == .castle
-             ? ProtectionCopy.backupsCastleSentence
-             : ProtectionCopy.backupsStandardSentence)
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .fixedSize(horizontal: false, vertical: true)
-        if posture == .castle {
-            Text(ProtectionCopy.backupsLockTimeCopyLine)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
     }
 }
 

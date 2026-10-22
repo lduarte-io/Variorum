@@ -48,7 +48,7 @@ nonisolated final class ICloudAppleKeysLeaf: AppleKeysLeaf, @unchecked Sendable 
 
     func readAppleKey(id: String) throws -> AppleKeyMaterial? {
         guard let data = try ProtectionKeychain.readData(service: Self.service, account: account(id), residence: .synchronizable),
-              let value = try? JSONDecoder().decode(AppleKey.self, from: data), value.id == id, value.key.count == 32
+              let value = try? JSONDecoder().decode(StoredAppleKey.self, from: data), value.id == id, value.key.count == 32
         else { return nil }
         return AppleKeyMaterial(id: id, key: SymmetricKey(data: value.key))
     }
@@ -56,7 +56,7 @@ nonisolated final class ICloudAppleKeysLeaf: AppleKeysLeaf, @unchecked Sendable 
     func addAppleKey(_ key: AppleKeyMaterial, libraryID: String) throws {
         try ProtectionKeychain.refuseUnderTest(scope, "apple.add")
         let bytes = key.key.withUnsafeBytes { Data($0) }
-        let data = try JSONEncoder().encode(AppleKey(id: key.id, key: bytes))
+        let data = try JSONEncoder().encode(StoredAppleKey(id: key.id, key: bytes))
         var attributes = ProtectionKeychain.base(service: Self.service, account: account(key.id), residence: .synchronizable)
         attributes[kSecValueData as String] = data
         attributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
@@ -77,5 +77,13 @@ nonisolated final class ICloudAppleKeysLeaf: AppleKeysLeaf, @unchecked Sendable 
 
     func appleKeyIDs(ofLibrary libraryID: String) throws -> Set<String> {
         Set(try listed().filter { $0.libraryID == libraryID }.map(\.id))
+    }
+
+    /// The item's value: the Apple key's id and its 32 bytes, as JSON — the coding shape today's `AppleKey` gave the
+    /// family (`{"id","key"}`), kept byte-for-byte when that type left with today's road (VX-329 U1), so every item
+    /// this leaf wrote still reads.
+    private struct StoredAppleKey: Codable {
+        var id: String
+        var key: Data
     }
 }

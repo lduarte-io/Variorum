@@ -110,11 +110,11 @@ final class RoadAccountConfirmModel: Identifiable {
         switch door.ask {
         case .passphraseAndWords:
             let passphraseTyped = !passphrase.isEmpty && (!door.newPassphrase || !again.isEmpty)
-            return passphraseTyped && !EncryptionSession.words(from: words).isEmpty
+            return passphraseTyped && !WordsInput.words(from: words).isEmpty
         case .passphrase:
             return !passphrase.isEmpty && (!door.newPassphrase || !again.isEmpty)
         case .oneSecret:
-            return !passphrase.isEmpty || !EncryptionSession.words(from: words).isEmpty
+            return !passphrase.isEmpty || !WordsInput.words(from: words).isEmpty
         case .nothing:
             return true
         }
@@ -124,9 +124,9 @@ final class RoadAccountConfirmModel: Identifiable {
         guard moment == nil, canSubmit(passphrase: passphrase, again: again, words: wordsText) else { return }
         var typedWords: [String]?
         // VX-308 U2: one secret (rule 14) — the words, when typed, checked for shape like any.
-        let oneSecretWords = door.ask == .oneSecret && !EncryptionSession.words(from: wordsText).isEmpty
+        let oneSecretWords = door.ask == .oneSecret && !WordsInput.words(from: wordsText).isEmpty
         if door.ask.asksWords || oneSecretWords {
-            let words = EncryptionSession.words(from: wordsText)
+            let words = WordsInput.words(from: wordsText)
             do {
                 try RecoveryPhrase.validate(words)
             } catch let error as RecoveryPhraseError {

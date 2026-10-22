@@ -305,6 +305,12 @@ final class RoadStandingModel {
     @ObservationIgnored private let keyFileStands: () -> Bool
     @ObservationIgnored private let takeBackupPair: () async -> Bool
     @ObservationIgnored private let receiptsOwed: () -> [String]
+    /// VX-329 U1 — the decrypted export's authorization on the one road (its rule unchanged — Castle, or a passphrase
+    /// set: the passphrase): the typed passphrase checked against the OPEN library's key file, off the main actor
+    /// (true opens it · false does not · nil no passphrase lock exists). PROVISIONAL P-VX329-U1-2.
+    @ObservationIgnored let checkPassphrase: (String) async -> Bool?
+    /// Whether the open library's key file carries a passphrase lock now.
+    var passphraseIsSet: Bool { passphraseExists() }
     /// The status seam's receipt door — set by the composition that holds it (the Mac's ready window); the
     /// receipts owed wait for it.
     @ObservationIgnored var speak: ((String) -> Void)? {
@@ -328,9 +334,11 @@ final class RoadStandingModel {
         lookAsksPassphrase: (() -> Bool)? = nil,
         keyFileStands: @escaping () -> Bool = { false },
         takeBackupPair: @escaping () async -> Bool = { false },
-        copyCounts: (() async -> RoadCopyCounts)? = nil
+        copyCounts: (() async -> RoadCopyCounts)? = nil,
+        checkPassphrase: @escaping (String) async -> Bool? = { _ in nil }
     ) {
         self.copyCounts = copyCounts
+        self.checkPassphrase = checkPassphrase
         self.faces = faces
         self.reminder = reminder
         self.setPassphrase = setPassphrase
@@ -425,6 +433,12 @@ final class RoadStandingModel {
             },
             copyCounts: {
                 await Task.detached(priority: .utility) { ProtectionCopyCounts.read(session) }.value
+            },
+            checkPassphrase: { typed in
+                await Task.detached(priority: .userInitiated) {
+                    guard let keyFile = session.library.keyFile, keyFile.passphrase != nil else { return nil }
+                    return (try? keyFile.open(passphrase: .passphrase(typed))) != nil
+                }.value
             })
         standing.model = model
         return model

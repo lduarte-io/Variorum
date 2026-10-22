@@ -9,10 +9,11 @@
 //  dropped)"*).
 //
 //  THE PLATFORM MAPPING, stated once so nobody re-derives it. The re-lock
-//  rule and the idle dial are SHARED (`ProtectionDials`; pre-13x 2a — the
-//  sleep / screen-lock re-lock is no longer a dial: always on in Castle,
-//  design §1.18); what each one MEANS is a per-platform reading, and the
-//  phone's is:
+//  rule and the idle setting are SHARED (VX-329 U1: the open library's
+//  `RoadRelockPolicy` — Castle locks, with this device's sealed idle
+//  minutes; the sleep / screen-lock re-lock is always on in Castle, design
+//  §1.18); what each one MEANS is a per-platform reading, and the phone's
+//  is:
 //
 //  · The sleep / screen-lock re-lock ⇒ **lock when Variorum leaves the
 //    screen.** On the Mac that rule is sleep + screen lock; on the phone,
@@ -21,15 +22,15 @@
 //    savepoint and the sync round all hang off it). Locking there is a
 //    REAL boundary, not theater: the pool closes and the key is dropped,
 //    so handing someone the phone hands them a lobby.
-//  · `relockAfterIdleMinutes` ⇒ **lock after time away.** The Mac polls
+//  · the idle minutes ⇒ **lock after time away.** The Mac polls
 //    idle time because it stays running; a suspended phone cannot poll at
 //    all, so the phone reads the same dial on RETURN — a short trip out
 //    of the app costs nothing, a long one re-asks. Same dial, same
 //    intent, honest mechanism.
 //
-//  Both re-check the dials AT FIRE TIME (the Mac monitors' own discipline)
-//  and both end at `AppBootstrap.lock()`, which refuses under Auto by
-//  itself — so no road here can produce the theater R13p-14 forbids.
+//  Both re-check the policy AT FIRE TIME (the Mac monitors' own discipline)
+//  and both end at `AppBootstrap.lock()`, which locks only Castle — so no
+//  road here can produce the theater R13p-14 forbids.
 //
 //  ORDER IS LOAD-BEARING: on leaving, the flush runs FIRST (quick note
 //  minted, editors flushed, savepoints landed, one sync round) and the
@@ -40,33 +41,20 @@
 import Foundation
 import VariorumCore
 
-// MARK: - The policy (pure — the dials' phone reading)
+// MARK: - The policy (pure — the open library's policy, the phone's reading)
 
 nonisolated enum MobileRelockPolicy {
-    /// The "lock after time away" rows — pre-13x 2a: the design's four
-    /// values (decision 18: 5 · 10 · 30 · never; default 10), the SAME
-    /// dial and the same values as the Mac's; only the mechanism differs.
-    static let awayChoices: [Int?] = ProtectionDials.idleChoices
-
-    static func awayLabel(_ minutes: Int?) -> String {
-        ProtectionCopy.idleChoiceLabel(minutes)
+    /// Does leaving the screen lock the library right now? In Castle ALWAYS (decision 18 — re-lock on sleep / screen
+    /// lock is always on; backgrounding IS the phone's leaving); in Standard never (`policy` nil — its quiet roads would
+    /// open it again at once, R13p-14).
+    static func locksOnLeaving(policy: RoadRelockPolicy?) -> Bool {
+        policy != nil
     }
 
-    /// Does leaving the screen lock the library right now? pre-13x 2a: in
-    /// Castle ALWAYS (decision 18 — re-lock on sleep / screen lock is
-    /// always on; backgrounding IS the phone's leaving); in Standard never
-    /// (no gate exists — a lock there would be theater, R13p-14).
-    static func locksOnLeaving(gate: StoreAtOpenMode) -> Bool {
-        gate.isDemanded
-    }
-
-    /// Does coming back after `awayFor` seconds lock it? (nil minutes =
-    /// never; a demanded gate is required, exactly as on the Mac.)
-    static func locksOnReturn(
-        gate: StoreAtOpenMode, dials: ProtectionDials, awayFor seconds: TimeInterval
-    ) -> Bool {
-        guard gate.isDemanded else { return false }
-        return IdleLockClock.isDue(idleSeconds: seconds, minutes: dials.relockAfterIdleMinutes)
+    /// Does coming back after `awayFor` seconds lock it? (nil minutes = never; Castle is required, exactly as on the Mac.)
+    static func locksOnReturn(policy: RoadRelockPolicy?, awayFor seconds: TimeInterval) -> Bool {
+        guard let policy else { return false }
+        return IdleLockClock.isDue(idleSeconds: seconds, minutes: policy.idleMinutes)
     }
 }
 
@@ -114,9 +102,8 @@ func mobileWillLock(
 /// above, and everything it DOES is `lock`, which is the bootstrap's.
 @MainActor
 final class MobileRelockCoordinator {
-    /// The facts at FIRE time (pre-13x 2a): the effective gate (derived —
-    /// Castle or not) and Castle's dials (the idle minutes).
-    private let facts: @MainActor () -> (gate: StoreAtOpenMode, dials: ProtectionDials)
+    /// The policy at FIRE time: the open library's (`AppBootstrap.roadRelockPolicy`).
+    private let policy: @MainActor () -> RoadRelockPolicy?
     private let lock: @MainActor () async -> Void
     private let now: @MainActor () -> Date
     /// When the app last left the screen — nil before the first leaving,
@@ -125,11 +112,11 @@ final class MobileRelockCoordinator {
     private(set) var leftAt: Date?
 
     init(
-        facts: @escaping @MainActor () -> (gate: StoreAtOpenMode, dials: ProtectionDials),
+        policy: @escaping @MainActor () -> RoadRelockPolicy?,
         lock: @escaping @MainActor () async -> Void,
         now: @escaping @MainActor () -> Date = { Date() }
     ) {
-        self.facts = facts
+        self.policy = policy
         self.lock = lock
         self.now = now
     }
@@ -138,7 +125,7 @@ final class MobileRelockCoordinator {
     /// in this file's header). Locks under Castle, always (decision 18).
     func didLeaveTheScreen() async {
         leftAt = now()
-        guard MobileRelockPolicy.locksOnLeaving(gate: facts().gate) else { return }
+        guard MobileRelockPolicy.locksOnLeaving(policy: policy()) else { return }
         leftAt = nil
         await lock()
     }
@@ -152,9 +139,7 @@ final class MobileRelockCoordinator {
         guard let leftAt else { return false }
         let away = now().timeIntervalSince(leftAt)
         self.leftAt = nil
-        let current = facts()
-        guard MobileRelockPolicy.locksOnReturn(
-            gate: current.gate, dials: current.dials, awayFor: away) else { return false }
+        guard MobileRelockPolicy.locksOnReturn(policy: policy(), awayFor: away) else { return false }
         await lock()
         return true
     }

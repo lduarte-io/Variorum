@@ -17,8 +17,6 @@ struct RootView: View {
     /// Session services (Phase 8) — nil for the first frames until the root
     /// `.task` starts them; the footer appears when ready.
     let services: AppServices?
-    /// pre-13u Act 10 (memo §6): the unchosen-state indicator reads this.
-    let protection: ProtectionController?
     /// 13f batch 5b (W2/A26): the app's register of open windows and the ONE
     /// authority on which is key. This window reads two things from it — is
     /// it the key window (the mount gate) and is it the navigation target
@@ -171,9 +169,6 @@ struct RootView: View {
 
     init(
         session: AppSession, services: AppServices? = nil,
-        // pre-13u Act 10 (memo §6): the unchosen-state indicator's brain —
-        // defaulted so harness mounts never need one.
-        protection: ProtectionController? = nil,
         router: ShellRouter = ShellRouter(), windows: WindowRegistry = WindowRegistry(),
         // 13e E14: defaulted like `windows`, and defaulted to the INERT
         // system — a harness that mounts this view must never ask the real
@@ -187,7 +182,6 @@ struct RootView: View {
     ) {
         self.session = session
         self.services = services
-        self.protection = protection
         self.windows = windows
         self.hotKeys = hotKeys
         self.whatsNew = whatsNew
@@ -338,7 +332,7 @@ struct RootView: View {
         .task(id: services != nil) {
             guard let services, iCloudOffer == nil else { return }
             let offer = ICloudDriveOfferModel(
-                leaves: .live(services: services, protection: protection))
+                leaves: .live(services: services, posture: { [protectionFaces] in protectionFaces?.posture }))
             iCloudOffer = offer
             guard let calmAsks else { return }
             let ownWriting = OwnWritingProbe(session: session)
@@ -586,9 +580,8 @@ struct RootView: View {
         }
     }
 
-    /// The sidebar column's BOTTOM — the bottom-left family: the
-    /// protection row (memo §6: renders only while the choice is genuinely
-    /// unmade; NEVER "encryption off") and the sync row (the bridge row
+    /// The sidebar column's BOTTOM — the bottom-left family: the sync row
+    /// (today's protection row left with today's road at VX-329; the bridge row
     /// stood third until the bridge's 2026-09-04 retirement). They
     /// were the split view's `safeAreaInset`; the flat column carries them
     /// as its own last region (Sitting 9's opaque voiced background survives
@@ -598,13 +591,8 @@ struct RootView: View {
         let tokens = theme.tokens(for: scheme)
         return AnyView(
             VStack(alignment: .leading, spacing: 0) {
-                // VX-307 U2c (VX-379's row — the VX-306 walk's W-1): the posture box reads TODAY's tier, so it renders on
-                // today's road only — on the new road its exposed line ("only this Mac can open your work") would be
-                // false (rule 8: the Apple road reaches her other Macs), and the card above the quick entry carries
-                // rule 3's ask there (U2b).
-                if let protection, protectionFaces == nil {
-                    ProtectionStatusRow(controller: protection, tokens: tokens)
-                }
+                // (VX-329 U1: today's posture box — `ProtectionStatusRow`, today's tier — left with today's road; the card
+                // above the quick entry carries rule 3's ask — VX-307 U2b.)
                 // VX-218: the family's words sit on the column's own content
                 // edge — where every row and header above them sits
                 // (`SidebarLayout.contentInset`) — never 6 pt from the

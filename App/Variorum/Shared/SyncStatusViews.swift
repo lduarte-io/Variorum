@@ -54,7 +54,7 @@ import VariorumCore
 nonisolated struct SyncRowFace: Equatable {
     enum Kind: Equatable {
         case devStore, signedOut, syncOff, syncing, offline
-        case keysLocked, keysReplaced, rekeyIncomplete, notEntitled, error, idle
+        case keysLocked, keysReplaced, notEntitled, error, idle
         /// VX-314: the signed-in account is not this library's — the engine
         /// refuses rounds (outbox intact, cursor unmoved). Calm paused
         /// voice; the door reaches the Account tab, where sign-in and the
@@ -104,10 +104,7 @@ nonisolated struct SyncRowFace: Equatable {
         lastError: String?,
         lastErrorIsOffline: Bool,
         stalled: Bool = false,
-        canCheckForUpdates: Bool = false,
-        // VX-110 (item 2): the pending marker's act, so the rekey row's door
-        // names what did not finish; nil = the older key-replacement words.
-        rekeyAct: CeremonyAct? = nil
+        canCheckForUpdates: Bool = false
     ) -> SyncRowFace {
         // The A4 fence: a dev-store session never syncs — no sign-in door
         // either (the one mirror belongs to the real store; signing in
@@ -135,25 +132,13 @@ nonisolated struct SyncRowFace: Equatable {
                     Door(label: "Sync now", act: .syncNow),
                 ])
             }
-            if EncryptionSession.isKeysLockedError(error) {
+            if Self.isKeysLockedError(error) {
                 // Phase 14b (L9): the keys-refusal presents as a paused
-                // state naming its fix; CF-14 keeps its door IN PLACE,
-                // opening the Encryption tab directly.
+                // state naming its fix. VX-329 U1 — PROVISIONAL P-VX329-U1-4:
+                // its door opened today's Encryption tab (today's road, deleted);
+                // it opens the Account sheet, the row's other doors' target.
                 return SyncRowFace(kind: .keysLocked, doors: [
-                    Door(label: "Unlock…", act: .openAccount(.encryption)),
-                ])
-            }
-            if EncryptionSession.isRekeyIncompleteError(error) {
-                // Ladder R1-1: a key replacement started on THIS device
-                // and never finished (a crash or mid-run failure left
-                // the persisted marker) — the engine refuses rounds on
-                // it, and the row's one door reaches the completing
-                // surface directly (fire-and-DO: the prompt IS the
-                // road). Its own state, never the replaced-keys row —
-                // CF-16's re-enroll prescription cannot complete a
-                // half-run re-key.
-                return SyncRowFace(kind: .rekeyIncomplete, doors: [
-                    Door(label: Self.rekeyIncompleteDoorLabel(for: rekeyAct), act: .openAccount(.encryption)),
+                    Door(label: "Account…", act: .openAccount(.account)),
                 ])
             }
             if Self.isAccountMismatchError(error) {
@@ -164,9 +149,9 @@ nonisolated struct SyncRowFace: Equatable {
                     Door(label: "Account…", act: .openAccount(.account)),
                 ])
             }
-            if EncryptionSession.isPayloadCryptoError(error)
-                || EncryptionSession.isKeysReplacedError(error)
-                || EncryptionSession.isKeyProofRefusedError(error) {
+            if Self.isPayloadCryptoError(error)
+                || Self.isKeysReplacedError(error)
+                || Self.isKeyProofRefusedError(error) {
                 // pre-13x 2c: the un-followed state (§7) — the fence's
                 // refusal and the proof's alike; the door reaches the
                 // Encryption tab, where the follow's door stands.
@@ -176,8 +161,10 @@ nonisolated struct SyncRowFace: Equatable {
                 // refusals on anything that slipped past — both present
                 // as the replaced-keys line naming the real fix instead
                 // of a generic error face.
+                // VX-329 U1 — P-VX329-U1-4: the door opened today's Encryption
+                // tab (deleted); the Account sheet, as above.
                 return SyncRowFace(kind: .keysReplaced, doors: [
-                    Door(label: "Re-enroll…", act: .openAccount(.encryption)),
+                    Door(label: "Account…", act: .openAccount(.account)),
                 ])
             }
             if Self.isAppBehindServerError(error) {
@@ -264,11 +251,32 @@ nonisolated struct SyncRowFace: Equatable {
         return rendered == text ? (client, server) : nil
     }
 
-    /// VX-110 (item 2 — PROVISIONAL words): the rekey row's door by the
-    /// pending marker's act — a switch into Castle is not a key replacement
-    /// in the words she reads (the panes' label rule, `entersCastle`).
-    static func rekeyIncompleteDoorLabel(for act: CeremonyAct?) -> String {
-        act?.entersCastle == true ? "Finish entering Castle…" : "Finish key replacement…"
+    // MARK: - The engine's refusals, classified (moved from today's `EncryptionSession` at VX-329 U1, byte-for-byte)
+
+    /// The locked-state classifier: true exactly for the engine's keys-refusal (`SyncError.encryptionKeysUnavailable`,
+    /// which the scheduler surfaces verbatim via `String(describing:)`).
+    nonisolated static func isKeysLockedError(_ text: String) -> Bool {
+        text == SyncError.encryptionKeysUnavailable.description
+    }
+
+    /// CF-16's classifier arm: true for the engine's payload-crypto refusal (`SyncError.payloadCryptoFailure`) as the
+    /// scheduler surfaces it. The case's description carries row coordinates, so this anchors on the description's two
+    /// invariant segments; the conjunction excludes the other "Sync refused:"-family case
+    /// (`unencryptedValueInEncryptedColumn`), which never means stale keys.
+    nonisolated static func isPayloadCryptoError(_ text: String) -> Bool {
+        text.hasPrefix("Sync refused: '")
+            && text.contains("failed to encrypt/decrypt (")
+    }
+
+    /// Phase 14c — the fence's classifier arm: true exactly for the server's vault-key-id fence refusal
+    /// (`SyncError.encryptionKeysReplaced`).
+    nonisolated static func isKeysReplacedError(_ text: String) -> Bool {
+        text == SyncError.encryptionKeysReplaced.description
+    }
+
+    /// pre-13x 2c — the key proof's refusal (`SyncError.keyProofRefused`): the same replaced-keys row.
+    nonisolated static func isKeyProofRefusedError(_ text: String) -> Bool {
+        text == SyncError.keyProofRefused.description
     }
 
     /// The door's words — the platform's own, identical to the Mac menu's
@@ -321,10 +329,6 @@ struct SyncStatusRow: View {
     /// CF-14: the ONE sheet, opened at the tab the pressed door names
     /// (nil = not presented).
     @State private var accountSheetTab: AccountTab?
-    /// VX-110 (item 2): the pending marker's act, read on the row's own
-    /// cadence (whenever the row's error changes) — the Encryption tab's
-    /// refresh may never have run.
-    @State private var rekeyAct: CeremonyAct?
 
     private var sync: SyncSession { services.sync }
 
@@ -337,17 +341,13 @@ struct SyncStatusRow: View {
             lastError: sync.status.lastError,
             lastErrorIsOffline: sync.status.lastErrorIsOffline,
             stalled: sync.status.pullStalled,
-            canCheckForUpdates: checkForUpdatesDoor != nil,
-            rekeyAct: rekeyAct)
+            canCheckForUpdates: checkForUpdatesDoor != nil)
     }
 
     var body: some View {
         row
             .sheet(item: $accountSheetTab) { tab in
                 AccountView(services: services, initialTab: tab)
-            }
-            .task(id: sync.status.lastError) {
-                rekeyAct = await services.encryption.readPendingCeremonyAct()
             }
     }
 
@@ -473,10 +473,6 @@ struct SyncStatusRow: View {
             Text(Self.keysReplacedLabel)
                 .pageCaptionWarning(pageStyle)
                 .help(sync.status.lastError ?? "")
-        case .rekeyIncomplete:
-            Text(Self.rekeyIncompleteLabel(for: rekeyAct))
-                .pageCaptionWarning(pageStyle)
-                .help(sync.status.lastError ?? "")
         case .accountMismatch:
             // VX-314 (PROVISIONAL words): paused, naming the fix; the
             // engine's full sentence rides the hover.
@@ -561,19 +557,6 @@ struct SyncStatusRow: View {
     /// different account than the signed-in one; the door beside it opens
     /// the Account tab (sign in, or the Move road).
     static let accountMismatchLabel = "Sync paused — this library belongs to a different account"
-
-    /// Ladder R1-1's row line: an unfinished re-key on THIS device (the
-    /// persisted marker) — the door beside it opens the Encryption tab,
-    /// whose banner carries the completing Replace door.
-    static let rekeyIncompleteLabel = "Sync paused — key replacement didn't finish on this device"
-
-    /// VX-110 (item 2 — PROVISIONAL words): the row line by the pending
-    /// marker's act; the older line for a replacement or an unknown act.
-    static func rekeyIncompleteLabel(for act: CeremonyAct?) -> String {
-        act?.entersCastle == true
-            ? "Sync paused — entering Castle didn't finish on this device"
-            : rekeyIncompleteLabel
-    }
 
     private var lastSyncLabel: String {
         guard let last = sync.status.lastSuccessAt else { return "Not synced yet" }

@@ -1,8 +1,8 @@
 //
 //  RestoreHoldModel.swift
 //  Variorum (shared — the restore-hold's observable face-state; the Mac's
-//  banner renders it; `wireGates` points the round and ceremony gates at
-//  the marker itself)
+//  banner renders it; `wireGates` points the round gate at the marker
+//  itself)
 //
 //  Phase 13x, U2 row 7 — THE LANDING STATE's brain (round 3, ruled on
 //  BOTH doors): the hold is the `LibraryRestoreHold` marker beside the
@@ -42,14 +42,11 @@ final class RestoreHoldModel {
         return { storeURL.map { LibraryRestoreHold.isHeld(besideStore: $0) } ?? false }
     }
 
-    /// The composition root's ONE wiring of both gates (R3-2): the round
-    /// trigger (`SyncSession.roundsHeld`) and the rotation ceremonies'
-    /// door (`ProtectionController.restoreHoldStands`, F1 R1-M1) — each
-    /// reading the marker.
-    func wireGates(sync: SyncSession, protection: ProtectionController) {
-        let gate = markerGate
-        sync.roundsHeld = gate
-        protection.restoreHoldStands = gate
+    /// The composition root's wiring of the round trigger's gate (R3-2 — `SyncSession.roundsHeld`), reading the
+    /// marker. (VX-329 U1: today's rotation ceremonies' door left with today's road; the road's crossings refuse a
+    /// held SYNCED Use Castle / Replace All Keys themselves, reading the same marker — F-4.)
+    func wireGates(sync: SyncSession) {
+        sync.roundsHeld = markerGate
     }
 
     @ObservationIgnored private let storeURL: URL?

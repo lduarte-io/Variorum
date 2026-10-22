@@ -143,23 +143,71 @@ form). Machinery note: the orchestrator's own commits interleave on this branch 
   today's envelope — VX-64) + `Vx64DrillFixtureTests`. The workbook LIBRARY (parser, plan, mint) and the vault-bootstrap
   BRAIN (`Crypto/VaultBootstrap.swift`, the 14b vault create + resync) are untouched — the brain is FLAGGED below.
 
+- **R-U1-4 — ONE ROAD IN THE BOOTSTRAP, AND ITS TEST HARNESS REQUIRED.** With today's route gone, a bootstrap without the
+  road has nothing to open: the production init always composes `RoadInputs.live(variant:)` (every variant — the dev-store
+  fence dissolved), and the test init takes the harness (`init(testStoreURL:protectionRoad:)`). Today's store id beside
+  the library (`ensureStoreIdentity` — today's `StoreIdentity` stub envelope, written on the new road "so the rest of the
+  app keeps its footing") went with the envelope: nothing reads it any more (today's sync custody, dials and backup log
+  were its only readers). The copy doors' `mintStoreIdentity` hook went with it.
+- **R-U1-5 — THE PAIR ROAD IS THE BACKUP WRITER.** `StoreBackup` keeps the clock (launch + hourly, Back Up Now, one run
+  at a time), the record and the log, the `RESTORE.md` drop and the Markdown leg; its run's writer is the road's pair road
+  (`ProtectionBackupHook.attach` → `StoreBackup.pairRoad`; `runPair`: due when this Mac's newest pair of the library beside
+  it is older than the interval — `OwnCopies.pairIsDue`, the catalogue's, never the folder's newest file — or forced;
+  `takePairReporting` lands the container pair, the picked folder's when due there, then retention, and reports both
+  legs). Today's flat legs (the container's flat snapshots + 14-newest prune, the second-folder copy + its 14+4 sweep
+  over this Mac's own list, today's key-file copies into both folders, the lock-time keyless byte copy and its next-unlock
+  check) are DELETED. Data Safety's two rows count the catalogue's pairs only (today's flat-file count deleted).
+- **R-U1-6 — SEND LIBRARY STANDS, ON THE ROAD'S ACT.** Today's producer copied today's key file beside a sealed snapshot;
+  the core already holds the road's act (`ProtectionExecutor.sendLibrary` → `writeSendPair`: `variorum.sqlite` + this
+  design's key file — exactly what the road's Open Library… files on the other Mac). The door, its faces and words are
+  unchanged; `AppBootstrap.sendLibrary(into:)` runs the act (one act at a time, off the main actor; a refusal removes the
+  half-made folder). PROVISIONAL P-VX329-U1-1 (stop-and-flag below).
+- **R-U1-7 — THE DECRYPTED EXPORT'S FACTS FROM THE ROAD.** Its authorization rule is unchanged (Castle, or a passphrase
+  set: the passphrase); the facts moved from today's controller and vault tie to the open library — its posture, whether
+  its key file carries a passphrase lock, the typed passphrase checked against that key file (`RoadStandingModel
+  .checkPassphrase`). PROVISIONAL P-VX329-U1-2. (The core's own `plaintextExport` act exists unwired — noted for R1's
+  VX-461.)
+
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton: DONE (`c629ae54f`).
 - Piece 0 — the flip (`ProtectionRoad.live` → true unconditionally; the dev-store fence's parameter deleted with its
-  callers' discrimination; the bootstrap's and the composition roots' `!newRoad` arms deleted): IN-PROGRESS —
-  `ProtectionRoad` flipped (`live` answers true for both arms; `opensOnTheNewRoad(devStore:)` deleted); the readme's
-  and the guide's today variants deleted (`ReadmeSeeder.paragraphs` is the nine; `TutorialSeeder.plan` IS the new-road
-  plan; `seed(…)` lost `onTheNewRoad`); Settings' catalogue/rendered-map/search lost `newRoad:` (the account row's
-  presence is `accountSection:` — where the pane renders the section). REMAINS: `AppBootstrap`, `VariorumApp`, the
-  phone's root, `LibraryOpenDoor`, `EditorCommands`.
-- Piece 1 — the Shared/ deletions (today's deciding and writing road in the app): NOT-STARTED.
+  callers' discrimination; the bootstrap's and the composition roots' `!newRoad` arms deleted): DONE (`c3d939c9e` the
+  seeders/Settings half · this commit the rest). `ProtectionRoad.live(debug:)` answers true for both arms (the pure
+  function kept, its pin to flip); `opensOnTheNewRoad(devStore:)` DELETED with every caller's discrimination;
+  `AppBootstrap.newRoad` DELETED — the bootstrap has one road: `State` lost `.locked`/`.waitingForICloudKeychain` and
+  `.failed`'s recovery lobby; the test init is `init(testStoreURL:protectionRoad:)` (the harness REQUIRED — today's
+  `testOpener`/`gate`/`testPresence` went with today's route); the production init composes `RoadInputs.live`.
+  `VariorumApp`, the phone's root, `LibraryOpenDoor`, `SettingsSceneContent`, `AppSettingsView`, `RootView` lost their
+  today arms. `swift build` + the Mac app `build` (Debug) GREEN at this commit; the TEST targets do not compile yet
+  (piece 3).
+- Piece 1 — the Shared/ deletions (today's deciding and writing road in the app): IN-PROGRESS — DELETED whole:
+  `AppleKeyCustody`, `AppleRelinkModel`, `EncryptionKeychain` (today's sync custody: `SyncCustodyRecord`/`Session`,
+  `E2EECustodyLeaves`, `DeviceKeyStore`, `DeviceKeySyncProvider`), `EncryptionSession`, `EncryptionViews` (the Account
+  sheet's Encryption tab), `KeyDoorModel`/`KeyDoorView`/`KeyDoorCopy`, `LibraryOpenModel` (13x's adoption flow + its
+  sheet), `LobbyVaultRoad`, `PassphraseSetModel` (+ `VaultTie`), `PostureCopy`, `PostureFollowModel`, `PostureSwitch`,
+  `PostureSwitchModel`, `ProtectionMigration`, `SecretCheck`, `StoreKeyGuard`, `StoreLaunchGate`, `StoreProtection`
+  (`Posture`, `RawKeyCustody`, `StoreAtOpenMode`, `ProtectionDials`, today's `ProtectionCopy` base), `SyncEnrollment
+  Model`/`View`, `WordsCeremony`, `BackupRetention`; the Mac's `ProtectionStatusRow` (today's tier); the phone's
+  `MobileProtectionSheet`, `MobileProtectionCeremonies`, `MobilePostureSheets`, `MobileStoreLockView`. STRIPPED to the
+  road's arms: `ProtectionController` (the relock monitors over `roadRelock`, the idle clock, the Settings pane
+  request — nothing else), `AppServices` (the key provider REQUIRED, today's encryption session / vault client / adopt
+  road / rotation-marker reads gone), `StoreBackup` (see R-U1-5), `LibraryHandOff` (see R-U1-6), `LibraryOpenCopy`,
+  `KeychainCustody` (the tripwire + partition rules kept; today's gated-save and handover choreographies gone),
+  `RestoreHoldModel` (the round gate only), `SyncStatusViews` (the engine-error classifiers moved here; the
+  rekey-incomplete arm gone), `AuthViews` (the Encryption tab gone), the Protection and Data Safety panes, the Mac's
+  `StoreLockView.swift` (today's `StoreLockView` struct gone; `RoadLockView` stays, its Finder-revealing restore arm gone),
+  `StoreFailureView` (both platforms — the sidecar recovery lobby gone), `LibraryMissingView` (the Finder reveal gone),
+  `MobileRelock` (reads `RoadRelockPolicy`). RELOCATED byte-for-byte: the road's surviving `ProtectionCopy` members
+  (`Shared/Protection/ProtectionCopy.swift`), `IdleLockClock` (→ `ProtectionRoadLock.swift`), the shared access group
+  (→ `ProtectionKeychain.sharedGroup`), `WordsInput.words(from:)` (today's `EncryptionSession.words`), the Apple-key
+  item's `{id,key}` JSON shape (a private struct in `ICloudAppleKeysLeaf`). REMAINS: the final sweep for dead members
+  (piece 6), the iOS build.
 - Piece 2 — the Persistence/ deletions (the envelope, custody, the legacy arms; the primitives the new core borrows
-  relocated byte-for-byte, never re-implemented): IN-PROGRESS — CORE DONE in this commit (`swift build` green, the core
-  library + tools): DELETED `StoreKeyEnvelope`, `CustodyCollisionRule`, `StoreIdentity`, `BackupRestoreCandidates`,
-  `LibraryAdoption`, `LibraryAsideCopies`, `StoreKeyKeychain` + `StoreKeyCustody.deviceKeychain*` (custody by library ID;
-  `liveValue` now holds nothing), `StoreEncryptionMigration.rekey` (today's export-and-swap); RELOCATED R-U1-1;
-  `LibraryClassifier` per R-U1-2; the tools per R-U1-3. The app's own Persistence-shaped legacy arms (`StoreBackup`'s
-  flat leg) ride piece 1. WIP: the app and test targets do not compile at this commit.
+  relocated byte-for-byte, never re-implemented): DONE (`c3d939c9e`) — `swift build` green (the core library + tools):
+  DELETED `StoreKeyEnvelope`, `CustodyCollisionRule`, `StoreIdentity`, `BackupRestoreCandidates`, `LibraryAdoption`,
+  `LibraryAsideCopies`, `StoreKeyKeychain` + `StoreKeyCustody.deviceKeychain*` (custody by library ID; `liveValue` now
+  holds nothing), `StoreEncryptionMigration.rekey` (today's export-and-swap); RELOCATED R-U1-1; `LibraryClassifier` per
+  R-U1-2; the tools per R-U1-3. `OwnCopies.pairIsDue` (per place — the backup clock's container due-check) added.
 - Piece 3 — the old suites (VX-233's drill, VX-406's list, VX-380's attacker test, every test of deleted code): NOT-STARTED.
 - Piece 4 — ⌃⌘L declared on `.lockLibraryNow` with its helper row (P-VX309-U1c-4 (b)): NOT-STARTED.
 - Piece 5 — the honest-refusal check (the §6 OPEN DESIGN NOTE): NOT-STARTED.

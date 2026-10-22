@@ -15,7 +15,7 @@
 //  or the library folder's `variorum-library-keys.json` (Send Library's pair writes exactly that). A picked folder
 //  holding one such store is that pair; several are offered, never guessed.
 //
-//  EVERYTHING ELSE keeps today's classifier for its honest words (`LibraryClassifier`), with two new-road readings:
+//  EVERYTHING ELSE keeps the classifier for its honest words (`LibraryClassifier`), with two readings:
 //    - a PLAIN-TEXT EXPORT (`.plaintextExport` — the unencrypted `.sqlite`) is its own verdict since VX-309 U1b (T-8): it
 //      is brought in as a NEW library through the import road (`ProtectionCopyDoors.readPlaintextExport` /
 //      `landPlaintextExport`) — never filed, never adopted (today's adoption road would land a library the new road
@@ -129,7 +129,9 @@ nonisolated enum PickedCopy {
             return .plaintextExport(store)
         case .plaintextLibrary:
             return .refused(ProtectionWords.plaintextCopyNotYet, detail: nil)
-        case .encryptedLibrary, .snapshotPair, .folderHoldingPair, .folderHoldingStores:
+        case .encryptedLibrary, .folderHoldingStores:
+            // A key file IS there (this design's that did not decode, or an older Variorum's — named, never read: rule
+            // 26), so never the keyless refusal (the plan's §6 OPEN DESIGN NOTE; piece 5's pin).
             return .refused(ProtectionWords.pickedCopyUnreadable, detail: nil)
         case .bareStoreWithoutKeyFile:
             return .refused(LibraryOpenCopy.bareStoreRefusal, detail: nil)

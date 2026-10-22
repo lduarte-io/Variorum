@@ -1,6 +1,6 @@
 //
 //  LibraryOpenCopy.swift
-//  Variorum (shared — the adoption doors' and the restore-hold's words)
+//  Variorum (shared — the copy doors' refusals, the restore-hold's and the hand-off's words)
 //
 //  Phase 13x, U2 — PROVISIONAL strings per the pre-13x copy conventions
 //  (honest content, placeholder voice; 13s re-voices — every constant here
@@ -9,7 +9,10 @@
 //  folder — the key file travels with it"), the round-3 restore-hold
 //  banner (her ratified shape), and copy §6's why-not sentence, which
 //  stays at its ONE home (`ProtectionCopy.liveLibraryNotInICloudDrive`)
-//  and is RENDERED by this phase's two faces.
+//  and is RENDERED by this phase's two faces. VX-329 U1: 13x's adoption
+//  flow's sentences (the unlock and confirm steps, the restore rows'
+//  credential lines, the progress lines) left with today's road; what the
+//  protection road's copy doors and the hand-off still speak stays here.
 //
 
 import Foundation
@@ -20,7 +23,6 @@ nonisolated enum LibraryOpenCopy {
 
     static let openLibraryDoor = "Open Library…"
     static let restoreSectionTitle = "Restore from Backup"
-    static let openCandidateDoor = "Open…"
     static let sheetTitle = "Open a Library"
 
     // MARK: - Refusals (worded per verdict; the facts are the classifier's)
@@ -37,43 +39,6 @@ nonisolated enum LibraryOpenCopy {
     /// The chooser's lead when a picked folder holds several stores
     /// (P-U1-3: reported, never guessed).
     static let severalStoresLead = "This folder holds more than one library — pick one."
-    static let wrongKeyRefusal =
-        "That key file doesn't open this library — it belongs to another copy."
-
-    // MARK: - The unlock step (the lobby's roads over the picked pair)
-
-    static let unlockLead = "This library is sealed. Enter its passphrase to open it."
-    static let unlockWordsDoor = "Use its twelve words instead"
-
-    // MARK: - The confirm step (what will happen, said before it does)
-
-    static let confirmLead = "Ready to open this library."
-    static let confirmStepAside =
-        "Your current library steps aside first — a dated copy stays on this Mac "
-        + "(Previous Libraries, next to your library), and a safety copy is kept with "
-        + "your backups. The file you picked is only read."
-    static let confirmFreshSlot = "Nothing stands here yet — the library you picked lands whole."
-    static let confirmSyncWaits =
-        "After it opens, sync waits until you press Resume — nothing uploads or "
-        + "downloads before that."
-    /// The plaintext road's extra sentence (ledger 5: fresh key + identity).
-    static let confirmPlaintext =
-        "This is an unencrypted copy. It gets a fresh key of its own the moment it "
-        + "lands, and opens encrypted."
-    static let confirmDoor = "Open This Library"
-    /// VX-209 (RUN VX-201, U5 — PROVISIONAL, the QUESTIONS #215 bundle): the
-    /// confirm's Castle line — the CURRENT library is Castle and the picked
-    /// copy is not (`LibraryOpenModel.leavesCastle`). It names Use Castle as
-    /// the road back, never Previous Libraries: the reproduction pin
-    /// (`VX209WayBackRoundTripTests`) shows bringing the Castle copy of the
-    /// same library back lands it the old way too. Resume Sync comes first
-    /// because every adoption lands HELD and a standing hold refuses Use
-    /// Castle (13x F1 R1-M1; re-verified by `VX209GuideWarningTests`). ONE
-    /// home — every adopt road (File ▸ Open Library…, the lobby faces,
-    /// Restore from Backup) renders the one sheet that reads it.
-    static let confirmLeavesCastle =
-        "This copy isn't in Castle, so once it's open your library opens the old way — press "
-        + "Resume Sync, then choose Use Castle again in Settings ▸ Protection to put it back in Castle."
 
     // MARK: - The restore-hold banner (round 3, her ratified shape)
 
@@ -106,39 +71,12 @@ nonisolated enum LibraryOpenCopy {
         "Sync is still waiting: Variorum couldn't remove the restore marker beside your library. "
         + "Press Resume Sync to try again."
 
-    // MARK: - The restore surface's rows (decision 11 rendered)
-
-    /// The which-credential sentence for one candidate's facts.
-    static func credentialLine(
-        _ credentials: BackupRestoreCandidates.Credentials, secondLook: Bool
-    ) -> String {
-        var roads: [String] = []
-        if secondLook { roads.append("your current passphrase or \(ProtectionCopy.biometryName) on this \(ProtectionCopy.deviceName)") }
-        if credentials.passphrase { roads.append("the passphrase of its day") }
-        if credentials.recovery { roads.append("your twelve words") }
-        if credentials.apple { roads.append("your Apple account") }
-        if credentials.master, !secondLook { roads.append("your current passphrase (online)") }
-        guard !roads.isEmpty else { return bareCandidateLine }
-        return "Opens with " + roads.joined(separator: " · ") + "."
-    }
-    static let bareCandidateLine =
-        "No key file serves this copy — it can't be opened. Its key file may be in "
-        + "another backup folder."
-    static let restoreSectionBody =
-        "Each copy below opens the same way your library does, with the keys of its day. "
-        + "Opening one makes it your library — the current one steps aside, recoverable."
-
     // MARK: - Row 9's faces (the ONE why-not sentence rendered)
 
     /// The backup-folder picker's refusal of the live library's own folder
     /// (copy §8's recorded note). The sentence is ProtectionCopy's.
     static let pickedLiveLibraryFolderRefusal =
         "That's the folder your library lives in — backups need a place of their own. "
-        + ProtectionCopy.liveLibraryNotInICloudDrive
-    /// The adoption confirm's informational line when the SOURCE sits in
-    /// iCloud Drive (the door adopts by copy; the guard teaches).
-    static let sourceInICloudDriveLine =
-        "This copy sits in iCloud Drive, so it is copied onto this \(ProtectionCopy.deviceName) first. "
         + ProtectionCopy.liveLibraryNotInICloudDrive
 
     // MARK: - The hand-off door (13x F1, ladder R1-MAJOR — deliverable 1's
@@ -175,35 +113,4 @@ nonisolated enum LibraryOpenCopy {
     static let handOffSectionBody =
         "One folder holds a sealed copy of your library and its key file. AirDrop the "
         + "whole folder to the other Mac and open it there with File ▸ Open Library…"
-
-    // MARK: - Progress / receipts
-
-    static let classifyingLine = "Reading what you picked…"
-    static let adoptingLine = "Opening the library — your current one is stepping aside…"
-    /// 13x F1 (ladder R1-M3): the failure copy is PER ARM — this lead's
-    /// facts (the dated copy + the safety copy exist) are TRUE only once
-    /// the adoption moved past the landing's start, so it renders for
-    /// the landing arm and the unknown class alone; the pre-move arms
-    /// say nothing moved, and the mid-move arm names its two nets.
-    static let adoptionFailedLead =
-        "The library couldn't be opened. Nothing you picked was changed; your current "
-        + "library is whole in its dated copy and the safety copy."
-    /// Round 4's MINOR: a failure on a FRESH slot — no library stood here,
-    /// so there is no current library, dated copy or safety copy to name.
-    static let adoptionFailedFreshSlot =
-        "The library couldn't be opened. No library was here before, nothing was "
-        + "moved, and the file you picked was only read."
-    /// The pre-move refusals (source missing/unreadable · the hot `-wal` ·
-    /// a failed safety copy or hold write): NOTHING moved, and no dated
-    /// copy exists to point at.
-    static let adoptionRefusedNothingMoved =
-        "The library couldn't be opened. Nothing moved — your current library stands "
-        + "as it was, and the file you picked was only read."
-    /// The mid-move arm: the safety copy EXISTS (it lands before any
-    /// move), and what moved is in the aside home.
-    static let adoptionFailedMidMove =
-        "The library couldn't be opened — it stopped while your current library was "
-        + "stepping aside. Your whole library is in its safety copy (Backups ▸ "
-        + "safety-copies, beside your library), and the files that moved are in "
-        + "Previous Libraries. The file you picked was only read."
 }

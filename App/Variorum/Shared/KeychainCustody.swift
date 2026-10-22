@@ -2,8 +2,10 @@
 //  KeychainCustody.swift
 //  Variorum (shared: Mac + Mobile)
 //
-//  Phase 13p-fix — the two rules every keychain custody family obeys,
-//  each stated ONCE. Both were learned the same day, from the same
+//  Phase 13p-fix — the rules every keychain family obeys, each stated
+//  ONCE (VX-329 U1: today's custody choreographies — the gated save and the
+//  three-step handover — left with today's custody; the protection road's
+//  keychain family, `ProtectionKeychain`, reads the two kept here). Both were learned the same day, from the same
 //  incident, and both exist because a comment three files away is not a
 //  mechanism. The pre-13u round added the THIRD rule below
 //  (`KeychainTestTripwire`) after the second lesson of that same day:
@@ -138,133 +140,5 @@ nonisolated enum KeychainPartition {
     /// trip.
     static var dataProtection: [String: Any] {
         [kSecUseDataProtectionKeychain as String: true]
-    }
-}
-
-/// RE-WRITING a gated (ACL'd) item — the probe-first rule (17h, 13p-fix
-/// ladder R2-7).
-///
-/// A gated item cannot be updated in place: updating an ACL'd item
-/// demands interactive auth, and a WRITE must never prompt — so both
-/// gated families are forced into delete-then-add. That order carries a
-/// window: a `SecItemAdd` that fails AFTER the forced delete leaves no
-/// gated custody at all (reached from `DeviceKeyStore.save` whenever a
-/// gated item already exists — a passphrase re-unwrap's re-save). The
-/// KnownIssues row's swap remedy (add under a temp account → rename) is
-/// unsound under the same platform rule — `SecItemUpdate` of an ACL'd
-/// item's attributes is an update too — so the window is NARROWED
-/// instead of state-machined: prove the keychain accepts an identical
-/// ACL'd add RIGHT NOW (a probe item under a sibling account, same ACL,
-/// dummy data, deleted immediately), and only then release the existing
-/// item and add the real one.
-///
-/// The probe genuinely exercises every stable failure mode — keychain
-/// identity/access group, data-protection admission, ACL acceptance,
-/// biometry enrollment state, disk, securityd health — so what SURVIVES
-/// is only a failure arising in the milliseconds between two identical
-/// adds, plus the crash-between-syscalls window that always existed
-/// (both recorded, pinned as behavior in `GatedSaveChoreographyTests`).
-/// When the window does fire, the incoming material is in hand at the
-/// caller and the surfaces already word the refusal; the vault
-/// re-derives custody by passphrase — a re-enrollment prompt, never
-/// lost writing. Probe litter from a crash is swept at the next run's
-/// leading sweep.
-nonisolated enum GatedSaveChoreography {
-    /// `sweepProbe` deletes the probe item (leading: a crashed prior
-    /// run's litter; trailing: this run's own). `releaseExisting` answers
-    /// the R3-5 released-semantics — a refusal stops the save with the
-    /// existing custody intact.
-    static func run(
-        sweepProbe: () -> Void,
-        addProbe: () -> Bool,
-        releaseExisting: () -> Bool,
-        addIncoming: () -> Bool
-    ) -> Bool {
-        sweepProbe()
-        guard addProbe() else { return false }  // adds don't land right now — nothing released
-        sweepProbe()
-        guard releaseExisting() else { return false }
-        return addIncoming()
-    }
-}
-
-/// MOVING custody between two items — the three-step rule.
-///
-/// Every mode transition that hands the key from one keychain item to
-/// another does the same thing: write the incoming item, VERIFY it reads
-/// back **through the production read path**, and only then delete the
-/// outgoing one.
-///
-/// The middle step is the one this project learned the hard way. A write
-/// returning success proves the item was ACCEPTED; it never proves
-/// anything can find it again. On 2026-08-30 an ACL'd write succeeded
-/// into the data-protection keychain while every read searched the
-/// file-based one — and the delete that followed destroyed the only
-/// reachable copy of the author's store key and, separately, of her E2EE
-/// custody. The keychain asymmetry was one cause of that shape; it is not
-/// the only possible one. The access group is part of an item's identity,
-/// so a bundle-id change, a distribution profile that omits the group, or
-/// any keychain-identity regression reproduces it exactly.
-///
-/// Refusing here costs a mode change the user can retry. Skipping it
-/// costs the key.
-nonisolated enum CustodyHandover {
-    /// The three outcomes are distinguished because they are not equally
-    /// true (13p-fix ladder R2-2): only `.writeRefused` leaves the
-    /// keychain untouched. `.wroteButUnreadable` means an item DID land
-    /// somewhere the read path cannot reach — the keychain-identity
-    /// symptom — and a surface that says "nothing was altered" there is
-    /// lying in exactly the case this rule exists to make visible.
-    enum Outcome: Equatable {
-        /// The incoming item is readable and the outgoing one is released.
-        case done
-        /// The write itself was refused — nothing changed anywhere.
-        case writeRefused
-        /// The write succeeded and the item could not be read back. The
-        /// outgoing custody is INTACT (that is the point); the incoming
-        /// write was rolled back best-effort, which may itself have been
-        /// unable to reach the item — that is the failure being handled,
-        /// so it is never load-bearing.
-        case wroteButUnreadable
-        /// 17h (13p-fix ladder R3-5): the incoming item landed and read
-        /// back, but the OUTGOING one would not go — `SecItemDelete`
-        /// refused. Until this case existed the delete's status was
-        /// dropped at the leaves, so the custody law bound WRITES only: a
-        /// gate transition could complete with the old silently-releasing
-        /// item still in place (theater, R13p-14's exact prohibition), or
-        /// the OFF flip could leave the gated item deciding `load()`'s
-        /// behavior. The incoming write is rolled back best-effort (never
-        /// load-bearing, as above) and the transition refuses whole — the
-        /// state the surface reports stays the state the Keychain holds.
-        case outgoingNotReleased
-    }
-
-    /// `verify` must read through the SAME path production reads through.
-    /// Where identity can be checked for free (a plain item whose value is
-    /// readable), verify identity — presence alone passes on a stale item
-    /// left by an earlier access group. The GATED arms are the forced
-    /// exception: reading an ACL'd item's DATA prompts for biometrics, and
-    /// a write must never prompt, so they verify presence only.
-    ///
-    /// `deleteOutgoing` answers whether the outgoing item is RELEASED
-    /// (deleted, or was never there) — 17h R3-5: a delete's status is
-    /// evidence exactly as a write's is, and dropping it enforced the
-    /// custody law in one direction only.
-    static func perform(
-        write: () -> Bool,
-        verify: () -> Bool,
-        deleteOutgoing: () -> Bool,
-        rollBackIncoming: () -> Void = {}
-    ) -> Outcome {
-        guard write() else { return .writeRefused }
-        guard verify() else {
-            rollBackIncoming()
-            return .wroteButUnreadable
-        }
-        guard deleteOutgoing() else {
-            rollBackIncoming()
-            return .outgoingNotReleased
-        }
-        return .done
     }
 }

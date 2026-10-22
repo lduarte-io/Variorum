@@ -31,10 +31,11 @@ struct VariorumMobileApp: App {
     /// The shell's shared routing state: the active editor (for the
     /// background flush) + the one voice authority (LK2).
     @State private var shellRouter = MobileShellRouter()
-    /// 13p Batch 4 (item g): the phone's re-lock coordinator — the dials'
-    /// phone reading (lock on leaving · lock after time away), asked at
-    /// both scene edges. It only ever ends at `bootstrap.lock()`, which
-    /// refuses under Auto on its own, so nothing here can ship theater.
+    /// 13p Batch 4 (item g): the phone's re-lock coordinator — the open
+    /// library's relock policy read the phone's way (lock on leaving · lock
+    /// after time away), asked at both scene edges. It only ever ends at
+    /// `bootstrap.lock()`, which locks only Castle, so nothing here can ship
+    /// theater.
     @State private var relock: MobileRelockCoordinator?
     /// Pre-13u Act 0: the first-write occasion (R-pre13u-1 / R-pre13u-8).
     /// Held for the session's lifetime like `services`, so the once-per-
@@ -44,7 +45,7 @@ struct VariorumMobileApp: App {
     /// VX-306 U3: the open whose rule-27 sheet was already said (the standing faces' identity — once per open).
     @State private var rule27SaidFor: ObjectIdentifier?
 
-    /// VX-306 U3: rule 27 after a quiet open owes its sheet (the new road only; once per open).
+    /// VX-306 U3: rule 27 after a quiet open owes its sheet (once per open).
     private var roadRule27Owed: Bool {
         guard let standing = bootstrap.roadStanding, standing.faces.noKeyFileAnywhere != nil else { return false }
         return rule27SaidFor != ObjectIdentifier(standing)
@@ -70,8 +71,7 @@ struct VariorumMobileApp: App {
                     // presented sheets, so the words are covered wherever
                     // they render.
                     .redacted(reason: SnapshotPrivacy.redactionReasons(for: scenePhase))
-                    // VX-306 U3: rule 27 after a quiet open on the new road — §7c (3)'s sentence, a sheet once per open
-                    // (nil on today's road).
+                    // VX-306 U3: rule 27 after a quiet open — §7c (3)'s sentence, a sheet once per open.
                     .sheet(isPresented: Binding(
                         get: { roadRule27Owed },
                         set: { if !$0, let standing = bootstrap.roadStanding { rule27SaidFor = ObjectIdentifier(standing) } })
@@ -89,17 +89,21 @@ struct VariorumMobileApp: App {
                             session: session,
                             storeVariant: bootstrap.storeVariant,
                             backupEnabled: false,
+                            // VX-329 U1 — PROVISIONAL P-VX329-U1-5: the engine's keys from the protection core's
+                            // custody and the account-binding gate — the Mac's composition (today's device-key
+                            // provider over today's sync custody left with today's road).
+                            makeSyncKeyProvider: { [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in newRoadSyncKeys },
+                            boundAccountRead: { @Sendable [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in
+                                newRoadSyncKeys.boundAccount
+                            },
                             // The retired-credential sweep — REQUIRED at the
                             // seam (pre-13x 1a); production names the real one.
                             legacyCleanup: { LegacyPasteInCleanup.clear() })
                         services = fresh
-                        // VX-308 U1 (P-VX308-U1-F1): on the new road the Account sheet's Delete Account also runs the
-                        // protection half (the open library stops naming the deleted account — rule 16's local leave);
-                        // nothing on today's road.
-                        if bootstrap.newRoad {
-                            fresh.afterAccountDeleted = { account in
-                                await bootstrap.accountDeletedOnNewRoad(account)
-                            }
+                        // VX-308 U1 (P-VX308-U1-F1): the Account sheet's Delete Account also runs the protection half
+                        // (the open library stops naming the deleted account — rule 16's local leave).
+                        fresh.afterAccountDeleted = { account in
+                            await bootstrap.accountDeletedOnNewRoad(account)
                         }
                         // Phase 13p ladder R1-M2: the phone's lock road
                         // used to skip the ruled teardown entirely —
@@ -125,82 +129,7 @@ struct VariorumMobileApp: App {
                                 // taken before the store was closed.
                                 firstWrite = nil
                             })
-                        // Phase 13p ladder R2-M1: the phone wires the SAME
-                        // four one-secret hooks the Mac wires (R13p-4 — one
-                        // passphrase, one phrase, both platforms). Until
-                        // this fix the phone presented the full shared
-                        // vault flows AND its own reset door with NONE of
-                        // them wired — a vault passphrase minted or changed
-                        // here never reached the store's sidecar, and a
-                        // phone reset skipped the vault half. Re-wired per
-                        // session exactly like the teardown above.
-                        wireOneSecretHooks(
-                            protection: bootstrap.protection,
-                            encryption: fresh.encryption,
-                            keyVault: fresh.keyVault, auth: fresh.auth)
-                        // pre-13x 2c (2b's runner at the PHONE'S root): the
-                        // posture switch — entering and leaving Castle, the
-                        // in-place Replace All Keys — the silent follow into
-                        // Standard, and the Encryption tab's follow door,
-                        // over the SAME shared runner the Mac wires (the
-                        // phone is a first-class birthplace of Castle, §9).
-                        // The services are read LIVE (the reopen rebuilds).
-                        if let storeURL = try? AppDatabase.defaultStoreURL(
-                            variant: bootstrap.storeVariant) {
-                            let runner = PostureSwitchRunner(leaves: .live(
-                                bootstrap: bootstrap,
-                                protection: bootstrap.protection,
-                                scope: bootstrap.storeVariant.rawValue,
-                                storeURL: storeURL,
-                                database: session.database,
-                                services: { services }))
-                            bootstrap.protection.switchRunner = runner
-                            bootstrap.protection.followIntoStandardAct = {
-                                try await runner.followIntoStandard()
-                            }
-                            fresh.encryption.followDoor = { bootstrap.protection.openFollow() }
-                            // Row 10 (ledger 54): and whether that door will ask.
-                            fresh.encryption.followDoorAsksNothing = {
-                                bootstrap.protection.pendingFollowAsksNothing
-                            }
-                            // pre-13x 3a (decision 17): the Connect door and
-                            // its act — the adopt road over the services.
-                            bootstrap.protection.connectAct = { [weak fresh] passphrase, words in
-                                guard let fresh else { throw ConnectLibraryError.signedOut }
-                                try await fresh.connectLibrary(passphrase: passphrase, recoveryWords: words)
-                            }
-                            fresh.encryption.connectDoor = { bootstrap.protection.openConnect() }
-                            // pre-13x 3a (copy §2d): enroll's two directed
-                            // joins ride the same runner — (c) the follow
-                            // with the typed secret; (d) the follow into Standard.
-                            fresh.encryption.joinCastleAct = { passphrase, words in
-                                _ = try await runner.follow(passphrase: passphrase, recoveryWords: words)
-                            }
-                            fresh.encryption.joinStandardAct = { try await runner.followIntoStandard() }
-                            fresh.encryption.libraryOwnerIsForeign = { bootstrap.protection.differentOwner }
-                            // pre-13x 3b (copy §4): REPLACE ALL KEYS — the
-                            // ceremony held on the controller (a pending
-                            // marker opens its resume instead); the change
-                            // and regenerate doors hand their new secret in.
-                            fresh.encryption.replaceKeysDoor = { [weak fresh] passphrase, words in
-                                Task { @MainActor in
-                                    let tie = VaultTie.make(services: fresh)
-                                    if let pending = await runner.pendingMarker() {
-                                        bootstrap.protection.openSwitch(.resume(pending), vaultTie: tie)
-                                    } else {
-                                        bootstrap.protection.openSwitch(
-                                            .replaceKeys, vaultTie: tie,
-                                            passphraseInHand: passphrase, wordsInHand: words)
-                                    }
-                                }
-                            }
-                        }
                         await fresh.start()
-                        // pre-13x 2d (decision 35): THE NEXT READY — the
-                        // vault hook is wired and the session restored
-                        // now, so the migration-if-undone + the reconcile
-                        // run again; the ready road's run had neither.
-                        await bootstrap.runReadyHousekeeping()
                         // Pre-13u Act 0 — R-pre13u-1: **NOTHING IS SEEDED
                         // HERE ANY MORE.** The launch used to mint the
                         // starter Journal (R27b, batch 5) behind a sync
@@ -248,31 +177,17 @@ struct VariorumMobileApp: App {
                 // spinner announcing 50 ms of work is worse than the calm
                 // ground the app opens onto anyway.
                 MobileStoreOpeningView()
-            case .locked(let lobby):
-                // Phase 13p Batch 4 (item c): THE PHONE'S LOCKED LOBBY.
-                // While this renders there is no session, no services, no
-                // open store — and therefore no capture surface of any
-                // kind: the quick-note box lives inside `MobileShellView`,
-                // which exists only in `.ready`. That is item (i)'s
-                // structural half (her ratification: capture demands
-                // unlock first, never a plaintext side channel); the box's
-                // own worded refusal covers the re-lock seam.
-                MobileStoreLockView(lobby: lobby, tokens: lockedTokens)
-            case .waitingForICloudKeychain(let lobby):
-                // pre-13x 2a (§3.8): Standard's waiting state — the same
-                // face, copy §2d's words, the doors that act.
-                MobileStoreLockView(lobby: lobby, tokens: lockedTokens)
             case .libraryMissing(let lobby):
                 // pre-13x 1a (§3.7): the three-door face — the lock stays.
                 MobileLibraryMissingView(lobby: lobby, tokens: lockedTokens)
-            case .failed(let error, let recovery):
-                // 13p ladder R1-M3: `recovery` is the sidecar-present
-                // unlock road — same brain and roads as the Mac's surface.
-                MobileStoreFailureView(error: error, recovery: recovery) {
+            case .failed(let error):
+                MobileStoreFailureView(error: error) {
                     bootstrap.retry()
                 }
             case .roadLobby(let lobby):
-                // VX-306 U3 (the phone's Debug build, the one switch — P-VX306-U1b-1 superseded): the new road's lobby.
+                // VX-306 U3: the road's lobby. While this renders there is no session, no services, no open store — and
+                // therefore no capture surface of any kind (the quick-note box lives inside `MobileShellView`, which
+                // exists only in `.ready` — 13p Batch 4 item (i)'s structural half).
                 MobileRoadLockView(lobby: lobby, tokens: lockedTokens)
             case .newLibraryWords(let card):
                 // VX-306 U3: the once-shown words card of a library just created (rule 2).
@@ -333,16 +248,17 @@ struct VariorumMobileApp: App {
     /// The re-lock coordinator, minted once and kept: its ONE piece of
     /// state is the leaving stamp, which a per-call construction would
     /// throw away between the two scene edges that need to compare it.
-    /// It reads the dials FRESH at every fire (the Mac monitors' rule),
-    /// so a dial changed mid-session is honoured without re-wiring.
+    /// It reads the open library's policy FRESH at every fire (the Mac
+    /// monitors' rule), so a setting changed mid-session is honoured
+    /// without re-wiring.
     @MainActor
     private func relockCoordinator() -> MobileRelockCoordinator {
         if let relock { return relock }
         let bootstrap = bootstrap
         let fresh = MobileRelockCoordinator(
-            // pre-13x 2a: the EFFECTIVE gate (derived) + Castle's dials,
-            // read fresh per store id at every fire.
-            facts: { (bootstrap.currentEffectiveGate, bootstrap.currentDials) },
+            // VX-329 U1: the open library's relock policy (Castle, with its sealed idle minutes; nil — Standard or
+            // nothing open — never locks), read fresh at every fire.
+            policy: { bootstrap.roadRelockPolicy },
             lock: { await bootstrap.lock() })
         relock = fresh
         return fresh

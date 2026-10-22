@@ -134,7 +134,7 @@ final class ProtectionLobbyModel {
     }
 
     func unlock(wordsText: String) async {
-        let words = EncryptionSession.words(from: wordsText)
+        let words = WordsInput.words(from: wordsText)
         guard !words.isEmpty else { return }
         await run(.words(words))
     }

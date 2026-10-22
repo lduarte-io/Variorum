@@ -139,10 +139,6 @@ struct MobileShellView: View {
     /// carrying the star door, the Mac StarDoor discipline).
     @State private var starsModel: MobileStarsModel
     @State private var settingsPresented = false
-    /// 13p Batch 4: the protection screen, openable from the nudge/
-    /// reminder bar as well as from Settings (each presenter owns its own
-    /// state — the tag-manager precedent).
-    @State private var protectionPresented = false
     @Environment(\.colorScheme) private var scheme
     #if DEBUG
     // Stage 0 TK2 spike auto-run (KEPT — the executable §5 form).
@@ -258,28 +254,9 @@ struct MobileShellView: View {
                 bandGesture(width: width),
                 including: pagingAllowed ? .all : .subviews)
         }
-        // 13p Batch 4 (item e): the Standard nudge / reminder, as a calm
-        // banner at the top — dismissible, NEVER modal (an offer that
-        // blocks the app is a demand). It sits above both tab stacks
-        // rather than inside either, so it survives a tab switch and never
-        // fights the tab bar for the bottom edge.
-        .safeAreaInset(edge: .top, spacing: 0) {
-            if let protection = bootstrap?.protection {
-                MobileProtectionNoticeBar(
-                    controller: protection, services: services, tokens: tokens,
-                    openProtection: { protectionPresented = true },
-                    openSettings: { settingsPresented = true })
-            }
-        }
+        // (13p Batch 4's notice bar — today's nudge and reminder — left with today's road at VX-329 U1.)
         .sheet(isPresented: $settingsPresented) {
             settingsSheet
-        }
-        .sheet(isPresented: $protectionPresented) {
-            if let protection = bootstrap?.protection {
-                MobileProtectionSheet(
-                    controller: protection, services: services,
-                    bootstrap: bootstrap, tokens: tokens)
-            }
         }
         .task { await starsModel.start() }
         // R27b's starter Journal used to be seeded from HERE, concurrently

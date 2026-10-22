@@ -36,10 +36,9 @@ struct VariorumApp: App {
     /// `RootView` installs it (it holds the `openWindow` the summon needs);
     /// installing is idempotent, so a second window costs nothing.
     @State private var hotKeys = GlobalHotKeyCenter()
-    /// 13x U2 row 6 — the adoption doors' presenters: the MAIN scene's
-    /// (File ▸ Open Library… + the lobby faces' doors) and SETTINGS' own
-    /// (the Restore surface) — two instances so the two scenes' sheets
-    /// can never both fire over one model.
+    /// The copy doors' presenters (VX-306 U3; 13x U2 row 6's shape): the MAIN scene's (File ▸ Open Library… + the
+    /// lobby faces' doors) and SETTINGS' own (the Restore surface) — two instances so the two scenes' sheets can never
+    /// both fire over one model.
     @State private var libraryOpen = LibraryOpenPresenter()
     @State private var settingsLibraryOpen = LibraryOpenPresenter()
     /// 13x F1 (ladder R1-MAJOR): the hand-off door's presenters — the
@@ -62,18 +61,8 @@ struct VariorumApp: App {
         // another one by name.
         WindowGroup(id: EditorCommands.mainWindowGroupID) {
             mainWindowContent
-                // 13x U2 row 6: the one adoption sheet of the MAIN scene
-                // (the File door and the lobby faces all drive this
-                // presenter).
-                .sheet(isPresented: Binding(
-                    get: { libraryOpen.model != nil },
-                    set: { if !$0 { libraryOpen.dismiss() } })
-                ) {
-                    if let model = libraryOpen.model {
-                        LibraryOpenSheet(model: model) { libraryOpen.dismiss() }
-                    }
-                }
-                // VX-306 U3 (the new road only — nil on today's): a picked copy's doors, Make this my library.
+                // VX-306 U3: a picked copy's doors, Make this my library (the File door and the lobby faces all drive
+                // this presenter).
                 .sheet(isPresented: Binding(
                     get: { libraryOpen.roadDoors != nil },
                     set: { if !$0 { libraryOpen.dismissRoad() } })
@@ -170,7 +159,7 @@ struct VariorumApp: App {
             case .ready(let session):
                 RootView(
                     session: session, services: services,
-                    protection: bootstrap.protection, windows: windows,
+                    windows: windows,
                     hotKeys: hotKeys, whatsNew: appDelegate.whatsNew,
                     calmAsks: appDelegate.calmAsks,
                     // 13s-b U1a: the first-open tour offer's one model.
@@ -225,23 +214,15 @@ struct VariorumApp: App {
                             // 13l Act 4 (row 13): the Mac's own restore
                             // recipe, dropped into every backup folder.
                             backupRunbookText: DataSafetyCopy.runbook,
-                            // VX-307 U1: on the new road the engine's keys come
-                            // from the protection core's custody (rule 15),
-                            // never today's SyncCustodyRecord; today's road
-                            // keeps its default provider, byte-unchanged.
-                            makeSyncKeyProvider: bootstrap.newRoad
-                                ? { [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in newRoadSyncKeys }
-                                : nil,
+                            // VX-307 U1: the engine's keys come from the
+                            // protection core's custody (rule 15).
+                            makeSyncKeyProvider: { [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in newRoadSyncKeys },
                             // VX-314: the engine's account-binding gate — the
                             // bound account from the SAME truth the key
-                            // provider reads (the protection record's); today's
-                            // road passes nothing (the gate inert, Release
-                            // byte-unchanged until VX-329).
-                            boundAccountRead: bootstrap.newRoad
-                                ? { @Sendable [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in
-                                    newRoadSyncKeys.boundAccount
-                                }
-                                : nil,
+                            // provider reads (the protection record's).
+                            boundAccountRead: { @Sendable [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in
+                                newRoadSyncKeys.boundAccount
+                            },
                             // 17y B-DEDUPE: the Mac's furniture-fold facts =
                             // the shared half + the GUIDE's (the engine's
                             // pairwise fold; the phone wires the shared half
@@ -254,19 +235,15 @@ struct VariorumApp: App {
                             // seam (pre-13x 1a); production names the real one.
                             legacyCleanup: { LegacyPasteInCleanup.clear() })
                         services = fresh
-                        // VX-308 U1 (P-VX308-U1-F1): on the new road the Account sheet's Delete Account also runs
-                        // the protection half (the open library stops naming the deleted account — rule 16's local
-                        // leave); and the account section's *Sign out…* signs out through this one session. Nothing
-                        // on today's road (no hook, no section).
-                        if bootstrap.newRoad {
-                            fresh.afterAccountDeleted = { account in
-                                await bootstrap.accountDeletedOnNewRoad(account)
-                            }
-                            bootstrap.roadAccount?.signOutRoad = { [weak fresh] in await fresh?.signOutVariorum() }
+                        // VX-308 U1 (P-VX308-U1-F1): the Account sheet's Delete Account also runs the protection
+                        // half (the open library stops naming the deleted account — rule 16's local leave); and the
+                        // account section's *Sign out…* signs out through this one session.
+                        fresh.afterAccountDeleted = { account in
+                            await bootstrap.accountDeletedOnNewRoad(account)
                         }
-                        // VX-306 U1b (P-VX306-K4): on the new road every backup run that wrote a snapshot also
-                        // lands rule 5's pair (the library + its key file) — today's runs untouched; nothing on
-                        // today's road (no session).
+                        bootstrap.roadAccount?.signOutRoad = { [weak fresh] in await fresh?.signOutVariorum() }
+                        // VX-306 U1b → VX-329 U1: the backup clock's writer is the open library's pair road (rule
+                        // 5's pair — the library + its key file), per services instance (every reopen rebuilds them).
                         ProtectionBackupHook.attach(to: fresh.backup, session: bootstrap.roadSession)
                         // 13x U2 row 7: the restore-hold's gate — wired
                         // BEFORE start() so no first round outruns it; the
@@ -278,7 +255,7 @@ struct VariorumApp: App {
                             // (F1 R1-M1: Replace All Keys / Use Castle
                             // refuse while held) — read the MARKER, never
                             // the projection this `.task` refreshes.
-                            hold.wireGates(sync: fresh.sync, protection: bootstrap.protection)
+                            hold.wireGates(sync: fresh.sync)
                             hold.onResume = { [weak fresh] in
                                 await fresh?.resumeSync()
                             }
@@ -306,106 +283,7 @@ struct VariorumApp: App {
                             // 13n-b U1 (A-8): a locked library serves no one.
                             appDelegate.mcp.detach()
                         }
-                        // pre-13x 2a (decision 18, row 7): the KEYLESS
-                        // byte-copy of the closed library at lock time when
-                        // a backup is due — the app's own folder only; the
-                        // values are captured (the services are gone by the
-                        // time it runs), never the objects.
-                        if let storeURL = try? AppDatabase.defaultStoreURL(
-                            variant: bootstrap.storeVariant) {
-                            let directory = storeURL.deletingLastPathComponent()
-                                .appendingPathComponent("Backups", isDirectory: true)
-                            bootstrap.lockTimeCopy = {
-                                StoreBackup.performLockTimeCopyIfDue(
-                                    storeURL: storeURL, directory: directory,
-                                    interval: StoreBackup.Configuration().interval,
-                                    defaults: .standard, now: Date())
-                            }
-                        }
-                        // 13p one-secret wiring (R13p-4): the vault's
-                        // passphrase FOLLOWS into the store wrap; the vault's
-                        // twelve words follow too (R1-m3's twin); the store
-                        // wrap GUARDS vault setup; and the reset door's
-                        // vault half re-wraps from held material (R13p-9 —
-                        // an enrolled account that cannot follow refuses
-                        // the whole reset rather than diverging). Extracted
-                        // to the SHARED factory at ladder R2-M1 so the phone
-                        // wires the SAME composition — see
-                        // `wireOneSecretHooks` (ProtectionController.swift).
-                        wireOneSecretHooks(
-                            protection: bootstrap.protection,
-                            encryption: fresh.encryption,
-                            keyVault: fresh.keyVault, auth: fresh.auth)
-                        // pre-13x 2b: THE POSTURE-SWITCH RUNNER — entering
-                        // and leaving Castle, and the in-place Replace All
-                        // Keys the Encryption tab's door now runs. Built
-                        // here because it composes the bootstrap's re-key
-                        // road with the controller's custody and the
-                        // services' vault; the services are read LIVE
-                        // (the reopen rebuilds them).
-                        // VX-306 U1b (P-VX306-U1b-6): NOT on the new road — today's posture switches re-key the
-                        // library under today's key file, which the protection core's key file would no longer
-                        // open; with no runner the choose doors do not render (P-2). Castle's crossings on the
-                        // new road are VX-307's.
-                        if !bootstrap.newRoad, let storeURL = try? AppDatabase.defaultStoreURL(
-                            variant: bootstrap.storeVariant) {
-                            let runner = PostureSwitchRunner(leaves: .live(
-                                bootstrap: bootstrap,
-                                protection: bootstrap.protection,
-                                scope: bootstrap.storeVariant.rawValue,
-                                storeURL: storeURL,
-                                database: session.database,
-                                services: { services }))
-                            bootstrap.protection.switchRunner = runner
-                            // pre-13x 2c (§7): the silent follow into Standard
-                            // and the Encryption tab's follow door ride the
-                            // same runner.
-                            bootstrap.protection.followIntoStandardAct = {
-                                try await runner.followIntoStandard()
-                            }
-                            fresh.encryption.followDoor = { bootstrap.protection.openFollow() }
-                            // Row 10 (ledger 54): and whether that door will ask.
-                            fresh.encryption.followDoorAsksNothing = {
-                                bootstrap.protection.pendingFollowAsksNothing
-                            }
-                            // pre-13x 3a (decision 17): the Connect door and
-                            // its act — the adopt road over the services.
-                            bootstrap.protection.connectAct = { [weak fresh] passphrase, words in
-                                guard let fresh else { throw ConnectLibraryError.signedOut }
-                                try await fresh.connectLibrary(passphrase: passphrase, recoveryWords: words)
-                            }
-                            fresh.encryption.connectDoor = { bootstrap.protection.openConnect() }
-                            // pre-13x 3a (copy §2d): enroll's two directed
-                            // joins ride the same runner — (c) the follow
-                            // with the typed secret; (d) the follow into Standard.
-                            fresh.encryption.joinCastleAct = { passphrase, words in
-                                _ = try await runner.follow(passphrase: passphrase, recoveryWords: words)
-                            }
-                            fresh.encryption.joinStandardAct = { try await runner.followIntoStandard() }
-                            fresh.encryption.libraryOwnerIsForeign = { bootstrap.protection.differentOwner }
-                            // pre-13x 3b (copy §4): REPLACE ALL KEYS — the
-                            // ceremony held on the controller (a pending
-                            // marker opens its resume instead); the change
-                            // and regenerate doors hand their new secret in.
-                            fresh.encryption.replaceKeysDoor = { [weak fresh] passphrase, words in
-                                Task { @MainActor in
-                                    let tie = VaultTie.make(services: fresh)
-                                    if let pending = await runner.pendingMarker() {
-                                        bootstrap.protection.openSwitch(.resume(pending), vaultTie: tie)
-                                    } else {
-                                        bootstrap.protection.openSwitch(
-                                            .replaceKeys, vaultTie: tie,
-                                            passphraseInHand: passphrase, wordsInHand: words)
-                                    }
-                                }
-                            }
-                        }
                         await fresh.start()
-                        // pre-13x 2d (decision 35): THE NEXT READY — the
-                        // vault hook is wired and the session restored
-                        // now, so the migration-if-undone + the reconcile
-                        // run again; the ready road's run had neither.
-                        await bootstrap.runReadyHousekeeping()
                         // THE LAUNCH'S FURNITURE — the sample books, the
                         // starred-notes gathering and, at a fresh store's
                         // birth, the Welcome arrangement. HERE, inside the
@@ -447,10 +325,10 @@ struct VariorumApp: App {
                             storeVariant: bootstrap.storeVariant,
                             gate: seedGate)
                     }
-                    // 13p: the calm, dismissible protection notices (the
-                    // Standard nudge's two-offer shape + the reminder).
-                    // 13x U2 row 7: the restore-hold banner stacks above
-                    // them — a standing bar until the one Resume press.
+                    // 13x U2 row 7: the restore-hold banner — a standing bar
+                    // until the one Resume press — above rule 27's banner
+                    // (VX-306 U2; today's 13p notice bar left with today's
+                    // road at VX-329).
                     .safeAreaInset(edge: .bottom, spacing: 0) {
                         VStack(spacing: 0) {
                             if let restoreHold {
@@ -466,10 +344,8 @@ struct VariorumApp: App {
                                         $0.account.variorum != nil || $0.sync.isConfigured
                                     } ?? true)
                             }
-                            ProtectionNoticeBar(
-                                controller: bootstrap.protection, services: services)
-                            // VX-306 U2 (the new road only — nil on today's): rule 27's banner. (VX-307 U2c dropped the
-                            // split pair's line; U2b moved rule 3's reminder into the card above the quick entry.)
+                            // VX-306 U2: rule 27's banner. (VX-307 U2c dropped the split pair's line; U2b moved rule
+                            // 3's reminder into the card above the quick entry.)
                             ProtectionRoadBar(model: bootstrap.roadStanding)
                         }
                     }
@@ -486,17 +362,6 @@ struct VariorumApp: App {
                 // is a first frame with no session. Quiet by design — see
                 // StoreOpeningView.
                 StoreOpeningView()
-            case .locked(let lobby):
-                // Phase 13p: the demanded at-open modes' lobby — no store,
-                // no session, no services until it unlocks (R13p-5).
-                StoreLockView(lobby: lobby)
-            case .waitingForICloudKeychain(let lobby):
-                // pre-13x 2a (§3.8): Standard's waiting state — the same
-                // face, copy §2d's words, the doors that act. 13x U2
-                // row 6: §3.8's second door — "open an existing library".
-                StoreLockView(lobby: lobby, openDoor: {
-                    libraryOpen.openPanel(bootstrap: bootstrap)
-                })
             case .libraryMissing(let lobby):
                 // pre-13x 1a (§3.7): the three-door face — the lock stays.
                 // 13x U2 row 6: the third door lands (copy §3's "Open an
@@ -505,21 +370,18 @@ struct VariorumApp: App {
                 // library needs a library open; the empty-slot landing, T-5, is VX-309's) — P-VX306-U3-7 narrowed.
                 LibraryMissingView(
                     lobby: lobby, openDoor: { libraryOpen.openPanel(bootstrap: bootstrap) },
-                    // VX-309 U1b: on the new road, Restore from a Backup… is the doors over this Mac's copies (rule 17).
-                    restoreDoor: bootstrap.newRoad ? { libraryOpen.openRestoreList(bootstrap: bootstrap) } : nil)
-            case .failed(let error, let recovery):
-                // 13p ladder R1-M3: `recovery` is the sidecar-present
-                // unlock road — non-nil when the key custody is empty but
-                // `variorum-keys.json` with wraps sits beside the store.
-                StoreFailureView(error: error, recovery: recovery) { bootstrap.retry() }
+                    // VX-309 U1b: Restore from a Backup… is the doors over this Mac's copies (rule 17).
+                    restoreDoor: { libraryOpen.openRestoreList(bootstrap: bootstrap) })
+            case .failed(let error):
+                StoreFailureView(error: error) { bootstrap.retry() }
             case .roadLobby(let lobby):
-                // VX-306 U1b (Debug, the one switch): the new road's lobby — roads only, before unlock. U2: rule
-                // 27's face carries the missing face's doors (the app's Backups folder, the 13x open door).
+                // VX-306 U1b: the road's lobby — roads only, before unlock. U2: rule 27's face carries the missing
+                // face's doors.
                 RoadLockView(
-                    lobby: lobby, backupsFolder: bootstrap.liveStoreURL.flatMap(RoadLockView.backupsFolder(besideStore:)),
+                    lobby: lobby,
                     // VX-306 U3: the door leads to the picked flow — filed, then Look inside (P-VX306-U3-7 narrowed).
                     openDoor: { libraryOpen.openPanel(bootstrap: bootstrap) },
-                    // VX-309 U1b: Restore from Backup… is the doors over this Mac's copies (rule 17), not the reveal.
+                    // VX-309 U1b: Restore from Backup… is the doors over this Mac's copies (rule 17).
                     restoreDoor: { libraryOpen.openRestoreList(bootstrap: bootstrap) },
                     copiesHome: bootstrap.liveStoreURL.map(RoadLockView.copiesHome(besideStore:)) ?? false)
             case .newLibraryWords(let card):
@@ -550,15 +412,14 @@ struct VariorumApp: App {
             switch (bootstrap.state, postID) {
             case (.ready(let session), .some(let postID)):
                 NoteWindowView(session: session, windows: windows, postID: postID, mcp: appDelegate.mcp)
-            case (.failed(let error, _), _):
+            case (.failed(let error), _):
                 // The note window shows the failure plainly; the MAIN
                 // window carries the recovery roads (one unlock surface,
                 // not two competing ones).
                 StoreFailureView(error: error) { bootstrap.retry() }
             case (.opening, _):
                 StoreOpeningView()
-            case (.locked, _), (.waitingForICloudKeychain, _), (.roadLobby, _), (.newLibraryWords, _),
-                 (.roadInterlude, _):
+            case (.roadLobby, _), (.newLibraryWords, _), (.roadInterlude, _):
                 // 13p: note windows never outlive a lock (the whole
                 // `.ready` tree tears down); a restored one says so.
                 Text("Variorum is locked — unlock it in the main window.")
