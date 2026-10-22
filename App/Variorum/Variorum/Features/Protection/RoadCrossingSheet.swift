@@ -117,12 +117,9 @@ struct RoadCrossingSheet: View {
             }
         }
         if ask.asksWords || ask == .oneSecret {
-            TextField(ProtectionWords.crossingWordsField, text: $words, axis: .vertical)
-                .lineLimit(2, reservesSpace: true)
-                .autocorrectionDisabled()
-                .privacySensitive()
+            // VX-463: the twelve words conceal like the passphrase, with the same reveal eye.
+            PeekableSecretField(label: ProtectionWords.crossingWordsField, text: $words, onSubmit: submit)
                 .textFieldStyle(.roundedBorder)
-                .onSubmit(submit)
         }
     }
 

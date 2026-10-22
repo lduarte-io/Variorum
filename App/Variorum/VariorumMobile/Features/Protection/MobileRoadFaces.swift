@@ -146,11 +146,8 @@ struct MobileRoadLockView: View {
 
     private var wordsField: some View {
         VStack(spacing: 10) {
-            TextField(ProtectionWords.wordsPlaceholder, text: $wordsText, axis: .vertical)
-                .lineLimit(3, reservesSpace: true)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .privacySensitive()
+            // VX-463 (her ruling: "conceal with a reveal eye"): the passphrase's one shared concealing field.
+            PeekableSecretField(label: ProtectionWords.wordsPlaceholder, text: $wordsText)
                 .font(tokens.body)
                 .foregroundStyle(tokens.ink)
                 .padding(EdgeInsets(top: 11, leading: 12, bottom: 11, trailing: 12))

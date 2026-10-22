@@ -853,8 +853,29 @@ a behavioral revert re-checks it):**
   after:** `✔ Test run with 3 tests in 2 suites passed`; and the Mac `build-for-testing` (`App/Variorum/DerivedData
   /vx329-r1`, APFS-cloned from U3's) **`** TEST BUILD SUCCEEDED **`** with this piece and piece 5's root edits in, no
   warning in a touched file (the clone's "stale file … outside the allowed root paths" notices only — Xcode declined to
-  touch U3's directory).
-- Piece 7 — VX-463: NOT-STARTED.
+  touch U3's directory). **REVERT CHECK (on `82285d1d3`, the tree clean first):** the ledger's decision restored to the
+  old claim (`return true`) AND the empty slot's mark removed → RED: `✘ Test run with 3 tests in 2 suites failed … with 2
+  issues` (the ledger's adoption arm; `makeThisMyLibraryInTheEmptySlot`'s mark); restored by `git checkout --`, `git diff
+  --exit-code` clean, the harness rebuilt. **VX-468: DONE (`82285d1d3`).**
+- Piece 7 — VX-463: FIX DONE (this commit); the revert check follows. **What it is:** a ruled design row (her ruling:
+  *"conceal with a reveal eye."*). **THE FIX:** every field a person types the twelve words into renders through
+  `PeekableSecretField` — the passphrase's ONE shared concealing field (a `SecureField` until the eye is pressed; back to
+  hidden when the field clears; `privacySensitive` over the pair): the Mac lobby (`StoreLockView.swift`), the phone lobby
+  (`MobileRoadFaces.swift`), Make this my library's full face (`CopyDoorsSheet.swift` — the empty slot's combined secret
+  field already was), the crossings (`RoadCrossingSheet.swift`), the join/Move/follow sheet and set-up's words
+  (`RoadAccountSheet.swift`, two fields), the reset door (`RoadKeyDoorSheet.swift`) — eight labels, seven views. Each
+  keeps its own submit (the crossings', the account sheet's two carry `onSubmit: submit` as before; the lobbies' and
+  Make-mine's had none and still have none — their button submits). Consequence, PROVISIONAL P-VX329-R1-4: the words
+  fields are now SINGLE-LINE in both states (the shared field's shape — the multi-line `axis: .vertical` with 2–3 reserved
+  lines is gone; twelve words read on one line when revealed, and the sheets lose the reserved height). **THE PIN**
+  (`App/Variorum/VariorumTests/Protection/WordsFieldsConcealTests.swift`, NEW — structural, source-read, harness):
+  `noWordsFieldIsAPlainTextField` (no `TextField(` in either app's product code carries a words label or a words binding)
+  and `everyWordsFieldIsThePasswordsSharedConcealingField` (each of the eight sites is a `PeekableSecretField(` call with
+  its label; the shared field still conceals until toggled and on clear). **RED on the pre-fix faces:** `✘ Test run with 2
+  tests in 1 suite failed … with 9 issues` (eight sites + the sweep). **GREEN after:** `✔ Test run with 2 tests in 1 suite
+  passed`; `build-for-testing` Mac **and** iOS (`App/Variorum/DerivedData/vx329-r1-ios`, cloned from U3's) **`** TEST
+  BUILD SUCCEEDED **`**, no warning in a touched face. Her eyes: the stage batch's walk captures (each field concealed,
+  then revealed by the eye — captures-before-typing with a disposable words string, never the dev pair).
 - Piece 8 — the evidence (core debug + release, the harness, build-for-testing both targets): NOT-STARTED.
 
 ## 6. THE KICKOFF RECORD (2026-10-22, the orchestrator — session `vx-329`, Fable, overnight mandate)

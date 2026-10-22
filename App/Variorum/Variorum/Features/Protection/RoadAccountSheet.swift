@@ -255,13 +255,11 @@ struct RoadAccountConfirmSheet: View {
                 label: follows ? ProtectionWords.followPassphraseField : ProtectionWords.joinPassphraseField,
                 text: $passphrase)
                 .textFieldStyle(.roundedBorder)
-            TextField(follows ? ProtectionWords.followWordsField : ProtectionWords.joinWordsField, text: $words,
-                      axis: .vertical)
-                .lineLimit(2, reservesSpace: true)
-                .autocorrectionDisabled()
-                .privacySensitive()
+            // VX-463: the twelve words conceal like the passphrase, with the same reveal eye.
+            PeekableSecretField(
+                label: follows ? ProtectionWords.followWordsField : ProtectionWords.joinWordsField, text: $words,
+                onSubmit: submit)
                 .textFieldStyle(.roundedBorder)
-                .onSubmit(submit)
         }
         if ask.asksPassphrase {
             if model.asksNewPassphrase {
@@ -280,12 +278,9 @@ struct RoadAccountConfirmSheet: View {
             }
         }
         if ask.asksWords {
-            TextField(ProtectionWords.crossingWordsField, text: $words, axis: .vertical)
-                .lineLimit(2, reservesSpace: true)
-                .autocorrectionDisabled()
-                .privacySensitive()
+            // VX-463: the twelve words conceal like the passphrase, with the same reveal eye.
+            PeekableSecretField(label: ProtectionWords.crossingWordsField, text: $words, onSubmit: submit)
                 .textFieldStyle(.roundedBorder)
-                .onSubmit(submit)
         }
     }
 
