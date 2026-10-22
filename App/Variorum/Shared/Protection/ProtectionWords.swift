@@ -19,9 +19,11 @@ nonisolated enum ProtectionWords {
     // MARK: - (1) The once-shown words card — §7c (1), verbatim (rule 2; K7: one button, no Copy, no later)
 
     static let wordsCardTitle = "Your twelve words"
-    static let wordsCardLead = "Your library is encrypted. These twelve words open it — on this Mac, on any copy of it, "
-        + "for as long as they are its words. Write them down now and keep them somewhere safe. Variorum won't show "
-        + "them again."
+    /// VX-329's phone fix leg (VX-306's walk W-15 — the phone's card said "on this Mac"): the device is the platform's
+    /// noun, as every road sentence below names it; the Mac's text is byte-unchanged. PROVISIONAL P-VX329-PH-1.
+    static let wordsCardLead = "Your library is encrypted. These twelve words open it — on this "
+        + "\(ProtectionCopy.deviceName), on any copy of it, for as long as they are its words. Write them down now and keep "
+        + "them somewhere safe. Variorum won't show them again."
     static let wordsCardFoot = "You can add a passphrase later, as a convenience over the words. Either one can reset "
         + "the other."
     static let wordsCardButton = "I've written them down"
@@ -33,8 +35,8 @@ nonisolated enum ProtectionWords {
 
     static let offerUseIt = "Use it"
     static let offerNotNow = "Not now"
-    /// The receipt after *Use it* — the source named.
-    static let offerRestoredFromKeychain = "Key file restored from this Mac's keychain."
+    /// The receipt after *Use it* — the source named (the device by the platform's noun — P-VX329-PH-1).
+    static let offerRestoredFromKeychain = "Key file restored from this \(ProtectionCopy.deviceName)'s keychain."
     static func offerRestoredFromBackup(_ date: String) -> String {
         "Key file restored from the backup from \(date)."
     }
@@ -53,8 +55,10 @@ nonisolated enum ProtectionWords {
     // MARK: - (3) Rule 27's refusal — §7c (3), verbatim (the lobby's moment + its doors; after a quiet-road open, the
     // standing banner in the same words, no doors)
 
+    /// (The device by the platform's noun — the phone's lobby says it too; P-VX329-PH-1, the Mac's text byte-unchanged.)
     static let noKeyFileAnywhere = "No key file opens this library. Variorum looked beside the library, inside every "
-        + "backup, and in this Mac's keychain, and found none that opens it. Without one, there is nothing left to open."
+        + "backup, and in this \(ProtectionCopy.deviceName)'s keychain, and found none that opens it. Without one, there is "
+        + "nothing left to open."
     /// VX-414 — HER U2-7 variant (1), verbatim from the ticket (her ruling 2026-10-18: "I agree with your suggested
     /// wording"): the STANDING BANNER after a quiet open with no key file found anywhere — replacing rule 27's refusal
     /// words in that one state (they ended *Without one, there is nothing left to open.* over a library that had just
@@ -74,7 +78,9 @@ nonisolated enum ProtectionWords {
 
     // MARK: - (6) Rule 1's restore receipt — §7c (6), verbatim (`Repair.restoreKeyFileFromMirror`)
 
-    static let restoredFromMirror = "The key file beside your library was missing. This Mac's sealed copy was put back."
+    /// (The device by the platform's noun — P-VX329-PH-1, the Mac's text byte-unchanged.)
+    static let restoredFromMirror = "The key file beside your library was missing. This \(ProtectionCopy.deviceName)'s "
+        + "sealed copy was put back."
 
     // MARK: - (7) Rule 3's reminder + the set-passphrase sheet — §7c (7), verbatim
 
@@ -391,9 +397,10 @@ nonisolated enum ProtectionWords {
     static let wordsPlaceholder = "Your twelve words, separated by spaces"
     static let wordsButton = "Open with the words"
     static let opening = "Opening your library…"
-    /// P-VX306-U1a-3's road: a keychain that could not be listed stops the facts — the typed field, and why.
-    static let keychainUnreadable = "Variorum couldn't check this Mac's keychain just now. Enter your passphrase or "
-        + "your twelve words."
+    /// P-VX306-U1a-3's road: a keychain that could not be listed stops the facts — the typed field, and why. (The device
+    /// by the platform's noun — the phone's lobby says it too; P-VX329-PH-1, the Mac's text byte-unchanged.)
+    static let keychainUnreadable = "Variorum couldn't check this \(ProtectionCopy.deviceName)'s keychain just now. Enter "
+        + "your passphrase or your twelve words."
 
     // MARK: - The lobby's refusals (a typed attempt that opened nothing)
 
@@ -1068,8 +1075,10 @@ nonisolated enum ProtectionWords {
     // MARK: - The route's failures (the failure face, with Try Again)
 
     static let couldNotCreate = "Variorum couldn't create your library."
-    static let keychainUnreadableNoLibrary = "Variorum couldn't check this Mac's keychain, so it didn't create a "
-        + "library. Try again."
+    /// (The device by the platform's noun — the phone's failure face says it too; P-VX329-PH-1, the Mac's text
+    /// byte-unchanged.)
+    static let keychainUnreadableNoLibrary = "Variorum couldn't check this \(ProtectionCopy.deviceName)'s keychain, so it "
+        + "didn't create a library. Try again."
     /// A hosted test run (the test host IS the dev-store app) never writes the dev scope — it never creates.
     static let testRunNeverCreates = "A test run never creates a library."
 }

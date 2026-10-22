@@ -1259,7 +1259,18 @@ re-worded device-neutral. (b) = no phone face renders it → exempted by exact l
   rule** (the real file symlinked back): `✔ Test run with 1 test in 1 suite passed`. (The harness cannot hold the pin's
   `!ProtectionRoad.isMac` on a macOS host — that line is the phone bundle's own, its run is the orchestrator's.) The
   phone's compile: piece 3's `build-for-testing`.
-- Piece 2 — RED 2: the six re-words (P-VX329-PH-1) + the 22 exemptions + the one-match cap: NOT-STARTED.
+- Piece 2 — RED 2: the six re-words (P-VX329-PH-1) + the 22 exemptions + the one-match cap: DONE (this commit).
+  `ProtectionWords.swift`: the six sentences name the device by `ProtectionCopy.deviceName` (Mac byte-identical — piece 3's
+  probe). `MobileStructuralTests.swift` (`MobileNoRedirectSweepTests` only): the exemption list rebuilt as 22 exact
+  literals, each `(file, literal, why)` with its reason as data (six named reasons, one per class above); the walk counts
+  each exemption's matches; after the walk every exact entry AND the Jekyll prefix must have matched exactly ONE literal,
+  and every entry must carry a reason. The 13p entry re-keyed to `ProtectionCopy.swift`; the stale "a Mac" entry gone with
+  its literal. **THE SWEEP, headless (the real suite extracted by `extract.sh`): RED on the pre-fix tree** — `✘ … Expectation
+  failed: offenders.isEmpty`, exactly the run's 28 offenders (the raw dump: 29 literals name the Mac, the Jekyll one
+  prefix-exempted); **GREEN after** — `✔ Test run with 3 tests in 3 suites passed` (the sweep, the switch rule, the dump:
+  23 literals name the Mac now — 22 exempted + Jekyll's). **THE CAP's red-on-old** (the extracted copy, scratch only, its
+  entry put back to the two pre-fix entries): `✘ … misfits.isEmpty` — *"StoreProtection.swift: "Mac" matched 0",
+  "StoreProtection.swift: "a Mac" matched 0"* — plus the bare "Mac" as an offender; restored by re-extracting.
 - Piece 3 — the evidence (the harness: the sweep red-on-old → green, the cap red on the old exemptions; U3's harness over the
   Mac's words pins; `build-for-testing` Mac and iOS): NOT-STARTED.
 
