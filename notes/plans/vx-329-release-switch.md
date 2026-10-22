@@ -1354,11 +1354,17 @@ name), `MobileCopyRegisterSweepTests` (the words file changed). The Mac's pins o
 on the stage, if wanted: `LibraryWordsCardTests`, `ProtectionRestoreReceiptTests`, `ProtectionFacesRouteTests`,
 `ProtectionOpenRoadPlantedTests`, `CopyRegisterPinTests`.
 
-### U4 RECORD — THE PRE-DESIGN FACE (Opus implementer, 2026-10-22; IN PROGRESS — the brief is §6d)
+### U4 RECORD — THE PRE-DESIGN FACE (Opus implementer, 2026-10-22; STOPPED AT THE FORK — pieces 1–2 DONE, piece 3 PROPOSED; the brief is §6d)
 
-**Not done in U4, first:** PENDING (filled at the unit's close). Standing limits from the brief: no stage, no Debug launch,
-no store touch, no network, no subagent, no `xcodebuild test` (the Mac-suite list below is the orchestrator's closing run);
-zero `Sources/VariorumCore/Sync/` lines; no product words beyond hers; the phone's face is VM-8's (flagged, not built).
+**Not done in U4, first:** **Start fresh's ACT is NOT BUILT** — the set-aside machinery resists reuse (THE FORK below,
+traced file:line; option (a) recommended); the bootstrap passes `startFresh: nil`, so today the Mac's face shows her
+lead, her body and *Open Library…* only, and the set-aside act's pins (files moved whole, the fresh mint after, the crash
+arms) do not exist yet. NO Mac or phone test suite was RUN (no stage — the brief's limit): every app pin here is COMPILED
+(`build-for-testing` green, both targets) and UNRUN — the list below is the orchestrator's closing run, and every
+app-side claim is PENDING until it runs. Not built either (flagged, none invented): the phone's face (VM-8, F-U4-2); the
+landings' whole set-aside from her face (D); the switch-day script's §testers update (F-U4-5). Standing limits kept: no
+stage, no Debug launch, no store touch, no network, no subagent, no `xcodebuild test`; zero `Sources/VariorumCore/Sync/`
+lines; no product words beyond hers.
 
 **Preflight (complete, not delegated):** CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md` whole;
 `notes/CastleRules.md` whole (rules 17, 20, 21, 26, 27 the unit's heart); this plan §1–§5 (the U1 record whole, piece 5
@@ -1422,8 +1428,27 @@ swap and T-5's empty-slot program), `Executor/Acts/DeviceActs.swift` (the plan-l
 - Piece 3 — Start fresh's ACT (the crash-safe set-aside, then the calm creation): **STOPPED AT THE FORK — PROPOSED, NOT
   BUILT** (the brief: "a genuine fork (e.g. the set-aside machinery resists reuse): stop and propose before building that
   half"). The trace and the options are **THE FORK** below; nothing of the act is written.
-- Piece 4 — closing evidence (headless both configurations, `build-for-testing` both targets): IN-PROGRESS —
-  `build-for-testing` GREEN both targets (piece 2); the headless suites are PENDING (this record flips them).
+- Piece 4 — closing evidence for what is built: DONE (every run foreground, in sequence, on the Pro, at `8cdc33118`):
+  - `swift test` (debug): **VariorumCoreTests 3295 tests in 430 suites PASSED** (the U4 suite among them, 7/7);
+    StringsWorkbook 32/32; VariorumMCPTests 382/383 — the ONE red the recurring load-timing flake
+    (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, 19.0 s against its 15 s
+    bound under the full suite), re-run ALONE green (3/3, 2.2 s). Not this unit's (the MCP harness is untouched).
+  - `swift test -c release`: **VariorumCoreTests 3266 tests in 425 suites PASSED**; StringsWorkbook 32/32;
+    VariorumMCPTests 382/383 — the same flake (18.6 s), re-run ALONE under `-c release` green (3/3, 2.2 s), with
+    `PreDesignStoreFactTests` 7/7 in the same release run.
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' build-for-testing` (DerivedData `vx329-u4`): GREEN, no new
+    warning in a file this unit touched. `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator'
+    build-for-testing` (`vx329-u4-ios`): GREEN.
+
+**MAC-SUITE LIST (the orchestrator's closing run — `-only-testing:VariorumTests/<Suite>`; compiled, unrun here):** NEW/
+REWRITTEN: `PreDesignStoreRefusalTests` (5 tests), `PreDesignFaceTests` (4). Neighbours whose code this unit touched:
+`ProtectionLobbyModelTests` (the model's init and auto-ask guard), `ProtectionOpenRoadPlantedTests` (the route's new arm),
+`ProtectionFactsGathererTests` (the gatherer's pre-design skip), `ProtectionWordsPlanTests` + `ProtectionWordsVX307Tests`
+(the words file and `RoadLockView`'s rule-27 line), `RoadLockViewNamesPinTests`, `EmptySlotDoorsSurfaceTests`,
+`WordsFieldsConcealTests`, `CopyRegisterPinTests`, `TravellingDotsIndicatorTests` (the lobby view's source) — or the whole
+`VariorumTests/Protection/` folder. Phone (`VariorumMobileTests`): `MobileProtectionTests`, `MobileCopyRegisterSweepTests`,
+`MobileNoRedirectSweepTests` (by name), `MobileTravellingDotsTests` (the shared words, face and model changed). THE LIVE
+FACE (her byte copy in the emptied dev slot → her face, not the lobby) is the orchestrator's re-check, per the brief.
 
 **THE FORK — WHY THE SET-ASIDE MACHINERY RESISTS REUSE (traced, file:line):** the brief asks Start fresh to set the
 slot's library files (store + sidecars + every key file + markers) aside WHOLE into `Previous Libraries/<stamp>/`,
