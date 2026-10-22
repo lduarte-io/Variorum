@@ -88,9 +88,10 @@ struct JoinWordsMomentTests {
         #expect(!replaced(rejoined))
     }
 
-    /// THE HONEST LIMIT (P-VX309-U2-1): the first device of the account (it handed its own pair up — its own words lock
-    /// stands beside the account's copy), Stop syncing here, back by the PASSPHRASE: its own words lock can't be proven to
-    /// be the account's words from the files alone, so the moment speaks — a true sentence (they are the account's now).
+    /// THE HONEST LIMIT (P-VX309-U2-1): a key file whose OWN words lock stands beside the account's copy (the fixture's
+    /// hand-built first device — the shape set-up made before VX-462, which no longer keeps the own lock: see
+    /// `JoinWordsMomentSetUpArmTests`), Stop syncing here, back by the PASSPHRASE: its own words lock can't be proven to be
+    /// the account's words from the files alone, so the moment speaks — a true sentence (they are the account's now).
     @Test func theFirstDevicesOwnWordsLockBesideTheCopyStillSpeaks() async throws {
         let mac = try EX(.standard, synced: true)
         let executor = mac.executor()

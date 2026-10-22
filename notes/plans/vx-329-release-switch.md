@@ -729,7 +729,37 @@ a behavioral revert re-checks it):**
   `ProtectionRecordSchemaTests`): `✔ Test run with 49 tests in 6 suites passed`; and the probe's (B) on the FIXED tree:
   **OK, 552,960 bytes, 36 tables, nothing beside it.** The backups-folder refusal arm (`PlaintextExportModel.refusal`) is
   untouched. The sidecar sweep after the copy is kept (now a no-op by construction — noted for the ladder).
-- Piece 2 — VX-462: NOT-STARTED.
+  **REVERT CHECK (on `3470c6905`, the tree clean first):** the `PRAGMA plain.journal_mode = MEMORY` line removed alone
+  → the pin RED for its stated reason (`attempt to write a readonly database - while executing `SELECT
+  sqlcipher_export('plain')``); restored by `git checkout --`, `git diff --exit-code` clean. **VX-461: DONE (`3470c6905`).**
+- Piece 2 — VX-462: FIX DONE (this commit); the revert check follows. **The mechanism, confirmed by the pins:** set-up's
+  `joinKeyFile` built `locks.words` from the typed words and re-made the library's OWN words lock (`settingWords`)
+  beside the master's twelve-words copy; the leave changes no lock (rule 16); at the re-join `wordsAreTheAccountsAlready`
+  requires `file.words == nil`, so it answered false and the moment spoke. A join by the PASSPHRASE drops the own lock
+  (the `typedSecret` arm) — hence join → leave → re-join was quiet. The SAME function re-made the own lock on a join by
+  the WORDS, so that arm over-spoke the same way. **THE FIX** (`Sources/VariorumCore/Protection/Executor/Acts
+  /AccountActs.swift`, `joinKeyFile` — custody-adjacent, Fable reads it): where the master's twelve-words copy is written
+  (`locks.masterWordsCopy` set — the vault's own recovery wrap, which holds the very words typed: a join verified them
+  against the vault, a set-up made the vault from them), no own words lock is kept (`file.words = nil`); with no copy to
+  write (the vault unread), the typed words keep their own lock as before. `opensWithTheWords` holds through the copy.
+  **THE PINS — RED on the pre-fix code, each for its stated reason** (`swift test --filter JoinWordsMoment`: 3 issues,
+  `!replaced(rejoined)` at each): `JoinWordsMomentSetUpArmTests.aRejoinAfterSetUpByThePassphraseIsQuiet` and
+  `…aRejoinAfterSetUpThatChoseThePassphraseIsQuiet` — their **`withKnownIssue` wrappers DROPPED** (they were the
+  red-on-old), each now also asserting the library's words and passphrase open it after; NEW
+  `…aRejoinByThePassphraseAfterAJoinByTheWordsIsQuiet` (the words-join arm; the laptop's old words never open it).
+  **GREEN after:** `✔ Test run with 11 tests in 2 suites passed` (no known issue left). **TWO PINS FLIPPED, each pinned the
+  shape this fix removes** (found by the full core run — `✔`/`✘` 3298 tests, 5 issues in exactly these two suites):
+  `AccountJoinTests.setUpSyncInStandardHandsTheLibrarysPairUpAndKeepsTheLibraryKey` asserted the own lock opened after
+  set-up (`open(words:)` — the own-lock road only) → now: no own lock beside the copy, and the library's words open it
+  (`open(.words(…))`, the copy's road); the lifecycle scenario's stage-12 check (`LifecycleChecks
+  .syncSetUpHandsThePairUp`, the page's *"Your library's passphrase and twelve words become the account's. Nothing is
+  replaced [7]."*) read "nothing is replaced" as the own words lock's BYTES unchanged → now: her words open the library
+  just after set-up (`LifecycleWalk` records `setUpWordsOpenAfter`) and no own lock is kept beside the copy — the page's
+  sentence and its fixture untouched (her words are not replaced; their road moves). The passphrase-lock arm of that
+  check is unchanged and green. `JoinWordsMomentTests.theFirstDevicesOwnWordsLockBesideTheCopyStillSpeaks` (the EX
+  fixture's hand-built own-lock-beside-copy file) stands green, its comment made true (that shape is now pre-VX-462's,
+  not set-up's). Re-run after the flips (`AccountJoinTests|LifecycleScenarioTests|JoinWordsMoment`): `✔ Test run with 21
+  tests in 4 suites passed`.
 - Piece 3 — VX-464: NOT-STARTED.
 - Piece 4 — VX-469 (c): NOT-STARTED.
 - Piece 5 — VX-473: NOT-STARTED.

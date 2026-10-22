@@ -485,7 +485,12 @@ struct LifecycleChecks {
             expect(ctx.sync.setUpFingerprintBefore != nil && ctx.sync.setUpFingerprintAfter == ctx.sync.setUpFingerprintBefore,
                    "the key changed at sync set-up")
             expect(ctx.sync.setUpLocksAfter?.0 == ctx.sync.setUpLocksBefore?.0, "the passphrase lock was replaced")
-            expect(ctx.sync.setUpLocksAfter?.1 == ctx.sync.setUpLocksBefore?.1, "the words lock was replaced")
+            // VX-462 (VX-329 R1): "nothing is replaced" — her words are not; their ROAD moves. Set-up writes the account's
+            // twelve-words copy of the master (made from these very words), and no own words lock is kept beside it (an own
+            // lock can never be proven the account's at a later re-join — W-VX309-5). Her words open the library still.
+            expect(ctx.sync.setUpWordsOpenAfter == true, "the library's own words don't open it after set-up")
+            expect(ctx.sync.setUpLocksBefore?.1 != nil && ctx.sync.setUpLocksAfter?.1 == nil,
+                   "an own words lock was kept beside the account's copy")
         case .joinAdoptsTheAccountsPair:
             let other = walk.other
             guard let file = world.liveKeyFile(other), let fp = other.slot?.fingerprint else { failures.append("no joiner"); break }

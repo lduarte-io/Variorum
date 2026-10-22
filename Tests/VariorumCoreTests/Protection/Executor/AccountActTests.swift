@@ -30,7 +30,10 @@ struct AccountJoinTests {
         #expect(fixture.liveRecord?.accountRowKeyID == vault.rowKeyID)
         let live = try #require(fixture.world.liveFormat3)
         #expect(live.master != nil && live.masterWordsCopy == vault.vault.masterByWords)
-        #expect(try live.open(words: fixture.words) == fixture.key, "the library's own words lock was dropped")
+        // VX-462 (VX-329 R1): the account's copy is the words' road — no own words lock is kept beside it (an own lock
+        // can never be proven the account's at a later re-join — W-VX309-5); the library's words open it through the copy.
+        #expect(live.words == nil, "an own words lock was kept beside the account's copy")
+        #expect(try live.open(.words(fixture.words), floor: PF.floor) == fixture.key, "the library's words open it")
         #expect(fixture.world.syncItems.keys.map(\.itemClass) == [.silent])
         #expect(fixture.world.writes.allSatisfy { if case .appleAdd = $0 { return false } else { return true } })
         expectSettled(fixture, library)
