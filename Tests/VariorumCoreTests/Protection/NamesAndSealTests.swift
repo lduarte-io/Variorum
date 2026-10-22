@@ -72,7 +72,7 @@ struct ProtectionNamesTests {
         #expect(ProtectionNames.backupsSubpath(libraryID: Self.uuid, deviceID: "a1b2c3d4-0000-4000-8000-000000000000")
             == "Backups/6f1c2a8e/a1b2c3d4")
         #expect(ProtectionNames.keyFilename == "variorum-library-keys.json")
-        #expect(ProtectionNames.keyFilename != StoreKeyEnvelope.legacyFilename)
+        #expect(ProtectionNames.keyFilename != PF.olderLegacyKeyFilename)
     }
 }
 
@@ -101,7 +101,7 @@ struct ProtectionSealTests {
             info: Data("variorum.seal.v1:memory".utf8), outputByteCount: 32)
         let expected = Data(HMAC<SHA256>.authenticationCode(for: sealed.payload, using: derived))
         #expect(sealed.seal.mac == expected)
-        #expect(sealed.seal.keyFingerprint == StoreKeyEnvelope.fingerprint(of: key))
+        #expect(sealed.seal.keyFingerprint == KeyFingerprint.of(key))
         #expect(sealed.payload == (try ProtectionCoding.canonical(sample())))
     }
 
@@ -148,7 +148,7 @@ struct ProtectionSealTests {
         let old = StoreKey.mint()
         let current = StoreKey.mint()
         let sealed = try Sealed.sealing(sample(), purpose: .plan, libraryID: Self.libraryID, key: old)
-        let keys = [StoreKeyEnvelope.fingerprint(of: old): old, StoreKeyEnvelope.fingerprint(of: current): current]
+        let keys = [KeyFingerprint.of(old): old, KeyFingerprint.of(current): current]
         #expect(try sealed.open(purpose: .plan, libraryID: Self.libraryID, reach: { keys[$0] }) == sample())
         #expect(throws: SealError.self) {
             _ = try sealed.open(purpose: .plan, libraryID: Self.libraryID, reach: { _ in current })

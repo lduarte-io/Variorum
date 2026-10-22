@@ -30,7 +30,7 @@ struct ProtectionLibraryFilesTests {
         let folder = Folder()
         let slot = folder.file("variorum.sqlite")
         let key = StoreKey.mint()
-        let record = Self.record(StoreKeyEnvelope.fingerprint(of: key))
+        let record = Self.record(KeyFingerprint.of(key))
         try ProtectionLibraryFiles.createLibrary(at: slot, key: key, record: record, date: Date())
         #expect(ProtectionLibraryFiles.opens(slot, key: key))
         #expect(!ProtectionLibraryFiles.opens(slot, key: StoreKey.mint()))
@@ -102,7 +102,7 @@ struct ProtectionLibraryFilesTests {
         let folder = Folder()
         let slot = folder.file("variorum.sqlite")
         let key = StoreKey.mint()
-        let record = Self.record(StoreKeyEnvelope.fingerprint(of: key))
+        let record = Self.record(KeyFingerprint.of(key))
         try ProtectionLibraryFiles.createLibrary(at: slot, key: key, record: record, date: Date())
         let live = try AppDatabase.onDisk(url: slot, key: key)  // WAL mode, held open — the app's pool
         try live.write { db in try db.execute(sql: "CREATE TABLE IF NOT EXISTS w2_probe (x INTEGER)") }

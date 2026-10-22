@@ -165,9 +165,9 @@ final class LStageContext {
     struct SyncSeen {
         // 12a
         var setUpFingerprintBefore: String?
-        var setUpLocksBefore: (StoreKeyEnvelope.PassphraseWrap?, Data?)?
+        var setUpLocksBefore: (PassphraseWrap?, Data?)?
         var setUpFingerprintAfter: String?
-        var setUpLocksAfter: (StoreKeyEnvelope.PassphraseWrap?, Data?)?
+        var setUpLocksAfter: (PassphraseWrap?, Data?)?
         // 12b
         var joinerFingerprintBefore: String?
         var joinerOwnWords: [String]?

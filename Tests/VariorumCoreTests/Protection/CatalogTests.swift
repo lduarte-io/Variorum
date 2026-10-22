@@ -1,8 +1,9 @@
 //
 //  CatalogTests.swift
 //  VariorumCoreTests — VX-305 U2: the catalog's ONE name parser covers every
-//  name this design writes (and agrees with today's parsers on the snapshot
-//  and stamp-folder names it shares with them), refuses every name no build
+//  name this design writes (and agrees with today's parsers — frozen as the
+//  oracle when they left, VX-329 U1 — on the snapshot and stamp-folder names
+//  it shares with them), refuses every name no build
 //  writes, and attributes each copy to its library (from the pair's key file)
 //  and its Mac (from the subfolder). (Today's key-file names, flat files and
 //  folder key files left with rule 26 — VX-378 U1.)
@@ -14,6 +15,66 @@ import Testing
 
 @testable import VariorumCore
 
+/// THE PARSERS AND NAMES OLDER BUILDS USED, FROZEN AS THE ORACLE (VX-329 U1). Today's road owned them —
+/// `BackupRestoreCandidates.backupDate`, `LibraryAdoption.adoptionStamp`, `LibraryAdoption.plan`'s two folder names,
+/// the classifier's `pairedKeyFile` and `backupNameFingerprint` — and was deleted; the names those builds left on disk stay the catalogue's to read, so the parity pins keep the
+/// rules byte-for-byte here (copied from the deleted sources at `c629ae54f`), never a looser restatement.
+enum OlderBuilds {
+    static let previousLibrariesFolderName = "Previous Libraries"
+    static let adoptSafetyPrefix = "variorum-adopt-safety-"
+
+    static func adoptionAsideFolderName(_ when: Date) -> String { stampFormatter.string(from: when) }
+    static func adoptionSafetyCopyFolderName(_ when: Date) -> String { adoptSafetyPrefix + stampFormatter.string(from: when) }
+
+    static func backupDate(_ url: URL) -> Date? {
+        let name = url.deletingPathExtension().lastPathComponent
+        guard name.hasPrefix("variorum-backup-") else { return nil }
+        let rest = name.dropFirst("variorum-backup-".count)
+        guard rest.count >= stampLength else { return nil }
+        let stamp = String(rest.prefix(stampLength))
+        let tail = rest.dropFirst(stampLength)
+        let fingerprintTail = tail.count == 9 && tail.first == "-"
+            && tail.dropFirst().allSatisfy { "0123456789abcdef".contains($0) }
+        guard tail.isEmpty || fingerprintTail else { return nil }
+        guard let date = stampFormatter.date(from: stamp),
+              stampFormatter.string(from: date) == stamp else { return nil }
+        return date
+    }
+
+    static func pairedKeyFile(for snapshot: URL) -> URL {
+        snapshot.deletingPathExtension().appendingPathExtension("keys.json")
+    }
+
+    static func backupNameFingerprint(_ url: URL) -> (isBackupNamed: Bool, fp8: String?) {
+        let name = url.deletingPathExtension().lastPathComponent
+        guard name.hasPrefix("variorum-backup-") else { return (false, nil) }
+        let tail = name.dropFirst("variorum-backup-".count)
+        guard tail.count >= 17 else { return (true, nil) }
+        let suffix = tail.dropFirst(17)
+        guard suffix.hasPrefix("-"), suffix.count == 9,
+              suffix.dropFirst().allSatisfy({ "0123456789abcdef".contains($0) })
+        else { return (true, nil) }
+        return (true, String(suffix.dropFirst()))
+    }
+
+    static func adoptionStamp(_ name: String) -> Date? {
+        guard let date = stampFormatter.date(from: name),
+              stampFormatter.string(from: date) == name else { return nil }
+        return date
+    }
+
+    /// `yyyy-MM-dd-HHmmss` is 17 characters.
+    private static let stampLength = 17
+
+    nonisolated(unsafe) private static let stampFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.dateFormat = "yyyy-MM-dd-HHmmss"
+        return formatter
+    }()
+}
+
 /// Key files and listings for the catalog, retention and route-finder suites.
 enum CF {
     static func stamp(_ day: Double, _ seconds: Double = 0) -> Date {
@@ -23,7 +84,7 @@ enum CF {
 
     static func stampText(_ date: Date) -> String { CatalogNames.stampString(date) }
 
-    static func fp8(_ key: StoreKey) -> String { StoreKeyEnvelope.shortFingerprint(PF.fp(key)) }
+    static func fp8(_ key: StoreKey) -> String { KeyFingerprint.short(PF.fp(key)) }
 
     static func snapshotName(_ date: Date, _ key: StoreKey?) -> String {
         "variorum-backup-\(stampText(date))" + (key.map { "-\(fp8($0))" } ?? "") + ".sqlite"
@@ -67,29 +128,27 @@ struct CatalogNameTests {
         // The backup writer (`StoreBackup.performPrimaryLeg` + the lock-time copy).
         #expect(CatalogNames.parseFile("variorum-backup-\(stamp).sqlite") == .snapshot(stamp: when, fingerprint8: nil))
         #expect(CatalogNames.parseFile(CF.snapshotName(when, key)) == .snapshot(stamp: when, fingerprint8: CF.fp8(key)))
-        // The pair writer (`StoreBackup.pairedKeyFile` = `LibraryClassifier.pairedKeyFile`).
-        let pair = LibraryClassifier.pairedKeyFile(for: URL(fileURLWithPath: "/x/" + CF.snapshotName(when, key)))
+        // The pair writer (`StoreBackup.pairedKeyFile` = `LibraryClassifier.pairedKeyFile`; frozen below).
+        let pair = OlderBuilds.pairedKeyFile(for: URL(fileURLWithPath: "/x/" + CF.snapshotName(when, key)))
         #expect(CatalogNames.parseFile(pair.lastPathComponent) == .snapshotKeyFile(stamp: when, fingerprint8: CF.fp8(key)))
         // Today's key-file names are not read (rule 26).
-        #expect(CatalogNames.parseFile(StoreKeyEnvelope.filename(forFingerprint: fp)) == nil)
-        #expect(CatalogNames.parseFile(StoreKeyEnvelope.legacyFilename) == nil)
+        #expect(CatalogNames.parseFile(PF.olderKeyFilename(fp)) == nil)
+        #expect(CatalogNames.parseFile(PF.olderLegacyKeyFilename) == nil)
         // The set-aside shape (today's `StoreIdentity.setAside`, and the repair
         // layer's set-aside that left with VX-378 U1 — rules 19, 21) is not
         // read: no writer of this design makes it.
-        for base in [StoreKeyEnvelope.filename(forFingerprint: fp), StoreKeyEnvelope.legacyFilename] {
+        for base in [PF.olderKeyFilename(fp), PF.olderLegacyKeyFilename] {
             let aside = URL(fileURLWithPath: "/x/" + base).deletingPathExtension()
                 .appendingPathExtension("stale-\(Int(when.timeIntervalSince1970)).json").lastPathComponent
             #expect(CatalogNames.parseFile(aside) == nil, "\(aside)")
         }
-        // The adoption's two stamp folders (`LibraryAdoption.plan`).
-        let store = URL(fileURLWithPath: "/lib/variorum.sqlite")
-        let plan = LibraryAdoption.plan(adopting: URL(fileURLWithPath: "/in/variorum.sqlite"), keyFile: nil,
-                                        intoStoreAt: store, now: when)
-        #expect(CatalogNames.parseFolder(plan.asideFolder.lastPathComponent, under: .previousLibraries)
+        // The adoption's two stamp folders (13x's `LibraryAdoption.plan`, deleted with today's road at VX-329 U1 —
+        // the folders older builds left stay the catalogue's to read).
+        #expect(CatalogNames.parseFolder(OlderBuilds.adoptionAsideFolderName(when), under: .previousLibraries)
             == .previousLibrary(stamp: when))
-        #expect(CatalogNames.parseFolder(plan.safetyCopyFolder.lastPathComponent, under: .safetyCopies)
+        #expect(CatalogNames.parseFolder(OlderBuilds.adoptionSafetyCopyFolderName(when), under: .safetyCopies)
             == .adoptionSafetyCopy(stamp: when))
-        #expect(CatalogNames.parseFolder(LibraryAdoption.previousLibrariesFolderName, under: nil) == .previousLibraries)
+        #expect(CatalogNames.parseFolder(OlderBuilds.previousLibrariesFolderName, under: nil) == .previousLibraries)
         // The slot, its sidecars, the recipe, the exports, the hand-off folder.
         #expect(CatalogNames.parseFile("variorum.sqlite") == .library)
         #expect(CatalogNames.parseFile("variorum.sqlite-wal") == .sidecar(of: .library, suffix: "-wal"))
@@ -135,24 +194,24 @@ struct CatalogNameTests {
                 return nil
             }()
             // 1. The backup-name parser (`StoreBackup.date(fromBackupURL:)`, restated
-            //    as `BackupRestoreCandidates.backupDate` — the listing reads `.sqlite`).
-            let theirs = url.pathExtension == "sqlite" ? BackupRestoreCandidates.backupDate(url) : nil
+            //    as `BackupRestoreCandidates.backupDate` — the listing reads `.sqlite`; frozen below).
+            let theirs = url.pathExtension == "sqlite" ? OlderBuilds.backupDate(url) : nil
             #expect(mine?.0 == theirs, "\(name): the backup-name parser")
             // 2. The classifier's fp8 (its routing flag is looser on purpose — a
-            //    picked file; its fp8 is exact).
+            //    picked file; its fp8 is exact; frozen below).
             if let mine {
-                #expect(LibraryClassifier.backupNameFingerprint(url).fp8 == mine.1, "\(name): the classifier's fp8")
+                #expect(OlderBuilds.backupNameFingerprint(url).fp8 == mine.1, "\(name): the classifier's fp8")
             }
         }
-        // 3. The stamp-folder qualifier (`LibraryAdoption.adoptionStamp`).
+        // 3. The stamp-folder qualifier (`LibraryAdoption.adoptionStamp`; frozen below).
         for folder in [stamp, "2026-13-40-999999", "variorum-backup-a1-\(stamp)", stamp + "x", "x" + stamp] {
             let mine: Date? = {
                 if case .previousLibrary(let date)? = CatalogNames.parseFolder(folder, under: .previousLibraries) { return date }
                 return nil
             }()
-            #expect(mine == LibraryAdoption.adoptionStamp(folder), "\(folder): the stamp-folder qualifier")
+            #expect(mine == OlderBuilds.adoptionStamp(folder), "\(folder): the stamp-folder qualifier")
             let safety = CatalogNames.parseFolder("variorum-adopt-safety-" + folder, under: .safetyCopies)
-            #expect((safety != nil) == (LibraryAdoption.adoptionStamp(folder) != nil), "\(folder): the safety twin")
+            #expect((safety != nil) == (OlderBuilds.adoptionStamp(folder) != nil), "\(folder): the safety twin")
         }
     }
 
@@ -191,9 +250,9 @@ struct CatalogAttributionTests {
                                     name: ProtectionNames.keyFilename, bytes: try CF.format3(library: CF.lib2, key: k2)))
         // Today's flat copies and folder key files: foreign now (rule 26).
         entries.append(CatalogEntry(place: .farFolder, folders: ["Backups"], name: CF.snapshotName(d1, flat)))
-        entries.append(CatalogEntry(place: .farFolder, name: StoreKeyEnvelope.filename(forFingerprint: PF.fp(flat))))
+        entries.append(CatalogEntry(place: .farFolder, name: PF.olderKeyFilename(PF.fp(flat))))
         entries.append(CatalogEntry(place: .container, folders: ["Backups"], name: CF.snapshotName(d1, nil)))
-        entries.append(CatalogEntry(place: .container, folders: ["Backups"], name: StoreKeyEnvelope.legacyFilename))
+        entries.append(CatalogEntry(place: .container, folders: ["Backups"], name: PF.olderLegacyKeyFilename))
         // An aside folder and a safety copy.
         let asideFolders = ["Previous Libraries", CF.stampText(d2)]
         entries.append(CatalogEntry(place: .container, folders: asideFolders, name: "variorum.sqlite"))
@@ -256,7 +315,7 @@ struct CatalogAttributionTests {
         let names = catalog.foreign.map(\.name)
         #expect(names.contains("variorum-backup-a1-2026-10-05-101010.sqlite"))
         #expect(names.contains("variorum-backup-seed-drill-1.sqlite"))
-        #expect(names.contains(StoreKeyEnvelope.legacyFilename), "today's key files are foreign now (rule 26)")
+        #expect(names.contains(PF.olderLegacyKeyFilename), "today's key files are foreign now (rule 26)")
         #expect(names.contains("variorum-keys.stale-1791000000.json"), "the set-aside shape is foreign now (rules 19, 21)")
         #expect(catalog.foreign.contains { $0.folders == ["Backups", "zzzz"] })
         #expect(!names.contains("note.md"), "an export is hers, not foreign to a copy's place")

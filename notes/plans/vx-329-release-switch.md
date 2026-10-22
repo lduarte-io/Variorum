@@ -172,7 +172,7 @@ form). Machinery note: the orchestrator's own commits interleave on this branch 
 - Piece R — this record skeleton: DONE (`c629ae54f`).
 - Piece 0 — the flip (`ProtectionRoad.live` → true unconditionally; the dev-store fence's parameter deleted with its
   callers' discrimination; the bootstrap's and the composition roots' `!newRoad` arms deleted): DONE (`c3d939c9e` the
-  seeders/Settings half · this commit the rest). `ProtectionRoad.live(debug:)` answers true for both arms (the pure
+  seeders/Settings half · `f2306a535` the rest). `ProtectionRoad.live(debug:)` answers true for both arms (the pure
   function kept, its pin to flip); `opensOnTheNewRoad(devStore:)` DELETED with every caller's discrimination;
   `AppBootstrap.newRoad` DELETED — the bootstrap has one road: `State` lost `.locked`/`.waitingForICloudKeychain` and
   `.failed`'s recovery lobby; the test init is `init(testStoreURL:protectionRoad:)` (the harness REQUIRED — today's
@@ -200,26 +200,112 @@ form). Machinery note: the orchestrator's own commits interleave on this branch 
   `MobileRelock` (reads `RoadRelockPolicy`). RELOCATED byte-for-byte: the road's surviving `ProtectionCopy` members
   (`Shared/Protection/ProtectionCopy.swift`), `IdleLockClock` (→ `ProtectionRoadLock.swift`), the shared access group
   (→ `ProtectionKeychain.sharedGroup`), `WordsInput.words(from:)` (today's `EncryptionSession.words`), the Apple-key
-  item's `{id,key}` JSON shape (a private struct in `ICloudAppleKeysLeaf`). REMAINS: the final sweep for dead members
-  (piece 6), the iOS build.
+  item's `{id,key}` JSON shape (a private struct in `ICloudAppleKeysLeaf`). The iOS app target BUILDS (`xcodebuild
+  -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' build` EXIT 0 at `1026d4484`). REMAINS: the final
+  sweep for dead members (piece 6).
 - Piece 2 — the Persistence/ deletions (the envelope, custody, the legacy arms; the primitives the new core borrows
   relocated byte-for-byte, never re-implemented): DONE (`c3d939c9e`) — `swift build` green (the core library + tools):
   DELETED `StoreKeyEnvelope`, `CustodyCollisionRule`, `StoreIdentity`, `BackupRestoreCandidates`, `LibraryAdoption`,
   `LibraryAsideCopies`, `StoreKeyKeychain` + `StoreKeyCustody.deviceKeychain*` (custody by library ID; `liveValue` now
   holds nothing), `StoreEncryptionMigration.rekey` (today's export-and-swap); RELOCATED R-U1-1; `LibraryClassifier` per
   R-U1-2; the tools per R-U1-3. `OwnCopies.pairIsDue` (per place — the backup clock's container due-check) added.
-- Piece 3 — the old suites (VX-233's drill, VX-406's list, VX-380's attacker test, every test of deleted code): NOT-STARTED.
+- Piece 3 — the old suites (VX-233's drill, VX-406's list, VX-380's attacker test, every test of deleted code):
+  IN-PROGRESS. **The core half DONE** (`232561ddf` + this commit; `swift build --build-tests` green; `swift test` (debug):
+  VariorumCoreTests **3296 tests in 430 suites passed** (2 known issues, pre-existing); VariorumMCPTests 383 tests, ONE
+  red — `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (18.98 s against its
+  15 s bound, the suite run under the full core load) — re-run ALONE green (3/3, 2.2 s): a load-timing flake, not this
+  unit's; StringsWorkbook 32/32). VX-406: `CorpusRotationTests`, `StoreKeyEnvelopeTests` (+ `Format2`, the floor suite)
+  DELETED with their subjects — the vault re-wrap suite that shared the envelope's file (`KeyVaultFormat
+  .rewrappingPassphrase`, a SURVIVING subject) moved byte-for-byte to `VaultRewrapFormatTests.swift`; StringsWorkbook's
+  `StoreUnlockTests` went at `c3d939c9e` (R-U1-3). VX-380: RESOLVED BY DELETION WITH ITS SUBJECT — the red
+  `herAttackerScenarioTheNineArmsAfterTheSwitchToCastle` entered Castle through today's posture switch (`CorpusRotation`,
+  `StoreEncryptionMigration.rekey`, today's format-2 key file), all deleted; arms 9 and 10 (the fake server's gate, the
+  deployed function set — surviving subjects) stay byte-untouched; the protection road's attacker promise is pinned by
+  `Protection/Scenario/Promises.swift`. Every test of deleted core code: DELETED whole — `BackupRestoreCandidatesTests`,
+  `CustodyCollisionRuleTests`, `LibraryAdoptionTests`, `LibraryAsideCopiesTests`, `LibraryExportAndReturnerDrillTests`
+  + `LibrarySameMacRestoreDrillTests` (13x's adoption door run call-for-call — their sync claims stand pinned in
+  `RestoreMatrixTests` + `PurgeConvergenceTests`); TRIMMED to the surviving subject — `StoreEncryptionMigrationTests`
+  (the re-key pins), `LibraryKeyLegDrillTests` (leg 2's wrap roads + collision rule gone; leg 5's consults stand, the
+  encrypted arm consulting with the key in hand), `LibraryHotCopyAdoptionTests` (the LANDING halves gone with 13x's
+  landing; the CONSULT halves stand — the source-never-written law, the verdict truths, and constraint (2) asserted on
+  what the classifier's staged read reads), `LibraryClassifierTests` (R-U1-2: the pair verdicts collapse into
+  `.encryptedLibrary`; the which-opens-which match and the fp8 name parser went with the readers; piece 5's pins added).
+  New-road suites REWIRED, never weakened: `KeyFingerprint` for the envelope's fingerprint everywhere; today's key-file
+  NAMES as fixtures (`PF.olderKeyFilename` / `.olderLegacyKeyFilename`, the same bytes); `CatalogTests`' parity pins keep
+  today's parsers as a FROZEN ORACLE (`OlderBuilds` — the deleted parsers' rules copied byte-for-byte from `c629ae54f`,
+  never a looser restatement). **The app test targets: IN-PROGRESS (next).**
 - Piece 4 — ⌃⌘L declared on `.lockLibraryNow` with its helper row (P-VX309-U1c-4 (b)): NOT-STARTED.
 - Piece 5 — the honest-refusal check (the §6 OPEN DESIGN NOTE): NOT-STARTED.
 - Piece 6 — the sweep table: NOT-STARTED.
 - Evidence — `swift test` + `swift test -c release` (counts), `xcodebuild build-for-testing` (Mac), the iOS target build:
   PENDING.
 
-**L1 FLAGS (Sync/ references to deleted symbols — the orchestrator's carve; file:line, symbol):** PENDING.
+**L1 FLAGS (Sync/ references to deleted symbols — the orchestrator's carve; file:line, symbol):** none of these
+breaks the build today (the symbols live IN Sync/ until L1 deletes them); every writer of the rotation marker is gone
+with today's posture switch, so these are now readers of a marker nothing sets.
+- `Sync/CorpusRotation.swift` whole (`CorpusRotation`, `RotationMarker`, `RotationSecrets`, `CorpusRotationError`) — no
+  caller outside Sync/ and the two test lines below remain.
+- `Sync/SyncEngine.swift:113,122` — the round's preflight reads `RotationMarker.isSet` → `SyncError.accountRekeyIncomplete`.
+- `Sync/PurgeJanitor.swift:21,79,89–90,670` — the janitor's preflight, the same read and throw.
+- `Sync/SyncSchema.swift:672–680,773–774` — `SyncError.accountRekeyIncomplete` (case + its description arm); the app's
+  rendering of it (`SyncRowFace`'s rekey-incomplete arm, today's `CeremonyAct`) is DELETED, so a thrown one falls to the
+  row's generic engine-error face.
+- `Sync/SyncTransport.swift:245` — a comment naming `CorpusRotation.horizonWait(forServedMillis:)`.
+- `Sync/SyncSchema.swift:387` — a comment naming `StorePlaintextExport` (KEPT — new-road, comment-only; no action).
+- Tests that read the Sync/ symbols L1 deletes (not Sync/ files; flagged so L1's carve takes them in the same commit):
+  `Tests/VariorumCoreTests/AccountLifecycleTests.swift:113` (`RotationMarker.isSet`; comments :11, :146 name
+  `CorpusRotationTests`), `Tests/VariorumCoreTests/AuthRLSDDLTests.swift:2230` (`CorpusRotation.horizonWait`).
+- OUTSIDE Sync/, kept and flagged (the 14b vault's brains, read by Sync/ and Auth/): `Crypto/KeyVaultClient.swift`,
+  `Crypto/VaultEnrollment.swift`, `Crypto/VaultBootstrap.swift` — their consumers are `Sync/CorpusRotation`,
+  `Auth/AccountLifecycle`, and (VaultBootstrap) nothing since its CLI shell left (R-U1-3). `KeyVaultFormat` is the NEW
+  road's too (`WireVaultLeaf`, `Protection/Model/Secrets.swift`, `Protection/Wire/AccountVaultClient.swift`) — KEPT.
 
-**STOP-AND-FLAG ITEMS (a face only today's road provided):** PENDING.
+**STOP-AND-FLAG ITEMS (a face only today's road provided) — each left as found or minimally rewired, for the
+orchestrator's ruling or her morning bundle; none invented:**
+- **F-U1-1 — the session-stamped owner.** `AppBootstrap.finish()` still stamps `OwnerIdentity` from the signed-in
+  session (`roadInputs.sessionFact`); §6's list names "the session-stamped owner", but its replacement (the library's
+  bound account as owner — vx-266 §3.8) is unbuilt, and deleting the stamp would leave synced rows ownerless. KEPT, with
+  a STOP-and-flag comment at the site.
+- **F-U1-2 — Send Library.** Today's producer was deleted; the door now runs the road's own act (R-U1-6). The door, its
+  words and faces are unchanged; whether the act's pair (store + format-3 key file) is the hand-off she wants is the
+  orchestrator's to confirm. PROVISIONAL P-VX329-U1-1.
+- **F-U1-3 — the phone's Protection screen and its notice bar** (`MobileProtectionSheet`, `MobileProtectionCeremonies`,
+  `MobilePostureSheets`, the shell's notice bar) were today's road whole and are DELETED; the phone's road faces are
+  VM-8's. Until VM-8 the phone's Settings has no Protection row (the phone already refuses marker 13 → 14 by her word).
+- **F-U1-4 — `RESTORE.md`** (`DataSafetyCopy.runbook`, dropped beside every backup run): its text describes TODAY's
+  restore (the flat snapshot + the key file, Finder steps); kept byte-equal to `notes/DataSafetyRunbook.md` (the pin), its
+  posture interpolations inlined as the literal words they rendered. Its rewrite to the pair road is words — hers / U2's
+  truth-check (VX-379), never this unit's.
+- **F-U1-5 — the phone's pocket guide's privacy chapter** (`ProtectionCopy.privacyLessonOneParagraphs` /
+  `privacyLessonTwoParagraphs`): copy §7's chapter, kept verbatim; lesson 2 describes today's postures. The Mac's guide
+  already seeds the road's chapter. Same owner as F-U1-4 (VX-379 / VM-8). PROVISIONAL P-VX329-U1-6.
+- **F-U1-6 — the sync row's key doors.** Today's keys-locked / keys-replaced rows offered today's ceremonies; with
+  those deleted the rows offer `Account…` (the road's account sheet). PROVISIONAL P-VX329-U1-4.
+- **F-U1-7 — the Account sheet's single tab.** The Encryption tab (today's E2EE flows) is deleted; the picker now holds
+  one segment. A face nit for the orchestrator (hide the picker, or leave it) — not invented here.
+- **F-U1-8 — Delete Account's error wording.** Today's mapper (`EncryptionSession.message(for:)`) is deleted; the error
+  now renders `String(describing:)`. The arms that mapper had for the account errors could be re-homed byte-for-byte if
+  the orchestrator wants them — flagged rather than re-invented.
+- **F-U1-9 — the orphaned `LocalMachineryRecreation`** (`Persistence/`): its only product caller was 13x's
+  `LibraryOpenModel` (deleted); the new road brings an export in through the import road. A NEW-road suite pins it
+  (`ProtectionRecordSchemaTests.thePlaintextExportLeavesItBehindAndTheRecreationMakesItEmpty`, VX-306 U1a), so it is KEPT
+  rather than delete a new-road test's half; the orchestrator rules (delete with that pin's second half, or keep).
+- **F-U1-10 — `StoreEncryptionMigration.migrateIfNeeded`** (the 13p plaintext → encrypted at-open migration) is KEPT:
+  `AppDatabase.openStore` composes it and the new road opens through that primitive (a no-op on an encrypted store);
+  rule 26 says a pre-13p plaintext store is not handled, so it may be dead in practice — not on §6's list; flagged.
 
-**PROVISIONALs / FINDINGS:** PENDING.
+**PROVISIONALs / FINDINGS:**
+- P-VX329-U1-1 — Send Library on the road's `sendLibrary` act (F-U1-2).
+- P-VX329-U1-2 — the decrypted export's facts from the open library (R-U1-7): the typed passphrase is checked against
+  the library's key file off the main actor (`RoadStandingModel.checkPassphrase`), `passphraseIsSet` from the same file.
+- P-VX329-U1-3 — the backup clock's far leg: the picked folder's pair is written only on a run that writes the
+  container's (a run that finds the container up to date writes no far pair even when the far folder is due) — the
+  narrowest reading of "the pair road is the writer"; widening it is a new-road behavior change (out of scope).
+- P-VX329-U1-4 — the sync row's key doors → `Account…` (F-U1-6).
+- P-VX329-U1-5 — the phone's root composes the road's key provider and the bound-account read unconditionally (as the
+  Mac's), its relock reading `RoadRelockPolicy`.
+- P-VX329-U1-6 — the phone's guide keeps copy §7's chapter verbatim until VM-8 (F-U1-5).
+- FINDING — `MCPHarnessTimeLimitTests` timing flake under full-suite load (piece 3's line); not this unit's.
 
 **MAC-SUITE LIST (the orchestrator's stage batch):** PENDING.
 
