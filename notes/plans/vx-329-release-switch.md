@@ -1168,7 +1168,7 @@ in the session scratchpad, `vx329-mac-suite.log`): `✘ Test run with 1556 tests
 run). Read `skipped:` and the "Test run with N tests" line before claiming them. F-FL-1's `RoadLockViewNamesPinTests` is
 still red-by-crash until someone takes it.
 
-### PHONE FIX LEG RECORD — THE PHONE SUITE'S TWO REDS (Opus implementer, 2026-10-22; IN PROGRESS)
+### PHONE FIX LEG RECORD — THE PHONE SUITE'S TWO REDS (Opus implementer, 2026-10-22; DONE — the phone suite's re-run is the orchestrator's stage batch)
 
 **Not done in the phone fix leg, first:** NO `xcodebuild test` (the brief's limit — the orchestrator re-runs the phone
 simulator suite after this lands), so both fixes' PHONE green is PENDING that re-run; the sweep and the switch's rule ran
@@ -1271,8 +1271,88 @@ re-worded device-neutral. (b) = no phone face renders it → exempted by exact l
   23 literals name the Mac now — 22 exempted + Jekyll's). **THE CAP's red-on-old** (the extracted copy, scratch only, its
   entry put back to the two pre-fix entries): `✘ … misfits.isEmpty` — *"StoreProtection.swift: "Mac" matched 0",
   "StoreProtection.swift: "a Mac" matched 0"* — plus the bare "Mac" as an offender; restored by re-extracting.
-- Piece 3 — the evidence (the harness: the sweep red-on-old → green, the cap red on the old exemptions; U3's harness over the
-  Mac's words pins; `build-for-testing` Mac and iOS): NOT-STARTED.
+- Piece 3 — the evidence: DONE (this commit; the tree `d607214e6` — nothing but this record changed after it; every run
+  foreground, in sequence, on the Pro):
+  - THE PHONE-FIX HARNESS (scratchpad `phonefix-harness` — no dependencies: `extract.sh` copies the real
+    `MobileNoRedirectSweepTests` out of `MobileStructuralTests.swift` with `#filePath` pinned to the real file, the real
+    `ProtectionRoad.swift` symlinked, a raw-literal dump beside them): on the final tree **`✔ Test run with 3 tests in 3
+    suites passed`** (the sweep; the switch rule; the dump — 23 literals name the Mac, all covered). The red sides are pieces
+    1 and 2's.
+  - THE MAC'S WORDS PINS (U3's harness, `u3-harness`, re-used): with a TRANSIENT probe (never committed, removed after —
+    the six constants equal their pre-fix literals byte for byte, `ProtectionCopy.deviceName == "Mac"`) **`✔ Test run with
+    387 tests in 66 suites passed`**, then without it **`✔ Test run with 386 tests in 65 suites passed`** (R1's and the
+    Mac fix leg's 386/65), 0 skipped — `ProtectionWordsPlanTests` (§7c byte-equal to the plan file, incl.
+    `noKeyFileAnywhere`, `offerRestoredFromKeychain`, `restoredFromMirror`) and `ProtectionWordsVX307Tests` inside it.
+  - `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' -derivedDataPath
+    App/Variorum/DerivedData/vx329-phonefix-ios build-for-testing` (APFS-cloned from `vx329-fixleg-ios`): **`** TEST BUILD
+    SUCCEEDED **`** — `ProtectionWords.swift`, `MobileStructuralTests.swift` and `MobileProtectionRoadTests.swift` compiled
+    (both arches); no warning in them but the clone's "stale file … outside the allowed root paths" notices.
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx329-phonefix
+    build-for-testing` (cloned from `vx329-fixleg`): **`** TEST BUILD SUCCEEDED **`**, `ProtectionWords.swift` compiled, no
+    new warning.
+  - THE CORE: untouched — `git diff a2208794b..HEAD -- Sources Tests Package.swift Tools` is EMPTY, so R1's floor stands by
+    construction (not re-run).
+  - PENDING — the phone's own run (the orchestrator's): the re-run list below.
+
+**THE DISPOSITIONS (both reds):**
+- **RED 1 — `MobileProtectionRoadTests.theOneSwitchIsOnInThePhonesDebugBuild` — STALE PREMISE, FLIPPED** (`fb95ff07e`):
+  renamed `theOneSwitchIsOnInEveryPhoneBuild`; red on the pre-flip rule for exactly its Release line, green on U1's.
+- **RED 2 — `MobileNoRedirectSweepTests.nothingUserFacingNamesTheMac` — FIXED** (`d607214e6`): the 28 by the triage above —
+  **(a) 4** re-worded; **(b) 24**: 22 exempted with their reasons as data, 2 (the unspoken receipts) re-worded instead; the
+  sweep red on old (the run's 28) and green after; the one-match cap red on the pre-fix entries. No product line changed on
+  the Mac (byte-identity probed); on the phone, four sentences a face renders today now say "iPhone".
+
+**THE RE-WORDED SENTENCES, as the phone now renders them (P-VX329-PH-1; the Mac's are byte-unchanged):**
+1. `wordsCardLead` — *"Your library is encrypted. These twelve words open it — on this iPhone, on any copy of it, for as
+   long as they are its words. Write them down now and keep them somewhere safe. Variorum won't show them again."*
+2. `noKeyFileAnywhere` — *"No key file opens this library. Variorum looked beside the library, inside every backup, and in
+   this iPhone's keychain, and found none that opens it. Without one, there is nothing left to open."*
+3. `keychainUnreadable` — *"Variorum couldn't check this iPhone's keychain just now. Enter your passphrase or your twelve
+   words."*
+4. `keychainUnreadableNoLibrary` — *"Variorum couldn't check this iPhone's keychain, so it didn't create a library. Try
+   again."*
+5. `offerRestoredFromKeychain` (unspoken on the phone today) — *"Key file restored from this iPhone's keychain."*
+6. `restoredFromMirror` (unspoken on the phone today) — *"The key file beside your library was missing. This iPhone's
+   sealed copy was put back."*
+
+**PROVISIONALs (for the orchestrator to bundle):**
+- **P-VX329-PH-1 — the six sentences' phone wording:** (a) BUILT — the platform's noun through `ProtectionCopy.deviceName`
+  (the words file's own idiom, P-VX306-U3-8; the Mac byte-identical); (b) "this device" on both platforms (changes the
+  Mac's drafted text — not taken); (c) phone-only constants beside the Mac's. Row 1 answers VX-306's W-15 (her taste call)
+  as (a).
+- **The two receipts re-worded rather than exempted** — a deviation from the brief's (b) remedy, for the reason in the
+  triage (an exemption would blind the sweep the day VM-8 speaks the phone's receipts); exempting them instead is a
+  two-entry change.
+
+**FLAGS (not this leg's; for the orchestrator):**
+- **F-PH-1 — STOP-AND-FLAG: the CORE's model sentences the phone renders today name the Mac, outside the sweep's two
+  roots** (`Sources/VariorumCore` is not walked, so they were never among the 28). `LibraryNotice.differentLibraryWords`
+  — *"This is a different library than the one this Mac last had open"* — is CastleRules rule 21 VERBATIM, her sentence;
+  the phone's interlude says it (`RoadInterludeModel.sentence` → `MobileRoadFaces.swift:264`; the phone's own pin
+  `theNoticeIsSaidOnceThenTheOpenGoesOn` reads it). `KeyFileOffer.keychainHoldsOne` — *"This Mac's keychain holds a copy
+  that does. Use it?"* — is her offer sentence (the model's; rule 21's shape); the phone's interlude offers it for a
+  keychain-held key file. Re-wording either changes a ruled sentence — hers (or VM-8's, at her word). Not touched. A third
+  sweep root over the core's model sentences would police them, and would read red until she rules — not built. (The core's
+  log lines that name the Mac — `Copies.swift`, `PlanRunner.swift`, `Executor.swift` — are logs.)
+- **F-PH-2 — her rule-12 leave sentence says "this Mac"** (CastleRules' own text) and is EXEMPTED as unreachable today.
+  When VM-8 renders a leave (a crossing into Standard, a follow out) on the phone, it needs her phone wording, and the
+  exemption must go. The one-match cap cannot see that day — it catches a literal changing, not a new phone reader — so
+  VM-8's kickoff re-reads this exemption list (every `why` says which face would make it reachable).
+- **F-PH-3 — VX-114 is answered here:** its offenders (13n's four acknowledgments + 13x's Send Library literals — five at
+  filing, four since U1 deleted the adoption flow's) are exempted with their reasons; the ticket can close at the closeout
+  (the orchestrator's call).
+- **F-PH-4 — machinery:** the plan's `## 6. THE KICKOFF RECORD (…)` heading had been clobbered by the Mac fix leg's skeleton
+  commit (`1ecb7226c` left only its tail, " (2026-10-22, the orchestrator — …)"); restored at this leg's first commit
+  (`3554cc1c4`). No other line of the orchestrator's records touched.
+- **F-PH-5 — a note:** on the phone, rule 27's lobby sentence says Variorum looked "inside every backup" though the phone
+  keeps none — vacuously true; the sentence's meaning is hers and was not touched.
+
+**PHONE RE-RUN LIST (the orchestrator's stage batch — `-only-testing:VariorumMobileTests/<Suite>`; compiled, unrun
+here):** `MobileProtectionRoadTests` (the renamed `theOneSwitchIsOnInEveryPhoneBuild`), `MobileNoRedirectSweepTests` (BY
+NAME — it shares `MobileStructuralTests.swift` with three other suites, the two-suites-per-file trap the VM-5 records
+name), `MobileCopyRegisterSweepTests` (the words file changed). The Mac's pins over the six sentences are harness-green;
+on the stage, if wanted: `LibraryWordsCardTests`, `ProtectionRestoreReceiptTests`, `ProtectionFacesRouteTests`,
+`ProtectionOpenRoadPlantedTests`, `CopyRegisterPinTests`.
 
 ## 6. THE KICKOFF RECORD (2026-10-22, the orchestrator — session `vx-329`, Fable, overnight mandate)
 
