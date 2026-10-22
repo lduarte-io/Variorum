@@ -514,11 +514,36 @@ final class AppBootstrap {
                 guard let self else { return nil }
                 return await self.createOnNewRoadFromAFace()
             },
-            // VX-329 U4 — her pre-design face's *Start fresh…*: its act (the store from before this design set aside
-            // WHOLE and crash-safe into Previous Libraries, then the calm creation) is the unit's piece 3, STOPPED at its
-            // fork (the plan's U4 record — the set-aside machinery resists reuse); until it lands the door is not
-            // offered (P-2: doors act).
-            startFresh: nil)
+            // VX-329 U4 — her pre-design face's *Start fresh…* (on her confirm's yes): the library from before this design
+            // set aside WHOLE into Previous Libraries (THE RULING (a)), then the calm creation. Wired, so the door is
+            // offered on the fact (P-2: doors act).
+            startFresh: { [weak self] in
+                guard let self else { return nil }
+                return await self.startFreshOverAPreDesignStore()
+            })
+    }
+
+    /// VX-329 U4 — *Start fresh…*: off the main actor through the road (`ProtectionOpenRoad
+    /// .startFreshOverAPreDesignStore`), one act at a time beside the no-library landings (Open Library…'s, which set the
+    /// same slot aside); a library created opens exactly as a creation does. nil = done; else the sentence the face shows.
+    private func startFreshOverAPreDesignStore() async -> String? {
+        guard let road = roadInputs.compose() else { return ProtectionWords.couldNotCreate }
+        guard !copyLandingRunning else { return ProtectionWords.copyDoorBusy }
+        copyLandingRunning = true
+        defer { copyLandingRunning = false }
+        let route = await Task.detached(priority: .userInitiated) {
+            // The context off the main actor: it reads the sign-in (a Keychain read).
+            await ProtectionOpenRoad.startFreshOverAPreDesignStore(road.context())
+        }.value
+        switch route {
+        case .created(let session, let words):
+            finish(.roadCreated(session, words))
+            return nil
+        case .failed(let sentence):
+            return sentence
+        case .opened, .lobby, .libraryMissing:
+            return ProtectionWords.couldNotCreate
+        }
     }
 
     /// VX-306 — a face's *Start a New Library* on the new road (the missing face — K5's record-less store among the
@@ -683,7 +708,9 @@ final class AppBootstrap {
             guard let session = roadSession, session.writes, binding != nil else { return .refused(.failed) }
             open = session
         case .libraryMissing: break
-        case .roadLobby(let lobby) where lobby.face.noKeyFileAnywhere != nil: break
+        // VX-329 U4 — (D): her pre-design face admits the landing by its OWN fact (what stands steps aside WHOLE —
+        // `setAsideLibraryWholeFor`'s pre-design arm); rule 27's face as before; every other occupied shape refuses.
+        case .roadLobby(let lobby) where lobby.face.noKeyFileAnywhere != nil || lobby.face.preDesignStore: break
         default: return .refused(.failed)
         }
         guard !copyLandingRunning else { return .refused(.busy) }
@@ -767,7 +794,8 @@ final class AppBootstrap {
         guard let road = roadInputs.compose(), road.writes else { return .refused(.failed) }
         switch state {
         case .libraryMissing: break
-        case .roadLobby(let lobby) where lobby.face.noKeyFileAnywhere != nil: break
+        // VX-329 U4 — (D): her pre-design face admits the landing by its own fact (the slot set aside WHOLE first).
+        case .roadLobby(let lobby) where lobby.face.noKeyFileAnywhere != nil || lobby.face.preDesignStore: break
         default: return .refused(.failed)
         }
         guard !copyLandingRunning else { return .refused(.busy) }

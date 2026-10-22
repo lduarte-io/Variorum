@@ -1454,7 +1454,33 @@ swap and T-5's empty-slot program), `Executor/Acts/DeviceActs.swift` (the plan-l
     never deletes a file found nowhere else. (Red-on-old: these pin NEW behaviour — the act did not exist; a first run
     whose seams named another slot's files interrupted nothing and failed 30-odd expectations, so the arms bite.) NOT
     pinned: the different-volume refusal (no second volume in a headless run — the branch is code-read only).
-  - **3b — THE APP: the press, the creation road, (D)'s landings and gates, the bootstrap's wiring:** IN-PROGRESS.
+  - **3b — THE APP: DONE (this commit; `build-for-testing` GREEN both targets — the Mac pins COMPILED, their RUN is the
+    orchestrator's closing batch: PENDING).** `ProtectionRoadActs`: `slotHoldsAPreDesignStore(places)` (the fact
+    re-read from disk now — `ProtectionFactsGatherer.storeFileFact` + the lister's catalogue), `setAsidePreDesignLibrary
+    WholeFor(places, carryingHold:)` (the core act, logged — no secret, no byte), `finishAnInterruptedSetAside(places)`
+    (THE CREATION ROAD'S RESUME — never blocks a creation; logs what it finished or why it could not). **(D) at ONE
+    seam:** `setAsideLibraryWholeFor` — the one app-side set-aside every door calls (T-5 through
+    `setAsideUnopenableLibraryFor`, carrying no hold: its own hold was written first; T-8 carrying the hold; a face's
+    *Start a New Library*) — sends a pre-design slot through the whole act by the fact, so no door can split the old
+    library from its key files. `ProtectionOpenRoad.create` runs the resume first (every creation — a first launch lists
+    nothing and returns at once). `ProtectionOpenRoad.startFreshOverAPreDesignStore` — the fact re-read (a stale face
+    moves nothing), the whole set-aside carrying the hold, then `create` (the calm first open); any refusal says the
+    creation's own sentence `couldNotCreate` (PROVISIONAL P-VX329-U4-6 — her words have no refusal). `AppBootstrap`:
+    `startFresh:` WIRED (`startFreshOverAPreDesignStore()` — off the main actor, one act at a time beside the no-library
+    landings via `copyLandingRunning`, refusing `copyDoorBusy`; a creation opens through `finish(.roadCreated)` exactly as
+    the faces' creation does), so `offersStartFresh` is the fact AND a wired act; THE TWO GATES (`bringInPlaintextExport`,
+    `makeThisMyLibraryInTheEmptySlot`) admit `.roadLobby` where `noKeyFileAnywhere != nil || face.preDesignStore` — every
+    other occupied shape still refuses. **PINS (Mac, compiled):** NEW `PreDesignLandingsRouteTests` (2, throwaway scope,
+    THE REMEMBERING-MAC SHAPE — a library of this design created here, its pair taken, then the slot replaced by a
+    pre-design one): T-5 from her face → `.made`, ready, held (its own hold), the old library in ONE aside, every file
+    the same inode, no older name in the slot; T-8 the same, never held. **THE GATE'S FACT ARM is red on the pre-U4
+    tree** — the file names no U4 symbol; the behavioural revert is the two gate lines' `|| lobby.face.preDesignStore`
+    (both pins then read `.refused(.failed)` at `== .made`) — PENDING the stage run. NEW `PreDesignStartFreshRouteTests`
+    (4): planted — Start fresh sets the old library aside whole and creates a new one whose next open is quiet; a slot
+    no longer pre-design moves nothing (`couldNotCreate`); THE CREATION ROAD finishes an interrupted set-aside (a
+    remainder of the aside's own key files beside an empty slot leaves before the creation); throwaway scope, through
+    the bootstrap — the door wired (`offersStartFresh`), the press opens a new library ready, never held, the old one
+    aside whole.
 - Piece 4 — closing evidence for what is built: DONE (every run foreground, in sequence, on the Pro, at `8cdc33118`):
   - `swift test` (debug): **VariorumCoreTests 3295 tests in 430 suites PASSED** (the U4 suite among them, 7/7);
     StringsWorkbook 32/32; VariorumMCPTests 382/383 — the ONE red the recurring load-timing flake

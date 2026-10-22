@@ -43,12 +43,7 @@ nonisolated struct ProtectionFactsGatherer {
         session: SessionFact, unlocked: UnlockedLibrary? = nil, touchIDPress: TouchIDPress? = nil
     ) throws -> ProtectionFacts {
         let catalog = lister.catalog()
-        let storeFile: StoreFileFact
-        switch StoreFilePresence.classify(at: places.slot) {
-        case .absent: storeFile = .absent
-        case .plaintext: storeFile = .plaintext
-        case .encryptedOrUnknown: storeFile = .present
-        }
+        let storeFile = Self.storeFileFact(at: places.slot)
         let custody: [CustodyItemFact]
         do {
             custody = try leaves.custody.custodyItems()
@@ -108,5 +103,14 @@ nonisolated struct ProtectionFactsGatherer {
             appleKeys: AppleKeyFacts(readable: (try? leaves.apple.readableAppleKeyIDs()) ?? []),
             biometry: leaves.biometry.biometry(), touchIDPress: touchIDPress, session: session,
             vault: nil, catalog: catalog, now: leaves.clock.now())
+    }
+
+    /// What sits at the slot, as `assess` reads it (`StoreFilePresence` — the file's header shape, never its content).
+    static func storeFileFact(at slot: URL) -> StoreFileFact {
+        switch StoreFilePresence.classify(at: slot) {
+        case .absent: return .absent
+        case .plaintext: return .plaintext
+        case .encryptedOrUnknown: return .present
+        }
     }
 }

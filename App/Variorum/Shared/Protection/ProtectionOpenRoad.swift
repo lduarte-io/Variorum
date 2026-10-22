@@ -284,6 +284,9 @@ nonisolated enum ProtectionOpenRoad {
         _ ctx: RoadContext, setAsideLiveKeyFile: Bool, setAsideUnopenableLibrary: Bool = false
     ) async -> RoadRoute {
         guard ctx.writes else { return .failed(ProtectionWords.testRunNeverCreates) }
+        // VX-329 U4 — THE RULING: the resume and the stale-staging sweep run on the creation road too (an interrupted
+        // whole set-aside's remainder leaves the slot before anything is made beside it).
+        finishAnInterruptedSetAside(ctx.system.places)
         do {
             if setAsideUnopenableLibrary { try setAsideUnopenableLibraryFor(ctx.system.places) }
             if setAsideLiveKeyFile { try setAsideLiveKeyFileFor(ctx.system.places) }
@@ -312,6 +315,27 @@ nonisolated enum ProtectionOpenRoad {
     /// no-clobber belt ("a library is already in the slot") and could never succeed.
     static func startNewLibraryFromAFace(_ ctx: RoadContext) async -> RoadRoute {
         await create(ctx, setAsideLiveKeyFile: true, setAsideUnopenableLibrary: true)
+    }
+
+    /// VX-329 U4 — her pre-design face's *Start fresh…*, on her confirm's yes (the plan's §6d; THE RULING (a)): the slot
+    /// re-read (the fact must still hold — names only; a stale face moves nothing), the library from before this design
+    /// set aside WHOLE (`setAsidePreDesignLibraryWholeFor` — its key files, sidecars and hold with it; the resume first;
+    /// no byte read), then the creation exactly as an empty slot's — the calm first open. Nothing is created unless the
+    /// set-aside landed. PROVISIONAL P-VX329-U4-6: a refusal says the creation's own sentence (her words have none).
+    static func startFreshOverAPreDesignStore(_ ctx: RoadContext) async -> RoadRoute {
+        guard ctx.writes else { return .failed(ProtectionWords.testRunNeverCreates) }
+        guard slotHoldsAPreDesignStore(ctx.system.places) else {
+            log("road: Start fresh refused — the slot no longer holds a store from before this design (nothing moved)")
+            return .failed(ProtectionWords.couldNotCreate)
+        }
+        do {
+            try setAsidePreDesignLibraryWholeFor(ctx.system.places, carryingHold: true)
+        } catch {
+            log("road: Start fresh refused — the library from before this design could not be set aside whole "
+                + "(\(String(describing: error)))")
+            return .failed(ProtectionWords.couldNotCreate)
+        }
+        return await create(ctx, setAsideLiveKeyFile: false)
     }
 
     /// A live key file in an EMPTY slot, moved (never deleted) into `Previous Libraries/<stamp>/`.
