@@ -559,9 +559,9 @@ struct EditorCommands: Commands {
             // demanded modes ONLY; under Auto the key auto-releases at the
             // next open, so a lock there is theater and no theater ships,
             // R13p-14). P-2: the door renders only where it acts.
-            // COLLISION SWEEP: ⌃⌘L is free — the only `l` chord anywhere
-            // in the app is ⌘⇧L (Save Choices as Lens); ⌃⌘Q (the system's
-            // own Lock Screen) is untouched.
+            // COLLISION SWEEP: ⌃⌘L is free — the other `l` chords are ⌘L
+            // (Switch Wing) and ⌘⇧L (Save Choices as Lens); ⌃⌘Q (the
+            // system's own Lock Screen) is untouched.
             if bootstrap.canLock {
                 Divider()
                 Button(verb(.lockLibraryNow)) {

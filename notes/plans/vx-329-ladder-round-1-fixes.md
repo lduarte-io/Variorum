@@ -21,13 +21,23 @@ the stage batch record); the findings file `notes/plans/vx-329-ladder-round-1.md
 ## LIVE STATUS (PENDING = unverified)
 
 - Piece D — this file, the four dispositions: DONE (`d438050f9`).
-- Finding 1 (MINOR, the export's sidecar sweep): IN-PROGRESS — the pin of record written
-  (`StorePlaintextExportTests.aStrangersShmBesideThePickSurvivesTheExport`) and RED on the old code for its stated
-  reason (`fileExists(atPath: stranger.path)` and the byte-identity both false — the sweep removed it); the fix next.
+- Finding 1 (MINOR, the export's sidecar sweep): **DONE** — pin `53635410d`, fix `da778d459`. The pin of record
+  `StorePlaintextExportTests.aStrangersShmBesideThePickSurvivesTheExport` (stranger bytes at `<picked>-shm` in a plain
+  writable temp folder; `export`; the copy lands, the stranger's file survives byte-identical — the comment says why only
+  `-shm` discriminates). **RED on the old code** (`swift test --filter StorePlaintextExportTests`: `✘ … 4 tests in 1 suite
+  failed … with 2 issues` — `fileExists(atPath: stranger.path)` and the byte-identity, the sweep removed it). THE FIX:
+  the four sweep lines deleted, one comment saying why none follows the copy. **GREEN after:** the export suites
+  (`StorePlaintextExportTests|PlaintextExportImportTests|MCPGrantSchemaTests|LibraryClassifierTests
+  |LocalMachineryRecreationTests|ProtectionRecordSchemaTests`) `✔ Test run with 50 tests in 6 suites passed` (R1's 49/6 +
+  this pin). **REVERT CHECK (on `da778d459`, the tree clean first):** the sweep's three lines restored alone → the pin RED
+  for its stated reason (the same 2 issues); restored by `git checkout --`, `git diff --exit-code` clean.
 - Finding 2 (MINOR, the pg_temp belt's drift pin): NOT-STARTED — the plan below.
 - Finding 3 (MINOR, `Crypto/VaultBootstrap.swift`): NOT-STARTED — option (a): delete the runner + its suite, the
   comments outside Sync/ made true, `VaultEnrollment` KEPT.
-- Finding 4 (NIT, the stale collision-sweep comment): NOT-STARTED — the plan below.
+- Finding 4 (NIT, the stale collision-sweep comment): **DONE** (this commit) — `EditorCommands.swift:562–564` now says
+  the other `l` chords are ⌘L (Switch Wing) and ⌘⇧L (Save Choices as Lens), ⌃⌘Q untouched; re-swept true (the key table's
+  `l` rows are exactly `.switchWing` ⌘L, `.saveChoicesAsLens` ⌘⇧L, `.lockLibraryNow` ⌃⌘L, and the three
+  `.keyboardShortcut("l", …)` call sites match them). Comment-only; its compile is the closing `build-for-testing`.
 - Evidence (suites, build-for-testing, the Mac re-run list): NOT-STARTED.
 
 ## THE DISPOSITIONS (one row per code finding)
