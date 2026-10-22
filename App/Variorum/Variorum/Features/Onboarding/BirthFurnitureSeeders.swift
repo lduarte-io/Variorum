@@ -100,20 +100,11 @@ enum ReadmeSeeder {
         .init(title: title, kind: "post")
     }
 
-    /// The blocks a fresh store's readme is born with: her five ALWAYS, then — only where the store opened on the
-    /// NEW road — the four Start Here passages (VX-306 ladder round 2, m2: they speak the new road's truths — the key
-    /// file and its copies, the twelve words shown when she asks, the new-words door in Settings ▸ Protection — which are
-    /// false on TODAY's road, so Release and a Debug build pointed at the real store seed her five alone until the
-    /// road switches, VX-329; the same rule every other VX-379 row follows).
-    nonisolated static func paragraphs(onTheNewRoad newRoad: Bool) -> [String] {
-        newRoad ? herBlocks + startHerePassages : herBlocks
-    }
-
-    /// The DEV store's seed in this build (the new road's in a Debug build, today's in Release) — what a launch over
-    /// the dev store seeds (`LaunchFurniture`), read by the pins.
-    nonisolated static var paragraphs: [String] {
-        Self.paragraphs(onTheNewRoad: ProtectionRoad.opensOnTheNewRoad(devStore: true))
-    }
+    /// The blocks a fresh store's readme is born with: her five, then the four Start Here passages (VX-306 ladder
+    /// round 2, m2: they speak the new road's truths — the key file and its copies, the twelve words shown when she
+    /// asks, the new-words door in Settings ▸ Protection). Every store opens on the new road since the release switch
+    /// (VX-329), so every fresh store seeds all nine; today's five-only variant went with today's road.
+    nonisolated static var paragraphs: [String] { herBlocks + startHerePassages }
 
     /// Her five blocks, in order (her reference's bytes) — seeded on every road.
     nonisolated static let herBlocks: [String] = [
@@ -138,7 +129,7 @@ enum ReadmeSeeder {
 
     /// VX-306 (2026-10-18, her kickoff word: the Start Here chapter drafted from `notes/CastleRules.md`, built as
     /// drafted, PROVISIONAL — P-VX306-W-1): the four passages of the plan's §7c (5), appended after her five blocks
-    /// (untouched) — and ONLY on the new road (`paragraphs(onTheNewRoad:)`, ladder round 2 m2). VX-307 U2c (F-U2b-1):
+    /// (untouched) — every store's since the release switch (VX-329; before it, the new road's only). VX-307 U2c (F-U2b-1):
     /// the second passage follows the amended rules 2, 3 and 7; all four are byte-pinned by `ReadmeStartHerePlanTests`
     /// to the VX-307 plan's U2c words block (the re-anchored source).
     nonisolated static let startHerePassages: [String] = [
@@ -194,14 +185,9 @@ enum ReadmeSeeder {
     private static let log = Logger(
         subsystem: "io.lduarte.Variorum", category: "birth-furniture")
 
-    /// `onTheNewRoad`: whether the store opened on the new road (`LaunchFurniture` passes the road's own rule for its
-    /// store variant); the default is the dev store's road in this build (`paragraphs`) — the direct callers are pins.
     @discardableResult
-    static func seedAtBirth(
-        session: AppSession,
-        onTheNewRoad: Bool = ProtectionRoad.opensOnTheNewRoad(devStore: true)
-    ) async -> BirthSeed {
-        let outcome = await perform(session: session, blocks: Self.paragraphs(onTheNewRoad: onTheNewRoad))
+    static func seedAtBirth(session: AppSession) async -> BirthSeed {
+        let outcome = await perform(session: session, blocks: Self.paragraphs)
         log.notice(
             "readme at a fresh store's birth: \(String(describing: outcome), privacy: .public)")
         return outcome

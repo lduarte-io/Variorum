@@ -5,7 +5,7 @@ import Foundation
 // descriptor — `PassphraseKDF`, reused) and the twelve words (BIP-39 →
 // HKDF — `RecoveryPhrase`, reused). No new primitive exists here: every lock
 // in the model is RFC 3394 `AES.KeyWrap` under one of these, exactly as
-// `StoreKeyEnvelope` and `KeyVaultFormat` lock theirs. Never stored, never
+// `KeyVaultFormat` locks its own. Never stored, never
 // encoded, never logged (none of these types is `Codable`; every description
 // is redacted).
 
@@ -24,7 +24,7 @@ public struct PassphraseKey: Sendable, CustomStringConvertible {
     public static func derive(
         _ passphrase: String, kdf: PassphraseKDF.Descriptor = .v1(salt: PassphraseKDF.randomSalt())
     ) throws -> PassphraseKey {
-        guard !passphrase.isEmpty else { throw StoreKeyEnvelopeError.emptyPassphrase }
+        guard !passphrase.isEmpty else { throw KeyFileError.emptyPassphrase }
         return PassphraseKey(key: try PassphraseKDF.deriveKey(passphrase: passphrase, descriptor: kdf), kdf: kdf)
     }
 

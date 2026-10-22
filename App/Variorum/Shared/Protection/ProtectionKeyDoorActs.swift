@@ -116,7 +116,7 @@ nonisolated enum ProtectionKeyDoorRoad {
         }
         session.library = library
         ProtectionOpenRoad.log("road: \(request.door.rawValue) — the current key re-locked "
-            + "(\(StoreKeyEnvelope.shortFingerprint(library.fingerprint)))\(request.shown.synced ? ", the account's lock with it" : "")")
+            + "(\(KeyFingerprint.short(library.fingerprint)))\(request.shown.synced ? ", the account's lock with it" : "")")
         return .made(request.door.receipt ?? ProtectionWords.crossingFailed)
     }
 

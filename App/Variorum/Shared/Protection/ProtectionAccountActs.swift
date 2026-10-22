@@ -286,7 +286,7 @@ nonisolated enum ProtectionAccountRoad {
         ProtectionOpenRoad.log(
             "road: \(door.rawValue) — library \(String((library.record?.libraryID ?? "none").prefix(8))) now names "
                 + "\(library.record?.account.map { "account \(String($0.prefix(8)))" } ?? "no account"), "
-                + "\(library.record?.mode.rawValue ?? "?") under \(StoreKeyEnvelope.shortFingerprint(library.fingerprint))"
+                + "\(library.record?.mode.rawValue ?? "?") under \(KeyFingerprint.short(library.fingerprint))"
                 + (acted == nil ? " — its last steps at the next open" : ""))
         return AccountActResult(
             press: .made(

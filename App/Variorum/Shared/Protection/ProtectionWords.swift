@@ -963,8 +963,7 @@ nonisolated enum ProtectionWords {
 
     // MARK: - VX-309 U2 — THE FIELD GUIDE'S PROTECTION CHAPTER ON THE NEW ROAD (VX-379's acceptance; #235: "written here")
     //
-    // Seeded ONLY where the store opens on the new road (`TutorialSeeder.seed(… onTheNewRoad:)` — the readme's own gate,
-    // VX-306 ladder r2 m2); today's road, Release included, seeds copy §7's chapter until the switch (VX-329). Lesson 1 LEADS
+    // Seeded on every store (VX-329: every store opens on the new road; copy §7's chapter went with today's road). Lesson 1 LEADS
     // with the readme's four Start Here passages, verbatim (`ReadmeSeeder.startHerePassages` — one text, two homes; the
     // seeder prepends them). Every paragraph here is drafted from `notes/CastleRules.md` and the lifecycle page as built —
     // her sentences verbatim where they exist (rule 9's promise, rule 12's leave sentence, rule 17's), PROVISIONAL

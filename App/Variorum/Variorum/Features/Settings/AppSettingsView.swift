@@ -131,22 +131,17 @@ struct AppSettingsView: View {
     /// — the pane itself (Diagnostics': its one toggle), so it can be found by
     /// name — and that row is what these entries say.
     ///
-    /// VX-309 U2 — VX-453: the BUILD's map (`rowIDsRendered(newRoad:)` over
-    /// `ProtectionRoad.newRoadIsLive`) — on the new road the Protection pane
-    /// also renders the account section (`RoadAccountSection`, its row
-    /// `"account"`); Release — today's road — keeps `everyRoadsRowIDs`.
-    static let rowIDsRendered: [SettingsPane: [String]] = rowIDsRendered(newRoad: ProtectionRoad.newRoadIsLive)
-
-    /// The map for a road: the Protection pane's account section renders only on the new road.
-    static func rowIDsRendered(newRoad: Bool) -> [SettingsPane: [String]] {
-        guard newRoad else { return everyRoadsRowIDs }
-        var rendered = everyRoadsRowIDs
+    /// VX-309 U2 — VX-453: the Protection pane also renders the account
+    /// section (`RoadAccountSection`, its row `"account"`). VX-329: one road,
+    /// one map.
+    static let rowIDsRendered: [SettingsPane: [String]] = {
+        var rendered = paneRowIDs
         rendered[.protection, default: []].append(SettingsCatalog.accountRow.id)
         return rendered
-    }
+    }()
 
-    /// The rows every road's panes render.
-    static let everyRoadsRowIDs: [SettingsPane: [String]] = [
+    /// The panes' own rows (the account section's joins them in `rowIDsRendered`).
+    static let paneRowIDs: [SettingsPane: [String]] = [
         .general: ["voice", "palette", "appearance", "receipts", "keepOpenNotes", "updates"],
         .editor: ["seams", "indicator", "inlineComments", "paragraphGap",
                   "arrivalFlash", "ownershipBadges", "hideOwnedDefault",
@@ -358,9 +353,8 @@ struct AppSettingsView: View {
             } else {
                 SettingsResultsPane(
                     tokens: tokens, query: query,
-                    // VX-309 U2 — VX-453: the index for the road this window is on — the account section's row only
-                    // where the Protection pane renders that section.
-                    newRoad: roadStanding?.account != nil,
+                    // VX-309 U2 — VX-453: the account section's row only where the Protection pane renders that section.
+                    accountSection: roadStanding?.account != nil,
                     onOpen: { finding in
                         query = ""
                         // VX-281 U1: the MCP pane is in tabs — a finding whose
@@ -457,12 +451,12 @@ struct AppSettingsView: View {
 private struct SettingsResultsPane: View {
     let tokens: VoiceTokens
     let query: String
-    /// VX-309 U2 — VX-453: whether the Protection pane renders the account section (the new road's).
-    let newRoad: Bool
+    /// VX-309 U2 — VX-453: whether the Protection pane renders the account section.
+    let accountSection: Bool
     let onOpen: (SettingsFinding) -> Void
 
     private var findings: [SettingsFinding] {
-        SettingsSearch.findings(matching: query, in: SettingsSearch.wholeIndex(newRoad: newRoad))
+        SettingsSearch.findings(matching: query, in: SettingsSearch.wholeIndex(accountSection: accountSection))
     }
 
     var body: some View {

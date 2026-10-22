@@ -129,7 +129,7 @@ public enum ProtectionNames {
 
     // MARK: - The shapes
 
-    /// Sixteen lowercase hex characters — `StoreKeyEnvelope.fingerprint(of:)`.
+    /// Sixteen lowercase hex characters — `KeyFingerprint.of`.
     public static func isFingerprint16(_ value: String) -> Bool {
         value.count == 16 && value.allSatisfy { "0123456789abcdef".contains($0) }
     }

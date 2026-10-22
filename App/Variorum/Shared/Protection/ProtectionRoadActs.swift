@@ -77,7 +77,7 @@ nonisolated extension ProtectionOpenRoad {
         report.besideIsEmpty = library.keyFile == nil
         session.library = library
         session.report = report
-        log("road: the offered key file is beside the library (\(StoreKeyEnvelope.shortFingerprint(offer.keyFile.fingerprint)))")
+        log("road: the offered key file is beside the library (\(KeyFingerprint.short(offer.keyFile.fingerprint)))")
         return .used
     }
 
@@ -142,7 +142,7 @@ nonisolated extension ProtectionOpenRoad {
             _ = try await session.executor.regenerateWords(&library, passphrase: passphrase, newWords: fresh)
             session.library = library
             log("road: rule 2's look — fresh words lock the key file; the key unchanged "
-                + "(\(StoreKeyEnvelope.shortFingerprint(library.fingerprint)))")
+                + "(\(KeyFingerprint.short(library.fingerprint)))")
             return .minted(fresh)
         } catch ExecutorRefusal.passphraseDoesNotOpen {
             session.library = library

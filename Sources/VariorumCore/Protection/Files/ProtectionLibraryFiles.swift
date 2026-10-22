@@ -18,7 +18,7 @@ import GRDB
 //     `ProtectionRecordSchema`); a write drains the file's WAL (TRUNCATE) after it, so a quiesced library
 //     carries no WAL into a swap.
 //   - `exportReencrypted` — `sqlcipher_export` from a keyed source into a fresh file under a new key
-//     (`StoreEncryptionMigration.rekey`'s measured road, its verification kept: the copy opens under the
+//     (the 13p export-and-swap's measured road, its verification kept: the copy opens under the
 //     new key and holds exactly the source's rows), the source's WAL drained after.
 //   - `createLibrary` — a fresh keyed file holding `protection_record` only, landed by a no-clobber link
 //     (a library already in the slot is never overwritten); the app's ordinary open then runs every

@@ -124,15 +124,42 @@ fingerprint and its `PassphraseWrap`); the new road's names (`Protection/Model/N
 form). Machinery note: the orchestrator's own commits interleave on this branch (`1d3b84a19`, VX-465; an untracked
 `Server/` artifact in progress) — every U1 commit is pathspec-limited, rebased before each push.
 
-**MY READINGS (each the brief's letter as I read it):** PENDING — filled per piece.
+**MY READINGS (each the brief's letter as I read it):**
+- **R-U1-1 — THE PRIMITIVES THE NEW CORE BORROWED ARE RELOCATED, NEVER RE-IMPLEMENTED.** The format-3 core named every
+  key by `StoreKeyEnvelope.fingerprint(of:)` (key files, custody items, seals, pairs) and typed its passphrase lock as
+  `StoreKeyEnvelope.PassphraseWrap`. Both moved byte-for-byte: `KeyFingerprint.of` / `.short`
+  (`Persistence/KeyFingerprint.swift` — the same SHA-256-first-8-bytes hex) and `PassphraseWrap` (in `KeyFile.swift`,
+  the same two coding keys `kdf`/`wrapped`, so a format-3 file's bytes are unchanged); the two envelope error cases the
+  core threw (`unreadable`, `emptyPassphrase`) re-homed on `KeyFileError` (no new-road code matched them).
+- **R-U1-2 — THE CLASSIFIER NAMES A KEY FILE, IT NEVER READS ONE.** With the envelope's readers gone, the opaque arm of
+  `LibraryClassifier` would have called every pre-design pair "keyless" (`.bareStoreWithoutKeyFile` → "no key file"),
+  which is false. It now recognises a key-file-shaped NAME beside an encrypted store — its own `<stem>.keys.json`, this
+  design's `variorum-library-keys.json`, an older Variorum's `variorum-keys-<fp16>.json` / `variorum-keys.json` — in a
+  FIXED order (never newest-modified), reading no byte, and says `.encryptedLibrary` (the new road's `PickedCopy` maps
+  it to today's honest minimum, "couldn't be read as a library", unchanged). `.snapshotPair`/`.folderHoldingPair`
+  collapsed into it (the faces were already one). Piece 5 pins it.
+- **R-U1-3 — TODAY'S TOOLS THAT UNLOCKED THROUGH TODAY'S KEY FILE GO WITH IT.** StringsWorkbook's `StoreUnlock` + its CLI
+  executable + `StoreUnlockTests` (VX-406's) + its rehearsal fixture; `vault-bootstrap`'s CLI shell (its unlock read
+  today's envelope — VX-64) + `Vx64DrillFixtureTests`. The workbook LIBRARY (parser, plan, mint) and the vault-bootstrap
+  BRAIN (`Crypto/VaultBootstrap.swift`, the 14b vault create + resync) are untouched — the brain is FLAGGED below.
 
 **LIVE STATUS (per piece; PENDING = unverified):**
-- Piece R — this record skeleton: IN-PROGRESS (this commit).
+- Piece R — this record skeleton: DONE (`c629ae54f`).
 - Piece 0 — the flip (`ProtectionRoad.live` → true unconditionally; the dev-store fence's parameter deleted with its
-  callers' discrimination; the bootstrap's and the composition roots' `!newRoad` arms deleted): NOT-STARTED.
+  callers' discrimination; the bootstrap's and the composition roots' `!newRoad` arms deleted): IN-PROGRESS —
+  `ProtectionRoad` flipped (`live` answers true for both arms; `opensOnTheNewRoad(devStore:)` deleted); the readme's
+  and the guide's today variants deleted (`ReadmeSeeder.paragraphs` is the nine; `TutorialSeeder.plan` IS the new-road
+  plan; `seed(…)` lost `onTheNewRoad`); Settings' catalogue/rendered-map/search lost `newRoad:` (the account row's
+  presence is `accountSection:` — where the pane renders the section). REMAINS: `AppBootstrap`, `VariorumApp`, the
+  phone's root, `LibraryOpenDoor`, `EditorCommands`.
 - Piece 1 — the Shared/ deletions (today's deciding and writing road in the app): NOT-STARTED.
 - Piece 2 — the Persistence/ deletions (the envelope, custody, the legacy arms; the primitives the new core borrows
-  relocated byte-for-byte, never re-implemented): NOT-STARTED.
+  relocated byte-for-byte, never re-implemented): IN-PROGRESS — CORE DONE in this commit (`swift build` green, the core
+  library + tools): DELETED `StoreKeyEnvelope`, `CustodyCollisionRule`, `StoreIdentity`, `BackupRestoreCandidates`,
+  `LibraryAdoption`, `LibraryAsideCopies`, `StoreKeyKeychain` + `StoreKeyCustody.deviceKeychain*` (custody by library ID;
+  `liveValue` now holds nothing), `StoreEncryptionMigration.rekey` (today's export-and-swap); RELOCATED R-U1-1;
+  `LibraryClassifier` per R-U1-2; the tools per R-U1-3. The app's own Persistence-shaped legacy arms (`StoreBackup`'s
+  flat leg) ride piece 1. WIP: the app and test targets do not compile at this commit.
 - Piece 3 — the old suites (VX-233's drill, VX-406's list, VX-380's attacker test, every test of deleted code): NOT-STARTED.
 - Piece 4 — ⌃⌘L declared on `.lockLibraryNow` with its helper row (P-VX309-U1c-4 (b)): NOT-STARTED.
 - Piece 5 — the honest-refusal check (the §6 OPEN DESIGN NOTE): NOT-STARTED.

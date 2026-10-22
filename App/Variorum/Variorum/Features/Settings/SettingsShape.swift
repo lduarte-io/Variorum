@@ -165,23 +165,17 @@ nonisolated enum SettingsCatalog {
     /// class as her item 7 one menu over — a face and its description
     /// drifting because nothing tied them together.
     ///
-    /// VX-309 U2 — VX-453: the BUILD's catalog. On the new road (a Debug
-    /// build — `ProtectionRoad.newRoadIsLive`) the account section's row
-    /// joins beside the Protection pane's; Release — today's road — keeps
-    /// `everyRoadsRows` byte for byte.
-    static let rows: [SettingsRow] = rows(newRoad: ProtectionRoad.newRoadIsLive)
-
-    /// The catalog for a road: the rows every road renders, plus — on the
-    /// new road — the account section's (after the Protection pane's own
-    /// row, so it reads beside it).
-    static func rows(newRoad: Bool) -> [SettingsRow] {
-        guard newRoad, let protection = everyRoadsRows.firstIndex(where: { $0.id == "protection" }) else {
-            return everyRoadsRows
+    /// VX-309 U2 — VX-453: the account section's row joins beside the
+    /// Protection pane's (after the pane's own row, so it reads beside it).
+    /// VX-329: one road, so one catalog — today's account-less variant went
+    /// with today's road.
+    static let rows: [SettingsRow] = {
+        var rows = paneRows
+        if let protection = rows.firstIndex(where: { $0.id == "protection" }) {
+            rows.insert(accountRow, at: protection + 1)
         }
-        var rows = everyRoadsRows
-        rows.insert(accountRow, at: protection + 1)
         return rows
-    }
+    }()
 
     /// **VX-309 U2 — RIDER VX-453 — the new road's Settings ▸ Protection ▸
     /// Sync section** (`RoadAccountSection`: the library's sync situation,
@@ -200,8 +194,8 @@ nonisolated enum SettingsCatalog {
                    "email", "turn on sync", "stop syncing", "other device", "iphone", "follow",
                    "move", "server", "cloud"])
 
-    /// The rows every road renders.
-    static let everyRoadsRows: [SettingsRow] = [
+    /// The panes' own rows (the account section's joins them in `rows`).
+    static let paneRows: [SettingsRow] = [
         // MARK: General
         SettingsRow(
             // Her ruling 2026-10-13: "Design voice" reads "Theme". The old
@@ -504,12 +498,15 @@ nonisolated enum SettingsSearch {
 
     /// The settings half of the index — pure, so a pin can build it without
     /// the helper's `@MainActor` lists.
-    static var settingsEntries: [Entry] { settingsEntries(newRoad: ProtectionRoad.newRoadIsLive) }
+    static var settingsEntries: [Entry] { settingsEntries(accountSection: true) }
 
-    /// VX-309 U2 — VX-453: the settings half for a road (the account
-    /// section's row only where the section renders).
-    static func settingsEntries(newRoad: Bool) -> [Entry] {
-        SettingsCatalog.rows(newRoad: newRoad).map { row in
+    /// VX-309 U2 — VX-453: the settings half (the account section's row only
+    /// where the section renders — VX-329: on the one road, wherever a
+    /// library is open on it).
+    static func settingsEntries(accountSection: Bool) -> [Entry] {
+        let rows = accountSection
+            ? SettingsCatalog.rows : SettingsCatalog.rows.filter { $0.id != SettingsCatalog.accountRow.id }
+        return rows.map { row in
             Entry(
                 finding: SettingsFinding(
                     kind: .setting, pane: row.pane, lead: row.title, detail: row.blurb),
@@ -533,13 +530,13 @@ extension SettingsSearch {
     /// setting, so a catalog-only search could never answer it. It is a
     /// chord (⌥⌘C) and a word (the dictionary's entry naming Block ▸
     /// Callout), and both are here.
-    @MainActor static var wholeIndex: [Entry] { wholeIndex(newRoad: ProtectionRoad.newRoadIsLive) }
+    @MainActor static var wholeIndex: [Entry] { wholeIndex(accountSection: true) }
 
-    /// VX-309 U2 — VX-453: the whole index for the road the window is on —
-    /// the results pane asks with the account section's presence, so a
-    /// search never names the section where the pane does not render it.
-    @MainActor static func wholeIndex(newRoad: Bool) -> [Entry] {
-        settingsEntries(newRoad: newRoad) + shortcutEntries + dictionaryEntries
+    /// VX-309 U2 — VX-453: the whole index for the window — the results pane
+    /// asks with the account section's presence, so a search never names the
+    /// section where the pane does not render it.
+    @MainActor static func wholeIndex(accountSection: Bool) -> [Entry] {
+        settingsEntries(accountSection: accountSection) + shortcutEntries + dictionaryEntries
     }
 
     @MainActor static var shortcutEntries: [Entry] {

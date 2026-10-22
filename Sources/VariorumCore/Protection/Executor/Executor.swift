@@ -75,7 +75,7 @@ public struct UnlockedLibrary {
     /// Mac remembers follows the library at the open's repairs.
     public var notice: LibraryNotice?
 
-    public var fingerprint: String { StoreKeyEnvelope.fingerprint(of: key) }
+    public var fingerprint: String { KeyFingerprint.of(key) }
 
     public init(
         key: StoreKey, record: ProtectionRecord?, section: DeviceSection, memory: DeviceMemory?, keyFile: KeyFile?
@@ -190,7 +190,7 @@ public final class ProtectionExecutor {
     func now() -> Date { leaves.clock.now() }
     func log(_ line: String) { leaves.diagnostics.log(line) }
     static func fp8(_ fingerprint: String?) -> String { String((fingerprint ?? "none").prefix(8)) }
-    static func fp(_ key: StoreKey) -> String { StoreKeyEnvelope.fingerprint(of: key) }
+    static func fp(_ key: StoreKey) -> String { KeyFingerprint.of(key) }
 
     // MARK: - The vault, read fresh
 

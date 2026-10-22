@@ -44,7 +44,7 @@ nonisolated final class SQLCipherLibraryLeaf: LibraryFileLeaf, @unchecked Sendab
 
     init(places: ProtectionPlaces) { self.places = places }
 
-    static func fp(_ key: StoreKey) -> String { StoreKeyEnvelope.fingerprint(of: key) }
+    static func fp(_ key: StoreKey) -> String { KeyFingerprint.of(key) }
 
     // MARK: - The live file
 

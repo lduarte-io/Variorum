@@ -328,7 +328,7 @@ nonisolated enum ProtectionCopyDoors {
         }
         ProtectionOpenRoad.log(
             "road: made a copy this Mac's library — library \(String((library.record?.libraryID ?? "none").prefix(8))) "
-                + "key \(StoreKeyEnvelope.shortFingerprint(library.fingerprint)); the previous one in Previous Libraries; held")
+                + "key \(KeyFingerprint.short(library.fingerprint)); the previous one in Previous Libraries; held")
         return MakeMineResult(outcome: .made, reopenKey: library.key)
     }
 
@@ -436,7 +436,7 @@ nonisolated enum ProtectionCopyDoors {
         if landed.mintedWords == nil, let landedID = landed.library.record?.libraryID { wordsLedger?.record(landedID) }
         ProtectionOpenRoad.log(
             "road: a copy landed in the empty slot — library \(String((landed.library.record?.libraryID ?? "none").prefix(8))) "
-                + "key \(StoreKeyEnvelope.shortFingerprint(landed.library.fingerprint)); nothing stepped aside; held"
+                + "key \(KeyFingerprint.short(landed.library.fingerprint)); nothing stepped aside; held"
                 + (landed.mintedWords == nil ? "" : "; its words wait for her look"))
         return EmptySlotResult(outcome: .made, key: landed.library.key)
     }

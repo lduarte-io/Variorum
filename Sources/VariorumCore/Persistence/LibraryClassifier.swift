@@ -2,51 +2,45 @@ import Foundation
 import GRDB
 
 // Phase 13x, U1 row 1 — THE PICKED-THING CLASSIFIER (the 13x plan's U1 §1;
-// the kickoff rulings QB/QC). ONE brain behind both framed doors — *File ▸
-// Open Library…* and *Restore from Backup…* — answering "what is this?"
-// for a URL the user picked, BEFORE any secret is typed and WITHOUT
-// inventing a byte of crypto: every fact it reads is non-secret by design
-// (file magic, key-file names and fingerprints, a plaintext store's own
-// schema tables).
+// the kickoff rulings QB/QC), answering "what is this?" for a URL the user
+// picked, BEFORE any secret is typed and WITHOUT inventing a byte of crypto:
+// every fact it reads is non-secret by design (file magic, file NAMES, a
+// plaintext store's own schema tables).
 //
 // TWO STAGES, by construction. `classify(at:)` is KEYLESS: an encrypted
 // copy's inside is unreadable until a secret opens it, so for ciphertext
-// the verdict is about the PAIR (corner 33: a library arriving WITH its
-// key file opens by the lobby's ordinary roads; without it nothing opens).
-// `schemaVerdict(at:key:)` is the POST-UNLOCK consult: with the key in
-// hand it reads `grdb_migrations` and renders the migrator's
-// superseded check honestly (the sync trace's item 5 — a copy from a
-// NEWER build refuses, never crashes). Neither stage ever runs the
-// migrator against the picked file — and (13x F3, ladder R3-1) neither
-// ever OPENS the picked file in place: every SQLite read goes through
-// `withStagedRead`, on our own copy, so the picked folder is only ever
-// read (the confirm's "the file you picked is only read").
+// the verdict is about what sits BESIDE it. `schemaVerdict(at:key:)` is the
+// POST-UNLOCK consult: with the key in hand it reads `grdb_migrations` and
+// renders the migrator's superseded check honestly (the sync trace's item 5
+// — a copy from a NEWER build refuses, never crashes). Neither stage ever
+// runs the migrator against the picked file — and (13x F3, ladder R3-1)
+// neither ever OPENS the picked file in place: every SQLite read goes
+// through `withStagedRead`, on our own copy, so the picked folder is only
+// ever read.
 //
-// The pair rules this file reads are the SHIPPED ones, restated from their
-// owners rather than re-invented: the live key file's fingerprint name
-// (`StoreKeyEnvelope.filename(forFingerprint:)`, §3.5), the snapshot's own
-// pair (`<snapshot>.keys.json`, pre-13x 2a row 42 — `StoreBackup
-// .pairedKeyFile` writes it; the rule is one `deletingPathExtension`), the
-// folder's fingerprint-named file serving pre-row-42 snapshots, and the
-// legacy `variorum-keys.json` serving legacy snapshots (design §6).
+// VX-329 U1 — THE RELEASE SWITCH: today's key-file READERS left with today's
+// road (rule 26 — stores and copies from before this design are neither
+// migrated nor handled). This design's pair (a store with its format-3 key
+// file) is the new road's to recognise (`PickedCopy`, which decodes it); the
+// classifier serves only the HONEST WORDS for everything else, and so it
+// still NAMES — by file name, reading no byte of it — a key file beside an
+// encrypted store: `.encryptedLibrary` says "a key file is there" (this
+// build's own name, or one an older Variorum wrote), so the refusal never
+// claims a copy is keyless when it is not (the plan's §6 OPEN DESIGN NOTE).
+// `.bareStoreWithoutKeyFile` is reserved for an encrypted store with NO
+// key-file-shaped name beside it.
 
 public enum LibraryClassifier {
     /// THE VERDICT TABLE (pinned by `LibraryClassifierTests`, one pin per
-    /// row). The door words are U2's; every refusal-shaped verdict here
-    /// carries the facts a sentence needs.
+    /// row). Every refusal-shaped verdict carries the facts a sentence needs.
     public enum Verdict: Equatable, Sendable {
-        /// An encrypted store with a key file beside it — the hand-off
-        /// shape and a hand-copied library folder alike. Opens by the
-        /// lobby's ordinary roads (the key file's wraps).
+        /// An encrypted store with a key-file-shaped file beside it (named,
+        /// never read — see `keyFileBeside`): its own `<stem>.keys.json`,
+        /// this design's `variorum-library-keys.json`, or a key file an
+        /// older Variorum wrote (`variorum-keys.json`,
+        /// `variorum-keys-<fp16>.json`). A picked folder holding one store
+        /// classifies as that store.
         case encryptedLibrary(store: URL, keyFile: URL)
-        /// A backup snapshot with the key file that serves it: its own
-        /// pair (`…keys.json`), the folder's fingerprint-named file
-        /// matched by the snapshot name's fp8, or the legacy folder file
-        /// for a stamp-only name (design §6, decision 11).
-        case snapshotPair(store: URL, keyFile: URL)
-        /// A picked FOLDER holding one store and its key file (the
-        /// AirDropped hand-off folder — QC's ruling).
-        case folderHoldingPair(store: URL, keyFile: URL)
         /// A picked folder holding SEVERAL stores: the door offers them;
         /// the classifier never guesses (PROVISIONAL P-U1-3).
         case folderHoldingStores([URL])
@@ -55,14 +49,12 @@ public enum LibraryClassifier {
         /// — §14.13's reconciliation subject).
         case plaintextExport(store: URL)
         /// A plaintext FULL library (local tables present — a pre-13p
-        /// store). PROVISIONAL P-U1-1: not one of the ruled seven; the
-        /// door's handling is U2's.
+        /// store). PROVISIONAL P-U1-1.
         case plaintextLibrary(store: URL)
-        /// A bare opaque file with NO key file that serves it — an
+        /// A bare opaque file with NO key-file-shaped file beside it — an
         /// encrypted library missing its key file, or not a database at
         /// all (indistinguishable without a key, deliberately). The
-        /// honest refusal; the remedy sentence ("send the whole folder —
-        /// the key file travels with it") is the door's.
+        /// honest refusal; the remedy sentence is the door's.
         case bareStoreWithoutKeyFile(store: URL)
         /// A READABLE plaintext store written by a newer build — the
         /// migrator's superseded check, keyless half.
@@ -96,8 +88,8 @@ public enum LibraryClassifier {
     }
 
     /// The folder arm (QB/QC: the door takes the `.sqlite` or the folder
-    /// itself). One store inside ⇒ the inner verdict, pair-shaped verdicts
-    /// wrapped as `folderHoldingPair`; several ⇒ reported, never guessed.
+    /// itself). One store inside ⇒ the inner verdict; several ⇒ reported,
+    /// never guessed.
     private static func classifyFolder(_ folder: URL) -> Verdict {
         let entries = (try? FileManager.default.contentsOfDirectory(
             at: folder, includingPropertiesForKeys: nil)) ?? []
@@ -112,107 +104,56 @@ public enum LibraryClassifier {
         case 0:
             return .notAVariorumStore(folder)
         case 1:
-            switch classify(at: stores[0]) {
-            case .encryptedLibrary(let store, let keyFile),
-                 .snapshotPair(let store, let keyFile):
-                return .folderHoldingPair(store: store, keyFile: keyFile)
-            case let inner:
-                return inner
-            }
+            return classify(at: stores[0])
         default:
             return .folderHoldingStores(stores)
         }
     }
 
-    // MARK: - The opaque arm (ciphertext — the key-file hunt)
+    // MARK: - The opaque arm (ciphertext — what sits beside it, by NAME)
 
-    /// The snapshot pair rule (pre-13x 2a row 42): the key file written
-    /// WITH a snapshot, beside it, under the snapshot's own name. The
-    /// writer is `StoreBackup.pairedKeyFile` (Shared); the rule is one
-    /// path transform, restated here so core can READ what Shared writes.
-    public static func pairedKeyFile(for snapshot: URL) -> URL {
-        snapshot.deletingPathExtension().appendingPathExtension("keys.json")
+    /// This design's key file beside a library (`ProtectionNames.keyFilename`, restated — core's Persistence cannot see
+    /// the Protection model's names file without a cycle of meaning; the pin holds the two equal).
+    static let thisDesignsKeyFilename = "variorum-library-keys.json"
+    /// The names an OLDER Variorum (before this design) wrote for its key files — recognised by NAME only, never
+    /// read (rule 26): the fixed legacy name and the fingerprint-named form.
+    static let olderKeyFilename = "variorum-keys.json"
+    static let olderFingerprintKeyFilePrefix = "variorum-keys-"
+
+    /// Whether `name` is an older Variorum's fingerprint-named key file (`variorum-keys-<fp16>.json`).
+    static func isOlderFingerprintKeyFileName(_ name: String) -> Bool {
+        guard name.hasPrefix(olderFingerprintKeyFilePrefix), name.hasSuffix(".json") else { return false }
+        let middle = name.dropFirst(olderFingerprintKeyFilePrefix.count).dropLast(".json".count)
+        return middle.count == 16 && middle.allSatisfy { "0123456789abcdef".contains($0) }
     }
 
-    /// The fp8 a backup snapshot's name carries
-    /// (`variorum-backup-<stamp>-<fp8>.sqlite`); nil for stamp-only names
-    /// and for names that are not the app's backup shape at all.
-    static func backupNameFingerprint(_ url: URL) -> (isBackupNamed: Bool, fp8: String?) {
-        let name = url.deletingPathExtension().lastPathComponent
-        guard name.hasPrefix("variorum-backup-") else { return (false, nil) }
-        let tail = name.dropFirst("variorum-backup-".count)
-        // `yyyy-MM-dd-HHmmss` is 17 characters; the optional tail is
-        // `-` + 8 lowercase hex (StoreBackup's own naming, restated).
-        guard tail.count >= 17 else { return (true, nil) }
-        let suffix = tail.dropFirst(17)
-        guard suffix.hasPrefix("-"), suffix.count == 9,
-              suffix.dropFirst().allSatisfy({ "0123456789abcdef".contains($0) })
-        else { return (true, nil) }
-        return (true, String(suffix.dropFirst()))
+    /// The first key-file-shaped file beside `store`, in a FIXED order (never by date): the store's own
+    /// `<stem>.keys.json`, this design's `variorum-library-keys.json`, an older Variorum's fingerprint-named files (by
+    /// name), then its fixed-name file. nil when none is there. Names only — no byte is read.
+    static func keyFileBeside(_ store: URL) -> URL? {
+        let manager = FileManager.default
+        let folder = store.deletingLastPathComponent()
+        let own = store.deletingPathExtension().appendingPathExtension("keys.json")
+        if manager.fileExists(atPath: own.path) { return own }
+        let thisDesigns = folder.appendingPathComponent(thisDesignsKeyFilename, isDirectory: false)
+        if manager.fileExists(atPath: thisDesigns.path) { return thisDesigns }
+        let names = ((try? manager.contentsOfDirectory(atPath: folder.path)) ?? []).sorted()
+        if let older = names.first(where: isOlderFingerprintKeyFileName) {
+            return folder.appendingPathComponent(older, isDirectory: false)
+        }
+        let legacy = folder.appendingPathComponent(olderKeyFilename, isDirectory: false)
+        return manager.fileExists(atPath: legacy.path) ? legacy : nil
     }
 
     private static func classifyOpaque(_ store: URL) -> Verdict {
-        // 1. The snapshot's OWN pair, whatever the name (the hand-off and
-        //    row-42 shapes alike carry the key file beside the store; the
-        //    pair name wins over the folder hunt because it was written
-        //    WITH this exact snapshot).
-        let pair = pairedKeyFile(for: store)
-        let (isBackupNamed, nameFP8) = backupNameFingerprint(store)
-        if let envelope = try? StoreKeyEnvelope.load(at: pair) {
-            // A name that carries fp8 must AGREE with the pair it names —
-            // a mismatched pair does not open this snapshot and must not
-            // be offered as if it did.
-            if let fp8 = nameFP8, let fingerprint = envelope.keyFingerprint,
-               StoreKeyEnvelope.shortFingerprint(fingerprint) != fp8 {
-                // fall through to the folder hunt
-            } else {
-                return .snapshotPair(store: store, keyFile: pair)
-            }
+        if let keyFile = keyFileBeside(store) {
+            return .encryptedLibrary(store: store, keyFile: keyFile)
         }
-        if isBackupNamed {
-            // 2. A backup-named snapshot without its own pair: the
-            //    folder's fingerprint-named file (serving pre-row-42
-            //    snapshots) matched by fp8, else — for a stamp-only
-            //    legacy name — whatever key file the folder holds.
-            let folder = store.deletingLastPathComponent()
-            let candidates = StoreKeyEnvelope.keyFileURLs(besideStore: store)
-                // The caller's path form, as in the folder arm.
-                .map { folder.appendingPathComponent($0.lastPathComponent, isDirectory: false) }
-            if let fp8 = nameFP8 {
-                if let match = candidates.first(where: {
-                    StoreKeyEnvelope.fingerprint(fromFilename: $0.lastPathComponent)?
-                        .hasPrefix(fp8) == true
-                }) {
-                    return .snapshotPair(store: store, keyFile: match)
-                }
-                // A folder key file of a DIFFERENT key does not open this
-                // snapshot — saying so is the honest refusal.
-                return .bareStoreWithoutKeyFile(store: store)
-            }
-            if let located = StoreKeyEnvelope.locate(besideStore: store) {
-                return .snapshotPair(store: store, keyFile: rebased(located, besideStore: store))
-            }
-            return .bareStoreWithoutKeyFile(store: store)
-        }
-        // 3. An ordinary name: the live-key-file rule (§3.5 — the current
-        //    key file beside the store). The hand-off folder classifies
-        //    here: its key file rides under its own fingerprint name.
-        if let located = StoreKeyEnvelope.locate(besideStore: store) {
-            return .encryptedLibrary(store: store, keyFile: rebased(located, besideStore: store))
-        }
-        // 4. Nothing serves it (corner 33's refusal).
+        // Nothing key-file-shaped serves it (corner 33's refusal).
         return .bareStoreWithoutKeyFile(store: store)
     }
 
     // MARK: - The plaintext arm (readable without any key)
-
-    /// A discovered sibling, spoken in the CALLER's path form (directory
-    /// listings resolve `/var/…` to `/private/var/…`; a verdict must
-    /// compare equal to URLs the door built from the picked one).
-    private static func rebased(_ discovered: URL, besideStore store: URL) -> URL {
-        store.deletingLastPathComponent()
-            .appendingPathComponent(discovered.lastPathComponent, isDirectory: false)
-    }
 
     private static func classifyPlaintext(_ store: URL) -> Verdict {
         do {
@@ -272,7 +213,7 @@ public enum LibraryClassifier {
     ///
     /// The copy is the main file plus its non-empty `-wal` — the committed
     /// frames a hot-copied library carries, the SAME pair the landing
-    /// carries (`LibraryAdoption` step 5) — and NEVER its `-shm`: a
+    /// carries (`PickedCopy.file`) — and NEVER its `-shm`: a
     /// rebuildable index, never trusted across a copy. It opens read-write
     /// (it is ours), so SQLite's own recovery rebuilds the index and folds
     /// the wal in exactly as the landing's reopen will: the consult reads

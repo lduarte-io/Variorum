@@ -65,7 +65,7 @@ enum ProtectionBackupHook {
         }
         let key = session.key
         guard let keyFile = (try? session.system.leaves.keyFiles.readLiveKeyFile()) ?? nil,
-              keyFile.fingerprint == StoreKeyEnvelope.fingerprint(of: key) else {
+              keyFile.fingerprint == KeyFingerprint.of(key) else {
             ProtectionOpenRoad.log("backup pair: no live key file of the current key — none taken")
             return .noKeyFileOfTheKey
         }
@@ -74,7 +74,7 @@ enum ProtectionBackupHook {
         do {
             snapshot = try backups.writeContainerPair(with: key, keyFile: keyFile, deviceID: deviceID)
             ProtectionOpenRoad.log(
-                "backup pair: written under \(StoreKeyEnvelope.shortFingerprint(keyFile.fingerprint)) in "
+                "backup pair: written under \(KeyFingerprint.short(keyFile.fingerprint)) in "
                     + ProtectionNames.backupsSubpath(libraryID: keyFile.libraryID, deviceID: deviceID))
         } catch {
             ProtectionOpenRoad.log("backup pair: failed — \(String(describing: error))")

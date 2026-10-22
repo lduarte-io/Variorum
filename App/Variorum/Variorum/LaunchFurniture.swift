@@ -115,16 +115,12 @@ enum LaunchFurniture {
             // 13s-b U1b: the example snippet FIRST (the oldest group is the
             // Snippets rail's first card — R-13s-26), then the guide, then
             // the readme LAST — the newest thing a fresh Library leads
-            // with (R-13s-29/39). VX-306 ladder r2 m2: the readme's Start
-            // Here passages only where this store opens on the new road
-            // (the road's own rule for the variant — today's road, Release
-            // included, seeds her five blocks alone until VX-329).
+            // with (R-13s-29/39). The readme carries its Start Here passages
+            // on every store (VX-329: every store opens on the new road).
             beforeArranging: {
                 _ = await ExampleSnippetSeeder.seedAtBirth(session: session)
                 _ = await TutorialSeeder.seedAtBirth(session: session)
-                _ = await ReadmeSeeder.seedAtBirth(
-                    session: session,
-                    onTheNewRoad: ProtectionRoad.opensOnTheNewRoad(devStore: storeVariant == .dev))
+                _ = await ReadmeSeeder.seedAtBirth(session: session)
             },
             loadMark: marks.welcome?.load,
             saveMark: marks.welcome?.save)

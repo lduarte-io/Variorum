@@ -70,7 +70,7 @@ nonisolated final class FileBackupsLeaf: BackupsLeaf, @unchecked Sendable {
     /// road hands THIS pair to the far leg, never one re-discovered by listing — 18k C7's rule).
     func writeContainerPair(with key: StoreKey, keyFile: KeyFile, deviceID: String) throws -> URL {
         guard !copiesArePaused else { throw BackupsLeafError.paused }
-        let fingerprint = StoreKeyEnvelope.fingerprint(of: key)
+        let fingerprint = KeyFingerprint.of(key)
         guard keyFile.fingerprint == fingerprint else { throw BackupsLeafError.keyFileIsAnotherKeys }
         let folder = places.backupFolder(libraryID: keyFile.libraryID, deviceID: deviceID)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
@@ -92,7 +92,7 @@ nonisolated final class FileBackupsLeaf: BackupsLeaf, @unchecked Sendable {
     /// re-made), a pair of that name there, a copy that does not verify.
     func landFarPair(copying snapshot: URL, key: StoreKey, keyFile: KeyFile, deviceID: String) throws -> String? {
         guard !copiesArePaused else { throw BackupsLeafError.paused }
-        guard keyFile.fingerprint == StoreKeyEnvelope.fingerprint(of: key) else { throw BackupsLeafError.keyFileIsAnotherKeys }
+        guard keyFile.fingerprint == KeyFingerprint.of(key) else { throw BackupsLeafError.keyFileIsAnotherKeys }
         guard let far = places.farFolder() else { return nil }
         let subpath = ProtectionNames.backupsSubpath(libraryID: keyFile.libraryID, deviceID: deviceID)
         return try far.withAccess { root in
@@ -192,7 +192,7 @@ nonisolated final class FileBackupsLeaf: BackupsLeaf, @unchecked Sendable {
         var date = Date()
         for _ in 0..<120 {
             let name = CatalogNames.backupPrefix + CatalogNames.stampString(date) + "-"
-                + StoreKeyEnvelope.shortFingerprint(fingerprint) + ".sqlite"
+                + KeyFingerprint.short(fingerprint) + ".sqlite"
             let url = folder.appendingPathComponent(name)
             if !FileManager.default.fileExists(atPath: url.path) { return url }
             date += 1

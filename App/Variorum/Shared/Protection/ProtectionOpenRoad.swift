@@ -462,7 +462,7 @@ nonisolated enum ProtectionOpenRoad {
         while index < keys.count {
             let key = keys[index]
             index += 1
-            let fingerprint = StoreKeyEnvelope.fingerprint(of: key)
+            let fingerprint = KeyFingerprint.of(key)
             for file in files where file.fingerprint == fingerprint {
                 for older in (try? file.historyKeys(currentKey: key)) ?? [] where !keys.contains(older.key) {
                     keys.append(older.key)
@@ -576,7 +576,7 @@ nonisolated enum ProtectionOpenRoad {
         let roads = library.keyFile.map { $0.roads.map(\.rawValue).sorted().joined(separator: ",") } ?? "none"
         let libraryID = String((library.record?.libraryID ?? "none").prefix(8))
         let repairs = report.repairsDone.map { String(String(describing: $0).prefix(32)) }.joined(separator: ",")
-        log("road: \(how) — library \(libraryID) key \(StoreKeyEnvelope.shortFingerprint(library.fingerprint)) "
+        log("road: \(how) — library \(libraryID) key \(KeyFingerprint.short(library.fingerprint)) "
             + "device \(library.section.deviceID.prefix(8)); custody silent \(silent) touchid \(touch); Apple keys "
             + "readable [\(apple)]; memory items \(memory); live key file roads [\(roads)]; notice "
             + "\(report.notice != nil); repairs [\(repairs)]; faults \(report.faults.count); acts \(report.acts.count); "
