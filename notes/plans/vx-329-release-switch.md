@@ -2210,5 +2210,9 @@ after the r2 fixes, her word corrections, the phone leg's ProtectionWords change
   suite failed … with 8 issues` — both landings `.refused(.failed)` for the pin's stated reason (rule 27's face was
   the only lobby admitted); restored by `git checkout --`, `git diff --exit-code` clean → re-run `✔ Test run with 2
   tests in 1 suite passed`.
-- **THE CLOSING FULL PHONE RUN:** PENDING (running at this commit; the result lands in this record's next edit).
+- **THE CLOSING FULL PHONE RUN** (iPhone 17 Pro, iOS 26.2 sim, DerivedData `vx329-stagebatch-ios`, at `190bf985e`):
+  **GREEN — `Test run with 808 tests in 126 suites passed after 410.4 seconds with 4 known issues`, exit 0**; zero
+  ✘ lines; the 4 known issues are the standing wrappers; the count matches the stage batch's run 2 (U4 added no
+  phone tests — the fact is shared core, the face VM-8's); every "skipped" mention in the log is a test's own name
+  or appintentsmetadataprocessor build noise (zero tests skipped); no new crash report in DiagnosticReports.
 - **The walk window (U4's byte-copy re-check + the R1 walk rows):** PENDING (after the phone run, same claim).
