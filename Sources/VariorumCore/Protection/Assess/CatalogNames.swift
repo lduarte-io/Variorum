@@ -17,8 +17,11 @@ import Foundation
 //   - beside them, the folders that are hers (`md-exports/`, the hand-off folder
 //     `Variorum Library — <day>`).
 // Today's fingerprint-named and fixed-name key files, the flat `Backups/` files
-// and the folder key files left with the legacy readers (VX-378 U1). Pure:
-// names in, values out — nothing here reads a disk.
+// and the folder key files left with the legacy readers (VX-378 U1). Their two
+// key-file NAMES are still recognised — as names, never as files this design
+// reads — so the slot can say it holds a store from before this design (rule
+// 26's fact, `isPreDesignKeyFileName`; VX-329 U4). Pure: names in, values out —
+// nothing here reads a disk.
 
 public enum CatalogNames {
     // MARK: - The stamp (`yyyy-MM-dd-HHmmss`, UTC — every stamp today's builds write)
@@ -86,6 +89,16 @@ public enum CatalogNames {
             default: return false
             }
         }
+    }
+
+    /// A key file an OLDER Variorum (before this design) wrote beside its
+    /// library: the fixed `variorum-keys.json`, or the fingerprint-named
+    /// `variorum-keys-<fp16>.json`. NAMES ONLY — `parseFile` answers nil for
+    /// both, so the catalogue lists them as foreign and never reads a byte of
+    /// them (rule 26: we don't handle them — detect and say). One rule with the
+    /// picked-copy classifier's (`LibraryClassifier`, R-U1-2), never restated.
+    public static func isPreDesignKeyFileName(_ name: String) -> Bool {
+        name == LibraryClassifier.olderKeyFilename || LibraryClassifier.isOlderFingerprintKeyFileName(name)
     }
 
     /// What a file name is — nil for a name no build of Variorum writes (the

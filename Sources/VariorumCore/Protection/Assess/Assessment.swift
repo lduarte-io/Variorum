@@ -16,6 +16,13 @@ public enum LaunchVerdict: Equatable, Sendable {
     case libraryMissing
     /// A library, locked: the lobby offers its roads.
     case lobby
+    /// A library from BEFORE this design in the slot (CastleRules rule 26 — "we
+    /// don't migrate stores from before this design, and we don't handle them"):
+    /// a store, no key file of this design beside it, and a key file an older
+    /// Variorum wrote — named, never read (`AssessRules.preDesignStore`).
+    /// Decided before any road is tried; the face says so and offers a fresh
+    /// start (VX-329 U4, the plan's §6d).
+    case preDesignStore
     /// Unlocked.
     case open
 }

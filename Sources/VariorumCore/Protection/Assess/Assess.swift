@@ -85,7 +85,25 @@ public enum AssessRules {
         if facts.unlocked != nil { return .open }
         switch facts.storeFile {
         case .absent: return facts.containerMarker ? .libraryMissing : .startFresh
-        case .present, .plaintext: return .lobby
+        case .present, .plaintext: return preDesignStore(facts) ? .preDesignStore : .lobby
+        }
+    }
+
+    /// RULE 26's FACT (VX-329 U4, the plan's §6d): a store in the slot, NO key
+    /// file of this design beside it (`variorum-library-keys.json`, readable or
+    /// not — a format-3 slot keeps the lobby), and at least one key file in the
+    /// slot's own folder wearing an OLDER Variorum's name
+    /// (`CatalogNames.isPreDesignKeyFileName`). Names only: the catalogue lists
+    /// those names as foreign and never reads them. It precedes every road —
+    /// nothing this Mac holds (a memory item, a custody item, a session) opens a
+    /// store this build has no reader for (the §8 addendum: her real store's
+    /// byte copy met the lobby's typed roads because the dev library's memory
+    /// item stood beside it). A slot with no key-file name at all stays rule
+    /// 27's.
+    public static func preDesignStore(_ facts: ProtectionFacts) -> Bool {
+        guard facts.storeFile != .absent, facts.catalog.liveKeyFile == nil else { return false }
+        return facts.catalog.foreign.contains {
+            $0.place == .container && $0.folders.isEmpty && CatalogNames.isPreDesignKeyFileName($0.name)
         }
     }
 

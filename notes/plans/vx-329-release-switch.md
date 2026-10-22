@@ -1375,9 +1375,26 @@ swap and T-5's empty-slot program), `Executor/Acts/DeviceActs.swift` (the plan-l
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton: DONE (this commit).
-- Piece 1 — THE FACT (core, pure, names only): NOT-STARTED — `LaunchVerdict.preDesignStore` from `AssessRules.launch`
-  (a store in the slot, no format-3 key file listed beside it, a pre-design key-file NAME at the container's root —
-  `catalog.foreign`, never read); the route shows the face without trying a quiet road on the old store.
+- Piece 1 — THE FACT (core, pure, names only): DONE (this commit; core VERIFIED, the app's one switch arm compiles at
+  piece 2's `build-for-testing` — PENDING until then). `LaunchVerdict.preDesignStore` from `AssessRules.launch` via
+  `AssessRules.preDesignStore(_:)`: a store in the slot (`present` or `plaintext`), NO format-3 key file listed beside it
+  (`catalog.liveKeyFile == nil` — a format-3 NAME this build can't decode still counts as one, so that slot keeps the
+  lobby's unreadable-file line), and a pre-design key-file NAME in the slot's own folder (`catalog.foreign`, container
+  root only — never `Backups/`, a Previous Libraries folder or the far folder). The names are
+  `CatalogNames.isPreDesignKeyFileName` = R-U1-2's two rules in `LibraryClassifier` (one rule, two readers — pinned by
+  behaviour). `parseFile` answers nil for both names, so the lister never reads their bytes. The route
+  (`ProtectionOpenRoad.route`) answers `.lobby(lobby)` for the verdict WITHOUT trying a quiet road: no key is ever tried
+  against the old store. **THE PIN — `PreDesignStoreFactTests` (7 tests), RED ON OLD:** run on the pre-fix tree (the pin
+  file written first, old API only, the verdict read through its printed form): **2 of its 6 tests red, 6 issues, every
+  verdict printed `lobby`** — `aStoreWithAnOlderVariorumsKeyFileBesideItIsAPreDesignStore` (×5: the fixed name, the
+  fingerprint name, both, a plaintext store, a crowded slot) and `theFactPrecedesWhateverThisMacsKeychainHolds` (the §8
+  addendum's shape: a remembered library with a key-file copy, a silent and a Touch ID item, signed in). The keyless arm
+  (`aKeylessStoreKeepsRule27sRefusal`, near-miss names included), `onlyTheSlotsOwnFolderCounts`,
+  `aFormat3SlotKeepsTheLobbyWhateverOlderNamesStandBesideIt` (a readable and an undecodable format-3 file; an empty slot
+  stays `startFresh`) and `theOlderNamesAreListedByNameAndNeverRead` were GREEN on old (unchanged arms, as the brief
+  says). After the fix: **7/7 green** (the seventh, `theSlotsFactAndThePickedCopyClassifierReadOneRule`, added after
+  the red run — it names the new function); neighbours green (`AssessModeTests`, `U2PinsRule27Tests`, `CatalogTests`,
+  `LibraryClassifierTests` — 42 tests in 6 suites).
 - Piece 2 — THE FACE (Mac): NOT-STARTED — her words byte-faithful (`ProtectionWords`), the lobby face's fact, the two
   doors, Start fresh's confirm.
 - Piece 3 — Start fresh's ACT (the crash-safe set-aside, then the calm creation): NOT-STARTED.

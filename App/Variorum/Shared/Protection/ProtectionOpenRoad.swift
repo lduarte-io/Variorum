@@ -11,6 +11,8 @@
 //    - `.startFresh` → `createLibrary(passphrase: nil)` (rule 2: the twelve words at birth, shown once on the
 //      card; rule 3: the passphrase is asked later) → the card, then the open.
 //    - `.libraryMissing` → today's three-door face (unchanged this unit).
+//    - `.preDesignStore` (VX-329 U4 — rule 26: a store with an older Variorum's key file beside it and none of this
+//      design's) → the lobby's facts with NO road tried on the store; the face is her pre-design face.
 //    - `.lobby` → THE QUIET ROADS AT ONCE, in order (rule 8: "the next open uses whatever quiet road still
 //      works"): every silent item's key, then each Apple wrap whose key reads here — the live key file's first,
 //      then this Mac's sealed mirror's and every catalogued key file's (P-VX306-U1b-2: the scenario world's own
@@ -241,6 +243,10 @@ nonisolated enum ProtectionOpenRoad {
             return await create(ctx, setAsideLiveKeyFile: false)
         case .libraryMissing:
             return .libraryMissing
+        case .preDesignStore:
+            // VX-329 U4 — RULE 26: a store from before this design. No road is tried on it (this build has no reader for
+            // it, and nothing here reads it); the lobby's face says so in her words (`ProtectionLobbyFace.preDesignStore`).
+            return .lobby(lobby)
         case .lobby, .open:
             var standing = lobby
             switch await open(ctx, candidates: quietCandidates(ctx, facts: facts), typed: .none) {
