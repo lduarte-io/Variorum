@@ -543,8 +543,15 @@ switch-day script, the release notes) — every U3 commit is pathspec-limited, r
   `theVaultLeafFollowsASignOutAndASignInToAnotherAccount`). **The harness on the fixed tree: `✔ Test run with 375 tests
   in 60 suites passed`** (0 skipped; 368 − the deleted provider test + this unit's 8; P2 GREEN 4/4). The Mac and phone
   builds: PENDING (piece 4).
-- Piece 3 — P1's behavioral revert (announced here before it starts; commit-before-revert; restore verified by
-  `git diff --exit-code`): NOT-STARTED. No revert is in flight.
+- Piece 3 — P1's behavioral revert: IN-PROGRESS — **REVERTS STARTING on the committed tree `550ff123a`** (restore =
+  `git checkout -- App/Variorum/Shared/AuthSession.swift App/Variorum/Shared/Protection/WireVaultLeaf.swift` + removing
+  the restored `FollowingSessionProvider.swift`, verified by `git status`/`git diff --exit-code` clean). THE REVERT (the
+  pre-fix vault-leaf composition, over the pin world's stored session and endpoint): `FollowingSessionProvider.swift`
+  restored byte-for-byte from `550ff123a^`; `WireVaultLeaf.live` composes `FollowingSessionProvider(signedInUser: {
+  <the authority's store>.load()?.userID }, make: { <a second AuthSession over the same store, endpoint and clock> })`
+  — exactly the pre-fix `signedInUser` (the stored session's user) and `make` (another instance over the same item),
+  the store and endpoint being the pin world's instead of the scope's Keychain item and the production project (no
+  network); two REVERT-ONLY accessors on `AuthSession` expose its store and mint that sibling.
 - Piece 4 — evidence: the harness (P1–P3 + the app's protection/auth suites it carries), core auth/account + protection
   sets debug AND release, `build-for-testing` both targets: NOT-STARTED.
 
