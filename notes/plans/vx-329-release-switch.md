@@ -104,9 +104,16 @@ find that it doesn't and bring it to her), on the throwaway project, before her 
 Each unit appends its record here (the VX-309 §6 form); the ladder files `notes/plans/vx-329-ladder-round-N.md`;
 the walk and the rehearsals in §8; the closeout in §9.
 
-### U1 RECORD — THE SWITCH (Opus implementer, 2026-10-22; IN PROGRESS)
+### U1 RECORD — THE SWITCH (Opus implementer, 2026-10-22; DONE — the Mac and phone suite RUNS are the orchestrator's stage batch)
 
-**Not done in U1, first:** PENDING (filled at the unit's end). Standing limits from the brief: no stage, no Debug launch, no
+**Not done in U1, first:** NO Mac or phone test suite was RUN (no stage — the brief's limit): every app pin written,
+rewired or trimmed here is COMPILED (`build-for-testing` green, both targets) and UNRUN — the suite list below is the
+orchestrator's stage batch, and every app-side claim in this record is PENDING until it runs. NO walk, no Debug launch, no
+dev-store touch. NOT built (each flagged below, none invented): a face that NAMES an older Variorum's key file or the road
+out of a pre-design store (piece 5); the replacement for the session-stamped owner (F-U1-1); the phone's road faces (VM-8,
+F-U1-3); the rewrites of `RESTORE.md` and the phone guide's privacy chapter (F-U1-4, F-U1-5); the deletion of the
+orphaned `LocalMachineryRecreation` (F-U1-9) and of the 14b vault brains (`Crypto/VaultBootstrap` etc. — L1's call);
+anything in `Sources/VariorumCore/Sync/` (the L1 flags). Standing limits from the brief: no stage, no Debug launch, no
 dev-store touch, no network, no Linear, no subagent, no `xcodebuild test` (the Mac suite list below is the orchestrator's);
 zero `Sources/VariorumCore/Sync/` lines (the L1 flags below are the orchestrator's); `SyncSchema` untouched (L0's 14 stands).
 
@@ -306,8 +313,21 @@ form). Machinery note: the orchestrator's own commits interleave on this branch 
   retention rule's home, the harness's init) reworded to what is true — history kept, the claim made true; every
   source-string pin that held on the pre-cut tree and no longer does was found by a scan (pre-cut product sources vs
   now) and fixed (`EmptySlotDoorsSurfaceTests`, `FollowDoneNoticeTests`, `U2WordsTests`, `RoadAccountSurfaceTests`).
-- Evidence — `swift test` + `swift test -c release` (counts), `xcodebuild build-for-testing` (Mac), the iOS target build:
-  PENDING.
+- Evidence (at `df9835835` + the final tidy commit; every run foreground, in sequence, on the Pro):
+  - `swift test` (debug): **VariorumCoreTests 3296 tests in 430 suites PASSED** (2 known issues, pre-existing);
+    **VariorumMCPTests 383 tests in 71 suites PASSED**; **StringsWorkbook 32 tests in 4 suites PASSED**; EXIT 0.
+  - `swift test -c release` (the acceptance): **VariorumCoreTests 3267 tests in 425 suites PASSED** (2 known issues;
+    the DEBUG-only pins compile out — VX-406's release-floor reds are GONE with their suites, VX-380's with its
+    subject); StringsWorkbook 32/32; VariorumMCPTests 382/383 — ONE red, the same load-timing flake as debug run 1
+    (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, 18.2 s against its 15 s
+    bound under the full suite's load), re-run ALONE under `-c release` GREEN (3/3, 2.2 s). Not this unit's (the MCP
+    harness is untouched) — FINDING below.
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' build-for-testing`: GREEN.
+  - `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' build-for-testing`: GREEN (the iOS
+    app target and its tests).
+  - `xcodebuild -scheme Variorum -configuration Release build` into this unit's own DerivedData (no Variorum instance
+    running — checked first; nothing near `/Applications`): GREEN — §6's "a Release-configuration build of the Mac app
+    compiles".
 
 **THE SWEEP TABLE (piece 6 — every deleted symbol `rg`'d as a WORD across `Sources/`, the app's four source and test
 folders, `Tests/`, `Tools/` and `Package.swift`, at this commit; DerivedData excluded):**
@@ -394,9 +414,29 @@ orchestrator's ruling or her morning bundle; none invented:**
 - P-VX329-U1-6 — the phone's guide keeps copy §7's chapter verbatim until VM-8 (F-U1-5).
 - P-VX329-U1-7 — the ⌃⌘L helper row's words: "lock the library now — in Castle, where it can lock; it closes and
   forgets its key until you unlock it again" (her copy pass).
-- FINDING — `MCPHarnessTimeLimitTests` timing flake under full-suite load (piece 3's line); not this unit's.
+- FINDING — `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` flakes under the
+  full suite's load (18–19 s against its 15 s bound — 2 of 3 full runs, debug and release; alone 3/3 green in 2.2 s). The
+  MCP harness is untouched by this unit; a ticket's (the orchestrator's to file).
+- FINDING — a warning this unit introduced was fixed in place (`LibraryOpenDoor`'s weak capture); no other new warning in
+  a file this unit touched.
 
-**MAC-SUITE LIST (the orchestrator's stage batch):** PENDING.
+**MAC-SUITE LIST (the orchestrator's stage batch — every app suite this unit added, rewired or trimmed; all COMPILED,
+none RUN).** The bootstrap's route changed for every launch, so the whole Mac suite is the honest closing run; the list
+is the minimum. Mac (`-only-testing:VariorumTests/<Suite>`): the WHOLE `VariorumTests/Protection/` folder (every road
+suite — the harness's init changed under all of them; NEW: `PreDesignStoreRefusalTests`), plus
+`AppBootstrapOffMainTests`, `SettingsLockCloseTests`, `SettingsAccountSurfaceTests`, `LibraryHandOffTests`,
+`LibraryPortabilityDoorTests`, `DataSafetyTests` (`BackupRunTests`, `DataSafetyRunbookTests`, `BackupSingleFlightTests`),
+`DataSafetyFacesTests` (`MarkdownInsuranceTests`, `SyncSafetyFaceTests`), `BackupFutureStampTests`,
+`Phase13pSubstrateTests` (`MarkdownInsuranceFlipTests`, `AcknowledgmentsCopyTests`, `Phase13pInsuranceFaceTests`),
+`Phase13pProtectionBrainTests` (`ProtectionCadenceTests`), `Phase13pCopySweepTests`, `Phase13pKeychainFactTests`
+(signed host), `Phase8ServicesTests`, `KeychainOffMainTests` (`AuthSessionLazyLoadTests`), `KeychainPartitionTests`,
+`KeychainTripwireTests`, `SessionTokenBindingTests` (signed host), `PlaintextExportDoorTests`, `ICloudDriveOfferTests`,
+`TierAndOnboardingTests` (3 suites), `SyncOutOfDateFaceTests`, `CopyRegisterPinTests`, `TravellingDotsIndicatorTests`,
+`EncryptionExplainedDrillTests`, `TutorialWalkTests` (`TutorialPrivacyChapterTests` and its siblings),
+`CapabilityRegistryTests` (piece 4's guards). Phone (`VariorumMobileTests`, simulator): `MobileProtectionTests` (6
+suites), `MobileStructuralTests` (`MobileCopyRegisterSweepTests`), `MobileTravellingDotsTests`, `MobileTutorialWalkTests`
+(`MobilePocketGuidePrivacyTests`), `MobileKDFLatencyTests`. Opt-in, unchanged in kind: `ICloudAppleKeysLeafTests`
+(`VARIORUM_APPLE_KEY_ROUND_TRIP=1`).
 
 ## 6. THE KICKOFF RECORD (2026-10-22, the orchestrator — session `vx-329`, Fable, overnight mandate)
 

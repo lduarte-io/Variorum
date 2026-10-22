@@ -66,7 +66,7 @@ enum OlderBuilds {
     /// `yyyy-MM-dd-HHmmss` is 17 characters.
     private static let stampLength = 17
 
-    nonisolated(unsafe) private static let stampFormatter: DateFormatter = {
+    private static let stampFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.timeZone = TimeZone(identifier: "UTC")

@@ -120,9 +120,8 @@ final class LibraryHandOffPresenter {
         })
         model = fresh
         Task {
-            await fresh.begin(into: parent) { [weak bootstrap] parent in
-                await bootstrap?.sendLibrary(into: parent) ?? .failure(.failed(ProtectionWords.somethingWentWrong))
-            }
+            // The bootstrap lives as long as the app; the act is one bounded send.
+            await fresh.begin(into: parent) { parent in await bootstrap.sendLibrary(into: parent) }
         }
     }
 
