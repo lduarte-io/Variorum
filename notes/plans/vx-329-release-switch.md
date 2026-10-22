@@ -1,7 +1,9 @@
 # VX-329 — Castle rebuild: the release switch
 
-**Status: PLANNED (written at VX-309's closeout, 2026-10-20). Kickoff at her word; `/architect-phase vx-329`
-recommended (design calls arise mid-run and her hands are in two rehearsals).**
+**Status: READY (plan written at VX-309's closeout, 2026-10-20; her kickoff calls ANSWERED at the 2026-10-22
+sitting — the kickoff block below carries them, QUESTIONS #237's answer block is the record). `/architect-phase
+vx-329`, overnight mandate, no coordinator tonight; the run pauses before the real-store rehearsal (her hands,
+her morning).**
 `Ticket: VX-329 · Project: Castle & backups before launch · Branch: vx-329-release-switch · Worktree:
 ~/dev/variorum-vx-329 (Pro)`. Holds the Sync/-custody slot.
 
@@ -16,11 +18,24 @@ recommended (design calls arise mid-run and her hands are in two rehearsals).**
 > WALK RECORD; `notes/plans/vx-309-copies-and-words.md` §8–§9 (the walk's machinery notes and the born tickets);
 > `notes/plans/vx-266-castle-backups-prelaunch.md` §3.15 (today's deletion list — superseded where the ticket says
 > "nothing is kept read-only"); QUESTIONS #237 (her VX-309 bundle — any answer there may reshape a unit).
-> **Her calls before the first spawn (bring as one question batch):** (1) does the switch wait for VX-212 (phase 6,
-> the poison-row case)? (2) the cold review — Fable (the custody/`Sync/` rule) or her waiver if credits are out;
-> (3) riders: VX-461 (the export door — recommended IN, rule 26 leans on it), VX-465 (device-ID drift trace —
-> recommended IN), VX-213's `pg_temp` (her go), VX-462 / VX-464 / VX-473 (small Castle & sync items in the touched
-> area); (4) the release number and notes (drafted for her).
+> **Her calls — ANSWERED at the 2026-10-22 sitting (QUESTIONS #237's answer block is the record):**
+> (1) the switch does NOT wait for VX-212 — phase 6 runs right after this merge, before her public launch.
+> (2) the cold review is FABLE (credits are back; no waiver).
+> (3) riders IN: VX-461 (the export door — rule 26 and §2 lean on it) · VX-465 (the device-ID drift trace) ·
+> VX-462 · VX-464 · VX-473 · VX-463 (ruled: conceal the words fields, with a reveal eye) · VX-469's ruled (c)
+> confirm line (wording) · VX-468 if it fits (ruled: the what's-new card waits after a restore). VX-213's `pg_temp`
+> is HELD — her go was not given at the sitting; ask once at the first checkpoint. **VX-470 is RULED but unsized**
+> ((c) plus an explicit Standard choice, carried to T-5 — #237's shape): take it only if it fits a batch cleanly,
+> else it leads the next run.
+> (4) the release is **0.10** (her word: no 1.0 until public launch, and 0.9.9 "will just get more confusing");
+> notes drafted for her.
+> **VX-423 joins as its own unit** (U3 below — her call at the sitting).
+> **No stage coordinator tonight:** VX-329 is the only session running — hold `Tools/stage` claims directly and
+> skip the announce step.
+> **The pause point (her word):** run U1, U3 and U2's throwaway rehearsal to completion, then PAUSE with everything
+> staged for her hands — the byte-copy rehearsal of her real store waits for her morning (stage the byte copy if
+> container access allows, else leave her the exact commands; A1 discipline and the zero-instance gate as ever).
+> **The phone (her word):** the Macs switch first — see §3's revised deploy line and §4.
 
 ## 1. What this phase is
 
@@ -54,20 +69,31 @@ find that it doesn't and bring it to her), on the throwaway project, before her 
   the website delta brief REWRITTEN to the rules (F-U2-4) and handed to the site agent after a check against the
   shipped build; VX-379's truth-check of the guide and panes against the Release build, and her real store's re-seed
   plan. Evidence: the script walked green on the throwaway; her rehearsal done; the brief rewritten.
-- **The deploy and the release** are hers: the mirror deploy at her explicit go; every device updated in one window
-  ("update every device first: no crossing until every device runs the new build"); her acceptance on both Macs and
-  the phone; the release at her word (notes drafted for her); then she deletes the throwaway project.
+- **U3 — VX-423 (Fable-reviewed Sync/custody work):** one refresh authority for the scope's rotating refresh
+  token — the vault leaf's provider (`FollowingSessionProvider` → its `AuthSession`) and the app's own `AuthSession`
+  stop refreshing it independently (F-U1-1's trace, routed at VX-308; the reuse detection fires as
+  `refresh_token_already_used` and sync stops until re-login). Evidence: a red-on-old pin on the two-refreshers
+  race, and U2's throwaway rehearsal running with the fix in — switch day is wall-to-wall sign-ins, which is why
+  this rides here rather than phase 6 (her call at the sitting).
+- **The deploy and the release** are hers: the mirror deploy at her explicit go; **both Macs** updated in one window
+  (her 2026-10-22 revision of "update every device first": the phone follows when VM-8's catch-up lands — *"it's ok
+  if the phone doesn't sync for a day after the switch"* — and cannot sync against marker 14 until then); her
+  acceptance on both Macs now and on the phone at its catch-up; the release at her word (**0.10**, notes drafted
+  for her); then she deletes the throwaway project.
 
 ## 4. Dependencies and risks
 
-- **The phone.** Her acceptance includes the phone and the switch needs every device on the new build. Check the VM
-  board at kickoff: the phone's new-road faces (VM-8's ledger row; F-U2-7) — if the phone isn't ready, that's a
-  scheduling call for her, not something to work around.
+- **The phone.** SETTLED at the 2026-10-22 sitting: VM-8 is still Backlog, so the Macs switch first and the phone
+  joins when its new-road catch-up lands (its kickoff prompt is with her; that session runs AFTER this phase merges,
+  from latest main merged into `mobile`, and takes the custody slot this phase releases). The old phone build cannot
+  sync against marker 14 until then — accepted by her word.
 - **The export door (VX-461)** writes an empty file today; rule 26's instruction must not name it until it's fixed.
 - **Device-ID drift (VX-465)** must be traced: a drifting device ID in Release would make "this Mac's copies" and
   retention lie.
-- **Release parity ends here:** every new-road face becomes Release-visible — VX-234's wording pass and the open
-  Needs-Lillian calls from #237 (VX-463, VX-468, VX-469, VX-470) are worth settling before strangers see them.
+- **Release parity ends here:** every new-road face becomes Release-visible. The #237 calls are SETTLED
+  (2026-10-22): VX-463's conceal-with-reveal-eye and VX-469's (c) confirm line ride this run; VX-468 waits-after-
+  restore rides if it fits; VX-470's ruled shape is sized at the kickoff (see the kickoff block). VX-234's wording
+  pass remains.
 - **The cold review** is custody code — Fable, or her explicit waiver.
 
 ## 5. Records
