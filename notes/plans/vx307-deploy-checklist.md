@@ -53,8 +53,8 @@ correction). The rows stay PENDING-UNTIL-LIVE — the rehearsal is additive evid
 - [ ] PENDING — `select sync_schema_version();` — 14.
 - [ ] PENDING — the artifact's four verification queries (its tail): mode/earlier_row_keys present; her row's `mode`
       equals the preflight's posture; rotation columns null; `sync_reencrypt` gone.
-- [ ] PENDING — the grant sweep (the 13y shape): expect the 13n-b counts ±0 (no new table; one function redefined,
-      owner/grants re-asserted in the artifact).
+- [ ] PENDING — the grant sweep (the 13y shape): expect **62 OK · 4 INFO · 0 fail** (the R-2 marker-aware
+      correction — `sync_reencrypt`'s row retires at 14; rehearsed twice on the throwaway: post-17 and post-pg_temp).
 
 ## Installs (AMENDED to her 2026-10-22 word — the Macs first; the phone follows VM-8)
 

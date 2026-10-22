@@ -1620,8 +1620,10 @@ product references to the deleted names outside the two honest history comments.
 3296 green (+MCP 383 with the recurring harness timing flake — unrelated, ticketed at closeout; StringsWorkbook 32);
 **the release leg GREEN** (3267 in 425 suites + StringsWorkbook 32; the one red is the same MCP harness
 timing flake — its fourth sighting tonight, both configurations, always green in isolation — ticketed at closeout).
-**Canon note for the closeout:** SyncSpec §3's `sync_state` key list still names `rekey_in_progress` — the key is
-dead with the marker; the canon delta lands at the merge moment per the two-file rule.
+**Canon note for the closeout (corrected at ladder r1):** the stale `rekey_in_progress` line is **AppSpec §7's**
+`sync_state` DDL comment — that is the canon delta's home at the merge moment; SyncSpec §3's own `sync_state` line
+carries a PRE-EXISTING staleness too (`device_id`, moved to custody at pre-13x) — one closeout line fixes both,
+each in its own file, per the two-file rule.
 
 ### THE R1 DOOR'S SIZING — VX-470 LEADS THE NEXT RUN (the orchestrator's call under her rule, 2026-10-22)
 

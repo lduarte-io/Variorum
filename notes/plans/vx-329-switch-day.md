@@ -3,8 +3,9 @@
 **What this is.** The step-by-step script for switch day: both Macs cross from today's road (0.9.8) to the new
 protection system (0.10), her writing returning by sync. §2's answer is inside it. The deploy half's authority is
 `notes/plans/vx307-deploy-checklist.md` (artifact 17 + the pg_temp artifact, marker 13 → 14); this file is the
-device-side choreography around it. Items marked REHEARSED carry tonight's throwaway proof; items marked HER-CALL
-sit in the morning bundle.
+device-side choreography around it. **Every REHEARSAL-PENDING marker below flips only when the plan's §8
+rehearsal record exists** (the ladder's round-1 MAJOR: this script claimed REHEARSED ahead of the rehearsal —
+corrected; the record is the proof, never the plan). HER-CALL items sit in the morning bundle.
 
 ## §2's answer (the one question — how a fresh new-road library gets her synced writing back)
 
@@ -12,9 +13,9 @@ sit in the morning bundle.
 written; artifact 17's backfill carries the vault's keys and posture into the marker-14 shape (proven field-by-field
 at VX-308 §5R); rule 15's kept list means a fresh library joining the account reads everything. The sealing seam
 (AES-GCM, AAD, `e1:`) is byte-unchanged across the switch, so key continuity is the whole question and the vault
-shape was the whole risk. REHEARSED (tonight): a fresh new-road library joins a throwaway account whose vault is
-post-backfill-shaped and whose rows predate the join — the full pull decrypts everything. *(Rehearsal record: §8 of
-the plan file.)*
+shape was the whole risk. REHEARSAL-PENDING: a fresh new-road library joins a throwaway account whose vault is
+post-backfill-shaped and whose rows predate the join — the full pull decrypts everything. *(This paragraph flips to
+REHEARSED only when §8 of the plan file carries the record.)*
 
 **The export road is the belt, not the road:** rule 26's instruction for anyone unsynced. It must name a door that
 works — VX-461's fix rides this phase; until the stage batch confirms it on a real store, the named roads are sync
@@ -29,8 +30,8 @@ works — VX-461's fix rides this phase; until the stage batch confirms it on a 
    way (zero instances, the whole slot, no extension filter).
 1. **Quit Variorum on both Macs** (zero instances by `pgrep -fl 'Variorum.app/Contents/MacOS'`).
 2. **The mirror deploy, at your explicit go** — the vx307 checklist verbatim: preflight probes (your vault row's
-   posture; marker 13), artifact 17 (`[]` expected), then the pg_temp artifact (REHEARSED; its own guard refuses
-   below 14), the verify tail (marker 14, the four queries), the grant sweep (expect 62 OK · 4 INFO · 0 fail).
+   posture; marker 13), artifact 17 (`[]` expected), then the pg_temp artifact (rehearsed green on the throwaway —
+   the plan's PG_TEMP REHEARSAL RECORD; its own guard refuses below 14), the verify tail (marker 14, the four queries), the grant sweep (expect 62 OK · 4 INFO · 0 fail).
 3. **Install 0.10 on the Pro** (the /Applications refresh road: A1 already taken, Release build, codesign verify) —
    and on the Air in the same window. No marker-13 Mac build outlives the bump; the phone's refusal is the fence,
    accepted by your word.
@@ -59,8 +60,10 @@ works — VX-461's fix rides this phase; until the stage batch confirms it on a 
 pgrep -fl 'Variorum.app/Contents/MacOS'   # must print nothing
 cd ~/Library/Containers/io.lduarte.Variorum/Data/Library/Application\ Support/
 mkdir -p ~/Documents/Variorum-pre-0.10-store-KEEP
-mv Variorum/variorum.sqlite Variorum/variorum.sqlite-wal Variorum/variorum.sqlite-shm \
-   Variorum/variorum-keys*.json ~/Documents/Variorum-pre-0.10-store-KEEP/
+for f in Variorum/variorum.sqlite Variorum/variorum.sqlite-wal Variorum/variorum.sqlite-shm \
+         Variorum/variorum-keys*.json(N); do
+  [ -e "$f" ] && mv "$f" ~/Documents/Variorum-pre-0.10-store-KEEP/
+done   # per-file, so an absent -wal/-shm never aborts the move (zsh's (N) keeps an empty glob legal)
 ```
 *(The Backups folder stays where it is — its sealed copies and safety copies are untouched; `store.sqlite` is a
 0-byte stray, leave or delete.)*
@@ -72,7 +75,7 @@ mv Variorum/variorum.sqlite Variorum/variorum.sqlite-wal Variorum/variorum.sqlit
   proves the refusal face is calm and true, never a crash or a guess. HER-CALL (the morning bundle): whether the
   refusal's words should name the way out (export from the old build · sign into sync · start fresh) — saying that
   needs a new fact and new words, deliberately not invented overnight (U1 piece 5's record).
-- The throwaway's §2 rehearsal is tonight's (REHEARSED above once §8's record lands).
+- The throwaway's §2 rehearsal is tonight's; its markers above flip only on §8's record.
 
 ## The beta testers' line (rule 26's procedure)
 
