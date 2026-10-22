@@ -379,3 +379,21 @@ row if the counts' per-era meaning should say itself; (b) remember more than one
 line; each memory item holds a sealed key-file copy, so N memories = N standing sealed copies — adjacent to her
 VX-469 (c) stance that kept Previous Libraries' roads standing); (c) does not exist by design (ID continuity without
 fingerprinting). No code changed; the pin question is moot until she rules.
+
+### THE PG_TEMP REHEARSAL RECORD (the orchestrator, Fable, 2026-10-22 — VX-213's held half, her go at the sitting;
+network-only, no stage; the ref guard in every apply)
+
+The artifact `Server/supabase/maintenance/vx213-pg-temp-search-path.sql` authored to the strict shape: one
+`alter function … set search_path` per EXACT deployed signature (never a pg_proc loop — the 13y blanket lesson),
+each list preserved with `pg_temp` appended LAST; the marker-14 guard (`VARIORUM_PGTEMP_NEEDS_14` — 17 redefines
+`key_vault_update` with a bare `public` list, so this artifact rides AFTER it); a fail-loud verify DO (zero definer
+functions in public without a trailing pg_temp) and a read-only config tail. **The rehearsal on the throwaway:**
+run 1 REFUSED in the verify — `rls_auto_enable()` (the project's RLS auto-enable event trigger, postgres-owned,
+`search_path=pg_catalog`, already in the grant sweep's expectation table) was not in my list; the artifact amended
+IN REPO (its own list preserved: `pg_catalog, pg_temp`) — the read-fix-re-run road working as designed, the same
+class every live window has caught. Run 2 landed WHOLE: the tail read all **19** functions with trailing pg_temp
+(the 14 definer RPCs incl. `sync_challenge`'s `public, extensions, pg_temp`, the four definer-path helpers,
+`rls_auto_enable`). **The grant sweep after: 62 OK · 4 INFO · 0 fail — byte-identical to the marker-14 expectation**
+(R-2's corrected shape). PRODUCTION application rides the marker-14 deploy set in the release window, AFTER 17, at
+her explicit go — the checklist's run section carries it. No secrets echoed; every apply ref-guarded to
+`<supabase-project-ref>`.
