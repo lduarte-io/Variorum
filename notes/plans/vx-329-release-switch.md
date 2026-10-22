@@ -687,3 +687,31 @@ class every live window has caught. Run 2 landed WHOLE: the tail read all **19**
 (R-2's corrected shape). PRODUCTION application rides the marker-14 deploy set in the release window, AFTER 17, at
 her explicit go — the checklist's run section carries it. No secrets echoed; every apply ref-guarded to
 `<supabase-project-ref>`.
+
+### L1 RECORD — THE SYNC/ CARVE (the orchestrator, Fable, 2026-10-22; commit `d0c579f08`)
+
+U1's flags carved in one commit, Fable's own hands (Sync/ is Fable work): `Sync/CorpusRotation.swift` DELETED WHOLE
+(`CorpusRotation`, `RotationMarker`, `RotationSecrets`, `CorpusRotationError`, the derived horizon wait);
+`refuseIfRekeyIncomplete` + both round guards and `SyncError.accountRekeyIncomplete` (case + description) retired —
+nothing writes the marker since U1 deleted the runner, and a pre-design store never reaches the engine, so the guards
+were dead code, not protection; `pullIgnoringMarker` folded into `pullRound` (the marker distinction had no meaning
+left); PurgeJanitor's preflight and doc comments follow; `visibilityHorizonMillis()` KEPT on the transport protocol
+as the served A5 value's one client-visible authority (13y Shape 1 — the server function still derives `sync_pull`'s
+filter; only the client consumer died), its comment rewritten honestly; `AccountLifecycleTests`' vault-write event
+drops the marker suffix (no pin consumed it); the AuthRLSDDL cross-pin's client half replaced by the recorded
+retirement note (the served constant and the inline-literal ban remain the non-vacuous arms). **Residue check:** zero
+product references to the deleted names outside the two honest history comments. **Evidence:** debug core suite
+3296 green (+MCP 383 with the recurring harness timing flake — unrelated, ticketed at closeout; StringsWorkbook 32);
+**the release leg PENDING** (running in background at this record's commit; the flip lands below).
+**Canon note for the closeout:** SyncSpec §3's `sync_state` key list still names `rekey_in_progress` — the key is
+dead with the marker; the canon delta lands at the merge moment per the two-file rule.
+
+### THE R1 DOOR'S SIZING — VX-470 LEADS THE NEXT RUN (the orchestrator's call under her rule, 2026-10-22)
+
+Her #237 ruling is (c) PLUS an explicit Standard choice, carried to T-5. The read: the core already parameterizes
+the landing posture (`ActParameters.newKind`; the full-face make-mine already lands `record.mode`), but the ruled
+shape needs the T-8 act's posture defaulted to the open library's mode, the empty-slot landing defaulted to the
+copy's own mode, BOTH confirm sheets gaining the explicit "land it in Standard instead" secondary choice with its
+consequence named, Castle landings typing the current pair, and pins per arm across three doors. That is a real
+acceptance unit, not a rider beside seven others — her word at the sitting: "take it only if it fits a batch
+cleanly, else it leads the next run." It leads the next run; the ticket carries this sizing as a comment.
