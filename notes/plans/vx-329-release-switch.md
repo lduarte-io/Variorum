@@ -274,7 +274,15 @@ form). Machinery note: the orchestrator's own commits interleave on this branch 
   suites went with today's road; `MobileTravellingDotsTests` (today's lobby pin), `MobileTutorialWalkTests` (today's
   posture names and floor constants — the paragraphs stay pinned verbatim), `MobileStructuralTests` (the register
   walk's file list: today's files out, `ProtectionCopy.swift` + `ProtectionWords.swift` in). **Piece 3: DONE.**
-- Piece 4 — ⌃⌘L declared on `.lockLibraryNow` with its helper row (P-VX309-U1c-4 (b)): NOT-STARTED.
+- Piece 4 — ⌃⌘L declared on `.lockLibraryNow` with its helper row (P-VX309-U1c-4 (b)): DONE (this commit;
+  `build-for-testing` GREEN). `shortcutLabel: "⌃⌘L"` on the declaration (`CapabilityRegistry.swift`), its one key
+  wiring in `EditorCommands.keyEquivalent(for:)` (`("l", [.command, .control])` — the walk's
+  `everyShortcutLabelHasExactlyOneKeyWiring`; the File menu's call site and its chord unchanged), and its row in the ⌘/
+  helper's "Windows & panes" group (`everyDeclaredShortcutIsFindableInTheHelper`; Settings ▸ Shortcuts and its search
+  read the same list) — words PROVISIONAL P-VX329-U1-7. `Capability.swift`'s comment says the (b) arm now stands. The
+  pin: `RoadIdleDialRouteTests.lockLibraryNowIsOneDeclarationTheMenuAndThePaneRender` gains the label, the wiring, the
+  helper row and one-act-one-chord (red on the pre-switch tree by construction — no label). Collision sweep re-run at
+  this tip: ⌃⌘L is the only ⌃⌘L in the key table and in every `.keyboardShortcut(` call site.
 - Piece 5 — the honest-refusal check (the §6 OPEN DESIGN NOTE): NOT-STARTED.
 - Piece 6 — the sweep table: NOT-STARTED.
 - Evidence — `swift test` + `swift test -c release` (counts), `xcodebuild build-for-testing` (Mac), the iOS target build:
@@ -345,6 +353,8 @@ orchestrator's ruling or her morning bundle; none invented:**
 - P-VX329-U1-5 — the phone's root composes the road's key provider and the bound-account read unconditionally (as the
   Mac's), its relock reading `RoadRelockPolicy`.
 - P-VX329-U1-6 — the phone's guide keeps copy §7's chapter verbatim until VM-8 (F-U1-5).
+- P-VX329-U1-7 — the ⌃⌘L helper row's words: "lock the library now — in Castle, where it can lock; it closes and
+  forgets its key until you unlock it again" (her copy pass).
 - FINDING — `MCPHarnessTimeLimitTests` timing flake under full-suite load (piece 3's line); not this unit's.
 
 **MAC-SUITE LIST (the orchestrator's stage batch):** PENDING.

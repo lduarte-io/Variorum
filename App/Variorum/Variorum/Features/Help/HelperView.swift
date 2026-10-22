@@ -232,6 +232,10 @@ struct HelperView: View {
             // door with the platform's chord — and a row here, where every
             // declared shortcut must be findable.
             ("⌃⌘S", "show or hide the sidebar (the leading toolbar button is the same door)"),
+            // VX-329 U1 — P-VX309-U1c-4 (b): Lock Library Now's chord, declared at last, with its row (PROVISIONAL
+            // words, P-VX329-U1-7 — her copy pass).
+            ("⌃⌘L", "lock the library now \u{2014} in Castle, where it can lock; it closes and forgets its key "
+                + "until you unlock it again"),
             // 13k round 2 (R2-1): the glyphs are INTERPOLATED from the bar's
             // own constants, so this row can never again describe a door the
             // bar stopped wearing (it read "← and ›" after R4-1 shipped →).

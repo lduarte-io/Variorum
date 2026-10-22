@@ -2519,17 +2519,18 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: "\u{2318}L", takesAccess: nil,
             unavailableNote: WingCopy.switchWingUnavailable,
             availability: { ctx in ctx.wingCount > 1 ? .act : .unavailable }),
-        // VX-309 U1c — VX-451: Lock Library Now — the File menu's item and the new road's Protection pane render THIS
-        // declaration (the verb is today's one constant, so both faces say the same words). The per-gesture condition (only
+        // VX-309 U1c — VX-451: Lock Library Now — the File menu's item and the road's Protection pane render THIS
+        // declaration (the verb is the one constant, so both faces say the same words). The per-gesture condition (only
         // where the library can lock — Castle) is each door's own (`canLock`; the Castle-only section): `always` as an act,
-        // the Data Safety precedent. No `shortcutLabel` — see the `CapabilityID` comment (P-VX309-U1c-4). The note is
-        // EMPTY (VX-309 ladder round 1, F-R4): the act is `always` and no router dispatch reaches it — both doors call the
-        // lock directly — so a note here could never be spoken; the registry's own idiom for a directly-wired door
-        // (`.mcpSettings`, `.newPost`, `.findAnything`).
+        // the Data Safety precedent. VX-329 U1 — P-VX309-U1c-4 (b): the chord ⌃⌘L is DECLARED here, with its row in the
+        // ⌘/ helper (today's road, which a helper row would have reached in Release, is gone). The note is EMPTY (VX-309
+        // ladder round 1, F-R4): the act is `always` and no router dispatch reaches it — both doors call the lock directly —
+        // so a note here could never be spoken; the registry's own idiom for a directly-wired door (`.mcpSettings`,
+        // `.newPost`, `.findAnything`).
         Capability(
             id: .lockLibraryNow, verb: ProtectionCopy.lockNowLabel, scope: .app,
             doors: [.menuBar, .surface],
-            shortcutLabel: nil, takesAccess: nil,
+            shortcutLabel: "\u{2303}\u{2318}L", takesAccess: nil,
             unavailableNote: "", availability: always),
     ]
 

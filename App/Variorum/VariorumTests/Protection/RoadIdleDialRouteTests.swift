@@ -9,6 +9,7 @@
 //
 
 import Foundation
+import SwiftUI
 import Testing
 
 @testable import Variorum
@@ -57,6 +58,14 @@ struct RoadIdleDialRouteTests {
         let menu = try CopyListingFacesSurfaceTests.code("Variorum/EditorCommands.swift")
         #expect(menu.contains("Button(verb(.lockLibraryNow)) {"))
         #expect(menu.contains(".keyboardShortcut(\"l\", modifiers: [.command, .control])"), "the chord, unchanged")
+        // VX-329 U1 — P-VX309-U1c-4 (b): the chord DECLARED — its label, its one key wiring, its ⌘/ helper row. (Red on
+        // the pre-switch tree by construction: the declaration carried no label.)
+        #expect(capability.shortcutLabel == "\u{2303}\u{2318}L")
+        let wiring = EditorCommands.keyEquivalent(for: .lockLibraryNow)
+        #expect(wiring?.0 == "l")
+        #expect(wiring?.1 == [.command, .control])
+        #expect(HelperView.shortcutKeysShown.contains("\u{2303}\u{2318}L"), "findable in the helper")
+        #expect(CapabilityRegistry.all.filter { $0.shortcutLabel == capability.shortcutLabel }.count == 1, "one act, one chord")
         let section = try CopyListingFacesSurfaceTests.code("Variorum/Features/Protection/RoadCrossingSheet.swift")
         #expect(section.contains("Button(CapabilityRegistry.capability(.lockLibraryNow).verb) { Task { await model.lockNow() } }"))
         #expect(section.contains("get: { row.idleMinutes ?? 0 },"))
