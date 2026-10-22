@@ -990,14 +990,14 @@ dev domain to make the card due, then a launch on the missing face and T-5: no c
 launch (the orchestrator's to stage or leave pin-covered). VX-462 — set up sync, Stop syncing here, re-join by the
 passphrase: no words moment (the throwaway).
 
-### FIX LEG RECORD — THE MAC SUITE'S SIX REDS (Opus implementer, 2026-10-22; IN PROGRESS)
+### FIX LEG RECORD — THE MAC SUITE'S SIX REDS (Opus implementer, 2026-10-22; DONE — the re-run of the affected Mac suites is the orchestrator's stage batch)
 
 **Not done in the fix leg, first:** NO `xcodebuild test` (the brief's limit — the orchestrator re-runs the affected suites
 at the stage after this lands), so every fix below is COMPILED and its green is PENDING that re-run. No stage, no app
 launch, no store touch, no network, no subagent; zero `Sources/` lines (the six reds are all test-side). The seventh name in
 the run's failing list (`RoadLockViewNamesPinTests.theBackupsFolderIsTheCataloguesName`) is NOT one of the six and NOT
-touched — it is a test-host restart (the log's *"Restarting after unexpected exit, crash, or test timeout"*) whose retry
-passed; flagged below.
+touched — the test host CRASHED in it (a real `EXC_BREAKPOINT`, not a timeout) and the restarted host reported its suite
+with no test run; traced and FLAGGED below (F-FL-1), its fix the orchestrator's to route.
 
 **The run read:** the orchestrator's full Mac app suite (`xcodebuild test`, the first app-side run after the switch; its log
 in the session scratchpad, `vx329-mac-suite.log`): `✘ Test run with 1556 tests in 274 suites failed … with 3 issues
@@ -1041,7 +1041,53 @@ in the session scratchpad, `vx329-mac-suite.log`): `✘ Test run with 1556 tests
   (beside: `FolderSummary(path as read, exists, 0, nil, nil)`; far: still `.set` at the same path, 0/nil/nil); the test
   renamed `theRowsCountThisMacsPairsOfThisLibraryAndNeverTheFlatFiles` (its doc names the old one and why); the file
   header made true.
-- Piece 4 — the evidence (`build-for-testing` both targets; the headless harness; the core suites): NOT-STARTED.
+- Piece 4 — the evidence: DONE (this commit; the tree `3335bdb8b` — nothing but this record changed after it; every run
+  foreground, in sequence):
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx329-fixleg
+    build-for-testing` (APFS-cloned from R1's `vx329-r1`): run 1 FAILED on my own slip — `invalid redeclaration of
+    'road'` in `aReopenRoadShowsTheOpeningSpinnerMidCeremony`, whose crossing `Task` already owns the name; its planted
+    road is `planted` (`3335bdb8b`) — run 2 **`** TEST BUILD SUCCEEDED **`**. One warning in a touched file,
+    PRE-EXISTING and not this leg's line (`LibraryPortabilityDoorTests.swift:85`, `UnnecessaryEffectMarker`, blamed
+    2026-10-07; in R1's log and the stage batch's too).
+  - `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' -derivedDataPath
+    App/Variorum/DerivedData/vx329-fixleg-ios build-for-testing` (cloned from `vx329-r1-ios`): **`** TEST BUILD
+    SUCCEEDED **`** (no phone file touched — the sanity build).
+  - THE HEADLESS HARNESS (U3's, debug — the app test targets' only configuration): with the probe in **`✔ Test run with
+    392 tests in 66 suites passed`** (R1's 386/65 + the probe's 6/1), then the probe REMOVED (transient — the harness is
+    left as R1 left it) **`✔ Test run with 386 tests in 65 suites passed`**, 0 failures, no skip. None of the six suites
+    compiles there (each needs `AppBootstrap`, `DataSafetyModel`/`StoreBackup` or `LaunchFurniture`) — their run is the
+    stage re-run below.
+  - THE CORE: untouched — `git diff aec559bca..HEAD -- Sources Tests Package.swift Tools` is EMPTY, so R1's floor (debug
+    3298 / release 3269) stands by construction; not re-run (no line of the package or its tests changed, either
+    configuration).
+  - CORROBORATION from the stage run itself: `RoadLockRouteTests.lockNowClosesACastleLibraryBehindTheLobbyAndItsSecretOpensItAgain`
+    — which holds its road as a local and drives failure 2's and 3's exact bootstrap path (ready → the crossing into
+    Castle through the bootstrap → lock → the lobby's typed unlock → ready) — PASSED in the same run; with the road held,
+    2 and 3 run that path.
+
+**THE DISPOSITIONS (every one of the six):**
+1. `LaunchFurnitureTests.aFreshStoreOnTodaysRoadSeedsHerFiveBlocksAlone` — **(a) STALE PREMISE**, rode U1's deletion of
+   today's road's five-only readme (`c3d939c9e`); the test DELETED with its subject and REPLACED by the new road's truth,
+   `aFreshStoreOfEitherVariantSeedsHerFiveThenTheFourPassages` (`79d11ea74`). The run's red is its red-on-old.
+2. `SettingsLockCloseTests.aReopenRoadThroughOpeningKeepsTheSettingsWindow` — **(c) TEST-WORLD DEFECT** of U1's rewire
+   (`e52f3f275`), the planted road's lifetime; FIXED in the test (`7438d26a4` + `3335bdb8b`), claim unchanged.
+3. `SettingsLockCloseTests.theLibraryClosedRuleNamesTheSettledClosedStatesAndNeverOpening` — **(c)**, the same; FIXED
+   (`7438d26a4`).
+4. `LibraryPortabilityDoorTests.theHandOffDoorProducesThePairRevealsItAndWordsItsRefusal` — **(c)**, the same; FIXED
+   (`7438d26a4`).
+5. `LibraryHandOffTests.theHandOffFolderRoundTripsThroughTheOpenDoorAndItsOwnKeyFile` — **(c)**, the same; FIXED
+   (`7438d26a4`).
+6. `DataSafetyRoadCountsTests.theNewRoadsRowsCountThisMacsPairsOfThisLibraryAndTodaysRoadIsUnchanged` — **(a) STALE
+   PREMISE** in its second half, rode U1's deletion of today's flat-file count (R-U1-5); that half REWRITTEN to the new
+   truth, the new-road half untouched, the test renamed `theRowsCountThisMacsPairsOfThisLibraryAndNeverTheFlatFiles`
+   (`79d11ea74`).
+- None is **(b)**: no product line is wrong on the paths these six drive (the probe's held arms prove the send, the
+  crossing and the typed road; the run proved the seeder and the counts). No new-road pin was weakened. No row hollow.
+  **Why (c) and not (a)/(b):** the four tests' premises are the new road's and true, and the product does what they
+  claim; the world they built destroyed its own library under the bootstrap — a test-harness lifetime, fixed in the test
+  with no expectation touched. If the orchestrator reads the brief's two classes as exhaustive, (c) sits nearer (a)
+  (a test-side cause, the product untouched), and is recorded as its own class so it is not mistaken for a premise
+  rewrite.
 
 **THE SIX — the traced mechanism and the disposition of each (recorded before any fix):**
 1. **`LaunchFurnitureTests.aFreshStoreOnTodaysRoadSeedsHerFiveBlocksAlone`** (:389 `blocks == 5` read 9, :390 the rendered
@@ -1090,7 +1136,37 @@ in the session scratchpad, `vx329-mac-suite.log`): `✘ Test run with 1556 tests
    count NOTHING (today's flat files never count, either way) while each row's path and the picked folder's set state stay
    as read; the test renamed to say so (its old name asserted today's road), the file header made true.
 
-**FLAGS (not this leg's; for the orchestrator):** PENDING the probe and the fixes.
+**FLAGS (not this leg's; for the orchestrator):**
+- **F-FL-1 — THE SEVENTH RED, a test-host CRASH (outside the six; not touched).**
+  `RoadLockViewNamesPinTests.theBackupsFolderIsTheCataloguesName` crashed the host (`~/Library/Logs/DiagnosticReports/
+  Variorum-2026-10-22-082458.ips`: `EXC_BREAKPOINT`/SIGTRAP in `_dispatch_assert_queue_fail` ← `_swift_task_checkIsolatedSwift`
+  ← closure #1 in `static RoadLockView.copiesHome(besideStore:)` ← `Sequence.contains(where:)` ← the test's `#expect` at
+  `RoadLockViewNamesPinTests.swift:45`). The mechanism as read: `copiesHome` is a static on a `View` in the app target
+  (default `MainActor` isolation), and its `contains { … }` closure carries that isolation with Swift's dynamic isolation
+  check; the suite is NONISOLATED (the test target has no default isolation), so Swift Testing may run it off the main
+  thread, and the check traps. U1 added the two `copiesHome` calls to this pin (its "VX-329 U1:" comment). The restarted
+  host then reported the suite "passed after 0.001 seconds" with no test line, so the test never re-ran. Options for
+  whoever owns it: `@MainActor` on the suite (test-side, the `LockWorld` suites' shape), or `nonisolated` on
+  `copiesHome` (product-side — a pure file-existence read). Unpinned and unfixed here, by the one-unit rule.
+- **F-FL-2 — the crossing reports `.made` when the library file is gone (seen through the probe; a product edge, not
+  built).** `ProtectionCrossings.cross`'s catch treats "the old key no longer opens the slot" as "past the swap"
+  (`ProtectionCrossingActs.swift:242–249`), so an act that threw BEFORE any swap because the slot's file was missing
+  (`no file at variorum.sqlite`) logs *"swapped, then stopped"* and returns `.made(door, …)` while the library stays in
+  its old mode; the reopen then routes the slot as it finds it. The same `opens(slot, key: oldKey)` test decides the
+  account acts' catch (`ProtectionAccountActs.swift:278–293`) and Make this my library's (`ProtectionCopyDoors.swift:
+  308–316`); the empty slot's landing (`:417–420`) asks `slotIsOccupied()` instead and is not this shape. Reachable in
+  product only if the library's file vanishes under an open library. A ticket or not — the orchestrator's (no ruling exists for that face; nothing invented).
+- **F-FL-3 — a hazard-class note for the next harness writer:** any helper that builds a bootstrap or a session from a
+  `PlantedRoad` and returns without it hands the caller a world whose files die with the road. `LockWorld`'s doc now says
+  so; no other inline site exists in either test tree (swept).
+
+**MAC-SUITE RE-RUN LIST (the orchestrator's stage batch — `-only-testing:VariorumTests/<Suite>`; compiled, unrun here):**
+`LaunchFurnitureTests` (the whole suite — the replaced pin is `aFreshStoreOfEitherVariantSeedsHerFiveThenTheFourPassages`),
+`SettingsLockCloseTests` (all five — the three that were green now run a real crossing too), `LibraryPortabilityDoorTests`,
+`LibraryHandOffTests` (both road tests), `DataSafetyRoadCountsTests` (the renamed
+`theRowsCountThisMacsPairsOfThisLibraryAndNeverTheFlatFiles`), `RoadLockRouteTests` (a doc comment only — the sanity
+run). Read `skipped:` and the "Test run with N tests" line before claiming them. F-FL-1's `RoadLockViewNamesPinTests` is
+still red-by-crash until someone takes it.
  (2026-10-22, the orchestrator — session `vx-329`, Fable, overnight mandate)
 
 **Her mandate (the /architect-phase argument, faithful):** the only session tonight — no coordinator, hold
