@@ -211,7 +211,10 @@ excepted [27]") and a regeneration; hers to want.
    files their records name; the fence (`git diff 2240a7f19..HEAD -- Sources/VariorumCore/Sync` = the one carve
    commit by the orchestrator's own hand) held.
 
-**Full core debug suite at the review tip (my run):** PENDING — recorded below when the run lands.
+**Full core debug suite at the review tip (my run, 2026-10-22):** VariorumCoreTests **3288 tests in 429 suites
+PASSED** (208 s — the fix leg's recorded floor exactly); StringsWorkbook **32/4 PASSED**. (The MCP target's summary
+line scrolled out of my capture window; the target is untouched by this whole phase and its load-flake family is
+already routed to the closeout ticket — F-R1-6/F-FL-R1-1.)
 
 ---
 
