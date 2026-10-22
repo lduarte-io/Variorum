@@ -1764,3 +1764,26 @@ SupabaseTransport + SyncEngine with the fabricated keys injected, sealed by the 
 6. Defaults end-diff reconciled; the walk library's slot files and keychain items recorded or cleared; the
    throwaway keeps its planted state until her deletion (her 2026-10-19 word).
 7. §8 THE REHEARSAL RECORD lands; the switch-day script's REHEARSAL-PENDING markers flip in the same commit.
+
+### THE MORNING SITTING RECORD (2026-10-22, her words — she joined live after the overnight half)
+
+- **The testers' choreography corrected by her:** "how can they open the app and let it sync once before updating if
+  it can't sync after deploy?" — right; the sync-once window closes at HER deploy, not the tester's update. The
+  switch-day script's testers' line rewritten to her robust instruction (copy out, then update; Copy full text on
+  the old build — never its broken Data Safety door; already-pushed writing returns by the join).
+- **RESTORE.md:** her full edit pass applied and LANDED (commit `543645f53`) — no temporal framing, no shouty caps
+  (bold for emphasis), the plaintext copies say takes and tags ride (verified against `bulkExportManifest`), §4
+  gains the backups-still-hold-it pointer to Look inside, §7's rule list reformatted, "None of this", the floor
+  names both secrets. The rest approved verbatim. The ops-history line ("executed live three times") removed at her
+  word — no operational details in user-facing text.
+- **Rule 27 amended at her word (canon):** "the account's passphrase or twelve words recover them from the account"
+  — fully accurate (both wrap the vault's master; the join types either). CastleRules edited in place + the two
+  quoting comments; the dated narrative is the closeout's AppSpecRecord entry. Commit `8a369f4c5`.
+- **The refusal face:** her call — NO added sentence ("it's fine, this is just for my testers & myself"); 0.10
+  ships rule 27's generic refusal on a pre-design store; the named-way-out face is a closeout ticket (Low).
+- **VX-465:** accept as designed; close traced-by-design at closeout + a Low wording row for the counts' per-era
+  meaning.
+- **The sealed-copy question answered** (the memory item's key-file copy exists in every posture, written fresh at
+  Castle entry — verified in the entry's step list; distinct from the gate-governed quiet-road item).
+- **Updating-never-loses clarified:** future locksteps pause sync (outbox intact) and resume on the same library
+  after update; this crossing's stranded-unpushed cost is rule 26's one-time call.
