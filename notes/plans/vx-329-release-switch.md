@@ -2186,3 +2186,29 @@ refusal; a junk passphrase reset the field; no door out anywhere (the File menu 
 refuses pre-design files; nothing mints into an occupied slot). The dev slot was restored 9/9 cmp-identical and
 the stage released. HER RULINGS at the sitting: build the face (U4 above), her words approved; the tester message
 is the switch-day script's §testers (updated at U4's close).
+
+### THE CLOSING BATCH RECORD (the orchestrator, Fable, 2026-10-22 — stage claim `vx-329`; the re-cover of record
+after the r2 fixes, her word corrections, the phone leg's ProtectionWords change and U4)
+
+- **THE CLOSING FULL MAC RUN** (`xcodebuild test`, DerivedData `vx329-stagebatch`, at `a7176e7f7`): `✘ Test run
+  with 5097 tests in 892 suites failed after 2114.9 s with 19 issues (including 4 warnings and 14 known issues)` —
+  ONE real red, `theShippedRunbookAndTheRepoCopyAreOneDocument` (DataSafetyTests.swift:219): the rewritten runbook
+  LITERAL ended without a final newline while `notes/DataSafetyRunbook.md` ends with one — a one-byte drift the r2
+  fix leg's Python byte proof could not see (it rebuilt the literal's lines, newline-insensitively; the "byte-equal"
+  claim was true of every word and false of the last byte). THE FIX (`190bf985e`): the literal gains its final
+  newline (a text file dropped on disk ends with one); her words untouched. `DataSafetyRunbookTests` re-run on the
+  fixed tree: **5/5 green** — the byte pin AND the five r2-flipped expectations. The only other DataSafetyCopy
+  reader (`TutorialWalkTests:2171`) reads `secondFolderSection`, a different constant, untouched — the full run
+  covered it green and no re-run is owed. The run's 4 warnings are the standing `Date.swift:37` class; the 14 known
+  issues the standing wrappers; `~/Library/Logs/DiagnosticReports` holds NO new test-host crash (the one Variorum
+  .ips is F-FL-1's 08:24, dispositioned; a 14:47 `swiftpm-testing-helper` .ips is the U4 headless runs' byproduct,
+  those suites reporting full counts green). U4's four Mac suites ran GREEN inside the full run (her face suite,
+  the (D) landings on the throwaway scope, Start fresh, the rewritten refusal pins); the five r2 pin flips green;
+  the phone leg's six re-worded sentences' Mac pins green.
+- **THE GATE ARM'S RED-ON-OLD (owed by the U4 record, run here):** the two gates' `|| lobby.face.preDesignStore`
+  reverted (behavioral revert, the tree clean first) → `PreDesignLandingsRouteTests` `✘ Test run with 2 tests in 1
+  suite failed … with 8 issues` — both landings `.refused(.failed)` for the pin's stated reason (rule 27's face was
+  the only lobby admitted); restored by `git checkout --`, `git diff --exit-code` clean → re-run `✔ Test run with 2
+  tests in 1 suite passed`.
+- **THE CLOSING FULL PHONE RUN:** PENDING (running at this commit; the result lands in this record's next edit).
+- **The walk window (U4's byte-copy re-check + the R1 walk rows):** PENDING (after the phone run, same claim).
