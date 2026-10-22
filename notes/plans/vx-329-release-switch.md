@@ -1,9 +1,9 @@
 # VX-329 — Castle rebuild: the release switch
 
-**Status: READY (plan written at VX-309's closeout, 2026-10-20; her kickoff calls ANSWERED at the 2026-10-22
-sitting — the kickoff block below carries them, QUESTIONS #237's answer block is the record). `/architect-phase
-vx-329`, overnight mandate, no coordinator tonight; the run pauses before the real-store rehearsal (her hands,
-her morning).**
+**Status: OPEN — IN FLIGHT (kicked off 2026-10-22 under her overnight mandate; the kickoff record is §6; the run
+pauses at U2's staging point — the real-store byte-copy rehearsal, the production deploy and the release are her
+morning's). Plan written at VX-309's closeout, 2026-10-20; her kickoff calls ANSWERED at the 2026-10-22 sitting —
+the kickoff block below carries them, QUESTIONS #237's answer block is the record.**
 `Ticket: VX-329 · Project: Castle & backups before launch · Branch: vx-329-release-switch · Worktree:
 ~/dev/variorum-vx-329 (Pro)`. Holds the Sync/-custody slot.
 
@@ -103,3 +103,191 @@ find that it doesn't and bring it to her), on the throwaway project, before her 
 
 Each unit appends its record here (the VX-309 §6 form); the ladder files `notes/plans/vx-329-ladder-round-N.md`;
 the walk and the rehearsals in §8; the closeout in §9.
+
+## 6. THE KICKOFF RECORD (2026-10-22, the orchestrator — session `vx-329`, Fable, overnight mandate)
+
+**Her mandate (the /architect-phase argument, faithful):** the only session tonight — no coordinator, hold
+`Tools/stage` directly. Run U1, U3, the riders and the throwaway rehearsal to completion, then pause with everything
+staged for her hands — the byte-copy rehearsal of her real store waits for her morning. Cold reviews are Fable.
+Release 0.10. `pg_temp` has her go: rehearse it on the throwaway; production rides the marker-14 deploy set at her
+morning go.
+
+**Preflight done (read in full, never delegated):** CLAUDE.md + canon · SessionResiliencyProtocol · CastleRules WHOLE
+· SyncSpec WHOLE · SurfaceContracts (The app, Doors — protection + portability) · the VX-329 ticket + all seven-input
+comments (read via the Linear API) · the rider tickets' bodies (VX-423, VX-213, VX-461..470, VX-473, VX-379, VX-234,
+VX-406, VX-233) · vx-308 §5R + REHEARSAL RECORD + WALK RECORD · vx-309 §8–§9 · vx-266 §3.15 · QUESTIONS #237 whole ·
+the master plan + in-flight table · TICKETS.md. Workspace: branch `vx-329-release-switch`, worktree
+`~/dev/variorum-vx-329` (Pro), in-flight row pushed on main (`c6b093258`), VX-329 + VX-423 In Progress in Linear.
+The Sync/-custody slot is HELD by this effort; no other effort is in flight.
+
+**Sizing, said plainly (the guidance's say-so):** U1 and U2 are the two phase-sized units; U3 and the rider batch are
+small units. All four were ruled IN by her at the 2026-10-22 sitting (the kickoff block), so the shape is hers.
+
+### THE CUT (final; one acceptance unit per implementer session, the orchestrator's own legs lettered L)
+
+- **L0 (the orchestrator, Fable — Sync/ is Fable work): THE LOCKSTEP COMMIT.** One commit:
+  `SyncSchema.lockstepVersion` 13 → 14 + `17_phase_vx307_vault.sql` registered in `AuthRLSDDLTests.lockstepFiles`
+  (the drift pin enforces the pairing — the vx307 checklist's preflight row) + the four
+  `MCPGrantSchemaTests` marker pins and `VX307VaultArtifactTests` read 14. Headless green before U1 spawns.
+  Consequence stated: from this commit the branch's builds speak marker 14 — they sync only against the throwaway
+  (already marker 14 since §5R) until the production deploy at her morning go; the dev store doesn't sync, so
+  nothing strands. **No `/Applications` refresh this phase until the production deploy lands (the skill's
+  lockstep-hold rule).**
+- **U1 (Opus implementer #1, Fable cold review): THE SWITCH.** `ProtectionRoad.live` → true for every build;
+  `opensOnTheNewRoad`'s dev-store fence dissolves (every store, every variant, both configurations take the new
+  road; the bootstrap's `!newRoad` arms die — `AppBootstrap.swift:217` is the seam). Delete today's whole deciding
+  and writing road per the ticket + vx-266 §3.15 (superseded where the ticket says "nothing is kept read-only" —
+  the legacy readers go entirely): the old envelope (`StoreKeyEnvelope`), `RawKeyCustody`, `Posture.derive`, the
+  13p read-through, `effectiveGate`/`landCustody`/`CustodyCollisionRule`/`ensuredEnvelope`, custody-by-library-ID,
+  several-key-files-per-folder + newest-modified, the `switchPending`/`thisDeviceOnly` defaults, the five
+  "enrolled" definitions, the session-stamped owner, Castle settings in UserDefaults, the shared never-deleted
+  Apple key as a live road + 17m's Re-link, the silent follow into Standard, VX-202's belts, the duplicate safety
+  copy, the old confirm/guide lines, the Finder-revealing restore, the identity-only silent sync item, today's flat
+  `StoreBackup` leg where it is today's road's writer, `PostureSwitch`/`PostureSwitchModel`/`PostureFollowModel`/
+  `PostureCopy`/`EncryptionSession`/`AppleRelinkModel`/`WordsCeremony` and the legacy arms of
+  `ProtectionController`, the posture drill (`PostureSwitchDrillTests.swift`, VX-233's retirement) and the old
+  suites (VX-406's list: `CorpusRotationTests`, `StoreKeyEnvelopeTests`/`Format2`, StringsWorkbook's
+  `StoreUnlockTests`; VX-380's red attacker test fixed or dead with its subject). **FENCE: `Sources/VariorumCore/
+  Sync/**` is NOT touched by this unit** — anything in Sync/ referencing deleted symbols is FLAGGED to the
+  orchestrator (L1 carves it). ⌃⌘L declared with its helper row (P-VX309-U1c-4 (b) — the `.lockLibraryNow`
+  capability gains its `shortcutLabel` + the shortcuts helper row). Evidence: the grep sweep table (every legacy
+  symbol GONE, instance × file, each cell DELETED or provably new-road); `swift build`/`swift test` green BOTH
+  configurations (`-c release` included — the protection set and the full core suite's release floor now honest);
+  `xcodebuild build-for-testing` green; the phone builds; a Release-configuration build of the Mac app compiles.
+- **L1 (the orchestrator, Fable): THE SYNC/ CARVE.** After U1: delete `Sync/CorpusRotation.swift`; retire the
+  in-file `RotationMarker`'s live-marker role and `sync_state.rekey_in_progress` writers; sweep U1's flagged Sync/
+  references. Own commit(s), headless green both configurations.
+- **U3 (Opus implementer #2, Fable cold review): VX-423 — ONE REFRESH AUTHORITY.** The app's `AuthSession`
+  (`App/Variorum/Shared/AuthSession.swift`) and the lobby's (`LobbyVaultRoad`/`FollowingSessionProvider`) stop
+  refreshing the rotating refresh token independently — one shared session provider or a cross-instance
+  single-flight + keychain re-read, per F-U1-1's trace (the VX-423 comment carries file:line). Evidence: a
+  red-on-old pin on the two-refreshers race (revert-verified); the suites green; U2's throwaway rehearsal then runs
+  with the fix in (switch day is wall-to-wall sign-ins — her sequencing reason).
+- **R1 (Opus implementer #3, Fable cold review rides the phase ladder): THE RIDERS.** Pin-before-fix PER MEMBER;
+  commits say `Part of VX-nnn`. Members: **VX-461** (the export door's 0-byte file — the save-panel grant not
+  held around the ATTACH is the lead; a file-access fix, rule 26's instruction leans on it) · **VX-463** (conceal
+  the words fields with a reveal eye — her ruling) · **VX-464** (the join refusal's referent — "that passphrase
+  doesn't open this account."-class line, the move sheet too) · **VX-473** (the hold banner's `hasAccount` reads
+  the library's bound account on the new road, not the Mac's sign-in) · **VX-469 (c)** (the Use Castle confirm
+  says Previous Libraries' quiet roads stand — one line, her ruled wording direction) · **VX-468** (the what's-new
+  card waits after a restore/adoption first open — her "wait") · **VX-462** (the set-up arm's words moment goes
+  quiet — custody-adjacent; its `withKnownIssue` wrappers drop). **VX-470 is sized at R1's door:** ruled (c) —
+  T-8 from an open Castle library lands in Castle with the current pair typed, PLUS an explicit "land it in
+  Standard instead" secondary choice with its consequence named, carried to T-5 the same way (supersedes
+  P-VX309-U1b-2's Standard landing). If it doesn't fit R1 cleanly it LEADS THE NEXT RUN (her word).
+- **VX-465 (the orchestrator): THE DEVICE-ID DRIFT TRACE** — owed before the switch; runs between batches
+  (read-only trace first; a fix only with a traced mechanism + red-on-old pin, else the ticket carries the trace).
+- **THE LADDER:** one ladder over the whole phase diff; FRESH `fable-reviewer` per round, REVIEW_PROMPT verbatim,
+  zero framing; cross-model flow (findings → implementer agree/dispute → reviewer's final call → implementer
+  applies; FINDER-FIXES and Sync/ lines the reviewer's own).
+- **U2 (the orchestrator): SWITCH DAY, REHEARSED (tonight's half)** — the step-by-step switch-day script for her
+  (§2's answer inside it); the §2 proof + the full script walked on the throwaway project (two test accounts, two
+  devices' worth of libraries); the `pg_temp` artifact authored, REHEARSED on the throwaway, and added to the
+  marker-14 deploy set (production at her morning go — VX-213's held half); the vx307 deploy checklist amended to
+  her 2026-10-22 choreography (BOTH MACS in one window, the phone follows VM-8 — its marker-13 install visibly
+  refuses until then, accepted by her word); `notes/stargazing-castle-rebuild-delta-brief.md` REWRITTEN to the
+  rules (F-U2-4) and checked against the built Release product, staged for her to hand to the site agent;
+  VX-379's truth-check of the guide and panes against the Release build; the 0.10 release notes DRAFTED for her;
+  the real-store byte-copy rehearsal STAGED (the copy placed if container access allows, else her exact commands)
+  with A1 discipline and the zero-instance gate. **PAUSE THERE — her morning: the byte-copy rehearsal, the
+  production deploy (marker-14 set incl. `pg_temp`), both Macs' installs, the release at her word.**
+
+### §2's proof, the planned shape (detail worked at U2, repo-first)
+
+Rule 15 across the switch = a fresh new-road library joining an account whose vault was BORN today's-road-shaped
+and crossed via artifact 17's backfill reads every row sealed under the pre-switch corpus key. The §5R rehearsal
+proved the backfill's field arms on planted rows; U2 proves the client end-to-end on the throwaway: a
+post-backfill-shaped vault under known secrets (the §5R planting recipe, `~/.variorum/dev-vault-throwaway.env`),
+rows sealed under its corpus key, then join + full pull from a fresh library — everything decrypts, the words/
+passphrase typed at the join are the account's. The sealing seam (AES-GCM, AAD, `e1:`) is byte-unchanged across
+the switch, so key continuity is the whole question and the vault shape is the whole risk.
+
+### OPEN DESIGN NOTE (resolve at U2; an author item if it bends the plan's sentence)
+
+With the legacy readers gone entirely (the ticket's "nothing is kept read-only"), a pre-design store — hers
+included — is a store the new road cannot open: Look inside and the live slot must give rule 26's HONEST REFUSAL
+naming the road (export from the old build / sign into sync / start fresh), never a crash and never a guess. The
+plan's U2 sentence "Look inside, then Make this my library on a byte-copy of her real store" is therefore read as:
+the byte-copy rehearsal proves the HONEST-REFUSAL face plus the switch-day script's real road (her writing returns
+by sync; the old store kept whole as a copy, openable by the old build she keeps). If the built classifier can do
+better than refuse (it cannot, without a reader), or if she wants a kept reader after all, that is HERS — bundled
+for the morning sitting. U1 must leave the refusal face honest (the classifier must not claim "keyless" when an
+old-format key file sits beside the store — name it as from an older Variorum where the shape allows).
+
+### Environment traps (binding on every session of this phase)
+
+Instance checks `pgrep -fl 'Variorum.app/Contents/MacOS'` AND discriminate by PATH; real-store instances by STORE,
+never quit/kill; no Release builds or /Applications refreshes while one lives — and NO /Applications refresh at all
+until the marker-14 deploy lands (L0's consequence). `xcodebuild build-for-testing` compiles without the runner;
+Mac tests from `App/Variorum/`, suite-level `-only-testing`, confirm the "Test run with N tests" line and read
+`skipped:` before claiming a gated suite ran; zsh `pipestatus`; NEVER a custom build configuration (non-"Debug"
+strips the DEBUG oracles). EVERY `xcodebuild test` run and anything touching the screen or a shared store holds a
+`Tools/stage` claim (no coordinator tonight — this session claims directly, renew-per-row on long walks). Headless
+`swift build`/`swift test` is stage-free. Backups WAL-safe, UTC names, into `Backups/safety-copies/` (A1). The dev
+Castle pair is `~/.variorum/dev-castle.env`, the throwaway's users `~/.variorum/dev-vault-throwaway.env` — values
+never echoed, never committed; every throwaway apply carries the in-command ref guard (the §5R discipline). The
+walk's Debug build lives at `App/Variorum/DerivedData/vx329` (the vx-309 stale-build slip's lesson: never launch
+the standard-path build). Implementers: no subagents, no stage, no Debug launches, no dev-store touch; headless +
+`build-for-testing` only; checkpoint commits per piece, push each, LIVE STATUS flips in the same commit, PENDING
+on every unverified claim; foreground waits only (poll, don't `tail -f`).
+
+## 6a. U1 BRIEF — THE SWITCH (an Opus implementer; ticket VX-329's trunk + VX-233 + VX-406/VX-380)
+
+**Read first, in full:** CLAUDE.md + its canon; `notes/SessionResiliencyProtocol.md`; `notes/CastleRules.md` WHOLE
+(rules 24, 26 and "What we do not promise" are this unit's heart); `notes/SurfaceContracts.md` "Doors to the
+outside" (Library protection + portability) and "The app"; this plan WHOLE (§1–§6 — §6's CUT carries your fence and
+your deletion list); `notes/plans/vx-266-castle-backups-prelaunch.md` §3.15 (the deletion list's birth — superseded
+where §6 says "nothing is kept read-only"); `App/Variorum/Shared/Protection/ProtectionRoad.swift` (the switch);
+`App/Variorum/Shared/AppBootstrap.swift` (the road fork at :217 and every `newRoad` arm);
+`App/Variorum/Variorum/Registry/CapabilityRegistry.swift` around `.lockLibraryNow` (P-VX309-U1c-4's comment).
+Work from `~/dev/variorum-vx-329`; commits say `Part of VX-329` (the drill deletion `Part of VX-233`; the suite
+resolutions name VX-406/VX-380 where theirs).
+
+**The goal.** One compile-time change in one place turns the new road on for EVERY build: `ProtectionRoad.live`
+returns true unconditionally (keep the pure function + its pin, flipped); `opensOnTheNewRoad`'s dev-store fence
+dissolves — every store, every variant, both configurations. Then delete today's whole deciding and writing road in
+the same change, per §6's U1 list — nothing kept read-only, no `#if` shrouds, no commented-out code. Today's road
+must be GONE as code, not dormant.
+
+**The fence (absolute):** you never edit anything under `Sources/VariorumCore/Sync/`. Where a Sync/ file references
+a symbol you deleted, STOP on that file, flag it in your record (file:line, the symbol), and leave it — the
+orchestrator carves Sync/ in its own commit (L1). If that fence makes your tree uncompilable mid-unit, flag it and
+coordinate with the orchestrator rather than working around it.
+
+**Pieces (suggested order; checkpoint commit + push per piece):**
+0. The flip: `ProtectionRoad` (live → true; `opensOnTheNewRoad` loses the fence or states it vacuously true —
+   prefer deleting the devStore parameter and its callers' discrimination), plus the bootstrap's `!newRoad` arms.
+   Compile-first discipline: get the app building on the new road everywhere before deleting files wholesale.
+1. The Shared/ deletions (PostureSwitch, PostureSwitchModel, PostureFollowModel, PostureCopy, EncryptionSession,
+   AppleRelinkModel, WordsCeremony, the legacy arms of ProtectionController/AppServices/AppBootstrap/VariorumApp,
+   the panes' today's-road rows — SettingsShape/AppSettingsView/ProtectionPane/DataSafetyPane legacy arms, the
+   mobile sheets' legacy arms).
+2. The Persistence/ deletions (StoreKeyEnvelope, RawKeyCustody, CustodyCollisionRule, Posture.derive, the legacy
+   arms of StoreIdentity/AppDatabase/LibraryAdoption/StoreBackup — today's flat backup leg dies where it is
+   today's road's writer; the new road's pair road is THE backup writer).
+3. The old suites: delete `PostureSwitchDrillTests.swift` (VX-233, Canceled — say so in the commit), the VX-406
+   list (`CorpusRotationTests`, `StoreKeyEnvelopeTests`/`Format2Tests`, StringsWorkbook's `StoreUnlockTests`),
+   and every test of deleted code; VX-380's red attacker test is FIXED if its subject survives, deleted with its
+   subject if not — never skipped. Tests of the new road are NEVER deleted or weakened.
+4. ⌃⌘L: the `.lockLibraryNow` capability gains `shortcutLabel` ⌃⌘L + the Shortcuts helper row
+   (P-VX309-U1c-4 (b)); the registry-walk pin covers it.
+5. The honest-refusal check (the §6 OPEN DESIGN NOTE): with the readers gone, point the classifier suites at a
+   pre-design-shaped store/key-file fixture and PIN what it says — the refusal must be honest (never "keyless"
+   where an old-format key file exists, if the shape allows naming it; never a crash). If the built shape cannot
+   name it better than the generic refusal, record that honestly for the orchestrator's morning bundle — do not
+   invent a new face without a ruling.
+6. The sweep table: `rg` every deleted symbol name + §6's list — instance × file, each cell DELETED or provably
+   new-road/comment-only; the table lands in your record.
+
+**Hard limits:** headless `swift build`/`swift test` (BOTH configurations — `-c release` is this unit's acceptance)
++ `xcodebuild build-for-testing` ONLY; no stage, no Debug launch, no dev-store touch, no network, no subagents;
+today's road's behavior is not "improved" on its way out — it is deleted; every new-road behavior change beyond §6's
+list is out of scope (flag, don't build); no shouting caps, sentence case. The lockstep marker is ALREADY 14 when
+you start (L0) — do not touch `SyncSchema` or anything in Sync/. `Tools/canon-size` is not yours. If a deletion
+exposes a genuine product-behavior hole (a face only today's road provided), STOP on it and flag — the orchestrator
+rules or bundles for her.
+
+**Evidence closing the unit:** the sweep table complete; `swift test` AND `swift test -c release` green (counts in
+the record; the release floor honest — VX-406's reds GONE with their suites); `xcodebuild build-for-testing` green
+for the Mac app; the iOS app target builds; the record (§5, the VX-309 §6 form) with counts, the Mac-suite list for
+the orchestrator's stage batch, PROVISIONALs bundled, findings routed, LIVE STATUS flipped per piece.
