@@ -104,6 +104,50 @@ find that it doesn't and bring it to her), on the throwaway project, before her 
 Each unit appends its record here (the VX-309 §6 form); the ladder files `notes/plans/vx-329-ladder-round-N.md`;
 the walk and the rehearsals in §8; the closeout in §9.
 
+### U1 RECORD — THE SWITCH (Opus implementer, 2026-10-22; IN PROGRESS)
+
+**Not done in U1, first:** PENDING (filled at the unit's end). Standing limits from the brief: no stage, no Debug launch, no
+dev-store touch, no network, no Linear, no subagent, no `xcodebuild test` (the Mac suite list below is the orchestrator's);
+zero `Sources/VariorumCore/Sync/` lines (the L1 flags below are the orchestrator's); `SyncSchema` untouched (L0's 14 stands).
+
+**Preflight (complete, not delegated):** CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md` whole;
+`notes/CastleRules.md` WHOLE (rules 24, 26, "What we do not promise" and the considered-and-not-pursued ledger);
+`notes/SurfaceContracts.md` whole (The app · Doors — Library portability + Library protection); this plan WHOLE (§1–§6, the
+CUT, the OPEN DESIGN NOTE, the environment traps, §6a, the L0 RECORD, the VX-465 RECORD); `notes/plans/vx-266-castle-
+backups-prelaunch.md` §3.12–§3.15; `ProtectionRoad.swift` WHOLE; `AppBootstrap.swift` WHOLE (the fork at :217, every
+`newRoad` arm); `CapabilityRegistry.swift` around `.lockLibraryNow` + `Capability.swift`'s P-VX309-U1c-4 comment +
+`HelperView.groups` + `CapabilityRegistryTests`' discoverability guard; the composition roots (`VariorumApp.swift`,
+`AppServices.swift`, `LibraryOpenDoor.swift`); the envelope (`StoreKeyEnvelope.swift` WHOLE — the new core borrows its
+fingerprint and its `PassphraseWrap`); the new road's names (`Protection/Model/Names.swift` — the format-3 key file is
+`variorum-library-keys.json`, a name today's files never carry); the backup seam (`ProtectionBackupHook.swift`,
+`ProtectionBackupPair.swift`, `StoreBackup.swift`'s outline); `LibraryHandOff.swift` WHOLE; the vx-309 §6 U1c record (the
+form). Machinery note: the orchestrator's own commits interleave on this branch (`1d3b84a19`, VX-465; an untracked
+`Server/` artifact in progress) — every U1 commit is pathspec-limited, rebased before each push.
+
+**MY READINGS (each the brief's letter as I read it):** PENDING — filled per piece.
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece R — this record skeleton: IN-PROGRESS (this commit).
+- Piece 0 — the flip (`ProtectionRoad.live` → true unconditionally; the dev-store fence's parameter deleted with its
+  callers' discrimination; the bootstrap's and the composition roots' `!newRoad` arms deleted): NOT-STARTED.
+- Piece 1 — the Shared/ deletions (today's deciding and writing road in the app): NOT-STARTED.
+- Piece 2 — the Persistence/ deletions (the envelope, custody, the legacy arms; the primitives the new core borrows
+  relocated byte-for-byte, never re-implemented): NOT-STARTED.
+- Piece 3 — the old suites (VX-233's drill, VX-406's list, VX-380's attacker test, every test of deleted code): NOT-STARTED.
+- Piece 4 — ⌃⌘L declared on `.lockLibraryNow` with its helper row (P-VX309-U1c-4 (b)): NOT-STARTED.
+- Piece 5 — the honest-refusal check (the §6 OPEN DESIGN NOTE): NOT-STARTED.
+- Piece 6 — the sweep table: NOT-STARTED.
+- Evidence — `swift test` + `swift test -c release` (counts), `xcodebuild build-for-testing` (Mac), the iOS target build:
+  PENDING.
+
+**L1 FLAGS (Sync/ references to deleted symbols — the orchestrator's carve; file:line, symbol):** PENDING.
+
+**STOP-AND-FLAG ITEMS (a face only today's road provided):** PENDING.
+
+**PROVISIONALs / FINDINGS:** PENDING.
+
+**MAC-SUITE LIST (the orchestrator's stage batch):** PENDING.
+
 ## 6. THE KICKOFF RECORD (2026-10-22, the orchestrator — session `vx-329`, Fable, overnight mandate)
 
 **Her mandate (the /architect-phase argument, faithful):** the only session tonight — no coordinator, hold
