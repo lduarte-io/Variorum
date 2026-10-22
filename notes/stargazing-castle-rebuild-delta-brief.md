@@ -87,7 +87,7 @@ Both modes stay end-to-end encrypted, and the server still never holds a key to 
   secrets — it stops syncing, and the server keeps what you pushed (removing it is the account-deletion road).
   Signing back in is a join.
 - **"What if every copy is gone?"** A library whose every key-file copy and every backup are gone is gone. Synced
-  libraries are the exception: the twelve words recover them from the account.
+  libraries are the exception: the account's passphrase or twelve words recover them from the account.
 
 **New entries the site may want:**
 - **Joining an account from a new device.** The account's shared keys are wrapped by the passphrase and the twelve
