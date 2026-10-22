@@ -3,9 +3,9 @@
 **What this is.** The step-by-step script for switch day: both Macs cross from today's road (0.9.8) to the new
 protection system (0.10), her writing returning by sync. §2's answer is inside it. The deploy half's authority is
 `notes/plans/vx307-deploy-checklist.md` (artifact 17 + the pg_temp artifact, marker 13 → 14); this file is the
-device-side choreography around it. **Every REHEARSAL-PENDING marker below flips only when the plan's §8
-rehearsal record exists** (the ladder's round-1 MAJOR: this script claimed REHEARSED ahead of the rehearsal —
-corrected; the record is the proof, never the plan). HER-CALL items sit in the morning bundle.
+device-side choreography around it. The §2 rehearsal ran 2026-10-22 and its record is the plan's §8 — the
+REHEARSED marks below cite it (the ladder's round-1 MAJOR taught the rule: the record is the proof, never the
+plan). HER-CALL items sit in the morning bundle.
 
 ## §2's answer (the one question — how a fresh new-road library gets her synced writing back)
 
@@ -13,9 +13,10 @@ corrected; the record is the proof, never the plan). HER-CALL items sit in the m
 written; artifact 17's backfill carries the vault's keys and posture into the marker-14 shape (proven field-by-field
 at VX-308 §5R); rule 15's kept list means a fresh library joining the account reads everything. The sealing seam
 (AES-GCM, AAD, `e1:`) is byte-unchanged across the switch, so key continuity is the whole question and the vault
-shape was the whole risk. REHEARSAL-PENDING: a fresh new-road library joins a throwaway account whose vault is
-post-backfill-shaped and whose rows predate the join — the full pull decrypts everything. *(This paragraph flips to
-REHEARSED only when §8 of the plan file carries the record.)*
+shape was the whole risk. REHEARSED (2026-10-22, the plan's §8): a fresh new-road library joined a throwaway
+account whose vault was born pre-VX307-shaped and crossed by artifact 17's backfill — the join read the backfilled
+mode live, the words moment spoke, and a fresh store pulled the pre-switch notes back verbatim decrypted by the
+typed account passphrase alone.
 
 **The export road is the belt, not the road:** rule 26's instruction for anyone unsynced. It must name a door that
 works — VX-461's fix rides this phase; until the stage batch confirms it on a real store, the named roads are sync
@@ -70,12 +71,12 @@ done   # per-file, so an absent -wal/-shm never aborts the move (zsh's (N) keeps
 
 ## The rehearsal before your stores are touched (your morning, the dev slot)
 
+- The throwaway's §2 rehearsal is DONE (the plan's §8); what remains below is yours.
 - The staged byte copy at `/Users/Shared/vx329-rehearsal/` (its README says what the rehearsal can and can't
   show): with the legacy readers gone, the new build gives rule 26's HONEST REFUSAL on this copy — the rehearsal
   proves the refusal face is calm and true, never a crash or a guess. HER-CALL (the morning bundle): whether the
   refusal's words should name the way out (export from the old build · sign into sync · start fresh) — saying that
   needs a new fact and new words, deliberately not invented overnight (U1 piece 5's record).
-- The throwaway's §2 rehearsal is tonight's; its markers above flip only on §8's record.
 
 ## The beta testers' line (rule 26's procedure — HER framing at the morning sitting)
 
