@@ -2215,4 +2215,60 @@ after the r2 fixes, her word corrections, the phone leg's ProtectionWords change
   ✘ lines; the 4 known issues are the standing wrappers; the count matches the stage batch's run 2 (U4 added no
   phone tests — the fact is shared core, the face VM-8's); every "skipped" mention in the log is a test's own name
   or appintentsmetadataprocessor build noise (zero tests skipped); no new crash report in DiagnosticReports.
-- **The walk window (U4's byte-copy re-check + the R1 walk rows):** PENDING (after the phone run, same claim).
+- **THE WALK WINDOW (U4's byte-copy re-check + the R1 walk rows; same claim, released after; captures
+  `~/vx329-walk/cap-22..73`, deleted at closeout; the walk build REBUILT at U4's tip into `DerivedData/vx329`
+  first — the stale-build trap):**
+  - **U4's BYTE-COPY RE-CHECK — HER FACE, THEN THE WHOLE ACT, LIVE ON HER REAL STORE'S COPY.** The staged copy's 7
+    files placed in the emptied dev slot (the 9 dev files asided by `mv`, same inodes); the 0.10 Debug build
+    (walk switch verified in-process by `ps eww` before anything): **HER FACE rendered** — the lock glyph, her
+    lead as the heading, her body, *Start fresh…* and *Open Library…*, no typed road, no Touch ID ask (cap-22;
+    yesterday's same copy hit the dead-end lobby, the §8 addendum). *Start fresh…* asked **her confirm
+    byte-faithful** ("Your old library will be set aside whole in Previous Libraries — nothing is deleted.",
+    buttons Start fresh / Cancel — cap-23); confirmed, **the whole act ran**: the calm first open minted a fresh
+    library straight onto the Bookcase (words + passphrase cards, "Sync off (dev store)" — cap-24), and ON DISK
+    `Previous Libraries/2026-10-22-223653/` held all SIX members `cmp`-identical to the staged source (the
+    frames-carrying WAL rode whole; the non-member `store.sqlite` stray stayed in the slot, per the mover's name
+    rules); the slot held the fresh library's files and NO pre-design name.
+  - **VX-461 — THE LIVE PROOF, three arms.** (1) Settings ▸ Data Safety ▸ the export door into a picked plain
+    folder (`~/vx329-walk/export-test/`): **552,960 bytes, a real plaintext SQLite** (system sqlite3, no key; 191
+    schema objects), NOTHING beside it — where 0.9.8's door writes 0 bytes under the same one-path grant. (2) A
+    note typed first ("VX-461 live export proof - this note rides the export."), the export again into
+    `~/Downloads/`: the note read back **VERBATIM in plaintext** (`select working_text from variant`), no
+    sidecars (the Downloads file then deleted — walk debris). (3) The export aimed INTO the container's Backups
+    folder: **the refusal spoke** — "Not into Variorum's backups folder — an unencrypted copy beside the sealed
+    ones would be the one anything in that folder could read. Choose somewhere else." — and nothing was written
+    (cap-48). The door's receipt line ("Written: …") renders in the pane.
+  - **VX-469 (c) + VX-463 — the Use Castle confirm, BOTH VOICES** (cap-50 Study, cap-68 Terminal): her line
+    exactly where ruled ("The libraries in Previous Libraries keep their own quiet roads on this Mac — Castle
+    protects the library you have open."), the backups warning above it, the export pointer and export-off notice
+    below; all three fields (New passphrase / Again / Your twelve words) CONCEALED with the reveal eye — a
+    disposable words string typed, captured concealed (dots) then revealed single-line by the eye
+    (cap-51/cap-52, P-VX329-R1-4 (a)'s shape). Cancelled, never entered.
+  - **VX-464 — the join's wrong-passphrase refusal NAMES THE ACCOUNT** (cap-55): still signed in as the
+    throwaway's B (the §8 session), Turn on sync → the join sheet read the backfilled mode live again ("Your
+    account is in Standard, like this library.") → a wrong passphrase typed → **"That passphrase doesn't open
+    this account."** — the account, never "this library"; nothing written; cancelled.
+  - **VX-473 — the hold banner reads the LIBRARY's account, never the Mac's sign-in** (cap-64): Record your
+    twelve words… minted the walk library's disposable words (the make-mine confirm requires the live library's
+    secret); Make this my library on the walk library's own 4:36 PM pair, the words typed → the landing → **the
+    held banner spoke WITHOUT the catch-up clause** ("This is your library as of October 22, 2026. Sync is
+    waiting until you press Resume. To keep something from this backup, duplicate it first — duplicates stay.")
+    while the Mac WAS signed in as B; the receipt "This is your library now. The previous one is in Previous
+    Libraries." spoke; the A4 fence stood throughout. (This landing also exercised (D)'s whole set-aside live:
+    the first walk library — the VX-461 note inside — went aside whole into `2026-10-22-225112/`.)
+  - **VX-468 and VX-462: left pin-covered, the orchestrator's call** — VX-468's walk needs a planted older
+    marketing version in the dev domain (the pins cover the wait + composition; incidental consistency: no
+    what's-new card greeted any walk landing); VX-462's set-up→leave→re-join arc is headless-pinned with revert
+    checks and the §8 join covered the live join path.
+  - **THE RESTORE, whole:** walk debris removed (the slot's walk-library files; the two walk-era asides
+    `2026-10-22-223653` + `2026-10-22-225112` — her staged copy at `/Users/Shared/vx329-rehearsal/` UNTOUCHED;
+    the walk libraries' `Backups/9499c976` + `Backups/6f1ee6b1` subfolders; the Downloads export); the 9 dev
+    files `mv`'d back (same inodes, never written while asided); the relaunch WITHOUT the walk switch (`ps eww`:
+    0 walk vars) → **rule 21's notice ONCE → the dev library open QUIETLY** — byte-matching the §8 restore's own
+    capture (the same empty Bookcase, the same standing VX-309 October-20 hold, Resume never pressed, "Sync off
+    (dev store)"); quit at zero instances; the stage RELEASED. Keychain residue: the two walk libraries'
+    custody/memory/words items + B's still-signed-in session in the dev scope — the §8 class, recorded.
+  - **Machinery notes (not product findings):** cliclick's `kp:return` does not drive the quick-entry band's
+    onSubmit or the notice dialog's default button (System Events `key code 36` does; typing via `t:` lands
+    fine) — the walk-lessons class; the export door's "Choose Where…" arms an inline Export/Cancel pair before
+    the panel, and the panel's Go To overlay needs `key code 36` too.
