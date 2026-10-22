@@ -1167,7 +1167,96 @@ in the session scratchpad, `vx329-mac-suite.log`): `✘ Test run with 1556 tests
 `theRowsCountThisMacsPairsOfThisLibraryAndNeverTheFlatFiles`), `RoadLockRouteTests` (a doc comment only — the sanity
 run). Read `skipped:` and the "Test run with N tests" line before claiming them. F-FL-1's `RoadLockViewNamesPinTests` is
 still red-by-crash until someone takes it.
- (2026-10-22, the orchestrator — session `vx-329`, Fable, overnight mandate)
+
+### PHONE FIX LEG RECORD — THE PHONE SUITE'S TWO REDS (Opus implementer, 2026-10-22; IN PROGRESS)
+
+**Not done in the phone fix leg, first:** NO `xcodebuild test` (the brief's limit — the orchestrator re-runs the phone
+simulator suite after this lands), so both fixes' PHONE green is PENDING that re-run; the sweep and the switch's rule ran
+HEADLESS in a transient scratchpad harness that runs the REAL sweep (extracted verbatim from `MobileStructuralTests.swift`,
+`#filePath` pinned to the real file — below). No stage, no launch, no store touch, no network, no subagent; zero
+`Sources/` lines (the core untouched). NOT done, flagged below: the "Mac" in the CORE's model sentences the phone renders,
+outside the sweep's two roots (F-PH-1 — one is a CastleRules sentence, so a stop-and-flag); the phone wording of her rule-12
+leave sentence (exempted as unreachable today — VM-8's and hers, F-PH-2).
+
+**The run read:** the orchestrator's phone run (`vx329-ios-suite.log`, iPhone 17 Pro, iOS 26.2): `✘ Test run with 808 tests
+in 126 suites failed … with 6 issues (including 4 known issues)` — the two reds below; the 4 known issues are the standing
+wrappers. The harness reproduces RED 2 exactly: the same 28 offenders on the pre-fix tree (29 literals name the Mac; the
+Jekyll book's one is the standing prefix exemption).
+
+**RED 1 — `MobileProtectionRoadTests.theOneSwitchIsOnInThePhonesDebugBuild` (:27, `!ProtectionRoad.live(debug: false)`).
+STALE PREMISE.** VX-306 U3 pinned the Debug-only rule (P-VX306-U1b-1: "a Release build runs today's road"); U1 piece 0
+(`c3d939c9e` + `f2306a535`) made `live(debug:)` true for every input and flipped the MAC's twin
+(`ProtectionRoadSwitchTests.theRuleIsTheNewRoadInEveryBuild`); the phone's twin was missed (compiled, never run). The product
+is right; the pin is the deleted road's. Disposition: FLIPPED test-side — `live` true for both inputs, the test renamed
+`theOneSwitchIsOnInEveryPhoneBuild`, the suite's name and header made true. Its red-on-old is the pre-flip rule (`c629ae54f`'s
+`ProtectionRoad.swift`, `live(debug:)` = `debug`), run in the harness.
+
+**RED 2 — `MobileNoRedirectSweepTests.nothingUserFacingNamesTheMac` (:1156). The mechanism:** the sweep reads every string
+literal under `VariorumMobile/` and `Shared/` (both compile into the phone) and fails on a word-bounded "Mac" unless an
+exact-literal exemption names it. Three causes: (i) U1 moved `ProtectionCopy` byte-for-byte from `StoreProtection.swift` to
+`Shared/Protection/ProtectionCopy.swift`, and the sweep's two exemptions are keyed to the deleted file name, so the bare
+"Mac" (`deviceName`'s macOS arm) trips; the second ("a Mac", `deviceNameWithArticle`) names a literal U1 deleted, so it is
+stale; (ii) the eight acknowledgments and Send Library literals are VX-114's, standing since 13n/13x (the run-finals ledger's
+"the standing `nothingUserFacingNamesTheMac`"); (iii) the other nineteen live in the new road's shared files (VX-306…309),
+and none of those phases' records shows a phone run of this sweep.
+
+**THE TRIAGE (recorded before any fix; reachability read from the call sites).** (a) = a phone face renders it today →
+re-worded device-neutral. (b) = no phone face renders it → exempted by exact literal, its reason stated in the exemption.
+- **(a) PHONE-REACHABLE — 4, re-worded** (the device noun by `ProtectionCopy.deviceName`, the file's own idiom
+  P-VX306-U3-8: the Mac's sentence byte-identical, so every Mac pin and §7c's plan pin still hold; the phone says "iPhone").
+  Each "this Mac" here means the device you're on, and the phone's road keeps the same keychain copy (the same
+  `ProtectionSystem` leaves), so "this iPhone's keychain" is true there. PROVISIONAL P-VX329-PH-1.
+  1. `ProtectionWords.wordsCardLead` — the phone's once-shown words card at creation (`MobileRoadFaces.swift:208`;
+     `ProtectionRoad.wordsCardAtCreation(mac: false)` is true). This is VX-306's walk finding W-15 (her taste call).
+  2. `ProtectionWords.noKeyFileAnywhere` — rule 27's lobby moment on the phone (`MobileRoadFaces.swift:53`). §7c (3)'s text;
+     not CastleRules wording (rule 27's own sentence is untouched), and the meaning is the same sentence with the device
+     named — not a stop.
+  3. `ProtectionWords.keychainUnreadable` — the phone's lobby when the keychain can't be listed (`MobileRoadFaces.swift:69`).
+  4. `ProtectionWords.keychainUnreadableNoLibrary` — `ProtectionOpenRoad.route`'s `.failed(…)` over an empty slot →
+     `AppBootstrap` :297–298 (`StoreOpenError(reason:)`) → `MobileStoreFailureView` renders `error.reason`.
+- **(b) PHONE-UNREACHABLE — 24: 22 exempted, 2 re-worded instead.**
+  - RE-WORDED, NOT EXEMPTED (2) — the open's two RECEIPTS, `ProtectionWords.offerRestoredFromKeychain` and
+    `.restoredFromMirror`. Unreachable today: the phone's road produces them (the interlude's `receipt:` →
+    `session.addReceipt`; `RoadStandingFaces.receipts` → `ProtectionOpenRoad.swift:522`), but they are spoken only through
+    `RoadStandingModel.speak`, which only the Mac's ready window sets (`VariorumApp.swift:205`; the phone's faces header:
+    "the receipts have no phone face"). They are neither a Mac-only door nor a log line — they are the phone road's own
+    sentences waiting for a face (VM-8's), so an exemption would blind the sweep the day that face lands. The same device-noun
+    re-word as (a), Mac byte-identical. PROVISIONAL P-VX329-PH-1. (A deviation from the brief's (b) remedy, said here.)
+  - EXEMPTED (22), each with its reason in the exemption itself:
+    - `ProtectionCopy.swift` "Mac" (1) — `deviceName`'s `#if os(macOS)` arm (the phone compiles "iPhone"); the 13p exemption
+      re-keyed to the file U1 moved it into. The stale "a Mac" entry REMOVED (its literal left with today's road at U1).
+    - `AcknowledgmentsCopy.swift` (4) — the MCP SDK family's roles, "(Mac only)": `mcpFamily` joins `all` only in its
+      `#if os(macOS)` arm; the phone's sheet reads `all` (`MobileAcknowledgmentsSheet.swift:49`) = `shared` on iOS. VX-114's.
+    - `LibraryOpenCopy.swift` (4) — Send Library to Another Mac (the door's name, its sheet title, Data Safety's section title
+      and body): read only by the Mac target (`CapabilityRegistry.swift:2296`, `LibraryOpenDoor.swift:104,139`,
+      `DataSafetyPane.swift:164–165`); the sentences mean a Mac (the folder opens with File ▸ Open Library… on the other
+      Mac). VX-114's.
+    - `ProtectionWords.otherLibrariesHeading` (1) — the copies list's heading, the Mac's `CopyDoorsSheet.swift:298` only (the
+      phone keeps no backups and has no Restore or Open Library door).
+    - `ProtectionWords.lookInsideAsk` (1) — the Mac's `LookInsideSheet.swift:38` only (P-VX306-U3-18: no Look inside on the
+      phone).
+    - `ProtectionWords.deleteCopiesLead`'s two staying clauses (2) — the copies' delete confirm (`CopyDoorsModel.lead`,
+      rendered by the Mac's `CopyDoorsSheet` only; no phone file composes `CopyDoorsModel`), and "another Mac made" means a
+      Mac: only Macs write backup pairs.
+    - `ProtectionWords.leaveSentence` (1) — HER rule-12 sentence, verbatim (`RoadCrossingWordsTests` pins it to
+      CastleRules): rendered by the Mac's crossing and account sheets (`RoadCrossingFaces.sentence(.ruleFive)`) and the Mac's
+      field guide (`guidePosturesLesson`, `TutorialSeeder.swift:2485`; the phone's pocket guide seeds copy §7's chapter). The
+      phone renders no crossing, account or follow face until VM-8 (F-U1-3). Not mine to re-word — F-PH-2.
+    - The protection log's lines (8) — `ProtectionAccountActs.swift` ×1, `ProtectionCopyDoors.swift` ×3,
+      `ProtectionCrossingActs.swift` ×2, `ProtectionBackupPair.swift` ×2: every one an argument of `ProtectionOpenRoad.log`
+      (`os.Logger`, subsystem `io.lduarte.Variorum`, category `protection`, `.notice`) — the unified log, read by no face.
+- **The sweep's own discipline, tightened (test-side):** each exact-literal exemption now carries its reason as data and is
+  CAPPED AT ONE match, and the Jekyll prefix exemption is counted the same way — a stale entry (its literal reworded or
+  gone: 0 matches) or a second copy of the sentence (2+) trips. Two stale entries had survived U1's move unnoticed.
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece R — this record skeleton, the two reds traced and the 28 dispositioned before any fix: DONE (this commit).
+- Piece 1 — RED 1's flip (test-side) + its red-on-old in the harness: NOT-STARTED.
+- Piece 2 — RED 2: the six re-words (P-VX329-PH-1) + the 22 exemptions + the one-match cap: NOT-STARTED.
+- Piece 3 — the evidence (the harness: the sweep red-on-old → green, the cap red on the old exemptions; U3's harness over the
+  Mac's words pins; `build-for-testing` Mac and iOS): NOT-STARTED.
+
+## 6. THE KICKOFF RECORD (2026-10-22, the orchestrator — session `vx-329`, Fable, overnight mandate)
 
 **Her mandate (the /architect-phase argument, faithful):** the only session tonight — no coordinator, hold
 `Tools/stage` directly. Run U1, U3, the riders and the throwaway rehearsal to completion, then pause with everything
