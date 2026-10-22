@@ -86,9 +86,8 @@ public enum StorePlaintextExport {
                 try db.execute(sql: "DELETE FROM plain.\"\(quoted)\"")
             }
         }
-        // The export's own journal sidecars (the attached file's) — swept.
-        for suffix in ["-wal", "-shm", "-journal"] {
-            try? FileManager.default.removeItem(atPath: destination.path + suffix)
-        }
+        // VX-329 ladder r1: no sidecar sweep follows the copy. With the journal in memory the export makes no file beside
+        // the pick, so a sweep of `-wal`/`-shm`/`-journal` there could only delete a stranger's file of those names
+        // (`StorePlaintextExportTests.aStrangersShmBesideThePickSurvivesTheExport`).
     }
 }
