@@ -14,6 +14,10 @@ import Testing
 @testable import Variorum
 import VariorumCore
 
+// VX-329 fix leg, F-FL-1: `copiesHome(besideStore:)` carries the app target's main-actor isolation, and a
+// nonisolated suite calling it trips Swift's dynamic isolation check (EXC_BREAKPOINT — the host crashed and the
+// suite reported "no test run"). The suite takes the actor; the product keeps its isolation.
+@MainActor
 @Suite("VX-306 ladder r1 NIT 1 — RoadLockView names the Backups folder by the catalogue's name")
 struct RoadLockViewNamesPinTests {
     /// `RoadLockView`'s code lines, from its declaration to the end of the file (it is the file's last type).
