@@ -118,9 +118,15 @@ Window**: nothing is wrong with your library, the app just did not open one.
 
 ## 4. What restoring does to things you deleted
 
-\(syncedRestoreWarning)
+*(The next two paragraphs are shared constants — the same sentences render on other surfaces, so an edit here
+changes those too. Shown inline for your review; they are road-neutral and unchanged by this phase.)*
 
-\(localRestoreWarning)
+If this Mac syncs, restoring an older copy does not undo your deletions. Your account tells this Mac what you
+deleted since: ordinary deletions re-apply and the writing lands in the Trash, recoverable for the rest of its 30
+days — and anything you deleted permanently stays permanently deleted.
+
+If this Mac is not syncing, restoring is time travel: anything deleted after this copy was made comes back —
+including things deleted permanently.
 
 ## 5. What deletion means
 
@@ -135,7 +141,10 @@ Deleting happens in three stages, and only the third one is final.
    record of *which ids were removed* — no words, no titles — so a device that comes back with an old copy is told
    "that one is gone" instead of putting it back.
 
-\(bothSidedDeletionTruth)
+*(A shared constant, shown inline:)* Permanent deletion removes writing from your library and your synced
+devices — not from backup files. If you restore a backup made before a permanent delete, the deleted writing does
+not come back into your library; but it is still inside that backup file, and stays there until the backup is
+rotated away or you delete the file.
 
 The same is true of any backup outside this app — Time Machine, a cloned drive, a folder in the cloud. And it cuts
 the other way too: a backup that was rotated or overwritten AFTER you deleted something no longer contains it. The
