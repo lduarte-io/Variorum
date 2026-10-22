@@ -1840,3 +1840,59 @@ every typed secret the throwaway's own, disposable by design)
 **What this record proves for the switch-day script:** §2's answer ("by the join") is REHEARSED — the markers in
 `notes/plans/vx-329-switch-day.md` flip in this commit. What stays HERS: the byte-copy rehearsal (the staged copy
 + README), the deploy, the installs, the release.
+
+## 6d. U4 BRIEF — THE PRE-DESIGN FACE (a fresh Opus implementer; her go + her approved words at the morning
+sitting, after the §8 rehearsal's byte-copy finding)
+
+**The finding (the §8 addendum below records it):** a REAL today's-road store in the live slot (the sqlite +
+old-format `variorum-keys.json` + `variorum-keys-<fp8>.json` beside it) meets the 0.10 build as the LOBBY — typed
+roads no secret can ever satisfy, no door out; `File ▸ Open Library…` can't read a pre-design file either and
+nothing mints into an occupied slot. A tester who updates without exporting is WEDGED. Piece 5's pins covered the
+keyless and foreign-copy shapes; the real pre-design shape fell between them.
+
+**Read first, in full:** CLAUDE.md + canon; `notes/SessionResiliencyProtocol.md`; this plan §6/§6a + the §5 U1
+record (piece 5) + §8 and its addendum; `notes/CastleRules.md` rules 17, 20, 21, 26, 27; `Sources/VariorumCore/
+Protection/Assess/` (the classifier + CatalogNames — the legacy NAMES are recorded there as not-this-design's),
+`Executor/Acts/Copies.swift` (T-5's set-aside machinery), the lobby/notice faces under
+`App/Variorum/Variorum/Features/Protection/` + `App/Variorum/Shared/Protection/`. Work from
+`~/dev/variorum-vx-329`; commits `Part of VX-329`.
+
+**The ruled face (HER WORDS, approved 2026-10-22 — byte-faithful, sentence case):**
+- Lead: "This library is from an older version of Variorum."
+- Body: "This version can't open it. Open the previous version to copy anything out — or if it synced, your
+  writing comes back when you sign in. Starting fresh sets this library aside, whole, in Previous Libraries."
+- Doors: **Start fresh…** and **Open Library…**.
+- Start fresh's confirm: "Your old library will be set aside whole in Previous Libraries — nothing is deleted."
+
+**The build:**
+1. THE FACT (pure, in the classifier): a live slot holding a store + NO format-3 key file + at least one
+   key file wearing a PRE-DESIGN NAME (`variorum-keys.json` / `variorum-keys-<fp8>.json` — names only, NEVER
+   read/parsed) reads as `preDesignStore`. The keyless arm keeps rule 27's face unchanged; a format-3 slot keeps
+   the lobby unchanged.
+2. THE FACE on that fact (the lobby's surface, the Mac): her words + the two doors. P-2: doors act.
+3. **Start fresh…** — the confirmed act: the slot's library files (store + sidecars + every key file + markers)
+   set aside WHOLE into `Previous Libraries/<stamp>/` (T-5's set-aside shape — crash-safe per rule 20: reuse the
+   planned-act/set-aside machinery, never a bare move; the act READS NOTHING of the old store), then the calm
+   first open mints fresh exactly as an empty slot does. Nothing deleted; rule 26's "we don't handle them" holds —
+   detect and say, move whole, never read.
+4. **Open Library…** — the standing door, unchanged.
+5. PINS: the fact's three arms (pre-design → face; keyless → rule 27; format-3 → lobby) red-on-old where the old
+   behavior differs (the pre-design arm IS red on old: the old classifier reads it as the lobby); the set-aside
+   act's files-moved-whole + fresh-mint-after + crash arms; the face's words byte-pinned.
+6. MOBILE: the FACT is shared core (compiles for iOS); the phone's face is VM-8's — flag, don't build.
+
+**Hard limits:** §6's environment traps verbatim (headless + build-for-testing ONLY, no stage, no launches, no
+store touches, no subagents, no Sync/); the words are HERS — byte-faithful, no improvements; checkpoint commits
+pushed per piece; LIVE STATUS in your unit record under §5; PENDING on unverified claims; foreground waits only.
+**Evidence closing the unit:** the pins green headless both configurations; build-for-testing green both targets;
+the record with the Mac-suite list (the orchestrator's closing run covers the live face; the byte-copy re-check is
+the orchestrator's).
+
+### §8 ADDENDUM — THE BYTE-COPY FACE CHECK (the orchestrator, 2026-10-22, stage claim `vx-329`, released)
+
+Her real store's byte copy placed in the emptied dev slot; the 0.10 Debug build launched: **the LOBBY rendered**
+("Open your library — enter your passphrase or your twelve words", the honest Touch ID line) — NOT piece 5's
+refusal; a junk passphrase reset the field; no door out anywhere (the File menu carries Open Library… but it
+refuses pre-design files; nothing mints into an occupied slot). The dev slot was restored 9/9 cmp-identical and
+the stage released. HER RULINGS at the sitting: build the face (U4 above), her words approved; the tester message
+is the switch-day script's §testers (updated at U4's close).
