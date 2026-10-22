@@ -51,24 +51,24 @@ The ladder: three rounds, round 3 PASS (your fourth-round latitude unused). The 
 
 ## The filed tickets, by priority (minted at the merge, each labeled per the rule)
 
-- **Medium · Bug · Tests & tooling (Test-only):** the MCP suite load-flake family — `MCPHarnessTimeLimitTests`
+- **VX-477 · Medium · Bug · Tests & tooling (Test-only):** the MCP suite load-flake family — `MCPHarnessTimeLimitTests`
   (7+ sightings, both configurations, always green alone), `MCPSizeCapTests`, `MCPSetupKeyServerTests`,
   `StarContextTests` (one each). The target is untouched by this phase.
-- **Low · Bug · Castle & sync (Suspected):** F-FL-2 — the crossing/account/make-mine catch arms read a missing
+- **VX-479 · Low · Bug · Castle & sync (Suspected):** F-FL-2 — the crossing/account/make-mine catch arms read a missing
   library file as "past the swap" (reachable only if the slot's file vanishes under an open library).
-- **Low · Bug · Castle & sync (Suspected):** F-U3-3 — `AuthTokensStore.keychain.save` drops a refused Keychain
+- **VX-482 · Low · Bug · Castle & sync (Suspected):** F-U3-3 — `AuthTokensStore.keychain.save` drops a refused Keychain
   write's result (fail-visible, never destructive).
-- **Low · Improvement · Castle & sync:** F-R1-4 — the re-keying roads still mint the own-words-lock-beside-copy
+- **VX-480 · Low · Improvement · Castle & sync:** F-R1-4 — the re-keying roads still mint the own-words-lock-beside-copy
   shape VX-462 removed from set-up (they over-speak, truthfully, after a leave/re-join).
-- **Low · Improvement · Import & export:** the export door could refuse a pick whose SQLite-sidecar-named
+- **VX-478 · Low · Improvement · Import & export:** the export door could refuse a pick whose SQLite-sidecar-named
   siblings exist (near-unreachable in the sandboxed app; the r1 reviewer's ruled ticket).
-- **Low · Improvement · Tests & tooling:** walks-never-run-rounds — the A4 fence vs the walk switch (the dev
+- **VX-483 · Low · Improvement · Tests & tooling:** walks-never-run-rounds — the A4 fence vs the walk switch (the dev
   store never runs rounds, so live pull proofs go headless; an opt-in would let a walk pull).
-- **Low · Improvement · Castle & sync:** F-U3-2 — two PROCESSES over one scope still race the refresh token
+- **VX-481 · Low · Improvement · Castle & sync:** F-U3-2 — two PROCESSES over one scope still race the refresh token
   (forbidden by rule today, not by mechanism).
-- **Low · Wording · Castle & sync:** VX-465's counts — earlier device-ID eras' pairs list but never count as this
+- **VX-484 · Low · Wording · Castle & sync:** VX-465's counts — earlier device-ID eras' pairs list but never count as this
   Mac's; should the per-era meaning say itself? (Your accept-as-designed ruling's one wording row.)
-- **Low · Wording · Tests & tooling (NIT, your call):** the lifecycle page's never-list reads over rule 27's
+- **VX-485 · Low · Wording · Castle & sync (NIT, your call):** the lifecycle page's never-list reads over rule 27's
   synced-libraries exception — one clause in the fixture + a regeneration if you want it.
 
 ## Standing items
