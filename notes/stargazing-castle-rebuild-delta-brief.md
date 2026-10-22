@@ -124,15 +124,20 @@ Both modes stay end-to-end encrypted, and the server still never holds a key to 
   count of earlier sync keys the account carries. The operator opens none of them: nothing in the record is
   Apple-wrapped and nothing opens without a typed secret.
 - **Deleting the account: what outlives it** *(added 2026-10-20 for VX-213, from the VX-191 audit's account-deletion
-  check, C3 — not a Castle change: true today and stays true)*. Deleting the account deletes everything Variorum
-  keeps for it on the server: the library's encrypted copy, the account's key record, its sync bookkeeping, and the
-  login itself. What it can't delete is the sign-in service's own log. Variorum's sign-in runs on Supabase, which
-  keeps an audit log of sign-in events, recording the account's email address and the IP address each sign-in came
-  from. Those entries stay after the account is deleted, kept under Supabase's retention, not Variorum's. So the
-  policy should say that deleting the account doesn't erase the sign-in service's records of past sign-ins. (Checked
-  in the repo: the deletion removes the login row and nothing touches that log. The log's exact contents and
-  Supabase's retention period are being confirmed against Supabase's own documentation at VX-329 — the site gives a
-  period only once that lands in this brief.)
+  check, C3 — not a Castle change: true today and stays true; the facts below re-checked 2026-10-22 at VX-329 against
+  Supabase's documentation and empirically on the rehearsal project)*. Deleting the account deletes everything
+  Variorum keeps for it on the server: the library's encrypted copy, the account's key record, its sync bookkeeping,
+  and the login itself. What it can't delete is the sign-in service's own log. Variorum's sign-in runs on Supabase,
+  whose auth service records sign-in events (the event, a timestamp, and the account's email; Supabase's docs also
+  name the IP address, though community reports say the IP lands per-session rather than per-event). The checked
+  facts: by default those records live in Supabase's own log platform, NOT in the project's database — the project's
+  optional audit-log table is empty unless its toggle is turned on (verified empty on the rehearsal project after
+  many sign-ins), and the deletion road removes the login and its sessions while the platform's logs are outside any
+  project table. Supabase documents NO retention period for the auth audit log itself; its log platform's retention
+  is plan-based. So the policy should say that deleting the account doesn't erase the sign-in service's own records
+  of past sign-ins, that they are kept under Supabase's retention (not Variorum's), and it should give a NUMBER only
+  from Supabase's current platform-logs documentation for the project's plan at the time the page is written — not
+  from this brief.
 - **Cautions, added.**
   - Don't say backups made in Standard stay openable through the Apple account after entering Castle. They don't,
     apart from rule 25's two stated exceptions.
