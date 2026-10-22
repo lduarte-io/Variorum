@@ -1,5 +1,7 @@
 # VX-329 — ladder round 1, the FIX LEG (Opus implementer, 2026-10-22)
 
+**LEG CLOSED — all four code findings applied and evidenced (the EVIDENCE section); the Mac re-run list is the orchestrator's stage.**
+
 **Not done in this leg, first:** nothing under `Sources/VariorumCore/Sync/` (the fence — `StaticSyncKeyProvider`, orphaned
 by finding 3's deletion, is the orchestrator's own carve right after this leg lands); no refusal for a stranger's
 `-wal`/`-journal` beside a fresh pick (the reviewer's final call: a Low ticket at closeout, never built here); no Mac or
@@ -7,7 +9,7 @@ phone `xcodebuild test` run (the brief's limit — the re-run list is under EVID
 dispositions landed at `d438050f9` and the leg stopped; the reviewer's final calls (`notes/plans/vx-329-ladder-round-1.md`
 §"THE REVIEWER'S FINAL CALLS", `72e2f7c73`) UPHELD finding 1's dispute (the `-shm` counter-pin is the pin of record, the
 `-wal` pin withdrawn as hollow), confirmed findings 2 and 4 as planned, and recorded the orchestrator's option (a) for
-finding 3 (delete the runner and its suite; `VaultEnrollment` KEPT). This leg then applied all four, in the order below.
+finding 3 (delete the runner and its suite; `VaultEnrollment` KEPT). This leg then applied all four (1, 4, 3, 2 — in that order), each recorded below.
 
 **Scope:** the CODE findings of `notes/plans/vx-329-ladder-round-1.md` only (verbatim there — the spec). The record/doc
 findings (the MAJOR, the deploy-checklist MINOR, the L1 canon-note MINOR, the runbook MINOR, the zsh NIT) are the
@@ -46,7 +48,7 @@ the stage batch record); the findings file `notes/plans/vx-329-ladder-round-1.md
   **RED-ON-OLD (behavioral revert, on `deee7fe79`, the tree clean first):** the belt's one registration line
   (`"17_phase_vx307_vault.sql": pgTempBeltFile`) removed → the real arm RED (`Expectation failed:
   resolution.problems.isEmpty`); restored by `git checkout --`, `git diff --exit-code` clean.
-- Finding 3 (MINOR, `Crypto/VaultBootstrap.swift`): **DONE** (this commit) — option (a), the orchestrator's ruling
+- Finding 3 (MINOR, `Crypto/VaultBootstrap.swift`): **DONE** (`a51a76adc`) — option (a), the orchestrator's ruling
   confirmed by the reviewer. DELETED: `Sources/VariorumCore/Crypto/VaultBootstrap.swift` (`VaultBootstrap`,
   `VaultBootstrapError`, its private `isTransientTransport`) and `Tests/VariorumCoreTests/VaultBootstrapTests.swift`.
   Comments OUTSIDE Sync/ that named the runner made true: `Package.swift:73–77`; `Crypto/VaultEnrollment.swift` (the
@@ -62,11 +64,11 @@ the stage batch record); the findings file `notes/plans/vx-329-ladder-round-1.md
   `rg vault-bootstrap` over `Sources App Tools Tests Package.swift`): history comments only, plus the one Sync/ line
   above; the vault-world suites `VaultEnrollmentTests|AccountLifecycleTests|KeyVaultClientTests|KeyProofGateTests` `✔
   Test run with 53 tests in 4 suites passed`. No pin (dead code — a compile fact).
-- Finding 4 (NIT, the stale collision-sweep comment): **DONE** (this commit) — `EditorCommands.swift:562–564` now says
+- Finding 4 (NIT, the stale collision-sweep comment): **DONE** (`cdfa36076`) — `EditorCommands.swift:562–564` now says
   the other `l` chords are ⌘L (Switch Wing) and ⌘⇧L (Save Choices as Lens), ⌃⌘Q untouched; re-swept true (the key table's
   `l` rows are exactly `.switchWing` ⌘L, `.saveChoicesAsLens` ⌘⇧L, `.lockLibraryNow` ⌃⌘L, and the three
   `.keyboardShortcut("l", …)` call sites match them). Comment-only; its compile is the closing `build-for-testing`.
-- Evidence (suites, build-for-testing, the Mac re-run list): NOT-STARTED.
+- Evidence (suites, build-for-testing, the Mac re-run list): **DONE** (this commit — the EVIDENCE section below).
 
 ## THE DISPOSITIONS (one row per code finding)
 
@@ -167,11 +169,37 @@ File menu's comment (`:562–564`) says the `l` chords are ⌘L (Switch Wing) an
 ⌃⌘Q (the system's Lock Screen) untouched — comment-only; no pin (the NIT names none); evidence the Mac
 `build-for-testing`.
 
-## EVIDENCE
+## EVIDENCE (on `fec7b7f20` — after it only this record changed; every run foreground, polled to its exit line, in sequence)
 
-NOT-STARTED — after the rulings. The planned closing set: `swift build`; `swift test --filter
-'StorePlaintextExportTests|PlaintextExportImportTests|AuthRLSDDLTests|AccountLifecycleTests|VaultEnrollmentTests|KeyVaultClientTests'`
-both configurations (+ the full core suite debug and release if finding 3 deletes); `xcodebuild build-for-testing`
-Mac + iOS. The Mac suites for the orchestrator's re-run (finding 1 — every app suite that names `StorePlaintextExport`):
-`PlaintextExportDoorTests`, `PlaintextExportBringInRoadTests`, `PickedCopyRoadTests` (the export's app callers are
-`PlaintextExportModel`, `DataSafetyPane`, `SQLCipherLibraryLeaf`) — PENDING the applied fix.
+- `swift test` (debug, the whole package): **VariorumCoreTests `✔ Test run with 3288 tests in 429 suites passed`** (R1's
+  3298/430 − `VaultBootstrapTests`' 13 tests and its suite + this leg's 3 pins: the `-shm` pin and the two pg_temp
+  pins); StringsWorkbook `✔ 32 tests in 4 suites`; VariorumMCPTests 383/71 with ONE red — the recurring
+  `MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded` (18.7 s against its 15 s bound
+  under the full run) — re-run ALONE `✔ 3 tests in 1 suite` (2.2 s).
+- `swift test -c release` (the whole package): **VariorumCoreTests `✔ Test run with 3259 tests in 424 suites passed`**
+  (R1's 3269/425 − 13 + 3, the suite gone); StringsWorkbook `✔ 32/4`; VariorumMCPTests 383/71 with TWO reds — the same
+  time-limit flake and a NEW SIGHTING, `MCPSetupKeyServerTests.twoToolsUnderOneNameAreToldApart` (`rebound["id"] as? Int
+  == 6 && rebound["result"] != nil` at :108, 3.8 s under the full load) — both re-run ALONE under `-c release` `✔ Test
+  run with 13 tests in 2 suites passed`. The MCP target is untouched by this leg and this phase (F-FL-R1-1 below).
+- `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx329-r1fix
+  build-for-testing` (APFS-cloned from `vx329-phonefix`): **`** TEST BUILD SUCCEEDED **`**; `-scheme VariorumMobile
+  -destination 'generic/platform=iOS Simulator' -derivedDataPath …/vx329-r1fix-ios build-for-testing` (cloned from
+  `vx329-phonefix-ios`): **`** TEST BUILD SUCCEEDED **`**. Zero source warnings in a touched file (both logs grepped; the
+  clone's "stale file … outside the allowed root paths" notices only).
+- The fence: `git diff --stat 2240a7f19..HEAD -- Sources/VariorumCore/Sync` EMPTY.
+
+**MAC RE-RUN LIST (the orchestrator's stage — `-only-testing:VariorumTests/<Suite>`; compiled, unrun here):** finding 1
+reaches the app only through `StorePlaintextExport` — `PlaintextExportDoorTests`,
+`Protection/PlaintextExportBringInRoadTests`, `Protection/PickedCopyRoadTests` (the export's app callers:
+`PlaintextExportModel`, `DataSafetyPane`, `SQLCipherLibraryLeaf`). Findings 2 and 3 are core-only (headless-green above);
+finding 4 is a comment (compiled). Phone: no phone file touched — no re-run owed (the iOS build above is the sanity).
+
+**FINDINGS (routed, not fixed):**
+- **F-FL-R1-1 (Tests & tooling — for the MCP flake ticket at closeout):** a new release-run sighting,
+  `MCPSetupKeyServerTests.twoToolsUnderOneNameAreToldApart`, red under the full `-c release` load and green alone —
+  the same load-timing class as `MCPHarnessTimeLimitTests` (its sixth sighting tonight) and R1's `MCPSizeCapTests`.
+- **F-FL-R1-2 (the orchestrator's carve, as ruled):** `StaticSyncKeyProvider` (`Sync/SyncEncryption.swift:114–128`) is
+  caller-less after finding 3, its doc at :116 naming the deleted runner and `CorpusRotation`.
+- **F-FL-R1-3 (the reviewer's ruled ticket, restated so it cannot drop):** a Low ticket — "the export door could refuse
+  a pick whose SQLite-sidecar-named siblings exist; near-unreachable in the sandboxed app" (SQLite itself removes a
+  stranger's `<picked>-wal`/`-journal` beside the zero-page pick).
