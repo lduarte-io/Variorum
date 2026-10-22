@@ -1029,7 +1029,18 @@ in the session scratchpad, `vx329-mac-suite.log`): `✘ Test run with 1556 tests
   expectation, claim or helper body changed. `LockWorld.readyInStandard`'s doc and `SettingsLockCloseTests`' own helper
   say the caller holds the road (comment only). A sweep for the hazard's other shapes (`PlantedRoad().…`, an inline
   `TempSlot(…)`) across both test trees: none.
-- Piece 3 — failures 1 and 6 rewritten to the new road's truth: NOT-STARTED.
+- Piece 3 — failures 1 and 6 rewritten to the new road's truth: DONE (this commit; the compile PENDING piece 4, the
+  green PENDING the stage re-run). **1:** `aFreshStoreOnTodaysRoadSeedsHerFiveBlocksAlone` DELETED with its subject
+  (today's road's five-only readme — U1 `c3d939c9e`) and REPLACED by
+  `aFreshStoreOfEitherVariantSeedsHerFiveThenTheFourPassages`: per `StoreVariant` (`.real` and `.dev`), each in its own
+  fresh launch world through `LaunchFurniture.seed`, the readme holds nine blocks and renders `herBlocks +
+  startHerePassages` joined (the oracle built from the two lists, never from `paragraphs` — so a variant fork returning
+  inside the seeder reads red), and the real variant's page equals the dev variant's byte for byte. Its red side is the
+  run's own: the real variant read nine where today's road read five. **6:** the new-road half byte-unchanged (2 beside,
+  1 far); the second half now asserts that with no road counts both rows count NONE over the same planted flat files
+  (beside: `FolderSummary(path as read, exists, 0, nil, nil)`; far: still `.set` at the same path, 0/nil/nil); the test
+  renamed `theRowsCountThisMacsPairsOfThisLibraryAndNeverTheFlatFiles` (its doc names the old one and why); the file
+  header made true.
 - Piece 4 — the evidence (`build-for-testing` both targets; the headless harness; the core suites): NOT-STARTED.
 
 **THE SIX — the traced mechanism and the disposition of each (recorded before any fix):**
