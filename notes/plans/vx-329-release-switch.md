@@ -1516,3 +1516,20 @@ bore each member). Work from `~/dev/variorum-vx-329`; commits say `Part of VX-nn
 **Evidence closing the unit:** per-member pins red-on-old (named in the record with their revert checks); the
 protection + faces suites green headless both configurations; `build-for-testing` green both targets; the record
 (§5) with per-member dispositions, the Mac-suite list for the stage batch, PROVISIONALs bundled.
+
+### THE STAGE BATCH RECORD (the orchestrator, Fable, 2026-10-22; stage claim `vx-329`, renewed per row)
+
+**Run 1 — the FULL Mac app suite** (the honest run: every launch takes the new route; `xcodebuild test`,
+DerivedData `vx329-stagebatch`): SEVEN reds — six test failures (LaunchFurniture's today's-road readme pin,
+SettingsLockClose ×2, LibraryPortabilityDoor, LibraryHandOff, DataSafetyRoadCounts' today's-road half) and ONE
+HOST CRASH the first grep missed (`RoadLockViewNamesPinTests` — EXC_BREAKPOINT in the dynamic actor-isolation
+check; the restarted host said "no test run", so it printed no ✘ — the lesson: read the crash reports, not only
+the ✘ lines). **The fix leg** (its record above) dispositioned the six: two stale today's-road premises rewritten
+to the new road's truth, four the PLANTED ROAD'S LIFETIME — U1's rewire passed an inline `PlantedRoad()` the
+bootstrap doesn't retain, so `TempSlot.deinit` deleted the slot under a ready bootstrap; every site now holds its
+road (test-only; one previously-vacuous spinner pin now really crosses). F-FL-1 (the crash) fixed by the
+orchestrator's own hand: the suite takes `@MainActor`; the product keeps its isolation. **Run 2 — the full Mac
+suite again, on the fixed tree: GREEN — 5085 tests in 889 suites, 14 known issues (standing wrappers), exit 0.**
+The phone's full simulator suite runs next (the record flips below). Findings carried: F-FL-2 (the catch arms'
+past-the-swap read when the library file vanishes mid-act — ticket at closeout), F-FL-3 (the lifetime trap's
+class note), and the recurring MCP harness timing flake (its ticket at closeout).
