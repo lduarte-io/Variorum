@@ -176,8 +176,9 @@ struct LibraryHandOffSheet: View {
 /// Resume press; no dismiss (the hold IS the state; Resume ends it).
 struct RestoreHoldBar: View {
     @Bindable var model: RestoreHoldModel
-    /// Whether this Mac belongs to an account, read by the composition
-    /// root at render (W-4) — the banner's account clause only.
+    /// Whether the OPEN LIBRARY syncs with an account (VX-473 — its record,
+    /// never this Mac's sign-in), read by the composition root at render
+    /// (W-4) — the banner's account clause only.
     var hasAccount = true
 
     var body: some View {

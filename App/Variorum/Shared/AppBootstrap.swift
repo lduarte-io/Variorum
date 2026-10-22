@@ -950,6 +950,8 @@ final class AppBootstrap {
             landed: { [weak self] in
                 await self?.roadCrossings?.refresh()
                 self?.roadStanding?.rereadPassphrase()
+                // VX-473: the hold banner's account clause follows the record (turning sync on, a leave).
+                self?.roadStanding?.rereadAccountBinding()
                 await self?.roadKeyDoors?.refresh()
             },
             receipt: { [weak self] text in self?.roadStanding?.speak?(text) },

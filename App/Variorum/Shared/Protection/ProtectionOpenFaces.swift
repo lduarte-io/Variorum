@@ -269,6 +269,7 @@ final class RoadStandingModel {
     /// (`rereadPassphrase` — an act on the open session may have set one since this open's faces were made).
     func refreshPane() async {
         rereadPassphrase()
+        rereadAccountBinding()
         guard let paneWave else {
             await crossings?.refresh()
             await account?.refresh()
@@ -285,6 +286,14 @@ final class RoadStandingModel {
     /// Safety's Castle warning reads it (VX-329 U1: its only input — today's controller's posture left with today's road).
     /// nil: not known (a test's hand-made faces).
     let posture: ProtectionMode?
+    /// **VX-473 (F-U2-2):** whether the OPEN library's record names an account — the restore-hold banner's account clause
+    /// (*"Resume to catch up with your account"*) reads this, never whether this Mac is signed in: Make this my library
+    /// while signed in lands a library that names no account (the copy carries no sync identity), and Resume then only
+    /// clears the hold. Read when these faces are made, and again when an account act lands on the open session or the
+    /// pane appears (`rereadAccountBinding` — turning sync on and the leaves change the record with no reopen). nil: not
+    /// known (a test's hand-made faces).
+    private(set) var syncsWithAnAccount: Bool?
+    @ObservationIgnored private let librarySyncs: (() -> Bool)?
     /// VX-309 U1a (VX-397): Settings ▸ Data Safety's counts on the new road — THIS Mac's pairs of THIS library per place,
     /// read from the catalogue off the main actor (`ProtectionCopyCounts`). nil (a test's hand-made faces): the pane keeps
     /// today's counts. Settings re-builds its panes at every reopen (its `.opening` arm), so a road never outlives the
@@ -335,8 +344,11 @@ final class RoadStandingModel {
         keyFileStands: @escaping () -> Bool = { false },
         takeBackupPair: @escaping () async -> Bool = { false },
         copyCounts: (() async -> RoadCopyCounts)? = nil,
-        checkPassphrase: @escaping (String) async -> Bool? = { _ in nil }
+        checkPassphrase: @escaping (String) async -> Bool? = { _ in nil },
+        librarySyncs: (() -> Bool)? = nil
     ) {
+        self.librarySyncs = librarySyncs
+        syncsWithAnAccount = librarySyncs?()
         self.copyCounts = copyCounts
         self.checkPassphrase = checkPassphrase
         self.faces = faces
@@ -439,7 +451,8 @@ final class RoadStandingModel {
                     guard let keyFile = session.library.keyFile, keyFile.passphrase != nil else { return nil }
                     return (try? keyFile.open(passphrase: .passphrase(typed))) != nil
                 }.value
-            })
+            },
+            librarySyncs: synced)
         standing.model = model
         return model
     }
@@ -507,6 +520,14 @@ final class RoadStandingModel {
         if offersSetPassphrase { ProtectionOpenRoad.log("road: a passphrase exists now — the set row and rule 3's reminder retire") }
         offersSetPassphrase = false
         reminder.passphraseWasSet()
+    }
+
+    /// **VX-473:** the hold banner's account fact, re-read from the open library's record now (an account act on the OPEN
+    /// session binds or unbinds it with no reopen to make fresh faces — the bootstrap's landing calls this; so does the
+    /// pane's appearance).
+    func rereadAccountBinding() {
+        guard let librarySyncs else { return }
+        syncsWithAnAccount = librarySyncs()
     }
 
     /// The receipts the open owes, spoken once (each `receiptsOwed` call takes them).

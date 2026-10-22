@@ -335,17 +335,17 @@ struct VariorumApp: App {
                     .safeAreaInset(edge: .bottom, spacing: 0) {
                         VStack(spacing: 0) {
                             if let restoreHold {
-                                // Read at RENDER from the observable account
-                                // state (W-4): the hold is wired before
-                                // `start()` restores the sign-in, so a value
-                                // captured there reads "no account" on a
-                                // signed-in Mac. Unknown (no services yet)
-                                // keeps the shipped account wording.
+                                // VX-473 (F-U2-2): the account clause reads
+                                // whether the OPEN LIBRARY syncs with an
+                                // account — its standing faces' record fact,
+                                // observable, re-read when an account act
+                                // lands — never whether this Mac is signed in
+                                // (Make this my library while signed in lands
+                                // a library that names no account). Unknown
+                                // (no faces) keeps the shipped wording.
                                 RestoreHoldBar(
                                     model: restoreHold,
-                                    hasAccount: services.map {
-                                        $0.account.variorum != nil || $0.sync.isConfigured
-                                    } ?? true)
+                                    hasAccount: bootstrap.roadStanding?.syncsWithAnAccount ?? true)
                             }
                             // VX-306 U2: rule 27's banner. (VX-307 U2c dropped the split pair's line; U2b moved rule
                             // 3's reminder into the card above the quick entry.)

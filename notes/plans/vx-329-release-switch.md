@@ -804,8 +804,30 @@ a behavioral revert re-checks it):**
   issues` — exactly the three expectations (the pin's first run also tripped on its own construction — `Crossing.inCastle`
   makes its own library, so it took a second road; fixed in the pin, re-run red as stated). **GREEN after:**
   `RoadCrossing*|RoadJoinFollow*|ProtectionCrossingRoadTests|ProtectionJoinFollowRoadTests|U2WordsTests` `✔ Test run with
-  83 tests in 9 suites passed`. Her eyes: the stage batch's walk capture of Use Castle's confirm (both voices).
-- Piece 5 — VX-473: NOT-STARTED.
+  83 tests in 9 suites passed`. Her eyes: the stage batch's walk capture of Use Castle's confirm (both voices). **REVERT
+  CHECK (on `557558321`, the tree clean first):** the line unwired from both confirms → the three pins RED
+  (`aFreshStandardLibraryOffersUseCastleAlone`, `vx469_…`, `joiningACastleAccountEntersCastleAndSaysSo`); restored by `git
+  checkout --`, `git diff --exit-code` clean, the harness rebuilt. **VX-469 (c): DONE (`557558321`).**
+- Piece 5 — VX-473: FIX DONE (this commit); the revert check follows. **The mechanism** (traced in the code): the Mac
+  root composed `RestoreHoldBar(hasAccount: services.map { $0.account.variorum != nil || $0.sync.isConfigured } ?? true)`
+  — whether THIS MAC is signed in — so Make this my library while signed in (the new library names no account,
+  P-VX378-U2-4) spoke *"Resume to catch up with your account"* where Resume only clears the hold (the VX-314 gate refuses
+  a round there). **THE FIX:** `RoadStandingModel.syncsWithAnAccount: Bool?` — the OPEN library's record names an account
+  (`make` passes the session's `record?.account != nil`, the band's own `synced` read), observable, re-read by
+  `rereadAccountBinding()` from the bootstrap's account-act `landed` hook (turning sync on and the leaves change the record
+  with no reopen) and from `refreshPane()`; nil for hand-made faces (no session). The root reads
+  `bootstrap.roadStanding?.syncsWithAnAccount ?? true` (unknown keeps the shipped wording, as before); the bar's parameter
+  comment made true. The phone hosts no hold banner. **THE PINS** (`HoldBannerAccountTests.swift`, NEW — harness):
+  `HoldBannerAccountFactTests.anUnboundLibraryOnASignedInMacNamesNoAccountUntilItSyncs` (a signed-in Mac, an unbound
+  library → false and the banner's no-account sentence; turning sync on, the landing's re-read → true; Stop syncing here,
+  the pane's re-read → false) and `…handMadeFacesKnowNothing` (nil); `HoldBannerAccountCompositionTests
+  .theRootFeedsTheBannerTheOpenLibrarysAccountNeverTheMacsSignIn` (source: the bar's `hasAccount` reads `roadStanding`'s
+  `syncsWithAnAccount`, never `services`/`account.variorum`/`isConfigured`; the `landed` hook re-reads). **RED on the
+  pre-fix root** (the fact added first, the root unwired): the composition pin `✘ … with 2 issues` (the sign-in read
+  found, the library's fact absent) — the fact pins green, by design (a new fact — red-on-old by construction; their
+  behavioral check is the revert below). **GREEN after:** `HoldBannerAccount*|SetPassphraseRowReread*|ProtectionPaneWave*`
+  `✔ Test run with 8 tests in 4 suites passed`. The root's compile is the stage batch's build (the harness reads
+  `VariorumApp.swift` as text).
 - Piece 6 — VX-468: NOT-STARTED.
 - Piece 7 — VX-463: NOT-STARTED.
 - Piece 8 — the evidence (core debug + release, the harness, build-for-testing both targets): NOT-STARTED.
