@@ -513,9 +513,22 @@ switch-day script, the release notes) — every U3 commit is pathspec-limited, r
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton: DONE (this commit).
-- Piece 0 — the headless harness (the VX-308/309 recipe, pointed at this worktree, in this session's scratchpad):
-  NOT-STARTED.
-- Piece 1 — P2 committed BEFORE the fix, run red on the pre-fix product sources: NOT-STARTED.
+- Piece 0 — the headless harness: DONE (not durable — this session's scratchpad `u3-harness`; the VX-308/309 recipe
+  pointed at this worktree: tools 6.2, macOS 26, the app target's concurrency settings — default `MainActor`,
+  `NonisolatedNonsendingByDefault`, `InferIsolatedConformances`, `MemberImportVisibility` — and the TEST target's WITHOUT
+  the default `MainActor` (the Xcode test targets carry none; the earlier recipe gave both targets the app's, which
+  `KeychainOffMainTests` cannot compile under), the worktree's core by path; its `Variorum` target symlinks every
+  `Shared/Protection/*.swift` but `ProtectionBackupHook.swift` — `WireVaultLeaf.swift` and `FollowingSessionProvider
+  .swift` REAL now (the earlier recipe stubbed the leaf nil) — plus `Shared/AuthSession.swift`, `KeychainCustody.swift`,
+  `LibraryOpenCopy.swift`, `WordsCopyDoor.swift` and one stub file (`DeviceName`, `BackupDestination`, a `ProjectConfig`
+  pointed at a host never dialled); its test target symlinks the VX-309 harness's 57 protection files, the app's
+  `AuthSessionTests` + `KeychainOffMainTests` (the auth suites), this unit's suite, and the `RoadWorldError` stub).
+  **HARNESS BASELINE on the pre-fix tree `4f6e3edef`: `✔ Test run with 368 tests in 59 suites passed`** (0 skipped).
+- Piece 1 — P2 committed BEFORE the fix (`OneRefreshAuthorityTests.swift`, `OneRefreshAuthorityCompositionTests`): DONE
+  (this commit). **RED on the pre-fix product sources** (the harness, `--filter OneRefreshAuthority`): `✘ Test run with 4
+  tests in 1 suite failed … with 7 issues` — the mints found `["WireVaultLeaf.swift": 1, "AppServices.swift": 1]`, neither
+  root hands `auth: bootstrap.auth`, the road and system lines absent, `FollowingSessionProvider` present (its file and the
+  leaf's use). Green is piece 2's.
 - Piece 2 — THE FIX (the bootstrap's authority; `AppServices(auth:)` required; the roots; `RoadInputs`/`ProtectionSystem`/
   `WireVaultLeaf`; `FollowingSessionProvider` + its suite deleted) + P1/P3: NOT-STARTED.
 - Piece 3 — P1's behavioral revert (announced here before it starts; commit-before-revert; restore verified by
