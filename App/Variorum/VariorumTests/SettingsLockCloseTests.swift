@@ -262,9 +262,9 @@ struct SettingsLockCloseTests {
     @Test func aReopenRoadShowsTheOpeningSpinnerMidCeremony() async throws {
         try await withRoadDependencies {
             let hold = OpenHold()
-            let road = PlantedRoad()
-            defer { withExtendedLifetime(road) {} }
-            let (bootstrap, words) = try await readyInStandard(road, hold: hold)
+            let planted = PlantedRoad()
+            defer { withExtendedLifetime(planted) {} }
+            let (bootstrap, words) = try await readyInStandard(planted, hold: hold)
             let (window, hosting) = mountSettings(bootstrap)
             defer {
                 window.orderOut(nil)
