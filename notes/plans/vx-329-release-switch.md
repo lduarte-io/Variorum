@@ -641,6 +641,74 @@ provider suite removed), `AppBootstrapOffMainTests`, `SettingsLockCloseTests` an
 `ProtectionFactsGathererTests` (`ProtectionSystem.init`'s defaulted `session:`); U1's whole `VariorumTests/Protection/`
 folder covers the rest. Phone: `MobileProtectionTests` (the phone root's composition changed — the sanity run).
 
+### R1 RECORD — THE RIDERS (Opus implementer, 2026-10-22; IN PROGRESS)
+
+**Not done in R1, first:** (filled at the close — PENDING.) Standing limits from the brief: no stage, no app launch, no
+`xcodebuild test`, no walk, no dev-store or real-store touch, no network, no subagent; zero `Sources/VariorumCore/Sync/`
+lines; VX-470 is not this unit's (it leads the next run).
+
+**Preflight (complete, not delegated):** CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md` whole;
+this plan §1–§6 (the CUT, the environment traps, §6c — this brief), the U1 RECORD (its F-flags) and the U3 RECORD (the
+one-authority shape); `notes/CastleRules.md` whole (rules 9, 11, 17, 21, 25–27 the heart); `notes/SurfaceContracts.md`
+(The app; Doors — Library protection and portability); `notes/plans/vx-309-copies-and-words.md` §8 (the walk rows that
+bore each member: W-VX309-3 → VX-464, W-VX309-4 → VX-461, W-VX309-5 → VX-462, the clear-text words slips → VX-463, the
+what's-new greeting at row 3 → VX-468, F-U2-2's banner → VX-473) and the findings behind them (F-U1b-1 + F-U1c-4 → VX-469,
+F-U2-2, P-VX309-U2-1); QUESTIONS #237's answer block (her rulings for VX-463, VX-468, VX-469). The code read per member
+is named in its row below.
+
+**THE MEMBERS — the traced mechanism and the planned pin (each pin red on the pre-fix tree, then the fix, then green;
+a behavioral revert re-checks it):**
+- **VX-461 — the export door's empty file.** Traced (piece 1 carries the proof): `StorePlaintextExport.export` ATTACHes
+  the picked path and lets `sqlcipher_export` write it; the attached database's first write opens a ROLLBACK JOURNAL
+  beside it (`<picked>-journal`). The save panel's sandbox grant is the one picked PATH (the system's app-sandbox
+  profile carries no related-file rule for SQLite sidecars — `/System/Library/Sandbox/Profiles/application.sb` read), so
+  the sibling's creation is denied → `SQLITE_CANTOPEN` inside the export → the walk's exact *"SQLite error 1: unable to
+  open database file - while executing `SELECT sqlcipher_export('plain')`"*, the ATTACH having already created the
+  picked file at 0 bytes. PENDING the probe (the real export, the app's own SQLCipher, under a one-literal-path sandbox
+  profile). Pin (core): a folder where no sibling of the picked file can be made (a directory standing at each sidecar
+  name) — the export must write its file and nothing beside it. Fix: the attached copy keeps its journal in memory.
+- **VX-462 — the set-up arm's words moment.** Traced: set-up's `joinKeyFile` re-makes the library's OWN words lock from
+  the typed words beside the master's twelve-words copy (`locks.words` set → `settingWords`), and rule 16's leave changes
+  no lock, so at the re-join `wordsAreTheAccountsAlready`'s first clause (`file.words == nil`) can never hold — the moment
+  speaks. A passphrase join drops the own lock (the `typedSecret` arm), which is why join → leave → re-join is quiet.
+  Fix (the ticket's first candidate): where the master's words copy is written — the copy holds the very words typed (a
+  join verified them against the vault; a set-up made the vault from them) — the own words lock is not kept; the copy is
+  the words' road. Pins: `JoinWordsMomentSetUpArmTests`' two `withKnownIssue` wrappers DROP (they are the red-on-old).
+- **VX-464 — the join refusal's referent.** Traced: the join's and Move's typed secret is checked against the ACCOUNT's
+  vault (`ProtectionAccountRoad.accountSecretRefusal`; the core's `join`), but the refusal is the lobby's
+  `passphraseDoesNotOpen`/`wordsDoNotOpen` ("…this library"). Fix: the two arms say the account on join and Move; the
+  follow (the library's pair IS the account's — rule 7) and set-up (the library's own pair) keep theirs. Pins:
+  `ProtectionJoinFollowRoadTests`' wrong-secret pins flip to the account's sentences (they pinned the mis-aim); a Move
+  pin; guards on the follow and the set-up arm.
+- **VX-473 — the hold banner's `hasAccount`.** Traced: the composition root passes `services.account.variorum != nil ||
+  services.sync.isConfigured` — whether this Mac is SIGNED IN — so after Make this my library while signed in (the new
+  library names no account) the banner speaks the catch-up clause. Fix: the open library's record names an account,
+  read by its standing faces and re-read when an account act lands. Pins: the standing faces' fact (unbound / bound /
+  after a landed join) and the root's composition (never the Mac's sign-in).
+- **VX-469 (c) — the Use Castle confirm's line.** Fix: one sentence on every confirm that enters Castle from this Mac's
+  door (Use Castle; the join into a Castle account — the doors that say the backups warning) saying Previous Libraries'
+  quiet roads on this Mac stand. Words PROVISIONAL. Pins: the confirms' exact sentence lists.
+- **VX-468 — the what's-new card waits.** Traced: the ledger is decided once per process and claimed by the first ready
+  window's appearance; a launch that opens on the missing face or the lobby has no ready window until a copy door lands,
+  so the adopted library's first open is the first window — and the card greets it. Fix: a copy door's landing (Make
+  this my library, the empty slot's, the plain-text bring-in) makes this process's show wait; the version stays
+  unrecorded, so the next ordinary launch shows it. Pins: the ledger's wait (harness) and the landings' composition.
+- **VX-463 — the words fields conceal.** Every typed-words field (the lobby's, both platforms; Make this my library's;
+  the crossings'; the join/Move/follow sheet's; the set-up's; the reset door's) renders through `PeekableSecretField`, the
+  passphrase's one shared concealing field with its reveal eye. A ruled design row: its evidence is the stage batch's
+  walk capture; a structural pin (no words field outside the shared field) rides as insurance.
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece R — this record skeleton: DONE (this commit).
+- Piece 1 — VX-461: NOT-STARTED.
+- Piece 2 — VX-462: NOT-STARTED.
+- Piece 3 — VX-464: NOT-STARTED.
+- Piece 4 — VX-469 (c): NOT-STARTED.
+- Piece 5 — VX-473: NOT-STARTED.
+- Piece 6 — VX-468: NOT-STARTED.
+- Piece 7 — VX-463: NOT-STARTED.
+- Piece 8 — the evidence (core debug + release, the harness, build-for-testing both targets): NOT-STARTED.
+
 ## 6. THE KICKOFF RECORD (2026-10-22, the orchestrator — session `vx-329`, Fable, overnight mandate)
 
 **Her mandate (the /architect-phase argument, faithful):** the only session tonight — no coordinator, hold
