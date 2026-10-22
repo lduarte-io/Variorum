@@ -438,9 +438,17 @@ suites), `MobileStructuralTests` (`MobileCopyRegisterSweepTests`), `MobileTravel
 (`MobilePocketGuidePrivacyTests`), `MobileKDFLatencyTests`. Opt-in, unchanged in kind: `ICloudAppleKeysLeafTests`
 (`VARIORUM_APPLE_KEY_ROUND_TRIP=1`).
 
-### U3 RECORD — VX-423, ONE REFRESH AUTHORITY (Opus implementer, 2026-10-22; IN PROGRESS)
+### U3 RECORD — VX-423, ONE REFRESH AUTHORITY (Opus implementer, 2026-10-22; DONE — the Mac and phone suite RUNS are the orchestrator's stage batch, the live proof is U2's rehearsal)
 
-**Not done in U3, first:** PENDING — filled at the close.
+**Not done in U3, first:** NO Mac or phone suite was RUN through `xcodebuild test` (no stage — the brief's limit): this
+unit's pins and the app's auth + protection suites ran in the HEADLESS HARNESS (below); the suites that need
+`AppServices`, the signed host or the bootstrap's hosted road (`Phase9cAuthWiringTests`, `TierAndOnboardingTests`,
+`SessionTokenBindingTests`, the bootstrap-constructing road suites) are COMPILED (`build-for-testing` green, both
+targets) and UNRUN — the stage-batch list below; every claim about them is PENDING until it runs. NO live network: the
+fix has not met a real GoTrue — that is U2's throwaway rehearsal (the hand-forward below says what it must outlive to
+exercise the race). NO Release-configuration build of the Mac app (U1's stands; no line here sits under `#if`). No walk,
+no Debug launch, no dev-store touch, no subagent, zero `Sources/` lines (core untouched: `git diff 4f6e3edef..HEAD --
+Sources Tests Package.swift` is empty — the fence never came near `Sync/`).
 
 **Preflight (complete, not delegated):** CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md` whole;
 this plan §1–§6 (the CUT, the environment traps, §6b — this brief) and the U1 RECORD (the shape inherited); the VX-308
@@ -496,6 +504,15 @@ switch-day script, the release notes) — every U3 commit is pathspec-limited, r
 - **R-U3-4 — PER PROCESS, NOT PER MACHINE.** A second process over the same scope (two instances of one build) is
   outside the unit (the brief: "one refresh authority per process"); the readers that read the item directly
   (`OwnerIdentity`, `sessionFact`) read, never refresh, and are untouched (F-U1-1's owner stamp is U1's flag).
+- **R-U3-5 — THE AUTHORITY HOLDS THE SIGN-IN ACROSS A LOCK; THE LOCK STILL FORGETS THE KEY.** Before, the services'
+  session was released with the services at a relock, so the access and refresh tokens left process memory until the
+  next unlock re-read the item; now the bootstrap's authority keeps them through the locked window. Considered and
+  kept: what a Castle lock forgets is the LIBRARY's key and the account's sync keys (`ProtectionRoadLock
+  .dropSessionMemory` — untouched); no rule (CastleRules read for "lock", "session", "memory", "sign-in") names the
+  account's sign-in among them, and the item itself stays readable by the process without a prompt
+  (`WhenUnlockedThisDeviceOnly`, no ACL) through any lock — so memory retention crosses no boundary the item did not.
+  No lobby door signs in or out (the Account surfaces need the services — `rg`'d), so nothing reaches the authority
+  while locked but a vault read the lobby's road makes.
 
 **THE PINS (planned; each named with its red-on-old in LIVE STATUS):**
 - P1 — THE TWO-REFRESHERS RACE (behavioral): a fake GoTrue that rotates every refresh token and, on a reused one,
@@ -570,8 +587,56 @@ switch-day script, the release notes) — every U3 commit is pathspec-limited, r
   leaf-read checks were `(try? r.get()) == .some(nil)`, which `try?`'s flattening makes TRUE for a refusal too, so the
   leaf's own refusal did not register. Fixed in the pin (this commit: `answeredNoVault` matches `.success(.none)` by
   case); green again on the fixed tree (8/8). Revert run 2 follows on this commit.
-- Piece 4 — evidence: the harness (P1–P3 + the app's protection/auth suites it carries), core auth/account + protection
-  sets debug AND release, `build-for-testing` both targets: NOT-STARTED.
+- Piece 4 — evidence: DONE (the tree `9ccad2e42`, no source change after; every run foreground-polled, in sequence):
+  - THE HARNESS (debug — the app test targets' only configuration): **`✔ Test run with 375 tests in 60 suites passed`**,
+    0 skipped (baseline 368/59 on the pre-fix `4f6e3edef`; − `FollowingSessionProviderTests`' 1, + this unit's 8: the
+    composition 4, the race 2, the witness 1, the follow guard 1). The app's auth suites inside it:
+    `AuthSessionTests` and `AuthSessionLazyLoadTests` (13e B-1's lazy load — the bootstrap's construction reads nothing)
+    green. Under `-c release` the harness does not build — the app's protection suites name DEBUG-only walk machinery
+    (`ProtectionWalkSwitch`), exactly as the Xcode test targets build in Debug only; the release floor is the core's.
+  - THE CORE (untouched — confirmation of L1's floor): the protection set (every test type under
+    `Tests/VariorumCoreTests/Protection`) + the auth/account set (`AccountBindingGateTests`, `AccountLifecycleTests`,
+    `AuthRLSDDLTests`, `KeyVaultClientTests`, `SupabaseTransportTests`, `SupabaseTransportSessionTests`): debug **`✔ Test
+    run with 497 tests in 97 suites passed … with 2 known issues`**; release (`swift test -c release`, the same filter)
+    **`✔ Test run with 473 tests in 93 suites passed … with 2 known issues`**; 0 skipped both; the 2 known issues are
+    VX-462's standing `withKnownIssue` wrappers (`JoinWordsMomentSetUpArmTests` — R1's to drop), not this unit's.
+  - `xcodebuild -scheme Variorum -destination 'platform=macOS' -derivedDataPath App/Variorum/DerivedData/vx329-u3
+    build-for-testing`: **`** TEST BUILD SUCCEEDED **`**; `-scheme VariorumMobile -destination 'generic/platform=iOS
+    Simulator' -derivedDataPath …/vx329-u3-ios build-for-testing`: **`** TEST BUILD SUCCEEDED **`**; no warning in a file
+    this unit touched (both logs grepped).
+
+**PROVISIONALs:** none — no product behavior was decided: sign-in, sign-out, the account doors and the vault's refusals
+read exactly as before; the composition changed beneath them.
+
+**FINDINGS AND HAND-FORWARDS (routed, not fixed here):**
+- **F-U3-1 → U2 (the orchestrator): the live proof must OUTLIVE AN ACCESS TOKEN.** The race needs a refresh: GoTrue's
+  access tokens live an hour (`expires_in` 3600 on the project's default), and a consumer refreshes only within 60 s of
+  expiry or on a 401. A throwaway rehearsal shorter than an hour never exercises it; to see the fix live, keep one
+  signed-in library open past one expiry with both consumers active (a sync round AND a Settings ▸ Protection pane read
+  — the vault leaf) and watch for `refresh_token_already_used` (absent) in the sync row and the protection log.
+- **F-U3-2 (the orchestrator — a ticket or not): two PROCESSES over one scope still race.** One authority per process is
+  the unit; a Debug build opened on the real store beside the installed Release app (the real-store opt-in) would be two
+  refreshers of her real token again. Today's posture forbids that pairing by rule (CLAUDE.md), not by mechanism.
+- **F-U3-3 (pre-existing, fail-closed — the orchestrator's to ticket or not):** `AuthTokensStore.keychain`'s `save`
+  drops `KeychainAuthStorage.save`'s result, so a refused Keychain write leaves the authority's in-memory tokens newer
+  than the item the direct readers read (`RoadInputs.live`'s `sessionFact`, `OwnerIdentity`) — the road would then
+  name a different signed-in user than the leaf rides, and the vault client refuses `notSignedIn` (the mismatch check).
+  Visible, never destructive; unchanged by this unit.
+- **F-U3-4 (machinery, for the next harness): the recipe's TEST target must not take the app's default `MainActor`
+  isolation** — the Xcode test targets carry none, and `KeychainOffMainTests` (rightly) does not compile under it.
+- **F-U3-5 (found and fixed in my own pin, recorded as the lesson):** `#expect((try? r.get()) == .some(nil))` is
+  vacuous for a refusal — `try?` flattens, the nil promotes to `.some(nil)` — so revert run 1 showed the burn but not the
+  leaf's own refusal; matched by case now. A sweep of the test tree for the same shape found none.
+
+**MAC-SUITE LIST (the orchestrator's stage batch — compiled, unrun here):** `OneRefreshAuthorityCompositionTests`,
+`OneRefreshAuthorityRaceTests` (harness-green), `AuthSessionTests`, `AuthSessionLazyLoadTests` (harness-green),
+`Phase9cAuthWiringTests` and `TierAndOnboardingTests` (`AppServices`' `auth:` now required — every test site already
+passed one), `SessionTokenBindingTests` (signed host — subject untouched, the sanity run), `RoadAccountFacesTests` (the
+provider suite removed), `AppBootstrapOffMainTests`, `SettingsLockCloseTests` and the bootstrap-constructing road suites
+(`RoadJoinFollowSurfaceTests`, `RoadLockRouteTests`, `RoadKeyDoorSurfaceTests`, `SetPassphraseRowRereadRouteTests`,
+`RoadAccountSurfaceTests` — the bootstrap's inits gained the authority), `ProtectionSystemCompositionTests` and
+`ProtectionFactsGathererTests` (`ProtectionSystem.init`'s defaulted `session:`); U1's whole `VariorumTests/Protection/`
+folder covers the rest. Phone: `MobileProtectionTests` (the phone root's composition changed — the sanity run).
 
 ## 6. THE KICKOFF RECORD (2026-10-22, the orchestrator — session `vx-329`, Fable, overnight mandate)
 
