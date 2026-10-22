@@ -143,6 +143,11 @@ final class AppBootstrap {
     /// VX-306 U3 — receipts the NEXT open owes the status seam (Make this my library's §7c (9)): handed to the session
     /// the reopen makes, then spoken by the ready composition like every owed receipt.
     @ObservationIgnored private var receiptsForNextRoadOpen: [String] = []
+    /// **VX-468 (her "wait", QUESTIONS #237):** a copy door landed a library in this process — Make this my library, the
+    /// empty slot's landing, a plain-text copy brought in. Set before the landing's open, so the ready window that open
+    /// makes reads it: the Mac's What's New waits for the next ordinary launch rather than greeting the adopted library's
+    /// first open (`WhatsNewLedger.claimAutoShow(afterAdoption:)`). Never reset — one process, one automatic show.
+    @ObservationIgnored private(set) var adoptedALibraryThisProcess = false
     /// VX-307 U2a — the crossings (nil before the first open): OWNED HERE because a crossing reopens the library — the
     /// `.ready` tree, the Settings pane and its `@State` go down and come back, and the confirm in flight, its refusal
     /// and rule 11's notice must survive that. Made at the first ready.
@@ -706,6 +711,7 @@ final class AppBootstrap {
             }
             return .refused(result.refusal ?? .failed)
         }
+        adoptedALibraryThisProcess = true
         // VX-309 U2: the receipt says where the previous library went when one was open (the lead said it would).
         receiptsForNextRoadOpen.append(ProtectionWords.bringInReceipt(
             result.landing, stoppedEarly: result.stoppedEarly, steppedAside: open != nil))
@@ -771,6 +777,7 @@ final class AppBootstrap {
                 ctx, row: row, copySecrets: copySecrets, wordsLedger: wordsLedger)
         }.value
         guard result.outcome == .made else { return result.outcome }
+        adoptedALibraryThisProcess = true
         receiptsForNextRoadOpen.append(ProtectionWords.makeMineEmptySlotReceipt)
         beginOpening(unlockedKey: result.key)
         await awaitOpen()
@@ -830,7 +837,10 @@ final class AppBootstrap {
                 wordsLedger: wordsLedger)
         }.value
         session.endAct()
-        if result.outcome == .made { receiptsForNextRoadOpen.append(ProtectionWords.makeMineReceipt) }
+        if result.outcome == .made {
+            adoptedALibraryThisProcess = true
+            receiptsForNextRoadOpen.append(ProtectionWords.makeMineReceipt)
+        }
         beginOpening(unlockedKey: result.reopenKey)
         await awaitOpen()
         return result.outcome

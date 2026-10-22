@@ -24,57 +24,13 @@
 //  read as fresh and stay quiet — the calm direction (her daily drive's first
 //  U3 refresh included). From then on each version change shows once.
 //
+//  VX-329 R1 (VX-468): `WhatsNewLedger` moved byte-for-byte to
+//  `WhatsNewLedger.swift` beside this file (Foundation only, so a headless
+//  harness compiles it); the sheet stays here.
+//
 
 import Foundation
 import SwiftUI
-
-@MainActor
-final class WhatsNewLedger {
-    /// The local preference: the marketing version last settled.
-    nonisolated static let recordKey = "variorum.whatsNew.lastVersion"
-
-    let currentVersion: String
-    private let defaults: UserDefaults
-    /// Decided ONCE at launch: true only when a RECORDED version differs.
-    private(set) var isDue: Bool
-    /// One automatic presentation per process, whichever window asks first.
-    private var claimed = false
-
-    init(currentVersion: String, defaults: UserDefaults) {
-        self.currentVersion = currentVersion
-        self.defaults = defaults
-        if let recorded = defaults.string(forKey: Self.recordKey) {
-            isDue = recorded != currentVersion
-        } else {
-            // FRESH: record silently; nothing greets a first open.
-            defaults.set(currentVersion, forKey: Self.recordKey)
-            isDue = false
-        }
-    }
-
-    /// The app's own ledger (the app delegate holds the one instance).
-    static func forThisApp() -> WhatsNewLedger {
-        WhatsNewLedger(currentVersion: thisAppsVersion, defaults: .standard)
-    }
-
-    /// The running app's marketing version.
-    nonisolated static var thisAppsVersion: String {
-        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
-    }
-
-    /// The automatic show's ticket: true exactly once, and only when due.
-    func claimAutoShow() -> Bool {
-        guard isDue, !claimed else { return false }
-        claimed = true
-        return true
-    }
-
-    /// The sheet appeared: this version is settled; the next launch is quiet.
-    func markShown() {
-        defaults.set(currentVersion, forKey: Self.recordKey)
-        isDue = false
-    }
-}
 
 /// The sheet: the current version's notes, in the voice (P-8 — the tokens
 /// from the window's `ThemeStore`, `VoicedButtonStyle` for the door, every

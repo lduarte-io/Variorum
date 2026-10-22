@@ -826,9 +826,34 @@ a behavioral revert re-checks it):**
   pre-fix root** (the fact added first, the root unwired): the composition pin `✘ … with 2 issues` (the sign-in read
   found, the library's fact absent) — the fact pins green, by design (a new fact — red-on-old by construction; their
   behavioral check is the revert below). **GREEN after:** `HoldBannerAccount*|SetPassphraseRowReread*|ProtectionPaneWave*`
-  `✔ Test run with 8 tests in 4 suites passed`. The root's compile is the stage batch's build (the harness reads
-  `VariorumApp.swift` as text).
-- Piece 6 — VX-468: NOT-STARTED.
+  `✔ Test run with 8 tests in 4 suites passed`. The root's compile: `build-for-testing` green at piece 6 (below). **REVERT
+  CHECK (on `cf9efc580`, the tree clean first):** the root's old expression restored AND `rereadAccountBinding` made a
+  no-op → the composition pin RED (2 issues — the sign-in read found, the library's fact absent) and the fact pin RED
+  (`standing.syncsWithAnAccount == true` after the landing's re-read); restored by `git checkout --`, `git diff
+  --exit-code` clean, the harness rebuilt. **VX-473: DONE (`cf9efc580`).**
+- Piece 6 — VX-468: FIX DONE (this commit); the revert check follows. **The mechanism** (traced in the code): the ledger
+  (`WhatsNewLedger`) is decided once per process and claimed in the FIRST ready window's `onAppear` (`RootView`); a launch
+  that opens on the missing face or rule 27's lobby has no ready window until a copy door lands, so the adopted library's
+  first open IS the first window — the walk's row 3 (T-5 from the missing face) exactly. **THE FIX:** `AppBootstrap
+  .adoptedALibraryThisProcess` (set at the three copy-door landings on a made landing — `makeThisMyLibrary`,
+  `makeThisMyLibraryInTheEmptySlot`, `bringInPlaintextExport` — before the landing's open, so the ready window that open
+  makes reads it; never reset); the Mac root hands it to `RootView(whatsNewWaits:)`; the window's one claim is
+  `claimAutoShow(afterAdoption: whatsNewWaits)` — adopted, the process's ticket is spent and nothing is recorded (no sheet
+  appears, so `markShown` never runs) → the next ordinary launch shows it. Help ▸ What's New untouched. A creation (Start a
+  New Library) is not a copy door and is unchanged (PROVISIONAL P-VX329-R1-3 — her ruling named a restored/adopted
+  library). `WhatsNewLedger` RELOCATED byte-for-byte to `Features/WhatsNew/WhatsNewLedger.swift` (diffed identical) so the
+  harness compiles it; `WhatsNew.swift` keeps the sheet and says where the ledger went. **THE PINS**
+  (`App/Variorum/VariorumTests/WhatsNewWaitsAfterAdoptionTests.swift`, NEW — harness): `WhatsNewWaitsAfterAdoptionTests
+  .aDueShowWaitsForTheNextLaunchWhenThisProcessAdoptedALibrary` (due 0.9.8 → 0.10: no card at the adopted open nor a later
+  window, the record still 0.9.8, the next launch shows it once) and `…anOrdinaryLaunchStillShowsOnceAndAFreshInstallStays
+  Silent` (the guard); `WhatsNewWaitsCompositionTests.everyCopyDoorLandingMarksTheProcessAndTheReadyWindowReadsIt`
+  (source: each landing's body marks it, the root hands it, the claim reads it). **RED on the pre-fix decision** (the seam
+  added first carrying the old claim — the adoption ignored, exactly what the claim did before): the ledger pin `✘ … 1
+  issue` (`claimAutoShow(afterAdoption: true) == false`), the composition `✘ … 5 issues`; the guard green. **GREEN
+  after:** `✔ Test run with 3 tests in 2 suites passed`; and the Mac `build-for-testing` (`App/Variorum/DerivedData
+  /vx329-r1`, APFS-cloned from U3's) **`** TEST BUILD SUCCEEDED **`** with this piece and piece 5's root edits in, no
+  warning in a touched file (the clone's "stale file … outside the allowed root paths" notices only — Xcode declined to
+  touch U3's directory).
 - Piece 7 — VX-463: NOT-STARTED.
 - Piece 8 — the evidence (core debug + release, the harness, build-for-testing both targets): NOT-STARTED.
 

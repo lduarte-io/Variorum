@@ -161,6 +161,8 @@ struct VariorumApp: App {
                     session: session, services: services,
                     windows: windows,
                     hotKeys: hotKeys, whatsNew: appDelegate.whatsNew,
+                    // VX-468: a copy door landed a library in this process — What's New waits for the next launch.
+                    whatsNewWaits: bootstrap.adoptedALibraryThisProcess,
                     calmAsks: appDelegate.calmAsks,
                     // 13s-b U1a: the first-open tour offer's one model.
                     tourOffer: appDelegate.tourOffer,

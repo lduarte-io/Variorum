@@ -60,6 +60,9 @@ struct RootView: View {
     /// 13r U3-A: What's New's ledger (the app delegate's one instance; nil
     /// in harness mounts, which then never auto-show) and this window's sheet.
     let whatsNew: WhatsNewLedger?
+    /// VX-468: this process adopted a library through a copy door before this window — the automatic show waits for the
+    /// next ordinary launch (`WhatsNewLedger.claimAutoShow(afterAdoption:)`).
+    let whatsNewWaits: Bool
     @State private var whatsNewShown = false
     /// 13r U3-A: the calm-asks scheduler (the app delegate's one instance);
     /// this window registers the backup-folder ask once its services exist.
@@ -175,6 +178,7 @@ struct RootView: View {
         // system for her chord (it would fight the running app for it).
         hotKeys: GlobalHotKeyCenter = GlobalHotKeyCenter(system: .inert),
         whatsNew: WhatsNewLedger? = nil,
+        whatsNewWaits: Bool = false,
         calmAsks: CalmAskScheduler? = nil,
         tourOffer: TourOfferModel? = nil,
         mcp: MCPDoor? = nil,
@@ -185,6 +189,7 @@ struct RootView: View {
         self.windows = windows
         self.hotKeys = hotKeys
         self.whatsNew = whatsNew
+        self.whatsNewWaits = whatsNewWaits
         self.calmAsks = calmAsks
         self.tourOffer = tourOffer
         self.mcp = mcp
@@ -560,8 +565,8 @@ struct RootView: View {
             // deliberately — she can close every window and the pad still
             // answers her chord (the menu-bar extra's own promise).
             hotKeys.install { _ in summonQuickNote() }
-            // 13r U3-A: the version-change show, claimed once per process.
-            if whatsNew?.claimAutoShow() == true { whatsNewShown = true }
+            // 13r U3-A: the version-change show, claimed once per process (VX-468: it waits after an adoption).
+            if whatsNew?.claimAutoShow(afterAdoption: whatsNewWaits) == true { whatsNewShown = true }
         }
         .onDisappear {
             windows.unregister(windowID)
