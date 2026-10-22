@@ -1728,3 +1728,39 @@ harness re-covered it (386/65 + the byte-identity probe), and the CLOSING full M
 re-cover of record. Findings carried: F-FL-2 (the catch arms'
 past-the-swap read when the library file vanishes mid-act — ticket at closeout), F-FL-3 (the lifetime trap's
 class note), and the recurring MCP harness timing flake (its ticket at closeout).
+
+## 7. THE REHEARSAL PLAN (the orchestrator's — §2's proof on the throwaway, ONE stage window after the ladder closes)
+
+**The question it answers (§2):** a fresh new-road library joining an account whose vault was BORN today's-road-shaped
+and CROSSED via artifact 17's backfill reads every row sealed under the pre-switch corpus key. The §5R rehearsal
+proved the backfill's field arms; this walk proves the CLIENT end to end on real Postgres and the real wire.
+
+**The fixture tool** (scratchpad `vx329-plant`, built against this worktree's core — disposable, never committed):
+`mint <passphrase>` fabricates a pre-VX307-shaped vault for the throwaway's user B with REAL crypto from the core's
+own functions (KeyVaultFormat.create, Argon2id v1 descriptor, RecoveryPhrase, KeyProof) — outputs the plant SQL +
+a local secrets file; `push` builds a tiny in-memory library (Operations) and pushes it as B through the REAL
+SupabaseTransport + SyncEngine with the fabricated keys injected, sealed by the production serializer.
+
+**Rows (order; the ref guard in every SQL apply; secrets never echoed — the throwaway's are disposable by design):**
+0. Stage claim `vx-329-rehearsal`; 0 instances; the DEV SLOT's files aside cmp-verified (no extension filter);
+   defaults pre-exported. The Debug app builds at `App/Variorum/DerivedData/vx329` (never the standard path — the
+   vx-309 stale-build lesson).
+1. SQL: B's data rows wiped (the data tables; a rehearsal-only dumb-road act, recorded); the freshly-minted
+   pre-shape vault row planted (mode NULL, apple-held wrap present — the Standard arm) + kp2 into Vault; verify.
+2. The BACKFILL: artifact 17's backfill UPDATE run VERBATIM as its own statement (it touches only mode-NULL rows —
+   exactly the planted one; 17's DDL already ran at §5R so the artifact itself is not re-run). Verify mode =
+   'standard', rotation columns null.
+3. The PUSH: the plant's push arm as B — the rehearsal notes sealed under the fabricated corpus key. Verify by SQL:
+   B's rows present, payload columns `e1:`-ciphertext, the outbox drained (the tool prints it).
+4. THE WALK (the Debug app + the walk switch env → the throwaway): a fresh library on the empty dev slot (the calm
+   first open) → sign in as B → Turn on sync → the JOIN (the vault exists; the account's passphrase typed) → the
+   words moment speaks (the account's words replace the fresh library's) → the pull → **THE PROOF: the planted
+   notes read back verbatim in the Library.** Quit at 0 instances.
+5. The dev store RESTORED whole (cmp per file), relaunch WITHOUT the walk switch → the quiet open; the hold/banner
+   posture as it was. **Expected and recorded, not a finding: the walk's fresh library deletes the dev library's
+   memory item (rule 21's one-library memory — the VX-465 trace), so the dev library's next open mints a fresh
+   device-ID era; its earlier pairs keep listing and stop counting. By design; her bundle carries the design
+   question already.**
+6. Defaults end-diff reconciled; the walk library's slot files and keychain items recorded or cleared; the
+   throwaway keeps its planted state until her deletion (her 2026-10-19 word).
+7. §8 THE REHEARSAL RECORD lands; the switch-day script's REHEARSAL-PENDING markers flip in the same commit.
