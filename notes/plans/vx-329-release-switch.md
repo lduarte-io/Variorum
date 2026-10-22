@@ -24,7 +24,9 @@ her morning).**
 > (3) riders IN: VX-461 (the export door — rule 26 and §2 lean on it) · VX-465 (the device-ID drift trace) ·
 > VX-462 · VX-464 · VX-473 · VX-463 (ruled: conceal the words fields, with a reveal eye) · VX-469's ruled (c)
 > confirm line (wording) · VX-468 if it fits (ruled: the what's-new card waits after a restore). VX-213's `pg_temp`
-> is HELD — her go was not given at the sitting; ask once at the first checkpoint. **VX-470 is RULED but unsized**
+> has her GO (2026-10-22 follow-up): rehearse it on the throwaway mirror with the rest; its PRODUCTION application
+> rides the marker-14 deploy set in the release window — the deploy itself still runs only at her explicit go.
+> **VX-470 is RULED but unsized**
 > ((c) plus an explicit Standard choice, carried to T-5 — #237's shape): take it only if it fits a batch cleanly,
 > else it leads the next run.
 > (4) the release is **0.10** (her word: no 1.0 until public launch, and 0.9.9 "will just get more confusing");
