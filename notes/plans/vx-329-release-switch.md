@@ -700,7 +700,35 @@ a behavioral revert re-checks it):**
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton: DONE (this commit).
-- Piece 1 — VX-461: NOT-STARTED.
+- Piece 1 — VX-461: FIX DONE (this commit); the behavioral revert follows (its own line below). **THE TRACE, PROVEN
+  (headless, no store, no network — a transient probe test, never committed, removed before this commit):** the real
+  `StorePlaintextExport.export` over a scratch encrypted store (the app's own SQLCipher via the core), run through
+  SwiftPM's testing helper under `sandbox-exec` with a profile that denies writes in the destination folder except ONE
+  literal path — the save panel's grant shape. (A) unsandboxed: OK, 552,960 bytes. (B) one-path grant: **`SQLite error 1:
+  unable to open database file - while executing `SELECT sqlcipher_export('plain')``, the picked file left at 0 bytes —
+  the walk's line byte-for-byte.** (C) the same grant plus ONLY `<picked>-journal`: OK, 552,960 bytes — the journal
+  sibling is the one missing grant. (D) the system `/usr/bin/sqlite3` (3.54.0) under (B)'s profile: `ATTACH` then `CREATE
+  TABLE plain.t` → "unable to open database file"; with `PRAGMA plain.journal_mode=MEMORY` first → written (8,192
+  bytes). So the earlier one-literal-path probe's pass (§8, W-VX309-4's trace) was not this grant's shape; under it both
+  SQLite builds fail at the first write. Why the walk saw it: the ATTACH opens (creates) the picked path — allowed —
+  and the copy's first write opens a rollback journal BESIDE it, which the grant does not cover; SQLCipher turns the
+  inner `SQLITE_CANTOPEN` into its error 1. The system profile `application.sb` carries no related-file rule for SQLite's
+  sidecars (read: no `journal`/`sqlite`/`related` rule). **THE PIN** (core, `StorePlaintextExportTests
+  .theCopyLandsInThePickedFileAloneWhereNoSiblingCanBeMade`): the grant's shape without a sandbox — the picked file
+  standing empty and writable (what the ATTACH makes there) in a folder at mode 0555 where nothing new can be created;
+  the copy must land whole in it with nothing beside it. **RED on the pre-fix code:** `SQLite error 1: attempt to write a
+  readonly database - while executing `SELECT sqlcipher_export('plain')`` (the same failing open of `<picked>-journal`;
+  the folder's `EACCES` reads as SQLite's `SQLITE_READONLY_DIRECTORY` where the sandbox's `EPERM` reads as
+  `SQLITE_CANTOPEN`). A first stand-in (a DIRECTORY at each sidecar name) was discarded unrun-as-evidence: it trips the
+  hot-journal check at the ATTACH itself (`disk I/O error`), which the real grant never does. **THE FIX**
+  (`Sources/VariorumCore/Persistence/StorePlaintextExport.swift`): `PRAGMA plain.journal_mode = MEMORY` right after the
+  ATTACH — the fresh copy's rollback journal never touches the disk (nothing reads the copy until it is whole); the
+  writing half split out as `write(from:into:)` (internal — the pin's door; `export` keeps its never-overwrite guard
+  and the folder creation, byte-for-byte). **GREEN after:** the pin + the export's suites (`StorePlaintextExportTests`,
+  `PlaintextExportImportTests`, `MCPGrantSchemaTests`, `LibraryClassifierTests`, `LocalMachineryRecreationTests`,
+  `ProtectionRecordSchemaTests`): `✔ Test run with 49 tests in 6 suites passed`; and the probe's (B) on the FIXED tree:
+  **OK, 552,960 bytes, 36 tables, nothing beside it.** The backups-folder refusal arm (`PlaintextExportModel.refusal`) is
+  untouched. The sidecar sweep after the copy is kept (now a no-op by construction — noted for the ladder).
 - Piece 2 — VX-462: NOT-STARTED.
 - Piece 3 — VX-464: NOT-STARTED.
 - Piece 4 — VX-469 (c): NOT-STARTED.
