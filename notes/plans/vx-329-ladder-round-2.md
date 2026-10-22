@@ -236,7 +236,10 @@ literal, `notes/DataSafetyRunbook.md` and every product file byte-unchanged); no
 
 **LIVE STATUS**
 - The five flips in `App/Variorum/VariorumTests/DataSafetyTests.swift` — DONE (this commit).
-- Compile evidence (`swift build` headless + `xcodebuild build-for-testing` from `App/Variorum/`) — **PENDING** (flips
+- Compile evidence — DONE (flipped by the orchestrator; the leg stopped honestly when 514f8e60c landed under it):
+  `swift build` (core) Build complete; `xcodebuild build-for-testing` from App/Variorum/ exit 0, TEST BUILD
+  SUCCEEDED, DataSafetyTests.swift in the compile log; the byte proof re-run green at both c47c61b84 and
+  514f8e60c. The pins' GREEN run is the closing Mac batch's.
   in the next commit).
 
 **The red-on-old is the CURRENT red** — no new pin owed (the finding's own disposition). Its mechanism, re-proven by
