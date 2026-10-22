@@ -52,21 +52,8 @@ nonisolated enum DataSafetyCopy {
     /// copy that could drift).
     static let secondFolderSection = "A second folder"
 
-    /// VX-307 U2c (VX-379's row — the VX-306 walk's F-U3-1): the "Restoring a
-    /// copy" section's lead, in rule 17's language ("The app's Restore from
-    /// Backup is this door"; the previous library "steps aside whole into
-    /// Previous Libraries") and TRUE OF TODAY'S ROAD, where it renders: the
-    /// 13x door adopts a copy with the current library stepping aside whole
-    /// into Previous Libraries, and File ▸ Open Library… does the same for a
-    /// copy kept anywhere else; the hand recipe stays the runbook's (it is
-    /// what you need when the app won't open). It replaces "Restoring is a
-    /// Finder operation, not a button", false since that door. PROVISIONAL
-    /// P-VX307-U2c-7 — hers at the bundle.
-    static let restoringByTheDoor =
-        "To restore a copy, use Restore from Backup above, or File \u{25B8} Open Library\u{2026} for a copy kept "
-        + "anywhere else: the copy becomes your library, and your current library steps aside whole into Previous "
-        + "Libraries. If Variorum won't open, the step-by-step for restoring by hand is in "
-        + "\u{201C}\(StoreBackup.runbookFilename)\u{201D}, which sits in every backup folder above."
+    // (VX-329 U1: the "Restoring a copy" lead — `restoringByTheDoor`, VX-307 U2c's today's-road row — rendered only on
+    // today's road and was deleted with it.)
 
     // MARK: - The three sentences the app itself must say
 

@@ -261,7 +261,4 @@ nonisolated enum ProtectionCopy {
         guard let minutes else { return "never" }
         return "\(minutes) minutes"
     }
-
-    static let wordsCopyAll = "Copy All"
-
 }
