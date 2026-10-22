@@ -92,16 +92,24 @@ public enum OwnCopies {
         return copy.folders.prefix(3).map { $0.lowercased() }
     }
 
-    /// **The far folder's own due-ness (P-VX306-U1a-4's deferral, VX-309 U1a piece 1)**: due when the catalog holds NO
-    /// pair of this library by this Mac in the far folder whose stamp is trusted and younger than `interval` — the
-    /// question today's flat far leg asks of the folder's newest file (`StoreBackup.performSecondLeg`), asked of this
-    /// Mac's own pairs of this library instead (VX-397: another Mac's fresh copy never satisfies it).
-    public static func farPairIsDue(
-        _ catalog: Catalog, libraryID: String, thisMac deviceID: String, now: Date, interval: TimeInterval
+    /// **A place's own due-ness (P-VX306-U1a-4's deferral, VX-309 U1a piece 1; VX-329 U1 the container's too)**: due
+    /// when the catalog holds NO pair of this library by this Mac in `place` whose stamp is trusted and younger than
+    /// `interval` — the question the backup clock asks of this Mac's own pairs of this library (VX-397: another Mac's
+    /// fresh copy never satisfies it; a future stamp is not evidence of freshness).
+    public static func pairIsDue(
+        _ catalog: Catalog, libraryID: String, thisMac deviceID: String, in place: CatalogPlace, now: Date,
+        interval: TimeInterval
     ) -> Bool {
-        !of(catalog, libraryID: libraryID, thisMac: deviceID, in: .farFolder).contains { copy in
+        !of(catalog, libraryID: libraryID, thisMac: deviceID, in: place).contains { copy in
             guard let stamp = copy.stamp, stampIsTrusted(stamp, now: now) else { return false }
             return now.timeIntervalSince(stamp) < interval
         }
+    }
+
+    /// The far folder's due-ness — `pairIsDue` in the picked folder.
+    public static func farPairIsDue(
+        _ catalog: Catalog, libraryID: String, thisMac deviceID: String, now: Date, interval: TimeInterval
+    ) -> Bool {
+        pairIsDue(catalog, libraryID: libraryID, thisMac: deviceID, in: .farFolder, now: now, interval: interval)
     }
 }
