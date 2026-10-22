@@ -1419,8 +1419,105 @@ swap and T-5's empty-slot program), `Executor/Acts/DeviceActs.swift` (the plan-l
   offered only on the fact with its act, the act's sentence said, nothing run off the fact; the view's composition —
   her lead/body/doors in the branch, no lobby title, road or rule 27 there, the confirm before the act). Red-on-old for
   the Mac pins is by construction (they name `preDesignStore`/`offersStartFresh`, absent on old) — their RUN is PENDING.
-- Piece 3 — Start fresh's ACT (the crash-safe set-aside, then the calm creation): NOT-STARTED.
-- Piece 4 — closing evidence (headless both configurations, `build-for-testing` both targets): NOT-STARTED.
+- Piece 3 — Start fresh's ACT (the crash-safe set-aside, then the calm creation): **STOPPED AT THE FORK — PROPOSED, NOT
+  BUILT** (the brief: "a genuine fork (e.g. the set-aside machinery resists reuse): stop and propose before building that
+  half"). The trace and the options are **THE FORK** below; nothing of the act is written.
+- Piece 4 — closing evidence (headless both configurations, `build-for-testing` both targets): IN-PROGRESS —
+  `build-for-testing` GREEN both targets (piece 2); the headless suites are PENDING (this record flips them).
+
+**THE FORK — WHY THE SET-ASIDE MACHINERY RESISTS REUSE (traced, file:line):** the brief asks Start fresh to set the
+slot's library files (store + sidecars + every key file + markers) aside WHOLE into `Previous Libraries/<stamp>/`,
+crash-safe per rule 20, "reuse the planned-act/set-aside machinery, never a bare move", reading nothing of the old store.
+None of the three machineries this tree holds does that:
+1. **The planned-act machinery cannot hold a key-less act.** A plan is SEALED under a key (`Plan.swift:194`) and resumes
+   only when the record's section of the library that holds the act names it (`Plan.swift:185`, `isNamed(by:)`). A store
+   from before this design has no key this build holds and no record; and the creation that follows is deliberately
+   plan-less ("no plan in an empty slot" — `DeviceActs.swift:70`, `:116`'s doc). Sealing a set-aside plan under the NEW
+   library's key would make the creation a planned act — a change to that recorded refinement, not a reuse.
+2. **The core's crash-safe set-aside is a re-encryption swap's commit step, not a mover.** `SQLCipherLibraryLeaf
+   .swapStaged(setAside:asideKeyFile:)` (`:112`) needs a staged library at `variorum.sqlite.staged` under a new key;
+   REFUSES a WAL with frames beside the slot (`:116` — a pre-design store left by a crashed old build may carry one, and
+   it must ride WHOLE, never be drained — draining needs the key); hard-links ONLY the main file (`:120`) and WRITES a
+   format-3 key-file DOCUMENT beside it (`:122`) — it carries neither the pre-design key files nor the sidecars; and it
+   REMOVES the slot's sidecars before the rename (`:127`). Make this my library uses it inside `MakeMineProgram`
+   (`Copies.swift:185`); T-5's empty-slot program skips it (`setAside: false`, `Copies.swift:239`/`:263`).
+3. **The app's set-aside, which T-5's and T-8's doors and rule 27's Start a New Library use, is bare moves.**
+   `ProtectionOpenRoad.setAsideLibraryWholeFor` (`ProtectionRoadActs.swift:206`): the sidecars first (`:218`), then the
+   store (`:226`), then the FORMAT-3 key-file name only (`:235`) — a crash between the sidecar and store moves leaves the
+   store in the slot and its WAL in the aside (the next press then sets the store aside into a SECOND folder — the library
+   split), and the pre-design key files are never carried (they stay in the slot, beside whatever lands next). The brief
+   rules a bare move out.
+
+**THE OPTIONS (the orchestrator's ruling; P-VX329-U4-5 until then):**
+- **(a) RECOMMENDED — THE WHOLE SET-ASIDE: link, one atomic rename, unlink; resumed from the disk itself.** A pure core
+  function names the library's files from the slot's NAMES alone (the store; its `-wal`/`-shm`/`-journal` present; every
+  pre-design key-file name and today's `.stale-<epoch>` set-asides of them; the restore-hold marker — NOT the container's
+  "a library lived here" marker, which is the container's fact) and their order. The act: (1) hard-link (`link(2)` — no
+  byte read, no byte copied) each into a HIDDEN staging folder under Previous Libraries (the lister skips hidden names, so
+  a half-made folder is never listed), each link verified by inode; a link that fails removes the staging folder and
+  refuses — nothing moved; (2) THE COMMIT — one `rename(2)` of the staging folder to `Previous Libraries/<stamp>/`: from
+  that instant the aside is whole; (3) unlink each name from the slot, sidecars first, the store, then the key files and
+  the marker — each only while the slot's name still has the aside's inode; (4) the ordinary creation (`ProtectionOpenRoad
+  .create` — the calm first open, exactly an empty slot's). RESUME BY IDENTITY: a press (or the creation's road) that
+  finds a committed aside holding the slot's own store (same device + inode — metadata, never a byte) finishes step 3 into
+  THAT folder; a stale hidden staging folder is cleared at the next press. Crash table: before (2) — the slot untouched
+  (the old state), invisible hard-link debris; after (2) — the aside whole and the slot a finishable remainder (the store
+  still there ⇒ her face again, the next press finishes; the store gone ⇒ only stray pre-design NAMES remain, hard links to
+  the aside's files, which the creation's road finishes before it creates). Never two asides, never a split library,
+  never a byte of the old store read. Pins: the files-moved-whole arm (inodes and names in the aside; the slot empty of
+  them; a WAL with frames rides whole), the fresh-mint-after arm, and a crash arm per step boundary (an injected failure
+  at each of the four seams → the reading above), all headless where the mover is core (the creation's arm in the Mac
+  suite). Rule 20's "planned" is met by the disk itself (the staging name and the inode identity) — no key-less plan can
+  be sealed, and none is pretended; the "says which" is a log line (no words beyond hers).
+- **(b) A PLANNED CORE ACT on Make this my library's shape:** the fresh library created at `variorum.sqlite.staged`, a
+  plan sealed under ITS key and named by its new record's section, the swap's set-aside extended to hard-link the
+  pre-design names, the sidecars and an undrained WAL whole, the live key file written after the swap (before it the
+  format-3 name beside the old store would turn the slot back into a lobby no secret opens). Reuses the plan/settle/resume
+  machinery; costs a new program, a new leaf swap variant, and makes the creation planned (a change to "no plan in an
+  empty slot"); its swap step still has an inner window (the sidecars must leave before the rename, or the old WAL would
+  replay into the new key's file).
+- **(c) The floor, ruled out by the brief:** `setAsideLibraryWholeFor` extended to carry the pre-design names and the
+  marker — bare moves, not crash-safe across files.
+- **AND, whichever she picks (D):** Open Library…'s two landings from her face (T-5's Make this my library into the
+  empty slot, T-8's bring-in of a plaintext export) set the slot aside FIRST through today's bare road
+  (`ProtectionCopyDoors.swift:406`, `:487`) — which would leave the pre-design key files in the slot beside the landed
+  library. Today their gates (`AppBootstrap.swift:686`, `:770`) admit rule 27's face only: on a clean Mac a pre-design
+  slot also derives rule 27's refusal in the face's value, so the landing IS admitted (U1's behaviour, unchanged here);
+  on a Mac that remembers a library of this design it refuses. The proposal: both landings set a pre-design slot aside
+  through the same whole act, and the gates admit her face by its own fact.
+
+**FLAGS (for the orchestrator; none built):**
+- **F-U4-1 — the names-only fact over a Debug-era library that LOST its format-3 file.** A library of this design opened
+  by a Debug build before the switch carries today's stub envelope (`variorum-keys-<fp16>.json`, written by the deleted
+  `ensureStoreIdentity`) beside its format-3 file. While the format-3 file stands, the slot is no pre-design store
+  (pinned). If that file is lost (rule 1's mirror restore is the road for that) the slot reads as pre-design and her face
+  shows instead of the quiet road. Only Debug-era dev libraries carry the stub (her real store and the testers' are today's
+  road whole). Options: accept (dev-only); or the fact also requires the container's "a library lived here" marker to be
+  absent (a container where this design created a library is not pre-design) — a deviation from the brief's definition,
+  so not taken.
+- **F-U4-2 — the phone's face is VM-8's.** The fact, the face's value and the model's door are shared and compile for
+  iOS; the phone's `MobileRoadLockView` renders nothing of her face (it keeps rendering the road fields as derived — rule
+  27's refusal on a clean phone, the typed roads on one that remembers a library of this design).
+- **F-U4-3 — the two shared behaviour changes the phone sees:** the route tries no road on a pre-design store and the
+  gatherer reads no custody item for it (neither could open it); the model's AUTOMATIC biometry ask stands down over it.
+  The phone's buttons still render and press as before (VM-8's to replace).
+- **F-U4-4 — an unreadable keychain hides the fact.** When the gatherer cannot list the custody or memory items
+  (P-VX306-U1a-3) the lobby has no facts at all and shows its typed field with the keychain line, even over a pre-design
+  store — the fact is names-only and could be known without the keychain, but `RoadLobbyFacts` carries no catalogue in
+  that state. Not changed.
+- **F-U4-5 — the switch-day script's §testers** is "updated at U4's close" per the §8 addendum — the orchestrator's (no
+  words were written here).
+
+**PROVISIONALs (for the orchestrator to bundle):**
+- **P-VX329-U4-1 — her lead heads the card:** (a) BUILT — her lead in the heading's place, her body beneath, the room's
+  lock glyph kept, the lobby's title ("Open your library") NOT shown on her face (it would add words to hers and contradict
+  "This version can't open it"); (b) the title above her lead; (c) no glyph.
+- **P-VX329-U4-2 — the confirm's buttons:** (a) BUILT — *Start fresh* (her door's words without its ellipsis) and
+  *Cancel* (the system's); (b) her door's words with the ellipsis; (c) a longer verb (words beyond hers — not taken).
+- **P-VX329-U4-3 — a PLAINTEXT store wearing an older name is pre-design too** (any store in the slot): (a) BUILT; (b)
+  encrypted only (a plaintext slot with older names would keep the lobby).
+- **P-VX329-U4-4 — the busy line under her face is the dots alone** (no "Opening your library…" where nothing opens).
+- **P-VX329-U4-5 — Start fresh's act: THE FORK above** (until ruled, the door is not offered).
 
 ## 6. THE KICKOFF RECORD (2026-10-22, the orchestrator — session `vx-329`, Fable, overnight mandate)
 
