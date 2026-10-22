@@ -16,9 +16,9 @@
 //  (each composed system used to mint one over the scope's stored session, refreshing the rotating token beside the
 //  services'). A system composed without it (a test world) rides no one's sign-in (`NobodySignedIn`).
 //
-//  The TYPES compile in both configurations (rule 24); their USE is U1b's Debug gate — nothing in
-//  `AppBootstrap` calls this yet. Tests compose it over a throwaway scope and a temp slot, overriding the
-//  leaves that must not reach iCloud.
+//  The TYPES compile in both configurations (rule 24); their USE was U1b's Debug gate until VX-329 U1's switch — every
+//  build's bootstrap composes it now, through `RoadInputs.live`. Tests compose it over a throwaway scope and a temp slot,
+//  overriding the leaves that must not reach iCloud.
 //
 
 import Foundation

@@ -559,7 +559,7 @@ switch-day script, the release notes) — every U3 commit is pathspec-limited, r
   `bothConsumersPastExpiryAtOnceRefreshOnce`, `twoInstancesOverOneStoredTokenBurnTheSessionOnThisFake`,
   `theVaultLeafFollowsASignOutAndASignInToAnotherAccount`). **The harness on the fixed tree: `✔ Test run with 375 tests
   in 60 suites passed`** (0 skipped; 368 − the deleted provider test + this unit's 8; P2 GREEN 4/4). The Mac and phone
-  builds: PENDING (piece 4).
+  builds: green (piece 4).
 - Piece 3 — P1's behavioral revert: DONE — no revert is in flight (both runs restored, `git status` + `git diff
   --exit-code` clean). **REVERT RUN 2 (on `21f956933`, the corrected pin): the race pins RED for the reasons their names
   state** — `aRotationByTheServicesNeverLeavesTheVaultLeafASpentToken` ✘ 5 issues (the leaf's second read refused
@@ -587,9 +587,12 @@ switch-day script, the release notes) — every U3 commit is pathspec-limited, r
   leaf-read checks were `(try? r.get()) == .some(nil)`, which `try?`'s flattening makes TRUE for a refusal too, so the
   leaf's own refusal did not register. Fixed in the pin (this commit: `answeredNoVault` matches `.success(.none)` by
   case); green again on the fixed tree (8/8). Revert run 2 follows on this commit.
-- Piece 4 — evidence: DONE (the tree `9ccad2e42`, no source change after; every run foreground-polled, in sequence):
+- Piece 4 — evidence: DONE (the tree `9ccad2e42`; after it ONE comment-only edit — `ProtectionSystem.swift`'s header
+  line "nothing in `AppBootstrap` calls this yet", stale since U1's switch, made true — the harness re-run on it below;
+  every run foreground-polled, in sequence):
   - THE HARNESS (debug — the app test targets' only configuration): **`✔ Test run with 375 tests in 60 suites passed`**,
-    0 skipped (baseline 368/59 on the pre-fix `4f6e3edef`; − `FollowingSessionProviderTests`' 1, + this unit's 8: the
+    0 skipped — on `9ccad2e42` and again after the comment-only edit (baseline 368/59 on the pre-fix `4f6e3edef`; −
+    `FollowingSessionProviderTests`' 1, + this unit's 8: the
     composition 4, the race 2, the witness 1, the follow guard 1). The app's auth suites inside it:
     `AuthSessionTests` and `AuthSessionLazyLoadTests` (13e B-1's lazy load — the bootstrap's construction reads nothing)
     green. Under `-c release` the harness does not build — the app's protection suites name DEBUG-only walk machinery
