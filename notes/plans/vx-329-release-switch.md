@@ -1251,7 +1251,14 @@ re-worded device-neutral. (b) = no phone face renders it → exempted by exact l
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton, the two reds traced and the 28 dispositioned before any fix: DONE (this commit).
-- Piece 1 — RED 1's flip (test-side) + its red-on-old in the harness: NOT-STARTED.
+- Piece 1 — RED 1's flip (test-side) + its red-on-old in the harness: DONE (this commit). The pin
+  (`theOneSwitchIsOnInEveryPhoneBuild`) keeps its three platform/compile-fact lines and gains `live(debug: true)` and
+  `live(debug: false)` — "every Release build runs the new road — today's road is gone" (the Mac twin's words). **RED on the
+  pre-flip rule** (the harness, its rule lines over `c629ae54f`'s `ProtectionRoad.swift`, whose `live(debug:)` is `debug`):
+  `✘ … Expectation failed: ProtectionRoad.live(debug: false)` — 1 issue, the stale line exactly; **GREEN on the current
+  rule** (the real file symlinked back): `✔ Test run with 1 test in 1 suite passed`. (The harness cannot hold the pin's
+  `!ProtectionRoad.isMac` on a macOS host — that line is the phone bundle's own, its run is the orchestrator's.) The
+  phone's compile: piece 3's `build-for-testing`.
 - Piece 2 — RED 2: the six re-words (P-VX329-PH-1) + the 22 exemptions + the one-match cap: NOT-STARTED.
 - Piece 3 — the evidence (the harness: the sweep red-on-old → green, the cap red on the old exemptions; U3's harness over the
   Mac's words pins; `build-for-testing` Mac and iOS): NOT-STARTED.
