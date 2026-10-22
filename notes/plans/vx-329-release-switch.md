@@ -1020,7 +1020,15 @@ in the session scratchpad, `vx329-mac-suite.log`): `✘ Test run with 1556 tests
   it. **`✔ Test run with 6 tests in 1 suite passed`** (all six arms as stated). So nothing hides behind the lifetime
   defect on the send, crossing and typed-road paths these four tests drive — the remaining unproven layer is the
   bootstrap's own wrapper (its `.ready` guard, the pool close and reopen), which is the stage re-run's.
-- Piece 2 — failures 2–5 fixed (the road held for the test's life): NOT-STARTED.
+- Piece 2 — failures 2–5 fixed (the road held for the test's life): DONE (this commit; the compile PENDING piece 4's
+  `build-for-testing`, the green PENDING the orchestrator's stage re-run). Every one of the eight inline sites U1's
+  rewire left (`SettingsLockCloseTests` ×5 — the three green ones too, so `aReopenRoadShowsTheOpeningSpinnerMidCeremony`
+  stops passing vacuously over a crossing that never crossed and a reopen that minted a fresh library;
+  `LibraryHandOffTests` ×2; `LibraryPortabilityDoorTests` ×1) now reads `let road = PlantedRoad()` + `defer {
+  withExtendedLifetime(road) {} }` (explicit — never leaning on Debug's lexical lifetimes) and passes `road`; no
+  expectation, claim or helper body changed. `LockWorld.readyInStandard`'s doc and `SettingsLockCloseTests`' own helper
+  say the caller holds the road (comment only). A sweep for the hazard's other shapes (`PlantedRoad().…`, an inline
+  `TempSlot(…)`) across both test trees: none.
 - Piece 3 — failures 1 and 6 rewritten to the new road's truth: NOT-STARTED.
 - Piece 4 — the evidence (`build-for-testing` both targets; the headless harness; the core suites): NOT-STARTED.
 

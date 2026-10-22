@@ -57,7 +57,8 @@ struct SettingsLockCloseTests {
         }
     }
 
-    /// A planted-road bootstrap whose opener the pin can hold — ready in Standard, its words kept.
+    /// A planted-road bootstrap whose opener the pin can hold — ready in Standard, its words kept. The caller holds `road`
+    /// (`LockWorld.readyInStandard`'s rule).
     private func readyInStandard(
         _ road: PlantedRoad, hold: OpenHold
     ) async throws -> (bootstrap: AppBootstrap, words: [String]) {
@@ -147,7 +148,12 @@ struct SettingsLockCloseTests {
     /// must CLOSE — never stand on as the "Open the main window first." stub.
     @Test func lockingWithSettingsOpenClosesTheSettingsWindow() async throws {
         try await withRoadDependencies {
-            let (bootstrap, _) = try await LockWorld.readyInCastle(PlantedRoad())
+            // Every test here HOLDS its road for its whole life: the slot's folder is the road's (`TempSlot` removes it
+            // at deinit) and the bootstrap keeps only the road's system and the slot's URL — an inline `PlantedRoad()`
+            // is released at the call's end and takes the library's files with it (VX-329's Mac-suite fix leg).
+            let road = PlantedRoad()
+            defer { withExtendedLifetime(road) {} }
+            let (bootstrap, _) = try await LockWorld.readyInCastle(road)
             let (window, hosting) = mountSettings(bootstrap)
             defer {
                 window.orderOut(nil)
@@ -179,7 +185,9 @@ struct SettingsLockCloseTests {
     /// keyed on "not ready" would shut it under its own ceremony.
     @Test func aReopenRoadThroughOpeningKeepsTheSettingsWindow() async throws {
         try await withRoadDependencies {
-            let (bootstrap, words) = try await readyInStandard(PlantedRoad(), hold: OpenHold())
+            let road = PlantedRoad()
+            defer { withExtendedLifetime(road) {} }
+            let (bootstrap, words) = try await readyInStandard(road, hold: OpenHold())
             let (window, hosting) = mountSettings(bootstrap)
             defer {
                 window.orderOut(nil)
@@ -207,7 +215,9 @@ struct SettingsLockCloseTests {
             #expect(!SettingsSceneContent.libraryClosed(.opening))
             #expect(SettingsSceneContent.libraryClosed(.failed(
                 AppDatabase.StoreOpenError(storePath: "", reason: "x"))))
-            let (bootstrap, _) = try await LockWorld.readyInCastle(PlantedRoad())
+            let road = PlantedRoad()
+            defer { withExtendedLifetime(road) {} }
+            let (bootstrap, _) = try await LockWorld.readyInCastle(road)
             #expect(!SettingsSceneContent.libraryClosed(bootstrap.state), "ready is open")
             await bootstrap.lock()
             guard case .roadLobby = bootstrap.state else {
@@ -233,7 +243,9 @@ struct SettingsLockCloseTests {
             #expect(SettingsSceneContent.Copy.opening == "Opening your library\u{2026}")
             #expect(SettingsSceneContent.nonReadyFace(.failed(
                 AppDatabase.StoreOpenError(storePath: "", reason: "x"))) == .stub)
-            let (bootstrap, _) = try await LockWorld.readyInCastle(PlantedRoad())
+            let road = PlantedRoad()
+            defer { withExtendedLifetime(road) {} }
+            let (bootstrap, _) = try await LockWorld.readyInCastle(road)
             await bootstrap.lock()
             guard case .roadLobby = bootstrap.state else {
                 Issue.record("expected the road's lobby after the lock")
@@ -250,7 +262,9 @@ struct SettingsLockCloseTests {
     @Test func aReopenRoadShowsTheOpeningSpinnerMidCeremony() async throws {
         try await withRoadDependencies {
             let hold = OpenHold()
-            let (bootstrap, words) = try await readyInStandard(PlantedRoad(), hold: hold)
+            let road = PlantedRoad()
+            defer { withExtendedLifetime(road) {} }
+            let (bootstrap, words) = try await readyInStandard(road, hold: hold)
             let (window, hosting) = mountSettings(bootstrap)
             defer {
                 window.orderOut(nil)

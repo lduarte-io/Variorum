@@ -38,7 +38,12 @@ struct LibraryHandOffTests {
         try await withRoadDependencies {
             let dir = try temporaryDirectory()
             defer { try? FileManager.default.removeItem(at: dir) }
-            let (bootstrap, words) = try await LockWorld.readyInStandard(PlantedRoad())
+            // The test HOLDS its road for its whole life: the slot's folder is the road's (`TempSlot` removes it at
+            // deinit) and the bootstrap keeps only the road's system and the slot's URL — an inline `PlantedRoad()` is
+            // released at the call's end and takes the library's files with it (VX-329's Mac-suite fix leg).
+            let road = PlantedRoad()
+            defer { withExtendedLifetime(road) {} }
+            let (bootstrap, words) = try await LockWorld.readyInStandard(road)
             guard case .ready(let app) = bootstrap.state, let session = bootstrap.roadSession else {
                 Issue.record("the library is open on the road: \(bootstrap.state)")
                 return
@@ -87,7 +92,9 @@ struct LibraryHandOffTests {
         try await withRoadDependencies {
             let dir = try temporaryDirectory()
             defer { try? FileManager.default.removeItem(at: dir) }
-            let (bootstrap, _) = try await LockWorld.readyInStandard(PlantedRoad())
+            let road = PlantedRoad()
+            defer { withExtendedLifetime(road) {} }
+            let (bootstrap, _) = try await LockWorld.readyInStandard(road)
             let session = try #require(bootstrap.roadSession)
             var library = session.library
             library.keyFile = nil

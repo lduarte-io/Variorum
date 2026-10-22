@@ -221,7 +221,12 @@ struct LibraryPortabilityDoorTests {
         try await withRoadDependencies {
             let dir = try temporaryDirectory()
             defer { try? FileManager.default.removeItem(at: dir) }
-            let (bootstrap, _) = try await LockWorld.readyInStandard(PlantedRoad())
+            // The test HOLDS its road for its whole life: the slot's folder is the road's (`TempSlot` removes it at
+            // deinit) and the bootstrap keeps only the road's system and the slot's URL — an inline `PlantedRoad()` is
+            // released at the call's end and takes the library's files with it (VX-329's Mac-suite fix leg).
+            let road = PlantedRoad()
+            defer { withExtendedLifetime(road) {} }
+            let (bootstrap, _) = try await LockWorld.readyInStandard(road)
             let destination = dir.appendingPathComponent("Chosen", isDirectory: true)
             try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
 
