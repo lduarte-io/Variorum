@@ -1354,17 +1354,19 @@ name), `MobileCopyRegisterSweepTests` (the words file changed). The Mac's pins o
 on the stage, if wanted: `LibraryWordsCardTests`, `ProtectionRestoreReceiptTests`, `ProtectionFacesRouteTests`,
 `ProtectionOpenRoadPlantedTests`, `CopyRegisterPinTests`.
 
-### U4 RECORD — THE PRE-DESIGN FACE (Opus implementer, 2026-10-22; STOPPED AT THE FORK — pieces 1–2 DONE, piece 3 PROPOSED; the brief is §6d)
+### U4 RECORD — THE PRE-DESIGN FACE (Opus implementer, 2026-10-22; DONE — the fork stopped, ruled (a) + (D), built; the Mac and phone suite RUNS are the orchestrator's closing batch; the brief is §6d)
 
-**Not done in U4, first:** **Start fresh's ACT is NOT BUILT** — the set-aside machinery resists reuse (THE FORK below,
-traced file:line; option (a) recommended); the bootstrap passes `startFresh: nil`, so today the Mac's face shows her
-lead, her body and *Open Library…* only, and the set-aside act's pins (files moved whole, the fresh mint after, the crash
-arms) do not exist yet. NO Mac or phone test suite was RUN (no stage — the brief's limit): every app pin here is COMPILED
-(`build-for-testing` green, both targets) and UNRUN — the list below is the orchestrator's closing run, and every
-app-side claim is PENDING until it runs. Not built either (flagged, none invented): the phone's face (VM-8, F-U4-2); the
-landings' whole set-aside from her face (D); the switch-day script's §testers update (F-U4-5). Standing limits kept: no
-stage, no Debug launch, no store touch, no network, no subagent, no `xcodebuild test`; zero `Sources/VariorumCore/Sync/`
-lines; no product words beyond hers.
+**Not done in U4, first:** NO Mac or phone test suite was RUN (no stage — the brief's limit): every app pin here
+(`PreDesignStoreRefusalTests`, `PreDesignFaceTests`, `PreDesignLandingsRouteTests`, `PreDesignStartFreshRouteTests`) is
+COMPILED (`build-for-testing` green, both targets) and UNRUN — the list below is the orchestrator's closing run, every
+app-side claim is PENDING until it runs, and THE GATE ARM'S RED-ON-OLD is PENDING its behavioural revert on the stage (the
+recipe is in 3b). The LIVE face and act (her byte copy in the emptied dev slot → her face → Start fresh…) are the
+orchestrator's walk. NOT pinned: the set-aside's different-volume refusal (no second volume headless — code-read only).
+Not built (flagged, none invented): the phone's face (VM-8, F-U4-2); the switch-day script's §testers update (F-U4-5).
+Piece 3 was STOPPED at its fork and PROPOSED (`8cdc33118`) before it was built to THE RULING (`b02b9bb8f`). Standing
+limits kept: no stage, no Debug launch, no store touch, no network, no subagent, no `xcodebuild test`; zero
+`Sources/VariorumCore/Sync/` lines; no product words beyond hers (the one refusal the act can say is the creation's own
+existing sentence — P-VX329-U4-6).
 
 **Preflight (complete, not delegated):** CLAUDE.md + its auto-loaded canon; `notes/SessionResiliencyProtocol.md` whole;
 `notes/CastleRules.md` whole (rules 17, 20, 21, 26, 27 the unit's heart); this plan §1–§5 (the U1 record whole, piece 5
@@ -1415,9 +1417,8 @@ swap and T-5's empty-slot program), `Executor/Acts/DeviceActs.swift` (the plan-l
   (the standing door); the busy line shows the dots alone (no "Opening your library…" over a face where nothing opens).
   Every other slot renders exactly as before (`standingLobby` — the old two arms moved whole). The facts gatherer reads
   no keychain item and tries no key against a pre-design store (`custodyOpensLibrary` nil — not read;
-  `AssessRules.preDesignStore(storeFile:catalog:)` lets it know the fact first). **The bootstrap passes `startFresh:
-  nil` — the act is piece 3, STOPPED at its fork below; until it lands the face shows her lead, her body and Open
-  Library… only.** PINS (Mac, compiled): `PreDesignStoreRefusalTests` rewritten to U4 (the live slot → her face, the
+  `AssessRules.preDesignStore(storeFile:catalog:)` lets it know the fact first). (At this commit the bootstrap passed `startFresh:
+  nil` — the act was piece 3, stopped at its fork; SUPERSEDED by 3b, which wires it.) PINS (Mac, compiled): `PreDesignStoreRefusalTests` rewritten to U4 (the live slot → her face, the
   slot's listing unchanged, nothing minted or written; THE ADDENDUM'S SHAPE — a remembered library of this design with a
   memory item, a silent and a Touch ID item, biometry ready → her face, `custody.reads` EMPTY, no automatic press; the
   keyless arm → rule 27 unchanged; a library of this design with today's names beside it → opens; the picked-copy pin
@@ -1481,20 +1482,29 @@ swap and T-5's empty-slot program), `Executor/Acts/DeviceActs.swift` (the plan-l
     remainder of the aside's own key files beside an empty slot leaves before the creation); throwaway scope, through
     the bootstrap — the door wired (`offersStartFresh`), the press opens a new library ready, never held, the old one
     aside whole.
-- Piece 4 — closing evidence for what is built: DONE (every run foreground, in sequence, on the Pro, at `8cdc33118`):
-  - `swift test` (debug): **VariorumCoreTests 3295 tests in 430 suites PASSED** (the U4 suite among them, 7/7);
-    StringsWorkbook 32/32; VariorumMCPTests 382/383 — the ONE red the recurring load-timing flake
-    (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamedAndBounded`, 19.0 s against its 15 s
-    bound under the full suite), re-run ALONE green (3/3, 2.2 s). Not this unit's (the MCP harness is untouched).
-  - `swift test -c release`: **VariorumCoreTests 3266 tests in 425 suites PASSED**; StringsWorkbook 32/32;
-    VariorumMCPTests 382/383 — the same flake (18.6 s), re-run ALONE under `-c release` green (3/3, 2.2 s), with
-    `PreDesignStoreFactTests` 7/7 in the same release run.
+- Piece 4 — closing evidence: DONE (every run foreground, in sequence, on the Pro, at the closing tip `6da8cb743` —
+  nothing but this record changed after it). (The fork-time run at `8cdc33118` was 3295/430 debug, 3266/425 release.)
+  - `swift test` (debug): **VariorumCoreTests 3303 tests in 431 suites PASSED** (both U4 suites among them —
+    `PreDesignStoreFactTests` 7, `PreDesignSetAsideTests` 8); StringsWorkbook 32/32; VariorumMCPTests 382/383 — the ONE
+    red the recurring load-timing flake (`MCPHarnessTimeLimitTests.aPeerThatNeverAnswersInitializeFailsTheConnectNamed
+    AndBounded`, 19.3 s against its 15 s bound under the full suite), re-run ALONE green (3/3, 2.2 s). Not this unit's
+    (the MCP harness is untouched).
+  - `swift test -c release`: **VariorumCoreTests 3274 tests in 426 suites PASSED** (both U4 suites green);
+    StringsWorkbook 32/32; VariorumMCPTests 382/383 — the same flake (18.5 s), re-run ALONE under `-c release` green
+    (3/3, 2.2 s).
   - `xcodebuild -scheme Variorum -destination 'platform=macOS' build-for-testing` (DerivedData `vx329-u4`): GREEN, no new
     warning in a file this unit touched. `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS Simulator'
     build-for-testing` (`vx329-u4-ios`): GREEN.
+  - The fence: `git diff 238519724..HEAD -- Sources/VariorumCore/Sync` is EMPTY.
 
 **MAC-SUITE LIST (the orchestrator's closing run — `-only-testing:VariorumTests/<Suite>`; compiled, unrun here):** NEW/
-REWRITTEN: `PreDesignStoreRefusalTests` (5 tests), `PreDesignFaceTests` (4). Neighbours whose code this unit touched:
+REWRITTEN: `PreDesignStoreRefusalTests` (5 tests), `PreDesignFaceTests` (4), `PreDesignLandingsRouteTests` (2 — the
+throwaway keychain scope; THE GATE ARM — for its red-on-old, revert the two gates' `|| lobby.face.preDesignStore` and
+both read `.refused(.failed)`), `PreDesignStartFreshRouteTests` (4 — the last one through the bootstrap on the throwaway
+scope). The landings' and creations' neighbours (the one set-aside and `create` changed under them):
+`EmptySlotMakeMineRouteTests`, `EmptySlotLandingRoadTests`, `PlaintextExportBringInRouteTests`,
+`PlaintextExportBringInRoadTests`, `MakeMineRoadTests`, `ProtectionRoadRouteTests`, `MakeMineRouteTests`, every suite
+that drives rule 27's or the missing face's *Start a New Library*. Neighbours whose code this unit touched:
 `ProtectionLobbyModelTests` (the model's init and auto-ask guard), `ProtectionOpenRoadPlantedTests` (the route's new arm),
 `ProtectionFactsGathererTests` (the gatherer's pre-design skip), `ProtectionWordsPlanTests` + `ProtectionWordsVX307Tests`
 (the words file and `RoadLockView`'s rule-27 line), `RoadLockViewNamesPinTests`, `EmptySlotDoorsSurfaceTests`,
