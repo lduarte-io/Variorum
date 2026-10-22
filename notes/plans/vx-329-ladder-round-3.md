@@ -218,3 +218,28 @@ build; U4 is CONFIRMED whole — the fact, her words, the face, the set-aside's 
 pins are solid, and the records landed since round 2 are honest against the tree and the logs. The hard cap
 stands: the three findings are wording/record fixes under the orchestrator's line-by-line check; nothing here
 re-opens the ladder.**
+
+---
+
+## ROUND-3 FIX LEG (the orchestrator's own hand, 2026-10-22 — the final-round rule: each fix line-by-line against
+its finding; all three doc/record-class, zero product edits)
+
+- **The MINOR (the testers' reinstall clause) — APPLIED, flagged for her word.** The mechanism re-verified against
+  my own earlier read of the mover (step (3) unlinks every member before the creation mints — the reviewer's trace
+  is exact). Both spots split into the two cases: the prose sentence ("UNTIL Start fresh is pressed, reinstalling
+  0.9.8 still opens it; after Start fresh the old library sits whole in Previous Libraries, and moving its files
+  back puts it in front of 0.9.8 again") and the paste-ready message's last paragraph ("before you press Start
+  fresh … After Start fresh, your old library is whole in Previous Libraries, inside Variorum's folder — move its
+  files back and the old version opens it"). The message is HERS to send — the corrected phrasing is presented for
+  her word in session and rides the morning bundle; the repo no longer carries the false clause either way.
+- **NIT 1 (the round-2 record's dangling "in the next commit).") — DELETED**, verified the surrounding bullet reads
+  whole.
+- **NIT 2 (`<fp8>` → `<fp16>`) — APPLIED at both named spots** (§6d build step 1, the §6d finding paragraph quoting
+  the §8 addendum); the U1 record's :239 "the fp8 name parser went with the readers" is a history note about a
+  DELETED parser and deliberately not touched (the reviewer named only the two doc spots).
+- **The ladder CLOSES at round 3.** Her in-session latitude (a fourth round permitted at the orchestrator's
+  judgment) goes UNUSED, per the stated rule beside it: round 3 confirmed no new BLOCKER/MAJOR, and the three
+  findings' fixes are the orchestrator's own doc edits — a fresh cold round would re-read a tree it just passed.
+- **Closeout carries from this round:** the AppSpecRecord entry names her approval of the two r2 word corrections
+  (the disposition note's ask); the gate-revert count note stands as recorded; T-5's hold-marker overwrite stands
+  accepted-as-designed.

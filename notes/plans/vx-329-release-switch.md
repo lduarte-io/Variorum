@@ -2135,7 +2135,7 @@ every typed secret the throwaway's own, disposable by design)
 sitting, after the §8 rehearsal's byte-copy finding)
 
 **The finding (the §8 addendum below records it):** a REAL today's-road store in the live slot (the sqlite +
-old-format `variorum-keys.json` + `variorum-keys-<fp8>.json` beside it) meets the 0.10 build as the LOBBY — typed
+old-format `variorum-keys.json` + `variorum-keys-<fp16>.json` beside it) meets the 0.10 build as the LOBBY — typed
 roads no secret can ever satisfy, no door out; `File ▸ Open Library…` can't read a pre-design file either and
 nothing mints into an occupied slot. A tester who updates without exporting is WEDGED. Piece 5's pins covered the
 keyless and foreign-copy shapes; the real pre-design shape fell between them.
@@ -2156,7 +2156,7 @@ Protection/Assess/` (the classifier + CatalogNames — the legacy NAMES are reco
 
 **The build:**
 1. THE FACT (pure, in the classifier): a live slot holding a store + NO format-3 key file + at least one
-   key file wearing a PRE-DESIGN NAME (`variorum-keys.json` / `variorum-keys-<fp8>.json` — names only, NEVER
+   key file wearing a PRE-DESIGN NAME (`variorum-keys.json` / `variorum-keys-<fp16>.json` — names only, NEVER
    read/parsed) reads as `preDesignStore`. The keyless arm keeps rule 27's face unchanged; a format-3 slot keeps
    the lobby unchanged.
 2. THE FACE on that fact (the lobby's surface, the Mac): her words + the two doors. P-2: doors act.

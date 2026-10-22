@@ -240,7 +240,6 @@ literal, `notes/DataSafetyRunbook.md` and every product file byte-unchanged); no
   `swift build` (core) Build complete; `xcodebuild build-for-testing` from App/Variorum/ exit 0, TEST BUILD
   SUCCEEDED, DataSafetyTests.swift in the compile log; the byte proof re-run green at both c47c61b84 and
   514f8e60c. The pins' GREEN run is the closing Mac batch's.
-  in the next commit).
 
 **The red-on-old is the CURRENT red** — no new pin owed (the finding's own disposition). Its mechanism, re-proven by
 me before the edit: each of the five old expectation strings occurs **0** times in the runbook literal

@@ -91,7 +91,9 @@ writes an empty file — so the old-build export is **Copy full text per note** 
 turned on and left to run). Since U4, the careless are not wedged either: a 0.10 build meeting the old library
 says her face ("This library is from an older version of Variorum.") and offers **Start fresh…** (the old library
 set aside whole in Previous Libraries) beside Open Library… — and 0.10 writes nothing to a store it refuses, so
-reinstalling 0.9.8 still opens it.
+UNTIL Start fresh is pressed, reinstalling 0.9.8 still opens it; after Start fresh the old library sits whole in
+Previous Libraries, and moving its files back puts it in front of 0.9.8 again (the r3 correction — the aside is
+whole, same inodes, pinned and walked live).
 
 **The paste-ready message (send with the 0.10 release note):**
 
@@ -104,5 +106,6 @@ reinstalling 0.9.8 still opens it.
 > your old library is set aside whole in Previous Libraries; nothing is deleted. Then sign in if you sync, and
 > your writing comes back; if you don't sync, paste back what you copied.
 >
-> If you ever need the old version again, reinstalling it still opens your old library — 0.10 never writes to a
-> library it can't open.
+> If you ever need the old version again: before you press Start fresh, reinstalling it still opens your old
+> library — 0.10 never writes to a library it can't open. After Start fresh, your old library is whole in
+> Previous Libraries, inside Variorum's folder — move its files back and the old version opens it.
