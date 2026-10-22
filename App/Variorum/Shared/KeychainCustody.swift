@@ -37,9 +37,10 @@ import VariorumCore
 /// deliberately: its launch path never writes E2EE custody (enrollment
 /// and the gate toggle are user acts), so anything that trips here IS a
 /// test reaching real custody — the R3-1 shape, refused before any
-/// SecItem call. Scoped families (`StoreKeyGuard`'s `scope:`,
-/// `StoreKeyCustody`) stay unguarded: throwaway scopes are their safety,
-/// and the fact suite's probes ride their own throwaway service.
+/// SecItem call. (VX-329 U1: today's E2EE custody, which the guard was born
+/// for, left with today's road; the protection road's keychain family —
+/// `ProtectionKeychain.refuseUnderTest` — is its caller now, under the same
+/// rule: throwaway scopes write for real, the real scopes refuse.)
 ///
 /// READS stay open (they are how pins observe the world and they damage
 /// nothing); `unlockGatedItem` — a read that PROMPTS — is deliberately
@@ -73,10 +74,10 @@ nonisolated enum KeychainTestTripwire {
     }
 
     /// 17h (R3-4's leaf-mapping pin): WHICH leaves refused, in order. A
-    /// test calls one `E2EECustodyLeaves.live` closure and asserts the
-    /// delta names the leaf it expects — so a leaves struct that lies
-    /// about its mapping (`deletePlain` wired to `deleteGatedItem`) goes
-    /// red without one byte of Keychain traffic. Append-only within a
+    /// test calls one leaf and asserts the delta names the leaf it expects
+    /// — so a leaf that lies about its mapping goes red without one byte of
+    /// Keychain traffic (today's `E2EECustodyLeaves` pin was the first; the
+    /// road's family is read the same way). Append-only within a
     /// process; concurrent suites can only ADD names, so a containment
     /// assertion over a delta never false-fails.
     static var refusedLeafNames: [String] {
@@ -85,15 +86,17 @@ nonisolated enum KeychainTestTripwire {
         return refusedNames
     }
 
-    /// pre-13x 1a: the E2EE family is per store now (`<scope>-<storeID>-…`),
-    /// so what a test process must never mutate is an item under one of
+    /// pre-13x 1a made the E2EE family per store (`<scope>-<storeID>-…`), and
+    /// the protection road's family is per scope too, so what a test process
+    /// must never mutate is an item under one of
     /// the REAL scopes — the store variants' raw values (`Variorum`,
     /// `Variorum-dev`) — and the legacy fixed accounts. A throwaway scope is
     /// exactly that, and the per-store pins write under one (the store-key
     /// family's own precedent).
     static let realScopes: Set<String> = Set(AppDatabase.StoreVariant.allCases.map(\.rawValue)).union(["legacy"])
 
-    /// Consulted FIRST by every E2EE write/delete leaf: true = refuse,
+    /// Consulted FIRST by every keychain write/delete leaf of the road's family
+    /// (`ProtectionKeychain.refuseUnderTest`): true = refuse,
     /// recorded. Never fires in production. A REFUSAL rather than a trap,
     /// deliberately: the leaf's `false`/no-op is observable (the pin
     /// exercises the leaves themselves), while a trap would kill the very
@@ -105,7 +108,7 @@ nonisolated enum KeychainTestTripwire {
         trips += 1
         refusedNames.append(leaf)
         tripLock.unlock()
-        NSLog("KeychainTestTripwire: refused E2EEKeychainStorage.%@ under the REAL scope %@ from a test process (the 13p-fix R3-1 class) — drive the injected seams or a throwaway scope instead", leaf, scope)
+        NSLog("KeychainTestTripwire: refused the keychain leaf %@ under the REAL scope %@ from a test process (the 13p-fix R3-1 class) — drive the injected seams or a throwaway scope instead", leaf, scope)
         return true
     }
 }
@@ -127,13 +130,12 @@ nonisolated enum KeychainTestTripwire {
 /// itself. It is a documented no-op on iOS, which has only the
 /// data-protection keychain.
 ///
-/// **Every custody family merges it since pre-13x 1a** — the store key's
-/// silent item since #82 (R-pre13u-3: core's `StoreKeyKeychain` runs the
-/// TN3137 read→re-add-with-flag→delete-old migration), and now the E2EE
-/// sync custody (`E2EEKeychainStorage`, per store) and the session tokens
-/// (`KeychainAuthStorage`, device-bound) by the same road — the postures
-/// design's §1.13: custody items per store id, session tokens device-bound,
-/// nothing usable in a Migration-Assistant or Time-Machine copy.
+/// **Every keychain family merges it** — the session tokens
+/// (`KeychainAuthStorage`, device-bound) and the protection road's family
+/// (`ProtectionKeychain`); today's custody families that merged it since
+/// pre-13x 1a (the store key's `StoreKeyKeychain`, the E2EE sync custody's
+/// `E2EEKeychainStorage`) left with today's road at VX-329 U1. Nothing is
+/// usable in a Migration-Assistant or Time-Machine copy.
 nonisolated enum KeychainPartition {
     /// Computed, not stored: `[String: Any]` is not `Sendable`, and a
     /// fresh dictionary per call costs nothing beside a Keychain round

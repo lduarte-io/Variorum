@@ -362,8 +362,8 @@ final class AppServices {
         guard sync.allowsSync else { return }
         guard await runOwnerAdoption() else { return }
         // VX-314: the account-binding gate — wired only where a bound-account
-        // read exists (the new road's composition); nil leaves the engine's
-        // gate inert, so today's road is byte-unchanged.
+        // read exists (the road's composition — every root since VX-329 U1);
+        // nil (a test's composition) leaves the engine's gate inert.
         let binding = boundAccountRead.map { read in
             SyncAccountBinding(
                 boundAccount: read,
@@ -422,8 +422,8 @@ final class AppServices {
     /// VX-308 U1 (P-VX308-U1-F1, the U1 ARBITRATION's refined (b)) — the new
     /// road's after-deletion hook: the deleted account's id, once the server's
     /// deletion landed (before the sign-out). The composition root wires it
-    /// on the new road only (`AppBootstrap.accountDeletedOnNewRoad`); nil —
-    /// today's road — runs nothing.
+    /// (`AppBootstrap.accountDeletedOnNewRoad` — every root since VX-329 U1);
+    /// nil (a test's composition) runs nothing.
     var afterAccountDeleted: (@MainActor (String) async -> Void)?
 
     func deleteAccount(accountPassword: String) async {

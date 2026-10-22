@@ -301,9 +301,31 @@ form). Machinery note: the orchestrator's own commits interleave on this branch 
   key file OPENS it — this build reads none of today's) and claims nothing keyless, but it does not say an older
   Variorum's key file is there. Naming it needs a new fact (the road's facts do not see foreign names, rule 26) and new
   words — hers.
-- Piece 6 — the sweep table: NOT-STARTED.
+- Piece 6 — the sweep table: DONE (this commit; the table below). Comments that still described today's road as
+  present (the "nil on today's road" family, the tripwire's leaf log line, the vault-bootstrap brain's caller note, the
+  retention rule's home, the harness's init) reworded to what is true — history kept, the claim made true; every
+  source-string pin that held on the pre-cut tree and no longer does was found by a scan (pre-cut product sources vs
+  now) and fixed (`EmptySlotDoorsSurfaceTests`, `FollowDoneNoticeTests`, `U2WordsTests`, `RoadAccountSurfaceTests`).
 - Evidence — `swift test` + `swift test -c release` (counts), `xcodebuild build-for-testing` (Mac), the iOS target build:
   PENDING.
+
+**THE SWEEP TABLE (piece 6 — every deleted symbol `rg`'d as a WORD across `Sources/`, the app's four source and test
+folders, `Tests/`, `Tools/` and `Package.swift`, at this commit; DerivedData excluded):**
+
+| Symbol(s) | Remaining | Cells |
+|---|---|---|
+| `CustodyCollisionRule` `LibraryAsideCopies`(code) `StoreKeyKeychain`(code) `deviceKeychain*` `ensureStoreIdentity` `mintStoreIdentity` `StoreUnlock`(code) `RehearsalFixture` `ScratchLibrary` | 0 code | DELETED |
+| `AppleKeyCustody` `AppleKeyLeaves` `AppleRelinkModel` `CeremonyAct` `ConnectLibraryError` `connectLibrary` `CustodyHandover` `FollowNotice` `GatedSaveChoreography` `InMemoryStoreKeyGuardBacking` `KeyDoorModel` `KeyDoorView` `LibraryOpenSheet` `LobbyVaultRoad` `MobilePostureSheets` `MobileProtectionCeremonies` `MobileProtectionSheet` `PassphraseSetModel` `PostureSwitchModel` `ProtectionLegs` `ProtectionNoticeBar` `RawKeyCustody` `ScriptedDialsBox` `ScriptedEnvelopeBox` `ScriptedStampsBox` `StoreLaunchRoute` `SyncCustodyScope` `SyncCustodySession` `VaultTie` `WordsCeremony` `existingBackups` `wireOneSecretHooks` `testPresence` `waitingForICloudKeychain` `awayChoices` `awayLabel` `checklistRows` `postureCard` `privacyLessonTwoTitle` `lockTimeCopy` `folderHoldingPair` `protection.restoreHoldStands` | 0 anywhere | DELETED |
+| `StoreKeyEnvelope` `StoreKeyEnvelopeError` `StoreIdentity` `BackupRestoreCandidates` `LibraryAdoption` `LibraryOpenModel` `BackupRetention` `PostureSwitch` `PostureCopy` `PostureFollowModel` `KeyDoorCopy` `EncryptionSession` `EncryptionView` `SyncCustodyRecord` `E2EEKeychainStorage` `E2EECustodyLeaves` `DeviceKeyStore` `DeviceKeySyncProvider` `AppleKeyKeychain` `StoreKeyGuard` `StoreKeyGuardKeychain` `StoreLaunchGate` `StoreLobby` `StoreAtOpenMode` `ProtectionDials` `ProtectionMigration` `LegacyLegs` `SecretCheckModel` `SyncEnrollmentModel` `SyncEnrollmentView` `ProtectionStatusRow` `MobileStoreLockView` `WordsCopyDoor` `adoptLibrary` `copyKeyEnvelope` `integrityCheck` `performBackupIfDue` `performPrimaryLeg` `performSecondLeg` `performLockTimeCopyIfDue` `restoringByTheDoor` `opensOnTheNewRoad` `onTheNewRoad` `StoreEncryptionMigration.rekey` `wordsCopied` `testOpener` `LibraryClassifier.pairedKeyFile` | 1–7 each | COMMENT-ONLY — history notes saying the symbol left at VX-329 U1 (each read; none describes it as present), the pins that assert ABSENCE (`!contains`), the relocation notes of what moved byte-for-byte |
+| `backupNameFingerprint`, `pairedKeyFile` | `CatalogTests` | NEW-ROAD TEST ORACLE — `OlderBuilds`, today's parsers frozen byte-for-byte so the catalogue keeps reading the names older builds left on disk |
+| `StoreLaunchGate`, `StoreLockView` in `Tools/StringsWorkbook/Tests/WorkbookPlanTests.swift:84,92`, `InventoryParserTests.swift:43` | 3 | FIXTURE TEXT — inventory lines inside the parser tests' multi-line literals (paths as data, never read) |
+| `StoreLockView` (the file) | 6 | NEW-ROAD — the file keeps its name and holds `RoadLockView` (the pins read it by path) |
+| `Posture` | 6 code | NEW-ROAD — `Promises.swift`'s own test-local `struct Posture` (the scenario's), another type; the rest comments (`FallbackCanary`'s unrelated "Posture (memo)") |
+| `newRoad` | 4 code | NEW-ROAD — a local variable named `newRoad` in `DataSafetyRoadCountsTests`; the rest comments and the fork-absence pin's literals |
+| `VaultBootstrap` | 21 code | KEPT, FLAGGED — the 14b vault brain (`Crypto/VaultBootstrap.swift`) and its suite; its CLI shell deleted (R-U1-3); no app caller (L1 flags) |
+| `rekeyLibrary`, `RotationMarker`, `CorpusRotation` | Sync/ + 2 test lines | L1's — the fence (the flags below) |
+| `StorePlaintextExport` | 28 | NEW-ROAD — the decrypted export's writer and the classifier's export check (kept) |
+| `LocalMachineryRecreation` | its file, its suite, `ProtectionRecordSchemaTests` | KEPT, FLAGGED (F-U1-9) — orphaned in product since `LibraryOpenModel` left; a new-road pin reads it |
 
 **L1 FLAGS (Sync/ references to deleted symbols — the orchestrator's carve; file:line, symbol):** none of these
 breaks the build today (the symbols live IN Sync/ until L1 deletes them); every writer of the rotation marker is gone

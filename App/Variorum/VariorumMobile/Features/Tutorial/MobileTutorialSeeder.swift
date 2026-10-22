@@ -785,7 +785,8 @@ enum MobileTutorialSeeder {
         //
         // pre-13x 5a — copy §7's SHORT chapter in the phone's one-lesson
         // edition: both lessons' paragraphs VERBATIM from the copy constants
-        // (`PostureCopy.swift`), the phone's nouns riding the interpolation
+        // (`ProtectionCopy.swift` since VX-329 U1 — they moved there byte-for-byte
+        // from `PostureCopy.swift`), the phone's nouns riding the interpolation
         // (iPhone · Face ID), under the copy's first title. The 13p dials
         // lesson retired with the presets and the reset door it described.
 

@@ -81,10 +81,10 @@ struct AppSettingsView: View {
     /// 13x F1 (R1-MAJOR): Data Safety's hand-off twin (Settings' own
     /// presenter behind it). nil hosts render no door.
     let handOffDoor: (() -> Void)?
-    /// VX-306 U2: the new road's open library faces (nil on today's road) —
+    /// VX-306 U2: the road's open library faces (nil while no library is open on it) —
     /// the Protection pane's one *Set a passphrase…* row reads it.
     let roadStanding: RoadStandingModel?
-    /// VX-306 U3: the new road's Restore list (nil on today's road) — Data Safety's rows read it.
+    /// VX-306 U3: the road's Restore list (nil while none stands) — Data Safety's rows read it.
     let roadDoors: RoadDoorsHost?
 
     init(

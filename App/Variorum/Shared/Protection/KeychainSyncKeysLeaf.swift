@@ -10,8 +10,8 @@
 //
 //  Real and tested; NO ACT OF THIS PHASE CALLS IT (P-VX306-K3: the vault is unreachable, the record names
 //  no account — creation binds none; sync setup is VX-308's door). Today's sync-key custody
-//  (`SyncCustodyRecord`, `DeviceKeySyncProvider`, `E2EEKeychainStorage`) is UNTOUCHED — sync keeps
-//  running on it in every configuration until VX-307/308 cross it.
+//  (`SyncCustodyRecord`, `DeviceKeySyncProvider`, `E2EEKeychainStorage`) was deleted with today's road at VX-329 U1; this
+//  leaf is the engine's one custody since.
 //
 
 import Foundation

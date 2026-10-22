@@ -7,8 +7,9 @@ import Testing
 /// pre-13x batch 1a (the postures design §3.3 / §12 "keys in custody, never
 /// in the file"): the library file carries WRITING AND LOCAL BOOKKEEPING
 /// ONLY — never a key and never an identity. The sync keys and the device
-/// identity ride the per-store custody item (the app layer's
-/// `E2EEKeychainStorage`) and reach the engine through `SyncKeyProviding`;
+/// identity ride the custody items (the app layer's — today's
+/// `E2EEKeychainStorage` until VX-329 U1, the protection road's custody leaves
+/// since) and reach the engine through `SyncKeyProviding`;
 /// the store's `sync_state` no longer holds `device_id`. Pinned by a BYTE
 /// SCAN of an on-disk PLAINTEXT store (so the bytes are scannable) after
 /// real rounds, of its `backup(to:)` copy, and again after

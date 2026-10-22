@@ -18,7 +18,7 @@
 //      words away (a stray Return must never).
 //    - `TourEndLibraryBlock` — the tour's last card's two asks side by side (rule 3): the passphrase and the words.
 //    - `WordsLookSection` — Settings ▸ Protection's door (the ✕'s toast names it; rule 7's "new-words door").
-//  All of it on the NEW road only (the models exist only there — Debug); today's road renders none of it.
+//  All of it over the road's models (VX-329 U1: in every build — today's road, which rendered none of it, is gone).
 //
 
 import SwiftUI

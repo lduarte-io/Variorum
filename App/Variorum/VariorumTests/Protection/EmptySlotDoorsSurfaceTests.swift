@@ -36,13 +36,14 @@ struct EmptySlotDoorsSurfaceTests {
     /// Finder reveal byte for byte); rule 27's face (the new road only) gets it with its copies-home gate.
     @Test func theFacesWithNoLibraryOpenTakeTheDoorsRestoreOnTheNewRoadOnly() throws {
         let app = try Self.code("Variorum/VariorumApp.swift")
-        #expect(app.contains("restoreDoor: bootstrap.newRoad ? { libraryOpen.openRestoreList(bootstrap: bootstrap) } : nil)"))
+        // VX-329 U1: one road — the missing face takes the doors' Restore unconditionally (today's nil arm, the Finder
+        // reveal, left with today's road).
+        #expect(app.contains("restoreDoor: { libraryOpen.openRestoreList(bootstrap: bootstrap) })"))
         #expect(app.contains("restoreDoor: { libraryOpen.openRestoreList(bootstrap: bootstrap) },"))
         #expect(app.contains("copiesHome: bootstrap.liveStoreURL.map(RoadLockView.copiesHome(besideStore:)) ?? false)"))
         let missing = try Self.code("Variorum/LibraryMissingView.swift")
         #expect(missing.contains("if let restoreDoor, lobby.copiesHomeExists {"))
-        #expect(missing.contains("} else if restoreDoor == nil, let folder = lobby.backupsFolderURL {"),
-                "today's road keeps the Finder reveal")
+        #expect(!missing.contains("backupsFolderURL"), "the Finder reveal left with today's road")
         let lock = try Self.code("Variorum/StoreLockView.swift")
         #expect(lock.contains("if let restoreDoor, copiesHome {"))
     }
@@ -51,7 +52,6 @@ struct EmptySlotDoorsSurfaceTests {
     @Test func thePresentersRestoreListIsTheDoorsListingOnTheNewRoad() throws {
         let door = try Self.code("Variorum/LibraryOpenDoor.swift")
         #expect(door.contains("func openRestoreList(bootstrap: AppBootstrap) {"))
-        #expect(door.contains("bootstrap.newRoad,"))
         #expect(door.contains("let roads = bootstrap.copyDoorsRoadsWithoutALibrary() else { return }"))
         #expect(door.contains("Task { await fresh.beginListing() }"))
         let sheet = try Self.code("Variorum/Features/Protection/CopyDoorsSheet.swift")

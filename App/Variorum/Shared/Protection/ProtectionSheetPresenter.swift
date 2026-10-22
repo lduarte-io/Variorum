@@ -19,8 +19,8 @@
 //      missing face, a failure — so a sheet never re-presents after an unlock. An act still running under a dropped sheet
 //      finishes on its own road; its sheet is simply gone.
 //
-//  Today's road keeps its own presenters (the controller's ceremony and follow) byte-unchanged — its two bugs close by
-//  its retirement at VX-329.
+//  Today's road's own presenters (the controller's ceremony and follow) and their two bugs were retired with it at VX-329
+//  U1; this is the one presenter.
 //
 
 import Foundation

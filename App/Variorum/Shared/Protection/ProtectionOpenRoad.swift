@@ -3,8 +3,8 @@
 //  Variorum (shared: Mac + Mobile)
 //
 //  VX-306 U1b — THE NEW OPEN ROAD, off the main actor (`notes/plans/vx-306-castle-open-road.md` §2 U1b; the
-//  contract `notes/CastleRules.md`). Reached ONLY behind the one switch (`ProtectionRoad.newRoadIsLive`, read at
-//  the head of `AppBootstrap.routeAndOpen`). Nothing here decides: the gatherer's facts go to `assess`, its
+//  contract `notes/CastleRules.md`). Since VX-329 U1 (the release switch) the ONLY open road, in every build — the
+//  bootstrap's `routeAndOpen` reaches it for every store. Nothing here decides: the gatherer's facts go to `assess`, its
 //  `LaunchVerdict` routes, every road verifies itself against the library in the slot, and the executor is the
 //  one thing that writes.
 //
@@ -656,8 +656,9 @@ nonisolated struct ComposedRoad: Sendable {
     func context() -> RoadContext { RoadContext(system: system, session: sessionFact(), writes: writes) }
 }
 
-/// TEST-ONLY: a new-road bootstrap over a temp slot and a throwaway scope (`AppBootstrap(testOpener:…,
-/// protectionRoad:)`) — the system, the sign-in, and the opener that opens the temp slot with the key in hand.
+/// TEST-ONLY: a bootstrap over a temp slot and a throwaway scope (`AppBootstrap(testStoreURL:protectionRoad:)` — VX-329
+/// U1: required, the bootstrap's one road) — the system, the sign-in, and the opener that opens the temp slot with the
+/// key in hand.
 struct ProtectionRoadTestHarness {
     var system: ProtectionSystem
     var session: SessionFact = .signedOut

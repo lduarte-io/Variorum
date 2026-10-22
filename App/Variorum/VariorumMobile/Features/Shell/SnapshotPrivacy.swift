@@ -7,7 +7,8 @@
 //  for her walk): iOS snapshots the window when the app deactivates, and
 //  that snapshot lives in the app switcher. If the 12 recovery words (or
 //  a typed phrase entry) are on screen, the snapshot holds them. The
-//  shared EncryptionView marks exactly those spans `privacySensitive`;
+//  shared faces that show them mark exactly those spans `privacySensitive`
+//  (today's EncryptionView did first; it left with today's road at VX-329 U1);
 //  this rule turns the marking into redaction whenever the scene is not
 //  active, so the words never ride into a snapshot. Everything unmarked
 //  renders normally — the switcher keeps its ordinary preview.

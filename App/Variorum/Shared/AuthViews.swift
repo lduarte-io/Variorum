@@ -162,8 +162,9 @@ struct AccountView: View {
         .tint(pageStyle?.tokens.accent)
         // Mac-only floor (review round 1, R1-2): an iPhone sheet proposes
         // ~393 pt — a forced width clips the form on the phone door. macOS
-        // keeps a minimum sized for the wider Encryption tab (its 460, the
-        // pre-tabs EncryptionView floor).
+        // keeps the minimum the Encryption tab once sized (its 460, the
+        // pre-tabs EncryptionView floor — the tab left with today's road at
+        // VX-329 U1; the width stays the sheet's).
         #if os(macOS)
         .frame(minWidth: 460, minHeight: 340)
         #endif

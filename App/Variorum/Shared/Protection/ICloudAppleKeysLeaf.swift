@@ -5,9 +5,10 @@
 //  VX-306 U1a — THE PRODUCTION `AppleKeysLeaf` (`Executor/Leaves.swift`): Apple keys in iCloud Keychain —
 //  synchronizable generic passwords, service `ProtectionNames.appleKeyService` (today's), account
 //  `<scope>-apple-key-<id>` (NAMED BY THEIR OWN ID — the old shared `<scope>-apple-key` is never read: the
-//  parser refuses it, rule 26), the SHARED access group today's `AppleKeyKeychain` uses (team prefix +
-//  shared suffix — the phone shares it), `kSecAttrAccessibleAfterFirstUnlock`, NO access control (Apple does
-//  not sync an ACL'd item — the Apple facts §10). The value is today's `AppleKey` JSON `{id, key}`.
+//  parser refuses it, rule 26), the SHARED access group (`ProtectionKeychain.sharedGroup` — team prefix + shared suffix,
+//  the phone shares it; today's `AppleKeyKeychain` used the same, and was deleted at VX-329 U1),
+//  `kSecAttrAccessibleAfterFirstUnlock`, NO access control (Apple does not sync an ACL'd item — the Apple facts §10). The
+//  value is the `{id, key}` JSON today's `AppleKey` wrote (kept byte-for-byte — `StoredAppleKey` below).
 //    - `readableAppleKeyIDs` — the own-named items present AND readable here (each read, its id checked);
 //    - `addAppleKey` — a fresh key under its own name, STAMPED (`kSecAttrLabel` = the library ID, VX-390);
 //      an item already under that name is never overwritten (a key is never replaced in place) — the same

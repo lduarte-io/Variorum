@@ -247,7 +247,7 @@ struct RoadCrossingsSection: View {
                     .alarmVoice()
             }
             // VX-309 U1c — VX-451 (F-U4-1's option (a)): the idle dial — this Mac's SEALED minutes (`changeSettings`) — and
-            // Lock Library Now, here where Castle stands (P-2: this section exists only in Castle); today's road untouched.
+            // Lock Library Now, here where Castle stands (P-2: this section exists only in Castle).
             Picker(ProtectionCopy.idleLabel, selection: Binding(
                 get: { row.idleMinutes ?? 0 },
                 set: { minutes in Task { await model.setIdleMinutes(minutes == 0 ? nil : minutes) } })

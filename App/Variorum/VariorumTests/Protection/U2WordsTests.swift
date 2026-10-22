@@ -250,11 +250,13 @@ struct U2WordsTests {
         let gate = try #require(pane.components(separatedBy: "if roadStanding != nil {").dropFirst().first)
         #expect(gate.prefix(500).contains("ProtectionWords.dataSafetyTheCountsAreThisMacs")
             && gate.prefix(500).contains("ProtectionWords.dataSafetyWhatOpensABackup"))
-        #expect(pane.contains("roadStanding != nil\n                     ? ProtectionWords.dataSafetySecondFolderKept"))
+        // VX-329 U1: one road — the second folder's line is the road's, unconditionally (today's caption left with it), and
+        // the guide seeds the road's chapter in every store (no road parameter is left).
+        #expect(pane.contains("Text(ProtectionWords.dataSafetySecondFolderKept)"))
         let seeder = try String(contentsOf: app.appendingPathComponent("Variorum/Features/Tutorial/TutorialSeeder.swift"),
                                 encoding: .utf8)
-        #expect(seeder.contains("onTheNewRoad: ProtectionRoad.opensOnTheNewRoad(devStore: session.storeVariant == .dev)"))
-        #expect(seeder.contains("onTheNewRoad: Bool = false"), "a direct seed is today's edition unless asked")
+        #expect(!seeder.contains("onTheNewRoad"), "no road parameter is left")
+        #expect(!seeder.contains("opensOnTheNewRoad"), "the dev-store fence is gone")
     }
 
     // MARK: - Piece 9 — U1a–U1c's undrafted words, one pass in §7c's voice (P-VX309-U1b-3, P-VX309-U1c-1 → P-VX309-U2-10)

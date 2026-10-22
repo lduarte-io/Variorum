@@ -618,8 +618,8 @@ nonisolated enum ProtectionWords {
     static let wordsLookRuleSix = "Your library's key doesn't change: every backup opens with these words, and still "
         + "with the words you had when you made it."
     /// VX-412's Copy door and its caption. VX-308 U3 — VX-448 (her ruling, QUESTIONS #235: the 60-second timer and the
-    /// restore go; a concealed type, cleared at lock and at quit): the caption says the new road's rule (PROVISIONAL
-    /// P-VX308-U3-2 — today's road keeps its own sentence, `ProtectionCopy.wordsCopied`, with its own rule).
+    /// restore go; a concealed type, cleared at lock and at quit): the caption says the road's rule (PROVISIONAL
+    /// P-VX308-U3-2; today's own sentence, `ProtectionCopy.wordsCopied`, left with today's road at VX-329 U1).
     static let wordsLookCopy = "Copy"
     static let wordsLookCopied = "Copied. Your clipboard keeps them until you copy something else, your library locks or "
         + "Variorum quits."
@@ -1041,7 +1041,7 @@ nonisolated enum ProtectionWords {
 
     // MARK: - VX-309 U2 — DATA SAFETY ON THE NEW ROAD (F-U2c-4; F-U1a-3) — PROVISIONAL P-VX309-U2-9
 
-    /// F-U2c-4 — RULE 5's sentence for the pane (the copies section; today's road keeps its posture lines): what opens a
+    /// F-U2c-4 — RULE 5's sentence for the pane (the copies section; today's posture lines left with today's road): what opens a
     /// backup, with VX-263's quiet-road clause.
     static let dataSafetyWhatOpensABackup = "A backup is your library plus its key file. It opens with the passphrase and "
         + "twelve words you had when you made it, with your current ones too, or \u{2014} on this "

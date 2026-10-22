@@ -171,8 +171,8 @@ nonisolated enum ProtectionCopy {
     /// the export OFF with copy §2b's notice). VX-307 U2c (VX-379's row; U2a's
     /// F-6): in RULE 11's language — "a plain copy on disk would undo the
     /// promise; it is your call" (`notes/CastleRules.md`; U2a's notice says
-    /// the same) — true on both roads; on the new road Data Safety shows it by
-    /// the OPEN library's posture. PROVISIONAL P-VX307-U2c-7.
+    /// the same); Data Safety shows it by the OPEN library's posture (VX-329 U1:
+    /// the one road). PROVISIONAL P-VX307-U2c-7.
     static let plaintextExportUnderLockedDown =
         "You're in Castle — and a scheduled plain-text copy on disk would undo "
         + "Castle's promise: every note, readable, on a timer, in the folder you "

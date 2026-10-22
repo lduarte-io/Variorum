@@ -769,7 +769,7 @@ final class AppBootstrap {
 
     /// **MAKE THIS MY LIBRARY** (rule 17; the plan's U3 addendum) — one confirmed door, on the new road at ready. Every
     /// check first, all reads (`ProtectionCopyDoors.preflight` — a typo never tears the window down); then
-    /// `adoptLibrary`'s seam shape: the composition root's teardown (`onWillLock` — flush, savepoint, stop), the
+    /// 13x's adoption seam's shape (`adoptLibrary`, deleted with today's road at VX-329 U1): the composition root's teardown (`onWillLock` — flush, savepoint, stop), the
     /// `.ready` tree down, the app's pool CLOSED through the binding (a checkpoint-truncate, then the close — the
     /// swap's precondition), and the act off the main actor (`ProtectionCopyDoors.makeMine`: the restore hold by the
     /// core writer, the executor's plan); then the reopen THROUGH THE ROAD with the

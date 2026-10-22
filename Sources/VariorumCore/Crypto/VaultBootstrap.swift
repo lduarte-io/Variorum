@@ -6,8 +6,10 @@ import Foundation
 /// architect's pre-spawn concretization: the Round-5 overnight arrangement's
 /// EXECUTOR). The wipe-and-repush client half (`resyncReinitialize`, R-2)
 /// productized behind an explicit, announced door: a headless maintenance
-/// act, never reachable from any app surface — the CLI shell in
-/// `Tools/VaultBootstrap/` is its only caller besides the tests.
+/// act, never reachable from any app surface. Its CLI shell
+/// (`Tools/VaultBootstrap/`) was deleted at VX-329 U1 (its unlock read today's
+/// key file), so the tests are its only caller now — FLAGGED in the U1 record
+/// for the orchestrator's carve.
 ///
 /// The acts, each logged: create the vault (passphrase wrap ONLY, Round 5;
 /// REFUSES on an existing row — idempotence by refusal, never overwrite) OR

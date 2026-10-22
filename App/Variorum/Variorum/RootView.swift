@@ -68,8 +68,8 @@ struct RootView: View {
     /// delegate's ONE model (one per process, every window's Bookcase reads
     /// it); nil in harness mounts, which then draw no offer.
     let tourOffer: TourOfferModel?
-    /// VX-307 U2b — the open library's protection faces on the NEW road (the bootstrap's `roadStanding`; nil on
-    /// today's road and in harness mounts): the card above the quick entry (the twelve words and rule 3's reminder)
+    /// VX-307 U2b — the open library's protection faces (the bootstrap's `roadStanding`; nil while no library is open on
+    /// the road, and in harness mounts): the card above the quick entry (the twelve words and rule 3's reminder)
     /// and the tour's last card's two asks. The shell renders their views and never holds a sibling's model beyond
     /// handing it down (composition's road).
     let protectionFaces: RoadStandingModel?
@@ -999,7 +999,7 @@ struct RootView: View {
     }
 
     /// VX-307 U2b — the tour's last card's two asks (rule 3: the passphrase and the words, side by side): a fresh
-    /// model each time the end card shows (the new road only; nil — today's road — leaves the end card as it was).
+    /// model each time the end card shows (nil while no protection faces stand — the end card draws without the asks).
     private var tourEndLibrary: (@MainActor () -> TourEndLibraryModel)? {
         guard let standing = protectionFaces else { return nil }
         return { TourEndLibraryModel(standing: standing) }

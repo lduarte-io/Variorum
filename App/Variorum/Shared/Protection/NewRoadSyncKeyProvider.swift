@@ -5,8 +5,8 @@
 //  VX-307 U1 — THE ENGINE'S KEY SEAM ON THE NEW ROAD (the plan §5a piece 4; P-VX306-K3's two-systems
 //  coexistence ends here): on the new road the sync engine reads the account's keys from the protection
 //  core's custody — `KeychainSyncKeysLeaf` (rule 15: the master, the current sync key and every earlier
-//  one, held by the account's mode) — never today's `SyncCustodyRecord`. Today's road keeps
-//  `DeviceKeySyncProvider`, byte-unchanged (the composition site switches on `AppBootstrap.newRoad`).
+//  one, held by the account's mode) — never today's `SyncCustodyRecord`. VX-329 U1: the ONE provider — today's
+//  `DeviceKeySyncProvider` and the composition's road fork left with today's road.
 //
 //  The provider is attached to the road session at each ready (the `ProtectionBackupHook` shape). With no
 //  session, no bound account, or no readable keys it throws — the engine refuses the round visibly, outbox
@@ -15,9 +15,8 @@
 //  rounds run while an act or unlock has loaded session memory; P-VX307-U1-3). The device identity is the
 //  record's own (rule 23), read from the attached session.
 //
-//  Honest limit this phase: the new road reaches only the dev store, whose `SyncSession` never configures
-//  (`allowsSync` is the real store's alone) — so this provider is structural, proven by its suite, and
-//  dormant live until VX-329.
+//  VX-329 U1 — THE RELEASE SWITCH: the road reaches every store now, so this provider is the engine's live key seam
+//  (it was structural and dormant while the new road reached only the dev store, whose `SyncSession` never configures).
 //
 
 import CryptoKit
@@ -30,7 +29,7 @@ nonisolated final class NewRoadSyncKeyProvider: SyncKeyProviding, @unchecked Sen
 
     init() {}
 
-    /// The road session of the current open (nil detaches — today's road, or none yet).
+    /// The road session of the current open (nil detaches — no library open on the road, or none yet).
     func attach(_ session: ProtectionRoadSession?) {
         lock.withLock { self.session = session }
     }

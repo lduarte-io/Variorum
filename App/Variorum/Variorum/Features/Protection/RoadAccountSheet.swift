@@ -417,7 +417,7 @@ struct ProtectionSheetsHost: ViewModifier {
 }
 
 extension View {
-    /// The new road's protection sheets, presented through the one presenter (nil on today's road — nothing presents).
+    /// The road's protection sheets, presented through the one presenter (nil — no library open — nothing presents).
     func protectionSheets(_ presenter: ProtectionSheetPresenter?, services: AppServices?) -> some View {
         modifier(ProtectionSheetsHost(presenter: presenter, services: services))
     }

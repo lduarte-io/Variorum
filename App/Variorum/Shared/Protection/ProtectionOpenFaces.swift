@@ -282,8 +282,8 @@ final class RoadStandingModel {
     let band: WordsBandModel?
     /// VX-307 U2c (VX-379's pane rows, U2a's F-6): the OPEN library's posture — the record's mode, read when this
     /// open's faces were made (a crossing reopens, and the reopened library gets faces of its own). Settings ▸ Data
-    /// Safety's Castle warning reads it on the new road (today's controller's posture is today's road's). nil: not
-    /// known (a test's hand-made faces).
+    /// Safety's Castle warning reads it (VX-329 U1: its only input — today's controller's posture left with today's road).
+    /// nil: not known (a test's hand-made faces).
     let posture: ProtectionMode?
     /// VX-309 U1a (VX-397): Settings ▸ Data Safety's counts on the new road — THIS Mac's pairs of THIS library per place,
     /// read from the catalogue off the main actor (`ProtectionCopyCounts`). nil (a test's hand-made faces): the pane keeps

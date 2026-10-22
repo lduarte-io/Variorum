@@ -10,10 +10,11 @@ import Foundation
 // its open finishes — the open's own plan removes it). (Today's flat files and
 // their never-prune arm left with rule 26 — VX-378 U1.)
 //
-// The far folder's 14 + 4 rule is today's `BackupRetention.keep`
-// (App/Variorum/Shared/BackupRetention.swift — her 13l ruling), restated
-// here byte for byte in its decisions so the core owns the one rule; the
-// container's is today's newest-14 (`StoreBackup.prune`). Pure: the catalog
+// The far folder's 14 + 4 rule was today's `BackupRetention.keep` (her 13l
+// ruling), restated here byte for byte in its decisions so the core owns the
+// one rule — and since VX-329 U1 (today's `BackupRetention` and its flat
+// prune deleted with today's road) the only home it has; the container's is
+// the newest-14 today's `StoreBackup.prune` kept. Pure: the catalog
 // in, the copies to prune out; the caller removes each with its pair (VX-309 U1a: the app's pair road runs it after
 // every pair it lands — `ProtectionBackupHook.takePair` — through the backups leaf; the predicate lives in `OwnCopies`).
 
@@ -93,7 +94,7 @@ public enum Retention {
         return Outcome(prune: prune.sorted(), keep: keep.sorted())
     }
 
-    // MARK: - Today's 14 + 4 rule (BackupRetention.keep, restated)
+    // MARK: - The 14 + 4 rule (today's BackupRetention.keep, restated — its one home since VX-329 U1)
 
     /// Whole days since the epoch, UTC — the grain the names carry.
     static func dayIndex(_ date: Date) -> Int { Int(floor(date.timeIntervalSince1970 / 86_400)) }

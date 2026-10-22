@@ -168,7 +168,7 @@ nonisolated enum MarkdownInsurance {
     // MARK: - Retention (whole folders, oldest first)
 
     /// Removes export folders beyond `keep`, oldest first. Returns how many
-    /// went. Deliberately simpler than `BackupRetention`'s 14+4 rule: these
+    /// went. Deliberately simpler than the far folder's 14+4 rule (`Retention`): these
     /// are bulky (a copy of every note) and their job is "the most recent
     /// prose exists in plain text", not reach into the past — the snapshots
     /// beside them are what reach.

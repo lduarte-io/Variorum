@@ -4,8 +4,8 @@
 //
 //  VX-307 U1 — THE PRODUCTION `VaultLeaf`: the core's `AccountVaultClient` (the marker-14 `key_vault`
 //  shape, `Server/supabase/17_phase_vx307_vault.sql`) behind the executor's leaf protocol. It replaces
-//  `UnreachableVaultLeaf` at `ProtectionSystem`'s composition on the NEW ROAD ONLY; today's road
-//  (`KeyVaultClient`/`KeyVaultFormat`, the postures machinery) is byte-untouched and keeps serving Release.
+//  `UnreachableVaultLeaf` at `ProtectionSystem`'s composition. VX-329 U1: the road is the only road, in Release too; today's
+//  postures machinery over `KeyVaultClient` left the app with today's road (the core's `KeyVaultFormat` is this leaf's too).
 //
 //  Honest limits this phase: the mirror still speaks marker 13 (the 17 artifact deploys only in the
 //  VX-329 release window — her ruling, the plan §1), so a LIVE fetch of a real account answers

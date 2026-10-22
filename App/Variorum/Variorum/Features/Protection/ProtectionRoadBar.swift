@@ -16,7 +16,7 @@
 //    - (RULE 3's REMINDER lived here until VX-307 U2b: the amended rule 3 makes the card above the quick entry its one
 //      home — "never a second bar" — so `WordsBandCard` renders it now, its words and cadence unchanged. This bar still
 //      re-reads the reminder's schedule when the app becomes active, for the card.)
-//  The bars render nothing on today's road (no model).
+//  The bars render nothing without a model (no library open on the road).
 //
 
 import SwiftUI

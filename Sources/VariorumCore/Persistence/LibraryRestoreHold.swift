@@ -7,8 +7,9 @@ import Foundation
 // The flag is a MARKER FILE beside the store (`variorum-restore-hold.json`),
 // per-store BY LOCATION — "held after restore" is a fact about the file
 // sitting at the store path, exactly what the location encodes. It is set
-// by the adoption itself (inside `LibraryAdoption.execute`, step 3½ —
-// 13x F1 R1-M2: before the move, so nothing ever lands un-held), cleared
+// by the landing itself (13x's `LibraryAdoption.execute`, step 3½ — F1
+// R1-M2: before the move, so nothing ever lands un-held; since VX-329 U1 the
+// road's copy doors, the restore hold by the core writer), cleared
 // by the one Resume press, and consulted at the round-trigger seam
 // (`Shared`'s `SyncSession` — the un-followed device's refused-rounds
 // precedent re-worn). It never travels: the hand-off folder and every
