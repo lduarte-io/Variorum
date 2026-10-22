@@ -34,6 +34,22 @@ nonisolated struct RoadRelockPolicy: Equatable, Sendable {
     }
 }
 
+/// THE IDLE CLOCK (decision 18: "the clock = time since Variorum was last used") — pure, so the cadence has pins. The
+/// Mac stamps `lastUsedAt` from its own event stream (never the system's idle clock, which any app's activity resets —
+/// "switching to another app doesn't lock it; time away does"); the phone reads the same rule on RETURN from the time it
+/// left the screen. (Moved here byte-for-byte from today's `StoreProtection.swift` at VX-329 U1 — the road's lock reads it.)
+nonisolated enum IdleLockClock {
+    static func isDue(idleSeconds: TimeInterval, minutes: Int?) -> Bool {
+        guard let minutes, minutes > 0 else { return false }
+        return idleSeconds >= Double(minutes) * 60
+    }
+
+    static func isDue(now: Date, lastUsedAt: Date?, minutes: Int?) -> Bool {
+        guard let lastUsedAt else { return false }
+        return isDue(idleSeconds: now.timeIntervalSince(lastUsedAt), minutes: minutes)
+    }
+}
+
 nonisolated enum ProtectionRoadLock {
     /// The account's sync keys held in session memory for the library the lock closes — dropped (the leaf's contract:
     /// "gone at a relock"). A library bound to no account holds none.

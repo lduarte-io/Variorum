@@ -661,3 +661,71 @@ writes an empty file (VX-461), VX-456's set-up arm (VX-462 — pinned headless a
 (VX-465), and five smaller findings; walk slips said in §8. Born tickets VX-461..VX-475 and the bundle QUESTIONS
 #237; the handoff `notes/handoffs/vx-309-handoff.md`. Mobile parity: nothing mobile-visible; the phone's guide
 chapter and passphrase faces are the VM-8 comment. Next: VX-329, its plan written at this closeout.
+
+## 2026-10-22 — VX-329 (Castle rebuild, the release switch; kickoff to closeout in one day)
+
+**The effort (the full record is `notes/plans/vx-329-release-switch.md` — the kickoff record §6, the cut, the
+briefs §6a–§6d, the unit records §5, the L0/L1/pg_temp/VX-465 records, the stage batch + closing batch records,
+THE REHEARSAL §8 + its addendum, THE RULING under the U4 record, the morning sitting record, the closeout §9; the
+ladder `notes/plans/vx-329-ladder-round-1.md` / `-round-1-fixes.md` / `-round-2.md` / `-round-3.md`).** Her
+mandate: the only session, no coordinator, overnight to a staged pause; Fable cold reviews; release 0.10; pg_temp
+rehearsed on the throwaway with production riding the marker-14 deploy set at her go. She woke mid-run and ruled
+live through the day.
+
+**§12 (SurfaceContracts, the portability + protection bullets) — what changed and why:** the Castle rebuild's last
+step. `ProtectionRoad.live` true for every build; today's whole deciding and writing road DELETED (~8,200 lines +
+suites; "nothing is kept read-only" — the ticket's word, the U1 sweep table the proof); the 13x portability road
+went with it (Send Library and the copy doors are the road's own); the lockstep marker 13→14 with artifact 17
+registered in the drift pin; the Sync/ carve (CorpusRotation, the rekey guards, `accountRekeyIncomplete`,
+`StaticSyncKeyProvider` — Fable's own hands); VX-423 as U3 (one `AuthSession` per process on the bootstrap — the
+two-refreshers race that burned refresh tokens pinned red-on-old by behavioral revert); the seven riders (VX-461
+the export door's rollback-journal mechanism fixed with an in-memory journal; VX-462 the quiet set-up arm; VX-463
+every words field concealed behind the shared field; VX-464 the account-naming refusals; VX-468 the what's-new
+wait; VX-469 (c)'s confirm line; VX-473 the banner's library-fact read); and U4 THE PRE-DESIGN FACE.
+
+**Her rulings, verbatim where quoted:** rule 27 amended at her word — "the account's passphrase or twelve words
+recover them from the account" (both wrap the vault's master; CastleRules edited in place at `8a369f4c5`, the two
+quoting comments and the runbook following). The refusal face first DECLINED at the morning sitting ("it's fine,
+this is just for my testers & myself"), then SUPERSEDED the same day by the §8 addendum's byte-copy finding — her
+real store's copy met 0.10 as a dead-end lobby — and she ruled U4 IN with her approved words: lead "This library
+is from an older version of Variorum."; body "This version can't open it. Open the previous version to copy
+anything out — or if it synced, your writing comes back when you sign in. Starting fresh sets this library aside,
+whole, in Previous Libraries."; doors Start fresh… / Open Library…; the confirm "Your old library will be set
+aside whole in Previous Libraries — nothing is deleted." (byte-pinned). The testers' choreography corrected by her
+("how can they open the app and let it sync once before updating if it can't sync after deploy?") — the sync-once
+window closes at HER deploy; her robust instruction "Copy out anything you need, then update and start fresh" is
+the script's line, and the round-3 reinstall-clause split got her word ("yeah that's fine"). RESTORE.md rewritten
+to the rules at her approval with her full edit pass; the two round-2 word corrections ("One copy a day lands in
+each place"; the pane, not each row, says what opens a copy) APPROVED BY HER and landed (`514f8e60c`) — the
+approval recorded here at round 3's ask. VX-465 accepted as designed (the one-library memory; a Low wording row
+minted). Her in-session latitude with round 3 in flight — "you can run a fourth round if you think it's
+necessary" — went UNUSED (round 3 passed with nothing structural).
+
+**U4's fork, ruled under the mandate (THE RULING in the plan):** Start fresh's set-aside could not reuse the
+planned-act machinery (a plan is sealed under a key; a pre-design store has none this build can hold) — ruled (a),
+the whole set-aside by link → one `RENAME_EXCL` commit → unlink, resumed from the files' identity (device + inode,
+never a byte), AND (D): both Open Library… landings and the gates ride the same act and fact. Round 3 read the
+mover line by line and confirmed rule 20's substance.
+
+**The cast and the ladder:** Fable orchestrated (L0, L1, the rehearsals, the stage batches, the walks, the fork
+ruling) with three fresh Fable reviewers; Opus implemented (U1, U3, R1, the fix legs, the r1/r2 fix legs, U4 — one
+fresh session each). Round 1: 1 MAJOR (record-class — the §2 proof claimed ahead of its record; the lesson "the
+record is the proof, never the plan") + 6 MINOR + 2 NIT; the export-pin dispute UPHELD for the implementer (the
+`-shm` counter-pin the pin of record, the reviewer's own pin withdrawn as hollow). Round 2: all r1 fixes
+confirmed; 1 MAJOR (five stale runbook pins — fixed test-side as justified edits) + 2 MINOR + 2 NIT. Round 3
+(final): PASS — 1 MINOR + 2 NIT, all wording/record-class, the orchestrator's own line-by-line fixes. The closing
+runs: Mac 5097/892 (one red — the rewritten runbook literal's missing final newline, a one-byte drift both earlier
+byte proofs were insensitive to; the suite's own pin caught it; fixed `190bf985e`) and phone 808/126 exit 0. The
+§8 rehearsal answered the phase's one question YES on real Postgres (rule 15 across the switch: the backfilled
+vault joined, the words moment spoke her draft byte-faithful, a fresh store pulled the pre-switch notes back
+verbatim by the typed passphrase alone); the walk window proved her face and the whole set-aside live on her real
+store's byte copy and landed VX-461's three live arms, VX-463/469's captures in both voices, VX-464's and
+VX-473's.
+
+**Born tickets** (triaged at the merge; the handoff lists them by priority): the MCP load-flake family, the export
+stranger-sidecar refusal (Low), F-FL-2, F-R1-4, F-U3-2, F-U3-3, walks-never-run-rounds, the VX-465 counts-wording
+row, the lifecycle never-list clause. The bundle QUESTIONS #238; the handoff `notes/handoffs/vx-329-handoff.md`.
+MOBILE PARITY: `notes/MobileSoul.md` PL-51. HERS AT THE WINDOW: the marker-14 deploy (the vx307 checklist + the
+pg_temp belt), both Macs' installs, her rounds, the release 0.10, the delta brief to the site agent, the
+throwaway's deletion. Next: VX-470 leads the next run; VX-212 phase 6 right after the merge at her call; VM-8 on
+the phone.

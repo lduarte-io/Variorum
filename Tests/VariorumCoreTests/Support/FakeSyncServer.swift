@@ -127,7 +127,8 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     /// `key_vault_update` through this row so ONE emulation exists.
     struct VaultRow: Equatable {
         /// nil = AUTO-ADOPT: the first round's presented key id becomes
-        /// the vault's (the bootstrap-runner latitude — `setVaultKeyAutoAdopt`).
+        /// the vault's (the auto-adopt latitude, born for the deleted
+        /// vault-bootstrap runner — `setVaultKeyAutoAdopt`).
         var corpusKeyID: String?
         /// nil = a hash-less row. The 11-era NULL-hash migration arm is
         /// RETIRED (13y UNIT B) — the challenge road refuses it; the one
@@ -348,7 +349,8 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         accounts[userID]?.entitled = entitled
     }
 
-    /// The bootstrap-runner latitude (recorded emulation choice): the
+    /// The auto-adopt latitude (recorded emulation choice, born for the
+    /// vault-bootstrap runner — deleted at VX-329's ladder round 1): the
     /// account's vault key id ADOPTS the first round's presented id —
     /// models "the same act that just WROTE the vault now drains through
     /// it" (the runner's create-vault → reinit → drain sequence, where
@@ -356,8 +358,8 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     /// presents). The proof hash adopts the same way (the NULL-hash arm).
     /// Fence and proof tests always set explicit values instead — never
     /// this. (Since pre-13x 1b the linked `ScriptedVaultServer` provisions
-    /// the account at vault CREATE, so the runner's world no longer needs
-    /// this; kept for any world that composes the fakes apart.)
+    /// the account at vault CREATE, so no world here needs this; kept for
+    /// any world that composes the fakes apart.)
     func setVaultKeyAutoAdopt(for userID: String = FakeSyncServer.defaultUserID) {
         accounts[userID]?.vault.corpusKeyID = nil
         accounts[userID]?.vault.keyProofHash = nil

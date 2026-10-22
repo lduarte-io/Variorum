@@ -49,6 +49,11 @@ public enum KeyFileError: Error, Equatable, Sendable {
     /// A file written by a newer build — refused, never guessed.
     case newerFormat(Int)
     case wrapFailed
+    /// Bytes that are not a key file (decode/IO failure carried). VX-329 U1: today's envelope's `unreadable` case,
+    /// re-homed here with the envelope's deletion.
+    case unreadable(String)
+    /// An empty passphrase is never legal (the 14b floor, kept). VX-329 U1: re-homed from today's envelope.
+    case emptyPassphrase
 }
 
 /// The roads into a key file's current key — the vocabulary refusals, the
@@ -60,6 +65,20 @@ public enum KeyFileRoad: String, Codable, Sendable, CaseIterable {
     /// The master's twelve-words copy → the master → the master wrap.
     case masterThroughWords = "master_through_words"
     case apple
+}
+
+/// A passphrase wrap: the current key under the passphrase-derived key, with the KDF descriptor it was derived under
+/// (the descriptor is truth — never re-derive from app defaults). VX-329 U1: relocated byte-for-byte from today's
+/// envelope (`PassphraseWrap`, deleted with today's road) — the same two coding keys, `kdf` and
+/// `wrapped`, so a format-3 key file's bytes are unchanged.
+public struct PassphraseWrap: Codable, Equatable, Sendable {
+    public var kdf: PassphraseKDF.Descriptor
+    public var wrapped: Data
+
+    public init(kdf: PassphraseKDF.Descriptor, wrapped: Data) {
+        self.kdf = kdf
+        self.wrapped = wrapped
+    }
 }
 
 /// An Apple wrap: the current key under an Apple key, naming its id.
@@ -112,7 +131,7 @@ public struct KeyFile: Codable, Equatable, Sendable {
     /// The current key's fingerprint and epoch.
     public var fingerprint: String
     public var epoch: Int
-    public var passphrase: StoreKeyEnvelope.PassphraseWrap?
+    public var passphrase: PassphraseWrap?
     public var words: Data?
     public var master: Data?
     /// The master wrapped under the twelve words — the vault's recovery wrap,
@@ -124,7 +143,7 @@ public struct KeyFile: Codable, Equatable, Sendable {
 
     public init(
         formatVersion: Int = KeyFile.currentFormatVersion, libraryID: String, fingerprint: String,
-        epoch: Int, passphrase: StoreKeyEnvelope.PassphraseWrap? = nil, words: Data? = nil,
+        epoch: Int, passphrase: PassphraseWrap? = nil, words: Data? = nil,
         master: Data? = nil, masterWordsCopy: Data? = nil, apple: AppleWrap? = nil,
         history: [HistoryEntry] = []
     ) {
@@ -142,13 +161,13 @@ public struct KeyFile: Codable, Equatable, Sendable {
 
     /// A wraps-less file for `key` (the builders add the wraps).
     public init(libraryID: String, key: StoreKey, epoch: Int) {
-        self.init(libraryID: libraryID, fingerprint: StoreKeyEnvelope.fingerprint(of: key), epoch: epoch)
+        self.init(libraryID: libraryID, fingerprint: KeyFingerprint.of(key), epoch: epoch)
     }
 
     // MARK: - The current key's wraps (the key doors re-wrap these and nothing else)
 
     private func requireOwnKey(_ key: StoreKey) throws {
-        guard StoreKeyEnvelope.fingerprint(of: key) == fingerprint else { throw KeyFileError.keyIsNotThisFilesKey }
+        guard KeyFingerprint.of(key) == fingerprint else { throw KeyFileError.keyIsNotThisFilesKey }
     }
 
     /// The passphrase wrap, set or replaced — the history is untouched (rule 6:
@@ -156,7 +175,7 @@ public struct KeyFile: Codable, Equatable, Sendable {
     public func settingPassphrase(_ passphrase: PassphraseKey, for key: StoreKey) throws -> KeyFile {
         try requireOwnKey(key)
         var next = self
-        next.passphrase = StoreKeyEnvelope.PassphraseWrap(
+        next.passphrase = PassphraseWrap(
             kdf: passphrase.kdf, wrapped: try Lock.wrap(key.data, under: passphrase.key))
         return next
     }
@@ -206,7 +225,7 @@ public struct KeyFile: Codable, Equatable, Sendable {
 
     private func verified(_ key: StoreKey?, _ road: KeyFileRoad) throws -> StoreKey {
         guard let key else { throw KeyFileError.doesNotOpen(road) }
-        guard StoreKeyEnvelope.fingerprint(of: key) == fingerprint else { throw KeyFileError.wrapsAnotherKey(road) }
+        guard KeyFingerprint.of(key) == fingerprint else { throw KeyFileError.wrapsAnotherKey(road) }
         return key
     }
 
@@ -290,7 +309,7 @@ public struct KeyFile: Codable, Equatable, Sendable {
         try requireOwnKey(currentKey)
         return try history.map { entry in
             guard let key = Lock.unwrapStoreKey(entry.wrapped, under: SymmetricKey(data: currentKey.data)),
-                  StoreKeyEnvelope.fingerprint(of: key) == entry.fingerprint
+                  KeyFingerprint.of(key) == entry.fingerprint
             else { throw KeyFileError.historyEntryDoesNotOpen(entry.fingerprint) }
             return OpenedKey(fingerprint: entry.fingerprint, epoch: entry.epoch, retiredAt: entry.retiredAt, key: key)
         }
@@ -318,7 +337,7 @@ public struct KeyFile: Codable, Equatable, Sendable {
     public static func decode(_ data: Data) throws -> KeyFile {
         struct Probe: Decodable { var formatVersion: Int }
         guard let probe = try? JSONDecoder().decode(Probe.self, from: data) else {
-            throw StoreKeyEnvelopeError.unreadable("not a key file")
+            throw KeyFileError.unreadable("not a key file")
         }
         guard probe.formatVersion == currentFormatVersion else {
             throw probe.formatVersion > currentFormatVersion
@@ -327,7 +346,7 @@ public struct KeyFile: Codable, Equatable, Sendable {
         do {
             return try ProtectionCoding.decoder().decode(KeyFile.self, from: data)
         } catch {
-            throw StoreKeyEnvelopeError.unreadable(String(describing: error))
+            throw KeyFileError.unreadable(String(describing: error))
         }
     }
 

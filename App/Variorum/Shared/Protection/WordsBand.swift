@@ -28,6 +28,15 @@ import Foundation
 import Observation
 import VariorumCore
 
+/// The twelve words as she typed them: split on any whitespace, nothing else (the phrase machinery validates the
+/// words themselves). VX-329 U1: moved byte-for-byte from today's `WordsInput.words(from:)`, which the road's
+/// faces read.
+nonisolated enum WordsInput {
+    static func words(from text: String) -> [String] {
+        text.split(whereSeparator: \.isWhitespace).map(String.init)
+    }
+}
+
 // MARK: - The rules (pure)
 
 nonisolated enum WordsCardRules {

@@ -76,6 +76,70 @@ struct StorePlaintextExportTests {
         }
     }
 
+    /// VX-461 (W-VX309-4) — THE SAVE PANEL'S GRANT IS ONE PATH. A sandboxed save panel grants exactly the picked file,
+    /// never a sibling (the system's app-sandbox profile carries no related-file rule for SQLite's sidecars): the ATTACH
+    /// creates the picked file at 0 bytes, and an export whose first write needs `<picked>-journal` beside it fails inside
+    /// `sqlcipher_export` with "unable to open database file" — the walk's exact line and its 0-byte file. Here the grant's
+    /// shape, with no sandbox: the picked file stands empty and writable (what the ATTACH makes there) in a folder where
+    /// nothing new can be created. The copy lands whole in it, and nothing else appears beside it.
+    /// RED ON OLD: the attached copy's rollback journal is a file beside it.
+    @Test func theCopyLandsInThePickedFileAloneWhereNoSiblingCanBeMade() throws {
+        let dir = try scratchDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let database = try AppDatabase.openStore(
+            at: dir.appendingPathComponent("library/variorum.sqlite"), custody: .inMemory(initial: StoreKey.mint()))
+        let stamp = "2026-10-22T00:00:00Z"
+        try database.write { db in
+            try db.execute(
+                sql: "INSERT INTO container (id, kind, title, created_at, updated_at) VALUES (?, 'post', ?, ?, ?)",
+                arguments: ["note-vx461", "Written through a one-path grant", stamp, stamp])
+        }
+        let picked = dir.appendingPathComponent("picked", isDirectory: true)
+        try FileManager.default.createDirectory(at: picked, withIntermediateDirectories: true)
+        let destination = picked.appendingPathComponent("Variorum-unencrypted.sqlite")
+        #expect(FileManager.default.createFile(atPath: destination.path, contents: nil))
+        try FileManager.default.setAttributes([.posixPermissions: 0o555], ofItemAtPath: picked.path)
+        defer { try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: picked.path) }
+
+        try StorePlaintextExport.write(from: database, into: destination)
+
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: picked.path)
+        #expect(try FileManager.default.contentsOfDirectory(atPath: picked.path) == ["Variorum-unencrypted.sqlite"],
+                "nothing beside the picked file")
+        #expect(StoreFilePresence.classify(at: destination) == .plaintext)
+        let plain = try DatabaseQueue(path: destination.path)
+        defer { try? plain.close() }
+        let title = try plain.read { db in
+            try String.fetchOne(db, sql: "SELECT title FROM container WHERE id = ?", arguments: ["note-vx461"])
+        }
+        #expect(title == "Written through a one-path grant", "the copy is whole")
+    }
+
+    /// VX-329 ladder r1, finding 1 — THE EXPORT NEVER DELETES A STRANGER'S FILE. The copy keeps its journal in memory
+    /// (VX-461), so it leaves no sidecar of its own; the post-export sweep of `-wal`/`-shm`/`-journal` beside the pick
+    /// could only ever remove someone else's file of those names. Only `-shm` discriminates: the ATTACH creates the
+    /// picked file at zero pages, and SQLite itself removes a `<picked>-wal` (its open-WAL-if-present step over a
+    /// zero-page database) and a `<picked>-journal` (a journal beside a zero-page database is never hot) at the first
+    /// statement on the attached copy — sweep or no sweep — while `-shm` is opened and removed only in WAL mode, which
+    /// the copy never enters. So a planted `-shm` survives exactly when the export itself deletes nothing beside the pick.
+    /// RED ON OLD: the sweep removed it.
+    @Test func aStrangersShmBesideThePickSurvivesTheExport() throws {
+        let dir = try scratchDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let database = try AppDatabase.openStore(
+            at: dir.appendingPathComponent("library/variorum.sqlite"), custody: .inMemory(initial: StoreKey.mint()))
+        let destination = dir.appendingPathComponent("Variorum-unencrypted.sqlite")
+        let stranger = URL(fileURLWithPath: destination.path + "-shm")
+        let strangersBytes = Data("another app's own shared-memory file — not the export's".utf8)
+        try strangersBytes.write(to: stranger)
+
+        try StorePlaintextExport.export(from: database, to: destination)
+
+        #expect(StoreFilePresence.classify(at: destination) == .plaintext, "the copy landed")
+        #expect(FileManager.default.fileExists(atPath: stranger.path), "the stranger's file is still there")
+        #expect((try? Data(contentsOf: stranger)) == strangersBytes, "and byte-identical")
+    }
+
     /// 13o §FORK RULINGS (2026-10-06), the derived-set ruling's pin: the
     /// export KEEPS the search-index family — the no-lock-in file answers a
     /// full-text query through a bare connection, and no derived table was

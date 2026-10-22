@@ -31,7 +31,7 @@ struct ProtectionNoticeFaceTests {
         try Plant.moveLibraryAway(road, to: road.slot.root.appendingPathComponent("kept-aside"))
         let record = ProtectionRecord.minting(
             libraryID: libraryID, mode: .standard, account: nil,
-            currentFingerprint: StoreKeyEnvelope.fingerprint(of: older), at: date)
+            currentFingerprint: KeyFingerprint.of(older), at: date)
         try road.system().leaves.library.createLibrary(with: older, record: record)
         try road.system().leaves.keyFiles.writeLiveKeyFile(try Plant.keyFile(older, libraryID: libraryID))
         try road.custody.writeCustody(older, itemClass: .silent, libraryID: libraryID)

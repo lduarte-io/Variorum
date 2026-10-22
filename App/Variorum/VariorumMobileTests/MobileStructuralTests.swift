@@ -1089,26 +1089,83 @@ struct MobileNoRedirectSweepTests {
             appRoot.appendingPathComponent("VariorumMobile", isDirectory: true),
             appRoot.appendingPathComponent("Shared", isDirectory: true),
         ]
-        // THE ONE EXPLICIT EXEMPTION (13p Batch 2 — this walk's own caveat
-        // above: "exempt it explicitly here rather than narrowing the
-        // walk"): `ProtectionCopy.deviceName`'s macOS arm is the bare
+        // THE EXACT-LITERAL EXEMPTIONS (this walk's own caveat above:
+        // "exempt it explicitly here rather than narrowing the walk").
+        // Each names ONE literal, byte-exact as `stringLiteralContents`
+        // yields it (an interpolation reads as its bare parenthesised
+        // text), in ONE file, and carries WHY the phone never renders it
+        // — a literal the phone CAN render is re-worded, never exempted
+        // (VX-329's phone fix leg: `notes/plans/vx-329-release-switch.md`,
+        // the PHONE FIX LEG RECORD, triaged all 28 by their call sites).
+        // Each is CAPPED AT ONE match below: a stale entry or a second
+        // copy of the sentence trips.
+        //
+        // 13p Batch 2: `ProtectionCopy.deviceName`'s macOS arm is the bare
         // literal "Mac" inside `#if os(macOS)` — the protection copy is
         // platform-aware by interpolation (the phone renders "iPhone" /
         // "Face ID" through the same sentences), so the phone never shows
-        // it; the literal exists only so the MAC's ruled knot-8 sentences
-        // stay byte-identical. Only the exact bare word in that one file
-        // is exempt — a sentence naming the Mac still trips.
-        let exempt: [(file: String, literal: String)] = [
-            (file: "StoreProtection.swift", literal: "Mac"),
-            // pre-13x ladder round 2, F3 (the F2 adjudication's copy
-            // follow-up 3): `ProtectionCopy.deviceNameWithArticle`'s macOS
-            // arm — the bare noun with its article ("a Mac"), in the SAME
-            // `#if os(macOS)` block as the exempted "Mac", for the one
-            // sentence that names ANOTHER device of the kind ("run Replace
-            // All Keys from a Mac that is"); the phone renders "an iPhone"
-            // through the same sentence. Exactly this walk's own caveat,
-            // exempted explicitly rather than by narrowing the walk.
-            (file: "StoreProtection.swift", literal: "a Mac"),
+        // it; the literal exists only so the MAC's ruled sentences stay
+        // byte-identical. VX-329 U1 moved `ProtectionCopy` byte-for-byte
+        // out of `StoreProtection.swift` (deleted with today's road) into
+        // `Shared/Protection/ProtectionCopy.swift`; the entry follows it.
+        // (pre-13x F3's second entry, "a Mac" — `deviceNameWithArticle` —
+        // left with today's road at U1, and its exemption with it.)
+        let macOSArm = "the `#if os(macOS)` arm of `ProtectionCopy.deviceName` — the phone compiles \"iPhone\""
+        let mcpFamily = "the MCP SDK family's notices: `AcknowledgmentsCopy.all` lists `mcpFamily` only in its "
+            + "`#if os(macOS)` arm, and the phone's sheet reads `all` (`shared` there) — VX-114's"
+        let sendLibrary = "Send Library to Another Mac: read only by the Mac target (the capability registry, "
+            + "`LibraryOpenDoor`, `DataSafetyPane`) — and it means a Mac — VX-114's"
+        let macCopyDoors = "the copies list, Look inside and the copies' delete confirm render only in the Mac's "
+            + "sheets (`CopyDoorsSheet`, `LookInsideSheet`): the phone keeps no backups and has no Restore or Open "
+            + "Library door, and only Macs write the pairs \"another Mac made\" names"
+        let herRuleTwelve = "HER rule-12 leave sentence, verbatim (CastleRules; `RoadCrossingWordsTests`): said only "
+            + "by the Mac's crossing and account sheets and the Mac's field guide — the phone has no crossing, "
+            + "account or follow face until VM-8, and its phone wording is hers"
+        let logLine = "an argument of `ProtectionOpenRoad.log` — the unified log (`os.Logger`), read by no face"
+        let exempt: [(file: String, literal: String, why: String)] = [
+            (file: "ProtectionCopy.swift", literal: "Mac", why: macOSArm),
+            (file: "AcknowledgmentsCopy.swift",
+             literal: "door that lets a client you approve reach your library (Mac only).", why: mcpFamily),
+            (file: "AcknowledgmentsCopy.swift",
+             literal: "Apple's logging API, which the MCP SDK speaks through (Mac only).", why: mcpFamily),
+            (file: "AcknowledgmentsCopy.swift",
+             literal: "Apple's system-call interfaces, which the MCP SDK builds on (Mac only).", why: mcpFamily),
+            (file: "AcknowledgmentsCopy.swift",
+             literal: "A server-sent-events parser the MCP SDK carries (Mac only).", why: mcpFamily),
+            (file: "LibraryOpenCopy.swift", literal: "Send Library to Another Mac…", why: sendLibrary),
+            (file: "LibraryOpenCopy.swift", literal: "Send Library to Another Mac", why: sendLibrary),
+            (file: "LibraryOpenCopy.swift", literal: "Moving to another Mac", why: sendLibrary),
+            (file: "LibraryOpenCopy.swift",
+             literal: "whole folder to the other Mac and open it there with File ▸ Open Library…", why: sendLibrary),
+            (file: "ProtectionWords.swift", literal: "Other libraries on this Mac", why: macCopyDoors),
+            (file: "ProtectionWords.swift",
+             literal: "This copy doesn't open by itself on this Mac. Enter its passphrase or twelve words.",
+             why: macCopyDoors),
+            (file: "ProtectionWords.swift",
+             literal: " One copy another Mac made, (unvouched), stays.", why: macCopyDoors),
+            (file: "ProtectionWords.swift",
+             literal: " (choice.staying) copies another Mac made, (unvouched), stay.", why: macCopyDoors),
+            (file: "ProtectionWords.swift",
+             literal: "Your library and all your backups will open through your Apple account and this Mac ",
+             why: herRuleTwelve),
+            (file: "ProtectionAccountActs.swift", literal: "screens' This Mac Only closes it", why: logLine),
+            (file: "ProtectionCopyDoors.swift",
+             literal: "road: deleted (mine.count) of another library's copies on this Mac — library "
+                + "(ProtectionNames.library8(libraryID))", why: logLine),
+            (file: "ProtectionCopyDoors.swift",
+             literal: "road: deleted (deleted.count) of another library's copies on this Mac (no library open) — "
+                + "library ", why: logLine),
+            (file: "ProtectionCopyDoors.swift",
+             literal: "road: made a copy this Mac's library — library (String((library.record?.libraryID ?? ",
+             why: logLine),
+            (file: "ProtectionCrossingActs.swift", literal: "road: this Mac's gate is (gate.rawValue) now", why: logLine),
+            (file: "ProtectionCrossingActs.swift", literal: "road: this Mac locks after (minutes.map { ", why: logLine),
+            (file: "ProtectionBackupPair.swift",
+             literal: "backup pair: retention removed (removed.count) of this Mac's pairs of this library — ",
+             why: logLine),
+            (file: "ProtectionBackupPair.swift",
+             literal: "backup pair: the picked folder holds this Mac's fresh pair of this library — none copied there",
+             why: logLine),
         ]
         // ONE PREFIX exemption (the VM-5 merge, 2026-10-07): the Jekyll
         // sample book's restore instructions name the Mac's Help ▸ Restore
@@ -1125,6 +1182,9 @@ struct MobileNoRedirectSweepTests {
         ]
         var walked = 0
         var offenders: [String] = []
+        // How many literals each exemption covered (the one-match cap).
+        var exemptHits = [Int](repeating: 0, count: exempt.count)
+        var prefixHits = [Int](repeating: 0, count: exemptPrefixes.count)
         for root in roots {
             // A missing root yields an EMPTY enumerator, not nil (C5 R2
             // NIT-1) — assert each root exists so a rename can never
@@ -1139,15 +1199,21 @@ struct MobileNoRedirectSweepTests {
                 let source = try String(contentsOf: url, encoding: .utf8)
                 for literal in Self.stringLiteralContents(of: source)
                 where literal.contains(Self.forbidden) {
-                    guard !exempt.contains(where: {
+                    if let hit = exempt.firstIndex(where: {
                         $0.file == url.lastPathComponent && $0.literal == literal
-                    }) else { continue }
+                    }) {
+                        exemptHits[hit] += 1
+                        continue
+                    }
                     // …and the prefix exemption is CAPPED AT ONE occurrence
                     // (round-1 MINOR 2): a future sentence naming the Mac
                     // added INSIDE the exempted literal still trips the sweep.
-                    guard !(exemptPrefixes.contains(where: {
+                    if let hit = exemptPrefixes.firstIndex(where: {
                         $0.file == url.lastPathComponent && literal.hasPrefix($0.prefix)
-                    }) && literal.ranges(of: Self.forbidden).count == 1) else { continue }
+                    }), literal.ranges(of: Self.forbidden).count == 1 {
+                        prefixHits[hit] += 1
+                        continue
+                    }
                     offenders.append("\(url.lastPathComponent): \"\(literal)\"")
                 }
             }
@@ -1155,6 +1221,17 @@ struct MobileNoRedirectSweepTests {
         #expect(walked > 40, "the walk must actually reach the shipped mobile sources")
         #expect(offenders.isEmpty,
                 "no user-facing mobile string names the Mac — found \(offenders)")
+        // EVERY EXEMPTION COVERS EXACTLY ONE LITERAL (VX-329's phone fix
+        // leg — two entries had outlived U1's deletion of the file they
+        // named): an entry whose literal was re-worded or deleted (0
+        // matches) is stale and must go; a second copy of an exempted
+        // sentence (2+) is a new string and must earn its own reason.
+        let misfits = exempt.indices.filter { exemptHits[$0] != 1 }
+            .map { "\(exempt[$0].file): \"\(exempt[$0].literal)\" matched \(exemptHits[$0])" }
+            + exemptPrefixes.indices.filter { prefixHits[$0] != 1 }
+            .map { "\(exemptPrefixes[$0].file): prefix matched \(prefixHits[$0])" }
+        #expect(misfits.isEmpty, "every exemption covers exactly one literal — \(misfits)")
+        #expect(exempt.allSatisfy { !$0.why.isEmpty }, "every exemption says why the phone never renders it")
     }
 
     /// Extracts string-literal CONTENTS from Swift source — single-line
@@ -1232,13 +1309,12 @@ struct MobileCopyRegisterSweepTests {
         let appRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()  // VariorumMobileTests
             .deletingLastPathComponent()  // App/Variorum
+        // VX-329 U1: today's copy homes and shared faces were deleted with today's road; the copy the road still speaks
+        // moved to `Shared/Protection/ProtectionCopy.swift`, and the road's own words (`ProtectionWords`, which the phone's
+        // road faces render) join the walk — the Mac's twin reads the same home.
         var files: [URL] = [
-            "Shared/StoreProtection.swift", "Shared/PostureCopy.swift", "Shared/KeyDoorCopy.swift",
+            "Shared/Protection/ProtectionCopy.swift", "Shared/Protection/ProtectionWords.swift",
             "Shared/SampleLibrary/SampleLibraryEncryptionBook.swift",
-            "Shared/EncryptionViews.swift", "Shared/KeyDoorView.swift", "Shared/KeyDoorModel.swift",
-            "Shared/PostureSwitchModel.swift", "Shared/PostureFollowModel.swift",
-            "Shared/SyncEnrollmentView.swift", "Shared/SyncEnrollmentModel.swift",
-            "Shared/EncryptionSession.swift",
         ].map { appRoot.appendingPathComponent($0) }
         let faces = appRoot.appendingPathComponent("VariorumMobile/Features/Protection", isDirectory: true)
         let walk = try #require(FileManager.default.enumerator(at: faces, includingPropertiesForKeys: nil))

@@ -32,7 +32,7 @@ public enum CatalogPlace: String, Codable, Sendable, CaseIterable {
 /// One file the leaf listed: its root, the folders below the root, its
 /// name, and — for every name `CatalogNames.parseFile` calls a key file —
 /// its bytes (nil when it could not be read) and its modification date
-/// (today's `StoreKeyEnvelope.locate` rule picks the newest of several).
+/// (kept for the catalogue's readers; no rule picks by it).
 public struct CatalogEntry: Equatable, Sendable {
     public var place: CatalogPlace
     public var folders: [String]
@@ -314,7 +314,7 @@ public struct Catalog: Equatable, Sendable {
         let pairName = String(entry.name.dropLast(".sqlite".count)) + ".keys.json"
         let pair = keyFiles.first { $0.place == entry.place && $0.folders == entry.folders && $0.name == pairName }
         if let pair, let fp8, let fingerprint = pair.fingerprint,
-           StoreKeyEnvelope.shortFingerprint(fingerprint) != fp8 {
+           KeyFingerprint.short(fingerprint) != fp8 {
             // A mismatched pair does not open this snapshot — never offered as
             // if it did (today's rule).
         } else if let pair, pair.document != nil {
@@ -325,7 +325,7 @@ public struct Catalog: Equatable, Sendable {
         }
         guard let fp8 else { return folderFiles.sorted { servingOrder($0) < servingOrder($1) } }
         return folderFiles.filter { file in
-            file.heldFingerprints.contains { StoreKeyEnvelope.shortFingerprint($0) == fp8 }
+            file.heldFingerprints.contains { KeyFingerprint.short($0) == fp8 }
         }.sorted { servingOrder($0) < servingOrder($1) }
     }
 
@@ -339,8 +339,8 @@ public struct Catalog: Equatable, Sendable {
         var fingerprint: String?
         if let fp8 {
             fingerprint = readable.lazy.compactMap(\.fingerprint)
-                .first { StoreKeyEnvelope.shortFingerprint($0) == fp8 }
-                ?? readable.lazy.flatMap(\.heldFingerprints).first { StoreKeyEnvelope.shortFingerprint($0) == fp8 }
+                .first { KeyFingerprint.short($0) == fp8 }
+                ?? readable.lazy.flatMap(\.heldFingerprints).first { KeyFingerprint.short($0) == fp8 }
         } else if readable.count == 1 || (readable.first.map { CatalogNames.parseFile($0.name) == .keyFile } ?? false) {
             fingerprint = readable.first?.fingerprint
         }

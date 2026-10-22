@@ -52,6 +52,12 @@ public enum StorePlaintextExport {
         }
         try FileManager.default.createDirectory(
             at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try write(from: database, into: destination)
+    }
+
+    /// The copy itself, into `destination` — made by the ATTACH when absent (the save panel's grant lets exactly that
+    /// one path be created and written; `export` refuses a file already there before calling this).
+    static func write(from database: AppDatabase, into destination: URL) throws {
         try database.writeWithoutTransaction { db in
             do {
                 try db.execute(
@@ -60,6 +66,11 @@ public enum StorePlaintextExport {
                 throw ExportError(reason: "the destination could not be opened for writing (\(error))")
             }
             defer { try? db.execute(sql: "DETACH DATABASE plain") }
+            // VX-461 (W-VX309-4): the copy's rollback journal lives in MEMORY, never as a file beside it. A sandboxed
+            // save panel grants the picked path alone, so `<picked>-journal` cannot be created there — the copy's first
+            // write failed "unable to open database file" and left the picked file at 0 bytes. The copy is a fresh file
+            // nothing else reads until it is whole, so an on-disk journal protected nothing here.
+            try db.execute(sql: "PRAGMA plain.journal_mode = MEMORY")
             try db.execute(sql: "SELECT sqlcipher_export('plain')")
             for table in localOnlyTables.sorted() {
                 let quoted = table.replacingOccurrences(of: "\"", with: "\"\"")
@@ -75,9 +86,8 @@ public enum StorePlaintextExport {
                 try db.execute(sql: "DELETE FROM plain.\"\(quoted)\"")
             }
         }
-        // The export's own journal sidecars (the attached file's) — swept.
-        for suffix in ["-wal", "-shm", "-journal"] {
-            try? FileManager.default.removeItem(atPath: destination.path + suffix)
-        }
+        // VX-329 ladder r1: no sidecar sweep follows the copy. With the journal in memory the export makes no file beside
+        // the pick, so a sweep of `-wal`/`-shm`/`-journal` there could only delete a stranger's file of those names
+        // (`StorePlaintextExportTests.aStrangersShmBesideThePickSurvivesTheExport`).
     }
 }

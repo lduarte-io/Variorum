@@ -162,7 +162,7 @@ nonisolated final class KeychainCustodyLeaf: CustodyLeaf, @unchecked Sendable {
 
     func writeCustody(_ key: StoreKey, itemClass: ProtectionNames.CustodyClass, libraryID: String) throws {
         try ProtectionKeychain.refuseUnderTest(scope, "custody.write")
-        let fingerprint = StoreKeyEnvelope.fingerprint(of: key)
+        let fingerprint = KeyFingerprint.of(key)
         let account = account(fingerprint, itemClass)
         switch itemClass {
         case .silent:

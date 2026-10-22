@@ -44,7 +44,7 @@ struct ICloudDriveOfferTests {
     }
 
     private func model(
-        variant: AppDatabase.StoreVariant = .real, defaults: UserDefaults, posture: Posture = .standard,
+        variant: AppDatabase.StoreVariant = .real, defaults: UserDefaults, posture: ProtectionMode = .standard,
         calls: Calls
     ) -> ICloudDriveOfferModel {
         ICloudDriveOfferModel(leaves: .init(
@@ -191,7 +191,7 @@ struct ICloudDriveOfferTests {
     @Test func theSheetRendersCopySixByPosture() async {
         let (defaults, name) = scratchDefaults()
         defer { defaults.removePersistentDomain(forName: name) }
-        for posture in [Posture.standard, Posture.castle] {
+        for posture in [ProtectionMode.standard, ProtectionMode.castle] {
             let offer = model(defaults: defaults, posture: posture, calls: Calls())
             offer.openSheet()
             let sheet = ICloudDriveOfferSheet(model: offer)

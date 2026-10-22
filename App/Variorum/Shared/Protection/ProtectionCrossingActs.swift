@@ -257,7 +257,7 @@ nonisolated enum ProtectionCrossings {
         let reopenKey = ProtectionLibraryFiles.opens(slot, key: library.key) ? library.key : oldKey
         ProtectionOpenRoad.log(
             "road: \(door.rawValue) — library \(String((library.record?.libraryID ?? "none").prefix(8))) now "
-                + "\(library.record?.mode.rawValue ?? "?") under \(StoreKeyEnvelope.shortFingerprint(library.fingerprint)); "
+                + "\(library.record?.mode.rawValue ?? "?") under \(KeyFingerprint.short(library.fingerprint)); "
                 + "the export notice owed \(exportTurnedOff)")
         return CrossingResult(outcome: .made(door, exportTurnedOff: exportTurnedOff), reopenKey: reopenKey)
     }

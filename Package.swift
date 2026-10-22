@@ -70,22 +70,18 @@ let package = Package(
                 .copy("Resources/bip39-english.txt")
             ]
         ),
-        // Phase 14b (L10): the headless wipe-and-repush executor — the
-        // resyncReinitialize door, NEVER linked into any app (the apps link
-        // VariorumCore; this CLI shell exists only for the architect's gate
-        // act). Its brain is Crypto/VaultBootstrap.swift, tested in
-        // VariorumCoreTests.
-        .executableTarget(
-            name: "vault-bootstrap",
-            dependencies: ["VariorumCore"],
-            path: "Tools/VaultBootstrap"
-        ),
+        // (Phase 14b L10's `vault-bootstrap` CLI shell — the headless
+        // wipe-and-repush executor — was deleted at VX-329 U1: it unlocked a
+        // store only through TODAY's key file. Its brain,
+        // Crypto/VaultBootstrap.swift, followed with its suite at VX-329's
+        // ladder round 1: with the shell gone it had no caller.)
         // BRANCH-ONLY (`tools/strings-workbook`, never merges — issue #7's
         // branch rule; issue #5): the App Strings workbook generator. The
         // parser, the tier plan and the ops-driven mint live in ONE library
-        // so the tests cover the real logic; the executable is the headless
-        // road onto her store (the lobby's own passphrase road). Never linked
-        // into any app. Record: notes/plans/strings-workbook-record.md.
+        // so the tests cover the real logic. Never linked into any app.
+        // Record: notes/plans/strings-workbook-record.md. VX-329 U1: its
+        // executable — the headless road onto her store through TODAY's key
+        // file (`StoreUnlock`) — was deleted with today's road (VX-406).
         .target(
             name: "StringsWorkbook",
             dependencies: [
@@ -94,11 +90,6 @@ let package = Package(
                 .product(name: "Dependencies", package: "swift-dependencies"),
             ],
             path: "Tools/StringsWorkbook/Sources"
-        ),
-        .executableTarget(
-            name: "strings-workbook-mint",
-            dependencies: ["StringsWorkbook", "VariorumCore"],
-            path: "Tools/StringsWorkbook/CLI"
         ),
         .testTarget(
             name: "StringsWorkbookTests",

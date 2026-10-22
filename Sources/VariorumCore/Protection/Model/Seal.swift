@@ -98,14 +98,14 @@ public enum ProtectionSeal {
     ) -> Seal {
         let key = sealingKey(libraryKey: libraryKey, libraryID: libraryID, purpose: purpose)
         let mac = HMAC<SHA256>.authenticationCode(for: message, using: key)
-        return Seal(keyFingerprint: StoreKeyEnvelope.fingerprint(of: libraryKey), mac: Data(mac))
+        return Seal(keyFingerprint: KeyFingerprint.of(libraryKey), mac: Data(mac))
     }
 
     /// Constant-time verification (`HMAC.isValidAuthenticationCode`).
     public static func verify(
         _ message: Data, seal: Seal, libraryKey: StoreKey, libraryID: String, purpose: SealPurpose
     ) -> Bool {
-        guard seal.keyFingerprint == StoreKeyEnvelope.fingerprint(of: libraryKey) else { return false }
+        guard seal.keyFingerprint == KeyFingerprint.of(libraryKey) else { return false }
         let key = sealingKey(libraryKey: libraryKey, libraryID: libraryID, purpose: purpose)
         return HMAC<SHA256>.isValidAuthenticationCode(seal.mac, authenticating: message, using: key)
     }
@@ -137,7 +137,7 @@ public struct Sealed<Value: Codable & Sendable>: Codable, Sendable {
 
     /// Verify with `key`, then decode the verified bytes.
     public func open(purpose: SealPurpose, libraryID: String, key: StoreKey) throws -> Value {
-        guard seal.keyFingerprint == StoreKeyEnvelope.fingerprint(of: key) else {
+        guard seal.keyFingerprint == KeyFingerprint.of(key) else {
             throw SealError.sealedUnderAnotherKey(seal.keyFingerprint)
         }
         guard ProtectionSeal.verify(payload, seal: seal, libraryKey: key, libraryID: libraryID, purpose: purpose) else {

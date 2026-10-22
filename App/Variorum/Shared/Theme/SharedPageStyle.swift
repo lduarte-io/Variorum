@@ -3,8 +3,8 @@
 //  Variorum (shared: Mac + Mobile)
 //
 //  Mobile parity round, Stage D batch D1 — the ONE styling seam for the
-//  shared account/encryption/tier pages (AccountView · EncryptionView ·
-//  SyncStatusRow · HostedSyncSection). Her instruction (the stage table's
+//  shared account/encryption/tier pages (AccountView · EncryptionView — gone
+//  with today's road at VX-329 U1 · SyncStatusRow · HostedSyncSection). Her instruction (the stage table's
 //  D row): "they work, I just think they're a bit ugly right now and
 //  don't follow UI principles" — the pages restyle AS THE PHONE RENDERS
 //  THEM, through this seam, never a fork.

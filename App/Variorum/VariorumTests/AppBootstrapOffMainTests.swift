@@ -11,6 +11,13 @@
 //  compile against a two-case `State`, and its budget is the 54 ms the
 //  measurement recorded.
 //
+//  VX-329 U1 — THE RELEASE SWITCH: the bootstrap has one road, so these pins
+//  run it — a library created on the PLANTED road (no keychain), the test
+//  bootstrap's harness carrying the staged opener (today's `testOpener` went
+//  with today's route). The claims are unchanged: init returns before the
+//  store opens; a failed open lands `.failed` and retry re-enters; a second
+//  retry mid-open starts nothing; the launch cost, printed.
+//
 
 import Dependencies
 import Foundation
@@ -39,15 +46,23 @@ struct AppBootstrapOffMainTests {
     /// and friends — and the bootstrap's own open runs on a DETACHED task,
     /// which does not inherit a `withDependencies` scope. So the pins open
     /// their store out here and hand the opener a ready one: the state
-    /// machine and the off-main hop are what they are exercising.
-    private func openStore(at url: URL) throws -> AppDatabase {
-        try AppDatabase.openStore(at: url)
+    /// machine and the off-main hop are what they are exercising. The
+    /// library is created on the planted road first, so the road's route
+    /// opens it quietly (Standard, its silent item) and calls the opener.
+    private func plantedLibrary() async throws -> (road: PlantedRoad, database: AppDatabase) {
+        let road = PlantedRoad()
+        let (session, _) = try await road.created()
+        let database = try AppDatabase.openStore(at: road.slot.places.slot, custody: .inMemory(initial: session.key))
+        return (road, database)
     }
 
-    private func temporaryStoreURL() -> URL {
-        FileManager.default.temporaryDirectory
-            .appendingPathComponent("variorum-13l-\(UUID().uuidString)", isDirectory: true)
-            .appendingPathComponent("variorum.sqlite")
+    /// The test bootstrap over `road`, its opener `open` (the harness's — the road hands it the key).
+    private func bootstrap(
+        _ road: PlantedRoad, open: @escaping @Sendable () -> Result<AppDatabase, AppDatabase.StoreOpenError>
+    ) -> AppBootstrap {
+        AppBootstrap(
+            testStoreURL: road.slot.places.slot,
+            protectionRoad: ProtectionRoadTestHarness(system: road.system(), open: { _ in open() }))
     }
 
     /// **THE FIX, stated as behaviour.** `init` must return with the store
@@ -57,15 +72,12 @@ struct AppBootstrapOffMainTests {
     /// speed.
     @Test func initReturnsBeforeTheStoreIsOpen() async throws {
         try await withDeps {
-            let url = temporaryStoreURL()
-            defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
-
-            let database = try openStore(at: url)
+            let (road, database) = try await plantedLibrary()
             let started = ContinuousClock.now
-            let bootstrap = AppBootstrap(testOpener: {
+            let bootstrap = bootstrap(road) {
                 Thread.sleep(forTimeInterval: 0.05)
                 return .success(database)
-            })
+            }
             let initCost = ContinuousClock.now - started
 
             if case .opening = bootstrap.state {} else {
@@ -85,11 +97,8 @@ struct AppBootstrapOffMainTests {
     @Test func aFailedOpenLandsInFailedAndRetryReEnters() async throws {
         try await withDeps {
             let attempts = LockIsolated(0)
-            let url = temporaryStoreURL()
-            defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
-
-            let database = try openStore(at: url)
-            let bootstrap = AppBootstrap(testOpener: {
+            let (road, database) = try await plantedLibrary()
+            let bootstrap = bootstrap(road) {
                 let n = attempts.withValue { value -> Int in
                     value += 1
                     return value
@@ -99,10 +108,10 @@ struct AppBootstrapOffMainTests {
                         storePath: "/nowhere", reason: "staged"))
                 }
                 return .success(database)
-            })
+            }
 
             await bootstrap.awaitOpen()
-            guard case .failed(let error, _) = bootstrap.state else {
+            guard case .failed(let error) = bootstrap.state else {
                 Issue.record("a failed open must land in .failed")
                 return
             }
@@ -126,15 +135,12 @@ struct AppBootstrapOffMainTests {
     @Test func aRetryDuringAnOpenDoesNotStartASecondOne() async throws {
         try await withDeps {
             let attempts = LockIsolated(0)
-            let url = temporaryStoreURL()
-            defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
-
-            let database = try openStore(at: url)
-            let bootstrap = AppBootstrap(testOpener: {
+            let (road, database) = try await plantedLibrary()
+            let bootstrap = bootstrap(road) {
                 attempts.withValue { $0 += 1 }
                 Thread.sleep(forTimeInterval: 0.03)
                 return .success(database)
-            })
+            }
             bootstrap.retry()
             bootstrap.retry()
             await bootstrap.awaitOpen()
@@ -153,20 +159,23 @@ struct AppBootstrapOffMainTests {
     /// the second is what used to be paid on the main thread before paint.
     @Test func theLaunchCostIsMeasuredAgain() async throws {
         try await withDeps {
-            let url = temporaryStoreURL()
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent("variorum-13l-\(UUID().uuidString)", isDirectory: true)
+                .appendingPathComponent("variorum.sqlite")
             defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
 
             // A real first open — the whole migration set, empty store.
             let coldStart = ContinuousClock.now
-            let database = try openStore(at: url)
+            _ = try AppDatabase.openStore(at: url)
             let coldOpen = ContinuousClock.now - coldStart
 
             let warmStart = ContinuousClock.now
-            _ = try openStore(at: url)
+            _ = try AppDatabase.openStore(at: url)
             let warmOpen = ContinuousClock.now - warmStart
 
+            let (road, database) = try await plantedLibrary()
             let initStart = ContinuousClock.now
-            let bootstrap = AppBootstrap(testOpener: { .success(database) })
+            let bootstrap = bootstrap(road) { .success(database) }
             let initCost = ContinuousClock.now - initStart
             await bootstrap.awaitOpen()
 

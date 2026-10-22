@@ -55,7 +55,7 @@ struct PickedCopyRoadTests {
         #expect(opened.road == .itsOwnSecrets, "their words opened their copy at her press")
         let result = await ProtectionCopyDoors.makeMine(
             session, copy: copy, catalog: catalog, row: row, opened: opened,
-            currentPair: TypedSecrets(words: myWords), mintStoreIdentity: { _ in })
+            currentPair: TypedSecrets(words: myWords))
         #expect(result.outcome == .made)
         let record = try #require(try ProtectionLibraryFiles.readRecord(at: mine.slot.places.slot, key: result.reopenKey))
         #expect(record.libraryID != theirID, "rule 18: an AirDropped library becomes its own library on arrival")
@@ -115,7 +115,7 @@ struct PickedCopyRoadTests {
         let live2 = try #require(try road.system().leaves.keyFiles.readLiveKeyFile())
         for stamp in [1, 2] {
             let stem = CatalogNames.backupPrefix + CatalogNames.stampString(PlantCatalog.day(stamp)) + "-"
-                + StoreKeyEnvelope.shortFingerprint(live2.fingerprint)
+                + KeyFingerprint.short(live2.fingerprint)
             try FileManager.default.copyItem(at: road.slot.places.slot, to: two.appendingPathComponent(stem + ".sqlite"))
             try live2.encoded().write(to: two.appendingPathComponent(stem + ".keys.json"))
         }

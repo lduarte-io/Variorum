@@ -167,26 +167,6 @@ struct SessionTokenBindingTests {
                     && !KeychainAuthStorage.inheritsUnscopedItems(scope: devScope))
     }
 
-    /// **CORNER 47 — THE §11 LEGACY LEGS RUN UNDER THE REAL SCOPE ONLY (2c).**
-    /// The 14b/CF-12 sync-key items and the 13p escrow item are SCOPE-LESS
-    /// (one keychain on iOS for the dev and Release builds), so a dev
-    /// store's migration must never read or release them: its legs are
-    /// INERT — no Keychain call at all. Pinned on the rule and on the set
-    /// the live leaves compose from; the live real-scope legs are not
-    /// exercised here (they name the author's own items). RED ON OLD:
-    /// `forScope` handed every scope the live legs.
-    @Test func theLegacyLegsAreInertForADevScopeAndLiveForTheRealScopeOnly() {
-        #expect(LegacyLegs.apply(to: "Variorum"))
-        #expect(!LegacyLegs.apply(to: "Variorum-dev"))
-        #expect(!LegacyLegs.apply(to: "throwaway-\(UUID().uuidString.prefix(6))"))
-        let guardSeam = StoreKeyGuard.inMemory(backing: InMemoryStoreKeyGuardBacking())
-        let dev = LegacyLegs.forScope("Variorum-dev", guardSeam: guardSeam)
-        #expect(dev.isInert, "a dev scope has no 14b past — its legs never reach the Keychain")
-        #expect(dev.loadPlainMaterial() == nil)
-        #expect(!dev.deleteItems())
-        #expect(dev.loadEscrow("store-x") == nil)
-        #expect(!dev.removeEscrow("store-x"))
-        #expect(!LegacyLegs.forScope("Variorum", guardSeam: guardSeam).isInert,
-                "the real scope's legs are the live ones")
-    }
+    // (Corner 47's legacy-legs pin — `LegacyLegs`, the §11 migration's 14b/13p legs — was deleted with its subject,
+    // `ProtectionMigration`, at VX-329 U1.)
 }

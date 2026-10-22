@@ -94,7 +94,7 @@ struct ShelfView: View {
     /// `notes/plans/vx-307/her-cards-area-2026-10-18.png`): **the card above the quick entry** — the twelve words'
     /// offer and rule 3's reminder, between the shelf listing and the quick-entry line, the main column's full width.
     /// Built by the composition root (the protection faces are the bootstrap's) and RENDERED here, the offer line's
-    /// road. nil (today's road, harness mounts): no card — the first open stays calm either way.
+    /// road. nil (no protection faces yet, harness mounts): no card — the first open stays calm either way.
     var wordsBand: AnyView? = nil
     /// VX-326 — the shell's opening ask for the quick entry's caret, handed
     /// down by the shell that owns it (`RootView`); the bar claims it once.

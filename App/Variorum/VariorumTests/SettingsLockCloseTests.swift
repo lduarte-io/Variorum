@@ -14,16 +14,20 @@
 //  window stands on as the stub over a locked library.
 //
 //  The evidence of record (the architect's ruling, 2026-10-13): a REAL
-//  `AppBootstrap` on the Phase13pLobbyTests demanded-world road (a test
-//  opener + a scripted Castle gate, Always ask) driven unlock → ready →
-//  lock, with the scene's real content in a real window. The dev store's
-//  custody is never touched.
+//  `AppBootstrap` driven unlock → ready → lock, with the scene's real
+//  content in a real window. The dev store's custody is never touched.
+//  VX-329 U1 — THE RELEASE SWITCH: today's demanded-world road (a test
+//  opener + a scripted Castle gate) went with today's road, so the world is
+//  the protection road's, PLANTED (no keychain): a library created there,
+//  crossed into Castle (Always ask) THROUGH the bootstrap, locked into the
+//  road's lobby — `RoadLockRouteTests`' `LockWorld`.
 //
-//  The guard beside it: the reopen roads (`adoptLibrary` — Settings' own
-//  Restore from Backup door; `rekeyLibrary` — the Protection pane's posture
-//  switches) pass through `.opening` WITH this window hosting their sheets,
-//  so a fix that closed on "not ready" would close the window under its own
-//  ceremony. The window must survive them.
+//  The guard beside it: the reopen roads (the Protection pane's crossings,
+//  Make this my library — the bootstrap's reopening seam) pass through
+//  `.opening` WITH this window hosting their sheets, so a fix that closed on
+//  "not ready" would close the window under its own ceremony. The window
+//  must survive them — pinned over the crossing into Castle, its reopen's
+//  opener held so the middle can be looked at.
 //
 
 import AppKit
@@ -37,62 +41,53 @@ import VariorumCore
 @MainActor
 @Suite("Settings — the window closes when the library locks (VX-224)", .serialized)
 struct SettingsLockCloseTests {
-    private struct World {
-        let bootstrap: AppBootstrap
-        let key: StoreKey
-        let directory: URL
-    }
-
-    private func withDeps<T>(_ body: @MainActor () async throws -> T) async rethrows -> T {
-        try await withDependencies {
-            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
-            $0.uuid = .incrementing
-        } operation: { @MainActor in
-            try await body()
+    /// The reopen's opener, holdable: armed, the next open waits on the gate (the crossing's reopen caught in its
+    /// `.opening` middle); never armed, it opens at once.
+    final class OpenHold: @unchecked Sendable {
+        private let lock = NSLock()
+        private var armed = false
+        let gate = DispatchSemaphore(value: 0)
+        func arm() { lock.withLock { armed = true } }
+        func waitIfArmed() {
+            let wait = lock.withLock { () -> Bool in
+                defer { armed = false }
+                return armed
+            }
+            if wait { _ = gate.wait(timeout: .now() + 20) }
         }
     }
 
-    /// The Phase13pLobbyTests demanded world: a passphrase-wrapped key file
-    /// (no Apple copy) derives Castle; Always ask is the dial.
-    private func demandedWorld() throws -> World {
-        let dir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("variorum-vx224-\(UUID().uuidString)", isDirectory: true)
-        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        let storeURL = dir.appendingPathComponent("store.sqlite")
-        let key = StoreKey.mint()
-        var envelope = StoreKeyEnvelope()
-        try envelope.setPassphraseWrap(
-            key: key, passphrase: "sesame",
-            kdf: PassphraseKDF.Descriptor(
-                algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
-                memoryKiB: 256, iterations: 1, parallelism: 1,
-                salt: PassphraseKDF.randomSalt(), outputBytes: 32))
-        let gate = StoreLaunchGate.scripted(
-            dials: ProtectionDials(alwaysAsk: true),
-            backing: InMemoryStoreKeyGuardBacking(), envelope: envelope)
+    /// A planted-road bootstrap whose opener the pin can hold — ready in Standard, its words kept. The caller holds `road`
+    /// (`LockWorld.readyInStandard`'s rule).
+    private func readyInStandard(
+        _ road: PlantedRoad, hold: OpenHold
+    ) async throws -> (bootstrap: AppBootstrap, words: [String]) {
+        let (_, words) = try await road.created()
+        let url = road.slot.places.slot
         let bootstrap = AppBootstrap(
-            testOpener: {
-                Result { try AppDatabase.onDisk(url: storeURL, key: key) }
-                    .mapError { AppDatabase.StoreOpenError(
-                        storePath: storeURL.path, reason: String(describing: $0)) }
-            },
-            gate: gate)
-        return World(bootstrap: bootstrap, key: key, directory: dir)
+            testStoreURL: url,
+            protectionRoad: ProtectionRoadTestHarness(system: road.system(), session: .signedOut, open: { key in
+                hold.waitIfArmed()
+                return Result { try AppDatabase.openStore(at: url, custody: .inMemory(initial: key)) }
+                    .mapError { $0 as? AppDatabase.StoreOpenError
+                        ?? AppDatabase.StoreOpenError(storePath: url.path, reason: String(describing: $0)) }
+            }))
+        await bootstrap.awaitOpen()
+        guard case .ready = bootstrap.state else {
+            throw LockWorld.LockWorldError.notReady("\(bootstrap.state)")
+        }
+        return (bootstrap, words)
     }
 
-    /// Unlocks the world's lobby into `.ready`.
-    private func unlock(_ world: World) async throws {
-        await world.bootstrap.awaitOpen()
-        guard case .locked(let lobby) = world.bootstrap.state else {
-            Issue.record("expected the demanded world to start .locked")
-            return
-        }
-        await lobby.unlock(passphrase: "sesame")
-        await world.bootstrap.awaitOpen()
-        guard case .ready = world.bootstrap.state else {
-            Issue.record("expected .ready after unlock")
-            return
-        }
+    /// The crossing into Castle (Always ask) through the bootstrap — the reopen road this window hosts.
+    private func crossIntoCastle(_ bootstrap: AppBootstrap, words: [String]) async throws {
+        let crossings = try #require(bootstrap.roadCrossings)
+        await crossings.refresh()
+        crossings.open(.useCastle)
+        let confirm = try #require(crossings.confirm)
+        confirm.gate = .alwaysAsk
+        await confirm.submit(
+            passphrase: LockWorld.passphrase, again: LockWorld.passphrase, words: words.joined(separator: " "))
     }
 
     /// The Settings scene's REAL content in a real window — the window the
@@ -152,11 +147,14 @@ struct SettingsLockCloseTests {
     /// Settings open over an unlocked library; Lock Library Now. The window
     /// must CLOSE — never stand on as the "Open the main window first." stub.
     @Test func lockingWithSettingsOpenClosesTheSettingsWindow() async throws {
-        try await withDeps {
-            let world = try demandedWorld()
-            defer { try? FileManager.default.removeItem(at: world.directory) }
-            try await unlock(world)
-            let (window, hosting) = mountSettings(world.bootstrap)
+        try await withRoadDependencies {
+            // Every test here HOLDS its road for its whole life: the slot's folder is the road's (`TempSlot` removes it
+            // at deinit) and the bootstrap keeps only the road's system and the slot's URL — an inline `PlantedRoad()`
+            // is released at the call's end and takes the library's files with it (VX-329's Mac-suite fix leg).
+            let road = PlantedRoad()
+            defer { withExtendedLifetime(road) {} }
+            let (bootstrap, _) = try await LockWorld.readyInCastle(road)
+            let (window, hosting) = mountSettings(bootstrap)
             defer {
                 window.orderOut(nil)
                 window.close()
@@ -164,11 +162,11 @@ struct SettingsLockCloseTests {
             await settle(window, hosting, until: { false }, maxTurns: 10)
             // Non-vacuity: the panes are up over the open library.
             #expect(window.isVisible, "Settings is on screen over the unlocked library")
-            #expect(world.bootstrap.canLock, "a demanded posture offers Lock Library Now")
+            #expect(bootstrap.canLock, "Castle offers Lock Library Now")
 
-            await world.bootstrap.lock()
-            guard case .locked = world.bootstrap.state else {
-                Issue.record("expected .locked after Lock Library Now")
+            await bootstrap.lock()
+            guard case .roadLobby = bootstrap.state else {
+                Issue.record("expected the road's lobby after Lock Library Now")
                 return
             }
             await settle(window, hosting, until: { !window.isVisible })
@@ -182,17 +180,15 @@ struct SettingsLockCloseTests {
 
     // MARK: - The guard (green on old and new)
 
-    /// The reopen roads run FROM this window (Restore from Backup's
-    /// `adoptLibrary`; the posture switches' `rekeyLibrary`) and pass through
-    /// `.opening` on their way back to `.ready`. The window hosts their
-    /// sheets, so it must survive the road — a close keyed on "not ready"
-    /// would shut it under its own ceremony.
+    /// The reopen roads run FROM this window (the Protection pane's crossings; Make this my library) and pass through
+    /// `.opening` on their way back to `.ready`. The window hosts their sheets, so it must survive the road — a close
+    /// keyed on "not ready" would shut it under its own ceremony.
     @Test func aReopenRoadThroughOpeningKeepsTheSettingsWindow() async throws {
-        try await withDeps {
-            let world = try demandedWorld()
-            defer { try? FileManager.default.removeItem(at: world.directory) }
-            try await unlock(world)
-            let (window, hosting) = mountSettings(world.bootstrap)
+        try await withRoadDependencies {
+            let road = PlantedRoad()
+            defer { withExtendedLifetime(road) {} }
+            let (bootstrap, words) = try await readyInStandard(road, hold: OpenHold())
+            let (window, hosting) = mountSettings(bootstrap)
             defer {
                 window.orderOut(nil)
                 window.close()
@@ -200,36 +196,37 @@ struct SettingsLockCloseTests {
             await settle(window, hosting, until: { false }, maxTurns: 10)
             #expect(window.isVisible)
 
-            // An adoption whose work moves nothing, reopening under the same
-            // key: ready → opening → ready, exactly the Restore door's road.
-            try await world.bootstrap.adoptLibrary(reopeningWith: world.key, work: {})
+            // The crossing into Castle: ready → opening → ready, the reopening seam's road.
+            try await crossIntoCastle(bootstrap, words: words)
             await settle(window, hosting, until: { false }, maxTurns: 10)
-            guard case .ready = world.bootstrap.state else {
-                Issue.record("expected the reopen to land .ready")
+            guard case .ready = bootstrap.state, bootstrap.roadSession?.library.record?.mode == .castle else {
+                Issue.record("expected the crossing's reopen to land .ready in Castle: \(bootstrap.state)")
                 return
             }
             #expect(window.isVisible,
-                    "the window survives the reopen road's .opening (the Restore door's own sheet lives on it)")
+                    "the window survives the reopen road's .opening (the crossing's own sheet lives on it)")
         }
     }
 
     /// The rule's table: which states mean the library CLOSED under Settings.
     /// `.opening` never does — it is the reopen roads' in-flight middle.
     @Test func theLibraryClosedRuleNamesTheSettledClosedStatesAndNeverOpening() async throws {
-        try await withDeps {
+        try await withRoadDependencies {
             #expect(!SettingsSceneContent.libraryClosed(.opening))
             #expect(SettingsSceneContent.libraryClosed(.failed(
-                AppDatabase.StoreOpenError(storePath: "", reason: "x"), recovery: nil)))
-            let world = try demandedWorld()
-            defer { try? FileManager.default.removeItem(at: world.directory) }
-            await world.bootstrap.awaitOpen()
-            guard case .locked = world.bootstrap.state else {
-                Issue.record("expected the demanded world to start .locked")
+                AppDatabase.StoreOpenError(storePath: "", reason: "x"))))
+            let road = PlantedRoad()
+            defer { withExtendedLifetime(road) {} }
+            let (bootstrap, _) = try await LockWorld.readyInCastle(road)
+            #expect(!SettingsSceneContent.libraryClosed(bootstrap.state), "ready is open")
+            await bootstrap.lock()
+            guard case .roadLobby = bootstrap.state else {
+                Issue.record("expected the road's lobby after the lock")
                 return
             }
-            #expect(SettingsSceneContent.libraryClosed(world.bootstrap.state))
-            try await unlock(world)
-            #expect(!SettingsSceneContent.libraryClosed(world.bootstrap.state), "ready is open")
+            #expect(SettingsSceneContent.libraryClosed(bootstrap.state))
+            try await LockWorld.unlock(bootstrap)
+            #expect(!SettingsSceneContent.libraryClosed(bootstrap.state), "ready is open again")
         }
     }
 
@@ -241,44 +238,44 @@ struct SettingsLockCloseTests {
     /// "Opening your library…" with a spinner. Every settled closed state
     /// keeps the stub.
     @Test func theOpeningFaceSaysHerWordsAndEverySettledClosedStateKeepsTheStub() async throws {
-        try await withDeps {
+        try await withRoadDependencies {
             #expect(SettingsSceneContent.nonReadyFace(.opening) == .opening)
             #expect(SettingsSceneContent.Copy.opening == "Opening your library\u{2026}")
             #expect(SettingsSceneContent.nonReadyFace(.failed(
-                AppDatabase.StoreOpenError(storePath: "", reason: "x"), recovery: nil)) == .stub)
-            let world = try demandedWorld()
-            defer { try? FileManager.default.removeItem(at: world.directory) }
-            await world.bootstrap.awaitOpen()
-            guard case .locked = world.bootstrap.state else {
-                Issue.record("expected the demanded world to start .locked")
+                AppDatabase.StoreOpenError(storePath: "", reason: "x"))) == .stub)
+            let road = PlantedRoad()
+            defer { withExtendedLifetime(road) {} }
+            let (bootstrap, _) = try await LockWorld.readyInCastle(road)
+            await bootstrap.lock()
+            guard case .roadLobby = bootstrap.state else {
+                Issue.record("expected the road's lobby after the lock")
                 return
             }
-            #expect(SettingsSceneContent.nonReadyFace(world.bootstrap.state) == .stub)
+            #expect(SettingsSceneContent.nonReadyFace(bootstrap.state) == .stub)
         }
     }
 
     /// The real road, caught in its middle: Settings open over the unlocked
-    /// library, an adoption whose work is held on a gate, so the window sits
-    /// in `.opening` long enough to look at — it shows the spinner.
+    /// library, the crossing into Castle with its reopen's opener held on a
+    /// gate, so the window sits in `.opening` long enough to look at — it
+    /// shows the spinner.
     @Test func aReopenRoadShowsTheOpeningSpinnerMidCeremony() async throws {
-        try await withDeps {
-            let world = try demandedWorld()
-            defer { try? FileManager.default.removeItem(at: world.directory) }
-            try await unlock(world)
-            let (window, hosting) = mountSettings(world.bootstrap)
+        try await withRoadDependencies {
+            let hold = OpenHold()
+            let planted = PlantedRoad()
+            defer { withExtendedLifetime(planted) {} }
+            let (bootstrap, words) = try await readyInStandard(planted, hold: hold)
+            let (window, hosting) = mountSettings(bootstrap)
             defer {
                 window.orderOut(nil)
                 window.close()
             }
             await settle(window, hosting, until: { false }, maxTurns: 10)
 
-            let gate = DispatchSemaphore(value: 0)
-            let key = world.key
-            let bootstrap = world.bootstrap
+            hold.arm()
+            let gate = hold.gate
             let road = Task { @MainActor in
-                try await bootstrap.adoptLibrary(reopeningWith: key, work: {
-                    _ = gate.wait(timeout: .now() + 20)
-                })
+                try await crossIntoCastle(bootstrap, words: words)
             }
             @MainActor func opening() -> Bool {
                 if case .opening = bootstrap.state { return true }

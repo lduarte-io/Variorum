@@ -240,14 +240,11 @@ public protocol SyncRotationTransport: Sendable {
     /// The server's A5 visibility horizon, in milliseconds — the value
     /// `sync_visibility_horizon_ms()` serves (Phase 13y, the R-13y-4 fork's
     /// Shape 1: the SAME function derives `sync_pull`'s filter, so the
-    /// served value and the enforced value cannot drift). The rotation
-    /// walk's production wait DERIVES from it
-    /// (`CorpusRotation.horizonWait(forServedMillis:)` — served + margin);
-    /// nothing client-side hardcodes the horizon any more. On this
-    /// protocol rather than `SyncTransport` for the same 13j reason the
-    /// protocol exists: the walk is the only consumer, so the dozens of
-    /// wrapper transports never carry a dead conformance. REQUIRED, no
-    /// default — wrappers forward, fakes serve (the schemaVersion
-    /// doctrine).
+    /// served value and the enforced value cannot drift). Nothing
+    /// client-side hardcodes the horizon. Its one client consumer, the
+    /// rotation walk's derived wait, left with today's road (VX-329 L1);
+    /// the read stays as the served value's one client-visible authority.
+    /// REQUIRED, no default — wrappers forward, fakes serve (the
+    /// schemaVersion doctrine).
     func visibilityHorizonMillis() async throws -> Int64
 }

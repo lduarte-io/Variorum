@@ -17,12 +17,13 @@ import VariorumCore
 @MainActor
 @Suite("pre-13x 3b — the decrypted export's door")
 struct PlaintextExportDoorTests {
+    /// VX-329 U1: the facts read the open library's posture (Castle or not) — today's `Posture` left with today's road.
     private func facts(
-        posture: Posture, hasPassphrase: Bool, exports: LockIsolated<[URL]>,
+        castle: Bool, hasPassphrase: Bool, exports: LockIsolated<[URL]>,
         refused: [URL] = []
     ) -> PlaintextExportModel.Facts {
         PlaintextExportModel.Facts(
-            posture: { posture },
+            isCastle: { castle },
             hasPassphrase: { hasPassphrase },
             verifyPassphrase: { typed in typed == "sesame" ? .match : .mismatch("not it") },
             refusedFolders: { refused },
@@ -32,7 +33,7 @@ struct PlaintextExportDoorTests {
     @Test func castleTakesThePassphraseRefusesAWrongOneAndNeverTheBackupsFolder() async throws {
         let exports = LockIsolated<[URL]>([])
         let backups = URL(fileURLWithPath: "/tmp/variorum-3b/Backups", isDirectory: true)
-        let model = PlaintextExportModel(facts: facts(posture: .castle, hasPassphrase: true, exports: exports, refused: [backups]))
+        let model = PlaintextExportModel(facts: facts(castle: true, hasPassphrase: true, exports: exports, refused: [backups]))
         #expect(model.phase == .authorize(needsPassphrase: true))
         await model.authorize(passphrase: "not-it")
         #expect(model.lastError == "not it" && model.phase == .authorize(needsPassphrase: true))
@@ -51,12 +52,12 @@ struct PlaintextExportDoorTests {
 
     @Test func standardWithoutAPassphraseExportsOnThePlainConfirm() async throws {
         let exports = LockIsolated<[URL]>([])
-        let model = PlaintextExportModel(facts: facts(posture: .standard, hasPassphrase: false, exports: exports))
+        let model = PlaintextExportModel(facts: facts(castle: false, hasPassphrase: false, exports: exports))
         #expect(model.phase == .authorize(needsPassphrase: false))
         await model.authorize(passphrase: nil)
         #expect(model.phase == .choosing)
         // Standard WITH a passphrase set asks for it.
-        let withWord = PlaintextExportModel(facts: facts(posture: .standard, hasPassphrase: true, exports: exports))
+        let withWord = PlaintextExportModel(facts: facts(castle: false, hasPassphrase: true, exports: exports))
         #expect(withWord.phase == .authorize(needsPassphrase: true))
     }
 }

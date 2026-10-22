@@ -26,7 +26,7 @@ enum LibraryRekey {
 }
 
 extension ActContext {
-    static func fp(_ key: StoreKey) -> String { StoreKeyEnvelope.fingerprint(of: key) }
+    static func fp(_ key: StoreKey) -> String { KeyFingerprint.of(key) }
     static func fp8(_ fingerprint: String?) -> String { ProtectionExecutor.fp8(fingerprint) }
 
     var deviceID: String { library.section.deviceID }

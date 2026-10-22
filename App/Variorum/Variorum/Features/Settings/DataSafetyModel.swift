@@ -6,19 +6,21 @@
 //
 //  Her kickoff ruling: the freshness evidence is "the small face + log", and
 //  "Back Up Now…" is an ADJUNCT, never the load-bearing mechanism. So the
-//  face's own load-bearing half is a READ OF THE FILES: how many snapshots
-//  each destination holds, when the newest one was taken, how far back the
-//  kept set reaches. A schedule can stop silently; a folder's newest file
-//  cannot lie about its date, and that read is what catches the failure this
-//  whole phase exists to kill.
+//  face's own load-bearing half is a READ OF THE COPIES: how many of this
+//  Mac's pairs of this library each place holds, when the newest was taken,
+//  how far back the kept set reaches (VX-309 U1a — VX-397, the catalogue's
+//  per library per Mac count; VX-329 U1: today's flat-file count left with
+//  today's road). A schedule can stop silently; a copy's stamp cannot lie
+//  about its date, and that read is what catches the failure this whole
+//  phase exists to kill.
 //
 //  The persisted log (`BackupLog`) is the second half — it is the only thing
 //  that can report a run which produced NO file (an unplugged drive, a
 //  revoked folder), because a failure leaves nothing behind to read.
 //
-//  No business rules live here: retention is `BackupRetention` (pure), the
-//  run is `StoreBackup`, the destination is `BackupDestination`. This holds
-//  a projection and calls them.
+//  No business rules live here: retention is core's `Retention` (pure), the
+//  run is `StoreBackup` over the road's pair road, the destination is
+//  `BackupDestination`. This holds a projection and calls them.
 //
 
 import Foundation
@@ -55,9 +57,8 @@ final class DataSafetyModel {
     private let sync: SyncSession?
     private let signedIn: () -> Bool
     private let database: AppDatabase?
-    /// VX-309 U1a (VX-397): the NEW road's counts — this Mac's backup pairs of the open library, per place, from the
-    /// catalogue (`RoadStandingModel.copyCounts`, handed down by the pane — nil on TODAY's road, whose counts stay the
-    /// folder reads below, byte-unchanged).
+    /// VX-309 U1a (VX-397): the counts — this Mac's backup pairs of the open library, per place, from the catalogue
+    /// (`RoadStandingModel.copyCounts`, handed down by the pane; nil — no library's faces — counts none).
     private let roadCounts: (() async -> RoadCopyCounts)?
 
     private(set) var primary: FolderSummary?
@@ -79,10 +80,6 @@ final class DataSafetyModel {
     /// The last thing an act had to say — a receipt or a refusal, never a
     /// silent outcome (P-2's letter applied to a Settings pane).
     private(set) var note: String?
-    /// 13x U2 row 6 — the Restore surface's rows: the in-container
-    /// folder's snapshot pairs with their which-credential facts and the
-    /// same-fingerprint second look (`BackupRestoreCandidates`).
-    private(set) var restoreCandidates: [BackupRestoreCandidates.Candidate] = []
 
     init(
         backup: StoreBackup?,
@@ -112,28 +109,22 @@ final class DataSafetyModel {
         guard let backup else { return }
         let directory = backup.directory
         let defaults = self.defaults
-        // 13x U2 row 6: the live key's fingerprint for the second look
-        // (nil — locked, plaintext-era — just never lights it).
-        let liveFingerprint = database?.storeKeyFingerprint
         let read = await Task.detached(priority: .utility) {
             let store = defaults()
             return (primary: DataSafetyModel.summarize(directory),
                     secondary: DataSafetyModel.summarizeSecondDestination(in: store),
                     exports: DataSafetyModel.summarizeExports(in: store),
                     log: BackupLog.read(store),
-                    insurance: MarkdownInsurance.isEnabled(in: store),
-                    candidates: BackupRestoreCandidates.gather(
-                        in: directory, liveKeyFingerprint: liveFingerprint))
+                    insurance: MarkdownInsurance.isEnabled(in: store))
         }.value
-        // VX-309 U1a (VX-397): on the new road the two rows count THIS Mac's pairs of THIS library in their place (the
-        // catalogue, per library per Mac) — their paths and the folder's set/unset/unreachable states stay as read.
+        // VX-309 U1a (VX-397): the two rows count THIS Mac's pairs of THIS library in their place (the catalogue, per
+        // library per Mac) — their paths and the folder's set/unset/unreachable states stay as read.
         let counts = await roadCounts?()
-        primary = counts.map { Self.counted(read.primary, $0.container) } ?? read.primary
-        destination = counts.map { Self.counted(read.secondary, $0.far) } ?? read.secondary
+        primary = Self.counted(read.primary, counts?.container ?? .none)
+        destination = Self.counted(read.secondary, counts?.far ?? .none)
         exports = read.exports
         log = read.log
         insuranceEnabled = read.insurance
-        restoreCandidates = read.candidates
     }
 
     /// 13p Batch 2: the opt-in's act. Turning it ON runs a backup pass so
@@ -187,23 +178,12 @@ final class DataSafetyModel {
             lastSuccessAt: sync.status.lastSuccessAt)
     }
 
-    /// 18o U1 (row 84): `newest` and `oldest` — the face's freshness and its
-    /// reach — read only stamps no later than `now` (`StoreBackup
-    /// .stampIsTrusted`, the due-checks' one rule): a copy stamped ahead of
-    /// the clock is COUNTED (it is a real file) but never shown as the
-    /// newest, so it can no longer hold the row out of the stale colour while
-    /// the copies it can trust grow old.
-    nonisolated static func summarize(_ directory: URL, now: Date = Date()) -> FolderSummary {
-        let display = BackupDestination.displayPath(directory)
-        guard FileManager.default.fileExists(atPath: directory.path) else {
-            return FolderSummary(displayPath: display, exists: false, count: 0)
-        }
-        let dated = ((try? StoreBackup.existingBackups(in: directory)) ?? [])
-            .compactMap(StoreBackup.date(fromBackupURL:))
-        let trusted = dated.filter { StoreBackup.stampIsTrusted($0, now: now) }
-        return FolderSummary(
-            displayPath: display, exists: true, count: dated.count,
-            newest: trusted.max(), oldest: trusted.min())
+    /// A row's path and whether its folder exists — its count, newest and oldest are the catalogue's (`counted`, below;
+    /// trusted stamps only — 18o U1, row 84).
+    nonisolated static func summarize(_ directory: URL) -> FolderSummary {
+        FolderSummary(
+            displayPath: BackupDestination.displayPath(directory),
+            exists: FileManager.default.fileExists(atPath: directory.path), count: 0)
     }
 
     /// VX-309 U1a (VX-397) — a row's summary with its count, newest and oldest taken from this Mac's pairs of this library

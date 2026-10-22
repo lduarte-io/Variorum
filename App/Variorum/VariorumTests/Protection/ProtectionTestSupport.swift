@@ -118,7 +118,7 @@ nonisolated final class PlantedCustodyLeaf: CustodyLeaf, @unchecked Sendable {
 
     func writeCustody(_ key: StoreKey, itemClass: ProtectionNames.CustodyClass, libraryID: String) throws {
         writes.append("write \(itemClass)")
-        let fact = CustodyItemFact(fingerprint: StoreKeyEnvelope.fingerprint(of: key), itemClass: itemClass, libraryID: libraryID)
+        let fact = CustodyItemFact(fingerprint: KeyFingerprint.of(key), itemClass: itemClass, libraryID: libraryID)
         items.removeValue(forKey: fact)
         items[fact] = key
     }

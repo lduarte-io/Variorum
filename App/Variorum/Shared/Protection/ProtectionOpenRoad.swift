@@ -3,14 +3,16 @@
 //  Variorum (shared: Mac + Mobile)
 //
 //  VX-306 U1b — THE NEW OPEN ROAD, off the main actor (`notes/plans/vx-306-castle-open-road.md` §2 U1b; the
-//  contract `notes/CastleRules.md`). Reached ONLY behind the one switch (`ProtectionRoad.newRoadIsLive`, read at
-//  the head of `AppBootstrap.routeAndOpen`). Nothing here decides: the gatherer's facts go to `assess`, its
+//  contract `notes/CastleRules.md`). Since VX-329 U1 (the release switch) the ONLY open road, in every build — the
+//  bootstrap's `routeAndOpen` reaches it for every store. Nothing here decides: the gatherer's facts go to `assess`, its
 //  `LaunchVerdict` routes, every road verifies itself against the library in the slot, and the executor is the
 //  one thing that writes.
 //
 //    - `.startFresh` → `createLibrary(passphrase: nil)` (rule 2: the twelve words at birth, shown once on the
 //      card; rule 3: the passphrase is asked later) → the card, then the open.
 //    - `.libraryMissing` → today's three-door face (unchanged this unit).
+//    - `.preDesignStore` (VX-329 U4 — rule 26: a store with an older Variorum's key file beside it and none of this
+//      design's) → the lobby's facts with NO road tried on the store; the face is her pre-design face.
 //    - `.lobby` → THE QUIET ROADS AT ONCE, in order (rule 8: "the next open uses whatever quiet road still
 //      works"): every silent item's key, then each Apple wrap whose key reads here — the live key file's first,
 //      then this Mac's sealed mirror's and every catalogued key file's (P-VX306-U1b-2: the scenario world's own
@@ -241,6 +243,10 @@ nonisolated enum ProtectionOpenRoad {
             return await create(ctx, setAsideLiveKeyFile: false)
         case .libraryMissing:
             return .libraryMissing
+        case .preDesignStore:
+            // VX-329 U4 — RULE 26: a store from before this design. No road is tried on it (this build has no reader for
+            // it, and nothing here reads it); the lobby's face says so in her words (`ProtectionLobbyFace.preDesignStore`).
+            return .lobby(lobby)
         case .lobby, .open:
             var standing = lobby
             switch await open(ctx, candidates: quietCandidates(ctx, facts: facts), typed: .none) {
@@ -278,6 +284,9 @@ nonisolated enum ProtectionOpenRoad {
         _ ctx: RoadContext, setAsideLiveKeyFile: Bool, setAsideUnopenableLibrary: Bool = false
     ) async -> RoadRoute {
         guard ctx.writes else { return .failed(ProtectionWords.testRunNeverCreates) }
+        // VX-329 U4 — THE RULING: the resume and the stale-staging sweep run on the creation road too (an interrupted
+        // whole set-aside's remainder leaves the slot before anything is made beside it).
+        finishAnInterruptedSetAside(ctx.system.places)
         do {
             if setAsideUnopenableLibrary { try setAsideUnopenableLibraryFor(ctx.system.places) }
             if setAsideLiveKeyFile { try setAsideLiveKeyFileFor(ctx.system.places) }
@@ -306,6 +315,27 @@ nonisolated enum ProtectionOpenRoad {
     /// no-clobber belt ("a library is already in the slot") and could never succeed.
     static func startNewLibraryFromAFace(_ ctx: RoadContext) async -> RoadRoute {
         await create(ctx, setAsideLiveKeyFile: true, setAsideUnopenableLibrary: true)
+    }
+
+    /// VX-329 U4 — her pre-design face's *Start fresh…*, on her confirm's yes (the plan's §6d; THE RULING (a)): the slot
+    /// re-read (the fact must still hold — names only; a stale face moves nothing), the library from before this design
+    /// set aside WHOLE (`setAsidePreDesignLibraryWholeFor` — its key files, sidecars and hold with it; the resume first;
+    /// no byte read), then the creation exactly as an empty slot's — the calm first open. Nothing is created unless the
+    /// set-aside landed. PROVISIONAL P-VX329-U4-6: a refusal says the creation's own sentence (her words have none).
+    static func startFreshOverAPreDesignStore(_ ctx: RoadContext) async -> RoadRoute {
+        guard ctx.writes else { return .failed(ProtectionWords.testRunNeverCreates) }
+        guard slotHoldsAPreDesignStore(ctx.system.places) else {
+            log("road: Start fresh refused — the slot no longer holds a store from before this design (nothing moved)")
+            return .failed(ProtectionWords.couldNotCreate)
+        }
+        do {
+            try setAsidePreDesignLibraryWholeFor(ctx.system.places, carryingHold: true)
+        } catch {
+            log("road: Start fresh refused — the library from before this design could not be set aside whole "
+                + "(\(String(describing: error)))")
+            return .failed(ProtectionWords.couldNotCreate)
+        }
+        return await create(ctx, setAsideLiveKeyFile: false)
     }
 
     /// A live key file in an EMPTY slot, moved (never deleted) into `Previous Libraries/<stamp>/`.
@@ -462,7 +492,7 @@ nonisolated enum ProtectionOpenRoad {
         while index < keys.count {
             let key = keys[index]
             index += 1
-            let fingerprint = StoreKeyEnvelope.fingerprint(of: key)
+            let fingerprint = KeyFingerprint.of(key)
             for file in files where file.fingerprint == fingerprint {
                 for older in (try? file.historyKeys(currentKey: key)) ?? [] where !keys.contains(older.key) {
                     keys.append(older.key)
@@ -576,7 +606,7 @@ nonisolated enum ProtectionOpenRoad {
         let roads = library.keyFile.map { $0.roads.map(\.rawValue).sorted().joined(separator: ",") } ?? "none"
         let libraryID = String((library.record?.libraryID ?? "none").prefix(8))
         let repairs = report.repairsDone.map { String(String(describing: $0).prefix(32)) }.joined(separator: ",")
-        log("road: \(how) — library \(libraryID) key \(StoreKeyEnvelope.shortFingerprint(library.fingerprint)) "
+        log("road: \(how) — library \(libraryID) key \(KeyFingerprint.short(library.fingerprint)) "
             + "device \(library.section.deviceID.prefix(8)); custody silent \(silent) touchid \(touch); Apple keys "
             + "readable [\(apple)]; memory items \(memory); live key file roads [\(roads)]; notice "
             + "\(report.notice != nil); repairs [\(repairs)]; faults \(report.faults.count); acts \(report.acts.count); "
@@ -620,11 +650,13 @@ nonisolated struct RoadInputs: Sendable {
     let open: (@Sendable (StoreKey) -> Result<AppDatabase, AppDatabase.StoreOpenError>)?
 
     /// Production: the variant's slot and far folder; the scoped sign-in (read off the main actor, a read); and
-    /// READ-ONLY in a hosted test run (the test host is the dev-store app — `KeychainTestTripwire`).
-    static func live(variant: AppDatabase.StoreVariant) -> RoadInputs {
+    /// READ-ONLY in a hosted test run (the test host is the dev-store app — `KeychainTestTripwire`). VX-423: every
+    /// system composed here rides `auth`, the process's one refresh authority (the bootstrap's) — its vault leaf never
+    /// mints a session of its own.
+    static func live(variant: AppDatabase.StoreVariant, auth: AuthSession) -> RoadInputs {
         let scope = variant.rawValue
         return RoadInputs(
-            makeSystem: { try? ProtectionSystem.live(variant: variant) },
+            makeSystem: { try? ProtectionSystem.live(variant: variant, session: auth) },
             sessionFact: {
                 KeychainAuthStorage.load(service: KeychainAuthStorage.variorumService, scope: scope)
                     .map { SessionFact.signedIn(accountID: $0.userID, email: $0.email) } ?? .signedOut
@@ -656,8 +688,9 @@ nonisolated struct ComposedRoad: Sendable {
     func context() -> RoadContext { RoadContext(system: system, session: sessionFact(), writes: writes) }
 }
 
-/// TEST-ONLY: a new-road bootstrap over a temp slot and a throwaway scope (`AppBootstrap(testOpener:…,
-/// protectionRoad:)`) — the system, the sign-in, and the opener that opens the temp slot with the key in hand.
+/// TEST-ONLY: a bootstrap over a temp slot and a throwaway scope (`AppBootstrap(testStoreURL:protectionRoad:)` — VX-329
+/// U1: required, the bootstrap's one road) — the system, the sign-in, and the opener that opens the temp slot with the
+/// key in hand.
 struct ProtectionRoadTestHarness {
     var system: ProtectionSystem
     var session: SessionFact = .signedOut

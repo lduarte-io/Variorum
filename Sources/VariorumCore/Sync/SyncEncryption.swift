@@ -112,21 +112,6 @@ public struct UnenrolledKeyProvider: SyncKeyProviding {
     }
 }
 
-/// A fixed key world with a FIXED identity — the in-process worlds that
-/// hold keys in memory (the `vault-bootstrap` runner, the re-key brain's
-/// `resyncReinitialize`-only engine, the tests' fixed providers) compose
-/// over it. Public so the app's test target can build one too.
-public struct StaticSyncKeyProvider: SyncKeyProviding {
-    public let keys: SyncEncryptionKeys
-    public let deviceID: String
-    public init(keys: SyncEncryptionKeys, deviceID: String) {
-        self.keys = keys
-        self.deviceID = deviceID
-    }
-    public func currentKeys() throws -> SyncEncryptionKeys { keys }
-    public func deviceIdentity() throws -> String { deviceID }
-}
-
 public enum SyncKeyProviderError: Error, Equatable, Sendable {
     /// No key material is available on this device (never enrolled, or the
     /// Keychain item is inaccessible/locked).

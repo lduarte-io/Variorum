@@ -1,9 +1,8 @@
 //
 //  RoadCrossingSurfaceTests.swift
 //  VariorumTests — VX-307 U2a piece 5: THE CROSSINGS' MAC FACES build and lay out (hosted in a real window — a face that
-//  crashes or cannot lay out fails here), and Settings ▸ Protection's gate is the switch's: on the new road the pane
-//  renders the crossings' section from the bootstrap's model and today's rows retire; on today's road (no road model)
-//  today's rows render exactly as before. The faces' logic is the models' (pinned headless — `RoadCrossingModelTests`,
+//  crashes or cannot lay out fails here), and Settings ▸ Protection renders the crossings' section from the bootstrap's
+//  model (VX-329 U1: today's rows, and the gate that showed them on today's road, were deleted with it). The faces' logic is the models' (pinned headless — `RoadCrossingModelTests`,
 //  `RoadCrossingFacesTests`); this suite pins the composition. Mac only (hosting).
 //
 
@@ -15,21 +14,8 @@ import Testing
 import VariorumCore
 
 @MainActor
-@Suite("VX-307 U2a — the crossings' Mac faces (hosted) and the pane's gate", .serialized)
+@Suite("VX-307 U2a — the crossings' Mac faces (hosted) and the pane's road sections", .serialized)
 struct RoadCrossingSurfaceTests {
-    private func controller() -> ProtectionController {
-        let backing = InMemoryStoreKeyGuardBacking(auto: StoreKey.mint(), biometryAvailable: true, biometricSucceeds: true)
-        let gate = StoreLaunchGate.scripted(
-            dials: ScriptedDialsBox(ProtectionDials()), backing: backing,
-            envelope: ScriptedEnvelopeBox(nil), stamps: ScriptedStampsBox())
-        return ProtectionController(configuration: .init(
-            scope: "Variorum", storeURL: nil, gate: gate, isRealVariant: true,
-            makeKDF: { PassphraseKDF.Descriptor(
-                algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
-                memoryKiB: 256, iterations: 1, parallelism: 1,
-                salt: PassphraseKDF.randomSalt(), outputBytes: 32) }))
-    }
-
     private func standing(defaults: UserDefaults, crossings: RoadCrossingsModel?) -> RoadStandingModel {
         let reminder = PassphraseReminderModel(
             libraryID: "lib", moment: nil, ledger: PassphraseReminderLedger(defaults: defaults),
@@ -51,7 +37,7 @@ struct RoadCrossingSurfaceTests {
         let crossings = RoadCrossingsModel(roads: planted.roads)
         await crossings.refresh()
         await SurfaceComposition.host(
-            ProtectionPane(controller: controller(), services: nil,
+            ProtectionPane(services: nil,
                            roadStanding: standing(defaults: suite.defaults, crossings: crossings)),
             size: NSSize(width: 640, height: 900))
         let castle = PlantedCrossingRoads()
@@ -66,7 +52,7 @@ struct RoadCrossingSurfaceTests {
         let inCastle = RoadCrossingsModel(roads: castle.roads)
         await inCastle.refresh()
         await SurfaceComposition.host(
-            ProtectionPane(controller: controller(), services: nil,
+            ProtectionPane(services: nil,
                            roadStanding: standing(defaults: suite.defaults, crossings: inCastle)),
             size: NSSize(width: 640, height: 900))
     }
@@ -94,10 +80,10 @@ struct RoadCrossingSurfaceTests {
         await SurfaceComposition.host(RoadCrossingSheet(model: leave), size: NSSize(width: 480, height: 600))
     }
 
-    /// THE PANE'S GATE is the switch's (source pin — a Form's conditional sections are not reachable by composition
-    /// before hosting, VX-306's adjudication): the crossings' section from the bootstrap's model, today's rows only with
-    /// no road model, the confirm held by that model.
-    @Test func thePanesTodayRowsRetireOnTheNewRoadOnly() throws {
+    /// THE PANE IS THE ROAD'S (source pin — a Form's conditional sections are not reachable by composition before
+    /// hosting, VX-306's adjudication): the crossings' section from the bootstrap's model, then the closing line; today's
+    /// rows and their gate are gone (VX-329 U1 — the release switch); the confirm held by the one presenter.
+    @Test func thePanesSectionsAreTheRoadsAndTodaysRowsAreGone() throws {
         let source = try String(
             contentsOf: URL(fileURLWithPath: #filePath)
                 .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
@@ -106,11 +92,10 @@ struct RoadCrossingSurfaceTests {
         let body = try #require(source.range(of: "var body: some View {")).upperBound
         let rest = String(source[body...])
         let crossings = try #require(rest.range(of: "if let crossings = roadStanding?.crossings {"))
-        let todayGate = try #require(rest.range(of: "if roadStanding == nil {"))
-        let lead = try #require(rest.range(of: "leadSection\n"))
         let keystone = try #require(rest.range(of: "keystoneSection\n"))
-        #expect(crossings.lowerBound < todayGate.lowerBound && todayGate.lowerBound < lead.lowerBound)
-        #expect(lead.lowerBound < keystone.lowerBound)
+        #expect(crossings.lowerBound < keystone.lowerBound)
+        #expect(!rest.contains("if roadStanding == nil {"), "no gate for today's rows — there are none")
+        #expect(!rest.contains("leadSection"), "today's lead section left with today's road")
         // VX-308 U1 (VX-239 + VX-243): the confirm is held by the bootstrap's ONE PRESENTER and presented through it.
         #expect(rest.contains(".protectionSheets(roadStanding?.sheets, services: services)"))
         #expect(!rest.contains("roadStanding?.crossings?.confirm"), "no second presenter of the crossings' confirm")

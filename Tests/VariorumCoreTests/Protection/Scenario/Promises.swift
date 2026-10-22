@@ -116,7 +116,7 @@ extension SWorld {
         for key in seeds.keys { keys[PF.fp(key)] = key }
         var masters = seeds.masters
         let wordsKeys = seeds.words.compactMap { wordsKey($0) }
-        func pass(_ wrap: StoreKeyEnvelope.PassphraseWrap?) -> [SymmetricKey] {
+        func pass(_ wrap: PassphraseWrap?) -> [SymmetricKey] {
             guard let wrap else { return [] }
             return seeds.passphrases.compactMap { passphraseKey($0, wrap.kdf)?.key }
         }

@@ -32,18 +32,6 @@ struct MobileTravellingDotsTests {
         _ = host
     }
 
-    /// The phone's lobby composes the indicator on its phase line (the
-    /// busy + progress state) — never a `ProgressView`.
-    @Test func thePhonesLobbyComposesTheIndicatorWhileWorking() {
-        let lobby = StoreLobby(
-            demand: .passphrase, biometryOffered: false, passphraseOffered: true,
-            recoveryOffered: true, envelopeUnreadable: false,
-            gatedRoad: { nil },
-            envelopeRoad: { _ in .failure(.init(message: "not it")) },
-            complete: { _ in })
-        let shown = composition(of: MobileStoreLockView(lobby: lobby, tokens: .terminalLight).body)
-        #expect(shown.contains("TravellingDotsIndicator") || !lobby.busy,
-                "the lobby's busy branch is the indicator's; idle composes none")
-        #expect(!shown.contains("ProgressView"), "no system spinner in the phone's lobby composition")
-    }
+    // (VX-329 U1: the pin over the phone's lobby — today's `MobileStoreLockView` over `StoreLobby` — was deleted with
+    // it; the phone's road faces are in the Mac suite's no-spinner walk, `TravellingDotsIndicatorTests`.)
 }

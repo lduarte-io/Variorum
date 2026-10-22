@@ -63,7 +63,8 @@ struct RoadJoinFollowFacesTests {
         #expect(join.sentences == [
             ProtectionWords.joinLead, ProtectionWords.onePairAtATime,
             ProtectionWords.joinPlanLine(.entersCastle, library: .standard)!, ProtectionWords.castlePromise,
-            ProtectionWords.useCastleLead, ProtectionWords.castleFloor, ProtectionWords.exportAPlainCopyFirst,
+            ProtectionWords.useCastleLead, ProtectionWords.castleLeavesPreviousLibraries, ProtectionWords.castleFloor,
+            ProtectionWords.exportAPlainCopyFirst,
         ])
         #expect(join.gate == RoadGateChoice(touchIDAvailable: false, preselected: .alwaysAsk))
         #expect(join.receipt == ProtectionWords.joinedReceipt(.entersCastle, moved: false))

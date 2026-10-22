@@ -10,14 +10,15 @@
 //  journal connection that stood beside it left with the bridge on
 //  2026-09-04 (pre-13x batch 0b).
 //
-//  Phase 14b CROSSOVER ROUND (CF-14, her ruling): the Account sheet gains
+//  Phase 14b CROSSOVER ROUND (CF-14, her ruling): the Account sheet gained
 //  TABS — Account · Encryption ("account will one day show payment") —
-//  both form factors through this one shared seam. The sync row's
-//  separate "Encryption…" door retires into the Encryption tab; the
-//  LOCKED state's "Unlock…" door opens that tab DIRECTLY (one act — the
-//  refusal's own affordance, never buried). The sheet's dismissal is the
-//  CF-1 grammar applied whole: one borderless "Close" in the header row,
-//  no defaultAction, never beside an act.
+//  both form factors through this one shared seam. VX-329 U1: the
+//  Encryption tab was today's E2EE face (enroll, setup, follow, the key
+//  doors over today's sync custody) and was deleted with today's road; the
+//  account's protection lives in Settings ▸ Protection's Sync section.
+//  The tab mechanism stays for the payment tab to come. The sheet's
+//  dismissal is the CF-1 grammar applied whole: one borderless "Close" in
+//  the header row, no defaultAction, never beside an act.
 //
 
 import SwiftUI
@@ -27,7 +28,6 @@ import VariorumCore
 /// row's pure face model can name a door's target tab as plain data.
 nonisolated enum AccountTab: String, CaseIterable, Identifiable, Sendable {
     case account = "Account"
-    case encryption = "Encryption"
     var id: String { rawValue }
 }
 
@@ -147,8 +147,6 @@ struct AccountView: View {
                 switch tab {
                 case .account:
                     accountSection
-                case .encryption:
-                    EncryptionView(services: services)
                 }
             }
             .padding(20)
@@ -164,8 +162,9 @@ struct AccountView: View {
         .tint(pageStyle?.tokens.accent)
         // Mac-only floor (review round 1, R1-2): an iPhone sheet proposes
         // ~393 pt — a forced width clips the form on the phone door. macOS
-        // keeps a minimum sized for the wider Encryption tab (its 460, the
-        // pre-tabs EncryptionView floor).
+        // keeps the minimum the Encryption tab once sized (its 460, the
+        // pre-tabs EncryptionView floor — the tab left with today's road at
+        // VX-329 U1; the width stays the sheet's).
         #if os(macOS)
         .frame(minWidth: 460, minHeight: 340)
         #endif

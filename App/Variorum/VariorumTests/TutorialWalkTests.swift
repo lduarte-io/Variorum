@@ -3533,16 +3533,17 @@ private let privacyChapter = "keeping it private"
 /// The DANGER with a chapter like this is drift: a settings pane re-worded at
 /// 13s and a lesson left behind is a lesson that lies about a security
 /// feature — the worst class of stale copy in the app. So the pins below tie
-/// the prose to the app's OWN sentences (`ProtectionCopy` — the copy §7
-/// constants both seeders render, the same brain the pane renders). A
-/// re-worded posture name or a changed floor makes this red rather than
-/// merely wrong.
+/// the prose to the app's OWN sentences. VX-329 U1 — THE RELEASE SWITCH: the
+/// Mac's guide seeds the protection road's chapter in every store (VX-309 U2's
+/// three lessons over `ProtectionWords` — `TutorialNewRoadChapterTests` pins
+/// the seed paragraph by paragraph); copy §7's two-lesson chapter (today's
+/// road's) left the Mac with it, so this suite holds the chapter's PLACE and
+/// its everyday REGISTER over what is seeded now.
 ///
 /// It is a CONTRACT suite, not an acts suite, and deliberately so: every act
 /// this chapter could ask a reader to perform is a Keychain or biometric act,
 /// which no test may drive (the standing prompt rule). The behaviour those
-/// sentences describe is pinned where it lives — `Phase13pLobbyTests`,
-/// `Phase13pControllerTests`, `Phase13pProtectionBrainTests`.
+/// sentences describe is pinned where it lives — the protection road's suites.
 @MainActor
 @Suite("Tutorial contract — keeping it private")
 struct TutorialPrivacyChapterTests {
@@ -3567,7 +3568,7 @@ struct TutorialPrivacyChapterTests {
     /// it (`index == books + 1`, untouched) — so this chapter is the WORKFLOW'S
     /// close now, and the MCP chapter, the one door she may open, is the only
     /// thing after it. RED ON OLD: the old plan has nothing after privacy.
-    @Test func theChapterIsTwoLessonsInTheRightPlace() {
+    @Test func theChapterIsTheRoadsThreeLessonsInTheRightPlace() {
         let index = TutorialSeeder.plan.firstIndex { $0.chapter == privacyChapter }
         #expect(index != nil)
         let books = TutorialSeeder.plan.firstIndex { $0.chapter == TutorialSeeder.booksChapter }
@@ -3580,56 +3581,30 @@ struct TutorialPrivacyChapterTests {
                     "the one chapter after it is the MCP door's")
             #expect(index == books + 1, "right after the workflow's capstone")
         }
-        // pre-13x 5a: copy §7's two lessons, by the copy's own titles.
+        // VX-309 U2 (QUESTIONS #235's "written here") → VX-329 U1: the road's three lessons, by their own titles (copy
+        // §7's two, "SHORT, as she ruled", left the Mac's guide with today's road).
         #expect(TutorialSeeder.plan.first { $0.chapter == privacyChapter }?.lessons
-            == [ProtectionCopy.privacyLessonOneTitle, ProtectionCopy.privacyLessonTwoTitle],
-                "SHORT, as she ruled — two lessons")
+            == [ProtectionWords.guideKeyLessonTitle, ProtectionWords.guidePosturesLessonTitle,
+                ProtectionWords.guideCopiesLessonTitle])
     }
 
-    /// **RENDER, DON'T RE-DERIVE** (pre-13x 5a): each lesson's prose is copy
-    /// §7's paragraphs VERBATIM — the copy constants both seeders render —
-    /// and the chapter says exactly what copy §7's parenthetical promises:
-    /// both modes, both floors, keystone 3, keystone 4, and the book's door.
-    @Test func theChapterRendersCopySevenVerbatimAndNamesBothModesBothFloorsTheKeystonesAndTheBooksDoor() async throws {
+    /// The rendered chapter (VX-329 U1: the road's three lessons) keeps keystones 3 and 4, names no retired door or
+    /// pointer, and speaks the everyday register — no key-family internal in any lesson.
+    @Test func theRenderedChapterKeepsTheKeystonesAndTheEverydayRegister() async throws {
         try await withTutorialWorld { _, db, bookID in
-            let one = try await db.read { db in
-                try Queries.renderedText(
-                    db, containerID: lessonID(db, bookID: bookID, ProtectionCopy.privacyLessonOneTitle))
+            var lessons: [String] = []
+            for title in [ProtectionWords.guideKeyLessonTitle, ProtectionWords.guidePosturesLessonTitle,
+                          ProtectionWords.guideCopiesLessonTitle] {
+                lessons.append(try await db.read { db in
+                    try Queries.renderedText(db, containerID: lessonID(db, bookID: bookID, title))
+                })
             }
-            let two = try await db.read { db in
-                try Queries.renderedText(
-                    db, containerID: lessonID(db, bookID: bookID, ProtectionCopy.privacyLessonTwoTitle))
-            }
-            for paragraph in ProtectionCopy.privacyLessonOneParagraphs {
-                #expect(one.contains(paragraph), "lesson 1 carries the copy's paragraph verbatim")
-            }
-            for paragraph in ProtectionCopy.privacyLessonTwoParagraphs {
-                #expect(two.contains(paragraph), "lesson 2 carries the copy's paragraph verbatim")
-            }
-            // Keystone 3, verbatim; keystone 4 rides a sentence that lowercases
-            // its first word ("…changes: while Variorum is open…").
-            #expect(one.contains(ProtectionCopy.keystoneAccountPassword))
-            #expect(one.lowercased().contains(ProtectionCopy.keystoneOpenMeansReadable.lowercased()))
-            #expect(one.contains("who holds a key"))
-            // Both modes by their real words; both floors; the Castle keystone's
-            // second clause; the book's door by the seeded book's own name.
-            for posture in [Posture.standard, Posture.castle] {
-                #expect(two.contains(ProtectionCopy.postureName(posture)))
-            }
-            #expect(two.contains(ProtectionCopy.privacyStandardFloorSentence))
-            #expect(two.contains(ProtectionCopy.privacyCastleFloorSentence))
-            #expect(two.contains("your passphrase is what lets a new device in"))
-            // 13s-b U1b (R-13s-37, the U3 disposition 1 — a JUSTIFIED
-            // EDIT): the book's-door arm INVERTS — the pointer paragraph
-            // retired with the book's seed and doors, so the chapter must
-            // no longer name a book a fresh store cannot hold. The two
-            // never-soften floor arms above are byte-untouched.
-            #expect(!two.contains(SampleLibraryEncryptionBook.name),
-                    "the retired pointer stays gone")
-            // The retired 13p dials lesson is gone: no reset door, no presets.
-            #expect(!one.contains("Forgot It? Reset") && !two.contains("Forgot It? Reset"))
-            // The two-register rule over the rendered chapter.
-            for prose in [one, two] {
+            let one = lessons[0]
+            #expect(one.contains(ProtectionCopy.keystoneAccountPassword), "keystone 3, verbatim")
+            #expect(one.contains(ProtectionWords.guideOpenMeansReadable), "keystone 4, the road's words")
+            for prose in lessons {
+                #expect(!prose.contains(SampleLibraryEncryptionBook.name), "the retired pointer stays gone")
+                #expect(!prose.contains("Forgot It? Reset"), "the retired 13p dials lesson is gone")
                 #expect(!prose.contains(Self.forbiddenRegisterWords),
                         "the tutorial names no key-family internal: \(prose.prefix(80))…")
             }

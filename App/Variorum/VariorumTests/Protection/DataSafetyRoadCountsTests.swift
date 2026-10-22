@@ -2,8 +2,8 @@
 //  DataSafetyRoadCountsTests.swift
 //  VariorumTests — VX-309 U1a piece 2 (VX-397): Settings ▸ Data Safety's two rows on the NEW road count THIS Mac's backup
 //  pairs of THIS library in their place — the catalogue, per library per Mac — while their paths and the picked folder's
-//  set/unset/unreachable states stay as read; TODAY's road (no `roadCounts`) counts its folders' flat files exactly as
-//  before. Also the two restatements the pair road and core make of `StoreBackup`'s rules (the interval, the trusted
+//  set/unset/unreachable states stay as read; with no `roadCounts` (no library's faces) they count nothing — today's
+//  flat-file count went with today's road at the release switch (VX-329 U1, R-U1-5). Also the two restatements the pair road and core make of `StoreBackup`'s rules (the interval, the trusted
 //  stamp), held equal here where `StoreBackup` is in reach. Mac-only (`DataSafetyModel`, `StoreBackup`): the run is the
 //  orchestrator's under the stage.
 //
@@ -58,11 +58,15 @@ struct DataSafetyRoadCountsTests {
         return DataSafetyModel(backup: backup, defaults: defaults, roadCounts: roadCounts)
     }
 
-    /// THE ROWS ON THE NEW ROAD: this Mac's pairs of this library, per place — never today's flat files, never another
-    /// Mac's or another library's. And on TODAY's road (no road counts), the flat files exactly as before. RED ON OLD (the
-    /// orchestrator's behavioural revert — the refresh's two road lines back to `read.primary` / `read.secondary`): the new
-    /// road's rows read 3 and 2.
-    @Test func theNewRoadsRowsCountThisMacsPairsOfThisLibraryAndTodaysRoadIsUnchanged() async throws {
+    /// THE ROWS: this Mac's pairs of this library, per place — never today's flat files, never another Mac's or another
+    /// library's. And with NO road counts (no library's faces — the model's nil), the rows count nothing: today's flat
+    /// files never count, either way, while each row's path and the picked folder's set state stay as read. RED ON OLD
+    /// (VX-309 U1a — the orchestrator's behavioural revert, the refresh's two road lines back to `read.primary` /
+    /// `read.secondary`): the rows read the flat files' 3 and 2. VX-329's Mac-suite fix leg: the second half was
+    /// `…AndTodaysRoadIsUnchanged` — it held TODAY's road (no road counts → the flat files counted as before), whose
+    /// flat-file count U1 deleted with today's flat legs (R-U1-5); the first run after the switch read it 0 and 0, as
+    /// designed, so the half now holds the new truth over the same planted world.
+    @Test func theRowsCountThisMacsPairsOfThisLibraryAndNeverTheFlatFiles() async throws {
         let road = PlantedRoad(farFolder: true)
         let (session, _) = try await road.created()
         let now = Date()
@@ -84,13 +88,22 @@ struct DataSafetyRoadCountsTests {
         }
         #expect(far.count == 1, "the picked folder: this Mac's one pair — never another Mac's fresh copy — \(far)")
 
-        let todaysRoad = try model(road, defaults: defaults, roadCounts: nil)
-        await todaysRoad.refresh()
-        #expect(todaysRoad.primary?.count == 3, "today's road: the flat files beside the library, as before")
-        guard case .set(_, let todaysFar) = todaysRoad.destination else {
-            Issue.record("the picked folder reads as set on today's road"); return
+        // No road counts: nothing counted — never the three flat files beside the library nor the picked folder's two.
+        let noCounts = try model(road, defaults: defaults, roadCounts: nil)
+        await noCounts.refresh()
+        let bare = try #require(noCounts.primary)
+        #expect(bare == DataSafetyModel.FolderSummary(
+            displayPath: primary.displayPath, exists: true, count: 0, newest: nil, oldest: nil),
+                "beside the library: none counted (the flat files planted there never count), its path and folder as read — \(bare)")
+        guard case .set(let farPath, let bareFar) = noCounts.destination else {
+            Issue.record("the picked folder still reads as set with no road counts: \(noCounts.destination)"); return
         }
-        #expect(todaysFar.count == 2, "today's road: the picked folder's flat files, as before")
+        guard case .set(let farPathWithCounts, _) = newRoad.destination else {
+            Issue.record("the counted model's picked folder reads as set: \(newRoad.destination)"); return
+        }
+        #expect(farPath == farPathWithCounts, "the picked folder's path stays as read")
+        #expect(bareFar.count == 0 && bareFar.newest == nil && bareFar.oldest == nil,
+                "the picked folder: none counted (its two flat files never count) — \(bareFar)")
     }
 
     /// The mapping keeps a row's path and its folder's state; only the counts move. Unset and unreachable stay as they are.

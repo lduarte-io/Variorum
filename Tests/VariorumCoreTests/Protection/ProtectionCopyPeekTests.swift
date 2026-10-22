@@ -177,7 +177,7 @@ struct ProtectionCopyPeekTests {
             at: store, key: key,
             record: ProtectionRecord.minting(
                 libraryID: UUID().uuidString.lowercased(), mode: .standard, account: nil,
-                currentFingerprint: StoreKeyEnvelope.fingerprint(of: key), at: Date()),
+                currentFingerprint: KeyFingerprint.of(key), at: Date()),
             date: Date())
         let reader = try ProtectionCopyPeek.open(store, key: key, inside: folder.file("scratch"))
         defer { reader.close() }

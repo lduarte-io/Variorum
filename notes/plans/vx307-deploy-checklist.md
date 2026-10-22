@@ -42,21 +42,32 @@ correction). The rows stay PENDING-UNTIL-LIVE — the rehearsal is additive evid
       first run (the 13i-c/13i-e precedent).
 - [ ] PENDING — on any error: read, fix the artifact (amend in repo, never live-only), re-run — the 13j
       read-fix-re-run road; a grant repair follows the 13i-a precedent.
+- [ ] PENDING — AFTER 17, in the same window (VX-213's held half, her go 2026-10-22): execute
+      `Server/supabase/maintenance/vx213-pg-temp-search-path.sql` VERBATIM. REHEARSED GREEN on the throwaway at
+      VX-329's kickoff (run 1 caught `rls_auto_enable()`, amended in repo; run 2 whole — 19 functions with trailing
+      pg_temp; the sweep after read 62 OK · 4 INFO · 0 fail). Its own guard refuses below marker 14; its verify DO
+      fails loud on any missed definer function. Expected: the read-only tail's 19 config rows.
 
 ## Verify (read-only, in the window)
 
 - [ ] PENDING — `select sync_schema_version();` — 14.
 - [ ] PENDING — the artifact's four verification queries (its tail): mode/earlier_row_keys present; her row's `mode`
       equals the preflight's posture; rotation columns null; `sync_reencrypt` gone.
-- [ ] PENDING — the grant sweep (the 13y shape): expect the 13n-b counts ±0 (no new table; one function redefined,
-      owner/grants re-asserted in the artifact).
+- [ ] PENDING — the grant sweep (the 13y shape): expect **62 OK · 4 INFO · 0 fail** (the R-2 marker-aware
+      correction — `sync_reencrypt`'s row retires at 14; rehearsed twice on the throwaway: post-17 and post-pg_temp).
 
-## Installs (same window — no marker-13 build outlives the bump)
+## Installs (AMENDED to her 2026-10-22 word — the Macs first; the phone follows VM-8)
 
-- [ ] PENDING — the Mac Release build at `/Applications` (codesign verified; sha256 vs the fresh product).
-- [ ] PENDING — the phone via `devicectl` (the 13y/13i-e road).
-- [ ] PENDING — her first rounds, both devices ("sync worked" is the window's close); the §12 refusal grammar has
-      nothing to catch when both installs land in-window.
+- [ ] PENDING — the Mac Release build at `/Applications` on the PRO (codesign verified; sha256 vs the fresh product;
+      the A1 rail and zero instances as ever).
+- [ ] PENDING — the AIR updated in the same window (both Macs in one window — her 2026-10-22 revision of "update
+      every device first").
+- [ ] PENDING — THE PHONE DOES NOT INSTALL IN THIS WINDOW: VM-8 (the phone's new-road faces) runs after this phase
+      merges, on a main-based worktree; her current phone install sits at marker 13 and VISIBLY REFUSES to sync until
+      VM-8's build lands — accepted by her word (*"it's ok if the phone doesn't sync for a day after the switch"*).
+      The §12 refusal grammar is the fence, not a failure.
+- [ ] PENDING — her first rounds, both Macs ("sync worked" is the window's close); her phone acceptance moves to
+      VM-8's catch-up.
 
 ## After
 

@@ -71,10 +71,12 @@ final class ICloudDriveOfferModel {
         /// The 13l seed-immediately precedent: a forced run so the first
         /// copy lands in the folder she just chose.
         var backUpNow: @MainActor () async -> Void
-        var posture: @MainActor () -> Posture
+        /// The open library's posture (VX-329 U1: the protection road's — the bootstrap's `roadStanding.posture`; today's
+        /// controller's derived posture left with today's road). nil — nothing open — reads Standard.
+        var posture: @MainActor () -> ProtectionMode
 
         @MainActor
-        static func live(services: AppServices, protection: ProtectionController?) -> Leaves {
+        static func live(services: AppServices, posture: @escaping @MainActor () -> ProtectionMode?) -> Leaves {
             Leaves(
                 variant: services.storeVariant,
                 defaults: { .standard },
@@ -85,7 +87,7 @@ final class ICloudDriveOfferModel {
                 },
                 remember: { url, defaults in try BackupDestination.remember(url, in: defaults) },
                 backUpNow: { [weak services] in _ = await services?.backup?.backUpNow() },
-                posture: { protection?.posture ?? .standard })
+                posture: { posture() ?? .standard })
         }
     }
 
@@ -117,7 +119,7 @@ final class ICloudDriveOfferModel {
         self.leaves = leaves
     }
 
-    var posture: Posture { leaves.posture() }
+    var posture: ProtectionMode { leaves.posture() }
 
     nonisolated static func isMarked(variant: AppDatabase.StoreVariant, in defaults: UserDefaults) -> Bool {
         defaults.bool(forKey: markKey(for: variant))

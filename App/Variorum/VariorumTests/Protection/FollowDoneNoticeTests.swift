@@ -133,7 +133,9 @@ struct FollowDoneNoticeTests {
             #expect(line.contains("FollowDoneMark.set(libraryID") || line.contains("FollowDoneMark.owed(libraryID"), "\(line)")
         }
         let accountActs = bootstrap.components(separatedBy: "func accountActOnNewRoad(").last ?? ""
-        #expect(accountActs.prefix(400).contains("guard newRoad"), "the press arm sits behind the new road's guard")
+        // VX-329 U1: one road — the press arm sits behind the open road's own guard (its `newRoad` half left with the fork).
+        #expect(accountActs.prefix(400).contains("guard case .ready = state, let binding, let session = roadSession, session.writes"),
+                "the press arm sits behind the open road's guard")
     }
 
     /// The notice's words: VX-107's other-device sentence (unchanged) and one button.

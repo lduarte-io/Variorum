@@ -420,12 +420,12 @@ final class MakeMineModel: Identifiable {
 
     /// The button: her words typed, her passphrase typed when one is set, nothing running.
     func canSubmit(words: String, passphrase: String) -> Bool {
-        !checking && !busy && !EncryptionSession.words(from: words).isEmpty && (!passphraseSet || !passphrase.isEmpty)
+        !checking && !busy && !WordsInput.words(from: words).isEmpty && (!passphraseSet || !passphrase.isEmpty)
     }
 
     func submit(copySecret: String, words wordsText: String, passphrase: String) async {
         guard canSubmit(words: wordsText, passphrase: passphrase) else { return }
-        let words = EncryptionSession.words(from: wordsText)
+        let words = WordsInput.words(from: wordsText)
         do {
             try RecoveryPhrase.validate(words)
         } catch let error as RecoveryPhraseError {
@@ -458,7 +458,7 @@ final class MakeMineModel: Identifiable {
     /// anything else a passphrase — or, with the field empty, her own pair (rule 4; PROVISIONAL P-VX306-U3-4).
     nonisolated static func copySecrets(_ text: String, currentPair: TypedSecrets) -> TypedSecrets {
         guard !text.isEmpty else { return currentPair }
-        let words = EncryptionSession.words(from: text)
+        let words = WordsInput.words(from: text)
         if words.count == 12, (try? RecoveryPhrase.validate(words)) != nil { return TypedSecrets(words: words) }
         return TypedSecrets(passphrase: text)
     }

@@ -1044,11 +1044,10 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// row carries its ask, and the pane is their only renderer.
     case mcpAllowRebind, mcpDeclineRebind
     /// VX-309 U1c — VX-451 (F-U4-1's option (a)): LOCK LIBRARY NOW, declared at last — ONE act, TWO doors: the File menu's
-    /// item (`.menuBar`, ⌃⌘L — rendered only where the library can lock: Castle, on either road — `AppBootstrap.canLock`)
+    /// item (`.menuBar`, ⌃⌘L — rendered only where the library can lock: Castle — `AppBootstrap.canLock`)
     /// and the new road's Protection pane, in the Castle-only "On this Mac" section beside the idle dial (`.surface` —
-    /// `RoadCrossingsSection`). The chord stays wired at the menu's call site and is deliberately NOT the declaration's
-    /// `shortcutLabel`: a label makes the discoverability guard demand a ⌘/ helper row, which Release would render — and
-    /// this unit leaves today's road byte-unchanged (PROVISIONAL P-VX309-U1c-4: declaring the chord with its helper row is
-    /// the other arm). Never `.palette`: locking is not a find-anything row.
+    /// `RoadCrossingsSection`). VX-329 U1 — P-VX309-U1c-4 (b): with today's road gone, the chord is the declaration's
+    /// `shortcutLabel` (⌃⌘L), its key wired in `EditorCommands.keyEquivalent(for:)` and its row in the ⌘/ helper (the
+    /// discoverability guard's demand, now met). Never `.palette`: locking is not a find-anything row.
     case lockLibraryNow
 }

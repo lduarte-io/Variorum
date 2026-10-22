@@ -37,7 +37,12 @@ enum PF {
     static let t0 = Date(timeIntervalSinceReferenceDate: 781_000_000.25)
     static func day(_ n: Double) -> Date { t0.addingTimeInterval(n * 86_400) }
 
-    static func fp(_ key: StoreKey) -> String { StoreKeyEnvelope.fingerprint(of: key) }
+    static func fp(_ key: StoreKey) -> String { KeyFingerprint.of(key) }
+
+    /// The names an OLDER Variorum gave its key files — fixtures for rule 26's foreign files (VX-329 U1: today's
+    /// envelope, which owned these names, was deleted with today's road; the bytes of the names are unchanged).
+    static func olderKeyFilename(_ fingerprint: String) -> String { "variorum-keys-\(fingerprint).json" }
+    static let olderLegacyKeyFilename = "variorum-keys.json"
 
     /// A reach over a set of keys, by fingerprint.
     static func reach(_ keys: [StoreKey]) -> (String) -> StoreKey? {

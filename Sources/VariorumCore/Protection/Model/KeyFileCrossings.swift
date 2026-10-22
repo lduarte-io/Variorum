@@ -50,7 +50,7 @@ extension KeyFile {
     public func rekeyed(
         from currentKey: StoreKey, to newKey: StoreKey, kind: ProtectionMode, locks: NewKeyLocks, at: Date
     ) throws -> KeyFile {
-        guard StoreKeyEnvelope.fingerprint(of: currentKey) == fingerprint else {
+        guard KeyFingerprint.of(currentKey) == fingerprint else {
             throw KeyFileError.keyIsNotThisFilesKey
         }
         guard newKey != currentKey else { throw KeyFileError.newKeyIsTheCurrentKey }
@@ -79,7 +79,7 @@ extension KeyFile {
     /// Wrap the taken keys directly under the new key — one entry per
     /// fingerprint (the first wins), never the new key itself.
     private static func wrapping(_ keys: [OpenedKey], under newKey: StoreKey) throws -> [HistoryEntry] {
-        let newFingerprint = StoreKeyEnvelope.fingerprint(of: newKey)
+        let newFingerprint = KeyFingerprint.of(newKey)
         var seen: Set<String> = [newFingerprint]
         var entries: [HistoryEntry] = []
         for key in keys where seen.insert(key.fingerprint).inserted {

@@ -6,8 +6,8 @@
 //  are THIS Mac's backup PAIRS of THIS library in each place — the catalogue read fresh, through core's one predicate
 //  (`OwnCopies`, retention's own), never the folder's flat files — so another Mac's copy in a shared folder, another
 //  library's, today's flat files and a copy whose key file doesn't read are never counted as this Mac's. Newest and
-//  oldest read trusted stamps only (18o U1's rule). Today's road never reaches this file (its counts stay
-//  `DataSafetyModel.summarize`'s, byte-unchanged): the open library's faces carry the road (`RoadStandingModel.copyCounts`).
+//  oldest read trusted stamps only (18o U1's rule). The open library's faces carry the road (`RoadStandingModel.copyCounts`);
+//  since VX-329 U1 these are Data Safety's only counts (today's flat-file count left with today's road).
 //  A READ: nothing is written.
 //
 

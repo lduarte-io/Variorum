@@ -74,7 +74,7 @@ final class RoadKeyDoorConfirmModel: Identifiable {
     func canSubmit(current: String, new: String, again: String, words: String) -> Bool {
         guard !busy, !new.isEmpty, !again.isEmpty else { return false }
         if asksCurrent, current.isEmpty { return false }
-        if asksWords, EncryptionSession.words(from: words).isEmpty { return false }
+        if asksWords, WordsInput.words(from: words).isEmpty { return false }
         return true
     }
 
@@ -87,7 +87,7 @@ final class RoadKeyDoorConfirmModel: Identifiable {
         guard canSubmit(current: current, new: new, again: again, words: wordsText) else { return }
         var typedWords: [String]?
         if asksWords {
-            let words = EncryptionSession.words(from: wordsText)
+            let words = WordsInput.words(from: wordsText)
             do {
                 try RecoveryPhrase.validate(words)
             } catch let error as RecoveryPhraseError {

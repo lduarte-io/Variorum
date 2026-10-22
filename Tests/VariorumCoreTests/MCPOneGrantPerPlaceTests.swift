@@ -227,7 +227,7 @@ struct MCPOneGrantPerPlaceTests {
     /// and a revoked row may stand beside it. Local-only like its family: no
     /// `sync_version`, no trigger, the marker untouched.
     @Test func theFamilyHoldsOneStandingGrantPerPlaceByConstruction() throws {
-        #expect(SyncSchema.lockstepVersion == 13, "a local-only migration never moves the marker")
+        #expect(SyncSchema.lockstepVersion == 14, "a local-only migration never moves the marker")
         let db = try AppDatabase.inMemory()
         try db.write { db in
             try db.execute(sql: """

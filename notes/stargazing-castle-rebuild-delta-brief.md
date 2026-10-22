@@ -1,122 +1,148 @@
 # The Castle rebuild's delta for the stargazing.tech agent — hand over at the release switch, not before
 
-**Written 2026-10-14 with the VX-266 design** (`notes/plans/vx-266-castle-backups-prelaunch.md`). This is a delta to
-the two current briefs: `notes/stargazing-privacy-policy-brief-2026-10-04.md` and
-`notes/stargazing-help-faq-brief-2026-10-04.md`. **Those briefs stay true until her release switch (VX-329)**, because
-every Release build runs today's protection code until she turns the new system on. So this delta is handed to the
-site agent only at that switch, by the author, with the release that carries it.
-
-**Before handing it over, VX-329 re-checks each fact below against the shipped build.** The phases may refine
-wording, and the app's own sentences come from the copy file (`notes/plans/pre-13x-copy.md`) as phases 3–5 re-write
-it. As with the current briefs, the site agent writes the copy and this brief carries facts only.
-
-VX-329 also checks whether any device can still run an older build. While one can, the "I left Castle" entry carries
-the design's §8 transitional note: an older build's leave puts the Castle-era master under the old shared Apple key,
-so copies from before that leave can open through the Apple account until the old key is retired.
+**REWRITTEN 2026-10-22 at VX-329 (F-U2-4) to `notes/CastleRules.md` — the contract that superseded the VX-266
+design this brief was first written against.** The superseded facts are gone from this text: the Castle anchor, the
+salted hardware hash, the per-copy *Opens with* route lines, Re-link as a repair act, the old shared key and every
+transitional old-build note (rule 26 ended migration). This is a delta to the two current briefs:
+`notes/stargazing-privacy-policy-brief-2026-10-04.md` and `notes/stargazing-help-faq-brief-2026-10-04.md`. **Those
+briefs stay true until the release that carries VX-329's switch**, because every Release build runs today's
+protection code until then. The author hands this delta to the site agent with that release, after the VX-329 window
+re-checks each fact against the shipped build. As with the current briefs, the site agent writes the copy and this
+brief carries facts only.
 
 The register stays the current briefs' one. Everyday answers name no key. The FAQ may say "the twelve words", "your
 Apple account" and "iCloud Keychain", and never "box".
 
-## The two-sentence model, as it becomes
+## The one sentence (the rules' own)
 
-Both modes stay end-to-end encrypted, and the server still never holds a key to either. Who holds a key changes in
-two ways:
+Your writing is encrypted. Your passphrase or your twelve words — together with any copy of your library — always
+open it. Everything else is a convenience.
 
-- **In Standard,** your Apple account holds keys of its own for your library: one for each Mac's copy of each
-  library, and one for the sync account, which opens only the server's copy of the master key. Anyone who can sign
-  in to that Mac can open the library too. That's true today; the new system says it plainly, on the Standard card,
-  with a try-it-yourself line in the field guide.
-- **In Castle,** nothing reachable through the Apple account or the Mac's login password opens the library, or any
-  copy Variorum made of it. Entering Castle deletes the library's Apple keys, so older copies stop opening through
-  the Apple account too, apart from the stated exceptions below.
+## The model, as it becomes
+
+Both modes stay end-to-end encrypted, and the server still never holds a key to anything. The shape:
+
+- **Every library is encrypted with its own random key.** The key lives in a small key file beside the library, and
+  the app keeps copies of it without asking: beside the library, inside every backup, and a sealed copy in the Mac's
+  keychain. The key file is non-secret — holding it opens nothing without a secret.
+- **Every library has twelve words from the moment it is created, and is asked for a passphrase.** Either one opens
+  it; either can reset the other. Nothing ever stores the words.
+- **Standard is a convenience posture.** Besides your secrets, the app may keep quiet roads to the key: an Apple road
+  (iCloud Keychain, through your Apple account — which also reaches your other Macs on that account) and an on-device
+  road (this Mac's login keychain: your login password or Touch ID). The plain truth belongs in the policy: in
+  Standard, anyone who can sign in to the Mac can open the library. If an Apple road stops working, the next open
+  quietly makes a fresh one from whatever road still works, and asks for a secret only when none remains.
+- **Castle is one promise: no quiet road through Apple, ever, on any device of the account.** Touch ID on the Mac is
+  optional; "Always ask" keeps no copy of the key on the device at all. In Castle, the key isn't on the Mac in any
+  form the login password can release.
+- **One posture at a time.** Entering Castle takes everything in; leaving hands everything out. The app never keeps a
+  protection you chose to leave, and never leaves a hole you chose to close.
 
 ## FAQ entries whose facts change
 
-- **"I switched to Castle. Are my old backups protected?"** The answer becomes **yes**. Entering Castle deletes this
-  Mac's own Apple keys for the library, and the old shared one, after checks at the door. No copy Variorum made then
-  opens through the Apple account. The exceptions are stated, each said on the affected copy's *Opens with* line:
-  - a library already in Castle before this change, until its old shared key is retired (one press);
-  - copies from a sync account's Standard days, through that account, until it replaces its keys or enters Castle;
-  - a library sent to another Mac before this change, until either copy crosses a line;
-  - a retirement made while iCloud Keychain is off, until it's back on;
-  - Markdown exports, which are plain text;
-  - copies locked under an Apple key in an Apple account the Mac has since left.
-
-  Time Machine copies of Variorum's backups follow the same rule, since their Apple locks die with the key.
-- **"I moved to Castle, lost my passphrase and twelve words, and have an old backup and my iCloud."** The old backup
-  **no longer opens** through the Apple account. Her ruling: *"I think it's fine for people to lose access to previosu
-  backups if they lost their passphrase / words / touchID + they're going into castle, so long as they're adequately
-  warned about it."* The door says so before anything happens and offers *Export a plain copy first*. Only plain
-  exports you made remain readable: Markdown exports, or a plain copy exported at the door.
+- **"I switched to Castle. Are my old backups protected?"** The answer is **yes**. Entering Castle makes a new
+  library key, deletes the library's Apple and on-device keychain items — and an Apple item's deletion reaches every
+  device on the Apple account, so your Standard-era backups' quiet locks die with it. From then on they open only
+  with your passphrase or twelve words, like the live library. Two stated exceptions, neither a road to your current
+  writing (rule 25): a Standard-era backup locked under an Apple account you have since left keeps that lock (the app
+  cannot delete another account's keychain item), and a key file someone kept outside Variorum's own folders still
+  opens the backups from before you entered. Time Machine copies of Variorum's backups follow the same rule — their
+  quiet locks died with the deleted key.
+- **"I'm entering Castle — anything I should know?"** Entering types your passphrase AND your twelve words, and turns
+  the scheduled plain-text export off with one notice you may reverse (a plain copy on disk would undo the promise;
+  it's your call). Castle is account-wide: when one device enters, every device of the account follows, each typing a
+  secret once; until a device follows, it can still read its own local copy through its own quiet road — accepted and
+  said plainly.
+- **"I moved to Castle, lost my passphrase and twelve words."** Nothing opens the library any more — that is the
+  promise working. The doors warn before anything is lost, and the words are shown and asked to be written down from
+  the first day.
 - **"Someone has my old backups and my Apple account — and I've since moved to Castle."** They **can't open** those
-  backups any more, apart from the exceptions above.
-- **"Moving to a new Mac" / Send Library.** The copy lands on the other Mac under a fresh key of its own, with an
-  empty key history: nothing is shared between the Macs. The passphrase alone, or the twelve words alone, opens it,
-  and the landing then asks for the other one — typed, or made new — so both open it from then on. A Standard copy on
-  the same Apple account can land with nothing typed. A synced copy lands held until Resume Sync, and a secret made new
-  at the landing becomes the account's then.
-- **"Restoring a backup."** A copy of your library opens through its key history: today's key opens the older ones,
-  so nothing more is typed. A restored copy takes the library's current mode and never lowers it. Copies from before
-  you left Castle open with the passphrase or the twelve words you had on the day you left. On your other devices,
-  copies open with at least the secret you typed there when that device followed. Each copy's *Opens with* line says
-  which, and from which day. The entry's fact "a backup carries no sync key and no device identity" becomes **no sync
-  key**: a backup's protection record names each device that has opened it, by a random identity and a salted hardware
-  hash, as the Tier 2 change below says.
-- **"My twelve words were seen" / "I forgot my passphrase."** If your library left Castle earlier, every door that
-  replaces a secret says what still opens the copies from before the leave:
-  - new words: the old words still open them — keep that paper;
-  - the forgot road: they now open with that day's twelve words.
-- **"I reset my iCloud Keychain."** Re-link now makes a **fresh** key for the account, and its library arm makes a
-  fresh own key for a library whose Apple key this Mac can no longer read. Nothing is re-keyed. The old "the iCloud key
-  is read, never re-minted" fact is gone.
-- **"Someone was inside my Apple account, and I'm in Standard."** It stands: Replace All Keys in Standard keeps the
-  new master under the account's Apple key, and Castle is the answer. An account still on the old shared key gets a
-  fresh key of its own first.
+  backups, apart from rule 25's two exceptions above.
+- **"I left Castle. Who can open what now?"** Leaving types both secrets and hands everything to Standard: a new key
+  carrying every earlier one, a fresh Apple road, the on-device road back. Your text, the server's rows, the sync key
+  and **every backup you have ever made** open through your Apple account and this Mac again. The leave screen says
+  so plainly: if you want Castle-era writing to stay Castle-protected, don't leave.
+- **"Restoring a backup."** A backup is the library plus its key file. It opens with the passphrase and words you had
+  when you made it; your current secrets open older backups of the same library (every key change carries the earlier
+  keys forward — no exceptions); or this Mac's quiet road opens it while that road still holds the backup's key.
+  Restore from Backup is the *Make this my library* door: the copy becomes a **new library** — a fresh identity and a
+  fresh key, in the posture you are in now, under your current passphrase and words — and your previous library steps
+  aside whole into Previous Libraries. A restored copy of a synced library joins the account by its rows, like any
+  device. A backup carries **no sync key and no device identity**, so a Mac new to a library enrolls.
+- **"Changing my passphrase / making new words."** Either re-locks the current key; it does not change the key. Older
+  backups still open with your new secrets; older keys still open through the carried list. The doors say so in one
+  sentence. On a synced library the account's lock changes in the same act.
+- **"Moving to a new Mac" / Send Library.** Two devices share a library through sync, never through files. An
+  AirDropped or hand-carried copy is a copy: it becomes its own library on arrival (a fresh key under the secrets
+  typed at the landing) and may diverge — unless both devices sign into the same account, in which case the restored
+  copy merges by its rows exactly as any device does. Nothing is shared between the Macs by the file itself.
+- **"I reset my iCloud Keychain" / "my Apple road stopped working."** Not an event any more: the next open uses
+  whatever quiet road still works and quietly makes a fresh Apple road; it asks for your passphrase or words only
+  when no quiet road remains. Either way nothing was ever at risk. (The old Re-link door is gone.)
+- **"Someone was inside my Apple account, and I'm in Standard."** Replace All Keys makes a new library key carrying
+  the old ones; Castle is the stronger answer — it is exactly the posture with no Apple road at all.
+- **"Does Castle on my Mac make my iPhone Castle?"** It stands: Castle is account-wide; each device follows by typing
+  the passphrase or the words once.
+- **"I stopped syncing a library" / "I signed out."** Leaving an account changes none of your library's keys or
+  secrets — it stops syncing, and the server keeps what you pushed (removing it is the account-deletion road).
+  Signing back in is a join.
+- **"What if every copy is gone?"** A library whose every key-file copy and every backup are gone is gone. Synced
+  libraries are the exception: the account's passphrase or twelve words recover them from the account.
 
 **New entries the site may want:**
-- **I left Castle. Who can open what now?** Your Apple account, and anyone who can sign in to that Mac, opens the
-  library itself — with everything written in it, in Castle too — and every copy made after you left. No copy made
-  before you left opens through them: those open with the passphrase or twelve words you had that day. Leaving never
-  makes new words, so that day's paper keeps working.
-- **I stopped syncing a library, or moved it to another account.** The library gets a new key in either mode. The
-  account you left opens only the copies from while it synced in Standard, until that account replaces its keys or
-  enters Castle, and never anything written after.
-- **Does Castle on my Mac make my iPhone Castle?** It stands. Each device follows by typing the passphrase or the
-  words once.
+- **Joining an account from a new device.** The account's shared keys are wrapped by the passphrase and the twelve
+  words only — never by Apple — so joining always types one of them. A device holds one pair of secrets at a time:
+  the first device to turn on sync hands its library's pair up to become the account's; a device that joins later
+  adopts the account's pair and is told plainly — the old words still open backups made before that day.
+- **Reading old writing years later.** Each row on the server is sealed under the sync key that was current when it
+  was written, and the account keeps every sync key it has ever had — so a device joining years later reads
+  everything. The sync key changes only when the account enters Castle.
+- **Copies made by versions before this release.** The new system doesn't open libraries from before its design
+  (there is no migration; the few people concerned were told and export or sync first, then start fresh). An old copy
+  stays readable by the old app version that made it.
 
 ## Privacy-policy facts that change
 
 - **Tier 1, key custody.**
-  - Standard: the Apple account holds keys, not "ONE key": one per library per Mac, and one per sync account for the
-    server's wrapped copy of the master. They're still Apple's keys, never ours.
-  - Castle: entering it deletes those keys, and no copy Variorum made opens through the Apple account, apart from the
-    stated exceptions.
-- **Tier 2, what a copy of the library file carries.** "No sync key and no device identity" becomes: **no sync key.**
-  Its protection record names each device that has opened it, by a random identity and a salted hash of its hardware
-  (never the identifier itself), with that device's protection settings. These are used only on that device; another
-  Mac mints its own identity.
-- **Tier 2, what a backup carries.** Each backup carries its own key file, still non-secret: holding it opens nothing
-  without a secret. The key file now also holds the key history (older keys, each locked under the current key) and,
-  after a leave from Castle, the Castle anchor, locked only with that day's passphrase and words.
-- **Tier 2, Standard's login-password truth.** It belongs in the policy plainly: in Standard, anyone who can sign in to
-  the Mac can open the library through the Mac's keychain. In Castle, the key isn't on the Mac in any form the login
-  password can release.
-- **Tier 3, what the operator sees.** The account's key record shows one of three states: a wrapped copy under the
-  account's Apple key (Standard); none (Castle); or, while a device is moving the account out of Castle, an Apple key
-  named with no copy yet. The operator still opens none of them.
+  - Standard: the Apple account holds quiet keys for the library on each Mac (iCloud Keychain items), and the Mac's
+    login keychain holds an on-device one. They are Apple's roads, never ours. **The sync account's keys are never
+    Apple-wrapped**: the account's shared keys are wrapped by the passphrase and the twelve words only, so joining a
+    device always types a secret. (The old "one Apple key for the sync account" fact is gone.)
+  - Castle: entering it deletes the library's Apple and on-device keychain items — the Apple deletion reaching every
+    device on the Apple account — and no copy Variorum made opens through the Apple account, apart from rule 25's two
+    stated exceptions (a backup locked under a departed Apple account; a key file kept outside the app's folders).
+- **Tier 2, what a copy of the library file carries.** A backup is the library plus its key file. **No sync key and
+  no device identity** — a restored copy enrolls as a new device. The key file carries the key history (every earlier
+  key, each sealed under the current one) and is non-secret: holding it opens nothing without a secret. Device
+  identity, where the library's own record names devices, is a **plain random ID made at creation — no hardware
+  fingerprinting, no salted hardware hash.** (The old "salted hash of its hardware" fact is gone.)
+- **Tier 2, Standard's login-password truth.** It belongs in the policy plainly: in Standard, anyone who can sign in
+  to the Mac can open the library through the Mac's keychain. In Castle, the key isn't on the Mac in any form the
+  login password can release ("Always ask" keeps no copy on the device at all).
+- **Tier 3, what the operator sees.** The account's key record shows its posture (standard or castle) and its wrapped
+  key copies — master wrapped by passphrase and by the twelve words, the corpus keys sealed under the master, and the
+  count of earlier sync keys the account carries. The operator opens none of them: nothing in the record is
+  Apple-wrapped and nothing opens without a typed secret.
 - **Deleting the account: what outlives it** *(added 2026-10-20 for VX-213, from the VX-191 audit's account-deletion
-  check, C3)*. Not a Castle change: it is true today and stays true, and the current brief's account-password section
-  says deleting the account deletes "the server copy, the account's key record and the login" without it. Deleting the
-  account deletes everything Variorum keeps for it on the server: the library's encrypted copy, the account's key
-  record, its sync bookkeeping, and the login itself. What it can't delete is the sign-in service's own log. Variorum's
-  sign-in runs on Supabase, which keeps an audit log of sign-in events, recording the account's email address and the
-  IP address each sign-in came from. Those entries stay after the account is deleted, kept under Supabase's retention,
-  not Variorum's. So the policy should say that deleting the account doesn't erase the sign-in service's records of past
-  sign-ins. (Checked in the repo: the deletion removes the login row and nothing touches that log. Not checked: the
-  log's exact contents and how long Supabase keeps it, which the audit left open as outside the repo. VX-329 confirms
-  both against Supabase's own documentation before the site gives a period.)
+  check, C3 — not a Castle change: true today and stays true; the facts below re-checked 2026-10-22 at VX-329 against
+  Supabase's documentation and empirically on the rehearsal project)*. Deleting the account deletes everything
+  Variorum keeps for it on the server: the library's encrypted copy, the account's key record, its sync bookkeeping,
+  and the login itself. What it can't delete is the sign-in service's own log. Variorum's sign-in runs on Supabase,
+  whose auth service records sign-in events (the event, a timestamp, and the account's email; Supabase's docs also
+  name the IP address, though community reports say the IP lands per-session rather than per-event). The checked
+  facts: by default those records live in Supabase's own log platform, NOT in the project's database — the project's
+  optional audit-log table is empty unless its toggle is turned on (verified empty on the rehearsal project after
+  many sign-ins), and the deletion road removes the login and its sessions while the platform's logs are outside any
+  project table. Supabase documents NO retention period for the auth audit log itself; its log platform's retention
+  is plan-based. So the policy should say that deleting the account doesn't erase the sign-in service's own records
+  of past sign-ins, that they are kept under Supabase's retention (not Variorum's), and it should give a NUMBER only
+  from Supabase's current platform-logs documentation for the project's plan at the time the page is written — not
+  from this brief.
 - **Cautions, added.**
   - Don't say backups made in Standard stay openable through the Apple account after entering Castle. They don't,
-    apart from the stated exceptions.
-  - Don't say a library sent to another Mac shares its keys. It doesn't, apart from one sent before this change.
+    apart from rule 25's two stated exceptions.
+  - Don't say a library sent to another Mac shares its keys. It doesn't — a copy becomes its own library, and only
+    sync shares.
   - Don't say deleting the account erases every record of it. The sign-in service's own log of past sign-ins stays.
+  - Don't promise Apple's roads keep working across Apple ID changes, iCloud sign-outs, keychain resets or a move to
+    a new Mac. The promise is that you never *need* them.

@@ -103,3 +103,24 @@ Finals: Mac batches — U1a 1,590/259 · U1b 1,998/332 + the D-2 verify 308/64 �
   cold) 0B/0M/3m/3N over the fixes — every round-1 fix confirmed; m2/m3/NIT 3 fixed red-on-old, NITs 1–2 → VX-307's plan
   §3; no round 3; the round-2 fixes line-by-line checked by the orchestrator (`notes/plans/vx-306-ladder-round-1.md`,
   `-round-2.md`).
+
+## VX-329 — Castle rebuild: the release switch (CLOSED 2026-10-22; one day, kickoff to closeout)
+- Branch `vx-329-release-switch`, worktree `~/dev/variorum-vx-329` (Pro); the Sync/-custody slot held; no
+  coordinator (her mandate — the only session, `Tools/stage` held directly). Merge: the VX-329 PR (merge commit;
+  the number in the handoff).
+- The cut: L0 lockstep (marker 13→14, Fable) → U1 the switch + deletion (Opus) → L1/L1b Sync/ carve (Fable) → U3
+  VX-423 (Opus) → R1 seven riders (Opus) → Mac/phone fix legs (Opus) → ladder r1/r2 (Fable reviewers, Opus fix
+  legs) → §8 rehearsal + pg_temp + the byte-copy finding (Fable) → U4 the pre-design face (Opus; the fork ruled
+  (a)+(D) by the orchestrator) → closing runs + walk window (Fable) → ladder r3 (Fable reviewer; PASS).
+- The ladder: r1 1 MAJOR (record-class) + 6 MINOR + 2 NIT, the export-pin dispute upheld for the implementer;
+  r2 all r1 fixes confirmed, 1 MAJOR (five stale pins, test-side) + 2 MINOR (her word corrections) + 2 NIT;
+  r3 FINAL PASS 1 MINOR + 2 NIT (orchestrator-fixed line-by-line); her fourth-round latitude offered in session
+  and unused. Cold reviews all Fable (her kickoff call).
+- Tickets closed at the merge: VX-329 · VX-423 · VX-461 · VX-462 · VX-463 · VX-464 · VX-468 · VX-469 · VX-473 ·
+  VX-406 · VX-380 · VX-213 · VX-465 · VX-114 (VX-233 already Canceled). Born: the mint list in the §9 closeout +
+  the handoff. VX-470 ruled, sized out, leads the next run.
+- Evidence floors at the tip: core debug 3303/431 · release 3274/426; Mac app 5097/892 (one one-byte red, fixed,
+  suite re-run 5/5); phone 808/126 exit 0; the §8 rehearsal (rule 15 across the switch, real Postgres); the walk
+  window (her face + the whole set-aside live on her real store's byte copy; VX-461's three live arms).
+- The deploy, installs and release 0.10 are HERS at her window (the vx307 checklist + the pg_temp belt;
+  marker-14 entry HELD in SyncSpec §12 until the window closes).

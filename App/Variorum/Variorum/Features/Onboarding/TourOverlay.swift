@@ -23,8 +23,8 @@ struct TourOverlay: View {
     let engine: TourEngine
     let sources: TourFactSources
     /// VX-307 U2b (rule 3 as amended: "the tutorial's last card asks, and shows the twelve words beside the ask") —
-    /// the end card's two asks, on the NEW road only (the composition root's factory; nil on today's road, whose end
-    /// card is exactly as it was). Made once, when the end card first shows.
+    /// the end card's two asks (the composition root's factory; nil while no library's protection faces stand — VX-329
+    /// U1: the one road, so "today's road" no longer has an arm here). Made once, when the end card first shows.
     var endLibrary: (@MainActor () -> TourEndLibraryModel)? = nil
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
@@ -347,7 +347,7 @@ struct TourEndCard: View {
     /// The readme honesty gate (extra-pass MINOR-1).
     let readmeExists: Bool
     /// VX-307 U2b (rule 3 as amended): the passphrase ask and the twelve words, side by side, above the doors — the
-    /// NEW road only; nil (today's road) draws the card exactly as it was.
+    /// nil (no protection faces) draws the card without them.
     var library: TourEndLibraryModel? = nil
     let onChoose: (Tour.EndChoice) -> Void
 

@@ -108,11 +108,11 @@ final class RoadCrossingConfirmModel: Identifiable {
         switch door.ask {
         case .passphraseAndWords:
             let passphraseTyped = !passphrase.isEmpty && (!door.newPassphrase || !again.isEmpty)
-            return passphraseTyped && !EncryptionSession.words(from: words).isEmpty
+            return passphraseTyped && !WordsInput.words(from: words).isEmpty
         case .passphrase:
             return !passphrase.isEmpty && (!door.newPassphrase || !again.isEmpty)
         case .oneSecret:
-            return !passphrase.isEmpty || !EncryptionSession.words(from: words).isEmpty
+            return !passphrase.isEmpty || !WordsInput.words(from: words).isEmpty
         case .nothing:
             return true
         }
@@ -122,7 +122,7 @@ final class RoadCrossingConfirmModel: Identifiable {
         guard canSubmit(passphrase: passphrase, again: again, words: wordsText) else { return }
         var typedWords: [String]?
         if door.ask.asksWords || (door.ask == .oneSecret && passphrase.isEmpty) {
-            let words = EncryptionSession.words(from: wordsText)
+            let words = WordsInput.words(from: wordsText)
             do {
                 try RecoveryPhrase.validate(words)
             } catch let error as RecoveryPhraseError {

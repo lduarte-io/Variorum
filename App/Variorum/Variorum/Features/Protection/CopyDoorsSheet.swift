@@ -225,10 +225,8 @@ struct MakeMineConfirm: View {
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                TextField(ProtectionWords.makeMineWordsField, text: $words, axis: .vertical)
-                    .lineLimit(2, reservesSpace: true)
-                    .autocorrectionDisabled()
-                    .privacySensitive()
+                // VX-463: the twelve words conceal like the passphrase, with the same reveal eye.
+                PeekableSecretField(label: ProtectionWords.makeMineWordsField, text: $words)
                     .textFieldStyle(.roundedBorder)
                 if model.passphraseSet {
                     PeekableSecretField(label: ProtectionWords.makeMinePassphraseField, text: $passphrase, onSubmit: submit)

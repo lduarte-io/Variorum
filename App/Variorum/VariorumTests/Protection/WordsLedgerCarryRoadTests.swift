@@ -49,8 +49,7 @@ struct WordsLedgerCarryRoadTests {
             return
         }
         let result = await ProtectionCopyDoors.makeMine(
-            session, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: pair,
-            mintStoreIdentity: { _ in }, wordsLedger: ledger)
+            session, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: pair, wordsLedger: ledger)
         #expect(result.outcome == .made)
         let newID = try #require(session.library.record?.libraryID)
         #expect(newID != oldID)
@@ -84,7 +83,7 @@ struct WordsLedgerCarryRoadTests {
         let ctx = EmptySlotPlant.noLibraryContext(road)
         let row = try #require(ProtectionCopyDoors.listing(ctx).all.first { $0.kind == .backup })
         let result = await ProtectionCopyDoors.makeMineInTheEmptySlot(
-            ctx, row: row, copySecrets: TypedSecrets(words: words), mintStoreIdentity: { _ in }, wordsLedger: ledger)
+            ctx, row: row, copySecrets: TypedSecrets(words: words), wordsLedger: ledger)
         #expect(result.outcome == .made)
         let key = try #require(result.key)
         let newID = try #require(try ProtectionLibraryFiles.readRecord(at: road.slot.places.slot, key: key)?.libraryID)
@@ -111,7 +110,7 @@ struct WordsLedgerCarryRoadTests {
         let ctx = EmptySlotPlant.noLibraryContext(road)
         let row = try #require(ProtectionCopyDoors.listing(ctx).all.first { $0.kind == .backup })
         let result = await ProtectionCopyDoors.makeMineInTheEmptySlot(
-            ctx, row: row, copySecrets: TypedSecrets(passphrase: passphrase), mintStoreIdentity: { _ in },
+            ctx, row: row, copySecrets: TypedSecrets(passphrase: passphrase),
             wordsLedger: ledger)
         #expect(result.outcome == .made)
         let key = try #require(result.key)

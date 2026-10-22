@@ -89,8 +89,8 @@ public enum ProtectionNames {
 
     // MARK: - Apple keys — named by their own id (design §3.5)
 
-    /// The Apple-key family's service — today's (`AppleKeyKeychain.service`,
-    /// App/Variorum/Shared/AppleKeyCustody.swift), kept.
+    /// The Apple-key family's service — the one today's road used (its `AppleKeyKeychain` was deleted with it at VX-329
+    /// U1), kept: the road's own-named items live under it.
     public static let appleKeyService = "io.lduarte.Variorum.apple-key"
 
     /// `<scope>-apple-key-<id>` — one per library per Mac, one per account.
@@ -129,7 +129,7 @@ public enum ProtectionNames {
 
     // MARK: - The shapes
 
-    /// Sixteen lowercase hex characters — `StoreKeyEnvelope.fingerprint(of:)`.
+    /// Sixteen lowercase hex characters — `KeyFingerprint.of`.
     public static func isFingerprint16(_ value: String) -> Bool {
         value.count == 16 && value.allSatisfy { "0123456789abcdef".contains($0) }
     }

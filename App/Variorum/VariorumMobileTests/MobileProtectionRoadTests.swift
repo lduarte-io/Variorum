@@ -4,11 +4,12 @@
 //
 //  VX-306 U3 piece 5 — THE PHONE OPENS ON THE NEW ROAD (`notes/plans/vx-306-castle-open-road.md` §2 U3 + its
 //  addendum): the model pins the phone's compiled copy of the shared brains can run (a hoist is only real if both
-//  sides run it). No keychain, no store: the one switch reads ON in the phone's Debug build (P-VX306-U1b-1
-//  superseded); the biometry and device are named as the phone's own in the shared words (P-VX306-U3-8); the
-//  once-shown words card's two columns and one button; the lobby model with an unlistable keychain (no facts — the
-//  typed field and its reason, no biometry claimed) and its presses; the interlude's notice said once; rule 27's
-//  after-open sheet condition read from the open's report.
+//  sides run it). No keychain, no store: the one switch reads ON in every phone build, Debug and Release (VX-329 U1
+//  flipped the rule for every input — VX-306's Debug-only rule, P-VX306-U1b-1, is gone with today's road; the Mac's
+//  twin is `ProtectionRoadSwitchTests`); the biometry and device are named as the phone's own in the shared words
+//  (P-VX306-U3-8); the once-shown words card's two columns and one button; the lobby model with an unlistable keychain
+//  (no facts — the typed field and its reason, no biometry claimed) and its presses; the interlude's notice said once;
+//  rule 27's after-open sheet condition read from the open's report.
 //
 
 import Foundation
@@ -16,15 +17,17 @@ import Testing
 import VariorumCore
 @testable import VariorumMobile
 
-@Suite("VX-306 U3 — the phone opens on the new road (the shared brains, the phone's copy)")
+@Suite("VX-306 U3 — the phone opens on the new road, in every build since VX-329 (the shared brains, the phone's copy)")
 @MainActor
 struct MobileProtectionRoadTests {
-    /// The switch is compile-time and reads `debug` alone: this test bundle is the phone's Debug build.
-    @Test func theOneSwitchIsOnInThePhonesDebugBuild() {
+    /// The switch is compile-time and its rule answers ON for both configurations (VX-329 U1): this test bundle is the
+    /// phone's Debug build, and a Release phone takes the same road — today's road no longer exists to take.
+    @Test func theOneSwitchIsOnInEveryPhoneBuild() {
         #expect(ProtectionRoad.isDebugBuild && !ProtectionRoad.isMac)
         #expect(ProtectionRoad.newRoadIsLive == ProtectionRoad.live(debug: ProtectionRoad.isDebugBuild))
         #expect(ProtectionRoad.newRoadIsLive)
-        #expect(!ProtectionRoad.live(debug: false), "a Release build runs today's road")
+        #expect(ProtectionRoad.live(debug: true))
+        #expect(ProtectionRoad.live(debug: false), "every Release build runs the new road — today's road is gone")
     }
 
     /// The shared words name the phone's biometry and the phone itself (the Mac's read "Touch ID" / "Mac" unchanged).

@@ -116,10 +116,8 @@ struct RoadKeyDoorSheet: View {
                 .textFieldStyle(.roundedBorder)
         }
         if model.asksWords {
-            TextField(ProtectionWords.resetPassphraseWordsField, text: $words, axis: .vertical)
-                .lineLimit(2, reservesSpace: true)
-                .autocorrectionDisabled()
-                .privacySensitive()
+            // VX-463: the twelve words conceal like the passphrase, with the same reveal eye.
+            PeekableSecretField(label: ProtectionWords.resetPassphraseWordsField, text: $words)
                 .textFieldStyle(.roundedBorder)
         }
         PeekableSecretField(label: ProtectionWords.keyDoorNewPassphraseField, text: $new)

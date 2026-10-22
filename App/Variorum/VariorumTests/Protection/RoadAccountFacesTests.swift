@@ -171,47 +171,6 @@ struct RoadAccountFacesTests {
     }
 }
 
-/// R-3 — the vault leaf's session FOLLOWS the current sign-in.
-@Suite("VX-308 U1 — the vault leaf's session follows the sign-in")
-struct FollowingSessionProviderTests {
-    /// A provider that answers as one user, counting its uses.
-    nonisolated final class Stub: UserSessionProviding, @unchecked Sendable {
-        let user: String
-        var refreshes = 0
-        init(_ user: String) { self.user = user }
-        func currentSession() async throws -> UserSession { UserSession(accessToken: "t-\(user)", userID: user) }
-        func refreshedSession() async throws -> UserSession {
-            refreshes += 1
-            return UserSession(accessToken: "r-\(user)", userID: user)
-        }
-    }
-
-    nonisolated final class Box: @unchecked Sendable {
-        var user: String?
-        var made: [Stub] = []
-    }
-
-    @Test func itServesWhoeverIsSignedInNowAndRefusesWithNoOne() async throws {
-        let box = Box()
-        let provider = FollowingSessionProvider(
-            signedInUser: { box.user },
-            make: {
-                let stub = Stub(box.user ?? "?")
-                box.made.append(stub)
-                return stub
-            })
-        await #expect(throws: UserSessionError.notSignedIn) { try await provider.currentSession() }
-        box.user = "a"
-        #expect(try await provider.currentSession().userID == "a")
-        #expect(try await provider.currentSession().userID == "a")
-        #expect(box.made.count == 1, "the same user keeps the same provider")
-        box.user = nil
-        await #expect(throws: UserSessionError.notSignedIn) { try await provider.currentSession() }
-        box.user = "b"
-        #expect(try await provider.currentSession().userID == "b", "a sign-in to another account is followed")
-        #expect(try await provider.refreshedSession().userID == "b")
-        box.user = "a"
-        #expect(try await provider.currentSession().userID == "a")
-        #expect(box.made.map(\.user) == ["a", "b", "a"])
-    }
-}
+// VX-329 U3 — VX-423: `FollowingSessionProviderTests` (R-3 — the vault leaf's session follows the sign-in) was deleted
+// with its subject; the claim is pinned on the new shape — the leaf handed the process's one authority — by
+// `OneRefreshAuthorityTests.theVaultLeafFollowsASignOutAndASignInToAnotherAccount`.

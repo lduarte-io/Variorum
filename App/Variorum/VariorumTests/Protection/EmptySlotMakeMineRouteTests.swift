@@ -4,7 +4,7 @@
 //  on a temp slot and a THROWAWAY keychain scope (the real custody and memory leaves; an in-memory Apple leaf). The missing
 //  face (the library file gone, its key file and backup pair still here): the doors' roads with no library open now carry
 //  Make this my library INTO THE EMPTY SLOT — the copy's own words typed — and the open lands READY on the new road with a
-//  NEW library, held, a store id under its key, and the receipt said once; a wrong word refuses and the missing face stays.
+//  NEW library, held, no file of today's names beside it (VX-329 U1), and the receipt said once; a wrong word refuses and the missing face stays.
 //  Mac only (the keychain); the same road over planted leaves is `EmptySlotLandingRoadTests`'. Red by construction on the
 //  pre-unit tree (`copyDoorsRoadsWithoutALibrary().makeMine` was nil).
 //
@@ -57,11 +57,11 @@ struct EmptySlotMakeMineRouteTests {
             let newID = try #require(session.library.record?.libraryID)
             #expect(newID != oldID && session.key != oldKey && session.library.record?.mode == .standard)
             #expect(LibraryRestoreHold.isHeld(besideStore: world.slotURL), "held, as every adoption lands")
-            guard case .known = StoreIdentity.resolve(besideStore: world.slotURL) else {
-                Issue.record("a store id beside the new library")
-                return
-            }
-            #expect(try StoreKeyEnvelope.loadCurrent(besideStore: world.slotURL)?.keyFingerprint == session.library.fingerprint)
+            // VX-329 U1: today's store id (a stub envelope beside the store, read only by today's sync custody, dials and
+            // backup log) left with today's road — nothing of today's key-file names is written beside the library now.
+            let besideTheSlot = try FileManager.default.contentsOfDirectory(
+                atPath: world.slotURL.deletingLastPathComponent().path)
+            #expect(!besideTheSlot.contains { $0.hasPrefix("variorum-keys") }, "no file of today's names: \(besideTheSlot)")
             let aside = CopyDoorsPlant.asideFolders(world.slot.places)
             #expect(aside.count == 1, "the missing library's key file set aside, never written over")
             let standing = try #require(bootstrap.roadStanding)

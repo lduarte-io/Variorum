@@ -187,9 +187,14 @@ extension ActContext {
         } else if let vaultKDF, let own = file.passphrase, own.kdf != vaultKDF {
             file.passphrase = nil
         }
-        if let words = locks.words {
+        // VX-462 (W-VX309-5): where the master's twelve-words copy is written it holds the very words typed (a join
+        // verified them against the vault; a set-up made the vault from them), so the copy IS the words' road and no
+        // own words lock is kept beside it — an own lock can never be proven the account's (`wordsAreTheAccountsAlready`),
+        // and a re-join after a leave (rule 16 changes no lock) would say the words were replaced by the same words. With
+        // no copy to write (the vault unread), the typed words keep their own lock, as before.
+        if let words = locks.words, locks.masterWordsCopy == nil {
             file = try file.settingWords(words, for: library.key)
-        } else if parameters.typedSecret != nil {
+        } else if locks.words != nil || parameters.typedSecret != nil {
             file.words = nil
         }
         if let master = locks.master { file = try file.settingMaster(master, wordsCopy: locks.masterWordsCopy, for: library.key) }

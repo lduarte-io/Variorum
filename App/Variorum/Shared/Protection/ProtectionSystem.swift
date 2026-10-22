@@ -11,9 +11,14 @@
 //  `deviceName` defaults to `DeviceName.current`, which on the PHONE reads `UIDevice` under
 //  `MainActor.assumeIsolated` — so the phone composes this on the main actor, or passes the name (U3).
 //
-//  The TYPES compile in both configurations (rule 24); their USE is U1b's Debug gate — nothing in
-//  `AppBootstrap` calls this yet. Tests compose it over a throwaway scope and a temp slot, overriding the
-//  leaves that must not reach iCloud.
+//  VX-329 U3 — VX-423: the vault leaf rides the session the system is HANDED — production's is the process's one refresh
+//  authority (`AppBootstrap.auth` → `RoadInputs.live` → `live(variant:session:)`), never a session of the system's own
+//  (each composed system used to mint one over the scope's stored session, refreshing the rotating token beside the
+//  services'). A system composed without it (a test world) rides no one's sign-in (`NobodySignedIn`).
+//
+//  The TYPES compile in both configurations (rule 24); their USE was U1b's Debug gate until VX-329 U1's switch — every
+//  build's bootstrap composes it now, through `RoadInputs.live`. Tests compose it over a throwaway scope and a temp slot,
+//  overriding the leaves that must not reach iCloud.
 //
 
 import Foundation
@@ -36,7 +41,7 @@ nonisolated final class ProtectionSystem: @unchecked Sendable {
         scope: String, places: ProtectionPlaces, deviceName: String = DeviceName.current,
         floor: PassphraseKDF.Floor = PassphraseKDF.floor,
         custody: (any CustodyLeaf)? = nil, syncKeys: (any SyncKeysLeaf)? = nil, apple: (any AppleKeysLeaf)? = nil,
-        vault: (any VaultLeaf)? = nil,
+        session: any UserSessionProviding = NobodySignedIn(), vault: (any VaultLeaf)? = nil,
         memory: (any MemoryStoreLeaf)? = nil, biometry: (any BiometryLeaf)? = nil, clock: (any ClockLeaf)? = nil,
         ids: (any IDsLeaf)? = nil
     ) {
@@ -60,8 +65,8 @@ nonisolated final class ProtectionSystem: @unchecked Sendable {
             // VX-307 U1: the production wire leaf (the marker-14 shape) when
             // the project is configured; else the vault stays unreachable and
             // an act that needs it rolls back, exactly as before. Tests
-            // inject their own.
-            vault: vault ?? WireVaultLeaf.live(scope: scope, deviceName: deviceName) ?? UnreachableVaultLeaf(),
+            // inject their own. VX-423: served by the session handed in.
+            vault: vault ?? WireVaultLeaf.live(deviceName: deviceName, session: session) ?? UnreachableVaultLeaf(),
             library: SQLCipherLibraryLeaf(places: places), keyFiles: FileKeyFileStoreLeaf(places: places),
             memory: memory, plans: FilePlanStoreLeaf(places: places),
             backups: backups, clock: clock ?? SystemClockLeaf(), ids: ids ?? SystemIDsLeaf(), biometry: biometry,
@@ -96,13 +101,14 @@ nonisolated final class ProtectionSystem: @unchecked Sendable {
     }
 
     /// The store variant's protection system: its slot (`AppDatabase.defaultStoreURL`), and today's picked
-    /// backup destination as the far folder (resolved security-scoped at each use).
-    static func live(variant: AppDatabase.StoreVariant) throws -> ProtectionSystem {
+    /// backup destination as the far folder (resolved security-scoped at each use). `session` — REQUIRED — is the
+    /// process's one refresh authority the vault leaf rides (VX-423; the bootstrap's).
+    static func live(variant: AppDatabase.StoreVariant, session: any UserSessionProviding) throws -> ProtectionSystem {
         let slot = try AppDatabase.defaultStoreURL(variant: variant)
         let places = ProtectionPlaces(slot: slot, farFolder: {
             BackupDestination.resolve().map { ProtectionFarFolder(picked: $0.picked, scoped: true) }
         })
-        return ProtectionSystem(scope: variant.rawValue, places: places)
+        return ProtectionSystem(scope: variant.rawValue, places: places, session: session)
     }
 
     /// The executor's configuration now: the library ID the live key file names (else "" — unlock names it).

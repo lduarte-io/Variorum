@@ -4,12 +4,12 @@
 //
 //  VX-306 U1a — THE PROTECTION CORE'S KEYCHAIN FAMILY: ONE query builder for the four keychain leaves
 //  (custody, sync keys, memory — device-only; Apple keys — synchronizable), so the family can never
-//  disagree with itself (the `KeychainPartition` rule and `AppleKeyKeychain`'s Q5 rule, applied):
+//  disagree with itself (the `KeychainPartition` rule and the Apple key family's Q5 rule, applied):
 //    - every query is DATA-PROTECTION resident (`KeychainPartition.dataProtection`);
 //    - the device-only items are generic passwords under their `ProtectionNames` service and account,
 //      `kSecAttrAccessibleWhenUnlockedThisDeviceOnly` (today's silent item's shape), never synchronizable;
 //    - the Apple items carry `kSecAttrSynchronizable` and the SHARED access group on every verb
-//      (`AppleKeyKeychain.sharedGroup` — the phone shares it), `kSecAttrAccessibleAfterFirstUnlock` (a
+//      (`sharedGroup` — the phone shares it), `kSecAttrAccessibleAfterFirstUnlock` (a
 //      synchronizable item cannot be ThisDeviceOnly);
 //    - VX-390's STAMP rides `kSecAttrLabel` — the library ID, non-secret (the key file says it in the
 //      clear) — a plain, queryable attribute beside the item;
@@ -59,6 +59,15 @@ nonisolated enum ProtectionKeychain {
         case synchronizable
     }
 
+    // MARK: - The shared access group (moved here from today's `AppleKeyKeychain` at VX-329 U1, byte-for-byte)
+
+    /// The team identifier prefix (the provisioning profile's; every signed entitlement dump carries it).
+    static let teamPrefix = "384925MZJ6."
+    static let sharedGroupSuffix = "io.lduarte.Variorum.shared"
+    /// THE SHARED ACCESS GROUP — the second entry of both targets' `keychain-access-groups`; `EntitlementsTests` pins
+    /// the order. The Apple keys' synchronizable items ride it on every verb (the phone shares it).
+    static var sharedGroup: String { teamPrefix + sharedGroupSuffix }
+
     // MARK: - The one builder
 
     static func base(service: String, account: String? = nil, residence: Residence) -> [String: Any] {
@@ -69,7 +78,7 @@ nonisolated enum ProtectionKeychain {
         if let account { query[kSecAttrAccount as String] = account }
         if residence == .synchronizable {
             query[kSecAttrSynchronizable as String] = true
-            query[kSecAttrAccessGroup as String] = AppleKeyKeychain.sharedGroup
+            query[kSecAttrAccessGroup as String] = sharedGroup
         }
         return query.merging(KeychainPartition.dataProtection) { a, _ in a }
     }

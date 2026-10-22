@@ -165,9 +165,11 @@ final class LStageContext {
     struct SyncSeen {
         // 12a
         var setUpFingerprintBefore: String?
-        var setUpLocksBefore: (StoreKeyEnvelope.PassphraseWrap?, Data?)?
+        var setUpLocksBefore: (PassphraseWrap?, Data?)?
         var setUpFingerprintAfter: String?
-        var setUpLocksAfter: (StoreKeyEnvelope.PassphraseWrap?, Data?)?
+        var setUpLocksAfter: (PassphraseWrap?, Data?)?
+        /// VX-462: the library's own twelve words open its key file just after set-up (through the account's copy).
+        var setUpWordsOpenAfter: Bool?
         // 12b
         var joinerFingerprintBefore: String?
         var joinerOwnWords: [String]?
@@ -637,6 +639,8 @@ final class LifecycleWalk {
         guard setUp == .done else { throw StartingStateRefused(description: "set up sync → \(setUp)") }
         ctx.sync.setUpFingerprintAfter = slot?.fingerprint
         ctx.sync.setUpLocksAfter = (liveKeyFile?.passphrase, liveKeyFile?.words)
+        ctx.sync.setUpWordsOpenAfter = (try? liveKeyFile?.open(.words(words), floor: PF.floor)).map { PF.fp($0) }
+            == slot?.fingerprint
         ctx.sync.firstRowKeyID = world.server.snapshot(account)?.rowKeyID
         firstRowKeyID = ctx.sync.firstRowKeyID
         // 12b — her other Mac makes its own library, backs it up, joins.

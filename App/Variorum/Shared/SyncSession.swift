@@ -87,7 +87,8 @@ final class SyncSession {
     /// `keyProvider` (Phase 14b batch 3 — batch 2's PROVISIONAL 2 resolved):
     /// the engine's E2EE key seam, REQUIRED at this seam so every
     /// composition site decides — the production caller passes the
-    /// Keychain-backed `DeviceKeySyncProvider`; tests pass fixed or locked
+    /// protection road's `NewRoadSyncKeyProvider` (VX-329 U1: today's
+    /// `DeviceKeySyncProvider` left with today's road); tests pass fixed or locked
     /// providers. There is no plaintext mode: a refusing provider means
     /// every round refuses visibly, which is the designed pre-enrollment
     /// state, never a wiring accident.

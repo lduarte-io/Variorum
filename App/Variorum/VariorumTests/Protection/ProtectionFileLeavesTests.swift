@@ -25,7 +25,7 @@ struct ProtectionFileLeavesTests {
     static func record(_ key: StoreKey, libraryID: String = UUID().uuidString.lowercased()) -> ProtectionRecord {
         ProtectionRecord.minting(
             libraryID: libraryID, mode: .standard, account: nil,
-            currentFingerprint: StoreKeyEnvelope.fingerprint(of: key), at: Date(timeIntervalSinceReferenceDate: 790_000_000))
+            currentFingerprint: KeyFingerprint.of(key), at: Date(timeIntervalSinceReferenceDate: 790_000_000))
     }
 
     // MARK: The live key file
@@ -113,7 +113,7 @@ struct ProtectionFileLeavesTests {
         #expect(try leaf.stagedFingerprint() == nil)
         // A re-key: staged, its record, the swap in place.
         try leaf.stageReencryption(from: k0, to: k1)
-        #expect(try leaf.stagedFingerprint() == StoreKeyEnvelope.fingerprint(of: k1))
+        #expect(try leaf.stagedFingerprint() == KeyFingerprint.of(k1))
         #expect(throws: SQLCipherLibraryLeaf.LibraryLeafError.stagedUnderAnotherKey) {
             try leaf.writeStagedRecord(Self.record(k2), with: k2)
         }
@@ -150,7 +150,7 @@ struct ProtectionFileLeavesTests {
         #expect(throws: SQLCipherLibraryLeaf.LibraryLeafError.walNotDrained) {
             try leaf.swapStaged(setAside: true, asideKeyFile: nil)
         }
-        #expect(try leaf.stagedFingerprint() == StoreKeyEnvelope.fingerprint(of: k1), "the staged file is still there")
+        #expect(try leaf.stagedFingerprint() == KeyFingerprint.of(k1), "the staged file is still there")
         #expect(!FileManager.default.fileExists(atPath: slot.places.previousLibraries.path))
         try leaf.discardStaged()
         #expect(try leaf.stagedFingerprint() == nil)
@@ -176,7 +176,7 @@ struct ProtectionFileLeavesTests {
         #expect(try leaf.copyOpens(copyID: far.id, with: k0))
         #expect(!(try leaf.copyOpens(copyID: far.id, with: k1)))
         try leaf.stageCopy(copyID: far.id, opener: k0, to: k1)
-        #expect(try leaf.stagedFingerprint() == StoreKeyEnvelope.fingerprint(of: k1))
+        #expect(try leaf.stagedFingerprint() == KeyFingerprint.of(k1))
         #expect(try FileManager.default.contentsOfDirectory(atPath: farFolder.path).sorted() == before, "the copy's folder is unwritten")
         #expect(!(try leaf.copyOpens(copyID: "farFolder:../../etc/passwd", with: k0)), "a path never climbs out")
         try leaf.discardStaged()

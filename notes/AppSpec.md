@@ -414,7 +414,8 @@ CREATE TABLE setting (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE sync_outbox (table_name TEXT NOT NULL, row_id TEXT NOT NULL, queued_at TEXT NOT NULL,
   PRIMARY KEY (table_name, row_id));           -- dirty-row SET: coalesces keystroke-rate autosaves
 CREATE TABLE sync_state (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-  -- keys: 'last_server_seq', 'rekey_in_progress' (device identity lives in the per-store custody record)
+  -- keys: 'last_server_seq' (device identity lives in the per-store custody record; VX-329 retired
+  --   'rekey_in_progress' with the rotation era)
 CREATE TABLE _sync_applying (applying INTEGER NOT NULL);   -- apply-mode flag; permanent table, normally empty
 CREATE TABLE sync_row_seq (table_name TEXT NOT NULL, row_id TEXT NOT NULL, server_seq INTEGER NOT NULL,
   PRIMARY KEY (table_name, row_id));           -- per-row server_seq bookkeeping for seq-ranked repairs
@@ -553,7 +554,7 @@ Shelves as a mode-row strip led by the virtual starred shelf; solo and All; Unsh
 ### Doors to the outside
 - **Import and Copy full text** read and write the Variorum document format (`Domain/VariorumDocument`, the export's one home); a file imports as a Pool note, a folder as a book; no export path writes a row.
 - **The MCP door** is authoritative in `notes/MCPSpec.md`. The rules any session can break without knowingly touching MCP: every AI write is one of §9's operations with the grant check inside its transaction and one ⌥⌘Z entry naming the client; the author's pending typing lands before any wire act; Private, Seal and Own are hers alone (no MCP road writes `ai_private_at`, `sealed_at` or `owned`); the fence answers hidden and missing with one byte-identical shape; grants are local-only and never synced; a rule an AI writes bells and never backfill-seats; the shared icon reads reach only for the rows drawn and nothing while no client is approved (P1); `show_in_app` never raises windows. Full list: SurfaceContracts, Doors.
-- **Library portability** (the Release road until VX-329) sends and opens a library as a folder pair, adopts with the current library stepping aside whole, and lands held until Resume Sync; the live library is never placed in iCloud Drive. **Library protection** is authoritative in `notes/CastleRules.md`; the new core is live in Debug builds only behind `ProtectionRoad.newRoadIsLive`. Full contract: SurfaceContracts, Doors.
+- **Library portability** sends and opens a library as the road's folder pair (the store and this design's key file), adopts with the current library stepping aside whole into Previous Libraries, and lands held until Resume Sync; the live library is never placed in iCloud Drive. **Library protection** is authoritative in `notes/CastleRules.md`; the road is live in EVERY build since VX-329 (`ProtectionRoad.live` — today's road deleted whole; `notes/plans/vx-329-release-switch.md`), and a store from before the design gets the pre-design face (detect by name, say, set aside whole — never read). Full contract: SurfaceContracts, Doors.
 
 The views the model must support beyond today's surface — side-by-side, swap-and-reread, diff with optional whitespace normalization, infinite scroll, timeline as a Library view mode, the collapsible block index — are capabilities, built functional first; the UI is iterated with the author.
 

@@ -27,9 +27,6 @@ enum LockWorld {
     static func bootstrap(_ road: PlantedRoad) -> AppBootstrap {
         let url = road.slot.places.slot
         return AppBootstrap(
-            testOpener: { .failure(AppDatabase.StoreOpenError(storePath: "", reason: "today's road is not taken here")) },
-            gate: .scripted(dials: ProtectionDials(), backing: InMemoryStoreKeyGuardBacking()),
-            testPresence: StoreFilePresence.classify(at: url),
             testStoreURL: url,
             protectionRoad: ProtectionRoadTestHarness(system: road.system(), session: .signedOut, open: { key in
                 Result { try AppDatabase.openStore(at: url, custody: .inMemory(initial: key)) }
@@ -39,6 +36,10 @@ enum LockWorld {
     }
 
     /// A library created on the planted road (its words kept), opened by a new-road bootstrap — ready, in Standard.
+    /// The CALLER HOLDS `road` for as long as it uses the bootstrap (here and in `readyInCastle`): the slot's folder is the
+    /// road's (`TempSlot` removes it at deinit) and the bootstrap keeps only the road's system and the slot's URL, so an
+    /// inline `PlantedRoad()` is released at the call's end and takes the library's files with it (VX-329's Mac-suite fix
+    /// leg — four reds).
     static func readyInStandard(_ road: PlantedRoad) async throws -> (bootstrap: AppBootstrap, words: [String]) {
         let (_, words) = try await road.created()
         let bootstrap = bootstrap(road)

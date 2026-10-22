@@ -6,11 +6,13 @@
 //
 //  pre-13x batch 3b — copy §4's *Export a decrypted copy* (the postures
 //  design decision 15; §5's row): the authorization by posture — Castle: the
-//  passphrase, vault-verified when enrolled, else the key file's own copy,
-//  NEVER Touch ID alone; Standard: the passphrase if one is set, else a
-//  plain confirm — then a user-chosen destination (the picker refuses the
-//  backups folder), then `StorePlaintextExport` off the main actor. Never
-//  scheduled.
+//  passphrase, NEVER Touch ID alone; Standard: the passphrase if one is set,
+//  else a plain confirm — then a user-chosen destination (the picker refuses
+//  the backups folder), then `StorePlaintextExport` off the main actor. Never
+//  scheduled. VX-329 U1: the facts come from the protection road (the open
+//  library's posture, and the typed passphrase checked against its key file —
+//  rule 7: a synced library's pair IS the account's); today's posture, its
+//  envelope and its vault tie left with today's road.
 //
 
 import Foundation
@@ -31,12 +33,19 @@ final class PlaintextExportModel {
         case failed(String)
     }
 
+    /// What a passphrase check found.
+    enum Verify: Equatable, Sendable {
+        case match
+        case mismatch(String)
+        case couldNotCheck(String)
+    }
+
     nonisolated struct Facts: Sendable {
-        var posture: @MainActor () -> Posture
+        /// Whether the open library is in Castle (nil posture — nothing open — reads Standard).
+        var isCastle: @MainActor () -> Bool
         var hasPassphrase: @MainActor () -> Bool
-        /// The vault's copy when enrolled, else the key file's (the caller
-        /// composes the road).
-        var verifyPassphrase: @MainActor (String) async -> VaultTie.Verify
+        /// The typed passphrase against the open library's key file (the caller composes the road).
+        var verifyPassphrase: @MainActor (String) async -> Verify
         /// Folders an export must never land in (the app's own backups —
         /// beside the library, and the picked second folder's).
         var refusedFolders: @MainActor () -> [URL]
@@ -50,7 +59,7 @@ final class PlaintextExportModel {
 
     init(facts: Facts) {
         self.facts = facts
-        let needsPassphrase = facts.posture() == .castle || facts.hasPassphrase()
+        let needsPassphrase = facts.isCastle() || facts.hasPassphrase()
         phase = .authorize(needsPassphrase: needsPassphrase)
     }
 
@@ -64,7 +73,7 @@ final class PlaintextExportModel {
             return
         }
         guard let passphrase, !passphrase.isEmpty else {
-            lastError = ProtectionCopy.message(for: StoreKeyEnvelopeError.emptyPassphrase)
+            lastError = ProtectionCopy.emptyPassphraseRefusal
             return
         }
         busy = true

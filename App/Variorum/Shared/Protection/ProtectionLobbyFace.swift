@@ -62,6 +62,12 @@ nonisolated struct ProtectionLobbyFace: Equatable, Sendable {
     var liveKeyFileUnreadable: Bool
     /// RULE 27 before unlock: no road at all (its face's doors are U2's).
     var noKeyFileAnywhere: NoKeyFileAnywhere?
+    /// VX-329 U4 — RULE 26 before unlock: the slot holds a store from before this design (`LaunchVerdict
+    /// .preDesignStore` — an older Variorum's key file beside it by name, none of this design's). The Mac's face is HER
+    /// pre-design face (the plan's §6d) in place of every road below; no road is ever pressed for it (the model's
+    /// automatic ask stands down). The road fields keep their derivation: the phone renders them until VM-8 builds its
+    /// face (F-U4-3).
+    var preDesignStore = false
 
     /// The face for the lobby's facts, the last press and this Mac's biometry after it.
     static func derive(
@@ -101,7 +107,7 @@ nonisolated struct ProtectionLobbyFace: Equatable, Sendable {
             touchIDButton: touchID.button, touchIDLine: line, autoAsk: touchID.autoAsk, pressSays: touchID.pressSays,
             passphraseField: nothing == nil && passphrase, wordsRoad: nothing == nil ? words : .none,
             keychainUnreadable: false, liveKeyFileUnreadable: standing.liveKeyFileUnreadable,
-            noKeyFileAnywhere: nothing)
+            noKeyFileAnywhere: nothing, preDesignStore: AssessRules.launch(facts) == .preDesignStore)
     }
 
     /// The lead line over the typed field.

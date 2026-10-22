@@ -117,12 +117,9 @@ struct RoadCrossingSheet: View {
             }
         }
         if ask.asksWords || ask == .oneSecret {
-            TextField(ProtectionWords.crossingWordsField, text: $words, axis: .vertical)
-                .lineLimit(2, reservesSpace: true)
-                .autocorrectionDisabled()
-                .privacySensitive()
+            // VX-463: the twelve words conceal like the passphrase, with the same reveal eye.
+            PeekableSecretField(label: ProtectionWords.crossingWordsField, text: $words, onSubmit: submit)
                 .textFieldStyle(.roundedBorder)
-                .onSubmit(submit)
         }
     }
 
@@ -247,7 +244,7 @@ struct RoadCrossingsSection: View {
                     .alarmVoice()
             }
             // VX-309 U1c — VX-451 (F-U4-1's option (a)): the idle dial — this Mac's SEALED minutes (`changeSettings`) — and
-            // Lock Library Now, here where Castle stands (P-2: this section exists only in Castle); today's road untouched.
+            // Lock Library Now, here where Castle stands (P-2: this section exists only in Castle).
             Picker(ProtectionCopy.idleLabel, selection: Binding(
                 get: { row.idleMinutes ?? 0 },
                 set: { minutes in Task { await model.setIdleMinutes(minutes == 0 ? nil : minutes) } })

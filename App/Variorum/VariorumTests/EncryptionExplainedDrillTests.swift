@@ -90,7 +90,8 @@ struct EncryptionExplainedDrillTests {
             #expect(shelf.contains(SampleLibraryEncryptionBook.name))
             #expect(shelf.contains(SampleLibraryJekyllBook.name))
 
-            // THE CHAPTER: copy §7's two lessons under "keeping it private".
+            // THE CHAPTER: the road's three lessons under "keeping it private" (VX-329 U1: copy §7's two left with today's
+            // road — every store seeds the road's chapter now).
             let guide = try await db.read { db in
                 try #require(Queries.readings(db).first { $0.name == TutorialSeeder.bookName })
             }
@@ -99,7 +100,8 @@ struct EncryptionExplainedDrillTests {
                     .filter { $0.sectionPath == "keeping it private" }
                     .compactMap(\.title)
             }
-            #expect(chapterLessons == [ProtectionCopy.privacyLessonOneTitle, ProtectionCopy.privacyLessonTwoTitle])
+            #expect(chapterLessons == [ProtectionWords.guideKeyLessonTitle, ProtectionWords.guidePosturesLessonTitle,
+                                       ProtectionWords.guideCopiesLessonTitle])
 
             // THE BOOK: nine notes, Chapter 1 first after the front matter.
             let encryption = try #require(books[SampleLibraryEncryptionBook.name])
@@ -128,7 +130,8 @@ struct EncryptionExplainedDrillTests {
                     .filter { $0.sectionPath == "keeping it private" }
                     .compactMap(\.title)
             }
-            #expect(again == [ProtectionCopy.privacyLessonOneTitle, ProtectionCopy.privacyLessonTwoTitle])
+            #expect(again == [ProtectionWords.guideKeyLessonTitle, ProtectionWords.guidePosturesLessonTitle,
+                              ProtectionWords.guideCopiesLessonTitle])
             let shelfAfter = try await db.read { db in
                 try Queries.readings(db).filter { $0.deletedAt == nil }.map(\.name)
             }

@@ -5,7 +5,7 @@
 //  keychain; the suite also runs headless in the implementer's SwiftPM harness). The missing face (the library file gone,
 //  its key file still in the live place) and rule 27's lobby (a library no key file opens): Make this my library lands a
 //  catalogued copy as a NEW library under the secret typed for it, what stood in the slot set aside WHOLE first (never
-//  written over), the restore hold beside it, today's store id minted fresh; a wrong secret or a quiet road alone refuses
+//  written over), the restore hold beside it (today's store id, minted here until VX-329 U1, left with today's road); a wrong secret or a quiet road alone refuses
 //  with NOTHING written. And the confirm's brain at the empty slot: the copy's secret, always asked, the one thing typed.
 //  New road and new model arm — red by construction on the pre-unit tree (`makeMine` was nil with no library open).
 //
@@ -39,16 +39,15 @@ struct EmptySlotLandingRoadTests {
     /// THE MISSING FACE: A's own backup, its own words typed → a NEW library in the empty slot (fresh identity and key,
     /// Standard, under the typed words, no past), its content landed; A's key file — the missing library's, still in the
     /// live place — set aside WHOLE into Previous Libraries first (never written over); the hold beside the new library,
-    /// its day the backup's; today's store id minted for the new key; this Mac remembers ONE library.
+    /// its day the backup's; this Mac remembers ONE library.
     @Test func theMissingFacesBackupLandsAsANewLibraryAndTheMissingKeyFileStepsAside() async throws {
         let road = PlantedRoad()
         let (oldKey, words, oldID) = try await EmptySlotPlant.missingFace(road)
         let oldFile = try Data(contentsOf: road.slot.places.liveKeyFile)
         let ctx = EmptySlotPlant.noLibraryContext(road)
         let row = try #require(ProtectionCopyDoors.listing(ctx).all.first { $0.kind == .backup })
-        let minted = KeyBox()
         let result = await ProtectionCopyDoors.makeMineInTheEmptySlot(
-            ctx, row: row, copySecrets: TypedSecrets(words: words), mintStoreIdentity: { minted.append($0) })
+            ctx, row: row, copySecrets: TypedSecrets(words: words))
         #expect(result.outcome == .made)
         let newKey = try #require(result.key)
         let slot = road.slot.places.slot
@@ -67,7 +66,6 @@ struct EmptySlotLandingRoadTests {
                 "nothing else stood in the slot — only the missing library's key file stepped aside")
         let hold = try #require(LibraryRestoreHold.read(besideStore: slot))
         #expect(hold.asOf == row.asOf, "held, as every adoption lands")
-        #expect(minted.keys == [newKey], "today's store id minted for the new library")
         #expect(road.memory.items.keys.sorted() == [record.libraryID], "this Mac remembers ONE library (rule 21)")
         // Its content landed (read back through Look inside's own read road).
         let reader = try ProtectionCopyPeek.open(slot, key: newKey, inside: road.slot.places.scratch)
@@ -102,7 +100,7 @@ struct EmptySlotLandingRoadTests {
         }
         let unopenableBytes = try Data(contentsOf: mine.slot.places.slot)
         let result = await ProtectionCopyDoors.makeMineInTheEmptySlot(
-            ctx, row: row, copySecrets: TypedSecrets(words: theirWords), mintStoreIdentity: { _ in })
+            ctx, row: row, copySecrets: TypedSecrets(words: theirWords))
         #expect(result.outcome == .made)
         let newKey = try #require(result.key)
         let record = try #require(try ProtectionLibraryFiles.readRecord(at: mine.slot.places.slot, key: newKey))
@@ -125,7 +123,7 @@ struct EmptySlotLandingRoadTests {
         let before = try CopyDoorsPlant.tree(road.slot.places.container)
         for typed in [TypedSecrets(words: try RecoveryPhrase.generate()), TypedSecrets.none] {
             let result = await ProtectionCopyDoors.makeMineInTheEmptySlot(
-                ctx, row: row, copySecrets: typed, mintStoreIdentity: { _ in Issue.record("no store id for nothing landed") })
+                ctx, row: row, copySecrets: typed)
             #expect(result.outcome == .refused(.copyDoesNotOpen) && result.key == nil)
         }
         #expect(try CopyDoorsPlant.tree(road.slot.places.container) == before, "nothing written")

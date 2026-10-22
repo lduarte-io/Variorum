@@ -1,12 +1,11 @@
 //
 //  ProtectionRoadSwitchTests.swift
-//  VariorumTests — VX-306 U1b piece 1: THE ONE SWITCH (`notes/plans/vx-306-castle-open-road.md` §2 U1b, the
-//  Release check). The new open road is live only in a DEBUG build (the Mac's, and since VX-306 U3 — superseding
-//  P-VX306-U1b-1 — the phone's); the value is a compile-time
-//  fact (the `#if DEBUG` arm), never a default or an environment key; and a test bootstrap runs today's road
-//  unless a pin turns the new one on — so the existing route suites are the evidence that the switch forced off
-//  leaves today's road as it was. The third leg of the check is `xcodebuild -configuration Release build`
-//  (the record).
+//  VariorumTests — VX-306 U1b piece 1: THE ONE SWITCH (`notes/plans/vx-306-castle-open-road.md` §2 U1b), FLIPPED at
+//  VX-329 U1 (`notes/plans/vx-329-release-switch.md` §6a): the new open road is the ONLY road, in every build — Debug and
+//  Release, the Mac and the phone. The pure rule and its pin stay, flipped; the value is still a compile-time fact
+//  (the `#if DEBUG` arm is the rule's only input and it answers true for both), never a default or an environment key.
+//  The Release leg of the check is `xcodebuild -configuration Release build` (the U1 record). Today's road — and the
+//  test bootstrap that ran it unless a pin turned the new one on — was deleted with the switch.
 //
 
 import Foundation
@@ -15,13 +14,13 @@ import Testing
 @testable import Variorum
 import VariorumCore
 
-@Suite("VX-306 U1b — the one switch: the new road only in a Debug build (U3: the phone's too)")
+@Suite("VX-306 U1b — the one switch, flipped at VX-329: the new road in every build")
 @MainActor
 struct ProtectionRoadSwitchTests {
-    /// VX-306 U3 supersedes P-VX306-U1b-1 (`debug && mac`): the phone's Debug build takes the new road too.
-    @Test func theRuleIsDebugAndNothingElse() {
+    /// VX-329 U1 supersedes VX-306's Debug-only rule (and U3's phone arm with it): every build takes the new road.
+    @Test func theRuleIsTheNewRoadInEveryBuild() {
         #expect(ProtectionRoad.live(debug: true))
-        #expect(!ProtectionRoad.live(debug: false), "every Release build runs today's road")
+        #expect(ProtectionRoad.live(debug: false), "every Release build runs the new road — today's road is gone")
     }
 
     /// This test bundle is a Debug Mac build: the switch reads its rule over the compile-time fact.
@@ -32,8 +31,9 @@ struct ProtectionRoadSwitchTests {
         #expect(ProtectionRoad.newRoadIsLive)
     }
 
-    /// The Release arm is COMPILE-TIME: `isDebugBuild` is `true` only inside `#if DEBUG`, `false` in its
-    /// `#else`, and the switch has no other input — no defaults key, no environment, no launch argument.
+    /// The configuration input is COMPILE-TIME: `isDebugBuild` is `true` only inside `#if DEBUG`, `false` in its
+    /// `#else`, and the switch has no other input — no defaults key, no environment, no launch argument — so nothing at
+    /// run time can turn today's road back on (there is none to turn on).
     @Test func theReleaseArmIsTheCompileTimeElseAndNothingCanFlipIt() throws {
         let source = try String(
             contentsOf: URL(fileURLWithPath: #filePath)
@@ -51,31 +51,5 @@ struct ProtectionRoadSwitchTests {
         for input in ["UserDefaults", "ProcessInfo", "environment", "CommandLine"] {
             #expect(!code.contains(input), "the switch reads nothing at run time (\(input))")
         }
-    }
-
-    /// The test override: a bootstrap built under a test opener runs TODAY's road unless a pin turns the new
-    /// road on — the existing route suites (`Phase13pLobbyTests`, `AppBootstrapOffMainTests`, …) run unchanged.
-    @Test func aTestBootstrapRunsTodaysRoadUnlessAPinTurnsTheNewOneOn() async throws {
-        let key = StoreKey.mint()
-        var envelope = StoreKeyEnvelope()
-        try envelope.setPassphraseWrap(
-            key: key, passphrase: "sesame",
-            kdf: PassphraseKDF.Descriptor(
-                algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13, memoryKiB: 256, iterations: 1,
-                parallelism: 1, salt: PassphraseKDF.randomSalt(), outputBytes: 32))
-        // Today's road: a passphrase wrap with no Apple copy derives Castle; always-ask is the passphrase gate.
-        let gate = StoreLaunchGate.scripted(
-            dials: ProtectionDials(alwaysAsk: true), backing: InMemoryStoreKeyGuardBacking(), envelope: envelope)
-        let bootstrap = AppBootstrap(
-            testOpener: { .failure(AppDatabase.StoreOpenError(storePath: "", reason: "never opened")) },
-            gate: gate)
-        #expect(!bootstrap.newRoad)
-        await bootstrap.awaitOpen()
-        guard case .locked(let lobby) = bootstrap.state else {
-            Issue.record("today's road routes a demanded gate to today's lobby: \(bootstrap.state)")
-            return
-        }
-        #expect(lobby.demand == .passphrase)
-        #expect(lobby.passphraseOffered)
     }
 }

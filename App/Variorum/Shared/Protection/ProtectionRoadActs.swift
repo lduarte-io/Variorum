@@ -20,6 +20,9 @@
 //      `passphraseSet` follows (the plan's facts write stamps it).
 //    - RULE 3's DISMISSAL (`recordReminderDismissed`) — `recordPassphraseReminderDismissed`, one record write.
 //    - RULE 27's *Start a New Library* sets the unopenable library aside first (`setAsideUnopenableLibraryFor`).
+//    - VX-329 U4 — RULE 26: a library from before this design leaves WHOLE (`setAsidePreDesignLibraryWholeFor` — core's
+//      `PreDesignSetAside`: link, one rename, unlink, resumed from the files' identity), by every door that sets the slot
+//      aside; the creation road finishes an interrupted one first (`finishAnInterruptedSetAside`).
 //
 
 import Foundation
@@ -77,7 +80,7 @@ nonisolated extension ProtectionOpenRoad {
         report.besideIsEmpty = library.keyFile == nil
         session.library = library
         session.report = report
-        log("road: the offered key file is beside the library (\(StoreKeyEnvelope.shortFingerprint(offer.keyFile.fingerprint)))")
+        log("road: the offered key file is beside the library (\(KeyFingerprint.short(offer.keyFile.fingerprint)))")
         return .used
     }
 
@@ -142,7 +145,7 @@ nonisolated extension ProtectionOpenRoad {
             _ = try await session.executor.regenerateWords(&library, passphrase: passphrase, newWords: fresh)
             session.library = library
             log("road: rule 2's look — fresh words lock the key file; the key unchanged "
-                + "(\(StoreKeyEnvelope.shortFingerprint(library.fingerprint)))")
+                + "(\(KeyFingerprint.short(library.fingerprint)))")
             return .minted(fresh)
         } catch ExecutorRefusal.passphraseDoesNotOpen {
             session.library = library
@@ -187,6 +190,45 @@ nonisolated extension ProtectionOpenRoad {
         }
     }
 
+    // MARK: - Rule 26: a library from before this design, set aside WHOLE (VX-329 U4 — THE RULING: (a) + (D))
+
+    /// The slot holds a store from before this design — the fact (`AssessRules.preDesignStore`), re-read from disk NOW
+    /// (names only: the store file's presence and the container's listing). Every act that sets one aside asks it first.
+    static func slotHoldsAPreDesignStore(_ places: ProtectionPlaces) -> Bool {
+        AssessRules.preDesignStore(
+            storeFile: ProtectionFactsGatherer.storeFileFact(at: places.slot), catalog: CatalogLister(places: places).catalog())
+    }
+
+    /// The library from before this design moved WHOLE into `Previous Libraries/<stamp>/` (`PreDesignSetAside` — link,
+    /// one rename, unlink; the resume first; no byte of it read). `carryingHold`: the restore hold beside it is THAT
+    /// library's (Start fresh, T-8) — a landing that wrote its own hold first (T-5) keeps it. The folder, or nil when no
+    /// store stood in the slot. Throws when nothing could be moved, or when a remainder could not leave yet (the aside
+    /// whole; the next press or the creation road finishes it).
+    @discardableResult
+    static func setAsidePreDesignLibraryWholeFor(_ places: ProtectionPlaces, carryingHold: Bool) throws -> URL? {
+        let report = try PreDesignSetAside.setAsideWhole(slotFolder: places.container, carryingHold: carryingHold)
+        log("road: the library from before this design was set aside whole into Previous Libraries/"
+            + "\(report.folder?.lastPathComponent ?? "-") (no byte read; resumed \(report.finished.count) entries, swept "
+            + "\(report.sweptStaging) staging, kept \(report.keptStaging.count))")
+        return report.folder
+    }
+
+    /// THE CREATION ROAD'S RESUME (THE RULING: the resume and the stale-staging sweep run at the press AND on the creation
+    /// road): an interrupted set-aside's remainder beside the slot — entries that are the same files as a committed
+    /// aside's — leaves before anything is created; stale staging is swept. Never blocks the creation (a remainder that
+    /// cannot leave yet is said in the log, and the creation's own no-clobber preflight still guards the slot).
+    static func finishAnInterruptedSetAside(_ places: ProtectionPlaces) {
+        do {
+            let report = try PreDesignSetAside.finishInterrupted(slotFolder: places.container)
+            guard !report.finished.isEmpty || report.sweptStaging > 0 || !report.keptStaging.isEmpty else { return }
+            log("road: an interrupted set-aside finished — \(report.finished.count) entries left the slot into "
+                + "Previous Libraries/\(report.folder?.lastPathComponent ?? "-"); swept \(report.sweptStaging) staging, "
+                + "kept \(report.keptStaging.count)")
+        } catch {
+            log("road: an interrupted set-aside could not be finished yet — \(String(describing: error))")
+        }
+    }
+
     // MARK: - Rule 27: Start a New Library over a library no key file opens
 
     /// The slot's library — the file, its sidecars, and anything in the live place — moved WHOLE into
@@ -202,8 +244,15 @@ nonisolated extension ProtectionOpenRoad {
     /// sidecars first (a creation never meets a stray WAL beside the slot; they go back if the file cannot move), the key
     /// file in the live place, and — `carryingHold` — the restore-hold marker beside it (the hold describes THAT library;
     /// T-8's new library is never held). The folder, or nil when nothing stood in the slot.
+    /// VX-329 U4 — (D): a library from BEFORE this design in the slot leaves through the WHOLE act instead
+    /// (`setAsidePreDesignLibraryWholeFor` — its older key files, its sidecars and its hold with it; crash-safe; never a
+    /// byte read): every door that sets the slot aside — T-5's and T-8's landings, a face's *Start a New Library* — keeps
+    /// her confirm's promise by this one fact.
     @discardableResult
     static func setAsideLibraryWholeFor(_ places: ProtectionPlaces, carryingHold: Bool) throws -> URL? {
+        if slotHoldsAPreDesignStore(places) {
+            return try setAsidePreDesignLibraryWholeFor(places, carryingHold: carryingHold)
+        }
         let manager = FileManager.default
         guard manager.fileExists(atPath: places.slot.path) else { return nil }
         var date = Date()

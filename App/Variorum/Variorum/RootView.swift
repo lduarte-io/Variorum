@@ -17,8 +17,6 @@ struct RootView: View {
     /// Session services (Phase 8) — nil for the first frames until the root
     /// `.task` starts them; the footer appears when ready.
     let services: AppServices?
-    /// pre-13u Act 10 (memo §6): the unchosen-state indicator reads this.
-    let protection: ProtectionController?
     /// 13f batch 5b (W2/A26): the app's register of open windows and the ONE
     /// authority on which is key. This window reads two things from it — is
     /// it the key window (the mount gate) and is it the navigation target
@@ -62,6 +60,9 @@ struct RootView: View {
     /// 13r U3-A: What's New's ledger (the app delegate's one instance; nil
     /// in harness mounts, which then never auto-show) and this window's sheet.
     let whatsNew: WhatsNewLedger?
+    /// VX-468: this process adopted a library through a copy door before this window — the automatic show waits for the
+    /// next ordinary launch (`WhatsNewLedger.claimAutoShow(afterAdoption:)`).
+    let whatsNewWaits: Bool
     @State private var whatsNewShown = false
     /// 13r U3-A: the calm-asks scheduler (the app delegate's one instance);
     /// this window registers the backup-folder ask once its services exist.
@@ -70,8 +71,8 @@ struct RootView: View {
     /// delegate's ONE model (one per process, every window's Bookcase reads
     /// it); nil in harness mounts, which then draw no offer.
     let tourOffer: TourOfferModel?
-    /// VX-307 U2b — the open library's protection faces on the NEW road (the bootstrap's `roadStanding`; nil on
-    /// today's road and in harness mounts): the card above the quick entry (the twelve words and rule 3's reminder)
+    /// VX-307 U2b — the open library's protection faces (the bootstrap's `roadStanding`; nil while no library is open on
+    /// the road, and in harness mounts): the card above the quick entry (the twelve words and rule 3's reminder)
     /// and the tour's last card's two asks. The shell renders their views and never holds a sibling's model beyond
     /// handing it down (composition's road).
     let protectionFaces: RoadStandingModel?
@@ -171,15 +172,13 @@ struct RootView: View {
 
     init(
         session: AppSession, services: AppServices? = nil,
-        // pre-13u Act 10 (memo §6): the unchosen-state indicator's brain —
-        // defaulted so harness mounts never need one.
-        protection: ProtectionController? = nil,
         router: ShellRouter = ShellRouter(), windows: WindowRegistry = WindowRegistry(),
         // 13e E14: defaulted like `windows`, and defaulted to the INERT
         // system — a harness that mounts this view must never ask the real
         // system for her chord (it would fight the running app for it).
         hotKeys: GlobalHotKeyCenter = GlobalHotKeyCenter(system: .inert),
         whatsNew: WhatsNewLedger? = nil,
+        whatsNewWaits: Bool = false,
         calmAsks: CalmAskScheduler? = nil,
         tourOffer: TourOfferModel? = nil,
         mcp: MCPDoor? = nil,
@@ -187,10 +186,10 @@ struct RootView: View {
     ) {
         self.session = session
         self.services = services
-        self.protection = protection
         self.windows = windows
         self.hotKeys = hotKeys
         self.whatsNew = whatsNew
+        self.whatsNewWaits = whatsNewWaits
         self.calmAsks = calmAsks
         self.tourOffer = tourOffer
         self.mcp = mcp
@@ -338,7 +337,7 @@ struct RootView: View {
         .task(id: services != nil) {
             guard let services, iCloudOffer == nil else { return }
             let offer = ICloudDriveOfferModel(
-                leaves: .live(services: services, protection: protection))
+                leaves: .live(services: services, posture: { [protectionFaces] in protectionFaces?.posture }))
             iCloudOffer = offer
             guard let calmAsks else { return }
             let ownWriting = OwnWritingProbe(session: session)
@@ -566,8 +565,8 @@ struct RootView: View {
             // deliberately — she can close every window and the pad still
             // answers her chord (the menu-bar extra's own promise).
             hotKeys.install { _ in summonQuickNote() }
-            // 13r U3-A: the version-change show, claimed once per process.
-            if whatsNew?.claimAutoShow() == true { whatsNewShown = true }
+            // 13r U3-A: the version-change show, claimed once per process (VX-468: it waits after an adoption).
+            if whatsNew?.claimAutoShow(afterAdoption: whatsNewWaits) == true { whatsNewShown = true }
         }
         .onDisappear {
             windows.unregister(windowID)
@@ -586,9 +585,8 @@ struct RootView: View {
         }
     }
 
-    /// The sidebar column's BOTTOM — the bottom-left family: the
-    /// protection row (memo §6: renders only while the choice is genuinely
-    /// unmade; NEVER "encryption off") and the sync row (the bridge row
+    /// The sidebar column's BOTTOM — the bottom-left family: the sync row
+    /// (today's protection row left with today's road at VX-329; the bridge row
     /// stood third until the bridge's 2026-09-04 retirement). They
     /// were the split view's `safeAreaInset`; the flat column carries them
     /// as its own last region (Sitting 9's opaque voiced background survives
@@ -598,13 +596,8 @@ struct RootView: View {
         let tokens = theme.tokens(for: scheme)
         return AnyView(
             VStack(alignment: .leading, spacing: 0) {
-                // VX-307 U2c (VX-379's row — the VX-306 walk's W-1): the posture box reads TODAY's tier, so it renders on
-                // today's road only — on the new road its exposed line ("only this Mac can open your work") would be
-                // false (rule 8: the Apple road reaches her other Macs), and the card above the quick entry carries
-                // rule 3's ask there (U2b).
-                if let protection, protectionFaces == nil {
-                    ProtectionStatusRow(controller: protection, tokens: tokens)
-                }
+                // (VX-329 U1: today's posture box — `ProtectionStatusRow`, today's tier — left with today's road; the card
+                // above the quick entry carries rule 3's ask — VX-307 U2b.)
                 // VX-218: the family's words sit on the column's own content
                 // edge — where every row and header above them sits
                 // (`SidebarLayout.contentInset`) — never 6 pt from the
@@ -1011,7 +1004,7 @@ struct RootView: View {
     }
 
     /// VX-307 U2b — the tour's last card's two asks (rule 3: the passphrase and the words, side by side): a fresh
-    /// model each time the end card shows (the new road only; nil — today's road — leaves the end card as it was).
+    /// model each time the end card shows (nil while no protection faces stand — the end card draws without the asks).
     private var tourEndLibrary: (@MainActor () -> TourEndLibraryModel)? {
         guard let standing = protectionFaces else { return nil }
         return { TourEndLibraryModel(standing: standing) }

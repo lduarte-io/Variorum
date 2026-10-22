@@ -48,8 +48,8 @@ struct AppSettingsView: View {
     /// Settings scene can open before the main window's composition has run,
     /// and the pane says so honestly rather than rendering dashes.
     let services: AppServices?
-    /// 13p Batch 2: the protection brain (the bootstrap's — dials, modes,
-    /// escrow, the passphrase doors). Optional like `services`.
+    /// The bootstrap's protection controller — VX-329 U1: its road arms only (the Settings pane request a crossing's
+    /// reopen adopts; the Protection pane renders where one exists). Optional like `services`.
     let protection: ProtectionController?
     /// 18j (her R-Q12): the app's ONE appearance owner (`NSApp.appearance`
     /// at the root — `AppearanceChoice.swift`). Optional like `services`
@@ -78,16 +78,13 @@ struct AppSettingsView: View {
     @State private var query = ""
     @Environment(\.colorScheme) private var scheme
 
-    /// 13x U2 row 6: the Restore surface's per-row door (Settings' own
-    /// adoption presenter behind it). nil hosts render no Open… rows.
-    let restoreDoor: ((URL) -> Void)?
     /// 13x F1 (R1-MAJOR): Data Safety's hand-off twin (Settings' own
     /// presenter behind it). nil hosts render no door.
     let handOffDoor: (() -> Void)?
-    /// VX-306 U2: the new road's open library faces (nil on today's road) —
+    /// VX-306 U2: the road's open library faces (nil while no library is open on it) —
     /// the Protection pane's one *Set a passphrase…* row reads it.
     let roadStanding: RoadStandingModel?
-    /// VX-306 U3: the new road's Restore list (nil on today's road) — Data Safety's rows read it.
+    /// VX-306 U3: the road's Restore list (nil while none stands) — Data Safety's rows read it.
     let roadDoors: RoadDoorsHost?
 
     init(
@@ -97,7 +94,6 @@ struct AppSettingsView: View {
         updates: UpdateChannel? = nil,
         crashReports: CrashReporting? = nil,
         mcp: MCPDoor? = nil,
-        restoreDoor: ((URL) -> Void)? = nil,
         handOffDoor: (() -> Void)? = nil,
         roadStanding: RoadStandingModel? = nil,
         roadDoors: RoadDoorsHost? = nil
@@ -109,7 +105,6 @@ struct AppSettingsView: View {
         self.updates = updates
         self.crashReports = crashReports
         self.mcp = mcp
-        self.restoreDoor = restoreDoor
         self.handOffDoor = handOffDoor
         self.roadStanding = roadStanding
         self.roadDoors = roadDoors
@@ -131,22 +126,17 @@ struct AppSettingsView: View {
     /// — the pane itself (Diagnostics': its one toggle), so it can be found by
     /// name — and that row is what these entries say.
     ///
-    /// VX-309 U2 — VX-453: the BUILD's map (`rowIDsRendered(newRoad:)` over
-    /// `ProtectionRoad.newRoadIsLive`) — on the new road the Protection pane
-    /// also renders the account section (`RoadAccountSection`, its row
-    /// `"account"`); Release — today's road — keeps `everyRoadsRowIDs`.
-    static let rowIDsRendered: [SettingsPane: [String]] = rowIDsRendered(newRoad: ProtectionRoad.newRoadIsLive)
-
-    /// The map for a road: the Protection pane's account section renders only on the new road.
-    static func rowIDsRendered(newRoad: Bool) -> [SettingsPane: [String]] {
-        guard newRoad else { return everyRoadsRowIDs }
-        var rendered = everyRoadsRowIDs
+    /// VX-309 U2 — VX-453: the Protection pane also renders the account
+    /// section (`RoadAccountSection`, its row `"account"`). VX-329: one road,
+    /// one map.
+    static let rowIDsRendered: [SettingsPane: [String]] = {
+        var rendered = paneRowIDs
         rendered[.protection, default: []].append(SettingsCatalog.accountRow.id)
         return rendered
-    }
+    }()
 
-    /// The rows every road's panes render.
-    static let everyRoadsRowIDs: [SettingsPane: [String]] = [
+    /// The panes' own rows (the account section's joins them in `rowIDsRendered`).
+    static let paneRowIDs: [SettingsPane: [String]] = [
         .general: ["voice", "palette", "appearance", "receipts", "keepOpenNotes", "updates"],
         .editor: ["seams", "indicator", "inlineComments", "paragraphGap",
                   "arrivalFlash", "ownershipBadges", "hideOwnedDefault",
@@ -358,9 +348,8 @@ struct AppSettingsView: View {
             } else {
                 SettingsResultsPane(
                     tokens: tokens, query: query,
-                    // VX-309 U2 — VX-453: the index for the road this window is on — the account section's row only
-                    // where the Protection pane renders that section.
-                    newRoad: roadStanding?.account != nil,
+                    // VX-309 U2 — VX-453: the account section's row only where the Protection pane renders that section.
+                    accountSection: roadStanding?.account != nil,
                     onOpen: { finding in
                         query = ""
                         // VX-281 U1: the MCP pane is in tabs — a finding whose
@@ -414,18 +403,16 @@ struct AppSettingsView: View {
         case .tags:
             TagManagerPane(session: session, tags: tags)
         case .protection:
-            if let protection {
-                // 13p Batch 2: the at-open modes, presets, escrow, and the
-                // passphrase/recovery doors (R13p-5/6/7/9).
-                ProtectionPane(controller: protection, services: services, roadStanding: roadStanding)
+            if protection != nil {
+                // The protection road's sections (`ProtectionPane`).
+                ProtectionPane(services: services, roadStanding: roadStanding)
             }
         case .dataSafety:
             // 13l Act 4 (ledger row 12): backups, their freshness, and what
             // restoring one does — including to things that were deleted.
             // 13x U2: + the Restore from Backup rows (QB's second door).
             DataSafetyPane(
-                services: services, protection: protection, restoreDoor: restoreDoor,
-                handOffDoor: handOffDoor, roadDoors: roadDoors, roadStanding: roadStanding)
+                services: services, handOffDoor: handOffDoor, roadDoors: roadDoors, roadStanding: roadStanding)
         case .diagnostics:
             // 13r U3-B (R-13r-5; the architect's Option A): the crash-report
             // opt-in at the head, the received reports verbatim under it.
@@ -457,12 +444,12 @@ struct AppSettingsView: View {
 private struct SettingsResultsPane: View {
     let tokens: VoiceTokens
     let query: String
-    /// VX-309 U2 — VX-453: whether the Protection pane renders the account section (the new road's).
-    let newRoad: Bool
+    /// VX-309 U2 — VX-453: whether the Protection pane renders the account section.
+    let accountSection: Bool
     let onOpen: (SettingsFinding) -> Void
 
     private var findings: [SettingsFinding] {
-        SettingsSearch.findings(matching: query, in: SettingsSearch.wholeIndex(newRoad: newRoad))
+        SettingsSearch.findings(matching: query, in: SettingsSearch.wholeIndex(accountSection: accountSection))
     }
 
     var body: some View {

@@ -165,7 +165,7 @@ and never leaves a hole you chose to close.**
     their writing or signs into sync before the switch, then starts fresh; the people concerned are the author and a few
     testers, and they have been told.
 27. **A library whose every key-file copy and every backup are gone is gone.** Synced libraries are the exception: the
-    twelve words recover them from the account.
+    account's passphrase or twelve words recover them from the account.
 
 ---
 

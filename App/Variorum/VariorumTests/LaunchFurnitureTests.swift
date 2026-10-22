@@ -358,37 +358,48 @@ struct LaunchFurnitureTests {
         }
     }
 
-    /// **VX-306 ladder round 2, m2 — TODAY'S ROAD seeds her five blocks alone.** The four Start Here passages speak the
-    /// new road's truths (the key file and its copies, the twelve words shown once at the creation, a new-words door in
-    /// Data Safety), false on today's road — so a fresh store whose variant keeps today's road (the real store's, as
-    /// every Release build's) is born with her readme exactly as she wrote it, until the road switches (VX-329). Driven
-    /// through the PRODUCTION composition with the real variant (the marks injected — no defaults are touched); written
-    /// against what both trees carry (her five blocks are the seed's first five on either side), so it runs RED on the
-    /// tree before the gate: nine blocks.
-    @Test func aFreshStoreOnTodaysRoadSeedsHerFiveBlocksAlone() async throws {
-        try await withLaunchWorld { session, db in
-            let device = DeviceMarks()
-            _ = await LaunchFurniture.seed(
-                session: session, storeVariant: .real,
-                gate: gate(account: false, clean: true), marks: device.marks)
-            let readme = try await db.read { db in
-                try String.fetchOne(
-                    db,
-                    sql: "SELECT id FROM container WHERE kind = 'post' AND title = ? AND deleted_at IS NULL",
-                    arguments: [ReadmeSeeder.title])
+    /// **EVERY STORE SEEDS THE SAME NINE (VX-329 — the release switch).** Before the switch, a store of the real variant
+    /// (every Release build's) kept today's road and was born with her five blocks alone — the four Start Here passages
+    /// speak the new road's truths (VX-306 ladder round 2, m2), false on today's road. The switch put every store on the
+    /// new road and deleted that fork with today's road (U1, `c3d939c9e`: `ReadmeSeeder.paragraphs` is every store's), so
+    /// a fresh store of EITHER variant is born with her five blocks, byte-exact and first, then the four passages — the
+    /// real variant's page identical to the dev variant's. Driven through the PRODUCTION composition per variant, each in
+    /// its own fresh world (the marks injected — no defaults are touched). It replaces the pre-switch pin
+    /// `aFreshStoreOnTodaysRoadSeedsHerFiveBlocksAlone`, whose subject — today's road's five-only readme — went with
+    /// today's road (the first run after the switch read it red: nine blocks, as designed). The four passages' static
+    /// fact is `ReadmeStartHerePlanTests.theFourPassagesSeedInEveryStore`; this is the behavioural one.
+    @Test func aFreshStoreOfEitherVariantSeedsHerFiveThenTheFourPassages() async throws {
+        let nine = ReadmeSeeder.herBlocks + ReadmeSeeder.startHerePassages
+        #expect(ReadmeSeeder.herBlocks.count == 5 && ReadmeSeeder.startHerePassages.count == 4)
+        var pages: [AppDatabase.StoreVariant: String] = [:]
+        for variant in AppDatabase.StoreVariant.allCases {
+            pages[variant] = try await withLaunchWorld { session, db -> String in
+                let device = DeviceMarks()
+                _ = await LaunchFurniture.seed(
+                    session: session, storeVariant: variant,
+                    gate: gate(account: false, clean: true), marks: device.marks)
+                let readme = try await db.read { db in
+                    try String.fetchOne(
+                        db,
+                        sql: "SELECT id FROM container WHERE kind = 'post' AND title = ? AND deleted_at IS NULL",
+                        arguments: [ReadmeSeeder.title])
+                }
+                let id = try #require(readme, "the readme placeholder seeds on the \(variant) variant")
+                let (blocks, rendered) = try await db.read { db in
+                    (try Int.fetchOne(
+                        db,
+                        sql: "SELECT COUNT(*) FROM container_block WHERE container_id = ? AND deleted_at IS NULL",
+                        arguments: [id]) ?? 0,
+                     try Queries.renderedText(db, containerID: id))
+                }
+                #expect(blocks == nine.count, "the \(variant) variant seeded \(blocks) blocks — every store seeds nine")
+                #expect(rendered == nine.joined(separator: "\n\n"),
+                        "the \(variant) variant: her five blocks byte-exact and first, then the four passages")
+                return rendered
             }
-            let id = try #require(readme, "the readme placeholder seeds on today's road too")
-            let (blocks, rendered) = try await db.read { db in
-                (try Int.fetchOne(
-                    db,
-                    sql: "SELECT COUNT(*) FROM container_block WHERE container_id = ? AND deleted_at IS NULL",
-                    arguments: [id]) ?? 0,
-                 try Queries.renderedText(db, containerID: id))
-            }
-            let herFive = Array(ReadmeSeeder.paragraphs.prefix(5))
-            #expect(blocks == 5, "today's road seeded \(blocks) blocks — the Start Here passages rode along")
-            #expect(rendered == herFive.joined(separator: "\n\n"), "her five blocks, byte-exact, and nothing after them")
         }
+        #expect(pages.count == AppDatabase.StoreVariant.allCases.count)
+        #expect(pages[.real] == pages[.dev], "the real variant's readme is the dev variant's, byte for byte")
     }
 
     /// **NEVER A RETROFIT** (the `declined` mark's contract). An existing

@@ -16,7 +16,8 @@ struct MobileKDFLatencyTests {
     /// the MOBILE-SUITE number — a SIMULATOR number, which is NOT the
     /// device number: the device number lands at the gate through the
     /// enrollment flow itself, which measures and shows its derivation
-    /// duration on its own surface (`EncryptionSession.lastKDFSeconds`).
+    /// duration on its own surface (today's `EncryptionSession.lastKDFSeconds` —
+    /// deleted with today's road at VX-329 U1).
     /// The assertion is existence-and-sanity, never a latency budget — sim
     /// hardware is not the phone's.
     @Test func v1DescriptorDerivationMeasuresOnThisSimulator() throws {

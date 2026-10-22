@@ -22,7 +22,7 @@ struct KeychainLeavesTests {
         defer { throwaway.purge() }
         let leaf = KeychainCustodyLeaf(scope: throwaway.scope)
         let key = StoreKey.mint()
-        let fingerprint = StoreKeyEnvelope.fingerprint(of: key)
+        let fingerprint = KeyFingerprint.of(key)
         let first = UUID().uuidString.lowercased(), second = UUID().uuidString.lowercased()
         #expect(try leaf.custodyItems().isEmpty)
         try leaf.writeCustody(key, itemClass: .silent, libraryID: first)
@@ -47,8 +47,8 @@ struct KeychainLeavesTests {
         let keyA = StoreKey.mint(), keyB = StoreKey.mint()
         try KeychainCustodyLeaf(scope: a.scope).writeCustody(keyA, itemClass: .silent, libraryID: "a")
         try KeychainCustodyLeaf(scope: b.scope).writeCustody(keyB, itemClass: .silent, libraryID: "b")
-        #expect(try KeychainCustodyLeaf(scope: a.scope).custodyItems().map(\.fingerprint) == [StoreKeyEnvelope.fingerprint(of: keyA)])
-        #expect(try KeychainCustodyLeaf(scope: b.scope).custodyItems().map(\.fingerprint) == [StoreKeyEnvelope.fingerprint(of: keyB)])
+        #expect(try KeychainCustodyLeaf(scope: a.scope).custodyItems().map(\.fingerprint) == [KeyFingerprint.of(keyA)])
+        #expect(try KeychainCustodyLeaf(scope: b.scope).custodyItems().map(\.fingerprint) == [KeyFingerprint.of(keyB)])
     }
 
     /// A Touch ID item: made, listed BY NAME over the candidates, never pressed, deleted without a prompt.
@@ -58,7 +58,7 @@ struct KeychainLeavesTests {
         let throwaway = ThrowawayScope()
         defer { throwaway.purge() }
         let key = StoreKey.mint()
-        let fingerprint = StoreKeyEnvelope.fingerprint(of: key)
+        let fingerprint = KeyFingerprint.of(key)
         let leaf = KeychainCustodyLeaf(scope: throwaway.scope, touchIDCandidates: { [fingerprint] })
         try leaf.writeCustody(key, itemClass: .touchid, libraryID: UUID().uuidString.lowercased())
         #expect(try leaf.custodyItems().contains(CustodyItemFact(fingerprint: fingerprint, itemClass: .touchid)))
@@ -80,7 +80,7 @@ struct KeychainLeavesTests {
         let key = StoreKey.mint()
         let libraryID = UUID().uuidString.lowercased()
         let memory = DeviceMemory(
-            libraryID: libraryID, currentFingerprint: StoreKeyEnvelope.fingerprint(of: key),
+            libraryID: libraryID, currentFingerprint: KeyFingerprint.of(key),
             deviceID: UUID().uuidString.lowercased())
         let sealed = try memory.sealed(under: key)
         try leaf.writeMemory(sealed, libraryID: libraryID)

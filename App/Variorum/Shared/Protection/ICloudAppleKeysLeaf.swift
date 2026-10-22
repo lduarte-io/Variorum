@@ -5,9 +5,10 @@
 //  VX-306 U1a — THE PRODUCTION `AppleKeysLeaf` (`Executor/Leaves.swift`): Apple keys in iCloud Keychain —
 //  synchronizable generic passwords, service `ProtectionNames.appleKeyService` (today's), account
 //  `<scope>-apple-key-<id>` (NAMED BY THEIR OWN ID — the old shared `<scope>-apple-key` is never read: the
-//  parser refuses it, rule 26), the SHARED access group today's `AppleKeyKeychain` uses (team prefix +
-//  shared suffix — the phone shares it), `kSecAttrAccessibleAfterFirstUnlock`, NO access control (Apple does
-//  not sync an ACL'd item — the Apple facts §10). The value is today's `AppleKey` JSON `{id, key}`.
+//  parser refuses it, rule 26), the SHARED access group (`ProtectionKeychain.sharedGroup` — team prefix + shared suffix,
+//  the phone shares it; today's `AppleKeyKeychain` used the same, and was deleted at VX-329 U1),
+//  `kSecAttrAccessibleAfterFirstUnlock`, NO access control (Apple does not sync an ACL'd item — the Apple facts §10). The
+//  value is the `{id, key}` JSON today's `AppleKey` wrote (kept byte-for-byte — `StoredAppleKey` below).
 //    - `readableAppleKeyIDs` — the own-named items present AND readable here (each read, its id checked);
 //    - `addAppleKey` — a fresh key under its own name, STAMPED (`kSecAttrLabel` = the library ID, VX-390);
 //      an item already under that name is never overwritten (a key is never replaced in place) — the same
@@ -48,7 +49,7 @@ nonisolated final class ICloudAppleKeysLeaf: AppleKeysLeaf, @unchecked Sendable 
 
     func readAppleKey(id: String) throws -> AppleKeyMaterial? {
         guard let data = try ProtectionKeychain.readData(service: Self.service, account: account(id), residence: .synchronizable),
-              let value = try? JSONDecoder().decode(AppleKey.self, from: data), value.id == id, value.key.count == 32
+              let value = try? JSONDecoder().decode(StoredAppleKey.self, from: data), value.id == id, value.key.count == 32
         else { return nil }
         return AppleKeyMaterial(id: id, key: SymmetricKey(data: value.key))
     }
@@ -56,7 +57,7 @@ nonisolated final class ICloudAppleKeysLeaf: AppleKeysLeaf, @unchecked Sendable 
     func addAppleKey(_ key: AppleKeyMaterial, libraryID: String) throws {
         try ProtectionKeychain.refuseUnderTest(scope, "apple.add")
         let bytes = key.key.withUnsafeBytes { Data($0) }
-        let data = try JSONEncoder().encode(AppleKey(id: key.id, key: bytes))
+        let data = try JSONEncoder().encode(StoredAppleKey(id: key.id, key: bytes))
         var attributes = ProtectionKeychain.base(service: Self.service, account: account(key.id), residence: .synchronizable)
         attributes[kSecValueData as String] = data
         attributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
@@ -77,5 +78,13 @@ nonisolated final class ICloudAppleKeysLeaf: AppleKeysLeaf, @unchecked Sendable 
 
     func appleKeyIDs(ofLibrary libraryID: String) throws -> Set<String> {
         Set(try listed().filter { $0.libraryID == libraryID }.map(\.id))
+    }
+
+    /// The item's value: the Apple key's id and its 32 bytes, as JSON — the coding shape today's `AppleKey` gave the
+    /// family (`{"id","key"}`), kept byte-for-byte when that type left with today's road (VX-329 U1), so every item
+    /// this leaf wrote still reads.
+    private struct StoredAppleKey: Codable {
+        var id: String
+        var key: Data
     }
 }

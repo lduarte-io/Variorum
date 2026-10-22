@@ -19,9 +19,11 @@ nonisolated enum ProtectionWords {
     // MARK: - (1) The once-shown words card — §7c (1), verbatim (rule 2; K7: one button, no Copy, no later)
 
     static let wordsCardTitle = "Your twelve words"
-    static let wordsCardLead = "Your library is encrypted. These twelve words open it — on this Mac, on any copy of it, "
-        + "for as long as they are its words. Write them down now and keep them somewhere safe. Variorum won't show "
-        + "them again."
+    /// VX-329's phone fix leg (VX-306's walk W-15 — the phone's card said "on this Mac"): the device is the platform's
+    /// noun, as every road sentence below names it; the Mac's text is byte-unchanged. PROVISIONAL P-VX329-PH-1.
+    static let wordsCardLead = "Your library is encrypted. These twelve words open it — on this "
+        + "\(ProtectionCopy.deviceName), on any copy of it, for as long as they are its words. Write them down now and keep "
+        + "them somewhere safe. Variorum won't show them again."
     static let wordsCardFoot = "You can add a passphrase later, as a convenience over the words. Either one can reset "
         + "the other."
     static let wordsCardButton = "I've written them down"
@@ -33,8 +35,8 @@ nonisolated enum ProtectionWords {
 
     static let offerUseIt = "Use it"
     static let offerNotNow = "Not now"
-    /// The receipt after *Use it* — the source named.
-    static let offerRestoredFromKeychain = "Key file restored from this Mac's keychain."
+    /// The receipt after *Use it* — the source named (the device by the platform's noun — P-VX329-PH-1).
+    static let offerRestoredFromKeychain = "Key file restored from this \(ProtectionCopy.deviceName)'s keychain."
     static func offerRestoredFromBackup(_ date: String) -> String {
         "Key file restored from the backup from \(date)."
     }
@@ -53,8 +55,10 @@ nonisolated enum ProtectionWords {
     // MARK: - (3) Rule 27's refusal — §7c (3), verbatim (the lobby's moment + its doors; after a quiet-road open, the
     // standing banner in the same words, no doors)
 
+    /// (The device by the platform's noun — the phone's lobby says it too; P-VX329-PH-1, the Mac's text byte-unchanged.)
     static let noKeyFileAnywhere = "No key file opens this library. Variorum looked beside the library, inside every "
-        + "backup, and in this Mac's keychain, and found none that opens it. Without one, there is nothing left to open."
+        + "backup, and in this \(ProtectionCopy.deviceName)'s keychain, and found none that opens it. Without one, there is "
+        + "nothing left to open."
     /// VX-414 — HER U2-7 variant (1), verbatim from the ticket (her ruling 2026-10-18: "I agree with your suggested
     /// wording"): the STANDING BANNER after a quiet open with no key file found anywhere — replacing rule 27's refusal
     /// words in that one state (they ended *Without one, there is nothing left to open.* over a library that had just
@@ -67,6 +71,23 @@ nonisolated enum ProtectionWords {
     static let noKeyFileOpenDoor = "Open Library\u{2026}"
     static let noKeyFileStartDoor = "Start a New Library"
 
+    // MARK: - (3b) The pre-design face — HER WORDS (VX-329 U4; approved at her 2026-10-22 morning sitting, the plan's
+    // §6d, byte-faithful — `PreDesignFaceTests` pins each byte-equal to the plan file). Rule 26: a store from before this
+    // design is detected by its key files' names and said; set aside whole at her word, never read.
+
+    static let preDesignLead = "This library is from an older version of Variorum."
+    static let preDesignBody = "This version can't open it. Open the previous version to copy anything out \u{2014} or if "
+        + "it synced, your writing comes back when you sign in. Starting fresh sets this library aside, whole, in "
+        + "Previous Libraries."
+    static let preDesignStartFreshDoor = "Start fresh\u{2026}"
+    /// Her second door is the standing one, by its own name (rule 27's face's — the same words).
+    static var preDesignOpenDoor: String { noKeyFileOpenDoor }
+    static let preDesignStartFreshConfirm = "Your old library will be set aside whole in Previous Libraries \u{2014} "
+        + "nothing is deleted."
+    /// The confirm's act button: her door's own words without its ellipsis (the macOS idiom — the ellipsis says a door
+    /// asks more; the button that answers the ask does not). PROVISIONAL P-VX329-U4-2.
+    static let preDesignStartFreshButton = "Start fresh"
+
     // MARK: - (4) The notice — §7c (4) (rule 21): her two sentences are the MODEL's (`LibraryNotice.sentence(date:)`),
     // never restated; the face's one button.
 
@@ -74,7 +95,9 @@ nonisolated enum ProtectionWords {
 
     // MARK: - (6) Rule 1's restore receipt — §7c (6), verbatim (`Repair.restoreKeyFileFromMirror`)
 
-    static let restoredFromMirror = "The key file beside your library was missing. This Mac's sealed copy was put back."
+    /// (The device by the platform's noun — P-VX329-PH-1, the Mac's text byte-unchanged.)
+    static let restoredFromMirror = "The key file beside your library was missing. This \(ProtectionCopy.deviceName)'s "
+        + "sealed copy was put back."
 
     // MARK: - (7) Rule 3's reminder + the set-passphrase sheet — §7c (7), verbatim
 
@@ -391,14 +414,20 @@ nonisolated enum ProtectionWords {
     static let wordsPlaceholder = "Your twelve words, separated by spaces"
     static let wordsButton = "Open with the words"
     static let opening = "Opening your library…"
-    /// P-VX306-U1a-3's road: a keychain that could not be listed stops the facts — the typed field, and why.
-    static let keychainUnreadable = "Variorum couldn't check this Mac's keychain just now. Enter your passphrase or "
-        + "your twelve words."
+    /// P-VX306-U1a-3's road: a keychain that could not be listed stops the facts — the typed field, and why. (The device
+    /// by the platform's noun — the phone's lobby says it too; P-VX329-PH-1, the Mac's text byte-unchanged.)
+    static let keychainUnreadable = "Variorum couldn't check this \(ProtectionCopy.deviceName)'s keychain just now. Enter "
+        + "your passphrase or your twelve words."
 
     // MARK: - The lobby's refusals (a typed attempt that opened nothing)
 
     static let passphraseDoesNotOpen = "That passphrase doesn't open this library."
     static let wordsDoNotOpen = "Those twelve words don't open this library."
+    /// VX-464 (W-VX309-3) — the join's and Move's typed secret is the ACCOUNT's (rule 14: checked against the account's
+    /// vault), so its refusal names the account; "this library" stays where the typed pair is the library's own (the
+    /// lobby, Make this my library, set-up, the follow — rule 7). PROVISIONAL P-VX329-R1-1.
+    static let passphraseDoesNotOpenAccount = "That passphrase doesn't open this account."
+    static let wordsDoNotOpenAccount = "Those twelve words don't open this account."
     static func wordsWrongCount(_ count: Int) -> String {
         "There are twelve words — you entered \(count)."
     }
@@ -489,6 +518,12 @@ nonisolated enum ProtectionWords {
     /// Use Castle — what entering does (rule 11; the lifecycle's stage 6).
     static let useCastleLead = "Your library gets a new key, and the Apple and on-device keychain items are deleted — the "
         + "Apple ones on every device of your Apple account — so your backups are Castle-protected along with your library."
+    /// VX-469 (c) — her ruling at the 2026-10-22 sitting (QUESTIONS #237): Castle's promise is about LIVE libraries, so
+    /// entering it leaves the quiet roads of the libraries in Previous Libraries on this Mac standing — said at the door,
+    /// in the warning idiom of the backups sentence (rule 25's), on every confirm that says what entering does. Words
+    /// PROVISIONAL P-VX329-R1-2.
+    static let castleLeavesPreviousLibraries = "The libraries in Previous Libraries keep their own quiet roads on this "
+        + "\(ProtectionCopy.deviceName) \u{2014} Castle protects the library you have open."
     /// `Words.floorSentence` — Castle's floor (rule 9: no quiet road through Apple; the design's §3.1 (2)).
     static let castleFloor = "From now on your passphrase, your twelve words, or \(ProtectionCopy.biometryName) on this "
         + "\(ProtectionCopy.deviceName) open your library. Lose all three and it is gone."
@@ -618,8 +653,8 @@ nonisolated enum ProtectionWords {
     static let wordsLookRuleSix = "Your library's key doesn't change: every backup opens with these words, and still "
         + "with the words you had when you made it."
     /// VX-412's Copy door and its caption. VX-308 U3 — VX-448 (her ruling, QUESTIONS #235: the 60-second timer and the
-    /// restore go; a concealed type, cleared at lock and at quit): the caption says the new road's rule (PROVISIONAL
-    /// P-VX308-U3-2 — today's road keeps its own sentence, `ProtectionCopy.wordsCopied`, with its own rule).
+    /// restore go; a concealed type, cleared at lock and at quit): the caption says the road's rule (PROVISIONAL
+    /// P-VX308-U3-2; today's own sentence, `ProtectionCopy.wordsCopied`, left with today's road at VX-329 U1).
     static let wordsLookCopy = "Copy"
     static let wordsLookCopied = "Copied. Your clipboard keeps them until you copy something else, your library locks or "
         + "Variorum quits."
@@ -963,8 +998,7 @@ nonisolated enum ProtectionWords {
 
     // MARK: - VX-309 U2 — THE FIELD GUIDE'S PROTECTION CHAPTER ON THE NEW ROAD (VX-379's acceptance; #235: "written here")
     //
-    // Seeded ONLY where the store opens on the new road (`TutorialSeeder.seed(… onTheNewRoad:)` — the readme's own gate,
-    // VX-306 ladder r2 m2); today's road, Release included, seeds copy §7's chapter until the switch (VX-329). Lesson 1 LEADS
+    // Seeded on every store (VX-329: every store opens on the new road; copy §7's chapter went with today's road). Lesson 1 LEADS
     // with the readme's four Start Here passages, verbatim (`ReadmeSeeder.startHerePassages` — one text, two homes; the
     // seeder prepends them). Every paragraph here is drafted from `notes/CastleRules.md` and the lifecycle page as built —
     // her sentences verbatim where they exist (rule 9's promise, rule 12's leave sentence, rule 17's), PROVISIONAL
@@ -1042,7 +1076,7 @@ nonisolated enum ProtectionWords {
 
     // MARK: - VX-309 U2 — DATA SAFETY ON THE NEW ROAD (F-U2c-4; F-U1a-3) — PROVISIONAL P-VX309-U2-9
 
-    /// F-U2c-4 — RULE 5's sentence for the pane (the copies section; today's road keeps its posture lines): what opens a
+    /// F-U2c-4 — RULE 5's sentence for the pane (the copies section; today's posture lines left with today's road): what opens a
     /// backup, with VX-263's quiet-road clause.
     static let dataSafetyWhatOpensABackup = "A backup is your library plus its key file. It opens with the passphrase and "
         + "twelve words you had when you made it, with your current ones too, or \u{2014} on this "
@@ -1058,8 +1092,10 @@ nonisolated enum ProtectionWords {
     // MARK: - The route's failures (the failure face, with Try Again)
 
     static let couldNotCreate = "Variorum couldn't create your library."
-    static let keychainUnreadableNoLibrary = "Variorum couldn't check this Mac's keychain, so it didn't create a "
-        + "library. Try again."
+    /// (The device by the platform's noun — the phone's failure face says it too; P-VX329-PH-1, the Mac's text
+    /// byte-unchanged.)
+    static let keychainUnreadableNoLibrary = "Variorum couldn't check this \(ProtectionCopy.deviceName)'s keychain, so it "
+        + "didn't create a library. Try again."
     /// A hosted test run (the test host IS the dev-store app) never writes the dev scope — it never creates.
     static let testRunNeverCreates = "A test run never creates a library."
 }

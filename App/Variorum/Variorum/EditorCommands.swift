@@ -351,6 +351,11 @@ struct EditorCommands: Commands {
         // SWEEP'S RESULT: ⌃⌘S is FREE (see the registry row) — and it is the
         // platform's own Toggle Sidebar chord.
         case .toggleSidebar: ("s", [.command, .control])
+        // VX-329 U1 — P-VX309-U1c-4 (b): Lock Library Now's chord, declared. The collision sweep is the File menu call
+        // site's own (⌃⌘L is free: the `l` chords are ⌘L Switch Wing and ⌘⇧L Save Choices as Lens; ⌃⌘Q, the system's
+        // Lock Screen, untouched) — re-run at this tip: this table and every `.keyboardShortcut(` call site carry no
+        // other ⌃⌘L.
+        case .lockLibraryNow: ("l", [.command, .control])
         case .switchMode: nil  // ⌘1–⌘6, wired per mode below
         case .openNote: nil  // ⌘⇧1–⌘⇧9, wired per ordinal below
         default: nil
@@ -554,9 +559,9 @@ struct EditorCommands: Commands {
             // demanded modes ONLY; under Auto the key auto-releases at the
             // next open, so a lock there is theater and no theater ships,
             // R13p-14). P-2: the door renders only where it acts.
-            // COLLISION SWEEP: ⌃⌘L is free — the only `l` chord anywhere
-            // in the app is ⌘⇧L (Save Choices as Lens); ⌃⌘Q (the system's
-            // own Lock Screen) is untouched.
+            // COLLISION SWEEP: ⌃⌘L is free — the other `l` chords are ⌘L
+            // (Switch Wing) and ⌘⇧L (Save Choices as Lens); ⌃⌘Q (the
+            // system's own Lock Screen) is untouched.
             if bootstrap.canLock {
                 Divider()
                 Button(verb(.lockLibraryNow)) {

@@ -245,7 +245,7 @@ enum SPath {
     }
 
     static func snapshot(_ stamp: Date, _ fingerprint: String) -> String {
-        "variorum-backup-\(CatalogNames.stampString(stamp))-\(StoreKeyEnvelope.shortFingerprint(fingerprint)).sqlite"
+        "variorum-backup-\(CatalogNames.stampString(stamp))-\(KeyFingerprint.short(fingerprint)).sqlite"
     }
 
     static func pair(of snapshot: String) -> String { String(snapshot.dropLast(".sqlite".count)) + ".keys.json" }
@@ -635,7 +635,7 @@ final class SWorld {
             // back past the press) the memory's mirror of it: the press's
             // passphrase is the one that opens them (the closer's soak, seed 5
             // sequence 626).
-            let planLocks: [StoreKeyEnvelope.PassphraseWrap] = {
+            let planLocks: [PassphraseWrap] = {
                 guard let kdf = planKDF else { return [] }
                 var files = [liveKeyFile(device)].compactMap { $0 }
                 if let libraryID = device.slot?.libraryID,

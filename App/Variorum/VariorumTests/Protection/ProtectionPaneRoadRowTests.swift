@@ -18,19 +18,6 @@ import VariorumCore
 @MainActor
 @Suite("VX-306 ladder r1 NIT 4 — the Protection pane's Set a passphrase… row only while none exists", .serialized)
 struct ProtectionPaneRoadRowTests {
-    private func controller() -> ProtectionController {
-        let backing = InMemoryStoreKeyGuardBacking(auto: StoreKey.mint(), biometryAvailable: true, biometricSucceeds: true)
-        let gate = StoreLaunchGate.scripted(
-            dials: ScriptedDialsBox(ProtectionDials()), backing: backing,
-            envelope: ScriptedEnvelopeBox(nil), stamps: ScriptedStampsBox())
-        return ProtectionController(configuration: .init(
-            scope: "Variorum", storeURL: nil, gate: gate, isRealVariant: true,
-            makeKDF: { PassphraseKDF.Descriptor(
-                algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
-                memoryKiB: 256, iterations: 1, parallelism: 1,
-                salt: PassphraseKDF.randomSalt(), outputBytes: 32) }))
-    }
-
     private func standing(passphraseExists: Bool, defaults: UserDefaults) -> RoadStandingModel {
         let reminder = PassphraseReminderModel(
             libraryID: "lib", moment: nil, ledger: PassphraseReminderLedger(defaults: defaults),
@@ -57,7 +44,7 @@ struct ProtectionPaneRoadRowTests {
         #expect(source.contains("if let roadStanding, roadStanding.offersSetPassphrase {"),
                 "the pane renders the row only through the model's gate")
         let with = ProtectionPane(
-            controller: controller(), services: nil, roadStanding: standing(passphraseExists: true, defaults: suite.defaults))
+            services: nil, roadStanding: standing(passphraseExists: true, defaults: suite.defaults))
         await SurfaceComposition.host(with, size: NSSize(width: 640, height: 900))
     }
 }

@@ -56,6 +56,13 @@ struct AuthRLSDDLTests {
         // PLAIN, the archived_at class — the AI fence's third leg); no
         // table, no RPC change. Deploy is HER closeout window.
         "16_phase13nb_private.sql",
+        // VX-307/VX-329 (the key-vault event, marker 14): the vault's new
+        // wire shape — `mode` + `earlier_row_keys`, the mode backfill,
+        // key_vault_update's canonical body (now the CANONICAL home for
+        // that function), sync_reencrypt retired. HELD at VX-307; deploys
+        // in VX-329's release window at her explicit go (the vx307 deploy
+        // checklist; rehearsed green on the throwaway at VX-308 §5R).
+        "17_phase_vx307_vault.sql",
     ]
 
     /// The DATA RPCs — every function 11 re-creates with `key_proof` beside
@@ -1752,16 +1759,21 @@ struct AuthRLSDDLTests {
     /// VARIORUM_ROTATION_IN_PROGRESS on a DIFFERENT one (decision 32);
     /// cleared with the key.
     @Test func theVaultUpdateDoorLocksForUpdateCASesAndRecordsTheRotationSeq() throws {
-        // The DEPLOYED body — since Phase 13y that is 12's canonical one
-        // (the F1 completion guard FOLDED IN, and the rotation seq minted
-        // from the CALLER'S OWN counter, M3); 11's era body (the overlay's)
-        // stays pinned line for line by the sibling
+        // THE ROTATION-ERA body — 12's canonical one (the F1 completion
+        // guard FOLDED IN, and the rotation seq minted from the CALLER'S
+        // OWN counter, M3); 11's era body (the overlay's) stays pinned
+        // line for line by the sibling
         // `theClearingGuardOverlayIsElevensBodyPlusOneClause`, and the
         // fold-in's exactness by `theCompletionGuardIsTheOverlaysBodyWithExactlyTheMintSwapped`.
-        for body in [try Self.finalBody(of: "key_vault_update"), try Self.deployedBody(of: "key_vault_update")] {
-            try Self.expectVaultUpdateDoor(body, mintsRotationSeqWith: "next_tenant_seq(caller)")
-        }
-        let deployed = try Self.deployedBody(of: "key_vault_update")
+        // VX-329 (marker 14): 17 REDEFINES the door and RETIRES rotation,
+        // so 12's body is HISTORY here (read from 12's own file), and the
+        // DEPLOYED body's pin is `theMarker14VaultDoorRetiresRotation…`.
+        // The last pre-17 definition is 13's (13i-a re-carried the body
+        // with the wing/shelf ciphertext registry) — the rotation era's
+        // deployed truth; 12's fold-in exactness is the siblings' pin.
+        let thirteen = Self.strippingComments(try Self.sqlFile("13_phase13i_wings.sql"))
+        let deployed = try #require(Self.lastBody(of: "key_vault_update", in: thirteen))
+        try Self.expectVaultUpdateDoor(deployed, mintsRotationSeqWith: "next_tenant_seq(caller)")
         #expect(deployed.contains(SyncServerRefusalMarker.rotationRowsRemain),
                 "F1 (BLOCKER-1): completion is 'no row of mine below it' — the clearing arm refuses while one remains")
         #expect(deployed.contains("if vault_previous is not null then")
@@ -1778,6 +1790,43 @@ struct AuthRLSDDLTests {
         let clearSite = try #require(deployed.range(of: "next_seq := null;"))
         #expect(arm.lowerBound < guardSite.lowerBound && guardSite.lowerBound < clearSite.lowerBound,
                 "the guard runs in the clearing arm before the seq is nulled")
+    }
+
+    /// THE MARKER-14 DOOR (VX-307's artifact, registered at VX-329): the
+    /// DEPLOYED `key_vault_update` is 17's — the FOR UPDATE lock, the
+    /// challenge-verified proof and the revision CAS kept byte-faithful
+    /// from 12; EVERY rotation arm retired with rotation itself; the mode
+    /// shape landed (`mode` + `earlier_row_keys` from the payload, a
+    /// pre-VX307 payload refused loudly). The artifact's own text pins are
+    /// `VX307VaultArtifactTests`; THIS pin is the chain's resolution — the
+    /// deployed truth is 17's body, not 12's.
+    @Test func theMarker14VaultDoorRetiresRotationAndLandsTheModeShape() throws {
+        let body = try Self.finalBody(of: "key_vault_update")
+        let seventeen = Self.strippingComments(try Self.sqlFile("17_phase_vx307_vault.sql"))
+        #expect(body == (try #require(Self.lastBody(of: "key_vault_update", in: seventeen))),
+                "the deployed door IS 17's body — the chain resolves past 12")
+        // Kept from 12, byte-faithful clauses:
+        #expect(body.contains("from key_vault where user_id = caller for update;"),
+                "the serialization point (decision 31) survives the redefinition")
+        #expect(body.contains("perform sync_key_proof_check(key_proof, challenge, 'key_vault_update');"))
+        #expect(body.contains(SyncServerRefusalMarker.vaultAbsent))
+        #expect(body.contains(SyncServerRefusalMarker.vaultRevisionConflict))
+        #expect(body.contains("where user_id = caller and revision = expected_revision;"), "the CAS belt inside")
+        // The mode shape:
+        #expect(body.contains("VARIORUM_PRE_VX307_PAYLOAD"),
+                "a payload with no mode is a pre-VX307 client's and refuses loudly")
+        #expect(body.contains("mode                                 = payload->>'mode',")
+                    && body.contains("earlier_row_keys                     = payload->'earlier_row_keys',"),
+                "mode and the earlier keys land from the payload (rule 15's kept list)")
+        // Rotation retired whole:
+        #expect(!body.contains("VARIORUM_ROTATION") && !body.contains("next_tenant_seq")
+                    && !body.contains("corpus_previous_key_id") && !body.contains("rotation_started_seq"),
+                "no rotation arm survives in the deployed door (VX-329 — rotation retires with today's road)")
+        #expect(!body.contains("payload->>'revision'") && !body.contains("payload->>'user_id'")
+                    && !body.contains("payload->>'updated_at'"),
+                "server-managed columns never come from the payload")
+        #expect(body.contains("return jsonb_build_object('revision', expected_revision + 1);"),
+                "the receipt carries the new revision — and no rotation seq exists to carry")
     }
 
     /// The one write road's clauses, as a sentence about a BODY. `mint` is
@@ -1868,9 +1917,15 @@ struct AuthRLSDDLTests {
                 "the overlay's key_vault_update, fences removed, is 11's line for line (signature included)")
         #expect(overlayLines.first == "create or replace function key_vault_update(payload jsonb, expected_revision int, key_proof text) returns jsonb",
                 "the SAME signature — a body change only")
-        // The deployed body (fences kept) carries the guard; 11's does not.
+        // The guard's history: 11 never carried it; 12's fold-in did; the
+        // marker-14 door (17) RETIRES it with rotation itself (VX-329).
         #expect(!body11.contains(SyncServerRefusalMarker.rotationRowsRemain), "11 itself is untouched")
-        #expect(try Self.deployedBody(of: "key_vault_update").contains(SyncServerRefusalMarker.rotationRowsRemain))
+        let stripped12 = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        let body12 = try #require(Self.lastBody(of: "key_vault_update", in: stripped12))
+        #expect(body12.contains(SyncServerRefusalMarker.rotationRowsRemain),
+                "12's fold-in carried the guard — the rotation era's deployed truth")
+        #expect(!(try Self.deployedBody(of: "key_vault_update")).contains(SyncServerRefusalMarker.rotationRowsRemain),
+                "the marker-14 door retires the guard with rotation (17 redefines the body)")
         // The re-run guard: refuses below marker 8 and a second deploy.
         #expect(raw.contains("VARIORUM_CLEARING_GUARD_NEEDS_11") && raw.contains("if deployed_marker < 8 then"))
         #expect(raw.contains("VARIORUM_CLEARING_GUARD_ALREADY_DEPLOYED")
@@ -2164,16 +2219,10 @@ struct AuthRLSDDLTests {
         #expect(sql.contains("revoke execute on function sync_visibility_horizon_ms() from public, anon;"))
         #expect(sql.contains("grant execute on function sync_visibility_horizon_ms() to authenticated, service_role;"),
                 "sync_schema_version()'s exact grant pair")
-        // THE CROSS-PIN (the client half): the deployed constant, fed to
-        // the client's ONE derivation, yields exactly the retired
-        // hardcoded wait — if either side moves alone, this line names
-        // the other (a horizon change is a §12 act moving BOTH: the
-        // function above and, for free, every derived wait).
-        let constant = try #require(Int64(
-            body.components(separatedBy: "select ").last?
-                .components(separatedBy: ";").first ?? ""))
-        #expect(CorpusRotation.horizonWait(forServedMillis: constant) == .milliseconds(2500),
-                "served \(constant) + the derived margin must equal the wait the retired hardcode stated")
+        // The client half of the old cross-pin — CorpusRotation's derived
+        // wait — left with today's road (VX-329 L1). The served constant
+        // stays pinned above, and the derivation pins' ban on an inline
+        // literal in `sync_pull` remains the non-vacuous arm.
     }
 
     /// The per-owner counter table takes the `device_cursor` posture
@@ -2242,9 +2291,12 @@ struct AuthRLSDDLTests {
         #expect(try Self.finalBody(of: "sync_purge_execute")
                     .contains("granted_seq := next_tenant_seq(caller);"),
                 "M2: the granted ledger seq is the caller's own")
-        #expect(try Self.finalBody(of: "key_vault_update")
-                    .contains("next_seq := next_tenant_seq(caller);"),
-                "M3: the rotation seq is the caller's own — the seq rule and the completion guard compare it against the caller's data rows")
+        let twelveBody = try #require(Self.lastBody(of: "key_vault_update",
+                                                    in: Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))))
+        #expect(twelveBody.contains("next_seq := next_tenant_seq(caller);"),
+                "M3: the rotation seq is the caller's own — 12's body, the rotation era's deployed truth (17 retires the mint with rotation — the deployed-door pin)")
+        #expect(!(try Self.finalBody(of: "key_vault_update")).contains("next_tenant_seq"),
+                "the marker-14 door mints nothing: rotation retired, M3's site gone from the deployed body (VX-329)")
         #expect(!sql.contains("nextval"),
                 "no global mint survives anywhere in 12")
         #expect(sql.contains("drop sequence if exists sync_server_seq;"),
@@ -2299,7 +2351,12 @@ struct AuthRLSDDLTests {
     /// client registry's encrypted columns exactly (the overlay pin's
     /// check, applied to 12).
     @Test func theCompletionGuardLivesInTheCanonicalTwelveBody() throws {
-        let body = try Self.finalBody(of: "key_vault_update")
+        // The rotation era's CANONICAL body — the last pre-17 definition,
+        // 13's (13i-a re-carried 12's fold-in with the wing/shelf registry;
+        // the deployed door since VX-329 is 17's, pinned by
+        // `theMarker14VaultDoorRetiresRotationAndLandsTheModeShape`).
+        let body = try #require(Self.lastBody(of: "key_vault_update",
+                                              in: Self.strippingComments(try Self.sqlFile("13_phase13i_wings.sql"))))
         #expect(body.contains(SyncServerRefusalMarker.rotationRowsRemain),
                 "completion is 'no row of mine below it' — in the CANONICAL body now")
         #expect(body.contains("if vault_previous is not null then")
@@ -2805,5 +2862,299 @@ struct AuthRLSDDLTests {
                         "\(signature) must return to the non-bypass definer owner")
             }
         }
+    }
+
+    // MARK: - VX-213's pg_temp belt (marker 14; VX-329 ladder r1, finding 2): the drift pin.
+
+    /// The belt artifact: one `alter function … set search_path = …, pg_temp` per deployed signature. Not a lockstep
+    /// file (it moves no marker); it deploys right after `17_phase_vx307_vault.sql` — 17 re-creates `key_vault_update`
+    /// with a bare `public` list, and a `create or replace` resets a function's SET clause, which is exactly the drift a
+    /// LATER artifact could repeat.
+    private static let pgTempBeltFile = "maintenance/vx213-pg-temp-search-path.sql"
+
+    /// Signatures the belt alters that the repo's chain never creates — each with its reason, as data.
+    private static let pgTempBeltFurniture: [String: String] = [
+        "rls_auto_enable()": "the project's RLS auto-enable event trigger — postgres-owned Supabase furniture, created "
+            + "outside this repo; the grant sweep's expectation table carries its row",
+    ]
+
+    /// Every artifact that DEFINES, DROPS or ALTERS a function, in deploy order: 01–04, the lockstep chain with the
+    /// function-creating maintenance artifacts at their deploy positions (13j's in-window sync_pull rename after 10,
+    /// the ladder overlay after 11, signup auto-entitlement after 12), the belt right after 17 — and every LATER
+    /// lockstep file after the belt, so a future event's `create or replace` is resolved after it.
+    private static var searchPathDeployOrder: [String] {
+        let after: [String: String] = [
+            "10_phase13j_purge.sql": "maintenance/13j-window-pull-rename.sql",
+            "11_pre13x_postures.sql": ladderOverlayFile,
+            "12_phase13y_tenant_seq.sql": "maintenance/beta-signup-auto-entitle.sql",
+            "17_phase_vx307_vault.sql": pgTempBeltFile,
+        ]
+        var order = ["01_mirror_schema.sql", "02_sync_rpc.sql", "03_visibility_horizon.sql", "04_auth_rls.sql"]
+        for file in lockstepFiles {
+            order.append(file)
+            if let next = after[file] { order.append(next) }
+        }
+        return order
+    }
+
+    /// What the search_path resolution found: every function whose FINAL definition is SECURITY DEFINER or carries
+    /// its own search_path (the belt's scope — the definer RPCs and the invoker helpers that run inside them), and
+    /// what is wrong.
+    struct SearchPathResolution {
+        var checked: Set<String> = []
+        var problems: Set<String> = []
+    }
+
+    /// One Postgres type name, normalized (lowercase, single spaces, the aliases the artifacts spell both ways).
+    private static func normalizedType(_ raw: String) -> String {
+        let collapsed = raw.lowercased().split(whereSeparator: \.isWhitespace).joined(separator: " ")
+        switch collapsed {
+        case "int", "int4": return "integer"
+        case "int8": return "bigint"
+        case "bool": return "boolean"
+        case "timestamptz": return "timestamp with time zone"
+        case "varchar": return "character varying"
+        default: return collapsed
+        }
+    }
+
+    /// Split a parenthesized list at its top-level commas.
+    private static func topLevelItems(_ list: String) -> [String] {
+        var items: [String] = [], current = "", depth = 0
+        for character in list {
+            switch character {
+            case "(": depth += 1; current.append(character)
+            case ")": depth -= 1; current.append(character)
+            case "," where depth == 0: items.append(current); current = ""
+            default: current.append(character)
+            }
+        }
+        if !current.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { items.append(current) }
+        return items.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+    }
+
+    /// A `create` header's parameter → its type (the name and any default dropped); nil when it carries no name.
+    private static func parameterType(_ parameter: String) -> String? {
+        var text = parameter.lowercased()
+        if let range = text.range(of: #"\s+default\s+.*$"#, options: .regularExpression) { text.removeSubrange(range) }
+        if let range = text.range(of: #"\s*=\s*.*$"#, options: .regularExpression) { text.removeSubrange(range) }
+        var tokens = text.split(whereSeparator: \.isWhitespace).map(String.init)
+        if let mode = tokens.first, ["in", "out", "inout", "variadic"].contains(mode) { tokens.removeFirst() }
+        guard tokens.count >= 2 else { return nil }
+        return normalizedType(tokens.dropFirst().joined(separator: " "))
+    }
+
+    /// A search_path list, normalized (`public, extensions, pg_temp` → its entries in order).
+    private static func searchPathList(_ raw: String) -> [String] {
+        raw.split(separator: ",").map {
+            $0.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "\"'"))
+                .lowercased()
+        }
+    }
+
+    /// The text with every dollar-quoted region (function bodies, DO blocks) blanked to spaces, so only top-level
+    /// statements are read — a body that mentions `alter function` or `$$;` never reads as one.
+    private static func maskingDollarQuotes(_ sql: String) -> String {
+        guard let opener = try? NSRegularExpression(pattern: #"\$([A-Za-z_][A-Za-z0-9_]*)?\$"#) else { return sql }
+        let text = sql as NSString
+        let out = NSMutableString(string: sql)
+        var cursor = 0
+        while let open = opener.firstMatch(in: sql, range: NSRange(location: cursor, length: text.length - cursor)) {
+            let tag = text.substring(with: open.range)
+            let afterOpen = open.range.location + open.range.length
+            let close = text.range(of: tag, range: NSRange(location: afterOpen, length: text.length - afterOpen))
+            guard close.location != NSNotFound else { break }
+            let blank = NSRange(location: afterOpen, length: close.location - afterOpen)
+            out.replaceCharacters(in: blank, with: String(repeating: " ", count: blank.length))
+            cursor = close.location + close.length
+        }
+        return out as String
+    }
+
+    /// THE RESOLVER (pure — the `deployShapeProblems` shape, so the doctored proofs below exercise it). Walks the
+    /// artifacts in deploy order per exact signature (name + normalized argument types — the chain drops old overloads
+    /// by signature): a `create or replace function` sets the signature's definer flag and its search_path (NONE when
+    /// the header sets none — a replace resets the SET clause); `drop function` removes it; `alter function … set
+    /// search_path` overrides it. Problems: a checked function whose final list does not end in `pg_temp`; an alter
+    /// naming a signature not live where it runs (furniture exempt); an alter whose list is not the list in force there
+    /// with `pg_temp` appended LAST (the belt's own "each list preserved" claim); a create header it cannot read.
+    static func searchPathResolution(
+        deploy: [(file: String, sql: String)], furniture: Set<String>
+    ) -> SearchPathResolution {
+        var live: [String: (definer: Bool, path: [String]?)] = [:]
+        var resolution = SearchPathResolution()
+        guard let statement = try? NSRegularExpression(
+            pattern: #"(?is)\b(create\s+or\s+replace\s+function|drop\s+function(?:\s+if\s+exists)?|alter\s+function)\s+(?:public\.)?([a-z_][a-z0-9_]*)\s*\("#)
+        else { resolution.problems.insert("resolver-regex"); return resolution }
+
+        for (file, raw) in deploy {
+            let sql = maskingDollarQuotes(strippingComments(raw))
+            let text = sql as NSString
+            for match in statement.matches(in: sql, range: NSRange(location: 0, length: text.length)) {
+                let verb = text.substring(with: match.range(at: 1)).lowercased()
+                let name = text.substring(with: match.range(at: 2)).lowercased()
+                // The balanced argument list.
+                var depth = 1, index = match.range.location + match.range.length
+                let argsStart = index
+                while index < text.length, depth > 0 {
+                    let c = text.character(at: index)
+                    if c == 40 { depth += 1 } else if c == 41 { depth -= 1 }
+                    index += 1
+                }
+                guard depth == 0 else { resolution.problems.insert("unterminated-args:\(file):\(name)"); continue }
+                let args = text.substring(with: NSRange(location: argsStart, length: index - 1 - argsStart))
+                let rest = text.substring(from: index)
+
+                if verb.hasPrefix("create") {
+                    let types = topLevelItems(args).map(parameterType)
+                    guard !types.contains(where: { $0 == nil }) else {
+                        resolution.problems.insert("unreadable-create:\(file):\(name)")
+                        continue
+                    }
+                    let signature = "\(name)(\(types.compactMap { $0 }.joined(separator: ", ")))"
+                    // The header: up to the body's opening `as $…$` (the body itself is masked).
+                    let header: String
+                    if let bodyStart = rest.range(of: #"(?i)\bas\s+\$"#, options: .regularExpression) {
+                        header = String(rest[..<bodyStart.lowerBound]).lowercased()
+                    } else {
+                        resolution.problems.insert("unreadable-create:\(file):\(name)")
+                        continue
+                    }
+                    var path: [String]?
+                    if let set = header.range(of: #"set\s+search_path\s*(=|to)\s*[^\n]+"#, options: .regularExpression) {
+                        let clause = String(header[set])
+                        let value = clause.replacingOccurrences(
+                            of: #"^set\s+search_path\s*(=|to)\s*"#, with: "", options: .regularExpression)
+                        path = searchPathList(value)
+                    }
+                    live[signature] = (header.contains("security definer"), path)
+                } else {
+                    let signature = "\(name)(\(topLevelItems(args).map(normalizedType).joined(separator: ", ")))"
+                    if verb.hasPrefix("drop") {
+                        live[signature] = nil
+                        continue
+                    }
+                    // alter function …: only a search_path SET concerns the belt (owner changes do not).
+                    let statementText = rest.prefix { $0 != ";" }
+                    guard let set = statementText.range(
+                        of: #"^\s*set\s+search_path\s*(=|to)\s*"#, options: [.regularExpression, .caseInsensitive])
+                    else { continue }
+                    let list = searchPathList(String(statementText[set.upperBound...]))
+                    guard let current = live[signature] else {
+                        if !furniture.contains(signature) { resolution.problems.insert("alter-unknown:\(signature)") }
+                        continue
+                    }
+                    let inForce = current.path ?? []
+                    let preserved = inForce.last == "pg_temp" ? inForce : inForce + ["pg_temp"]
+                    if list != preserved {
+                        resolution.problems.insert("alter-changes-list:\(signature)")
+                    }
+                    live[signature] = (current.definer, list)
+                }
+            }
+        }
+        for (signature, state) in live where state.definer || state.path != nil {
+            resolution.checked.insert(signature)
+            if state.path?.last != "pg_temp" { resolution.problems.insert("no-trailing-pg_temp:\(signature)") }
+        }
+        return resolution
+    }
+
+    private static func searchPathDeploy(_ files: [String]) throws -> [(file: String, sql: String)] {
+        try files.map { ($0, try sqlFile($0)) }
+    }
+
+    /// THE DRIFT PIN: across the whole chain plus the belt, every SECURITY DEFINER function — and every invoker helper
+    /// that carries its own search_path and runs inside one — ends its search_path with `pg_temp`, each alter targets a
+    /// live signature and keeps that function's list. Red with the belt unread (the chain's lists are bare `public`);
+    /// red the day a later artifact re-creates one of these functions without the trailing `pg_temp`.
+    @Test func everyDefinerPathEndsInPgTempOnceTheBeltIsRead() throws {
+        let resolution = Self.searchPathResolution(
+            deploy: try Self.searchPathDeploy(Self.searchPathDeployOrder),
+            furniture: Set(Self.pgTempBeltFurniture.keys))
+        #expect(resolution.problems.isEmpty, "the pg_temp belt drifted: \(resolution.problems.sorted())")
+        // Non-vacuous: the resolver saw the functions the belt exists for.
+        for signature in ["key_vault_update(jsonb, integer, text, text)", "sync_challenge(integer)",
+                          "sync_push(jsonb, text, text, text)", "signup_auto_entitle()",
+                          "entitlement_set(uuid, text, boolean, timestamp with time zone, text)",
+                          "sync_key_proof_check(text, text, text)", "next_tenant_seq(uuid)"] {
+            #expect(resolution.checked.contains(signature), "the resolver must check \(signature)")
+        }
+        #expect(!resolution.checked.contains("sync_reencrypt(jsonb, text, text, text)"),
+                "17 drops sync_reencrypt — the resolver must see the drop")
+        #expect(resolution.checked.count >= 18, "the belt's 18 chain functions at least (got \(resolution.checked.count))")
+        // Every furniture exemption carries its reason.
+        for (signature, why) in Self.pgTempBeltFurniture {
+            #expect(!why.isEmpty, "\(signature)'s exemption names its reason")
+        }
+    }
+
+    /// The doctored-fixture proof that the resolver BITES (the `aDoctoredDeployShapeIsFlaggedByTheCheck` pattern).
+    @Test func aDoctoredChainIsFlaggedByTheSearchPathCheck() throws {
+        let furniture = Set(Self.pgTempBeltFurniture.keys)
+        let order = Self.searchPathDeployOrder
+
+        // The belt unread: every checked function is flagged — the chain alone leaves bare lists.
+        let unbelted = Self.searchPathResolution(
+            deploy: try Self.searchPathDeploy(order.filter { $0 != Self.pgTempBeltFile }), furniture: furniture)
+        #expect(unbelted.checked.count >= 18)
+        for signature in unbelted.checked {
+            #expect(unbelted.problems.contains("no-trailing-pg_temp:\(signature)"),
+                    "without the belt \(signature) must be flagged")
+        }
+
+        // A LATER lockstep event re-creating key_vault_update with a bare list (what 17 itself did) undoes the belt.
+        let later = (file: "18_doctored_future.sql", sql: """
+            create or replace function key_vault_update(payload jsonb, expected_revision int, key_proof text, challenge text) returns jsonb
+            language plpgsql security definer
+            set search_path = public
+            as $$
+            begin
+              return null;
+            end;
+            $$;
+            """)
+        let drifted = Self.searchPathResolution(
+            deploy: try Self.searchPathDeploy(order) + [later], furniture: furniture)
+        #expect(drifted.problems == ["no-trailing-pg_temp:key_vault_update(jsonb, integer, text, text)"],
+                "a later bare re-create is flagged by name, and nothing else (got \(drifted.problems.sorted()))")
+
+        // …while a later definer that carries its own trailing pg_temp is clean (the check is not over-eager).
+        let carried = (file: "18_doctored_future.sql", sql: """
+            create or replace function a_future_door(n int) returns jsonb
+            language plpgsql security definer
+            set search_path = public, pg_temp
+            as $$ begin return null; end; $$;
+            """)
+        let clean = Self.searchPathResolution(
+            deploy: try Self.searchPathDeploy(order) + [carried], furniture: furniture)
+        #expect(clean.problems.isEmpty && clean.checked.contains("a_future_door(integer)"))
+
+        // A belt alter that drops a function's own entry (sync_challenge's `extensions`) is flagged.
+        let belt = try Self.sqlFile(Self.pgTempBeltFile)
+        let droppedExtensions = belt.replacingOccurrences(
+            of: "alter function sync_challenge(int)                                      set search_path = public, extensions, pg_temp;",
+            with: "alter function sync_challenge(int) set search_path = public, pg_temp;")
+        #expect(droppedExtensions != belt, "fixture: the sync_challenge alter was found to doctor")
+        let doctoredBelt = try Self.searchPathDeploy(order).map {
+            $0.file == Self.pgTempBeltFile ? (file: $0.file, sql: droppedExtensions) : $0
+        }
+        #expect(Self.searchPathResolution(deploy: doctoredBelt, furniture: furniture).problems
+                    .contains("alter-changes-list:sync_challenge(integer)"))
+
+        // An alter naming a signature the chain never created (a typo'd overload) is flagged, unless furniture.
+        let typo = belt.replacingOccurrences(
+            of: "alter function next_tenant_seq(uuid)", with: "alter function next_tenant_seq(text)")
+        #expect(typo != belt, "fixture: the next_tenant_seq alter was found to doctor")
+        let typoed = Self.searchPathResolution(
+            deploy: try Self.searchPathDeploy(order).map {
+                $0.file == Self.pgTempBeltFile ? (file: $0.file, sql: typo) : $0
+            },
+            furniture: furniture)
+        #expect(typoed.problems.contains("alter-unknown:next_tenant_seq(text)")
+                    && typoed.problems.contains("no-trailing-pg_temp:next_tenant_seq(uuid)"))
+        let noFurniture = Self.searchPathResolution(deploy: try Self.searchPathDeploy(order), furniture: [])
+        #expect(noFurniture.problems == ["alter-unknown:rls_auto_enable()"],
+                "the furniture list is the only reason rls_auto_enable() passes (got \(noFurniture.problems.sorted()))")
     }
 }

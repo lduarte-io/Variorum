@@ -60,25 +60,21 @@ struct ReadmeStartHerePlanTests {
         }
     }
 
-    // MARK: - Ladder round 2, m2: the passages seed ONLY where the store opens on the new road
+    // MARK: - Ladder round 2, m2 → VX-329 U1: the passages seed in EVERY store (the road is the only road)
 
-    /// The passages speak the new road's truths (the key file and its copies, the words shown once at the creation, a
-    /// new-words door), false on TODAY's road — so today's road (Release, a Debug build on the real store) seeds her
-    /// five blocks alone until VX-329; the dev store's seed in this Debug build is all nine.
-    @Test func theFourPassagesSeedOnlyWhereTheStoreOpensOnTheNewRoad() {
+    /// The passages speak the road's truths (the key file and its copies, the words shown once at the creation, a
+    /// new-words door). Until VX-329 they seeded only where a store opened on the new road (the dev store in a Debug
+    /// build); with the switch flipped and today's road gone, every store's readme is her five blocks and the four.
+    @Test func theFourPassagesSeedInEveryStore() {
         #expect(ReadmeSeeder.herBlocks.count == 5 && ReadmeSeeder.startHerePassages.count == 4)
-        #expect(ReadmeSeeder.paragraphs(onTheNewRoad: false) == ReadmeSeeder.herBlocks, "today's road: her five alone")
-        #expect(ReadmeSeeder.paragraphs(onTheNewRoad: true) == ReadmeSeeder.herBlocks + ReadmeSeeder.startHerePassages)
-        #expect(ReadmeSeeder.paragraphs == ReadmeSeeder.paragraphs(onTheNewRoad: ProtectionRoad.newRoadIsLive))
-        // The ONE rule the bootstrap's road and the readme read: the switch AND the dev-store fence (P-VX306-U1b-5).
-        #expect(!ProtectionRoad.opensOnTheNewRoad(devStore: false), "a store of the real variant keeps today's road")
-        #expect(ProtectionRoad.opensOnTheNewRoad(devStore: true) == ProtectionRoad.newRoadIsLive)
+        #expect(ReadmeSeeder.paragraphs == ReadmeSeeder.herBlocks + ReadmeSeeder.startHerePassages)
+        #expect(ProtectionRoad.newRoadIsLive && ProtectionRoad.live(debug: false), "every build, every store")
     }
 
-    /// The SOURCE: the four passages live only in `startHerePassages` (never among her blocks), the seed's one join of
-    /// them sits behind the road, the launch hands the seeder the road's own rule for its store variant, and the
-    /// bootstrap reads that same rule — so no later edit can append them to every road unseen.
-    @Test func theFourPassagesSitBehindTheRoadInTheSource() throws {
+    /// The SOURCE: the four passages live only in `startHerePassages` (never among her blocks), joined once after them,
+    /// and the launch seeds that one list (no road parameter is left to choose another) — so no later edit can splice
+    /// them among her blocks unseen.
+    @Test func theFourPassagesAreJoinedOnceAfterHerBlocksInTheSource() throws {
         let app = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
         func code(_ relative: String) throws -> String {
@@ -97,12 +93,13 @@ struct ReadmeStartHerePlanTests {
             #expect(!herBody.contains(lead), "a Start Here passage sits among her blocks: \(lead)")
             #expect(seeder.components(separatedBy: lead).count == 2, "the passage is spelled once: \(lead)")
         }
-        #expect(seeder.contains("newRoad ? herBlocks + startHerePassages : herBlocks"))
+        #expect(seeder.contains("nonisolated static var paragraphs: [String] { herBlocks + startHerePassages }"))
         #expect(seeder.components(separatedBy: "startHerePassages").count == 3,
-                "startHerePassages is declared once and joined once, behind the road")
+                "startHerePassages is declared once and joined once")
         let launch = try code("Variorum/LaunchFurniture.swift")
-        #expect(launch.contains("onTheNewRoad: ProtectionRoad.opensOnTheNewRoad(devStore: storeVariant == .dev))"))
+        #expect(launch.contains("ReadmeSeeder.seedAtBirth(session: session)"))
+        #expect(!launch.contains("onTheNewRoad"), "no road parameter is left")
         let bootstrap = try code("Shared/AppBootstrap.swift")
-        #expect(bootstrap.contains("newRoad = ProtectionRoad.opensOnTheNewRoad(devStore: variant == .dev)"))
+        #expect(!bootstrap.contains("opensOnTheNewRoad"), "the dev-store fence is gone")
     }
 }

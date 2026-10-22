@@ -34,12 +34,14 @@ struct ProtectionKeychainFamilyTests {
     @Test func theSynchronizableFamilyCarriesItsFlagAndTheSharedGroupOnEveryVerb() {
         let base = ProtectionKeychain.base(service: ProtectionNames.appleKeyService, account: "a", residence: .synchronizable)
         #expect(Self.flag(base, kSecAttrSynchronizable))
-        #expect((base[kSecAttrAccessGroup as String] as? String) == AppleKeyKeychain.sharedGroup)
+        #expect((base[kSecAttrAccessGroup as String] as? String) == ProtectionKeychain.sharedGroup)
         #expect(Self.flag(base, kSecUseDataProtectionKeychain))
         let listing = ProtectionKeychain.listingQuery(service: ProtectionNames.appleKeyService, residence: .synchronizable)
         #expect((listing[kSecAttrSynchronizable as String] as? String) == (kSecAttrSynchronizableAny as String))
-        #expect((listing[kSecAttrAccessGroup as String] as? String) == AppleKeyKeychain.sharedGroup)
+        #expect((listing[kSecAttrAccessGroup as String] as? String) == ProtectionKeychain.sharedGroup)
         #expect(listing[kSecReturnData as String] == nil)
+        // VX-329 U1: the shared group moved here from today's `AppleKeyKeychain` (deleted); its value's pin moved with it.
+        #expect(ProtectionKeychain.sharedGroup.hasSuffix(".io.lduarte.Variorum.shared"))
     }
 
     @Test func theTouchIDControlIsBiometryCurrentSetAlone() {
@@ -60,7 +62,7 @@ extension KeychainTripwireTests {
     @Test func theProtectionLeavesRefuseEveryRealScopeMutation() throws {
         let scope = AppDatabase.StoreVariant.dev.rawValue
         let key = StoreKey.mint()
-        let fingerprint = StoreKeyEnvelope.fingerprint(of: key)
+        let fingerprint = KeyFingerprint.of(key)
         let libraryID = UUID().uuidString.lowercased()
         let custody = KeychainCustodyLeaf(scope: scope)
         let memory = KeychainMemoryLeaf(scope: scope)

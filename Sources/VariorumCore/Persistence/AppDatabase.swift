@@ -150,9 +150,9 @@ public struct AppDatabase: Sendable {
     public var storeKeyFingerprint: String? {
         switch storage {
         case .direct(_, let key):
-            return key.map(StoreKeyEnvelope.fingerprint(of:))
+            return key.map(KeyFingerprint.of)
         case .bound(let binding):
-            return binding.currentState()?.key.map(StoreKeyEnvelope.fingerprint(of:))
+            return binding.currentState()?.key.map(KeyFingerprint.of)
         }
     }
 
