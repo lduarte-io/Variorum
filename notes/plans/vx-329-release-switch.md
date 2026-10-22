@@ -1005,7 +1005,21 @@ in the session scratchpad, `vx329-mac-suite.log`): `✘ Test run with 1556 tests
 
 **LIVE STATUS (per piece; PENDING = unverified):**
 - Piece R — this record skeleton, the six traced and dispositioned: DONE (this commit).
-- Piece 1 — the lifetime mechanism (failures 2–5) proven headless by a transient probe: NOT-STARTED.
+- Piece 1 — the lifetime mechanism (failures 2–5) proven headless by a transient probe: DONE (this commit). The probe
+  (`FixLegLifetimeProbe`, never committed — U3's headless harness in the session scratchpad, `u3-harness`, which
+  compiles `PlantedRoad`/`TempSlot`/`Crossing` and the road but not `AppBootstrap`) drives the failing sites' exact
+  shape — a helper that takes an inline `PlantedRoad()`, makes the library and returns the session, the system and the
+  slot's URL (what the bootstrap keeps) but never the road — beside the same helper over a HELD road:
+  RELEASED → the slot's file is gone at the call's end; the send act throws exactly *"ProtectionLibraryFiles: no file at
+  variorum.sqlite"* (failures 4 + 5's detail, verbatim); Use Castle (the bootstrap's preflight-then-act order,
+  `Crossing.press`) reports `.made` while the library stays STANDARD (failure 2 — the catch's no-file arm reads as past
+  the swap); after a crossing made while the road lived, the lobby's passphrase road (`ProtectionOpenRoad.openTyped`
+  over the kept system) opens NOTHING (failure 3). HELD → the send lands exactly the pair, `PickedCopy` reads `.pair`,
+  the words open it to the library's key, and a row written through a pool OPEN on the slot (in its WAL) travels inside
+  the copy (failures 4 + 5's claims, the snapshot's backup-API read); the crossing lands in Castle; the passphrase opens
+  it. **`✔ Test run with 6 tests in 1 suite passed`** (all six arms as stated). So nothing hides behind the lifetime
+  defect on the send, crossing and typed-road paths these four tests drive — the remaining unproven layer is the
+  bootstrap's own wrapper (its `.ready` guard, the pool close and reopen), which is the stage re-run's.
 - Piece 2 — failures 2–5 fixed (the road held for the test's life): NOT-STARTED.
 - Piece 3 — failures 1 and 6 rewritten to the new road's truth: NOT-STARTED.
 - Piece 4 — the evidence (`build-for-testing` both targets; the headless harness; the core suites): NOT-STARTED.
