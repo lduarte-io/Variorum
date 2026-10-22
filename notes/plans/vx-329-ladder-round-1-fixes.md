@@ -1,11 +1,13 @@
 # VX-329 — ladder round 1, the FIX LEG (Opus implementer, 2026-10-22)
 
-**Not done in this leg, first:** NO fix is applied yet. Per the brief's binding order, the dispositions below are
-committed BEFORE any fix, and this leg carries a DISPUTE (finding 1's pin shape) and a STOP-AND-FLAG (finding 3's
-deletion ripples into `Sources/VariorumCore/Sync/`) — so the leg STOPS here for the orchestrator and the reviewer's
-final call. Findings 2 and 4 are agreed with their planned fixes stated; they are NOT applied (rule (ii): any dispute
-stops the leg after the dispositions). No revert or probe edit is in flight: the one transient probe (finding 1) was
-restored and removed — `git status` clean but this file, `git diff --exit-code Sources/` clean.
+**Not done in this leg, first:** nothing under `Sources/VariorumCore/Sync/` (the fence — `StaticSyncKeyProvider`, orphaned
+by finding 3's deletion, is the orchestrator's own carve right after this leg lands); no refusal for a stranger's
+`-wal`/`-journal` beside a fresh pick (the reviewer's final call: a Low ticket at closeout, never built here); no Mac or
+phone `xcodebuild test` run (the brief's limit — the re-run list is under EVIDENCE). **The rulings (resumed leg):** the
+dispositions landed at `d438050f9` and the leg stopped; the reviewer's final calls (`notes/plans/vx-329-ladder-round-1.md`
+§"THE REVIEWER'S FINAL CALLS", `72e2f7c73`) UPHELD finding 1's dispute (the `-shm` counter-pin is the pin of record, the
+`-wal` pin withdrawn as hollow), confirmed findings 2 and 4 as planned, and recorded the orchestrator's option (a) for
+finding 3 (delete the runner and its suite; `VaultEnrollment` KEPT). This leg then applied all four, in the order below.
 
 **Scope:** the CODE findings of `notes/plans/vx-329-ladder-round-1.md` only (verbatim there — the spec). The record/doc
 findings (the MAJOR, the deploy-checklist MINOR, the L1 canon-note MINOR, the runbook MINOR, the zsh NIT) are the
@@ -18,15 +20,15 @@ the stage batch record); the findings file `notes/plans/vx-329-ladder-round-1.md
 
 ## LIVE STATUS (PENDING = unverified)
 
-- Piece D — this file, the four dispositions: DONE (this commit).
-- Finding 1 (MINOR, the export's sidecar sweep): AGREE with the fix, DISPUTE the pin's shape — HELD for the reviewer's
-  final call. NOT applied.
-- Finding 2 (MINOR, the pg_temp belt's drift pin): AGREE — planned below. NOT applied (the leg stopped on the dispute).
-- Finding 3 (MINOR, `Crypto/VaultBootstrap.swift`): AGREE with the orchestrator's ruling (delete) — STOP-AND-FLAG on
-  the Sync/ ripple. NOT applied, pending the orchestrator's word on the ripple.
-- Finding 4 (NIT, the stale collision-sweep comment): AGREE — planned below. NOT applied (the leg stopped on the
-  dispute).
-- Evidence (suites, build-for-testing, the Mac re-run list): NOT-STARTED — after the rulings.
+- Piece D — this file, the four dispositions: DONE (`d438050f9`).
+- Finding 1 (MINOR, the export's sidecar sweep): IN-PROGRESS — the pin of record written
+  (`StorePlaintextExportTests.aStrangersShmBesideThePickSurvivesTheExport`) and RED on the old code for its stated
+  reason (`fileExists(atPath: stranger.path)` and the byte-identity both false — the sweep removed it); the fix next.
+- Finding 2 (MINOR, the pg_temp belt's drift pin): NOT-STARTED — the plan below.
+- Finding 3 (MINOR, `Crypto/VaultBootstrap.swift`): NOT-STARTED — option (a): delete the runner + its suite, the
+  comments outside Sync/ made true, `VaultEnrollment` KEPT.
+- Finding 4 (NIT, the stale collision-sweep comment): NOT-STARTED — the plan below.
+- Evidence (suites, build-for-testing, the Mac re-run list): NOT-STARTED.
 
 ## THE DISPOSITIONS (one row per code finding)
 

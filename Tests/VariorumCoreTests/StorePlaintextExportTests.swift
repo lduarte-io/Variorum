@@ -115,6 +115,31 @@ struct StorePlaintextExportTests {
         #expect(title == "Written through a one-path grant", "the copy is whole")
     }
 
+    /// VX-329 ladder r1, finding 1 — THE EXPORT NEVER DELETES A STRANGER'S FILE. The copy keeps its journal in memory
+    /// (VX-461), so it leaves no sidecar of its own; the post-export sweep of `-wal`/`-shm`/`-journal` beside the pick
+    /// could only ever remove someone else's file of those names. Only `-shm` discriminates: the ATTACH creates the
+    /// picked file at zero pages, and SQLite itself removes a `<picked>-wal` (its open-WAL-if-present step over a
+    /// zero-page database) and a `<picked>-journal` (a journal beside a zero-page database is never hot) at the first
+    /// statement on the attached copy — sweep or no sweep — while `-shm` is opened and removed only in WAL mode, which
+    /// the copy never enters. So a planted `-shm` survives exactly when the export itself deletes nothing beside the pick.
+    /// RED ON OLD: the sweep removed it.
+    @Test func aStrangersShmBesideThePickSurvivesTheExport() throws {
+        let dir = try scratchDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let database = try AppDatabase.openStore(
+            at: dir.appendingPathComponent("library/variorum.sqlite"), custody: .inMemory(initial: StoreKey.mint()))
+        let destination = dir.appendingPathComponent("Variorum-unencrypted.sqlite")
+        let stranger = URL(fileURLWithPath: destination.path + "-shm")
+        let strangersBytes = Data("another app's own shared-memory file — not the export's".utf8)
+        try strangersBytes.write(to: stranger)
+
+        try StorePlaintextExport.export(from: database, to: destination)
+
+        #expect(StoreFilePresence.classify(at: destination) == .plaintext, "the copy landed")
+        #expect(FileManager.default.fileExists(atPath: stranger.path), "the stranger's file is still there")
+        #expect((try? Data(contentsOf: stranger)) == strangersBytes, "and byte-identical")
+    }
+
     /// 13o §FORK RULINGS (2026-10-06), the derived-set ruling's pin: the
     /// export KEEPS the search-index family — the no-lock-in file answers a
     /// full-text query through a bare connection, and no derived table was
