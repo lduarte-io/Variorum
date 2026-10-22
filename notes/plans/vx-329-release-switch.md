@@ -1717,6 +1717,12 @@ bootstrap doesn't retain, so `TempSlot.deinit` deleted the slot under a ready bo
 road (test-only; one previously-vacuous spinner pin now really crosses). F-FL-1 (the crash) fixed by the
 orchestrator's own hand: the suite takes `@MainActor`; the product keeps its isolation. **Run 2 — the full Mac
 suite again, on the fixed tree: GREEN — 5085 tests in 889 suites, 14 known issues (standing wrappers), exit 0.**
-The phone's full simulator suite runs next (the record flips below). Findings carried: F-FL-2 (the catch arms'
+**The phone's full simulator suite (iPhone 17 Pro, iOS 26.2): run 1 found TWO reds** (the stale Debug-only switch
+pin; the no-redirect sweep's 28 offenders — the PHONE FIX LEG record carries the dispositions: 4 phone-reachable
+sentences re-worded to the device's own noun with the Mac byte-identical, 2 unspoken receipts re-worded rather than
+hidden, 22 exempted with reasons and a one-match cap); **run 2 on the fixed tree: GREEN — 808 tests in 126 suites,
+4 known issues, exit 0.** The Mac's full-suite green predates the phone leg's ProtectionWords change; the headless
+harness re-covered it (386/65 + the byte-identity probe), and the CLOSING full Mac run after the ladder is the
+re-cover of record. Findings carried: F-FL-2 (the catch arms'
 past-the-swap read when the library file vanishes mid-act — ticket at closeout), F-FL-3 (the lifetime trap's
 class note), and the recurring MCP harness timing flake (its ticket at closeout).
