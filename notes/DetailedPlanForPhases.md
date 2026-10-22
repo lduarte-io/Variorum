@@ -13,6 +13,7 @@ This is the master build plan. It holds: the phase table, the **IN-FLIGHT table*
 | Effort | Ticket · branch | Worktree · machine | State |
 |---|---|---|---|
 | **VX-284 (split 2026-10-17 at her ruling: three runs + VX-216 alone; parts A · B · C ALL CLOSED — VX-383 2026-10-17, VX-381 2026-10-18, VX-382 2026-10-18 (PR #172) — the handoffs `notes/handoffs/vx-383-handoff.md` · `vx-381-handoff.md` · `vx-382-handoff.md`).** The umbrella's remainder: **VX-216** (hers, author-attended — the same menus and sheets; ready for her sitting) | VX-284 · VX-216 at her kickoff | — | VX-284 closes when VX-216 is Done. |
+| **VX-329 — Castle rebuild, the release switch** (`/architect-phase`, her 2026-10-22 overnight mandate; the plan `notes/plans/vx-329-release-switch.md`; **HOLDS the Sync/-custody slot**; no coordinator tonight — the session holds `Tools/stage` directly) | VX-329 · `vx-329-release-switch` | `~/dev/variorum-vx-329` · Pro | U1 the switch · U3 VX-423 · riders · the throwaway rehearsal; PAUSES before the real-store byte-copy rehearsal (her morning). |
 
 ### Latest closeout
 
