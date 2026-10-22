@@ -169,6 +169,18 @@ nonisolated enum ProtectionAccountRoad {
         return .ready
     }
 
+    /// **VX-464 (W-VX309-3): whether the secret this door types is the ACCOUNT's** — the join (turning sync on where the
+    /// account already has a vault) and Move check it against the vault (rule 14), so their refusals name the account.
+    /// The follow types the library's pair, which the account's already is (rule 7), and set-up the library's own pair
+    /// (rule 7's hand-up): theirs keep "this library".
+    static func typesTheAccountsSecret(_ request: RoadAccountRequest) -> Bool {
+        switch request.door {
+        case .moveToSignedInAccount: return true
+        case .turnOnSync: return request.shown.spec.join.map { $0 != .setsUpInLibrarysMode } ?? false
+        case .follow, .stopSyncingHere, .deleteAccountHere, .thisMacOnly: return false
+        }
+    }
+
     /// The typed secret against the account's vault (a READ): what the core's own checks would refuse, said in the act's
     /// words — a join types one of the account's secrets, either or both, each that is typed opening the vault (rule 14);
     /// the follow types one — the passphrase when it is typed, else the words — and an old passphrase whose lock is not
@@ -179,7 +191,10 @@ nonisolated enum ProtectionAccountRoad {
         guard let snapshot else { return ProtectionWords.doorRefusedNeedsVault }
         let vault = snapshot.vault
         let follows = request.door == .follow
-        func said(_ refusal: ExecutorRefusal) -> String { RoadAccountFaces.actRefusalSentence(refusal, unfinished: false) }
+        let accounts = typesTheAccountsSecret(request)
+        func said(_ refusal: ExecutorRefusal) -> String {
+            RoadAccountFaces.actRefusalSentence(refusal, unfinished: false, secretIsTheAccounts: accounts)
+        }
         let typed = request.typed
         guard typed.passphrase != nil || typed.words != nil else { return said(.secretMissing) }
         if let text = typed.passphrase {
@@ -269,8 +284,9 @@ nonisolated enum ProtectionAccountRoad {
                     "road: \(door.rawValue) did not land\(unfinished ? " — its act stays in flight; the next open settles it" : "")"
                         + " — \(String(describing: error))")
                 return AccountActResult(
-                    press: .refused(RoadAccountFaces.actRefusalSentence(error, unfinished: unfinished)), reopenKey: oldKey,
-                    landedWhole: false)
+                    press: .refused(RoadAccountFaces.actRefusalSentence(
+                        error, unfinished: unfinished, secretIsTheAccounts: typesTheAccountsSecret(request))),
+                    reopenKey: oldKey, landedWhole: false)
             }
             // Past the swap (the commit point): the act LANDED; its last steps finish at the next open's settle.
             ProtectionOpenRoad.log(

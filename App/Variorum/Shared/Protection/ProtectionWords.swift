@@ -399,6 +399,11 @@ nonisolated enum ProtectionWords {
 
     static let passphraseDoesNotOpen = "That passphrase doesn't open this library."
     static let wordsDoNotOpen = "Those twelve words don't open this library."
+    /// VX-464 (W-VX309-3) — the join's and Move's typed secret is the ACCOUNT's (rule 14: checked against the account's
+    /// vault), so its refusal names the account; "this library" stays where the typed pair is the library's own (the
+    /// lobby, Make this my library, set-up, the follow — rule 7). PROVISIONAL P-VX329-R1-1.
+    static let passphraseDoesNotOpenAccount = "That passphrase doesn't open this account."
+    static let wordsDoNotOpenAccount = "Those twelve words don't open this account."
     static func wordsWrongCount(_ count: Int) -> String {
         "There are twelve words — you entered \(count)."
     }

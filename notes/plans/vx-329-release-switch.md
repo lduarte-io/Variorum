@@ -759,8 +759,30 @@ a behavioral revert re-checks it):**
   check is unchanged and green. `JoinWordsMomentTests.theFirstDevicesOwnWordsLockBesideTheCopyStillSpeaks` (the EX
   fixture's hand-built own-lock-beside-copy file) stands green, its comment made true (that shape is now pre-VX-462's,
   not set-up's). Re-run after the flips (`AccountJoinTests|LifecycleScenarioTests|JoinWordsMoment`): `✔ Test run with 21
-  tests in 4 suites passed`.
-- Piece 3 — VX-464: NOT-STARTED.
+  tests in 4 suites passed`. **REVERT CHECK (on `ab4e2cbe3`, the tree clean first):** `joinKeyFile`'s pre-fix branch
+  restored alone → RED for the stated reasons: the three re-join pins (`!replaced(rejoined)`), the flipped set-up pin
+  (`live.words == nil`), the lifecycle's stage 12 (4 cases); restored by `git checkout --`, `git diff --exit-code` clean.
+  **VX-462: DONE (`ab4e2cbe3`).**
+- Piece 3 — VX-464: FIX DONE (this commit); the revert check follows. **The mechanism:** the join's and Move's typed
+  secret is checked against the ACCOUNT's vault on both roads — the open session's (`ProtectionAccountRoad.press` →
+  `perform` → the core's `join` throws `passphraseDoesNotOpen`/`wordsDoNotOpen` → `RoadAccountFaces.actRefusalSentence`)
+  and the re-keying seam's (`preflight` → `accountSecretRefusal` → the same mapper) — and the mapper said the lobby's
+  "…doesn't open this library." **THE FIX** (`App/Variorum/Shared/Protection/`): `ProtectionAccountRoad
+  .typesTheAccountsSecret(request)` — Move, and turning sync on where the account has a vault (the join: `spec.join` set,
+  not `.setsUpInLibrarysMode`) — feeds a new `secretIsTheAccounts:` on `actRefusalSentence` (defaulted false: every other
+  caller unchanged) from BOTH roads; true, the two arms say `ProtectionWords.passphraseDoesNotOpenAccount` *"That
+  passphrase doesn't open this account."* and `wordsDoNotOpenAccount` *"Those twelve words don't open this account."*
+  (PROVISIONAL P-VX329-R1-1 — the plan's ruled direction, "this account"); the follow (the library's pair is the
+  account's — rule 7) and set-up (the library's own pair) keep "this library". **THE PINS** (`ProtectionJoinFollowRoadTests`,
+  harness): `aWrongSecretWritesNothing` (the same-posture join, the open session's road) and `aJoinIntoACastleAccount
+  EntersCastle`'s preflight loop (the seam's road) FLIPPED DELIBERATELY — they held the mis-aimed line; NEW
+  `vx464_aWrongSecretAtMoveNamesTheAccount` (Move on both roads, nothing written); NEW GUARD
+  `vx464_theFollowsWrongPassphraseKeepsTheLibrarysSentence` (green on both sides by design); the set-up arm's guard is the
+  standing `ProtectionAccountRoadTests.aWrongWordWritesNothing` (unchanged, green). **RED before the fix** (the two
+  sentences added first with no caller, so the red is behavioral, never a compile failure): `✘ Test run with 15 tests in 1
+  suite failed … with 8 issues` — the join's press ×2, its preflight ×2, Move's press ×2 and preflight ×2. **GREEN after:**
+  the account suites (`ProtectionJoinFollowRoadTests|ProtectionAccountRoadTests|RoadAccount*|RoadJoinFollow*`) `✔ Test
+  run with 70 tests in 8 suites passed`. The two sentences pass the two-register rule (no forbidden word).
 - Piece 4 — VX-469 (c): NOT-STARTED.
 - Piece 5 — VX-473: NOT-STARTED.
 - Piece 6 — VX-468: NOT-STARTED.

@@ -180,14 +180,16 @@ struct ProtectionJoinFollowRoadTests {
         #expect(world.session.library.record?.account == Account.account)
     }
 
-    /// A wrong secret is refused in the act's own words, nothing written (the same posture, the open session).
+    /// A wrong secret is refused in the act's own words, nothing written (the same posture, the open session). VX-464
+    /// (W-VX309-3): the secret a join types is the ACCOUNT's (rule 14 — it is checked against the vault), so the refusal
+    /// names the account, never "this library" (FLIPPED DELIBERATELY at VX-329 R1: the old pin held the mis-aimed line).
     @Test func aWrongSecretWritesNothing() async throws {
         let world = try await world(account: .standard)
         let before = try Plant.containerBytes(world.road)
         let wrong = try await press(world, .turnOnSync, typed: TypedSecrets(passphrase: "not it"))
-        #expect(wrong.press == .refused(ProtectionWords.passphraseDoesNotOpen))
+        #expect(wrong.press == .refused(ProtectionWords.passphraseDoesNotOpenAccount))
         let words = try await press(world, .turnOnSync, typed: TypedSecrets(words: try RecoveryPhrase.generate()))
-        #expect(words.press == .refused(ProtectionWords.wordsDoNotOpen))
+        #expect(words.press == .refused(ProtectionWords.wordsDoNotOpenAccount))
         #expect(try Plant.containerBytes(world.road) == before && world.session.library.record?.account == nil)
     }
 
@@ -201,8 +203,9 @@ struct ProtectionJoinFollowRoadTests {
         let bytes = try Plant.containerBytes(world.road)
         // R-U2-3: the PREFLIGHT itself refuses a typo against the vault — before the bootstrap would close anything.
         let shownJoin = try await shown(world, .turnOnSync)
-        for (typed, said) in [(TypedSecrets(passphrase: "not it"), ProtectionWords.passphraseDoesNotOpen),
-                              (TypedSecrets(words: try RecoveryPhrase.generate()), ProtectionWords.wordsDoNotOpen),
+        // VX-464: the account's secret's refusal names the account (FLIPPED DELIBERATELY at VX-329 R1).
+        for (typed, said) in [(TypedSecrets(passphrase: "not it"), ProtectionWords.passphraseDoesNotOpenAccount),
+                              (TypedSecrets(words: try RecoveryPhrase.generate()), ProtectionWords.wordsDoNotOpenAccount),
                               (TypedSecrets.none, ProtectionWords.crossingSecretsMissing)] {
             let preflight = await ProtectionAccountRoad.preflight(
                 world.session, request: RoadAccountRequest(door: .turnOnSync, shown: shownJoin, typed: typed, gate: .alwaysAsk),
@@ -253,7 +256,47 @@ struct ProtectionJoinFollowRoadTests {
         #expect(!world.keys.accountsHeld.contains(Account.other), "this Mac forgets the old account's sync keys")
     }
 
+    /// VX-464 — MOVE types the signed-in ACCOUNT's secret (rule 14): a wrong one is refused naming the account, on the
+    /// open session's road (`press` → the core's act) and on the re-keying seam's (`preflight`) alike; nothing written.
+    @Test func vx464_aWrongSecretAtMoveNamesTheAccount() async throws {
+        let world = try await world(account: .standard)
+        let other = SessionFact.signedIn(accountID: Account.other, email: "other@example.test")
+        let setUp = try await shown(world, .turnOnSync, other)
+        _ = await ProtectionAccountRoad.press(
+            world.session, request: RoadAccountRequest(
+                door: .turnOnSync, shown: setUp, typed: TypedSecrets(words: world.words, newPassphrase: "own passphrase")),
+            signIn: other, exportSwitch: nil)
+        #expect(world.session.library.record?.account == Account.other)
+        let before = try Plant.containerBytes(world.road)
+        let wrong = try await press(world, .moveToSignedInAccount, typed: TypedSecrets(passphrase: "not it"))
+        #expect(wrong.press == .refused(ProtectionWords.passphraseDoesNotOpenAccount))
+        let words = try await press(world, .moveToSignedInAccount, typed: TypedSecrets(words: try RecoveryPhrase.generate()))
+        #expect(words.press == .refused(ProtectionWords.wordsDoNotOpenAccount))
+        let shownMove = try await shown(world, .moveToSignedInAccount)
+        for (typed, said) in [(TypedSecrets(passphrase: "not it"), ProtectionWords.passphraseDoesNotOpenAccount),
+                              (TypedSecrets(words: try RecoveryPhrase.generate()), ProtectionWords.wordsDoNotOpenAccount)] {
+            let preflight = await ProtectionAccountRoad.preflight(
+                world.session, request: RoadAccountRequest(door: .moveToSignedInAccount, shown: shownMove, typed: typed),
+                signIn: Account.signedIn, exportSwitch: nil)
+            #expect(preflight == .refused(said))
+        }
+        #expect(try Plant.containerBytes(world.road) == before && world.session.library.record?.account == Account.other)
+    }
+
     // MARK: - The follow (rules 10, 12, 15)
+
+    /// VX-464's GUARD: the follow types the library's own pair — which the account's already is (rule 7) — so its wrong
+    /// passphrase keeps the library's sentence; nothing written.
+    @Test func vx464_theFollowsWrongPassphraseKeepsTheLibrarysSentence() async throws {
+        var world = try await world(account: .standard)
+        try await joined(world)
+        world.accountKeys = try world.vault.enterCastleElsewhere(
+            Account.account, held: world.accountKeys, passphrase: Account.passphrase, words: Self.accountWords)
+        let bytes = try Plant.containerBytes(world.road)
+        let wrong = try await press(world, .follow, typed: TypedSecrets(passphrase: "not it"), gate: .alwaysAsk)
+        #expect(wrong.press == .refused(ProtectionWords.passphraseDoesNotOpen))
+        #expect(try Plant.containerBytes(world.road) == bytes)
+    }
 
     /// INTO CASTLE (another device entered): one secret, the gate, the library re-keyed into Castle following the new
     /// sync key — the Done says the other-device sentence; the export follows rule 11; nothing more is owed.

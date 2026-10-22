@@ -397,13 +397,16 @@ nonisolated struct RoadAccountFaces: Equatable, Sendable {
     }
 
     /// What an account act's refusal says. `unfinished`: the act stopped mid-plan (its act in flight — the next open
-    /// settles it, rule 20) — never "nothing changed" then.
-    static func actRefusalSentence(_ error: any Error, unfinished: Bool) -> String {
+    /// settles it, rule 20) — never "nothing changed" then. `secretIsTheAccounts` (VX-464 — the join's and Move's,
+    /// `ProtectionAccountRoad.typesTheAccountsSecret`): a secret that opens nothing is the ACCOUNT's, and is said so.
+    static func actRefusalSentence(_ error: any Error, unfinished: Bool, secretIsTheAccounts: Bool = false) -> String {
         if unfinished { return ProtectionWords.accountActUnfinished }
         if error is VaultRefusal { return ProtectionWords.doorRefusedNeedsVault }
         switch error as? ExecutorRefusal {
-        case .passphraseDoesNotOpen?: return ProtectionWords.passphraseDoesNotOpen
-        case .wordsDoNotOpen?: return ProtectionWords.wordsDoNotOpen
+        case .passphraseDoesNotOpen?:
+            return secretIsTheAccounts ? ProtectionWords.passphraseDoesNotOpenAccount : ProtectionWords.passphraseDoesNotOpen
+        case .wordsDoNotOpen?:
+            return secretIsTheAccounts ? ProtectionWords.wordsDoNotOpenAccount : ProtectionWords.wordsDoNotOpen
         case .secretMissing?, .wordsMustBeTyped?, .secretsRequired?: return ProtectionWords.crossingSecretsMissing
         // VX-113 — her #205 ruling (ii): the old passphrase after a change elsewhere names the change (the device and the
         // day the vault's row says — the wire's `updated_at`, `AccountVaultClient.day`).
