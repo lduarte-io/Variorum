@@ -37,6 +37,16 @@
 //  so no caller can interleave between "read the Keychain" and "adopt what
 //  it held" (see `ensureLoadedFromStore`'s note on why that matters).
 //
+//  VX-329 U3 — VX-423: ONE INSTANCE PER PROCESS. The refresh token ROTATES
+//  (every refresh spends the token presented and returns a new one; GoTrue
+//  answers a spent one with `refresh_token_already_used` and revokes the
+//  family), and this actor reads the stored session once and single-flights
+//  its refresh within ITSELF only — so a second instance over the same
+//  stored session refreshes from a stale copy and burns the account's
+//  session. The product mints exactly one, `AppBootstrap.auth`, and hands it
+//  to every consumer (the services, the protection road's vault leaf); the
+//  composition pin (`OneRefreshAuthorityCompositionTests`) counts the mints.
+//
 
 import Foundation
 import Security

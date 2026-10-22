@@ -214,6 +214,9 @@ struct VariorumApp: App {
                             // 13l Act 4 (row 13): the Mac's own restore
                             // recipe, dropped into every backup folder.
                             backupRunbookText: DataSafetyCopy.runbook,
+                            // VX-423: the process's one refresh authority —
+                            // the vault leaf rides the same one.
+                            auth: bootstrap.auth,
                             // VX-307 U1: the engine's keys come from the
                             // protection core's custody (rule 15).
                             makeSyncKeyProvider: { [newRoadSyncKeys = bootstrap.newRoadSyncKeys] in newRoadSyncKeys },

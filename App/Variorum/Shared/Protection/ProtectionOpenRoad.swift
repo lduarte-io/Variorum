@@ -620,11 +620,13 @@ nonisolated struct RoadInputs: Sendable {
     let open: (@Sendable (StoreKey) -> Result<AppDatabase, AppDatabase.StoreOpenError>)?
 
     /// Production: the variant's slot and far folder; the scoped sign-in (read off the main actor, a read); and
-    /// READ-ONLY in a hosted test run (the test host is the dev-store app — `KeychainTestTripwire`).
-    static func live(variant: AppDatabase.StoreVariant) -> RoadInputs {
+    /// READ-ONLY in a hosted test run (the test host is the dev-store app — `KeychainTestTripwire`). VX-423: every
+    /// system composed here rides `auth`, the process's one refresh authority (the bootstrap's) — its vault leaf never
+    /// mints a session of its own.
+    static func live(variant: AppDatabase.StoreVariant, auth: AuthSession) -> RoadInputs {
         let scope = variant.rawValue
         return RoadInputs(
-            makeSystem: { try? ProtectionSystem.live(variant: variant) },
+            makeSystem: { try? ProtectionSystem.live(variant: variant, session: auth) },
             sessionFact: {
                 KeychainAuthStorage.load(service: KeychainAuthStorage.variorumService, scope: scope)
                     .map { SessionFact.signedIn(accountID: $0.userID, email: $0.email) } ?? .signedOut

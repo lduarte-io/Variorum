@@ -529,8 +529,20 @@ switch-day script, the release notes) — every U3 commit is pathspec-limited, r
   tests in 1 suite failed … with 7 issues` — the mints found `["WireVaultLeaf.swift": 1, "AppServices.swift": 1]`, neither
   root hands `auth: bootstrap.auth`, the road and system lines absent, `FollowingSessionProvider` present (its file and the
   leaf's use). Green is piece 2's.
-- Piece 2 — THE FIX (the bootstrap's authority; `AppServices(auth:)` required; the roots; `RoadInputs`/`ProtectionSystem`/
-  `WireVaultLeaf`; `FollowingSessionProvider` + its suite deleted) + P1/P3: NOT-STARTED.
+- Piece 2 — THE FIX + P1/P3: DONE (this commit). `AppBootstrap.auth` — the process's one authority, minted once by
+  `AppBootstrap.authority(_:)` (production: over the scope's Keychain item; the test init: over memory, signed out);
+  `RoadInputs.live(variant:auth:)` → `ProtectionSystem.live(variant:session:)` (REQUIRED) → `ProtectionSystem.init`'s
+  `session:` (defaulted to `NobodySignedIn` — R-U3-3) → `WireVaultLeaf.live(deviceName:session:load:)` (`scope:` gone with
+  the keychain read it served; `load:` the vault endpoint's pin seam, production never passes it);
+  `AppServices.init(auth:)` REQUIRED (the default mint deleted); both roots pass `auth: bootstrap.auth`;
+  `FollowingSessionProvider.swift` DELETED and its suite (`FollowingSessionProviderTests`, in `RoadAccountFacesTests
+  .swift`) with it, a pointer left at its place; the headers of `AuthSession`, `AppServices`, `WireVaultLeaf`,
+  `ProtectionSystem` made true. P1 + P3 + the witness added to `OneRefreshAuthorityTests.swift`
+  (`OneRefreshAuthorityRaceTests`: `aRotationByTheServicesNeverLeavesTheVaultLeafASpentToken`,
+  `bothConsumersPastExpiryAtOnceRefreshOnce`, `twoInstancesOverOneStoredTokenBurnTheSessionOnThisFake`,
+  `theVaultLeafFollowsASignOutAndASignInToAnotherAccount`). **The harness on the fixed tree: `✔ Test run with 375 tests
+  in 60 suites passed`** (0 skipped; 368 − the deleted provider test + this unit's 8; P2 GREEN 4/4). The Mac and phone
+  builds: PENDING (piece 4).
 - Piece 3 — P1's behavioral revert (announced here before it starts; commit-before-revert; restore verified by
   `git diff --exit-code`): NOT-STARTED. No revert is in flight.
 - Piece 4 — evidence: the harness (P1–P3 + the app's protection/auth suites it carries), core auth/account + protection

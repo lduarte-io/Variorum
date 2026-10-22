@@ -89,6 +89,8 @@ struct VariorumMobileApp: App {
                             session: session,
                             storeVariant: bootstrap.storeVariant,
                             backupEnabled: false,
+                            // VX-423: the process's one refresh authority — the vault leaf rides the same one.
+                            auth: bootstrap.auth,
                             // VX-329 U1 — PROVISIONAL P-VX329-U1-5: the engine's keys from the protection core's
                             // custody and the account-binding gate — the Mac's composition (today's device-key
                             // provider over today's sync custody left with today's road).

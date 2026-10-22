@@ -125,6 +125,15 @@ final class AppBootstrap {
     /// VX-307 U1 — the engine's key seam: attached to the road session at each ready; the composition site hands it to
     /// `AppServices` as the sync key provider.
     @ObservationIgnored let newRoadSyncKeys = NewRoadSyncKeyProvider()
+    /// VX-329 U3 — VX-423: THE PROCESS'S ONE REFRESH AUTHORITY — the scope's signed-in session, its rotating refresh
+    /// token refreshed single-flight in this one actor for every caller. Owned HERE because the bootstrap lives for the
+    /// process (across every lobby, locked window and reopen) while the services die at each relock: the road's inputs
+    /// hand it to every composed system's vault leaf, and the composition root hands it to `AppServices` (`auth:` —
+    /// required). The only `AuthSession` the product mints (`authority(_:)`); two used to stand over the one stored
+    /// token — the services' and the vault leaf's — and the second to refresh presented a token the first had spent
+    /// (`refresh_token_already_used`: the family revoked, sync stopped until a new sign-in). Construction reads nothing
+    /// (13e B-1's lazy load: the Keychain is consulted at first use, on the actor's executor).
+    @ObservationIgnored let auth: AuthSession
     /// VX-306 U2 — the open library's protection faces: rule 27's banner, rule 3's reminder and its set-passphrase
     /// sheet, the receipts the open owes.
     private(set) var roadStanding: RoadStandingModel?
@@ -154,7 +163,10 @@ final class AppBootstrap {
         storeVariant = variant
         isTestBootstrap = false
         testStoreURL = nil
-        roadInputs = RoadInputs.live(variant: variant)
+        // pre-13x 2c (corner 47): the session's Keychain item is SCOPED by store variant — a dev-store build starts
+        // signed out and never adopts the installed build's session.
+        auth = Self.authority(.keychain(scope: variant.rawValue))
+        roadInputs = RoadInputs.live(variant: variant, auth: auth)
         reminderLedger = PassphraseReminderLedger()
         exportSwitch = Self.markdownInsuranceSwitch(suiteName: nil)
         protection = ProtectionController()
@@ -175,6 +187,9 @@ final class AppBootstrap {
         storeVariant = .dev
         isTestBootstrap = true
         self.testStoreURL = testStoreURL
+        // VX-423: a test bootstrap's authority is signed out and in memory — its road is the harness's (a planted
+        // system), and no test reaches the scope's Keychain item through it.
+        auth = Self.authority(.inMemory())
         roadInputs = RoadInputs.test(protectionRoad)
         reminderLedger = PassphraseReminderLedger(
             defaults: UserDefaults(suiteName: PassphraseReminderLedger.testSuiteName) ?? .standard)
@@ -188,6 +203,12 @@ final class AppBootstrap {
 
     func retry() {
         beginOpening()
+    }
+
+    /// VX-423 — the product's ONE `AuthSession` construction (the composition pin counts it): the Variorum project's
+    /// sign-in over `store`.
+    private static func authority(_ store: AuthTokensStore) -> AuthSession {
+        AuthSession(configuration: ProjectConfig.variorumAuth, store: store)
     }
 
     /// Awaits the in-flight open. Production never calls it (the roots

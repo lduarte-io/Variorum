@@ -25,6 +25,13 @@
 //  bridge engine's composition, its key-provider seam and its round trigger
 //  all left this file. One session, one chain.
 //
+//  VX-329 U3 — VX-423: the session is no longer OWNED here. It is the
+//  process's one refresh authority (`AppBootstrap.auth`), handed in by the
+//  composition root and shared with the protection road's vault leaf — the
+//  services die at each relock, the authority lives for the process. (A
+//  session minted here beside the leaf's own was the second refresher of
+//  one rotating token.)
+//
 
 import Dependencies  // the T1 probe's database binding (Act 10 wave 2a)
 import Foundation
@@ -81,7 +88,10 @@ final class AppServices {
     let backup: StoreBackup?
     /// The Variorum-project session (the suite account, signed in direct —
     /// Phase 14a round 0h): the identity `owner_id` and the mirror's RLS
-    /// key on.
+    /// key on. VX-329 U3 — VX-423: BORROWED, never minted — the process's one
+    /// refresh authority (`AppBootstrap.auth`), which outlives these services
+    /// (they die at each relock) and which the protection road's vault leaf
+    /// rides too, so the rotating refresh token has one refresher per process.
     let auth: AuthSession
     /// pre-13x 5b (ledger 64): the store variant these services serve — the
     /// iCloud Drive offer's mark is scoped by it (a dev-store offer never
@@ -139,7 +149,7 @@ final class AppServices {
     init(
         session: AppSession, storeVariant: AppDatabase.StoreVariant,
         backupEnabled: Bool, backupRunbookText: String? = nil,
-        auth: AuthSession? = nil,
+        auth: AuthSession,
         makeSyncTransport: ((any UserSessionProviding) -> any SyncTransport)? = nil,
         makeSyncKeyProvider: @escaping () -> any SyncKeyProviding,
         boundAccountRead: (@Sendable () async -> String?)? = nil,
@@ -176,12 +186,10 @@ final class AppServices {
         // 13j ladder B (B3): the purge doors' receipts and the local purge
         // road both read this — one truth, the sync session's own.
         session.syncConfigured = { [weak sync = sync] in sync?.isConfigured ?? false }
-        // pre-13x 2c (corner 47): the session's Keychain item is SCOPED by
-        // store variant — a dev-store build starts signed out and never
-        // adopts the installed build's session.
-        self.auth = auth ?? AuthSession(
-            configuration: ProjectConfig.variorumAuth,
-            store: .keychain(scope: storeVariant.rawValue))
+        // VX-423: REQUIRED — the composition root hands the bootstrap's one
+        // authority (its Keychain item scoped by store variant, pre-13x 2c's
+        // corner 47); a default mint here was the second refresher.
+        self.auth = auth
         self.storeVariant = storeVariant
         // The sweep's low-water mark is per-store bookkeeping: scoped by
         // variant so a dev-store sweep can never advance the real store's
