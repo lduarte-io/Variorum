@@ -2219,16 +2219,10 @@ struct AuthRLSDDLTests {
         #expect(sql.contains("revoke execute on function sync_visibility_horizon_ms() from public, anon;"))
         #expect(sql.contains("grant execute on function sync_visibility_horizon_ms() to authenticated, service_role;"),
                 "sync_schema_version()'s exact grant pair")
-        // THE CROSS-PIN (the client half): the deployed constant, fed to
-        // the client's ONE derivation, yields exactly the retired
-        // hardcoded wait — if either side moves alone, this line names
-        // the other (a horizon change is a §12 act moving BOTH: the
-        // function above and, for free, every derived wait).
-        let constant = try #require(Int64(
-            body.components(separatedBy: "select ").last?
-                .components(separatedBy: ";").first ?? ""))
-        #expect(CorpusRotation.horizonWait(forServedMillis: constant) == .milliseconds(2500),
-                "served \(constant) + the derived margin must equal the wait the retired hardcode stated")
+        // The client half of the old cross-pin — CorpusRotation's derived
+        // wait — left with today's road (VX-329 L1). The served constant
+        // stays pinned above, and the derivation pins' ban on an inline
+        // literal in `sync_pull` remains the non-vacuous arm.
     }
 
     /// The per-owner counter table takes the `device_cursor` posture

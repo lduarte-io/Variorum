@@ -8,7 +8,8 @@ import Testing
 /// Phase 14c batch 2 (L4/L5) — the account lifecycle doors' brains: the
 /// deletion door's passphrase authorization, the post-purge fence
 /// backstop, and the lifecycle client's wire shape. (CF-8's truncate-road
-/// re-key pins retired with `AccountRekey` at pre-13x 2b — `CorpusRotationTests`.)
+/// re-key pins retired with `AccountRekey` at pre-13x 2b; the rotation
+/// itself left with today's road at VX-329.)
 ///
 /// EMULATION CAVEAT (the batch-1 discipline, in force here): the vault
 /// lives on a `ScriptedVaultServer` and the mirror on `FakeSyncServer` —
@@ -93,10 +94,7 @@ struct AccountLifecycleTests {
         // a vault CREATE provisions the mirror's fence comparand + proof
         // hash, and `key_vault_update` runs on the mirror's vault row):
         // the loader below only LOGS each successful write for the ORDER
-        // pin. The event's `marker=` suffix records whether the persisted
-        // rekey marker was set AT the write (ladder R1-1: the brain must
-        // set it BEFORE the vault write, so a crash in every later window
-        // leaves it behind).
+        // pin.
         let vault = ScriptedVaultServer(syncServer: server)
         let vaultClient = KeyVaultClient(
             configuration: KeyVaultClient.Configuration(
@@ -110,10 +108,7 @@ struct AccountLifecycleTests {
                 if let method = request.httpMethod, method == "POST",
                    (response.1 as? HTTPURLResponse).map({ (200..<300).contains($0.statusCode) }) == true,
                    let row = vault.storedRow(userID: RekeyWorld.vaultUserID) {
-                    let markerSet = (try? await db.read { try RotationMarker.isSet($0) }) ?? false
-                    events.withValue {
-                        $0.append("vault-write:\(row.corpusKeyID):marker=\(markerSet ? "set" : "clear")")
-                    }
+                    events.withValue { $0.append("vault-write:\(row.corpusKeyID)") }
                 }
                 return response
             })
@@ -142,8 +137,8 @@ struct AccountLifecycleTests {
     }
 
     // (The 14c `AccountRekey` brain's six pins — the truncate road — retired
-    // with the brain at pre-13x 2b: the rotation is IN PLACE now, and its
-    // road is pinned in `CorpusRotationTests`.)
+    // with the brain at pre-13x 2b; the in-place rotation then left with
+    // today's road at VX-329.)
 
     // MARK: - Account deletion (L5)
 

@@ -18,10 +18,9 @@ import GRDB
 /// completes. **No horizon ⇒ no-op** — no server, no session, no recorded
 /// device cursors all read as horizon 0, and nothing is ≤ 0.
 ///
-/// The whole pass shares the engine's preflight discipline: the rekey
-/// marker refuses first, keys refuse before any network contact, the §12
-/// lockstep check refuses a schema-skewed mirror — outbox intact, cursor
-/// unmoved, every time.
+/// The whole pass shares the engine's preflight discipline: keys refuse
+/// before any network contact, the §12 lockstep check refuses a
+/// schema-skewed mirror — outbox intact, cursor unmoved, every time.
 public struct PurgeJanitor: Sendable {
     @Dependency(\.database) var database
     @Dependency(\.date) var date
@@ -76,8 +75,8 @@ public struct PurgeJanitor: Sendable {
     // MARK: - The preflight (one body, three doors — LADDER R1 F-R7)
 
     /// The janitor's preflight — the engine's refusal discipline in the
-    /// engine's order (the rekey marker first, keys before any network
-    /// contact, the §12 lockstep check), shared by `sweep()`,
+    /// engine's order (keys before any network contact, the §12 lockstep
+    /// check), shared by `sweep()`,
     /// `reconcileLedger()` and `healPurgeOrphan` (which carried it
     /// verbatim ×3 until this hoist; the R2-M2 rationale at
     /// `reconcileLedger` explains why the pre-pass must never run naked).
@@ -86,8 +85,6 @@ public struct PurgeJanitor: Sendable {
     /// one nonce per RPC call); refuses by throw — outbox intact, cursor
     /// unmoved, every time.
     private func preflight() async throws -> (keyID: String, signer: SyncChallengeSigner) {
-        let rekeyIncomplete = try await database.read { try RotationMarker.isSet($0) }
-        guard !rekeyIncomplete else { throw SyncError.accountRekeyIncomplete }
         let keyID: String
         let material: KeyProofMaterial
         do {
@@ -667,8 +664,8 @@ public struct PurgeJanitor: Sendable {
     ///     NEVER healed, whatever the ledger says: an untraced class,
     ///     left stalled and honest under the status flag
     ///     (safe-by-refusal), recorded if ever observed.
-    ///  2. **Preflight**: the reconcile's own discipline (rekey marker,
-    ///     keys, §12 lockstep) — refusal, never improvisation.
+    ///  2. **Preflight**: the reconcile's own discipline (keys, §12
+    ///     lockstep) — refusal, never improvisation.
     ///  3. **The DISCRIMINATOR — exact, no timers**: EVERY missing
     ///     referent must be named in the purged-ids ledger (read from 0:
     ///     content-free and prunable by design; this path runs only on a

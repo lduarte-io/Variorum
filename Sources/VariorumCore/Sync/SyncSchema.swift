@@ -668,16 +668,6 @@ public enum SyncError: Error, Equatable, Sendable {
     /// signed-out-reads-as-normal principle: sync is the tier, the app
     /// is not).
     case syncNotEntitled
-    /// Phase 14c ladder R1-1: a key replacement (CF-8) started on THIS
-    /// device and never completed — the persisted per-step `RotationMarker`
-    /// (pre-13x 2b; the 14c `AccountRekeyMarker`'s successor) survives a
-    /// crash/relaunch mid-road. The round refuses — outbox
-    /// intact, cursor unmoved — because rounds against a mid-re-key
-    /// account can silently strand the hosted copy (a truncated-but-not-
-    /// reinitialized mirror reads idle while near-empty; an untruncated
-    /// old-key corpus poisons every later enrollment). Running the
-    /// re-key door again completes the road and clears the marker.
-    case accountRekeyIncomplete
     /// Phase 13j (round 10 — the SAY-SO-FIRST returner): this device's
     /// purge-ledger scan point sits BELOW the ledger's coverage floor —
     /// it was away long enough that purge records it needs have been
@@ -770,13 +760,6 @@ extension SyncError: CustomStringConvertible {
         case .syncNotEntitled:
             return "Sync paused: hosted sync isn't active on this account. Your writing "
                 + "stays safe on this device; sync resumes once the plan is active."
-        case .accountRekeyIncomplete:
-            // pre-13x 2b: the per-step rotation marker (`RotationMarker`) —
-            // entering Castle or Replace All Keys started here and has not
-            // finished; the acting device resumes it at the failed step.
-            return "Sync paused: replacing this account's encryption keys didn't finish on "
-                + "this device. It resumes from Settings ▸ Protection (or Replace All Keys); "
-                + "nothing is lost while paused."
         case .pullStalled(let cursor):
             return "Sync couldn't read everything from the server just now — another "
                 + "device still owes some of it (paused at \(cursor)). Nothing is lost; "

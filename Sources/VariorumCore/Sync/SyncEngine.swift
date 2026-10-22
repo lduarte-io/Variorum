@@ -109,34 +109,18 @@ public struct SyncEngine: Sendable {
         throw SyncError.accountMismatch(bound: bound, signedIn: signedIn)
     }
 
-    /// Ladder R1-1, re-based on pre-13x 2b's PER-STEP marker: the posture
-    /// switch / Replace All Keys runner writes `RotationMarker` before its
-    /// vault write and advances it step by step, clearing it only when the
-    /// whole road completes — a crash anywhere between leaves it set across
-    /// relaunches. While ANY step is set, both round halves refuse with a
-    /// self-explaining error naming the resume road — outbox intact, cursor
-    /// unmoved, the §12 refusal grammar. (`pullToHead` and
-    /// `resyncReinitialize` are the runner's own tools and are deliberately
-    /// NOT guarded: the runner calls them with the marker set.)
-    private func refuseIfRekeyIncomplete() async throws {
-        let incomplete = try await database.read { try RotationMarker.isSet($0) }
-        guard !incomplete else { throw SyncError.accountRekeyIncomplete }
-    }
-
     // MARK: - pre-13x 2b: the two named primitives (the BATCH 2 brief's fact iv)
 
     /// PULL TO HEAD — §4 step 1's named primitive: pull until the changefeed
     /// is read to head, retrying a STALLED pull (a straggler whose referents
     /// another device still owes) a bounded number of times; a pull that
     /// never un-stalls refuses typed (`pullStalled`) with the cursor where it
-    /// holds. Deliberately NOT gated by the rotation marker (`pull()` is;
-    /// this bypasses that one guard and nothing else): the runner calls it
-    /// with the marker set to finish a rotation.
+    /// holds.
     @discardableResult
     public func pullToHead(maxAttempts: Int = 6) async throws -> PullReport {
         var last = PullReport()
         for _ in 0..<max(1, maxAttempts) {
-            last = try await pullIgnoringMarker()
+            last = try await pullRound()
             if !last.stalled { return last }
         }
         throw SyncError.pullStalled(cursor: last.newCursor)
@@ -189,12 +173,6 @@ public struct SyncEngine: Sendable {
     /// rows merge per SyncSpec §6 and re-push on the next iteration.
     @discardableResult
     public func push() async throws -> PushReport {
-        // An unfinished re-key on THIS device refuses first (ladder
-        // R1-1): rounds against a mid-re-key account can silently strand
-        // the hosted copy — see `AccountRekeyMarker`. Before keys and
-        // lockstep because its prescription (re-run the re-key door)
-        // subsumes both; before any network contact by construction.
-        try await refuseIfRekeyIncomplete()
         // The library's account, not whoever is signed in (VX-314): a
         // mismatched sign-in refuses before keys say anything — the bound
         // account's keys may well be in custody, and "keys unavailable"
@@ -470,14 +448,13 @@ public struct SyncEngine: Sendable {
     /// everything else.
     @discardableResult
     public func pull() async throws -> PullReport {
-        // The unfinished-re-key guard, the push half's twin (ladder R1-1).
-        try await refuseIfRekeyIncomplete()
-        return try await pullIgnoringMarker()
+        try await pullRound()
     }
 
-    /// The pull's body — everything but the marker guard (pre-13x 2b:
-    /// `pullToHead` runs it with the marker set).
-    private func pullIgnoringMarker() async throws -> PullReport {
+    /// The pull's body (`pull()` and `pullToHead` share it; the rotation
+    /// marker guard that once sat between them left with today's road —
+    /// VX-329 L1, nothing writes the marker any more).
+    private func pullRound() async throws -> PullReport {
         // VX-314: the push half's twin — here rather than `pull()` so
         // `pullToHead` is gated too (the binding is nil on every
         // deliberate-act engine, so only the live session's rounds feel it).
