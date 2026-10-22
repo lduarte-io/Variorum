@@ -990,7 +990,75 @@ dev domain to make the card due, then a launch on the missing face and T-5: no c
 launch (the orchestrator's to stage or leave pin-covered). VX-462 — set up sync, Stop syncing here, re-join by the
 passphrase: no words moment (the throwaway).
 
-## 6. THE KICKOFF RECORD (2026-10-22, the orchestrator — session `vx-329`, Fable, overnight mandate)
+### FIX LEG RECORD — THE MAC SUITE'S SIX REDS (Opus implementer, 2026-10-22; IN PROGRESS)
+
+**Not done in the fix leg, first:** NO `xcodebuild test` (the brief's limit — the orchestrator re-runs the affected suites
+at the stage after this lands), so every fix below is COMPILED and its green is PENDING that re-run. No stage, no app
+launch, no store touch, no network, no subagent; zero `Sources/` lines (the six reds are all test-side). The seventh name in
+the run's failing list (`RoadLockViewNamesPinTests.theBackupsFolderIsTheCataloguesName`) is NOT one of the six and NOT
+touched — it is a test-host restart (the log's *"Restarting after unexpected exit, crash, or test timeout"*) whose retry
+passed; flagged below.
+
+**The run read:** the orchestrator's full Mac app suite (`xcodebuild test`, the first app-side run after the switch; its log
+in the session scratchpad, `vx329-mac-suite.log`): `✘ Test run with 1556 tests in 274 suites failed … with 3 issues
+(including 1 known issue)` for the restarted host's tail, the failing list naming the six below (plus the restart).
+
+**LIVE STATUS (per piece; PENDING = unverified):**
+- Piece R — this record skeleton, the six traced and dispositioned: DONE (this commit).
+- Piece 1 — the lifetime mechanism (failures 2–5) proven headless by a transient probe: NOT-STARTED.
+- Piece 2 — failures 2–5 fixed (the road held for the test's life): NOT-STARTED.
+- Piece 3 — failures 1 and 6 rewritten to the new road's truth: NOT-STARTED.
+- Piece 4 — the evidence (`build-for-testing` both targets; the headless harness; the core suites): NOT-STARTED.
+
+**THE SIX — the traced mechanism and the disposition of each (recorded before any fix):**
+1. **`LaunchFurnitureTests.aFreshStoreOnTodaysRoadSeedsHerFiveBlocksAlone`** (:389 `blocks == 5` read 9, :390 the rendered
+   page read her five + the four Start Here passages) — **(a) A STALE PREMISE.** The pin held TODAY's road's readme (her
+   five blocks alone on the `.real` variant, "until the road switches (VX-329)" — its own doc); U1 deleted that variant
+   fork deliberately (`c3d939c9e`, the seeders half of piece 0 — `ReadmeSeeder.paragraphs` is `herBlocks +
+   startHerePassages` for every store: "today's five-only variant went with today's road"). The product is right; the pin
+   is today's road's. Disposition: REWRITTEN to the new road's truth through the same production composition — a fresh
+   store of the `.real` variant (the Release builds' store) seeds the same nine blocks as every store, her five first and
+   byte-exact (the four-passage static fact is `ReadmeStartHerePlanTests.theFourPassagesSeedInEveryStore`; this keeps the
+   behavioural one).
+2. **`SettingsLockCloseTests.aReopenRoadThroughOpeningKeepsTheSettingsWindow`** (:195 — the crossing's reopen did not land
+   in Castle) — **(c) A TEST-WORLD DEFECT in U1's rewire — neither a stale premise nor a product break.** The mechanism
+   (inputs → wrong state): the test hands an INLINE `PlantedRoad()` to `readyInStandard(_:hold:)`, which returns the
+   bootstrap and the words and never the road; the bootstrap keeps the road's `ProtectionSystem` (its `places` are URLs, a
+   value) and the opener's captured URL — nothing that holds the road — so the road is released when that call expression
+   ends, and `TempSlot.deinit` (`ProtectionTestSupport.swift:65`) removes the slot's whole folder: `variorum.sqlite`, the
+   key file, the lived-here marker. The open pool keeps its unlinked file (reads and writes still work), so the ready
+   stands; the crossing's act then opens the slot by PATH (`ProtectionLibraryFiles.keyedQueue(…, mustExist: true)`) →
+   *"no file at variorum.sqlite"*; its catch arm finds the old key no longer opening the (absent) slot and logs *"useCastle
+   swapped, then stopped"*; the reopen routes an empty slot → a FRESH library (the log's `create library: c7ebbe3b`) in
+   Standard. The claim (the window survives a reopen road) was never reached. Every inline site came in at U1's rewire
+   (`e52f3f275`, compiled, never run). Disposition: the test HOLDS its road for its whole life (the canonical
+   `RoadLockRouteTests` shape — `let road = PlantedRoad()`), the claim and every expectation unchanged.
+3. **`SettingsLockCloseTests.theLibraryClosedRuleNamesTheSettledClosedStatesAndNeverOpening`** (:205 — `.notReady("after
+   the unlock: roadLobby(…)")`) — **(c), the same mechanism**: `LockWorld.readyInCastle(PlantedRoad())` crosses while the
+   road lives (the log's `enter_castle: done`), the road is released at the call's end, the lock lands in the lobby
+   (nothing path-based), and the lobby's typed road finds no library to open — the reopen never comes. Disposition: as 2.
+4. **`LibraryPortabilityDoorTests.theHandOffDoorProducesThePairRevealsItAndWordsItsRefusal`** (:234 — `.refused("The
+   travelling folder couldn't be made…", detail: "ProtectionLibraryFiles: no file at variorum.sqlite")`) — **(c), the
+   same mechanism** at `LockWorld.readyInStandard(PlantedRoad())`: the send act's snapshot opens the slot by path
+   (`ProtectionLibraryFiles.snapshot` → `keyedQueue(…, mustExist: true)`) — the detail string is that throw, verbatim.
+   Disposition: as 2.
+5. **`LibraryHandOffTests.theHandOffFolderRoundTripsThroughTheOpenDoorAndItsOwnKeyFile`** (:37 — `.failed("…no file at
+   variorum.sqlite")`) — **(c), the same mechanism and the same throw** (the marked row's write succeeded through the open
+   pool's unlinked file; the send then found no file). Disposition: as 2; its sibling
+   `aLibraryWithoutItsKeyFileRefusesAndLeavesNothingBehind` (green — it refuses before any path read) is held the same way
+   so no inline site stays.
+6. **`DataSafetyRoadCountsTests.theNewRoadsRowsCountThisMacsPairsOfThisLibraryAndTodaysRoadIsUnchanged`** (:89 `primary
+   count == 3` read 0, :93 `far count == 2` read 0) — **(a) A STALE PREMISE.** The pin's second half held TODAY's road
+   (no `roadCounts` → the folders' flat files counted "exactly as before"); U1 deleted today's flat-file count with today's
+   flat legs (R-U1-5: "Data Safety's two rows count the catalogue's pairs only (today's flat-file count deleted)") — the
+   model's own comment: `roadCounts` nil — no library's faces — "counts none". The new-road half (this Mac's pairs of this
+   library: 2 beside, 1 far — never another Mac's or another library's) was GREEN in the run and stays byte-unchanged.
+   Disposition: the second half REWRITTEN to the new truth over the same planted world — with no road counts the rows
+   count NOTHING (today's flat files never count, either way) while each row's path and the picked folder's set state stay
+   as read; the test renamed to say so (its old name asserted today's road), the file header made true.
+
+**FLAGS (not this leg's; for the orchestrator):** PENDING the probe and the fixes.
+ (2026-10-22, the orchestrator — session `vx-329`, Fable, overnight mandate)
 
 **Her mandate (the /architect-phase argument, faithful):** the only session tonight — no coordinator, hold
 `Tools/stage` directly. Run U1, U3, the riders and the throwaway rehearsal to completion, then pause with everything
