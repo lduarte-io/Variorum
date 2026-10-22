@@ -84,9 +84,10 @@ find that it doesn't and bring it to her), on the throwaway project, before her 
 ## 4. Dependencies and risks
 
 - **The phone.** SETTLED at the 2026-10-22 sitting: VM-8 is still Backlog, so the Macs switch first and the phone
-  joins when its new-road catch-up lands (its kickoff prompt is with her; that session runs AFTER this phase merges,
-  from latest main merged into `mobile`, and takes the custody slot this phase releases). The old phone build cannot
-  sync against marker 14 until then — accepted by her word.
+  joins when VM-8's faces land (its kickoff prompt is with her; that session runs AFTER this phase merges, on a
+  main-based `vm-8` worktree — VM-5 retired the `mobile` branch 2026-10-07 and her phone runs MAIN-built installs,
+  so it sits at main's marker today and there is no merge leg). Her current phone install cannot sync against
+  marker 14 until the VM-8 build installs — accepted by her word.
 - **The export door (VX-461)** writes an empty file today; rule 26's instruction must not name it until it's fixed.
 - **Device-ID drift (VX-465)** must be traced: a drifting device ID in Release would make "this Mac's copies" and
   retention lie.
