@@ -2,7 +2,7 @@
 //  U2PinsRule27Tests.swift
 //  VariorumCoreTests — VX-378 U2 piece I: RULE 27 (`notes/CastleRules.md`: "A
 //  library whose every key-file copy and every backup are gone is gone. Synced
-//  libraries are the exception: the twelve words recover them from the
+//  libraries are the exception: the account's passphrase or twelve words recover them from the
 //  account."). The honest refusal, naming the roads that would have worked —
 //  and only when nothing might still open the library. Facts built directly,
 //  the refusal read through its printed form, so the red-on-old run is honest.

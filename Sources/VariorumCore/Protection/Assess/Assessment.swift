@@ -147,8 +147,8 @@ public enum KeyFileHome: String, Hashable, Sendable, CaseIterable {
 }
 
 /// RULE 27 ("A library whose every key-file copy and every backup are gone is
-/// gone. Synced libraries are the exception: the twelve words recover them from
-/// the account"): the honest refusal — the copies that would have opened it, and
+/// gone. Synced libraries are the exception: the account's passphrase or twelve
+/// words recover them from the account"): the honest refusal — the copies that would have opened it, and
 /// the account road when the library was (or may have been) synced. No
 /// copy-less rebuild exists (§3's rule-1 row).
 public struct NoKeyFileAnywhere: Hashable, Sendable {
