@@ -1425,9 +1425,36 @@ swap and T-5's empty-slot program), `Executor/Acts/DeviceActs.swift` (the plan-l
   offered only on the fact with its act, the act's sentence said, nothing run off the fact; the view's composition —
   her lead/body/doors in the branch, no lobby title, road or rule 27 there, the confirm before the act). Red-on-old for
   the Mac pins is by construction (they name `preDesignStore`/`offersStartFresh`, absent on old) — their RUN is PENDING.
-- Piece 3 — Start fresh's ACT (the crash-safe set-aside, then the calm creation): **STOPPED AT THE FORK — PROPOSED, NOT
-  BUILT** (the brief: "a genuine fork (e.g. the set-aside machinery resists reuse): stop and propose before building that
-  half"). The trace and the options are **THE FORK** below; nothing of the act is written.
+- Piece 3 — Start fresh's ACT, BUILT TO THE RULING ((a) + (D), THE RULING below — the fork was stopped and proposed
+  first, `8cdc33118`; ruled `b02b9bb8f`):
+  - **3a — THE CORE MOVER: DONE (this commit; headless VERIFIED).** `Protection/Files/PreDesignSetAside.swift`:
+    `members(inSlotFolder:carryingHold:)` (pure, names only — the store's sidecars, the store, every older key file and
+    every older `.stale-<epoch>` set-aside of one (`CatalogNames.isPreDesignKeyFileSetAsideName`), the restore hold when
+    carried; never this design's files, the lived-here marker, the recipe or hers — in the order they LEAVE the slot);
+    `setAsideWhole(slotFolder:carryingHold:now:)` — the resume first, then (1) `linkat(2)` of each member into a hidden
+    `Previous Libraries/.variorum-setting-aside-<uuid>/`, the staging folder checked on the store's own volume (device),
+    each link verified the same file; ANY failure removes the staging folder (and a Previous Libraries folder the act made)
+    and refuses whole; (2) THE COMMIT — `renamex_np(…, RENAME_EXCL)` to `<stamp>/`, an existing stamp (even an empty
+    folder) never overwritten, the next second taken; (3) each member unlinked, sidecars first, only while it is still the
+    aside's file; `finishInterrupted(slotFolder:)` — THE RESUME (the press's first step, and the creation road's): stale
+    staging swept (removed when every file is still linked elsewhere; COMMITTED to a stamp of its own when one is not —
+    never deleted), and every slot entry that is the same file (device + inode, `lstat` only) as a same-named file in a
+    committed aside unlinked in the members' order — a store only when every sidecar beside it is its aside's too (else
+    it refuses, the slot as it is). Test seams (`Seam`, `Interruption`) are an internal parameter, not `#if DEBUG`.
+    **PINS — `PreDesignSetAsideTests` (8), all GREEN:** the members from the listing alone; THE FILES MOVED WHOLE (every
+    member in one `<stamp>/`, each the same inode it was in the slot with its bytes, the WAL's "frames" among them; the
+    slot emptied of the library; hers, the lived-here marker, the recipe and `Backups/` untouched; no staging left; the
+    catalogue reads the folder; the fact false after); THE FRESH MINT AFTER (`createLibrary` lands in the emptied slot,
+    opens with its own key, reads back its record); a failed link (a folder wearing a key file's name) refuses whole with
+    nothing moved and no folder made; an existing EMPTY `<stamp>/` never overwritten; **THE CRASH ARMS — an interruption
+    at each of the 16 seams** (7 links, staged, committed, 7 unlinks): before the commit the slot untouched, nothing
+    listed, her face again; after it the aside whole and the slot exactly the members not yet unlinked (the store still
+    there ⇔ her face again); then the next press (or, the store gone, the creation road's finish) — exactly ONE aside,
+    whole, no staging, the slot emptied; a remainder beside a foreign WAL refuses and leaves the slot as it is; the sweep
+    never deletes a file found nowhere else. (Red-on-old: these pin NEW behaviour — the act did not exist; a first run
+    whose seams named another slot's files interrupted nothing and failed 30-odd expectations, so the arms bite.) NOT
+    pinned: the different-volume refusal (no second volume in a headless run — the branch is code-read only).
+  - **3b — THE APP: the press, the creation road, (D)'s landings and gates, the bootstrap's wiring:** IN-PROGRESS.
 - Piece 4 — closing evidence for what is built: DONE (every run foreground, in sequence, on the Pro, at `8cdc33118`):
   - `swift test` (debug): **VariorumCoreTests 3295 tests in 430 suites PASSED** (the U4 suite among them, 7/7);
     StringsWorkbook 32/32; VariorumMCPTests 382/383 — the ONE red the recurring load-timing flake

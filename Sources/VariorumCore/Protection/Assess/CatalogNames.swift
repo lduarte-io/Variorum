@@ -101,6 +101,17 @@ public enum CatalogNames {
         name == LibraryClassifier.olderKeyFilename || LibraryClassifier.isOlderFingerprintKeyFileName(name)
     }
 
+    /// An older Variorum's SET-ASIDE of one of those key files: `<name>.stale-<epoch>.json` (today's controller and
+    /// launch gate set a foreign key file aside in this shape — the epoch whole seconds). Never part of the slot's fact
+    /// (`isPreDesignKeyFileName` alone is); carried WHOLE with the library when it is set aside (VX-329 U4 — "every key
+    /// file"). Names only.
+    public static func isPreDesignKeyFileSetAsideName(_ name: String) -> Bool {
+        guard name.hasSuffix(".json"), let marker = name.range(of: ".stale-", options: .backwards) else { return false }
+        let epoch = name[marker.upperBound...].dropLast(".json".count)
+        guard !epoch.isEmpty, epoch.allSatisfy({ "0123456789".contains($0) }) else { return false }
+        return isPreDesignKeyFileName(String(name[..<marker.lowerBound]) + ".json")
+    }
+
     /// What a file name is — nil for a name no build of Variorum writes (the
     /// A1 rail's copies, a drill's files, anything of hers).
     public static func parseFile(_ name: String) -> FileName? {
