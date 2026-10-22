@@ -71,7 +71,7 @@ struct MCPGrantSchemaTests {
     /// stays 13; nothing on the mirror changes).
     @Test func theSetupKeyStoreIsRegisteredLocalOnlyLikeTheGrantsFamily() throws {
         #expect(MCPGrantSchema.tables.contains("mcp_setup_key"))
-        #expect(SyncSchema.lockstepVersion == 13, "a local-only migration never moves the marker")
+        #expect(SyncSchema.lockstepVersion == 14, "a local-only migration never moves the marker")
         let db = try AppDatabase.inMemory()
         try db.read { (db: Database) throws in
             #expect(SyncSchema.table(named: "mcp_setup_key") == nil)
@@ -106,7 +106,7 @@ struct MCPGrantSchemaTests {
     @Test func theCommentAuthorRecordIsRegisteredLocalOnlyLikeTheGrantsFamily() throws {
         #expect(MCPGrantSchema.tables.contains("mcp_comment_author"))
         #expect(MCPGrantSchema.childFirstOrder.contains("mcp_comment_author"))
-        #expect(SyncSchema.lockstepVersion == 13, "a local-only migration never moves the marker")
+        #expect(SyncSchema.lockstepVersion == 14, "a local-only migration never moves the marker")
         let db = try AppDatabase.inMemory()
         try db.read { (db: Database) throws in
             #expect(SyncSchema.table(named: "mcp_comment_author") == nil)
@@ -155,7 +155,7 @@ struct MCPGrantSchemaTests {
         let order = MCPGrantSchema.childFirstOrder
         #expect(try #require(order.firstIndex(of: "mcp_rebind_request")) < #require(order.firstIndex(of: "mcp_client")),
                 "stripped before the client rows it names")
-        #expect(SyncSchema.lockstepVersion == 13, "a local-only migration never moves the marker")
+        #expect(SyncSchema.lockstepVersion == 14, "a local-only migration never moves the marker")
         let db = try AppDatabase.inMemory()
         try db.read { (db: Database) throws in
             #expect(SyncSchema.table(named: "mcp_rebind_request") == nil)
@@ -215,7 +215,7 @@ struct MCPGrantSchemaTests {
     /// trigger, never the outbox, the marker 13 — and a record write carrying
     /// a digest never reaches the outbox either.
     @Test func theWordsDigestIsLocalOnlyLikeItsTable() throws {
-        #expect(SyncSchema.lockstepVersion == 13, "a local-only migration never moves the marker")
+        #expect(SyncSchema.lockstepVersion == 14, "a local-only migration never moves the marker")
         let db = try AppDatabase.inMemory()
         try db.read { (db: Database) throws in
             let columns = try Row.fetchAll(db, sql: "PRAGMA table_info(mcp_comment_author)")

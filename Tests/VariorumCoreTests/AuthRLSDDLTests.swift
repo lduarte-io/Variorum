@@ -56,6 +56,13 @@ struct AuthRLSDDLTests {
         // PLAIN, the archived_at class — the AI fence's third leg); no
         // table, no RPC change. Deploy is HER closeout window.
         "16_phase13nb_private.sql",
+        // VX-307/VX-329 (the key-vault event, marker 14): the vault's new
+        // wire shape — `mode` + `earlier_row_keys`, the mode backfill,
+        // key_vault_update's canonical body (now the CANONICAL home for
+        // that function), sync_reencrypt retired. HELD at VX-307; deploys
+        // in VX-329's release window at her explicit go (the vx307 deploy
+        // checklist; rehearsed green on the throwaway at VX-308 §5R).
+        "17_phase_vx307_vault.sql",
     ]
 
     /// The DATA RPCs — every function 11 re-creates with `key_proof` beside
@@ -1752,16 +1759,21 @@ struct AuthRLSDDLTests {
     /// VARIORUM_ROTATION_IN_PROGRESS on a DIFFERENT one (decision 32);
     /// cleared with the key.
     @Test func theVaultUpdateDoorLocksForUpdateCASesAndRecordsTheRotationSeq() throws {
-        // The DEPLOYED body — since Phase 13y that is 12's canonical one
-        // (the F1 completion guard FOLDED IN, and the rotation seq minted
-        // from the CALLER'S OWN counter, M3); 11's era body (the overlay's)
-        // stays pinned line for line by the sibling
+        // THE ROTATION-ERA body — 12's canonical one (the F1 completion
+        // guard FOLDED IN, and the rotation seq minted from the CALLER'S
+        // OWN counter, M3); 11's era body (the overlay's) stays pinned
+        // line for line by the sibling
         // `theClearingGuardOverlayIsElevensBodyPlusOneClause`, and the
         // fold-in's exactness by `theCompletionGuardIsTheOverlaysBodyWithExactlyTheMintSwapped`.
-        for body in [try Self.finalBody(of: "key_vault_update"), try Self.deployedBody(of: "key_vault_update")] {
-            try Self.expectVaultUpdateDoor(body, mintsRotationSeqWith: "next_tenant_seq(caller)")
-        }
-        let deployed = try Self.deployedBody(of: "key_vault_update")
+        // VX-329 (marker 14): 17 REDEFINES the door and RETIRES rotation,
+        // so 12's body is HISTORY here (read from 12's own file), and the
+        // DEPLOYED body's pin is `theMarker14VaultDoorRetiresRotation…`.
+        // The last pre-17 definition is 13's (13i-a re-carried the body
+        // with the wing/shelf ciphertext registry) — the rotation era's
+        // deployed truth; 12's fold-in exactness is the siblings' pin.
+        let thirteen = Self.strippingComments(try Self.sqlFile("13_phase13i_wings.sql"))
+        let deployed = try #require(Self.lastBody(of: "key_vault_update", in: thirteen))
+        try Self.expectVaultUpdateDoor(deployed, mintsRotationSeqWith: "next_tenant_seq(caller)")
         #expect(deployed.contains(SyncServerRefusalMarker.rotationRowsRemain),
                 "F1 (BLOCKER-1): completion is 'no row of mine below it' — the clearing arm refuses while one remains")
         #expect(deployed.contains("if vault_previous is not null then")
@@ -1778,6 +1790,43 @@ struct AuthRLSDDLTests {
         let clearSite = try #require(deployed.range(of: "next_seq := null;"))
         #expect(arm.lowerBound < guardSite.lowerBound && guardSite.lowerBound < clearSite.lowerBound,
                 "the guard runs in the clearing arm before the seq is nulled")
+    }
+
+    /// THE MARKER-14 DOOR (VX-307's artifact, registered at VX-329): the
+    /// DEPLOYED `key_vault_update` is 17's — the FOR UPDATE lock, the
+    /// challenge-verified proof and the revision CAS kept byte-faithful
+    /// from 12; EVERY rotation arm retired with rotation itself; the mode
+    /// shape landed (`mode` + `earlier_row_keys` from the payload, a
+    /// pre-VX307 payload refused loudly). The artifact's own text pins are
+    /// `VX307VaultArtifactTests`; THIS pin is the chain's resolution — the
+    /// deployed truth is 17's body, not 12's.
+    @Test func theMarker14VaultDoorRetiresRotationAndLandsTheModeShape() throws {
+        let body = try Self.finalBody(of: "key_vault_update")
+        let seventeen = Self.strippingComments(try Self.sqlFile("17_phase_vx307_vault.sql"))
+        #expect(body == (try #require(Self.lastBody(of: "key_vault_update", in: seventeen))),
+                "the deployed door IS 17's body — the chain resolves past 12")
+        // Kept from 12, byte-faithful clauses:
+        #expect(body.contains("from key_vault where user_id = caller for update;"),
+                "the serialization point (decision 31) survives the redefinition")
+        #expect(body.contains("perform sync_key_proof_check(key_proof, challenge, 'key_vault_update');"))
+        #expect(body.contains(SyncServerRefusalMarker.vaultAbsent))
+        #expect(body.contains(SyncServerRefusalMarker.vaultRevisionConflict))
+        #expect(body.contains("where user_id = caller and revision = expected_revision;"), "the CAS belt inside")
+        // The mode shape:
+        #expect(body.contains("VARIORUM_PRE_VX307_PAYLOAD"),
+                "a payload with no mode is a pre-VX307 client's and refuses loudly")
+        #expect(body.contains("mode                                 = payload->>'mode',")
+                    && body.contains("earlier_row_keys                     = payload->'earlier_row_keys',"),
+                "mode and the earlier keys land from the payload (rule 15's kept list)")
+        // Rotation retired whole:
+        #expect(!body.contains("VARIORUM_ROTATION") && !body.contains("next_tenant_seq")
+                    && !body.contains("corpus_previous_key_id") && !body.contains("rotation_started_seq"),
+                "no rotation arm survives in the deployed door (VX-329 — rotation retires with today's road)")
+        #expect(!body.contains("payload->>'revision'") && !body.contains("payload->>'user_id'")
+                    && !body.contains("payload->>'updated_at'"),
+                "server-managed columns never come from the payload")
+        #expect(body.contains("return jsonb_build_object('revision', expected_revision + 1);"),
+                "the receipt carries the new revision — and no rotation seq exists to carry")
     }
 
     /// The one write road's clauses, as a sentence about a BODY. `mint` is
@@ -1868,9 +1917,15 @@ struct AuthRLSDDLTests {
                 "the overlay's key_vault_update, fences removed, is 11's line for line (signature included)")
         #expect(overlayLines.first == "create or replace function key_vault_update(payload jsonb, expected_revision int, key_proof text) returns jsonb",
                 "the SAME signature — a body change only")
-        // The deployed body (fences kept) carries the guard; 11's does not.
+        // The guard's history: 11 never carried it; 12's fold-in did; the
+        // marker-14 door (17) RETIRES it with rotation itself (VX-329).
         #expect(!body11.contains(SyncServerRefusalMarker.rotationRowsRemain), "11 itself is untouched")
-        #expect(try Self.deployedBody(of: "key_vault_update").contains(SyncServerRefusalMarker.rotationRowsRemain))
+        let stripped12 = Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))
+        let body12 = try #require(Self.lastBody(of: "key_vault_update", in: stripped12))
+        #expect(body12.contains(SyncServerRefusalMarker.rotationRowsRemain),
+                "12's fold-in carried the guard — the rotation era's deployed truth")
+        #expect(!(try Self.deployedBody(of: "key_vault_update")).contains(SyncServerRefusalMarker.rotationRowsRemain),
+                "the marker-14 door retires the guard with rotation (17 redefines the body)")
         // The re-run guard: refuses below marker 8 and a second deploy.
         #expect(raw.contains("VARIORUM_CLEARING_GUARD_NEEDS_11") && raw.contains("if deployed_marker < 8 then"))
         #expect(raw.contains("VARIORUM_CLEARING_GUARD_ALREADY_DEPLOYED")
@@ -2242,9 +2297,12 @@ struct AuthRLSDDLTests {
         #expect(try Self.finalBody(of: "sync_purge_execute")
                     .contains("granted_seq := next_tenant_seq(caller);"),
                 "M2: the granted ledger seq is the caller's own")
-        #expect(try Self.finalBody(of: "key_vault_update")
-                    .contains("next_seq := next_tenant_seq(caller);"),
-                "M3: the rotation seq is the caller's own — the seq rule and the completion guard compare it against the caller's data rows")
+        let twelveBody = try #require(Self.lastBody(of: "key_vault_update",
+                                                    in: Self.strippingComments(try Self.sqlFile("12_phase13y_tenant_seq.sql"))))
+        #expect(twelveBody.contains("next_seq := next_tenant_seq(caller);"),
+                "M3: the rotation seq is the caller's own — 12's body, the rotation era's deployed truth (17 retires the mint with rotation — the deployed-door pin)")
+        #expect(!(try Self.finalBody(of: "key_vault_update")).contains("next_tenant_seq"),
+                "the marker-14 door mints nothing: rotation retired, M3's site gone from the deployed body (VX-329)")
         #expect(!sql.contains("nextval"),
                 "no global mint survives anywhere in 12")
         #expect(sql.contains("drop sequence if exists sync_server_seq;"),
@@ -2299,7 +2357,12 @@ struct AuthRLSDDLTests {
     /// client registry's encrypted columns exactly (the overlay pin's
     /// check, applied to 12).
     @Test func theCompletionGuardLivesInTheCanonicalTwelveBody() throws {
-        let body = try Self.finalBody(of: "key_vault_update")
+        // The rotation era's CANONICAL body — the last pre-17 definition,
+        // 13's (13i-a re-carried 12's fold-in with the wing/shelf registry;
+        // the deployed door since VX-329 is 17's, pinned by
+        // `theMarker14VaultDoorRetiresRotationAndLandsTheModeShape`).
+        let body = try #require(Self.lastBody(of: "key_vault_update",
+                                              in: Self.strippingComments(try Self.sqlFile("13_phase13i_wings.sql"))))
         #expect(body.contains(SyncServerRefusalMarker.rotationRowsRemain),
                 "completion is 'no row of mine below it' — in the CANONICAL body now")
         #expect(body.contains("if vault_previous is not null then")

@@ -147,11 +147,18 @@ public enum SyncSchema {
     /// whole-row push would silently null the columns out from under a
     /// marker-13 writer; mirror DDL 16_phase13nb_private.sql — deploy is
     /// HER closeout window, never pre-authorized).
+    /// version 14 = the VX-307/VX-329 KEY-VAULT event (the vault's new
+    /// shape on the wire — `mode` + `earlier_row_keys`, the mode backfill,
+    /// `key_vault_update`'s canonical body re-asserted, `sync_reencrypt`
+    /// retired; the artifact was HELD at VX-307 and deploys in VX-329's
+    /// release window at her explicit go; mirror DDL
+    /// 17_phase_vx307_vault.sql — the vx307 deploy checklist, never
+    /// pre-authorized).
     /// **Bump this
     /// constant together with the mirror file's marker in every future
     /// lockstep event** — the DDL pin (`AuthRLSDDLTests`) fails the build
     /// if they drift.
-    public static let lockstepVersion = 13
+    public static let lockstepVersion = 14
     /// The synced tables, in FK-dependency-friendly apply order: parents
     /// before children wherever the graph is acyclic. (`container`⇄`block`⇄
     /// `variant` are mutually circular by design — the apply transaction runs
