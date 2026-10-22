@@ -3,12 +3,11 @@
 //  VariorumTests
 //
 //  VX-309 U2 piece 10 — RIDER VX-453, the road half (`SettingsAccountSearchTests` is the search half). The account section
-//  renders only on the new road (`ProtectionPane`: `roadStanding?.account`), so its catalog row joins only there: the
-//  catalog, the rendered map and the search's index each take the road, and today's road — Release included — keeps its
-//  catalog byte for byte (no row the pane does not show — P-1's declared ⇔ rendered, one layer down). At runtime the
-//  results pane asks the index for the road the window is on (the section's presence), so a Debug build over the real
-//  store's variant (today's road) never names it either. Mac only (it reads `AppSettingsView` and the faces' sources).
-//  New API (`rows(newRoad:)`, `rowIDsRendered(newRoad:)`, `wholeIndex(newRoad:)`): red by construction on the old tree.
+//  renders in `ProtectionPane` (`roadStanding?.account`), and its catalog row is declared exactly where it renders (P-1's
+//  declared ⇔ rendered, one layer down). At runtime the results pane asks the index whether the window shows the
+//  section, so a window without it never names it. Mac only (it reads `AppSettingsView` and the faces' sources).
+//  VX-329 U1 — THE RELEASE SWITCH: one road, so one catalog and one rendered map (today's account-less variants went with
+//  today's road); the window's question is the section's presence (`accountSection:`), never the road.
 //
 
 import Foundation
@@ -17,42 +16,39 @@ import Testing
 @testable import Variorum
 
 @MainActor
-@Suite("VX-453 — the account section's row joins only on the new road")
+@Suite("VX-453 — the account section's row joins where the section renders")
 struct SettingsAccountSurfaceTests {
-    @Test func todaysRoadKeepsTodaysCatalogAndTheNewRoadAddsOneRow() throws {
-        let today = SettingsCatalog.rows(newRoad: false)
-        let newRoad = SettingsCatalog.rows(newRoad: true)
-        #expect(!today.contains { $0.id == "account" }, "today's road names no section it does not render")
-        #expect(newRoad.filter { $0.id != "account" } == today, "the new road adds ONE row and changes none")
-        let row = try #require(newRoad.first { $0.id == "account" })
+    @Test func theCatalogAddsOneRowBesideTheProtectionPanesOwn() throws {
+        let rows = SettingsCatalog.rows
+        #expect(rows.filter { $0.id == "account" }.count == 1, "the section's row, once")
+        #expect(rows.filter { $0.id != "account" } == SettingsCatalog.paneRows, "the account row adds ONE row and changes none")
+        let row = try #require(rows.first { $0.id == "account" })
         #expect(row.pane == .protection && row.title == ProtectionWords.accountSectionTitle,
                 "the section's own title — one text, the face's and the search's")
-        let protection = newRoad.filter { $0.pane == .protection }.map(\.id)
+        let protection = rows.filter { $0.pane == .protection }.map(\.id)
         #expect(protection == ["protection", "account"], "beside the pane's own row")
-        #expect(SettingsCatalog.rows == SettingsCatalog.rows(newRoad: ProtectionRoad.newRoadIsLive), "the build's catalog")
-        #expect(SettingsSearch.findings(matching: "account", in: SettingsSearch.wholeIndex(newRoad: false)).isEmpty,
-                "today's road answers as before")
+        #expect(SettingsSearch.findings(matching: "account", in: SettingsSearch.wholeIndex(accountSection: false)).isEmpty,
+                "a window without the section never names it")
+        #expect(!SettingsSearch.findings(matching: "account", in: SettingsSearch.wholeIndex(accountSection: true)).isEmpty,
+                "a window with it finds it")
     }
 
     @Test func theRowIsRenderedWhereItIsDeclared() {
-        #expect(AppSettingsView.rowIDsRendered(newRoad: true)[.protection] == ["protection", "account"])
-        #expect(AppSettingsView.rowIDsRendered(newRoad: false)[.protection] == ["protection"])
-        #expect(AppSettingsView.rowIDsRendered == AppSettingsView.rowIDsRendered(newRoad: ProtectionRoad.newRoadIsLive))
-        for newRoad in [false, true] {
-            let declared = Set(SettingsCatalog.rows(newRoad: newRoad).map(\.id))
-            let rendered = Set(AppSettingsView.rowIDsRendered(newRoad: newRoad).values.flatMap { $0 })
-            #expect(declared == rendered, "declared ⇔ rendered on \(newRoad ? "the new road" : "today's road")")
-        }
+        #expect(AppSettingsView.rowIDsRendered[.protection] == ["protection", "account"])
+        #expect(AppSettingsView.paneRowIDs[.protection] == ["protection"])
+        let declared = Set(SettingsCatalog.rows.map(\.id))
+        let rendered = Set(AppSettingsView.rowIDsRendered.values.flatMap { $0 })
+        #expect(declared == rendered, "declared ⇔ rendered")
     }
 
-    /// The faces, by source: the results pane asks the index for the window's road (the section's presence), and the
-    /// section renders its title from the one constant the row carries.
-    @Test func theResultsPaneAsksForTheWindowsRoad() throws {
+    /// The faces, by source: the results pane asks the index for the window's section, and the section renders its title
+    /// from the one constant the row carries.
+    @Test func theResultsPaneAsksForTheWindowsSection() throws {
         let features = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
             .appendingPathComponent("Variorum/Features")
         let view = try String(contentsOf: features.appendingPathComponent("Settings/AppSettingsView.swift"), encoding: .utf8)
-        #expect(view.contains("SettingsSearch.findings(matching: query, in: SettingsSearch.wholeIndex(newRoad: newRoad))"))
-        #expect(view.contains("newRoad: roadStanding?.account != nil"))
+        #expect(view.contains("SettingsSearch.findings(matching: query, in: SettingsSearch.wholeIndex(accountSection: accountSection))"))
+        #expect(view.contains("accountSection: roadStanding?.account != nil"))
         let section = try String(contentsOf: features.appendingPathComponent("Protection/RoadAccountSheet.swift"),
                                  encoding: .utf8)
         #expect(section.contains("Section(ProtectionWords.accountSectionTitle)"))

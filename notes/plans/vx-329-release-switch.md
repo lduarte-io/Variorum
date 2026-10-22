@@ -233,7 +233,39 @@ form). Machinery note: the orchestrator's own commits interleave on this branch 
   New-road suites REWIRED, never weakened: `KeyFingerprint` for the envelope's fingerprint everywhere; today's key-file
   NAMES as fixtures (`PF.olderKeyFilename` / `.olderLegacyKeyFilename`, the same bytes); `CatalogTests`' parity pins keep
   today's parsers as a FROZEN ORACLE (`OlderBuilds` — the deleted parsers' rules copied byte-for-byte from `c629ae54f`,
-  never a looser restatement). **The app test targets: IN-PROGRESS (next).**
+  never a looser restatement). **The Mac test target: DONE** (this commit — `xcodebuild -scheme Variorum
+  build-for-testing` GREEN; RUN is the orchestrator's stage batch, the list below). DELETED with their subjects (today's
+  road whole): `PostureSwitchTests`, `PostureSwitchDrillTests` (VX-233, its own commit `b388fc994`),
+  `Phase13pControllerTests`, `Phase13pLobbyTests`, `EncryptionFlowTests`, `VX110SignedOutCastleTests`,
+  `VX202ReopenRaceTests`, `AppleRelinkDoorTests`, `ProtectionMigrationTests` + `…DrillTests`, `LobbyVaultRoadTests`,
+  `VX209WayBackRoundTripTests`, `VX209LeavesCastleConfirmTests`, `VX209GuideWarningTests`, `KeyDoorTests`,
+  `SyncEnrollmentTests`, `EnrollDirectionsTests`, `CustodyHandoverTests`, `CustodyReleaseTests`,
+  `GatedSaveChoreographyTests`, `VX80CastleFollowRecoveryTests`, `VX338SharedBackupFolderTests`, `SnapshotPairTests`,
+  `ConnectLibraryTests`, `ConnectDrillTests`, `StoreKeyBindingTests`, `VX206ProtectionLandingTests`,
+  `LobbyAutoAskTests` (today's `StoreLobby`; the road lobby's auto-ask is `RoadLockTests`/`RoadRearmTests`'),
+  `AppleKeyRoundTripTests`, `Phase13pKeyedDrillTests`, `ProtectionTierFaceTests`, `ProtectionSurfaceRenderTests`,
+  `VX310TodayLobbyWitnessTests` (its own header: "revisit at VX-329"), `WordsCopyDoorTests` (its subject retired —
+  `4c3e3b5f0`), `EncryptionTestSupport`, `VaultRPCEmulation` (orphaned). TRIMMED to the surviving subject, the trims
+  named in each file: `KeychainOffMainTests` (the session's lazy load stands), `KeychainPartitionTests` +
+  `KeychainTripwireTests` (the rules stand; today's families went), `Phase13pKeychainFactTests` (the platform facts
+  stand), `Phase13pProtectionBrainTests` (the idle clock + its words), `Phase13pCopySweepTests` (keystone 4, rule 11's
+  warning), `Phase13pSubstrateTests`, `Phase8ServicesTests` (the flat A1 suite), `DataSafetyFacesTests` (row 18's
+  sanity check), `DataSafetyTests` (the 14+4 rule, the flat legs' integrity/far-leg/own-files pins; the run, log,
+  runbook and single-flight pins now drive a SCRIPTED pair road), `BackupFutureStampTests` (the flat readers; the
+  weekly export and the face's stale rule stand), `SessionTokenBindingTests` (corner 47's legacy legs),
+  `LibraryPortabilityDoorTests` (13x's adoption flow), `TutorialWalkTests`' privacy suite (copy §7's chapter → the
+  road's three lessons + the register rule). REWIRED onto the road, the claim unchanged: `AppBootstrapOffMainTests`
+  (the planted road, the harness's staged opener), `SettingsLockCloseTests` (`LockWorld` + a holdable opener — the
+  crossing into Castle is the reopen road held mid-flight), `LibraryHandOffTests` (the road's act; `PickedCopy` reads
+  the pair back; the key file opens with the words), `ProtectionBackupHookTests` (`attach`/`runPair` — the writer),
+  `ProtectionRoadSwitchTests` (the pin FLIPPED: `live(debug: false)` is true), `ReadmeStartHerePlanTests` +
+  `TutorialNewRoadChapterTests` (every store, both variants), `SettingsAccountSurfaceTests`, `VX379PaneRowsTests`,
+  `RoadCrossingSurfaceTests`, `ProtectionPaneRoadRowTests`, `WordsConcealedClipboardTests`, `CopyRegisterPinTests` +
+  `TravellingDotsIndicatorTests` (their file lists: today's files out, the relocated `ProtectionCopy.swift` in);
+  today's store id assertions in the road route tests INVERTED (no file of today's names beside the library);
+  today's test init (`testOpener:gate:testPresence:`) stripped from every road harness. RELOCATED byte-for-byte: the
+  `SurfaceComposition` read (`VariorumTests/SurfaceComposition.swift`), the `AppleKeyRoundTrip` switch. **The phone's
+  test target: NEXT.**
 - Piece 4 — ⌃⌘L declared on `.lockLibraryNow` with its helper row (P-VX309-U1c-4 (b)): NOT-STARTED.
 - Piece 5 — the honest-refusal check (the §6 OPEN DESIGN NOTE): NOT-STARTED.
 - Piece 6 — the sweep table: NOT-STARTED.

@@ -5,16 +5,14 @@
 //  VX-309 U2 piece 7 — THE FIELD GUIDE'S PROTECTION CHAPTER ON THE NEW ROAD (VX-379's acceptance; QUESTIONS #235:
 //  "written here"; the brief is §5d of notes/plans/vx-309-copies-and-words.md, the record its U2 RECORD). The guide's
 //  "keeping it private" chapter is re-seeded against the rules AS BUILT — three lessons, the first LEADING with the
-//  readme's four Start Here passages verbatim — and seeded ONLY where the store opens on the new road (the readme's own
-//  gate, `ProtectionRoad.opensOnTheNewRoad(devStore:)`; VX-306 ladder r2 m2). Today's road, Release included, keeps
-//  copy §7's chapter (VX-209's older-copy warning with it) until the switch (VX-329). The words themselves are pinned
-//  headless by `U2WordsTests`; this suite pins the SEED: the book's shape against `plan(onTheNewRoad:)`, every paragraph
-//  landed, the export lesson's backup paragraphs, and the gate both ways.
+//  readme's four Start Here passages verbatim. VX-329 U1 — THE RELEASE SWITCH: the road is the only road, so EVERY store
+//  (the dev store and the real store's variant alike — the dev-store fence dissolved) seeds this chapter; copy §7's
+//  chapter and VX-209's older-copy warning left with today's road. The words themselves are pinned headless by
+//  `U2WordsTests`; this suite pins the SEED: the book's shape against `plan`, every paragraph landed, the export
+//  lesson's backup paragraphs, on both variants.
 //
-//  RED ON OLD (behavioural reverts, recorded in the U2 RECORD):
-//    · R-U2-7-gate — `restore` seeds with `onTheNewRoad: false` whatever the variant: the dev-store pins go red;
-//    · R-U2-7-seed — the seed ignores `onTheNewRoad` (today's chapter always): the dev-store pins go red;
-//    · R-U2-7-fence — the gate drops the dev-store fence (`newRoadIsLive` alone): the real-store pin goes red.
+//  RED ON OLD (behavioural reverts, recorded in the VX-309 U2 RECORD): R-U2-7-gate / R-U2-7-seed (the dev-store pins);
+//  the flip's own red is the real variant's arm — before VX-329 the fence kept today's chapter there.
 //  Mac-only (the seeder is the Mac's): run on the stage — headless runs never reach it.
 //
 
@@ -83,36 +81,28 @@ private func lessons(_ db: AppDatabase, _ guideID: String) async throws -> [Seed
 }
 
 @MainActor
-@Suite("VX-309 U2 — the field guide's protection chapter on the new road", .serialized)
+@Suite("VX-309 U2 — the field guide's protection chapter (VX-329: every store's)", .serialized)
 struct TutorialNewRoadChapterTests {
     private static let privacy = "keeping it private"
 
-    /// The new road's three lesson titles stand in for copy §7's two; every other chapter is untouched.
-    @Test func theNewRoadsPlanSwapsOnlyThePrivacyChapter() {
-        let today = TutorialSeeder.plan(onTheNewRoad: false)
-        let newRoad = TutorialSeeder.plan(onTheNewRoad: true)
-        #expect(today.map(\.chapter) == TutorialSeeder.plan.map(\.chapter)
-                && today.map(\.lessons) == TutorialSeeder.plan.map(\.lessons), "today's plan is the plan")
-        #expect(newRoad.map(\.chapter) == today.map(\.chapter), "the same chapters, in the same order")
-        for (new, old) in zip(newRoad, today) where new.chapter != Self.privacy {
-            #expect(new.lessons == old.lessons, "\(new.chapter) is untouched")
-        }
-        #expect(newRoad.first { $0.chapter == Self.privacy }?.lessons == [
+    /// The road's three lesson titles are the privacy chapter's; copy §7's titles are in no chapter.
+    @Test func thePlansPrivacyChapterIsTheRoads() {
+        let plan = TutorialSeeder.plan
+        #expect(plan.first { $0.chapter == Self.privacy }?.lessons == [
             ProtectionWords.guideKeyLessonTitle, ProtectionWords.guidePosturesLessonTitle,
             ProtectionWords.guideCopiesLessonTitle,
         ])
-        #expect(today.first { $0.chapter == Self.privacy }?.lessons == [
-            ProtectionCopy.privacyLessonOneTitle, ProtectionCopy.privacyLessonTwoTitle,
-        ])
+        #expect(!plan.flatMap(\.lessons).contains(ProtectionCopy.privacyLessonOneTitle), "copy §7's chapter left")
+        #expect(Set(plan.map(\.chapter)).count == plan.count, "each chapter once")
     }
 
-    /// The dev store in this (Debug) build opens on the new road: the seeded book matches the new road's plan exactly, and
-    /// the chapter says every paragraph — lesson 1 LEADING with the readme's Start Here passages.
-    @Test func theDevStoresGuideSeedsTheNewRoadsChapter() async throws {
-        try #require(ProtectionRoad.opensOnTheNewRoad(devStore: true), "a Debug test host: the dev store's road is new")
-        try await withGuide(variant: .dev) { db, guideID in
+    /// Every store's guide — the dev store's and the real store's variant alike — matches the plan exactly, and the
+    /// chapter says every paragraph — lesson 1 LEADING with the readme's Start Here passages.
+    @Test(arguments: [AppDatabase.StoreVariant.dev, .real])
+    func everyStoresGuideSeedsTheRoadsChapter(_ variant: AppDatabase.StoreVariant) async throws {
+        try await withGuide(variant: variant) { db, guideID in
             let seeded = try await lessons(db, guideID)
-            let planned = TutorialSeeder.plan(onTheNewRoad: true).flatMap { chapter, lessons in
+            let planned = TutorialSeeder.plan.flatMap { chapter, lessons in
                 lessons.map { (title: $0, chapter: chapter) }
             }
             #expect(seeded.count == planned.count, "every lesson is in the book exactly once")
@@ -136,28 +126,8 @@ struct TutorialNewRoadChapterTests {
             #expect(book.contains(ProtectionWords.guideBackupsHappen), "the export lesson: a backup is a pair")
             #expect(book.contains(ProtectionWords.guideSecondFolderLead + " Settings \u{25B8} "
                                   + "\(SettingsPane.dataSafety.title)"), "the second folder's lead, then the door")
-            #expect(!book.contains("copies your whole library into a backups folder"), "today's backup words retire here")
-            #expect(!book.contains(ProtectionCopy.privacyOlderCopyParagraph), "VX-209's warning retires on this road")
-            #expect(!seeded.contains { $0.title == ProtectionCopy.privacyLessonOneTitle
-                                       || $0.title == ProtectionCopy.privacyLessonTwoTitle })
-        }
-    }
-
-    /// A store of the REAL variant keeps today's road even in a Debug build (the dev-store fence): copy §7's chapter, the
-    /// older-copy warning, today's backup words — and none of the new road's.
-    @Test func theRealStoresGuideKeepsTodaysChapter() async throws {
-        try #require(!ProtectionRoad.opensOnTheNewRoad(devStore: false))
-        try await withGuide(variant: .real) { db, guideID in
-            let seeded = try await lessons(db, guideID)
-            #expect(seeded.map(\.title) == TutorialSeeder.plan.flatMap(\.lessons), "today's plan, exactly")
-            let book = seeded.map(\.text).joined(separator: "\n")
-            #expect(book.contains(ProtectionCopy.privacyOlderCopyParagraph))
-            #expect(book.contains("copies your whole library into a backups folder"))
-            for absent in [ProtectionWords.guideBackupsHappen, ProtectionWords.guideSecondFolderLead,
-                           ProtectionWords.guideOpenMeansReadable, ReadmeSeeder.startHerePassages[0]]
-                + ProtectionWords.guidePosturesLesson + ProtectionWords.guideCopiesLesson {
-                #expect(!book.contains(absent), "the new road's words stay off today's road: \(absent.prefix(40))")
-            }
+            #expect(!book.contains("copies your whole library into a backups folder"), "today's backup words are gone")
+            #expect(!seeded.contains { $0.title == ProtectionCopy.privacyLessonOneTitle })
         }
     }
 }

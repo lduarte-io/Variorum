@@ -73,7 +73,7 @@ struct SyncOutOfDateFaceTests {
             String(describing: SyncError.encryptionKeysUnavailable)))
         #expect(!SyncRowFace.isAppBehindServerError("(app 1, server 2)"))
         // And the keys-locked classifier does not swallow it either way.
-        #expect(!EncryptionSession.isKeysLockedError(real))
+        #expect(!SyncRowFace.isKeysLockedError(real))
     }
 
     /// The words: calm and plain (her letter), and the door's label is the

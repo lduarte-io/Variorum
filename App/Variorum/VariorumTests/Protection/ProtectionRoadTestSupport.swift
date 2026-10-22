@@ -45,9 +45,6 @@ final class RoadWorld {
     /// A new-road bootstrap over this world (today's opener is never taken on the new road).
     func bootstrap(writes: Bool = true) -> AppBootstrap {
         AppBootstrap(
-            testOpener: { .failure(AppDatabase.StoreOpenError(storePath: "", reason: "today's road is not taken here")) },
-            gate: .scripted(dials: ProtectionDials(), backing: InMemoryStoreKeyGuardBacking()),
-            testPresence: StoreFilePresence.classify(at: slotURL),
             testStoreURL: slotURL,
             protectionRoad: harness(writes: writes))
     }

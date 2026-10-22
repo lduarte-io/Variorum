@@ -65,9 +65,9 @@ struct HostedSyncTierFaceTests {
         #expect(!HostedSyncTier.isNotEntitledError(
             String(describing: SyncError.encryptionKeysUnavailable)))
         #expect(!HostedSyncTier.isNotEntitledError("Sync error: something else"))
-        #expect(!EncryptionSession.isKeysReplacedError(tier))
-        #expect(!EncryptionSession.isKeysLockedError(tier))
-        #expect(!EncryptionSession.isPayloadCryptoError(tier))
+        #expect(!SyncRowFace.isKeysReplacedError(tier))
+        #expect(!SyncRowFace.isKeysLockedError(tier))
+        #expect(!SyncRowFace.isPayloadCryptoError(tier))
     }
 
     /// The tier copy: honest (what it is · works fully without it · where
@@ -204,15 +204,6 @@ struct HostedSyncStatusReadTests {
             accessToken: "access", refreshToken: "refresh",
             expiresAt: Date().addingTimeInterval(3600),
             userID: "user-tier", email: "tier@example.com"))
-        let keyVault = KeyVaultClient(
-            configuration: KeyVaultClient.Configuration(
-                projectURL: URL(string: "https://vault.test.invalid")!,
-                apiKey: "publishable-test-key", deviceName: "test device"),
-            sessionProvider: auth,
-            load: { _ in throw URLError(.cancelled) })
-        let store = DeviceKeyStore.inMemory()
-        let encryption = EncryptionSession(
-            store: store, client: keyVault, signedIn: { true })
         let lifecycle = ScriptedLifecycle(script)
         try await withDependencies {
             $0.database = db
@@ -222,10 +213,9 @@ struct HostedSyncStatusReadTests {
             let services = AppServices(
                 session: AppSession(database: db), storeVariant: .real,
                 backupEnabled: false,
-                auth: auth, encryption: encryption,
+                auth: auth,
                 makeSyncTransport: { _ in QuietTransport() },
                 makeSyncKeyProvider: { AppTestKeyProvider() },
-                keyVault: keyVault,
                 makeAccountLifecycle: { _ in lifecycle },
                 // pre-13x 1a (the retirement's round-3 finding 2): the seam
                 // is REQUIRED now — this world declares its inertness

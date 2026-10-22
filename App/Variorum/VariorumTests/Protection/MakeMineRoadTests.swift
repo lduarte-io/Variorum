@@ -78,10 +78,8 @@ struct MakeMineRoadTests {
             Issue.record("the preflight passes for her own backup and her own words")
             return
         }
-        let minted = KeyBox()
         let result = await ProtectionCopyDoors.makeMine(
-            session, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: pair,
-            mintStoreIdentity: { minted.append($0) })
+            session, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: pair)
         #expect(result.outcome == .made)
         let slot = road.slot.places.slot
         let newKey = result.reopenKey
@@ -104,7 +102,6 @@ struct MakeMineRoadTests {
         #expect(hold.asOf == row.asOf)
         // Rule 21: this Mac remembers ONE library — the new one.
         #expect(road.memory.items.keys.sorted() == [record.libraryID])
-        #expect(minted.keys == [newKey], "today's store id minted for the new library")
         // The catalogue lists the outgoing library as another library's copy now (§7c (8): "where you can look
         // inside it or make it your library again").
         let after = ProtectionCopyDoors.listing(session)
@@ -156,8 +153,7 @@ struct MakeMineRoadTests {
         #expect(opened.road == .quietRoad(.touchID))
         #expect(QuietProbePlant.touchIDReads(road) == before + 1, "her press — the preflight's one read")
         let result = await ProtectionCopyDoors.makeMine(
-            session, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: pair,
-            mintStoreIdentity: { _ in })
+            session, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: pair)
         #expect(result.outcome == .made)
         #expect(QuietProbePlant.touchIDReads(road) == before + 1, "ONE press for one door — the act never re-opened the copy")
     }
@@ -173,8 +169,7 @@ struct MakeMineRoadTests {
         let opened = try CopyDoorsContext(session).readExecutor().lookInside(
             copy, in: catalog, typed: TypedSecrets(words: words), quietRoads: .withoutAPress)
         let result = await ProtectionCopyDoors.makeMine(
-            session, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: wrong,
-            mintStoreIdentity: { _ in Issue.record("no store id for a library never made") })
+            session, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: wrong)
         #expect(result.outcome == .refused(.wordsDoNotOpen) && result.reopenKey == session.key)
         #expect(!LibraryRestoreHold.isHeld(besideStore: road.slot.places.slot), "no hold stood — none stands")
         // A hold that stood before stays exactly as it was.
@@ -182,8 +177,7 @@ struct MakeMineRoadTests {
         let marker = LibraryRestoreHold.markerURL(besideStore: road.slot.places.slot)
         let standing = try Data(contentsOf: marker)
         _ = await ProtectionCopyDoors.makeMine(
-            session, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: wrong,
-            mintStoreIdentity: { _ in })
+            session, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: wrong)
         #expect(try Data(contentsOf: marker) == standing)
     }
 }

@@ -73,9 +73,10 @@ struct TravellingDotsIndicatorTests {
             .deletingLastPathComponent()  // VariorumTests
             .deletingLastPathComponent()  // App/Variorum
         let spinner = "Progress" + "View("
+        // VX-329 U1: today's road's surfaces (the Encryption tab, the key doors, sync setup, the secret check, today's
+        // lobby, the phone's posture sheets, ceremonies, lock view and Protection screen) were deleted with it; the list
+        // keeps every surviving one.
         let surfaces = [
-            "Shared/EncryptionViews.swift", "Shared/KeyDoorView.swift",
-            "Shared/SyncEnrollmentView.swift", "Shared/SecretCheck.swift",
             "Variorum/StoreLockView.swift", "Variorum/LibraryMissingView.swift",
             "Variorum/Features/Settings/ProtectionPane.swift",
             // VX-306 U2: the new road's interlude card and set-passphrase sheet.
@@ -93,19 +94,18 @@ struct TravellingDotsIndicatorTests {
             // VX-307 U2b: the card above the quick entry, the look, the tour's two asks, the Settings section.
             "Variorum/Features/Protection/WordsBandCard.swift",
             "VariorumMobile/Features/Protection/MobileRoadFaces.swift",
-            "VariorumMobile/Features/Protection/MobilePostureSheets.swift",
-            "VariorumMobile/Features/Protection/MobileProtectionCeremonies.swift",
-            "VariorumMobile/Features/Protection/MobileStoreLockView.swift",
             "VariorumMobile/Features/Protection/MobileLibraryMissingView.swift",
-            "VariorumMobile/Features/Protection/MobileProtectionSheet.swift",
         ]
+        // The Protection pane's busy rows were today's ceremonies (deleted with today's road at VX-329 U1); the road's
+        // sections open sheets that carry the indicator, so the pane itself renders none — it still names no spinner.
+        let noIndicatorOfItsOwn: Set<String> = ["Variorum/Features/Settings/ProtectionPane.swift"]
         var offenders: [String] = []
         for relative in surfaces {
             let url = appRoot.appendingPathComponent(relative)
             #expect(FileManager.default.fileExists(atPath: url.path), "surface missing: \(relative)")
             let text = try String(contentsOf: url, encoding: .utf8)
             if text.contains(spinner) { offenders.append(relative) }
-            #expect(text.contains("TravellingDotsIndicator") || relative.hasSuffix("MobileProtectionSheet.swift"),
+            #expect(text.contains("TravellingDotsIndicator") || noIndicatorOfItsOwn.contains(relative),
                     "\(relative) should render the indicator where it once spun")
         }
         #expect(offenders.isEmpty, "the system spinner survives on a protection surface: \(offenders)")

@@ -41,7 +41,7 @@ enum ArcPlant {
         guard case .ready(let copy, let catalog, let opened) = ProtectionCopyDoors.preflight(
             a, row: newest, copySecrets: pair, currentPair: pair) else { throw ArcError.preflight }
         let made = await ProtectionCopyDoors.makeMine(
-            a, copy: copy, catalog: catalog, row: newest, opened: opened, currentPair: pair, mintStoreIdentity: { _ in })
+            a, copy: copy, catalog: catalog, row: newest, opened: opened, currentPair: pair)
         guard made.outcome == .made else { throw ArcError.notMade }
         guard case .opened(let b) = await ProtectionOpenRoad.route(road.context(), keyInHand: made.reopenKey) else {
             throw ArcError.notOpened
@@ -68,7 +68,7 @@ enum ArcPlant {
             passphraseSet: { false },
             makeMine: { row, copySecrets, _ in
                 await ProtectionCopyDoors.makeMineInTheEmptySlot(
-                    context(), row: row, copySecrets: copySecrets, mintStoreIdentity: { _ in }).outcome
+                    context(), row: row, copySecrets: copySecrets).outcome
             },
             pick: { ProtectionCopyDoors.pick($0, context()) },
             lookInside: { copy, typed, quietRoads in
@@ -108,7 +108,7 @@ struct PreviousLibrariesArcTests {
         #expect(try quiet.notes().map(\.title).contains("A's own note"))
         quiet.close()
         // Its own words, with its quiet roads gone.
-        road.custody.items = road.custody.items.filter { $0.key.fingerprint != StoreKeyEnvelope.fingerprint(of: stepped.aKey) }
+        road.custody.items = road.custody.items.filter { $0.key.fingerprint != KeyFingerprint.of(stepped.aKey) }
         road.apple.keys = road.apple.keys.filter { road.apple.stamps[$0.key] != stepped.aID }
         let afterRoadsGone = try LookPlant.untouched(road)
         guard case .refused(.copyDoesNotOpen) = ProtectionCopyDoors.lookInside(
@@ -144,7 +144,7 @@ struct PreviousLibrariesArcTests {
             return
         }
         let made = await ProtectionCopyDoors.makeMine(
-            stepped.b, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: pair, mintStoreIdentity: { _ in })
+            stepped.b, copy: copy, catalog: catalog, row: row, opened: opened, currentPair: pair)
         #expect(made.outcome == .made)
         let record = try #require(try ProtectionLibraryFiles.readRecord(at: road.slot.places.slot, key: made.reopenKey))
         #expect(record.libraryID != stepped.aID && record.libraryID != bID, "a NEW library, A's writing in it")
@@ -163,7 +163,7 @@ struct PreviousLibrariesArcTests {
         let ctx = CopyDoorsContext(road.context())
         let row = try #require(ArcPlant.previousRow(ProtectionCopyDoors.listing(ctx), library: stepped.aID))
         let result = await ProtectionCopyDoors.makeMineInTheEmptySlot(
-            ctx, row: row, copySecrets: TypedSecrets(words: stepped.aWords), mintStoreIdentity: { _ in })
+            ctx, row: row, copySecrets: TypedSecrets(words: stepped.aWords))
         #expect(result.outcome == .made)
         let key = try #require(result.key)
         let record = try #require(try ProtectionLibraryFiles.readRecord(at: road.slot.places.slot, key: key))

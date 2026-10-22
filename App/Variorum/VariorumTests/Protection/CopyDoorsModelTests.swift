@@ -28,7 +28,7 @@ enum PlantCatalog {
     /// A backup pair of `file`'s library in `Backups/<library8>/<mac8>/`, stamped `date`.
     static func backup(_ file: KeyFile, mac: String, at date: Date) throws -> [CatalogEntry] {
         let stem = CatalogNames.backupPrefix + CatalogNames.stampString(date) + "-"
-            + StoreKeyEnvelope.shortFingerprint(file.fingerprint)
+            + KeyFingerprint.short(file.fingerprint)
         let folders = [CatalogNames.backupsFolderName, String(file.libraryID.prefix(8)), String(mac.prefix(8))]
         return [
             CatalogEntry(place: .container, folders: folders, name: stem + ".sqlite"),

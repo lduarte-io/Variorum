@@ -54,12 +54,11 @@ struct MakeMineRouteTests {
                 #expect(ProtectionLibraryFiles.opens(folder.appendingPathComponent(CatalogNames.libraryFilename), key: created.key))
                 #expect(FileManager.default.fileExists(atPath: folder.appendingPathComponent(ProtectionNames.keyFilename).path))
             }
-            // Today's store id beside the new library is a fresh one, under the new key.
-            guard case .known = StoreIdentity.resolve(besideStore: world.slotURL) else {
-                Issue.record("a store id beside the new library")
-                return
-            }
-            #expect(try StoreKeyEnvelope.loadCurrent(besideStore: world.slotURL)?.keyFingerprint == reopened.library.fingerprint)
+            // VX-329 U1: today's store id (a stub envelope beside the store, read only by today's sync custody, dials and
+            // backup log) left with today's road — nothing of today's key-file names is written beside the library now.
+            let besideTheSlot = try FileManager.default.contentsOfDirectory(
+                atPath: world.slotURL.deletingLastPathComponent().path)
+            #expect(!besideTheSlot.contains { $0.hasPrefix("variorum-keys") }, "no file of today's names: \(besideTheSlot)")
             // §7c (9), owed once to the reopened session's status seam.
             let standing = try #require(bootstrap.roadStanding)
             var spoken: [String] = []

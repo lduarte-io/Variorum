@@ -33,11 +33,11 @@ struct ProtectionFactsGathererTests {
                 with: key,
                 record: ProtectionRecord.minting(
                     libraryID: UUID().uuidString.lowercased(), mode: .standard, account: nil,
-                    currentFingerprint: StoreKeyEnvelope.fingerprint(of: key), at: Date()))
+                    currentFingerprint: KeyFingerprint.of(key), at: Date()))
         }
     }
 
-    static func fp(_ key: StoreKey) -> String { StoreKeyEnvelope.fingerprint(of: key) }
+    static func fp(_ key: StoreKey) -> String { KeyFingerprint.of(key) }
 
     @Test func rule27sCustodyFactNeverReadsCouldNotReadAsOpensNothing() throws {
         let rig = Rig()

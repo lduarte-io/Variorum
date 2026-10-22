@@ -220,71 +220,7 @@ struct Phase13pKeychainFactTests {
                 "the data-protection keychain HAS it")
     }
 
-    /// THE RED-ON-OLD PIN, and the lesson of the verification gap that let
-    /// this ship: a custody pin asserts the ROUND TRIP — write through
-    /// production, then find it through production's OWN read path — never
-    /// the write alone. Before the fix `saveGated` succeeded and
-    /// `gatedItemExists` returned false, which is precisely how the author
-    /// lost her Auto store-key item to a mode switch that had "worked".
-    ///
-    /// Safe by construction: `StoreKeyGuardKeychain`'s gated item is scoped, so a
-    /// throwaway scope never touches real custody, and it is
-    /// ThisDeviceOnly — never synchronizable. (The E2EE gated item's
-    /// account is FIXED, so it is deliberately never exercised here: a
-    /// test write would land on the author's live custody.)
-    @Test func theGatedStoreKeyIsFoundByProductionsOwnProbeAfterProductionWritesIt() {
-        let scope = "13p-fix-probe-\(UUID().uuidString)"
-        defer { StoreKeyGuardKeychain.deleteGated(scope: scope, storeID: nil) }
-        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope, storeID: nil) == false,
-                "clean start")
-        #expect(StoreKeyGuardKeychain.saveGated(StoreKey.mint(), scope: scope, storeID: nil),
-                "the ACL'd write lands (this half passed even before the fix)")
-        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope, storeID: nil),
-                "and production's own probe must FIND it — the half that was broken")
-
-        // 13p-fix R1-7: the third leg of the same round trip — a DELETE
-        // must reach the keychain the WRITE reached. Unasserted cleanup is
-        // how this suite left invisible ACL'd litter on every run.
-        // (17h R3-5: the delete now ANSWERS, so the leg asserts directly.)
-        #expect(StoreKeyGuardKeychain.deleteGated(scope: scope, storeID: nil),
-                "the delete reaches the same keychain the write did — and says so")
-        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope, storeID: nil) == false)
-    }
-
-    /// 17h R2-7 — the probe-first RE-SAVE round trip against the real
-    /// data-protection keychain in the signed host: a second `saveGated`
-    /// over an existing gated item runs the full choreography (leading
-    /// probe sweep, probe add, trailing sweep, verified release, real
-    /// add) and ends with the item present and no probe litter. Throwaway
-    /// scope, ThisDeviceOnly, never synchronizable — the standing safety
-    /// construction.
-    @Test func aGatedReSaveOverAnExistingItemLandsAndLeavesNoProbeLitter() {
-        let scope = "17h-resave-probe-\(UUID().uuidString)"
-        defer { StoreKeyGuardKeychain.deleteGated(scope: scope, storeID: nil) }
-        #expect(StoreKeyGuardKeychain.saveGated(StoreKey.mint(), scope: scope, storeID: nil),
-                "the first gated save lands")
-        #expect(StoreKeyGuardKeychain.saveGated(StoreKey.mint(), scope: scope, storeID: nil),
-                "the RE-SAVE over an existing item lands through the probe-first choreography")
-        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope, storeID: nil),
-                "production's own probe finds the re-saved item")
-
-        // No probe litter: the probe account's item was swept within the
-        // call (attributes-only, non-interactive — the standing probe
-        // discipline).
-        var probe: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: StoreKeyCustody.deviceKeychainService,
-            kSecAttrAccount as String: StoreKeyGuardKeychain.probeAccount(scope: scope, storeID: nil),
-            kSecUseDataProtectionKeychain as String: true,
-        ]
-        probe[kSecReturnAttributes as String] = true
-        let ctx = LAContext()
-        ctx.interactionNotAllowed = true
-        probe[kSecUseAuthenticationContext as String] = ctx
-        #expect(SecItemCopyMatching(probe as CFDictionary, nil) == errSecItemNotFound,
-                "the probe item is swept before the call returns")
-
-        #expect(StoreKeyGuardKeychain.deleteGated(scope: scope, storeID: nil))
-        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope, storeID: nil) == false)
-    }
+    // (VX-329 U1: the gated store key's two round trips — `StoreKeyGuardKeychain`'s write, probe, re-save choreography and
+    // delete — drove today's store-key custody, deleted with it. The protection road's custody family round-trips the real
+    // keychain in its own opt-in suites.)
 }

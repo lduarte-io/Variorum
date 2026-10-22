@@ -28,15 +28,12 @@ struct CopyRegisterPinTests {
     }
 
     /// The copy homes and the faces with inline literals, relative to `App/Variorum`.
+    /// VX-329 U1: today's road's copy homes and faces were deleted with it; the protection copy the road still speaks
+    /// moved byte-for-byte to `Shared/Protection/ProtectionCopy.swift`, scanned here in their place.
     static let copyHomes: [String] = [
-        "Shared/StoreProtection.swift", "Shared/PostureCopy.swift", "Shared/KeyDoorCopy.swift",
+        "Shared/Protection/ProtectionCopy.swift",
         "Shared/SampleLibrary/SampleLibraryEncryptionBook.swift",
-        "Shared/EncryptionViews.swift", "Shared/KeyDoorView.swift", "Shared/KeyDoorModel.swift",
-        "Shared/PostureSwitchModel.swift", "Shared/PostureFollowModel.swift",
-        "Shared/SyncEnrollmentView.swift", "Shared/SyncEnrollmentModel.swift",
-        "Shared/EncryptionSession.swift",
         "Variorum/StoreLockView.swift", "Variorum/LibraryMissingView.swift",
-        "Variorum/ProtectionStatusRow.swift",
         "Variorum/Features/Settings/ProtectionPane.swift",
         "Variorum/Features/Settings/DataSafetyPane.swift",
         // VX-306 U2: the rebuilt protection core's words, in ONE file (§7c — the faces read them from here).

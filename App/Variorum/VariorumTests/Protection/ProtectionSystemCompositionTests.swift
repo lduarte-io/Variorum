@@ -35,7 +35,7 @@ struct ProtectionSystemCompositionTests {
         #expect(created.words.count == 12)
         let libraryID = try #require(created.library.record?.libraryID)
         let key = created.library.key
-        let fingerprint = StoreKeyEnvelope.fingerprint(of: key)
+        let fingerprint = KeyFingerprint.of(key)
 
         // What landed: the library under its key, the key file beside it with its words lock, the silent
         // item STAMPED with this library, the Apple key (in memory here) stamped too, the memory item.

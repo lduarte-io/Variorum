@@ -20,6 +20,14 @@ import Testing
 @testable import Variorum
 import VariorumCore
 
+/// The opt-in switch (VX-329 U1: moved byte-for-byte out of `AppleKeyRoundTripTests.swift`, deleted with today's
+/// Apple-key family it drove — this suite is its one reader now).
+nonisolated enum AppleKeyRoundTrip {
+    static var requested: Bool {
+        ProcessInfo.processInfo.environment["VARIORUM_APPLE_KEY_ROUND_TRIP"] == "1"
+    }
+}
+
 @Suite(
     "VX-306 U1a — the Apple-keys leaf round-trips on this Mac (opt-in; DISABLED unless VARIORUM_APPLE_KEY_ROUND_TRIP=1)",
     .serialized,

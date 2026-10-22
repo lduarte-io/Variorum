@@ -21,9 +21,6 @@ struct SetPassphraseRowRereadRouteTests {
     private func bootstrap(_ road: PlantedRoad, session: SessionFact) -> AppBootstrap {
         let url = road.slot.places.slot
         return AppBootstrap(
-            testOpener: { .failure(AppDatabase.StoreOpenError(storePath: "", reason: "today's road is not taken here")) },
-            gate: .scripted(dials: ProtectionDials(), backing: InMemoryStoreKeyGuardBacking()),
-            testPresence: StoreFilePresence.classify(at: url),
             testStoreURL: url,
             protectionRoad: ProtectionRoadTestHarness(system: road.system(), session: session, open: { key in
                 Result { try AppDatabase.openStore(at: url, custody: .inMemory(initial: key)) }

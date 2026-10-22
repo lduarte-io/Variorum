@@ -4,7 +4,7 @@
 //  turned on by a test harness) on a temp slot and a THROWAWAY keychain scope: the lifecycle's stage 1 (a fresh
 //  slot → the creation → the library open with nothing in front — VX-307 U2b retired the creation-time words card on
 //  the Mac — the four remembered things written,
-//  today's store id minted beside it), the quiet relaunch, stage 5's on-device half (the silent item gone → the
+//  and — since VX-329 U1 — no file of today's names beside it), the quiet relaunch, stage 5's on-device half (the silent item gone → the
 //  Apple wrap opens silently and the item is re-made — rule 8), both quiet roads gone → the lobby's typed field →
 //  the words open it, and the throwing edges: K5's `recordMissing` → the missing face with no sentence; a file in
 //  the live place that is no key file → the lobby, never a crash (P-VX306-U1a-2); an unlistable keychain → the
@@ -23,14 +23,13 @@ import VariorumCore
 @MainActor
 struct ProtectionRoadRouteTests {
     /// Stage 1, then a relaunch: the open with NOTHING in front of it (VX-307 U2b — rules 2–3 as amended: the words are
-    /// never shown before the first screen), rule 21's four things, the store id — and a silent reopen. Before VX-412
+    /// never shown before the first screen), rule 21's four things, nothing of today's names (VX-329 U1) — and a silent reopen. Before VX-412
     /// this arm landed on `.newLibraryWords` (the creation-time card) — the flip's red-on-old.
     @Test func aFreshSlotCreatesAndOpensWithNothingInFrontThenReopensQuietly() async throws {
         try await withRoadDependencies {
             let world = RoadWorld()
             defer { world.scope.purge() }
             let bootstrap = world.bootstrap()
-            #expect(bootstrap.newRoad)
             #expect(!ProtectionRoad.showsWordsAtCreation, "the Mac's first open has no words card")
             await bootstrap.awaitOpen()
             if case .opening = bootstrap.state { await bootstrap.awaitOpen() }
@@ -51,11 +50,11 @@ struct ProtectionRoadRouteTests {
                 try String.fetchAll(db, sql: "SELECT name FROM sqlite_master WHERE type = 'table'")
             }
             #expect(tables.contains("protection_record") && tables.contains("container"))
-            // Today's store id beside the store (sync custody, the dials, the backup log keep their footing).
-            guard case .known = StoreIdentity.resolve(besideStore: world.slotURL) else {
-                Issue.record("today's store id is minted at a creation")
-                return
-            }
+            // VX-329 U1: today's store id (a stub envelope beside the store, read only by today's sync custody, dials and
+            // backup log) left with today's road — nothing of today's key-file names is written beside the library now.
+            let besideTheSlot = try FileManager.default.contentsOfDirectory(
+                atPath: world.slotURL.deletingLastPathComponent().path)
+            #expect(!besideTheSlot.contains { $0.hasPrefix("variorum-keys") }, "no file of today's names: \(besideTheSlot)")
             // Rule 21's four things, as this Mac remembers them; the silent item stamped; the Apple key stamped.
             let libraryID = try #require(road.library.record?.libraryID)
             #expect(try KeychainMemoryLeaf(scope: world.scope.scope).rememberedLibraryIDs() == [libraryID])
@@ -262,7 +261,7 @@ struct ProtectionRoadRouteTests {
             defer { world.scope.purge() }
             let bootstrap = world.bootstrap(writes: false)
             await bootstrap.awaitOpen()
-            guard case .failed(let error, _) = bootstrap.state else {
+            guard case .failed(let error) = bootstrap.state else {
                 Issue.record("a read-only road over an empty slot creates nothing: \(bootstrap.state)")
                 return
             }

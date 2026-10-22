@@ -6,7 +6,8 @@
 //  (the bootstrap's `finish`, a library closed behind the lobby) and at quit (`applicationWillTerminate`), and then ONLY
 //  if the board still holds that copy. Every drive uses a PRIVATE named pasteboard — her clipboard is never a test's.
 //  The wirings are pinned by source (red on the pre-VX-448 tree: the bootstrap's one road was `WordsClipboard.copy`, the
-//  60-second timer, and nothing cleared at the lock or at quit). Today's `copy` is untouched (its own pins stand).
+//  60-second timer, and nothing cleared at the lock or at quit). VX-329 U1: today's timed `copy` was deleted with today's
+//  words screens; this rule is the only one left.
 //
 
 #if os(macOS)
@@ -80,7 +81,7 @@ struct WordsConcealedClipboardTests {
 
     /// THE WIRINGS (red on the pre-VX-448 tree): the bootstrap's ONE `copyWords` — every new-road look's road (the
     /// card, the doors' look, the tour, the banner, U2's join moment) — is the concealed rule, never today's timer; the
-    /// lock's clear sits in `finish`'s non-ready arm beside the presenter's `libraryClosed`, the new road only; the quit's
+    /// lock's clear sits in `finish`'s non-ready arm beside the presenter's `libraryClosed`; the quit's
     /// in `applicationWillTerminate`; the rule's body sleeps on nothing.
     @Test func everyNewRoadLookRidesItAndTheLockAndTheQuitClearIt() throws {
         let bootstrap = try Self.code("Shared/AppBootstrap.swift")
@@ -90,8 +91,12 @@ struct WordsConcealedClipboardTests {
         #expect(!roadBody.contains("WordsClipboard.copy(words)"), "never today's 60-second timer")
         let finish = try #require(bootstrap.range(of: "private func finish(_ outcome: OpenOutcome)"))
         let finishHead = bootstrap[finish.upperBound...].prefix(700)
-        #expect(finishHead.contains("protectionSheets?.libraryClosed()") && finishHead.contains("if newRoad { Self.clearWordsAtLock() }"),
-                "the lock's clear beside VX-239's drop, the new road only")
+        // VX-329 U1: one road, so the clear is unconditional beside the drop (its `newRoad` guard went with the fork).
+        #expect(finishHead.contains("protectionSheets?.libraryClosed()") && finishHead.contains("Self.clearWordsAtLock()"),
+                "the lock's clear beside VX-239's drop")
+        for fork in ["if newRoad", "!newRoad", "guard newRoad", "let newRoad:"] {
+            #expect(!bootstrap.contains(fork), "no road fork is left to guard it (\(fork))")
+        }
         #expect(bootstrap.contains("WordsClipboard.clearHeld()"), "clearWordsAtLock clears the held copy")
         let delegate = try Self.code("Variorum/VariorumAppDelegate.swift")
         let quit = try #require(delegate.range(of: "func applicationWillTerminate(_ notification: Notification)"))

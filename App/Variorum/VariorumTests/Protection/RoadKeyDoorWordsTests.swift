@@ -61,7 +61,7 @@ struct RoadKeyDoorWordsTests {
         #expect(ProtectionWords.wordsLookCopied == "Copied. Your clipboard keeps them until you copy something else, your "
             + "library locks or Variorum quits.")
         #expect(!ProtectionWords.wordsLookCopied.contains("60"), "VX-448: the 60-second timer is gone from the new road")
-        #expect(ProtectionCopy.wordsCopied.contains("60 seconds"), "today's road keeps its own sentence (its own rule)")
+        // (VX-329 U1: today's own sentence, `ProtectionCopy.wordsCopied`, left with today's words screens.)
     }
 
     /// The key doors as drafted (PROVISIONAL P-VX308-U3-2).

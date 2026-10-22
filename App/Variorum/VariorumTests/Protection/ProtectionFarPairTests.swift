@@ -45,7 +45,7 @@ enum FarPlant {
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let key = StoreKey.mint()
         let stem = CatalogNames.backupPrefix + CatalogNames.stampString(date) + "-"
-            + StoreKeyEnvelope.shortFingerprint(StoreKeyEnvelope.fingerprint(of: key))
+            + KeyFingerprint.short(KeyFingerprint.of(key))
         try Data("planted snapshot".utf8).write(to: folder.appendingPathComponent(stem + ".sqlite"))
         try KeyFile(libraryID: libraryID, key: key, epoch: 1).encoded()
             .write(to: folder.appendingPathComponent(stem + ".keys.json"))
@@ -174,7 +174,7 @@ struct ProtectionFarPairTests {
         let container = FarPlant.ownContainer(road, session)
         try FileManager.default.createDirectory(at: container, withIntermediateDirectories: true)
         let name = CatalogNames.backupPrefix + CatalogNames.stampString(Date()) + "-"
-            + StoreKeyEnvelope.shortFingerprint(keyFile.fingerprint) + ".sqlite"
+            + KeyFingerprint.short(keyFile.fingerprint) + ".sqlite"
         let fake = container.appendingPathComponent(name)
         try Data("not a library".utf8).write(to: fake)
         try keyFile.encoded().write(to: FileBackupsLeaf.pairURL(of: fake))
