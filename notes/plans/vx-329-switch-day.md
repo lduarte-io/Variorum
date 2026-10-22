@@ -77,8 +77,14 @@ done   # per-file, so an absent -wal/-shm never aborts the move (zsh's (N) keeps
   needs a new fact and new words, deliberately not invented overnight (U1 piece 5's record).
 - The throwaway's §2 rehearsal is tonight's; its markers above flip only on §8's record.
 
-## The beta testers' line (rule 26's procedure)
+## The beta testers' line (rule 26's procedure — HER framing at the morning sitting)
 
-Before updating: sign into sync (everything returns by the join), or export (Copy full text per note — the
-markdown road — until the Data Safety export door's fix is confirmed on a real store), then start fresh on 0.10.
-The old store stays openable by the old build.
+**The robust instruction, hers: "Copy out anything you need, then update and start fresh."** The timing fact that
+makes it the right one: the sync-once road closes at HER DEPLOY, not at the tester's update — once the mirror
+speaks marker 14, an old build refuses to sync, so "open it and let it sync first" is advice a tester may already
+be unable to follow by the time they hear it. Whatever they had ALREADY pushed before the deploy returns by the
+join on 0.10 with nothing done; unpushed writing comes out of the old build by hand. **And the export must not be
+Data Safety's door on the OLD build** — VX-461's fix ships in 0.10 and will never be in 0.9.8, where that door
+writes an empty file — so the old-build export is **Copy full text per note** (or the scheduled Markdown export,
+turned on and left to run). The careless have a way back regardless: 0.10 writes nothing to a store it refuses,
+so reinstalling 0.9.8 still opens it.

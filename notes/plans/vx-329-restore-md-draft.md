@@ -159,7 +159,7 @@ cannot be removed again by a rule that was about the old one.
 ## 7. If the mirror is lost, or a device is
 
 - **The mirror is lost or wrong.** Your Mac's store is the truth. The mirror is rebuilt by pushing this store back
-  up to it. This has been executed live three times. Nothing about your keys changes.
+  up to it. Nothing about your keys changes.
 - **A device is lost or stolen.** In this order: Settings ▸ Account ▸ **Sign Out Everywhere**, so the device can no
   longer sync; Settings ▸ Protection ▸ **Replace All Keys**, so nothing it holds opens anything new — your library
   gets a new key carrying the old ones, and the account's locks change in the same act, so each of your other
