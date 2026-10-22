@@ -494,6 +494,12 @@ nonisolated enum ProtectionWords {
     /// Use Castle — what entering does (rule 11; the lifecycle's stage 6).
     static let useCastleLead = "Your library gets a new key, and the Apple and on-device keychain items are deleted — the "
         + "Apple ones on every device of your Apple account — so your backups are Castle-protected along with your library."
+    /// VX-469 (c) — her ruling at the 2026-10-22 sitting (QUESTIONS #237): Castle's promise is about LIVE libraries, so
+    /// entering it leaves the quiet roads of the libraries in Previous Libraries on this Mac standing — said at the door,
+    /// in the warning idiom of the backups sentence (rule 25's), on every confirm that says what entering does. Words
+    /// PROVISIONAL P-VX329-R1-2.
+    static let castleLeavesPreviousLibraries = "The libraries in Previous Libraries keep their own quiet roads on this "
+        + "\(ProtectionCopy.deviceName) \u{2014} Castle protects the library you have open."
     /// `Words.floorSentence` — Castle's floor (rule 9: no quiet road through Apple; the design's §3.1 (2)).
     static let castleFloor = "From now on your passphrase, your twelve words, or \(ProtectionCopy.biometryName) on this "
         + "\(ProtectionCopy.deviceName) open your library. Lose all three and it is gone."

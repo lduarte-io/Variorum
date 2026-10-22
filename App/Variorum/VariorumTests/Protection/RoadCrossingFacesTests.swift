@@ -50,12 +50,34 @@ struct RoadCrossingFacesTests {
         #expect(open.ask == .passphraseAndWords)
         #expect(open.newPassphrase, "no passphrase yet — the door sets the one typed")
         #expect(open.sentences == [
-            ProtectionWords.castlePromise, ProtectionWords.useCastleLead, ProtectionWords.castleFloor,
-            ProtectionWords.exportAPlainCopyFirst,
+            ProtectionWords.castlePromise, ProtectionWords.useCastleLead, ProtectionWords.castleLeavesPreviousLibraries,
+            ProtectionWords.castleFloor, ProtectionWords.exportAPlainCopyFirst,
         ])
         #expect(open.undeletableCopies.isEmpty)
         #expect(!open.synced)
         #expect(open.gate == RoadGateChoice(touchIDAvailable: true, preselected: .touchID))
+    }
+
+    /// VX-469 (c) — her ruling (QUESTIONS #237: "Castle's promise is about live libraries … at most we should show a
+    /// warning like we do for backups"): Use Castle's confirm says the libraries in Previous Libraries keep their quiet
+    /// roads on this Mac, right after what entering does; the doors that do not enter Castle never say it.
+    @Test func vx469_useCastleSaysPreviousLibrariesKeepTheirQuietRoads() async throws {
+        let road = PlantedRoad()
+        let (session, _) = try await road.created()
+        let faces = try CrossingPlant.faces(road, session) { $0.biometry = .ready }
+        let open = try #require(faces.useCastle.openDoor)
+        let lead = try #require(open.sentences.firstIndex(of: ProtectionWords.useCastleLead))
+        #expect(open.sentences.dropFirst(lead + 1).first == ProtectionWords.castleLeavesPreviousLibraries)
+        #expect(ProtectionWords.castleLeavesPreviousLibraries
+                == "The libraries in Previous Libraries keep their own quiet roads on this Mac \u{2014} Castle protects "
+                + "the library you have open.")
+        let castleRoad = PlantedRoad()
+        let (castle, _) = try await Crossing.inCastle(castleRoad)
+        let inCastle = try CrossingPlant.faces(castleRoad, castle)
+        #expect(inCastle.mode == .castle && inCastle.useStandard.openDoor != nil)
+        for door in [inCastle.useStandard, inCastle.replaceAllKeys] {
+            #expect(!(door.openDoor?.sentences.contains(ProtectionWords.castleLeavesPreviousLibraries) ?? false))
+        }
     }
 
     /// The gate choice follows THIS Mac: no finger enrolled (or no hardware) → Always ask is the only choice; an earlier
@@ -249,8 +271,9 @@ struct RoadCrossingWordsTests {
     /// "OK"/"ID" are the only capitals beyond a sentence's first letter and the proper names).
     @Test func noCrossingLineShouts() {
         let lines = [
-            ProtectionWords.useCastleLead, ProtectionWords.castleFloor, ProtectionWords.exportAPlainCopyFirst,
-            ProtectionWords.copiesUnderAKeyThisMacCantDelete, ProtectionWords.scheduledExportTurnsOff,
+            ProtectionWords.useCastleLead, ProtectionWords.castleLeavesPreviousLibraries, ProtectionWords.castleFloor,
+            ProtectionWords.exportAPlainCopyFirst, ProtectionWords.copiesUnderAKeyThisMacCantDelete,
+            ProtectionWords.scheduledExportTurnsOff,
             ProtectionWords.gateTouchIDLine, ProtectionWords.gateAlwaysAskLine, ProtectionWords.useStandardLead,
             ProtectionWords.replaceAllKeysLead, ProtectionWords.crossingNewPassphraseLead, ProtectionWords.crossingFailed,
             ProtectionWords.crossingDoorClosed, ProtectionWords.exportTurnedOffNotice, ProtectionWords.gateRowTouchID,

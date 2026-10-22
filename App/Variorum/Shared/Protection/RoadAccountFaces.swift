@@ -345,7 +345,11 @@ nonisolated struct RoadAccountFaces: Equatable, Sendable {
         if door == .moveToSignedInAccount { sentences += [ProtectionWords.moveLead, ProtectionWords.ruleSixteen] }
         sentences += [ProtectionWords.joinLead, ProtectionWords.onePairAtATime]
         if let line = ProtectionWords.joinPlanLine(plan, library: library) { sentences.append(line) }
-        if plan == .entersCastle { sentences += [ProtectionWords.castlePromise, ProtectionWords.useCastleLead] }
+        if plan == .entersCastle {
+            // Use Castle's own door words, VX-469 (c)'s line with them.
+            sentences += [ProtectionWords.castlePromise, ProtectionWords.useCastleLead,
+                          ProtectionWords.castleLeavesPreviousLibraries]
+        }
         var copies: [String] = []
         for words in spec.words {
             switch words {

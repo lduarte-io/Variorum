@@ -234,7 +234,10 @@ nonisolated struct RoadCrossingFaces: Equatable, Sendable {
     ) -> RoadDoorOpen {
         var sentences: [String]
         switch door {
-        case .useCastle: sentences = [ProtectionWords.castlePromise, ProtectionWords.useCastleLead]
+        // VX-469 (c): what entering does, then that Previous Libraries' quiet roads on this Mac stand (her ruling).
+        case .useCastle:
+            sentences = [ProtectionWords.castlePromise, ProtectionWords.useCastleLead,
+                         ProtectionWords.castleLeavesPreviousLibraries]
         case .useStandard: sentences = [ProtectionWords.useStandardLead]
         case .replaceAllKeys: sentences = [ProtectionWords.replaceAllKeysLead]
         }

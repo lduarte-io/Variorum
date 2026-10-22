@@ -782,8 +782,29 @@ a behavioral revert re-checks it):**
   sentences added first with no caller, so the red is behavioral, never a compile failure): `✘ Test run with 15 tests in 1
   suite failed … with 8 issues` — the join's press ×2, its preflight ×2, Move's press ×2 and preflight ×2. **GREEN after:**
   the account suites (`ProtectionJoinFollowRoadTests|ProtectionAccountRoadTests|RoadAccount*|RoadJoinFollow*`) `✔ Test
-  run with 70 tests in 8 suites passed`. The two sentences pass the two-register rule (no forbidden word).
-- Piece 4 — VX-469 (c): NOT-STARTED.
+  run with 70 tests in 8 suites passed`. The two sentences pass the two-register rule (no forbidden word). **REVERT
+  CHECK (on `181774e60`, the tree clean first):** `typesTheAccountsSecret` answering false for Move and the join →
+  `✘ Test run with 15 tests in 1 suite failed … with 8 issues` (the same eight); restored by `git checkout --`, `git diff
+  --exit-code` clean, the harness rebuilt. **VX-464: DONE (`181774e60`).**
+- Piece 4 — VX-469 (c): FIX DONE (this commit); the revert check follows. **What it is:** a wording row under her ruling
+  (QUESTIONS #237: *"Castle's promise is about live libraries and at most we should show a warning like we do for backups
+  when you go into castle. I think C is fine."*). **THE LINE** (`ProtectionWords.castleLeavesPreviousLibraries`,
+  PROVISIONAL P-VX329-R1-2): *"The libraries in Previous Libraries keep their own quiet roads on this Mac — Castle protects
+  the library you have open."* (the device name the platform's). **WHERE:** right after what entering does
+  (`useCastleLead`) on every confirm that says it — Use Castle (`RoadCrossingFaces.open`) and the join into a Castle account
+  (`RoadAccountFaces.joinDoor`, which speaks Use Castle's own door words and the backups warning); the sheets render a door's
+  sentence list as given, so no face changed. Not on the follow into Castle (its confirm carries neither the entering lead
+  nor the backups warning — PROVISIONAL; adding it there is one line). Unconditional: entering Castle never touches a
+  Previous Library's roads, so the line is true whether or not one is there (option (b), said only when this Mac holds a
+  Previous Library, needs a new fact from the catalogue — not built). **THE PINS** (harness): NEW `RoadCrossingFacesTests
+  .vx469_useCastleSaysPreviousLibrariesKeepTheirQuietRoads` (the line right after the lead, its exact words, never on Use
+  Standard or Replace All Keys); the exact sentence lists FLIPPED (`aFreshStandardLibraryOffersUseCastleAlone`,
+  `RoadJoinFollowFacesTests.joiningACastleAccountEntersCastleAndSaysSo`) and the no-shouting sweep gains the line. **RED
+  before the wiring** (the sentence added first with no caller): `✘ Test run with 22 tests in 3 suites failed … with 3
+  issues` — exactly the three expectations (the pin's first run also tripped on its own construction — `Crossing.inCastle`
+  makes its own library, so it took a second road; fixed in the pin, re-run red as stated). **GREEN after:**
+  `RoadCrossing*|RoadJoinFollow*|ProtectionCrossingRoadTests|ProtectionJoinFollowRoadTests|U2WordsTests` `✔ Test run with
+  83 tests in 9 suites passed`. Her eyes: the stage batch's walk capture of Use Castle's confirm (both voices).
 - Piece 5 — VX-473: NOT-STARTED.
 - Piece 6 — VX-468: NOT-STARTED.
 - Piece 7 — VX-463: NOT-STARTED.
