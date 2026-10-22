@@ -283,7 +283,24 @@ form). Machinery note: the orchestrator's own commits interleave on this branch 
   pin: `RoadIdleDialRouteTests.lockLibraryNowIsOneDeclarationTheMenuAndThePaneRender` gains the label, the wiring, the
   helper row and one-act-one-chord (red on the pre-switch tree by construction — no label). Collision sweep re-run at
   this tip: ⌃⌘L is the only ⌃⌘L in the key table and in every `.keyboardShortcut(` call site.
-- Piece 5 — the honest-refusal check (the §6 OPEN DESIGN NOTE): NOT-STARTED.
+- Piece 5 — the honest-refusal check (the §6 OPEN DESIGN NOTE): DONE as pins; the Mac half's RUN is PENDING (the
+  stage batch). THE CLASSIFIER (core — VERIFIED green in `swift test`, 0ab016636's run): an encrypted store with an older
+  Variorum's key file beside it (`variorum-keys-<fp16>.json` or `variorum-keys.json`) is `.encryptedLibrary` naming that
+  file, never `.bareStoreWithoutKeyFile`; names alone, any bytes; the keyless verdict only when no key-file-shaped name is
+  there (`LibraryClassifierTests`: `aPreDesignLibraryWith…IsNamedNeverKeyless` ×3,
+  `theClassifierNamesByNameAloneAndOnlyTheShapesAnyBuildWrote`). THE TWO FACES (Mac — `PreDesignStoreRefusalTests`,
+  PENDING the stage run): the LIVE SLOT holding such a store routes to the lobby with RULE 27'S REFUSAL — "No key file
+  opens this library. Variorum looked beside the library, inside every backup, and in this Mac's keychain, and found none
+  that opens it. Without one, there is nothing left to open." (§7c (3)) and its doors (Restore from Backup…, Open
+  Library…, Start a New Library — which steps the library aside WHOLE into Previous Libraries, never deleted); signed in,
+  its account line ("This library syncs with your account. Sign in and enter your passphrase or twelve words to bring
+  your writing back."); no typed or Touch ID road; the older key file and the store only read; nothing minted. A PICKED
+  copy of that shape → "This file couldn't be read as a library." (with no key file at all: the keyless refusal, true).
+  **What the built shape cannot do (recorded, not built — the morning bundle's):** neither face NAMES the older format or
+  the road out (export from the old build; sign into sync; start fresh). Rule 27's sentence is honest on its letter (no
+  key file OPENS it — this build reads none of today's) and claims nothing keyless, but it does not say an older
+  Variorum's key file is there. Naming it needs a new fact (the road's facts do not see foreign names, rule 26) and new
+  words — hers.
 - Piece 6 — the sweep table: NOT-STARTED.
 - Evidence — `swift test` + `swift test -c release` (counts), `xcodebuild build-for-testing` (Mac), the iOS target build:
   PENDING.
